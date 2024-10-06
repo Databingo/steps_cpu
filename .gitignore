@@ -1,0 +1,8 @@
+db
+*.qpf
+*.qsf
+simulation
+*.vcd
+output_files
+steps_cpu
+*.vwf
