@@ -1,18 +1,18 @@
-// L 
-00000000000000000000000000000011  // LB  load byte 8        |imm.12|rs1.5|000.3|rd.5|0000011.7|
-00000000000000000001000000000011  // LH  load half-word 16  |imm.12|rs1.5|001.3|rd.5|0000011.7|
-00000000000000000010000000000011  // LW  load word 32       |imm.12|rs1.5|010.3|rd.5|0000011.7|
-00000000000000000100000000000011  // LBU load byte unsigned |imm.12|rs1.5|100.3|rd.5|0000011.7|
-00000000000000000110000000000011  // LWU load word unsigned |imm.12|rs1.5|110.3|rd.5|0000011.7|  64
-00000000000000000011000000000011  // LD  load double-word 64|imm.12|rs1.5|011.3|rd.5|0000011.7|  64
-
-
-
-
-
-
+// I-type immediate 立即数类型指令
+// load
+00000000000000000000000000000011  // LB  load byte 8         |imm.12|rs1.5|000.3|rd.5|0000011.7|
+00000000000000000001000000000011  // LH  load half-word 16   |imm.12|rs1.5|001.3|rd.5|0000011.7|
+00000000000000000010000000000011  // LW  load word 32        |imm.12|rs1.5|010.3|rd.5|0000011.7|
+00000000000000000100000000000011  // LBU load byte unsigned  |imm.12|rs1.5|100.3|rd.5|0000011.7|
+00000000000000000110000000000011  // LWU load word unsigned  |imm.12|rs1.5|110.3|rd.5|0000011.7| 64
+00000000000000000011000000000011  // LD  load double-word 64 |imm.12|rs1.5|011.3|rd.5|0000011.7| 64
+// S-type store 存储类型指令
 // SB store byte
 // SH store half-word
 // SW store word
-// SD store double-word 64
+// SD store double-word | 64
 
+// R-type register 寄存器类型指令
+// B-type branch   分支类型指令
+// U-type upper 上立即数类型指令
+// J-type jump  跳转类型指令
