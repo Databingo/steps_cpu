@@ -1,7 +1,7 @@
 // 分步设计制作CPU 2024.10.04 解释权陈钢Email:databingo@foxmail.com
 
 
-module Steps_2 (reset_n, clock, o, opc, ojp);
+module s2 (reset_n, clock, o, opc, ojp);
  
 
 // 自动读取程序机

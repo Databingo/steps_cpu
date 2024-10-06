@@ -20,7 +20,7 @@ wire [2:0] ojp;
 
 
 // 实例化待测电路
-Steps_2 dut(
+s2 dut(
  .clock (clk),
  .reset_n (reset_n),
  .o (o),
