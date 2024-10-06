@@ -6,7 +6,7 @@
 
 
 parameter ZQ = 60; // 时钟周期是 60 时间单位
-parameter TIME_WINDOW = 60*50; // 运行仿真 60*50 时间单位, 即 50 个时钟周期
+parameter TIME_WINDOW = 60*30; // 运行仿真 60*50 时间单位, 即 50 个时钟周期
 
 
 module s2_tb();
@@ -49,7 +49,8 @@ end
 initial begin
  $dumpfile("2.vcd");
  $dumpvars(0, s2_tb);
- #TIME_WINDOW $stop;
+ #TIME_WINDOW $finish;
+//$stop;
 end
 
 // 输出监控
