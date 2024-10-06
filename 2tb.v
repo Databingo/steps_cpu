@@ -9,7 +9,7 @@ parameter ZQ = 60; // 时钟周期是 60 时间单位
 parameter TIME_WINDOW = 60*30; // 运行仿真 60*50 时间单位, 即 50 个时钟周期
 
 
-module s2_tb();
+module s2tb();
 
 // 信号声明
 reg clk;
@@ -48,7 +48,7 @@ end
 // Test
 initial begin
  $dumpfile("2.vcd");
- $dumpvars(0, s2_tb);
+ $dumpvars(0, s2tb);
  #TIME_WINDOW $finish;
 //$stop;
 end
@@ -58,4 +58,4 @@ always @(negedge clk) begin
      $monitor("At time %0t: o=%b, opc=%b, ojp=%b", $time, o, opc, ojp);
     end
 
-endmodule ： s2_tb
+endmodule ： s2tb
