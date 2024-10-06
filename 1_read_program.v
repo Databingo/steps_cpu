@@ -1,7 +1,7 @@
 // 分步设计制作CPU 2024.10.04 解释权陈钢Email:databingo@foxmail.com
 
 
-module s2 (reset_n, clock, o, opc, ojp);
+module s1 (reset_n, clock, o, opc, ojp);
  
 
 // 自动读取程序机
@@ -31,7 +31,7 @@ assign o = ir[6:0];
 assign opc = pc[2:0];
 assign ojp = jp[2:0];
 
-initial $readmemb("./programb.txt", irom);
+//initial $readmemb("./programb.txt", irom);
 
 always @(posedge clock or negedge reset_n)
 begin
@@ -41,8 +41,8 @@ begin
 	  pc <=0;
 	  jp <=0;
      // 写入两行程序
-     //irom[0] <= 64'b00000000_00000000_00000000_00000000_000000000001_00000_100_00000_0000011;
-     //irom[1] <= 64'b00000000_00000000_00000000_00000000_000000000001_00000_100_00000_1111111;
+     irom[0] <= 64'b00000000_00000000_00000000_00000000_000000000001_00000_100_00000_0000011;
+     irom[1] <= 64'b00000000_00000000_00000000_00000000_000000000001_00000_100_00000_1111111;
 	end
 	else
    // 开始指令节拍
