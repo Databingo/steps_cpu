@@ -14,7 +14,7 @@ module s2tb();
 // 信号声明
 reg clk;
 reg reset_n;
-wire [6:0] o;
+wire [31:0] o;
 wire [2:0] opc ;
 wire [2:0] ojp;
 

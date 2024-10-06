@@ -22,12 +22,12 @@ reg [2:0] jp; // 程序节拍器
 reg [63:0] ir; // 程序寄存器:64位宽度
 
 // 显示器
-output [6:0] o;
+output [31:0] o;
 output [2:0] opc;
 output [2:0] ojp;
 
-// 显示低 7 位
-assign o = ir[6:0];
+// 显示低 32 位指令
+assign o = ir[31:0];
 assign opc = pc[2:0];
 assign ojp = jp[2:0];
 
