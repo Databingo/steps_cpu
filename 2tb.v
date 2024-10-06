@@ -15,7 +15,7 @@ module s2tb();
 reg clk;
 reg reset_n;
 wire [31:0] o;
-wire [2:0] opc ;
+wire [6:0] opc ;
 wire [2:0] ojp;
 
 
@@ -54,7 +54,7 @@ initial begin
 end
 
 // 输出监控
-always @(negedge clk) begin
+always @(posedge clk) begin
      $monitor("At time %0t: o=%b, opc=%b, ojp=%b", $time, o, opc, ojp);
     end
 

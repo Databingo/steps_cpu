@@ -5,7 +5,7 @@ module s2 (reset_n, clock, o, opc, ojp);
  
 
 // 自动读取程序机
-reg [31:0] irom [0:1];// 程序存储器:32位宽度，2行深度
+reg [31:0] irom [0:30];// 程序存储器:32位宽度，60行深度
 // 写入两行程序
 //irom[0] = 64'b00000000_00000000_00000000_00000000_000000000001_00000_100_00000_0000011;
 //irom[1] = 64'b00000000_00000000_00000000_00000000_000000000001_00000_100_00000_1111111;
@@ -15,20 +15,20 @@ input reset_n;
 
 // 计数工具
 input clock;  // 时钟
-reg [2:0] pc; // 程序计数器
+reg [64:0] pc; // 程序计数器 64 位长度
 reg [2:0] jp; // 程序节拍器
 
 // 读取器
-reg [63:0] ir; // 程序寄存器:64位宽度
+reg [31:0] ir; // 程序指令寄存器: 32 位宽度
 
 // 显示器
 output [31:0] o;
-output [2:0] opc;
+output [31:0] opc;
 output [2:0] ojp;
 
-// 显示低 32 位指令
+// 显示 32 位指令
 assign o = ir[31:0];
-assign opc = pc[2:0];
+assign opc = pc[63:0];
 assign ojp = jp[2:0];
 
 initial $readmemb("./programb.txt", irom);
@@ -53,7 +53,7 @@ begin
 	       end
 	    1: begin // 取指令
 	    	   ir <= irom[pc];
-		      pc <= pc + 1; // 程序计数器加一
+		   pc <= pc + 1; // 程序计数器加一
 	    	   jp <=1; 
 	       end
 	    //2: begin // 分析指令
