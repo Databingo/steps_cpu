@@ -1,18 +1,38 @@
+//RV32I 47条指令
 // I-type immediate 立即数类型指令
-// load
-00000000000000000000000000000011  // LB  load byte 8         |imm.12|rs1.5|000.3|rd.5|0000011.7|
-00000000000000000001000000000011  // LH  load half-word 16   |imm.12|rs1.5|001.3|rd.5|0000011.7|
-00000000000000000010000000000011  // LW  load word 32        |imm.12|rs1.5|010.3|rd.5|0000011.7|
-00000000000000000100000000000011  // LBU load byte unsigned  |imm.12|rs1.5|100.3|rd.5|0000011.7|
-00000000000000000110000000000011  // LWU load word unsigned  |imm.12|rs1.5|110.3|rd.5|0000011.7| 64
-00000000000000000011000000000011  // LD  load double-word 64 |imm.12|rs1.5|011.3|rd.5|0000011.7| 64
+// Load
+00000000000000000000000000000011 // LB  |imm.12|rs1.5|000.3|rd.5|0000011.7|     load byte 8           
+00000000000000000001000000000011 // LH  |imm.12|rs1.5|001.3|rd.5|0000011.7|     load half-word 16     
+00000000000000000010000000000011 // LW  |imm.12|rs1.5|010.3|rd.5|0000011.7|     load word 32          
+00000000000000000100000000000011 // LBU |imm.12|rs1.5|100.3|rd.5|0000011.7|     load byte 8 unsigned  
+00000000000000000101000000000011 // LHU |imm.12|rs1.5|100.3|rd.5|0000011.7|     load half-word 16 unsigned 
+00000000000000000110000000000011 // LWU |imm.12|rs1.5|110.3|rd.5|0000011.7| 64  load word 32 unsigned  
+00000000000000000011000000000011 // LD  |imm.12|rs1.5|011.3|rd.5|0000011.7| 64  load double-word 64    
 // S-type store 存储类型指令
-// SB store byte
-// SH store half-word
-// SW store word
-// SD store double-word | 64
-
+00000000000000000000000000100011 // SB  |imm.7|rs2.5|rs1.5|000.3|imm.5|0100011.7|     store byte, write low 8 bits of rs1 to rs2's imm.12
+00000000000000000001000000100011 // SH  |imm.7|rs2.5|rs1.5|000.3|imm.5|0100011.7|     store half-word, write low 16 bits of rs1 to rs2's imm.12
+00000000000000000010000000100011 // SW  |imm.7|rs2.5|rs1.5|000.3|imm.5|0100011.7|     store word, 32
+00000000000000000011000000100011 // SD  |imm.7|rs2.5|rs1.5|000.3|imm.5|0100011.7| 64  store double-word, 64 
 // R-type register 寄存器类型指令
-// B-type branch   分支类型指令
+// B-type branch   分支类型指令 imm[12]=sign in bit 32, imm[11] in bit 8
 // U-type upper 上立即数类型指令
 // J-type jump  跳转类型指令
+
+
+//RV64I 多15条指令
+//LWU
+//LD
+//SD
+//SLLI
+//SRIL
+//SRAI
+//SLLIW
+//SRILW
+//SRAIW
+//ADDIW
+//ADDW
+//SUBW
+//SLLW
+//SRLW
+//SRAW
+
