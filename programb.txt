@@ -20,7 +20,7 @@
 // B-type branch   分支类型指令 imm[12]=sign in bit 32, imm[11] in bit 8
 
 
-?立即数版本的计算总是进行符号扩展
+//?立即数版本的计算总是进行符号扩展
 
 // U-type upper 上立即数类型指令(20 位立即数,无符号数)
 00000000000000000000_00000_0110111 // LUI   |imm.20|rd.5|0110011.7| put 20 bits immediate to upper 20 bits of rd and left lower 12 bits 0
