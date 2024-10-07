@@ -8,6 +8,10 @@
 000000000000_00000_101_00000_0000011 // LHU |imm.12|rs1.5|100.3|rd.5|0000011.7|     load half-word 16 unsigned 
 000000000000_00000_110_00000_0000011 // LWU |imm.12|rs1.5|110.3|rd.5|0000011.7| 64  load word 32 unsigned  
 000000000000_00000_011_00000_0000011 // LD  |imm.12|rs1.5|011.3|rd.5|0000011.7| 64  load double-word 64    
+
+000000000000_00000_011_00000_0010011 // ADDI|imm.12|rs1.5|000.3|rd.5|0010011.7|     add sign-extended imm.12 to sr1 then send overflow ingnored result to rd (LUI need to plus 1 when ADDI nege imm)
+
+
 // S-type store 存储类型指令
 000000000000_00000_000_00000_0100011 // SB  |imm.7|rs2.5|rs1.5|000.3|imm.5|0100011.7|     store byte, write low 8 bits of rs1 to rs2's imm.12
 000000000000_00000_001_00000_0100011 // SH  |imm.7|rs2.5|rs1.5|000.3|imm.5|0100011.7|     store half-word, write low 16 bits of rs1 to rs2's imm.12
@@ -15,8 +19,12 @@
 000000000000_00000_011_00000_0100011 // SD  |imm.7|rs2.5|rs1.5|000.3|imm.5|0100011.7| 64  store double-word, 64 
 // B-type branch   分支类型指令 imm[12]=sign in bit 32, imm[11] in bit 8
 
-// U-type upper 上立即数类型指令(20 位立即数)
-00000000000000000000_00000_0110111 // LUI |imm.20|rd.5|0100011.7| put 20 bits immediate to upper 20 bits of rd and left lower 12 bits 0
+
+?立即数版本的计算总是进行符号扩展
+
+// U-type upper 上立即数类型指令(20 位立即数,无符号数)
+00000000000000000000_00000_0110111 // LUI   |imm.20|rd.5|0110011.7| put 20 bits immediate to upper 20 bits of rd and left lower 12 bits 0
+00000000000000000000_00000_0010111 // AUIPC |imm.20|rd.5|0010011.7| left shift 20 bits immediate 12 bits then add pc value then put to rd
 
 // R-type register 寄存器类型指令
 
