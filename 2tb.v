@@ -6,7 +6,7 @@
 
 
 parameter ZQ = 60; // 时钟周期是 60 时间单位
-parameter TIME_WINDOW = 60*62; // 运行仿真 60*62 时间单位, 即 62 个时钟周期(47+15 instruction)
+parameter TIME_WINDOW = 60*128; // 运行仿真 60*124 时间单位, 即 64 个时钟周期(47+15=62 instruction)
 
 
 module s2tb();
@@ -55,7 +55,7 @@ end
 
 // 输出监控
 always @(posedge clk) begin
-     $monitor("At time %0t: o=%b, opc=%b, ojp=%b", $time, o, opc, ojp);
+     $monitor("At time %0t: o=%b, opc=%d, ojp=%b", $time, o, opc, ojp);
     end
 
 endmodule ： s2tb
