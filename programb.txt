@@ -73,8 +73,8 @@
 0100000_00000_00000_101_00000_0111011 // SRAW   |xxx.7|rs2.5|rs1.5|101.3|rd.5|0111011.7| 64  shift right arithmetical logicl rs1 32 by imm.12[low5.unsign] padding 1 then put into rd 
 
 // J-type jump  跳转类型指令
-// JAL
-
+// JAL padding 0ne 0
+ 
 //-------------
 //RV64I 多15条指令
 //LWU
@@ -93,3 +93,4 @@
 //SRLW
 //SRAW
 //?立即数版本的计算总是进行符号扩展
+
