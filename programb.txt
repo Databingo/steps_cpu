@@ -11,8 +11,8 @@
 
 000000000000_00000_000_00000_0010011 // ADDI    |imm.12|rs1.5|000.3|rd.5|0010011.7|     add sign-extended imm.12 to sr1 then send overflow ingnored result to rd (LUI need to plus 1 when ADDI nege imm)
 000000000000_00000_000_00000_0010011 // ADDIW   |imm.12|rs1.5|000.3|rd.5|0011011.7| 64  add sign-extended imm.12 to sr1 as sign-extended overflow-ingnored 64 then put low 32 in rd
-000000000000_00000_010_00000_0010011 // SLTI    |imm.12|rs1.5|010.3|rd.5|0010011.7|     if rs1 is less than imm.12 both as sign-extended then put 1 in rd else 0
-000000000000_00000_011_00000_0010011 // SLTIU   |imm.12|rs1.5|011.3|rd.5|0010011.7|     if rs1 is less than imm.12 both as unsigned number then put 1 in rd else 0
+000000000000_00000_010_00000_0010011 // SLTI    |imm.12|rs1.5|010.3|rd.5|0010011.7|     if set rs1 is less than imm.12 both as sign-extended then put 1 in rd else 0
+000000000000_00000_011_00000_0010011 // SLTIU   |imm.12|rs1.5|011.3|rd.5|0010011.7|     if set rs1 is less than imm.12 both as unsigned number then put 1 in rd else 0
 000000000000_00000_111_00000_0010011 // ANDI    |imm.12|rs1.5|111.3|rd.5|0010011.7|     bitwise AND rs1 and sign-extended imm.12 then put reslut in rd
 000000000000_00000_110_00000_0010011 // ORI     |imm.12|rs1.5|110.3|rd.5|0010011.7|     bitwise OR  rs1 and sign-extended imm.12 then put reslut in rd
 000000000000_00000_100_00000_0010011 // XORI    |imm.12|rs1.5|100.3|rd.5|0010011.7|     bitwise XOR rs1 and sign-extended imm.12 then put reslut in rd, (XORI, rd, rs1, -1) same as (NOT, rd, rs)
@@ -51,8 +51,6 @@
 // BGEU
 
 
-//?立即数版本的计算总是进行符号扩展
-
 // U-type upper 上立即数类型指令(20 位立即数,无符号数)
 00000000000000000000_00000_0110111 // LUI   |imm.20|rd.5|0110011.7| put 20 bits immediate to upper 20 bits of rd and left lower 12 bits 0
 00000000000000000000_00000_0010111 // AUIPC |imm.20|rd.5|0010011.7| left shift 20 bits immediate 12 bits then add pc value then put to rd
@@ -66,13 +64,13 @@
 0000000_00000_00000_001_00000_0110011 // SLLW  |xxx.7|rs2.5|rs1.5|001.3|imm.5|0111011.7|     shift lift  logicl rs1 low 32 by rs2[low5.unsign] padding 0 then put into rd 32
 0000000_00000_00000_010_00000_0110011 // SLT   |xxx.7|rs2.5|rs1.5|010.3|imm.5|0110011.7|     if rs1 is less than rs2 both as sign-extended then put 1 in rd else 0
 0000000_00000_00000_011_00000_0110011 // SLTU  |xxx.7|rs2.5|rs1.5|011.3|imm.5|0110011.7|     if rs1 is less than rs2 both as unsigned number then put 1 in rd else 0
-// AND
-// OR
-// XOR
-// SRL
-// SRLW
-// SRA
-// SRAW
+0000000_00000_00000_000_00000_0110011 // AND    |xxx.7|rs2.5|rs1.5|000.3|rd.5|0110011.7|     bitwise AND rs1 and rs2 then put result in rd
+0000000_00000_00000_110_00000_0110011 // OR     |xxx.7|rs2.5|rs1.5|110.3|rd.5|0110011.7|     bitwise OR  rs1 and rs2 then put reslut in rd
+0000000_00000_00000_100_00000_0110011 // XOR    |xxx.7|rs2.5|rs1.5|100.3|rd.5|0010011.7|     bitwise XOR rs1 and rs2 then put reslut in rd
+0000000_00000_00000_101_00000_0110011 // SRL    |xxx.7|rs2.5|rs1.5|101.3|rd.5|0110011.7|     shift right logicl rs1 by amount in rs2[low5.unsign] padding 0 then put into rd
+0000000_00000_00000_101_00000_0111011 // SRLW   |xxx.7|rs2.5|rs1.5|101.3|rd.5|0111011.7| 64  shift right logicl rs1 low 32 by amount in rs2[low5.unsign] padding 0 then 32 put into rd 
+0100000_00000_00000_101_00000_0110011 // SRA    |xxx.7|rs2.5|rs1.5|101.3|rd.5|0110011.7|     shift right arithmetical logicl rs1 rs2[low5.unsign] padding 1 then put into rd
+0100000_00000_00000_101_00000_0111011 // SRAW   |xxx.7|rs2.5|rs1.5|101.3|rd.5|0111011.7| 64  shift right arithmetical logicl rs1 32 by imm.12[low5.unsign] padding 1 then put into rd 
 
 // J-type jump  跳转类型指令
 // JAL
@@ -94,4 +92,4 @@
 //SLLW
 //SRLW
 //SRAW
-
+//?立即数版本的计算总是进行符号扩展
