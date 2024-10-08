@@ -72,12 +72,9 @@
 0100000_00000_00000_101_00000_0111011 // SRAW   |xxx.7|rs2.5|rs1.5|101.3|rd.5|0111011.7| 64  shift right arithmetical logicl rs1 32 by imm.12[low5.unsign] padding 1 then put into rd 
 
 // J-type jump  跳转类型指令
-// JAL padding 0ne 0
-0_0000000000_0_00000000_00000_0100011 // JAL  |imm.20[20|10:1|11|19:12]|rd|1101111.7|    jump (set PC) to address (PC+imm) and place return address (PC+4) in rd 
+0_0000000000_0_00000000_00000_0100011 // JAL  |imm.20[20|10:1|11|19:12]|rd|1101111.7|    jump (set PC) to address (PC+imm) and place return address (PC+4) in rd // JAL padding 0ne 0 at the last
 000000000000_00000_000_00000_1100111 // JALR  |imm.12|rs1.5|000|rd.5|1101111.7|    jump (set PC) to address (PC+imm(rs1)) and place return address (PC+4) in rd 
 
-
- 
 //-------------
 //RV64I 多15条指令
 //LWU
