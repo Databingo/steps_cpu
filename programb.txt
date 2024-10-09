@@ -26,7 +26,9 @@
 010000_000000_00000_101_00000_0010011 // SRAI   |imm.12|rs1.5|101.3|rd.5|0010011.7| 64  shift right arithmetical logicl rs1 64 by imm.12[low6.unsign] padding 1 then put into rd 
 0100000_00000_00000_101_00000_0011011 // SRAIW  |imm.12|rs1.5|101.3|rd.5|0010011.7| 64  shift right arithmetical logicl rs1 32 by imm.12[low5.unsign] padding 1 then put into rd 
 // FENCE
+0000_0000_0000_00000_000_00000_0001111 // FENCE |0.4|pred.4|succ.4|0.5|000|0001111.7| 64 make sure RW of I/O and memory operation completed before FENCE for the successor
 // FENCE.I
+0000_0000_0000_00000_001_00000_0001111 // FENCE |0.4|0.4|0.4|0.5|001|0001111.7| 64 make sure instruction operation completed before FENCE.I
 // ECALL
 // EBREAK
 // CSRRW
