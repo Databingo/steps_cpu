@@ -17,6 +17,8 @@ reg reset_n;
 wire [31:0] o;
 wire [6:0] opc ;
 wire [2:0] ojp;
+wire [6:0] o_opcode;
+wire [2:0] oshow;
 
 
 // 实例化待测电路
@@ -25,7 +27,9 @@ s3 dut(
  .reset_n (reset_n),
  .o (o),
  .opc (opc),
- .ojp (ojp)
+ .ojp (ojp),
+ .o_opcode (o_opcode),
+ .oshow (oshow)
 
 );
 
@@ -55,7 +59,7 @@ end
 
 // 输出监控
 always @(posedge clk) begin
-     $monitor("At time %0t: o=%b, opc=%d, ojp=%b", $time, o, opc, ojp);
+     $monitor("At time %0t: o=%b, opc=%d, ojp=%b, o_opcode=%b, oshow=%b", $time, o, opc, ojp, o_opcode, oshow);
     end
 
 endmodule ： s3tb
