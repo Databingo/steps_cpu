@@ -25,20 +25,16 @@
 0100000_00000_00000_101_00000_0010011 // SRAI   |imm.12|rs1.5|101.3|rd.5|0010011.7|     shift right arithmetical logicl rs1 32 by imm.12[low5.unsign] padding 1 then put into rd
 010000_000000_00000_101_00000_0010011 // SRAI   |imm.12|rs1.5|101.3|rd.5|0010011.7| 64  shift right arithmetical logicl rs1 64 by imm.12[low6.unsign] padding 1 then put into rd 
 0100000_00000_00000_101_00000_0011011 // SRAIW  |imm.12|rs1.5|101.3|rd.5|0010011.7| 64  shift right arithmetical logicl rs1 32 by imm.12[low5.unsign] padding 1 then put into rd 
-// FENCE
-0000_0000_0000_00000_000_00000_0001111 // FENCE |0.4|pred.4|succ.4|0.5|000.3|0001111.7| 64 make sure RW of I/O and memory operation completed before FENCE for the successor
-// FENCE.I
-0000_0000_0000_00000_001_00000_0001111 // FENCE |0.4|0.4|0.4|0.5|001.3|0001111.7| 64 make sure instruction operation completed before FENCE.I
-// ECALL
-000000000000_00000_000_000000_0001111 // FENCE |0.12|0.4|000.3|1110011.7| system enviroment call, put break in pc and save pc to rg
-// EBREAK
-000000000001_00000_000_000000_0001111 // FENCE |k.12|0.4|000.3|1110011.7| system break call, put break in pc and save pc to rg
-// CSRRW
-// CSRRS
-// CSRRC
-// CSRRWI
-// CSRRSI
-// CSRRCI
+0000_0000_0000_00000_000_00000_0001111 // FENCE |0.4|pred.4|succ.4|0.5|000.3|0.5|0001111.7| 64 make sure RW of I/O and memory operation completed before FENCE for the successor
+0000_0000_0000_00000_001_00000_0001111 // FENCE |0.4|0000.4|0000.4|0.5|001.3|0.5|0001111.7| 64 make sure instruction operation completed before FENCE.I
+000000000000_00000_000_000000_0001111 // ECALL |0.12|0.4|000.3|0.5|1110011.7| system enviroment call, put break in pc and save pc to rg
+000000000001_00000_000_000000_0001111 // EBREAK|k.12|0.4|000.3|0.5|1110011.7| system break call, put break in pc and save pc to rg
+000000000000_00000_001_000000_1110011 // CSRRW |csr.12|rs1.5|001.3|rd.5|1110011.7| csr atomic read and write, put 0-extended csr value in rd, then put sr1 to csr 
+000000000000_00000_010_000000_1110011 // CSRRS |csr.12|rs1.5|001.3|rd.5|1110011.7| csr atomic read and set, put 0-extended csr value in rd, use sr1 as 1 mask to set csr 1 correspond
+000000000000_00000_011_000000_1110011 // CSRRC |csr.12|rs1.5|011.3|rd.5|1110011.7| csr atomic read and set, put 0-extended csr value in rd, use sr1 as 1 mask to set csr 0 correspond
+000000000000_00000_101_000000_1110011 // CSRRWI |csr.12|zim.5|101.3|rd.5|1110011.7| csr atomic read and write, put 0-extended csr value in rd, then put 0-extended 5 unsigned zimm to csr 
+000000000000_00000_110_000000_1110011 // CSRRSI |csr.12|zim.5|110.3|rd.5|1110011.7| csr atomic read and write, put 0-extended csr value in rd, then use 0-extended 5 unsigned zimm as 1 mask to set csr 1
+000000000000_00000_111_000000_1110011 // CSRRCI |csr.12|zim.5|111.3|rd.5|1110011.7| csr atomic read and write, put 0-extended csr value in rd, then use 0-extended 5 unsigned zimm as 1 mask to set csr 0
 
 // S-type store 存储类型指令
 000000000000_00000_000_00000_0100011 // SB     |imm.7|rs2.5|rs1.5|000.3|imm.5|0100011.7|     store byte, write low 8 bits of rs1 to rs2's imm.12
