@@ -5,8 +5,8 @@
 //1ns = 1000ps 皮秒
 
 
-parameter ZQ = 60; // 时钟周期是 60 时间单位
-parameter TIME_WINDOW = 60*128; // 运行仿真 60*124 时间单位, 即 64 个时钟周期(47+15=62 instruction)
+parameter ZQ = 60; // 时钟是 120 纳秒时间单位
+parameter TIME_WINDOW = 60*2*64; // 运行仿真 64 个时钟周期
 
 
 module s2tb();
