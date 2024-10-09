@@ -25,7 +25,7 @@
 0100000_00000_00000_101_00000_0010011 // SRAI   |imm.12|rs1.5|101.3|rd.5|0010011.7|     shift right arithmetical logicl rs1 32 by imm.12[low5.unsign] padding 1 then put into rd
 010000_000000_00000_101_00000_0010011 // SRAI   |imm.12|rs1.5|101.3|rd.5|0010011.7| 64  shift right arithmetical logicl rs1 64 by imm.12[low6.unsign] padding 1 then put into rd 
 0100000_00000_00000_101_00000_0011011 // SRAIW  |imm.12|rs1.5|101.3|rd.5|0010011.7| 64  shift right arithmetical logicl rs1 32 by imm.12[low5.unsign] padding 1 then put into rd 
-// Super
+// Control
 0000_0000_0000_00000_000_00000_0001111 // FENCE |0.4|pred.4|succ.4|0.5|000.3|0.5|0001111.7| make sure RW of I/O and memory operation completed before FENCE for the successor
 0000_0000_0000_00000_001_00000_0001111 // FENCE |0.4|0000.4|0000.4|0.5|001.3|0.5|0001111.7| make sure instruction operation completed before FENCE.I
 000000000000_00000_000_000000_0001111 // ECALL |0.12|0.4|000.3|0.5|1110011.7| system enviroment call, put break in pc and save pc to rg
@@ -36,13 +36,15 @@
 000000000000_00000_101_000000_1110011 // CSRRWI |csr.12|zim.5|101.3|rd.5|1110011.7| csr atomic read and write, put 0-extended csr value in rd, then put 0-extended 5 unsigned zimm to csr 
 000000000000_00000_110_000000_1110011 // CSRRSI |csr.12|zim.5|110.3|rd.5|1110011.7| csr atomic read and write, put 0-extended csr value in rd, then use 0-extended 5 unsigned zimm as 1 mask to set csr 1
 000000000000_00000_111_000000_1110011 // CSRRCI |csr.12|zim.5|111.3|rd.5|1110011.7| csr atomic read and write, put 0-extended csr value in rd, then use 0-extended 5 unsigned zimm as 1 mask to set csr 0
-// JALR
-000000000000_00000_000_00000_1100111 // JALR  |imm.12|rs1.5|000|rd.5|1101111.7|    jump (set PC) to address (PC+imm(rs1)) and place return address (PC+4) in rd 
 // S-type store 存储类型指令
 000000000000_00000_000_00000_0100011 // SB     |imm.7|rs2.5|rs1.5|000.3|imm.5|0100011.7|     store byte, write low 8 bits of rs1 to rs2's imm.12
 000000000000_00000_001_00000_0100011 // SH     |imm.7|rs2.5|rs1.5|000.3|imm.5|0100011.7|     store half-word, write low 16 bits of rs1 to rs2's imm.12
 000000000000_00000_010_00000_0100011 // SW     |imm.7|rs2.5|rs1.5|000.3|imm.5|0100011.7|     store word, 32
 000000000000_00000_011_00000_0100011 // SD     |imm.7|rs2.5|rs1.5|000.3|imm.5|0100011.7| 64  store double-word, 64 
+// J-type jump  跳转类型指令
+0_0000000000_0_00000000_00000_0100011 // JAL  |imm.20[20|10:1|11|19:12]|rd|1101111.7|    jump (set PC) to address (PC+imm) and place return address (PC+4) in rd // JAL padding 0ne 0 at the last
+// JALR
+000000000000_00000_000_00000_1100111 // JALR  |imm.12|rs1.5|000|rd.5|1101111.7|    jump (set PC) to address (PC+imm(rs1)) and place return address (PC+4) in rd 
 // B-type branch   分支类型指令 imm[12]=sign in bit 32, imm[11] in bit 8
 0_000000_00000_00000_000_0000_0_0100011 // BEQ    |imm.7[12|10:5]|rs2.5|rs1.5|000.3|imm.5[4:1|11]|1100011.7|     take the branch if rs1 and rs2 are equal
 0_000000_00000_00000_001_0000_0_0100011 // BNE    |imm.7[12|10:5]|rs2.5|rs1.5|001.3|imm.5[4:1|11]|1100011.7|     take the branch if rs1 and rs2 not equal
@@ -69,6 +71,5 @@
 0000000_00000_00000_101_00000_0111011 // SRLW   |xxx.7|rs2.5|rs1.5|101.3|rd.5|0111011.7| 64  shift right logicl rs1 low 32 by amount in rs2[low5.unsign] padding 0 then 32 put into rd 
 0100000_00000_00000_101_00000_0110011 // SRA    |xxx.7|rs2.5|rs1.5|101.3|rd.5|0110011.7|     shift right arithmetical logicl rs1 rs2[low5.unsign] padding 1 then put into rd
 0100000_00000_00000_101_00000_0111011 // SRAW   |xxx.7|rs2.5|rs1.5|101.3|rd.5|0111011.7| 64  shift right arithmetical logicl rs1 32 by imm.12[low5.unsign] padding 1 then put into rd 
-// J-type jump  跳转类型指令
-0_0000000000_0_00000000_00000_0100011 // JAL  |imm.20[20|10:1|11|19:12]|rd|1101111.7|    jump (set PC) to address (PC+imm) and place return address (PC+4) in rd // JAL padding 0ne 0 at the last
 
+///-------------re-order------
