@@ -10,7 +10,16 @@ oLh,
 oLhu,
 oLw,
 oLwu,
-oLd
+oLd,
+
+oSb,
+oSh,
+oSw,
+oSd,
+
+
+
+
 );
 
 
@@ -44,6 +53,15 @@ reg Lwu;
 reg Ld;
 
 
+reg Sb;
+reg Sh;
+reg Sw;
+reg Sd;
+
+
+
+
+
 
 
 // 显示器
@@ -64,9 +82,10 @@ output oLw;
 output oLwu;
 output oLd;
 
-
-
-
+output oSb;
+output oSh;
+output oSw;
+output oSd;
 
 
 
@@ -91,6 +110,11 @@ assign oLw = Lw;
 assign oLwu = Lwu;
 assign oLd = Ld;
 
+assign oSb = Sb;
+assign oSh = Sh;
+assign oSw = Sw;
+assign oSd = Sd;
+
 
 
 
@@ -107,9 +131,20 @@ begin
 	  pc <=0;
 	  jp <=0;
 	  //ir <=0;
-	  Lui <=0;
-	  Lb <=0;
-	  Lbu <=0;
+	  //Lui <=0;
+	  //Lb <=0;
+	  //Lbu <=0;
+          //Lh <=0; 
+          //Lhu <=0;
+          //Lw <=0;
+          //Lwu <=0;
+          //Ld <=0;
+          //Sb <=0;
+          //Sh <=0;
+          //Sw <=0;
+          //Sd <=0;
+
+
 	  //opcode <=0;
 	  //func3 <=0;
 	end
@@ -142,13 +177,21 @@ begin
 		   7'b0110111:begin 
 		                  Lui <= 1'b1; // set Flag
 			      end
+	           7'b0100011:begin // S-type
+			        case(ir[14:12]) // func3
+			          3'b000: Sb  <= 1'b1; // set Sb  Flag 
+			          3'b001: Sh  <= 1'b1; // set Sh  Flag 
+			          3'b010: Sw  <= 1'b1; // set Sw  Flag 
+			          3'b011: Sd  <= 1'b1; // set Sd  Flag  
+				endcase
+			      end
 	    	   endcase
 	    	   jp <=3;
 	       end
 	    3: begin // 指令执行
 	           //opcode <= ir[6:0];
 	    	   case(ir[6:0])
-		   7'b0000011:begin 
+		   7'b0000011:begin // Load type
 			        case(ir[14:12])  // func3
 			          3'b000: Lb  <= 1'b0; // close Lb  Flag 
 			          3'b100: Lbu <= 1'b0; // close Lbu Flag 
@@ -158,12 +201,14 @@ begin
 			          3'b110: Lwu <= 1'b0; // close Lwu Flag 
 			          3'b011: Ld  <= 1'b0; // close Ld  Flag 
 			        endcase
-			      //3'b000: 
-			      //begin
-		              //    // doing .... done
-			      //    Lb <= 1'b0; // close Flag
-			      //   end
-			      //endcase
+			      end
+	           7'b0100011:begin // S-type
+			        case(ir[14:12]) // func3
+			          3'b000: Sb  <= 1'b0; // close Sb Flag 
+			          3'b001: Sh  <= 1'b0; // close Sh Flag 
+			          3'b010: Sw  <= 1'b0; // close Sw Flag 
+			          3'b011: Sd  <= 1'b0; // close Sd Flag  
+				endcase
 			      end
 		   7'b0110111:begin 
 		                  // doing .... done

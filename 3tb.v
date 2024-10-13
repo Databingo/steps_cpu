@@ -30,6 +30,14 @@ wire oLw;
 wire oLwu;
 wire oLd;
 
+wire oSb;
+wire oSh;
+wire oSw;
+wire oSd;
+
+
+
+
 // 实例化待测电路
 s3 dut(
  .clock (clk),
@@ -48,12 +56,12 @@ s3 dut(
  .oLhu (oLhu),
  .oLw (oLw),
  .oLwu (oLwu),
- .oLd (oLd)
+ .oLd (oLd),
 
-
-
-
-
+.oSb (oSb), 
+.oSh (oSh),
+.oSw (oSw),
+.oSd (oSd)
 
 
 
@@ -94,6 +102,10 @@ always @(posedge clk) begin
              "oLw=%b,",  oLw, 
              "oLwu=%b,", oLwu, 
              "oLd=%b,",  oLd,
+"oSb=%b,",  oSb,
+"oSh=%b,",  oSh,
+"oSw=%b,",  oSw,
+"oSd=%b,",  oSd,
 
 
 
