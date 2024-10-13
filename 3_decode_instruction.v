@@ -17,6 +17,16 @@ oSh,
 oSw,
 oSd,
 
+oAdd,
+oSub,
+oSll,
+oSlt,
+oSltu,
+oXor ,
+oSrl,
+oSra,
+oOr,
+oAnd
 
 
 
@@ -43,7 +53,6 @@ reg [31:0] ir; // 程序指令寄存器: 32 位宽度
 //reg [2:0] func3;
 reg Lui;
 
-// 
 reg Lb;
 reg Lbu;
 reg Lh; 
@@ -52,17 +61,25 @@ reg Lw;
 reg Lwu;
 reg Ld;
 
-
 reg Sb;
 reg Sh;
 reg Sw;
 reg Sd;
 
-
-
-
-
-
+reg Add;
+reg Sub;
+reg Sll;
+reg Slt;
+reg Sltu;
+reg Xor ;
+reg Srl;
+reg Sra;
+reg Or;
+reg And;
+    
+    
+    
+    
 
 // 显示器
 output [31:0] oir;
@@ -70,7 +87,6 @@ output [31:0] opc;
 output [2:0]  ojp;
 output [6:0]  o_opcode;
 output [2:0]  ofunc3;
-
 
 output oLui;
 
@@ -87,14 +103,19 @@ output oSh;
 output oSw;
 output oSd;
 
+output oAdd;
+output oSub;
+output oSll;
+output oSlt;
+output oSltu;
+output oXor; 
+output oSrl;
+output oSra;
+output oOr;
+output oAnd;
 
 
-
-
-
-
-
-
+// 连接显示器
 assign oir = ir[31:0];  // 显示 32 位指令
 assign opc = pc[63:0];// 显示 64 位程序计数器值
 assign ojp = jp[2:0]; // 显示 3 位节拍计数器
@@ -115,6 +136,16 @@ assign oSh = Sh;
 assign oSw = Sw;
 assign oSd = Sd;
 
+assign oAdd  = Add;
+assign oSub  = Sub;
+assign oSll  = Sll;
+assign oSlt  = Slt;
+assign oSltu = Sltu;
+assign oXor  = Xor;
+assign oSrl  = Srl;
+assign oSra  = Sra;
+assign oOr   = Or;
+assign oAnd  = And;
 
 
 
@@ -143,6 +174,16 @@ begin
           //Sh <=0;
           //Sw <=0;
           //Sd <=0;
+	  //Add <=0;
+	  //Sub <=0;
+	  //Sll <=0;
+	  //Slt <=0;
+	  //Sltu <=0;
+	  //Xor <=0;
+	  //Srl <=0;
+	  //Sra <=0;
+	  //Or <=0;
+	  //And <=0;
 
 
 	  //opcode <=0;
@@ -185,6 +226,31 @@ begin
 			          3'b011: Sd  <= 1'b1; // set Sd  Flag  
 				endcase
 			      end
+	           7'b0110011:begin // Math-Logic-type
+			        case(ir[14:12]) // func3
+				  3'b000:begin
+				          case(ir[31:25]) // func7
+				            7'b0000000:Add  <= 1'b1; // set Add Flag  
+				            7'b0100000:Sub  <= 1'b1; // set Sub Flag  
+				          endcase
+				        end 
+			          3'b001: Sll  <= 1'b1; // set Sll Flag 
+			          3'b010: Slt  <= 1'b1; // set Slt Flag 
+			          3'b011: Sltu <= 1'b1; // set Sltu Flag  
+			          3'b100: Xor  <= 1'b1; // set Xor Flag 
+				  3'b101:begin 
+				          case(ir[31:25]) // func7
+				            7'b0000000:Srl  <= 1'b1; // set Srl Flag 
+				            7'b0100000:Sra  <= 1'b1; // set Sra Flag  
+				          endcase
+				         end 
+			          3'b110: Or   <= 1'b1; // set Or Flag 
+			          3'b111: And  <= 1'b1; // set And Flag 
+				endcase
+			      end
+
+
+
 	    	   endcase
 	    	   jp <=3;
 	       end

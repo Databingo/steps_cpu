@@ -35,6 +35,21 @@ wire oSh;
 wire oSw;
 wire oSd;
 
+wire oAdd;
+wire oSub;
+wire oSll;
+wire oSlt;
+wire oSltu;
+wire oXor;
+wire oSrl;
+wire oSra;
+wire oOr;
+wire oAnd;
+
+
+
+
+
 
 
 
@@ -61,7 +76,18 @@ s3 dut(
 .oSb (oSb), 
 .oSh (oSh),
 .oSw (oSw),
-.oSd (oSd)
+.oSd (oSd),
+
+.oAdd(oAdd),
+.oSub(oSub),
+.oSll(oSll),
+.oSlt(oSlt),
+.oSltu(oSltu),
+.oXor(oXor),
+.oSrl(oSrl),
+.oSra(oSra),
+.oOr(oOr),
+.oAnd(oAnd)
 
 
 
@@ -95,33 +121,32 @@ end
 
 // 输出监控
 always @(posedge clk) begin
-     $monitor("At time %0t:oir=%b,opc=%0d,ojp=%d,o_opcode=%b,ofunc3=%b,oLui=%b,oLb=%b,", $time, oir, opc, ojp, o_opcode, ofunc3, oLui, oLb,
-             "oLbu=%b,", oLbu, 
-             "oLh=%b,",  oLh, 
-             "oLhu=%b,", oLhu, 
-             "oLw=%b,",  oLw, 
-             "oLwu=%b,", oLwu, 
-             "oLd=%b,",  oLd,
+     $monitor("Time %0t:oir=%b,opc=%0d,ojp=%d,o_opcode=%b,ofunc3=%b,oLui=%b,oLb=%b,", $time, oir, opc, ojp, o_opcode, ofunc3, oLui, oLb,
+"oLbu=%b,", oLbu, 
+"oLh=%b,",  oLh, 
+"oLhu=%b,", oLhu, 
+"oLw=%b,",  oLw, 
+"oLwu=%b,", oLwu, 
+"oLd=%b,",  oLd,
 "oSb=%b,",  oSb,
 "oSh=%b,",  oSh,
 "oSw=%b,",  oSw,
 "oSd=%b,",  oSd,
 
+"oAdd=%b,",  oAdd,
+"oSub=%b,",  oSub,
+"oSll=%b,",  oSll,
+"oSlt=%b,",  oSlt,
+"oSltu=%b,", oSltu,
+"oXor=%b,",  oXor,
+"oSrl=%b,",  oSrl,
+"oSra=%b,",  oSra,
+"oOr=%b,",   oOr,
+"oAnd=%b,",  oAnd,
+   );
+  
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-     );
     end
 
 endmodule ： s3tb
