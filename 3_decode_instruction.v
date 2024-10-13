@@ -1,8 +1,23 @@
 // 分步设计制作CPU 2024.10.04 解释权陈钢Email:databingo@foxmail.com
 
 
-module s3 (reset_n, clock, oir, opc, ojp, o_opcode, oLb, oLui, ofunc3);
- 
+module s3 (reset_n, clock, oir, opc, ojp, o_opcode,ofunc3,
+oLui, 
+
+oLb,
+oLbu,
+oLh, 
+oLhu,
+oLw,
+oLwu,
+oLd
+);
+
+
+
+
+
+
 
 // 自动读取程序机
 reg [31:0] irom [0:61];// 程序存储器:32位宽度，62行深度
@@ -17,25 +32,69 @@ reg [2:0] jp;  // 程序节拍器
 reg [31:0] ir; // 程序指令寄存器: 32 位宽度
 //reg [6:0] opcode;
 //reg [2:0] func3;
-reg [2:0] Lb ;
 reg Lui;
+
+// 
+reg Lb;
+reg Lbu;
+reg Lh; 
+reg Lhu;
+reg Lw;
+reg Lwu;
+reg Ld;
+
+
+
 
 // 显示器
 output [31:0] oir;
 output [31:0] opc;
-output [2:0] ojp;
-output [6:0] o_opcode;
-output [2:0] oLb ;
-output [1:0] oLui;
-output [2:0] ofunc3;
+output [2:0]  ojp;
+output [6:0]  o_opcode;
+output [2:0]  ofunc3;
+
+
+output oLui;
+
+output oLb;
+output oLbu;
+output oLh; 
+output oLhu;
+output oLw;
+output oLwu;
+output oLd;
+
+
+
+
+
+
+
+
+
+
+
+
 
 assign oir = ir[31:0];  // 显示 32 位指令
 assign opc = pc[63:0];// 显示 64 位程序计数器值
 assign ojp = jp[2:0]; // 显示 3 位节拍计数器
 assign o_opcode = ir[6:0];// 显示 7 位操作码
-assign oLb = Lb[2:0];
+assign ofunc3 = ir[14:12]; //显示 func3 值
 assign oLui = Lui; // 显示 Lui 标志线
-assign ofunc3 = ir[15:13]; //显示 func 值
+
+assign oLb = Lb;
+assign oLbu = Lbu;
+assign oLh = Lh; 
+assign oLhu = Lhu;
+assign oLw = Lw;
+assign oLwu = Lwu;
+assign oLd = Ld;
+
+
+
+
+
 
 // 从文件读取程序到 irom
 initial $readmemb("./programb.txt", irom);
@@ -48,9 +107,10 @@ begin
 	  pc <=0;
 	  jp <=0;
 	  //ir <=0;
-	  //opcode <=0;
-	  Lb <=0;
 	  Lui <=0;
+	  Lb <=0;
+	  Lbu <=0;
+	  //opcode <=0;
 	  //func3 <=0;
 	end
 	else
@@ -69,17 +129,18 @@ begin
 	    2: begin // 分析指令
 	    	   case(ir[6:0])
 		   7'b0000011:begin  // L-type
-			      case(ir[14:12]) 
-			      3'b000: 
-			      begin
-			       Lb <= 1'b1; // set Flag Lb 
-	    	              // jp <=3;
-			      end
-			      endcase
+			        case(ir[14:12]) // func3
+			          3'b000: Lb  <= 1'b1; // set Lb  Flag 
+			          3'b100: Lbu <= 1'b1; // set Lbu Flag 
+			          3'b001: Lh  <= 1'b1; // set Lh  Flag 
+			          3'b101: Lhu <= 1'b1; // set Lhu Flag  
+			          3'b010: Lw  <= 1'b1; // set Lw  Flag 
+			          3'b110: Lwu <= 1'b1; // set Lwu Flag 
+			          3'b011: Ld  <= 1'b1; // set Ld  Flag 
+			        endcase
 		              end 
 		   7'b0110111:begin 
 		                  Lui <= 1'b1; // set Flag
-	    	                 // jp <=3;
 			      end
 	    	   endcase
 	    	   jp <=3;
@@ -88,21 +149,25 @@ begin
 	           //opcode <= ir[6:0];
 	    	   case(ir[6:0])
 		   7'b0000011:begin 
-			      case(ir[14:12]) 
-			      3'b000: 
-			      begin
-		                  // doing .... done
-			          Lb <= 1'b0; // close Flag
-		                  //pc <= pc + 1;   // 程序计数器加一
-			          //jp <=0;
-				 end
-			      endcase
+			        case(ir[14:12])  // func3
+			          3'b000: Lb  <= 1'b0; // close Lb  Flag 
+			          3'b100: Lbu <= 1'b0; // close Lbu Flag 
+			          3'b001: Lh  <= 1'b0; // close Lh  Flag 
+			          3'b101: Lhu <= 1'b0; // close Lhu Flag  
+			          3'b010: Lw  <= 1'b0; // close Lw  Flag 
+			          3'b110: Lwu <= 1'b0; // close Lwu Flag 
+			          3'b011: Ld  <= 1'b0; // close Ld  Flag 
+			        endcase
+			      //3'b000: 
+			      //begin
+		              //    // doing .... done
+			      //    Lb <= 1'b0; // close Flag
+			      //   end
+			      //endcase
 			      end
 		   7'b0110111:begin 
 		                  // doing .... done
 		                  Lui <= 1'b0; // close Flag
-		                  //pc <= pc + 1;   // 程序计数器加一
-			          //jp <=0;
 			      end
 		   endcase
 		   pc <= pc + 1;   // 程序计数器加一

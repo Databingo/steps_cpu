@@ -18,10 +18,17 @@ wire [31:0] oir;
 wire [6:0] opc ;
 wire [2:0] ojp;
 wire [6:0] o_opcode;
-wire [2:0] oLb;
-wire oLui;
 wire [2:0] ofunc3;
 
+wire oLui;
+
+wire oLb;
+wire oLbu;
+wire oLh; 
+wire oLhu;
+wire oLw;
+wire oLwu;
+wire oLd;
 
 // 实例化待测电路
 s3 dut(
@@ -31,9 +38,26 @@ s3 dut(
  .opc (opc),
  .ojp (ojp),
  .o_opcode (o_opcode),
- .oLb (oLb),
+ .ofunc3 (ofunc3),
+
  .oLui (oLui),
- .ofunc3 (ofunc3)
+
+ .oLb (oLb),
+ .oLbu (oLbu),
+ .oLh  (oLh),
+ .oLhu (oLhu),
+ .oLw (oLw),
+ .oLwu (oLwu),
+ .oLd (oLd)
+
+
+
+
+
+
+
+
+
 
 );
 
@@ -63,7 +87,29 @@ end
 
 // 输出监控
 always @(posedge clk) begin
-     $monitor("At time %0t: oir=%b, opc=%d, ojp=%d, o_opcode=%b, ofunc3=%b, oLb=%b, oLui=%b", $time, oir, opc, ojp, o_opcode, ofunc3, oLb, oLui);
+     $monitor("At time %0t:oir=%b,opc=%0d,ojp=%d,o_opcode=%b,ofunc3=%b,oLui=%b,oLb=%b,", $time, oir, opc, ojp, o_opcode, ofunc3, oLui, oLb,
+             "oLbu=%b,", oLbu, 
+             "oLh=%b,",  oLh, 
+             "oLhu=%b,", oLhu, 
+             "oLw=%b,",  oLw, 
+             "oLwu=%b,", oLwu, 
+             "oLd=%b,",  oLd,
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+     );
     end
 
 endmodule ： s3tb
