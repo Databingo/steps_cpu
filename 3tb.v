@@ -6,7 +6,7 @@
 
 
 parameter YMC = 60; // 一个脉冲是 60 纳秒时间单位，从上升沿到上升沿是一个周期，两个脉冲，120 纳秒
-parameter TIME_WINDOW = 60*2*128; // 运行仿真 128 个时钟周期
+parameter TIME_WINDOW = 60*2 * 62 * 4 + 1 ; // 运行仿真 62*4(节拍+1延迟节拍) 个时钟周期
 
 
 module s3tb();
@@ -14,24 +14,26 @@ module s3tb();
 // 信号声明
 reg clk;
 reg reset_n;
-wire [31:0] o;
+wire [31:0] oir;
 wire [6:0] opc ;
 wire [2:0] ojp;
 wire [6:0] o_opcode;
-wire [2:0] oshow;
+wire [2:0] oLb;
 wire oLui;
+wire [2:0] ofunc3;
 
 
 // 实例化待测电路
 s3 dut(
  .clock (clk),
  .reset_n (reset_n),
- .o (o),
+ .oir (oir),
  .opc (opc),
  .ojp (ojp),
  .o_opcode (o_opcode),
- .oshow (oshow),
- .oLui (oLui)
+ .oLb (oLb),
+ .oLui (oLui),
+ .ofunc3 (ofunc3)
 
 );
 
@@ -61,7 +63,7 @@ end
 
 // 输出监控
 always @(posedge clk) begin
-     $monitor("At time %0t: o=%b, opc=%d, ojp=%d, o_opcode=%b, oshow=%b, oLui=%b", $time, o, opc, ojp, o_opcode, oshow, oLui);
+     $monitor("At time %0t: oir=%b, opc=%d, ojp=%d, o_opcode=%b, ofunc3=%b, oLb=%b, oLui=%b", $time, oir, opc, ojp, o_opcode, ofunc3, oLb, oLui);
     end
 
 endmodule ： s3tb

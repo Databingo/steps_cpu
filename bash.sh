@@ -8,7 +8,7 @@
 
 # s3
 iverilog -g2012 -o s3 3_decode_instruction.v 3tb.v &&
-vvp s3 
+vvp s3 |less
 
 
 
