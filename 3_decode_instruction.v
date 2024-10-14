@@ -493,7 +493,7 @@ begin
 				         end 
 				endcase
 			      end
-	           7'b0011011:begin // Math-logic-Imm-64 type
+	           7'b0011011:begin // Math-logic-I-64 type
 			        case(ir[14:12]) // func3
 			          3'b000: Addiw  <= 1'b0; // close Addiw  Flag 
 			          3'b001: Slliw  <= 1'b0; // close Slliw  Flag 
@@ -501,6 +501,23 @@ begin
 				          case(ir[31:25]) // func7
 				            7'b0000000: Srliw <= 1'b0; // close Srliw  Flag 
 				            7'b0100000: Sraiw <= 1'b0; // close Sraiw  Flag 
+				          endcase
+				         end 
+				endcase
+		              end
+	           7'b0111011:begin // Math-logic-R-64 type
+			        case(ir[14:12]) // func3
+				  3'b000: begin
+				          case(ir[31:25]) // func7
+				            7'b0000000: Addw  <= 1'b0; // close Addw  Flag 
+				            7'b0100000: Subw  <= 1'b0; // close Subw  Flag 
+				          endcase
+				         end 
+			          3'b001: Sllw  <= 1'b0; // close Sllw  Flag 
+				  3'b101: begin
+				          case(ir[31:25]) // func7
+				            7'b0000000: Srlw  <= 1'b0; // close Srlw  Flag 
+				            7'b0100000: Sraw  <= 1'b0; // close Sraw  Flag 
 				          endcase
 				         end 
 				endcase
