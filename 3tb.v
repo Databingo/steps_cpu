@@ -121,29 +121,34 @@ end
 
 // 输出监控
 always @(posedge clk) begin
-     $monitor("Time %0t:oir=%b,opc=%0d,ojp=%d,o_opcode=%b,ofunc3=%b,oLui=%b,oLb=%b,", $time, oir, opc, ojp, o_opcode, ofunc3, oLui, oLb,
-"oLbu=%b,", oLbu, 
-"oLh=%b,",  oLh, 
-"oLhu=%b,", oLhu, 
-"oLw=%b,",  oLw, 
-"oLwu=%b,", oLwu, 
-"oLd=%b,",  oLd,
-"oSb=%b,",  oSb,
-"oSh=%b,",  oSh,
-"oSw=%b,",  oSw,
-"oSd=%b,",  oSd,
-
-"oAdd=%b,",  oAdd,
-"oSub=%b,",  oSub,
-"oSll=%b,",  oSll,
-"oSlt=%b,",  oSlt,
-"oSltu=%b,", oSltu,
-"oXor=%b,",  oXor,
-"oSrl=%b,",  oSrl,
-"oSra=%b,",  oSra,
-"oOr=%b,",   oOr,
-"oAnd=%b,",  oAnd,
+     $write("Tm %0t:oir=%b,opc=%0d,ojp=%d,o_opcode=%b,ofunc3=%b,oLui=%b,oLb=%b,", $time, oir, opc, ojp, o_opcode, ofunc3, oLui, oLb,
+//"oLbu=%b,", oLbu, 
+//"oLh=%b,",  oLh, 
+//"oLhu=%b,", oLhu, 
+//"oLw=%b,",  oLw, 
+//"oLwu=%b,", oLwu, 
+//"oLd=%b,",  oLd,
+//"oSb=%b,",  oSb,
+//"oSh=%b,",  oSh,
+//"oSw=%b,",  oSw,
+//"oSd=%b,",  oSd,
+//
+//"oAdd=%b,",  oAdd,
+//"oSub=%b,",  oSub,
+//"oSll=%b,",  oSll,
+//"oSlt=%b,",  oSlt,
+//"oSltu=%b,", oSltu,
+//"oXor=%b,",  oXor,
+//"oSrl=%b,",  oSrl,
+//"oSra=%b,",  oSra,
+//"oOr=%b,",   oOr,
+//"oAnd=%b,",  oAnd,
    );
+   if (oLbu == 1'b1) begin
+    $write("oLbu=%b,", oLbu);
+   end
+    $write("\n");
+
   
 
 
