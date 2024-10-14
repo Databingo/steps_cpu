@@ -48,6 +48,15 @@ wire oSra;
 wire oOr;
 wire oAnd;
 
+wire oAddi; 
+wire oSlti; 
+wire oSltiu;
+wire oOri; 
+wire oAndi;
+wire oXori;
+wire oSlli;
+wire oSrli;
+wire oSrai;
 
 
 
@@ -91,7 +100,18 @@ s3 dut(
 .oSrl(oSrl),
 .oSra(oSra),
 .oOr(oOr),
-.oAnd(oAnd)
+.oAnd(oAnd),
+
+
+.oAddi(oAddi),  
+.oSlti(oSlti), 
+.oSltiu(oSltiu),
+.oOri(oOri), 
+.oAndi(oAndi),
+.oXori(oXori),
+.oSlli(oSlli),
+.oSrli(oSrli),
+.oSrai(oSrai)
 
 
 
@@ -155,7 +175,27 @@ always @(posedge clk) begin
    if (oAnd == 1'b1) $write("oAnd=%b,",  oAnd,);
 
 
+   if (oAddi == 1'b1) $write("oAddi =%b,",  oAddi ,);
+   if (oSlti == 1'b1) $write("oSlti =%b,",  oSlti ,);
+   if (oSltiu== 1'b1) $write("oSltiu=%b,",  oSltiu,);
+   if (oOri  == 1'b1) $write("oOri  =%b,",  oOri  ,);
+   if (oAndi == 1'b1) $write("oAndi =%b,",  oAndi ,);
+   if (oXori == 1'b1) $write("oXori =%b,",  oXori ,);
+   if (oSlli == 1'b1) $write("oSlli =%b,",  oSlli ,);
+   if (oSrli == 1'b1) $write("oSrli =%b,",  oSrli ,);
+   if (oSrai == 1'b1) $write("oSrai =%b,",  oSrai ,);
 
+
+
+       
+       
+       
+      
+      
+      
+      
+      
+      
 
     $write("\n");
 

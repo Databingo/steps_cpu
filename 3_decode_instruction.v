@@ -21,14 +21,27 @@ oSd,
 
 oAdd,
 oSub,
-oSll,
 oSlt,
 oSltu,
+oOr,
+oAnd,
 oXor,
+oSll,
 oSrl,
 oSra,
-oOr,
-oAnd
+
+oAddi, 
+oSlti, 
+oSltiu,
+oOri, 
+oAndi,
+oXori,
+oSlli,
+oSrli,
+oSrai
+
+
+
 
 
 
@@ -78,7 +91,22 @@ reg Srl;
 reg Sra;
 reg Or;
 reg And;
-    
+
+reg Addi; 
+reg Slti;
+reg Sltiu;
+reg Ori; 
+reg Andi;
+reg Xori;
+reg Slli;
+reg Srli;
+reg Srai;
+
+
+
+
+
+
     
     
     
@@ -119,6 +147,19 @@ output oOr;
 output oAnd;
 
 
+output oAddi; 
+output oSlti;
+output oSltiu;
+output oOri; 
+output oAndi;
+output oXori;
+output oSlli;
+output oSrli;
+output oSrai;
+
+
+
+
 // 连接显示器
 assign oir = ir[31:0];  // 显示 32 位指令
 assign opc = pc[63:0];// 显示 64 位程序计数器值
@@ -153,6 +194,18 @@ assign oSrl  = Srl;
 assign oSra  = Sra;
 assign oOr   = Or;
 assign oAnd  = And;
+
+
+assign oAddi = Addi; 
+assign oSlti = Slti;
+assign oSltiu=Sltiu;
+assign oOri  =  Ori; 
+assign oAndi = Andi;
+assign oXori = Xori;
+assign oSlli = Slli;
+assign oSrli = Srli;
+assign oSrai = Srai;
+
 
 
 
@@ -192,6 +245,17 @@ begin
 	  //Sra <=0;
 	  //Or <=0;
 	  //And <=0;
+	  // Addi <=0;
+	  // Slti <=0;
+	  //Sltiu <=0;
+	  //  Ori <=0;
+	  // Andi <=0;
+	  // Xori <=0;
+	  // Slli <=0;
+	  // Srli <=0;
+	  // Srai <=0;
+	  //
+	  //
 
 
 	  //opcode <=0;
@@ -233,7 +297,7 @@ begin
 			          3'b011: Sd  <= 1'b1; // set Sd  Flag  
 				endcase
 			      end
-	           7'b0110011:begin // Math-Logic-type
+	           7'b0110011:begin // Math-Logic-Register type
 			        case(ir[14:12]) // func3
 				  3'b000:begin
 				          case(ir[31:25]) // func7
@@ -255,8 +319,23 @@ begin
 			          3'b111: And  <= 1'b1; // set And Flag 
 				endcase
 			      end
-
-
+	           7'b0010011:begin // Math-logic-Imm type
+			        case(ir[14:12]) // func3
+			          3'b000: Addi  <= 1'b1; // set Addi  Flag 
+			          3'b010: Slti  <= 1'b1; // set Slti  Flag 
+			          3'b011: Sltiu <= 1'b1; // set Sltiu Flag 
+			          3'b110: Ori   <= 1'b1; // set Ori   Flag 
+			          3'b111: Andi  <= 1'b1; // set Andi  Flag 
+			          3'b100: Xori  <= 1'b1; // set Xori  Flag 
+			          3'b001: Slli  <= 1'b1; // set Slli  Flag 
+				  3'b101: begin
+				          case(ir[31:25]) // func7
+				            7'b0000000: Srli  <= 1'b1; // set Srli  Flag 
+				            7'b0100000: Srai  <= 1'b1; // set Srai  Flag 
+				          endcase
+				         end 
+				endcase
+			      end
 
 	    	   endcase
 	    	   jp <=2;
