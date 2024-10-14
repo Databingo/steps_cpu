@@ -44,9 +44,13 @@ oSrai,
 oAddiw,
 oSlliw,
 oSrliw,
-oSraiw
+oSraiw,
 
-
+oAddw,
+oSubw,
+oSllw,
+oSrlw,
+oSraw
 
 
 
@@ -118,6 +122,12 @@ reg Slliw;
 reg Srliw;
 reg Sraiw;
 
+
+reg Addw;
+reg Subw;
+reg Sllw;
+reg Srlw;
+reg Sraw;
     
     
     
@@ -174,6 +184,12 @@ output oSrliw;
 output oSraiw;
 
 
+output oAddw;
+output oSubw;
+output oSllw;
+output oSrlw;
+output oSraw;
+
 
 
 
@@ -228,6 +244,12 @@ assign oSlliw= Slliw;
 assign oSrliw= Srliw;
 assign oSraiw= Sraiw;
 
+assign oAddw= Addw;
+assign oSubw= Subw;
+assign oSllw= Sllw;
+assign oSrlw= Srlw;
+assign oSraw= Sraw;
+
 
 
 
@@ -280,6 +302,14 @@ begin
 	  //Slliw <=0;
 	  //Srliw <=0;
 	  //Sraiw <=0;
+	  //Addw <=0;
+	  //Subw <=0;
+	  //Sllw <=0;
+	  //Srlw <=0;
+	  //Sraw <=0;
+	  //
+	  //
+	  //
 	  //
 	  //
 	  //
@@ -375,6 +405,28 @@ begin
 				         end 
 				endcase
 		              end
+	           7'b0111011:begin // Math-logic-R-64 type
+			        case(ir[14:12]) // func3
+				  3'b000: begin
+				          case(ir[31:25]) // func7
+				            7'b0000000: Addw  <= 1'b1; // set Addw  Flag 
+				            7'b0100000: Subw  <= 1'b1; // set Subw  Flag 
+				          endcase
+				         end 
+			          3'b001: Sllw  <= 1'b1; // set Sllw  Flag 
+				  3'b101: begin
+				          case(ir[31:25]) // func7
+				            7'b0000000: Srlw  <= 1'b1; // set Srlw  Flag 
+				            7'b0100000: Sraw  <= 1'b1; // set Sraw  Flag 
+				          endcase
+				         end 
+				endcase
+		              end
+ 
+ 
+ 
+ 
+ 
 
 	    	   endcase
 	    	   jp <=2;
