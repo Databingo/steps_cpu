@@ -38,7 +38,18 @@ oAndi,
 oXori,
 oSlli,
 oSrli,
-oSrai
+oSrai,
+
+
+oAddiw,
+oSlliw,
+oSrliw,
+oSraiw
+
+
+
+
+
 
 
 
@@ -102,10 +113,10 @@ reg Slli;
 reg Srli;
 reg Srai;
 
-
-
-
-
+reg Addiw;
+reg Slliw;
+reg Srliw;
+reg Sraiw;
 
     
     
@@ -157,6 +168,12 @@ output oSlli;
 output oSrli;
 output oSrai;
 
+output oAddiw;
+output oSlliw;
+output oSrliw;
+output oSraiw;
+
+
 
 
 
@@ -206,6 +223,11 @@ assign oSlli = Slli;
 assign oSrli = Srli;
 assign oSrai = Srai;
 
+assign oAddiw= Addiw;
+assign oSlliw= Slliw;
+assign oSrliw= Srliw;
+assign oSraiw= Sraiw;
+
 
 
 
@@ -254,6 +276,11 @@ begin
 	  // Slli <=0;
 	  // Srli <=0;
 	  // Srai <=0;
+	  //Addiw <=0;
+	  //Slliw <=0;
+	  //Srliw <=0;
+	  //Sraiw <=0;
+	  //
 	  //
 	  //
 
@@ -336,6 +363,18 @@ begin
 				         end 
 				endcase
 			      end
+	           7'b0011011:begin // Math-logic-Imm-64 type
+			        case(ir[14:12]) // func3
+			          3'b000: Addiw  <= 1'b1; // set Addiw  Flag 
+			          3'b001: Slliw  <= 1'b1; // set Slliw  Flag 
+				  3'b101: begin
+				          case(ir[31:25]) // func7
+				            7'b0000000: Srliw  <= 1'b1; // set Srliw  Flag 
+				            7'b0100000: Sraiw <= 1'b1; // set Sraiw  Flag 
+				          endcase
+				         end 
+				endcase
+		              end
 
 	    	   endcase
 	    	   jp <=2;
@@ -402,6 +441,18 @@ begin
 				         end 
 				endcase
 			      end
+	           7'b0011011:begin // Math-logic-Imm-64 type
+			        case(ir[14:12]) // func3
+			          3'b000: Addiw  <= 1'b0; // close Addiw  Flag 
+			          3'b001: Slliw  <= 1'b0; // close Slliw  Flag 
+				  3'b101: begin
+				          case(ir[31:25]) // func7
+				            7'b0000000: Srliw <= 1'b0; // close Srliw  Flag 
+				            7'b0100000: Sraiw <= 1'b0; // close Sraiw  Flag 
+				          endcase
+				         end 
+				endcase
+		              end
 
 		   endcase
 		   pc <= pc + 1;   // 程序计数器加一
