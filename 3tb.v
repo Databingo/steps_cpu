@@ -121,7 +121,7 @@ end
 
 // 输出监控
 always @(posedge clk) begin
-     $write("Tm %0t:oir=%b,opc=%0d,ojp=%d,o_opcode=%b,ofunc3=%b,oLui=%b,oLb=%b,", $time, oir, opc, ojp, o_opcode, ofunc3, oLui, oLb,
+     $write("Tm %0t:oir=%b,opc=%0d,ojp=%d,o_opcode=%b,ofunc3=%b,", $time, oir, opc, ojp, o_opcode, ofunc3,
 //"oLbu=%b,", oLbu, 
 //"oLh=%b,",  oLh, 
 //"oLhu=%b,", oLhu, 
@@ -144,9 +144,13 @@ always @(posedge clk) begin
 //"oOr=%b,",   oOr,
 //"oAnd=%b,",  oAnd,
    );
-   if (oLbu == 1'b1) begin
-    $write("oLbu=%b,", oLbu);
-   end
+   if (oLui == 1'b1) begin $write("oLui=%b,", oLui); end
+   if (oLb == 1'b1) begin $write("oLb=%b,", oLb); end
+   if (oLbu == 1'b1) begin $write("oLbu=%b,", oLbu); end
+
+
+
+
     $write("\n");
 
   

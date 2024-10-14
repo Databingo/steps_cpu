@@ -193,16 +193,16 @@ begin
         // 开始指令节拍
 	begin
 	    case(jp)
-	    0: begin // 空拍，pc 传值到程序存储器前端的地址寄存器 
-	    	   jp <=1;
-	       end
-	    1: begin 
+	    //0: begin // 空拍，pc 传值到程序存储器前端的地址寄存器 
+	    //	   jp <=1;
+	    //   end
+	    0: begin 
 	    	   ir <=irom[pc]; // 取指令
 	           //opcode <= irom[pc][6:0];
 		   //func3 <= irom[pc][14:12];
-	    	   jp <=2; 
+	    	   jp <=1; 
 	       end
-	    2: begin // 分析指令
+	    1: begin // 分析指令
 	    	   case(ir[6:0])
 		   7'b0000011:begin  // L-type
 			        case(ir[14:12]) // func3
@@ -252,9 +252,9 @@ begin
 
 
 	    	   endcase
-	    	   jp <=3;
+	    	   jp <=2;
 	       end
-	    3: begin // 指令执行
+	    2: begin // 指令执行
 	           //opcode <= ir[6:0];
 	    	   case(ir[6:0])
 		   7'b0000011:begin // Load type
