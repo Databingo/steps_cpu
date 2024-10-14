@@ -2,7 +2,9 @@
 
 
 module s3 (reset_n, clock, oir, opc, ojp, o_opcode,ofunc3,
+
 oLui, 
+oAuipc,
 
 oLb,
 oLbu,
@@ -52,7 +54,7 @@ reg [31:0] ir; // 程序指令寄存器: 32 位宽度
 //reg [6:0] opcode;
 //reg [2:0] func3;
 reg Lui;
-
+reg Auipc; 
 reg Lb;
 reg Lbu;
 reg Lh; 
@@ -89,6 +91,7 @@ output [6:0]  o_opcode;
 output [2:0]  ofunc3;
 
 output oLui;
+output oAuipc; 
 
 output oLb;
 output oLbu;
@@ -121,7 +124,9 @@ assign opc = pc[63:0];// 显示 64 位程序计数器值
 assign ojp = jp[2:0]; // 显示 3 位节拍计数器
 assign o_opcode = ir[6:0];// 显示 7 位操作码
 assign ofunc3 = ir[14:12]; //显示 func3 值
+//
 assign oLui = Lui; // 显示 Lui 标志线
+assign oAuipc = Auipc;
 
 assign oLb = Lb;
 assign oLbu = Lbu;
@@ -163,6 +168,7 @@ begin
 	  jp <=0;
 	  //ir <=0;
 	  //Lui <=0;
+	  //Auipc <=0;  
 	  //Lb <=0;
 	  //Lbu <=0;
           //Lh <=0; 
@@ -216,7 +222,10 @@ begin
 			        endcase
 		              end 
 		   7'b0110111:begin 
-		                  Lui <= 1'b1; // set Flag
+		                  Lui <= 1'b1; // set Lui Flag
+			      end
+	           7'b0010111:begin
+		                  Auipc <= 1'b1; // set Auipc Flag
 			      end
 	           7'b0100011:begin // S-type
 			        case(ir[14:12]) // func3
@@ -255,32 +264,31 @@ begin
 	    	   jp <=2;
 	       end
 	    2: begin // 指令执行
-	           //opcode <= ir[6:0];
-	    	   case(ir[6:0])
-		   7'b0000011:begin // Load type
-			        case(ir[14:12])  // func3
-			          3'b000: Lb  <= 1'b0; // close Lb  Flag 
-			          3'b100: Lbu <= 1'b0; // close Lbu Flag 
-			          3'b001: Lh  <= 1'b0; // close Lh  Flag 
-			          3'b101: Lhu <= 1'b0; // close Lhu Flag  
-			          3'b010: Lw  <= 1'b0; // close Lw  Flag 
-			          3'b110: Lwu <= 1'b0; // close Lwu Flag 
-			          3'b011: Ld  <= 1'b0; // close Ld  Flag 
-			        endcase
-			      end
-	           7'b0100011:begin // S-type
-			        case(ir[14:12]) // func3
-			          3'b000: Sb  <= 1'b0; // close Sb Flag 
-			          3'b001: Sh  <= 1'b0; // close Sh Flag 
-			          3'b010: Sw  <= 1'b0; // close Sw Flag 
-			          3'b011: Sd  <= 1'b0; // close Sd Flag  
-				endcase
-			      end
-		   7'b0110111:begin 
-		                  // doing .... done
-		                  Lui <= 1'b0; // close Flag
-			      end
-		   endcase
+	    	   //case(ir[6:0])
+		   //7'b0000011:begin // Load type
+		   //             case(ir[14:12])  // func3
+		   //               3'b000: Lb  <= 1'b0; // close Lb  Flag 
+		   //               3'b100: Lbu <= 1'b0; // close Lbu Flag 
+		   //               3'b001: Lh  <= 1'b0; // close Lh  Flag 
+		   //               3'b101: Lhu <= 1'b0; // close Lhu Flag  
+		   //               3'b010: Lw  <= 1'b0; // close Lw  Flag 
+		   //               3'b110: Lwu <= 1'b0; // close Lwu Flag 
+		   //               3'b011: Ld  <= 1'b0; // close Ld  Flag 
+		   //             endcase
+		   //           end
+	           //7'b0100011:begin // S-type
+		   //             case(ir[14:12]) // func3
+		   //               3'b000: Sb  <= 1'b0; // close Sb Flag 
+		   //               3'b001: Sh  <= 1'b0; // close Sh Flag 
+		   //               3'b010: Sw  <= 1'b0; // close Sw Flag 
+		   //               3'b011: Sd  <= 1'b0; // close Sd Flag  
+		   //     	endcase
+		   //           end
+		   //7'b0110111:begin 
+		   //               // doing .... done
+		   //               Lui <= 1'b0; // close Flag
+		   //           end
+		   //endcase
 		   pc <= pc + 1;   // 程序计数器加一
 	    	   jp <=0;
 	       end

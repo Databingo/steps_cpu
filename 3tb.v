@@ -21,6 +21,7 @@ wire [6:0] o_opcode;
 wire [2:0] ofunc3;
 
 wire oLui;
+wire oAuipc; 
 
 wire oLb;
 wire oLbu;
@@ -64,6 +65,7 @@ s3 dut(
  .ofunc3 (ofunc3),
 
  .oLui (oLui),
+ .oAuipc (oAuipc), 
 
  .oLb (oLb),
  .oLbu (oLbu),
@@ -121,9 +123,11 @@ end
 
 // 输出监控
 always @(posedge clk) begin
-     $write("Tm %0t:oir=%b,opc=%0d,ojp=%d,o_opcode=%b,ofunc3=%b,", $time, oir, opc, ojp, o_opcode, ofunc3,);
+     $write("Tm %0t:oir=%b,opc=%0d,ojp=%d,o_op=%b,ofunc3=%b,", $time, oir, opc, ojp, o_opcode, ofunc3,);
 
    if (oLui == 1'b1) $write("oLui=%b,", oLui);
+   if (oAuipc == 1'b1) $write("oAuipc=%b,", oAuipc);
+
    if (oLb == 1'b1) $write("oLb=%b,", oLb);
    if (oLbu == 1'b1) $write("oLbu=%b,", oLbu);
 
