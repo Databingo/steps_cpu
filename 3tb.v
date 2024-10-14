@@ -69,6 +69,9 @@ wire oSllw;
 wire oSrlw;
 wire oSraw;
 
+wire oJal; 
+wire oJalr;
+
 
 
 
@@ -133,7 +136,10 @@ s3 dut(
 .oSubw(oSubw),
 .oSllw(oSllw),
 .oSrlw(oSrlw),
-.oSraw(oSraw)
+.oSraw(oSraw),
+
+.oJal(oJal),  
+.oJalr(oJalr)
 
 
 
@@ -224,10 +230,13 @@ always @(posedge clk) begin
    if (oSraw == 1'b1) $write("oSraw =%b,",  oSraw ,);
 
        
+   if (oJal  == 1'b1) $write("oJal  =%b,",  oJal  ,);
+   if (oJalr == 1'b1) $write("oJalr =%b,",  oJalr ,);
       
       
-      
-      
+
+
+
 
 
 

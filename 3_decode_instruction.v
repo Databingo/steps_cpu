@@ -50,10 +50,10 @@ oAddw,
 oSubw,
 oSllw,
 oSrlw,
-oSraw
+oSraw,
 
-
-
+oJal,
+oJalr
 
 
 
@@ -128,8 +128,13 @@ reg Subw;
 reg Sllw;
 reg Srlw;
 reg Sraw;
-    
-    
+
+reg Jal;   
+reg Jalr;
+
+
+
+
     
 
 // 显示器
@@ -189,6 +194,9 @@ output oSubw;
 output oSllw;
 output oSrlw;
 output oSraw;
+
+output oJal;
+output oJalr;
 
 
 
@@ -250,6 +258,11 @@ assign oSllw= Sllw;
 assign oSrlw= Srlw;
 assign oSraw= Sraw;
 
+assign oJal=Jal;
+assign oJalr=Jalr;
+
+
+
 
 
 
@@ -307,6 +320,12 @@ begin
 	  //Sllw <=0;
 	  //Srlw <=0;
 	  //Sraw <=0;
+	  //Jal <=0;
+	  //Jalr <=0;
+	  //
+	  //
+	  //
+	  //
 	  //
 	  //
 	  //
@@ -422,9 +441,12 @@ begin
 				         end 
 				endcase
 		              end
- 
- 
- 
+	           7'b1101111:begin // Jump
+                                Jal <= 1'b1; // set Jal Flag 
+                              end
+	           7'b1100111:begin // RJump
+                                Jalr <= 1'b1; // set Jalr Flag 
+                              end
  
  
 
