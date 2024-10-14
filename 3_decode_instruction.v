@@ -53,7 +53,14 @@ oSrlw,
 oSraw,
 
 oJal,
-oJalr
+oJalr,
+
+oBeq, 
+oBne, 
+oBlt, 
+oBge, 
+oBltu,
+oBgeu
 
 
 
@@ -132,7 +139,12 @@ reg Sraw;
 reg Jal;   
 reg Jalr;
 
-
+reg Beq;
+reg Bne;
+reg Blt;
+reg Bge;
+reg Bltu;
+reg Bgeu;
 
 
     
@@ -198,6 +210,15 @@ output oSraw;
 output oJal;
 output oJalr;
 
+output oBeq;
+output oBne;
+output oBlt;
+output oBge;
+output oBltu;
+output oBgeu;
+
+
+
 
 
 
@@ -261,6 +282,13 @@ assign oSraw= Sraw;
 assign oJal=Jal;
 assign oJalr=Jalr;
 
+assign oBeq=Beq;
+assign oBne=Bne;
+assign oBlt=Blt;
+assign oBge=Bge;
+assign oBltu=Bltu;
+assign oBgeu=Bgeu;
+
 
 
 
@@ -322,7 +350,12 @@ begin
 	  //Sraw <=0;
 	  //Jal <=0;
 	  //Jalr <=0;
-	  //
+	  //Beq <=0;
+	  //Bne <=0;
+	  //Blt <=0;
+	  //Bge <=0;
+	  //Bltu <=0;
+	  //Bgeu <=0;
 	  //
 	  //
 	  //
@@ -448,6 +481,16 @@ begin
                                 Jalr <= 1'b1; // set Jalr Flag 
                               end
  
+	           7'b1100011:begin // Branch type
+			        case(ir[14:12]) // func3
+			          3'b000: Beq  <= 1'b1; // set Beq  Flag 
+			          3'b001: Bne  <= 1'b1; // set Bne  Flag 
+			          3'b100: Blt  <= 1'b1; // set Blt  Flag 
+			          3'b101: Bge  <= 1'b1; // set Bge  Flag 
+			          3'b110: Bltu <= 1'b1; // set Bltu Flag 
+			          3'b111: Bgeu <= 1'b1; // set Bgeu Flag 
+				endcase
+		              end
  
 
 	    	   endcase
@@ -550,6 +593,16 @@ begin
 	           7'b1100111:begin // RJump
                                 Jalr <= 1'b0; // close Jalr Flag 
                               end
+	           7'b1100011:begin // Branch type
+			        case(ir[14:12]) // func3
+			          3'b000: Beq  <= 1'b0; // close Beq  Flag 
+			          3'b001: Bne  <= 1'b0; // close Bne  Flag 
+			          3'b100: Blt  <= 1'b0; // close Blt  Flag 
+			          3'b101: Bge  <= 1'b0; // close Bge  Flag 
+			          3'b110: Bltu <= 1'b0; // close Bltu Flag 
+			          3'b111: Bgeu <= 1'b0; // close Bgeu Flag 
+				endcase
+		              end
 
 		   endcase
 		   pc <= pc + 1;   // 程序计数器加一

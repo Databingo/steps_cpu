@@ -72,6 +72,12 @@ wire oSraw;
 wire oJal; 
 wire oJalr;
 
+wire oBeq; 
+wire oBne; 
+wire oBlt; 
+wire oBge; 
+wire oBltu;
+wire oBgeu;
 
 
 
@@ -139,10 +145,14 @@ s3 dut(
 .oSraw(oSraw),
 
 .oJal(oJal),  
-.oJalr(oJalr)
+.oJalr(oJalr),
 
-
-
+.oBeq(oBeq), 
+.oBne(oBne), 
+.oBlt(oBlt), 
+.oBge(oBge), 
+.oBltu(oBltu),
+.oBgeu(oBgeu)
 
 
 
@@ -233,7 +243,16 @@ always @(posedge clk) begin
    if (oJal  == 1'b1) $write("oJal=%b,",  oJal  ,);
    if (oJalr == 1'b1) $write("oJalr=%b,",  oJalr ,);
       
-      
+   if (oBeq  == 1'b1) $write("oBeq=%b,",  oBeq  ,);
+   if (oBne  == 1'b1) $write("oBne=%b,",  oBne  ,);
+   if (oBlt  == 1'b1) $write("oBlt=%b,",  oBlt  ,);
+   if (oBge  == 1'b1) $write("oBge=%b,",  oBge  ,);
+   if (oBltu == 1'b1) $write("oBltu=%b,",  oBltu ,);
+   if (oBgeu == 1'b1) $write("oBgeu=%b,",  oBgeu ,);
+
+
+
+
 
 
 
