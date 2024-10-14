@@ -544,6 +544,12 @@ begin
 				         end 
 				endcase
 		              end
+	           7'b1101111:begin // Jump
+                                Jal <= 1'b0; // close Jal Flag 
+                              end
+	           7'b1100111:begin // RJump
+                                Jalr <= 1'b0; // close Jalr Flag 
+                              end
 
 		   endcase
 		   pc <= pc + 1;   // 程序计数器加一

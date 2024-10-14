@@ -208,30 +208,30 @@ always @(posedge clk) begin
    if (oAnd == 1'b1) $write("oAnd=%b,",  oAnd,);
 
 
-   if (oAddi == 1'b1) $write("oAddi =%b,",  oAddi ,);
-   if (oSlti == 1'b1) $write("oSlti =%b,",  oSlti ,);
+   if (oAddi == 1'b1) $write("oAddi=%b,",  oAddi ,);
+   if (oSlti == 1'b1) $write("oSlti=%b,",  oSlti ,);
    if (oSltiu== 1'b1) $write("oSltiu=%b,",  oSltiu,);
-   if (oOri  == 1'b1) $write("oOri  =%b,",  oOri  ,);
-   if (oAndi == 1'b1) $write("oAndi =%b,",  oAndi ,);
-   if (oXori == 1'b1) $write("oXori =%b,",  oXori ,);
-   if (oSlli == 1'b1) $write("oSlli =%b,",  oSlli ,);
-   if (oSrli == 1'b1) $write("oSrli =%b,",  oSrli ,);
-   if (oSrai == 1'b1) $write("oSrai =%b,",  oSrai ,);
+   if (oOri  == 1'b1) $write("oOri=%b,",  oOri  ,);
+   if (oAndi == 1'b1) $write("oAndi=%b,",  oAndi ,);
+   if (oXori == 1'b1) $write("oXori=%b,",  oXori ,);
+   if (oSlli == 1'b1) $write("oSlli=%b,",  oSlli ,);
+   if (oSrli == 1'b1) $write("oSrli=%b,",  oSrli ,);
+   if (oSrai == 1'b1) $write("oSrai=%b,",  oSrai ,);
 
-   if (oAddiw == 1'b1) $write("oAddiw =%b,",  oAddiw ,);
-   if (oSlliw == 1'b1) $write("oSlliw =%b,",  oSlliw ,);
-   if (oSrliw == 1'b1) $write("oSrliw =%b,",  oSrliw ,);
-   if (oSraiw == 1'b1) $write("oSraiw =%b,",  oSraiw ,);
+   if (oAddiw == 1'b1) $write("oAddiw=%b,",  oAddiw ,);
+   if (oSlliw == 1'b1) $write("oSlliw=%b,",  oSlliw ,);
+   if (oSrliw == 1'b1) $write("oSrliw=%b,",  oSrliw ,);
+   if (oSraiw == 1'b1) $write("oSraiw=%b,",  oSraiw ,);
 
-   if (oAddw == 1'b1) $write("oAddw =%b,",  oAddw ,);
-   if (oSubw == 1'b1) $write("oSubw =%b,",  oSubw ,);
-   if (oSllw == 1'b1) $write("oSllw =%b,",  oSllw ,);
-   if (oSrlw == 1'b1) $write("oSrlw =%b,",  oSrlw ,);
-   if (oSraw == 1'b1) $write("oSraw =%b,",  oSraw ,);
+   if (oAddw == 1'b1) $write("oAddw=%b,",  oAddw ,);
+   if (oSubw == 1'b1) $write("oSubw=%b,",  oSubw ,);
+   if (oSllw == 1'b1) $write("oSllw=%b,",  oSllw ,);
+   if (oSrlw == 1'b1) $write("oSrlw=%b,",  oSrlw ,);
+   if (oSraw == 1'b1) $write("oSraw=%b,",  oSraw ,);
 
        
-   if (oJal  == 1'b1) $write("oJal  =%b,",  oJal  ,);
-   if (oJalr == 1'b1) $write("oJalr =%b,",  oJalr ,);
+   if (oJal  == 1'b1) $write("oJal=%b,",  oJal  ,);
+   if (oJalr == 1'b1) $write("oJalr=%b,",  oJalr ,);
       
       
 
