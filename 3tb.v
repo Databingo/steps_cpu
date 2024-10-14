@@ -82,6 +82,21 @@ wire oBgeu;
 wire oFence; 
 wire oFencei;
 
+wire oEcall; 
+wire oEbreak;
+wire oCsrrw; 
+wire oCsrrs;
+wire oCsrrc; 
+wire oCsrrwi;
+wire oCsrrsi;
+wire oCsrrci;
+
+
+
+
+
+
+
 
 
 
@@ -158,8 +173,16 @@ s3 dut(
 .oBgeu(oBgeu),
 
 .oFence(oFence),  
-.oFencei(oFencei)
+.oFencei(oFencei),
 
+.oEcall (oEcall),
+.oEbreak(oEbreak),
+.oCsrrw (oCsrrw), 
+.oCsrrs (oCsrrs),
+.oCsrrc (oCsrrc), 
+.oCsrrwi(oCsrrwi),
+.oCsrrsi(oCsrrsi),
+.oCsrrci(oCsrrci)
 
 
 
@@ -256,6 +279,17 @@ always @(posedge clk) begin
 
    if (oFence  == 1'b1) $write("oFence=%b,",  oFence  ,);
    if (oFencei == 1'b1) $write("oFencei=%b,",  oFencei ,);
+
+
+   if (oEcall  == 1'b1) $write("oEcall=%b,",  oEcall  ,);
+   if (oEbreak == 1'b1) $write("oEbreak=%b,",  oEbreak ,);
+   if (oCsrrw  == 1'b1) $write("oCsrrw=%b,",  oCsrrw  ,);
+   if (oCsrrs  == 1'b1) $write("oCsrrs=%b,",  oCsrrs  ,);
+   if (oCsrrc  == 1'b1) $write("oCsrrc=%b,",  oCsrrc  ,);
+   if (oCsrrwi == 1'b1) $write("oCsrrwi=%b,",  oCsrrwi ,);
+   if (oCsrrsi == 1'b1) $write("oCsrrsi=%b,",  oCsrrsi ,);
+   if (oCsrrci == 1'b1) $write("oCsrrci=%b,",  oCsrrci ,);
+
 
 
 

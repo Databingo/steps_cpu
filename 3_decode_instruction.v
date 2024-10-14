@@ -65,7 +65,14 @@ oBgeu,
 oFence, 
 oFencei,
 
-
+oEcall, 
+oEbreak,
+oCsrrw,
+oCsrrs,
+oCsrrc,
+oCsrrwi,
+oCsrrsi,
+oCsrrci
 
 );
 
@@ -149,7 +156,14 @@ reg Bgeu;
 reg Fence;
 reg Fencei;    
 
-
+reg Ecall; 
+reg Ebreak;
+reg Csrrw;
+reg Csrrs;
+reg Csrrc;
+reg Csrrwi;
+reg Csrrsi;
+reg Csrrci;
 
 
 
@@ -227,11 +241,14 @@ output oBgeu;
 output oFence;
 output oFencei;
 
-
-
-
-
-
+output oEcall; 
+output oEbreak;
+output oCsrrw;
+output oCsrrs;
+output oCsrrc;
+output oCsrrwi;
+output oCsrrsi;
+output oCsrrci;
 
 // 连接显示器
 assign oir = ir[31:0];  // 显示 32 位指令
@@ -303,10 +320,14 @@ assign oBgeu=Bgeu;
 assign oFence=Fence;
 assign oFencei=Fencei;
 
-
-
-
-
+assign oEcall= Ecall; 
+assign oEbreak=Ebreak;
+assign oCsrrw= Csrrw;
+assign oCsrrs= Csrrs;
+assign oCsrrc= Csrrc;
+assign oCsrrwi=Csrrwi;
+assign oCsrrsi=Csrrsi;
+assign oCsrrci=Csrrci;
 
 // 从文件读取程序到 irom
 initial $readmemb("./programb.txt", irom);
@@ -370,10 +391,14 @@ begin
 	  //Bgeu <=0;
 	  //Fence <=0;
 	  //Fencei <=0;
-	  //
-	  //
-	  //
-	  //
+	  //Ecall <=0; 
+	  //Ebreak <=0;
+	  //Csrrw <=0;
+	  //Csrrs <=0;
+	  //Csrrc <=0;
+	  //Csrrwi <=0;
+	  //Csrrsi <=0;
+	  //Csrrci <=0;
 	  //
 	  //
 	  //
@@ -509,6 +534,23 @@ begin
 			          3'b001: Fencei <= 1'b1; // set Fencei Flag 
 				endcase
 		              end
+	           7'b1110011:begin // Enverioment type
+			        case(ir[14:12]) // func3
+				  3'b000: begin
+				          case(ir[31:20]) // func12
+				            12'b000000000000: Ecall  <= 1'b1; // set Ecall  Flag 
+				            12'b000000000001: Ebreak <= 1'b1; // set Ebreak Flag 
+				          endcase
+				         end 
+			          3'b001: Csrrw  <= 1'b1; // set Csrrw  Flag 
+			          3'b010: Csrrs  <= 1'b1; // set Csrrs  Flag 
+			          3'b011: Csrrc  <= 1'b1; // set Csrrc  Flag 
+			          3'b101: Csrrwi <= 1'b1; // set Csrrwi Flag 
+			          3'b110: Csrrsi <= 1'b1; // set Csrrsi Flag 
+			          3'b111: Csrrci <= 1'b1; // set Csrrci Flag 
+				endcase
+		              end
+
 
 	    	   endcase
 	    	   jp <=2;

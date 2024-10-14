@@ -65,13 +65,13 @@ ___000000000000_00000_000_00000_1100111 // JALR   |imm.12|rs1.5|000|rd.5|1100111
 // Control 控制 10
 _0000_0000_0000_00000_000_00000_0001111 // FENCE  |0.4|pred.4|succ.4|0.5|000.3|0.5|0001111.7| make sure RW of I/O and memory operation completed before FENCE for the successor
 _0000_0000_0000_00000_001_00000_0001111 // FENCE.I|0.4|0000.4|0000.4|0.5|001.3|0.5|0001111.7| make sure instruction operation completed before FENCE.I
-__000000000000_00000_000_000000_1110011 // ECALL  |0.12|0.4|000.3|0.5|1110011.7| system enviroment call, put break in pc and save pc to rg
-__000000000001_00000_000_000000_1110011 // EBREAK |k.12|0.4|000.3|0.5|1110011.7| system break call, put break in pc and save pc to rg
-__000000000000_00000_001_000000_1110011 // CSRRW  |csr.12|rs1.5|001.3|rd.5|1110011.7| csr atomic read and write, put 0-extended csr value in rd, then put sr1 to csr 
-__000000000000_00000_010_000000_1110011 // CSRRS  |csr.12|rs1.5|001.3|rd.5|1110011.7| csr atomic read and set, put 0-extended csr value in rd, use sr1 as 1 mask to set csr 1 correspond
-__000000000000_00000_011_000000_1110011 // CSRRC  |csr.12|rs1.5|011.3|rd.5|1110011.7| csr atomic read and set, put 0-extended csr value in rd, use sr1 as 1 mask to set csr 0 correspond
-__000000000000_00000_101_000000_1110011 // CSRRWI |csr.12|zim.5|101.3|rd.5|1110011.7| csr atomic read and write, put 0-extended csr value in rd, then put 0-extended 5 unsigned zimm to csr 
-__000000000000_00000_110_000000_1110011 // CSRRSI |csr.12|zim.5|110.3|rd.5|1110011.7| csr atomic read and write, put 0-extended csr value in rd, then use 0-extended 5 unsigned zimm as 1 mask to set csr 1
-__000000000000_00000_111_000000_1110011 // CSRRCI |csr.12|zim.5|111.3|rd.5|1110011.7| csr atomic read and write, put 0-extended csr value in rd, then use 0-extended 5 unsigned zimm as 1 mask to set csr 0
+___000000000000_00000_000_00000_1110011 // ECALL  |0.12|0.4|000.3|0.5|1110011.7| system enviroment call, put break in pc and save pc to rg
+___000000000001_00000_000_00000_1110011 // EBREAK |k.12|0.4|000.3|0.5|1110011.7| system break call, put break in pc and save pc to rg
+___000000000000_00000_001_00000_1110011 // CSRRW  |csr.12|rs1.5|001.3|rd.5|1110011.7| csr atomic read and write, put 0-extended csr value in rd, then put sr1 to csr 
+___000000000000_00000_010_00000_1110011 // CSRRS  |csr.12|rs1.5|001.3|rd.5|1110011.7| csr atomic read and set, put 0-extended csr value in rd, use sr1 as 1 mask to set csr 1 correspond
+___000000000000_00000_011_00000_1110011 // CSRRC  |csr.12|rs1.5|011.3|rd.5|1110011.7| csr atomic read and set, put 0-extended csr value in rd, use sr1 as 1 mask to set csr 0 correspond
+___000000000000_00000_101_00000_1110011 // CSRRWI |csr.12|zim.5|101.3|rd.5|1110011.7| csr atomic read and write, put 0-extended csr value in rd, then put 0-extended 5 unsigned zimm to csr 
+___000000000000_00000_110_00000_1110011 // CSRRSI |csr.12|zim.5|110.3|rd.5|1110011.7| csr atomic read and write, put 0-extended csr value in rd, then use 0-extended 5 unsigned zimm as 1 mask to set csr 1
+___000000000000_00000_111_00000_1110011 // CSRRCI |csr.12|zim.5|111.3|rd.5|1110011.7| csr atomic read and write, put 0-extended csr value in rd, then use 0-extended 5 unsigned zimm as 1 mask to set csr 0
 
 
