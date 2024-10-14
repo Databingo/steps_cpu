@@ -663,6 +663,28 @@ begin
 			          3'b111: Bgeu <= 1'b0; // close Bgeu Flag 
 				endcase
 		              end
+	           7'b0001111:begin // Fence type
+			        case(ir[14:12]) // func3
+			          3'b000: Fence  <= 1'b0; // close Fence Flag 
+			          3'b001: Fencei <= 1'b0; // close Fencei Flag 
+				endcase
+		              end
+	           7'b1110011:begin // Enverioment type
+			        case(ir[14:12]) // func3
+				  3'b000: begin
+				          case(ir[31:20]) // func12
+				            12'b000000000000: Ecall  <= 1'b0; // close Ecall  Flag 
+				            12'b000000000001: Ebreak <= 1'b0; // close Ebreak Flag 
+				          endcase
+				         end 
+			          3'b001: Csrrw  <= 1'b0; // close Csrrw  Flag 
+			          3'b010: Csrrs  <= 1'b0; // close Csrrs  Flag 
+			          3'b011: Csrrc  <= 1'b0; // close Csrrc  Flag 
+			          3'b101: Csrrwi <= 1'b0; // close Csrrwi Flag 
+			          3'b110: Csrrsi <= 1'b0; // close Csrrsi Flag 
+			          3'b111: Csrrci <= 1'b0; // close Csrrci Flag 
+				endcase
+		              end
 
 		   endcase
 		   pc <= pc + 1;   // 程序计数器加一
