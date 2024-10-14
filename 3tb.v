@@ -19,6 +19,7 @@ wire [6:0] opc ;
 wire [2:0] ojp;
 wire [6:0] o_opcode;
 wire [2:0] ofunc3;
+wire [6:0] ofunc7;
 
 wire oLui;
 wire oAuipc; 
@@ -63,6 +64,7 @@ s3 dut(
  .ojp (ojp),
  .o_opcode (o_opcode),
  .ofunc3 (ofunc3),
+ .ofunc7 (ofunc7),
 
  .oLui (oLui),
  .oAuipc (oAuipc), 
@@ -123,28 +125,29 @@ end
 
 // 输出监控
 always @(posedge clk) begin
-     $write("Tm %0t:oir=%b,opc=%0d,ojp=%d,o_op=%b,ofunc3=%b,", $time, oir, opc, ojp, o_opcode, ofunc3,);
+     $write("Tm %0t:oir=%b,opc=%0d,ojp=%d,o_op=%b,ofunc3=%b,ofunc7=%b,", $time, oir, opc, ojp, o_opcode, ofunc3, ofunc7);
 
    if (oLui == 1'b1) $write("oLui=%b,", oLui);
    if (oAuipc == 1'b1) $write("oAuipc=%b,", oAuipc);
 
    if (oLb == 1'b1) $write("oLb=%b,", oLb);
    if (oLbu == 1'b1) $write("oLbu=%b,", oLbu);
-
    if (oLh  == 1'b1) $write("oLh=%b,",  oLh,   );
    if (oLhu == 1'b1) $write("oLhu=%b,", oLhu,  );
    if (oLw  == 1'b1) $write("oLw=%b,",  oLw,   );
    if (oLwu == 1'b1) $write("oLwu=%b,", oLwu,  );
    if (oLd  == 1'b1) $write("oLd=%b,",  oLd,   );
+
    if (oSb  == 1'b1) $write("oSb=%b,",  oSb,   );
    if (oSh  == 1'b1) $write("oSh=%b,",  oSh,   );
    if (oSw  == 1'b1) $write("oSw=%b,",  oSw,   );
    if (oSd  == 1'b1) $write("oSd=%b,",  oSd,   );
+
    if (oAdd == 1'b1) $write("oAdd=%b,",  oAdd, );
    if (oSub == 1'b1) $write("oSub=%b,",  oSub, );
    if (oSll == 1'b1) $write("oSll=%b,",  oSll, );
    if (oSlt == 1'b1) $write("oSlt=%b,",  oSlt, );
-   if (oSlt == 1'b1) $write("oSltu=%b,", oSltu,);
+   if (oSltu== 1'b1) $write("oSltu=%b,", oSltu,);
    if (oXor == 1'b1) $write("oXor=%b,",  oXor,);
    if (oSrl == 1'b1) $write("oSrl=%b,",  oSrl,);
    if (oSra == 1'b1) $write("oSra=%b,",  oSra,);
