@@ -79,6 +79,9 @@ wire oBge;
 wire oBltu;
 wire oBgeu;
 
+wire oFence; 
+wire oFencei;
+
 
 
 
@@ -152,10 +155,10 @@ s3 dut(
 .oBlt(oBlt), 
 .oBge(oBge), 
 .oBltu(oBltu),
-.oBgeu(oBgeu)
+.oBgeu(oBgeu),
 
-
-
+.oFence(oFence),  
+.oFencei(oFencei)
 
 
 
@@ -251,9 +254,8 @@ always @(posedge clk) begin
    if (oBgeu == 1'b1) $write("oBgeu=%b,",  oBgeu ,);
 
 
-
-
-
+   if (oFence  == 1'b1) $write("oFence=%b,",  oFence  ,);
+   if (oFencei == 1'b1) $write("oFencei=%b,",  oFencei ,);
 
 
 
