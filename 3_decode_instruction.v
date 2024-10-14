@@ -60,10 +60,10 @@ oBne,
 oBlt, 
 oBge, 
 oBltu,
-oBgeu
+oBgeu,
 
-
-
+oFence, 
+oFencei,
 
 
 
@@ -146,8 +146,15 @@ reg Bge;
 reg Bltu;
 reg Bgeu;
 
+reg Fence;
+reg Fencei;    
 
-    
+
+
+
+
+
+
 
 // 显示器
 output [31:0] oir;
@@ -216,6 +223,10 @@ output oBlt;
 output oBge;
 output oBltu;
 output oBgeu;
+
+output oFence;
+output oFencei;
+
 
 
 
@@ -289,7 +300,8 @@ assign oBge=Bge;
 assign oBltu=Bltu;
 assign oBgeu=Bgeu;
 
-
+assign oFence=Fence;
+assign oFencei=Fencei;
 
 
 
@@ -356,8 +368,8 @@ begin
 	  //Bge <=0;
 	  //Bltu <=0;
 	  //Bgeu <=0;
-	  //
-	  //
+	  //Fence <=0;
+	  //Fencei <=0;
 	  //
 	  //
 	  //
@@ -491,11 +503,17 @@ begin
 			          3'b111: Bgeu <= 1'b1; // set Bgeu Flag 
 				endcase
 		              end
- 
+	           7'b0001111:begin // Fence type
+			        case(ir[14:12]) // func3
+			          3'b000: Fence  <= 1'b1; // set Fence Flag 
+			          3'b001: Fencei <= 1'b1; // set Fencei Flag 
+				endcase
+		              end
 
 	    	   endcase
 	    	   jp <=2;
 	       end
+	       //########
 	    2: begin // 指令执行
 	    	   case(ir[6:0])
 		   7'b0110111: Lui <= 1'b0; // close Lui Flag

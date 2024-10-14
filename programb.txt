@@ -64,9 +64,9 @@ ___000000000000_00000_000_00000_1100111 // JALR   |imm.12|rs1.5|000|rd.5|1100111
 0_000000_00000_00000_111_0000_0_1100011 // BGEU   |imm.7[12|10:5]|rs2.5|rs1.5|111.3|imm.5[4:1|11]|1100011.7| take the branch if rs1 greater than or equal to rs2 in unsigned comparison 
 // Control 控制 10
 _0000_0000_0000_00000_000_00000_0001111 // FENCE  |0.4|pred.4|succ.4|0.5|000.3|0.5|0001111.7| make sure RW of I/O and memory operation completed before FENCE for the successor
-_0000_0000_0000_00000_001_00000_0001111 // FENCE  |0.4|0000.4|0000.4|0.5|001.3|0.5|0001111.7| make sure instruction operation completed before FENCE.I
-__000000000000_00000_000_000000_0001111 // ECALL  |0.12|0.4|000.3|0.5|1110011.7| system enviroment call, put break in pc and save pc to rg
-__000000000001_00000_000_000000_0001111 // EBREAK |k.12|0.4|000.3|0.5|1110011.7| system break call, put break in pc and save pc to rg
+_0000_0000_0000_00000_001_00000_0001111 // FENCE.I|0.4|0000.4|0000.4|0.5|001.3|0.5|0001111.7| make sure instruction operation completed before FENCE.I
+__000000000000_00000_000_000000_1110011 // ECALL  |0.12|0.4|000.3|0.5|1110011.7| system enviroment call, put break in pc and save pc to rg
+__000000000001_00000_000_000000_1110011 // EBREAK |k.12|0.4|000.3|0.5|1110011.7| system break call, put break in pc and save pc to rg
 __000000000000_00000_001_000000_1110011 // CSRRW  |csr.12|rs1.5|001.3|rd.5|1110011.7| csr atomic read and write, put 0-extended csr value in rd, then put sr1 to csr 
 __000000000000_00000_010_000000_1110011 // CSRRS  |csr.12|rs1.5|001.3|rd.5|1110011.7| csr atomic read and set, put 0-extended csr value in rd, use sr1 as 1 mask to set csr 1 correspond
 __000000000000_00000_011_000000_1110011 // CSRRC  |csr.12|rs1.5|011.3|rd.5|1110011.7| csr atomic read and set, put 0-extended csr value in rd, use sr1 as 1 mask to set csr 0 correspond
