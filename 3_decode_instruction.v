@@ -385,6 +385,24 @@ begin
 			          3'b111: And  <= 1'b0; // close And Flag 
 				endcase
 			      end
+	           7'b0010011:begin // Math-logic-Imm type
+			        case(ir[14:12]) // func3
+			          3'b000: Addi  <= 1'b0; // close Addi  Flag 
+			          3'b010: Slti  <= 1'b0; // close Slti  Flag 
+			          3'b011: Sltiu <= 1'b0; // close Sltiu Flag 
+			          3'b110: Ori   <= 1'b0; // close Ori   Flag 
+			          3'b111: Andi  <= 1'b0; // close Andi  Flag 
+			          3'b100: Xori  <= 1'b0; // close Xori  Flag 
+			          3'b001: Slli  <= 1'b0; // close Slli  Flag 
+				  3'b101: begin
+				          case(ir[31:25]) // func7
+				            7'b0000000: Srli  <= 1'b0; // set Srli  Flag 
+				            7'b0100000: Srai  <= 1'b0; // set Srai  Flag 
+				          endcase
+				         end 
+				endcase
+			      end
+
 		   endcase
 		   pc <= pc + 1;   // 程序计数器加一
 	    	   jp <=0;
