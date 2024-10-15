@@ -7,10 +7,12 @@
 #vvp s2 
 
 # s3
-iverilog -g2012 -o s3 3_decode_instruction.v 3tb.v &&
-vvp s3 |less
+#iverilog -g2012 -o s3 3_decode_instruction.v 3tb.v &&
+#vvp s3 |less
 
-
+# s4
+iverilog -g2012 -o s4 4_execute_instruction_1_jump.v 4tb.v &&
+vvp s4 |less
 
 
 
