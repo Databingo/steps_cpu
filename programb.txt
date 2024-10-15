@@ -54,7 +54,7 @@ __0100000_00000_00000_101_00000_0111011 // SRAW   |xxx.7|rs2.5|rs1.5|101.3|rd.5|
 // Jump 跳转 2
 //__0_0000000000_0_00000000_00000_1101111 // JAL    |imm.20[20|10:1|11|19:12]|rd|1101111.7|  jump (set PC) to address (PC+imm) and place return address (PC+4) in rd // JAL padding 0ne 0 at the last
 // Rjump 寄存器相对寻址 跳转 
-___000000000000_00000_000_00000_1100111 // JALR   |imm.12|rs1.5|000|rd.5|1100111.7|        jump (set PC) to address (PC+imm(rs1)) and place return address (PC+4) in rd 
+//___000000000000_00000_000_00000_1100111 // JALR   |imm.12|rs1.5|000|rd.5|1100111.7|        jump (set PC) to address (PC+imm(rs1)) and place return address (PC+4) in rd 
 // Branch 分支 6
 0_000000_00000_00000_000_0000_0_1100011 // BEQ    |imm.7[12|10:5]|rs2.5|rs1.5|000.3|imm.5[4:1|11]|1100011.7| take the branch if rs1 and rs2 are equal (branch at address now BEQ + sign-extended imm)
 0_000000_00000_00000_001_0000_0_1100011 // BNE    |imm.7[12|10:5]|rs2.5|rs1.5|001.3|imm.5[4:1|11]|1100011.7| take the branch if rs1 and rs2 not equal
@@ -75,9 +75,15 @@ ___000000000000_00000_110_00000_1110011 // CSRRSI |csr.12|zim.5|110.3|rd.5|11100
 ___000000000000_00000_111_00000_1110011 // CSRRCI |csr.12|zim.5|111.3|rd.5|1110011.7| csr atomic read and write, put 0-extended csr value in rd, then use 0-extended 5 unsigned zimm as 1 mask to set csr 0
 
 // Test
-__0_0000100000_0_00000000_00000_1101111 // JAL    |imm.20[20|10:1|11|19:12]|rd|1101111.7|  jump (set PC) to address (PC+imm) and place return address (PC+4) in rd // JAL padding 0ne 0 at the last
+__0_0000000001_0_00000000_00001_1101111 // JAL    |imm.20[20|10:1|11|19:12]|rd|1101111.7|  jump (set PC) to address (PC+imm) and place return address (PC+4) in rd // JAL padding 0ne 0 at the last
 _0000_0000_0000_00000_000_00000_0001111 // FENCE  |0.4|pred.4|succ.4|0.5|000.3|0.5|0001111.7| make sure RW of I/O and memory operation completed before FENCE for the successor
+___000000000000_00001_000_00000_1100111 // JALR   |imm.12|rs1.5|000|rd.5|1100111.7|        jump (set PC) to address (PC+imm(rs1)) and place return address (PC+4) in rd 
+_0000_0000_0000_00000_001_00000_0001111 // FENCE.I|0.4|0000.4|0000.4|0.5|001.3|0.5|0001111.7| make sure instruction operation completed before FENCE.I
+_0000_0000_0000_00000_001_00000_0001111 // FENCE.I|0.4|0000.4|0000.4|0.5|001.3|0.5|0001111.7| make sure instruction operation completed before FENCE.I
+_0000_0000_0000_00000_001_00000_0001111 // FENCE.I|0.4|0000.4|0000.4|0.5|001.3|0.5|0001111.7| make sure instruction operation completed before FENCE.I
+_0000_0000_0000_00000_001_00000_0001111 // FENCE.I|0.4|0000.4|0000.4|0.5|001.3|0.5|0001111.7| make sure instruction operation completed before FENCE.I
 //63
 //___000000000000_00001_000_00000_1100111 // JALR   |imm.12|rs1.5|000|rd.5|1100111.7|        jump (set PC) to address (PC+imm(rs1)) and place return address (PC+4) in rd 
 //64
 //___000000000000_00001_000_00000_1100111 // JALR   |imm.12|rs1.5|000|rd.5|1100111.7|        jump (set PC) to address (PC+imm(rs1)) and place return address (PC+4) in rd 
+

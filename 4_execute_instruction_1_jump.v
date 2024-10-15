@@ -526,7 +526,7 @@ begin
 	    //	   ir <=irom[pc]; 
 	    //	   jp <=1; 
 	    //   end
-	    0: begin // 取指令 + 分析指令
+	    0: begin // 取指令 + 分析指令 (分析就是准备好该指令所需的数据，且能不用寄存器就不用寄存器，那会浪费一个时钟周期）
 	    	   ir <=irom[pc]; 
 	    	   case(irom[pc][6:0]) //case(ir[6:0])
                    // Load-class
@@ -626,21 +626,27 @@ begin
 		              end
                    // Jump
 	           7'b1101111:begin 
-		                imm[19:0] <= {irom[pc][31], irom[pc][19:12], irom[pc][20], irom[pc][30:21], 1'b0}; // read immediate & padding last 0
+		                //imm[19:0] <= {irom[pc][31], irom[pc][19:12], irom[pc][20], irom[pc][30:21], 1'b0}; // read immediate & padding last 0
+				rram[irom[pc][11:7]] <= pc + 1;
+				pc <= pc + {irom[pc][31], irom[pc][19:12], irom[pc][20], irom[pc][30:21], 1'b0};
                                 Jal <= 1'b1; // set Jal Flag 
+	    	                jp <=0;
                               end
                    // RJump
 	           7'b1100111:begin 
 		                imm[11:0] <= irom[pc][31:20]; // read immediate (no need padding last 0 not as JAL)
-				rram[x1] <= my_case_function(2'b00);
-// rram[ir[11:7]] = ; 	//rd 
+				rram[irom[pc][11:7]] <= pc + 1;
+				pc <= rram[irom[pc][19:15]] + irom[pc][31:20];
+                                Jalr <= 1'b1; // set Jalr Flag 
+	    	                jp <=0;
+// ir[11:7] ; 	//rd 
 // ir[19:15]; 	//rs1
 // ir[24:20];  //rs2
-                                Jalr <= 1'b1; // set Jalr Flag 
+                                //Jalr <= 1'b1; // set Jalr Flag 
                               end
                    // Branch class
 	           7'b1100011:begin 
-			        case(ir[14:12]) // func3
+			        case(irom[pc][14:12]) // func3
 			          3'b000: Beq  <= 1'b1; // set Beq  Flag 
 			          3'b001: Bne  <= 1'b1; // set Bne  Flag 
 			          3'b100: Blt  <= 1'b1; // set Blt  Flag 
@@ -651,16 +657,16 @@ begin
 		              end
                    // Fence class
 	           7'b0001111:begin
-			        case(ir[14:12]) // func3
+			        case(irom[pc][14:12]) // func3
 			          3'b000: Fence  <= 1'b1; // set Fence Flag 
 			          3'b001: Fencei <= 1'b1; // set Fencei Flag 
 				endcase
 		              end
                    // Enverioment class
 	           7'b1110011:begin
-			        case(ir[14:12]) // func3
+			        case(irom[pc][14:12]) // func3
 				  3'b000: begin
-				          case(ir[31:20]) // func12
+				          case(irom[pc][31:20]) // func12
 				            12'b000000000000: Ecall  <= 1'b1; // set Ecall  Flag 
 				            12'b000000000001: Ebreak <= 1'b1; // set Ebreak Flag 
 				          endcase
@@ -801,15 +807,13 @@ begin
                    // Jump
 		   //e####
 	           7'b1101111:begin
-                                rram[x1] <= pc + 1; 
-				pc <= imm;
                                 Jal <= 1'b0; // close Jal Flag 
 	    	                jp <=0;
                               end
                    // RJump
 	           7'b1100111:begin 
                                 Jalr <= 1'b0; // close Jalr Flag 
-		                  pc <= pc + 1;   // 程序计数器加一
+		                  //pc <= pc + 1;   // 程序计数器加一
 	    	                  jp <=0;
                               end
                    // Branch class
