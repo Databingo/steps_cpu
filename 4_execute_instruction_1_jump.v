@@ -14,6 +14,9 @@ function [3:0] my_case_function;
   end
 endfunction
 
+
+
+
 module s4 (reset_n, clock, oir, opc, ojp, o_opcode, ofunc3, ofunc7,
 
 oimm,
@@ -174,10 +177,13 @@ parameter x28 = 28;
 parameter x29 = 29;
 parameter x30 = 30;
 parameter x31 = 31;
-parameter x32 = 32; // pc
+
+// <= ir[11:7];	  //rd 
+// <= ir[19:15];  //rs1
+// <= ir[24:20];  //rs2
 
 // 寄存器存储器
-reg [63:0] rrom [0:32];// 64位宽度，33行深度, 0行x0, 1行x1... 31行x31, 32行pc
+reg [63:0] rram [0:32];// 64位宽度，32行深度, 0行x0, 1行x1... 31行x31
 // 立即数寄存器, 20 位
 reg [19:0] imm;
 // 数据存储器
@@ -362,7 +368,7 @@ assign o_opcode = ir[6:0];// 显示 7 位操作码
 assign ofunc3 = ir[14:12]; //显示 func3 值
 assign ofunc7 = ir[31:25]; //显示 func7 值
 assign oimm = imm[19:0]; // 显示 imm 值
-assign ox1 = x1[63:0]; // 显示 x1 值
+assign ox1 = rram[x1];//[63:0]; // 显示 x1 值
   
 assign oLui = Lui; // 显示 Lui 标志线
 assign oAuipc = Auipc;
@@ -446,7 +452,8 @@ begin
 	  jp <=0;
 	  //ir <=0;
 	  imm <=0;
-	  rrom[x1] <=0;
+          rram[x0] <= 64'h0;  // x0 恒为 0
+	  rram[x1] <=0;
 	  //Lui <=0;
 	  //Auipc <=0;  
 	  //Lb <=0;
@@ -515,17 +522,18 @@ begin
         // 开始指令节拍
 	begin
 	    case(jp)
-	    0: begin // 取指令
+	    //0: begin // 取指令
+	    //	   ir <=irom[pc]; 
+	    //	   jp <=1; 
+	    //   end
+	    0: begin // 取指令 + 分析指令
 	    	   ir <=irom[pc]; 
-	    	   jp <=1; 
-	       end
-	    1: begin // 分析指令
-	    	   case(ir[6:0])
+	    	   case(irom[pc][6:0]) //case(ir[6:0])
                    // Load-class
 		   7'b0110111: Lui <= 1'b1; // set Lui Flag
 	           7'b0010111: Auipc <= 1'b1; // set Auipc Flag
 		   7'b0000011:begin
-			        case(ir[14:12]) // func3
+	    	                case(irom[pc][14:12]) // func3 case(ir[14:12])
 			          3'b000: Lb  <= 1'b1; // set Lb  Flag 
 			          3'b100: Lbu <= 1'b1; // set Lbu Flag 
 			          3'b001: Lh  <= 1'b1; // set Lh  Flag 
@@ -537,7 +545,7 @@ begin
 		              end 
                    // Store-class
 	           7'b0100011:begin
-			        case(ir[14:12]) // func3
+	    	                case(irom[pc][14:12]) // func3 case(ir[14:12])
 			          3'b000: Sb  <= 1'b1; // set Sb  Flag 
 			          3'b001: Sh  <= 1'b1; // set Sh  Flag 
 			          3'b010: Sw  <= 1'b1; // set Sw  Flag 
@@ -619,14 +627,19 @@ begin
                    // Jump
 	           7'b1101111:begin 
 		                imm[19:0] <= {ir[31], ir[19:12], ir[20], ir[30:21], 1'b0}; // read immediate & padding last 0
+				//
+				//
+				//
+				//
                                 Jal <= 1'b1; // set Jal Flag 
                               end
                    // RJump
 	           7'b1100111:begin 
 		                imm[11:0] <= ir[31:20]; // read immediate (no need padding last 0 not as JAL)
-			        //rs1 <= ir[19:15]; 	
-			        //rd  <= ir[11:7]; 	
-				rrom[x1] <= my_case_function(2'b00);
+				rram[x1] <= my_case_function(2'b00);
+// rram[ir[11:7]] = ; 	//rd 
+// ir[19:15]; 	//rs1
+// ir[24:20];  //rs2
                                 Jalr <= 1'b1; // set Jalr Flag 
                               end
                    // Branch class
@@ -667,10 +680,10 @@ begin
 
 
 	    	   endcase
-	    	   jp <=2;
+	    	   jp <=1;
 	       end
 	    //######## // 指令执行 // Close Flage
-	    2: begin 
+	    1: begin 
 	    	   case(ir[6:0])
                    // Load class
 		   7'b0110111: 
@@ -790,9 +803,9 @@ begin
 	    	                  jp <=0;
 		              end
                    // Jump
-		   // ####
+		   //e####
 	           7'b1101111:begin
-                                rrom[x1] <= pc + 1; 
+                                rram[x1] <= pc + 1; 
 				pc <= imm;
                                 Jal <= 1'b0; // close Jal Flag 
 	    	                jp <=0;
