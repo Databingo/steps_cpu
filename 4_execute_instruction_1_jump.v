@@ -577,7 +577,7 @@ begin
 			      end
                    // Math-Logic-Shift-Immediate class
 	           7'b0010011:begin 
-			        case(ir[14:12]) // func3
+			        case(irom[pc][14:12]) // func3
 			          3'b000: Addi  <= 1'b1; // set Addi  Flag 
 			          3'b010: Slti  <= 1'b1; // set Slti  Flag 
 			          3'b011: Sltiu <= 1'b1; // set Sltiu Flag 
@@ -586,7 +586,7 @@ begin
 			          3'b100: Xori  <= 1'b1; // set Xori  Flag 
 			          3'b001: Slli  <= 1'b1; // set Slli  Flag  // 32-->64 one more bit
 				  3'b101: begin
-				          case(ir[31:25]) // func7
+				          case(irom[pc][31:25]) // func7
 				            7'b0000000: Srli  <= 1'b1; // set Srli  Flag // 32-->64 one more bit64
 				            7'b0100000: Srai  <= 1'b1; // set Srai  Flag // 32-->64 one more bit64
 				          endcase
@@ -595,11 +595,11 @@ begin
 			      end
                    // Math-Logic-Shift-Immediate-64 class
 	           7'b0011011:begin 
-			        case(ir[14:12]) // func3
+			        case(irom[pc][14:12]) // func3
 			          3'b000: Addiw  <= 1'b1; // set Addiw  Flag 
 			          3'b001: Slliw  <= 1'b1; // set Slliw  Flag 
 				  3'b101: begin
-				          case(ir[31:25]) // func7
+				          case(irom[pc][31:25]) // func7
 				            7'b0000000: Srliw  <= 1'b1; // set Srliw  Flag 
 				            7'b0100000: Sraiw <= 1'b1; // set Sraiw  Flag 
 				          endcase
@@ -608,16 +608,16 @@ begin
 		              end
                    // Math-Logic-Shift-Register-64 class
 	           7'b0111011:begin 
-			        case(ir[14:12]) // func3
+			        case(irom[pc][14:12]) // func3
 				  3'b000: begin
-				          case(ir[31:25]) // func7
+				          case(irom[pc][31:25]) // func7
 				            7'b0000000: Addw  <= 1'b1; // set Addw  Flag 
 				            7'b0100000: Subw  <= 1'b1; // set Subw  Flag 
 				          endcase
 				         end 
 			          3'b001: Sllw  <= 1'b1; // set Sllw  Flag 
 				  3'b101: begin
-				          case(ir[31:25]) // func7
+				          case(irom[pc][31:25]) // func7
 				            7'b0000000: Srlw  <= 1'b1; // set Srlw  Flag 
 				            7'b0100000: Sraw  <= 1'b1; // set Sraw  Flag 
 				          endcase
@@ -626,16 +626,12 @@ begin
 		              end
                    // Jump
 	           7'b1101111:begin 
-		                imm[19:0] <= {ir[31], ir[19:12], ir[20], ir[30:21], 1'b0}; // read immediate & padding last 0
-				//
-				//
-				//
-				//
+		                imm[19:0] <= {irom[pc][31], irom[pc][19:12], irom[pc][20], irom[pc][30:21], 1'b0}; // read immediate & padding last 0
                                 Jal <= 1'b1; // set Jal Flag 
                               end
                    // RJump
 	           7'b1100111:begin 
-		                imm[11:0] <= ir[31:20]; // read immediate (no need padding last 0 not as JAL)
+		                imm[11:0] <= irom[pc][31:20]; // read immediate (no need padding last 0 not as JAL)
 				rram[x1] <= my_case_function(2'b00);
 // rram[ir[11:7]] = ; 	//rd 
 // ir[19:15]; 	//rs1
