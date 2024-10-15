@@ -1,7 +1,7 @@
 // 分步设计制作CPU 2024.10.04 解释权陈钢Email:databingo@foxmail.com
 
 
-module s3 (reset_n, clock, oir, opc, ojp, o_opcode,ofunc3,ofunc7,
+module s3 (reset_n, clock, oir, opc, ojp, o_opcode, ofunc3, ofunc7,
 
 oLui, 
 oAuipc,
@@ -89,11 +89,12 @@ input reset_n;
 
 // 计数工具
 input clock;  // 时钟
-reg [64:0] pc; // 程序计数器 64 位长度
+reg [64:0] pc; // 程序计数器 64 位宽度
 reg [2:0] jp;  // 程序节拍器
 reg [31:0] ir; // 程序指令寄存器: 32 位宽度
 //reg [6:0] opcode;
 //reg [2:0] func3;
+
 reg Lui;
 reg Auipc; 
 reg Lb;
@@ -517,7 +518,7 @@ begin
 	           7'b1100111:begin 
                                 Jalr <= 1'b1; // set Jalr Flag 
                               end
-                   // Branch type
+                   // Branch class
 	           7'b1100011:begin 
 			        case(ir[14:12]) // func3
 			          3'b000: Beq  <= 1'b1; // set Beq  Flag 
@@ -528,14 +529,14 @@ begin
 			          3'b111: Bgeu <= 1'b1; // set Bgeu Flag 
 				endcase
 		              end
-                   // Fence type
+                   // Fence class
 	           7'b0001111:begin
 			        case(ir[14:12]) // func3
 			          3'b000: Fence  <= 1'b1; // set Fence Flag 
 			          3'b001: Fencei <= 1'b1; // set Fencei Flag 
 				endcase
 		              end
-                   // Enverioment type
+                   // Enverioment class
 	           7'b1110011:begin
 			        case(ir[14:12]) // func3
 				  3'b000: begin
@@ -557,12 +558,13 @@ begin
 	    	   endcase
 	    	   jp <=2;
 	       end
-	    //########
-	    2: begin // 指令执行 // Close Flage
+	    //######## // 指令执行 // Close Flage
+	    2: begin 
 	    	   case(ir[6:0])
+                   // Load class
 		   7'b0110111: Lui <= 1'b0; // close Lui Flag
 	           7'b0010111: Auipc <= 1'b0; // close Auipc Flag
-		   7'b0000011:begin // Load class
+		   7'b0000011:begin 
 		                case(ir[14:12])  // func3
 		                  3'b000: Lb  <= 1'b0; // close Lb  Flag 
 		                  3'b100: Lbu <= 1'b0; // close Lbu Flag 
@@ -573,7 +575,8 @@ begin
 		                  3'b011: Ld  <= 1'b0; // close Ld  Flag 
 		                endcase
 		              end
-	           7'b0100011:begin // Store class
+                   // Store class
+	           7'b0100011:begin 
 		                case(ir[14:12]) // func3
 		                  3'b000: Sb  <= 1'b0; // close Sb Flag 
 		                  3'b001: Sh  <= 1'b0; // close Sh Flag 
@@ -581,6 +584,7 @@ begin
 		                  3'b011: Sd  <= 1'b0; // close Sd Flag  
 		        	endcase
 		              end
+                   // Math-Logic-Shift-Register class
 	           7'b0110011:begin 
 			        case(ir[14:12]) // func3
 				  3'b000:begin
@@ -603,6 +607,7 @@ begin
 			          3'b111: And  <= 1'b0; // close And Flag 
 				endcase
 			      end
+                   // Math-Logic-Shift-Immediate class
 	           7'b0010011:begin 
 			        case(ir[14:12]) // func3
 			          3'b000: Addi  <= 1'b0; // close Addi  Flag 
@@ -620,6 +625,7 @@ begin
 				         end 
 				endcase
 			      end
+                   // Math-Logic-Shift-Immediate-64 class
 	           7'b0011011:begin
 			        case(ir[14:12]) // func3
 			          3'b000: Addiw  <= 1'b0; // close Addiw  Flag 
@@ -632,6 +638,7 @@ begin
 				         end 
 				endcase
 		              end
+                   // Math-Logic-Shift-Register-64 class
 	           7'b0111011:begin
 			        case(ir[14:12]) // func3
 				  3'b000: begin
@@ -649,13 +656,16 @@ begin
 				         end 
 				endcase
 		              end
-	           7'b1101111:begin // Jump
+                   // Jump
+	           7'b1101111:begin
                                 Jal <= 1'b0; // close Jal Flag 
                               end
-	           7'b1100111:begin // RJump
+                   // RJump
+	           7'b1100111:begin 
                                 Jalr <= 1'b0; // close Jalr Flag 
                               end
-	           7'b1100011:begin // Branch class
+                   // Branch class
+	           7'b1100011:begin 
 			        case(ir[14:12]) // func3
 			          3'b000: Beq  <= 1'b0; // close Beq  Flag 
 			          3'b001: Bne  <= 1'b0; // close Bne  Flag 
@@ -665,13 +675,15 @@ begin
 			          3'b111: Bgeu <= 1'b0; // close Bgeu Flag 
 				endcase
 		              end
-	           7'b0001111:begin // Fence class
+                   // Fence class
+	           7'b0001111:begin 
 			        case(ir[14:12]) // func3
 			          3'b000: Fence  <= 1'b0; // close Fence Flag 
 			          3'b001: Fencei <= 1'b0; // close Fencei Flag 
 				endcase
 		              end
-	           7'b1110011:begin // Enverioment class
+                   // Enverioment class
+	           7'b1110011:begin 
 			        case(ir[14:12]) // func3
 				  3'b000: begin
 				          case(ir[31:20]) // func12
