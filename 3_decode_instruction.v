@@ -399,9 +399,6 @@ begin
 	  //Csrrci <=0;
 	  //
 	  //
-	  //
-
-
 	  //opcode <=0;
 	  //func3 <=0;
 	end
