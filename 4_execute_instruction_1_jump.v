@@ -109,43 +109,76 @@ oCsrrci
 //  程序存储器 
 reg [31:0] irom [0:99];// 32 位宽度，100 行深度
 
-// 32 个寄存器
-reg [63:0] x0 = 64'h0;  // hardwire 0
-reg [63:0] x1; // returned address
-reg [63:0] x2; // sp stack pointer
-reg [63:0] x3; // gp global pointer
-reg [63:0] x4; // tp thread pointer
-reg [63:0] x5;
-reg [63:0] x6;
-reg [63:0] x7;
-reg [63:0] x8;
-reg [63:0] x9;
-reg [63:0] x10;
-reg [63:0] x11;
-reg [63:0] x12;
-reg [63:0] x13;
-reg [63:0] x14;
-reg [63:0] x15;
-reg [63:0] x16;
-reg [63:0] x17;
-reg [63:0] x18;
-reg [63:0] x19;
-reg [63:0] x20;
-reg [63:0] x21;
-reg [63:0] x22;
-reg [63:0] x23;
-reg [63:0] x24;
-reg [63:0] x25;
-reg [63:0] x26;
-reg [63:0] x27;
-reg [63:0] x28;
-reg [63:0] x29;
-reg [63:0] x30;
-reg [63:0] x31;
+//// 32 个寄存器
+//reg [63:0] x0 = 64'h0;  // hardwire 0
+//reg [63:0] x1; // returned address
+//reg [63:0] x2; // sp stack pointer
+//reg [63:0] x3; // gp global pointer
+//reg [63:0] x4; // tp thread pointer
+//reg [63:0] x5;
+//reg [63:0] x6;
+//reg [63:0] x7;
+//reg [63:0] x8;
+//reg [63:0] x9;
+//reg [63:0] x10;
+//reg [63:0] x11;
+//reg [63:0] x12;
+//reg [63:0] x13;
+//reg [63:0] x14;
+//reg [63:0] x15;
+//reg [63:0] x16;
+//reg [63:0] x17;
+//reg [63:0] x18;
+//reg [63:0] x19;
+//reg [63:0] x20;
+//reg [63:0] x21;
+//reg [63:0] x22;
+//reg [63:0] x23;
+//reg [63:0] x24;
+//reg [63:0] x25;
+//reg [63:0] x26;
+//reg [63:0] x27;
+//reg [63:0] x28;
+//reg [63:0] x29;
+//reg [63:0] x30;
+//reg [63:0] x31;
+parameter x0 = 0;
+parameter x1 = 1;
+parameter x2 = 2;
+parameter x3 = 3;
+parameter x4 = 4;
+parameter x5 = 5;
+parameter x6 = 6;
+parameter x7 = 7;
+parameter x8 = 8;
+parameter x9 = 9;
+parameter x10 = 10;
+parameter x11 = 11;
+parameter x12 = 12;
+parameter x13 = 13;
+parameter x14 = 14;
+parameter x15 = 15;
+parameter x16 = 16;
+parameter x17 = 17;
+parameter x18 = 18;
+parameter x19 = 19;
+parameter x20 = 20;
+parameter x21 = 21;
+parameter x22 = 22;
+parameter x23 = 23;
+parameter x24 = 24;
+parameter x25 = 25;
+parameter x26 = 26;
+parameter x27 = 27;
+parameter x28 = 28;
+parameter x29 = 29;
+parameter x30 = 30;
+parameter x31 = 31;
+parameter x32 = 32; // pc
 
-
-
-// 20 位立即数寄存器
+// 寄存器存储器
+reg [63:0] rrom [0:32];// 64位宽度，33行深度, 0行x0, 1行x1... 31行x31, 32行pc
+// 立即数寄存器, 20 位
 reg [19:0] imm;
 // 数据存储器
 reg [63:0] drom [0:61];// 64位宽度，62行深度
@@ -413,7 +446,7 @@ begin
 	  jp <=0;
 	  //ir <=0;
 	  imm <=0;
-	  x1 <=0;
+	  rrom[x1] <=0;
 	  //Lui <=0;
 	  //Auipc <=0;  
 	  //Lb <=0;
@@ -593,7 +626,7 @@ begin
 		                imm[11:0] <= ir[31:20]; // read immediate (no need padding last 0 not as JAL)
 			        //rs1 <= ir[19:15]; 	
 			        //rd  <= ir[11:7]; 	
-				x1 <= my_case_function(2'b00);
+				rrom[x1] <= my_case_function(2'b00);
                                 Jalr <= 1'b1; // set Jalr Flag 
                               end
                    // Branch class
@@ -759,7 +792,7 @@ begin
                    // Jump
 		   // ####
 	           7'b1101111:begin
-                                x1 <= pc + 1; 
+                                rrom[x1] <= pc + 1; 
 				pc <= imm;
                                 Jal <= 1'b0; // close Jal Flag 
 	    	                jp <=0;
