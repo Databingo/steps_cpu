@@ -5,7 +5,7 @@ module s4 (reset_n, clock, oir, opc, ojp, o_opcode, ofunc3, ofunc7,
 
 oimm,
 
-ox5,
+ox1,
 
 
 
@@ -230,7 +230,7 @@ output [6:0]  o_opcode;
 output [2:0]  ofunc3;
 output [6:0]  ofunc7;
 output [19:0] oimm;
-output [63:0] ox5;
+output [63:0] ox1;
  
 output oLui;
 output oAuipc; 
@@ -314,7 +314,7 @@ assign o_opcode = ir[6:0];// 显示 7 位操作码
 assign ofunc3 = ir[14:12]; //显示 func3 值
 assign ofunc7 = ir[31:25]; //显示 func7 值
 assign oimm = imm[19:0]; // 显示 imm 值
-assign ox5 = x5[63:0]; // 显示 x5 值
+assign ox1 = x1[63:0]; // 显示 x1 值
   
 assign oLui = Lui; // 显示 Lui 标志线
 assign oAuipc = Auipc;
@@ -391,13 +391,14 @@ initial $readmemb("./programb.txt", irom);
 
 always @(posedge clock or negedge reset_n)
 begin
-	// 初始化各项 0 值
+	//#### 初始化各项 0 值
 	if (!reset_n)
 	begin
 	  pc <=0;
 	  jp <=0;
 	  //ir <=0;
 	  imm <=0;
+	  x1 <=0;
 	  //Lui <=0;
 	  //Auipc <=0;  
 	  //Lb <=0;
@@ -620,8 +621,18 @@ begin
 	    2: begin 
 	    	   case(ir[6:0])
                    // Load class
-		   7'b0110111: Lui <= 1'b0; // close Lui Flag
-	           7'b0010111: Auipc <= 1'b0; // close Auipc Flag
+		   7'b0110111: 
+		              begin
+                                Lui <= 1'b0; // close Lui Flag
+		                pc <= pc + 1;   // 程序计数器加一
+	    	                jp <=0;
+		              end
+	           7'b0010111: 
+		              begin
+                                Auipc <= 1'b0; // close Auipc Flag
+		                pc <= pc + 1;   // 程序计数器加一
+	    	                jp <=0;
+		              end
 		   7'b0000011:begin 
 		                case(ir[14:12])  // func3
 		                  3'b000: Lb  <= 1'b0; // close Lb  Flag 
@@ -632,6 +643,8 @@ begin
 		                  3'b110: Lwu <= 1'b0; // close Lwu Flag 
 		                  3'b011: Ld  <= 1'b0; // close Ld  Flag 
 		                endcase
+		                  pc <= pc + 1;   // 程序计数器加一
+	    	                  jp <=0;
 		              end
                    // Store class
 	           7'b0100011:begin 
@@ -641,6 +654,8 @@ begin
 		                  3'b010: Sw  <= 1'b0; // close Sw Flag 
 		                  3'b011: Sd  <= 1'b0; // close Sd Flag  
 		        	endcase
+		                  pc <= pc + 1;   // 程序计数器加一
+	    	                  jp <=0;
 		              end
                    // Math-Logic-Shift-Register class
 	           7'b0110011:begin 
@@ -664,6 +679,8 @@ begin
 			          3'b110: Or   <= 1'b0; // close Or Flag 
 			          3'b111: And  <= 1'b0; // close And Flag 
 				endcase
+		                  pc <= pc + 1;   // 程序计数器加一
+	    	                  jp <=0;
 			      end
                    // Math-Logic-Shift-Immediate class
 	           7'b0010011:begin 
@@ -682,6 +699,8 @@ begin
 				          endcase
 				         end 
 				endcase
+		                  pc <= pc + 1;   // 程序计数器加一
+	    	                  jp <=0;
 			      end
                    // Math-Logic-Shift-Immediate-64 class
 	           7'b0011011:begin
@@ -695,6 +714,8 @@ begin
 				          endcase
 				         end 
 				endcase
+		                  pc <= pc + 1;   // 程序计数器加一
+	    	                  jp <=0;
 		              end
                    // Math-Logic-Shift-Register-64 class
 	           7'b0111011:begin
@@ -713,16 +734,22 @@ begin
 				          endcase
 				         end 
 				endcase
+		                  pc <= pc + 1;   // 程序计数器加一
+	    	                  jp <=0;
 		              end
                    // Jump
+		   // ####
 	           7'b1101111:begin
-                                x5 <= pc + 1; 
-				//pc <= imm;
+                                x1 <= pc + 1; 
+				pc <= imm;
                                 Jal <= 1'b0; // close Jal Flag 
+	    	                jp <=0;
                               end
                    // RJump
 	           7'b1100111:begin 
                                 Jalr <= 1'b0; // close Jalr Flag 
+		                  pc <= pc + 1;   // 程序计数器加一
+	    	                  jp <=0;
                               end
                    // Branch class
 	           7'b1100011:begin 
@@ -734,6 +761,8 @@ begin
 			          3'b110: Bltu <= 1'b0; // close Bltu Flag 
 			          3'b111: Bgeu <= 1'b0; // close Bgeu Flag 
 				endcase
+		                  pc <= pc + 1;   // 程序计数器加一
+	    	                  jp <=0;
 		              end
                    // Fence class
 	           7'b0001111:begin 
@@ -741,6 +770,8 @@ begin
 			          3'b000: Fence  <= 1'b0; // close Fence Flag 
 			          3'b001: Fencei <= 1'b0; // close Fencei Flag 
 				endcase
+		                  pc <= pc + 1;   // 程序计数器加一
+	    	                  jp <=0;
 		              end
                    // Enverioment class
 	           7'b1110011:begin 
@@ -758,11 +789,11 @@ begin
 			          3'b110: Csrrsi <= 1'b0; // close Csrrsi Flag 
 			          3'b111: Csrrci <= 1'b0; // close Csrrci Flag 
 				endcase
+		                  pc <= pc + 1;   // 程序计数器加一
+	    	                  jp <=0;
 		              end
 
 		   endcase
-		   pc <= pc + 1;   // 程序计数器加一
-	    	   jp <=0;
 	       end
 	    endcase
         end

@@ -52,7 +52,7 @@ __0000000_00000_00000_001_00000_0111011 // SLLW   |xxx.7|rs2.5|rs1.5|001.3|imm.5
 __0000000_00000_00000_101_00000_0111011 // SRLW   |xxx.7|rs2.5|rs1.5|101.3|rd.5|0111011.7|  64 shift right logicl rs1 low 32 by amount in rs2[low5.unsign] padding 0 then 32 put into rd 
 __0100000_00000_00000_101_00000_0111011 // SRAW   |xxx.7|rs2.5|rs1.5|101.3|rd.5|0111011.7|  64 shift right arithmetical logicl rs1 32 by imm.12[low5.unsign] padding 1 then put into rd 
 // Jump 跳转 2
-__0_0000000000_0_00000000_00000_1101111 // JAL    |imm.20[20|10:1|11|19:12]|rd|1101111.7|  jump (set PC) to address (PC+imm) and place return address (PC+4) in rd // JAL padding 0ne 0 at the last
+//__0_0000000000_0_00000000_00000_1101111 // JAL    |imm.20[20|10:1|11|19:12]|rd|1101111.7|  jump (set PC) to address (PC+imm) and place return address (PC+4) in rd // JAL padding 0ne 0 at the last
 // Rjump 寄存器相对寻址 跳转 
 ___000000000000_00000_000_00000_1100111 // JALR   |imm.12|rs1.5|000|rd.5|1100111.7|        jump (set PC) to address (PC+imm(rs1)) and place return address (PC+4) in rd 
 // Branch 分支 6
@@ -73,5 +73,6 @@ ___000000000000_00000_011_00000_1110011 // CSRRC  |csr.12|rs1.5|011.3|rd.5|11100
 ___000000000000_00000_101_00000_1110011 // CSRRWI |csr.12|zim.5|101.3|rd.5|1110011.7| csr atomic read and write, put 0-extended csr value in rd, then put 0-extended 5 unsigned zimm to csr 
 ___000000000000_00000_110_00000_1110011 // CSRRSI |csr.12|zim.5|110.3|rd.5|1110011.7| csr atomic read and write, put 0-extended csr value in rd, then use 0-extended 5 unsigned zimm as 1 mask to set csr 1
 ___000000000000_00000_111_00000_1110011 // CSRRCI |csr.12|zim.5|111.3|rd.5|1110011.7| csr atomic read and write, put 0-extended csr value in rd, then use 0-extended 5 unsigned zimm as 1 mask to set csr 0
+
 // Test
-__0_0000000001_0_00000000_00000_1101111 // JAL    |imm.20[20|10:1|11|19:12]|rd|1101111.7|  jump (set PC) to address (PC+imm) and place return address (PC+4) in rd // JAL padding 0ne 0 at the last
+__0_0000000010_0_00000000_00000_1101111 // JAL    |imm.20[20|10:1|11|19:12]|rd|1101111.7|  jump (set PC) to address (PC+imm) and place return address (PC+4) in rd // JAL padding 0ne 0 at the last
