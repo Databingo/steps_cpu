@@ -6,10 +6,10 @@
 
 
 parameter YMC = 60; // 一个脉冲是 60 纳秒时间单位，从上升沿到上升沿是一个周期，两个脉冲，120 纳秒
-parameter TIME_WINDOW = 60*2 * 62 * 4 + 1 ; // 运行仿真 62*4(节拍+1延迟节拍) 个时钟周期
+parameter TIME_WINDOW = 60*2 * 66 * 3 + 2 ; // 运行仿真 66*3(+2延迟节拍) 个时钟周期
 
 
-module s3tb();
+module s4tb();
 
 // 信号声明
 reg clk;
@@ -20,6 +20,8 @@ wire [2:0] ojp;
 wire [6:0] o_opcode;
 wire [2:0] ofunc3;
 wire [6:0] ofunc7;
+wire [19:0] oimm;
+wire [63:0] ox5;
 
 wire oLui;
 wire oAuipc; 
@@ -102,7 +104,7 @@ wire oCsrrci;
 
 
 // 实例化待测电路
-s3 dut(
+s4 dut(
  .clock (clk),
  .reset_n (reset_n),
  .oir (oir),
@@ -111,6 +113,10 @@ s3 dut(
  .o_opcode (o_opcode),
  .ofunc3 (ofunc3),
  .ofunc7 (ofunc7),
+ .oimm (oimm),
+ .ox5 (ox5),
+
+
 
  .oLui (oLui),
  .oAuipc (oAuipc), 
@@ -207,7 +213,7 @@ end
 // Test
 initial begin
  $dumpfile("3.vcd");
- $dumpvars(0, s3tb);
+ $dumpvars(0, s4tb);
  #TIME_WINDOW $finish;
 //$stop;
 end
@@ -291,6 +297,8 @@ always @(posedge clk) begin
    if (oCsrrci == 1'b1) $write("oCsrrci=%b,",  oCsrrci ,);
 
 
+   if (oimm !== 0 ) $write("oimm=%b,",  oimm ,);
+   if (ox5 !== 0 ) $write("ox5=%0d,",  ox5 ,);
 
 
 
@@ -307,4 +315,4 @@ always @(posedge clk) begin
 
     end
 
-endmodule ： s3tb
+endmodule ： s4tb

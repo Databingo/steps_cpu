@@ -1,7 +1,13 @@
 // 分步设计制作CPU 2024.10.04 解释权陈钢Email:databingo@foxmail.com
 
 
-module s3 (reset_n, clock, oir, opc, ojp, o_opcode, ofunc3, ofunc7,
+module s4 (reset_n, clock, oir, opc, ojp, o_opcode, ofunc3, ofunc7,
+
+oimm,
+
+ox5,
+
+
 
 oLui, 
 oAuipc,
@@ -88,7 +94,7 @@ oCsrrci
 // jalr rd, rs1, imm # rd = pc+4; pc = rs1 + imm
 
 //  程序存储器 
-reg [31:0] irom [0:61];// 32位宽度，62行深度
+reg [31:0] irom [0:62];// 32位宽度，63行深度
 
 // 32 个寄存器
 reg [63:0] x0 = 64'h0;  // hardwire 0
@@ -124,12 +130,12 @@ reg [63:0] x29;
 reg [63:0] x30;
 reg [63:0] x31;
 
-// 立即数寄存器
+// 20 位立即数寄存器
 reg [19:0] imm;
 // 数据存储器
-reg [31:0] drom [0:61];// 32位宽度，62行深度
+reg [63:0] drom [0:61];// 64位宽度，62行深度
 // 堆栈存储器
-reg [31:0] srom [0:61];// 32位宽度，62行深度
+reg [63:0] srom [0:61];// 64位宽度，62行深度
 
 // 初始化开关
 input reset_n;
@@ -223,6 +229,8 @@ output [2:0]  ojp;
 output [6:0]  o_opcode;
 output [2:0]  ofunc3;
 output [6:0]  ofunc7;
+output [19:0] oimm;
+output [63:0] ox5;
  
 output oLui;
 output oAuipc; 
@@ -296,6 +304,8 @@ output oCsrrwi;
 output oCsrrsi;
 output oCsrrci;
 
+
+
 // 连接显示器
 assign oir = ir[31:0];  // 显示 32 位指令
 assign opc = pc[63:0];// 显示 64 位程序计数器值
@@ -303,6 +313,8 @@ assign ojp = jp[2:0]; // 显示 3 位节拍计数器
 assign o_opcode = ir[6:0];// 显示 7 位操作码
 assign ofunc3 = ir[14:12]; //显示 func3 值
 assign ofunc7 = ir[31:25]; //显示 func7 值
+assign oimm = imm[19:0]; // 显示 imm 值
+assign ox5 = x5[63:0]; // 显示 x5 值
   
 assign oLui = Lui; // 显示 Lui 标志线
 assign oAuipc = Auipc;
@@ -385,6 +397,7 @@ begin
 	  pc <=0;
 	  jp <=0;
 	  //ir <=0;
+	  imm <=0;
 	  //Lui <=0;
 	  //Auipc <=0;  
 	  //Lb <=0;
@@ -556,7 +569,7 @@ begin
 		              end
                    // Jump
 	           7'b1101111:begin 
-		                imm[19:0] <= {ir[31], ir[19:12], ir[20], ir[30:21], 1'b0};
+		                imm[19:0] <= {ir[31], ir[19:12], ir[20], ir[30:21], 1'b0}; // read immediate & padding last 0
                                 Jal <= 1'b1; // set Jal Flag 
                               end
                    // RJump
@@ -703,6 +716,8 @@ begin
 		              end
                    // Jump
 	           7'b1101111:begin
+                                x5 <= pc + 1; 
+				//pc <= imm;
                                 Jal <= 1'b0; // close Jal Flag 
                               end
                    // RJump

@@ -73,5 +73,5 @@ ___000000000000_00000_011_00000_1110011 // CSRRC  |csr.12|rs1.5|011.3|rd.5|11100
 ___000000000000_00000_101_00000_1110011 // CSRRWI |csr.12|zim.5|101.3|rd.5|1110011.7| csr atomic read and write, put 0-extended csr value in rd, then put 0-extended 5 unsigned zimm to csr 
 ___000000000000_00000_110_00000_1110011 // CSRRSI |csr.12|zim.5|110.3|rd.5|1110011.7| csr atomic read and write, put 0-extended csr value in rd, then use 0-extended 5 unsigned zimm as 1 mask to set csr 1
 ___000000000000_00000_111_00000_1110011 // CSRRCI |csr.12|zim.5|111.3|rd.5|1110011.7| csr atomic read and write, put 0-extended csr value in rd, then use 0-extended 5 unsigned zimm as 1 mask to set csr 0
-
-
+// Test
+__0_0000000001_0_00000000_00000_1101111 // JAL    |imm.20[20|10:1|11|19:12]|rd|1101111.7|  jump (set PC) to address (PC+imm) and place return address (PC+4) in rd // JAL padding 0ne 0 at the last
