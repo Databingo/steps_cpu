@@ -40,7 +40,6 @@ oSlli,
 oSrli,
 oSrai,
 
-
 oAddiw,
 oSlliw,
 oSrliw,
@@ -135,7 +134,6 @@ reg Addiw;
 reg Slliw;
 reg Srliw;
 reg Sraiw;
-
 
 reg Addw;
 reg Subw;
@@ -257,7 +255,7 @@ assign ojp = jp[2:0]; // 显示 3 位节拍计数器
 assign o_opcode = ir[6:0];// 显示 7 位操作码
 assign ofunc3 = ir[14:12]; //显示 func3 值
 assign ofunc7 = ir[31:25]; //显示 func7 值
-//
+  
 assign oLui = Lui; // 显示 Lui 标志线
 assign oAuipc = Auipc;
 
@@ -284,7 +282,6 @@ assign oSrl  = Srl;
 assign oSra  = Sra;
 assign oOr   = Or;
 assign oAnd  = And;
-
 
 assign oAddi = Addi; 
 assign oSlti = Slti;
@@ -363,15 +360,15 @@ begin
 	  //Sra <=0;
 	  //Or <=0;
 	  //And <=0;
-	  // Addi <=0;
-	  // Slti <=0;
+	  //Addi <=0;
+	  //Slti <=0;
 	  //Sltiu <=0;
-	  //  Ori <=0;
-	  // Andi <=0;
-	  // Xori <=0;
-	  // Slli <=0;
-	  // Srli <=0;
-	  // Srai <=0;
+	  //Ori <=0;
+	  //Andi <=0;
+	  //Xori <=0;
+	  //Slli <=0;
+	  //Srli <=0;
+	  //Srai <=0;
 	  //Addiw <=0;
 	  //Slliw <=0;
 	  //Srliw <=0;
@@ -411,20 +408,16 @@ begin
         // 开始指令节拍
 	begin
 	    case(jp)
-	    //0: begin // 空拍，pc 传值到程序存储器前端的地址寄存器 
-	    //	   jp <=1;
-	    //   end
 	    0: begin // 取指令
 	    	   ir <=irom[pc]; 
-	           //opcode <= irom[pc][6:0];
-		   //func3 <= irom[pc][14:12];
 	    	   jp <=1; 
 	       end
 	    1: begin // 分析指令
 	    	   case(ir[6:0])
+                   // Load-class
 		   7'b0110111: Lui <= 1'b1; // set Lui Flag
 	           7'b0010111: Auipc <= 1'b1; // set Auipc Flag
-		   7'b0000011:begin  // L-type
+		   7'b0000011:begin
 			        case(ir[14:12]) // func3
 			          3'b000: Lb  <= 1'b1; // set Lb  Flag 
 			          3'b100: Lbu <= 1'b1; // set Lbu Flag 
@@ -435,7 +428,8 @@ begin
 			          3'b011: Ld  <= 1'b1; // set Ld  Flag 
 			        endcase
 		              end 
-	           7'b0100011:begin // S-type
+                   // Store-class
+	           7'b0100011:begin
 			        case(ir[14:12]) // func3
 			          3'b000: Sb  <= 1'b1; // set Sb  Flag 
 			          3'b001: Sh  <= 1'b1; // set Sh  Flag 
@@ -443,7 +437,8 @@ begin
 			          3'b011: Sd  <= 1'b1; // set Sd  Flag  
 				endcase
 			      end
-	           7'b0110011:begin // Math-Logic-Register type
+                   // Math-Logic-Shift-Register class
+	           7'b0110011:begin 
 			        case(ir[14:12]) // func3
 				  3'b000:begin
 				          case(ir[31:25]) // func7
@@ -451,21 +446,22 @@ begin
 				            7'b0100000:Sub  <= 1'b1; // set Sub Flag  
 				          endcase
 				        end 
-			          3'b001: Sll  <= 1'b1; // set Sll Flag 
 			          3'b010: Slt  <= 1'b1; // set Slt Flag 
 			          3'b011: Sltu <= 1'b1; // set Sltu Flag  
+			          3'b110: Or   <= 1'b1; // set Or Flag 
+			          3'b111: And  <= 1'b1; // set And Flag 
 			          3'b100: Xor  <= 1'b1; // set Xor Flag 
+			          3'b001: Sll  <= 1'b1; // set Sll Flag 
 				  3'b101:begin 
 				          case(ir[31:25]) // func7
 				            7'b0000000:Srl  <= 1'b1; // set Srl Flag 
 				            7'b0100000:Sra  <= 1'b1; // set Sra Flag  
 				          endcase
 				         end 
-			          3'b110: Or   <= 1'b1; // set Or Flag 
-			          3'b111: And  <= 1'b1; // set And Flag 
 				endcase
 			      end
-	           7'b0010011:begin // Math-logic-Imm type
+                   // Math-Logic-Shift-Immediate class
+	           7'b0010011:begin 
 			        case(ir[14:12]) // func3
 			          3'b000: Addi  <= 1'b1; // set Addi  Flag 
 			          3'b010: Slti  <= 1'b1; // set Slti  Flag 
@@ -473,16 +469,17 @@ begin
 			          3'b110: Ori   <= 1'b1; // set Ori   Flag 
 			          3'b111: Andi  <= 1'b1; // set Andi  Flag 
 			          3'b100: Xori  <= 1'b1; // set Xori  Flag 
-			          3'b001: Slli  <= 1'b1; // set Slli  Flag 
+			          3'b001: Slli  <= 1'b1; // set Slli  Flag  // 32-->64 one more bit
 				  3'b101: begin
 				          case(ir[31:25]) // func7
-				            7'b0000000: Srli  <= 1'b1; // set Srli  Flag 
-				            7'b0100000: Srai  <= 1'b1; // set Srai  Flag 
+				            7'b0000000: Srli  <= 1'b1; // set Srli  Flag // 32-->64 one more bit64
+				            7'b0100000: Srai  <= 1'b1; // set Srai  Flag // 32-->64 one more bit64
 				          endcase
 				         end 
 				endcase
 			      end
-	           7'b0011011:begin // Math-logic-Imm-64 type
+                   // Math-Logic-Shift-Immediate-64 class
+	           7'b0011011:begin 
 			        case(ir[14:12]) // func3
 			          3'b000: Addiw  <= 1'b1; // set Addiw  Flag 
 			          3'b001: Slliw  <= 1'b1; // set Slliw  Flag 
@@ -494,7 +491,8 @@ begin
 				         end 
 				endcase
 		              end
-	           7'b0111011:begin // Math-logic-R-64 type
+                   // Math-Logic-Shift-Register-64 class
+	           7'b0111011:begin 
 			        case(ir[14:12]) // func3
 				  3'b000: begin
 				          case(ir[31:25]) // func7
@@ -511,14 +509,16 @@ begin
 				         end 
 				endcase
 		              end
-	           7'b1101111:begin // Jump
+                   // Jump
+	           7'b1101111:begin 
                                 Jal <= 1'b1; // set Jal Flag 
                               end
-	           7'b1100111:begin // RJump
+                   // RJump
+	           7'b1100111:begin 
                                 Jalr <= 1'b1; // set Jalr Flag 
                               end
- 
-	           7'b1100011:begin // Branch type
+                   // Branch type
+	           7'b1100011:begin 
 			        case(ir[14:12]) // func3
 			          3'b000: Beq  <= 1'b1; // set Beq  Flag 
 			          3'b001: Bne  <= 1'b1; // set Bne  Flag 
@@ -528,13 +528,15 @@ begin
 			          3'b111: Bgeu <= 1'b1; // set Bgeu Flag 
 				endcase
 		              end
-	           7'b0001111:begin // Fence type
+                   // Fence type
+	           7'b0001111:begin
 			        case(ir[14:12]) // func3
 			          3'b000: Fence  <= 1'b1; // set Fence Flag 
 			          3'b001: Fencei <= 1'b1; // set Fencei Flag 
 				endcase
 		              end
-	           7'b1110011:begin // Enverioment type
+                   // Enverioment type
+	           7'b1110011:begin
 			        case(ir[14:12]) // func3
 				  3'b000: begin
 				          case(ir[31:20]) // func12
@@ -555,12 +557,12 @@ begin
 	    	   endcase
 	    	   jp <=2;
 	       end
-	       //########
-	    2: begin // 指令执行
+	    //########
+	    2: begin // 指令执行 // Close Flage
 	    	   case(ir[6:0])
 		   7'b0110111: Lui <= 1'b0; // close Lui Flag
 	           7'b0010111: Auipc <= 1'b0; // close Auipc Flag
-		   7'b0000011:begin // L-type
+		   7'b0000011:begin // Load class
 		                case(ir[14:12])  // func3
 		                  3'b000: Lb  <= 1'b0; // close Lb  Flag 
 		                  3'b100: Lbu <= 1'b0; // close Lbu Flag 
@@ -571,7 +573,7 @@ begin
 		                  3'b011: Ld  <= 1'b0; // close Ld  Flag 
 		                endcase
 		              end
-	           7'b0100011:begin // S-type
+	           7'b0100011:begin // Store class
 		                case(ir[14:12]) // func3
 		                  3'b000: Sb  <= 1'b0; // close Sb Flag 
 		                  3'b001: Sh  <= 1'b0; // close Sh Flag 
@@ -579,7 +581,7 @@ begin
 		                  3'b011: Sd  <= 1'b0; // close Sd Flag  
 		        	endcase
 		              end
-	           7'b0110011:begin // Math-Logic-type
+	           7'b0110011:begin 
 			        case(ir[14:12]) // func3
 				  3'b000:begin
 				          case(ir[31:25]) // func7
@@ -601,7 +603,7 @@ begin
 			          3'b111: And  <= 1'b0; // close And Flag 
 				endcase
 			      end
-	           7'b0010011:begin // Math-logic-Imm type
+	           7'b0010011:begin 
 			        case(ir[14:12]) // func3
 			          3'b000: Addi  <= 1'b0; // close Addi  Flag 
 			          3'b010: Slti  <= 1'b0; // close Slti  Flag 
@@ -618,7 +620,7 @@ begin
 				         end 
 				endcase
 			      end
-	           7'b0011011:begin // Math-logic-I-64 type
+	           7'b0011011:begin
 			        case(ir[14:12]) // func3
 			          3'b000: Addiw  <= 1'b0; // close Addiw  Flag 
 			          3'b001: Slliw  <= 1'b0; // close Slliw  Flag 
@@ -630,7 +632,7 @@ begin
 				         end 
 				endcase
 		              end
-	           7'b0111011:begin // Math-logic-R-64 type
+	           7'b0111011:begin
 			        case(ir[14:12]) // func3
 				  3'b000: begin
 				          case(ir[31:25]) // func7
@@ -653,7 +655,7 @@ begin
 	           7'b1100111:begin // RJump
                                 Jalr <= 1'b0; // close Jalr Flag 
                               end
-	           7'b1100011:begin // Branch type
+	           7'b1100011:begin // Branch class
 			        case(ir[14:12]) // func3
 			          3'b000: Beq  <= 1'b0; // close Beq  Flag 
 			          3'b001: Bne  <= 1'b0; // close Bne  Flag 
@@ -663,13 +665,13 @@ begin
 			          3'b111: Bgeu <= 1'b0; // close Bgeu Flag 
 				endcase
 		              end
-	           7'b0001111:begin // Fence type
+	           7'b0001111:begin // Fence class
 			        case(ir[14:12]) // func3
 			          3'b000: Fence  <= 1'b0; // close Fence Flag 
 			          3'b001: Fencei <= 1'b0; // close Fencei Flag 
 				endcase
 		              end
-	           7'b1110011:begin // Enverioment type
+	           7'b1110011:begin // Enverioment class
 			        case(ir[14:12]) // func3
 				  3'b000: begin
 				          case(ir[31:20]) // func12

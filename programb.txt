@@ -1,4 +1,4 @@
-// RV32I + RV64I extension = 47 + 15 -2 重复 = 62 -3 = 59 条指令
+// RV32I + RV64I extension = 47 + 15 - 3 重复(SLLI SRLI SRAI) = 62 - 3 = 59 条指令
 // -------------Re-order-by-operation_code-----------
 // Load 加载 7
 ___000000000000_00000_000_00000_0000011 // LB     |imm.12|rs1.5|000.3|rd.5|0000011.7|    load byte 8           
