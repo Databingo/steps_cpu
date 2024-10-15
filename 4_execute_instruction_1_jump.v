@@ -530,8 +530,14 @@ begin
 	    	   ir <=irom[pc]; 
 	    	   case(irom[pc][6:0]) //case(ir[6:0])
                    // Load-class
-		   7'b0110111: Lui <= 1'b1; // set Lui Flag
-	           7'b0010111: Auipc <= 1'b1; // set Auipc Flag
+		   7'b0110111:begin
+		                Lui <= 1'b1; // set Lui Flag
+	    	   jp <=1;
+		   end
+		   7'b0010111:begin
+		                Auipc <= 1'b1; // set Auipc Flag
+	    	   jp <=1;
+		   end
 		   7'b0000011:begin
 	    	                case(irom[pc][14:12]) // func3 case(ir[14:12])
 			          3'b000: Lb  <= 1'b1; // set Lb  Flag 
@@ -542,6 +548,7 @@ begin
 			          3'b110: Lwu <= 1'b1; // set Lwu Flag 
 			          3'b011: Ld  <= 1'b1; // set Ld  Flag 
 			        endcase
+	    	   jp <=1;
 		              end 
                    // Store-class
 	           7'b0100011:begin
@@ -551,6 +558,7 @@ begin
 			          3'b010: Sw  <= 1'b1; // set Sw  Flag 
 			          3'b011: Sd  <= 1'b1; // set Sd  Flag  
 				endcase
+	    	   jp <=1;
 			      end
                    // Math-Logic-Shift-Register class
 	           7'b0110011:begin 
@@ -574,6 +582,7 @@ begin
 				          endcase
 				         end 
 				endcase
+	    	   jp <=1;
 			      end
                    // Math-Logic-Shift-Immediate class
 	           7'b0010011:begin 
@@ -592,6 +601,7 @@ begin
 				          endcase
 				         end 
 				endcase
+	    	   jp <=1;
 			      end
                    // Math-Logic-Shift-Immediate-64 class
 	           7'b0011011:begin 
@@ -605,6 +615,7 @@ begin
 				          endcase
 				         end 
 				endcase
+	    	   jp <=1;
 		              end
                    // Math-Logic-Shift-Register-64 class
 	           7'b0111011:begin 
@@ -623,6 +634,7 @@ begin
 				          endcase
 				         end 
 				endcase
+	    	   jp <=1;
 		              end
                    // Jump
 	           7'b1101111:begin 
@@ -631,6 +643,7 @@ begin
 				pc <= pc + {irom[pc][31], irom[pc][19:12], irom[pc][20], irom[pc][30:21], 1'b0};
                                 Jal <= 1'b1; // set Jal Flag 
 	    	                jp <=0;
+	    	   //jp <=1;
                               end
                    // RJump
 	           7'b1100111:begin 
@@ -642,7 +655,7 @@ begin
 // ir[11:7] ; 	//rd 
 // ir[19:15]; 	//rs1
 // ir[24:20];  //rs2
-                                //Jalr <= 1'b1; // set Jalr Flag 
+	    	   //jp <=1;
                               end
                    // Branch class
 	           7'b1100011:begin 
@@ -654,6 +667,7 @@ begin
 			          3'b110: Bltu <= 1'b1; // set Bltu Flag 
 			          3'b111: Bgeu <= 1'b1; // set Bgeu Flag 
 				endcase
+	    	   jp <=1;
 		              end
                    // Fence class
 	           7'b0001111:begin
@@ -661,6 +675,7 @@ begin
 			          3'b000: Fence  <= 1'b1; // set Fence Flag 
 			          3'b001: Fencei <= 1'b1; // set Fencei Flag 
 				endcase
+	    	   jp <=1;
 		              end
                    // Enverioment class
 	           7'b1110011:begin
@@ -678,11 +693,12 @@ begin
 			          3'b110: Csrrsi <= 1'b1; // set Csrrsi Flag 
 			          3'b111: Csrrci <= 1'b1; // set Csrrci Flag 
 				endcase
+	    	   jp <=1;
 		              end
 
 
 	    	   endcase
-	    	   jp <=1;
+	    	   //jp <=1;
 	       end
 	    //######## // 指令执行 // Close Flage
 	    1: begin 
@@ -813,8 +829,8 @@ begin
                    // RJump
 	           7'b1100111:begin 
                                 Jalr <= 1'b0; // close Jalr Flag 
-		                  //pc <= pc + 1;   // 程序计数器加一
-	    	                  jp <=0;
+		                //pc <= pc + 1;   // 程序计数器加一
+	    	                jp <=0;
                               end
                    // Branch class
 	           7'b1100011:begin 
