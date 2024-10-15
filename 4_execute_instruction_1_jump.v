@@ -554,9 +554,9 @@ begin
 			      end
                    // Math-Logic-Shift-Register class
 	           7'b0110011:begin 
-			        case(ir[14:12]) // func3
+			        case(irom[pc][14:12]) // func3
 				  3'b000:begin
-				          case(ir[31:25]) // func7
+				          case(irom[pc][31:25]) // func7
 				            7'b0000000:Add  <= 1'b1; // set Add Flag  
 				            7'b0100000:Sub  <= 1'b1; // set Sub Flag  
 				          endcase
@@ -568,7 +568,7 @@ begin
 			          3'b100: Xor  <= 1'b1; // set Xor Flag 
 			          3'b001: Sll  <= 1'b1; // set Sll Flag 
 				  3'b101:begin 
-				          case(ir[31:25]) // func7
+				          case(irom[pc][31:25]) // func7
 				            7'b0000000:Srl  <= 1'b1; // set Srl Flag 
 				            7'b0100000:Sra  <= 1'b1; // set Sra Flag  
 				          endcase
