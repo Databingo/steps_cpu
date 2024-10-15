@@ -1,5 +1,18 @@
 // 分步设计制作CPU 2024.10.04 解释权陈钢Email:databingo@foxmail.com
 
+function [3:0] my_case_function;
+  input [1:0] selector;
+  
+  begin
+    case (selector)
+      2'b00: my_case_function = 4'b0001;
+      2'b01: my_case_function = 4'b0010;
+      2'b10: my_case_function = 4'b0100;
+      2'b11: my_case_function = 4'b1000;
+      default: my_case_function = 4'b0000;
+    endcase
+  end
+endfunction
 
 module s4 (reset_n, clock, oir, opc, ojp, o_opcode, ofunc3, ofunc7,
 
@@ -94,7 +107,7 @@ oCsrrci
 // jalr rd, rs1, imm # rd = pc+4; pc = rs1 + imm
 
 //  程序存储器 
-reg [31:0] irom [0:62];// 32位宽度，63行深度
+reg [31:0] irom [0:99];// 32 位宽度，100 行深度
 
 // 32 个寄存器
 reg [63:0] x0 = 64'h0;  // hardwire 0
@@ -129,6 +142,8 @@ reg [63:0] x28;
 reg [63:0] x29;
 reg [63:0] x30;
 reg [63:0] x31;
+
+
 
 // 20 位立即数寄存器
 reg [19:0] imm;
@@ -575,6 +590,10 @@ begin
                               end
                    // RJump
 	           7'b1100111:begin 
+		                imm[11:0] <= ir[31:20]; // read immediate (no need padding last 0 not as JAL)
+			        //rs1 <= ir[19:15]; 	
+			        //rd  <= ir[11:7]; 	
+				x1 <= my_case_function(2'b00);
                                 Jalr <= 1'b1; // set Jalr Flag 
                               end
                    // Branch class
