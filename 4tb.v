@@ -20,7 +20,8 @@ wire [2:0] ojp;
 wire [6:0] o_opcode;
 wire [2:0] ofunc3;
 wire [6:0] ofunc7;
-wire [19:0] oimm;
+wire [11:0] oimm;
+wire [19:0] oupimm; 
 wire [63:0] ox1;
 
 wire oLui;
@@ -114,6 +115,7 @@ s4 dut(
  .ofunc3 (ofunc3),
  .ofunc7 (ofunc7),
  .oimm (oimm),
+ .oupimm (oupimm),
  .ox1 (ox1),
 
 
@@ -297,9 +299,10 @@ always @(posedge clk) begin
    if (oCsrrci == 1'b1) $write("oCsrrci=%b,",  oCsrrci ,);
 
 
-   if (oimm !== 0 ) $write("oimm=%0d,",  oimm ,);
-   if (ox1 !== 0 ) $write("ox1=%0d,",  ox1 ,);
+   if (oimm !== 0 ) $write("oimm=%0b,",  oimm ,);
+   if (ox1 !== 0 ) $write("ox1=%0b,",  ox1 ,);
 
+   if (oupimm  !== 0 ) $write("oupimm=%0b,",  oupimm ,);
 
 
 

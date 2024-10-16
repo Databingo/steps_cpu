@@ -20,6 +20,7 @@ endfunction
 module s4 (reset_n, clock, oir, opc, ojp, o_opcode, ofunc3, ofunc7,
 
 oimm,
+oupimm,
 ox1,
 
 
@@ -110,7 +111,8 @@ oCsrrci
 reg [7:0] irom [0:399];// 8 位宽度，400 行深度
   
 // 寄存器列表 32 个
-reg [63:0] rram [0:32];// 64位宽度，32行深度, 0行x0, 1行x1... 31行x31
+reg [63:0] rram [0:31];// 64位宽度，32行深度, 0行x0, 1行x1... 31行x31
+
 // 寄存器编号
 parameter x0 = 0;
 parameter x1 = 1;
@@ -238,7 +240,8 @@ output [2:0]  ojp;
 output [6:0]  o_opcode;
 output [2:0]  ofunc3;
 output [6:0]  ofunc7;
-output [19:0] oimm;
+output [11:0] oimm;
+output [19:0] oupimm;
 output [63:0] ox1;
 
 // 控制线显示器
@@ -321,6 +324,7 @@ assign o_opcode = wire_op;// 显示 7 位操作码
 assign ofunc3 = wire_func3; //显示 func3 值
 assign ofunc7 = wire_func7; //显示 func7 值
 assign oimm = wire_imm; // 显示 imm 值
+assign oupimm = wire_upimm; // 显示 upimm 值
 assign ox1 = rram[x1]; // 显示 x1 值
 
 // 根据 pc 组合出完整指令 
@@ -518,21 +522,25 @@ begin
         // 开始指令节拍
 	begin
 	    case(jp)
-	    0: begin // 取指令 + 分析指令 (分析就是准备好该指令所需的数据，且能不用寄存器就不用寄存器，那会浪费一个时钟周期）
+	    0: begin // 取指令 + 分析指令 + 执行 | 或 准备数据 (分析且备好该指令所需的数据）
 	    	   ir <= wire_ir ; 
-	    	   case(wire_op) //case(ir[6:0])
+	    	   case(wire_op)
                    // Load-class
 		   7'b0110111:begin
 		                Lui <= 1'b1; // set Lui Flag
-				//
-				rram[wire_rd] <= wire_upimm << 12; 
-				pc <= pc +4; 
-				//
+				//put 20 bits immediate to upper 20 bits of rd left lower 12 bits 0
+				rram[wire_rd] <= wire_upimm << 12; // execution
+				// prepare next instruction
+				pc <= pc + 4; 
 	    	                jp <=0;
 		              end
 		   7'b0010111:begin
 		                Auipc <= 1'b1; // set Auipc Flag
-	    	   jp <=1;
+				//left shift the 20 bits immediate 12 bits add pc then put to rd
+				rram[wire_rd] <= pc + (wire_upimm << 12); // execution
+				// prepare next instruction
+				pc <= pc + 4; 
+	    	                jp <=0;
 		   end
 		   7'b0000011:begin
 	    	                case(irom[pc][14:12]) // func3 case(ir[14:12])
