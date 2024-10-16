@@ -18,13 +18,12 @@ endfunction
 
 
 
-module s4 (reset_n, clock, oir, opc, ojp, o_opcode, ofunc3, ofunc7,
+module s4 (reset_n, clock, oir, opc, ojp, oop, ofunc3, ofunc7,
 
 oimm,
 oupimm,
 ox1,
 ox2,
-
 
 oLui, 
 oAuipc,
@@ -116,136 +115,31 @@ reg [7:0] drom [0:399];// 8 位宽度，400 行深度
 // 堆栈存储器
 reg [7:0] srom [0:399];// 8 位宽度，400 行深度
 // 寄存器列表 32 个
-reg [63:0] rram [0:31];// 64 位宽度，32 行深度
-
-
-// 寄存器编号
-//parameter x0 = 0;
-//parameter x1 = 1;
-//parameter x2 = 2;
-//parameter x3 = 3;
-//parameter x4 = 4;
-//parameter x5 = 5;
-//parameter x6 = 6;
-//parameter x7 = 7;
-//parameter x8 = 8;
-//parameter x9 = 9;
-//parameter x10 = 10;
-//parameter x11 = 11;
-//parameter x12 = 12;
-//parameter x13 = 13;
-//parameter x14 = 14;
-//parameter x15 = 15;
-//parameter x16 = 16;
-//parameter x17 = 17;
-//parameter x18 = 18;
-//parameter x19 = 19;
-//parameter x20 = 20;
-//parameter x21 = 21;
-//parameter x22 = 22;
-//parameter x23 = 23;
-//parameter x24 = 24;
-//parameter x25 = 25;
-//parameter x26 = 26;
-//parameter x27 = 27;
-//parameter x28 = 28;
-//parameter x29 = 29;
-//parameter x30 = 30;
-//parameter x31 = 31;
+reg [63:0] rram [0:31];// 64 位宽度，32 行深度 x0, x1, x2... x31
 
 // 计数工具
 input clock;  // 时钟
 reg [64:0] pc; // 程序计数寄存器 64 位宽度
 reg [2:0] jp;  // 程序节寄存拍器
 
-// 初始化开关
-input reset_n;
-
-  
 // 程序指令寄存器: 32 位宽度
 reg [31:0] ir; 
 
-reg Lui;
-reg Auipc; 
-reg Lb;
-reg Lbu;
-reg Lh; 
-reg Lhu;
-reg Lw;
-reg Lwu;
-reg Ld;
+// 初始化开关
+input reset_n;
 
-reg Sb;
-reg Sh;
-reg Sw;
-reg Sd;
-
-reg Add;
-reg Sub;
-reg Sll;
-reg Slt;
-reg Sltu;
-reg Xor ;
-reg Srl;
-reg Sra;
-reg Or;
-reg And;
-
-reg Addi; 
-reg Slti;
-reg Sltiu;
-reg Ori; 
-reg Andi;
-reg Xori;
-reg Slli;
-reg Srli;
-reg Srai;
-
-reg Addiw;
-reg Slliw;
-reg Srliw;
-reg Sraiw;
-
-reg Addw;
-reg Subw;
-reg Sllw;
-reg Srlw;
-reg Sraw;
-
-reg Jal;   
-reg Jalr;
-
-reg Beq;
-reg Bne;
-reg Blt;
-reg Bge;
-reg Bltu;
-reg Bgeu;
-
-reg Fence;
-reg Fencei;    
-
-reg Ecall; 
-reg Ebreak;
-reg Csrrw;
-reg Csrrs;
-reg Csrrc;
-reg Csrrwi;
-reg Csrrsi;
-reg Csrrci;
-
-
-// 显示器
+// 指令显示器
 output [31:0] oir;
 output [31:0] opc;
 output [2:0]  ojp;
-output [6:0]  o_opcode;
+output [6:0]  oop;
 output [2:0]  ofunc3;
 output [6:0]  ofunc7;
 output [11:0] oimm;
 output [19:0] oupimm;
 output [63:0] ox1;
 output [63:0] ox2;
+
 // 控制线显示器
 output oLui;
 output oAuipc; 
@@ -323,6 +217,19 @@ output oCsrrci;
 assign wire_ir = {irom[pc], irom[pc+1], irom[pc+2], irom[pc+3]}; 
 
 // 组合数据线，避免使用寄存器浪费时钟
+wire [31:0] wire_ir;
+wire [ 6:0] wire_op;
+wire [ 5:0] wire_rd;
+wire [ 5:0] wire_rs1;
+wire [ 5:0] wire_rs2;
+wire [ 5:0] wire_f3;
+wire [ 5:0] wire_f7;
+wire [11:0] wire_imm;   // I-type immediate Lb Lh Lw Lbu Lhu Lwu Ld Jalr Addi Slti Sltiu Xori Ori Andi Addiw
+wire [19:0] wire_upimm; // U-type immediate Lui Auipc
+wire [20:0] wire_jimm;  // UJ-type immediate Jal
+wire [11:0] wire_simm;  // S-type immediate Sb Sh Sw Sd
+wire [12:0] wire_bimm;  // SB-type immediate Beq Bne Blt Bge Bltu Bgeu
+wire [ 5:0] wire_shamt; // If 6 bits the highest is always 0
 // parse instruction by type
 // ______________________________________________
 //|31        25 24 20 19 15 14 12 11        7 6 0|
@@ -333,40 +240,26 @@ assign wire_ir = {irom[pc], irom[pc+1], irom[pc+2], irom[pc+3]};
 //|imm[31:12]                    |rd         |op |U
 //|imm[20|10:1|11|19:12]         |rd         |op |UJ
 //````````````````````````````````````````````````
-wire [31:0] wire_ir;
-wire [ 6:0] wire_op;
-wire [ 5:0] wire_rd;
-wire [ 5:0] wire_rs1;
-wire [ 5:0] wire_rs2;
-wire [ 5:0] wire_func3;
-wire [ 5:0] wire_func7;
-wire [11:0] wire_imm;   // I- Lb Lh Lw Lbu Lhu Lwu Ld Jalr Addi Slti Sltiu Xori Ori Andi Addiw
-wire [19:0] wire_upimm; // U- Lui Auipc
-wire [20:0] wire_jimm;  // UJ- Jal
-wire [11:0] wire_simm;  // S- Sb Sh Sw Sd
-wire [12:0] wire_bimm;  // SB- Beq Bne Blt Bge Bltu Bgeu
-wire [ 5:0] wire_shamt; // If 6 bits the highest is always 0
-
-assign wire_op = wire_ir[6:0]; 
-assign wire_rd = wire_ir[11:7]; 
-assign wire_func3 = wire_ir[14:12];
+assign wire_op  = wire_ir[6:0]; 
+assign wire_rd  = wire_ir[11:7]; 
+assign wire_f3  = wire_ir[14:12];
 assign wire_rs1 = wire_ir[19:15]; 
 assign wire_rs2 = wire_ir[24:20]; 
-assign wire_func7 = wire_ir[31:25]; 
+assign wire_f7  = wire_ir[31:25]; 
 assign wire_imm = wire_ir[31:20];
 assign wire_upimm = wire_ir[31:12];
-assign wire_jpimm = {wire_ir[31], wire_ir[19:12], wire_ir[20], wire_ir[31:20], 1'b0};
-assign wire_simm = {wire_ir[31:25], wire_ir[11:7]};
-assign wire_bimm = {wire_ir[31], wire_ir[19:12], wire_ir[20], wire_ir[30:21],  1'b0};
+assign wire_jimm  = {wire_ir[31], wire_ir[19:12], wire_ir[20], wire_ir[31:20], 1'b0};
+assign wire_simm  = {wire_ir[31:25], wire_ir[11:7]};
+assign wire_bimm  = {wire_ir[31], wire_ir[19:12], wire_ir[20], wire_ir[30:21],  1'b0};
 assign wire_shamt = wire_ir[25:20];
 
 // 连接显示器
 assign oir = wire_ir;  // 显示 32 位指令
 assign opc = pc[63:0];// 显示 64 位程序计数器值
 assign ojp = jp[2:0]; // 显示 3 位节拍计数器
-assign o_opcode = wire_op;// 显示 7 位操作码
-assign ofunc3 = wire_func3; //显示 func3 值
-assign ofunc7 = wire_func7; //显示 func7 值
+assign oop = wire_op;// 显示 7 位操作码
+assign ofunc3 = wire_f3; //显示 func3 值
+assign ofunc7 = wire_f7; //显示 func7 值
 assign oimm = wire_imm; // 显示 imm 值
 assign oupimm = wire_upimm; // 显示 upimm 值
 assign ox1 = rram[1]; // 显示 x1 值
@@ -547,7 +440,7 @@ begin
 	    	                jp <=0;
 		   end
 		   7'b0000011:begin
-	    	                case(wire_func3) // func3 case(ir[14:12])
+	    	                case(wire_f3) // func3 case(ir[14:12])
 				  3'b000:begin 
 				           Lb  <= 1'b1; // set Lb  Flag 
 				           //load 8 bite at imm(s1) to rd

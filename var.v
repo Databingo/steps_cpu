@@ -1,37 +1,4 @@
 // 分步设计制作CPU 2024.10.04 解释权陈钢Email:databingo@foxmail.com
-// 寄存器编号
-//parameter x0 = 0;
-//parameter x1 = 1;
-//parameter x2 = 2;
-//parameter x3 = 3;
-//parameter x4 = 4;
-//parameter x5 = 5;
-//parameter x6 = 6;
-//parameter x7 = 7;
-//parameter x8 = 8;
-//parameter x9 = 9;
-//parameter x10 = 10;
-//parameter x11 = 11;
-//parameter x12 = 12;
-//parameter x13 = 13;
-//parameter x14 = 14;
-//parameter x15 = 15;
-//parameter x16 = 16;
-//parameter x17 = 17;
-//parameter x18 = 18;
-//parameter x19 = 19;
-//parameter x20 = 20;
-//parameter x21 = 21;
-//parameter x22 = 22;
-//parameter x23 = 23;
-//parameter x24 = 24;
-//parameter x25 = 25;
-//parameter x26 = 26;
-//parameter x27 = 27;
-//parameter x28 = 28;
-//parameter x29 = 29;
-//parameter x30 = 30;
-//parameter x31 = 31;
  
 // 控制线
 reg Lui;
