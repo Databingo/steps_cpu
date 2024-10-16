@@ -22,6 +22,7 @@ module s4 (reset_n, clock, oir, opc, ojp, o_opcode, ofunc3, ofunc7,
 oimm,
 oupimm,
 ox1,
+ox2,
 
 
 oLui, 
@@ -243,6 +244,7 @@ output [6:0]  ofunc7;
 output [11:0] oimm;
 output [19:0] oupimm;
 output [63:0] ox1;
+output [63:0] ox2;
 
 // 控制线显示器
 output oLui;
@@ -326,6 +328,7 @@ assign ofunc7 = wire_func7; //显示 func7 值
 assign oimm = wire_imm; // 显示 imm 值
 assign oupimm = wire_upimm; // 显示 upimm 值
 assign ox1 = rram[x1]; // 显示 x1 值
+assign ox2 = rram[x2]; // 显示 x2 值
 
 // 根据 pc 组合出完整指令 
 // combine 8 bits of 4 bytes into a 32 bit instruction
@@ -543,8 +546,17 @@ begin
 	    	                jp <=0;
 		   end
 		   7'b0000011:begin
-	    	                case(irom[pc][14:12]) // func3 case(ir[14:12])
-			          3'b000: Lb  <= 1'b1; // set Lb  Flag 
+	    	                case(wire_func3) // func3 case(ir[14:12])
+				  3'b000:begin 
+				           Lb  <= 1'b1; // set Lb  Flag 
+				           //load 8 bite at imm(s1) to rd
+				           //rram[wire_rd] <= drom[rram[wire_rs1]+wire_imm]; 
+				           rram[wire_rd] <= 128;
+				           // prepare next instruction
+				           pc <= pc + 4; 
+	    	                           jp <=0;
+					   
+				         end 
 			          3'b100: Lbu <= 1'b1; // set Lbu Flag 
 			          3'b001: Lh  <= 1'b1; // set Lh  Flag 
 			          3'b101: Lhu <= 1'b1; // set Lhu Flag  
