@@ -304,6 +304,7 @@ always @(posedge clk) begin
    if (oimm !== 0 ) $write("oimm=%0b,",  oimm ,);
    if (ox1 !== 0 ) $write("ox1=%0b,",  ox1 ,);
    if (ox2 !== 0 ) $write("ox2=0x%0h,",  ox2 ,);
+   //if (ox2 !== 0 ) $write("ox2=%0b,",  ox2 ,);
 
    if (oupimm  !== 0 ) $write("oupimm=%0b,",  oupimm ,);
 

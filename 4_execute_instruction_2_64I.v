@@ -444,23 +444,35 @@ begin
 	    	                case(wire_f3) // func3 case(ir[14:12])
 				  3'b000:begin 
 				           Lb  <= 1'b1; // set Lb  Flag 
-				           //load 8 bite at imm(s1) to rd
-					   //+++++++++++++++++++++++++++++++++
-				           rram[wire_rd] <= drom[rram[wire_rs1]+wire_imm]; 
-				           //rram[wire_rd] <= 128;
+				           //load 8 bite sign extend to 64 bits at imm(s1) to rd
+				           rram[wire_rd] <= {{56{drom[rram[wire_rs1]+wire_imm][7]}}, drom[rram[wire_rs1]+wire_imm]}; 
 				           // prepare next instruction
 				           pc <= pc + 4; 
 	    	                           jp <=0;
-					   
 				         end 
-			          3'b100: Lbu <= 1'b1; // set Lbu Flag 
-			          3'b001: Lh  <= 1'b1; // set Lh  Flag 
+				  3'b100:begin 
+				           Lbu  <= 1'b1; // set Lbu  Flag 
+				           //load 8 bite unsign to 64 bits at imm(s1) to rd
+				           rram[wire_rd] <= {56'b0, drom[rram[wire_rs1]+wire_imm]}; 
+				           // prepare next instruction
+				           pc <= pc + 4; 
+	    	                           jp <=0;
+				         end 
+				  //+++++++++++++++++++++++++++++++++
+				  3'b001:begin 
+                                           Lh  <= 1'b1; // set Lh  Flag 
+				           //load 16 bite unsign to 64 bits at imm(s1) to rd
+				           rram[wire_rd] <= {{48{drom[rram[wire_rs1]+wire_imm][7]}}, drom[rram[wire_rs1]+wire_imm], drom[rram[wire_rs1]+wire_imm+1] }; 
+				           // prepare next instruction
+				           pc <= pc + 4; 
+	    	                           jp <=0;
+				         end 
 			          3'b101: Lhu <= 1'b1; // set Lhu Flag  
 			          3'b010: Lw  <= 1'b1; // set Lw  Flag 
 			          3'b110: Lwu <= 1'b1; // set Lwu Flag 
 			          3'b011: Ld  <= 1'b1; // set Ld  Flag 
 			        endcase
-	    	   jp <=1;
+	    	   //jp <=1;
 		              end 
                    // Store-class
 	           7'b0100011:begin
