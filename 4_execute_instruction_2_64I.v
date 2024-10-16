@@ -20,9 +20,7 @@ endfunction
 module s4 (reset_n, clock, oir, opc, ojp, o_opcode, ofunc3, ofunc7,
 
 oimm,
-
 ox1,
-
 
 
 oLui, 
@@ -103,49 +101,17 @@ oCsrrci
 
 
 // 自动顺序读取程序机-> [带跳转的]自动顺序读取程序机
-// 顺序读取的指令最后一个指令，是跳转到第一条指令，然后继续顺序读取。
-// jal rd, imm       # rd = pc+4; pc = pc  + imm
-// jal x4, 0
-//
+// jal rd, imm       # rd = pc+4; pc = pc  + imm_0
+// jal x1, 0
 // jalr rd, rs1, imm # rd = pc+4; pc = rs1 + imm
+// return: jalr x0, x1, 0
 
 //  程序存储器 
-//reg [31:0] irom [0:99];// 32 位宽度，100 行深度
 reg [7:0] irom [0:399];// 8 位宽度，400 行深度
-
-//// 32 个寄存器
-//reg [63:0] x0 = 64'h0;  // hardwire 0
-//reg [63:0] x1; // returned address
-//reg [63:0] x2; // sp stack pointer
-//reg [63:0] x3; // gp global pointer
-//reg [63:0] x4; // tp thread pointer
-//reg [63:0] x5;
-//reg [63:0] x6;
-//reg [63:0] x7;
-//reg [63:0] x8;
-//reg [63:0] x9;
-//reg [63:0] x10;
-//reg [63:0] x11;
-//reg [63:0] x12;
-//reg [63:0] x13;
-//reg [63:0] x14;
-//reg [63:0] x15;
-//reg [63:0] x16;
-//reg [63:0] x17;
-//reg [63:0] x18;
-//reg [63:0] x19;
-//reg [63:0] x20;
-//reg [63:0] x21;
-//reg [63:0] x22;
-//reg [63:0] x23;
-//reg [63:0] x24;
-//reg [63:0] x25;
-//reg [63:0] x26;
-//reg [63:0] x27;
-//reg [63:0] x28;
-//reg [63:0] x29;
-//reg [63:0] x30;
-//reg [63:0] x31;
+  
+// 寄存器列表 32 个
+reg [63:0] rram [0:32];// 64位宽度，32行深度, 0行x0, 1行x1... 31行x31
+// 寄存器编号
 parameter x0 = 0;
 parameter x1 = 1;
 parameter x2 = 2;
@@ -179,14 +145,6 @@ parameter x29 = 29;
 parameter x30 = 30;
 parameter x31 = 31;
 
-// <= ir[11:7];	  //rd 
-// <= ir[19:15];  //rs1
-// <= ir[24:20];  //rs2
-
-// 寄存器列表
-reg [63:0] rram [0:32];// 64位宽度，32行深度, 0行x0, 1行x1... 31行x31
-// 立即数寄存器
-reg [19:0] imm; // 20 位
 // 数据存储器
 reg [63:0] drom [0:61];// 64位宽度，62行深度
 // 堆栈存储器
@@ -197,11 +155,11 @@ input reset_n;
 
 // 计数工具
 input clock;  // 时钟
-reg [64:0] pc; // 程序计数器 64 位宽度
-reg [2:0] jp;  // 程序节拍器
-reg [31:0] ir; // 程序指令寄存器: 32 位宽度
-//reg [6:0] opcode;
-//reg [2:0] func3;
+reg [64:0] pc; // 程序计数寄存器 64 位宽度
+reg [2:0] jp;  // 程序节寄存拍器
+  
+// 程序指令寄存器: 32 位宽度
+reg [31:0] ir; 
 
 reg Lui;
 reg Auipc; 
@@ -273,10 +231,6 @@ reg Csrrsi;
 reg Csrrci;
 
 
-
-
-
-
 // 显示器
 output [31:0] oir;
 output [31:0] opc;
@@ -286,7 +240,8 @@ output [2:0]  ofunc3;
 output [6:0]  ofunc7;
 output [19:0] oimm;
 output [63:0] ox1;
- 
+
+// 控制线显示器
 output oLui;
 output oAuipc; 
 
@@ -314,7 +269,6 @@ output oSra;
 output oOr;
 output oAnd;
 
-
 output oAddi; 
 output oSlti;
 output oSltiu;
@@ -329,7 +283,6 @@ output oAddiw;
 output oSlliw;
 output oSrliw;
 output oSraiw;
-
 
 output oAddw;
 output oSubw;
@@ -360,59 +313,60 @@ output oCsrrsi;
 output oCsrrci;
 
 
-
-// 连接显示器
-//assign oir = ir[31:0];  // 显示 32 位指令
+// 连接到显示器
 assign oir = wire_ir;  // 显示 32 位指令
 assign opc = pc[63:0];// 显示 64 位程序计数器值
 assign ojp = jp[2:0]; // 显示 3 位节拍计数器
-//assign o_opcode = ir[6:0];// 显示 7 位操作码
 assign o_opcode = wire_op;// 显示 7 位操作码
-//assign ofunc3 = ir[14:12]; //显示 func3 值
 assign ofunc3 = wire_func3; //显示 func3 值
-//assign ofunc7 = ir[31:25]; //显示 func7 值
 assign ofunc7 = wire_func7; //显示 func7 值
-assign oimm = imm[19:0]; // 显示 imm 值
-assign ox1 = rram[x1];//[63:0]; // 显示 x1 值
-  
-wire [31:0] wire_ir;
-wire [6:0] wire_op;
-wire [5:0] wire_rd;
-wire [5:0] wire_rs1;
-wire [5:0] wire_rs2;
-wire [5:0] wire_func3;
-wire [5:0] wire_func7;
+assign oimm = wire_imm; // 显示 imm 值
+assign ox1 = rram[x1]; // 显示 x1 值
 
+// 根据 pc 组合出完整指令 
+// combine 8 bits of 4 bytes into a 32 bit instruction
 assign wire_ir = {irom[pc], irom[pc+1], irom[pc+2], irom[pc+3]}; 
 
-// R-
+// 分析组合数据线，避免使用寄存器浪费时钟
+// parse instruction by type
+// ______________________________________________
+//|31        25 24 20 19 15 14 12 11        7 6 0|
+//|func7       |rs2  |rs1  |func3|rd         |op |R
+//|imm[11:0]         |rs1  |func3|rd         |op |I
+//|imm[11:5]   |rs2  |rs1  |func3|imm[4:0]   |op |S
+//|imm[12|10:5]|rs2  |rs1  |func3|imm[4:1|11]|op |SB
+//|imm[31:12]                    |rd         |op |U
+//|imm[20|10:1|11|19:12]         |rd         |op |UJ
+//````````````````````````````````````````````````
+wire [31:0] wire_ir;
+wire [ 6:0] wire_op;
+wire [ 5:0] wire_rd;
+wire [ 5:0] wire_rs1;
+wire [ 5:0] wire_rs2;
+wire [ 5:0] wire_func3;
+wire [ 5:0] wire_func7;
+wire [11:0] wire_imm;   // I- Lb Lh Lw Lbu Lhu Lwu Ld Jalr Addi Slti Sltiu Xori Ori Andi Addiw
+wire [19:0] wire_upimm; // U- Lui Auipc
+wire [20:0] wire_jimm;  // UJ- Jal
+wire [11:0] wire_simm;  // S- Sb Sh Sw Sd
+wire [12:0] wire_bimm;  // SB- Beq Bne Blt Bge Bltu Bgeu
+wire [ 5:0] wire_shamt; // If 6 bits the highest is always 0
+
 assign wire_op = wire_ir[6:0]; 
 assign wire_rd = wire_ir[11:7]; 
 assign wire_func3 = wire_ir[14:12];
 assign wire_rs1 = wire_ir[19:15]; 
 assign wire_rs2 = wire_ir[24:20]; 
 assign wire_func7 = wire_ir[31:25]; 
-
-wire [11:0] wire_imm; // I- Lb Lh Lw Lbu Lhu Lwu Ld Jalr Addi Slti Sltiu Xori Ori Andi Addiw
 assign wire_imm = wire_ir[31:20];
-
-wire [19:0] wire_upimm; // U- Lui Auipc
 assign wire_upimm = wire_ir[31:12];
-
-wire [20:0] wire_jimm; // UJ- Jal
 assign wire_jpimm = {wire_ir[31], wire_ir[19:12], wire_ir[20], wire_ir[31:20], 1'b0};
-
-wire [11:0] wire_simm; // S- Sb Sh Sw Sd
 assign wire_simm = {wire_ir[31:25], wire_ir[11:7]};
-
-wire [12:0] wire_bimm; // SB- Beq Bne Blt Bge Bltu Bgeu
 assign wire_bimm = {wire_ir[31], wire_ir[19:12], wire_ir[20], wire_ir[30:21],  1'b0};
-
-wire [5:0] wire_shamt; // If 6 bits the highest is always 0
 assign wire_shamt = wire_ir[25:20];
 
-
-assign oLui = Lui; // 显示 Lui 标志线
+// 显示标志线
+assign oLui = Lui; 
 assign oAuipc = Auipc;
 
 assign oLb = Lb;
@@ -493,7 +447,7 @@ begin
 	  pc <=0;
 	  jp <=0;
 	  //ir <=0;
-	  imm <=0;
+	  //imm <=0;
           rram[x0] <= 64'h0;  // x0 恒为 0
 	  rram[x1] <=0;
 	  //Lui <=0;
@@ -566,13 +520,14 @@ begin
 	    case(jp)
 	    0: begin // 取指令 + 分析指令 (分析就是准备好该指令所需的数据，且能不用寄存器就不用寄存器，那会浪费一个时钟周期）
 	    	   ir <= wire_ir ; 
-	    	   //case(irom[pc][6:0]) //case(ir[6:0])
 	    	   case(wire_op) //case(ir[6:0])
                    // Load-class
 		   7'b0110111:begin
 		                Lui <= 1'b1; // set Lui Flag
-				rram[irom[pc][11:7]] <= irom[pc][31:12] << 12; 
+				//
+				rram[wire_rd] <= wire_upimm << 12; 
 				pc <= pc +4; 
+				//
 	    	                jp <=0;
 		              end
 		   7'b0010111:begin
