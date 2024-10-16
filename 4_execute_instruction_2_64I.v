@@ -18,7 +18,7 @@ endfunction
 
 
 
-module s4 (reset_n, clock, oir, opc, ojp, oop, ofunc3, ofunc7,
+module s4 (reset_n, clock, oir, opc, ojp, oop, of3, of7,
 
 oimm,
 oupimm,
@@ -133,8 +133,8 @@ output [31:0] oir;
 output [31:0] opc;
 output [2:0]  ojp;
 output [6:0]  oop;
-output [2:0]  ofunc3;
-output [6:0]  ofunc7;
+output [2:0]  of3;
+output [6:0]  of7;
 output [11:0] oimm;
 output [19:0] oupimm;
 output [63:0] ox1;
@@ -258,8 +258,8 @@ assign oir = wire_ir;  // 显示 32 位指令
 assign opc = pc[63:0];// 显示 64 位程序计数器值
 assign ojp = jp[2:0]; // 显示 3 位节拍计数器
 assign oop = wire_op;// 显示 7 位操作码
-assign ofunc3 = wire_f3; //显示 func3 值
-assign ofunc7 = wire_f7; //显示 func7 值
+assign of3 = wire_f3; //显示 func3 值
+assign of7 = wire_f7; //显示 func7 值
 assign oimm = wire_imm; // 显示 imm 值
 assign oupimm = wire_upimm; // 显示 upimm 值
 assign ox1 = rram[1]; // 显示 x1 值

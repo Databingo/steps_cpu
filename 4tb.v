@@ -18,8 +18,8 @@ wire [31:0] oir;
 wire [6:0] opc ;
 wire [2:0] ojp;
 wire [6:0] oop;
-wire [2:0] ofunc3;
-wire [6:0] ofunc7;
+wire [2:0] of3;
+wire [6:0] of7;
 wire [11:0] oimm;
 wire [19:0] oupimm; 
 wire [63:0] ox1;
@@ -113,8 +113,8 @@ s4 dut(
  .opc (opc),
  .ojp (ojp),
  .oop (oop),
- .ofunc3 (ofunc3),
- .ofunc7 (ofunc7),
+ .of3 (of3),
+ .of7 (of7),
  .oimm (oimm),
  .oupimm (oupimm),
  .ox1 (ox1),
@@ -224,7 +224,7 @@ end
 
 // 输出监控
 always @(posedge clk) begin
-     $write("Tm %0t:oir=%b,opc=%0d,ojp=%d,o_op=%b,ofunc3=%b,ofunc7=%b,", $time, oir, opc, ojp, oop, ofunc3, ofunc7);
+     $write("Tm %0t:oir=%b,opc=%0d,ojp=%d,o_op=%b,of3=%b,of7=%b,", $time, oir, opc, ojp, oop, of3, of7);
 
    if (oLui == 1'b1) $write("oLui=%b,", oLui);
    if (oAuipc == 1'b1) $write("oAuipc=%b,", oAuipc);
