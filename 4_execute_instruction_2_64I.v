@@ -1,4 +1,5 @@
 // 分步设计制作CPU 2024.10.04 解释权陈钢Email:databingo@foxmail.com
+`include "var.v"
 
 function [3:0] my_case_function;
   input [1:0] selector;
@@ -119,46 +120,47 @@ reg [63:0] rram [0:31];// 64 位宽度，32 行深度
 
 
 // 寄存器编号
-parameter x0 = 0;
-parameter x1 = 1;
-parameter x2 = 2;
-parameter x3 = 3;
-parameter x4 = 4;
-parameter x5 = 5;
-parameter x6 = 6;
-parameter x7 = 7;
-parameter x8 = 8;
-parameter x9 = 9;
-parameter x10 = 10;
-parameter x11 = 11;
-parameter x12 = 12;
-parameter x13 = 13;
-parameter x14 = 14;
-parameter x15 = 15;
-parameter x16 = 16;
-parameter x17 = 17;
-parameter x18 = 18;
-parameter x19 = 19;
-parameter x20 = 20;
-parameter x21 = 21;
-parameter x22 = 22;
-parameter x23 = 23;
-parameter x24 = 24;
-parameter x25 = 25;
-parameter x26 = 26;
-parameter x27 = 27;
-parameter x28 = 28;
-parameter x29 = 29;
-parameter x30 = 30;
-parameter x31 = 31;
-
-// 初始化开关
-input reset_n;
+//parameter x0 = 0;
+//parameter x1 = 1;
+//parameter x2 = 2;
+//parameter x3 = 3;
+//parameter x4 = 4;
+//parameter x5 = 5;
+//parameter x6 = 6;
+//parameter x7 = 7;
+//parameter x8 = 8;
+//parameter x9 = 9;
+//parameter x10 = 10;
+//parameter x11 = 11;
+//parameter x12 = 12;
+//parameter x13 = 13;
+//parameter x14 = 14;
+//parameter x15 = 15;
+//parameter x16 = 16;
+//parameter x17 = 17;
+//parameter x18 = 18;
+//parameter x19 = 19;
+//parameter x20 = 20;
+//parameter x21 = 21;
+//parameter x22 = 22;
+//parameter x23 = 23;
+//parameter x24 = 24;
+//parameter x25 = 25;
+//parameter x26 = 26;
+//parameter x27 = 27;
+//parameter x28 = 28;
+//parameter x29 = 29;
+//parameter x30 = 30;
+//parameter x31 = 31;
 
 // 计数工具
 input clock;  // 时钟
 reg [64:0] pc; // 程序计数寄存器 64 位宽度
 reg [2:0] jp;  // 程序节寄存拍器
+
+// 初始化开关
+input reset_n;
+
   
 // 程序指令寄存器: 32 位宽度
 reg [31:0] ir; 
@@ -244,7 +246,6 @@ output [11:0] oimm;
 output [19:0] oupimm;
 output [63:0] ox1;
 output [63:0] ox2;
-
 // 控制线显示器
 output oLui;
 output oAuipc; 
@@ -317,23 +318,11 @@ output oCsrrsi;
 output oCsrrci;
 
 
-// 连接到显示器
-assign oir = wire_ir;  // 显示 32 位指令
-assign opc = pc[63:0];// 显示 64 位程序计数器值
-assign ojp = jp[2:0]; // 显示 3 位节拍计数器
-assign o_opcode = wire_op;// 显示 7 位操作码
-assign ofunc3 = wire_func3; //显示 func3 值
-assign ofunc7 = wire_func7; //显示 func7 值
-assign oimm = wire_imm; // 显示 imm 值
-assign oupimm = wire_upimm; // 显示 upimm 值
-assign ox1 = rram[x1]; // 显示 x1 值
-assign ox2 = rram[x2]; // 显示 x2 值
-
-// 根据 pc 组合出完整指令 
+// 根据 pc 组合出指令 
 // combine 8 bits of 4 bytes into a 32 bit instruction
 assign wire_ir = {irom[pc], irom[pc+1], irom[pc+2], irom[pc+3]}; 
 
-// 分析组合数据线，避免使用寄存器浪费时钟
+// 组合数据线，避免使用寄存器浪费时钟
 // parse instruction by type
 // ______________________________________________
 //|31        25 24 20 19 15 14 12 11        7 6 0|
@@ -371,7 +360,19 @@ assign wire_simm = {wire_ir[31:25], wire_ir[11:7]};
 assign wire_bimm = {wire_ir[31], wire_ir[19:12], wire_ir[20], wire_ir[30:21],  1'b0};
 assign wire_shamt = wire_ir[25:20];
 
-// 显示标志线
+// 连接显示器
+assign oir = wire_ir;  // 显示 32 位指令
+assign opc = pc[63:0];// 显示 64 位程序计数器值
+assign ojp = jp[2:0]; // 显示 3 位节拍计数器
+assign o_opcode = wire_op;// 显示 7 位操作码
+assign ofunc3 = wire_func3; //显示 func3 值
+assign ofunc7 = wire_func7; //显示 func7 值
+assign oimm = wire_imm; // 显示 imm 值
+assign oupimm = wire_upimm; // 显示 upimm 值
+assign ox1 = rram[1]; // 显示 x1 值
+assign ox2 = rram[2]; // 显示 x2 值
+
+//
 assign oLui = Lui; 
 assign oAuipc = Auipc;
 
