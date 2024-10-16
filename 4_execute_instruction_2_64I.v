@@ -458,16 +458,23 @@ begin
 				           pc <= pc + 4; 
 	    	                           jp <=0;
 				         end 
-				  //+++++++++++++++++++++++++++++++++
 				  3'b001:begin 
                                            Lh  <= 1'b1; // set Lh  Flag 
-				           //load 16 bite unsign to 64 bits at imm(s1) to rd
+				           //load 16 bite sign extend to 64 bits at imm(s1) to rd
 				           rram[wire_rd] <= {{48{drom[rram[wire_rs1]+wire_imm][7]}}, drom[rram[wire_rs1]+wire_imm], drom[rram[wire_rs1]+wire_imm+1] }; 
 				           // prepare next instruction
 				           pc <= pc + 4; 
 	    	                           jp <=0;
 				         end 
-			          3'b101: Lhu <= 1'b1; // set Lhu Flag  
+				  //+++++++++++++++++++++++++++++++++
+				  3'b101:begin 
+                                           Lhu <= 1'b1; // set Lhu Flag  
+				           //load 16 bite unsign to 64 bits at imm(s1) to rd
+				           rram[wire_rd] <= {48'b0, drom[rram[wire_rs1]+wire_imm], drom[rram[wire_rs1]+wire_imm+1] }; 
+				           // prepare next instruction
+				           pc <= pc + 4; 
+	    	                           jp <=0;
+				         end 
 			          3'b010: Lw  <= 1'b1; // set Lw  Flag 
 			          3'b110: Lwu <= 1'b1; // set Lwu Flag 
 			          3'b011: Ld  <= 1'b1; // set Ld  Flag 
