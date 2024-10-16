@@ -230,6 +230,7 @@ wire [20:0] wire_jimm;  // UJ-type immediate Jal
 wire [11:0] wire_simm;  // S-type immediate Sb Sh Sw Sd
 wire [12:0] wire_bimm;  // SB-type immediate Beq Bne Blt Bge Bltu Bgeu
 wire [ 5:0] wire_shamt; // If 6 bits the highest is always 0
+
 // parse instruction by type
 // ______________________________________________
 //|31        25 24 20 19 15 14 12 11        7 6 0|
@@ -265,7 +266,6 @@ assign oupimm = wire_upimm; // 显示 upimm 值
 assign ox1 = rram[1]; // 显示 x1 值
 assign ox2 = rram[2]; // 显示 x2 值
 
-//
 assign oLui = Lui; 
 assign oAuipc = Auipc;
 
@@ -351,6 +351,7 @@ begin
 	  //imm <=0;
           rram[0] <= 64'h0;  // x0 恒为 0
 	  rram[1] <=0;
+	  rram[2] <=0;
 	  //Lui <=0;
 	  //Auipc <=0;  
 	  //Lb <=0;
@@ -444,8 +445,9 @@ begin
 				  3'b000:begin 
 				           Lb  <= 1'b1; // set Lb  Flag 
 				           //load 8 bite at imm(s1) to rd
-				           //rram[wire_rd] <= drom[rram[wire_rs1]+wire_imm]; 
-				           rram[wire_rd] <= 128;
+					   //+++++++++++++++++++++++++++++++++
+				           rram[wire_rd] <= drom[rram[wire_rs1]+wire_imm]; 
+				           //rram[wire_rd] <= 128;
 				           // prepare next instruction
 				           pc <= pc + 4; 
 	    	                           jp <=0;
