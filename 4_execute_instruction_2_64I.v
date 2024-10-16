@@ -110,9 +110,13 @@ oCsrrci
 
 //  程序存储器 
 reg [7:0] irom [0:399];// 8 位宽度，400 行深度
-  
+// 数据存储器
+reg [7:0] drom [0:399];// 8 位宽度，400 行深度
+// 堆栈存储器
+reg [7:0] srom [0:399];// 8 位宽度，400 行深度
 // 寄存器列表 32 个
-reg [63:0] rram [0:31];// 64位宽度，32行深度, 0行x0, 1行x1... 31行x31
+reg [63:0] rram [0:31];// 64 位宽度，32 行深度
+
 
 // 寄存器编号
 parameter x0 = 0;
@@ -147,11 +151,6 @@ parameter x28 = 28;
 parameter x29 = 29;
 parameter x30 = 30;
 parameter x31 = 31;
-
-// 数据存储器
-reg [63:0] drom [0:61];// 64位宽度，62行深度
-// 堆栈存储器
-reg [63:0] srom [0:61];// 64位宽度，62行深度
 
 // 初始化开关
 input reset_n;
@@ -445,6 +444,7 @@ assign oCsrrci=Csrrci;
 
 // 从文件读取程序到 irom
 initial $readmemb("./programb.txt", irom);
+initial $readmemb("./data.txt", drom);
 
 always @(posedge clock or negedge reset_n)
 begin
