@@ -1,16 +1,17 @@
-// RV32I + RV64I extension = 47 + 15 - 3 重复(SLLI SRLI SRAI) = 62 - 3 = 59 条指令
-// -------------Re-order-by-operation_code-----------
-// Load 加载 7
-___000000000000_00000_000_00000_0000011 // LB     |imm.12|rs1.5|000.3|rd.5|0000011.7|    load byte 8           
-___000000000000_00000_100_00000_0000011 // LBU    |imm.12|rs1.5|100.3|rd.5|0000011.7|    load byte 8 unsigned  
-___000000000000_00000_001_00000_0000011 // LH     |imm.12|rs1.5|001.3|rd.5|0000011.7|    load half-word 16     
-___000000000000_00000_101_00000_0000011 // LHU    |imm.12|rs1.5|101.3|rd.5|0000011.7|    load half-word 16 unsigned 
-___000000000000_00000_010_00000_0000011 // LW     |imm.12|rs1.5|010.3|rd.5|0000011.7|    load word 32          
-___000000000000_00000_110_00000_0000011 // LWU    |imm.12|rs1.5|110.3|rd.5|0000011.7| 64 load word 32 unsigned  
-___000000000000_00000_011_00000_0000011 // LD     |imm.12|rs1.5|011.3|rd.5|0000011.7| 64 load double-word 64    
+// rv32i + rv64i extension = 47 + 15 - 3 重复(SLLI SRLI SRAI) = 62 - 3 = 59 条指令
+// -------------re-order-by-operation_code-----------
+// load 加载 7
+00000000 00000000 00000000 00000011 //___000000000000_00000_000_00000_0000011 // LB     |imm.12|rs1.5|000.3|rd.5|0000011.7|    load byte 8           
+00000000 00000000 01000000 00000011 //___000000000000_00000_100_00000_0000011 // LBU    |imm.12|rs1.5|100.3|rd.5|0000011.7|    load byte 8 unsigned  
+00000000 00000000 00010000 00000011 //___000000000000_00000_001_00000_0000011 // LH     |imm.12|rs1.5|001.3|rd.5|0000011.7|    load half-word 16     
+00000000 00000000 01010000 00000011 //___000000000000_00000_101_00000_0000011 // LHU    |imm.12|rs1.5|101.3|rd.5|0000011.7|    load half-word 16 unsigned 
+00000000 00000000 00100000 00000011 //___000000000000_00000_010_00000_0000011 // LW     |imm.12|rs1.5|010.3|rd.5|0000011.7|    load word 32          
+00000000 00000000 01100000 00000011 //___000000000000_00000_110_00000_0000011 // LWU    |imm.12|rs1.5|110.3|rd.5|0000011.7| 64 load word 32 unsigned  
+00000000 00000000 00110000 00000011 //___000000000000_00000_011_00000_0000011 // LD     |imm.12|rs1.5|011.3|rd.5|0000011.7| 64 load double-word 64    
 // Upper 上立即数 2
-_____00000000000000000000_00000_0110111 // LUI    |imm.20|rd.5|0110111.7| put 20 bits immediate to upper 20 bits of rd and left lower 12 bits 0
-_____00000000000000000000_00000_0010111 // AUIPC  |imm.20|rd.5|0010111.7| left shift the 20 bits immediate 12 bits then add pc value then put to rd
+00000000 00000000 00000000 00110111 //_____00000000000000000000_00000_0110111 // LUI    |imm.20|rd.5|0110111.7| put 20 bits immediate to upper 20 bits of rd and left lower 12 bits 0
+00000000 00000000 00000000 00010111 //_____00000000000000000000_00000_0010111 // AUIPC  |imm.20|rd.5|0010111.7| left shift the 20 bits immediate 12 bits then add pc value then put to rd
+
 // Store 存储 4
 ___000000000000_00000_000_00000_0100011 // SB     |imm.7|rs2.5|rs1.5|000.3|imm.5|0100011.7|    store byte, write low 8 bits of rs1 to rs2's imm.12
 ___000000000000_00000_001_00000_0100011 // SH     |imm.7|rs2.5|rs1.5|001.3|imm.5|0100011.7|    store half-word, write low 16 bits of rs1 to rs2's imm.12
@@ -77,6 +78,7 @@ ___000000000000_00000_111_00000_1110011 // CSRRCI |csr.12|zim.5|111.3|rd.5|11100
 // Test
 __0_0000000001_0_00000000_00001_1101111 // JAL    |imm.20[20|10:1|11|19:12]|rd|1101111.7|  jump (set PC) to address (PC+imm) and place return address (PC+4) in rd // JAL padding 0ne 0 at the last
 _0000_0000_0000_00000_000_00000_0001111 // FENCE  |0.4|pred.4|succ.4|0.5|000.3|0.5|0001111.7| make sure RW of I/O and memory operation completed before FENCE for the successor
+_____00000000000000000001_00001_0110111 // LUI    |imm.20|rd.5|0110111.7| put 20 bits immediate to upper 20 bits of rd and left lower 12 bits 0
 ___000000000000_00001_000_00000_1100111 // JALR   |imm.12|rs1.5|000|rd.5|1100111.7|        jump (set PC) to address (PC+imm(rs1)) and place return address (PC+4) in rd 
 _0000_0000_0000_00000_001_00000_0001111 // FENCE.I|0.4|0000.4|0000.4|0.5|001.3|0.5|0001111.7| make sure instruction operation completed before FENCE.I
 _0000_0000_0000_00000_001_00000_0001111 // FENCE.I|0.4|0000.4|0000.4|0.5|001.3|0.5|0001111.7| make sure instruction operation completed before FENCE.I
