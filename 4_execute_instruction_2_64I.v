@@ -490,7 +490,6 @@ begin
 				           pc <= pc + 4; 
 	    	                           jp <=0;
 				         end 
-				  //+++++++++++++++++++++++++++++++++
 				  3'b011:begin 
                                            Ld  <= 1'b1; // set Ld  Flag 
 					   //load 64 bite sign to 64 bits at imm(s1) to rd
@@ -504,13 +503,23 @@ begin
 		              end 
                    // Store-class
 	           7'b0100011:begin
-	    	                case(irom[pc][14:12]) // func3 case(ir[14:12])
-			          3'b000: Sb  <= 1'b1; // set Sb  Flag 
+	    	                case(wire_f3) // func3 case(ir[14:12])
+				  //+++++++++++++++++++++++++++++++++
+				  3'b000:begin 
+				           //store byte, write low 8 bits of rs1 to rs2's imm.12
+				           Sb  <= 1'b1; // set Sb  Flag 
+					   drom[rram[wire_rs1]+wire_simm] <= {{56{rram[wire_rs2][7]}}, rram[wire_rs2]};
+				           //rram[wire_rs2] <= {56'b0, drom[rram[wire_rs1]+wire_imm]}; 
+
+				           // prepare next instruction
+				           pc <= pc + 4; 
+	    	                           jp <=0;
+				         end 
 			          3'b001: Sh  <= 1'b1; // set Sh  Flag 
 			          3'b010: Sw  <= 1'b1; // set Sw  Flag 
 			          3'b011: Sd  <= 1'b1; // set Sd  Flag  
 				endcase
-	    	   jp <=1;
+	    	   //jp <=1;
 			      end
                    // Math-Logic-Shift-Register class
 	           7'b0110011:begin 
