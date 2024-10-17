@@ -504,18 +504,26 @@ begin
                    // Store-class
 	           7'b0100011:begin
 	    	                case(wire_f3) // func3 case(ir[14:12])
-				  //+++++++++++++++++++++++++++++++++
 				  3'b000:begin 
 				           //store byte, write low 8 bits of rs1 to rs2's imm.12
 				           Sb  <= 1'b1; // set Sb  Flag 
-					   drom[rram[wire_rs1]+wire_simm] <= {{56{rram[wire_rs2][7]}}, rram[wire_rs2]};
-				           //rram[wire_rs2] <= {56'b0, drom[rram[wire_rs1]+wire_imm]}; 
-
+					   //drom[rram[wire_rs1]+wire_simm] <= {{56{rram[wire_rs2][7]}}, rram[wire_rs2]};
+					   drom[rram[wire_rs1]+wire_simm] <= rram[wire_rs2][7:0];
 				           // prepare next instruction
 				           pc <= pc + 4; 
 	    	                           jp <=0;
 				         end 
+				  //+++++++++++++++++++++++++++++++++
 			          3'b001: Sh  <= 1'b1; // set Sh  Flag 
+				  3'b001:begin 
+				           //store half word, write low 16 bits of rs1 to rs2's imm.12
+				           Sh  <= 1'b1; // set Sh  Flag 
+					   drom[rram[wire_rs1]+wire_simm] <= rram[wire_rs2][7:0];
+					   drom[rram[wire_rs1]+wire_simm+1] <= rram[wire_rs2][15:8];
+				           // prepare next instruction
+				           pc <= pc + 4; 
+	    	                           jp <=0;
+				         end 
 			          3'b010: Sw  <= 1'b1; // set Sw  Flag 
 			          3'b011: Sd  <= 1'b1; // set Sd  Flag  
 				endcase
