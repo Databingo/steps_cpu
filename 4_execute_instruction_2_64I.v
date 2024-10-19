@@ -559,7 +559,6 @@ begin
 			        case(wire_f3) // func3
 				  3'b000:begin
 				          case(wire_f7) // func7
-				            //+++++++++++++++++++++++++++++++++
 				            7'b0000000:begin 
 				                     Add  <= 1'b1; // set Add Flag
 				                     // Add s1 to s2 then send ignore overfloat to rd
@@ -567,7 +566,14 @@ begin
 				                     pc <= pc + 4; 
 	    	                                     jp <=0;
 				                   end 
-				            7'b0100000:Sub  <= 1'b1; // set Sub Flag  
+				            //+++++++++++++++++++++++++++++++++
+					    7'b0100000:begin
+				                     Sub  <= 1'b1; // set Sub Flag  
+				                     // Sub rs2 from rs1 then send ignore overfloat to rd
+				                     rram[wire_rd] <= rram[wire_rs1] - rram[wire_rs2]; 
+				                     pc <= pc + 4; 
+	    	                                     jp <=0;
+				                   end 
 				          endcase
 				        end 
 			          3'b010: Slt  <= 1'b1; // set Slt Flag 
