@@ -566,7 +566,6 @@ begin
 				                     pc <= pc + 4; 
 	    	                                     jp <=0;
 				                   end 
-				            //+++++++++++++++++++++++++++++++++
 					    7'b0100000:begin
 				                     Sub  <= 1'b1; // set Sub Flag  
 				                     // Sub rs2 from rs1 then send ignore overfloat to rd
@@ -576,6 +575,7 @@ begin
 				                   end 
 				          endcase
 				        end 
+				            //+++++++++++++++++++++++++++++++++
 			          3'b010: Slt  <= 1'b1; // set Slt Flag 
 			          3'b011: Sltu <= 1'b1; // set Sltu Flag  
 			          3'b110: Or   <= 1'b1; // set Or Flag 
