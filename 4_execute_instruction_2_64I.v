@@ -576,7 +576,14 @@ begin
 				          endcase
 				        end 
 				            //+++++++++++++++++++++++++++++++++
-			          3'b010: Slt  <= 1'b1; // set Slt Flag 
+				  3'b010:begin 
+				           Slt  <= 1'b1; // set Slt Flag 
+				           // if rs1 less than rs2 both as sign-extended then put 1 in rd else 0
+					   if (rram[wire_rs1] < rram[wire_rs2]) rram[wire_rd] <= 1'b1; 
+					   else if (rram[wire_rs1] >= rram[wire_rs2]) rram[wire_rd] <= 1'b0; 
+				           pc <= pc + 4; 
+	    	                           jp <=0;
+				         end 
 			          3'b011: Sltu <= 1'b1; // set Sltu Flag  
 			          3'b110: Or   <= 1'b1; // set Or Flag 
 			          3'b111: And  <= 1'b1; // set And Flag 
