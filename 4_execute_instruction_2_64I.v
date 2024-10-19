@@ -470,7 +470,7 @@ begin
 				  3'b101:begin 
                                            Lhu <= 1'b1; // set Lhu Flag  
 				           //load 16 bite unsign to 64 bits at imm(s1) to rd
-				           rram[wire_rd] <= {48'b0, drom[rram[wire_rs1]+wire_imm], drom[rram[wire_rs1]+wire_imm+1] }; 
+				           rram[wire_rd] <= {48'b0, drom[rram[wire_rs1]+wire_imm + 1], drom[rram[wire_rs1]+wire_imm] }; 
 				           // prepare next instruction
 				           pc <= pc + 4; 
 	    	                           jp <=0;
