@@ -214,7 +214,8 @@ output oCsrrci;
 
 // 根据 pc 组合出指令 
 // combine 8 bits of 4 bytes into a 32 bit instruction
-assign wire_ir = {irom[pc], irom[pc+1], irom[pc+2], irom[pc+3]}; 
+// assign wire_ir = {irom[pc], irom[pc+1], irom[pc+2], irom[pc+3]};  // Big endian
+assign wire_ir = {irom[pc+3], irom[pc+2], irom[pc+1], irom[pc]};  // Little endian
 
 // 组合数据线，避免使用寄存器浪费时钟
 wire [31:0] wire_ir;

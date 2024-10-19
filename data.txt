@@ -1,4 +1,4 @@
-// Test date
+// Test data Little Endian
 @000
 10000000 11111111 00000001 10110111 
 @004
