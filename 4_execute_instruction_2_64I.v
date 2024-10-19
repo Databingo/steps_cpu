@@ -428,16 +428,14 @@ begin
 		   7'b0110111:begin
 		                Lui <= 1'b1; // set Lui Flag
 				//put 20 bits immediate to upper 20 bits of rd left lower 12 bits 0
-				rram[wire_rd] <= wire_upimm << 12; // execution
-				// prepare next instruction
+				rram[wire_rd] <= wire_upimm << 12;
 				pc <= pc + 4; 
 	    	                jp <=0;
 		              end
 		   7'b0010111:begin
 		                Auipc <= 1'b1; // set Auipc Flag
 				//left shift the 20 bits immediate 12 bits add pc then put to rd
-				rram[wire_rd] <= pc + (wire_upimm << 12); // execution
-				// prepare next instruction
+				rram[wire_rd] <= pc + (wire_upimm << 12); 
 				pc <= pc + 4; 
 	    	                jp <=0;
 		   end
@@ -448,7 +446,6 @@ begin
 				           //load 8 bite sign extend to 64 bits at imm(s1) to rd
 				           rram[wire_rd] <= {{56{drom[rram[wire_rs1]+wire_imm][7]}}, 
 					                         drom[rram[wire_rs1]+wire_imm]}; 
-				           // prepare next instruction
 				           pc <= pc + 4; 
 	    	                           jp <=0;
 				         end 
@@ -456,7 +453,6 @@ begin
 				           Lbu  <= 1'b1; // set Lbu  Flag 
 				           //load 8 bite unsign to 64 bits at imm(s1) to rd
 				           rram[wire_rd] <= {56'b0, drom[rram[wire_rs1]+wire_imm]}; 
-				           // prepare next instruction
 				           pc <= pc + 4; 
 	    	                           jp <=0;
 				         end 
@@ -466,7 +462,6 @@ begin
 				           rram[wire_rd] <= {{48{drom[rram[wire_rs1]+wire_imm + 1][7]}}, 
 					                         drom[rram[wire_rs1]+wire_imm + 1], 
 								 drom[rram[wire_rs1]+wire_imm] }; 
-				           // prepare next instruction
 				           pc <= pc + 4; 
 	    	                           jp <=0;
 				         end 
@@ -475,7 +470,6 @@ begin
 				           //load 16 bite unsign to 64 bits at imm(s1) to rd
 				           rram[wire_rd] <= {48'b0, drom[rram[wire_rs1]+wire_imm + 1], 
 					                            drom[rram[wire_rs1]+wire_imm] }; 
-				           // prepare next instruction
 				           pc <= pc + 4; 
 	    	                           jp <=0;
 				         end 
@@ -487,7 +481,6 @@ begin
 	                                 			 drom[rram[wire_rs1]+wire_imm+2], 
 	                                 			 drom[rram[wire_rs1]+wire_imm+1], 
 	                                 			 drom[rram[wire_rs1]+wire_imm]}; 
-				           // prepare next instruction
 				           pc <= pc + 4; 
 	    	                           jp <=0;
 				         end 
@@ -498,7 +491,6 @@ begin
 	                                                            drom[rram[wire_rs1]+wire_imm+2], 
 	                                                            drom[rram[wire_rs1]+wire_imm+1], 
 	                                                            drom[rram[wire_rs1]+wire_imm]}; 
-				           // prepare next instruction
 				           pc <= pc + 4; 
 	    	                           jp <=0;
 				         end 
@@ -513,7 +505,6 @@ begin
 	                                                     drom[rram[wire_rs1]+wire_imm+2], 
 	                                                     drom[rram[wire_rs1]+wire_imm+1], 
 	                                                     drom[rram[wire_rs1]+wire_imm  ]}; 
-				           // prepare next instruction
 				           pc <= pc + 4; 
 	    	                           jp <=0;
 				         end 
@@ -526,7 +517,6 @@ begin
 				           //store byte, write low 8 bits of rs1 to rs2's imm.12
 				           Sb  <= 1'b1; // set Sb  Flag 
 					   drom[rram[wire_rs1]+wire_simm] <= rram[wire_rs2][7:0];
-				           // prepare next instruction
 				           pc <= pc + 4; 
 	    	                           jp <=0;
 				         end 
@@ -535,7 +525,6 @@ begin
 				           Sh  <= 1'b1; // set Sh  Flag 
 					   drom[rram[wire_rs1]+wire_simm] <= rram[wire_rs2][7:0];
 					   drom[rram[wire_rs1]+wire_simm+1] <= rram[wire_rs2][15:8];
-				           // prepare next instruction
 				           pc <= pc + 4; 
 	    	                           jp <=0;
 				         end 
@@ -546,7 +535,6 @@ begin
 					   drom[rram[wire_rs1]+wire_simm+1] <= rram[wire_rs2][15:8];
 					   drom[rram[wire_rs1]+wire_simm+2] <= rram[wire_rs2][23:16];
 					   drom[rram[wire_rs1]+wire_simm+3] <= rram[wire_rs2][31:24];
-				           // prepare next instruction
 				           pc <= pc + 4; 
 	    	                           jp <=0;
 				         end 
@@ -561,19 +549,24 @@ begin
 					   drom[rram[wire_rs1]+wire_simm+5] <= rram[wire_rs2][47:40];
 					   drom[rram[wire_rs1]+wire_simm+6] <= rram[wire_rs2][55:48];
 					   drom[rram[wire_rs1]+wire_simm+7] <= rram[wire_rs2][63:56];
-				           // prepare next instruction
 				           pc <= pc + 4; 
 	    	                           jp <=0;
 				         end 
 				endcase
 			      end
-				  //+++++++++++++++++++++++++++++++++
                    // Math-Logic-Shift-Register class
 	           7'b0110011:begin 
-			        case(irom[pc][14:12]) // func3
+			        case(wire_f3) // func3
 				  3'b000:begin
-				          case(irom[pc][31:25]) // func7
-				            7'b0000000:Add  <= 1'b1; // set Add Flag  
+				          case(wire_f7) // func7
+				            //+++++++++++++++++++++++++++++++++
+				            7'b0000000:begin 
+				                     Add  <= 1'b1; // set Add Flag
+				                     // Add s1 to s2 then send ignore overfloat to rd
+				                     rram[wire_rd] <= rram[wire_rs1] + rram[wire_rs2]; 
+				                     pc <= pc + 4; 
+	    	                                     jp <=0;
+				                   end 
 				            7'b0100000:Sub  <= 1'b1; // set Sub Flag  
 				          endcase
 				        end 
