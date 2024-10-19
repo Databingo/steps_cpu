@@ -515,7 +515,6 @@ begin
 	    	                           jp <=0;
 				         end 
 				  //+++++++++++++++++++++++++++++++++
-			          3'b001: Sh  <= 1'b1; // set Sh  Flag 
 				  3'b001:begin 
 				           //store half word, write low 16 bits of rs1 to rs2's imm.12
 				           Sh  <= 1'b1; // set Sh  Flag 
