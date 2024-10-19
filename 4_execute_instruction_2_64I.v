@@ -513,7 +513,6 @@ begin
 				           pc <= pc + 4; 
 	    	                           jp <=0;
 				         end 
-				  //+++++++++++++++++++++++++++++++++
 				  3'b001:begin 
 				           //store half word, write low 16 bits of rs1 to rs2's imm.12
 				           Sh  <= 1'b1; // set Sh  Flag 
@@ -550,8 +549,8 @@ begin
 	    	                           jp <=0;
 				         end 
 				endcase
-	    	   //jp <=1;
 			      end
+				  //+++++++++++++++++++++++++++++++++
                    // Math-Logic-Shift-Register class
 	           7'b0110011:begin 
 			        case(irom[pc][14:12]) // func3
