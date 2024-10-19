@@ -478,7 +478,7 @@ begin
 				  3'b010:begin 
                                            Lw  <= 1'b1; // set Lw  Flag
 					   //load 32 bite sign extend to 64 bits at imm(s1) to rd
-	  rram[wire_rd] <= {{32{drom[rram[wire_rs1]+wire_imm][7]}}, drom[rram[wire_rs1]+wire_imm], drom[rram[wire_rs1]+wire_imm+1], drom[rram[wire_rs1]+wire_imm+2], drom[rram[wire_rs1]+wire_imm+3]}; 
+	  rram[wire_rd] <= {{32{drom[rram[wire_rs1]+wire_imm + 3][7]}}, drom[rram[wire_rs1]+wire_imm+3], drom[rram[wire_rs1]+wire_imm+2], drom[rram[wire_rs1]+wire_imm+1], drom[rram[wire_rs1]+wire_imm]}; 
 				           // prepare next instruction
 				           pc <= pc + 4; 
 	    	                           jp <=0;
@@ -486,7 +486,7 @@ begin
 				  3'b110:begin 
                                            Lwu <= 1'b1; // set Lwu Flag 
 					   //load 32 bite unsign to 64 bits at imm(s1) to rd
-	  rram[wire_rd] <= {32'b0, drom[rram[wire_rs1]+wire_imm], drom[rram[wire_rs1]+wire_imm+1], drom[rram[wire_rs1]+wire_imm+2], drom[rram[wire_rs1]+wire_imm+3]}; 
+	  rram[wire_rd] <= {32'b0, drom[rram[wire_rs1]+wire_imm+3], drom[rram[wire_rs1]+wire_imm+2], drom[rram[wire_rs1]+wire_imm+1], drom[rram[wire_rs1]+wire_imm]}; 
 				           // prepare next instruction
 				           pc <= pc + 4; 
 	    	                           jp <=0;
