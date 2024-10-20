@@ -561,8 +561,21 @@ begin
 				          case(wire_f7) // func7
 				            7'b0000000:begin 
 				                     Add  <= 1'b1; // set Add Flag
-				                     // Add s1 to s2 then send ignore overfloat to rd
+				                     // Add s1 to s2 then send ignore overfloat to rd 
+						     // 同号相加或异号相减会有溢出，异号相减可以变成同号相加，因此只有同号相加才会有溢出，
+						     // 溢出是加数与结果首异
+						     // 符号是加数的符号
+						     //
+						     // 同号相减和异号相加，都可以变成异号相加, 结果不会溢出，符号以运算结果为准, 1 就是负，0就是正。
+						     //
+						     // 无符号相加只是特殊的溢出，确定结果符号为正, 或只是分段相加，高一段是 0 + 0, 接受低一段进位
+						     
+						      // 执行加法
 				                     rram[wire_rd] <= rram[wire_rs1] + rram[wire_rs2]; 
+						      // 同号与结果最高位变化则为溢出
+						      // (a[gao] ~^ b[gao]) ^ c[gao] == 1 溢出 
+						      // 结果扩充一个同号位
+
 				                     pc <= pc + 4; 
 	    	                                     jp <=0;
 				                   end 
@@ -579,8 +592,9 @@ begin
 				  3'b010:begin 
 				           Slt  <= 1'b1; // set Slt Flag 
 				           // if rs1 less than rs2 both as sign-extended then put 1 in rd else 0
-					   if (rram[wire_rs1] < rram[wire_rs2]) rram[wire_rd] <= 1'b1; 
-					   else if (rram[wire_rs1] >= rram[wire_rs2]) rram[wire_rd] <= 1'b0; 
+					   if (rram[wire_rs1][63] == 1 && rram[wire_rs2])[63] == 0) rram[wire_rd] <= 1'b1; 
+					   else if (rram[wire_rs1][63] == 0 && rram[wire_rs2])[63] == 1) rram[wire_rd] <= 1'b0;  
+					   else rram[wire_rd] <= 1'b0; 
 				           pc <= pc + 4; 
 	    	                           jp <=0;
 				         end 
