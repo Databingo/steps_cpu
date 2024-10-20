@@ -15,24 +15,24 @@ function [3:0] my_case_function;
   end
 endfunction
 
-function [2:0] add;
- input [63:0] rs1;
- input [63:0] rs2;
- input [63:0] rd;
- input [63:0] sum;
- input [63:0] rs3;
- input [63:0] rs4;
-
- begin
-    rd = rs1 + rs2; 
-    if ((rs1[63] ~^ rs2[63]) & (rs1[63] ^ sum[63])) 
-    begin
-      rs3 = 1; // 溢出标志
-      rs4 = rs1[63]; // 溢出值
-      add = 3'b001;
-    end
- end 
-endfunction
+//function [2:0] add;
+// input [63:0] rs1;
+// input [63:0] rs2;
+// input [63:0] rd;
+// input [63:0] sum;
+// input [63:0] rs3;
+// input [63:0] rs4;
+//
+// begin
+//    rd = rs1 + rs2; 
+//    if ((rs1[63] ~^ rs2[63]) & (rs1[63] ^ sum[63])) 
+//    begin
+//      rs3 = 1; // 溢出标志
+//      rs4 = rs1[63]; // 溢出值
+//      add = 3'b001;
+//    end
+// end 
+//endfunction
 
 
 module s4 (reset_n, clock, oir, opc, ojp, oop, of3, of7,
@@ -359,10 +359,14 @@ initial $readmemb("./programb.txt", irom);
 initial $readmemb("./data.txt", drom);
 
 reg [63:0] sum; // 加法结果组合逻辑寄存器
+reg [63:0] mirro_rs2; // rs2 相反数，取反加一，减法变加法用
+//
+
 // 组合逻辑（电路即时生效,无需等待时钟周期）
 always @(*)
 begin
  sum = rram[wire_rs1] + rram[wire_rs2];
+ mirro_rs2 = ~rram[wire_rs2] + 1;
 end 
 
 
@@ -607,34 +611,27 @@ begin
 						      // 结果扩充一个同号数位
 						      // 加法和溢出判断可以通过电路设计在一个时钟周期内完成
 						      
-				                     if ((rram[wire_rs1][63] ~^ rram[wire_rs2][63]) & (rram[wire_rs1][63] ^ sum[63])) 
+				                     if ((rram[wire_rs1][63] ~^ rram[wire_rs2][63]) && (rram[wire_rs1][63] ^ sum[63])) 
 						     begin
 	    	                                      rram[3] <= 1; // 溢出标志
 	    	                                      rram[4] <= rram[wire_rs1][63]; // 溢出值
-						      jp <= 0;
 						     end
-
-
 				                     pc <= pc + 4; 
-	    	                                     //rram[2] <= sum + 7;
 	    	                                     jp <=0;
+
 				                   end 
 					    7'b0100000:begin
 				                     Sub  <= 1'b1; // set Sub Flag  
 				                     // Sub rs2 from rs1 then send ignore overfloat to rd
 						     // 转化成加法：加相反数-反码加一, 使用加法器，加法流程
-				                     //rram[wire_rd] <= rram[wire_rs1] + (~rram[wire_rs2]+1); 
-
-						    jp <= add(rram[wire_rs1], rram[wire_rs2], rram[wire_rd], sum, rram[3]. rram[4]); 
-// function add;
-// input [63:0] rs1;
-// input [63:0] rs2;
-// input [63:0] rd;
-// input [63:0] sum;
-// input [63:0] rs3;
-// input [63:0] rs4;
-
-
+						     // 执行加法:
+				                     rram[wire_rd] <= rram[wire_rs1] + (~rram[wire_rs2]+1);
+						     // 溢出判断：
+				                     if ((rram[wire_rs1][63] ~^ mirro_rs2 [63]) && (rram[wire_rs1][63] ^ sum[63])) 
+						     begin
+	    	                                      rram[3] <= 1; // 溢出标志
+	    	                                      rram[4] <= rram[wire_rs1][63]; // 溢出值
+						     end
 				                     pc <= pc + 4; 
 	    	                                     jp <=0;
 				                   end 
