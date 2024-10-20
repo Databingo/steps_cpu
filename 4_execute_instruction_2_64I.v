@@ -15,7 +15,24 @@ function [3:0] my_case_function;
   end
 endfunction
 
+function [2:0] add;
+ input [63:0] rs1;
+ input [63:0] rs2;
+ input [63:0] rd;
+ input [63:0] sum;
+ input [63:0] rs3;
+ input [63:0] rs4;
 
+ begin
+    rd = rs1 + rs2; 
+    if ((rs1[63] ~^ rs2[63]) & (rs1[63] ^ sum[63])) 
+    begin
+      rs3 = 1; // 溢出标志
+      rs4 = rs1[63]; // 溢出值
+      add = 3'b001;
+    end
+ end 
+endfunction
 
 
 module s4 (reset_n, clock, oir, opc, ojp, oop, of3, of7,
@@ -606,7 +623,18 @@ begin
 				                     Sub  <= 1'b1; // set Sub Flag  
 				                     // Sub rs2 from rs1 then send ignore overfloat to rd
 						     // 转化成加法：加相反数-反码加一, 使用加法器，加法流程
-				                     rram[wire_rd] <= rram[wire_rs1] + (~rram[wire_rs2]+1); 
+				                     //rram[wire_rd] <= rram[wire_rs1] + (~rram[wire_rs2]+1); 
+
+						    jp <= add(rram[wire_rs1], rram[wire_rs2], rram[wire_rd], sum, rram[3]. rram[4]); 
+// function add;
+// input [63:0] rs1;
+// input [63:0] rs2;
+// input [63:0] rd;
+// input [63:0] sum;
+// input [63:0] rs3;
+// input [63:0] rs4;
+
+
 				                     pc <= pc + 4; 
 	    	                                     jp <=0;
 				                   end 
