@@ -360,6 +360,7 @@ initial $readmemb("./data.txt", drom);
 
 reg [63:0] sum; // 加法结果组合逻辑寄存器
 reg [63:0] mirro_rs2; // rs2 相反数，取反加一，减法变加法用
+reg [63:0] sub; // 减法结果组合逻辑寄存器
 //
 
 // 组合逻辑（电路即时生效,无需等待时钟周期）
@@ -367,6 +368,7 @@ always @(*)
 begin
  sum = rram[wire_rs1] + rram[wire_rs2];
  mirro_rs2 = ~rram[wire_rs2] + 1;
+ sub = rram[wire_rs1] + mirro_rs2;
 end 
 
 
@@ -625,9 +627,10 @@ begin
 				                     // Sub rs2 from rs1 then send ignore overfloat to rd
 						     // 转化成加法：加相反数-反码加一, 使用加法器，加法流程
 						     // 执行加法:
-				                     rram[wire_rd] <= rram[wire_rs1] + (~rram[wire_rs2]+1);
+				                     //rram[wire_rd] <= rram[wire_rs1] + (~rram[wire_rs2]+1);
+				                     rram[wire_rd] <= sub;
 						     // 溢出判断：
-				                     if ((rram[wire_rs1][63] ~^ mirro_rs2 [63]) && (rram[wire_rs1][63] ^ sum[63])) 
+				                     if ((rram[wire_rs1][63] ~^ mirro_rs2 [63]) && (rram[wire_rs1][63] ^ sub[63])) 
 						     begin
 	    	                                      rram[3] <= 1; // 溢出标志
 	    	                                      rram[4] <= rram[wire_rs1][63]; // 溢出值
@@ -643,18 +646,19 @@ begin
 				           // if rs1 less than rs2 both as sign-extended then put 1 in rd else 0
 					   
 					   // 电路方式: 一周期实现比较 
-					   // 计算 rs1 - rs2  转化 Sub -> Add 
+					   // 计算 rs1 - rs2 < 0  转化 Sub -> Add
 					   // 同号相加, 号即大小: 1: rs1 小于 rs2
-					   // if ((rram[wire_rs1][63] ~^ rram[wire_rs2][63]) & rram[wire_rs1][63] == 1)
-                                           //          rram[wire_rd] <= 1'b1; 
+					    if ((rram[wire_rs1][63] ~^ mirro_rs2[63]) && rram[wire_rs1][63] == 1)
+                                                     rram[wire_rd] <= 1'b1; 
 					   // 异号相加, 果即大小：1: rs1 小于 rs2
-					   // else if ((rram[wire_rs1][63] ^ rram[wire_rs2][63]) & ([rram[wire_rs1] + (~rram[wire_rs2 ]+1)][63] == 1))
-                                           //          rram[wire_rd] <= 1'b1; 
+					    else if ((rram[wire_rs1][63] ^ mirro_rs2[63]) && (sub[63] == 1))
+                                                     rram[wire_rd] <= 1'b1; 
                                            // 否则 rs1 大于 rs2
-					   // else rram[wire_rd] <= 1'b0;
+					    else rram[wire_rd] <= 1'b0;
 					  
 					   // 代码模式 
-					   if (rram[wire_rs1] - rram[wire_rs2] < 0 ) rram[wire_rd] <= 1'b1; 
+					   // if (rram[wire_rs1] - rram[wire_rs2] < 0 ) rram[wire_rd] <= 1'b1; 
+
 				           pc <= pc + 4; 
 	    	                           jp <=0;
 				         end 
