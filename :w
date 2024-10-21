@@ -679,12 +679,12 @@ begin
 					   // 异号相加, 果即大小：1: rs1 小于 rs2
 					   // 溢出位 0 取反为 1 负
 					   // 次首位进位判断：a==b==1; a^b && c==0
-					   // 进位后为 正(或0) 大于等于
+					   // 进位后为 正(或0)
 					    if (rram[wire_rs1][63] == mirro_rs2[63] == 1)
                                                      rram[wire_rd] <= 1'b0; 
-					    else if ((rram[wire_rs1][63] ^ mirro_rs2[63]) && (sub[63] == 0))
+					    else if ((rram[wire_rs1][63] ^ mirro_rs2[63]) && (sub[63] == 0) && sub != 0)
                                                      rram[wire_rd] <= 1'b0; 
-                                           // 否则 rs1 小于 rs2
+                                           // 否则 rs1 大于 rs2
 					    else rram[wire_rd] <= 1'b1;
 					  
 					   // 代码模式 
@@ -787,12 +787,12 @@ begin
 					   // 异号相加, 果即大小：1: rs1 小于 imm 
 					   // 溢出位 0 取反为 1 负
 					   // 次首位进位判断：a==b==1; a^b && c==0
-					   // 进位后为 正(或0) 大于等于
+					   // 进位后为 正(或0)
 					    if (rram[wire_rs1][63] == mirro_imm[63] == 1)
                                                      rram[wire_rd] <= 1'b0; 
-					    else if ((rram[wire_rs1][63] ^ mirro_imm[63]) && (sub_imm[63] == 0))
+					    else if ((rram[wire_rs1][63] ^ mirro_imm[63]) && (sub_imm[63] == 0) && sub_imm != 0)
                                                      rram[wire_rd] <= 1'b0; 
-                                           // 否则 rs1 小于 rs2
+                                           // 否则 rs1 大于 rs2
 					    else rram[wire_rd] <= 1'b1;
 					  
 					   // 代码模式 
@@ -830,7 +830,7 @@ begin
 	    	                           jp <=0;
 					   end
 				  3'b101: begin
-				          case(wire_f7) // func7
+				          case(irom[pc][31:25]) // func7
 					    7'b0000000:begin
 					               Srli  <= 1'b1; // set Srli  Flag // 32-->64 one more bit64
 					               // shift right logicl rs1 by imm.12[low6.unsign] padding 0 to rd
@@ -856,7 +856,7 @@ begin
 			          3'b000: Addiw  <= 1'b1; // set Addiw  Flag 
 			          3'b001: Slliw  <= 1'b1; // set Slliw  Flag 
 				  3'b101: begin
-				          case(wire_f7) // func7
+				          case(irom[pc][31:25]) // func7
 				            7'b0000000: Srliw  <= 1'b1; // set Srliw  Flag 
 				            7'b0100000: Sraiw <= 1'b1; // set Sraiw  Flag 
 				          endcase
@@ -930,8 +930,12 @@ begin
 					 // 异号相加, 果即大小：1: rs1 小于 rs2
 					  else if ((rram[wire_rs1][63] ^ mirro_rs2[63]) && (sub[63] == 1))
 				             pc <= pc + sign_extended_bimm;
-                                         // 否则 rs1 大于或等于 rs2
-					  else pc <= pc + 4;
+                                         // 相等
+					  else if (rram[wire_rs1] == rram[wire_rs2])
+				             pc <= pc + 4;
+                                         // 否则 rs1 大于 rs2
+					  else
+				             pc <= pc + 4;
 					 
 					 // 代码模式 
 					 //if (rram[wire_rs1] != rram[wire_rs2])
@@ -967,13 +971,13 @@ begin
 					   // 异号相加, 果即大小：1: rs1 小于 imm 
 					   // 溢出位 0 取反为 1 负
 					   // 次首位进位判断：a==b==1; a^b && c==0
-					   // 进位后为 正(或0) 大于等于
+					   // 进位后为 正(或0)
 					    if (rram[wire_rs1][63] == mirro_imm[63] == 1)
-				                 pc <= pc + 4;
-					    else if ((rram[wire_rs1][63] ^ mirro_imm[63]) && (sub_imm[63] == 0))
-				                 pc <= pc + 4;
-                                           // 否则 rs1 小于 rs2
-					    else pc <= pc + sign_extended_bimm;
+                                                     rram[wire_rd] <= 1'b0; 
+					    else if ((rram[wire_rs1][63] ^ mirro_imm[63]) && (sub_imm[63] == 0) && sub_imm != 0)
+                                                     rram[wire_rd] <= 1'b0; 
+                                           // 否则 rs1 大于 rs2
+					    else rram[wire_rd] <= 1'b1;
 					  
 					   // 代码模式 
 					   // if ({[0],rram[wire_rs1]} - {[0],imm} < 0 ) rram[wire_rd] <= 1'b1; 
