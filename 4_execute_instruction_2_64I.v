@@ -996,7 +996,6 @@ begin
 					 // if (rram[wire_rs1] - rram[wire_rs2] < 0 ) rram[wire_rd] <= 1'b1; 
 				         end 
 				endcase
-	    	   jp <=1;
 		              end
                    // Fence class
 	           7'b0001111:begin
