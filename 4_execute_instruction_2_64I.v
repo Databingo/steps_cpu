@@ -776,7 +776,6 @@ begin
 	    	                           jp <=0;
 				         end 
 				 3'b011:begin
-			        //+++++++++++++++++++++++++++++++++
 					   Sltiu <= 1'b1; // set Sltiu Flag 
 				           // if rs1 less than imm both as unsign then put 1 in rd else 0
 					   
@@ -799,18 +798,54 @@ begin
 				           pc <= pc + 4; 
 	    	                           jp <=0;
 				         end 
-			          3'b110: Ori   <= 1'b1; // set Ori   Flag 
-			          3'b111: Andi  <= 1'b1; // set Andi  Flag 
-			          3'b100: Xori  <= 1'b1; // set Xori  Flag 
-			          3'b001: Slli  <= 1'b1; // set Slli  Flag  // 32-->64 one more bit
+				 3'b110:begin 
+				           Ori   <= 1'b1; // set Ori   Flag 
+                                           // bitwise OR  rs1 and sign-extend imm.12 put reslut in rd
+					   rram[wire_rd] <= (rram[wire_rs1] | {{52{wire_imm[11]}}, wire_imm}); 
+				           pc <= pc + 4; 
+	    	                           jp <=0;
+					   end
+				 3'b111:begin 
+				           Andi  <= 1'b1; // set Andi  Flag 
+                                           // bitwise AND rs1 and sign-extend imm.12 put reslut in rd
+					   rram[wire_rd] <= (rram[wire_rs1] & {{52{wire_imm[11]}}, wire_imm}); 
+				           pc <= pc + 4; 
+	    	                           jp <=0;
+					   end
+				 3'b100:begin 
+				           Xori  <= 1'b1; // set Xori  Flag 
+                                           // bitwise XORI  rs1 and rs2 then put reslut in rd
+					   rram[wire_rd] <= (rram[wire_rs1] ^ {{52{wire_imm[11]}}, wire_imm}); 
+				           pc <= pc + 4; 
+	    	                           jp <=0;
+					   end
+				 3'b001:begin
+					   Slli  <= 1'b1; // set Slli  Flag  // 32-->64 one more bit
+					   // shift lift  logicl rs1 by imm.12[low6.unsign] padding 0 to rd
+					   rram[wire_rd] <= (rram[wire_rs1] << wire_shamt ); 
+				           pc <= pc + 4; 
+	    	                           jp <=0;
+					   end
 				  3'b101: begin
 				          case(irom[pc][31:25]) // func7
-				            7'b0000000: Srli  <= 1'b1; // set Srli  Flag // 32-->64 one more bit64
-				            7'b0100000: Srai  <= 1'b1; // set Srai  Flag // 32-->64 one more bit64
+			                    //+++++++++++++++++++++++++++++++++
+					    7'b0000000:begin
+					               Srli  <= 1'b1; // set Srli  Flag // 32-->64 one more bit64
+					               // shift right logicl rs1 by imm.12[low6.unsign] padding 0 to rd
+					               rram[wire_rd] <= (rram[wire_rs1] >> wire_shamt ); 
+				                       pc <= pc + 4; 
+	    	                                       jp <=0;
+						       end
+					     7'b0100000:begin 
+					               Srai  <= 1'b1; // set Srai  Flag // 32-->64 one more bit64
+					               // shift right arithmatical rs1 by imm.12[low6.unsign] padding 0 to rd
+					               rram[wire_rd] <= (rram[wire_rs1] >>> wire_shamt ); 
+				                       pc <= pc + 4; 
+	    	                                       jp <=0;
+						       end
 				          endcase
 				         end 
 				endcase
-	    	   jp <=1;
 			      end
                    // Math-Logic-Shift-Immediate-64 class
 	           7'b0011011:begin 
