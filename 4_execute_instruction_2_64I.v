@@ -673,11 +673,11 @@ begin
 					   // 次首位进位判断：a==b==1; a^b && c==1
 					   // 进位后为 正
 					    if (rram[wire_rs1][63] == mirro_rs2[63] == 1)
-                                                     rram[wire_rd] <= 1'b1; 
+                                                     rram[wire_rd] <= 1'b0; 
 					    else if ((rram[wire_rs1][63] ^ mirro_rs2[63]) && (sub[63] == 1))
-                                                     rram[wire_rd] <= 1'b1; 
+                                                     rram[wire_rd] <= 1'b0; 
                                            // 否则 rs1 大于 rs2
-					    else rram[wire_rd] <= 1'b0;
+					    else rram[wire_rd] <= 1'b1;
 					  
 					   // 代码模式 
 					   // if (rram[wire_rs1] - rram[wire_rs2] < 0 ) rram[wire_rd] <= 1'b1; 
