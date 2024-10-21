@@ -267,9 +267,9 @@ assign wire_rs2 = wire_ir[24:20];
 assign wire_f7  = wire_ir[31:25]; 
 assign wire_imm = wire_ir[31:20];
 assign wire_upimm = wire_ir[31:12];
-assign wire_jimm  = {wire_ir[31], wire_ir[19:12], wire_ir[20], wire_ir[31:20], 1'b0};
+assign wire_jimm  = {wire_ir[31], wire_ir[19:12], wire_ir[20], wire_ir[31:20], 1'b0}; // read immediate & padding last 0
 assign wire_simm  = {wire_ir[31:25], wire_ir[11:7]};
-assign wire_bimm  = {wire_ir[31], wire_ir[19:12], wire_ir[20], wire_ir[30:21],  1'b0};
+assign wire_bimm  = {wire_ir[31], wire_ir[19:12], wire_ir[20], wire_ir[30:21],  1'b0};// read immediate & padding last 0
 assign wire_shamt = wire_ir[25:20];
 
 // 连接显示器
@@ -849,7 +849,7 @@ begin
 			      end
                    // Math-Logic-Shift-Immediate-64 class
 	           7'b0011011:begin 
-			        case(irom[pc][14:12]) // func3
+			        case(wire_f3) // func3
 			          3'b000: Addiw  <= 1'b1; // set Addiw  Flag 
 			          3'b001: Slliw  <= 1'b1; // set Slliw  Flag 
 				  3'b101: begin
@@ -863,16 +863,16 @@ begin
 		              end
                    // Math-Logic-Shift-Register-64 class
 	           7'b0111011:begin 
-			        case(irom[pc][14:12]) // func3
+			        case(wire_f3) // func3
 				  3'b000: begin
-				          case(irom[pc][31:25]) // func7
+				          case(wire_f7) // func7
 				            7'b0000000: Addw  <= 1'b1; // set Addw  Flag 
 				            7'b0100000: Subw  <= 1'b1; // set Subw  Flag 
 				          endcase
 				         end 
 			          3'b001: Sllw  <= 1'b1; // set Sllw  Flag 
 				  3'b101: begin
-				          case(irom[pc][31:25]) // func7
+				          case(wire_f7) // func7
 				            7'b0000000: Srlw  <= 1'b1; // set Srlw  Flag 
 				            7'b0100000: Sraw  <= 1'b1; // set Sraw  Flag 
 				          endcase
@@ -882,18 +882,17 @@ begin
 		              end
                    // Jump
 	           7'b1101111:begin 
-		                //imm[19:0] <= {irom[pc][31], irom[pc][19:12], irom[pc][20], irom[pc][30:21], 1'b0}; // read immediate & padding last 0
-				rram[irom[pc][11:7]] <= pc + 1;
-				pc <= pc + {irom[pc][31], irom[pc][19:12], irom[pc][20], irom[pc][30:21], 1'b0};
                                 Jal <= 1'b1; // set Jal Flag 
+				//jump PC to PC+imm(padding 0) and place return address PC+4 in rd
+				rram[wire_rd] <= pc + 4;
+				pc <= pc + wire_jimm;
 	    	                jp <=0;
-	    	   //jp <=1;
                               end
                    // RJump
 	           7'b1100111:begin 
-		                //imm[11:0] <= irom[pc][31:20]; // read immediate (no need padding last 0 not as JAL)
-				rram[irom[pc][11:7]] <= pc + 1;
-				pc <= rram[irom[pc][19:15]] + irom[pc][31:20];
+		                //jump PC to address imm(rs1) and place return address PC+4 in rd (no need padding last 0 not as JAL)
+				rram[wire_rd] <= pc + 4;
+				pc <= rram[wire_rs1] + wire_imm;
                                 Jalr <= 1'b1; // set Jalr Flag 
 	    	                jp <=0;
 	    	   //jp <=1;
