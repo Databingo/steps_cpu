@@ -890,12 +890,11 @@ begin
                               end
                    // RJump
 	           7'b1100111:begin 
+                                Jalr <= 1'b1; // set Jalr Flag 
 		                //jump PC to address imm(rs1) and place return address PC+4 in rd (no need padding last 0 not as JAL)
 				rram[wire_rd] <= pc + 4;
 				pc <= rram[wire_rs1] + wire_imm;
-                                Jalr <= 1'b1; // set Jalr Flag 
 	    	                jp <=0;
-	    	   //jp <=1;
                               end
                    // Branch class
 	           7'b1100011:begin 
