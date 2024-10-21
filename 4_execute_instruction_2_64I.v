@@ -958,25 +958,43 @@ begin
 			                 //+++++++++++++++++++++++++++++++++
 					 Bltu <= 1'b1; // set Bltu Flag 
 					 //take branch if rs1 < rs2 in unsigned comparison 
-					   // 电路方式: 一周期实现比较 
-					   // 计算 rs1 - rs2 < 0  转化 Sub -> Add 正数相加变成了正数减去负数
-					   // 异号相加, 果即大小：1: rs1 小于 rs2
-					   // 溢出位 0 取反为 1 负
-					   // 次首位进位判断：a==b==1; a^b && c==0
-					   // 进位后为 正(或0) 大于等于
-					    if (rram[wire_rs1][63] == mirro_rs2[63] == 1)
-					        pc <= pc + 4;
-					    else if ((rram[wire_rs1][63] ^ mirro_rs2[63]) && (sub[63] == 0))
-					        pc <= pc + 4;
-                                           // 否则 rs1 小于 rs2
-					    else pc <= pc + sign_extended_bimm;
-	    	                           jp <=0;
-					  
-					   // 代码模式 
-					   // if (rram[wire_rs1] - rram[wire_rs2] < 0 ) rram[wire_rd] <= 1'b1; 
-
+					 // 电路方式: 一周期实现比较 
+					 // 计算 rs1 - rs2 < 0  转化 Sub -> Add 正数相加变成了正数减去负数
+					 // 异号相加, 果即大小：1: rs1 小于 rs2
+					 // 溢出位 0 取反为 1 负
+					 // 次首位进位判断：a==b==1; a^b && c==0
+					 // 进位后为 正(或0) 大于等于
+					  if (rram[wire_rs1][63] == mirro_rs2[63] == 1)
+					      pc <= pc + 4;
+					  else if ((rram[wire_rs1][63] ^ mirro_rs2[63]) && (sub[63] == 0))
+					      pc <= pc + 4;
+                                         // 否则 rs1 小于 rs2
+					  else pc <= pc + sign_extended_bimm;
+	    	                          jp <=0;
+					 // 代码模式 
 				         end 
-			          3'b111: Bgeu <= 1'b1; // set Bgeu Flag 
+					 
+				  3'b111:begin
+					 Bgeu <= 1'b1; // set Bgeu Flag 
+					 //take branch if rs1 >= rs2 in unsigned comparison 
+					 // 电路方式: 一周期实现比较 
+					 // 计算 rs1 - rs2 > 0  转化 Sub -> Add 正数相加变成了正数减去负数
+					 // 异号相加, 果即大小：0: rs1 大于 rs2
+					 // 溢出位 0 取反为 1 负
+					 // 次首位进位判断：a==b==1; a^b && c==0
+					 // 进位后为 正(或0) 大于等于
+					  if (rram[wire_rs1][63] == mirro_rs2[63] == 1)
+                                              pc <= pc + sign_extended_bimm;
+					  else if ((rram[wire_rs1][63] ^ mirro_rs2[63]) && (sub[63] == 0))
+                                              pc <= pc + sign_extended_bimm;
+                                         // 否则 rs1 小于 rs2
+					  else pc <= pc + 4;
+
+	    	                          jp <=0;
+					 
+					 // 代码模式 
+					 // if (rram[wire_rs1] - rram[wire_rs2] < 0 ) rram[wire_rd] <= 1'b1; 
+				         end 
 				endcase
 	    	   jp <=1;
 		              end
