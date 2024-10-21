@@ -359,16 +359,22 @@ initial $readmemb("./programb.txt", irom);
 initial $readmemb("./data.txt", drom);
 
 reg [63:0] sum; // 加法结果组合逻辑寄存器
+reg [63:0] sum_imm; // 加法结果组合逻辑寄存器
 reg [63:0] mirro_rs2; // rs2 相反数，取反加一，减法变加法用
+reg [63:0] mirro_imm; // imm 相反数，取反加一，减法变加法用
 reg [63:0] sub; // 减法结果组合逻辑寄存器
+reg [63:0] sub_imm; // 减法结果组合逻辑寄存器
 //
 
 // 组合逻辑（电路即时生效,无需等待时钟周期）
 always @(*)
 begin
  sum = rram[wire_rs1] + rram[wire_rs2];
+ sum_imm = rram[wire_rs1] + {{52{wire_imm[11]}}, wire_imm};
  mirro_rs2 = ~rram[wire_rs2] + 1;
+ mirro_imm = ~{{52{wire_imm[11]}}, wire_imm} + 1;
  sub = rram[wire_rs1] + mirro_rs2;
+ sub_imm = rram[wire_rs1] + mirro_imm;
 end 
 
 
@@ -669,11 +675,11 @@ begin
 					   // 计算 rs1 - rs2 < 0  转化 Sub -> Add
 					   // 异号相加, 果即大小：1: rs1 小于 rs2
 					   // 溢出位 0 取反为 1 负
-					   // 次首位进位判断：a==b==1; a^b && c==1
+					   // 次首位进位判断：a==b==1; a^b && c==0
 					   // 进位后为 正
 					    if (rram[wire_rs1][63] == mirro_rs2[63] == 1)
                                                      rram[wire_rd] <= 1'b0; 
-					    else if ((rram[wire_rs1][63] ^ mirro_rs2[63]) && (sub[63] == 1))
+					    else if ((rram[wire_rs1][63] ^ mirro_rs2[63]) && (sub[63] == 0))
                                                      rram[wire_rd] <= 1'b0; 
                                            // 否则 rs1 大于 rs2
 					    else rram[wire_rd] <= 1'b1;
@@ -721,7 +727,6 @@ begin
 				                       pc <= pc + 4; 
 	    	                                       jp <=0;
 						       end
-				            //+++++++++++++++++++++++++++++++++
 					    7'b0100000:begin 
 					               Sra  <= 1'b1; // set Sra Flag  
 					               // shift right arithmatical rs1 by imm.12[low5.unsign] padding 0 to rd
@@ -735,10 +740,65 @@ begin
 			      end
                    // Math-Logic-Shift-Immediate class
 	           7'b0010011:begin 
-			        case(irom[pc][14:12]) // func3
-			          3'b000: Addi  <= 1'b1; // set Addi  Flag 
-			          3'b010: Slti  <= 1'b1; // set Slti  Flag 
-			          3'b011: Sltiu <= 1'b1; // set Sltiu Flag 
+			        case(wire_f3) // func3
+				  3'b000:begin
+				         Addi  <= 1'b1; // set Addi  Flag 
+				         //add sign-extend imm.12 to sr1, send overflow ingnored result to rd 
+				         // 执行加法:
+				         rram[wire_rd] <= rram[wire_rs1] + {{52{wire_imm[11]}}, wire_imm}; 
+				         // 溢出判断：
+				         if ((rram[wire_rs1][63] ~^ wire_imm[11]) && (rram[wire_rs1][63] ^ sum_imm[63])) 
+				           begin
+	    	                         rram[3] <= 1; // 溢出标志
+	    	                         rram[4] <= rram[wire_rs1][63]; // 溢出值
+				           end
+				         pc <= pc + 4; 
+	    	                         jp <=0;
+				         end
+				 3'b010:begin
+					  Slti  <= 1'b1; // set Slti  Flag 
+				           // if rs1 is less than imm.12 both as sign-extended then put 1 in rd else 0
+					   
+					   // 电路方式: 一周期实现比较 
+					   // 计算 rs1 - imm < 0  转化 Sub -> Add
+					   // 同号相加, 号即大小: 1: rs1 小于 imm 
+					    if ((rram[wire_rs1][63] ~^ mirro_imm[63]) && rram[wire_rs1][63] == 1)
+                                                     rram[wire_rd] <= 1'b1; 
+					   // 异号相加, 果即大小：1: rs1 小于 imm
+					    else if ((rram[wire_rs1][63] ^ mirro_imm[63]) && (sub_imm[63] == 1))
+                                                     rram[wire_rd] <= 1'b1; 
+                                           // 否则 rs1 大于 imm 
+					    else rram[wire_rd] <= 1'b0;
+					   // 代码模式 
+					   // if (rram[wire_rs1] - imm < 0 ) rram[wire_rd] <= 1'b1; 
+
+				           pc <= pc + 4; 
+	    	                           jp <=0;
+				         end 
+				 3'b011:begin
+			        //+++++++++++++++++++++++++++++++++
+					   Sltiu <= 1'b1; // set Sltiu Flag 
+				           // if rs1 less than imm both as unsign then put 1 in rd else 0
+					   
+					   // 电路方式: 一周期实现比较 
+					   // 计算 rs1 - imm < 0  转化 Sub -> Add
+					   // 异号相加, 果即大小：1: rs1 小于 imm 
+					   // 溢出位 0 取反为 1 负
+					   // 次首位进位判断：a==b==1; a^b && c==0
+					   // 进位后为 正
+					    if (rram[wire_rs1][63] == mirro_imm[63] == 1)
+                                                     rram[wire_rd] <= 1'b0; 
+					    else if ((rram[wire_rs1][63] ^ mirro_imm[63]) && (sub_imm[63] == 0))
+                                                     rram[wire_rd] <= 1'b0; 
+                                           // 否则 rs1 大于 rs2
+					    else rram[wire_rd] <= 1'b1;
+					  
+					   // 代码模式 
+					   // if ({[0],rram[wire_rs1]} - {[0],imm} < 0 ) rram[wire_rd] <= 1'b1; 
+
+				           pc <= pc + 4; 
+	    	                           jp <=0;
+				         end 
 			          3'b110: Ori   <= 1'b1; // set Ori   Flag 
 			          3'b111: Andi  <= 1'b1; // set Andi  Flag 
 			          3'b100: Xori  <= 1'b1; // set Xori  Flag 
