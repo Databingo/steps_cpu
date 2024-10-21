@@ -529,7 +529,8 @@ func main() {
             fmt.Println("Syntax Error on line: ", lineCounter)
             os.Exit(0)
         }
-        fmt.Printf("Address: 0x%08x     Line: %d     Instruction:  0x%08x\n", address, lineCounter, instruction)
+        //fmt.Printf("Address: 0x%08x     Line: %d     Instruction:  0x%08x\n", address, lineCounter, instruction)
+        fmt.Printf("Address: 0x%08x     Line: %d     Instruction:  0x%08x, %b\n", address, lineCounter,  instruction, instruction)
         lineCounter++
         address += 4
 
