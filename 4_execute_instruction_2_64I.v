@@ -267,9 +267,9 @@ assign wire_rs2 = wire_ir[24:20];
 assign wire_f7  = wire_ir[31:25]; 
 assign wire_imm = wire_ir[31:20];
 assign wire_upimm = wire_ir[31:12];
-assign wire_jimm  = {wire_ir[31], wire_ir[19:12], wire_ir[20], wire_ir[31:20], 1'b0}; // read immediate & padding last 0
+assign wire_jimm  = {wire_ir[31], wire_ir[19:12], wire_ir[20], wire_ir[31:20], 1'b0}; // read immediate & padding last 0, total 20 + 1 = 21 bits
 assign wire_simm  = {wire_ir[31:25], wire_ir[11:7]};
-assign wire_bimm  = {wire_ir[31], wire_ir[19:12], wire_ir[20], wire_ir[30:21],  1'b0};// read immediate & padding last 0
+assign wire_bimm  = {wire_ir[31], wire_ir[19:12], wire_ir[20], wire_ir[30:21],  1'b0};// read immediate & padding last 0, total 12 + 1 = 13 bits
 assign wire_shamt = wire_ir[25:20];
 
 // 连接显示器
@@ -364,6 +364,8 @@ reg [63:0] mirro_rs2; // rs2 相反数，取反加一，减法变加法用
 reg [63:0] mirro_imm; // imm 相反数，取反加一，减法变加法用
 reg [63:0] sub; // 减法结果组合逻辑寄存器
 reg [63:0] sub_imm; // 减法结果组合逻辑寄存器
+reg [63:0] sign_extended_bimm; // 符号扩展的 bimm
+
 //
 
 // 组合逻辑（电路即时生效,无需等待时钟周期）
@@ -375,6 +377,7 @@ begin
  mirro_imm = ~{{52{wire_imm[11]}}, wire_imm} + 1;
  sub = rram[wire_rs1] + mirro_rs2;
  sub_imm = rram[wire_rs1] + mirro_imm;
+ sign_extended_bimm = {{52{wire_bimm[12]}}, wire_bimm};
 end 
 
 
@@ -655,7 +658,7 @@ begin
 					   // 同号相加, 号即大小: 1: rs1 小于 rs2
 					    if ((rram[wire_rs1][63] ~^ mirro_rs2[63]) && rram[wire_rs1][63] == 1)
                                                      rram[wire_rd] <= 1'b1; 
-					   // 异号相加, 果即大小：1: rs1 小于 rs2
+					   // 异号相加, 果即大小 |1: rs1 小于 rs2 |000: 相等 |0xxx: rs1 大于 rs2
 					    else if ((rram[wire_rs1][63] ^ mirro_rs2[63]) && (sub[63] == 1))
                                                      rram[wire_rd] <= 1'b1; 
                                            // 否则 rs1 大于 rs2
@@ -676,10 +679,10 @@ begin
 					   // 异号相加, 果即大小：1: rs1 小于 rs2
 					   // 溢出位 0 取反为 1 负
 					   // 次首位进位判断：a==b==1; a^b && c==0
-					   // 进位后为 正
+					   // 进位后为 正(或0)
 					    if (rram[wire_rs1][63] == mirro_rs2[63] == 1)
                                                      rram[wire_rd] <= 1'b0; 
-					    else if ((rram[wire_rs1][63] ^ mirro_rs2[63]) && (sub[63] == 0))
+					    else if ((rram[wire_rs1][63] ^ mirro_rs2[63]) && (sub[63] == 0) && sub != 0)
                                                      rram[wire_rd] <= 1'b0; 
                                            // 否则 rs1 大于 rs2
 					    else rram[wire_rd] <= 1'b1;
@@ -784,10 +787,10 @@ begin
 					   // 异号相加, 果即大小：1: rs1 小于 imm 
 					   // 溢出位 0 取反为 1 负
 					   // 次首位进位判断：a==b==1; a^b && c==0
-					   // 进位后为 正
+					   // 进位后为 正(或0)
 					    if (rram[wire_rs1][63] == mirro_imm[63] == 1)
                                                      rram[wire_rd] <= 1'b0; 
-					    else if ((rram[wire_rs1][63] ^ mirro_imm[63]) && (sub_imm[63] == 0))
+					    else if ((rram[wire_rs1][63] ^ mirro_imm[63]) && (sub_imm[63] == 0) && sub_imm != 0)
                                                      rram[wire_rd] <= 1'b0; 
                                            // 否则 rs1 大于 rs2
 					    else rram[wire_rd] <= 1'b1;
@@ -828,7 +831,6 @@ begin
 					   end
 				  3'b101: begin
 				          case(irom[pc][31:25]) // func7
-			                    //+++++++++++++++++++++++++++++++++
 					    7'b0000000:begin
 					               Srli  <= 1'b1; // set Srli  Flag // 32-->64 one more bit64
 					               // shift right logicl rs1 by imm.12[low6.unsign] padding 0 to rd
@@ -850,6 +852,7 @@ begin
                    // Math-Logic-Shift-Immediate-64 class
 	           7'b0011011:begin 
 			        case(wire_f3) // func3
+			                    //+++++++++++++++++++++++++++++++++
 			          3'b000: Addiw  <= 1'b1; // set Addiw  Flag 
 			          3'b001: Slliw  <= 1'b1; // set Slliw  Flag 
 				  3'b101: begin
@@ -898,11 +901,68 @@ begin
                               end
                    // Branch class
 	           7'b1100011:begin 
-			        case(irom[pc][14:12]) // func3
-			          3'b000: Beq  <= 1'b1; // set Beq  Flag 
-			          3'b001: Bne  <= 1'b1; // set Bne  Flag 
-			          3'b100: Blt  <= 1'b1; // set Blt  Flag 
-			          3'b101: Bge  <= 1'b1; // set Bge  Flag 
+			        case(wire_f3) // func3
+				  3'b000:begin
+				         Beq  <= 1'b1; // set Beq  Flag 
+				         //  take branch if rs1 rs2 equal to PC+(sign-extend imm_0)
+					 if (rram[wire_rs1] == rram[wire_rs2])
+				             pc <= pc + sign_extended_bimm;
+					 else pc <= pc + 4; 
+	    	                         jp <=0;
+				         end
+			                 //+++++++++++++++++++++++++++++++++
+				  3'b001:begin 
+					 Bne  <= 1'b1; // set Bne  Flag 
+				         //  take branch if rs1 rs2 not equal to PC+(sign-extend imm_0)
+					 if (rram[wire_rs1] != rram[wire_rs2])
+				             pc <= pc + sign_extended_bimm;
+					 else pc <= pc + 4; 
+	    	                         jp <=0;
+				         end
+				  3'b100:begin 
+					 Blt  <= 1'b1; // set Blt  Flag 
+				         //  take branch if rs1 smaller than rs2 to PC+(sign-extend imm_0)
+					 //
+					 // 电路方式: 一周期实现比较 
+					 // 计算 rs1 - rs2 < 0  转化 Sub -> Add
+					 // 同号相加, 号即大小: 1: rs1 小于 rs2
+					  if ((rram[wire_rs1][63] ~^ mirro_rs2[63]) && rram[wire_rs1][63] == 1)
+				             pc <= pc + sign_extended_bimm;
+					 // 异号相加, 果即大小：1: rs1 小于 rs2
+					  else if ((rram[wire_rs1][63] ^ mirro_rs2[63]) && (sub[63] == 1))
+				             pc <= pc + sign_extended_bimm;
+                                         // 相等
+					  else if (rram[wire_rs1] == rram[wire_rs2])
+				             pc <= pc + 4;
+                                         // 否则 rs1 大于 rs2
+					  else
+				             pc <= pc + 4;
+					 
+					 // 代码模式 
+					 //if (rram[wire_rs1] != rram[wire_rs2])
+				         //    pc <= pc + sign_extended_bimm;
+					 //else pc <= pc + 4; 
+	    	                         jp <=0;
+				         end
+				  3'b101:begin 
+					 Bge  <= 1'b1; // set Bge  Flag 
+				         //  take branch if rs1 bigger than or equite to rs2 to PC+(sign-extend imm_0)
+					 //
+					 // 电路方式: 一周期实现比较 
+					 // 计算 rs1 - rs2 > 0  转化 Sub -> Add
+					 // 同号相加, 号即大小: 0: rs1 大于 rs2
+					  if ((rram[wire_rs1][63] ~^ mirro_rs2[63]) && rram[wire_rs1][63] == 0)
+				             pc <= pc + sign_extended_bimm;
+					 // 异号相加, 果即大小：0: rs1 大于(或等于) rs2
+					  else if ((rram[wire_rs1][63] ^ mirro_rs2[63]) && (sub[63] == 0))
+				             pc <= pc + sign_extended_bimm;
+                                         // 否则 rs1 小于 rs2
+					  else
+				             pc <= pc + 4;
+					 
+					 // 代码模式 
+	    	                         jp <=0;
+					 end
 			          3'b110: Bltu <= 1'b1; // set Bltu Flag 
 			          3'b111: Bgeu <= 1'b1; // set Bgeu Flag 
 				endcase
