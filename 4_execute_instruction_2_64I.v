@@ -705,22 +705,33 @@ begin
 				           pc <= pc + 4; 
 	    	                           jp <=0;
 					   end
-				            //+++++++++++++++++++++++++++++++++
 				    3'b001:begin 
 				           Sll  <= 1'b1; // set Sll Flag 
-					   // shift lift  logicl rs1 64 by imm.12[low6.unsign] padding 0 to rd
+					   // shift lift  logicl rs1 by imm.12[low5.unsign] padding 0 to rd
 					   rram[wire_rd] <= (rram[wire_rs1] << wire_shamt ); 
 				           pc <= pc + 4; 
 	    	                           jp <=0;
 					   end
 				  3'b101:begin 
 				          case(wire_f7) // func7
-				            7'b0000000:Srl  <= 1'b1; // set Srl Flag 
-				            7'b0100000:Sra  <= 1'b1; // set Sra Flag  
+					    7'b0000000:begin
+					               Srl  <= 1'b1; // set Srl Flag 
+					               // shift right logicl rs1 by imm.12[low5.unsign] padding 0 to rd
+					               rram[wire_rd] <= (rram[wire_rs1] >> wire_shamt ); 
+				                       pc <= pc + 4; 
+	    	                                       jp <=0;
+						       end
+				            //+++++++++++++++++++++++++++++++++
+					    7'b0100000:begin 
+					               Sra  <= 1'b1; // set Sra Flag  
+					               // shift right arithmatical rs1 by imm.12[low5.unsign] padding 0 to rd
+					               rram[wire_rd] <= (rram[wire_rs1] >>> wire_shamt ); 
+				                       pc <= pc + 4; 
+	    	                                       jp <=0;
+						       end
 				          endcase
 				         end 
 				endcase
-	    	   jp <=1;
 			      end
                    // Math-Logic-Shift-Immediate class
 	           7'b0010011:begin 
