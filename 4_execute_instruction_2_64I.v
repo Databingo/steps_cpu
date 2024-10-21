@@ -661,7 +661,6 @@ begin
 				           pc <= pc + 4; 
 	    	                           jp <=0;
 				         end 
-				            //+++++++++++++++++++++++++++++++++
 				    3'b011:begin 
 				           Sltu <= 1'b1; // set Sltu Flag  
 				           // if rs1 less than rs2 both as unsign then put 1 in rd else 0
@@ -685,12 +684,37 @@ begin
 				           pc <= pc + 4; 
 	    	                           jp <=0;
 				         end 
-			          3'b110: Or   <= 1'b1; // set Or Flag 
-			          3'b111: And  <= 1'b1; // set And Flag 
-			          3'b100: Xor  <= 1'b1; // set Xor Flag 
-			          3'b001: Sll  <= 1'b1; // set Sll Flag 
+				    3'b110:begin
+					   Or   <= 1'b1; // set Or Flag 
+                                           // bitwise OR  rs1 and rs2 then put reslut in rd
+					   rram[wire_rd] <= (rram[wire_rs1] | rram[wire_rs2]); 
+				           pc <= pc + 4; 
+	    	                           jp <=0;
+					   end
+				   3'b111:begin 
+					   And  <= 1'b1; // set And Flag 
+                                           // bitwise AND  rs1 and rs2 then put reslut in rd
+					   rram[wire_rd] <= (rram[wire_rs1] & rram[wire_rs2]); 
+				           pc <= pc + 4; 
+	    	                           jp <=0;
+					   end
+				   3'b100:begin 
+					   Xor  <= 1'b1; // set Xor Flag
+                                           // bitwise XOR  rs1 and rs2 then put reslut in rd
+					   rram[wire_rd] <= (rram[wire_rs1] ^ rram[wire_rs2]); 
+				           pc <= pc + 4; 
+	    	                           jp <=0;
+					   end
+				            //+++++++++++++++++++++++++++++++++
+				    3'b001:begin 
+				           Sll  <= 1'b1; // set Sll Flag 
+					   // shift lift  logicl rs1 64 by imm.12[low6.unsign] padding 0 to rd
+					   rram[wire_rd] <= (rram[wire_rs1] << wire_shamt ); 
+				           pc <= pc + 4; 
+	    	                           jp <=0;
+					   end
 				  3'b101:begin 
-				          case(irom[pc][31:25]) // func7
+				          case(wire_f7) // func7
 				            7'b0000000:Srl  <= 1'b1; // set Srl Flag 
 				            7'b0100000:Sra  <= 1'b1; // set Sra Flag  
 				          endcase
