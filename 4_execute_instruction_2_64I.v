@@ -640,7 +640,6 @@ begin
 				                   end 
 				          endcase
 				        end 
-				            //+++++++++++++++++++++++++++++++++
 				  3'b010:begin 
 				           Slt  <= 1'b1; // set Slt Flag 
 				           // if rs1 less than rs2 both as sign-extended then put 1 in rd else 0
@@ -662,7 +661,30 @@ begin
 				           pc <= pc + 4; 
 	    	                           jp <=0;
 				         end 
-			          3'b011: Sltu <= 1'b1; // set Sltu Flag  
+				            //+++++++++++++++++++++++++++++++++
+				    3'b011:begin 
+				           Sltu <= 1'b1; // set Sltu Flag  
+				           // if rs1 less than rs2 both as unsign then put 1 in rd else 0
+					   
+					   // 电路方式: 一周期实现比较 
+					   // 计算 rs1 - rs2 < 0  转化 Sub -> Add
+					   // 异号相加, 果即大小：1: rs1 小于 rs2
+					   // 溢出位 0 取反为 1 负
+					   // 次首位进位判断：a==b==1; a^b && c==1
+					   // 进位后为 正
+					    if (rram[wire_rs1][63] == mirro_rs2[63] == 1)
+                                                     rram[wire_rd] <= 1'b1; 
+					    else if ((rram[wire_rs1][63] ^ mirro_rs2[63]) && (sub[63] == 1))
+                                                     rram[wire_rd] <= 1'b1; 
+                                           // 否则 rs1 大于 rs2
+					    else rram[wire_rd] <= 1'b0;
+					  
+					   // 代码模式 
+					   // if (rram[wire_rs1] - rram[wire_rs2] < 0 ) rram[wire_rd] <= 1'b1; 
+
+				           pc <= pc + 4; 
+	    	                           jp <=0;
+				         end 
 			          3'b110: Or   <= 1'b1; // set Or Flag 
 			          3'b111: And  <= 1'b1; // set And Flag 
 			          3'b100: Xor  <= 1'b1; // set Xor Flag 
