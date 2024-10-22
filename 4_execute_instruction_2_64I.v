@@ -355,7 +355,9 @@ assign oCsrrsi=Csrrsi;
 assign oCsrrci=Csrrci;
 
 // 从文件读取程序到 irom
-initial $readmemb("./programb.txt", irom);
+//initial $readmemb("./programb.txt", irom);
+//initial $readmemb("./asm/binary_instructions.txt", irom);
+initial $readmemb("./binary_instructions.txt", irom);
 initial $readmemb("./data.txt", drom);
 
 reg [63:0] sum; // 加法结果组合逻辑寄存器

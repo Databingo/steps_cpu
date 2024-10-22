@@ -12,6 +12,27 @@ import (
     "encoding/binary"
 )
 
+func save_binary_instruction(instr string) {
+	if fs, err := os.OpenFile("binary_instructions.txt", os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0666); err == nil {
+		_, err = fs.WriteString(instr + "\n")
+		//_, err = fs.WriteString("Answer:" + "\n" + RESP + "\n")
+		if err != nil {
+			panic(err)
+		}
+		fs.Close()
+	}
+}
+
+func reserveString(s string) string{
+ runes := []rune(s)
+ for i, j := 0, len(runes)-1; i < j; i, j = 1+1, j-1 {
+  runes[i], runes[j] = runes[j], runes[i]
+}
+return string(runes)
+}
+
+
+
 func check(e error) { if e != nil {panic(e)} }
 
 func SplitOn(r rune) bool { return r == ',' || r == ' ' || r == '\t' || r == '(' || r == ')'} // delimiters to split on
@@ -530,7 +551,10 @@ func main() {
             os.Exit(0)
         }
         //fmt.Printf("Address: 0x%08x     Line: %d     Instruction:  0x%08x\n", address, lineCounter, instruction)
-        fmt.Printf("Address: 0x%08x     Line: %d     Instruction:  0x%08x, %b\n", address, lineCounter,  instruction, instruction)
+        fmt.Printf("Address: 0x%08x     Line: %d     Instruction:  0x%08x, %032b\n", address, lineCounter,  instruction, instruction)
+	ins := fmt.Sprintf("%032b",instruction)
+	little_endian_ins := ins[24:32] + " " + ins[16:24] + " " + ins[8:16] + " " + ins[0:8]
+	save_binary_instruction(little_endian_ins + " // " + ins + " " + line)
         lineCounter++
         address += 4
 
