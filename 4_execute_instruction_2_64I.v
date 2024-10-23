@@ -41,6 +41,7 @@ oimm,
 oupimm,
 ox1,
 ox2,
+ox6,
 osign_extended_bimm,
 
 oLui, 
@@ -157,6 +158,7 @@ output [11:0] oimm;
 output [19:0] oupimm;
 output [63:0] ox1;
 output [63:0] ox2;
+output [63:0] ox6;
 output [63:0] osign_extended_bimm;
 // 控制线显示器
 output oLui;
@@ -284,6 +286,7 @@ assign oimm = wire_imm; // 显示 imm 值
 assign oupimm = wire_upimm; // 显示 upimm 值
 assign ox1 = rram[1]; // 显示 x1 值
 assign ox2 = rram[2]; // 显示 x2 值
+assign ox6 = rram[6]; // 显示 x6 值
 assign osign_extended_bimm = sign_extended_bimm[63:0];
 
 assign oLui = Lui; 
