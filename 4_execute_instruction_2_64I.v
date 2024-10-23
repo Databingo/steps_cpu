@@ -41,6 +41,7 @@ oimm,
 oupimm,
 ox1,
 ox2,
+osign_extended_bimm,
 
 oLui, 
 oAuipc,
@@ -156,7 +157,7 @@ output [11:0] oimm;
 output [19:0] oupimm;
 output [63:0] ox1;
 output [63:0] ox2;
-
+output [63:0] osign_extended_bimm;
 // 控制线显示器
 output oLui;
 output oAuipc; 
@@ -269,7 +270,7 @@ assign wire_imm = wire_ir[31:20];
 assign wire_upimm = wire_ir[31:12];
 assign wire_jimm  = {wire_ir[31], wire_ir[19:12], wire_ir[20], wire_ir[31:20], 1'b0}; // read immediate & padding last 0, total 20 + 1 = 21 bits
 assign wire_simm  = {wire_ir[31:25], wire_ir[11:7]};
-assign wire_bimm  = {wire_ir[31], wire_ir[19:12], wire_ir[20], wire_ir[30:21],  1'b0};// read immediate & padding last 0, total 12 + 1 = 13 bits
+assign wire_bimm  = {wire_ir[31], wire_ir[7],  wire_ir[30:25], wire_ir[11:8], 1'b0};// read immediate & padding last 0, total 12 + 1 = 13 bits
 assign wire_shamt = wire_ir[25:20];
 
 // 连接显示器
@@ -283,6 +284,7 @@ assign oimm = wire_imm; // 显示 imm 值
 assign oupimm = wire_upimm; // 显示 upimm 值
 assign ox1 = rram[1]; // 显示 x1 值
 assign ox2 = rram[2]; // 显示 x2 值
+assign osign_extended_bimm = sign_extended_bimm[63:0];
 
 assign oLui = Lui; 
 assign oAuipc = Auipc;
@@ -380,7 +382,7 @@ begin
  mirro_imm = ~{{52{wire_imm[11]}}, wire_imm} + 1;
  sub = rram[wire_rs1] + mirro_rs2;
  sub_imm = rram[wire_rs1] + mirro_imm;
- sign_extended_bimm = {{52{wire_bimm[12]}}, wire_bimm};
+ sign_extended_bimm = {{51{wire_ir[31]}}, wire_bimm};  //bimm is 13 bits length
 end 
 
 
@@ -1033,7 +1035,7 @@ begin
 	       end
 	    //######## // 指令执行 // Close Flage
 	    1: begin 
-	    	   case(ir[6:0])
+	    	   case(wire_op)
                    // Load class
 		   7'b0110111: 
 		              begin
@@ -1165,7 +1167,7 @@ begin
                               end
                    // Branch class
 	           7'b1100011:begin 
-			        case(ir[14:12]) // func3
+			        case(wire_f3) // func3
 			          3'b000: Beq  <= 1'b0; // close Beq  Flag 
 			          3'b001: Bne  <= 1'b0; // close Bne  Flag 
 			          3'b100: Blt  <= 1'b0; // close Blt  Flag 

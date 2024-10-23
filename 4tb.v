@@ -24,6 +24,7 @@ wire [11:0] oimm;
 wire [19:0] oupimm; 
 wire [63:0] ox1;
 wire [63:0] ox2;
+wire [63:0] osign_extended_bimm;
 
 wire oLui;
 wire oAuipc; 
@@ -119,7 +120,7 @@ s4 dut(
  .oupimm (oupimm),
  .ox1 (ox1),
  .ox2 (ox2),
-
+ .osign_extended_bimm (osign_extended_bimm),
 
 
  .oLui (oLui),
@@ -224,7 +225,7 @@ end
 
 // 输出监控
 always @(posedge clk) begin
-     $write("Tm %0t:oir=%b,opc=%0d,ojp=%d,o_op=%b,of3=%b,of7=%b,", $time, oir, opc, ojp, oop, of3, of7);
+     $write("Tm %0t:oir=%b,opc=%0b|%0d,ojp=%d,o_op=%b,of3=%b,of7=%b,", $time, oir, opc, opc, ojp, oop, of3, of7);
 
    if (oLui == 1'b1) $write("oLui=%b,", oLui);
    if (oAuipc == 1'b1) $write("oAuipc=%b,", oAuipc);
@@ -307,6 +308,7 @@ always @(posedge clk) begin
    if (ox2 !== 0 ) $write("ox2=%0d,",  ox2 ,);
 
    if (oupimm  !== 0 ) $write("oupimm=%0b,",  oupimm ,);
+   $write("osign_extended_bimm=%064b,",  osign_extended_bimm ,);
 
 
 
