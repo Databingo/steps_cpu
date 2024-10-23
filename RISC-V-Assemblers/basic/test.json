@@ -4,6 +4,6 @@
     "WriteOutFile": "Yes",
     "OutFile": "firmware.out",
     "OutHexFile": "firmware.hex",
-    "OutPath": "./",
+    "OutPath": "../../",
     "VerboseEnabled": "No"
 }

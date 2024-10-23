@@ -182,4 +182,5 @@ func BtypeBranch(parms map[string]interface{}, json map[string]interface{}) (mac
 		fmt.Println("### END Btype ###")
 	}
 	return utils.BinaryStringToHexString(instr, false), nil
+	///return instr, nil
 }

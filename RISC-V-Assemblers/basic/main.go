@@ -586,7 +586,10 @@ func writeOutFile(context map[string]interface{}, sections []section) {
 			case "Data", "AddrRef":
 				_, err = f.WriteString("@" + mc_line.addr + " " + mc_line.value + " " + mc_line.line + "\n")
 			default:
-				_, err = f.WriteString("@" + mc_line.addr + " " + mc_line.code + " " + mc_line.line + "\n")
+				//_, err = f.WriteString("@" + mc_line.addr + " " +  utils.HexStringToBinaryString(mc_line.code) + " " + mc_line.line + "\n")
+				ins := utils.HexStringToBinaryString(mc_line.code)
+	                        little_endian_ins := ins[24:32] + " " + ins[16:24] + " " + ins[8:16] + " " + ins[0:8]
+				_, err = f.WriteString(little_endian_ins  + " // " + ins + " @" + mc_line.addr + " " + mc_line.line + "\n")
 			}
 
 			if err != nil {

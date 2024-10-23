@@ -102,6 +102,14 @@ func BinaryStringToHexString(binary string, with0x bool) string {
 
 	return UintToHexString(ui, with0x)
 }
+func HexStringToBinaryString(hex string) string {
+ num, err := strconv.ParseUint(hex, 16, 64)
+ if err != nil {
+  return "error"
+ }
+ numstr := fmt.Sprintf("%032b", num)
+ return numstr
+}
 
 func BinaryArrayToHexString(arr []byte, with0x bool) string {
 	return BinaryStringToHexString(BinaryArrayToString(arr, false), with0x)
