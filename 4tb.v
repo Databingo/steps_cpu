@@ -216,7 +216,7 @@ end
 
 // Test
 initial begin
- $dumpfile("3.vcd");
+ $dumpfile("4.vcd");
  $dumpvars(0, s4tb);
  #TIME_WINDOW $finish;
 //$stop;
