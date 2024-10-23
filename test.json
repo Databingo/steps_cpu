@@ -1,9 +1,0 @@
-{
-    "InFile": "test.s",
-    "InPath": "./",
-    "WriteOutFile": "Yes",
-    "OutFile": "firmware.out",
-    "OutHexFile": "firmware.hex",
-    "OutPath": "./",
-    "VerboseEnabled": "No"
-}
