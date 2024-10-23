@@ -553,8 +553,10 @@ func main() {
         //fmt.Printf("Address: 0x%08x     Line: %d     Instruction:  0x%08x\n", address, lineCounter, instruction)
         fmt.Printf("Address: 0x%08x     Line: %d     Instruction:  0x%08x, %032b\n", address, lineCounter,  instruction, instruction)
 	ins := fmt.Sprintf("%032b",instruction)
+	addr := fmt.Sprintf("%08b", address)
+	addrd := fmt.Sprintf("%03d", address)
 	little_endian_ins := ins[24:32] + " " + ins[16:24] + " " + ins[8:16] + " " + ins[0:8]
-	save_binary_instruction(little_endian_ins + " // " + ins + " " + line)
+	save_binary_instruction(little_endian_ins + " // Addr: " + addrd + " " + addr + " " + ins + " " + line)
         lineCounter++
         address += 4
 

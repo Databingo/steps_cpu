@@ -1,5 +1,9 @@
-lw x1, 0, x0 
-lw x2, 4, x0 
-add x1, x1, x2
-lw x2, 4, x0 
-addi x2, x0, 4
+addi x1, x0, 1
+addi x2, x0, 8
+addi x3, x2, 1
+add  x4, x3, x0 
+loop: @
+add  x5, x2, x2
+addi x4, x4, -1
+blt  x4, x3, @loop
+

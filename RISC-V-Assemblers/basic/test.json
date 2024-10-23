@@ -1,6 +1,6 @@
 {
     "InFile": "test.s",
-    "InPath": "./",
+    "InPath": "../../",
     "WriteOutFile": "Yes",
     "OutFile": "firmware.out",
     "OutHexFile": "firmware.hex",
