@@ -24,6 +24,10 @@ wire [11:0] oimm;
 wire [19:0] oupimm; 
 wire [63:0] ox1;
 wire [63:0] ox2;
+wire [63:0] ox3;
+wire [63:0] ox4;
+wire [63:0] ox5;
+
 wire [63:0] ox6;
 wire [63:0] osign_extended_bimm;
 
@@ -121,7 +125,11 @@ s4 dut(
  .oupimm (oupimm),
  .ox1 (ox1),
  .ox2 (ox2),
+ .ox3 (ox3),
+ .ox4 (ox4),
+ .ox5 (ox5),
  .ox6 (ox6),
+
  .osign_extended_bimm (osign_extended_bimm),
 
 
@@ -308,6 +316,12 @@ always @(posedge clk) begin
    if (ox1 !== 0 ) $write("ox1=%0d,",  ox1 ,);
    //if (ox2 !== 0 ) $write("ox2=0x%0h,",  ox2 ,);
    if (ox2 !== 0 ) $write("ox2=%0d,",  ox2 ,);
+
+   if (ox3 !== 0 ) $write("ox3=%0d,",  ox3 ,);
+   if (ox4 !== 0 ) $write("ox4=%0d,",  ox4 ,);
+   if (ox5 !== 0 ) $write("ox5=%0d,",  ox5 ,);
+
+
    if (ox6 !== 0 ) $write("ox6=%0d,",  ox6 ,);
 
    if (oupimm  !== 0 ) $write("oupimm=%0b,",  oupimm ,);

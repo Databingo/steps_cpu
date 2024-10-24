@@ -41,6 +41,9 @@ oimm,
 oupimm,
 ox1,
 ox2,
+ox3,
+ox4,
+ox5,
 ox6,
 osign_extended_bimm,
 
@@ -158,6 +161,9 @@ output [11:0] oimm;
 output [19:0] oupimm;
 output [63:0] ox1;
 output [63:0] ox2;
+output [63:0] ox3;
+output [63:0] ox4;
+output [63:0] ox5;
 output [63:0] ox6;
 output [63:0] osign_extended_bimm;
 // 控制线显示器
@@ -286,7 +292,11 @@ assign oimm = wire_imm; // 显示 imm 值
 assign oupimm = wire_upimm; // 显示 upimm 值
 assign ox1 = rram[1]; // 显示 x1 值
 assign ox2 = rram[2]; // 显示 x2 值
+assign ox3 = rram[3];
+assign ox4 = rram[4];
+assign ox5 = rram[5];
 assign ox6 = rram[6]; // 显示 x6 值
+
 assign osign_extended_bimm = sign_extended_bimm[63:0];
 
 assign oLui = Lui; 
@@ -362,8 +372,8 @@ assign oCsrrci=Csrrci;
 // 从文件读取程序到 irom
 //initial $readmemb("./programb.txt", irom);
 //initial $readmemb("./asm/binary_instructions.txt", irom);
-//initial $readmemb("./binary_instructions.txt", irom);
-initial $readmemb("./firmware.out", irom);
+initial $readmemb("./binary_instructions.txt", irom);
+//initial $readmemb("./firmware.out", irom);
 initial $readmemb("./data.txt", drom);
 
 reg [63:0] sum; // 加法结果组合逻辑寄存器
