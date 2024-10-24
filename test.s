@@ -1,9 +1,9 @@
 addi x1, x0, 1
-addi x2, x0, 8
+addi x2, x0, 11 
 add  x6, x0, x0 # 0
 add  x5, x2, x0 # 加数
-add  x3, x2, x0 # 8
-add  x4, x3, x0 # 8
+add  x3, x2, x0 # 
+add  x4, x3, x0 # 
 loop1:
 sub  x3, x3, x1 # loop 1
 sub  x4, x3, x0 # loop 2
