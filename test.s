@@ -19,3 +19,9 @@ blt  x1, x3, loop1
 
 
 
+#.section .text
+#    addi a0, x0, 5
+#    addi a0, a0, 1
+#
+#.section .data
+#    .string "Hello, world!"
