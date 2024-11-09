@@ -467,12 +467,15 @@ func main() {
 		0x00,                                     // EI_OSABI: System V "None", evquivalent to UNIX - System - V, default version
 		0x00,                                     // EI_ABIVERSION (usually 0 for System V)
 		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // EI_PAD: padding (for consistence of ELF header size to 16 bytes) and for future compatibility
+
 		0x01, 0x00, // e_type: ET_REL (relocatable file, means linkable to be executable or a shared file such as .so); 0x0200 means Static executable
 		0xF3, 0x00, // e_machine: RISC-V (two bytes, 0xF300 for RISC-V, 0x3e00 for AMD X86-64)
 		0x01, 0x00, 0x00, 0x00, // e_version: original ELF version, current version
 		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80, // e_entry: entry point address (0x0 for relocatable files) transfer control when starting process, needed for executables 0x80000000
+
 		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // e_phoff: program header table offset (0 for relocatable) start of program heasers
 		0x40, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // e_shoff: section header table offset (64 bytes from start, just after this 64-bit ELF header)start of section heasers
+
 		0x00, 0x00, 0x00, 0x00, // e_flags none by the ELF specifications by now
 		0x40, 0x00, // e_ehsize: ELF header size (64 bytes) (for 32-bit format it's 0x40 aka 52 Bytes)
 		0x00, 0x00, // e_phentsize: program header entry size (0 for relocatable because relocatable don't have a Program Header Table), for 64-bit architectures is 0x38 aka 56 bytes
@@ -489,11 +492,14 @@ func main() {
 		0x01, 0x00, 0x00, 0x00,                                     // name offset in .shstrtab as null-terminated ASCII string Offset into the section header string table (index into .shstrtab)
 		0x03, 0x00, 0x00, 0x00,                                     // type PROGBITS                                            Type of the section (e.g., SHT_PROGBITS, SHT_STRTAB)
 		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,             // flags allocatable + executabel                           Section flags (e.g., SHF_ALLOC)
+
 		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,             // address                                                  Virtual address of the section (set to 0x0 for relocatable files)
 		0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,             // offset, the resides address of this section in ELF file  File offset where section's data begins
+
 		0x0C, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,             // size, how many bytes the section takes up in this file   Size of the section data
 		0x00, 0x00, 0x00, 0x00,                                     // link, links to another section header by index           Link to another section (e.g., for symbol tables)
 		0x00, 0x00, 0x00, 0x00,                                     // info, extra infomation                                   Additional info (depends on section type)
+
 		0x10, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,             // address alignment constraint in bytes                    Section alignment in memory (usually power of 2)
 		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,             // entry size                                               Size of each entry in the section, or 0 if no entries
 	}) 
