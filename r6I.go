@@ -483,36 +483,39 @@ func main() {
 	})
 
         // Section Header Table (64 Bytes for 64-bit format) (Little endian)
+
+        // sh of .shstrtab
 	f.Write([]byte{
 		0x01, 0x00, 0x00, 0x00,                                     // name offset in .shstrtab as null-terminated ASCII string Offset into the section header string table (index into .shstrtab)
 		0x03, 0x00, 0x00, 0x00,                                     // type PROGBITS                                            Type of the section (e.g., SHT_PROGBITS, SHT_STRTAB)
 		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,             // flags allocatable + executabel                           Section flags (e.g., SHF_ALLOC)
 		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,             // address                                                  Virtual address of the section (set to 0x0 for relocatable files)
-		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,             // offset, the resides address of this section in ELF file  File offset where section's data begins
-		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,             // size, how many bytes the section takes up in this file   Size of the section data
+		0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,             // offset, the resides address of this section in ELF file  File offset where section's data begins
+		0x0C, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,             // size, how many bytes the section takes up in this file   Size of the section data
 		0x00, 0x00, 0x00, 0x00,                                     // link, links to another section header by index           Link to another section (e.g., for symbol tables)
 		0x00, 0x00, 0x00, 0x00,                                     // info, extra infomation                                   Additional info (depends on section type)
 		0x10, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,             // address alignment constraint in bytes                    Section alignment in memory (usually power of 2)
 		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,             // entry size                                               Size of each entry in the section, or 0 if no entries
 	}) 
 
+        // sh of .text
 	f.Write([]byte{
-		0x03, 0x00, 0x00, 0x00,                                     // name offset in .shstrtab as null-terminated ASCII string Offset into the section header string table (index into .shstrtab)
-		0x03, 0x00, 0x00, 0x00,                                     // type PROGBITS                                            Type of the section (e.g., SHT_PROGBITS, SHT_STRTAB)
+		0x04, 0x00, 0x00, 0x00,                                     // name offset in .shstrtab as null-terminated ASCII string Offset into the section header string table (index into .shstrtab)
+		0x01, 0x00, 0x00, 0x00,                                     // type PROGBITS                                            Type of the section (e.g., SHT_PROGBITS, SHT_STRTAB)
 		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,             // flags allocatable + executabel                           Section flags (e.g., SHF_ALLOC)
 		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,             // address                                                  Virtual address of the section (set to 0x0 for relocatable files)
 		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,             // offset, the resides address of this section in ELF file  File offset where section's data begins
-		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,             // size, how many bytes the section takes up in this file   Size of the section data
+		0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,             // size, how many bytes the section takes up in this file   Size of the section data
 		0x00, 0x00, 0x00, 0x00,                                     // link, links to another section header by index           Link to another section (e.g., for symbol tables)
 		0x00, 0x00, 0x00, 0x00,                                     // info, extra infomation                                   Additional info (depends on section type)
 		0x10, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,             // address alignment constraint in bytes                    Section alignment in memory (usually power of 2)
 		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,             // entry size                                               Size of each entry in the section, or 0 if no entries
 	}) 
-
-
+      
+        // sh of .data
 	f.Write([]byte{
 		0x08, 0x00, 0x00, 0x00,                                     // name offset in .shstrtab as null-terminated ASCII string Offset into the section header string table (index into .shstrtab)
-		0x03, 0x00, 0x00, 0x00,                                     // type PROGBITS                                            Type of the section (e.g., SHT_PROGBITS, SHT_STRTAB)
+		0x01, 0x00, 0x00, 0x00,                                     // type PROGBITS                                            Type of the section (e.g., SHT_PROGBITS, SHT_STRTAB)
 		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,             // flags allocatable + executabel                           Section flags (e.g., SHF_ALLOC)
 		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,             // address                                                  Virtual address of the section (set to 0x0 for relocatable files)
 		0xC0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,             // offset, the resides address of this section in ELF file  File offset where section's data begins
@@ -525,10 +528,9 @@ func main() {
 
 // .shstrtab section content; .text .data .shstrtab
 f.Write([]byte{
-    0x00, 0x45, 0x00, 0x46,     // Null terminator for the string table
-    0x06, 0x00, 0x00, 0x00,     // ".text" string
-    0x0C, 0x00, 0x00, 0x00,     // ".data" string
-    0x14, 0x00, 0x00, 0x00,     // ".shstrtab" string
+    0x00, 0x45, 0x45, 0x00,     // Null terminator for the string table + ".text" string
+    0x46, 0x46, 0x46, 0x00,     // ".data" string
+    0x4C, 0x4C, 0x4C, 0x00,     // ".shstrtab" string
 })
 
 // .text section content: machine code for the instructions
