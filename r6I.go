@@ -458,107 +458,181 @@ func main() {
 	//SHT 2 64Byte .data
 	//...
 
-        // ELF header (64 Bytes for 64-bit format) (Little endian)
-	f.Write([]byte{
-		0x7F, 0x45, 0x4C, 0x46,                   // ELF magic number (delete(0x7f)E(0x45)L(0x4c)F(0x46) in ascii)
-		0x02,                                     // EI_CLASS: 64-bit Architecture ELF64
-		0x01,                                     // EI_DATA: little endian, 2's complement.
-		0x01,                                     // EI_VERSION: ELF version 1 
-		0x00,                                     // EI_OSABI: System V "None", evquivalent to UNIX - System - V, default version
-		0x00,                                     // EI_ABIVERSION (usually 0 for System V)
-		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // EI_PAD: padding (for consistence of ELF header size to 16 bytes) and for future compatibility
+//        // ELF header (64 Bytes for 64-bit format) (Little endian)
+//	f.Write([]byte{
+//		0x7F, 0x45, 0x4C, 0x46,                   // ELF magic number (delete(0x7f)E(0x45)L(0x4c)F(0x46) in ascii)
+//		0x02,                                     // EI_CLASS: 64-bit Architecture ELF64
+//		0x01,                                     // EI_DATA: little endian, 2's complement.
+//		0x01,                                     // EI_VERSION: ELF version 1 
+//		0x00,                                     // EI_OSABI: System V "None", evquivalent to UNIX - System - V, default version
+//		0x00,                                     // EI_ABIVERSION (usually 0 for System V)
+//		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // EI_PAD: padding (for consistence of ELF header size to 16 bytes) and for future compatibility
+//
+//		0x01, 0x00, // e_type: ET_REL (relocatable file, means linkable to be executable or a shared file such as .so); 0x0200 means Static executable
+//		0xF3, 0x00, // e_machine: RISC-V (two bytes, 0xF300 for RISC-V, 0x3e00 for AMD X86-64)
+//		0x01, 0x00, 0x00, 0x00, // e_version: original ELF version, current version
+//		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80, // e_entry: entry point address (0x0 for relocatable files) transfer control when starting process, needed for executables 0x80000000
+//
+//		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // e_phoff: program header table offset (0 for relocatable) start of program heasers
+//		0x40, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // e_shoff: section header table offset (64 bytes from start, just after this 64-bit ELF header)start of section heasers
+//
+//		0x00, 0x00, 0x00, 0x00, // e_flags none by the ELF specifications by now
+//		0x40, 0x00, // e_ehsize: ELF header size (64 bytes) (for 32-bit format it's 0x40 aka 52 Bytes)
+//		0x00, 0x00, // e_phentsize: program header entry size (0 for relocatable because relocatable don't have a Program Header Table), for 64-bit architectures is 0x38 aka 56 bytes
+//		0x00, 0x00, // e_phnum: number of entries in program header table (0 for relocatable)
+//		0x40, 0x00, // e_shentsize: section header entry size (64 bytes for 64-bit)
+//		0x03, 0x00, // e_shnum: number of entries in section header table (e.g., .text, .shstrtab, null) (.shstrtab Section Header String Table holds section names)
+//		0x01, 0x00, // e_shstrndx: index of the section header string table, means the second(0,1...) entry in Section Header Table is .shstrtab section
+//	})
+//
+//        // Section Header Table (64 Bytes for 64-bit format) (Little endian)
+//
+//        // sh of .null
+//	f.Write(make[]byte, 64)) 
+//
+//        // sh of .shstrtab
+//	f.Write([]byte{
+//		0x01, 0x00, 0x00, 0x00,                                     // name offset in .shstrtab as null-terminated ASCII string Offset into the section header string table (index into .shstrtab)
+//		0x03, 0x00, 0x00, 0x00,                                     // type PROGBITS                                            Type of the section (e.g., SHT_PROGBITS, SHT_STRTAB)
+//		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,             // flags allocatable + executabel                           Section flags (e.g., SHF_ALLOC)
+//
+//		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,             // address                                                  Virtual address of the section (set to 0x0 for relocatable files)
+//		0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,             // offset, the resides address of this section in ELF file  File offset where section's data begins
+//
+//		0x0C, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,             // size, how many bytes the section takes up in this file   Size of the section data
+//		0x00, 0x00, 0x00, 0x00,                                     // link, links to another section header by index           Link to another section (e.g., for symbol tables)
+//		0x00, 0x00, 0x00, 0x00,                                     // info, extra infomation                                   Additional info (depends on section type)
+//
+//		0x10, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,             // address alignment constraint in bytes                    Section alignment in memory (usually power of 2)
+//		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,             // entry size                                               Size of each entry in the section, or 0 if no entries
+//	}) 
+//
+//        // sh of .text
+//	f.Write([]byte{
+//		0x04, 0x00, 0x00, 0x00,                                     // name offset in .shstrtab as null-terminated ASCII string Offset into the section header string table (index into .shstrtab)
+//		0x01, 0x00, 0x00, 0x00,                                     // type PROGBITS                                            Type of the section (e.g., SHT_PROGBITS, SHT_STRTAB)
+//		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,             // flags allocatable + executabel                           Section flags (e.g., SHF_ALLOC)
+//		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,             // address                                                  Virtual address of the section (set to 0x0 for relocatable files)
+//		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,             // offset, the resides address of this section in ELF file  File offset where section's data begins
+//		0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,             // size, how many bytes the section takes up in this file   Size of the section data
+//		0x00, 0x00, 0x00, 0x00,                                     // link, links to another section header by index           Link to another section (e.g., for symbol tables)
+//		0x00, 0x00, 0x00, 0x00,                                     // info, extra infomation                                   Additional info (depends on section type)
+//		0x10, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,             // address alignment constraint in bytes                    Section alignment in memory (usually power of 2)
+//		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,             // entry size                                               Size of each entry in the section, or 0 if no entries
+//	}) 
+//      
+//        // sh of .data
+//	f.Write([]byte{
+//		0x08, 0x00, 0x00, 0x00,                                     // name offset in .shstrtab as null-terminated ASCII string Offset into the section header string table (index into .shstrtab)
+//		0x01, 0x00, 0x00, 0x00,                                     // type PROGBITS                                            Type of the section (e.g., SHT_PROGBITS, SHT_STRTAB)
+//		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,             // flags allocatable + executabel                           Section flags (e.g., SHF_ALLOC)
+//		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,             // address                                                  Virtual address of the section (set to 0x0 for relocatable files)
+//		0xC0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,             // offset, the resides address of this section in ELF file  File offset where section's data begins
+//		0x10, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,             // size, how many bytes the section takes up in this file   Size of the section data
+//		0x00, 0x00, 0x00, 0x00,                                     // link, links to another section header by index           Link to another section (e.g., for symbol tables)
+//		0x00, 0x00, 0x00, 0x00,                                     // info, extra infomation                                   Additional info (depends on section type)
+//		0x10, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,             // address alignment constraint in bytes                    Section alignment in memory (usually power of 2)
+//		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,             // entry size                                               Size of each entry in the section, or 0 if no entries
+//	}) 
+//
+//// .shstrtab section content; .text .data .shstrtab
+//f.Write([]byte{
+//    0x00, 0x45, 0x45, 0x00,     // Null terminator for the string table + ".text" string
+//    0x46, 0x46, 0x46, 0x00,     // ".data" string
+//    0x4C, 0x4C, 0x4C, 0x00,     // ".shstrtab" string
+//})
+//
+//// .text section content: machine code for the instructions
+//f.Write([]byte{
+//    0x00, 0x00, 0x00, 0x13, // addi a0, x0, 5
+//    0x01, 0x00, 0x00, 0x13, // addi a0, a0, 1
+//})
+//
+//// .data section content: string "Hello, world!"
+//f.Write([]byte{
+//    0x48, 0x65, 0x6C, 0x6C, 0x6F, 0x2C, 0x20, 0x77, 0x6F, 0x72, 0x6C, 0x64, 0x21, 0x00, 0x00,
+//})
 
-		0x01, 0x00, // e_type: ET_REL (relocatable file, means linkable to be executable or a shared file such as .so); 0x0200 means Static executable
-		0xF3, 0x00, // e_machine: RISC-V (two bytes, 0xF300 for RISC-V, 0x3e00 for AMD X86-64)
-		0x01, 0x00, 0x00, 0x00, // e_version: original ELF version, current version
-		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80, // e_entry: entry point address (0x0 for relocatable files) transfer control when starting process, needed for executables 0x80000000
 
-		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // e_phoff: program header table offset (0 for relocatable) start of program heasers
-		0x40, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // e_shoff: section header table offset (64 bytes from start, just after this 64-bit ELF header)start of section heasers
-
-		0x00, 0x00, 0x00, 0x00, // e_flags none by the ELF specifications by now
-		0x40, 0x00, // e_ehsize: ELF header size (64 bytes) (for 32-bit format it's 0x40 aka 52 Bytes)
-		0x00, 0x00, // e_phentsize: program header entry size (0 for relocatable because relocatable don't have a Program Header Table), for 64-bit architectures is 0x38 aka 56 bytes
-		0x00, 0x00, // e_phnum: number of entries in program header table (0 for relocatable)
-		0x40, 0x00, // e_shentsize: section header entry size (64 bytes for 64-bit)
-		0x03, 0x00, // e_shnum: number of entries in section header table (e.g., .text, .shstrtab, null) (.shstrtab Section Header String Table holds section names)
-		0x00, 0x00, // e_shstrndx: index of the section header string table, means the second(0,1...) entry in Section Header Table is .shstrtab section
-	})
-
-        // Section Header Table (64 Bytes for 64-bit format) (Little endian)
-
-        // sh of .shstrtab
-	f.Write([]byte{
-		0x01, 0x00, 0x00, 0x00,                                     // name offset in .shstrtab as null-terminated ASCII string Offset into the section header string table (index into .shstrtab)
-		0x03, 0x00, 0x00, 0x00,                                     // type PROGBITS                                            Type of the section (e.g., SHT_PROGBITS, SHT_STRTAB)
-		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,             // flags allocatable + executabel                           Section flags (e.g., SHF_ALLOC)
-
-		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,             // address                                                  Virtual address of the section (set to 0x0 for relocatable files)
-		0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,             // offset, the resides address of this section in ELF file  File offset where section's data begins
-
-		0x0C, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,             // size, how many bytes the section takes up in this file   Size of the section data
-		0x00, 0x00, 0x00, 0x00,                                     // link, links to another section header by index           Link to another section (e.g., for symbol tables)
-		0x00, 0x00, 0x00, 0x00,                                     // info, extra infomation                                   Additional info (depends on section type)
-
-		0x10, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,             // address alignment constraint in bytes                    Section alignment in memory (usually power of 2)
-		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,             // entry size                                               Size of each entry in the section, or 0 if no entries
-	}) 
-
-        // sh of .text
-	f.Write([]byte{
-		0x04, 0x00, 0x00, 0x00,                                     // name offset in .shstrtab as null-terminated ASCII string Offset into the section header string table (index into .shstrtab)
-		0x01, 0x00, 0x00, 0x00,                                     // type PROGBITS                                            Type of the section (e.g., SHT_PROGBITS, SHT_STRTAB)
-		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,             // flags allocatable + executabel                           Section flags (e.g., SHF_ALLOC)
-		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,             // address                                                  Virtual address of the section (set to 0x0 for relocatable files)
-		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,             // offset, the resides address of this section in ELF file  File offset where section's data begins
-		0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,             // size, how many bytes the section takes up in this file   Size of the section data
-		0x00, 0x00, 0x00, 0x00,                                     // link, links to another section header by index           Link to another section (e.g., for symbol tables)
-		0x00, 0x00, 0x00, 0x00,                                     // info, extra infomation                                   Additional info (depends on section type)
-		0x10, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,             // address alignment constraint in bytes                    Section alignment in memory (usually power of 2)
-		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,             // entry size                                               Size of each entry in the section, or 0 if no entries
-	}) 
-      
-        // sh of .data
-	f.Write([]byte{
-		0x08, 0x00, 0x00, 0x00,                                     // name offset in .shstrtab as null-terminated ASCII string Offset into the section header string table (index into .shstrtab)
-		0x01, 0x00, 0x00, 0x00,                                     // type PROGBITS                                            Type of the section (e.g., SHT_PROGBITS, SHT_STRTAB)
-		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,             // flags allocatable + executabel                           Section flags (e.g., SHF_ALLOC)
-		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,             // address                                                  Virtual address of the section (set to 0x0 for relocatable files)
-		0xC0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,             // offset, the resides address of this section in ELF file  File offset where section's data begins
-		0x10, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,             // size, how many bytes the section takes up in this file   Size of the section data
-		0x00, 0x00, 0x00, 0x00,                                     // link, links to another section header by index           Link to another section (e.g., for symbol tables)
-		0x00, 0x00, 0x00, 0x00,                                     // info, extra infomation                                   Additional info (depends on section type)
-		0x10, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,             // address alignment constraint in bytes                    Section alignment in memory (usually power of 2)
-		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,             // entry size                                               Size of each entry in the section, or 0 if no entries
-	}) 
-
-// .shstrtab section content; .text .data .shstrtab
 f.Write([]byte{
-    0x00, 0x45, 0x45, 0x00,     // Null terminator for the string table + ".text" string
-    0x46, 0x46, 0x46, 0x00,     // ".data" string
-    0x4C, 0x4C, 0x4C, 0x00,     // ".shstrtab" string
+    0x7F, 0x45, 0x4C, 0x46,                   // ELF Magic Number
+    0x02,                                     // EI_CLASS: 64-bit (ELF64)
+    0x01,                                     // EI_DATA: Little Endian
+    0x01,                                     // EI_VERSION: ELF Version 1
+    0x00,                                     // EI_OSABI: System V ABI
+    0x00,                                     // EI_ABIVERSION
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // EI_PAD: Padding bytes to complete 16-byte header
+
+    0x01, 0x00,                               // e_type: ET_REL (Relocatable)
+    0xF3, 0x00,                               // e_machine: RISC-V
+    0x01, 0x00, 0x00, 0x00,                   // e_version: Original ELF Version
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80, // e_entry: Entry Point Address (not used in relocatable files)
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // e_phoff: Program Header Offset (0 for relocatable files)
+    0x40, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // e_shoff: Section Header Table Offset (0x40)
+    0x00, 0x00, 0x00, 0x00,                   // e_flags: Processor-specific flags (none for now)
+    0x40, 0x00,                               // e_ehsize: ELF Header size (64 bytes)
+    0x00, 0x00,                               // e_phentsize: Program Header Entry size (0 for relocatable files)
+    0x00, 0x00,                               // e_phnum: Number of Program Header Entries (0 for relocatable files)
+    0x40, 0x00,                               // e_shentsize: Section Header Entry size (64 bytes)
+    0x04, 0x00,                               // e_shnum: Number of Section Header Entries (null, .text, .data, .shstrtab)
+    0x03, 0x00,                               // e_shstrndx: Section Header String Table Index (.shstrtab)
 })
 
-// .text section content: machine code for the instructions
+f.Write(make([]byte, 64))
+
 f.Write([]byte{
-    0x00, 0x00, 0x00, 0x13, // addi a0, x0, 5
-    0x01, 0x00, 0x00, 0x13, // addi a0, a0, 1
+    0x01, 0x00, 0x00, 0x00,                   // sh_name: Offset in .shstrtab for ".text"
+    0x01, 0x00, 0x00, 0x00,                   // sh_type: SHT_PROGBITS
+    0x06, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,                   // sh_flags: SHF_ALLOC + SHF_EXECINSTR
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,                   // sh_addr: Address in memory (0 for relocatable)
+    0x80, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,                  // sh_offset: Offset of .text content
+    0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,                   // sh_size: Size of .text content (8 bytes)
+    0x00, 0x00, 0x00, 0x00,                                           // sh_link: Unused
+    0x00, 0x00, 0x00, 0x00,                                           // sh_info: Unused
+    0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,                   // sh_addralign: 4-byte alignment
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,                   // sh_entsize: Unused
 })
 
-// .data section content: string "Hello, world!"
 f.Write([]byte{
-    0x48, 0x65, 0x6C, 0x6C, 0x6F, 0x2C, 0x20, 0x77, 0x6F, 0x72, 0x6C, 0x64, 0x21, 0x00, 0x00,
+    0x07, 0x00, 0x00, 0x00,                   // sh_name: Offset in .shstrtab for ".data"
+    0x01, 0x00, 0x00, 0x00,                   // sh_type: SHT_PROGBITS
+    0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,                   // sh_flags: SHF_ALLOC + SHF_WRITE
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,                   // sh_addr: Address in memory (0 for relocatable)
+    0x88, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,                  // sh_offset: Offset of .data content
+    0x0E, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,                   // sh_size: Size of .data content (14 bytes, "Hello, world!\0")
+    0x00, 0x00, 0x00, 0x00,                                           // sh_link: Unused
+    0x00, 0x00, 0x00, 0x00,                                           // sh_info: Unused
+    0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,                   // sh_addralign: 1-byte alignment
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,                   // sh_entsize: Unused
 })
 
+f.Write([]byte{
+    0x0D, 0x00, 0x00, 0x00,                   // sh_name: Offset in .shstrtab for ".shstrtab"
+    0x03, 0x00, 0x00, 0x00,                   // sh_type: SHT_STRTAB
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,                   // sh_flags: No flags for string table
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,                   // sh_addr: Address in memory (0 for relocatable)
+    0x56, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,                  // sh_offset: Offset of .shstrtab content
+    0x17, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,                   // sh_size: Size of .shstrtab content (23 bytes)
+    0x00, 0x00, 0x00, 0x00,                                           // sh_link: Unused
+    0x00, 0x00, 0x00, 0x00,                                           // sh_info: Unused
+    0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,                   // sh_addralign: 1-byte alignment
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,                   // sh_entsize: Unused
+})
+
+f.Write([]byte{
+    0x13, 0x05, 0x00, 0x00,   // addi a0, x0, 5
+    0x13, 0x05, 0x10, 0x00,   // addi a0, a0, 1
+})
+
+f.Write([]byte("Hello, world!\x00"))
 
 
-
-
-
-
-
-
-
+f.Write([]byte{
+    0x00,               // Null byte at start
+    0x2e, 0x74, 0x65, 0x78, 0x74, 0x00, // ".text\0"
+    0x2e, 0x64, 0x61, 0x74, 0x61, 0x00, // ".data\0"
+    0x2e, 0x73, 0x68, 0x73, 0x74, 0x72, 0x74, 0x61, 0x62, 0x00, // ".shstrtab\0"
+})
 
 	// second pass
 	//------------Generater-----------
