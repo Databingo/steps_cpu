@@ -244,7 +244,7 @@ func main() {
 		}
 
 		//------------Parser?-----------
-		//fmt.Println(switchOnOp)
+		fmt.Println("Parser see:", switchOnOp)
 		switch switchOnOp {
 		case "lui", "auipc", "jal": // Instruction format:  op  rd, imm     or      label: op  rd, imm
 			if len(code) != 3 && len(code) != 4 {
@@ -442,36 +442,44 @@ func main() {
 	//	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,// points to start of section header table
 	//	0x00, 0x00, 0x00, 0x00, // e_flags
 	//	//0x34, 0x00, // specify size of header, 52 bytes for 32-bit format
-	//	0x40, 0x00, // specify size of header, 52 bytes for 64-bit format
+	//	0x40, 0x00, // specify size of header, 64 bytes for 64-bit format
 	//	0x00, 0x00, // size of program header table entry
 	//	0x00, 0x00, // contains number of entries in program header table
 	//	0x00, 0x00, // size of section header entry
 	//	0x00, 0x00, // number of entries in the section header table
 	//	0x00, 0x00, // index of the section header table entry that contains the section names
 	//})
-
+        // ELF header (64 Bytes for 64-bit format) (Little endian)
 	f.Write([]byte{
-		0x7F, 0x45, 0x4C, 0x46, // ELF magic number
+		0x7F, 0x45, 0x4C, 0x46,                   // ELF magic number
 		0x02,                                     // EI_CLASS: 64-bit format
 		0x01,                                     // EI_DATA: little endian
 		0x01,                                     // EI_VERSION: ELF version 1
-		0x00,                                     // EI_OSABI: System V
-		0x00,                                     // EI_ABIVERSION
-		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // EI_PAD: padding
-		0x01, 0x00, // e_type: ET_REL (relocatable file)
-		0xF3, 0x00, // e_machine: RISC-V
+		0x00,                                     // EI_OSABI: System V ??
+		0x00,                                     // EI_ABIVERSION (usually 0 for System V)
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // EI_PAD: padding (for consistence of ELF header size)
+		0x01, 0x00, // e_type: ET_REL (relocatable file, means linkable to be executable or a shared file)
+		0xF3, 0x00, // e_machine: RISC-V (two bytes, 0xF3 for RISC-V)
 		0x01, 0x00, 0x00, 0x00, // e_version: original ELF version
 		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80, // e_entry: entry point (0x0 for relocatable files)
-		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // e_phoff: program header offset (0 for relocatable)
-		0x40, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // e_shoff: section header table offset (64 bytes from start)
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // e_phoff: program header table offset (0 for relocatable)
+		0x40, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // e_shoff: section header table offset (64 bytes from start, just after this 64-bit ELF header)
 		0x00, 0x00, 0x00, 0x00, // e_flags
-		0x40, 0x00, // e_ehsize: ELF header size (64 bytes)
-		0x00, 0x00, // e_phentsize: program header entry size (0 for relocatable)
+		0x40, 0x00, // e_ehsize: ELF header size (64 bytes) (for 32-bit format it's 0x40 52 Bytes)
+		0x00, 0x00, // e_phentsize: program header entry size (0 for relocatable because relocatable don't have a Program Header Table)
 		0x00, 0x00, // e_phnum: number of entries in program header table (0 for relocatable)
 		0x40, 0x00, // e_shentsize: section header entry size (64 bytes for 64-bit)
-		0x03, 0x00, // e_shnum: number of entries in section header table (e.g., .text, .shstrtab, null)
-		0x01, 0x00, // e_shstrndx: index of the section header string table
-	})
+		0x03, 0x00, // e_shnum: number of entries in section header table (e.g., .text, .shstrtab, null) (.shstrtab Section Header String Table holds section names)
+		0x01, 0x00, // e_shstrndx: index of the section header string table, means the second(0,1...) entry in Section Header Table is .shstrtab section
+	}) // 64 Bytes Totally
+
+	//ELF header 64Byte
+	//SHT 0 64Byte .text
+	//SHT 1 64Byte .shstrtab
+	//SHT 2 64Byte .data
+	//...
+
+
 	// second pass
 	//------------Generater-----------
 	address = 0
