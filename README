@@ -1,0 +1,12 @@
+https://stackoverflow.com/questions/58414772/why-are-risc-v-s-b-and-u-j-instruction-types-encoded-in-this-way
+https://stackoverflow.com/questions/76347221/why-does-risc-v-j-immediate-encode-imm11-in-inst20
+https://stackoverflow.com/questions/39427092/risc-v-immediate-encoding-variants
+
+ISA shower
+https://luplab.gitlab.io/rvcodecjs/#q=01400fef&abi=false&isa=AUTO
+
+extend go assembler to phesuo-instruction
+extend cpu with wfi
+write kernel system (error and interrupt)
+write driver of keyborad
+write driver of LCD screen

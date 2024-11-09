@@ -1,0 +1,5 @@
+zip -er f.zip f // encrypt recursive compress
+objdump -s -j .data some.elf  // show .data
+objdump -d some.elf  // show .text instructions
+one address indiatate one byte in ram
+0x's 1 in higher position means 16 in lower position

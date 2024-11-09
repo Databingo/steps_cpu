@@ -1,0 +1,83 @@
+// RV32I table + RV64I plus
+// RV32I 47条指令 + RV64I 15 = RV32I-64I 62 条指令
+///-------------Re-order-by-function-----------
+// Load 加载 7
+000000000000_00000_000_00000_0000011 // LB      |imm.12|rs1.5|000.3|rd.5|0000011.7|     load byte 8           
+000000000000_00000_100_00000_0000011 // LBU     |imm.12|rs1.5|100.3|rd.5|0000011.7|     load byte 8 unsigned  
+000000000000_00000_001_00000_0000011 // LH      |imm.12|rs1.5|001.3|rd.5|0000011.7|     load half-word 16     
+000000000000_00000_101_00000_0000011 // LHU     |imm.12|rs1.5|101.3|rd.5|0000011.7|     load half-word 16 unsigned 
+000000000000_00000_010_00000_0000011 // LW      |imm.12|rs1.5|010.3|rd.5|0000011.7|     load word 32          
+000000000000_00000_110_00000_0000011 // LWU     |imm.12|rs1.5|110.3|rd.5|0000011.7| 64  load word 32 unsigned  
+000000000000_00000_011_00000_0000011 // LD      |imm.12|rs1.5|011.3|rd.5|0000011.7| 64  load double-word 64    
+// Upper 上立即数 2
+__00000000000000000000_00000_0110111   // LUI    |imm.20|rd.5|0110011.7| put 20 bits immediate to upper 20 bits of rd and left lower 12 bits 0
+__00000000000000000000_00000_0010111   // AUIPC  |imm.20|rd.5|0010011.7| left shift the 20 bits immediate 12 bits then add pc value then put to rd
+// Store 存储 4
+000000000000_00000_000_00000_0100011 // SB      |imm.7|rs2.5|rs1.5|000.3|imm.5|0100011.7|     store byte, write low 8 bits of rs1 to rs2's imm.12
+000000000000_00000_001_00000_0100011 // SH      |imm.7|rs2.5|rs1.5|001.3|imm.5|0100011.7|     store half-word, write low 16 bits of rs1 to rs2's imm.12
+000000000000_00000_010_00000_0100011 // SW      |imm.7|rs2.5|rs1.5|010.3|imm.5|0100011.7|     store word, 32
+000000000000_00000_011_00000_0100011 // SD      |imm.7|rs2.5|rs1.5|011.3|imm.5|0100011.7| 64  store double-word, 64 
+// Math 算数 10
+0000000_00000_00000_000_00000_0110011 // ADD    |xxx.7|rs2.5|rs1.5|000.3|imm.5|0110011.7|     add rs1 and rs2 send overflow ingnored result to rd 
+0000000_00000_00000_000_00000_0111011 // ADDW   |xxx.7|rs2.5|rs1.5|000.3|imm.5|0111011.7| 64  add rs1 32 and rs2 32 as overflow-ingnored 64 then put low 32 to rd 
+_000000000000_00000_000_00000_0010011  // ADDI   |imm.12|rs1.5|000.3|rd.5|0010011.7|           add sign-extended imm.12 to sr1 then send overflow ingnored result to rd (LUI need plus 1 when ADDI nege imm)
+_000000000000_00000_000_00000_0010011  // ADDIW  |imm.12|rs1.5|000.3|rd.5|0011011.7| 64        add sign-extended imm.12 to sr1 as sign-extended overflow-ingnored 64 then put low 32 in rd
+0100000_00000_00000_000_00000_0110011 // SUB    |xxx.7|rs2.5|rs1.5|000.3|imm.5|0110011.7|     sub rs2 from rs1 send overflow ingnored result to rd 
+0100000_00000_00000_000_00000_0111011 // SUBW   |xxx.7|rs2.5|rs1.5|000.3|imm.5|0111011.7| 64  sub rs2 32 from rs1 32 as overflow-ingnored 64 then put low 32 to rd
+0000000_00000_00000_010_00000_0110011 // SLT    |xxx.7|rs2.5|rs1.5|010.3|imm.5|0110011.7|     if rs1 is less than rs2 both as sign-extended then put 1 in rd else 0
+0000000_00000_00000_011_00000_0110011 // SLTU   |xxx.7|rs2.5|rs1.5|011.3|imm.5|0110011.7|     if rs1 is less than rs2 both as unsigned number then put 1 in rd else 0
+_000000000000_00000_010_00000_0010011  // SLTI   |imm.12|rs1.5|010.3|rd.5|0010011.7|           if set rs1 is less than imm.12 both as sign-extended then put 1 in rd else 0
+_000000000000_00000_011_00000_0010011  // SLTIU  |imm.12|rs1.5|011.3|rd.5|0010011.7|           if set rs1 is less than imm.12 both as unsigned number then put 1 in rd else 0
+// Logic 逻辑 6
+0000000_00000_00000_000_00000_0110011 // AND    |xxx.7|rs2.5|rs1.5|000.3|rd.5|0110011.7|      bitwise AND rs1 and rs2 then put result in rd
+0000000_00000_00000_110_00000_0110011 // OR     |xxx.7|rs2.5|rs1.5|110.3|rd.5|0110011.7|      bitwise OR  rs1 and rs2 then put reslut in rd
+0000000_00000_00000_100_00000_0110011 // XOR    |xxx.7|rs2.5|rs1.5|100.3|rd.5|0010011.7|      bitwise XOR rs1 and rs2 then put reslut in rd
+_000000000000_00000_111_00000_0010011  // ANDI   |imm.12|rs1.5|111.3|rd.5|0010011.7|           bitwise AND rs1 and sign-extended imm.12 then put reslut in rd
+_000000000000_00000_110_00000_0010011  // ORI    |imm.12|rs1.5|110.3|rd.5|0010011.7|           bitwise OR  rs1 and sign-extended imm.12 then put reslut in rd
+_000000000000_00000_100_00000_0010011  // XORI   |imm.12|rs1.5|100.3|rd.5|0010011.7|           bitwise XOR rs1 and sign-extended imm.12 then put reslut in rd, (XORI, rd, rs1, -1) same as (NOT, rd, rs)
+// Shift_Left 左位移 5
+0000000_00000_00000_001_00000_0110011 // SLL    |xxx.7|rs2.5|rs1.5|001.3|imm.5|0110011.7|     shift lift  logicl rs1 by rs2[low5.unsign] padding 0 then put into rd 
+0000000_00000_00000_001_00000_0010011 // SLLI   |imm.12|rs1.5|001.3|rd.5|0010011.7|           shift lift  logicl rs1 32 by imm.12[low5.unsign] padding 0 then put into rd 
+000000_000000_00000_001_00000_0010011 // SLLI   |imm.12|rs1.5|001.3|rd.5|0010011.7|       64  shift lift  logicl rs1 64 by imm.12[low6.unsign] padding 0 then put into rd
+0000000_00000_00000_001_00000_0011011 // SLLIW  |imm.12|rs1.5|001.3|rd.5|0010011.7|       64  shift lift  logicl rs1 32 by imm.12[low5.unsign] padding 0 then put into rd 
+0000000_00000_00000_001_00000_0111011 // SLLW   |xxx.7|rs2.5|rs1.5|001.3|imm.5|0111011.7| 64  shift lift  logicl rs1 low 32 by rs2[low5.unsign] padding 0 then put into rd 32
+// Shift_Right 右移 5
+0000000_00000_00000_101_00000_0110011 // SRL    |xxx.7|rs2.5|rs1.5|101.3|rd.5|0110011.7|     shift right logicl rs1 by amount in rs2[low5.unsign] padding 0 then put into rd
+0000000_00000_00000_101_00000_0010011 // SRLI   |imm.12|rs1.5|101.3|rd.5|0010011.7|          shift right logicl rs1 32 by imm.12[low5.unsign] padding 0 then put into rd
+000000_000000_00000_101_00000_0010011 // SRLI   |imm.12|rs1.5|101.3|rd.5|0010011.7|       64 shift right logicl rs1 64 by imm.12[low6.unsign] padding 0 then put into rd 
+0000000_00000_00000_101_00000_0011011 // SRLIW  |imm.12|rs1.5|101.3|rd.5|0010011.7|       64 shift right logicl rs1 32 by imm.12[low5.unsign] padding 0 then put into rd 
+0000000_00000_00000_101_00000_0111011 // SRLW   |xxx.7|rs2.5|rs1.5|101.3|rd.5|0111011.7|  64 shift right logicl rs1 low 32 by amount in rs2[low5.unsign] padding 0 then 32 put into rd 
+// Shift_Right_Arithmetical 算数右移 5
+0100000_00000_00000_101_00000_0110011 // SRA    |xxx.7|rs2.5|rs1.5|101.3|rd.5|0110011.7|     shift right arithmetical logicl rs1 rs2[low5.unsign] padding 1 then put into rd
+0100000_00000_00000_101_00000_0010011 // SRAI   |imm.12|rs1.5|101.3|rd.5|0010011.7|          shift right arithmetical logicl rs1 32 by imm.12[low5.unsign] padding 1 then put into rd
+010000_000000_00000_101_00000_0010011 // SRAI   |imm.12|rs1.5|101.3|rd.5|0010011.7|       64 shift right arithmetical logicl rs1 64 by imm.12[low6.unsign] padding 1 then put into rd 
+0100000_00000_00000_101_00000_0011011 // SRAIW  |imm.12|rs1.5|101.3|rd.5|0010011.7|       64 shift right arithmetical logicl rs1 32 by imm.12[low5.unsign] padding 1 then put into rd 
+0100000_00000_00000_101_00000_0111011 // SRAW   |xxx.7|rs2.5|rs1.5|101.3|rd.5|0111011.7|  64 shift right arithmetical logicl rs1 32 by imm.12[low5.unsign] padding 1 then put into rd 
+// Jump_Branch  跳转 8
+0_0000000000_0_00000000_00000_1100011 // JAL    |imm.20[20|10:1|11|19:12]|rd|1101111.7|  jump (set PC) to address (PC+imm) and place return address (PC+4) in rd // JAL padding 0ne 0 at the last
+_000000000000_00000_000_00000_1100111  // JALR   |imm.12|rs1.5|000|rd.5|1101111.7|        jump (set PC) to address (PC+imm(rs1)) and place return address (PC+4) in rd 
+0_000000_00000_00000_000_0000_0_1100011 // BEQ  |imm.7[12|10:5]|rs2.5|rs1.5|000.3|imm.5[4:1|11]|1100011.7|  take the branch if rs1 and rs2 are equal
+0_000000_00000_00000_001_0000_0_1100011 // BNE  |imm.7[12|10:5]|rs2.5|rs1.5|001.3|imm.5[4:1|11]|1100011.7|  take the branch if rs1 and rs2 not equal
+0_000000_00000_00000_100_0000_0_1100011 // BLT  |imm.7[12|10:5]|rs2.5|rs1.5|100.3|imm.5[4:1|11]|1100011.7|  take the branch if rs1 less than rs2 in signed comparison 
+0_000000_00000_00000_101_0000_0_1100011 // BGE  |imm.7[12|10:5]|rs2.5|rs1.5|101.3|imm.5[4:1|11]|1100011.7|  take the branch if rs1 greater than or equal to rs2 in signed comparison 
+0_000000_00000_00000_110_0000_0_1100011 // BLTU |imm.7[12|10:5]|rs2.5|rs1.5|100.3|imm.5[4:1|11]|1100011.7|  take the branch if rs1 less than rs2 in unsigned comparison 
+0_000000_00000_00000_111_0000_0_1100011 // BGEU |imm.7[12|10:5]|rs2.5|rs1.5|111.3|imm.5[4:1|11]|1100011.7|  take the branch if rs1 greater than or equal to rs2 in unsigned comparison 
+// Control 控制 10
+0000_0000_0000_00000_000_00000_000111 // FENCE  |0.4|pred.4|succ.4|0.5|000.3|0.5|0001111.7| make sure RW of I/O and memory operation completed before FENCE for the successor
+0000_0000_0000_00000_001_00000_000111 // FENCE  |0.4|0000.4|0000.4|0.5|001.3|0.5|0001111.7| make sure instruction operation completed before FENCE.I
+000000000000_00000_000_000000_0001111 // ECALL  |0.12|0.4|000.3|0.5|1110011.7|              system enviroment call, put break in pc and save pc to rg
+000000000001_00000_000_000000_0001111 // EBREAK |k.12|0.4|000.3|0.5|1110011.7|              system break call, put break in pc and save pc to rg
+000000000000_00000_001_000000_1110011 // CSRRW  |csr.12|rs1.5|001.3|rd.5|1110011.7| csr atomic read and write, put 0-extended csr value in rd, then put sr1 to csr 
+000000000000_00000_010_000000_1110011 // CSRRS  |csr.12|rs1.5|001.3|rd.5|1110011.7| csr atomic read and set, put 0-extended csr value in rd, use sr1 as 1 mask to set csr 1 correspond
+000000000000_00000_011_000000_1110011 // CSRRC  |csr.12|rs1.5|011.3|rd.5|1110011.7| csr atomic read and set, put 0-extended csr value in rd, use sr1 as 1 mask to set csr 0 correspond
+000000000000_00000_101_000000_1110011 // CSRRWI |csr.12|zim.5|101.3|rd.5|1110011.7| csr atomic read and write, put 0-extended csr value in rd, then put 0-extended 5 unsigned zimm to csr 
+000000000000_00000_110_000000_1110011 // CSRRSI |csr.12|zim.5|110.3|rd.5|1110011.7| csr atomic read and write, put 0-extended csr value in rd, then use 0-extended 5 unsigned zimm as 1 mask to set csr 1
+000000000000_00000_111_000000_1110011 // CSRRCI |csr.12|zim.5|111.3|rd.5|1110011.7| csr atomic read and write, put 0-extended csr value in rd, then use 0-extended 5 unsigned zimm as 1 mask to set csr 0
+
+
+
+
+
+
+
+
