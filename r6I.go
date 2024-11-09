@@ -451,7 +451,7 @@ func main() {
 	//})
         // ELF header (64 Bytes for 64-bit format) (Little endian)
 	f.Write([]byte{
-		0x7F, 0x45, 0x4C, 0x46,                   // ELF magic number
+		0x7F, 0x45, 0x4C, 0x46,                   // ELF magic number (delete(0x7f)E(0x45)L(0x4c)F(0x46) in ascii)
 		0x02,                                     // EI_CLASS: 64-bit format
 		0x01,                                     // EI_DATA: little endian
 		0x01,                                     // EI_VERSION: ELF version 1
