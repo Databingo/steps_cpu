@@ -28,22 +28,42 @@
 
 
 
-#lui     s1, 0x10000     # load upper 20 bits
-#addi    s1, s1, 0x000   # load lower 12 bits
-#addi    s4, x0, 0xE4    # load A 41
-#sb      s4, 0(s1)       # write byte to UART register 
-#addi    s4, x0, 0xBD  # load A
-#sb      s4, 0(s1)       # write byte to UART register 
-#addi    s4, x0, 0xA0  # load A
-#sb      s4, 0(s1)       # write byte to UART register 
-#
-#loop: 
-#lui     s2, 0x10000     # load upper 20 bits
-#addi    s2, s2, 0x004   # load lower 12 bits
-#lb      s4, 0(s2)       # load received byte to s4
-#sb      s4, 0(s1)       # write byte to UART register 
-#jal     x0, loop
+# UART  i/o register
+lui     s1, 0x10000     # load upper 20 bits
+addi    s1, s1, 0x000   # load lower 12 bits
 
+# UART  line_status_register
+lui     s2, 0x10000     # load upper 20 bits
+addi    s2, s2, 0x005   # load lower 12 bits
+
+test:
+addi    s4, x0, 0xE4    # load A 41
+sb      s4, 0(s1)       # write byte to UART register 
+addi    s4, x0, 0xBD  # load A
+sb      s4, 0(s1)       # write byte to UART register 
+addi    s4, x0, 0xA0  # load A
+sb      s4, 0(s1)       # write byte to UART register 
+
+loop: 
+lb      s3, 0(s2)       # load UART_LSR
+andi    s3, s3, 1       # bitwise AND only left the "UART data ready" position as it is
+beq     x0, s3, loop
+jal     x0, loop
+
+#loop:
+#    # Poll the UART receive register for data
+#    lui s1,   0x10000        # Load UART RX register upper 20 bits into s1
+#    addi s1, s1, 0x000     # Load lower 12 bits for UART RX register
+#
+#    lb s2, 0(s1)                 # Load received byte into s2 (assume any byte means data available)
+#    
+#    # Echo the received byte to the UART transmit register
+#    lui s1, 0x10000         # Load UART TX register upper 20 bits into s1
+#    addi s1, s1, 0x000    # Load lower 12 bits for UART TX register
+#    sb s2, 0(s1)                 # Write byte to UART transmit register
+#
+#    # Repeat the loop
+#    jal x0, loop                 # Infinite loop
 #你x0E4BDA0
 #_start:
 #    # Initialize UART output
@@ -72,17 +92,3 @@
 #
 #    jal x0, loop                # Jump to 'loop' (infinite loop without return)
 
-loop:
-    # Poll the UART receive register for data
-    lui s1,   0x10000        # Load UART RX register upper 20 bits into s1
-    addi s1, s1, 0x000     # Load lower 12 bits for UART RX register
-
-    lb s2, 0(s1)                 # Load received byte into s2 (assume any byte means data available)
-    
-    # Echo the received byte to the UART transmit register
-    lui s1, 0x10000         # Load UART TX register upper 20 bits into s1
-    addi s1, s1, 0x000    # Load lower 12 bits for UART TX register
-    sb s2, 0(s1)                 # Write byte to UART transmit register
-
-    # Repeat the loop
-    jal x0, loop                 # Infinite loop
