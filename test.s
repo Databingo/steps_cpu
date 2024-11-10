@@ -33,8 +33,8 @@ andi    s3, s3, 1       # bitwise AND only left the "UART data ready" position a
 beq     x0, s3, loop
 lb s4, 0(s1)
 sb s4, 0(s1) 
-addi    s4, x0, 0x41  # load A
-sb      s4, 0(s1)       # write byte to UART register 
+#addi    s4, x0, 0x41  # load A
+#sb      s4, 0(s1)       # write byte to UART register 
 bltu    x0, s3, loop
-#jal x0, loop
+#jal x0, loop # jal to 2440 ? bug?
 
