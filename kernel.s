@@ -20,11 +20,11 @@ lui     s2, 0x10000     # load upper 20 bits
 addi    s2, s2, 0x005   # load lower 12 bits
 
 test:
-addi    s4, x0, 0xE4    # load A 41
+addi    s4, x0, 0xE4    # load
 sb      s4, 0(s1)       # write byte to UART register 
-addi    s4, x0, 0xBD  # load A
+addi    s4, x0, 0xBD  # load 
 sb      s4, 0(s1)       # write byte to UART register 
-addi    s4, x0, 0xA0  # load A
+addi    s4, x0, 0xA0  # load 
 sb      s4, 0(s1)       # write byte to UART register 
 
 loop: 

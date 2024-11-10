@@ -128,7 +128,5 @@ wait:
 lb      s3, 0(s2)       # load UART_LSR
 andi    s3, s3, 1       # bitwise AND only left the "UART data ready" position as it is
 beq     x0, s3, wait
-lb s4, 0(s1)
-sb s4, 0(s1) 
 jal x0, loop
 
