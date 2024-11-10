@@ -1,6 +1,6 @@
 #.section .text # .text .data .bss .rodata .test.unlikely .mydata .text.debug .init .fini
 ## .data .byte .word .half .asciz .ascii .string .float .double .align .skip .set 
-addi x1, x0, 1
+#addi x1, x0, 1
 #addi x2, x0, 8
 #add  x6, x0, x0 # 0
 #add  x5, x2, x0 # 加数
@@ -25,3 +25,14 @@ addi x1, x0, 1
 #
 #.section .data
 #    .string "Hello, world!"
+
+
+
+lui     s1, 0x10000     # load upper 20 bits
+addi    s1, s1, 0x000   # load lower 12 bits
+addi    s4, x0, 0xE4    # load A 41
+sb      s4, 0(s1)       # write byte to UART register 
+addi    s4, x0, 0xBD  # load A
+sb      s4, 0(s1)       # write byte to UART register 
+addi    s4, x0, 0xA0  # load A
+sb      s4, 0(s1)       # write byte to UART register 
