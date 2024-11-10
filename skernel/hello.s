@@ -33,10 +33,17 @@
 #  .string "你好世界!\n"
 #  
 
-addi    s4, x0, 0x41    # load A
 lui     s1, 0x10000     # load upper 20 bits
 addi    s1, s1, 0x000   # load lower 12 bits
+addi    s4, x0, 0xE4    # load A 41
 sb      s4, 0(s1)       # write byte to UART register 
+addi    s4, x0, 0xBD  # load A
+sb      s4, 0(s1)       # write byte to UART register 
+addi    s4, x0, 0xA0  # load A
+sb      s4, 0(s1)       # write byte to UART register 
+#4F60;&#x597D
+
+
 
 #.section .text
 #    addi a0, x0, 5
