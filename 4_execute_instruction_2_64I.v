@@ -932,7 +932,7 @@ begin
 		   // 2.async interrupt 异步中断（外部中断）: outer event, that is not instructions, such as software, timer, keyboard/mouse
 		   //
 		   // 8 CSRs for M mode necessary
-		   // mepc: refer to the error instruction
+		   // mepc: refer to the error instruction(machine exception program counter)
 		   // mtvec: keep the address of the interrupt-handler address or re-continue address in async interrupt
 		   // mcause: cause, type of interrupt
 		   // mtval: trap value, address of the error address, instruction of the error instruction, or 0
@@ -1275,3 +1275,24 @@ begin
         end
 end
 endmodule
+
+
+
+
+//interrupte document
+//https://www.reddit.com/r/RISCV/comments/fy09gs/riscv_interrupt_architecture/
+//https://riscv.org/wp-content/uploads/2017/12/Tue1642_PLIC_Richard_Herveille.pdf
+//https://domipheus.com/blog/designing-a-risc-v-cpu-in-vhdl-part-20-interrupts-and-exceptions/
+//https://sifive.cdn.prismic.io/sifive%2F834354f0-08e6-423c-bf1f-0cb58ef14061_fu540-c000-v1.0.pdf
+//https://cdn2.hubspot.net/hubfs/3020607/An%20Introduction%20to%20the%20RISC-V%
+//20Architecture.pdf
+//https://sifive.cdn.prismic.io/sifive/0d163928-2128-42be-a75a-464df65e04e0_sifive-interrupt-cookbook.pdf
+//https://github.com/riscv/riscv-plic-spec/blob/master/riscv-plic.adoc
+//https://five-embeddev.com/riscv-priv-isa-manual/Priv-v1.12/plic.html
+//https://github.com/riscv/riscv-fast-interrupt
+
+//whole core code
+//https://sergeykhbr.github.io/riscv_vhdl/
+
+//run linux example:
+//https://riscv.org/wp-content/uploads/2019/12/12.10-12.50-RISC-V_Summit_Fu_Wei_.pdf
