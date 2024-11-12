@@ -1,3 +1,21 @@
+How a keyboard interrupt be noticed and dealed
+
+#  ------before------
+#  MIE set by software when initial
+#  MTVEC set by sofeware when initial
+#  ------when------
+#  MIP set by PLIC when interrupt happen
+#  when MIE and MIP is 1
+#  MEPC set by hart(wire)
+#  MCAUSE set by hart(wire)
+#  MSTATUS.MIE set by hart(wire)
+#  PC set to MTVEC by hart(wire)
+#  then CORE start exectue interrupt hander from the start address saved in MTVEC's value
+#  ------finish------
+#  the handler execute MRET to set PC to MEPC
+
+
+
 #.section .text # .text .data .bss .rodata .test.unlikely .mydata .text.debug .init .fini
 ## .data .byte .word .half .asciz .ascii .string .float .double .align .skip .set 
 

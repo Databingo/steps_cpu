@@ -932,7 +932,7 @@ begin
 		   // 2.async interrupt 异步中断（外部中断）: outer event, that is not instructions, such as software, timer, keyboard/mouse
 		   //
 		   // 8 CSRs for M mode necessary
-		   // mepc: refer to the error instruction
+		   // mepc: refer to the error instruction(machine exception program counter)
 		   // mtvec: keep the address of the interrupt-handler address or re-continue address in async interrupt
 		   // mcause: cause, type of interrupt
 		   // mtval: trap value, address of the error address, instruction of the error instruction, or 0
