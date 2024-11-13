@@ -1,4 +1,5 @@
-
+# default with openSBI
+# qemu-system-riscv64 -M virt -bios default -nographic
 
 #export ARCH=/usr/local/projects/egos/riscv64-unknown-elf-gcc-8.3.0-2020.04.1-x86_64-apple-darwin/bin/riscv64-unknown-elf
 #export ARCH=/usr/local/projects/steps_cpu/riscv_gcc_bin/riscv64-unknown-elf
@@ -19,7 +20,7 @@ $OBJCOPY $kernel.elf -I binary $kernel.img # only machine code without ELF heade
 
 #/usr/local/projects/xpack-qemu-riscv-7.2.5-1/bin/qemu-system-riscv64 -M virt -bios none -serial stdio -display none -kernel $kernel.img
 #/usr/local/projects/bin/qemu-system-riscv64 -M virt -bios none -serial stdio -display none -kernel $kernel.img
-qemu-system-riscv64 -M virt -bios none -serial stdio -display none -kernel $kernel.img
+qemu-system-riscv64 -M virt -bios none  -serial stdio -display none -kernel $kernel.img
 
 
 
