@@ -17,7 +17,9 @@ $LD -T link.ld -o $kernel.elf $kernel.o
 echo "ob"
 $OBJCOPY $kernel.elf -I binary $kernel.img # only machine code without ELF headers/metadata
 
-/usr/local/projects/xpack-qemu-riscv-7.2.5-1/bin/qemu-system-riscv64 -M virt -bios none -serial stdio -display none -kernel $kernel.img
+#/usr/local/projects/xpack-qemu-riscv-7.2.5-1/bin/qemu-system-riscv64 -M virt -bios none -serial stdio -display none -kernel $kernel.img
+#/usr/local/projects/bin/qemu-system-riscv64 -M virt -bios none -serial stdio -display none -kernel $kernel.img
+qemu-system-riscv64 -M virt -bios none -serial stdio -display none -kernel $kernel.img
 
 
 
