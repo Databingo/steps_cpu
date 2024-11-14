@@ -1,5 +1,6 @@
 #EFI for QEMU
 #https://releases.linaro.org/components/kernel/uefi-linaro/latest/release/qemu64/QEMU_EFI.fd
+#https://wiki.gentoo.org/wiki/QEMU/Linux_guest#Hard_drive
 
 #More space potentail
 #qemu-img resize xx.qcow2 +19G
