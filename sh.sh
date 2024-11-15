@@ -107,16 +107,33 @@
 #  -device virtio-net,netdev=vmnic \
 
 
+#qemu-img resize FreeBSD-14.1-RELEASE-amd64.qcow2 +19G
+#qemu-img create -f qcow2 new10G.img 10G
+#sysctl -n hw.logicalcpu
+# qemu-img info FreeBSD-14.1-RELEASE-amd64.qcow2
+# gpart recover vtbd0
+# sysctl kern.geom.debugflags=16
+# gpart resize -i 4 -s 20G -a 4k vtbd0
+# growfs /dev/vtbd0p4 # for ufs
+# service growfs onestart
+# zpool online -e root /dev/vtbd0p4 # for zfs
+
 # for freebsd
 qemu-system-x86_64 -d strace \
+  -monitor stdio \
   -accel hvf \
   -M pc \
   -m 3G \
   -cpu host \
-  -smp cores=2 \
-  -drive file=FreeBSD-14.1-RELEASE-amd64.qcow2,id=hd0,if=virtio \
+  -smp cores=4 \
+  -drive file=FreeBSD-14.1-RELEASE-amd64.qcow2,id=hd0,if=none \
+  -device virtio-blk-pci,drive=hd0 \
   -netdev user,id=vmnic,hostfwd=tcp::2222-:22,hostfwd=tcp::7777-:7777,hostfwd=tcp::7778-:7778 \
   -device virtio-net,netdev=vmnic \
+  -drive file=new10G.img,id=new10G,format=qcow2,if=none \
+  -device virtio-blk-pci,drive=new10G \
   -vga std \
   -display cocoa \
-  -full-screen \
+  -usbdevice host:05dc:a81d \
+ #-nic user,id=nic0,smb=/usr/local/public \
+ #-full-screen \
