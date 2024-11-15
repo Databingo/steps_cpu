@@ -12,3 +12,7 @@
 
 #pkg install git
 #pkg install go
+
+# if system check failed:
+# fsck -y
+# reboot
