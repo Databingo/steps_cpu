@@ -17,5 +17,6 @@
 # fsck -y
 # reboot
 
+# shutdown -p now # for power off
 
 
