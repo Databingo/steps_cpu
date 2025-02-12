@@ -10,3 +10,19 @@ extend cpu with wfi
 write kernel system (error and interrupt)
 write driver of keyborad
 write driver of LCD screen
+
+
+rk.sh run test
+
+Research road map:
+0.ISA
+1.Assembler
+2.Compiler
+3.Kernel/Opensbi
+4.U-boot?
+5.FreeBSD
+6.Trainsystem
+7.Deepeek-x
+8.Audiotalker
+9.Bot
+
