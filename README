@@ -26,3 +26,4 @@ rk.sh run test
 8.Audiotalker
 9.Bot
 
+now: instructions in verilog on FPGA + opensbi in instructions from asm via assambler.go = to run keyboad + mounse + monitor + microphone + camera + speaker + freebsdmini
