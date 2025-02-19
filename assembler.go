@@ -69,9 +69,13 @@ func isValidImmediate(s string) (int64, error) {
 
 func main() {
 	// golang 1.13
-	// 0b/0B for binary
-	// 0o/0O for octol
-	// 0x/0X for hexadecimal
+	// 0b/0B for binary 二进制
+	// 0o/0O for octal 八进制
+	// 12345 for decimal 十进制
+	// 0x/0X for hexadecimal 十六进制
+
+
+	// 5 位 32 个物理存器
 	regBin := map[string]uint32{
 		"x0": 0b00000, "zero": 0b00000,
 		"x1": 0b00001, "ra": 0b00001,
@@ -106,6 +110,8 @@ func main() {
 		"x30": 0b11110, "t5": 0b11110,
 		"x31": 0b11111, "t6": 0b11111,
 	}
+
+	// 12 位 4096 个控制态寄存器
 	csrBin := map[string]uint32{
 		"mvendorid":  0xF11, // MRO mvendorid Vendor ID
 		"marchid":    0xF12, // MRO Architecture ID
