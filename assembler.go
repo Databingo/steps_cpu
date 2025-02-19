@@ -776,7 +776,7 @@ func main() {
 }
 
 // target rv64 add
-//1. instructio "csrrw", "csrrs", "csrrc", "csrrwi", "csrrsi", "csrrci", "fence", "fence.i"
+//1. instruction "csrrw", "csrrs", "csrrc", "csrrwi", "csrrsi", "csrrci", "fence", "fence.i"
 //2. pseudo instruction support
 //3. assembler directive support
 
