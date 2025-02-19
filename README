@@ -27,3 +27,5 @@ rk.sh run test
 9.Bot
 
 now: instructions in verilog on FPGA + opensbi in instructions from asm via assambler.go = to run keyboad + mounse + monitor + microphone + camera + speaker + freebsdmini
+
+最强的基本功：verilog 实现的指令集 + 汇编实现的 sbi + assembler.go
