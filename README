@@ -35,4 +35,4 @@ now: instructions in verilog on FPGA + opensbi in instructions from asm via assa
 3.汇编实现 sbi
 
 
-用自研的芯片训练自研的AI
+用自己的芯片训练自己的AI
