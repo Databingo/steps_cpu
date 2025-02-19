@@ -29,3 +29,7 @@ rk.sh run test
 now: instructions in verilog on FPGA + opensbi in instructions from asm via assambler.go = to run keyboad + mounse + monitor + microphone + camera + speaker + freebsdmini
 
 最强的基本功：verilog 实现的指令集 + 汇编实现的 sbi + assembler.go
+
+1.csr verilog 实现
+2.assembler.go 完善伪指令 
+3.汇编实现 sbi
