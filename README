@@ -33,3 +33,6 @@ now: instructions in verilog on FPGA + opensbi in instructions from asm via assa
 1.csr verilog 实现
 2.assembler.go 完善伪指令 
 3.汇编实现 sbi
+
+
+用自研的芯片训练自研的AI
