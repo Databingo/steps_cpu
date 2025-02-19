@@ -15,7 +15,7 @@
 #vvp s4 |less
 
 echo "" > binary_instructions.txt
-go run rvasm64I.go test.s
+go run rvasm64I.go test.s &&
 # s4.2
 iverilog -g2012 -o s4 4_execute_instruction_2_64I.v 4tb.v &&
 vvp s4 |less
