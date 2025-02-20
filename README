@@ -36,3 +36,5 @@ now: instructions in verilog on FPGA + opensbi in instructions from asm via assa
 
 
 用自己的芯片训练自己的AI
+Xilinx Artix-7 XC7A200T（Digilent Nexys Video）
+Xilinx Kintex-7 KC705
