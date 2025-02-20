@@ -36,5 +36,29 @@ now: instructions in verilog on FPGA + opensbi in instructions from asm via assa
 
 
 用自己的芯片训练自己的AI
+在 FPGA 上部署 verilog 实现的 riscv 处理器逻辑，然后运行 freebsd, 然后用 freebsd 安装 pyTorch 训练 AI
+FPGA grok 推荐：
 Xilinx Artix-7 XC7A200T（Digilent Nexys Video）
 Xilinx Kintex-7 KC705
+Lattice ECP5
+
+
+FPGA 版的 riscv 要支持 freebsd 系统运行，最少要实现: RV64IMAFD
+I 整数
+M 乘除法
+A 原子指令集
+Zicsr 控制状态寄存器指令（内涵于 I）
+--
+F 单精度浮点数 AI 
+D 双精度浮点数 AI
+
+
+
+verilog MAFD
+golang pseudo
+golang .setion...
+run opensbi.bin freebsc.bin
+golang compiler compile opensbiC freebsc.C
+install pyTorch
+train X-mode
+run X-mode
