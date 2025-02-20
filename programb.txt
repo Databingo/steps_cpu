@@ -135,6 +135,7 @@
 
 
 //伪指令 60 条（ 32 条 x0, 28 条 no-x0）
+//-
 //nop: addi x0, x0, 0 空操作
 //neg rd, rs: sub rd, x0, rs 取负
 //negw rd, rs: subw rd, x0, rs 取负字（32bit)
@@ -150,6 +151,29 @@
 //j offset: jal x0, offset PC(pc+imm)跳转（返回地址 pc+4 写入 x0 无效）
 //jr rs: jalr x0, rs, 0 寄存器(rs+imm)跳转（返回地址 pc+4 写入 x0 无效）
 //ret: jalr x0, x1, 0 从子过程中返回（子函数返回）
+//tail offset: auipc x6, offset[32:12]; jalr x0, x6, offset[11:0] 尾调用远距离子过程
+//-
+//rdinstret[h] rd: csrrs rd, instret[h], x0 读已提交指令计数器
+//rdcycle[h] rd: csrrs rd, cycle[h], x0 读周期计数器
+//rdtimeh[h] rd: csrrs rd, time[h], x0 读实时时钟
+//-
+//csrr rd,csr:CSR 读
+//csrw csr, rs: CSR 写
+//csrs csr, rs: CSR 置位
+//csrc csr, rs: CSR 清位
+//csrwi csr, imm: CSR写立即数
+//csrsi csr, imm: CSR置位立即数
+//csrci csr, imm: CSR清位立即数
+//-
+//frcsr rd: 读浮点 csr 寄存器
+//fscsr rs: 写浮点 csr 寄存器
+//frrm rd: 读浮点写入模式
+//fsrm rs: 写浮点写入模式
+//frflags rd: 读浮点异常标识
+//fslags rs: 写浮点异常标识
+//-- no-x0
+
+
 
 
 
