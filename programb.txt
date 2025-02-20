@@ -172,6 +172,41 @@
 //frflags rd: 读浮点异常标识
 //fslags rs: 写浮点异常标识
 //-- no-x0
+//lla rd, symbol: auipc rd, symbol[31:12]; add rd, rd, symbol[11:0] 装入局部地址 ??
+//la rd, symbol: auipc rd, GOT[symbol][31:12]; l{w|d}rd, GOT[symbol][11:0](rd) 装入地址（GOT: Global Offset Table) ??
+//l{b|h|w|d} rd, symbol: auipc rd, symbol[31:12]; l{b|h|w|d} rd, symbol[11:0](rd) 读全局符号
+//s{b|h|w|d} rd, symbol, rt: auipc rt, symbol[31:12]; s{b|h|w|d} rd, symbol[11:0](rt) 写全局符号
+//fl{w|d} rd, symbol, rt: 读全局浮点符号
+//fs{w|d} rd, symbol, rt: 写全局浮点符号
+//li rd, imm: 装入立即数
+//mv rd,rs: addi rd, rs, 0 复制寄存器
+//not rd, rs: xori rd, rs, -1 取反
+//sext.w rd, rs: addiw rd, rs, 0 符号字扩展
+//seqz rd, rs: sltiu rd, rs, 1 等于 0 时置位
+//fmv.s rd, rs: 复制单精度寄存器
+//fabs.s rd, rs:单精度浮点绝对值
+//fneg.s rd, rs:单精度浮点相反数
+//fmv.d rd, rs:复制双精度寄存器
+//fabs.d rd, rs:双精度浮点绝对值
+//fneg.d rd, rs:双精度浮点相反数
+//bgt rs, rt, offset: blt rt, rs, offset 大于时分支
+//ble rs, rt, offset: bet rt, rs, offset 小于等于时分支
+//bgtu rs, rt, offset: bltu rt, rs, offset 无符号大于时分支
+//bleu rs, rt, offset: bgeu rt, rs, offset 无符号小于等于时分支
+//jal offset: jal x1, offset 跳转并链接
+//jalr rs: jalr x1, rs, 0 寄存器跳转并链接
+//call offset: auipc x1, offset[31:12]; jalr x1, offset[11:0](x1) 调用远距离过程
+//fence: fence iorw, iorw 内存和 I/O 屏障
+//fscsr rd, rs: csrrw rd, fcrs, rs 交换浮点 csr 寄存器
+//fsrm rd, rs: csrrw rd, frm, rs 交换浮点舍入模式
+//fsflags rd, rs: csrrw rd, fflags, rs 交换浮点异常模式
+
+
+
+
+
+
+
 
 
 
