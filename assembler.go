@@ -217,7 +217,7 @@ func main() {
 
 	var code []string
 	var instruction uint32
-	var address uint32 = 0 // assembly line number
+	var address uint32 = 0 // assembly line number (byte array order number)
 	lineCounter := 1
 
 	symbolTable := make(map[string]int64, 100)
@@ -230,12 +230,12 @@ func main() {
 		code = strings.FieldsFunc(line, SplitOn) // break code into its operation and operands
 		//fmt.Println(code)
 		if len(code) == 0 { // filter out whitespace
-			lineCounter++ // 空行也算以备symbol跳转正确行号
+			lineCounter++ // 空行也算, 但 symbol(label) 是以 address 每非空行加 4 来跳转（label 仅仅是用来标记当前或下一非空行的 byte 序号, 每一指令是 32 位/8 = 4 byte）
 			continue
 		}
 		switchOnOp := code[0] // check if first entry of code is a label or an op
 		if strings.HasSuffix(switchOnOp, ":") {
-			label := strings.TrimSuffix(code[0], ":")
+			label := strings.TrimSuffix(code[0], ":") // How about reduplicated lable ??
 			symbolTable[label] = int64(address) // if label exists in symbolTable, update value to valid address
 			if len(code) >= 2 {                 // opcode is in code[1] if code[0] is a label
 				switchOnOp = code[1]
@@ -248,7 +248,8 @@ func main() {
 			fmt.Println(switchOnOp)
 		}
 
-		//------------Parser?-----------
+		//------------Parser-----------
+		// When get exact operation of this line
 		fmt.Println("Parser see:", switchOnOp)
 		switch switchOnOp {
 		case "lui", "auipc", "jal": // Instruction format:  op  rd, imm     or      label: op  rd, imm
