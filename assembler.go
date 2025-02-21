@@ -75,7 +75,7 @@ func main() {
 	// 0x/0X for hexadecimal 十六进制
 
 
-	// 5 位 32 个物理存器
+	// 32(5 位)个物理存器
 	regBin := map[string]uint32{
 		"x0": 0b00000, "zero": 0b00000,
 		"x1": 0b00001, "ra": 0b00001,
@@ -111,7 +111,7 @@ func main() {
 		"x31": 0b11111, "t6": 0b11111,
 	}
 
-	// 12 位 4096 个控制态寄存器
+	// 4096(12 位)个控制态寄存器
 	csrBin := map[string]uint32{
 		"mvendorid":  0xF11, // MRO mvendorid Vendor ID
 		"marchid":    0xF12, // MRO Architecture ID
@@ -225,7 +225,8 @@ func main() {
 	symbolTable := make(map[string]int64, 100)
 	const UNKNOWN = -1
 	//    literalPool := make(map[string]int64, 100)
-	for scanner.Scan() { // first pass
+        // first pass
+	for scanner.Scan() { 
 		line := strings.Split(scanner.Text(), "#")[0] // get any text before the comment "#" and ignore any text after it
 		//------------Lexer-----------
 		code = strings.FieldsFunc(line, SplitOn) // break code into its operation and operands
