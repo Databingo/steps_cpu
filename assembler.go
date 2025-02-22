@@ -571,8 +571,31 @@ func main() {
 				fmt.Println("Invalid register on line", lineCounter)
 				os.Exit(0)
 			}
-			label = label - int64(address)
-			instruction = (uint32(label)&0x80000)<<11 | (uint32(label)&0x7FE)<<20 | (uint32(label)&0x400)<<19 | (uint32(label)&0x7F800)<<11 | rd<<7 | op
+                        //XXXXX
+			//label = label - int64(address) 
+			//instruction = (uint32(label)&0x80000)<<11 | (uint32(label)&0x7FE)<<20 | (uint32(label)&0x400)<<19 | (uint32(label)&0x7F800)<<11 | rd<<7 | op
+
+			//label = label - int64(address) >> 1 // 省略最低位 0 !!??
+			//instruction = (uint32(label)&0x80000)<<12 | (uint32(label)&0x7FE)<<20 | (uint32(label)&0x400)<<9 | (uint32(label)&0x7F800)<<11 | rd<<7 | op
+			// 0x80000 = 0b10000000000000000000(20位) 用 & 取 label 地址第 20 位(因省略了最低位实际第 21 位符号位)的值, <<12 左移 12 位, 对准 instruction 第 20+12=32 位
+			// 0x7FE = 0b11111111110(11位) 用 & 取 label 地址 11:1 位（实际 12:2），<< 左移 20 位，对准 instructin 第 11+20=31, 2+20=22 31:22 位
+			// 0x400 = 0b10000000000(11位）用 & 取 label 地址 11 位（实际 12），<< 左移 9 位，对准 instructin 第 12+9=21 位
+		        // 0x7F800 =0b1111111100000000000(19位）用 & 取 label 地址 19:12 位（实际 20:13），不移，对准 instructin 第 20:13 位 
+			// rd 长度 5 位 <<7 左移 7 位，对准 instruction 第 
+                        //XXXXX
+                        
+			// RV 约定 JAL 跳转地址省略最后一位，因为指令长度 32 位，必定以 4 byte 为单位跳转，十进制为 0，4，8... 二进制为 000,100,1000, 低 2 位为零
+			// JAL imm 显式有 20 位，最高位是符号位，加上省略的最低位，一共是 21 位有符号数, 跳转空间可以是 -2^20 到 +2^20-1, -1MB: ~1MB, 共约 2 MB 寻址空间  
+			//|imm20|imm10:1|imm11|imm19:12|rd|op|
+			offset := label - int64(address) // 计算偏移量 // JAL 中 imm 写入的偏移量默认省略最低 1 位 0 
+			//立即数分段提取(从 0 开始计数)
+			imm20    := (offset >> 20) & 0x1   //提取 imm[20]    1            长度:1
+			imm10_1  := (offset >> 1 ) & 0x3FF //提取 imm[10:1]  11.1111.1111 长度:10
+			imm11    := (offset >> 11) & 0x1   //提取 imm[11]    1            长度:1 
+			imm19_12 := (offset >> 12) & 0xFF  //提取 imm[19:12] 1111.1111    长度:8
+
+			//组合出指令
+			instruction = uint32(imm20)<<31 | uint32(imm10_1)<<21 | unit32(imm11)<<20 | uint32(imm19_12)<<12 | rd << 7 | op
 
 		case "beq", "bne", "blt", "bge", "bltu", "bgeu": // op rs1, rs2, imm
 			if len(code) != 4 {
@@ -770,6 +793,7 @@ func main() {
 		addrd := fmt.Sprintf("%03d", address)
 		little_endian_ins := ins[24:32] + " " + ins[16:24] + " " + ins[8:16] + " " + ins[0:8]
 		save_binary_instruction(little_endian_ins + " // Addr: " + addrd + " " + addr + " " + ins + " " + line)
+		//save_binary_instruction(little_endian_ins + " // Addr: " + addrd + " " + addr + " " + ins + " " + scanner.Text())
 		lineCounter++
 		address += 4
 
