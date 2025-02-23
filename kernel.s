@@ -1,4 +1,4 @@
-How a keyboard interrupt be noticed and dealed
+#How a keyboard interrupt be noticed and dealed
 
 #  ------before------
 #  MIE set by software when initial
@@ -51,6 +51,6 @@ andi    s3, s3, 1       # bitwise AND only left the "UART data ready" position a
 beq     x0, s3, loop
 lb s4, 0(s1)
 sb s4, 0(s1) 
-bltu    x0, s3, loop
-#jal x0, loop # jal to 2440 ? bug?
+#bltu    x0, s3, loop
+jal x0, loop # jal to 2440 ? bug?
 
