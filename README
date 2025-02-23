@@ -61,3 +61,8 @@ golang compiler compile opensbiC freebsc.C
 install pyTorch
 train X-mode
 run X-mode
+
+
+指令|assembler.go汇编实现|qemu测试正常|verilog编码实现|iverilog测试正常|fpga测试正常
+Jal |Y                   |Y           |Y              |                |
+
