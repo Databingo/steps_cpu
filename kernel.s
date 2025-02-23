@@ -1,5 +1,4 @@
 #How a keyboard interrupt be noticed and dealed
-
 #  ------before------
 #  MIE set by software when initial
 #  MTVEC set by sofeware when initial
@@ -52,5 +51,5 @@ beq     x0, s3, loop
 lb s4, 0(s1)
 sb s4, 0(s1) 
 #bltu    x0, s3, loop
-jal x0, loop # jal to 2440 ? bug?
+jal x0, loop # jal to loop
 
