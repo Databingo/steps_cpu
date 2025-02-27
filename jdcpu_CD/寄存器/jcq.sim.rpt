@@ -1,0 +1,714 @@
+Simulator report for jcq
+Wed Sep 25 15:23:09 2013
+Quartus II Version 7.2 Build 151 09/26/2007 SJ Web Edition
+
+
+---------------------
+; Table of Contents ;
+---------------------
+  1. Legal Notice
+  2. Simulator Summary
+  3. Simulator Settings
+  4. Simulation Waveforms
+  5. Coverage Summary
+  6. Complete 1/0-Value Coverage
+  7. Missing 1-Value Coverage
+  8. Missing 0-Value Coverage
+  9. Simulator INI Usage
+ 10. Simulator Messages
+
+
+
+----------------
+; Legal Notice ;
+----------------
+Copyright (C) 1991-2007 Altera Corporation
+Your use of Altera Corporation's design tools, logic functions 
+and other software and tools, and its AMPP partner logic 
+functions, and any output files from any of the foregoing 
+(including device programming or simulation files), and any 
+associated documentation or information are expressly subject 
+to the terms and conditions of the Altera Program License 
+Subscription Agreement, Altera MegaCore Function License 
+Agreement, or other applicable license agreement, including, 
+without limitation, that your use is for the sole purpose of 
+programming logic devices manufactured by Altera and sold by 
+Altera or its authorized distributors.  Please refer to the 
+applicable agreement for further details.
+
+
+
++--------------------------------------------+
+; Simulator Summary                          ;
++-----------------------------+--------------+
+; Type                        ; Value        ;
++-----------------------------+--------------+
+; Simulation Start Time       ; 0 ps         ;
+; Simulation End Time         ; 100.0 us     ;
+; Simulation Netlist Size     ; 552 nodes    ;
+; Simulation Coverage         ;     100.00 % ;
+; Total Number of Transitions ; 22700        ;
+; Simulation Breakpoints      ; 0            ;
+; Family                      ; Cyclone      ;
+; Device                      ; EP1C20F400C8 ;
++-----------------------------+--------------+
+
+
++-------------------------------------------------------------------------------------------------------------------------+
+; Simulator Settings                                                                                                      ;
++--------------------------------------------------------------------------------------------+------------+---------------+
+; Option                                                                                     ; Setting    ; Default Value ;
++--------------------------------------------------------------------------------------------+------------+---------------+
+; Simulation mode                                                                            ; Timing     ; Timing        ;
+; Start time                                                                                 ; 0 ns       ; 0 ns          ;
+; Simulation results format                                                                  ; CVWF       ;               ;
+; Vector input source                                                                        ; ymq256.vwf ;               ;
+; Add pins automatically to simulation output waveforms                                      ; On         ; On            ;
+; Check outputs                                                                              ; Off        ; Off           ;
+; Report simulation coverage                                                                 ; On         ; On            ;
+; Display complete 1/0 value coverage report                                                 ; On         ; On            ;
+; Display missing 1-value coverage report                                                    ; On         ; On            ;
+; Display missing 0-value coverage report                                                    ; On         ; On            ;
+; Detect setup and hold time violations                                                      ; Off        ; Off           ;
+; Detect glitches                                                                            ; Off        ; Off           ;
+; Disable timing delays in Timing Simulation                                                 ; Off        ; Off           ;
+; Generate Signal Activity File                                                              ; Off        ; Off           ;
+; Generate VCD File for PowerPlay Power Analyzer                                             ; Off        ; Off           ;
+; Group bus channels in simulation results                                                   ; Off        ; Off           ;
+; Preserve fewer signal transitions to reduce memory requirements                            ; On         ; On            ;
+; Trigger vector comparison with the specified mode                                          ; INPUT_EDGE ; INPUT_EDGE    ;
+; Disable setup and hold time violations detection in input registers of bi-directional pins ; Off        ; Off           ;
+; Overwrite Waveform Inputs With Simulation Outputs                                          ; On         ;               ;
+; Perform Glitch Filtering in Timing Simulation                                              ; Auto       ; Auto          ;
++--------------------------------------------------------------------------------------------+------------+---------------+
+
+
++----------------------+
+; Simulation Waveforms ;
++----------------------+
+Waveform report data cannot be output to ASCII.
+Please use Quartus II to view the waveform report data.
+
+
++--------------------------------------------------------------------+
+; Coverage Summary                                                   ;
++-----------------------------------------------------+--------------+
+; Type                                                ; Value        ;
++-----------------------------------------------------+--------------+
+; Total coverage as a percentage                      ;     100.00 % ;
+; Total nodes checked                                 ; 552          ;
+; Total output ports checked                          ; 552          ;
+; Total output ports with complete 1/0-value coverage ; 552          ;
+; Total output ports with no 1/0-value coverage       ; 0            ;
+; Total output ports with no 1-value coverage         ; 0            ;
+; Total output ports with no 0-value coverage         ; 0            ;
++-----------------------------------------------------+--------------+
+
+
+The following table displays output ports that toggle between 1 and 0 during simulation.
++------------------------------------------------------------------------------+
+; Complete 1/0-Value Coverage                                                  ;
++-----------------------------+-----------------------------+------------------+
+; Node Name                   ; Output Port Name            ; Output Port Type ;
++-----------------------------+-----------------------------+------------------+
+; |ymq8|ymq_4:inst11|inst2~48 ; |ymq8|ymq_4:inst11|inst2~48 ; combout          ;
+; |ymq8|ymq_4:inst19|inst2~48 ; |ymq8|ymq_4:inst19|inst2~48 ; combout          ;
+; |ymq8|inst29[15]            ; |ymq8|inst29[15]            ; combout          ;
+; |ymq8|ymq_4:inst11|inst2~49 ; |ymq8|ymq_4:inst11|inst2~49 ; combout          ;
+; |ymq8|inst29[14]            ; |ymq8|inst29[14]            ; combout          ;
+; |ymq8|ymq_4:inst11|inst2~50 ; |ymq8|ymq_4:inst11|inst2~50 ; combout          ;
+; |ymq8|inst29[13]            ; |ymq8|inst29[13]            ; combout          ;
+; |ymq8|ymq_4:inst11|inst2~51 ; |ymq8|ymq_4:inst11|inst2~51 ; combout          ;
+; |ymq8|inst29[12]            ; |ymq8|inst29[12]            ; combout          ;
+; |ymq8|ymq_4:inst11|inst2~52 ; |ymq8|ymq_4:inst11|inst2~52 ; combout          ;
+; |ymq8|inst29[11]            ; |ymq8|inst29[11]            ; combout          ;
+; |ymq8|ymq_4:inst11|inst2~53 ; |ymq8|ymq_4:inst11|inst2~53 ; combout          ;
+; |ymq8|inst29[10]            ; |ymq8|inst29[10]            ; combout          ;
+; |ymq8|ymq_4:inst11|inst2~54 ; |ymq8|ymq_4:inst11|inst2~54 ; combout          ;
+; |ymq8|inst29[9]             ; |ymq8|inst29[9]             ; combout          ;
+; |ymq8|ymq_4:inst11|inst2~55 ; |ymq8|ymq_4:inst11|inst2~55 ; combout          ;
+; |ymq8|inst29[8]             ; |ymq8|inst29[8]             ; combout          ;
+; |ymq8|ymq_4:inst11|inst2~56 ; |ymq8|ymq_4:inst11|inst2~56 ; combout          ;
+; |ymq8|inst29[7]             ; |ymq8|inst29[7]             ; combout          ;
+; |ymq8|ymq_4:inst11|inst2~57 ; |ymq8|ymq_4:inst11|inst2~57 ; combout          ;
+; |ymq8|inst29[6]             ; |ymq8|inst29[6]             ; combout          ;
+; |ymq8|ymq_4:inst11|inst2~58 ; |ymq8|ymq_4:inst11|inst2~58 ; combout          ;
+; |ymq8|inst29[5]             ; |ymq8|inst29[5]             ; combout          ;
+; |ymq8|ymq_4:inst11|inst2~59 ; |ymq8|ymq_4:inst11|inst2~59 ; combout          ;
+; |ymq8|inst29[4]             ; |ymq8|inst29[4]             ; combout          ;
+; |ymq8|ymq_4:inst11|inst2~60 ; |ymq8|ymq_4:inst11|inst2~60 ; combout          ;
+; |ymq8|inst29[3]             ; |ymq8|inst29[3]             ; combout          ;
+; |ymq8|ymq_4:inst11|inst2~61 ; |ymq8|ymq_4:inst11|inst2~61 ; combout          ;
+; |ymq8|inst29[2]             ; |ymq8|inst29[2]             ; combout          ;
+; |ymq8|ymq_4:inst11|inst2~62 ; |ymq8|ymq_4:inst11|inst2~62 ; combout          ;
+; |ymq8|inst29[1]             ; |ymq8|inst29[1]             ; combout          ;
+; |ymq8|ymq_4:inst11|inst2~63 ; |ymq8|ymq_4:inst11|inst2~63 ; combout          ;
+; |ymq8|inst29[0]             ; |ymq8|inst29[0]             ; combout          ;
+; |ymq8|ymq_4:inst19|inst2~49 ; |ymq8|ymq_4:inst19|inst2~49 ; combout          ;
+; |ymq8|inst27[15]            ; |ymq8|inst27[15]            ; combout          ;
+; |ymq8|inst27[14]            ; |ymq8|inst27[14]            ; combout          ;
+; |ymq8|inst27[13]            ; |ymq8|inst27[13]            ; combout          ;
+; |ymq8|inst27[12]            ; |ymq8|inst27[12]            ; combout          ;
+; |ymq8|inst27[11]            ; |ymq8|inst27[11]            ; combout          ;
+; |ymq8|inst27[10]            ; |ymq8|inst27[10]            ; combout          ;
+; |ymq8|inst27[9]             ; |ymq8|inst27[9]             ; combout          ;
+; |ymq8|inst27[8]             ; |ymq8|inst27[8]             ; combout          ;
+; |ymq8|inst27[7]             ; |ymq8|inst27[7]             ; combout          ;
+; |ymq8|inst27[6]             ; |ymq8|inst27[6]             ; combout          ;
+; |ymq8|inst27[5]             ; |ymq8|inst27[5]             ; combout          ;
+; |ymq8|inst27[4]             ; |ymq8|inst27[4]             ; combout          ;
+; |ymq8|inst27[3]             ; |ymq8|inst27[3]             ; combout          ;
+; |ymq8|inst27[2]             ; |ymq8|inst27[2]             ; combout          ;
+; |ymq8|inst27[1]             ; |ymq8|inst27[1]             ; combout          ;
+; |ymq8|inst27[0]             ; |ymq8|inst27[0]             ; combout          ;
+; |ymq8|ymq_4:inst19|inst2~50 ; |ymq8|ymq_4:inst19|inst2~50 ; combout          ;
+; |ymq8|inst25[15]            ; |ymq8|inst25[15]            ; combout          ;
+; |ymq8|inst25[14]            ; |ymq8|inst25[14]            ; combout          ;
+; |ymq8|inst25[13]            ; |ymq8|inst25[13]            ; combout          ;
+; |ymq8|inst25[12]            ; |ymq8|inst25[12]            ; combout          ;
+; |ymq8|inst25[11]            ; |ymq8|inst25[11]            ; combout          ;
+; |ymq8|inst25[10]            ; |ymq8|inst25[10]            ; combout          ;
+; |ymq8|inst25[9]             ; |ymq8|inst25[9]             ; combout          ;
+; |ymq8|inst25[8]             ; |ymq8|inst25[8]             ; combout          ;
+; |ymq8|inst25[7]             ; |ymq8|inst25[7]             ; combout          ;
+; |ymq8|inst25[6]             ; |ymq8|inst25[6]             ; combout          ;
+; |ymq8|inst25[5]             ; |ymq8|inst25[5]             ; combout          ;
+; |ymq8|inst25[4]             ; |ymq8|inst25[4]             ; combout          ;
+; |ymq8|inst25[3]             ; |ymq8|inst25[3]             ; combout          ;
+; |ymq8|inst25[2]             ; |ymq8|inst25[2]             ; combout          ;
+; |ymq8|inst25[1]             ; |ymq8|inst25[1]             ; combout          ;
+; |ymq8|inst25[0]             ; |ymq8|inst25[0]             ; combout          ;
+; |ymq8|ymq_4:inst19|inst2~51 ; |ymq8|ymq_4:inst19|inst2~51 ; combout          ;
+; |ymq8|inst23[15]            ; |ymq8|inst23[15]            ; combout          ;
+; |ymq8|inst23[14]            ; |ymq8|inst23[14]            ; combout          ;
+; |ymq8|inst23[13]            ; |ymq8|inst23[13]            ; combout          ;
+; |ymq8|inst23[12]            ; |ymq8|inst23[12]            ; combout          ;
+; |ymq8|inst23[11]            ; |ymq8|inst23[11]            ; combout          ;
+; |ymq8|inst23[10]            ; |ymq8|inst23[10]            ; combout          ;
+; |ymq8|inst23[9]             ; |ymq8|inst23[9]             ; combout          ;
+; |ymq8|inst23[8]             ; |ymq8|inst23[8]             ; combout          ;
+; |ymq8|inst23[7]             ; |ymq8|inst23[7]             ; combout          ;
+; |ymq8|inst23[6]             ; |ymq8|inst23[6]             ; combout          ;
+; |ymq8|inst23[5]             ; |ymq8|inst23[5]             ; combout          ;
+; |ymq8|inst23[4]             ; |ymq8|inst23[4]             ; combout          ;
+; |ymq8|inst23[3]             ; |ymq8|inst23[3]             ; combout          ;
+; |ymq8|inst23[2]             ; |ymq8|inst23[2]             ; combout          ;
+; |ymq8|inst23[1]             ; |ymq8|inst23[1]             ; combout          ;
+; |ymq8|inst23[0]             ; |ymq8|inst23[0]             ; combout          ;
+; |ymq8|ymq_4:inst19|inst2~52 ; |ymq8|ymq_4:inst19|inst2~52 ; combout          ;
+; |ymq8|inst21[15]            ; |ymq8|inst21[15]            ; combout          ;
+; |ymq8|inst21[14]            ; |ymq8|inst21[14]            ; combout          ;
+; |ymq8|inst21[13]            ; |ymq8|inst21[13]            ; combout          ;
+; |ymq8|inst21[12]            ; |ymq8|inst21[12]            ; combout          ;
+; |ymq8|inst21[11]            ; |ymq8|inst21[11]            ; combout          ;
+; |ymq8|inst21[10]            ; |ymq8|inst21[10]            ; combout          ;
+; |ymq8|inst21[9]             ; |ymq8|inst21[9]             ; combout          ;
+; |ymq8|inst21[8]             ; |ymq8|inst21[8]             ; combout          ;
+; |ymq8|inst21[7]             ; |ymq8|inst21[7]             ; combout          ;
+; |ymq8|inst21[6]             ; |ymq8|inst21[6]             ; combout          ;
+; |ymq8|inst21[5]             ; |ymq8|inst21[5]             ; combout          ;
+; |ymq8|inst21[4]             ; |ymq8|inst21[4]             ; combout          ;
+; |ymq8|inst21[3]             ; |ymq8|inst21[3]             ; combout          ;
+; |ymq8|inst21[2]             ; |ymq8|inst21[2]             ; combout          ;
+; |ymq8|inst21[1]             ; |ymq8|inst21[1]             ; combout          ;
+; |ymq8|inst21[0]             ; |ymq8|inst21[0]             ; combout          ;
+; |ymq8|ymq_4:inst19|inst2~53 ; |ymq8|ymq_4:inst19|inst2~53 ; combout          ;
+; |ymq8|inst18[15]            ; |ymq8|inst18[15]            ; combout          ;
+; |ymq8|inst18[14]            ; |ymq8|inst18[14]            ; combout          ;
+; |ymq8|inst18[13]            ; |ymq8|inst18[13]            ; combout          ;
+; |ymq8|inst18[12]            ; |ymq8|inst18[12]            ; combout          ;
+; |ymq8|inst18[11]            ; |ymq8|inst18[11]            ; combout          ;
+; |ymq8|inst18[10]            ; |ymq8|inst18[10]            ; combout          ;
+; |ymq8|inst18[9]             ; |ymq8|inst18[9]             ; combout          ;
+; |ymq8|inst18[8]             ; |ymq8|inst18[8]             ; combout          ;
+; |ymq8|inst18[7]             ; |ymq8|inst18[7]             ; combout          ;
+; |ymq8|inst18[6]             ; |ymq8|inst18[6]             ; combout          ;
+; |ymq8|inst18[5]             ; |ymq8|inst18[5]             ; combout          ;
+; |ymq8|inst18[4]             ; |ymq8|inst18[4]             ; combout          ;
+; |ymq8|inst18[3]             ; |ymq8|inst18[3]             ; combout          ;
+; |ymq8|inst18[2]             ; |ymq8|inst18[2]             ; combout          ;
+; |ymq8|inst18[1]             ; |ymq8|inst18[1]             ; combout          ;
+; |ymq8|inst18[0]             ; |ymq8|inst18[0]             ; combout          ;
+; |ymq8|ymq_4:inst19|inst2~54 ; |ymq8|ymq_4:inst19|inst2~54 ; combout          ;
+; |ymq8|inst16[15]            ; |ymq8|inst16[15]            ; combout          ;
+; |ymq8|inst16[14]            ; |ymq8|inst16[14]            ; combout          ;
+; |ymq8|inst16[13]            ; |ymq8|inst16[13]            ; combout          ;
+; |ymq8|inst16[12]            ; |ymq8|inst16[12]            ; combout          ;
+; |ymq8|inst16[11]            ; |ymq8|inst16[11]            ; combout          ;
+; |ymq8|inst16[10]            ; |ymq8|inst16[10]            ; combout          ;
+; |ymq8|inst16[9]             ; |ymq8|inst16[9]             ; combout          ;
+; |ymq8|inst16[8]             ; |ymq8|inst16[8]             ; combout          ;
+; |ymq8|inst16[7]             ; |ymq8|inst16[7]             ; combout          ;
+; |ymq8|inst16[6]             ; |ymq8|inst16[6]             ; combout          ;
+; |ymq8|inst16[5]             ; |ymq8|inst16[5]             ; combout          ;
+; |ymq8|inst16[4]             ; |ymq8|inst16[4]             ; combout          ;
+; |ymq8|inst16[3]             ; |ymq8|inst16[3]             ; combout          ;
+; |ymq8|inst16[2]             ; |ymq8|inst16[2]             ; combout          ;
+; |ymq8|inst16[1]             ; |ymq8|inst16[1]             ; combout          ;
+; |ymq8|inst16[0]             ; |ymq8|inst16[0]             ; combout          ;
+; |ymq8|ymq_4:inst19|inst2~55 ; |ymq8|ymq_4:inst19|inst2~55 ; combout          ;
+; |ymq8|inst2[15]             ; |ymq8|inst2[15]             ; combout          ;
+; |ymq8|inst2[14]             ; |ymq8|inst2[14]             ; combout          ;
+; |ymq8|inst2[13]             ; |ymq8|inst2[13]             ; combout          ;
+; |ymq8|inst2[12]             ; |ymq8|inst2[12]             ; combout          ;
+; |ymq8|inst2[11]             ; |ymq8|inst2[11]             ; combout          ;
+; |ymq8|inst2[10]             ; |ymq8|inst2[10]             ; combout          ;
+; |ymq8|inst2[9]              ; |ymq8|inst2[9]              ; combout          ;
+; |ymq8|inst2[8]              ; |ymq8|inst2[8]              ; combout          ;
+; |ymq8|inst2[7]              ; |ymq8|inst2[7]              ; combout          ;
+; |ymq8|inst2[6]              ; |ymq8|inst2[6]              ; combout          ;
+; |ymq8|inst2[5]              ; |ymq8|inst2[5]              ; combout          ;
+; |ymq8|inst2[4]              ; |ymq8|inst2[4]              ; combout          ;
+; |ymq8|inst2[3]              ; |ymq8|inst2[3]              ; combout          ;
+; |ymq8|inst2[2]              ; |ymq8|inst2[2]              ; combout          ;
+; |ymq8|inst2[1]              ; |ymq8|inst2[1]              ; combout          ;
+; |ymq8|inst2[0]              ; |ymq8|inst2[0]              ; combout          ;
+; |ymq8|ymq_4:inst19|inst2~56 ; |ymq8|ymq_4:inst19|inst2~56 ; combout          ;
+; |ymq8|inst14[15]            ; |ymq8|inst14[15]            ; combout          ;
+; |ymq8|inst14[14]            ; |ymq8|inst14[14]            ; combout          ;
+; |ymq8|inst14[13]            ; |ymq8|inst14[13]            ; combout          ;
+; |ymq8|inst14[12]            ; |ymq8|inst14[12]            ; combout          ;
+; |ymq8|inst14[11]            ; |ymq8|inst14[11]            ; combout          ;
+; |ymq8|inst14[10]            ; |ymq8|inst14[10]            ; combout          ;
+; |ymq8|inst14[9]             ; |ymq8|inst14[9]             ; combout          ;
+; |ymq8|inst14[8]             ; |ymq8|inst14[8]             ; combout          ;
+; |ymq8|inst14[7]             ; |ymq8|inst14[7]             ; combout          ;
+; |ymq8|inst14[6]             ; |ymq8|inst14[6]             ; combout          ;
+; |ymq8|inst14[5]             ; |ymq8|inst14[5]             ; combout          ;
+; |ymq8|inst14[4]             ; |ymq8|inst14[4]             ; combout          ;
+; |ymq8|inst14[3]             ; |ymq8|inst14[3]             ; combout          ;
+; |ymq8|inst14[2]             ; |ymq8|inst14[2]             ; combout          ;
+; |ymq8|inst14[1]             ; |ymq8|inst14[1]             ; combout          ;
+; |ymq8|inst14[0]             ; |ymq8|inst14[0]             ; combout          ;
+; |ymq8|ymq_4:inst19|inst2~57 ; |ymq8|ymq_4:inst19|inst2~57 ; combout          ;
+; |ymq8|inst8[15]             ; |ymq8|inst8[15]             ; combout          ;
+; |ymq8|inst8[14]             ; |ymq8|inst8[14]             ; combout          ;
+; |ymq8|inst8[13]             ; |ymq8|inst8[13]             ; combout          ;
+; |ymq8|inst8[12]             ; |ymq8|inst8[12]             ; combout          ;
+; |ymq8|inst8[11]             ; |ymq8|inst8[11]             ; combout          ;
+; |ymq8|inst8[10]             ; |ymq8|inst8[10]             ; combout          ;
+; |ymq8|inst8[9]              ; |ymq8|inst8[9]              ; combout          ;
+; |ymq8|inst8[8]              ; |ymq8|inst8[8]              ; combout          ;
+; |ymq8|inst8[7]              ; |ymq8|inst8[7]              ; combout          ;
+; |ymq8|inst8[6]              ; |ymq8|inst8[6]              ; combout          ;
+; |ymq8|inst8[5]              ; |ymq8|inst8[5]              ; combout          ;
+; |ymq8|inst8[4]              ; |ymq8|inst8[4]              ; combout          ;
+; |ymq8|inst8[3]              ; |ymq8|inst8[3]              ; combout          ;
+; |ymq8|inst8[2]              ; |ymq8|inst8[2]              ; combout          ;
+; |ymq8|inst8[1]              ; |ymq8|inst8[1]              ; combout          ;
+; |ymq8|inst8[0]              ; |ymq8|inst8[0]              ; combout          ;
+; |ymq8|ymq_4:inst19|inst2~58 ; |ymq8|ymq_4:inst19|inst2~58 ; combout          ;
+; |ymq8|inst7[15]             ; |ymq8|inst7[15]             ; combout          ;
+; |ymq8|inst7[14]             ; |ymq8|inst7[14]             ; combout          ;
+; |ymq8|inst7[13]             ; |ymq8|inst7[13]             ; combout          ;
+; |ymq8|inst7[12]             ; |ymq8|inst7[12]             ; combout          ;
+; |ymq8|inst7[11]             ; |ymq8|inst7[11]             ; combout          ;
+; |ymq8|inst7[10]             ; |ymq8|inst7[10]             ; combout          ;
+; |ymq8|inst7[9]              ; |ymq8|inst7[9]              ; combout          ;
+; |ymq8|inst7[8]              ; |ymq8|inst7[8]              ; combout          ;
+; |ymq8|inst7[7]              ; |ymq8|inst7[7]              ; combout          ;
+; |ymq8|inst7[6]              ; |ymq8|inst7[6]              ; combout          ;
+; |ymq8|inst7[5]              ; |ymq8|inst7[5]              ; combout          ;
+; |ymq8|inst7[4]              ; |ymq8|inst7[4]              ; combout          ;
+; |ymq8|inst7[3]              ; |ymq8|inst7[3]              ; combout          ;
+; |ymq8|inst7[2]              ; |ymq8|inst7[2]              ; combout          ;
+; |ymq8|inst7[1]              ; |ymq8|inst7[1]              ; combout          ;
+; |ymq8|inst7[0]              ; |ymq8|inst7[0]              ; combout          ;
+; |ymq8|ymq_4:inst19|inst2~59 ; |ymq8|ymq_4:inst19|inst2~59 ; combout          ;
+; |ymq8|inst6[15]             ; |ymq8|inst6[15]             ; combout          ;
+; |ymq8|inst6[14]             ; |ymq8|inst6[14]             ; combout          ;
+; |ymq8|inst6[13]             ; |ymq8|inst6[13]             ; combout          ;
+; |ymq8|inst6[12]             ; |ymq8|inst6[12]             ; combout          ;
+; |ymq8|inst6[11]             ; |ymq8|inst6[11]             ; combout          ;
+; |ymq8|inst6[10]             ; |ymq8|inst6[10]             ; combout          ;
+; |ymq8|inst6[9]              ; |ymq8|inst6[9]              ; combout          ;
+; |ymq8|inst6[8]              ; |ymq8|inst6[8]              ; combout          ;
+; |ymq8|inst6[7]              ; |ymq8|inst6[7]              ; combout          ;
+; |ymq8|inst6[6]              ; |ymq8|inst6[6]              ; combout          ;
+; |ymq8|inst6[5]              ; |ymq8|inst6[5]              ; combout          ;
+; |ymq8|inst6[4]              ; |ymq8|inst6[4]              ; combout          ;
+; |ymq8|inst6[3]              ; |ymq8|inst6[3]              ; combout          ;
+; |ymq8|inst6[2]              ; |ymq8|inst6[2]              ; combout          ;
+; |ymq8|inst6[1]              ; |ymq8|inst6[1]              ; combout          ;
+; |ymq8|inst6[0]              ; |ymq8|inst6[0]              ; combout          ;
+; |ymq8|ymq_4:inst19|inst2~60 ; |ymq8|ymq_4:inst19|inst2~60 ; combout          ;
+; |ymq8|inst5[15]             ; |ymq8|inst5[15]             ; combout          ;
+; |ymq8|inst5[14]             ; |ymq8|inst5[14]             ; combout          ;
+; |ymq8|inst5[13]             ; |ymq8|inst5[13]             ; combout          ;
+; |ymq8|inst5[12]             ; |ymq8|inst5[12]             ; combout          ;
+; |ymq8|inst5[11]             ; |ymq8|inst5[11]             ; combout          ;
+; |ymq8|inst5[10]             ; |ymq8|inst5[10]             ; combout          ;
+; |ymq8|inst5[9]              ; |ymq8|inst5[9]              ; combout          ;
+; |ymq8|inst5[8]              ; |ymq8|inst5[8]              ; combout          ;
+; |ymq8|inst5[7]              ; |ymq8|inst5[7]              ; combout          ;
+; |ymq8|inst5[6]              ; |ymq8|inst5[6]              ; combout          ;
+; |ymq8|inst5[5]              ; |ymq8|inst5[5]              ; combout          ;
+; |ymq8|inst5[4]              ; |ymq8|inst5[4]              ; combout          ;
+; |ymq8|inst5[3]              ; |ymq8|inst5[3]              ; combout          ;
+; |ymq8|inst5[2]              ; |ymq8|inst5[2]              ; combout          ;
+; |ymq8|inst5[1]              ; |ymq8|inst5[1]              ; combout          ;
+; |ymq8|inst5[0]              ; |ymq8|inst5[0]              ; combout          ;
+; |ymq8|ymq_4:inst19|inst2~61 ; |ymq8|ymq_4:inst19|inst2~61 ; combout          ;
+; |ymq8|inst4[15]             ; |ymq8|inst4[15]             ; combout          ;
+; |ymq8|inst4[14]             ; |ymq8|inst4[14]             ; combout          ;
+; |ymq8|inst4[13]             ; |ymq8|inst4[13]             ; combout          ;
+; |ymq8|inst4[12]             ; |ymq8|inst4[12]             ; combout          ;
+; |ymq8|inst4[11]             ; |ymq8|inst4[11]             ; combout          ;
+; |ymq8|inst4[10]             ; |ymq8|inst4[10]             ; combout          ;
+; |ymq8|inst4[9]              ; |ymq8|inst4[9]              ; combout          ;
+; |ymq8|inst4[8]              ; |ymq8|inst4[8]              ; combout          ;
+; |ymq8|inst4[7]              ; |ymq8|inst4[7]              ; combout          ;
+; |ymq8|inst4[6]              ; |ymq8|inst4[6]              ; combout          ;
+; |ymq8|inst4[5]              ; |ymq8|inst4[5]              ; combout          ;
+; |ymq8|inst4[4]              ; |ymq8|inst4[4]              ; combout          ;
+; |ymq8|inst4[3]              ; |ymq8|inst4[3]              ; combout          ;
+; |ymq8|inst4[2]              ; |ymq8|inst4[2]              ; combout          ;
+; |ymq8|inst4[1]              ; |ymq8|inst4[1]              ; combout          ;
+; |ymq8|inst4[0]              ; |ymq8|inst4[0]              ; combout          ;
+; |ymq8|ymq_4:inst19|inst2~62 ; |ymq8|ymq_4:inst19|inst2~62 ; combout          ;
+; |ymq8|inst3[15]             ; |ymq8|inst3[15]             ; combout          ;
+; |ymq8|inst3[14]             ; |ymq8|inst3[14]             ; combout          ;
+; |ymq8|inst3[13]             ; |ymq8|inst3[13]             ; combout          ;
+; |ymq8|inst3[12]             ; |ymq8|inst3[12]             ; combout          ;
+; |ymq8|inst3[11]             ; |ymq8|inst3[11]             ; combout          ;
+; |ymq8|inst3[10]             ; |ymq8|inst3[10]             ; combout          ;
+; |ymq8|inst3[9]              ; |ymq8|inst3[9]              ; combout          ;
+; |ymq8|inst3[8]              ; |ymq8|inst3[8]              ; combout          ;
+; |ymq8|inst3[7]              ; |ymq8|inst3[7]              ; combout          ;
+; |ymq8|inst3[6]              ; |ymq8|inst3[6]              ; combout          ;
+; |ymq8|inst3[5]              ; |ymq8|inst3[5]              ; combout          ;
+; |ymq8|inst3[4]              ; |ymq8|inst3[4]              ; combout          ;
+; |ymq8|inst3[3]              ; |ymq8|inst3[3]              ; combout          ;
+; |ymq8|inst3[2]              ; |ymq8|inst3[2]              ; combout          ;
+; |ymq8|inst3[1]              ; |ymq8|inst3[1]              ; combout          ;
+; |ymq8|inst3[0]              ; |ymq8|inst3[0]              ; combout          ;
+; |ymq8|ymq_4:inst19|inst2~63 ; |ymq8|ymq_4:inst19|inst2~63 ; combout          ;
+; |ymq8|inst1[15]             ; |ymq8|inst1[15]             ; combout          ;
+; |ymq8|inst1[14]             ; |ymq8|inst1[14]             ; combout          ;
+; |ymq8|inst1[13]             ; |ymq8|inst1[13]             ; combout          ;
+; |ymq8|inst1[12]             ; |ymq8|inst1[12]             ; combout          ;
+; |ymq8|inst1[11]             ; |ymq8|inst1[11]             ; combout          ;
+; |ymq8|inst1[10]             ; |ymq8|inst1[10]             ; combout          ;
+; |ymq8|inst1[9]              ; |ymq8|inst1[9]              ; combout          ;
+; |ymq8|inst1[8]              ; |ymq8|inst1[8]              ; combout          ;
+; |ymq8|inst1[7]              ; |ymq8|inst1[7]              ; combout          ;
+; |ymq8|inst1[6]              ; |ymq8|inst1[6]              ; combout          ;
+; |ymq8|inst1[5]              ; |ymq8|inst1[5]              ; combout          ;
+; |ymq8|inst1[4]              ; |ymq8|inst1[4]              ; combout          ;
+; |ymq8|inst1[3]              ; |ymq8|inst1[3]              ; combout          ;
+; |ymq8|inst1[2]              ; |ymq8|inst1[2]              ; combout          ;
+; |ymq8|inst1[1]              ; |ymq8|inst1[1]              ; combout          ;
+; |ymq8|inst1[0]              ; |ymq8|inst1[0]              ; combout          ;
+; |ymq8|addr[255]             ; |ymq8|addr[255]             ; padio            ;
+; |ymq8|addr[254]             ; |ymq8|addr[254]             ; padio            ;
+; |ymq8|addr[253]             ; |ymq8|addr[253]             ; padio            ;
+; |ymq8|addr[252]             ; |ymq8|addr[252]             ; padio            ;
+; |ymq8|addr[251]             ; |ymq8|addr[251]             ; padio            ;
+; |ymq8|addr[250]             ; |ymq8|addr[250]             ; padio            ;
+; |ymq8|addr[249]             ; |ymq8|addr[249]             ; padio            ;
+; |ymq8|addr[248]             ; |ymq8|addr[248]             ; padio            ;
+; |ymq8|addr[247]             ; |ymq8|addr[247]             ; padio            ;
+; |ymq8|addr[246]             ; |ymq8|addr[246]             ; padio            ;
+; |ymq8|addr[245]             ; |ymq8|addr[245]             ; padio            ;
+; |ymq8|addr[244]             ; |ymq8|addr[244]             ; padio            ;
+; |ymq8|addr[243]             ; |ymq8|addr[243]             ; padio            ;
+; |ymq8|addr[242]             ; |ymq8|addr[242]             ; padio            ;
+; |ymq8|addr[241]             ; |ymq8|addr[241]             ; padio            ;
+; |ymq8|addr[240]             ; |ymq8|addr[240]             ; padio            ;
+; |ymq8|addr[239]             ; |ymq8|addr[239]             ; padio            ;
+; |ymq8|addr[238]             ; |ymq8|addr[238]             ; padio            ;
+; |ymq8|addr[237]             ; |ymq8|addr[237]             ; padio            ;
+; |ymq8|addr[236]             ; |ymq8|addr[236]             ; padio            ;
+; |ymq8|addr[235]             ; |ymq8|addr[235]             ; padio            ;
+; |ymq8|addr[234]             ; |ymq8|addr[234]             ; padio            ;
+; |ymq8|addr[233]             ; |ymq8|addr[233]             ; padio            ;
+; |ymq8|addr[232]             ; |ymq8|addr[232]             ; padio            ;
+; |ymq8|addr[231]             ; |ymq8|addr[231]             ; padio            ;
+; |ymq8|addr[230]             ; |ymq8|addr[230]             ; padio            ;
+; |ymq8|addr[229]             ; |ymq8|addr[229]             ; padio            ;
+; |ymq8|addr[228]             ; |ymq8|addr[228]             ; padio            ;
+; |ymq8|addr[227]             ; |ymq8|addr[227]             ; padio            ;
+; |ymq8|addr[226]             ; |ymq8|addr[226]             ; padio            ;
+; |ymq8|addr[225]             ; |ymq8|addr[225]             ; padio            ;
+; |ymq8|addr[224]             ; |ymq8|addr[224]             ; padio            ;
+; |ymq8|addr[223]             ; |ymq8|addr[223]             ; padio            ;
+; |ymq8|addr[222]             ; |ymq8|addr[222]             ; padio            ;
+; |ymq8|addr[221]             ; |ymq8|addr[221]             ; padio            ;
+; |ymq8|addr[220]             ; |ymq8|addr[220]             ; padio            ;
+; |ymq8|addr[219]             ; |ymq8|addr[219]             ; padio            ;
+; |ymq8|addr[218]             ; |ymq8|addr[218]             ; padio            ;
+; |ymq8|addr[217]             ; |ymq8|addr[217]             ; padio            ;
+; |ymq8|addr[216]             ; |ymq8|addr[216]             ; padio            ;
+; |ymq8|addr[215]             ; |ymq8|addr[215]             ; padio            ;
+; |ymq8|addr[214]             ; |ymq8|addr[214]             ; padio            ;
+; |ymq8|addr[213]             ; |ymq8|addr[213]             ; padio            ;
+; |ymq8|addr[212]             ; |ymq8|addr[212]             ; padio            ;
+; |ymq8|addr[211]             ; |ymq8|addr[211]             ; padio            ;
+; |ymq8|addr[210]             ; |ymq8|addr[210]             ; padio            ;
+; |ymq8|addr[209]             ; |ymq8|addr[209]             ; padio            ;
+; |ymq8|addr[208]             ; |ymq8|addr[208]             ; padio            ;
+; |ymq8|addr[207]             ; |ymq8|addr[207]             ; padio            ;
+; |ymq8|addr[206]             ; |ymq8|addr[206]             ; padio            ;
+; |ymq8|addr[205]             ; |ymq8|addr[205]             ; padio            ;
+; |ymq8|addr[204]             ; |ymq8|addr[204]             ; padio            ;
+; |ymq8|addr[203]             ; |ymq8|addr[203]             ; padio            ;
+; |ymq8|addr[202]             ; |ymq8|addr[202]             ; padio            ;
+; |ymq8|addr[201]             ; |ymq8|addr[201]             ; padio            ;
+; |ymq8|addr[200]             ; |ymq8|addr[200]             ; padio            ;
+; |ymq8|addr[199]             ; |ymq8|addr[199]             ; padio            ;
+; |ymq8|addr[198]             ; |ymq8|addr[198]             ; padio            ;
+; |ymq8|addr[197]             ; |ymq8|addr[197]             ; padio            ;
+; |ymq8|addr[196]             ; |ymq8|addr[196]             ; padio            ;
+; |ymq8|addr[195]             ; |ymq8|addr[195]             ; padio            ;
+; |ymq8|addr[194]             ; |ymq8|addr[194]             ; padio            ;
+; |ymq8|addr[193]             ; |ymq8|addr[193]             ; padio            ;
+; |ymq8|addr[192]             ; |ymq8|addr[192]             ; padio            ;
+; |ymq8|addr[191]             ; |ymq8|addr[191]             ; padio            ;
+; |ymq8|addr[190]             ; |ymq8|addr[190]             ; padio            ;
+; |ymq8|addr[189]             ; |ymq8|addr[189]             ; padio            ;
+; |ymq8|addr[188]             ; |ymq8|addr[188]             ; padio            ;
+; |ymq8|addr[187]             ; |ymq8|addr[187]             ; padio            ;
+; |ymq8|addr[186]             ; |ymq8|addr[186]             ; padio            ;
+; |ymq8|addr[185]             ; |ymq8|addr[185]             ; padio            ;
+; |ymq8|addr[184]             ; |ymq8|addr[184]             ; padio            ;
+; |ymq8|addr[183]             ; |ymq8|addr[183]             ; padio            ;
+; |ymq8|addr[182]             ; |ymq8|addr[182]             ; padio            ;
+; |ymq8|addr[181]             ; |ymq8|addr[181]             ; padio            ;
+; |ymq8|addr[180]             ; |ymq8|addr[180]             ; padio            ;
+; |ymq8|addr[179]             ; |ymq8|addr[179]             ; padio            ;
+; |ymq8|addr[178]             ; |ymq8|addr[178]             ; padio            ;
+; |ymq8|addr[177]             ; |ymq8|addr[177]             ; padio            ;
+; |ymq8|addr[176]             ; |ymq8|addr[176]             ; padio            ;
+; |ymq8|addr[175]             ; |ymq8|addr[175]             ; padio            ;
+; |ymq8|addr[174]             ; |ymq8|addr[174]             ; padio            ;
+; |ymq8|addr[173]             ; |ymq8|addr[173]             ; padio            ;
+; |ymq8|addr[172]             ; |ymq8|addr[172]             ; padio            ;
+; |ymq8|addr[171]             ; |ymq8|addr[171]             ; padio            ;
+; |ymq8|addr[170]             ; |ymq8|addr[170]             ; padio            ;
+; |ymq8|addr[169]             ; |ymq8|addr[169]             ; padio            ;
+; |ymq8|addr[168]             ; |ymq8|addr[168]             ; padio            ;
+; |ymq8|addr[167]             ; |ymq8|addr[167]             ; padio            ;
+; |ymq8|addr[166]             ; |ymq8|addr[166]             ; padio            ;
+; |ymq8|addr[165]             ; |ymq8|addr[165]             ; padio            ;
+; |ymq8|addr[164]             ; |ymq8|addr[164]             ; padio            ;
+; |ymq8|addr[163]             ; |ymq8|addr[163]             ; padio            ;
+; |ymq8|addr[162]             ; |ymq8|addr[162]             ; padio            ;
+; |ymq8|addr[161]             ; |ymq8|addr[161]             ; padio            ;
+; |ymq8|addr[160]             ; |ymq8|addr[160]             ; padio            ;
+; |ymq8|addr[159]             ; |ymq8|addr[159]             ; padio            ;
+; |ymq8|addr[158]             ; |ymq8|addr[158]             ; padio            ;
+; |ymq8|addr[157]             ; |ymq8|addr[157]             ; padio            ;
+; |ymq8|addr[156]             ; |ymq8|addr[156]             ; padio            ;
+; |ymq8|addr[155]             ; |ymq8|addr[155]             ; padio            ;
+; |ymq8|addr[154]             ; |ymq8|addr[154]             ; padio            ;
+; |ymq8|addr[153]             ; |ymq8|addr[153]             ; padio            ;
+; |ymq8|addr[152]             ; |ymq8|addr[152]             ; padio            ;
+; |ymq8|addr[151]             ; |ymq8|addr[151]             ; padio            ;
+; |ymq8|addr[150]             ; |ymq8|addr[150]             ; padio            ;
+; |ymq8|addr[149]             ; |ymq8|addr[149]             ; padio            ;
+; |ymq8|addr[148]             ; |ymq8|addr[148]             ; padio            ;
+; |ymq8|addr[147]             ; |ymq8|addr[147]             ; padio            ;
+; |ymq8|addr[146]             ; |ymq8|addr[146]             ; padio            ;
+; |ymq8|addr[145]             ; |ymq8|addr[145]             ; padio            ;
+; |ymq8|addr[144]             ; |ymq8|addr[144]             ; padio            ;
+; |ymq8|addr[143]             ; |ymq8|addr[143]             ; padio            ;
+; |ymq8|addr[142]             ; |ymq8|addr[142]             ; padio            ;
+; |ymq8|addr[141]             ; |ymq8|addr[141]             ; padio            ;
+; |ymq8|addr[140]             ; |ymq8|addr[140]             ; padio            ;
+; |ymq8|addr[139]             ; |ymq8|addr[139]             ; padio            ;
+; |ymq8|addr[138]             ; |ymq8|addr[138]             ; padio            ;
+; |ymq8|addr[137]             ; |ymq8|addr[137]             ; padio            ;
+; |ymq8|addr[136]             ; |ymq8|addr[136]             ; padio            ;
+; |ymq8|addr[135]             ; |ymq8|addr[135]             ; padio            ;
+; |ymq8|addr[134]             ; |ymq8|addr[134]             ; padio            ;
+; |ymq8|addr[133]             ; |ymq8|addr[133]             ; padio            ;
+; |ymq8|addr[132]             ; |ymq8|addr[132]             ; padio            ;
+; |ymq8|addr[131]             ; |ymq8|addr[131]             ; padio            ;
+; |ymq8|addr[130]             ; |ymq8|addr[130]             ; padio            ;
+; |ymq8|addr[129]             ; |ymq8|addr[129]             ; padio            ;
+; |ymq8|addr[128]             ; |ymq8|addr[128]             ; padio            ;
+; |ymq8|addr[127]             ; |ymq8|addr[127]             ; padio            ;
+; |ymq8|addr[126]             ; |ymq8|addr[126]             ; padio            ;
+; |ymq8|addr[125]             ; |ymq8|addr[125]             ; padio            ;
+; |ymq8|addr[124]             ; |ymq8|addr[124]             ; padio            ;
+; |ymq8|addr[123]             ; |ymq8|addr[123]             ; padio            ;
+; |ymq8|addr[122]             ; |ymq8|addr[122]             ; padio            ;
+; |ymq8|addr[121]             ; |ymq8|addr[121]             ; padio            ;
+; |ymq8|addr[120]             ; |ymq8|addr[120]             ; padio            ;
+; |ymq8|addr[119]             ; |ymq8|addr[119]             ; padio            ;
+; |ymq8|addr[118]             ; |ymq8|addr[118]             ; padio            ;
+; |ymq8|addr[117]             ; |ymq8|addr[117]             ; padio            ;
+; |ymq8|addr[116]             ; |ymq8|addr[116]             ; padio            ;
+; |ymq8|addr[115]             ; |ymq8|addr[115]             ; padio            ;
+; |ymq8|addr[114]             ; |ymq8|addr[114]             ; padio            ;
+; |ymq8|addr[113]             ; |ymq8|addr[113]             ; padio            ;
+; |ymq8|addr[112]             ; |ymq8|addr[112]             ; padio            ;
+; |ymq8|addr[111]             ; |ymq8|addr[111]             ; padio            ;
+; |ymq8|addr[110]             ; |ymq8|addr[110]             ; padio            ;
+; |ymq8|addr[109]             ; |ymq8|addr[109]             ; padio            ;
+; |ymq8|addr[108]             ; |ymq8|addr[108]             ; padio            ;
+; |ymq8|addr[107]             ; |ymq8|addr[107]             ; padio            ;
+; |ymq8|addr[106]             ; |ymq8|addr[106]             ; padio            ;
+; |ymq8|addr[105]             ; |ymq8|addr[105]             ; padio            ;
+; |ymq8|addr[104]             ; |ymq8|addr[104]             ; padio            ;
+; |ymq8|addr[103]             ; |ymq8|addr[103]             ; padio            ;
+; |ymq8|addr[102]             ; |ymq8|addr[102]             ; padio            ;
+; |ymq8|addr[101]             ; |ymq8|addr[101]             ; padio            ;
+; |ymq8|addr[100]             ; |ymq8|addr[100]             ; padio            ;
+; |ymq8|addr[99]              ; |ymq8|addr[99]              ; padio            ;
+; |ymq8|addr[98]              ; |ymq8|addr[98]              ; padio            ;
+; |ymq8|addr[97]              ; |ymq8|addr[97]              ; padio            ;
+; |ymq8|addr[96]              ; |ymq8|addr[96]              ; padio            ;
+; |ymq8|addr[95]              ; |ymq8|addr[95]              ; padio            ;
+; |ymq8|addr[94]              ; |ymq8|addr[94]              ; padio            ;
+; |ymq8|addr[93]              ; |ymq8|addr[93]              ; padio            ;
+; |ymq8|addr[92]              ; |ymq8|addr[92]              ; padio            ;
+; |ymq8|addr[91]              ; |ymq8|addr[91]              ; padio            ;
+; |ymq8|addr[90]              ; |ymq8|addr[90]              ; padio            ;
+; |ymq8|addr[89]              ; |ymq8|addr[89]              ; padio            ;
+; |ymq8|addr[88]              ; |ymq8|addr[88]              ; padio            ;
+; |ymq8|addr[87]              ; |ymq8|addr[87]              ; padio            ;
+; |ymq8|addr[86]              ; |ymq8|addr[86]              ; padio            ;
+; |ymq8|addr[85]              ; |ymq8|addr[85]              ; padio            ;
+; |ymq8|addr[84]              ; |ymq8|addr[84]              ; padio            ;
+; |ymq8|addr[83]              ; |ymq8|addr[83]              ; padio            ;
+; |ymq8|addr[82]              ; |ymq8|addr[82]              ; padio            ;
+; |ymq8|addr[81]              ; |ymq8|addr[81]              ; padio            ;
+; |ymq8|addr[80]              ; |ymq8|addr[80]              ; padio            ;
+; |ymq8|addr[79]              ; |ymq8|addr[79]              ; padio            ;
+; |ymq8|addr[78]              ; |ymq8|addr[78]              ; padio            ;
+; |ymq8|addr[77]              ; |ymq8|addr[77]              ; padio            ;
+; |ymq8|addr[76]              ; |ymq8|addr[76]              ; padio            ;
+; |ymq8|addr[75]              ; |ymq8|addr[75]              ; padio            ;
+; |ymq8|addr[74]              ; |ymq8|addr[74]              ; padio            ;
+; |ymq8|addr[73]              ; |ymq8|addr[73]              ; padio            ;
+; |ymq8|addr[72]              ; |ymq8|addr[72]              ; padio            ;
+; |ymq8|addr[71]              ; |ymq8|addr[71]              ; padio            ;
+; |ymq8|addr[70]              ; |ymq8|addr[70]              ; padio            ;
+; |ymq8|addr[69]              ; |ymq8|addr[69]              ; padio            ;
+; |ymq8|addr[68]              ; |ymq8|addr[68]              ; padio            ;
+; |ymq8|addr[67]              ; |ymq8|addr[67]              ; padio            ;
+; |ymq8|addr[66]              ; |ymq8|addr[66]              ; padio            ;
+; |ymq8|addr[65]              ; |ymq8|addr[65]              ; padio            ;
+; |ymq8|addr[64]              ; |ymq8|addr[64]              ; padio            ;
+; |ymq8|addr[63]              ; |ymq8|addr[63]              ; padio            ;
+; |ymq8|addr[62]              ; |ymq8|addr[62]              ; padio            ;
+; |ymq8|addr[61]              ; |ymq8|addr[61]              ; padio            ;
+; |ymq8|addr[60]              ; |ymq8|addr[60]              ; padio            ;
+; |ymq8|addr[59]              ; |ymq8|addr[59]              ; padio            ;
+; |ymq8|addr[58]              ; |ymq8|addr[58]              ; padio            ;
+; |ymq8|addr[57]              ; |ymq8|addr[57]              ; padio            ;
+; |ymq8|addr[56]              ; |ymq8|addr[56]              ; padio            ;
+; |ymq8|addr[55]              ; |ymq8|addr[55]              ; padio            ;
+; |ymq8|addr[54]              ; |ymq8|addr[54]              ; padio            ;
+; |ymq8|addr[53]              ; |ymq8|addr[53]              ; padio            ;
+; |ymq8|addr[52]              ; |ymq8|addr[52]              ; padio            ;
+; |ymq8|addr[51]              ; |ymq8|addr[51]              ; padio            ;
+; |ymq8|addr[50]              ; |ymq8|addr[50]              ; padio            ;
+; |ymq8|addr[49]              ; |ymq8|addr[49]              ; padio            ;
+; |ymq8|addr[48]              ; |ymq8|addr[48]              ; padio            ;
+; |ymq8|addr[47]              ; |ymq8|addr[47]              ; padio            ;
+; |ymq8|addr[46]              ; |ymq8|addr[46]              ; padio            ;
+; |ymq8|addr[45]              ; |ymq8|addr[45]              ; padio            ;
+; |ymq8|addr[44]              ; |ymq8|addr[44]              ; padio            ;
+; |ymq8|addr[43]              ; |ymq8|addr[43]              ; padio            ;
+; |ymq8|addr[42]              ; |ymq8|addr[42]              ; padio            ;
+; |ymq8|addr[41]              ; |ymq8|addr[41]              ; padio            ;
+; |ymq8|addr[40]              ; |ymq8|addr[40]              ; padio            ;
+; |ymq8|addr[39]              ; |ymq8|addr[39]              ; padio            ;
+; |ymq8|addr[38]              ; |ymq8|addr[38]              ; padio            ;
+; |ymq8|addr[37]              ; |ymq8|addr[37]              ; padio            ;
+; |ymq8|addr[36]              ; |ymq8|addr[36]              ; padio            ;
+; |ymq8|addr[35]              ; |ymq8|addr[35]              ; padio            ;
+; |ymq8|addr[34]              ; |ymq8|addr[34]              ; padio            ;
+; |ymq8|addr[33]              ; |ymq8|addr[33]              ; padio            ;
+; |ymq8|addr[32]              ; |ymq8|addr[32]              ; padio            ;
+; |ymq8|addr[31]              ; |ymq8|addr[31]              ; padio            ;
+; |ymq8|addr[30]              ; |ymq8|addr[30]              ; padio            ;
+; |ymq8|addr[29]              ; |ymq8|addr[29]              ; padio            ;
+; |ymq8|addr[28]              ; |ymq8|addr[28]              ; padio            ;
+; |ymq8|addr[27]              ; |ymq8|addr[27]              ; padio            ;
+; |ymq8|addr[26]              ; |ymq8|addr[26]              ; padio            ;
+; |ymq8|addr[25]              ; |ymq8|addr[25]              ; padio            ;
+; |ymq8|addr[24]              ; |ymq8|addr[24]              ; padio            ;
+; |ymq8|addr[23]              ; |ymq8|addr[23]              ; padio            ;
+; |ymq8|addr[22]              ; |ymq8|addr[22]              ; padio            ;
+; |ymq8|addr[21]              ; |ymq8|addr[21]              ; padio            ;
+; |ymq8|addr[20]              ; |ymq8|addr[20]              ; padio            ;
+; |ymq8|addr[19]              ; |ymq8|addr[19]              ; padio            ;
+; |ymq8|addr[18]              ; |ymq8|addr[18]              ; padio            ;
+; |ymq8|addr[17]              ; |ymq8|addr[17]              ; padio            ;
+; |ymq8|addr[16]              ; |ymq8|addr[16]              ; padio            ;
+; |ymq8|addr[15]              ; |ymq8|addr[15]              ; padio            ;
+; |ymq8|addr[14]              ; |ymq8|addr[14]              ; padio            ;
+; |ymq8|addr[13]              ; |ymq8|addr[13]              ; padio            ;
+; |ymq8|addr[12]              ; |ymq8|addr[12]              ; padio            ;
+; |ymq8|addr[11]              ; |ymq8|addr[11]              ; padio            ;
+; |ymq8|addr[10]              ; |ymq8|addr[10]              ; padio            ;
+; |ymq8|addr[9]               ; |ymq8|addr[9]               ; padio            ;
+; |ymq8|addr[8]               ; |ymq8|addr[8]               ; padio            ;
+; |ymq8|addr[7]               ; |ymq8|addr[7]               ; padio            ;
+; |ymq8|addr[6]               ; |ymq8|addr[6]               ; padio            ;
+; |ymq8|addr[5]               ; |ymq8|addr[5]               ; padio            ;
+; |ymq8|addr[4]               ; |ymq8|addr[4]               ; padio            ;
+; |ymq8|addr[3]               ; |ymq8|addr[3]               ; padio            ;
+; |ymq8|addr[2]               ; |ymq8|addr[2]               ; padio            ;
+; |ymq8|addr[1]               ; |ymq8|addr[1]               ; padio            ;
+; |ymq8|addr[0]               ; |ymq8|addr[0]               ; padio            ;
+; |ymq8|adr[3]                ; |ymq8|adr[3]~corein         ; combout          ;
+; |ymq8|adr[2]                ; |ymq8|adr[2]~corein         ; combout          ;
+; |ymq8|adr[1]                ; |ymq8|adr[1]~corein         ; combout          ;
+; |ymq8|adr[0]                ; |ymq8|adr[0]~corein         ; combout          ;
+; |ymq8|adr[7]                ; |ymq8|adr[7]~corein         ; combout          ;
+; |ymq8|adr[6]                ; |ymq8|adr[6]~corein         ; combout          ;
+; |ymq8|adr[5]                ; |ymq8|adr[5]~corein         ; combout          ;
+; |ymq8|adr[4]                ; |ymq8|adr[4]~corein         ; combout          ;
++-----------------------------+-----------------------------+------------------+
+
+
+The following table displays output ports that do not toggle to 1 during simulation.
++-------------------------------------------------+
+; Missing 1-Value Coverage                        ;
++-----------+------------------+------------------+
+; Node Name ; Output Port Name ; Output Port Type ;
++-----------+------------------+------------------+
+
+
+The following table displays output ports that do not toggle to 0 during simulation.
++-------------------------------------------------+
+; Missing 0-Value Coverage                        ;
++-----------+------------------+------------------+
+; Node Name ; Output Port Name ; Output Port Type ;
++-----------+------------------+------------------+
+
+
++---------------------+
+; Simulator INI Usage ;
++--------+------------+
+; Option ; Usage      ;
++--------+------------+
+
+
++--------------------+
+; Simulator Messages ;
++--------------------+
+Info: *******************************************************************
+Info: Running Quartus II Simulator
+    Info: Version 7.2 Build 151 09/26/2007 SJ Web Edition
+    Info: Processing started: Wed Sep 25 15:23:08 2013
+Info: Command: quartus_sim --read_settings_files=on --write_settings_files=off jcq -c jcq
+Info: Using vector source file "D:/¼Ä´æÆ÷/ymq256.vwf"
+Info: Overwriting simulation input file with simulation results
+    Info: A backup of ymq256.vwf called jcq.sim_ori.vwf has been created in the db folder
+Info: Option to preserve fewer signal transitions to reduce memory requirements is enabled
+    Info: Simulation has been partitioned into sub-simulations according to the maximum transition count determined by the engine. Transitions from memory will be flushed out to disk at the end of each sub-simulation to reduce memory requirements.
+Info: Simulation partitioned into 1 sub-simulations
+Info: Simulation coverage is     100.00 %
+Info: Number of transitions in simulation is 22700
+Info: Vector file ymq256.vwf is saved in VWF text format. You can compress it into CVWF format in order to reduce file size. For more details please refer to the Quartus II Help.
+Info: Quartus II Simulator was successful. 0 errors, 0 warnings
+    Info: Allocated 101 megabytes of memory during processing
+    Info: Processing ended: Wed Sep 25 15:23:09 2013
+    Info: Elapsed time: 00:00:01
+
+

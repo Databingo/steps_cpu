@@ -1,0 +1,36 @@
+module bufuucpu (go,		//恢复运行
+				data,		//输入数据
+				wre,		//写使能
+				back,		//向回浏览
+				forw,		//往前浏览
+				clk,		//时钟
+				clr,		//复位
+				brak,		//中断
+				oh,			//输出高字节
+				ol,			//输出低字节
+				q,			//输出数据
+				count		//缓冲区计数
+				);
+input go,wre,back,forw,clk,clr,brak;
+input [7:0] data;
+output [7:0] oh,ol,q;
+output [6:0] count;
+wire w1,w2,w3,w4,w5,irup;		//中间变量
+wire [7:0] w6;
+assign w2=~(brak|irup);  		//两种信号共同控制
+
+	DFF dff0 (						//调用时标触发器
+				.d(w1), 			//反馈连接，保证稳定输出
+				.clk(clk), 
+				.clrn(w2), 			//低电位有效
+				.prn(go), 			//低电位有效
+				.q(w1)
+				);
+	//调用CPU：			
+	jb_cpu cpu0(.clock(clk),.reset_n(clr),.brak(brak),.reset(w1),.read(w3),
+		.empty(w4),.orup(irup),.endf(w5),.data(w6),.o({oh,ol}));
+//调用缓冲区：
+	buffin buff0(.data(data),.wre(wre),.back(back),.clk(clk),.clr(clr),
+		.read(w3),.forw(forw),.empt(w4),.endf(w5),.q(q),.count(count),
+		.out(w6));
+endmodule 

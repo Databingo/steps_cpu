@@ -1,0 +1,232 @@
+Simulator report for one
+Mon Sep 12 21:05:04 2011
+Quartus II Version 7.2 Build 151 09/26/2007 SJ Web Edition
+
+
+---------------------
+; Table of Contents ;
+---------------------
+  1. Legal Notice
+  2. Simulator Summary
+  3. Simulator Settings
+  4. Simulation Waveforms
+  5. Coverage Summary
+  6. Complete 1/0-Value Coverage
+  7. Missing 1-Value Coverage
+  8. Missing 0-Value Coverage
+  9. Simulator INI Usage
+ 10. Simulator Messages
+
+
+
+----------------
+; Legal Notice ;
+----------------
+Copyright (C) 1991-2007 Altera Corporation
+Your use of Altera Corporation's design tools, logic functions 
+and other software and tools, and its AMPP partner logic 
+functions, and any output files from any of the foregoing 
+(including device programming or simulation files), and any 
+associated documentation or information are expressly subject 
+to the terms and conditions of the Altera Program License 
+Subscription Agreement, Altera MegaCore Function License 
+Agreement, or other applicable license agreement, including, 
+without limitation, that your use is for the sole purpose of 
+programming logic devices manufactured by Altera and sold by 
+Altera or its authorized distributors.  Please refer to the 
+applicable agreement for further details.
+
+
+
++--------------------------------------------+
+; Simulator Summary                          ;
++-----------------------------+--------------+
+; Type                        ; Value        ;
++-----------------------------+--------------+
+; Simulation Start Time       ; 0 ps         ;
+; Simulation End Time         ; 10.0 us      ;
+; Simulation Netlist Size     ; 51 nodes     ;
+; Simulation Coverage         ;      97.01 % ;
+; Total Number of Transitions ; 7676         ;
+; Simulation Breakpoints      ; 0            ;
+; Family                      ; Cyclone      ;
+; Device                      ; EP1C6T144C8  ;
++-----------------------------+--------------+
+
+
++----------------------------------------------------------------------------------------------------------------------------+
+; Simulator Settings                                                                                                         ;
++--------------------------------------------------------------------------------------------+---------------+---------------+
+; Option                                                                                     ; Setting       ; Default Value ;
++--------------------------------------------------------------------------------------------+---------------+---------------+
+; Simulation mode                                                                            ; Timing        ; Timing        ;
+; Start time                                                                                 ; 0 ns          ; 0 ns          ;
+; Simulation results format                                                                  ; CVWF          ;               ;
+; Vector input source                                                                        ; add_sub_8.vwf ;               ;
+; Add pins automatically to simulation output waveforms                                      ; On            ; On            ;
+; Check outputs                                                                              ; Off           ; Off           ;
+; Report simulation coverage                                                                 ; On            ; On            ;
+; Display complete 1/0 value coverage report                                                 ; On            ; On            ;
+; Display missing 1-value coverage report                                                    ; On            ; On            ;
+; Display missing 0-value coverage report                                                    ; On            ; On            ;
+; Detect setup and hold time violations                                                      ; Off           ; Off           ;
+; Detect glitches                                                                            ; Off           ; Off           ;
+; Disable timing delays in Timing Simulation                                                 ; Off           ; Off           ;
+; Generate Signal Activity File                                                              ; Off           ; Off           ;
+; Generate VCD File for PowerPlay Power Analyzer                                             ; Off           ; Off           ;
+; Group bus channels in simulation results                                                   ; Off           ; Off           ;
+; Preserve fewer signal transitions to reduce memory requirements                            ; On            ; On            ;
+; Trigger vector comparison with the specified mode                                          ; INPUT_EDGE    ; INPUT_EDGE    ;
+; Disable setup and hold time violations detection in input registers of bi-directional pins ; Off           ; Off           ;
+; Overwrite Waveform Inputs With Simulation Outputs                                          ; On            ;               ;
+; Perform Glitch Filtering in Timing Simulation                                              ; Auto          ; Auto          ;
++--------------------------------------------------------------------------------------------+---------------+---------------+
+
+
++----------------------+
+; Simulation Waveforms ;
++----------------------+
+Waveform report data cannot be output to ASCII.
+Please use Quartus II to view the waveform report data.
+
+
++--------------------------------------------------------------------+
+; Coverage Summary                                                   ;
++-----------------------------------------------------+--------------+
+; Type                                                ; Value        ;
++-----------------------------------------------------+--------------+
+; Total coverage as a percentage                      ;      97.01 % ;
+; Total nodes checked                                 ; 51           ;
+; Total output ports checked                          ; 67           ;
+; Total output ports with complete 1/0-value coverage ; 65           ;
+; Total output ports with no 1/0-value coverage       ; 1            ;
+; Total output ports with no 1-value coverage         ; 2            ;
+; Total output ports with no 0-value coverage         ; 1            ;
++-----------------------------------------------------+--------------+
+
+
+The following table displays output ports that toggle between 1 and 0 during simulation.
++---------------------------------------------------------------------------------------------------------+
+; Complete 1/0-Value Coverage                                                                             ;
++----------------------------------------+---------------------------------------------+------------------+
+; Node Name                              ; Output Port Name                            ; Output Port Type ;
++----------------------------------------+---------------------------------------------+------------------+
+; |addsub_8|add4:inst|qjq:inst|inst8~157 ; |addsub_8|add4:inst|qjq:inst|inst8~157      ; combout          ;
+; |addsub_8|add4:inst|qjq:inst|inst8~159 ; |addsub_8|add4:inst|qjq:inst|inst8~159      ; combout          ;
+; |addsub_8|add4:inst|qjq:inst|inst8~159 ; |addsub_8|add4:inst|qjq:inst|inst8~160      ; cout0            ;
+; |addsub_8|add4:inst|qjq:inst|inst8~159 ; |addsub_8|add4:inst|qjq:inst|inst8~160COUT1 ; cout1            ;
+; |addsub_8|add4:inst|qjq:inst|inst8~161 ; |addsub_8|add4:inst|qjq:inst|inst8~161      ; combout          ;
+; |addsub_8|add4:inst|qjq:inst|inst8~161 ; |addsub_8|add4:inst|qjq:inst|inst8~162      ; cout0            ;
+; |addsub_8|add4:inst|qjq:inst|inst8~161 ; |addsub_8|add4:inst|qjq:inst|inst8~162COUT1 ; cout1            ;
+; |addsub_8|add4:inst|qjq:inst|inst8~163 ; |addsub_8|add4:inst|qjq:inst|inst8~163      ; combout          ;
+; |addsub_8|add4:inst|qjq:inst|inst8~163 ; |addsub_8|add4:inst|qjq:inst|inst8~164      ; cout0            ;
+; |addsub_8|add4:inst|qjq:inst|inst8~163 ; |addsub_8|add4:inst|qjq:inst|inst8~164COUT1 ; cout1            ;
+; |addsub_8|add4:inst|qjq:inst|inst8~165 ; |addsub_8|add4:inst|qjq:inst|inst8~165      ; combout          ;
+; |addsub_8|add4:inst|qjq:inst|inst8~165 ; |addsub_8|add4:inst|qjq:inst|inst8~166      ; cout0            ;
+; |addsub_8|add4:inst|qjq:inst|inst8~165 ; |addsub_8|add4:inst|qjq:inst|inst8~166COUT1 ; cout1            ;
+; |addsub_8|add4:inst|qjq:inst|inst8~167 ; |addsub_8|add4:inst|qjq:inst|inst8~167      ; combout          ;
+; |addsub_8|add4:inst|qjq:inst|inst8~167 ; |addsub_8|add4:inst|qjq:inst|inst8~168      ; cout             ;
+; |addsub_8|add4:inst|qjq:inst|inst8~169 ; |addsub_8|add4:inst|qjq:inst|inst8~169      ; combout          ;
+; |addsub_8|add4:inst|qjq:inst|inst8~169 ; |addsub_8|add4:inst|qjq:inst|inst8~170      ; cout0            ;
+; |addsub_8|add4:inst|qjq:inst|inst8~169 ; |addsub_8|add4:inst|qjq:inst|inst8~170COUT1 ; cout1            ;
+; |addsub_8|add4:inst|qjq:inst|inst8~171 ; |addsub_8|add4:inst|qjq:inst|inst8~171      ; combout          ;
+; |addsub_8|add4:inst|qjq:inst|inst8~171 ; |addsub_8|add4:inst|qjq:inst|inst8~172      ; cout0            ;
+; |addsub_8|add4:inst|qjq:inst|inst8~171 ; |addsub_8|add4:inst|qjq:inst|inst8~172COUT1 ; cout1            ;
+; |addsub_8|add4:inst|qjq:inst|inst8~173 ; |addsub_8|add4:inst|qjq:inst|inst8~173      ; combout          ;
+; |addsub_8|add4:inst|qjq:inst|inst8~173 ; |addsub_8|add4:inst|qjq:inst|inst8~174      ; cout0            ;
+; |addsub_8|add4:inst|qjq:inst|inst8~173 ; |addsub_8|add4:inst|qjq:inst|inst8~174COUT1 ; cout1            ;
+; |addsub_8|add4:inst|qjq:inst|inst8~176 ; |addsub_8|add4:inst|qjq:inst|inst8~176      ; cout0            ;
+; |addsub_8|add4:inst|qjq:inst|inst8~176 ; |addsub_8|add4:inst|qjq:inst|inst8~176COUT1 ; cout1            ;
+; |addsub_8|inst12~62                    ; |addsub_8|inst12~62                         ; combout          ;
+; |addsub_8|inst3[3]~1                   ; |addsub_8|inst3[3]~1                        ; combout          ;
+; |addsub_8|inst3[2]                     ; |addsub_8|inst3[2]                          ; combout          ;
+; |addsub_8|inst3[1]                     ; |addsub_8|inst3[1]                          ; combout          ;
+; |addsub_8|inst3[0]                     ; |addsub_8|inst3[0]                          ; combout          ;
+; |addsub_8|inst4[3]                     ; |addsub_8|inst4[3]                          ; combout          ;
+; |addsub_8|inst4[2]                     ; |addsub_8|inst4[2]                          ; combout          ;
+; |addsub_8|inst4[1]                     ; |addsub_8|inst4[1]                          ; combout          ;
+; |addsub_8|inst14                       ; |addsub_8|inst15~9                          ; combout          ;
+; |addsub_8|inst4[0]                     ; |addsub_8|inst4[0]                          ; combout          ;
+; |addsub_8|coo                          ; |addsub_8|coo                               ; padio            ;
+; |addsub_8|overflow                     ; |addsub_8|overflow                          ; padio            ;
+; |addsub_8|s[7]                         ; |addsub_8|s[7]                              ; padio            ;
+; |addsub_8|s[6]                         ; |addsub_8|s[6]                              ; padio            ;
+; |addsub_8|s[5]                         ; |addsub_8|s[5]                              ; padio            ;
+; |addsub_8|s[4]                         ; |addsub_8|s[4]                              ; padio            ;
+; |addsub_8|s[3]                         ; |addsub_8|s[3]                              ; padio            ;
+; |addsub_8|s[2]                         ; |addsub_8|s[2]                              ; padio            ;
+; |addsub_8|s[1]                         ; |addsub_8|s[1]                              ; padio            ;
+; |addsub_8|s[0]                         ; |addsub_8|s[0]                              ; padio            ;
+; |addsub_8|sub                          ; |addsub_8|sub~corein                        ; combout          ;
+; |addsub_8|b[7]                         ; |addsub_8|b[7]~corein                       ; combout          ;
+; |addsub_8|b[6]                         ; |addsub_8|b[6]~corein                       ; combout          ;
+; |addsub_8|a[6]                         ; |addsub_8|a[6]~corein                       ; combout          ;
+; |addsub_8|b[5]                         ; |addsub_8|b[5]~corein                       ; combout          ;
+; |addsub_8|a[5]                         ; |addsub_8|a[5]~corein                       ; combout          ;
+; |addsub_8|b[4]                         ; |addsub_8|b[4]~corein                       ; combout          ;
+; |addsub_8|a[4]                         ; |addsub_8|a[4]~corein                       ; combout          ;
+; |addsub_8|b[3]                         ; |addsub_8|b[3]~corein                       ; combout          ;
+; |addsub_8|a[3]                         ; |addsub_8|a[3]~corein                       ; combout          ;
+; |addsub_8|b[2]                         ; |addsub_8|b[2]~corein                       ; combout          ;
+; |addsub_8|a[2]                         ; |addsub_8|a[2]~corein                       ; combout          ;
+; |addsub_8|b[1]                         ; |addsub_8|b[1]~corein                       ; combout          ;
+; |addsub_8|a[1]                         ; |addsub_8|a[1]~corein                       ; combout          ;
+; |addsub_8|carry                        ; |addsub_8|carry~corein                      ; combout          ;
+; |addsub_8|b[0]                         ; |addsub_8|b[0]~corein                       ; combout          ;
+; |addsub_8|clock                        ; |addsub_8|clock~corein                      ; combout          ;
+; |addsub_8|ena                          ; |addsub_8|ena~corein                        ; combout          ;
+; |addsub_8|a[0]                         ; |addsub_8|a[0]~corein                       ; combout          ;
++----------------------------------------+---------------------------------------------+------------------+
+
+
+The following table displays output ports that do not toggle to 1 during simulation.
++-----------------------------------------------------------------+
+; Missing 1-Value Coverage                                        ;
++-------------------+--------------------------+------------------+
+; Node Name         ; Output Port Name         ; Output Port Type ;
++-------------------+--------------------------+------------------+
+; |addsub_8|a[7]    ; |addsub_8|a[7]~corein    ; combout          ;
+; |addsub_8|clear_n ; |addsub_8|clear_n~corein ; combout          ;
++-------------------+--------------------------+------------------+
+
+
+The following table displays output ports that do not toggle to 0 during simulation.
++-----------------------------------------------------------------+
+; Missing 0-Value Coverage                                        ;
++-------------------+--------------------------+------------------+
+; Node Name         ; Output Port Name         ; Output Port Type ;
++-------------------+--------------------------+------------------+
+; |addsub_8|clear_n ; |addsub_8|clear_n~corein ; combout          ;
++-------------------+--------------------------+------------------+
+
+
++---------------------+
+; Simulator INI Usage ;
++--------+------------+
+; Option ; Usage      ;
++--------+------------+
+
+
++--------------------+
+; Simulator Messages ;
++--------------------+
+Info: *******************************************************************
+Info: Running Quartus II Simulator
+    Info: Version 7.2 Build 151 09/26/2007 SJ Web Edition
+    Info: Processing started: Mon Sep 12 21:05:03 2011
+Info: Command: quartus_sim --read_settings_files=on --write_settings_files=off one -c one
+Info: Using vector source file "D:/jjjj/add_sub_8.vwf"
+Info: Overwriting simulation input file with simulation results
+    Info: A backup of add_sub_8.vwf called one.sim_ori.vwf has been created in the db folder
+Info: Option to preserve fewer signal transitions to reduce memory requirements is enabled
+    Info: Simulation has been partitioned into sub-simulations according to the maximum transition count determined by the engine. Transitions from memory will be flushed out to disk at the end of each sub-simulation to reduce memory requirements.
+Info: Simulation partitioned into 1 sub-simulations
+Info: Simulation coverage is      97.01 %
+Info: Number of transitions in simulation is 7676
+Info: Vector file add_sub_8.vwf is saved in VWF text format. You can compress it into CVWF format in order to reduce file size. For more details please refer to the Quartus II Help.
+Info: Quartus II Simulator was successful. 0 errors, 0 warnings
+    Info: Allocated 99 megabytes of memory during processing
+    Info: Processing ended: Mon Sep 12 21:05:04 2011
+    Info: Elapsed time: 00:00:01
+
+

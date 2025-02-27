@@ -1,0 +1,76 @@
+--------------------------------------------------------------------------------------
+Timing Analyzer Summary
+--------------------------------------------------------------------------------------
+
+Type           : Worst-case tsu
+Slack          : N/A
+Required Time  : None
+Actual Time    : 11.125 ns
+From           : KEY[0]
+To             : mycputop:inst|Co[21]
+From Clock     : --
+To Clock       : clk27
+Failed Paths   : 0
+
+Type           : Worst-case tco
+Slack          : N/A
+Required Time  : None
+Actual Time    : 14.796 ns
+From           : mycputop:inst|buffcpu:jsj0|inst11[5]
+To             : HEX1[4]
+From Clock     : clk27
+To Clock       : --
+Failed Paths   : 0
+
+Type           : Worst-case tpd
+Slack          : N/A
+Required Time  : None
+Actual Time    : 20.109 ns
+From           : SW[0]
+To             : HEX1[4]
+From Clock     : --
+To Clock       : --
+Failed Paths   : 0
+
+Type           : Worst-case th
+Slack          : N/A
+Required Time  : None
+Actual Time    : -6.720 ns
+From           : RE_N
+To             : mycputop:inst|fo[5]
+From Clock     : --
+To Clock       : clk27
+Failed Paths   : 0
+
+Type           : Clock Setup: 'mycputop:inst|altpll0:altp0|altpll:altpll_component|_clk0'
+Slack          : 5.295 ns
+Required Time  : 18.00 MHz ( period = 55.555 ns )
+Actual Time    : 22.24 MHz ( period = 44.966 ns )
+From           : mycputop:inst|buffcpu:jsj0|buffint:inst4|ram~969
+To             : mycputop:inst|buffcpu:jsj0|buffint:inst4|out[5]
+From Clock     : mycputop:inst|altpll0:altp0|altpll:altpll_component|_clk0
+To Clock       : mycputop:inst|altpll0:altp0|altpll:altpll_component|_clk0
+Failed Paths   : 0
+
+Type           : Clock Hold: 'mycputop:inst|altpll0:altp0|altpll:altpll_component|_clk0'
+Slack          : 0.872 ns
+Required Time  : 18.00 MHz ( period = 55.555 ns )
+Actual Time    : N/A
+From           : mycputop:inst|buffcpu:jsj0|JPQ:inst1|inst1
+To             : mycputop:inst|buffcpu:jsj0|JPQ:inst1|inst2
+From Clock     : mycputop:inst|altpll0:altp0|altpll:altpll_component|_clk0
+To Clock       : mycputop:inst|altpll0:altp0|altpll:altpll_component|_clk0
+Failed Paths   : 0
+
+Type           : Total number of failed paths
+Slack          : 
+Required Time  : 
+Actual Time    : 
+From           : 
+To             : 
+From Clock     : 
+To Clock       : 
+Failed Paths   : 0
+
+--------------------------------------------------------------------------------------
+

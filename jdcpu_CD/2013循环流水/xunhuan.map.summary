@@ -1,0 +1,12 @@
+Analysis & Synthesis Status : Successful - Tue Sep 06 21:48:48 2011
+Quartus II Version : 7.2 Build 151 09/26/2007 SJ Web Edition
+Revision Name : xunhuan
+Top-level Entity Name : L_cpum
+Family : Cyclone
+Total logic elements : 14,802
+Total pins : 93
+Total virtual pins : 0
+Total memory bits : 43,008
+DSP block 9-bit elements : N/A until Partition Merge
+Total PLLs : 0
+Total DLLs : N/A until Partition Merge

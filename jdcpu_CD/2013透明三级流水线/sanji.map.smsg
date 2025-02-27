@@ -1,0 +1,2 @@
+Warning (10236): Verilog HDL Implicit Net warning at buffcpu.v(35): created implicit net for "irup"
+Warning (10236): Verilog HDL Implicit Net warning at sjlsTOP.v(301): created implicit net for "clk18"

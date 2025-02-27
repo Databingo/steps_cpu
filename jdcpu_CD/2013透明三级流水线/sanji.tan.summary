@@ -1,0 +1,76 @@
+--------------------------------------------------------------------------------------
+Timing Analyzer Summary
+--------------------------------------------------------------------------------------
+
+Type           : Worst-case tsu
+Slack          : N/A
+Required Time  : None
+Actual Time    : 14.862 ns
+From           : KEY[4]
+To             : boo[1]
+From Clock     : --
+To Clock       : clk27
+Failed Paths   : 0
+
+Type           : Worst-case tco
+Slack          : N/A
+Required Time  : None
+Actual Time    : 16.608 ns
+From           : buffcpu:cpu0|buffin:buff0|q[6]
+To             : HEX3[3]
+From Clock     : clk27
+To Clock       : --
+Failed Paths   : 0
+
+Type           : Worst-case tpd
+Slack          : N/A
+Required Time  : None
+Actual Time    : 23.880 ns
+From           : SW[0]
+To             : HEX3[3]
+From Clock     : --
+To Clock       : --
+Failed Paths   : 0
+
+Type           : Worst-case th
+Slack          : N/A
+Required Time  : None
+Actual Time    : -3.480 ns
+From           : RE_N
+To             : flge
+From Clock     : --
+To Clock       : clk27
+Failed Paths   : 0
+
+Type           : Clock Setup: 'altpll0:altp0|altpll:altpll_component|_clk0'
+Slack          : 20.700 ns
+Required Time  : 18.00 MHz ( period = 55.555 ns )
+Actual Time    : 28.69 MHz ( period = 34.855 ns )
+From           : writ
+To             : buffcpu:cpu0|buffin:buff0|q[1]
+From Clock     : altpll0:altp0|altpll:altpll_component|_clk0
+To Clock       : altpll0:altp0|altpll:altpll_component|_clk0
+Failed Paths   : 0
+
+Type           : Clock Hold: 'altpll0:altp0|altpll:altpll_component|_clk0'
+Slack          : 0.866 ns
+Required Time  : 18.00 MHz ( period = 55.555 ns )
+Actual Time    : N/A
+From           : writ
+To             : buffcpu:cpu0|buffin:buff0|flgw
+From Clock     : altpll0:altp0|altpll:altpll_component|_clk0
+To Clock       : altpll0:altp0|altpll:altpll_component|_clk0
+Failed Paths   : 0
+
+Type           : Total number of failed paths
+Slack          : 
+Required Time  : 
+Actual Time    : 
+From           : 
+To             : 
+From Clock     : 
+To Clock       : 
+Failed Paths   : 0
+
+--------------------------------------------------------------------------------------
+

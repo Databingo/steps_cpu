@@ -1,0 +1,21 @@
+module move_4 (	oSEG0,oSEG1,oSEG2,oSEG3,iDIG,flash,clk );
+input	[15:0]	iDIG;		//输入的16位数
+input   flash;		//闪烁控制
+input	clk;				//时钟
+output	[6:0]	oSEG0,oSEG1,oSEG2,oSEG3;	//输出的7位数
+reg  [15:0]  dig;
+reg  [23:0]  tim;
+ 
+always @(posedge clk)
+begin
+ dig <= iDIG;
+ tim <= tim + 1;
+ if (tim[23]) dig <= {dig[11:0],dig[15:12]};
+end
+
+SEG7_LUT	u0	(	oSEG0,dig[3:0],flash);		//调用一个数码管驱动程序
+SEG7_LUT	u1	(	oSEG1,dig[7:4],flash);
+SEG7_LUT	u2	(	oSEG2,dig[11:8],flash);
+SEG7_LUT	u3	(	oSEG3,dig[15:12],flash);
+
+endmodule

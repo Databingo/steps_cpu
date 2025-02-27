@@ -1,0 +1,608 @@
+module L_cpum(  //三级循环流水
+	clock,      //系统时钟
+	clr_n,		//初始复位，低电位有效
+	idata,		//输入数据
+	odata,		//输出数据
+	w,
+	w1,
+	w2,
+	opc,
+go		//恢复中断
+);
+	
+	input	        clock,clr_n,go;
+	input	[15:0]  idata;
+	output	[15:0]  odata;
+	output	[15:0]  w,w1,w2;
+	output  [9:0]  opc;
+
+	wire 			clk;
+	
+	reg 	[15:0]	r_0,r_1,r_2,r_3,r_4,r_5,r_6,r_7,x;
+	reg				lda,add,sub,out,in,str,mov,xtda,mult,divi,sdal,sdah,
+					ldar,strr,jmp,jz,jn,call,ret,nop,push,pop,stp;
+	wire 	[15:0]  q_w,q_data;
+	wire	[9:0]  pc_next;
+	reg 	[15:0]	aq_w,bq_w,cq_w,dq_w,wdata,ddata,a,b,da,outd;
+	reg     [9:0]  pc,sp,pc_back,pc_go,mar;
+	reg     [0:0]   dwren,swren,brak;
+	reg		[1:0]	jp,js;			//加1将0到3循环
+//程序存储器调用：
+ altsyncram4 iram(.address(pc),.clock(clock),.data(idata),
+.wren(iwren),.q(q_w));  
+//数据存储器调用：
+	altsyncram4 dram(.address(mar),.clock(clock),.data(ddata),
+.wren(dwren),.q(q_data));
+	 //堆栈存储器调用：
+	altsyncram4 sram(.address(sp),.clock(clock),.data(pc_back),
+.wren(swren),.q(pc_next));  
+	
+	assign odata = outd;
+	assign w=q_w;		//程序存储器输出指令
+	assign w1=aq_w;		//二级流水的环境
+	assign w2=bq_w;		//三级流水的环境
+assign opc=pc;
+	
+	always @(posedge clock  or negedge clr_n)  //取出指令与传递指令
+	begin
+	if (!clr_n)
+	begin
+    aq_w <= 16'h0000;
+		bq_w <= 16'h0000;
+		jp  <= 3;				//初始从3拍开始
+		pc	<= 0;
+		sp 	<= 10'h3FF; 		//栈底下一位，堆栈开口向上
+		dwren	<= 0;
+		swren 	<= 0; 
+		brak	<= 0;
+	// 指令线
+		lda 	<= 0;                   
+		str 	<= 0;                  
+		ldar 	<= 0;                   
+		strr 	<= 0;                   
+		add 	<= 0;                   
+		sub 	<= 0;                   
+		out 	<= 0;                   
+		mov 	<= 0; 
+		xtda	<= 0;
+		mult	<= 0;
+		divi	<= 0;                  
+		sdal 	<= 0;                   
+		sdah	<= 0;                   
+		jmp 	<= 0;                   
+		jz 		<= 0;                   
+		jn 		<= 0;                   
+		call	<= 0;                   
+		ret 	<= 0; 
+		push	<= 0;
+		pop		<= 0;
+		stp		<= 0;
+		js		<= 0;
+	end
+	else
+	begin
+//<1>取指传递和节拍控制设备： 
+
+		if (!brak)		//不中断
+		begin
+			if (str==1 && dwren==1) begin  //写存储器在此拍结束
+		            dwren 	<= 0;
+					str		<= 0;
+					end	
+			if ((push==1 || call==1) && swren==1) //如果是入栈或子程序调用
+begin
+				swren 	<= 0;	//栈写完成
+				push	<= 0;	//入栈结束
+				call	<= 0;	//调用结束
+			end 
+			if (go)  pc<=pc_go;
+			else
+			begin
+				pc <= pc+1;		//取下一条指令
+				aq_w <= q_w;    //实际aq_w在第一拍改变
+				bq_w <= aq_w;   //实际bq_w在第二拍改变
+			end
+		end
+		else 		//是中断状态
+		begin		
+			pc_go	 <= pc; //保存断点
+			aq_w <= 0;               
+			bq_w <= 0;              
+		end
+//以上是初始过程，此后q_w将依次向后传递。
+ 
+//<2>分析准备设备：
+	case (q_w[15:12])
+	4'b0000: 					//类码是0000
+case (q_w[5:0])		//功能码
+			6'b000001:			// push
+					begin
+					sp <= sp+1;
+					push <= 1;
+					case (q_w[11:9])	//寄存器编号
+					3'b000: pc_back <= r_0;
+					3'b001: pc_back <= r_1;
+					3'b010: pc_back <= r_2;
+					3'b011: pc_back <= r_3;
+					3'b100: pc_back <= r_4;
+					3'b101: pc_back <= r_5;
+					3'b110: pc_back <= r_6;
+					3'b111: pc_back <= r_7;
+					endcase
+					end
+			6'b000010:		//pop出栈
+					begin
+					case (q_w[11:9])		//寄存器编号
+					3'b000:  r_0 <= pc_next;
+					3'b001:  r_1 <= pc_next ;
+					3'b010:  r_2 <= pc_next;
+					3'b011:  r_3 <= pc_next ;
+					3'b100:  r_4 <= pc_next;
+					3'b101:  r_5 <= pc_next;
+					3'b110:  r_6 <= pc_next ;
+					3'b111:  r_7 <= pc_next;
+					endcase	
+					end
+			6'b000011:		//ldar
+					case (q_w[11:9])
+					3'b000: da <= r_0;
+					3'b001: da <= r_1;
+					3'b010: da <= r_2;
+					3'b011: da <= r_3;
+					3'b100: da <= r_4;
+					3'b101: da <= r_5;
+					3'b110: da <= r_6;
+					3'b111: da <= r_7;
+					endcase
+			6'b000100: 		// strr 
+					case (q_w[11:9])		//寄存器
+					3'b000:  if (lda==1)r_0 <= q_data;	//如果正在读直接送
+								else r_0 <= da;			//不然送da的值
+					3'b001:  if (lda==1)r_1 <= q_data;
+								else r_1 <= da;
+					3'b010:  if (lda==1)r_2 <= q_data;
+								else r_2 <= da;
+					3'b011:  if (lda==1)r_3 <= q_data;
+								else r_3 <= da;
+					3'b100:  if (lda==1)r_4 <= q_data;
+								else r_4 <= da;
+					3'b101:  if (lda==1)r_5 <= q_data;
+								else r_5 <= da;
+					3'b110:  if (lda==1)r_6 <= q_data;
+								else r_6 <= da;
+					3'b111:  if (lda==1)r_7 <= q_data;
+								else r_7 <= da;
+					endcase
+			6'b000101:		// (add )
+					case (q_w[11:6])
+					6'b000000: r_0 <= r_0+r_0;
+					6'b001001: r_1 <= r_1+r_1;
+					6'b010010: r_2 <= r_2+r_2;
+					6'b011011: r_3 <= r_3+r_3;
+					6'b100100: r_4 <= r_4+r_4;
+					6'b101101: r_5 <= r_5+r_5;
+					6'b110110: r_6 <= r_6+r_6;
+					6'b111111: r_7 <= r_7+r_7;
+					6'b000001: r_1 <= r_0+r_1;
+					6'b000010: r_2 <= r_0+r_2;
+					6'b000011: r_3 <= r_0+r_3;
+					6'b000100: r_4 <= r_0+r_4;
+					6'b000101: r_5 <= r_0+r_5;
+					6'b000110: r_6 <= r_0+r_6;
+					6'b000111: r_7 <= r_0+r_7;
+					6'b001000: r_0 <= r_1+r_0;
+					6'b001010: r_2 <= r_1+r_2;
+					6'b001011: r_3 <= r_1+r_3;
+					6'b001100: r_4 <= r_1+r_4;
+					6'b001101: r_5 <= r_1+r_5;
+					6'b001110: r_6 <= r_1+r_6;
+					6'b001111: r_7 <= r_1+r_7;
+					6'b010000: r_0 <= r_2+r_0;
+					6'b010001: r_1 <= r_2+r_1;
+					6'b010011: r_3 <= r_2+r_3;
+					6'b010100: r_4 <= r_2+r_4;
+					6'b010101: r_5 <= r_2+r_5;
+					6'b010110: r_6 <= r_2+r_6;
+					6'b010111: r_7 <= r_2+r_7;
+					6'b011000: r_0 <= r_3+r_0;
+					6'b011001: r_1 <= r_3+r_1;
+					6'b011010: r_2 <= r_3+r_2;
+					6'b011100: r_4 <= r_3+r_4;
+					6'b011101: r_5 <= r_3+r_5;
+					6'b011110: r_6 <= r_3+r_6;
+					6'b011111: r_7 <= r_3+r_7;
+					6'b100000: r_0 <= r_4+r_0;
+					6'b100001: r_1 <= r_4+r_1;
+					6'b100010: r_2 <= r_4+r_2;
+					6'b100011: r_3 <= r_4+r_3;
+					6'b100101: r_5 <= r_4+r_5;
+					6'b100110: r_6 <= r_4+r_6;
+					6'b100111: r_7 <= r_4+r_7;
+					6'b101000: r_0 <= r_5+r_0;
+					6'b101001: r_1 <= r_5+r_1;
+					6'b101010: r_2 <= r_5+r_2;
+					6'b101011: r_3 <= r_5+r_3;
+					6'b101100: r_4 <= r_5+r_4;
+					6'b101110: r_6 <= r_5+r_6;
+					6'b101111: r_7 <= r_5+r_7;
+					6'b110000: r_0 <= r_6+r_0;
+					6'b110001: r_1 <= r_6+r_1;
+					6'b110010: r_2 <= r_6+r_2;
+					6'b110011: r_3 <= r_6+r_3;
+					6'b110100: r_4 <= r_6+r_4;
+					6'b110101: r_5 <= r_6+r_5;
+					6'b110111: r_7 <= r_6+r_7;
+					6'b111000: r_0 <= r_7+r_0;
+					6'b111001: r_1 <= r_7+r_1;
+					6'b111010: r_2 <= r_7+r_2;
+					6'b111011: r_3 <= r_7+r_3;
+					6'b111100: r_4 <= r_7+r_4;
+					6'b111101: r_5 <= r_7+r_5;
+					6'b111110: r_6 <= r_7+r_6;
+					endcase
+				6'b000110:		 // (sub )
+					case (q_w[11:6])
+					6'b000000: r_0 <= r_0-r_0;
+					6'b001001: r_1 <= r_1-r_1;
+					6'b010010: r_2 <= r_2-r_2;
+					6'b011011: r_3 <= r_3-r_3;
+					6'b100100: r_4 <= r_4-r_4;
+					6'b101101: r_5 <= r_5-r_5;
+					6'b110110: r_6 <= r_6-r_6;
+					6'b111111: r_7 <= r_7-r_7;
+					6'b000001: r_1 <= r_1-r_0;
+					6'b000010: r_2 <= r_2-r_0;
+					6'b000011: r_3 <= r_3-r_0;
+					6'b000100: r_4 <= r_4-r_0;
+					6'b000101: r_5 <= r_5-r_0;
+					6'b000110: r_6 <= r_6-r_0;
+					6'b000111: r_7 <= r_7-r_0;
+					6'b001000: r_0 <= r_0-r_1;
+					6'b001010: r_2 <= r_2-r_1;
+					6'b001011: r_3 <= r_3-r_1;
+					6'b001100: r_4 <= r_4-r_1;
+					6'b001101: r_5 <= r_5-r_1;
+					6'b001110: r_6 <= r_6-r_1;
+					6'b001111: r_7 <= r_7-r_1;
+					6'b010000: r_0 <= r_0-r_2;
+					6'b010001: r_1 <= r_1-r_2;
+					6'b010011: r_3 <= r_3-r_2;
+					6'b010100: r_4 <= r_4-r_2;
+					6'b010101: r_5 <= r_5-r_2;
+					6'b010110: r_6 <= r_6-r_2;
+					6'b010111: r_7 <= r_7-r_2;
+					6'b011000: r_0 <= r_0-r_3;
+					6'b011001: r_1 <= r_1-r_3;
+					6'b011010: r_2 <= r_2-r_3;
+					6'b011100: r_4 <= r_4-r_3;
+					6'b011101: r_5 <= r_5-r_3;
+					6'b011110: r_6 <= r_6-r_3;
+					6'b011111: r_7 <= r_7-r_3;
+					6'b100000: r_0 <= r_0-r_4;
+					6'b100001: r_1 <= r_1-r_4;
+					6'b100010: r_2 <= r_2-r_4;
+					6'b100011: r_3 <= r_3-r_4;
+					6'b100101: r_5 <= r_5-r_4;
+					6'b100110: r_6 <= r_6-r_4;
+					6'b100111: r_7 <= r_7-r_4;
+					6'b101000: r_0 <= r_0-r_5;
+					6'b101001: r_1 <= r_1-r_5;
+					6'b101010: r_2 <= r_2-r_5;
+					6'b101011: r_3 <= r_3-r_5;
+					6'b101100: r_4 <= r_4-r_5;
+					6'b101110: r_6 <= r_6-r_5;
+					6'b101111: r_7 <= r_7-r_5;
+					6'b110000: r_0 <= r_0-r_6;
+					6'b110001: r_1 <= r_1-r_6;
+					6'b110010: r_2 <= r_2-r_6;
+					6'b110011: r_3 <= r_3-r_6;
+					6'b110100: r_4 <= r_4-r_6;
+					6'b110101: r_5 <= r_5-r_6;
+					6'b110111: r_7 <= r_7-r_6;
+					6'b111000: r_0 <= r_0-r_7;
+					6'b111001: r_1 <= r_1-r_7;
+					6'b111010: r_2 <= r_2-r_7;
+					6'b111011: r_3 <= r_3-r_7;
+					6'b111100: r_4 <= r_4-r_7;
+					6'b111101: r_5 <= r_5-r_7;
+					6'b111110: r_6 <= r_6-r_7;
+					endcase
+				6'b000111:	    					// (out )
+					case (q_w[11:9])
+					3'b000: outd <= r_0;
+					3'b001: outd <= r_1;
+					3'b010: outd <= r_2;
+					3'b011: outd <= r_3;
+					3'b100: outd <= r_4;
+					3'b101: outd <= r_5;
+					3'b110: outd <= r_6;
+					3'b111: outd <= r_7;
+					endcase
+				6'b001000:							//(mov)
+					case (q_w[11:6])
+					6'b000001: r_1 <= r_0;
+					6'b000010: r_2 <= r_0;
+					6'b000011: r_3 <= r_0;
+					6'b000100: r_4 <= r_0;
+					6'b000101: r_5 <= r_0;
+					6'b000110: r_6 <= r_0;
+					6'b000111: r_7 <= r_0;
+					6'b001000: r_0 <= r_1;
+					6'b001010: r_2 <= r_1;
+					6'b001011: r_3 <= r_1;
+					6'b001100: r_4 <= r_1;
+					6'b001101: r_5 <= r_1;
+					6'b001110: r_6 <= r_1;
+					6'b001111: r_7 <= r_1;
+					6'b010000: r_0 <= r_2;
+					6'b010001: r_1 <= r_2;
+					6'b010011: r_3 <= r_2;
+					6'b010100: r_4 <= r_2;
+					6'b010101: r_5 <= r_2;
+					6'b010110: r_6 <= r_2;
+					6'b010111: r_7 <= r_2;
+					6'b011000: r_0 <= r_3;
+					6'b011001: r_1 <= r_3;
+					6'b011010: r_2 <= r_3;
+					6'b011100: r_4 <= r_3;
+					6'b011101: r_5 <= r_3;
+					6'b011110: r_6 <= r_3;
+					6'b011111: r_7 <= r_3;
+					6'b100000: r_0 <= r_4;
+					6'b100001: r_1 <= r_4;
+					6'b100010: r_2 <= r_4;
+					6'b100011: r_3 <= r_4;
+					6'b100101: r_5 <= r_4;
+					6'b100110: r_6 <= r_4;
+					6'b100111: r_7 <= r_4;
+					6'b101000: r_0 <= r_5;
+					6'b101001: r_1 <= r_5;
+					6'b101010: r_2 <= r_5;
+					6'b101011: r_3 <= r_5;
+					6'b101100: r_4 <= r_5;
+					6'b101110: r_6 <= r_5;
+					6'b101111: r_7 <= r_5;
+					6'b110000: r_0 <= r_6;
+					6'b110001: r_1 <= r_6;
+					6'b110010: r_2 <= r_6;
+					6'b110011: r_3 <= r_6;
+					6'b110100: r_4 <= r_6;
+					6'b110101: r_5 <= r_6;
+					6'b110111: r_7 <= r_6;
+					6'b111000: r_0 <= r_7;
+					6'b111001: r_1 <= r_7;
+					6'b111010: r_2 <= r_7;
+					6'b111011: r_3 <= r_7;
+					6'b111100: r_4 <= r_7;
+					6'b111101: r_5 <= r_7;
+					6'b111110: r_6 <= r_7;
+					endcase
+				6'b001001:		// mult
+					begin
+					case (q_w[11:9])
+					3'b000: begin
+							if (lda==1){x,da} <= q_data*r_0;//前推机制
+							else 	{x,da} <= da*r_0;
+							end
+					3'b001: begin
+							if (lda==1){x,da} <= q_data*r_1;
+							else 	{x,da} <= da*r_1;
+							end
+					3'b010: begin
+							if (lda==1){x,da} <= q_data*r_2;
+							else 	{x,da} <= da*r_2;
+							end
+					3'b011: begin
+							if (lda==1){x,da} <= q_data*r_3;
+							else 	{x,da} <= da*r_3;
+							end
+					3'b100: begin
+							if (lda==1){x,da} <= q_data*r_4;
+							else 	{x,da} <= da*r_4;
+							end
+					3'b101: begin
+							if (lda==1){x,da} <= q_data*r_5;
+							else 	{x,da} <= da*r_5;
+							end
+					3'b110: begin
+							if (lda==1){x,da} <= q_data*r_6;
+							else 	{x,da} <= da*r_6;
+							end
+					3'b111: begin
+							if (lda==1){x,da} <= q_data*r_7;
+							else 	{x,da} <= da*r_7;
+							end
+					endcase
+					end
+				6'b001010:		// divi
+					begin
+					if (js<4) begin
+js <= js+1; 
+pc <= pc-2; 
+aq_w <= 0; 
+end
+					if (js==0)
+					case (q_w[11:9])
+					3'b000: begin
+							if (lda==1) begin 
+da <= q_data/r_0; 
+x <= q_data%r_0; 
+end
+							else	begin 
+da <= da/r_0; 
+x <= da%r_0; 
+end
+							end
+					3'b001: begin
+							if (lda==1) begin 
+da <= q_data/r_1; 
+x <= q_data%r_1; 
+end
+							else	begin 
+da <= da/r_1; 
+x <= da%r_1; 
+end
+							end
+					3'b010: begin
+							if (lda==1) begin 
+da <= q_data/r_2; 
+x <= q_data%r_2; 
+end
+							else	begin 
+da <= da/r_2; 
+x <= da%r_2; 
+end
+							end
+					3'b011: begin
+							if (lda==1) begin 
+da <= q_data/r_3; 
+x <= q_data%r_3; 
+end
+							else	begin 
+da <= da/r_3; 
+x <= da%r_3; 
+end
+							end
+					3'b100: begin
+							if (lda==1) begin 
+da <= q_data/r_4; 
+x <= q_data%r_4; 
+end
+							else	begin 
+da <= da/r_4; 
+x <= da%r_4; 
+end
+							end
+					3'b101: begin
+							if (lda==1) begin 
+da <= q_data/r_5; 
+x <= q_data%r_5; 
+end
+							else	begin 
+da <= da/r_5; 
+x <= da%r_5; 
+end
+							end
+					3'b110: begin
+							if (lda==1) begin 
+da <= q_data/r_6; 
+x <= q_data%r_6; 
+end
+							else	begin 
+da <= da/r_6; 
+x <= da%r_6; 
+end
+							end
+					3'b111: begin
+							if (lda==1) begin 
+da <= q_data/r_7; 
+x <= q_data%r_7; 
+end
+							else	begin 
+da <= da/r_7; 
+x <= da%r_7; 
+end
+							end
+					endcase 
+					end 
+							
+				6'b001011:da <= x;  	//x->da
+				6'b000000:
+					begin end     		//nop
+				6'b111110:				// (ret )
+					begin   					
+					pc <= pc_next;  
+					end
+				6'b111111:	
+					begin   			// (stp)
+					brak <= 1;
+					end
+				default:	begin end
+				endcase
+								
+	4'b0001: 	begin 						// (lda 避免先写后读)
+				mar   <= q_w[11:0];			//选择存储器地址
+				lda	<= 1;					//存储器读操作状态
+				end
+	4'b0010:	begin    		// (str )
+				mar   <= q_w[11:0];			//地址
+				ddata <= da;
+				str <= 1;					//存储器写操作状态
+				end  
+	4'b1001:	begin   						// (sdal )
+				da <= {{8{q_w[7]}},q_w[7:0]};	//扩充16位有符号数
+				end 
+	4'b1010:	begin   					 	// (sdah )
+				da[15:0] <= {q_w[7:0],da[7:0]}; //事先sdal送低8位
+				end 
+	4'b1011:	begin   					 	// (jmp )
+				pc <= q_w[11:0];
+				end  
+	4'b1100:	begin   					 	// (jz )
+				if (da==0)	pc <= q_w[11:0];
+				end  
+	4'b1101:	begin    					 	// (jn)
+				if (da<0)	pc <= q_w[11:0];
+				end  
+	4'b1110:	begin   					 	// (call )
+				pc_back <= pc+1;      	 		//返回地址入栈
+				pc 	 <= q_w[11:0];
+				sp <= sp+1;
+				call <= 1;
+				end  
+	default:	begin   
+				end  
+	endcase
+//<3>执行设备：					
+	case (aq_w[15:12])
+	4'b0000:										
+			case (aq_w[5:0])
+			6'b000001:  		//push
+					begin 
+					swren <= 1;	//第3拍实现入栈
+					end
+			6'b000010:  		//pop
+					sp <= sp-1;
+			6'b001010:			// divi
+					js <= 0;
+			6'b111110:  		//ret
+					sp <= sp-1;
+			default: begin end
+			endcase
+
+	4'b0001: 	begin 						// (lda )
+				da   <= q_data;	//第3拍实现读
+				lda  <= 0;
+				end
+									 
+	4'b0010:	begin    		// (str )
+				dwren <= 1;		//第3拍实现写
+				end  
+	4'b1110:	begin   		// (call )
+				swren  <= 1;    //pc_back实现入栈
+				end  
+	default:	begin   
+				end  
+	endcase
+/*//<4>存取设备：		这一段转成循环流水就可以去掉。				
+	case (bq_w[15:12])
+									 
+	4'b0000:										
+			case (bq_w[5:0])
+			6'b000001:  		//push
+				begin 
+				swren <= 0;
+				end
+			endcase
+	4'b0010:	begin    		// (str )
+				dwren <= 0;
+				end  
+	4'b1110:	begin    		// (call )
+				swren  <= 0;             
+				end  
+	default:	begin   
+				end  
+	endcase */
+	end
+	end
+endmodule
