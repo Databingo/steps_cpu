@@ -1,0 +1,5 @@
+开始游戏: Keyboard_Space
+上：Keyboard_UpArrow
+下：Keyboard_DownArrow
+左：Keyboard_LeftArrow
+右：Keyboard_RightArrow
