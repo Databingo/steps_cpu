@@ -12,6 +12,9 @@ write driver of keyborad
 write driver of LCD screen
 
 
+brew install icarus-verilog # with vvp
+
+
 rk.sh run test
 
 2025 Research road map:
