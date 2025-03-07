@@ -3,7 +3,6 @@ module key_board (in,out,clk);
 input in,clk;
 output reg out;
 reg [22:0] count;
-
 	always @(posedge(clk))
 		begin
 			if(in==1)
@@ -12,17 +11,12 @@ reg [22:0] count;
 						begin 
 							out <= ~out;
 						end
-				
 						count <= count + 1;
-				
 				end 
-				
 				else 
-				
 					begin 
-							out <= 0;
-							count <= 1;
+						out <= 0;
+						count <= 1;
 					end
 				end	
-							
 endmodule
