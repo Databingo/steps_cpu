@@ -70,6 +70,7 @@ reg Csrrc;
 reg Csrrwi;
 reg Csrrsi;
 reg Csrrci;
+
 function [4:0] csr_index;
  input [11:0] csr_wire;
  begin
