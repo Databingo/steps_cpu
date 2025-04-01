@@ -150,7 +150,6 @@ output [19:0] oupimm;
 // 寄存器显示器
 output [63:0] ox1, ox2, ox3, ox4, ox5, ox6, ox7, ox8, ox9, ox10, ox11, ox12, ox13, ox14, ox15, ox16, ox17, ox18, ox19, ox20, ox21, ox22, ox23, ox24, ox25, ox26, ox27, ox28, ox29, ox30, ox31;
 output [63:0] osign_extended_bimm;
-
 // 控制线显示器
 output oLui; output oAuipc;
 output oLb; output oLbu; output oLh; output oLhu; output oLw; output oLwu; output oLd;
@@ -219,8 +218,8 @@ assign oir = wire_ir;       // 显示 32 位指令
 assign opc = pc[63:0];      // 显示 64 位程序计数器值
 assign ojp = jp[2:0];       // 显示 3 位节拍计数器
 assign oop = wire_op;       // 显示 7 位操作码
-assign of3 = wire_f3;       //显示 func3 值
-assign of7 = wire_f7;       //显示 func7 值
+assign of3 = wire_f3;       // 显示 func3 值
+assign of7 = wire_f7;       // 显示 func7 值
 assign oimm = wire_imm;     // 显示 imm 值
 assign oupimm = wire_upimm; // 显示 upimm 值
 assign ox0 = rram[0];       // 显示 x0 值
