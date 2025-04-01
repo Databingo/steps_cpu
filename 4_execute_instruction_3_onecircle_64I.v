@@ -110,7 +110,6 @@ oFence, oFencei,
 oEcall, oEbreak, oCsrrw, oCsrrs, oCsrrc, oCsrrwi, oCsrrsi, oCsrrci
 );
 
-
 // 自动顺序读取程序机-> [带跳转的]自动顺序读取程序机
 // jal rd, imm       # rd = pc+4; pc = pc  + imm_0
 // jal x1, 0
@@ -256,6 +255,7 @@ assign ox28 = rram[28];
 assign ox29 = rram[29];
 assign ox30 = rram[30];
 assign ox31 = rram[31];
+
 assign osign_extended_bimm = sign_extended_bimm[63:0];
 assign oLui = Lui; assign oAuipc = Auipc;
 assign oLb = Lb; assign oLbu = Lbu; assign oLh = Lh; assign oLhu = Lhu; assign oLw = Lw; assign oLwu = Lwu; assign oLd = Ld;
@@ -368,7 +368,6 @@ begin
 	  //Csrrwi <=0;
 	  //Csrrsi <=0;
 	  //Csrrci <=0;
-	  //
 	  //
 	  //opcode <=0;
 	  //func3 <=0;
