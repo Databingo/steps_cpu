@@ -1092,181 +1092,181 @@ begin
 	    	   //jp <=1;
 	       end
 	    //######## // 指令执行 // Close Flage
-	    1: begin 
-	    	   case(wire_op)
-                   // Load class
-	           7'b0110111: 
-	                      begin
-                                Lui <= 1'b0; // close Lui Flag
-	                        pc <= pc + 4;   // 程序计数器加一
-	    	                jp <=0;
-	                      end
-	           7'b0010111: 
-	                      begin
-                                Auipc <= 1'b0; // close Auipc Flag
-	                        pc <= pc + 4;   // 程序计数器加一
-	    	                jp <=0;
-	                      end
-	           7'b0000011:begin 
-	                        case(ir[14:12])  // func3
-	                          3'b000: Lb  <= 1'b0; // close Lb  Flag 
-	                          3'b100: Lbu <= 1'b0; // close Lbu Flag 
-	                          3'b001: Lh  <= 1'b0; // close Lh  Flag 
-	                          3'b101: Lhu <= 1'b0; // close Lhu Flag  
-	                          3'b010: Lw  <= 1'b0; // close Lw  Flag 
-	                          3'b110: Lwu <= 1'b0; // close Lwu Flag 
-	                          3'b011: Ld  <= 1'b0; // close Ld  Flag 
-	                        endcase
-	                          pc <= pc + 4;   // 程序计数器加一
-	    	                  jp <=0;
-	                      end
-                   // Store class
-	           7'b0100011:begin 
-	                        case(ir[14:12]) // func3
-	                          3'b000: Sb  <= 1'b0; // close Sb Flag 
-	                          3'b001: Sh  <= 1'b0; // close Sh Flag 
-	                          3'b010: Sw  <= 1'b0; // close Sw Flag 
-	                          3'b011: Sd  <= 1'b0; // close Sd Flag  
-	                	endcase
-	                          pc <= pc + 4;   // 程序计数器加一
-	    	                  jp <=0;
-	                      end
-                   // Math-Logic-Shift-Register class
-	           7'b0110011:begin 
-	        	        case(ir[14:12]) // func3
-	        		  3'b000:begin
-	        		          case(ir[31:25]) // func7
-	        		            7'b0000000:Add  <= 1'b0; // close Add Flag  
-	        		            7'b0100000:Sub  <= 1'b0; // close Sub Flag  
-	        		          endcase
-	        		        end 
-	        	          3'b001: Sll  <= 1'b0; // close Sll Flag 
-	        	          3'b010: Slt  <= 1'b0; // close Slt Flag 
-	        	          3'b011: Sltu <= 1'b0; // close Sltu Flag  
-	        	          3'b100: Xor  <= 1'b0; // close Xor Flag 
-	        		  3'b101:begin 
-	        		          case(ir[31:25]) // func7
-	        		            7'b0000000:Srl  <= 1'b0; // close Srl Flag 
-	        		            7'b0100000:Sra  <= 1'b0; // close Sra Flag  
-	        		          endcase
-	        		         end 
-	        	          3'b110: Or   <= 1'b0; // close Or Flag 
-	        	          3'b111: And  <= 1'b0; // close And Flag 
-	        		endcase
-	                          pc <= pc + 4;   // 程序计数器加一
-	    	                  jp <=0;
-	        	      end
-                   // Math-Logic-Shift-Immediate class
-	           7'b0010011:begin 
-	        	        case(ir[14:12]) // func3
-	        	          3'b000: Addi  <= 1'b0; // close Addi  Flag 
-	        	          3'b010: Slti  <= 1'b0; // close Slti  Flag 
-	        	          3'b011: Sltiu <= 1'b0; // close Sltiu Flag 
-	        	          3'b110: Ori   <= 1'b0; // close Ori   Flag 
-	        	          3'b111: Andi  <= 1'b0; // close Andi  Flag 
-	        	          3'b100: Xori  <= 1'b0; // close Xori  Flag 
-	        	          3'b001: Slli  <= 1'b0; // close Slli  Flag 
-	        		  3'b101: begin
-	        		          case(ir[31:25]) // func7
-	        		            7'b0000000: Srli  <= 1'b0; // set Srli  Flag 
-	        		            7'b0100000: Srai  <= 1'b0; // set Srai  Flag 
-	        		          endcase
-	        		         end 
-	        		endcase
-	                          pc <= pc + 4;   // 程序计数器加一
-	    	                  jp <=0;
-	        	      end
-                   // Math-Logic-Shift-Immediate-64 class
-	           7'b0011011:begin
-	        	        case(ir[14:12]) // func3
-	        	          3'b000: Addiw  <= 1'b0; // close Addiw  Flag 
-	        	          3'b001: Slliw  <= 1'b0; // close Slliw  Flag 
-	        		  3'b101: begin
-	        		          case(ir[31:25]) // func7
-	        		            7'b0000000: Srliw <= 1'b0; // close Srliw  Flag 
-	        		            7'b0100000: Sraiw <= 1'b0; // close Sraiw  Flag 
-	        		          endcase
-	        		         end 
-	        		endcase
-	                          pc <= pc + 4;   // 程序计数器加一
-	    	                  jp <=0;
-	                      end
-                   // Math-Logic-Shift-Register-64 class
-	           7'b0111011:begin
-	        	        case(ir[14:12]) // func3
-	        		  3'b000: begin
-	        		          case(ir[31:25]) // func7
-	        		            7'b0000000: Addw  <= 1'b0; // close Addw  Flag 
-	        		            7'b0100000: Subw  <= 1'b0; // close Subw  Flag 
-	        		          endcase
-	        		         end 
-	        	          3'b001: Sllw  <= 1'b0; // close Sllw  Flag 
-	        		  3'b101: begin
-	        		          case(ir[31:25]) // func7
-	        		            7'b0000000: Srlw  <= 1'b0; // close Srlw  Flag 
-	        		            7'b0100000: Sraw  <= 1'b0; // close Sraw  Flag 
-	        		          endcase
-	        		         end 
-	        		endcase
-	                          pc <= pc + 4;   // 程序计数器加一
-	    	                  jp <=0;
-	                      end
-                   // Jump
-	           //e####
-	           7'b1101111:begin
-                                Jal <= 1'b0; // close Jal Flag 
-	    	                jp <=0;
-                              end
-                   // RJump
-	           7'b1100111:begin 
-                                Jalr <= 1'b0; // close Jalr Flag 
-	                        //pc <= pc + 1;   // 程序计数器加一
-	    	                jp <=0;
-                              end
-                   // Branch class
-	           7'b1100011:begin 
-	        	        case(wire_f3) // func3
-	        	          3'b000: Beq  <= 1'b0; // close Beq  Flag 
-	        	          3'b001: Bne  <= 1'b0; // close Bne  Flag 
-	        	          3'b100: Blt  <= 1'b0; // close Blt  Flag 
-	        	          3'b101: Bge  <= 1'b0; // close Bge  Flag 
-	        	          3'b110: Bltu <= 1'b0; // close Bltu Flag 
-	        	          3'b111: Bgeu <= 1'b0; // close Bgeu Flag 
-	        		endcase
-	                          pc <= pc + 4;   // 程序计数器加一
-	    	                  jp <=0;
-	                      end
-                   // Fence class
-	           7'b0001111:begin 
-	        	        case(ir[14:12]) // func3
-	        	          3'b000: Fence  <= 1'b0; // close Fence Flag 
-	        	          3'b001: Fencei <= 1'b0; // close Fencei Flag 
-	        		endcase
-	                          pc <= pc + 4;   // 程序计数器加一
-	    	                  jp <=0;
-	                      end
-                   // Enverioment class
-	           7'b1110011:begin 
-	        	        case(ir[14:12]) // func3
-	        		  3'b000: begin
-	        		          case(ir[31:20]) // func12
-	        		            12'b000000000000: Ecall  <= 1'b0; // close Ecall  Flag 
-	        		            12'b000000000001: Ebreak <= 1'b0; // close Ebreak Flag 
-	        		          endcase
-	        		         end 
-	        	          3'b001: Csrrw  <= 1'b0; // close Csrrw  Flag 
-	        	          3'b010: Csrrs  <= 1'b0; // close Csrrs  Flag 
-	        	          3'b011: Csrrc  <= 1'b0; // close Csrrc  Flag 
-	        	          3'b101: Csrrwi <= 1'b0; // close Csrrwi Flag 
-	        	          3'b110: Csrrsi <= 1'b0; // close Csrrsi Flag 
-	        	          3'b111: Csrrci <= 1'b0; // close Csrrci Flag 
-	        		endcase
-	                          pc <= pc + 4;   // 程序计数器加一
-	    	                  jp <=0;
-	                      end
+	    //1: begin 
+	    //	   case(wire_op)
+            //       // Load class
+	    //       7'b0110111: 
+	    //                  begin
+            //                    Lui <= 1'b0; // close Lui Flag
+	    //                    pc <= pc + 4;   // 程序计数器加一
+	    //	                jp <=0;
+	    //                  end
+	    //       7'b0010111: 
+	    //                  begin
+            //                    Auipc <= 1'b0; // close Auipc Flag
+	    //                    pc <= pc + 4;   // 程序计数器加一
+	    //	                jp <=0;
+	    //                  end
+	    //       7'b0000011:begin 
+	    //                    case(ir[14:12])  // func3
+	    //                      3'b000: Lb  <= 1'b0; // close Lb  Flag 
+	    //                      3'b100: Lbu <= 1'b0; // close Lbu Flag 
+	    //                      3'b001: Lh  <= 1'b0; // close Lh  Flag 
+	    //                      3'b101: Lhu <= 1'b0; // close Lhu Flag  
+	    //                      3'b010: Lw  <= 1'b0; // close Lw  Flag 
+	    //                      3'b110: Lwu <= 1'b0; // close Lwu Flag 
+	    //                      3'b011: Ld  <= 1'b0; // close Ld  Flag 
+	    //                    endcase
+	    //                      pc <= pc + 4;   // 程序计数器加一
+	    //	                  jp <=0;
+	    //                  end
+            //       // Store class
+	    //       7'b0100011:begin 
+	    //                    case(ir[14:12]) // func3
+	    //                      3'b000: Sb  <= 1'b0; // close Sb Flag 
+	    //                      3'b001: Sh  <= 1'b0; // close Sh Flag 
+	    //                      3'b010: Sw  <= 1'b0; // close Sw Flag 
+	    //                      3'b011: Sd  <= 1'b0; // close Sd Flag  
+	    //            	endcase
+	    //                      pc <= pc + 4;   // 程序计数器加一
+	    //	                  jp <=0;
+	    //                  end
+            //       // Math-Logic-Shift-Register class
+	    //       7'b0110011:begin 
+	    //    	        case(ir[14:12]) // func3
+	    //    		  3'b000:begin
+	    //    		          case(ir[31:25]) // func7
+	    //    		            7'b0000000:Add  <= 1'b0; // close Add Flag  
+	    //    		            7'b0100000:Sub  <= 1'b0; // close Sub Flag  
+	    //    		          endcase
+	    //    		        end 
+	    //    	          3'b001: Sll  <= 1'b0; // close Sll Flag 
+	    //    	          3'b010: Slt  <= 1'b0; // close Slt Flag 
+	    //    	          3'b011: Sltu <= 1'b0; // close Sltu Flag  
+	    //    	          3'b100: Xor  <= 1'b0; // close Xor Flag 
+	    //    		  3'b101:begin 
+	    //    		          case(ir[31:25]) // func7
+	    //    		            7'b0000000:Srl  <= 1'b0; // close Srl Flag 
+	    //    		            7'b0100000:Sra  <= 1'b0; // close Sra Flag  
+	    //    		          endcase
+	    //    		         end 
+	    //    	          3'b110: Or   <= 1'b0; // close Or Flag 
+	    //    	          3'b111: And  <= 1'b0; // close And Flag 
+	    //    		endcase
+	    //                      pc <= pc + 4;   // 程序计数器加一
+	    //	                  jp <=0;
+	    //    	      end
+            //       // Math-Logic-Shift-Immediate class
+	    //       7'b0010011:begin 
+	    //    	        case(ir[14:12]) // func3
+	    //    	          3'b000: Addi  <= 1'b0; // close Addi  Flag 
+	    //    	          3'b010: Slti  <= 1'b0; // close Slti  Flag 
+	    //    	          3'b011: Sltiu <= 1'b0; // close Sltiu Flag 
+	    //    	          3'b110: Ori   <= 1'b0; // close Ori   Flag 
+	    //    	          3'b111: Andi  <= 1'b0; // close Andi  Flag 
+	    //    	          3'b100: Xori  <= 1'b0; // close Xori  Flag 
+	    //    	          3'b001: Slli  <= 1'b0; // close Slli  Flag 
+	    //    		  3'b101: begin
+	    //    		          case(ir[31:25]) // func7
+	    //    		            7'b0000000: Srli  <= 1'b0; // set Srli  Flag 
+	    //    		            7'b0100000: Srai  <= 1'b0; // set Srai  Flag 
+	    //    		          endcase
+	    //    		         end 
+	    //    		endcase
+	    //                      pc <= pc + 4;   // 程序计数器加一
+	    //	                  jp <=0;
+	    //    	      end
+            //       // Math-Logic-Shift-Immediate-64 class
+	    //       7'b0011011:begin
+	    //    	        case(ir[14:12]) // func3
+	    //    	          3'b000: Addiw  <= 1'b0; // close Addiw  Flag 
+	    //    	          3'b001: Slliw  <= 1'b0; // close Slliw  Flag 
+	    //    		  3'b101: begin
+	    //    		          case(ir[31:25]) // func7
+	    //    		            7'b0000000: Srliw <= 1'b0; // close Srliw  Flag 
+	    //    		            7'b0100000: Sraiw <= 1'b0; // close Sraiw  Flag 
+	    //    		          endcase
+	    //    		         end 
+	    //    		endcase
+	    //                      pc <= pc + 4;   // 程序计数器加一
+	    //	                  jp <=0;
+	    //                  end
+            //       // Math-Logic-Shift-Register-64 class
+	    //       7'b0111011:begin
+	    //    	        case(ir[14:12]) // func3
+	    //    		  3'b000: begin
+	    //    		          case(ir[31:25]) // func7
+	    //    		            7'b0000000: Addw  <= 1'b0; // close Addw  Flag 
+	    //    		            7'b0100000: Subw  <= 1'b0; // close Subw  Flag 
+	    //    		          endcase
+	    //    		         end 
+	    //    	          3'b001: Sllw  <= 1'b0; // close Sllw  Flag 
+	    //    		  3'b101: begin
+	    //    		          case(ir[31:25]) // func7
+	    //    		            7'b0000000: Srlw  <= 1'b0; // close Srlw  Flag 
+	    //    		            7'b0100000: Sraw  <= 1'b0; // close Sraw  Flag 
+	    //    		          endcase
+	    //    		         end 
+	    //    		endcase
+	    //                      pc <= pc + 4;   // 程序计数器加一
+	    //	                  jp <=0;
+	    //                  end
+            //       // Jump
+	    //       //e####
+	    //       7'b1101111:begin
+            //                    Jal <= 1'b0; // close Jal Flag 
+	    //	                jp <=0;
+            //                  end
+            //       // RJump
+	    //       7'b1100111:begin 
+            //                    Jalr <= 1'b0; // close Jalr Flag 
+	    //                    //pc <= pc + 1;   // 程序计数器加一
+	    //	                jp <=0;
+            //                  end
+            //       // Branch class
+	    //       7'b1100011:begin 
+	    //    	        case(wire_f3) // func3
+	    //    	          3'b000: Beq  <= 1'b0; // close Beq  Flag 
+	    //    	          3'b001: Bne  <= 1'b0; // close Bne  Flag 
+	    //    	          3'b100: Blt  <= 1'b0; // close Blt  Flag 
+	    //    	          3'b101: Bge  <= 1'b0; // close Bge  Flag 
+	    //    	          3'b110: Bltu <= 1'b0; // close Bltu Flag 
+	    //    	          3'b111: Bgeu <= 1'b0; // close Bgeu Flag 
+	    //    		endcase
+	    //                      pc <= pc + 4;   // 程序计数器加一
+	    //	                  jp <=0;
+	    //                  end
+            //       // Fence class
+	    //       7'b0001111:begin 
+	    //    	        case(ir[14:12]) // func3
+	    //    	          3'b000: Fence  <= 1'b0; // close Fence Flag 
+	    //    	          3'b001: Fencei <= 1'b0; // close Fencei Flag 
+	    //    		endcase
+	    //                      pc <= pc + 4;   // 程序计数器加一
+	    //	                  jp <=0;
+	    //                  end
+            //       // Enverioment class
+	    //       7'b1110011:begin 
+	    //    	        case(ir[14:12]) // func3
+	    //    		  3'b000: begin
+	    //    		          case(ir[31:20]) // func12
+	    //    		            12'b000000000000: Ecall  <= 1'b0; // close Ecall  Flag 
+	    //    		            12'b000000000001: Ebreak <= 1'b0; // close Ebreak Flag 
+	    //    		          endcase
+	    //    		         end 
+	    //    	          3'b001: Csrrw  <= 1'b0; // close Csrrw  Flag 
+	    //    	          3'b010: Csrrs  <= 1'b0; // close Csrrs  Flag 
+	    //    	          3'b011: Csrrc  <= 1'b0; // close Csrrc  Flag 
+	    //    	          3'b101: Csrrwi <= 1'b0; // close Csrrwi Flag 
+	    //    	          3'b110: Csrrsi <= 1'b0; // close Csrrsi Flag 
+	    //    	          3'b111: Csrrci <= 1'b0; // close Csrrci Flag 
+	    //    		endcase
+	    //                      pc <= pc + 4;   // 程序计数器加一
+	    //	                  jp <=0;
+	    //                  end
 
-	           endcase
-	       end
+	    //       endcase
+	    //   end
 	    endcase
         end
 end
