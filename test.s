@@ -39,4 +39,6 @@ sb s4, 0(s1)            # write byte back to THR for stdio to output
 #sb      s4, 0(s1)       # write byte to UART register 
 #bltu    x0, s3, loop     # if DR is 1 then s3 > 0 then jump to loop for waiting new keystroke
 #jal x0, loop # jal to loop
-addi x31, x0, 666
+addi x30, x0, 111
+addi x31, x30, 666
+addi x31, x31, 1
