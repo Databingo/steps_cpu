@@ -285,6 +285,7 @@ initial begin
  $dumpfile("4.vcd");
  $dumpvars(0, s4tb);
  #TIME_WINDOW $finish;
+ //#TIME_WINDOW $finish; // run forever
 //$stop;
 end
 
