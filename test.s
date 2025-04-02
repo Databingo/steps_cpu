@@ -83,7 +83,7 @@
 #addi x30, x0, 0x05
 #addi x31, x30, 0
 # Test 11 pseduo li
-addi x30, x0, 111
+addi x31, x0, 0xB 
 
 
 
