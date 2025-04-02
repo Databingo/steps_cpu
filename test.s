@@ -44,7 +44,7 @@
 #addi x31, x31, 1
 
 # Test Instruction
-# ADDI  |imm.12|rs1.5|000.3|rd.5|0010011.7|  add sign-extend imm.12 to sr1, send overflow ingnored result to rd
+# ADDI  |imm.12|rs1.5|000.3|rd.5|0010011.7|  add sign-extend imm.12 to sr1, send overflow ingnored result to rd, imm is -2048:2047
 # Test 1 add number decimal positive 
 #addi x31, x0, 1 
 #addi x31, x0, 2 
@@ -74,13 +74,11 @@
 #addi x31, x0, -0x1 
 #addi x31, x30, 0x2 
 # Test 8 minimal and maximal number
-addi x31, x0,   0b11111111111 # maximal 2047
-addi x31, x0,  -0b00000000000 # minimal -2048
+#addi x31, x0,  0b11111111111 # maximal 2047
+#addi x31, x0, -0b00000000000 # minimal -2048
 # Test 9 0verflow 12 bits
-#addi x31, x0, -0b011111111111
-#addi x31, x0, -0b111111111111
-#addi x31, x0,  0b111111111111 # overflow
-#addi x31, x0, -0b111111111111
+addi x31, x0,  0b111111111111 # overflow
+addi x31, x0, -0b111111111111
 
 
 
