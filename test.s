@@ -42,3 +42,16 @@ sb s4, 0(s1)            # write byte back to THR for stdio to output
 addi x30, x0, 111
 addi x31, x30, 666
 addi x31, x31, 1
+
+# Test Instruction
+# Load
+
+
+
+
+
+
+
+
+
+
