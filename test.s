@@ -80,8 +80,10 @@
 #addi x31, x0,  0b111111111111 # overflow
 #addi x31, x0, -0b111111111111 # overflow
 # Test 10 add 0 as mv
-addi x30, x0, 0x05
-addi x31, x30, 0
+#addi x30, x0, 0x05
+#addi x31, x30, 0
+# Test 11 pseduo li
+addi x30, x0, 111
 
 
 
