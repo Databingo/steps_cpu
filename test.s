@@ -73,11 +73,12 @@
 #addi x30, x0, -0x1 
 #addi x31, x0, -0x1 
 #addi x31, x30, 0x2 
-# 0verfloat 12 bits
-addi x31, x0, 0b011111111111
+# 0verflow 12 bits
+addi x31, x0, 0b011111111111 # maximal
 addi x31, x0, -0b011111111111
-addi x31, x0, 0b111111111111
+addi x31, x0, 0b111111111111 # overflow
 addi x31, x0, -0b111111111111
+
 
 
 
