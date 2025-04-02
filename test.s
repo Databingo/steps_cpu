@@ -91,7 +91,14 @@
 #addi x0, x0, 0x2
 #addi x31, x0, 3
 # Test 13 NOP
-addi x0, x0, 0
+#addi x0, x0, 0
+# Test 14 maximal positive to minimal negative int64
+## addi x30, x0, 0x7fffffffffffffff # not work due to [-2048:2047] of addi imm
+lui  x31, 0x80000    # load upper 20 bits
+## x31 now is 0x8000000000000000
+#addi x31, x31, 0xfff   # subtract 1, 0xfff = 111111111111 = -1 
+addi x31, x31, -1   # subtract 1, 0xfff = 111111111111 = -1 
+## x31 now is 0x7fffffffffffffff  
 
 
 
