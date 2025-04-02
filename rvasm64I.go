@@ -39,7 +39,10 @@ func SplitOn(r rune) bool { return r == ',' || r == ' ' || r == '\t' || r == '('
 
 func isValidImmediate(s string) (int64, error) {
     var imm1, imm2, imm3 int64
-    var err1, err2, err3 error
+  //var err1, err2, err3 error
+	var err1 = errors.New("error_init")
+	var err2 = errors.New("error_init")
+	var err3 = errors.New("error_init")
     imm1, err1 = strconv.ParseInt(s, 10, 32) // check if s is a decimal number
 
     if strings.HasPrefix(s, "0x") {

@@ -47,7 +47,10 @@ func SplitOn(r rune) bool { return r == ',' || r == ' ' || r == '\t' || r == '('
 // 0x/0X for hexadecimal 十六进制
 func isValidImmediate(s string) (int64, error) {
 	var imm1, imm2, imm3 int64
-	var err1, err2, err3 error
+	//var err1, err2, err3 error
+	var err1 = errors.New("error_init")
+	var err2 = errors.New("error_init")
+	var err3 = errors.New("error_init")
 	imm1, err1 = strconv.ParseInt(s, 10, 32) // check if s is a decimal number
 
 	if strings.HasPrefix(s, "0x") {
@@ -55,10 +58,14 @@ func isValidImmediate(s string) (int64, error) {
 	} else if strings.HasPrefix(s, "-0x") {
 		imm2, err2 = strconv.ParseInt(string(s[0])+s[3:], 16, 64) // ignore the "0x" part but include the '-'
 	} else if strings.HasPrefix(s, "0b") {
+	        //fmt.Println("raw imm is:", s)
 		imm3, err3 = strconv.ParseInt(s[2:], 2, 64) // check if s is binary
 	} else if strings.HasPrefix(s, "-0b") {
 		imm3, err3 = strconv.ParseInt(string(s[0])+s[3:], 2, 64)
 	}
+	        //fmt.Println("get imm1:", imm1, err1)
+	        //fmt.Println("get imm2:", imm2, err2)
+	        //fmt.Println("get imm3:", imm3, err3)
 
 	if err1 != nil && err2 != nil && err3 != nil {
 		return 0, errors.New("Invalid immediate value")
@@ -653,7 +660,9 @@ func main() {
 			if len(code) != 4 {
 				fmt.Println("Incorrect argument count on line: ", lineCounter)
 			}
+			fmt.Println("raw imm is:",code[3])
 			imm, err := isValidImmediate(code[3])
+			fmt.Println("imm is ", imm)
 			if err != nil {
 				fmt.Printf("Error on line %d: %s\n", lineCounter, err)
 				os.Exit(0)
