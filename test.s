@@ -100,30 +100,6 @@ srli x31, x31, 1
 addi x31, x31, 1
 ## x31 now is 0x8000000000000000 # Min int64 -2**63 = -9,223,372,036,854,775,808
 
-#addi x31, x31, 0xfff   # subtract 1, 0xfff = 111111111111 = -1 
-#addi x31, x31, -1   # subtract 1, 0xfff = 111111111111 = -1 
-
-
-
-
-
-
-#addi x31, x0, 0b011111111111
-#addi x31, x0, 0b111111111111
-#addi x31, x0, -1
-#addi x31, x0, -2
-#addi x31, x0, 2
-#addi x31, x0, 0b01
-#addi x30, x0, -2
-#addi x31, x30, 3
-# Load
-#lui  x31, 0x10000     # load upper 20 bits
-
-
-
-
-
-
 
 
 
