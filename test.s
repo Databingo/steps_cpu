@@ -45,38 +45,40 @@
 
 # Test Instruction
 # ADDI  |imm.12|rs1.5|000.3|rd.5|0010011.7|  add sign-extend imm.12 to sr1, send overflow ingnored result to rd
-# add number decimal positive 
+# Test 1 add number decimal positive 
 #addi x31, x0, 1 
 #addi x31, x0, 2 
 #addi x31, x0, 3 
-# add number 0b positive 
+# Test 2 add number 0b positive 
 #addi x31, x0, 0b1 
 #addi x31, x0, 0b10
 #addi x31, x0, 0b11 
-# add number 0x positive 
+# Test 3 add number 0x positive 
 #addi x31, x0, 0x1 
 #addi x31, x0, 0x2
 #addi x31, x0, 0x3
-# add number decimal negative
+# Test 4 add number decimal negative
 #addi x31, x0, -1 
 #addi x31, x0, -2 
 #addi x31, x0, -3 
-# add number 0b negative
+# Test 5 add number 0b negative
 #addi x31, x0, -0b1 
 #addi x31, x0, -0b10
 #addi x31, x0, -0b11 
-# add number 0x negative
+# Test 6 add number 0x negative
 #addi x31, x0, -0x1 
 #addi x31, x0, -0x2
 #addi x31, x0, -0x3
-# add number 0x positive then turn to negative
+# Test 7 add number 0x positive then turn to negative
 #addi x30, x0, -0x1 
 #addi x31, x0, -0x1 
 #addi x31, x30, 0x2 
-# 0verflow 12 bits
+# Test 8 minimal and maximal number
 addi x31, x0,   0b11111111111 # maximal 2047
 addi x31, x0,  -0b00000000000 # minimal -2048
+# Test 9 0verflow 12 bits
 #addi x31, x0, -0b011111111111
+#addi x31, x0, -0b111111111111
 #addi x31, x0,  0b111111111111 # overflow
 #addi x31, x0, -0b111111111111
 
