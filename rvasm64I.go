@@ -55,6 +55,12 @@ func isValidImmediate(s string) (int64, error) {
 		imm3, err3 = strconv.ParseInt(s[2:], 2, 64) // check if s is binary
 	} else if strings.HasPrefix(s, "-0b") {
 		imm3, err3 = strconv.ParseInt(string(s[0])+s[3:], 2, 64)
+		//fmt.Println("s:", s)
+		//fmt.Println("imm3:", imm3)
+		//fmt.Println("lens:", len(s))
+		// -00000000000 = 100000000000 = 1100000000000  = -2048 
+		if imm3 == 0 && len(s) == 14 {imm3 = -2048}
+		//fmt.Println("imm3:", imm3)
 	}
 
 	if err1 != nil && err2 != nil && err3 != nil {
