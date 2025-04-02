@@ -44,7 +44,8 @@
 #addi x31, x31, 1
 
 # Test Instruction
-# ADDI  |imm.12|rs1.5|000.3|rd.5|0010011.7|  add sign-extend imm.12 to sr1, send overflow ingnored result to rd, imm is -2048:2047
+# ADDI  |imm.12|rs1.5|000.3|rd.5|0010011.7|  add sign-extend imm.12 to sr1, send overflow ingnored result to rd, 
+# Limitation: imm is in -2048:2047
 # Test 1 add number decimal positive 
 #addi x31, x0, 1 
 #addi x31, x0, 2 
@@ -93,18 +94,18 @@
 # Test 13 NOP
 #addi x0, x0, 0
 # Test 14 maximal positive to minimal negative int64
-addi x31, x0,-1 
-## x31 now is 0xffffffffffffffff # -1
-srli x31, x31, 1
-## x31 now is 0x7fffffffffffffff # Max int64 +2**63-1 = 9,223,372,036,854,775,807
-addi x31, x31, 1
-## x31 now is 0x8000000000000000 # Min int64 -2**63 = -9,223,372,036,854,775,808
-addi x31, x31, -1
-## x31 now is 0x7fffffffffffffff # Max overflow 
-addi x31, x31, 2
-## x31 now is 0x8000000000000001 
-addi x31, x31, -1
-## x31 now is 0x8000000000000000 
+#addi x31, x0,-1 
+### x31 now is 0xffffffffffffffff # -1
+#srli x31, x31, 1
+### x31 now is 0x7fffffffffffffff # Max int64 +2**63-1 = 9,223,372,036,854,775,807
+#addi x31, x31, 1
+### x31 now is 0x8000000000000000 # Min int64 -2**63 = -9,223,372,036,854,775,808
+#addi x31, x31, -1
+### x31 now is 0x7fffffffffffffff # Max overflow 
+#addi x31, x31, 2
+### x31 now is 0x8000000000000001 
+#addi x31, x31, -1
+### x31 now is 0x8000000000000000 
 
 
 
