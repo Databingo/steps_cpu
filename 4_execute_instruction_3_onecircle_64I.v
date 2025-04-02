@@ -776,7 +776,7 @@ begin
 				          endcase
 				         end 
 				endcase
-	    	   jp <=1;
+	    	   //jp <=1;
 		              end
                    // Math-Logic-Shift-Register-64 class
 	           7'b0111011:begin 
@@ -795,7 +795,7 @@ begin
 				          endcase
 				         end 
 				endcase
-	    	   jp <=1;
+	    	   //jp <=1;
 		              end
                    // Jump
 	           7'b1101111:begin 
@@ -917,7 +917,7 @@ begin
 			          3'b000: Fence  <= 1'b1; // set Fence Flag 
 			          3'b001: Fencei <= 1'b1; // set Fencei Flag 
 				endcase
-	    	   jp <=1;
+	    	   //jp <=1;
 		              end
                    // Enverioment class
 		   //
@@ -1088,6 +1088,7 @@ begin
 
 	    	   endcase
 	    	   //jp <=1;
+                   rram[0] <= 64'h0;  // x0 恒为 0
 	       end
 	    //######## // 指令执行 // Close Flage
 	    //1: begin 
