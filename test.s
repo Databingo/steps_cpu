@@ -44,9 +44,28 @@
 #addi x31, x31, 1
 
 # Test Instruction
-addi x31, x0, 2
-addi x31, x0, 0b01
-addi x31, x0, 0b011111111111
+# ADDI  |imm.12|rs1.5|000.3|rd.5|0010011.7|  add sign-extend imm.12 to sr1, send overflow ingnored result to rd
+# add positive number decimal
+#addi x31, x0, 1 
+#addi x31, x0, 2 
+#addi x31, x0, 3 
+# add positive number 0b
+#addi x31, x0, 0b1 
+#addi x31, x0, 0b10
+#addi x31, x0, 0b11 
+# add positive number 0x
+addi x31, x0, 0x1 
+addi x31, x0, 0x2
+addi x31, x0, 0x3
+
+#addi x31, x0, 0b011111111111
+#addi x31, x0, 0b111111111111
+#addi x31, x0, -1
+#addi x31, x0, -2
+#addi x31, x0, 2
+#addi x31, x0, 0b01
+#addi x30, x0, -2
+#addi x31, x30, 3
 # Load
 #lui  x31, 0x10000     # load upper 20 bits
 
