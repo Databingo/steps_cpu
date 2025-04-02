@@ -99,6 +99,8 @@ srli x31, x31, 1
 ## x31 now is 0x7fffffffffffffff # Max int64 +2**63-1 = 9,223,372,036,854,775,807
 addi x31, x31, 1
 ## x31 now is 0x8000000000000000 # Min int64 -2**63 = -9,223,372,036,854,775,808
+addi x31, x31, -1
+## x31 now is 0x7fffffffffffffff # Max overflow 
 
 
 
