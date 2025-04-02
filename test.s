@@ -97,7 +97,7 @@
 lui  x31, 0x80000    # load upper 20 bits
 ## x31 now is 0x8000000000000000
 #addi x31, x31, 0xfff   # subtract 1, 0xfff = 111111111111 = -1 
-addi x31, x31, -1   # subtract 1, 0xfff = 111111111111 = -1 
+#addi x31, x31, -1   # subtract 1, 0xfff = 111111111111 = -1 
 ## x31 now is 0x7fffffffffffffff  
 
 
