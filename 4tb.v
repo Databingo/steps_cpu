@@ -402,8 +402,8 @@ always @(posedge clk) begin
    if (ox30 !== 0 && ox30 !== 64'bz && ox30 !== 64'bx) $write("ox30=%0d,",  ox30 ,);
    if (ox31 !== 0 && ox31 !== 64'bz && ox31 !== 64'bx) $write("ox31=%0d,",  ox31 ,);
 
-   if (oupimm  !== 0 ) $write("oupimm=%0b,",  oupimm ,);
-   $write("osign_extended_bimm=%064b,",  osign_extended_bimm ,);
+  // if (oupimm  !== 0 ) $write("oupimm=%0b,",  oupimm ,);
+  // $write("osign_extended_bimm=%064b,",  osign_extended_bimm ,);
 
 
 

@@ -44,6 +44,7 @@ addi x31, x30, 666
 addi x31, x31, 1
 
 # Test Instruction
+addi x31, x0, 1
 # Load
 
 
