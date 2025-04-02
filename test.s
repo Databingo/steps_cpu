@@ -45,8 +45,8 @@
 
 # Test Instruction
 addi x31, x0, 2
-#addi x31, x0, 0b011111111111
 addi x31, x0, 0b01
+addi x31, x0, 0b011111111111
 # Load
 #lui  x31, 0x10000     # load upper 20 bits
 
