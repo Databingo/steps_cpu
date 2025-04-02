@@ -77,8 +77,11 @@
 #addi x31, x0,  0b11111111111 # maximal 2047
 #addi x31, x0, -0b00000000000 # minimal -2048
 # Test 9 0verflow 12 bits
-addi x31, x0,  0b111111111111 # overflow
-addi x31, x0, -0b111111111111
+#addi x31, x0,  0b111111111111 # overflow
+#addi x31, x0, -0b111111111111 # overflow
+# Test 10 add 0 as mv
+addi x30, x0, 0x05
+addi x31, x30, 0
 
 
 
