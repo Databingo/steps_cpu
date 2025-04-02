@@ -84,12 +84,14 @@
 #addi x31, x30, 0
 # Test 11 pseduo li
 #addi x31, x0, 0xB 
-# Test 12 write to x0
-addi x0, x0, 0x2
-addi x31, x0, 0
-addi x31, x0, 2
-addi x0, x0, 0x2
-addi x31, x0, 3
+# Test 12 write to x0 for discard
+#addi x0, x0, 0x2
+#addi x31, x0, 0
+#addi x31, x0, 2
+#addi x0, x0, 0x2
+#addi x31, x0, 3
+# Test 13 NOP
+addi x0, x0, 0
 
 
 
