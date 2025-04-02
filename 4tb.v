@@ -399,7 +399,11 @@ always @(posedge clk) begin
    if (ox27 !== 0 && ox27 !== 64'bz && ox27 !== 64'bx) $write("ox27=%0d,",  ox27 ,);
    if (ox28 !== 0 && ox28 !== 64'bz && ox28 !== 64'bx) $write("ox28=%0d,",  ox28 ,);
    if (ox29 !== 0 && ox29 !== 64'bz && ox29 !== 64'bx) $write("ox29=%0d,",  ox29 ,);
+
    if (ox30 !== 0 && ox30 !== 64'bz && ox30 !== 64'bx) $write("ox30=%0d,",  ox30 ,);
+   if (ox30 !== 0 && ox30 !== 64'bz && ox30 !== 64'bx) $write("ox30=0b%0b,",  ox30 ,); 
+   if (ox30 !== 0 && ox30 !== 64'bz && ox30 !== 64'bx) $write("ox30=0x%0h,",  ox30 ,); 
+
    if (ox31 !== 0 && ox31 !== 64'bz && ox31 !== 64'bx) $write("ox31=%0d,",  ox31 ,); 
    if (ox31 !== 0 && ox31 !== 64'bz && ox31 !== 64'bx) $write("ox31=0b%0b,",  ox31 ,); 
    if (ox31 !== 0 && ox31 !== 64'bz && ox31 !== 64'bx) $write("ox31=0x%0h,",  ox31 ,); 
