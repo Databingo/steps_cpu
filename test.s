@@ -54,9 +54,13 @@
 #addi x31, x0, 0b10
 #addi x31, x0, 0b11 
 # add positive number 0x
-addi x31, x0, 0x1 
-addi x31, x0, 0x2
-addi x31, x0, 0x3
+#addi x31, x0, 0x1 
+#addi x31, x0, 0x2
+#addi x31, x0, 0x3
+# add positive number decimal negetive
+addi x31, x0, -1 
+addi x31, x0, -2 
+addi x31, x0, -3 
 
 #addi x31, x0, 0b011111111111
 #addi x31, x0, 0b111111111111
