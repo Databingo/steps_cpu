@@ -514,7 +514,7 @@ func main() {
 				os.Exit(0)
 			}
 			if imm > 2047 || imm < -2048 {
-				fmt.Printf("Error on line %d: Immediate value out of range (should be between -2048 and 2047)\n", lineCounter)
+				fmt.Printf("Error on line %d: Immediate value out of range (should be between -2048 and 2047) with %d \n", lineCounter, imm)
 				os.Exit(0)
 			}
 			op, opFound := opBin[code[0]]

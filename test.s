@@ -110,6 +110,15 @@
 # SRLI
 # -------
 # Limitation: shamt is in 0:63, padding always 0
+# Test 1 basic positive number
+#addi x31, x0, 0xf0
+#srli x31, x31, 4
+## Now  x31 is 0xf
+# Test 1 basic negative number
+addi x31, x0, -1
+srli x31, x31, 1
+srli x31, x31, 3
+
 
 
 
