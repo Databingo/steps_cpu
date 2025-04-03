@@ -162,7 +162,7 @@
 
 # SRAI
 # -------
-# Limitation: shamt 6bits in 0:63, padding according to +- position
+# Limitation: shamt 6bits in 0:63, padding according to +- sign bit
 # Test 1 basic positive number
 #addi x31, x0, 0b1
 #slli x31, x31, 1
