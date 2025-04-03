@@ -1,6 +1,6 @@
 //// rv32i + rv64i extension = 47 + 15 - 3 重复(SLLI SRLI SRAI) = 62 - 3 = 59 条指令
 //// -------------re-order-by-operation_code-----------
-//// load 加载 7
+//// load 加载(到寄存器) 7
 //00000000 00000000 00000000 00000011 //___000000000000_00000_000_00000_0000011 // LB   |imm.12|rs1.5|000.3|rd.5|0000011.7|    load 8 bite sign extend to 64 bits at imm(s1) to rd       
 //00000000 00000000 01000000 00000011 //___000000000000_00000_100_00000_0000011 // LBU  |imm.12|rs1.5|100.3|rd.5|0000011.7|    load 8 bite unsign to 64 bits at imm(s1) to rd         
 //00000000 00000000 00010000 00000011 //___000000000000_00000_001_00000_0000011 // LH   |imm.12|rs1.5|001.3|rd.5|0000011.7|    load half-word 16     
@@ -8,14 +8,32 @@
 //00000000 00000000 00100000 00000011 //___000000000000_00000_010_00000_0000011 // LW   |imm.12|rs1.5|010.3|rd.5|0000011.7|    load word 32          
 //00000000 00000000 01100000 00000011 //___000000000000_00000_110_00000_0000011 // LWU  |imm.12|rs1.5|110.3|rd.5|0000011.7| 64 load word 32 unsigned  
 //00000000 00000000 00110000 00000011 //___000000000000_00000_011_00000_0000011 // LD   |imm.12|rs1.5|011.3|rd.5|0000011.7| 64 load double-word 64    
-//// Upper 上立即数 2
-//00000000 00000000 00000000 00110111 //_____00000000000000000000_00000_0110111 // LUI  |imm.20|rd.5|0110111.7| put 20 bits immediate to upper 20 bits of rd and left lower 12 bits 0
-//00000000 00000000 00000000 00010111 //_____00000000000000000000_00000_0010111 // AUIPC|imm.20|rd.5|0010111.7| left shift the 20 bits immediate 12 bits then add pc value then put to rd
-//// Store 存储 4
+//// Store 存储(到内存) 4
 //00000000 00000000 00000000 00100011 //___000000000000_00000_000_00000_0100011 // SB   |imm.7|rs2.5|rs1.5|000.3|imm.5|0100011.7|    store byte, write low 8 bits of rs1 to rs2's imm.12
 //00000000 00000000 00010000 00100011 //___000000000000_00000_001_00000_0100011 // SH   |imm.7|rs2.5|rs1.5|001.3|imm.5|0100011.7|    store half-word, write low 16 bits of rs1 to rs2's imm.12
 //00000000 00000000 00100000 00100011 //___000000000000_00000_010_00000_0100011 // SW   |imm.7|rs2.5|rs1.5|010.3|imm.5|0100011.7|    store word, 32
 //00000000 00000000 00110000 00100011 //___000000000000_00000_011_00000_0100011 // SD   |imm.7|rs2.5|rs1.5|011.3|imm.5|0100011.7| 64 store double-word, 64 
+//// Upper 上立即数 2
+//00000000 00000000 00000000 00110111 //_____00000000000000000000_00000_0110111 // LUI  |imm.20|rd.5|0110111.7| put 20 bits immediate to upper 20 bits of rd and left lower 12 bits 0
+//00000000 00000000 00000000 00010111 //_____00000000000000000000_00000_0010111 // AUIPC|imm.20|rd.5|0010111.7| left shift the 20 bits immediate 12 bits then add pc value then put to rd
+//// 算数逻辑位移 立即数类型 Math-Logic-I 9  (LUI need plus 1 when ADDI nege imm)
+//00000000 00000000 00000000 00010011 //___000000000000_00000_000_00000_0010011 // ADDI*|imm.12|rs1.5|000.3|rd.5|0010011.7| add sign-extend imm to sr1, send overflow ingnored result to rd|op rd,rs1,imm 
+//00000000 00000000 00100000 00010011 //___000000000000_00000_010_00000_0010011 // SLTI |imm.12|rs1.5|010.3|rd.5|0010011.7| if rs1 is less than imm.12 both as sign-extended then put 1 in rd else 0
+//00000000 00000000 00110000 00010011 //___000000000000_00000_011_00000_0010011 // SLTIU|imm.12|rs1.5|011.3|rd.5|0010011.7| if rs1 is less than imm.12 both as unsigned number then put 1 in rd else 0
+//00000000 00000000 01100000 00010011 //___000000000000_00000_110_00000_0010011 // ORI  |imm.12|rs1.5|110.3|rd.5|0010011.7| bitwise OR  rs1 and sign-extend imm.12 put reslut in rd
+//00000000 00000000 01110000 00010011 //___000000000000_00000_111_00000_0010011 // ANDI |imm.12|rs1.5|111.3|rd.5|0010011.7| bitwise AND rs1 and sign-extend imm.12 put reslut in rd
+//00000000 00000000 01000000 00010011 //___000000000000_00000_100_00000_0010011 // XORI |imm.12|rs1.5|100.3|rd.5|0010011.7| XOR (XORI, rd, rs1, -1) same as (NOT, rd, rs)
+////00000000 00000000 00010000 00010011 //__0000000_00000_00000_001_00000_0010011 // SLLI |imm.12|rs1.5|001.3|rd.5|0010011.7|  shift lift  logicl rs1 32 by imm.12[low5.unsign] padding 0 put into rd 
+////00000000 00000000 01010000 00010011 //__0000000_00000_00000_101_00000_0010011 // SRLI |imm.12|rs1.5|101.3|rd.5|0010011.7|  shift right logicl rs1 32 by imm.12[low5.unsign] padding 0 put into rd
+////01000000 00000000 01010000 00010011 //__0100000_00000_00000_101_00000_0010011 // SRAI |imm.12|rs1.5|101.3|rd.5|0010011.7|  shift right arithmetical logicl rs1 32 by imm.12[low5.unsign] padding 1 to rd
+//// 算数逻辑位移 立即数类型 64 位 Math-Logic-I-64 7
+//00000000 00000000 00010000 00010011 //__000000_000000_00000_001_00000_0010011 // SLLI*  |000000.6|shamt.6|rs1.5|001.3|rd.5|0010011.7| 64 shift lift  logicl rs1 64 by imm.12[low6.unsign] padding 0 to rd
+//00000000 00000000 01010000 00010011 //__000000_000000_00000_101_00000_0010011 // SRLI*  |000000.6|shamt.6|rs1.5|101.3|rd.5|0010011.7| 64 shift right rs1 shamt.6[unsign] padding 0 to rd, srli rd,rs1,amt
+//01000000 00000000 01010000 00010011 //__010000_000000_00000_101_00000_0010011 // SRAI*  |010000.6|shamt.6|rs1.5|101.3|rd.5|0010011.7| 64 shift right arithm rs1 shamt.6[unsign] padding 1? to rd
+//00000000 00000000 00000000 00011011 //___000000000000_00000_000_00000_0011011 // ADDIW- |imm.12|rs1.5|000.3|rd.5|0011011.7| 64 add sign-extend imm.12 to sr1 as sign-extend overflow-ingnor64 low 32 to rd
+//00000000 00000000 00010000 00011011 //__0000000_00000_00000_001_00000_0011011 // SLLIW- |imm.12|rs1.5|001.3|rd.5|0011011.7| 64 shift lift  logicl rs1 32 by imm.12[low5.unsign] padding 0 to rd 
+//00000000 00000000 01010000 00011011 //__0000000_00000_00000_101_00000_0011011 // SRLIW- |imm.12|rs1.5|101.3|rd.5|0011011.7| 64 shift right logicl rs1 32 by imm.12[low5.unsign] padding 0 to rd 
+//01000000 00000000 01010000 00011011 //__0100000_00000_00000_101_00000_0011011 // SRAIW- |imm.12|rs1.5|101.3|rd.5|0011011.7| 64 shift right arithm logicl rs1 32 by imm.12[L5.unsign] padding 1 to rd
 //// 算数逻辑位移 寄存器类型 Math-Logic-R 10
 //00000000 00000000 00000000 00110011 //__0000000_00000_00000_000_00000_0110011 // ADD  |xxx.7|rs2.5|rs1.5|000.3|rd.5|0110011.7| add rs1 and rs2 send overflow ingnored result to rd 
 //01000000 00000000 00000000 00110011 //__0100000_00000_00000_000_00000_0110011 // SUB  |xxx.7|rs2.5|rs1.5|000.3|rd.5|0110011.7| sub rs2 from rs1 send overflow ingnored result to rd |sub rd rs1 rs2
@@ -27,34 +45,12 @@
 //00000000 00000000 00010000 00110011 //__0000000_00000_00000_001_00000_0110011 // SLL  |xxx.7|rs2.5|rs1.5|001.3|rd.5|0110011.7| shift lift  logicl rs1 by rs2[low5.unsign] padding 0 then put into rd 
 //00000000 00000000 01010000 00110011 //__0000000_00000_00000_101_00000_0110011 // SRL  |xxx.7|rs2.5|rs1.5|101.3|rd.5|0110011.7| shift right logicl rs1 by amount in rs2[low5.unsign] padding 0 put into rd
 //01000000 00000000 01010000 00110011 //__0100000_00000_00000_101_00000_0110011 // SRA  |xxx.7|rs2.5|rs1.5|101.3|rd.5|0110011.7| shift right arithmetical logicl rs1 rs2[low5.unsign] padding 1 put into rd
-//// 算数逻辑位移 立即数类型 Math-Logic-I 9  (LUI need plus 1 when ADDI nege imm)
-//00000000 00000000 00000000 00010011 //___000000000000_00000_000_00000_0010011 // ADDI |imm.12|rs1.5|000.3|rd.5|0010011.7| add sign-extend imm to sr1, send overflow ingnored result to rd|op rd,rs1,imm 
-//00000000 00000000 00100000 00010011 //___000000000000_00000_010_00000_0010011 // SLTI |imm.12|rs1.5|010.3|rd.5|0010011.7| if rs1 is less than imm.12 both as sign-extended then put 1 in rd else 0
-//00000000 00000000 00110000 00010011 //___000000000000_00000_011_00000_0010011 // SLTIU|imm.12|rs1.5|011.3|rd.5|0010011.7| if rs1 is less than imm.12 both as unsigned number then put 1 in rd else 0
-//00000000 00000000 01100000 00010011 //___000000000000_00000_110_00000_0010011 // ORI  |imm.12|rs1.5|110.3|rd.5|0010011.7| bitwise OR  rs1 and sign-extend imm.12 put reslut in rd
-//00000000 00000000 01110000 00010011 //___000000000000_00000_111_00000_0010011 // ANDI |imm.12|rs1.5|111.3|rd.5|0010011.7| bitwise AND rs1 and sign-extend imm.12 put reslut in rd
-//00000000 00000000 01000000 00010011 //___000000000000_00000_100_00000_0010011 // XORI |imm.12|rs1.5|100.3|rd.5|0010011.7| XOR (XORI, rd, rs1, -1) same as (NOT, rd, rs)
-////00000000 00000000 00010000 00010011 //__0000000_00000_00000_001_00000_0010011 // SLLI |imm.12|rs1.5|001.3|rd.5|0010011.7|  shift lift  logicl rs1 32 by imm.12[low5.unsign] padding 0 put into rd 
-////00000000 00000000 01010000 00010011 //__0000000_00000_00000_101_00000_0010011 // SRLI |imm.12|rs1.5|101.3|rd.5|0010011.7|  shift right logicl rs1 32 by imm.12[low5.unsign] padding 0 put into rd
-////01000000 00000000 01010000 00010011 //__0100000_00000_00000_101_00000_0010011 // SRAI |imm.12|rs1.5|101.3|rd.5|0010011.7|  shift right arithmetical logicl rs1 32 by imm.12[low5.unsign] padding 1 to rd
-//// 算数逻辑位移 立即数类型 64 位 Math-Logic-I-64 7
-//00000000 00000000 00010000 00010011 //__000000_000000_00000_001_00000_0010011 // SLLI   |imm.12|rs1.5|001.3|rd.5|0010011.7| 64 shift lift  logicl rs1 64 by imm.12[low6.unsign] padding 0 to rd
-//00000000 00000000 01010000 00010011 //__000000_000000_00000_101_00000_0010011 // SRLI   |000000.6|shamt.6|rs1.5|101.3|rd.5|0010011.7| 64 shift right rs1 shamt.6[unsign] padding 0 to rd, srli rd,rs1,amt
-//01000000 00000000 01010000 00010011 //__010000_000000_00000_101_00000_0010011 // SRAI   |010000.6|shamt.6|rs1.5|101.3|rd.5|0010011.7| 64 shift right arithm rs1 shamt.6[unsign] padding 1? to rd
-//00000000 00000000 00000000 00011011 //___000000000000_00000_000_00000_0011011 // ADDIW  |imm.12|rs1.5|000.3|rd.5|0011011.7| 64 add sign-extend imm.12 to sr1 as sign-extend overflow-ingnor64 low 32 to rd
-//00000000 00000000 00010000 00011011 //__0000000_00000_00000_001_00000_0011011 // SLLIW  |imm.12|rs1.5|001.3|rd.5|0011011.7| 64 shift lift  logicl rs1 32 by imm.12[low5.unsign] padding 0 to rd 
-//00000000 00000000 01010000 00011011 //__0000000_00000_00000_101_00000_0011011 // SRLIW  |imm.12|rs1.5|101.3|rd.5|0011011.7| 64 shift right logicl rs1 32 by imm.12[low5.unsign] padding 0 to rd 
-//01000000 00000000 01010000 00011011 //__0100000_00000_00000_101_00000_0011011 // SRAIW  |imm.12|rs1.5|101.3|rd.5|0011011.7| 64 shift right arithm logicl rs1 32 by imm.12[L5.unsign] padding 1 to rd
 //// 算数逻辑位移 寄存器类型 64 位 Math-Logic-R-64 5
 //00000000 00000000 00000000 00111011 //__0000000_00000_00000_000_00000_0111011 // ADDW   |xxx.7|rs2.5|rs1.5|000.3|rd.5|0111011.7| 64 add rs1 32 and rs2 32 as overflow-ingnored 64 low 32 to rd 
 //01000000 00000000 00000000 00111011 //__0100000_00000_00000_000_00000_0111011 // SUBW   |xxx.7|rs2.5|rs1.5|000.3|rd.5|0111011.7| 64 sub rs2 32 from rs1 32 as overflow-ingnored 64 low 32 to rd
 //00000000 00000000 00010000 00111011 //__0000000_00000_00000_001_00000_0111011 // SLLW   |xxx.7|rs2.5|rs1.5|001.3|rd.5|0111011.7| 64 shift lift  logicl rs1 low 32 by rs2[l5unsign] padding 0 to rd 32
 //00000000 00000000 01010000 00111011 //__0000000_00000_00000_101_00000_0111011 // SRLW   |xxx.7|rs2.5|rs1.5|101.3|rd.5|0111011.7| 64 shift right logicl rs1 low 32 by rs2[l5unsign] padding 0 to rd 32 
 //01000000 00000000 01010000 00111011 //__0100000_00000_00000_101_00000_0111011 // SRAW   |xxx.7|rs2.5|rs1.5|101.3|rd.5|0111011.7| 64 shift right arithm logicl rs1 32 by rs2[L5unsign] padding 1 to rd 
-//// Jump PC 跳转 2
-//00000000 00000000 00000000 01101111 //__0_0000000000_0_00000000_00000_1101111 // JAL    |imm.21[20|10:1|11|19:12]|rd.5|1101111.7| jump PC to PC+imm(paddingr 0) and place return address PC+4 in rd
-//// Rjump 寄存器 跳转 
-//00000000 00000000 00000000 01100111 //___000000000000_00000_000_00000_1100111 // JALR   |imm.12|rs1.5|000|rd.5|1100111.7|        jump PC to address imm(rs1) and place return address PC+4 in rd 
 //// Branch 分支 6
 //00000000 00000000 00000000 01100011 //0_000000_00000_00000_000_0000_0_1100011 // BEQ    |imm.7[12|10:5]|rs2.5|rs1.5|000.3|imm.5[4:1|11]|1100011.7| take branch if rs1 rs2 equal to PC+(sign-extend imm_0)
 //00000000 00000000 00010000 01100011 //0_000000_00000_00000_001_0000_0_1100011 // BNE    |imm.7[12|10:5]|rs2.5|rs1.5|001.3|imm.5[4:1|11]|1100011.7| take branch if rs1 and rs2 not equal
@@ -62,6 +58,10 @@
 //00000000 00000000 01010000 01100011 //0_000000_00000_00000_101_0000_0_1100011 // BGE    |imm.7[12|10:5]|rs2.5|rs1.5|101.3|imm.5[4:1|11]|1100011.7| take branch if rs1 >= rs2 in signed comparison 
 //00000000 00000000 01100000 01100011 //0_000000_00000_00000_110_0000_0_1100011 // BLTU   |imm.7[12|10:5]|rs2.5|rs1.5|100.3|imm.5[4:1|11]|1100011.7| take branch if rs1 < rs2 in unsigned comparison 
 //00000000 00000000 01110000 01100011 //0_000000_00000_00000_111_0000_0_1100011 // BGEU   |imm.7[12|10:5]|rs2.5|rs1.5|111.3|imm.5[4:1|11]|1100011.7| take branch if rs1 >= rs2 in unsigned comparison 
+//// Jump PC 跳转 2
+//00000000 00000000 00000000 01101111 //__0_0000000000_0_00000000_00000_1101111 // JAL    |imm.21[20|10:1|11|19:12]|rd.5|1101111.7| jump PC to PC+imm(paddingr 0) and place return address PC+4 in rd
+//// Rjump 寄存器 跳转 
+//00000000 00000000 00000000 01100111 //___000000000000_00000_000_00000_1100111 // JALR   |imm.12|rs1.5|000|rd.5|1100111.7|        jump PC to address imm(rs1) and place return address PC+4 in rd 
 //// Control 控制 10
 //00000000 00000000 00000000 00001111 //_0000_0000_0000_00000_000_00000_0001111 // FENCE  |0.4|pred.4|succ.4|0.5|000.3|0.5|0001111.7| sure RW I/O and memory completed before FENCE for successor
 //00000000 00000000 00010000 00001111 //_0000_0000_0000_00000_001_00000_0001111 // FENCE.I|0.4|0000.4|0000.4|0.5|001.3|0.5|0001111.7| sure instruction operation completed before FENCE.I
@@ -93,7 +93,6 @@
 //00000011 00100001 00000000 00000000 //00000000 00000000 00100001 00000011 //___000000000000_00000_010_00000_0000011 // LW load x0+0 w to x2 
 //00000011 01100001 00000000 00000000 //00000000 00000000 01100001 00000011 //___000000000000_00000_110_00000_0000011 // LWU load x0+0 w to x2  
 //00000011 00110001 01000000 00000000 //00000000 01000000 00110001 00000011 //___000000000000_00000_011_00000_0000011 // LD load x0+4 dw to x2 
-
 
 //10100011 00000000 00100000 00000000 //0000000_0 0010_0000 0_000_0000 10100011 //_0000000_00010_00000_000_00001_0100011// SB L8 x2 to x0+1 data
 //10000011 00000000 00010000 00000000 //00000000 00010000 00000000 1_0000011 //___000000000001_00000_000_00001_0000011 // LB load x0+1 B to x1

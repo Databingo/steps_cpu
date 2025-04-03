@@ -747,7 +747,7 @@ begin
 	    	                           jp <=0;
 					   end
 				  3'b101: begin // func3 101 for right
-				          case(wire_f7[6:1]) // func7 // rv64 shame take wire_f7[0]
+				          case(wire_f7[6:1]) // func7->6 // rv64 shame take wire_f7[0]
 					  //7'b0000000:begin
 					    7'b000000:begin
 					               Srli  <= 1'b1; // set Srli  Flag // 32-->64 one more bit64
