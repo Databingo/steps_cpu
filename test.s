@@ -120,11 +120,11 @@
 #addi x31, x0, -1
 #slli x31, x31, 0
 # Test 4 shift maximal shamt 63
-addi x31, x0, 1
-slli x31, x31, 63 
+#addi x31, x0, 1
+#slli x31, x31, 63 
 # Test 5 shift tobe 0
-#addi x31, x0, 0b100 
-#srli x31, x31, 2 
+addi x31, x0, 0x80000000000000 
+slli x31, x31, 1 
 # Test 6 shift 0
 #addi x31, x0, 0
 #srli x31, x31, 0 
