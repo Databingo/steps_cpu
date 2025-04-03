@@ -23,6 +23,7 @@ wire [2:0] of3;
 wire [6:0] of7;
 wire [11:0] oimm;
 wire [19:0] oupimm; 
+wire [5:0] oshamt;
 wire [63:0] ox0;
 wire [63:0] ox1;
 wire [63:0] ox2;
@@ -152,7 +153,7 @@ s4 dut(
  .of7 (of7),
  .oimm (oimm),
  .oupimm (oupimm),
-
+ .oshamt (oshamt),
  .ox1 (ox1),
  .ox2 (ox2),
  .ox3 (ox3),
@@ -368,6 +369,7 @@ always @(posedge clk) begin
    if (oCsrrci == 1'b1) $write("oCsrrci=%b,",  oCsrrci ,);
 
    if (oimm !== 0 ) $write("oimm=%0b,",  oimm ,);
+   if (oshamt!== 0 ) $write("oshamt=%0b,",  oshamt ,);
 
    if (ox0 !== 0 && ox0 !== 64'bz && ox0 !== 64'bx) $write("ox0=%0d,",  ox0 ,);
    if (ox1 !== 0 && ox1 !== 64'bz && ox1 !== 64'bx) $write("ox1=%0d,",  ox1 ,);

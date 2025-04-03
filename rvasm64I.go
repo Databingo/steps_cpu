@@ -527,7 +527,7 @@ func main() {
 				os.Exit(0)
 			}
 
-		case "slli", "srli", "srai": // op rd, rs1, immediate
+		case "slli", "srli", "srai": // op rd, rs1, immediate(shamt)
 			if len(code) != 4 {
 				fmt.Println("Incorrect argument count on line: ", lineCounter)
 				os.Exit(0)
@@ -537,8 +537,12 @@ func main() {
 				fmt.Printf("Error on line %d: %s\n", lineCounter, err)
 				os.Exit(0)
 			}
-			if imm > 31 {
-				fmt.Printf("Error on line %d: Immediate value out of range (should be between 0 and 31)")
+///////////////////////// // riscv32
+			//if imm > 31 { 
+			//	fmt.Printf("Error on line %d: Immediate value out of range (should be between 0 and 31)")
+///////////////////////// // riscv32
+			if imm > 63 {
+				fmt.Printf("Error on line %d: Immediate value out of range (should be between 0 and 63)")
 				os.Exit(0)
 			}
 			op, opFound := opBin[code[0]]
@@ -546,6 +550,8 @@ func main() {
 			rs1, rs1Found := regBin[code[2]]
 			if opFound && rdFound && rs1Found {
 				instruction = uint32(imm)<<20 | rs1<<15 | rd<<7 | op
+				fmt.Printf("imm: %06b\n", imm)
+				fmt.Printf("%032b\n", instruction)
 			} else if !rdFound || !rs1Found {
 				fmt.Println("Invalid register on line", lineCounter)
 				os.Exit(0)

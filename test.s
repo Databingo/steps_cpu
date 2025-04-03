@@ -119,8 +119,11 @@
 #srli x31, x31, 1
 #srli x31, x31, 3 # padding 0 at left ignore the 1 negative head number
 # Test 2 shift 0
+#addi x31, x0, -1
+#srli x31, x31, 0
+# Test 3 shift maximal shamt 63
 addi x31, x0, -1
-srli x31, x31, 0
+srli x31, x31, 63 
 
 
 

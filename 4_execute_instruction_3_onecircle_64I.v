@@ -94,7 +94,7 @@ reg [4:0] csr_id;
 //# 11 Machine External Interrupt          
 
 module s4 (reset_n, clock, oir, opc, ojp, oop, of3, of7,
-oimm, oupimm,
+oimm, oupimm,oshamt, 
 ox1, ox2, ox3, ox4, ox5, ox6, ox7, ox8, ox9, ox10, ox11, ox12, ox13, ox14, ox15, ox16, ox17, ox18, ox19, ox20, ox21, ox22, ox23, ox24, ox25, ox26, ox27, ox28, ox29, ox30, ox31,
 osign_extended_bimm,
 oLui, oAuipc,
@@ -147,6 +147,7 @@ output [2:0]  of3;
 output [6:0]  of7;
 output [11:0] oimm;
 output [19:0] oupimm;
+output [5:0] oshamt;
 // 寄存器显示器
 output [63:0] ox1, ox2, ox3, ox4, ox5, ox6, ox7, ox8, ox9, ox10, ox11, ox12, ox13, ox14, ox15, ox16, ox17, ox18, ox19, ox20, ox21, ox22, ox23, ox24, ox25, ox26, ox27, ox28, ox29, ox30, ox31;
 output [63:0] osign_extended_bimm;
@@ -183,7 +184,7 @@ wire [19:0] wire_upimm; // U-type immediate Lui Auipc
 wire [20:0] wire_jimm;  // UJ-type immediate Jal
 wire [11:0] wire_simm;  // S-type immediate Sb Sh Sw Sd
 wire [12:0] wire_bimm;  // SB-type immediate Beq Bne Blt Bge Bltu Bgeu
-wire [ 5:0] wire_shamt; // If 6 bits the highest is always 0
+wire [ 5:0] wire_shamt; // If 6 bits the highest is always 0??
 wire [11:0] wire_csr;   // CSR address
 wire [ 5:0] wire_zimm;  // CSR zimm
 
@@ -222,6 +223,7 @@ assign of3 = wire_f3;       // 显示 func3 值
 assign of7 = wire_f7;       // 显示 func7 值
 assign oimm = wire_imm;     // 显示 imm 值
 assign oupimm = wire_upimm; // 显示 upimm 值
+assign oshamt = wire_shamt;
 assign ox0 = rram[0];       // 显示 x0 值
 assign ox1 = rram[1];       
 assign ox2 = rram[2];       
