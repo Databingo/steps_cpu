@@ -127,9 +127,12 @@
 # Test 4 shift tobe 0
 #addi x31, x0, 0b100 
 #srli x31, x31, 2 
-# Test 4 shift 0
-addi x31, x0, 0
-srli x31, x31, 0 
+# Test 5 shift 0
+#addi x31, x0, 0
+#srli x31, x31, 0 
+# Test 6 shift to x0
+addi x31, x0, 0b11 
+srli x0, x31, 1 
 
 
 
