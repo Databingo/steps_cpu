@@ -751,8 +751,8 @@ begin
 					    7'b000000:begin
 					               Srli  <= 1'b1; // set Srli  Flag // 32-->64 one more bit64
 					               // shift right logicl rs1 by imm.12[low6.unsign] padding 0 to rd
-					               //rram[wire_rd] <= (rram[wire_rs1] >> wire_shamt ); 
-					               rram[wire_rd] <= (rram[wire_rs1] >> 63); 
+					               rram[wire_rd] <= (rram[wire_rs1] >> wire_shamt ); 
+					               //rram[wire_rd] <= (rram[wire_rs1] >> 63); 
 				                       pc <= pc + 4; 
 	    	                                       jp <=0;
 						       end
