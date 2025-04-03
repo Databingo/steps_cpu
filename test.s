@@ -44,7 +44,7 @@
 #addi x31, x31, 1
 
 # Test Instruction
-# ADDI  |imm.12|rs1.5|000.3|rd.5|0010011.7|  add sign-extend imm.12 to sr1, send overflow ingnored result to rd, 
+# ADDI
 # -------
 # Limitation: imm is in -2048:2047
 # Test 1 add number decimal positive 
@@ -109,6 +109,7 @@
 ### x31 now is 0x8000000000000000 
 # SRLI
 # -------
+# Limitation: shamt is in 0:63, padding always 0
 
 
 

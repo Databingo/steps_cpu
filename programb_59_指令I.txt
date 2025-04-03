@@ -39,8 +39,8 @@
 ////01000000 00000000 01010000 00010011 //__0100000_00000_00000_101_00000_0010011 // SRAI |imm.12|rs1.5|101.3|rd.5|0010011.7|  shift right arithmetical logicl rs1 32 by imm.12[low5.unsign] padding 1 to rd
 //// 算数逻辑位移 立即数类型 64 位 Math-Logic-I-64 7
 //00000000 00000000 00010000 00010011 //__000000_000000_00000_001_00000_0010011 // SLLI   |imm.12|rs1.5|001.3|rd.5|0010011.7| 64 shift lift  logicl rs1 64 by imm.12[low6.unsign] padding 0 to rd
-//00000000 00000000 01010000 00010011 //__000000_000000_00000_101_00000_0010011 // SRLI   |imm.12|rs1.5|101.3|rd.5|0010011.7| 64 shift right logicl rs1 64 by imm.12[low6.unsign] padding 0 to rd 
-//01000000 00000000 01010000 00010011 //__010000_000000_00000_101_00000_0010011 // SRAI   |imm.12|rs1.5|101.3|rd.5|0010011.7| 64 shift right arithm logicl rs1 64 by imm.12[low6.unsign] padding 1 to rd
+//00000000 00000000 01010000 00010011 //__000000_000000_00000_101_00000_0010011 // SRLI   |000000.6|shamt.6|rs1.5|101.3|rd.5|0010011.7| 64 shift right rs1 shamt.6[unsign] padding 0 to rd, srli rd,rs1,amt
+//01000000 00000000 01010000 00010011 //__010000_000000_00000_101_00000_0010011 // SRAI   |010000.6|shamt.6|rs1.5|101.3|rd.5|0010011.7| 64 shift right arithm rs1 shamt.6[unsign] padding 1? to rd
 //00000000 00000000 00000000 00011011 //___000000000000_00000_000_00000_0011011 // ADDIW  |imm.12|rs1.5|000.3|rd.5|0011011.7| 64 add sign-extend imm.12 to sr1 as sign-extend overflow-ingnor64 low 32 to rd
 //00000000 00000000 00010000 00011011 //__0000000_00000_00000_001_00000_0011011 // SLLIW  |imm.12|rs1.5|001.3|rd.5|0011011.7| 64 shift lift  logicl rs1 32 by imm.12[low5.unsign] padding 0 to rd 
 //00000000 00000000 01010000 00011011 //__0000000_00000_00000_101_00000_0011011 // SRLIW  |imm.12|rs1.5|101.3|rd.5|0011011.7| 64 shift right logicl rs1 32 by imm.12[low5.unsign] padding 0 to rd 
