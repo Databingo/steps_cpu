@@ -760,7 +760,7 @@ begin
 					     7'b010000:begin 
 					               Srai  <= 1'b1; // set Srai  Flag // 32-->64 one more bit64
 					               // shift right arithmatical rs1 by imm.12[low6.unsign] padding?
-					               rram[wire_rd] <= (rram[wire_rs1] >>> wire_shamt ); 
+					               rram[wire_rd] <= ($signed(rram[wire_rs1]) >>> wire_shamt ); 
 				                       pc <= pc + 4; 
 	    	                                       jp <=0;
 						       end
