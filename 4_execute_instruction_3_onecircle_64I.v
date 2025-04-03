@@ -176,7 +176,7 @@ wire [ 6:0] wire_op;
 wire [ 5:0] wire_rd;
 wire [ 5:0] wire_rs1;
 wire [ 5:0] wire_rs2;
-wire [ 5:0] wire_f3; //????
+wire [ 5:0] wire_f3; 
 wire [ 6:0] wire_f7;
 wire [11:0] wire_f12;   // ecall 0, ebreak 1
 wire [11:0] wire_imm;   // I-type immediate Lb Lh Lw Lbu Lhu Lwu Ld Jalr Addi Slti Sltiu Xori Ori Andi Addiw
@@ -753,13 +753,13 @@ begin
 					               Srli  <= 1'b1; // set Srli  Flag // 32-->64 one more bit64
 					               // shift right logicl rs1 by imm.12[low6.unsign] padding 0 to rd
 					               rram[wire_rd] <= (rram[wire_rs1] >> wire_shamt ); 
-					               //rram[wire_rd] <= (rram[wire_rs1] >> 63); 
 				                       pc <= pc + 4; 
 	    	                                       jp <=0;
 						       end
-					     7'b0100000:begin 
+					   //7'b0100000:begin 
+					     7'b010000:begin 
 					               Srai  <= 1'b1; // set Srai  Flag // 32-->64 one more bit64
-					               // shift right arithmatical rs1 by imm.12[low6.unsign] padding 0 to rd
+					               // shift right arithmatical rs1 by imm.12[low6.unsign] padding?
 					               rram[wire_rd] <= (rram[wire_rs1] >>> wire_shamt ); 
 				                       pc <= pc + 4; 
 	    	                                       jp <=0;

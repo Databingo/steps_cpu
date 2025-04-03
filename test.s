@@ -111,6 +111,33 @@
 # -------
 # Limitation: shamt 6bits in 0:63, padding always 0, shame borrow 1 bit from func7[0]
 # Test 1 basic positive number
+#addi x31, x0, 0xf0
+#srli x31, x31, 4
+## Now  x31 is 0xf
+# Test 1 basic negative number
+#addi x31, x0, -1
+#srli x31, x31, 1
+#srli x31, x31, 3 # padding 0 at left ignore the 1 negative head number
+# Test 2 shift 0
+#addi x31, x0, -1
+#srli x31, x31, 0
+# Test 3 shift maximal shamt 63
+#addi x31, x0, -1
+#srli x31, x31, 63 
+# Test 4 shift tobe 0
+#addi x31, x0, 0b100 
+#srli x31, x31, 2 
+# Test 5 shift 0
+#addi x31, x0, 0
+#srli x31, x31, 0 
+# Test 6 shift to x0
+#addi x31, x0, 0b11 
+#srli x0, x31, 1 
+
+# SLLI
+# -------
+# Limitation: shamt 6bits in 0:63, padding always 0
+# Test 1 basic positive number
 #addi x31, x0, 0b1
 #slli x31, x31, 1
 # Test 2 basic negative number
@@ -123,20 +150,40 @@
 #addi x31, x0, 1
 #slli x31, x31, 63 
 # Test 5 shift tobe 0
-addi x31, x0, 1
-slli x31, x31, 63 
-slli x31, x31, 1 
+#addi x31, x0, 1
+#slli x31, x31, 63 
+#slli x31, x31, 1 
 # Test 6 shift 0
-#addi x31, x0, 0
-#srli x31, x31, 0 
+#addi x31, x0, 1
+#slli x31, x31, 0 
 # Test 7 shift to x0
 #addi x31, x0, 0b11 
-#srli x0, x31, 1 
+#slli x0, x31, 1 
 
-# SLLI
+# SRAI
 # -------
-# Limitation: shamt 6bits in 0:63, padding always 0
-
-
+# Limitation: shamt 6bits in 0:63, padding according to +- position
+# Test 1 basic positive number
+#addi x31, x0, 0b1
+#slli x31, x31, 1
+# Test 2 basic negative number
+#addi x31, x0, -1
+#slli x31, x31, 1
+# Test 3 shift 0
+#addi x31, x0, -1
+#slli x31, x31, 0
+# Test 4 shift maximal shamt 63
+#addi x31, x0, 1
+#slli x31, x31, 63 
+# Test 5 shift tobe 0
+#addi x31, x0, 1
+#slli x31, x31, 63 
+#slli x31, x31, 1 
+# Test 6 shift 0
+#addi x31, x0, 1
+#slli x31, x31, 0 
+# Test 7 shift to x0
+#addi x31, x0, 0b11 
+#slli x0, x31, 1 
 
 
