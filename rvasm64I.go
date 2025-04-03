@@ -542,7 +542,7 @@ func main() {
 			//	fmt.Printf("Error on line %d: Immediate value out of range (should be between 0 and 31)")
 ///////////////////////// // riscv32
 			if imm > 63 {
-				fmt.Printf("Error on line %d: Immediate value out of range (should be between 0 and 63)")
+				fmt.Printf("Error on line %d: Immediate value out of range (should be between 0 and 63)\n", lineCounter)
 				os.Exit(0)
 			}
 			op, opFound := opBin[code[0]]
@@ -551,7 +551,9 @@ func main() {
 			if opFound && rdFound && rs1Found {
 				instruction = uint32(imm)<<20 | rs1<<15 | rd<<7 | op
 				fmt.Printf("imm: %06b\n", imm)
+				fmt.Printf("op:", op)
 				fmt.Printf("%032b\n", instruction)
+				fmt.Printf("000000 %06b %05b 101 %05b 0010011\n", imm, rs1, rd)
 			} else if !rdFound || !rs1Found {
 				fmt.Println("Invalid register on line", lineCounter)
 				os.Exit(0)
