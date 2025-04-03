@@ -379,6 +379,7 @@ begin
 	    case(jp)
 	    0: begin // 取指令 + 分析指令 + 执行 | 或 准备数据 (分析且备好该指令所需的数据）
 	    	   ir <= wire_ir ; 
+		   // parse: op->func3->func7
 	    	   case(wire_op)
                    // Load-class
 		   7'b0110111:begin
@@ -738,14 +739,14 @@ begin
 				           pc <= pc + 4; 
 	    	                           jp <=0;
 					   end
-				 3'b001:begin
+				 3'b001:begin// func3 001 for left 
 					   Slli  <= 1'b1; // set Slli  Flag  // 32-->64 one more bit
 					   // shift lift  logicl rs1 by imm.12[low6.unsign] padding 0 to rd
 					   rram[wire_rd] <= (rram[wire_rs1] << wire_shamt ); 
 				           pc <= pc + 4; 
 	    	                           jp <=0;
 					   end
-				  3'b101: begin
+				  3'b101: begin // func3 101 for right
 				          case(wire_f7[6:1]) // func7 // rv64 shame take wire_f7[0]
 					  //7'b0000000:begin
 					    7'b000000:begin

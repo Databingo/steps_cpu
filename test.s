@@ -109,7 +109,7 @@
 ### x31 now is 0x8000000000000000 
 # SRLI
 # -------
-# Limitation: shamt is in 0:63, padding always 0
+# Limitation: shamt 6bits in 0:63, padding always 0, shame borrow 1 bit from func7[0]
 # Test 1 basic positive number
 #addi x31, x0, 0xf0
 #srli x31, x31, 4
@@ -131,9 +131,12 @@
 #addi x31, x0, 0
 #srli x31, x31, 0 
 # Test 6 shift to x0
-addi x31, x0, 0b11 
-srli x0, x31, 1 
+#addi x31, x0, 0b11 
+#srli x0, x31, 1 
 
+# SLLI
+# -------
+# Limitation: shamt 6bits in 0:63, padding always 0
 
 
 
