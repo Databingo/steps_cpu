@@ -123,7 +123,8 @@
 #addi x31, x0, 1
 #slli x31, x31, 63 
 # Test 5 shift tobe 0
-addi x31, x0, 0x80000000000000 
+addi x31, x0, 1
+slli x31, x31, 63 
 slli x31, x31, 1 
 # Test 6 shift 0
 #addi x31, x0, 0
