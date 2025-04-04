@@ -200,15 +200,27 @@
 #addiw x31, x0, -0b10
 #addiw x31, x0, -0x3 
 # Test 3 add number positive then turn to negative
-addiw x30, x0, -1 
-addiw x31, x0, -0b1 
-addiw x31, x30, 0x2 
+#addiw x30, x0, -1 
+#addiw x31, x0, -0b1 
+#addiw x31, x30, 0x2 
 # Test 8 minimal and maximal number
-#addi x31, x0,  0b11111111111 # maximal 2047
-#addi x31, x0, -0b00000000000 # minimal -2048
+#addiw x31, x0,  0b11111111111 # maximal 2047
+#addiw x31, x0, -0b00000000000 # minimal -2048
 # Test 9 0verflow 12 bits
-#addi x31, x0,  0b111111111111 # overflow
-#addi x31, x0, -0b111111111111 # overflow
+#addiw x31, x0,  0b111111111111 # overflow # error of assembler
+#addiw x31, x0, -0b111111111111 # overflow # error of assembler
+# Test 64bit s1 be cut to 32bit 
+#addiw x31, x0, 0b1
+#slli x31, x31, 62 
+#addiw x31, x0, 0b1
+# Test fullfill maximal int64
+lui x31, 0x80000
+slli x31, x31, 32
+addi x31, x31, -1
+
+#addi x31, x0, -0x001
+
+
 # Test 10 add 0 as mv
 #addi x30, x0, 0x05
 #addi x31, x30, 0
