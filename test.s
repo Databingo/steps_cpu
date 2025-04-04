@@ -221,13 +221,17 @@
 #slli x31, x31, 20 
 #addi x31, x31, -1
 # or
-addi x31, x0, -1
-slli x31, x31, 32
-srli x31, x31, 32 # load 0xffffffff
-addiw x31, x31, 1
-addi x31, x0, 0x8 
-slli x31, x31, 32 # load 0x80000000
-addi x31, x31, 0x1 # load 0x80000001
+#addi x31, x0, -1
+#slli x31, x31, 32
+#srli x31, x31, 32 # load 0xffffffff
+#addiw x31, x31, 1 # no sext
+#addi x31, x0, 0x1 
+#slli x31, x31, 31 # construct 0x80000000
+#addiw x31, x31, -1 # get 0x000000007fffffff
+addi x31, x0, 0x1 
+slli x31, x31, 31 # construct 0x80000000
+addi x31, x31, 0x1 # construct 0x80000001
+addiw x31, x31, -1 # get 0xffffffff80000000
 
 
 
