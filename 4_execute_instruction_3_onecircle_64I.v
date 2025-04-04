@@ -663,7 +663,7 @@ begin
 			        case(wire_f3) // func3
 				  3'b000:begin
 				         Addi  <= 1'b1; // set Addi  Flag 
-				         //add sign-extend imm.12 to sr1, send overflow ingnored result to rd 
+				         //sign-extend imm.12 to 64 add to sr1, send overflow ingnored result to rd 
 				         // 执行加法:
 				         rram[wire_rd] <= rram[wire_rs1] + {{52{wire_imm[11]}}, wire_imm}; 
 				         // 溢出判断：
@@ -772,7 +772,24 @@ begin
 	           7'b0011011:begin 
 			        case(wire_f3) // func3
 			                    //+++++++++++++++++++++++++++++++++
-			          3'b000: Addiw  <= 1'b1; // set Addiw  Flag 
+				  3'b000: begin
+				         Addiw  <= 1'b1; // set Addiw  Flag 
+
+				         //sign-extend imm.12 to 32 add to sr1.low32, sign-extend to 64 to rd 
+				         // 执行加法:
+				         rram[wire_rd] <= {{32{sum_imm[31]}}, 32'b0} + rram[wire_rs1][31:0] + {{20{wire_imm[11]}}, wire_imm}; 
+
+				         // 溢出判断：
+				         //if ((rram[wire_rs1][63] ~^ wire_imm[11]) && (rram[wire_rs1][63] ^ sum_imm[63])) 
+				         if ((rram[wire_rs1][31] ~^ wire_imm[11]) && (rram[wire_rs1][31] ^ sum_imm[31])) 
+				           begin
+	    	                             rram[3] <= 1; // 溢出标志
+	    	                             //rram[4] <= rram[wire_rs1][63]; // 溢出值
+	    	                             rram[4] <= rram[wire_rs1][31]; // 溢出值
+				           end
+				         pc <= pc + 4; 
+	    	                         jp <=0;
+				         end
 			          3'b001: Slliw  <= 1'b1; // set Slliw  Flag 
 				  3'b101: begin
 				          case(wire_f7) // func7

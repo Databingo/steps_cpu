@@ -188,4 +188,66 @@
 #addi x31, x0, 0b11 
 #srai x0, x31, 1 
 
-
+#ADDIW
+# -------
+# Limitation: only on 64 for 32, imm is in -2048:2047, extend to 64 bits rather than ADDI's 32 bits
+# Test 1 add number decimal positive 
+addiw x31, x0, 1 
+addiw x31, x0, 2 
+addiw x31, x0, 3 
+# Test 2 add number 0b positive 
+#addi x31, x0, 0b1 
+#addi x31, x0, 0b10
+#addi x31, x0, 0b11 
+# Test 3 add number 0x positive 
+#addi x31, x0, 0x1 
+#addi x31, x0, 0x2
+#addi x31, x0, 0x3
+# Test 4 add number decimal negative
+#addi x31, x0, -1 
+#addi x31, x0, -2 
+#addi x31, x0, -3 
+# Test 5 add number 0b negative
+#addi x31, x0, -0b1 
+#addi x31, x0, -0b10
+#addi x31, x0, -0b11 
+# Test 6 add number 0x negative
+#addi x31, x0, -0x1 
+#addi x31, x0, -0x2
+#addi x31, x0, -0x3
+# Test 7 add number 0x positive then turn to negative
+#addi x30, x0, -0x1 
+#addi x31, x0, -0x1 
+#addi x31, x30, 0x2 
+# Test 8 minimal and maximal number
+#addi x31, x0,  0b11111111111 # maximal 2047
+#addi x31, x0, -0b00000000000 # minimal -2048
+# Test 9 0verflow 12 bits
+#addi x31, x0,  0b111111111111 # overflow
+#addi x31, x0, -0b111111111111 # overflow
+# Test 10 add 0 as mv
+#addi x30, x0, 0x05
+#addi x31, x30, 0
+# Test 11 pseduo li
+#addi x31, x0, 0xB 
+# Test 12 write to x0 for discard
+#addi x0, x0, 0x2
+#addi x31, x0, 0
+#addi x31, x0, 2
+#addi x0, x0, 0x2
+#addi x31, x0, 3
+# Test 13 NOP
+#addi x0, x0, 0
+# Test 14 maximal positive to minimal negative int64
+#addi x31, x0,-1 
+### x31 now is 0xffffffffffffffff # -1
+#srli x31, x31, 1
+### x31 now is 0x7fffffffffffffff # Max int64 +2**63-1 = 9,223,372,036,854,775,807
+#addi x31, x31, 1
+### x31 now is 0x8000000000000000 # Min int64 -2**63 = -9,223,372,036,854,775,808
+#addi x31, x31, -1
+### x31 now is 0x7fffffffffffffff # Max overflow 
+#addi x31, x31, 2
+### x31 now is 0x8000000000000001 
+#addi x31, x31, -1
+### x31 now is 0x8000000000000000 

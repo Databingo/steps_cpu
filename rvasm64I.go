@@ -137,6 +137,7 @@ func main() {
 		"sw": 0b00000000000000000010000000100011,
 
 		"addi":  0b00000000000000000000000000010011,
+		"addiw": 0b00000000000000000000000000011011,
 		"slti":  0b00000000000000000010000000010011,
 		"sltiu": 0b00000000000000000011000000010011,
 		"xori":  0b00000000000000000100000000010011,
@@ -278,7 +279,7 @@ func main() {
 				}
 			}
 
-		case "addi", "slti", "sltiu", "xori", "ori", "andi", "jalr": // Instruction format: op rd, rs1, imm     or      label:  op rd, rs1, imm
+		case "addi", "addiw", "slti", "sltiu", "xori", "ori", "andi", "jalr": // Instruction format: op rd, rs1, imm     or      label:  op rd, rs1, imm
 			if len(code) != 4 && len(code) != 5 {
 				fmt.Println("Incorrect argument count on line: ", lineCounter)
 				os.Exit(0)
@@ -504,7 +505,7 @@ func main() {
 				os.Exit(0)
 			}
 
-		case "addi", "slti", "sltiu", "xori", "ori", "andi", "jalr": // op rd, rs1, immediate
+		case "addi", "addiw", "slti", "sltiu", "xori", "ori", "andi", "jalr": // op rd, rs1, immediate
 			if len(code) != 4 {
 				fmt.Println("Incorrect argument count on line: ", lineCounter)
 			}
