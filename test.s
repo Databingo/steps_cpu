@@ -214,12 +214,8 @@
 #slli x31, x31, 62 
 #addiw x31, x0, 0b1
 # Test fullfill maximal int64
-lui x31, 0x1
-lui x31, 0xfffff
-lui x31, 0x80000
-lui x31, 0x8000
-##slli x31, x31, 32
-#addi x31, x31, -1
+addiw x31, x0, -1
+srli x31, x31, 1
 
 #addi x31, x0, -0x001
 
