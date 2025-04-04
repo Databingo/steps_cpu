@@ -214,10 +214,12 @@
 #slli x31, x31, 62 
 #addiw x31, x0, 0b1
 # Test fullfill maximal int64
-addiw x31, x0, -1
-srli x31, x31, 1
-
-#addi x31, x0, -0x001
+#addiw x31, x0, -1
+#srli x31, x31, 1
+# Test negative 32b sext to 64b
+lui x31, 0x1
+slli x31, x31, 20 
+addi x31, x31, -1
 
 
 # Test 10 add 0 as mv
