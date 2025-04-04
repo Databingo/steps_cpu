@@ -385,7 +385,7 @@ begin
 		   7'b0110111:begin
 		                Lui <= 1'b1; // set Lui Flag
 				//put 20 bits immediate to upper 20 bits of rd left lower 12 bits 0, sext to 64
-				rram[wire_rd] <= {{32{wire_upimm[10]}}, wire_upimm << 12};
+				rram[wire_rd] <= {{32{wire_upimm[19]}}, wire_upimm, 12'b0};
 				pc <= pc + 4; 
 	    	                jp <=0;
 		              end
