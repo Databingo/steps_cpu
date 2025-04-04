@@ -233,10 +233,15 @@
 #addi x31, x31, 0x1 # construct 0x80000001
 #addiw x31, x31, -1 # get 0xffffffff80000000
 # Test 32 0 result is 64 0 result
+#addi x31, x0, -1
+#slli x31, x31, 32
+#srli x31, x31, 32 # load 0xffffffff -1 in 32 bit
+#addiw x31, x31, 1 # get 0
+# Test 32 -1 result is 64 -1 result
 addi x31, x0, -1
 slli x31, x31, 32
 srli x31, x31, 32 # load 0xffffffff -1 in 32 bit
-addiw x31, x31, 1 # get 0
+addiw x31, x31, 0 # get -1 in 0xffffffffffffffff
 
 
 
