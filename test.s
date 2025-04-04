@@ -191,34 +191,18 @@
 #ADDIW
 # -------
 # Limitation: only on 64 for 32, imm is in -2048:2047, extend to 64 bits rather than ADDI's 32 bits
-# Test 1 add number decimal positive 
+# Test 1 add number positive 
 #addiw x31, x0, 1 
-#addiw x31, x0, 2 
-#addiw x31, x0, 3 
-# Test 2 add number 0b positive 
-addi x31, x0, 0b1 
-addi x31, x0, 0b10
-addi x31, x0, 0b11 
-# Test 3 add number 0x positive 
-#addi x31, x0, 0x1 
-#addi x31, x0, 0x2
-#addi x31, x0, 0x3
-# Test 4 add number decimal negative
-#addi x31, x0, -1 
-#addi x31, x0, -2 
-#addi x31, x0, -3 
-# Test 5 add number 0b negative
-#addi x31, x0, -0b1 
-#addi x31, x0, -0b10
-#addi x31, x0, -0b11 
-# Test 6 add number 0x negative
-#addi x31, x0, -0x1 
-#addi x31, x0, -0x2
-#addi x31, x0, -0x3
-# Test 7 add number 0x positive then turn to negative
-#addi x30, x0, -0x1 
-#addi x31, x0, -0x1 
-#addi x31, x30, 0x2 
+#addiw x31, x0, 0b10
+#addiw x31, x0, 0x3 
+# Test 2 add number negative
+#addiw x31, x0, -1 
+#addiw x31, x0, -0b10
+#addiw x31, x0, -0x3 
+# Test 3 add number positive then turn to negative
+addiw x30, x0, -1 
+addiw x31, x0, -0b1 
+addiw x31, x30, 0x2 
 # Test 8 minimal and maximal number
 #addi x31, x0,  0b11111111111 # maximal 2047
 #addi x31, x0, -0b00000000000 # minimal -2048
