@@ -221,7 +221,7 @@
 #slli x31, x31, 20 
 #addi x31, x31, -1
 # or
-addi x31, x31, -1
+addi x31, x0, -1
 slli x31, x31, 32
 srli x31, x31, 32
 
