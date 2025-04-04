@@ -227,6 +227,7 @@ srli x31, x31, 32 # load 0xffffffff
 addiw x31, x31, 1
 addi x31, x0, 0x8 
 slli x31, x31, 32 # load 0x80000000
+addi x31, x31, 0x1 # load 0x80000001
 
 
 
