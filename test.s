@@ -238,10 +238,13 @@
 #srli x31, x31, 32 # load 0xffffffff -1 in 32 bit
 #addiw x31, x31, 1 # get 0
 # Test 32 -1 result is 64 -1 result
-addi x31, x0, -1
-slli x31, x31, 32
-srli x31, x31, 32 # load 0xffffffff -1 in 32 bit
-addiw x31, x31, 0 # get -1 in 0xffffffffffffffff
+#addi x31, x0, -1
+#slli x31, x31, 32
+#srli x31, x31, 32 # load 0xffffffff -1 in 32 bit
+#addiw x31, x31, 0 # get -1 in 0xffffffffffffffff
+# Test ignore hight 32b
+# Load arbitrary int64 by LUI, i.e. 0x12345805 
+# say, LUI has auto sext, ADDI/ADDIW has 12 signed immediate, so, if highest 1, it is substruct because 0xfffff805 is negative, so when 0x12345000 need plus positive 0x805 it actually substruct ~0x805, so we need 0x12345 + 0x805 + ~0x805 then substruct ~0x805 to keep the result correct, then 0x805 + ~0x805 = -x1000, so 0x12345 should be 0x12346, the left step is 0x12346 + 0xfffff805, so the LUI should put 0x12346 on high 20 bit. Am I right in the proof process of mathmetical logic?
 
 
 
