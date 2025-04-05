@@ -243,27 +243,13 @@
 #srli x31, x31, 32 # load 0xffffffff -1 in 32 bit
 #addiw x31, x31, 0 # get -1 in 0xffffffffffffffff
 # Test ignore hight 32b
-# Load arbitrary int64 by LUI, i.e. 0x12345805 
-# say, LUI has auto sext, ADDI/ADDIW has 12 signed immediate, so, if highest 1, it is substruct because 0xfffff805 is negative, so when 0x12345000 need plus positive 0x805 it actually substruct ~0x805, so we need 0x12345 + 0x805 + ~0x805 then substruct ~0x805 to keep the result correct, then 0x805 + ~0x805 = x1000, so 0x12345 should be 0x12346, the left step is 0x12346 + 0xfffff805 in marchine code, in assembler should pass -~0x805+1 , so the LUI should put 0x12346 on high 20 bit. 
 # load 0x12345002 positive
 lui x31, 0x12345
-addi x31, x31, 0x002  
-# load 0x12345802 0x802 -> 1000 0000 0010 -> 0111 1111 1101 + 1 -> 0111 1111 1110 ->  0x7fe
-lui x31, 0x12346
-addi x31, x31, -0x7fe
-# load -0x77313779 negative -> 0x88cec887
-lui x31, -0x77313
-addi x31, x31, -0x779
-# load -0x77313879 negative cut negative-> 0x88cec787 多减1加上补码 (补码=反码加一)
-lui x31, -0x77314
-addi x31, x31, 0x787
-# load 0x77313779 positive 
-lui x31, 0x77313
-addi x31, x31, 0x779
-# load 0x77313879 positive cut negative 多加1减去补码(补码=反码加一)
-lui x31, 0x77314
-addi x31, x31, -0x787
-
+addi x31, x31, 0x002  # get 0x12345002
+slli x31, x31, 32 # get  0x12345002_00000000
+lui x30, 0x12345
+addi x30, x30, 0x002  # get 0x12345002
+add x31, x31, x30     # get 0x12345002_12345002
 
 # Test 10 add 0 as mv
 #addi x30, x0, 0x05
@@ -291,3 +277,31 @@ addi x31, x31, -0x787
 ### x31 now is 0x8000000000000001 
 #addi x31, x31, -1
 ### x31 now is 0x8000000000000000 
+
+
+# LUI
+#-----------
+# Limitation: 20 bits signed [-0x100000:0x7ffff], auto-sext in rv64
+# Load arbitrary int32 by LUI, i.e. 0x12345805 
+# say, LUI has auto sext, ADDI/ADDIW has 12 signed immediate, so, if highest 1, it is substruct because 0xfffff805 is negative, so when 0x12345000 need plus positive 0x805 it actually substruct ~0x805, so we need 0x12345 + 0x805 + ~0x805 then substruct ~0x805 to keep the result correct, then 0x805 + ~0x805 = x1000, so 0x12345 should be 0x12346, the left step is 0x12346 + 0xfffff805 in marchine code, in assembler should pass -~0x805+1 , so the LUI should put 0x12346 on high 20 bit. 
+## load 0x12345002 positive
+#lui x31, 0x12345
+#addi x31, x31, 0x002  
+## load 0x12345802 0x802 -> 1000 0000 0010 -> 0111 1111 1101 + 1 -> 0111 1111 1110 ->  0x7fe
+#lui x31, 0x12346
+#addi x31, x31, -0x7fe
+## load -0x77313779 negative -> 0x88cec887
+#lui x31, -0x77313
+#addi x31, x31, -0x779
+## load -0x77313879 negative cut negative-> 0x88cec787 多减1加上补码 (补码=反码加一)
+#lui x31, -0x77314
+#addi x31, x31, 0x787
+## load 0x77313779 positive 
+#lui x31, 0x77313
+#addi x31, x31, 0x779
+## load 0x77313879 positive cut negative 多加1减去补码(补码=反码加一)
+#lui x31, 0x77314
+#addi x31, x31, -0x787
+
+# Load arbitrary int64 by LUI, i.e. 0x12345805_12345805
+
