@@ -127,16 +127,17 @@ reg [63:0] rram [0:31];// 64 位宽度，32 行深度 x0, x1, x2... x31
 // CSR 寄存器列表 32 个(预设个数 2**12=4096)
 reg [63:0] csrram [0:31];// 64 位宽度，32 行深度
 
-// 计数工具
-input clock;  // 时钟
+// --- 3 input---
+input reset_n; // 初始化开关
+input clock;  // 时钟 // 计数工具
+// irom as program input of model
+
 reg [64:0] pc; // 程序计数寄存器 64 位宽度
 reg [2:0] jp;  // 程序节寄存拍器
 
 // 程序指令寄存器: 32 位宽度
 reg [31:0] ir; 
 
-// 初始化开关
-input reset_n;
 
 // 指令显示器
 output [31:0] oir;
