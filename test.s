@@ -250,7 +250,7 @@ slli x31, x31, 32     # get  0x12345002_00000000
 lui x30, 0x12345
 addi x30, x30, 0x002  # get 0x12345002
 add x31, x31, x30     # get 0x12345002_12345002
-addiw x31, x31, 1
+addiw x31, x31, -2    # get 0x00000000_12345000
 
 # Test 10 add 0 as mv
 #addi x30, x0, 0x05
