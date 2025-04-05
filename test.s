@@ -250,7 +250,7 @@ slli x31, x31, 32     # get  0x12345002_00000000
 lui x30, 0x12345
 addi x30, x30, 0x002  # get 0x12345002
 add x31, x31, x30     # get 0x12345002_12345002
-addiw x31, x31, 0x12345678
+addiw x31, x31, 1
 
 # Test 10 add 0 as mv
 #addi x30, x0, 0x05
@@ -306,10 +306,10 @@ addiw x31, x31, 0x12345678
 
 # Load arbitrary int64 by LUI, i.e. 0x12345805_12345805
 # load 0x12345002 positive
-lui x31, 0x12345
-addi x31, x31, 0x002  # get 0x12345002
-slli x31, x31, 32     # get  0x12345002_00000000
-lui x30, 0x12345
-addi x30, x30, 0x002  # get 0x12345002
-add x31, x31, x30     # get 0x12345002_12345002
-
+#lui x31, 0x12345
+#addi x31, x31, 0x002  # get 0x12345002
+#slli x31, x31, 32     # get  0x12345002_00000000
+#lui x30, 0x12345
+#addi x30, x30, 0x002  # get 0x12345002
+#add x31, x31, x30     # get 0x12345002_12345002
+#
