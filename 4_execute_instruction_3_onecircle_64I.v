@@ -273,7 +273,6 @@ assign oEcall= Ecall; assign oEbreak=Ebreak; assign oCsrrw= Csrrw; assign oCsrrs
 
 // 从文件读取程序到 irom
 //initial $readmemb("./programb.txt", irom);
-//initial $readmemb("./asm/binary_instructions.txt", irom);
 initial $readmemb("./binary_instructions.txt", irom);
 //initial $readmemb("./firmware.out", irom);
 initial $readmemb("./data.txt", drom);
