@@ -318,7 +318,8 @@ lui x31, -0x80000 # get 0xffffffff_80000000
 #lui x31, -4096 # get 0x10000000_00000000
 lui x31, -0b0000 # get 0xffffffff_ffff0000
 lui x31, -0x00000 # get 0xffffffff_ffff0000
-//lui x31, -0x1 # get 0xffffffff_fffff000
+#lui x31, -0x00000 # get 0xffffffff_ffff0000
+#lui x31, -0x1 # get 0xffffffff_fffff000
 
 
 
