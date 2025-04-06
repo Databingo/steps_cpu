@@ -327,15 +327,16 @@
 # SLLIW
 #-------
 # Limitation: only shift 32 bits and sext to 64 bits
-## load 0x12345002 positive
+## load 0x12345002 cut positive
 lui x31, 0x12345
 addi x31, x31, 0x002  
 slliw x31, x31, 4   # get 0x0000000023450020
-## load 0x1f345002 negative
+## load 0x1f345002 cut negative
 lui x31, 0x1f845
 addi x31, x31, 0x002  
 slliw x31, x31, 4  # get 0xfffffffff8450020
 slliw x31, x31, 4  # get 0xffffffff84500200
+
 
 
 
