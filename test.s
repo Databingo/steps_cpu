@@ -317,8 +317,8 @@ lui x31, 0x7ffff # get 0x00000000_7ffff000
 lui x31, -0b0000 # get 0xffffffff_ffff0000
 lui x31, -0x0 # get 0xffffffff_ffff0000
 lui x31, -0x1 # get 0xffffffff_fffff000
-# Test 5 load mim -0x7ffff
-lui x31, -0x7ffff # get 0xffffffff_80000000
+# Test 5 load mim -0x7ffff  80000000
+lui x31, -0x80000 # get 0xffffffff_80000000
 
 
 
