@@ -255,9 +255,9 @@
 #addiw x30, x0, 0x05
 #addiw x31, x30, 0
 # Test 11 write to x0 for discard
-addiw x0, x0, 0x2
+#addiw x0, x0, 0x2
 # Test 13 NOP
-#addi x0, x0, 0
+addi x0, x0, 0
 # Test 14 maximal positive to minimal negative int64
 #addi x31, x0,-1 
 ### x31 now is 0xffffffffffffffff # -1
