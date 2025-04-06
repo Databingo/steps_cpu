@@ -331,6 +331,10 @@
 lui x31, 0x12345
 addi x31, x31, 0x002  
 slliw x31, x31, 4
+## load 0x1f345002 negative
+lui x31, 0x1f345
+addi x31, x31, 0x002  
+slliw x31, x31, 4
 
 
 

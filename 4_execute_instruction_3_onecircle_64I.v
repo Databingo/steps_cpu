@@ -803,7 +803,7 @@ begin
 					   // shift lift  logicl rs1.low32 by imm.12[low5.unsign] padding 0 to rd
 					   //rram[wire_rd] <= {{32{rram[wire_rs1][32-wire_shamt]}}, (rram[wire_rs1][31:0] << wire_shamt )[31:0]}; 
 					   //rram[wire_rd] <= {{32{sll_s1[31-wire_shamt]}}, (rram[wire_rs1][31:0] << wire_shamt )}; 
-					   rram[wire_rd] <= (rram[wire_rs1] << wire_shamt ); 
+					   rram[wire_rd] <= {{32{sll_s1[31]}}, sll_s1[31:0]};
 				           pc <= pc + 4; 
 	    	                           jp <=0;
 					   end
