@@ -315,6 +315,8 @@ lui x31, 0x7ffff # get 0x00000000_7ffff000
 # Test 4 load mim -0xfffff
 #lui x31, -4096 # get 0x10000000_00000000
 lui x31, -0b0000 # get 0xffffffff_ffff0000
+lui x31, -0x0 # get 0xffffffff_ffff0000
+lui x31, -0x1 # get 0xffffffff_fffff000
 
 
 

@@ -51,6 +51,11 @@ func isValidImmediate(s string) (int64, error) {
 		imm2, err2 = strconv.ParseInt(s[2:], 16, 64) // check if s is hex
 	} else if strings.HasPrefix(s, "-0x") {
 		imm2, err2 = strconv.ParseInt(string(s[0])+s[3:], 16, 64) // ignore the "0x" part but include the '-'
+		if imm2 == 0  {
+		     imm2, err2 = strconv.ParseInt(string(s[0])+"1"+strings.Repeat("0", len(s[3:])*4), 2, 64)
+		   //fmt.Println("imm2:", string(s[0])+"1"+strings.Repeat("0", len(s[3:])*4))
+		 }
+
 	} else if strings.HasPrefix(s, "0b") {
 		imm3, err3 = strconv.ParseInt(s[2:], 2, 64) // check if s is binary
 	} else if strings.HasPrefix(s, "-0b") {
@@ -65,7 +70,7 @@ func isValidImmediate(s string) (int64, error) {
 		 //}
 		if imm3 == 0  {
 		     imm3, err3 = strconv.ParseInt(string(s[0])+"1"+s[3:], 2, 64)
-		     fmt.Println("imm3:", string(s[0])+"1"+s[3:])
+		     //fmt.Println("imm3:", string(s[0])+"1"+s[3:])
 		 }
 		//fmt.Println("imm3:", imm3)
 	}
@@ -417,7 +422,7 @@ func main() {
 				fmt.Printf("Error on line %d: %s\n", lineCounter, err)
 				os.Exit(0)
 			}
-			fmt.Printf("imm: 0x%X\n", imm)
+			//fmt.Printf("imm: 0x%X\n", imm)
 			//if imm > 1048575 || imm < 0 {
 			if imm > 0x7ffff || imm < -0x100000 {
 			    fmt.Printf("Lui: Error on line %d: Immediate value %d=0x%X out of range (should be between 0x%X and 0x7ffff )\n", lineCounter, imm, imm, -0x100000)
