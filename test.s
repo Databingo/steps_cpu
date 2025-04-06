@@ -244,25 +244,18 @@
 #addiw x31, x31, 0 # get -1 in 0xffffffffffffffff
 # Test ignore hight 32b
 # load 0x12345002 positive
-lui x31, 0x12345
-addi x31, x31, 0x002  # get 0x12345002
-slli x31, x31, 32     # get  0x12345002_00000000
-lui x30, 0x12345
-addi x30, x30, 0x002  # get 0x12345002
-add x31, x31, x30     # get 0x12345002_12345002
-addiw x31, x31, -2    # get 0x00000000_12345000
-
+#lui x31, 0x12345
+#addi x31, x31, 0x002  # get 0x12345002
+#slli x31, x31, 32     # get  0x12345002_00000000
+#lui x30, 0x12345
+#addi x30, x30, 0x002  # get 0x12345002
+#add x31, x31, x30     # get 0x12345002_12345002
+#addiw x31, x31, -2    # get 0x00000000_12345000
 # Test 10 add 0 as mv
-#addi x30, x0, 0x05
-#addi x31, x30, 0
-# Test 11 pseduo li
-#addi x31, x0, 0xB 
-# Test 12 write to x0 for discard
-#addi x0, x0, 0x2
-#addi x31, x0, 0
-#addi x31, x0, 2
-#addi x0, x0, 0x2
-#addi x31, x0, 3
+#addiw x30, x0, 0x05
+#addiw x31, x30, 0
+# Test 11 write to x0 for discard
+addiw x0, x0, 0x2
 # Test 13 NOP
 #addi x0, x0, 0
 # Test 14 maximal positive to minimal negative int64
