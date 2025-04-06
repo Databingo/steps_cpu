@@ -775,7 +775,7 @@ begin
 				  3'b000: begin
 				         Addiw  <= 1'b1; // set Addiw  Flag 
 
-				         //sign-extend imm.12 to 32 add to sr1.low32, sign-extend to 64 to rd! 
+				         //sign-extend imm.12 to 32 add to sr1.low32, sign-extend to 64 to rd 
 				         // 执行加法:
 				         //rram[wire_rd] <= {{32{sum_imm[31]}}, 32'b0} + rram[wire_rs1][31:0] + {{20{wire_imm[11]}}, wire_imm}; 
 				         //rram[wire_rd] <= rram[wire_rs1] + {{52{wire_imm[11]}}, wire_imm}; 
