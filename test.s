@@ -307,21 +307,22 @@
 #addi x30, x30, 0x002  # get 0x12345002
 #add x31, x31, x30     # get 0x12345002_12345002
 # Test 1 load 0
-lui x31, 0x0
-# Test 2 load 1
-lui x31, 0x1 # get 0x00000000_00001000
-# Test 3 load max 0x7ffff
-lui x31, 0x7ffff # get 0x00000000_7ffff000
-# Test 5 load mim normal -0x7ffff  80000000
-lui x31, -0x80000 # get 0xffffffff_80000000
-# Test 4 load mim -0x00000
-#lui x31, -4096 # get 0x10000000_00000000
-lui x31, -0b000  # get 0xffffffff_ffff8000
-lui x31, -0b0000 # get 0xffffffff_ffff0000
-lui x31, -0x00 # get 0xffffffff_ffff00000
-#lui x31, -0x00000 # get 0xffffffff_ffff0000
-#lui x31, -0x00000 # get 0xffffffff_ffff0000
-#lui x31, -0x1 # get 0xffffffff_fffff000
+#lui x31, 0x0
+## Test 2 load 1
+#lui x31, 0x1 # get 0x00000000_00001000
+## Test 3 load max 0x7ffff
+#lui x31, 0x7ffff # get 0x00000000_7ffff000
+## Test 5 load mim normal -0x7ffff  80000000
+#lui x31, -0x80000 # get 0xffffffff_80000000
+## Test 4 load mim -0x00000
+##lui x31, -4096 # get 0x10000000_00000000
+#lui x31, -0b000  # get 0xffffffff_ffff8000
+#lui x31, -0b0000 # get 0xffffffff_ffff0000
+#lui x31, -0x00 # get 0xffffffff_ffff00000
+##lui x31, -0x00000 # get 0xffffffff_ffff0000
+##lui x31, -0x00000 # get 0xffffffff_ffff0000
+##lui x31, -0x1 # get 0xffffffff_fffff000
+#lui x0, 0x1 # get 0
 
 
 
