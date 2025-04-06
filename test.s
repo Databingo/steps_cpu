@@ -324,6 +324,15 @@
 ##lui x31, -0x1 # get 0xffffffff_fffff000
 #lui x0, 0x1 # get 0
 
+# SLLIW
+#-------
+# Limitation: only shift 32 bits and sext to 64 bits
+## load 0x12345002 positive
+lui x31, 0x12345
+addi x31, x31, 0x002  
+slliw x31, x31, 4
+
+
 
 
 

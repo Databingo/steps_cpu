@@ -154,6 +154,7 @@ func main() {
 		"andi":  0b00000000000000000111000000010011,
 
 		"slli": 0b00000000000000000001000000010011,
+		"slliw":0b00000000000000000001000000011011,
 		"srli": 0b00000000000000000101000000010011,
 		"srai": 0b01000000000000000101000000010011,
 
@@ -305,7 +306,7 @@ func main() {
 				}
 			}
 
-		case "slli", "srli", "srai": // Instruction format: op rd, rs1, imm     or      label: rd, rs1, imm
+		case "slli", "slliw", "srli", "srai": // Instruction format: op rd, rs1, imm     or      label: rd, rs1, imm
 			if len(code) != 4 && len(code) != 5 {
 				fmt.Println("Incorrect argument count on line: ", lineCounter)
 				os.Exit(0)
@@ -539,7 +540,7 @@ func main() {
 				os.Exit(0)
 			}
 
-		case "slli", "srli", "srai": // op rd, rs1, immediate(shamt)
+		case "slli", "slliw", "srli", "srai": // op rd, rs1, immediate(shamt)
 			if len(code) != 4 {
 				fmt.Println("Incorrect argument count on line: ", lineCounter)
 				os.Exit(0)
@@ -563,7 +564,7 @@ func main() {
 			if opFound && rdFound && rs1Found {
 				instruction = uint32(imm)<<20 | rs1<<15 | rd<<7 | op
 				fmt.Printf("imm: %06b\n", imm)
-				fmt.Printf("op:", op)
+				fmt.Printf("op: %b\n", op)
 				fmt.Printf("%032b\n", instruction)
 				fmt.Printf("000000 %06b %05b 101 %05b 0010011\n", imm, rs1, rd)
 			} else if !rdFound || !rs1Found {
