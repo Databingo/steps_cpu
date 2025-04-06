@@ -257,20 +257,22 @@
 # Test 11 write to x0 for discard
 #addiw x0, x0, 0x2
 # Test 13 NOP
-addi x0, x0, 0
-# Test 14 maximal positive to minimal negative int64
-#addi x31, x0,-1 
-### x31 now is 0xffffffffffffffff # -1
+#addiw x0, x0, 0
+# Test 14 maximal positive cut to int32 sext to int64
+#addiw x31, x0,-1 
+#### x31 now is 0xffffffffffffffff # -1 addiw will add sext(imm).32 to s1.low32, cut to 32 sext to 64.
 #srli x31, x31, 1
-### x31 now is 0x7fffffffffffffff # Max int64 +2**63-1 = 9,223,372,036,854,775,807
-#addi x31, x31, 1
-### x31 now is 0x8000000000000000 # Min int64 -2**63 = -9,223,372,036,854,775,808
-#addi x31, x31, -1
-### x31 now is 0x7fffffffffffffff # Max overflow 
-#addi x31, x31, 2
-### x31 now is 0x8000000000000001 
-#addi x31, x31, -1
-### x31 now is 0x8000000000000000 
+#### x31 now is 0x7fffffffffffffff # Max int64 +2**63-1 = 9,223,372,036,854,775,807
+#addiw x31, x31, 1
+#### x31 now is 0x0000000000000000 # Cut 0xffffffff + 1 to 0x00000000 sext to 0x0000000000000000
+#addiw x31, x0,-1 
+##### x31 now is 0xffffffffffffffff # -1 addiw will add sext(imm).32 to s1.low32, cut to 32 sext to 64.
+#srli x31, x31, 1
+##### x31 now is 0x7fffffffffffffff # Max int64 +2**63-1 = 9,223,372,036,854,775,807
+#addiw x31, x31, -1
+#### x31 now is 0xfffffffffffffffe # Cut 0xffffffff - 1 to 0xfffffffe sext to 0xfffffffffffffffe
+#addiw x31, x31, 3
+### x31 now is 0x0000000000000000  # Cut 0xfffffffe + 3 to 0x00000001 sext to 0x0000000000000001
 
 
 # LUI
@@ -296,7 +298,6 @@ addi x0, x0, 0
 ## load 0x77313879 positive cut negative 多加1减去补码(补码=反码加一)
 #lui x31, 0x77314
 #addi x31, x31, -0x787
-
 # Load arbitrary int64 by LUI, i.e. 0x12345805_12345805
 # load 0x12345002 positive
 #lui x31, 0x12345
@@ -305,4 +306,16 @@ addi x0, x0, 0
 #lui x30, 0x12345
 #addi x30, x30, 0x002  # get 0x12345002
 #add x31, x31, x30     # get 0x12345002_12345002
-#
+# Test 1 load 0
+lui x31, 0x0
+# Test 2 load 1
+lui x31, 0x1 # get 0x00000000_00001000
+# Test 3 load max 0x7ffff
+lui x31, 0x7ffff # get 0x00000000_7ffff000
+# Test 4 load mim -0xfffff
+#lui x31, -4096 # get 0x10000000_00000000
+lui x31, -0b0000 # get 0x10000000_00000000
+
+
+
+

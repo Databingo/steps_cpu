@@ -60,8 +60,12 @@ func isValidImmediate(s string) (int64, error) {
 		//fmt.Println("lens:", len(s))
 		// -00000000000 = 100000000000 = 1100000000000  = -2048 
 		// -000000000000 = 1000000000000 = 11000000000000  = -4096 
-		if imm3 == 0 && len(s) >= 14 {
+		//if imm3 == 0 && len(s) >= 14 {
+		 //    imm3, err3 = strconv.ParseInt(string(s[0])+"1"+s[3:], 2, 64)
+		 //}
+		if imm3 == 0  {
 		     imm3, err3 = strconv.ParseInt(string(s[0])+"1"+s[3:], 2, 64)
+		     fmt.Println("imm3:", string(s[0])+"1"+s[3:])
 		 }
 		//fmt.Println("imm3:", imm3)
 	}
@@ -413,9 +417,10 @@ func main() {
 				fmt.Printf("Error on line %d: %s\n", lineCounter, err)
 				os.Exit(0)
 			}
+			fmt.Printf("imm: 0x%X\n", imm)
 			//if imm > 1048575 || imm < 0 {
 			if imm > 0x7ffff || imm < -0x100000 {
-			    fmt.Printf("Lui: Error on line %d: Immediate value %d=0x%X out of range (should be between 0x%X and 0x7fff )\n", lineCounter, imm, imm, -0x100000)
+			    fmt.Printf("Lui: Error on line %d: Immediate value %d=0x%X out of range (should be between 0x%X and 0x7ffff )\n", lineCounter, imm, imm, -0x100000)
 				os.Exit(0)
 			}
 			if !opFound || !rdFound {
