@@ -391,9 +391,10 @@ lui x31, 0x7ffff
 addi x31, x31, 0x7ff
 andi x31, x31, -0x002
 # Test negative with positive imm
-lui x31, -0x80000
-addi x31, x31, -0x800
-#andi x31, x31, 0x0b2
+addi x31, x0, 0
+lui x31, -0x80000  # 0xf80000
+addi x31, x31, -0x7ef #ffffff901   
+andi x31, x31, 0x011
 
 
 
