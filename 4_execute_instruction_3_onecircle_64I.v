@@ -284,9 +284,9 @@ reg [63:0] mirro_imm; // imm 相反数，取反加一，减法变加法用
 reg [63:0] sub; // 减法结果组合逻辑寄存器
 reg [63:0] sub_imm; // 减法结果组合逻辑寄存器
 reg [63:0] sign_extended_bimm; // 符号扩展的 bimm
-reg [63:0] sll_s1; // 逻辑左移
-reg [63:0] srl_s1; // 算数左移
-reg [63:0] sal_s1; // 算数右移
+reg [63:0] sllw_s1; // 逻辑左移word
+reg [63:0] srlw_s1; // 算数左移word
+reg [63:0] sraw_s1; // 算数右移word
 
 // 组合逻辑（电路即时生效,无需等待时钟周期）
 always @(*)
@@ -298,8 +298,9 @@ begin
  sub = rram[wire_rs1] + mirro_rs2;
  sub_imm = rram[wire_rs1] + mirro_imm;
  sign_extended_bimm = {{51{wire_ir[31]}}, wire_bimm};  //bimm is 13 bits length
- sll_s1 = rram[wire_rs1] << wire_shamt; 
- srl_s1 = rram[wire_rs1][31:0] >> wire_shamt; 
+ sllw_s1 = rram[wire_rs1] << wire_shamt[4:0]; 
+ srlw_s1 = rram[wire_rs1][31:0] >> wire_shamt[4:0]; 
+ sraw_s1 = rram[wire_rs1][31:0] >>> wire_shamt[4:0]; 
 end 
 
 
@@ -804,7 +805,7 @@ begin
 					   // shift lift  logicl rs1.low32 by imm.12[low5.unsign] padding 0 to rd
 					   //rram[wire_rd] <= {{32{rram[wire_rs1][32-wire_shamt]}}, (rram[wire_rs1][31:0] << wire_shamt )[31:0]}; 
 					   //rram[wire_rd] <= {{32{sll_s1[31-wire_shamt]}}, (rram[wire_rs1][31:0] << wire_shamt )}; 
-					   rram[wire_rd] <= {{32{sll_s1[31]}}, sll_s1[31:0]};
+					   rram[wire_rd] <= {{32{sllw_s1[31]}}, sllw_s1[31:0]};
 				           pc <= pc + 4; 
 	    	                           jp <=0;
 					   end
@@ -812,11 +813,16 @@ begin
 				          case(wire_f7) // func7
 					      7'b0000000:begin 
 						Srliw  <= 1'b1; // set Srliw  Flag 
-					        rram[wire_rd] <= {{32{srl_s1[31]}}, srl_s1[31:0]};
+					        rram[wire_rd] <= {{32{srlw_s1[31]}}, srlw_s1[31:0]};
 				                pc <= pc + 4; 
 	    	                                jp <=0;
 					        end
-				            7'b0100000: Sraiw <= 1'b1; // set Sraiw  Flag 
+					      7'b0100000:begin 
+						Sraiw <= 1'b1; // set Sraiw  Flag 
+					        rram[wire_rd] <= {{32{sraw_s1[31]}}, sraw_s1[31:0]};
+				                pc <= pc + 4; 
+	    	                                jp <=0;
+					        end
 				          endcase
 				         end 
 				endcase
