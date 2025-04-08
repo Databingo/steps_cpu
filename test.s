@@ -382,10 +382,14 @@
 # ANDI
 #-----
 # limiation: 12 signed imm sext to 64 AND with s1 to rd
-# Test positive imm
+# Test positive with positive imm
 lui x31, 0x7ffff
 addi x31, x31, 0x7ff
 andi x31, x31, 0x0b2
+# Test positive with negative imm
+lui x31, 0x7ffff
+addi x31, x31, 0x7ff
+andi x31, x31, -0x002
 
 
 
