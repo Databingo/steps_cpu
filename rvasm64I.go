@@ -551,12 +551,12 @@ func main() {
 				fmt.Printf("Error on line %d: %s\n", lineCounter, err)
 				os.Exit(0)
 			}
-///////////////////////// // riscv32
-			//if imm > 31 { 
-			//	fmt.Printf("Error on line %d: Immediate value out of range (should be between 0 and 31)")
-///////////////////////// // riscv32
+			if (switchOnOp == "slliw" || switchOnOp == "srliw") && imm > 31 { 
+				fmt.Printf("Error on line %d: Immediate value out of range (should be between 0 and 31), get %d\n", lineCounter, imm)
+				os.Exit(0)
+			}
 			if imm > 63 {
-				fmt.Printf("Error on line %d: Immediate value out of range (should be between 0 and 63)\n", lineCounter)
+				fmt.Printf("Error on line %d: Immediate value out of range (should be between 0 and 63), get %d\n", lineCounter, imm)
 				os.Exit(0)
 			}
 			op, opFound := opBin[code[0]]
