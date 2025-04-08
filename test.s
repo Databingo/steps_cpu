@@ -340,10 +340,15 @@
 # SRLIW
 #-------
 # Limitation: only shift 32 bits and sext to 64 bits; only negative shift 0 sext 1..
-# load 0x12345002 cut positive
-lui x31, 0x12345
+## load 0x12345002 cut positive
+#lui x31, 0x12345
+#addi x31, x31, 0x002  
+#srliw x31, x31, 4   # get 0x0000000001234500
+### load 0x1f345002 cut negative but shift no-0
+lui x31, 0x1f845
 addi x31, x31, 0x002  
-srliw x31, x31, 4   # get 0x0000000001234500
+srliw x31, x31, 4  # get 0x0000000001f84500
+#srliw x31, x31, 4  # get 0xffffffff84500200
 
 
 
