@@ -383,9 +383,9 @@
 #-----
 # limiation: 12 signed imm sext to 64 AND with s1 to rd
 # Test positive imm
-lui x30, 0x7ffff
-addi x30, x30, 0x7ff
-andi x30, x30, 0x0b2
+lui x31, 0x7ffff
+addi x31, x31, 0x7ff
+andi x31, x31, 0x0b2
 
 
 
