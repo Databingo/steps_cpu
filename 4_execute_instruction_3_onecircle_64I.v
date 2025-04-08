@@ -284,9 +284,9 @@ reg [63:0] mirro_imm; // imm 相反数，取反加一，减法变加法用
 reg [63:0] sub; // 减法结果组合逻辑寄存器
 reg [63:0] sub_imm; // 减法结果组合逻辑寄存器
 reg [63:0] sign_extended_bimm; // 符号扩展的 bimm
-reg [63:0] sllw_s1; // 逻辑左移word
-reg [63:0] srlw_s1; // 算数左移word
-reg [63:0] sraw_s1; // 算数右移word
+reg [31:0] sllw_s1; // 逻辑左移word
+reg [31:0] srlw_s1; // 算数左移word
+reg [31:0] sraw_s1; // 算数右移word
 
 // 组合逻辑（电路即时生效,无需等待时钟周期）
 always @(*)
@@ -300,7 +300,7 @@ begin
  sign_extended_bimm = {{51{wire_ir[31]}}, wire_bimm};  //bimm is 13 bits length
  sllw_s1 = rram[wire_rs1] << wire_shamt[4:0]; 
  srlw_s1 = rram[wire_rs1][31:0] >> wire_shamt[4:0]; 
- sraw_s1 = rram[wire_rs1][31:0] >>> wire_shamt[4:0]; 
+ sraw_s1 = $signed(rram[wire_rs1][31:0]) >>> wire_shamt[4:0]; 
 end 
 
 
@@ -656,7 +656,7 @@ begin
 					    7'b0100000:begin 
 					               Sra  <= 1'b1; // set Sra Flag  
 					               // shift right arithmatical rs1 by imm.12[low5.unsign] padding 0 to rd
-					               rram[wire_rd] <= (rram[wire_rs1] >>> wire_shamt ); 
+					               rram[wire_rd] <= ($signed(rram[wire_rs1]) >>> wire_shamt ); 
 				                       pc <= pc + 4; 
 	    	                                       jp <=0;
 						       end
@@ -820,6 +820,7 @@ begin
 					      7'b0100000:begin 
 						Sraiw <= 1'b1; // set Sraiw  Flag 
 					        rram[wire_rd] <= {{32{sraw_s1[31]}}, sraw_s1[31:0]};
+					        //rram[wire_rd] <= {{32{1'b1}}, sraw_s1[31:0]};
 				                pc <= pc + 4; 
 	    	                                jp <=0;
 					        end

@@ -362,9 +362,24 @@
 # SRAIW
 # Limitation: max 31, sext 32 to 64 
 ## load 0x12345002 cut positive
-lui x31, 0x12345
-addi x31, x31, 0x002  
-sraiw x31, x31, 4   # get 0x0000000001234500
+#lui x31, 0x12345
+#addi x31, x31, 0x002  
+#sraiw x31, x31, 4   # get 0x0000000001234500
+## load negative cut positive but shift no-0
+lui x31, -0x80000
+addi x31, x31, -0x002  
+sraiw x31, x31, 4  # get 0x000000007ffffff
+lui x31, -0xfffff
+sraiw x31, x31, 8  
+## load negative cut negative but shift no-0
+lui x31, -0x80000
+addi x31, x31, 0x001  
+sraiw x31, x31, 4  # get 0xfffffffff8000000
+## load negative cut negative shift 0
+lui x31, -0x80000
+addi x31, x31, 0x001  
+sraiw x31, x31, 0  # get 0xffffffff80000001
+
 
 
 
