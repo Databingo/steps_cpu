@@ -156,6 +156,7 @@ func main() {
 		"slli": 0b00000000000000000001000000010011,
 		"slliw":0b00000000000000000001000000011011,
 		"srli": 0b00000000000000000101000000010011,
+		"srliw":0b00000000000000000101000000011011,
 		"srai": 0b01000000000000000101000000010011,
 
 		"add":  0b00000000000000000000000000110011,
@@ -306,7 +307,7 @@ func main() {
 				}
 			}
 
-		case "slli", "slliw", "srli", "srai": // Instruction format: op rd, rs1, imm     or      label: rd, rs1, imm
+		case "slli", "slliw", "srli", "srliw", "srai": // Instruction format: op rd, rs1, imm     or      label: rd, rs1, imm
 			if len(code) != 4 && len(code) != 5 {
 				fmt.Println("Incorrect argument count on line: ", lineCounter)
 				os.Exit(0)
@@ -540,7 +541,7 @@ func main() {
 				os.Exit(0)
 			}
 
-		case "slli", "slliw", "srli", "srai": // op rd, rs1, immediate(shamt)
+		case "slli", "slliw", "srli", "srliw", "srai": // op rd, rs1, immediate(shamt)
 			if len(code) != 4 {
 				fmt.Println("Incorrect argument count on line: ", lineCounter)
 				os.Exit(0)

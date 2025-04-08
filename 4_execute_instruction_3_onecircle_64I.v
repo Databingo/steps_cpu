@@ -299,6 +299,7 @@ begin
  sub_imm = rram[wire_rs1] + mirro_imm;
  sign_extended_bimm = {{51{wire_ir[31]}}, wire_bimm};  //bimm is 13 bits length
  sll_s1 = rram[wire_rs1] << wire_imm; 
+ srl_s1 = rram[wire_rs1][31:0] >> wire_shamt; 
 end 
 
 
@@ -809,7 +810,12 @@ begin
 					   end
 				  3'b101: begin
 				          case(wire_f7) // func7
-				            7'b0000000: Srliw  <= 1'b1; // set Srliw  Flag 
+					      7'b0000000:begin 
+						Srliw  <= 1'b1; // set Srliw  Flag 
+					        rram[wire_rd] <= {{32{srl_s1[31]}}, srl_s1[31:0]};
+				                pc <= pc + 4; 
+	    	                                jp <=0;
+					        end
 				            7'b0100000: Sraiw <= 1'b1; // set Sraiw  Flag 
 				          endcase
 				         end 
