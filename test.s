@@ -379,26 +379,44 @@
 #addi x31, x31, 0x001  
 #sraiw x31, x31, 0  # get 0xffffffff80000001
 
+# ANDI
+#-----
+# limiation: 12 signed imm sext to 64 AND with s1 to rd
+# Test positive imm
+lui x30, 0x7ffff
+addi x30, x30, 0x7ff
+andi x30, x30, 0x0b2
+
+
+
+
+
+
+
+
+
+
+
 # Setup
-lui x10, 0x12345          # x10 = 0x12345000
-addi x10, x10, 0x678      # x10 = 0x12345678 (Using LUI, ADDI)
-# 64-bit shifts
-slli x11, x10, 32         # x11 = 0x1234567800000000 (Using SLLI)
-srli x12, x11, 4          # x12 = 0x0123456780000000 (Using SRLI)
-# Make a negative value for srai (-1024)
-# Replacing: li x13, -1024
-# -1024 fits within the 12-bit signed immediate range of ADDI.
-addi x13, x0, -1024       # x13 = -1024 (0xFFFFFFFFFFFFFC00) using ADDI with x0 (zero reg)
-srai x11, x13, 5          # x11 = -32 (0xFFFFFFFFFFFFFFE0) (Using SRAI)
-# 32-bit word operations - result in x10
-addiw x10, x11, 16        # x10 = -16 (0xFFFFFFFFFFFFFFF0) (Using ADDIW)
-slliw x11, x10, 2         # x11 = -64 (0xFFFFFFFFFFFFFFC0) (Using SLLIW)
-# Use a positive value for srliw (256)
-# Replacing: li x12, 256
-# 256 fits within the 12-bit signed immediate range of ADDI.
-addi x12, x0, 256         # x12 = 256 (0x100) using ADDI with x0
-srliw x13, x12, 4         # x13 = 16 (0x10) (Using SRLIW)
-# Use the negative value for sraiw
-sraiw x10, x11, 3         # x10 = -8 (0xFFFFFFFFFFFFFFF8) (Using SRAIW)
-# Final step to get -4
-addiw x31, x10, 4         # x31 = -4 (0xFFFFFFFFFFFFFFFC) (Using ADDIW)
+#lui x10, 0x12345          # x10 = 0x12345000
+#addi x10, x10, 0x678      # x10 = 0x12345678 (Using LUI, ADDI)
+## 64-bit shifts
+#slli x11, x10, 32         # x11 = 0x1234567800000000 (Using SLLI)
+#srli x12, x11, 4          # x12 = 0x0123456780000000 (Using SRLI)
+## Make a negative value for srai (-1024)
+## Replacing: li x13, -1024
+## -1024 fits within the 12-bit signed immediate range of ADDI.
+#addi x13, x0, -1024       # x13 = -1024 (0xFFFFFFFFFFFFFC00) using ADDI with x0 (zero reg)
+#srai x11, x13, 5          # x11 = -32 (0xFFFFFFFFFFFFFFE0) (Using SRAI)
+## 32-bit word operations - result in x10
+#addiw x10, x11, 16        # x10 = -16 (0xFFFFFFFFFFFFFFF0) (Using ADDIW)
+#slliw x11, x10, 2         # x11 = -64 (0xFFFFFFFFFFFFFFC0) (Using SLLIW)
+## Use a positive value for srliw (256)
+## Replacing: li x12, 256
+## 256 fits within the 12-bit signed immediate range of ADDI.
+#addi x12, x0, 256         # x12 = 256 (0x100) using ADDI with x0
+#srliw x13, x12, 4         # x13 = 16 (0x10) (Using SRLIW)
+## Use the negative value for sraiw
+#sraiw x10, x11, 3         # x10 = -8 (0xFFFFFFFFFFFFFFF8) (Using SRAIW)
+## Final step to get -4
+#addiw x31, x10, 4         # x31 = -4 (0xFFFFFFFFFFFFFFFC) (Using ADDIW)
