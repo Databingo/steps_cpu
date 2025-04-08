@@ -332,10 +332,10 @@
 #addi x31, x31, 0x002  
 #slliw x31, x31, 4   # get 0x0000000023450020
 ### load 0x1f345002 cut negative
-#lui x31, 0x1f845
-#addi x31, x31, 0x002  
-#slliw x31, x31, 4  # get 0xfffffffff8450020
-#slliw x31, x31, 4  # get 0xffffffff84500200
+lui x31, 0x1f845
+addi x31, x31, 0x002  
+slliw x31, x31, 4  # get 0xfffffffff8450020
+slliw x31, x31, 4  # get 0xffffffff84500200
 
 # SRLIW
 #-------
@@ -345,10 +345,13 @@
 #addi x31, x31, 0x002  
 #srliw x31, x31, 4   # get 0x0000000001234500
 ### load 0x1f345002 cut negative but shift no-0
-lui x31, 0x1f845
-addi x31, x31, 0x002  
-srliw x31, x31, 4  # get 0x0000000001f84500
-#srliw x31, x31, 4  # get 0xffffffff84500200
+#lui x31, -0x80000
+#addi x31, x31, 0x002  
+#srliw x31, x31, 4  # get 0x0000000008000000
+#### load -0x1f345002 cut negative and shift 0
+#lui x31, -0x1f345
+#addi x31, x31, -0x002  
+#srliw x31, x31, 0  # get 0xfffffffffe0cbaffe
 
 
 

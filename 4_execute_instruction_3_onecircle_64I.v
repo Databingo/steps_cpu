@@ -298,7 +298,7 @@ begin
  sub = rram[wire_rs1] + mirro_rs2;
  sub_imm = rram[wire_rs1] + mirro_imm;
  sign_extended_bimm = {{51{wire_ir[31]}}, wire_bimm};  //bimm is 13 bits length
- sll_s1 = rram[wire_rs1] << wire_imm; 
+ sll_s1 = rram[wire_rs1] << wire_shamt; 
  srl_s1 = rram[wire_rs1][31:0] >> wire_shamt; 
 end 
 
