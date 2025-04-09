@@ -207,7 +207,7 @@ func main() {
 		label := ""
 		if strings.HasSuffix(switchOnOp, ":"){
 		    label = strings.TrimSuffix(code[0], ":")
-		    fmt.Printf("lable:%s\n", label)
+		    //fmt.Printf("lable:%s\n", label)
 		    //symbolTable[label] = int64(address)
 		    if len(code) >= 2 {
 			switchOnOp = code[1]
@@ -249,9 +249,9 @@ func main() {
 			if sign_bit == 1 {
 			    h20  = (imm >> 0x1000 - 1) << 12
 			}
-		        w32 := h20 + l12
-			fmt.Printf("h20: 0b%b, 0x%x, -0x%x\n", h20, h20, ^h20+1)
-			fmt.Printf("w32: 0b%b, 0x%x, -0x%x\n", w32, w32, ^w32+1)
+		        //w32 := h20 + l12
+			//fmt.Printf("h20: 0b%b, 0x%x, -0x%x\n", h20, h20, ^h20+1)
+			//fmt.Printf("w32: 0b%b, 0x%x, -0x%x\n", w32, w32, ^w32+1)
 			fmt.Printf("lui %s, %d\n", code[1], h20)
 			fmt.Printf("addi %s, %s, %d\n", code[1], code[1], l12)
 		    }
@@ -265,14 +265,14 @@ func main() {
 			if sign_bit == 1 {
 			    h20  = (imm >> 0x1000 - 1) << 12
 			}
-		        w32 := h20 + l12
-			fmt.Printf("h20: 0b%b, 0x%x, -0x%x\n", h20, h20, ^h20+1)
-			fmt.Printf("w32: 0b%b, 0x%x, -0x%x\n", w32, w32, ^w32+1)
+		        //w32 := h20 + l12
+			//fmt.Printf("h20: 0b%b, 0x%x, -0x%x\n", h20, h20, ^h20+1)
+			//fmt.Printf("w32: 0b%b, 0x%x, -0x%x\n", w32, w32, ^w32+1)
 			fmt.Printf("lui %s, %d\n", code[1], h20)
 			fmt.Printf("addi %s, %s, %d\n", code[1], code[1], l12)
 
                         h64_32 := imm >> 32
-			fmt.Printf("h64_32: 0b%b, 0x%x, -0x%x\n", h64_32, h64_32, ^h64_32+1)
+			//fmt.Printf("h64_32: 0b%b, 0x%x, -0x%x\n", h64_32, h64_32, ^h64_32+1)
 			hl12 := h64_32 & 0xfff
 			//fmt.Printf("l12: 0b%b\n", l12)
 			hsign_bit := hl12 >> 11 & 1
@@ -281,9 +281,9 @@ func main() {
 			if hsign_bit == 1 {
 			    hh20  = (h64_32 >> 0x1000 - 1) << 12
 			}
-		        hw32 := hh20 + hl12
-			fmt.Printf("hh20: 0b%b, 0x%x, -0x%x\n", hh20, hh20, ^hh20+1)
-			fmt.Printf("hw32: 0b%b, 0x%x, -0x%x\n", hw32, hw32, ^hw32+1)
+		        //hw32 := hh20 + hl12
+			//fmt.Printf("hh20: 0b%b, 0x%x, -0x%x\n", hh20, hh20, ^hh20+1)
+			//fmt.Printf("hw32: 0b%b, 0x%x, -0x%x\n", hw32, hw32, ^hw32+1)
 			fmt.Printf("lui x30, %d\n", hh20)
 			fmt.Printf("addi x30, x30, %d\n", hl12)
 			fmt.Printf("slli x30, x30, 32\n")
