@@ -420,11 +420,12 @@
 #lui x31, -1
 #addi x31, x31, 0
 #test: li x31, -0x1800
-#lui x31, -1
+lui x31, -1
 #addi x31, x31, -2048
 #test2: li x31, 100
 #test: li x31, 0x800000001   
-addi x10, x10, 100 
+addi x31, x31, -2048
+#addi x31, x31, -100 
 #slli x31, x31, 32
 #addi x30, x31, 0
 #addi x31, x31, 0x1
