@@ -424,9 +424,8 @@
 #addi x31, x31, -2048
 #test2: li x31, 100
 #test: li x31, 0x800000001   
-addi x31, x31, -2048
-addi x31, x31, -0x7
-#addi x31, x31, -100 
+addi x31, x0, -0x7 
+# addi x31, x31, -100  not work with x31+x31 !!!!
 #slli x31, x31, 32
 #addi x30, x31, 0
 #addi x31, x31, 0x1
@@ -446,8 +445,8 @@ addi x31, x31, -0x7
 
 
 # Setup
-lui x10, 0x12345          # x10 = 0x12345000
-addi x31, x10, 0x678      # x10 = 0x12345678 (Using LUI, ADDI)
+#lui x10, 0x12345          # x10 = 0x12345000
+#addi x31, x10, 0x678      # x10 = 0x12345678 (Using LUI, ADDI)
 ## 64-bit shifts
 #slli x11, x10, 32         # x11 = 0x1234567800000000 (Using SLLI)
 #srli x12, x11, 4          # x12 = 0x0123456780000000 (Using SRLI)
