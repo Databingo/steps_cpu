@@ -236,6 +236,18 @@ func main() {
 			if  -0x1000 < imm  && imm < 0x7ff {
 			fmt.Println(label+": "+"addi "+ code[1]+ ", x0, " + code[2])
 		    }
+			if   -0x100000000 < imm  && imm <= -0x1000 {
+			fmt.Println(label+": "+"addi "+ code[1]+ ", x0, " + code[2])
+			fmt.Printf("0b%b => 0b%b \n", imm, imm>>0x1000)
+			sign_bit := imm>>0x1000 & 1
+			fmt.Printf("cutted_low_12bits sign_bit: 0b%b\n", sign_bit)
+			if sign_bit == 1 {
+			    top20 := (imm >> 0x1000 - 1) << 12
+			fmt.Printf("0b%b, 0x%x, -0x%x\n", top20, top20, ^top20+1)
+
+			}
+			
+		    }
 
 			//if !opFound || !rdFound {
 			//	fmt.Println("Invalid register on line", lineCounter)
