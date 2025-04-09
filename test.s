@@ -412,7 +412,7 @@
 # limiation: 12 signed imm sext to 64 OR with s1 to rd
 # Test 
 
-test: li x31, -0x1701
+test: li x31, -0x100000000
 li x31, 100
 
 

@@ -233,16 +233,18 @@ func main() {
 			    fmt.Printf("Li: Error on line %d: Immediate value %d=0x%X out of range (should be between 0x%X and 0x7ffff )\n", lineCounter, imm, imm, -0x1000000000000000)
 				os.Exit(0)
 			}
+			if label != "" {
+			    fmt.Printf("%s: \n", label)
+			}
 			if  -0x1000 < imm  && imm < 0x7ff {
-			fmt.Println(label+": "+"addi "+ code[1]+ ", x0, " + code[2])
+			fmt.Println("addi "+ code[1]+ ", x0, " + code[2])
 		    }
+		        //----
 			if   -0x100000000 < imm  && imm <= -0x1000 {
-			fmt.Println(label+": "+"addi "+ code[1]+ ", x0, " + code[2])
-			fmt.Printf("0b%b => 0b%b \n", imm, imm>>0x1000)
 			l12 := imm & 0xfff
-			fmt.Printf("l12: 0b%b\n", l12)
+			//fmt.Printf("l12: 0b%b\n", l12)
 			sign_bit := l12 >> 11 & 1
-			fmt.Printf("l_sign: 0b%b\n", sign_bit)
+			//fmt.Printf("l_sign: 0b%b\n", sign_bit)
 		        h20 := (imm >> 0x1000) << 12
 			if sign_bit == 1 {
 			    h20  = (imm >> 0x1000 - 1) << 12
@@ -250,11 +252,44 @@ func main() {
 		        w32 := h20 + l12
 			fmt.Printf("h20: 0b%b, 0x%x, -0x%x\n", h20, h20, ^h20+1)
 			fmt.Printf("w32: 0b%b, 0x%x, -0x%x\n", w32, w32, ^w32+1)
-			if label != "" {
-			    fmt.Printf("%s:\n", label)
-			}
 			fmt.Printf("lui %s, %d\n", code[1], h20)
 			fmt.Printf("addi %s, %s, %d\n", code[1], code[1], l12)
+		    }
+		        //----
+			if -0x8000000000000000 < imm && imm <= -0x100000000 {
+			l12 := imm & 0xfff
+			//fmt.Printf("l12: 0b%b\n", l12)
+			sign_bit := l12 >> 11 & 1
+			//fmt.Printf("l_sign: 0b%b\n", sign_bit)
+		        h20 := (imm >> 0x1000) << 12
+			if sign_bit == 1 {
+			    h20  = (imm >> 0x1000 - 1) << 12
+			}
+		        w32 := h20 + l12
+			fmt.Printf("h20: 0b%b, 0x%x, -0x%x\n", h20, h20, ^h20+1)
+			fmt.Printf("w32: 0b%b, 0x%x, -0x%x\n", w32, w32, ^w32+1)
+			fmt.Printf("lui %s, %d\n", code[1], h20)
+			fmt.Printf("addi %s, %s, %d\n", code[1], code[1], l12)
+
+                        h64_32 := imm >> 32
+			fmt.Printf("h64_32: 0b%b, 0x%x, -0x%x\n", h64_32, h64_32, ^h64_32+1)
+			hl12 := h64_32 & 0xfff
+			//fmt.Printf("l12: 0b%b\n", l12)
+			hsign_bit := hl12 >> 11 & 1
+			//fmt.Printf("l_sign: 0b%b\n", sign_bit)
+		        hh20 := (h64_32>> 0x1000) << 12
+			if hsign_bit == 1 {
+			    hh20  = (h64_32 >> 0x1000 - 1) << 12
+			}
+		        hw32 := hh20 + hl12
+			fmt.Printf("hh20: 0b%b, 0x%x, -0x%x\n", hh20, hh20, ^hh20+1)
+			fmt.Printf("hw32: 0b%b, 0x%x, -0x%x\n", hw32, hw32, ^hw32+1)
+			fmt.Printf("lui x30, %d\n", hh20)
+			fmt.Printf("addi x30, x30, %d\n", hl12)
+			fmt.Printf("slli x30, x30, 32\n")
+			fmt.Printf("add x31, x31, x30\n")
+
+
 			
 		    }
 
