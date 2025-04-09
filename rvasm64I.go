@@ -250,6 +250,7 @@ func main() {
 		        w32 := h20 + l12
 			fmt.Printf("h20: 0b%b, 0x%x, -0x%x\n", h20, h20, ^h20+1)
 			fmt.Printf("w32: 0b%b, 0x%x, -0x%x\n", w32, w32, ^w32+1)
+			fmt.Printf("lui %s, %d", code[1], h20)
 			
 		    }
 
