@@ -228,7 +228,7 @@ func main() {
 				fmt.Printf("Error on line %d: %s\n", lineCounter, err)
 				os.Exit(0)
 			}
-			fmt.Printf("line %d, imm: 0x%X=0b%b=%d\n", lineCounter, imm, imm, imm)
+			fmt.Printf("line %d, imm: 0x%X=0b%b=%d, 0x%x\n", lineCounter, imm, imm, imm, ^imm+1)
 			if imm > 0x7fffffffffffffff || imm < -0x1000000000000000 {
 			    fmt.Printf("Li: Error on line %d: Immediate value %d=0x%X out of range (should be between 0x%X and 0x7ffff )\n", lineCounter, imm, imm, -0x1000000000000000)
 				os.Exit(0)
@@ -236,7 +236,7 @@ func main() {
 			if label != "" {
 			    fmt.Printf("%s: \n", label)
 			}
-			if  -0x1000 < imm  && imm < 0x7ff {
+			if  -0x1000 < imm  && imm <= 0x7ff {
 			fmt.Println("addi "+ code[1]+ ", x0, " + code[2])
 		    }
 		        //----
@@ -257,41 +257,59 @@ func main() {
 		    }
 		        //----
 			if -0x8000000000000000 < imm && imm <= -0x100000000 {
-			l12 := imm & 0xfff
-			//fmt.Printf("l12: 0b%b\n", l12)
-			sign_bit := l12 >> 11 & 1
+			l12 := imm & 0x7ff // 11 bits
+			sign_bit := (imm & 0xfff) >> 11 & 1
 			//fmt.Printf("l_sign: 0b%b\n", sign_bit)
 		        h20 := (imm >> 0x1000) << 12
-			if sign_bit == 1 {
-			    h20  = (imm >> 0x1000 - 1) << 12
+			if sign_bit == 1 { // borrow 1
+			    h20 = (imm >> 0x1000 - 1) << 12
+			    l12 = -l12
 			}
+			//fmt.Printf("l12: 0b%b\n", l12)
 		        //w32 := h20 + l12
 			//fmt.Printf("h20: 0b%b, 0x%x, -0x%x\n", h20, h20, ^h20+1)
 			//fmt.Printf("w32: 0b%b, 0x%x, -0x%x\n", w32, w32, ^w32+1)
 			fmt.Printf("lui %s, %d\n", code[1], h20)
 			fmt.Printf("addi %s, %s, %d\n", code[1], code[1], l12)
-
+                        //-
                         h64_32 := imm >> 32
-			//fmt.Printf("h64_32: 0b%b, 0x%x, -0x%x\n", h64_32, h64_32, ^h64_32+1)
-			hl12 := h64_32 & 0xfff
-			//fmt.Printf("l12: 0b%b\n", l12)
-			hsign_bit := hl12 >> 11 & 1
-			//fmt.Printf("l_sign: 0b%b\n", sign_bit)
+			fmt.Printf("h64_32: 0b%b, 0x%x, -0x%x\n", h64_32, h64_32, ^h64_32+1)
+			hl12 := h64_32 & 0x7ff // 11 bits
+			//fmt.Printf("hl12: 0b%b=%d\n", hl12, hl12)
+			hsign_bit := (h64_32 & 0xfff) >> 11 & 1
+			//fmt.Printf("hl_sign: 0b%b\n", hsign_bit)
 		        hh20 := (h64_32>> 0x1000) << 12
 			if hsign_bit == 1 {
-			    hh20  = (h64_32 >> 0x1000 - 1) << 12
+			    hh20 = (h64_32 >> 0x1000 - 1) << 12
+			    hl12 = -hl12
 			}
 		        //hw32 := hh20 + hl12
 			//fmt.Printf("hh20: 0b%b, 0x%x, -0x%x\n", hh20, hh20, ^hh20+1)
 			//fmt.Printf("hw32: 0b%b, 0x%x, -0x%x\n", hw32, hw32, ^hw32+1)
-			fmt.Printf("lui x30, %d\n", hh20)
-			fmt.Printf("addi x30, x30, %d\n", hl12)
+			fmt.Printf("lui x30, %x\n", hh20)
+			fmt.Printf("addi x30, x30, %x\n", hl12)
 			fmt.Printf("slli x30, x30, 32\n")
 			fmt.Printf("add x31, x31, x30\n")
-
+		    }
+                        //----
+			if 0x7ff < imm && imm <= 0x7fffffff {
+			l12 := imm & 0xfff // 12 bits
+			sign_bit := (imm & 0xfff) >> 11 & 1
+			fmt.Printf("l12: 0b%b\n", l12)
+			fmt.Printf("l_sign: 0b%b\n", sign_bit)
+		        h20 := (imm >> 12) 
+			if sign_bit == 1 {
+			    h20  = imm >> 12 + 1
+			    l12 = -(0x1000 - l12)
+			}
+		        //w32 := h20 + l12
+			//fmt.Printf("h20: 0b%b, 0x%x, -0x%x\n", h20, h20, ^h20+1)
+			//fmt.Printf("w32: 0b%b, 0x%x, -0x%x\n", w32, w32, ^w32+1)
+			fmt.Printf("lui %s, %#x\n", code[1], h20)
+			fmt.Printf("addi %s, %s, %#x\n", code[1], code[1], l12)
+		    }
 
 			
-		    }
 
 			//if !opFound || !rdFound {
 			//	fmt.Println("Invalid register on line", lineCounter)
@@ -302,12 +320,12 @@ func main() {
 
 	
 		default:
-			fmt.Println("Syntax Error on line: ", lineCounter)
-			os.Exit(0)
+			//fmt.Println("Syntax Error on line: ", lineCounter)
+			//os.Exit(0)
 		}
 		lineCounter++
 		address += 4
-		os.Exit(0)
+		//os.Exit(0)
 
 	}
 	// first pass
