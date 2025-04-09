@@ -193,7 +193,8 @@ func main() {
 	symbolTable := make(map[string]int64, 100)
 	const UNKNOWN = -1
 	//    literalPool := make(map[string]int64, 100)
-	for scanner.Scan() { // first pass
+	// first pass
+	for scanner.Scan() { 
 		line := strings.Split(scanner.Text(), "#")[0] // get any text before the comment "#" and ignore any text after it
 		code = strings.FieldsFunc(line, SplitOn)      // break code into its operation and operands
 		if len(code) == 0 {                           // filter out whitespace
@@ -213,7 +214,7 @@ func main() {
 		}
 
 		switch switchOnOp {
-		case "lui", "auipc", "jal": // Instruction format:  op  rd, imm     or      label: op  rd, imm
+		case "lui", "auipc", "jal", "li": // Instruction format:  op  rd, imm     or      label: op  rd, imm
 			if len(code) != 3 && len(code) != 4 {
 				fmt.Println("Incorrect argument count on line: ", lineCounter)
 				os.Exit(0)

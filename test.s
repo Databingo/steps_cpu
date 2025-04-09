@@ -383,31 +383,34 @@
 #-----
 # limiation: 12 signed imm sext to 64 AND with s1 to rd
 # Test positive with positive imm
-lui x31, 0x7ffff
-addi x31, x31, 0x7ff
-andi x31, x31, 0x0b2
-# Test positive with negative imm
-lui x31, 0x7ffff
-addi x31, x31, 0x7ff
-andi x31, x31, -0x002
-# Test negative with positive imm
-addi x31, x0, 0
-lui x31, -0x80000  # 0xf80000
-addi x31, x31, -0x7ef #ffffff901   
-andi x31, x31, 0x011
-# Test negative with negasitive imm
-addi x31, x0, 0
-lui x31, -0x80000  # 0xf80000
-addi x31, x31, -0x7ef #ffffff811 # 0xfffffff7ffff811   
-andi x31, x31, -0x011 #                         ffef
-# Test negative with 0 imm
-addi x31, x0, 0
-lui x31, -0x80000  # 0xf80000
-addi x31, x31, -0x7ef #ffffff811 # 0xfffffff7ffff811   
-andi x31, x31, 0x1 #                         
-andi x31, x31, 0x0 #                         
+#lui x31, 0x7ffff
+#addi x31, x31, 0x7ff
+#andi x31, x31, 0x0b2
+## Test positive with negative imm
+#lui x31, 0x7ffff
+#addi x31, x31, 0x7ff
+#andi x31, x31, -0x002
+## Test negative with positive imm
+#addi x31, x0, 0
+#lui x31, -0x80000  # 0xf80000
+#addi x31, x31, -0x7ef #ffffff901   
+#andi x31, x31, 0x011
+## Test negative with negasitive imm
+#addi x31, x0, 0
+#lui x31, -0x80000  # 0xf80000
+#addi x31, x31, -0x7ef #ffffff811 # 0xfffffff7ffff811   
+#andi x31, x31, -0x011 #                         ffef
+## Test negative with 0 imm
+#addi x31, x0, 0
+#lui x31, -0x80000  # 0xf80000
+#addi x31, x31, -0x7ef #ffffff811 # 0xfffffff7ffff811   
+#andi x31, x31, 0x1 #                         
+#andi x31, x31, 0x0 #                         
 
-
+# ORI
+#-----
+# limiation: 12 signed imm sext to 64 OR with s1 to rd
+# Test 
 
 
 
