@@ -51,10 +51,10 @@ func isValidImmediate(s string) (int64, error) {
 		imm2, err2 = strconv.ParseInt(s[2:], 16, 64) // check if s is hex
 	} else if strings.HasPrefix(s, "-0x") {
 		imm2, err2 = strconv.ParseInt(string(s[0])+s[3:], 16, 64) // ignore the "0x" part but include the '-'
-		if imm2 == 0  {
-		     imm2, err2 = strconv.ParseInt(string(s[0])+"1"+strings.Repeat("0", len(s[3:])*4), 2, 64)
-		   //fmt.Println("imm2:", string(s[0])+"1"+strings.Repeat("0", len(s[3:])*4))
-		 }
+		if imm2 == 0 {
+			imm2, err2 = strconv.ParseInt(string(s[0])+"1"+strings.Repeat("0", len(s[3:])*4), 2, 64)
+			//fmt.Println("imm2:", string(s[0])+"1"+strings.Repeat("0", len(s[3:])*4))
+		}
 
 	} else if strings.HasPrefix(s, "0b") {
 		imm3, err3 = strconv.ParseInt(s[2:], 2, 64) // check if s is binary
@@ -63,15 +63,15 @@ func isValidImmediate(s string) (int64, error) {
 		//fmt.Println("s:", s)
 		//fmt.Println("imm3:", imm3)
 		//fmt.Println("lens:", len(s))
-		// -00000000000 = 100000000000 = 1100000000000  = -2048 
-		// -000000000000 = 1000000000000 = 11000000000000  = -4096 
+		// -00000000000 = 100000000000 = 1100000000000  = -2048
+		// -000000000000 = 1000000000000 = 11000000000000  = -4096
 		//if imm3 == 0 && len(s) >= 14 {
-		 //    imm3, err3 = strconv.ParseInt(string(s[0])+"1"+s[3:], 2, 64)
-		 //}
-		if imm3 == 0  {
-		     imm3, err3 = strconv.ParseInt(string(s[0])+"1"+s[3:], 2, 64)
-		     //fmt.Println("imm3:", string(s[0])+"1"+s[3:])
-		 }
+		//    imm3, err3 = strconv.ParseInt(string(s[0])+"1"+s[3:], 2, 64)
+		//}
+		if imm3 == 0 {
+			imm3, err3 = strconv.ParseInt(string(s[0])+"1"+s[3:], 2, 64)
+			//fmt.Println("imm3:", string(s[0])+"1"+s[3:])
+		}
 		//fmt.Println("imm3:", imm3)
 	}
 
@@ -153,12 +153,12 @@ func main() {
 		"ori":   0b00000000000000000110000000010011,
 		"andi":  0b00000000000000000111000000010011,
 
-		"slli": 0b00000000000000000001000000010011,
-		"slliw":0b00000000000000000001000000011011,
-		"srli": 0b00000000000000000101000000010011,
-		"srliw":0b00000000000000000101000000011011,
-		"srai": 0b01000000000000000101000000010011,
-		"sraiw":0b01000000000000000101000000011011,
+		"slli":  0b00000000000000000001000000010011,
+		"slliw": 0b00000000000000000001000000011011,
+		"srli":  0b00000000000000000101000000010011,
+		"srliw": 0b00000000000000000101000000011011,
+		"srai":  0b01000000000000000101000000010011,
+		"sraiw": 0b01000000000000000101000000011011,
 
 		"add":  0b00000000000000000000000000110011,
 		"sub":  0b01000000000000000000000000110011,
@@ -193,34 +193,35 @@ func main() {
 	symbolTable := make(map[string]int64, 100)
 	const UNKNOWN = -1
 	//    literalPool := make(map[string]int64, 100)
-        
-	// zero pass 
+
+	// zero pass
 	// translate pseudo-instruction to real-instruction
 	for scanner.Scan() {
-	        line := strings.Split(scanner.Text(), "#")[0]
+		line := strings.Split(scanner.Text(), "#")[0]
 		code = strings.FieldsFunc(line, SplitOn)
 		if len(code) == 0 {
-		    lineCounter++
-		    continue
+			lineCounter++
+			continue
 		}
 		switchOnOp := code[0]
 		label := ""
-		if strings.HasSuffix(switchOnOp, ":"){
-		    label = strings.TrimSuffix(code[0], ":")
-		    //fmt.Printf("lable:%s\n", label)
-		    //symbolTable[label] = int64(address)
-		    if len(code) >= 2 {
-			switchOnOp = code[1]
-			code = code[1:]
-		    } else {
-			continue
-		    }}
-		switch switchOnOp{
+		if strings.HasSuffix(switchOnOp, ":") {
+			label = strings.TrimSuffix(code[0], ":")
+			//fmt.Printf("lable:%s\n", label)
+			//symbolTable[label] = int64(address)
+			if len(code) >= 2 {
+				switchOnOp = code[1]
+				code = code[1:]
+			} else {
+				continue
+			}
+		}
+		switch switchOnOp {
 		case "li":
-		    if len(code) != 3 && len(code) != 4 {
-			fmt.Println("Incorrect argument count on line: ", lineCounter)
-			os.Exit(0)
-		    }
+			if len(code) != 3 && len(code) != 4 {
+				fmt.Println("Incorrect argument count on line: ", lineCounter)
+				os.Exit(0)
+			}
 			imm, err := isValidImmediate(code[2])
 			//op, opFound := opBin[code[0]]
 			//rd, rdFound := regBin[code[1]]
@@ -230,140 +231,59 @@ func main() {
 			}
 			fmt.Printf("line %d, imm: 0x%X=0b%b=%d, 0x%x\n", lineCounter, imm, imm, imm, ^imm+1)
 			if imm > 0x7fffffffffffffff || imm < -0x1000000000000000 {
-			    fmt.Printf("Li: Error on line %d: Immediate value %d=0x%X out of range (should be between 0x%X and 0x7ffff )\n", lineCounter, imm, imm, -0x1000000000000000)
+				fmt.Printf("Li: Error on line %d: Immediate value %d=0x%X out of range (should be between 0x%X and 0x7ffff )\n", lineCounter, imm, imm, -0x1000000000000000)
 				os.Exit(0)
 			}
 			if label != "" {
-			    fmt.Printf("%s: \n", label)
+				fmt.Printf("%s: \n", label)
 			}
-			if  -0x1000 < imm  && imm <= 0x7ff {
-			fmt.Println("addi "+ code[1]+ ", x0, " + code[2])
-		    }
-
-		        load_32 := func(imm int64) int {
-			l12 := imm & 0xfff // 12 bits
-			sign_bit := l12 >> 11 & 1
-			//fmt.Printf("l12: 0b%b\n", l12)
-			//fmt.Printf("l_sign: 0b%b\n", sign_bit)
-		        h20 := (imm >> 12) 
-			if sign_bit == 1 {
-			    h20  = h20 + 1
-			    l12 = -(0x1000 - l12)
-			}
-		        //w32 := h20 + l12
-			//fmt.Printf("h20: 0b%b, 0x%x, -0x%x\n", h20, h20, ^h20+1)
-			//fmt.Printf("w32: 0b%b, 0x%x, -0x%x\n", w32, w32, ^w32+1)
-			if h20 != 0 {
-			fmt.Printf("lui %s, %#x\n", code[1], h20)
-		    }
-			if l12 != 0 {
-			fmt.Printf("addi %s, %s, %#x\n", code[1], code[1], l12)
-		    }
-			return 0
+			if -0x1000 < imm && imm <= 0x7ff {
+				fmt.Println("addi " + code[1] + ", x0, " + code[2])
 			}
 
-                        //----
-			if 0x7ff < imm && imm <= 0x7fffffff {
-			    load_32(imm)
-			//l12 := imm & 0xfff // 12 bits
-			//sign_bit := l12 >> 11 & 1
-			//fmt.Printf("l12: 0b%b\n", l12)
-			//fmt.Printf("l_sign: 0b%b\n", sign_bit)
-		        //h20 := (imm >> 12) 
-			//if sign_bit == 1 {
-			//    h20  = h20 + 1
-			//    l12 = -(0x1000 - l12)
-			//}
-		        ////w32 := h20 + l12
-			////fmt.Printf("h20: 0b%b, 0x%x, -0x%x\n", h20, h20, ^h20+1)
-			////fmt.Printf("w32: 0b%b, 0x%x, -0x%x\n", w32, w32, ^w32+1)
-			//fmt.Printf("lui %s, %#x\n", code[1], h20)
-			//fmt.Printf("addi %s, %s, %#x\n", code[1], code[1], l12)
-		    }
-		        //----
-			if   -0x100000000 < imm  && imm <= -0x1000 {
-			    load_32(imm)
-			//l12 := imm & 0xfff
-			////fmt.Printf("l12: 0b%b\n", l12)
-			//sign_bit := l12 >> 11 & 1
-			////fmt.Printf("l_sign: 0b%b\n", sign_bit)
-		        //h20 := imm >> 12
-			//if sign_bit == 1 {
-			//    h20  = h20 + 1
-			//    l12 = -(0x1000 - l12)
-			//}
-		        ////w32 := h20 + l12
-			////fmt.Printf("h20: 0b%b, 0x%x, -0x%x\n", h20, h20, ^h20+1)
-			////fmt.Printf("w32: 0b%b, 0x%x, -0x%x\n", w32, w32, ^w32+1)
-			//fmt.Printf("lui %s, %d\n", code[1], h20)
-			//fmt.Printf("addi %s, %s, %d\n", code[1], code[1], l12)
-		    }
+			load_32 := func(imm int64) int {
+				l12 := imm & 0xfff // 12 bits
+				sign_bit := l12 >> 11 & 1
+				//fmt.Printf("l12: 0b%b\n", l12)
+				//fmt.Printf("l_sign: 0b%b\n", sign_bit)
+				h20 := (imm >> 12)
+				if sign_bit == 1 {
+					h20 = h20 + 1
+					l12 = -(0x1000 - l12)
+				}
+				//w32 := h20 + l12
+				//fmt.Printf("h20: 0b%b, 0x%x, -0x%x\n", h20, h20, ^h20+1)
+				//fmt.Printf("w32: 0b%b, 0x%x, -0x%x\n", w32, w32, ^w32+1)
+				if h20 != 0 {
+					fmt.Printf("lui %s, %#x\n", code[1], h20)
+				}
+				if l12 != 0 {
+					fmt.Printf("addi %s, %s, %#x\n", code[1], "x0", l12)
+				}
+				return 0
+			}
 
+			//----
+			if 0x7ff < imm && imm <= 0x7fffffff || -0x100000000 < imm && imm <= -0x1000 {
+				load_32(imm)
+			}
 
-
-		        //----
-			if -0x8000000000000000 < imm && imm <= -0x100000000 {
-                        h_imm := imm >> 32
-                        load_32(h_imm)
-			fmt.Printf("slli x31, x31, 32\n")
-			fmt.Printf("addi x30, x31, 0\n")
-			l_imm := imm << 32 >> 32
-                        load_32(l_imm)
-			fmt.Printf("add x31, x31, x30\n")
-			//l12 := imm & 0x7ff // 11 bits
-			//sign_bit := (imm & 0xfff) >> 11 & 1
-			////fmt.Printf("l_sign: 0b%b\n", sign_bit)
-		        //h20 := (imm >> 0x1000) << 12
-			//if sign_bit == 1 { // borrow 1
-			//    h20 = (imm >> 0x1000 - 1) << 12
-			//    l12 = -l12
-			//}
-			////fmt.Printf("l12: 0b%b\n", l12)
-		        ////w32 := h20 + l12
-			////fmt.Printf("h20: 0b%b, 0x%x, -0x%x\n", h20, h20, ^h20+1)
-			////fmt.Printf("w32: 0b%b, 0x%x, -0x%x\n", w32, w32, ^w32+1)
-			//fmt.Printf("lui %s, %d\n", code[1], h20)
-			//fmt.Printf("addi %s, %s, %d\n", code[1], code[1], l12)
-                        ////-
-                        //h64_32 := imm >> 32
-			//fmt.Printf("h64_32: 0b%b, 0x%x, -0x%x\n", h64_32, h64_32, ^h64_32+1)
-			//hl12 := h64_32 & 0x7ff // 11 bits
-			////fmt.Printf("hl12: 0b%b=%d\n", hl12, hl12)
-			//hsign_bit := (h64_32 & 0xfff) >> 11 & 1
-			////fmt.Printf("hl_sign: 0b%b\n", hsign_bit)
-		        //hh20 := (h64_32>> 0x1000) << 12
-			//if hsign_bit == 1 {
-			//    hh20 = (h64_32 >> 0x1000 - 1) << 12
-			//    hl12 = -hl12
-			//}
-		        ////hw32 := hh20 + hl12
-			////fmt.Printf("hh20: 0b%b, 0x%x, -0x%x\n", hh20, hh20, ^hh20+1)
-			////fmt.Printf("hw32: 0b%b, 0x%x, -0x%x\n", hw32, hw32, ^hw32+1)
-			//fmt.Printf("lui x30, %x\n", hh20)
-			//fmt.Printf("addi x30, x30, %x\n", hl12)
-			//fmt.Printf("slli x30, x30, 32\n")
-			//fmt.Printf("add x31, x31, x30\n")
-		    }
-			if 0x7fffffff < imm && imm <= 0x7fffffffffffffff {
-                        h_imm := imm >> 32
-                        load_32(h_imm)
-			fmt.Printf("slli x31, x31, 32\n")
-			fmt.Printf("addi x30, x31, 0\n")
-			l_imm := imm << 32 >> 32
-                        load_32(l_imm)
-			fmt.Printf("add x31, x31, x30\n")
-
-		    }
-			
-
+			//----
+			if -0x8000000000000000 < imm && imm <= -0x100000000 || 0x7fffffff < imm && imm <= 0x7fffffffffffffff {
+				h_imm := imm >> 32
+				load_32(h_imm)
+				fmt.Printf("slli x31, x31, 32\n")
+				fmt.Printf("addi x30, x31, 0\n")
+				l_imm := imm << 32 >> 32
+				load_32(l_imm)
+				fmt.Printf("add x31, x31, x30\n")
+			}
 			//if !opFound || !rdFound {
 			//	fmt.Println("Invalid register on line", lineCounter)
 			//	os.Exit(0)
 			//}
 			//instruction = uint32(imm)<<12 | rd<<7 | op
 
-
-	
 		default:
 			//fmt.Println("Syntax Error on line: ", lineCounter)
 			//os.Exit(0)
@@ -374,7 +294,7 @@ func main() {
 
 	}
 	// first pass
-	for scanner.Scan() { 
+	for scanner.Scan() {
 		line := strings.Split(scanner.Text(), "#")[0] // get any text before the comment "#" and ignore any text after it
 		code = strings.FieldsFunc(line, SplitOn)      // break code into its operation and operands
 		if len(code) == 0 {                           // filter out whitespace
@@ -609,7 +529,7 @@ func main() {
 			fmt.Printf("imm: 0x%X, 0b%b\n", imm, imm)
 			//if imm > 1048575 || imm < 0 {
 			if imm > 0x7ffff || imm < -0x100000 {
-			    fmt.Printf("Lui: Error on line %d: Immediate value %d=0x%X out of range (should be between 0x%X and 0x7ffff )\n", lineCounter, imm, imm, -0x100000)
+				fmt.Printf("Lui: Error on line %d: Immediate value %d=0x%X out of range (should be between 0x%X and 0x7ffff )\n", lineCounter, imm, imm, -0x100000)
 				os.Exit(0)
 			}
 			if !opFound || !rdFound {
@@ -733,7 +653,7 @@ func main() {
 				fmt.Printf("Error on line %d: %s\n", lineCounter, err)
 				os.Exit(0)
 			}
-			if (switchOnOp == "slliw" || switchOnOp == "srliw" || switchOnOp == "sraiw" ) && imm > 31 { 
+			if (switchOnOp == "slliw" || switchOnOp == "srliw" || switchOnOp == "sraiw") && imm > 31 {
 				fmt.Printf("Error on line %d: Immediate value out of range (should be between 0 and 31), get %d\n", lineCounter, imm)
 				os.Exit(0)
 			}
