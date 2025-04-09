@@ -243,8 +243,8 @@ func main() {
 		        load_32 := func(imm int64) int {
 			l12 := imm & 0xfff // 12 bits
 			sign_bit := l12 >> 11 & 1
-			fmt.Printf("l12: 0b%b\n", l12)
-			fmt.Printf("l_sign: 0b%b\n", sign_bit)
+			//fmt.Printf("l12: 0b%b\n", l12)
+			//fmt.Printf("l_sign: 0b%b\n", sign_bit)
 		        h20 := (imm >> 12) 
 			if sign_bit == 1 {
 			    h20  = h20 + 1
@@ -253,8 +253,12 @@ func main() {
 		        //w32 := h20 + l12
 			//fmt.Printf("h20: 0b%b, 0x%x, -0x%x\n", h20, h20, ^h20+1)
 			//fmt.Printf("w32: 0b%b, 0x%x, -0x%x\n", w32, w32, ^w32+1)
+			if h20 != 0 {
 			fmt.Printf("lui %s, %#x\n", code[1], h20)
+		    }
+			if l12 != 0 {
 			fmt.Printf("addi %s, %s, %#x\n", code[1], code[1], l12)
+		    }
 			return 0
 			}
 
@@ -302,7 +306,7 @@ func main() {
                         h_imm := imm >> 32
                         load_32(h_imm)
 			fmt.Printf("slli x31, x31, 32\n")
-			fmt.Printf("add x30, x31, 0\n")
+			fmt.Printf("addi x30, x31, 0\n")
 			l_imm := imm << 32 >> 32
                         load_32(l_imm)
 			fmt.Printf("add x31, x31, x30\n")
@@ -340,7 +344,16 @@ func main() {
 			//fmt.Printf("slli x30, x30, 32\n")
 			//fmt.Printf("add x31, x31, x30\n")
 		    }
+			if 0x7fffffff < imm && imm <= 0x7fffffffffffffff {
+                        h_imm := imm >> 32
+                        load_32(h_imm)
+			fmt.Printf("slli x31, x31, 32\n")
+			fmt.Printf("addi x30, x31, 0\n")
+			l_imm := imm << 32 >> 32
+                        load_32(l_imm)
+			fmt.Printf("add x31, x31, x30\n")
 
+		    }
 			
 
 			//if !opFound || !rdFound {
