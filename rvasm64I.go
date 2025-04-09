@@ -239,13 +239,17 @@ func main() {
 			if   -0x100000000 < imm  && imm <= -0x1000 {
 			fmt.Println(label+": "+"addi "+ code[1]+ ", x0, " + code[2])
 			fmt.Printf("0b%b => 0b%b \n", imm, imm>>0x1000)
-			sign_bit := imm>>0x1000 & 1
-			fmt.Printf("cutted_low_12bits sign_bit: 0b%b\n", sign_bit)
+			l12 := imm & 0xfff
+			fmt.Printf("l12: 0b%b\n", l12)
+			sign_bit := l12 >> 11 & 1
+			fmt.Printf("l_sign: 0b%b\n", sign_bit)
+		        h20 := (imm >> 0x1000) << 12
 			if sign_bit == 1 {
-			    top20 := (imm >> 0x1000 - 1) << 12
-			fmt.Printf("0b%b, 0x%x, -0x%x\n", top20, top20, ^top20+1)
-
+			    h20  = (imm >> 0x1000 - 1) << 12
 			}
+		        w32 := h20 + l12
+			fmt.Printf("h20: 0b%b, 0x%x, -0x%x\n", h20, h20, ^h20+1)
+			fmt.Printf("w32: 0b%b, 0x%x, -0x%x\n", w32, w32, ^w32+1)
 			
 		    }
 
