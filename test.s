@@ -424,8 +424,7 @@
 #addi x31, x31, -2048
 #test2: li x31, 100
 #test: li x31, 0x800000001   
-
-addi x31, x31, 100 
+addi x10, x10, 100 
 #slli x31, x31, 32
 #addi x30, x31, 0
 #addi x31, x31, 0x1
