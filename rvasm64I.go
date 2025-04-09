@@ -193,6 +193,60 @@ func main() {
 	symbolTable := make(map[string]int64, 100)
 	const UNKNOWN = -1
 	//    literalPool := make(map[string]int64, 100)
+        
+	// zero pass 
+	// translate pseudo-instruction to real-instruction
+	for scanner.Scan() {
+	        line := strings.Split(scanner.Text(), "#")[0]
+		code = strings.FieldsFunc(line, SplitOn)
+		if len(code) == 0 {
+		    lineCounter++
+		    continue
+		}
+		switchOnOp := code[0]
+		if strings.HasSuffix(switchOnOp, ":"){
+		    //label := strings.TrimSuffix(code[0], ":")
+		    if len(code) >= 2 {
+			switchOnOp = code[1]
+			code = code[1:]
+		    } else {
+			continue
+		    }}
+		switch switchOnOp{
+		case "li":
+		    if len(code) != 3 && len(code) != 4 {
+			fmt.Println("Incorrect argument count on line: ", lineCounter)
+			os.Exit(0)
+		    }
+			imm, err := isValidImmediate(code[2])
+			//op, opFound := opBin[code[0]]
+			//rd, rdFound := regBin[code[1]]
+			if err != nil {
+				fmt.Printf("Error on line %d: %s\n", lineCounter, err)
+				os.Exit(0)
+			}
+			fmt.Printf("imm: 0x%X=0b%b=%d\n", imm, imm, imm)
+			if imm > 0x7fffffffffffffff || imm < -0x1000000000000000 {
+			    fmt.Printf("Li: Error on line %d: Immediate value %d=0x%X out of range (should be between 0x%X and 0x7ffff )\n", lineCounter, imm, imm, -0x1000000000000000)
+				os.Exit(0)
+			}
+			//if !opFound || !rdFound {
+			//	fmt.Println("Invalid register on line", lineCounter)
+			//	os.Exit(0)
+			//}
+			//instruction = uint32(imm)<<12 | rd<<7 | op
+
+
+	
+		default:
+			fmt.Println("Syntax Error on line: ", lineCounter)
+			os.Exit(0)
+		}
+		lineCounter++
+		address += 4
+		os.Exit(0)
+
+	}
 	// first pass
 	for scanner.Scan() { 
 		line := strings.Split(scanner.Text(), "#")[0] // get any text before the comment "#" and ignore any text after it
@@ -214,7 +268,7 @@ func main() {
 		}
 
 		switch switchOnOp {
-		case "lui", "auipc", "jal", "li": // Instruction format:  op  rd, imm     or      label: op  rd, imm
+		case "lui", "auipc", "jal": // Instruction format:  op  rd, imm     or      label: op  rd, imm
 			if len(code) != 3 && len(code) != 4 {
 				fmt.Println("Incorrect argument count on line: ", lineCounter)
 				os.Exit(0)

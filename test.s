@@ -411,6 +411,7 @@
 #-----
 # limiation: 12 signed imm sext to 64 OR with s1 to rd
 # Test 
+li x31, 100
 
 
 
