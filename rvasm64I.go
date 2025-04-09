@@ -204,8 +204,11 @@ func main() {
 		    continue
 		}
 		switchOnOp := code[0]
+		label := ""
 		if strings.HasSuffix(switchOnOp, ":"){
-		    //label := strings.TrimSuffix(code[0], ":")
+		    label = strings.TrimSuffix(code[0], ":")
+		    fmt.Printf("lable:%s\n", label)
+		    //symbolTable[label] = int64(address)
 		    if len(code) >= 2 {
 			switchOnOp = code[1]
 			code = code[1:]
@@ -225,11 +228,15 @@ func main() {
 				fmt.Printf("Error on line %d: %s\n", lineCounter, err)
 				os.Exit(0)
 			}
-			fmt.Printf("imm: 0x%X=0b%b=%d\n", imm, imm, imm)
+			fmt.Printf("line %d, imm: 0x%X=0b%b=%d\n", lineCounter, imm, imm, imm)
 			if imm > 0x7fffffffffffffff || imm < -0x1000000000000000 {
 			    fmt.Printf("Li: Error on line %d: Immediate value %d=0x%X out of range (should be between 0x%X and 0x7ffff )\n", lineCounter, imm, imm, -0x1000000000000000)
 				os.Exit(0)
 			}
+			if  -0x1000 < imm  && imm < 0x7ff {
+			fmt.Println(label+": "+"addi "+ code[1]+ ", x0, " + code[2])
+		    }
+
 			//if !opFound || !rdFound {
 			//	fmt.Println("Invalid register on line", lineCounter)
 			//	os.Exit(0)
@@ -583,7 +590,7 @@ func main() {
 				fmt.Printf("Error on line %d: %s\n", lineCounter, err)
 				os.Exit(0)
 			}
-			if imm > 2047 || imm < -2048 {
+			if imm > 2047 || imm < -2048 { //0x7ff -0x1000
 				fmt.Printf("Error on line %d: Immediate value out of range (should be between -2048 and 2047) with %d \n", lineCounter, imm)
 				os.Exit(0)
 			}
