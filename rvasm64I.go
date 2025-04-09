@@ -245,9 +245,10 @@ func main() {
 			//fmt.Printf("l12: 0b%b\n", l12)
 			sign_bit := l12 >> 11 & 1
 			//fmt.Printf("l_sign: 0b%b\n", sign_bit)
-		        h20 := (imm >> 0x1000) << 12
+		        h20 := imm >> 12
 			if sign_bit == 1 {
-			    h20  = (imm >> 0x1000 - 1) << 12
+			    h20  = h20 + 1
+			    l12 = -(0x1000 - l12)
 			}
 		        //w32 := h20 + l12
 			//fmt.Printf("h20: 0b%b, 0x%x, -0x%x\n", h20, h20, ^h20+1)
@@ -299,7 +300,7 @@ func main() {
 			fmt.Printf("l_sign: 0b%b\n", sign_bit)
 		        h20 := (imm >> 12) 
 			if sign_bit == 1 {
-			    h20  = imm >> 12 + 1
+			    h20  = h20 + 1
 			    l12 = -(0x1000 - l12)
 			}
 		        //w32 := h20 + l12
