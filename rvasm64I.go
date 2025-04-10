@@ -289,7 +289,7 @@ func main() {
 				h_imm := imm >> 32
 				if h_imm != 0 {
 				load_32(h_imm)
-				ins := fmt.Sprintf("slli x31, x31, 32\naddi x30, x31, 0\naddi x31, x0, 0\n")
+				ins := fmt.Sprintf("slli %s, %s, 32\naddi x30, %s, 0\naddi %s, x0, 0\n", code[1], code[1], code[1], code[1])
 				        real_instr.WriteString(ins)
 				    }
 				l_imm := imm << 32 >> 32
@@ -298,12 +298,12 @@ func main() {
 				    }
 				    //fmt.Println(l_imm, h_imm)
 				    if h_imm !=0 {
-					ins := fmt.Sprintf("add x31, x30, x31\n")
+					ins := fmt.Sprintf("add %s, x30, %s\n", code[1], code[1])
 				        real_instr.WriteString(ins)
 				    }
 				// 取补码还原负数
 				if sign_bit == 1 { 
-					ins := fmt.Sprintf("xori x31, x31, -1\naddi x31, x31, 1\n")
+					ins := fmt.Sprintf("xori %s, %s, -1\naddi %s, %s, 1\n", code[1], code[1], code[1], code[1])
 				        real_instr.WriteString(ins)
 
 				}
