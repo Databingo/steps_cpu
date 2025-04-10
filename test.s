@@ -417,8 +417,8 @@
 #addi x31, x0, -0x1
 #slli x31, x31, 32
 #addi x30, x31, 0
-#test: li x31, 0x7ff
-test: li x31, 0x7fff
+test: li x31, 0x7ff
+#test: li x31, 0x7fff
 #lui x31, 0x8
 #addi x31, x31, -0x1
 #test: li x31, -0x1000

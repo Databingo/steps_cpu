@@ -237,7 +237,7 @@ func main() {
 				fmt.Printf("Error on line %d: %s\n", lineCounter, err)
 				os.Exit(0)
 			}
-			fmt.Printf("line %d, imm: 0x%X=0b%b=%d, 0x%x\n", lineCounter, imm, imm, imm, ^imm+1)
+			fmt.Printf("line %d, imm: 0x%X=0b%b=%d\n", lineCounter, imm, imm, imm)
 			if imm > 0x7fffffffffffffff || imm < -0x1000000000000000 {
 				fmt.Printf("Li: Error on line %d: Immediate value %d=0x%X out of range (should be between 0x%X and 0x7ffff )\n", lineCounter, imm, imm, -0x1000000000000000)
 				os.Exit(0)
