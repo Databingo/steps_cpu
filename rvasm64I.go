@@ -256,9 +256,9 @@ func main() {
 				sign_bit := imm >> 63 & 1
 				l12 := imm & 0xfff // 12 bits
 				l12_sign_bit := l12 >> 11 & 1
-				//fmt.Printf("l12: 0b%b\n", l12)
+				fmt.Printf("l12: 0b%b\n", l12)
 				//fmt.Printf("l_sign: 0b%b\n", sign_bit)
-				h20 := (imm >> 12)
+				h20 := imm >> 12
 				if l12_sign_bit == 1 {
 				        //h20 = h20 + 1
 					//l12 = (0x1000 - l12)
