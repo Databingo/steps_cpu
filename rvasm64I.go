@@ -253,14 +253,19 @@ func main() {
 			//}
 
 			load_32 := func(imm int64) int {
+				//sign_bit := imm >> 63 & 1
 				l12 := imm & 0xfff // 12 bits
-				sign_bit := l12 >> 11 & 1
+				l12_sign_bit := l12 >> 11 & 1
 				//fmt.Printf("l12: 0b%b\n", l12)
 				//fmt.Printf("l_sign: 0b%b\n", sign_bit)
 				h20 := (imm >> 12)
-				if sign_bit == 1 {
-					h20 = h20 + 1
+				if l12_sign_bit == 1 {
+					if imm >0  {h20 = h20 + 1
 					l12 = -(0x1000 - l12)
+				    } else if imm<0{ h20 = h20 - 1
+					l12 = (0x1000 - l12)
+
+				    }
 				}
 				//w32 := h20 + l12
 				//fmt.Printf("h20: 0b%b, 0x%x, -0x%x\n", h20, h20, ^h20+1)
@@ -270,7 +275,7 @@ func main() {
 				        real_instr.WriteString(ins)
 				}
 				if l12 != 0 {
-				    ins := fmt.Sprintf("addi %s, %s, %#x\n", code[1], "x0", l12)
+				    ins := fmt.Sprintf("addi %s, %s, %#x\n", code[1], code[1], l12)
 				        real_instr.WriteString(ins)
 				}
 				return 0
