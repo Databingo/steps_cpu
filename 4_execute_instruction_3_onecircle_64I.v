@@ -316,6 +316,7 @@ begin
           rram[0] <= 64'h0;  // x0 恒为 0 
 	  rram[1] <=0;
 	  rram[2] <=0;
+	  rram[30] <=0;
 	  rram[31] <=0;
 	  //Lui <=0;
 	  //Auipc <=0;  

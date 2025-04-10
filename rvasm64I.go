@@ -297,8 +297,8 @@ func main() {
 				load_32(l_imm)
 				    }
 				    //fmt.Println(l_imm, h_imm)
-				    if l_imm !=0 && h_imm !=0 {
-					ins := fmt.Sprintf("add x31, x31, x30\n")
+				    if h_imm !=0 {
+					ins := fmt.Sprintf("add x31, x30, x31\n")
 				        real_instr.WriteString(ins)
 				    }
 				// 取补码还原负数
