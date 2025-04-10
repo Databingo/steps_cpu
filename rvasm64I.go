@@ -5,7 +5,7 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
-	"io"
+	//"io"
 	"log"
 	"os"
 	"strconv"
@@ -182,8 +182,8 @@ func main() {
 	check(err)
 	defer file.Close()
 
-	scanner := bufio.NewScanner(file) // stores content from file
-	scanner.Split(bufio.ScanLines)
+	scanner0 := bufio.NewScanner(file) // stores content from file
+	scanner0.Split(bufio.ScanLines)
 
 	var code []string
 	var instruction uint32
@@ -194,10 +194,17 @@ func main() {
 	const UNKNOWN = -1
 	//    literalPool := make(map[string]int64, 100)
 
+	//writer := bufio.NewWriter()
+	var real_instr strings.Builder
+
+
+
+
 	// zero pass
 	// translate pseudo-instruction to real-instruction
-	for scanner.Scan() {
-		line := strings.Split(scanner.Text(), "#")[0]
+	for scanner0.Scan() {
+	        origin_instr := scanner0.Text() + "\n"
+		line := strings.Split(scanner0.Text(), "#")[0]
 		code = strings.FieldsFunc(line, SplitOn)
 		if len(code) == 0 {
 			lineCounter++
@@ -236,9 +243,12 @@ func main() {
 			}
 			if label != "" {
 				fmt.Printf("%s: \n", label)
+				real_instr.WriteString(label+":\n")
 			}
 			if -0x1000 < imm && imm <= 0x7ff {
-				fmt.Println("addi " + code[1] + ", x0, " + code[2])
+			    instr := "addi " + code[1] + ", x0, " + code[2] + "\n"
+				fmt.Println(instr)
+				real_instr.WriteString(instr)
 			}
 
 			load_32 := func(imm int64) int {
@@ -285,6 +295,7 @@ func main() {
 			//instruction = uint32(imm)<<12 | rd<<7 | op
 
 		default:
+			real_instr.WriteString(origin_instr)
 			//fmt.Println("Syntax Error on line: ", lineCounter)
 			//os.Exit(0)
 		}
@@ -293,7 +304,15 @@ func main() {
 		//os.Exit(0)
 
 	}
+	
+	fmt.Println("print real_instr")
+	fmt.Println(real_instr.String())
+	fmt.Println("zero pass fininshed.")
+
+	scanner := bufio.NewScanner(strings.NewReader(real_instr.String())) // stores content from file
+	scanner.Split(bufio.ScanLines)
 	// first pass
+	fmt.Println("start first pass.")
 	for scanner.Scan() {
 		line := strings.Split(scanner.Text(), "#")[0] // get any text before the comment "#" and ignore any text after it
 		code = strings.FieldsFunc(line, SplitOn)      // break code into its operation and operands
@@ -448,7 +467,7 @@ func main() {
 			// check if imm has a constant definition
 
 		default:
-			fmt.Println("Syntax Error on line: ", lineCounter)
+			fmt.Println("1 Syntax Error on line: ", lineCounter, switchOnOp)
 			os.Exit(0)
 		}
 		lineCounter++
@@ -460,9 +479,9 @@ func main() {
 		fmt.Println("Key:", key, "Element:", element)
 	}
 	// reset file to start and reinitialize scanner
-	_, err = file.Seek(0, io.SeekStart)
-	scanner = bufio.NewScanner(file)
-	scanner.Split(bufio.ScanLines)
+	//_, err = file.Seek(0, io.SeekStart)
+	//scanner = bufio.NewScanner(file)
+	//scanner.Split(bufio.ScanLines)
 
 	// set up write file for machine code comparison
 	f, err := os.Create("add.o") //("asm-tests/asm-u-bin/beq-mc-u.txt")
@@ -494,6 +513,8 @@ func main() {
 		0x00, 0x00, // index of the section header table entry that contains the section names
 	})
 
+	scanner = bufio.NewScanner(strings.NewReader(real_instr.String())) // stores content from file
+	scanner.Split(bufio.ScanLines)
 	// second pass
 	address = 0
 	lineCounter = 1
@@ -699,7 +720,7 @@ func main() {
 			instruction = opBin[code[0]]
 
 		default:
-			fmt.Println("Syntax Error on line: ", lineCounter)
+			fmt.Println("2 Syntax Error on line: ", lineCounter, switchOnOp)
 			os.Exit(0)
 		}
 		//fmt.Printf("Address: 0x%08x     Line: %d     Instruction:  0x%08x\n", address, lineCounter, instruction)
