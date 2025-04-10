@@ -212,6 +212,7 @@ func main() {
 		}
 		switchOnOp := code[0]
 		label := ""
+		//var label string
 		if strings.HasSuffix(switchOnOp, ":") {
 			label = strings.TrimSuffix(code[0], ":")
 			//fmt.Printf("lable:%s\n", label)
@@ -241,7 +242,7 @@ func main() {
 				fmt.Printf("Li: Error on line %d: Immediate value %d=0x%X out of range (should be between 0x%X and 0x7ffff )\n", lineCounter, imm, imm, -0x1000000000000000)
 				os.Exit(0)
 			}
-			if label != "" {
+			if label != ":" {
 				fmt.Printf("%s: \n", label)
 				real_instr.WriteString(label+":\n")
 			}
@@ -265,10 +266,12 @@ func main() {
 				//fmt.Printf("h20: 0b%b, 0x%x, -0x%x\n", h20, h20, ^h20+1)
 				//fmt.Printf("w32: 0b%b, 0x%x, -0x%x\n", w32, w32, ^w32+1)
 				if h20 != 0 {
-					fmt.Printf("lui %s, %#x\n", code[1], h20)
+				    ins := fmt.Sprintf("lui %s, %#x\n", code[1], h20)
+				        real_instr.WriteString(ins)
 				}
 				if l12 != 0 {
-					fmt.Printf("addi %s, %s, %#x\n", code[1], "x0", l12)
+				    ins := fmt.Sprintf("addi %s, %s, %#x\n", code[1], "x0", l12)
+				        real_instr.WriteString(ins)
 				}
 				return 0
 			}
@@ -282,11 +285,12 @@ func main() {
 			if -0x8000000000000000 < imm && imm <= -0x100000000 || 0x7fffffff < imm && imm <= 0x7fffffffffffffff {
 				h_imm := imm >> 32
 				load_32(h_imm)
-				fmt.Printf("slli x31, x31, 32\n")
-				fmt.Printf("addi x30, x31, 0\n")
+				ins := fmt.Sprintf("slli x31, x31, 32\naddi x30, x31, 0\n")
+				        real_instr.WriteString(ins)
 				l_imm := imm << 32 >> 32
 				load_32(l_imm)
-				fmt.Printf("add x31, x31, x30\n")
+				ins = fmt.Sprintf("add x31, x31, x30\n")
+				        real_instr.WriteString(ins)
 			}
 			//if !opFound || !rdFound {
 			//	fmt.Println("Invalid register on line", lineCounter)
@@ -307,6 +311,7 @@ func main() {
 	
 	fmt.Println("print real_instr")
 	fmt.Println(real_instr.String())
+	fmt.Println("print real_instr finished")
 	fmt.Println("zero pass fininshed.")
 
 	scanner := bufio.NewScanner(strings.NewReader(real_instr.String())) // stores content from file
