@@ -253,7 +253,7 @@ func main() {
 			//}
 
 			load_32 := func(imm int64) int {
-				//sign_bit := imm >> 63 & 1
+				sign_bit := imm >> 63 & 1
 				l12 := imm & 0xfff // 12 bits
 				l12_sign_bit := l12 >> 11 & 1
 				//fmt.Printf("l12: 0b%b\n", l12)
@@ -262,12 +262,10 @@ func main() {
 				if l12_sign_bit == 1 {
 				        //h20 = h20 + 1
 					//l12 = (0x1000 - l12)
-					if imm <0  {h20 = h20 + 1
-					l12 = (0x1000 - l12)
-				    } else if imm>0{ h20 = h20 + 1
-					l12 = -(0x1000 - l12)
-
-				    }
+					if sign_bit ==1{h20 = h20 + 1 
+					   l12 = (0x1000 - l12) } 
+					if sign_bit ==0{h20 = h20 + 1 
+					   l12 = -(0x1000 - l12) }
 				}
 				//w32 := h20 + l12
 				//fmt.Printf("h20: 0b%b, 0x%x, -0x%x\n", h20, h20, ^h20+1)
