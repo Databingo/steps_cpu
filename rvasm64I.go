@@ -260,10 +260,12 @@ func main() {
 				//fmt.Printf("l_sign: 0b%b\n", sign_bit)
 				h20 := (imm >> 12)
 				if l12_sign_bit == 1 {
-					if imm >0  {h20 = h20 + 1
-					l12 = -(0x1000 - l12)
-				    } else if imm<0{ h20 = h20 - 1
+				        //h20 = h20 + 1
+					//l12 = (0x1000 - l12)
+					if imm <0  {h20 = h20 + 1
 					l12 = (0x1000 - l12)
+				    } else if imm>0{ h20 = h20 + 1
+					l12 = -(0x1000 - l12)
 
 				    }
 				}
