@@ -243,7 +243,7 @@ func main() {
 				os.Exit(0)
 			}
 			if label != ":" {
-				fmt.Printf("%s: \n", label)
+				//fmt.Printf("%s: \n", label)
 				real_instr.WriteString(label+":\n")
 			}
 			//if -0x1000 < imm && imm <= 0x7ff {
@@ -256,7 +256,7 @@ func main() {
 				sign_bit := imm >> 63 & 1
 				l12 := imm & 0xfff // 12 bits
 				l12_sign_bit := l12 >> 11 & 1
-				fmt.Printf("l12: 0b%b\n", l12)
+				//fmt.Printf("l12: 0b%b\n", l12)
 				//fmt.Printf("l_sign: 0b%b\n", sign_bit)
 				h20 := imm >> 12
 				if l12_sign_bit == 1 {
@@ -284,7 +284,7 @@ func main() {
 				h_imm := imm >> 32
 				if h_imm != 0 {
 				load_32(h_imm)
-				ins := fmt.Sprintf("slli x31, x31, 32\naddi x30, x31, 0\n")
+				ins := fmt.Sprintf("slli x31, x31, 32\naddi x30, x31, 0\naddi x31, x0, 0\n")
 				        real_instr.WriteString(ins)
 				    }
 				l_imm := imm << 32 >> 32
@@ -334,8 +334,8 @@ func main() {
 	
 	fmt.Println("print real_instr")
 	fmt.Println(real_instr.String())
-	fmt.Println("print real_instr finished")
-	fmt.Println("zero pass fininshed.")
+	//fmt.Println("print real_instr finished")
+	//fmt.Println("zero pass fininshed.")
 
 	scanner := bufio.NewScanner(strings.NewReader(real_instr.String())) // stores content from file
 	scanner.Split(bufio.ScanLines)
@@ -715,10 +715,10 @@ func main() {
 			rs1, rs1Found := regBin[code[2]]
 			if opFound && rdFound && rs1Found {
 				instruction = uint32(imm)<<20 | rs1<<15 | rd<<7 | op
-				fmt.Printf("imm: %06b\n", imm)
-				fmt.Printf("op: %b\n", op)
-				fmt.Printf("%032b\n", instruction)
-				fmt.Printf("000000 %06b %05b 101 %05b 0010011\n", imm, rs1, rd)
+				//fmt.Printf("imm: %06b\n", imm)
+				//fmt.Printf("op: %b\n", op)
+				//fmt.Printf("%032b\n", instruction)
+				//fmt.Printf("000000 %06b %05b 101 %05b 0010011\n", imm, rs1, rd)
 			} else if !rdFound || !rs1Found {
 				fmt.Println("Invalid register on line", lineCounter)
 				os.Exit(0)
@@ -752,7 +752,7 @@ func main() {
 			os.Exit(0)
 		}
 		//fmt.Printf("Address: 0x%08x     Line: %d     Instruction:  0x%08x\n", address, lineCounter, instruction)
-		fmt.Printf("Address: 0x%08x     Line: %d     Instruction:  0x%08x, %032b\n", address, lineCounter, instruction, instruction)
+		//fmt.Printf("Address: 0x%08x     Line: %d     Instruction:  0x%08x, %032b\n", address, lineCounter, instruction, instruction)
 		ins := fmt.Sprintf("%032b", instruction)
 		addr := fmt.Sprintf("%08b", address)
 		addrd := fmt.Sprintf("%03d", address)

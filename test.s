@@ -419,6 +419,8 @@
 #addi x30, x31, 0
 #test: li x31, 0x7ff
 #test: li x31, 0x7fff
+#test2: li x31, 100
+test: li x31, 0x800000001   
 #lui x31, 0x8
 #addi x31, x31, -0x1
 #test: li x31, -0x1000
@@ -429,8 +431,6 @@
 #addi x31, x0, -0x800
 #lui x31, -1
 #addi x31, x31, -2048
-test2: li x31, 100
-#test: li x31, 0x800000001   
 #addi x31, x0, -0x7 
 # addi x31, x31, -100  not work with x31+x31 !!!!
 #slli x31, x31, 32
