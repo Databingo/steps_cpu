@@ -242,7 +242,7 @@ func main() {
 				fmt.Printf("Li: Error on line %d: Immediate value %d=0x%X out of range (should be between 0x%X and 0x7ffff )\n", lineCounter, imm, imm, -0x1000000000000000)
 				os.Exit(0)
 			}
-			if label != ":" {
+			if label != "" {
 				//fmt.Printf("%s: \n", label)
 				real_instr.WriteString(label+":\n")
 			}
@@ -284,7 +284,7 @@ func main() {
 			//-----
 			        // 加载绝对值
 				sign_bit := imm >> 63 & 1
-				if sign_bit == 1 { imm = ^imm + 1 }
+				if sign_bit == 1 { imm = ^imm + 1 }// same imm = -imm 
 				
 				h_imm := imm >> 32
 				if h_imm != 0 {

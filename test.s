@@ -411,6 +411,11 @@
 #-----
 # limiation: 12 signed imm sext to 64 OR with s1 to rd
 # Test 
+li x31, -0x100000000   #-4294967296
+li x30, -0x1
+ori x31, x30, x31
+
+
 
 #test: li x31, -0x100000000   #-4294967296
 #test:
@@ -425,7 +430,7 @@
 #test: li x31, -0x111
 #test: li x31, -0x1000
 #test: li x31, -0x1800
-test: li x31, -0x800000001   
+#test: li x31, -0x800000001   
 #lui x31, 0x8
 #addi x31, x31, -0x1
 #lui x31, -1
