@@ -276,15 +276,15 @@ func main() {
 				return 0
 			}
 			//-----
-				l_imm := imm << 32 >> 32
-				if l_imm != 0 {
-				load_32(l_imm)
-				    }
 				h_imm := imm >> 32
 				if h_imm != 0 {
 				load_32(h_imm)
 				ins := fmt.Sprintf("slli x31, x31, 32\naddi x30, x31, 0\n")
 				        real_instr.WriteString(ins)
+				    }
+				l_imm := imm << 32 >> 32
+				if l_imm != 0 {
+				load_32(l_imm)
 				    }
 				    //fmt.Println(l_imm, h_imm)
 				    if l_imm !=0 && h_imm !=0 {
