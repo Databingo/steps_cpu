@@ -246,11 +246,11 @@ func main() {
 				fmt.Printf("%s: \n", label)
 				real_instr.WriteString(label+":\n")
 			}
-			if -0x1000 < imm && imm <= 0x7ff {
-			    instr := "addi " + code[1] + ", x0, " + code[2] + "\n"
-				fmt.Println(instr)
-				real_instr.WriteString(instr)
-			}
+			//if -0x1000 < imm && imm <= 0x7ff {
+			//    instr := "addi " + code[1] + ", x0, " + code[2] + "\n"
+			//	fmt.Println(instr)
+			//	real_instr.WriteString(instr)
+			//}
 
 			load_32 := func(imm int64) int {
 				l12 := imm & 0xfff // 12 bits
@@ -275,23 +275,41 @@ func main() {
 				}
 				return 0
 			}
-
-			//----
-			if 0x7ff < imm && imm <= 0x7fffffff || -0x100000000 < imm && imm <= -0x1000 {
-				load_32(imm)
-			}
-
-			//----
-			if -0x8000000000000000 < imm && imm <= -0x100000000 || 0x7fffffff < imm && imm <= 0x7fffffffffffffff {
+			//-----
+				l_imm := imm << 32 >> 32
+				if l_imm != 0 {
+				load_32(l_imm)
+				    }
 				h_imm := imm >> 32
+				if h_imm != 0 {
 				load_32(h_imm)
 				ins := fmt.Sprintf("slli x31, x31, 32\naddi x30, x31, 0\n")
 				        real_instr.WriteString(ins)
-				l_imm := imm << 32 >> 32
-				load_32(l_imm)
-				ins = fmt.Sprintf("add x31, x31, x30\n")
+				    }
+				    //fmt.Println(l_imm, h_imm)
+				    if l_imm !=0 && h_imm !=0 {
+					ins := fmt.Sprintf("add x31, x31, x30\n")
 				        real_instr.WriteString(ins)
-			}
+				    }
+				    //continue
+
+
+			//----
+			//if 0x7ff < imm && imm <= 0x7fffffff || -0x100000000 < imm && imm <= -0x1000 {
+			//	load_32(imm)
+			//}
+
+			////----
+			//if -0x8000000000000000 < imm && imm <= -0x100000000 || 0x7fffffff < imm && imm <= 0x7fffffffffffffff {
+			//	h_imm := imm >> 32
+			//	load_32(h_imm)
+			//	ins := fmt.Sprintf("slli x31, x31, 32\naddi x30, x31, 0\n")
+			//	        real_instr.WriteString(ins)
+			//	l_imm := imm << 32 >> 32
+			//	load_32(l_imm)
+			//	ins = fmt.Sprintf("add x31, x31, x30\n")
+			//	        real_instr.WriteString(ins)
+			//}
 			//if !opFound || !rdFound {
 			//	fmt.Println("Invalid register on line", lineCounter)
 			//	os.Exit(0)
