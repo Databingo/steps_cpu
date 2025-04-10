@@ -248,8 +248,9 @@ func main() {
 			}
 			//if -0x1000 < imm && imm <= 0x7ff {
 			//    instr := "addi " + code[1] + ", x0, " + code[2] + "\n"
-			//	fmt.Println(instr)
+			//	//fmt.Println(instr)
 			//	real_instr.WriteString(instr)
+			//	continue
 			//}
 
 			load_32 := func(imm int64) int {
@@ -262,9 +263,9 @@ func main() {
 				if l12_sign_bit == 1 {
 				        //h20 = h20 + 1
 					//l12 = (0x1000 - l12)
-					if sign_bit ==1{h20 = h20 + 1 
+					if sign_bit == 1 {h20 = h20 - 1 
 					   l12 = (0x1000 - l12) } 
-					if sign_bit ==0{h20 = h20 + 1 
+					if sign_bit == 0 {h20 = h20 + 1 
 					   l12 = -(0x1000 - l12) }
 				}
 				//w32 := h20 + l12
@@ -281,6 +282,10 @@ func main() {
 				return 0
 			}
 			//-----
+			        // 加载绝对值
+				sign_bit := imm >> 63 & 1
+				if sign_bit == 1 { imm = ^imm + 1 }
+				
 				h_imm := imm >> 32
 				if h_imm != 0 {
 				load_32(h_imm)
@@ -296,6 +301,12 @@ func main() {
 					ins := fmt.Sprintf("add x31, x31, x30\n")
 				        real_instr.WriteString(ins)
 				    }
+				// 取补码还原负数
+				if sign_bit == 1 { 
+					ins := fmt.Sprintf("xori x31, x31, -1\naddi x31, x31, 1\n")
+				        real_instr.WriteString(ins)
+
+				}
 				    //continue
 
 
