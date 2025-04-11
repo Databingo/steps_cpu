@@ -419,6 +419,7 @@
 #ori x31, x31, 0x7ff
 li x31, 0x7ffffffe   #-4294967296
 ori x31, x31, 0x7ff
+ori x31, x31, -0x1
 
 
 
