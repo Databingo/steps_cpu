@@ -417,9 +417,15 @@
 #ori x31, x31, 0b11011
 #li x31, -0x100000000   #-4294967296
 #ori x31, x31, 0x7ff
-li x31, 0x7ffffffe   #-4294967296
-ori x31, x31, 0x7ff
-ori x31, x31, -0x1
+#li x31, 0x7ffffffe   #-4294967296
+#ori x31, x31, 0x7ff
+#ori x31, x31, -0x1
+
+# XORI
+#-----
+# limiation: 12 signed imm sext to 64 XORI with s1 to rd
+li x31, 0x100000000   #-4294967296
+xori x31, x31, 0b10101
 
 
 
