@@ -1,5 +1,4 @@
 // 分步设计制作CPU 2024.10.04 解释权陈钢Email:databingo@foxmail.com
-//`include "var.v"
 
 // 声明指令控制线
 reg Lui, Auipc, Lb, Lbu, Lh, Lhu, Lw, Lwu, Ld, Sb, Sh, Sw, Sd, Add, Sub, Sll, Slt, Sltu, Xor, Srl, Sra, Or, And, Addi, Slti, Sltiu, Ori, Andi, Xori, Slli, Srli, Srai, Addiw, Slliw, Srliw, Sraiw, Addw, Subw, Sllw, Srlw, Sraw, Jal, Jalr, Beq, Bne, Blt, Bge, Bltu, Bgeu, Fence, Fencei, Ecall, Ebreak, Csrrw, Csrrs, Csrrc, Csrrwi, Csrrsi, Csrrci;
@@ -55,43 +54,6 @@ function [4:0] csr_index;
 endfunction
 
 reg [4:0] csr_id; 
-
-//#------------------
-//# mcause table
-//#------------------
-//# 0x8000000B # MSB: 0 exception, 1 interrupt; 
-//#              LSB: interrupt 11 M-mode 
-//# Exception 0
-//# 0 Instruction Address Misaligned
-//# 1 Instruction Access Fault         
-//# 2 Illegal Instruction          
-//# 3 Breakpoint          
-//# 4 Load Address Misaligned          
-//# 5 Load Access Fault         
-//# 6 Store/AMO(Atomic Memory Operation) Address Misaligned          
-//# 7 Store/AMO(Atomic Memory Operation) Access Fault
-//# 8 Environment Call from U-mode (ECALL)          
-//# 9 Environment Call from S-mode (ECALL)                   
-//# 10 Reserved           
-//# 11 Environment Call from M-mode (ECALL)                   
-//# 12 Instruction Page Fault         
-//# 13 Load Page Fault         
-//# 14 Reserved           
-//# 15 Store/AMO(Atomic Memory Operation) Page Fault
-//
-//# Interrupt 1
-//# 0 User Software Interrupt
-//# 1 Supervisor Software Interrupt          
-//# 2 Reserved          
-//# 3 Machine Software Interrupt                     
-//# 4 User Timer Interrupt          
-//# 5 Supervisor Timer Interrupt                     
-//# 6 Reserved                    
-//# 7 Machine Timer Interrupt                     
-//# 8 User External Interrupt          
-//# 9 Supervisor External Interrupt          
-//# 10 Reserved                              
-//# 11 Machine External Interrupt          
 
 module s4 (reset_n, clock, oir, opc, ojp, oop, of3, of7,
 oimm, oupimm,oshamt, 
@@ -374,7 +336,6 @@ begin
 	  //Csrrwi <=0;
 	  //Csrrsi <=0;
 	  //Csrrci <=0;
-	  //
 	  //opcode <=0;
 	  //func3 <=0;
 	end
@@ -574,7 +535,6 @@ begin
 				  3'b010:begin 
 				           Slt  <= 1'b1; // set Slt Flag 
 				           // if rs1 less than rs2 both as sign-extended then put 1 in rd else 0
-					   
 					   // 电路方式: 一周期实现比较 
 					   // 计算 rs1 - rs2 < 0  转化 Sub -> Add
 					   // 同号相加, 号即大小: 1: rs1 小于 rs2
@@ -585,17 +545,14 @@ begin
                                                      rram[wire_rd] <= 1'b1; 
                                            // 否则 rs1 大于 rs2
 					    else rram[wire_rd] <= 1'b0;
-					  
 					   // 代码模式 
 					   // if (rram[wire_rs1] - rram[wire_rs2] < 0 ) rram[wire_rd] <= 1'b1; 
-
 				           pc <= pc + 4; 
 	    	                           jp <=0;
 				         end 
 				    3'b011:begin 
 				           Sltu <= 1'b1; // set Sltu Flag  
 				           // if rs1 less than rs2 both as unsign then put 1 in rd else 0
-					   
 					   // 电路方式: 一周期实现比较 
 					   // 计算 rs1 - rs2 < 0  转化 Sub -> Add
 					   // 异号相加, 果即大小：1: rs1 小于 rs2
@@ -608,10 +565,8 @@ begin
                                                      rram[wire_rd] <= 1'b0; 
                                            // 否则 rs1 小于 rs2
 					    else rram[wire_rd] <= 1'b1;
-					  
 					   // 代码模式 
 					   // if (rram[wire_rs1] - rram[wire_rs2] < 0 ) rram[wire_rd] <= 1'b1; 
-
 				           pc <= pc + 4; 
 	    	                           jp <=0;
 				         end 
@@ -683,7 +638,6 @@ begin
 				 3'b010:begin
 					  Slti  <= 1'b1; // set Slti  Flag 
 				           // if rs1 is less than imm.12 both as sign-extended then put 1 in rd else 0
-					   
 					   // 电路方式: 一周期实现比较 
 					   // 计算 rs1 - imm < 0  转化 Sub -> Add
 					   // 同号相加, 号即大小: 1: rs1 小于 imm 
@@ -696,14 +650,12 @@ begin
 					    else rram[wire_rd] <= 1'b0;
 					   // 代码模式 
 					   // if (rram[wire_rs1] - imm < 0 ) rram[wire_rd] <= 1'b1; 
-
 				           pc <= pc + 4; 
 	    	                           jp <=0;
 				         end 
 				 3'b011:begin
 					   Sltiu <= 1'b1; // set Sltiu Flag 
 				           // if rs1 less than imm both as unsign then put 1 in rd else 0
-					   
 					   // 电路方式: 一周期实现比较 
 					   // 计算 rs1 - imm < 0  转化 Sub -> Add
 					   // 异号相加, 果即大小：1: rs1 小于 imm 
@@ -716,10 +668,8 @@ begin
                                                      rram[wire_rd] <= 1'b0; 
                                            // 否则 rs1 小于 rs2
 					    else rram[wire_rd] <= 1'b1;
-					  
 					   // 代码模式 
 					   // if ({[0],rram[wire_rs1]} - {[0],imm} < 0 ) rram[wire_rd] <= 1'b1; 
-
 				           pc <= pc + 4; 
 	    	                           jp <=0;
 				         end 
@@ -779,7 +729,6 @@ begin
 			                    //+++++++++++++++++++++++++++++++++
 				  3'b000: begin
 				         Addiw  <= 1'b1; // set Addiw  Flag 
-
 				         //sign-extend imm.12 to 32 add to sr1.low32, sign-extend to 64 to rd 
 				         // 执行加法:
 				         //rram[wire_rd] <= {{32{sum_imm[31]}}, 32'b0} + rram[wire_rs1][31:0] + {{20{wire_imm[11]}}, wire_imm}; 
@@ -798,7 +747,6 @@ begin
 				         pc <= pc + 4; 
 	    	                         jp <=0;
 				         end
-			       //3'b001: Slliw  <= 1'b1; // set Slliw  Flag 
 				 3'b001:begin// func3 001 for left 
 					   Slliw  <= 1'b1; // set Slliw  Flag  
 					   // shift lift  logicl rs1.low32 by imm.12[low5.unsign] padding 0 to rd
@@ -826,7 +774,6 @@ begin
 				          endcase
 				         end 
 				endcase
-	    	   //jp <=1;
 		              end
                    // Math-Logic-Shift-Register-64 class
 	           7'b0111011:begin 
@@ -845,7 +792,6 @@ begin
 				          endcase
 				         end 
 				endcase
-	    	   //jp <=1;
 		              end
                    // Jump
 	           7'b1101111:begin 
@@ -896,14 +842,12 @@ begin
 				             pc <= pc + sign_extended_bimm;
                                          // 否则 rs1 大于或等于 rs2
 					  else pc <= pc + 4;
-					 
 					 // 代码模式 
 	    	                         jp <=0;
 				         end
 				  3'b101:begin 
 					 Bge  <= 1'b1; // set Bge  Flag 
 				         //  take branch if rs1 bigger than or equite to rs2 to PC+(sign-extend imm_0)
-					 //
 					 // 电路方式: 一周期实现比较 
 					 // 计算 rs1 - rs2 > 0  转化 Sub -> Add
 					 // 同号相加, 号即大小: 0: rs1 大于 rs2
@@ -914,7 +858,6 @@ begin
 				             pc <= pc + sign_extended_bimm;
                                          // 否则 rs1 小于 rs2
 					  else pc <= pc + 4;
-					 
 	    	                         jp <=0;
 					 // 代码模式 
 					 end
@@ -953,9 +896,7 @@ begin
                                               pc <= pc + sign_extended_bimm;
                                          // 否则 rs1 小于 rs2
 					  else pc <= pc + 4;
-
 	    	                          jp <=0;
-					 
 					 // 代码模式 
 					 // if (rram[wire_rs1] - rram[wire_rs2] < 0 ) rram[wire_rd] <= 1'b1; 
 				         end 
@@ -1042,6 +983,8 @@ begin
 	    	   endcase
 	    	   //jp <=1;
                    rram[0] <= 64'h0;  // x0 恒为 0
+                   //pc <= pc + 4; 
+                   //jp <=0;
 	       end
 	    //######## // 指令执行 // Close Flage
 	    //1: begin 
@@ -1050,5 +993,3 @@ begin
         end
 end
 endmodule
-
-
