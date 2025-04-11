@@ -445,8 +445,8 @@
 # SLTIU
 #-----
 # limiation: 12 signed imm sext to 64, both unsigned, s1 < imm => 1 rd 
-li x31, 0x1
-sltiu x30, x31, -0x1
+li x30, 0x1
+sltiu x31, x30, -0x1
 
 #test: li x31, -0x100000000   #-4294967296
 #test:
