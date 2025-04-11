@@ -194,7 +194,6 @@ func main() {
 	const UNKNOWN = -1
 	//    literalPool := make(map[string]int64, 100)
 
-	//writer := bufio.NewWriter()
 	var real_instr strings.Builder
 
 
@@ -239,7 +238,7 @@ func main() {
 			}
 			fmt.Printf("line %d, imm: 0x%X=0b%b=%d\n", lineCounter, imm, imm, imm)
 			if imm > 0x7fffffffffffffff || imm < -0x1000000000000000 {
-				fmt.Printf("Li: Error on line %d: Immediate value %d=0x%X out of range (should be between 0x%X and 0x7ffff )\n", lineCounter, imm, imm, -0x1000000000000000)
+				fmt.Printf("li: Error on line %d: Immediate value %d=0x%X out of range (should be between 0x%X and 0x7ffff )\n", lineCounter, imm, imm, -0x1000000000000000)
 				os.Exit(0)
 			}
 			if label != "" {
@@ -260,10 +259,10 @@ func main() {
 					if sign_bit == 0 {h20 = h20 + 1 
 					   l12 = -(0x1000 - l12) }
 				}
-				if h20 != 0 {
+				//if h20 != 0 { // lui for clean destiny reg
 				    ins := fmt.Sprintf("lui %s, %#x\n", code[1], h20)
 				        real_instr.WriteString(ins)
-				}
+				//}
 				if l12 != 0 {
 				    ins := fmt.Sprintf("addi %s, %s, %#x\n", code[1], code[1], l12)
 				        real_instr.WriteString(ins)
