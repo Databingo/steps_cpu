@@ -314,12 +314,7 @@ begin
 	  //ir <=0;
 	  //imm <=0;
           rram[0] <= 64'h0;  // x0 恒为 0 
-	  rram[1] <=0;
-	  rram[2] <=0;
-	  rram[3] <=0;
-
-	  rram[30] <=0;
-	  rram[31] <=0;
+	  rram[1] <=0; rram[2] <=0; rram[3] <=0; rram[30] <=0; rram[31] <=0;
 	  //Lui <=0;
 	  //Auipc <=0;  
 	  //Lb <=0;
@@ -974,103 +969,6 @@ begin
 				endcase
 	    	   //jp <=1;
 		              end
-                   // Enverioment class
-		   //
-		   // M mode (must) 
-		   // 1.sync error 同步异常（内部异常）: inner instructions, 5-type: access, break, ecall, opcode, address 
-		   // 2.async interrupt 异步中断（外部中断）: outer event, that is not instructions, such as software, timer, keyboard/mouse
-		   //
-		   // 8 CSRs for M mode necessary
-		   // mepc: refer to the error instruction(machine exception program counter)
-		   // mtvec: keep the address of the interrupt-handler address or re-continue address in async interrupt
-		   // mcause: cause, type of interrupt
-		   // mtval: trap value, address of the error address, instruction of the error instruction, or 0
-		   // mie: machine interrupt enable that indicate can deal and have to ignore, all interrupt have a position here
-		   // mip: machine interrupt pending same position as mie
-		   // mscratch: one word data
-		   // mstatus: keep global interrupt enable and other status
-		   // timer interrupt must mstatus[3].MIE(global interrupt enable) = 1, mie[7](M timer interrupt enable) = 1, mip[7](dealing interrupt) = 1
-		   //
-		   // Deal steps:
-		   // mepc <= pc
-		   // pc <= mtvec (mtvec refer to error instruction as Error, refer to re-continue instruction as Interrupe)
-		   // mcasue <= casue
-		   // mtval <= value
-		   // mstatus.MIE <= 0 (disable other Interrupt)
-		   // MPIE <= MIE keep pre mie to mpie
-		   // mstatus.MPP <= 11 (change privilage to M[User 00, Supervisor 01, Machine 11])
-		   //
-		   // Return step:
-		   // mret
-		   // pc <= mepc
-		   // mstatus.MIE <= mstatus.MPIE
-		   // mstatus.MPP <= mstatus.MPP pre
-		   // 
-		   // for upgraded(or embeded) interrupe, keep mepc mcause mtval mstatus to stack of ram and recover them to csr before return
-		   //
-		   // wfi：wait for interrupt
-		   //
-		   // Register
-		   // ----------------------------
-		   // x0     0    
-		   // x1     ra    return address
-		   // x2     sp    stack pointer
-		   // x3     gp    global pointer
-		   // x4     tp    thread pointer
-		   // x5-7   t0-2  temporary registers
-		   // x8     s0/fp saved registers/frame pointer
-		   // x9     s1
-		   // x10-11 a0-1  function arguments/return values
-		   // x12-17 a2-7
-		   // x18-27 s2-11 saved registers
-		   // x28-31 t3-6  temporary registers
-		   // ----------------------------
-		   // CS Register[12:0]    
-		   // [11:10] read/write 00、01、01rw/11read only 
-		   // [9:8] privilege 00user 01supervisor 10hypervisor 11machine
-		   // ----------------------------
-		   // Machine Information Registers
-		   // 0xF11 MRO mvendorid Vendor ID
-		   // 0xF12 MRO marchid Architecture ID
-		   // 0xF13 MRO mimpid Implementation ID
-		   // 0xF14 MRO mhartid Hardware thread ID
-		   // 0xF15 MRO mconfigptr Pointer to configuration data structure
-		   // Machine Trap Setup
-		   // 0x300 MRW mstatus Machine status register
-		   // 0x301 MRW misa ISA and extensions
-		   // 0x302 MRW medeleg Machine exception delegation register
-		   // 0x303 MRW mideleg Machine interrupt delegation register
-		   // 0x304 MRW mie Machine interrupt-enable register
-		   // 0x305 MRW mtvec Machine trap-handler base address
-		   // 0x306 MRW mcounteren Machine counter enable
-		   // 0x307 MRW mtvt Machine Trap-Handler vector table base address
-		   // 0x310 MRW mstatush Additional machine status register, RV32 only
-		   // Machine Trap Handling
-		   // 0x340 MRW mscratch Scratch register for machine trap handlers
-		   // 0x341 MRW mepc Machine exception program counter
-		   // 0x342 MRW mcasue Machine trap casue
-		   // 0x343 MRW mtval Machine bad address or instruction
-		   // 0x344 MRW mip Machine interrupt pending
-		   // 0x34A MRW mtinst Machine trap instruction (transformed)
-		   // 0x34B MRW mtval2 Machine bad guset physical address
-		   // Machine Configuration
-		   // 0x30A MRW menvcfg Machine environment configuration register
-		   // 0x31A MRW menvcfgh Additional machine env. conf. register, RV32 only
-		   // 0x747 MRW mseccfg Machine security configuration register
-		   // 0x757 MRW mseccfgh Additional machine security conf. register, RV32 only
-		   // Machine Memory Protection
-		   // 0x3A0 MRW pmpcfg0  Physical memory protection configuration.
-		   // 0x3A1 MRW pmpcfg1  Physical memory protection configuration, RV32 only.
-		   // 0x3A2 MRW pmpcfg2  Physical memory protection configuration.
-		   // 0x3A3 MRW pmpcfg3  Physical memory protection configuration.
-		   // ...
-		   // 0x3AE MRW pmpcfg14  
-		   // 0x3AF MRW pmpcfg15  
-		   // 0x3B0 MRW pmpaddr0 Physical memory protection address register.
-		   // 0x3B1 MRW pmpaddr0
-		   // ...
-		   // 0x3EF MRW pmpaddr0
-		   //mpie 
 		   // ----------------------------
 	           7'b1110011:begin
 		                csr_id =  csr_index(wire_csr);
