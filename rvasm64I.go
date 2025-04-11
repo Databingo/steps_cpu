@@ -653,8 +653,9 @@ func main() {
 				fmt.Printf("Error on line %d: %s\n", lineCounter, err)
 				os.Exit(0)
 			}
+			//if imm > 0xfff || imm < -2048 { //0x7ff -0x1000  0xfff for sltiu
 			if imm > 2047 || imm < -2048 { //0x7ff -0x1000
-				fmt.Printf("Error on line %d: Immediate value out of range (should be between -2048=-0x1000 and 2047=0x7ff) with %d \n", lineCounter, imm)
+				fmt.Printf("Error on line %d: Immediate value out of range (should be between -2048=-0x1000 and 4094=0xfff) with %d \n", lineCounter, imm)
 				os.Exit(0)
 			}
 			op, opFound := opBin[code[0]]

@@ -433,14 +433,20 @@
 #-----
 # limiation: 12 signed imm sext to 64, both signed, s1 < imm => 1 rd 
 #li x31, 0x100000000   
-li x31, -0x100
-slti x31, x31, -0xff
-li x31, 2046
-slti x31, x31, 2047 
-li x31, -2047
-slti x31, x31, -2048 
-slti x31, x0, 2047 
+#li x31, -0x100
+#slti x31, x31, -0xff
+#li x31, 2046
+#slti x31, x31, 2047 
+#li x31, -2047
+#slti x31, x31, -2048 
+#slti x31, x0, 2047 
+#addi x31, x31, 0xfff
 
+# SLTIU
+#-----
+# limiation: 12 signed imm sext to 64, both unsigned, s1 < imm => 1 rd 
+li x31, 0x1
+#sltiu x31, x31, -0x1
 
 #test: li x31, -0x100000000   #-4294967296
 #test:
