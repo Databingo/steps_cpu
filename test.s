@@ -411,10 +411,14 @@
 #-----
 # limiation: 12 signed imm sext to 64 OR with s1 to rd
 # Test 
-li x31, -0x100000000   #-4294967296
-ori x31, x31, 2
-li x31, 0x7
-ori x31, x31, 0b11011
+#li x31, -0x100000000   #-4294967296
+#ori x31, x31, 2
+#li x31, 0x7
+#ori x31, x31, 0b11011
+#li x31, -0x100000000   #-4294967296
+#ori x31, x31, 0x7ff
+li x31, 0x7ffffffe   #-4294967296
+ori x31, x31, 0x7ff
 
 
 
