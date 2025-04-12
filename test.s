@@ -492,10 +492,13 @@
 
 # LW
 # limiation: 32 bits sext 
+#li x30, -0x1
+#lw x31, 5(x30)
+
+# LWU
+# limiation: 
 li x30, -0x1
-lw x31, 5(x30)
-
-
+lwu x31, 5(x30)
 
  
 #test: li x31, -0x100000000   #-4294967296

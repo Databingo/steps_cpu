@@ -136,10 +136,11 @@ func main() {
 		"bgeu": 0b00000000000000000111000001100011,
 
 		"lb":  0b00000000000000000000000000000011,
-		"lh":  0b00000000000000000001000000000011,
-		"lw":  0b00000000000000000010000000000011,
 		"lbu": 0b00000000000000000100000000000011,
+		"lh":  0b00000000000000000001000000000011,
 		"lhu": 0b00000000000000000101000000000011,
+		"lw":  0b00000000000000000010000000000011,
+		"lwu": 0b00000000000000000110000000000011,
 
 		"sb": 0b00000000000000000000000000100011,
 		"sh": 0b00000000000000000001000000100011,
@@ -389,7 +390,7 @@ func main() {
 				}
 			}
 
-		case "lb", "lh", "lw", "lbu", "lhu": // Instruction format: op rd, imm(rs1)     or      label: op rd, imm(rs1)
+		case "lb", "lh", "lw", "lwu", "lbu", "lhu": // Instruction format: op rd, imm(rs1)     or      label: op rd, imm(rs1)
 			if len(code) != 4 && len(code) != 5 {
 				fmt.Println("Incorrect argument count on line: ", lineCounter)
 				os.Exit(0)
@@ -611,7 +612,7 @@ func main() {
 				os.Exit(0)
 			}
 
-		case "lb", "lh", "lw", "lbu", "lhu": // op rd, imm(rs1)
+		case "lb", "lh", "lw", "lwu", "lbu", "lhu": // op rd, imm(rs1)
 			if len(code) != 4 {
 				fmt.Println("Incorrect argument count on line: ", lineCounter)
 			}
