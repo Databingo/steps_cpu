@@ -482,9 +482,13 @@
 
 # LH
 # limiation: 8 bits sext 
-li x30, -0x1
-lh x31, 5(x30)
+#li x30, -0x1
+#lh x31, 5(x30)
 
+# LHU
+# limiation: 8 bits sext 
+li x30, -0x1
+lhu x31, 5(x30)
 
 
 
