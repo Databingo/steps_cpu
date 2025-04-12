@@ -459,7 +459,13 @@
 # LB
 # limiation: 8 bits sext 
 li x30, -0x1
-lb x31, 5(x30)
+lb x4, 5(x30)
+lb x1, 1(x0)
+lb x2, 2(x0)
+lb x3, 3(x0)
+add x31, x2, x1
+add x31, x31,x3
+add x31, x31,x4
 
 
  
