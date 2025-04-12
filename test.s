@@ -458,15 +458,27 @@
 
 # LB
 # limiation: 8 bits sext 
-li x30, -0x1
-lb x4, 5(x30)
-lb x1, 1(x0)
-lb x2, 2(x0)
-lb x3, 3(x0)
+#li x30, -0x1
+#lb x4, 5(x30)
+#lb x1, 1(x0)
+#lb x2, 2(x0)
+#lb x3, 3(x0)
+#add x31, x2, x1
+#add x31, x31,x3
+#add x31, x31,x4
+
+# LBU
+# limiation: 8 bits sext 
+#li x30, -0x1
+#lbu x31, 5(x30)
+#lbu x4, 5(x30)
+lbu x1, 1(x0)
+lbu x2, 2(x0)
+lbu x3, 3(x0)
+lbu x4, 4(x0)
 add x31, x2, x1
 add x31, x31,x3
 add x31, x31,x4
-
 
  
 #test: li x31, -0x100000000   #-4294967296
