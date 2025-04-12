@@ -480,6 +480,15 @@
 #add x31, x31,x3
 #add x31, x31,x4
 
+# LH
+# limiation: 8 bits sext 
+li x30, -0x1
+lh x31, 5(x30)
+
+
+
+
+
  
 #test: li x31, -0x100000000   #-4294967296
 #test:
