@@ -447,6 +447,14 @@
 # limiation: 12 signed imm sext to 64, both unsigned, s1 < imm => 1 rd 
 #li x30, 0x3
 #sltiu x31, x30, 0x4
+
+# AUIPC
+# limiation: 12 signed imm sext to 64
+auipc x31, 0x3  
+auipc x31, 0x3  
+
+
+
  
 #test: li x31, -0x100000000   #-4294967296
 #test:
