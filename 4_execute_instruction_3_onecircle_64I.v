@@ -357,8 +357,9 @@ begin
 		              end
 		   7'b0010111:begin
 		                Auipc <= 1'b1; // set Auipc Flag
-				//left shift the 20 bits immediate 12 bits add pc then put to rd
-				rram[wire_rd] <= pc + (wire_upimm << 12); 
+				//left shift 20 bits immediate 12bits sext to 64 add pc then put to rd
+				//rram[wire_rd] <= pc + (wire_upimm << 12); 
+				rram[wire_rd] <= pc + {{32{wire_upimm[19]}}, wire_upimm, 12'b0};
 				pc <= pc + 4; 
 	    	                jp <=0;
 		   end
