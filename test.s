@@ -458,7 +458,7 @@
 
 # LB
 # limiation: 8 bits sext 
-li x31, -0x7ffffffff 
+li x31, -0x78fff3fff 
 #lui x30, 0x0
 #addiw x30, x30, 0x1
 #xori x30, x30, -1

@@ -278,32 +278,26 @@ func main() {
 				return 0
 			}
 			//-----
-			        // 加载绝对值
+			        // 获取绝对值
 				sign_bit := imm >> 63 & 1
 				if sign_bit == 1 { imm = ^imm + 1 }// same imm = -imm 
-			        
 
-				// 低 32 位到 rd
+				// 低 32 位到 rd ( even 0 must act once)
 				l_imm := imm << 32 >> 32
-				//if l_imm != 0 {
-				load_32(code[1], l_imm) //}
+				load_32(code[1], l_imm)
 
-				// 高 32 位到 x(32-rd)
+				// 高 32 位到 x_tmp(32-rd)
 				h_imm := imm >> 32
 				if h_imm != 0 {
 				x_number, _ := strconv.Atoi(code[1][1:])
 				x_tmp := "x"+ strconv.Itoa(32 - x_number)
 				load_32(x_tmp, h_imm)
-				//ins := fmt.Sprintf("slli %s, %s, 32\naddi x%d, %s, 0\naddi %s, x0, 0\n", code[1], code[1], x_tmp, code[1], code[1])
 				ins := fmt.Sprintf("slli %s, %s, 32\n", x_tmp, x_tmp)
 				real_instr.WriteString(ins)
-				    //}
 
-
-				    //fmt.Println(l_imm, h_imm)
-				    //if h_imm !=0 {
-					ins = fmt.Sprintf("add %s, %s, %s\n", code[1], code[1], x_tmp)
-				        real_instr.WriteString(ins)
+				// concat with low_32
+				ins = fmt.Sprintf("add %s, %s, %s\n", code[1], code[1], x_tmp)
+			        real_instr.WriteString(ins)
 				    }
 				// 取补码还原负数
 				if sign_bit == 1 { 
