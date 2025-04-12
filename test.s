@@ -468,7 +468,7 @@
 #add x31, x31,x4
 
 # LBU
-# limiation: 8 bits sext 
+# limiation: 
 #li x30, -0x1
 #lbu x31, 5(x30)
 #lbu x4, 5(x30)
@@ -481,15 +481,19 @@
 #add x31, x31,x4
 
 # LH
-# limiation: 8 bits sext 
+# limiation: 16 bits sext 
 #li x30, -0x1
 #lh x31, 5(x30)
 
 # LHU
-# limiation: 8 bits sext 
-li x30, -0x1
-lhu x31, 5(x30)
+# limiation: 
+#li x30, -0x1
+#lhu x31, 5(x30)
 
+# LW
+# limiation: 32 bits sext 
+li x30, -0x1
+lw x31, 5(x30)
 
 
 
