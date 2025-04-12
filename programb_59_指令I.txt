@@ -1,7 +1,7 @@
 //// rv32i + rv64i extension = 47 + 15 - 3 重复(SLLI SRLI SRAI) = 62 - 3 = 59 条指令
 //// -------------re-order-by-operation_code-----------
 //// load 加载(内存到寄存器) 7
-//00000000 00000000 00000000 00000011 //___000000000000_00000_000_00000_0000011 // LB   |imm.12|rs1.5|000.3|rd.5|0000011.7|    load 8 bite sign extend to 64 bits at imm(s1) to rd       
+//00000000 00000000 00000000 00000011 //___000000000000_00000_000_00000_0000011 //-LB   |imm.12|rs1.5|000.3|rd.5|0000011.7|    load 8 bite sign extend to 64 bits at imm(s1) to rd       
 //00000000 00000000 01000000 00000011 //___000000000000_00000_100_00000_0000011 // LBU  |imm.12|rs1.5|100.3|rd.5|0000011.7|    load 8 bite unsign to 64 bits at imm(s1) to rd         
 //00000000 00000000 00010000 00000011 //___000000000000_00000_001_00000_0000011 // LH   |imm.12|rs1.5|001.3|rd.5|0000011.7|    load half-word 16     
 //00000000 00000000 01010000 00000011 //___000000000000_00000_101_00000_0000011 // LHU  |imm.12|rs1.5|101.3|rd.5|0000011.7|    load half-word 16 unsigned 
@@ -15,7 +15,7 @@
 //00000000 00000000 00110000 00100011 //___000000000000_00000_011_00000_0100011 // SD   |imm.7|rs2.5|rs1.5|011.3|imm.5|0100011.7| 64 store double-word, 64 
 //// Upper 上立即数 2
 //00000000 00000000 00000000 00110111 //_____00000000000000000000_00000_0110111 //*LUI  |imm.20|rd.5|0110111.7| put 20 bits immediate to upper 20 bits of rd[31:12] sext to 64 and left lower 12 bits 0
-//00000000 00000000 00000000 00010111 //_____00000000000000000000_00000_0010111 //-AUIPC|imm.20|rd.5|0010111.7| left shift the 20 bits immediate 12 bits then add pc value then put to rd
+//00000000 00000000 00000000 00010111 //_____00000000000000000000_00000_0010111 //*AUIPC|imm.20|rd.5|0010111.7| left shift the 20 bits immediate 12 bits then add pc value then put to rd
 //// 算数逻辑位移 立即数类型 Math-Logic-I 9  (LUI need plus 1 when ADDI nege imm)
 //00000000 00000000 00000000 00010011 //___000000000000_00000_000_00000_0010011 //*ADDI |imm.12|rs1.5|000.3|rd.5|0010011.7| sign-extend imm.12 to 64 add sr1.64 overflow ingnored to rd|op rd,rs1,imm 
 //00000000 00000000 00000000 00011011 //___000000000000_00000_000_00000_0011011 //*ADDIW|imm.12|rs1.5|000.3|rd.5|0011011.7| sign-extend imm.12 to 32 add to sr1.low32 then sign-extend sum.32 to rd.64

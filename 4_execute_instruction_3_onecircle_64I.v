@@ -736,7 +736,8 @@ begin
 				         //rram[wire_rd] <= {{32{sum_imm[31]}}, 32'b0} + rram[wire_rs1][31:0] + {{20{wire_imm[11]}}, wire_imm}; 
 				         //rram[wire_rd] <= rram[wire_rs1] + {{52{wire_imm[11]}}, wire_imm}; 
 				         //rram[wire_rd] <=   {{32{sum_imm[31]}}, sum_imm[31:0]}; 
-				         rram[wire_rd] <=   {{32{sum_imm[31]}} , rram[wire_rs1][31:0] + {{20{wire_imm[11]}}, wire_imm}}; 
+				         //rram[wire_rd] <=   {{32{sum_imm[31]}} , rram[wire_rs1][31:0] + {{20{wire_imm[11]}}, wire_imm}}; 
+				         rram[wire_rd] <=   {32'b0 , rram[wire_rs1][31:0] + {{20{wire_imm[11]}}, wire_imm}}; 
 
 				         // 溢出判断：
 				         //if ((rram[wire_rs1][63] ~^ wire_imm[11]) && (rram[wire_rs1][63] ^ sum_imm[63])) 

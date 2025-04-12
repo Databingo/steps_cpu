@@ -246,47 +246,63 @@ func main() {
 				real_instr.WriteString(label+":\n")
 			}
 
-			load_32 := func(imm int64) int {
-				sign_bit := imm >> 63 & 1
+			load_32 := func(reg string, imm int64) int {
+				//sign_bit := imm >> 63 & 1
+				sign_bit := imm >> 31 & 1
+				if sign_bit == 1 { imm = ^imm + 1 }// same imm = -imm 
+
 				l12 := imm & 0xfff // 12 bits
 				l12_sign_bit := l12 >> 11 & 1
 				//fmt.Printf("l12: 0b%b\n", l12)
 				//fmt.Printf("l_sign: 0b%b\n", sign_bit)
 				h20 := imm >> 12
 				if l12_sign_bit == 1 {
-					if sign_bit == 1 {h20 = h20 - 1 
-					   l12 = (0x1000 - l12) } 
+					//if sign_bit == 1 {h20 = h20 - 1 
+					//   l12 = (0x1000 - l12) } 
 					if sign_bit == 0 {h20 = h20 + 1 
 					   l12 = -(0x1000 - l12) }
 				}
 				//if h20 != 0 { // lui for clean destiny reg
-				    ins := fmt.Sprintf("lui %s, %#x\n", code[1], h20)
+				    ins := fmt.Sprintf("lui %s, %#x\n", reg, h20)
 				        real_instr.WriteString(ins)
 				//}
-				if l12 != 0 { // addiw for cut sign-extend if lui 0x800 upper
-				    ins := fmt.Sprintf("addiw %s, %s, %#x\n", code[1], code[1], l12)
+				//if l12 != 0 { // addiw for cut sign-extend if lui 0x800 upper
+				    ins = fmt.Sprintf("addiw %s, %s, %#x\n", reg, reg, l12)
 				        real_instr.WriteString(ins)
-				}
+			//	}
+				if sign_bit == 1 { 
+					ins = fmt.Sprintf("xori %s, %s, -1\naddiw %s, %s, 1\n", reg, reg, reg, reg)
+				        real_instr.WriteString(ins)
+
+			    }
 				return 0
 			}
 			//-----
 			        // 加载绝对值
 				sign_bit := imm >> 63 & 1
 				if sign_bit == 1 { imm = ^imm + 1 }// same imm = -imm 
-				
+			        
+
+				// 低 32 位到 rd
+				l_imm := imm << 32 >> 32
+				//if l_imm != 0 {
+				load_32(code[1], l_imm) //}
+
+				// 高 32 位到 x(32-rd)
 				h_imm := imm >> 32
 				if h_imm != 0 {
-				load_32(h_imm)
-				ins := fmt.Sprintf("slli %s, %s, 32\naddi x30, %s, 0\naddi %s, x0, 0\n", code[1], code[1], code[1], code[1])
-				        real_instr.WriteString(ins)
-				    }
-				l_imm := imm << 32 >> 32
-				if l_imm != 0 {
-				load_32(l_imm)
-				    }
+				x_number, _ := strconv.Atoi(code[1][1:])
+				x_tmp := "x"+ strconv.Itoa(32 - x_number)
+				load_32(x_tmp, h_imm)
+				//ins := fmt.Sprintf("slli %s, %s, 32\naddi x%d, %s, 0\naddi %s, x0, 0\n", code[1], code[1], x_tmp, code[1], code[1])
+				ins := fmt.Sprintf("slli %s, %s, 32\n", x_tmp, x_tmp)
+				real_instr.WriteString(ins)
+				    //}
+
+
 				    //fmt.Println(l_imm, h_imm)
-				    if h_imm !=0 {
-					ins := fmt.Sprintf("add %s, x30, %s\n", code[1], code[1])
+				    //if h_imm !=0 {
+					ins = fmt.Sprintf("add %s, %s, %s\n", code[1], code[1], x_tmp)
 				        real_instr.WriteString(ins)
 				    }
 				// 取补码还原负数
