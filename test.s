@@ -497,9 +497,13 @@
 
 # LWU
 # limiation: 
-li x30, -0x1
-lwu x31, 5(x30)
+#li x30, -0x1
+#lwu x31, 5(x30)
 
+# LD
+# limiation: 
+li x30, -0x1
+ld x31, 6(x30)
  
 #test: li x31, -0x100000000   #-4294967296
 #test:
