@@ -451,8 +451,8 @@
 # AUIPC
 # limiation: 12 signed imm sext to 64
 #auipc x31, 0x3  
-#auipc x31, 0x3  
 auipc x31, -0x1  
+auipc x31, 0x3  
 
 
 
