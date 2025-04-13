@@ -146,6 +146,7 @@ func main() {
 		"sb": 0b00000000000000000000000000100011,
 		"sh": 0b00000000000000000001000000100011,
 		"sw": 0b00000000000000000010000000100011,
+		"sd": 0b00000000000000000011000000100011,
 
 		"addi":  0b00000000000000000000000000010011,
 		"addiw": 0b00000000000000000000000000011011,
@@ -408,7 +409,7 @@ func main() {
 				}
 			}
 
-		case "sb", "sh", "sw": // Instruction format: op rs2, imm(rs1)      or      label: op rs2, imm(rs1)
+		case "sb", "sh", "sw", "sd": // Instruction format: op rs2, imm(rs1)      or      label: op rs2, imm(rs1)
 			if len(code) != 4 && len(code) != 5 {
 				fmt.Println("Incorrect argument count on line: ", lineCounter)
 				os.Exit(0)
@@ -637,7 +638,7 @@ func main() {
 				}
 			}
 
-		case "sb", "sh", "sw": // op rs2, imm(rs1)
+		case "sb", "sh", "sw", "sd": // op rs2, imm(rs1)
 			if len(code) != 4 {
 				fmt.Println("Incorrect argument count on line: ", lineCounter)
 			}

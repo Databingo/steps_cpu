@@ -520,9 +520,20 @@
 
 # SW
 # limiation: 
-li x30,-0x77777777
-sw x30, 6(x0)
-lw x31, 6(x0)
+#li x30, 0x77777787
+#sw x30, 6(x0)
+#lb x31, 6(x0)
+
+# SD
+# limiation: 
+li x30, 0x7fffffff77777787
+sd x30, 6(x0)
+ld x31, 6(x0)
+
+
+
+
+
 
 #test: li x31, -0x100000000   #-4294967296
 #test:
