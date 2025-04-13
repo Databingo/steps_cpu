@@ -46,8 +46,8 @@
 //00000000 00000000 01010000 00110011 //__0000000_00000_00000_101_00000_0110011 // SRL  |xxx.7|rs2.5|rs1.5|101.3|rd.5|0110011.7| shift right logicl rs1 by amount in rs2[low5.unsign] padding 0 put into rd
 //01000000 00000000 01010000 00110011 //__0100000_00000_00000_101_00000_0110011 // SRA  |xxx.7|rs2.5|rs1.5|101.3|rd.5|0110011.7| shift right arithmetical logicl rs1 rs2[low5.unsign] padding 1 put into rd
 //// 算数逻辑位移 寄存器类型 64 位 Math-Logic-R-64 5
-//00000000 00000000 00000000 00111011 //__0000000_00000_00000_000_00000_0111011 // ADDW   |xxx.7|rs2.5|rs1.5|000.3|rd.5|0111011.7| 64 add rs1 32 and rs2 32 as overflow-ingnored 64 low 32 to rd 
-//01000000 00000000 00000000 00111011 //__0100000_00000_00000_000_00000_0111011 // SUBW   |xxx.7|rs2.5|rs1.5|000.3|rd.5|0111011.7| 64 sub rs2 32 from rs1 32 as overflow-ingnored 64 low 32 to rd
+//00000000 00000000 00000000 00111011 //__0000000_00000_00000_000_00000_0111011 //*ADDW   |xxx.7|rs2.5|rs1.5|000.3|rd.5|0111011.7| 64 add rs1 32 and rs2 32 as overflow-ingnored low 32 sext 64 to rd 
+//01000000 00000000 00000000 00111011 //__0100000_00000_00000_000_00000_0111011 //-SUBW   |xxx.7|rs2.5|rs1.5|000.3|rd.5|0111011.7| 64 sub rs2 32 from rs1 32 as overflow-ingnored low 32 sext 64 to rd
 //00000000 00000000 00010000 00111011 //__0000000_00000_00000_001_00000_0111011 // SLLW   |xxx.7|rs2.5|rs1.5|001.3|rd.5|0111011.7| 64 shift lift  logicl rs1 low 32 by rs2[l5unsign] padding 0 to rd 32
 //00000000 00000000 01010000 00111011 //__0000000_00000_00000_101_00000_0111011 // SRLW   |xxx.7|rs2.5|rs1.5|101.3|rd.5|0111011.7| 64 shift right logicl rs1 low 32 by rs2[l5unsign] padding 0 to rd 32 
 //01000000 00000000 01010000 00111011 //__0100000_00000_00000_101_00000_0111011 // SRAW   |xxx.7|rs2.5|rs1.5|101.3|rd.5|0111011.7| 64 shift right arithm logicl rs1 32 by rs2[L5unsign] padding 1 to rd 
