@@ -616,7 +616,7 @@ begin
 					    7'b0100000:begin 
 					               Sra  <= 1'b1; // set Sra Flag  
 					               // shift right arithmatical rs1 by imm.12[low5.unsign] padding 0 to rd
-					               rram[wire_rd] <= ($signed(rram[wire_rs1]) >>> wire_shamt ); 
+					               rram[wire_rd] <= ($signed(rram[wire_rs1]) >>> rram[wire_rs2]); 
 				                       pc <= pc + 4; 
 	    	                                       jp <=0;
 						       end
@@ -813,7 +813,13 @@ begin
 					                if (rram[wire_rs2] == 0)
 							    rram[wire_rd] <= {{32{rram[wire_rs1][31]}}, rram[wire_rs1][31:0]}; 
 					                end
-				            7'b0100000: Sraw  <= 1'b1; // set Sraw  Flag 
+					    7'b0100000: begin
+						       Sraw  <= 1'b1; // set Sraw  Flag 
+					               // shift right arithmatical rs1.l32 by sr2[low5.unsign] cut 32 sext 64 to rd
+					               rram[wire_rd] <= {{32{rram[wire_rs1][31]}}, ($signed(rram[wire_rs1][31:0]) >>> rram[wire_rs2])}; 
+				                       pc <= pc + 4; 
+	    	                                       jp <=0;
+						       end
 				          endcase
 				         end 
 				endcase

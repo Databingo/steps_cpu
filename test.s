@@ -594,8 +594,23 @@
 #srl x31, x29, x30
 
 # SRLW
-li x30, 0x7fffffff
-srlw x31, x30, x0
+#li x30, 0x7fffffff
+#srlw x31, x30, x0
+
+# SRA 
+#li x29, -0b110000
+#li x30, 4 
+#sra x31, x29, x30
+
+# SRA 
+li x29, 0x7fffffff
+li x30, 4 
+sraw x31, x29, x30
+
+
+
+
+
 
 #test: li x31, -0x100000000   #-4294967296
 #test:
