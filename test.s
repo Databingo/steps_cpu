@@ -530,6 +530,12 @@
 #sd x30, 6(x0)
 #ld x31, 6(x0)
 
+# ADD
+#li x30, 0x7fffffffffffffff
+#li x29, 0x1
+#add x31, x30, x29
+li x31, -0x7fffffffffffffff
+
 
 
 
