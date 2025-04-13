@@ -241,7 +241,7 @@ func main() {
 			}
 			fmt.Printf("line %d, imm: 0x%X=0b%b=%d\n", lineCounter, imm, imm, imm)
 			if imm > 0x7fffffffffffffff || imm  < -0x8000000000000000 {
-				fmt.Printf("li: Error on line %d: Immediate value %d=0x%X out of range (should be between 0x%X and 0x7ffff )\n", lineCounter, imm, imm, -0x1000000000000000)
+				fmt.Printf("li: Error on line %d: Immediate value %d=0x%X out of range (should be between 0x%X and 0x7fffffffffffffff )\n", lineCounter, imm, imm, -0x800000000000000)
 				os.Exit(0)
 			}
 			if label != "" {
@@ -565,8 +565,8 @@ func main() {
 			//fmt.Printf("imm: 0x%X, 0b%b\n", imm, imm)
 			//if imm > 1048575 || imm < 0 {
 			//if imm > 0x7ffff || imm < -0x100000 {
-			if -0x100000 > imm || imm > 0xfffff { // for assembler create lui 0x800 in li 
-				fmt.Printf("Lui: Error on line %d: Immediate value %d=0x%X out of range (should be between 0x%X and 0x7ffff )\n", lineCounter, imm, imm, -0x100000)
+			if imm < -0x80000 || imm > 0xfffff { // for assembler create lui 0x800 in li 
+				fmt.Printf("Lui: Error on line %d: Immediate value %d=0x%X out of range (should be between 0x%X and 0x7ffff )\n", lineCounter, imm, imm, -0x80000)
 				os.Exit(0)
 			}
 			if !opFound || !rdFound {
@@ -667,7 +667,7 @@ func main() {
 				os.Exit(0)
 			}
 			//if imm > 0xfff || imm < -2048 { //0x7ff -0x1000  0xfff for sltiu
-			if imm > 2047 || imm < -2048 { //0x7ff -0x1000
+			if imm > 2047 || imm < -2048 { //0x7ff -0x800
 				fmt.Printf("Error on line %d: Immediate value out of range (should be between -2048=-0x1000 and 4094=0xfff) with %d \n", lineCounter, imm)
 				os.Exit(0)
 			}
