@@ -579,11 +579,15 @@
 #xor x31, x29, x30
 
 # SLL 
-li x29, 1
+#li x29, 1
+#li x30, 5 
+#sll x31, x29, x30
+
+
+# SLLW
+li x29, -1
 li x30, 5 
-sll x31, x29, x30
-
-
+sllw x31, x29, x30
 
 
 

@@ -599,7 +599,7 @@ begin
 					   end
 				    3'b001:begin 
 				           Sll  <= 1'b1; // set Sll Flag 
-					   // shift lift  logicl rs1 by imm.12[low5.unsign] padding 0 to rd
+					   // shift lift  logicl rs1 by rs2's value [low5/6.unsign] padding 0 to rd
 					   rram[wire_rd] <= (rram[wire_rs1] << rram[wire_rs2]); 
 				           pc <= pc + 4; 
 	    	                           jp <=0;
@@ -608,8 +608,8 @@ begin
 				          case(wire_f7) // func7
 					    7'b0000000:begin
 					               Srl  <= 1'b1; // set Srl Flag 
-					               // shift right logicl rs1 by imm.12[low5.unsign] padding 0 to rd
-					               rram[wire_rd] <= (rram[wire_rs1] >> wire_shamt ); 
+					               // shift right logicl rs1 by rs2[low5/6.unsign] padding 0 to rd
+					               rram[wire_rd] <= (rram[wire_rs1] >> rram[wire_rs2]); 
 				                       pc <= pc + 4; 
 	    	                                       jp <=0;
 						       end
@@ -798,7 +798,13 @@ begin
 						          end
 				          endcase
 				         end 
-			          3'b001: Sllw  <= 1'b1; // set Sllw  Flag 
+				  3'b001: begin
+				           Sllw  <= 1'b1; // set Sllw Flag 
+					   // shift lift  logicl rs1.32 by rs2's value [low5.unsign], take the l32 sext to 64 put into rd
+					   rram[wire_rd] <= {{32{rram[wire_rs1][31-rram[wire_rs2]]}}, (rram[wire_rs1][31:0] << rram[wire_rs2])}; 
+				           pc <= pc + 4; 
+	    	                           jp <=0;
+				          end
 				  3'b101: begin
 				          case(wire_f7) // func7
 				            7'b0000000: Srlw  <= 1'b1; // set Srlw  Flag 
