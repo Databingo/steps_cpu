@@ -603,9 +603,9 @@
 #sra x31, x29, x30
 
 # SRA 
-li x29, 0x7fffffff
-li x30, 4 
-sraw x31, x29, x30
+#li x29, 0x7fffffff
+#li x30, 4 
+#sraw x31, x29, x30
 
 
 
