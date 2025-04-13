@@ -549,12 +549,19 @@
 #sub x31, x29, x31
 
 # SUBW
+#li x29, 0x1
+#li x30, 0x7fffffff7fffffff
+#subw x31, x29, x30
+
+# SLT
+#li x29, 0x1
+#li x30, -0x7fffffff7fffffff
+#slt x31, x29, x30
+
+# SLT
 li x29, 0x1
-li x30, 0x7fffffff7fffffff
-subw x31, x29, x30
-
-
-
+li x30, -0x7fffffff7fffffff
+sltu x31, x29, x30
 
 #test: li x31, -0x100000000   #-4294967296
 #test:
