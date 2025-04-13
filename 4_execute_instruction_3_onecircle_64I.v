@@ -785,11 +785,13 @@ begin
 				          case(wire_f7) // func7
 					      7'b0000000: begin 
 					                  Addw  <= 1'b1; // set Addw  Flag 
-
 						          // 执行加法:
 				                          rram[wire_rd] <= {{32{sum[31]}}, rram[wire_rs1][31:0] + rram[wire_rs2][31:0]}; 
 						          end
-				            7'b0100000: Subw  <= 1'b1; // set Subw  Flag 
+					      7'b0100000: begin
+							  Subw  <= 1'b1; // set Subw  Flag 
+				                          rram[wire_rd] <= {{32{sub[31]}}, rram[wire_rs1][31:0] - rram[wire_rs2][31:0]}; 
+						          end
 				          endcase
 				         end 
 			          3'b001: Sllw  <= 1'b1; // set Sllw  Flag 

@@ -548,7 +548,10 @@
 #li x29, 0x1
 #sub x31, x29, x31
 
-
+# SUBW
+li x29, 0x1
+li x30, 0x7fffffff7fffffff
+subw x31, x29, x30
 
 
 
