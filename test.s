@@ -583,15 +583,19 @@
 #li x30, 5 
 #sll x31, x29, x30
 
-
 # SLLW
-li x29, -1
-li x30, 5 
-sllw x31, x29, x30
+#li x29, -1
+#li x30, 5 
+#sllw x31, x29, x30
 
+# SRL 
+#li x29, 0b100000
+#li x30, 4 
+#srl x31, x29, x30
 
-
-
+# SRLW
+li x30, 0x7fffffff
+srlw x31, x30, x0
 
 #test: li x31, -0x100000000   #-4294967296
 #test:

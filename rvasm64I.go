@@ -173,6 +173,7 @@ func main() {
 		"sltu": 0b00000000000000000011000000110011,
 		"xor":  0b00000000000000000100000000110011,
 		"srl":  0b00000000000000000101000000110011,
+		"srlw": 0b00000000000000000101000000111011,
 		"sra":  0b01000000000000000101000000110011,
 		"or":   0b00000000000000000110000000110011,
 		"and":  0b00000000000000000111000000110011,
@@ -463,7 +464,7 @@ func main() {
 				}
 			}
 
-		case "add", "addw", "sub", "subw", "sll", "sllw", "slt", "sltu", "xor", "srl", "sra", "or", "and": // Instruction format: op rd, rs1, rs2       or      label: op rd, rs1, rs2
+		case "add", "addw", "sub", "subw", "sll", "sllw", "slt", "sltu", "xor", "srl", "srlw", "sra", "or", "and": // Instruction format: op rd, rs1, rs2       or      label: op rd, rs1, rs2
 			if len(code) != 4 && len(code) != 5 {
 				fmt.Println("Incorrect argument count on line: ", lineCounter)
 				os.Exit(0)
@@ -716,7 +717,7 @@ func main() {
 				os.Exit(0)
 			}
 
-		case "add", "addw", "sub", "subw", "sll", "sllw", "slt", "sltu", "xor", "srl", "sra", "or", "and": // op rd, rs1, rs2
+		case "add", "addw", "sub", "subw", "sll", "sllw", "slt", "sltu", "xor", "srl", "srlw", "sra", "or", "and": // op rd, rs1, rs2
 			if len(code) != 4 {
 				fmt.Println("Incorrect argument count on line: ", lineCounter)
 				os.Exit(0)

@@ -807,7 +807,12 @@ begin
 				          end
 				  3'b101: begin
 				          case(wire_f7) // func7
-				            7'b0000000: Srlw  <= 1'b1; // set Srlw  Flag 
+					    7'b0000000: begin
+						        Srlw  <= 1'b1; // set Srlw  Flag 
+					                rram[wire_rd] <= (rram[wire_rs1][31:0] >> rram[wire_rs2]); 
+					                if (rram[wire_rs2] == 0)
+							    rram[wire_rd] <= {{32{rram[wire_rs1][31]}}, rram[wire_rs1][31:0]}; 
+					                end
 				            7'b0100000: Sraw  <= 1'b1; // set Sraw  Flag 
 				          endcase
 				         end 
