@@ -600,7 +600,7 @@ begin
 				    3'b001:begin 
 				           Sll  <= 1'b1; // set Sll Flag 
 					   // shift lift  logicl rs1 by imm.12[low5.unsign] padding 0 to rd
-					   rram[wire_rd] <= (rram[wire_rs1] << wire_shamt ); 
+					   rram[wire_rd] <= (rram[wire_rs1] << rram[wire_rs2]); 
 				           pc <= pc + 4; 
 	    	                           jp <=0;
 					   end
