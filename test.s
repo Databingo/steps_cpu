@@ -505,6 +505,17 @@
 #li x30, -0x1
 #ld x31, 6(x30)
  
+# SB
+# limiation: 
+li x30, -0x7
+li x29, -0x1
+sb x30, 6(x29)
+lb x31, 6(x29)
+
+
+
+
+
 #test: li x31, -0x100000000   #-4294967296
 #test:
 #addi x31, x0, -0x1
