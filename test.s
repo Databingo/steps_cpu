@@ -513,11 +513,16 @@
 
 # SH
 # limiation: 
-li x30, -0x556
-sh x30, 6(x0)
-lh x31, 6(x0)
+#li x30, -0x556
+#sh x30, 6(x0)
+#lh x31, 6(x0)
 
 
+# SW
+# limiation: 
+li x30,-0x77777777
+sw x30, 6(x0)
+lw x31, 6(x0)
 
 #test: li x31, -0x100000000   #-4294967296
 #test:
