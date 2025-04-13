@@ -534,6 +534,10 @@
 li x31, -0x7fffffffffffffff
 li x29, 0x1
 add x31, x31, x29
+li x31, -0x7
+li x29, 0x6
+add x31, x31, x29
+
 
 
 
