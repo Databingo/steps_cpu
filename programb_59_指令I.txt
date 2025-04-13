@@ -37,8 +37,8 @@
 //// 算数逻辑位移 寄存器类型 Math-Logic-R 10
 //00000000 00000000 00000000 00110011 //__0000000_00000_00000_000_00000_0110011 //*ADD  |xxx.7|rs2.5|rs1.5|000.3|rd.5|0110011.7| add rs1 and rs2 send overflow ingnored result to rd 
 //01000000 00000000 00000000 00110011 //__0100000_00000_00000_000_00000_0110011 //*SUB  |xxx.7|rs2.5|rs1.5|000.3|rd.5|0110011.7| sub rs2 from rs1 send overflow ingnored result to rd |sub rd rs1 rs2
-//00000000 00000000 00100000 00110011 //__0000000_00000_00000_010_00000_0110011 //-SLT  |xxx.7|rs2.5|rs1.5|010.3|rd.5|0110011.7| if rs1 is less than rs2 both as sign-extended then Set 1 in rd else 0
-//00000000 00000000 00110000 00110011 //__0000000_00000_00000_011_00000_0110011 // SLTU |xxx.7|rs2.5|rs1.5|011.3|rd.5|0110011.7| if rs1 is less than rs2 both as unsigned number then Set 1 in rd else 0
+//00000000 00000000 00100000 00110011 //__0000000_00000_00000_010_00000_0110011 //*SLT  |xxx.7|rs2.5|rs1.5|010.3|rd.5|0110011.7| if rs1 is less than rs2 both as sign-extended then Set 1 in rd else 0
+//00000000 00000000 00110000 00110011 //__0000000_00000_00000_011_00000_0110011 //*SLTU |xxx.7|rs2.5|rs1.5|011.3|rd.5|0110011.7| if rs1 is less than rs2 both as unsigned number then Set 1 in rd else 0
 //00000000 00000000 01100000 00110011 //__0000000_00000_00000_110_00000_0110011 // OR   |xxx.7|rs2.5|rs1.5|110.3|rd.5|0110011.7| bitwise OR  rs1 and rs2 then put reslut in rd
 //00000000 00000000 00000000 00110011 //__0000000_00000_00000_000_00000_0110011 // AND  |xxx.7|rs2.5|rs1.5|000.3|rd.5|0110011.7| bitwise AND rs1 and rs2 then put result in rd
 //00000000 00000000 01000000 00110011 //__0000000_00000_00000_100_00000_0110011 // XOR  |xxx.7|rs2.5|rs1.5|100.3|rd.5|0110011.7| bitwise XOR rs1 and rs2 then put reslut in rd
