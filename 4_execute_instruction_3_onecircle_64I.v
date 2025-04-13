@@ -561,14 +561,14 @@ begin
 					   // 溢出位 0 取反为 1 负
 					   // 次首位进位判断：a==b==1; a^b && c==0
 					   // 进位后为 正(或0) 大于等于
-					    if (rram[wire_rs1][63] == mirro_rs2[63] == 1)
-                                                     rram[wire_rd] <= 1'b0; 
-					    else if ((rram[wire_rs1][63] ^ mirro_rs2[63]) && (sub[63] == 0))
-                                                     rram[wire_rd] <= 1'b0; 
-                                           // 否则 rs1 小于 rs2
-					    else rram[wire_rd] <= 1'b1;
+					 // if (rram[wire_rs1][63] == mirro_rs2[63] == 1)
+                                         //          rram[wire_rd] <= 1'b0; 
+					 // else if ((rram[wire_rs1][63] ^ mirro_rs2[63]) && (sub[63] == 0))
+                                         //          rram[wire_rd] <= 1'b0; 
+                                         //// 否则 rs1 小于 rs2
+					 // else rram[wire_rd] <= 1'b1;
 					   // 代码模式 
-					   // if (rram[wire_rs1] - rram[wire_rs2] < 0 ) rram[wire_rd] <= 1'b1; 
+					     if (rram[wire_rs1] < rram[wire_rs2]) rram[wire_rd] <= 1'b1; 
 					   // if ({1'b0, rram[wire_rs1]} - {1'b0, rram[wire_rs2]} < 0 ) rram[wire_rd] <= 1'b1; 
 					   
 					  
