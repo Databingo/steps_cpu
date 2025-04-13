@@ -526,7 +526,7 @@
 
 # SD
 # limiation: 
-li x30, 0x7fffffff77777787
+li x30, -0x0fffffff77777787
 sd x30, 6(x0)
 ld x31, 6(x0)
 
