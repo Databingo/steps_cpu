@@ -507,11 +507,16 @@
  
 # SB
 # limiation: 
-li x30, -0x7
-li x29, -0x1
-sb x30, 6(x29)
-lb x31, 6(x29)
+li x30, -0x556
+sb x30, 6(x0)
+lb x31, 6(x0)
 
+# SB
+# limiation: 
+#li x30, -0x7
+#li x29, -0x1
+#sb x30, 6(x29)
+#lb x31, 6(x29)
 
 
 
