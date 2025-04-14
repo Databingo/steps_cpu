@@ -170,7 +170,7 @@ assign wire_f7  = wire_ir[31:25];
 assign wire_f12 = wire_ir[31:20]; 
 assign wire_imm = wire_ir[31:20];
 assign wire_upimm = wire_ir[31:12];
-assign wire_jimm  = {wire_ir[31], wire_ir[19:12], wire_ir[20], wire_ir[31:20], 1'b0}; // read immediate & padding last 0, total 20 + 1 = 21 bits
+assign wire_jimm  = {wire_ir[31], wire_ir[19:12], wire_ir[20], wire_ir[30:21], 1'b0}; // read immediate & padding last 0, total 20 + 1 = 21 bits
 assign wire_simm  = {wire_ir[31:25], wire_ir[11:7]};
 assign wire_bimm  = {wire_ir[31], wire_ir[7],  wire_ir[30:25], wire_ir[11:8], 1'b0};// read immediate & padding last 0, total 12 + 1 = 13 bits
 assign wire_shamt = wire_ir[25:20];

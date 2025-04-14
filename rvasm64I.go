@@ -597,8 +597,9 @@ func main() {
 			}
 			label = label - int64(address)
 			//instruction = (uint32(label)&0x80000)<<11 | (uint32(label)&0x7FE)<<20 | (uint32(label)&0x400)<<19 | (uint32(label)&0x7F800)<<11 | rd<<7 | op
-			instruction = (uint32(label)&0x80000)<<31 | (uint32(label)&0x7FE)<<21 | (uint32(label)&0x400)<<20 | (uint32(label)&0x7F800)<<12 | rd<<7 | op
-			fmt.Printf("jarlabel: %d\n", label)
+			instruction = (uint32(label)&0x80000)<<12 | (uint32(label)&0x7FE)<<20 | (uint32(label)&0x800)<<9 | (uint32(label)&0xFF000) | rd<<7 | op
+			fmt.Printf("jarlabel: %d, %b\n", label, uint32(label))
+			fmt.Printf("instruction: %b\n", instruction)
 
 		case "beq", "bne", "blt", "bge", "bltu", "bgeu": // op rs1, rs2, imm
 			if len(code) != 4 {
