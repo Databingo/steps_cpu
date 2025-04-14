@@ -913,6 +913,7 @@ begin
 					    if (rram[wire_rs1] < rram[wire_rs2]) 
 					        pc <= pc + sign_extended_bimm;
 					    else pc <= pc + 4;
+	    	                            jp <=0;
 				         end 
 					 
 				  3'b111:begin
@@ -924,15 +925,19 @@ begin
 					 // 溢出位 0 取反为 1 负
 					 // 次首位进位判断：a==b==1; a^b && c==0
 					 // 进位后为 正(或0) 大于等于
-					  if (rram[wire_rs1][63] == mirro_rs2[63] == 1)
-                                              pc <= pc + sign_extended_bimm;
-					  else if ((rram[wire_rs1][63] ^ mirro_rs2[63]) && (sub[63] == 0))
-                                              pc <= pc + sign_extended_bimm;
-                                         // 否则 rs1 小于 rs2
-					  else pc <= pc + 4;
-	    	                          jp <=0;
+			//		  if (rram[wire_rs1][63] == mirro_rs2[63] == 1)
+                        //                      pc <= pc + sign_extended_bimm;
+			//		  else if ((rram[wire_rs1][63] ^ mirro_rs2[63]) && (sub[63] == 0))
+                        //                      pc <= pc + sign_extended_bimm;
+                        //                 // 否则 rs1 小于 rs2
+			//		  else pc <= pc + 4;
+	    	        //                  jp <=0;
 					 // 代码模式 
 					 // if (rram[wire_rs1] - rram[wire_rs2] < 0 ) rram[wire_rd] <= 1'b1; 
+					    if (rram[wire_rs1] >= rram[wire_rs2]) 
+					        pc <= pc + sign_extended_bimm;
+					    else pc <= pc + 4;
+	    	                            jp <=0;
 				         end 
 				endcase
 		              end
