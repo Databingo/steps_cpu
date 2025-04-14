@@ -94,7 +94,7 @@ input reset_n; // 初始化开关
 input clock;  // 时钟 // 计数工具
 // irom as program input of model
 
-reg [64:0] pc; // 程序计数寄存器 64 位宽度
+reg [63:0] pc; // 程序计数寄存器 64 位宽度
 reg [2:0] jp;  // 程序节寄存拍器
 
 // 程序指令寄存器: 32 位宽度
@@ -741,7 +741,8 @@ begin
 				         //rram[wire_rd] <= rram[wire_rs1] + {{52{wire_imm[11]}}, wire_imm}; 
 				         //rram[wire_rd] <=   {{32{sum_imm[31]}}, sum_imm[31:0]}; 
 				         //rram[wire_rd] <=   {{32{sum_imm[31]}} , rram[wire_rs1][31:0] + {{20{wire_imm[11]}}, wire_imm}}; 
-				         rram[wire_rd] <=   {32'b0 , rram[wire_rs1][31:0] + {{20{wire_imm[11]}}, wire_imm}}; 
+					   
+				         //rram[wire_rd] <=   {32'b0 , rram[wire_rs1][31:0] + {{20{wire_imm[11]}}, wire_imm}}; 
 
 				         // 溢出判断：
 				         //if ((rram[wire_rs1][63] ~^ wire_imm[11]) && (rram[wire_rs1][63] ^ sum_imm[63])) 
@@ -830,6 +831,7 @@ begin
 				//jump PC to PC+imm(padding 0) and place return address PC+4 in rd
 				rram[wire_rd] <= pc + 4;
 				pc <= pc + wire_jimm;
+				//pc <= pc - 4;
 	    	                jp <=0;
                               end
                    // RJump
