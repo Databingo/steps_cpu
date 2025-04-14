@@ -246,7 +246,7 @@
 #addiw x31, x0, 0b10
 #addiw x31, x0, 0x3 
 # Test 2 add number negative
-addiw x31, x0, -1 
+#addiw x31, x0, -1 
 #addiw x31, x0, -0b10
 #addiw x31, x0, -0x3 
 # Test 3 add number positive then turn to negative
@@ -675,15 +675,15 @@ addiw x31, x0, -1
 #end: li x31, 2 
 
 #JAL
-#start: li x30, 0b1 
-#li x31, 3 
-#li x31, 0b011 
-#bgeu x31, x30, end
-#li x31, 5 
-#li x31, 6 
-#end: li x31, 2 
-#li x31, 4 
-#jal x31, end 
+start: li x30, 0b1 
+li x31, 3 
+li x31, 0b011 
+bgeu x31, x30, end
+li x31, 5 
+li x31, 6 
+end: li x31, 2 
+li x31, 4 
+jal x31, end 
 
 
 
