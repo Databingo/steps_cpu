@@ -241,6 +241,7 @@ initial $readmemb("./data.txt", drom);
 
 reg [63:0] sum; // 加法结果组合逻辑寄存器
 reg [63:0] sum_imm; // 加法结果组合逻辑寄存器
+reg [31:0] sum_imm_32; // 32位加法结果组合逻辑寄存器
 reg [63:0] mirro_rs2; // rs2 相反数，取反加一，减法变加法用
 reg [63:0] mirro_imm; // imm 相反数，取反加一，减法变加法用
 reg [63:0] sub; // 减法结果组合逻辑寄存器
@@ -255,6 +256,7 @@ always @(*)
 begin
  sum = rram[wire_rs1] + rram[wire_rs2];
  sum_imm = rram[wire_rs1] + {{52{wire_imm[11]}}, wire_imm};
+ sum_imm_32 = rram[wire_rs1][31:0] + {{20{wire_imm[11]}}, wire_imm};
  mirro_rs2 = ~rram[wire_rs2] + 1;
  mirro_imm = ~{{52{wire_imm[11]}}, wire_imm} + 1;
  sub = rram[wire_rs1] + mirro_rs2;
@@ -742,16 +744,17 @@ begin
 				         //rram[wire_rd] <=   {{32{sum_imm[31]}}, sum_imm[31:0]}; 
 				         //rram[wire_rd] <=   {{32{sum_imm[31]}} , rram[wire_rs1][31:0] + {{20{wire_imm[11]}}, wire_imm}}; 
 					   
-				         //rram[wire_rd] <=   {32'b0 , rram[wire_rs1][31:0] + {{20{wire_imm[11]}}, wire_imm}}; 
+				         rram[wire_rd] <=   {{32{sum_imm_32[31]}}, rram[wire_rs1][31:0] + {{20{wire_imm[11]}}, wire_imm}}; 
+				         //rram[wire_rd] <=   {{32{sum_imm_32[31]}}, sum_imm_32}; 
 
 				         // 溢出判断：
-				         //if ((rram[wire_rs1][63] ~^ wire_imm[11]) && (rram[wire_rs1][63] ^ sum_imm[63])) 
-				         if ((rram[wire_rs1][31] ~^ wire_imm[11]) && (rram[wire_rs1][31] ^ sum_imm[31])) 
-				           begin
-	    	                             rram[3] <= 1; // 溢出标志
-	    	                             //rram[4] <= rram[wire_rs1][63]; // 溢出值
-	    	                             rram[4] <= rram[wire_rs1][31]; // 溢出值
-				           end
+				       //  //if ((rram[wire_rs1][63] ~^ wire_imm[11]) && (rram[wire_rs1][63] ^ sum_imm[63])) 
+				       //  if ((rram[wire_rs1][31] ~^ wire_imm[11]) && (rram[wire_rs1][31] ^ sum_imm[31])) 
+				       //    begin
+	    	                       //      rram[3] <= 1; // 溢出标志
+	    	                       //      //rram[4] <= rram[wire_rs1][63]; // 溢出值
+	    	                       //      rram[4] <= rram[wire_rs1][31]; // 溢出值
+				       //    end
 				         pc <= pc + 4; 
 	    	                         jp <=0;
 				         end
@@ -831,7 +834,6 @@ begin
 				//jump PC to PC+imm(padding 0) and place return address PC+4 in rd
 				rram[wire_rd] <= pc + 4;
 				pc <= pc +  {{43{wire_jimm[20]}}, wire_jimm};
-				//pc <= pc - 16;
 	    	                jp <=0;
                               end
                    // RJump
