@@ -242,11 +242,11 @@
 # -------
 # Limitation: only on 64 for 32, imm is in -2048:2047, extend to 64 bits rather than ADDI's 32 bits
 # Test 1 add number positive 
-addiw x31, x0, 0x7ff
+#addiw x31, x0, 0x7ff
 #addiw x31, x0, 0b10
 #addiw x31, x0, 0x3 
 # Test 2 add number negative
-#addiw x31, x0, -1 
+addiw x31, x0, -1 
 #addiw x31, x0, -0b10
 #addiw x31, x0, -0x3 
 # Test 3 add number positive then turn to negative
