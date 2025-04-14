@@ -666,6 +666,15 @@
 
 
 # BGEU
+#start: li x30, 0b1 
+#li x31, 3 
+#li x31, 0b011 
+#bgeu x31, x30, end
+#li x31, 5 
+#li x31, 6 
+#end: li x31, 2 
+
+#JAL
 start: li x30, 0b1 
 li x31, 3 
 li x31, 0b011 
@@ -673,6 +682,11 @@ bgeu x31, x30, end
 li x31, 5 
 li x31, 6 
 end: li x31, 2 
+li x31, 4 
+jal x31, end 
+
+
+
 
 
 #test: li x31, -0x100000000   #-4294967296

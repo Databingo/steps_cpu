@@ -596,7 +596,9 @@ func main() {
 				os.Exit(0)
 			}
 			label = label - int64(address)
-			instruction = (uint32(label)&0x80000)<<11 | (uint32(label)&0x7FE)<<20 | (uint32(label)&0x400)<<19 | (uint32(label)&0x7F800)<<11 | rd<<7 | op
+			//instruction = (uint32(label)&0x80000)<<11 | (uint32(label)&0x7FE)<<20 | (uint32(label)&0x400)<<19 | (uint32(label)&0x7F800)<<11 | rd<<7 | op
+			instruction = (uint32(label)&0x80000)<<31 | (uint32(label)&0x7FE)<<21 | (uint32(label)&0x400)<<20 | (uint32(label)&0x7F800)<<12 | rd<<7 | op
+			fmt.Printf("jarlabel: %d\n", label)
 
 		case "beq", "bne", "blt", "bge", "bltu", "bgeu": // op rs1, rs2, imm
 			if len(code) != 4 {
@@ -749,7 +751,7 @@ func main() {
 		//fmt.Printf("Address: 0x%08x     Line: %d     Instruction:  0x%08x, %032b\n", address, lineCounter, instruction, instruction)
 		ins := fmt.Sprintf("%032b", instruction)
 		addr := fmt.Sprintf("%08b", address)
-		addrd := fmt.Sprintf("%03d", address)
+		addrd := fmt.Sprintf("%05d", address)
 		little_endian_ins := ins[24:32] + " " + ins[16:24] + " " + ins[8:16] + " " + ins[0:8]
 		save_binary_instruction(little_endian_ins + " // Addr: " + addrd + " " + addr + " " + ins + " " + line)
 		lineCounter++
