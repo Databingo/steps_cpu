@@ -245,7 +245,7 @@ reg [63:0] mirro_rs2; // rs2 相反数，取反加一，减法变加法用
 reg [63:0] mirro_imm; // imm 相反数，取反加一，减法变加法用
 reg [63:0] sub; // 减法结果组合逻辑寄存器
 reg [63:0] sub_imm; // 减法结果组合逻辑寄存器
-reg [63:0] sign_extended_bimm; // 符号扩展的 bimm
+reg [63:0] sign_extended_bimm; // 符号扩展的 bimm (branch imm)
 reg [31:0] sllw_s1; // 逻辑左移word
 reg [31:0] srlw_s1; // 算数左移word
 reg [31:0] sraw_s1; // 算数右移word
