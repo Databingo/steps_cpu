@@ -617,6 +617,21 @@
 #end: li x31, 2 
 
 
+# BNE
+start: li x29, 1
+li x31, 3 
+li x31, 4 
+bne x31, x29, end
+li x31, 5 
+li x31, 6 
+end: li x31, 2 
+
+
+
+
+
+
+
 
 
 
