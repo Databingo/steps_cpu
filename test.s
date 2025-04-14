@@ -611,7 +611,10 @@
 start: li x29, 4
 li x31, 3 
 li x31, 4 
-beq x31, x29, start
+beq x31, x29, end
+li x31, 5 
+li x31, 6 
+end: li x31, 2 
 
 
 
