@@ -609,6 +609,7 @@
 
 # BEQ
 start: li x29, 4
+li x31, 3 
 li x31, 4 
 beq x31, x29, start
 
