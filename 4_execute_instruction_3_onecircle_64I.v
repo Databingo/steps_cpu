@@ -830,8 +830,8 @@ begin
                                 Jal <= 1'b1; // set Jal Flag 
 				//jump PC to PC+imm(padding 0) and place return address PC+4 in rd
 				rram[wire_rd] <= pc + 4;
-				pc <= pc + wire_jimm;
-				//pc <= pc - 4;
+				//pc <= pc + wire_jimm;
+				pc <= pc - 16;
 	    	                jp <=0;
                               end
                    // RJump
