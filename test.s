@@ -636,15 +636,23 @@
 
 
 # BLT
-start: li x29, 100
+#start: li x29, 100
+#li x31, 3 
+#li x31, 4 
+#blt x31, x29, end
+#li x31, 5 
+#li x31, 6 
+#end: li x31, 2 
+
+
+# BGE
+start: li x29, 5
 li x31, 3 
 li x31, 4 
-blt x31, x29, end
+bge x31, x29, end
 li x31, 5 
 li x31, 6 
 end: li x31, 2 
-
-
 
 
 
