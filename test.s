@@ -646,15 +646,23 @@
 
 
 # BGE
-start: li x29, 5
+#start: li x29, 5
+#li x31, 3 
+#li x31, 4 
+#bge x31, x29, end
+#li x31, 5 
+#li x31, 6 
+#end: li x31, 2 
+
+
+# BLTU
+start: li x30, -0b1 
 li x31, 3 
-li x31, 4 
-bge x31, x29, end
+li x31, 0b011 
+bltu x31, x30, end
 li x31, 5 
 li x31, 6 
 end: li x31, 2 
-
-
 
 
 
