@@ -318,8 +318,8 @@ func main() {
 			//fmt.Println("Syntax Error on line: ", lineCounter)
 			//os.Exit(0)
 		}
-		lineCounter++
-		address += 4
+		//lineCounter++
+		//address += 4
 		//os.Exit(0)
 
 	}

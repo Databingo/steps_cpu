@@ -608,9 +608,9 @@
 #sraw x31, x29, x30
 
 # BEQ
-li x29, 0x7fffffff
-li x30, 4 
-beq x31, x29, 0
+start: li x29, 4
+li x31, 4 
+beq x31, x29, start
 
 
 
