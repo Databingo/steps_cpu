@@ -474,8 +474,8 @@ func main() {
 	defer f.Close()
 
 	// set up file header table
-	f.Write([]byte{0x7F, 0x45, 0x4C, 0x46, // indicates elf file
-		0x01,                                     // identifies 32 bit format
+	f.Write([]byte{0x7F, 0x45, 0x4C, 0x46, // indicates ELF file
+		0x01,                                     // identifies 32 bit format ?
 		0x01,                                     // specify little endian
 		0x01,                                     // current elf version
 		0x00,                                     // target platform, usually set to 0x0 (System V)
@@ -488,7 +488,7 @@ func main() {
 		0x34, 0x00, 0x00, 0x00, // points to start of program header table
 		0x00, 0x00, 0x00, 0x00, // points to start of section header table
 		0x00, 0x00, 0x00, 0x00, // e_flags
-		0x34, 0x00, // specify size of header, 52 bytes for 32-bit format
+		0x34, 0x00, // specify size of header, 52 bytes for 32-bit format ?
 		0x00, 0x00, // size of program header table entry
 		0x00, 0x00, // contains number of entries in program header table
 		0x00, 0x00, // size of section header entry
