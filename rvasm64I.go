@@ -15,20 +15,11 @@ import (
 func save_binary_instruction(instr string) {
 	if fs, err := os.OpenFile("binary_instructions.txt", os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0666); err == nil {
 		_, err = fs.WriteString(instr + "\n")
-		//_, err = fs.WriteString("Answer:" + "\n" + RESP + "\n")
 		if err != nil {
 			panic(err)
 		}
 		fs.Close()
 	}
-}
-
-func reserveString(s string) string {
-	runes := []rune(s)
-	for i, j := 0, len(runes)-1; i < j; i, j = 1+1, j-1 {
-		runes[i], runes[j] = runes[j], runes[i]
-	}
-	return string(runes)
 }
 
 func check(e error) {
@@ -41,7 +32,6 @@ func SplitOn(r rune) bool { return r == ',' || r == ' ' || r == '\t' || r == '('
 
 func isValidImmediate(s string) (int64, error) {
 	var imm1, imm2, imm3 int64
-	//var err1, err2, err3 error
 	var err1 = errors.New("error_init")
 	var err2 = errors.New("error_init")
 	var err3 = errors.New("error_init")
@@ -60,19 +50,9 @@ func isValidImmediate(s string) (int64, error) {
 		imm3, err3 = strconv.ParseInt(s[2:], 2, 64) // check if s is binary
 	} else if strings.HasPrefix(s, "-0b") {
 		imm3, err3 = strconv.ParseInt(string(s[0])+s[3:], 2, 64)
-		//fmt.Println("s:", s)
-		//fmt.Println("imm3:", imm3)
-		//fmt.Println("lens:", len(s))
-		// -00000000000 = 100000000000 = 1100000000000  = -2048
-		// -000000000000 = 1000000000000 = 11000000000000  = -4096
-		//if imm3 == 0 && len(s) >= 14 {
-		//    imm3, err3 = strconv.ParseInt(string(s[0])+"1"+s[3:], 2, 64)
-		//}
 		if imm3 == 0 {
 			imm3, err3 = strconv.ParseInt(string(s[0])+"1"+s[3:], 2, 64)
-			//fmt.Println("imm3:", string(s[0])+"1"+s[3:])
 		}
-		//fmt.Println("imm3:", imm3)
 	}
 
 	if err1 != nil && err2 != nil && err3 != nil {
@@ -204,9 +184,6 @@ func main() {
 
 	var real_instr strings.Builder
 
-
-
-
 	// zero pass
 	// translate pseudo-instruction to real-instruction
 	for scanner0.Scan() {
@@ -261,23 +238,15 @@ func main() {
 
 				l12 := imm & 0xfff // 12 bits
 				l12_sign_bit := l12 >> 11 & 1
-				//fmt.Printf("l12: 0b%b\n", l12)
-				//fmt.Printf("l_sign: 0b%b\n", sign_bit)
 				h20 := imm >> 12
 				if l12_sign_bit == 1 {
-					//if sign_bit == 1 {h20 = h20 - 1 
-					//   l12 = (0x1000 - l12) } 
 					if sign_bit == 0 {h20 = h20 + 1 
 					   l12 = -(0x1000 - l12) }
 				}
-				//if h20 != 0 { // lui for clean destiny reg
 				    ins := fmt.Sprintf("lui %s, %#x\n", reg, h20)
 				        real_instr.WriteString(ins)
-				//}
-				//if l12 != 0 { // addiw for cut sign-extend if lui 0x800 upper
 				    ins = fmt.Sprintf("addiw %s, %s, %#x\n", reg, reg, l12)
 				        real_instr.WriteString(ins)
-			//	}
 				if sign_bit == 1 { 
 					ins = fmt.Sprintf("xori %s, %s, -1\naddiw %s, %s, 1\n", reg, reg, reg, reg)
 				        real_instr.WriteString(ins)
@@ -315,19 +284,13 @@ func main() {
 				}
 		default:
 			real_instr.WriteString(origin_instr)
-			//fmt.Println("Syntax Error on line: ", lineCounter)
-			//os.Exit(0)
 		}
-		//lineCounter++
-		//address += 4
 		//os.Exit(0)
 
 	}
 	
 	fmt.Println("print real_instr")
 	fmt.Println(real_instr.String())
-	//fmt.Println("print real_instr finished")
-	//fmt.Println("zero pass fininshed.")
 
 	scanner := bufio.NewScanner(strings.NewReader(real_instr.String())) // stores content from file
 	scanner.Split(bufio.ScanLines)
@@ -567,9 +530,6 @@ func main() {
 				fmt.Printf("Error on line %d: %s\n", lineCounter, err)
 				os.Exit(0)
 			}
-			//fmt.Printf("imm: 0x%X, 0b%b\n", imm, imm)
-			//if imm > 1048575 || imm < 0 {
-			//if imm > 0x7ffff || imm < -0x100000 {
 			if imm < -0x80000 || imm > 0xfffff { // for assembler create lui 0x800 in li 
 				fmt.Printf("Lui: Error on line %d: Immediate value %d=0x%X out of range (should be between 0x%X and 0x7ffff )\n", lineCounter, imm, imm, -0x80000)
 				os.Exit(0)
@@ -712,10 +672,6 @@ func main() {
 			rs1, rs1Found := regBin[code[2]]
 			if opFound && rdFound && rs1Found {
 				instruction = uint32(imm)<<20 | rs1<<15 | rd<<7 | op
-				//fmt.Printf("imm: %06b\n", imm)
-				//fmt.Printf("op: %b\n", op)
-				//fmt.Printf("%032b\n", instruction)
-				//fmt.Printf("000000 %06b %05b 101 %05b 0010011\n", imm, rs1, rd)
 			} else if !rdFound || !rs1Found {
 				fmt.Println("Invalid register on line", lineCounter)
 				os.Exit(0)
@@ -748,8 +704,6 @@ func main() {
 			fmt.Println("2 Syntax Error on line: ", lineCounter, switchOnOp)
 			os.Exit(0)
 		}
-		//fmt.Printf("Address: 0x%08x     Line: %d     Instruction:  0x%08x\n", address, lineCounter, instruction)
-		//fmt.Printf("Address: 0x%08x     Line: %d     Instruction:  0x%08x, %032b\n", address, lineCounter, instruction, instruction)
 		ins := fmt.Sprintf("%032b", instruction)
 		addr := fmt.Sprintf("%08b", address)
 		addrd := fmt.Sprintf("%05d", address)
