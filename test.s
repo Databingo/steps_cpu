@@ -675,17 +675,23 @@
 #end: li x31, 2 
 
 #JAL
+# limitation: in (-2^19)*2 : (2^19 -1)*2  = -1047576:1046574 bytes 
+#start: li x30, 0b1 
+#li x31, 3 
+#li x31, 0b011 
+#bgeu x31, x30, end
+#li x31, 5 
+#li x31, 6 
+#end: li x31, 2 
+#li x31, 4 
+#jal x31, end 
+
+
+#JALR
 start: li x30, 0b1 
-li x31, 3 
-li x31, 0b011 
-bgeu x31, x30, end
-li x31, 5 
-li x31, 6 
 end: li x31, 2 
-li x31, 4 
-jal x31, end 
-
-
+li x31, 0 
+jalr x30, x31, 0
 
 
 

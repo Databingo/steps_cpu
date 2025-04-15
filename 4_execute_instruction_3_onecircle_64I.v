@@ -841,7 +841,7 @@ begin
                                 Jalr <= 1'b1; // set Jalr Flag 
 		                //jump PC to address imm(rs1) and place return address PC+4 in rd (no need padding last 0 not as JAL)
 				rram[wire_rd] <= pc + 4;
-				pc <= rram[wire_rs1] + wire_imm;
+				pc <= (rram[wire_rs1] +  {{52{wire_imm[11]}}, wire_imm}) & 64'hFFFFFFFFFFFFFFFE ;
 	    	                jp <=0;
                               end
                    // Branch class
