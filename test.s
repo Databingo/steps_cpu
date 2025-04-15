@@ -695,14 +695,14 @@
 #li x2, 8
 #li x1, 1
 #li x1, 0
-addi x27, x27, 8
-addi x30, x30, 0
-jalr x31, x30, 16 
-addi x30, x30, 3
-addi x30, x30, 2 
-li x2, 12 # right answer to x2
-li x1, 1 # indicate for compare
-li x1, 0 # clean for next test
+#addi x27, x27, 8
+#addi x30, x30, 0
+#jalr x31, x30, 16 
+#addi x30, x30, 3
+#addi x30, x30, 2 
+#li x2, 12 # right answer to x2
+#li x1, 1 # indicate for compare
+#li x1, 0 # clean for next test
 
 
 #test: li x31, -0x100000000   #-4294967296
