@@ -705,32 +705,32 @@
 #li x1, 0 # clean for next test
 
 
-_start:
-    # Initialize common registers if needed (optional)
-    li x3, 0
-    li x4, 0
-    li x5, 0
-    # x1 = signal, x2 = golden, x31 = result
-
-#--------------------------------------------
-# Immediate Arithmetic Tests
-#--------------------------------------------
-
-# TEST: ADDI (Positive)
-    li x3, 1000
-    addi x31, x3, 123   # x31 = 1000 + 123 = 1123
-    li x2, 1123         # Golden
-    li x1, 1            # Signal Compare
-    li x1, 0            # Clear Signal
-
-# TEST: ADDI (Negative)
-    li x3, 1000
-    addi x31, x3, -23   # x31 = 1000 - 23 = 977
-    li x2, 977          # Golden
-    li x1, 1            # Signal Compare
-    li x1, 0            # Clear Signal
-.section .text
-.global _start
+#_start:
+#    # Initialize common registers if needed (optional)
+#    li x3, 0
+#    li x4, 0
+#    li x5, 0
+#    # x1 = signal, x2 = golden, x31 = result
+#
+##--------------------------------------------
+## Immediate Arithmetic Tests
+##--------------------------------------------
+#
+## TEST: ADDI (Positive)
+#    li x3, 1000
+#    addi x31, x3, 123   # x31 = 1000 + 123 = 1123
+#    li x2, 1123         # Golden
+#    li x1, 1            # Signal Compare
+#    li x1, 0            # Clear Signal
+#
+## TEST: ADDI (Negative)
+#    li x3, 1000
+#    addi x31, x3, -23   # x31 = 1000 - 23 = 977
+#    li x2, 977          # Golden
+#    li x1, 1            # Signal Compare
+#    li x1, 0            # Clear Signal
+#.section .text
+#.global _start
 
 _start:
     # Initialize common registers if needed (optional)
