@@ -39,11 +39,12 @@ func isValidImmediate(s string) (int64, error) {
 
 	if strings.HasPrefix(s, "0x") {
 		imm2, err2 = strconv.ParseInt(s[2:], 16, 64) // check if s is hex
+		fmt.Println("imm2:", imm2, err2)
 	} else if strings.HasPrefix(s, "-0x") {
 		imm2, err2 = strconv.ParseInt(string(s[0])+s[3:], 16, 64) // ignore the "0x" part but include the '-'
 		if imm2 == 0 {
 			imm2, err2 = strconv.ParseInt(string(s[0])+"1"+strings.Repeat("0", len(s[3:])*4), 2, 64)
-			//fmt.Println("imm2:", string(s[0])+"1"+strings.Repeat("0", len(s[3:])*4))
+			fmt.Println("imm2:", string(s[0])+"1"+strings.Repeat("0", len(s[3:])*4))
 		}
 
 	} else if strings.HasPrefix(s, "0b") {
@@ -56,6 +57,7 @@ func isValidImmediate(s string) (int64, error) {
 	}
 
 	if err1 != nil && err2 != nil && err3 != nil {
+	        fmt.Println(s)
 		return 0, errors.New("Invalid immediate value")
 	} else if err1 == nil {
 		return imm1, nil
@@ -63,6 +65,48 @@ func isValidImmediate(s string) (int64, error) {
 		return imm2, nil
 	} else {
 		return imm3, nil
+	}
+}
+func isValidImmediate_u(s string) (int64, uint64, error) {
+	var sign int64
+	var imm1, imm2, imm3 uint64
+	var err1 = errors.New("error_init")
+	var err2 = errors.New("error_init")
+	var err3 = errors.New("error_init")
+
+	//imm1, err1 = strconv.ParseUint(s, 10, 32) // check if s is a decimal number
+
+	if strings.HasPrefix(s, "0x"){
+		imm2, err2 = strconv.ParseUint(s[2:], 16, 64) // check if s is hex
+		fmt.Println("imm2:", imm2, err2)
+	    } else if strings.HasPrefix(s, "-0x") {
+		imm3, err2 = strconv.ParseUint(s[3:], 16, 64) // check if s is binary
+		fmt.Println("imm2:", imm2, err2)
+	    } else if strings.HasPrefix(s, "0b") {
+		imm3, err3 = strconv.ParseUint(s[2:], 2, 64) // check if s is binary
+	    } else if strings.HasPrefix(s, "-0b") {
+		imm3, err3 = strconv.ParseUint(s[3:], 2, 64) // check if s is binary
+	    } else if strings.HasPrefix(s, "-") {
+		imm1, err1 = strconv.ParseUint(s[1:], 10, 64) // check if s is binary
+	    } else {
+		imm1, err1 = strconv.ParseUint(s, 10, 64) // check if s is a decimal number
+	    }
+
+
+	if strings.HasPrefix(s, "-") { sign = 1}
+
+	if err1 != nil && err2 != nil && err3 != nil {
+	        fmt.Println(err1)
+	        fmt.Println(err2)
+	        fmt.Println(err3)
+	        fmt.Println(s)
+		return 0, 0, errors.New("Invalid immediate value")
+	} else if err1 == nil {
+		return sign, imm1, nil
+	} else if err2 == nil {
+		return sign, imm2, nil
+	} else {
+		return sign, imm3, nil
 	}
 }
 
@@ -214,50 +258,51 @@ func main() {
 				fmt.Println("Incorrect argument count on line: ", lineCounter)
 				os.Exit(0)
 			}
-			imm, err := isValidImmediate(code[2])
+			sign, imm, err := isValidImmediate_u(code[2])
 			//op, opFound := opBin[code[0]]
 			//rd, rdFound := regBin[code[1]]
 			if err != nil {
-				fmt.Printf("Error on line %d: %s\n", lineCounter, err)
+				fmt.Printf("~Error on line %d: %s, %s \n", lineCounter, err, line)
 				os.Exit(0)
 			}
 			fmt.Printf("line %d, imm: 0x%X=0b%b=%d\n", lineCounter, imm, imm, imm)
-			if imm > 0x7fffffffffffffff || imm  < -0x8000000000000000 {
-				fmt.Printf("li: Error on line %d: Immediate value %d=0x%X out of range (should be between 0x%X and 0x7fffffffffffffff )\n", lineCounter, imm, imm, -0x800000000000000)
-				os.Exit(0)
-			}
+			//if imm > 0x7fffffffffffffff || imm  < -0x8000000000000000 {
+			//	fmt.Printf("li: Error on line %d: Immediate value %d=0x%X out of range (should be between 0x%X and 0x7fffffffffffffff )\n", lineCounter, imm, imm, -0x800000000000000)
+			//	os.Exit(0)
+			//}
 			if label != "" {
 				//fmt.Printf("%s: \n", label)
 				real_instr.WriteString(label+":\n")
 			}
 
-			load_32 := func(reg string, imm int64) int {
+			load_32 := func(reg string, imm uint64) int {
 				//sign_bit := imm >> 63 & 1
-				sign_bit := imm >> 31 & 1
-				if sign_bit == 1 { imm = ^imm + 1 }// same imm = -imm 
+		//		sign_bit := imm >> 31 & 1
+		//		if sign_bit == 1 { imm = ^imm + 1 }// same imm = -imm 
 
 				l12 := imm & 0xfff // 12 bits
 				l12_sign_bit := l12 >> 11 & 1
 				h20 := imm >> 12
 				if l12_sign_bit == 1 {
-					if sign_bit == 0 {h20 = h20 + 1 
+	//				if sign_bit == 0 {
+					   h20 = h20 + 1 
 					   l12 = -(0x1000 - l12) }
-				}
+			//	}
 				    ins := fmt.Sprintf("lui %s, %#x\n", reg, h20)
 				        real_instr.WriteString(ins)
 				    ins = fmt.Sprintf("addiw %s, %s, %#x\n", reg, reg, l12)
 				        real_instr.WriteString(ins)
-				if sign_bit == 1 { 
-					ins = fmt.Sprintf("xori %s, %s, -1\naddiw %s, %s, 1\n", reg, reg, reg, reg)
-				        real_instr.WriteString(ins)
+	//			if sign_bit == 1 { 
+	//				ins = fmt.Sprintf("xori %s, %s, -1\naddiw %s, %s, 1\n", reg, reg, reg, reg)
+	//			        real_instr.WriteString(ins)
 
-			    }
+	//		    }
 				return 0
 			}
 			//-----
 			        // 获取绝对值
-				sign_bit := imm >> 63 & 1
-				if sign_bit == 1 { imm = ^imm + 1 }// same imm = -imm 
+				//sign_bit := imm >> 63 & 1
+				//if sign_bit == 1 { imm = ^imm + 1 }// same imm = -imm 
 
 				// 低 32 位到 rd ( even 0 must act once)
 				l_imm := imm << 32 >> 32
@@ -277,7 +322,8 @@ func main() {
 			        real_instr.WriteString(ins)
 				    }
 				// 取补码还原负数
-				if sign_bit == 1 { 
+				//if sign_bit == 1 { 
+				if sign == 1 { 
 					ins := fmt.Sprintf("xori %s, %s, -1\naddi %s, %s, 1\n", code[1], code[1], code[1], code[1])
 				        real_instr.WriteString(ins)
 
@@ -528,7 +574,7 @@ func main() {
 			op, opFound := opBin[code[0]]
 			rd, rdFound := regBin[code[1]]
 			if err != nil {
-				fmt.Printf("Error on line %d: %s\n", lineCounter, err)
+				fmt.Printf("-Error on line %d: %s\n", lineCounter, err)
 				os.Exit(0)
 			}
 			if imm < -0x80000 || imm > 0xfffff { // for assembler create lui 0x800 in li 
@@ -589,7 +635,7 @@ func main() {
 			}
 			imm, err := isValidImmediate(code[2])
 			if err != nil {
-				fmt.Printf("Error on line %d: %s\n", lineCounter, err)
+				fmt.Printf("!!Error on line %d: %s\n", lineCounter, err)
 				os.Exit(0)
 			}
 			op, opFound := opBin[code[0]]
@@ -613,7 +659,7 @@ func main() {
 			}
 			imm, err := isValidImmediate(code[2])
 			if err != nil {
-				fmt.Printf("Error on line %d: %s\n", lineCounter, err)
+				fmt.Printf("@Error on line %d: %s\n", lineCounter, err)
 				os.Exit(0)
 			}
 			op, opFound := opBin[code[0]]
@@ -632,7 +678,7 @@ func main() {
 			}
 			imm, err := isValidImmediate(code[3])
 			if err != nil {
-				fmt.Printf("Error on line %d: %s\n", lineCounter, err)
+				fmt.Printf("$Error on line %d: %s\n", lineCounter, err)
 				os.Exit(0)
 			}
 			//if imm > 0xfff || imm < -2048 { //0x7ff -0x1000  0xfff for sltiu
@@ -657,7 +703,7 @@ func main() {
 			}
 			imm, err := isValidImmediate(code[3])
 			if err != nil {
-				fmt.Printf("Error on line %d: %s\n", lineCounter, err)
+				fmt.Printf("!Error on line %d: %s\n", lineCounter, err)
 				os.Exit(0)
 			}
 			if (switchOnOp == "slliw" || switchOnOp == "srliw" || switchOnOp == "sraiw") && imm > 31 {
