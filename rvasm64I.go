@@ -474,25 +474,26 @@ func main() {
 	defer f.Close()
 
 	// set up file header table
-	f.Write([]byte{0x7F, 0x45, 0x4C, 0x46, // indicates ELF file
-		0x01,                                     // identifies 32 bit format ?
+	f.Write([]byte{0x7F, 0x45, 0x4C, 0x46, // Magic number indicates ELF file
+		0x02,                                     // 01 for 32-bit 02 for 64-bit
 		0x01,                                     // specify little endian
 		0x01,                                     // current elf version
 		0x00,                                     // target platform, usually set to 0x0 (System V)
 		0x00,                                     // ABI version
 		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // zero padding
-		0x01, 0x00, // object relocatable file
-		0xF3, 0x00, // specify machine RISC-V
-		0x01, 0x00, 0x00, 0x00, // specify original elf version
-		0x00, 0x00, 0x00, 0x80, // program entry address
-		0x34, 0x00, 0x00, 0x00, // points to start of program header table
-		0x00, 0x00, 0x00, 0x00, // points to start of section header table
+		// e_ident[16]
+		0x01, 0x00, // e_type object relocatable file
+		0xF3, 0x00, // e_machine specify machine RISC-V
+		0x01, 0x00, 0x00, 0x00, // e_version specify original elf version
+		0x00, 0x00, 0x00, 0x00, // e_entry program entry address
+		0x00, 0x00, 0x00, 0x00, // e_phoff points to start of program header table
+		0x00, 0x00, 0x00, 0x00, // e_shoff points to start of section header table
 		0x00, 0x00, 0x00, 0x00, // e_flags
-		0x34, 0x00, // specify size of header, 52 bytes for 32-bit format ?
+		0x40, 0x00, // e_ehsize specify size of header, 52 bytes(0x34) for 32-bit format, 64 bytes(0x40) for 64-bit ?
 		0x00, 0x00, // size of program header table entry
 		0x00, 0x00, // contains number of entries in program header table
-		0x00, 0x00, // size of section header entry
-		0x00, 0x00, // number of entries in the section header table
+		0x40, 0x00, // e_shentsize size of section header entry
+		0x00, 0x00, // e_shnum number of entries in the section header table
 		0x00, 0x00, // index of the section header table entry that contains the section names
 	})
 
