@@ -1,5 +1,3 @@
-// 分步设计制作CPU 2024.10.04 解释权陈钢Email:databingo@foxmail.com
-
 // 声明指令控制线
 reg Lui, Auipc, Lb, Lbu, Lh, Lhu, Lw, Lwu, Ld, Sb, Sh, Sw, Sd, Add, Sub, Sll, Slt, Sltu, Xor, Srl, Sra, Or, And, Addi, Slti, Sltiu, Ori, Andi, Xori, Slli, Srli, Srai, Addiw, Slliw, Srliw, Sraiw, Addw, Subw, Sllw, Srlw, Sraw, Jal, Jalr, Beq, Bne, Blt, Bge, Bltu, Bgeu, Fence, Fencei, Ecall, Ebreak, Csrrw, Csrrs, Csrrc, Csrrwi, Csrrsi, Csrrci;
 
@@ -79,7 +77,7 @@ oEcall, oEbreak, oCsrrw, oCsrrs, oCsrrc, oCsrrwi, oCsrrsi, oCsrrci
 // return: jalr x0, x1, 0
 
 //  程序存储器 
-reg [7:0] irom [0:399];// 8 位宽度，400 行深度
+reg [7:0] irom [0:1999];// 8 位宽度，400 行深度
 // 数据存储器
 reg [7:0] drom [0:399];// 8 位宽度，400 行深度
 // 堆栈存储器
