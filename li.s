@@ -56,13 +56,13 @@
     li x11, 1               # Signal Compare
     li x11, 0               # Clear Signal
 
-### TEST: LI_MEDIUM_POS_LUI_ADDI_2
-#    # Purpose: Test another value requiring LUI/ADDI.
-#    li x31, 100000          # Value under test (0x186A0) -> x31
-#    li x30, 100000          # Golden value -> x30
-#    li x11, 1               # Signal Compare
-#    li x11, 0               # Clear Signal
-#
+## TEST: LI_MEDIUM_POS_LUI_ADDI_2
+    # Purpose: Test another value requiring LUI/ADDI.
+    li x31, 100000          # Value under test (0x186A0) -> x31
+    li x30, 100000          # Golden value -> x30
+    li x11, 1               # Signal Compare
+    li x11, 0               # Clear Signal
+
 ### TEST: LI_CONST_POS_32BIT_MAX_SIGNED (0x7FFFFFFF)
 #    # Purpose: Test loading max positive 32-bit signed integer value.
 #    li x31, 0x7FFFFFFF      # Value under test (Hex) -> x31
