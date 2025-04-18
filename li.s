@@ -4,6 +4,43 @@
 ## Using x30 to load Golden value
 ## Using x11 for Compare Signaling
 ##--------------------------------------------
+
+## TEST: LI_ZERO
+    # Purpose: Test loading zero.
+    li x31, 0               # Value under test -> x31
+    li x30, 0               # Golden value -> x30
+    li x11, 1               # Signal Compare (External harness should check x31 == x30)
+    li x11, 0               # Clear Signal
+
+## TEST: LI_SMALL_POS_1 (Fits in ADDI imm)
+    # Purpose: Test loading a small positive value.
+    li x31, 1               # Value under test -> x31
+    li x30, 1               # Golden value -> x30
+    li x11, 1               # Signal Compare
+    li x11, 0               # Clear Signal
+
+## TEST: LI_SMALL_POS_1000 (Fits in ADDI imm)
+    # Purpose: Test loading a larger small positive value.
+    li x31, 1000            # Value under test -> x31
+    li x30, 1000            # Golden value -> x30
+    li x11, 1               # Signal Compare
+    li x11, 0               # Clear Signal
+
+## TEST: LI_SMALL_POS_ADDI_MAX (Upper limit of ADDI imm)
+    # Purpose: Test the positive boundary of ADDI immediate field.
+    li x31, 2047            # Value under test (0x7FF) -> x31
+    li x30, 0x7FF           # Golden value -> x30
+    li x11, 1               # Signal Compare
+    li x11, 0               # Clear Signal
+
+## TEST: LI_SMALL_NEG_ADDI (Fits in ADDI imm)
+    # Purpose: Test loading a small negative value (decimal).
+    li x31, -1000           # Value under test -> x31
+    li x30, -1000           # Golden value (assembler handles negative decimal) -> x30
+    # Golden hex: 0xFFFFFFFFFFFFFС18
+    li x11, 1               # Signal Compare
+    li x11, 0               # Clear Signal
+
 ## TEST: LI_SMALL_NEG_ADDI_MIN (Lower limit of ADDI imm)
     # Purpose: Test the negative boundary of ADDI immediate field.
     li x31, -2048           # Value under test (bit pattern 0xFF...FFF800) -> x31
@@ -12,50 +49,6 @@
     li x11, 1               # Signal Compare
     li x11, 0               # Clear Signal
 
-### TEST: LI_ZERO
-#    # Purpose: Test loading zero.
-#    li x31, 0               # Value under test -> x31
-#    li x30, 0               # Golden value -> x30
-#    li x11, 1               # Signal Compare (External harness should check x31 == x30)
-#    li x11, 0               # Clear Signal
-#
-### TEST: LI_SMALL_POS_1 (Fits in ADDI imm)
-#    # Purpose: Test loading a small positive value.
-#    li x31, 1               # Value under test -> x31
-#    li x30, 1               # Golden value -> x30
-#    li x11, 1               # Signal Compare
-#    li x11, 0               # Clear Signal
-#
-### TEST: LI_SMALL_POS_1000 (Fits in ADDI imm)
-#    # Purpose: Test loading a larger small positive value.
-#    li x31, 1000            # Value under test -> x31
-#    li x30, 1000            # Golden value -> x30
-#    li x11, 1               # Signal Compare
-#    li x11, 0               # Clear Signal
-#
-### TEST: LI_SMALL_POS_ADDI_MAX (Upper limit of ADDI imm)
-#    # Purpose: Test the positive boundary of ADDI immediate field.
-#    li x31, 2047            # Value under test (0x7FF) -> x31
-#    li x30, 0x7FF           # Golden value -> x30
-#    li x11, 1               # Signal Compare
-#    li x11, 0               # Clear Signal
-#
-### TEST: LI_SMALL_NEG_ADDI (Fits in ADDI imm)
-#    # Purpose: Test loading a small negative value (decimal).
-#    li x31, -1000           # Value under test -> x31
-#    li x30, -1000           # Golden value (assembler handles negative decimal) -> x30
-#    # Golden hex: 0xFFFFFFFFFFFFFС18
-#    li x11, 1               # Signal Compare
-#    li x11, 0               # Clear Signal
-#
-### TEST: LI_SMALL_NEG_ADDI_MIN (Lower limit of ADDI imm)
-#    # Purpose: Test the negative boundary of ADDI immediate field.
-#    li x31, -2048           # Value under test (bit pattern 0xFF...FFF800) -> x31
-#    li x30, -2048           # Golden value -> x30
-#    # Golden hex: 0xFFFFFFFFFFFFF800
-#    li x11, 1               # Signal Compare
-#    li x11, 0               # Clear Signal
-#
 ### TEST: LI_MEDIUM_POS_LUI_ADDI (Requires LUI/ADDI)
 #    # Purpose: Test value just outside ADDI range, requiring LUI.
 #    li x31, 2048            # Value under test (0x800) -> x31

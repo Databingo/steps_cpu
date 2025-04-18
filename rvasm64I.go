@@ -295,12 +295,14 @@ func main() {
 				L12_sign_bit := imm >> 11 & 1
 				L11 := imm & 0x7ff // 11 bits
 				if imm&0xfff != 0 {
-					ins = fmt.Sprintf("addi %s, %s, %#x\n", reg, "x0", 0) // clean
+					ins = fmt.Sprintf("addi %s, %s, %#x\n", reg, "x0", 0) // clean reg
 					real_instr.WriteString(ins)
 					ins = fmt.Sprintf("addi %s, %s, %#x\n", reg, reg, L11)
 					real_instr.WriteString(ins)
 
 					if L12_sign_bit == 1 {
+						ins = fmt.Sprintf("addi %s, %s, %#x\n", rt, "x0", 0) //clean rt
+						real_instr.WriteString(ins)
 						ins = fmt.Sprintf("addi %s, %s, %#x\n", rt, rt, 1)
 						real_instr.WriteString(ins)
 						ins = fmt.Sprintf("slli %s, %s, %#x\n", rt, rt, 11)
@@ -314,10 +316,13 @@ func main() {
 				H20_sign_bit := imm >> 31 & 1
 				h19 := imm << 1 >> 1 >> 12
 				if imm>>12 != 0 {
-					ins := fmt.Sprintf("lui %s, %#x\n", rt, h19)
+					real_instr.WriteString(ins)
+					ins  = fmt.Sprintf("lui %s, %#x\n", rt, h19) // clean rt automatically
 					real_instr.WriteString(ins)
 
 					if H20_sign_bit == 1 {
+						ins = fmt.Sprintf("addi %s, %s, %#x\n", rt2, "x0", 0) //clean rt2
+					        real_instr.WriteString(ins)
 						ins = fmt.Sprintf("addi %s, %s, %#x\n", rt2, rt2, 1)
 						real_instr.WriteString(ins)
 						ins = fmt.Sprintf("slli %s, %s, %#x\n", rt2, rt2, 19)
