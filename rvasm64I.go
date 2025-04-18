@@ -260,7 +260,7 @@ func main() {
 			}
 		}
 		switch switchOnOp {
-		case "li": // assembly use 0x and decimal with -+ meets the KISS 
+		case "li": // assembly use 0x and decimal with -+ meets the KISS, at least one way to go through first
 			if len(code) != 3 && len(code) != 4 {
 				fmt.Println("Incorrect argument count on line: ", lineCounter)
 				os.Exit(0)
@@ -288,41 +288,41 @@ func main() {
 			}
 
 			rt := "x5"  // t0 assember used
-			rt1 := "x6"   // t1 assember used
-			rt2 := "x7"   // t2 assember used
+			rt1 := "x6" // t1 assember used
+			rt2 := "x7" // t2 assember used
 
 			load_32 := func(reg string, imm uint64) int {
 				// L12
 				L12_sign_bit := imm >> 11 & 1
-				L11 := imm & 0x7ff // 11 bits
+				L11 := imm & 0x7ff                                    // 11 bits
 				ins = fmt.Sprintf("addi %s, %s, %#x\n", reg, "x0", 0) // clean reg
 				real_instr.WriteString(ins)
-				if L11 != 0  {
+				if L11 != 0 {
 					ins = fmt.Sprintf("addi %s, %s, %#x\n", reg, reg, L11)
 					real_instr.WriteString(ins)
-				    }
-                                        // Fix L12_MSB
-					if L12_sign_bit == 1 {
-						ins = fmt.Sprintf("addi %s, %s, %#x\n", rt, "x0", 0) //clean rt
-						real_instr.WriteString(ins)
-						ins = fmt.Sprintf("addi %s, %s, %#x\n", rt, rt, 1)
-						real_instr.WriteString(ins)
-						ins = fmt.Sprintf("slli %s, %s, %#x\n", rt, rt, 11)
-						real_instr.WriteString(ins)
-						ins = fmt.Sprintf("add %s, %s, %s\n", reg, reg, rt)
-						real_instr.WriteString(ins)
-					}
+				}
+				// Fix L12_MSB
+				if L12_sign_bit == 1 {
+					ins = fmt.Sprintf("addi %s, %s, %#x\n", rt, "x0", 0) //clean rt
+					real_instr.WriteString(ins)
+					ins = fmt.Sprintf("addi %s, %s, %#x\n", rt, rt, 1)
+					real_instr.WriteString(ins)
+					ins = fmt.Sprintf("slli %s, %s, %#x\n", rt, rt, 11)
+					real_instr.WriteString(ins)
+					ins = fmt.Sprintf("add %s, %s, %s\n", reg, reg, rt)
+					real_instr.WriteString(ins)
+				}
 
 				// H20
 				H20_sign_bit := imm >> 31 & 1
 				h19 := imm >> 12 & 0x7ffff
 				if imm>>12 != 0 { // H exist
-					ins  = fmt.Sprintf("lui %s, %#x\n", rt, h19) // lui clean rt automatically
+					ins = fmt.Sprintf("lui %s, %#x\n", rt, h19) // lui clean rt automatically
 					real_instr.WriteString(ins)
-                                        // Fix H20_MSB
+					// Fix H20_MSB
 					if H20_sign_bit == 1 {
 						ins = fmt.Sprintf("addi %s, %s, %#x\n", rt1, "x0", 0) //clean rt2
-					        real_instr.WriteString(ins)
+						real_instr.WriteString(ins)
 						ins = fmt.Sprintf("addi %s, %s, %#x\n", rt1, rt1, 1)
 						real_instr.WriteString(ins)
 						ins = fmt.Sprintf("slli %s, %s, %#x\n", rt1, rt1, 31) // MSB
@@ -341,14 +341,13 @@ func main() {
 				return 0
 			}
 
-
 			// 0
 			if imm == 0 {
 				ins = fmt.Sprintf("addi %s, %s, %#x\n", code[1], "x0", 0)
 				real_instr.WriteString(ins)
 			}
 			if imm != 0 {
-				// 低 32 位到 rd 
+				// 低 32 位到 rd
 				l_imm := imm << 32 >> 32
 				load_32(code[1], l_imm)
 
