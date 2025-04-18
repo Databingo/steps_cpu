@@ -147,4 +147,99 @@
     li x30, 0xC000000000000000 # Golden value -> x30
     li x11, 1               # Signal Compare
     li x11, 0               # Clear Signal
+##--------------------------------------------
+## Additional li Tests (Pattern Stress) - RV64
+## Using x31 as result/test value
+## Using x30 to load Golden value
+## Using x11 for Compare Signaling
+##--------------------------------------------
 
+## TEST: LI_PATTERN_ALT_10
+    # Purpose: Test alternating 10 pattern (64-bit)
+    li x31, 0xAAAAAAAAAAAAAAAA # Value under test
+    li x30, 0xAAAAAAAAAAAAAAAA # Golden value
+    li x11, 1                  # Signal Compare (External harness should check x31 == x30)
+    li x11, 0                  # Clear Signal
+
+## TEST: LI_PATTERN_ALT_01
+    # Purpose: Test alternating 01 pattern (64-bit)
+    li x31, 0x5555555555555555 # Value under test
+    li x30, 0x5555555555555555 # Golden value
+    li x11, 1                  # Signal Compare
+    li x11, 0                  # Clear Signal
+
+## TEST: LI_PATTERN_32_ALT_10
+    # Purpose: Test alternating 10 pattern (32-bit), check zero extension on RV64
+    li x31, 0xAAAAAAAA         # Value under test
+    li x30, 0x00000000AAAAAAAA # Golden value (assuming zero-extend for positive hex < 2^31)
+    li x11, 1                  # Signal Compare
+    li x11, 0                  # Clear Signal
+
+## TEST: LI_PATTERN_32_ALT_01
+    # Purpose: Test alternating 01 pattern (32-bit), check zero extension on RV64
+    li x31, 0x55555555         # Value under test
+    li x30, 0x0000000055555555 # Golden value
+    li x11, 1                  # Signal Compare
+    li x11, 0                  # Clear Signal
+##--------------------------------------------
+## Additional li Tests (LUI/ADDI Stress) - RV64
+##--------------------------------------------
+
+## TEST: LI_STRESS_LUI_ADDI_NEG_LO_1
+    # Purpose: Test LUI/ADDI combination with negative lower 12 bits (-2048 = 0x800)
+    # Example: target 0xABC800 = lui(0xABD) + addi(-2048)
+    li x31, 0xABC800           # Value under test
+    li x30, 0x00000000ABC800   # Golden value (assuming zero-extend overall)
+    li x11, 1                  # Signal Compare
+    li x11, 0                  # Clear Signal
+
+## TEST: LI_STRESS_LUI_ADDI_NEG_LO_2
+    # Purpose: Test LUI/ADDI near 32-bit wrap with negative lower 12 bits (-1 = 0xFFF)
+    # Example: target 0x123FFF = lui(0x124) + addi(-1)
+    li x31, 0x123FFF           # Value under test
+    li x30, 0x00000000123FFF   # Golden value (assuming zero-extend overall)
+    li x11, 1                  # Signal Compare
+    li x11, 0                  # Clear Signal
+
+## TEST: LI_STRESS_LUI_ADDI_NEG_LO_3
+    # Purpose: Test LUI/ADDI that constructs 0xFFFFFxxx pattern using negative lower bits
+    # Example: target 0xFFFFE800 = lui(0xFFFFF) + addi(-2048)? No, that's FFFFE800. Need lui(0x100000)+addi(-2048)? No, wrong sign ext.
+    # How about lui(0xFFFFE) + addi(0x800)? -> 0xFFFFE800. Let's use this.
+    li x31, 0xFFFFE800         # Value under test
+    li x30, 0x00000000FFFFE800 # Golden value (assuming zero-extend overall)
+    li x11, 1                  # Signal Compare
+    li x11, 0                  # Clear Signal
+##--------------------------------------------
+## Additional li Tests (32/64 Boundary) - RV64
+##--------------------------------------------
+
+## TEST: LI_NEAR_32_BOUNDARY_POS
+    # Purpose: Test value just above 32-bit boundary
+    li x31, 0x100000000        # Value under test (2^32)
+    li x30, 0x0000000100000000 # Golden value
+    li x11, 1                  # Signal Compare
+    li x11, 0                  # Clear Signal
+
+## TEST: LI_NEAR_32_BOUNDARY_NEG
+    # Purpose: Test pattern with high 32 bits set, low clear
+    li x31, 0xFFFFFFFF00000000 # Value under test
+    li x30, 0xFFFFFFFF00000000 # Golden value
+    li x11, 1                  # Signal Compare
+    li x11, 0                  # Clear Signal
+##--------------------------------------------
+## Additional li Tests (Complex Pattern) - RV64
+##--------------------------------------------
+
+## TEST: LI_COMPLEX_PATTERN_1
+    # Purpose: Test a general complex bit pattern
+    li x31, 0xFEDCBA9876543210 # Value under test
+    li x30, 0xFEDCBA9876543210 # Golden value
+    li x11, 1                  # Signal Compare
+    li x11, 0                  # Clear Signal
+
+## TEST: LI_COMPLEX_PATTERN_2
+    # Purpose: Test another complex bit pattern
+    li x31, 0x1234ABCD4321EF01 # Value under test
+    li x30, 0x1234ABCD4321EF01 # Golden value
+    li x11, 1                  # Signal Compare
+    li x11, 0                  # Clear Signal
