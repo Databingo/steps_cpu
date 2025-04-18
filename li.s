@@ -49,13 +49,13 @@
     li x11, 1               # Signal Compare
     li x11, 0               # Clear Signal
 
-### TEST: LI_MEDIUM_POS_LUI_ADDI (Requires LUI/ADDI)
-#    # Purpose: Test value just outside ADDI range, requiring LUI.
-#    li x31, 2048            # Value under test (0x800) -> x31
-#    li x30, 0x800           # Golden value -> x30
-#    li x11, 1               # Signal Compare
-#    li x11, 0               # Clear Signal
-#
+## TEST: LI_MEDIUM_POS_LUI_ADDI (Requires LUI/ADDI)
+    # Purpose: Test value just outside ADDI range, requiring LUI.
+    li x31, 2048            # Value under test (0x800) -> x31
+    li x30, 0x800           # Golden value -> x30
+    li x11, 1               # Signal Compare
+    li x11, 0               # Clear Signal
+
 ### TEST: LI_MEDIUM_POS_LUI_ADDI_2
 #    # Purpose: Test another value requiring LUI/ADDI.
 #    li x31, 100000          # Value under test (0x186A0) -> x31
