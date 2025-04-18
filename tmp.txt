@@ -18,3 +18,14 @@ addi x1, x0, 0x0
 addi x1, x1, 0x1
 #     li x1, 0                
 addi x1, x0, 0x0
+#     li x31, 1000            
+addi x31, x0, 0x0
+addi x31, x31, 0x3e8
+#     li x2, 1000             
+addi x2, x0, 0x0
+addi x2, x2, 0x3e8
+#     li x1, 1                
+addi x1, x0, 0x0
+addi x1, x1, 0x1
+#     li x1, 0                
+addi x1, x0, 0x0

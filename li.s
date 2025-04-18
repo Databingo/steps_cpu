@@ -20,13 +20,13 @@
     li x1, 0                # Clear Signal
 
 
-### TEST: LI_SMALL_POS_1000 (Fits in ADDI imm)
-#    # Purpose: Test loading a larger small positive value.
-#    li x31, 1000            # Value under test -> x31
-#    li x2, 1000             # Golden value -> x2 (sp)
-#    li x1, 1                # Signal Compare
-#    li x1, 0                # Clear Signal
-#
+## TEST: LI_SMALL_POS_1000 (Fits in ADDI imm)
+    # Purpose: Test loading a larger small positive value.
+    li x31, 1000            # Value under test -> x31
+    li x2, 1000             # Golden value -> x2 (sp)
+    li x1, 1                # Signal Compare
+    li x1, 0                # Clear Signal
+
 ### TEST: LI_SMALL_POS_ADDI_MAX (Upper limit of ADDI imm)
 #    # Purpose: Test the positive boundary of ADDI immediate field.
 #    li x31, 2047            # Value under test (0x7FF) -> x31
