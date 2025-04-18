@@ -301,7 +301,7 @@ func main() {
 					ins = fmt.Sprintf("addi %s, %s, %#x\n", reg, reg, L11)
 					real_instr.WriteString(ins)
 				    }
-
+                                        // Fix L12_MSB
 					if L12_sign_bit == 1 {
 						ins = fmt.Sprintf("addi %s, %s, %#x\n", rt, "x0", 0) //clean rt
 						real_instr.WriteString(ins)
@@ -316,10 +316,10 @@ func main() {
 				// H20
 				H20_sign_bit := imm >> 31 & 1
 				h19 := imm >> 12 & 0x7ffff
-				if imm>>12 != 0 {
-					ins  = fmt.Sprintf("lui %s, %#x\n", rt, h19) // clean rt automatically
+				if imm>>12 != 0 { // H exist
+					ins  = fmt.Sprintf("lui %s, %#x\n", rt, h19) // lui clean rt automatically
 					real_instr.WriteString(ins)
-
+                                        // Fix H20_MSB
 					if H20_sign_bit == 1 {
 						ins = fmt.Sprintf("addi %s, %s, %#x\n", rt1, "x0", 0) //clean rt2
 					        real_instr.WriteString(ins)

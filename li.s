@@ -79,14 +79,14 @@
     li x11, 1               # Signal Compare
     li x11, 0               # Clear Signal
 
-### TEST: LI_MEDIUM_NEG_LUI_ADDI (Requires LUI/ADDI)
-#    # Purpose: Test negative value just outside ADDI range.
-#    li x31, -2049           # Value under test (bit pattern 0xFF...FFF7FF) -> x31
-#    li x30, -2049           # Golden value -> x30
-#    # Golden hex: 0xFFFFFFFFFFFFF7FF
-#    li x11, 1               # Signal Compare
-#    li x11, 0               # Clear Signal
-#
+## TEST: LI_MEDIUM_NEG_LUI_ADDI (Requires LUI/ADDI)
+    # Purpose: Test negative value just outside ADDI range.
+    li x31, -2049           # Value under test (bit pattern 0xFF...FFF7FF) -> x31
+    li x30, -2049           # Golden value -> x30
+    # Golden hex: 0xFFFFFFFFFFFFF7FF
+    li x11, 1               # Signal Compare
+    li x11, 0               # Clear Signal
+
 ### TEST: LI_CONST_NEG_32BIT_MIN_SIGNED (Decimal)
 #    # Purpose: Test loading min negative 32-bit signed value (-2^31).
 #    # On RV64, li sign-extends negative decimal values.
