@@ -7,7 +7,7 @@
 
 parameter YMC = 60; // 一个脉冲是 60 纳秒时间单位，从上升沿到上升沿是一个周期，两个脉冲，120 纳秒
 //parameter TIME_WINDOW = 60*2 * 66 * 3 + 2 ; // 运行仿真 66*3(+2延迟节拍) 个时钟周期
-parameter TIME_WINDOW = 60*100 * 66 * 4 + 2 ;
+parameter TIME_WINDOW = 60*1000 * 66 * 4 + 2 ;
 
 
 module s4tb();
@@ -411,6 +411,7 @@ always @(posedge clk) begin
 //   if (ox31 !== 0 && ox31 !== 64'bz && ox31 !== 64'bx) $write("ox31=%0d,",  ox31 ,); 
 //   if (ox31 !== 0 && ox31 !== 64'bz && ox31 !== 64'bx && ox31[63] == 1'b1) $write("ox31=-0x%0h,",  ~ox31[63:0]+1'b1 ,); 
 //   if (ox31 !== 0 && ox31 !== 64'bz && ox31 !== 64'bx && ox31[63] == 1'b1) $write("ox31=-%0d,",  ~ox31[63:0]+1'b1 ,); 
+   $display("opc=%0b|%0d, ox11=%0d, ox31=0x%16h|%0d", opc, opc, ox11, ox31, $signed(ox31), ); 
    if (ox11 == 1 && ox30  ==  ox31) $display("opc=%0b|%0d, ox11=%0d, ox31=0x%16h|%0d, PASS", opc, opc, ox11, ox31, $signed(ox31), ); 
    if (ox11 == 1 && ox30 !==  ox31) $display("opc=%0b|%0d, ox11=%0d, ox30=0b%64b, ox31=0b%64b, FAILED!", opc, opc, ox11, ox30, ox31); 
   // if (oupimm  !== 0 ) $write("oupimm=%0b,",  oupimm ,);
