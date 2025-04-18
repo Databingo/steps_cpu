@@ -315,7 +315,7 @@ func main() {
 
 				// H20
 				H20_sign_bit := imm >> 31 & 1
-				h19 := imm << 1 >> 1 >> 12
+				h19 := imm >> 12 & 0x7ffff
 				if imm>>12 != 0 {
 					ins  = fmt.Sprintf("lui %s, %#x\n", rt, h19) // clean rt automatically
 					real_instr.WriteString(ins)
@@ -325,7 +325,7 @@ func main() {
 					        real_instr.WriteString(ins)
 						ins = fmt.Sprintf("addi %s, %s, %#x\n", rt1, rt1, 1)
 						real_instr.WriteString(ins)
-						ins = fmt.Sprintf("slli %s, %s, %#x\n", rt1, rt1, 19)
+						ins = fmt.Sprintf("slli %s, %s, %#x\n", rt1, rt1, 31)
 						real_instr.WriteString(ins)
 						ins = fmt.Sprintf("add %s, %s, %s\n", rt, rt, rt1)
 						real_instr.WriteString(ins)

@@ -71,14 +71,14 @@
     li x11, 1               # Signal Compare
     li x11, 0               # Clear Signal
 
-### TEST: LI_CONST_POS_32BIT_0xFFFFFFFF
-#    # Purpose: Test loading 0xFFFFFFFF (often -1 in 32-bit signed).
-#    # On RV64, li typically zero-extends positive hex values if <= 32 bits.
-#    li x31, 0xFFFFFFFF      # Value under test (Hex) -> x31
-#    li x30, 0x00000000FFFFFFFF # Golden value (zero-extended 32-bit pattern) -> x30
-#    li x11, 1               # Signal Compare
-#    li x11, 0               # Clear Signal
-#
+## TEST: LI_CONST_POS_32BIT_0xFFFFFFFF
+    # Purpose: Test loading 0xFFFFFFFF (often -1 in 32-bit signed).
+    # On RV64, li typically zero-extends positive hex values if <= 32 bits.
+    li x31, 0xFFFFFFFF      # Value under test (Hex) -> x31
+    li x30, 0x00000000FFFFFFFF # Golden value (zero-extended 32-bit pattern) -> x30
+    li x11, 1               # Signal Compare
+    li x11, 0               # Clear Signal
+
 ### TEST: LI_MEDIUM_NEG_LUI_ADDI (Requires LUI/ADDI)
 #    # Purpose: Test negative value just outside ADDI range.
 #    li x31, -2049           # Value under test (bit pattern 0xFF...FFF7FF) -> x31
