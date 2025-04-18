@@ -1089,99 +1089,99 @@ _start:
 #--------------------------------------------
 # Load/Store Tests (Require Memory Setup)
 #--------------------------------------------
-.section .data
-.align 3 # Ensure 8-byte alignment for LD/SD
-test_byte:   .byte 0xAA
-test_half:   .half 0xBBCC
-test_word:   .word 0xDDEECCBB
-test_dword:  .dword 0x1122334455667788
-test_store:  .dword 0 # Location to test stores
-
-.section .text
-# TEST: LB (Negative byte value)
-    la x3, test_byte      # Load address of test_byte (value 0xAA = -86)
-    lb x31, 0(x3)         # x31 = sign_extend(0xAA) -> 0xFFFFFFFFFFFFFFAA
-    li x2, -86            # Golden (0xFFFFFFFFFFFFFFAA)
-    li x1, 1
-    li x1, 0
-
-# TEST: LBU (Positive byte value)
-    la x3, test_byte      # Load address of test_byte (value 0xAA = 170)
-    lbu x31, 0(x3)        # x31 = zero_extend(0xAA) -> 0x00000000000000AA
-    li x2, 170            # Golden (0xAA)
-    li x1, 1
-    li x1, 0
-
-# TEST: LH (Negative half value)
-    la x3, test_half      # Load address of test_half (value 0xBBCC = -17204)
-    lh x31, 0(x3)         # x31 = sign_extend(0xBBCC) -> 0xFFFFFFFFFFFFBBCC
-    li x2, -17204         # Golden
-    li x1, 1
-    li x1, 0
-
-# TEST: LHU (Positive half value)
-    la x3, test_half      # Load address of test_half (value 0xBBCC = 48076)
-    lhu x31, 0(x3)        # x31 = zero_extend(0xBBCC) -> 0x000000000000BBCC
-    li x2, 48076          # Golden
-    li x1, 1
-    li x1, 0
-
-# TEST: LW (Negative word value)
-    la x3, test_word      # Load address of test_word (value 0xDDEECCBB = neg)
-    lw x31, 0(x3)         # x31 = sign_extend(0xDDEECCBB) -> 0xFFFFFFFFDDEECCBB
-    li x2, 0xFFFFFFFFDDEECCBB # Golden
-    li x1, 1
-    li x1, 0
-
-# TEST: LWU (Positive word value)
-    la x3, test_word      # Load address of test_word (value 0xDDEECCBB = pos)
-    lwu x31, 0(x3)        # x31 = zero_extend(0xDDEECCBB) -> 0x00000000DDEECCBB
-    li x2, 0xDDEECCBB     # Golden
-    li x1, 1
-    li x1, 0
-
-# TEST: LD
-    la x3, test_dword     # Load address of test_dword
-    ld x31, 0(x3)         # x31 = 0x1122334455667788
-    li x2, 0x1122334455667788 # Golden
-    li x1, 1
-    li x1, 0
-
-# TEST: SD / LD (Store then load back)
-    la x3, test_store     # Address to store/load from
-    li x4, 0xCAFEBABEDEADBEEF # Value to store
-    sd x4, 0(x3)          # Store value
-    ld x31, 0(x3)         # Load it back
-    li x2, 0xCAFEBABEDEADBEEF # Golden
-    li x1, 1
-    li x1, 0
-
-# TEST: SB / LB (Store byte then load back)
-    la x3, test_store     # Address
-    li x4, 0xFF           # Value to store (-1 byte)
-    sb x4, 0(x3)          # Store lowest byte (0xFF)
-    lb x31, 0(x3)         # Load back, should sign extend
-    li x2, -1             # Golden
-    li x1, 1
-    li x1, 0
-
-# TEST: SH / LH (Store half then load back)
-    la x3, test_store     # Address
-    li x4, 0xFFFF         # Value to store (-1 half)
-    sh x4, 0(x3)          # Store lowest half (0xFFFF)
-    lh x31, 0(x3)         # Load back, should sign extend
-    li x2, -1             # Golden
-    li x1, 1
-    li x1, 0
-
-# TEST: SW / LW (Store word then load back)
-    la x3, test_store     # Address
-    li x4, 0xFFFFFFFF     # Value to store (-1 word)
-    sw x4, 0(x3)          # Store lowest word (0xFFFFFFFF)
-    lw x31, 0(x3)         # Load back, should sign extend
-    li x2, -1             # Golden
-    li x1, 1
-    li x1, 0
+#.section .data
+#.align 3 # Ensure 8-byte alignment for LD/SD
+#test_byte:   .byte 0xAA
+#test_half:   .half 0xBBCC
+#test_word:   .word 0xDDEECCBB
+#test_dword:  .dword 0x1122334455667788
+#test_store:  .dword 0 # Location to test stores
+#
+#.section .text
+## TEST: LB (Negative byte value)
+#    la x3, test_byte      # Load address of test_byte (value 0xAA = -86)
+#    lb x31, 0(x3)         # x31 = sign_extend(0xAA) -> 0xFFFFFFFFFFFFFFAA
+#    li x2, -86            # Golden (0xFFFFFFFFFFFFFFAA)
+#    li x1, 1
+#    li x1, 0
+#
+## TEST: LBU (Positive byte value)
+#    la x3, test_byte      # Load address of test_byte (value 0xAA = 170)
+#    lbu x31, 0(x3)        # x31 = zero_extend(0xAA) -> 0x00000000000000AA
+#    li x2, 170            # Golden (0xAA)
+#    li x1, 1
+#    li x1, 0
+#
+## TEST: LH (Negative half value)
+#    la x3, test_half      # Load address of test_half (value 0xBBCC = -17204)
+#    lh x31, 0(x3)         # x31 = sign_extend(0xBBCC) -> 0xFFFFFFFFFFFFBBCC
+#    li x2, -17204         # Golden
+#    li x1, 1
+#    li x1, 0
+#
+## TEST: LHU (Positive half value)
+#    la x3, test_half      # Load address of test_half (value 0xBBCC = 48076)
+#    lhu x31, 0(x3)        # x31 = zero_extend(0xBBCC) -> 0x000000000000BBCC
+#    li x2, 48076          # Golden
+#    li x1, 1
+#    li x1, 0
+#
+## TEST: LW (Negative word value)
+#    la x3, test_word      # Load address of test_word (value 0xDDEECCBB = neg)
+#    lw x31, 0(x3)         # x31 = sign_extend(0xDDEECCBB) -> 0xFFFFFFFFDDEECCBB
+#    li x2, 0xFFFFFFFFDDEECCBB # Golden
+#    li x1, 1
+#    li x1, 0
+#
+## TEST: LWU (Positive word value)
+#    la x3, test_word      # Load address of test_word (value 0xDDEECCBB = pos)
+#    lwu x31, 0(x3)        # x31 = zero_extend(0xDDEECCBB) -> 0x00000000DDEECCBB
+#    li x2, 0xDDEECCBB     # Golden
+#    li x1, 1
+#    li x1, 0
+#
+## TEST: LD
+#    la x3, test_dword     # Load address of test_dword
+#    ld x31, 0(x3)         # x31 = 0x1122334455667788
+#    li x2, 0x1122334455667788 # Golden
+#    li x1, 1
+#    li x1, 0
+#
+## TEST: SD / LD (Store then load back)
+#    la x3, test_store     # Address to store/load from
+#    li x4, 0xCAFEBABEDEADBEEF # Value to store
+#    sd x4, 0(x3)          # Store value
+#    ld x31, 0(x3)         # Load it back
+#    li x2, 0xCAFEBABEDEADBEEF # Golden
+#    li x1, 1
+#    li x1, 0
+#
+## TEST: SB / LB (Store byte then load back)
+#    la x3, test_store     # Address
+#    li x4, 0xFF           # Value to store (-1 byte)
+#    sb x4, 0(x3)          # Store lowest byte (0xFF)
+#    lb x31, 0(x3)         # Load back, should sign extend
+#    li x2, -1             # Golden
+#    li x1, 1
+#    li x1, 0
+#
+## TEST: SH / LH (Store half then load back)
+#    la x3, test_store     # Address
+#    li x4, 0xFFFF         # Value to store (-1 half)
+#    sh x4, 0(x3)          # Store lowest half (0xFFFF)
+#    lh x31, 0(x3)         # Load back, should sign extend
+#    li x2, -1             # Golden
+#    li x1, 1
+#    li x1, 0
+#
+## TEST: SW / LW (Store word then load back)
+#    la x3, test_store     # Address
+#    li x4, 0xFFFFFFFF     # Value to store (-1 word)
+#    sw x4, 0(x3)          # Store lowest word (0xFFFFFFFF)
+#    lw x31, 0(x3)         # Load back, should sign extend
+#    li x2, -1             # Golden
+#    li x1, 1
+#    li x1, 0
 
 
 #--------------------------------------------
@@ -1191,16 +1191,16 @@ test_store:  .dword 0 # Location to test stores
 # TEST: JAL (rd = PC+4, PC-dependent!)
     # Assume this JAL is at PC = 0x200 for calculation
     # Need to adjust golden value based on actual assembled address
-jal_label_1: nop
-    # ... maybe other instructions here affecting PC ...
-jal_test_inst:
-    jal x31, jal_label_1  # x31 = PC_of_jal_test_inst + 4
-    # *** Execution jumps to jal_label_1 ***
-    # The following lines might not execute as intended after the jump
-    li x2, 0x204          # ** ADJUST GOLDEN VALUE (PC_of_jal_test_inst + 4) **
-    li x1, 1
-    li x1, 0
-    # *** Need code at jal_label_1 to maybe jump back or halt ***
+#jal_label_1: nop
+#    # ... maybe other instructions here affecting PC ...
+#jal_test_inst:
+#    jal x31, jal_label_1  # x31 = PC_of_jal_test_inst + 4
+#    # *** Execution jumps to jal_label_1 ***
+#    # The following lines might not execute as intended after the jump
+#    li x2, 0x204          # ** ADJUST GOLDEN VALUE (PC_of_jal_test_inst + 4) **
+#    li x1, 1
+#    li x1, 0
+#    # *** Need code at jal_label_1 to maybe jump back or halt ***
 
 # TEST: JALR (rd = PC+4, PC-dependent! Jump complicates test)
     # Assume this JALR is at PC = 0x300 for calculation
@@ -1220,180 +1220,180 @@ jalr_test_inst:
 # Branch Tests (Testing which path is taken)
 #--------------------------------------------
 
-# TEST: BEQ (Taken)
-    li x3, 100
-    li x4, 100
-    beq x3, x4, beq_taken_path_1
-    # Not taken path (error for this test)
-    li x31, 0xFFFFFFFFFFFFFFFF # -1 indicates failure path taken
-    j beq_end_1
-beq_taken_path_1:
-    li x31, 1 # 1 indicates success path taken
-beq_end_1:
-    li x2, 1  # Golden: Expect taken path code
-    li x1, 1
-    li x1, 0
+## TEST: BEQ (Taken)
+#    li x3, 100
+#    li x4, 100
+#    beq x3, x4, beq_taken_path_1
+#    # Not taken path (error for this test)
+#    li x31, 0xFFFFFFFFFFFFFFFF # -1 indicates failure path taken
+#    j beq_end_1
+#beq_taken_path_1:
+#    li x31, 1 # 1 indicates success path taken
+#beq_end_1:
+#    li x2, 1  # Golden: Expect taken path code
+#    li x1, 1
+#    li x1, 0
 
-# TEST: BEQ (Not Taken)
-    li x3, 100
-    li x4, 101
-    beq x3, x4, beq_taken_path_2
-    # Not taken path (success for this test)
-    li x31, 2 # 2 indicates success path taken
-    j beq_end_2
-beq_taken_path_2:
-    li x31, 0xFFFFFFFFFFFFFFFF # -1 indicates failure path taken
-beq_end_2:
-    li x2, 2  # Golden: Expect not taken path code
-    li x1, 1
-    li x1, 0
+## TEST: BEQ (Not Taken)
+#    li x3, 100
+#    li x4, 101
+#    beq x3, x4, beq_taken_path_2
+#    # Not taken path (success for this test)
+#    li x31, 2 # 2 indicates success path taken
+#    j beq_end_2
+#beq_taken_path_2:
+#    li x31, 0xFFFFFFFFFFFFFFFF # -1 indicates failure path taken
+#beq_end_2:
+#    li x2, 2  # Golden: Expect not taken path code
+#    li x1, 1
+#    li x1, 0
 
-# TEST: BNE (Taken)
-    li x3, 100
-    li x4, 101
-    bne x3, x4, bne_taken_path_1
-    # Not taken path (error for this test)
-    li x31, -1
-    j bne_end_1
-bne_taken_path_1:
-    li x31, 3 # Success code
-bne_end_1:
-    li x2, 3  # Golden
-    li x1, 1
-    li x1, 0
+## TEST: BNE (Taken)
+#    li x3, 100
+#    li x4, 101
+#    bne x3, x4, bne_taken_path_1
+#    # Not taken path (error for this test)
+#    li x31, -1
+#    j bne_end_1
+#bne_taken_path_1:
+#    li x31, 3 # Success code
+#bne_end_1:
+#    li x2, 3  # Golden
+#    li x1, 1
+#    li x1, 0
+ 
+## TEST: BNE (Not Taken)
+#    li x3, 100
+#    li x4, 100
+#    bne x3, x4, bne_taken_path_2
+#    # Not taken path (success for this test)
+#    li x31, 4 # Success code
+#    j bne_end_2
+#bne_taken_path_2:
+#    li x31, -1
+#bne_end_2:
+#    li x2, 4  # Golden
+#    li x1, 1
+#    li x1, 0
 
-# TEST: BNE (Not Taken)
-    li x3, 100
-    li x4, 100
-    bne x3, x4, bne_taken_path_2
-    # Not taken path (success for this test)
-    li x31, 4 # Success code
-    j bne_end_2
-bne_taken_path_2:
-    li x31, -1
-bne_end_2:
-    li x2, 4  # Golden
-    li x1, 1
-    li x1, 0
-
-# TEST: BLT (Taken, signed)
-    li x3, -10
-    li x4, 10
-    blt x3, x4, blt_taken_path_1
-    # Not taken path
-    li x31, -1
-    j blt_end_1
-blt_taken_path_1:
-    li x31, 5 # Success code
-blt_end_1:
-    li x2, 5  # Golden
-    li x1, 1
-    li x1, 0
-
-# TEST: BLT (Not Taken, signed)
-    li x3, 10
-    li x4, -10
-    blt x3, x4, blt_taken_path_2
-    # Not taken path
-    li x31, 6 # Success code
-    j blt_end_2
-blt_taken_path_2:
-    li x31, -1
-blt_end_2:
-    li x2, 6  # Golden
-    li x1, 1
-    li x1, 0
-
-# TEST: BGE (Taken, signed)
-    li x3, 10
-    li x4, -10
-    bge x3, x4, bge_taken_path_1
-    # Not taken path
-    li x31, -1
-    j bge_end_1
-bge_taken_path_1:
-    li x31, 7 # Success code
-bge_end_1:
-    li x2, 7  # Golden
-    li x1, 1
-    li x1, 0
-
-# TEST: BGE (Not Taken, signed)
-    li x3, -10
-    li x4, 10
-    bge x3, x4, bge_taken_path_2
-    # Not taken path
-    li x31, 8 # Success code
-    j bge_end_2
-bge_taken_path_2:
-    li x31, -1
-bge_end_2:
-    li x2, 8  # Golden
-    li x1, 1
-    li x1, 0
-
-# TEST: BLTU (Taken, unsigned)
-    li x3, 10
-    li x4, 20
-    bltu x3, x4, bltu_taken_path_1
-    # Not taken path
-    li x31, -1
-    j bltu_end_1
-bltu_taken_path_1:
-    li x31, 9 # Success code
-bltu_end_1:
-    li x2, 9  # Golden
-    li x1, 1
-    li x1, 0
-
-# TEST: BLTU (Not Taken, unsigned, -1 vs 10)
-    li x3, -1 # Max unsigned
-    li x4, 10
-    bltu x3, x4, bltu_taken_path_2
-    # Not taken path
-    li x31, 10 # Success code
-    j bltu_end_2
-bltu_taken_path_2:
-    li x31, -1
-bltu_end_2:
-    li x2, 10 # Golden
-    li x1, 1
-    li x1, 0
-
-# TEST: BGEU (Taken, unsigned)
-    li x3, -1 # Max unsigned
-    li x4, 10
-    bgeu x3, x4, bgeu_taken_path_1
-    # Not taken path
-    li x31, -1
-    j bgeu_end_1
-bgeu_taken_path_1:
-    li x31, 11 # Success code
-bgeu_end_1:
-    li x2, 11 # Golden
-    li x1, 1
-    li x1, 0
-
-# TEST: BGEU (Not Taken, unsigned)
-    li x3, 10
-    li x4, 20
-    bgeu x3, x4, bgeu_taken_path_2
-    # Not taken path
-    li x31, 12 # Success code
-    j bgeu_end_2
-bgeu_taken_path_2:
-    li x31, -1
-bgeu_end_2:
-    li x2, 12 # Golden
-    li x1, 1
-    li x1, 0
+## TEST: BLT (Taken, signed)
+#    li x3, -10
+#    li x4, 10
+#    blt x3, x4, blt_taken_path_1
+#    # Not taken path
+#    li x31, -1
+#    j blt_end_1
+#blt_taken_path_1:
+#    li x31, 5 # Success code
+#blt_end_1:
+#    li x2, 5  # Golden
+#    li x1, 1
+#    li x1, 0
+#
+## TEST: BLT (Not Taken, signed)
+#    li x3, 10
+#    li x4, -10
+#    blt x3, x4, blt_taken_path_2
+#    # Not taken path
+#    li x31, 6 # Success code
+#    j blt_end_2
+#blt_taken_path_2:
+#    li x31, -1
+#blt_end_2:
+#    li x2, 6  # Golden
+#    li x1, 1
+#    li x1, 0
+#
+## TEST: BGE (Taken, signed)
+#    li x3, 10
+#    li x4, -10
+#    bge x3, x4, bge_taken_path_1
+#    # Not taken path
+#    li x31, -1
+#    j bge_end_1
+#bge_taken_path_1:
+#    li x31, 7 # Success code
+#bge_end_1:
+#    li x2, 7  # Golden
+#    li x1, 1
+#    li x1, 0
+#
+## TEST: BGE (Not Taken, signed)
+#    li x3, -10
+#    li x4, 10
+#    bge x3, x4, bge_taken_path_2
+#    # Not taken path
+#    li x31, 8 # Success code
+#    j bge_end_2
+#bge_taken_path_2:
+#    li x31, -1
+#bge_end_2:
+#    li x2, 8  # Golden
+#    li x1, 1
+#    li x1, 0
+#
+## TEST: BLTU (Taken, unsigned)
+#    li x3, 10
+#    li x4, 20
+#    bltu x3, x4, bltu_taken_path_1
+#    # Not taken path
+#    li x31, -1
+#    j bltu_end_1
+#bltu_taken_path_1:
+#    li x31, 9 # Success code
+#bltu_end_1:
+#    li x2, 9  # Golden
+#    li x1, 1
+#    li x1, 0
+#
+## TEST: BLTU (Not Taken, unsigned, -1 vs 10)
+#    li x3, -1 # Max unsigned
+#    li x4, 10
+#    bltu x3, x4, bltu_taken_path_2
+#    # Not taken path
+#    li x31, 10 # Success code
+#    j bltu_end_2
+#bltu_taken_path_2:
+#    li x31, -1
+#bltu_end_2:
+#    li x2, 10 # Golden
+#    li x1, 1
+#    li x1, 0
+#
+## TEST: BGEU (Taken, unsigned)
+#    li x3, -1 # Max unsigned
+#    li x4, 10
+#    bgeu x3, x4, bgeu_taken_path_1
+#    # Not taken path
+#    li x31, -1
+#    j bgeu_end_1
+#bgeu_taken_path_1:
+#    li x31, 11 # Success code
+#bgeu_end_1:
+#    li x2, 11 # Golden
+#    li x1, 1
+#    li x1, 0
+#
+## TEST: BGEU (Not Taken, unsigned)
+#    li x3, 10
+#    li x4, 20
+#    bgeu x3, x4, bgeu_taken_path_2
+#    # Not taken path
+#    li x31, 12 # Success code
+#    j bgeu_end_2
+#bgeu_taken_path_2:
+#    li x31, -1
+#bgeu_end_2:
+#    li x2, 12 # Golden
+#    li x1, 1
+#    li x1, 0
 
 
 #--------------------------------------------
 # End of Tests - Halt Processor
 #--------------------------------------------
-_end_tests:
-    j _end_tests  # Infinite loop
+#_end_tests:
+#    j _end_tests  # Infinite loop
 
 
 

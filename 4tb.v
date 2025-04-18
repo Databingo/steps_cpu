@@ -292,138 +292,130 @@ end
 
 // 输出监控
 always @(posedge clk) begin
-     $write("Tm %0t:oir=%b,opc=%0b|%0d,ojp=%d,o_op=%b,of3=%b,of7=%b,", $time, oir, opc, opc, ojp, oop, of3, of7);
+//     $write("Tm %0t:oir=%b,opc=%0b|%0d,ojp=%d,o_op=%b,of3=%b,of7=%b,", $time, oir, opc, opc, ojp, oop, of3, of7);
 
-   if (oLui == 1'b1) $write("oLui=%b,", oLui);
-   if (oAuipc == 1'b1) $write("oAuipc=%b,", oAuipc);
-
-   if (oLb == 1'b1) $write("oLb=%b,", oLb);
-   if (oLbu == 1'b1) $write("oLbu=%b,", oLbu);
-   if (oLh  == 1'b1) $write("oLh=%b,",  oLh,   );
-   if (oLhu == 1'b1) $write("oLhu=%b,", oLhu,  );
-   if (oLw  == 1'b1) $write("oLw=%b,",  oLw,   );
-   if (oLwu == 1'b1) $write("oLwu=%b,", oLwu,  );
-   if (oLd  == 1'b1) $write("oLd=%b,",  oLd,   );
-
-   if (oSb  == 1'b1) $write("oSb=%b,",  oSb,   );
-   if (oSh  == 1'b1) $write("oSh=%b,",  oSh,   );
-   if (oSw  == 1'b1) $write("oSw=%b,",  oSw,   );
-   if (oSd  == 1'b1) $write("oSd=%b,",  oSd,   );
-
-   if (oAdd == 1'b1) $write("oAdd=%b,",  oAdd, );
-   if (oSub == 1'b1) $write("oSub=%b,",  oSub, );
-   if (oSll == 1'b1) $write("oSll=%b,",  oSll, );
-   if (oSlt == 1'b1) $write("oSlt=%b,",  oSlt, );
-   if (oSltu== 1'b1) $write("oSltu=%b,", oSltu,);
-   if (oXor == 1'b1) $write("oXor=%b,",  oXor,);
-   if (oSrl == 1'b1) $write("oSrl=%b,",  oSrl,);
-   if (oSra == 1'b1) $write("oSra=%b,",  oSra,);
-   if (oOr  == 1'b1) $write("oOr=%b,",   oOr,);
-   if (oAnd == 1'b1) $write("oAnd=%b,",  oAnd,);
-
-
-   if (oAddi == 1'b1) $write("oAddi=%b,",  oAddi ,);
-   if (oSlti == 1'b1) $write("oSlti=%b,",  oSlti ,);
-   if (oSltiu== 1'b1) $write("oSltiu=%b,",  oSltiu,);
-   if (oOri  == 1'b1) $write("oOri=%b,",  oOri  ,);
-   if (oAndi == 1'b1) $write("oAndi=%b,",  oAndi ,);
-   if (oXori == 1'b1) $write("oXori=%b,",  oXori ,);
-   if (oSlli == 1'b1) $write("oSlli=%b,",  oSlli ,);
-   if (oSrli == 1'b1) $write("oSrli=%b,",  oSrli ,);
-   if (oSrai == 1'b1) $write("oSrai=%b,",  oSrai ,);
-
-   if (oAddiw == 1'b1) $write("oAddiw=%b,",  oAddiw ,);
-   if (oSlliw == 1'b1) $write("oSlliw=%b,",  oSlliw ,);
-   if (oSrliw == 1'b1) $write("oSrliw=%b,",  oSrliw ,);
-   if (oSraiw == 1'b1) $write("oSraiw=%b,",  oSraiw ,);
-
-   if (oAddw == 1'b1) $write("oAddw=%b,",  oAddw ,);
-   if (oSubw == 1'b1) $write("oSubw=%b,",  oSubw ,);
-   if (oSllw == 1'b1) $write("oSllw=%b,",  oSllw ,);
-   if (oSrlw == 1'b1) $write("oSrlw=%b,",  oSrlw ,);
-   if (oSraw == 1'b1) $write("oSraw=%b,",  oSraw ,);
-
-       
-   if (oJal  == 1'b1) $write("oJal=%b,",  oJal  ,);
-   if (oJalr == 1'b1) $write("oJalr=%b,",  oJalr ,);
-      
-   if (oBeq  == 1'b1) $write("oBeq=%b,",  oBeq  ,);
-   if (oBne  == 1'b1) $write("oBne=%b,",  oBne  ,);
-   if (oBlt  == 1'b1) $write("oBlt=%b,",  oBlt  ,);
-   if (oBge  == 1'b1) $write("oBge=%b,",  oBge  ,);
-   if (oBltu == 1'b1) $write("oBltu=%b,",  oBltu ,);
-   if (oBgeu == 1'b1) $write("oBgeu=%b,",  oBgeu ,);
-
-
-   if (oFence  == 1'b1) $write("oFence=%b,",  oFence  ,);
-   if (oFencei == 1'b1) $write("oFencei=%b,",  oFencei ,);
-
-
-   if (oEcall  == 1'b1) $write("oEcall=%b,",  oEcall  ,);
-   if (oEbreak == 1'b1) $write("oEbreak=%b,",  oEbreak ,);
-   if (oCsrrw  == 1'b1) $write("oCsrrw=%b,",  oCsrrw  ,);
-   if (oCsrrs  == 1'b1) $write("oCsrrs=%b,",  oCsrrs  ,);
-   if (oCsrrc  == 1'b1) $write("oCsrrc=%b,",  oCsrrc  ,);
-   if (oCsrrwi == 1'b1) $write("oCsrrwi=%b,",  oCsrrwi ,);
-   if (oCsrrsi == 1'b1) $write("oCsrrsi=%b,",  oCsrrsi ,);
-   if (oCsrrci == 1'b1) $write("oCsrrci=%b,",  oCsrrci ,);
-
-   if (oimm !== 0 ) $write("oimm=%0b,",  oimm ,);
-   if (oshamt!== 0 ) $write("oshamt=%0b,",  oshamt ,);
-
-   if (ox0 !== 0 && ox0 !== 64'bz && ox0 !== 64'bx) $write("ox0=%0d,",  ox0 ,);
-   if (ox1 !== 0 && ox1 !== 64'bz && ox1 !== 64'bx) $write("ox1=%0d,",  ox1 ,);
-   if (ox2 !== 0 && ox2 !== 64'bz && ox2 !== 64'bx) $write("ox2=%0d,",  ox2 ,);
-   if (ox3 !== 0 && ox3 !== 64'bz && ox3 !== 64'bx) $write("ox3=%0d,",  ox3 ,);
-   if (ox4 !== 0 && ox4 !== 64'bz && ox4 !== 64'bx) $write("ox4=%0d,",  ox4 ,);
-   if (ox5 !== 0 && ox5 !== 64'bz && ox5 !== 64'bx) $write("ox5=%0d,",  ox5 ,);
-   if (ox6 !== 0 && ox6 !== 64'bz && ox6 !== 64'bx) $write("ox6=%0d,",  ox6 ,);
-   if (ox7 !== 0 && ox7 !== 64'bz && ox7 !== 64'bx) $write("ox7=%0d,",  ox7 ,);
-   if (ox8 !== 0 && ox8 !== 64'bz && ox8 !== 64'bx) $write("ox8=%0d,",  ox8 ,);
-   if (ox9 !== 0 && ox9 !== 64'bz && ox9 !== 64'bx) $write("ox9=%0d,",  ox9 ,);
-   if (ox10 !== 0 && ox10 !== 64'bz && ox10 !== 64'bx) $write("ox10=%0d,",  ox10 ,);
-   if (ox11 !== 0 && ox11 !== 64'bz && ox11 !== 64'bx) $write("ox11=%0d,",  ox11 ,);
-   if (ox12 !== 0 && ox12 !== 64'bz && ox12 !== 64'bx) $write("ox12=%0d,",  ox12 ,);
-   if (ox13 !== 0 && ox13 !== 64'bz && ox13 !== 64'bx) $write("ox13=%0d,",  ox13 ,);
-   if (ox14 !== 0 && ox14 !== 64'bz && ox14 !== 64'bx) $write("ox14=%0d,",  ox14 ,);
-   if (ox15 !== 0 && ox15 !== 64'bz && ox15 !== 64'bx) $write("ox15=%0d,",  ox15 ,);
-   if (ox16 !== 0 && ox16 !== 64'bz && ox16 !== 64'bx) $write("ox16=%0d,",  ox16 ,);
-   if (ox17 !== 0 && ox17 !== 64'bz && ox17 !== 64'bx) $write("ox17=%0d,",  ox17 ,);
-   if (ox18 !== 0 && ox18 !== 64'bz && ox18 !== 64'bx) $write("ox18=%0d,",  ox18 ,);
-   if (ox19 !== 0 && ox19 !== 64'bz && ox19 !== 64'bx) $write("ox19=%0d,",  ox19 ,);
-   if (ox20 !== 0 && ox20 !== 64'bz && ox20 !== 64'bx) $write("ox20=%0d,",  ox20 ,);
-   if (ox21 !== 0 && ox21 !== 64'bz && ox21 !== 64'bx) $write("ox21=%0d,",  ox21 ,);
-   if (ox22 !== 0 && ox22 !== 64'bz && ox22 !== 64'bx) $write("ox22=%0d,",  ox22 ,);
-   if (ox23 !== 0 && ox23 !== 64'bz && ox23 !== 64'bx) $write("ox23=%0d,",  ox23 ,);
-   if (ox24 !== 0 && ox24 !== 64'bz && ox24 !== 64'bx) $write("ox24=%0d,",  ox24 ,);
-   if (ox25 !== 0 && ox25 !== 64'bz && ox25 !== 64'bx) $write("ox25=%0d,",  ox25 ,);
-   if (ox26 !== 0 && ox26 !== 64'bz && ox26 !== 64'bx) $write("ox26=%0d,",  ox26 ,);
-   if (ox27 !== 0 && ox27 !== 64'bz && ox27 !== 64'bx) $write("ox27=%0d,",  ox27 ,);
-   if (ox28 !== 0 && ox28 !== 64'bz && ox28 !== 64'bx) $write("ox28=%0d,",  ox28 ,);
-   if (ox29 !== 0 && ox29 !== 64'bz && ox29 !== 64'bx) $write("ox29=%0d,",  ox29 ,);
-
-   if (ox30 !== 0 && ox30 !== 64'bz && ox30 !== 64'bx) $write("ox30=0b%0b,",  ox30 ,); 
-   if (ox30 !== 0 && ox30 !== 64'bz && ox30 !== 64'bx) $write("ox30=0x%0h,",  ox30 ,); 
-   if (ox30 !== 0 && ox30 !== 64'bz && ox30 !== 64'bx) $write("ox30=%0d,",  ox30 ,);
-
-   if (ox31 !== 0 && ox31 !== 64'bz && ox31 !== 64'bx) $write("ox31=0b%64b,",  ox31 ,); 
-   if (ox31 !== 0 && ox31 !== 64'bz && ox31 !== 64'bx) $write("ox31=0x%16h,",  ox31 ,); 
-   if (ox31 !== 0 && ox31 !== 64'bz && ox31 !== 64'bx) $write("ox31=%0d,",  ox31 ,); 
-   if (ox31 !== 0 && ox31 !== 64'bz && ox31 !== 64'bx && ox31[63] == 1'b1) $write("ox31=-0x%0h,",  ~ox31[63:0]+1'b1 ,); 
-   if (ox31 !== 0 && ox31 !== 64'bz && ox31 !== 64'bx && ox31[63] == 1'b1) $write("ox31=-%0d,",  ~ox31[63:0]+1'b1 ,); 
+//   if (oLui == 1'b1) $write("oLui=%b,", oLui);
+//   if (oAuipc == 1'b1) $write("oAuipc=%b,", oAuipc);
+//
+//   if (oLb == 1'b1) $write("oLb=%b,", oLb);
+//   if (oLbu == 1'b1) $write("oLbu=%b,", oLbu);
+//   if (oLh  == 1'b1) $write("oLh=%b,",  oLh,   );
+//   if (oLhu == 1'b1) $write("oLhu=%b,", oLhu,  );
+//   if (oLw  == 1'b1) $write("oLw=%b,",  oLw,   );
+//   if (oLwu == 1'b1) $write("oLwu=%b,", oLwu,  );
+//   if (oLd  == 1'b1) $write("oLd=%b,",  oLd,   );
+//
+//   if (oSb  == 1'b1) $write("oSb=%b,",  oSb,   );
+//   if (oSh  == 1'b1) $write("oSh=%b,",  oSh,   );
+//   if (oSw  == 1'b1) $write("oSw=%b,",  oSw,   );
+//   if (oSd  == 1'b1) $write("oSd=%b,",  oSd,   );
+//
+//   if (oAdd == 1'b1) $write("oAdd=%b,",  oAdd, );
+//   if (oSub == 1'b1) $write("oSub=%b,",  oSub, );
+//   if (oSll == 1'b1) $write("oSll=%b,",  oSll, );
+//   if (oSlt == 1'b1) $write("oSlt=%b,",  oSlt, );
+//   if (oSltu== 1'b1) $write("oSltu=%b,", oSltu,);
+//   if (oXor == 1'b1) $write("oXor=%b,",  oXor,);
+//   if (oSrl == 1'b1) $write("oSrl=%b,",  oSrl,);
+//   if (oSra == 1'b1) $write("oSra=%b,",  oSra,);
+//   if (oOr  == 1'b1) $write("oOr=%b,",   oOr,);
+//   if (oAnd == 1'b1) $write("oAnd=%b,",  oAnd,);
+//
+//
+//   if (oAddi == 1'b1) $write("oAddi=%b,",  oAddi ,);
+//   if (oSlti == 1'b1) $write("oSlti=%b,",  oSlti ,);
+//   if (oSltiu== 1'b1) $write("oSltiu=%b,",  oSltiu,);
+//   if (oOri  == 1'b1) $write("oOri=%b,",  oOri  ,);
+//   if (oAndi == 1'b1) $write("oAndi=%b,",  oAndi ,);
+//   if (oXori == 1'b1) $write("oXori=%b,",  oXori ,);
+//   if (oSlli == 1'b1) $write("oSlli=%b,",  oSlli ,);
+//   if (oSrli == 1'b1) $write("oSrli=%b,",  oSrli ,);
+//   if (oSrai == 1'b1) $write("oSrai=%b,",  oSrai ,);
+//
+//   if (oAddiw == 1'b1) $write("oAddiw=%b,",  oAddiw ,);
+//   if (oSlliw == 1'b1) $write("oSlliw=%b,",  oSlliw ,);
+//   if (oSrliw == 1'b1) $write("oSrliw=%b,",  oSrliw ,);
+//   if (oSraiw == 1'b1) $write("oSraiw=%b,",  oSraiw ,);
+//
+//   if (oAddw == 1'b1) $write("oAddw=%b,",  oAddw ,);
+//   if (oSubw == 1'b1) $write("oSubw=%b,",  oSubw ,);
+//   if (oSllw == 1'b1) $write("oSllw=%b,",  oSllw ,);
+//   if (oSrlw == 1'b1) $write("oSrlw=%b,",  oSrlw ,);
+//   if (oSraw == 1'b1) $write("oSraw=%b,",  oSraw ,);
+//
+//       
+//   if (oJal  == 1'b1) $write("oJal=%b,",  oJal  ,);
+//   if (oJalr == 1'b1) $write("oJalr=%b,",  oJalr ,);
+//      
+//   if (oBeq  == 1'b1) $write("oBeq=%b,",  oBeq  ,);
+//   if (oBne  == 1'b1) $write("oBne=%b,",  oBne  ,);
+//   if (oBlt  == 1'b1) $write("oBlt=%b,",  oBlt  ,);
+//   if (oBge  == 1'b1) $write("oBge=%b,",  oBge  ,);
+//   if (oBltu == 1'b1) $write("oBltu=%b,",  oBltu ,);
+//   if (oBgeu == 1'b1) $write("oBgeu=%b,",  oBgeu ,);
+//
+//
+//   if (oFence  == 1'b1) $write("oFence=%b,",  oFence  ,);
+//   if (oFencei == 1'b1) $write("oFencei=%b,",  oFencei ,);
+//
+//
+//   if (oEcall  == 1'b1) $write("oEcall=%b,",  oEcall  ,);
+//   if (oEbreak == 1'b1) $write("oEbreak=%b,",  oEbreak ,);
+//   if (oCsrrw  == 1'b1) $write("oCsrrw=%b,",  oCsrrw  ,);
+//   if (oCsrrs  == 1'b1) $write("oCsrrs=%b,",  oCsrrs  ,);
+//   if (oCsrrc  == 1'b1) $write("oCsrrc=%b,",  oCsrrc  ,);
+//   if (oCsrrwi == 1'b1) $write("oCsrrwi=%b,",  oCsrrwi ,);
+//   if (oCsrrsi == 1'b1) $write("oCsrrsi=%b,",  oCsrrsi ,);
+//   if (oCsrrci == 1'b1) $write("oCsrrci=%b,",  oCsrrci ,);
+//
+//   if (oimm !== 0 ) $write("oimm=%0b,",  oimm ,);
+//   if (oshamt!== 0 ) $write("oshamt=%0b,",  oshamt ,);
+//
+//   if (ox0 !== 0 && ox0 !== 64'bz && ox0 !== 64'bx) $write("ox0=%0d,",  ox0 ,);
+//   if (ox1 !== 0 && ox1 !== 64'bz && ox1 !== 64'bx) $write("ox1=%0d,",  ox1 ,);
+//   if (ox2 !== 0 && ox2 !== 64'bz && ox2 !== 64'bx) $write("ox2=%0d,",  ox2 ,);
+//   if (ox3 !== 0 && ox3 !== 64'bz && ox3 !== 64'bx) $write("ox3=%0d,",  ox3 ,);
+//   if (ox4 !== 0 && ox4 !== 64'bz && ox4 !== 64'bx) $write("ox4=%0d,",  ox4 ,);
+//   if (ox5 !== 0 && ox5 !== 64'bz && ox5 !== 64'bx) $write("ox5=%0d,",  ox5 ,);
+//   if (ox6 !== 0 && ox6 !== 64'bz && ox6 !== 64'bx) $write("ox6=%0d,",  ox6 ,);
+//   if (ox7 !== 0 && ox7 !== 64'bz && ox7 !== 64'bx) $write("ox7=%0d,",  ox7 ,);
+//   if (ox8 !== 0 && ox8 !== 64'bz && ox8 !== 64'bx) $write("ox8=%0d,",  ox8 ,);
+//   if (ox9 !== 0 && ox9 !== 64'bz && ox9 !== 64'bx) $write("ox9=%0d,",  ox9 ,);
+//   if (ox10 !== 0 && ox10 !== 64'bz && ox10 !== 64'bx) $write("ox10=%0d,",  ox10 ,);
+//   if (ox11 !== 0 && ox11 !== 64'bz && ox11 !== 64'bx) $write("ox11=%0d,",  ox11 ,);
+//   if (ox12 !== 0 && ox12 !== 64'bz && ox12 !== 64'bx) $write("ox12=%0d,",  ox12 ,);
+//   if (ox13 !== 0 && ox13 !== 64'bz && ox13 !== 64'bx) $write("ox13=%0d,",  ox13 ,);
+//   if (ox14 !== 0 && ox14 !== 64'bz && ox14 !== 64'bx) $write("ox14=%0d,",  ox14 ,);
+//   if (ox15 !== 0 && ox15 !== 64'bz && ox15 !== 64'bx) $write("ox15=%0d,",  ox15 ,);
+//   if (ox16 !== 0 && ox16 !== 64'bz && ox16 !== 64'bx) $write("ox16=%0d,",  ox16 ,);
+//   if (ox17 !== 0 && ox17 !== 64'bz && ox17 !== 64'bx) $write("ox17=%0d,",  ox17 ,);
+//   if (ox18 !== 0 && ox18 !== 64'bz && ox18 !== 64'bx) $write("ox18=%0d,",  ox18 ,);
+//   if (ox19 !== 0 && ox19 !== 64'bz && ox19 !== 64'bx) $write("ox19=%0d,",  ox19 ,);
+//   if (ox20 !== 0 && ox20 !== 64'bz && ox20 !== 64'bx) $write("ox20=%0d,",  ox20 ,);
+//   if (ox21 !== 0 && ox21 !== 64'bz && ox21 !== 64'bx) $write("ox21=%0d,",  ox21 ,);
+//   if (ox22 !== 0 && ox22 !== 64'bz && ox22 !== 64'bx) $write("ox22=%0d,",  ox22 ,);
+//   if (ox23 !== 0 && ox23 !== 64'bz && ox23 !== 64'bx) $write("ox23=%0d,",  ox23 ,);
+//   if (ox24 !== 0 && ox24 !== 64'bz && ox24 !== 64'bx) $write("ox24=%0d,",  ox24 ,);
+//   if (ox25 !== 0 && ox25 !== 64'bz && ox25 !== 64'bx) $write("ox25=%0d,",  ox25 ,);
+//   if (ox26 !== 0 && ox26 !== 64'bz && ox26 !== 64'bx) $write("ox26=%0d,",  ox26 ,);
+//   if (ox27 !== 0 && ox27 !== 64'bz && ox27 !== 64'bx) $write("ox27=%0d,",  ox27 ,);
+//   if (ox28 !== 0 && ox28 !== 64'bz && ox28 !== 64'bx) $write("ox28=%0d,",  ox28 ,);
+//   if (ox29 !== 0 && ox29 !== 64'bz && ox29 !== 64'bx) $write("ox29=%0d,",  ox29 ,);
+//
+//   if (ox30 !== 0 && ox30 !== 64'bz && ox30 !== 64'bx) $write("ox30=0b%0b,",  ox30 ,); 
+//   if (ox30 !== 0 && ox30 !== 64'bz && ox30 !== 64'bx) $write("ox30=0x%0h,",  ox30 ,); 
+//   if (ox30 !== 0 && ox30 !== 64'bz && ox30 !== 64'bx) $write("ox30=%0d,",  ox30 ,);
+//
+//   if (ox31 !== 0 && ox31 !== 64'bz && ox31 !== 64'bx) $write("ox31=0b%64b,",  ox31 ,); 
+//   if (ox31 !== 0 && ox31 !== 64'bz && ox31 !== 64'bx) $write("ox31=0x%16h,",  ox31 ,); 
+//   if (ox31 !== 0 && ox31 !== 64'bz && ox31 !== 64'bx) $write("ox31=%0d,",  ox31 ,); 
+//   if (ox31 !== 0 && ox31 !== 64'bz && ox31 !== 64'bx && ox31[63] == 1'b1) $write("ox31=-0x%0h,",  ~ox31[63:0]+1'b1 ,); 
+//   if (ox31 !== 0 && ox31 !== 64'bz && ox31 !== 64'bx && ox31[63] == 1'b1) $write("ox31=-%0d,",  ~ox31[63:0]+1'b1 ,); 
    if (ox1 == 1 && ox2  ==  ox31) $display("ox31=0b%64b, PASS",  ox31 ,); 
    if (ox1 == 1 && ox2 !==  ox31) $write("ox2=0b%64b, ox31=0b%64b, FAILED!",  ox2, ox31); 
   // if (oupimm  !== 0 ) $write("oupimm=%0b,",  oupimm ,);
   // $write("osign_extended_bimm=%064b,",  osign_extended_bimm ,);
-
-
-
-
-
-
-
-
-    $write("\n");
+   //$write("\n");
 
   
 

@@ -39,7 +39,7 @@ func isValidImmediate(s string) (int64, error) {
 
 	if strings.HasPrefix(s, "0x") {
 		imm2, err2 = strconv.ParseInt(s[2:], 16, 64) // check if s is hex
-		fmt.Println("imm2:", imm2, err2)
+		fmt.Println(s, "imm2:", imm2, err2)
 	} else if strings.HasPrefix(s, "-0x") {
 		imm2, err2 = strconv.ParseInt(string(s[0])+s[3:], 16, 64) // ignore the "0x" part but include the '-'
 		if imm2 == 0 {
@@ -78,10 +78,10 @@ func isValidImmediate_u(s string) (int64, uint64, error) {
 
 	if strings.HasPrefix(s, "0x"){
 		imm2, err2 = strconv.ParseUint(s[2:], 16, 64) // check if s is hex
-		fmt.Println("imm2:", imm2, err2)
+		fmt.Println("+imm2:", imm2, err2)
 	    } else if strings.HasPrefix(s, "-0x") {
-		imm3, err2 = strconv.ParseUint(s[3:], 16, 64) // check if s is binary
-		fmt.Println("imm2:", imm2, err2)
+		imm2, err2 = strconv.ParseUint(s[3:], 16, 64) // check if s is binary
+		fmt.Println("-imm2:", imm2, err2)
 	    } else if strings.HasPrefix(s, "0b") {
 		imm3, err3 = strconv.ParseUint(s[2:], 2, 64) // check if s is binary
 	    } else if strings.HasPrefix(s, "-0b") {
@@ -96,9 +96,9 @@ func isValidImmediate_u(s string) (int64, uint64, error) {
 	if strings.HasPrefix(s, "-") { sign = 1}
 
 	if err1 != nil && err2 != nil && err3 != nil {
-	        fmt.Println(err1)
-	        fmt.Println(err2)
-	        fmt.Println(err3)
+	        fmt.Println(".", err1)
+	        fmt.Println("..",err2)
+	        fmt.Println("...",err3)
 	        fmt.Println(s)
 		return 0, 0, errors.New("Invalid immediate value")
 	} else if err1 == nil {
@@ -275,10 +275,11 @@ func main() {
 				real_instr.WriteString(label+":\n")
 			}
 
-			load_32 := func(reg string, imm uint64) int {
+			load_32 := func(reg string, immu uint64) int {
 				//sign_bit := imm >> 63 & 1
 		//		sign_bit := imm >> 31 & 1
 		//		if sign_bit == 1 { imm = ^imm + 1 }// same imm = -imm 
+		                imm := int(immu)
 
 				l12 := imm & 0xfff // 12 bits
 				l12_sign_bit := l12 >> 11 & 1
@@ -328,6 +329,34 @@ func main() {
 				        real_instr.WriteString(ins)
 
 				}
+		case "j":
+			if len(code) != 2 && len(code) != 3 {
+				fmt.Println("Incorrect argument count on line: ", lineCounter)
+				os.Exit(0)
+			}
+			imm, err := isValidImmediate(code[1])
+				ins := fmt.Sprintf("jal x0, %d\n", imm)
+				fmt.Printf("%s: \n", ins)
+			//op, opFound := opBin[code[0]]
+			if err != nil {
+				fmt.Printf("~Error on line %d: %s, %s \n", lineCounter, err, line)
+				os.Exit(0)
+			}
+			fmt.Printf("line %d, imm: 0x%X=0b%b=%d\n", lineCounter, imm, imm, imm)
+			//if imm > 0x7fffffffffffffff || imm  < -0x8000000000000000 {
+			//	fmt.Printf("li: Error on line %d: Immediate value %d=0x%X out of range (should be between 0x%X and 0x7fffffffffffffff )\n", lineCounter, imm, imm, -0x800000000000000)
+			//	os.Exit(0)
+			//}
+			if label != "" {
+				//fmt.Printf("%s: \n", label)
+				real_instr.WriteString(label+":\n")
+			}
+
+				ins  = fmt.Sprintf("jal x0, %d\n", imm)
+
+				real_instr.WriteString(ins)
+				fmt.Printf("%s: \n", ins)
+
 		default:
 			real_instr.WriteString(origin_instr)
 		}
@@ -676,6 +705,7 @@ func main() {
 			if len(code) != 4 {
 				fmt.Println("Incorrect argument count on line: ", lineCounter)
 			}
+			//fmt.Println(line)
 			imm, err := isValidImmediate(code[3])
 			if err != nil {
 				fmt.Printf("$Error on line %d: %s\n", lineCounter, err)
