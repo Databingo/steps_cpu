@@ -292,7 +292,7 @@ func main() {
 				L12_sign_bit := imm >> 11 & 1
 				L11 := imm & 0x7ff // 11 bits
 				if imm&0xfff != 0 {
-					ins = fmt.Sprintf("addi %s, %s, %#x\n", reg, reg, 0) // clean
+					ins = fmt.Sprintf("addi %s, %s, %#x\n", reg, "x0", 0) // clean
 					real_instr.WriteString(ins)
 					ins = fmt.Sprintf("addi %s, %s, %#x\n", reg, reg, L11)
 					real_instr.WriteString(ins)
