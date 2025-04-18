@@ -335,7 +335,7 @@ func main() {
 			//-----
 			// 0
 			if imm == 0 {
-				ins = fmt.Sprintf("addi %s, %s, %#x\n", code[1], code[1], 0)
+				ins = fmt.Sprintf("addi %s, %s, %#x\n", code[1], "x0", 0)
 				real_instr.WriteString(ins)
 			}
 			if imm != 0 {
