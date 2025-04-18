@@ -63,14 +63,14 @@
     li x11, 1               # Signal Compare
     li x11, 0               # Clear Signal
 
-### TEST: LI_CONST_POS_32BIT_MAX_SIGNED (0x7FFFFFFF)
-#    # Purpose: Test loading max positive 32-bit signed integer value.
-#    li x31, 0x7FFFFFFF      # Value under test (Hex) -> x31
-#    li x30, 0x7FFFFFFF      # Golden value -> x30
-#    # Expected in RV64 reg: 0x000000007FFFFFFF
-#    li x11, 1               # Signal Compare
-#    li x11, 0               # Clear Signal
-#
+## TEST: LI_CONST_POS_32BIT_MAX_SIGNED (0x7FFFFFFF)
+    # Purpose: Test loading max positive 32-bit signed integer value.
+    li x31, 0x7FFFFFFF      # Value under test (Hex) -> x31
+    li x30, 0x7FFFFFFF      # Golden value -> x30
+    # Expected in RV64 reg: 0x000000007FFFFFFF
+    li x11, 1               # Signal Compare
+    li x11, 0               # Clear Signal
+
 ### TEST: LI_CONST_POS_32BIT_0xFFFFFFFF
 #    # Purpose: Test loading 0xFFFFFFFF (often -1 in 32-bit signed).
 #    # On RV64, li typically zero-extends positive hex values if <= 32 bits.
