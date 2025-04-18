@@ -412,7 +412,7 @@ always @(posedge clk) begin
 //   if (ox31 !== 0 && ox31 !== 64'bz && ox31 !== 64'bx && ox31[63] == 1'b1) $write("ox31=-0x%0h,",  ~ox31[63:0]+1'b1 ,); 
 //   if (ox31 !== 0 && ox31 !== 64'bz && ox31 !== 64'bx && ox31[63] == 1'b1) $write("ox31=-%0d,",  ~ox31[63:0]+1'b1 ,); 
    if (ox1 == 1 && ox2  ==  ox31) $display("ox31=0b%64b, PASS",  ox31 ,); 
-   if (ox1 == 1 && ox2 !==  ox31) $write("ox2=0b%64b, ox31=0b%64b, FAILED!",  ox2, ox31); 
+   if (ox1 == 1 && ox2 !==  ox31) $display("ox2=0b%64b, ox31=0b%64b, FAILED!",  ox2, ox31); 
   // if (oupimm  !== 0 ) $write("oupimm=%0b,",  oupimm ,);
   // $write("osign_extended_bimm=%064b,",  osign_extended_bimm ,);
    //$write("\n");

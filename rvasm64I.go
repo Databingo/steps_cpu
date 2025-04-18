@@ -11,10 +11,11 @@ import (
 	"strconv"
 	"strings"
 )
-func write2f(b []byte){
-    f, _ := os.Create("tmp.txt")
-    defer f.Close()
-    f.Write(b)
+
+func write2f(b []byte) {
+	f, _ := os.Create("tmp.txt")
+	defer f.Close()
+	f.Write(b)
 }
 
 func save_binary_instruction(instr string) {
@@ -62,7 +63,7 @@ func isValidImmediate(s string) (int64, error) {
 	}
 
 	if err1 != nil && err2 != nil && err3 != nil {
-	        fmt.Println(s)
+		fmt.Println(s)
 		return 0, errors.New("Invalid immediate value")
 	} else if err1 == nil {
 		return imm1, nil
@@ -81,30 +82,31 @@ func isValidImmediate_u(s string) (int64, uint64, error) {
 
 	//imm1, err1 = strconv.ParseUint(s, 10, 32) // check if s is a decimal number
 
-	if strings.HasPrefix(s, "0x"){
+	if strings.HasPrefix(s, "0x") {
 		imm2, err2 = strconv.ParseUint(s[2:], 16, 64) // check if s is hex
 		fmt.Println("+imm2:", imm2, err2)
-	    } else if strings.HasPrefix(s, "-0x") {
+	} else if strings.HasPrefix(s, "-0x") {
 		imm2, err2 = strconv.ParseUint(s[3:], 16, 64) // check if s is binary
 		fmt.Println("-imm2:", imm2, err2)
-	    } else if strings.HasPrefix(s, "0b") {
+	} else if strings.HasPrefix(s, "0b") {
 		imm3, err3 = strconv.ParseUint(s[2:], 2, 64) // check if s is binary
-	    } else if strings.HasPrefix(s, "-0b") {
+	} else if strings.HasPrefix(s, "-0b") {
 		imm3, err3 = strconv.ParseUint(s[3:], 2, 64) // check if s is binary
-	    } else if strings.HasPrefix(s, "-") {
+	} else if strings.HasPrefix(s, "-") {
 		imm1, err1 = strconv.ParseUint(s[1:], 10, 64) // check if s is binary
-	    } else {
+	} else {
 		imm1, err1 = strconv.ParseUint(s, 10, 64) // check if s is a decimal number
-	    }
+	}
 
-
-	if strings.HasPrefix(s, "-") { sign = 1}
+	if strings.HasPrefix(s, "-") {
+		sign = 1
+	}
 
 	if err1 != nil && err2 != nil && err3 != nil {
-	        fmt.Println(".", err1)
-	        fmt.Println("..",err2)
-	        fmt.Println("...",err3)
-	        fmt.Println(s)
+		fmt.Println(".", err1)
+		fmt.Println("..", err2)
+		fmt.Println("...", err3)
+		fmt.Println(s)
 		return 0, 0, errors.New("Invalid immediate value")
 	} else if err1 == nil {
 		return sign, imm1, nil
@@ -116,18 +118,18 @@ func isValidImmediate_u(s string) (int64, uint64, error) {
 }
 
 func main() {
-	regBin := map[string]uint32{
+	regBin := map[string]uint32{ // t0-6 a0-7 could bu use
 		"x0": 0b00000, "zero": 0b00000,
-		"x1": 0b00001, "ra": 0b00001,
-		"x2": 0b00010, "sp": 0b00010,
-		"x3": 0b00011, "gp": 0b00011,
-		"x4": 0b00100, "tp": 0b00100,
-		"x5": 0b00101, "t0": 0b00101,
-		"x6": 0b00110, "t1": 0b00110,
-		"x7": 0b00111, "t2": 0b00111,
-		"x8": 0b01000, "s0": 0b01000, "fp": 0b01000,
+		"x1": 0b00001, "ra": 0b00001, // return address
+		"x2": 0b00010, "sp": 0b00010, // stack pointer
+		"x3": 0b00011, "gp": 0b00011, // global pointer
+		"x4": 0b00100, "tp": 0b00100, // thread pointer
+		"x5": 0b00101, "t0": 0b00101, // tmp t0-6
+		"x6": 0b00110, "t1": 0b00110, // tmp
+		"x7": 0b00111, "t2": 0b00111, // tmp
+		"x8": 0b01000, "s0": 0b01000, "fp": 0b01000, // frame pointer
 		"x9": 0b01001, "s1": 0b01001,
-		"x10": 0b01010, "a0": 0b01010,
+		"x10": 0b01010, "a0": 0b01010, // function argument a0-7  (a0,a1 returned value)
 		"x11": 0b01011, "a1": 0b01011,
 		"x12": 0b01100, "a2": 0b01100,
 		"x13": 0b01101, "a3": 0b01101,
@@ -135,7 +137,7 @@ func main() {
 		"x15": 0b01111, "a5": 0b01111,
 		"x16": 0b10000, "a6": 0b10000,
 		"x17": 0b10001, "a7": 0b10001,
-		"x18": 0b10010, "s2": 0b10010,
+		"x18": 0b10010, "s2": 0b10010, //saved register s0-11
 		"x19": 0b10011, "s3": 0b10011,
 		"x20": 0b10100, "s4": 0b10100,
 		"x21": 0b10101, "s5": 0b10101,
@@ -145,10 +147,10 @@ func main() {
 		"x25": 0b11001, "s9": 0b11001,
 		"x26": 0b11010, "s10": 0b11010,
 		"x27": 0b11011, "s11": 0b11011,
-		"x28": 0b11100, "t3": 0b11100,
-		"x29": 0b11101, "t4": 0b11101,
-		"x30": 0b11110, "t5": 0b11110,
-		"x31": 0b11111, "t6": 0b11111,
+		"x28": 0b11100, "t3": 0b11100, // tmp
+		"x29": 0b11101, "t4": 0b11101, // tmp
+		"x30": 0b11110, "t5": 0b11110, // tmp
+		"x31": 0b11111, "t6": 0b11111, // tmp
 	}
 
 	opBin := map[string]uint32{
@@ -236,7 +238,7 @@ func main() {
 	// zero pass
 	// translate pseudo-instruction to real-instruction
 	for scanner0.Scan() {
-	        origin_instr := scanner0.Text() + "\n"
+		origin_instr := scanner0.Text() + "\n"
 		line := strings.Split(scanner0.Text(), "#")[0]
 		code = strings.FieldsFunc(line, SplitOn)
 		if len(code) == 0 {
@@ -266,6 +268,8 @@ func main() {
 			sign, imm, err := isValidImmediate_u(code[2])
 			//op, opFound := opBin[code[0]]
 			//rd, rdFound := regBin[code[1]]
+			fmt.Println("get li: ", sign, imm)
+
 			if err != nil {
 				fmt.Printf("~Error on line %d: %s, %s \n", lineCounter, err, line)
 				os.Exit(0)
@@ -275,41 +279,66 @@ func main() {
 			//	fmt.Printf("li: Error on line %d: Immediate value %d=0x%X out of range (should be between 0x%X and 0x7fffffffffffffff )\n", lineCounter, imm, imm, -0x800000000000000)
 			//	os.Exit(0)
 			//}
+			ins := fmt.Sprintf("# %s\n", line)
+			real_instr.WriteString(ins)
 			if label != "" {
 				//fmt.Printf("%s: \n", label)
-				real_instr.WriteString(label+":\n")
+				ins := fmt.Sprintf("%s:\n", label)
+				real_instr.WriteString(ins)
 			}
 
-			load_32 := func(reg string, immu uint64) int {
-				//sign_bit := imm >> 63 & 1
-		//		sign_bit := imm >> 31 & 1
-		//		if sign_bit == 1 { imm = ^imm + 1 }// same imm = -imm 
-		                imm := int(immu)
+			load_32 := func(reg string, imm uint64) int {
+				// L12
+				L12_sign_bit := imm >> 11 & 1
+				L11 := imm & 0x7ff // 11 bits
+				if imm&0xfff != 0 {
+					ins = fmt.Sprintf("addi %s, %s, %#x\n", reg, reg, 0) // clean
+					real_instr.WriteString(ins)
+					ins = fmt.Sprintf("addi %s, %s, %#x\n", reg, reg, L11)
+					real_instr.WriteString(ins)
 
-				l12 := imm & 0xfff // 12 bits
-				l12_sign_bit := l12 >> 11 & 1
-				h20 := imm >> 12
-				if l12_sign_bit == 1 {
-	//				if sign_bit == 0 {
-					   h20 = h20 + 1 
-					   l12 = -(0x1000 - l12) }
-			//	}
-				    ins := fmt.Sprintf("lui %s, %#x\n", reg, h20)
-				        real_instr.WriteString(ins)
-				    ins = fmt.Sprintf("addiw %s, %s, %#x\n", reg, reg, l12)
-				        real_instr.WriteString(ins)
-	//			if sign_bit == 1 { 
-	//				ins = fmt.Sprintf("xori %s, %s, -1\naddiw %s, %s, 1\n", reg, reg, reg, reg)
-	//			        real_instr.WriteString(ins)
+					if L12_sign_bit == 1 {
+						ins = fmt.Sprintf("addi %s, %s, %#x\n", "t0", "t0", 1)
+						real_instr.WriteString(ins)
+						ins = fmt.Sprintf("slli %s, %s, %#x\n", "t0", "t0", 11)
+						real_instr.WriteString(ins)
+						ins = fmt.Sprintf("add %s, %s, %s\n", reg, reg, "t0")
+						real_instr.WriteString(ins)
+					}
+				}
 
-	//		    }
+				// H20
+				H20_sign_bit := imm >> 31 & 1
+				h19 := imm << 1 >> 1 >> 12
+				if imm>>12 != 0 {
+					ins := fmt.Sprintf("lui %s, %#x\n", "t0", h19)
+					real_instr.WriteString(ins)
+
+					if H20_sign_bit == 1 {
+						ins = fmt.Sprintf("addi %s, %s, %#x\n", "t1", "t1", 1)
+						real_instr.WriteString(ins)
+						ins = fmt.Sprintf("slli %s, %s, %#x\n", "t1", "t1", 19)
+						real_instr.WriteString(ins)
+						ins = fmt.Sprintf("add %s, %s, %s\n", "t0", "t0", "t1")
+						real_instr.WriteString(ins)
+					}
+				}
+
+				// concat
+				if imm&0xfff != 0 && imm>>12 != 0 {
+					ins = fmt.Sprintf("add %s, %s, %s\n", reg, reg, "t0")
+					real_instr.WriteString(ins)
+				}
+
 				return 0
 			}
 			//-----
-			        // 获取绝对值
-				//sign_bit := imm >> 63 & 1
-				//if sign_bit == 1 { imm = ^imm + 1 }// same imm = -imm 
-
+			// 0
+			if imm == 0 {
+				ins = fmt.Sprintf("addi %s, %s, %#x\n", code[1], code[1], 0)
+				real_instr.WriteString(ins)
+			}
+			if imm != 0 {
 				// 低 32 位到 rd ( even 0 must act once)
 				l_imm := imm << 32 >> 32
 				load_32(code[1], l_imm)
@@ -317,31 +346,31 @@ func main() {
 				// 高 32 位到 x_tmp(32-rd)
 				h_imm := imm >> 32
 				if h_imm != 0 {
-				x_number, _ := strconv.Atoi(code[1][1:])
-				x_tmp := "x"+ strconv.Itoa(32 - x_number)
-				load_32(x_tmp, h_imm)
-				ins := fmt.Sprintf("slli %s, %s, 32\n", x_tmp, x_tmp)
-				real_instr.WriteString(ins)
+					x_tmp := "t2"
+					load_32(x_tmp, h_imm)
+					ins := fmt.Sprintf("slli %s, %s, 32\n", x_tmp, x_tmp)
+					real_instr.WriteString(ins)
 
-				// concat with low_32
-				ins = fmt.Sprintf("add %s, %s, %s\n", code[1], code[1], x_tmp)
-			        real_instr.WriteString(ins)
-				    }
+					// concat high_32 with low_32
+					ins = fmt.Sprintf("add %s, %s, %s\n", code[1], code[1], x_tmp)
+					real_instr.WriteString(ins)
+				}
+
 				// 取补码还原负数
-				//if sign_bit == 1 { 
-				if sign == 1 { 
+				if sign == 1 {
 					ins := fmt.Sprintf("xori %s, %s, -1\naddi %s, %s, 1\n", code[1], code[1], code[1], code[1])
-				        real_instr.WriteString(ins)
+					real_instr.WriteString(ins)
 
 				}
+			}
 		case "j":
 			if len(code) != 2 && len(code) != 3 {
 				fmt.Println("Incorrect argument count on line: ", lineCounter)
 				os.Exit(0)
 			}
 			imm, err := isValidImmediate(code[1])
-				ins := fmt.Sprintf("jal x0, %d\n", imm)
-				fmt.Printf("%s: \n", ins)
+			ins := fmt.Sprintf("jal x0, %d\n", imm)
+			fmt.Printf("%s: \n", ins)
 			//op, opFound := opBin[code[0]]
 			if err != nil {
 				fmt.Printf("~Error on line %d: %s, %s \n", lineCounter, err, line)
@@ -354,22 +383,22 @@ func main() {
 			//}
 			if label != "" {
 				//fmt.Printf("%s: \n", label)
-				real_instr.WriteString(label+":\n")
+				real_instr.WriteString(label + ":\n")
 			}
 
-				ins  = fmt.Sprintf("jal x0, %d\n", imm)
+			ins = fmt.Sprintf("jal x0, %d\n", imm)
 
-				real_instr.WriteString(ins)
-				fmt.Printf("%s: \n", ins)
+			real_instr.WriteString(ins)
+			fmt.Printf("%s: \n", ins)
 
 		default:
 			real_instr.WriteString(origin_instr)
-	//write2f([]byte(real_instr.String()))
+			//write2f([]byte(real_instr.String()))
 		}
 		//os.Exit(0)
 
 	}
-	
+
 	fmt.Println("print real_instr")
 	fmt.Println(real_instr.String())
 	write2f([]byte(real_instr.String()))
@@ -613,7 +642,7 @@ func main() {
 				fmt.Printf("-Error on line %d: %s\n", lineCounter, err)
 				os.Exit(0)
 			}
-			if imm < -0x80000 || imm > 0xfffff { // for assembler create lui 0x800 in li 
+			if imm < -0x80000 || imm > 0xfffff { // for assembler create lui 0x800 in li
 				fmt.Printf("Lui: Error on line %d: Immediate value %d=0x%X out of range (should be between 0x%X and 0x7ffff )\n", lineCounter, imm, imm, -0x80000)
 				os.Exit(0)
 			}
@@ -640,7 +669,7 @@ func main() {
 			}
 			label = label - int64(address)
 			//instruction = (uint32(label)&0x80000)<<11 | (uint32(label)&0x7FE)<<20 | (uint32(label)&0x400)<<19 | (uint32(label)&0x7F800)<<11 | rd<<7 | op
-			instruction = (uint32(label)&0x80000)<<12 | (uint32(label)&0x7FE)<<20 | (uint32(label)&0x800)<<9 | (uint32(label)&0xFF000) | rd<<7 | op
+			instruction = (uint32(label)&0x80000)<<12 | (uint32(label)&0x7FE)<<20 | (uint32(label)&0x800)<<9 | (uint32(label) & 0xFF000) | rd<<7 | op
 			fmt.Printf("jarlabel: %d, %b\n", label, uint32(label))
 			fmt.Printf("instruction: %b\n", instruction)
 
