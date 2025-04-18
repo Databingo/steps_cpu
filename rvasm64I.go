@@ -260,7 +260,7 @@ func main() {
 			}
 		}
 		switch switchOnOp {
-		case "li":
+		case "li": // assembly use 0x and decimal with -+ meets the KISS 
 			if len(code) != 3 && len(code) != 4 {
 				fmt.Println("Incorrect argument count on line: ", lineCounter)
 				os.Exit(0)
