@@ -325,7 +325,7 @@ func main() {
 					        real_instr.WriteString(ins)
 						ins = fmt.Sprintf("addi %s, %s, %#x\n", rt1, rt1, 1)
 						real_instr.WriteString(ins)
-						ins = fmt.Sprintf("slli %s, %s, %#x\n", rt1, rt1, 31)
+						ins = fmt.Sprintf("slli %s, %s, %#x\n", rt1, rt1, 31) // MSB
 						real_instr.WriteString(ins)
 						ins = fmt.Sprintf("add %s, %s, %s\n", rt, rt, rt1)
 						real_instr.WriteString(ins)
