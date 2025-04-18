@@ -41,14 +41,14 @@
     li x11, 1               # Signal Compare
     li x11, 0               # Clear Signal
 
-### TEST: LI_SMALL_NEG_ADDI_MIN (Lower limit of ADDI imm)
-#    # Purpose: Test the negative boundary of ADDI immediate field.
-#    li x31, -2048           # Value under test (bit pattern 0xFF...FFF800) -> x31
-#    li x30, -2048           # Golden value -> x30
-#    # Golden hex: 0xFFFFFFFFFFFFF800
-#    li x11, 1               # Signal Compare
-#    li x11, 0               # Clear Signal
-#
+## TEST: LI_SMALL_NEG_ADDI_MIN (Lower limit of ADDI imm)
+    # Purpose: Test the negative boundary of ADDI immediate field.
+    li x31, -2048           # Value under test (bit pattern 0xFF...FFF800) -> x31
+    li x30, -2048           # Golden value -> x30
+    # Golden hex: 0xFFFFFFFFFFFFF800
+    li x11, 1               # Signal Compare
+    li x11, 0               # Clear Signal
+
 ### TEST: LI_MEDIUM_POS_LUI_ADDI (Requires LUI/ADDI)
 #    # Purpose: Test value just outside ADDI range, requiring LUI.
 #    li x31, 2048            # Value under test (0x800) -> x31

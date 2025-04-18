@@ -7,7 +7,7 @@
 
 parameter YMC = 60; // 一个脉冲是 60 纳秒时间单位，从上升沿到上升沿是一个周期，两个脉冲，120 纳秒
 //parameter TIME_WINDOW = 60*2 * 66 * 3 + 2 ; // 运行仿真 66*3(+2延迟节拍) 个时钟周期
-parameter TIME_WINDOW = 60*2 * 66 * 4 + 2 ;
+parameter TIME_WINDOW = 60*100 * 66 * 4 + 2 ;
 
 
 module s4tb();
@@ -16,7 +16,7 @@ module s4tb();
 reg clk;
 reg reset_n;
 wire [31:0] oir;
-wire [6:0] opc ;
+wire [31:0] opc ;
 wire [2:0] ojp;
 wire [6:0] oop;
 wire [2:0] of3;
