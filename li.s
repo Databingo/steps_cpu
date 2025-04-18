@@ -87,64 +87,64 @@
     li x11, 1               # Signal Compare
     li x11, 0               # Clear Signal
 
-### TEST: LI_CONST_NEG_32BIT_MIN_SIGNED (Decimal)
-#    # Purpose: Test loading min negative 32-bit signed value (-2^31).
-#    # On RV64, li sign-extends negative decimal values.
-#    li x31, -2147483648     # Value under test (Decimal) -> x31
-#    li x30, -2147483648     # Golden value -> x30
-#    # Golden hex: 0xFFFFFFFF80000000 (sign-extended from 32-bit 0x80000000)
-#    li x11, 1               # Signal Compare
-#    li x11, 0               # Clear Signal
-#
-### TEST: LI_CONST_HEX_32BIT_0x80000000
-#    # Purpose: Test loading the pattern 0x80000000 via hex.
-#    # On RV64, li typically zero-extends positive hex values.
-#    li x31, 0x80000000      # Value under test (Hex) -> x31
-#    li x30, 0x0000000080000000 # Golden value (zero-extended pattern) -> x30
-#    li x11, 1               # Signal Compare
-#    li x11, 0               # Clear Signal
-#
-### TEST: LI_LARGE_POS_64BIT (Requires multi-instruction sequence)
-#    # Purpose: Test loading a large positive 64-bit value.
-#    li x31, 0x123456789ABCDEF0 # Value under test -> x31
-#    li x30, 0x123456789ABCDEF0 # Golden value -> x30
-#    li x11, 1               # Signal Compare
-#    li x11, 0               # Clear Signal
-#
-### TEST: LI_LARGE_POS_64BIT_MAX_SIGNED (0x7FFFFFFFFFFFFFFF)
-#    # Purpose: Test loading the maximum positive signed 64-bit value.
-#    li x31, 0x7FFFFFFFFFFFFFFF # Value under test -> x31
-#    li x30, 0x7FFFFFFFFFFFFFFF # Golden value -> x30
-#    li x11, 1               # Signal Compare
-#    li x11, 0               # Clear Signal
-#
-### TEST: LI_LARGE_CONST_NEG_ONE (0xFFFFFFFFFFFFFFFF)
-#    # Purpose: Test loading the pattern for -1 (signed) or max uint64 (unsigned).
-#    li x31, 0xFFFFFFFFFFFFFFFF # Value under test (Hex) -> x31
-#    li x30, 0xFFFFFFFFFFFFFFFF # Golden value -> x30
-#    li x11, 1               # Signal Compare
-#    li x11, 0               # Clear Signal
-#
-### TEST: LI_NEG_ONE_DECIMAL
-#    # Purpose: Test loading -1 using decimal literal.
-#    li x31, -1                # Value under test (Decimal) -> x31
-#    li x30, -1                # Golden value (should also be 0xFF...FF) -> x30
-#    li x11, 1               # Signal Compare
-#    li x11, 0               # Clear Signal
-#
-### TEST: LI_LARGE_CONST_MIN_SIGNED (0x8000000000000000)
-#    # Purpose: Test loading the pattern for minimum signed 64-bit value (-2^63).
-#    li x31, 0x8000000000000000 # Value under test (Hex is safest) -> x31
-#    li x30, 0x8000000000000000 # Golden value -> x30
-#    li x11, 1               # Signal Compare
-#    li x11, 0               # Clear Signal
-#    # Note: Loading -9223372036854775808 via decimal might fail in some
-#    # assembler parsers due to internal limits, hex is preferred here.
-#
-### TEST: LI_LARGE_NEG_OTHER
-#    # Purpose: Test loading another large negative 64-bit value.
-#    li x31, 0xC000000000000000 # Value under test -> x31
-#    li x30, 0xC000000000000000 # Golden value -> x30
-#    li x11, 1               # Signal Compare
-#    li x11, 0               # Clear Signal
-#
+## TEST: LI_CONST_NEG_32BIT_MIN_SIGNED (Decimal)
+    # Purpose: Test loading min negative 32-bit signed value (-2^31).
+    # On RV64, li sign-extends negative decimal values.
+    li x31, -2147483648     # Value under test (Decimal) -> x31
+    li x30, -2147483648     # Golden value -> x30
+    # Golden hex: 0xFFFFFFFF80000000 (sign-extended from 32-bit 0x80000000)
+    li x11, 1               # Signal Compare
+    li x11, 0               # Clear Signal
+
+## TEST: LI_CONST_HEX_32BIT_0x80000000
+    # Purpose: Test loading the pattern 0x80000000 via hex.
+    # On RV64, li typically zero-extends positive hex values.
+    li x31, 0x80000000      # Value under test (Hex) -> x31
+    li x30, 0x0000000080000000 # Golden value (zero-extended pattern) -> x30
+    li x11, 1               # Signal Compare
+    li x11, 0               # Clear Signal
+
+## TEST: LI_LARGE_POS_64BIT (Requires multi-instruction sequence)
+    # Purpose: Test loading a large positive 64-bit value.
+    li x31, 0x123456789ABCDEF0 # Value under test -> x31
+    li x30, 0x123456789ABCDEF0 # Golden value -> x30
+    li x11, 1               # Signal Compare
+    li x11, 0               # Clear Signal
+
+## TEST: LI_LARGE_POS_64BIT_MAX_SIGNED (0x7FFFFFFFFFFFFFFF)
+    # Purpose: Test loading the maximum positive signed 64-bit value.
+    li x31, 0x7FFFFFFFFFFFFFFF # Value under test -> x31
+    li x30, 0x7FFFFFFFFFFFFFFF # Golden value -> x30
+    li x11, 1               # Signal Compare
+    li x11, 0               # Clear Signal
+
+## TEST: LI_LARGE_CONST_NEG_ONE (0xFFFFFFFFFFFFFFFF)
+    # Purpose: Test loading the pattern for -1 (signed) or max uint64 (unsigned).
+    li x31, 0xFFFFFFFFFFFFFFFF # Value under test (Hex) -> x31
+    li x30, 0xFFFFFFFFFFFFFFFF # Golden value -> x30
+    li x11, 1               # Signal Compare
+    li x11, 0               # Clear Signal
+
+## TEST: LI_NEG_ONE_DECIMAL
+    # Purpose: Test loading -1 using decimal literal.
+    li x31, -1                # Value under test (Decimal) -> x31
+    li x30, -1                # Golden value (should also be 0xFF...FF) -> x30
+    li x11, 1               # Signal Compare
+    li x11, 0               # Clear Signal
+
+## TEST: LI_LARGE_CONST_MIN_SIGNED (0x8000000000000000)
+    # Purpose: Test loading the pattern for minimum signed 64-bit value (-2^63).
+    li x31, 0x8000000000000000 # Value under test (Hex is safest) -> x31
+    li x30, 0x8000000000000000 # Golden value -> x30
+    li x11, 1               # Signal Compare
+    li x11, 0               # Clear Signal
+    # Note: Loading -9223372036854775808 via decimal might fail in some
+    # assembler parsers due to internal limits, hex is preferred here.
+
+## TEST: LI_LARGE_NEG_OTHER
+    # Purpose: Test loading another large negative 64-bit value.
+    li x31, 0xC000000000000000 # Value under test -> x31
+    li x30, 0xC000000000000000 # Golden value -> x30
+    li x11, 1               # Signal Compare
+    li x11, 0               # Clear Signal
+

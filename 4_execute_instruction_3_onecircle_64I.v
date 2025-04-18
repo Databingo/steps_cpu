@@ -77,7 +77,7 @@ oEcall, oEbreak, oCsrrw, oCsrrs, oCsrrc, oCsrrwi, oCsrrsi, oCsrrci
 // return: jalr x0, x1, 0
 
 //  程序存储器 
-reg [7:0] irom [0:1999];// 8 位宽度，400 行深度
+reg [7:0] irom [0:2999];// 8 位宽度，400 行深度
 // 数据存储器
 reg [7:0] drom [0:399];// 8 位宽度，400 行深度
 // 堆栈存储器

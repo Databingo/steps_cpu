@@ -5,67 +5,54 @@ addi x30, x0, 0x0
 #     li x11, 1               
 addi x11, x0, 0x0
 addi x11, x11, 0x1
-lui x5, 0x0
 #     li x11, 0               
 addi x11, x0, 0x0
 #     li x31, 1               
 addi x31, x0, 0x0
 addi x31, x31, 0x1
-lui x5, 0x0
 #     li x30, 1               
 addi x30, x0, 0x0
 addi x30, x30, 0x1
-lui x5, 0x0
 #     li x11, 1               
 addi x11, x0, 0x0
 addi x11, x11, 0x1
-lui x5, 0x0
 #     li x11, 0               
 addi x11, x0, 0x0
 #     li x31, 1000            
 addi x31, x0, 0x0
 addi x31, x31, 0x3e8
-lui x5, 0x0
 #     li x30, 1000            
 addi x30, x0, 0x0
 addi x30, x30, 0x3e8
-lui x5, 0x0
 #     li x11, 1               
 addi x11, x0, 0x0
 addi x11, x11, 0x1
-lui x5, 0x0
 #     li x11, 0               
 addi x11, x0, 0x0
 #     li x31, 2047            
 addi x31, x0, 0x0
 addi x31, x31, 0x7ff
-lui x5, 0x0
 #     li x30, 0x7FF           
 addi x30, x0, 0x0
 addi x30, x30, 0x7ff
-lui x5, 0x0
 #     li x11, 1               
 addi x11, x0, 0x0
 addi x11, x11, 0x1
-lui x5, 0x0
 #     li x11, 0               
 addi x11, x0, 0x0
 #     li x31, -1000           
 addi x31, x0, 0x0
 addi x31, x31, 0x3e8
-lui x5, 0x0
 xori x31, x31, -1
 addi x31, x31, 1
 #     li x30, -1000           
 addi x30, x0, 0x0
 addi x30, x30, 0x3e8
-lui x5, 0x0
 xori x30, x30, -1
 addi x30, x30, 1
 #     li x11, 1               
 addi x11, x0, 0x0
 addi x11, x11, 0x1
-lui x5, 0x0
 #     li x11, 0               
 addi x11, x0, 0x0
 #     li x31, -2048           
@@ -74,7 +61,6 @@ addi x5, x0, 0x0
 addi x5, x5, 0x1
 slli x5, x5, 0xb
 add x31, x31, x5
-lui x5, 0x0
 xori x31, x31, -1
 addi x31, x31, 1
 #     li x30, -2048           
@@ -83,13 +69,11 @@ addi x5, x0, 0x0
 addi x5, x5, 0x1
 slli x5, x5, 0xb
 add x30, x30, x5
-lui x5, 0x0
 xori x30, x30, -1
 addi x30, x30, 1
 #     li x11, 1               
 addi x11, x0, 0x0
 addi x11, x11, 0x1
-lui x5, 0x0
 #     li x11, 0               
 addi x11, x0, 0x0
 #     li x31, 2048            
@@ -98,18 +82,15 @@ addi x5, x0, 0x0
 addi x5, x5, 0x1
 slli x5, x5, 0xb
 add x31, x31, x5
-lui x5, 0x0
 #     li x30, 0x800           
 addi x30, x0, 0x0
 addi x5, x0, 0x0
 addi x5, x5, 0x1
 slli x5, x5, 0xb
 add x30, x30, x5
-lui x5, 0x0
 #     li x11, 1               
 addi x11, x0, 0x0
 addi x11, x11, 0x1
-lui x5, 0x0
 #     li x11, 0               
 addi x11, x0, 0x0
 #     li x31, 100000          
@@ -125,7 +106,6 @@ add x30, x30, x5
 #     li x11, 1               
 addi x11, x0, 0x0
 addi x11, x11, 0x1
-lui x5, 0x0
 #     li x11, 0               
 addi x11, x0, 0x0
 #     li x31, 0x7FFFFFFF      
@@ -149,7 +129,6 @@ add x30, x30, x5
 #     li x11, 1               
 addi x11, x0, 0x0
 addi x11, x11, 0x1
-lui x5, 0x0
 #     li x11, 0               
 addi x11, x0, 0x0
 #     li x31, 0xFFFFFFFF      
@@ -181,7 +160,6 @@ add x30, x30, x5
 #     li x11, 1               
 addi x11, x0, 0x0
 addi x11, x11, 0x1
-lui x5, 0x0
 #     li x11, 0               
 addi x11, x0, 0x0
 #     li x31, -2049           
@@ -191,7 +169,6 @@ addi x5, x0, 0x0
 addi x5, x5, 0x1
 slli x5, x5, 0xb
 add x31, x31, x5
-lui x5, 0x0
 xori x31, x31, -1
 addi x31, x31, 1
 #     li x30, -2049           
@@ -201,12 +178,278 @@ addi x5, x0, 0x0
 addi x5, x5, 0x1
 slli x5, x5, 0xb
 add x30, x30, x5
-lui x5, 0x0
 xori x30, x30, -1
 addi x30, x30, 1
 #     li x11, 1               
 addi x11, x0, 0x0
 addi x11, x11, 0x1
+#     li x11, 0               
+addi x11, x0, 0x0
+#     li x31, -2147483648     
+addi x31, x0, 0x0
 lui x5, 0x0
+addi x6, x0, 0x0
+addi x6, x6, 0x1
+slli x6, x6, 0x1f
+add x5, x5, x6
+add x31, x31, x5
+xori x31, x31, -1
+addi x31, x31, 1
+#     li x30, -2147483648     
+addi x30, x0, 0x0
+lui x5, 0x0
+addi x6, x0, 0x0
+addi x6, x6, 0x1
+slli x6, x6, 0x1f
+add x5, x5, x6
+add x30, x30, x5
+xori x30, x30, -1
+addi x30, x30, 1
+#     li x11, 1               
+addi x11, x0, 0x0
+addi x11, x11, 0x1
+#     li x11, 0               
+addi x11, x0, 0x0
+#     li x31, 0x80000000      
+addi x31, x0, 0x0
+lui x5, 0x0
+addi x6, x0, 0x0
+addi x6, x6, 0x1
+slli x6, x6, 0x1f
+add x5, x5, x6
+add x31, x31, x5
+#     li x30, 0x0000000080000000 
+addi x30, x0, 0x0
+lui x5, 0x0
+addi x6, x0, 0x0
+addi x6, x6, 0x1
+slli x6, x6, 0x1f
+add x5, x5, x6
+add x30, x30, x5
+#     li x11, 1               
+addi x11, x0, 0x0
+addi x11, x11, 0x1
+#     li x11, 0               
+addi x11, x0, 0x0
+#     li x31, 0x123456789ABCDEF0 
+addi x31, x0, 0x0
+addi x31, x31, 0x6f0
+addi x5, x0, 0x0
+addi x5, x5, 0x1
+slli x5, x5, 0xb
+add x31, x31, x5
+lui x5, 0x1abcd
+addi x6, x0, 0x0
+addi x6, x6, 0x1
+slli x6, x6, 0x1f
+add x5, x5, x6
+add x31, x31, x5
+addi x7, x0, 0x0
+addi x7, x7, 0x678
+lui x5, 0x12345
+add x7, x7, x5
+slli x7, x7, 32
+add x31, x31, x7
+#     li x30, 0x123456789ABCDEF0 
+addi x30, x0, 0x0
+addi x30, x30, 0x6f0
+addi x5, x0, 0x0
+addi x5, x5, 0x1
+slli x5, x5, 0xb
+add x30, x30, x5
+lui x5, 0x1abcd
+addi x6, x0, 0x0
+addi x6, x6, 0x1
+slli x6, x6, 0x1f
+add x5, x5, x6
+add x30, x30, x5
+addi x7, x0, 0x0
+addi x7, x7, 0x678
+lui x5, 0x12345
+add x7, x7, x5
+slli x7, x7, 32
+add x30, x30, x7
+#     li x11, 1               
+addi x11, x0, 0x0
+addi x11, x11, 0x1
+#     li x11, 0               
+addi x11, x0, 0x0
+#     li x31, 0x7FFFFFFFFFFFFFFF 
+addi x31, x0, 0x0
+addi x31, x31, 0x7ff
+addi x5, x0, 0x0
+addi x5, x5, 0x1
+slli x5, x5, 0xb
+add x31, x31, x5
+lui x5, 0x7ffff
+addi x6, x0, 0x0
+addi x6, x6, 0x1
+slli x6, x6, 0x1f
+add x5, x5, x6
+add x31, x31, x5
+addi x7, x0, 0x0
+addi x7, x7, 0x7ff
+addi x5, x0, 0x0
+addi x5, x5, 0x1
+slli x5, x5, 0xb
+add x7, x7, x5
+lui x5, 0x7ffff
+add x7, x7, x5
+slli x7, x7, 32
+add x31, x31, x7
+#     li x30, 0x7FFFFFFFFFFFFFFF 
+addi x30, x0, 0x0
+addi x30, x30, 0x7ff
+addi x5, x0, 0x0
+addi x5, x5, 0x1
+slli x5, x5, 0xb
+add x30, x30, x5
+lui x5, 0x7ffff
+addi x6, x0, 0x0
+addi x6, x6, 0x1
+slli x6, x6, 0x1f
+add x5, x5, x6
+add x30, x30, x5
+addi x7, x0, 0x0
+addi x7, x7, 0x7ff
+addi x5, x0, 0x0
+addi x5, x5, 0x1
+slli x5, x5, 0xb
+add x7, x7, x5
+lui x5, 0x7ffff
+add x7, x7, x5
+slli x7, x7, 32
+add x30, x30, x7
+#     li x11, 1               
+addi x11, x0, 0x0
+addi x11, x11, 0x1
+#     li x11, 0               
+addi x11, x0, 0x0
+#     li x31, 0xFFFFFFFFFFFFFFFF 
+addi x31, x0, 0x0
+addi x31, x31, 0x7ff
+addi x5, x0, 0x0
+addi x5, x5, 0x1
+slli x5, x5, 0xb
+add x31, x31, x5
+lui x5, 0x7ffff
+addi x6, x0, 0x0
+addi x6, x6, 0x1
+slli x6, x6, 0x1f
+add x5, x5, x6
+add x31, x31, x5
+addi x7, x0, 0x0
+addi x7, x7, 0x7ff
+addi x5, x0, 0x0
+addi x5, x5, 0x1
+slli x5, x5, 0xb
+add x7, x7, x5
+lui x5, 0x7ffff
+addi x6, x0, 0x0
+addi x6, x6, 0x1
+slli x6, x6, 0x1f
+add x5, x5, x6
+add x7, x7, x5
+slli x7, x7, 32
+add x31, x31, x7
+#     li x30, 0xFFFFFFFFFFFFFFFF 
+addi x30, x0, 0x0
+addi x30, x30, 0x7ff
+addi x5, x0, 0x0
+addi x5, x5, 0x1
+slli x5, x5, 0xb
+add x30, x30, x5
+lui x5, 0x7ffff
+addi x6, x0, 0x0
+addi x6, x6, 0x1
+slli x6, x6, 0x1f
+add x5, x5, x6
+add x30, x30, x5
+addi x7, x0, 0x0
+addi x7, x7, 0x7ff
+addi x5, x0, 0x0
+addi x5, x5, 0x1
+slli x5, x5, 0xb
+add x7, x7, x5
+lui x5, 0x7ffff
+addi x6, x0, 0x0
+addi x6, x6, 0x1
+slli x6, x6, 0x1f
+add x5, x5, x6
+add x7, x7, x5
+slli x7, x7, 32
+add x30, x30, x7
+#     li x11, 1               
+addi x11, x0, 0x0
+addi x11, x11, 0x1
+#     li x11, 0               
+addi x11, x0, 0x0
+#     li x31, -1                
+addi x31, x0, 0x0
+addi x31, x31, 0x1
+xori x31, x31, -1
+addi x31, x31, 1
+#     li x30, -1                
+addi x30, x0, 0x0
+addi x30, x30, 0x1
+xori x30, x30, -1
+addi x30, x30, 1
+#     li x11, 1               
+addi x11, x0, 0x0
+addi x11, x11, 0x1
+#     li x11, 0               
+addi x11, x0, 0x0
+#     li x31, 0x8000000000000000 
+addi x31, x0, 0x0
+addi x7, x0, 0x0
+lui x5, 0x0
+addi x6, x0, 0x0
+addi x6, x6, 0x1
+slli x6, x6, 0x1f
+add x5, x5, x6
+add x7, x7, x5
+slli x7, x7, 32
+add x31, x31, x7
+#     li x30, 0x8000000000000000 
+addi x30, x0, 0x0
+addi x7, x0, 0x0
+lui x5, 0x0
+addi x6, x0, 0x0
+addi x6, x6, 0x1
+slli x6, x6, 0x1f
+add x5, x5, x6
+add x7, x7, x5
+slli x7, x7, 32
+add x30, x30, x7
+#     li x11, 1               
+addi x11, x0, 0x0
+addi x11, x11, 0x1
+#     li x11, 0               
+addi x11, x0, 0x0
+#     li x31, 0xC000000000000000 
+addi x31, x0, 0x0
+addi x7, x0, 0x0
+lui x5, 0x40000
+addi x6, x0, 0x0
+addi x6, x6, 0x1
+slli x6, x6, 0x1f
+add x5, x5, x6
+add x7, x7, x5
+slli x7, x7, 32
+add x31, x31, x7
+#     li x30, 0xC000000000000000 
+addi x30, x0, 0x0
+addi x7, x0, 0x0
+lui x5, 0x40000
+addi x6, x0, 0x0
+addi x6, x6, 0x1
+slli x6, x6, 0x1f
+add x5, x5, x6
+add x7, x7, x5
+slli x7, x7, 32
+add x30, x30, x7
+#     li x11, 1               
+addi x11, x0, 0x0
+addi x11, x11, 0x1
 #     li x11, 0               
 addi x11, x0, 0x0

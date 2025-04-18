@@ -333,7 +333,7 @@ func main() {
 				}
 
 				// Concat H20_L12
-				if imm&0xfff != 0 && imm>>12 != 0 {
+				if imm>>12 != 0 {
 					ins = fmt.Sprintf("add %s, %s, %s\n", reg, reg, rt)
 					real_instr.WriteString(ins)
 				}
