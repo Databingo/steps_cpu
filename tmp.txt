@@ -1,34 +1,40 @@
 #     li x5, 0
 addi x5, x0, 0x0
-    lw  x31, 8(x5)            # Load word: x31 = MEM[0 + 8] sign-extended
-#     li  x30, 0x0000000012345678 
+    ld  x31, 16(x5)           # Load double: x31 = MEM[0 + 16]
+#     li  x30, 0x1122334455667788 
 addi x30, x0, 0x0
-slli x30, x30, 0xb
-ori x30, x30, 0x48
-slli x30, x30, 0xb
-ori x30, x30, 0x68a
-slli x30, x30, 0xb
-ori x30, x30, 0x678
-#     li  x11, 1                 
-addi x11, x0, 0x0
-ori x11, x11, 0x1
-#     li  x11, 0                 
-addi x11, x0, 0x0
-    lw  x31, 12(x5)           # Load word: x31 = MEM[0 + 12] sign-extended
-#     li  x30, 0xFFFFFFFF80000000 
-addi x30, x0, 0x0
-lui x30, 0xfffff
+lui x30, 0x11223
 srli x30, x30, 0x1
-ori x30, x30, 0x7ff
+ori x30, x30, 0x1a2
 slli x30, x30, 0xb
-ori x30, x30, 0x600
-slli x30, x30, 0x16
+ori x30, x30, 0x155
+slli x30, x30, 0xb
+ori x30, x30, 0x4ce
+slli x30, x30, 0xb
+ori x30, x30, 0x788
 #     li  x11, 1                 
 addi x11, x0, 0x0
 ori x11, x11, 0x1
 #     li  x11, 0                 
 addi x11, x0, 0x0
-    lw  x31, 40(x5)           # Load word: x31 = MEM[0 + 40] sign-extended
+    ld  x31, 24(x5)           # Load double: x31 = MEM[0 + 24]
+#     li  x30, 0xAABBCCDDEEFF0011 
+addi x30, x0, 0x0
+lui x30, 0xaabbc
+srli x30, x30, 0x1
+ori x30, x30, 0x66e
+slli x30, x30, 0xb
+ori x30, x30, 0x7bb
+slli x30, x30, 0xb
+ori x30, x30, 0x7e0
+slli x30, x30, 0xb
+ori x30, x30, 0x11
+#     li  x11, 1                 
+addi x11, x0, 0x0
+ori x11, x11, 0x1
+#     li  x11, 0                 
+addi x11, x0, 0x0
+    ld  x31, 32(x5)           # Load double: x31 = MEM[0 + 32]
 #     li  x30, 0xFFFFFFFFFFFFFFFF 
 addi x30, x0, 0x0
 addi x30, x0, 0x1
@@ -39,11 +45,14 @@ addi x11, x0, 0x0
 ori x11, x11, 0x1
 #     li  x11, 0                 
 addi x11, x0, 0x0
-    lw  x31, 44(x5)           # Load word: x31 = MEM[0 + 44] sign-extended
-#     li  x30, 0x000000007FFFFFFF 
+    ld  x31, 40(x5)           # Load double: x31 = MEM[0 + 40]
+#     li  x30, 0x7FFFFFFFFFFFFFFF 
 addi x30, x0, 0x0
+lui x30, 0x7ffff
+srli x30, x30, 0x1
+ori x30, x30, 0x7ff
 slli x30, x30, 0xb
-ori x30, x30, 0x1ff
+ori x30, x30, 0x7ff
 slli x30, x30, 0xb
 ori x30, x30, 0x7ff
 slli x30, x30, 0xb
@@ -53,71 +62,40 @@ addi x11, x0, 0x0
 ori x11, x11, 0x1
 #     li  x11, 0                 
 addi x11, x0, 0x0
-    lwu x31, 8(x5)            # Load word: x31 = MEM[0 + 8] zero-extended
-#     li  x30, 0x0000000012345678 
+    ld  x31, 48(x5)           # Load double: x31 = MEM[0 + 48]
+#     li  x30, 0x8000000000000000 
 addi x30, x0, 0x0
-slli x30, x30, 0xb
-ori x30, x30, 0x48
-slli x30, x30, 0xb
-ori x30, x30, 0x68a
-slli x30, x30, 0xb
-ori x30, x30, 0x678
+lui x30, 0x80000
+srli x30, x30, 0x1
+slli x30, x30, 0x21
 #     li  x11, 1                 
 addi x11, x0, 0x0
 ori x11, x11, 0x1
 #     li  x11, 0                 
 addi x11, x0, 0x0
-    lwu x31, 12(x5)           # Load word: x31 = MEM[0 + 12] zero-extended
-#     li  x30, 0x0000000080000000 
+    ld  x31, 56(x5)           # Load double: x31 = MEM[0 + 56]
+#     li  x30, 0x0000000000000000 
 addi x30, x0, 0x0
-slli x30, x30, 0xb
-ori x30, x30, 0x200
-slli x30, x30, 0x16
 #     li  x11, 1                 
 addi x11, x0, 0x0
 ori x11, x11, 0x1
 #     li  x11, 0                 
 addi x11, x0, 0x0
-    lwu x31, 40(x5)           # Load word: x31 = MEM[0 + 40] zero-extended
-#     li  x30, 0x00000000FFFFFFFF 
-addi x30, x0, 0x0
-slli x30, x30, 0xb
-ori x30, x30, 0x3ff
-slli x30, x30, 0xb
-ori x30, x30, 0x7ff
-slli x30, x30, 0xb
-ori x30, x30, 0x7ff
-#     li  x11, 1                 
-addi x11, x0, 0x0
-ori x11, x11, 0x1
-#     li  x11, 0                 
-addi x11, x0, 0x0
-    lwu x31, 44(x5)           # Load word: x31 = MEM[0 + 44] zero-extended
-#     li  x30, 0x000000007FFFFFFF 
-addi x30, x0, 0x0
-slli x30, x30, 0xb
-ori x30, x30, 0x1ff
-slli x30, x30, 0xb
-ori x30, x30, 0x7ff
-slli x30, x30, 0xb
-ori x30, x30, 0x7ff
-#     li  x11, 1                 
-addi x11, x0, 0x0
-ori x11, x11, 0x1
-#     li  x11, 0                 
-addi x11, x0, 0x0
-#     li  x5, 12                
+#     li  x5, 24                
 addi x5, x0, 0x0
-ori x5, x5, 0xc
-    lw  x31, -4(x5)           # Load word: x31 = MEM[12 + (-4)] = MEM[8]
-#     li  x30, 0x0000000012345678 
+ori x5, x5, 0x18
+    ld  x31, -8(x5)           # Load double: x31 = MEM[24 + (-8)] = MEM[16]
+#     li  x30, 0x1122334455667788 
 addi x30, x0, 0x0
+lui x30, 0x11223
+srli x30, x30, 0x1
+ori x30, x30, 0x1a2
 slli x30, x30, 0xb
-ori x30, x30, 0x48
+ori x30, x30, 0x155
 slli x30, x30, 0xb
-ori x30, x30, 0x68a
+ori x30, x30, 0x4ce
 slli x30, x30, 0xb
-ori x30, x30, 0x678
+ori x30, x30, 0x788
 #     li  x11, 1                 
 addi x11, x0, 0x0
 ori x11, x11, 0x1

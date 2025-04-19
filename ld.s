@@ -13,6 +13,7 @@ _start:
 ## Using x11 for Compare Signaling
 ## Using x5 as base address register (rs1), assumes base address = 0
 ## REQUIRES data memory pre-loaded from 'data_test.txt' at address 0.
+## --- Ensure Verilog 'ld' implementation correctly sign-extends the offset ---
 ##--------------------------------------------
 
 # -- LD Tests (No extension needed for RV64) --
@@ -67,6 +68,7 @@ _start:
 # -- Offset Test --
 ## TEST: LD_NEGATIVE_OFFSET
     # Purpose: Load double 0x11...88 (Addr 16) using base x5=24 and offset -8.
+    # THIS TEST REQUIRES VERILOG 'ld' TO SIGN-EXTEND THE OFFSET -8 CORRECTLY
     li  x5, 24                # Set base register temporarily
     ld  x31, -8(x5)           # Load double: x31 = MEM[24 + (-8)] = MEM[16]
     li  x30, 0x1122334455667788 # Golden value
@@ -74,3 +76,7 @@ _start:
     li  x11, 0                 # Clear Signal
     li  x5, 0                 # Restore base register x5 to 0
 
+
+##--------------------------------------------
+## End of LD Tests
+##--------------------------------------------

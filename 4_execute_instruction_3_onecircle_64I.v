@@ -435,14 +435,14 @@ begin
 				  3'b011:begin 
                                            Ld  <= 1'b1; // set Ld  Flag 
 					   //load 64 bite sign to 64 bits at imm(s1) to rd
-	                                   rram[wire_rd] <= {drom[rram[wire_rs1]+wire_imm+7], 
-	                                                     drom[rram[wire_rs1]+wire_imm+6], 
-	                                                     drom[rram[wire_rs1]+wire_imm+5], 
-	                                                     drom[rram[wire_rs1]+wire_imm+4],
-	                                                     drom[rram[wire_rs1]+wire_imm+3], 
-	                                                     drom[rram[wire_rs1]+wire_imm+2], 
-	                                                     drom[rram[wire_rs1]+wire_imm+1], 
-	                                                     drom[rram[wire_rs1]+wire_imm  ]}; 
+	                                   rram[wire_rd] <= {drom[rram[wire_rs1]+{{52{wire_imm[11]}},wire_imm}+7], 
+	                                                     drom[rram[wire_rs1]+{{52{wire_imm[11]}},wire_imm}+6], 
+	                                                     drom[rram[wire_rs1]+{{52{wire_imm[11]}},wire_imm}+5], 
+	                                                     drom[rram[wire_rs1]+{{52{wire_imm[11]}},wire_imm}+4],
+	                                                     drom[rram[wire_rs1]+{{52{wire_imm[11]}},wire_imm}+3], 
+	                                                     drom[rram[wire_rs1]+{{52{wire_imm[11]}},wire_imm}+2], 
+	                                                     drom[rram[wire_rs1]+{{52{wire_imm[11]}},wire_imm}+1], 
+	                                                     drom[rram[wire_rs1]+{{52{wire_imm[11]}},wire_imm}  ]}; 
 				           pc <= pc + 4; 
 	    	                           jp <=0;
 				         end 
