@@ -406,8 +406,8 @@ begin
 				  3'b101:begin 
                                            Lhu <= 1'b1; // set Lhu Flag  
 				           //load 16 bite unsign to 64 bits at imm(s1) to rd
-				           rram[wire_rd] <= {48'b0, drom[rram[wire_rs1]+wire_imm + 1], 
-					                            drom[rram[wire_rs1]+wire_imm] }; 
+				           rram[wire_rd] <= {48'b0, drom[rram[wire_rs1]+{{52{wire_imm[11]}},wire_imm}+ 1], 
+					                            drom[rram[wire_rs1]+{{52{wire_imm[11]}},wire_imm}]}; 
 				           pc <= pc + 4; 
 	    	                           jp <=0;
 				         end 
