@@ -380,7 +380,7 @@ func main() {
 			if h20 != 0 {
 				ins = fmt.Sprintf("lui %s, %#x\n", code[1], h20)
 				real_instr.WriteString(ins)
-			        ins = fmt.Sprintf("srli %s, %s, %#x\n", code[1], code[1], 1) 
+				ins = fmt.Sprintf("srli %s, %s, %#x\n", code[1], code[1], 1)
 				real_instr.WriteString(ins)
 			}
 			// 次 11 位
@@ -390,28 +390,42 @@ func main() {
 				real_instr.WriteString(ins)
 			}
 			// 中 11 位
+			sv := 0
 			z11 := imm >> 22 & 0x7ff
-			ins = fmt.Sprintf("slli %s, %s, %#x\n", code[1], code[1], 11) //
-			real_instr.WriteString(ins)
 			if z11 != 0 {
+				ins = fmt.Sprintf("slli %s, %s, %#x\n", code[1], code[1], 11) //
+				real_instr.WriteString(ins)
 				ins = fmt.Sprintf("ori %s, %s, %#x\n", code[1], code[1], z11) //
 				real_instr.WriteString(ins)
+			} else {
+				sv += 11
 			}
 			// 低 11 位
 			d11 := imm >> 11 & 0x7ff
-			ins = fmt.Sprintf("slli %s, %s, %#x\n", code[1], code[1], 11) //
-			real_instr.WriteString(ins)
 			if d11 != 0 {
+				ins = fmt.Sprintf("slli %s, %s, %#x\n", code[1], code[1], sv+11) //
+				real_instr.WriteString(ins)
 				ins = fmt.Sprintf("ori %s, %s, %#x\n", code[1], code[1], d11) //
 				real_instr.WriteString(ins)
+				sv = 0
+			} else {
+				sv += 11
 			}
 			// 末 11 位
 			m11 := imm & 0x7ff
-			ins = fmt.Sprintf("slli %s, %s, %#x\n", code[1], code[1], 11) //
-			real_instr.WriteString(ins)
 			if m11 != 0 {
+				ins = fmt.Sprintf("slli %s, %s, %#x\n", code[1], code[1], sv+11) //
+				real_instr.WriteString(ins)
 				ins = fmt.Sprintf("ori %s, %s, %#x\n", code[1], code[1], m11) //
 				real_instr.WriteString(ins)
+				sv = 0
+			} else {
+				sv += 11
+			}
+			if sv != 0 && imm != 0{
+				ins = fmt.Sprintf("slli %s, %s, %#x\n", code[1], code[1], sv) //
+				real_instr.WriteString(ins)
+
 			}
 
 			// 取补码还原负数
