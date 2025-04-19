@@ -383,7 +383,7 @@ begin
 				  3'b100:begin 
 				           Lbu  <= 1'b1; // set Lbu  Flag 
 				           //load 8 bite unsign to 64 bits at imm(s1) to rd
-				           rram[wire_rd] <= {56'b0, drom[rram[wire_rs1]+wire_imm]}; 
+				           rram[wire_rd] <= {56'b0, drom[rram[wire_rs1]+{{52{wire_imm[11]}},wire_imm}]}; 
 				           pc <= pc + 4; 
 	    	                           jp <=0;
 				         end 
