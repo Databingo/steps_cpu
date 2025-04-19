@@ -388,38 +388,38 @@ func main() {
 				real_instr.WriteString(ins)
 			}
 			// 中 11 位
-			sf := 11
+			lshift := 11
 			z11 := imm >> 22 & 0x7ff
 			if z11 != 0 {
-				ins = fmt.Sprintf("slli %s, %s, %#x\n", code[1], code[1], sf)
+				ins = fmt.Sprintf("slli %s, %s, %#x\n", code[1], code[1], lshift)
 				real_instr.WriteString(ins)
 				ins = fmt.Sprintf("ori %s, %s, %#x\n", code[1], code[1], z11)
 				real_instr.WriteString(ins)
-				sf = 0
+				lshift = 0
 			} 
 			// 低 11 位
-			sf += 11
+			lshift += 11
 			d11 := imm >> 11 & 0x7ff
 			if d11 != 0 {
-				ins = fmt.Sprintf("slli %s, %s, %#x\n", code[1], code[1], sf)
+				ins = fmt.Sprintf("slli %s, %s, %#x\n", code[1], code[1], lshift)
 				real_instr.WriteString(ins)
 				ins = fmt.Sprintf("ori %s, %s, %#x\n", code[1], code[1], d11)
 				real_instr.WriteString(ins)
-				sf = 0
+				lshift = 0
 			}
 			// 末 11 位
-			sf += 11
+			lshift += 11
 			m11 := imm & 0x7ff
 			if m11 != 0 {
-				ins = fmt.Sprintf("slli %s, %s, %#x\n", code[1], code[1], sf)
+				ins = fmt.Sprintf("slli %s, %s, %#x\n", code[1], code[1], lshift)
 				real_instr.WriteString(ins)
 				ins = fmt.Sprintf("ori %s, %s, %#x\n", code[1], code[1], m11)
 				real_instr.WriteString(ins)
-				sf = 0
+				lshift = 0
 			}
 			// 左移
-			if sf != 0 && imm != 0{
-				ins = fmt.Sprintf("slli %s, %s, %#x\n", code[1], code[1], sf) 
+			if lshift != 0 && imm != 0{
+				ins = fmt.Sprintf("slli %s, %s, %#x\n", code[1], code[1], lshift) 
 				real_instr.WriteString(ins)
 
 			}
