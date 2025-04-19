@@ -376,8 +376,7 @@ begin
 				           //load 8 bite sign extend to 64 bits at imm(s1) to rd
 				           rram[wire_rd] <= {{56{drom[rram[wire_rs1]+ {{52{wire_imm[11]}},wire_imm}][7]}}, 
 					                         drom[rram[wire_rs1]+ {{52{wire_imm[11]}},wire_imm}]}; 
-				           //rram[wire_rd] <= {{56{drom[rram[wire_rs1]+wire_imm][7]}}, 
-					   //                      drom[rram[wire_rs1]+wire_imm]}; 
+				           //rram[wire_rd] <= 48;
 				           pc <= pc + 4; 
 	    	                           jp <=0;
 				         end 
@@ -454,7 +453,7 @@ begin
 				  3'b000:begin 
 				           //store byte, write low 8 bits of rs1 to rs2's imm.12
 				           Sb  <= 1'b1; // set Sb  Flag 
-					   drom[rram[wire_rs1]+wire_simm] <= rram[wire_rs2][7:0];
+					   drom[rram[wire_rs1]+{{52{wire_simm[11]}},wire_simm}] <= rram[wire_rs2][7:0];
 				           pc <= pc + 4; 
 	    	                           jp <=0;
 				         end 
