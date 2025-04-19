@@ -460,32 +460,32 @@ begin
 				  3'b001:begin 
 				           //store half word, write low 16 bits of rs1 to rs2's imm.12
 				           Sh  <= 1'b1; // set Sh  Flag 
-					   drom[rram[wire_rs1]+wire_simm] <= rram[wire_rs2][7:0];
-					   drom[rram[wire_rs1]+wire_simm+1] <= rram[wire_rs2][15:8];
+					   drom[rram[wire_rs1]+{{52{wire_simm[11]}},wire_simm}] <= rram[wire_rs2][7:0];
+					   drom[rram[wire_rs1]+{{52{wire_simm[11]}},wire_simm}+1] <= rram[wire_rs2][15:8];
 				           pc <= pc + 4; 
 	    	                           jp <=0;
 				         end 
 				  3'b010:begin 
 				           //store word, write low 16 bits of rs1 to rs2's imm.12
 				           Sw  <= 1'b1; // set Sw  Flag  
-					   drom[rram[wire_rs1]+wire_simm] <= rram[wire_rs2][7:0];
-					   drom[rram[wire_rs1]+wire_simm+1] <= rram[wire_rs2][15:8];
-					   drom[rram[wire_rs1]+wire_simm+2] <= rram[wire_rs2][23:16];
-					   drom[rram[wire_rs1]+wire_simm+3] <= rram[wire_rs2][31:24];
+					   drom[rram[wire_rs1]+{{52{wire_simm[11]}},wire_simm}] <= rram[wire_rs2][7:0];
+					   drom[rram[wire_rs1]+{{52{wire_simm[11]}},wire_simm}+1] <= rram[wire_rs2][15:8];
+					   drom[rram[wire_rs1]+{{52{wire_simm[11]}},wire_simm}+2] <= rram[wire_rs2][23:16];
+					   drom[rram[wire_rs1]+{{52{wire_simm[11]}},wire_simm}+3] <= rram[wire_rs2][31:24];
 				           pc <= pc + 4; 
 	    	                           jp <=0;
 				         end 
 				  3'b011:begin 
 				           //store double words, write 64 bits of rs1 to rs2's imm.12
 				           Sd  <= 1'b1; // set Sd  Flag  
-					   drom[rram[wire_rs1]+wire_simm] <= rram[wire_rs2][7:0];
-					   drom[rram[wire_rs1]+wire_simm+1] <= rram[wire_rs2][15:8];
-					   drom[rram[wire_rs1]+wire_simm+2] <= rram[wire_rs2][23:16];
-					   drom[rram[wire_rs1]+wire_simm+3] <= rram[wire_rs2][31:24];
-					   drom[rram[wire_rs1]+wire_simm+4] <= rram[wire_rs2][39:32];
-					   drom[rram[wire_rs1]+wire_simm+5] <= rram[wire_rs2][47:40];
-					   drom[rram[wire_rs1]+wire_simm+6] <= rram[wire_rs2][55:48];
-					   drom[rram[wire_rs1]+wire_simm+7] <= rram[wire_rs2][63:56];
+					   drom[rram[wire_rs1]+{{52{wire_simm[11]}},wire_simm}] <= rram[wire_rs2][7:0];
+					   drom[rram[wire_rs1]+{{52{wire_simm[11]}},wire_simm}+1] <= rram[wire_rs2][15:8];
+					   drom[rram[wire_rs1]+{{52{wire_simm[11]}},wire_simm}+2] <= rram[wire_rs2][23:16];
+					   drom[rram[wire_rs1]+{{52{wire_simm[11]}},wire_simm}+3] <= rram[wire_rs2][31:24];
+					   drom[rram[wire_rs1]+{{52{wire_simm[11]}},wire_simm}+4] <= rram[wire_rs2][39:32];
+					   drom[rram[wire_rs1]+{{52{wire_simm[11]}},wire_simm}+5] <= rram[wire_rs2][47:40];
+					   drom[rram[wire_rs1]+{{52{wire_simm[11]}},wire_simm}+6] <= rram[wire_rs2][55:48];
+					   drom[rram[wire_rs1]+{{52{wire_simm[11]}},wire_simm}+7] <= rram[wire_rs2][63:56];
 				           pc <= pc + 4; 
 	    	                           jp <=0;
 				         end 
