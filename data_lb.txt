@@ -1,0 +1,30 @@
+// Data file ONLY for LB tests
+// Format: @Address (Hex) followed by Hex Bytes (space separated)
+// Target for Verilog $readmemh
+@000
+// Addr 0: 7F (Positive byte)
+// Addr 1: 80 (Negative byte -128)
+// Addr 2: FF (Negative byte -1)
+// Addr 3: 00 (Zero byte / Padding)
+7F 80 FF 00
+@004
+// Padding addresses 4 through 31 with zeros
+00 00 00 00
+@008
+00 00 00 00
+@00C
+00 00 00 00
+@010
+00 00 00 00
+@014
+00 00 00 00
+@018
+00 00 00 00
+@01C
+00 00 00 00
+@020
+// Addr 32: 00 (Padding)
+// Addr 33: BB (Byte for offset test)
+// Addr 34: 00 (Padding)
+// Addr 35: 00 (Padding)
+00 BB 00 00

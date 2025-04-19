@@ -79,7 +79,7 @@ oEcall, oEbreak, oCsrrw, oCsrrs, oCsrrc, oCsrrwi, oCsrrsi, oCsrrci
 //  程序存储器 
 reg [7:0] irom [0:2999];// 8 位宽度，400 行深度
 // 数据存储器
-reg [7:0] drom [0:399];// 8 位宽度，400 行深度
+reg [7:0] drom [0:999];// 8 位宽度，400 行深度
 // 堆栈存储器
 reg [7:0] srom [0:399];// 8 位宽度，400 行深度
 // 通用寄存器列表 32 个
@@ -235,7 +235,8 @@ assign oEcall= Ecall; assign oEbreak=Ebreak; assign oCsrrw= Csrrw; assign oCsrrs
 //initial $readmemb("./programb.txt", irom);
 initial $readmemb("./binary_instructions.txt", irom);
 //initial $readmemb("./firmware.out", irom);
-initial $readmemb("./data.txt", drom);
+//initial $readmemb("./data.txt", drom);
+initial $readmemh("./data_lb.txt", drom);
 
 reg [63:0] sum; // 加法结果组合逻辑寄存器
 reg [63:0] sum_imm; // 加法结果组合逻辑寄存器
@@ -371,6 +372,8 @@ begin
 				  3'b000:begin 
 				           Lb  <= 1'b1; // set Lb  Flag 
 				           //load 8 bite sign extend to 64 bits at imm(s1) to rd
+				           //rram[wire_rd] <= {{56{drom[rram[wire_rs1]+ {{52{wire_imm[11]}},wire_imm}][7]}}, 
+					   //                      drom[rram[wire_rs1]+ {{52{wire_imm[11]}},wire_imm}]}; 
 				           rram[wire_rd] <= {{56{drom[rram[wire_rs1]+wire_imm][7]}}, 
 					                         drom[rram[wire_rs1]+wire_imm]}; 
 				           pc <= pc + 4; 

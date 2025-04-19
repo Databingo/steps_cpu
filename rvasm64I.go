@@ -283,93 +283,145 @@ func main() {
 			real_instr.WriteString(ins)
 			if label != "" {
 				//fmt.Printf("%s: \n", label)
-				ins := fmt.Sprintf("%s:\n", label)
+				ins = fmt.Sprintf("%s:\n", label)
 				real_instr.WriteString(ins)
 			}
+			/////////////////////////--
+			//rt := "x5"  // t0 assember used
+			//rt1 := "x6" // t1 assember used
+			//rt2 := "x7" // t2 assember used
 
-			rt := "x5"  // t0 assember used
-			rt1 := "x6" // t1 assember used
-			rt2 := "x7" // t2 assember used
+			//load_32 := func(reg string, imm uint64) int {
+			//	// L12
+			//	L12_sign_bit := imm >> 11 & 1
+			//	L11 := imm & 0x7ff                                    // 11 bits
+			//	ins = fmt.Sprintf("addi %s, %s, %#x\n", reg, "x0", 0) // clean reg
+			//	real_instr.WriteString(ins)
+			//	if L11 != 0 {
+			//		ins = fmt.Sprintf("addi %s, %s, %#x\n", reg, reg, L11)
+			//		real_instr.WriteString(ins)
+			//	}
+			//	// Fix L12_MSB
+			//	if L12_sign_bit == 1 {
+			//		ins = fmt.Sprintf("addi %s, %s, %#x\n", rt, "x0", 0) //clean rt
+			//		real_instr.WriteString(ins)
+			//		ins = fmt.Sprintf("addi %s, %s, %#x\n", rt, rt, 1)
+			//		real_instr.WriteString(ins)
+			//		ins = fmt.Sprintf("slli %s, %s, %#x\n", rt, rt, 11)
+			//		real_instr.WriteString(ins)
+			//		ins = fmt.Sprintf("add %s, %s, %s\n", reg, reg, rt)
+			//		real_instr.WriteString(ins)
+			//	}
 
-			load_32 := func(reg string, imm uint64) int {
-				// L12
-				L12_sign_bit := imm >> 11 & 1
-				L11 := imm & 0x7ff                                    // 11 bits
-				ins = fmt.Sprintf("addi %s, %s, %#x\n", reg, "x0", 0) // clean reg
+			//	// H20
+			//	H20_sign_bit := imm >> 31 & 1
+			//	h19 := imm >> 12 & 0x7ffff
+			//	if imm>>12 != 0 { // H exist
+			//		ins = fmt.Sprintf("lui %s, %#x\n", rt, h19) // lui clean rt automatically
+			//		real_instr.WriteString(ins)
+			//		// Fix H20_MSB
+			//		if H20_sign_bit == 1 {
+			//			ins = fmt.Sprintf("addi %s, %s, %#x\n", rt1, "x0", 0) //clean rt2
+			//			real_instr.WriteString(ins)
+			//			ins = fmt.Sprintf("addi %s, %s, %#x\n", rt1, rt1, 1)
+			//			real_instr.WriteString(ins)
+			//			ins = fmt.Sprintf("slli %s, %s, %#x\n", rt1, rt1, 31) // MSB
+			//			real_instr.WriteString(ins)
+			//			ins = fmt.Sprintf("add %s, %s, %s\n", rt, rt, rt1)
+			//			real_instr.WriteString(ins)
+			//		}
+			//	}
+
+			//	// Concat H20_L12
+			//	if imm>>12 != 0 {
+			//		ins = fmt.Sprintf("add %s, %s, %s\n", reg, reg, rt)
+			//		real_instr.WriteString(ins)
+			//	}
+
+			//	return 0
+			//}
+
+			//// 0
+			//if imm == 0 {
+			//	ins = fmt.Sprintf("addi %s, %s, %#x\n", code[1], "x0", 0)
+			//	real_instr.WriteString(ins)
+			//}
+			//if imm != 0 {
+			//	// 低 32 位到 rd
+			//	l_imm := imm << 32 >> 32
+			//	load_32(code[1], l_imm)
+
+			//	// 高 32 位到 x_tmp(32-rd)
+			//	h_imm := imm >> 32
+			//	if h_imm != 0 {
+			//		load_32(rt2, h_imm)
+			//		ins := fmt.Sprintf("slli %s, %s, 32\n", rt2, rt2)
+			//		real_instr.WriteString(ins)
+
+			//		// Concat high_32 with low_32
+			//		ins = fmt.Sprintf("add %s, %s, %s\n", code[1], code[1], rt2)
+			//		real_instr.WriteString(ins)
+			//	}
+
+			//	// 取补码还原负数
+			//	if sign == 1 {
+			//		ins := fmt.Sprintf("xori %s, %s, -1\naddi %s, %s, 1\n", code[1], code[1], code[1], code[1])
+			//		real_instr.WriteString(ins)
+
+			//	}
+			//}
+			/////////////////////////-- deploy 2
+			//if imm == 0 {
+			ins = fmt.Sprintf("addi %s, %s, %#x\n", code[1], "x0", 0) // for 0 or clean reg
+			real_instr.WriteString(ins)
+			//	}
+			// 高 32 位
+			h_imm := imm >> 32 & 0xffffffff
+			h_h20 := h_imm >> 12
+			if h_h20 != 0 {
+				ins = fmt.Sprintf("lui %s, %#x\n", code[1], h_h20)
 				real_instr.WriteString(ins)
-				if L11 != 0 {
-					ins = fmt.Sprintf("addi %s, %s, %#x\n", reg, reg, L11)
-					real_instr.WriteString(ins)
-				}
-				// Fix L12_MSB
-				if L12_sign_bit == 1 {
-					ins = fmt.Sprintf("addi %s, %s, %#x\n", rt, "x0", 0) //clean rt
-					real_instr.WriteString(ins)
-					ins = fmt.Sprintf("addi %s, %s, %#x\n", rt, rt, 1)
-					real_instr.WriteString(ins)
-					ins = fmt.Sprintf("slli %s, %s, %#x\n", rt, rt, 11)
-					real_instr.WriteString(ins)
-					ins = fmt.Sprintf("add %s, %s, %s\n", reg, reg, rt)
-					real_instr.WriteString(ins)
-				}
-
-				// H20
-				H20_sign_bit := imm >> 31 & 1
-				h19 := imm >> 12 & 0x7ffff
-				if imm>>12 != 0 { // H exist
-					ins = fmt.Sprintf("lui %s, %#x\n", rt, h19) // lui clean rt automatically
-					real_instr.WriteString(ins)
-					// Fix H20_MSB
-					if H20_sign_bit == 1 {
-						ins = fmt.Sprintf("addi %s, %s, %#x\n", rt1, "x0", 0) //clean rt2
-						real_instr.WriteString(ins)
-						ins = fmt.Sprintf("addi %s, %s, %#x\n", rt1, rt1, 1)
-						real_instr.WriteString(ins)
-						ins = fmt.Sprintf("slli %s, %s, %#x\n", rt1, rt1, 31) // MSB
-						real_instr.WriteString(ins)
-						ins = fmt.Sprintf("add %s, %s, %s\n", rt, rt, rt1)
-						real_instr.WriteString(ins)
-					}
-				}
-
-				// Concat H20_L12
-				if imm>>12 != 0 {
-					ins = fmt.Sprintf("add %s, %s, %s\n", reg, reg, rt)
-					real_instr.WriteString(ins)
-				}
-
-				return 0
 			}
-
-			// 0
-			if imm == 0 {
-				ins = fmt.Sprintf("addi %s, %s, %#x\n", code[1], "x0", 0)
+			h_l12 := h_imm & 0xfff
+			if h_l12 != 0 {
+				ins = fmt.Sprintf("ori %s, %s, %#x\n", code[1], code[1], h_l12) //
 				real_instr.WriteString(ins)
 			}
-			if imm != 0 {
-				// 低 32 位到 rd
-				l_imm := imm << 32 >> 32
-				load_32(code[1], l_imm)
-
-				// 高 32 位到 x_tmp(32-rd)
-				h_imm := imm >> 32
-				if h_imm != 0 {
-					load_32(rt2, h_imm)
-					ins := fmt.Sprintf("slli %s, %s, 32\n", rt2, rt2)
-					real_instr.WriteString(ins)
-
-					// Concat high_32 with low_32
-					ins = fmt.Sprintf("add %s, %s, %s\n", code[1], code[1], rt2)
-					real_instr.WriteString(ins)
-				}
-
-				// 取补码还原负数
-				if sign == 1 {
-					ins := fmt.Sprintf("xori %s, %s, -1\naddi %s, %s, 1\n", code[1], code[1], code[1], code[1])
-					real_instr.WriteString(ins)
-
-				}
+			// 低 32 位
+			l_imm := imm & 0xffffffff
+			if l_imm == 0 {
+				ins = fmt.Sprintf("slli %s, %s, %#x\n", code[1], code[1], 32) //
+				real_instr.WriteString(ins)
+				continue
 			}
+			l_h12 := l_imm >> 20 & 0xfff
+			ins = fmt.Sprintf("slli %s, %s, %#x\n", code[1], code[1], 12) //
+			real_instr.WriteString(ins)
+			if l_h12 != 0 {
+				ins = fmt.Sprintf("ori %s, %s, %#x\n", code[1], code[1], l_h12) //
+				real_instr.WriteString(ins)
+			}
+			l_m12 := l_imm >> 8 & 0xfff
+			ins = fmt.Sprintf("slli %s, %s, %#x\n", code[1], code[1], 12) //
+			real_instr.WriteString(ins)
+			if l_m12 != 0 {
+				ins = fmt.Sprintf("ori %s, %s, %#x\n", code[1], code[1], l_m12) //
+				real_instr.WriteString(ins)
+			}
+			l_l8 := l_imm & 0xff
+			ins = fmt.Sprintf("slli %s, %s, %#x\n", code[1], code[1], 8) //
+			real_instr.WriteString(ins)
+			if l_l8 != 0 {
+				ins = fmt.Sprintf("ori %s, %s, %#x\n", code[1], code[1], l_l8) //
+				real_instr.WriteString(ins)
+			}
+			// 取补码还原负数
+			if sign == 1 {
+				ins = fmt.Sprintf("xori %s, %s, -1\naddi %s, %s, 1\n", code[1], code[1], code[1], code[1])
+				real_instr.WriteString(ins)
+
+			}
+
 		case "j":
 			if len(code) != 2 && len(code) != 3 {
 				fmt.Println("Incorrect argument count on line: ", lineCounter)
@@ -436,7 +488,7 @@ func main() {
 		switch switchOnOp {
 		case "lui", "auipc", "jal": // Instruction format:  op  rd, imm     or      label: op  rd, imm
 			if len(code) != 3 && len(code) != 4 {
-				fmt.Println("Incorrect argument count on line: ", lineCounter)
+				fmt.Println("lui1 Incorrect argument count on line: ", lineCounter)
 				os.Exit(0)
 			}
 			if len(code) == 4 && !strings.HasSuffix(code[0], ":") && len(code[0]) > 1 {
@@ -514,7 +566,7 @@ func main() {
 
 		case "addi", "addiw", "slti", "sltiu", "xori", "ori", "andi", "jalr": // Instruction format: op rd, rs1, imm     or      label:  op rd, rs1, imm
 			if len(code) != 4 && len(code) != 5 {
-				fmt.Println("Incorrect argument count on line: ", lineCounter)
+				fmt.Println("addi ori 1 Incorrect argument count on line: ", lineCounter, line)
 				os.Exit(0)
 			}
 			if len(code) == 5 && !strings.HasSuffix(code[0], ":") && len(code[0]) > 1 {
@@ -531,7 +583,7 @@ func main() {
 
 		case "slli", "slliw", "srli", "srliw", "srai", "sraiw": // Instruction format: op rd, rs1, imm     or      label: rd, rs1, imm
 			if len(code) != 4 && len(code) != 5 {
-				fmt.Println("Incorrect argument count on line: ", lineCounter)
+				fmt.Println("slli 1 Incorrect argument count on line: ", lineCounter)
 				os.Exit(0)
 			}
 			if len(code) == 5 && !strings.HasSuffix(code[0], ":") && len(code[0]) > 1 {
@@ -568,7 +620,7 @@ func main() {
 			// check if imm has a constant definition
 
 		default:
-			fmt.Println("1 Syntax Error on line: ", lineCounter, switchOnOp)
+			fmt.Println("1 Syntax Error on line: ", lineCounter, switchOnOp, line)
 			os.Exit(0)
 		}
 		lineCounter++
@@ -746,7 +798,7 @@ func main() {
 
 		case "addi", "addiw", "slti", "sltiu", "xori", "ori", "andi", "jalr": // op rd, rs1, immediate
 			if len(code) != 4 {
-				fmt.Println("Incorrect argument count on line: ", lineCounter)
+				fmt.Println("ori 2 Incorrect argument count on line: ", lineCounter)
 			}
 			//fmt.Println(line)
 			imm, err := isValidImmediate(code[3])
@@ -771,7 +823,7 @@ func main() {
 
 		case "slli", "slliw", "srli", "srliw", "srai", "sraiw": // op rd, rs1, immediate(shamt)
 			if len(code) != 4 {
-				fmt.Println("Incorrect argument count on line: ", lineCounter)
+				fmt.Println("slli Incorrect argument count on line: ", lineCounter)
 				os.Exit(0)
 			}
 			imm, err := isValidImmediate(code[3])
