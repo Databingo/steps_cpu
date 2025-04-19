@@ -371,10 +371,8 @@ func main() {
 			//	}
 			//}
 			/////////////////////////-- deploy 2
-			//if imm == 0 {
 			ins = fmt.Sprintf("addi %s, %s, %#x\n", code[1], "x0", 0) // for 0 or clean reg
 			real_instr.WriteString(ins)
-			//	}
 			// 高 20 位
 			h20 := imm >> 44 & 0xfffff
 			if h20 != 0 {
@@ -386,44 +384,42 @@ func main() {
 			// 次 11 位
 			c11 := imm >> 33 & 0x7ff
 			if c11 != 0 {
-				ins = fmt.Sprintf("ori %s, %s, %#x\n", code[1], code[1], c11) //
+				ins = fmt.Sprintf("ori %s, %s, %#x\n", code[1], code[1], c11)
 				real_instr.WriteString(ins)
 			}
 			// 中 11 位
-			sv := 0
+			sf := 11
 			z11 := imm >> 22 & 0x7ff
 			if z11 != 0 {
-				ins = fmt.Sprintf("slli %s, %s, %#x\n", code[1], code[1], 11) //
+				ins = fmt.Sprintf("slli %s, %s, %#x\n", code[1], code[1], sf)
 				real_instr.WriteString(ins)
-				ins = fmt.Sprintf("ori %s, %s, %#x\n", code[1], code[1], z11) //
+				ins = fmt.Sprintf("ori %s, %s, %#x\n", code[1], code[1], z11)
 				real_instr.WriteString(ins)
-			} else {
-				sv += 11
-			}
+				sf = 0
+			} 
 			// 低 11 位
+			sf += 11
 			d11 := imm >> 11 & 0x7ff
 			if d11 != 0 {
-				ins = fmt.Sprintf("slli %s, %s, %#x\n", code[1], code[1], sv+11) //
+				ins = fmt.Sprintf("slli %s, %s, %#x\n", code[1], code[1], sf)
 				real_instr.WriteString(ins)
-				ins = fmt.Sprintf("ori %s, %s, %#x\n", code[1], code[1], d11) //
+				ins = fmt.Sprintf("ori %s, %s, %#x\n", code[1], code[1], d11)
 				real_instr.WriteString(ins)
-				sv = 0
-			} else {
-				sv += 11
+				sf = 0
 			}
 			// 末 11 位
+			sf += 11
 			m11 := imm & 0x7ff
 			if m11 != 0 {
-				ins = fmt.Sprintf("slli %s, %s, %#x\n", code[1], code[1], sv+11) //
+				ins = fmt.Sprintf("slli %s, %s, %#x\n", code[1], code[1], sf)
 				real_instr.WriteString(ins)
-				ins = fmt.Sprintf("ori %s, %s, %#x\n", code[1], code[1], m11) //
+				ins = fmt.Sprintf("ori %s, %s, %#x\n", code[1], code[1], m11)
 				real_instr.WriteString(ins)
-				sv = 0
-			} else {
-				sv += 11
+				sf = 0
 			}
-			if sv != 0 && imm != 0{
-				ins = fmt.Sprintf("slli %s, %s, %#x\n", code[1], code[1], sv) //
+			// 左移
+			if sf != 0 && imm != 0{
+				ins = fmt.Sprintf("slli %s, %s, %#x\n", code[1], code[1], sf) 
 				real_instr.WriteString(ins)
 
 			}
