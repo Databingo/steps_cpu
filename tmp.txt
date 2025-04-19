@@ -1,110 +1,119 @@
 #     li x5, 0
 addi x5, x0, 0x0
-    lbu x31, 0(x5)            # Load byte: x31 = MEM[0 + 0] zero-extended
-#     li  x30, 0x000000000000007F 
+    lh  x31, 4(x5)            # Load half: x31 = MEM[0 + 4] sign-extended
+#     li  x30, 0x0000000000001234 
 addi x30, x0, 0x0
-ori x30, x30, 0x7f
+slli x30, x30, 0x16
+ori x30, x30, 0x2
+slli x30, x30, 0xb
+ori x30, x30, 0x234
 #     li  x11, 1                 
 addi x11, x0, 0x0
 ori x11, x11, 0x1
 #     li  x11, 0                 
 addi x11, x0, 0x0
-    lbu x31, 1(x5)            # Load byte: x31 = MEM[0 + 1] zero-extended
-#     li  x30, 0x0000000000000080 
+    lh  x31, 6(x5)            # Load half: x31 = MEM[0 + 6] sign-extended
+#     li  x30, 0xFFFFFFFFFFFF8000 
 addi x30, x0, 0x0
-ori x30, x30, 0x80
+lui x30, 0xfffff
+srli x30, x30, 0x1
+ori x30, x30, 0x7ff
+slli x30, x30, 0xb
+ori x30, x30, 0x7ff
+slli x30, x30, 0xb
+ori x30, x30, 0x7f0
+slli x30, x30, 0xb
 #     li  x11, 1                 
 addi x11, x0, 0x0
 ori x11, x11, 0x1
 #     li  x11, 0                 
 addi x11, x0, 0x0
-    lbu x31, 2(x5)            # Load byte: x31 = MEM[0 + 2] zero-extended
-#     li  x30, 0x00000000000000FF 
+    lh  x31, 48(x5)           # Load half: x31 = MEM[0 + 48] sign-extended
+#     li  x30, 0xFFFFFFFFFFFFFFFF 
 addi x30, x0, 0x0
-ori x30, x30, 0xff
+lui x30, 0xfffff
+srli x30, x30, 0x1
+ori x30, x30, 0x7ff
+slli x30, x30, 0xb
+ori x30, x30, 0x7ff
+slli x30, x30, 0xb
+ori x30, x30, 0x7ff
+slli x30, x30, 0xb
+ori x30, x30, 0x7ff
 #     li  x11, 1                 
 addi x11, x0, 0x0
 ori x11, x11, 0x1
 #     li  x11, 0                 
 addi x11, x0, 0x0
-    lbu x31, 3(x5)            # Load byte: x31 = MEM[0 + 3] zero-extended
-#     li  x30, 0x0000000000000000 
+    lh  x31, 50(x5)           # Load half: x31 = MEM[0 + 50] sign-extended
+#     li  x30, 0x0000000000007FFF 
 addi x30, x0, 0x0
+slli x30, x30, 0x16
+ori x30, x30, 0xf
+slli x30, x30, 0xb
+ori x30, x30, 0x7ff
 #     li  x11, 1                 
 addi x11, x0, 0x0
 ori x11, x11, 0x1
 #     li  x11, 0                 
 addi x11, x0, 0x0
-    lbu x31, 76(x5)           # Load byte: x31 = MEM[0 + 76] zero-extended
-#     li  x30, 0x0000000000000055 
+    lhu x31, 4(x5)            # Load half: x31 = MEM[0 + 4] zero-extended
+#     li  x30, 0x0000000000001234 
 addi x30, x0, 0x0
-ori x30, x30, 0x55
+slli x30, x30, 0x16
+ori x30, x30, 0x2
+slli x30, x30, 0xb
+ori x30, x30, 0x234
 #     li  x11, 1                 
 addi x11, x0, 0x0
 ori x11, x11, 0x1
 #     li  x11, 0                 
 addi x11, x0, 0x0
-    lbu x31, 77(x5)           # Load byte: x31 = MEM[0 + 77] zero-extended
-#     li  x30, 0x00000000000000AA 
+    lhu x31, 6(x5)            # Load half: x31 = MEM[0 + 6] zero-extended
+#     li  x30, 0x0000000000008000 
 addi x30, x0, 0x0
-ori x30, x30, 0xaa
+slli x30, x30, 0x16
+ori x30, x30, 0x10
+slli x30, x30, 0xb
 #     li  x11, 1                 
 addi x11, x0, 0x0
 ori x11, x11, 0x1
 #     li  x11, 0                 
 addi x11, x0, 0x0
-    lbu x31, 4(x5)            # Load byte: x31 = MEM[0 + 4] zero-extended
-#     li  x30, 0x0000000000000034 
+    lhu x31, 48(x5)           # Load half: x31 = MEM[0 + 48] zero-extended
+#     li  x30, 0x000000000000FFFF 
 addi x30, x0, 0x0
-ori x30, x30, 0x34
+slli x30, x30, 0x16
+ori x30, x30, 0x1f
+slli x30, x30, 0xb
+ori x30, x30, 0x7ff
 #     li  x11, 1                 
 addi x11, x0, 0x0
 ori x11, x11, 0x1
 #     li  x11, 0                 
 addi x11, x0, 0x0
-    lbu x31, 5(x5)            # Load byte: x31 = MEM[0 + 5] zero-extended
-#     li  x30, 0x0000000000000012 
+    lhu x31, 50(x5)           # Load half: x31 = MEM[0 + 50] zero-extended
+#     li  x30, 0x0000000000007FFF 
 addi x30, x0, 0x0
-ori x30, x30, 0x12
+slli x30, x30, 0x16
+ori x30, x30, 0xf
+slli x30, x30, 0xb
+ori x30, x30, 0x7ff
 #     li  x11, 1                 
 addi x11, x0, 0x0
 ori x11, x11, 0x1
 #     li  x11, 0                 
 addi x11, x0, 0x0
-    lbu x31, 8(x5)            # Load byte: x31 = MEM[0 + 8] zero-extended
-#     li  x30, 0x0000000000000078 
-addi x30, x0, 0x0
-ori x30, x30, 0x78
-#     li  x11, 1                 
-addi x11, x0, 0x0
-ori x11, x11, 0x1
-#     li  x11, 0                 
-addi x11, x0, 0x0
-    lbu x31, 16(x5)           # Load byte: x31 = MEM[0 + 16] zero-extended
-#     li  x30, 0x0000000000000088 
-addi x30, x0, 0x0
-ori x30, x30, 0x88
-#     li  x11, 1                 
-addi x11, x0, 0x0
-ori x11, x11, 0x1
-#     li  x11, 0                 
-addi x11, x0, 0x0
-    lbu x31, 23(x5)           # Load byte: x31 = MEM[0 + 23] zero-extended
-#     li  x30, 0x0000000000000011 
-addi x30, x0, 0x0
-ori x30, x30, 0x11
-#     li  x11, 1                 
-addi x11, x0, 0x0
-ori x11, x11, 0x1
-#     li  x11, 0                 
-addi x11, x0, 0x0
-#     li  x5, 3                 
+#     li  x5, 6                 
 addi x5, x0, 0x0
-ori x5, x5, 0x3
-    lbu x31, -1(x5)           # Load byte: x31 = MEM[3 + (-1)] = MEM[2] = 0xFF zero-extended
-#     li  x30, 0x00000000000000FF 
+ori x5, x5, 0x6
+    lh  x31, -2(x5)           # Load half: x31 = MEM[6 + (-2)] = MEM[4]
+#     li  x30, 0x0000000000001234 
 addi x30, x0, 0x0
-ori x30, x30, 0xff
+slli x30, x30, 0x16
+ori x30, x30, 0x2
+slli x30, x30, 0xb
+ori x30, x30, 0x234
 #     li  x11, 1                 
 addi x11, x0, 0x0
 ori x11, x11, 0x1
