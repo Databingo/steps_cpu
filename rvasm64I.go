@@ -373,6 +373,14 @@ func main() {
 			/////////////////////////-- deploy 2
 			ins = fmt.Sprintf("addi %s, %s, %#x\n", code[1], "x0", 0) // for 0 or clean reg
 			real_instr.WriteString(ins)
+			if imm == 0xffffffffffffffff {
+			        ins = fmt.Sprintf("addi %s, %s, %#x\n", code[1], "x0", 1) // for 0 or clean reg
+			        real_instr.WriteString(ins)
+				ins = fmt.Sprintf("xori %s, %s, -1\naddi %s, %s, 1\n", code[1], code[1], code[1], code[1])
+				real_instr.WriteString(ins)
+				continue
+
+			}
 			// 高 20 位
 			h20 := imm >> 44 & 0xfffff
 			if h20 != 0 {

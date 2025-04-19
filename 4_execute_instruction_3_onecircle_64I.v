@@ -82,6 +82,7 @@ reg [7:0] irom [0:2999];// 8 位宽度，400 行深度
 reg [7:0] drom [0:999];// 8 位宽度，400 行深度
 // 堆栈存储器
 reg [7:0] srom [0:399];// 8 位宽度，400 行深度
+
 // 通用寄存器列表 32 个
 reg [63:0] rram [0:31];// 64 位宽度，32 行深度 x0, x1, x2... x31
 // CSR 寄存器列表 32 个(预设个数 2**12=4096)
@@ -390,9 +391,15 @@ begin
 				  3'b001:begin 
                                            Lh  <= 1'b1; // set Lh  Flag 
 				           //load 16 bite sign extend to 64 bits at imm(s1) to rd
-				           rram[wire_rd] <= {{48{drom[rram[wire_rs1]+wire_imm + 1][7]}}, 
-					                         drom[rram[wire_rs1]+wire_imm + 1], 
-								 drom[rram[wire_rs1]+wire_imm] }; 
+				        //   rram[wire_rd] <= {{48{drom[rram[wire_rs1]+wire_imm + 1][7]}}, 
+					//                         drom[rram[wire_rs1]+wire_imm + 1], 
+					//			 drom[rram[wire_rs1]+wire_imm] }; 
+				           rram[wire_rd] <= {{48{drom[rram[wire_rs1]+{{52{wire_imm[11]}},wire_imm}+ 1][7]}}, 
+					                         drom[rram[wire_rs1]+{{52{wire_imm[11]}},wire_imm}+ 1], 
+								 drom[rram[wire_rs1]+{{52{wire_imm[11]}},wire_imm}] }; 
+				           //rram[wire_rd] <= rram[wire_rs1];
+				           //rram[wire_rd] <= drom[rram[wire_rs1] + wire_imm];
+				          // rram[wire_rd] <= drom[48];
 				           pc <= pc + 4; 
 	    	                           jp <=0;
 				         end 
