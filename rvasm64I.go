@@ -378,7 +378,7 @@ func main() {
 			if h20 != 0 {
 				ins = fmt.Sprintf("lui %s, %#x\n", code[1], h20)
 				real_instr.WriteString(ins)
-				ins = fmt.Sprintf("srli %s, %s, %#x\n", code[1], code[1], 1)
+				ins = fmt.Sprintf("srli %s, %s, %#x\n", code[1], code[1], 1) // righ shift to concat with 11 to 12
 				real_instr.WriteString(ins)
 			}
 			// 次 11 位
