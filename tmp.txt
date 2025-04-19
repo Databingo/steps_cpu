@@ -1,24 +1,6 @@
-#     li x8, 0
-addi x8, x0, 0x0
-    lb  x31, 2(x8)            # Load byte: x31 = MEM[0 + 2] sign-extended
-#     li  x30, 0xFFFFFFFFFFFFFFFF 
-addi x30, x0, 0x0
-lui x30, 0xfffff
-srli x30, x30, 0x1
-ori x30, x30, 0x7ff
-slli x30, x30, 0xb
-ori x30, x30, 0x7ff
-slli x30, x30, 0xb
-ori x30, x30, 0x7ff
-slli x30, x30, 0xb
-ori x30, x30, 0x7ff
-#     li  x11, 1                 
-addi x11, x0, 0x0
-slli x11, x11, 0x21
-ori x11, x11, 0x1
-#     li  x11, 0                 
-addi x11, x0, 0x0
-    lb  x31, 0(x8)            # Load byte: x31 = MEM[0 + 0] sign-extended
+#     li x5, 0
+addi x5, x0, 0x0
+    lb  x31, 0(x5)            # Load byte: x31 = MEM[0 + 0] sign-extended
 #     li  x30, 0x000000000000007F 
 addi x30, x0, 0x0
 slli x30, x30, 0x21
@@ -29,7 +11,7 @@ slli x11, x11, 0x21
 ori x11, x11, 0x1
 #     li  x11, 0                 
 addi x11, x0, 0x0
-    lb  x31, 1(x8)            # Load byte: x31 = MEM[0 + 1] sign-extended
+    lb  x31, 1(x5)            # Load byte: x31 = MEM[0 + 1] sign-extended
 #     li  x30, 0xFFFFFFFFFFFFFF80 
 addi x30, x0, 0x0
 lui x30, 0xfffff
@@ -47,7 +29,7 @@ slli x11, x11, 0x21
 ori x11, x11, 0x1
 #     li  x11, 0                 
 addi x11, x0, 0x0
-    lb  x31, 2(x8)            # Load byte: x31 = MEM[0 + 2] sign-extended
+    lb  x31, 2(x5)            # Load byte: x31 = MEM[0 + 2] sign-extended
 #     li  x30, 0xFFFFFFFFFFFFFFFF 
 addi x30, x0, 0x0
 lui x30, 0xfffff
@@ -65,7 +47,7 @@ slli x11, x11, 0x21
 ori x11, x11, 0x1
 #     li  x11, 0                 
 addi x11, x0, 0x0
-    lb  x31, 3(x8)            # Load byte: x31 = MEM[0 + 3] sign-extended
+    lb  x31, 3(x5)            # Load byte: x31 = MEM[0 + 3] sign-extended
 #     li  x30, 0x0000000000000000 
 addi x30, x0, 0x0
 #     li  x11, 1                 
@@ -74,8 +56,19 @@ slli x11, x11, 0x21
 ori x11, x11, 0x1
 #     li  x11, 0                 
 addi x11, x0, 0x0
-    lb  x31, 33(x8)           # x31 = MEM[0 + 33] = 0xBB (sign extends to 0xFF..FFBB)
-#     li  x30, 0xFFFFFFFFFFFFFFBB 
+    lb  x31, 76(x5)           # Load byte: x31 = MEM[0 + 76] sign-extended
+#     li  x30, 0x0000000000000055 
+addi x30, x0, 0x0
+slli x30, x30, 0x21
+ori x30, x30, 0x55
+#     li  x11, 1                 
+addi x11, x0, 0x0
+slli x11, x11, 0x21
+ori x11, x11, 0x1
+#     li  x11, 0                 
+addi x11, x0, 0x0
+    lb  x31, 77(x5)           # Load byte: x31 = MEM[0 + 77] sign-extended
+#     li  x30, 0xFFFFFFFFFFFFFFAA 
 addi x30, x0, 0x0
 lui x30, 0xfffff
 srli x30, x30, 0x1
@@ -85,10 +78,107 @@ ori x30, x30, 0x7ff
 slli x30, x30, 0xb
 ori x30, x30, 0x7ff
 slli x30, x30, 0xb
-ori x30, x30, 0x7bb
+ori x30, x30, 0x7aa
 #     li  x11, 1                 
 addi x11, x0, 0x0
 slli x11, x11, 0x21
 ori x11, x11, 0x1
 #     li  x11, 0                 
 addi x11, x0, 0x0
+    lb  x31, 4(x5)            # Load byte: x31 = MEM[0 + 4] sign-extended
+#     li  x30, 0x0000000000000034 
+addi x30, x0, 0x0
+slli x30, x30, 0x21
+ori x30, x30, 0x34
+#     li  x11, 1                 
+addi x11, x0, 0x0
+slli x11, x11, 0x21
+ori x11, x11, 0x1
+#     li  x11, 0                 
+addi x11, x0, 0x0
+    lb  x31, 5(x5)            # Load byte: x31 = MEM[0 + 5] sign-extended
+#     li  x30, 0x0000000000000012 
+addi x30, x0, 0x0
+slli x30, x30, 0x21
+ori x30, x30, 0x12
+#     li  x11, 1                 
+addi x11, x0, 0x0
+slli x11, x11, 0x21
+ori x11, x11, 0x1
+#     li  x11, 0                 
+addi x11, x0, 0x0
+    lb  x31, 8(x5)            # Load byte: x31 = MEM[0 + 8] sign-extended
+#     li  x30, 0x0000000000000078 
+addi x30, x0, 0x0
+slli x30, x30, 0x21
+ori x30, x30, 0x78
+#     li  x11, 1                 
+addi x11, x0, 0x0
+slli x11, x11, 0x21
+ori x11, x11, 0x1
+#     li  x11, 0                 
+addi x11, x0, 0x0
+    lb  x31, 9(x5)            # Load byte: x31 = MEM[0 + 9] sign-extended
+#     li  x30, 0x0000000000000056 
+addi x30, x0, 0x0
+slli x30, x30, 0x21
+ori x30, x30, 0x56
+#     li  x11, 1                 
+addi x11, x0, 0x0
+slli x11, x11, 0x21
+ori x11, x11, 0x1
+#     li  x11, 0                 
+addi x11, x0, 0x0
+    lb  x31, 16(x5)           # Load byte: x31 = MEM[0 + 16] sign-extended
+#     li  x30, 0xFFFFFFFFFFFFFF88 
+addi x30, x0, 0x0
+lui x30, 0xfffff
+srli x30, x30, 0x1
+ori x30, x30, 0x7ff
+slli x30, x30, 0xb
+ori x30, x30, 0x7ff
+slli x30, x30, 0xb
+ori x30, x30, 0x7ff
+slli x30, x30, 0xb
+ori x30, x30, 0x788
+#     li  x11, 1                 
+addi x11, x0, 0x0
+slli x11, x11, 0x21
+ori x11, x11, 0x1
+#     li  x11, 0                 
+addi x11, x0, 0x0
+    lb  x31, 23(x5)           # Load byte: x31 = MEM[0 + 23] sign-extended
+#     li  x30, 0x0000000000000011 
+addi x30, x0, 0x0
+slli x30, x30, 0x21
+ori x30, x30, 0x11
+#     li  x11, 1                 
+addi x11, x0, 0x0
+slli x11, x11, 0x21
+ori x11, x11, 0x1
+#     li  x11, 0                 
+addi x11, x0, 0x0
+#     li  x5, 3                 
+addi x5, x0, 0x0
+slli x5, x5, 0x21
+ori x5, x5, 0x3
+    lb  x31, -1(x5)           # Load byte: x31 = MEM[3 + (-1)] = MEM[2]
+#     li  x30, 0xFFFFFFFFFFFFFFFF 
+addi x30, x0, 0x0
+lui x30, 0xfffff
+srli x30, x30, 0x1
+ori x30, x30, 0x7ff
+slli x30, x30, 0xb
+ori x30, x30, 0x7ff
+slli x30, x30, 0xb
+ori x30, x30, 0x7ff
+slli x30, x30, 0xb
+ori x30, x30, 0x7ff
+#     li  x11, 1                 
+addi x11, x0, 0x0
+slli x11, x11, 0x21
+ori x11, x11, 0x1
+#     li  x11, 0                 
+addi x11, x0, 0x0
+#     li  x5, 0                 
+addi x5, x0, 0x0
