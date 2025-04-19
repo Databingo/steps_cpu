@@ -1,17 +1,5 @@
 #     li x5, 0
 addi x5, x0, 0x0
-    lhu x31, 48(x5)           # Load half: x31 = MEM[0 + 48] zero-extended
-#     li  x30, 0x000000000000FFFF 
-addi x30, x0, 0x0
-slli x30, x30, 0x16
-ori x30, x30, 0x1f
-slli x30, x30, 0xb
-ori x30, x30, 0x7ff
-#     li  x11, 1                 
-addi x11, x0, 0x0
-ori x11, x11, 0x1
-#     li  x11, 0                 
-addi x11, x0, 0x0
     lh  x31, 4(x5)            # Load half: x31 = MEM[0 + 4] sign-extended
 #     li  x30, 0x0000000000001234 
 addi x30, x0, 0x0
@@ -40,7 +28,7 @@ addi x11, x0, 0x0
 ori x11, x11, 0x1
 #     li  x11, 0                 
 addi x11, x0, 0x0
-    lh  x31, 48(x5)           # Load half: x31 = MEM[0 + 48] sign-extended
+    lh  x31, 72(x5)           # Load half: x31 = MEM[0 + 72] sign-extended <-- CORRECTED OFFSET
 #     li  x30, 0xFFFFFFFFFFFFFFFF 
 addi x30, x0, 0x0
 addi x30, x0, 0x1
@@ -51,7 +39,7 @@ addi x11, x0, 0x0
 ori x11, x11, 0x1
 #     li  x11, 0                 
 addi x11, x0, 0x0
-    lh  x31, 50(x5)           # Load half: x31 = MEM[0 + 50] sign-extended
+    lh  x31, 74(x5)           # Load half: x31 = MEM[0 + 74] sign-extended <-- CORRECTED OFFSET
 #     li  x30, 0x0000000000007FFF 
 addi x30, x0, 0x0
 slli x30, x30, 0x16
@@ -86,7 +74,7 @@ addi x11, x0, 0x0
 ori x11, x11, 0x1
 #     li  x11, 0                 
 addi x11, x0, 0x0
-    lhu x31, 48(x5)           # Load half: x31 = MEM[0 + 48] zero-extended
+    lhu x31, 72(x5)           # Load half: x31 = MEM[0 + 72] zero-extended <-- CORRECTED OFFSET
 #     li  x30, 0x000000000000FFFF 
 addi x30, x0, 0x0
 slli x30, x30, 0x16
@@ -98,7 +86,7 @@ addi x11, x0, 0x0
 ori x11, x11, 0x1
 #     li  x11, 0                 
 addi x11, x0, 0x0
-    lhu x31, 50(x5)           # Load half: x31 = MEM[0 + 50] zero-extended
+    lhu x31, 74(x5)           # Load half: x31 = MEM[0 + 74] zero-extended <-- CORRECTED OFFSET
 #     li  x30, 0x0000000000007FFF 
 addi x30, x0, 0x0
 slli x30, x30, 0x16
