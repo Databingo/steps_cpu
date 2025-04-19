@@ -375,46 +375,45 @@ func main() {
 			ins = fmt.Sprintf("addi %s, %s, %#x\n", code[1], "x0", 0) // for 0 or clean reg
 			real_instr.WriteString(ins)
 			//	}
-			// 高 32 位
-			h_imm := imm >> 32 & 0xffffffff
-			h_h20 := h_imm >> 12
-			if h_h20 != 0 {
-				ins = fmt.Sprintf("lui %s, %#x\n", code[1], h_h20)
+			// 高 20 位
+			h20 := imm >> 44 & 0xfffff
+			if h20 != 0 {
+				ins = fmt.Sprintf("lui %s, %#x\n", code[1], h20)
+				real_instr.WriteString(ins)
+			        ins = fmt.Sprintf("srli %s, %s, %#x\n", code[1], code[1], 1) 
 				real_instr.WriteString(ins)
 			}
-			h_l12 := h_imm & 0xfff
-			if h_l12 != 0 {
-				ins = fmt.Sprintf("ori %s, %s, %#x\n", code[1], code[1], h_l12) //
+			// 次 11 位
+			c11 := imm >> 33 & 0x7ff
+			if c11 != 0 {
+				ins = fmt.Sprintf("ori %s, %s, %#x\n", code[1], code[1], c11) //
 				real_instr.WriteString(ins)
 			}
-			// 低 32 位
-			l_imm := imm & 0xffffffff
-			if l_imm == 0 {
-				ins = fmt.Sprintf("slli %s, %s, %#x\n", code[1], code[1], 32) //
-				real_instr.WriteString(ins)
-				continue
-			}
-			l_h12 := l_imm >> 20 & 0xfff
-			ins = fmt.Sprintf("slli %s, %s, %#x\n", code[1], code[1], 12) //
+			// 中 11 位
+			z11 := imm >> 22 & 0x7ff
+			ins = fmt.Sprintf("slli %s, %s, %#x\n", code[1], code[1], 11) //
 			real_instr.WriteString(ins)
-			if l_h12 != 0 {
-				ins = fmt.Sprintf("ori %s, %s, %#x\n", code[1], code[1], l_h12) //
+			if z11 != 0 {
+				ins = fmt.Sprintf("ori %s, %s, %#x\n", code[1], code[1], z11) //
 				real_instr.WriteString(ins)
 			}
-			l_m12 := l_imm >> 8 & 0xfff
-			ins = fmt.Sprintf("slli %s, %s, %#x\n", code[1], code[1], 12) //
+			// 低 11 位
+			d11 := imm >> 11 & 0x7ff
+			ins = fmt.Sprintf("slli %s, %s, %#x\n", code[1], code[1], 11) //
 			real_instr.WriteString(ins)
-			if l_m12 != 0 {
-				ins = fmt.Sprintf("ori %s, %s, %#x\n", code[1], code[1], l_m12) //
+			if d11 != 0 {
+				ins = fmt.Sprintf("ori %s, %s, %#x\n", code[1], code[1], d11) //
 				real_instr.WriteString(ins)
 			}
-			l_l8 := l_imm & 0xff
-			ins = fmt.Sprintf("slli %s, %s, %#x\n", code[1], code[1], 8) //
+			// 末 11 位
+			m11 := imm & 0x7ff
+			ins = fmt.Sprintf("slli %s, %s, %#x\n", code[1], code[1], 11) //
 			real_instr.WriteString(ins)
-			if l_l8 != 0 {
-				ins = fmt.Sprintf("ori %s, %s, %#x\n", code[1], code[1], l_l8) //
+			if m11 != 0 {
+				ins = fmt.Sprintf("ori %s, %s, %#x\n", code[1], code[1], m11) //
 				real_instr.WriteString(ins)
 			}
+
 			// 取补码还原负数
 			if sign == 1 {
 				ins = fmt.Sprintf("xori %s, %s, -1\naddi %s, %s, 1\n", code[1], code[1], code[1], code[1])

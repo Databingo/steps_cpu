@@ -1,4 +1,4 @@
-// t0,t1,t2(x5,x6,x7) was used in li
+#// t0,t1,t2(x5,x6,x7) was used in li
 _start:
     # Initialize base address register x8 to 0.
     # Assumes the data from 'data_lb.txt' is loaded into memory starting at address 0.
