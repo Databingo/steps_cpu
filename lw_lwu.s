@@ -1,4 +1,3 @@
-
 _start:
     # Initialize base address register x5 to 0.
     # Assumes the data from 'data_test.txt' is loaded into memory starting at address 0.
@@ -34,16 +33,16 @@ _start:
     li  x11, 0                 # Clear Signal
 
 ## TEST: LW_NEG_ONE
-    # Purpose: Load negative one word (0xFFFFFFFF at Addr 0x28 = 40), check sign extension.
-    # Data @040: FF FF FF FF
+    # Purpose: Load negative one word (0xFFFFFFFF at Addr 40 = 0x28), check sign extension.
+    # Data @028 (hex, dec 40): FF FF FF FF
     lw  x31, 40(x5)           # Load word: x31 = MEM[0 + 40] sign-extended
     li  x30, 0xFFFFFFFFFFFFFFFF # Golden value (-1)
     li  x11, 1                 # Signal Compare
     li  x11, 0                 # Clear Signal
 
 ## TEST: LW_MAX_POS
-    # Purpose: Load max positive word (0x7FFFFFFF at Addr 0x2C = 44), check sign extension.
-    # Data @044: FF FF FF 7F
+    # Purpose: Load max positive word (0x7FFFFFFF at Addr 44 = 0x2C), check sign extension.
+    # Data @02C (hex, dec 44): FF FF FF 7F
     lw  x31, 44(x5)           # Load word: x31 = MEM[0 + 44] sign-extended
     li  x30, 0x000000007FFFFFFF # Golden value
     li  x11, 1                 # Signal Compare
@@ -67,16 +66,16 @@ _start:
     li  x11, 0                 # Clear Signal
 
 ## TEST: LWU_NEG_ONE_PATTERN
-    # Purpose: Load word pattern 0xFFFFFFFF at Addr 0x28 (40), check zero extension.
-    # Data @040: FF FF FF FF
+    # Purpose: Load word pattern 0xFFFFFFFF at Addr 40 = 0x28, check zero extension.
+    # Data @028 (hex, dec 40): FF FF FF FF
     lwu x31, 40(x5)           # Load word: x31 = MEM[0 + 40] zero-extended
     li  x30, 0x00000000FFFFFFFF # Golden value
     li  x11, 1                 # Signal Compare
     li  x11, 0                 # Clear Signal
 
 ## TEST: LWU_MAX_POS
-    # Purpose: Load max positive word (0x7FFFFFFF at Addr 0x2C = 44), check zero extension.
-    # Data @044: FF FF FF 7F
+    # Purpose: Load max positive word (0x7FFFFFFF at Addr 44 = 0x2C), check zero extension.
+    # Data @02C (hex, dec 44): FF FF FF 7F
     lwu x31, 44(x5)           # Load word: x31 = MEM[0 + 44] zero-extended
     li  x30, 0x000000007FFFFFFF # Golden value
     li  x11, 1                 # Signal Compare
@@ -93,3 +92,6 @@ _start:
     li  x5, 0                 # Restore base register x5 to 0
 
 
+##--------------------------------------------
+## End of LW/LWU Tests
+##--------------------------------------------

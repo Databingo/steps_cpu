@@ -414,21 +414,21 @@ begin
 				  3'b010:begin 
                                            Lw  <= 1'b1; // set Lw  Flag
 					   //load 32 bite sign extend to 64 bits at imm(s1) to rd
-	                                   rram[wire_rd] <= {{32{drom[rram[wire_rs1]+wire_imm + 3][7]}}, 
-	                                                         drom[rram[wire_rs1]+wire_imm+3], 
-	                                 			 drom[rram[wire_rs1]+wire_imm+2], 
-	                                 			 drom[rram[wire_rs1]+wire_imm+1], 
-	                                 			 drom[rram[wire_rs1]+wire_imm]}; 
+	                                   rram[wire_rd] <= {{32{drom[rram[wire_rs1]+{{52{wire_imm[11]}},wire_imm}+ 3][7]}}, 
+	                                                         drom[rram[wire_rs1]+{{52{wire_imm[11]}},wire_imm}+3], 
+	                                 			 drom[rram[wire_rs1]+{{52{wire_imm[11]}},wire_imm}+2], 
+	                                 			 drom[rram[wire_rs1]+{{52{wire_imm[11]}},wire_imm}+1], 
+	                                 			 drom[rram[wire_rs1]+{{52{wire_imm[11]}},wire_imm}]}; 
 				           pc <= pc + 4; 
 	    	                           jp <=0;
 				         end 
 				  3'b110:begin 
                                            Lwu <= 1'b1; // set Lwu Flag 
 					   //load 32 bite unsign to 64 bits at imm(s1) to rd
-	                                   rram[wire_rd] <= {32'b0, drom[rram[wire_rs1]+wire_imm+3], 
-	                                                            drom[rram[wire_rs1]+wire_imm+2], 
-	                                                            drom[rram[wire_rs1]+wire_imm+1], 
-	                                                            drom[rram[wire_rs1]+wire_imm]}; 
+	                                   rram[wire_rd] <= {32'b0, drom[rram[wire_rs1]+{{52{wire_imm[11]}},wire_imm}+3], 
+	                                                            drom[rram[wire_rs1]+{{52{wire_imm[11]}},wire_imm}+2], 
+	                                                            drom[rram[wire_rs1]+{{52{wire_imm[11]}},wire_imm}+1], 
+	                                                            drom[rram[wire_rs1]+{{52{wire_imm[11]}},wire_imm}]}; 
 				           pc <= pc + 4; 
 	    	                           jp <=0;
 				         end 
