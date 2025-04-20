@@ -81,7 +81,7 @@
 //#比较 slt sltu slti sltiu 
 //#门电 and or xor (andi ori xori)i 
 //#位移 sll srl sra sllw srlw sraw (slli srli srai slliw srliw sraiw)i
-// 条件 beq bne blt bge bltu bgeu
+//#条件 beq bne blt bge bltu bgeu
 // 跳转 jal jalr
 // 中断 ecall ebreak 
 // 保护 fence fence.i

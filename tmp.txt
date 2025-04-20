@@ -1,24 +1,16 @@
 _start:
 #     li x5, 0
 addi x5, x0, 0x0
-#     li x6, 0
-addi x6, x0, 0x0
-#     li x5, 10
-addi x5, x0, 0x0
-ori x5, x5, 0xa
-#     li x6, 10
-addi x6, x0, 0x0
-ori x6, x6, 0xa
-beq x5, x6, L_beq_t_1      # Branch TAKEN
-#     li x31, 2                  
+jal x0, L_jal_fwd_target   # Jump forward
+#     li x31, 999                
 addi x31, x0, 0x0
-ori x31, x31, 0x2
-jal x0, L_beq_v_1
-L_beq_t_1:
+ori x31, x31, 0x3e7
+jal x0, L_jal_fwd_verify
+L_jal_fwd_target:
 #     li x31, 1                  
 addi x31, x0, 0x0
 ori x31, x31, 0x1
-L_beq_v_1:
+L_jal_fwd_verify:
 #     li x30, 1                  
 addi x30, x0, 0x0
 ori x30, x30, 0x1
@@ -27,22 +19,18 @@ addi x11, x0, 0x0
 ori x11, x11, 0x1
 #     li x11, 0
 addi x11, x0, 0x0
-#     li x5, 10
-addi x5, x0, 0x0
-ori x5, x5, 0xa
-#     li x6, 11
-addi x6, x0, 0x0
-ori x6, x6, 0xb
-beq x5, x6, L_beq_nt_1     # Branch NOT Taken
+jal x0, L_jal_back_setup
+L_jal_back_target:
 #     li x31, 2                  
 addi x31, x0, 0x0
 ori x31, x31, 0x2
-jal x0, L_beq_v_2
-L_beq_nt_1:
-#     li x31, 1                  
+jal x0, L_jal_back_verify
+L_jal_back_setup:
+jal x0, L_jal_back_target  # Jump backward
+#     li x31, 888                
 addi x31, x0, 0x0
-ori x31, x31, 0x1
-L_beq_v_2:
+ori x31, x31, 0x378
+L_jal_back_verify:
 #     li x30, 2                  
 addi x30, x0, 0x0
 ori x30, x30, 0x2
@@ -51,1243 +39,123 @@ addi x11, x0, 0x0
 ori x11, x11, 0x1
 #     li x11, 0
 addi x11, x0, 0x0
-#     li x5, -5
-addi x5, x0, 0x0
-ori x5, x5, 0x5
-xori x5, x5, -1
-addi x5, x5, 1
-#     li x6, -5
-addi x6, x0, 0x0
-ori x6, x6, 0x5
-xori x6, x6, -1
-addi x6, x6, 1
-beq x5, x6, L_beq_t_2      # Branch TAKEN
-#     li x31, 2
+jal x7, L_jal_link_target  # Jump forward, save PC+4 to x7
+#     li x31, 777
 addi x31, x0, 0x0
-ori x31, x31, 0x2
-jal x0, L_beq_v_3
-L_beq_t_2:
-#     li x31, 1
+ori x31, x31, 0x309
+jal x0, L_jal_link_verify
+L_jal_link_target:
+#     li x31, 3                  
 addi x31, x0, 0x0
-ori x31, x31, 0x1
-L_beq_v_3:
-#     li x30, 1
+ori x31, x31, 0x3
+L_jal_link_verify:
+#     li x30, 3                  
 addi x30, x0, 0x0
-ori x30, x30, 0x1
+ori x30, x30, 0x3
 #     li x11, 1
 addi x11, x0, 0x0
 ori x11, x11, 0x1
 #     li x11, 0
 addi x11, x0, 0x0
-#     li x5, 10
-addi x5, x0, 0x0
-ori x5, x5, 0xa
-#     li x6, 11
-addi x6, x0, 0x0
-ori x6, x6, 0xb
-bne x5, x6, L_bne_t_1      # Branch TAKEN
-#     li x31, 2                  
+auipc x5, 0                # x5 = PC of auipc
+addi x5, x5, 20            # x5 = PC + 20 = Address of L_jalr_target_1 (jalr=4, li=4, j=4, li=4 -> total 16 to skip)
+jalr x0, x5, 0             # Jump to address in x5
+#     li x31, 666
 addi x31, x0, 0x0
-ori x31, x31, 0x2
-jal x0, L_bne_v_1
-L_bne_t_1:
-#     li x31, 1                  
+ori x31, x31, 0x29a
+jal x0, L_jalr_zero_verify
+L_jalr_target_1:
+#     li x31, 4                  
 addi x31, x0, 0x0
-ori x31, x31, 0x1
-L_bne_v_1:
-#     li x30, 1                  
+ori x31, x31, 0x4
+L_jalr_zero_verify:
+#     li x30, 4
 addi x30, x0, 0x0
-ori x30, x30, 0x1
+ori x30, x30, 0x4
 #     li x11, 1
 addi x11, x0, 0x0
 ori x11, x11, 0x1
 #     li x11, 0
 addi x11, x0, 0x0
-#     li x5, 10
-addi x5, x0, 0x0
-ori x5, x5, 0xa
-#     li x6, 10
-addi x6, x0, 0x0
-ori x6, x6, 0xa
-bne x5, x6, L_bne_nt_1     # Branch NOT Taken
-#     li x31, 2                  
+auipc x5, 0                # x5 = PC of auipc (A)
+addi x5, x5, 8             # x5 = A + 8 (Base address for jump)
+jalr x0, x5, 16            # Jump to x5 + 16 = (A+8)+16 = A+24 (target)
+#     li x31, 555
 addi x31, x0, 0x0
-ori x31, x31, 0x2
-jal x0, L_bne_v_2
-L_bne_nt_1:
-#     li x31, 1                  
+ori x31, x31, 0x22b
+jal x0, L_jalr_pos_verify
+L_jalr_target_2:               # Label expected at A + 24
+#     li x31, 5                  
 addi x31, x0, 0x0
-ori x31, x31, 0x1
-L_bne_v_2:
-#     li x30, 2                  
+ori x31, x31, 0x5
+L_jalr_pos_verify:
+#     li x30, 5
 addi x30, x0, 0x0
-ori x30, x30, 0x2
+ori x30, x30, 0x5
 #     li x11, 1
 addi x11, x0, 0x0
 ori x11, x11, 0x1
 #     li x11, 0
 addi x11, x0, 0x0
-#     li x5, 10
-addi x5, x0, 0x0
-ori x5, x5, 0xa
-#     li x6, -10
-addi x6, x0, 0x0
-ori x6, x6, 0xa
-xori x6, x6, -1
-addi x6, x6, 1
-bne x5, x6, L_bne_t_2      # Branch TAKEN
-#     li x31, 2
+jal x0, L_jalr_neg_setup_2
+L_jalr_neg_target_2:           # Target Label: Execution should land here. PC = T
+#     li x31, 6                  
 addi x31, x0, 0x0
-ori x31, x31, 0x2
-jal x0, L_bne_v_3
-L_bne_t_2:
-#     li x31, 1
+ori x31, x31, 0x6
+jal x0, L_jalr_neg_verify_2
+L_jalr_neg_setup_2:
+auipc x5, 0                # x5 = PC of auipc (A)
+addi x5, x5, 12            # x5 = A + 12 (Points 4 bytes past the jalr instruction)
+jalr x0, x5, -20           # Jump target = (A+12) - 20 = A - 8 (Should hit the label)
+#     li x31, 444                
 addi x31, x0, 0x0
-ori x31, x31, 0x1
-L_bne_v_3:
-#     li x30, 1
+ori x31, x31, 0x1bc
+L_jalr_neg_verify_2:
+#     li x30, 6                  
 addi x30, x0, 0x0
-ori x30, x30, 0x1
+ori x30, x30, 0x6
 #     li x11, 1
 addi x11, x0, 0x0
 ori x11, x11, 0x1
 #     li x11, 0
 addi x11, x0, 0x0
-#     li x5, 5
-addi x5, x0, 0x0
-ori x5, x5, 0x5
-#     li x6, 10
-addi x6, x0, 0x0
-ori x6, x6, 0xa
-blt x5, x6, L_blt_t_1      # Branch TAKEN
-#     li x31, 2
+jal ra, sub_function       # Call sub_function, ra = PC + 4 (address of next li x31)
+#     li x31, 7                  
 addi x31, x0, 0x0
-ori x31, x31, 0x2
-jal x0, L_blt_v_1
-L_blt_t_1:
-#     li x31, 1
+ori x31, x31, 0x7
+jal x0, L_jalr_ret_verify
+sub_function:
+addi x7, x0, 123           # Dummy work
+jalr x0, x1, 0
+#     li x31, 333                
 addi x31, x0, 0x0
-ori x31, x31, 0x1
-L_blt_v_1:
-#     li x30, 1
+ori x31, x31, 0x14d
+L_jalr_ret_verify:
+#     li x30, 7                  
 addi x30, x0, 0x0
-ori x30, x30, 0x1
+ori x30, x30, 0x7
 #     li x11, 1
 addi x11, x0, 0x0
 ori x11, x11, 0x1
 #     li x11, 0
 addi x11, x0, 0x0
-#     li x5, 10
-addi x5, x0, 0x0
-ori x5, x5, 0xa
-#     li x6, 5
-addi x6, x0, 0x0
-ori x6, x6, 0x5
-blt x5, x6, L_blt_nt_1     # Branch NOT Taken
-#     li x31, 2
+auipc x6, 0                # x6 = PC of auipc (A)
+addi x6, x6, 24            # x6 = A + 24 = Approx address of L_jalr_lsb_target_GOOD
+addi x6, x6, -4            # Correct offset: x6 = A + 20 = Address of L_jalr_lsb_target_GOOD
+addi x5, x6, -1            # x5 = Target - 1 (Odd Address)
+jalr x0, x5, 1
+#     li x31, 99                 
 addi x31, x0, 0x0
-ori x31, x31, 0x2
-jal x0, L_blt_v_2
-L_blt_nt_1:
-#     li x31, 1
+ori x31, x31, 0x63
+jal x0, L_jalr_lsb_verify_2
+L_jalr_lsb_target_GOOD:        # Expected Target (Address = A + 20)
+#     li x31, 8                  
 addi x31, x0, 0x0
-ori x31, x31, 0x1
-L_blt_v_2:
-#     li x30, 2
+ori x31, x31, 0x8
+L_jalr_lsb_verify_2:
+#     li x30, 8                  
 addi x30, x0, 0x0
-ori x30, x30, 0x2
-#     li x11, 1
-addi x11, x0, 0x0
-ori x11, x11, 0x1
-#     li x11, 0
-addi x11, x0, 0x0
-#     li x5, -5
-addi x5, x0, 0x0
-ori x5, x5, 0x5
-xori x5, x5, -1
-addi x5, x5, 1
-#     li x6, 10
-addi x6, x0, 0x0
-ori x6, x6, 0xa
-blt x5, x6, L_blt_t_2      # Branch TAKEN
-#     li x31, 2
-addi x31, x0, 0x0
-ori x31, x31, 0x2
-jal x0, L_blt_v_3
-L_blt_t_2:
-#     li x31, 1
-addi x31, x0, 0x0
-ori x31, x31, 0x1
-L_blt_v_3:
-#     li x30, 1
-addi x30, x0, 0x0
-ori x30, x30, 0x1
-#     li x11, 1
-addi x11, x0, 0x0
-ori x11, x11, 0x1
-#     li x11, 0
-addi x11, x0, 0x0
-#     li x5, 10
-addi x5, x0, 0x0
-ori x5, x5, 0xa
-#     li x6, -5
-addi x6, x0, 0x0
-ori x6, x6, 0x5
-xori x6, x6, -1
-addi x6, x6, 1
-blt x5, x6, L_blt_nt_2     # Branch NOT Taken
-#     li x31, 2
-addi x31, x0, 0x0
-ori x31, x31, 0x2
-jal x0, L_blt_v_4
-L_blt_nt_2:
-#     li x31, 1
-addi x31, x0, 0x0
-ori x31, x31, 0x1
-L_blt_v_4:
-#     li x30, 2
-addi x30, x0, 0x0
-ori x30, x30, 0x2
-#     li x11, 1
-addi x11, x0, 0x0
-ori x11, x11, 0x1
-#     li x11, 0
-addi x11, x0, 0x0
-#     li x5, -10
-addi x5, x0, 0x0
-ori x5, x5, 0xa
-xori x5, x5, -1
-addi x5, x5, 1
-#     li x6, -5
-addi x6, x0, 0x0
-ori x6, x6, 0x5
-xori x6, x6, -1
-addi x6, x6, 1
-blt x5, x6, L_blt_t_3      # Branch TAKEN
-#     li x31, 2
-addi x31, x0, 0x0
-ori x31, x31, 0x2
-jal x0, L_blt_v_5
-L_blt_t_3:
-#     li x31, 1
-addi x31, x0, 0x0
-ori x31, x31, 0x1
-L_blt_v_5:
-#     li x30, 1
-addi x30, x0, 0x0
-ori x30, x30, 0x1
-#     li x11, 1
-addi x11, x0, 0x0
-ori x11, x11, 0x1
-#     li x11, 0
-addi x11, x0, 0x0
-#     li x5, 5
-addi x5, x0, 0x0
-ori x5, x5, 0x5
-#     li x6, 5
-addi x6, x0, 0x0
-ori x6, x6, 0x5
-blt x5, x6, L_blt_nt_3     # Branch NOT Taken
-#     li x31, 2
-addi x31, x0, 0x0
-ori x31, x31, 0x2
-jal x0, L_blt_v_6
-L_blt_nt_3:
-#     li x31, 1
-addi x31, x0, 0x0
-ori x31, x31, 0x1
-L_blt_v_6:
-#     li x30, 2
-addi x30, x0, 0x0
-ori x30, x30, 0x2
-#     li x11, 1
-addi x11, x0, 0x0
-ori x11, x11, 0x1
-#     li x11, 0
-addi x11, x0, 0x0
-#     li x5, 5
-addi x5, x0, 0x0
-ori x5, x5, 0x5
-#     li x6, 10
-addi x6, x0, 0x0
-ori x6, x6, 0xa
-bge x5, x6, L_bge_nt_1     # Branch NOT Taken
-#     li x31, 2
-addi x31, x0, 0x0
-ori x31, x31, 0x2
-jal x0, L_bge_v_1
-L_bge_nt_1:
-#     li x31, 1
-addi x31, x0, 0x0
-ori x31, x31, 0x1
-L_bge_v_1:
-#     li x30, 2
-addi x30, x0, 0x0
-ori x30, x30, 0x2
-#     li x11, 1
-addi x11, x0, 0x0
-ori x11, x11, 0x1
-#     li x11, 0
-addi x11, x0, 0x0
-#     li x5, 10
-addi x5, x0, 0x0
-ori x5, x5, 0xa
-#     li x6, 5
-addi x6, x0, 0x0
-ori x6, x6, 0x5
-bge x5, x6, L_bge_t_1      # Branch TAKEN
-#     li x31, 2
-addi x31, x0, 0x0
-ori x31, x31, 0x2
-jal x0, L_bge_v_2
-L_bge_t_1:
-#     li x31, 1
-addi x31, x0, 0x0
-ori x31, x31, 0x1
-L_bge_v_2:
-#     li x30, 1
-addi x30, x0, 0x0
-ori x30, x30, 0x1
-#     li x11, 1
-addi x11, x0, 0x0
-ori x11, x11, 0x1
-#     li x11, 0
-addi x11, x0, 0x0
-#     li x5, -5
-addi x5, x0, 0x0
-ori x5, x5, 0x5
-xori x5, x5, -1
-addi x5, x5, 1
-#     li x6, 10
-addi x6, x0, 0x0
-ori x6, x6, 0xa
-bge x5, x6, L_bge_nt_2     # Branch NOT Taken
-#     li x31, 2
-addi x31, x0, 0x0
-ori x31, x31, 0x2
-jal x0, L_bge_v_3
-L_bge_nt_2:
-#     li x31, 1
-addi x31, x0, 0x0
-ori x31, x31, 0x1
-L_bge_v_3:
-#     li x30, 2
-addi x30, x0, 0x0
-ori x30, x30, 0x2
-#     li x11, 1
-addi x11, x0, 0x0
-ori x11, x11, 0x1
-#     li x11, 0
-addi x11, x0, 0x0
-#     li x5, 10
-addi x5, x0, 0x0
-ori x5, x5, 0xa
-#     li x6, -5
-addi x6, x0, 0x0
-ori x6, x6, 0x5
-xori x6, x6, -1
-addi x6, x6, 1
-bge x5, x6, L_bge_t_2      # Branch TAKEN
-#     li x31, 2
-addi x31, x0, 0x0
-ori x31, x31, 0x2
-jal x0, L_bge_v_4
-L_bge_t_2:
-#     li x31, 1
-addi x31, x0, 0x0
-ori x31, x31, 0x1
-L_bge_v_4:
-#     li x30, 1
-addi x30, x0, 0x0
-ori x30, x30, 0x1
-#     li x11, 1
-addi x11, x0, 0x0
-ori x11, x11, 0x1
-#     li x11, 0
-addi x11, x0, 0x0
-#     li x5, -5
-addi x5, x0, 0x0
-ori x5, x5, 0x5
-xori x5, x5, -1
-addi x5, x5, 1
-#     li x6, -10
-addi x6, x0, 0x0
-ori x6, x6, 0xa
-xori x6, x6, -1
-addi x6, x6, 1
-bge x5, x6, L_bge_t_3      # Branch TAKEN
-#     li x31, 2
-addi x31, x0, 0x0
-ori x31, x31, 0x2
-jal x0, L_bge_v_5
-L_bge_t_3:
-#     li x31, 1
-addi x31, x0, 0x0
-ori x31, x31, 0x1
-L_bge_v_5:
-#     li x30, 1
-addi x30, x0, 0x0
-ori x30, x30, 0x1
-#     li x11, 1
-addi x11, x0, 0x0
-ori x11, x11, 0x1
-#     li x11, 0
-addi x11, x0, 0x0
-#     li x5, 5
-addi x5, x0, 0x0
-ori x5, x5, 0x5
-#     li x6, 5
-addi x6, x0, 0x0
-ori x6, x6, 0x5
-bge x5, x6, L_bge_t_4      # Branch TAKEN
-#     li x31, 2
-addi x31, x0, 0x0
-ori x31, x31, 0x2
-jal x0, L_bge_v_6
-L_bge_t_4:
-#     li x31, 1
-addi x31, x0, 0x0
-ori x31, x31, 0x1
-L_bge_v_6:
-#     li x30, 1
-addi x30, x0, 0x0
-ori x30, x30, 0x1
-#     li x11, 1
-addi x11, x0, 0x0
-ori x11, x11, 0x1
-#     li x11, 0
-addi x11, x0, 0x0
-#     li x5, 5
-addi x5, x0, 0x0
-ori x5, x5, 0x5
-#     li x6, 10
-addi x6, x0, 0x0
-ori x6, x6, 0xa
-bltu x5, x6, L_bltu_t_1    # Branch TAKEN
-#     li x31, 2
-addi x31, x0, 0x0
-ori x31, x31, 0x2
-jal x0, L_bltu_v_1
-L_bltu_t_1:
-#     li x31, 1
-addi x31, x0, 0x0
-ori x31, x31, 0x1
-L_bltu_v_1:
-#     li x30, 1
-addi x30, x0, 0x0
-ori x30, x30, 0x1
-#     li x11, 1
-addi x11, x0, 0x0
-ori x11, x11, 0x1
-#     li x11, 0
-addi x11, x0, 0x0
-#     li x5, 10
-addi x5, x0, 0x0
-ori x5, x5, 0xa
-#     li x6, 5
-addi x6, x0, 0x0
-ori x6, x6, 0x5
-bltu x5, x6, L_bltu_nt_1   # Branch NOT Taken
-#     li x31, 2
-addi x31, x0, 0x0
-ori x31, x31, 0x2
-jal x0, L_bltu_v_2
-L_bltu_nt_1:
-#     li x31, 1
-addi x31, x0, 0x0
-ori x31, x31, 0x1
-L_bltu_v_2:
-#     li x30, 2
-addi x30, x0, 0x0
-ori x30, x30, 0x2
-#     li x11, 1
-addi x11, x0, 0x0
-ori x11, x11, 0x1
-#     li x11, 0
-addi x11, x0, 0x0
-#     li x5, -5                  
-addi x5, x0, 0x0
-ori x5, x5, 0x5
-xori x5, x5, -1
-addi x5, x5, 1
-#     li x6, 10
-addi x6, x0, 0x0
-ori x6, x6, 0xa
-bltu x5, x6, L_bltu_nt_2   # Branch NOT Taken
-#     li x31, 2
-addi x31, x0, 0x0
-ori x31, x31, 0x2
-jal x0, L_bltu_v_3
-L_bltu_nt_2:
-#     li x31, 1
-addi x31, x0, 0x0
-ori x31, x31, 0x1
-L_bltu_v_3:
-#     li x30, 2
-addi x30, x0, 0x0
-ori x30, x30, 0x2
-#     li x11, 1
-addi x11, x0, 0x0
-ori x11, x11, 0x1
-#     li x11, 0
-addi x11, x0, 0x0
-#     li x5, 10
-addi x5, x0, 0x0
-ori x5, x5, 0xa
-#     li x6, -5                  
-addi x6, x0, 0x0
-ori x6, x6, 0x5
-xori x6, x6, -1
-addi x6, x6, 1
-bltu x5, x6, L_bltu_t_2    # Branch TAKEN
-#     li x31, 2
-addi x31, x0, 0x0
-ori x31, x31, 0x2
-jal x0, L_bltu_v_4
-L_bltu_t_2:
-#     li x31, 1
-addi x31, x0, 0x0
-ori x31, x31, 0x1
-L_bltu_v_4:
-#     li x30, 1
-addi x30, x0, 0x0
-ori x30, x30, 0x1
-#     li x11, 1
-addi x11, x0, 0x0
-ori x11, x11, 0x1
-#     li x11, 0
-addi x11, x0, 0x0
-#     li x5, -1                  
-addi x5, x0, 0x0
-ori x5, x5, 0x1
-xori x5, x5, -1
-addi x5, x5, 1
-#     li x6, 10
-addi x6, x0, 0x0
-ori x6, x6, 0xa
-bltu x5, x6, L_bltu_nt_3   # Branch NOT Taken
-#     li x31, 2
-addi x31, x0, 0x0
-ori x31, x31, 0x2
-jal x0, L_bltu_v_5
-L_bltu_nt_3:
-#     li x31, 1
-addi x31, x0, 0x0
-ori x31, x31, 0x1
-L_bltu_v_5:
-#     li x30, 2
-addi x30, x0, 0x0
-ori x30, x30, 0x2
-#     li x11, 1
-addi x11, x0, 0x0
-ori x11, x11, 0x1
-#     li x11, 0
-addi x11, x0, 0x0
-#     li x5, 5
-addi x5, x0, 0x0
-ori x5, x5, 0x5
-#     li x6, 10
-addi x6, x0, 0x0
-ori x6, x6, 0xa
-bgeu x5, x6, L_bgeu_nt_1   # Branch NOT Taken
-#     li x31, 2
-addi x31, x0, 0x0
-ori x31, x31, 0x2
-jal x0, L_bgeu_v_1
-L_bgeu_nt_1:
-#     li x31, 1
-addi x31, x0, 0x0
-ori x31, x31, 0x1
-L_bgeu_v_1:
-#     li x30, 2
-addi x30, x0, 0x0
-ori x30, x30, 0x2
-#     li x11, 1
-addi x11, x0, 0x0
-ori x11, x11, 0x1
-#     li x11, 0
-addi x11, x0, 0x0
-#     li x5, 10
-addi x5, x0, 0x0
-ori x5, x5, 0xa
-#     li x6, 5
-addi x6, x0, 0x0
-ori x6, x6, 0x5
-bgeu x5, x6, L_bgeu_t_1    # Branch TAKEN
-#     li x31, 2
-addi x31, x0, 0x0
-ori x31, x31, 0x2
-jal x0, L_bgeu_v_2
-L_bgeu_t_1:
-#     li x31, 1
-addi x31, x0, 0x0
-ori x31, x31, 0x1
-L_bgeu_v_2:
-#     li x30, 1
-addi x30, x0, 0x0
-ori x30, x30, 0x1
-#     li x11, 1
-addi x11, x0, 0x0
-ori x11, x11, 0x1
-#     li x11, 0
-addi x11, x0, 0x0
-#     li x5, -5                  
-addi x5, x0, 0x0
-ori x5, x5, 0x5
-xori x5, x5, -1
-addi x5, x5, 1
-#     li x6, 10
-addi x6, x0, 0x0
-ori x6, x6, 0xa
-bgeu x5, x6, L_bgeu_t_2    # Branch TAKEN
-#     li x31, 2
-addi x31, x0, 0x0
-ori x31, x31, 0x2
-jal x0, L_bgeu_v_3
-L_bgeu_t_2:
-#     li x31, 1
-addi x31, x0, 0x0
-ori x31, x31, 0x1
-L_bgeu_v_3:
-#     li x30, 1
-addi x30, x0, 0x0
-ori x30, x30, 0x1
-#     li x11, 1
-addi x11, x0, 0x0
-ori x11, x11, 0x1
-#     li x11, 0
-addi x11, x0, 0x0
-#     li x5, 10
-addi x5, x0, 0x0
-ori x5, x5, 0xa
-#     li x6, -5                  
-addi x6, x0, 0x0
-ori x6, x6, 0x5
-xori x6, x6, -1
-addi x6, x6, 1
-bgeu x5, x6, L_bgeu_nt_2   # Branch NOT Taken
-#     li x31, 2
-addi x31, x0, 0x0
-ori x31, x31, 0x2
-jal x0, L_bgeu_v_4
-L_bgeu_nt_2:
-#     li x31, 1
-addi x31, x0, 0x0
-ori x31, x31, 0x1
-L_bgeu_v_4:
-#     li x30, 2
-addi x30, x0, 0x0
-ori x30, x30, 0x2
-#     li x11, 1
-addi x11, x0, 0x0
-ori x11, x11, 0x1
-#     li x11, 0
-addi x11, x0, 0x0
-#     li x5, -1                  
-addi x5, x0, 0x0
-ori x5, x5, 0x1
-xori x5, x5, -1
-addi x5, x5, 1
-#     li x6, 10
-addi x6, x0, 0x0
-ori x6, x6, 0xa
-bgeu x5, x6, L_bgeu_t_3    # Branch TAKEN
-#     li x31, 2
-addi x31, x0, 0x0
-ori x31, x31, 0x2
-jal x0, L_bgeu_v_5
-L_bgeu_t_3:
-#     li x31, 1
-addi x31, x0, 0x0
-ori x31, x31, 0x1
-L_bgeu_v_5:
-#     li x30, 1
-addi x30, x0, 0x0
-ori x30, x30, 0x1
-#     li x11, 1
-addi x11, x0, 0x0
-ori x11, x11, 0x1
-#     li x11, 0
-addi x11, x0, 0x0
-#     li x5, 5
-addi x5, x0, 0x0
-ori x5, x5, 0x5
-#     li x6, 5
-addi x6, x0, 0x0
-ori x6, x6, 0x5
-bgeu x5, x6, L_bgeu_t_4    # Branch TAKEN
-#     li x31, 2
-addi x31, x0, 0x0
-ori x31, x31, 0x2
-jal x0, L_bgeu_v_6
-L_bgeu_t_4:
-#     li x31, 1
-addi x31, x0, 0x0
-ori x31, x31, 0x1
-L_bgeu_v_6:
-#     li x30, 1
-addi x30, x0, 0x0
-ori x30, x30, 0x1
-#     li x11, 1
-addi x11, x0, 0x0
-ori x11, x11, 0x1
-#     li x11, 0
-addi x11, x0, 0x0
-#     li x5, 0x7FFFFFFFFFFFFFFF
-addi x5, x0, 0x0
-lui x5, 0x7ffff
-srli x5, x5, 0x1
-ori x5, x5, 0x7ff
-slli x5, x5, 0xb
-ori x5, x5, 0x7ff
-slli x5, x5, 0xb
-ori x5, x5, 0x7ff
-slli x5, x5, 0xb
-ori x5, x5, 0x7ff
-#     li x6, 0x8000000000000000
-addi x6, x0, 0x0
-lui x6, 0x80000
-srli x6, x6, 0x1
-slli x6, x6, 0x21
-blt x5, x6, L_blt_t_4      # Branch NOT Taken (Signed: Positive is not less than Negative)
-#     li x31, 2                  
-addi x31, x0, 0x0
-ori x31, x31, 0x2
-jal x0, L_blt_v_7
-L_blt_t_4:
-#     li x31, 1                  
-addi x31, x0, 0x0
-ori x31, x31, 0x1
-L_blt_v_7:
-#     li x30, 2                  
-addi x30, x0, 0x0
-ori x30, x30, 0x2
-#     li x11, 1
-addi x11, x0, 0x0
-ori x11, x11, 0x1
-#     li x11, 0
-addi x11, x0, 0x0
-#     li x5, 0x8000000000000000
-addi x5, x0, 0x0
-lui x5, 0x80000
-srli x5, x5, 0x1
-slli x5, x5, 0x21
-#     li x6, 0x7FFFFFFFFFFFFFFF
-addi x6, x0, 0x0
-lui x6, 0x7ffff
-srli x6, x6, 0x1
-ori x6, x6, 0x7ff
-slli x6, x6, 0xb
-ori x6, x6, 0x7ff
-slli x6, x6, 0xb
-ori x6, x6, 0x7ff
-slli x6, x6, 0xb
-ori x6, x6, 0x7ff
-blt x5, x6, L_blt_t_5      # Branch TAKEN (Signed: Negative is less than Positive)
-#     li x31, 2
-addi x31, x0, 0x0
-ori x31, x31, 0x2
-jal x0, L_blt_v_8
-L_blt_t_5:
-#     li x31, 1
-addi x31, x0, 0x0
-ori x31, x31, 0x1
-L_blt_v_8:
-#     li x30, 1
-addi x30, x0, 0x0
-ori x30, x30, 0x1
-#     li x11, 1
-addi x11, x0, 0x0
-ori x11, x11, 0x1
-#     li x11, 0
-addi x11, x0, 0x0
-#     li x5, 0x7FFFFFFFFFFFFFFF
-addi x5, x0, 0x0
-lui x5, 0x7ffff
-srli x5, x5, 0x1
-ori x5, x5, 0x7ff
-slli x5, x5, 0xb
-ori x5, x5, 0x7ff
-slli x5, x5, 0xb
-ori x5, x5, 0x7ff
-slli x5, x5, 0xb
-ori x5, x5, 0x7ff
-#     li x6, 0x8000000000000000
-addi x6, x0, 0x0
-lui x6, 0x80000
-srli x6, x6, 0x1
-slli x6, x6, 0x21
-bge x5, x6, L_bge_t_5      # Branch TAKEN (Signed: Positive is greater than Negative)
-#     li x31, 2
-addi x31, x0, 0x0
-ori x31, x31, 0x2
-jal x0, L_bge_v_7
-L_bge_t_5:
-#     li x31, 1
-addi x31, x0, 0x0
-ori x31, x31, 0x1
-L_bge_v_7:
-#     li x30, 1
-addi x30, x0, 0x0
-ori x30, x30, 0x1
-#     li x11, 1
-addi x11, x0, 0x0
-ori x11, x11, 0x1
-#     li x11, 0
-addi x11, x0, 0x0
-#     li x5, 0x8000000000000000
-addi x5, x0, 0x0
-lui x5, 0x80000
-srli x5, x5, 0x1
-slli x5, x5, 0x21
-#     li x6, 0x7FFFFFFFFFFFFFFF
-addi x6, x0, 0x0
-lui x6, 0x7ffff
-srli x6, x6, 0x1
-ori x6, x6, 0x7ff
-slli x6, x6, 0xb
-ori x6, x6, 0x7ff
-slli x6, x6, 0xb
-ori x6, x6, 0x7ff
-slli x6, x6, 0xb
-ori x6, x6, 0x7ff
-bge x5, x6, L_bge_nt_3     # Branch NOT Taken (Signed: Negative is not >= Positive)
-#     li x31, 2
-addi x31, x0, 0x0
-ori x31, x31, 0x2
-jal x0, L_bge_v_8
-L_bge_nt_3:
-#     li x31, 1
-addi x31, x0, 0x0
-ori x31, x31, 0x1
-L_bge_v_8:
-#     li x30, 2
-addi x30, x0, 0x0
-ori x30, x30, 0x2
-#     li x11, 1
-addi x11, x0, 0x0
-ori x11, x11, 0x1
-#     li x11, 0
-addi x11, x0, 0x0
-#     li x5, -1
-addi x5, x0, 0x0
-ori x5, x5, 0x1
-xori x5, x5, -1
-addi x5, x5, 1
-#     li x6, 0
-addi x6, x0, 0x0
-blt x5, x6, L_blt_t_6      # Branch TAKEN
-#     li x31, 2
-addi x31, x0, 0x0
-ori x31, x31, 0x2
-jal x0, L_blt_v_9
-L_blt_t_6:
-#     li x31, 1
-addi x31, x0, 0x0
-ori x31, x31, 0x1
-L_blt_v_9:
-#     li x30, 1
-addi x30, x0, 0x0
-ori x30, x30, 0x1
-#     li x11, 1
-addi x11, x0, 0x0
-ori x11, x11, 0x1
-#     li x11, 0
-addi x11, x0, 0x0
-#     li x5, -1
-addi x5, x0, 0x0
-ori x5, x5, 0x1
-xori x5, x5, -1
-addi x5, x5, 1
-#     li x6, 0
-addi x6, x0, 0x0
-bge x5, x6, L_bge_nt_4     # Branch NOT Taken
-#     li x31, 2
-addi x31, x0, 0x0
-ori x31, x31, 0x2
-jal x0, L_bge_v_10
-L_bge_nt_4:
-#     li x31, 1
-addi x31, x0, 0x0
-ori x31, x31, 0x1
-L_bge_v_10:
-#     li x30, 2
-addi x30, x0, 0x0
-ori x30, x30, 0x2
-#     li x11, 1
-addi x11, x0, 0x0
-ori x11, x11, 0x1
-#     li x11, 0
-addi x11, x0, 0x0
-#     li x5, 0x7FFFFFFFFFFFFFFF
-addi x5, x0, 0x0
-lui x5, 0x7ffff
-srli x5, x5, 0x1
-ori x5, x5, 0x7ff
-slli x5, x5, 0xb
-ori x5, x5, 0x7ff
-slli x5, x5, 0xb
-ori x5, x5, 0x7ff
-slli x5, x5, 0xb
-ori x5, x5, 0x7ff
-#     li x6, 0x8000000000000000
-addi x6, x0, 0x0
-lui x6, 0x80000
-srli x6, x6, 0x1
-slli x6, x6, 0x21
-bltu x5, x6, L_bltu_t_3    # Branch TAKEN (Unsigned: 0x7F... is less than 0x80...)
-#     li x31, 2
-addi x31, x0, 0x0
-ori x31, x31, 0x2
-jal x0, L_bltu_v_6
-L_bltu_t_3:
-#     li x31, 1
-addi x31, x0, 0x0
-ori x31, x31, 0x1
-L_bltu_v_6:
-#     li x30, 1
-addi x30, x0, 0x0
-ori x30, x30, 0x1
-#     li x11, 1
-addi x11, x0, 0x0
-ori x11, x11, 0x1
-#     li x11, 0
-addi x11, x0, 0x0
-#     li x5, 0x8000000000000000
-addi x5, x0, 0x0
-lui x5, 0x80000
-srli x5, x5, 0x1
-slli x5, x5, 0x21
-#     li x6, 0x7FFFFFFFFFFFFFFF
-addi x6, x0, 0x0
-lui x6, 0x7ffff
-srli x6, x6, 0x1
-ori x6, x6, 0x7ff
-slli x6, x6, 0xb
-ori x6, x6, 0x7ff
-slli x6, x6, 0xb
-ori x6, x6, 0x7ff
-slli x6, x6, 0xb
-ori x6, x6, 0x7ff
-bltu x5, x6, L_bltu_nt_4   # Branch NOT Taken (Unsigned: 0x80... is not less than 0x7F...)
-#     li x31, 2
-addi x31, x0, 0x0
-ori x31, x31, 0x2
-jal x0, L_bltu_v_7
-L_bltu_nt_4:
-#     li x31, 1
-addi x31, x0, 0x0
-ori x31, x31, 0x1
-L_bltu_v_7:
-#     li x30, 2
-addi x30, x0, 0x0
-ori x30, x30, 0x2
-#     li x11, 1
-addi x11, x0, 0x0
-ori x11, x11, 0x1
-#     li x11, 0
-addi x11, x0, 0x0
-#     li x5, 0x7FFFFFFFFFFFFFFF
-addi x5, x0, 0x0
-lui x5, 0x7ffff
-srli x5, x5, 0x1
-ori x5, x5, 0x7ff
-slli x5, x5, 0xb
-ori x5, x5, 0x7ff
-slli x5, x5, 0xb
-ori x5, x5, 0x7ff
-slli x5, x5, 0xb
-ori x5, x5, 0x7ff
-#     li x6, 0x8000000000000000
-addi x6, x0, 0x0
-lui x6, 0x80000
-srli x6, x6, 0x1
-slli x6, x6, 0x21
-bgeu x5, x6, L_bgeu_nt_3   # Branch NOT Taken
-#     li x31, 2
-addi x31, x0, 0x0
-ori x31, x31, 0x2
-jal x0, L_bgeu_v_7
-L_bgeu_nt_3:
-#     li x31, 1
-addi x31, x0, 0x0
-ori x31, x31, 0x1
-L_bgeu_v_7:
-#     li x30, 2
-addi x30, x0, 0x0
-ori x30, x30, 0x2
-#     li x11, 1
-addi x11, x0, 0x0
-ori x11, x11, 0x1
-#     li x11, 0
-addi x11, x0, 0x0
-#     li x5, 0x8000000000000000
-addi x5, x0, 0x0
-lui x5, 0x80000
-srli x5, x5, 0x1
-slli x5, x5, 0x21
-#     li x6, 0x7FFFFFFFFFFFFFFF
-addi x6, x0, 0x0
-lui x6, 0x7ffff
-srli x6, x6, 0x1
-ori x6, x6, 0x7ff
-slli x6, x6, 0xb
-ori x6, x6, 0x7ff
-slli x6, x6, 0xb
-ori x6, x6, 0x7ff
-slli x6, x6, 0xb
-ori x6, x6, 0x7ff
-bgeu x5, x6, L_bgeu_t_5    # Branch TAKEN
-#     li x31, 2
-addi x31, x0, 0x0
-ori x31, x31, 0x2
-jal x0, L_bgeu_v_8
-L_bgeu_t_5:
-#     li x31, 1
-addi x31, x0, 0x0
-ori x31, x31, 0x1
-L_bgeu_v_8:
-#     li x30, 1
-addi x30, x0, 0x0
-ori x30, x30, 0x1
-#     li x11, 1
-addi x11, x0, 0x0
-ori x11, x11, 0x1
-#     li x11, 0
-addi x11, x0, 0x0
-#     li x5, -1                  
-addi x5, x0, 0x0
-ori x5, x5, 0x1
-xori x5, x5, -1
-addi x5, x5, 1
-#     li x6, 0
-addi x6, x0, 0x0
-bltu x5, x6, L_bltu_nt_5   # Branch NOT Taken
-#     li x31, 2
-addi x31, x0, 0x0
-ori x31, x31, 0x2
-jal x0, L_bltu_v_8
-L_bltu_nt_5:
-#     li x31, 1
-addi x31, x0, 0x0
-ori x31, x31, 0x1
-L_bltu_v_8:                 # Label typo fixed
-#     li x30, 2
-addi x30, x0, 0x0
-ori x30, x30, 0x2
-#     li x11, 1
-addi x11, x0, 0x0
-ori x11, x11, 0x1
-#     li x11, 0
-addi x11, x0, 0x0
-#     li x5, -1                  
-addi x5, x0, 0x0
-ori x5, x5, 0x1
-xori x5, x5, -1
-addi x5, x5, 1
-#     li x6, 0
-addi x6, x0, 0x0
-bgeu x5, x6, L_bgeu_t_6    # Branch TAKEN
-#     li x31, 2
-addi x31, x0, 0x0
-ori x31, x31, 0x2
-jal x0, L_bgeu_v_9
-L_bgeu_t_6:
-#     li x31, 1
-addi x31, x0, 0x0
-ori x31, x31, 0x1
-L_bgeu_v_9:
-#     li x30, 1
-addi x30, x0, 0x0
-ori x30, x30, 0x1
-#     li x11, 1
-addi x11, x0, 0x0
-ori x11, x11, 0x1
-#     li x11, 0
-addi x11, x0, 0x0
-#     li x5, 0x7FFFFFFFFFFFFFFF
-addi x5, x0, 0x0
-lui x5, 0x7ffff
-srli x5, x5, 0x1
-ori x5, x5, 0x7ff
-slli x5, x5, 0xb
-ori x5, x5, 0x7ff
-slli x5, x5, 0xb
-ori x5, x5, 0x7ff
-slli x5, x5, 0xb
-ori x5, x5, 0x7ff
-#     li x6, -1                  
-addi x6, x0, 0x0
-ori x6, x6, 0x1
-xori x6, x6, -1
-addi x6, x6, 1
-bltu x5, x6, L_bltu_t_4    # Branch TAKEN
-#     li x31, 2
-addi x31, x0, 0x0
-ori x31, x31, 0x2
-jal x0, L_bltu_v_10
-L_bltu_t_4:
-#     li x31, 1
-addi x31, x0, 0x0
-ori x31, x31, 0x1
-L_bltu_v_10:
-#     li x30, 1
-addi x30, x0, 0x0
-ori x30, x30, 0x1
-#     li x11, 1
-addi x11, x0, 0x0
-ori x11, x11, 0x1
-#     li x11, 0
-addi x11, x0, 0x0
-#     li x5, 0x7FFFFFFFFFFFFFFF
-addi x5, x0, 0x0
-lui x5, 0x7ffff
-srli x5, x5, 0x1
-ori x5, x5, 0x7ff
-slli x5, x5, 0xb
-ori x5, x5, 0x7ff
-slli x5, x5, 0xb
-ori x5, x5, 0x7ff
-slli x5, x5, 0xb
-ori x5, x5, 0x7ff
-#     li x6, -1                  
-addi x6, x0, 0x0
-ori x6, x6, 0x1
-xori x6, x6, -1
-addi x6, x6, 1
-bgeu x5, x6, L_bgeu_nt_4   # Branch NOT Taken
-#     li x31, 2
-addi x31, x0, 0x0
-ori x31, x31, 0x2
-jal x0, L_bgeu_v_11
-L_bgeu_nt_4:
-#     li x31, 1
-addi x31, x0, 0x0
-ori x31, x31, 0x1
-L_bgeu_v_11:
-#     li x30, 2
-addi x30, x0, 0x0
-ori x30, x30, 0x2
-#     li x11, 1
-addi x11, x0, 0x0
-ori x11, x11, 0x1
-#     li x11, 0
-addi x11, x0, 0x0
-#     li x5, 0
-addi x5, x0, 0x0
-#     li x7, 0x12345678        
-addi x7, x0, 0x0
-slli x7, x7, 0xb
-ori x7, x7, 0x48
-slli x7, x7, 0xb
-ori x7, x7, 0x68a
-slli x7, x7, 0xb
-ori x7, x7, 0x678
-lw x6, 8(x5)             # Load x6 = 0x12345678 (Value available AFTER MEM stage)
-beq x6, x7, L_hlwb_t_1   # Branch condition depends on x6 (Needs value potentially before MEM stage)
-#     li x31, 2
-addi x31, x0, 0x0
-ori x31, x31, 0x2
-jal x0, L_hlwb_v_1
-L_hlwb_t_1:
-#     li x31, 1
-addi x31, x0, 0x0
-ori x31, x31, 0x1
-L_hlwb_v_1:
-#     li x30, 1                  
-addi x30, x0, 0x0
-ori x30, x30, 0x1
-#     li x11, 1
-addi x11, x0, 0x0
-ori x11, x11, 0x1
-#     li x11, 0
-addi x11, x0, 0x0
-#     li x5, 0
-addi x5, x0, 0x0
-#     li x7, 0x12345678
-addi x7, x0, 0x0
-slli x7, x7, 0xb
-ori x7, x7, 0x48
-slli x7, x7, 0xb
-ori x7, x7, 0x68a
-slli x7, x7, 0xb
-ori x7, x7, 0x678
-lw x6, 8(x5)             # Load x6 = 0x12345678
-bne x6, x7, L_hlwb_nt_1  # Branch condition depends on x6. NOT Taken.
-#     li x31, 2
-addi x31, x0, 0x0
-ori x31, x31, 0x2
-jal x0, L_hlwb_v_2
-L_hlwb_nt_1:
-#     li x31, 1
-addi x31, x0, 0x0
-ori x31, x31, 0x1
-L_hlwb_v_2:
-#     li x30, 2                  
-addi x30, x0, 0x0
-ori x30, x30, 0x2
-#     li x11, 1
-addi x11, x0, 0x0
-ori x11, x11, 0x1
-#     li x11, 0
-addi x11, x0, 0x0
-#     li x5, 999
-addi x5, x0, 0x0
-ori x5, x5, 0x3e7
-#     li x7, 2000              
-addi x7, x0, 0x0
-ori x7, x7, 0x7d0
-addi x6, x5, 1           # x6 = 1000 (Writeback happens late)
-blt x6, x7, L_hablt_t_1  # Branch condition 1000 < 2000 (True). Depends on x6. TAKEN.
-#     li x31, 2
-addi x31, x0, 0x0
-ori x31, x31, 0x2
-jal x0, L_hablt_v_1
-L_hablt_t_1:
-#     li x31, 1
-addi x31, x0, 0x0
-ori x31, x31, 0x1
-L_hablt_v_1:
-#     li x30, 1                  
-addi x30, x0, 0x0
-ori x30, x30, 0x1
-#     li x11, 1
-addi x11, x0, 0x0
-ori x11, x11, 0x1
-#     li x11, 0
-addi x11, x0, 0x0
-#     li x5, 0x70000000
-addi x5, x0, 0x0
-slli x5, x5, 0xb
-ori x5, x5, 0x1c0
-slli x5, x5, 0x16
-#     li x6, 0x0FFFFFFF
-addi x6, x0, 0x0
-slli x6, x6, 0xb
-ori x6, x6, 0x3f
-slli x6, x6, 0xb
-ori x6, x6, 0x7ff
-slli x6, x6, 0xb
-ori x6, x6, 0x7ff
-addw x7, x5, x6          # x7 = 0x70000000 + 0x0FFFFFFF = 0x7FFFFFFF (32b). Sign ext -> 0x7FFFFFFF
-#     li x8, 0x80000000        
-addi x8, x0, 0x0
-slli x8, x8, 0xb
-ori x8, x8, 0x200
-slli x8, x8, 0x16
-bgeu x7, x8, L_habwu_nt_1 # Branch condition 0x7F... (unsigned) >= 0x80... (unsigned) -> False. NOT TAKEN.
-#     li x31, 2
-addi x31, x0, 0x0
-ori x31, x31, 0x2
-jal x0, L_habwu_v_1
-L_habwu_nt_1:
-#     li x31, 1
-addi x31, x0, 0x0
-ori x31, x31, 0x1
-L_habwu_v_1:
-#     li x30, 2                  
-addi x30, x0, 0x0
-ori x30, x30, 0x2
+ori x30, x30, 0x8
 #     li x11, 1
 addi x11, x0, 0x0
 ori x11, x11, 0x1
