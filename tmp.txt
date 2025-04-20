@@ -733,3 +733,443 @@ addi x11, x0, 0x0
 ori x11, x11, 0x1
 #     li x11, 0
 addi x11, x0, 0x0
+#     li x5, 0x7FFFFFFFFFFFFFFF
+addi x5, x0, 0x0
+lui x5, 0x7ffff
+srli x5, x5, 0x1
+ori x5, x5, 0x7ff
+slli x5, x5, 0xb
+ori x5, x5, 0x7ff
+slli x5, x5, 0xb
+ori x5, x5, 0x7ff
+slli x5, x5, 0xb
+ori x5, x5, 0x7ff
+#     li x6, 0x8000000000000000
+addi x6, x0, 0x0
+lui x6, 0x80000
+srli x6, x6, 0x1
+slli x6, x6, 0x21
+blt x5, x6, L_blt_t_4      # Branch NOT Taken (Signed: Positive is not less than Negative)
+#     li x31, 2                  
+addi x31, x0, 0x0
+ori x31, x31, 0x2
+jal x0, L_blt_v_7
+L_blt_t_4:
+#     li x31, 1                  
+addi x31, x0, 0x0
+ori x31, x31, 0x1
+L_blt_v_7:
+#     li x30, 2                  
+addi x30, x0, 0x0
+ori x30, x30, 0x2
+#     li x11, 1
+addi x11, x0, 0x0
+ori x11, x11, 0x1
+#     li x11, 0
+addi x11, x0, 0x0
+#     li x5, 0x8000000000000000
+addi x5, x0, 0x0
+lui x5, 0x80000
+srli x5, x5, 0x1
+slli x5, x5, 0x21
+#     li x6, 0x7FFFFFFFFFFFFFFF
+addi x6, x0, 0x0
+lui x6, 0x7ffff
+srli x6, x6, 0x1
+ori x6, x6, 0x7ff
+slli x6, x6, 0xb
+ori x6, x6, 0x7ff
+slli x6, x6, 0xb
+ori x6, x6, 0x7ff
+slli x6, x6, 0xb
+ori x6, x6, 0x7ff
+blt x5, x6, L_blt_t_5      # Branch TAKEN (Signed: Negative is less than Positive)
+#     li x31, 2
+addi x31, x0, 0x0
+ori x31, x31, 0x2
+jal x0, L_blt_v_8
+L_blt_t_5:
+#     li x31, 1
+addi x31, x0, 0x0
+ori x31, x31, 0x1
+L_blt_v_8:
+#     li x30, 1
+addi x30, x0, 0x0
+ori x30, x30, 0x1
+#     li x11, 1
+addi x11, x0, 0x0
+ori x11, x11, 0x1
+#     li x11, 0
+addi x11, x0, 0x0
+#     li x5, 0x7FFFFFFFFFFFFFFF
+addi x5, x0, 0x0
+lui x5, 0x7ffff
+srli x5, x5, 0x1
+ori x5, x5, 0x7ff
+slli x5, x5, 0xb
+ori x5, x5, 0x7ff
+slli x5, x5, 0xb
+ori x5, x5, 0x7ff
+slli x5, x5, 0xb
+ori x5, x5, 0x7ff
+#     li x6, 0x8000000000000000
+addi x6, x0, 0x0
+lui x6, 0x80000
+srli x6, x6, 0x1
+slli x6, x6, 0x21
+bge x5, x6, L_bge_t_5      # Branch TAKEN (Signed: Positive is greater than Negative)
+#     li x31, 2
+addi x31, x0, 0x0
+ori x31, x31, 0x2
+jal x0, L_bge_v_7
+L_bge_t_5:
+#     li x31, 1
+addi x31, x0, 0x0
+ori x31, x31, 0x1
+L_bge_v_7:
+#     li x30, 1
+addi x30, x0, 0x0
+ori x30, x30, 0x1
+#     li x11, 1
+addi x11, x0, 0x0
+ori x11, x11, 0x1
+#     li x11, 0
+addi x11, x0, 0x0
+#     li x5, 0x8000000000000000
+addi x5, x0, 0x0
+lui x5, 0x80000
+srli x5, x5, 0x1
+slli x5, x5, 0x21
+#     li x6, 0x7FFFFFFFFFFFFFFF
+addi x6, x0, 0x0
+lui x6, 0x7ffff
+srli x6, x6, 0x1
+ori x6, x6, 0x7ff
+slli x6, x6, 0xb
+ori x6, x6, 0x7ff
+slli x6, x6, 0xb
+ori x6, x6, 0x7ff
+slli x6, x6, 0xb
+ori x6, x6, 0x7ff
+bge x5, x6, L_bge_nt_3     # Branch NOT Taken (Signed: Negative is not >= Positive)
+#     li x31, 2
+addi x31, x0, 0x0
+ori x31, x31, 0x2
+jal x0, L_bge_v_8
+L_bge_nt_3:
+#     li x31, 1
+addi x31, x0, 0x0
+ori x31, x31, 0x1
+L_bge_v_8:
+#     li x30, 2
+addi x30, x0, 0x0
+ori x30, x30, 0x2
+#     li x11, 1
+addi x11, x0, 0x0
+ori x11, x11, 0x1
+#     li x11, 0
+addi x11, x0, 0x0
+#     li x5, -1
+addi x5, x0, 0x0
+ori x5, x5, 0x1
+xori x5, x5, -1
+addi x5, x5, 1
+#     li x6, 0
+addi x6, x0, 0x0
+blt x5, x6, L_blt_t_6      # Branch TAKEN
+#     li x31, 2
+addi x31, x0, 0x0
+ori x31, x31, 0x2
+jal x0, L_blt_v_9
+L_blt_t_6:
+#     li x31, 1
+addi x31, x0, 0x0
+ori x31, x31, 0x1
+L_blt_v_9:
+#     li x30, 1
+addi x30, x0, 0x0
+ori x30, x30, 0x1
+#     li x11, 1
+addi x11, x0, 0x0
+ori x11, x11, 0x1
+#     li x11, 0
+addi x11, x0, 0x0
+#     li x5, -1
+addi x5, x0, 0x0
+ori x5, x5, 0x1
+xori x5, x5, -1
+addi x5, x5, 1
+#     li x6, 0
+addi x6, x0, 0x0
+bge x5, x6, L_bge_nt_4     # Branch NOT Taken
+#     li x31, 2
+addi x31, x0, 0x0
+ori x31, x31, 0x2
+jal x0, L_bge_v_10
+L_bge_nt_4:
+#     li x31, 1
+addi x31, x0, 0x0
+ori x31, x31, 0x1
+L_bge_v_10:
+#     li x30, 2
+addi x30, x0, 0x0
+ori x30, x30, 0x2
+#     li x11, 1
+addi x11, x0, 0x0
+ori x11, x11, 0x1
+#     li x11, 0
+addi x11, x0, 0x0
+#     li x5, 0x7FFFFFFFFFFFFFFF
+addi x5, x0, 0x0
+lui x5, 0x7ffff
+srli x5, x5, 0x1
+ori x5, x5, 0x7ff
+slli x5, x5, 0xb
+ori x5, x5, 0x7ff
+slli x5, x5, 0xb
+ori x5, x5, 0x7ff
+slli x5, x5, 0xb
+ori x5, x5, 0x7ff
+#     li x6, 0x8000000000000000
+addi x6, x0, 0x0
+lui x6, 0x80000
+srli x6, x6, 0x1
+slli x6, x6, 0x21
+bltu x5, x6, L_bltu_t_3    # Branch TAKEN (Unsigned: 0x7F... is less than 0x80...)
+#     li x31, 2
+addi x31, x0, 0x0
+ori x31, x31, 0x2
+jal x0, L_bltu_v_6
+L_bltu_t_3:
+#     li x31, 1
+addi x31, x0, 0x0
+ori x31, x31, 0x1
+L_bltu_v_6:
+#     li x30, 1
+addi x30, x0, 0x0
+ori x30, x30, 0x1
+#     li x11, 1
+addi x11, x0, 0x0
+ori x11, x11, 0x1
+#     li x11, 0
+addi x11, x0, 0x0
+#     li x5, 0x8000000000000000
+addi x5, x0, 0x0
+lui x5, 0x80000
+srli x5, x5, 0x1
+slli x5, x5, 0x21
+#     li x6, 0x7FFFFFFFFFFFFFFF
+addi x6, x0, 0x0
+lui x6, 0x7ffff
+srli x6, x6, 0x1
+ori x6, x6, 0x7ff
+slli x6, x6, 0xb
+ori x6, x6, 0x7ff
+slli x6, x6, 0xb
+ori x6, x6, 0x7ff
+slli x6, x6, 0xb
+ori x6, x6, 0x7ff
+bltu x5, x6, L_bltu_nt_4   # Branch NOT Taken (Unsigned: 0x80... is not less than 0x7F...)
+#     li x31, 2
+addi x31, x0, 0x0
+ori x31, x31, 0x2
+jal x0, L_bltu_v_7
+L_bltu_nt_4:
+#     li x31, 1
+addi x31, x0, 0x0
+ori x31, x31, 0x1
+L_bltu_v_7:
+#     li x30, 2
+addi x30, x0, 0x0
+ori x30, x30, 0x2
+#     li x11, 1
+addi x11, x0, 0x0
+ori x11, x11, 0x1
+#     li x11, 0
+addi x11, x0, 0x0
+#     li x5, 0x7FFFFFFFFFFFFFFF
+addi x5, x0, 0x0
+lui x5, 0x7ffff
+srli x5, x5, 0x1
+ori x5, x5, 0x7ff
+slli x5, x5, 0xb
+ori x5, x5, 0x7ff
+slli x5, x5, 0xb
+ori x5, x5, 0x7ff
+slli x5, x5, 0xb
+ori x5, x5, 0x7ff
+#     li x6, 0x8000000000000000
+addi x6, x0, 0x0
+lui x6, 0x80000
+srli x6, x6, 0x1
+slli x6, x6, 0x21
+bgeu x5, x6, L_bgeu_nt_3   # Branch NOT Taken
+#     li x31, 2
+addi x31, x0, 0x0
+ori x31, x31, 0x2
+jal x0, L_bgeu_v_7
+L_bgeu_nt_3:
+#     li x31, 1
+addi x31, x0, 0x0
+ori x31, x31, 0x1
+L_bgeu_v_7:
+#     li x30, 2
+addi x30, x0, 0x0
+ori x30, x30, 0x2
+#     li x11, 1
+addi x11, x0, 0x0
+ori x11, x11, 0x1
+#     li x11, 0
+addi x11, x0, 0x0
+#     li x5, 0x8000000000000000
+addi x5, x0, 0x0
+lui x5, 0x80000
+srli x5, x5, 0x1
+slli x5, x5, 0x21
+#     li x6, 0x7FFFFFFFFFFFFFFF
+addi x6, x0, 0x0
+lui x6, 0x7ffff
+srli x6, x6, 0x1
+ori x6, x6, 0x7ff
+slli x6, x6, 0xb
+ori x6, x6, 0x7ff
+slli x6, x6, 0xb
+ori x6, x6, 0x7ff
+slli x6, x6, 0xb
+ori x6, x6, 0x7ff
+bgeu x5, x6, L_bgeu_t_5    # Branch TAKEN
+#     li x31, 2
+addi x31, x0, 0x0
+ori x31, x31, 0x2
+jal x0, L_bgeu_v_8
+L_bgeu_t_5:
+#     li x31, 1
+addi x31, x0, 0x0
+ori x31, x31, 0x1
+L_bgeu_v_8:
+#     li x30, 1
+addi x30, x0, 0x0
+ori x30, x30, 0x1
+#     li x11, 1
+addi x11, x0, 0x0
+ori x11, x11, 0x1
+#     li x11, 0
+addi x11, x0, 0x0
+#     li x5, -1                  
+addi x5, x0, 0x0
+ori x5, x5, 0x1
+xori x5, x5, -1
+addi x5, x5, 1
+#     li x6, 0
+addi x6, x0, 0x0
+bltu x5, x6, L_bltu_nt_5   # Branch NOT Taken
+#     li x31, 2
+addi x31, x0, 0x0
+ori x31, x31, 0x2
+jal x0, L_bltu_v_8
+L_bltu_nt_5:
+#     li x31, 1
+addi x31, x0, 0x0
+ori x31, x31, 0x1
+L_bltu_v_8:                 # Label typo fixed
+#     li x30, 2
+addi x30, x0, 0x0
+ori x30, x30, 0x2
+#     li x11, 1
+addi x11, x0, 0x0
+ori x11, x11, 0x1
+#     li x11, 0
+addi x11, x0, 0x0
+#     li x5, -1                  
+addi x5, x0, 0x0
+ori x5, x5, 0x1
+xori x5, x5, -1
+addi x5, x5, 1
+#     li x6, 0
+addi x6, x0, 0x0
+bgeu x5, x6, L_bgeu_t_6    # Branch TAKEN
+#     li x31, 2
+addi x31, x0, 0x0
+ori x31, x31, 0x2
+jal x0, L_bgeu_v_9
+L_bgeu_t_6:
+#     li x31, 1
+addi x31, x0, 0x0
+ori x31, x31, 0x1
+L_bgeu_v_9:
+#     li x30, 1
+addi x30, x0, 0x0
+ori x30, x30, 0x1
+#     li x11, 1
+addi x11, x0, 0x0
+ori x11, x11, 0x1
+#     li x11, 0
+addi x11, x0, 0x0
+#     li x5, 0x7FFFFFFFFFFFFFFF
+addi x5, x0, 0x0
+lui x5, 0x7ffff
+srli x5, x5, 0x1
+ori x5, x5, 0x7ff
+slli x5, x5, 0xb
+ori x5, x5, 0x7ff
+slli x5, x5, 0xb
+ori x5, x5, 0x7ff
+slli x5, x5, 0xb
+ori x5, x5, 0x7ff
+#     li x6, -1                  
+addi x6, x0, 0x0
+ori x6, x6, 0x1
+xori x6, x6, -1
+addi x6, x6, 1
+bltu x5, x6, L_bltu_t_4    # Branch TAKEN
+#     li x31, 2
+addi x31, x0, 0x0
+ori x31, x31, 0x2
+jal x0, L_bltu_v_10
+L_bltu_t_4:
+#     li x31, 1
+addi x31, x0, 0x0
+ori x31, x31, 0x1
+L_bltu_v_10:
+#     li x30, 1
+addi x30, x0, 0x0
+ori x30, x30, 0x1
+#     li x11, 1
+addi x11, x0, 0x0
+ori x11, x11, 0x1
+#     li x11, 0
+addi x11, x0, 0x0
+#     li x5, 0x7FFFFFFFFFFFFFFF
+addi x5, x0, 0x0
+lui x5, 0x7ffff
+srli x5, x5, 0x1
+ori x5, x5, 0x7ff
+slli x5, x5, 0xb
+ori x5, x5, 0x7ff
+slli x5, x5, 0xb
+ori x5, x5, 0x7ff
+slli x5, x5, 0xb
+ori x5, x5, 0x7ff
+#     li x6, -1                  
+addi x6, x0, 0x0
+ori x6, x6, 0x1
+xori x6, x6, -1
+addi x6, x6, 1
+bgeu x5, x6, L_bgeu_nt_4   # Branch NOT Taken
+#     li x31, 2
+addi x31, x0, 0x0
+ori x31, x31, 0x2
+jal x0, L_bgeu_v_11
+L_bgeu_nt_4:
+#     li x31, 1
+addi x31, x0, 0x0
+ori x31, x31, 0x1
+L_bgeu_v_11:
+#     li x30, 2
+addi x30, x0, 0x0
+ori x30, x30, 0x2
+#     li x11, 1
+addi x11, x0, 0x0
+ori x11, x11, 0x1
+#     li x11, 0
+addi x11, x0, 0x0
