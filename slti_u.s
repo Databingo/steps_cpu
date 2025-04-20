@@ -7,7 +7,7 @@ _start:
     # Assumes an external harness monitors x11 and compares x31 vs x30 when x11 becomes 1.
 
 ##--------------------------------------------
-## SLT / SLTU / SLTI / SLTIU Tests - RV64
+## SLTI / SLTIU Tests - RV64
 ## Using x31 as result (rd)
 ## Using x5 as rs1, x6 as rs2
 ## Using x30 for Golden value (0 or 1)
