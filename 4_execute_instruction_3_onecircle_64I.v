@@ -580,10 +580,11 @@ begin
                                          //// 否则 rs1 小于 rs2
 					 // else rram[wire_rd] <= 1'b1;
 					   // 代码模式 
-					     if (rram[wire_rs1] < rram[wire_rs2]) rram[wire_rd] <= 1'b1; 
+					     if (rram[wire_rs1] < rram[wire_rs2]) 
+					    // if ($unsigned(rram[wire_rs1]) < $unsigned(rram[wire_rs2])) 
+						 rram[wire_rd] <= 1'b1; 
+					     else rram[wire_rd] <= 1'b0;
 					   // if ({1'b0, rram[wire_rs1]} - {1'b0, rram[wire_rs2]} < 0 ) rram[wire_rd] <= 1'b1; 
-					   
-					  
 					   
 				           pc <= pc + 4; 
 	    	                           jp <=0;
