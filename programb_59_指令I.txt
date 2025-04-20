@@ -73,18 +73,19 @@
 //00000000 00000000 01100000 01110011 //___000000000000_00000_110_00000_1110011 // CSRRSI |csr.12|zim.5|110.3|rd.5|1110011.7| atomic set, 0-extend csr in rd, 0-extended 5unsigned zimm as 1 mask set csr 1
 //00000000 00000000 01110000 01110011 //___000000000000_00000_111_00000_1110011 // CSRRCI |csr.12|zim.5|111.3|rd.5|1110011.7| atomic clear,0-extend csr in rd, 0-extended 5unsigned zimm as 1 mask set csr0
 
-//测试分类：
-//#立即 li lui 
+//测试分类：  59+li=60
+//#立即 li lui ^auipc
 //#加载 lb lbu lh lhu lw lwu ld
 //#保存 sb sh sw sd
-// 加减 addi addiw add addw sub subw 
-// 比较 slti sltiu slt sltu andi and ori or xori xor 
-// 位移 slli slliw sll sllw srli srliw srl srlw srai sraiw sra sraw
-// 条件 beq bne blt bltu bge bgeu
+//#加减 add addw addi addiw sub subw 
+// 比较 slt sltu slti sltiu 
+// 电路 and or xor (andi ori xori)i 
+// 位移 sll srl sra slli srli srai (sllw srlw sraw slliw srliw sraiw)w
+// 条件 beq bne blt bge bltu bgeu
 // 跳转 jal jalr
 // 中断 ecall ebreak 
 // 保护 fence fence.i
-// 控制 csrrw csrrwi csrrs csrrsi csrrc csrrci
+// 控制 csrrw csrrs csrrc (csrrwi csrrsi csrrci)i
 
 
 
