@@ -365,6 +365,102 @@ _start:
     li  x30, -1
     li  x11, 1
     li  x11, 0
+##--------------------------------------------
+## Additional SLLIW Tests (Post-Fix Verification) - RV64
+## Using x31 as result (rd)
+## Using x5 as rs1 (value), immediate as shift amount
+## Using x30 for Golden value
+## Using x11 for Compare Signaling
+## Verifying lower 32-bit operation and 64-bit sign extension
+##--------------------------------------------
+
+## TEST: SLLIW_UPPER_IGNORED_POS
+    # Purpose: Verify upper 32 bits of rs1 are ignored (positive 32b result)
+    li  x5, 0xABCDEF9876543210 # Lower 32 = 0x76543210 (positive)
+    slliw x31, x5, 4           # 32b op: 0x76543210 << 4 = 0x65432100. Sign extend -> 0x0...065432100
+    li  x30, 0x65432100
+    li  x11, 1
+    li  x11, 0
+
+## TEST: SLLIW_UPPER_IGNORED_NEG
+    # Purpose: Verify upper 32 bits of rs1 are ignored (negative 32b result)
+    li  x5, 0xABCDEF1F87654321 # Lower 32 = 0x87654321 (negative)
+    slliw x31, x5, 4           # 32b op: 0x87654321 << 4 = 0x76543210. Sign extend -> 0x0...076543210
+    li  x30, 0x76543210
+    li  x11, 1
+    li  x11, 0
+
+## TEST: SLLIW_AMT_0_NEG_OPERAND
+    # Purpose: Verify shift by 0 on negative 32b operand correctly sign extends
+    li  x5, 0x1111111187654321 # Lower 32 = 0x87654321
+    slliw x31, x5, 0           # 32b op: 0x87654321 << 0 = 0x87654321. Sign extend -> 0xFF...87654321
+    li  x30, 0xFFFFFFFF87654321
+    li  x11, 1
+    li  x11, 0
+
+## TEST: SLLIW_AMT_31_VAL_2
+    # Purpose: Test shift by 31 for value 2 (result becomes 0)
+    li  x5, 0x2                # Lower 32 = 2
+    slliw x31, x5, 31          # 32b op: 2 << 31 = 0x0. Sign extend -> 0
+    li  x30, 0
+    li  x11, 1
+    li  x11, 0
+
+## TEST: SLLIW_AMT_31_VAL_3
+    # Purpose: Test shift by 31 for value 3 (result becomes min neg 32b)
+    li  x5, 0x3                # Lower 32 = 3
+    slliw x31, x5, 31          # 32b op: 3 << 31 = 0x80000000. Sign extend -> 0xFF...F80000000
+    li  x30, 0xFFFFFFFF80000000
+    li  x11, 1
+    li  x11, 0
+
+## TEST: SLLIW_AMT_31_MAX_POS_32
+    # Purpose: Test shift by 31 for max positive 32b value
+    li  x5, 0x7FFFFFFF         # Lower 32 = 0x7FFFFFFF
+    slliw x31, x5, 31          # 32b op: 0x7FFFFFFF << 31 = 0x80000000. Sign extend -> 0xFF...F80000000
+    li  x30, 0xFFFFFFFF80000000
+    li  x11, 1
+    li  x11, 0
+
+## TEST: SLLIW_AMT_31_MIN_NEG_32
+    # Purpose: Test shift by 31 for min negative 32b value
+    li  x5, 0x80000000         # Lower 32 = 0x80000000
+    slliw x31, x5, 31          # 32b op: 0x80000000 << 31 = 0x0. Sign extend -> 0
+    li  x30, 0
+    li  x11, 1
+    li  x11, 0
+
+## TEST: SLLIW_AMT_31_NEG_ONE_32
+    # Purpose: Test shift by 31 for -1 (32b)
+    li  x5, 0xFFFFFFFF         # Lower 32 = 0xFFFFFFFF
+    slliw x31, x5, 31          # 32b op: 0xFFFFFFFF << 31 = 0x80000000. Sign extend -> 0xFF...F80000000
+    li  x30, 0xFFFFFFFF80000000
+    li  x11, 1
+    li  x11, 0
+
+## TEST: SLLIW_RESULT_MAX_POS_32
+    # Purpose: Test shift resulting in max positive 32b value
+    li  x5, 0x3FFFFFFF
+    slliw x31, x5, 1           # 32b op: 0x3FFFFFFF << 1 = 0x7FFFFFFF. Sign extend -> 0x7FFFFFFF
+    li  x30, 0x7FFFFFFE
+    li  x11, 1
+    li  x11, 0
+
+## TEST: SLLIW_RESULT_NEG_4
+    # Purpose: Test shift resulting in -4 (32b)
+    li  x5, 0xFFFFFFFE         # Lower 32 = -2
+    slliw x31, x5, 1           # 32b op: 0xFFFFFFFE << 1 = 0xFFFFFFFC (-4). Sign extend -> -4
+    li  x30, -4                # Or 0xFFFFFFFFFFFFFFFC
+    li  x11, 1
+    li  x11, 0
+
+## TEST: SLLIW_RESULT_MIN_NEG_32
+    # Purpose: Test shift resulting in min negative 32b value
+    li  x5, 0xC0000000         # Lower 32 = -2^30
+    slliw x31, x5, 1           # 32b op: 0xC0000000 << 1 = 0x80000000. Sign extend -> 0xFF...F80000000
+    li  x30, 0xFFFFFFFF80000000
+    li  x11, 1
+    li  x11, 0
 
 ##--------------------------------------------
 ## End of Immediate Word Shift Tests
