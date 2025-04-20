@@ -1,16 +1,24 @@
 _start:
 #     li x5, 0
 addi x5, x0, 0x0
-jal x0, L_jal_fwd_target   # Jump forward
-#     li x31, 999                
-addi x31, x0, 0x0
-ori x31, x31, 0x3e7
-jal x0, L_jal_fwd_verify
-L_jal_fwd_target:
+#     li x6, 0
+addi x6, x0, 0x0
+#     li x7, 0
+addi x7, x0, 0x0
+jal x0, setup_jalr_zero_offset
+target_jalr_zero_offset:
 #     li x31, 1                  
 addi x31, x0, 0x0
 ori x31, x31, 0x1
-L_jal_fwd_verify:
+jal x0, verify_jalr_zero_offset
+setup_jalr_zero_offset:
+auipc x5, 0                # x5 = PC of auipc (A)
+addi x5, x5, 12            # x5 = A + 12 = Address of target_jalr_zero_offset
+jalr x0, x5, 0             # Jump to address in x5 (Target)
+#     li x31, 999                
+addi x31, x0, 0x0
+ori x31, x31, 0x3e7
+verify_jalr_zero_offset:
 #     li x30, 1                  
 addi x30, x0, 0x0
 ori x30, x30, 0x1
@@ -19,18 +27,20 @@ addi x11, x0, 0x0
 ori x11, x11, 0x1
 #     li x11, 0
 addi x11, x0, 0x0
-jal x0, L_jal_back_setup
-L_jal_back_target:
+jal x0, setup_jalr_pos_offset
+target_jalr_pos_offset:        # PC = T
 #     li x31, 2                  
 addi x31, x0, 0x0
 ori x31, x31, 0x2
-jal x0, L_jal_back_verify
-L_jal_back_setup:
-jal x0, L_jal_back_target  # Jump backward
+jal x0, verify_jalr_pos_offset
+setup_jalr_pos_offset:
+auipc x5, 0                # x5 = PC of auipc (A)
+addi x5, x5, 4             # x5 = A + 4 = Target - 8
+jalr x0, x5, 8             # Jump to x5 + 8 = (Target-8)+8 = Target
 #     li x31, 888                
 addi x31, x0, 0x0
 ori x31, x31, 0x378
-L_jal_back_verify:
+verify_jalr_pos_offset:
 #     li x30, 2                  
 addi x30, x0, 0x0
 ori x30, x30, 0x2
@@ -39,19 +49,74 @@ addi x11, x0, 0x0
 ori x11, x11, 0x1
 #     li x11, 0
 addi x11, x0, 0x0
-jal x7, L_jal_link_target  # Jump forward, save PC+4 to x7
-#     li x31, 777
-addi x31, x0, 0x0
-ori x31, x31, 0x309
-jal x0, L_jal_link_verify
-L_jal_link_target:
+jal x0, setup_jalr_neg_offset
+target_jalr_neg_offset:        # PC = T
 #     li x31, 3                  
 addi x31, x0, 0x0
 ori x31, x31, 0x3
-L_jal_link_verify:
+jal x0, verify_jalr_neg_offset
+setup_jalr_neg_offset:         # PC = T + 8 (approx)
+auipc x5, 0                # x5 = PC of auipc (A = approx T+8)
+addi x5, x5, 4             # x5 = A + 4
+jalr x0, x5, -12           # Jump back to Target
+#     li x31, 777                
+addi x31, x0, 0x0
+ori x31, x31, 0x309
+verify_jalr_neg_offset:
 #     li x30, 3                  
 addi x30, x0, 0x0
 ori x30, x30, 0x3
+#     li x11, 1
+addi x11, x0, 0x0
+ori x11, x11, 0x1
+#     li x11, 0
+addi x11, x0, 0x0
+jal x0, setup_jalr_link
+target_jalr_link:              # PC = T
+#     li x31, 4                  
+addi x31, x0, 0x0
+ori x31, x31, 0x4
+jalr x0, x7, 0             # Return jump using x7
+#     li x31, 555
+addi x31, x0, 0x0
+ori x31, x31, 0x22b
+setup_jalr_link:
+auipc x6, 0                # x6 = PC of auipc (A)
+addi x6, x6, 16            # x6 = A + 16 = Address of target_jalr_link
+jalr x7, x6, 0             # Jump to Target, SAVE PC+4 in x7
+#     li x31, 44                 
+addi x31, x0, 0x0
+ori x31, x31, 0x2c
+jal x0, verify_jalr_link
+#     li x31, 666
+addi x31, x0, 0x0
+ori x31, x31, 0x29a
+verify_jalr_link:
+#     li x30, 44                 
+addi x30, x0, 0x0
+ori x30, x30, 0x2c
+#     li x11, 1
+addi x11, x0, 0x0
+ori x11, x11, 0x1
+#     li x11, 0
+addi x11, x0, 0x0
+jal x0, setup_jalr_lsb
+target_jalr_lsb:               # PC = T (Assume Even)
+#     li x31, 5                  
+addi x31, x0, 0x0
+ori x31, x31, 0x5
+jal x0, verify_jalr_lsb
+setup_jalr_lsb:
+auipc x5, 0                # x5 = PC of auipc (A)
+addi x5, x5, 11            # x5 = A + 11 = Target - 1 (Odd)
+jalr x0, x5, 1             # Jump target = (x5+1)&~1 = ((T-1)+1)&~1 = T&~1 = T
+#     li x31, 333                
+addi x31, x0, 0x0
+ori x31, x31, 0x14d
+verify_jalr_lsb:
+#     li x30, 5                  
+addi x30, x0, 0x0
+ori x30, x30, 0x5
 #     li x11, 1
 addi x11, x0, 0x0
 ori x11, x11, 0x1
