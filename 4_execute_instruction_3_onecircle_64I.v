@@ -821,8 +821,7 @@ begin
 				  3'b001: begin
 				           Sllw  <= 1'b1; // set Sllw Flag 
 					   // shift lift  logicl rs1.32 by rs2's value [low5.unsign], take the l32 sext to 64 put into rd
-					   rram[wire_rd] <= {{32{rram[wire_rs1][31-rram[wire_rs2]]}}, (rram[wire_rs1][31:0] << rram[wire_rs2][4:0])}; 
-					   //rram[wire_rd] <= (rram[wire_rs1][31:0] << rram[wire_rs2][4:0]); 
+					   rram[wire_rd] <= {{32{rram[wire_rs1][31-rram[wire_rs2][4:0]]}}, (rram[wire_rs1][31:0] << rram[wire_rs2][4:0])}; 
 				           pc <= pc + 4; 
 	    	                           jp <=0;
 				          end
@@ -830,7 +829,7 @@ begin
 				          case(wire_f7) // func7
 					    7'b0000000: begin
 						        Srlw  <= 1'b1; // set Srlw  Flag 
-					                rram[wire_rd] <= (rram[wire_rs1][31:0] >> rram[wire_rs2]); 
+					                rram[wire_rd] <= (rram[wire_rs1][31:0] >> rram[wire_rs2][4:0]); 
 					                if (rram[wire_rs2] == 0)
 							    rram[wire_rd] <= {{32{rram[wire_rs1][31]}}, rram[wire_rs1][31:0]}; 
 				                       pc <= pc + 4; 
@@ -839,7 +838,7 @@ begin
 					    7'b0100000: begin
 						       Sraw  <= 1'b1; // set Sraw  Flag 
 					               // shift right arithmatical rs1.l32 by sr2[low5.unsign] cut 32 sext 64 to rd
-					               rram[wire_rd] <= {{32{rram[wire_rs1][31]}}, ($signed(rram[wire_rs1][31:0]) >>> rram[wire_rs2][5:0])}; 
+					               rram[wire_rd] <= {{32{rram[wire_rs1][31]}}, ($signed(rram[wire_rs1][31:0]) >>> rram[wire_rs2][4:0])}; 
 				                       pc <= pc + 4; 
 	    	                                       jp <=0;
 						       end
