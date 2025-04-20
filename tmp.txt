@@ -1317,9 +1317,9 @@ addi x11, x0, 0x0
 addi x5, x0, 0x0
 ori x5, x5, 0x3
 slli x31, x5, 63           # Shift amount 63
-#     li  x30, 0xC000000000000000 
+#     li  x30, 0x8000000000000000 
 addi x30, x0, 0x0
-lui x30, 0xc0000
+lui x30, 0x80000
 srli x30, x30, 0x1
 slli x30, x30, 0x21
 #     li  x11, 1
@@ -1407,13 +1407,11 @@ ori x5, x5, 0x7ff
 slli x5, x5, 0xb
 ori x5, x5, 0x600
 slli x5, x5, 0x16
-srliw x31, x5, 16          # 32b op: 0x80000000 >> 16 = 0x8000. Sign extend -> 0xFFFF8000
-#     li  x30, 0xFFFF8000        
+srliw x31, x5, 16          # 32b op: 0x80000000 >> 16 = 0x8000. No Sign extend -> 0x00008000
+#     li  x30, 0x00008000        
 addi x30, x0, 0x0
-slli x30, x30, 0xb
-ori x30, x30, 0x3ff
-slli x30, x30, 0xb
-ori x30, x30, 0x7f0
+slli x30, x30, 0x16
+ori x30, x30, 0x10
 slli x30, x30, 0xb
 #     li  x11, 1
 addi x11, x0, 0x0
@@ -1429,9 +1427,9 @@ slli x5, x5, 0xb
 ori x5, x5, 0x600
 slli x5, x5, 0x16
 sraiw x31, x5, 16          # 32b op: 0x80000000 >>> 16 = 0xFFFF8000 (-32768). Sign extend -> 0xFFFF...FFFF8000
-#     li  x30, 0xFFFFFFFFFFF8000 
+#     li  x30, 0xFFFFFFFFFFFF8000 
 addi x30, x0, 0x0
-lui x30, 0xffff
+lui x30, 0xfffff
 srli x30, x30, 0x1
 ori x30, x30, 0x7ff
 slli x30, x30, 0xb
