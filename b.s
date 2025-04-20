@@ -629,7 +629,287 @@ L_bgeu_v_11:
     li x30, 2
     li x11, 1
     li x11, 0
+##--------------------------------------------
+## Additional Branch Tests (Hazard Scenarios) - RV64
+## Using x31 as result indicator (1=Taken, 2=Not Taken)
+## Using x5, x6, x7, x8 for operands/results
+## Using x30 for Golden value
+## Using x11 for Compare Signaling
+##--------------------------------------------
 
+# -- Load-Use Hazard into Branch --
+
+## TEST: HAZARD_LW_BEQ_TAKEN
+    # Purpose: Branch condition depends on immediately preceding LW. Tests Load-Use stall/forwarding.
+    # Assumes Addr 8 contains 0x12345678
+    li x5, 0
+    li x7, 0x12345678        # Value to compare against
+    lw x6, 8(x5)             # Load x6 = 0x12345678 (Value available AFTER MEM stage)
+    beq x6, x7, L_hlwb_t_1   # Branch condition depends on x6 (Needs value potentially before MEM stage)
+    # --- Not Taken Path ---
+    li x31, 2
+    j L_hlwb_v_1
+L_hlwb_t_1:
+    # --- Taken Path ---
+    li x31, 1
+L_hlwb_v_1:
+    # --- Verification ---
+    li x30, 1                  # Expected: Taken (if stall/forward works)
+    li x11, 1
+    li x11, 0
+
+## TEST: HAZARD_LW_BNE_NOT_TAKEN
+    # Purpose: Test BNE with Load-Use hazard, branch not taken.
+    # Assumes Addr 8 contains 0x12345678
+    li x5, 0
+    li x7, 0x12345678
+    lw x6, 8(x5)             # Load x6 = 0x12345678
+    bne x6, x7, L_hlwb_nt_1  # Branch condition depends on x6. NOT Taken.
+    # --- Not Taken Path ---
+    li x31, 2
+    j L_hlwb_v_2
+L_hlwb_nt_1:
+    # --- Taken Path ---
+    li x31, 1
+L_hlwb_v_2:
+    # --- Verification ---
+    li x30, 2                  # Expected: Not Taken
+    li x11, 1
+    li x11, 0
+
+# -- ALU Result Hazard into Branch --
+
+## TEST: HAZARD_ADDI_BLT_TAKEN
+    # Purpose: Branch condition depends on immediately preceding ADDI. Tests EX->EX forwarding or stall.
+    li x5, 999
+    li x7, 2000              # Value to compare against
+    addi x6, x5, 1           # x6 = 1000 (Writeback happens late)
+    blt x6, x7, L_hablt_t_1  # Branch condition 1000 < 2000 (True). Depends on x6. TAKEN.
+    # --- Not Taken Path ---
+    li x31, 2
+    j L_hablt_v_1
+L_hablt_t_1:
+    # --- Taken Path ---
+    li x31, 1
+L_hablt_v_1:
+    # --- Verification ---
+    li x30, 1                  # Expected: Taken
+    li x11, 1
+    li x11, 0
+
+## TEST: HAZARD_ADDW_BGEU_NOT_TAKEN
+    # Purpose: Branch condition depends on ADDW. Tests EX->EX forwarding or stall for W instr.
+    li x5, 0x80000000        # MinNeg 32b
+    li x6, -1                # -1 (32b view)
+    li x8, 0x7FFFFFFF        # Value to compare against (MaxPos 32b)
+    addw x7, x5, x6          # x7 = 0x80000000 + 0xFFFFFFFF = 0x7FFFFFFF (32b result, sign ext to 0x7F...)
+    bgeu x7, x8, L_habwu_nt_1 # Branch condition 0x7F... >= 0x7F... (True because >=). TAKEN.
+                               # Let's change comparison to make it Not Taken. Compare x7 vs x5
+    # --- Redo Test ---
+    li x5, 0x70000000
+    li x6, 0x0FFFFFFF
+    addw x7, x5, x6          # x7 = 0x70000000 + 0x0FFFFFFF = 0x7FFFFFFF (32b). Sign ext -> 0x7FFFFFFF
+    li x8, 0x80000000        # Compare against MinNeg 32b (which is large unsigned)
+    bgeu x7, x8, L_habwu_nt_1 # Branch condition 0x7F... (unsigned) >= 0x80... (unsigned) -> False. NOT TAKEN.
+    # --- Not Taken Path ---
+    li x31, 2
+    j L_habwu_v_1
+L_habwu_nt_1:
+    # --- Taken Path ---
+    li x31, 1
+L_habwu_v_1:
+    # --- Verification ---
+    li x30, 2                  # Expected: Not Taken
+    li x11, 1
+    li x11, 0
+
+# -- Optional: Max/Min Offset Tests (Can make files large) --
+# These primarily test assembler/linker + PC adder, less the core comparison.
+# Add ~510 NOPs between branch and target for max offset.
+
+# ## TEST: BEQ_MAX_POS_OFFSET
+#     li x5, 10
+#     li x6, 10
+#     beq x5, x6, target_fwd_max  # Branch Taken
+#     li x31, 2 ; j verify_beq_fwd_max
+#     # <<< Insert ~510 NOPs here >>>
+# target_fwd_max:
+#     li x31, 1
+# verify_beq_fwd_max:
+#     li x30, 1 ; li x11, 1; li x11, 0
+
+# ## TEST: BNE_MAX_NEG_OFFSET
+#     j start_bne_neg_max
+# target_back_max:
+#     li x31, 1 ; j verify_bne_neg_max
+#     # <<< Insert ~511 NOPs here (before start_bne_neg_max) >>>
+# start_bne_neg_max:
+#     li x5, 10
+#     li x6, 11
+#     bne x5, x6, target_back_max # Branch Taken (backwards)
+#     li x31, 2
+# verify_bne_neg_max:
+#     li x30, 1 ; li x11, 1; li x11, 0
+
+##--------------------------------------------
+## End of Additional Branch Tests
+##--------------------------------------------
+
+
+
+##--------------------------------------------
+## Additional Immediate Shift Tests (Extremes) - RV64
+## Using x31 as result (rd)
+## Using x5 as rs1 (value), immediate as shift amount
+## Using x30 for Golden value
+## Using x11 for Compare Signaling
+##--------------------------------------------
+
+# -- SLLI / SRLI / SRAI Boundary Amounts (shamt 0-63) --
+
+## TEST: SLLI_MAX_AMT_63_VAL_3
+    # Purpose: Test slli with max immediate shift amount (63)
+    li  x5, 0x3                 # Value = 3 (0...011)
+    slli x31, x5, 63           # Shift amount 63
+    li  x30, 0xC000000000000000 # Golden: 3 << 63
+    li  x11, 1
+    li  x11, 0
+
+## TEST: SRLI_MAX_AMT_63_NEG_2
+    # Purpose: Test srli with max immediate shift amount (63)
+    li  x5, 0xFFFFFFFFFFFFFFFE # Value = -2
+    srli x31, x5, 63           # Shift amount 63
+    li  x30, 0x1               # Golden: -2 >> 63 (logical)
+    li  x11, 1
+    li  x11, 0
+
+## TEST: SRAI_MAX_AMT_63_POS
+    # Purpose: Test srai with max immediate shift amount (63)
+    li  x5, 0x7FFFFFFFFFFFFFFF # Value = MaxPos
+    srai x31, x5, 63           # Shift amount 63
+    li  x30, 0                 # Golden: MaxPos >>> 63
+    li  x11, 1
+    li  x11, 0
+
+## TEST: SRAI_MAX_AMT_63_NEG_VAL
+    # Purpose: Test srai with max immediate shift amount (63)
+    li  x5, 0x8000000000000002 # Value = MinNeg+2
+    srai x31, x5, 63           # Shift amount 63
+    li  x30, -1                # Golden: Negative >>> 63 = -1
+    li  x11, 1
+    li  x11, 0
+
+# -- SLLIW / SRLIW / SRAIW Boundary Amounts (shamt 0-31) --
+
+## TEST: SLLIW_AMT_16_NEG_OP
+    # Purpose: Test mid-range shift on min neg 32-bit value
+    li  x5, 0xFFFFFFFF80000000 # Lower 32 = MinNeg
+    slliw x31, x5, 16          # 32b op: 0x80000000 << 16 = 0. Sign extend -> 0
+    li  x30, 0
+    li  x11, 1
+    li  x11, 0
+
+##^^ TEST: SRLIW_AMT_16_NEG_OP
+    # Purpose: Test mid-range logical shift on min neg 32-bit value
+    li  x5, 0xFFFFFFFF80000000 # Lower 32 = MinNeg
+    srliw x31, x5, 16          # 32b op: 0x80000000 >> 16 = 0x8000. Sign extend -> 0xFFFF8000
+    li  x30, 0xFFFF8000        # Corrected Golden Value
+    li  x11, 1
+    li  x11, 0
+
+##^^ TEST: SRAIW_AMT_16_NEG_OP
+    # Purpose: Test mid-range arithmetic shift on min neg 32-bit value
+    li  x5, 0xFFFFFFFF80000000 # Lower 32 = MinNeg (sign=1)
+    sraiw x31, x5, 16          # 32b op: 0x80000000 >>> 16 = 0xFFFF8000 (-32768). Sign extend -> 0xFFFF...FFFF8000
+    li  x30, 0xFFFFFFFFFFF8000 # Corrected Golden Value
+    li  x11, 1
+    li  x11, 0
+
+## TEST: SRAIW_AMT_16_POS_OP
+    # Purpose: Test mid-range arithmetic shift on positive 32-bit value
+    li  x5, 0x7ABCDEF0         # Lower 32 = 0x7ABCDEF0 (sign=0)
+    sraiw x31, x5, 16          # 32b op: 0x7ABCDEF0 >>> 16 = 0x00007ABC. Sign extend -> 0x7ABC
+    li  x30, 0x7ABC
+    li  x11, 1
+    li  x11, 0
+
+# -- Zero Operand with Max Shifts --
+## TEST: SLLI_ZERO_OP_MAX_SHIFT
+    # Purpose: Test slli on zero with max shift
+    li  x5, 0
+    slli x31, x5, 63
+    li  x30, 0
+    li  x11, 1
+    li  x11, 0
+
+## TEST: SRLIW_ZERO_OP_MAX_SHIFT
+    # Purpose: Test srliw on zero with max shift
+    li  x5, 0
+    srliw x31, x5, 31
+    li  x30, 0
+    li  x11, 1
+    li  x11, 0
+
+## TEST: SRAIW_ZERO_OP_MAX_SHIFT
+    # Purpose: Test sraiw on zero with max shift
+    li  x5, 0
+    sraiw x31, x5, 31
+    li  x30, 0
+    li  x11, 1
+    li  x11, 0
+
+# -- -1 Operand with Max Shifts --
+## TEST: SLLI_NEG_ONE_OP_MAX_SHIFT
+    # Purpose: Test slli on -1 with max shift
+    li  x5, -1
+    slli x31, x5, 63
+    li  x30, 0x8000000000000000 # Golden: -1 << 63
+    li  x11, 1
+    li  x11, 0
+
+## TEST: SRLI_NEG_ONE_OP_MAX_SHIFT
+    # Purpose: Test srli on -1 with max shift
+    li  x5, -1
+    srli x31, x5, 63
+    li  x30, 0x1               # Golden: -1 >> 63 (logical)
+    li  x11, 1
+    li  x11, 0
+
+## TEST: SRAI_NEG_ONE_OP_MAX_SHIFT
+    # Purpose: Test srai on -1 with max shift
+    li  x5, -1
+    srai x31, x5, 63
+    li  x30, -1                # Golden: -1 >>> 63 (arithmetic)
+    li  x11, 1
+    li  x11, 0
+
+## TEST: SLLIW_NEG_ONE_OP_MAX_SHIFT
+    # Purpose: Test slliw on -1 with max shift
+    li  x5, -1
+    slliw x31, x5, 31          # 32b op: 0xFFFFFFFF << 31 = 0x80000000. Sign extend -> 0xFF...F80000000
+    li  x30, 0xFFFFFFFF80000000
+    li  x11, 1
+    li  x11, 0
+
+## TEST: SRLIW_NEG_ONE_OP_MAX_SHIFT
+    # Purpose: Test srliw on -1 with max shift
+    li  x5, -1
+    srliw x31, x5, 31          # 32b op: 0xFFFFFFFF >> 31 = 0x1. Sign extend -> 1
+    li  x30, 1
+    li  x11, 1
+    li  x11, 0
+
+## TEST: SRAIW_NEG_ONE_OP_MAX_SHIFT
+    # Purpose: Test sraiw on -1 with max shift
+    li  x5, -1
+    sraiw x31, x5, 31          # 32b op: 0xFFFFFFFF >>> 31 = 0xFFFFFFFF (-1). Sign extend -> -1
+    li  x30, -1
+    li  x11, 1
+    li  x11, 0
+
+# (Ensure the main end_loop label is present after these tests)
+# end_loop_shift_imm_word: # Or whichever file these are added to
+#    j end_loop_shift_imm_word
 ##--------------------------------------------
 ## End of Branch Tests
 ##--------------------------------------------
