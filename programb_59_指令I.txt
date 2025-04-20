@@ -79,7 +79,7 @@
 //#保存 sb sh sw sd
 //#加减 add addw addi addiw sub subw 
 // 比较 slt sltu slti sltiu 
-// 电路 and or xor (andi ori xori)i 
+// 门电 and or xor (andi ori xori)i 
 // 位移 sll srl sra slli srli srai (sllw srlw sraw slliw srliw sraiw)w
 // 条件 beq bne blt bge bltu bgeu
 // 跳转 jal jalr
