@@ -28,8 +28,8 @@ target_jalr_zero_offset:
 setup_jalr_zero_offset:
     auipc x5, 0                 # x5 = PC of auipc (A)
     # Target is at A - 8 bytes (addi, jalr back)
-    addi x5, x5, -8             # x5 = Address of target_jalr_zero_offset
-    jalr x0, x5, 0              # Jump to address in x5 (Target)
+    addi x5, x5, -8             # x5 = Address of target_jalr_zero_offset 
+    jalr x0, x5, 0              # Jump to address in x5 (Target)运气to li.2(addi xori)
     # --- Skipped code ---
     li x31, 999                 # Error value if fall through
 verify_jalr_zero_offset:
