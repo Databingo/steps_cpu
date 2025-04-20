@@ -396,6 +396,124 @@ _start:
     li  x30, 0
     li  x11, 1
     li  x11, 0
+##--------------------------------------------
+## Additional Shift Reg Tests (Extreme Amt Source/Self) - RV64
+## Using x31 as result (rd)
+## Using x5 as rs1 (value), x6 as rs2 (shift amount)
+## Using x30 for Golden value
+## Using x11 for Compare Signaling
+##--------------------------------------------
+
+## TEST: SLL_AMT_X0
+    # Purpose: Test shift amount from x0 (should be shift by 0)
+    li  x5, 0x1234ABCDFFFF4321
+    sll x31, x5, x0            # Shift Amount = x0[5:0] = 0
+    li  x30, 0x1234ABCDFFFF4321 # Golden: Unchanged
+    li  x11, 1
+    li  x11, 0
+
+## TEST: SRL_AMT_X0
+    # Purpose: Test shift amount from x0 (should be shift by 0)
+    li  x5, 0x87654321FEDCBA98
+    srl x31, x5, x0            # Shift Amount = x0[5:0] = 0
+    li  x30, 0x87654321FEDCBA98 # Golden: Unchanged
+    li  x11, 1
+    li  x11, 0
+
+## TEST: SRA_AMT_X0
+    # Purpose: Test shift amount from x0 (should be shift by 0)
+    li  x5, 0x98BADCFE13579BDF
+    sra x31, x5, x0            # Shift Amount = x0[5:0] = 0
+    li  x30, 0x98BADCFE13579BDF # Golden: Unchanged
+    li  x11, 1
+    li  x11, 0
+
+## TEST: SLLW_AMT_X0
+    # Purpose: Test word shift amount from x0 (should be shift by 0)
+    li  x5, 0x1111111187654321 # Lower 32 = 0x87654321
+    sllw x31, x5, x0           # Shift Amount = x0[4:0] = 0
+                               # 32b op: 0x87654321 << 0 = 0x87654321. Sign extend -> 0xFF...87654321
+    li  x30, 0xFFFFFFFF87654321
+    li  x11, 1
+    li  x11, 0
+
+## TEST: SRLW_AMT_X0
+    # Purpose: Test word shift amount from x0 (should be shift by 0)
+    li  x5, 0x1111111187654321 # Lower 32 = 0x87654321
+    srlw x31, x5, x0           # Shift Amount = x0[4:0] = 0
+                               # 32b op: 0x87654321 >> 0 = 0x87654321. Sign extend -> 0xFF...87654321
+    li  x30, 0xFFFFFFFF87654321
+    li  x11, 1
+    li  x11, 0
+
+## TEST: SRAW_AMT_X0
+    # Purpose: Test word shift amount from x0 (should be shift by 0)
+    li  x5, 0x1111111176543210 # Lower 32 = 0x76543210
+    sraw x31, x5, x0           # Shift Amount = x0[4:0] = 0
+                               # 32b op: 0x76543210 >>> 0 = 0x76543210. Sign extend -> 0x76543210
+    li  x30, 0x76543210
+    li  x11, 1
+    li  x11, 0
+
+## TEST: SLL_AMT_NEG_ONE
+    # Purpose: Test shift amount from register holding -1 (shift by 63)
+    li  x5, 0x3                 # Value = 3
+    li  x6, -1                 # x6 = 0xFF...FF, so x6[5:0] = 63 (0x3F)
+    sll x31, x5, x6
+    li  x30, 0x8000000000000000 # Golden: 3 << 63
+    li  x11, 1
+    li  x11, 0
+
+## TEST: SRA_AMT_NEG_ONE
+    # Purpose: Test shift amount from register holding -1 (shift by 63)
+    li  x5, 0x8000000000000002 # Value = -2^63 + 2
+    li  x6, -1                 # x6[5:0] = 63 (0x3F)
+    sra x31, x5, x6
+    li  x30, -1                # Golden: (Negative number) >>> 63 = -1
+    li  x11, 1
+    li  x11, 0
+
+## TEST: SLLW_AMT_NEG_ONE
+    # Purpose: Test word shift amount from register holding -1 (shift by 31)
+    li  x5, 0x3                # Lower 32 bits = 3
+    li  x6, -1                 # x6 = 0xFF...FF, so x6[4:0] = 31 (0x1F)
+    sllw x31, x5, x6           # 32b op: 3 << 31 = 0x80000000. Sign extend -> 0xFFFFFFFF80000000
+    li  x30, 0xFFFFFFFF80000000
+    li  x11, 1
+    li  x11, 0
+
+## TEST: SRAW_AMT_NEG_ONE
+    # Purpose: Test word shift amount from register holding -1 (shift by 31)
+    li  x5, 0x00000002         # Lower 32 bits = 2
+    li  x6, -1                 # x6[4:0] = 31 (0x1F)
+    sraw x31, x5, x6           # 32b op: 2 >>> 31 = 0. Sign extend -> 0.
+    li  x30, 0
+    li  x11, 1
+    li  x11, 0
+
+## TEST: SLL_SELF_SHIFT
+    # Purpose: Test shift left using rs1 as amount source (x5=4)
+    li  x5, 4                  # Value=4, Shift Amount=4 (x5[5:0]=4)
+    sll x31, x5, x5            # x31 = 4 << 4 = 64
+    li  x30, 64
+    li  x11, 1
+    li  x11, 0
+
+## TEST: SRA_SELF_SHIFT
+    # Purpose: Test shift right arithmetic using rs1 as amount source (x5=-8)
+    li  x5, 0xFFFFFFFFFFFFFFF8 # Value = -8, Shift Amount = -8 & 0x3F = 56
+    sra x31, x5, x5            # x31 = -8 >>> 56 = -1
+    li  x30, -1
+    li  x11, 1
+    li  x11, 0
+
+## TEST: SRLW_SELF_SHIFT
+    # Purpose: Test shift right logical word using rs1 as amount source (x5=10)
+    li  x5, 0x0000000A         # Value[31:0] = 10, Shift Amount[4:0] = 10
+    srlw x31, x5, x5           # 32b op: 10 >> 10 = 0. Sign extend -> 0
+    li  x30, 0
+    li  x11, 1
+    li  x11, 0
 
 ##--------------------------------------------
 ## End of Register Shift Tests
