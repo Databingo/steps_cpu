@@ -23,7 +23,8 @@ echo "" > binary_instructions.txt
 #go run rvasm64I.go lw_lwu.s &&
 #go run rvasm64I.go ld.s &&
 #go run rvasm64I.go s.s &&
-go run rvasm64I.go add_sub.s &&
+#go run rvasm64I.go add_sub.s &&
+go run rvasm64I.go slt_u.s &&
 # s4.2
 #iverilog -g2012 -o s4 4_execute_instruction_2_64I.v 4tb.v &&
 #iverilog -g2012 -o s4 4_mini.v 4tb.v &&
