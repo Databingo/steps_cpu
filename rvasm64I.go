@@ -256,8 +256,8 @@ func main() {
 				switchOnOp = code[1]
 				code = code[1:]
 			} else {
-		        origin_instr = strings.TrimLeft(origin_instr, " ")
-			real_instr.WriteString(origin_instr)
+				origin_instr = strings.TrimLeft(origin_instr, " ")
+				real_instr.WriteString(origin_instr)
 				continue
 			}
 		}
@@ -292,8 +292,8 @@ func main() {
 			ins = fmt.Sprintf("addi %s, %s, %#x\n", code[1], "x0", 0) // for 0 or clean reg
 			real_instr.WriteString(ins)
 			if imm == 0xffffffffffffffff {
-			        ins = fmt.Sprintf("addi %s, %s, %#x\n", code[1], "x0", 1) // for 0 or clean reg
-			        real_instr.WriteString(ins)
+				ins = fmt.Sprintf("addi %s, %s, %#x\n", code[1], "x0", 1) // for 0 or clean reg
+				real_instr.WriteString(ins)
 				ins = fmt.Sprintf("xori %s, %s, -1\naddi %s, %s, 1\n", code[1], code[1], code[1], code[1])
 				real_instr.WriteString(ins)
 				continue
@@ -322,7 +322,7 @@ func main() {
 				ins = fmt.Sprintf("ori %s, %s, %#x\n", code[1], code[1], z11)
 				real_instr.WriteString(ins)
 				sf = 0
-			} 
+			}
 			// 低 11 位
 			sf += 11
 			d11 := imm >> 11 & 0x7ff
@@ -346,8 +346,8 @@ func main() {
 				sf = 0
 			}
 			// 左移
-			if sf != 0 && imm != 0{
-				ins = fmt.Sprintf("slli %s, %s, %#x\n", code[1], code[1], sf) 
+			if sf != 0 && imm != 0 {
+				ins = fmt.Sprintf("slli %s, %s, %#x\n", code[1], code[1], sf)
 				real_instr.WriteString(ins)
 
 			}
@@ -391,7 +391,7 @@ func main() {
 			fmt.Printf("%s: \n", ins)
 
 		default:
-		        origin_instr = strings.TrimLeft(origin_instr, " ")
+			origin_instr = strings.TrimLeft(origin_instr, " ")
 			real_instr.WriteString(origin_instr)
 			//write2f([]byte(real_instr.String()))
 		}
