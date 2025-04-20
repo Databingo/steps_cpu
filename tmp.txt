@@ -1,7 +1,5 @@
 #     li x5, 0
 addi x5, x0, 0x0
-#     li x6, 0
-addi x6, x0, 0x0
 #     li  x5, 0x123456789ABCDEF0
 addi x5, x0, 0x0
 lui x5, 0x12345
@@ -13,10 +11,8 @@ slli x5, x5, 0xb
 ori x5, x5, 0x79b
 slli x5, x5, 0xb
 ori x5, x5, 0x6f0
-#     li  x6, 0
-addi x6, x0, 0x0
-and x31, x5, x6
-#     li  x30, 0                  
+andi x31, x5, 0            # Immediate 0 sign extends to 0
+#     li  x30, 0
 addi x30, x0, 0x0
 #     li  x11, 1
 addi x11, x0, 0x0
@@ -25,59 +21,9 @@ ori x11, x11, 0x1
 addi x11, x0, 0x0
 #     li  x5, 0
 addi x5, x0, 0x0
-#     li  x6, 0x123456789ABCDEF0
-addi x6, x0, 0x0
-lui x6, 0x12345
-srli x6, x6, 0x1
-ori x6, x6, 0x33c
-slli x6, x6, 0xb
-ori x6, x6, 0x26a
-slli x6, x6, 0xb
-ori x6, x6, 0x79b
-slli x6, x6, 0xb
-ori x6, x6, 0x6f0
-and x31, x5, x6
-#     li  x30, 0                  
+andi x31, x5, 0x5A5        # Immediate 0x5A5 sign extends to 0x5A5
+#     li  x30, 0
 addi x30, x0, 0x0
-#     li  x11, 1
-addi x11, x0, 0x0
-ori x11, x11, 0x1
-#     li  x11, 0
-addi x11, x0, 0x0
-#     li  x5, 0xAABBCCDDEEFF0011
-addi x5, x0, 0x0
-lui x5, 0xaabbc
-srli x5, x5, 0x1
-ori x5, x5, 0x66e
-slli x5, x5, 0xb
-ori x5, x5, 0x7bb
-slli x5, x5, 0xb
-ori x5, x5, 0x7e0
-slli x5, x5, 0xb
-ori x5, x5, 0x11
-#     li  x6, 0xAABBCCDDEEFF0011
-addi x6, x0, 0x0
-lui x6, 0xaabbc
-srli x6, x6, 0x1
-ori x6, x6, 0x66e
-slli x6, x6, 0xb
-ori x6, x6, 0x7bb
-slli x6, x6, 0xb
-ori x6, x6, 0x7e0
-slli x6, x6, 0xb
-ori x6, x6, 0x11
-and x31, x5, x6
-#     li  x30, 0xAABBCCDDEEFF0011 
-addi x30, x0, 0x0
-lui x30, 0xaabbc
-srli x30, x30, 0x1
-ori x30, x30, 0x66e
-slli x30, x30, 0xb
-ori x30, x30, 0x7bb
-slli x30, x30, 0xb
-ori x30, x30, 0x7e0
-slli x30, x30, 0xb
-ori x30, x30, 0x11
 #     li  x11, 1
 addi x11, x0, 0x0
 ori x11, x11, 0x1
@@ -94,12 +40,7 @@ slli x5, x5, 0xb
 ori x5, x5, 0x43d
 slli x5, x5, 0xb
 ori x5, x5, 0x701
-#     li  x6, -1                 
-addi x6, x0, 0x0
-ori x6, x6, 0x1
-xori x6, x6, -1
-addi x6, x6, 1
-and x31, x5, x6
+andi x31, x5, -1           # Immediate -1 (0xFFF) sign extends to 0xFF...FF
 #     li  x30, 0x1234ABCD4321EF01 
 addi x30, x0, 0x0
 lui x30, 0x1234a
@@ -116,70 +57,62 @@ addi x11, x0, 0x0
 ori x11, x11, 0x1
 #     li  x11, 0
 addi x11, x0, 0x0
-#     li  x5, 0xF0F0F0F0F0F0F0F0
+#     li  x5, 0xFFFFFFFFFFFFFFAA
 addi x5, x0, 0x0
-lui x5, 0xf0f0f
+lui x5, 0xfffff
 srli x5, x5, 0x1
-ori x5, x5, 0x78
+ori x5, x5, 0x7ff
 slli x5, x5, 0xb
-ori x5, x5, 0x3c3
+ori x5, x5, 0x7ff
 slli x5, x5, 0xb
-ori x5, x5, 0x61e
+ori x5, x5, 0x7ff
 slli x5, x5, 0xb
-ori x5, x5, 0xf0
-#     li  x6, 0x0FF00FF00FF00FF0
-addi x6, x0, 0x0
-lui x6, 0xff00
-srli x6, x6, 0x1
-ori x6, x6, 0x7f8
-slli x6, x6, 0xb
-ori x6, x6, 0x3f
-slli x6, x6, 0xb
-ori x6, x6, 0x601
-slli x6, x6, 0xb
-ori x6, x6, 0x7f0
-and x31, x5, x6
-#     li  x30, 0x00F000F000F000F0  
+ori x5, x5, 0x7aa
+andi x31, x5, 0x0FF        # Immediate 0x0FF sign extends to 0x0FF
+#     li  x30, 0xAA              
 addi x30, x0, 0x0
-lui x30, 0xf00
+ori x30, x30, 0xaa
+#     li  x11, 1
+addi x11, x0, 0x0
+ori x11, x11, 0x1
+#     li  x11, 0
+addi x11, x0, 0x0
+#     li  x5,  0x123456789ABCDEF0
+addi x5, x0, 0x0
+lui x5, 0x12345
+srli x5, x5, 0x1
+ori x5, x5, 0x33c
+slli x5, x5, 0xb
+ori x5, x5, 0x26a
+slli x5, x5, 0xb
+ori x5, x5, 0x79b
+slli x5, x5, 0xb
+ori x5, x5, 0x6f0
+andi x31, x5, -2048        # Immediate -2048 (0x800) sign extends to 0xFF...F800
+#     li  x30, 0x123456789ABCD800 
+addi x30, x0, 0x0
+lui x30, 0x12345
 srli x30, x30, 0x1
-ori x30, x30, 0x78
+ori x30, x30, 0x33c
 slli x30, x30, 0xb
-ori x30, x30, 0x3
+ori x30, x30, 0x26a
 slli x30, x30, 0xb
-ori x30, x30, 0x600
+ori x30, x30, 0x79b
 slli x30, x30, 0xb
-ori x30, x30, 0xf0
 #     li  x11, 1
 addi x11, x0, 0x0
 ori x11, x11, 0x1
 #     li  x11, 0
 addi x11, x0, 0x0
-#     li  x5, 0xAAAAAAAAAAAAAAAA
+#     li  x5, 0xFFFFFFFFFFFFFFFF
 addi x5, x0, 0x0
-lui x5, 0xaaaaa
-srli x5, x5, 0x1
-ori x5, x5, 0x555
-slli x5, x5, 0xb
-ori x5, x5, 0x2aa
-slli x5, x5, 0xb
-ori x5, x5, 0x555
-slli x5, x5, 0xb
-ori x5, x5, 0x2aa
-#     li  x6, 0x5555555555555555
-addi x6, x0, 0x0
-lui x6, 0x55555
-srli x6, x6, 0x1
-ori x6, x6, 0x2aa
-slli x6, x6, 0xb
-ori x6, x6, 0x555
-slli x6, x6, 0xb
-ori x6, x6, 0x2aa
-slli x6, x6, 0xb
-ori x6, x6, 0x555
-and x31, x5, x6
-#     li  x30, 0                  
+addi x5, x0, 0x1
+xori x5, x5, -1
+addi x5, x5, 1
+andi x31, x5, 2047         # Immediate 2047 (0x7FF) sign extends to 0x7FF
+#     li  x30, 0x7FF             
 addi x30, x0, 0x0
+ori x30, x30, 0x7ff
 #     li  x11, 1
 addi x11, x0, 0x0
 ori x11, x11, 0x1
@@ -196,32 +129,7 @@ slli x5, x5, 0xb
 ori x5, x5, 0x79b
 slli x5, x5, 0xb
 ori x5, x5, 0x6f0
-#     li  x6, 0xFF
-addi x6, x0, 0x0
-ori x6, x6, 0xff
-and x31, x5, x6
-#     li  x30, 0xF0               
-addi x30, x0, 0x0
-ori x30, x30, 0xf0
-#     li  x11, 1
-addi x11, x0, 0x0
-ori x11, x11, 0x1
-#     li  x11, 0
-addi x11, x0, 0x0
-#     li  x5, 0x123456789ABCDEF0
-addi x5, x0, 0x0
-lui x5, 0x12345
-srli x5, x5, 0x1
-ori x5, x5, 0x33c
-slli x5, x5, 0xb
-ori x5, x5, 0x26a
-slli x5, x5, 0xb
-ori x5, x5, 0x79b
-slli x5, x5, 0xb
-ori x5, x5, 0x6f0
-#     li  x6, 0
-addi x6, x0, 0x0
-or  x31, x5, x6
+ori x31, x5, 0             # Immediate 0 sign extends to 0
 #     li  x30, 0x123456789ABCDEF0 
 addi x30, x0, 0x0
 lui x30, 0x12345
@@ -240,68 +148,10 @@ ori x11, x11, 0x1
 addi x11, x0, 0x0
 #     li  x5, 0
 addi x5, x0, 0x0
-#     li  x6, 0x123456789ABCDEF0
-addi x6, x0, 0x0
-lui x6, 0x12345
-srli x6, x6, 0x1
-ori x6, x6, 0x33c
-slli x6, x6, 0xb
-ori x6, x6, 0x26a
-slli x6, x6, 0xb
-ori x6, x6, 0x79b
-slli x6, x6, 0xb
-ori x6, x6, 0x6f0
-or  x31, x5, x6
-#     li  x30, 0x123456789ABCDEF0 
+ori x31, x5, 0x5A5         # Immediate 0x5A5 sign extends to 0x5A5
+#     li  x30, 0x5A5             
 addi x30, x0, 0x0
-lui x30, 0x12345
-srli x30, x30, 0x1
-ori x30, x30, 0x33c
-slli x30, x30, 0xb
-ori x30, x30, 0x26a
-slli x30, x30, 0xb
-ori x30, x30, 0x79b
-slli x30, x30, 0xb
-ori x30, x30, 0x6f0
-#     li  x11, 1
-addi x11, x0, 0x0
-ori x11, x11, 0x1
-#     li  x11, 0
-addi x11, x0, 0x0
-#     li  x5, 0xAABBCCDDEEFF0011
-addi x5, x0, 0x0
-lui x5, 0xaabbc
-srli x5, x5, 0x1
-ori x5, x5, 0x66e
-slli x5, x5, 0xb
-ori x5, x5, 0x7bb
-slli x5, x5, 0xb
-ori x5, x5, 0x7e0
-slli x5, x5, 0xb
-ori x5, x5, 0x11
-#     li  x6, 0xAABBCCDDEEFF0011
-addi x6, x0, 0x0
-lui x6, 0xaabbc
-srli x6, x6, 0x1
-ori x6, x6, 0x66e
-slli x6, x6, 0xb
-ori x6, x6, 0x7bb
-slli x6, x6, 0xb
-ori x6, x6, 0x7e0
-slli x6, x6, 0xb
-ori x6, x6, 0x11
-or  x31, x5, x6
-#     li  x30, 0xAABBCCDDEEFF0011 
-addi x30, x0, 0x0
-lui x30, 0xaabbc
-srli x30, x30, 0x1
-ori x30, x30, 0x66e
-slli x30, x30, 0xb
-ori x30, x30, 0x7bb
-slli x30, x30, 0xb
-ori x30, x30, 0x7e0
-slli x30, x30, 0xb
-ori x30, x30, 0x11
+ori x30, x30, 0x5a5
 #     li  x11, 1
 addi x11, x0, 0x0
 ori x11, x11, 0x1
@@ -318,17 +168,59 @@ slli x5, x5, 0xb
 ori x5, x5, 0x43d
 slli x5, x5, 0xb
 ori x5, x5, 0x701
-#     li  x6, -1                 
-addi x6, x0, 0x0
-ori x6, x6, 0x1
-xori x6, x6, -1
-addi x6, x6, 1
-or  x31, x5, x6
+ori x31, x5, -1            # Immediate -1 (0xFFF) sign extends to 0xFF...FF
 #     li  x30, -1                
 addi x30, x0, 0x0
 ori x30, x30, 0x1
 xori x30, x30, -1
 addi x30, x30, 1
+#     li  x11, 1
+addi x11, x0, 0x0
+ori x11, x11, 0x1
+#     li  x11, 0
+addi x11, x0, 0x0
+#     li  x5, 0xF0F0F0F0F0F0F000
+addi x5, x0, 0x0
+lui x5, 0xf0f0f
+srli x5, x5, 0x1
+ori x5, x5, 0x78
+slli x5, x5, 0xb
+ori x5, x5, 0x3c3
+slli x5, x5, 0xb
+ori x5, x5, 0x61e
+slli x5, x5, 0xb
+ori x31, x5, 0x0F0         # Immediate 0x0F0 sign extends to 0x0F0
+#     li  x30, 0xF0F0F0F0F0F0F0F0 
+addi x30, x0, 0x0
+lui x30, 0xf0f0f
+srli x30, x30, 0x1
+ori x30, x30, 0x78
+slli x30, x30, 0xb
+ori x30, x30, 0x3c3
+slli x30, x30, 0xb
+ori x30, x30, 0x61e
+slli x30, x30, 0xb
+ori x30, x30, 0xf0
+#     li  x11, 1
+addi x11, x0, 0x0
+ori x11, x11, 0x1
+#     li  x11, 0
+addi x11, x0, 0x0
+#     li  x5, 0x00000000000000AA
+addi x5, x0, 0x0
+ori x5, x5, 0xaa
+ori x31, x5, -2048         # Immediate -2048 (0x800) sign extends to 0xFF...F800
+#     li  x30, 0xFFFFFFFFFFFFF8AA 
+addi x30, x0, 0x0
+lui x30, 0xfffff
+srli x30, x30, 0x1
+ori x30, x30, 0x7ff
+slli x30, x30, 0xb
+ori x30, x30, 0x7ff
+slli x30, x30, 0xb
+ori x30, x30, 0x7ff
+slli x30, x30, 0xb
+ori x30, x30, 0xaa
 #     li  x11, 1
 addi x11, x0, 0x0
 ori x11, x11, 0x1
@@ -345,93 +237,18 @@ slli x5, x5, 0xb
 ori x5, x5, 0x61e
 slli x5, x5, 0xb
 ori x5, x5, 0xf0
-#     li  x6, 0x0FF00FF00FF00FF0
-addi x6, x0, 0x0
-lui x6, 0xff00
-srli x6, x6, 0x1
-ori x6, x6, 0x7f8
-slli x6, x6, 0xb
-ori x6, x6, 0x3f
-slli x6, x6, 0xb
-ori x6, x6, 0x601
-slli x6, x6, 0xb
-ori x6, x6, 0x7f0
-or  x31, x5, x6
-#     li  x30, 0xFFF0FFF0FFF0FFF0  
+ori x31, x5, 2047          # Immediate 2047 (0x7FF) sign extends to 0x7FF
+#     li  x30, 0xF0F0F0F0F0F0F7FF 
 addi x30, x0, 0x0
-lui x30, 0xfff0f
+lui x30, 0xf0f0f
 srli x30, x30, 0x1
-ori x30, x30, 0x7f8
+ori x30, x30, 0x78
 slli x30, x30, 0xb
-ori x30, x30, 0x3ff
+ori x30, x30, 0x3c3
 slli x30, x30, 0xb
-ori x30, x30, 0x61f
+ori x30, x30, 0x61e
 slli x30, x30, 0xb
-ori x30, x30, 0x7f0
-#     li  x11, 1
-addi x11, x0, 0x0
-ori x11, x11, 0x1
-#     li  x11, 0
-addi x11, x0, 0x0
-#     li  x5, 0xAAAAAAAAAAAAAAAA
-addi x5, x0, 0x0
-lui x5, 0xaaaaa
-srli x5, x5, 0x1
-ori x5, x5, 0x555
-slli x5, x5, 0xb
-ori x5, x5, 0x2aa
-slli x5, x5, 0xb
-ori x5, x5, 0x555
-slli x5, x5, 0xb
-ori x5, x5, 0x2aa
-#     li  x6, 0x5555555555555555
-addi x6, x0, 0x0
-lui x6, 0x55555
-srli x6, x6, 0x1
-ori x6, x6, 0x2aa
-slli x6, x6, 0xb
-ori x6, x6, 0x555
-slli x6, x6, 0xb
-ori x6, x6, 0x2aa
-slli x6, x6, 0xb
-ori x6, x6, 0x555
-or  x31, x5, x6
-#     li  x30, 0xFFFFFFFFFFFFFFFF 
-addi x30, x0, 0x0
-addi x30, x0, 0x1
-xori x30, x30, -1
-addi x30, x30, 1
-#     li  x11, 1
-addi x11, x0, 0x0
-ori x11, x11, 0x1
-#     li  x11, 0
-addi x11, x0, 0x0
-#     li  x5, 0x123456789ABCDE00
-addi x5, x0, 0x0
-lui x5, 0x12345
-srli x5, x5, 0x1
-ori x5, x5, 0x33c
-slli x5, x5, 0xb
-ori x5, x5, 0x26a
-slli x5, x5, 0xb
-ori x5, x5, 0x79b
-slli x5, x5, 0xb
-ori x5, x5, 0x600
-#     li  x6, 0xFF
-addi x6, x0, 0x0
-ori x6, x6, 0xff
-or  x31, x5, x6
-#     li  x30, 0x123456789ABCDEFF 
-addi x30, x0, 0x0
-lui x30, 0x12345
-srli x30, x30, 0x1
-ori x30, x30, 0x33c
-slli x30, x30, 0xb
-ori x30, x30, 0x26a
-slli x30, x30, 0xb
-ori x30, x30, 0x79b
-slli x30, x30, 0xb
-ori x30, x30, 0x6ff
+ori x30, x30, 0x7ff
 #     li  x11, 1
 addi x11, x0, 0x0
 ori x11, x11, 0x1
@@ -448,9 +265,7 @@ slli x5, x5, 0xb
 ori x5, x5, 0x79b
 slli x5, x5, 0xb
 ori x5, x5, 0x6f0
-#     li  x6, 0
-addi x6, x0, 0x0
-xor x31, x5, x6
+xori x31, x5, 0            # Immediate 0 sign extends to 0
 #     li  x30, 0x123456789ABCDEF0 
 addi x30, x0, 0x0
 lui x30, 0x12345
@@ -469,59 +284,10 @@ ori x11, x11, 0x1
 addi x11, x0, 0x0
 #     li  x5, 0
 addi x5, x0, 0x0
-#     li  x6, 0x123456789ABCDEF0
-addi x6, x0, 0x0
-lui x6, 0x12345
-srli x6, x6, 0x1
-ori x6, x6, 0x33c
-slli x6, x6, 0xb
-ori x6, x6, 0x26a
-slli x6, x6, 0xb
-ori x6, x6, 0x79b
-slli x6, x6, 0xb
-ori x6, x6, 0x6f0
-xor x31, x5, x6
-#     li  x30, 0x123456789ABCDEF0 
+xori x31, x5, 0x5A5        # Immediate 0x5A5 sign extends to 0x5A5
+#     li  x30, 0x5A5             
 addi x30, x0, 0x0
-lui x30, 0x12345
-srli x30, x30, 0x1
-ori x30, x30, 0x33c
-slli x30, x30, 0xb
-ori x30, x30, 0x26a
-slli x30, x30, 0xb
-ori x30, x30, 0x79b
-slli x30, x30, 0xb
-ori x30, x30, 0x6f0
-#     li  x11, 1
-addi x11, x0, 0x0
-ori x11, x11, 0x1
-#     li  x11, 0
-addi x11, x0, 0x0
-#     li  x5, 0xAABBCCDDEEFF0011
-addi x5, x0, 0x0
-lui x5, 0xaabbc
-srli x5, x5, 0x1
-ori x5, x5, 0x66e
-slli x5, x5, 0xb
-ori x5, x5, 0x7bb
-slli x5, x5, 0xb
-ori x5, x5, 0x7e0
-slli x5, x5, 0xb
-ori x5, x5, 0x11
-#     li  x6, 0xAABBCCDDEEFF0011
-addi x6, x0, 0x0
-lui x6, 0xaabbc
-srli x6, x6, 0x1
-ori x6, x6, 0x66e
-slli x6, x6, 0xb
-ori x6, x6, 0x7bb
-slli x6, x6, 0xb
-ori x6, x6, 0x7e0
-slli x6, x6, 0xb
-ori x6, x6, 0x11
-xor x31, x5, x6
-#     li  x30, 0                  
-addi x30, x0, 0x0
+ori x30, x30, 0x5a5
 #     li  x11, 1
 addi x11, x0, 0x0
 ori x11, x11, 0x1
@@ -538,12 +304,7 @@ slli x5, x5, 0xb
 ori x5, x5, 0x79b
 slli x5, x5, 0xb
 ori x5, x5, 0x6f0
-#     li  x6, -1                 
-addi x6, x0, 0x0
-ori x6, x6, 0x1
-xori x6, x6, -1
-addi x6, x6, 1
-xor x31, x5, x6
+xori x31, x5, -1           # Immediate -1 (0xFFF) sign extends to 0xFF...FF
 #     li  x30, 0xEDCBA9876543210F 
 addi x30, x0, 0x0
 lui x30, 0xedcba
@@ -560,7 +321,34 @@ addi x11, x0, 0x0
 ori x11, x11, 0x1
 #     li  x11, 0
 addi x11, x0, 0x0
-#     li  x5,  0xF0F0F0F0F0F0F0F0
+#     li  x5, 0xABCDEF0123456789
+addi x5, x0, 0x0
+lui x5, 0xabcde
+srli x5, x5, 0x1
+ori x5, x5, 0x780
+slli x5, x5, 0xb
+ori x5, x5, 0x48d
+slli x5, x5, 0xb
+ori x5, x5, 0xac
+slli x5, x5, 0xb
+ori x5, x5, 0x789
+xori x31, x5, 0x789        # Immediate 0x789 sign extends to 0x789
+#     li  x30, 0xABCDEF0123456000 
+addi x30, x0, 0x0
+lui x30, 0xabcde
+srli x30, x30, 0x1
+ori x30, x30, 0x780
+slli x30, x30, 0xb
+ori x30, x30, 0x48d
+slli x30, x30, 0xb
+ori x30, x30, 0xac
+slli x30, x30, 0xb
+#     li  x11, 1
+addi x11, x0, 0x0
+ori x11, x11, 0x1
+#     li  x11, 0
+addi x11, x0, 0x0
+#     li  x5, 0xF0F0F0F0F0F0F0F0
 addi x5, x0, 0x0
 lui x5, 0xf0f0f
 srli x5, x5, 0x1
@@ -571,29 +359,37 @@ slli x5, x5, 0xb
 ori x5, x5, 0x61e
 slli x5, x5, 0xb
 ori x5, x5, 0xf0
-#     li  x6,  0x0FF00FF00FF00FF0
-addi x6, x0, 0x0
-lui x6, 0xff00
-srli x6, x6, 0x1
-ori x6, x6, 0x7f8
-slli x6, x6, 0xb
-ori x6, x6, 0x3f
-slli x6, x6, 0xb
-ori x6, x6, 0x601
-slli x6, x6, 0xb
-ori x6, x6, 0x7f0
-xor x31, x5, x6
-#     li  x30, 0xFF00FF00FF00FF00 
+xori x31, x5, 0x0F0        # Immediate 0x0F0 sign extends to 0x0F0
+#     li  x30, 0xF0F0F0F0F0F0F000 
 addi x30, x0, 0x0
-lui x30, 0xff00f
+lui x30, 0xf0f0f
 srli x30, x30, 0x1
-ori x30, x30, 0x780
+ori x30, x30, 0x78
 slli x30, x30, 0xb
-ori x30, x30, 0x3fc
+ori x30, x30, 0x3c3
 slli x30, x30, 0xb
-ori x30, x30, 0x1f
+ori x30, x30, 0x61e
 slli x30, x30, 0xb
-ori x30, x30, 0x700
+#     li  x11, 1
+addi x11, x0, 0x0
+ori x11, x11, 0x1
+#     li  x11, 0
+addi x11, x0, 0x0
+#     li  x5, 0x00000000000000AA
+addi x5, x0, 0x0
+ori x5, x5, 0xaa
+xori x31, x5, -1           # Immediate -1 (0xFFF) sign extends to 0xFF...FF
+#     li  x30, 0xFFFFFFFFFFFFFF55 
+addi x30, x0, 0x0
+lui x30, 0xfffff
+srli x30, x30, 0x1
+ori x30, x30, 0x7ff
+slli x30, x30, 0xb
+ori x30, x30, 0x7ff
+slli x30, x30, 0xb
+ori x30, x30, 0x7ff
+slli x30, x30, 0xb
+ori x30, x30, 0x755
 #     li  x11, 1
 addi x11, x0, 0x0
 ori x11, x11, 0x1
@@ -610,217 +406,10 @@ slli x5, x5, 0xb
 ori x5, x5, 0x555
 slli x5, x5, 0xb
 ori x5, x5, 0x2aa
-#     li  x6, 0x5555555555555555
-addi x6, x0, 0x0
-lui x6, 0x55555
-srli x6, x6, 0x1
-ori x6, x6, 0x2aa
-slli x6, x6, 0xb
-ori x6, x6, 0x555
-slli x6, x6, 0xb
-ori x6, x6, 0x2aa
-slli x6, x6, 0xb
-ori x6, x6, 0x555
-xor x31, x5, x6
-#     li  x30, 0xFFFFFFFFFFFFFFFF 
+xori x31, x5, -2048        # Immediate -2048 (0x800) sign extends to 0xFF...F800
+#     li  x30, 0x55555555555552AA 
 addi x30, x0, 0x0
-addi x30, x0, 0x1
-xori x30, x30, -1
-addi x30, x30, 1
-#     li  x11, 1
-addi x11, x0, 0x0
-ori x11, x11, 0x1
-#     li  x11, 0
-addi x11, x0, 0x0
-#     li  x5, 0x123456789ABCDEF0
-addi x5, x0, 0x0
-lui x5, 0x12345
-srli x5, x5, 0x1
-ori x5, x5, 0x33c
-slli x5, x5, 0xb
-ori x5, x5, 0x26a
-slli x5, x5, 0xb
-ori x5, x5, 0x79b
-slli x5, x5, 0xb
-ori x5, x5, 0x6f0
-#     li  x6, 0xFF
-addi x6, x0, 0x0
-ori x6, x6, 0xff
-xor x31, x5, x6
-#     li  x30, 0x123456789ABCDE0F 
-addi x30, x0, 0x0
-lui x30, 0x12345
-srli x30, x30, 0x1
-ori x30, x30, 0x33c
-slli x30, x30, 0xb
-ori x30, x30, 0x26a
-slli x30, x30, 0xb
-ori x30, x30, 0x79b
-slli x30, x30, 0xb
-ori x30, x30, 0x60f
-#     li  x11, 1
-addi x11, x0, 0x0
-ori x11, x11, 0x1
-#     li  x11, 0
-addi x11, x0, 0x0
-#     li  x5, 0x7FFFFFFFFFFFFFFF
-addi x5, x0, 0x0
-lui x5, 0x7ffff
-srli x5, x5, 0x1
-ori x5, x5, 0x7ff
-slli x5, x5, 0xb
-ori x5, x5, 0x7ff
-slli x5, x5, 0xb
-ori x5, x5, 0x7ff
-slli x5, x5, 0xb
-ori x5, x5, 0x7ff
-#     li  x6, 0x8000000000000000
-addi x6, x0, 0x0
-lui x6, 0x80000
-srli x6, x6, 0x1
-slli x6, x6, 0x21
-and x31, x5, x6
-#     li  x30, 0                 
-addi x30, x0, 0x0
-#     li  x11, 1
-addi x11, x0, 0x0
-ori x11, x11, 0x1
-#     li  x11, 0
-addi x11, x0, 0x0
-#     li  x5, 0x8000000000000000
-addi x5, x0, 0x0
-lui x5, 0x80000
-srli x5, x5, 0x1
-slli x5, x5, 0x21
-#     li  x6, 0x8000000000000000
-addi x6, x0, 0x0
-lui x6, 0x80000
-srli x6, x6, 0x1
-slli x6, x6, 0x21
-and x31, x5, x6
-#     li  x30, 0x8000000000000000 
-addi x30, x0, 0x0
-lui x30, 0x80000
-srli x30, x30, 0x1
-slli x30, x30, 0x21
-#     li  x11, 1
-addi x11, x0, 0x0
-ori x11, x11, 0x1
-#     li  x11, 0
-addi x11, x0, 0x0
-#     li  x5, 0x7FFFFFFFFFFFFFFF
-addi x5, x0, 0x0
-lui x5, 0x7ffff
-srli x5, x5, 0x1
-ori x5, x5, 0x7ff
-slli x5, x5, 0xb
-ori x5, x5, 0x7ff
-slli x5, x5, 0xb
-ori x5, x5, 0x7ff
-slli x5, x5, 0xb
-ori x5, x5, 0x7ff
-#     li  x6, 0x8000000000000000
-addi x6, x0, 0x0
-lui x6, 0x80000
-srli x6, x6, 0x1
-slli x6, x6, 0x21
-or  x31, x5, x6
-#     li  x30, -1                
-addi x30, x0, 0x0
-ori x30, x30, 0x1
-xori x30, x30, -1
-addi x30, x30, 1
-#     li  x11, 1
-addi x11, x0, 0x0
-ori x11, x11, 0x1
-#     li  x11, 0
-addi x11, x0, 0x0
-#     li  x5, 0xAAAAAAAAAAAAAAAA 
-addi x5, x0, 0x0
-lui x5, 0xaaaaa
-srli x5, x5, 0x1
-ori x5, x5, 0x555
-slli x5, x5, 0xb
-ori x5, x5, 0x2aa
-slli x5, x5, 0xb
-ori x5, x5, 0x555
-slli x5, x5, 0xb
-ori x5, x5, 0x2aa
-#     li  x6, 0x8000000000000000 
-addi x6, x0, 0x0
-lui x6, 0x80000
-srli x6, x6, 0x1
-slli x6, x6, 0x21
-or  x31, x5, x6             # 1010... | 1000... -> 1010... = 0xA...A
-#     li  x30, 0xAAAAAAAAAAAAAAAA
-addi x30, x0, 0x0
-lui x30, 0xaaaaa
-srli x30, x30, 0x1
-ori x30, x30, 0x555
-slli x30, x30, 0xb
-ori x30, x30, 0x2aa
-slli x30, x30, 0xb
-ori x30, x30, 0x555
-slli x30, x30, 0xb
-ori x30, x30, 0x2aa
-#     li  x11, 1
-addi x11, x0, 0x0
-ori x11, x11, 0x1
-#     li  x11, 0
-addi x11, x0, 0x0
-#     li  x5, 0x7FFFFFFFFFFFFFFF
-addi x5, x0, 0x0
-lui x5, 0x7ffff
-srli x5, x5, 0x1
-ori x5, x5, 0x7ff
-slli x5, x5, 0xb
-ori x5, x5, 0x7ff
-slli x5, x5, 0xb
-ori x5, x5, 0x7ff
-slli x5, x5, 0xb
-ori x5, x5, 0x7ff
-#     li  x6, 0x8000000000000000
-addi x6, x0, 0x0
-lui x6, 0x80000
-srli x6, x6, 0x1
-slli x6, x6, 0x21
-xor x31, x5, x6
-#     li  x30, -1                
-addi x30, x0, 0x0
-ori x30, x30, 0x1
-xori x30, x30, -1
-addi x30, x30, 1
-#     li  x11, 1
-addi x11, x0, 0x0
-ori x11, x11, 0x1
-#     li  x11, 0
-addi x11, x0, 0x0
-#     li  x5, 0xAAAAAAAAAAAAAAAA 
-addi x5, x0, 0x0
-lui x5, 0xaaaaa
-srli x5, x5, 0x1
-ori x5, x5, 0x555
-slli x5, x5, 0xb
-ori x5, x5, 0x2aa
-slli x5, x5, 0xb
-ori x5, x5, 0x555
-slli x5, x5, 0xb
-ori x5, x5, 0x2aa
-#     li  x6, 0x7FFFFFFFFFFFFFFF 
-addi x6, x0, 0x0
-lui x6, 0x7ffff
-srli x6, x6, 0x1
-ori x6, x6, 0x7ff
-slli x6, x6, 0xb
-ori x6, x6, 0x7ff
-slli x6, x6, 0xb
-ori x6, x6, 0x7ff
-slli x6, x6, 0xb
-ori x6, x6, 0x7ff
-xor x31, x5, x6             # 1010^0111=1101(D), 0101^1111=1010(A) -> DADADADA...
-#     li  x30, 0xD555555555555555
-addi x30, x0, 0x0
-lui x30, 0xd5555
+lui x30, 0x55555
 srli x30, x30, 0x1
 ori x30, x30, 0x2aa
 slli x30, x30, 0xb
@@ -828,133 +417,7 @@ ori x30, x30, 0x555
 slli x30, x30, 0xb
 ori x30, x30, 0x2aa
 slli x30, x30, 0xb
-ori x30, x30, 0x555
-#     li  x11, 1
-addi x11, x0, 0x0
-ori x11, x11, 0x1
-#     li  x11, 0
-addi x11, x0, 0x0
-#     li  x5, 0xAAAAAAAAAAAAAAAA 
-addi x5, x0, 0x0
-lui x5, 0xaaaaa
-srli x5, x5, 0x1
-ori x5, x5, 0x555
-slli x5, x5, 0xb
-ori x5, x5, 0x2aa
-slli x5, x5, 0xb
-ori x5, x5, 0x555
-slli x5, x5, 0xb
-ori x5, x5, 0x2aa
-#     li  x6, 0x8000000000000000 
-addi x6, x0, 0x0
-lui x6, 0x80000
-srli x6, x6, 0x1
-slli x6, x6, 0x21
-xor x31, x5, x6             # 1010^1000=0010(2), 0101^0000=0101(5) -> 25252525...
-#     li  x30, 0x2AAAAAAAAAAAAAAA
-addi x30, x0, 0x0
-lui x30, 0x2aaaa
-srli x30, x30, 0x1
-ori x30, x30, 0x555
-slli x30, x30, 0xb
 ori x30, x30, 0x2aa
-slli x30, x30, 0xb
-ori x30, x30, 0x555
-slli x30, x30, 0xb
-ori x30, x30, 0x2aa
-#     li  x11, 1
-addi x11, x0, 0x0
-ori x11, x11, 0x1
-#     li  x11, 0
-addi x11, x0, 0x0
-#     li  x5, 0xAAAAAAAAAAAAAAA A
-addi x5, x0, 0x0
-lui x5, 0xaaaa
-srli x5, x5, 0x1
-ori x5, x5, 0x555
-slli x5, x5, 0xb
-ori x5, x5, 0x2aa
-slli x5, x5, 0xb
-ori x5, x5, 0x555
-slli x5, x5, 0xb
-ori x5, x5, 0x2aa
-#     li  x6, 0x5555555555555555
-addi x6, x0, 0x0
-lui x6, 0x55555
-srli x6, x6, 0x1
-ori x6, x6, 0x2aa
-slli x6, x6, 0xb
-ori x6, x6, 0x555
-slli x6, x6, 0xb
-ori x6, x6, 0x2aa
-slli x6, x6, 0xb
-ori x6, x6, 0x555
-and x0, x5, x6             # Attempt write to x0 (result would be 0 anyway)
-addi x31, x0, 0            # Copy x0 to x31 (using addi instead of mv)
-#     li  x30, 0                 
-addi x30, x0, 0x0
-#     li  x11, 1
-addi x11, x0, 0x0
-ori x11, x11, 0x1
-#     li  x11, 0
-addi x11, x0, 0x0
-#     li  x5, 0xAAAAAAAAAAAAAAA A
-addi x5, x0, 0x0
-lui x5, 0xaaaa
-srli x5, x5, 0x1
-ori x5, x5, 0x555
-slli x5, x5, 0xb
-ori x5, x5, 0x2aa
-slli x5, x5, 0xb
-ori x5, x5, 0x555
-slli x5, x5, 0xb
-ori x5, x5, 0x2aa
-#     li  x6, 0x5555555555555555
-addi x6, x0, 0x0
-lui x6, 0x55555
-srli x6, x6, 0x1
-ori x6, x6, 0x2aa
-slli x6, x6, 0xb
-ori x6, x6, 0x555
-slli x6, x6, 0xb
-ori x6, x6, 0x2aa
-slli x6, x6, 0xb
-ori x6, x6, 0x555
-or  x0, x5, x6             # Attempt write to x0 (result would be -1)
-addi x31, x0, 0            # Copy x0 to x31
-#     li  x30, 0                 
-addi x30, x0, 0x0
-#     li  x11, 1
-addi x11, x0, 0x0
-ori x11, x11, 0x1
-#     li  x11, 0
-addi x11, x0, 0x0
-#     li  x5, 0x123456789ABCDEF0
-addi x5, x0, 0x0
-lui x5, 0x12345
-srli x5, x5, 0x1
-ori x5, x5, 0x33c
-slli x5, x5, 0xb
-ori x5, x5, 0x26a
-slli x5, x5, 0xb
-ori x5, x5, 0x79b
-slli x5, x5, 0xb
-ori x5, x5, 0x6f0
-#     li  x6, 0x123456789ABCDEF0
-addi x6, x0, 0x0
-lui x6, 0x12345
-srli x6, x6, 0x1
-ori x6, x6, 0x33c
-slli x6, x6, 0xb
-ori x6, x6, 0x26a
-slli x6, x6, 0xb
-ori x6, x6, 0x79b
-slli x6, x6, 0xb
-ori x6, x6, 0x6f0
-xor x0, x5, x6             # Attempt write to x0 (result is 0 anyway)
-addi x31, x0, 0            # Copy x0 to x31
-#     li  x30, 0                 
-addi x30, x0, 0x0
 #     li  x11, 1
 addi x11, x0, 0x0
 ori x11, x11, 0x1
