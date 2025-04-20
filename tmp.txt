@@ -663,3 +663,300 @@ addi x11, x0, 0x0
 ori x11, x11, 0x1
 #     li  x11, 0
 addi x11, x0, 0x0
+#     li  x5, 0x7FFFFFFFFFFFFFFF
+addi x5, x0, 0x0
+lui x5, 0x7ffff
+srli x5, x5, 0x1
+ori x5, x5, 0x7ff
+slli x5, x5, 0xb
+ori x5, x5, 0x7ff
+slli x5, x5, 0xb
+ori x5, x5, 0x7ff
+slli x5, x5, 0xb
+ori x5, x5, 0x7ff
+#     li  x6, 0x8000000000000000
+addi x6, x0, 0x0
+lui x6, 0x80000
+srli x6, x6, 0x1
+slli x6, x6, 0x21
+and x31, x5, x6
+#     li  x30, 0                 
+addi x30, x0, 0x0
+#     li  x11, 1
+addi x11, x0, 0x0
+ori x11, x11, 0x1
+#     li  x11, 0
+addi x11, x0, 0x0
+#     li  x5, 0x8000000000000000
+addi x5, x0, 0x0
+lui x5, 0x80000
+srli x5, x5, 0x1
+slli x5, x5, 0x21
+#     li  x6, 0x8000000000000000
+addi x6, x0, 0x0
+lui x6, 0x80000
+srli x6, x6, 0x1
+slli x6, x6, 0x21
+and x31, x5, x6
+#     li  x30, 0x8000000000000000 
+addi x30, x0, 0x0
+lui x30, 0x80000
+srli x30, x30, 0x1
+slli x30, x30, 0x21
+#     li  x11, 1
+addi x11, x0, 0x0
+ori x11, x11, 0x1
+#     li  x11, 0
+addi x11, x0, 0x0
+#     li  x5, 0x7FFFFFFFFFFFFFFF
+addi x5, x0, 0x0
+lui x5, 0x7ffff
+srli x5, x5, 0x1
+ori x5, x5, 0x7ff
+slli x5, x5, 0xb
+ori x5, x5, 0x7ff
+slli x5, x5, 0xb
+ori x5, x5, 0x7ff
+slli x5, x5, 0xb
+ori x5, x5, 0x7ff
+#     li  x6, 0x8000000000000000
+addi x6, x0, 0x0
+lui x6, 0x80000
+srli x6, x6, 0x1
+slli x6, x6, 0x21
+or  x31, x5, x6
+#     li  x30, -1                
+addi x30, x0, 0x0
+ori x30, x30, 0x1
+xori x30, x30, -1
+addi x30, x30, 1
+#     li  x11, 1
+addi x11, x0, 0x0
+ori x11, x11, 0x1
+#     li  x11, 0
+addi x11, x0, 0x0
+#     li  x5, 0xAAAAAAAAAAAAAAAA 
+addi x5, x0, 0x0
+lui x5, 0xaaaaa
+srli x5, x5, 0x1
+ori x5, x5, 0x555
+slli x5, x5, 0xb
+ori x5, x5, 0x2aa
+slli x5, x5, 0xb
+ori x5, x5, 0x555
+slli x5, x5, 0xb
+ori x5, x5, 0x2aa
+#     li  x6, 0x8000000000000000 
+addi x6, x0, 0x0
+lui x6, 0x80000
+srli x6, x6, 0x1
+slli x6, x6, 0x21
+or  x31, x5, x6             # 1010... | 1000... -> 1010... = 0xA...A
+#     li  x30, 0xAAAAAAAAAAAAAAAA
+addi x30, x0, 0x0
+lui x30, 0xaaaaa
+srli x30, x30, 0x1
+ori x30, x30, 0x555
+slli x30, x30, 0xb
+ori x30, x30, 0x2aa
+slli x30, x30, 0xb
+ori x30, x30, 0x555
+slli x30, x30, 0xb
+ori x30, x30, 0x2aa
+#     li  x11, 1
+addi x11, x0, 0x0
+ori x11, x11, 0x1
+#     li  x11, 0
+addi x11, x0, 0x0
+#     li  x5, 0x7FFFFFFFFFFFFFFF
+addi x5, x0, 0x0
+lui x5, 0x7ffff
+srli x5, x5, 0x1
+ori x5, x5, 0x7ff
+slli x5, x5, 0xb
+ori x5, x5, 0x7ff
+slli x5, x5, 0xb
+ori x5, x5, 0x7ff
+slli x5, x5, 0xb
+ori x5, x5, 0x7ff
+#     li  x6, 0x8000000000000000
+addi x6, x0, 0x0
+lui x6, 0x80000
+srli x6, x6, 0x1
+slli x6, x6, 0x21
+xor x31, x5, x6
+#     li  x30, -1                
+addi x30, x0, 0x0
+ori x30, x30, 0x1
+xori x30, x30, -1
+addi x30, x30, 1
+#     li  x11, 1
+addi x11, x0, 0x0
+ori x11, x11, 0x1
+#     li  x11, 0
+addi x11, x0, 0x0
+#     li  x5, 0xAAAAAAAAAAAAAAAA 
+addi x5, x0, 0x0
+lui x5, 0xaaaaa
+srli x5, x5, 0x1
+ori x5, x5, 0x555
+slli x5, x5, 0xb
+ori x5, x5, 0x2aa
+slli x5, x5, 0xb
+ori x5, x5, 0x555
+slli x5, x5, 0xb
+ori x5, x5, 0x2aa
+#     li  x6, 0x7FFFFFFFFFFFFFFF 
+addi x6, x0, 0x0
+lui x6, 0x7ffff
+srli x6, x6, 0x1
+ori x6, x6, 0x7ff
+slli x6, x6, 0xb
+ori x6, x6, 0x7ff
+slli x6, x6, 0xb
+ori x6, x6, 0x7ff
+slli x6, x6, 0xb
+ori x6, x6, 0x7ff
+xor x31, x5, x6             # 1010^0111=1101(D), 0101^1111=1010(A) -> DADADADA...
+#     li  x30, 0xD555555555555555
+addi x30, x0, 0x0
+lui x30, 0xd5555
+srli x30, x30, 0x1
+ori x30, x30, 0x2aa
+slli x30, x30, 0xb
+ori x30, x30, 0x555
+slli x30, x30, 0xb
+ori x30, x30, 0x2aa
+slli x30, x30, 0xb
+ori x30, x30, 0x555
+#     li  x11, 1
+addi x11, x0, 0x0
+ori x11, x11, 0x1
+#     li  x11, 0
+addi x11, x0, 0x0
+#     li  x5, 0xAAAAAAAAAAAAAAAA 
+addi x5, x0, 0x0
+lui x5, 0xaaaaa
+srli x5, x5, 0x1
+ori x5, x5, 0x555
+slli x5, x5, 0xb
+ori x5, x5, 0x2aa
+slli x5, x5, 0xb
+ori x5, x5, 0x555
+slli x5, x5, 0xb
+ori x5, x5, 0x2aa
+#     li  x6, 0x8000000000000000 
+addi x6, x0, 0x0
+lui x6, 0x80000
+srli x6, x6, 0x1
+slli x6, x6, 0x21
+xor x31, x5, x6             # 1010^1000=0010(2), 0101^0000=0101(5) -> 25252525...
+#     li  x30, 0x2AAAAAAAAAAAAAAA
+addi x30, x0, 0x0
+lui x30, 0x2aaaa
+srli x30, x30, 0x1
+ori x30, x30, 0x555
+slli x30, x30, 0xb
+ori x30, x30, 0x2aa
+slli x30, x30, 0xb
+ori x30, x30, 0x555
+slli x30, x30, 0xb
+ori x30, x30, 0x2aa
+#     li  x11, 1
+addi x11, x0, 0x0
+ori x11, x11, 0x1
+#     li  x11, 0
+addi x11, x0, 0x0
+#     li  x5, 0xAAAAAAAAAAAAAAA A
+addi x5, x0, 0x0
+lui x5, 0xaaaa
+srli x5, x5, 0x1
+ori x5, x5, 0x555
+slli x5, x5, 0xb
+ori x5, x5, 0x2aa
+slli x5, x5, 0xb
+ori x5, x5, 0x555
+slli x5, x5, 0xb
+ori x5, x5, 0x2aa
+#     li  x6, 0x5555555555555555
+addi x6, x0, 0x0
+lui x6, 0x55555
+srli x6, x6, 0x1
+ori x6, x6, 0x2aa
+slli x6, x6, 0xb
+ori x6, x6, 0x555
+slli x6, x6, 0xb
+ori x6, x6, 0x2aa
+slli x6, x6, 0xb
+ori x6, x6, 0x555
+and x0, x5, x6             # Attempt write to x0 (result would be 0 anyway)
+addi x31, x0, 0            # Copy x0 to x31 (using addi instead of mv)
+#     li  x30, 0                 
+addi x30, x0, 0x0
+#     li  x11, 1
+addi x11, x0, 0x0
+ori x11, x11, 0x1
+#     li  x11, 0
+addi x11, x0, 0x0
+#     li  x5, 0xAAAAAAAAAAAAAAA A
+addi x5, x0, 0x0
+lui x5, 0xaaaa
+srli x5, x5, 0x1
+ori x5, x5, 0x555
+slli x5, x5, 0xb
+ori x5, x5, 0x2aa
+slli x5, x5, 0xb
+ori x5, x5, 0x555
+slli x5, x5, 0xb
+ori x5, x5, 0x2aa
+#     li  x6, 0x5555555555555555
+addi x6, x0, 0x0
+lui x6, 0x55555
+srli x6, x6, 0x1
+ori x6, x6, 0x2aa
+slli x6, x6, 0xb
+ori x6, x6, 0x555
+slli x6, x6, 0xb
+ori x6, x6, 0x2aa
+slli x6, x6, 0xb
+ori x6, x6, 0x555
+or  x0, x5, x6             # Attempt write to x0 (result would be -1)
+addi x31, x0, 0            # Copy x0 to x31
+#     li  x30, 0                 
+addi x30, x0, 0x0
+#     li  x11, 1
+addi x11, x0, 0x0
+ori x11, x11, 0x1
+#     li  x11, 0
+addi x11, x0, 0x0
+#     li  x5, 0x123456789ABCDEF0
+addi x5, x0, 0x0
+lui x5, 0x12345
+srli x5, x5, 0x1
+ori x5, x5, 0x33c
+slli x5, x5, 0xb
+ori x5, x5, 0x26a
+slli x5, x5, 0xb
+ori x5, x5, 0x79b
+slli x5, x5, 0xb
+ori x5, x5, 0x6f0
+#     li  x6, 0x123456789ABCDEF0
+addi x6, x0, 0x0
+lui x6, 0x12345
+srli x6, x6, 0x1
+ori x6, x6, 0x33c
+slli x6, x6, 0xb
+ori x6, x6, 0x26a
+slli x6, x6, 0xb
+ori x6, x6, 0x79b
+slli x6, x6, 0xb
+ori x6, x6, 0x6f0
+xor x0, x5, x6             # Attempt write to x0 (result is 0 anyway)
+addi x31, x0, 0            # Copy x0 to x31
+#     li  x30, 0                 
+addi x30, x0, 0x0
+#     li  x11, 1
+addi x11, x0, 0x0
+ori x11, x11, 0x1
+#     li  x11, 0
+addi x11, x0, 0x0

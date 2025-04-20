@@ -206,6 +206,106 @@ _start:
     li  x30, 0x123456789ABCDE0F # Expected: lower byte flipped
     li  x11, 1
     li  x11, 0
+##--------------------------------------------
+## Additional Logical Tests (Extreme Values/x0) - RV64
+## Using x31 as result (rd)
+## Using x5 as rs1, x6 as rs2
+## Using x30 for Golden value
+## Using x11 for Compare Signaling
+##--------------------------------------------
+
+## TEST: AND_MAXPOS_MINNEG
+    # Purpose: Max Positive & Min Negative -> 0
+    li  x5, 0x7FFFFFFFFFFFFFFF
+    li  x6, 0x8000000000000000
+    and x31, x5, x6
+    li  x30, 0                 # Golden: 0111... & 1000... = 0
+    li  x11, 1
+    li  x11, 0
+
+## TEST: AND_MINNEG_MINNEG
+    # Purpose: Min Negative & Min Negative -> Min Negative
+    li  x5, 0x8000000000000000
+    li  x6, 0x8000000000000000
+    and x31, x5, x6
+    li  x30, 0x8000000000000000 # Golden: 1000... & 1000... = 1000...
+    li  x11, 1
+    li  x11, 0
+
+## TEST: OR_MAXPOS_MINNEG
+    # Purpose: Max Positive | Min Negative -> -1
+    li  x5, 0x7FFFFFFFFFFFFFFF
+    li  x6, 0x8000000000000000
+    or  x31, x5, x6
+    li  x30, -1                # Golden: 0111... | 1000... = 1111... (-1)
+    li  x11, 1
+    li  x11, 0
+
+## TEST: OR_PATTERN_MINNEG
+    # Purpose: Pattern | Min Negative
+    li  x5, 0xAAAAAAAAAAAAAAAA # 1010...
+    li  x6, 0x8000000000000000 # 1000...
+    or  x31, x5, x6             # 1010... | 1000... -> 1010... = 0xA...A
+    li  x30, 0xAAAAAAAAAAAAAAAA
+    li  x11, 1
+    li  x11, 0
+
+## TEST: XOR_MAXPOS_MINNEG
+    # Purpose: Max Positive ^ Min Negative -> -1
+    li  x5, 0x7FFFFFFFFFFFFFFF
+    li  x6, 0x8000000000000000
+    xor x31, x5, x6
+    li  x30, -1                # Golden: 0111... ^ 1000... = 1111... (-1)
+    li  x11, 1
+    li  x11, 0
+
+## TEST: XOR_PATTERN_MAXPOS
+    # Purpose: Pattern ^ Max Positive
+    li  x5, 0xAAAAAAAAAAAAAAAA # 10101010...
+    li  x6, 0x7FFFFFFFFFFFFFFF # 01111111...
+    xor x31, x5, x6             # 1010^0111=1101(D), 0101^1111=1010(A) -> DADADADA...
+    li  x30, 0xD555555555555555
+    li  x11, 1
+    li  x11, 0
+
+## TEST: XOR_PATTERN_MINNEG
+    # Purpose: Pattern ^ Min Negative
+    li  x5, 0xAAAAAAAAAAAAAAAA # 10100101...
+    li  x6, 0x8000000000000000 # 10000000...
+    xor x31, x5, x6             # 1010^1000=0010(2), 0101^0000=0101(5) -> 25252525...
+    li  x30, 0x2AAAAAAAAAAAAAAA
+    li  x11, 1
+    li  x11, 0
+
+## TEST: AND_WRITE_X0
+    # Purpose: Test writing to x0 using AND (should have no effect)
+    li  x5, 0xAAAAAAAAAAAAAAA A
+    li  x6, 0x5555555555555555
+    and x0, x5, x6             # Attempt write to x0 (result would be 0 anyway)
+    addi x31, x0, 0            # Copy x0 to x31 (using addi instead of mv)
+    li  x30, 0                 # Golden value should still be 0
+    li  x11, 1
+    li  x11, 0
+
+## TEST: OR_WRITE_X0
+    # Purpose: Test writing to x0 using OR (should have no effect)
+    li  x5, 0xAAAAAAAAAAAAAAA A
+    li  x6, 0x5555555555555555
+    or  x0, x5, x6             # Attempt write to x0 (result would be -1)
+    addi x31, x0, 0            # Copy x0 to x31
+    li  x30, 0                 # Golden value should still be 0
+    li  x11, 1
+    li  x11, 0
+
+## TEST: XOR_WRITE_X0
+    # Purpose: Test writing to x0 using XOR (should have no effect)
+    li  x5, 0x123456789ABCDEF0
+    li  x6, 0x123456789ABCDEF0
+    xor x0, x5, x6             # Attempt write to x0 (result is 0 anyway)
+    addi x31, x0, 0            # Copy x0 to x31
+    li  x30, 0                 # Golden value should still be 0
+    li  x11, 1
+    li  x11, 0
 
 ##--------------------------------------------
 ## End of Logical Tests
