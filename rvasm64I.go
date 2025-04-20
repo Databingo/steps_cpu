@@ -256,6 +256,8 @@ func main() {
 				switchOnOp = code[1]
 				code = code[1:]
 			} else {
+		        origin_instr = strings.TrimLeft(origin_instr, " ")
+			real_instr.WriteString(origin_instr)
 				continue
 			}
 		}
@@ -362,15 +364,17 @@ func main() {
 				fmt.Println("Incorrect argument count on line: ", lineCounter)
 				os.Exit(0)
 			}
-			imm, err := isValidImmediate(code[1])
-			ins := fmt.Sprintf("jal x0, %d\n", imm)
+			//imm, err := isValidImmediate(code[1])
+			//ins := fmt.Sprintf("jal x0, %d\n", imm)
+			lab := code[1]
+			ins := fmt.Sprintf("jal x0, %s\n", lab)
 			fmt.Printf("%s: \n", ins)
 			//op, opFound := opBin[code[0]]
 			if err != nil {
 				fmt.Printf("~Error on line %d: %s, %s \n", lineCounter, err, line)
 				os.Exit(0)
 			}
-			fmt.Printf("line %d, imm: 0x%X=0b%b=%d\n", lineCounter, imm, imm, imm)
+			//fmt.Printf("line %d, imm: 0x%X=0b%b=%d\n", lineCounter, imm, imm, imm)
 			//if imm > 0x7fffffffffffffff || imm  < -0x8000000000000000 {
 			//	fmt.Printf("li: Error on line %d: Immediate value %d=0x%X out of range (should be between 0x%X and 0x7fffffffffffffff )\n", lineCounter, imm, imm, -0x800000000000000)
 			//	os.Exit(0)
@@ -380,7 +384,8 @@ func main() {
 				real_instr.WriteString(label + ":\n")
 			}
 
-			ins = fmt.Sprintf("jal x0, %d\n", imm)
+			//ins = fmt.Sprintf("jal x0, %d\n", imm)
+			ins = fmt.Sprintf("jal x0, %s\n", lab)
 
 			real_instr.WriteString(ins)
 			fmt.Printf("%s: \n", ins)

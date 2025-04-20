@@ -1,1114 +1,735 @@
-#     li  x5, 0x123456789ABCDEF0
-addi x5, x0, 0x0
-lui x5, 0x12345
-srli x5, x5, 0x1
-ori x5, x5, 0x33c
-slli x5, x5, 0xb
-ori x5, x5, 0x26a
-slli x5, x5, 0xb
-ori x5, x5, 0x79b
-slli x5, x5, 0xb
-ori x5, x5, 0x6f0
-slli x31, x5, 0
-#     li  x30, 0x123456789ABCDEF0 
-addi x30, x0, 0x0
-lui x30, 0x12345
-srli x30, x30, 0x1
-ori x30, x30, 0x33c
-slli x30, x30, 0xb
-ori x30, x30, 0x26a
-slli x30, x30, 0xb
-ori x30, x30, 0x79b
-slli x30, x30, 0xb
-ori x30, x30, 0x6f0
-#     li  x11, 1
-addi x11, x0, 0x0
-ori x11, x11, 0x1
-#     li  x11, 0
-addi x11, x0, 0x0
-#     li  x5, 0x000000000000000F
-addi x5, x0, 0x0
-ori x5, x5, 0xf
-slli x31, x5, 4
-#     li  x30, 0x00000000000000F0 
-addi x30, x0, 0x0
-ori x30, x30, 0xf0
-#     li  x11, 1
-addi x11, x0, 0x0
-ori x11, x11, 0x1
-#     li  x11, 0
-addi x11, x0, 0x0
-#     li  x5, 0x00000000FFFFFFFF
-addi x5, x0, 0x0
-slli x5, x5, 0xb
-ori x5, x5, 0x3ff
-slli x5, x5, 0xb
-ori x5, x5, 0x7ff
-slli x5, x5, 0xb
-ori x5, x5, 0x7ff
-slli x31, x5, 32
-#     li  x30, 0xFFFFFFFF00000000 
-addi x30, x0, 0x0
-lui x30, 0xfffff
-srli x30, x30, 0x1
-ori x30, x30, 0x7ff
-slli x30, x30, 0xb
-ori x30, x30, 0x400
-slli x30, x30, 0x16
-#     li  x11, 1
-addi x11, x0, 0x0
-ori x11, x11, 0x1
-#     li  x11, 0
-addi x11, x0, 0x0
-#     li  x5, 0x1
-addi x5, x0, 0x0
-ori x5, x5, 0x1
-slli x31, x5, 31
-#     li  x30, 0x0000000080000000 
-addi x30, x0, 0x0
-slli x30, x30, 0xb
-ori x30, x30, 0x200
-slli x30, x30, 0x16
-#     li  x11, 1
-addi x11, x0, 0x0
-ori x11, x11, 0x1
-#     li  x11, 0
-addi x11, x0, 0x0
-#     li  x5, 0xFEDCBA9876543210
-addi x5, x0, 0x0
-lui x5, 0xfedcb
-srli x5, x5, 0x1
-ori x5, x5, 0x54c
-slli x5, x5, 0xb
-ori x5, x5, 0x1d9
-slli x5, x5, 0xb
-ori x5, x5, 0x286
-slli x5, x5, 0xb
-ori x5, x5, 0x210
-srli x31, x5, 0
-#     li  x30, 0xFEDCBA9876543210 
-addi x30, x0, 0x0
-lui x30, 0xfedcb
-srli x30, x30, 0x1
-ori x30, x30, 0x54c
-slli x30, x30, 0xb
-ori x30, x30, 0x1d9
-slli x30, x30, 0xb
-ori x30, x30, 0x286
-slli x30, x30, 0xb
-ori x30, x30, 0x210
-#     li  x11, 1
-addi x11, x0, 0x0
-ori x11, x11, 0x1
-#     li  x11, 0
-addi x11, x0, 0x0
-#     li  x5, 0xFEDCBA9876543210
-addi x5, x0, 0x0
-lui x5, 0xfedcb
-srli x5, x5, 0x1
-ori x5, x5, 0x54c
-slli x5, x5, 0xb
-ori x5, x5, 0x1d9
-slli x5, x5, 0xb
-ori x5, x5, 0x286
-slli x5, x5, 0xb
-ori x5, x5, 0x210
-srli x31, x5, 4
-#     li  x30, 0x0FEDCBA987654321 
-addi x30, x0, 0x0
-lui x30, 0xfedc
-srli x30, x30, 0x1
-ori x30, x30, 0x5d4
-slli x30, x30, 0xb
-ori x30, x30, 0x61d
-slli x30, x30, 0xb
-ori x30, x30, 0x4a8
-slli x30, x30, 0xb
-ori x30, x30, 0x321
-#     li  x11, 1
-addi x11, x0, 0x0
-ori x11, x11, 0x1
-#     li  x11, 0
-addi x11, x0, 0x0
-#     li  x5, 0x1111111122222222
-addi x5, x0, 0x0
-lui x5, 0x11111
-srli x5, x5, 0x1
-ori x5, x5, 0x88
-slli x5, x5, 0xb
-ori x5, x5, 0x488
-slli x5, x5, 0xb
-ori x5, x5, 0x444
-slli x5, x5, 0xb
-ori x5, x5, 0x222
-srli x31, x5, 32
-#     li  x30, 0x0000000011111111 
-addi x30, x0, 0x0
-slli x30, x30, 0xb
-ori x30, x30, 0x44
-slli x30, x30, 0xb
-ori x30, x30, 0x222
-slli x30, x30, 0xb
-ori x30, x30, 0x111
-#     li  x11, 1
-addi x11, x0, 0x0
-ori x11, x11, 0x1
-#     li  x11, 0
-addi x11, x0, 0x0
-#     li  x5, 0x8000000000000000 
-addi x5, x0, 0x0
-lui x5, 0x80000
-srli x5, x5, 0x1
-slli x5, x5, 0x21
-srli x31, x5, 31
-#     li  x30, 0x0000000100000000 
-addi x30, x0, 0x0
-slli x30, x30, 0xb
-ori x30, x30, 0x400
-slli x30, x30, 0x16
-#     li  x11, 1
-addi x11, x0, 0x0
-ori x11, x11, 0x1
-#     li  x11, 0
-addi x11, x0, 0x0
-#     li  x5, 0xFEDCBA9876543210 
-addi x5, x0, 0x0
-lui x5, 0xfedcb
-srli x5, x5, 0x1
-ori x5, x5, 0x54c
-slli x5, x5, 0xb
-ori x5, x5, 0x1d9
-slli x5, x5, 0xb
-ori x5, x5, 0x286
-slli x5, x5, 0xb
-ori x5, x5, 0x210
-srai x31, x5, 0
-#     li  x30, 0xFEDCBA9876543210 
-addi x30, x0, 0x0
-lui x30, 0xfedcb
-srli x30, x30, 0x1
-ori x30, x30, 0x54c
-slli x30, x30, 0xb
-ori x30, x30, 0x1d9
-slli x30, x30, 0xb
-ori x30, x30, 0x286
-slli x30, x30, 0xb
-ori x30, x30, 0x210
-#     li  x11, 1
-addi x11, x0, 0x0
-ori x11, x11, 0x1
-#     li  x11, 0
-addi x11, x0, 0x0
-#     li  x5, 0xFEDCBA9876543210 
-addi x5, x0, 0x0
-lui x5, 0xfedcb
-srli x5, x5, 0x1
-ori x5, x5, 0x54c
-slli x5, x5, 0xb
-ori x5, x5, 0x1d9
-slli x5, x5, 0xb
-ori x5, x5, 0x286
-slli x5, x5, 0xb
-ori x5, x5, 0x210
-srai x31, x5, 4
-#     li  x30, 0xFFEDCBA987654321 
-addi x30, x0, 0x0
-lui x30, 0xffedc
-srli x30, x30, 0x1
-ori x30, x30, 0x5d4
-slli x30, x30, 0xb
-ori x30, x30, 0x61d
-slli x30, x30, 0xb
-ori x30, x30, 0x4a8
-slli x30, x30, 0xb
-ori x30, x30, 0x321
-#     li  x11, 1
-addi x11, x0, 0x0
-ori x11, x11, 0x1
-#     li  x11, 0
-addi x11, x0, 0x0
-#     li  x5, 0x7EDCBA9876543210 
-addi x5, x0, 0x0
-lui x5, 0x7edcb
-srli x5, x5, 0x1
-ori x5, x5, 0x54c
-slli x5, x5, 0xb
-ori x5, x5, 0x1d9
-slli x5, x5, 0xb
-ori x5, x5, 0x286
-slli x5, x5, 0xb
-ori x5, x5, 0x210
-srai x31, x5, 4
-#     li  x30, 0x07EDCBA987654321 
-addi x30, x0, 0x0
-lui x30, 0x7edc
-srli x30, x30, 0x1
-ori x30, x30, 0x5d4
-slli x30, x30, 0xb
-ori x30, x30, 0x61d
-slli x30, x30, 0xb
-ori x30, x30, 0x4a8
-slli x30, x30, 0xb
-ori x30, x30, 0x321
-#     li  x11, 1
-addi x11, x0, 0x0
-ori x11, x11, 0x1
-#     li  x11, 0
-addi x11, x0, 0x0
-#     li  x5, 0xFFFFFFFF11111111 
-addi x5, x0, 0x0
-lui x5, 0xfffff
-srli x5, x5, 0x1
-ori x5, x5, 0x7ff
-slli x5, x5, 0xb
-ori x5, x5, 0x444
-slli x5, x5, 0xb
-ori x5, x5, 0x222
-slli x5, x5, 0xb
-ori x5, x5, 0x111
-srai x31, x5, 32
-#     li  x30, 0xFFFFFFFFFFFFFFFF 
-addi x30, x0, 0x0
-addi x30, x0, 0x1
-xori x30, x30, -1
-addi x30, x30, 1
-#     li  x11, 1
-addi x11, x0, 0x0
-ori x11, x11, 0x1
-#     li  x11, 0
-addi x11, x0, 0x0
-#     li  x5, 0x8000000000000000
-addi x5, x0, 0x0
-lui x5, 0x80000
-srli x5, x5, 0x1
-slli x5, x5, 0x21
-srai x31, x5, 31
-#     li  x30, 0xFFFFFFFF00000000 
-addi x30, x0, 0x0
-lui x30, 0xfffff
-srli x30, x30, 0x1
-ori x30, x30, 0x7ff
-slli x30, x30, 0xb
-ori x30, x30, 0x400
-slli x30, x30, 0x16
-#     li  x11, 1
-addi x11, x0, 0x0
-ori x11, x11, 0x1
-#     li  x11, 0
-addi x11, x0, 0x0
-#     li  x5, 0x7FFFFFFFFFFFFFFF
-addi x5, x0, 0x0
-lui x5, 0x7ffff
-srli x5, x5, 0x1
-ori x5, x5, 0x7ff
-slli x5, x5, 0xb
-ori x5, x5, 0x7ff
-slli x5, x5, 0xb
-ori x5, x5, 0x7ff
-slli x5, x5, 0xb
-ori x5, x5, 0x7ff
-srai x31, x5, 31
-#     li  x30, 0x00000000FFFFFFFF 
-addi x30, x0, 0x0
-slli x30, x30, 0xb
-ori x30, x30, 0x3ff
-slli x30, x30, 0xb
-ori x30, x30, 0x7ff
-slli x30, x30, 0xb
-ori x30, x30, 0x7ff
-#     li  x11, 1
-addi x11, x0, 0x0
-ori x11, x11, 0x1
-#     li  x11, 0
-addi x11, x0, 0x0
-#     li  x5, 0x7FFFFFFFFFFFFFFF
-addi x5, x0, 0x0
-lui x5, 0x7ffff
-srli x5, x5, 0x1
-ori x5, x5, 0x7ff
-slli x5, x5, 0xb
-ori x5, x5, 0x7ff
-slli x5, x5, 0xb
-ori x5, x5, 0x7ff
-slli x5, x5, 0xb
-ori x5, x5, 0x7ff
-srai x31, x5, 63 
-#     li  x30, 0x0000000000000000 
-addi x30, x0, 0x0
-#     li  x11, 1
-addi x11, x0, 0x0
-ori x11, x11, 0x1
-#     li  x11, 0
-addi x11, x0, 0x0
+_start:
 #     li x5, 0
 addi x5, x0, 0x0
-#     li  x5, 0x1111111187654321 
+#     li x6, 0
+addi x6, x0, 0x0
+#     li x5, 10
 addi x5, x0, 0x0
-lui x5, 0x11111
-srli x5, x5, 0x1
-ori x5, x5, 0x88
-slli x5, x5, 0xb
-ori x5, x5, 0x61d
-slli x5, x5, 0xb
-ori x5, x5, 0x4a8
-slli x5, x5, 0xb
-ori x5, x5, 0x321
-slliw x31, x5, 0           # 32b op: 0x87654321 << 0 = 0x87654321. Sign extend -> 0xFF...87654321
-#     li  x30, 0xFFFFFFFF87654321
-addi x30, x0, 0x0
-lui x30, 0xfffff
-srli x30, x30, 0x1
-ori x30, x30, 0x7ff
-slli x30, x30, 0xb
-ori x30, x30, 0x61d
-slli x30, x30, 0xb
-ori x30, x30, 0x4a8
-slli x30, x30, 0xb
-ori x30, x30, 0x321
-#     li  x11, 1
-addi x11, x0, 0x0
-ori x11, x11, 0x1
-#     li  x11, 0
-addi x11, x0, 0x0
-#     li  x5, 0x0000000012345678 
-addi x5, x0, 0x0
-slli x5, x5, 0xb
-ori x5, x5, 0x48
-slli x5, x5, 0xb
-ori x5, x5, 0x68a
-slli x5, x5, 0xb
-ori x5, x5, 0x678
-slliw x31, x5, 4           # 32b op: 0x12345678 << 4 = 0x23456780. Sign extend -> 0x23456780
-#     li  x30, 0x23456780
-addi x30, x0, 0x0
-slli x30, x30, 0xb
-ori x30, x30, 0x8d
-slli x30, x30, 0xb
-ori x30, x30, 0xac
-slli x30, x30, 0xb
-ori x30, x30, 0x780
-#     li  x11, 1
-addi x11, x0, 0x0
-ori x11, x11, 0x1
-#     li  x11, 0
-addi x11, x0, 0x0
-#     li  x5, 0x1                 
-addi x5, x0, 0x0
-ori x5, x5, 0x1
-slliw x31, x5, 31          # 32b op: 1 << 31 = 0x80000000. Sign extend -> 0xFF...F80000000
-#     li  x30, 0xFFFFFFFF80000000
-addi x30, x0, 0x0
-lui x30, 0xfffff
-srli x30, x30, 0x1
-ori x30, x30, 0x7ff
-slli x30, x30, 0xb
-ori x30, x30, 0x600
-slli x30, x30, 0x16
-#     li  x11, 1
-addi x11, x0, 0x0
-ori x11, x11, 0x1
-#     li  x11, 0
-addi x11, x0, 0x0
-#     li  x5, 0x40000000         
-addi x5, x0, 0x0
-slli x5, x5, 0xb
-ori x5, x5, 0x100
-slli x5, x5, 0x16
-slliw x31, x5, 1           # 32b op: 0x40000000 << 1 = 0x80000000. Sign extend -> 0xFF...F80000000
-#     li  x30, 0xFFFFFFFF80000000
-addi x30, x0, 0x0
-lui x30, 0xfffff
-srli x30, x30, 0x1
-ori x30, x30, 0x7ff
-slli x30, x30, 0xb
-ori x30, x30, 0x600
-slli x30, x30, 0x16
-#     li  x11, 1
-addi x11, x0, 0x0
-ori x11, x11, 0x1
-#     li  x11, 0
-addi x11, x0, 0x0
-#     li  x5, 0x87654321         
-addi x5, x0, 0x0
-slli x5, x5, 0xb
-ori x5, x5, 0x21d
-slli x5, x5, 0xb
-ori x5, x5, 0x4a8
-slli x5, x5, 0xb
-ori x5, x5, 0x321
-slliw x31, x5, 4           # 32b op: 0x87654321 << 4 = 0x76543210. Sign extend -> 0x76543210
-#     li  x30, 0x76543210
-addi x30, x0, 0x0
-slli x30, x30, 0xb
-ori x30, x30, 0x1d9
-slli x30, x30, 0xb
-ori x30, x30, 0x286
-slli x30, x30, 0xb
-ori x30, x30, 0x210
-#     li  x11, 1
-addi x11, x0, 0x0
-ori x11, x11, 0x1
-#     li  x11, 0
-addi x11, x0, 0x0
-#     li  x5, 0xAAAAAAAA87654321 
-addi x5, x0, 0x0
-lui x5, 0xaaaaa
-srli x5, x5, 0x1
-ori x5, x5, 0x555
-slli x5, x5, 0xb
-ori x5, x5, 0x21d
-slli x5, x5, 0xb
-ori x5, x5, 0x4a8
-slli x5, x5, 0xb
-ori x5, x5, 0x321
-srliw x31, x5, 0           # 32b op: 0x87654321 >> 0 = 0x87654321. Sign extend -> 0xFF...87654321
-#     li  x30, 0xFFFFFFFF87654321
-addi x30, x0, 0x0
-lui x30, 0xfffff
-srli x30, x30, 0x1
-ori x30, x30, 0x7ff
-slli x30, x30, 0xb
-ori x30, x30, 0x61d
-slli x30, x30, 0xb
-ori x30, x30, 0x4a8
-slli x30, x30, 0xb
-ori x30, x30, 0x321
-#     li  x11, 1
-addi x11, x0, 0x0
-ori x11, x11, 0x1
-#     li  x11, 0
-addi x11, x0, 0x0
-#     li  x5, 0xAAAAAAAA87654321 
-addi x5, x0, 0x0
-lui x5, 0xaaaaa
-srli x5, x5, 0x1
-ori x5, x5, 0x555
-slli x5, x5, 0xb
-ori x5, x5, 0x21d
-slli x5, x5, 0xb
-ori x5, x5, 0x4a8
-slli x5, x5, 0xb
-ori x5, x5, 0x321
-srliw x31, x5, 4           # 32b op: 0x87654321 >> 4 = 0x08765432. Sign extend -> 0x08765432
-#     li  x30, 0x08765432
-addi x30, x0, 0x0
-slli x30, x30, 0xb
-ori x30, x30, 0x21
-slli x30, x30, 0xb
-ori x30, x30, 0x6ca
-slli x30, x30, 0xb
-ori x30, x30, 0x432
-#     li  x11, 1
-addi x11, x0, 0x0
-ori x11, x11, 0x1
-#     li  x11, 0
-addi x11, x0, 0x0
-#     li  x5, 0xFFFFFFFF         
-addi x5, x0, 0x0
-slli x5, x5, 0xb
-ori x5, x5, 0x3ff
-slli x5, x5, 0xb
-ori x5, x5, 0x7ff
-slli x5, x5, 0xb
-ori x5, x5, 0x7ff
-srliw x31, x5, 31          # 32b op: 0xFFFFFFFF >> 31 = 0x1. Sign extend -> 1
-#     li  x30, 1
+ori x5, x5, 0xa
+#     li x6, 10
+addi x6, x0, 0x0
+ori x6, x6, 0xa
+beq x5, x6, L_beq_t_1      # Branch TAKEN
+#     li x31, 2                  
+addi x31, x0, 0x0
+ori x31, x31, 0x2
+jal x0, L_beq_v_1
+L_beq_t_1:
+#     li x31, 1                  
+addi x31, x0, 0x0
+ori x31, x31, 0x1
+L_beq_v_1:
+#     li x30, 1                  
 addi x30, x0, 0x0
 ori x30, x30, 0x1
-#     li  x11, 1
+#     li x11, 1
 addi x11, x0, 0x0
 ori x11, x11, 0x1
-#     li  x11, 0
+#     li x11, 0
 addi x11, x0, 0x0
-#     li  x5, 0x1111111180000000 
+#     li x5, 10
 addi x5, x0, 0x0
-lui x5, 0x11111
-srli x5, x5, 0x1
-ori x5, x5, 0x88
-slli x5, x5, 0xb
-ori x5, x5, 0x600
-slli x5, x5, 0x16
-srliw x31, x5, 1           # 32b op: 0x80000000 >> 1 = 0x40000000. Sign extend -> 0x40000000
-#     li  x30, 0x40000000
-addi x30, x0, 0x0
-slli x30, x30, 0xb
-ori x30, x30, 0x100
-slli x30, x30, 0x16
-#     li  x11, 1
-addi x11, x0, 0x0
-ori x11, x11, 0x1
-#     li  x11, 0
-addi x11, x0, 0x0
-#     li  x5, 0xAAAAAAAA87654321 
-addi x5, x0, 0x0
-lui x5, 0xaaaaa
-srli x5, x5, 0x1
-ori x5, x5, 0x555
-slli x5, x5, 0xb
-ori x5, x5, 0x21d
-slli x5, x5, 0xb
-ori x5, x5, 0x4a8
-slli x5, x5, 0xb
-ori x5, x5, 0x321
-sraiw x31, x5, 0           # 32b op: 0x87654321 >>> 0 = 0x87654321. Sign extend -> 0xFF...87654321
-#     li  x30, 0xFFFFFFFF87654321
-addi x30, x0, 0x0
-lui x30, 0xfffff
-srli x30, x30, 0x1
-ori x30, x30, 0x7ff
-slli x30, x30, 0xb
-ori x30, x30, 0x61d
-slli x30, x30, 0xb
-ori x30, x30, 0x4a8
-slli x30, x30, 0xb
-ori x30, x30, 0x321
-#     li  x11, 1
-addi x11, x0, 0x0
-ori x11, x11, 0x1
-#     li  x11, 0
-addi x11, x0, 0x0
-#     li  x5, 0xAAAAAAAA87654321 
-addi x5, x0, 0x0
-lui x5, 0xaaaaa
-srli x5, x5, 0x1
-ori x5, x5, 0x555
-slli x5, x5, 0xb
-ori x5, x5, 0x21d
-slli x5, x5, 0xb
-ori x5, x5, 0x4a8
-slli x5, x5, 0xb
-ori x5, x5, 0x321
-sraiw x31, x5, 4           # 32b op: 0x87654321 >>> 4 = 0xF8765432. Sign extend -> 0xFF...FF8765432
-#     li  x30, 0xFFFFFFFFF8765432
-addi x30, x0, 0x0
-lui x30, 0xfffff
-srli x30, x30, 0x1
-ori x30, x30, 0x7ff
-slli x30, x30, 0xb
-ori x30, x30, 0x7e1
-slli x30, x30, 0xb
-ori x30, x30, 0x6ca
-slli x30, x30, 0xb
-ori x30, x30, 0x432
-#     li  x11, 1
-addi x11, x0, 0x0
-ori x11, x11, 0x1
-#     li  x11, 0
-addi x11, x0, 0x0
-#     li  x5, 0xBBBBBBBB7FEDCBA9 
-addi x5, x0, 0x0
-lui x5, 0xbbbbb
-srli x5, x5, 0x1
-ori x5, x5, 0x5dd
-slli x5, x5, 0xb
-ori x5, x5, 0x5ff
-slli x5, x5, 0xb
-ori x5, x5, 0x5b9
-slli x5, x5, 0xb
-ori x5, x5, 0x3a9
-sraiw x31, x5, 4           # 32b op: 0x7FEDCBA9 >>> 4 = 0x07FEDCBA. Sign extend -> 0x07FEDCBA
-#     li  x30, 0x07FEDCBA
-addi x30, x0, 0x0
-slli x30, x30, 0xb
-ori x30, x30, 0x1f
-slli x30, x30, 0xb
-ori x30, x30, 0x7db
-slli x30, x30, 0xb
-ori x30, x30, 0x4ba
-#     li  x11, 1
-addi x11, x0, 0x0
-ori x11, x11, 0x1
-#     li  x11, 0
-addi x11, x0, 0x0
-#     li  x5, 0x80000000         
-addi x5, x0, 0x0
-slli x5, x5, 0xb
-ori x5, x5, 0x200
-slli x5, x5, 0x16
-sraiw x31, x5, 31          # 32b op: 0x80000000 >>> 31 = 0xFFFFFFFF (-1). Sign extend -> -1
-#     li  x30, -1
-addi x30, x0, 0x0
-ori x30, x30, 0x1
-xori x30, x30, -1
-addi x30, x30, 1
-#     li  x11, 1
-addi x11, x0, 0x0
-ori x11, x11, 0x1
-#     li  x11, 0
-addi x11, x0, 0x0
-#     li  x5, 0x7FFFFFFF         
-addi x5, x0, 0x0
-slli x5, x5, 0xb
-ori x5, x5, 0x1ff
-slli x5, x5, 0xb
-ori x5, x5, 0x7ff
-slli x5, x5, 0xb
-ori x5, x5, 0x7ff
-sraiw x31, x5, 31          # 32b op: 0x7FFFFFFF >>> 31 = 0x0. Sign extend -> 0
-#     li  x30, 0
-addi x30, x0, 0x0
-#     li  x11, 1
-addi x11, x0, 0x0
-ori x11, x11, 0x1
-#     li  x11, 0
-addi x11, x0, 0x0
-#     li  x5, 0xAAAAAAAAAAAAAAAA 
-addi x5, x0, 0x0
-lui x5, 0xaaaaa
-srli x5, x5, 0x1
-ori x5, x5, 0x555
-slli x5, x5, 0xb
-ori x5, x5, 0x2aa
-slli x5, x5, 0xb
-ori x5, x5, 0x555
-slli x5, x5, 0xb
-ori x5, x5, 0x2aa
-slliw x31, x5, 1           # 32b op: 0xAAAAAAAA << 1 = 0x55555554. Sign extend -> 0x55555554
-#     li  x30, 0x55555554
-addi x30, x0, 0x0
-slli x30, x30, 0xb
-ori x30, x30, 0x155
-slli x30, x30, 0xb
-ori x30, x30, 0x2aa
-slli x30, x30, 0xb
-ori x30, x30, 0x554
-#     li  x11, 1
-addi x11, x0, 0x0
-ori x11, x11, 0x1
-#     li  x11, 0
-addi x11, x0, 0x0
-#     li  x5, 0xAAAAAAAAAAAAAAAA 
-addi x5, x0, 0x0
-lui x5, 0xaaaaa
-srli x5, x5, 0x1
-ori x5, x5, 0x555
-slli x5, x5, 0xb
-ori x5, x5, 0x2aa
-slli x5, x5, 0xb
-ori x5, x5, 0x555
-slli x5, x5, 0xb
-ori x5, x5, 0x2aa
-srliw x31, x5, 1           # 32b op: 0xAAAAAAAA >> 1 = 0x55555555. Sign extend -> 0x55555555
-#     li  x30, 0x55555555
-addi x30, x0, 0x0
-slli x30, x30, 0xb
-ori x30, x30, 0x155
-slli x30, x30, 0xb
-ori x30, x30, 0x2aa
-slli x30, x30, 0xb
-ori x30, x30, 0x555
-#     li  x11, 1
-addi x11, x0, 0x0
-ori x11, x11, 0x1
-#     li  x11, 0
-addi x11, x0, 0x0
-#     li  x5, 0xAAAAAAAAAAAAAAAA 
-addi x5, x0, 0x0
-lui x5, 0xaaaaa
-srli x5, x5, 0x1
-ori x5, x5, 0x555
-slli x5, x5, 0xb
-ori x5, x5, 0x2aa
-slli x5, x5, 0xb
-ori x5, x5, 0x555
-slli x5, x5, 0xb
-ori x5, x5, 0x2aa
-sraiw x31, x5, 1           # 32b op: 0xAAAAAAAA >>> 1 = 0xD5555555. Sign extend -> 0xFFFFFFFED5555555
-#     li  x30, 0xffffffffd5555555
-addi x30, x0, 0x0
-lui x30, 0xfffff
-srli x30, x30, 0x1
-ori x30, x30, 0x7ff
-slli x30, x30, 0xb
-ori x30, x30, 0x755
-slli x30, x30, 0xb
-ori x30, x30, 0x2aa
-slli x30, x30, 0xb
-ori x30, x30, 0x555
-#     li  x11, 1
-addi x11, x0, 0x0
-ori x11, x11, 0x1
-#     li  x11, 0
-addi x11, x0, 0x0
-#     li  x5, 0x5555555555555555 
-addi x5, x0, 0x0
-lui x5, 0x55555
-srli x5, x5, 0x1
-ori x5, x5, 0x2aa
-slli x5, x5, 0xb
-ori x5, x5, 0x555
-slli x5, x5, 0xb
-ori x5, x5, 0x2aa
-slli x5, x5, 0xb
-ori x5, x5, 0x555
-slliw x31, x5, 1           # 32b op: 0x55555555 << 1 = 0xAAAAAAAA. Sign extend -> 0xFFFFFFFFAAAAAAAA
-#     li  x30, 0xFFFFFFFFAAAAAAAA
-addi x30, x0, 0x0
-lui x30, 0xfffff
-srli x30, x30, 0x1
-ori x30, x30, 0x7ff
-slli x30, x30, 0xb
-ori x30, x30, 0x6aa
-slli x30, x30, 0xb
-ori x30, x30, 0x555
-slli x30, x30, 0xb
-ori x30, x30, 0x2aa
-#     li  x11, 1
-addi x11, x0, 0x0
-ori x11, x11, 0x1
-#     li  x11, 0
-addi x11, x0, 0x0
-#     li  x5, 0x5555555555555555 
-addi x5, x0, 0x0
-lui x5, 0x55555
-srli x5, x5, 0x1
-ori x5, x5, 0x2aa
-slli x5, x5, 0xb
-ori x5, x5, 0x555
-slli x5, x5, 0xb
-ori x5, x5, 0x2aa
-slli x5, x5, 0xb
-ori x5, x5, 0x555
-srliw x31, x5, 1           # 32b op: 0x55555555 >> 1 = 0x2AAAAAAA. Sign extend -> 0x2AAAAAAA
-#     li  x30, 0x2AAAAAAA
-addi x30, x0, 0x0
-slli x30, x30, 0xb
-ori x30, x30, 0xaa
-slli x30, x30, 0xb
-ori x30, x30, 0x555
-slli x30, x30, 0xb
-ori x30, x30, 0x2aa
-#     li  x11, 1
-addi x11, x0, 0x0
-ori x11, x11, 0x1
-#     li  x11, 0
-addi x11, x0, 0x0
-#     li  x5, 0x5555555555555555 
-addi x5, x0, 0x0
-lui x5, 0x55555
-srli x5, x5, 0x1
-ori x5, x5, 0x2aa
-slli x5, x5, 0xb
-ori x5, x5, 0x555
-slli x5, x5, 0xb
-ori x5, x5, 0x2aa
-slli x5, x5, 0xb
-ori x5, x5, 0x555
-sraiw x31, x5, 1           # 32b op: 0x55555555 >>> 1 = 0x2AAAAAAA. Sign extend -> 0x2AAAAAAA
-#     li  x30, 0x2AAAAAAA
-addi x30, x0, 0x0
-slli x30, x30, 0xb
-ori x30, x30, 0xaa
-slli x30, x30, 0xb
-ori x30, x30, 0x555
-slli x30, x30, 0xb
-ori x30, x30, 0x2aa
-#     li  x11, 1
-addi x11, x0, 0x0
-ori x11, x11, 0x1
-#     li  x11, 0
-addi x11, x0, 0x0
-#     li  x5, 0                  
-addi x5, x0, 0x0
-slliw x31, x5, 15          # Shift amount 15
-#     li  x30, 0                 
-addi x30, x0, 0x0
-#     li  x11, 1
-addi x11, x0, 0x0
-ori x11, x11, 0x1
-#     li  x11, 0
-addi x11, x0, 0x0
-#     li  x5, 0                  
-addi x5, x0, 0x0
-srliw x31, x5, 15          # Shift amount 15
-#     li  x30, 0                 
-addi x30, x0, 0x0
-#     li  x11, 1
-addi x11, x0, 0x0
-ori x11, x11, 0x1
-#     li  x11, 0
-addi x11, x0, 0x0
-#     li  x5, 0                  
-addi x5, x0, 0x0
-sraiw x31, x5, 15          # Shift amount 15
-#     li  x30, 0                 
-addi x30, x0, 0x0
-#     li  x11, 1
-addi x11, x0, 0x0
-ori x11, x11, 0x1
-#     li  x11, 0
-addi x11, x0, 0x0
-#     li  x5, -1                 
-addi x5, x0, 0x0
-ori x5, x5, 0x1
-xori x5, x5, -1
-addi x5, x5, 1
-slliw x31, x5, 1           # 32b op: 0xFFFFFFFF << 1 = 0xFFFFFFFE (-2). Sign extend -> -2
-#     li  x30, -2
+ori x5, x5, 0xa
+#     li x6, 11
+addi x6, x0, 0x0
+ori x6, x6, 0xb
+beq x5, x6, L_beq_nt_1     # Branch NOT Taken
+#     li x31, 2                  
+addi x31, x0, 0x0
+ori x31, x31, 0x2
+jal x0, L_beq_v_2
+L_beq_nt_1:
+#     li x31, 1                  
+addi x31, x0, 0x0
+ori x31, x31, 0x1
+L_beq_v_2:
+#     li x30, 2                  
 addi x30, x0, 0x0
 ori x30, x30, 0x2
-xori x30, x30, -1
-addi x30, x30, 1
-#     li  x11, 1
+#     li x11, 1
 addi x11, x0, 0x0
 ori x11, x11, 0x1
-#     li  x11, 0
+#     li x11, 0
 addi x11, x0, 0x0
-#     li  x5, -1                 
+#     li x5, -5
 addi x5, x0, 0x0
-ori x5, x5, 0x1
+ori x5, x5, 0x5
 xori x5, x5, -1
 addi x5, x5, 1
-srliw x31, x5, 1           # 32b op: 0xFFFFFFFF >> 1 = 0x7FFFFFFF (max pos). Sign extend -> 0x7FFFFFFF
-#     li  x30, 0x7FFFFFFF
-addi x30, x0, 0x0
-slli x30, x30, 0xb
-ori x30, x30, 0x1ff
-slli x30, x30, 0xb
-ori x30, x30, 0x7ff
-slli x30, x30, 0xb
-ori x30, x30, 0x7ff
-#     li  x11, 1
-addi x11, x0, 0x0
-ori x11, x11, 0x1
-#     li  x11, 0
-addi x11, x0, 0x0
-#     li  x5, -1                 
-addi x5, x0, 0x0
-ori x5, x5, 0x1
-xori x5, x5, -1
-addi x5, x5, 1
-sraiw x31, x5, 1           # 32b op: 0xFFFFFFFF >>> 1 = 0xFFFFFFFF (-1). Sign extend -> -1
-#     li  x30, -1
+#     li x6, -5
+addi x6, x0, 0x0
+ori x6, x6, 0x5
+xori x6, x6, -1
+addi x6, x6, 1
+beq x5, x6, L_beq_t_2      # Branch TAKEN
+#     li x31, 2
+addi x31, x0, 0x0
+ori x31, x31, 0x2
+jal x0, L_beq_v_3
+L_beq_t_2:
+#     li x31, 1
+addi x31, x0, 0x0
+ori x31, x31, 0x1
+L_beq_v_3:
+#     li x30, 1
 addi x30, x0, 0x0
 ori x30, x30, 0x1
-xori x30, x30, -1
-addi x30, x30, 1
-#     li  x11, 1
+#     li x11, 1
 addi x11, x0, 0x0
 ori x11, x11, 0x1
-#     li  x11, 0
+#     li x11, 0
 addi x11, x0, 0x0
-#     li  x5, 0xABCDEF9876543210 
+#     li x5, 10
 addi x5, x0, 0x0
-lui x5, 0xabcde
-srli x5, x5, 0x1
-ori x5, x5, 0x7cc
-slli x5, x5, 0xb
-ori x5, x5, 0x1d9
-slli x5, x5, 0xb
-ori x5, x5, 0x286
-slli x5, x5, 0xb
-ori x5, x5, 0x210
-slliw x31, x5, 4           # 32b op: 0x76543210 << 4 = 0x65432100. Sign extend -> 0x0...065432100
-#     li  x30, 0x65432100
+ori x5, x5, 0xa
+#     li x6, 11
+addi x6, x0, 0x0
+ori x6, x6, 0xb
+bne x5, x6, L_bne_t_1      # Branch TAKEN
+#     li x31, 2                  
+addi x31, x0, 0x0
+ori x31, x31, 0x2
+jal x0, L_bne_v_1
+L_bne_t_1:
+#     li x31, 1                  
+addi x31, x0, 0x0
+ori x31, x31, 0x1
+L_bne_v_1:
+#     li x30, 1                  
 addi x30, x0, 0x0
-slli x30, x30, 0xb
-ori x30, x30, 0x195
-slli x30, x30, 0xb
-ori x30, x30, 0x64
-slli x30, x30, 0xb
-ori x30, x30, 0x100
-#     li  x11, 1
+ori x30, x30, 0x1
+#     li x11, 1
 addi x11, x0, 0x0
 ori x11, x11, 0x1
-#     li  x11, 0
+#     li x11, 0
 addi x11, x0, 0x0
-#     li  x5, 0xABCDEF1F87654321 
+#     li x5, 10
 addi x5, x0, 0x0
-lui x5, 0xabcde
-srli x5, x5, 0x1
-ori x5, x5, 0x78f
-slli x5, x5, 0xb
-ori x5, x5, 0x61d
-slli x5, x5, 0xb
-ori x5, x5, 0x4a8
-slli x5, x5, 0xb
-ori x5, x5, 0x321
-slliw x31, x5, 4           # 32b op: 0x87654321 << 4 = 0x76543210. Sign extend -> 0x0...076543210
-#     li  x30, 0x76543210
+ori x5, x5, 0xa
+#     li x6, 10
+addi x6, x0, 0x0
+ori x6, x6, 0xa
+bne x5, x6, L_bne_nt_1     # Branch NOT Taken
+#     li x31, 2                  
+addi x31, x0, 0x0
+ori x31, x31, 0x2
+jal x0, L_bne_v_2
+L_bne_nt_1:
+#     li x31, 1                  
+addi x31, x0, 0x0
+ori x31, x31, 0x1
+L_bne_v_2:
+#     li x30, 2                  
 addi x30, x0, 0x0
-slli x30, x30, 0xb
-ori x30, x30, 0x1d9
-slli x30, x30, 0xb
-ori x30, x30, 0x286
-slli x30, x30, 0xb
-ori x30, x30, 0x210
-#     li  x11, 1
+ori x30, x30, 0x2
+#     li x11, 1
 addi x11, x0, 0x0
 ori x11, x11, 0x1
-#     li  x11, 0
+#     li x11, 0
 addi x11, x0, 0x0
-#     li  x5, 0x1111111187654321 
+#     li x5, 10
 addi x5, x0, 0x0
-lui x5, 0x11111
-srli x5, x5, 0x1
-ori x5, x5, 0x88
-slli x5, x5, 0xb
-ori x5, x5, 0x61d
-slli x5, x5, 0xb
-ori x5, x5, 0x4a8
-slli x5, x5, 0xb
-ori x5, x5, 0x321
-slliw x31, x5, 0           # 32b op: 0x87654321 << 0 = 0x87654321. Sign extend -> 0xFF...87654321
-#     li  x30, 0xFFFFFFFF87654321
+ori x5, x5, 0xa
+#     li x6, -10
+addi x6, x0, 0x0
+ori x6, x6, 0xa
+xori x6, x6, -1
+addi x6, x6, 1
+bne x5, x6, L_bne_t_2      # Branch TAKEN
+#     li x31, 2
+addi x31, x0, 0x0
+ori x31, x31, 0x2
+jal x0, L_bne_v_3
+L_bne_t_2:
+#     li x31, 1
+addi x31, x0, 0x0
+ori x31, x31, 0x1
+L_bne_v_3:
+#     li x30, 1
 addi x30, x0, 0x0
-lui x30, 0xfffff
-srli x30, x30, 0x1
-ori x30, x30, 0x7ff
-slli x30, x30, 0xb
-ori x30, x30, 0x61d
-slli x30, x30, 0xb
-ori x30, x30, 0x4a8
-slli x30, x30, 0xb
-ori x30, x30, 0x321
-#     li  x11, 1
+ori x30, x30, 0x1
+#     li x11, 1
 addi x11, x0, 0x0
 ori x11, x11, 0x1
-#     li  x11, 0
+#     li x11, 0
 addi x11, x0, 0x0
-#     li  x5, 0x2                
+#     li x5, 5
 addi x5, x0, 0x0
-ori x5, x5, 0x2
-slliw x31, x5, 31          # 32b op: 2 << 31 = 0x0. Sign extend -> 0
-#     li  x30, 0
+ori x5, x5, 0x5
+#     li x6, 10
+addi x6, x0, 0x0
+ori x6, x6, 0xa
+blt x5, x6, L_blt_t_1      # Branch TAKEN
+#     li x31, 2
+addi x31, x0, 0x0
+ori x31, x31, 0x2
+jal x0, L_blt_v_1
+L_blt_t_1:
+#     li x31, 1
+addi x31, x0, 0x0
+ori x31, x31, 0x1
+L_blt_v_1:
+#     li x30, 1
 addi x30, x0, 0x0
-#     li  x11, 1
+ori x30, x30, 0x1
+#     li x11, 1
 addi x11, x0, 0x0
 ori x11, x11, 0x1
-#     li  x11, 0
+#     li x11, 0
 addi x11, x0, 0x0
-#     li  x5, 0x3                
+#     li x5, 10
 addi x5, x0, 0x0
-ori x5, x5, 0x3
-slliw x31, x5, 31          # 32b op: 3 << 31 = 0x80000000. Sign extend -> 0xFF...F80000000
-#     li  x30, 0xFFFFFFFF80000000
+ori x5, x5, 0xa
+#     li x6, 5
+addi x6, x0, 0x0
+ori x6, x6, 0x5
+blt x5, x6, L_blt_nt_1     # Branch NOT Taken
+#     li x31, 2
+addi x31, x0, 0x0
+ori x31, x31, 0x2
+jal x0, L_blt_v_2
+L_blt_nt_1:
+#     li x31, 1
+addi x31, x0, 0x0
+ori x31, x31, 0x1
+L_blt_v_2:
+#     li x30, 2
 addi x30, x0, 0x0
-lui x30, 0xfffff
-srli x30, x30, 0x1
-ori x30, x30, 0x7ff
-slli x30, x30, 0xb
-ori x30, x30, 0x600
-slli x30, x30, 0x16
-#     li  x11, 1
+ori x30, x30, 0x2
+#     li x11, 1
 addi x11, x0, 0x0
 ori x11, x11, 0x1
-#     li  x11, 0
+#     li x11, 0
 addi x11, x0, 0x0
-#     li  x5, 0x7FFFFFFF         
+#     li x5, -5
 addi x5, x0, 0x0
-slli x5, x5, 0xb
-ori x5, x5, 0x1ff
-slli x5, x5, 0xb
-ori x5, x5, 0x7ff
-slli x5, x5, 0xb
-ori x5, x5, 0x7ff
-slliw x31, x5, 31          # 32b op: 0x7FFFFFFF << 31 = 0x80000000. Sign extend -> 0xFF...F80000000
-#     li  x30, 0xFFFFFFFF80000000
+ori x5, x5, 0x5
+xori x5, x5, -1
+addi x5, x5, 1
+#     li x6, 10
+addi x6, x0, 0x0
+ori x6, x6, 0xa
+blt x5, x6, L_blt_t_2      # Branch TAKEN
+#     li x31, 2
+addi x31, x0, 0x0
+ori x31, x31, 0x2
+jal x0, L_blt_v_3
+L_blt_t_2:
+#     li x31, 1
+addi x31, x0, 0x0
+ori x31, x31, 0x1
+L_blt_v_3:
+#     li x30, 1
 addi x30, x0, 0x0
-lui x30, 0xfffff
-srli x30, x30, 0x1
-ori x30, x30, 0x7ff
-slli x30, x30, 0xb
-ori x30, x30, 0x600
-slli x30, x30, 0x16
-#     li  x11, 1
+ori x30, x30, 0x1
+#     li x11, 1
 addi x11, x0, 0x0
 ori x11, x11, 0x1
-#     li  x11, 0
+#     li x11, 0
 addi x11, x0, 0x0
-#     li  x5, 0x80000000         
+#     li x5, 10
 addi x5, x0, 0x0
-slli x5, x5, 0xb
-ori x5, x5, 0x200
-slli x5, x5, 0x16
-slliw x31, x5, 31          # 32b op: 0x80000000 << 31 = 0x0. Sign extend -> 0
-#     li  x30, 0
+ori x5, x5, 0xa
+#     li x6, -5
+addi x6, x0, 0x0
+ori x6, x6, 0x5
+xori x6, x6, -1
+addi x6, x6, 1
+blt x5, x6, L_blt_nt_2     # Branch NOT Taken
+#     li x31, 2
+addi x31, x0, 0x0
+ori x31, x31, 0x2
+jal x0, L_blt_v_4
+L_blt_nt_2:
+#     li x31, 1
+addi x31, x0, 0x0
+ori x31, x31, 0x1
+L_blt_v_4:
+#     li x30, 2
 addi x30, x0, 0x0
-#     li  x11, 1
+ori x30, x30, 0x2
+#     li x11, 1
 addi x11, x0, 0x0
 ori x11, x11, 0x1
-#     li  x11, 0
+#     li x11, 0
 addi x11, x0, 0x0
-#     li  x5, 0xFFFFFFFF         
+#     li x5, -10
 addi x5, x0, 0x0
-slli x5, x5, 0xb
-ori x5, x5, 0x3ff
-slli x5, x5, 0xb
-ori x5, x5, 0x7ff
-slli x5, x5, 0xb
-ori x5, x5, 0x7ff
-slliw x31, x5, 31          # 32b op: 0xFFFFFFFF << 31 = 0x80000000. Sign extend -> 0xFF...F80000000
-#     li  x30, 0xFFFFFFFF80000000
+ori x5, x5, 0xa
+xori x5, x5, -1
+addi x5, x5, 1
+#     li x6, -5
+addi x6, x0, 0x0
+ori x6, x6, 0x5
+xori x6, x6, -1
+addi x6, x6, 1
+blt x5, x6, L_blt_t_3      # Branch TAKEN
+#     li x31, 2
+addi x31, x0, 0x0
+ori x31, x31, 0x2
+jal x0, L_blt_v_5
+L_blt_t_3:
+#     li x31, 1
+addi x31, x0, 0x0
+ori x31, x31, 0x1
+L_blt_v_5:
+#     li x30, 1
 addi x30, x0, 0x0
-lui x30, 0xfffff
-srli x30, x30, 0x1
-ori x30, x30, 0x7ff
-slli x30, x30, 0xb
-ori x30, x30, 0x600
-slli x30, x30, 0x16
-#     li  x11, 1
+ori x30, x30, 0x1
+#     li x11, 1
 addi x11, x0, 0x0
 ori x11, x11, 0x1
-#     li  x11, 0
+#     li x11, 0
 addi x11, x0, 0x0
-#     li  x5, 0x3FFFFFFF
+#     li x5, 5
 addi x5, x0, 0x0
-slli x5, x5, 0xb
-ori x5, x5, 0xff
-slli x5, x5, 0xb
-ori x5, x5, 0x7ff
-slli x5, x5, 0xb
-ori x5, x5, 0x7ff
-slliw x31, x5, 1           # 32b op: 0x3FFFFFFF << 1 = 0x7FFFFFFF. Sign extend -> 0x7FFFFFFF
-#     li  x30, 0x7FFFFFFE
+ori x5, x5, 0x5
+#     li x6, 5
+addi x6, x0, 0x0
+ori x6, x6, 0x5
+blt x5, x6, L_blt_nt_3     # Branch NOT Taken
+#     li x31, 2
+addi x31, x0, 0x0
+ori x31, x31, 0x2
+jal x0, L_blt_v_6
+L_blt_nt_3:
+#     li x31, 1
+addi x31, x0, 0x0
+ori x31, x31, 0x1
+L_blt_v_6:
+#     li x30, 2
 addi x30, x0, 0x0
-slli x30, x30, 0xb
-ori x30, x30, 0x1ff
-slli x30, x30, 0xb
-ori x30, x30, 0x7ff
-slli x30, x30, 0xb
-ori x30, x30, 0x7fe
-#     li  x11, 1
+ori x30, x30, 0x2
+#     li x11, 1
 addi x11, x0, 0x0
 ori x11, x11, 0x1
-#     li  x11, 0
+#     li x11, 0
 addi x11, x0, 0x0
-#     li  x5, 0xFFFFFFFE         
+#     li x5, 5
 addi x5, x0, 0x0
-slli x5, x5, 0xb
-ori x5, x5, 0x3ff
-slli x5, x5, 0xb
-ori x5, x5, 0x7ff
-slli x5, x5, 0xb
-ori x5, x5, 0x7fe
-slliw x31, x5, 1           # 32b op: 0xFFFFFFFE << 1 = 0xFFFFFFFC (-4). Sign extend -> -4
-#     li  x30, -4                
+ori x5, x5, 0x5
+#     li x6, 10
+addi x6, x0, 0x0
+ori x6, x6, 0xa
+bge x5, x6, L_bge_nt_1     # Branch NOT Taken
+#     li x31, 2
+addi x31, x0, 0x0
+ori x31, x31, 0x2
+jal x0, L_bge_v_1
+L_bge_nt_1:
+#     li x31, 1
+addi x31, x0, 0x0
+ori x31, x31, 0x1
+L_bge_v_1:
+#     li x30, 2
 addi x30, x0, 0x0
-ori x30, x30, 0x4
-xori x30, x30, -1
-addi x30, x30, 1
-#     li  x11, 1
+ori x30, x30, 0x2
+#     li x11, 1
 addi x11, x0, 0x0
 ori x11, x11, 0x1
-#     li  x11, 0
+#     li x11, 0
 addi x11, x0, 0x0
-#     li  x5, 0xC0000000         
+#     li x5, 10
 addi x5, x0, 0x0
-slli x5, x5, 0xb
-ori x5, x5, 0x300
-slli x5, x5, 0x16
-slliw x31, x5, 1           # 32b op: 0xC0000000 << 1 = 0x80000000. Sign extend -> 0xFF...F80000000
-#     li  x30, 0xFFFFFFFF80000000
+ori x5, x5, 0xa
+#     li x6, 5
+addi x6, x0, 0x0
+ori x6, x6, 0x5
+bge x5, x6, L_bge_t_1      # Branch TAKEN
+#     li x31, 2
+addi x31, x0, 0x0
+ori x31, x31, 0x2
+jal x0, L_bge_v_2
+L_bge_t_1:
+#     li x31, 1
+addi x31, x0, 0x0
+ori x31, x31, 0x1
+L_bge_v_2:
+#     li x30, 1
 addi x30, x0, 0x0
-lui x30, 0xfffff
-srli x30, x30, 0x1
-ori x30, x30, 0x7ff
-slli x30, x30, 0xb
-ori x30, x30, 0x600
-slli x30, x30, 0x16
-#     li  x11, 1
+ori x30, x30, 0x1
+#     li x11, 1
 addi x11, x0, 0x0
 ori x11, x11, 0x1
-#     li  x11, 0
+#     li x11, 0
+addi x11, x0, 0x0
+#     li x5, -5
+addi x5, x0, 0x0
+ori x5, x5, 0x5
+xori x5, x5, -1
+addi x5, x5, 1
+#     li x6, 10
+addi x6, x0, 0x0
+ori x6, x6, 0xa
+bge x5, x6, L_bge_nt_2     # Branch NOT Taken
+#     li x31, 2
+addi x31, x0, 0x0
+ori x31, x31, 0x2
+jal x0, L_bge_v_3
+L_bge_nt_2:
+#     li x31, 1
+addi x31, x0, 0x0
+ori x31, x31, 0x1
+L_bge_v_3:
+#     li x30, 2
+addi x30, x0, 0x0
+ori x30, x30, 0x2
+#     li x11, 1
+addi x11, x0, 0x0
+ori x11, x11, 0x1
+#     li x11, 0
+addi x11, x0, 0x0
+#     li x5, 10
+addi x5, x0, 0x0
+ori x5, x5, 0xa
+#     li x6, -5
+addi x6, x0, 0x0
+ori x6, x6, 0x5
+xori x6, x6, -1
+addi x6, x6, 1
+bge x5, x6, L_bge_t_2      # Branch TAKEN
+#     li x31, 2
+addi x31, x0, 0x0
+ori x31, x31, 0x2
+jal x0, L_bge_v_4
+L_bge_t_2:
+#     li x31, 1
+addi x31, x0, 0x0
+ori x31, x31, 0x1
+L_bge_v_4:
+#     li x30, 1
+addi x30, x0, 0x0
+ori x30, x30, 0x1
+#     li x11, 1
+addi x11, x0, 0x0
+ori x11, x11, 0x1
+#     li x11, 0
+addi x11, x0, 0x0
+#     li x5, -5
+addi x5, x0, 0x0
+ori x5, x5, 0x5
+xori x5, x5, -1
+addi x5, x5, 1
+#     li x6, -10
+addi x6, x0, 0x0
+ori x6, x6, 0xa
+xori x6, x6, -1
+addi x6, x6, 1
+bge x5, x6, L_bge_t_3      # Branch TAKEN
+#     li x31, 2
+addi x31, x0, 0x0
+ori x31, x31, 0x2
+jal x0, L_bge_v_5
+L_bge_t_3:
+#     li x31, 1
+addi x31, x0, 0x0
+ori x31, x31, 0x1
+L_bge_v_5:
+#     li x30, 1
+addi x30, x0, 0x0
+ori x30, x30, 0x1
+#     li x11, 1
+addi x11, x0, 0x0
+ori x11, x11, 0x1
+#     li x11, 0
+addi x11, x0, 0x0
+#     li x5, 5
+addi x5, x0, 0x0
+ori x5, x5, 0x5
+#     li x6, 5
+addi x6, x0, 0x0
+ori x6, x6, 0x5
+bge x5, x6, L_bge_t_4      # Branch TAKEN
+#     li x31, 2
+addi x31, x0, 0x0
+ori x31, x31, 0x2
+jal x0, L_bge_v_6
+L_bge_t_4:
+#     li x31, 1
+addi x31, x0, 0x0
+ori x31, x31, 0x1
+L_bge_v_6:
+#     li x30, 1
+addi x30, x0, 0x0
+ori x30, x30, 0x1
+#     li x11, 1
+addi x11, x0, 0x0
+ori x11, x11, 0x1
+#     li x11, 0
+addi x11, x0, 0x0
+#     li x5, 5
+addi x5, x0, 0x0
+ori x5, x5, 0x5
+#     li x6, 10
+addi x6, x0, 0x0
+ori x6, x6, 0xa
+bltu x5, x6, L_bltu_t_1    # Branch TAKEN
+#     li x31, 2
+addi x31, x0, 0x0
+ori x31, x31, 0x2
+jal x0, L_bltu_v_1
+L_bltu_t_1:
+#     li x31, 1
+addi x31, x0, 0x0
+ori x31, x31, 0x1
+L_bltu_v_1:
+#     li x30, 1
+addi x30, x0, 0x0
+ori x30, x30, 0x1
+#     li x11, 1
+addi x11, x0, 0x0
+ori x11, x11, 0x1
+#     li x11, 0
+addi x11, x0, 0x0
+#     li x5, 10
+addi x5, x0, 0x0
+ori x5, x5, 0xa
+#     li x6, 5
+addi x6, x0, 0x0
+ori x6, x6, 0x5
+bltu x5, x6, L_bltu_nt_1   # Branch NOT Taken
+#     li x31, 2
+addi x31, x0, 0x0
+ori x31, x31, 0x2
+jal x0, L_bltu_v_2
+L_bltu_nt_1:
+#     li x31, 1
+addi x31, x0, 0x0
+ori x31, x31, 0x1
+L_bltu_v_2:
+#     li x30, 2
+addi x30, x0, 0x0
+ori x30, x30, 0x2
+#     li x11, 1
+addi x11, x0, 0x0
+ori x11, x11, 0x1
+#     li x11, 0
+addi x11, x0, 0x0
+#     li x5, -5                  
+addi x5, x0, 0x0
+ori x5, x5, 0x5
+xori x5, x5, -1
+addi x5, x5, 1
+#     li x6, 10
+addi x6, x0, 0x0
+ori x6, x6, 0xa
+bltu x5, x6, L_bltu_nt_2   # Branch NOT Taken
+#     li x31, 2
+addi x31, x0, 0x0
+ori x31, x31, 0x2
+jal x0, L_bltu_v_3
+L_bltu_nt_2:
+#     li x31, 1
+addi x31, x0, 0x0
+ori x31, x31, 0x1
+L_bltu_v_3:
+#     li x30, 2
+addi x30, x0, 0x0
+ori x30, x30, 0x2
+#     li x11, 1
+addi x11, x0, 0x0
+ori x11, x11, 0x1
+#     li x11, 0
+addi x11, x0, 0x0
+#     li x5, 10
+addi x5, x0, 0x0
+ori x5, x5, 0xa
+#     li x6, -5                  
+addi x6, x0, 0x0
+ori x6, x6, 0x5
+xori x6, x6, -1
+addi x6, x6, 1
+bltu x5, x6, L_bltu_t_2    # Branch TAKEN
+#     li x31, 2
+addi x31, x0, 0x0
+ori x31, x31, 0x2
+jal x0, L_bltu_v_4
+L_bltu_t_2:
+#     li x31, 1
+addi x31, x0, 0x0
+ori x31, x31, 0x1
+L_bltu_v_4:
+#     li x30, 1
+addi x30, x0, 0x0
+ori x30, x30, 0x1
+#     li x11, 1
+addi x11, x0, 0x0
+ori x11, x11, 0x1
+#     li x11, 0
+addi x11, x0, 0x0
+#     li x5, -1                  
+addi x5, x0, 0x0
+ori x5, x5, 0x1
+xori x5, x5, -1
+addi x5, x5, 1
+#     li x6, 10
+addi x6, x0, 0x0
+ori x6, x6, 0xa
+bltu x5, x6, L_bltu_nt_3   # Branch NOT Taken
+#     li x31, 2
+addi x31, x0, 0x0
+ori x31, x31, 0x2
+jal x0, L_bltu_v_5
+L_bltu_nt_3:
+#     li x31, 1
+addi x31, x0, 0x0
+ori x31, x31, 0x1
+L_bltu_v_5:
+#     li x30, 2
+addi x30, x0, 0x0
+ori x30, x30, 0x2
+#     li x11, 1
+addi x11, x0, 0x0
+ori x11, x11, 0x1
+#     li x11, 0
+addi x11, x0, 0x0
+#     li x5, 5
+addi x5, x0, 0x0
+ori x5, x5, 0x5
+#     li x6, 10
+addi x6, x0, 0x0
+ori x6, x6, 0xa
+bgeu x5, x6, L_bgeu_nt_1   # Branch NOT Taken
+#     li x31, 2
+addi x31, x0, 0x0
+ori x31, x31, 0x2
+jal x0, L_bgeu_v_1
+L_bgeu_nt_1:
+#     li x31, 1
+addi x31, x0, 0x0
+ori x31, x31, 0x1
+L_bgeu_v_1:
+#     li x30, 2
+addi x30, x0, 0x0
+ori x30, x30, 0x2
+#     li x11, 1
+addi x11, x0, 0x0
+ori x11, x11, 0x1
+#     li x11, 0
+addi x11, x0, 0x0
+#     li x5, 10
+addi x5, x0, 0x0
+ori x5, x5, 0xa
+#     li x6, 5
+addi x6, x0, 0x0
+ori x6, x6, 0x5
+bgeu x5, x6, L_bgeu_t_1    # Branch TAKEN
+#     li x31, 2
+addi x31, x0, 0x0
+ori x31, x31, 0x2
+jal x0, L_bgeu_v_2
+L_bgeu_t_1:
+#     li x31, 1
+addi x31, x0, 0x0
+ori x31, x31, 0x1
+L_bgeu_v_2:
+#     li x30, 1
+addi x30, x0, 0x0
+ori x30, x30, 0x1
+#     li x11, 1
+addi x11, x0, 0x0
+ori x11, x11, 0x1
+#     li x11, 0
+addi x11, x0, 0x0
+#     li x5, -5                  
+addi x5, x0, 0x0
+ori x5, x5, 0x5
+xori x5, x5, -1
+addi x5, x5, 1
+#     li x6, 10
+addi x6, x0, 0x0
+ori x6, x6, 0xa
+bgeu x5, x6, L_bgeu_t_2    # Branch TAKEN
+#     li x31, 2
+addi x31, x0, 0x0
+ori x31, x31, 0x2
+jal x0, L_bgeu_v_3
+L_bgeu_t_2:
+#     li x31, 1
+addi x31, x0, 0x0
+ori x31, x31, 0x1
+L_bgeu_v_3:
+#     li x30, 1
+addi x30, x0, 0x0
+ori x30, x30, 0x1
+#     li x11, 1
+addi x11, x0, 0x0
+ori x11, x11, 0x1
+#     li x11, 0
+addi x11, x0, 0x0
+#     li x5, 10
+addi x5, x0, 0x0
+ori x5, x5, 0xa
+#     li x6, -5                  
+addi x6, x0, 0x0
+ori x6, x6, 0x5
+xori x6, x6, -1
+addi x6, x6, 1
+bgeu x5, x6, L_bgeu_nt_2   # Branch NOT Taken
+#     li x31, 2
+addi x31, x0, 0x0
+ori x31, x31, 0x2
+jal x0, L_bgeu_v_4
+L_bgeu_nt_2:
+#     li x31, 1
+addi x31, x0, 0x0
+ori x31, x31, 0x1
+L_bgeu_v_4:
+#     li x30, 2
+addi x30, x0, 0x0
+ori x30, x30, 0x2
+#     li x11, 1
+addi x11, x0, 0x0
+ori x11, x11, 0x1
+#     li x11, 0
+addi x11, x0, 0x0
+#     li x5, -1                  
+addi x5, x0, 0x0
+ori x5, x5, 0x1
+xori x5, x5, -1
+addi x5, x5, 1
+#     li x6, 10
+addi x6, x0, 0x0
+ori x6, x6, 0xa
+bgeu x5, x6, L_bgeu_t_3    # Branch TAKEN
+#     li x31, 2
+addi x31, x0, 0x0
+ori x31, x31, 0x2
+jal x0, L_bgeu_v_5
+L_bgeu_t_3:
+#     li x31, 1
+addi x31, x0, 0x0
+ori x31, x31, 0x1
+L_bgeu_v_5:
+#     li x30, 1
+addi x30, x0, 0x0
+ori x30, x30, 0x1
+#     li x11, 1
+addi x11, x0, 0x0
+ori x11, x11, 0x1
+#     li x11, 0
+addi x11, x0, 0x0
+#     li x5, 5
+addi x5, x0, 0x0
+ori x5, x5, 0x5
+#     li x6, 5
+addi x6, x0, 0x0
+ori x6, x6, 0x5
+bgeu x5, x6, L_bgeu_t_4    # Branch TAKEN
+#     li x31, 2
+addi x31, x0, 0x0
+ori x31, x31, 0x2
+jal x0, L_bgeu_v_6
+L_bgeu_t_4:
+#     li x31, 1
+addi x31, x0, 0x0
+ori x31, x31, 0x1
+L_bgeu_v_6:
+#     li x30, 1
+addi x30, x0, 0x0
+ori x30, x30, 0x1
+#     li x11, 1
+addi x11, x0, 0x0
+ori x11, x11, 0x1
+#     li x11, 0
 addi x11, x0, 0x0
