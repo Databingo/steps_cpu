@@ -227,7 +227,175 @@ _start:
     li  x30, 0xFFFFFFFFF8765432
     li  x11, 1
     li  x11, 0
+##--------------------------------------------
+## Additional Shift Reg Tests (Extremes/Boundaries) - RV64
+## Using x31 as result (rd)
+## Using x5 as rs1 (value), x6 as rs2 (shift amount)
+## Using x30 for Golden value
+## Using x11 for Compare Signaling
+##--------------------------------------------
 
+## TEST: SLLW_AMT_31
+    # Purpose: Test sllw with max valid shift amount (31)
+    li  x5, 0x1                 # Low 32 bits = 1
+    li  x6, 31
+    sllw x31, x5, x6           # 32b op: 1 << 31 = 0x80000000. Sign extend -> 0xFFFFFFFF80000000
+    li  x30, 0xFFFFFFFF80000000
+    li  x11, 1
+    li  x11, 0
+
+## TEST: SLLW_AMT_32_MASKED
+    # Purpose: Test sllw with shift amount 32 (should now use rs2[4:0]=0)
+    li  x5, 0x12345678         # Low 32 bits = 0x12345678
+    li  x6, 32                 # x6[4:0] = 0
+    sllw x31, x5, x6           # 32b op: 0x12345678 << 0 = 0x12345678. Sign extend -> 0x12345678
+    li  x30, 0x12345678
+    li  x11, 1
+    li  x11, 0
+
+## TEST: SRLW_AMT_31
+    # Purpose: Test srlw with max valid shift amount (31)
+    li  x5, 0xFFFFFFFF         # Lower 32 bits = -1
+    li  x6, 31
+    srlw x31, x5, x6           # 32b op: 0xFFFFFFFF >> 31 = 0x1. Sign extend -> 1
+    li  x30, 1
+    li  x11, 1
+    li  x11, 0
+
+## TEST: SRLW_AMT_32_MASKED
+    # Purpose: Test srlw with shift amount 32 (should now use rs2[4:0]=0)
+    li  x5, 0xAAAAAAAA87654321 # Lower 32 bits = 0x87654321
+    li  x6, 32                 # x6[4:0] = 0
+    srlw x31, x5, x6           # 32b op: 0x87654321 >> 0 = 0x87654321. Sign extend -> 0xFFFFFFFF87654321
+    li  x30, 0xFFFFFFFF87654321
+    li  x11, 1
+    li  x11, 0
+
+## TEST: SRAW_AMT_31
+    # Purpose: Test sraw with max valid shift amount (31)
+    li  x5, 0x80000000         # Lower 32 bits = -2^31
+    li  x6, 31
+    sraw x31, x5, x6           # 32b op: 0x80000000 >>> 31 = 0xFFFFFFFF (-1). Sign extend -> -1
+    li  x30, -1
+    li  x11, 1
+    li  x11, 0
+
+## TEST: SRAW_AMT_32_MASKED
+    # Purpose: Test sraw with shift amount 32 (should now use rs2[4:0]=0)
+    li  x5, 0xAAAAAAAA87654321 # Lower 32 bits = 0x87654321
+    li  x6, 32                 # x6[4:0] = 0
+    sraw x31, x5, x6           # 32b op: 0x87654321 >>> 0 = 0x87654321. Sign extend -> 0xFFFFFFFF87654321
+    li  x30, 0xFFFFFFFF87654321
+    li  x11, 1
+    li  x11, 0
+
+## TEST: SLL_PATTERN_A
+    # Purpose: Shift alternating 10 pattern left
+    li  x5, 0xAAAAAAAAAAAAAAAA
+    li  x6, 4
+    sll x31, x5, x6
+    li  x30, 0xAAAAAAAAAAAAAAA0 # Expected: A...A0
+    li  x11, 1
+    li  x11, 0
+
+## TEST: SRL_PATTERN_A
+    # Purpose: Shift alternating 10 pattern right logical
+    li  x5, 0xAAAAAAAAAAAAAAAA
+    li  x6, 4
+    srl x31, x5, x6
+    li  x30, 0x0AAAAAAAAAAAAAAA # Expected: 0A...A
+    li  x11, 1
+    li  x11, 0
+
+## TEST: SRA_PATTERN_A
+    # Purpose: Shift alternating 10 pattern right arithmetic
+    li  x5, 0xAAAAAAAAAAAAAAAA # Negative
+    li  x6, 4
+    sra x31, x5, x6
+    li  x30, 0xFAAAAAAAAAAAAAAA # Expected: FA...A
+    li  x11, 1
+    li  x11, 0
+
+## TEST: SLL_SHIFT_BY_64_MASKED
+    # Purpose: Test shift by 64 (should use rs2[5:0]=0, be no-op)
+    li  x5, 0x123456789ABCDEF0
+    li  x6, 64                 # x6[5:0] = 0
+    sll x31, x5, x6
+    li  x30, 0x123456789ABCDEF0
+    li  x11, 1
+    li  x11, 0
+
+## TEST: SRL_SHIFT_BY_64_MASKED
+    # Purpose: Test shift by 64 (should use rs2[5:0]=0, be no-op)
+    li  x5, 0x123456789ABCDEF0
+    li  x6, 64                 # x6[5:0] = 0
+    srl x31, x5, x6
+    li  x30, 0x123456789ABCDEF0
+    li  x11, 1
+    li  x11, 0
+
+## TEST: SRA_SHIFT_BY_64_MASKED
+    # Purpose: Test shift by 64 (should use rs2[5:0]=0, be no-op)
+    li  x5, 0x8765432112345678 # Negative
+    li  x6, 64                 # x6[5:0] = 0
+    sra x31, x5, x6
+    li  x30, 0x8765432112345678
+    li  x11, 1
+    li  x11, 0
+
+## TEST: SLLW_SHIFT_INTO_SIGN
+    # Purpose: Test sllw shifting 1 into bit 31, check sign extension
+    li  x5, 0x40000000         # Lower 32 bits
+    li  x6, 1                  # Shift amount 1
+    sllw x31, x5, x6           # 32b result: 0x80000000. Sign extend -> 0xFFFFFFFF80000000
+    li  x30, 0xFFFFFFFF80000000
+    li  x11, 1
+    li  x11, 0
+
+## TEST: SRLW_SHIFT_OUT_SIGN
+    # Purpose: Test srlw shifting out sign bit, check sign extension of result
+    li  x5, 0x87654321         # Lower 32 bits (MSB=1)
+    li  x6, 1                  # Shift amount 1
+    srlw x31, x5, x6           # 32b result: 0x43B2A320. Sign extend -> 0x43B2A320
+    li  x30, 0x0000000043B2A190
+    li  x11, 1
+    li  x11, 0
+
+## TEST: SRAW_SHIFT_OUT_SIGN
+    # Purpose: Test sraw shifting out sign bit (but replicating it), check sign extension
+    li  x5, 0x87654321         # Lower 32 bits (MSB=1)
+    li  x6, 1                  # Shift amount 1
+    sraw x31, x5, x6           # 32b result: 0xC3B2A320. Sign extend -> 0xFFFFFFFFC3B2A320
+    li  x30, 0xFFFFFFFFC3B2A190
+    li  x11, 1
+    li  x11, 0
+
+## TEST: SLL_ZERO_OPERAND
+    # Purpose: Test shifting zero
+    li  x5, 0
+    li  x6, 15
+    sll x31, x5, x6
+    li  x30, 0
+    li  x11, 1
+    li  x11, 0
+
+## TEST: SRAW_ZERO_OPERAND
+    # Purpose: Test shifting zero
+    li  x5, 0
+    li  x6, 15
+    sraw x31, x5, x6
+    li  x30, 0
+    li  x11, 1
+    li  x11, 0
+
+## TEST: SRLW_ZERO_OPERAND
+    # Purpose: Test shifting zero
+    li  x5, 0
+    li  x6, 15
+    srlw x31, x5, x6
+    li  x30, 0
+    li  x11, 1
+    li  x11, 0
 
 ##--------------------------------------------
 ## End of Register Shift Tests

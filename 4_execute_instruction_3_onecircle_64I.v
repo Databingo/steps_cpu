@@ -829,9 +829,9 @@ begin
 				          case(wire_f7) // func7
 					    7'b0000000: begin
 						        Srlw  <= 1'b1; // set Srlw  Flag 
-					                rram[wire_rd] <= (rram[wire_rs1][31:0] >> rram[wire_rs2][4:0]); 
-					                if (rram[wire_rs2] == 0)
+					                if (rram[wire_rs2][4:0] == 0)
 							    rram[wire_rd] <= {{32{rram[wire_rs1][31]}}, rram[wire_rs1][31:0]}; 
+					                else rram[wire_rd] <= (rram[wire_rs1][31:0] >> rram[wire_rs2][4:0]); 
 				                       pc <= pc + 4; 
 	    	                                       jp <=0;
 					                end
