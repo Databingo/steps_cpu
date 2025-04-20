@@ -889,14 +889,19 @@ begin
 					 // 电路方式: 一周期实现比较 
 					 // 计算 rs1 - rs2 < 0  转化 Sub -> Add
 					 // 同号相加, 号即大小: 1: rs1 小于 rs2
-					  if ((rram[wire_rs1][63] ~^ mirro_rs2[63]) && rram[wire_rs1][63] == 1)
-				             pc <= pc + sign_extended_bimm;
-					 // 异号相加, 果即大小：1: rs1 小于 rs2
-					  else if ((rram[wire_rs1][63] ^ mirro_rs2[63]) && (sub[63] == 1))
+			//		  if ((rram[wire_rs1][63] ~^ mirro_rs2[63]) && rram[wire_rs1][63] == 1)
+			//	             pc <= pc + sign_extended_bimm;
+			//		 // 异号相加, 果即大小：1: rs1 小于 rs2
+			//		  else if ((rram[wire_rs1][63] ^ mirro_rs2[63]) && (sub[63] == 1))
+			//	             pc <= pc + sign_extended_bimm;
+                        //                 // 否则 rs1 大于或等于 rs2
+			//		  else pc <= pc + 4;
+	    	        //                 jp <=0;
+					 // 代码模式 
+					 if ($signed(rram[wire_rs1]) < $signed(rram[wire_rs2]))
 				             pc <= pc + sign_extended_bimm;
                                          // 否则 rs1 大于或等于 rs2
 					  else pc <= pc + 4;
-					 // 代码模式 
 	    	                         jp <=0;
 				         end
 				  3'b101:begin 
@@ -905,15 +910,20 @@ begin
 					 // 电路方式: 一周期实现比较 
 					 // 计算 rs1 - rs2 > 0  转化 Sub -> Add
 					 // 同号相加, 号即大小: 0: rs1 大于 rs2
-					  if ((rram[wire_rs1][63] ~^ mirro_rs2[63]) && rram[wire_rs1][63] == 0)
-				             pc <= pc + sign_extended_bimm;
-					 // 异号相加, 果即大小：0: rs1 大于(或等于) rs2
-					  else if ((rram[wire_rs1][63] ^ mirro_rs2[63]) && (sub[63] == 0))
+				//	  if ((rram[wire_rs1][63] ~^ mirro_rs2[63]) && rram[wire_rs1][63] == 0)
+				//             pc <= pc + sign_extended_bimm;
+				//	 // 异号相加, 果即大小：0: rs1 大于(或等于) rs2
+				//	  else if ((rram[wire_rs1][63] ^ mirro_rs2[63]) && (sub[63] == 0))
+				//             pc <= pc + sign_extended_bimm;
+                                //         // 否则 rs1 小于 rs2
+				//	  else pc <= pc + 4;
+	    	                //        jp <=0;
+					 // 代码模式 
+					 if ($signed(rram[wire_rs1]) >= $signed(rram[wire_rs2]))
 				             pc <= pc + sign_extended_bimm;
                                          // 否则 rs1 小于 rs2
 					  else pc <= pc + 4;
 	    	                         jp <=0;
-					 // 代码模式 
 					 end
 				  3'b110:begin
 			                 //+++++++++++++++++++++++++++++++++
