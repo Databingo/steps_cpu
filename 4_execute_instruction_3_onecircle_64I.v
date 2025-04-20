@@ -689,6 +689,7 @@ begin
 					  //  else rram[wire_rd] <= 1'b1;
 					   // 代码模式 
 					   if (rram[wire_rs1] < {{52{wire_imm[11]}}, wire_imm} ) rram[wire_rd] <= 1'b1; 
+					   else rram[wire_rd] <= 1'b0; 
 				           pc <= pc + 4; 
 	    	                           jp <=0;
 				         end 
