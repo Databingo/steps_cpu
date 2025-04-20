@@ -82,6 +82,9 @@
 // 位移 slli slliw sll sllw srli srliw srl srlw srai sraiw sra sraw
 // 条件 beq bne blt bltu bge bgeu
 // 跳转 jal jalr
+// 中断 ecall ebreak 
+// 保护 fence fence.i
+// 控制 csrrw csrrwi csrrs csrrsi csrrc csrrci
 
 
 

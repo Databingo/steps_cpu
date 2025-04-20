@@ -77,9 +77,9 @@ oEcall, oEbreak, oCsrrw, oCsrrs, oCsrrc, oCsrrwi, oCsrrsi, oCsrrci
 // return: jalr x0, x1, 0
 
 //  程序存储器 
-reg [7:0] irom [0:2999];// 8 位宽度，400 行深度
+reg [7:0] irom [0:9999];// 8 位宽度，400 行深度
 // 数据存储器
-reg [7:0] drom [0:999];// 8 位宽度，400 行深度
+reg [7:0] drom [0:9999];// 8 位宽度，400 行深度
 // 堆栈存储器
 reg [7:0] srom [0:399];// 8 位宽度，400 行深度
 
@@ -805,10 +805,14 @@ begin
 					                  Addw  <= 1'b1; // set Addw  Flag 
 						          // 执行加法:
 				                          rram[wire_rd] <= {{32{sum[31]}}, rram[wire_rs1][31:0] + rram[wire_rs2][31:0]}; 
+				                          pc <= pc + 4; 
+	    	                                          jp <=0;
 						          end
 					      7'b0100000: begin
 							  Subw  <= 1'b1; // set Subw  Flag 
 				                          rram[wire_rd] <= {{32{sub[31]}}, rram[wire_rs1][31:0] - rram[wire_rs2][31:0]}; 
+				                          pc <= pc + 4; 
+	    	                                          jp <=0;
 						          end
 				          endcase
 				         end 

@@ -470,6 +470,7 @@ func main() {
 			fmt.Printf("%s: \n", ins)
 
 		default:
+		        origin_instr = strings.TrimLeft(origin_instr, " ")
 			real_instr.WriteString(origin_instr)
 			//write2f([]byte(real_instr.String()))
 		}
