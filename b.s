@@ -699,11 +699,11 @@ L_hablt_v_1:
 
 ## TEST: HAZARD_ADDW_BGEU_NOT_TAKEN
     # Purpose: Branch condition depends on ADDW. Tests EX->EX forwarding or stall for W instr.
-    li x5, 0x80000000        # MinNeg 32b
-    li x6, -1                # -1 (32b view)
-    li x8, 0x7FFFFFFF        # Value to compare against (MaxPos 32b)
-    addw x7, x5, x6          # x7 = 0x80000000 + 0xFFFFFFFF = 0x7FFFFFFF (32b result, sign ext to 0x7F...)
-    bgeu x7, x8, L_habwu_nt_1 # Branch condition 0x7F... >= 0x7F... (True because >=). TAKEN.
+    #li x5, 0x80000000        # MinNeg 32b
+    #li x6, -1                # -1 (32b view)
+    #li x8, 0x7FFFFFFF        # Value to compare against (MaxPos 32b)
+    #addw x7, x5, x6          # x7 = 0x80000000 + 0xFFFFFFFF = 0x7FFFFFFF (32b result, sign ext to 0x7F...)
+    #bgeu x7, x8, L_habwu_nt_1 # Branch condition 0x7F... >= 0x7F... (True because >=). TAKEN.
                                # Let's change comparison to make it Not Taken. Compare x7 vs x5
     # --- Redo Test ---
     li x5, 0x70000000
@@ -756,11 +756,3 @@ L_habwu_v_1:
 ##--------------------------------------------
 
 
-
-
-# (Ensure the main end_loop label is present after these tests)
-# end_loop_shift_imm_word: # Or whichever file these are added to
-#    j end_loop_shift_imm_word
-##--------------------------------------------
-## End of Branch Tests
-##--------------------------------------------
