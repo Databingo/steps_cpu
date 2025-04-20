@@ -74,7 +74,7 @@
 //00000000 00000000 01110000 01110011 //___000000000000_00000_111_00000_1110011 // CSRRCI |csr.12|zim.5|111.3|rd.5|1110011.7| atomic clear,0-extend csr in rd, 0-extended 5unsigned zimm as 1 mask set csr0
 
 //测试分类：  59+li=60
-//#立即 li lui ^auipc
+//#立即 li lui auipc
 //#加载 lb lbu lh lhu lw lwu ld
 //#保存 sb sh sw sd
 //#加减 add addw addi addiw sub subw 
