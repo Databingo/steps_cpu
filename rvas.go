@@ -389,11 +389,11 @@ func main() {
 
 			real_instr.WriteString(ins)
 			fmt.Printf("%s: \n", ins)
-	        case "nop":
-		        ins := "addi x0, x0, 0\n"
+		case "nop":
+			ins := "addi x0, x0, 0\n"
 			real_instr.WriteString(ins)
-	        case "ret":
-		        ins := "jalr x0, x1, 0\n"
+		case "ret":
+			ins := "jalr x0, x1, 0\n"
 			real_instr.WriteString(ins)
 		default:
 			origin_instr = strings.TrimLeft(origin_instr, " ")
