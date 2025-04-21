@@ -15,25 +15,25 @@
 #vvp s4 |less
 
 echo "" > binary_instructions.txt
-#go run rvasm64I.go test.s &&
-#go run rvasm64I.go li.s &&
-#go run rvasm64I.go lui.s &&
-#go run rvasm64I.go lb_lbu.s &&
-#go run rvasm64I.go lh_lhu.s &&
-#go run rvasm64I.go lw_lwu.s &&
-#go run rvasm64I.go ld.s &&
-#go run rvasm64I.go s.s &&
-#go run rvasm64I.go add_sub.s &&
-#go run rvasm64I.go slt_u.s &&
-#go run rvasm64I.go slti_u.s &&
-#go run rvasm64I.go gate.s &&
-#go run rvasm64I.go gate_i.s &&
-#go run rvasm64I.go sh.s &&
-#go run rvasm64I.go sh_i.s &&
-#go run rvasm64I.go b.s &&
-#go run rvasm64I.go j.s &&
-#go run rvasm64I.go auipc.s &&
-go run rvasm64I.go jr.s &&
+#go run rvas.go test.s &&
+#go run rvas.go li.s &&
+#go run rvas.go lui.s &&
+#go run rvas.go lb_lbu.s &&
+#go run rvas.go lh_lhu.s &&
+#go run rvas.go lw_lwu.s &&
+#go run rvas.go ld.s &&
+#go run rvas.go s.s &&
+#go run rvas.go add_sub.s &&
+#go run rvas.go slt_u.s &&
+#go run rvas.go slti_u.s &&
+#go run rvas.go gate.s &&
+#go run rvas.go gate_i.s &&
+#go run rvas.go sh.s &&
+#go run rvas.go sh_i.s &&
+#go run rvas.go b.s &&
+#go run rvas.go j.s &&
+#go run rvas.go auipc.s &&
+go run rvas.go jr.s &&
 # s4.2
 #iverilog -g2012 -o s4 4_execute_instruction_2_64I.v 4tb.v &&
 #iverilog -g2012 -o s4 4_mini.v 4tb.v &&
