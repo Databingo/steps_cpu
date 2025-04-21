@@ -12,17 +12,15 @@ import (
 	"strings"
 )
 
-func save_f(text string, name string) {
-	f, _ := os.Create(name)
-	defer f.Close()
-	f.WriteString(text)
+func write2f(text string, name string) {
+	fi, _ := os.Create(name)
+	defer fi.Close()
+	fi.WriteString(text)
 }
-func save_binary_instruction(instr string) {
-	if fs, err := os.OpenFile("binary_instructions.txt", os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0666); err == nil {
+func append2f(instr string, name string) {
+	if fs, err := os.OpenFile(name, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0666); err == nil {
 		_, err = fs.WriteString(instr + "\n")
-		if err != nil {
-			panic(err)
-		}
+		check(err)
 		fs.Close()
 	}
 }
@@ -220,6 +218,7 @@ func main() {
 	check(err)
 	defer file.Close()
 
+	// zero pass
 	scanner0 := bufio.NewScanner(file) // stores content from file
 	scanner0.Split(bufio.ScanLines)
 
@@ -234,7 +233,6 @@ func main() {
 
 	var real_instr strings.Builder
 
-	// zero pass
 	// translate pseudo-instruction to real-instruction
 	for scanner0.Scan() {
 		origin_instr := scanner0.Text() + "\n"
@@ -269,7 +267,7 @@ func main() {
 			sign, imm, err := isValidImmediate_u(code[2])
 			//op, opFound := opBin[code[0]]
 			//rd, rdFound := regBin[code[1]]
-			fmt.Println("get li: ", sign, imm)
+			//fmt.Println("get li: ", sign, imm)
 
 			if err != nil {
 				fmt.Printf("~Error on line %d: %s, %s \n", lineCounter, err, line)
@@ -405,11 +403,12 @@ func main() {
 
 	fmt.Println("print real_instr")
 	fmt.Println(real_instr.String())
-        save_f(real_instr.String(), "tmp.txt")
-	scanner := bufio.NewScanner(strings.NewReader(real_instr.String())) // stores content from file
-	scanner.Split(bufio.ScanLines)
+        write2f(real_instr.String(), "tmp.txt")
+
 	// first pass
 	fmt.Println("start first pass.")
+	scanner := bufio.NewScanner(strings.NewReader(real_instr.String()))
+	scanner.Split(bufio.ScanLines)
 	for scanner.Scan() {
 		line := strings.Split(scanner.Text(), "#")[0] // get any text before the comment "#" and ignore any text after it
 		code = strings.FieldsFunc(line, SplitOn)      // break code into its operation and operands
@@ -611,12 +610,12 @@ func main() {
 		0x00, 0x00, // index of the section header table entry that contains the section names
 	})
 
-	scanner = bufio.NewScanner(strings.NewReader(real_instr.String())) // stores content from file
-	scanner.Split(bufio.ScanLines)
 	// second pass
 	address = 0
 	lineCounter = 1
 	instructionBuffer := make([]byte, 4) // buffer to store 4 bytes
+	scanner = bufio.NewScanner(strings.NewReader(real_instr.String())) // stores content from file
+	scanner.Split(bufio.ScanLines)
 	for scanner.Scan() {
 		line := strings.Split(scanner.Text(), "#")[0] // get any text before the comment "#" and ignore any text after it
 		code = strings.FieldsFunc(line, SplitOn)      // split into  operation, operands, and/or labels
@@ -824,7 +823,7 @@ func main() {
 		addr := fmt.Sprintf("%08b", address)
 		addrd := fmt.Sprintf("%05d", address)
 		little_endian_ins := ins[24:32] + " " + ins[16:24] + " " + ins[8:16] + " " + ins[0:8]
-		save_binary_instruction(little_endian_ins + " // Addr: " + addrd + " " + addr + " " + ins + " " + line)
+		append2f(little_endian_ins + " // Addr: " + addrd + " " + addr + " " + ins + " " + line, "binary_instructions.txt")
 		lineCounter++
 		address += 4
 
