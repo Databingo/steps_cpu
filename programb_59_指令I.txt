@@ -73,8 +73,8 @@
 //00000000 00000000 01100000 01110011 //___000000000000_00000_110_00000_1110011 // CSRRSI |csr.12|zim.5|110.3|rd.5|1110011.7| atomic set, 0-extend csr in rd, 0-extended 5unsigned zimm as 1 mask set csr 1
 //00000000 00000000 01110000 01110011 //___000000000000_00000_111_00000_1110011 // CSRRCI |csr.12|zim.5|111.3|rd.5|1110011.7| atomic clear,0-extend csr in rd, 0-extended 5unsigned zimm as 1 mask set csr0
 
-//测试分类：  59+li=60
-//#立即 li lui auipc
+//测试分类：  59
+//#高位 lui auipc
 //#加载 lb lbu lh lhu lw lwu ld
 //#保存 sb sh sw sd
 //#加减 add addw addi addiw sub subw 
@@ -221,7 +221,6 @@
 
 // 伪指令汇编测试
 //#LI
-//#LUI
 
 
 
