@@ -116,7 +116,7 @@ target_jalr_lsb:                # PC = T (Assume Even)
 setup_jalr_lsb:
     # Set base x5 = Target Address - 1 (ODD address)
     auipc x6, 0                 # x6 = PC of auipc (A)
-    addi x6, x6, 16             # x6 = A + 16 = Address of target_jalr_lsb
+    addi x6, x6, -12             # x6 = A + 16 = Address of target_jalr_lsb
                                 # (Count: addi 4, jalr 4, li 4, j 4 -> 16 bytes)
     addi x5, x6, -1             # x5 = Target - 1 (Odd Address)
     # Jump using x5+1. Target = (x5+1)&~1 = ((Target-1)+1)&~1 = Target&~1 = Target
