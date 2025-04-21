@@ -12,12 +12,11 @@ import (
 	"strings"
 )
 
-func write2f(b []byte) {
-	f, _ := os.Create("tmp.txt")
+func save_f(text string, name string) {
+	f, _ := os.Create(name)
 	defer f.Close()
-	f.Write(b)
+	f.WriteString(text)
 }
-
 func save_binary_instruction(instr string) {
 	if fs, err := os.OpenFile("binary_instructions.txt", os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0666); err == nil {
 		_, err = fs.WriteString(instr + "\n")
@@ -406,8 +405,7 @@ func main() {
 
 	fmt.Println("print real_instr")
 	fmt.Println(real_instr.String())
-	write2f([]byte(real_instr.String()))
-
+        save_f(real_instr.String(), "tmp.txt")
 	scanner := bufio.NewScanner(strings.NewReader(real_instr.String())) // stores content from file
 	scanner.Split(bufio.ScanLines)
 	// first pass
