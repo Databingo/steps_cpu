@@ -13,8 +13,8 @@ ori x31, x31, 0x1
 jal x0, verify_jalr_zero_offset
 setup_jalr_zero_offset:
 auipc x5, 0                 # x5 = PC of auipc (A)
-addi x5, x5, -8             # x5 = Address of target_jalr_zero_offset
-jalr x0, x5, 0              # Jump to address in x5 (Target)
+addi x5, x5, -8             # x5 = Address of target_jalr_zero_offset 
+jalr x0, x5, 0              # Jump to address in x5 (Target)运气to li.2(addi xori)
 #     li x31, 999                 
 addi x31, x0, 0x0
 ori x31, x31, 0x3e7
@@ -35,7 +35,7 @@ ori x31, x31, 0x2
 jal x0, verify_jalr_pos_offset
 setup_jalr_pos_offset:          # PC = T+8 (approx)
 auipc x5, 0                 # x5 = PC of auipc (A = approx T+8)
-addi x5, x5, -20            # x5 = A - 20
+addi x5, x5, -24           # x5 = A - 20
 jalr x0, x5, 12             # Use positive offset 12
 #     li x31, 888                 
 addi x31, x0, 0x0
@@ -80,7 +80,7 @@ addi x31, x0, 0x0
 ori x31, x31, 0x22b
 setup_jalr_link_ret:
 auipc x5, 0                 # x5 = PC of auipc (A)
-addi x5, x5, 16             # x5 = A + 16 = Address of target_jalr_link_ret
+addi x5, x5, -16            # x5 = A + 16 = Address of target_jalr_link_ret
 jalr ra, x5, 0
 #     li x31, 4                   
 addi x31, x0, 0x0

@@ -48,7 +48,7 @@ setup_jalr_pos_offset:          # PC = T+8 (approx)
     # Set base x5 = Target Address - 12
     auipc x5, 0                 # x5 = PC of auipc (A = approx T+8)
     # Target is at A - 8 bytes. Base needs to be Target - 12 = A - 8 - 12 = A - 20
-    addi x5, x5, -20            # x5 = A - 20
+    addi x5, x5, -24           # x5 = A - 20
     # Jump target = Base + Offset = (A-20) + 12 = A - 8 = Target
     jalr x0, x5, 12             # Use positive offset 12
     # --- Skipped code ---
@@ -92,7 +92,7 @@ target_jalr_link_ret:           # PC = T
 setup_jalr_link_ret:
     # Calculate target address
     auipc x5, 0                 # x5 = PC of auipc (A)
-    addi x5, x5, 16             # x5 = A + 16 = Address of target_jalr_link_ret
+    addi x5, x5, -16            # x5 = A + 16 = Address of target_jalr_link_ret
                                 # (Count: addi 4, jalr 4, li 4, j 4 -> 16 bytes)
     # Call function, save return address in ra (x1)
     jalr ra, x5, 0
