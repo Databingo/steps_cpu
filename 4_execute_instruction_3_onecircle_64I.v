@@ -843,16 +843,6 @@ begin
 						       csrram[sstatus][1] <= csrram[sstatus][5]; // save previous interrupt enable(SIE) to SPIE 
 						       csrram[sstatus][5] <= 0; // clear SIE
                            //stvec: 63-2_BASE|1-0_MODE|(auto padding last 00 for base) Mode: 00direct to base<<2; 01vectord to base if ecall and base+4*scause[62:0] if interrupt;10,11
-                                                       //base_addr = stvec[63:2] << 2;
-						       //mode = stvec[1:0];
-						       //is_interrupt = scasue[63];
-						       //is_vectored = (mode == 2'b01);
-						       //if (is_interrupt && is_vectored)
-						       //begin
-						       //    interrupt_cause = scause[62:0]; 
-						       //    target_pc = base_addr + (interrupt_casue << 2);
-						       //end
-						       //else target_pc = base_addr;
 						       if ((scause[63]==1'b1) && (stvec[1:0]== 2'b01))
 							   pc <= (stvec[63:2] << 2) + (scause[62:0] << 2);
 						       else pc <= (stvec[63:2] << 2);
