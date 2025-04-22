@@ -280,69 +280,8 @@ begin
 	  //imm <=0;
           rram[0] <= 64'h0;  // x0 恒为 0 
 	  rram[1] <=0; rram[2] <=0; rram[3] <=0; rram[30] <=0; rram[31] <=0;
-	  for (integer i = 0; i < 32; i = i + 1)  //!!!!!!!!!!!!!!!!!!!!!!!!!!初始化零否则新启用寄存器就不灵
+	  for (integer i = 0; i < 32; i = i + 1)  //!!初始化零否则新启用寄存器就不灵
 	      rram[i] <= 64'h0;
-	  //Lui <=0;
-	  //Auipc <=0;  
-	  //Lb <=0;
-	  //Lbu <=0;
-          //Lh <=0; 
-          //Lhu <=0;
-          //Lw <=0;
-          //Lwu <=0;
-          //Ld <=0;
-          //Sb <=0;
-          //Sh <=0;
-          //Sw <=0;
-          //Sd <=0;
-	  //Add <=0;
-	  //Sub <=0;
-	  //Sll <=0;
-	  //Slt <=0;
-	  //Sltu <=0;
-	  //Xor <=0;
-	  //Srl <=0;
-	  //Sra <=0;
-	  //Or <=0;
-	  //And <=0;
-	  //Addi <=0;
-	  //Slti <=0;
-	  //Sltiu <=0;
-	  //Ori <=0;
-	  //Andi <=0;
-	  //Xori <=0;
-	  //Slli <=0;
-	  //Srli <=0;
-	  //Srai <=0;
-	  //Addiw <=0;
-	  //Slliw <=0;
-	  //Srliw <=0;
-	  //Sraiw <=0;
-	  //Addw <=0;
-	  //Subw <=0;
-	  //Sllw <=0;
-	  //Srlw <=0;
-	  //Sraw <=0;
-	  //Jal <=0;
-	  //Jalr <=0;
-	  //Beq <=0;
-	  //Bne <=0;
-	  //Blt <=0;
-	  //Bge <=0;
-	  //Bltu <=0;
-	  //Bgeu <=0;
-	  //Fence <=0;
-	  //Fencei <=0;
-	  //Ecall <=0; 
-	  //Ebreak <=0;
-	  //Csrrw <=0;
-	  //Csrrs <=0;
-	  //Csrrc <=0;
-	  //Csrrwi <=0;
-	  //Csrrsi <=0;
-	  //Csrrci <=0;
-	  //opcode <=0;
-	  //func3 <=0;
 	end
 	else
         // 开始指令节拍
@@ -559,9 +498,8 @@ begin
 				    3'b011:begin 
 				           Sltu <= 1'b1; // set Sltu Flag  
 				           // if rs1 less than rs2 both as unsign then put 1 in rd else 0
-					     if (rram[wire_rs1] < rram[wire_rs2]) 
-						 rram[wire_rd] <= 1'b1; 
-					     else rram[wire_rd] <= 1'b0;
+					   if (rram[wire_rs1] < rram[wire_rs2]) rram[wire_rd] <= 1'b1; 
+					   else rram[wire_rd] <= 1'b0;
 				           pc <= pc + 4; 
 	    	                           jp <=0;
 				         end 
@@ -624,8 +562,8 @@ begin
 				         // 溢出判断：
 				         if ((rram[wire_rs1][63] ~^ wire_imm[11]) && (rram[wire_rs1][63] ^ sum_imm[63])) 
 				           begin
-	    	                         rram[3] <= 1; // 溢出标志
-	    	                         rram[4] <= rram[wire_rs1][63]; // 溢出值
+	    	                           rram[3] <= 1; // 溢出标志
+	    	                           rram[4] <= rram[wire_rs1][63]; // 溢出值
 				           end
 				         pc <= pc + 4; 
 	    	                         jp <=0;
@@ -748,7 +686,6 @@ begin
 				          case(wire_f7) // func7
 					      7'b0000000: begin 
 					                  Addw  <= 1'b1; // set Addw  Flag 
-						          // 执行加法:
 				                          rram[wire_rd] <= {{32{sum[31]}}, rram[wire_rs1][31:0] + rram[wire_rs2][31:0]}; 
 				                          pc <= pc + 4; 
 	    	                                          jp <=0;
@@ -772,11 +709,10 @@ begin
 				          case(wire_f7) // func7
 					    7'b0000000: begin
 						        Srlw  <= 1'b1; // set Srlw  Flag 
-					                if (rram[wire_rs2][4:0] == 0)
-							    rram[wire_rd] <= {{32{rram[wire_rs1][31]}}, rram[wire_rs1][31:0]}; 
+					                if (rram[wire_rs2][4:0] == 0) rram[wire_rd] <= {{32{rram[wire_rs1][31]}}, rram[wire_rs1][31:0]}; 
 					                else rram[wire_rd] <= (rram[wire_rs1][31:0] >> rram[wire_rs2][4:0]); 
-				                       pc <= pc + 4; 
-	    	                                       jp <=0;
+				                        pc <= pc + 4; 
+	    	                                        jp <=0;
 					                end
 					    7'b0100000: begin
 						       Sraw  <= 1'b1; // set Sraw  Flag 
@@ -811,42 +747,35 @@ begin
 				  3'b000:begin
 				         Beq  <= 1'b1; // set Beq  Flag 
 				         //  take branch if rs1 rs2 equal to PC+(sign-extend imm_0)
-					 if (rram[wire_rs1] == rram[wire_rs2])
-				             pc <= pc + sign_extended_bimm;
+					 if (rram[wire_rs1] == rram[wire_rs2]) pc <= pc + sign_extended_bimm;
 					 else pc <= pc + 4; 
 	    	                         jp <=0;
 				         end
 				  3'b001:begin 
 					 Bne  <= 1'b1; // set Bne  Flag 
 				         //  take branch if rs1 rs2 not equal to PC+(sign-extend imm_0)
-					 if (rram[wire_rs1] != rram[wire_rs2])
-				             pc <= pc + sign_extended_bimm;
+					 if (rram[wire_rs1] != rram[wire_rs2]) pc <= pc + sign_extended_bimm;
 					 else pc <= pc + 4; 
 	    	                         jp <=0;
 				         end
 				  3'b100:begin 
 					 Blt  <= 1'b1; // set Blt  Flag 
 				         //  take branch if rs1 smaller than rs2 to PC+(sign-extend imm_0)
-					 if ($signed(rram[wire_rs1]) < $signed(rram[wire_rs2]))
-				             pc <= pc + sign_extended_bimm;
-                                         // 否则 rs1 大于或等于 rs2
+					 if ($signed(rram[wire_rs1]) < $signed(rram[wire_rs2])) pc <= pc + sign_extended_bimm;
 					  else pc <= pc + 4;
 	    	                         jp <=0;
 				         end
 				  3'b101:begin 
 					 Bge  <= 1'b1; // set Bge  Flag 
 				         //  take branch if rs1 bigger than or equite to rs2 to PC+(sign-extend imm_0)
-					 if ($signed(rram[wire_rs1]) >= $signed(rram[wire_rs2]))
-				             pc <= pc + sign_extended_bimm;
-                                         // 否则 rs1 小于 rs2
+					 if ($signed(rram[wire_rs1]) >= $signed(rram[wire_rs2])) pc <= pc + sign_extended_bimm;
 					  else pc <= pc + 4;
 	    	                         jp <=0;
 					 end
 				  3'b110:begin
 					 Bltu <= 1'b1; // set Bltu Flag 
 					 //take branch if rs1 < rs2 in unsigned comparison 
-					    if (rram[wire_rs1] < rram[wire_rs2]) 
-					        pc <= pc + sign_extended_bimm;
+					    if (rram[wire_rs1] < rram[wire_rs2]) pc <= pc + sign_extended_bimm;
 					    else pc <= pc + 4;
 	    	                            jp <=0;
 				         end 
@@ -854,8 +783,7 @@ begin
 				  3'b111:begin
 					 Bgeu <= 1'b1; // set Bgeu Flag 
 					 //take branch if rs1 >= rs2 in unsigned comparison 
-					    if (rram[wire_rs1] >= rram[wire_rs2]) 
-					        pc <= pc + sign_extended_bimm;
+					    if (rram[wire_rs1] >= rram[wire_rs2]) pc <= pc + sign_extended_bimm;
 					    else pc <= pc + 4;
 	    	                            jp <=0;
 				         end 
