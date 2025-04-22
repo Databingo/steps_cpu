@@ -46,6 +46,15 @@ function [4:0] csr_index;
 	//12'h3B1: csr_index = 5'd33;	                           // 0x3B1 MRW pmpaddr0
 	//                          	                           // ...
 	//12'h3EF: csr_index = 5'd34;	                           // 0x3EF MRW pmpaddr0
+
+
+
+
+
+
+   
+   
+   
     default: csr_index = 5'b00000;
   endcase
  end
