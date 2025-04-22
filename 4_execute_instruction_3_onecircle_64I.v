@@ -47,6 +47,7 @@ function [4:0] csr_index;
 	//                          	                           // ...
 	//12'h3EF: csr_index = 5'd34;	                           // 0x3EF MRW pmpaddr0
 
+	12'h100: csr_index = 5'd31;	                           // 0x3AF MRW pmpcfg15  
 
 
 
@@ -61,6 +62,7 @@ function [4:0] csr_index;
 endfunction
 
 reg [4:0] csr_id; 
+reg [11:0] csr_nu; 
 
 module s4 (reset_n, clock, oir, opc, ojp, oop, of3, of7,
 oimm, oupimm,oshamt, 
