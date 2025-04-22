@@ -93,7 +93,10 @@
 //// -------Privileged-----------------
 // 0001000 00010 00000 000 00000 1110011 SRET
 // 0011000 00010 00000 000 00000 1110011 MRET
-// 0001000 00101 00000 000 00000 1110011 WFI
+// 0001000 00101 00000 000 00000 1110011 WFI //wait for interrupt
+URET
+CSR..
+SFENCE.VMA supervisor fence virtual memory address
 
 
 

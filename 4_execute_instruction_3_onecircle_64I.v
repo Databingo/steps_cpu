@@ -1,7 +1,7 @@
 // 声明指令控制线
 reg Lui, Auipc, Lb, Lbu, Lh, Lhu, Lw, Lwu, Ld, Sb, Sh, Sw, Sd, Add, Sub, Sll, Slt, Sltu, Xor, Srl, Sra, Or, And, Addi, Slti, Sltiu, Ori, Andi, Xori, Slli, Srli, Srai, Addiw, Slliw, Srliw, Sraiw, Addw, Subw, Sllw, Srlw, Sraw, Jal, Jalr, Beq, Bne, Blt, Bge, Bltu, Bgeu, Fence, Fencei, Ecall, Ebreak, Csrrw, Csrrs, Csrrc, Csrrwi, Csrrsi, Csrrci;
 
-
+// CSR pre 00 user 01 super 10 hyper 11 machine
 // Supervisor Trap Setup
 integer sstatus = 12'h100; //63_SD|WPRI|33_UXL1|32_UXL0|WPRI|19_MXR|18_SUM|17_WPRI|16_XS1|15_XS0|14_FS1|13_FS0|WPRI|8_SPP|7_WPRI|6_UBE|5_SPIE|WPRI|1_SIE|0_WPRI|
 integer sedeleg = 12'h102;
