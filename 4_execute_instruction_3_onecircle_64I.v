@@ -363,9 +363,7 @@ begin
 		   7'b0010111:begin
 		                Auipc <= 1'b1; // set Auipc Flag
 				//left shift 20 bits immediate 12bits sext to 64 add pc then put to rd
-				//rram[wire_rd] <= pc + (wire_upimm << 12); 
 				rram[wire_rd] <= pc + {{32{wire_upimm[19]}}, wire_upimm, 12'b0};
-				//rram[wire_rd] <= pc + {{32{wire_upimm[19]}}, wire_upimm << 12};
 				pc <= pc + 4; 
 	    	                jp <=0;
 		   end
@@ -390,15 +388,9 @@ begin
 				  3'b001:begin 
                                            Lh  <= 1'b1; // set Lh  Flag 
 				           //load 16 bite sign extend to 64 bits at imm(s1) to rd
-				        //   rram[wire_rd] <= {{48{drom[rram[wire_rs1]+wire_imm + 1][7]}}, 
-					//                         drom[rram[wire_rs1]+wire_imm + 1], 
-					//			 drom[rram[wire_rs1]+wire_imm] }; 
 				           rram[wire_rd] <= {{48{drom[rram[wire_rs1]+{{52{wire_imm[11]}},wire_imm}+ 1][7]}}, 
 					                         drom[rram[wire_rs1]+{{52{wire_imm[11]}},wire_imm}+ 1], 
 								 drom[rram[wire_rs1]+{{52{wire_imm[11]}},wire_imm}] }; 
-				           //rram[wire_rd] <= rram[wire_rs1];
-				           //rram[wire_rd] <= drom[rram[wire_rs1] + wire_imm];
-				          // rram[wire_rd] <= drom[48];
 				           pc <= pc + 4; 
 	    	                           jp <=0;
 				         end 
@@ -567,25 +559,9 @@ begin
 				    3'b011:begin 
 				           Sltu <= 1'b1; // set Sltu Flag  
 				           // if rs1 less than rs2 both as unsign then put 1 in rd else 0
-					   // 电路方式: 一周期实现比较 
-					   // 计算 rs1 - rs2 < 0  转化 Sub -> Add
-					   // 异号相加, 果即大小：1: rs1 小于 rs2
-					   // 溢出位 0 取反为 1 负
-					   // 次首位进位判断：a==b==1; a^b && c==0
-					   // 进位后为 正(或0) 大于等于
-					 // if (rram[wire_rs1][63] == mirro_rs2[63] == 1)
-                                         //          rram[wire_rd] <= 1'b0; 
-					 // else if ((rram[wire_rs1][63] ^ mirro_rs2[63]) && (sub[63] == 0))
-                                         //          rram[wire_rd] <= 1'b0; 
-                                         //// 否则 rs1 小于 rs2
-					 // else rram[wire_rd] <= 1'b1;
-					   // 代码模式 
 					     if (rram[wire_rs1] < rram[wire_rs2]) 
-					    // if ($unsigned(rram[wire_rs1]) < $unsigned(rram[wire_rs2])) 
 						 rram[wire_rd] <= 1'b1; 
 					     else rram[wire_rd] <= 1'b0;
-					   // if ({1'b0, rram[wire_rs1]} - {1'b0, rram[wire_rs2]} < 0 ) rram[wire_rd] <= 1'b1; 
-					   
 				           pc <= pc + 4; 
 	    	                           jp <=0;
 				         end 
@@ -675,19 +651,6 @@ begin
 				 3'b011:begin
 					   Sltiu <= 1'b1; // set Sltiu Flag 
 				           // if rs1 less than imm both as unsign then put 1 in rd else 0
-					   // 电路方式: 一周期实现比较 
-					   // 计算 rs1 - imm < 0  转化 Sub -> Add
-					   // 异号相加, 果即大小：1: rs1 小于 imm 
-					   // 溢出位 0 取反为 1 负
-					   // 次首位进位判断：a==b==1; a^b && c==0
-					   // 进位后为 正(或0) 大于等于
-					  //  if (rram[wire_rs1][63] == mirro_imm[63] == 1)
-                                          //           rram[wire_rd] <= 1'b0; 
-					  //  else if ((rram[wire_rs1][63] ^ mirro_imm[63]) && (sub_imm[63] == 0))
-                                          //           rram[wire_rd] <= 1'b0; 
-                                          // // 否则 rs1 小于 rs2
-					  //  else rram[wire_rd] <= 1'b1;
-					   // 代码模式 
 					   if (rram[wire_rs1] < {{52{wire_imm[11]}}, wire_imm} ) rram[wire_rd] <= 1'b1; 
 					   else rram[wire_rd] <= 1'b0; 
 				           pc <= pc + 4; 
@@ -746,35 +709,16 @@ begin
                    // Math-Logic-Shift-Immediate-64 class
 	           7'b0011011:begin 
 			        case(wire_f3) // func3
-			                    //+++++++++++++++++++++++++++++++++
 				  3'b000: begin
 				         Addiw  <= 1'b1; // set Addiw  Flag 
 				         //sign-extend imm.12 to 32 add to sr1.low32, sign-extend to 64 to rd 
-				         // 执行加法:
-				         //rram[wire_rd] <= {{32{sum_imm[31]}}, 32'b0} + rram[wire_rs1][31:0] + {{20{wire_imm[11]}}, wire_imm}; 
-				         //rram[wire_rd] <= rram[wire_rs1] + {{52{wire_imm[11]}}, wire_imm}; 
-				         //rram[wire_rd] <=   {{32{sum_imm[31]}}, sum_imm[31:0]}; 
-				         //rram[wire_rd] <=   {{32{sum_imm[31]}} , rram[wire_rs1][31:0] + {{20{wire_imm[11]}}, wire_imm}}; 
-					   
 				         rram[wire_rd] <=   {{32{sum_imm_32[31]}}, rram[wire_rs1][31:0] + {{20{wire_imm[11]}}, wire_imm}}; 
-				         //rram[wire_rd] <=   {{32{sum_imm_32[31]}}, sum_imm_32}; 
-
-				         // 溢出判断：
-				       //  //if ((rram[wire_rs1][63] ~^ wire_imm[11]) && (rram[wire_rs1][63] ^ sum_imm[63])) 
-				       //  if ((rram[wire_rs1][31] ~^ wire_imm[11]) && (rram[wire_rs1][31] ^ sum_imm[31])) 
-				       //    begin
-	    	                       //      rram[3] <= 1; // 溢出标志
-	    	                       //      //rram[4] <= rram[wire_rs1][63]; // 溢出值
-	    	                       //      rram[4] <= rram[wire_rs1][31]; // 溢出值
-				       //    end
 				         pc <= pc + 4; 
 	    	                         jp <=0;
 				         end
 				 3'b001:begin// func3 001 for left 
 					   Slliw  <= 1'b1; // set Slliw  Flag  
 					   // shift lift  logicl rs1.low32 by imm.12[low5.unsign] padding 0 to rd
-					   //rram[wire_rd] <= {{32{rram[wire_rs1][32-wire_shamt]}}, (rram[wire_rs1][31:0] << wire_shamt )[31:0]}; 
-					   //rram[wire_rd] <= {{32{sll_s1[31-wire_shamt]}}, (rram[wire_rs1][31:0] << wire_shamt )}; 
 					   rram[wire_rd] <= {{32{slliw_s1[31]}}, slliw_s1[31:0]};
 				           pc <= pc + 4; 
 	    	                           jp <=0;
@@ -790,8 +734,6 @@ begin
 					      7'b0100000:begin 
 						Sraiw <= 1'b1; // set Sraiw  Flag 
 					        rram[wire_rd] <= {{32{sraiw_s1[31]}}, sraiw_s1[31:0]};
-					        //rram[wire_rd] <= ($signed(rram[wire_rs1][31:0]) >>> wire_shamt[4:0] ); 
-					        //rram[wire_rd] <= {{32{1'b1}}, sraiw_s1[31:0]};
 				                pc <= pc + 4; 
 	    	                                jp <=0;
 					        end
@@ -885,19 +827,6 @@ begin
 				  3'b100:begin 
 					 Blt  <= 1'b1; // set Blt  Flag 
 				         //  take branch if rs1 smaller than rs2 to PC+(sign-extend imm_0)
-					 //
-					 // 电路方式: 一周期实现比较 
-					 // 计算 rs1 - rs2 < 0  转化 Sub -> Add
-					 // 同号相加, 号即大小: 1: rs1 小于 rs2
-			//		  if ((rram[wire_rs1][63] ~^ mirro_rs2[63]) && rram[wire_rs1][63] == 1)
-			//	             pc <= pc + sign_extended_bimm;
-			//		 // 异号相加, 果即大小：1: rs1 小于 rs2
-			//		  else if ((rram[wire_rs1][63] ^ mirro_rs2[63]) && (sub[63] == 1))
-			//	             pc <= pc + sign_extended_bimm;
-                        //                 // 否则 rs1 大于或等于 rs2
-			//		  else pc <= pc + 4;
-	    	        //                 jp <=0;
-					 // 代码模式 
 					 if ($signed(rram[wire_rs1]) < $signed(rram[wire_rs2]))
 				             pc <= pc + sign_extended_bimm;
                                          // 否则 rs1 大于或等于 rs2
@@ -907,18 +836,6 @@ begin
 				  3'b101:begin 
 					 Bge  <= 1'b1; // set Bge  Flag 
 				         //  take branch if rs1 bigger than or equite to rs2 to PC+(sign-extend imm_0)
-					 // 电路方式: 一周期实现比较 
-					 // 计算 rs1 - rs2 > 0  转化 Sub -> Add
-					 // 同号相加, 号即大小: 0: rs1 大于 rs2
-				//	  if ((rram[wire_rs1][63] ~^ mirro_rs2[63]) && rram[wire_rs1][63] == 0)
-				//             pc <= pc + sign_extended_bimm;
-				//	 // 异号相加, 果即大小：0: rs1 大于(或等于) rs2
-				//	  else if ((rram[wire_rs1][63] ^ mirro_rs2[63]) && (sub[63] == 0))
-				//             pc <= pc + sign_extended_bimm;
-                                //         // 否则 rs1 小于 rs2
-				//	  else pc <= pc + 4;
-	    	                //        jp <=0;
-					 // 代码模式 
 					 if ($signed(rram[wire_rs1]) >= $signed(rram[wire_rs2]))
 				             pc <= pc + sign_extended_bimm;
                                          // 否则 rs1 小于 rs2
@@ -926,23 +843,8 @@ begin
 	    	                         jp <=0;
 					 end
 				  3'b110:begin
-			                 //+++++++++++++++++++++++++++++++++
 					 Bltu <= 1'b1; // set Bltu Flag 
 					 //take branch if rs1 < rs2 in unsigned comparison 
-					 // 电路方式: 一周期实现比较 
-					 // 计算 rs1 - rs2 < 0  转化 Sub -> Add 正数相加变成了正数减去负数
-					 // 异号相加, 果即大小：1: rs1 小于 rs2
-					 // 溢出位 0 取反为 1 负
-					 // 次首位进位判断：a==b==1; a^b && c==0
-					 // 进位后为 正(或0) 大于等于
-			//		  if (rram[wire_rs1][63] == mirro_rs2[63] == 1)
-			//		      pc <= pc + 4;
-			//		  else if ((rram[wire_rs1][63] ^ mirro_rs2[63]) && (sub[63] == 0))
-			//		      pc <= pc + 4;
-                        //                 // 否则 rs1 小于 rs2
-			//		  else pc <= pc + sign_extended_bimm;
-	    	        //                  jp <=0;
-					 // 代码模式 
 					    if (rram[wire_rs1] < rram[wire_rs2]) 
 					        pc <= pc + sign_extended_bimm;
 					    else pc <= pc + 4;
@@ -952,21 +854,6 @@ begin
 				  3'b111:begin
 					 Bgeu <= 1'b1; // set Bgeu Flag 
 					 //take branch if rs1 >= rs2 in unsigned comparison 
-					 // 电路方式: 一周期实现比较 
-					 // 计算 rs1 - rs2 > 0  转化 Sub -> Add 正数相加变成了正数减去负数
-					 // 异号相加, 果即大小：0: rs1 大于 rs2
-					 // 溢出位 0 取反为 1 负
-					 // 次首位进位判断：a==b==1; a^b && c==0
-					 // 进位后为 正(或0) 大于等于
-			//		  if (rram[wire_rs1][63] == mirro_rs2[63] == 1)
-                        //                      pc <= pc + sign_extended_bimm;
-			//		  else if ((rram[wire_rs1][63] ^ mirro_rs2[63]) && (sub[63] == 0))
-                        //                      pc <= pc + sign_extended_bimm;
-                        //                 // 否则 rs1 小于 rs2
-			//		  else pc <= pc + 4;
-	    	        //                  jp <=0;
-					 // 代码模式 
-					 // if (rram[wire_rs1] - rram[wire_rs2] < 0 ) rram[wire_rd] <= 1'b1; 
 					    if (rram[wire_rs1] >= rram[wire_rs2]) 
 					        pc <= pc + sign_extended_bimm;
 					    else pc <= pc + 4;
