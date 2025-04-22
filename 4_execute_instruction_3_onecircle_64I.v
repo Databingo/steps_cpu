@@ -1,6 +1,25 @@
 // 声明指令控制线
 reg Lui, Auipc, Lb, Lbu, Lh, Lhu, Lw, Lwu, Ld, Sb, Sh, Sw, Sd, Add, Sub, Sll, Slt, Sltu, Xor, Srl, Sra, Or, And, Addi, Slti, Sltiu, Ori, Andi, Xori, Slli, Srli, Srai, Addiw, Slliw, Srliw, Sraiw, Addw, Subw, Sllw, Srlw, Sraw, Jal, Jalr, Beq, Bne, Blt, Bge, Bltu, Bgeu, Fence, Fencei, Ecall, Ebreak, Csrrw, Csrrs, Csrrc, Csrrwi, Csrrsi, Csrrci;
 
+
+// Supervisor Trap Setup
+integer sstatus = 12'h100; //63_SD|WPRI|33_UXL1|32_UXL0|WPRI|19_MXR|18_SUM|17_WPRI|16_XS1|15_XS0|14_FS1|13_FS0|WPRI|8_SPP|7_WPRI|6_UBE|5_SPIE|WPRI|1_SIE|0_WPRI|
+integer sedeleg = 12'h102;
+integer sideleg = 12'h103;
+integer sie = 12'h104;   // Supervisor interrupt-enable register
+integer stvec = 12'h105; // Supervisor Trap Vector Base Address //63-2_BASE|1-0_MODE|(auto padding last 00 for base) Mode: 00direct to base<<2; 01vectord to base if ecall and base+4*scause[62:0] if interrupt;10,11
+integer scounteren = 12'h106; //Supervisor counter enable
+// Supervisor Trap Handling
+integer sscratch = 12'h140;
+integer sepc = 12'h141; //
+integer scause = 12'h142;//  //63_type 0exception 1interrupt|value
+integer stval = 12'h143; 
+integer sip = 12'h144; // Supervisor interrupt pending
+// Supervisor Protection and Translation
+integer satp = 12'h180; // Supervisor address translation and protection
+// Debug/Trace Registers
+integer scontext = 12'h5a8; // Supervisor-mode context register
+
 // 定义 csr 选择器
 function [4:0] csr_index;
  input [11:0] csr_wire;
@@ -96,8 +115,8 @@ reg [7:0] srom [0:399];// 8 位宽度，400 行深度
 
 // 通用寄存器列表 32 个
 reg [63:0] rram [0:31];// 64 位宽度，32 行深度 x0, x1, x2... x31
-// CSR 寄存器列表 32 个(预设个数 2**12=4096)
-reg [63:0] csrram [0:31];// 64 位宽度，32 行深度
+// CSR 寄存器列表 4096 个(预设个数 2**12=4096)
+reg [63:0] csrram [0:4096];// 64 位宽度，4096 行深度
 
 // --- 3 input---
 input reset_n; // 初始化开关
@@ -816,6 +835,28 @@ begin
 			                    //+++++++++++++++++++++++++++++++++
 					    12'b000000000000:begin 
 					               Ecall  <= 1'b1; // set Ecall  Flag 
+						       csrram[sepc] <= pc;
+						       csrram[scause] <= 8; // 8 indicate Ecall from U-mode
+                            //sstatus: 63_SD|WPRI|33_UXL1|32_UXL0|WPRI|19_MXR|18_SUM|17_WPRI|16_XS1|15_XS0|14_FS1|13_FS0|WPRI|8_SPP|7_WPRI|6_UBE|5_SPIE|WPRI|1_SIE|0_WPRI|
+						       csrram[sstatus][8] <= 0; // save previous privilege mode(user0 super1) to SPP 
+						       csrram[sstatus][1] <= csrram[sstatus][5]; // save previous interrupt enable(SIE) to SPIE 
+						       csrram[sstatus][5] <= 0; // clear SIE
+                           //stvec: 63-2_BASE|1-0_MODE|(auto padding last 00 for base) Mode: 00direct to base<<2; 01vectord to base if ecall and base+4*scause[62:0] if interrupt;10,11
+                                                       //base_addr = stvec[63:2] << 2;
+						       //mode = stvec[1:0];
+						       //is_interrupt = scasue[63];
+						       //is_vectored = (mode == 2'b01);
+						       //if (is_interrupt && is_vectored)
+						       //begin
+						       //    interrupt_cause = scause[62:0]; 
+						       //    target_pc = base_addr + (interrupt_casue << 2);
+						       //end
+						       //else target_pc = base_addr;
+						       if ((scause[63]==1'b1) && (stvec[1:0]== 2'b01))
+							   pc <= (stvec[63:2] << 2) + (scause[62:0] << 2);
+						       else pc <= (stvec[63:2] << 2);
+               
+               
 						       end
 					    12'b000000000001:begin 
 					               Ebreak <= 1'b1; // set Ebreak Flag 
