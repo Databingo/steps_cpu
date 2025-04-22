@@ -795,13 +795,12 @@ begin
 			          3'b000: Fence  <= 1'b1; // set Fence Flag 
 			          3'b001: Fencei <= 1'b1; // set Fencei Flag 
 				endcase
-	    	   //jp <=1;
 		              end
 		   // ----------------------------
-	           7'b1110011:begin
+	           7'b1110011:begin // system 
 		                csr_id =  csr_index(wire_csr);
 			        case(wire_f3) // func3
-				  3'b000: begin
+				  3'b000: begin // priv
 				          case(wire_f12) // func12
 			                    //+++++++++++++++++++++++++++++++++
 				            12'b000000000000: Ecall  <= 1'b1; // set Ecall  Flag 
