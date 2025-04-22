@@ -803,8 +803,12 @@ begin
 				  3'b000: begin // priv
 				          case(wire_f12) // func12
 			                    //+++++++++++++++++++++++++++++++++
-				            12'b000000000000: Ecall  <= 1'b1; // set Ecall  Flag 
-				            12'b000000000001: Ebreak <= 1'b1; // set Ebreak Flag 
+					    12'b000000000000:begin 
+					               Ecall  <= 1'b1; // set Ecall  Flag 
+						       end
+					    12'b000000000001:begin 
+					               Ebreak <= 1'b1; // set Ebreak Flag 
+						       end
 				          endcase
 				         end 
                                   // CSRRW  |csr.12|rs1.5|001.3|rd.5|1110011.7| atomic write, put 0-extend csr value! in rd(if rd=x0 not read), then put sr1 to csr
