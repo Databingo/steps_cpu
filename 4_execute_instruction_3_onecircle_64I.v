@@ -836,7 +836,8 @@ begin
 					    12'b000000000000:begin 
 					               Ecall  <= 1'b1; // set Ecall  Flag 
 						       csrram[sepc] <= pc;
-						       csrram[scause] <= 8; // 8 indicate Ecall from U-mode
+						       // 63_0exception-1interrpt
+						       csrram[scause] <= 8; // 8 indicate Ecall from U-mode; 9 call from S-mode; 11 call from M-mode
                             //sstatus: 63_SD|WPRI|33_UXL1|32_UXL0|WPRI|19_MXR|18_SUM|17_WPRI|16_XS1|15_XS0|14_FS1|13_FS0|WPRI|8_SPP|7_WPRI|6_UBE|5_SPIE|WPRI|1_SIE|0_WPRI|
 						       csrram[sstatus][8] <= 0; // save previous privilege mode(user0 super1) to SPP 
 						       csrram[sstatus][1] <= csrram[sstatus][5]; // save previous interrupt enable(SIE) to SPIE 
