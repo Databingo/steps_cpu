@@ -1,6 +1,12 @@
 // 声明指令控制线
 reg Lui, Auipc, Lb, Lbu, Lh, Lhu, Lw, Lwu, Ld, Sb, Sh, Sw, Sd, Add, Sub, Sll, Slt, Sltu, Xor, Srl, Sra, Or, And, Addi, Slti, Sltiu, Ori, Andi, Xori, Slli, Srli, Srai, Addiw, Slliw, Srliw, Sraiw, Addw, Subw, Sllw, Srlw, Sraw, Jal, Jalr, Beq, Bne, Blt, Bge, Bltu, Bgeu, Fence, Fencei, Ecall, Ebreak, Csrrw, Csrrs, Csrrc, Csrrwi, Csrrsi, Csrrci;
 
+
+localparam M_mode = 2'b11;
+localparam S_mode = 2'b01;
+localparam U_mode = 2'b00;
+reg [1:0] current_privilege_mode;
+
 // CSR pre 00 user 01 super 10 hyper 11 machine
 // Supervisor Trap Setup
 integer sstatus = 12'h100; //63_SD|WPRI|33_UXL1|32_UXL0|WPRI|19_MXR|18_SUM|17_WPRI|16_XS1|15_XS0|14_FS1|13_FS0|WPRI|8_SPP|7_WPRI|6_UBE|5_SPIE|WPRI|1_SIE|0_WPRI|
@@ -312,12 +318,14 @@ begin
 	  rram[1] <=0; rram[2] <=0; rram[3] <=0; rram[30] <=0; rram[31] <=0;
 	  for (integer i = 0; i < 32; i = i + 1)  //!!初始化零否则新启用寄存器就不灵
 	      rram[i] <= 64'h0;
+	      current_privilege_mode <= M_mode; // init from M-mode for all RISCV processor
 	end
 	else
         // 开始指令节拍
 	begin
 	    case(jp)
 	    0: begin // 取指令 + 分析指令 + 执行 | 或 准备数据 (分析且备好该指令所需的数据）
+	 	   current_privilege_mode <= current_privilege_mode; // update mode
 	    	   ir <= wire_ir ; 
 		   // parse: op->func3->func7
 	    	   case(wire_op)
@@ -850,6 +858,10 @@ begin
 						       end
 					    12'b000100000010:begin 
 					               //Sret <= 1'b1; // set Sret Flag 
+						       //wire p_mode = csrram[sstatus][8];
+						       //wire [1:0] r_mode = p_mode ? S_mode : U_mode;
+						       if (csrram[sstatus][8] == 0) current_privilege_mode <= U_mode;
+						       if (csrram[sstatus][8] == 1) current_privilege_mode <= S_mode;
 						       csrram[sstatus][1] <= csrram[sstatus][5]; // set back interrupt enable(SIE) by SPIE 
 						       csrram[sstatus][5] <= 1; // set previous interrupt enable(SIE) to be 1 (enable)
 						       csrram[sstatus][8] <= 0; // set previous privilege mode(SPP) to be 0 (U-mode)
