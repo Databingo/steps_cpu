@@ -832,7 +832,6 @@ begin
 			        case(wire_f3) // func3
 				  3'b000: begin // priv
 				          case(wire_f12) // func12
-			                    //+++++++++++++++++++++++++++++++++
 					    12'b000000000000:begin 
 					               Ecall  <= 1'b1; // set Ecall  Flag 
 						       csrram[sepc] <= pc;
@@ -840,17 +839,21 @@ begin
 						       csrram[scause] <= 8; // 8 indicate Ecall from U-mode; 9 call from S-mode; 11 call from M-mode
                             //sstatus: 63_SD|WPRI|33_UXL1|32_UXL0|WPRI|19_MXR|18_SUM|17_WPRI|16_XS1|15_XS0|14_FS1|13_FS0|WPRI|8_SPP|7_WPRI|6_UBE|5_SPIE|WPRI|1_SIE|0_WPRI|
 						       csrram[sstatus][8] <= 0; // save previous privilege mode(user0 super1) to SPP 
-						       csrram[sstatus][1] <= csrram[sstatus][5]; // save previous interrupt enable(SIE) to SPIE 
-						       csrram[sstatus][5] <= 0; // clear SIE
+						       csrram[sstatus][5] <= csrram[sstatus][1]; // save interrupt enable(SIE) to SPIE 
+						       csrram[sstatus][1] <= 0; // clear SIE
                            //stvec: 63-2_BASE|1-0_MODE|(auto padding last 00 for base) Mode: 00direct to base<<2; 01vectord to base if ecall and base+4*scause[62:0] if interrupt;10,11
-						       if ((scause[63]==1'b1) && (stvec[1:0]== 2'b01))
-							   pc <= (stvec[63:2] << 2) + (scause[62:0] << 2);
-						       else pc <= (stvec[63:2] << 2);
-               
-               
+						       if ((csrram[scause][63]==1'b1) && (csrram[stvec][1:0]== 2'b01)) pc <= (csrram[stvec][63:2] << 2) + (csrram[scause][62:0] << 2);
+						       else pc <= (csrram[stvec][63:2] << 2);
 						       end
 					    12'b000000000001:begin 
 					               Ebreak <= 1'b1; // set Ebreak Flag 
+						       end
+					    12'b000100000010:begin 
+					               //Sret <= 1'b1; // set Sret Flag 
+						       csrram[sstatus][1] <= csrram[sstatus][5]; // set back interrupt enable(SIE) by SPIE 
+						       csrram[sstatus][5] <= 1; // set previous interrupt enable(SIE) to be 1 (enable)
+						       csrram[sstatus][8] <= 0; // set previous privilege mode(SPP) to be 0 (U-mode)
+						       pc <=  csrram[sepc]; // sepc was +4 be the software handler and written back to sepc
 						       end
 				          endcase
 				         end 
