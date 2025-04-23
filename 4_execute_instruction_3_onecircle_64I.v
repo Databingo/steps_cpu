@@ -325,7 +325,7 @@ begin
 	begin
 	    case(jp)
 	    0: begin // 取指令 + 分析指令 + 执行 | 或 准备数据 (分析且备好该指令所需的数据）
-	 	   current_privilege_mode <= current_privilege_mode; // update mode
+	 	   //current_privilege_mode <= current_privilege_mode; // update mode
 	    	   ir <= wire_ir ; 
 		   // parse: op->func3->func7
 	    	   case(wire_op)
@@ -858,8 +858,6 @@ begin
 						       end
 					    12'b000100000010:begin 
 					               //Sret <= 1'b1; // set Sret Flag 
-						       //wire p_mode = csrram[sstatus][8];
-						       //wire [1:0] r_mode = p_mode ? S_mode : U_mode;
 						       if (csrram[sstatus][8] == 0) current_privilege_mode <= U_mode;
 						       if (csrram[sstatus][8] == 1) current_privilege_mode <= S_mode;
 						       csrram[sstatus][1] <= csrram[sstatus][5]; // set back interrupt enable(SIE) by SPIE 
