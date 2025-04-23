@@ -9,11 +9,11 @@ reg [1:0] current_privilege_mode;
 
 // CSR pre 00 user 01 super 10 hyper 11 machine
 // Supervisor Trap Setup
-integer sstatus = 12'h100; //63_SD|WPRI|33_UXL1|32_UXL0|WPRI|19_MXR|18_SUM|17_WPRI|16_XS1|15_XS0|14_FS1|13_FS0|WPRI|8_SPP|7_WPRI|6_UBE|5_SPIE|WPRI|1_SIE|0_WPRI|
+integer sstatus = 12'h100; // 63_SD|WPRI|33:32_UXL10|WPRI|19_MXR|18_SUM|17_WPRI|16:15_XS10|14:13_FS10|WPRI|8_SPP|7_WPRI|6_UBE|5_SPIE|WPRI|1_SIE|0_WPRI
 integer sedeleg = 12'h102;
 integer sideleg = 12'h103;
 integer sie = 12'h104;   // Supervisor interrupt-enable register
-integer stvec = 12'h105; // Supervisor Trap Vector Base Address //63-2_BASE|1-0_MODE|(auto padding last 00 for base) Mode: 00direct to base<<2; 01vectord to base if ecall and base+4*scause[62:0] if interrupt;10,11
+integer stvec = 12'h105; // Supervisor Trap Vector Base Address//63-2_BASE|1-0_MODE|(auto padding last 00 base) Mode:00direct to base<<2; 01vectord to base if ecall base+4*scause[62:0] if interrupt;10,11
 integer scounteren = 12'h106; //Supervisor counter enable
 // Supervisor Trap Handling
 integer sscratch = 12'h140;
@@ -26,8 +26,35 @@ integer satp = 12'h180; // Supervisor address translation and protection
 // Debug/Trace Registers
 integer scontext = 12'h5a8; // Supervisor-mode context register
 
-integer mstatus = 12'h100; //63_SD|WPRI|33_UXL1|32_UXL0|WPRI|19_MXR|18_SUM|17_WPRI|16_XS1|15_XS0|14_FS1|13_FS0|WPRI|8_SPP|7_WPRI|6_UBE|5_SPIE|WPRI|1_SIE|0_WPRI|
-
+// Machine Information Registers
+integer mvendorid = 12'hF11;    // 0xF11 MRO Vendor ID
+integer marchid= 'hF12; 	// 0xF12 MRO Architecture ID
+integer mimpid= 'hF13; 	        // 0xF13 MRO Implementation ID
+integer mhartid= 'hF14; 	// 0xF14 MRO Hardware thread ID
+integer mconfigptr= 'hF11; 	// 0xF15 MRO Pointer to configuration data structure
+// Machine Trap Setup
+integer mstatus = 12'h300;     // 0x300 MRW Machine status reg   // 63_SD|37_MBE|36_SBE|35:34_SXL10|22_TSR|21_TW|20_TVW|17_WPRV|12:11_MPP10|7_MPIE|3_MIE|1_SIE|0_WPRI
+integer misa = 12'h301;         // 0x301 MRW ISA and extensions
+integer medeleg = 12'h302;      // 0x302 MRW Machine exception delegation register
+integer mideleg = 12'h303;      // 0x303 MRW Machine interrupt delegation register
+integer mie = 12'h304;          // 0x304 MRW Machine interrupt-enable register *
+integer mtvec = 12'h305;        // 0x305 MRW Machine trap-handler base address *
+integer mcounteren = 12'h306;   // 0x306 MRW Machine counter enable
+integer mtvt = 12'h307;         // 0x307 MRW Machine Trap-Handler vector table base address
+integer mstatush = 12'h310;     // 0x310 MRW Additional machine status register, RV32 only
+// Machine Trap Handling
+integer mscratch = 12'h340;     // 0x340 MRW Scratch register for machine trap handlers *
+integer mepc = 12'h341;         // 0x341 MRW Machine exception program counter *
+integer mcause = 12'h342;       // 0x342 MRW Machine trap casue *
+integer mtval =12'h343;         // 0x343 MRW Machine bad address or instruction *
+integer mip = 12'h344;          // 0x344 MRW Machine interrupt pending *
+integer mtinst = 12'h34A;       // 0x34A MRW Machine trap instruction (transformed)
+integer mtval2 = 12'h34B;       // 0x34B MRW Machine bad guset physical address
+// Machine Configuration
+integer menvcfg = 12'h30A;      // 0x30A MRW Machine environment configuration register
+integer menvcfgh = 12'h31A;     // 0x31A MRW Additional machine env. conf. register, RV32 only
+integer mseccfg = 12'h747;      // 0x747 MRW Machine security configuration register
+integer mseccfgh = 12'h757;     // 0x757 MRW Additional machine security conf. register, RV32 only
 
 
 
@@ -843,21 +870,36 @@ begin
 	           7'b1110011:begin // system 
 		                csr_id =  csr_index(wire_csr);
 			        case(wire_f3) // func3
-				  m'b000: begin // priv
+				  3'b000: begin // priv
 				          case(wire_f12) // func12
 					    12'b000000000000:begin 
 					               Ecall  <= 1'b1; // set Ecall  Flag 
-						       csrram[sepc] <= pc;
-						       // 63_0exception-1interrpt
-						       csrram[scause] <= 8; // 8 indicate Ecall from U-mode; 9 call from S-mode; 11 call from M-mode
-                            //sstatus: 63_SD|WPRI|33_UXL1|32_UXL0|WPRI|19_MXR|18_SUM|17_WPRI|16_XS1|15_XS0|14_FS1|13_FS0|WPRI|8_SPP|7_WPRI|6_UBE|5_SPIE|WPRI|1_SIE|0_WPRI|
-			    // abstract to TCU(Trap Control Unit)
-						       csrram[sstatus][8] <= 0; // save previous privilege mode(user0 super1) to SPP 
-						       csrram[sstatus][5] <= csrram[sstatus][1]; // save interrupt enable(SIE) to SPIE 
-						       csrram[sstatus][1] <= 0; // clear SIE
-                           //stvec: 63-2_BASE|1-0_MODE|(auto padding last 00 for base) Mode: 00direct to base<<2; 01vectord to base if ecall and base+4*scause[62:0] if interrupt;10,11
-						       if ((csrram[scause][63]==1'b1) && (csrram[stvec][1:0]== 2'b01)) pc <= (csrram[stvec][63:2] << 2) + (csrram[scause][62:0] << 2);
-						       else pc <= (csrram[stvec][63:2] << 2);
+                                                       // Trap into S-mode
+			                               if (current_privilege_mode == U_mode && medeleg[8] == 1)
+						       begin
+						           csrram[scause][63] <= 0; //63_type 0exception 1interrupt|value
+						           csrram[scause][62:0] <= 8; // 8 indicate Ecall from U-mode; 9 call from S-mode; 11 call from M-mode
+						           csrram[sepc] <= pc;
+						           csrram[sstatus][8] <= 0; // save previous privilege mode(user0 super1) to SPP 
+						           csrram[sstatus][5] <= csrram[sstatus][1]; // save interrupt enable(SIE) to SPIE 
+						           csrram[sstatus][1] <= 0; // clear SIE
+						           //if ((csrram[scause][63]==1'b1) && (csrram[stvec][1:0]== 2'b01)) pc <= (csrram[stvec][63:2] << 2) + (csrram[scause][62:0] << 2);
+						           pc <= (csrram[stvec][63:2] << 2);
+							   current_privilege_mode <= S_mode;
+						       end
+						       else begin
+						       // Trap into M-mode
+						           csrram[mcause][63] <= 0; //63_type 0exception 1interrupt|value
+						           csrram[mepc] <= pc;
+						           csrram[mstatus][7] <= csrram[mstatus][3]; // save interrupt enable(MIE) to MPIE 
+						           csrram[mstatus][3] <= 0; // clear SIE
+						           pc <= (csrram[mtvec][63:2] << 2);
+			                                   if (current_privilege_mode == U_mode && medeleg[8] == 0) csrram[mcause][62:0] <= 8; // save cause 
+			                                   if (current_privilege_mode == S_mode) csrram[mcause][62:0] <= 9; 
+						           if (current_privilege_mode == M_mode) csrram[mcause][62:0] <= 11; 
+							   csrram[mstatus][12:11] <= current_privilege_mode; // save privilege mode to MPP 
+							   current_privilege_mode <= M_mode;  // set current privilege mode
+						           end
 						       end
 					    12'b000000000001:begin 
 					               Ebreak <= 1'b1; // set Ebreak Flag 
