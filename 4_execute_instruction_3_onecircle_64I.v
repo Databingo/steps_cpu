@@ -843,7 +843,7 @@ begin
 	           7'b1110011:begin // system 
 		                csr_id =  csr_index(wire_csr);
 			        case(wire_f3) // func3
-				  3'b000: begin // priv
+				  m'b000: begin // priv
 				          case(wire_f12) // func12
 					    12'b000000000000:begin 
 					               Ecall  <= 1'b1; // set Ecall  Flag 
@@ -851,6 +851,7 @@ begin
 						       // 63_0exception-1interrpt
 						       csrram[scause] <= 8; // 8 indicate Ecall from U-mode; 9 call from S-mode; 11 call from M-mode
                             //sstatus: 63_SD|WPRI|33_UXL1|32_UXL0|WPRI|19_MXR|18_SUM|17_WPRI|16_XS1|15_XS0|14_FS1|13_FS0|WPRI|8_SPP|7_WPRI|6_UBE|5_SPIE|WPRI|1_SIE|0_WPRI|
+			    // abstract to TCU(Trap Control Unit)
 						       csrram[sstatus][8] <= 0; // save previous privilege mode(user0 super1) to SPP 
 						       csrram[sstatus][5] <= csrram[sstatus][1]; // save interrupt enable(SIE) to SPIE 
 						       csrram[sstatus][1] <= 0; // clear SIE
