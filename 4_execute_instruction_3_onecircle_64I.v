@@ -33,7 +33,7 @@ integer mimpid= 'hF13; 	        // 0xF13 MRO Implementation ID
 integer mhartid= 'hF14; 	// 0xF14 MRO Hardware thread ID
 integer mconfigptr= 'hF11; 	// 0xF15 MRO Pointer to configuration data structure
 // Machine Trap Setup
-integer mstatus = 12'h300;     // 0x300 MRW Machine status reg   // 63_SD|37_MBE|36_SBE|35:34_SXL10|22_TSR|21_TW|20_TVW|17_WPRV|12:11_MPP10|7_MPIE|3_MIE|1_SIE|0_WPRI
+integer mstatus = 12'h300;     // 0x300 MRW Machine status reg   // 63_SD|37_MBE|36_SBE|35:34_SXL10|22_TSR|21_TW|20_TVW|17_MPRV|12:11_MPP10|7_MPIE|3_MIE|1_SIE|0_WPRI
 integer misa = 12'h301;         // 0x301 MRW ISA and extensions
 integer medeleg = 12'h302;      // 0x302 MRW Machine exception delegation register
 integer mideleg = 12'h303;      // 0x303 MRW Machine interrupt delegation register
@@ -893,7 +893,7 @@ begin
 						           csrram[mcause][63] <= 0; //63_type 0exception 1interrupt|value
 						           csrram[mepc] <= pc;
 						           csrram[mstatus][7] <= csrram[mstatus][3]; // save interrupt enable(MIE) to MPIE 
-						           csrram[mstatus][3] <= 0; // clear SIE
+						           csrram[mstatus][3] <= 0; // clear MIE (not enabled)
 						           pc <= (csrram[mtvec][63:2] << 2);
 			                                   if (current_privilege_mode == U_mode && medeleg[8] == 0) csrram[mcause][62:0] <= 8; // save cause 
 			                                   if (current_privilege_mode == S_mode) csrram[mcause][62:0] <= 9; 
@@ -912,7 +912,16 @@ begin
 						       csrram[sstatus][1] <= csrram[sstatus][5]; // set back interrupt enable(SIE) by SPIE 
 						       csrram[sstatus][5] <= 1; // set previous interrupt enable(SIE) to be 1 (enable)
 						       csrram[sstatus][8] <= 0; // set previous privilege mode(SPP) to be 0 (U-mode)
-						       pc <=  csrram[sepc]; // sepc was +4 be the software handler and written back to sepc
+						       pc <=  csrram[sepc]; // sepc was +4 by the software handler and written back to sepc
+						       end
+					    12'b001100000010:begin 
+					               //Mret <= 1'b1; // set Mret Flag 
+						       csrram[mstatus][3] <= csrram[mstatus][7]; // set back interrupt enable(MIE) by MPIE 
+						       csrram[mstatus][7] <= 1; // set previous interrupt enable(MIE) to be 1 (enable)
+						       if (csrram[mstatus][12:11]) < M_mode csrram[mstatus][17] <= 0; // set mprv to 0
+						       current_privilege_mode  <= csrram[mstatus][12:11] // set back previous mode
+						       csrram[mstatus][12:11] <= 2'b00 // set previous privilege mode(MPP) to be 00 (U-mode)
+						       pc <=  csrram[mepc]; // mepc was +4 by the software handler and written back to sepc
 						       end
 				          endcase
 				         end 
