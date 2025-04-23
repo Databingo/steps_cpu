@@ -887,8 +887,9 @@ begin
 						           pc <= (csrram[stvec][63:2] << 2);
 							   current_privilege_mode <= S_mode;
 						       end
-						       else begin
 						       // Trap into M-mode
+						       else 
+						       begin
 						           csrram[mcause][63] <= 0; //63_type 0exception 1interrupt|value
 						           csrram[mepc] <= pc;
 						           csrram[mstatus][7] <= csrram[mstatus][3]; // save interrupt enable(MIE) to MPIE 
@@ -899,7 +900,7 @@ begin
 						           if (current_privilege_mode == M_mode) csrram[mcause][62:0] <= 11; 
 							   csrram[mstatus][12:11] <= current_privilege_mode; // save privilege mode to MPP 
 							   current_privilege_mode <= M_mode;  // set current privilege mode
-						           end
+						       end
 						       end
 					    12'b000000000001:begin 
 					               Ebreak <= 1'b1; // set Ebreak Flag 
