@@ -918,9 +918,9 @@ begin
 					               //Mret <= 1'b1; // set Mret Flag 
 						       csrram[mstatus][3] <= csrram[mstatus][7]; // set back interrupt enable(MIE) by MPIE 
 						       csrram[mstatus][7] <= 1; // set previous interrupt enable(MIE) to be 1 (enable)
-						       if (csrram[mstatus][12:11]) < M_mode csrram[mstatus][17] <= 0; // set mprv to 0
-						       current_privilege_mode  <= csrram[mstatus][12:11] // set back previous mode
-						       csrram[mstatus][12:11] <= 2'b00 // set previous privilege mode(MPP) to be 00 (U-mode)
+						       if (csrram[mstatus][12:11] < M_mode) csrram[mstatus][17] <= 0; // set mprv to 0
+						       current_privilege_mode  <= csrram[mstatus][12:11]; // set back previous mode
+						       csrram[mstatus][12:11] <= 2'b00; // set previous privilege mode(MPP) to be 00 (U-mode)
 						       pc <=  csrram[mepc]; // mepc was +4 by the software handler and written back to sepc
 						       end
 				          endcase
