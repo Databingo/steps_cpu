@@ -289,6 +289,14 @@ func main() {
 				ins = fmt.Sprintf("%s:\n", label)
 				real_instr.WriteString(ins)
 			}
+			/////////////////////////-- deploy 3
+			// (from 1)bit 44 is 0 lui addi slli32 
+			// bit 12 is 0 lui addi 
+			// bit 12 is 1 xori-1 lui addi  xori-1
+			// (from 1)bit 44 is 1 xori-1 lui addi slli32
+			// bit 12 is 0 lui addi xori-1
+			// bit 12 is 1 xori-1 lui addi 
+
 			/////////////////////////-- deploy 2
 			ins = fmt.Sprintf("addi %s, %s, %#x\n", code[1], "x0", 0) // for 0 or clean reg
 			real_instr.WriteString(ins)
