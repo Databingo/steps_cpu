@@ -222,7 +222,7 @@ func main() {
 	check(err)
 	defer file.Close()
 
-	// zero pass
+	// 1pass trans pseudo to real
 	scanner0 := bufio.NewScanner(file) // stores content from file
 	scanner0.Split(bufio.ScanLines)
 
@@ -417,7 +417,7 @@ func main() {
 	fmt.Println(real_instr.String())
         write2f(real_instr.String(), "tmp.txt")
 
-	// first pass
+	// 2pass count label address; check grammar
 	fmt.Println("start first pass.")
 	scanner := bufio.NewScanner(strings.NewReader(real_instr.String()))
 	scanner.Split(bufio.ScanLines)
@@ -622,7 +622,7 @@ func main() {
 		0x00, 0x00, // index of the section header table entry that contains the section names
 	})
 
-	// second pass
+	// 3pass trans assembly to binary
 	address = 0
 	lineCounter = 1
 	instructionBuffer := make([]byte, 4) // buffer to store 4 bytes
