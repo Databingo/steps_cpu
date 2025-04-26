@@ -223,8 +223,36 @@ func main() {
 	check(err)
 	defer file.Close()
 
+
+
+        ////////
+	// 0pass parse directive
+	scanner0 := bufio.NewScanner(file) // stores content from file
+	scanner0.Split(bufio.ScanLines)
+	var copy_instr strings.Builder
+
+	for scanner0.Scan() {
+	        raw_instr := scanner0.Text() + "\n"
+		line := strings.Split(scanner0.Text(), "#")[0]
+		code := strings.FieldsFunc(line, SplitOn)
+		if len(code) == 0 { continue }
+		switchOnOp := code[0]
+		directive := ""
+		if strings.HasSuffix(switchOnOp, ".") {
+		    directive = strings.TrimSuffix(code[0], ".")
+		    fmt.Println("Directive: ", directive)
+
+		}
+		copy_instr.WriteString(raw_instr)
+	}
+        ////////
+
+	//scanner := bufio.NewScanner(strings.NewReader(real_instr.String()))
+	//scanner.Split(bufio.ScanLines)
 	// 1pass trans pseudo to real
-	scanner1 := bufio.NewScanner(file) // stores content from file
+	//scanner1 := bufio.NewScanner(file) // stores content from file
+	//scanner1.Split(bufio.ScanLines)
+	scanner1 := bufio.NewScanner(strings.NewReader(copy_instr.String())) // stores content from file
 	scanner1.Split(bufio.ScanLines)
 
 	var code []string
