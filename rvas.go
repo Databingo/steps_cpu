@@ -209,6 +209,7 @@ func main() {
 
 		"ecall":  0b00000000000000000000000001110011,
 		"ebreak": 0b00000000000100000000000001110011,
+
                 // privilege
 		"sret": 0b00010000001000000000000001110011,
 		"mret": 0b00110000001000000000000001110011,
@@ -223,8 +224,8 @@ func main() {
 	defer file.Close()
 
 	// 1pass trans pseudo to real
-	scanner0 := bufio.NewScanner(file) // stores content from file
-	scanner0.Split(bufio.ScanLines)
+	scanner1 := bufio.NewScanner(file) // stores content from file
+	scanner1.Split(bufio.ScanLines)
 
 	var code []string
 	var instruction uint32
@@ -238,9 +239,9 @@ func main() {
 	var real_instr strings.Builder
 
 	// translate pseudo-instruction to real-instruction
-	for scanner0.Scan() {
-		origin_instr := scanner0.Text() + "\n"
-		line := strings.Split(scanner0.Text(), "#")[0]
+	for scanner1.Scan() {
+		origin_instr := scanner1.Text() + "\n"
+		line := strings.Split(scanner1.Text(), "#")[0]
 		code = strings.FieldsFunc(line, SplitOn)
 		if len(code) == 0 {
 			lineCounter++
@@ -251,8 +252,6 @@ func main() {
 		//var label string
 		if strings.HasSuffix(switchOnOp, ":") {
 			label = strings.TrimSuffix(code[0], ":")
-			//fmt.Printf("lable:%s\n", label)
-			//symbolTable[label] = int64(address)
 			if len(code) >= 2 {
 				switchOnOp = code[1]
 				code = code[1:]
@@ -269,34 +268,16 @@ func main() {
 				os.Exit(0)
 			}
 			sign, imm, err := isValidImmediate_u(code[2])
-			//op, opFound := opBin[code[0]]
-			//rd, rdFound := regBin[code[1]]
-			//fmt.Println("get li: ", sign, imm)
-
 			if err != nil {
 				fmt.Printf("~Error on line %d: %s, %s \n", lineCounter, err, line)
 				os.Exit(0)
 			}
-			//fmt.Printf("line %d, imm: 0x%X=0b%b=%d\n", lineCounter, imm, imm, imm)
-			//if imm > 0x7fffffffffffffff || imm  < -0x8000000000000000 {
-			//	fmt.Printf("li: Error on line %d: Immediate value %d=0x%X out of range (should be between 0x%X and 0x7fffffffffffffff )\n", lineCounter, imm, imm, -0x800000000000000)
-			//	os.Exit(0)
-			//}
 			ins := fmt.Sprintf("# %s\n", line)
 			real_instr.WriteString(ins)
 			if label != "" {
-				//fmt.Printf("%s: \n", label)
 				ins = fmt.Sprintf("%s:\n", label)
 				real_instr.WriteString(ins)
 			}
-			/////////////////////////-- deploy 3 //not work l32 lui
-			// (from 1)bit 44 is 0 lui addi slli32 
-			// bit 12 is 0 lui addi 
-			// bit 12 is 1 xori-1* lui addi  xori-1
-			// (from 1)bit 44 is 1 xori-1 lui addi slli32
-			// bit 12 is 0 lui addi xori-1
-			// bit 12 is 1 xori-1* lui addi 
-
 			/////////////////////////-- deploy 2
 			ins = fmt.Sprintf("addi %s, %s, %#x\n", code[1], "x0", 0) // for 0 or clean reg
 			real_instr.WriteString(ins)
@@ -373,27 +354,17 @@ func main() {
 				fmt.Println("Incorrect argument count on line: ", lineCounter)
 				os.Exit(0)
 			}
-			//imm, err := isValidImmediate(code[1])
-			//ins := fmt.Sprintf("jal x0, %d\n", imm)
 			lab := code[1]
 			ins := fmt.Sprintf("jal x0, %s\n", lab)
 			fmt.Printf("%s: \n", ins)
-			//op, opFound := opBin[code[0]]
 			if err != nil {
 				fmt.Printf("~Error on line %d: %s, %s \n", lineCounter, err, line)
 				os.Exit(0)
 			}
-			//fmt.Printf("line %d, imm: 0x%X=0b%b=%d\n", lineCounter, imm, imm, imm)
-			//if imm > 0x7fffffffffffffff || imm  < -0x8000000000000000 {
-			//	fmt.Printf("li: Error on line %d: Immediate value %d=0x%X out of range (should be between 0x%X and 0x7fffffffffffffff )\n", lineCounter, imm, imm, -0x800000000000000)
-			//	os.Exit(0)
-			//}
 			if label != "" {
-				//fmt.Printf("%s: \n", label)
 				real_instr.WriteString(label + ":\n")
 			}
 
-			//ins = fmt.Sprintf("jal x0, %d\n", imm)
 			ins = fmt.Sprintf("jal x0, %s\n", lab)
 
 			real_instr.WriteString(ins)
@@ -407,7 +378,6 @@ func main() {
 		default:
 			origin_instr = strings.TrimLeft(origin_instr, " ")
 			real_instr.WriteString(origin_instr)
-			//write2f([]byte(real_instr.String()))
 		}
 		//os.Exit(0)
 
@@ -621,7 +591,27 @@ func main() {
 		0x00, 0x00, // e_shnum number of entries in the section header table
 		0x00, 0x00, // index of the section header table entry that contains the section names
 	})
-
+//f.Write([]byte{0x7F, 0x45, 0x4C, 0x46, // indicates elf file
+// 		0x01,                                     // identifies 32 bit format
+// 		0x01,                                     // specify little endian
+// 		0x01,                                     // current elf version
+// 		0x00,                                     // target platform, usually set to 0x0 (System V)
+// 		0x00,                                     // ABI version
+// 		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // zero padding
+// 		0x01, 0x00, // object relocatable file
+// 		0xF3, 0x00, // specify machine RISC-V
+// 		0x01, 0x00, 0x00, 0x00, // specify original elf version
+// 		0x00, 0x00, 0x00, 0x80, // program entry address
+// 		0x34, 0x00, 0x00, 0x00, // points to start of program header table
+// 		0x00, 0x00, 0x00, 0x00, // points to start of section header table
+// 		0x00, 0x00, 0x00, 0x00, // e_flags
+// 		0x34, 0x00, // specify size of header, 52 bytes for 32-bit format
+// 		0x00, 0x00, // size of program header table entry
+// 		0x00, 0x00, // contains number of entries in program header table
+// 		0x00, 0x00, // size of section header entry
+// 		0x00, 0x00, // number of entries in the section header table
+// 		0x00, 0x00, // index of the section header table entry that contains the section names
+// 	})
 	// 3pass trans assembly to binary
 	address = 0
 	lineCounter = 1
