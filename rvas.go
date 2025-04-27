@@ -227,6 +227,8 @@ func main() {
 
         ////////
 	// 0pass parse directive
+	// .section .text .data .rodata .bss 5 
+	// .byte .string .half .word .dword .zero .align .equ 8
 	fmt.Println("start 0pass.")
 	scanner0 := bufio.NewScanner(file) // stores content from file
 	scanner0.Split(bufio.ScanLines)
@@ -239,9 +241,11 @@ func main() {
 		if len(code) == 0 { continue }
 		switchOnOp := code[0]
 		directive := ""
+		syb := ""
 		if strings.HasPrefix(switchOnOp, ".") {
 		    directive = strings.TrimPrefix(code[0], ".")
-		    fmt.Println("Directive: ", directive)
+		    syb = strings.Join(code[1:len(code)], " ")
+		    fmt.Println("Directive:", directive, "Symbol:", syb)
 
 		}
 		copy_instr.WriteString(raw_instr)
