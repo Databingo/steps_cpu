@@ -227,6 +227,7 @@ func main() {
 
         ////////
 	// 0pass parse directive
+	fmt.Println("start 0pass.")
 	scanner0 := bufio.NewScanner(file) // stores content from file
 	scanner0.Split(bufio.ScanLines)
 	var copy_instr strings.Builder
@@ -238,8 +239,8 @@ func main() {
 		if len(code) == 0 { continue }
 		switchOnOp := code[0]
 		directive := ""
-		if strings.HasSuffix(switchOnOp, ".") {
-		    directive = strings.TrimSuffix(code[0], ".")
+		if strings.HasPrefix(switchOnOp, ".") {
+		    directive = strings.TrimPrefix(code[0], ".")
 		    fmt.Println("Directive: ", directive)
 
 		}
@@ -267,6 +268,7 @@ func main() {
 	var real_instr strings.Builder
 
 	// translate pseudo-instruction to real-instruction
+	fmt.Println("start 1pass.")
 	for scanner1.Scan() {
 		origin_instr := scanner1.Text() + "\n"
 		line := strings.Split(scanner1.Text(), "#")[0]
@@ -416,7 +418,7 @@ func main() {
         write2f(real_instr.String(), "tmp.txt")
 
 	// 2pass count label address; check grammar
-	fmt.Println("start first pass.")
+	fmt.Println("start 2pass.")
 	scanner := bufio.NewScanner(strings.NewReader(real_instr.String()))
 	scanner.Split(bufio.ScanLines)
 	for scanner.Scan() {
@@ -641,6 +643,7 @@ func main() {
 // 		0x00, 0x00, // index of the section header table entry that contains the section names
 // 	})
 	// 3pass trans assembly to binary
+	fmt.Println("start 3pass.")
 	address = 0
 	lineCounter = 1
 	instructionBuffer := make([]byte, 4) // buffer to store 4 bytes
