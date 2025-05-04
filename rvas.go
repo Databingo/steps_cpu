@@ -475,11 +475,17 @@ func main() {
 
 			real_instr.WriteString(ins)
 			fmt.Printf("%s: \n", ins)
+		case "jr":
+			ins := fmt.Sprintf("jalr x0, %s, 0\n", code[1]) // 寄存器跳转 jr rs|jump to rs+0
+			real_instr.WriteString(ins)
 		case "nop":
-			ins := "addi x0, x0, 0\n"
+			ins := "addi x0, x0, 0\n" // 空操作
 			real_instr.WriteString(ins)
 		case "ret":
-			ins := "jalr x0, x1, 0\n"
+			ins := "jalr x0, x1, 0\n" // 从子过程中返回
+			real_instr.WriteString(ins)
+		case "neg":
+			ins := fmt.Sprintf("sub %s, x0, %s\n", code[1], code[2]) // 取负值
 			real_instr.WriteString(ins)
 		default:
 			origin_instr = strings.TrimLeft(origin_instr, " ")
@@ -596,6 +602,7 @@ func main() {
 			}
 
 		case "addi", "addiw", "slti", "sltiu", "xori", "ori", "andi", "jalr": // Instruction format: op rd, rs1, imm     or      label:  op rd, rs1, imm
+		//special form: jalr offset(rs1)?? is real (len(code)==3)
 			if len(code) != 4 && len(code) != 5 {
 				fmt.Println("addi ori 1 Incorrect argument count on line: ", lineCounter, line)
 				os.Exit(0)

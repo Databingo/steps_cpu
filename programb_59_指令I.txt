@@ -154,8 +154,8 @@ SFENCE.VMA supervisor fence virtual memory address
 
 //伪指令 60 条（ 32 条 x0, 28 条 no-x0）
 //-
-//nop: addi x0, x0, 0 空操作
-//neg rd, rs: sub rd, x0, rs 取负
+*//nop: addi x0, x0, 0 空操作
+*//neg rd, rs: sub rd, x0, rs 取负
 //negw rd, rs: subw rd, x0, rs 取负字（32bit)
 //snez rd, rs: sltu rd, x0, rs 不等于 0 时置位 (x0 < rs)
 //sltz rd, rs: slt rd, rs, x0 小于 0 时置位（rs < x0）
@@ -166,10 +166,10 @@ SFENCE.VMA supervisor fence virtual memory address
 //bgez rs, offset: bge rs, x0, offset 大于等于 0 时分支（rs >= x0）
 //bltz rs, offset: blt rs, x0, offset 小于 0 时分支（rs < x0） 
 //bgtz rs, offset: blt x0, rs, offset 大于 0 时分支（rs > x0）
-//j offset: jal x0, offset PC(pc+imm)跳转（返回地址 pc+4 写入 x0 无效）
-//jr rs: jalr x0, rs, 0 寄存器(rs+imm)跳转（返回地址 pc+4 写入 x0 无效）
-//ret: jalr x0, x1, 0 从子过程中返回（子函数返回）
-//tail offset: auipc x6, offset[32:12]; jalr x0, x6, offset[11:0] 尾调用远距离子过程
+*//j offset: jal x0, offset PC(pc+imm)跳转（返回地址 pc+4 写入 x0 无效）
+*//jr rs: jalr x0, rs, 0 寄存器(rs+imm)跳转（返回地址 pc+4 写入 x0 无效）
+*//ret: jalr x0, x1, 0 从子过程中返回（子函数返回）
+0//tail offset: auipc x6, offset[32:12]; jalr x0, x6, offset[11:0] 尾调用远距离子过程
 //-
 //rdinstret[h] rd: csrrs rd, instret[h], x0 读已提交指令计数器
 //rdcycle[h] rd: csrrs rd, cycle[h], x0 读周期计数器
@@ -190,15 +190,15 @@ SFENCE.VMA supervisor fence virtual memory address
 //frflags rd: 读浮点异常标识
 //fslags rs: 写浮点异常标识
 //-- no-x0
-//lla rd, symbol: auipc rd, symbol[31:12]; add rd, rd, symbol[11:0] 装入局部地址 ??
-//la rd, symbol: auipc rd, GOT[symbol][31:12]; l{w|d}rd, GOT[symbol][11:0](rd) 装入地址（GOT: Global Offset Table) ??
+0//lla rd, symbol: auipc rd, symbol[31:12]; add rd, rd, symbol[11:0] 装入局部地址 ??
+00//la rd, symbol: auipc rd, GOT[symbol][31:12]; l{w|d}rd, GOT[symbol][11:0](rd) 装入地址（GOT: Global Offset Table) ??
 //l{b|h|w|d} rd, symbol: auipc rd, symbol[31:12]; l{b|h|w|d} rd, symbol[11:0](rd) 读全局符号
 //s{b|h|w|d} rd, symbol, rt: auipc rt, symbol[31:12]; s{b|h|w|d} rd, symbol[11:0](rt) 写全局符号
 //fl{w|d} rd, symbol, rt: 读全局浮点符号
 //fs{w|d} rd, symbol, rt: 写全局浮点符号
-//li rd, imm: 装入立即数
-//mv rd,rs: addi rd, rs, 0 复制寄存器
-//not rd, rs: xori rd, rs, -1 取反
+*//li rd, imm: 装入立即数
+0//mv rd,rs: addi rd, rs, 0 复制寄存器
+0//not rd, rs: xori rd, rs, -1 取反
 //sext.w rd, rs: addiw rd, rs, 0 符号字扩展
 //seqz rd, rs: sltiu rd, rs, 1 等于 0 时置位
 //fmv.s rd, rs: 复制单精度寄存器
@@ -211,9 +211,9 @@ SFENCE.VMA supervisor fence virtual memory address
 //ble rs, rt, offset: bet rt, rs, offset 小于等于时分支
 //bgtu rs, rt, offset: bltu rt, rs, offset 无符号大于时分支
 //bleu rs, rt, offset: bgeu rt, rs, offset 无符号小于等于时分支
-//jal offset: jal x1, offset 跳转并链接
-//jalr rs: jalr x1, rs, 0 寄存器跳转并链接
-//call offset: auipc x1, offset[31:12]; jalr x1, offset[11:0](x1) 调用远距离过程
+-//jal offset: jal x1, offset 跳转并链接(jar x1, imm is real)
+-//jalr rs: jalr x1, rs, 0 寄存器跳转并链接(jalr x1, x5, imm; jalr offset(rs1)?? is real)
+0//call offset: auipc x1, offset[31:12]; jalr x1, offset[11:0](x1) 调用远距离过程
 //fence: fence iorw, iorw 内存和 I/O 屏障
 //fscsr rd, rs: csrrw rd, fcrs, rs 交换浮点 csr 寄存器
 //fsrm rd, rs: csrrw rd, frm, rs 交换浮点舍入模式
