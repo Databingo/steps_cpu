@@ -320,8 +320,7 @@ func main() {
 		    syb = strings.Join(code[1:len(code)], " ")
 		    fmt.Println("Directive:", directive, "Symbol:", syb)
 
-		}
-		copy_instr.WriteString(raw_instr)
+		} else {copy_instr.WriteString(raw_instr)}
 	}
         ////////
 

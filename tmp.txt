@@ -1,10 +1,4 @@
-rective: Define global symbols (visible to linker)
-.global _start
-.global my_message
-.section .data
 my_message:
-.string "Hello RISC-V\n"
-.section .text
 _start:
 la      a1, my_message
 #     li      a0, 1           

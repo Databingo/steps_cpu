@@ -1,4 +1,4 @@
-rective: Define global symbols (visible to linker)
+# Directive: Define global symbols (visible to linker)
 .global _start
 .global my_message
 
