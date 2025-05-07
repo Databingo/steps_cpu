@@ -476,8 +476,9 @@ func main() {
 			real_instr.WriteString(ins)
 			fmt.Printf("%s: \n", ins)
 		case "la":
-			ins := fmt.Sprintf("jalr x0, %s, 0\n", code[1]) // 寄存器跳转 jr rs|jump to rs+0
-
+			ins := fmt.Sprintf("auipc %s, %%pcrel_hi(%s)\n", code[1], code[2]) // hi = (rela_addr + 0x800) >> 12
+			real_instr.WriteString(ins)
+			ins = fmt.Sprintf("addi  %s, %s, %%pcrel_lo_i(%s)\n", code[1], code[1], code[2]) // lo = rela_addr  - (hi << 12)
 			real_instr.WriteString(ins)
 		case "jr":
 			ins := fmt.Sprintf("jalr x0, %s, 0\n", code[1]) // 寄存器跳转 jr rs|jump to rs+0
