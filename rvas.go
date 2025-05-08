@@ -476,14 +476,20 @@ func main() {
 			real_instr.WriteString(ins)
 			fmt.Printf("%s: \n", ins)
 		case "la":
-		    fmt.Println(`
-		                 for .rela.text: addr:instruction addr
-		                 type:R_RISCV_PCREL_HI20_18, 
-				 symbol_index:index of symbol in .symtab
+		        fmt.Println(`
+		                 for .rela.text: 
+				 Elf64_Addr r_offset: instruction addr(index in .text) 0x0000000000000000
+				 Elf64_Xword r_infor: type:R_RISCV_PCREL_HI20=18 << 31 | symbol_index:index of symbol in .symtab(defined in .data section)  0x0000000100000012
+				 Elf64_Sxword r_addend: 0 for PC-relative 0x0000000000000000
 				 `)
 			//ins := fmt.Sprintf("auipc %s, %%pcrel_hi(%s)\n", code[1], code[2]) // hi = (rela_addr + 0x800) >> 12
 			ins := fmt.Sprintf("auipc %s, 0 # %s \n", code[1], code[2]) // hi = (rela_addr + 0x800) >> 12
 			real_instr.WriteString(ins)
+		        fmt.Println(`
+		                 for .rela.text: addr:instruction addr
+		                 type:R_RISCV_PCREL_LO12_I=19, 
+				 symbol_index:index of symbol in .symtab
+				 `)
 			//ins = fmt.Sprintf("addi  %s, %s, %%pcrel_lo(%s)\n", code[1], code[1], code[2]) // lo = rela_addr  - (hi << 12)
 			ins = fmt.Sprintf("addi  %s, %s, 0 # %s \n", code[1], code[1], code[2]) // lo = rela_addr  - (hi << 12)
 			real_instr.WriteString(ins)
