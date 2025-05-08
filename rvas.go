@@ -476,6 +476,11 @@ func main() {
 			real_instr.WriteString(ins)
 			fmt.Printf("%s: \n", ins)
 		case "la":
+		    fmt.Println(`
+		                 for .rela.text: addr:instruction addr
+		                 type:R_RISCV_PCREL_HI20_18, 
+				 symbol_index:index of symbol in .symtab
+				 `)
 			//ins := fmt.Sprintf("auipc %s, %%pcrel_hi(%s)\n", code[1], code[2]) // hi = (rela_addr + 0x800) >> 12
 			ins := fmt.Sprintf("auipc %s, 0\n", code[1]) // hi = (rela_addr + 0x800) >> 12
 			real_instr.WriteString(ins)
