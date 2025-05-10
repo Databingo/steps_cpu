@@ -487,7 +487,7 @@ func main() {
 
 			real_instr.WriteString(ins)
 			fmt.Printf("%s: \n", ins)
-		case "la": // 装入地址
+		case "la", "lla": // 装入地址 (lla for certainly pc-related address, la is not sure)
 			ins := fmt.Sprintf("# %s\n", line)
 			real_instr.WriteString(ins)
 			fmt.Println(`
