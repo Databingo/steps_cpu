@@ -493,12 +493,12 @@ func main() {
 			//ins = fmt.Sprintf("jal x0, 0 # %s\n", code[1]) //calculate offset by linker?
 			ins = fmt.Sprintf("jal x0, %s\n", code[1]) // calculate offset by linker?
 			real_instr.WriteString(ins)
-		case "jr": // 寄存器尾跳转 jr rs|jump to rs+0
+		case "jr": // 寄存器尾跳转 jr rs|jump to rs+0 (imm default 0)
 			ins := fmt.Sprintf("# %s\n", line)
 			real_instr.WriteString(ins)
 			ins = fmt.Sprintf("jalr x0, %s, 0\n", code[1])
 			real_instr.WriteString(ins)
-		case "jal": // PC跳转 jal offset|jump to pc+imm|save pc+4 to x1
+		case "jal": // PC跳转 jal offset|jump to pc+imm|save pc+4 to x1 (retrun default x1)
 		        if len(code) == 2 { // different from real: jal rd, imm
 			ins := fmt.Sprintf("# %s\n", line)
 			real_instr.WriteString(ins)
@@ -506,11 +506,11 @@ func main() {
 			ins = fmt.Sprintf("jal x1, %s\n", code[1])//should calculate offset by linker?
 			real_instr.WriteString(ins)
 			}
-		case "jalr": // 寄存器跳转 jalr rs |jump to rs|save pc+4 to x1
+		case "jalr": // 寄存器跳转 jalr rs |jump to rs|save pc+4 to x1 (imm defalut 0, retrun default x1)
 		        if len(code) == 2 { // different from real: jal rd, imm
 			ins := fmt.Sprintf("# %s\n", line)
 			real_instr.WriteString(ins)
-			ins = fmt.Sprintf("jalr x1, %s, 0 %s\n", code[1])
+			ins = fmt.Sprintf("jalr x1, %s, 0\n", code[1])
 			real_instr.WriteString(ins)
 			}
 		case "la", "lla": // 装入地址 (lla for certainly pc-related address, la is not sure)

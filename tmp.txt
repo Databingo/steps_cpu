@@ -13,8 +13,12 @@ auipc x6, 0 # _start
 jalr x0, x6, 0 # _start
 #     j _start
 jal x0, _start
+#     jr x9
+jalr x0, x9, 0
 #     jal _start
 jal x1, _start
+#     jalr x9
+jalr x1, x9, 0
 #     li      a0, 1           
 addi a0, x0, 0x0
 ori a0, a0, 0x1
