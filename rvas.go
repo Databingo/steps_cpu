@@ -368,12 +368,13 @@ func main() {
 		//var label string
 		if strings.HasSuffix(switchOnOp, ":") {
 			label = strings.TrimSuffix(code[0], ":")
+			real_instr.WriteString(label+":\n") // separate label: to a independent line
 			if len(code) >= 2 {
 				switchOnOp = code[1]
 				code = code[1:]
 			} else {
-				origin_instr = strings.TrimLeft(origin_instr, " ")
-				real_instr.WriteString(origin_instr)
+				//origin_instr = strings.TrimLeft(origin_instr, " ")
+				//real_instr.WriteString(origin_instr)
 				continue
 			}
 		}
@@ -392,7 +393,7 @@ func main() {
 			real_instr.WriteString(ins)
 			if label != "" {
 				ins = fmt.Sprintf("%s:\n", label)
-				real_instr.WriteString(ins)
+				//real_instr.WriteString(ins)
 			}
 			/////////////////////////-- deploy 3
 			// lui +0x800>>12; addi -(a<<12)#for h32; srli 11; ori 11; srli 11; ori 11; srli 10, ori 10; r sub 2 instruction for main
@@ -467,7 +468,7 @@ func main() {
 
 			}
 
-		case "j":
+		case "j":// PC相对无记跳转 j offset|jump to pc+offset
 			if len(code) != 2 && len(code) != 3 {
 				fmt.Println("Incorrect argument count on line: ", lineCounter)
 				os.Exit(0)
@@ -487,6 +488,20 @@ func main() {
 
 			real_instr.WriteString(ins)
 			fmt.Printf("%s: \n", ins)
+		case "jr": // 寄存器绝对无记跳转 jr rs|jump to rs+0
+			ins := fmt.Sprintf("# %s\n", line)
+			real_instr.WriteString(ins)
+			ins = fmt.Sprintf("jalr x0, %s, 0\n", code[1])
+			real_instr.WriteString(ins)
+		case "jar": // 寄存器绝对跳转 jr rs|jump to rs+0|save pc+4 to x1
+			if len(code) == 2 || len(code) != 3 {
+				fmt.Println("Incorrect argument count on line: ", lineCounter)
+				os.Exit(0)
+			}
+			ins := fmt.Sprintf("# %s\n", line)
+			real_instr.WriteString(ins)
+			ins = fmt.Sprintf("jalr x0, %s, 0\n", code[1])
+			real_instr.WriteString(ins)
 		case "la", "lla": // 装入地址 (lla for certainly pc-related address, la is not sure)
 			ins := fmt.Sprintf("# %s\n", line)
 			real_instr.WriteString(ins)
@@ -523,11 +538,6 @@ func main() {
 			ins = fmt.Sprintf("auipc x6, 0 # %s\n", code[1])
 			real_instr.WriteString(ins)
 			ins = fmt.Sprintf("jalr x0, x6, 0 # %s\n", code[1])
-			real_instr.WriteString(ins)
-		case "jr": // 寄存器跳转 jr rs|jump to rs+0
-			ins := fmt.Sprintf("# %s\n", line)
-			real_instr.WriteString(ins)
-			ins = fmt.Sprintf("jalr x0, %s, 0\n", code[1])
 			real_instr.WriteString(ins)
 		case "nop": // 空操作
 			ins := fmt.Sprintf("# %s\n", line)
