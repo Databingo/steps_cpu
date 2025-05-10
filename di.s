@@ -17,6 +17,8 @@ _start:
     nop
     call _start
     tail _start
+    j _start
+    jal _start
 
     # Prepare for write(1, message_addr, length) syscall (Linux RV64)
     li      a0, 1           # fd = 1 (stdout)

@@ -468,40 +468,51 @@ func main() {
 
 			}
 
-		case "j":// PC相对无记跳转 j offset|jump to pc+offset
-			if len(code) != 2 && len(code) != 3 {
-				fmt.Println("Incorrect argument count on line: ", lineCounter)
-				os.Exit(0)
-			}
-			lab := code[1]
-			ins := fmt.Sprintf("jal x0, %s\n", lab)
-			fmt.Printf("%s: \n", ins)
-			if err != nil {
-				fmt.Printf("~Error on line %d: %s, %s \n", lineCounter, err, line)
-				os.Exit(0)
-			}
-			if label != "" {
-				real_instr.WriteString(label + ":\n")
-			}
+		case "j":// PC尾跳转 j offset|jump to pc+offset
+			//if len(code) != 2 && len(code) != 3 {
+			//	fmt.Println("Incorrect argument count on line: ", lineCounter)
+			//	os.Exit(0)
+			//}
+			//lab := code[1]
+			//ins := fmt.Sprintf("jal x0, %s\n", lab)
+			//fmt.Printf("%s: \n", ins)
+			//if err != nil {
+			//	fmt.Printf("~Error on line %d: %s, %s \n", lineCounter, err, line)
+			//	os.Exit(0)
+			//}
+			//if label != "" {
+			//	real_instr.WriteString(label + ":\n")
+			//}
 
-			ins = fmt.Sprintf("jal x0, %s\n", lab)
+			//ins = fmt.Sprintf("jal x0, %s\n", lab)
 
+			//real_instr.WriteString(ins)
+			//fmt.Printf("%s: \n", ins)
+			ins := fmt.Sprintf("# %s\n", line)
 			real_instr.WriteString(ins)
-			fmt.Printf("%s: \n", ins)
-		case "jr": // 寄存器绝对无记跳转 jr rs|jump to rs+0
+			//ins = fmt.Sprintf("jal x0, 0 # %s\n", code[1]) //calculate offset by linker?
+			ins = fmt.Sprintf("jal x0, %s\n", code[1]) // calculate offset by linker?
+			real_instr.WriteString(ins)
+		case "jr": // 寄存器尾跳转 jr rs|jump to rs+0
 			ins := fmt.Sprintf("# %s\n", line)
 			real_instr.WriteString(ins)
 			ins = fmt.Sprintf("jalr x0, %s, 0\n", code[1])
 			real_instr.WriteString(ins)
-		case "jar": // 寄存器绝对跳转 jr rs|jump to rs+0|save pc+4 to x1
-			if len(code) == 2 || len(code) != 3 {
-				fmt.Println("Incorrect argument count on line: ", lineCounter)
-				os.Exit(0)
-			}
+		case "jal": // PC跳转 jal offset|jump to pc+imm|save pc+4 to x1
+		        if len(code) == 2 { // different from real: jal rd, imm
 			ins := fmt.Sprintf("# %s\n", line)
 			real_instr.WriteString(ins)
-			ins = fmt.Sprintf("jalr x0, %s, 0\n", code[1])
+			//ins = fmt.Sprintf("jal x1, 0 # %s\n", code[1])//should calculate offset by linker?
+			ins = fmt.Sprintf("jal x1, %s\n", code[1])//should calculate offset by linker?
 			real_instr.WriteString(ins)
+			}
+		case "jalr": // 寄存器跳转 jalr rs |jump to rs|save pc+4 to x1
+		        if len(code) == 2 { // different from real: jal rd, imm
+			ins := fmt.Sprintf("# %s\n", line)
+			real_instr.WriteString(ins)
+			ins = fmt.Sprintf("jalr x1, %s, 0 %s\n", code[1])
+			real_instr.WriteString(ins)
+			}
 		case "la", "lla": // 装入地址 (lla for certainly pc-related address, la is not sure)
 			ins := fmt.Sprintf("# %s\n", line)
 			real_instr.WriteString(ins)
@@ -848,7 +859,7 @@ func main() {
 			rd, rdFound := regBin[code[1]]
 			label, labelFound := symbolTable[code[2]]
 			if !labelFound {
-				fmt.Println("Error: label not found")
+				fmt.Println("Error: label not found", label, code)
 				os.Exit(0)
 			}
 			if !opFound && !rdFound {
