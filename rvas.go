@@ -487,7 +487,7 @@ func main() {
 
 			real_instr.WriteString(ins)
 			fmt.Printf("%s: \n", ins)
-		case "la":
+		case "la": // 装入地址
 			ins := fmt.Sprintf("# %s\n", line)
 			real_instr.WriteString(ins)
 			fmt.Println(`
@@ -510,25 +510,25 @@ func main() {
 			//ins = fmt.Sprintf("addi  %s, %s, %%pcrel_lo(%s)\n", code[1], code[1], code[2]) // lo = rela_addr  - (hi << 12)
 			ins = fmt.Sprintf("addi  %s, %s, 0 # %s \n", code[1], code[1], code[2]) // lo = rela_addr  - (hi << 12)
 			real_instr.WriteString(ins)
-		case "jr":
+		case "jr": // 寄存器跳转 jr rs|jump to rs+0
 			ins := fmt.Sprintf("# %s\n", line)
 			real_instr.WriteString(ins)
-			ins = fmt.Sprintf("jalr x0, %s, 0\n", code[1]) // 寄存器跳转 jr rs|jump to rs+0
+			ins = fmt.Sprintf("jalr x0, %s, 0\n", code[1])
 			real_instr.WriteString(ins)
-		case "nop":
+		case "nop": // 空操作
 			ins := fmt.Sprintf("# %s\n", line)
 			real_instr.WriteString(ins)
-			ins = "addi x0, x0, 0\n" // 空操作
+			ins = "addi x0, x0, 0\n"
 			real_instr.WriteString(ins)
-		case "ret":
+		case "ret": // 从子过程中返回
 			ins := fmt.Sprintf("# %s\n", line)
 			real_instr.WriteString(ins)
-			ins = "jalr x0, x1, 0\n" // 从子过程中返回
+			ins = "jalr x0, x1, 0\n"
 			real_instr.WriteString(ins)
-		case "neg":
+		case "neg": // 取负值
 			ins := fmt.Sprintf("# %s\n", line)
 			real_instr.WriteString(ins)
-			ins = fmt.Sprintf("sub %s, x0, %s\n", code[1], code[2]) // 取负值
+			ins = fmt.Sprintf("sub %s, x0, %s\n", code[1], code[2])
 			real_instr.WriteString(ins)
 		default:
 			origin_instr = strings.TrimLeft(origin_instr, " ")
