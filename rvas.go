@@ -394,6 +394,8 @@ func main() {
 				ins = fmt.Sprintf("%s:\n", label)
 				real_instr.WriteString(ins)
 			}
+			/////////////////////////-- deploy 3
+			// lui +0x800>>12; addi -(a<<12)#for h32; srli 11; ori 11; srli 11; ori 11; srli 10, ori 10; # sub 2 instruction for main
 			/////////////////////////-- deploy 2
 			ins = fmt.Sprintf("addi %s, %s, %#x\n", code[1], "x0", 0) // for 0 or clean reg
 			real_instr.WriteString(ins)
