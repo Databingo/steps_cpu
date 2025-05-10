@@ -1,5 +1,6 @@
 my_message:
 _start:
+#     la      a1, my_message
 auipc a1, 0 # my_message 
 addi  a1, a1, 0 # my_message 
 #     li      a0, 1           

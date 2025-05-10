@@ -6,16 +6,16 @@ import (
 	"errors"
 	"fmt"
 	//"io"
+	"debug/elf"
 	"log"
 	"os"
 	"strconv"
 	"strings"
-	"debug/elf"
 )
 
-type symbol_info  struct {
-    Name string
-    Section elf.SectionIndex
+type symbol_info struct {
+	Name    string
+	Section elf.SectionIndex
 }
 
 func write2f(text string, name string) {
@@ -216,7 +216,7 @@ func main() {
 		"ecall":  0b00000000000000000000000001110011,
 		"ebreak": 0b00000000000100000000000001110011,
 
-                // privilege
+		// privilege
 		"sret": 0b00010000001000000000000001110011,
 		"mret": 0b00110000001000000000000001110011,
 		"wfi":  0b00010000010100000000000001110011,
@@ -229,19 +229,18 @@ func main() {
 	check(err)
 	defer file.Close()
 
-
-        ////////
+	////////
 	// 0pass parse directive
-	// .section 
-	// .text .data .rodata .bss 
-        // .symtab .strtab .shstrtab
-        // 
+	// .section
+	// .text .data .rodata .bss
+	// .symtab .strtab .shstrtab
+	//
 	// .byte .string .half .word .dword .zero .align .equ 8
 	fmt.Println("start 0pass.")
 	fmt.Println("ELF header inital:")
 	fmt.Println([]byte{
-	        ////// e_ident[16]
-	        0x7F, 0x45, 0x4C, 0x46, // Magic number indicates ELF file (0x7f E L F)
+		////// e_ident[16]
+		0x7F, 0x45, 0x4C, 0x46, // Magic number indicates ELF file (0x7f E L F)
 		0x02,                                     // ei_class 01 for 32-bit 02 for 64-bit
 		0x01,                                     // ei_data specify little endian
 		0x01,                                     // ei_version current elf version
@@ -252,9 +251,9 @@ func main() {
 		0x01, 0x00, // e_type object 1 for ET_REL relocatable file
 		0xF3, 0x00, // e_machine specify machine 0xf3 for RISC-V
 		0x01, 0x00, 0x00, 0x00, // e_version specify original elf version
-		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,// e_entry program entry address -- 0 for relocatable file set final entry point by linker
-		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,// e_phoff points to start of program header table --  0 for relocatable file (no program headers)
-		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,// e_shoff points to start of section header table --  no 0 have to be the start of SHT  (e_shnum * e_shentsize = whole table of SHT)
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // e_entry program entry address -- 0 for relocatable file set final entry point by linker
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // e_phoff points to start of program header table --  0 for relocatable file (no program headers)
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // e_shoff points to start of section header table --  no 0 have to be the start of SHT  (e_shnum * e_shentsize = whole table of SHT)
 		0x04, 0x00, 0x00, 0x00, // e_flags  // 0x4 for LP64D ABI  (EF_RISCV_FLOAT_ABI_DOUBLE) fit for RV64G
 		0x40, 0x00, // e_ehsize specify size of header, 52 bytes(0x34) for 32-bit format, 64 bytes(0x40) for 64-bit ?
 		0x00, 0x00, // e_phentsize size of program header table entry -- 0 for relocatable
@@ -263,66 +262,77 @@ func main() {
 		0x00, 0x00, // e_shnum number of entries in the section header table -- no 0 must be actual number of section headers
 		0x00, 0x00, // e_shstrndx index of the section header table entry that contains the section names -- no 0 must be SHT index for .shstrtab section
 	})
-	fmt.Println("Section header inital:")
+	fmt.Println("SHT Section header inital:")
 	fmt.Println([]byte{
-	        0x00, 0x00, 0x00, 0x00, // sh_name
-	        0x00, 0x00, 0x00, 0x00, // sh_type
-	        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // sh_flags
-	        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // sh_addr
-	        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // sh_offset (with sh_size to locate whole section content)
-	        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // sh_size
-	        0x00, 0x00, 0x00, 0x00, // sh_link
-	        0x00, 0x00, 0x00, 0x00, // sh_info
-	        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // sh_addralign
-	        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // sh_entsize
+		0x00, 0x00, 0x00, 0x00, // sh_name
+		0x00, 0x00, 0x00, 0x00, // sh_type 3_SHT_STRTAB
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // sh_flags
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // sh_addr
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // sh_offset (with sh_size to locate whole section content)
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // sh_size
+		0x00, 0x00, 0x00, 0x00, // sh_link
+		0x00, 0x00, 0x00, 0x00, // sh_info
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // sh_addralign
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // sh_entsize
 	})
 	//Find Section name string
-	//Elf64_hdr -> Elf64_Shdr(SHT) -> Section header of .x -> sh_name(index in .shstrtab) -> section name string in .shstrtab 
+	//Elf64_hdr -> Elf64_Shdr(SHT) -> Section header of .x -> sh_name(index in .shstrtab) -> section name string in .shstrtab
 	//Elf64_hdr -> e_shstrndx(.shstrtab index in SHT) -> Section header of .shstrtab -> sh_offset + sh_size -> .shstrtab
-	fmt.Println("Symbol table inital:")
+	fmt.Println(".symtab Symbol table inital:")
 	fmt.Println([]byte{
-	        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // st_name (byte offset in .strtab)
-	        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
-	        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // st_info
-	        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
-	        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // st_other
-	        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // st_shndx (in which section)
-	        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // st_value (offset in seciton)
-	        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // st_size
-	        0x00, 0x00, 0x00, 0x00, // sh_type
-	        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // sh_flags
-	        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // sh_addr
-	        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // sh_offset (with sh_size to locate whole section content)
-	        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // sh_size
-	        0x00, 0x00, 0x00, 0x00, // sh_link (.strtab's index in SHT, standard find .strtab)
-	        0x00, 0x00, 0x00, 0x00, // sh_info
-	        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // sh_addralign
-	        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // sh_entsize
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // st_name (byte offset in .strtab)
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // st_info
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // st_other
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // st_shndx (in which section)
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // st_value (offset in seciton)
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // st_size
+		0x00, 0x00, 0x00, 0x00, // sh_type
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // sh_flags
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // sh_addr
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // sh_offset (with sh_size to locate whole section content)
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // sh_size
+		0x00, 0x00, 0x00, 0x00, // sh_link (.strtab's index in SHT, standard find .strtab)
+		0x00, 0x00, 0x00, 0x00, // sh_info
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // sh_addralign
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // sh_entsize
 	})
 	//Find symbol string
-	//Elf64_hdr -> e_shoff + e_shnum * e_shentsize -> Elf64_Shdr(SHT) -> Section header of .symtab -> sh_offset + sh_size -> .symtab -> st_name -> byte start point in .strtab to null  
-	//Elf64_hdr -> e_shoff + e_shnum * e_shentsize -> Elf64_Shdr(SHT) -> Section header of .strtab -> sh_offset + sh_size -> .strtab 
+	//Elf64_hdr -> e_shoff + e_shnum * e_shentsize -> Elf64_Shdr(SHT) -> Section header of .symtab -> sh_offset + sh_size -> .symtab -> st_name -> byte start point in .strtab to null
+	//Elf64_hdr -> e_shoff + e_shnum * e_shentsize -> Elf64_Shdr(SHT) -> Section header of .strtab -> sh_offset + sh_size -> .strtab
+	fmt.Println(".shstrab inital:")
+	fmt.Println([]byte{
+		0x00,                               // \0 Empty string (for unnamed sections)
+		0x2E, 0x74, 0x65, 0x78, 0x74, 0x00, // .text\0
+		0x2E, 0x72, 0x65, 0x6C, 0x61, 0x2E, 0x74, 0x65, 0x78, 0x74, 0x00, // .rela.text\0
+		// ....
+	})
 
 	scanner0 := bufio.NewScanner(file) // stores content from file
 	scanner0.Split(bufio.ScanLines)
 	var copy_instr strings.Builder
 
 	for scanner0.Scan() {
-	        raw_instr := scanner0.Text() + "\n"
+		raw_instr := scanner0.Text() + "\n"
 		line := strings.Split(scanner0.Text(), "#")[0]
 		code := strings.FieldsFunc(line, SplitOn)
-		if len(code) == 0 { continue }
+		if len(code) == 0 {
+			continue
+		}
 		switchOnOp := code[0]
 		directive := ""
 		syb := ""
 		if strings.HasPrefix(switchOnOp, ".") {
-		    directive = strings.TrimPrefix(code[0], ".")
-		    syb = strings.Join(code[1:len(code)], " ")
-		    fmt.Println("Directive:", directive, "Symbol:", syb)
+			directive = strings.TrimPrefix(code[0], ".")
+			syb = strings.Join(code[1:len(code)], " ")
+			fmt.Println("Directive:", directive, "Symbol:", syb)
 
-		} else {copy_instr.WriteString(raw_instr)}
+		} else {
+			copy_instr.WriteString(raw_instr)
+		}
 	}
-        ////////
+	////////
 
 	//scanner := bufio.NewScanner(strings.NewReader(real_instr.String()))
 	//scanner.Split(bufio.ScanLines)
@@ -476,19 +486,24 @@ func main() {
 			real_instr.WriteString(ins)
 			fmt.Printf("%s: \n", ins)
 		case "la":
-		        fmt.Println(`
+			ins := fmt.Sprintf("# %s\n", line)
+			real_instr.WriteString(ins)
+			fmt.Println(`
 		                 for .rela.text: 
+			         Entry: (24 bytes)
 				 Elf64_Addr r_offset: instruction addr(index in .text) 0x0000000000000000
-				 Elf64_Xword r_infor: type:R_RISCV_PCREL_HI20=18 << 31 | symbol_index:index of symbol in .symtab(defined in .data section)  0x0000000100000012
+				 Elf64_Xword r_infor: type:R_RISCV_PCREL_HI20=18 << 32 | symbol_index:index of symbol in .symtab(defined in .data section)  0x0000000100000012
 				 Elf64_Sxword r_addend: 0 for PC-relative 0x0000000000000000
 				 `)
 			//ins := fmt.Sprintf("auipc %s, %%pcrel_hi(%s)\n", code[1], code[2]) // hi = (rela_addr + 0x800) >> 12
-			ins := fmt.Sprintf("auipc %s, 0 # %s \n", code[1], code[2]) // hi = (rela_addr + 0x800) >> 12
+			ins = fmt.Sprintf("auipc %s, 0 # %s \n", code[1], code[2]) // hi = (rela_addr + 0x800) >> 12
 			real_instr.WriteString(ins)
-		        fmt.Println(`
-		                 for .rela.text: addr:instruction addr
-		                 type:R_RISCV_PCREL_LO12_I=19, 
-				 symbol_index:index of symbol in .symtab
+			fmt.Println(`
+		                 for .rela.text: 
+			         Entry: (24 bytes)
+				 Elf64_Addr r_offset: instruction addr(index in .text) 0x0000000000000004
+				 Elf64_Xword r_infor: type:R_RISCV_PCREL_LO12_I=19 << 32 | symbol_index:index of symbol in .symtab(defined in .data section)  0x0000000100000013
+				 Elf64_Sxword r_addend: 0 for PC-relative 0x0000000000000000
 				 `)
 			//ins = fmt.Sprintf("addi  %s, %s, %%pcrel_lo(%s)\n", code[1], code[1], code[2]) // lo = rela_addr  - (hi << 12)
 			ins = fmt.Sprintf("addi  %s, %s, 0 # %s \n", code[1], code[1], code[2]) // lo = rela_addr  - (hi << 12)
@@ -515,7 +530,7 @@ func main() {
 
 	fmt.Println("print real_instr")
 	fmt.Println(real_instr.String())
-        write2f(real_instr.String(), "tmp.txt")
+	write2f(real_instr.String(), "tmp.txt")
 
 	// 2pass count label address; check grammar
 	fmt.Println("start 2pass.")
@@ -620,7 +635,7 @@ func main() {
 			}
 
 		case "addi", "addiw", "slti", "sltiu", "xori", "ori", "andi", "jalr": // Instruction format: op rd, rs1, imm     or      label:  op rd, rs1, imm
-		//special form: jalr offset(rs1)?? is real (len(code)==3)
+			//special form: jalr offset(rs1)?? is real (len(code)==3)
 			if len(code) != 4 && len(code) != 5 {
 				fmt.Println("addi ori 1 Incorrect argument count on line: ", lineCounter, line)
 				os.Exit(0)
@@ -700,10 +715,10 @@ func main() {
 	defer f.Close()
 
 	// set up file header table
-		
+
 	f.Write([]byte{
-	        ////// e_ident[16]
-	        0x7F, 0x45, 0x4C, 0x46, // Magic number indicates ELF file (0x7f E L F)
+		////// e_ident[16]
+		0x7F, 0x45, 0x4C, 0x46, // Magic number indicates ELF file (0x7f E L F)
 		0x02,                                     // ei_class 01 for 32-bit 02 for 64-bit
 		0x01,                                     // ei_data specify little endian
 		0x01,                                     // ei_version current elf version
@@ -714,9 +729,9 @@ func main() {
 		0x01, 0x00, // e_type object 1 for ET_REL relocatable file
 		0xF3, 0x00, // e_machine specify machine 0xf3 for RISC-V
 		0x01, 0x00, 0x00, 0x00, // e_version specify original elf version
-		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,// e_entry program entry address -- 0 for relocatable file set final entry point by linker
-		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,// e_phoff points to start of program header table --  0 for relocatable file (no program headers)
-		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,// e_shoff points to start of section header table --  no 0 have to be the start of SHT
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // e_entry program entry address -- 0 for relocatable file set final entry point by linker
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // e_phoff points to start of program header table --  0 for relocatable file (no program headers)
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // e_shoff points to start of section header table --  no 0 have to be the start of SHT
 		0x04, 0x00, 0x00, 0x00, // e_flags  // 0x4 for LP64D ABI  (EF_RISCV_FLOAT_ABI_DOUBLE) fit for RV64G
 		0x40, 0x00, // e_ehsize specify size of header, 52 bytes(0x34) for 32-bit format, 64 bytes(0x40) for 64-bit ?
 		0x00, 0x00, // e_phentsize size of program header table entry -- 0 for relocatable
@@ -725,32 +740,32 @@ func main() {
 		0x00, 0x00, // e_shnum number of entries in the section header table -- no 0 must be actual number of section headers
 		0x00, 0x00, // e_shstrndx index of the section header table entry that contains the section names -- no 0 must be SHT index for .shstrtab section
 	})
-//f.Write([]byte{0x7F, 0x45, 0x4C, 0x46, // indicates elf file
-// 		0x01,                                     // identifies 32 bit format
-// 		0x01,                                     // specify little endian
-// 		0x01,                                     // current elf version
-// 		0x00,                                     // target platform, usually set to 0x0 (System V)
-// 		0x00,                                     // ABI version
-// 		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // zero padding
-// 		0x01, 0x00, // object relocatable file
-// 		0xF3, 0x00, // specify machine RISC-V
-// 		0x01, 0x00, 0x00, 0x00, // specify original elf version
-// 		0x00, 0x00, 0x00, 0x80, // program entry address
-// 		0x34, 0x00, 0x00, 0x00, // points to start of program header table
-// 		0x00, 0x00, 0x00, 0x00, // points to start of section header table
-// 		0x00, 0x00, 0x00, 0x00, // e_flags
-// 		0x34, 0x00, // specify size of header, 52 bytes for 32-bit format
-// 		0x00, 0x00, // size of program header table entry
-// 		0x00, 0x00, // contains number of entries in program header table
-// 		0x00, 0x00, // size of section header entry
-// 		0x00, 0x00, // number of entries in the section header table
-// 		0x00, 0x00, // index of the section header table entry that contains the section names
-// 	})
+	//f.Write([]byte{0x7F, 0x45, 0x4C, 0x46, // indicates elf file
+	// 		0x01,                                     // identifies 32 bit format
+	// 		0x01,                                     // specify little endian
+	// 		0x01,                                     // current elf version
+	// 		0x00,                                     // target platform, usually set to 0x0 (System V)
+	// 		0x00,                                     // ABI version
+	// 		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // zero padding
+	// 		0x01, 0x00, // object relocatable file
+	// 		0xF3, 0x00, // specify machine RISC-V
+	// 		0x01, 0x00, 0x00, 0x00, // specify original elf version
+	// 		0x00, 0x00, 0x00, 0x80, // program entry address
+	// 		0x34, 0x00, 0x00, 0x00, // points to start of program header table
+	// 		0x00, 0x00, 0x00, 0x00, // points to start of section header table
+	// 		0x00, 0x00, 0x00, 0x00, // e_flags
+	// 		0x34, 0x00, // specify size of header, 52 bytes for 32-bit format
+	// 		0x00, 0x00, // size of program header table entry
+	// 		0x00, 0x00, // contains number of entries in program header table
+	// 		0x00, 0x00, // size of section header entry
+	// 		0x00, 0x00, // number of entries in the section header table
+	// 		0x00, 0x00, // index of the section header table entry that contains the section names
+	// 	})
 	// 3pass trans assembly to binary
 	fmt.Println("start 3pass.")
 	address = 0
 	lineCounter = 1
-	instructionBuffer := make([]byte, 4) // buffer to store 4 bytes
+	instructionBuffer := make([]byte, 4)                               // buffer to store 4 bytes
 	scanner = bufio.NewScanner(strings.NewReader(real_instr.String())) // stores content from file
 	scanner.Split(bufio.ScanLines)
 	for scanner.Scan() {
@@ -960,7 +975,7 @@ func main() {
 		addr := fmt.Sprintf("%08b", address)
 		addrd := fmt.Sprintf("%05d", address)
 		little_endian_ins := ins[24:32] + " " + ins[16:24] + " " + ins[8:16] + " " + ins[0:8]
-		append2f(little_endian_ins + " // Addr: " + addrd + " " + addr + " " + ins + " " + line, "binary_instructions.txt")
+		append2f(little_endian_ins+" // Addr: "+addrd+" "+addr+" "+ins+" "+line, "binary_instructions.txt")
 		lineCounter++
 		address += 4
 
@@ -970,4 +985,22 @@ func main() {
 		binary.LittleEndian.PutUint32(instructionBuffer, instruction)
 		f.Write(instructionBuffer)
 	}
+
+	fmt.Println(`
+		                 ELF header
+				 - Identifies
+				 - Points to section headers
+				 Section .text
+				 - Machine code
+				 Section .rela.text
+				 - Relocation entrires
+				 Section .symtab
+				 - Symbol entries
+				 Section .strtab
+				 - Symbol names
+				 Sedtion .shstrtab
+				 - Section names
+				 Section Headers
+				 - Describe sections
+				 `)
 }
