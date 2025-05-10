@@ -395,7 +395,7 @@ func main() {
 				real_instr.WriteString(ins)
 			}
 			/////////////////////////-- deploy 3
-			// lui +0x800>>12; addi -(a<<12)#for h32; srli 11; ori 11; srli 11; ori 11; srli 10, ori 10; # sub 2 instruction for main
+			// lui +0x800>>12; addi -(a<<12)#for h32; srli 11; ori 11; srli 11; ori 11; srli 10, ori 10; r sub 2 instruction for main
 			/////////////////////////-- deploy 2
 			ins = fmt.Sprintf("addi %s, %s, %#x\n", code[1], "x0", 0) // for 0 or clean reg
 			real_instr.WriteString(ins)
@@ -511,16 +511,24 @@ func main() {
 			ins = fmt.Sprintf("addi  %s, %s, 0 # %s \n", code[1], code[1], code[2]) // lo = rela_addr  - (hi << 12)
 			real_instr.WriteString(ins)
 		case "jr":
-			ins := fmt.Sprintf("jalr x0, %s, 0\n", code[1]) // 寄存器跳转 jr rs|jump to rs+0
+			ins := fmt.Sprintf("# %s\n", line)
+			real_instr.WriteString(ins)
+			ins = fmt.Sprintf("jalr x0, %s, 0\n", code[1]) // 寄存器跳转 jr rs|jump to rs+0
 			real_instr.WriteString(ins)
 		case "nop":
-			ins := "addi x0, x0, 0\n" // 空操作
+			ins := fmt.Sprintf("# %s\n", line)
+			real_instr.WriteString(ins)
+			ins = "addi x0, x0, 0\n" // 空操作
 			real_instr.WriteString(ins)
 		case "ret":
-			ins := "jalr x0, x1, 0\n" // 从子过程中返回
+			ins := fmt.Sprintf("# %s\n", line)
+			real_instr.WriteString(ins)
+			ins = "jalr x0, x1, 0\n" // 从子过程中返回
 			real_instr.WriteString(ins)
 		case "neg":
-			ins := fmt.Sprintf("sub %s, x0, %s\n", code[1], code[2]) // 取负值
+			ins := fmt.Sprintf("# %s\n", line)
+			real_instr.WriteString(ins)
+			ins = fmt.Sprintf("sub %s, x0, %s\n", code[1], code[2]) // 取负值
 			real_instr.WriteString(ins)
 		default:
 			origin_instr = strings.TrimLeft(origin_instr, " ")

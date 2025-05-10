@@ -14,6 +14,7 @@ _start:
     # Load the address of my_message into t0 (a0 for syscall)
     # 'la' is a pseudo-instruction handled by assembler/linker
     la      a1, my_message
+    nop
 
     # Prepare for write(1, message_addr, length) syscall (Linux RV64)
     li      a0, 1           # fd = 1 (stdout)
