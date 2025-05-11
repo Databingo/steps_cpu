@@ -160,12 +160,12 @@ SFENCE.VMA supervisor fence virtual memory address
 *//snez rd, rs: sltu rd, x0, rs 不为 0 时置位 (x0 < rs)
 *//sltz rd, rs: slt rd, rs, x0 小于 0 时置位（rs < x0）
 *//sgtz rd, rs: slt rd, x0, rs 大于 0 时置位（x0 < rs）
-//beqz rs, offset: beq rs, x0, offset 等于 0 时分支（rs == x0)
-//bnez rs, offset: bne rs, x0, offset 不于 0 时分支（rs != x0)
-//blez rs, offset: bge x0, rs, offset 小于等于 0 时分支（rs <= x0）
-//bgez rs, offset: bge rs, x0, offset 大于等于 0 时分支（rs >= x0）
-//bltz rs, offset: blt rs, x0, offset 小于 0 时分支（rs < x0） 
-//bgtz rs, offset: blt x0, rs, offset 大于 0 时分支（rs > x0）
+*//beqz rs, offset: beq rs, x0, offset 等于 0 时分支（rs == x0)
+*//bnez rs, offset: bne rs, x0, offset 不于 0 时分支（rs != x0)
+*//blez rs, offset: bge x0, rs, offset 小于等于 0 时分支（rs <= x0）
+*//bgez rs, offset: bge rs, x0, offset 大于等于 0 时分支（rs >= x0）
+*//bltz rs, offset: blt rs, x0, offset 小于 0 时分支（rs < x0） 
+*//bgtz rs, offset: blt x0, rs, offset 大于 0 时分支（rs > x0）
 *//j offset: jal x0, offset PC(pc+imm)跳转（返回地址 pc+4 写入 x0 无效）
 *//jr rs: jalr x0, rs, 0 寄存器(rs+imm)跳转（返回地址 pc+4 写入 x0 无效）
 *//ret: jalr x0, x1, 0 从子过程中返回（子函数返回）

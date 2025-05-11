@@ -570,7 +570,7 @@ func main() {
 			real_instr.WriteString(ins)
 			ins = "jalr x0, x1, 0\n"
 			real_instr.WriteString(ins)
-		case "neg": // 取负值 neg rd, rs
+		case "neg": // 取负 neg rd, rs
 			ins := fmt.Sprintf("# %s\n", line)
 			real_instr.WriteString(ins)
 			ins = fmt.Sprintf("sub %s, x0, %s\n", code[1], code[2])
