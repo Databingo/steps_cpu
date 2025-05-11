@@ -560,6 +560,11 @@ func main() {
 			real_instr.WriteString(ins)
 			ins = fmt.Sprintf("addi %s, %s, 0\n", code[1], code[2])
 			real_instr.WriteString(ins)
+		case "not": // 取反
+			ins := fmt.Sprintf("# %s\n", line)
+			real_instr.WriteString(ins)
+			ins = fmt.Sprintf("xori %s, %s, -1\n", code[1], code[2])
+			real_instr.WriteString(ins)
 		case "ret": // 从子过程中返回
 			ins := fmt.Sprintf("# %s\n", line)
 			real_instr.WriteString(ins)
@@ -569,6 +574,11 @@ func main() {
 			ins := fmt.Sprintf("# %s\n", line)
 			real_instr.WriteString(ins)
 			ins = fmt.Sprintf("sub %s, x0, %s\n", code[1], code[2])
+			real_instr.WriteString(ins)
+		case "negw": // 取负字
+			ins := fmt.Sprintf("# %s\n", line)
+			real_instr.WriteString(ins)
+			ins = fmt.Sprintf("subw %s, x0, %s\n", code[1], code[2])
 			real_instr.WriteString(ins)
 		default:
 			origin_instr = strings.TrimLeft(origin_instr, " ")
