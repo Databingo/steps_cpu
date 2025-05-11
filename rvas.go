@@ -615,11 +615,6 @@ func main() {
 			real_instr.WriteString(ins)
 			ins = fmt.Sprintf("bge %s, x0, %s\n", code[1], code[2])
 			real_instr.WriteString(ins)
-		case "blez": // 小于等于零时分支 blez rs, offset
-			ins := fmt.Sprintf("# %s\n", line)
-			real_instr.WriteString(ins)
-			ins = fmt.Sprintf("bge x0, %s, %s\n", code[1], code[2])
-			real_instr.WriteString(ins)
 		case "bltz": // 小于零时分支 bltz rs, offset
 			ins := fmt.Sprintf("# %s\n", line)
 			real_instr.WriteString(ins)
