@@ -580,6 +580,11 @@ func main() {
 			real_instr.WriteString(ins)
 			ins = fmt.Sprintf("subw %s, x0, %s\n", code[1], code[2])
 			real_instr.WriteString(ins)
+		case "seqz": // 等于零时置位 seqz rd, rs
+			ins := fmt.Sprintf("# %s\n", line)
+			real_instr.WriteString(ins)
+			ins = fmt.Sprintf("sltiu %s, %s, 1\n", code[1], code[2])
+			real_instr.WriteString(ins)
 		case "snez": // 不为零时置位 snez rd, rs
 			ins := fmt.Sprintf("# %s\n", line)
 			real_instr.WriteString(ins)
