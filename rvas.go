@@ -555,6 +555,11 @@ func main() {
 			real_instr.WriteString(ins)
 			ins = "addi x0, x0, 0\n"
 			real_instr.WriteString(ins)
+		case "mv": // 复制寄存器
+			ins := fmt.Sprintf("# %s\n", line)
+			real_instr.WriteString(ins)
+			ins = fmt.Sprintf("addi %s, %s, 0\n", code[1], code[2])
+			real_instr.WriteString(ins)
 		case "ret": // 从子过程中返回
 			ins := fmt.Sprintf("# %s\n", line)
 			real_instr.WriteString(ins)

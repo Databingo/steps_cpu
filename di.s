@@ -21,6 +21,7 @@ _start:
     jr x9
     jal _start
     jalr x9
+    mv x1, x2
 
     # Prepare for write(1, message_addr, length) syscall (Linux RV64)
     li      a0, 1           # fd = 1 (stdout)
