@@ -570,15 +570,35 @@ func main() {
 			real_instr.WriteString(ins)
 			ins = "jalr x0, x1, 0\n"
 			real_instr.WriteString(ins)
-		case "neg": // 取负值
+		case "neg": // 取负值 neg rd, rs
 			ins := fmt.Sprintf("# %s\n", line)
 			real_instr.WriteString(ins)
 			ins = fmt.Sprintf("sub %s, x0, %s\n", code[1], code[2])
 			real_instr.WriteString(ins)
-		case "negw": // 取负字
+		case "negw": // 取负字 negw rd, rs
 			ins := fmt.Sprintf("# %s\n", line)
 			real_instr.WriteString(ins)
 			ins = fmt.Sprintf("subw %s, x0, %s\n", code[1], code[2])
+			real_instr.WriteString(ins)
+		case "snez": // 不为零时置位 snez rd, rs
+			ins := fmt.Sprintf("# %s\n", line)
+			real_instr.WriteString(ins)
+			ins = fmt.Sprintf("sltu %s, x0, %s\n", code[1], code[2])
+			real_instr.WriteString(ins)
+		case "sltz": // 小于零时置位 sltz rd, rs
+			ins := fmt.Sprintf("# %s\n", line)
+			real_instr.WriteString(ins)
+			ins = fmt.Sprintf("sltz %s, %s, x0\n", code[1], code[2])
+			real_instr.WriteString(ins)
+		case "sgtz": // 大于零时置位 sgtz rd, rs
+			ins := fmt.Sprintf("# %s\n", line)
+			real_instr.WriteString(ins)
+			ins = fmt.Sprintf("sgtz %s, x0, %s\n", code[1], code[2])
+			real_instr.WriteString(ins)
+		case "beqz": // 等于时分支 beqz rs, offset
+			ins := fmt.Sprintf("# %s\n", line)
+			real_instr.WriteString(ins)
+			ins = fmt.Sprintf("sgtz %s, x0, %s\n", code[1], code[2])
 			real_instr.WriteString(ins)
 		default:
 			origin_instr = strings.TrimLeft(origin_instr, " ")
