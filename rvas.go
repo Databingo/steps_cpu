@@ -595,10 +595,40 @@ func main() {
 			real_instr.WriteString(ins)
 			ins = fmt.Sprintf("sgtz %s, x0, %s\n", code[1], code[2])
 			real_instr.WriteString(ins)
-		case "beqz": // 等于时分支 beqz rs, offset
+		case "beqz": // 等于零时分支 beqz rs, offset
 			ins := fmt.Sprintf("# %s\n", line)
 			real_instr.WriteString(ins)
-			ins = fmt.Sprintf("sgtz %s, x0, %s\n", code[1], code[2])
+			ins = fmt.Sprintf("beq %s, x0, %s\n", code[1], code[2])
+			real_instr.WriteString(ins)
+		case "bnez": // 不等于零时分支 bnez rs, offset
+			ins := fmt.Sprintf("# %s\n", line)
+			real_instr.WriteString(ins)
+			ins = fmt.Sprintf("bne %s, x0, %s\n", code[1], code[2])
+			real_instr.WriteString(ins)
+		case "blez": // 小于等于零时分支 blez rs, offset
+			ins := fmt.Sprintf("# %s\n", line)
+			real_instr.WriteString(ins)
+			ins = fmt.Sprintf("bge x0, %s, %s\n", code[1], code[2])
+			real_instr.WriteString(ins)
+		case "bgez": // 大于等于零时分支 bgez rs, offset
+			ins := fmt.Sprintf("# %s\n", line)
+			real_instr.WriteString(ins)
+			ins = fmt.Sprintf("bge %s, x0, %s\n", code[1], code[2])
+			real_instr.WriteString(ins)
+		case "blez": // 小于等于零时分支 blez rs, offset
+			ins := fmt.Sprintf("# %s\n", line)
+			real_instr.WriteString(ins)
+			ins = fmt.Sprintf("bge x0, %s, %s\n", code[1], code[2])
+			real_instr.WriteString(ins)
+		case "bltz": // 小于零时分支 bltz rs, offset
+			ins := fmt.Sprintf("# %s\n", line)
+			real_instr.WriteString(ins)
+			ins = fmt.Sprintf("blt %s, x0, %s\n", code[1], code[2])
+			real_instr.WriteString(ins)
+		case "bgtz": // 大于零时分支 bgtz rs, offset
+			ins := fmt.Sprintf("# %s\n", line)
+			real_instr.WriteString(ins)
+			ins = fmt.Sprintf("blt x0, %s, %s\n", code[1], code[2])
 			real_instr.WriteString(ins)
 		default:
 			origin_instr = strings.TrimLeft(origin_instr, " ")
