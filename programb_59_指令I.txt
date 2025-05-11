@@ -200,7 +200,7 @@ SFENCE.VMA supervisor fence virtual memory address
 *//mv rd,rs: addi rd, rs, 0 复制寄存器
 *//not rd, rs: xori rd, rs, -1 取反
 //sext.w rd, rs: addiw rd, rs, 0 符号字扩展
-//seqz rd, rs: sltiu rd, rs, 1 等于 0 时置位
+*//seqz rd, rs: sltiu rd, rs, 1 等于 0 时置位
 //fmv.s rd, rs: 复制单精度寄存器
 //fabs.s rd, rs:单精度浮点绝对值
 //fneg.s rd, rs:单精度浮点相反数
