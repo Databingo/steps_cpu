@@ -156,7 +156,7 @@ SFENCE.VMA supervisor fence virtual memory address
 //-
 *//nop: addi x0, x0, 0 空操作
 *//neg rd, rs: sub rd, x0, rs 取负
-//negw rd, rs: subw rd, x0, rs 取负字（32bit)
+*//negw rd, rs: subw rd, x0, rs 取负字（32bit)
 //snez rd, rs: sltu rd, x0, rs 不等于 0 时置位 (x0 < rs)
 //sltz rd, rs: slt rd, rs, x0 小于 0 时置位（rs < x0）
 //sgtz rd, rs: slt rd, x0, rs 大于 0 时置位（x0 < rs）
