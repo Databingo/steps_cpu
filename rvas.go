@@ -630,6 +630,26 @@ func main() {
 			real_instr.WriteString(ins)
 			ins = fmt.Sprintf("blt x0, %s, %s\n", code[1], code[2])
 			real_instr.WriteString(ins)
+		case "bgt": // 大于时分支 bgt rs, rt, offset
+			ins := fmt.Sprintf("# %s\n", line)
+			real_instr.WriteString(ins) // blt rs1 比 rs2 ...
+			ins = fmt.Sprintf("blt %s, %s, %s\n", code[2], code[1], code[3])
+			real_instr.WriteString(ins)
+		case "ble": // 小于等于时分支 ble rs, rt, offset
+			ins := fmt.Sprintf("# %s\n", line)
+			real_instr.WriteString(ins)
+			ins = fmt.Sprintf("bge %s, %s, %s\n", code[2], code[1], code[3])
+			real_instr.WriteString(ins)
+		case "bgtu": // 无符号大于时分支 bgtu rs, rt, offset
+			ins := fmt.Sprintf("# %s\n", line)
+			real_instr.WriteString(ins)
+			ins = fmt.Sprintf("bltu %s, %s, %s\n", code[2], code[1], code[3])
+			real_instr.WriteString(ins)
+		case "bleu": // 无符号小于等于时分支 bleu rs, rt, offset
+			ins := fmt.Sprintf("# %s\n", line)
+			real_instr.WriteString(ins)
+			ins = fmt.Sprintf("bgeu %s, %s, %s\n", code[2], code[1], code[3])
+			real_instr.WriteString(ins)
 		default:
 			origin_instr = strings.TrimLeft(origin_instr, " ")
 			real_instr.WriteString(origin_instr)

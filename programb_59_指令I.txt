@@ -208,7 +208,7 @@ SFENCE.VMA supervisor fence virtual memory address
 //fabs.d rd, rs:双精度浮点绝对值
 //fneg.d rd, rs:双精度浮点相反数
 //bgt rs, rt, offset: blt rt, rs, offset 大于时分支
-//ble rs, rt, offset: bet rt, rs, offset 小于等于时分支
+//ble rs, rt, offset: bge rt, rs, offset 小于等于时分支
 //bgtu rs, rt, offset: bltu rt, rs, offset 无符号大于时分支
 //bleu rs, rt, offset: bgeu rt, rs, offset 无符号小于等于时分支
 *//jal offset: jal x1, offset 跳转并链接(jar x1, imm is real)
