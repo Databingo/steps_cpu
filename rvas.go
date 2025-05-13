@@ -513,7 +513,7 @@ func main() {
 			ins = fmt.Sprintf("jalr x1, %s, 0\n", code[1])
 			real_instr.WriteString(ins)
 			}
-		case "la", "lla": // 装入地址 (lla for certainly pc-related address, la is not sure)
+		case "la", "lla": // 装入地址 (lla for certainly pc-related address, la is not sure) (+- 2GB) larger use li
 			ins := fmt.Sprintf("# %s\n", line)
 			real_instr.WriteString(ins)
 			fmt.Println(`
@@ -650,13 +650,10 @@ func main() {
 			real_instr.WriteString(ins)
 			ins = fmt.Sprintf("bgeu %s, %s, %s\n", code[2], code[1], code[3])
 			real_instr.WriteString(ins)
-		case "lb", "lh", "lw", "ld": // 读全局符号 lb rd, symbol
+		case "lb", "lh", "lw", "ld": // 读全局符号 lb rd, symbol (+- 2GB)
 		        if len(code) == 3 { // different from real: lb rd, imm(rs)
 			ins := fmt.Sprintf("# %s\n", line)
 			real_instr.WriteString(ins)
-			//ins = fmt.Sprintf("bgeu %s, %s, %s\n", code[2], code[1], code[3])
-			//real_instr.WriteString(ins)
-
 			ins = fmt.Sprintf("auipc %s, 0 # %s\n", code[1], code[2])
 			real_instr.WriteString(ins)
 			ins = fmt.Sprintf("%s %s, 0(%s) # %s\n", code[0], code[1], code[1], code[2])
