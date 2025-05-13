@@ -664,9 +664,9 @@ func main() {
 		        if err != nil {// different from real: sb rd, imm(rs)
 			ins := fmt.Sprintf("# %s\n", line)
 			real_instr.WriteString(ins)
-			ins = fmt.Sprintf("auipc %s, 0 # %s\n", code[1], code[2])
+			ins = fmt.Sprintf("auipc %s, 0 # %s\n", code[3], code[2])
 			real_instr.WriteString(ins)
-			ins = fmt.Sprintf("%s %s, 0(%s) # %s\n", code[0], code[1], code[1], code[2])
+			ins = fmt.Sprintf("%s %s, 0(%s) # %s\n", code[0], code[1], code[3], code[2])
 			real_instr.WriteString(ins)
 		        }
 		default:
