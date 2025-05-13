@@ -24,6 +24,9 @@ _start:
     mv x1, x2
     not x1, x3
     lb x1, _start
+    lh x1, _start
+    lw x1, _start
+    ld x1, _start
 
     # Prepare for write(1, message_addr, length) syscall (Linux RV64)
     li      a0, 1           # fd = 1 (stdout)

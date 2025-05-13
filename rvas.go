@@ -650,7 +650,7 @@ func main() {
 			real_instr.WriteString(ins)
 			ins = fmt.Sprintf("bgeu %s, %s, %s\n", code[2], code[1], code[3])
 			real_instr.WriteString(ins)
-		case "lb": // 读全局符号 lb rd, symbol
+		case "lb", "lh", "lw", "ld": // 读全局符号 lb rd, symbol
 		        if len(code) == 3 { // different from real: lb rd, imm(rs)
 			ins := fmt.Sprintf("# %s\n", line)
 			real_instr.WriteString(ins)
