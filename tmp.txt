@@ -23,6 +23,9 @@ jalr x1, x9, 0
 addi x1, x2, 0
 #     not x1, x3
 xori x1, x3, -1
+#     lb x1, _start
+auipc x1, 0 # _start
+lb x1, 0(x1) # _start
 #     li      a0, 1           
 addi a0, x0, 0x0
 ori a0, a0, 0x1

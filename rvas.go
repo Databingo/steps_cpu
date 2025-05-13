@@ -650,6 +650,18 @@ func main() {
 			real_instr.WriteString(ins)
 			ins = fmt.Sprintf("bgeu %s, %s, %s\n", code[2], code[1], code[3])
 			real_instr.WriteString(ins)
+		case "lb": // 读全局符号 lb rd, symbol
+		        if len(code) == 3 { // different from real: lb rd, imm(rs)
+			ins := fmt.Sprintf("# %s\n", line)
+			real_instr.WriteString(ins)
+			//ins = fmt.Sprintf("bgeu %s, %s, %s\n", code[2], code[1], code[3])
+			//real_instr.WriteString(ins)
+
+			ins = fmt.Sprintf("auipc %s, 0 # %s\n", code[1], code[2])
+			real_instr.WriteString(ins)
+			ins = fmt.Sprintf("%s %s, 0(%s) # %s\n", code[0], code[1], code[1], code[2])
+			real_instr.WriteString(ins)
+		        }
 		default:
 			origin_instr = strings.TrimLeft(origin_instr, " ")
 			real_instr.WriteString(origin_instr)

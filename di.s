@@ -23,6 +23,7 @@ _start:
     jalr x9
     mv x1, x2
     not x1, x3
+    lb x1, _start
 
     # Prepare for write(1, message_addr, length) syscall (Linux RV64)
     li      a0, 1           # fd = 1 (stdout)
