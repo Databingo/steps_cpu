@@ -505,14 +505,20 @@ func main() {
 			//ins = fmt.Sprintf("jal x1, 0 # %s\n", code[1])//should calculate offset by linker?
 			ins = fmt.Sprintf("jal x1, %s\n", code[1])//should calculate offset by linker?
 			real_instr.WriteString(ins)
-			}
+			} else {
+			origin_instr = strings.TrimLeft(origin_instr, " ")
+			real_instr.WriteString(origin_instr)
+		    }
 		case "jalr": // 寄存器跳转 jalr rs |jump to rs|save pc+4 to x1 (imm defalut 0, retrun default x1)
 		        if len(code) == 2 { // different from real: jal rd, imm
 			ins := fmt.Sprintf("# %s\n", line)
 			real_instr.WriteString(ins)
 			ins = fmt.Sprintf("jalr x1, %s, 0\n", code[1])
 			real_instr.WriteString(ins)
-			}
+			} else {
+			origin_instr = strings.TrimLeft(origin_instr, " ")
+			real_instr.WriteString(origin_instr)
+		    }
 		case "la", "lla": // 装入地址 (lla for certainly pc-related address, la is not sure) (+- 2GB) larger use li
 			ins := fmt.Sprintf("# %s\n", line)
 			real_instr.WriteString(ins)
@@ -658,7 +664,10 @@ func main() {
 			real_instr.WriteString(ins)
 			ins = fmt.Sprintf("%s %s, 0(%s) # %s\n", code[0], code[1], code[1], code[2])
 			real_instr.WriteString(ins)
-		        }
+			} else {
+			origin_instr = strings.TrimLeft(origin_instr, " ")
+			real_instr.WriteString(origin_instr)
+		    }
 		case "sb", "sh", "sw", "sd": // 写全局符号 sb rd, symbol, rt (+- 2GB)
 			_, err := strconv.Atoi(code[2])
 		        if err != nil {// different from real: sb rd, imm(rs)
@@ -668,7 +677,10 @@ func main() {
 			real_instr.WriteString(ins)
 			ins = fmt.Sprintf("%s %s, 0(%s) # %s\n", code[0], code[1], code[3], code[2])
 			real_instr.WriteString(ins)
-		        }
+			} else {
+			origin_instr = strings.TrimLeft(origin_instr, " ")
+			real_instr.WriteString(origin_instr)
+		    }
 		default:
 			origin_instr = strings.TrimLeft(origin_instr, " ")
 			real_instr.WriteString(origin_instr)

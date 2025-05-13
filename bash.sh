@@ -18,13 +18,11 @@ echo "" > binary_instructions.txt
 #go run rvas.go test.s &&
 #go run rvas.go li.s &&
 #go run rvas.go lui.s &&
-#
 #go run rvas.go lb_lbu.s &&
 #go run rvas.go lh_lhu.s &&
 #go run rvas.go lw_lwu.s &&
 #go run rvas.go ld.s &&
 #go run rvas.go s.s &&
-#
 #go run rvas.go add_sub.s &&
 #go run rvas.go slt_u.s &&
 #go run rvas.go slti_u.s &&
@@ -34,9 +32,9 @@ echo "" > binary_instructions.txt
 #go run rvas.go sh_i.s &&
 #go run rvas.go b.s &&
 # go run rvas.go auipc.s &&
+#go run rvas.go j.s &&
 #
-go run rvas.go j.s &&
-#go run rvas.go jr.s &&
+go run rvas.go jr.s &&
 # s4.2
 #iverilog -g2012 -o s4 4_execute_instruction_2_64I.v 4tb.v &&
 #iverilog -g2012 -o s4 4_mini.v 4tb.v &&

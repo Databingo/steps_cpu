@@ -20,7 +20,7 @@ _start:
     # Purpose: Test jumping forward to a label, discarding return address (rd=x0)
     jal x0, L_jal_fwd_target   # Jump forward
     # --- Code that should be skipped ---
-    li x31, 999                # Error indicator if jump fails
+    li x31, 3#999                # Error indicator if jump fails
     j L_jal_fwd_verify         # Skip target code if this runs
 L_jal_fwd_target:
     # --- Target Code ---
