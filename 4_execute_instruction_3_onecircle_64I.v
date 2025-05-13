@@ -379,6 +379,7 @@ begin
 		   7'b0000011:begin
 	    	                case(wire_f3) // func3 case(ir[14:12])
 				  3'b000:begin 
+				           //lb/lbu/lh/lhu/lw/lwu/ld rd, rs1, simm12  
 				           Lb  <= 1'b1; // set Lb  Flag 
 				           //load 8 bite sign extend to 64 bits at imm(s1) to rd
 				           rram[wire_rd] <= {{56{drom[rram[wire_rs1]+ {{52{wire_imm[11]}},wire_imm}][7]}}, 
@@ -448,7 +449,9 @@ begin
 				         end 
 			        endcase
 		              end 
-                   // Store-class
+                   // Store-class  // ld and sb are different direction: 
+		   // lb rd,  imm(rs1); rd  <- rs1+imm
+		   // sb rs2, imm(rs1); rs2 -> rs1+imm
 	           7'b0100011:begin
 	    	                case(wire_f3) // func3 case(ir[14:12])
 				  3'b000:begin 

@@ -659,6 +659,15 @@ func main() {
 			ins = fmt.Sprintf("%s %s, 0(%s) # %s\n", code[0], code[1], code[1], code[2])
 			real_instr.WriteString(ins)
 		        }
+		case "sb", "sh", "sw", "sd": // 写全局符号 sb rd, symbol, rt (+- 2GB)
+		        if len(code) == 3 { // different from real: lb rd, imm(rs)
+			ins := fmt.Sprintf("# %s\n", line)
+			real_instr.WriteString(ins)
+			ins = fmt.Sprintf("auipc %s, 0 # %s\n", code[1], code[2])
+			real_instr.WriteString(ins)
+			ins = fmt.Sprintf("%s %s, 0(%s) # %s\n", code[0], code[1], code[1], code[2])
+			real_instr.WriteString(ins)
+		        }
 		default:
 			origin_instr = strings.TrimLeft(origin_instr, " ")
 			real_instr.WriteString(origin_instr)
