@@ -353,7 +353,7 @@ begin
 	      current_privilege_mode <= M_mode; // init from M-mode for all RISCV processor
 	end
 	else
-        // 开始指令节拍
+        // 开始指令节拍  // Did every circle have to clean registers like upper !! initial?
 	begin
 	    case(jp)
 	    0: begin // 取指令 + 分析指令 + 执行 | 或 准备数据 (分析且备好该指令所需的数据）

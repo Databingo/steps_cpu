@@ -660,7 +660,8 @@ func main() {
 			real_instr.WriteString(ins)
 		        }
 		case "sb", "sh", "sw", "sd": // 写全局符号 sb rd, symbol, rt (+- 2GB)
-		        if len(code) == 3 { // different from real: lb rd, imm(rs)
+			_, err := strconv.Atoi(code[2])
+		        if err != nil {// different from real: sb rd, imm(rs)
 			ins := fmt.Sprintf("# %s\n", line)
 			real_instr.WriteString(ins)
 			ins = fmt.Sprintf("auipc %s, 0 # %s\n", code[1], code[2])
