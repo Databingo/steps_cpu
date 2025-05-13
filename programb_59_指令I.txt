@@ -192,8 +192,8 @@ SFENCE.VMA supervisor fence virtual memory address
 //-- no-x0
 *//lla rd, symbol: auipc rd, symbol[31:12]; add rd, rd, symbol[11:0] 装入局部地址 ??
 *0//la rd, symbol: auipc rd, GOT[symbol][31:12]; l{w|d}rd, GOT[symbol][11:0](rd) 装入地址（GOT: Global Offset Table) ??  hi = (offset + 0x800) >>12; lo = offset - (hi <<12)
-*//l{b|h|w|d} rd, symbol: auipc rd, symbol[31:12]; l{b|h|w|d} rd, symbol[11:0](rd) 读全局符号
-//s{b|h|w|d} rd, symbol, rt: auipc rt, symbol[31:12]; s{b|h|w|d} rd, symbol[11:0](rt) 写全局符号
+*0//l{b|h|w|d} rd, symbol: auipc rd, symbol[31:12]; l{b|h|w|d} rd, symbol[11:0](rd) 读全局符号
+*0//s{b|h|w|d} rd, symbol, rt: auipc rt, symbol[31:12]; s{b|h|w|d} rd, symbol[11:0](rt) 写全局符号
 //fl{w|d} rd, symbol, rt: 读全局浮点符号
 //fs{w|d} rd, symbol, rt: 写全局浮点符号
 *//li rd, imm: 装入立即数
