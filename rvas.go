@@ -253,14 +253,17 @@ func main() {
 		0x01, 0x00, 0x00, 0x00, // e_version specify original elf version
 		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // e_entry program entry address -- 0 for relocatable file set final entry point by linker
 		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // e_phoff points to start of program header table --  0 for relocatable file (no program headers)
+		//---
 		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // e_shoff points to start of section header table --  no 0 have to be the start of SHT  (e_shnum * e_shentsize = whole table of SHT)
 		0x04, 0x00, 0x00, 0x00, // e_flags  // 0x4 for LP64D ABI  (EF_RISCV_FLOAT_ABI_DOUBLE) fit for RV64G
-		0x40, 0x00, // e_ehsize specify size of header, 52 bytes(0x34) for 32-bit format, 64 bytes(0x40) for 64-bit ?
+		0x40, 0x00, // e_ehsize specify size of This header, 52 bytes(0x34) for 32-bit format, 64 bytes(0x40) for 64-bit ?
 		0x00, 0x00, // e_phentsize size of program header table entry -- 0 for relocatable
 		0x00, 0x00, // e_phnum contains number of entries in program header table --
 		0x40, 0x00, // e_shentsize size of section header entry -- 64 for Elf64_shdr
+		//---
 		0x00, 0x00, // e_shnum number of entries in the section header table -- no 0 must be actual number of section headers
-		0x00, 0x00, // e_shstrndx index of the section header table entry that contains the section names -- no 0 must be SHT index for .shstrtab section
+		//---
+		0x00, 0x00, // e_shstrndx index of the section header table entry that contains the section names -- if no, 0 must be SHT index for .shstrtab section 
 	})
 	fmt.Println("SHT Section header inital:")
 	fmt.Println([]byte{
