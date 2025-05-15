@@ -265,7 +265,8 @@ func main() {
 		//---
 		0x00, 0x00, // e_shstrndx index of the section header table entry that contains the section names -- if no, 0 must be SHT index for .shstrtab section 
 	})
-	// Usually format:
+        // ----------------
+	// .out Usually format:
 	// ELF header 64bytes
 	// Content of section 1, .text 
 	// Content of section 2, .data
@@ -277,6 +278,7 @@ func main() {
 	// Content of section 8, ...
 	// Section Header Table (SHT) (starts at "e_shoff" in ELF header)
 	// each entrie of SHT is 64 bytes, sh_offset is the exactly offset from beginning of file to the start point of this section's context, e.g., .text's sh_offset is 64, after ELF header
+        // ----------------
 
 	fmt.Println("SHT Section header inital:")
 	fmt.Println([]byte{
