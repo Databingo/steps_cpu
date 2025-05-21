@@ -309,7 +309,7 @@ func main() {
 		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // e_phoff points to start of program header table --  0 for relocatable file (no program headers)
 		//---
 		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // e_shoff points to start of section header table --  no 0 have to be the start of SHT  (e_shnum * e_shentsize = whole table of SHT)
-		0x04, 0x00, 0x00, 0x00, //???64bits? e_flags  // 0x4 for LP64D ABI  (EF_RISCV_FLOAT_ABI_DOUBLE) fit for RV64G
+		0x04, 0x00, 0x00, 0x00, // e_flags  // 0x4 for LP64D ABI  (EF_RISCV_FLOAT_ABI_DOUBLE) fit for RV64G
 		0x40, 0x00, // e_ehsize specify size of This header, 52 bytes(0x34) for 32-bit format, 64 bytes(0x40) for 64-bit ?
 		0x00, 0x00, // e_phentsize size of program header table entry -- 0 for relocatable
 		0x00, 0x00, // e_phnum contains number of entries in program header table --
