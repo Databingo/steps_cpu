@@ -322,10 +322,7 @@ func main() {
 
 	 fmt.Println(elf_header_verify)
          if reflect.DeepEqual(elf_header_bytes, elf_header_verify){
-	     fmt.Println("Generated elf header verified")} else {
-
-	     fmt.Println("Generated elf header verify Not Match")
-	     }
+	     fmt.Println("Generated elf header verified")} else { fmt.Println("Generated elf header verify Not Match") }
         // ----------------
 	// .out Usually format:
 	// ELF header 64bytes
