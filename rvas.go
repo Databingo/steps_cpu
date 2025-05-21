@@ -11,7 +11,31 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"bytes"
+
 )
+
+type Elf_header struct {
+    Ident [16]byte
+    Type uint16
+    Machine uint16
+    Version uint32
+    Entry uint64
+    Phoff uint64
+    Shoff uint64
+    Flags uint32
+    Ehsize uint16
+    Phentsize uint16
+    Phnum uint16
+    Shentsize uint16
+    Shnum uint16
+    Shstrndx uint16
+}
+
+
+
+
+
 
 type symbol_info struct {
 	Name    string
@@ -238,6 +262,34 @@ func main() {
 	// .byte .string .half .word .dword .zero .align .equ 8
 	fmt.Println("start 0pass.")
 	fmt.Println("ELF header inital:")
+	var elf_header Elf_header
+	elf_header.Ident = [16]byte{
+		0x7F, 0x45, 0x4C, 0x46, // Magic number indicates ELF file (.ELF)
+		0x02,                                     // ei_class 01 for 32-bit 02 for 64-bit
+		0x01,                                     // ei_data specify little endian
+		0x01,                                     // ei_version current elf version
+		0x09,                                     // ei_osabi target platform, usually set to 0x0 (System V) 9 for FreeBSD
+		0x00,                                     // ei_abiverison ABI version
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // ei_padding zero padding
+	}
+        elf_header.Type = 0x0001
+        elf_header.Machine = 0x00F3
+        elf_header.Version = 0x00000001
+        elf_header.Entry = 0x0
+        elf_header.Phoff = 0x0
+        elf_header.Shoff = 0x0
+        elf_header.Flags = 0x00000004
+        elf_header.Ehsize = 0x0040
+        elf_header.Phentsize = 0x0
+        elf_header.Phnum = 0x0
+        elf_header.Shentsize = 0x0040
+        elf_header.Shnum = 0x0
+        elf_header.Shstrndx = 0x0
+	
+	buf := new(bytes.Buffer)
+	_ = binary.Write(buf, binary.LittleEndian, &elf_header)
+	elf_bytes := buf.Bytes()
+	fmt.Println(elf_bytes)
 	fmt.Println([]byte{
 		////// e_ident[16]
 		0x7F, 0x45, 0x4C, 0x46, // Magic number indicates ELF file (0x7f E L F)
@@ -255,7 +307,7 @@ func main() {
 		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // e_phoff points to start of program header table --  0 for relocatable file (no program headers)
 		//---
 		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // e_shoff points to start of section header table --  no 0 have to be the start of SHT  (e_shnum * e_shentsize = whole table of SHT)
-		0x04, 0x00, 0x00, 0x00, // e_flags  // 0x4 for LP64D ABI  (EF_RISCV_FLOAT_ABI_DOUBLE) fit for RV64G
+		0x04, 0x00, 0x00, 0x00, //???64bits? e_flags  // 0x4 for LP64D ABI  (EF_RISCV_FLOAT_ABI_DOUBLE) fit for RV64G
 		0x40, 0x00, // e_ehsize specify size of This header, 52 bytes(0x34) for 32-bit format, 64 bytes(0x40) for 64-bit ?
 		0x00, 0x00, // e_phentsize size of program header table entry -- 0 for relocatable
 		0x00, 0x00, // e_phnum contains number of entries in program header table --
