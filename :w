@@ -289,8 +289,8 @@ func main() {
 	
 	buf := new(bytes.Buffer)
 	_ = binary.Write(buf, binary.LittleEndian, &elf_header)
-	elf_header_bytes := buf.Bytes()
-	fmt.Println(elf_header_bytes)
+	elf_bytes := buf.Bytes()
+	fmt.Println(elf_bytes)
         // raw elf_header_verify
 	 elf_header_verify := []byte{
 		////// e_ident[16]
@@ -318,14 +318,10 @@ func main() {
 		0x00, 0x00, // e_shnum number of entries in the section header table -- no 0 must be actual number of section headers
 		//---
 		0x00, 0x00, // e_shstrndx index of the section header table entry that contains the section names -- if no, 0 must be SHT index for .shstrtab section 
-	}
+	})
 
-	 fmt.Println(elf_header_verify)
-         if reflect.DeepEqual(elf_header_bytes, elf_header_verify){
-	     fmt.Println("Generated elf header verified")} else {
 
-	     fmt.Println("Generated elf header verify Not Match")
-	     }
+         if reflect.DeepEqual(elf_header_bytes, elf_header_verify 
         // ----------------
 	// .out Usually format:
 	// ELF header 64bytes
