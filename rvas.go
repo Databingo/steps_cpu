@@ -23,14 +23,14 @@ type Elf_header struct {
     Version uint32
     Entry uint64
     Phoff uint64
-    Shoff uint64
+    Shoff uint64   // start of SHT section header table (e_shnum * e_shentsize = whole table of SHT)
     Flags uint32
     Ehsize uint16
     Phentsize uint16
     Phnum uint16
-    Shentsize uint16
-    Shnum uint16
-    Shstrndx uint16
+    Shentsize uint16 // size of SHT's entry -- 64 for Elf64_shdr
+    Shnum uint16 // number of entries of SHT
+    Shstrndx uint16 // index of the SHT entry that contains the section names -- if no, 0 must be SHT index for .shstrtab section 
 }
 
 
@@ -323,8 +323,8 @@ func main() {
 	 fmt.Println(elf_header_verify)
          if reflect.DeepEqual(elf_header_bytes, elf_header_verify){
 	     fmt.Println("Generated elf header verified")} else { fmt.Println("Generated elf header verify Not Match") }
-        // ----------------
 	// .out Usually format:
+        // ----------------
 	// ELF header 64bytes
 	// Content of section 1, .text 
 	// Content of section 2, .data
@@ -335,8 +335,8 @@ func main() {
 	// Content of section 7, .rela.text
 	// Content of section 8, ...
 	// Section Header Table (SHT) (starts at "e_shoff" in ELF header)
-	// each entrie of SHT is 64 bytes, sh_offset is the exactly offset from beginning of file to the start point of this section's context, e.g., .text's sh_offset is 64, after ELF header
         // ----------------
+	// each entrie of SHT is 64 bytes, sh_offset is the exactly offset from beginning of file to the start point of this section's context, e.g., .text's sh_offset is 64, after ELF header
 
 	fmt.Println("SHT Section header inital:")
 	fmt.Println([]byte{
