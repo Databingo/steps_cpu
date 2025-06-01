@@ -23,16 +23,28 @@ type Elf_header struct {
     Version uint32
     Entry uint64
     Phoff uint64
-    Shoff uint64   // start of SHT section header table (e_shnum * e_shentsize = whole table of SHT)
+    Shoff uint64   // start of SHT section header table (e_shnum * e_shentsize|64 = whole table of SHT)
     Flags uint32
     Ehsize uint16
     Phentsize uint16
     Phnum uint16
-    Shentsize uint16 // size of SHT's entry -- 64 for Elf64_shdr
+    Shentsize uint16 
     Shnum uint16 // number of entries of SHT
     Shstrndx uint16 // index of the SHT entry that contains the section names -- if no, 0 must be SHT index for .shstrtab section 
 }
 
+type Elf64_SHT_entry struct {
+    Name uint32
+    Type uint32
+    Flags uint64
+    Addr uint64
+    Offset uint64 // section offset
+    Size uint64   // section size
+    Link uint32
+    Info uint32 
+    Addralign uint64
+    Entsize uint64
+}
 
 
 
@@ -343,7 +355,7 @@ func main() {
 		0x00, 0x00, 0x00, 0x00, // sh_name
 		0x00, 0x00, 0x00, 0x00, // sh_type 3_SHT_STRTAB
 		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // sh_flags
-		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // sh_addr
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // sh_addr virtual address at exection?
 		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // sh_offset (with sh_size to locate whole section content)
 		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // sh_size
 		0x00, 0x00, 0x00, 0x00, // sh_link
