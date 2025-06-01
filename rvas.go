@@ -15,6 +15,19 @@ import (
 	"reflect"
 
 )
+// find SHT
+// elf-shoff\
+// elf-shsize64-> SHT
+// elf-shnum/
+
+// find Shstrtab
+// elf-> e_shstrndx(.shstrtab index in SHT) -> Section header of .shstrtab -> sh_offset + sh_size -> .shstrtab
+
+// find Section
+// elf-shoff-sht-offset + elf-shoff-sht-size -> section_content
+
+// find Section_name
+// elf-shoff-sht-namendx + .shstrtab -> name
 
 type Elf_header struct {
     Ident [16]byte
@@ -30,13 +43,13 @@ type Elf_header struct {
     Phnum uint16
     Shentsize uint16 
     Shnum uint16 // number of entries of SHT
-    Shstrndx uint16 // index of the SHT entry that contains the section names -- if no, 0 must be SHT index for .shstrtab section 
+    Shstrndx uint16 // index of the SHT entry that contains all the section names -- if no, 0 must be SHT index for .shstrtab section 
 }
 
-type Elf64_SHT_entry struct {
+type SHT_entry struct {
     Name uint32
-    Type uint32
-    Flags uint64
+    Type uint32 // 0 unused|1 program|2 symbol|3 string|4 relocation entries with addends|5 symbol hash|6 dynamic linking|7 notes|8 bss|9 relocation no addends|10 reserved|11 dynamic linker symbol...
+    Flags uint64 // 1 writable|2 occupies memory during exection|4 executable|0x10 might by merged|0x20 contains null-terminated strings|0x40 sh_info contains SHT index
     Addr uint64
     Offset uint64 // section offset
     Size uint64   // section size
@@ -278,15 +291,15 @@ func main() {
 	var elf_header Elf_header
 	elf_header.Ident = [16]byte{
 		0x7F, 0x45, 0x4C, 0x46, // Magic number indicates ELF file (.ELF)
-		0x02,                                     // ei_class 01 for 32-bit 02 for 64-bit
-		0x01,                                     // ei_data specify little endian
+		0x02,                                     // ei_class|0 Invalid|1 32-bit|2 64-bit
+		0x01,                                     // ei_data specify|0 Invalid|1 2's complete little endian|2 2's complete bit endian
 		0x01,                                     // ei_version current elf version
-		0x09,                                     // ei_osabi target platform, usually set to 0x0 (System V) 9 for FreeBSD
+		0x09,                                     // ei_osabi target platform|0 NONE/UNIX System V|1 HP-UX|2 NetBSD|3 Linux|9 FreeBSD
 		0x00,                                     // ei_abiverison ABI version
 		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // ei_padding zero padding
 	}
-        elf_header.Type = 0x0001
-        elf_header.Machine = 0x00F3
+        elf_header.Type = 0x0001 // 0 No type|1 Relocatable file|2 Executable file|3 Shared object file|4 Core file
+        elf_header.Machine = 0x00F3 // 0 No machine|62 AMDx86-64|183 ARMaarh64|0xF3 RISC-V
         elf_header.Version = 0x00000001
         elf_header.Entry = 0x0
         elf_header.Phoff = 0x0
