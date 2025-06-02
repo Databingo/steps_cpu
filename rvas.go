@@ -60,9 +60,6 @@ type SHT_entry struct {
 }
 
 
-
-
-
 type symbol_info struct {
 	Name    string
 	Section elf.SectionIndex
