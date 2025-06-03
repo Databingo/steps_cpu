@@ -361,7 +361,7 @@ func main() {
 	// each entrie of SHT is 64 bytes, sh_offset is the exactly offset from beginning of file to the start point of this section's context, e.g., .text's sh_offset is 64, after ELF header
 	fmt.Println("SHT Section header inital:")
         var sht1 SHT_entry 
-        sht1.Name = 0x00000001 
+        sht1.Name = 18 //0x00000001 
         sht1.Type = 0x00000001 
         sht1.Flags = 0x0000000000000001 
         sht1.Addr = 0x0000000000000001 
@@ -420,9 +420,13 @@ func main() {
 		0x00,                               // \0 Empty string (for unnamed sections)
 		0x2E, 0x74, 0x65, 0x78, 0x74, 0x00, // .text\0
 		0x2E, 0x72, 0x65, 0x6C, 0x61, 0x2E, 0x74, 0x65, 0x78, 0x74, 0x00, // .rela.text\0
+		0x2E, 0x73, 0x68, 0x73, 0x74, 0x72, 0x74, 0x61, 0x62, 0x00, // .shstrtab\0
 		// ....
 	})
-
+       //read elf_header.Shoff to get the start point of SHT
+       //read elf_header.Shstrndx to get the index of shstrtab header
+       //find the content of shstrtab by read the sh_offset and sh_size. 
+       //find shstrtab header's sh_name to get the offset of its name in shstrtab
 	scanner0 := bufio.NewScanner(file) // stores content from file
 	scanner0.Split(bufio.ScanLines)
 	var copy_instr strings.Builder
