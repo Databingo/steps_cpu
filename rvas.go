@@ -58,7 +58,7 @@ type SHT_entry struct {
     Addralign uint64
     Entsize uint64
 }
-
+// elf_header Sht shstrtab
 
 type symbol_info struct {
 	Name    string
