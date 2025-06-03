@@ -359,6 +359,17 @@ func main() {
 	// Section Header Table (SHT) (starts at "e_shoff" in ELF header)
         // ----------------
 	// each entrie of SHT is 64 bytes, sh_offset is the exactly offset from beginning of file to the start point of this section's context, e.g., .text's sh_offset is 64, after ELF header
+        var sht1 SHT_entry 
+        sht1.Name = 0x00000001 
+        sht1.Type = 0x00000001 
+        sht1.Flags = 0x0000000000000001 
+        sht1.Addr = 0x0000000000000001 
+        sht1.Offset = 0x0000000000000001 
+        sht1.Size = 0x0000000000000001 
+        sht1.Link = 0x00000001 
+        sht1.Info = 0x00000001 
+        sht1.Addralign = 0x0000000000000001 
+        sht1.Entsize = 0x0000000000000001 
 
 	fmt.Println("SHT Section header inital:")
 	fmt.Println([]byte{
