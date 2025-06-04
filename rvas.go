@@ -409,6 +409,10 @@ func main() {
        combined  = append(combined, shstrtab_verify...)
        fmt.Println("combined:")
 	fmt.Println(combined)
+
+
+
+
        //read elf_header.Shoff to get the start point of SHT
 	fmt.Println(".symtab Symbol table inital:")
 	fmt.Println([]byte{
