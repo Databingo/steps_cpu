@@ -1295,10 +1295,10 @@ func main() {
 		// put instruction into b buffer
 		binary.LittleEndian.PutUint32(instructionBuffer, instruction)
 		f.Write(instructionBuffer)
-		ff.Write(combined)
 
 	}
 
+		ff.Write(combined)
 	fmt.Println(`
 		                 ELF header
 				 - Identifies
