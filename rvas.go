@@ -306,8 +306,8 @@ func main() {
         elf_header.Phentsize = 0x0
         elf_header.Phnum = 0x0
         elf_header.Shentsize = 0x0040
-        elf_header.Shnum = 0x1 //
-        elf_header.Shstrndx = 0x0
+        elf_header.Shnum = 0x2 //
+        elf_header.Shstrndx = 0x1   // 0 indicate SHN_UNDEF no section header string table
 	
 	buf := new(bytes.Buffer)
 	_ = binary.Write(buf, binary.LittleEndian, &elf_header)
@@ -359,18 +359,38 @@ func main() {
 	// Section Header Table (SHT) (starts at "e_shoff" in ELF header)
         // ----------------
 	// each entrie of SHT is 64 bytes, sh_offset is the exactly offset from beginning of file to the start point of this section's context, e.g., .text's sh_offset is 64, after ELF header
+	// usually need a Non Section for the first section header
+	fmt.Println("SHT Section header NON inital:")
+        var sht0 SHT_entry 
+        sht0.Name = 0 //0x00000001   // offset in shstrtab
+        sht0.Type = 0x00000000  // 0 for sh_null
+        sht0.Flags = 0x0000000000000000 
+        sht0.Addr = 0x0000000000000000 
+        sht0.Offset = 0  // need calculate
+        sht0.Size = 0  // need calculate
+        sht0.Link = 0x00000000 
+        sht0.Info = 0x00000000 
+        sht0.Addralign = 0x0000000000000000  //?
+        sht0.Entsize = 0x0000000000000000 
+	buf_sht0 := new(bytes.Buffer)
+	_ = binary.Write(buf_sht0, binary.LittleEndian, &sht0)
+	sht0_bytes := buf_sht0.Bytes()
+	fmt.Println(sht0_bytes)
+
+
+
 	fmt.Println("SHT Section header inital:")
         var sht1 SHT_entry 
-        sht1.Name = 1 //0x00000001 
-        sht1.Type = 0x00000001 
-        sht1.Flags = 0x0000000000000001 
-        sht1.Addr = 0x0000000000000001 
-        sht1.Offset = 0x0000000000000001  // need calculate
-        sht1.Size = 0x0000000000000001  // need calculate
+        sht1.Name = 1 //0x00000001   // offset in shstrtab
+        sht1.Type = 0x00000003  // 3 for sh_strtab 
+        sht1.Flags = 0x0000000000000000 
+        sht1.Addr = 0x0000000000000000 
+        sht1.Offset = 192  // need calculate
+        sht1.Size = 28  // need calculate
         sht1.Link = 0x00000000 
         sht1.Info = 0x00000000 
         sht1.Addralign = 0x0000000000000001  //?
-        sht1.Entsize = 0x0000000000000001 
+        sht1.Entsize = 0x0000000000000000 
 	buf_sht1 := new(bytes.Buffer)
 	_ = binary.Write(buf_sht1, binary.LittleEndian, &sht1)
 	sht1_bytes := buf_sht1.Bytes()
@@ -405,7 +425,8 @@ func main() {
        //read elf_header.Shstrndx to get the index of shstrtab header
        //find the content of shstrtab by read the sh_offset and sh_size. 
        //find shstrtab header's sh_name to get the offset of its name in shstrtab
-       combined := append(elf_header_bytes, sht1_bytes...)
+       combined := append(elf_header_bytes, sht0_bytes...)
+       combined  = append(combined,sht1_bytes...)
        combined  = append(combined, shstrtab_verify...)
        fmt.Println("combined:")
        fmt.Println(combined)
