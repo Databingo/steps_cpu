@@ -46,7 +46,7 @@ type Elf_header struct {
     Shstrndx uint16 // index of the SHT entry that contains all the section names -- if no, 0 must be SHT index for .shstrtab section 
 }
 
-type SHT_entry struct {
+type SHT struct {
     Name uint32
     Type uint32 // 0 unused|1 program|2 symbol|3 string|4 relocation entries with addends|5 symbol hash|6 dynamic linking|7 notes|8 bss|9 relocation no addends|10 reserved|11 dynamic linker symbol...
     Flags uint64 // 1 writable|2 occupies memory during exection|4 executable|0x10 might by merged|0x20 contains null-terminated strings|0x40 sh_info contains SHT index
@@ -361,7 +361,7 @@ func main() {
 	// each entrie of SHT is 64 bytes, sh_offset is the exactly offset from beginning of file to the start point of this section's context, e.g., .text's sh_offset is 64, after ELF header
 	// usually need a Non Section for the first section header
 	fmt.Println("SHT Section header NON inital:")
-        var sht0 SHT_entry 
+        var sht0 SHT 
         sht0.Name = 0 //0x00000001   // offset in shstrtab
         sht0.Type = 0x00000000  // 0 for sh_null
         sht0.Flags = 0x0000000000000000 
@@ -380,7 +380,7 @@ func main() {
 
 
 	fmt.Println("SHT Section header inital:")
-        var sht1 SHT_entry 
+        var sht1 SHT 
         sht1.Name = 1 //0x00000001   // offset in shstrtab
         sht1.Type = 0x00000003  // 3 for sh_strtab 
         sht1.Flags = 0x0000000000000000 
