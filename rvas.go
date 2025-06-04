@@ -393,17 +393,23 @@ func main() {
 	//Elf64_hdr -> Elf64_Shdr(SHT) -> Section header of .x -> sh_name(index in .shstrtab) -> section name string in .shstrtab
 	//Elf64_hdr -> e_shstrndx(.shstrtab index in SHT) -> Section header of .shstrtab -> sh_offset + sh_size -> .shstrtab
 	fmt.Println(".shstrab inital:")
-	fmt.Println([]byte{
+	shstrtab_verify := []byte{
 		0x00,                               // \0 Empty string (for unnamed sections)
 		0x2E, 0x74, 0x65, 0x78, 0x74, 0x00, // .text\0
 		0x2E, 0x72, 0x65, 0x6C, 0x61, 0x2E, 0x74, 0x65, 0x78, 0x74, 0x00, // .rela.text\0
 		0x2E, 0x73, 0x68, 0x73, 0x74, 0x72, 0x74, 0x61, 0x62, 0x00, // .shstrtab\0
 		// ....
-	})
+	}
+	fmt.Println(shstrtab_verify)
        //read elf_header.Shoff to get the start point of SHT
        //read elf_header.Shstrndx to get the index of shstrtab header
        //find the content of shstrtab by read the sh_offset and sh_size. 
        //find shstrtab header's sh_name to get the offset of its name in shstrtab
+       combined := append(elf_header_bytes, sht1_bytes...)
+       combined  = append(combined, shstrtab_verify...)
+       fmt.Println("combined:")
+	fmt.Println(combined)
+       //read elf_header.Shoff to get the start point of SHT
 	fmt.Println(".symtab Symbol table inital:")
 	fmt.Println([]byte{
 		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // st_name (byte offset in .strtab)
