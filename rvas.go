@@ -408,7 +408,7 @@ func main() {
        combined := append(elf_header_bytes, sht1_bytes...)
        combined  = append(combined, shstrtab_verify...)
        fmt.Println("combined:")
-	fmt.Println(combined)
+       fmt.Println(combined)
 
 
 
@@ -998,6 +998,7 @@ func main() {
 
 	// set up write file for machine code comparison
 	f, err := os.Create("add.o") //("asm-tests/asm-u-bin/beq-mc-u.txt")
+	ff, err := os.Create("combined.o") //("asm-tests/asm-u-bin/beq-mc-u.txt")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -1273,6 +1274,8 @@ func main() {
 		// put instruction into b buffer
 		binary.LittleEndian.PutUint32(instructionBuffer, instruction)
 		f.Write(instructionBuffer)
+		ff.Write(combined)
+
 	}
 
 	fmt.Println(`
