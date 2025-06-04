@@ -307,7 +307,7 @@ func main() {
         elf_header.Phnum = 0x0
         elf_header.Shentsize = 0x0040
         elf_header.Shnum = 0x1 //
-        elf_header.Shstrndx = 0x1
+        elf_header.Shstrndx = 0x0
 	
 	buf := new(bytes.Buffer)
 	_ = binary.Write(buf, binary.LittleEndian, &elf_header)
@@ -361,15 +361,15 @@ func main() {
 	// each entrie of SHT is 64 bytes, sh_offset is the exactly offset from beginning of file to the start point of this section's context, e.g., .text's sh_offset is 64, after ELF header
 	fmt.Println("SHT Section header inital:")
         var sht1 SHT_entry 
-        sht1.Name = 18 //0x00000001 
+        sht1.Name = 1 //0x00000001 
         sht1.Type = 0x00000001 
         sht1.Flags = 0x0000000000000001 
         sht1.Addr = 0x0000000000000001 
-        sht1.Offset = 0x0000000000000001 
-        sht1.Size = 0x0000000000000001 
-        sht1.Link = 0x00000001 
-        sht1.Info = 0x00000001 
-        sht1.Addralign = 0x0000000000000001 
+        sht1.Offset = 0x0000000000000001  // need calculate
+        sht1.Size = 0x0000000000000001  // need calculate
+        sht1.Link = 0x00000000 
+        sht1.Info = 0x00000000 
+        sht1.Addralign = 0x0000000000000001  //?
         sht1.Entsize = 0x0000000000000001 
 	buf_sht1 := new(bytes.Buffer)
 	_ = binary.Write(buf_sht1, binary.LittleEndian, &sht1)
