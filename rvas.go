@@ -300,14 +300,14 @@ func main() {
         elf_header.Version = 0x00000001
         elf_header.Entry = 0x0
         elf_header.Phoff = 0x0
-        elf_header.Shoff = 0x0
+        elf_header.Shoff = 0x40 //
         elf_header.Flags = 0x00000004
         elf_header.Ehsize = 0x0040
         elf_header.Phentsize = 0x0
         elf_header.Phnum = 0x0
         elf_header.Shentsize = 0x0040
-        elf_header.Shnum = 0x0
-        elf_header.Shstrndx = 0x0
+        elf_header.Shnum = 0x1 //
+        elf_header.Shstrndx = 0x1
 	
 	buf := new(bytes.Buffer)
 	_ = binary.Write(buf, binary.LittleEndian, &elf_header)
@@ -395,9 +395,9 @@ func main() {
 	fmt.Println(".shstrab inital:")
 	shstrtab_verify := []byte{
 		0x00,                               // \0 Empty string (for unnamed sections)
+		0x2E, 0x73, 0x68, 0x73, 0x74, 0x72, 0x74, 0x61, 0x62, 0x00, // .shstrtab\0
 		0x2E, 0x74, 0x65, 0x78, 0x74, 0x00, // .text\0
 		0x2E, 0x72, 0x65, 0x6C, 0x61, 0x2E, 0x74, 0x65, 0x78, 0x74, 0x00, // .rela.text\0
-		0x2E, 0x73, 0x68, 0x73, 0x74, 0x72, 0x74, 0x61, 0x62, 0x00, // .shstrtab\0
 		// ....
 	}
 	fmt.Println(shstrtab_verify)
