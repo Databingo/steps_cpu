@@ -392,6 +392,18 @@ func main() {
 	//Find Section name string
 	//Elf64_hdr -> Elf64_Shdr(SHT) -> Section header of .x -> sh_name(index in .shstrtab) -> section name string in .shstrtab
 	//Elf64_hdr -> e_shstrndx(.shstrtab index in SHT) -> Section header of .shstrtab -> sh_offset + sh_size -> .shstrtab
+	fmt.Println(".shstrab inital:")
+	fmt.Println([]byte{
+		0x00,                               // \0 Empty string (for unnamed sections)
+		0x2E, 0x74, 0x65, 0x78, 0x74, 0x00, // .text\0
+		0x2E, 0x72, 0x65, 0x6C, 0x61, 0x2E, 0x74, 0x65, 0x78, 0x74, 0x00, // .rela.text\0
+		0x2E, 0x73, 0x68, 0x73, 0x74, 0x72, 0x74, 0x61, 0x62, 0x00, // .shstrtab\0
+		// ....
+	})
+       //read elf_header.Shoff to get the start point of SHT
+       //read elf_header.Shstrndx to get the index of shstrtab header
+       //find the content of shstrtab by read the sh_offset and sh_size. 
+       //find shstrtab header's sh_name to get the offset of its name in shstrtab
 	fmt.Println(".symtab Symbol table inital:")
 	fmt.Println([]byte{
 		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // st_name (byte offset in .strtab)
@@ -415,18 +427,6 @@ func main() {
 	//Find symbol string
 	//Elf64_hdr -> e_shoff + e_shnum * e_shentsize -> Elf64_Shdr(SHT) -> Section header of .symtab -> sh_offset + sh_size -> .symtab -> st_name -> byte start point in .strtab to null
 	//Elf64_hdr -> e_shoff + e_shnum * e_shentsize -> Elf64_Shdr(SHT) -> Section header of .strtab -> sh_offset + sh_size -> .strtab
-	fmt.Println(".shstrab inital:")
-	fmt.Println([]byte{
-		0x00,                               // \0 Empty string (for unnamed sections)
-		0x2E, 0x74, 0x65, 0x78, 0x74, 0x00, // .text\0
-		0x2E, 0x72, 0x65, 0x6C, 0x61, 0x2E, 0x74, 0x65, 0x78, 0x74, 0x00, // .rela.text\0
-		0x2E, 0x73, 0x68, 0x73, 0x74, 0x72, 0x74, 0x61, 0x62, 0x00, // .shstrtab\0
-		// ....
-	})
-       //read elf_header.Shoff to get the start point of SHT
-       //read elf_header.Shstrndx to get the index of shstrtab header
-       //find the content of shstrtab by read the sh_offset and sh_size. 
-       //find shstrtab header's sh_name to get the offset of its name in shstrtab
 	scanner0 := bufio.NewScanner(file) // stores content from file
 	scanner0.Split(bufio.ScanLines)
 	var copy_instr strings.Builder
