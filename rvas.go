@@ -60,11 +60,6 @@ type SHT struct {
 }
 // elf_header Sht shstrtab
 
-type symbol_info struct {
-	Name    string
-	Section elf.SectionIndex
-}
-
 func write2f(text string, name string) {
 	fi, _ := os.Create(name)
 	defer fi.Close()
