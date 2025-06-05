@@ -301,7 +301,7 @@ func main() {
         elf_header.Phentsize = 0x0// e_phentsize size of program header table entry -- 0 for relocatable
         elf_header.Phnum = 0x0// e_phnum contains number of entries in program header table --
         elf_header.Shentsize = 0x0040// e_shentsize size of section header entry -- 64 for Elf64_shdr
-        elf_header.Shnum = 0x2 //
+        elf_header.Shnum = 0x3 //
         elf_header.Shstrndx = 0x1   // 0 indicate SHN_UNDEF no section header string table ** -- if no, 0 must be SHT index for .shstrtab section 
 	
 	buf := new(bytes.Buffer)
@@ -343,13 +343,13 @@ func main() {
 	sht0_bytes := buf_sht0.Bytes()
 	fmt.Println(sht0_bytes)
 
-	fmt.Println("SHT shstrtab Section header inital:")
+	fmt.Println("SHT .shstrtab Section header inital:")
         var sht1 SHT 
         sht1.Name = 1 // sh_name //0x00000001   // offset in shstrtab
         sht1.Type = 0x00000003 // sh_type 3_SHT_STRTAB // 3 for sh_strtab 
         sht1.Flags = 0x0000000000000000 
         sht1.Addr = 0x0000000000000000 // sh_addr virtual address at exection?
-        sht1.Offset = 192  // need calculate // sh_offset (with sh_size to locate whole section content)
+        sht1.Offset = 64*4  // need calculate // sh_offset (with sh_size to locate whole section content)
         sht1.Size = 28  // need calculate
         sht1.Link = 0x00000000 
         sht1.Info = 0x00000000 
@@ -364,21 +364,21 @@ func main() {
 	//Elf64_hdr -> e_shstrndx(.shstrtab index in SHT) -> Section header of .shstrtab -> sh_offset + sh_size -> .shstrtab
 
 	fmt.Println("SHT .text Section header inital:")
-        var sht1 SHT 
-        sht1.Name = 11 // sh_name offset in shstrtab
-        sht1.Type = 0x00000001 // sh_type 
-        sht1.Flags = 0x0000000000000000 
-        sht1.Addr = 0x0000000000000000 // sh_addr virtual address at exection?
-        sht1.Offset = 196  // need calculate // sh_offset (with sh_size to locate whole section content)
-        sht1.Size = 28  // need calculate
-        sht1.Link = 0x00000000 
-        sht1.Info = 0x00000000 
-        sht1.Addralign = 0x0000000000000001  //?
-        sht1.Entsize = 0x0000000000000000 
-	buf_sht1 := new(bytes.Buffer)
-	_ = binary.Write(buf_sht1, binary.LittleEndian, &sht1)
-	sht1_bytes := buf_sht1.Bytes()
-	fmt.Println(sht1_bytes)
+        var sht2 SHT 
+        sht2.Name = 11 // sh_name offset in shstrtab
+        sht2.Type = 0x00000001 // sh_type 
+        sht2.Flags = 0x0000000000000000 
+        sht2.Addr = 0x0000000000000000 // sh_addr virtual address at exection?
+        sht2.Offset = 64*4+28  // need calculate // sh_offset (with sh_size to locate whole section content)
+        sht2.Size = 0  // need calculate
+        sht2.Link = 0x00000000 
+        sht2.Info = 0x00000000 
+        sht2.Addralign = 0x0000000000000001  //?
+        sht2.Entsize = 0x0000000000000000 
+	buf_sht2 := new(bytes.Buffer)
+	_ = binary.Write(buf_sht2, binary.LittleEndian, &sht2)
+	sht2_bytes := buf_sht2.Bytes()
+	fmt.Println(sht2_bytes)
 
 	
 	fmt.Println(".shstrab inital:")
@@ -396,6 +396,7 @@ func main() {
        //find shstrtab header's sh_name to get the offset of its name in shstrtab
        combined := append(elf_header_bytes, sht0_bytes...)
        combined  = append(combined,sht1_bytes...)
+       combined  = append(combined,sht2_bytes...)
        combined  = append(combined, shstrtab_verify...)
        fmt.Println("combined:")
        fmt.Println(combined)
