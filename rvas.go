@@ -341,15 +341,13 @@ func main() {
 	sht0_bytes := buf_sht0.Bytes()
 	fmt.Println(sht0_bytes)
 
-
-
-	fmt.Println("SHT Section header inital:")
+	fmt.Println("SHT shstrtab Section header inital:")
         var sht1 SHT 
-        sht1.Name = 1 //0x00000001   // offset in shstrtab
-        sht1.Type = 0x00000003  // 3 for sh_strtab 
+        sht1.Name = 1 // sh_name //0x00000001   // offset in shstrtab
+        sht1.Type = 0x00000003 // sh_type 3_SHT_STRTAB // 3 for sh_strtab 
         sht1.Flags = 0x0000000000000000 
-        sht1.Addr = 0x0000000000000000 
-        sht1.Offset = 192  // need calculate
+        sht1.Addr = 0x0000000000000000 // sh_addr virtual address at exection?
+        sht1.Offset = 192  // need calculate // sh_offset (with sh_size to locate whole section content)
         sht1.Size = 28  // need calculate
         sht1.Link = 0x00000000 
         sht1.Info = 0x00000000 
@@ -359,23 +357,10 @@ func main() {
 	_ = binary.Write(buf_sht1, binary.LittleEndian, &sht1)
 	sht1_bytes := buf_sht1.Bytes()
 	fmt.Println(sht1_bytes)
-
-	fmt.Println("SHT Section header verifing:")
-	fmt.Println([]byte{
-		0x00, 0x00, 0x00, 0x00, // sh_name
-		0x00, 0x00, 0x00, 0x00, // sh_type 3_SHT_STRTAB
-		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // sh_flags
-		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // sh_addr virtual address at exection?
-		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // sh_offset (with sh_size to locate whole section content)
-		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // sh_size
-		0x00, 0x00, 0x00, 0x00, // sh_link
-		0x00, 0x00, 0x00, 0x00, // sh_info
-		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // sh_addralign
-		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // sh_entsize
-	})
 	//Find Section name string
 	//Elf64_hdr -> Elf64_Shdr(SHT) -> Section header of .x -> sh_name(index in .shstrtab) -> section name string in .shstrtab
 	//Elf64_hdr -> e_shstrndx(.shstrtab index in SHT) -> Section header of .shstrtab -> sh_offset + sh_size -> .shstrtab
+
 	fmt.Println(".shstrab inital:")
 	shstrtab_verify := []byte{
 		0x00,                               // \0 Empty string (for unnamed sections)
