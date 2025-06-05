@@ -312,15 +312,17 @@ func main() {
 	// .out Usually format:
         // ----------------
 	// ELF header 64bytes
-	// Content of section 1, .text 
-	// Content of section 2, .data
-	// Content of section 3, .rodata
-	// Content of section 4, .symtab
-	// Content of section 5, .strtab
-	// Content of section 6, .shstrtab
+	// Section Header Table (SHT) 0 (starts at "e_shoff" in ELF header) 64bytes 
+	// Section Header Table (SHT) 1 shstrtab 64bytes 
+	// Section Header Table (SHT) 2 text 64bytes 
+	// Content of section 1, .shstrtab
+	// Content of section 2, .text 
+	// Content of section 3, .data
+	// Content of section 4, .rodata
+	// Content of section 5, .symtab
+	// Content of section 6, .strtab
 	// Content of section 7, .rela.text
 	// Content of section 8, ...
-	// Section Header Table (SHT) (starts at "e_shoff" in ELF header)
         // ----------------
 	// each entrie of SHT is 64 bytes, sh_offset is the exactly offset from beginning of file to the start point of this section's context, e.g., .text's sh_offset is 64, after ELF header
 	// usually need a Non Section for the first section header
@@ -361,6 +363,24 @@ func main() {
 	//Elf64_hdr -> Elf64_Shdr(SHT) -> Section header of .x -> sh_name(index in .shstrtab) -> section name string in .shstrtab
 	//Elf64_hdr -> e_shstrndx(.shstrtab index in SHT) -> Section header of .shstrtab -> sh_offset + sh_size -> .shstrtab
 
+	fmt.Println("SHT .text Section header inital:")
+        var sht1 SHT 
+        sht1.Name = 11 // sh_name offset in shstrtab
+        sht1.Type = 0x00000001 // sh_type 
+        sht1.Flags = 0x0000000000000000 
+        sht1.Addr = 0x0000000000000000 // sh_addr virtual address at exection?
+        sht1.Offset = 196  // need calculate // sh_offset (with sh_size to locate whole section content)
+        sht1.Size = 28  // need calculate
+        sht1.Link = 0x00000000 
+        sht1.Info = 0x00000000 
+        sht1.Addralign = 0x0000000000000001  //?
+        sht1.Entsize = 0x0000000000000000 
+	buf_sht1 := new(bytes.Buffer)
+	_ = binary.Write(buf_sht1, binary.LittleEndian, &sht1)
+	sht1_bytes := buf_sht1.Bytes()
+	fmt.Println(sht1_bytes)
+
+	
 	fmt.Println(".shstrab inital:")
 	shstrtab_verify := []byte{
 		0x00,                               // \0 Empty string (for unnamed sections)
