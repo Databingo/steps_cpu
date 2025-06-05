@@ -292,54 +292,23 @@ func main() {
 	}
         elf_header.Type = 0x0001 // 0 No type|1 Relocatable file|2 Executable file|3 Shared object file|4 Core file
         elf_header.Machine = 0x00F3 // 0 No machine|62 AMDx86-64|183 ARMaarh64|0xF3 RISC-V
-        elf_header.Version = 0x00000001
-        elf_header.Entry = 0x0
-        elf_header.Phoff = 0x0
-        elf_header.Shoff = 0x40 //
-        elf_header.Flags = 0x00000004
-        elf_header.Ehsize = 0x0040
-        elf_header.Phentsize = 0x0
-        elf_header.Phnum = 0x0
-        elf_header.Shentsize = 0x0040
+        elf_header.Version = 0x00000001 // e_version specify original elf version
+        elf_header.Entry = 0x0 // e_entry program entry address -- 0 for relocatable file set final entry point by linker
+        elf_header.Phoff = 0x0 // e_phoff points to start of program header table --  0 for relocatable file (no program headers)
+        elf_header.Shoff = 0x40 // e_shoff points to start of section header table --  no 0 have to be the start of SHT  (e_shnum * e_shentsize = whole table of SHT)
+        elf_header.Flags = 0x00000004 // e_flags  // 0x4 for LP64D ABI  (EF_RISCV_FLOAT_ABI_DOUBLE) fit for RV64G
+        elf_header.Ehsize = 0x0040// e_ehsize specify size of This header, 52 bytes(0x34) for 32-bit format, 64 bytes(0x40) for 64-bit ?
+        elf_header.Phentsize = 0x0// e_phentsize size of program header table entry -- 0 for relocatable
+        elf_header.Phnum = 0x0// e_phnum contains number of entries in program header table --
+        elf_header.Shentsize = 0x0040// e_shentsize size of section header entry -- 64 for Elf64_shdr
         elf_header.Shnum = 0x2 //
-        elf_header.Shstrndx = 0x1   // 0 indicate SHN_UNDEF no section header string table
+        elf_header.Shstrndx = 0x1   // 0 indicate SHN_UNDEF no section header string table ** -- if no, 0 must be SHT index for .shstrtab section 
 	
 	buf := new(bytes.Buffer)
 	_ = binary.Write(buf, binary.LittleEndian, &elf_header)
 	elf_header_bytes := buf.Bytes()
 	fmt.Println(elf_header_bytes)
-        // raw elf_header_verify
-	 elf_header_verify := []byte{
-		////// e_ident[16]
-		0x7F, 0x45, 0x4C, 0x46, // Magic number indicates ELF file (0x7f E L F)
-		0x02,                                     // ei_class 01 for 32-bit 02 for 64-bit
-		0x01,                                     // ei_data specify little endian
-		0x01,                                     // ei_version current elf version
-		0x09,                                     // ei_osabi target platform, usually set to 0x0 (System V) 9 for FreeBSD
-		0x00,                                     // ei_abiverison ABI version
-		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // ei_padding zero padding
-		//////
-		0x01, 0x00, // e_type object 1 for ET_REL relocatable file
-		0xF3, 0x00, // e_machine specify machine 0xf3 for RISC-V
-		0x01, 0x00, 0x00, 0x00, // e_version specify original elf version
-		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // e_entry program entry address -- 0 for relocatable file set final entry point by linker
-		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // e_phoff points to start of program header table --  0 for relocatable file (no program headers)
-		//---
-		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // e_shoff points to start of section header table --  no 0 have to be the start of SHT  (e_shnum * e_shentsize = whole table of SHT)
-		0x04, 0x00, 0x00, 0x00, // e_flags  // 0x4 for LP64D ABI  (EF_RISCV_FLOAT_ABI_DOUBLE) fit for RV64G
-		0x40, 0x00, // e_ehsize specify size of This header, 52 bytes(0x34) for 32-bit format, 64 bytes(0x40) for 64-bit ?
-		0x00, 0x00, // e_phentsize size of program header table entry -- 0 for relocatable
-		0x00, 0x00, // e_phnum contains number of entries in program header table --
-		0x40, 0x00, // e_shentsize size of section header entry -- 64 for Elf64_shdr
-		//---
-		0x00, 0x00, // e_shnum number of entries in the section header table -- no 0 must be actual number of section headers
-		//---
-		0x00, 0x00, // e_shstrndx index of the section header table entry that contains the section names -- if no, 0 must be SHT index for .shstrtab section 
-	}
 
-	 fmt.Println(elf_header_verify)
-         if reflect.DeepEqual(elf_header_bytes, elf_header_verify){
-	     fmt.Println("Generated elf header verified")} else { fmt.Println("Generated elf header verify Not Match") }
 	// .out Usually format:
         // ----------------
 	// ELF header 64bytes
