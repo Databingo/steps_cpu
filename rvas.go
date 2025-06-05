@@ -6,13 +6,13 @@ import (
 	"errors"
 	"fmt"
 	//"io"
-	"debug/elf"
+	//"debug/elf"
 	"log"
 	"os"
 	"strconv"
 	"strings"
 	"bytes"
-	"reflect"
+	//"reflect"
 
 )
 // find SHT
