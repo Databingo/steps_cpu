@@ -13,6 +13,7 @@ import (
 	"strings"
 	"bytes"
 	//"reflect"
+	"io/ioutil"
 
 )
 // find SHT
@@ -394,12 +395,12 @@ func main() {
        //read elf_header.Shstrndx to get the index of shstrtab header
        //find the content of shstrtab by read the sh_offset and sh_size. 
        //find shstrtab header's sh_name to get the offset of its name in shstrtab
-       combined := append(elf_header_bytes, sht0_bytes...)
-       combined  = append(combined,sht1_bytes...)
-       combined  = append(combined,sht2_bytes...)
-       combined  = append(combined, shstrtab_verify...)
-       fmt.Println("combined:")
-       fmt.Println(combined)
+       //combined := append(elf_header_bytes, sht0_bytes...)
+       //combined  = append(combined,sht1_bytes...)
+       //combined  = append(combined,sht2_bytes...)
+       //combined  = append(combined, shstrtab_verify...)
+       //fmt.Println("combined:")
+       //fmt.Println(combined)
 
 
 
@@ -1267,7 +1268,14 @@ func main() {
 		f.Write(instructionBuffer)
 
 	}
-
+                txt, _ := ioutil.ReadFile("add.o")
+       combined := append(elf_header_bytes, sht0_bytes...)
+       combined  = append(combined,sht1_bytes...)
+       combined  = append(combined,sht2_bytes...)
+       combined  = append(combined, shstrtab_verify...)
+       combined  = append(combined, txt...)
+       fmt.Println("combined:")
+       fmt.Println(combined)
 		ff.Write(combined)
 	fmt.Println(`
 		                 ELF header
