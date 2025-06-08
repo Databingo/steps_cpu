@@ -1269,13 +1269,15 @@ func main() {
 
 	}
                 txt, _ := ioutil.ReadFile("add.o")
-       combined := append(elf_header_bytes, sht0_bytes...)
-       combined  = append(combined,sht1_bytes...)
-       combined  = append(combined,sht2_bytes...)
-       combined  = append(combined, shstrtab_verify...)
-       combined  = append(combined, txt...)
-       fmt.Println("combined:")
-       fmt.Println(combined)
+
+                combined := append(elf_header_bytes, sht0_bytes...)
+                combined  = append(combined,sht1_bytes...)
+                combined  = append(combined,sht2_bytes...)
+                combined  = append(combined, shstrtab_verify...)
+                combined  = append(combined, txt...)
+                fmt.Println("combined:")
+                fmt.Println(combined)
+
 		ff.Write(combined)
 	fmt.Println(`
 		                 ELF header
