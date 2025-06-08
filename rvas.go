@@ -998,30 +998,31 @@ func main() {
 
 	// set up file header table
 
-	f.Write([]byte{
-		////// e_ident[16]
-		0x7F, 0x45, 0x4C, 0x46, // Magic number indicates ELF file (0x7f E L F)
-		0x02,                                     // ei_class 01 for 32-bit 02 for 64-bit
-		0x01,                                     // ei_data specify little endian
-		0x01,                                     // ei_version current elf version
-		0x09,                                     // ei_osabi target platform, usually set to 0x0 (System V) 9 for FreeBSD
-		0x00,                                     // ei_abiverison ABI version
-		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // ei_padding zero padding
-		//////
-		0x01, 0x00, // e_type object 1 for ET_REL relocatable file
-		0xF3, 0x00, // e_machine specify machine 0xf3 for RISC-V
-		0x01, 0x00, 0x00, 0x00, // e_version specify original elf version
-		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // e_entry program entry address -- 0 for relocatable file set final entry point by linker
-		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // e_phoff points to start of program header table --  0 for relocatable file (no program headers)
-		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // e_shoff points to start of section header table --  no 0 have to be the start of SHT
-		0x04, 0x00, 0x00, 0x00, // e_flags  // 0x4 for LP64D ABI  (EF_RISCV_FLOAT_ABI_DOUBLE) fit for RV64G
-		0x40, 0x00, // e_ehsize specify size of header, 52 bytes(0x34) for 32-bit format, 64 bytes(0x40) for 64-bit ?
-		0x00, 0x00, // e_phentsize size of program header table entry -- 0 for relocatable
-		0x00, 0x00, // e_phnum contains number of entries in program header table --
-		0x40, 0x00, // e_shentsize size of section header entry -- 64 for Elf64_shdr
-		0x00, 0x00, // e_shnum number of entries in the section header table -- no 0 must be actual number of section headers
-		0x00, 0x00, // e_shstrndx index of the section header table entry that contains the section names -- no 0 must be SHT index for .shstrtab section
-	})
+	//f.Write([]byte{
+	//	////// e_ident[16]
+	//	0x7F, 0x45, 0x4C, 0x46, // Magic number indicates ELF file (0x7f E L F)
+	//	0x02,                                     // ei_class 01 for 32-bit 02 for 64-bit
+	//	0x01,                                     // ei_data specify little endian
+	//	0x01,                                     // ei_version current elf version
+	//	0x09,                                     // ei_osabi target platform, usually set to 0x0 (System V) 9 for FreeBSD
+	//	0x00,                                     // ei_abiverison ABI version
+	//	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // ei_padding zero padding
+	//	//////
+	//	0x01, 0x00, // e_type object 1 for ET_REL relocatable file
+	//	0xF3, 0x00, // e_machine specify machine 0xf3 for RISC-V
+	//	0x01, 0x00, 0x00, 0x00, // e_version specify original elf version
+	//	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // e_entry program entry address -- 0 for relocatable file set final entry point by linker
+	//	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // e_phoff points to start of program header table --  0 for relocatable file (no program headers)
+	//	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // e_shoff points to start of section header table --  no 0 have to be the start of SHT
+	//	0x04, 0x00, 0x00, 0x00, // e_flags  // 0x4 for LP64D ABI  (EF_RISCV_FLOAT_ABI_DOUBLE) fit for RV64G
+	//	0x40, 0x00, // e_ehsize specify size of header, 52 bytes(0x34) for 32-bit format, 64 bytes(0x40) for 64-bit ?
+	//	0x00, 0x00, // e_phentsize size of program header table entry -- 0 for relocatable
+	//	0x00, 0x00, // e_phnum contains number of entries in program header table --
+	//	0x40, 0x00, // e_shentsize size of section header entry -- 64 for Elf64_shdr
+	//	0x00, 0x00, // e_shnum number of entries in the section header table -- no 0 must be actual number of section headers
+	//	0x00, 0x00, // e_shstrndx index of the section header table entry that contains the section names -- no 0 must be SHT index for .shstrtab section
+	//})
+
 	//f.Write([]byte{0x7F, 0x45, 0x4C, 0x46, // indicates elf file
 	// 		0x01,                                     // identifies 32 bit format
 	// 		0x01,                                     // specify little endian
