@@ -343,6 +343,8 @@ func main() {
 	_ = binary.Write(buf_sht0, binary.LittleEndian, &sht0)
 	sht0_bytes := buf_sht0.Bytes()
 	fmt.Println(sht0_bytes)
+	fmt.Println("--------#")
+	fmt.Println(len(sht0_bytes))
 
 	fmt.Println("SHT .shstrtab Section header inital:")
         var sht1 SHT 
@@ -360,6 +362,8 @@ func main() {
 	_ = binary.Write(buf_sht1, binary.LittleEndian, &sht1)
 	sht1_bytes := buf_sht1.Bytes()
 	fmt.Println(sht1_bytes)
+	fmt.Println("--------#")
+	fmt.Println(len(sht1_bytes))
 	//Find Section name string
 	//Elf64_hdr -> Elf64_Shdr(SHT) -> Section header of .x -> sh_name(index in .shstrtab) -> section name string in .shstrtab
 	//Elf64_hdr -> e_shstrndx(.shstrtab index in SHT) -> Section header of .shstrtab -> sh_offset + sh_size -> .shstrtab
@@ -371,7 +375,7 @@ func main() {
         sht2.Flags = 0x0000000000000000 
         sht2.Addr = 0x0000000000000000 // sh_addr virtual address at exection?
         sht2.Offset = 64*4+28  // need calculate // sh_offset (with sh_size to locate whole section content)
-        sht2.Size = 0  // need calculate
+        sht2.Size = 160  // need calculate
         sht2.Link = 0x00000000 
         sht2.Info = 0x00000000 
         sht2.Addralign = 0x0000000000000001  //?
@@ -380,6 +384,8 @@ func main() {
 	_ = binary.Write(buf_sht2, binary.LittleEndian, &sht2)
 	sht2_bytes := buf_sht2.Bytes()
 	fmt.Println(sht2_bytes)
+	fmt.Println("--------#")
+	fmt.Println(len(sht2_bytes))
 
 	
 	fmt.Println(".shstrab inital:")
@@ -391,6 +397,8 @@ func main() {
 		// ....
 	}
 	fmt.Println(shstrtab_verify)
+	fmt.Println("--------#")
+	fmt.Println(len(shstrtab_verify))
        //read elf_header.Shoff to get the start point of SHT
        //read elf_header.Shstrndx to get the index of shstrtab header
        //find the content of shstrtab by read the sh_offset and sh_size. 
@@ -1277,6 +1285,8 @@ func main() {
                 combined  = append(combined, shstrtab_verify...)
                 combined  = append(combined, txt...)
                 fmt.Println("combined:")
+                fmt.Println("----------#")
+                fmt.Println(len(txt))
                 fmt.Println(combined)
 
 		ff.Write(combined)
