@@ -42,3 +42,14 @@ _start:
     li      a0, 0           # exit code 0
     li      a7, 93          # exit syscall number = 93
     ecall                   # Make the system call
+
+
+#auipc a1, 0
+#addi  a1, a1, 0
+#li    a0, 1
+#li    a2, 1
+#li    a7, 4
+#ecall
+#li    a0, 0
+#li    a7, 1 
+#ecall

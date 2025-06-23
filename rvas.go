@@ -380,12 +380,12 @@ func main() {
         sht2.Info = 0x00000000 
         sht2.Addralign = 0x0000000000000001  //?
         sht2.Entsize = 0x0000000000000000 
-	buf_sht2 := new(bytes.Buffer)
-	_ = binary.Write(buf_sht2, binary.LittleEndian, &sht2)
-	sht2_bytes := buf_sht2.Bytes()
-	fmt.Println(sht2_bytes)
-	fmt.Println("--------#")
-	fmt.Println(len(sht2_bytes))
+//	buf_sht2 := new(bytes.Buffer)
+//	_ = binary.Write(buf_sht2, binary.LittleEndian, &sht2)
+//	sht2_bytes := buf_sht2.Bytes()
+	//fmt.Println(sht2_bytes)
+	//fmt.Println("--------#")
+	//fmt.Println(len(sht2_bytes))
 
 	
 	fmt.Println(".shstrab inital:")
@@ -1281,6 +1281,10 @@ func main() {
 
                 combined := append(elf_header_bytes, sht0_bytes...)
                 combined  = append(combined,sht1_bytes...)
+		sht2.Size = uint64(len(txt))
+	buf_sht2 := new(bytes.Buffer)
+	_ = binary.Write(buf_sht2, binary.LittleEndian, &sht2)
+	sht2_bytes := buf_sht2.Bytes()
                 combined  = append(combined,sht2_bytes...)
                 combined  = append(combined, shstrtab_verify...)
                 combined  = append(combined, txt...)
