@@ -401,12 +401,12 @@ func main() {
         sht3.Info = 0x00000000 
         sht3.Addralign = 0x0000000000000001  //?
         sht3.Entsize = 0x0000000000000000 
-	buf_sht3 := new(bytes.Buffer)
-	_ = binary.Write(buf_sht3, binary.LittleEndian, &sht3)
-	sht3_bytes := buf_sht3.Bytes()
-	fmt.Println(sht3_bytes)
-	fmt.Println("--------#")
-	fmt.Println(len(sht3_bytes))
+	//buf_sht3 := new(bytes.Buffer)
+	//_ = binary.Write(buf_sht3, binary.LittleEndian, &sht3)
+	//sht3_bytes := buf_sht3.Bytes()
+	//fmt.Println(sht3_bytes)
+	//fmt.Println("--------#")
+	//fmt.Println(len(sht3_bytes))
 
 	fmt.Println("SHT .text Section header inital:")
         var sht4 SHT 
@@ -1327,14 +1327,16 @@ func main() {
 
 
 	shstrtab_data := []byte("\x00" + ".shstrtab\x00" + ".strtab\x00" + ".symtab\x00" + ".text\x00")
+	strtab_data := []byte("\x00" + "_start\x00")
 	//fmt.Println(shstrtab_data)
 	//fmt.Println(".shstrab data len:", len(shstrtab_data))
 	//fmt.Println("--------#")
 
 	//-----------
-        sht1.Name = uint32(len("\x00")) // offset in shstrtab
+        sht1.Name = sht0.Name + uint32(len("\x00")) // offset in shstrtab
         sht1.Offset = uint64(elf_header.Ehsize + elf_header.Shentsize * elf_header.Shnum) //data offset
         sht1.Size =  uint64(len(shstrtab_data))
+
 	buf_sht1 := new(bytes.Buffer)
 	_ = binary.Write(buf_sht1, binary.LittleEndian, &sht1)
 	sht1_bytes := buf_sht1.Bytes()
@@ -1343,9 +1345,10 @@ func main() {
 	fmt.Println(len(sht1_bytes))
 
 	//-----------
-        sht2.Name = uint32(len("\x00") + len(".shstrtab\x00")) // offset in shstrtab
+        sht2.Name = sht1.Name + uint32(len(".shstrtab\x00")) // offset in shstrtab
         sht2.Offset = sht1.Offset + sht1.Size
-        sht1.Size = uint64(len(shstrtab_data))
+        sht2.Size = uint64(len(shstrtab_data))
+
 	buf_sht2 := new(bytes.Buffer)
 	_ = binary.Write(buf_sht2, binary.LittleEndian, &sht2)
 	sht2_bytes := buf_sht2.Bytes()
@@ -1353,6 +1356,17 @@ func main() {
 	fmt.Println("--------#")
 	fmt.Println(len(sht2_bytes))
 
+	//-----------
+        sht3.Name = sht2.Name + uint32(len(".strtab\x00")) // offset in shstrtab
+        sht3.Offset = sht2.Offset + sht2.Size
+        sht3.Size = uint64(len(strtab_data))
+
+	//buf_sht3 := new(bytes.Buffer)
+	//_ = binary.Write(buf_sht3, binary.LittleEndian, &sht3)
+	//sht3_bytes := buf_sht3.Bytes()
+	//fmt.Println(sht3_bytes)
+	//fmt.Println("--------#")
+	//fmt.Println(len(sht3_bytes))
 
 
 
