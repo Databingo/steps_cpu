@@ -370,7 +370,7 @@ func main() {
 	//Elf64_hdr -> Elf64_Shdr(SHT) -> Section header of .x -> sh_name(index in .shstrtab) -> section name string in .shstrtab
 	//Elf64_hdr -> e_shstrndx(.shstrtab index in SHT) -> Section header of .shstrtab -> sh_offset + sh_size -> .shstrtab
 
-	fmt.Println("SHT .symtab Section header inital:")
+	fmt.Println("SHT .strtab Section header inital:")
         var sht2 SHT 
         sht2.Name = 11 // sh_name offset in shstrtab
         sht2.Type = 0x00000001 // sh_type 
@@ -389,7 +389,7 @@ func main() {
 	//fmt.Println("--------#")
 	//fmt.Println(len(sht2_bytes))
 
-	fmt.Println("SHT .strtab Section header inital:")
+	fmt.Println("SHT .symtab Section header inital:")
         var sht3 SHT 
         sht3.Name = 11 // sh_name offset in shstrtab
         sht3.Type = 0x00000001 // sh_type 
@@ -420,12 +420,12 @@ func main() {
         sht4.Info = 0x00000000 
         sht4.Addralign = 0x0000000000000001  //?
         sht4.Entsize = 0x0000000000000000 
-	buf_sht4 := new(bytes.Buffer)
-	_ = binary.Write(buf_sht4, binary.LittleEndian, &sht4)
-	sht4_bytes := buf_sht4.Bytes()
-	fmt.Println(sht4_bytes)
-	fmt.Println("--------#")
-	fmt.Println(len(sht4_bytes))
+	//buf_sht4 := new(bytes.Buffer)
+	//_ = binary.Write(buf_sht4, binary.LittleEndian, &sht4)
+	//sht4_bytes := buf_sht4.Bytes()
+	//fmt.Println(sht4_bytes)
+	//fmt.Println("--------#")
+	//fmt.Println(len(sht4_bytes))
 
 	
 	//shstrtab_data := []byte{
@@ -1317,7 +1317,7 @@ func main() {
 	}
                 txt, _ := ioutil.ReadFile("add.o")
 
-        elf_header.Shnum = 0x5 //sht0 1 2 3 4
+        elf_header.Shnum = 0x5 //sht0 1shstrtab 2strtab 3symtab 4text
 	//-------
 	buf := new(bytes.Buffer)
 	_ = binary.Write(buf, binary.LittleEndian, &elf_header)
@@ -1328,11 +1328,12 @@ func main() {
 
 	shstrtab_data := []byte("\x00" + ".shstrtab\x00" + ".strtab\x00" + ".symtab\x00" + ".text\x00")
 	strtab_data := []byte("\x00" + "_start\x00")
+	symtab_data := []byte("\x00" + "symtal_data\x00")
 	//fmt.Println(shstrtab_data)
 	//fmt.Println(".shstrab data len:", len(shstrtab_data))
 	//fmt.Println("--------#")
 
-	//-----------
+	//-----------shstrtab h
         sht1.Name = sht0.Name + uint32(len("\x00")) // offset in shstrtab
         sht1.Offset = uint64(elf_header.Ehsize + elf_header.Shentsize * elf_header.Shnum) //data offset
         sht1.Size =  uint64(len(shstrtab_data))
@@ -1344,7 +1345,7 @@ func main() {
 	fmt.Println("--------#")
 	fmt.Println(len(sht1_bytes))
 
-	//-----------
+	//-----------strtab h
         sht2.Name = sht1.Name + uint32(len(".shstrtab\x00")) // offset in shstrtab
         sht2.Offset = sht1.Offset + sht1.Size
         sht2.Size = uint64(len(shstrtab_data))
@@ -1356,24 +1357,39 @@ func main() {
 	fmt.Println("--------#")
 	fmt.Println(len(sht2_bytes))
 
-	//-----------
+	//-----------symtab h
         sht3.Name = sht2.Name + uint32(len(".strtab\x00")) // offset in shstrtab
         sht3.Offset = sht2.Offset + sht2.Size
         sht3.Size = uint64(len(strtab_data))
 
-	//buf_sht3 := new(bytes.Buffer)
-	//_ = binary.Write(buf_sht3, binary.LittleEndian, &sht3)
-	//sht3_bytes := buf_sht3.Bytes()
-	//fmt.Println(sht3_bytes)
-	//fmt.Println("--------#")
-	//fmt.Println(len(sht3_bytes))
+	buf_sht3 := new(bytes.Buffer)
+	_ = binary.Write(buf_sht3, binary.LittleEndian, &sht3)
+	sht3_bytes := buf_sht3.Bytes()
+	fmt.Println(sht3_bytes)
+	fmt.Println("--------#")
+	fmt.Println(len(sht3_bytes))
 
+	//-----------text h
+        sht4.Name = sht3.Name + uint32(len(".symtab\x00")) // offset in shstrtab
+        sht4.Offset = sht3.Offset + sht3.Size
+        sht4.Size = uint64(len(txt))
+
+	buf_sht4 := new(bytes.Buffer)
+	_ = binary.Write(buf_sht4, binary.LittleEndian, &sht4)
+	sht4_bytes := buf_sht4.Bytes()
+	fmt.Println(sht4_bytes)
+	fmt.Println("--------#")
+	fmt.Println(len(sht4_bytes))
 
 
                 combined := append(elf_header_bytes, sht0_bytes...)
-                combined  = append(combined,sht1_bytes...)
-                combined  = append(combined,sht2_bytes...)
+                combined  = append(combined, sht1_bytes...)
+                combined  = append(combined, sht2_bytes...)
+                combined  = append(combined, sht3_bytes...)
+                combined  = append(combined, sht4_bytes...)
                 combined  = append(combined, shstrtab_data...)
+                combined  = append(combined, strtab_data...)
+                combined  = append(combined, symtab_data...)
                 combined  = append(combined, txt...)
                 fmt.Println("combined:")
                 fmt.Println("----------#")
