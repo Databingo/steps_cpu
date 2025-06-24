@@ -1349,7 +1349,7 @@ func main() {
 	//-----------strtab h
         sht2.Name = sht1.Name + uint32(len(".shstrtab\x00")) // offset in shstrtab
         sht2.Offset = sht1.Offset + sht1.Size
-        sht2.Size = uint64(len(shstrtab_data))
+        sht2.Size = uint64(len(strtab_data))
 
 	buf_sht2 := new(bytes.Buffer)
 	_ = binary.Write(buf_sht2, binary.LittleEndian, &sht2)
@@ -1361,7 +1361,7 @@ func main() {
 	//-----------symtab h
         sht3.Name = sht2.Name + uint32(len(".strtab\x00")) // offset in shstrtab
         sht3.Offset = sht2.Offset + sht2.Size
-        sht3.Size = uint64(len(strtab_data))
+        sht3.Size = uint64(len(symtab_data))
 
 	buf_sht3 := new(bytes.Buffer)
 	_ = binary.Write(buf_sht3, binary.LittleEndian, &sht3)
