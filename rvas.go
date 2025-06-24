@@ -307,10 +307,10 @@ func main() {
 	//-------
         elf_header.Shstrndx = 0x1   //# 0 indicate SHN_UNDEF no section header string table ** -- if no, 0 must be SHT index for .shstrtab section 
 	
-	buf := new(bytes.Buffer)
-	_ = binary.Write(buf, binary.LittleEndian, &elf_header)
-	elf_header_bytes := buf.Bytes()
-	fmt.Println(elf_header_bytes)
+	//buf := new(bytes.Buffer)
+	//_ = binary.Write(buf, binary.LittleEndian, &elf_header)
+	//elf_header_bytes := buf.Bytes()
+	//fmt.Println(elf_header_bytes)
 
 	// .out Usually format:
         // ----------------
@@ -1317,6 +1317,15 @@ func main() {
 	}
                 txt, _ := ioutil.ReadFile("add.o")
 
+        elf_header.Shnum = 0x5 //sht0 1 2 3 4
+	//-------
+	buf := new(bytes.Buffer)
+	_ = binary.Write(buf, binary.LittleEndian, &elf_header)
+	elf_header_bytes := buf.Bytes()
+	fmt.Println(elf_header_bytes)
+
+
+
 	shstrtab_data := []byte("\x00" + ".shstrtab\x00" + ".strtab\x00" + ".symtab\x00" + ".text\x00")
 	//fmt.Println(shstrtab_data)
 	//fmt.Println(".shstrab data len:", len(shstrtab_data))
@@ -1324,7 +1333,7 @@ func main() {
 
 	//-----------
         sht1.Name = uint32(len("\x00")) // offset in shstrtab
-        sht1.Offset = uint64(len(elf_header_bytes)) + uint64(elf_header.Shentsize)*5
+        sht1.Offset = uint64(elf_header.Ehsize) + uint64(elf_header.Shentsize) * uint64(elf_header.Shnum) //data offset
         sht1.Size =  uint64(len(shstrtab_data))
 	buf_sht1 := new(bytes.Buffer)
 	_ = binary.Write(buf_sht1, binary.LittleEndian, &sht1)
