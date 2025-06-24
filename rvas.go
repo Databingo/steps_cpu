@@ -417,10 +417,10 @@ func main() {
         sht3.Addr = 0x0000000000000000 // sh_addr virtual address at exection?
         sht3.Offset = 64*4+28  // need calculate // sh_offset (with sh_size to locate whole section content)
         sht3.Size = 160  // need calculate
-        sht3.Link = 0x00000000 
-        sht3.Info = 0x00000000 
-        sht3.Addralign = 0x0000000000000001  //?
-        sht3.Entsize = 0x0000000000000000 
+        sht3.Link = 0x00000002 // .strtab index 2 in .shstrtab
+        sht3.Info = 0x00000001  // first no local symbol in syms
+        sht3.Addralign = 0x0000000000000008  //? Good practice for alignment
+        sht3.Entsize = 0x18 //24 each sym record size is 24 bytes
 	//buf_sht3 := new(bytes.Buffer)
 	//_ = binary.Write(buf_sht3, binary.LittleEndian, &sht3)
 	//sht3_bytes := buf_sht3.Bytes()
