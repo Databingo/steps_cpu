@@ -1333,7 +1333,7 @@ func main() {
 
 	//-----------
         sht1.Name = uint32(len("\x00")) // offset in shstrtab
-        sht1.Offset = uint64(elf_header.Ehsize) + uint64(elf_header.Shentsize * elf_header.Shnum) //data offset
+        sht1.Offset = uint64(elf_header.Ehsize + elf_header.Shentsize * elf_header.Shnum) //data offset
         sht1.Size =  uint64(len(shstrtab_data))
 	buf_sht1 := new(bytes.Buffer)
 	_ = binary.Write(buf_sht1, binary.LittleEndian, &sht1)
