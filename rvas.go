@@ -435,10 +435,10 @@ func main() {
 	//	0x2E, 0x72, 0x65, 0x6C, 0x61, 0x2E, 0x74, 0x65, 0x78, 0x74, 0x00, // .rela.text\0
 	//	// ....
 	//}
-	shstrtab_data := []byte("\0.shstrtab\0.strtab\0.symtab\0.text\0")
-	fmt.Println(shstrtab_data)
-	fmt.Println(".shstrab data len:", len(shstrtab_data))
-	fmt.Println("--------#")
+//	shstrtab_data := []byte("\0.shstrtab\0.strtab\0.symtab\0.text\0")
+//	fmt.Println(shstrtab_data)
+//	fmt.Println(".shstrab data len:", len(shstrtab_data))
+//	fmt.Println("--------#")
        //read elf_header.Shoff to get the start point of SHT
        //read elf_header.Shstrndx to get the index of shstrtab header
        //find the content of shstrtab by read the sh_offset and sh_size. 
@@ -1317,13 +1317,17 @@ func main() {
 	}
                 txt, _ := ioutil.ReadFile("add.o")
 
+	shstrtab_data := []byte("\x00" + ".shstrtab\x00" + ".strtab\x00" + ".symtab\x00" + ".text\x00")
+	//fmt.Println(shstrtab_data)
+	//fmt.Println(".shstrab data len:", len(shstrtab_data))
+	//fmt.Println("--------#")
 
-        sht1.Name = len("\0") // offset in shstrtab
+        sht1.Name = uint32(len("\x00")) // offset in shstrtab
 
-	sht1_data_offset := len(elf_header_bytes) + len(sht0_bytes) + len(sht1_bytes) + len(sht2_bytes) + len(sht3_bytes) + len(sht4_bytes)
+	sht1_data_offset := uint64(len(elf_header_bytes)) + uint64(elf_header.Shentsize)*5
         sht1.Offset = sht1_data_offset
 
-	sht1_data_lenght := len(shstrtab_data)
+	sht1_data_lenght := uint64(len(shstrtab_data))
         sht1.Size = sht1_data_lenght 
 
 	buf_sht1 := new(bytes.Buffer)
