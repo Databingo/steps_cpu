@@ -382,12 +382,12 @@ func main() {
         sht2.Info = 0x00000000 
         sht2.Addralign = 0x0000000000000001  //?
         sht2.Entsize = 0x0000000000000000 
-	buf_sht2 := new(bytes.Buffer)
-	_ = binary.Write(buf_sht2, binary.LittleEndian, &sht2)
-	sht2_bytes := buf_sht2.Bytes()
-	fmt.Println(sht2_bytes)
-	fmt.Println("--------#")
-	fmt.Println(len(sht2_bytes))
+	//buf_sht2 := new(bytes.Buffer)
+	//_ = binary.Write(buf_sht2, binary.LittleEndian, &sht2)
+	//sht2_bytes := buf_sht2.Bytes()
+	//fmt.Println(sht2_bytes)
+	//fmt.Println("--------#")
+	//fmt.Println(len(sht2_bytes))
 
 	fmt.Println("SHT .strtab Section header inital:")
         var sht3 SHT 
@@ -1322,20 +1322,30 @@ func main() {
 	//fmt.Println(".shstrab data len:", len(shstrtab_data))
 	//fmt.Println("--------#")
 
+	//-----------
         sht1.Name = uint32(len("\x00")) // offset in shstrtab
-
-	sht1_data_offset := uint64(len(elf_header_bytes)) + uint64(elf_header.Shentsize)*5
-        sht1.Offset = sht1_data_offset
-
-	sht1_data_lenght := uint64(len(shstrtab_data))
-        sht1.Size = sht1_data_lenght 
-
+        sht1.Offset = uint64(len(elf_header_bytes)) + uint64(elf_header.Shentsize)*5
+        sht1.Size =  uint64(len(shstrtab_data))
 	buf_sht1 := new(bytes.Buffer)
 	_ = binary.Write(buf_sht1, binary.LittleEndian, &sht1)
 	sht1_bytes := buf_sht1.Bytes()
 	fmt.Println(sht1_bytes)
 	fmt.Println("--------#")
 	fmt.Println(len(sht1_bytes))
+
+	//-----------
+        sht2.Name = uint32(len("\x00") + len(".shstrtab\x00")) // offset in shstrtab
+        sht2.Offset = sht1.Offset + sht1.Size
+        sht1.Size = uint64(len(shstrtab_data))
+	buf_sht2 := new(bytes.Buffer)
+	_ = binary.Write(buf_sht2, binary.LittleEndian, &sht2)
+	sht2_bytes := buf_sht2.Bytes()
+	fmt.Println(sht2_bytes)
+	fmt.Println("--------#")
+	fmt.Println(len(sht2_bytes))
+
+
+
 
                 combined := append(elf_header_bytes, sht0_bytes...)
                 combined  = append(combined,sht1_bytes...)
