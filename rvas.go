@@ -448,13 +448,33 @@ func main() {
 	//fmt.Println(len(sht4_bytes))
 
 	fmt.Println(".symtab Symbol table inital:")
-    var sym1 Elf64_sym 
-        sym1.Name = 1 //uint32 // offset in string table
-        sym1.Info = 0 //# uint8 // H4:binding and L4:type 
+        var sym0 Elf64_sym 
+        sym0.Name = 0 //uint32 // offset in string table
+        sym0.Info = 0 //# uint8 // H4:binding and L4:type 
+        sym0.Other = 0 //uint8 // reserved, currently holds 0
+        sym0.Shndx = 0 //uint16 // section index the symbol in
+        sym0.Value = 0 //# uint64  for relocatable .o file it's symbol's offset in its section
+        sym0.Size = 0 //#uint64  for function it's its size
+	//buf_sym1 := new(bytes.Buffer)
+	//_ = binary.Write(buf_sym0, binary.LittleEndian, &sym0)
+	//sym0_bytes := buf_sym0.Bytes()
+	//fmt.Println(smy0_bytes)
+	//fmt.Println("--------#")
+	//fmt.Println(len(sym0_bytes))
+
+        var sym1 Elf64_sym 
+        sym1.Name = 1 // points to "_start" in .strtab
+        sym1.Info = (STB_GLOBAL << 4 | STT_FUNC) //# uint8 // H4:binding and L4:type 
         sym1.Other = 0 //uint8 // reserved, currently holds 0
         sym1.Shndx = 4 //uint16 // section index the symbol in
-        sym1.Value = 0 //# uint64
-        sym1.Size = 0 //#uint64 
+        sym1.Value = 0 //# uint64  for relocatable .o file it's symbol's offset in its section
+        sym1.Size = 0 //#uint64  for function it's its size
+	//buf_sym1 := new(bytes.Buffer)
+	//_ = binary.Write(buf_sym1, binary.LittleEndian, &sym1)
+	//sym1_bytes := buf_sym1.Bytes()
+	//fmt.Println(smy1_bytes)
+	//fmt.Println("--------#")
+	//fmt.Println(len(sym1_bytes))
  
 	fmt.Println([]byte{
 		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // st_name (byte offset in .strtab)
@@ -1331,28 +1351,17 @@ func main() {
 
 	shstrtab_data := []byte("\x00" + ".shstrtab\x00" + ".strtab\x00" + ".symtab\x00" + ".text\x00")
 	strtab_data := []byte("\x00" + "_start\x00")
-	symtab_data := []byte{
-		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // st_name (byte offset in .strtab)
-		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // st_info
-		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // st_other
-		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // st_shndx (in which section)
-		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // st_value (offset in seciton)
-		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // st_size
-		0x00, 0x00, 0x00, 0x00, // sh_type
-		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // sh_flags
-		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // sh_addr
-		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // sh_offset (with sh_size to locate whole section content)
-		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // sh_size
-		0x00, 0x00, 0x00, 0x00, // sh_link (.strtab's index in SHT, standard find .strtab)
-		0x00, 0x00, 0x00, 0x00, // sh_info
-		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // sh_addralign
-		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // sh_entsize
-	}
-	//fmt.Println(shstrtab_data)
-	//fmt.Println(".shstrab data len:", len(shstrtab_data))
-	//fmt.Println("--------#")
+	symtab := make([]Elf64_sym, 2)
+	symtab[0] = sym0
+	symtab[1] = sym1
+	buf_symtab := new(bytes.Buffer)
+	for _, sym := range symtab{
+	_ = binary.Write(buf_symtab, binary.LittleEndian, &sym)
+        }
+	symtab_data := buf_symtab.Bytes()
+	fmt.Println(symtab_data)
+	fmt.Println("--------#")
+	fmt.Println(len(symtab_data))
 
 	//-----------shstrtab h
         sht1.Name = sht0.Name + uint32(len("\x00")) // offset in shstrtab
