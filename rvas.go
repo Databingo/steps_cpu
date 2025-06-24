@@ -30,7 +30,7 @@ import (
 // find Section_name
 // elf-shoff-sht-namendx + .shstrtab -> name
 
-type Elf_header struct {
+type Elf64_header struct {
     Ident [16]byte
     Type uint16
     Machine uint16
@@ -59,7 +59,27 @@ type SHT struct {
     Addralign uint64
     Entsize uint64
 }
-// elf_header Sht shstrtab
+
+
+//symtab info's type
+const STT_NOTYPE = 0 // undefined
+const STT_OBJECT = 1
+const STT_FUNC = 2
+const STT_SECTION = 3
+const STT_FILE = 4
+//symtab info's binding
+const STB_LOCAL = 0  // local visiable
+const STB_GLOBAL = 1 // global visiable
+const STB_WEAK = 2 // coverable global
+
+type Elf64_sym struct { // 24 bytes
+    Name uint32 // offset in string table
+    Info uint8 // H4:binding and L4:type 
+    Other uint8 // reserved, currently holds 0
+    Shndx uint16 // section index the symbol in
+    Value uint64
+    Size uint64 
+}
 
 func write2f(text string, name string) {
 	fi, _ := os.Create(name)
@@ -281,7 +301,7 @@ func main() {
 	// .byte .string .half .word .dword .zero .align .equ 8
 	fmt.Println("start 0pass.")
 	fmt.Println("ELF header inital:")
-	var elf_header Elf_header
+	var elf_header Elf64_header
 	elf_header.Ident = [16]byte{
 		0x7F, 0x45, 0x4C, 0x46, // Magic number indicates ELF file (.ELF)
 		0x02,                                     // ei_class|0 Invalid|1 32-bit|2 64-bit
@@ -373,7 +393,7 @@ func main() {
 	fmt.Println("SHT .strtab Section header inital:")
         var sht2 SHT 
         sht2.Name = 11 // sh_name offset in shstrtab
-        sht2.Type = 0x00000001 // sh_type 
+        sht2.Type = 0x00000003 // sh_type 
         sht2.Flags = 0x0000000000000000 
         sht2.Addr = 0x0000000000000000 // sh_addr virtual address at exection?
         sht2.Offset = 64*4+28  // need calculate // sh_offset (with sh_size to locate whole section content)
@@ -392,7 +412,7 @@ func main() {
 	fmt.Println("SHT .symtab Section header inital:")
         var sht3 SHT 
         sht3.Name = 11 // sh_name offset in shstrtab
-        sht3.Type = 0x00000001 // sh_type 
+        sht3.Type = 0x00000002 // sh_type 
         sht3.Flags = 0x0000000000000000 
         sht3.Addr = 0x0000000000000000 // sh_addr virtual address at exection?
         sht3.Offset = 64*4+28  // need calculate // sh_offset (with sh_size to locate whole section content)
@@ -427,32 +447,15 @@ func main() {
 	//fmt.Println("--------#")
 	//fmt.Println(len(sht4_bytes))
 
-	
-	//shstrtab_data := []byte{
-	//	0x00,                               // \0 Empty string (for unnamed sections)
-	//	0x2E, 0x73, 0x68, 0x73, 0x74, 0x72, 0x74, 0x61, 0x62, 0x00, // .shstrtab\0
-	//	0x2E, 0x74, 0x65, 0x78, 0x74, 0x00, // .text\0
-	//	0x2E, 0x72, 0x65, 0x6C, 0x61, 0x2E, 0x74, 0x65, 0x78, 0x74, 0x00, // .rela.text\0
-	//	// ....
-	//}
-//	shstrtab_data := []byte("\0.shstrtab\0.strtab\0.symtab\0.text\0")
-//	fmt.Println(shstrtab_data)
-//	fmt.Println(".shstrab data len:", len(shstrtab_data))
-//	fmt.Println("--------#")
-       //read elf_header.Shoff to get the start point of SHT
-       //read elf_header.Shstrndx to get the index of shstrtab header
-       //find the content of shstrtab by read the sh_offset and sh_size. 
-       //find shstrtab header's sh_name to get the offset of its name in shstrtab
-       //combined := append(elf_header_bytes, sht0_bytes...)
-       //combined  = append(combined,sht1_bytes...)
-       //combined  = append(combined,sht2_bytes...)
-       //combined  = append(combined, shstrtab_data...)
-       //fmt.Println("combined:")
-       //fmt.Println(combined)
-
-
-       //read elf_header.Shoff to get the start point of SHT
 	fmt.Println(".symtab Symbol table inital:")
+    var sym1 Elf64_sym 
+        sym1.Name = 1 //uint32 // offset in string table
+        sym1.Info = 0 //# uint8 // H4:binding and L4:type 
+        sym1.Other = 0 //uint8 // reserved, currently holds 0
+        sym1.Shndx = 4 //uint16 // section index the symbol in
+        sym1.Value = 0 //# uint64
+        sym1.Size = 0 //#uint64 
+ 
 	fmt.Println([]byte{
 		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // st_name (byte offset in .strtab)
 		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -1328,7 +1331,25 @@ func main() {
 
 	shstrtab_data := []byte("\x00" + ".shstrtab\x00" + ".strtab\x00" + ".symtab\x00" + ".text\x00")
 	strtab_data := []byte("\x00" + "_start\x00")
-	symtab_data := []byte("\x00" + "symtal_data\x00")
+	symtab_data := []byte{
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // st_name (byte offset in .strtab)
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // st_info
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // st_other
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // st_shndx (in which section)
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // st_value (offset in seciton)
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // st_size
+		0x00, 0x00, 0x00, 0x00, // sh_type
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // sh_flags
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // sh_addr
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // sh_offset (with sh_size to locate whole section content)
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // sh_size
+		0x00, 0x00, 0x00, 0x00, // sh_link (.strtab's index in SHT, standard find .strtab)
+		0x00, 0x00, 0x00, 0x00, // sh_info
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // sh_addralign
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // sh_entsize
+	}
 	//fmt.Println(shstrtab_data)
 	//fmt.Println(".shstrab data len:", len(shstrtab_data))
 	//fmt.Println("--------#")
