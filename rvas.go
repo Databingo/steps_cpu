@@ -1335,6 +1335,7 @@ func main() {
 
 	//-----------shstrtab h
         sht1.Name = sht0.Name + uint32(len("\x00")) // offset in shstrtab
+	fmt.Println("--------###", sht1.Name)
         sht1.Offset = uint64(elf_header.Ehsize + elf_header.Shentsize * elf_header.Shnum) //data offset
         sht1.Size =  uint64(len(shstrtab_data))
 
