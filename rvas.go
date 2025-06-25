@@ -484,17 +484,20 @@ func main() {
 	fmt.Println(".symtab 1 _start inital:")
         var sym1 Elf64_sym 
         sym1.Name = 1 // points to "_start" in .strtab
-        sym1.Info = (STB_GLOBAL << 4 | STT_FUNC) //# uint8 // H4:binding and L4:type 
+        sym1.Info =  0 //# uint8 // H4:binding and L4:type 
         sym1.Other = 0 //uint8 // reserved, currently holds 0
         sym1.Shndx = 4 //uint16 // section index the symbol in (.text)
         sym1.Value = 0 //# uint64  for relocatable .o file it's symbol's offset in its section
-        sym1.Size = 0 //#uint64  for function it's its size
-	//buf_sym1 := new(bytes.Buffer)
-	//_ = binary.Write(buf_sym1, binary.LittleEndian, &sym1)
-	//sym1_bytes := buf_sym1.Bytes()
-	//fmt.Println(smy1_bytes)
-	//fmt.Println("--------#")
-	//fmt.Println(len(sym1_bytes))
+        sym1.Size =  0 //#uint64  for function it's its size
+
+	fmt.Println(".symtab 2 msg inital:")
+        var sym2 Elf64_sym 
+        sym2.Name =  0// points to "_start" in .strtab
+        sym2.Info =  0  //# uint8 // H4:binding and L4:type 
+        sym2.Other = 0 //uint8 // reserved, currently holds 0
+        sym2.Shndx = 5 //uint16 // section index the symbol in (.data)
+        sym2.Value = 0 //# uint64  for relocatable .o file it's symbol's offset in its section
+        sym2.Size = 0 //#uint64  for function it's its size
  
 	fmt.Println([]byte{
 		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // st_name (byte offset in .strtab)
@@ -1358,7 +1361,7 @@ func main() {
 		f.Write(instructionBuffer)
 
 	}
-                txt, _ := ioutil.ReadFile("add.o")
+        txt, _ := ioutil.ReadFile("add.o")
 
         elf_header.Shnum = 0x6 //sht0 1shstrtab 2strtab 3symtab 4text 5data
 	//-------
@@ -1371,9 +1374,19 @@ func main() {
 
 	shstrtab_data := []byte("\x00" + ".shstrtab\x00" + ".strtab\x00" + ".symtab\x00" + ".text\x00" + ".data\x00")
 	strtab_data := []byte("\x00" + "_start\x00" + "msg\x00")
-	symtab := make([]Elf64_sym, 2)
+	dat := []byte("H\n")
+	symtab := make([]Elf64_sym, 3)
 	symtab[0] = sym0
+
+        sym1.Size = uint64(len(txt)) //#uint64  for function it's its size
+        sym1.Info = (STB_GLOBAL << 4 | STT_FUNC) //# uint8 // H4:binding and L4:type 
+        sym1.Shndx = 4 //uint16 // section index the symbol in (.text)
 	symtab[1] = sym1
+
+        sym2.Info = (STB_GLOBAL << 4 | STT_OBJECT) //# uint8 // H4:binding and L4:type 
+        sym2.Shndx = 5 //uint16 // section index the symbol in (.data)
+        sym2.Size = uint64(len(dat)) //#uint64  for function it's its size
+	symtab[2] = sym2
 	buf_symtab := new(bytes.Buffer)
 	for _, sym := range symtab{
 	_ = binary.Write(buf_symtab, binary.LittleEndian, &sym)
@@ -1382,7 +1395,6 @@ func main() {
 	fmt.Println(symtab_data)
 	fmt.Println("--------#")
 	fmt.Println(len(symtab_data))
-	dat := []byte("H\n")
 
 
 	//-----------shstrtab h
