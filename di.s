@@ -1,19 +1,19 @@
 # Directive: Define global symbols (visible to linker)
 .global _start
-.global my_message
+.global msg
 
 # Directive: Switch to data section for initialized data
 .section .data
-my_message:
+msg:
     # Directive: Define a null-terminated string
     .string "Hello RISC-V\n"
 
 # Directive: Switch to text section for code
 .section .text
 _start:
-#    # Load the address of my_message into t0 (a0 for syscall)
+#    # Load the address of msg into t0 (a0 for syscall)
 #    # 'la' is a pseudo-instruction handled by assembler/linker
-#    la      a1, my_message
+#    la      a1, msg
 #    nop
 #    call _start
 #    tail _start
