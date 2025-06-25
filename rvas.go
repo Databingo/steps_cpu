@@ -1378,11 +1378,13 @@ func main() {
 	symtab := make([]Elf64_sym, 3)
 	symtab[0] = sym0
 
-        sym1.Size = uint64(len(txt)) //#uint64  for function it's its size
+        sym1.Name = sym0.Name + uint32(len("\x00")) // points to "_start" in .strtab
         sym1.Info = (STB_GLOBAL << 4 | STT_FUNC) //# uint8 // H4:binding and L4:type 
         sym1.Shndx = 4 //uint16 // section index the symbol in (.text)
+        sym1.Size = uint64(len(txt)) //#uint64  for function it's its size
 	symtab[1] = sym1
 
+        sym2.Name = sym1.Name + uint32(len("_start\x00")) // points to "_start" in .strtab
         sym2.Info = (STB_GLOBAL << 4 | STT_OBJECT) //# uint8 // H4:binding and L4:type 
         sym2.Shndx = 5 //uint16 // section index the symbol in (.data)
         sym2.Size = uint64(len(dat)) //#uint64  for function it's its size
