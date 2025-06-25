@@ -29,6 +29,17 @@ import (
 
 // find Section_name
 // elf-shoff-sht-namendx + .shstrtab -> name
+func Align8(data interface{}) []byte {
+	buf := new(bytes.Buffer)
+	_ = binary.Write(buf, binary.LittleEndian, data)
+	bytes := buf.Bytes()
+	padding := 8 - len(bytes) % 8
+	if padding == 8 { padding = 0 }
+        padded := make([]byte, len(bytes) + padding)
+	copy(padded, bytes)
+	return padded
+}
+
 
 type Elf64_header struct {
     Ident [16]byte
@@ -438,7 +449,7 @@ func main() {
         sht4.Size = 160  // need calculate
         sht4.Link = 0x00000000 
         sht4.Info = 0x00000000 
-        sht4.Addralign = 0x0000000000000001  //?
+        sht4.Addralign = 0x0000000000000008  //?
         sht4.Entsize = 0x0000000000000000 
 	//buf_sht4 := new(bytes.Buffer)
 	//_ = binary.Write(buf_sht4, binary.LittleEndian, &sht4)
@@ -457,7 +468,7 @@ func main() {
         sht5.Size = 160  // need calculate
         sht5.Link = 0x00000000 
         sht5.Info = 0x00000000 
-        sht5.Addralign = 0x0000000000000001  //?
+        sht5.Addralign = 0x0000000000000008  //?
         sht5.Entsize = 0x0000000000000000 
 	//buf_sht5 := new(bytes.Buffer)
 	//_ = binary.Write(buf_sht5, binary.LittleEndian, &sht5)
@@ -1387,7 +1398,7 @@ func main() {
         sym2.Name = sym1.Name + uint32(len("_start\x00")) // points to "_start" in .strtab
         sym2.Info = (STB_GLOBAL << 4 | STT_OBJECT) //# uint8 // H4:binding and L4:type 
         sym2.Shndx = 5 //uint16 // section index the symbol in (.data)
-        sym2.Size = uint64(len(dat)) //#uint64  for function it's its size
+        sym2.Size = uint64(len("H\n")) //#uint64  for function it's its size
 	symtab[2] = sym2
 	buf_symtab := new(bytes.Buffer)
 	for _, sym := range symtab{
