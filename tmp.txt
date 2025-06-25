@@ -1,52 +1,5 @@
 my_message:
 _start:
-#     la      a1, my_message
-auipc a1, 0 # my_message 
-addi  a1, a1, 0 # my_message 
-#     nop
-addi x0, x0, 0
-#     call _start
-auipc x1, 0 # _start
-jalr x1, x1, 0 # _start
-#     tail _start
-auipc x6, 0 # _start
-jalr x0, x6, 0 # _start
-#     j _start
-jal x0, _start
-#     jr x9
-jalr x0, x9, 0
-#     jal _start
-jal x1, _start
-#     jalr x9
-jalr x1, x9, 0
-#     mv x1, x2
-addi x1, x2, 0
-#     not x1, x3
-xori x1, x3, -1
-#     lb x1, _start
-auipc x1, 0 # _start
-lb x1, 0(x1) # _start
-#     lh x1, _start
-auipc x1, 0 # _start
-lh x1, 0(x1) # _start
-#     lw x1, _start
-auipc x1, 0 # _start
-lw x1, 0(x1) # _start
-#     ld x1, _start
-auipc x1, 0 # _start
-ld x1, 0(x1) # _start
-#     sb x1, _start, x2
-auipc x2, 0 # _start
-sb x1, 0(x2) # _start
-#     sh x1, _start, x2
-auipc x2, 0 # _start
-sh x1, 0(x2) # _start
-#     sw x1, _start, x2
-auipc x2, 0 # _start
-sw x1, 0(x2) # _start
-#     sd x1, _start, x2
-auipc x2, 0 # _start
-sd x1, 0(x2) # _start
 #     li      a0, 1           
 addi a0, x0, 0x0
 ori a0, a0, 0x1

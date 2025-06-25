@@ -447,7 +447,7 @@ func main() {
 	//fmt.Println("--------#")
 	//fmt.Println(len(sht4_bytes))
 
-	fmt.Println(".symtab Symbol table inital:")
+	fmt.Println(".symtab 0 inital:")
         var sym0 Elf64_sym 
         sym0.Name = 0 //uint32 // offset in string table
         sym0.Info = 0 //# uint8 // H4:binding and L4:type 
@@ -462,11 +462,12 @@ func main() {
 	//fmt.Println("--------#")
 	//fmt.Println(len(sym0_bytes))
 
+	fmt.Println(".symtab 1 _start inital:")
         var sym1 Elf64_sym 
         sym1.Name = 1 // points to "_start" in .strtab
         sym1.Info = (STB_GLOBAL << 4 | STT_FUNC) //# uint8 // H4:binding and L4:type 
         sym1.Other = 0 //uint8 // reserved, currently holds 0
-        sym1.Shndx = 4 //uint16 // section index the symbol in
+        sym1.Shndx = 4 //uint16 // section index the symbol in (.text)
         sym1.Value = 0 //# uint64  for relocatable .o file it's symbol's offset in its section
         sym1.Size = 0 //#uint64  for function it's its size
 	//buf_sym1 := new(bytes.Buffer)
@@ -1392,6 +1393,7 @@ func main() {
         sht3.Name = sht2.Name + uint32(len(".strtab\x00")) // offset in shstrtab
         sht3.Offset = sht2.Offset + sht2.Size
         sht3.Size = uint64(len(symtab_data))
+        sht3.Link = 0x00000002 // .strtab index 2 in .shstrtab
 
 	buf_sht3 := new(bytes.Buffer)
 	_ = binary.Write(buf_sht3, binary.LittleEndian, &sht3)
