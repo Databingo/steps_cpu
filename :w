@@ -1369,7 +1369,7 @@ func main() {
 
 
 
-	shstrtab_data := []byte("\x00" + ".shstrtab\x00" + ".strtab\x00" + ".symtab\x00" + ".text\x00" + ".data\x00")
+	shstrtab_data := []byte("\x00" + ".shstrtab\x00" + ".strtab\x00" + ".symtab\x00" + ".text\x00", + ".data\x00")
 	strtab_data := []byte("\x00" + "_start\x00" + "msg\x00")
 	symtab := make([]Elf64_sym, 2)
 	symtab[0] = sym0
@@ -1382,7 +1382,7 @@ func main() {
 	fmt.Println(symtab_data)
 	fmt.Println("--------#")
 	fmt.Println(len(symtab_data))
-	dat := []byte("H\n")
+	dat := []byte("H", "\n")
 
 
 	//-----------shstrtab h
