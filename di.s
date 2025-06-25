@@ -34,13 +34,13 @@ _start:
 
     # Prepare for write(1, message_addr, length) syscall (Linux RV64)
     li      a0, 1           # fd = 1 (stdout)
-    li      a2, 13          # length = 13 (bytes in "Hello RISC-V\n")
-    li      a7, 64          # write syscall number = 64
+    li      a2, 2          # length = 13 (bytes in "H\n")
+    li      a7, 4          # write syscall number = 4
     ecall                   # Make the system call
 
     # Prepare for exit(0) syscall
     li      a0, 0           # exit code 0
-    li      a7, 93          # exit syscall number = 93
+    li      a7, 1          # exit syscall number = 1
     ecall                   # Make the system call
 
 

@@ -3,16 +3,16 @@ _start:
 #     li      a0, 1           
 addi a0, x0, 0x0
 ori a0, a0, 0x1
-#     li      a2, 13          
+#     li      a2, 2          
 addi a2, x0, 0x0
-ori a2, a2, 0xd
-#     li      a7, 64          
+ori a2, a2, 0x2
+#     li      a7, 4          
 addi a7, x0, 0x0
-ori a7, a7, 0x40
+ori a7, a7, 0x4
 ecall                   # Make the system call
 #     li      a0, 0           
 addi a0, x0, 0x0
-#     li      a7, 93          
+#     li      a7, 1          
 addi a7, x0, 0x0
-ori a7, a7, 0x5d
+ori a7, a7, 0x1
 ecall                   # Make the system call

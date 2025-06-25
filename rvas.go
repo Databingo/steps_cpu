@@ -30,6 +30,9 @@ import (
 // find Section_name
 // elf-shoff-sht-namendx + .shstrtab -> name
 func align8(data interface{}) []byte {
+        if s, ok := data.(string); ok {
+	    data = []byte(s)
+	}
 	buf := new(bytes.Buffer)
 	_ = binary.Write(buf, binary.LittleEndian, data)
 	bytes := buf.Bytes()
@@ -1365,7 +1368,8 @@ func main() {
 
 	shstrtab_data := []byte("\x00" + ".shstrtab\x00" + ".strtab\x00" + ".symtab\x00" + ".text\x00" + ".data\x00")
 	strtab_data := []byte("\x00" + "_start\x00" + "msg\x00")
-	dat := []byte(align8("H\n"))
+	//dat := align8([]byte("H\n"))
+	dat := align8("H\n")
 	fmt.Println("---------###--------:", dat)
 	symtab := make([]Elf64_sym, 3)
 	symtab[0] = sym0
