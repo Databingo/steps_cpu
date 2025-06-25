@@ -481,6 +481,25 @@ func main() {
 	//fmt.Println("--------#")
 	//fmt.Println(len(sht5_bytes))
 
+	fmt.Println("SHT .rela.text Section header inital:")
+	var sht6 SHT
+	sht6.Name = 11         // sh_name offset in shstrtab
+	sht6.Type = 0x00000001 // sh_type
+	sht6.Flags = 0x0000000000000000
+	sht6.Addr = 0x0000000000000000 // sh_addr virtual address at exection?
+	sht6.Offset = 64*4 + 28        // need calculate // sh_offset (with sh_size to locate whole section content)
+	sht6.Size = 160                // need calculate
+	sht6.Link = 0x00000000
+	sht6.Info = 0x00000000
+	sht6.Addralign = 0x0000000000000008 //?
+	sht6.Entsize = 0x0000000000000000
+	//buf_sht6 := new(bytes.Buffer)
+	//_ = binary.Write(buf_sht6, binary.LittleEndian, &sht6)
+	//sht6_bytes := buf_sht6.Bytes()
+	//fmt.Println(sht6_bytes)
+	//fmt.Println("--------#")
+	//fmt.Println(len(sht6_bytes))
+
 	fmt.Println(".symtab 0 inital:")
 	var sym0 Elf64_sym
 	sym0.Name = 0  //uint32 // offset in string table
@@ -1359,14 +1378,14 @@ func main() {
 	}
 	txt, _ := ioutil.ReadFile("add.o")
 
-	elf_header.Shnum = 0x6 //sht0 1shstrtab 2strtab 3symtab 4text 5data
+	elf_header.Shnum = 0x7 //sht0 1shstrtab 2strtab 3symtab 4text 5data 6relatext
 	//-------
 	buf := new(bytes.Buffer)
 	_ = binary.Write(buf, binary.LittleEndian, &elf_header)
 	elf_header_bytes := buf.Bytes()
 	fmt.Println(elf_header_bytes)
 
-	shstrtab_data := []byte("\x00" + ".shstrtab\x00" + ".strtab\x00" + ".symtab\x00" + ".text\x00" + ".data\x00")
+	shstrtab_data := []byte("\x00" + ".shstrtab\x00" + ".strtab\x00" + ".symtab\x00" + ".text\x00" + ".data\x00" + ".rela.text\x00")
 	strtab_data := []byte("\x00" + "_start\x00" + "msg\x00")
 	//dat := align8([]byte("H\n"))
 	dat := align8("H\n")
@@ -1393,6 +1412,8 @@ func main() {
 	fmt.Println(symtab_data)
 	fmt.Println("--------#")
 	fmt.Println(len(symtab_data))
+
+	relatext_data := []byte("relatext_data")
 
 	//-----------shstrtab h
 	sht1.Name = sht0.Name + uint32(len("\x00")) // offset in shstrtab
@@ -1451,17 +1472,30 @@ func main() {
 	fmt.Println("--------#")
 	fmt.Println(len(sht5_bytes))
 
+	//-----------rela.text h
+	sht6.Name = sht5.Name + uint32(len(".data\x00")) // offset in shstrtab
+	sht6.Offset = sht5.Offset + sht5.Size
+	sht6.Size = uint64(len(relatext_data))
+	buf_sht6 := new(bytes.Buffer)
+	_ = binary.Write(buf_sht6, binary.LittleEndian, &sht6)
+	sht6_bytes := buf_sht6.Bytes()
+	fmt.Println(sht6_bytes)
+	fmt.Println("--------#")
+	fmt.Println(len(sht6_bytes))
+
 	combined := append(elf_header_bytes, sht0_bytes...)
 	combined = append(combined, sht1_bytes...)
 	combined = append(combined, sht2_bytes...)
 	combined = append(combined, sht3_bytes...)
 	combined = append(combined, sht4_bytes...)
 	combined = append(combined, sht5_bytes...)
+	combined = append(combined, sht6_bytes...)
 	combined = append(combined, shstrtab_data...)
 	combined = append(combined, strtab_data...)
 	combined = append(combined, symtab_data...)
 	combined = append(combined, txt...)
 	combined = append(combined, dat...)
+	combined = append(combined, relatext_data...)
 	fmt.Println("combined:")
 	fmt.Println("----------#")
 	fmt.Println(len(txt))
