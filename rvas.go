@@ -581,8 +581,8 @@ func main() {
 	var shstrtab []string
 	var text []byte
 	var data []byte
-	symtab_ := []Elf64_sym{sym}
-	strtab := []string{"\x00"} // 0 is \x00
+	symtab_ := []Elf64_sym{sym}// symtab_ array and strtab are same order
+	strtab := []string{"\x00"}
         
 	//elf
 	//sht0
@@ -620,14 +620,15 @@ func main() {
 	                        shts = append(shts, sht)
 	                        shstrtab = append(shstrtab, ".symtab\x00")
 			    }
+
 			    fmt.Println(shstrtab, strtab, text, data, shts)
-			    //sym
 	                    sym.Name = 0  //#uint32 // offset in string table
 	                    sym.Info = (STB_GLOBAL<<4 | STT_FUNC)    //# H4:binding and L4:type
 	                    sym.Other = 0 //uint8 // reserved, currently holds 0
 	                    sym.Shndx = 0 //#uint16 // section index the symbol in
 	                    sym.Value = 0 //# uint64  for relocatable .o file it's symbol's offset in its section
 	                    sym.Size = 0  //#uint64  for function it's its size
+			    //sym
 			    symtab_ = append(symtab_, sym)
 			    //str
 			    strtab = append(strtab, suf_directive)
@@ -1606,6 +1607,7 @@ func main() {
 				 Section Headers
 				 - Describe sections
 				 `)
+				 fmt.Println("shts list:", shts, len(shts))
 				 fmt.Println("shstrtab string list:", shstrtab, len(shstrtab))
 				 fmt.Println("symtab_ string list:", symtab_, len(symtab_))
 				 fmt.Println("strtab string list:", strtab, len(strtab))
