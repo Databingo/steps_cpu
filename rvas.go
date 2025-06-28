@@ -527,6 +527,14 @@ func main() {
 	//fmt.Println("--------#")
 	//fmt.Println(len(sht6_bytes))
 
+	var sym Elf64_sym
+	sym.Name = 0  //uint32 // offset in string table
+	sym.Info = 0  //# uint8 // H4:binding and L4:type
+	sym.Other = 0 //uint8 // reserved, currently holds 0
+	sym.Shndx = 0 //uint16 // section index the symbol in
+	sym.Value = 0 //# uint64  for relocatable .o file it's symbol's offset in its section
+	sym.Size = 0  //#uint64  for function it's its size
+
 	fmt.Println(".symtab 0 inital:")
 	var sym0 Elf64_sym
 	sym0.Name = 0  //uint32 // offset in string table
@@ -568,11 +576,12 @@ func main() {
 	var copy_instr strings.Builder
 
 	//shstrtab := []string{"\x00"}  // 0 is \x00
-	var shstrtab []string
-	strtab := []string{"\x00"} // 0 is \x00
-	text := []byte("")
-	data := []byte("")
 	var shts []SHT
+	var shstrtab []string
+	var text []byte
+	var data []byte
+	var syms []Elf64_sym
+	strtab := []string{"\x00"} // 0 is \x00
         
 	//elf
 	//sht0
@@ -605,6 +614,16 @@ func main() {
 			    fmt.Println("Directive:", directive, "|Suf_directive:", suf_directive)
 			    fmt.Println("create .symtab entry + .strtab entry")
 			    fmt.Println(shstrtab, strtab, text, data, shts)
+			    //sym
+	                    sym.Name = 0  //uint32 // offset in string table
+	                    sym.Info = 0  //# uint8 // H4:binding and L4:type
+	                    sym.Other = 0 //uint8 // reserved, currently holds 0
+	                    sym.Shndx = 0 //uint16 // section index the symbol in
+	                    sym.Value = 0 //# uint64  for relocatable .o file it's symbol's offset in its section
+	                    sym.Size = 0  //#uint64  for function it's its size
+			    syms = append(syms, sym)
+			    //str
+			    strtab = append(strtab, suf_directive)
 			}
 			if directive == ".section" {
 			    fmt.Println("Directive:", directive, "||Suf_directive:", suf_directive)
@@ -1581,4 +1600,5 @@ func main() {
 				 - Describe sections
 				 `)
 				 fmt.Println("shstrtab string list:", shstrtab, len(shstrtab))
+				 fmt.Println("strtab string list:", strtab, len(strtab))
 }
