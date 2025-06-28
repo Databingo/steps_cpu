@@ -1607,6 +1607,6 @@ func main() {
 				 - Describe sections
 				 `)
 				 fmt.Println("shstrtab string list:", shstrtab, len(shstrtab))
-				 fmt.Println("strtab string list:", strtab, len(strtab))
 				 fmt.Println("symtab_ string list:", symtab_, len(symtab_))
+				 fmt.Println("strtab string list:", strtab, len(strtab))
 }
