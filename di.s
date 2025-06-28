@@ -33,14 +33,15 @@ _start:
 #    sd x1, _start, x2
 
     # Prepare for write(1, message_addr, length) syscall (Linux RV64)
-    li      a0, 1           # fd = 1 (stdout)
-    li      a2, 2          # length = 13 (bytes in "H\n")
     li      a7, 4          # write syscall number = 4
+    li      a0, 1           # fd = 1 (stdout)
+    la      a1, msg
+    li      a2, 2          # length = 13 (bytes in "H\n")
     ecall                   # Make the system call
 
     # Prepare for exit(0) syscall
-    li      a0, 0           # exit code 0
     li      a7, 1          # exit syscall number = 1
+    li      a0, 0           # exit code 0
     ecall                   # Make the system call
 
 
