@@ -96,6 +96,15 @@ type Elf64_sym struct { // 24 bytes
 	Size  uint64
 }
 
+const R_RISCV_PCREL_HI20 = 23
+const R_RISCV_PCREL_LO12_I = 24
+
+type Elf64_rela struct {
+	Offset uint64  // modified instruction's offset in .text
+	Infor uint64   // sym index and relocation type
+	Addend int16 
+}
+
 func write2f(text string, name string) {
 	fi, _ := os.Create(name)
 	defer fi.Close()
