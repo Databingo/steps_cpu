@@ -45,6 +45,13 @@ func align8(data interface{}) []byte {
 	return padded
 }
 
+func byted(data interface{}) []byte{
+	buf := new(bytes.Buffer)
+	_ = binary.Write(buf, binary.LittleEndian, &data)
+	bytes := buf.Bytes()
+	return  bytes
+}
+
 type Elf64_header struct {
 	Ident     [16]byte
 	Type      uint16
@@ -373,6 +380,17 @@ func main() {
 	// ----------------
 	// each entrie of SHT is 64 bytes, sh_offset is the exactly offset from beginning of file to the start point of this section's context, e.g., .text's sh_offset is 64, after ELF header
 	// Must need a Non Section for the first section header
+	var sht SHT
+	sht.Name = 0     // 0 for null
+	sht.Type = 0x00000000 // 0 for sh_null
+	sht.Flags = 0x0000000000000000
+	sht.Addr = 0x0000000000000000
+	sht.Offset = 0 // need calculate
+	sht.Size = 0   // need calculate
+	sht.Link = 0x00000000
+	sht.Info = 0x00000000
+	sht.Addralign = 0x0000000000000000 //?
+	sht.Entsize = 0x0000000000000000
 	fmt.Println("SHT Section header NON inital:")
 	var sht0 SHT
 	sht0.Name = 0          //0x00000001   // offset in shstrtab
@@ -549,6 +567,34 @@ func main() {
 	scanner0.Split(bufio.ScanLines)
 	var copy_instr strings.Builder
 
+	//shstrtab := []string{"\x00"}  // 0 is \x00
+	var shstrtab []string
+	strtab := []string{"\x00"} // 0 is \x00
+	text := []byte("")
+	data := []byte("")
+	var shts []SHT
+        
+	//elf
+	//sht0
+	elf_header.Shnum = 1 
+	shts = append(shts, sht) // sht and .shstrtab are same order
+	shstrtab = append(shstrtab,"\x00")
+	//sht1
+	elf_header.Shnum += 1 
+	elf_header.Shstrndx = 0x1 //# 0 indicate SHN_UNDEF no section header string table ** -- if no, 0 must be SHT index for .shstrtab section
+	sht.Name = sht.Name + uint32(len(shstrtab)) // offset in shstrtab
+	sht.Type = 0x00000003 // sh_type 3_SHT_STRTAB // 3 for sh_strtab
+	sht.Flags = 0x0000000000000000
+	sht.Addr = 0x0000000000000000
+	sht.Offset = 64 * 5           // need calculate // sh_offset (with sh_size to locate whole section content)
+	sht.Size = 28                 // need calculate
+	sht.Link = 0x00000000
+	sht.Info = 0x00000000
+	sht.Addralign = 0x0000000000000001 
+	sht.Entsize = 0x0000000000000000
+	shts = append(shts, sht)
+	shstrtab = append(shstrtab,".shstrtab\x00")
+	
 	for scanner0.Scan() {
 		raw_instr := scanner0.Text() + "\n"
 		line := strings.Split(scanner0.Text(), "#")[0]
@@ -558,11 +604,25 @@ func main() {
 		}
 		switchOnOp := code[0]
 		directive := ""
-		syb := ""
+		suf_directive := ""
 		if strings.HasPrefix(switchOnOp, ".") {
-			directive = strings.TrimPrefix(code[0], ".")
-			syb = strings.Join(code[1:len(code)], " ")
-			fmt.Println("Directive:", directive, "Symbol:", syb)
+			//directive = strings.TrimPrefix(code[0], ".")
+			directive = code[0]
+			suf_directive = strings.Join(code[1:len(code)], " ")
+                        //if !strings.HasPrefix(code[1], "."){
+			//fmt.Println("Directive:", directive, "|Suf_directive:", suf_directive)
+			//}
+			if directive == ".global" {
+			    fmt.Println("Directive:", directive, "|Suf_directive:", suf_directive)
+			    fmt.Println("create .symtab entry + .strtab entry")
+			    a := []byte(strings.Join(shstrtab, ""))
+			    fmt.Println(shstrtab, a, strtab, text, data, shts)
+			}
+			if directive == ".section" {
+			    fmt.Println("Directive:", directive, "||Suf_directive:", suf_directive)
+			    fmt.Println("create SHT(s) + .shstrtab entry + section[]byte")
+			}
+		
 
 		} else {
 			copy_instr.WriteString(raw_instr)
