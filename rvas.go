@@ -680,6 +680,7 @@ func main() {
 
 
 			}
+			copy_instr.WriteString(raw_instr)
 		} else {
 			copy_instr.WriteString(raw_instr)
 		}
