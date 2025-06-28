@@ -354,7 +354,7 @@ func main() {
 	elf_header.Phnum = 0x0          // e_phnum contains number of entries in program header table --
 	elf_header.Shentsize = 0x0040   // e_shentsize size of section header entry -- 64 for Elf64_shdr
 	//-------
-	elf_header.Shnum = 0x5 //#
+	elf_header.Shnum = 0x0 //#
 	//-------
 	elf_header.Shstrndx = 0x1 //# 0 indicate SHN_UNDEF no section header string table ** -- if no, 0 must be SHT index for .shstrtab section
 
@@ -576,22 +576,11 @@ func main() {
         
 	//elf
 	//sht0
-	elf_header.Shnum = 1 
-	shts = append(shts, sht) // sht and .shstrtab are same order
+	elf_header.Shnum += 1 
+	shts = append(shts, sht) // strings array shts and shstrtab are same order
 	shstrtab = append(shstrtab,"\x00")
 	//sht1
 	elf_header.Shnum += 1 
-	elf_header.Shstrndx = 0x1 //# 0 indicate SHN_UNDEF no section header string table ** -- if no, 0 must be SHT index for .shstrtab section
-	sht.Name = sht.Name + uint32(len(shstrtab)) // offset in shstrtab
-	sht.Type = 0x00000003 // sh_type 3_SHT_STRTAB // 3 for sh_strtab
-	sht.Flags = 0x0000000000000000
-	sht.Addr = 0x0000000000000000
-	sht.Offset = 64 * 5           // need calculate // sh_offset (with sh_size to locate whole section content)
-	sht.Size = 28                 // need calculate
-	sht.Link = 0x00000000
-	sht.Info = 0x00000000
-	sht.Addralign = 0x0000000000000001 
-	sht.Entsize = 0x0000000000000000
 	shts = append(shts, sht)
 	shstrtab = append(shstrtab,".shstrtab\x00")
 	
@@ -615,12 +604,15 @@ func main() {
 			if directive == ".global" {
 			    fmt.Println("Directive:", directive, "|Suf_directive:", suf_directive)
 			    fmt.Println("create .symtab entry + .strtab entry")
-			    a := []byte(strings.Join(shstrtab, ""))
-			    fmt.Println(shstrtab, a, strtab, text, data, shts)
+			    fmt.Println(shstrtab, strtab, text, data, shts)
 			}
 			if directive == ".section" {
 			    fmt.Println("Directive:", directive, "||Suf_directive:", suf_directive)
 			    fmt.Println("create SHT(s) + .shstrtab entry + section[]byte")
+			    //sht
+	                    elf_header.Shnum += 1 
+	                    shts = append(shts, sht)
+	                    shstrtab = append(shstrtab,suf_directive+"\x00")
 			}
 		
 
@@ -1588,4 +1580,5 @@ func main() {
 				 Section Headers
 				 - Describe sections
 				 `)
+				 fmt.Println("xxx--", shstrtab)
 }
