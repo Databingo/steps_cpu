@@ -576,7 +576,7 @@ func main() {
 	scanner0.Split(bufio.ScanLines)
 	var copy_instr strings.Builder
 
-	//shstrtab := []string{"\x00"}  // 0 is \x00
+	var section_in string
 	var shts []SHT
 	var shstrtab []string
 	var text []byte
@@ -621,21 +621,21 @@ func main() {
 	                        shstrtab = append(shstrtab, ".symtab\x00")
 			    }
 
-			    fmt.Println(shstrtab, strtab, text, data, shts)
 	                    sym.Name = 0  //#uint32 // offset in string table
 	                    sym.Info = (STB_GLOBAL<<4 | STT_FUNC)    //# H4:binding and L4:type
 	                    sym.Other = 0 //uint8 // reserved, currently holds 0
 	                    sym.Shndx = 0 //#uint16 // section index the symbol in
 	                    sym.Value = 0 //# uint64  for relocatable .o file it's symbol's offset in its section
 	                    sym.Size = 0  //#uint64  for function it's its size
-			    //sym
+			    //sym + str
 			    symtab_ = append(symtab_, sym)
-			    //str
 			    strtab = append(strtab, suf_directive)
 			}
+
 			if directive == ".section" {
 			    fmt.Println("Directive:", directive, "||Suf_directive:", suf_directive)
 			    fmt.Println("create SHT(s) + .shstrtab entry + section[]byte")
+			    section_in = suf_directive
 			    //sht
 	                    elf_header.Shnum += 1 
 	                    shts = append(shts, sht)
@@ -646,6 +646,7 @@ func main() {
 		} else {
 			copy_instr.WriteString(raw_instr)
 		}
+			    fmt.Println(shstrtab, strtab, text, data, shts, section_in, "-_")
 	}
 	////////
 
