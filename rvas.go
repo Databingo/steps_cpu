@@ -1580,5 +1580,5 @@ func main() {
 				 Section Headers
 				 - Describe sections
 				 `)
-				 fmt.Println("xxx--", shstrtab, len(shstrtab))
+				 fmt.Println("shstrtab string list:", shstrtab, len(shstrtab))
 }
