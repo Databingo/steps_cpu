@@ -629,7 +629,7 @@ func main() {
 			    //fmt.Println("-::", section_in, uint16(slices.Index(shstrtab, section_in)))//0 //#uint16 // section index the symbol in
 	                    sym.Value = 0 //# uint64  for relocatable .o file it's symbol's offset in its section
 	                    sym.Size = 0  //#uint64  for function it's its size   -- uint64(len(align8("H\n")))                   
-			    //sym + str
+			    //sym + str + data
 			    symtab_ = append(symtab_, sym)
 			    strtab = append(strtab, suf_directive+"\x00")
 			}
@@ -650,12 +650,15 @@ func main() {
 			    sym_index := slices.Index(strtab, label_in+"\x00")
 			    fmt.Println("label_in-:", label_in, sym_index)
 			    fmt.Println("sym_e:", symtab_[sym_index])
-	                    symtab_[sym_index].Name = 1  // points to "_start" in .strtab
-	                    symtab_[sym_index].Info = 0  //# uint8 // H4:binding and L4:type
-	                    symtab_[sym_index].Other = 0 //uint8 // reserved, currently holds 0
-	                    symtab_[sym_index].Shndx = 4 //uint16 // section index the symbol in (.text)
-	                    symtab_[sym_index].Value = 0 //# uint64  for relocatable .o file it's symbol's offset in its section
-	                    symtab_[sym_index].Size = 0  //#uint64  for function it's its size
+			    pad8 :=  align8(suf_directive)
+	                    //symtab_[sym_index].Name = 1  // points to "_start" in .strtab
+	                    symtab_[sym_index].Info = ( symtab_[sym_index].Info | STT_OBJECT  ) //# uint8 // H4:binding and L4:type
+	                    //symtab_[sym_index].Other = 0 //uint8 // reserved, currently holds 0
+	                    symtab_[sym_index].Shndx = uint16(slices.Index(shstrtab, section_in+"\x00"))//4 //uint16 // section index the symbol in (.text)
+	                    symtab_[sym_index].Value = uint64(len(data)) //# uint64  for relocatable .o file it's symbol's offset in its section
+	                    symtab_[sym_index].Size = uint64(len(pad8))  //#uint64  for function it's its size
+			    //sym + str + data
+                            data = append(data, pad8...)
 
 			}
 		
