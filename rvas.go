@@ -14,6 +14,7 @@ import (
 	"strings"
 	//"reflect"
 	"io/ioutil"
+	"slices"
 )
 
 // find SHT
@@ -580,7 +581,7 @@ func main() {
 	var shstrtab []string
 	var text []byte
 	var data []byte
-	var syms []Elf64_sym
+	symtab_ := []Elf64_sym{sym}
 	strtab := []string{"\x00"} // 0 is \x00
         
 	//elf
@@ -612,16 +613,22 @@ func main() {
 			//}
 			if directive == ".global" {
 			    fmt.Println("Directive:", directive, "|Suf_directive:", suf_directive)
-			    fmt.Println("create .symtab entry + .strtab entry")
+			    fmt.Println("create .symtab entry + .strtab entry, add .symtab to .shstrtab")
+			    if !slices.Contains(shstrtab, ".symtab\x00") {
+			        //sht
+	                        elf_header.Shnum += 1 
+	                        shts = append(shts, sht)
+	                        shstrtab = append(shstrtab, ".symtab\x00")
+			    }
 			    fmt.Println(shstrtab, strtab, text, data, shts)
 			    //sym
-	                    sym.Name = 0  //uint32 // offset in string table
-	                    sym.Info = 0  //# uint8 // H4:binding and L4:type
+	                    sym.Name = 0  //#uint32 // offset in string table
+	                    sym.Info = (STB_GLOBAL<<4 | STT_FUNC)    //# H4:binding and L4:type
 	                    sym.Other = 0 //uint8 // reserved, currently holds 0
-	                    sym.Shndx = 0 //uint16 // section index the symbol in
+	                    sym.Shndx = 0 //#uint16 // section index the symbol in
 	                    sym.Value = 0 //# uint64  for relocatable .o file it's symbol's offset in its section
 	                    sym.Size = 0  //#uint64  for function it's its size
-			    syms = append(syms, sym)
+			    symtab_ = append(symtab_, sym)
 			    //str
 			    strtab = append(strtab, suf_directive)
 			}
@@ -1601,4 +1608,5 @@ func main() {
 				 `)
 				 fmt.Println("shstrtab string list:", shstrtab, len(shstrtab))
 				 fmt.Println("strtab string list:", strtab, len(strtab))
+				 fmt.Println("symtab_ string list:", symtab_, len(symtab_))
 }
