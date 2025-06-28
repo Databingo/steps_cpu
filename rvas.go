@@ -577,6 +577,7 @@ func main() {
 	var copy_instr strings.Builder
 
 	var section_in string
+	var label_in string
 	var shts []SHT
 	var shstrtab []string
 	var text []byte
@@ -615,21 +616,22 @@ func main() {
 			    fmt.Println("Directive:", directive, "|Suf_directive:", suf_directive)
 			    fmt.Println("create .symtab entry + .strtab entry, add .symtab to .shstrtab")
 			    if !slices.Contains(shstrtab, ".symtab\x00") {
-			        //sht
+			        //sht + shstrtab
 	                        elf_header.Shnum += 1 
 	                        shts = append(shts, sht)
 	                        shstrtab = append(shstrtab, ".symtab\x00")
 			    }
 
-	                    sym.Name = 0  //#uint32 // offset in string table
+	                    sym.Name = uint32(len(strings.Join(strtab,"")))  //#uint32 // offset in string table
 	                    sym.Info = (STB_GLOBAL<<4 | STT_FUNC)    //# H4:binding and L4:type
 	                    sym.Other = 0 //uint8 // reserved, currently holds 0
-	                    sym.Shndx = 0 //#uint16 // section index the symbol in
+	                    //sym.Shndx = uint16(slices.Index(shstrtab, section_in))//0 //#uint16 // section index the symbol in
+			    //fmt.Println("-::", section_in, uint16(slices.Index(shstrtab, section_in)))//0 //#uint16 // section index the symbol in
 	                    sym.Value = 0 //# uint64  for relocatable .o file it's symbol's offset in its section
-	                    sym.Size = 0  //#uint64  for function it's its size
+	                    sym.Size = 0  //#uint64  for function it's its size   -- uint64(len(align8("H\n")))                   
 			    //sym + str
 			    symtab_ = append(symtab_, sym)
-			    strtab = append(strtab, suf_directive)
+			    strtab = append(strtab, suf_directive+"\x00")
 			}
 
 			if directive == ".section" {
@@ -641,12 +643,24 @@ func main() {
 	                    shts = append(shts, sht)
 	                    shstrtab = append(shstrtab,suf_directive+"\x00")
 			}
+			if directive == ".string" {
+			    fmt.Println("Directive:", directive, "||Suf_directive:", suf_directive)
+			    fmt.Println("check label_in + check strtab + edit symtab")
+			    fmt.Println("strtab:", strtab)
+			    sym_index := slices.Index(strtab, label_in+"\x00")
+			    fmt.Println("label_in-:", label_in, sym_index)
+			    sym_e := symtab_[sym_index]
+			    fmt.Println("sym_e:", sym_e)
+
+			}
 		
 
+		} else if strings.HasSuffix(switchOnOp, ":") {
+			label_in = strings.TrimSuffix(code[0], ":")
 		} else {
 			copy_instr.WriteString(raw_instr)
 		}
-			    fmt.Println(shstrtab, strtab, text, data, shts, section_in, "-_")
+         	    fmt.Println(shstrtab, strtab, text, data, shts, section_in, label_in, "x|")
 	}
 	////////
 
