@@ -1,6 +1,5 @@
 # Directive: Define global symbols (visible to linker)
 .global _start
-.global msg
 
 # Directive: Switch to data section for initialized data
 .section .data

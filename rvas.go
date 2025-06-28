@@ -649,14 +649,34 @@ func main() {
 			    fmt.Println("strtab:", strtab)
 			    sym_index := slices.Index(strtab, label_in+"\x00")
 			    fmt.Println("label_in-:", label_in, sym_index)
-			    sym_e := symtab_[sym_index]
-			    fmt.Println("sym_e:", sym_e)
+			    fmt.Println("sym_e:", symtab_[sym_index])
+	                    symtab_[sym_index].Name = 1  // points to "_start" in .strtab
+	                    symtab_[sym_index].Info = 0  //# uint8 // H4:binding and L4:type
+	                    symtab_[sym_index].Other = 0 //uint8 // reserved, currently holds 0
+	                    symtab_[sym_index].Shndx = 4 //uint16 // section index the symbol in (.text)
+	                    symtab_[sym_index].Value = 0 //# uint64  for relocatable .o file it's symbol's offset in its section
+	                    symtab_[sym_index].Size = 0  //#uint64  for function it's its size
 
 			}
 		
 
 		} else if strings.HasSuffix(switchOnOp, ":") {
 			label_in = strings.TrimSuffix(code[0], ":")
+		        sym_index := slices.Index(strtab, label_in+"\x00")
+			if sym_index == -1 {
+	                    sym.Name = uint32(len(strings.Join(strtab,"")))  //#uint32 // offset in string table
+	                    sym.Info = (STB_GLOBAL<<4 | STT_FUNC)    //# H4:binding and L4:type
+	                    sym.Other = 0 //uint8 // reserved, currently holds 0
+	                    //sym.Shndx = uint16(slices.Index(shstrtab, section_in))//0 //#uint16 // section index the symbol in
+			    //fmt.Println("-::", section_in, uint16(slices.Index(shstrtab, section_in)))//0 //#uint16 // section index the symbol in
+	                    sym.Value = 0 //# uint64  for relocatable .o file it's symbol's offset in its section
+	                    sym.Size = 0  //#uint64  for function it's its size   -- uint64(len(align8("H\n")))                   
+			    //sym + str
+			    symtab_ = append(symtab_, sym)
+			    strtab = append(strtab, label_in+"\x00")
+
+
+			}
 		} else {
 			copy_instr.WriteString(raw_instr)
 		}
