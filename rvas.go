@@ -615,6 +615,12 @@ func main() {
 			if directive == ".global" {
 			    fmt.Println("Directive:", directive, "|Suf_directive:", suf_directive)
 			    fmt.Println("create .symtab entry + .strtab entry, add .symtab to .shstrtab")
+			    if !slices.Contains(shstrtab, ".strtab\x00") {
+			        //sht + shstrtab
+	                        elf_header.Shnum += 1 
+	                        shts = append(shts, sht)
+	                        shstrtab = append(shstrtab, ".strtab\x00")
+			    }
 			    if !slices.Contains(shstrtab, ".symtab\x00") {
 			        //sht + shstrtab
 	                        elf_header.Shnum += 1 
@@ -876,6 +882,13 @@ func main() {
 		case "la", "lla": // 装入地址 (lla for certainly pc-related address, la is not sure) (+- 2GB) larger use li
 			ins := fmt.Sprintf("# %s\n", line)
 			real_instr.WriteString(ins)
+			    if !slices.Contains(shstrtab, ".rela.text\x00") {
+			        fmt.Println("create .rela.text")
+			        //sht + shstrtab
+	                        elf_header.Shnum += 1 
+	                        shts = append(shts, sht)
+	                        shstrtab = append(shstrtab, ".rela.text\x00")
+			    }
 			fmt.Println(`
 		                 for .rela.text: 
 			         Entry: (24 bytes)
