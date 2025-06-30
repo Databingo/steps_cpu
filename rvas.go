@@ -576,6 +576,7 @@ func main() {
 	scanner0.Split(bufio.ScanLines)
 	var copy_instr strings.Builder
 
+	//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	var section_in string
 	var label_in string
 	var shts []SHT
@@ -584,7 +585,8 @@ func main() {
 	var data []byte
 	symtab_ := []Elf64_sym{sym}// symtab_ array and strtab are same order
 	strtab := []string{"\x00"}
-        
+	var relatext []Elf64_rela
+       
 	//elf
 	//sht0
 	elf_header.Shnum += 1 
@@ -1231,7 +1233,7 @@ func main() {
 		fmt.Println("Key:", key, "Element:", element)
 	}
 
-	// 2.5pass create .rela.text
+	// 2.5pass create entry of .rela.text
 	fmt.Println("start 2.5pass.")
 	address = 0
 	lineCounter = 1
@@ -1259,17 +1261,36 @@ func main() {
 			if len(code) != 3 {
 				fmt.Println("Incorrect argument count on line: ", lineCounter)
 			}
-		//	op, opFound := opBin[code[0]]
-		//	rd, rdFound := regBin[code[1]]
-		//	if err != nil {
-		//		fmt.Printf("-Error on line %d: %s\n", lineCounter, err)
-		//		os.Exit(0)
-		//	}
-		//	if !opFound || !rdFound {
-		//		fmt.Println("Invalid register on line", lineCounter)
-		//		os.Exit(0)
-		//	}
-			fmt.Println("create .rela.text entry")
+			//auipc reg, 0 # R_RISCV_PCREL_HI20 arg
+			if code[2] == "0"  && strings.Contains(scanner.Text(), "R_RISCV_PCREL_HI20") {
+			    cs := strings.Split(scanner.Text(), " ")
+			    sy := cs[len(cs)-2] // ending with \n
+			    idx := slices.Index(strtab, sy+"\x00")
+			    fmt.Println("create .rela.text entry for HI20: of", sy, idx, lineCounter)
+                            var rela Elf64_rela 
+                            rela.Offset = uint64(lineCounter)//uint64 modified instruction's offset in .text
+                            rela.Infor = (uint64(idx) << 32) | R_RISCV_PCREL_HI20 //uint64   // sym index and relocation type
+                            rela.Addend = int16(0)// int16   // A constant addend used in the reloction calculation 加数
+			    fmt.Printf("%+v\n", rela)
+			    relatext = append(relatext, rela)
+			}
+		case "addi": // op rd, rs1, immediate
+			if len(code) != 4 {
+				fmt.Println("ori 2 Incorrect argument count on line: ", lineCounter)
+			}
+			//addi reg, reg 0 # R_RISCV_PCREL_LO12_I arg
+			if code[3] == "0"  && strings.Contains(scanner.Text(), "R_RISCV_PCREL_LO12_I") {
+			    cs := strings.Split(scanner.Text(), " ")
+			    sy := cs[len(cs)-2] // ending with \n
+			    idx := slices.Index(strtab, sy+"\x00")
+			    fmt.Println("create .rela.text entry for LO12_I: of", sy, idx, lineCounter)
+                            var rela Elf64_rela 
+                            rela.Offset = uint64(lineCounter)//uint64 modified instruction's offset in .text
+                            rela.Infor = (uint64(idx) << 32) | R_RISCV_PCREL_LO!@_I //uint64   // sym index and relocation type
+                            rela.Addend = int16(0)// int16   // A constant addend used in the reloction calculation 加数
+			    fmt.Printf("%+v\n", rela)
+			    relatext = append(relatext, rela)
+			}
 
 		default:
 			//os.Exit(0)
