@@ -897,7 +897,7 @@ func main() {
 				 Elf64_Sxword r_addend: 0 for PC-relative 0x0000000000000000
 				 `)
 			//ins := fmt.Sprintf("auipc %s, %%pcrel_hi(%s)\n", code[1], code[2]) // hi = (rela_addr + 0x800) >> 12
-			ins = fmt.Sprintf("auipc %s, 0 # .rela.text %s \n", code[1], code[2]) // hi = (rela_addr + 0x800) >> 12
+			ins = fmt.Sprintf("auipc %s, 0 # R_RISCV_PCREL_HI20 %s \n", code[1], code[2]) // hi = (rela_addr + 0x800) >> 12
 			real_instr.WriteString(ins)
 			fmt.Println(`
 		                 for .rela.text: 
@@ -907,7 +907,7 @@ func main() {
 				 Elf64_Sxword r_addend: 0 for PC-relative 0x0000000000000000
 				 `)
 			//ins = fmt.Sprintf("addi  %s, %s, %%pcrel_lo(%s)\n", code[1], code[1], code[2]) // lo = rela_addr  - (hi << 12)
-			ins = fmt.Sprintf("addi  %s, %s, 0 # .rela.text %s \n", code[1], code[1], code[2]) // lo = rela_addr  - (hi << 12)
+			ins = fmt.Sprintf("addi  %s, %s, 0 # R_RISCV_PCREL_LO12_I %s \n", code[1], code[1], code[2]) // lo = rela_addr  - (hi << 12)
 			real_instr.WriteString(ins)
 		case "call": //auipc x1, offset[31:12]; jalr x1, offset[11:0](x1) 调用远距离过程(save pc+4)
 			ins := fmt.Sprintf("# %s\n", line)
