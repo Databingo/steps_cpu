@@ -48,7 +48,7 @@ func align8(data interface{}) []byte {
 
 func byted(data interface{}) []byte{
 	buf := new(bytes.Buffer)
-	_ = binary.Write(buf, binary.LittleEndian, &data)
+	_ = binary.Write(buf, binary.LittleEndian, data)
 	bytes := buf.Bytes()
 	return  bytes
 }
@@ -1726,7 +1726,7 @@ func main() {
 	elf_header.Shnum = uint16(len(shstrtab))
 	elf_header.Shoff = uint64(64 + 64 * elf_header.Shnum)        // e_shoff points to start of section header table --  no 0 have to be the start of SHT  (e_shnum * e_shentsize = whole table of SHT)
 	//elf_header_bytes = byted(elf_header)
-	var cal_bytes []byte
+	cal_bytes := []byte{}
 	cal_bytes = append(cal_bytes, byted(elf_header)...)
 	for idx, sht := range shts {
 			   // fmt.Printf("{{%d, %+v\n", idx, sht)
@@ -1855,7 +1855,6 @@ func main() {
 	for _, shstr := range  shstrtab {
 	    switch shstr {
             case "\x00":
-	        continue
 	    case ".shstrtab\x00":
 	        cal_bytes = append(cal_bytes, byted(shstrtab)...)
 	    case ".strtab\x00":
@@ -1890,6 +1889,7 @@ func main() {
 			    fmt.Printf("==%d, %+v\n", idx, rela)
 	}
 	fmt.Println("cal_bytes:")
+	fmt.Println(cal_bytes)
 	fff.Write(cal_bytes)
 
 
@@ -1897,27 +1897,28 @@ func main() {
 
 
 
-	fmt.Println(`
-		                 ELF header
-				 - Identifies
-				 - Points to section headers
-				 Section .text
-				 - Machine code
-				 Section .rela.text
-				 - Relocation entrires
-				 Section .symtab
-				 - Symbol entries
-				 Section .strtab
-				 - Symbol names
-				 Sedtion .shstrtab
-				 - Section names
-				 Section Headers
-				 - Describe sections
-				 `)
+//	fmt.Println(`
+//		                 ELF header
+//				 - Identifies
+//				 - Points to section headers
+//				 Section .text
+//				 - Machine code
+//				 Section .rela.text
+//				 - Relocation entrires
+//				 Section .symtab
+//				 - Symbol entries
+//				 Section .strtab
+//				 - Symbol names
+//				 Sedtion .shstrtab
+//				 - Section names
+//				 Section Headers
+//				 - Describe sections
+//				 `)
 				 fmt.Println("shts SHT list:", shts, len(shts))
 				 fmt.Println("shstrtab string list:", shstrtab, len(shstrtab))
 				 fmt.Println("strtab string list:", strtab, len(strtab))
 				 fmt.Println("symtab_ Elf64_sym list:", symtab_, len(symtab_))
 				 //text, data byte list
 				 fmt.Println("relatext Elf64_rela list:", relatext, len(relatext))
+	fmt.Println(byted(elf_header))
 }
