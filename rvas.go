@@ -1857,15 +1857,16 @@ func main() {
 	    switch shstr {
             case "\x00":
 	    case ".shstrtab\x00":
-	        cal_bytes = append(cal_bytes, byted(shstrtab)...)
+	        cal_bytes = append(cal_bytes, byted(strings.Join(shstrtab, ""))...)
+	        fmt.Println("caled .shstrtab")
 	    case ".strtab\x00":
-	        cal_bytes = append(cal_bytes, byted(strtab)...)
+	        cal_bytes = append(cal_bytes, byted(strings.Join(strtab, ""))...)
 	    case ".symtab\x00":
 	        cal_bytes = append(cal_bytes, byted(symtab)...)
 	    case ".text\x00":
-	        cal_bytes = append(cal_bytes, byted(txt)...)
+	        cal_bytes = append(cal_bytes, txt...)
 	    case ".data\x00":
-	        cal_bytes = append(cal_bytes, byted(data)...)
+	        cal_bytes = append(cal_bytes, data...)
 	    case ".rela.text\x00":
 	        cal_bytes = append(cal_bytes, byted(relatext)...)
 	    }
