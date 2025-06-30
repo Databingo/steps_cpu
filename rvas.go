@@ -1895,32 +1895,10 @@ func main() {
 	fff.Write(cal_bytes)
 
 
-
-
-
-
-//	fmt.Println(`
-//		                 ELF header
-//				 - Identifies
-//				 - Points to section headers
-//				 Section .text
-//				 - Machine code
-//				 Section .rela.text
-//				 - Relocation entrires
-//				 Section .symtab
-//				 - Symbol entries
-//				 Section .strtab
-//				 - Symbol names
-//				 Sedtion .shstrtab
-//				 - Section names
-//				 Section Headers
-//				 - Describe sections
-//				 `)
-				 fmt.Println("shts SHT list:", shts, len(shts))
-				 fmt.Println("shstrtab string list:", shstrtab, len(shstrtab))
-				 fmt.Println("strtab string list:", strtab, len(strtab))
-				 fmt.Println("symtab_ Elf64_sym list:", symtab_, len(symtab_))
-				 //text, data byte list
-				 fmt.Println("relatext Elf64_rela list:", relatext, len(relatext))
-	fmt.Println(byted(elf_header))
+	 fmt.Println("shts SHT list:", shts, len(shts))
+	 fmt.Println("shstrtab string list:", shstrtab, len(shstrtab))
+	 fmt.Println("strtab string list:", strtab, len(strtab))
+	 fmt.Println("symtab_ Elf64_sym list:", symtab_, len(symtab_))
+	 //text, data byte list
+	 fmt.Println("relatext Elf64_rela list:", relatext, len(relatext))
 }
