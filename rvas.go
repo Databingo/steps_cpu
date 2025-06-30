@@ -109,7 +109,7 @@ const R_RISCV_PCREL_LO12_I = 24
 
 type Elf64_rela struct {
 	Offset uint64  // modified instruction's offset in .text
-	Infor uint64   // sym index and relocation type
+	Info uint64   // sym index and relocation type
 	Addend int16   // A constant addend used in the reloction calculation 加数
 }
 
@@ -348,6 +348,7 @@ func main() {
 	elf_header.Version = 0x00000001 // e_version specify original elf version
 	elf_header.Entry = 0x0          // e_entry program entry address -- 0 for relocatable file set final entry point by linker
 	elf_header.Phoff = 0x0          // e_phoff points to start of program header table --  0 for relocatable file (no program headers)
+	//-------
 	elf_header.Shoff = 0x40         // e_shoff points to start of section header table --  no 0 have to be the start of SHT  (e_shnum * e_shentsize = whole table of SHT)
 	elf_header.Flags = 0x00000004   // e_flags  // 0x4 for LP64D ABI  (EF_RISCV_FLOAT_ABI_DOUBLE) fit for RV64G
 	elf_header.Ehsize = 0x0040      // e_ehsize specify size of This header, 52 bytes(0x34) for 32-bit format, 64 bytes(0x40) for 64-bit ?
@@ -1266,10 +1267,10 @@ func main() {
 			    cs := strings.Split(scanner.Text(), " ")
 			    sy := cs[len(cs)-2] // ending with \n
 			    idx := slices.Index(strtab, sy+"\x00")
-			    fmt.Println("create .rela.text entry for HI20: of", sy, idx, lineCounter)
+			    fmt.Println("create .rela.text entry for HI20: of", sy, idx, "at line:", lineCounter, "address:", address)
                             var rela Elf64_rela 
-                            rela.Offset = uint64(lineCounter)//uint64 modified instruction's offset in .text
-                            rela.Infor = (uint64(idx) << 32) | R_RISCV_PCREL_HI20 //uint64   // sym index and relocation type
+                            rela.Offset = uint64(address)//uint64 modified instruction's offset in .text
+                            rela.Info = (uint64(idx) << 32) | R_RISCV_PCREL_HI20 //uint64   // sym index and relocation type
                             rela.Addend = int16(0)// int16   // A constant addend used in the reloction calculation 加数
 			    fmt.Printf("%+v\n", rela)
 			    relatext = append(relatext, rela)
@@ -1283,10 +1284,10 @@ func main() {
 			    cs := strings.Split(scanner.Text(), " ")
 			    sy := cs[len(cs)-2] // ending with \n
 			    idx := slices.Index(strtab, sy+"\x00")
-			    fmt.Println("create .rela.text entry for LO12_I: of", sy, idx, lineCounter)
+			    fmt.Println("create .rela.text entry for LO12_I.: of", sy, idx, "at line:", lineCounter, "address:", address)
                             var rela Elf64_rela 
-                            rela.Offset = uint64(lineCounter)//uint64 modified instruction's offset in .text
-                            rela.Infor = (uint64(idx) << 32) | R_RISCV_PCREL_LO!@_I //uint64   // sym index and relocation type
+                            rela.Offset = uint64(address)//uint64 modified instruction's offset in .text
+                            rela.Info = (uint64(idx) << 32) | R_RISCV_PCREL_LO12_I //uint64   // sym index and relocation type
                             rela.Addend = int16(0)// int16   // A constant addend used in the reloction calculation 加数
 			    fmt.Printf("%+v\n", rela)
 			    relatext = append(relatext, rela)
@@ -1295,6 +1296,8 @@ func main() {
 		default:
 			//os.Exit(0)
 		}
+		lineCounter++
+		address += 4
 	    }
 
 
@@ -1312,6 +1315,7 @@ func main() {
 	// set up write file for machine code comparison
 	f, err := os.Create("add.o")       //("asm-tests/asm-u-bin/beq-mc-u.txt")
 	ff, err := os.Create("combined.o") //("asm-tests/asm-u-bin/beq-mc-u.txt")
+	fff, err := os.Create("caled.o") //("asm-tests/asm-u-bin/beq-mc-u.txt")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -1714,8 +1718,185 @@ func main() {
 	fmt.Println("----------#")
 	fmt.Println(len(txt))
 	fmt.Println(combined)
-
 	ff.Write(combined)
+
+
+	fmt.Println("shts SHT list:", shts, len(shts))
+	sec_offset := uint64(0)
+	elf_header.Shnum = uint16(len(shstrtab))
+	elf_header.Shoff = uint64(64 + 64 * elf_header.Shnum)        // e_shoff points to start of section header table --  no 0 have to be the start of SHT  (e_shnum * e_shentsize = whole table of SHT)
+	//elf_header_bytes = byted(elf_header)
+	var cal_bytes []byte
+	cal_bytes = append(cal_bytes, byted(elf_header)...)
+	for idx, sht := range shts {
+			   // fmt.Printf("{{%d, %+v\n", idx, sht)
+	//Name uint32
+	//Type uint32 //0 unused|1 program|2 symbol|3 string|4 relocation entries with addends|5 symbol hash|6 dynamic linking|7 notes|8 bss|9 relocation no addends|10 reserved|11 dynamic linker symbol...
+	//Flags  uint64 // 1 writable|2 occupies memory during exection|4 executable|0x10 might by merged|0x20 contains null-terminated strings|0x40 sh_info contains SHT index
+	//Addr      uint64
+	//Offset    uint64 // section offset
+	//Size      uint64 // section size
+	//Link      uint32
+	//Info      uint32
+	//Addralign uint64
+	//Entsize   uint64
+	shstr := shstrtab[idx]
+	switch shstr {
+	    case "\x00":
+	        fmt.Println("SHT Section header of NON {{{:")
+		sht.Name = uint32(len(strings.Join(shstrtab[0:idx], "")))    // 0 for null
+	        sht.Type = uint32(0)
+	        sht.Flags = uint64(0)
+	        sht.Addr = uint64(0)
+	        sht.Offset = uint64(0)
+	        sht.Size = uint64(0)
+		// prepare for next loop sec
+		sec_offset = elf_header.Shoff + sht.Size
+		fmt.Println("set_offset:::", sec_offset)
+	        sht.Link = uint32(0)
+	        sht.Info = uint32(0)
+	        sht.Addralign = uint64(0)
+	        sht.Entsize = uint64(0)
+	        cal_bytes = append(cal_bytes, byted(sht)...)
+	    case ".shstrtab\x00":
+	        fmt.Println("SHT Section header of .shstrtab }}}:")
+		sht.Name = uint32(len(strings.Join(shstrtab[0:idx], "")))    // 0 for null
+	        sht.Type = uint32(3)// sh_type 3_SHT_STRTAB 
+	        sht.Flags = uint64(0)//?
+	        sht.Addr = uint64(0)// ?sh_addr virtual address at exection?
+	        sht.Offset = sec_offset  
+	        sht.Size = uint64(len(strings.Join(shstrtab, "")))   // need calculate
+		// prepare for next loop sec
+		sec_offset += sht.Size
+	        sht.Link = uint32(0) //?
+	        sht.Info = uint32(0) //?
+	        sht.Addralign = uint64(1) //?
+	        sht.Entsize = uint64(0)
+	        cal_bytes = append(cal_bytes, byted(sht)...)
+	    case ".strtab\x00":
+	        fmt.Println("SHT Section header of .strtab }}}:")
+		sht.Name = uint32(len(strings.Join(shstrtab[0:idx], "")))    // 0 for null
+	        sht.Type = uint32(0)
+	        sht.Flags = uint64(0)
+	        sht.Addr = uint64(0)
+	        sht.Offset = sec_offset  
+	        sht.Size = uint64(len(strings.Join(strtab, "")))   // need calculate
+		// prepare for next loop sec
+		sec_offset += sht.Size
+	        sht.Link = uint32(0)
+	        sht.Info = uint32(0)
+	        sht.Addralign = uint64(0)
+	        sht.Entsize = uint64(0)
+	        cal_bytes = append(cal_bytes, byted(sht)...)
+	    case ".symtab\x00":
+	        fmt.Println("SHT Section header of .symtab }}}:")
+		sht.Name = uint32(len(strings.Join(shstrtab[0:idx], "")))    // 0 for null
+	        sht.Type = uint32(0)
+	        sht.Flags = uint64(0)
+	        sht.Addr = uint64(0)
+	        sht.Offset = sec_offset  
+	        sht.Size = uint64(24*len(symtab_))   // need calculate
+		// prepare for next loop sec
+		sec_offset += sht.Size
+	        sht.Link = uint32(0)
+	        sht.Info = uint32(0)
+	        sht.Addralign = uint64(0)
+	        sht.Entsize = uint64(0)
+	        cal_bytes = append(cal_bytes, byted(sht)...)
+	    case ".text\x00":
+	        fmt.Println("SHT Section header of .text }}}:")
+		sht.Name = uint32(len(strings.Join(shstrtab[0:idx], "")))    // 0 for null
+	        sht.Type = uint32(0)
+	        sht.Flags = uint64(0)
+	        sht.Addr = uint64(0)
+	        sht.Offset = sec_offset  
+	        sht.Size = uint64(len(txt))   // need calculate
+		// prepare for next loop sec
+		sec_offset += sht.Size
+	        sht.Link = uint32(0)
+	        sht.Info = uint32(0)
+	        sht.Addralign = uint64(0)
+	        sht.Entsize = uint64(0)
+	        cal_bytes = append(cal_bytes, byted(sht)...)
+	    case ".data\x00":
+	        fmt.Println("SHT Section header of .data }}}:")
+		sht.Name = uint32(len(strings.Join(shstrtab[0:idx], "")))    // 0 for null
+	        sht.Type = uint32(0)
+	        sht.Flags = uint64(0)
+	        sht.Addr = uint64(0)
+	        sht.Offset = sec_offset  
+	        sht.Size = uint64(len(data))   // need calculate
+		// prepare for next loop sec
+		sec_offset += sht.Size
+	        sht.Link = uint32(0)
+	        sht.Info = uint32(0)
+	        sht.Addralign = uint64(0)
+	        sht.Entsize = uint64(0)
+	        cal_bytes = append(cal_bytes, byted(sht)...)
+	    case ".rela.text\x00":
+	        fmt.Println("SHT Section header of .rela.text }}}:")
+		sht.Name = uint32(len(strings.Join(shstrtab[0:idx], "")))    // 0 for null
+	        sht.Type = uint32(0)
+	        sht.Flags = uint64(0)
+	        sht.Addr = uint64(0)
+	        sht.Offset = sec_offset  
+	        sht.Size = uint64(24*len(relatext))   // need calculate
+		// prepare for next loop sec
+		sec_offset += sht.Size
+	        sht.Link = uint32(0)
+	        sht.Info = uint32(0)
+	        sht.Addralign = uint64(0)
+	        sht.Entsize = uint64(0)
+	        cal_bytes = append(cal_bytes, byted(sht)...)
+	}
+	        fmt.Printf("{{%d, %+v\n", idx, sht)
+	}
+
+	for _, shstr := range  shstrtab {
+	    switch shstr {
+            case "\x00":
+	        continue
+	    case ".shstrtab\x00":
+	        cal_bytes = append(cal_bytes, byted(shstrtab)...)
+	    case ".strtab\x00":
+	        cal_bytes = append(cal_bytes, byted(strtab)...)
+	    case ".symtab\x00":
+	        cal_bytes = append(cal_bytes, byted(symtab)...)
+	    case ".text\x00":
+	        cal_bytes = append(cal_bytes, byted(txt)...)
+	    case ".data\x00":
+	        cal_bytes = append(cal_bytes, byted(data)...)
+	    case ".rela.text\x00":
+	        cal_bytes = append(cal_bytes, byted(relatext)...)
+	    }
+	}
+
+
+	fmt.Println("shstrtab string list:", shstrtab, len(shstrtab))
+	for idx, shstr := range shstrtab {
+			    fmt.Printf("==%d, %+v\n", idx, shstr)
+	}
+	fmt.Println("strtab string list:", strtab, len(strtab))
+	for idx, str := range strtab {
+			    fmt.Printf("==%d, %+v\n", idx, str)
+	}
+	fmt.Println("symtab_ Elf64_sym list:", symtab_, len(symtab_))
+	for idx, sym := range symtab {
+			    fmt.Printf("==%d, %+v\n", idx, sym)
+	}
+	//text, data byte list
+	fmt.Println("relatext Elf64_rela list:", relatext, len(relatext))
+	for idx, rela := range relatext {
+			    fmt.Printf("==%d, %+v\n", idx, rela)
+	}
+	fmt.Println("cal_bytes:")
+	fff.Write(cal_bytes)
+
+
+
+
+
+
 	fmt.Println(`
 		                 ELF header
 				 - Identifies
@@ -1733,8 +1914,10 @@ func main() {
 				 Section Headers
 				 - Describe sections
 				 `)
-				 fmt.Println("shts list:", shts, len(shts))
+				 fmt.Println("shts SHT list:", shts, len(shts))
 				 fmt.Println("shstrtab string list:", shstrtab, len(shstrtab))
-				 fmt.Println("symtab_ string list:", symtab_, len(symtab_))
 				 fmt.Println("strtab string list:", strtab, len(strtab))
+				 fmt.Println("symtab_ Elf64_sym list:", symtab_, len(symtab_))
+				 //text, data byte list
+				 fmt.Println("relatext Elf64_rela list:", relatext, len(relatext))
 }
