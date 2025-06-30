@@ -110,7 +110,7 @@ const R_RISCV_PCREL_LO12_I = 24
 type Elf64_rela struct {
 	Offset uint64  // modified instruction's offset in .text
 	Infor uint64   // sym index and relocation type
-	Addend int16 
+	Addend int16   // A constant addend used in the reloction calculation 加数
 }
 
 func write2f(text string, name string) {
@@ -1230,6 +1230,59 @@ func main() {
 	for key, element := range symbolTable {
 		fmt.Println("Key:", key, "Element:", element)
 	}
+
+	// 2.5pass create .rela.text
+	fmt.Println("start 2.5pass.")
+	address = 0
+	lineCounter = 1
+	//instructionBuffer := make([]byte, 4)                               // buffer to store 4 bytes
+	scanner = bufio.NewScanner(strings.NewReader(real_instr.String())) // stores content from file
+	scanner.Split(bufio.ScanLines)
+	for scanner.Scan() {
+		line := strings.Split(scanner.Text(), "#")[0] // get any text before the comment "#" and ignore any text after it
+		code = strings.FieldsFunc(line, SplitOn)      // split into  operation, operands, and/or labels
+		if len(code) == 0 {                           // code is whitespace, ignore it
+			lineCounter++
+			continue
+		}
+		switchOnOp := code[0] // check if first entry of code is a label or an op
+		if strings.HasSuffix(switchOnOp, ":") {
+			if len(code) >= 2 { // opcode is in code[1] if code[0] is a label
+				switchOnOp = code[1]
+				code = code[1:] // reindex array so that op is at index 0
+			} else {
+				continue
+			}
+		}
+		switch switchOnOp { // switch on operation
+		case "auipc":
+			if len(code) != 3 {
+				fmt.Println("Incorrect argument count on line: ", lineCounter)
+			}
+		//	op, opFound := opBin[code[0]]
+		//	rd, rdFound := regBin[code[1]]
+		//	if err != nil {
+		//		fmt.Printf("-Error on line %d: %s\n", lineCounter, err)
+		//		os.Exit(0)
+		//	}
+		//	if !opFound || !rdFound {
+		//		fmt.Println("Invalid register on line", lineCounter)
+		//		os.Exit(0)
+		//	}
+			fmt.Println("create .rela.text entry")
+
+		default:
+			//os.Exit(0)
+		}
+	    }
+
+
+
+
+
+
+
+
 	// reset file to start and reinitialize scanner
 	//_, err = file.Seek(0, io.SeekStart)
 	//scanner = bufio.NewScanner(file)
