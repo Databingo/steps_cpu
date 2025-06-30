@@ -1724,7 +1724,7 @@ func main() {
 	fmt.Println("shts SHT list:", shts, len(shts))
 	sec_offset := uint64(0)
 	elf_header.Shnum = uint16(len(shstrtab))
-	elf_header.Shoff = uint64(64 + 64 * elf_header.Shnum)        // e_shoff points to start of section header table --  no 0 have to be the start of SHT  (e_shnum * e_shentsize = whole table of SHT)
+	elf_header.Shoff = uint64(64)        // afert elf_header, e_shoff points to start of section header table --  no 0 have to be the start of SHT  (e_shnum * e_shentsize = whole table of SHT)
 	//elf_header_bytes = byted(elf_header)
 	cal_bytes := []byte{}
 	cal_bytes = append(cal_bytes, byted(elf_header)...)
