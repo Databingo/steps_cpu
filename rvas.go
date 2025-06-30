@@ -1740,114 +1740,115 @@ func main() {
 	//Info      uint32
 	//Addralign uint64
 	//Entsize   uint64
+	shtp := &shts[idx]
 	shstr := shstrtab[idx]
 	switch shstr {
 	    case "\x00":
 	        fmt.Println("SHT Section header of NON {{{:")
-		sht.Name = uint32(len(strings.Join(shstrtab[0:idx], "")))    // 0 for null
-	        sht.Type = uint32(0)
-	        sht.Flags = uint64(0)
-	        sht.Addr = uint64(0)
-	        sht.Offset = uint64(0)
-	        sht.Size = uint64(0)
+		shtp.Name = uint32(len(strings.Join(shstrtab[0:idx], "")))    // 0 for null
+	        shtp.Type = uint32(0)
+	        shtp.Flags = uint64(0)
+	        shtp.Addr = uint64(0)
+	        shtp.Offset = uint64(0)
+	        shtp.Size = uint64(0)
 		// prepare for next loop sec
-		sec_offset = elf_header.Shoff + sht.Size
+		sec_offset = elf_header.Shoff + shtp.Size
 		fmt.Println("set_offset:::", sec_offset)
-	        sht.Link = uint32(0)
-	        sht.Info = uint32(0)
-	        sht.Addralign = uint64(0)
-	        sht.Entsize = uint64(0)
-	        cal_bytes = append(cal_bytes, byted(sht)...)
+	        shtp.Link = uint32(0)
+	        shtp.Info = uint32(0)
+	        shtp.Addralign = uint64(0)
+	        shtp.Entsize = uint64(0)
+	        cal_bytes = append(cal_bytes, byted(shtp)...)
 	    case ".shstrtab\x00":
 	        fmt.Println("SHT Section header of .shstrtab }}}:")
-		sht.Name = uint32(len(strings.Join(shstrtab[0:idx], "")))    // 0 for null
-	        sht.Type = uint32(3)// sh_type 3_SHT_STRTAB 
-	        sht.Flags = uint64(0)//?
-	        sht.Addr = uint64(0)// ?sh_addr virtual address at exection?
-	        sht.Offset = sec_offset  
-	        sht.Size = uint64(len(strings.Join(shstrtab, "")))   // need calculate
+		shtp.Name = uint32(len(strings.Join(shstrtab[0:idx], "")))    // 0 for null
+	        shtp.Type = uint32(3)// sh_type 3_SHT_STRTAB 
+	        shtp.Flags = uint64(0)//?
+	        shtp.Addr = uint64(0)// ?sh_addr virtual address at exection?
+	        shtp.Offset = sec_offset  
+	        shtp.Size = uint64(len(strings.Join(shstrtab, "")))   // need calculate
 		// prepare for next loop sec
-		sec_offset += sht.Size
-	        sht.Link = uint32(0) //?
-	        sht.Info = uint32(0) //?
-	        sht.Addralign = uint64(1) //?
-	        sht.Entsize = uint64(0)
-	        cal_bytes = append(cal_bytes, byted(sht)...)
+		sec_offset += shtp.Size
+	        shtp.Link = uint32(0) //?
+	        shtp.Info = uint32(0) //?
+	        shtp.Addralign = uint64(1) //?
+	        shtp.Entsize = uint64(0)
+	        cal_bytes = append(cal_bytes, byted(shtp)...)
 	    case ".strtab\x00":
 	        fmt.Println("SHT Section header of .strtab }}}:")
-		sht.Name = uint32(len(strings.Join(shstrtab[0:idx], "")))    // 0 for null
-	        sht.Type = uint32(0)
-	        sht.Flags = uint64(0)
-	        sht.Addr = uint64(0)
-	        sht.Offset = sec_offset  
-	        sht.Size = uint64(len(strings.Join(strtab, "")))   // need calculate
+		shtp.Name = uint32(len(strings.Join(shstrtab[0:idx], "")))    // 0 for null
+	        shtp.Type = uint32(0)
+	        shtp.Flags = uint64(0)
+	        shtp.Addr = uint64(0)
+	        shtp.Offset = sec_offset  
+	        shtp.Size = uint64(len(strings.Join(strtab, "")))   // need calculate
 		// prepare for next loop sec
-		sec_offset += sht.Size
-	        sht.Link = uint32(0)
-	        sht.Info = uint32(0)
-	        sht.Addralign = uint64(0)
-	        sht.Entsize = uint64(0)
-	        cal_bytes = append(cal_bytes, byted(sht)...)
+		sec_offset += shtp.Size
+	        shtp.Link = uint32(0)
+	        shtp.Info = uint32(0)
+	        shtp.Addralign = uint64(0)
+	        shtp.Entsize = uint64(0)
+	        cal_bytes = append(cal_bytes, byted(shtp)...)
 	    case ".symtab\x00":
 	        fmt.Println("SHT Section header of .symtab }}}:")
-		sht.Name = uint32(len(strings.Join(shstrtab[0:idx], "")))    // 0 for null
-	        sht.Type = uint32(0)
-	        sht.Flags = uint64(0)
-	        sht.Addr = uint64(0)
-	        sht.Offset = sec_offset  
-	        sht.Size = uint64(24*len(symtab_))   // need calculate
+		shtp.Name = uint32(len(strings.Join(shstrtab[0:idx], "")))    // 0 for null
+	        shtp.Type = uint32(0)
+	        shtp.Flags = uint64(0)
+	        shtp.Addr = uint64(0)
+	        shtp.Offset = sec_offset  
+	        shtp.Size = uint64(24*len(symtab_))   // need calculate
 		// prepare for next loop sec
-		sec_offset += sht.Size
-	        sht.Link = uint32(0)
-	        sht.Info = uint32(0)
-	        sht.Addralign = uint64(0)
-	        sht.Entsize = uint64(0)
-	        cal_bytes = append(cal_bytes, byted(sht)...)
+		sec_offset += shtp.Size
+	        shtp.Link = uint32(0)
+	        shtp.Info = uint32(0)
+	        shtp.Addralign = uint64(0)
+	        shtp.Entsize = uint64(0)
+	        cal_bytes = append(cal_bytes, byted(shtp)...)
 	    case ".text\x00":
 	        fmt.Println("SHT Section header of .text }}}:")
-		sht.Name = uint32(len(strings.Join(shstrtab[0:idx], "")))    // 0 for null
-	        sht.Type = uint32(0)
-	        sht.Flags = uint64(0)
-	        sht.Addr = uint64(0)
-	        sht.Offset = sec_offset  
-	        sht.Size = uint64(len(txt))   // need calculate
+		shtp.Name = uint32(len(strings.Join(shstrtab[0:idx], "")))    // 0 for null
+	        shtp.Type = uint32(0)
+	        shtp.Flags = uint64(0)
+	        shtp.Addr = uint64(0)
+	        shtp.Offset = sec_offset  
+	        shtp.Size = uint64(len(txt))   // need calculate
 		// prepare for next loop sec
-		sec_offset += sht.Size
-	        sht.Link = uint32(0)
-	        sht.Info = uint32(0)
-	        sht.Addralign = uint64(0)
-	        sht.Entsize = uint64(0)
-	        cal_bytes = append(cal_bytes, byted(sht)...)
+		sec_offset += shtp.Size
+	        shtp.Link = uint32(0)
+	        shtp.Info = uint32(0)
+	        shtp.Addralign = uint64(0)
+	        shtp.Entsize = uint64(0)
+	        cal_bytes = append(cal_bytes, byted(shtp)...)
 	    case ".data\x00":
 	        fmt.Println("SHT Section header of .data }}}:")
-		sht.Name = uint32(len(strings.Join(shstrtab[0:idx], "")))    // 0 for null
-	        sht.Type = uint32(0)
-	        sht.Flags = uint64(0)
-	        sht.Addr = uint64(0)
-	        sht.Offset = sec_offset  
-	        sht.Size = uint64(len(data))   // need calculate
+		shtp.Name = uint32(len(strings.Join(shstrtab[0:idx], "")))    // 0 for null
+	        shtp.Type = uint32(0)
+	        shtp.Flags = uint64(0)
+	        shtp.Addr = uint64(0)
+	        shtp.Offset = sec_offset  
+	        shtp.Size = uint64(len(data))   // need calculate
 		// prepare for next loop sec
-		sec_offset += sht.Size
-	        sht.Link = uint32(0)
-	        sht.Info = uint32(0)
-	        sht.Addralign = uint64(0)
-	        sht.Entsize = uint64(0)
-	        cal_bytes = append(cal_bytes, byted(sht)...)
+		sec_offset += shtp.Size
+	        shtp.Link = uint32(0)
+	        shtp.Info = uint32(0)
+	        shtp.Addralign = uint64(0)
+	        shtp.Entsize = uint64(0)
+	        cal_bytes = append(cal_bytes, byted(shtp)...)
 	    case ".rela.text\x00":
 	        fmt.Println("SHT Section header of .rela.text }}}:")
-		sht.Name = uint32(len(strings.Join(shstrtab[0:idx], "")))    // 0 for null
-	        sht.Type = uint32(0)
-	        sht.Flags = uint64(0)
-	        sht.Addr = uint64(0)
-	        sht.Offset = sec_offset  
-	        sht.Size = uint64(24*len(relatext))   // need calculate
+		shtp.Name = uint32(len(strings.Join(shstrtab[0:idx], "")))    // 0 for null
+	        shtp.Type = uint32(0)
+	        shtp.Flags = uint64(0)
+	        shtp.Addr = uint64(0)
+	        shtp.Offset = sec_offset  
+	        shtp.Size = uint64(24*len(relatext))   // need calculate
 		// prepare for next loop sec
-		sec_offset += sht.Size
-	        sht.Link = uint32(0)
-	        sht.Info = uint32(0)
-	        sht.Addralign = uint64(0)
-	        sht.Entsize = uint64(0)
-	        cal_bytes = append(cal_bytes, byted(sht)...)
+		sec_offset += shtp.Size
+	        shtp.Link = uint32(0)
+	        shtp.Info = uint32(0)
+	        shtp.Addralign = uint64(0)
+	        shtp.Entsize = uint64(0)
+	        cal_bytes = append(cal_bytes, byted(shtp)...)
 	}
 	        fmt.Printf("{{%d, %+v\n", idx, sht)
 	}
