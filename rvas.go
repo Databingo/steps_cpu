@@ -1777,7 +1777,7 @@ func main() {
 	    case ".strtab\x00":
 	        fmt.Println("SHT Section header of .strtab }}}:")
 		shtp.Name = uint32(len(strings.Join(shstrtab[0:idx], "")))    // 0 for null
-	        shtp.Type = uint32(0)
+	        shtp.Type = uint32(3)
 	        shtp.Flags = uint64(0)
 	        shtp.Addr = uint64(0)
 	        shtp.Offset = sec_offset  
@@ -1786,13 +1786,13 @@ func main() {
 		sec_offset += shtp.Size
 	        shtp.Link = uint32(0)
 	        shtp.Info = uint32(0)
-	        shtp.Addralign = uint64(0)
+	        shtp.Addralign = uint64(1)
 	        shtp.Entsize = uint64(0)
 	        cal_bytes = append(cal_bytes, byted(shtp)...)
 	    case ".symtab\x00":
 	        fmt.Println("SHT Section header of .symtab }}}:")
 		shtp.Name = uint32(len(strings.Join(shstrtab[0:idx], "")))    // 0 for null
-	        shtp.Type = uint32(0)
+	        shtp.Type = uint32(2)
 	        shtp.Flags = uint64(0)
 	        shtp.Addr = uint64(0)
 	        shtp.Offset = sec_offset  
@@ -1801,8 +1801,8 @@ func main() {
 		sec_offset += shtp.Size
 	        shtp.Link = uint32(0)
 	        shtp.Info = uint32(0)
-	        shtp.Addralign = uint64(0)
-	        shtp.Entsize = uint64(0)
+	        shtp.Addralign = uint64(8)
+	        shtp.Entsize = uint64(24)
 	        cal_bytes = append(cal_bytes, byted(shtp)...)
 	    case ".text\x00":
 	        fmt.Println("SHT Section header of .text }}}:")
@@ -1816,7 +1816,7 @@ func main() {
 		sec_offset += shtp.Size
 	        shtp.Link = uint32(0)
 	        shtp.Info = uint32(0)
-	        shtp.Addralign = uint64(0)
+	        shtp.Addralign = uint64(8)
 	        shtp.Entsize = uint64(0)
 	        cal_bytes = append(cal_bytes, byted(shtp)...)
 	    case ".data\x00":
@@ -1831,7 +1831,7 @@ func main() {
 		sec_offset += shtp.Size
 	        shtp.Link = uint32(0)
 	        shtp.Info = uint32(0)
-	        shtp.Addralign = uint64(0)
+	        shtp.Addralign = uint64(8)
 	        shtp.Entsize = uint64(0)
 	        cal_bytes = append(cal_bytes, byted(shtp)...)
 	    case ".rela.text\x00":
@@ -1846,7 +1846,7 @@ func main() {
 		sec_offset += shtp.Size
 	        shtp.Link = uint32(0)
 	        shtp.Info = uint32(0)
-	        shtp.Addralign = uint64(0)
+	        shtp.Addralign = uint64(1)
 	        shtp.Entsize = uint64(0)
 	        cal_bytes = append(cal_bytes, byted(shtp)...)
 	}
