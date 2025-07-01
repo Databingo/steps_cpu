@@ -1721,30 +1721,19 @@ func main() {
 	ff.Write(combined)
 
 
+	elf_header.Shnum = uint16(len(shstrtab))
+	elf_header.Shoff = uint64(elf_header.Ehsize)  // after elf_header, e_shoff points to start of section header table --  no 0 have to be the start of SHT  (e_shnum * e_shentsize = whole table of SHT)
+	//elf_header_bytes = byted(elf_header)
 	fmt.Println("shts SHT list:", shts, len(shts))
 	sec_offset := uint64(0)
-	elf_header.Shnum = uint16(len(shstrtab))
-	elf_header.Shoff = uint64(64)        // afert elf_header, e_shoff points to start of section header table --  no 0 have to be the start of SHT  (e_shnum * e_shentsize = whole table of SHT)
-	//elf_header_bytes = byted(elf_header)
 	cal_bytes := []byte{}
 	cal_bytes = append(cal_bytes, byted(elf_header)...)
 	for idx, sht := range shts {
-			   // fmt.Printf("{{%d, %+v\n", idx, sht)
-	//Name uint32
-	//Type uint32 //0 unused|1 program|2 symbol|3 string|4 relocation entries with addends|5 symbol hash|6 dynamic linking|7 notes|8 bss|9 relocation no addends|10 reserved|11 dynamic linker symbol...
-	//Flags  uint64 // 1 writable|2 occupies memory during exection|4 executable|0x10 might by merged|0x20 contains null-terminated strings|0x40 sh_info contains SHT index
-	//Addr      uint64
-	//Offset    uint64 // section offset
-	//Size      uint64 // section size
-	//Link      uint32
-	//Info      uint32
-	//Addralign uint64
-	//Entsize   uint64
 	shtp := &shts[idx]
 	shstr := shstrtab[idx]
 	switch shstr {
 	    case "\x00":
-	        fmt.Println("SHT Section header of NON {{{:")
+		fmt.Println("SHT Section header of NON XYY name startfrom:", idx, uint32(len(strings.Join(shstrtab[0:idx], ""))), "length:", len(byted(shtp)))
 		shtp.Name = uint32(len(strings.Join(shstrtab[0:idx], "")))    // 0 for null
 	        shtp.Type = uint32(0)
 	        shtp.Flags = uint64(0)
@@ -1752,7 +1741,7 @@ func main() {
 	        shtp.Offset = uint64(0)
 	        shtp.Size = uint64(0)
 		// prepare for next loop sec
-		sec_offset = elf_header.Shoff + shtp.Size
+		sec_offset = elf_header.Shoff + shtp.Size// ???!!! *sh
 		fmt.Println("set_offset:::", sec_offset)
 	        shtp.Link = uint32(0)
 	        shtp.Info = uint32(0)
@@ -1761,6 +1750,7 @@ func main() {
 	        cal_bytes = append(cal_bytes, byted(shtp)...)
 	    case ".shstrtab\x00":
 	        fmt.Println("SHT Section header of .shstrtab }}}:")
+		fmt.Println("SHT Section header of NON YXY name startf:", uint32(len(strings.Join(shstrtab[0:idx], ""))), "length:", len(byted(shtp)))
 		shtp.Name = uint32(len(strings.Join(shstrtab[0:idx], "")))    // 0 for null
 	        shtp.Type = uint32(3)// sh_type 3_SHT_STRTAB 
 	        shtp.Flags = uint64(0)//?
@@ -1769,6 +1759,7 @@ func main() {
 	        shtp.Size = uint64(len(strings.Join(shstrtab, "")))   // need calculate
 		// prepare for next loop sec
 		sec_offset += shtp.Size
+		fmt.Println("set_offset:::", sec_offset)
 	        shtp.Link = uint32(0) //?
 	        shtp.Info = uint32(0) //?
 	        shtp.Addralign = uint64(1) //?
