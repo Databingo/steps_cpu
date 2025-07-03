@@ -680,7 +680,7 @@ func main() {
 		        sym_index := slices.Index(strtab, label_in+"\x00")
 			if sym_index == -1 {
 	                    sym.Name = uint32(len(strings.Join(strtab,"")))  //#uint32 // offset in string table
-	                    sym.Info = (STB_GLOBAL<<4 | STT_FUNC)    //# H4:binding and L4:type
+	                    sym.Info = (STB_LOCAL<<4 | STT_FUNC)    //# H4:binding and L4:type
 	                    sym.Other = 0 //uint8 // reserved, currently holds 0
 	                    //sym.Shndx = uint16(slices.Index(shstrtab, section_in))//0 //#uint16 // section index the symbol in
 			    //fmt.Println("-::", section_in, uint16(slices.Index(shstrtab, section_in)))//0 //#uint16 // section index the symbol in
