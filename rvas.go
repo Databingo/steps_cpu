@@ -633,9 +633,9 @@ func main() {
 			    }
 
 	                    sym.Name = uint32(len(strings.Join(strtab,"")))  //#uint32 // offset in string table
-			    fmt.Println("sym.Name:|||", sym.Name)
+			    fmt.Println("sym.Name:--|", sym.Name)
 
-	                    sym.Info = (STB_GLOBAL<<4 | STT_FUNC)    //# H4:binding and L4:type
+	                    sym.Info = (STB_GLOBAL << 4 | STT_FUNC)    //# H4:binding and L4:type
 	                    sym.Other = 0 //uint8 // reserved, currently holds 0
 	                    //sym.Shndx = uint16(slices.Index(shstrtab, section_in))//0 //#uint16 // section index the symbol in
 			    //fmt.Println("-::", section_in, uint16(slices.Index(shstrtab, section_in)))//0 //#uint16 // section index the symbol in
@@ -649,7 +649,7 @@ func main() {
 			if directive == ".section" {
 			    fmt.Println("Directive:", directive, "||Suf_directive:", suf_directive)
 			    fmt.Println("create SHT(s) + .shstrtab entry + section[]byte")
-			    section_in = suf_directive
+			    section_in = suf_directive + "\x00"
 			    //sht
 	                    elf_header.Shnum += 1 
 	                    shts = append(shts, sht)
@@ -666,7 +666,7 @@ func main() {
 	                    //symtab_[sym_index].Name = 1  // points to "_start" in .strtab
 	                    symtab_[sym_index].Info = ( symtab_[sym_index].Info | STT_OBJECT  ) //# uint8 // H4:binding and L4:type
 	                    //symtab_[sym_index].Other = 0 //uint8 // reserved, currently holds 0
-	                    symtab_[sym_index].Shndx = uint16(slices.Index(shstrtab, section_in+"\x00"))//4 //uint16 // section index the symbol in (.text)
+	                    symtab_[sym_index].Shndx = uint16(slices.Index(shstrtab, section_in))//4 //uint16 // section index the symbol in (.text)
 	                    symtab_[sym_index].Value = uint64(len(data)) //# uint64  for relocatable .o file it's symbol's offset in its section
 	                    symtab_[sym_index].Size = uint64(len(pad8))  //#uint64  for function it's its size
 			    //sym + str + data
@@ -678,20 +678,27 @@ func main() {
 		} else if strings.HasSuffix(switchOnOp, ":") {
 			label_in = strings.TrimSuffix(code[0], ":")
 		        sym_index := slices.Index(strtab, label_in+"\x00")
+			    fmt.Println("|-:sym.Name",len(strings.Join(strtab,"")),  "strtab:", strtab, "section_in:", section_in)
 			if sym_index == -1 {
 	                    sym.Name = uint32(len(strings.Join(strtab,"")))  //#uint32 // offset in string table
-	                    sym.Info = (STB_LOCAL<<4 | STT_FUNC)    //# H4:binding and L4:type
+	                    sym.Info = (STB_LOCAL << 4 | STT_FUNC)    //# H4:binding and L4:type
 	                    sym.Other = 0 //uint8 // reserved, currently holds 0
-	                    //sym.Shndx = uint16(slices.Index(shstrtab, section_in))//0 //#uint16 // section index the symbol in
+	                    sym.Shndx = uint16(slices.Index(shstrtab, section_in))//0 //#uint16 // section index the symbol in
 			    //fmt.Println("-::", section_in, uint16(slices.Index(shstrtab, section_in)))//0 //#uint16 // section index the symbol in
 	                    sym.Value = 0 //# uint64  for relocatable .o file it's symbol's offset in its section
 	                    sym.Size = 0  //#uint64  for function it's its size   -- uint64(len(align8("H\n")))                   
 			    //sym + str
-			    symtab_ = append(symtab_, sym)
-			    strtab = append(strtab, label_in+"\x00")
-
-
-			}
+			    //symtab_ = append(symtab_, sym)
+			    //strtab = append(strtab, label_in+"\x00")
+			    //local symbols should be in front of global symbols in symtab
+			    symtab_ = append(symtab_[:1+1], symtab_[1:]...)
+			    symtab_[1] = sym
+			    strtab = append(strtab[:1+1], strtab[1:]...)
+			    strtab[1] = label_in+"\x00"
+			} else {
+			    fmt.Println("=|=shndx:", uint16(slices.Index(shstrtab, section_in)), strtab, "section_in:", section_in, "sym_index:", sym_index, "symbal:", strtab[sym_index])
+			    symtab_[sym_index].Shndx = uint16(slices.Index(shstrtab, section_in))//0 //#uint16 // section index the symbol in
+					    }
 			copy_instr.WriteString(raw_instr)
 		} else {
 			copy_instr.WriteString(raw_instr)
@@ -1794,9 +1801,9 @@ func main() {
 		// prepare for next loop sec
 		sec_offset += shtp.Size
 	        shtp.Link = uint32(slices.Index(shstrtab, ".strtab\x00")) // link to dependency SHT's index, calculated by (.strtab index in array .shstrtab) 
-	        shtp.Info = uint32(0) // first no-local symbol index in sym list
+	        //shtp.Info = uint32(0) // first no-local symbol index in sym list
 		for idn, sym := range symtab_{
-		    if sym.Info >> 4 == 1{
+		    if sym.Info >> 4 == 1{ //local symbols should be in front of global symbols in symtab
 	               shtp.Info = uint32(idn) // first no-local symbol index in sym list
 		       break
 		    }
