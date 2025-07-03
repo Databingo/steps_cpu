@@ -587,6 +587,7 @@ func main() {
 	symtab_ := []Elf64_sym{sym}// symtab_ array and strtab are same order
 	strtab := []string{"\x00"}
 	var relatext []Elf64_rela
+	//var no_local_sym_1st uint32
        
 	//elf
 	//sht0
@@ -1760,8 +1761,8 @@ func main() {
 		// prepare for next loop sec
 		sec_offset += shtp.Size
 		fmt.Println("set_offset:::", sec_offset)
-	        shtp.Link = uint32(0) //?
-	        shtp.Info = uint32(0) //?
+	        shtp.Link = uint32(0) //0
+	        shtp.Info = uint32(0) //
 	        shtp.Addralign = uint64(1) //?
 	        shtp.Entsize = uint64(0)
 	        cal_bytes = append(cal_bytes, byted(shtp)...)
@@ -1775,7 +1776,7 @@ func main() {
 	        shtp.Size = uint64(len(strings.Join(strtab, "")))   // need calculate
 		// prepare for next loop sec
 		sec_offset += shtp.Size
-	        shtp.Link = uint32(0)
+	        shtp.Link = uint32(0)//0
 	        shtp.Info = uint32(0)
 	        shtp.Addralign = uint64(1)
 	        shtp.Entsize = uint64(0)
@@ -1790,8 +1791,14 @@ func main() {
 	        shtp.Size = uint64(24*len(symtab_))   // need calculate
 		// prepare for next loop sec
 		sec_offset += shtp.Size
-	        shtp.Link = uint32(slices.Index(shstrtab, ".strtab\x00")) // link to SHT's index, same as (.strmtab index in .shstrtab) 
-	        shtp.Info = uint32(0)
+	        shtp.Link = uint32(slices.Index(shstrtab, ".strtab\x00")) // link to dependency SHT's index, calculated by (.strtab index in array .shstrtab) 
+	        shtp.Info = uint32(0) // first no-local symbol index in sym list
+		for idn, sym := range symtab_{
+		    if sym.Info >> 4 == 1{
+	               shtp.Info = uint32(idn) // first no-local symbol index in sym list
+		       break
+		    }
+		}
 	        shtp.Addralign = uint64(8)
 	        shtp.Entsize = uint64(24)
 	        cal_bytes = append(cal_bytes, byted(shtp)...)
@@ -1805,7 +1812,7 @@ func main() {
 	        shtp.Size = uint64(len(txt))   // need calculate
 		// prepare for next loop sec
 		sec_offset += shtp.Size
-	        shtp.Link = uint32(0)
+	        shtp.Link = uint32(0)//0
 	        shtp.Info = uint32(0)
 	        shtp.Addralign = uint64(8)
 	        shtp.Entsize = uint64(0)
@@ -1820,7 +1827,7 @@ func main() {
 	        shtp.Size = uint64(len(data))   // need calculate
 		// prepare for next loop sec
 		sec_offset += shtp.Size
-	        shtp.Link = uint32(0)
+	        shtp.Link = uint32(0)//0
 	        shtp.Info = uint32(0)
 	        shtp.Addralign = uint64(8)
 	        shtp.Entsize = uint64(0)
@@ -1835,7 +1842,7 @@ func main() {
 	        shtp.Size = uint64(24*len(relatext))   // need calculate
 		// prepare for next loop sec
 		sec_offset += shtp.Size
-	        shtp.Link = uint32(slices.Index(shstrtab, ".symtab\x00")) // link to SHT's index, same as (.symtab index in .shstrtab)
+	        shtp.Link = uint32(slices.Index(shstrtab, ".symtab\x00")) // link to dependency SHT's index, calculated by (.symtab index in array .shstrtab) 
 	        shtp.Info = uint32(0)
 	        shtp.Addralign = uint64(1)
 	        shtp.Entsize = uint64(0)
