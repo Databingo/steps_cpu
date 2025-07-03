@@ -617,7 +617,7 @@ func main() {
 			//fmt.Println("Directive:", directive, "|Suf_directive:", suf_directive)
 			//}
 			if directive == ".global" {
-			    fmt.Println("Directive:", directive, "|Suf_directive:", suf_directive)
+			    fmt.Println("Directive:", directive, "//Suf_directive:", suf_directive)
 			    fmt.Println("create .symtab entry + .strtab entry, add .symtab to .shstrtab")
 			    if !slices.Contains(shstrtab, ".strtab\x00") {
 			        //sht + shstrtab
@@ -633,6 +633,8 @@ func main() {
 			    }
 
 	                    sym.Name = uint32(len(strings.Join(strtab,"")))  //#uint32 // offset in string table
+			    fmt.Println("sym.Name:|||", sym.Name)
+
 	                    sym.Info = (STB_GLOBAL<<4 | STT_FUNC)    //# H4:binding and L4:type
 	                    sym.Other = 0 //uint8 // reserved, currently holds 0
 	                    //sym.Shndx = uint16(slices.Index(shstrtab, section_in))//0 //#uint16 // section index the symbol in
