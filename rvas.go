@@ -349,7 +349,7 @@ func main() {
 	elf_header.Entry = 0x0          // e_entry program entry address -- 0 for relocatable file set final entry point by linker
 	elf_header.Phoff = 0x0          // e_phoff points to start of program header table --  0 for relocatable file (no program headers)
 	//-------
-	elf_header.Shoff = 0x40         // e_shoff points to start of section header table --  no 0 have to be the start of SHT  (e_shnum * e_shentsize = whole table of SHT)
+	elf_header.Shoff = 0x40         // e_shoff points to start of section header table --  no 0 have to be the start of SHT  (e_shnum * e_shentsize = whole table of SHT) = elf_heaser.Ehsize ? 
 	elf_header.Flags = 0x00000004   // e_flags  // 0x4 for LP64D ABI  (EF_RISCV_FLOAT_ABI_DOUBLE) fit for RV64G
 	elf_header.Ehsize = 0x0040      // e_ehsize specify size of This header, 52 bytes(0x34) for 32-bit format, 64 bytes(0x40) for 64-bit ?
 	elf_header.Phentsize = 0x0      // e_phentsize size of program header table entry -- 0 for relocatable
@@ -1741,7 +1741,7 @@ func main() {
 	        shtp.Offset = uint64(0)
 	        shtp.Size = uint64(0)
 		// prepare for next loop sec
-		sec_offset = elf_header.Shoff + shtp.Size// ???!!! *sh
+		sec_offset = elf_header.Shoff + uint64(elf_header.Shentsize * elf_header.Shnum) + shtp.Size // prepare offset for first section .shstrtab
 		fmt.Println("set_offset:::", sec_offset)
 	        shtp.Link = uint32(0)
 	        shtp.Info = uint32(0)
