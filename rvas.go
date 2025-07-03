@@ -1790,7 +1790,7 @@ func main() {
 	        shtp.Size = uint64(24*len(symtab_))   // need calculate
 		// prepare for next loop sec
 		sec_offset += shtp.Size
-	        shtp.Link = uint32(0)
+	        shtp.Link = uint32(slices.Index(shstrtab, ".strtab\x00")) // link to SHT's index, same as (.strmtab index in .shstrtab) 
 	        shtp.Info = uint32(0)
 	        shtp.Addralign = uint64(8)
 	        shtp.Entsize = uint64(24)
@@ -1835,7 +1835,7 @@ func main() {
 	        shtp.Size = uint64(24*len(relatext))   // need calculate
 		// prepare for next loop sec
 		sec_offset += shtp.Size
-	        shtp.Link = uint32(0)
+	        shtp.Link = uint32(slices.Index(shstrtab, ".symtab\x00")) // link to SHT's index, same as (.symtab index in .shstrtab)
 	        shtp.Info = uint32(0)
 	        shtp.Addralign = uint64(1)
 	        shtp.Entsize = uint64(0)
@@ -1853,7 +1853,7 @@ func main() {
 	    case ".strtab\x00":
 	        cal_bytes = append(cal_bytes,[]byte(strings.Join(strtab, ""))...)
 	    case ".symtab\x00":
-		for _, sym := range symtab{
+		for _, sym := range symtab_{
 	        cal_bytes = append(cal_bytes, byted(sym)...)
 	    }
 	    case ".text\x00":
