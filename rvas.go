@@ -680,7 +680,7 @@ func main() {
 		        sym_index := slices.Index(strtab, label_in+"\x00")
 			    fmt.Println("|-:sym.Name",len(strings.Join(strtab,"")),  "strtab:", strtab, "section_in:", section_in)
 			if sym_index == -1 {
-	                    sym.Name = uint32(len(strings.Join(strtab,"")))  //#uint32 // offset in string table
+	                    //sym.Name = uint32(len(strings.Join(strtab,"")))  //#uint32 // offset in string table
 	                    sym.Info = (STB_LOCAL << 4 | STT_FUNC)    //# H4:binding and L4:type
 	                    sym.Other = 0 //uint8 // reserved, currently holds 0
 	                    sym.Shndx = uint16(slices.Index(shstrtab, section_in))//0 //#uint16 // section index the symbol in
@@ -1869,8 +1869,9 @@ func main() {
 	    case ".strtab\x00":
 	        cal_bytes = append(cal_bytes,[]byte(strings.Join(strtab, ""))...)
 	    case ".symtab\x00":
-		for _, sym := range symtab_{
-	        cal_bytes = append(cal_bytes, byted(sym)...)
+		for idx, _ := range symtab_{
+	        symtab_[idx].Name = uint32(len(strings.Join(strtab[:idx],"")))  //#uint32 // offset in string table
+	        cal_bytes = append(cal_bytes, byted(symtab_[idx])...)
 	    }
 	    case ".text\x00":
 	        cal_bytes = append(cal_bytes, txt...)
