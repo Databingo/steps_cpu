@@ -691,10 +691,10 @@ func main() {
 			    //symtab_ = append(symtab_, sym)
 			    //strtab = append(strtab, label_in+"\x00")
 			    //local symbols should be in front of global symbols in symtab
-			    symtab_ = append(symtab_[:1+1], symtab_[1:]...)
-			    symtab_[1] = sym
-			    strtab = append(strtab[:1+1], strtab[1:]...)
-			    strtab[1] = label_in+"\x00"
+			    //symtab_ = append(symtab_[:1+1], symtab_[1:]...)
+			    //symtab_[1] = sym
+			    symtab_ = slices.Insert(symtab_, 1, sym)
+			    strtab = slices.Insert(strtab, 1, label_in+"\x00")
 			} else {
 			    fmt.Println("=|=shndx:", uint16(slices.Index(shstrtab, section_in)), strtab, "section_in:", section_in, "sym_index:", sym_index, "symbal:", strtab[sym_index])
 			    symtab_[sym_index].Shndx = uint16(slices.Index(shstrtab, section_in))//0 //#uint16 // section index the symbol in
