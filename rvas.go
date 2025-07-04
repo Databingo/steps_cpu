@@ -664,7 +664,7 @@ func main() {
 			    fmt.Println("sym_e:", symtab_[sym_index])
 			    pad8 :=  align8(suf_directive)
 	                    //symtab_[sym_index].Name = 1  // points to "_start" in .strtab
-	                    symtab_[sym_index].Info = ( symtab_[sym_index].Info | STT_OBJECT  ) //# uint8 // H4:binding and L4:type
+	                    symtab_[sym_index].Info = ( symtab_[sym_index].Info >> 4 | STT_OBJECT  ) //# uint8 // H4:binding and L4:type
 	                    //symtab_[sym_index].Other = 0 //uint8 // reserved, currently holds 0
 	                    symtab_[sym_index].Shndx = uint16(slices.Index(shstrtab, section_in))//4 //uint16 // section index the symbol in (.text)
 	                    symtab_[sym_index].Value = uint64(len(data)) //# uint64  for relocatable .o file it's symbol's offset in its section
