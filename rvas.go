@@ -60,7 +60,8 @@ func align_x(data interface{}, align int) []byte {
 	bytes := buf.Bytes()
 	padding := align - len(bytes)%align
 	if padding == align {
-		padding = 0
+		//padding = 0
+	    return bytes
 	}
 	padded := make([]byte, len(bytes)+padding)
 	copy(padded, bytes)
