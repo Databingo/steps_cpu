@@ -1800,7 +1800,7 @@ func main() {
 	        shtp.Type = uint32(3)// sh_type 3_SHT_STRTAB 
 	        shtp.Flags = uint64(0)//?
 	        shtp.Addr = uint64(0)// ?sh_addr virtual address at exection?
-	        shtp.Offset = sec_offset  
+	        shtp.Offset = sec_offset   
 	        shtp.Size = uint64(len(strings.Join(shstrtab, "")))   // need calculate
 		// prepare for next loop sec
 		sec_offset += shtp.Size
@@ -1831,8 +1831,8 @@ func main() {
 	        shtp.Type = uint32(2)
 	        shtp.Flags = uint64(0)
 	        shtp.Addr = uint64(0)
-	        shtp.Offset = sec_offset  
-	        shtp.Size = uint64(24*len(symtab_))   // need calculate
+	        shtp.Offset = sec_offset // have to be padded with  Addralign value 
+	        shtp.Size = uint64(24*len(symtab_))  // need calculate and no need padding
 		// prepare for next loop sec
 		sec_offset += shtp.Size
 	        shtp.Link = uint32(slices.Index(shstrtab, ".strtab\x00")) // link to dependency SHT's index, calculated by (.strtab index in array .shstrtab) 
@@ -1852,8 +1852,8 @@ func main() {
 	        shtp.Type = uint32(SHT_PROGBITS)  // include .text .data .rodata what for define program
 	        shtp.Flags = uint64(SHF_ALLOC | SHF_EXECINSTR)
 	        shtp.Addr = uint64(0)
-	        shtp.Offset = sec_offset  
-	        shtp.Size = uint64(len(txt))   // need calculate
+	        shtp.Offset = sec_offset  // have to be padded with  Addralign value 
+	        shtp.Size = uint64(len(txt))   // need calculate and no need padding
 		// prepare for next loop sec
 		sec_offset += shtp.Size
 	        shtp.Link = uint32(0)//0
@@ -1867,8 +1867,8 @@ func main() {
 	        shtp.Type = uint32(SHT_PROGBITS)
 	        shtp.Flags = uint64(SHF_ALLOC | SHF_WRITE)
 	        shtp.Addr = uint64(0)
-	        shtp.Offset = sec_offset  
-	        shtp.Size = uint64(len(data))   // need calculate
+	        shtp.Offset = sec_offset  // have to be padded with  Addralign value 
+	        shtp.Size = uint64(len(data)) // need calculate and no need padding 
 		// prepare for next loop sec
 		sec_offset += shtp.Size
 	        shtp.Link = uint32(0)//0
@@ -1882,8 +1882,8 @@ func main() {
 	        shtp.Type = uint32(SHT_RELA)
 	        shtp.Flags = uint64(0)  // SHF_INFO_LINK for relocation section
 	        shtp.Addr = uint64(0)  // not loaded into memory
-	        shtp.Offset = sec_offset  
-	        shtp.Size = uint64(24*len(relatext))   // need calculate
+	        shtp.Offset = sec_offset  // have to be padded with  Addralign value 
+	        shtp.Size = uint64(24*len(relatext))   // need calculate and no need padding
 		// prepare for next loop sec
 		sec_offset += shtp.Size
 	        shtp.Link = uint32(slices.Index(shstrtab, ".symtab\x00")) // link to dependency SHT's index, calculated by (.symtab index in array .shstrtab) 
