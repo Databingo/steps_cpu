@@ -1854,7 +1854,7 @@ func main() {
 	        shtp.Link = uint32(slices.Index(shstrtab, ".symtab\x00")) // link to dependency SHT's index, calculated by (.symtab index in array .shstrtab) 
 	        shtp.Info = uint32(0)
 	        shtp.Addralign = uint64(1)
-	        shtp.Entsize = uint64(0)
+	        shtp.Entsize = uint64(24)
 	        cal_bytes = append(cal_bytes, byted(shtp)...)
 	}
 	        fmt.Printf("{{%d, %+v\n", idx, sht)
@@ -1886,31 +1886,31 @@ func main() {
 
 	fff.Write(cal_bytes)
 
-	fmt.Println("shstrtab string list:", shstrtab, len(shstrtab))
-	for idx, shstr := range shstrtab {
-			    fmt.Printf("==%d, %+v\n", idx, shstr)
-	}
-	fmt.Println("strtab string list:", strtab, len(strtab))
-	for idx, str := range strtab {
-			    fmt.Printf("==%d, %+v\n", idx, str)
-	}
-	fmt.Println("symtab_ Elf64_sym list:", symtab_, len(symtab_))
-	for idx, sym := range symtab {
-			    fmt.Printf("==%d, %+v\n", idx, sym)
-	}
-	//text, data byte list
-	fmt.Println("relatext Elf64_rela list:", relatext, len(relatext))
-	for idx, rela := range relatext {
-			    fmt.Printf("==%d, %+v\n", idx, rela)
-	}
-	fmt.Println("cal_bytes:")
-	fmt.Println(cal_bytes)
+	//fmt.Println("shstrtab string list:", shstrtab, len(shstrtab))
+	//for idx, shstr := range shstrtab {
+	//		    fmt.Printf("==%d, %+v\n", idx, shstr)
+	//}
+	//fmt.Println("strtab string list:", strtab, len(strtab))
+	//for idx, str := range strtab {
+	//		    fmt.Printf("==%d, %+v\n", idx, str)
+	//}
+	//fmt.Println("symtab_ Elf64_sym list:", symtab_, len(symtab_))
+	//for idx, sym := range symtab {
+	//		    fmt.Printf("==%d, %+v\n", idx, sym)
+	//}
+	////text, data byte list
+	//fmt.Println("relatext Elf64_rela list:", relatext, len(relatext))
+	//for idx, rela := range relatext {
+	//		    fmt.Printf("==%d, %+v\n", idx, rela)
+	//}
+	//fmt.Println("cal_bytes:")
+	//fmt.Println(cal_bytes)
 
 
-	 fmt.Println("shts SHT list:", shts, len(shts))
-	 fmt.Println("shstrtab string list:", shstrtab, len(shstrtab))
-	 fmt.Println("strtab string list:", strtab, len(strtab))
-	 fmt.Println("symtab_ Elf64_sym list:", symtab_, len(symtab_))
-	 //text, data byte list
-	 fmt.Println("relatext Elf64_rela list:", relatext, len(relatext))
+	// fmt.Println("shts SHT list:", shts, len(shts))
+	// fmt.Println("shstrtab string list:", shstrtab, len(shstrtab))
+	// fmt.Println("strtab string list:", strtab, len(strtab))
+	// fmt.Println("symtab_ Elf64_sym list:", symtab_, len(symtab_))
+	// //text, data byte list
+	// fmt.Println("relatext Elf64_rela list:", relatext, len(relatext))
 }
