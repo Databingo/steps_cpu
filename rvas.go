@@ -591,13 +591,13 @@ func main() {
        
 	//elf
 	//sht0
-	elf_header.Shnum += 1 
-	shts = append(shts, sht) // strings array shts and shstrtab are same order
 	shstrtab = append(shstrtab,"\x00")
-	//sht1
+	shts = append(shts, sht) // strings array shts and shstrtab are same order
 	elf_header.Shnum += 1 
-	shts = append(shts, sht)
+	//sht1
 	shstrtab = append(shstrtab,".shstrtab\x00")
+	shts = append(shts, sht)
+	elf_header.Shnum += 1 
 	
 	for scanner0.Scan() {
 		raw_instr := scanner0.Text() + "\n"
