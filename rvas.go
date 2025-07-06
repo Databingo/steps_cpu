@@ -30,6 +30,11 @@ import (
 
 // find Section_name
 // elf-shoff-sht-namendx + .shstrtab -> name
+
+// align
+// 4 .text
+// 8 .data .rela.text .symtab
+// 1 .strtab .shstrtab (no need align)
 func align8(data interface{}) []byte {
         if s, ok := data.(string); ok {
 	    data = []byte(s)
@@ -39,6 +44,22 @@ func align8(data interface{}) []byte {
 	bytes := buf.Bytes()
 	padding := 8 - len(bytes)%8
 	if padding == 8 {
+		padding = 0
+	}
+	padded := make([]byte, len(bytes)+padding)
+	copy(padded, bytes)
+	return padded
+}
+
+func align_x(data interface{}, align int) []byte {
+        if s, ok := data.(string); ok {
+	    data = []byte(s)
+	}
+	buf := new(bytes.Buffer)
+	_ = binary.Write(buf, binary.LittleEndian, data)
+	bytes := buf.Bytes()
+	padding := align - len(bytes)%align
+	if padding == align {
 		padding = 0
 	}
 	padded := make([]byte, len(bytes)+padding)
@@ -70,6 +91,18 @@ type Elf64_header struct {
 	Shstrndx  uint16 // index of the SHT entry that contains all the section names -- if no, 0 must be SHT index for .shstrtab section
 }
 
+// sht's type
+const SHT_NULL = 0
+const SHT_PROGBITS = 1
+const SHT_SYMTAB = 2
+const SHT_STRTAB = 3
+const SHT_RELA = 4
+// sht's flag
+const SHF_WRITE = 1 // writable during execution
+const SHF_ALLOC = 2 // load when run
+const SHF_EXECINSTR = 4 
+
+
 type SHT struct {
 	Name      uint32
 	Type      uint32 // 0 unused|1 program|2 symbol|3 string|4 relocation entries with addends|5 symbol hash|6 dynamic linking|7 notes|8 bss|9 relocation no addends|10 reserved|11 dynamic linker symbol...
@@ -83,17 +116,17 @@ type SHT struct {
 	Entsize   uint64
 }
 
+// symtab info's binding
+const STB_LOCAL = 0  // local visiable
+const STB_GLOBAL = 1 // global visiable
+const STB_WEAK = 2   // coverable global
+
 // symtab info's type
 const STT_NOTYPE = 0 // undefined
 const STT_OBJECT = 1
 const STT_FUNC = 2
 const STT_SECTION = 3
 const STT_FILE = 4
-
-// symtab info's binding
-const STB_LOCAL = 0  // local visiable
-const STB_GLOBAL = 1 // global visiable
-const STB_WEAK = 2   // coverable global
 
 type Elf64_sym struct { // 24 bytes
 	Name  uint32 // offset in string table
@@ -662,7 +695,8 @@ func main() {
 			    sym_index := slices.Index(strtab, label_in+"\x00")
 			    fmt.Println("label_in-:", label_in, sym_index)
 			    fmt.Println("sym_e:", symtab_[sym_index])
-			    pad8 :=  align8(suf_directive)
+			    //pad8 :=  align8(suf_directive)
+			    pad8 :=  align_x(suf_directive, 8)
 	                    //symtab_[sym_index].Name = 1  // points to "_start" in .strtab
 	                    symtab_[sym_index].Info = ( symtab_[sym_index].Info >> 4 | STT_OBJECT  ) //# uint8 // H4:binding and L4:type
 	                    //symtab_[sym_index].Other = 0 //uint8 // reserved, currently holds 0
@@ -1814,8 +1848,8 @@ func main() {
 	    case ".text\x00":
 	        fmt.Println("SHT Section header of .text }}}:")
 		shtp.Name = uint32(len(strings.Join(shstrtab[0:idx], "")))    // 0 for null
-	        shtp.Type = uint32(0)
-	        shtp.Flags = uint64(0)
+	        shtp.Type = uint32(SHT_PROGBITS)  // include .text .data .rodata what for define program
+	        shtp.Flags = uint64(SHF_ALLOC | SHF_EXECINSTR)
 	        shtp.Addr = uint64(0)
 	        shtp.Offset = sec_offset  
 	        shtp.Size = uint64(len(txt))   // need calculate
@@ -1823,14 +1857,14 @@ func main() {
 		sec_offset += shtp.Size
 	        shtp.Link = uint32(0)//0
 	        shtp.Info = uint32(0)
-	        shtp.Addralign = uint64(8)
+	        shtp.Addralign = uint64(4) // instruction is 32 bits aka aligned by 4 bytes
 	        shtp.Entsize = uint64(0)
 	        cal_bytes = append(cal_bytes, byted(shtp)...)
 	    case ".data\x00":
 	        fmt.Println("SHT Section header of .data }}}:")
 		shtp.Name = uint32(len(strings.Join(shstrtab[0:idx], "")))    // 0 for null
-	        shtp.Type = uint32(0)
-	        shtp.Flags = uint64(0)
+	        shtp.Type = uint32(SHT_PROGBITS)
+	        shtp.Flags = uint64(SHF_ALLOC | SHF_WRITE)
 	        shtp.Addr = uint64(0)
 	        shtp.Offset = sec_offset  
 	        shtp.Size = uint64(len(data))   // need calculate
@@ -1844,16 +1878,16 @@ func main() {
 	    case ".rela.text\x00":
 	        fmt.Println("SHT Section header of .rela.text }}}:")
 		shtp.Name = uint32(len(strings.Join(shstrtab[0:idx], "")))    // 0 for null
-	        shtp.Type = uint32(0)
-	        shtp.Flags = uint64(0)
-	        shtp.Addr = uint64(0)
+	        shtp.Type = uint32(SHT_RELA)
+	        shtp.Flags = uint64(0)  // SHF_INFO_LINK for relocation section
+	        shtp.Addr = uint64(0)  // not loaded into memory
 	        shtp.Offset = sec_offset  
 	        shtp.Size = uint64(24*len(relatext))   // need calculate
 		// prepare for next loop sec
 		sec_offset += shtp.Size
 	        shtp.Link = uint32(slices.Index(shstrtab, ".symtab\x00")) // link to dependency SHT's index, calculated by (.symtab index in array .shstrtab) 
-	        shtp.Info = uint32(0)
-	        shtp.Addralign = uint64(1)
+	        shtp.Info = uint32(slices.Index(shstrtab, ".text\x00")) // must info to be relocation section
+	        shtp.Addralign = uint64(8)
 	        shtp.Entsize = uint64(24)
 	        cal_bytes = append(cal_bytes, byted(shtp)...)
 	}
