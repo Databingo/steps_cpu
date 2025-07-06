@@ -1884,6 +1884,7 @@ func main() {
 	    }
 	}
 
+	fff.Write(cal_bytes)
 
 	fmt.Println("shstrtab string list:", shstrtab, len(shstrtab))
 	for idx, shstr := range shstrtab {
@@ -1904,7 +1905,6 @@ func main() {
 	}
 	fmt.Println("cal_bytes:")
 	fmt.Println(cal_bytes)
-	fff.Write(cal_bytes)
 
 
 	 fmt.Println("shts SHT list:", shts, len(shts))
