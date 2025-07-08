@@ -1912,10 +1912,16 @@ func main() {
 	    switch shstr {
             case "\x00":
 	    case ".shstrtab\x00":
-	        cal_bytes = append(cal_bytes,[]byte(strings.Join(shstrtab, ""))...)
+		former_len := shts[slices.Index(shstrtab, ".shstrtab\x00")].Offset
+	        padd := make([]byte, former_len)
+	        copy(padd, cal_bytes)
+	        cal_bytes = append(padd, []byte(strings.Join(shstrtab, ""))...)
 	        fmt.Println("caled .shstrtab")
 	    case ".strtab\x00":
-	        cal_bytes = append(cal_bytes,[]byte(strings.Join(strtab, ""))...)
+		former_len := shts[slices.Index(shstrtab, ".strtab\x00")].Offset
+	        padd := make([]byte, former_len)
+	        copy(padd, cal_bytes)
+	        cal_bytes = append(padd, []byte(strings.Join(strtab, ""))...)
 	    case ".symtab\x00":
 		for idx, _ := range symtab_{
 	        symtab_[idx].Name = uint32(len(strings.Join(strtab[:idx],"")))  //#uint32 // offset in string table
