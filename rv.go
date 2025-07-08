@@ -514,12 +514,14 @@ func main() {
 	                        shstrtab = append(shstrtab, ".strtab\x00")
 	                        shts = append(shts, sht)
 	                        elf_header.Shnum += 1 
+	                        add_sec(".strtab\x00")
 			    }
 			    if !slices.Contains(shstrtab, ".symtab\x00") {
 			        //sht + shstrtab
 	                        shstrtab = append(shstrtab, ".symtab\x00")
 	                        shts = append(shts, sht)
 	                        elf_header.Shnum += 1 
+	                        add_sec(".symtab\x00")
 			    }
 
 	                    sym.Name = uint32(len(strings.Join(strtab,"")))  //#uint32 // offset in string table
@@ -544,6 +546,7 @@ func main() {
 	                    shstrtab = append(shstrtab,suf_directive+"\x00")
 	                    shts = append(shts, sht)
 	                    elf_header.Shnum += 1 
+	                    add_sec(suf_directive + "\x00")
 			}
 			if directive == ".string" {
 			    fmt.Println("Directive:", directive, "||Suf_directive:", suf_directive)
@@ -792,6 +795,7 @@ func main() {
 	                        elf_header.Shnum += 1 
 	                        shts = append(shts, sht)
 	                        shstrtab = append(shstrtab, ".rela.text\x00")
+	                        add_sec(".rela.text\x00")
 			    }
 			fmt.Println(`
 		                 for .rela.text: 
@@ -1601,4 +1605,5 @@ func main() {
 
 	fff.Write(cal_bytes)
 
+	fmt.Printf("shstrtabb:", shstrtabb)
 }
