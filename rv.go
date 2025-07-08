@@ -1606,4 +1606,5 @@ func main() {
 	fff.Write(cal_bytes)
 
 	fmt.Printf("shstrtabb:", shstrtabb)
+	fmt.Printf("sec_map:", sec_map)
 }
