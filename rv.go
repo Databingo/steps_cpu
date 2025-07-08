@@ -1623,8 +1623,8 @@ func main() {
 	fff.Write(cal_bytes)
 
 	fmt.Println("shstrtabb:", shstrtabb, "\n")
-	fmt.Println("strtabb:", strtabb, "\n")
-	fmt.Println("sec_map:", sec_map, "\n")
-	fmt.Println("sym_map:", sym_map, "\n")
 	fmt.Println("sht_map:", sht_map, "\n")
+	fmt.Println("sec_map:", sec_map, "\n")
+	fmt.Println("strtabb:", strtabb, "\n")
+	fmt.Println("sym_map:", sym_map, "\n")
 }
