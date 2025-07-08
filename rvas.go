@@ -611,6 +611,7 @@ func main() {
 	scanner0.Split(bufio.ScanLines)
 	var copy_instr strings.Builder
 
+	// parse directive
 	//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	var section_in string
 	var label_in string
@@ -655,15 +656,15 @@ func main() {
 			    fmt.Println("create .symtab entry + .strtab entry, add .symtab to .shstrtab")
 			    if !slices.Contains(shstrtab, ".strtab\x00") {
 			        //sht + shstrtab
-	                        elf_header.Shnum += 1 
-	                        shts = append(shts, sht)
 	                        shstrtab = append(shstrtab, ".strtab\x00")
+	                        shts = append(shts, sht)
+	                        elf_header.Shnum += 1 
 			    }
 			    if !slices.Contains(shstrtab, ".symtab\x00") {
 			        //sht + shstrtab
-	                        elf_header.Shnum += 1 
-	                        shts = append(shts, sht)
 	                        shstrtab = append(shstrtab, ".symtab\x00")
+	                        shts = append(shts, sht)
+	                        elf_header.Shnum += 1 
 			    }
 
 	                    sym.Name = uint32(len(strings.Join(strtab,"")))  //#uint32 // offset in string table
@@ -675,9 +676,9 @@ func main() {
 			    //fmt.Println("-::", section_in, uint16(slices.Index(shstrtab, section_in)))//0 //#uint16 // section index the symbol in
 	                    sym.Value = 0 //# uint64  for relocatable .o file it's symbol's offset in its section
 	                    sym.Size = 0  //#uint64  for function it's its size   -- uint64(len(align8("H\n")))                   
-			    //sym + str + data
-			    symtab_ = append(symtab_, sym)
+			    //sym + str 
 			    strtab = append(strtab, suf_directive+"\x00")
+			    symtab_ = append(symtab_, sym)
 			}
 
 			if directive == ".section" {
@@ -685,9 +686,9 @@ func main() {
 			    fmt.Println("create SHT(s) + .shstrtab entry + section[]byte")
 			    section_in = suf_directive + "\x00"
 			    //sht
-	                    elf_header.Shnum += 1 
-	                    shts = append(shts, sht)
 	                    shstrtab = append(shstrtab,suf_directive+"\x00")
+	                    shts = append(shts, sht)
+	                    elf_header.Shnum += 1 
 			}
 			if directive == ".string" {
 			    fmt.Println("Directive:", directive, "||Suf_directive:", suf_directive)
@@ -728,8 +729,8 @@ func main() {
 			    //local symbols should be in front of global symbols in symtab
 			    //symtab_ = append(symtab_[:1+1], symtab_[1:]...)
 			    //symtab_[1] = sym
-			    symtab_ = slices.Insert(symtab_, 1, sym)
 			    strtab = slices.Insert(strtab, 1, label_in+"\x00")
+			    symtab_ = slices.Insert(symtab_, 1, sym)
 			} else {
 			    fmt.Println("=|=shndx:", uint16(slices.Index(shstrtab, section_in)), strtab, "section_in:", section_in, "sym_index:", sym_index, "symbal:", strtab[sym_index])
 			    symtab_[sym_index].Shndx = uint16(slices.Index(shstrtab, section_in))//0 //#uint16 // section index the symbol in
@@ -1880,7 +1881,7 @@ func main() {
 	        fmt.Println("SHT Section header of .rela.text }}}:")
 		shtp.Name = uint32(len(strings.Join(shstrtab[0:idx], "")))    // 0 for null
 	        shtp.Type = uint32(SHT_RELA)
-	        shtp.Flags = uint64(0)  // SHF_INFO_LINK for relocation section
+	        shtp.Flags = uint64(0x40)  // SHF_INFO_LINK for relocation section say sh_info work
 	        shtp.Addr = uint64(0)  // not loaded into memory
 	        shtp.Offset = sec_offset  // have to be padded with  Addralign value 
 	        shtp.Size = uint64(24*len(relatext))   // need calculate and no need padding
