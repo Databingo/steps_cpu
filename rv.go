@@ -1622,7 +1622,9 @@ func main() {
 
 	fff.Write(cal_bytes)
 
-	fmt.Printf("shstrtabb:", shstrtabb)
-	fmt.Printf("sec_map:", sec_map)
-	fmt.Printf("sym_map:", sym_map)
+	fmt.Println("shstrtabb:", shstrtabb, "\n")
+	fmt.Println("strtabb:", strtabb, "\n")
+	fmt.Println("sec_map:", sec_map, "\n")
+	fmt.Println("sym_map:", sym_map, "\n")
+	fmt.Println("sht_map:", sht_map, "\n")
 }
