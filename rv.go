@@ -465,10 +465,11 @@ func main() {
 	var data []byte
 	symtab_ := []Elf64_sym{sym}// symtab_ array and strtab are same order
 	strtab := []string{"\x00"}
+	strtabb := []string{"\x00"}
 	var relatext []Elf64_rela
 	//var no_local_sym_1st uint32
 	sht_map := make(map[string]SHT)
-	//var sym_map map[string]Elf64_sym
+	sym_map := make(map[string]Elf64_sym)
 	sec_map := make(map[string][]byte)
        
 	add_sec := func(shstr string) {
@@ -476,6 +477,16 @@ func main() {
 	     sht_map[shstr] = sht
 	     sec_map[shstr] = []byte{}
 	     elf_header.Shnum += 1 
+	}
+
+	add_sym_local := func(str string, sym Elf64_sym) {
+	     strtabb = slices.Insert(strtabb, 1, str)
+	     sym_map[str] = sym
+	}
+
+	add_sym_global := func(str string, sym Elf64_sym) {
+	     strtabb = append(strtabb, str)
+	     sym_map[str] = sym
 	}
 	//elf
 	//sht0
@@ -536,6 +547,9 @@ func main() {
 			    //sym + str 
 			    strtab = append(strtab, suf_directive+"\x00")
 			    symtab_ = append(symtab_, sym)
+			    //----
+			    sym_str := suf_directive+"\x00"
+                            add_sym_global(sym_str, sym) 
 			}
 
 			if directive == ".section" {
@@ -589,6 +603,9 @@ func main() {
 			    //symtab_[1] = sym
 			    strtab = slices.Insert(strtab, 1, label_in+"\x00")
 			    symtab_ = slices.Insert(symtab_, 1, sym)
+			    //----
+			    sym_str := label_in +"\x00"
+                            add_sym_local(sym_str, sym) 
 			} else {
 			    fmt.Println("=|=shndx:", uint16(slices.Index(shstrtab, section_in)), strtab, "section_in:", section_in, "sym_index:", sym_index, "symbal:", strtab[sym_index])
 			    symtab_[sym_index].Shndx = uint16(slices.Index(shstrtab, section_in))//0 //#uint16 // section index the symbol in
@@ -1607,4 +1624,5 @@ func main() {
 
 	fmt.Printf("shstrtabb:", shstrtabb)
 	fmt.Printf("sec_map:", sec_map)
+	fmt.Printf("sym_map:", sym_map)
 }
