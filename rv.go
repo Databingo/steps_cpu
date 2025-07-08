@@ -460,25 +460,34 @@ func main() {
 	var label_in string
 	var shts []SHT
 	var shstrtab []string
+	var shstrtabb []string
 	var text []byte
 	var data []byte
 	symtab_ := []Elf64_sym{sym}// symtab_ array and strtab are same order
 	strtab := []string{"\x00"}
 	var relatext []Elf64_rela
 	//var no_local_sym_1st uint32
-	var sht_map map[string]SHT
-	var sym_map map[string]Elf64_sym
-	var sec_map map[string]any
+	sht_map := make(map[string]SHT)
+	//var sym_map map[string]Elf64_sym
+	sec_map := make(map[string][]byte)
        
+	add_sec := func(shstr string) {
+	     shstrtabb = append(shstrtabb, shstr)
+	     sht_map[shstr] = sht
+	     sec_map[shstr] = []byte{}
+	     elf_header.Shnum += 1 
+	}
 	//elf
 	//sht0
 	shstrtab = append(shstrtab,"\x00")
 	shts = append(shts, sht) // strings array shts and shstrtab are same order
 	elf_header.Shnum += 1 
+	add_sec("\x00")
 	//sht1
 	shstrtab = append(shstrtab,".shstrtab\x00")
 	shts = append(shts, sht)
 	elf_header.Shnum += 1 
+	add_sec(".shstrtab\x00")
 	
 	for scanner0.Scan() {
 		raw_instr := scanner0.Text() + "\n"
