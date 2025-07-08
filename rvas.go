@@ -68,6 +68,16 @@ func align_x(data interface{}, align int) []byte {
 	return padded
 }
 
+func align_n(length uint64, align uint64) uint64 {
+	padding := align - length%align
+	if padding == align {
+		//padding = 0
+	    return length
+	}
+	padded := length+padding
+	return padded
+}
+
 func byted(data interface{}) []byte{
 	buf := new(bytes.Buffer)
 	_ = binary.Write(buf, binary.LittleEndian, data)
@@ -1781,61 +1791,64 @@ func main() {
 	    case "\x00":
 		fmt.Println("SHT Section header of NON XYY name startfrom:", idx, uint32(len(strings.Join(shstrtab[0:idx], ""))), "length:", len(byted(shtp)))
 		shtp.Name = uint32(len(strings.Join(shstrtab[0:idx], "")))    // 0 for null
+	        shtp.Addralign = uint64(1)
 	        shtp.Type = uint32(0)
 	        shtp.Flags = uint64(0)
 	        shtp.Addr = uint64(0)
-	        shtp.Offset = uint64(0)
 	        shtp.Size = uint64(0)
-		// prepare for next loop sec
+	        shtp.Offset = uint64(0)
+		// prepare for next loop sec (unpadding)
 		sec_offset = elf_header.Shoff + uint64(elf_header.Shentsize * elf_header.Shnum) + shtp.Size // prepare offset for first section .shstrtab
-		fmt.Println("set_offset:::", sec_offset)
+		fmt.Println("set_offset:X:", sec_offset)
 	        shtp.Link = uint32(0)
 	        shtp.Info = uint32(0)
-	        shtp.Addralign = uint64(0)
 	        shtp.Entsize = uint64(0)
 	        cal_bytes = append(cal_bytes, byted(shtp)...)
 	    case ".shstrtab\x00":
 	        fmt.Println("SHT Section header of .shstrtab }}}:")
 		fmt.Println("SHT Section header of NON YXY name startf:", uint32(len(strings.Join(shstrtab[0:idx], ""))), "length:", len(byted(shtp)))
 		shtp.Name = uint32(len(strings.Join(shstrtab[0:idx], "")))    // 0 for null
+	        shtp.Addralign = uint64(1) //?
 	        shtp.Type = uint32(3)// sh_type 3_SHT_STRTAB 
 	        shtp.Flags = uint64(0)//?
 	        shtp.Addr = uint64(0)// ?sh_addr virtual address at exection?
-	        shtp.Offset = sec_offset   
 	        shtp.Size = uint64(len(strings.Join(shstrtab, "")))   // need calculate
-		// prepare for next loop sec
-		sec_offset += shtp.Size
+		fmt.Println("set_offsetXXX", sec_offset)
+	        shtp.Offset = align_n(sec_offset, shtp.Addralign) // padding   
+		// prepare for next loop sec (unpadding)
+		sec_offset = shtp.Offset + shtp.Size
 		fmt.Println("set_offset:::", sec_offset)
 	        shtp.Link = uint32(0) //0
 	        shtp.Info = uint32(0) //
-	        shtp.Addralign = uint64(1) //?
 	        shtp.Entsize = uint64(0)
 	        cal_bytes = append(cal_bytes, byted(shtp)...)
 	    case ".strtab\x00":
 	        fmt.Println("SHT Section header of .strtab }}}:")
 		shtp.Name = uint32(len(strings.Join(shstrtab[0:idx], "")))    // 0 for null
+	        shtp.Addralign = uint64(1)
 	        shtp.Type = uint32(3)
 	        shtp.Flags = uint64(0)
 	        shtp.Addr = uint64(0)
-	        shtp.Offset = sec_offset  
 	        shtp.Size = uint64(len(strings.Join(strtab, "")))   // need calculate
-		// prepare for next loop sec
-		sec_offset += shtp.Size
+	        shtp.Offset = align_n(sec_offset, shtp.Addralign) // padding   
+		// prepare for next loop sec (unpadding)
+		sec_offset = shtp.Offset + shtp.Size
 	        shtp.Link = uint32(0)//0
 	        shtp.Info = uint32(0)
-	        shtp.Addralign = uint64(1)
 	        shtp.Entsize = uint64(0)
 	        cal_bytes = append(cal_bytes, byted(shtp)...)
 	    case ".symtab\x00":
 	        fmt.Println("SHT Section header of .symtab }}}:")
 		shtp.Name = uint32(len(strings.Join(shstrtab[0:idx], "")))    // 0 for null
+	        shtp.Addralign = uint64(8)
 	        shtp.Type = uint32(2)
 	        shtp.Flags = uint64(0)
 	        shtp.Addr = uint64(0)
-	        shtp.Offset = sec_offset // have to be padded with  Addralign value 
 	        shtp.Size = uint64(24*len(symtab_))  // need calculate and no need padding
-		// prepare for next loop sec
-		sec_offset += shtp.Size
+	        shtp.Offset = align_n(sec_offset, shtp.Addralign) // padding   
+		// prepare for next loop sec (unpadding)
+		sec_offset = shtp.Offset + shtp.Size
+		//sec_offset += align_x(shtp.Size, shtp.Addralign)
 	        shtp.Link = uint32(slices.Index(shstrtab, ".strtab\x00")) // link to dependency SHT's index, calculated by (.strtab index in array .shstrtab) 
 	        //shtp.Info = uint32(0) // first no-local symbol index in sym list
 		for idn, sym := range symtab_{
@@ -1844,52 +1857,51 @@ func main() {
 		       break
 		    }
 		}
-	        shtp.Addralign = uint64(8)
 	        shtp.Entsize = uint64(24)
 	        cal_bytes = append(cal_bytes, byted(shtp)...)
 	    case ".text\x00":
 	        fmt.Println("SHT Section header of .text }}}:")
 		shtp.Name = uint32(len(strings.Join(shstrtab[0:idx], "")))    // 0 for null
+	        shtp.Addralign = uint64(4) // instruction is 32 bits aka aligned by 4 bytes
 	        shtp.Type = uint32(SHT_PROGBITS)  // include .text .data .rodata what for define program
 	        shtp.Flags = uint64(SHF_ALLOC | SHF_EXECINSTR)
 	        shtp.Addr = uint64(0)
-	        shtp.Offset = sec_offset  // have to be padded with  Addralign value 
 	        shtp.Size = uint64(len(txt))   // need calculate and no need padding
-		// prepare for next loop sec
-		sec_offset += shtp.Size
+	        shtp.Offset = align_n(sec_offset, shtp.Addralign) // padding   
+		// prepare for next loop sec (unpadding)
+		sec_offset = shtp.Offset + shtp.Size
 	        shtp.Link = uint32(0)//0
 	        shtp.Info = uint32(0)
-	        shtp.Addralign = uint64(4) // instruction is 32 bits aka aligned by 4 bytes
 	        shtp.Entsize = uint64(0)
 	        cal_bytes = append(cal_bytes, byted(shtp)...)
 	    case ".data\x00":
 	        fmt.Println("SHT Section header of .data }}}:")
 		shtp.Name = uint32(len(strings.Join(shstrtab[0:idx], "")))    // 0 for null
+	        shtp.Addralign = uint64(8)
 	        shtp.Type = uint32(SHT_PROGBITS)
 	        shtp.Flags = uint64(SHF_ALLOC | SHF_WRITE)
 	        shtp.Addr = uint64(0)
-	        shtp.Offset = sec_offset  // have to be padded with  Addralign value 
 	        shtp.Size = uint64(len(data)) // need calculate and no need padding 
-		// prepare for next loop sec
-		sec_offset += shtp.Size
+	        shtp.Offset = align_n(sec_offset, shtp.Addralign) // padding   
+		// prepare for next loop sec (unpadding)
+		sec_offset = shtp.Offset + shtp.Size
 	        shtp.Link = uint32(0)//0
 	        shtp.Info = uint32(0)
-	        shtp.Addralign = uint64(8)
 	        shtp.Entsize = uint64(0)
 	        cal_bytes = append(cal_bytes, byted(shtp)...)
 	    case ".rela.text\x00":
 	        fmt.Println("SHT Section header of .rela.text }}}:")
 		shtp.Name = uint32(len(strings.Join(shstrtab[0:idx], "")))    // 0 for null
+	        shtp.Addralign = uint64(8)
 	        shtp.Type = uint32(SHT_RELA)
 	        shtp.Flags = uint64(0x40)  // SHF_INFO_LINK for relocation section say sh_info work
 	        shtp.Addr = uint64(0)  // not loaded into memory
-	        shtp.Offset = sec_offset  // have to be padded with  Addralign value 
 	        shtp.Size = uint64(24*len(relatext))   // need calculate and no need padding
-		// prepare for next loop sec
-		sec_offset += shtp.Size
+	        shtp.Offset = align_n(sec_offset, shtp.Addralign) // padding   
+		// prepare for next loop sec (unpadding)
+		sec_offset = shtp.Offset + shtp.Size
 	        shtp.Link = uint32(slices.Index(shstrtab, ".symtab\x00")) // link to dependency SHT's index, calculated by (.symtab index in array .shstrtab) 
 	        shtp.Info = uint32(slices.Index(shstrtab, ".text\x00")) // must info to be relocation section
-	        shtp.Addralign = uint64(8)
 	        shtp.Entsize = uint64(24)
 	        cal_bytes = append(cal_bytes, byted(shtp)...)
 	}
