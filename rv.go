@@ -117,7 +117,7 @@ const SHF_EXECINSTR = 4
 type SHT struct {
 	Name      uint32
 	Type      uint32 // 0 unused|1 program|2 symbol|3 string|4 relocation entries with addends|5 symbol hash|6 dynamic linking|7 notes|8 bss|9 relocation no addends|10 reserved|11 dynamic linker syb
-	Flags     uint64 // 1 writable|2 occupies memory during exection|4 executable|0x10 might by merged|0x20 contains null-terminated strings|0x40 sh_info contains SHT index
+	Flags     uint64 // 1 writable|2 occupies memory during exection|4 executable|0x10 might by merged|0x20 contains null-terminated strings|0x40 sh_info contains *SHT index
 	Addr      uint64
 	Offset    uint64 // section offset
 	Size      uint64 // section size
@@ -468,13 +468,13 @@ func main() {
 	strtabb := []string{"\x00"}
 	var relatext []Elf64_rela
 	//var no_local_sym_1st uint32
-	sht_map := make(map[string]SHT)
+	sht_map := make(map[string]*SHT)
 	sym_map := make(map[string]*Elf64_sym)
 	sec_map := make(map[string][]byte)
        
 	add_sec := func(shstr string) {
 	     shstrtabb = append(shstrtabb, shstr)
-	     sht_map[shstr] = sht
+	     sht_map[shstr] = &SHT{}
 	     sec_map[shstr] = []byte{}
 	     elf_header.Shnum += 1 
 	}
