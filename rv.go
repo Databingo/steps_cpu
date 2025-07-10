@@ -444,7 +444,7 @@ func main() {
 	sym.Info = 0  //# uint8 // H4:binding and L4:type
 	sym.Other = 0 //uint8 // reserved, currently holds 0
 	sym.Shndx = 0 //uint16 // section index the symbol in
-	sym.Value = 0 //# uint64  for relocatable .o file it's symbol's offset in its section such as .data
+	sym.Value = 0 //# uint64  for relocatable .o file it's symbol's offset in its section such as .data (single data no need ended with \x00)
 	sym.Size = 0  //#uint64  for it's its size
 
 	//Find symbol string
