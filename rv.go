@@ -553,6 +553,13 @@ func main() {
 			    sym_str := suf_directive+"\x00"
                             //###
                             add_sym_global(sym_str) //###
+	                    sym_map[sym_str].Name = uint32(len(strings.Join(strtabb,"")))  //#uint32 // offset in string table
+	                    sym_map[sym_str].Info = (STB_GLOBAL << 4 | STT_FUNC)    //# H4:binding and L4:type
+	                    sym_map[sym_str].Other = 0 //uint8 // reserved, currently holds 0
+	                    //sym.Shndx = uint16(slices.Index(shstrtab, section_in))//0 //#uint16 // section index the symbol in
+			    //fmt.Println("-::", section_in, uint16(slices.Index(shstrtab, section_in)))//0 //#uint16 // section index the symbol in
+	                    sym_map[sym_str].Value = 0 //# uint64  for relocatable .o file it's symbol's offset in its section
+	                    sym_map[sym_str].Size = 0  //#uint64  for function it's its size   -- uint64(len(align8("H\n")))                   
 			}
 
 			if directive == ".section" {
