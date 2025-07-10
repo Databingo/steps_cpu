@@ -525,13 +525,15 @@ func main() {
 	                        shstrtab = append(shstrtab, ".strtab\x00")
 	                        shts = append(shts, sht)
 	                        elf_header.Shnum += 1 
-	                        add_sec(".strtab\x00")//###
+                                //###
+	                        add_sec(".strtab\x00")
 			    }
 			    if !slices.Contains(shstrtab, ".symtab\x00") {
 			        //sht + shstrtab
 	                        shstrtab = append(shstrtab, ".symtab\x00")
 	                        shts = append(shts, sht)
 	                        elf_header.Shnum += 1 
+                                //###
 	                        add_sec(".symtab\x00")//###
 			    }
 
@@ -549,6 +551,7 @@ func main() {
 			    symtab_ = append(symtab_, sym)
 			    //----
 			    sym_str := suf_directive+"\x00"
+                            //###
                             add_sym_global(sym_str) //###
 			}
 
@@ -560,6 +563,7 @@ func main() {
 	                    shstrtab = append(shstrtab,suf_directive+"\x00")
 	                    shts = append(shts, sht)
 	                    elf_header.Shnum += 1 
+                            //###
 	                    add_sec(suf_directive + "\x00")//###
 			}
 			if directive == ".string" {
@@ -1632,4 +1636,5 @@ func main() {
 	fmt.Println("sec_map:", sec_map, "\n")
 	fmt.Println("strtabb:", strtabb, "\n")
 	fmt.Println("sym_map:", sym_map, "\n")
+	for k, s := range sym_map{ fmt.Printf("%v: %+v\n", k, s) }
 }
