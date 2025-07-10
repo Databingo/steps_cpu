@@ -484,9 +484,9 @@ func main() {
 	     sym_map[str] = &Elf64_sym{}
 	}
 
-	add_sym_global := func(str string, sym Elf64_sym) {
+	add_sym_global := func(str string) {
 	     strtabb = append(strtabb, str)
-	     sym_map[str] = &sym
+	     sym_map[str] = &Elf64_sym{}
 	}
 	//elf
 	//sht0
@@ -549,7 +549,7 @@ func main() {
 			    symtab_ = append(symtab_, sym)
 			    //----
 			    sym_str := suf_directive+"\x00"
-                            add_sym_global(sym_str, sym) //###
+                            add_sym_global(sym_str) //###
 			}
 
 			if directive == ".section" {
