@@ -591,6 +591,7 @@ func main() {
 			    //sym + str + data
                             data = append(data, pad8...)
 			    //###
+			    //sym_map[label_in+"\x00"].Name
 			    sym_map[label_in+"\x00"].Info = ( sym_map[label_in+"\x00"].Info >> 4 | STT_OBJECT  ) //# uint8 // H4:binding and L4:type
 			    sym_map[label_in+"\x00"].Shndx = uint16(slices.Index(shstrtab, section_in))//4 //uint16 // section index the symbol in (.text)
 			    sym_map[label_in+"\x00"].Value = uint64(len(data)) //# uint64  for relocatable .o file it's symbol's offset in its section
@@ -620,11 +621,20 @@ func main() {
 			    strtab = slices.Insert(strtab, 1, label_in+"\x00")
 			    symtab_ = slices.Insert(symtab_, 1, sym)
 			    //----
+			    //###
 			    sym_str := label_in +"\x00"
                             add_sym_local(sym_str) 
+	                    sym_map[sym_str].Info = (STB_LOCAL << 4 | STT_FUNC)    //# H4:binding and L4:type
+	                    sym_map[sym_str].Other = 0 //uint8 // reserved, currently holds 0
+	                    sym_map[sym_str].Shndx = uint16(slices.Index(shstrtab, section_in))//0 //#uint16 // section index the symbol in
+			    //fmt.Println("-::", section_in, uint16(slices.Index(shstrtab, section_in)))//0 //#uint16 // section index the symbol in
+	                    sym_map[sym_str].Value = 0 //# uint64  for relocatable .o file it's symbol's offset in its section
+	                    sym_map[sym_str].Size = 0  //#uint64  for function it's its size   -- uint64(len(align8("H\n")))                   
 			} else {
 			    fmt.Println("=|=shndx:", uint16(slices.Index(shstrtab, section_in)), strtab, "section_in:", section_in, "sym_index:", sym_index, "symbal:", strtab[sym_index])
 			    symtab_[sym_index].Shndx = uint16(slices.Index(shstrtab, section_in))//0 //#uint16 // section index the symbol in
+			    //###
+	                    sym_map[label_in+"\x00"].Shndx = uint16(slices.Index(shstrtab, section_in))//0 //#uint16 // section index the symbol in
 					    }
 			copy_instr.WriteString(raw_instr)
 		} else {
