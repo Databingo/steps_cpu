@@ -509,14 +509,14 @@ func main() {
 	     return slices.Index(array, str)
 	}
 
-	            // calculate section offset
-		    calc_sec_offset := func(shstr string) uint64{
-		    pre_shtp := sht_map[shstrtabb[get_sindex(shstrtabb, shstr)-1]]
-		    raw_offset :=  pre_shtp.Offset + pre_shtp.Size
-		    pad := padding(raw_offset,  sht_map[shstr].Addralign)
-		    sec_pad[shstr] = make([]byte, pad)
-		    return raw_offset + pad
-		}
+	calc_sec_offset := func(shstr string) uint64{
+	    pre_shtp := sht_map[shstrtabb[get_sindex(shstrtabb, shstr)-1]]
+	    raw_offset :=  pre_shtp.Offset + pre_shtp.Size
+	    pad := padding(raw_offset,  sht_map[shstr].Addralign)
+	    // padding bytes
+	    sec_pad[shstr] = make([]byte, pad)
+	    return raw_offset + pad
+	}
 	//elf
 	//sht0
 	//shstrtab = append(shstrtab,"\x00")
