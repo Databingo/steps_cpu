@@ -477,7 +477,6 @@ func main() {
 	sht_map := make(map[string]*SHT)
 	sym_map := make(map[string]*Elf64_sym)
 	sec_map := make(map[string][]byte)
-        sec_end := make(map[string]uint64)	
         sec_pad := make(map[string][]byte)	
 
 	shstrtab_d := []byte{}
@@ -1843,6 +1842,6 @@ func main() {
 	fmt.Println("shstrtabb:", shstrtabb)
 	for k, s := range sht_map{ fmt.Printf("sht_map %v: %+v\n", k, s) }
 	for k, s := range sec_map{ fmt.Printf("sec_map %v: %+v\n", k, s) }
-	for k, s := range sec_end{ fmt.Printf("end %v: %+v\n", k, s) }
+	for k, s := range sec_pad{ fmt.Printf("pad %v: %+v\n", k, s) }
 	fmt.Println("Shnum:", elf_header.Shnum)
 }
