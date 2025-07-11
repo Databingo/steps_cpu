@@ -479,6 +479,7 @@ func main() {
 	data_d := []byte{}
 	relatext_d := []byte{}
        
+	// NULL section is a real section excepts its contetn
 	add_sec := func(shstr string) {
 	     shstrtabb = append(shstrtabb, shstr)
 	     sht_map[shstr] = &SHT{}
@@ -1701,21 +1702,17 @@ func main() {
 	    fmt.Println(idx, shstr, sht_map[shstr])
 	    shtp := sht_map[shstr]
 	    switch shstr {
-	        case "\x00":
-	    	    shtp.Name = uint32(len(strings.Join(shstrtabb[0:idx], "")))    // 0 for null
-	            shtp.Addralign = uint64(1)
+	        case "\x00":// all 0 for null
+	    	    shtp.Name = uint32(0)    
+	            shtp.Addralign = uint64(0)
 	            shtp.Type = uint32(0)
 	            shtp.Flags = uint64(0)
 	            shtp.Addr = uint64(0)
 	            shtp.Size = uint64(0)
 	            shtp.Offset = uint64(0)
-	    	    // prepare for next loop sec (unpadding)
-	    	    sec_offset = elf_header.Shoff + uint64(elf_header.Shentsize * elf_header.Shnum) + shtp.Size // prepare offset for first section .shstrtab
-	    	    fmt.Println("set_offset:X:", sec_offset)
 	            shtp.Link = uint32(0)
 	            shtp.Info = uint32(0)
 	            shtp.Entsize = uint64(0)
-	            cal_bytes = append(cal_bytes, byted(shtp)...)
 	        case ".shstrtab\x00":
 	    	    shtp.Name = uint32(len(strings.Join(shstrtabb[0:idx], "")))    // 0 for null
 	            shtp.Addralign = uint64(1) //?
