@@ -160,7 +160,7 @@ const R_RISCV_PCREL_LO12_I = 24
 type Elf64_rela struct {
 	Offset uint64  // modified instruction's offset in .text
 	Info uint64   // sym index and relocation type
-	Addend int16   // A constant addend used in the reloction calculation 加数
+	Addend int64  // A constant addend used in the reloction calculation 加数
 }
 
 func write2f(text string, name string) {
@@ -1131,7 +1131,7 @@ func main() {
                             var rela Elf64_rela 
                             rela.Offset = uint64(address)//uint64 modified instruction's offset in .text
                             rela.Info = (uint64(idx) << 32) | R_RISCV_PCREL_HI20 //uint64   // sym index and relocation type
-                            rela.Addend = int16(0)// int16   // A constant addend used in the reloction calculation 加数
+                            rela.Addend = int64(0)// int16   // A constant addend used in the reloction calculation 加数
 			    fmt.Printf("%+v\n", rela)
 			    relatext = append(relatext, rela)
 			}
@@ -1148,7 +1148,7 @@ func main() {
                             var rela Elf64_rela 
                             rela.Offset = uint64(address)//uint64 modified instruction's offset in .text
                             rela.Info = (uint64(idx) << 32) | R_RISCV_PCREL_LO12_I //uint64   // sym index and relocation type
-                            rela.Addend = int16(0)// int16   // A constant addend used in the reloction calculation 加数
+                            rela.Addend = int64(0)// int16   // A constant addend used in the reloction calculation 加数
 			    fmt.Printf("%+v\n", rela)
 			    relatext = append(relatext, rela)
 			}
@@ -1562,7 +1562,7 @@ func main() {
 	//###
         // edit sym
 	for _, sym_str := range strtabb[1:] {
-	    sym_map[sym_str].Name = uint32(len(strings.Join(strtabb[:get_sindex(strtabb, sym_str)],"")))  //#uint32 // offset in string table
+	    sym_map[sym_str].Name = uint32(len(strings.Join(strtabb[:get_sindex(strtabb, sym_str)],""))) 
 	}
 
         // edit sec
