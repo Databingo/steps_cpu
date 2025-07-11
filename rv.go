@@ -415,20 +415,6 @@ func main() {
 	//elf_header_bytes := buf.Bytes()
 	//fmt.Println(elf_header_bytes)
 
-	// .out Usually format:
-	// ----------------
-	// ELF header 64bytes
-	// Section Header Table (SHT) 0 (starts at "e_shoff" in ELF header) 64bytes
-	// Section Header Table (SHT) 1 shstrtab 64bytes
-	// Section Header Table (SHT) 2 text 64bytes
-	// Content of section 1, .shstrtab
-	// Content of section 2, .text
-	// Content of section 3, .data
-	// Content of section 4, .rodata
-	// Content of section 5, .symtab
-	// Content of section 6, .strtab
-	// Content of section 7, .rela.text
-	// Content of section 8, ...
 	// ----------------
 	// each entrie of SHT is 64 bytes, sh_offset is the exactly offset from beginning of file to the start point of this section's context, e.g., .text's sh_offset is 64, after ELF header
 	// Must need a Non Section for the first section header
@@ -464,10 +450,10 @@ func main() {
 	//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	var section_in string
 	var label_in string
-	var shts []SHT
-	var shstrtab []string
+	//var shts []SHT
+	//var shstrtab []string
 	var shstrtabb []string
-	var text []byte
+//	var text []byte
 	var data []byte
 	symtab_ := []Elf64_sym{sym}// symtab_ array and strtab are same order
 	strtab := []string{"\x00"}
@@ -542,7 +528,7 @@ func main() {
 			if directive == ".global" {
 			    fmt.Println("Directive:", directive, "//Suf_directive:", suffix_directive)
 			    fmt.Println("create .symtab entry + .strtab entry, add .symtab to .shstrtab")
-			    if !slices.Contains(shstrtab, ".strtab\x00") {
+			    if !slices.Contains(shstrtabb, ".strtab\x00") {
 			        //sht + shstrtab
 	                        //shstrtab = append(shstrtab, ".strtab\x00")
 	                        //shts = append(shts, sht)
@@ -550,7 +536,7 @@ func main() {
                                 //###
 	                        add_sec(".strtab\x00")
 			    }
-			    if !slices.Contains(shstrtab, ".symtab\x00") {
+			    if !slices.Contains(shstrtabb, ".symtab\x00") {
 			        //sht + shstrtab
 	                        //shstrtab = append(shstrtab, ".symtab\x00")
 	                        //shts = append(shts, sht)
@@ -615,7 +601,7 @@ func main() {
 			    //###
 			    //sym_map[label_in+"\x00"].Name
 			    sym_map[label_in+"\x00"].Info = (sym_map[label_in+"\x00"].Info >> 4 | STT_OBJECT  ) //# uint8 // H4:binding and L4:type
-			    sym_map[label_in+"\x00"].Shndx = uint16(slices.Index(shstrtab, section_in))//4 //uint16 // section index the symbol in (.text)
+			    sym_map[label_in+"\x00"].Shndx = uint16(slices.Index(shstrtabb, section_in))//4 //uint16 // section index the symbol in (.text)
 			    sym_map[label_in+"\x00"].Value = uint64(len(data)) //# uint64  for relocatable .o file it's symbol's offset in its section
 			    sym_map[label_in+"\x00"].Size = uint64(len(pad8))  //#uint64  for function it's its size
 
@@ -649,7 +635,7 @@ func main() {
                             add_sym_local(sym_str) 
 	                    sym_map[sym_str].Info = (STB_LOCAL << 4 | STT_FUNC)    //# H4:binding and L4:type
 	                    sym_map[sym_str].Other = 0 //uint8 // reserved, currently holds 0
-	                    sym_map[sym_str].Shndx = uint16(slices.Index(shstrtab, section_in))//0 //#uint16 // section index the symbol in
+	                    sym_map[sym_str].Shndx = uint16(slices.Index(shstrtabb, section_in))//0 //#uint16 // section index the symbol in
 			    //fmt.Println("-::", section_in, uint16(slices.Index(shstrtab, section_in)))//0 //#uint16 // section index the symbol in
 	                    sym_map[sym_str].Value = 0 //# uint64  for relocatable .o file it's symbol's offset in its section
 	                    sym_map[sym_str].Size = 0  //#uint64  for function it's its size   -- uint64(len(align8("H\n")))                   
@@ -657,13 +643,13 @@ func main() {
 			    //fmt.Println("=|=shndx:", uint16(slices.Index(shstrtab, section_in)), strtab, "section_in:", section_in, "sym_index:", sym_index, "symbal:", strtab[sym_index])
 			    //symtab_[sym_index].Shndx = uint16(slices.Index(shstrtab, section_in))//0 //#uint16 // section index the symbol in
 			    //###
-	                    sym_map[label_in+"\x00"].Shndx = uint16(slices.Index(shstrtab, section_in))//0 //#uint16 // section index the symbol in
+	                    sym_map[label_in+"\x00"].Shndx = uint16(slices.Index(shstrtabb, section_in))//0 //#uint16 // section index the symbol in
 					    }
 			copy_instr.WriteString(raw_instr)
 		} else {
 			copy_instr.WriteString(raw_instr)
 		}
-         	    fmt.Println(shstrtab, strtab, text, data, shts, section_in, label_in, "x|")
+         	    //fmt.Println(shstrtab, strtab, text, data, shts, section_in, label_in, "x|")
 	}
 	////////
 
@@ -855,7 +841,7 @@ func main() {
 		case "la", "lla": // 装入地址 (lla for certainly pc-related address, la is not sure) (+- 2GB) larger use li
 			ins := fmt.Sprintf("# %s\n", line)
 			real_instr.WriteString(ins)
-			    if !slices.Contains(shstrtab, ".rela.text\x00") {
+			    if !slices.Contains(shstrtabb, ".rela.text\x00") {
 			        fmt.Println("create .rela.text")
 			        //sht + shstrtab
 	                        //elf_header.Shnum += 1 
