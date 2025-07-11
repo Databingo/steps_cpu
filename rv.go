@@ -1787,13 +1787,13 @@ func main() {
 
 	fff.Write(cal_bytes)
 
-	fmt.Println("shstrtabb:", shstrtabb, "\n")
-	fmt.Println("sht_map:", sht_map, "\n")
-	fmt.Println("sec_map:", sec_map, "\n")
-	fmt.Println("strtabb:", strtabb, "\n")
-	fmt.Println("strtab:", strtab, "\n")
-	fmt.Println("sym_map:", sym_map, "\n")
+	//fmt.Println("sht_map:", sht_map, "\n")
+	//fmt.Println("sec_map:", sec_map, "\n")
+	//fmt.Println("strtab:", strtab, "\n")
+	//fmt.Println("sym_map:", sym_map, "\n")
+	fmt.Println("strtabb:", strtabb)
 	for k, s := range sym_map{ fmt.Printf("sym %v: %+v\n", k, s) }
+	fmt.Println("shstrtabb:", shstrtabb)
 	for k, s := range sht_map{ fmt.Printf("sht %v: %+v\n", k, s) }
 	for k, s := range sec_map{ fmt.Printf("sec %v: %+v\n", k, s) }
 }
