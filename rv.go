@@ -1793,5 +1793,7 @@ func main() {
 	fmt.Println("strtabb:", strtabb, "\n")
 	fmt.Println("strtab:", strtab, "\n")
 	fmt.Println("sym_map:", sym_map, "\n")
-	for k, s := range sym_map{ fmt.Printf("%v: %+v\n", k, s) }
+	for k, s := range sym_map{ fmt.Printf("sym %v: %+v\n", k, s) }
+	for k, s := range sht_map{ fmt.Printf("sht %v: %+v\n", k, s) }
+	for k, s := range sec_map{ fmt.Printf("sec %v: %+v\n", k, s) }
 }
