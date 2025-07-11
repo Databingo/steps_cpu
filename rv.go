@@ -1716,6 +1716,7 @@ func main() {
 	            shtp.Link = uint32(0)
 	            shtp.Info = uint32(0)
 	            shtp.Entsize = uint64(0)
+	    	    sec_pad[shstr] = make([]byte, 0)
 	        case ".shstrtab\x00":
 	    	    shtp.Name = uint32(len(strings.Join(shstrtabb[0:idx], "")))
 	            shtp.Addralign = uint64(1)
@@ -1794,18 +1795,25 @@ func main() {
 
 
 	cal_bytes := []byte{}
-	//cal_bytes = append(cal_bytes, byted(elf_header)...)
-	//for _, shstr := range shstrtabb {
-	//    cal_bytes = append(cal_bytes, sec_map[shstr]...)
-        //}
+	cal_bytes = append(cal_bytes, byted(elf_header)...)
+	for _, shstr := range shstrtabb {
+
+	    fmt.Println("shstr:", shstr, byted(sht_map[shstr]))
+	    cal_bytes = append(cal_bytes, byted(sht_map[shstr])...)
+        }
+	for _, shstr := range shstrtabb {
+	    cal_bytes = append(cal_bytes, sec_pad[shstr]...)
+	    cal_bytes = append(cal_bytes, sec_map[shstr]...)
+        }
 
 
 	fff.Write(cal_bytes)
 
-	for k, s := range sym_map{ fmt.Printf("sym_map %v: %+v\n", k, s) }
-	fmt.Println("shstrtabb:", shstrtabb)
-	for k, s := range sht_map{ fmt.Printf("sht_map %v: %+v\n", k, s) }
-	for k, s := range sec_map{ fmt.Printf("sec_map %v: %+v\n", k, s) }
+	//fmt.Println("shstrtabb:", shstrtabb)
+	//fmt.Println("strtabb:", strtabb)
+	//for k, s := range sym_map{ fmt.Printf("sym_map %v: %+v\n", k, s) }
+	//for k, s := range sht_map{ fmt.Printf("sht_map %v: %+v\n", k, s) }
+	//for k, s := range sec_map{ fmt.Printf("sec_map %v: %+v\n", k, s) }
 	for k, s := range sec_pad{ fmt.Printf("pad %v: %+v\n", k, s) }
-	fmt.Println("Shnum:", elf_header.Shnum)
+	//fmt.Println("Shnum:", elf_header.Shnum)
 }
