@@ -1653,7 +1653,9 @@ func main() {
 	}
 	//###
 	for idx, shstr := range shstrtabb {
-	    fmt.Println(idx, sht_map[shstr], sec_map[shstr])
+	    //fmt.Println(idx, sht_map[shstr], sec_map[shstr])
+	    // edit sht
+	    fmt.Println(idx, shstr, sht_map[shstr])
 	}
 
 
