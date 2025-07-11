@@ -450,22 +450,15 @@ func main() {
 	//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	var section_in string
 	var label_in string
-	//var shts []SHT
-	//var shstrtab []string
 	var shstrtabb []string
-//	var text []byte
 	var data []byte
-	//symtab_ := []Elf64_sym{sym}// symtab_ array and strtab are same order
-	//strtab := []string{"\x00"}
 	strtabb := []string{"\x00"}
 	var relatext []Elf64_rela
-	//var no_local_sym_1st uint32
 	sht_map := make(map[string]*SHT)
 	sym_map := make(map[string]*Elf64_sym)
 	sec_map := make(map[string][]byte)
         sec_pad := make(map[string][]byte)	
 
-       
 	// NULL section is a real section excepts its contetn
 	add_sec := func(shstr string) {
 	     shstrtabb = append(shstrtabb, shstr)
@@ -496,16 +489,8 @@ func main() {
 	    sec_pad[shstr] = make([]byte, pad)
 	    return raw_offset + pad
 	}
-	//elf
-	//sht0
-	//shstrtab = append(shstrtab,"\x00")
-	//shts = append(shts, sht) // strings array shts and shstrtab are same order
-	//elf_header.Shnum += 1 
+
 	add_sec("\x00")//###
-	//sht1
-	//shstrtab = append(shstrtab,".shstrtab\x00")
-	//shts = append(shts, sht)
-	//elf_header.Shnum += 1 
 	add_sec(".shstrtab\x00")//###
 	
 	for scanner0.Scan() {
@@ -522,50 +507,17 @@ func main() {
 			//directive = strings.TrimPrefix(code[0], ".")
 			directive = code[0]
 			suffix_directive = strings.Join(code[1:len(code)], " ")
-                        //if !strings.HasPrefix(code[1], "."){
-			//fmt.Println("Directive:", directive, "|Suf_directive:", suffix_directive)
-			//}
 			if directive == ".global" {
 			    fmt.Println("Directive:", directive, "//Suf_directive:", suffix_directive)
-			    fmt.Println("create .symtab entry + .strtab entry, add .symtab to .shstrtab")
-			    if !slices.Contains(shstrtabb, ".strtab\x00") {
-			        //sht + shstrtab
-	                        //shstrtab = append(shstrtab, ".strtab\x00")
-	                        //shts = append(shts, sht)
-	                        //elf_header.Shnum += 1 
-                                //###
-	                        add_sec(".strtab\x00")
-			    }
-			    if !slices.Contains(shstrtabb, ".symtab\x00") {
-			        //sht + shstrtab
-	                        //shstrtab = append(shstrtab, ".symtab\x00")
-	                        //shts = append(shts, sht)
-	                        //elf_header.Shnum += 1 
-                                //###
-	                        add_sec(".symtab\x00")//###
-			    }
+			    if !slices.Contains(shstrtabb, ".strtab\x00") { add_sec(".strtab\x00") }
+			    if !slices.Contains(shstrtabb, ".symtab\x00") { add_sec(".symtab\x00") }
 
-	                    //sym.Name = uint32(len(strings.Join(strtab,"")))  //#uint32 // offset in string table
-			    //fmt.Println("sym.Name:--|", sym.Name)
-
-	                    //sym.Info = (STB_GLOBAL << 4 | STT_FUNC)    //# H4:binding and L4:type
-	                    //sym.Other = 0 //uint8 // reserved, currently holds 0
-	                    ////sym.Shndx = uint16(slices.Index(shstrtab, section_in))//0 //#uint16 // section index the symbol in
-			    ////fmt.Println("-::", section_in, uint16(slices.Index(shstrtab, section_in)))//0 //#uint16 // section index the symbol in
-	                    //sym.Value = 0 //# uint64  for relocatable .o file it's symbol's offset in its section
-	                    //sym.Size = 0  //#uint64  for function it's its size   -- uint64(len(align8("H\n")))                   
-			    //sym + str 
-			    //strtab = append(strtab, suffix_directive+"\x00")
-			    //symtab_ = append(symtab_, sym)
-			    //----
-                            //###
 			    sym_str := suffix_directive+"\x00"
                             add_sym_global(sym_str) //###
 			    sym_map[sym_str].Name = uint32(len(strings.Join(strtabb[:get_sindex(strtabb, sym_str)],"")))  //#uint32 // offset in string table
 	                    sym_map[sym_str].Info = (STB_GLOBAL << 4 | STT_FUNC)    //# H4:binding and L4:type
 	                    sym_map[sym_str].Other = 0 //uint8 // reserved, currently holds 0
-	                    //sym.Shndx = uint16(slices.Index(shstrtab, section_in))//0 //#uint16 // section index the symbol in
-			    //fmt.Println("-::", section_in, uint16(slices.Index(shstrtab, section_in)))//0 //#uint16 // section index the symbol in
+	                    //sym.Shndx 
 	                    sym_map[sym_str].Value = 0 //# uint64  for relocatable .o file it's symbol's offset in its section
 	                    sym_map[sym_str].Size = 0  //#uint64  for function it's its size   -- uint64(len(align8("H\n")))                   
 			}
@@ -574,31 +526,11 @@ func main() {
 			    fmt.Println("Directive:", directive, "||Suf_directive:", suffix_directive)
 			    fmt.Println("create SHT(s) + .shstrtab entry + section[]byte")
 			    section_in = suffix_directive + "\x00"
-			    //sht
-	                    //shstrtab = append(shstrtab,suffix_directive+"\x00")
-	                    //shts = append(shts, sht)
-	                    //elf_header.Shnum += 1 
-                            //###
 	                    add_sec(suffix_directive + "\x00")//###
 			}
 			if directive == ".string" {
-			    //fmt.Println("Directive:", directive, "||Suf_directive:", suffix_directive)
-			    //fmt.Println("check label_in + check strtab + edit symtab")
-			    //fmt.Println("strtab:", strtab)
-			    //sym_index := slices.Index(strtab, label_in+"\x00")
-			    //fmt.Println("label_in-:", label_in, sym_index)
-			    //fmt.Println("sym_e:", symtab_[sym_index])
-			    ////pad8 :=  align8(suffix_directive)
-			    pad8 :=  align_x(suffix_directive, 8)
-	                    ////symtab_[sym_index].Name = 1  // points to "_start" in .strtab
-	                    //symtab_[sym_index].Info = ( symtab_[sym_index].Info >> 4 | STT_OBJECT  ) //# uint8 // H4:binding and L4:type
-	                    ////symtab_[sym_index].Other = 0 //uint8 // reserved, currently holds 0
-	                    //symtab_[sym_index].Shndx = uint16(slices.Index(shstrtab, section_in))//4 //uint16 // section index the symbol in (.text)
-	                    //symtab_[sym_index].Value = uint64(len(data)) //# uint64  for relocatable .o file it's symbol's offset in its section
-	                    //symtab_[sym_index].Size = uint64(len(pad8))  //#uint64  for function it's its size
-			    //sym + str + data
+			    pad8 := align_x(suffix_directive, 8)
                             data = append(data, pad8...)
-			    //###
 			    //sym_map[label_in+"\x00"].Name
 			    sym_map[label_in+"\x00"].Info = (sym_map[label_in+"\x00"].Info >> 4 | STT_OBJECT  ) //# uint8 // H4:binding and L4:type
 			    sym_map[label_in+"\x00"].Shndx = uint16(slices.Index(shstrtabb, section_in))//4 //uint16 // section index the symbol in (.text)
@@ -610,54 +542,25 @@ func main() {
 
 		} else if strings.HasSuffix(switchOnOp, ":") {
 			label_in = strings.TrimSuffix(code[0], ":")
-		        //sym_index := slices.Index(strtab, label_in+"\x00")
 		        sym_index := get_sindex(strtabb, label_in+"\x00")
-			//fmt.Println("|-:sym.Name",len(strings.Join(strtab,"")),  "strtab:", strtab, "section_in:", section_in)
 			if sym_index == -1 {
-	                    ////sym.Name = uint32(len(strings.Join(strtab,"")))  //#uint32 // offset in string table
-	                    //sym.Info = (STB_LOCAL << 4 | STT_FUNC)    //# H4:binding and L4:type
-	                    //sym.Other = 0 //uint8 // reserved, currently holds 0
-	                    //sym.Shndx = uint16(slices.Index(shstrtab, section_in))//0 //#uint16 // section index the symbol in
-			    ////fmt.Println("-::", section_in, uint16(slices.Index(shstrtab, section_in)))//0 //#uint16 // section index the symbol in
-	                    //sym.Value = 0 //# uint64  for relocatable .o file it's symbol's offset in its section
-	                    //sym.Size = 0  //#uint64  for function it's its size   -- uint64(len(align8("H\n")))                   
-			    ////sym + str
-			    ////symtab_ = append(symtab_, sym)
-			    ////strtab = append(strtab, label_in+"\x00")
-			    ////local symbols should be in front of global symbols in symtab
-			    ////symtab_ = append(symtab_[:1+1], symtab_[1:]...)
-			    ////symtab_[1] = sym
-			    //strtab = slices.Insert(strtab, 1, label_in+"\x00")
-			    //symtab_ = slices.Insert(symtab_, 1, sym)
-			    //----
-			    //###
 			    sym_str := label_in +"\x00"
                             add_sym_local(sym_str) 
 	                    sym_map[sym_str].Info = (STB_LOCAL << 4 | STT_FUNC)    //# H4:binding and L4:type
 	                    sym_map[sym_str].Other = 0 //uint8 // reserved, currently holds 0
 	                    sym_map[sym_str].Shndx = uint16(slices.Index(shstrtabb, section_in))//0 //#uint16 // section index the symbol in
-			    //fmt.Println("-::", section_in, uint16(slices.Index(shstrtab, section_in)))//0 //#uint16 // section index the symbol in
 	                    sym_map[sym_str].Value = 0 //# uint64  for relocatable .o file it's symbol's offset in its section
 	                    sym_map[sym_str].Size = 0  //#uint64  for function it's its size   -- uint64(len(align8("H\n")))                   
 			} else {
-			    //fmt.Println("=|=shndx:", uint16(slices.Index(shstrtab, section_in)), strtab, "section_in:", section_in, "sym_index:", sym_index, "symbal:", strtab[sym_index])
-			    //symtab_[sym_index].Shndx = uint16(slices.Index(shstrtab, section_in))//0 //#uint16 // section index the symbol in
-			    //###
 	                    sym_map[label_in+"\x00"].Shndx = uint16(slices.Index(shstrtabb, section_in))//0 //#uint16 // section index the symbol in
 					    }
 			copy_instr.WriteString(raw_instr)
 		} else {
 			copy_instr.WriteString(raw_instr)
 		}
-         	    //fmt.Println(shstrtab, strtab, text, data, shts, section_in, label_in, "x|")
 	}
-	////////
 
-	//scanner := bufio.NewScanner(strings.NewReader(real_instr.String()))
-	//scanner.Split(bufio.ScanLines)
 	// 1pass trans pseudo to real
-	//scanner1 := bufio.NewScanner(file) // stores content from file
-	//scanner1.Split(bufio.ScanLines)
 	scanner1 := bufio.NewScanner(strings.NewReader(copy_instr.String())) // stores content from file
 	scanner1.Split(bufio.ScanLines)
 
