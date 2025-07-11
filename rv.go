@@ -1652,6 +1652,12 @@ func main() {
 	    }
 	}
 	//###
+	for idx, shstr := range shstrtabb {
+	    fmt.Println(idx, sht_map[shstr], sec_map[shstr])
+	}
+
+
+
         // final fix symbal.Name offset in strtab
 	for _, sym_str := range strtabb[1:] {
 	    sym_map[sym_str].Name = uint32(len(strings.Join(strtabb[:get_sindex(strtabb, sym_str)],"")))  //#uint32 // offset in string table
