@@ -1511,8 +1511,9 @@ func main() {
 		f.Write(instructionBuffer)
 
 	}
-	txt, _ := ioutil.ReadFile("add.o")
 
+
+	txt, _ := ioutil.ReadFile("add.o")
 
 	//elf_header.Shnum = uint16(len(shstrtab))
 	elf_header.Shoff = uint64(elf_header.Ehsize)  // after elf_header, e_shoff points to start of section header table --  no 0 have to be the start of SHT  (e_shnum * e_shentsize = whole table of SHT)
@@ -1520,7 +1521,7 @@ func main() {
 	//fmt.Println("shts SHT list:", shts, len(shts))
 	//sec_offset := uint64(0)
 	cal_bytes := []byte{}
-	cal_bytes = append(cal_bytes, byted(elf_header)...)
+	//cal_bytes = append(cal_bytes, byted(elf_header)...)
 	//for idx, sht := range shts {
 	//shtp := &shts[idx]
 	//shstr := shstrtab[idx]
