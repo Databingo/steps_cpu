@@ -1659,7 +1659,6 @@ func main() {
 	    shtp := sht_map[shstr]
 	    switch shstr {
 	        case "\x00":
-	    	    fmt.Println("SHT Section header of NON XYY name startfrom:", idx, uint32(len(strings.Join(shstrtabb[0:idx], ""))), "length:", len(byted(shtp)))
 	    	    shtp.Name = uint32(len(strings.Join(shstrtabb[0:idx], "")))    // 0 for null
 	            shtp.Addralign = uint64(1)
 	            shtp.Type = uint32(0)
@@ -1675,8 +1674,6 @@ func main() {
 	            shtp.Entsize = uint64(0)
 	            cal_bytes = append(cal_bytes, byted(shtp)...)
 	        case ".shstrtab\x00":
-	            fmt.Println("SHT Section header of .shstrtab }}}:")
-	    	    fmt.Println("SHT Section header of NON YXY name startf:", uint32(len(strings.Join(shstrtabb[0:idx], ""))), "length:", len(byted(shtp)))
 	    	    shtp.Name = uint32(len(strings.Join(shstrtabb[0:idx], "")))    // 0 for null
 	            shtp.Addralign = uint64(1) //?
 	            shtp.Type = uint32(3)// sh_type 3_SHT_STRTAB 
@@ -1693,7 +1690,6 @@ func main() {
 	            shtp.Entsize = uint64(0)
 	            cal_bytes = append(cal_bytes, byted(shtp)...)
 	        case ".strtab\x00":
-	            fmt.Println("SHT Section header of .strtab }}}:")
 	    	    shtp.Name = uint32(len(strings.Join(shstrtabb[0:idx], "")))    // 0 for null
 	            shtp.Addralign = uint64(1)
 	            shtp.Type = uint32(3)
@@ -1708,7 +1704,6 @@ func main() {
 	            shtp.Entsize = uint64(0)
 	            cal_bytes = append(cal_bytes, byted(shtp)...)
 	        case ".symtab\x00":
-	            fmt.Println("SHT Section header of .symtab }}}:")
 	    	    shtp.Name = uint32(len(strings.Join(shstrtabb[0:idx], "")))    // 0 for null
 	            shtp.Addralign = uint64(8)
 	            shtp.Type = uint32(2)
@@ -1730,7 +1725,6 @@ func main() {
 	            shtp.Entsize = uint64(24)
 	            cal_bytes = append(cal_bytes, byted(shtp)...)
 	        case ".text\x00":
-	            fmt.Println("SHT Section header of .text }}}:")
 	    	    shtp.Name = uint32(len(strings.Join(shstrtabb[0:idx], "")))    // 0 for null
 	            shtp.Addralign = uint64(4) // instruction is 32 bits aka aligned by 4 bytes
 	            shtp.Type = uint32(SHT_PROGBITS)  // include .text .data .rodata what for define program
@@ -1745,7 +1739,6 @@ func main() {
 	            shtp.Entsize = uint64(0)
 	            cal_bytes = append(cal_bytes, byted(shtp)...)
 	        case ".data\x00":
-	            fmt.Println("SHT Section header of .data }}}:")
 	    	    shtp.Name = uint32(len(strings.Join(shstrtabb[0:idx], "")))    // 0 for null
 	            shtp.Addralign = uint64(8)
 	            shtp.Type = uint32(SHT_PROGBITS)
@@ -1760,7 +1753,6 @@ func main() {
 	            shtp.Entsize = uint64(0)
 	            cal_bytes = append(cal_bytes, byted(shtp)...)
 	        case ".rela.text\x00":
-	            fmt.Println("SHT Section header of .rela.text }}}:")
 	    	    shtp.Name = uint32(len(strings.Join(shstrtabb[0:idx], "")))    // 0 for null
 	            shtp.Addralign = uint64(8)
 	            shtp.Type = uint32(SHT_RELA)
@@ -1775,7 +1767,6 @@ func main() {
 	            shtp.Entsize = uint64(24)
 	            cal_bytes = append(cal_bytes, byted(shtp)...)
 	    }
-	            fmt.Printf("{{%d, %+v\n", idx, sht)
 	    }
 
 
