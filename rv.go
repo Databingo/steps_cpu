@@ -1672,19 +1672,25 @@ func main() {
             case "\x00":
 	    case ".shstrtab\x00":
 		shstrtab_d = []byte(strings.Join(shstrtabb, ""))
+		sec_map[shstr] = []byte(strings.Join(shstrtabb, ""))
 	    case ".strtab\x00":
 		strtab_d = []byte(strings.Join(strtabb, ""))
+		sec_map[shstr] = []byte(strings.Join(strtabb, ""))
 	    case ".symtab\x00":
 		for _, str := range strtabb {
 	            symtab_d = append(symtab_d, byted(sym_map[str])...)
+		    sec_map[shstr] =append(sec_map[shstr], byted(sym_map[str])...)
 	    }
 	    case ".text\x00":
 		text_d = txt
+		sec_map[shstr] = txt
 	    case ".data\x00":
 	        data_d = data
+		sec_map[shstr] = data
 	    case ".rela.text\x00":
 		for _, rela := range relatext {
-	        relatext_d = append(relatext_d, byted(rela)...)
+	            relatext_d = append(relatext_d, byted(rela)...)
+		    sec_map[shstr] =append(sec_map[shstr], byted(rela)...) 
 	    }
 	}
     }
