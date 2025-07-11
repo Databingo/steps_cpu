@@ -1714,7 +1714,7 @@ func main() {
 	            shtp.Link = uint32(0)
 	            shtp.Info = uint32(0)
 	            shtp.Entsize = uint64(0)
-		    sec_end[shstr] = elf_header.Shoff + shtp.Size
+		    sec_end[shstr] = elf_header.Shoff + uint64(elf_header.Shentsize * elf_header.Shuum) + shtp.Size
 	        case ".shstrtab\x00":
 	    	    shtp.Name = uint32(len(strings.Join(shstrtabb[0:idx], "")))
 	            shtp.Addralign = uint64(1)
