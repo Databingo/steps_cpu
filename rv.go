@@ -1514,8 +1514,6 @@ func main() {
 	cal_bytes := []byte{}
 	cal_bytes = append(cal_bytes, byted(elf_header)...)
 	for _, shstr := range shstrtabb {
-
-	    fmt.Println("shstr:", shstr, byted(sht_map[shstr]))
 	    cal_bytes = append(cal_bytes, byted(sht_map[shstr])...)
         }
 	for _, shstr := range shstrtabb {
