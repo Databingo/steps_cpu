@@ -1728,7 +1728,6 @@ func main() {
 	            shtp.Link = uint32(0)
 	            shtp.Info = uint32(0)
 	            shtp.Entsize = uint64(0)
-		    //sec_end[shstr] = elf_header.Shoff + uint64(elf_header.Shentsize * elf_header.Shnum) + shtp.Size
 	        case ".shstrtab\x00":
 	    	    shtp.Name = uint32(len(strings.Join(shstrtabb[0:idx], "")))
 	            shtp.Addralign = uint64(1)
@@ -1736,15 +1735,7 @@ func main() {
 	            shtp.Flags = uint64(0)//?
 	            shtp.Addr = uint64(0)// ?sh_addr virtual address at exection?
 	            shtp.Size = uint64(len(sec_map[shstr]))  
-	            // calculate section offset
-		    poffset := calc_sec_offset(shstr)
-		    //pre_shtp := sht_map[shstrtabb[get_sindex(shstrtabb, shstr)-1]]
-		    //raw_offset :=  pre_shtp.Offset + pre_shtp.Size
-		    //pad := padding(raw_offset, shtp.Addralign)
-		    //sec_pad[shstr] = make([]byte, pad)
-	            //shtp.Offset = raw_offset + pad
-	            shtp.Offset = poffset
-	            // -------------------------
+	            shtp.Offset = calc_sec_offset(shstr)
 	            shtp.Link = uint32(0) //0
 	            shtp.Info = uint32(0) //
 	            shtp.Entsize = uint64(0)
@@ -1755,13 +1746,10 @@ func main() {
 	            shtp.Flags = uint64(0)
 	            shtp.Addr = uint64(0)
 	            shtp.Size = uint64(len(sec_map[shstr]))  
-	            shtp.Offset = align_n(sec_offset, shtp.Addralign) // padding   
-	    	    // prepare for next loop sec (unpadding)
-	    	    sec_offset = shtp.Offset + shtp.Size
+	            shtp.Offset = calc_sec_offset(shstr)
 	            shtp.Link = uint32(0)//0
 	            shtp.Info = uint32(0)
 	            shtp.Entsize = uint64(0)
-	            cal_bytes = append(cal_bytes, byted(shtp)...)
 	        case ".symtab\x00":
 	    	    shtp.Name = uint32(len(strings.Join(shstrtabb[0:idx], "")))    // 0 for null
 	            shtp.Addralign = uint64(8)
@@ -1769,10 +1757,7 @@ func main() {
 	            shtp.Flags = uint64(0)
 	            shtp.Addr = uint64(0)
 	            shtp.Size = uint64(len(sec_map[shstr]))  
-	            shtp.Offset = align_n(sec_offset, shtp.Addralign) // padding   
-	    	    // prepare for next loop sec (unpadding)
-	    	    sec_offset = shtp.Offset + shtp.Size
-	    	    //sec_offset += align_x(shtp.Size, shtp.Addralign)
+	            shtp.Offset = calc_sec_offset(shstr)
 	            shtp.Link = uint32(slices.Index(shstrtabb, ".strtab\x00")) // link to dependency SHT's index, calculated by (.strtab index in array .shstrtab) 
 	            //shtp.Info = uint32(0) // first no-local symbol index in sym list
 		    for idn, sym := range strtabb[1:]{
@@ -1782,7 +1767,6 @@ func main() {
 	    	    }
 	    	}
 	            shtp.Entsize = uint64(24)
-	            cal_bytes = append(cal_bytes, byted(shtp)...)
 	        case ".text\x00":
 	    	    shtp.Name = uint32(len(strings.Join(shstrtabb[0:idx], "")))    // 0 for null
 	            shtp.Addralign = uint64(4) // instruction is 32 bits aka aligned by 4 bytes
@@ -1790,13 +1774,10 @@ func main() {
 	            shtp.Flags = uint64(SHF_ALLOC | SHF_EXECINSTR)
 	            shtp.Addr = uint64(0)
 	            shtp.Size = uint64(len(sec_map[shstr]))  
-	            shtp.Offset = align_n(sec_offset, shtp.Addralign) // padding   
-	    	    // prepare for next loop sec (unpadding)
-	    	    sec_offset = shtp.Offset + shtp.Size
+	            shtp.Offset = calc_sec_offset(shstr)
 	            shtp.Link = uint32(0)//0
 	            shtp.Info = uint32(0)
 	            shtp.Entsize = uint64(0)
-	            cal_bytes = append(cal_bytes, byted(shtp)...)
 	        case ".data\x00":
 	    	    shtp.Name = uint32(len(strings.Join(shstrtabb[0:idx], "")))    // 0 for null
 	            shtp.Addralign = uint64(8)
@@ -1804,13 +1785,10 @@ func main() {
 	            shtp.Flags = uint64(SHF_ALLOC | SHF_WRITE)
 	            shtp.Addr = uint64(0)
 	            shtp.Size = uint64(len(sec_map[shstr]))  
-	            shtp.Offset = align_n(sec_offset, shtp.Addralign) // padding   
-	    	    // prepare for next loop sec (unpadding)
-	    	    sec_offset = shtp.Offset + shtp.Size
+	            shtp.Offset = calc_sec_offset(shstr)
 	            shtp.Link = uint32(0)//0
 	            shtp.Info = uint32(0)
 	            shtp.Entsize = uint64(0)
-	            cal_bytes = append(cal_bytes, byted(shtp)...)
 	        case ".rela.text\x00":
 	    	    shtp.Name = uint32(len(strings.Join(shstrtabb[0:idx], "")))    // 0 for null
 	            shtp.Addralign = uint64(8)
@@ -1818,13 +1796,10 @@ func main() {
 	            shtp.Flags = uint64(0x40)  // SHF_INFO_LINK for relocation section say sh_info work
 	            shtp.Addr = uint64(0)  // not loaded into memory
 	            shtp.Size = uint64(len(sec_map[shstr]))  
-	            shtp.Offset = align_n(sec_offset, shtp.Addralign) // padding   
-	    	    // prepare for next loop sec (unpadding)
-	    	    sec_offset = shtp.Offset + shtp.Size
+	            shtp.Offset = calc_sec_offset(shstr)
 	            shtp.Link = uint32(slices.Index(shstrtabb, ".symtab\x00")) // link to dependency SHT's index, calculated by (.symtab index in array .shstrtab) 
 	            shtp.Info = uint32(slices.Index(shstrtabb, ".text\x00")) // must info to be relocation section
 	            shtp.Entsize = uint64(24)
-	            cal_bytes = append(cal_bytes, byted(shtp)...)
 	    }
 	    }
 
