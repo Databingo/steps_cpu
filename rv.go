@@ -479,12 +479,6 @@ func main() {
 	sec_map := make(map[string][]byte)
         sec_pad := make(map[string][]byte)	
 
-	shstrtab_d := []byte{}
-	strtab_d := []byte{}
-	symtab_d := []byte{}
-	text_d := []byte{}
-	data_d := []byte{}
-	relatext_d := []byte{}
        
 	// NULL section is a real section excepts its contetn
 	add_sec := func(shstr string) {
@@ -1520,7 +1514,6 @@ func main() {
 	//elf_header_bytes = byted(elf_header)
 	//fmt.Println("shts SHT list:", shts, len(shts))
 	//sec_offset := uint64(0)
-	cal_bytes := []byte{}
 	//cal_bytes = append(cal_bytes, byted(elf_header)...)
 	//for idx, sht := range shts {
 	//shtp := &shts[idx]
@@ -1688,25 +1681,19 @@ func main() {
 	    switch shstr {
             case "\x00":
 	    case ".shstrtab\x00":
-		shstrtab_d = []byte(strings.Join(shstrtabb, ""))
 		sec_map[shstr] = []byte(strings.Join(shstrtabb, ""))
 	    case ".strtab\x00":
-		strtab_d = []byte(strings.Join(strtabb, ""))
 		sec_map[shstr] = []byte(strings.Join(strtabb, ""))
 	    case ".symtab\x00":
 		for _, str := range strtabb {
-	            symtab_d = append(symtab_d, byted(sym_map[str])...)
 		    sec_map[shstr] =append(sec_map[shstr], byted(sym_map[str])...)
 	    }
 	    case ".text\x00":
-		text_d = txt
 		sec_map[shstr] = txt
 	    case ".data\x00":
-	        data_d = data
 		sec_map[shstr] = data
 	    case ".rela.text\x00":
 		for _, rela := range relatext {
-	            relatext_d = append(relatext_d, byted(rela)...)
 		    sec_map[shstr] =append(sec_map[shstr], byted(rela)...) 
 	    }
 	}
@@ -1806,14 +1793,15 @@ func main() {
 
 
 
+	cal_bytes := []byte{}
+	//cal_bytes = append(cal_bytes, byted(elf_header)...)
+	//for _, shstr := range shstrtabb {
+	//    cal_bytes = append(cal_bytes, sec_map[shstr]...)
+        //}
+
+
 	fff.Write(cal_bytes)
 
-	fmt.Println("shstrtab_d:", shstrtab_d, "\n")
-	fmt.Println("strtab_d:", strtab_d, "\n")
-	fmt.Println("symtab_d:", symtab_d, "\n")
-	fmt.Println("text_d:", text_d, "\n")
-	fmt.Println("data_d:", data_d, "\n")
-	fmt.Println("relatext_d:",relatext_d, "\n")
 	for k, s := range sym_map{ fmt.Printf("sym_map %v: %+v\n", k, s) }
 	fmt.Println("shstrtabb:", shstrtabb)
 	for k, s := range sht_map{ fmt.Printf("sht_map %v: %+v\n", k, s) }
