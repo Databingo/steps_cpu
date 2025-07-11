@@ -78,6 +78,12 @@ func align_n(length uint64, align uint64) uint64 {
 	return padded
 }
 
+func padding(length uint64, align uint64) uint64{
+	p := align - length%align
+	if p == align { p = 0 }
+	return p
+}
+
 func byted(data interface{}) []byte{
 	buf := new(bytes.Buffer)
 	_ = binary.Write(buf, binary.LittleEndian, data)
@@ -472,7 +478,7 @@ func main() {
 	sym_map := make(map[string]*Elf64_sym)
 	sec_map := make(map[string][]byte)
         sec_end := make(map[string]uint64)	
-        sec_pad := make(map[string]uint64)	
+        sec_pad := make(map[string][]byte)	
 
 	shstrtab_d := []byte{}
 	strtab_d := []byte{}
@@ -1715,8 +1721,7 @@ func main() {
 	            shtp.Link = uint32(0)
 	            shtp.Info = uint32(0)
 	            shtp.Entsize = uint64(0)
-		    sec_end[shstr] = elf_header.Shoff + uint64(elf_header.Shentsize * elf_header.Shnum) + shtp.Size
-		    sec_pad[shstr] = 0
+		    //sec_end[shstr] = elf_header.Shoff + uint64(elf_header.Shentsize * elf_header.Shnum) + shtp.Size
 	        case ".shstrtab\x00":
 	    	    shtp.Name = uint32(len(strings.Join(shstrtabb[0:idx], "")))
 	            shtp.Addralign = uint64(1)
@@ -1724,14 +1729,15 @@ func main() {
 	            shtp.Flags = uint64(0)//?
 	            shtp.Addr = uint64(0)// ?sh_addr virtual address at exection?
 	            shtp.Size = uint64(len(sec_map[shstr]))  
-	            shtp.Offset = align_n(sec_offset, shtp.Addralign) // padding   
-	    	    // prepare for next loop sec (unpadding)
-	    	    sec_offset = shtp.Offset + shtp.Size
-	    	    fmt.Println("set_offset:::", sec_offset)
+	            //shtp.Offset = align_n(sec_offset, shtp.Addralign) // padding   
+		    pre_shtp := sht_map[shstrtabb[get_sindex(shstrtabb, shstr)+1]]
+		    raw_offset :=  pre_shtp.Offset + pre_shtp.Size
+		    pad := padding(raw_offset, shtp.Addralign)
+		    sec_pad[shstr] = make([]byte, pad)
+	            shtp.Offset = raw_offset + pad
 	            shtp.Link = uint32(0) //0
 	            shtp.Info = uint32(0) //
 	            shtp.Entsize = uint64(0)
-	            cal_bytes = append(cal_bytes, byted(shtp)...)
 	        case ".strtab\x00":
 	    	    shtp.Name = uint32(len(strings.Join(shstrtabb[0:idx], "")))    // 0 for null
 	            shtp.Addralign = uint64(1)
