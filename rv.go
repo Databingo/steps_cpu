@@ -455,7 +455,7 @@ func main() {
 	var shstrtabb []string
 //	var text []byte
 	var data []byte
-	symtab_ := []Elf64_sym{sym}// symtab_ array and strtab are same order
+	//symtab_ := []Elf64_sym{sym}// symtab_ array and strtab are same order
 	strtab := []string{"\x00"}
 	strtabb := []string{"\x00"}
 	var relatext []Elf64_rela
@@ -545,21 +545,21 @@ func main() {
 	                        add_sec(".symtab\x00")//###
 			    }
 
-	                    sym.Name = uint32(len(strings.Join(strtab,"")))  //#uint32 // offset in string table
-			    fmt.Println("sym.Name:--|", sym.Name)
+	                    //sym.Name = uint32(len(strings.Join(strtab,"")))  //#uint32 // offset in string table
+			    //fmt.Println("sym.Name:--|", sym.Name)
 
-	                    sym.Info = (STB_GLOBAL << 4 | STT_FUNC)    //# H4:binding and L4:type
-	                    sym.Other = 0 //uint8 // reserved, currently holds 0
-	                    //sym.Shndx = uint16(slices.Index(shstrtab, section_in))//0 //#uint16 // section index the symbol in
-			    //fmt.Println("-::", section_in, uint16(slices.Index(shstrtab, section_in)))//0 //#uint16 // section index the symbol in
-	                    sym.Value = 0 //# uint64  for relocatable .o file it's symbol's offset in its section
-	                    sym.Size = 0  //#uint64  for function it's its size   -- uint64(len(align8("H\n")))                   
+	                    //sym.Info = (STB_GLOBAL << 4 | STT_FUNC)    //# H4:binding and L4:type
+	                    //sym.Other = 0 //uint8 // reserved, currently holds 0
+	                    ////sym.Shndx = uint16(slices.Index(shstrtab, section_in))//0 //#uint16 // section index the symbol in
+			    ////fmt.Println("-::", section_in, uint16(slices.Index(shstrtab, section_in)))//0 //#uint16 // section index the symbol in
+	                    //sym.Value = 0 //# uint64  for relocatable .o file it's symbol's offset in its section
+	                    //sym.Size = 0  //#uint64  for function it's its size   -- uint64(len(align8("H\n")))                   
 			    //sym + str 
-			    strtab = append(strtab, suffix_directive+"\x00")
-			    symtab_ = append(symtab_, sym)
+			    //strtab = append(strtab, suffix_directive+"\x00")
+			    //symtab_ = append(symtab_, sym)
 			    //----
-			    sym_str := suffix_directive+"\x00"
                             //###
+			    sym_str := suffix_directive+"\x00"
                             add_sym_global(sym_str) //###
 			    sym_map[sym_str].Name = uint32(len(strings.Join(strtabb[:get_sindex(strtabb, sym_str)],"")))  //#uint32 // offset in string table
 	                    sym_map[sym_str].Info = (STB_GLOBAL << 4 | STT_FUNC)    //# H4:binding and L4:type
