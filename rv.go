@@ -472,6 +472,7 @@ func main() {
 	sym_map := make(map[string]*Elf64_sym)
 	sec_map := make(map[string][]byte)
         sec_end := make(map[string]uint64)	
+        sec_pad := make(map[string]uint64)	
 
 	shstrtab_d := []byte{}
 	strtab_d := []byte{}
@@ -1715,6 +1716,7 @@ func main() {
 	            shtp.Info = uint32(0)
 	            shtp.Entsize = uint64(0)
 		    sec_end[shstr] = elf_header.Shoff + uint64(elf_header.Shentsize * elf_header.Shnum) + shtp.Size
+		    sec_pad[shstr] = 0
 	        case ".shstrtab\x00":
 	    	    shtp.Name = uint32(len(strings.Join(shstrtabb[0:idx], "")))
 	            shtp.Addralign = uint64(1)
