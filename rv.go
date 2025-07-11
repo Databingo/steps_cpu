@@ -471,6 +471,13 @@ func main() {
 	sht_map := make(map[string]*SHT)
 	sym_map := make(map[string]*Elf64_sym)
 	sec_map := make(map[string][]byte)
+
+	shstrtab_d := []byte{}
+	strtab_d := []byte{}
+	symtab_d := []byte{}
+	text_d := []byte{}
+	data_d := []byte{}
+	relatext_d := []byte{}
        
 	add_sec := func(shstr string) {
 	     shstrtabb = append(shstrtabb, shstr)
@@ -1651,10 +1658,40 @@ func main() {
 	    }
 	    }
 	}
+
+
 	//###
+        // edit sym_map Name
+	for _, sym_str := range strtabb[1:] {
+	    sym_map[sym_str].Name = uint32(len(strings.Join(strtabb[:get_sindex(strtabb, sym_str)],"")))  //#uint32 // offset in string table
+	}
+
+        // edit sec
+	for _, shstr := range shstrtabb {
+	    switch shstr {
+            case "\x00":
+	    case ".shstrtab\x00":
+		shstrtab_d = []byte(strings.Join(shstrtabb, ""))
+	    case ".strtab\x00":
+		strtab_d = []byte(strings.Join(strtabb, ""))
+	    case ".symtab\x00":
+		for _, str := range strtabb {
+	            symtab_d = append(symtab_d, byted(sym_map[str])...)
+	    }
+	    case ".text\x00":
+		text_d = txt
+	    case ".data\x00":
+	        data_d = data
+	    case ".rela.text\x00":
+		for _, rela := range relatext {
+	        relatext_d = append(relatext_d, byted(rela)...)
+	    }
+	}
+    }
+
+        // edit sht
 	for idx, shstr := range shstrtabb {
 	    //fmt.Println(idx, sht_map[shstr], sec_map[shstr])
-	    // edit sht
 	    fmt.Println(idx, shstr, sht_map[shstr])
 	    shtp := sht_map[shstr]
 	    switch shstr {
@@ -1771,18 +1808,14 @@ func main() {
 
 
 
-        // final fix symbal.Name offset in strtab
-	for _, sym_str := range strtabb[1:] {
-	    sym_map[sym_str].Name = uint32(len(strings.Join(strtabb[:get_sindex(strtabb, sym_str)],"")))  //#uint32 // offset in string table
-	}
-
 	fff.Write(cal_bytes)
 
-	//fmt.Println("sht_map:", sht_map, "\n")
-	//fmt.Println("sec_map:", sec_map, "\n")
-	//fmt.Println("strtab:", strtab, "\n")
-	//fmt.Println("sym_map:", sym_map, "\n")
-	fmt.Println("strtabb:", strtabb)
+	fmt.Println("shstrtab_d:", shstrtab_d, "\n")
+	fmt.Println("strtab_d:", strtab_d, "\n")
+	fmt.Println("symtab_d:", symtab_d, "\n")
+	fmt.Println("text_d:", text_d, "\n")
+	fmt.Println("data_d:", data_d, "\n")
+	fmt.Println("relatext_d:",relatext_d, "\n")
 	for k, s := range sym_map{ fmt.Printf("sym %v: %+v\n", k, s) }
 	fmt.Println("shstrtabb:", shstrtabb)
 	for k, s := range sht_map{ fmt.Printf("sht %v: %+v\n", k, s) }
