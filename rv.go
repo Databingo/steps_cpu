@@ -456,7 +456,7 @@ func main() {
 //	var text []byte
 	var data []byte
 	//symtab_ := []Elf64_sym{sym}// symtab_ array and strtab are same order
-	strtab := []string{"\x00"}
+	//strtab := []string{"\x00"}
 	strtabb := []string{"\x00"}
 	var relatext []Elf64_rela
 	//var no_local_sym_1st uint32
@@ -612,7 +612,7 @@ func main() {
 			label_in = strings.TrimSuffix(code[0], ":")
 		        //sym_index := slices.Index(strtab, label_in+"\x00")
 		        sym_index := get_sindex(strtabb, label_in+"\x00")
-			fmt.Println("|-:sym.Name",len(strings.Join(strtab,"")),  "strtab:", strtab, "section_in:", section_in)
+			//fmt.Println("|-:sym.Name",len(strings.Join(strtab,"")),  "strtab:", strtab, "section_in:", section_in)
 			if sym_index == -1 {
 	                    ////sym.Name = uint32(len(strings.Join(strtab,"")))  //#uint32 // offset in string table
 	                    //sym.Info = (STB_LOCAL << 4 | STT_FUNC)    //# H4:binding and L4:type
@@ -1223,7 +1223,7 @@ func main() {
 			if code[2] == "0"  && strings.Contains(scanner.Text(), "R_RISCV_PCREL_HI20") {
 			    cs := strings.Split(scanner.Text(), " ")
 			    sy := cs[len(cs)-2] // ending with \n
-			    idx := slices.Index(strtab, sy+"\x00")
+			    idx := slices.Index(strtabb, sy+"\x00")
 			    fmt.Println("create .rela.text entry for HI20: of", sy, idx, "at line:", lineCounter, "address:", address)
                             var rela Elf64_rela 
                             rela.Offset = uint64(address)//uint64 modified instruction's offset in .text
@@ -1240,7 +1240,7 @@ func main() {
 			if code[3] == "0"  && strings.Contains(scanner.Text(), "R_RISCV_PCREL_LO12_I") {
 			    cs := strings.Split(scanner.Text(), " ")
 			    sy := cs[len(cs)-2] // ending with \n
-			    idx := slices.Index(strtab, sy+"\x00")
+			    idx := slices.Index(strtabb, sy+"\x00")
 			    fmt.Println("create .rela.text entry for LO12_I.: of", sy, idx, "at line:", lineCounter, "address:", address)
                             var rela Elf64_rela 
                             rela.Offset = uint64(address)//uint64 modified instruction's offset in .text
