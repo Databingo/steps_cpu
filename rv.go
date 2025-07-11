@@ -504,14 +504,14 @@ func main() {
 
 	//elf
 	//sht0
-	shstrtab = append(shstrtab,"\x00")
-	shts = append(shts, sht) // strings array shts and shstrtab are same order
-	elf_header.Shnum += 1 
+	//shstrtab = append(shstrtab,"\x00")
+	//shts = append(shts, sht) // strings array shts and shstrtab are same order
+	//elf_header.Shnum += 1 
 	add_sec("\x00")//###
 	//sht1
-	shstrtab = append(shstrtab,".shstrtab\x00")
-	shts = append(shts, sht)
-	elf_header.Shnum += 1 
+	//shstrtab = append(shstrtab,".shstrtab\x00")
+	//shts = append(shts, sht)
+	//elf_header.Shnum += 1 
 	add_sec(".shstrtab\x00")//###
 	
 	for scanner0.Scan() {
@@ -536,17 +536,17 @@ func main() {
 			    fmt.Println("create .symtab entry + .strtab entry, add .symtab to .shstrtab")
 			    if !slices.Contains(shstrtab, ".strtab\x00") {
 			        //sht + shstrtab
-	                        shstrtab = append(shstrtab, ".strtab\x00")
-	                        shts = append(shts, sht)
-	                        elf_header.Shnum += 1 
+	                        //shstrtab = append(shstrtab, ".strtab\x00")
+	                        //shts = append(shts, sht)
+	                        //elf_header.Shnum += 1 
                                 //###
 	                        add_sec(".strtab\x00")
 			    }
 			    if !slices.Contains(shstrtab, ".symtab\x00") {
 			        //sht + shstrtab
-	                        shstrtab = append(shstrtab, ".symtab\x00")
-	                        shts = append(shts, sht)
-	                        elf_header.Shnum += 1 
+	                        //shstrtab = append(shstrtab, ".symtab\x00")
+	                        //shts = append(shts, sht)
+	                        //elf_header.Shnum += 1 
                                 //###
 	                        add_sec(".symtab\x00")//###
 			    }
@@ -581,9 +581,9 @@ func main() {
 			    fmt.Println("create SHT(s) + .shstrtab entry + section[]byte")
 			    section_in = suffix_directive + "\x00"
 			    //sht
-	                    shstrtab = append(shstrtab,suffix_directive+"\x00")
-	                    shts = append(shts, sht)
-	                    elf_header.Shnum += 1 
+	                    //shstrtab = append(shstrtab,suffix_directive+"\x00")
+	                    //shts = append(shts, sht)
+	                    //elf_header.Shnum += 1 
                             //###
 	                    add_sec(suffix_directive + "\x00")//###
 			}
@@ -850,9 +850,9 @@ func main() {
 			    if !slices.Contains(shstrtab, ".rela.text\x00") {
 			        fmt.Println("create .rela.text")
 			        //sht + shstrtab
-	                        elf_header.Shnum += 1 
-	                        shts = append(shts, sht)
-	                        shstrtab = append(shstrtab, ".rela.text\x00")
+	                        //elf_header.Shnum += 1 
+	                        //shts = append(shts, sht)
+	                        //shstrtab = append(shstrtab, ".rela.text\x00")
 	                        add_sec(".rela.text\x00")
 			    }
 			fmt.Println(`
@@ -1500,7 +1500,7 @@ func main() {
 	txt, _ := ioutil.ReadFile("add.o")
 
 
-	elf_header.Shnum = uint16(len(shstrtab))
+	//elf_header.Shnum = uint16(len(shstrtab))
 	elf_header.Shoff = uint64(elf_header.Ehsize)  // after elf_header, e_shoff points to start of section header table --  no 0 have to be the start of SHT  (e_shnum * e_shentsize = whole table of SHT)
 	//elf_header_bytes = byted(elf_header)
 	fmt.Println("shts SHT list:", shts, len(shts))
@@ -1714,7 +1714,7 @@ func main() {
 	            shtp.Link = uint32(0)
 	            shtp.Info = uint32(0)
 	            shtp.Entsize = uint64(0)
-		    sec_end[shstr] = elf_header.Shoff + uint64(elf_header.Shentsize * elf_header.Shuum) + shtp.Size
+		    sec_end[shstr] = elf_header.Shoff + uint64(elf_header.Shentsize * elf_header.Shnum) + shtp.Size
 	        case ".shstrtab\x00":
 	    	    shtp.Name = uint32(len(strings.Join(shstrtabb[0:idx], "")))
 	            shtp.Addralign = uint64(1)
@@ -1820,9 +1820,10 @@ func main() {
 	fmt.Println("text_d:", text_d, "\n")
 	fmt.Println("data_d:", data_d, "\n")
 	fmt.Println("relatext_d:",relatext_d, "\n")
-	for k, s := range sym_map{ fmt.Printf("sym %v: %+v\n", k, s) }
+	for k, s := range sym_map{ fmt.Printf("sym_map %v: %+v\n", k, s) }
 	fmt.Println("shstrtabb:", shstrtabb)
-	for k, s := range sht_map{ fmt.Printf("sht %v: %+v\n", k, s) }
-	for k, s := range sec_map{ fmt.Printf("sec %v: %+v\n", k, s) }
+	for k, s := range sht_map{ fmt.Printf("sht_map %v: %+v\n", k, s) }
+	for k, s := range sec_map{ fmt.Printf("sec_map %v: %+v\n", k, s) }
 	for k, s := range sec_end{ fmt.Printf("end %v: %+v\n", k, s) }
+	fmt.Println("Shnum:", elf_header.Shnum)
 }
