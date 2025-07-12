@@ -35,21 +35,21 @@ import (
 // 4 .text
 // 8 .data .rela.text .symtab
 // 1 .strtab .shstrtab (no need align)
-func align8(data interface{}) []byte {
-        if s, ok := data.(string); ok {
-	    data = []byte(s)
-	}
-	buf := new(bytes.Buffer)
-	_ = binary.Write(buf, binary.LittleEndian, data)
-	bytes := buf.Bytes()
-	padding := 8 - len(bytes)%8
-	if padding == 8 {
-		padding = 0
-	}
-	padded := make([]byte, len(bytes)+padding)
-	copy(padded, bytes)
-	return padded
-}
+//func align8(data interface{}) []byte {
+//        if s, ok := data.(string); ok {
+//	    data = []byte(s)
+//	}
+//	buf := new(bytes.Buffer)
+//	_ = binary.Write(buf, binary.LittleEndian, data)
+//	bytes := buf.Bytes()
+//	padding := 8 - len(bytes)%8
+//	if padding == 8 {
+//		padding = 0
+//	}
+//	padded := make([]byte, len(bytes)+padding)
+//	copy(padded, bytes)
+//	return padded
+//}
 
 func align_x(data interface{}, align int) []byte {
         if s, ok := data.(string); ok {
@@ -65,16 +65,6 @@ func align_x(data interface{}, align int) []byte {
 	}
 	padded := make([]byte, len(bytes)+padding)
 	copy(padded, bytes)
-	return padded
-}
-
-func align_n(length uint64, align uint64) uint64 {
-	padding := align - length%align
-	if padding == align {
-		//padding = 0
-	    return length
-	}
-	padded := length+padding
 	return padded
 }
 
@@ -192,8 +182,7 @@ func isValidImmediate(s string) (int64, error) {
 	imm1, err1 = strconv.ParseInt(s, 10, 32) // check if s is a decimal number
 
 	if strings.HasPrefix(s, "0x") {
-		imm2, err2 = strconv.ParseInt(s[2:], 16, 64) // check if s is hex
-		fmt.Println(s, "imm2:", imm2, err2)
+		imm2, err2 = strconv.ParseInt(s[2:], 16, 64) // check if s is hex fmt.Println(s, "imm2:", imm2, err2)
 	} else if strings.HasPrefix(s, "-0x") {
 		imm2, err2 = strconv.ParseInt(string(s[0])+s[3:], 16, 64) // ignore the "0x" part but include the '-'
 		if imm2 == 0 {
