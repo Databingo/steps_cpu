@@ -1510,7 +1510,7 @@ func main() {
 	    }
 
 
-
+        // construct ELF object
 	cal_bytes := []byte{}
 	cal_bytes = append(cal_bytes, byted(elf_header)...)
 	for _, shstr := range shstrtabb {
