@@ -1113,6 +1113,7 @@ func main() {
 			    fmt.Println("create .rela.text entry for HI20: of", sy, idx, "at line:", lineCounter, "address:", address)
                             var rela Elf64_rela 
                             rela.Offset = uint64(address)//uint64 modified instruction's offset in .text
+			    fmt.Println("[[[[[", codes, strtabb, sy, idx, address)
                             rela.Info = (uint64(idx) << 32) | R_RISCV_PCREL_HI20 //uint64   // sym index and relocation type
                             rela.Addend = int64(0)// int16   // A constant addend used in the reloction calculation 加数
 			    fmt.Printf("%+v\n", rela)
