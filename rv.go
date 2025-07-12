@@ -1107,8 +1107,8 @@ func main() {
 			}
 			//auipc reg, 0 # R_RISCV_PCREL_HI20 arg
 			if code[2] == "0"  && strings.Contains(scanner.Text(), "R_RISCV_PCREL_HI20") {
-			    cs := strings.Split(scanner.Text(), " ")
-			    sy := cs[len(cs)-2] // ending with \n
+			    codes := strings.Split(scanner.Text(), " ")
+			    sy := codes[len(codes)-2] // ending with \n
 			    idx := slices.Index(strtabb, sy+"\x00")
 			    fmt.Println("create .rela.text entry for HI20: of", sy, idx, "at line:", lineCounter, "address:", address)
                             var rela Elf64_rela 
@@ -1124,8 +1124,8 @@ func main() {
 			}
 			//addi reg, reg 0 # R_RISCV_PCREL_LO12_I arg
 			if code[3] == "0"  && strings.Contains(scanner.Text(), "R_RISCV_PCREL_LO12_I") {
-			    cs := strings.Split(scanner.Text(), " ")
-			    sy := cs[len(cs)-2] // ending with \n
+			    codes := strings.Split(scanner.Text(), " ")
+			    sy := codes[len(codes)-2] // ending with \n
 			    idx := slices.Index(strtabb, sy+"\x00")
 			    fmt.Println("create .rela.text entry for LO12_I.: of", sy, idx, "at line:", lineCounter, "address:", address)
                             var rela Elf64_rela 
