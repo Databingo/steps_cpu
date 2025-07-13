@@ -521,7 +521,8 @@ func main() {
 			    pad8 := align_x(suffix_directive, 8)
                             data = append(data, pad8...)
 			    //sym_map[label_in+"\x00"].Name
-			    sym_map[label_in+"\x00"].Info = (sym_map[label_in+"\x00"].Info >> 4 | STT_OBJECT  ) //# uint8 // H4:binding and L4:type
+			    //sym_map[label_in+"\x00"].Info = (sym_map[label_in+"\x00"].Info >> 4 | STT_OBJECT  ) //# uint8 // H4:binding and L4:type
+			    sym_map[label_in+"\x00"].Info = (sym_map[label_in+"\x00"].Info >>4<<4| STT_OBJECT  ) //# uint8 // H4:binding and L4:type
 			    sym_map[label_in+"\x00"].Shndx = uint16(slices.Index(shstrtabb, section_in))//4 //uint16 // section index the symbol in (.text)
 			    sym_map[label_in+"\x00"].Value = uint64(len(data)) //# uint64  for relocatable .o file it's symbol's offset in its section
 			    sym_map[label_in+"\x00"].Size = uint64(len(pad8))  //#uint64  for function it's its size
@@ -531,9 +532,11 @@ func main() {
 
 		} else if strings.HasSuffix(switchOnOp, ":") {
 			label_in = strings.TrimSuffix(code[0], ":")
-		        sym_index := get_sindex(strtabb, label_in+"\x00")
-			if sym_index == -1 {
-			    sym_str := label_in +"\x00"
+		        //sym_index := get_sindex(strtabb, label_in+"\x00")
+			//if sym_index == -1 {
+			
+			sym_str := label_in +"\x00"
+		        if !slices.Contains(strtabb, label_in+"\x00"){
                             add_sym_local(sym_str) 
 	                    sym_map[sym_str].Info = (STB_LOCAL << 4 | STT_FUNC)    //# H4:binding and L4:type
 	                    sym_map[sym_str].Other = 0 //uint8 // reserved, currently holds 0
@@ -541,7 +544,7 @@ func main() {
 	                    sym_map[sym_str].Value = 0 //# uint64  for relocatable .o file it's symbol's offset in its section
 	                    sym_map[sym_str].Size = 0  //#uint64  for function it's its size   -- uint64(len(align8("H\n")))                   
 			} else {
-	                    sym_map[label_in+"\x00"].Shndx = uint16(slices.Index(shstrtabb, section_in))//0 //#uint16 // section index the symbol in
+	                    sym_map[sym_str].Shndx = uint16(slices.Index(shstrtabb, section_in))//0 //#uint16 // section index the symbol in
 					    }
 			copy_instr.WriteString(raw_instr)
 		} else {
