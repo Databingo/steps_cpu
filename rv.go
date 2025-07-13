@@ -146,6 +146,7 @@ type Elf64_sym struct { // 24 bytes
 
 const R_RISCV_PCREL_HI20 = 23
 const R_RISCV_PCREL_LO12_I = 24
+const R_RISCV_PCREL_LO12_S = 25
 
 type Elf64_rela struct {
 	Offset uint64  // modified instruction's offset in .text
@@ -744,7 +745,7 @@ func main() {
 				 Elf64_Sxword r_addend: 0 for PC-relative 0x0000000000000000
 				 `)
 			//ins := fmt.Sprintf("auipc %s, %%pcrel_hi(%s)\n", code[1], code[2]) // hi = (rela_addr + 0x800) >> 12
-			ins = fmt.Sprintf("auipc %s, 0 # R_RISCV_PCREL_HI20 %s \n", code[1], code[2]) // hi = (rela_addr + 0x800) >> 12
+			ins = fmt.Sprintf("auipc %s, 0 # R_RISCV_PCREL_HI20 %s\n", code[1], code[2]) // hi = (rela_addr + 0x800) >> 12
 			real_instr.WriteString(ins)
 			fmt.Println(`
 		                 for .rela.text: 
@@ -754,7 +755,7 @@ func main() {
 				 Elf64_Sxword r_addend: 0 for PC-relative 0x0000000000000000
 				 `)
 			//ins = fmt.Sprintf("addi  %s, %s, %%pcrel_lo(%s)\n", code[1], code[1], code[2]) // lo = rela_addr  - (hi << 12)
-			ins = fmt.Sprintf("addi  %s, %s, 0 # R_RISCV_PCREL_LO12_I %s \n", code[1], code[1], code[2]) // lo = rela_addr  - (hi << 12)
+			ins = fmt.Sprintf("addi  %s, %s, 0 # R_RISCV_PCREL_LO12_I %s\n", code[1], code[1], code[2]) // lo = rela_addr  - (hi << 12)
 			real_instr.WriteString(ins)
 		case "call": //auipc x1, offset[31:12]; jalr x1, offset[11:0](x1) 调用远距离过程(save pc+4)
 			ins := fmt.Sprintf("# %s\n", line)
@@ -1109,15 +1110,15 @@ func main() {
 			//auipc reg, 0 # R_RISCV_PCREL_HI20 arg
 			if code[2] == "0"  && strings.Contains(scanner.Text(), "R_RISCV_PCREL_HI20") {
 			    codes := strings.Split(scanner.Text(), " ")
-			    sy := codes[len(codes)-2] // ending with \n
+			    sy := codes[len(codes)-1] // ending with \n
 			    idx := slices.Index(strtabb, sy+"\x00")
 			    fmt.Println("create .rela.text entry for HI20: of", sy, idx, "at line:", lineCounter, "address:", address)
                             var rela Elf64_rela 
                             rela.Offset = uint64(address)//uint64 modified instruction's offset in .text
-			    fmt.Println("[[[[[", codes, strtabb, sy, idx, address, len(codes))
                             rela.Info = (uint64(idx) << 32) | R_RISCV_PCREL_HI20 //uint64   // sym index in symbol entry array and relocation type
-                            rela.Addend = int64(0)// int16   // A constant addend used in the reloction calculation 加数
+                            rela.Addend = int64(0)// int64  // A constant addend used in the reloction calculation 加数
 			    fmt.Printf("%+v\n", rela)
+			    fmt.Println("[[[[[", codes, strtabb, sy, idx, address, len(codes),"|", rela.Info>>32)
 			    relatext = append(relatext, rela)
 			}
 		case "addi": // op rd, rs1, immediate
@@ -1127,13 +1128,13 @@ func main() {
 			//addi reg, reg 0 # R_RISCV_PCREL_LO12_I arg
 			if code[3] == "0"  && strings.Contains(scanner.Text(), "R_RISCV_PCREL_LO12_I") {
 			    codes := strings.Split(scanner.Text(), " ")
-			    sy := codes[len(codes)-2] // ending with \n
+			    sy := codes[len(codes)-1] // ending with \n
 			    idx := slices.Index(strtabb, sy+"\x00")
 			    fmt.Println("create .rela.text entry for LO12_I.: of", sy, idx, "at line:", lineCounter, "address:", address)
                             var rela Elf64_rela 
                             rela.Offset = uint64(address)//uint64 modified instruction's offset in .text
                             rela.Info = (uint64(idx) << 32) | R_RISCV_PCREL_LO12_I //uint64   // sym index and relocation type
-                            rela.Addend = int64(0)// int16   // A constant addend used in the reloction calculation 加数
+                            rela.Addend = int64(0)// int64   // A constant addend used in the reloction calculation 加数
 			    fmt.Printf("%+v\n", rela)
 			    relatext = append(relatext, rela)
 			}
