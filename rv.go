@@ -441,7 +441,8 @@ func main() {
 	var label_in string
 	var shstrtabb []string
 	var data []byte
-	strtabb := []string{"\x00"}
+	//strtabb := []string{"\x00"}
+	var strtabb []string
 	var relatext []Elf64_rela
 	sht_map := make(map[string]*SHT)
 	sym_map := make(map[string]*Elf64_sym)
@@ -498,7 +499,7 @@ func main() {
 			if directive == ".global" {
 			    fmt.Println("Directive:", directive, "//Suf_directive:", suffix_directive)
 			    if !slices.Contains(shstrtabb, ".strtab\x00") { add_sec(".strtab\x00") }
-			    if !slices.Contains(shstrtabb, ".symtab\x00") { add_sec(".symtab\x00") }
+			    if !slices.Contains(shstrtabb, ".symtab\x00") { add_sec(".symtab\x00"); add_sym_global("\x00") }
 
 			    sym_str := suffix_directive+"\x00"
                             add_sym_global(sym_str) //###
@@ -1113,7 +1114,7 @@ func main() {
 			    fmt.Println("create .rela.text entry for HI20: of", sy, idx, "at line:", lineCounter, "address:", address)
                             var rela Elf64_rela 
                             rela.Offset = uint64(address)//uint64 modified instruction's offset in .text
-			    fmt.Println("[[[[[", codes, strtabb, sy, idx, address)
+			    fmt.Println("[[[[[", codes, strtabb, sy, idx, address, len(codes))
                             rela.Info = (uint64(idx) << 32) | R_RISCV_PCREL_HI20 //uint64   // sym index and relocation type
                             rela.Addend = int64(0)// int16   // A constant addend used in the reloction calculation 加数
 			    fmt.Printf("%+v\n", rela)
