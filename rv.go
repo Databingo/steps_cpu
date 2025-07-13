@@ -1459,7 +1459,7 @@ func main() {
 	            shtp.Link = uint32(slices.Index(shstrtabb, ".strtab\x00")) // link to dependency SHT's index, calculated by (.strtab index in array .shstrtab) 
 		    for idn, sym := range strtabb{
 	    	        if sym_map[sym].Info >> 4 == 1{ 
-	                       shtp.Info = uint32(idn) // first no-local symbol index in sym list
+	                       shtp.Info = uint32(idn) // 1st no-local symbol(global&weak) index in sym array
 	    	               break //local symbols should be in front of global symbols in symtab
 	    	        }
 	    	    }
