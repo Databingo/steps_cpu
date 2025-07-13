@@ -506,6 +506,7 @@ func main() {
                             add_sym_global(sym_str) //###
 			    sym_map[sym_str].Name = uint32(len(strings.Join(strtabb[:get_sindex(strtabb, sym_str)],"")))  //#uint32 // offset in string table
 	                    sym_map[sym_str].Info = (STB_GLOBAL << 4 | STT_FUNC)    //# H4:binding and L4:type
+	                    //sym_map[sym_str].Info = (STB_GLOBAL << 4 | STT_OBJECT)    //# H4:binding and L4:type
 	                    sym_map[sym_str].Other = 0 //uint8 // reserved, currently holds 0
 	                    //sym.Shndx 
 	                    sym_map[sym_str].Value = 0 //# uint64  for relocatable .o file it's symbol's offset in its section
@@ -519,13 +520,13 @@ func main() {
 			}
 			if directive == ".string" {
 			    pad8 := align_x(suffix_directive, 8)
-                            data = append(data, pad8...)
 			    //sym_map[label_in+"\x00"].Name
 			    //sym_map[label_in+"\x00"].Info = (sym_map[label_in+"\x00"].Info >> 4 | STT_OBJECT  ) //# uint8 // H4:binding and L4:type
 			    sym_map[label_in+"\x00"].Info = (sym_map[label_in+"\x00"].Info >>4<<4| STT_OBJECT  ) //# uint8 // H4:binding and L4:type
 			    sym_map[label_in+"\x00"].Shndx = uint16(slices.Index(shstrtabb, section_in))//4 //uint16 // section index the symbol in (.text)
 			    sym_map[label_in+"\x00"].Value = uint64(len(data)) //# uint64  for relocatable .o file it's symbol's offset in its section
 			    sym_map[label_in+"\x00"].Size = uint64(len(pad8))  //#uint64  for function it's its size
+                            data = append(data, pad8...)
 
 			}
 		
@@ -1292,7 +1293,6 @@ func main() {
 			if len(code) != 4 {
 				fmt.Println("ori 2 Incorrect argument count on line: ", lineCounter)
 			}
-			//fmt.Println(line)
 			imm, err := isValidImmediate(code[3])
 			if err != nil {
 				fmt.Printf("$Error on line %d: %s\n", lineCounter, err)
@@ -1306,6 +1306,9 @@ func main() {
 			op, opFound := opBin[code[0]]
 			rd, rdFound := regBin[code[1]]
 			rs1, rs1Found := regBin[code[2]]
+		        oop := fmt.Sprintf("%032b", op)
+			fmt.Println("]]]", address, code[0], imm, oop)
+			
 			if opFound && rdFound && rs1Found {
 				instruction = uint32(imm)<<20 | rs1<<15 | rd<<7 | op
 			} else if !rdFound || !rs1Found {
