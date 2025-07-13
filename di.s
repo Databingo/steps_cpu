@@ -1,5 +1,5 @@
 # Directive: Define global symbols (visible to linker)
-.global _start
+.global main
 #.global msg
 
 # Directive: Switch to data section for initialized data
@@ -10,7 +10,7 @@ msg:
 
 # Directive: Switch to text section for code
 .section .text
-_start:
+main:
 #    # Load the address of msg into t0 (a0 for syscall)
 #    # 'la' is a pseudo-instruction handled by assembler/linker
 #    la      a1, msg
