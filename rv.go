@@ -1394,7 +1394,7 @@ func main() {
 	elf_header.Shoff = uint64(elf_header.Ehsize)  // after elf_header, e_shoff points to start of section header table 
 
         // edit sym
-	for _, sym_str := range strtabb[1:] {
+	for _, sym_str := range strtabb[:] {
 	    sym_map[sym_str].Name = uint32(len(strings.Join(strtabb[:get_sindex(strtabb, sym_str)],""))) 
 	}
 
