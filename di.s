@@ -36,7 +36,7 @@ main:
     li      a7, 4          # write syscall number = 4
     li      a0, 1           # fd = 1 (stdout)
     la      a1, msg
-    li      a2, 2          # length = 13 (bytes in "H\n")
+    li      a2, 14          # length = 13 (bytes in "H\n")
     ecall                   # Make the system call
 
     # Prepare for exit(0) syscall

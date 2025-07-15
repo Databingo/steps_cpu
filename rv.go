@@ -521,7 +521,8 @@ func main() {
 	                    add_sec(suffix_directive + "\x00")//###
 			}
 			if directive == ".string" {
-			    pad8 := align_x(suffix_directive, 8)
+			    //pad8 := align_x(suffix_directive, 8)
+			    pad8 := []byte(suffix_directive + "\x00")
 			    //sym_map[label_in+"\x00"].Name
 			    //sym_map[label_in+"\x00"].Info = (sym_map[label_in+"\x00"].Info >> 4 | STT_OBJECT  ) //# uint8 // H4:binding and L4:type
 			    sym_map[label_in+"\x00"].Info = (sym_map[label_in+"\x00"].Info >>4<<4| STT_OBJECT  ) //# uint8 // H4:binding and L4:type
