@@ -147,6 +147,7 @@ type Elf64_sym struct { // 24 bytes
 const R_RISCV_PCREL_HI20 = 23
 const R_RISCV_PCREL_LO12_I = 24
 const R_RISCV_PCREL_LO12_S = 25
+const R_RISCV_RELAX = 51
 
 type Elf64_rela struct {
 	Offset uint64  // modified instruction's offset in .text
@@ -775,6 +776,13 @@ func main() {
                             //<<<
 			    local_label := ".L" + strconv.Itoa(local_idx) + "\x00"
 			    add_sym_local(local_label)
+
+	                    sym_map[local_label].Info = (STB_LOCAL << 4 | STT_NOTYPE)    //# H4:binding and L4:type
+	                    sym_map[local_label].Other = 0 //uint8 // reserved, currently holds 0
+	                    sym_map[local_label].Shndx = uint16(slices.Index(shstrtabb, section_in))//0 //#uint16 // section index the symbol in
+	                    sym_map[local_label].Value = 0 //# uint64  for relocatable .o file it's symbol's offset in its section
+	                    sym_map[local_label].Size = 0  //#uint64  for function it's its size   -- uint64(len(align8("H\n")))                   
+
 			    rel_map[local_label] = &Elf64_rela{}
 			    local_idx += 1
 			//ins = fmt.Sprintf("addi  %s, %s, 0 # R_RISCV_PCREL_LO12_I %s\n", code[1], code[1], code[2]) // lo = rela_addr  - (hi << 12)
@@ -1148,6 +1156,13 @@ func main() {
 			    fmt.Printf("%+v\n", rel_map[sy])
 			    fmt.Println("[[[[[", codes, strtabb, sy, idx, address, len(codes),"|", rel_map[sy].Info>>32)
 			    relatext = append(relatext, *rel_map[sy])
+                            
+			    // R_RISCV_RELAX
+                            var rela Elf64_rela 
+			    rela.Offset = uint64(address)
+                            rela.Info =  R_RISCV_RELAX
+                            rela.Addend = int64(0)
+			    relatext = append(relatext, rela)
 			}
 		case "addi": // op rd, rs1, immediate
 			if len(code) != 4 {
@@ -1168,6 +1183,12 @@ func main() {
 			    fmt.Printf("%+v\n", rel_map[sy])
 			    relatext = append(relatext, *rel_map[sy])
 
+			    // R_RISCV_RELAX
+                            var rela Elf64_rela 
+			    rela.Offset = uint64(address)
+                            rela.Info =  R_RISCV_RELAX
+                            rela.Addend = int64(0)
+			    relatext = append(relatext, rela)
 			    //local_label := ".L" + strconv.Itoa(local_idx)
 			    ////fmt.Println(">>>create symbol entry for LO12_I.: of", sy, idx, "at line:", lineCounter, "address:", address, "local_label:", local_label)
 			    fmt.Println(">>>create symbol entry for LO12_I.: of", sy, idx, "at line:", lineCounter, "address:", address)
@@ -1427,6 +1448,14 @@ func main() {
         // edit sym
 	for _, sym_str := range strtabb[:] {
 	    sym_map[sym_str].Name = uint32(len(strings.Join(strtabb[:get_sindex(strtabb, sym_str)],""))) 
+	}
+
+        // edit rel
+	for idx, sym_str := range strtabb[:] {
+	    if _, ok := rel_map[sym_str]; ok {
+		rel_map[sym_str].Info = (uint64(idx) << 32) | (rel_map[sym_str].Info << 32 >>32) 
+	        sym_map[sym_str].Value = rel_map[sym_str].Offset//uint64 modified instruction's offset in .text
+                }
 	}
 
         // edit sec
