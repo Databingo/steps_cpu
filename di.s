@@ -43,6 +43,7 @@ main:
     li      a7, 1          # exit syscall number = 1
     li      a0, 0           # exit code 0
     ecall                   # Make the system call
+    ret
 
 
 #auipc a1, 0

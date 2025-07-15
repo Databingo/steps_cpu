@@ -1158,11 +1158,11 @@ func main() {
 			    relatext = append(relatext, *rel_map[sy])
                             
 			    // R_RISCV_RELAX
-                            var rela Elf64_rela 
-			    rela.Offset = uint64(address)
-                            rela.Info =  R_RISCV_RELAX
-                            rela.Addend = int64(0)
-			    relatext = append(relatext, rela)
+                            //var rela Elf64_rela 
+			    //rela.Offset = uint64(address)
+                            //rela.Info =  R_RISCV_RELAX
+                            //rela.Addend = int64(0)
+			    //relatext = append(relatext, rela)
 			}
 		case "addi": // op rd, rs1, immediate
 			if len(code) != 4 {
@@ -1184,11 +1184,11 @@ func main() {
 			    relatext = append(relatext, *rel_map[sy])
 
 			    // R_RISCV_RELAX
-                            var rela Elf64_rela 
-			    rela.Offset = uint64(address)
-                            rela.Info =  R_RISCV_RELAX
-                            rela.Addend = int64(0)
-			    relatext = append(relatext, rela)
+                            //var rela Elf64_rela 
+			    //rela.Offset = uint64(address)
+                            //rela.Info =  R_RISCV_RELAX
+                            //rela.Addend = int64(0)
+			    //relatext = append(relatext, rela)
 			    //local_label := ".L" + strconv.Itoa(local_idx)
 			    ////fmt.Println(">>>create symbol entry for LO12_I.: of", sy, idx, "at line:", lineCounter, "address:", address, "local_label:", local_label)
 			    fmt.Println(">>>create symbol entry for LO12_I.: of", sy, idx, "at line:", lineCounter, "address:", address)
@@ -1456,7 +1456,7 @@ func main() {
 	    if _, ok := rel_map[sym_str]; ok {
 		rel_map[sym_str].Info = (uint64(idx) << 32) | (rel_map[sym_str].Info << 32 >>32) 
 	        if strings.HasPrefix(sym_str, ".L") {
-		    sym_map[sym_str].Value = rel_map[sym_str].Offset-4//uint64 modified instruction's offset in .text
+		    sym_map[sym_str].Value = rel_map[sym_str].Offset-4//uint64 modified data's value, string is the offsize in .data, rela.text is the former HI20 instruction's offset in .text
 		}
                 }
 	}
