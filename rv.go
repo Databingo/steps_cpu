@@ -751,7 +751,7 @@ func main() {
 				 Elf64_Sxword r_addend: 0 for PC-relative 0x0000000000000000
 				 `)
 			//ins := fmt.Sprintf("auipc %s, %%pcrel_hi(%s)\n", code[1], code[2]) // hi = (rela_addr + 0x800) >> 12
-			ins = fmt.Sprintf("auipc %s, 0 # R_RISCV_PCREL_HI20 %s\n", code[1], code[2]) // hi = (rela_addr + 0x800) >> 12
+			ins = fmt.Sprintf("auipc %s, 0 # R_RISCV_PCREL_HI20 %s\n", code[1], code[2]+"\x00") // hi = (rela_addr + 0x800) >> 12
 			real_instr.WriteString(ins)
                             //var rela Elf64_rela 
                             //rela.Offset = uint64(address)//uint64 modified instruction's offset in .text
@@ -759,7 +759,7 @@ func main() {
                             //rela.Addend = int64(0)// int64   // A constant addend used in the reloction calculation 加数
 			    //fmt.Printf("%+v\n", rela)
 			    //relatext = append(relatext, rela)
-			    rel_map[code[2]] = &Elf64_rela{}
+			    rel_map[code[2]+"\x00"] = &Elf64_rela{}
 			    //local_label := ".L" + strconv.Itoa(local_idx)
 			    //add_sym_local(local_label)
 			    //local_idx += 1
@@ -773,7 +773,7 @@ func main() {
 				 `)
 			//ins = fmt.Sprintf("addi  %s, %s, %%pcrel_lo(%s)\n", code[1], code[1], code[2]) // lo = rela_addr  - (hi << 12)
                             //<<<
-			    local_label := ".L" + strconv.Itoa(local_idx)
+			    local_label := ".L" + strconv.Itoa(local_idx) + "\x00"
 			    add_sym_local(local_label)
 			    rel_map[local_label] = &Elf64_rela{}
 			    local_idx += 1
@@ -1137,7 +1137,8 @@ func main() {
 			if code[2] == "0"  && strings.Contains(scanner.Text(), "R_RISCV_PCREL_HI20") {
 			    codes := strings.Split(scanner.Text(), " ")
 			    sy := codes[len(codes)-1] // ending with \n
-			    idx := slices.Index(strtabb, sy+"\x00")
+			    //idx := slices.Index(strtabb, sy+"\x00")
+			    idx := slices.Index(strtabb, sy)
 			    fmt.Println("create .rela.text entry for HI20: of", sy, idx, "at line:", lineCounter, "address:", address)
 
                             //var rela Elf64_rela 
@@ -1156,7 +1157,8 @@ func main() {
 			if code[3] == "0"  && strings.Contains(scanner.Text(), "R_RISCV_PCREL_LO12_I") {
 			    codes := strings.Split(scanner.Text(), " ")
 			    sy := codes[len(codes)-1] // ending with \n
-			    idx := slices.Index(strtabb, sy+"\x00")
+			    //idx := slices.Index(strtabb, sy+"\x00")
+			    idx := slices.Index(strtabb, sy)
 			    fmt.Println("create .rela.text entry for LO12_I.: of", sy, idx, "at line:", lineCounter, "address:", address)
 
                             //var rela Elf64_rela 
