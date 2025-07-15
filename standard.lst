@@ -1,0 +1,66 @@
+GAS LISTING di.s 			page 1
+
+
+   1              	# Directive: Define global symbols (visible to linker)
+   2              	.global main
+   3              	.global msg
+   4              	
+   5              	# Directive: Switch to data section for initialized data
+   6              	.section .data
+   7              	msg:
+   8              	    # Directive: Define a null-terminated string
+   9 0000 48656C6C 	    .string "Hello RISC-V\n"
+   9      6F205249 
+   9      53432D56 
+   9      0A00
+  10              	
+  11              	# Directive: Switch to text section for code
+  12              	.section .text
+  13              	main:
+  14              	#    # Load the address of msg into t0 (a0 for syscall)
+  15              	#    # 'la' is a pseudo-instruction handled by assembler/linker
+  16              	#    la      a1, msg
+  17              	#    nop
+  18              	#    call _start
+  19              	#    tail _start
+  20              	#    j _start
+  21              	#    jr x9
+  22              	#    jal _start
+  23              	#    jalr x9
+  24              	#    mv x1, x2
+  25              	#    not x1, x3
+  26              	#    lb x1, _start
+  27              	#    lh x1, _start
+  28              	#    lw x1, _start
+  29              	#    ld x1, _start
+  30              	#    sb x1, _start, x2
+  31              	#    sh x1, _start, x2
+  32              	#    sw x1, _start, x2
+  33              	#    sd x1, _start, x2
+  34              	
+  35              	    # Prepare for write(1, message_addr, length) syscall (Linux RV64)
+  36 0000 93084000 	    li      a7, 4          # write syscall number = 4
+  37 0004 13051000 	    li      a0, 1           # fd = 1 (stdout)
+  38 0008 97050000 	    la      a1, msg
+  38      93850500 
+  39 0010 13062000 	    li      a2, 2          # length = 13 (bytes in "H\n")
+  40 0014 73000000 	    ecall                   # Make the system call
+  41              	
+  42              	    # Prepare for exit(0) syscall
+  43 0018 93081000 	    li      a7, 1          # exit syscall number = 1
+  44 001c 13050000 	    li      a0, 0           # exit code 0
+  45 0020 73000000 	    ecall                   # Make the system call
+  46              	
+  47              	
+  48              	#auipc a1, 0
+  49              	#addi  a1, a1, 0
+  50              	#li    a0, 1
+  51              	#li    a2, 1
+  52              	#li    a7, 4
+  53              	#ecall
+GAS LISTING di.s 			page 2
+
+
+  54              	#li    a0, 0
+  55              	#li    a7, 1 
+  56              	#ecall
