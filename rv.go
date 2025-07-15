@@ -526,7 +526,7 @@ func main() {
 			    //sym_map[label_in+"\x00"].Info = (sym_map[label_in+"\x00"].Info >> 4 | STT_OBJECT  ) //# uint8 // H4:binding and L4:type
 			    sym_map[label_in+"\x00"].Info = (sym_map[label_in+"\x00"].Info >>4<<4| STT_OBJECT  ) //# uint8 // H4:binding and L4:type
 			    sym_map[label_in+"\x00"].Shndx = uint16(slices.Index(shstrtabb, section_in))//4 //uint16 // section index the symbol in (.text)
-			    sym_map[label_in+"\x00"].Value = uint64(len(data)) //# uint64  for relocatable .o file it's symbol's offset in its section
+			    sym_map[label_in+"\x00"].Value = uint64(len(data)) //# uint64  for relocatable .o file it's symbol value's offset in its section
 			    sym_map[label_in+"\x00"].Size = uint64(len(pad8))  //#uint64  for function it's its size
                             data = append(data, pad8...)
 
@@ -1193,6 +1193,7 @@ func main() {
 			    ////fmt.Println(">>>create symbol entry for LO12_I.: of", sy, idx, "at line:", lineCounter, "address:", address, "local_label:", local_label)
 			    fmt.Println(">>>create symbol entry for LO12_I.: of", sy, idx, "at line:", lineCounter, "address:", address)
 			    //local_idx += 1
+			    //sym_map[sy].Value = sym_map[sy].Value - 4
 			}
 
 		default:
@@ -1454,7 +1455,9 @@ func main() {
 	for idx, sym_str := range strtabb[:] {
 	    if _, ok := rel_map[sym_str]; ok {
 		rel_map[sym_str].Info = (uint64(idx) << 32) | (rel_map[sym_str].Info << 32 >>32) 
-	        sym_map[sym_str].Value = rel_map[sym_str].Offset//uint64 modified instruction's offset in .text
+	        if strings.HasPrefix(sym_str, ".L") {
+		    sym_map[sym_str].Value = rel_map[sym_str].Offset-4//uint64 modified instruction's offset in .text
+		}
                 }
 	}
 
@@ -1584,6 +1587,7 @@ func main() {
 
 	fmt.Println("shstrtabb:", shstrtabb)
 	fmt.Println("strtabb:", strtabb)
+	fmt.Println("data:", string(data))
 	//for k, s := range sym_map{ fmt.Printf("sym_map %v: %+v\n", k, s) }
 	//for k, s := range sht_map{ fmt.Printf("sht_map %v: %+v\n", k, s) }
 	//for k, s := range sec_map{ fmt.Printf("sec_map %v: %+v\n", k, s) }
