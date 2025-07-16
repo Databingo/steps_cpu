@@ -1,5 +1,5 @@
 /* uart.c */
-#include <stdarg.h>
+//#include <stdarg.h>
 
 // QEMU 'virt' machine UART is at this memory address
 #define UART_BASE 0x10000000
@@ -14,6 +14,9 @@ void uart_putc(char c) {
 
 void uart_puts(const char *s) {
     while (*s) {
+      if (*s == '\n') {
+        uart_putc('\r');
+      }
         uart_putc(*s++);
     }
 }
