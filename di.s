@@ -8,27 +8,25 @@ msg:
     # Directive: Define a null-terminated string
     .string "Hello RISC-V\n"
 
-# Directive: Switch to text section for code
 .section .text
 main:
-    # Prepare for write(1, message_addr, length) syscall (FreeBSD RV64)
-    li      a7, 4          # write syscall number = 4
-    li      a0, 1           # fd = 1 (stdout)
+    # ... your write syscall ...
+    li      a7, 4
+    li      a0, 1
     la      a1, msg
-    li      a2, 13          # length = 13 (bytes in "Hello RISC-V\n")
-    ecall                   # Make the system call
-    
-    # Check if write failed (return value < 0)
-    bltz    a0, write_error
-    
-    # Prepare for exit(0) syscall
-    li      a7, 1          # exit syscall number = 1
-    li      a0, 0           # exit code 0
-    ecall                   # Make the system call
+    li      a2, 13
+    ecall
 
-write_error:
-    # If write failed, exit with error code 1
-    li      a7, 1          # exit syscall number = 1
-    li      a0, 1           # exit code 1 (error)
-    ecall                   # Make the system call
-    ret
+    # --- ADD THIS DELAY LOOP ---
+    li      t0, 1000000   # Load a large number into a temporary register
+delay_loop:
+    addi    t0, t0, -1      # Decrement the counter
+    bnez    t0, delay_loop  # If not zero, loop again
+    # -------------------------
+
+    # Prepare for exit(0) syscall
+    li      a7, 1
+    li      a0, 0
+    ecall
+
+
