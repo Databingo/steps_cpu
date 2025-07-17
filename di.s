@@ -1,6 +1,6 @@
-    .section .rodata
+    .section .data
 msg:
-    .asciz "Hello from assembly main!"
+    .string "Hello from assembly main!"
 
     .text
     .globl main
