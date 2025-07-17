@@ -1,24 +1,21 @@
-# Directive: Define global symbols (visible to linker)
-.global main
-.global msg
+# Minimal RISC-V 64-bit assembly program to print a string on FreeBSD
 
-# Directive: Switch to data section for initialized data
 .section .data
-msg:
-    # Directive: Define a null-terminated string
-    .string "Hello RISC-V\n"
+msg:    .ascii  "Hello, FreeBSD!\n"  # String to print
+msg_len = . - msg                    # Length of the string
 
-# Directive: Switch to text section for code
 .section .text
-main:
-    # Prepare for write(1, message_addr, length) syscall (Linux RV64)
-    li      a7, 4          # write syscall number = 4
-    li      a0, 1           # fd = 1 (stdout)
-    la      a1, msg
-    li      a2, 14          # length = 13 (bytes in "Hello RISC-V\n")
-    ecall                   # Make the system call
+.global _start
 
-    # Prepare for exit(0) syscall
-    li      a7, 1          # exit syscall number = 1
-    li      a0, 0           # exit code 0
-    ecall                   # Make the system call
+_start:
+    # Prepare arguments for write syscall
+    li a0, 1            # File descriptor 1 (stdout)
+    la a1, msg          # Address of the string
+    li a2, msg_len      # Length of the string
+    li a7, 4            # Syscall number for write on FreeBSD
+    ecall               # Make the syscall
+
+    # Exit program
+    li a0, 0            # Exit status 0
+    li a7, 1            # Syscall number for exit on FreeBSD
+    ecall               # Make the syscall
