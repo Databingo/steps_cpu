@@ -7,24 +7,19 @@
 msg:
     # Directive: Define a null-terminated string
     .string "Hello RISC-V\n"
+
+# Directive: Switch to text section for code
 .section .text
 main:
-    # --- Write the string ---
-    li      a7, 4          # syscall: write
-    li      a0, 1          # fd: stdout
+    # Prepare for write(1, message_addr, length) syscall (Linux RV64)
+    li      a7, 4          # write syscall number = 4
+    li      a0, 1           # fd = 1 (stdout)
     la      a1, msg
-    li      a2, 13
-    ecall
+    li      a2, 14          # length = 13 (bytes in "H\n")
+    ecall                   # Make the system call
 
-    # --- Force a flush of stdout ---
-    li      a7, 82         # syscall: fsync (FreeBSD syscall number)
-    li      a0, 1          # fd: stdout (the same one we wrote to)
-    ecall
-
-    # --- Exit cleanly ---
-    li      a7, 1          # syscall: exit
-    li      a0, 0
-    ecall
-
-
-
+    # Prepare for exit(0) syscall
+    li      a7, 1          # exit syscall number = 1
+    li      a0, 0           # exit code 0
+    ecall                   # Make the system call
+    ret
