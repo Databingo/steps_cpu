@@ -1,13 +1,17 @@
-.global main
-.global msg
+.globl _start
 
-.section .data
+    .section .data
 msg:
-    .string "Hello from assembly main!\n"
+    .string "Hello, syscall!\n"
 
-.section   .text
-main:
-    la      a0, msg      # argument: pointer to string
-    call    puts         # call libc's puts
-    li      a0, 0        # return 0
-    ret
+    .section .text
+_start:
+    li      a0, 1          # fd = 1 (stdout)
+    la      a1, msg        # buf = msg
+    li      a2, 15         # count = 15 (length of string)
+    li      a7, 4          # syscall: write (FreeBSD RISC-V)
+    ecall
+
+    li      a0, 0          # exit code
+    li      a7, 93         # syscall: exit
+    ecall
