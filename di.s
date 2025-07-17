@@ -19,7 +19,7 @@ main:
     ecall                   # Make the system call
 
     # Prepare for exit(0) syscall
-    li      a7, 93          # exit syscall number = 93
+    li      a7, 1          # exit syscall number = 1
     li      a0, 0           # exit code 0
     ecall                   # Make the system call
     ret
