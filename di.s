@@ -1,17 +1,11 @@
     .section .rodata
 msg:
-    .asciz "Hello from assembly main!\n"
+    .asciz "Hello from assembly main!"
 
     .text
     .globl main
 main:
-    # write(1, msg, 24)
-    li      a0, 1          # fd = 1 (stdout)
-    la      a1, msg        # buf = msg
-    li      a2, 24         # count = 24
-    li      a7, 4          # syscall: write
-    ecall
-
-    # return 0
-    li      a0, 0
+    la      a0, msg      # argument: pointer to string
+    call    puts         # call libc's puts
+    li      a0, 0        # return 0
     ret
