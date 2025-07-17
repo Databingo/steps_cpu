@@ -541,6 +541,7 @@ func main() {
 			
 			sym_str := label_in +"\x00"
 		        if !slices.Contains(strtabb, label_in+"\x00"){
+	                    fmt.Println("add_sym_local:", sym_str)
                             add_sym_local(sym_str) 
 	                    sym_map[sym_str].Info = (STB_LOCAL << 4 | STT_FUNC)    //# H4:binding and L4:type
 	                    sym_map[sym_str].Other = 0 //uint8 // reserved, currently holds 0

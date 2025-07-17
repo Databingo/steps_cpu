@@ -1,9 +1,9 @@
+    .global main
+    .global msg
     .section .data
 msg:
     .string "Hello from assembly main!"
-
     .text
-    .globl main
 main:
     la      a0, msg      # argument: pointer to string
     call    puts         # call libc's puts
