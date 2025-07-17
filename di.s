@@ -1,21 +1,37 @@
-# Minimal RISC-V 64-bit assembly program to print a string on FreeBSD
+# hello.s: A minimal RISC-V 64-bit program for FreeBSD.
+# Prints "Hello, RISC-V on FreeBSD!\n" to standard output.
 
 .section .data
-msg:    .ascii  "Hello, FreeBSD!\n"  # String to print
-msg_len = . - msg                    # Length of the string
+# The string to be printed. .string automatically adds a null terminator,
+# but we will calculate the length without it.
+msg:
+    .string "Hello, RISC-V on FreeBSD!\n"
+# Calculate the length of the string at assembly time.
+# 'end_msg' is a label at the end of the string.
+# '.' represents the current address, so '.-msg' is the length.
+msg_len = . - msg - 1 # Subtract 1 to exclude the null terminator.
+
 
 .section .text
-.global _start
+.global _start      # The entry point for the linker.
 
 _start:
-    # Prepare arguments for write syscall
-    li a0, 1            # File descriptor 1 (stdout)
-    la a1, msg          # Address of the string
-    li a2, msg_len      # Length of the string
-    li a7, 4            # Syscall number for write on FreeBSD
-    ecall               # Make the syscall
+    # --- System call 1: write ---
+    # ssize_t write(int fd, const void *buf, size_t count);
+    # Syscall number for write on FreeBSD is 4.
 
-    # Exit program
-    li a0, 0            # Exit status 0
-    li a7, 1            # Syscall number for exit on FreeBSD
-    ecall               # Make the syscall
+    li a0, 1            # a0: argument 0, file descriptor (1 = stdout)
+    la a1, msg          # a1: argument 1, pointer to the string (buffer)
+    li a2, msg_len      # a2: argument 2, length of the string (count)
+    li a7, 4            # a7: syscall number for sys_write
+
+    ecall               # Make the system call to write to the screen
+
+    # --- System call 2: exit ---
+    # void exit(int status);
+    # Syscall number for exit on FreeBSD is 1.
+
+    li a0, 0            # a0: argument 0, exit status (0 = success)
+    li a7, 1            # a7: syscall number for sys_exit
+
+    ecall               # Make the system call to exit the program
