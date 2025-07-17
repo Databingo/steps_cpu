@@ -1,21 +1,24 @@
-# di.s
-.global _start
+# Directive: Define global symbols (visible to linker)
+.global main
+.global msg
 
-.section .rodata
+# Directive: Switch to data section for initialized data
+.section .data
 msg:
-    .string "Hello from RISC-V on FreeBSD!\n"
-.set msg_len, . - msg
+    # Directive: Define a null-terminated string
+    .string "Hello RISC-V\n"
 
+# Directive: Switch to text section for code
 .section .text
-_start:
-    # write(stdout, msg, msg_len)
-    li      a7, 4
-    li      a0, 1
+main:
+    # Prepare for write(1, message_addr, length) syscall (Linux RV64)
+    li      a7, 4          # write syscall number = 4
+    li      a0, 1           # fd = 1 (stdout)
     la      a1, msg
-    li      a2, msg_len
-    ecall
+    li      a2, 14          # length = 13 (bytes in "Hello RISC-V\n")
+    ecall                   # Make the system call
 
-    # exit(0)
-    li      a7, 1
-    li      a0, 0
-    ecall
+    # Prepare for exit(0) syscall
+    li      a7, 1          # exit syscall number = 1
+    li      a0, 0           # exit code 0
+    ecall                   # Make the system call
