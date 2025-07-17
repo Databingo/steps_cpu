@@ -7,26 +7,24 @@
 msg:
     # Directive: Define a null-terminated string
     .string "Hello RISC-V\n"
-
 .section .text
 main:
-    # ... your write syscall ...
-    li      a7, 4
-    li      a0, 1
+    # --- Write the string ---
+    li      a7, 4          # syscall: write
+    li      a0, 1          # fd: stdout
     la      a1, msg
     li      a2, 13
     ecall
 
-    # --- ADD THIS DELAY LOOP ---
-    li      t0, 1000000   # Load a large number into a temporary register
-delay_loop:
-    addi    t0, t0, -1      # Decrement the counter
-    bnez    t0, delay_loop  # If not zero, loop again
-    # -------------------------
+    # --- Force a flush of stdout ---
+    li      a7, 82         # syscall: fsync (FreeBSD syscall number)
+    li      a0, 1          # fd: stdout (the same one we wrote to)
+    ecall
 
-    # Prepare for exit(0) syscall
-    li      a7, 1
+    # --- Exit cleanly ---
+    li      a7, 1          # syscall: exit
     li      a0, 0
     ecall
+
 
 
