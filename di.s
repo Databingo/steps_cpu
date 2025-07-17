@@ -1,32 +1,33 @@
-# Define global main symbol
-.global main
+# di.s: A minimal "Hello, world" for FreeBSD/riscv64
 
-# Data section for initialized data
-.section .data
+# The .global directive makes _start visible to the linker.
+.global _start
+
+# The .section .rodata is for "read-only data" like constant strings.
+.section .rodata
 msg:
-    .string "test\n"  # String to print
+    .string "Hello from RISC-V on FreeBSD!\n"
+    # Let the assembler calculate the length for us.
+    # '.' means the current address. So . - msg is the length.
+    .set msg_len, . - msg
 
-# Text section for code
+# The .section .text contains the executable code.
 .section .text
-main:
-    # Save ra (return address) for FreeBSD ABI compliance
-    addi    sp, sp, -16
-    sd      ra, 8(sp)
+_start:
+    # System call to write(stdout, msg, msg_len)
+    # FreeBSD/riscv64 uses the same ABI as Linux for syscalls:
+    # a7 = syscall number
+    # a0, a1, a2, ... = arguments
+    li      a7, 4           # syscall number for write() is 4
+    li      a0, 1           # a0 = file descriptor 1 (stdout)
+    la      a1, msg         # a1 = address of the string
+    li      a2, msg_len     # a2 = length of the string
+    ecall                   # Make the system call
 
-    # write(1, msg, 5) syscall (FreeBSD: write = 4)
-    li      a7, 4          # Syscall number for write
-    li      a0, 1          # fd = 1 (stdout)
-    la      a1, msg        # Address of "test\n"
-    li      a2, 5          # Length of "test\n"
-    ecall                  # Make system call
+    # System call to exit(0)
+    li      a7, 1           # syscall number for exit() is 1
+    li      a0, 0           # a0 = exit code 0 (success)
+    ecall                   # Make the system call
 
-    # Restore ra and stack
-    ld      ra, 8(sp)
-    addi    sp, sp, 16
-
-    # Return 0 (success) from main
-    li      a0, 0
-    ret                    # Return to libc's exit handler
-
-
-
+# There is no 'ret' because the exit syscall never returns.
+# The program terminates here.
