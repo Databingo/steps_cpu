@@ -1,24 +1,32 @@
-# Directive: Define global symbols (visible to linker)
+# Define global main symbol
 .global main
-.global msg
 
-# Directive: Switch to data section for initialized data
+# Data section for initialized data
 .section .data
 msg:
-    # Directive: Define a null-terminated string
-    .string "Hello RISC-V\n"
+    .string "test\n"  # String to print
 
-# Directive: Switch to text section for code
+# Text section for code
 .section .text
 main:
-    # Prepare for write(1, message_addr, length) syscall (Linux RV64)
-    li      a7, 4          # write syscall number = 4
-    li      a0, 1           # fd = 1 (stdout)
-    la      a1, msg
-    li      a2, 14          # length = 13 (bytes in "Hello RISC-V\n")
-    ecall                   # Make the system call
+    # Save ra (return address) for FreeBSD ABI compliance
+    addi    sp, sp, -16
+    sd      ra, 8(sp)
 
-    # Prepare for exit(0) syscall
-    li      a7, 1          # exit syscall number = 1
-    li      a0, 0           # exit code 0
-    ecall                   # Make the system call
+    # write(1, msg, 5) syscall (FreeBSD: write = 4)
+    li      a7, 4          # Syscall number for write
+    li      a0, 1          # fd = 1 (stdout)
+    la      a1, msg        # Address of "test\n"
+    li      a2, 5          # Length of "test\n"
+    ecall                  # Make system call
+
+    # Restore ra and stack
+    ld      ra, 8(sp)
+    addi    sp, sp, 16
+
+    # Return 0 (success) from main
+    li      a0, 0
+    ret                    # Return to libc's exit handler
+
+
+
