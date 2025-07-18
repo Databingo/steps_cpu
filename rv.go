@@ -813,7 +813,7 @@ func main() {
 
 
 
-			ins = fmt.Sprintf("auipc x1, 0 # %s\n", code[1])
+			ins = fmt.Sprintf("auipc x1, 0 # R_RISCV_CALL %s\n", code[1])
 			real_instr.WriteString(ins)
 			ins = fmt.Sprintf("jalr x1, x1, 0 # %s\n", code[1])
 			real_instr.WriteString(ins)
