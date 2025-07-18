@@ -3,7 +3,7 @@
 
 .section .data
 msg:
-    .string "Hello from assembly main!\n"
+    .string "你好!\n"
 
 .section   .text
 main:
