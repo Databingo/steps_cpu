@@ -128,6 +128,8 @@ const STB_LOCAL = 0  // local visiable
 const STB_GLOBAL = 1 // global visiable
 const STB_WEAK = 2   // coverable global
 
+const SHN_UNDEF = 0
+
 // symtab info's type
 const STT_NOTYPE = 0 // undefined
 const STT_OBJECT = 1
@@ -148,6 +150,7 @@ const R_RISCV_PCREL_HI20 = 23
 const R_RISCV_PCREL_LO12_I = 24
 const R_RISCV_PCREL_LO12_S = 25
 const R_RISCV_RELAX = 51
+const R_RISCV_CALL = 18
 
 type Elf64_rela struct {
 	Offset uint64  // modified instruction's offset in .text
@@ -795,7 +798,23 @@ func main() {
 		case "call": //auipc x1, offset[31:12]; jalr x1, offset[11:0](x1) 调用远距离过程(save pc+4)
 			ins := fmt.Sprintf("# %s\n", line)
 			real_instr.WriteString(ins)
-			ins = fmt.Sprintf("auipc x1, 0 # %s\n", code[1])
+
+
+                        // record symtol and string
+                        call_label := code[1] + "\x00"
+			if get_sindex(strtabb, call_label) == -1 { add_sym_global(call_label) 
+	                    sym_map[call_label].Info = (STB_GLOBAL << 4 | STT_FUNC )    //# H4:binding and L4:type
+	                    sym_map[call_label].Other = 0 //uint8 // reserved, currently holds 0
+	                    sym_map[call_label].Shndx = SHN_UNDEF //0 //#uint16 // section index the symbol in
+	                    sym_map[call_label].Value = 0 //# uint64  for relocatable .o file it's symbol's offset in its section
+	                    sym_map[call_label].Size = 0  //#uint64  for function it's its size   -- uint64(len(align8("H\n")))                   
+                         }
+                        // record .rela.text
+			rel_map[call_label] = &Elf64_rela{}
+
+
+
+			ins = fmt.Sprintf("auipc x1, 0 # R_RISCV_CALL %s\n", code[1]+"\x00")
 			real_instr.WriteString(ins)
 			ins = fmt.Sprintf("jalr x1, x1, 0 # %s\n", code[1])
 			real_instr.WriteString(ins)
@@ -1157,6 +1176,28 @@ func main() {
                             rel_map[sy].Addend = int64(0)// int64  // A constant addend used in the reloction calculation 加数
 			    fmt.Printf("%+v\n", rel_map[sy])
 			    fmt.Println("[[[[[", codes, strtabb, sy, idx, address, len(codes),"|", rel_map[sy].Info>>32)
+			    relatext = append(relatext, *rel_map[sy])
+                            
+			    // R_RISCV_RELAX
+                            //var rela Elf64_rela 
+			    //rela.Offset = uint64(address)
+                            //rela.Info =  R_RISCV_RELAX
+                            //rela.Addend = int64(0)
+			    //relatext = append(relatext, rela)
+			}
+			if code[2] == "0"  && strings.Contains(scanner.Text(), "R_RISCV_CALL") {
+			    codes := strings.Split(scanner.Text(), " ")
+			    sy := codes[len(codes)-1]// ending with \n
+			    //idx := slices.Index(strtabb, sy+"\x00")
+			    idx := slices.Index(strtabb, sy) // symbol index
+			    fmt.Println("create .rela.text entry for CALL: of", sy, idx, "at line:", lineCounter, "address:", address)
+
+                            //var rela Elf64_rela 
+			    rel_map[sy].Offset = uint64(address)//uint64 modified instruction's offset in .text
+                            rel_map[sy].Info = (uint64(idx) << 32) | R_RISCV_CALL //uint64   // sym index in symbol entry array and relocation type
+                            rel_map[sy].Addend = int64(0)// int64  // A constant addend used in the reloction calculation 加数
+			    fmt.Printf("%+v\n", rel_map[sy])
+			    fmt.Println("<>", codes, strtabb, sy, idx, address, len(codes),"|", rel_map[sy].Info>>32)
 			    relatext = append(relatext, *rel_map[sy])
                             
 			    // R_RISCV_RELAX
