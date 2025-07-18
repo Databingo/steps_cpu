@@ -814,7 +814,7 @@ func main() {
 
 
 
-			ins = fmt.Sprintf("auipc x1, 0 # R_RISCV_CALL %s\n", code[1])
+			ins = fmt.Sprintf("auipc x1, 0 # R_RISCV_CALL %s\n", code[1]+"\x00")
 			real_instr.WriteString(ins)
 			ins = fmt.Sprintf("jalr x1, x1, 0 # %s\n", code[1])
 			real_instr.WriteString(ins)
@@ -1187,7 +1187,7 @@ func main() {
 			}
 			if code[2] == "0"  && strings.Contains(scanner.Text(), "R_RISCV_CALL") {
 			    codes := strings.Split(scanner.Text(), " ")
-			    sy := codes[len(codes)-1] + "\x00"// ending with \n
+			    sy := codes[len(codes)-1]// ending with \n
 			    //idx := slices.Index(strtabb, sy+"\x00")
 			    idx := slices.Index(strtabb, sy) // symbol index
 			    fmt.Println("create .rela.text entry for CALL: of", sy, idx, "at line:", lineCounter, "address:", address)
