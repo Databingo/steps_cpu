@@ -1494,12 +1494,13 @@ func main() {
 	    sym_map[sym_str].Name = uint32(len(strings.Join(strtabb[:get_sindex(strtabb, sym_str)],""))) 
 	}
 
-        // edit rel
+        // edit rela
 	for idx, sym_str := range strtabb[:] {
 	    if _, ok := rel_map[sym_str]; ok {
 		rel_map[sym_str].Info = (uint64(idx) << 32) | (rel_map[sym_str].Info << 32 >>32) 
 	        if strings.HasPrefix(sym_str, ".L") {
 		    sym_map[sym_str].Value = rel_map[sym_str].Offset-4//uint64 modified data's value, string is the offsize in .data, rela.text is the former HI20 instruction's offset in .text
+		    fmt.Println("edit rela.text:",sym_map[sym_str].Value)
 		}
                 }
 	}
