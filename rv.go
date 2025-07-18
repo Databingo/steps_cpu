@@ -128,6 +128,8 @@ const STB_LOCAL = 0  // local visiable
 const STB_GLOBAL = 1 // global visiable
 const STB_WEAK = 2   // coverable global
 
+const SHN_UNDEF = 0
+
 // symtab info's type
 const STT_NOTYPE = 0 // undefined
 const STT_OBJECT = 1
@@ -795,6 +797,22 @@ func main() {
 		case "call": //auipc x1, offset[31:12]; jalr x1, offset[11:0](x1) 调用远距离过程(save pc+4)
 			ins := fmt.Sprintf("# %s\n", line)
 			real_instr.WriteString(ins)
+
+
+                        // record symtol and string
+                        call_label := code[1] + "\x00"
+			if get_sindex(strtabb, call_label) == -1 { add_sym_global(call_label) 
+	                    sym_map[call_label].Info = (STB_GLOBAL << 4 | STT_FUNC )    //# H4:binding and L4:type
+	                    sym_map[call_label].Other = 0 //uint8 // reserved, currently holds 0
+	                    sym_map[call_label].Shndx = SHN_UNDEF //0 //#uint16 // section index the symbol in
+	                    sym_map[call_label].Value = 0 //# uint64  for relocatable .o file it's symbol's offset in its section
+	                    sym_map[call_label].Size = 0  //#uint64  for function it's its size   -- uint64(len(align8("H\n")))                   
+                         }
+                        // record .rela.text
+			rel_map[call_label] = &Elf64_rela{}
+
+
+
 			ins = fmt.Sprintf("auipc x1, 0 # %s\n", code[1])
 			real_instr.WriteString(ins)
 			ins = fmt.Sprintf("jalr x1, x1, 0 # %s\n", code[1])
