@@ -18,6 +18,7 @@ typedef unsigned int        uint32_t;
 typedef long long           int64_t;
 typedef unsigned long long  uint64_t;
 
+int __errno;
 // --- BARE-METAL CHANGE ---
 // Include our own data and drivers.
 #include "uart.c"
