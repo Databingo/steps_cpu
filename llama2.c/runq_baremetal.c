@@ -1,7 +1,7 @@
 /*
  * Bare-metal INT8 Quantized Inference for Llama-2 Transformer model in pure C
  * Ported from runq.c for a naked qemu-riscv64 target.
- * ADDED: Granular debugging prints inside the weight mapping functions.
+ * ADDED: Config validation and loop progress prints.
  */
 
 // --- BARE-METAL DEFINITIONS ---
@@ -81,12 +81,15 @@ int sample(Sampler* sampler, float* logits);
 // ----------------------------------------------------------------------------
 // Quantization functions
 void dequantize(QuantizedTensor *qx, float* x, int n) {
-    //for (int i = 0; i < n; i++) {
-    //    x[i] = qx->q[i] * qx->s[i / GS];
-    //}
+    // --- DEBUGGING VERSION WITH LOOP PRINT ---
     for (int i = 0; i < n; i++) {
-        x[i] = 1.0f; 
+        x[i] = 1.0f; // Use the dummy version first
+        // Print a dot every 4096 iterations to show progress
+        if ((i & 0xFFF) == 0xFFF) {
+            uart_putc('.');
+        }
     }
+    uart_puts("\n"); // Newline after the loop finishes
 }
 void quantize(QuantizedTensor *qx, float* x, int n) {
     int num_groups = n / GS;
@@ -111,7 +114,6 @@ void quantize(QuantizedTensor *qx, float* x, int n) {
 QuantizedTensor* init_quantized_tensors(unsigned char** ptr, int n, int size_each) {
     QuantizedTensor *res = arena_alloc(n * sizeof(QuantizedTensor));
     for(int i=0; i<n; i++) {
-        // Pointer alignment check for scales
         if ((size_t)(*ptr) % 4 != 0) { uart_puts("!!! UNALIGNED POINTER for scale !!!\n"); while(1); }
         res[i].s = (float*)*ptr;
         *ptr += (size_each / GS) * sizeof(float);
@@ -206,6 +208,22 @@ void build_transformer(Transformer *t) {
     
     int group_size; memcpy(&group_size, model_data + 8 + sizeof(Config) + 1, sizeof(int));
     GS = group_size;
+
+    // --- NEW: VALIDATE THE CONFIG VALUES ---
+    char buf[20];
+    uart_puts("   - Config values read from model:\n");
+    uart_puts("     dim: "); itoa(t->config.dim, buf); uart_puts(buf); uart_puts("\n");
+    uart_puts("     hidden_dim: "); itoa(t->config.hidden_dim, buf); uart_puts(buf); uart_puts("\n");
+    uart_puts("     n_layers: "); itoa(t->config.n_layers, buf); uart_puts(buf); uart_puts("\n");
+    uart_puts("     n_heads: "); itoa(t->config.n_heads, buf); uart_puts(buf); uart_puts("\n");
+    uart_puts("     n_kv_heads: "); itoa(t->config.n_kv_heads, buf); uart_puts(buf); uart_puts("\n");
+    uart_puts("     vocab_size: "); itoa(t->config.vocab_size, buf); uart_puts(buf); uart_puts("\n");
+    uart_puts("     seq_len: "); itoa(t->config.seq_len, buf); uart_puts(buf); uart_puts("\n");
+    uart_puts("     Group Size (GS): "); itoa(GS, buf); uart_puts(buf); uart_puts("\n");
+
+    // Sanity check
+    if (t->config.dim <= 0 || t->config.dim > 10000 || t->config.vocab_size == 0) { uart_puts("ERROR: Insane config value\n"); while(1); }
+    if (GS <= 0) { uart_puts("ERROR: Invalid Group Size (GS)\n"); while(1); }
 
     unsigned char* weights_ptr = model_data + header_size;
     
