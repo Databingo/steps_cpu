@@ -1,34 +1,24 @@
 /*
  * Bare-metal Inference for Llama-2 Transformer model in pure C
  * Altered for a naked qemu-riscv64 target.
- * All OS dependencies removed. Uses libm for math functions.
+ * Final version with no redefinitions.
  */
 
 // --- BARE-METAL CHANGE: DEFINITIONS ---
-// We are in a freestanding environment, so we must define fundamental types
-// that are normally in <stddef.h> and <stdint.h>.
 #define NULL ((void*)0)
 typedef unsigned long size_t;
 typedef signed char         int8_t;
-typedef unsigned char       uint8_t;
-typedef short               int16_t;
-typedef unsigned short      uint16_t;
 typedef int                 int32_t;
-typedef unsigned int        uint32_t;
-typedef long long           int64_t;
-typedef unsigned long long  uint64_t;
-
 int __errno;
+
 // --- BARE-METAL CHANGE ---
 // Include our own data and drivers.
 #include "uart.c"
-//#include "model.h"
-#include "model_260k.h"
+#include "model.h"      // Or model_260k.h if you are using the smaller model
 #include "tokenizer.h"
 
 // --- BARE-METAL CHANGE ---
-// Provide our own simple memory and string function implementations
-// The math functions (sqrtf, expf, etc.) will now come from libm.
+// Provide our own simple memory, string, and number-to-string functions
 void* memcpy(void* dest, const void* src, size_t n) {
     char* d = (char*)dest;
     const char* s = (const char*)src;
@@ -40,8 +30,7 @@ void* memcpy(void* dest, const void* src, size_t n) {
 
 void* memset(void* s, int c, size_t n) {
     unsigned char* p = (unsigned char*)s;
-    while(n--)
-        *p++ = (unsigned char)c;
+    while(n--) *p++ = (unsigned char)c;
     return s;
 }
 
@@ -52,88 +41,93 @@ size_t strlen(const char* s) {
 }
 
 int strcmp(const char* s1, const char* s2) {
-    while (*s1 && (*s1 == *s2)) {
-        s1++;
-        s2++;
-    }
+    while (*s1 && (*s1 == *s2)) { s1++; s2++; }
     return *(const unsigned char*)s1 - *(const unsigned char*)s2;
 }
 
-// --- BARE-METAL CHANGE ---
-// We need to declare the math functions we use from libm so the compiler knows their signatures.
+void itoa(int n, char* buf) {
+    if (n == 0) {
+        buf[0] = '0';
+        buf[1] = '\0';
+        return;
+    }
+    int i = 0;
+    int is_negative = 0;
+    if (n < 0) {
+        is_negative = 1;
+        n = -n;
+    }
+    while (n != 0) {
+        int rem = n % 10;
+        buf[i++] = rem + '0';
+        n = n / 10;
+    }
+    if (is_negative) {
+        buf[i++] = '-';
+    }
+    int start = 0;
+    int end = i - 1;
+    while (start < end) {
+        char temp = buf[start];
+        buf[start] = buf[end];
+        buf[end] = temp;
+        start++;
+        end--;
+    }
+    buf[i] = '\0';
+}
+
+// We need to declare the math functions we use from libm
 float sqrtf(float);
 float expf(float);
 float powf(float, float);
 float cosf(float);
 float sinf(float);
 
-
 // ----------------------------------------------------------------------------
 // Data structures
-
-typedef struct {
-    int dim; int hidden_dim; int n_layers; int n_heads; int n_kv_heads; int vocab_size; int seq_len;
-} Config;
-
+typedef struct { int dim; int hidden_dim; int n_layers; int n_heads; int n_kv_heads; int vocab_size; int seq_len; } Config;
 typedef struct {
     float* token_embedding_table; float* rms_att_weight; float* rms_ffn_weight;
     float* wq; float* wk; float* wv; float* wo;
     float* w1; float* w2; float* w3;
     float* rms_final_weight; float* wcls;
 } TransformerWeights;
-
 typedef struct {
     float *x; float *xb; float *xb2; float *hb; float *hb2; float *q; float *k; float *v;
     float *att; float *logits; float* key_cache; float* value_cache;
 } RunState;
-
-#define RUN_STATE_ARENA_SIZE 8000000 // 8MB unified memory arena
+#define RUN_STATE_ARENA_SIZE 8000000
 static unsigned char g_run_state_arena[RUN_STATE_ARENA_SIZE];
 static unsigned long g_arena_next_offset = 0;
-
 void* arena_alloc(size_t size) {
-    size = (size + 15) & ~15; // Align to 16 bytes
+    size = (size + 15) & ~15;
     if (g_arena_next_offset + size > RUN_STATE_ARENA_SIZE) {
         uart_puts("ERROR: RunState arena out of memory!\n");
-        while(1); // Halt
+        while(1);
     }
     void* ptr = &g_run_state_arena[g_arena_next_offset];
     g_arena_next_offset += size;
     return ptr;
 }
-
-typedef struct {
-    Config config;
-    TransformerWeights weights;
-    RunState state;
-} Transformer;
-
-typedef struct {
-    char *str; int id;
-} TokenIndex;
-
+typedef struct { Config config; TransformerWeights weights; RunState state; } Transformer;
+typedef struct { char *str; int id; } TokenIndex;
 typedef struct {
     char** vocab; float* vocab_scores; TokenIndex *sorted_vocab;
     int vocab_size; unsigned int max_token_length; unsigned char byte_pieces[512];
 } Tokenizer;
+typedef struct { float prob; int index; } ProbIndex;
+typedef struct { int vocab_size; ProbIndex* probindex; float temperature; float topp; unsigned long long rng_state; } Sampler;
 
-typedef struct {
-    float prob; int index;
-} ProbIndex;
-
-typedef struct {
-    int vocab_size; ProbIndex* probindex; float temperature; float topp; unsigned long long rng_state;
-} Sampler;
-
-// Function Prototypes (moved after typedefs)
+// Function Prototypes
 void encode(Tokenizer* t, char *text, int8_t bos, int8_t eos, int *tokens, int *n_tokens);
 void simple_qsort(void* base, size_t nitems, size_t size, int (*compar)(const void*, const void*));
 char* decode(Tokenizer* t, int prev_token, int token);
 int sample(Sampler* sampler, float* logits);
+float* forward(Transformer* transformer, int token, int pos);
 
 // ----------------------------------------------------------------------------
 // Model and memory management
-
 void malloc_run_state(RunState* s, Config* p) {
     int kv_dim = (p->dim * p->n_kv_heads) / p->n_heads;
     s->x = arena_alloc(p->dim * sizeof(float));
@@ -179,8 +173,7 @@ void memory_map_weights(TransformerWeights *w, Config* p, float* ptr, int shared
 }
 
 void build_transformer(Transformer *t) {
-    //unsigned char* model_data = stories15M_bin;
-    unsigned char* model_data = stories260K_bin;
+    unsigned char* model_data = stories15M_bin; // Or stories260K_bin
     memcpy(&t->config, model_data, sizeof(Config));
     int shared_weights = t->config.vocab_size > 0 ? 1 : 0;
     t->config.vocab_size = (t->config.vocab_size < 0) ? -t->config.vocab_size : t->config.vocab_size;
@@ -191,7 +184,6 @@ void build_transformer(Transformer *t) {
 
 // ----------------------------------------------------------------------------
 // neural net blocks
-
 void rmsnorm(float* o, float* x, float* weight, int size) {
     float ss = 0.0f;
     for (int j = 0; j < size; j++) { ss += x[j] * x[j]; }
@@ -297,7 +289,6 @@ float* forward(Transformer* transformer, int token, int pos) {
 
 // ----------------------------------------------------------------------------
 // Tokenizer
-
 int compare_tokens(const void *a, const void *b) {
     return strcmp(((TokenIndex*)a)->str, ((TokenIndex*)b)->str);
 }
@@ -421,7 +412,6 @@ void encode(Tokenizer* t, char *text, int8_t bos, int8_t eos, int *tokens, int *
 
 // ----------------------------------------------------------------------------
 // Sampler
-
 int sample_argmax(float* probabilities, int n) {
     int max_i = 0; float max_p = probabilities[0];
     for (int i = 1; i < n; i++) { if (probabilities[i] > max_p) { max_i = i; max_p = probabilities[i]; } }
@@ -493,7 +483,7 @@ int sample(Sampler* sampler, float* logits) {
 }
 
 // ----------------------------------------------------------------------------
-// generation loop
+// generation loop with status printing
 
 void generate(Transformer *transformer, Tokenizer *tokenizer, Sampler *sampler, char *prompt, int steps) {
     char *empty_prompt = "";
@@ -508,11 +498,22 @@ void generate(Transformer *transformer, Tokenizer *tokenizer, Sampler *sampler, 
         return;
     }
 
+    char status_buf[64];
+
     int next;
     int token = prompt_tokens[0];
     int pos = 0;
     while (pos < steps) {
+        uart_puts("\n[ Token ");
+        itoa(pos + 1, status_buf);
+        uart_puts(status_buf);
+        uart_puts(" / ");
+        itoa(steps, status_buf);
+        uart_puts(status_buf);
+        uart_puts(" ] -> ");
+
         float* logits = forward(transformer, token, pos);
+
         if (pos < num_prompt_tokens - 1) {
             next = prompt_tokens[pos + 1];
         } else {
@@ -520,6 +521,7 @@ void generate(Transformer *transformer, Tokenizer *tokenizer, Sampler *sampler, 
         }
         pos++;
         if (next == 1) { break; }
+        
         char* piece = decode(tokenizer, token, next);
         safe_printf(piece);
         token = next;
@@ -528,7 +530,7 @@ void generate(Transformer *transformer, Tokenizer *tokenizer, Sampler *sampler, 
 }
 
 // ----------------------------------------------------------------------------
-// main entry point
+// main entry point with status printing
 
 int main() {
     float temperature = 0.8f;
@@ -540,19 +542,27 @@ int main() {
     uart_puts("Bare-metal Llama2.c for RISC-V\n");
     uart_puts("--------------------------------\n");
 
+    uart_puts("Building transformer...\n");
     Transformer transformer;
     build_transformer(&transformer);
     if (steps <= 0 || steps > transformer.config.seq_len) steps = transformer.config.seq_len;
 
+    uart_puts("Building tokenizer...\n");
     Tokenizer tokenizer;
     build_tokenizer(&tokenizer, transformer.config.vocab_size);
 
+    uart_puts("Building sampler...\n");
     Sampler sampler;
     build_sampler(&sampler, transformer.config.vocab_size, temperature, topp, rng_seed);
 
+    uart_puts("Starting generation...\n");
+    uart_puts("--------------------------------\n");
+    safe_printf(prompt);
+
     generate(&transformer, &tokenizer, &sampler, prompt, steps);
 
-    uart_puts("\n--- DONE ---\n");
+    uart_puts("\n--------------------------------\n");
+    uart_puts("--- DONE ---\n");
 
     return 0;
 }
