@@ -7,3 +7,4 @@ simulation
 incremental_db
 output_files
 steps_cpu
+run_model/*.h
