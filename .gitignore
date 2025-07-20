@@ -9,3 +9,5 @@ output_files
 steps_cpu
 run_model/*.h
 llama2.c/*.h
+llama2.c/kernel.bin
+llama2.c/kernel.elf

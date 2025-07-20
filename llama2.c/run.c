@@ -96,7 +96,7 @@ typedef struct {
     float *att; float *logits; float* key_cache; float* value_cache;
 } RunState;
 
-#define RUN_STATE_ARENA_SIZE 2000000
+#define RUN_STATE_ARENA_SIZE 8000000
 static unsigned char g_run_state_arena[RUN_STATE_ARENA_SIZE];
 static unsigned long g_arena_next_offset = 0;
 
@@ -308,7 +308,7 @@ float* forward(Transformer* transformer, int token, int pos) {
 // ----------------------------------------------------------------------------
 // Tokenizer
 
-static char g_tokenizer_arena[32768]; // 32KB for tokenizer strings
+static char g_tokenizer_arena[40960]; // 40KB for tokenizer strings
 static unsigned long g_tokenizer_arena_offset = 0;
 
 void* tokenizer_arena_alloc(size_t size) {
