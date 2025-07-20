@@ -43,25 +43,25 @@ void* memset(void* s, int c, size_t n) {
 }
 
 // NOTE: These are placeholder math functions. They are NOT efficient or robust.
-float sqrtf(float x) {
-    if (x == 0.0f) return 0.0f;
-    float guess = x;
-    for(int i=0; i<10; i++) {
-        guess = 0.5f * (guess + x / guess);
-    }
-    return guess;
-}
-
-float expf_taylor(float x) {
-    float sum = 1.0f; float term = 1.0f;
-    for (int i = 1; i < 10; ++i) { term *= x / i; sum += term; }
-    return sum;
-}
-#define expf expf_taylor
-
-float powf(float base, float exp) { return 1.0f; } // HACK
-float cosf(float x) { return 1.0f; } // HACK
-float sinf(float x) { return x; }   // HACK
+//float sqrtf(float x) {
+//    if (x == 0.0f) return 0.0f;
+//    float guess = x;
+//    for(int i=0; i<10; i++) {
+//        guess = 0.5f * (guess + x / guess);
+//    }
+//    return guess;
+//}
+//
+//float expf_taylor(float x) {
+//    float sum = 1.0f; float term = 1.0f;
+//    for (int i = 1; i < 10; ++i) { term *= x / i; sum += term; }
+//    return sum;
+//}
+//#define expf expf_taylor
+//
+//float powf(float base, float exp) { return 1.0f; } // HACK
+//float cosf(float x) { return 1.0f; } // HACK
+//float sinf(float x) { return x; }   // HACK
 
 size_t strlen(const char* s) {
     const char* p = s;
