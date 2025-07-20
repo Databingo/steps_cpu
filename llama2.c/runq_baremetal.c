@@ -1,7 +1,7 @@
 /*
  * Bare-metal INT8 Quantized Inference for Llama-2 Transformer model in pure C
  * Ported from runq.c for a naked qemu-riscv64 target.
- * ADDED: Config validation and loop progress prints.
+ * Final version with no redefinitions and full debugging prints.
  */
 
 // --- BARE-METAL DEFINITIONS ---
@@ -24,6 +24,7 @@ void* memset(void* s, int c, size_t n) { unsigned char* p=(unsigned char*)s; whi
 size_t strlen(const char* s) { const char* p=s; while(*p) p++; return p-s; }
 int strcmp(const char* s1, const char* s2) { while(*s1 && (*s1==*s2)){s1++; s2++;} return *(const unsigned char*)s1 - *(const unsigned char*)s2; }
 void itoa(int n, char* buf) { if(n==0){buf[0]='0'; buf[1]='\0'; return;} int i=0; int is_neg=0; if(n<0){is_neg=1; n=-n;} while(n!=0){buf[i++]=(n%10)+'0'; n/=10;} if(is_neg) buf[i++]='-'; int s=0, e=i-1; while(s<e){char t=buf[s]; buf[s]=buf[e]; buf[e]=t; s++; e--;} buf[i]='\0'; }
+void check_ptr(void* ptr, const char* name) { if (ptr == NULL) { uart_puts("FATAL ERROR: Pointer "); uart_puts(name); uart_puts(" is NULL.\n"); while(1); } }
 
 // Declarations for libm functions
 float sqrtf(float);
@@ -81,15 +82,11 @@ int sample(Sampler* sampler, float* logits);
 // ----------------------------------------------------------------------------
 // Quantization functions
 void dequantize(QuantizedTensor *qx, float* x, int n) {
-    // --- DEBUGGING VERSION WITH LOOP PRINT ---
     for (int i = 0; i < n; i++) {
-        x[i] = 1.0f; // Use the dummy version first
-        // Print a dot every 4096 iterations to show progress
-        if ((i & 0xFFF) == 0xFFF) {
-            uart_putc('.');
-        }
+        x[i] = qx->q[i] * qx->s[i / GS];
+        if ((i & 0xFFF) == 0xFFF) { uart_putc('.'); }
     }
-    uart_puts("\n"); // Newline after the loop finishes
+    uart_puts("\n");
 }
 void quantize(QuantizedTensor *qx, float* x, int n) {
     int num_groups = n / GS;
@@ -125,112 +122,58 @@ QuantizedTensor* init_quantized_tensors(unsigned char** ptr, int n, int size_eac
 
 void memory_map_weights(TransformerWeights *w, Config* p, unsigned char* ptr, uint8_t shared_classifier) {
     int head_size = p->dim / p->n_heads;
-    
-    uart_puts("    - Mapping rms_att_weight...\n");
-    w->rms_att_weight = (float*) ptr;
-    ptr += p->n_layers * p->dim * sizeof(float);
-    
-    uart_puts("    - Mapping rms_ffn_weight...\n");
-    w->rms_ffn_weight = (float*) ptr;
-    ptr += p->n_layers * p->dim * sizeof(float);
-    
-    uart_puts("    - Mapping rms_final_weight...\n");
-    w->rms_final_weight = (float*) ptr;
-    ptr += p->dim * sizeof(float);
-
-    uart_puts("    - Mapping q_tokens...\n");
-    w->q_tokens = init_quantized_tensors(&ptr, 1, p->vocab_size * p->dim);
-    
-    uart_puts("    - Allocating token_embedding_table...\n");
-    w->token_embedding_table = arena_alloc(p->vocab_size * p->dim * sizeof(float));
-    
-    uart_puts("    - Dequantizing token_embedding_table...\n");
-    dequantize(w->q_tokens, w->token_embedding_table, p->vocab_size * p->dim);
-
-    uart_puts("    - Mapping wq...\n");
-    w->wq = init_quantized_tensors(&ptr, p->n_layers, p->dim * (p->n_heads * head_size));
-    
-    uart_puts("    - Mapping wk...\n");
-    w->wk = init_quantized_tensors(&ptr, p->n_layers, p->dim * (p->n_kv_heads * head_size));
-    
-    uart_puts("    - Mapping wv...\n");
-    w->wv = init_quantized_tensors(&ptr, p->n_layers, p->dim * (p->n_kv_heads * head_size));
-    
-    uart_puts("    - Mapping wo...\n");
-    w->wo = init_quantized_tensors(&ptr, p->n_layers, (p->n_heads * head_size) * p->dim);
-    
-    uart_puts("    - Mapping w1...\n");
-    w->w1 = init_quantized_tensors(&ptr, p->n_layers, p->dim * p->hidden_dim);
-    
-    uart_puts("    - Mapping w2...\n");
-    w->w2 = init_quantized_tensors(&ptr, p->n_layers, p->hidden_dim * p->dim);
-    
-    uart_puts("    - Mapping w3...\n");
-    w->w3 = init_quantized_tensors(&ptr, p->n_layers, p->dim * p->hidden_dim);
-
-    uart_puts("    - Mapping wcls...\n");
-    w->wcls = shared_classifier ? w->q_tokens : init_quantized_tensors(&ptr, 1, p->dim * p->vocab_size);
+    uart_puts("    - Mapping rms_att_weight...\n"); w->rms_att_weight = (float*) ptr; ptr += p->n_layers * p->dim * sizeof(float);
+    uart_puts("    - Mapping rms_ffn_weight...\n"); w->rms_ffn_weight = (float*) ptr; ptr += p->n_layers * p->dim * sizeof(float);
+    uart_puts("    - Mapping rms_final_weight...\n"); w->rms_final_weight = (float*) ptr; ptr += p->dim * sizeof(float);
+    uart_puts("    - Mapping q_tokens...\n"); w->q_tokens = init_quantized_tensors(&ptr, 1, p->vocab_size * p->dim);
+    uart_puts("    - Allocating token_embedding_table...\n"); w->token_embedding_table = arena_alloc(p->vocab_size * p->dim * sizeof(float));
+    char buf[20]; int n = p->vocab_size * p->dim;
+    uart_puts("    - PRE-DEQUANTIZE CHECK:\n");
+    uart_puts("      n (size): "); itoa(n, buf); uart_puts(buf); uart_puts("\n");
+    check_ptr(w->q_tokens, "w->q_tokens"); check_ptr(w->q_tokens->q, "w->q_tokens->q"); check_ptr(w->q_tokens->s, "w->q_tokens->s"); check_ptr(w->token_embedding_table, "w->token_embedding_table (x)");
+    uart_puts("    - All pointers are valid. Starting dequantization...");
+    dequantize(w->q_tokens, w->token_embedding_table, n);
+    uart_puts("    - Mapping wq...\n"); w->wq = init_quantized_tensors(&ptr, p->n_layers, p->dim * (p->n_heads * head_size));
+    uart_puts("    - Mapping wk...\n"); w->wk = init_quantized_tensors(&ptr, p->n_layers, p->dim * (p->n_kv_heads * head_size));
+    uart_puts("    - Mapping wv...\n"); w->wv = init_quantized_tensors(&ptr, p->n_layers, p->dim * (p->n_kv_heads * head_size));
+    uart_puts("    - Mapping wo...\n"); w->wo = init_quantized_tensors(&ptr, p->n_layers, (p->n_heads * head_size) * p->dim);
+    uart_puts("    - Mapping w1...\n"); w->w1 = init_quantized_tensors(&ptr, p->n_layers, p->dim * p->hidden_dim);
+    uart_puts("    - Mapping w2...\n"); w->w2 = init_quantized_tensors(&ptr, p->n_layers, p->hidden_dim * p->dim);
+    uart_puts("    - Mapping w3...\n"); w->w3 = init_quantized_tensors(&ptr, p->n_layers, p->dim * p->hidden_dim);
+    uart_puts("    - Mapping wcls...\n"); w->wcls = shared_classifier ? w->q_tokens : init_quantized_tensors(&ptr, 1, p->dim * p->vocab_size);
 }
 
 void malloc_run_state(RunState* s, Config* p) {
     int kv_dim = (p->dim * p->n_kv_heads) / p->n_heads;
-    s->x = arena_alloc(p->dim * sizeof(float));
-    s->xb = arena_alloc(p->dim * sizeof(float));
-    s->xb2 = arena_alloc(p->dim * sizeof(float));
-    s->hb = arena_alloc(p->hidden_dim * sizeof(float));
-    s->hb2 = arena_alloc(p->hidden_dim * sizeof(float));
-    s->xq.q = arena_alloc(p->dim * sizeof(int8_t));
-    s->xq.s = arena_alloc(p->dim / GS * sizeof(float));
-    s->hq.q = arena_alloc(p->hidden_dim * sizeof(int8_t));
-    s->hq.s = arena_alloc(p->hidden_dim / GS * sizeof(float));
-    s->q = arena_alloc(p->dim * sizeof(float));
-    s->k = arena_alloc(kv_dim * sizeof(float));
-    s->v = arena_alloc(kv_dim * sizeof(float));
-    s->att = arena_alloc(p->n_heads * p->seq_len * sizeof(float));
-    s->logits = arena_alloc(p->vocab_size * sizeof(float));
-    s->key_cache = arena_alloc(p->n_layers * p->seq_len * kv_dim * sizeof(float));
-    s->value_cache = arena_alloc(p->n_layers * p->seq_len * kv_dim * sizeof(float));
+    s->x = arena_alloc(p->dim * sizeof(float)); s->xb = arena_alloc(p->dim * sizeof(float)); s->xb2 = arena_alloc(p->dim * sizeof(float));
+    s->hb = arena_alloc(p->hidden_dim * sizeof(float)); s->hb2 = arena_alloc(p->hidden_dim * sizeof(float));
+    s->xq.q = arena_alloc(p->dim * sizeof(int8_t)); s->xq.s = arena_alloc(p->dim / GS * sizeof(float));
+    s->hq.q = arena_alloc(p->hidden_dim * sizeof(int8_t)); s->hq.s = arena_alloc(p->hidden_dim / GS * sizeof(float));
+    s->q = arena_alloc(p->dim * sizeof(float)); s->k = arena_alloc(kv_dim * sizeof(float)); s->v = arena_alloc(kv_dim * sizeof(float));
+    s->att = arena_alloc(p->n_heads * p->seq_len * sizeof(float)); s->logits = arena_alloc(p->vocab_size * sizeof(float));
+    s->key_cache = arena_alloc(p->n_layers * p->seq_len * kv_dim * sizeof(float)); s->value_cache = arena_alloc(p->n_layers * p->seq_len * kv_dim * sizeof(float));
 }
 
 void build_transformer(Transformer *t) {
     unsigned char* model_data = stories260K_q80_bin;
-    
-    uint32_t magic; memcpy(&magic, model_data, sizeof(uint32_t));
-    if (magic != 0x616b3432) { uart_puts("ERROR: Bad magic\n"); while(1); }
-    
-    int version; memcpy(&version, model_data + 4, sizeof(int));
-    if (version != 2) { uart_puts("ERROR: Bad version\n"); while(1); }
-
     int header_size = 256;
     memcpy(&t->config, model_data + 8, sizeof(Config));
-    
     uint8_t shared_classifier; memcpy(&shared_classifier, model_data + 8 + sizeof(Config), sizeof(uint8_t));
-    
     int group_size; memcpy(&group_size, model_data + 8 + sizeof(Config) + 1, sizeof(int));
     GS = group_size;
-
-    // --- NEW: VALIDATE THE CONFIG VALUES ---
     char buf[20];
     uart_puts("   - Config values read from model:\n");
     uart_puts("     dim: "); itoa(t->config.dim, buf); uart_puts(buf); uart_puts("\n");
     uart_puts("     hidden_dim: "); itoa(t->config.hidden_dim, buf); uart_puts(buf); uart_puts("\n");
     uart_puts("     n_layers: "); itoa(t->config.n_layers, buf); uart_puts(buf); uart_puts("\n");
-    uart_puts("     n_heads: "); itoa(t->config.n_heads, buf); uart_puts(buf); uart_puts("\n");
-    uart_puts("     n_kv_heads: "); itoa(t->config.n_kv_heads, buf); uart_puts(buf); uart_puts("\n");
     uart_puts("     vocab_size: "); itoa(t->config.vocab_size, buf); uart_puts(buf); uart_puts("\n");
-    uart_puts("     seq_len: "); itoa(t->config.seq_len, buf); uart_puts(buf); uart_puts("\n");
     uart_puts("     Group Size (GS): "); itoa(GS, buf); uart_puts(buf); uart_puts("\n");
-
-    // Sanity check
-    if (t->config.dim <= 0 || t->config.dim > 10000 || t->config.vocab_size == 0) { uart_puts("ERROR: Insane config value\n"); while(1); }
+    if (t->config.dim<=0||t->config.dim>4096||t->config.vocab_size==0){uart_puts("ERROR: Insane config\n");while(1);}
     if (GS <= 0) { uart_puts("ERROR: Invalid Group Size (GS)\n"); while(1); }
-
     unsigned char* weights_ptr = model_data + header_size;
-    
     uart_puts("   - Calling memory_map_weights...\n");
     memory_map_weights(&t->weights, &t->config, weights_ptr, shared_classifier);
     uart_puts("   - Returned from memory_map_weights.\n");
-    
     uart_puts("   - Allocating run state...\n");
     malloc_run_state(&t->state, &t->config);
     uart_puts("   - Run state allocated.\n");
@@ -352,7 +295,7 @@ int sample_argmax(float* p, int n){int max_i=0;float max_p=p[0];for(int i=1;i<n;
 unsigned int random_u32(unsigned long long *s){*s^=*s>>12;*s^=*s<<25;*s^=*s>>27;return(*s*0x2545F4914F6CDD1Dull)>>32;}
 float random_f32(unsigned long long *s){return(random_u32(s)>>8)/16777216.0f;}
 int sample(Sampler* s, float* logits){if(s->temperature==0.0f){return sample_argmax(logits,s->vocab_size);}else{for(int q=0;q<s->vocab_size;q++){logits[q]/=s->temperature;}softmax(logits,s->vocab_size);float coin=random_f32(&s->rng_state);float cdf=0.0f;for(int i=0;i<s->vocab_size;i++){cdf+=logits[i];if(coin<cdf){return i;}}return s->vocab_size-1;}}
-void build_sampler(Sampler* s, int vocab_size, float temp, float topp, unsigned long long seed){ s->vocab_size=vocab_size; s->temperature=temp; s->topp=topp; s->rng_state=seed; }
+void build_sampler(Sampler* s, int vocab_size, float temp, float topp, unsigned long long seed){ s->vocab_size=vocab_size; s->temperature=temp; s->topp=topp; s->rng_state=seed; s->probindex=arena_alloc(s->vocab_size * sizeof(ProbIndex)); }
 void generate(Transformer *transformer, Tokenizer *tokenizer, Sampler *sampler, char *prompt, int steps) {
     char status_buf[64]; int num_prompt_tokens=0; int* prompt_tokens=arena_alloc((strlen(prompt)+3)*sizeof(int));
     encode(tokenizer,prompt,1,0,prompt_tokens,&num_prompt_tokens);
