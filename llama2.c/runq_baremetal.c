@@ -81,8 +81,11 @@ int sample(Sampler* sampler, float* logits);
 // ----------------------------------------------------------------------------
 // Quantization functions
 void dequantize(QuantizedTensor *qx, float* x, int n) {
+    //for (int i = 0; i < n; i++) {
+    //    x[i] = qx->q[i] * qx->s[i / GS];
+    //}
     for (int i = 0; i < n; i++) {
-        x[i] = qx->q[i] * qx->s[i / GS];
+        x[i] = 1.0f; 
     }
 }
 void quantize(QuantizedTensor *qx, float* x, int n) {
