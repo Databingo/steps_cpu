@@ -308,18 +308,6 @@ float* forward(Transformer* transformer, int token, int pos) {
 // ----------------------------------------------------------------------------
 // Tokenizer
 
-static char g_tokenizer_arena[40960]; // 40KB for tokenizer strings
-static unsigned long g_tokenizer_arena_offset = 0;
-
-void* tokenizer_arena_alloc(size_t size) {
-    if (g_tokenizer_arena_offset + size > sizeof(g_tokenizer_arena)) {
-        uart_puts("ERROR: Tokenizer arena out of memory!\n");
-        while(1);
-    }
-    void* ptr = &g_tokenizer_arena[g_tokenizer_arena_offset];
-    g_tokenizer_arena_offset += size;
-    return ptr;
-}
 
 int compare_tokens(const void *a, const void *b) {
     return strcmp(((TokenIndex*)a)->str, ((TokenIndex*)b)->str);
@@ -344,7 +332,7 @@ void build_tokenizer(Tokenizer* t, int vocab_size) {
         int len;
         memcpy(&len, tokenizer_data + offset, sizeof(int));
         offset += sizeof(int);
-        t->vocab[i] = (char *)tokenizer_arena_alloc(len + 1);
+        t->vocab[i] = (char *)arena_alloc(len + 1);
         memcpy(t->vocab[i], tokenizer_data + offset, len);
         offset += len;
         t->vocab[i][len] = '\0';
