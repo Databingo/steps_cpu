@@ -14,7 +14,7 @@ int __errno;
 // --- BARE-METAL CHANGE ---
 // Include our own data and drivers.
 #include "uart.c"
-#include "model.h"      // Or model_260k.h if you are using the smaller model
+#include "model_260k.h"      // Or model_260k.h if you are using the smaller model
 #include "tokenizer.h"
 
 // --- BARE-METAL CHANGE ---
@@ -173,7 +173,8 @@ void memory_map_weights(TransformerWeights *w, Config* p, float* ptr, int shared
 }
 
 void build_transformer(Transformer *t) {
-    unsigned char* model_data = stories15M_bin; // Or stories260K_bin
+    //unsigned char* model_data = stories15M_bin; // Or stories260K_bin
+    unsigned char* model_data = stories260K_bin; // Or stories260K_bin
     memcpy(&t->config, model_data, sizeof(Config));
     int shared_weights = t->config.vocab_size > 0 ? 1 : 0;
     t->config.vocab_size = (t->config.vocab_size < 0) ? -t->config.vocab_size : t->config.vocab_size;
