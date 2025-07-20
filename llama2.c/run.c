@@ -1,7 +1,7 @@
 /*
  * Bare-metal Inference for Llama-2 Transformer model in pure C
  * Altered for a naked qemu-riscv64 target.
- * All OS dependencies (malloc, file I/O, mmap, printf) have been removed.
+ * All OS dependencies removed. Uses libm for math functions.
  */
 
 // --- BARE-METAL CHANGE: DEFINITIONS ---
@@ -25,7 +25,8 @@ typedef unsigned long long  uint64_t;
 #include "tokenizer.h"
 
 // --- BARE-METAL CHANGE ---
-// Provide our own simple math and memory function implementations
+// Provide our own simple memory and string function implementations
+// The math functions (sqrtf, expf, etc.) will now come from libm.
 void* memcpy(void* dest, const void* src, size_t n) {
     char* d = (char*)dest;
     const char* s = (const char*)src;
@@ -42,27 +43,6 @@ void* memset(void* s, int c, size_t n) {
     return s;
 }
 
-// NOTE: These are placeholder math functions. They are NOT efficient or robust.
-//float sqrtf(float x) {
-//    if (x == 0.0f) return 0.0f;
-//    float guess = x;
-//    for(int i=0; i<10; i++) {
-//        guess = 0.5f * (guess + x / guess);
-//    }
-//    return guess;
-//}
-//
-//float expf_taylor(float x) {
-//    float sum = 1.0f; float term = 1.0f;
-//    for (int i = 1; i < 10; ++i) { term *= x / i; sum += term; }
-//    return sum;
-//}
-//#define expf expf_taylor
-//
-//float powf(float base, float exp) { return 1.0f; } // HACK
-//float cosf(float x) { return 1.0f; } // HACK
-//float sinf(float x) { return x; }   // HACK
-
 size_t strlen(const char* s) {
     const char* p = s;
     while (*p) p++;
@@ -76,6 +56,15 @@ int strcmp(const char* s1, const char* s2) {
     }
     return *(const unsigned char*)s1 - *(const unsigned char*)s2;
 }
+
+// --- BARE-METAL CHANGE ---
+// We need to declare the math functions we use from libm so the compiler knows their signatures.
+float sqrtf(float);
+float expf(float);
+float powf(float, float);
+float cosf(float);
+float sinf(float);
+
 
 // ----------------------------------------------------------------------------
 // Data structures
@@ -96,7 +85,7 @@ typedef struct {
     float *att; float *logits; float* key_cache; float* value_cache;
 } RunState;
 
-#define RUN_STATE_ARENA_SIZE 8000000
+#define RUN_STATE_ARENA_SIZE 8000000 // 8MB unified memory arena
 static unsigned char g_run_state_arena[RUN_STATE_ARENA_SIZE];
 static unsigned long g_arena_next_offset = 0;
 
@@ -134,9 +123,7 @@ typedef struct {
     int vocab_size; ProbIndex* probindex; float temperature; float topp; unsigned long long rng_state;
 } Sampler;
 
-// --- BARE-METAL CHANGE: FUNCTION PROTOTYPES (MOVED HERE) ---
-// Now that all the typedefs (Tokenizer, Sampler) are defined,
-// we can declare our functions using those clean names.
+// Function Prototypes (moved after typedefs)
 void encode(Tokenizer* t, char *text, int8_t bos, int8_t eos, int *tokens, int *n_tokens);
 void simple_qsort(void* base, size_t nitems, size_t size, int (*compar)(const void*, const void*));
 char* decode(Tokenizer* t, int prev_token, int token);
@@ -308,7 +295,6 @@ float* forward(Transformer* transformer, int token, int pos) {
 // ----------------------------------------------------------------------------
 // Tokenizer
 
-
 int compare_tokens(const void *a, const void *b) {
     return strcmp(((TokenIndex*)a)->str, ((TokenIndex*)b)->str);
 }
@@ -357,7 +343,6 @@ void safe_printf(char *piece) {
 }
 
 int str_lookup(char *str, TokenIndex *sorted_vocab, int vocab_size) {
-    // bsearch is a stdlib function, so we use linear search.
     for(int i = 0; i < vocab_size; i++) {
         if (strcmp(str, sorted_vocab[i].str) == 0) {
             return sorted_vocab[i].id;
@@ -400,7 +385,6 @@ void encode(Tokenizer* t, char *text, int8_t bos, int8_t eos, int *tokens, int *
     }
 
     for (char *c = text; *c != '\0'; c++) {
-        size_t str_len = 1;
         str_buffer[0] = *c;
         str_buffer[1] = '\0';
         int id = str_lookup(str_buffer, t->sorted_vocab, t->vocab_size);
