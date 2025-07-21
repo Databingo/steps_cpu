@@ -127,7 +127,7 @@ void dequantize(QuantizedTensor *qx, float* x, int n) {
 
 
     // Try float assignment
-    x[0] = qx->q[0] //* qx->s[0];
+    x[0] = qx->q[0]; //* qx->s[0];
     uart_puts("     - Assigned x[0] (float multiply)\n");
     // Try integer-only assignment as fallback
     x[1] = (float)qx->q[1];
