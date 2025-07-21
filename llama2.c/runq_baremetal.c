@@ -1,6 +1,6 @@
 /*
  * Bare-metal INT8 Quantized Inference for Llama-2 Transformer model in pure C
- * Optimized version with alignment fix for float arrays.
+ * Optimized version with alignment fix for float arrays and extra debug output.
  */
 
 // --- BARE-METAL DEFINITIONS ---
@@ -82,67 +82,47 @@ int sample(Sampler* sampler, float* logits);
 // ----------------------------------------------------------------------------
 // Quantization functions
 void dequantize(QuantizedTensor *qx, float* x, int n) { 
-    uart_puts("   - Dequantizing token embeddings...\n"); // Step 1: Start of dequantize
-    uart_puts("     - Entering unrolled loop...\n");    // Step 2: Entering main loop
-    int i = 1;
-    char buf[16];  // Declare buf here for scope in the function
-    uart_puts("     - Checking GS value: "); itoa(GS, buf); uart_puts(buf); uart_puts("\n"); // Check GS
-    uart_puts("     - Checking qx->q pointer: "); itoa((int)qx->q, buf); uart_puts(buf); uart_puts("\n"); // Check pointer
-    uart_puts("     - Checking qx->s pointer: "); itoa((int)qx->s, buf); uart_puts(buf); uart_puts("\n"); // Check pointer
-    uart_puts("     - Checking x pointer: "); itoa((int)x, buf); uart_puts(buf); uart_puts("\n"); // Check output pointer
-    uart_puts("     - Checking n value: "); itoa(n, buf); uart_puts(buf); uart_puts("\n"); // Check loop bound
-    if (GS == 0) { uart_puts("ERROR: GS is 0, division by zero imminent!\n"); while(1); } // Explicit check for div by zero
+    uart_puts("   - Dequantizing token embeddings...\n");
+    uart_puts("     - Entering unrolled loop...\n");
+    int i = 0;
+    char buf[32];
+    uart_puts("     - Checking GS value: "); itoa(GS, buf); uart_puts(buf); uart_puts("\n");
+    uart_puts("     - Checking qx->q pointer: "); itoa((int)(size_t)qx->q, buf); uart_puts(buf); uart_puts("\n");
+    uart_puts("     - Checking qx->s pointer: "); itoa((int)(size_t)qx->s, buf); uart_puts(buf); uart_puts("\n");
+    uart_puts("     - Checking x pointer: "); itoa((int)(size_t)x, buf); uart_puts(buf); uart_puts("\n");
+    uart_puts("     - Checking n value: "); itoa(n, buf); uart_puts(buf); uart_puts("\n");
+    if (GS == 0) { uart_puts("ERROR: GS is 0, division by zero imminent!\n"); while(1); }
+    // Print first 4 scale floats as int bits for debug
+    uart_puts("     - First 4 scale floats (int bits): ");
+    for (int k = 0; k < 4; ++k) {
+        int* ival = (int*)&qx->s[k];
+        itoa(*ival, buf); uart_puts(buf); uart_puts(" ");
+    }
+    uart_puts("\n");
     for (; i < n - 3; i += 4) { 
-        uart_puts("       - Processing i="); itoa(i, buf); uart_puts(buf); uart_puts("\n"); // Fine-grained: Print i before computation
-        uart_puts("         - Computing index i/GS: "); itoa(i / GS, buf); uart_puts(buf); uart_puts("\n"); // Check div
-        uart_puts("         - Fetching qx->q[i]: "); itoa(qx->q[i], buf); uart_puts(buf); uart_puts("\n"); // Check array access
-        uart_puts("         - Fetching qx->s[i/GS]: "); // No itoa for float, just message
         x[i] = qx->q[i] * qx->s[i / GS]; 
-        uart_puts("         - Computed x[i]\n");    // After first computation
         x[i+1] = qx->q[i+1] * qx->s[(i+1) / GS]; 
-        uart_puts("         - Computed x[i+1]\n");  // After second
         x[i+2] = qx->q[i+2] * qx->s[(i+2) / GS]; 
-        uart_puts("         - Computed x[i+2]\n");  // After third
         x[i+3] = qx->q[i+3] * qx->s[(i+3) / GS]; 
-        uart_puts("         - Computed x[i+3]\n");  // After fourth
         if (i % 100000 == 0 && i != 0) { 
             uart_puts("     Progress: "); itoa(i, buf); uart_puts(buf); uart_puts(" / "); itoa(n, buf); uart_puts(buf); uart_puts("\n");
         }
     }
-    uart_puts("     - Exiting unrolled loop...\n");  // Step 3: Exiting main loop
-    uart_puts("     - Handling remaining elements...\n"); // Step 4: Entering remainder loop
     for (; i < n; i++) {
-        uart_puts("       - Processing remainder i="); itoa(i, buf); uart_puts(buf); uart_puts("\n"); // Fine-grained for remainder
         x[i] = qx->q[i] * qx->s[i / GS]; 
-        uart_puts("         - Computed remainder x[i]\n");
     }
-    uart_puts("     - Remainder complete.\n");      // Step 5: Exiting remainder loop
-    uart_puts("   - Dequantization complete.\n");  // Step 6: End of dequantize
+    uart_puts("   - Dequantization complete.\n");
 }
 void quantize(QuantizedTensor *qx, float* x, int n) {
-    uart_puts("   - Starting quantize...\n"); // Step 1: Start of quantize
     int num_groups = n / GS;
-    uart_puts("     - Number of groups: "); char buf[16]; itoa(num_groups, buf); uart_puts(buf); uart_puts("\n"); // Step 2: Print num_groups
+    char buf[16];
     for (int group = 0; group < num_groups; group++) {
-        uart_puts("       - Processing group "); itoa(group, buf); uart_puts(buf); uart_puts("\n"); // Fine-grained: Per group
         float wmax = 0.0f;
-        uart_puts("         - Computing wmax...\n"); // Step inside inner loop
-        for (int i = 0; i < GS; i++) { 
-            float val = fabsf(x[group * GS + i]); 
-            if (val > wmax) { wmax = val; } 
-            if (i % 32 == 0 && i != 0) { uart_puts("           - Inner loop progress: "); itoa(i, buf); uart_puts(buf); uart_puts("\n"); }
-        }
-        uart_puts("         - wmax computed.\n");
+        for (int i = 0; i < GS; i++) { float val = fabsf(x[group * GS + i]); if (val > wmax) { wmax = val; } }
         float scale = wmax / 127.0f;
         qx->s[group] = scale;
-        uart_puts("         - Computing q values...\n");
-        for (int i = 0; i < GS; i++) { 
-            qx->q[group * GS + i] = (int8_t)(roundf(x[group * GS + i] / scale)); 
-            if (i % 32 == 0 && i != 0) { uart_puts("           - q loop progress: "); itoa(i, buf); uart_puts(buf); uart_puts("\n"); }
-        }
-        uart_puts("         - q values computed for group.\n");
+        for (int i = 0; i < GS; i++) { qx->q[group * GS + i] = (int8_t)(roundf(x[group * GS + i] / scale)); }
     }
-    uart_puts("   - Quantize complete.\n"); // Step 3: End of quantize
 }
 
 // ----------------------------------------------------------------------------
@@ -151,12 +131,16 @@ QuantizedTensor* init_qtensor(unsigned char** ptr, int n, int size_each) {
     QuantizedTensor *res = arena_alloc(n * sizeof(QuantizedTensor));
     for(int i=0; i < n; i++) {
         // Align *ptr to 4 bytes for float access
-        size_t misalignment = (size_t)*ptr % 4;
+        size_t addr = (size_t)(*ptr);
+        size_t misalignment = addr % 4;
         if (misalignment != 0) {
             *ptr += (4 - misalignment);
         }
-        res[i].s = (float*)*ptr; *ptr += (size_each / GS) * sizeof(float);
-        res[i].q = (int8_t*)*ptr; *ptr += size_each * sizeof(int8_t);
+        res[i].s = (float*)*ptr;
+        *ptr += (size_each / GS) * sizeof(float);
+        // Align *ptr to 1 byte for int8_t (not needed, but for clarity)
+        res[i].q = (int8_t*)*ptr;
+        *ptr += size_each * sizeof(int8_t);
     }
     return res;
 }
@@ -184,7 +168,7 @@ void build_transformer(Transformer *t) {
     uart_puts("   - Allocating dequantized token table...\n");
     w->token_embedding_table = arena_alloc(p->vocab_size * p->dim * sizeof(float));
     
-    uart_puts("   - Dequantizing token embeddings..."); // No newline, dots will follow
+    uart_puts("   - Dequantizing token embeddings...\n");
     dequantize(w->q_tokens, w->token_embedding_table, p->vocab_size * p->dim);
 
     uart_puts("   - Mapping attention weights...\n");
@@ -215,7 +199,7 @@ void build_transformer(Transformer *t) {
 // ----------------------------------------------------------------------------
 // The forward pass (quantized)
 void rmsnorm(float* o, float* x, float* w, int s) { float ss=0.0f; for(int j=0;j<s;j++){ss+=x[j]*x[j];} ss/=s; ss+=1e-5f; ss=1.0f/sqrtf(ss); for(int j=0;j<s;j++){o[j]=w[j]*(ss*x[j]);}}
-void softmax(float* x, int s) { if(s<=0)return; float max=x[0]; for(int i=1;i<s;i++){if(x[i]>max)max=x[i];} float sum=0.0f; for(int i=0;i<s;i++){x[i]=expf(x[i]-max);sum+=x[i];} for(int i=0;i<s;i++){x[i]/=sum;}}
+void softmax(float* x, int s) { if(s<=0)return; float max=x[0]; for(int i=1;i<s;i++){if(x[i]>max)x[i]=max;} float sum=0.0f; for(int i=0;i<s;i++){x[i]=expf(x[i]-max);sum+=x[i];} for(int i=0;i<s;i++){x[i]/=sum;}}
 void matmul(float* xout, QuantizedTensor *x, QuantizedTensor *w, int n, int d) {
     for(int i=0; i<d; i++){ float val=0.0f; int32_t ival=0; int in=i*n; for(int j=0;j<n;j++){ival+=((int32_t)x->q[j])*((int32_t)w->q[in+j]); if((j+1)%GS==0){val+=((float)ival)*w->s[(in+j)/GS]*x->s[j/GS]; ival=0;}} xout[i]=val; }
 }
