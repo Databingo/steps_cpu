@@ -1,6 +1,6 @@
 /*
  * Bare-metal INT8 Quantized Inference for Llama-2 Transformer model in pure C
- * Final version with stack overflow and tokenizer bugs fixed.
+ * Final version with allocator debugging and configured for stories15M_q80.
  */
 
 // --- BARE-METAL DEFINITIONS ---
@@ -13,7 +13,7 @@ int __errno;
 
 // --- BARE-METAL INCLUDES ---
 #include "uart.c"
-#include "model_q80.h"
+#include "model_q80.h" // Correct header for the 15M model
 #include "tokenizer.h"
 
 // --- BARE-METAL HELPERS ---
@@ -28,6 +28,9 @@ float sqrtf(float);
 float expf(float);
 float roundf(float);
 float fabsf(float);
+float powf(float, float);
+float cosf(float);
+float sinf(float);
 
 // ----------------------------------------------------------------------------
 // Globals and Data Structures
@@ -52,6 +55,9 @@ typedef struct {
 static unsigned char g_arena[ARENA_SIZE];
 static size_t g_arena_offset = 0;
 void* arena_alloc(size_t size) {
+    char buf[20];
+    uart_puts("arena_alloc: requesting "); itoa(size, buf); uart_puts(buf);
+    uart_puts(" bytes. Current offset: "); itoa(g_arena_offset, buf); uart_puts(buf); uart_puts("\n");
     size = (size + 15) & ~15;
     if (g_arena_offset + size > ARENA_SIZE) { uart_puts("ERROR: Arena out of memory!\n"); while(1); }
     void* ptr = &g_arena[g_arena_offset];
@@ -97,7 +103,7 @@ QuantizedTensor* init_qtensor(unsigned char** ptr, int n, int size_each) {
     return res;
 }
 void build_transformer(Transformer *t) {
-    unsigned char* model_ptr = stories15M_q80_bin;
+    unsigned char* model_ptr = stories15M_q80_bin; // Use the 15M model
     int header_size = 256;
     memcpy(&t->config, model_ptr + 8, sizeof(Config));
     uint8_t shared_classifier = *(uint8_t*)(model_ptr + 8 + sizeof(Config));
@@ -145,6 +151,7 @@ float* forward(Transformer* t, int token, int pos) {
         rmsnorm(s->xb, x, w->rms_att_weight+l*dim, dim);
         quantize(&s->xq, s->xb, dim);
         matmul(s->q, &s->xq, w->wq+l, dim, dim); matmul(s->k, &s->xq, w->wk+l, dim, kv_dim); matmul(s->v, &s->xq, w->wv+l, dim, kv_dim);
+        for(int i=0;i<dim;i+=2){int head_dim_idx=i%head_size;float freq=1.0f/powf(10000.0f,head_dim_idx/(float)head_size);float val=pos*freq;float fcr=cosf(val);float fci=sinf(val);int rotn=i<kv_dim?2:1;for(int v_idx=0;v_idx<rotn;v_idx++){float*vec=v_idx==0?s->q:s->k;float v0=vec[i];float v1=vec[i+1];vec[i]=v0*fcr-v1*fci;vec[i+1]=v0*fci+v1*fcr;}}
         int loff=l*p->seq_len*kv_dim;
         memcpy(s->key_cache+loff+pos*kv_dim, s->k, kv_dim*sizeof(float)); memcpy(s->value_cache+loff+pos*kv_dim, s->v, kv_dim*sizeof(float));
         for(int h=0; h<p->n_heads; h++){
@@ -187,20 +194,15 @@ void build_tokenizer(Tokenizer* t, int vocab_size) {
     for(int i=0;i<vocab_size;i++){memcpy(t->vocab_scores+i,tokenizer_data+offset,sizeof(float));offset+=sizeof(float);int len;memcpy(&len,tokenizer_data+offset,sizeof(int));offset+=sizeof(int);t->vocab[i]=(char*)arena_alloc(len+1);memcpy(t->vocab[i],tokenizer_data+offset,len);offset+=len;t->vocab[i][len]='\0';}
 }
 char* decode(Tokenizer* t, int prev, int token){
-    // --- BUG FIX: Check for invalid token id ---
     if (token < 0 || token >= t->vocab_size) { return ""; }
-    char *p=t->vocab[token];if(prev==1&&p[0]==' '){p++;}if(p[0]=='<'&&p[1]=='0'&&p[2]=='x'){char b1=p[3]>='a'?(p[3]-'a'+10):(p[3]-'0');char b2=p[4]>='a'?(p[4]-'a'+10):(p[4]-'0');unsigned char byte=(b1<<4)|b2;p=(char*)t->byte_pieces+byte*2;}return p;
+    char*p=t->vocab[token];if(prev==1&&p[0]==' '){p++;}if(p[0]=='<'&&p[1]=='0'&&p[2]=='x'){char b1=p[3]>='a'?(p[3]-'a'+10):(p[3]-'0');char b2=p[4]>='a'?(p[4]-'a'+10):(p[4]-'a'+10);unsigned char byte=(b1<<4)|b2;p=(char*)t->byte_pieces+byte*2;}return p;
 }
 void safe_printf(char *p){if(p!=NULL&&p[0]!='\0')uart_puts(p);}
 int str_lookup(char*s,TokenIndex*v,int n){for(int i=0;i<n;i++){if(strcmp(s,v[i].str)==0)return v[i].id;}return-1;}
 void encode(Tokenizer*t,char*text,int8_t bos,int8_t eos,int*tokens,int*n){
     if(t->sorted_vocab==NULL){t->sorted_vocab=arena_alloc(t->vocab_size*sizeof(TokenIndex));for(int i=0;i<t->vocab_size;i++){t->sorted_vocab[i].str=t->vocab[i];t->sorted_vocab[i].id=i;}qsort(t->sorted_vocab,t->vocab_size,sizeof(TokenIndex),compare_tokens);}
     char* str_buffer=arena_alloc((t->max_token_length*2+3));*n=0;if(bos)tokens[(*n)++]=1;
-    if(text[0]!='\0'){
-        // --- BUG FIX: Check if dummy prefix exists before adding ---
-        int dummy_prefix=str_lookup(" ",t->sorted_vocab,t->vocab_size);
-        if(dummy_prefix!=-1) tokens[(*n)++]=dummy_prefix;
-    }
+    if(text[0]!='\0'){int dummy_prefix=str_lookup(" ",t->sorted_vocab,t->vocab_size); if(dummy_prefix!=-1) tokens[(*n)++]=dummy_prefix;}
     for(char*c=text;*c!='\0';c++){str_buffer[0]=*c;str_buffer[1]='\0';int id=str_lookup(str_buffer,t->sorted_vocab,t->vocab_size);if(id!=-1){tokens[(*n)++]=id;}else{tokens[(*n)++]=(unsigned char)str_buffer[0]+3;}}
     while(1){float best_score=-1e10;int best_id=-1;int best_idx=-1;for(int i=0;i<(*n-1);i++){char*s1=t->vocab[tokens[i]];char*s2=t->vocab[tokens[i+1]];int l1=strlen(s1),l2=strlen(s2);memcpy(str_buffer,s1,l1);memcpy(str_buffer+l1,s2,l2);str_buffer[l1+l2]='\0';int id=str_lookup(str_buffer,t->sorted_vocab,t->vocab_size);if(id!=-1&&t->vocab_scores[id]>best_score){best_score=t->vocab_scores[id];best_id=id;best_idx=i;}}if(best_idx==-1)break;tokens[best_idx]=best_id;for(int i=best_idx+1;i<(*n-1);i++){tokens[i]=tokens[i+1];}(*n)--;}
     if(eos)tokens[(*n)++]=2;
@@ -223,7 +225,6 @@ void generate(Transformer*t,Tokenizer*tok,Sampler*sampler,char*prompt,int steps)
     uart_puts("\n");
 }
 
-// --- CRITICAL FIX: Move the large structs to be static globals ---
 static Transformer transformer;
 static Tokenizer tokenizer;
 static Sampler sampler;
