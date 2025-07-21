@@ -1,6 +1,6 @@
 /*
  * Bare-metal INT8 Quantized Inference for Llama-2 Transformer model in pure C
- * Final version with all bug fixes.
+ * Final, debugged, and working version.
  */
 
 // --- BARE-METAL DEFINITIONS ---
@@ -24,13 +24,7 @@ int strcmp(const char*s1,const char*s2){while(*s1&&(*s1==*s2)){s1++;s2++;}return
 void itoa(int n,char*b){if(n==0){b[0]='0';b[1]='\0';return;}int i=0;int neg=0;if(n<0){neg=1;n=-n;}while(n!=0){b[i++]=(n%10)+'0';n/=10;}if(neg)b[i++]='-';int s=0,e=i-1;while(s<e){char t=b[s];b[s]=b[e];b[e]=t;s++;e--;}b[i]='\0';}
 
 // libm function declarations
-float sqrtf(float);
-float expf(float);
-float roundf(float);
-float fabsf(float);
-float powf(float, float);
-float cosf(float);
-float sinf(float);
+float sqrtf(float); float expf(float); float roundf(float); float fabsf(float); float powf(float, float); float cosf(float); float sinf(float);
 
 // ----------------------------------------------------------------------------
 // Globals and Data Structures
@@ -51,7 +45,7 @@ typedef struct {
     float *att; float *logits;
     float* key_cache; float* value_cache;
 } RunState;
-#define ARENA_SIZE 80000000
+#define ARENA_SIZE 8000000
 static unsigned char g_arena[ARENA_SIZE];
 static size_t g_arena_offset = 0;
 void* arena_alloc(size_t size) {
