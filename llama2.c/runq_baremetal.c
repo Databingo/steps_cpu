@@ -84,7 +84,7 @@ int sample(Sampler* sampler, float* logits);
 void dequantize(QuantizedTensor *qx, float* x, int n) { 
     uart_puts("   - Dequantizing token embeddings...\n"); // Step 1: Start of dequantize
     uart_puts("     - Entering unrolled loop...\n");    // Step 2: Entering main loop
-    int i = 0;
+    int i = 1;
     char buf[16];  // Declare buf here for scope in the function
     uart_puts("     - Checking GS value: "); itoa(GS, buf); uart_puts(buf); uart_puts("\n"); // Check GS
     uart_puts("     - Checking qx->q pointer: "); itoa((int)qx->q, buf); uart_puts(buf); uart_puts("\n"); // Check pointer
