@@ -82,12 +82,17 @@ void dequantize(QuantizedTensor *qx, float* x, int n) {
     uart_puts("     - Checking x pointer: "); itoa((int)x, buf); uart_puts(buf); uart_puts("\n"); // Check output pointer
     uart_puts("     - Checking n value: "); itoa(n, buf); uart_puts(buf); uart_puts("\n"); // Check loop bound
     if (GS == 0) { uart_puts("ERROR: GS is 0, division by zero imminent!\n"); while(1); } // Explicit check for div by zero
+    if (qx->q == NULL) { uart_puts("ERROR: qx->q is NULL!\n"); while(1); } // Null check
+    if (qx->s == NULL) { uart_puts("ERROR: qx->s is NULL!\n"); while(1); } // Null check
+    if (x == NULL) { uart_puts("ERROR: x is NULL!\n"); while(1); } // Null check
     for (; i < n - 3; i += 4) { 
         uart_puts("       - Processing i="); itoa(i, buf); uart_puts(buf); uart_puts("\n"); // Fine-grained: Print i before computation
         uart_puts("         - Computing index i/GS: "); itoa(i / GS, buf); uart_puts(buf); uart_puts("\n"); // Check div
         uart_puts("         - Fetching qx->q[i]: "); itoa(qx->q[i], buf); uart_puts(buf); uart_puts("\n"); // Check array access
         uart_puts("         - Fetching qx->s[i/GS]: "); // No itoa for float, just message
-        x[i] = qx->q[i] * qx->s[i / GS]; 
+        float s_val = qx->s[i / GS]; // Separate access
+        uart_puts("         - s_val fetched: "); // Placeholder, can't itoa float
+        x[i] = qx->q[i] * s_val; 
         uart_puts("         - Computed x[i]\n");    // After first computation
         x[i+1] = qx->q[i+1] * qx->s[(i+1) / GS]; 
         uart_puts("         - Computed x[i+1]\n");  // After second
@@ -103,9 +108,6 @@ void dequantize(QuantizedTensor *qx, float* x, int n) {
     uart_puts("     - Handling remaining elements...\n"); // Step 4: Entering remainder loop
     for (; i < n; i++) {
         uart_puts("       - Processing remainder i="); itoa(i, buf); uart_puts(buf); uart_puts("\n"); // Fine-grained for remainder
-        uart_puts("         - Computing index i/GS: "); itoa(i / GS, buf); uart_puts(buf); uart_puts("\n"); // Check div
-        uart_puts("         - Fetching qx->q[i]: "); itoa(qx->q[i], buf); uart_puts(buf); uart_puts("\n"); // Check array access
-        uart_puts("         - Fetching qx->s[i/GS]: "); // Message for s access
         x[i] = qx->q[i] * qx->s[i / GS]; 
         uart_puts("         - Computed remainder x[i]\n");
     }
