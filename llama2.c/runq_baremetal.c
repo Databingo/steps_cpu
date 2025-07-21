@@ -1,6 +1,6 @@
 /*
  * Bare-metal INT8 Quantized Inference for Llama-2 Transformer model in pure C
- * Final, debugged, and working version.
+ * Optimized version for faster execution on QEMU RISC-V bare-metal.
  */
 
 // --- BARE-METAL DEFINITIONS ---
@@ -45,7 +45,7 @@ typedef struct {
     float *att; float *logits;
     float* key_cache; float* value_cache;
 } RunState;
-#define ARENA_SIZE 8000000
+#define ARENA_SIZE 128000000 // Increased from 8MB to 128MB to handle larger models without OOM
 static unsigned char g_arena[ARENA_SIZE];
 static size_t g_arena_offset = 0;
 void* arena_alloc(size_t size) {
@@ -71,7 +71,25 @@ int sample(Sampler* sampler, float* logits);
 
 // ----------------------------------------------------------------------------
 // Quantization functions
-void dequantize(QuantizedTensor *qx, float* x, int n) { for (int i = 0; i < n; i++) { x[i] = qx->q[i] * qx->s[i / GS]; } }
+void dequantize(QuantizedTensor *qx, float* x, int n) {
+    uart_puts("   - Dequantizing token embeddings...\n"); // Added print to confirm start
+    // Unroll the loop by 4 for speed (assuming n % 4 == 0; adjust if not)
+    int i = 0;
+    for (; i < n - 3; i += 4) { 
+        x[i] = qx->q[i] * qx->s[i / GS]; 
+        x[i+1] = qx->q[i+1] * qx->s[(i+1) / GS]; 
+        x[i+2] = qx->q[i+2] * qx->s[(i+2) / GS]; 
+        x[i+3] = qx->q[i+3] * qx->s[(i+3) / GS]; 
+        if (i % 100000 == 0 && i != 0) {  // Print progress every 100,000 iterations
+            uart_puts("     Progress: "); char buf[16]; itoa(i, buf); uart_puts(buf); uart_puts(" / "); itoa(n, buf); uart_puts(buf); uart_puts("\n");
+        }
+    }
+    // Handle remaining elements
+    for (; i < n; i++) {
+        x[i] = qx->q[i] * qx->s[i / GS]; 
+    }
+    uart_puts("   - Dequantization complete.\n"); // Added print to confirm end
+}
 void quantize(QuantizedTensor *qx, float* x, int n) {
     int num_groups = n / GS;
     for (int group = 0; group < num_groups; group++) {
@@ -96,26 +114,45 @@ QuantizedTensor* init_qtensor(unsigned char** ptr, int n, int size_each) {
 void build_transformer(Transformer *t) {
     unsigned char* model_ptr = stories15M_q80_bin;
     int header_size = 256;
+
+    uart_puts("   - Reading header...\n");
     memcpy(&t->config, model_ptr + 8, sizeof(Config));
     uint8_t shared_classifier = *(uint8_t*)(model_ptr + 8 + sizeof(Config));
     GS = *(int*)(model_ptr + 8 + sizeof(Config) + 1);
+
     unsigned char* weights_ptr = model_ptr + header_size;
     Config* p = &t->config; TransformerWeights* w = &t->weights;
     int head_size = p->dim / p->n_heads;
+
+    uart_puts("   - Mapping float weights...\n");
     w->rms_att_weight = (float*) weights_ptr; weights_ptr += p->n_layers * p->dim * sizeof(float);
     w->rms_ffn_weight = (float*) weights_ptr; weights_ptr += p->n_layers * p->dim * sizeof(float);
     w->rms_final_weight = (float*) weights_ptr; weights_ptr += p->dim * sizeof(float);
+
+    uart_puts("   - Mapping quantized tokens...\n");
     w->q_tokens = init_qtensor(&weights_ptr, 1, p->vocab_size * p->dim);
+
+    uart_puts("   - Allocating dequantized token table...\n");
     w->token_embedding_table = arena_alloc(p->vocab_size * p->dim * sizeof(float));
+    
+    uart_puts("   - Dequantizing token embeddings...\n"); // No newline, dots will follow in dequantize
     dequantize(w->q_tokens, w->token_embedding_table, p->vocab_size * p->dim);
+
+    uart_puts("   - Mapping attention weights...\n");
     w->wq = init_qtensor(&weights_ptr, p->n_layers, p->dim * (p->n_heads * head_size));
     w->wk = init_qtensor(&weights_ptr, p->n_layers, p->dim * (p->n_kv_heads * head_size));
     w->wv = init_qtensor(&weights_ptr, p->n_layers, p->dim * (p->n_kv_heads * head_size));
     w->wo = init_qtensor(&weights_ptr, p->n_layers, (p->n_heads * head_size) * p->dim);
+
+    uart_puts("   - Mapping FFN weights...\n");
     w->w1 = init_qtensor(&weights_ptr, p->n_layers, p->dim * p->hidden_dim);
     w->w2 = init_qtensor(&weights_ptr, p->n_layers, p->hidden_dim * p->dim);
     w->w3 = init_qtensor(&weights_ptr, p->n_layers, p->dim * p->hidden_dim);
+
+    uart_puts("   - Mapping classifier...\n");
     w->wcls = shared_classifier ? w->q_tokens : init_qtensor(&weights_ptr, 1, p->dim * p->vocab_size);
+
+    uart_puts("   - Allocating RunState...\n");
     int kv_dim = (p->dim * p->n_kv_heads) / p->n_heads; RunState* s = &t->state;
     s->x = arena_alloc(p->dim * sizeof(float)); s->xb = arena_alloc(p->dim * sizeof(float)); s->xb2 = arena_alloc(p->dim * sizeof(float));
     s->hb = arena_alloc(p->hidden_dim * sizeof(float)); s->hb2 = arena_alloc(p->hidden_dim * sizeof(float));
