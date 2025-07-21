@@ -1,6 +1,6 @@
 /*
  * Bare-metal INT8 Quantized Inference for Llama-2 Transformer model in pure C
- * Final version with allocator debugging and configured for stories15M_q80.
+ * Final version with all bug fixes.
  */
 
 // --- BARE-METAL DEFINITIONS ---
@@ -13,7 +13,7 @@ int __errno;
 
 // --- BARE-METAL INCLUDES ---
 #include "uart.c"
-#include "model_q80.h" // Correct header for the 15M model
+#include "model_q80.h"
 #include "tokenizer.h"
 
 // --- BARE-METAL HELPERS ---
@@ -51,13 +51,10 @@ typedef struct {
     float *att; float *logits;
     float* key_cache; float* value_cache;
 } RunState;
-#define ARENA_SIZE 8000000
+#define ARENA_SIZE 80000000
 static unsigned char g_arena[ARENA_SIZE];
 static size_t g_arena_offset = 0;
 void* arena_alloc(size_t size) {
-    char buf[20];
-    uart_puts("arena_alloc: requesting "); itoa(size, buf); uart_puts(buf);
-    uart_puts(" bytes. Current offset: "); itoa(g_arena_offset, buf); uart_puts(buf); uart_puts("\n");
     size = (size + 15) & ~15;
     if (g_arena_offset + size > ARENA_SIZE) { uart_puts("ERROR: Arena out of memory!\n"); while(1); }
     void* ptr = &g_arena[g_arena_offset];
@@ -103,7 +100,7 @@ QuantizedTensor* init_qtensor(unsigned char** ptr, int n, int size_each) {
     return res;
 }
 void build_transformer(Transformer *t) {
-    unsigned char* model_ptr = stories15M_q80_bin; // Use the 15M model
+    unsigned char* model_ptr = stories15M_q80_bin;
     int header_size = 256;
     memcpy(&t->config, model_ptr + 8, sizeof(Config));
     uint8_t shared_classifier = *(uint8_t*)(model_ptr + 8 + sizeof(Config));
