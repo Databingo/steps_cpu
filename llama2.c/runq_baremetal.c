@@ -45,7 +45,7 @@ typedef struct {
     float *att; float *logits;
     float* key_cache; float* value_cache;
 } RunState;
-#define ARENA_SIZE 12000000
+#define ARENA_SIZE 120000000
 static unsigned char g_arena[ARENA_SIZE];
 static size_t g_arena_offset = 0;
 void* arena_alloc(size_t size) {
