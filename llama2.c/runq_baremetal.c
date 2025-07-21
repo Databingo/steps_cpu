@@ -99,8 +99,27 @@ void dequantize(QuantizedTensor *qx, float* x, int n) {
         itoa(*ival, buf); uart_puts(buf); uart_puts(" ");
     }
     uart_puts("\n");
+    uart_puts("     - First 4 scale floats (float): ");
+    for (int k = 0; k < 4; ++k) {
+        float val = qx->s[k];
+        // Print as int for now, but you could implement a float-to-string if needed
+        int* ival = (int*)&val;
+        char buf[16];
+        itoa(*ival, buf); uart_puts(buf); uart_puts(" ");
+    }
+    uart_puts("\n");
+    uart_puts("     - First 4 q values: ");
+    for (int k = 0; k < 4; ++k) {
+        char buf[16];
+        itoa(qx->q[k], buf); uart_puts(buf); uart_puts(" ");
+    }
+    uart_puts("\n");
     for (; i < n - 3; i += 4) { 
-        x[i] = qx->q[i] * qx->s[i / GS]; 
+        //x[i] = qx->q[i] * qx->s[i / GS]; 
+        x[i] = qx->q[i] * qx->s[i / GS];
+        int* ival = (int*)&x[i];
+        itoa(*ival, buf); uart_puts("     - x[0] bits: "); uart_puts(buf); uart_puts("\n");
+        break; // Stop after first iteration for debug
         x[i+1] = qx->q[i+1] * qx->s[(i+1) / GS]; 
         x[i+2] = qx->q[i+2] * qx->s[(i+2) / GS]; 
         x[i+3] = qx->q[i+3] * qx->s[(i+3) / GS]; 
