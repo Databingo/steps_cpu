@@ -5,7 +5,7 @@ ENTRY(_start)
 MEMORY {
   /* QEMU 'virt' machine has RAM at 0x80000000 */
   /* We define separate regions for code (RX) and data (RW) */
-  RAM (rwx) : ORIGIN = 0x80000000, LENGTH = 256M
+  RAM (rwx) : ORIGIN = 0x80000000, LENGTH = 512M
 }
 
 SECTIONS {
