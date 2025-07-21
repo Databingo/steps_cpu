@@ -97,9 +97,7 @@ void dequantize(QuantizedTensor *qx, float* x, int n) {
         uart_puts("         - Computing index i/GS: "); itoa(i / GS, buf); uart_puts(buf); uart_puts("\n"); // Check div
         uart_puts("         - Fetching qx->q[i]: "); itoa(qx->q[i], buf); uart_puts(buf); uart_puts("\n"); // Check array access
         uart_puts("         - Fetching qx->s[i/GS]: "); // No itoa for float, just message
-        float s_val = qx->s[i / GS]; // Separate access
-        uart_puts("         - s_val fetched: "); // Placeholder, can't itoa float
-        x[i] = qx->q[i] * s_val; 
+        x[i] = qx->q[i] * qx->s[i / GS]; 
         uart_puts("         - Computed x[i]\n");    // After first computation
         x[i+1] = qx->q[i+1] * qx->s[(i+1) / GS]; 
         uart_puts("         - Computed x[i+1]\n");  // After second
@@ -176,11 +174,8 @@ void build_transformer(Transformer *t) {
     int head_size = p->dim / p->n_heads;
 
     uart_puts("   - Mapping float weights...\n");
-    weights_ptr = (unsigned char*)align_ptr(weights_ptr, 4);
     w->rms_att_weight = (float*) weights_ptr; weights_ptr += p->n_layers * p->dim * sizeof(float);
-    weights_ptr = (unsigned char*)align_ptr(weights_ptr, 4);
     w->rms_ffn_weight = (float*) weights_ptr; weights_ptr += p->n_layers * p->dim * sizeof(float);
-    weights_ptr = (unsigned char*)align_ptr(weights_ptr, 4);
     w->rms_final_weight = (float*) weights_ptr; weights_ptr += p->dim * sizeof(float);
 
     uart_puts("   - Mapping quantized tokens...\n");
