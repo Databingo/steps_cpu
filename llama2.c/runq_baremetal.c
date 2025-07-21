@@ -82,18 +82,22 @@ void dequantize(QuantizedTensor *qx, float* x, int n) {
     uart_puts("     - Checking x pointer: "); itoa((int)x, buf); uart_puts(buf); uart_puts("\n"); // Check output pointer
     uart_puts("     - Checking n value: "); itoa(n, buf); uart_puts(buf); uart_puts("\n"); // Check loop bound
     if (GS == 0) { uart_puts("ERROR: GS is 0, division by zero imminent!\n"); while(1); } // Explicit check for div by zero
+    // Allocate and copy s to aligned memory
+    float* s_copy = arena_alloc((n / GS) * sizeof(float));
+    memcpy(s_copy, qx->s, (n / GS) * sizeof(float));
+    uart_puts("     - s_copy allocated and copied.\n"); // Confirm copy succeeded
     for (; i < n - 3; i += 4) { 
         uart_puts("       - Processing i="); itoa(i, buf); uart_puts(buf); uart_puts("\n"); // Fine-grained: Print i before computation
         uart_puts("         - Computing index i/GS: "); itoa(i / GS, buf); uart_puts(buf); uart_puts("\n"); // Check div
         uart_puts("         - Fetching qx->q[i]: "); itoa(qx->q[i], buf); uart_puts(buf); uart_puts("\n"); // Check array access
-        uart_puts("         - Fetching qx->s[i/GS]: "); // No itoa for float, just message
-        x[i] = (float)qx->q[i] * qx->s[i / GS];  // Explicit cast to float
+        uart_puts("         - Fetching s_copy[i/GS]: "); // Message for s access
+        x[i] = qx->q[i] * s_copy[i / GS]; 
         uart_puts("         - Computed x[i]\n");    // After first computation
-        x[i+1] = (float)qx->q[i+1] * qx->s[(i+1) / GS]; 
+        x[i+1] = qx->q[i+1] * s_copy[(i+1) / GS]; 
         uart_puts("         - Computed x[i+1]\n");  // After second
-        x[i+2] = (float)qx->q[i+2] * qx->s[(i+2) / GS]; 
+        x[i+2] = qx->q[i+2] * s_copy[(i+2) / GS]; 
         uart_puts("         - Computed x[i+2]\n");  // After third
-        x[i+3] = (float)qx->q[i+3] * qx->s[(i+3) / GS]; 
+        x[i+3] = qx->q[i+3] * s_copy[(i+3) / GS]; 
         uart_puts("         - Computed x[i+3]\n");  // After fourth
         if (i % 100000 == 0 && i != 0) { 
             uart_puts("     Progress: "); itoa(i, buf); uart_puts(buf); uart_puts(" / "); itoa(n, buf); uart_puts(buf); uart_puts("\n");
@@ -103,7 +107,7 @@ void dequantize(QuantizedTensor *qx, float* x, int n) {
     uart_puts("     - Handling remaining elements...\n"); // Step 4: Entering remainder loop
     for (; i < n; i++) {
         uart_puts("       - Processing remainder i="); itoa(i, buf); uart_puts(buf); uart_puts("\n"); // Fine-grained for remainder
-        x[i] = qx->q[i] * qx->s[i / GS]; 
+        x[i] = qx->q[i] * s_copy[i / GS]; 
         uart_puts("         - Computed remainder x[i]\n");
     }
     uart_puts("     - Remainder complete.\n");      // Step 5: Exiting remainder loop
