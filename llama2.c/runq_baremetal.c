@@ -127,14 +127,14 @@ void dequantize(QuantizedTensor *qx, float* x, int n) {
 
 
     // Try float assignment
-    x[0] = qx->q[0]; //* qx->s[0];
+    x[0] = qx->q[0]* qx->s[0];
     uart_puts("     - Assigned x[0] (float multiply)\n");
     // Try integer-only assignment as fallback
     x[1] = (float)qx->q[1];
     uart_puts("     - Assigned x[1] (int to float)\n");
     // Stop after first assignments for debug
     uart_puts("   - Dequantization debug complete.\n");
-    while(1); // Halt for debug
+    //while(1); // Halt for debug
 }
 void quantize(QuantizedTensor *qx, float* x, int n) {
     int num_groups = n / GS;
