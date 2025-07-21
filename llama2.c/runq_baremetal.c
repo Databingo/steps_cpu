@@ -13,7 +13,7 @@ int __errno;
 
 // --- BARE-METAL INCLUDES ---
 #include "uart.c"
-#include "model_260k_q80.h"
+#include "model_q80.h"
 #include "tokenizer.h"
 
 // --- BARE-METAL HELPERS ---
@@ -97,7 +97,7 @@ QuantizedTensor* init_qtensor(unsigned char** ptr, int n, int size_each) {
     return res;
 }
 void build_transformer(Transformer *t) {
-    unsigned char* model_ptr = stories260K_q80_bin;
+    unsigned char* model_ptr = stories15M_q80_bin;
     int header_size = 256;
     memcpy(&t->config, model_ptr + 8, sizeof(Config));
     uint8_t shared_classifier = *(uint8_t*)(model_ptr + 8 + sizeof(Config));
