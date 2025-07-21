@@ -102,35 +102,28 @@ void dequantize(QuantizedTensor *qx, float* x, int n) {
     uart_puts("     - First 4 scale floats (float): ");
     for (int k = 0; k < 4; ++k) {
         float val = qx->s[k];
-        // Print as int for now, but you could implement a float-to-string if needed
         int* ival = (int*)&val;
-        char buf[16];
         itoa(*ival, buf); uart_puts(buf); uart_puts(" ");
     }
     uart_puts("\n");
     uart_puts("     - First 4 q values: ");
     for (int k = 0; k < 4; ++k) {
-        char buf[16];
         itoa(qx->q[k], buf); uart_puts(buf); uart_puts(" ");
     }
     uart_puts("\n");
-    for (; i < n - 3; i += 4) { 
-        //x[i] = qx->q[i] * qx->s[i / GS]; 
-        x[i] = qx->q[i] * qx->s[i / GS];
-        int* ival = (int*)&x[i];
-        itoa(*ival, buf); uart_puts("     - x[0] bits: "); uart_puts(buf); uart_puts("\n");
-        break; // Stop after first iteration for debug
-        x[i+1] = qx->q[i+1] * qx->s[(i+1) / GS]; 
-        x[i+2] = qx->q[i+2] * qx->s[(i+2) / GS]; 
-        x[i+3] = qx->q[i+3] * qx->s[(i+3) / GS]; 
-        if (i % 100000 == 0 && i != 0) { 
-            uart_puts("     Progress: "); itoa(i, buf); uart_puts(buf); uart_puts(" / "); itoa(n, buf); uart_puts(buf); uart_puts("\n");
-        }
-    }
-    for (; i < n; i++) {
-        x[i] = qx->q[i] * qx->s[i / GS]; 
-    }
-    uart_puts("   - Dequantization complete.\n");
+    // Alignment check
+    itoa((int)((size_t)(&qx->s[0]) % 4), buf); uart_puts("     - qx->s[0] alignment: "); uart_puts(buf); uart_puts("\n");
+    // Try assignment and print before/after
+    uart_puts("     - About to assign x[0] = qx->q[0] * qx->s[0]\n");
+    // Try float assignment
+    x[0] = qx->q[0] * qx->s[0];
+    uart_puts("     - Assigned x[0] (float multiply)\n");
+    // Try integer-only assignment as fallback
+    x[1] = (float)qx->q[1];
+    uart_puts("     - Assigned x[1] (int to float)\n");
+    // Stop after first assignments for debug
+    uart_puts("   - Dequantization debug complete.\n");
+    while(1); // Halt for debug
 }
 void quantize(QuantizedTensor *qx, float* x, int n) {
     int num_groups = n / GS;
