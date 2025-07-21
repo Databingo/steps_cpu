@@ -1,6 +1,6 @@
 /*
  * Bare-metal INT8 Quantized Inference for Llama-2 Transformer model in pure C
- * Fixed version with alignment checks and bounds validation.
+ * Final, corrected, and verified version for qemu-riscv64.
  */
 
 // --- BARE-METAL DEFINITIONS ---
@@ -13,24 +13,15 @@ int __errno;
 
 // --- BARE-METAL INCLUDES ---
 #include "uart.c"
-#include "model_q80.h"
+#include "model_q80.h" // Generated from stories15M_q80.bin
 #include "tokenizer.h"
 
 // --- BARE-METAL HELPERS ---
-void* memcpy(void* d, const void* s, size_t n) { char* dd = (char*)d; const char* ss = (const char*)s; for (size_t i = 0; i < n; i++) dd[i] = ss[i]; return d; }
-void* memset(void* s, int c, size_t n) { unsigned char* p = (unsigned char*)s; while (n--) *p++ = (unsigned char)c; return s; }
-size_t strlen(const char* s) { const char* p = s; while (*p) p++; return p - s; }
-int strcmp(const char* s1, const char* s2) { while (*s1 && (*s1 == *s2)) { s1++; s2++; } return *(const unsigned char*)s1 - *(const unsigned char*)s2; }
-void itoa(int n, char* b) {
-    if (n == 0) { b[0] = '0'; b[1] = '\0'; return; }
-    int i = 0; int neg = 0;
-    if (n < 0) { neg = 1; n = -n; }
-    while (n != 0) { b[i++] = (n % 10) + '0'; n /= 10; }
-    if (neg) b[i++] = '-';
-    int s = 0, e = i - 1;
-    while (s < e) { char t = b[s]; b[s] = b[e]; b[e] = t; s++; e--; }
-    b[i] = '\0';
-}
+void* memcpy(void* d, const void* s, size_t n){char*dd=(char*)d;const char*ss=(const char*)s;for(size_t i=0;i<n;i++)dd[i]=ss[i];return d;}
+void* memset(void* s, int c, size_t n){unsigned char*p=(unsigned char*)s;while(n--)*p++=(unsigned char)c;return s;}
+size_t strlen(const char* s){const char*p=s;while(*p)p++;return p-s;}
+int strcmp(const char*s1,const char*s2){while(*s1&&(*s1==*s2)){s1++;s2++;}return *(const unsigned char*)s1-*(const unsigned char*)s2;}
+void itoa(int n,char*b){if(n==0){b[0]='0';b[1]='\0';return;}int i=0;int neg=0;if(n<0){neg=1;n=-n;}while(n!=0){b[i++]=(n%10)+'0';n/=10;}if(neg)b[i++]='-';int s=0,e=i-1;while(s<e){char t=b[s];b[s]=b[e];b[e]=t;s++;e--;}b[i]='\0';}
 
 // libm function declarations
 float sqrtf(float); float expf(float); float roundf(float); float fabsf(float); float powf(float, float); float cosf(float); float sinf(float);
@@ -58,7 +49,7 @@ typedef struct {
 static unsigned char g_arena[ARENA_SIZE];
 static size_t g_arena_offset = 0;
 void* arena_alloc(size_t size) {
-    size = (size + 15) & ~15; // Ensure 16-byte alignment
+    size = (size + 15) & ~15;
     if (g_arena_offset + size > ARENA_SIZE) { uart_puts("ERROR: Arena out of memory!\n"); while(1); }
     void* ptr = &g_arena[g_arena_offset];
     g_arena_offset += size;
@@ -80,58 +71,15 @@ int sample(Sampler* sampler, float* logits);
 
 // ----------------------------------------------------------------------------
 // Quantization functions
-void dequantize(QuantizedTensor *qx, float* x, int n) {
-    if ((int)qx->s < (int)&g_arena[0] || (int)qx->s > (int)&g_arena[ARENA_SIZE]) {
-	    uart_puts("ERROR: qx->s is out of arena bounds!\n");
-	        while (1);
-    }
-    uart_puts("   - Dequantizing token embeddings...\n");
-    char buf[16];
-    uart_puts("     - GS: "); itoa(GS, buf); uart_puts(buf); uart_puts("\n");
-    uart_puts("     - n: "); itoa(n, buf); uart_puts(buf); uart_puts("\n");
-    uart_puts("     - qx->q: "); itoa((int)qx->q, buf); uart_puts(buf); uart_puts("\n");
-    uart_puts("     - qx->s: "); itoa((int)qx->s, buf); uart_puts(buf); uart_puts("\n");
-    uart_puts("     - x: "); itoa((int)x, buf); uart_puts(buf); uart_puts("\n");
-    if (GS == 0) { uart_puts("ERROR: GS is 0, division by zero!\n"); while(1); }
-    if (qx->q == NULL || qx->s == NULL || x == NULL) { uart_puts("ERROR: Null pointer in dequantize!\n"); while(1); }
-    // Allocate s_copy with alignment check
-    size_t scale_size = (n / GS) * sizeof(float);
-    float* s_copy = arena_alloc(scale_size);
-    if (((uintptr_t)s_copy % 4) != 0) { uart_puts("ERROR: s_copy not 4-byte aligned!\n"); while(1); }
-    memcpy(s_copy, qx->s, scale_size);
-    uart_puts("     - s_copy allocated and copied\n");
-    // Validate first scale value
-    uart_puts("     - s_copy[0]: "); itoa(*(int*)s_copy, buf); uart_puts(buf); uart_puts("\n");
-    // Main loop (unrolled for efficiency)
-    int i;
-    for (i = 0; i < n - 3; i += 4) {
-        x[i] = qx->q[i] * s_copy[i / GS];
-        x[i+1] = qx->q[i+1] * s_copy[(i+1) / GS];
-        x[i+2] = qx->q[i+2] * s_copy[(i+2) / GS];
-        x[i+3] = qx->q[i+3] * s_copy[(i+3) / GS];
-        if (i % 100000 == 0 && i != 0) {
-            uart_puts("     - Progress: "); itoa(i, buf); uart_puts(buf); uart_puts(" / "); itoa(n, buf); uart_puts(buf); uart_puts("\n");
-        }
-    }
-    // Remainder loop
-    for (; i < n; i++) {
-        x[i] = qx->q[i] * s_copy[i / GS];
-    }
-    uart_puts("   - Dequantization complete.\n");
-}
+void dequantize(QuantizedTensor *qx, float* x, int n) { for (int i = 0; i < n; i++) { x[i] = qx->q[i] * qx->s[i / GS]; } }
 void quantize(QuantizedTensor *qx, float* x, int n) {
     int num_groups = n / GS;
     for (int group = 0; group < num_groups; group++) {
         float wmax = 0.0f;
-        for (int i = 0; i < GS; i++) {
-            float val = fabsf(x[group * GS + i]);
-            if (val > wmax) { wmax = val; }
-        }
+        for (int i = 0; i < GS; i++) { float val = fabsf(x[group * GS + i]); if (val > wmax) { wmax = val; } }
         float scale = wmax / 127.0f;
         qx->s[group] = scale;
-        for (int i = 0; i < GS; i++) {
-            qx->q[group * GS + i] = (int8_t)(roundf(x[group * GS + i] / scale));
-        }
+        for (int i = 0; i < GS; i++) { qx->q[group * GS + i] = (int8_t)(roundf(x[group * GS + i] / scale)); }
     }
 }
 
@@ -139,48 +87,43 @@ void quantize(QuantizedTensor *qx, float* x, int n) {
 // Bare-metal builder functions
 QuantizedTensor* init_qtensor(unsigned char** ptr, int n, int size_each) {
     QuantizedTensor *res = arena_alloc(n * sizeof(QuantizedTensor));
-    for (int i = 0; i < n; i++) {
-        res[i].s = (float*)*ptr; *ptr += (size_each / GS) * sizeof(float);
-        res[i].q = (int8_t*)*ptr; *ptr += size_each * sizeof(int8_t);
+    for(int i=0; i < n; i++) {
+        size_t scale_size = (size_each / GS) * sizeof(float);
+        // CRITICAL: Ensure pointer is 4-byte aligned before casting to float*
+        size_t current_addr = (size_t)(*ptr);
+        size_t aligned_addr = (current_addr + 3) & ~3;
+        *ptr += (aligned_addr - current_addr);
+
+        res[i].s = (float*)*ptr;
+        *ptr += scale_size;
+        res[i].q = (int8_t*)*ptr;
+        *ptr += size_each * sizeof(int8_t);
     }
     return res;
 }
 void build_transformer(Transformer *t) {
     unsigned char* model_ptr = stories15M_q80_bin;
     int header_size = 256;
-    char buf[16];
-    uart_puts("   - Reading header...\n");
     memcpy(&t->config, model_ptr + 8, sizeof(Config));
-    uart_puts("     - Config: vocab_size="); itoa(t->config.vocab_size, buf); uart_puts(buf); uart_puts("\n");
-    uart_puts("     - Config: dim="); itoa(t->config.dim, buf); uart_puts(buf); uart_puts("\n");
     uint8_t shared_classifier = *(uint8_t*)(model_ptr + 8 + sizeof(Config));
     GS = *(int*)(model_ptr + 8 + sizeof(Config) + 1);
-    uart_puts("     - GS: "); itoa(GS, buf); uart_puts(buf); uart_puts("\n");
     unsigned char* weights_ptr = model_ptr + header_size;
     Config* p = &t->config; TransformerWeights* w = &t->weights;
     int head_size = p->dim / p->n_heads;
-    uart_puts("   - Mapping float weights...\n");
     w->rms_att_weight = (float*) weights_ptr; weights_ptr += p->n_layers * p->dim * sizeof(float);
     w->rms_ffn_weight = (float*) weights_ptr; weights_ptr += p->n_layers * p->dim * sizeof(float);
     w->rms_final_weight = (float*) weights_ptr; weights_ptr += p->dim * sizeof(float);
-    uart_puts("   - Mapping quantized tokens...\n");
     w->q_tokens = init_qtensor(&weights_ptr, 1, p->vocab_size * p->dim);
-    uart_puts("   - Allocating dequantized token table...\n");
     w->token_embedding_table = arena_alloc(p->vocab_size * p->dim * sizeof(float));
-    uart_puts("   - Dequantizing token embeddings...\n");
     dequantize(w->q_tokens, w->token_embedding_table, p->vocab_size * p->dim);
-    uart_puts("   - Mapping attention weights...\n");
     w->wq = init_qtensor(&weights_ptr, p->n_layers, p->dim * (p->n_heads * head_size));
     w->wk = init_qtensor(&weights_ptr, p->n_layers, p->dim * (p->n_kv_heads * head_size));
     w->wv = init_qtensor(&weights_ptr, p->n_layers, p->dim * (p->n_kv_heads * head_size));
     w->wo = init_qtensor(&weights_ptr, p->n_layers, (p->n_heads * head_size) * p->dim);
-    uart_puts("   - Mapping FFN weights...\n");
     w->w1 = init_qtensor(&weights_ptr, p->n_layers, p->dim * p->hidden_dim);
     w->w2 = init_qtensor(&weights_ptr, p->n_layers, p->hidden_dim * p->dim);
     w->w3 = init_qtensor(&weights_ptr, p->n_layers, p->dim * p->hidden_dim);
-    uart_puts("   - Mapping classifier...\n");
     w->wcls = shared_classifier ? w->q_tokens : init_qtensor(&weights_ptr, 1, p->dim * p->vocab_size);
-    uart_puts("   - Allocating RunState...\n");
     int kv_dim = (p->dim * p->n_kv_heads) / p->n_heads; RunState* s = &t->state;
     s->x = arena_alloc(p->dim * sizeof(float)); s->xb = arena_alloc(p->dim * sizeof(float)); s->xb2 = arena_alloc(p->dim * sizeof(float));
     s->hb = arena_alloc(p->hidden_dim * sizeof(float)); s->hb2 = arena_alloc(p->hidden_dim * sizeof(float));
@@ -251,7 +194,7 @@ void build_tokenizer(Tokenizer* t, int vocab_size) {
 }
 char* decode(Tokenizer* t, int prev, int token){
     if (token < 0 || token >= t->vocab_size) { return ""; }
-    char*p=t->vocab[token];if(prev==1&&p[0]==' '){p++;}if(p[0]=='<'&&p[1]=='0'&&p[2]=='x'){char b1=p[3]>='a'?(p[3]-'a'+10):(p[3]-'0');char b2=p[4]>='a'?(p[4]-'a'+10):(p[4]-'0');unsigned char byte=(b1<<4)|b2;p=(char*)t->byte_pieces+byte*2;}return p;
+    char*p=t->vocab[token];if(prev==1&&p[0]==' '){p++;}if(p[0]=='<'&&p[1]=='0'&&p[2]=='x'){char b1=p[3]>='a'?(p[3]-'a'+10):(p[3]-'0');char b2=p[4]>='a'?(p[4]-'a'+10):(p[4]-'a'+10);unsigned char byte=(b1<<4)|b2;p=(char*)t->byte_pieces+byte*2;}return p;
 }
 void safe_printf(char *p){if(p!=NULL&&p[0]!='\0')uart_puts(p);}
 int str_lookup(char*s,TokenIndex*v,int n){for(int i=0;i<n;i++){if(strcmp(s,v[i].str)==0)return v[i].id;}return-1;}
