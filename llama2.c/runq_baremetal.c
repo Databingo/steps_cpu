@@ -87,13 +87,13 @@ void dequantize(QuantizedTensor *qx, float* x, int n) {
         uart_puts("         - Computing index i/GS: "); itoa(i / GS, buf); uart_puts(buf); uart_puts("\n"); // Check div
         uart_puts("         - Fetching qx->q[i]: "); itoa(qx->q[i], buf); uart_puts(buf); uart_puts("\n"); // Check array access
         uart_puts("         - Fetching qx->s[i/GS]: "); // No itoa for float, just message
-        x[i] = qx->q[i] * qx->s[i / GS]; 
+        x[i] = (float)qx->q[i] * qx->s[i / GS];  // Explicit cast to float
         uart_puts("         - Computed x[i]\n");    // After first computation
-        x[i+1] = qx->q[i+1] * qx->s[(i+1) / GS]; 
+        x[i+1] = (float)qx->q[i+1] * qx->s[(i+1) / GS]; 
         uart_puts("         - Computed x[i+1]\n");  // After second
-        x[i+2] = qx->q[i+2] * qx->s[(i+2) / GS]; 
+        x[i+2] = (float)qx->q[i+2] * qx->s[(i+2) / GS]; 
         uart_puts("         - Computed x[i+2]\n");  // After third
-        x[i+3] = qx->q[i+3] * qx->s[(i+3) / GS]; 
+        x[i+3] = (float)qx->q[i+3] * qx->s[(i+3) / GS]; 
         uart_puts("         - Computed x[i+3]\n");  // After fourth
         if (i % 100000 == 0 && i != 0) { 
             uart_puts("     Progress: "); itoa(i, buf); uart_puts(buf); uart_puts(" / "); itoa(n, buf); uart_puts(buf); uart_puts("\n");
