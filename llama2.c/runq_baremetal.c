@@ -115,8 +115,19 @@ void dequantize(QuantizedTensor *qx, float* x, int n) {
     itoa((int)((size_t)(&qx->s[0]) % 4), buf); uart_puts("     - qx->s[0] alignment: "); uart_puts(buf); uart_puts("\n");
     // Try assignment and print before/after
     uart_puts("     - About to assign x[0] = qx->q[0] * qx->s[0]\n");
+
+
+    // float *x = ...;
+    int *xi = (int*)x;
+    xi[0] = qx->q[0];
+    uart_puts("     - Assigned xi[0] (int assignment)\n");
+
+    int test = qx->q[0];
+    uart_puts("     - Assigned int test\n");
+
+
     // Try float assignment
-    x[0] = qx->q[0] * qx->s[0];
+    x[0] = qx->q[0] //* qx->s[0];
     uart_puts("     - Assigned x[0] (float multiply)\n");
     // Try integer-only assignment as fallback
     x[1] = (float)qx->q[1];
