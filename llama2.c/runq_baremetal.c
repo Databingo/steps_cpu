@@ -72,6 +72,11 @@ int sample(Sampler* sampler, float* logits);
 // ----------------------------------------------------------------------------
 // Quantization functions
 void dequantize(QuantizedTensor *qx, float* x, int n) { 
+    if ((int)qx->s < (int)&g_arena[0] || (int)qx->s > (int)&g_arena[ARENA_SIZE]) {
+	    uart_puts("ERROR: qx->s is out of arena bounds!\n");
+	        while (1);
+    }
+
     uart_puts("   - Dequantizing token embeddings...\n"); // Step 1: Start of dequantize
     uart_puts("     - Entering unrolled loop...\n");    // Step 2: Entering main loop
     int i = 0;
