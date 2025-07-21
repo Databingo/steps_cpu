@@ -1,5 +1,6 @@
 #!/bin/sh
 qemu-system-riscv64 \
+    -cpu rv64gc \
     -machine virt \
     -nographic \
     -m 1024M \
