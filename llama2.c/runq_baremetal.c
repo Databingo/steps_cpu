@@ -1,6 +1,6 @@
 /*
  * Bare-metal INT8 Quantized Inference for Llama-2 Transformer model in pure C
- * Final version with stack overflow fix and real dequantization.
+ * Final version with stack overflow and tokenizer bugs fixed.
  */
 
 // --- BARE-METAL DEFINITIONS ---
@@ -24,7 +24,10 @@ int strcmp(const char*s1,const char*s2){while(*s1&&(*s1==*s2)){s1++;s2++;}return
 void itoa(int n,char*b){if(n==0){b[0]='0';b[1]='\0';return;}int i=0;int neg=0;if(n<0){neg=1;n=-n;}while(n!=0){b[i++]=(n%10)+'0';n/=10;}if(neg)b[i++]='-';int s=0,e=i-1;while(s<e){char t=b[s];b[s]=b[e];b[e]=t;s++;e--;}b[i]='\0';}
 
 // libm function declarations
-float sqrtf(float); float expf(float); float roundf(float); float fabsf(float);
+float sqrtf(float);
+float expf(float);
+float roundf(float);
+float fabsf(float);
 
 // ----------------------------------------------------------------------------
 // Globals and Data Structures
@@ -45,7 +48,6 @@ typedef struct {
     float *att; float *logits;
     float* key_cache; float* value_cache;
 } RunState;
-
 #define ARENA_SIZE 8000000
 static unsigned char g_arena[ARENA_SIZE];
 static size_t g_arena_offset = 0;
@@ -64,15 +66,15 @@ typedef struct {
 } Tokenizer;
 typedef struct { int vocab_size; float temperature; unsigned long long rng_state; } Sampler;
 
+// Function Prototypes
+void encode(Tokenizer* t, char *text, int8_t bos, int8_t eos, int *tokens, int *n_tokens);
+void simple_qsort(void* base, size_t nitems, size_t size, int (*compar)(const void*, const void*));
+char* decode(Tokenizer* t, int prev_token, int token);
+int sample(Sampler* sampler, float* logits);
+
 // ----------------------------------------------------------------------------
 // Quantization functions
-void dequantize(QuantizedTensor *qx, float* x, int n) {
-    for (int i = 0; i < n; i++) {
-        x[i] = qx->q[i] * qx->s[i / GS];
-        if ((i & 0xFFF) == 0xFFF) { uart_putc('.'); }
-    }
-    uart_puts("\n");
-}
+void dequantize(QuantizedTensor *qx, float* x, int n) { for (int i = 0; i < n; i++) { x[i] = qx->q[i] * qx->s[i / GS]; } }
 void quantize(QuantizedTensor *qx, float* x, int n) {
     int num_groups = n / GS;
     for (int group = 0; group < num_groups; group++) {
@@ -108,7 +110,6 @@ void build_transformer(Transformer *t) {
     w->rms_final_weight = (float*) weights_ptr; weights_ptr += p->dim * sizeof(float);
     w->q_tokens = init_qtensor(&weights_ptr, 1, p->vocab_size * p->dim);
     w->token_embedding_table = arena_alloc(p->vocab_size * p->dim * sizeof(float));
-    uart_puts("   - Dequantizing token embeddings...");
     dequantize(w->q_tokens, w->token_embedding_table, p->vocab_size * p->dim);
     w->wq = init_qtensor(&weights_ptr, p->n_layers, p->dim * (p->n_heads * head_size));
     w->wk = init_qtensor(&weights_ptr, p->n_layers, p->dim * (p->n_kv_heads * head_size));
@@ -185,13 +186,21 @@ void build_tokenizer(Tokenizer* t, int vocab_size) {
     memcpy(&t->max_token_length,tokenizer_data,sizeof(int));offset+=sizeof(int);
     for(int i=0;i<vocab_size;i++){memcpy(t->vocab_scores+i,tokenizer_data+offset,sizeof(float));offset+=sizeof(float);int len;memcpy(&len,tokenizer_data+offset,sizeof(int));offset+=sizeof(int);t->vocab[i]=(char*)arena_alloc(len+1);memcpy(t->vocab[i],tokenizer_data+offset,len);offset+=len;t->vocab[i][len]='\0';}
 }
-char* decode(Tokenizer* t, int prev, int token){char*p=t->vocab[token];if(prev==1&&p[0]==' '){p++;}if(p[0]=='<'&&p[1]=='0'&&p[2]=='x'){char b1=p[3]>='a'?(p[3]-'a'+10):(p[3]-'0');char b2=p[4]>='a'?(p[4]-'a'+10):(p[4]-'0');unsigned char byte=(b1<<4)|b2;p=(char*)t->byte_pieces+byte*2;}return p;}
+char* decode(Tokenizer* t, int prev, int token){
+    // --- BUG FIX: Check for invalid token id ---
+    if (token < 0 || token >= t->vocab_size) { return ""; }
+    char *p=t->vocab[token];if(prev==1&&p[0]==' '){p++;}if(p[0]=='<'&&p[1]=='0'&&p[2]=='x'){char b1=p[3]>='a'?(p[3]-'a'+10):(p[3]-'0');char b2=p[4]>='a'?(p[4]-'a'+10):(p[4]-'0');unsigned char byte=(b1<<4)|b2;p=(char*)t->byte_pieces+byte*2;}return p;
+}
 void safe_printf(char *p){if(p!=NULL&&p[0]!='\0')uart_puts(p);}
 int str_lookup(char*s,TokenIndex*v,int n){for(int i=0;i<n;i++){if(strcmp(s,v[i].str)==0)return v[i].id;}return-1;}
 void encode(Tokenizer*t,char*text,int8_t bos,int8_t eos,int*tokens,int*n){
     if(t->sorted_vocab==NULL){t->sorted_vocab=arena_alloc(t->vocab_size*sizeof(TokenIndex));for(int i=0;i<t->vocab_size;i++){t->sorted_vocab[i].str=t->vocab[i];t->sorted_vocab[i].id=i;}qsort(t->sorted_vocab,t->vocab_size,sizeof(TokenIndex),compare_tokens);}
     char* str_buffer=arena_alloc((t->max_token_length*2+3));*n=0;if(bos)tokens[(*n)++]=1;
-    if(text[0]!='\0'){int dummy=str_lookup(" ",t->sorted_vocab,t->vocab_size);if(dummy!=-1)tokens[(*n)++]=dummy;}
+    if(text[0]!='\0'){
+        // --- BUG FIX: Check if dummy prefix exists before adding ---
+        int dummy_prefix=str_lookup(" ",t->sorted_vocab,t->vocab_size);
+        if(dummy_prefix!=-1) tokens[(*n)++]=dummy_prefix;
+    }
     for(char*c=text;*c!='\0';c++){str_buffer[0]=*c;str_buffer[1]='\0';int id=str_lookup(str_buffer,t->sorted_vocab,t->vocab_size);if(id!=-1){tokens[(*n)++]=id;}else{tokens[(*n)++]=(unsigned char)str_buffer[0]+3;}}
     while(1){float best_score=-1e10;int best_id=-1;int best_idx=-1;for(int i=0;i<(*n-1);i++){char*s1=t->vocab[tokens[i]];char*s2=t->vocab[tokens[i+1]];int l1=strlen(s1),l2=strlen(s2);memcpy(str_buffer,s1,l1);memcpy(str_buffer+l1,s2,l2);str_buffer[l1+l2]='\0';int id=str_lookup(str_buffer,t->sorted_vocab,t->vocab_size);if(id!=-1&&t->vocab_scores[id]>best_score){best_score=t->vocab_scores[id];best_id=id;best_idx=i;}}if(best_idx==-1)break;tokens[best_idx]=best_id;for(int i=best_idx+1;i<(*n-1);i++){tokens[i]=tokens[i+1];}(*n)--;}
     if(eos)tokens[(*n)++]=2;
@@ -214,7 +223,7 @@ void generate(Transformer*t,Tokenizer*tok,Sampler*sampler,char*prompt,int steps)
     uart_puts("\n");
 }
 
-// --- CRITICAL FIX: Move the Transformer struct to be a static global ---
+// --- CRITICAL FIX: Move the large structs to be static globals ---
 static Transformer transformer;
 static Tokenizer tokenizer;
 static Sampler sampler;
