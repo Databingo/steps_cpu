@@ -309,11 +309,23 @@ void generate(Transformer*t,Tokenizer*tok,Sampler*sampler,char*prompt,int steps)
     uart_puts("\n");
 }
 
+// Enable FPU in machine mode
+void enable_fpu() {
+    asm volatile (
+        "csrr t0, mstatus\n"
+        "li t1, 0b01 << 13\n"   // Set FS field to Initial state
+        "or t0, t0, t1\n"
+        "csrw mstatus, t0\n"
+        "fssr x0\n"             // Clear FPU state
+    );
+}
+
 static Transformer transformer;
 static Tokenizer tokenizer;
 static Sampler sampler;
 
 int main() {
+    enable_fpu(); // Enable FPU before any float operation
     float temp=0.8f; int steps=100; char* prompt="Once upon a time"; unsigned long long seed=1337;
     uart_puts("Bare-metal INT8 Llama2.c for RISC-V\n--------------------------------\n");
     
