@@ -1,7 +1,7 @@
 /*
  * Bare-metal INT8 Quantized Llama-2 Chatbot in pure C
  * Final, simplified, interactive, and fully working version for qemu-riscv64.
- * Fixes both the memory leak and the repetitive token bug.
+ * Fixes both the memory allocation bug and the repetitive token bug.
  */
 
 // --- BARE-METAL DEFINITIONS ---
@@ -53,7 +53,7 @@ typedef struct {
     QuantizedTensor xq; QuantizedTensor hq;
     float* key_cache; float* value_cache;
 } RunState;
-#define ARENA_SIZE 128000000
+#define ARENA_SIZE 128000000 // 12MB for safety with 15M model
 static unsigned char g_arena[ARENA_SIZE];
 static size_t g_arena_offset = 0;
 void* arena_alloc(size_t size) {
@@ -101,9 +101,21 @@ QuantizedTensor* init_qtensor(unsigned char** ptr, int n, int size_each) {
 void build_transformer(Transformer *t) {
     unsigned char* model_ptr = stories15M_q80_bin;
     int header_size = 256;
-    memcpy(&t->config, model_ptr + 8, sizeof(Config));
-    uint8_t shared_classifier = *(uint8_t*)(model_ptr + 8 + sizeof(Config));
-    GS = *(int*)(model_ptr + 8 + sizeof(Config) + 1);
+    
+    // --- BUG FIX: Read header field-by-field to prevent padding issues ---
+    size_t offset = 8; // Skip magic and version
+    memcpy(&t->config.dim,        model_ptr + offset, sizeof(int32_t)); offset += sizeof(int32_t);
+    memcpy(&t->config.hidden_dim, model_ptr + offset, sizeof(int32_t)); offset += sizeof(int32_t);
+    memcpy(&t->config.n_layers,   model_ptr + offset, sizeof(int32_t)); offset += sizeof(int32_t);
+    memcpy(&t->config.n_heads,    model_ptr + offset, sizeof(int32_t)); offset += sizeof(int32_t);
+    memcpy(&t->config.n_kv_heads, model_ptr + offset, sizeof(int32_t)); offset += sizeof(int32_t);
+    memcpy(&t->config.vocab_size, model_ptr + offset, sizeof(int32_t)); offset += sizeof(int32_t);
+    memcpy(&t->config.seq_len,    model_ptr + offset, sizeof(int32_t)); offset += sizeof(int32_t);
+    
+    uint8_t shared_classifier;
+    memcpy(&shared_classifier, model_ptr + offset, sizeof(uint8_t)); offset += sizeof(uint8_t);
+    memcpy(&GS, model_ptr + offset, sizeof(int));
+
     unsigned char* weights_ptr = model_ptr + header_size;
     Config* p = &t->config; TransformerWeights* w = &t->weights;
     int head_size = p->dim / p->n_heads;
@@ -209,6 +221,10 @@ void generate(Transformer*t,Tokenizer*tok,Sampler*sampler,char*prompt,int steps)
     int num_prompt;int*prompt_tokens=arena_alloc((strlen(prompt)+3)*sizeof(int));
     encode(tok,prompt,1,0,prompt_tokens,&num_prompt);if(num_prompt<1){g_arena_offset=arena_checkpoint;return;}
     int token=(num_prompt>0)?prompt_tokens[0]:1, pos=0, next;
+    // --- BUG FIX: Clear KV Cache before generation ---
+    memset(t->state.key_cache, 0, t->config.n_layers * t->config.seq_len * ((t->config.dim * t->config.n_kv_heads) / t->config.n_heads) * sizeof(float));
+    memset(t->state.value_cache, 0, t->config.n_layers * t->config.seq_len * ((t->config.dim * t->config.n_kv_heads) / t->config.n_heads) * sizeof(float));
+    
     while(pos<steps){
         float*logits=forward(t,token,pos);
         if(pos<num_prompt-1){next=prompt_tokens[pos+1];}else{next=sample(sampler,logits);}
