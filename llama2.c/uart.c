@@ -27,7 +27,7 @@ void uart_puts(const char *s) {
 char uart_getc() {
     // Wait until a character is received
     while ((UART_LSR & 0x01) == 0);
-    return UART_RHR;
+    return UART_THR;
 }
 void uart_init() {
     // Basic initialization if needed by your UART
