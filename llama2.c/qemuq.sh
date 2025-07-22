@@ -7,6 +7,7 @@ qemu-system-riscv64 \
     -bios none \
     -icount shift=7,align=off,sleep=off \
     -kernel kernel_q80.bin \
+    -serial mon:stdio \
 #   -d in_asm,cpu
 
   
