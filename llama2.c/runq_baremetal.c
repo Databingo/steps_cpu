@@ -371,7 +371,7 @@ int main() {
     //uart_puts("\n--------------------------------\n--- DONE ---\n");
     ////while(1); // Halt
     //return 0;
-    enable_fpu(); // Enable FPU before any float operation
+    //enable_fpu(); // Enable FPU before any float operation
     float temp = 0.8f;
     int steps = 100;
     unsigned long long seed = 1337;

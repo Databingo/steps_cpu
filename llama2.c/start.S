@@ -122,47 +122,36 @@
 //    sret
 
 
-
-
-
 /*
  * start.S - Final, correct bare-metal entry point.
- * Includes M-Mode setup to configure PMP and drop to S-Mode.
+ * Includes M-Mode setup to enable the FPU, configure PMP,
+ * and then drop to S-Mode to run the C code.
  */
 .section .text.init
 .globl _entry // The new, real entry point for the linker
 
 _entry:
   # This code starts in M-Mode.
-  # Our first job is to configure Physical Memory Protection (PMP)
-  # to grant S-Mode access to all of memory. We will set up a single
-  # PMP entry (pmpaddr0) to cover the entire 64-bit address space
-  # with Read, Write, and Execute permissions.
 
-  # Set pmpaddr0 to cover all addresses using a NAPOT (Naturally Aligned Power-of-2) rule.
-  # Writing all 1s (-1) to pmpaddrX creates a rule that matches the entire address space.
+  # 1. Enable the FPU.
+  # Set the FS bits (14:13) in mstatus to 0b01 (Initial).
+  li t0, (1 << 13)
+  csrs mstatus, t0
+
+  # 2. Configure PMP to grant S-Mode access to all of memory.
+  # We will set up pmpaddr0 to cover the entire address space
+  # with Read, Write, and Execute permissions.
   li t0, -1
   csrw pmpaddr0, t0
-
-  # Configure pmpcfg0.
-  # Bits:
-  # 7: L (locked) = 0
-  # 6-5: A (address matching) = 0b11 (NAPOT)
-  # 4-3: Reserved
-  # 2: X (execute) = 1
-  # 1: W (write) = 1
-  # 0: R (read) = 1
-  # Total value is 0b00011111 = 0x1F
-  li t0, 0x1F
+  li t0, 0x1F # A=NAPOT, R=1, W=1, X=1
   csrw pmpcfg0, t0
 
-  # Now, prepare to drop from M-Mode to S-Mode.
-  # We want to jump to the `_start_s_mode` label below.
-  la t0, _start_s_mode
-  csrw mepc, t0 // Set Machine Exception Program Counter to our S-Mode entry.
+  # 3. Prepare to drop from M-Mode to S-Mode.
+  # We want to jump to the `s_mode_start` label below.
+  la t0, s_mode_start
+  csrw mepc, t0 // Set Machine Exception Program Counter.
 
-  # Set the previous privilege mode in mstatus to S-Mode (0b01).
-  # The MPP field is at bits 11-12.
+  # Set the previous privilege mode in mstatus to S-Mode (MPP=0b01).
   csrr t0, mstatus
   li t1, ~(3 << 11)   // Create a mask to clear the MPP bits
   and t0, t0, t1
@@ -170,19 +159,16 @@ _entry:
   or t0, t0, t1
   csrw mstatus, t0
 
-  # Return from M-Mode. This will:
-  # 1. Change the privilege level to the one in MPP (S-Mode).
-  # 2. Jump to the address in mepc.
+  # 4. Execute the privilege drop. This jumps to mepc in S-Mode.
   mret
 
-_start_s_mode:
-  # We are now running in S-Mode, with full memory access.
-  # This is the original startup code.
-
+s_mode_start:
+  # We are now running in S-Mode, with FPU enabled and full memory access.
+  
   # Initialize the stack pointer.
   la sp, __stack_top
 
-  # Jump to the C main function
+  # Jump to the C main function.
   call main
 
 # If main ever returns, hang in a tight loop.
