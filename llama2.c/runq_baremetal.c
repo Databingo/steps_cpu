@@ -35,7 +35,27 @@ void* align_ptr(void* p, size_t align) {
     }
     return p;
 }
-
+// Add this at the beginning of your code (after helpers)
+#define MAX_INPUT_LEN 256
+void read_line(char* buffer, int max_len) {
+    int i = 0;
+    while (i < max_len - 1) {
+        char c = uart_getc();
+        if (c == '\r' || c == '\n') { // Enter key
+            uart_puts("\n");
+            break;
+        } else if (c == 127 || c == '\b') { // Backspace
+            if (i > 0) {
+                i--;
+                uart_puts("\b \b"); // Erase character on screen
+            }
+        } else {
+            buffer[i++] = c;
+            uart_putc(c); // Echo character
+        }
+    }
+    buffer[i] = '\0';
+}
 // ----------------------------------------------------------------------------
 // Globals and Data Structures
 int GS = 0;
@@ -325,15 +345,45 @@ static Tokenizer tokenizer;
 static Sampler sampler;
 
 int main() {
+    //enable_fpu(); // Enable FPU before any float operation
+    //float temp=0.8f; int steps=100; char* prompt="Once upon a time"; unsigned long long seed=1337;
+    //uart_puts("Bare-metal INT8 Llama2.c for RISC-V\n--------------------------------\n");
+    //
+    //uart_puts("1. Building transformer...\n");
+    //build_transformer(&transformer);
+    //uart_puts("   - Transformer built.\n");
+
+    //if(steps<=0||steps>transformer.config.seq_len)steps=transformer.config.seq_len;
+    //
+    //uart_puts("2. Building tokenizer...\n");
+    //build_tokenizer(&tokenizer, transformer.config.vocab_size);
+    //uart_puts("   - Tokenizer built.\n");
+    //
+    //uart_puts("3. Building sampler...\n");
+    //build_sampler(&sampler, transformer.config.vocab_size, temp, seed);
+    //uart_puts("   - Sampler built.\n");
+
+    //uart_puts("4. Starting generation...\n--------------------------------\n");
+
+    //safe_printf(prompt);
+    //generate(&transformer,&tokenizer,&sampler,prompt,steps);
+
+    //uart_puts("\n--------------------------------\n--- DONE ---\n");
+    ////while(1); // Halt
+    //return 0;
     enable_fpu(); // Enable FPU before any float operation
-    float temp=0.8f; int steps=100; char* prompt="Once upon a time"; unsigned long long seed=1337;
+    float temp = 0.8f;
+    int steps = 100;
+    unsigned long long seed = 1337;
+    
     uart_puts("Bare-metal INT8 Llama2.c for RISC-V\n--------------------------------\n");
     
     uart_puts("1. Building transformer...\n");
     build_transformer(&transformer);
     uart_puts("   - Transformer built.\n");
-
-    if(steps<=0||steps>transformer.config.seq_len)steps=transformer.config.seq_len;
+    
+    if (steps <= 0 || steps > transformer.config.seq_len)
+        steps = transformer.config.seq_len;
     
     uart_puts("2. Building tokenizer...\n");
     build_tokenizer(&tokenizer, transformer.config.vocab_size);
@@ -343,12 +393,31 @@ int main() {
     build_sampler(&sampler, transformer.config.vocab_size, temp, seed);
     uart_puts("   - Sampler built.\n");
 
-    uart_puts("4. Starting generation...\n--------------------------------\n");
-    safe_printf(prompt);
-
-    generate(&transformer,&tokenizer,&sampler,prompt,steps);
+    // Interactive prompt loop
+    char input[MAX_INPUT_LEN];
+    while (1) {
+        uart_puts("\n--------------------------------\n");
+        uart_puts("Enter prompt (or 'exit' to quit):\n> ");
+        read_line(input, MAX_INPUT_LEN);
+        
+        // Check for exit command
+        if (strcmp(input, "exit") == 0) {
+            uart_puts("Exiting...\n");
+            break;
+        }
+        
+        // Skip empty input
+        if (strlen(input) == 0) {
+            uart_puts("Please enter a prompt\n");
+            continue;
+        }
+        
+        uart_puts("\nGenerating response...\n");
+        uart_puts("--------------------------------\n");
+        generate(&transformer, &tokenizer, &sampler, input, steps);
+    }
 
     uart_puts("\n--------------------------------\n--- DONE ---\n");
-    //while(1); // Halt
+    while (1); // Halt
     return 0;
 }

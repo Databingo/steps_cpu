@@ -1,6 +1,6 @@
 /* linker.ld - Improved version */
 OUTPUT_ARCH(riscv)
-ENTRY(_start)
+ENTRY(_entry)
 
 MEMORY {
   /* QEMU 'virt' machine has RAM at 0x80000000 */
