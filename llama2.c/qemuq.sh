@@ -10,5 +10,3 @@ qemu-system-riscv64 \
     -serial mon:stdio \
 #   -d in_asm,cpu
 
-  
-
