@@ -25,25 +25,25 @@ void itoa(int n,char*b){if(n==0){b[0]='0';b[1]='\0';return;}int i=0;int neg=0;if
 
 // --- NEW: Interactive Input Function ---
 // IMPORTANT: Make sure your uart.c has a uart_getc() function!
-void read_line(char* buffer, int max_len) {
-    int i = 0;
-    while (i < max_len - 1) {
-        char c = uart_getc();
-        if (c == '\r' || c == '\n') { // Enter key
-            uart_puts("\n");
-            break;
-        } else if (c == 127 || c == '\b') { // Backspace
-            if (i > 0) {
-                i--;
-                uart_puts("\b \b"); // Erase character on screen
-            }
-        } else {
-            buffer[i++] = c;
-            uart_putc(c); // Echo character
-        }
-    }
-    buffer[i] = '\0';
-}
+//void read_line(char* buffer, int max_len) {
+//    int i = 0;
+//    while (i < max_len - 1) {
+//        char c = uart_getc();
+//        if (c == '\r' || c == '\n') { // Enter key
+//            uart_puts("\n");
+//            break;
+//        } else if (c == 127 || c == '\b') { // Backspace
+//            if (i > 0) {
+//                i--;
+//                uart_puts("\b \b"); // Erase character on screen
+//            }
+//        } else {
+//            buffer[i++] = c;
+//            uart_putc(c); // Echo character
+//        }
+//    }
+//    buffer[i] = '\0';
+//}
 // libm function declarations
 float sqrtf(float); float expf(float); float roundf(float); float fabsf(float); float powf(float, float); float cosf(float); float sinf(float);
 
@@ -369,20 +369,20 @@ int main() {
     //uart_puts("4. Starting generation...\n--------------------------------\n");
     uart_puts("4. Initialization complete. Ready for intersction...\n--------------------------------\n");
     //-------
-    char prompt_buffer[256];
-    while(1) {
-        uart_puts("\nUser: ");
-        read_line(prompt_buffer, sizeof(prompt_buffer));
-        if (strlen(prompt_buffer) == 0) { continue; }
+    //char prompt_buffer[256];
+    //while(1) {
+    //    uart_puts("\nUser: ");
+    //    read_line(prompt_buffer, sizeof(prompt_buffer));
+    //    if (strlen(prompt_buffer) == 0) { continue; }
 
-        uart_puts("Assistant: ");
-        generate(&transformer, &tokenizer, &sampler, prompt_buffer, steps);
-    }
+    //    uart_puts("Assistant: ");
+    //    generate(&transformer, &tokenizer, &sampler, prompt_buffer, steps);
+    //}
     //-----
-    //safe_printf(prompt);
+    safe_printf(prompt);
 
-    //generate(&transformer,&tokenizer,&sampler,prompt,steps);
-    //uart_puts("\n--------------------------------\n--- DONE ---\n");
-    //while(1); // Halt
+    generate(&transformer,&tokenizer,&sampler,prompt,steps);
+    uart_puts("\n--------------------------------\n--- DONE ---\n");
+    while(1); // Halt
     return 0;
 }
