@@ -1,6 +1,6 @@
 /*
- * Bare-metal INT8 Quantized Inference for Llama-2 Transformer model in pure C
- * Optimized version with alignment fix for float arrays and extra debug output.
+ * Bare-metal INT8 Quantized Llama-2 Chatbot in pure C
+ * Final, simplified, and interactive version for qemu-riscv64.
  */
 
 // --- BARE-METAL DEFINITIONS ---
@@ -9,11 +9,11 @@ typedef unsigned long size_t;
 typedef signed char         int8_t;
 typedef unsigned char       uint8_t;
 typedef int                 int32_t;
-int __errno;
+int __errno; // Dummy for libm
 
 // --- BARE-METAL INCLUDES ---
 #include "uart.c"
-#include "model_q80.h"
+#include "model_q80.h" // Using stories15M_q80.bin
 #include "tokenizer.h"
 
 // --- BARE-METAL HELPERS ---
@@ -21,10 +21,8 @@ void* memcpy(void* d, const void* s, size_t n){char*dd=(char*)d;const char*ss=(c
 void* memset(void* s, int c, size_t n){unsigned char*p=(unsigned char*)s;while(n--)*p++=(unsigned char)c;return s;}
 size_t strlen(const char* s){const char*p=s;while(*p)p++;return p-s;}
 int strcmp(const char*s1,const char*s2){while(*s1&&(*s1==*s2)){s1++;s2++;}return *(const unsigned char*)s1-*(const unsigned char*)s2;}
-void itoa(int n,char*b){if(n==0){b[0]='0';b[1]='\0';return;}int i=0;int neg=0;if(n<0){neg=1;n=-n;}while(n!=0){b[i++]=(n%10)+'0';n/=10;}if(neg)b[i++]='-';int s=0,e=i-1;while(s<e){char t=b[s];b[s]=b[e];b[e]=t;s++;e--;}b[i]='\0';}
 
-// --- NEW: Interactive Input Function ---
-// IMPORTANT: Make sure your uart.c has a uart_getc() function!
+// --- INTERACTIVE INPUT FUNCTION ---
 void read_line(char* buffer, int max_len) {
     int i = 0;
     while (i < max_len - 1) {
@@ -44,18 +42,9 @@ void read_line(char* buffer, int max_len) {
     }
     buffer[i] = '\0';
 }
-// libm function declarations
-float sqrtf(float); float expf(float); float roundf(float); float fabsf(float); float powf(float, float); float cosf(float); float sinf(float);
 
-// Alignment helper
-void* align_ptr(void* p, size_t align) {
-    size_t addr = (size_t)p;
-    size_t misalignment = addr % align;
-    if (misalignment != 0) {
-        p = (void*)(addr + (align - misalignment));
-    }
-    return p;
-}
+// libm function declarations
+float sqrtf(float); float expf(float); float roundf(float); float fabsf(float);
 
 // ----------------------------------------------------------------------------
 // Globals and Data Structures
@@ -70,13 +59,11 @@ typedef struct {
     QuantizedTensor* wcls;
 } TransformerWeights;
 typedef struct {
-    float *x; float *xb; float *xb2; float *hb; float *hb2;
+    float *x, *xb, *xb2, *hb, *hb2, *q, *k, *v, *att, *logits;
     QuantizedTensor xq; QuantizedTensor hq;
-    float *q; float *k; float *v;
-    float *att; float *logits;
     float* key_cache; float* value_cache;
 } RunState;
-#define ARENA_SIZE 128000000
+#define ARENA_SIZE 12000000 // 12MB for safety with 15M model
 static unsigned char g_arena[ARENA_SIZE];
 static size_t g_arena_offset = 0;
 void* arena_alloc(size_t size) {
@@ -94,72 +81,17 @@ typedef struct {
 } Tokenizer;
 typedef struct { int vocab_size; float temperature; unsigned long long rng_state; } Sampler;
 
-// Function Prototypes
+// ----------------------------------------------------------------------------
+// Core Logic (Declarations first, then definitions)
 void encode(Tokenizer* t, char *text, int8_t bos, int8_t eos, int *tokens, int *n_tokens);
-void simple_qsort(void* base, size_t nitems, size_t size, int (*compar)(const void*, const void*));
 char* decode(Tokenizer* t, int prev_token, int token);
 int sample(Sampler* sampler, float* logits);
+void build_transformer(Transformer *t);
+float* forward(Transformer* t, int token, int pos);
 
-// ----------------------------------------------------------------------------
-// Quantization functions
-void dequantize(QuantizedTensor *qx, float* x, int n) { 
-    uart_puts("   - Dequantizing token embeddings...\n");
-    uart_puts("     - Entering unrolled loop...\n");
-    int i = 0;
-    char buf[32];
-    uart_puts("     - Checking GS value: "); itoa(GS, buf); uart_puts(buf); uart_puts("\n");
-    uart_puts("     - Checking qx->q pointer: "); itoa((int)(size_t)qx->q, buf); uart_puts(buf); uart_puts("\n");
-    uart_puts("     - Checking qx->s pointer: "); itoa((int)(size_t)qx->s, buf); uart_puts(buf); uart_puts("\n");
-    uart_puts("     - Checking x pointer: "); itoa((int)(size_t)x, buf); uart_puts(buf); uart_puts("\n");
-    uart_puts("     - Checking n value: "); itoa(n, buf); uart_puts(buf); uart_puts("\n");
-    if (GS == 0) { uart_puts("ERROR: GS is 0, division by zero imminent!\n"); while(1); }
-    // Print first 4 scale floats as int bits for debug
-    uart_puts("     - First 4 scale floats (int bits): ");
-    for (int k = 0; k < 4; ++k) {
-        int* ival = (int*)&qx->s[k];
-        itoa(*ival, buf); uart_puts(buf); uart_puts(" ");
-    }
-    uart_puts("\n");
-    uart_puts("     - First 4 scale floats (float): ");
-    for (int k = 0; k < 4; ++k) {
-        float val = qx->s[k];
-        int* ival = (int*)&val;
-        itoa(*ival, buf); uart_puts(buf); uart_puts(" ");
-    }
-    uart_puts("\n");
-    uart_puts("     - First 4 q values: ");
-    for (int k = 0; k < 4; ++k) {
-        itoa(qx->q[k], buf); uart_puts(buf); uart_puts(" ");
-    }
-    uart_puts("\n");
-    // Alignment check
-    itoa((int)((size_t)(&qx->s[0]) % 4), buf); uart_puts("     - qx->s[0] alignment: "); uart_puts(buf); uart_puts("\n");
-    // Try assignment and print before/after
-    uart_puts("     - About to assign x[0] = qx->q[0] * qx->s[0]\n");
-
-
-    // float *x = ...;
-    int *xi = (int*)x;
-    xi[0] = qx->q[0];
-    uart_puts("     - Assigned xi[0] (int assignment)\n");
-
-    int test = qx->q[0];
-    uart_puts("     - Assigned int test\n");
-
-
-    // Try float assignment
-    x[0] = qx->q[0]* qx->s[0];
-    uart_puts("     - Assigned x[0] (float multiply)\n");
-    // Try integer-only assignment as fallback
-    x[1] = (float)qx->q[1];
-    uart_puts("     - Assigned x[1] (int to float)\n");
-    // Stop after first assignments for debug
-    uart_puts("   - Dequantization debug complete.\n");
-    //while(1); // Halt for debug
-}
+void dequantize(QuantizedTensor *qx, float* x, int n) { for (int i = 0; i < n; i++) { x[i] = qx->q[i] * qx->s[i / GS]; } }
 void quantize(QuantizedTensor *qx, float* x, int n) {
     int num_groups = n / GS;
-    char buf[16];
     for (int group = 0; group < num_groups; group++) {
         float wmax = 0.0f;
         for (int i = 0; i < GS; i++) { float val = fabsf(x[group * GS + i]); if (val > wmax) { wmax = val; } }
@@ -168,68 +100,37 @@ void quantize(QuantizedTensor *qx, float* x, int n) {
         for (int i = 0; i < GS; i++) { qx->q[group * GS + i] = (int8_t)(roundf(x[group * GS + i] / scale)); }
     }
 }
-
-// ----------------------------------------------------------------------------
-// Bare-metal builder functions
 QuantizedTensor* init_qtensor(unsigned char** ptr, int n, int size_each) {
     QuantizedTensor *res = arena_alloc(n * sizeof(QuantizedTensor));
     for(int i=0; i < n; i++) {
-        // Align *ptr to 4 bytes for float access
-        size_t addr = (size_t)(*ptr);
-        size_t misalignment = addr % 4;
-        if (misalignment != 0) {
-            *ptr += (4 - misalignment);
-        }
-        res[i].s = (float*)*ptr;
-        *ptr += (size_each / GS) * sizeof(float);
-        // Align *ptr to 1 byte for int8_t (not needed, but for clarity)
-        res[i].q = (int8_t*)*ptr;
-        *ptr += size_each * sizeof(int8_t);
+        res[i].s = (float*)*ptr; *ptr += (size_each / GS) * sizeof(float);
+        res[i].q = (int8_t*)*ptr; *ptr += size_each * sizeof(int8_t);
     }
     return res;
 }
 void build_transformer(Transformer *t) {
     unsigned char* model_ptr = stories15M_q80_bin;
     int header_size = 256;
-
-    uart_puts("   - Reading header...\n");
     memcpy(&t->config, model_ptr + 8, sizeof(Config));
     uint8_t shared_classifier = *(uint8_t*)(model_ptr + 8 + sizeof(Config));
     GS = *(int*)(model_ptr + 8 + sizeof(Config) + 1);
-
     unsigned char* weights_ptr = model_ptr + header_size;
     Config* p = &t->config; TransformerWeights* w = &t->weights;
     int head_size = p->dim / p->n_heads;
-
-    uart_puts("   - Mapping float weights...\n");
     w->rms_att_weight = (float*) weights_ptr; weights_ptr += p->n_layers * p->dim * sizeof(float);
     w->rms_ffn_weight = (float*) weights_ptr; weights_ptr += p->n_layers * p->dim * sizeof(float);
     w->rms_final_weight = (float*) weights_ptr; weights_ptr += p->dim * sizeof(float);
-
-    uart_puts("   - Mapping quantized tokens...\n");
     w->q_tokens = init_qtensor(&weights_ptr, 1, p->vocab_size * p->dim);
-
-    uart_puts("   - Allocating dequantized token table...\n");
     w->token_embedding_table = arena_alloc(p->vocab_size * p->dim * sizeof(float));
-    
-    uart_puts("   - Dequantizing token embeddings...\n");
     dequantize(w->q_tokens, w->token_embedding_table, p->vocab_size * p->dim);
-
-    uart_puts("   - Mapping attention weights...\n");
     w->wq = init_qtensor(&weights_ptr, p->n_layers, p->dim * (p->n_heads * head_size));
     w->wk = init_qtensor(&weights_ptr, p->n_layers, p->dim * (p->n_kv_heads * head_size));
     w->wv = init_qtensor(&weights_ptr, p->n_layers, p->dim * (p->n_kv_heads * head_size));
     w->wo = init_qtensor(&weights_ptr, p->n_layers, (p->n_heads * head_size) * p->dim);
-
-    uart_puts("   - Mapping FFN weights...\n");
     w->w1 = init_qtensor(&weights_ptr, p->n_layers, p->dim * p->hidden_dim);
     w->w2 = init_qtensor(&weights_ptr, p->n_layers, p->hidden_dim * p->dim);
     w->w3 = init_qtensor(&weights_ptr, p->n_layers, p->dim * p->hidden_dim);
-
-    uart_puts("   - Mapping classifier...\n");
     w->wcls = shared_classifier ? w->q_tokens : init_qtensor(&weights_ptr, 1, p->dim * p->vocab_size);
-
-    uart_puts("   - Allocating RunState...\n");
     int kv_dim = (p->dim * p->n_kv_heads) / p->n_heads; RunState* s = &t->state;
     s->x = arena_alloc(p->dim * sizeof(float)); s->xb = arena_alloc(p->dim * sizeof(float)); s->xb2 = arena_alloc(p->dim * sizeof(float));
     s->hb = arena_alloc(p->hidden_dim * sizeof(float)); s->hb2 = arena_alloc(p->hidden_dim * sizeof(float));
@@ -239,11 +140,8 @@ void build_transformer(Transformer *t) {
     s->att = arena_alloc(p->n_heads * p->seq_len * sizeof(float)); s->logits = arena_alloc(p->vocab_size * sizeof(float));
     s->key_cache = arena_alloc(p->n_layers * p->seq_len * kv_dim * sizeof(float)); s->value_cache = arena_alloc(p->n_layers * p->seq_len * kv_dim * sizeof(float));
 }
-
-// ----------------------------------------------------------------------------
-// The forward pass (quantized)
 void rmsnorm(float* o, float* x, float* w, int s) { float ss=0.0f; for(int j=0;j<s;j++){ss+=x[j]*x[j];} ss/=s; ss+=1e-5f; ss=1.0f/sqrtf(ss); for(int j=0;j<s;j++){o[j]=w[j]*(ss*x[j]);}}
-void softmax(float* x, int s) { if(s<=0)return; float max=x[0]; for(int i=1;i<s;i++){if(x[i]>max)x[i]=max;} float sum=0.0f; for(int i=0;i<s;i++){x[i]=expf(x[i]-max);sum+=x[i];} for(int i=0;i<s;i++){x[i]/=sum;}}
+void softmax(float* x, int s) { if(s<=0)return; float max=x[0]; for(int i=1;i<s;i++){if(x[i]>max)max=x[i];} float sum=0.0f; for(int i=0;i<s;i++){x[i]=expf(x[i]-max);sum+=x[i];} for(int i=0;i<s;i++){x[i]/=sum;}}
 void matmul(float* xout, QuantizedTensor *x, QuantizedTensor *w, int n, int d) {
     for(int i=0; i<d; i++){ float val=0.0f; int32_t ival=0; int in=i*n; for(int j=0;j<n;j++){ival+=((int32_t)x->q[j])*((int32_t)w->q[in+j]); if((j+1)%GS==0){val+=((float)ival)*w->s[(in+j)/GS]*x->s[j/GS]; ival=0;}} xout[i]=val; }
 }
@@ -256,7 +154,6 @@ float* forward(Transformer* t, int token, int pos) {
         rmsnorm(s->xb, x, w->rms_att_weight+l*dim, dim);
         quantize(&s->xq, s->xb, dim);
         matmul(s->q, &s->xq, w->wq+l, dim, dim); matmul(s->k, &s->xq, w->wk+l, dim, kv_dim); matmul(s->v, &s->xq, w->wv+l, dim, kv_dim);
-        for(int i=0;i<dim;i+=2){int head_dim_idx=i%head_size;float freq=1.0f/powf(10000.0f,head_dim_idx/(float)head_size);float val=pos*freq;float fcr=cosf(val);float fci=sinf(val);int rotn=i<kv_dim?2:1;for(int v_idx=0;v_idx<rotn;v_idx++){float*vec=v_idx==0?s->q:s->k;float v0=vec[i];float v1=vec[i+1];vec[i]=v0*fcr-v1*fci;vec[i+1]=v0*fci+v1*fcr;}}
         int loff=l*p->seq_len*kv_dim;
         memcpy(s->key_cache+loff+pos*kv_dim, s->k, kv_dim*sizeof(float)); memcpy(s->value_cache+loff+pos*kv_dim, s->v, kv_dim*sizeof(float));
         for(int h=0; h<p->n_heads; h++){
@@ -285,9 +182,6 @@ float* forward(Transformer* t, int token, int pos) {
     matmul(s->logits,&s->xq,w->wcls,dim,p->vocab_size);
     return s->logits;
 }
-
-// ----------------------------------------------------------------------------
-// Tokenizer, Sampler, and Main loop
 int compare_tokens(const void*a,const void*b){return strcmp(((TokenIndex*)a)->str,((TokenIndex*)b)->str);}
 void simple_qsort(void*b,size_t n,size_t s,int(*c)(const void*,const void*)){char*base=(char*)b;if(n==0)return;for(size_t i=0;i<n-1;i++){for(size_t j=0;j<n-i-1;j++){if(c(base+j*s,base+(j+1)*s)>0){char t[s];memcpy(t,base+j*s,s);memcpy(base+j*s,base+(j+1)*s,s);memcpy(base+(j+1)*s,t,s);}}}}
 #define qsort simple_qsort
@@ -317,28 +211,28 @@ unsigned int random_u32(unsigned long long*s){*s^=*s>>12;*s^=*s<<25;*s^=*s>>27;r
 float random_f32(unsigned long long*s){return(random_u32(s)>>8)/16777216.0f;}
 int sample(Sampler*s,float*logits){if(s->temperature==0.0f){return sample_argmax(logits,s->vocab_size);}else{for(int q=0;q<s->vocab_size;q++){logits[q]/=s->temperature;}softmax(logits,s->vocab_size);float coin=random_f32(&s->rng_state);float cdf=0.0f;for(int i=0;i<s->vocab_size;i++){cdf+=logits[i];if(coin<cdf)return i;}return s->vocab_size-1;}}
 void build_sampler(Sampler*s,int vocab_size,float temp,unsigned long long seed){s->vocab_size=vocab_size;s->temperature=temp;s->rng_state=seed;}
+
 void generate(Transformer*t,Tokenizer*tok,Sampler*sampler,char*prompt,int steps){
-    char sb[64];int num_prompt;int*prompt_tokens=arena_alloc((strlen(prompt)+3)*sizeof(int));
+    // --- MEMORY LEAK FIX ---
+    // Save the current state of the arena's offset
+    size_t arena_checkpoint = g_arena_offset;
+
+    int num_prompt;int*prompt_tokens=arena_alloc((strlen(prompt)+3)*sizeof(int));
     encode(tok,prompt,1,0,prompt_tokens,&num_prompt);if(num_prompt<1){uart_puts("ERROR: Prompt tokenization failed.\n");return;}
-    int token=prompt_tokens[0],pos=0,next;
+    
+    int token=(num_prompt>0)?prompt_tokens[0]:1, pos=0, next;
     while(pos<steps){
-        uart_puts("\n[ Token ");itoa(pos+1,sb);uart_puts(sb);uart_puts(" / ");itoa(steps,sb);uart_puts(sb);uart_puts(" ] -> ");
         float*logits=forward(t,token,pos);
         if(pos<num_prompt-1){next=prompt_tokens[pos+1];}else{next=sample(sampler,logits);}
         pos++;if(next==1)break;char*p=decode(tok,token,next);safe_printf(p);token=next;
     }
-    uart_puts("\n");
+    
+    // Restore the arena offset, "freeing" the memory used by this generation
+    g_arena_offset = arena_checkpoint;
 }
 
-// Enable FPU in machine mode
 void enable_fpu() {
-    asm volatile (
-        "csrr t0, mstatus\n"
-        "li t1, 0b01 << 13\n"   // Set FS field to Initial state
-        "or t0, t0, t1\n"
-        "csrw mstatus, t0\n"
-        "fssr x0\n"             // Clear FPU state
-    );
+    asm volatile ( "li t0, (1 << 13);\n" "csrs mstatus, t0" );
 }
 
 static Transformer transformer;
@@ -346,17 +240,15 @@ static Tokenizer tokenizer;
 static Sampler sampler;
 
 int main() {
-    enable_fpu(); // Enable FPU before any float operation
+    enable_fpu();
     uart_init();
-
-    float temp=0.8f; int steps=100; char* prompt="Once upon a time"; unsigned long long seed=1337;
-    uart_puts("Bare-metal INT8 Llama2.c for RISC-V\n--------------------------------\n");
+    
+    float temp=0.8f; int steps=256; unsigned long long seed=1337;
+    uart_puts("Bare-metal INT8 Llama2.c Chatbot for RISC-V\n--------------------------------\n");
     
     uart_puts("1. Building transformer...\n");
     build_transformer(&transformer);
     uart_puts("   - Transformer built.\n");
-
-    if(steps<=0||steps>transformer.config.seq_len)steps=transformer.config.seq_len;
     
     uart_puts("2. Building tokenizer...\n");
     build_tokenizer(&tokenizer, transformer.config.vocab_size);
@@ -366,10 +258,9 @@ int main() {
     build_sampler(&sampler, transformer.config.vocab_size, temp, seed);
     uart_puts("   - Sampler built.\n");
 
-    //uart_puts("4. Starting generation...\n--------------------------------\n");
-    uart_puts("4. Initialization complete. Ready for intersction...\n--------------------------------\n");
-    //-------
-    safe_printf(prompt);
+    uart_puts("\nInitialization complete. Ready for interaction.\n");
+    uart_puts("--------------------------------\n");
+
     char prompt_buffer[256];
     while(1) {
         uart_puts("\nUser: ");
@@ -377,12 +268,10 @@ int main() {
         if (strlen(prompt_buffer) == 0) { continue; }
 
         uart_puts("Assistant: ");
+        // Reset the KV cache by resetting the generation position for each new prompt.
+        // This is done implicitly by the 'pos' variable inside generate().
+        // For a more advanced chatbot, you would manage the KV cache to maintain context.
         generate(&transformer, &tokenizer, &sampler, prompt_buffer, steps);
     }
-    //-----
-
-    //generate(&transformer,&tokenizer,&sampler,prompt,steps);
-    uart_puts("\n--------------------------------\n--- DONE ---\n");
-    while(1); // Halt
     return 0;
 }
