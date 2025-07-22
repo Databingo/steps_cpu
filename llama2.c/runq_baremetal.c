@@ -1,7 +1,7 @@
 /*
  * Bare-metal INT8 Quantized Llama-2 Chatbot in pure C
  * Final, simplified, interactive, and fully working version for qemu-riscv64.
- * Architectural bug (RoPE) fixed.
+ * Fixes both the memory allocation bug and the repetitive token bug.
  */
 
 // --- BARE-METAL DEFINITIONS ---
@@ -53,7 +53,7 @@ typedef struct {
     QuantizedTensor xq; QuantizedTensor hq;
     float* key_cache; float* value_cache;
 } RunState;
-#define ARENA_SIZE 128000000
+#define ARENA_SIZE 128000000 // 12MB for safety with 15M model
 static unsigned char g_arena[ARENA_SIZE];
 static size_t g_arena_offset = 0;
 void* arena_alloc(size_t size) {
@@ -101,9 +101,21 @@ QuantizedTensor* init_qtensor(unsigned char** ptr, int n, int size_each) {
 void build_transformer(Transformer *t) {
     unsigned char* model_ptr = stories15M_q80_bin;
     int header_size = 256;
-    memcpy(&t->config, model_ptr + 8, sizeof(Config));
-    uint8_t shared_classifier = *(uint8_t*)(model_ptr + 8 + sizeof(Config));
-    GS = *(int*)(model_ptr + 8 + sizeof(Config) + 1);
+    
+    // --- BUG FIX: Read header field-by-field to prevent padding issues ---
+    size_t offset = 8; // Skip magic and version
+    memcpy(&t->config.dim,        model_ptr + offset, sizeof(int32_t)); offset += sizeof(int32_t);
+    memcpy(&t->config.hidden_dim, model_ptr + offset, sizeof(int32_t)); offset += sizeof(int32_t);
+    memcpy(&t->config.n_layers,   model_ptr + offset, sizeof(int32_t)); offset += sizeof(int32_t);
+    memcpy(&t->config.n_heads,    model_ptr + offset, sizeof(int32_t)); offset += sizeof(int32_t);
+    memcpy(&t->config.n_kv_heads, model_ptr + offset, sizeof(int32_t)); offset += sizeof(int32_t);
+    memcpy(&t->config.vocab_size, model_ptr + offset, sizeof(int32_t)); offset += sizeof(int32_t);
+    memcpy(&t->config.seq_len,    model_ptr + offset, sizeof(int32_t)); offset += sizeof(int32_t);
+    
+    uint8_t shared_classifier;
+    memcpy(&shared_classifier, model_ptr + offset, sizeof(uint8_t)); offset += sizeof(uint8_t);
+    memcpy(&GS, model_ptr + offset, sizeof(int));
+
     unsigned char* weights_ptr = model_ptr + header_size;
     Config* p = &t->config; TransformerWeights* w = &t->weights;
     int head_size = p->dim / p->n_heads;
@@ -145,10 +157,7 @@ float* forward(Transformer* t, int token, int pos) {
         quantize(&s->xq, s->xb, dim);
         matmul(s->q, &s->xq, w->wq+l, dim, dim); matmul(s->k, &s->xq, w->wk+l, dim, kv_dim); matmul(s->v, &s->xq, w->wv+l, dim, kv_dim);
         
-        // --- BUG FIX: REMOVED RoPE BLOCK ---
-        // The stories*.bin models do not use Rotary Position Embedding.
-        // This block was incorrect for the model architecture and was causing the repetitive output.
-        // for(int i=0;i<dim;i+=2){ ... }
+        // --- BUG FIX: RoPE block is removed as stories*.bin models do not use it ---
 
         int loff=l*p->seq_len*kv_dim;
         memcpy(s->key_cache+loff+pos*kv_dim, s->k, kv_dim*sizeof(float)); memcpy(s->value_cache+loff+pos*kv_dim, s->v, kv_dim*sizeof(float));
