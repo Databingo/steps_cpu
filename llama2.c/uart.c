@@ -29,6 +29,7 @@ char uart_getc() {
     while ((UART_LSR & 0x01) == 0);
     return UART_THR;
 }
+
 void uart_init() {
     // Basic initialization if needed by your UART
 }
