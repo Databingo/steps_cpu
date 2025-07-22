@@ -20,3 +20,17 @@ void uart_puts(const char *s) {
         uart_putc(*s++);
     }
 }
+
+
+// Add these to uart.c
+#define UART_RHR *(volatile unsigned char *)(UART_BASE + 0x00) // Receive
+#define UART_LSR *(volatile unsigned char *)(UART_BASE + 0x05) // Line Status
+
+char uart_getc() {
+    // Wait until a character is received
+    while ((UART_LSR & 0x01) == 0);
+    return UART_RHR;
+}
+void uart_init() {
+    // Basic initialization if needed by your UART
+}
