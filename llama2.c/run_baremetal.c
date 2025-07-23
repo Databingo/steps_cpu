@@ -3,7 +3,8 @@
  * Based on run.c from karpathy/llama2.c, adapted for RISC-V bare-metal
  * Uses FP32 weights to avoid quantization issues (e.g., zero-scale in matmul)
  * Includes UART I/O, static memory arena, and embedded model/tokenizer data
- * Fixed uint32_t definition for bare-metal compatibility
+ * Fixed uint32_t definition and arena_alloc typo
+ * Added build_transformer prototype
  */
 
 // --- BARE-METAL DEFINITIONS ---
@@ -12,7 +13,7 @@ typedef unsigned long size_t;
 typedef signed char   int8_t;
 typedef unsigned char uint8_t;
 typedef int           int32_t;
-typedef unsigned int  uint32_t; // Added for model header validation
+typedef unsigned int  uint32_t; // For model header validation
 int __errno;
 
 // --- BARE-METAL INCLUDES ---
@@ -140,7 +141,6 @@ static size_t g_arena_offset = 0;
 void* arena_alloc(size_t size) {
     size = (size + 15) & ~15; // Align to 16 bytes
     if (g_arena_offset + size > ARENA_SIZE) {
-       e
         char buf[32];
         uart_puts("ERROR: Arena out of memory! Offset: ");
         itoa(g_arena_offset, buf); uart_puts(buf);
@@ -180,6 +180,7 @@ typedef struct {
 } Sampler;
 
 // Function Prototypes
+void build_transformer(Transformer* t); // Added prototype
 void encode(Tokenizer* t, char *text, int8_t bos, int8_t eos, int *tokens, int *n_tokens);
 void simple_qsort(void* base, size_t nitems, size_t size, int (*compar)(const void*, const void*));
 char* decode(Tokenizer* t, int prev_token, int token);
@@ -664,6 +665,105 @@ void generate(Transformer* t, Tokenizer* tok, Sampler* sampler, char* prompt, in
         uart_puts(" / "); itoa(steps, buf); uart_puts(buf); uart_puts(" ]\n");
     }
     uart_puts("\n");
+}
+
+void build_transformer(Transformer *t) {
+    char buf[32];
+    uart_puts("   - Starting build_transformer...\n");
+    unsigned char* model_ptr = stories15M_bin;
+    if (model_ptr == NULL) {
+        uart_puts("ERROR: Model data pointer is NULL!\n");
+        while(1);
+    }
+    // Debug: Print first 8 bytes of model data
+    uart_puts("     - Model data first 8 bytes: ");
+    for (int i = 0; i < 8; i++) {
+        itoa(model_ptr[i], buf); uart_puts(buf); uart_puts(" ");
+    }
+    uart_puts("\n");
+
+    int header_size = 256;
+    // Validate header
+    uint32_t magic = *(uint32_t*)model_ptr;
+    if (magic != 0x67676d66 && magic != 0x67676d6c) { // 'ggmf' or 'ggml'
+        uart_puts("ERROR: Invalid model magic number: "); itoa(magic, buf); uart_puts(buf); uart_puts("\n");
+        while(1);
+    }
+
+    uart_puts("   - Reading header...\n");
+    memcpy(&t->config, model_ptr + 8, sizeof(Config));
+    uint8_t shared_classifier = *(uint8_t*)(model_ptr + 8 + sizeof(Config));
+    uart_puts("     - Config: dim="); itoa(t->config.dim, buf); uart_puts(buf);
+    uart_puts(" hidden_dim="); itoa(t->config.hidden_dim, buf); uart_puts(buf);
+    uart_puts(" n_layers="); itoa(t->config.n_layers, buf); uart_puts(buf);
+    uart_puts(" vocab_size="); itoa(t->config.vocab_size, buf); uart_puts(buf);
+    uart_puts(" seq_len="); itoa(t->config.seq_len, buf); uart_puts(buf); uart_puts("\n");
+
+    // Validate config
+    if (t->config.dim <= 0 || t->config.vocab_size <= 0 || t->config.n_layers <= 0) {
+        uart_puts("ERROR: Invalid config: dim="); itoa(t->config.dim, buf); uart_puts(buf);
+        uart_puts(" vocab_size="); itoa(t->config.vocab_size, buf); uart_puts(buf);
+        uart_puts(" n_layers="); itoa(t->config.n_layers, buf); uart_puts(buf); uart_puts("\n");
+        while(1);
+    }
+
+    unsigned char* weights_ptr = model_ptr + header_size;
+    Config* p = &t->config;
+    TransformerWeights* w = &t->weights;
+    int head_size = p->dim / p->n_heads;
+    int kv_dim = (p->dim * p->n_kv_heads) / p->n_heads;
+
+    uart_puts("   - Mapping weights...\n");
+    w->token_embedding_table = (float*)weights_ptr;
+    weights_ptr += p->vocab_size * p->dim * sizeof(float);
+    w->rms_att_weight = (float*)weights_ptr;
+    weights_ptr += p->n_layers * p->dim * sizeof(float);
+    w->wq = (float*)weights_ptr;
+    weights_ptr += p->n_layers * p->dim * (p->n_heads * head_size) * sizeof(float);
+    w->wk = (float*)weights_ptr;
+    weights_ptr += p->n_layers * p->dim * (p->n_kv_heads * head_size) * sizeof(float);
+    w->wv = (float*)weights_ptr;
+    weights_ptr += p->n_layers * p->dim * (p->n_kv_heads * head_size) * sizeof(float);
+    w->wo = (float*)weights_ptr;
+    weights_ptr += p->n_layers * (p->n_heads * head_size) * p->dim * sizeof(float);
+    w->rms_ffn_weight = (float*)weights_ptr;
+    weights_ptr += p->n_layers * p->dim * sizeof(float);
+    w->w1 = (float*)weights_ptr;
+    weights_ptr += p->n_layers * p->dim * p->hidden_dim * sizeof(float);
+    w->w2 = (float*)weights_ptr;
+    weights_ptr += p->n_layers * p->hidden_dim * p->dim * sizeof(float);
+    w->w3 = (float*)weights_ptr;
+    weights_ptr += p->n_layers * p->dim * p->hidden_dim * sizeof(float);
+    w->rms_final_weight = (float*)weights_ptr;
+    weights_ptr += p->dim * sizeof(float);
+    w->wcls = shared_classifier ? w->token_embedding_table : (float*)weights_ptr;
+    weights_ptr += shared_classifier ? 0 : p->dim * p->vocab_size * sizeof(float);
+
+    // Debug: Print first few weight values
+    uart_puts("     - token_embedding_table[0:3]: ");
+    for (int i = 0; i < 4 && i < p->vocab_size * p->dim; i++) {
+        int* fval = (int*)&w->token_embedding_table[i];
+        itoa(*fval, buf); uart_puts(buf); uart_puts(" ");
+    }
+    uart_puts("\n");
+
+    uart_puts("   - Allocating RunState...\n");
+    RunState* s = &t->state;
+    s->x = arena_alloc(p->dim * sizeof(float));
+    s->xb = arena_alloc(p->dim * sizeof(float));
+    s->xb2 = arena_alloc(p->dim * sizeof(float));
+    s->hb = arena_alloc(p->hidden_dim * sizeof(float));
+    s->hb2 = arena_alloc(p->hidden_dim * sizeof(float));
+    s->q = arena_alloc(p->dim * sizeof(float));
+    s->k = arena_alloc(kv_dim * sizeof(float));
+    s->v = arena_alloc(kv_dim * sizeof(float));
+    s->att = arena_alloc(p->n_heads * p->seq_len * sizeof(float));
+    s->logits = arena_alloc(p->vocab_size * sizeof(float));
+    s->key_cache = arena_alloc(p->n_layers * p->seq_len * kv_dim * sizeof(float));
+    s->value_cache = arena_alloc(p->n_layers * p->seq_len * kv_dim * sizeof(float));
+
+    uart_puts("   - build_transformer complete. Arena used: ");
+    itoa(g_arena_offset, buf); uart_puts(buf); uart_puts(" / "); itoa(ARENA_SIZE, buf); uart_puts(buf); uart_puts("\n");
 }
 
 // Enable FPU in machine mode
