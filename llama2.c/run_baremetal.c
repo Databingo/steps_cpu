@@ -134,7 +134,7 @@ typedef struct {
     float *value_cache;
 } RunState;
 
-#define ARENA_SIZE 128000000
+#define ARENA_SIZE 256000000
 static unsigned char g_arena[ARENA_SIZE];
 static size_t g_arena_offset = 0;
 
