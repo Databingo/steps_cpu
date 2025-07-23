@@ -685,7 +685,7 @@ void build_transformer(Transformer *t) {
     int header_size = 256;
     // Validate header
     uint32_t magic = *(uint32_t*)model_ptr;
-    if (magic != 0x67676d66 && magic != 0x67676d6c && magic != 0x00000120 { // 'ggmf' or 'ggml'
+    if (magic != 0x67676d66 && magic != 0x67676d6c && magic != 0x00000120) { // 'ggmf' or 'ggml'
         uart_puts("ERROR: Invalid model magic number: "); itoa(magic, buf); uart_puts(buf); uart_puts("\n");
         while(1);
     }
