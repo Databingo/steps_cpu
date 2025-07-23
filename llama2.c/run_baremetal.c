@@ -674,7 +674,6 @@ typedef struct {
     int vocab_size;   // 32000
     int seq_len;      // 256
 } TempConfig;
-
 void build_transformer(Transformer *t) {
     char buf[32];
     uart_puts("   - Starting build_transformer...\n");
@@ -699,8 +698,15 @@ void build_transformer(Transformer *t) {
     }
 
     uart_puts("   - Reading header...\n");
+    typedef struct {
+        int n_layers;     // 6
+        int n_heads;      // 6
+        int n_kv_heads;   // 6
+        int vocab_size;   // 32000
+        int seq_len;      // 256
+    } TempConfig;
     TempConfig temp_config;
-    memcpy(&temp_config, model_ptr + 8, sizeof(TempConfig)); // Offset 8 based on xxd
+    memcpy(&temp_config, model_ptr + 8, sizeof(TempConfig));
     t->config.dim = 288; // Hardcode for stories15M
     t->config.hidden_dim = 768; // Hardcode for stories15M
     t->config.n_layers = temp_config.n_layers;
@@ -709,11 +715,15 @@ void build_transformer(Transformer *t) {
     t->config.vocab_size = temp_config.vocab_size;
     t->config.seq_len = temp_config.seq_len;
 
+    // Read shared_classifier
+    uint8_t shared_classifier = *(uint8_t*)(model_ptr + 8 + sizeof(TempConfig));
+
     uart_puts("     - Config: dim="); itoa(t->config.dim, buf); uart_puts(buf);
     uart_puts(" hidden_dim="); itoa(t->config.hidden_dim, buf); uart_puts(buf);
     uart_puts(" n_layers="); itoa(t->config.n_layers, buf); uart_puts(buf);
     uart_puts(" vocab_size="); itoa(t->config.vocab_size, buf); uart_puts(buf);
-    uart_puts(" seq_len="); itoa(t->config.seq_len, buf); uart_puts(buf); uart_puts("\n");
+    uart_puts(" seq_len="); itoa(t->config.seq_len, buf); uart_puts(buf);
+    uart_puts(" shared_classifier="); itoa(shared_classifier, buf); uart_puts(buf); uart_puts("\n");
 
     // Validate config
     if (t->config.dim <= 0 || t->config.vocab_size <= 0 || t->config.n_layers <= 0 || t->config.seq_len <= 0) {
@@ -724,7 +734,6 @@ void build_transformer(Transformer *t) {
         while(1);
     }
 
-    // Rest of the function remains unchanged
     unsigned char* weights_ptr = model_ptr + header_size;
     Config* p = &t->config;
     TransformerWeights* w = &t->weights;
