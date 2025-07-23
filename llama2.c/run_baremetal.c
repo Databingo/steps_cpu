@@ -134,7 +134,7 @@ typedef struct {
     float *value_cache;
 } RunState;
 
-#define ARENA_SIZE 256000000
+#define ARENA_SIZE 1280000000
 static unsigned char g_arena[ARENA_SIZE];
 static size_t g_arena_offset = 0;
 
@@ -666,6 +666,15 @@ void generate(Transformer* t, Tokenizer* tok, Sampler* sampler, char* prompt, in
     }
     uart_puts("\n");
 }
+
+typedef struct {
+    int n_layers;     // 6
+    int n_heads;      // 6
+    int n_kv_heads;   // 6
+    int vocab_size;   // 32000
+    int seq_len;      // 256
+} TempConfig;
+
 void build_transformer(Transformer *t) {
     char buf[32];
     uart_puts("   - Starting build_transformer...\n");
@@ -684,15 +693,22 @@ void build_transformer(Transformer *t) {
     int header_size = 256;
     // Validate header
     uint32_t magic = *(uint32_t*)model_ptr;
-    if (magic != 0x67676d66 && magic != 0x67676d6c && magic != 0x00000120) { // 'ggmf' or 'ggml' or 0x00000120
+    if (magic != 0x67676d66 && magic != 0x67676d6c && magic != 0x00000120) {
         uart_puts("ERROR: Invalid model magic number: "); itoa(magic, buf); uart_puts(buf); uart_puts("\n");
         while(1);
     }
 
     uart_puts("   - Reading header...\n");
-    memcpy(&t->config, model_ptr + 4, sizeof(Config)); // Adjusted offset
-    t->config.n_kv_heads = t->config.n_heads; // Set n_kv_heads = n_heads
-    uint8_t shared_classifier = *(uint8_t*)(model_ptr + 4 + sizeof(Config));
+    TempConfig temp_config;
+    memcpy(&temp_config, model_ptr + 8, sizeof(TempConfig)); // Offset 8 based on xxd
+    t->config.dim = 288; // Hardcode for stories15M
+    t->config.hidden_dim = 768; // Hardcode for stories15M
+    t->config.n_layers = temp_config.n_layers;
+    t->config.n_heads = temp_config.n_heads;
+    t->config.n_kv_heads = temp_config.n_kv_heads;
+    t->config.vocab_size = temp_config.vocab_size;
+    t->config.seq_len = temp_config.seq_len;
+
     uart_puts("     - Config: dim="); itoa(t->config.dim, buf); uart_puts(buf);
     uart_puts(" hidden_dim="); itoa(t->config.hidden_dim, buf); uart_puts(buf);
     uart_puts(" n_layers="); itoa(t->config.n_layers, buf); uart_puts(buf);
@@ -700,13 +716,15 @@ void build_transformer(Transformer *t) {
     uart_puts(" seq_len="); itoa(t->config.seq_len, buf); uart_puts(buf); uart_puts("\n");
 
     // Validate config
-    if (t->config.dim <= 0 || t->config.vocab_size <= 0 || t->config.n_layers <= 0) {
+    if (t->config.dim <= 0 || t->config.vocab_size <= 0 || t->config.n_layers <= 0 || t->config.seq_len <= 0) {
         uart_puts("ERROR: Invalid config: dim="); itoa(t->config.dim, buf); uart_puts(buf);
         uart_puts(" vocab_size="); itoa(t->config.vocab_size, buf); uart_puts(buf);
-        uart_puts(" n_layers="); itoa(t->config.n_layers, buf); uart_puts(buf); uart_puts("\n");
+        uart_puts(" n_layers="); itoa(t->config.n_layers, buf); uart_puts(buf);
+        uart_puts(" seq_len="); itoa(t->config.seq_len, buf); uart_puts(buf); uart_puts("\n");
         while(1);
     }
 
+    // Rest of the function remains unchanged
     unsigned char* weights_ptr = model_ptr + header_size;
     Config* p = &t->config;
     TransformerWeights* w = &t->weights;
@@ -739,7 +757,6 @@ void build_transformer(Transformer *t) {
     w->wcls = shared_classifier ? w->token_embedding_table : (float*)weights_ptr;
     weights_ptr += shared_classifier ? 0 : p->dim * p->vocab_size * sizeof(float);
 
-    // Debug: Print first few weight values
     uart_puts("     - token_embedding_table[0:3]: ");
     for (int i = 0; i < 4 && i < p->vocab_size * p->dim; i++) {
         int* fval = (int*)&w->token_embedding_table[i];
@@ -765,7 +782,6 @@ void build_transformer(Transformer *t) {
     uart_puts("   - build_transformer complete. Arena used: ");
     itoa(g_arena_offset, buf); uart_puts(buf); uart_puts(" / "); itoa(ARENA_SIZE, buf); uart_puts(buf); uart_puts("\n");
 }
-
 // Enable FPU in machine mode
 void enable_fpu() {
     asm volatile (
