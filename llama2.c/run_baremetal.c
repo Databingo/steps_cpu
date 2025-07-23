@@ -1,3 +1,4 @@
+
 /*
  * Bare-metal FP32 Inference for Llama-2 Transformer model in pure C
  * Based on run.c from karpathy/llama2.c, adapted for RISC-V bare-metal
