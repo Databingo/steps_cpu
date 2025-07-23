@@ -1,4 +1,3 @@
-
 /*
  * Bare-metal FP32 Inference for Llama-2 Transformer model in pure C
  * Based on run.c from karpathy/llama2.c, adapted for RISC-V bare-metal
@@ -667,7 +666,6 @@ void generate(Transformer* t, Tokenizer* tok, Sampler* sampler, char* prompt, in
     }
     uart_puts("\n");
 }
-
 void build_transformer(Transformer *t) {
     char buf[32];
     uart_puts("   - Starting build_transformer...\n");
@@ -686,14 +684,15 @@ void build_transformer(Transformer *t) {
     int header_size = 256;
     // Validate header
     uint32_t magic = *(uint32_t*)model_ptr;
-    if (magic != 0x67676d66 && magic != 0x67676d6c && magic != 0x00000120) { // 'ggmf' or 'ggml'
+    if (magic != 0x67676d66 && magic != 0x67676d6c && magic != 0x00000120) { // 'ggmf' or 'ggml' or 0x00000120
         uart_puts("ERROR: Invalid model magic number: "); itoa(magic, buf); uart_puts(buf); uart_puts("\n");
         while(1);
     }
 
     uart_puts("   - Reading header...\n");
-    memcpy(&t->config, model_ptr + 8, sizeof(Config));
-    uint8_t shared_classifier = *(uint8_t*)(model_ptr + 8 + sizeof(Config));
+    memcpy(&t->config, model_ptr + 4, sizeof(Config)); // Adjusted offset
+    t->config.n_kv_heads = t->config.n_heads; // Set n_kv_heads = n_heads
+    uint8_t shared_classifier = *(uint8_t*)(model_ptr + 4 + sizeof(Config));
     uart_puts("     - Config: dim="); itoa(t->config.dim, buf); uart_puts(buf);
     uart_puts(" hidden_dim="); itoa(t->config.hidden_dim, buf); uart_puts(buf);
     uart_puts(" n_layers="); itoa(t->config.n_layers, buf); uart_puts(buf);
