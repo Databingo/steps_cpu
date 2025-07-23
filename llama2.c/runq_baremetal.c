@@ -22,6 +22,8 @@ void* memcpy(void* d, const void* s, size_t n){char*dd=(char*)d;const char*ss=(c
 void* memset(void* s, int c, size_t n){unsigned char*p=(unsigned char*)s;while(n--)*p++=(unsigned char)c;return s;}
 size_t strlen(const char* s){const char*p=s;while(*p)p++;return p-s;}
 int strcmp(const char*s1,const char*s2){while(*s1&&(*s1==*s2)){s1++;s2++;}return *(const unsigned char*)s1-*(const unsigned char*)s2;}
+void uart_putint(int x) { char buf[12]; int i=0, neg=0; if(x==0){uart_putc('0');return;} if(x<0){neg=1;x=-x;} while(x&&i<11){buf[i++]='0'+(x%10);x/=10;} if(neg)buf[i++]='-'; while(i--)uart_putc(buf[i]); }
+void uart_putfloat(float f) { int i = (int)f; uart_putint(i); uart_putc('.'); int frac = (int)((f - i) * 10000); if (frac < 0) frac = -frac; if (frac == 0) { uart_puts("0000"); return; } int d = 1000; while (frac < d && d > 1) { uart_putc('0'); d /= 10; } uart_putint(frac); }
 void read_line(char* buffer, int max_len) {
     int i = 0;
     while (i < max_len - 1) {
@@ -123,8 +125,18 @@ void build_transformer(Transformer *t) {
     w->rms_ffn_weight = (float*) weights_ptr; weights_ptr += p->n_layers * p->dim * sizeof(float);
     w->rms_final_weight = (float*) weights_ptr; weights_ptr += p->dim * sizeof(float);
     w->q_tokens = init_qtensor(&weights_ptr, 1, p->vocab_size * p->dim);
+    // Debug: print first 5 q and s values
+    uart_puts("[debug] q_tokens->q: ");
+    for(int i=0;i<5;i++) { uart_putint(w->q_tokens[0].q[i]); uart_puts(" "); }
+    uart_puts("\n[debug] q_tokens->s: ");
+    for(int i=0;i<5 && i < (p->vocab_size * p->dim / GS);i++) { uart_putfloat(w->q_tokens[0].s[i]); uart_puts(" "); }
+    uart_puts("\n");
     w->token_embedding_table = arena_alloc(p->vocab_size * p->dim * sizeof(float));
     dequantize(w->q_tokens, w->token_embedding_table, p->vocab_size * p->dim);
+    // Debug: print first 5 dequantized floats
+    uart_puts("[debug] token_embedding_table: ");
+    for(int i=0;i<5;i++) { uart_putfloat(w->token_embedding_table[i]); uart_puts(" "); }
+    uart_puts("\n");
     w->wq = init_qtensor(&weights_ptr, p->n_layers, p->dim * (p->n_heads * head_size));
     w->wk = init_qtensor(&weights_ptr, p->n_layers, p->dim * (p->n_kv_heads * head_size));
     w->wv = init_qtensor(&weights_ptr, p->n_layers, p->dim * (p->n_kv_heads * head_size));
@@ -214,7 +226,28 @@ void encode(Tokenizer*t,char*text,int8_t bos,int8_t eos,int*tokens,int*n){
 int sample_argmax(float*p,int n){int max_i=0;float max_p=p[0];for(int i=1;i<n;i++){if(p[i]>max_p){max_i=i;max_p=p[i];}}return max_i;}
 unsigned int random_u32(unsigned long long*s){*s^=*s>>12;*s^=*s<<25;*s^=*s>>27;return(*s*0x2545F4914F6CDD1Dull)>>32;}
 float random_f32(unsigned long long*s){return(random_u32(s)>>8)/16777216.0f;}
-int sample(Sampler*s,float*logits){if(s->temperature==0.0f){return sample_argmax(logits,s->vocab_size);}else{for(int q=0;q<s->vocab_size;q++){logits[q]/=s->temperature;}softmax(logits,s->vocab_size);float coin=random_f32(&s->rng_state);float cdf=0.0f;for(int i=0;i<s->vocab_size;i++){cdf+=logits[i];if(coin<cdf)return i;}return s->vocab_size-1;}}
+int sample(Sampler*s,float*logits){
+    if(s->temperature==0.0f){
+        int idx = sample_argmax(logits,s->vocab_size);
+        uart_puts("[sample] temp=0, argmax token: "); uart_putint(idx); uart_puts("\n");
+        return idx;
+    } else {
+        for(int q=0;q<s->vocab_size;q++){logits[q]/=s->temperature;}
+        softmax(logits,s->vocab_size);
+        float coin=random_f32(&s->rng_state);
+        uart_puts("[sample] rng_state: "); uart_putint((int)(s->rng_state & 0xFFFFFFFF)); uart_puts(" coin: "); uart_putfloat(coin); uart_puts("\n");
+        float cdf=0.0f;
+        for(int i=0;i<s->vocab_size;i++){
+            cdf+=logits[i];
+            if(coin<cdf) {
+                uart_puts("[sample] sampled token: "); uart_putint(i); uart_puts("\n");
+                return i;
+            }
+        }
+        uart_puts("[sample] fallback token: "); uart_putint(s->vocab_size-1); uart_puts("\n");
+        return s->vocab_size-1;
+    }
+}
 void build_sampler(Sampler*s,int vocab_size,float temp,unsigned long long seed){s->vocab_size=vocab_size;s->temperature=temp;s->rng_state=seed;}
 void generate(Transformer*t,Tokenizer*tok,Sampler*sampler,char*prompt,int steps){
     size_t arena_checkpoint = g_arena_offset;
@@ -224,11 +257,17 @@ void generate(Transformer*t,Tokenizer*tok,Sampler*sampler,char*prompt,int steps)
     // --- BUG FIX: Clear KV Cache before generation ---
     memset(t->state.key_cache, 0, t->config.n_layers * t->config.seq_len * ((t->config.dim * t->config.n_kv_heads) / t->config.n_heads) * sizeof(float));
     memset(t->state.value_cache, 0, t->config.n_layers * t->config.seq_len * ((t->config.dim * t->config.n_kv_heads) / t->config.n_heads) * sizeof(float));
-    
+    int debug_prints = 0;
     while(pos<steps){
         float*logits=forward(t,token,pos);
+        if(debug_prints < 5) {
+            uart_puts("[gen] pos: "); uart_putint(pos); uart_puts(" token: "); uart_putint(token); uart_puts(" logits: ");
+            for(int i=0;i<5;i++) { uart_putfloat(logits[i]); uart_puts(" "); }
+            uart_puts("...\n");
+        }
         if(pos<num_prompt-1){next=prompt_tokens[pos+1];}else{next=sample(sampler,logits);}
         pos++;if(next==1)break;char*p=decode(tok,token,next);safe_printf(p);token=next;
+        debug_prints++;
     }
     g_arena_offset = arena_checkpoint;
 }
