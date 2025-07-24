@@ -1,8 +1,8 @@
 /*
  * Bare-metal INT8 Quantized Inference for Llama-2 Transformer model in pure C
  * Optimized version with alignment fix for float arrays and extra debug output.
- * Fixed dequantize to process all elements, enhanced forward and sample to prevent repetitive tokens.
- * Added debug checks for logits and intermediate states to diagnose hanging and output issues.
+ * Fixed dequantize function to process all elements and prevent repetitive token output.
+ * Added debug checks to identify hanging issues during initialization.
  */
 
 // --- BARE-METAL DEFINITIONS ---
@@ -270,17 +270,6 @@ void build_transformer(Transformer *t) {
 
     uart_puts("   - Mapping quantized tokens...\n");
     w->q_tokens = init_qtensor(&weights_ptr, 1, p->vocab_size * p->dim);
-    // Debug: Check q_tokens data
-    uart_puts("     - q_tokens.q[0:3]: ");
-    for (int i = 0; i < 4 && i < p->vocab_size * p->dim; i++) {
-        itoa(w->q_tokens[0].q[i], buf); uart_puts(buf); uart_puts(" ");
-    }
-    uart_puts("\n     - q_tokens.s[0:3]: ");
-    for (int i = 0; i < 4 && i < p->vocab_size * p->dim / GS; i++) {
-        int* fval = (int*)&w->q_tokens[0].s[i];
-        itoa(*fval, buf); uart_puts(buf); uart_puts(" ");
-    }
-    uart_puts("\n");
 
     uart_puts("   - Allocating dequantized token table...\n");
     w->token_embedding_table = arena_alloc(p->vocab_size * p->dim * sizeof(float));
@@ -321,46 +310,28 @@ void build_transformer(Transformer *t) {
     s->logits = arena_alloc(p->vocab_size * sizeof(float));
     s->key_cache = arena_alloc(p->n_layers * p->seq_len * kv_dim * sizeof(float));
     s->value_cache = arena_alloc(p->n_layers * p->seq_len * kv_dim * sizeof(float));
-    uart_puts("   - build_transformer complete. Arena used: ");
-    itoa(g_arena_offset, buf); uart_puts(buf); uart_puts(" / "); itoa(ARENA_SIZE, buf); uart_puts(buf); uart_puts("\n");
+    uart_puts("   - build_transformer complete.\n");
 }
 
 // ----------------------------------------------------------------------------
 // The forward pass (quantized)
 void rmsnorm(float* o, float* x, float* w, int s) {
-    char buf[32];
     float ss = 0.0f;
     for (int j = 0; j < s; j++) { ss += x[j] * x[j]; }
     ss /= s;
     ss += 1e-5f;
-    if (ss == 0.0f) {
-        uart_puts("ERROR: rmsnorm ss is zero!\n");
-        return;
-    }
     ss = 1.0f / sqrtf(ss);
-    // Debug: Print ss for first call
-    static int first_call = 1;
-    if (first_call) {
-        int* fval = (int*)&ss;
-        uart_puts("rmsnorm ss: "); itoa(*fval, buf); uart_puts(buf); uart_puts("\n");
-        first_call = 0;
-    }
     for (int j = 0; j < s; j++) { o[j] = w[j] * (ss * x[j]); }
 }
 void softmax(float* x, int s) {
     if (s <= 0) return;
     float max = x[0];
-    for (int i = 1; i < s; i++) { if (x[i] > max) max = x[i]; }
+    for (int i = 1; i < s; i++) { if (x[i] > max) max = x[i]; } // Fix: Compare correctly
     float sum = 0.0f;
     for (int i = 0; i < s; i++) { x[i] = expf(x[i] - max); sum += x[i]; }
-    if (sum == 0.0f) {
-        uart_puts("ERROR: softmax sum is zero!\n");
-        return;
-    }
     for (int i = 0; i < s; i++) { x[i] /= sum; }
 }
 void matmul(float* xout, QuantizedTensor *x, QuantizedTensor *w, int n, int d) {
-    char buf[32];
     for (int i = 0; i < d; i++) {
         float val = 0.0f;
         int32_t ival = 0;
@@ -368,24 +339,14 @@ void matmul(float* xout, QuantizedTensor *x, QuantizedTensor *w, int n, int d) {
         for (int j = 0; j < n; j++) {
             ival += ((int32_t)x->q[j]) * ((int32_t)w->q[in + j]);
             if ((j + 1) % GS == 0) {
-                float scale = w->s[(in + j) / GS] * x->s[j / GS];
-                if (scale == 0.0f) {
-                    uart_puts("WARNING: Zero scale in matmul, group "); itoa((in + j) / GS, buf); uart_puts(buf); uart_puts("\n");
-                }
-                val += ((float)ival) * scale;
+                val += ((float)ival) * w->s[(in + j) / GS] * x->s[j / GS];
                 ival = 0;
             }
         }
         xout[i] = val;
-        // Debug: Print first few outputs
-        if (i < 4) {
-            int* fval = (int*)&xout[i];
-            uart_puts("matmul xout["); itoa(i, buf); uart_puts(buf); uart_puts("]: "); itoa(*fval, buf); uart_puts(buf); uart_puts("\n");
-        }
     }
 }
 float* forward(Transformer* t, int token, int pos) {
-    char buf[32];
     Config* p = &t->config;
     TransformerWeights* w = &t->weights;
     RunState* s = &t->state;
@@ -396,44 +357,17 @@ float* forward(Transformer* t, int token, int pos) {
     int hidden_dim = p->hidden_dim;
     int head_size = dim / p->n_heads;
     if (token < 0 || token >= p->vocab_size) {
+        char buf[32];
         uart_puts("ERROR: Invalid token ID in forward: "); itoa(token, buf); uart_puts(buf); uart_puts("\n");
         return s->logits;
     }
     memcpy(x, w->token_embedding_table + token * dim, dim * sizeof(float));
-    // Debug: Print first few x values
-    if (pos == 0) {
-        uart_puts("forward x[0:3]: ");
-        for (int i = 0; i < 4 && i < dim; i++) {
-            int* fval = (int*)&x[i];
-            itoa(*fval, buf); uart_puts(buf); uart_puts(" ");
-        }
-        uart_puts("\n");
-    }
     for (int l = 0; l < p->n_layers; l++) {
         rmsnorm(s->xb, x, w->rms_att_weight + l * dim, dim);
         quantize(&s->xq, s->xb, dim);
         matmul(s->q, &s->xq, w->wq + l, dim, dim);
         matmul(s->k, &s->xq, w->wk + l, dim, kv_dim);
         matmul(s->v, &s->xq, w->wv + l, dim, kv_dim);
-        // Debug: Print first few q, k, v values
-        if (pos == 0 && l == 0) {
-            uart_puts("forward q[0:3]: ");
-            for (int i = 0; i < 4 && i < dim; i++) {
-                int* fval = (int*)&s->q[i];
-                itoa(*fval, buf); uart_puts(buf); uart_puts(" ");
-            }
-            uart_puts("\nforward k[0:3]: ");
-            for (int i = 0; i < 4 && i < kv_dim; i++) {
-                int* fval = (int*)&s->k[i];
-                itoa(*fval, buf); uart_puts(buf); uart_puts(" ");
-            }
-            uart_puts("\nforward v[0:3]: ");
-            for (int i = 0; i < 4 && i < kv_dim; i++) {
-                int* fval = (int*)&s->v[i];
-                itoa(*fval, buf); uart_puts(buf); uart_puts(" ");
-            }
-            uart_puts("\n");
-        }
         for (int i = 0; i < dim; i += 2) {
             int head_dim_idx = i % head_size;
             float freq = 1.0f / powf(10000.0f, head_dim_idx / (float)head_size);
@@ -490,15 +424,6 @@ float* forward(Transformer* t, int token, int pos) {
     rmsnorm(x, x, w->rms_final_weight, dim);
     quantize(&s->xq, x, dim);
     matmul(s->logits, &s->xq, w->wcls, dim, p->vocab_size);
-    // Debug: Print final logits
-    if (pos < 3) {
-        uart_puts("Final logits[0:3]: ");
-        for (int i = 0; i < 4 && i < p->vocab_size; i++) {
-            int* fval = (int*)&s->logits[i];
-            itoa(*fval, buf); uart_puts(buf); uart_puts(" ");
-        }
-        uart_puts("\n");
-    }
     return s->logits;
 }
 
@@ -553,8 +478,8 @@ void build_tokenizer(Tokenizer* t, int vocab_size) {
         memcpy(t->vocab[i], tokenizer_data + offset, len);
         offset += len;
         t->vocab[i][len] = '\0';
-        // Debug: Print vocab entries around token 31999 and first few
-        if (i < 5 || (i >= 31995 && i <= 32000)) {
+        // Debug: Print first few vocab entries
+        if (i < 3) {
             uart_puts("     - Vocab["); itoa(i, buf); uart_puts(buf); uart_puts("]: "); uart_puts(t->vocab[i]); uart_puts("\n");
         }
     }
@@ -650,44 +575,27 @@ float random_f32(unsigned long long* s) {
 }
 int sample(Sampler* s, float* logits) {
     char buf[32];
-    // Check for invalid logits
+    // Debug: Check logits for validity
     float sum = 0.0f;
-    int non_zero_count = 0;
-    for (int i = 0; i < s->vocab_size; i++) {
-        sum += logits[i];
-        if (logits[i] != 0.0f) non_zero_count++;
+    for (int i = 0; i < s->vocab_size; i++) { sum += logits[i]; }
+    if (sum == 0.0f) {
+        uart_puts("ERROR: All logits are zero!\n");
+        return s->vocab_size - 1;
     }
-    if (sum == 0.0f || non_zero_count == 0) {
-        uart_puts("ERROR: All logits are zero or invalid! Returning default token.\n");
-        return 1; // Return BOS token as fallback
-    }
-    // Debug: Print top 5 logits
-    uart_puts("Top 5 logits: ");
-    for (int i = 0; i < 5 && i < s->vocab_size; i++) {
-        int* fval = (int*)&logits[i];
-        itoa(*fval, buf); uart_puts(buf); uart_puts(" ");
-    }
-    uart_puts("\n");
-    if (s->temperature == 0.0f) {
-        int token = sample_argmax(logits, s->vocab_size);
-        uart_puts("Sampled (argmax) token ID: "); itoa(token, buf); uart_puts(buf); uart_puts("\n");
-        return token;
-    } else {
+    if (s->temperature == 0.0f) { return sample_argmax(logits, s->vocab_size); }
+    else {
         for (int q = 0; q < s->vocab_size; q++) { logits[q] /= s->temperature; }
         softmax(logits, s->vocab_size);
         float coin = random_f32(&s->rng_state);
-        // Debug: Print random value
-        int* fval = (int*)&coin;
-        uart_puts("Random coin: "); itoa(*fval, buf); uart_puts(buf); uart_puts("\n");
         float cdf = 0.0f;
         for (int i = 0; i < s->vocab_size; i++) {
             cdf += logits[i];
             if (coin < cdf) {
-                uart_puts("Sampled (softmax) token ID: "); itoa(i, buf); uart_puts(buf); uart_puts("\n");
+                // Debug: Print selected token
+                uart_puts("Sampled token ID: "); itoa(i, buf); uart_puts(buf); uart_puts("\n");
                 return i;
             }
         }
-        uart_puts("Sampled (fallback) token ID: "); itoa(s->vocab_size - 1, buf); uart_puts(buf); uart_puts("\n");
         return s->vocab_size - 1;
     }
 }
@@ -719,6 +627,16 @@ void generate(Transformer* t, Tokenizer* tok, Sampler* sampler, char* prompt, in
         uart_puts(" / "); itoa(steps, buf); uart_puts(buf); uart_puts(" ] -> ");
 
         float* logits = forward(t, token, pos);
+        // Debug: Print first few logits
+        if (pos < 3) {
+            uart_puts("Logits: ");
+            for (int i = 0; i < 5 && i < sampler->vocab_size; i++) {
+                int* fval = (int*)&logits[i];
+                itoa(*fval, buf); uart_puts(buf); uart_puts(" ");
+            }
+            uart_puts("\n");
+        }
+
         if (pos < num_prompt - 1) {
             next = prompt_tokens[pos + 1];
         } else {
