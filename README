@@ -73,3 +73,9 @@ riscv64-unknown-elf-objdump -M no-aliases  -D caled.o
 
 
 ld -o t /usr/lib/crt1.o /usr/lib/crti.o caled.o /usr/lib/crtn.o -L/usr/lib -lc -lcompiler_rt -dynamic-linker /libexec/ld-elf.so.1
+
+
+
+gemini pro 2.5 RAM: 28Gb
+grok4 128Gb?
+deepseekr1 192Gb
