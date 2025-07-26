@@ -673,6 +673,8 @@ void generate(Transformer* t, Tokenizer* tok, Sampler* sampler, char* prompt, in
     //
     //utoa(g_arena_offset, bu); uart_puts(bu);
     char bu[32];
+    uart_puts("len_prompt: "); itoa(strlen(prompt)+3, bu); uart_puts(bu); uart_puts("\n");
+    uart_puts("sizeof_int : "); itoa(sizeof(int), bu); uart_puts(bu); uart_puts("\n");
     uart_puts("g_arena_offset: "); itoa(g_arena_offset, bu); uart_puts(bu); uart_puts("\n");
     //return;
 
@@ -736,7 +738,7 @@ int main() {
     // Assuming uart_init() exists in uart.c
     // uart_init();
 
-    uart_puts("Enabling FPU...\n");
+    //uart_puts("Enabling FPU...\n");
     //enable_fpu();
     // Test FPU
     float test_float = 1.0f;
@@ -787,7 +789,7 @@ int main() {
         uart_puts("\nGenerating response...\n");
         uart_puts("-.-------------------------------\n");
         uart_puts("input:");
-        uart_puts(input);
+        uart_puts(input); uart_puts("\n");
         generate(&transformer, &tokenizer, &sampler, input, steps);
     }
 
