@@ -111,12 +111,18 @@ void read_line(char* buffer, int max_len) {
 int GS = 0;
 typedef struct { int dim; int hidden_dim; int n_layers; int n_heads; int n_kv_heads; int vocab_size; int seq_len; } Config;
 typedef struct { int8_t* q; float* s; } QuantizedTensor;
+// Add dequantized float32 arrays to TransformerWeights
 typedef struct {
     float* rms_att_weight; float* rms_ffn_weight; float* rms_final_weight;
     QuantizedTensor* q_tokens; float* token_embedding_table;
-    QuantizedTensor* wq; QuantizedTensor* wk; QuantizedTensor* wv; QuantizedTensor* wo;
-    QuantizedTensor* w1; QuantizedTensor* w2; QuantizedTensor* w3;
-    QuantizedTensor* wcls;
+    QuantizedTensor* wq; float* wq_f32;
+    QuantizedTensor* wk; float* wk_f32;
+    QuantizedTensor* wv; float* wv_f32;
+    QuantizedTensor* wo; float* wo_f32;
+    QuantizedTensor* w1; float* w1_f32;
+    QuantizedTensor* w2; float* w2_f32;
+    QuantizedTensor* w3; float* w3_f32;
+    QuantizedTensor* wcls; float* wcls_f32;
 } TransformerWeights;
 typedef struct {
     float *x; float *xb; float *xb2; float *hb; float *hb2;
@@ -325,6 +331,54 @@ void build_transformer(Transformer *t) {
     s->key_cache = arena_alloc(p->n_layers * p->seq_len * kv_dim * sizeof(float));
     s->value_cache = arena_alloc(p->n_layers * p->seq_len * kv_dim * sizeof(float));
     uart_puts("   - build_transformer complete.\n");
+
+    // After mapping quantized weights:
+    // Dequantize all quantized weights to float32 arrays
+    uart_puts("   - Dequantizing all quantized weights...\n");
+    int n_layers = p->n_layers;
+    int dim = p->dim;
+    int n_heads = p->n_heads;
+    int n_kv_heads = p->n_kv_heads;
+    int vocab_size = p->vocab_size;
+    int hidden_dim = p->hidden_dim;
+    int head_size = dim / n_heads;
+    int kv_dim = (dim * n_kv_heads) / n_heads;
+    // wq
+    w->wq_f32 = arena_alloc(n_layers * dim * (n_heads * head_size) * sizeof(float));
+    for (int l = 0; l < n_layers; l++)
+        dequantize(w->wq + l, w->wq_f32 + l * dim * (n_heads * head_size), dim * (n_heads * head_size));
+    // wk
+    w->wk_f32 = arena_alloc(n_layers * dim * (n_kv_heads * head_size) * sizeof(float));
+    for (int l = 0; l < n_layers; l++)
+        dequantize(w->wk + l, w->wk_f32 + l * dim * (n_kv_heads * head_size), dim * (n_kv_heads * head_size));
+    // wv
+    w->wv_f32 = arena_alloc(n_layers * dim * (n_kv_heads * head_size) * sizeof(float));
+    for (int l = 0; l < n_layers; l++)
+        dequantize(w->wv + l, w->wv_f32 + l * dim * (n_kv_heads * head_size), dim * (n_kv_heads * head_size));
+    // wo
+    w->wo_f32 = arena_alloc(n_layers * (n_heads * head_size) * dim * sizeof(float));
+    for (int l = 0; l < n_layers; l++)
+        dequantize(w->wo + l, w->wo_f32 + l * (n_heads * head_size) * dim, (n_heads * head_size) * dim);
+    // w1
+    w->w1_f32 = arena_alloc(n_layers * dim * hidden_dim * sizeof(float));
+    for (int l = 0; l < n_layers; l++)
+        dequantize(w->w1 + l, w->w1_f32 + l * dim * hidden_dim, dim * hidden_dim);
+    // w2
+    w->w2_f32 = arena_alloc(n_layers * hidden_dim * dim * sizeof(float));
+    for (int l = 0; l < n_layers; l++)
+        dequantize(w->w2 + l, w->w2_f32 + l * hidden_dim * dim, hidden_dim * dim);
+    // w3
+    w->w3_f32 = arena_alloc(n_layers * dim * hidden_dim * sizeof(float));
+    for (int l = 0; l < n_layers; l++)
+        dequantize(w->w3 + l, w->w3_f32 + l * dim * hidden_dim, dim * hidden_dim);
+    // wcls
+    if (shared_classifier) {
+        w->wcls_f32 = w->token_embedding_table;
+    } else {
+        w->wcls_f32 = arena_alloc(dim * vocab_size * sizeof(float));
+        dequantize(w->wcls, w->wcls_f32, dim * vocab_size);
+    }
+    uart_puts("   - All quantized weights dequantized.\n");
 }
 
 // ----------------------------------------------------------------------------
@@ -345,17 +399,12 @@ void softmax(float* x, int s) {
     for (int i = 0; i < s; i++) { x[i] = expf(x[i] - max); sum += x[i]; }
     for (int i = 0; i < s; i++) { x[i] /= sum; }
 }
-void matmul(float* xout, QuantizedTensor *x, QuantizedTensor *w, int n, int d) {
+// Replace all matmul calls in forward() with float32 matmul, using dequantized weights
+void matmul(float* xout, float* x, float* w, int n, int d) {
     for (int i = 0; i < d; i++) {
         float val = 0.0f;
-        int32_t ival = 0;
-        int in = i * n;
         for (int j = 0; j < n; j++) {
-            ival += ((int32_t)x->q[j]) * ((int32_t)w->q[in + j]);
-            if ((j + 1) % GS == 0) {
-                val += ((float)ival) * w->s[(in + j) / GS] * x->s[j / GS];
-                ival = 0;
-            }
+            val += w[i * n + j] * x[j];
         }
         xout[i] = val;
     }
@@ -378,25 +427,9 @@ float* forward(Transformer* t, int token, int pos) {
     memcpy(x, w->token_embedding_table + token * dim, dim * sizeof(float));
     for (int l = 0; l < p->n_layers; l++) {
         rmsnorm(s->xb, x, w->rms_att_weight + l * dim, dim);
-        quantize(&s->xq, s->xb, dim);
-        matmul(s->q, &s->xq, w->wq + l, dim, dim);
-        matmul(s->k, &s->xq, w->wk + l, dim, kv_dim);
-        matmul(s->v, &s->xq, w->wv + l, dim, kv_dim);
-        for (int i = 0; i < dim; i += 2) {
-            int head_dim_idx = i % head_size;
-            float freq = 1.0f / powf(10000.0f, head_dim_idx / (float)head_size);
-            float val = pos * freq;
-            float fcr = cosf(val);
-            float fci = sinf(val);
-            int rotn = i < kv_dim ? 2 : 1;
-            for (int v_idx = 0; v_idx < rotn; v_idx++) {
-                float* vec = v_idx == 0 ? s->q : s->k;
-                float v0 = vec[i];
-                float v1 = vec[i + 1];
-                vec[i] = v0 * fcr - v1 * fci;
-                vec[i + 1] = v0 * fci + v1 * fcr;
-            }
-        }
+        matmul(s->q, s->xb, w->wq_f32 + l * dim * (p->n_heads * head_size), dim, dim);
+        matmul(s->k, s->xb, w->wk_f32 + l * dim * kv_dim, dim, kv_dim);
+        matmul(s->v, s->xb, w->wv_f32 + l * dim * kv_dim, dim, kv_dim);
         int loff = l * p->seq_len * kv_dim;
         memcpy(s->key_cache + loff + pos * kv_dim, s->k, kv_dim * sizeof(float));
         memcpy(s->value_cache + loff + pos * kv_dim, s->v, kv_dim * sizeof(float));
@@ -418,26 +451,22 @@ float* forward(Transformer* t, int token, int pos) {
                 for (int i = 0; i < head_size; i++) { xb[i] += a * v_t[i]; }
             }
         }
-        quantize(&s->xq, s->xb, dim);
-        matmul(s->xb2, &s->xq, w->wo + l, dim, dim);
+        matmul(s->xb2, s->xb, w->wo_f32 + l * (p->n_heads * head_size) * dim, dim, dim);
         for (int i = 0; i < dim; i++) { x[i] += s->xb2[i]; }
         rmsnorm(s->xb, x, w->rms_ffn_weight + l * dim, dim);
-        quantize(&s->xq, s->xb, dim);
-        matmul(s->hb, &s->xq, w->w1 + l, dim, hidden_dim);
-        matmul(s->hb2, &s->xq, w->w3 + l, dim, hidden_dim);
+        matmul(s->hb, s->xb, w->w1_f32 + l * dim * hidden_dim, dim, hidden_dim);
+        matmul(s->hb2, s->xb, w->w3_f32 + l * dim * hidden_dim, dim, hidden_dim);
         for (int i = 0; i < hidden_dim; i++) {
             float val = s->hb[i];
             val *= (1.0f / (1.0f + expf(-val)));
             val *= s->hb2[i];
             s->hb[i] = val;
         }
-        quantize(&s->hq, s->hb, hidden_dim);
-        matmul(s->xb, &s->hq, w->w2 + l, hidden_dim, dim);
+        matmul(s->xb, s->hb, w->w2_f32 + l * hidden_dim * dim, hidden_dim, dim);
         for (int i = 0; i < dim; i++) { x[i] += s->xb[i]; }
     }
     rmsnorm(x, x, w->rms_final_weight, dim);
-    quantize(&s->xq, x, dim);
-    matmul(s->logits, &s->xq, w->wcls, dim, p->vocab_size);
+    matmul(s->logits, x, w->wcls_f32, dim, p->vocab_size);
     return s->logits;
 }
 
