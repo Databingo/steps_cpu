@@ -7,7 +7,7 @@ TARGET_PREFIX="${XPACK_TOOLCHAIN_BIN}/riscv-none-elf-"
 CFLAGS="-march=rv64gc -mabi=lp64d -g -O3 -ffreestanding -nostdlib -mcmodel=medany"
 LDFLAGS="-T linker.ld -nostdlib -lm"
 
-echo "--- Compiling QUANTIZED C and Assembly Code ---"
+echo "--- Compiling C and Assembly Code ---"
 "${TARGET_PREFIX}gcc" $CFLAGS -c start.S -o start.o
 "${TARGET_PREFIX}gcc" $CFLAGS -c run_f.c -o run_f.o
 
