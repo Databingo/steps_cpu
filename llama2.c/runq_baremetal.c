@@ -341,8 +341,6 @@ void build_transformer(Transformer *t) {
     int n_kv_heads = p->n_kv_heads;
     int vocab_size = p->vocab_size;
     int hidden_dim = p->hidden_dim;
-    int head_size = dim / n_heads;
-    int kv_dim = (dim * n_kv_heads) / n_heads;
     // wq
     w->wq_f32 = arena_alloc(n_layers * dim * (n_heads * head_size) * sizeof(float));
     for (int l = 0; l < n_layers; l++)

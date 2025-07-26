@@ -2,11 +2,11 @@
 #xxd -i stories15M_q80.bin > model_q80.h 
 #qemu-system-riscv64 -machine help
 #
-#bash buildq.sh
-#bash qemuq.sh
+bash buildq.sh
+bash qemuq.sh
 #
 #bash build.sh
 #bash qemu.sh
 #
-bash buildf.sh
-bash qemuf.sh
+#bash buildf.sh
+#bash qemuf.sh
