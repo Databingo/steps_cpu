@@ -178,9 +178,11 @@ float random_f32(unsigned long long*s){return(random_u32(s)>>8)/16777216.0f;}
 int sample(Sampler*s,float*logits){if(s->temperature==0.0f){return sample_argmax(logits,s->vocab_size);}else{for(int q=0;q<s->vocab_size;q++){logits[q]/=s->temperature;}softmax(logits,s->vocab_size);float coin=random_f32(&s->rng_state);float cdf=0.0f;for(int i=0;i<s->vocab_size;i++){cdf+=logits[i];if(coin<cdf)return i;}return s->vocab_size-1;}}
 void build_sampler(Sampler*s,int vocab_size,float temp,unsigned long long seed){s->vocab_size=vocab_size;s->temperature=temp;s->rng_state=seed;}
 void generate(Transformer*t,Tokenizer*tok,Sampler*sampler,char*prompt,int steps){
-    size_t arena_checkpoint = g_arena_offset;
-    int num_prompt;int*prompt_tokens=arena_alloc((strlen(prompt)+3)*sizeof(int));
-    encode(tok,prompt,1,0,prompt_tokens,&num_prompt);if(num_prompt<1){g_arena_offset=arena_checkpoint;return;}
+    //size_t arena_checkpoint = g_arena_offset;
+    int prompt_tokens[512]; // Use static buffer instead of arena_alloc
+    int num_prompt;
+    encode(tok,prompt,1,0,prompt_tokens,&num_prompt);
+    if(num_prompt<1){return;}
     
     // --- BUG FIX: Clear KV Cache before generation ---
     int kv_dim = (t->config.dim * t->config.n_kv_heads) / t->config.n_heads;
@@ -193,7 +195,7 @@ void generate(Transformer*t,Tokenizer*tok,Sampler*sampler,char*prompt,int steps)
         if(pos<num_prompt-1){next=prompt_tokens[pos+1];}else{next=sample(sampler,logits);}
         pos++;if(next==1)break;char*p=decode(tok,token,next);safe_printf(p);token=next;
     }
-    g_arena_offset = arena_checkpoint;
+    //g_arena_offset = arena_checkpoint; // Do not restore arena offset!
 }
 
 static Transformer transformer;
