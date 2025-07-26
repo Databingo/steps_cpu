@@ -275,7 +275,7 @@ void build_transformer(Transformer *t) {
     unsigned char* weights_ptr = model_ptr + header_size;
     Config* p = &t->config;
     TransformerWeights* w = &t->weights;
-    int head_size = p->dim / p->n_heads;
+    int head_size = p->dim / p->n_heads; // size of each attentin head
 
     uart_puts("   - Mapping float weights...\n");
     w->rms_att_weight = (float*)weights_ptr; weights_ptr += p->n_layers * p->dim * sizeof(float);
