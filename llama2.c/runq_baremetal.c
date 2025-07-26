@@ -62,6 +62,22 @@ void read_line(char* buffer, int max_len) {
 float sqrtf(float);
 float expf(float);
 
+// --- ARENA ALLOCATOR (moved before quantization support) ---
+#define ARENA_SIZE 128000000 // 128MB for larger models
+static unsigned char g_arena[ARENA_SIZE];
+static size_t g_arena_offset = 0;
+
+void* arena_alloc(size_t size) {
+    size = (size + 15) & ~15;
+    if (g_arena_offset + size > ARENA_SIZE) {
+        uart_puts("ERROR: Arena out of memory!\n");
+        while (1);
+    }
+    void* ptr = &g_arena[g_arena_offset];
+    g_arena_offset += size;
+    return ptr;
+}
+
 // --- QUANTIZATION SUPPORT ---
 typedef struct { int8_t* q; float* s; } QuantizedTensor;
 int GS = 32; // Group size for quantization
@@ -126,21 +142,6 @@ typedef struct {
     float* key_cache;
     float* value_cache;
 } RunState;
-
-#define ARENA_SIZE 128000000 // 128MB for larger models
-static unsigned char g_arena[ARENA_SIZE];
-static size_t g_arena_offset = 0;
-
-void* arena_alloc(size_t size) {
-    size = (size + 15) & ~15;
-    if (g_arena_offset + size > ARENA_SIZE) {
-        uart_puts("ERROR: Arena out of memory!\n");
-        while (1);
-    }
-    void* ptr = &g_arena[g_arena_offset];
-    g_arena_offset += size;
-    return ptr;
-}
 
 typedef struct {
     Config config;
@@ -208,6 +209,21 @@ void build_transformer(Transformer* t) {
     QuantizedTensor* q_tokens = init_qtensor(&weights_ptr, 1, p->vocab_size * p->dim);
     w->token_embedding_table = arena_alloc(p->vocab_size * p->dim * sizeof(float));
     dequantize(q_tokens, w->token_embedding_table, p->vocab_size * p->dim);
+    
+    // Debug: Print first few dequantized token embedding values
+    uart_puts("Debug: First 5 token embedding values: ");
+    for (int i = 0; i < 5; i++) {
+        int* fval = (int*)&w->token_embedding_table[i];
+        char buf[16];
+        int n = *fval;
+        int j = 0;
+        if (n == 0) { uart_puts("0"); } else {
+            while (n > 0) { buf[j++] = '0' + (n % 10); n /= 10; }
+            while (j > 0) uart_putc(buf[--j]);
+        }
+        uart_puts(" ");
+    }
+    uart_puts("\n");
 
     QuantizedTensor* q_wq = init_qtensor(&weights_ptr, p->n_layers, p->dim * (p->n_heads * head_size));
     w->wq = arena_alloc(p->n_layers * p->dim * (p->n_heads * head_size) * sizeof(float));
@@ -380,6 +396,33 @@ float* forward(Transformer* t, int token, int pos) {
     }
     rmsnorm(x, x, w->rms_final_weight, dim);
     matmul(s->logits, x, w->wcls, dim, p->vocab_size);
+    
+    // Debug: Print first few logits for the first few tokens
+    static int debug_count = 0;
+    if (debug_count < 3) {
+        uart_puts("Debug: First 5 logits for token "); 
+        char buf[16];
+        int n = token;
+        int j = 0;
+        if (n == 0) { uart_puts("0"); } else {
+            while (n > 0) { buf[j++] = '0' + (n % 10); n /= 10; }
+            while (j > 0) uart_putc(buf[--j]);
+        }
+        uart_puts(": ");
+        for (int i = 0; i < 5; i++) {
+            int* fval = (int*)&s->logits[i];
+            n = *fval;
+            j = 0;
+            if (n == 0) { uart_puts("0"); } else {
+                while (n > 0) { buf[j++] = '0' + (n % 10); n /= 10; }
+                while (j > 0) uart_putc(buf[--j]);
+            }
+            uart_puts(" ");
+        }
+        uart_puts("\n");
+        debug_count++;
+    }
+    
     return s->logits;
 }
 
