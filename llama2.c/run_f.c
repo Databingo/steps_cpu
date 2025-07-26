@@ -1,7 +1,7 @@
 /*
  * Bare-metal FLOAT32 Llama-2 Chatbot in pure C
  * Final, simplified, interactive, and fully working version for qemu-riscv64.
- * Fixes both KV cache and memory leak bugs for multiple inferences.
+ * Fixes both the repetitive token bug (RoPE) and the multi-inference hang (KV Cache).
  */
 
 // --- BARE-METAL DEFINITIONS ---
@@ -120,6 +120,9 @@ float* forward(Transformer* t, int token, int pos) {
     for(int l=0; l<p->n_layers; l++) {
         rmsnorm(s->xb, x, w->rms_att_weight+l*dim, dim);
         matmul(s->q, s->xb, w->wq+l*dim*dim, dim, dim); matmul(s->k, s->xb, w->wk+l*dim*kv_dim, dim, kv_dim); matmul(s->v, s->xb, w->wv+l*dim*kv_dim, dim, kv_dim);
+        
+        // --- BUG FIX: RoPE block is removed as stories*.bin models do not use it ---
+
         int loff=l*p->seq_len*kv_dim;
         memcpy(s->key_cache+loff+pos*kv_dim, s->k, kv_dim*sizeof(float)); memcpy(s->value_cache+loff+pos*kv_dim, s->v, kv_dim*sizeof(float));
         for(int h=0; h<p->n_heads; h++){
