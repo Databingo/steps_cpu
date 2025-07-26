@@ -36,6 +36,6 @@ SECTIONS {
 
   . = ALIGN(8);
   __stack_bottom = .;
-  . += 4096 * 16; /* 64 KB stack */
+  . += 4096 * 64; /* 256 KB stack */
   __stack_top = .;
 }

@@ -50,6 +50,21 @@ void itoa(int n, char* b) {
     b[i] = '\0';
 }
 
+void utoa(size_t n, char* b) {
+    if (n == 0) { b[0] = '0'; b[1] = '\0'; return; }
+    int i = 0;
+    while (n != 0) {
+        b[i++] = (n % 10) + '0';
+        n /= 10;
+    }
+    // Reverse string
+    int s = 0, e = i - 1;
+    while (s < e) {
+        char t = b[s]; b[s] = b[e]; b[e] = t;
+        s++; e--;
+    }
+    b[i] = '\0';
+}
 // libm function declarations
 float sqrtf(float);
 float expf(float);
@@ -113,8 +128,7 @@ typedef struct {
 #define ARENA_SIZE 128000000
 static unsigned char g_arena[ARENA_SIZE];
 static size_t g_arena_offset = 0;
-void* arena_alloc(size_t size) {
-    size = (size + 15) & ~15; // Align to 16 bytes
+void* arena_alloc(size_t size) { size = (size + 15) & ~15; // Align to 16 bytes
     if (g_arena_offset + size > ARENA_SIZE) {
         char buf[32];
         uart_puts("ERROR: Arena out of memory! Offset: ");
@@ -604,6 +618,49 @@ void build_sampler(Sampler* s, int vocab_size, float temp, unsigned long long se
     s->temperature = temp;
     s->rng_state = seed;
 }
+/*
+ * A robust itoa implementation for bare-metal systems.
+ * It handles negative numbers, zero, and the most-negative-number corner case.
+ */
+void itoa_c(long long val, char* buf) {
+    long long n = val;
+    int i = 0;
+
+    if (n == 0) {
+        buf[i++] = '0';
+        buf[i] = '\0';
+        return;
+    }
+
+    // Use a temporary buffer to build the string in reverse
+    char temp_buf[21]; // Max length for a 64-bit signed long long + sign + null
+    int temp_i = 0;
+
+    // Handle negative numbers by printing the sign and working with the absolute value
+    if (n < 0) {
+        buf[i++] = '-';
+        // Carefully handle the most negative number case (e.g., -9223372036854775808)
+        // by converting to a large positive unsigned number.
+        unsigned long long pos_n = -(unsigned long long)n;
+        while (pos_n > 0) {
+            temp_buf[temp_i++] = (pos_n % 10) + '0';
+            pos_n /= 10;
+        }
+    } else {
+        while (n > 0) {
+            temp_buf[temp_i++] = (n % 10) + '0';
+            n /= 10;
+        }
+    }
+    
+    // Copy the reversed string from the temp buffer to the output buffer
+    while (temp_i > 0) {
+        buf[i++] = temp_buf[--temp_i];
+    }
+    
+    // Add the null terminator
+    buf[i] = '\0';
+}
 void generate(Transformer* t, Tokenizer* tok, Sampler* sampler, char* prompt, int steps) {
     char buf[64];
     int num_prompt;
@@ -613,43 +670,48 @@ void generate(Transformer* t, Tokenizer* tok, Sampler* sampler, char* prompt, in
         uart_puts("ERROR: Prompt tokenization failed.\n");
         return;
     }
+    //
+    //utoa(g_arena_offset, bu); uart_puts(bu);
+    char bu[32];
+    uart_puts("g_arena_offset: "); itoa(g_arena_offset, bu); uart_puts(bu); uart_puts("\n");
+    //return;
 
-    // Debug: Print prompt tokens
-    uart_puts("Prompt tokens: ");
-    for (int i = 0; i < num_prompt; i++) {
-        itoa(prompt_tokens[i], buf); uart_puts(buf); uart_puts(" ");
-    }
-    uart_puts("\n");
+    //// Debug: Print prompt tokens
+    //uart_puts("Prompt tokens: ");
+    //for (int i = 0; i < num_prompt; i++) {
+    //    itoa(prompt_tokens[i], buf); uart_puts(buf); uart_puts(" ");
+    //}
+    //uart_puts("\n");
 
-    int token = prompt_tokens[0], pos = 0, next;
-    while (pos < steps) {
-        uart_puts("[ Token "); itoa(pos + 1, buf); uart_puts(buf);
-        uart_puts(" / "); itoa(steps, buf); uart_puts(buf); uart_puts(" ] -> ");
+    //int token = prompt_tokens[0], pos = 0, next;
+    //while (pos < steps) {
+    //    uart_puts("[ Token "); itoa(pos + 1, buf); uart_puts(buf);
+    //    uart_puts(" / "); itoa(steps, buf); uart_puts(buf); uart_puts(" ] -> ");
 
-        float* logits = forward(t, token, pos);
-        // Debug: Print first few logits
-        if (pos < 3) {
-            uart_puts("Logits: ");
-            for (int i = 0; i < 5 && i < sampler->vocab_size; i++) {
-                int* fval = (int*)&logits[i];
-                itoa(*fval, buf); uart_puts(buf); uart_puts(" ");
-            }
-            uart_puts("\n");
-        }
+    //    float* logits = forward(t, token, pos);
+    //    // Debug: Print first few logits
+    //    if (pos < 3) {
+    //        uart_puts("Logits: ");
+    //        for (int i = 0; i < 5 && i < sampler->vocab_size; i++) {
+    //            int* fval = (int*)&logits[i];
+    //            itoa(*fval, buf); uart_puts(buf); uart_puts(" ");
+    //        }
+    //        uart_puts("\n");
+    //    }
 
-        if (pos < num_prompt - 1) {
-            next = prompt_tokens[pos + 1];
-        } else {
-            next = sample(sampler, logits);
-        }
+    //    if (pos < num_prompt - 1) {
+    //        next = prompt_tokens[pos + 1];
+    //    } else {
+    //        next = sample(sampler, logits);
+    //    }
 
-        pos++;
-        if (next == 1) break; // BOS token
-        char* p = decode(tok, token, next);
-        safe_printf(p);
-        token = next;
-    }
-    uart_puts("\n");
+    //    pos++;
+    //    if (next == 1) break; // BOS token
+    //    char* p = decode(tok, token, next);
+    //    safe_printf(p);
+    //    token = next;
+    //}
+    //uart_puts("\n");
 }
 
 // Enable FPU in machine mode
@@ -723,7 +785,9 @@ int main() {
         }
         
         uart_puts("\nGenerating response...\n");
-        uart_puts("--------------------------------\n");
+        uart_puts("-.-------------------------------\n");
+        uart_puts("input:");
+        uart_puts(input);
         generate(&transformer, &tokenizer, &sampler, input, steps);
     }
 
