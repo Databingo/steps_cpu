@@ -678,42 +678,42 @@ void generate(Transformer* t, Tokenizer* tok, Sampler* sampler, char* prompt, in
     uart_puts("g_arena_offset: "); itoa(g_arena_offset, bu); uart_puts(bu); uart_puts("\n");
     //return;
 
-    //// Debug: Print prompt tokens
-    //uart_puts("Prompt tokens: ");
-    //for (int i = 0; i < num_prompt; i++) {
-    //    itoa(prompt_tokens[i], buf); uart_puts(buf); uart_puts(" ");
-    //}
-    //uart_puts("\n");
+    // Debug: Print prompt tokens
+    uart_puts("Prompt tokens: ");
+    for (int i = 0; i < num_prompt; i++) {
+        itoa(prompt_tokens[i], buf); uart_puts(buf); uart_puts(" ");
+    }
+    uart_puts("\n");
 
-    //int token = prompt_tokens[0], pos = 0, next;
-    //while (pos < steps) {
-    //    uart_puts("[ Token "); itoa(pos + 1, buf); uart_puts(buf);
-    //    uart_puts(" / "); itoa(steps, buf); uart_puts(buf); uart_puts(" ] -> ");
+    int token = prompt_tokens[0], pos = 0, next;
+    while (pos < steps) {
+        uart_puts("[ Token "); itoa(pos + 1, buf); uart_puts(buf);
+        uart_puts(" / "); itoa(steps, buf); uart_puts(buf); uart_puts(" ] -> ");
 
-    //    float* logits = forward(t, token, pos);
-    //    // Debug: Print first few logits
-    //    if (pos < 3) {
-    //        uart_puts("Logits: ");
-    //        for (int i = 0; i < 5 && i < sampler->vocab_size; i++) {
-    //            int* fval = (int*)&logits[i];
-    //            itoa(*fval, buf); uart_puts(buf); uart_puts(" ");
-    //        }
-    //        uart_puts("\n");
-    //    }
+        float* logits = forward(t, token, pos);
+        // Debug: Print first few logits
+        if (pos < 3) {
+            uart_puts("Logits: ");
+            for (int i = 0; i < 5 && i < sampler->vocab_size; i++) {
+                int* fval = (int*)&logits[i];
+                itoa(*fval, buf); uart_puts(buf); uart_puts(" ");
+            }
+            uart_puts("\n");
+        }
 
-    //    if (pos < num_prompt - 1) {
-    //        next = prompt_tokens[pos + 1];
-    //    } else {
-    //        next = sample(sampler, logits);
-    //    }
+        if (pos < num_prompt - 1) {
+            next = prompt_tokens[pos + 1];
+        } else {
+            next = sample(sampler, logits);
+        }
 
-    //    pos++;
-    //    if (next == 1) break; // BOS token
-    //    char* p = decode(tok, token, next);
-    //    safe_printf(p);
-    //    token = next;
-    //}
-    //uart_puts("\n");
+        pos++;
+        if (next == 1) break; // BOS token
+        char* p = decode(tok, token, next);
+        safe_printf(p);
+        token = next;
+    }
+    uart_puts("\n");
 }
 
 // Enable FPU in machine mode
