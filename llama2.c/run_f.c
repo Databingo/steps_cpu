@@ -1,7 +1,7 @@
 /*
  * Bare-metal FLOAT32 Llama-2 Chatbot in pure C
  * Final, simplified, interactive, and fully working version for qemu-riscv64.
- * Fixes KV cache bug for multiple inferences.
+ * Fixes both KV cache and memory leak bugs for multiple inferences.
  */
 
 // --- BARE-METAL DEFINITIONS ---
