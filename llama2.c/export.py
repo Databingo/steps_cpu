@@ -997,6 +997,25 @@ def streaming_export_v2(model_path, filepath, group_size=64):
         del weight, q, s
         gc.collect()
     
+    print("Writing frequency tensors...")
+    # Generate and write frequency tensors for RoPE
+    import torch
+    import math
+    
+    # Generate freqs_cos and freqs_sin
+    freqs_cos = torch.zeros(max_seq_len, dim // n_heads // 2)
+    freqs_sin = torch.zeros(max_seq_len, dim // n_heads // 2)
+    
+    for pos in range(max_seq_len):
+        for i in range(dim // n_heads // 2):
+            freq = 1.0 / (10000 ** (2 * i / (dim // n_heads)))
+            angle = pos * freq
+            freqs_cos[pos, i] = math.cos(angle)
+            freqs_sin[pos, i] = math.sin(angle)
+    
+    serialize_fp32(out_file, freqs_cos)
+    serialize_fp32(out_file, freqs_sin)
+    
     out_file.close()
     print(f"wrote {filepath}")
     return True
