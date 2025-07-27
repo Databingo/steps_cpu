@@ -901,7 +901,7 @@ def streaming_export_v2(model_path, filepath, group_size=64):
     # Open output file
     out_file = open(filepath, 'wb')
     
-    # Write header (256 bytes)
+    # Write header (256 bytes) - exactly like original version2_export
     version = 2
     out_file.write(struct.pack('I', 0x616b3432))  # magic
     out_file.write(struct.pack('i', version))     # version
@@ -920,7 +920,7 @@ def streaming_export_v2(model_path, filepath, group_size=64):
         return None
     
     print("Writing normalization weights...")
-    # Write all normalization weights in fp32
+    # Write all normalization weights in fp32 - exactly like original version2_export
     # Attention norms
     for i in range(n_layers):
         weight = get_tensor_from_files(f'model.layers.{i}.input_layernorm.weight')
@@ -952,7 +952,7 @@ def streaming_export_v2(model_path, filepath, group_size=64):
     gc.collect()
     
     print("Writing quantized weights...")
-    # Write quantized weights
+    # Write quantized weights - exactly like original version2_export
     weight_names = [
         'model.embed_tokens.weight',
     ]
@@ -997,24 +997,8 @@ def streaming_export_v2(model_path, filepath, group_size=64):
         del weight, q, s
         gc.collect()
     
-    print("Writing frequency tensors...")
-    # Generate and write frequency tensors for RoPE
-    import torch
-    import math
-    
-    # Generate freqs_cos and freqs_sin
-    freqs_cos = torch.zeros(max_seq_len, dim // n_heads // 2)
-    freqs_sin = torch.zeros(max_seq_len, dim // n_heads // 2)
-    
-    for pos in range(max_seq_len):
-        for i in range(dim // n_heads // 2):
-            freq = 1.0 / (10000 ** (2 * i / (dim // n_heads)))
-            angle = pos * freq
-            freqs_cos[pos, i] = math.cos(angle)
-            freqs_sin[pos, i] = math.sin(angle)
-    
-    serialize_fp32(out_file, freqs_cos)
-    serialize_fp32(out_file, freqs_sin)
+    # Note: Do NOT write frequency tensors - they are not part of version 2 format
+    # The original version2_export does not include them
     
     out_file.close()
     print(f"wrote {filepath}")
