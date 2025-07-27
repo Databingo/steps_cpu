@@ -11,3 +11,5 @@ run_model/*.h
 llama2.c/*.h
 llama2.c/kernel.bin
 llama2.c/kernel.elf
+llama2.c/*.bin
+llama2.c/*.safetensors
