@@ -44,7 +44,9 @@ FPGA grok 推荐：
 Xilinx Artix-7 XC7A200T（Digilent Nexys Video）
 Xilinx Kintex-7 KC705
 Lattice ECP5
-
+=> 在 FPGA 上部署 verilog 实现的 riscv 处理器逻辑，然后运行用自己的汇编器、编译器编译 神经网络, 用它加载最新的开源 LLM 参数，通过 uart 串口与之互动。
+需要 FPGA 开发板, RISCV64 verilog 代码实现，riscv 汇编器(C 编译器)，神经网络 C 实现(无需 libc 及操作系统), 开源大模型 C 参数
+手撸了一个 riscv64 芯片(verilog)、一个 rva24 汇编器(go)、一个神经网络(c)，烧制在开发板上运行 llama2-7b 大模型，对话 4tokens/秒，这下软硬件全国产了, 一条龙，手工的哦。。。
 
 FPGA 版的 riscv 要支持 freebsd 系统运行，最少要实现: RV64IMAFD
 I 整数
