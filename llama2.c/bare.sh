@@ -6,5 +6,11 @@
 #bash buildq.sh
 #bash qemuq.sh
 #
+##riscv64-unknown-elf-objdump -D \
+#  -b binary \
+#  -m riscv:rv64 \
+#  --adjust-vma=0x80000000 \
+#  -M no-aliases \
+#  llama2.c/kernel_f.bin
 bash buildf.sh
 bash qemuf.sh
