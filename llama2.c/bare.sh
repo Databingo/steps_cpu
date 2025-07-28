@@ -3,11 +3,8 @@
 #qemu-system-riscv64 -machine help
 #smaller llama2 LLM:SparseLlama-2-7b-pruned_50.2of4 
 #
-bash buildq.sh
-bash qemuq.sh
+#bash buildq.sh
+#bash qemuq.sh
 #
-#bash build.sh
-#bash qemu.sh
-#
-#bash buildf.sh
-#bash qemuf.sh
+bash buildf.sh
+bash qemuf.sh
