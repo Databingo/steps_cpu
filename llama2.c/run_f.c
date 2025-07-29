@@ -68,9 +68,26 @@ void read_line(char* buffer, int max_len)
     buffer[i] = '\0';
 }
 
-// libm function declarations
-float sqrtf(float);
-float expf(float);
+//// libm function declarations
+//float sqrtf(float);
+//float expf(float);
+// --- SELF-CONTAINED MATH FUNCTIONS ---
+// Replaces the need for libm.a
+float fabsf(float x) { return x < 0 ? -x : x; }
+float roundf(float x) { return (x >= 0.0f) ? (int)(x + 0.5f) : (int)(x - 0.5f); }
+float sqrtf(float x) {
+    if (x == 0.0f) return 0.0f;
+    float guess = x;
+    for(int i=0; i<10; i++) { guess = 0.5f * (guess + x / guess); }
+    return guess;
+}
+// Fast approximation for expf, good enough for softmax
+float expf(float x) {
+    if (x < -20.0f) return 0.0f; // Prevent underflow for large negative x
+    float sum = 1.0f; float term = 1.0f;
+    for (int i = 1; i < 10; ++i) { term *= x / i; sum += term; }
+    return sum;
+}
 
 // ----------------------------------------------------------------------------
 // Globals and Data Structures (Simplified for float32)
