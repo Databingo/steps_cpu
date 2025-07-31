@@ -1,0 +1,21 @@
+#!/bin/sh
+set -e
+XPACK_TOOLCHAIN_BIN="/usr/local/projects/bin/xpack-riscv-none-elf-gcc-14.2.0-3/bin"
+TARGET_PREFIX="${XPACK_TOOLCHAIN_BIN}/riscv-none-elf-"
+#CFLAGS="-march=rv64gc -mabi=lp64d -g -O3 -ffreestanding -nostdlib -mcmodel=medany"
+#LDFLAGS="-T linker.ld -nostdlib -lm"  # No longer needed - using custom math functions
+#CFLAGS="-nodefaultlibs -fno-builtin -march=rv64imafd -mno-relax -mabi=lp64d -g -O3 -ffreestanding -nostdlib -mcmodel=medany"
+CFLAGS="-nodefaultlibs -fno-builtin -march=rv64imafd -mno-relax -mabi=lp64d -Os -ffreestanding -nostdlib -mcmodel=medany -fomit-frame-pointer" # rm -g and -0s for reduce size
+#LDFLAGS="-T linker.ld -nostdlib -mno-relax"
+
+echo "--- Compiling C and Assembly Code ---"
+"${TARGET_PREFIX}gcc" $CFLAGS -c  "-S" c_nake_2_assembly.c -o c_nake_2_assembly.s
+#"${TARGET_PREFIX}gcc" $CFLAGS -c run_f.c -o run_f.o
+#
+#echo "--- Linking Executable ---"
+#"${TARGET_PREFIX}gcc" $CFLAGS -o kernel_f.elf start.o run_f.o $LDFLAGS
+#
+#echo "--- Creating Flat Binary ---"
+#"${TARGET_PREFIX}objcopy" -O binary kernel_f.elf kernel_f.bin
+#
+#echo "--- Build successful! kernel_q80.bin is ready. ---"
