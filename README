@@ -81,3 +81,5 @@ ld -o t /usr/lib/crt1.o /usr/lib/crti.o caled.o /usr/lib/crtn.o -L/usr/lib -lc -
 gemini pro 2.5 RAM: 28Gb
 grok4 128Gb?
 deepseekr1 192Gb
+
+compiler:token-lexer-parser-ast-codegen
