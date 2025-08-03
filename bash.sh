@@ -34,7 +34,7 @@ echo "" > binary_instructions.txt
 # go run rvas.go auipc.s &&
 #go run rvas.go j.s &&
 #
-go run rvas.go jr.s &&
+go run rvas.go jr.s && #>> binary_instructions.txt
 # s4.2
 #iverilog -g2012 -o s4 4_execute_instruction_2_64I.v 4tb.v &&
 #iverilog -g2012 -o s4 4_mini.v 4tb.v &&
