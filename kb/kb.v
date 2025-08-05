@@ -20,5 +20,12 @@ reg [22:0] count;
 					end
 				end	
 endmodule
+
+// -----Blink ok-----
+// Device: EP2C20F484C7
+// Handbook:
 // Cyclone II FPGA Starter Board
-// SW0 
+// Pin map:
+// in : SW0-PIN_R20
+// out: LEDR0-PIN_L22
+// clk: CLK-PIN_L1 
