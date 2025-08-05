@@ -20,3 +20,5 @@ reg [22:0] count;
 					end
 				end	
 endmodule
+// Cyclone II FPGA Starter Board
+// SW0 
