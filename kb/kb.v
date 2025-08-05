@@ -1,7 +1,7 @@
-module kb (in,out,clk);
+module kb (in,out,out2, clk);
 
 input in,clk;
-output reg out;
+output reg out, out2;
 reg [22:0] count;
 	always @(posedge(clk))
 		begin
@@ -10,12 +10,14 @@ reg [22:0] count;
 					if (count == 0)
 						begin 
 							out <= ~out;
+							out2 <= ~out2;
 						end
 						count <= count + 1;
 				end 
 				else 
 					begin 
 						out <= 0;
+						out2 <= 1;
 						count <= 1;
 					end
 				end	
