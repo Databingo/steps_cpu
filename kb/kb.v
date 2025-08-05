@@ -1,8 +1,8 @@
 module kb (
 
-(* location = "PIN_R20" *)input in,   
-(* location = "PIN_L1" *)input clk,
-(* location = "PIN_L22" *)output reg out,
+input in,   
+input clk,
+output reg out,
 );
 
 reg [22:0] count;
