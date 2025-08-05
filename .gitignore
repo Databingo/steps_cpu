@@ -1,6 +1,5 @@
 db
 *.qpf
-*.qsf
 *.vcd
 *.vwf
 simulation
