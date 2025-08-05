@@ -24,7 +24,7 @@ module keyboard_to_leds(
     input CLOCK_50,
     input PS2_CLK,
     input PS2_DATA,
-    output [7:0] LEDG
+    output [7:0] LEDG,
     );
     
     wire [7:0] scan_code;
