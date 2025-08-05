@@ -25,7 +25,7 @@ endmodule
 // Device: EP2C20F484C7
 // Handbook:
 // Cyclone II FPGA Starter Board
-// Pin map:
+// Pin planner map:
 // in : SW0-PIN_R20
 // out: LEDR0-PIN_L22
 // clk: CLK-PIN_L1 
