@@ -2,7 +2,7 @@ module kb (
 
 input in,   
 input clk,
-output reg out,
+output reg out
 );
 
 reg [22:0] count;
