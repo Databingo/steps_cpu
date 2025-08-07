@@ -2,7 +2,8 @@ module kb (
 
 input in,   
 input clk,
-output reg out
+output reg out,
+output reg out2
 );
 
 reg [22:0] count;
@@ -13,12 +14,14 @@ reg [22:0] count;
 					if (count == 0)
 						begin 
 							out <= ~out;
+							out2 <= ~out2;
 						end
 						count <= count + 1;
 				end 
 				else 
 					begin 
 						out <= 0;
+						out2 <= 1;
 						count <= 1;
 					end
 				end	
@@ -32,3 +35,5 @@ endmodule
 // in : SW0-PIN_R20
 // out: LEDR0-PIN_L22
 // clk: CLK-PIN_L1 
+// -------------------
+// cofigure in qsf file
