@@ -1,7 +1,10 @@
-module kb (in,out,out2, clk);
+module kb (
 
-input in,clk;
-output reg out, out2;
+(* location = "PIN_R20" *)input in,   
+(* location = "PIN_L1" *)input clk,
+(* location = "PIN_L22" *)output reg out,
+);
+
 reg [22:0] count;
 	always @(posedge(clk))
 		begin
@@ -10,14 +13,12 @@ reg [22:0] count;
 					if (count == 0)
 						begin 
 							out <= ~out;
-							out2 <= ~out2;
 						end
 						count <= count + 1;
 				end 
 				else 
 					begin 
 						out <= 0;
-						out2 <= 1;
 						count <= 1;
 					end
 				end	
