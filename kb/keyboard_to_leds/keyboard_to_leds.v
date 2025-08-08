@@ -1,10 +1,3 @@
-// ---------------------------------------------------------------------------
-// File: keyboard_to_leds.v
-// FINAL, WORKING VERSION. This adapts the known-good tutorial code directly.
-// It keeps the core, proven logic and simplifies it for our specific task.
-// ---------------------------------------------------------------------------
-
-// This module is a direct, simplified adaptation of the working tutorial code.
 module ps2_decoder (
     input        clk,            // System clock (was clk_in)
     input        ps2_clk_async,  // Asynchronous PS/2 clock (was key_clk)
@@ -27,9 +20,9 @@ module ps2_decoder (
     // Falling edge detector for the synchronized clock (from tutorial)
     wire ps2_clk_falling_edge = ps2_clk_r1 & (~ps2_clk_r0);
 
-    // --- Data Capture Logic (from tutorial) ---
+    // --- Data Capture Logic ---
     reg [3:0] cnt;
-    reg [7:0] temp_data;
+    reg [10:0] temp_data;
 
     // This is the core state machine for capturing the 11-bit frame.
     always @(posedge clk) begin
@@ -42,14 +35,17 @@ module ps2_decoder (
 
             case (cnt)
                 // We only care about bits 1-8 (the data bits)
-                1: temp_data[0] <= ps2_data_r1;
-                2: temp_data[1] <= ps2_data_r1;
-                3: temp_data[2] <= ps2_data_r1;
-                4: temp_data[3] <= ps2_data_r1;
-                5: temp_data[4] <= ps2_data_r1;
-                6: temp_data[5] <= ps2_data_r1;
-                7: temp_data[6] <= ps2_data_r1;
-                8: temp_data[7] <= ps2_data_r1;
+                0: temp_data[0] <= ps2_data_r1; // Start bit:0
+                1: temp_data[1] <= ps2_data_r1;
+                2: temp_data[2] <= ps2_data_r1;
+                3: temp_data[3] <= ps2_data_r1;
+                4: temp_data[4] <= ps2_data_r1;
+                5: temp_data[5] <= ps2_data_r1;
+                6: temp_data[6] <= ps2_data_r1;
+                7: temp_data[7] <= ps2_data_r1;
+                8: temp_data[8] <= ps2_data_r1;
+                9: temp_data[9] <= ps2_data_r1; // Parity bit
+               10: temp_data[10] <= ps2_data_r1; // Stop bit:1
                 default: ;
             endcase
         end
@@ -62,7 +58,7 @@ module ps2_decoder (
         if (cnt == 10 && ps2_clk_falling_edge) begin
             // ...and the received data is not a key-release code...
             if (temp_data != 8'hF0) begin
-                code <= temp_data; // Latch the captured scan code to the output.
+                code <= temp_data[8:1]; // Latch the captured scan code to the output.
             end
         end
     end
