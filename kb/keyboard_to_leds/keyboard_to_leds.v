@@ -60,7 +60,7 @@ module ps2(
                 // 1. Start bit == 0 (which we already checked)
                 // 2. Stop bit == 1 (ps2_data at this edge should be the stop bit)
                 // 3. Odd parity (the XOR sum of the data bits and parity bit is 1)
-                if (ps2_data == 1'b1' && (^buffer[9:1]) == 1'b1) begin
+                if (ps2_data == 1'b1 && (^buffer[9:1]) == 1'b1) begin
                     code <= buffer[8:1]; // Latch the valid 8-bit scan code
                 end
                 count <= 0; // Reset for the next frame
