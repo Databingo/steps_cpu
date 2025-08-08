@@ -23,7 +23,7 @@ endmodule
 module keyboard_to_leds(
     input CLOCK_50,
     input PS2_CLK,
-    input PS2_DATA,
+    input PS2_DAT,
     output [7:0] LEDG
     );
     
@@ -32,7 +32,7 @@ module keyboard_to_leds(
     ps2 ps2_decoder (
         .clk(CLOCK_50),
         .ps2_clk(PS2_CLK),
-        .ps2_data(PS2_DATA),
+        .ps2_data(PS2_DAT),
         .code(scan_code)
     );
     
