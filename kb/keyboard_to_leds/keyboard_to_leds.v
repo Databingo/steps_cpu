@@ -5,7 +5,7 @@
 // ---------------------------------------------------------------------------
 
 // This module is a direct, simplified adaptation of the working tutorial code.
-module ps2_decoder_tutorial (
+module ps2_decoder (
     input        clk,            // System clock (was clk_in)
     input        ps2_clk_async,  // Asynchronous PS/2 clock (was key_clk)
     input        ps2_data_async, // Asynchronous PS/2 data (was key_data)
@@ -87,7 +87,7 @@ module keyboard_to_leds (
     assign LEDG = scan_code;
 
     // Instantiate our new, tutorial-based PS/2 module
-    ps2_decoder_tutorial ps2_decoder_inst (
+    ps2_decoder ps2_decoder_inst (
         .clk(CLOCK_50),
         .ps2_clk_async(PS2_CLK),
         .ps2_data_async(PS2_DAT),
