@@ -56,8 +56,8 @@ module ps2_decoder (
     always @(posedge clk) begin
         // When the 10th bit (stop bit) has just been received on the last falling edge...
         if (cnt == 10 && ps2_clk_falling_edge) begin
-            // ...and the received data is not a key-release code...
-            if (temp_data != 8'hF0) begin
+            // ...and the received data is not a key-release code...and parity is 1
+            if (temp_data[8:1] != 8'hF0 && temp_data[0] == 1'b0 && temp_data[10]==1'b1 && (^temp_data[9:1]==1'b1)) begin
                 code <= temp_data[8:1]; // Latch the captured scan code to the output.
             end
         end
