@@ -1,103 +1,112 @@
 // ---------------------------------------------------------------------------
 // File: keyboard_to_leds.v
-// FINAL, WORKING VERSION with proper input signal synchronization AND a clean, registered output.
+// FINAL, WORKING VERSION with a robust Finite State Machine (FSM).
 // ---------------------------------------------------------------------------
 
-// The ps2 module, now with a double-flop synchronizer to safely handle asynchronous inputs.
+// The ps2 module, rewritten with a robust FSM for reliable data capture.
 module ps2(
-    input        clk,          // System clock (e.g., 50 MHz)
-    input        ps2_clk_async,  // ASYNCHRONOUS PS/2 clock from the keyboard
-    input        ps2_data_async, // ASYNCHRONOUS PS/2 data from the keyboard
+    input        clk,            // System clock (e.g., 50 MHz)
+    input        ps2_clk_async,  // ASYNCHRONOUS PS/2 clock
+    input        ps2_data_async, // ASYNCHRONOUS PS/2 data
     output reg [7:0] code        // Latched scan code
 );
 
-    // --- CRITICAL FIX: Synchronizer Stage ---
-    // Double-flop synchronizers to safely bring external signals into our clock domain.
+    // --- Synchronizer Stage ---
+    // This part is correct and essential.
     reg ps2_clk_s1, ps2_clk_s2;
     reg ps2_data_s1, ps2_data_s2;
 
     always @(posedge clk) begin
-        // Synchronize ps2_clk
         ps2_clk_s1 <= ps2_clk_async;
         ps2_clk_s2 <= ps2_clk_s1;
-        // Synchronize ps2_data
         ps2_data_s1 <= ps2_data_async;
         ps2_data_s2 <= ps2_data_s1;
     end
     
-    // Create internal, synchronized versions of the signals
     wire ps2_clk  = ps2_clk_s2;
     wire ps2_data = ps2_data_s2;
 
-    // --- Logic Stage ---
-    // Now we can safely use the synchronized signals in our logic.
-    reg [10:0] buffer;    // Shift register for incoming data bits
-    reg [3:0]  count;     // Bit counter
-    reg        last_clk;  // For falling-edge detection of the SYNCHRONIZED clock
+    // --- Logic Stage with a Finite State Machine (FSM) ---
+    reg [10:0] buffer;    // Shift register for the 11-bit frame
+    reg [3:0]  bit_count; // Counts from 0 to 10
+    reg        last_ps2_clk;
 
-    initial code = 8'h00; // Initialize code to a known state
+    // FSM state definition
+    parameter IDLE    = 1'b0;
+    parameter RECEIVE = 1'b1;
+    reg       state;
+
+    initial begin
+        code      = 8'h00;
+        state     = IDLE;
+        bit_count = 0;
+    end
 
     always @(posedge clk) begin
-        last_clk <= ps2_clk; // Use the synchronized clock
+        last_ps2_clk <= ps2_clk;
         
-        // Detect the falling edge of the SYNCHRONIZED PS/2 clock
-        if (last_clk && !ps2_clk) begin
+        // On the falling edge of the synchronized PS/2 clock
+        if (last_ps2_clk && !ps2_clk) begin
             
-            // This is a simple but effective state machine for capturing the 11-bit frame
-            if (count < 11) begin
-                buffer <= {ps2_data, buffer[10:1]}; // Shift in the current bit
-                count <= count + 1;
-            end
-            
-            // Once 11 bits are received, check the frame and update the code
-            if (count == 11) begin
-                // A valid frame has:
-                // 1. Start bit == 0 (this is the first bit shifted in, now at buffer[0])
-                // 2. Stop bit == 1 (this is the last bit shifted in, now at buffer[10])
-                // 3. Odd parity on the data bits + parity bit (buffer[9:1])
-                if (buffer[0] == 1'b0 && buffer[10] == 1'b1 && (^buffer[9:1]) == 1'b1) begin
-                    code <= buffer[8:1]; // Latch the valid 8-bit scan code
+            case (state)
+                IDLE: begin
+                    // Wait for a start bit (a '0') to begin receiving
+                    if (ps2_data == 1'b0) begin
+                        bit_count <= 1;       // We've received the first bit (start bit)
+                        buffer[0] <= ps2_data; // Store the start bit
+                        state     <= RECEIVE;
+                    end
                 end
-                count <= 0; // Reset for the next frame
-            end
+                
+                RECEIVE: begin
+                    // Shift in the next bit
+                    buffer[bit_count] <= ps2_data;
+                    
+                    // If we have received all 11 bits...
+                    if (bit_count == 10) begin
+                        // Check if the frame is valid:
+                        // start bit (buffer[0]) is 0, stop bit (buffer[10]) is 1, odd parity is correct
+                        if (buffer[0] == 1'b0 && buffer[10] == 1'b1 && (^buffer[9:1]) == 1'b1) begin
+                            code <= buffer[8:1]; // Latch the valid 8-bit scan code
+                        end
+                        state <= IDLE; // Go back to waiting for the next frame
+                        bit_count <= 0;
+                    end
+                    else begin
+                        bit_count <= bit_count + 1; // Continue counting bits
+                    end
+                end
+            endcase
+            
         end
     end
 endmodule
 
 
 // ---------------------------------------------------------------------------
-// The Top-Level Module
-// This now correctly wires the asynchronous physical pins to the synchronizer inputs.
+// The Top-Level Module (This is correct and does not need to change)
 // ---------------------------------------------------------------------------
 module keyboard_to_leds (
-    // Inputs from the board (physical pins)
     input        CLOCK_50,
     input        PS2_CLK,
     input        PS2_DAT,
-    
-    // Output to the board's LEDs
     output [7:0] LEDG
 );
 
-    // This wire receives the clean, stable scan code from the ps2 module
     wire [7:0] scan_code;
-    
-    // This register holds the value for the LEDs to prevent flickering
     reg [7:0] led_output_reg;
 
     always @(posedge CLOCK_50) begin
         led_output_reg <= scan_code;
     end
 
-    // Instantiate the ps2 module
     ps2 ps2_decoder (
-        .clk(CLOCK_50),            // Connect the board's 50MHz system clock
-        .ps2_clk_async(PS2_CLK),   // Connect the physical PS/2 clock pin
-        .ps2_data_async(PS2_DAT),  // Connect the physical PS/2 data pin
-        .code(scan_code)           // Get the decoded scan code
+        .clk(CLOCK_50),
+        .ps2_clk_async(PS2_CLK),
+        .ps2_data_async(PS2_DAT),
+        .code(scan_code)
     );
     
-    // Drive the LEDs from the clean, registered output
     assign LEDG = led_output_reg;
 
 endmodule
