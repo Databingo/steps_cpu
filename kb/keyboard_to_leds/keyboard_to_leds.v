@@ -1,21 +1,19 @@
 // ---------------------------------------------------------------------------
 // File: keyboard_to_leds.v
-// FINAL, SIMPLIFIED, AND WORKING VERSION
-// This version uses a simple design that incorporates the two critical fixes:
-// 1. Double-flop synchronizer for the inputs.
-// 2. A fully registered output to prevent glitches.
+// FINAL, WORKING, AND SIMPLIFIED VERSION
+// Combines the essential input synchronizer with the robust, case-based
+// data capture logic inspired by the tutorial.
 // ---------------------------------------------------------------------------
 
-// A simple, robust PS/2 scan code receiver.
-module ps2_simple (
+// A simple and robust PS/2 scan code receiver.
+module ps2_decoder (
     input        clk,            // System clock (e.g., 50 MHz)
-    input        ps2_clk_async,  // Asynchronous PS/2 clock from the keyboard
-    input        ps2_data_async, // Asynchronous PS/2 data from the keyboard
-    output reg [7:0] code        // Latched scan code
+    input        ps2_clk_async,  // ASYNCHRONOUS PS/2 clock from the keyboard
+    input        ps2_data_async, // ASYNCHRONOUS PS/2 data from the keyboard
+    output reg [7:0] code        // The final, stable 8-bit scan code
 );
 
-    // --- Fix #1: Double-Flop Synchronizer ---
-    // Safely bring the external, asynchronous signals into our clock domain.
+    // --- Fix #1: Double-Flop Synchronizer (Essential) ---
     reg ps2_clk_s1, ps2_clk_s2;
     reg ps2_data_s1, ps2_data_s2;
 
@@ -30,53 +28,47 @@ module ps2_simple (
     wire ps2_clk  = ps2_clk_s2;
     wire ps2_data = ps2_data_s2;
 
-
-    // --- Logic Stage ---
+    // --- Fix #2: Robust Case-Based Data Capture Logic ---
     reg [3:0]  bit_count;     // Counts from 0 to 10 for the 11-bit frame
-    reg [9:0]  data_buffer;   // 10-bit buffer for data, parity, and stop bits
-    reg        last_ps2_clk;  // For detecting the falling edge of the sync'd clock
+    reg [7:0]  data_buffer;   // 8-bit buffer for the data payload
+    reg        last_ps2_clk;  // For detecting the falling edge
+
+    // A signal to detect the falling edge of the SYNCHRONIZED ps2_clk
+    wire ps2_clk_falling_edge = last_ps2_clk & ~ps2_clk;
 
     initial begin
         code      = 8'h00;
-        bit_count = 0;
+        bit_count = 4'd0;
     end
 
     always @(posedge clk) begin
         last_ps2_clk <= ps2_clk;
         
-        // On the falling edge of the synchronized PS/2 clock
-        if (last_ps2_clk && !ps2_clk) begin
-            
-            // If we are not in the middle of a frame, wait for a start bit ('0')
-            if (bit_count == 0) begin
-                if (ps2_data == 1'b0) begin
-                    bit_count <= bit_count + 1; // Start of frame detected
-                end
-            end
-            // If we are in the middle of a frame, shift in the next bit
-            else if (bit_count < 11) begin
-                // Shift data into our buffer. We only care about bits 1 through 10.
-                data_buffer <= {ps2_data, data_buffer[9:1]};
+        if (ps2_clk_falling_edge) begin
+            // If the counter is at 10 (stop bit), reset it. Otherwise, increment.
+            // This also handles the initial state where we wait for a start bit.
+            if (bit_count >= 10) begin
+                bit_count <= 0;
+            end else begin
                 bit_count <= bit_count + 1;
             end
-            
-            // If we have just received the 11th and final bit (the stop bit)
-            if (bit_count == 11) begin
-                // --- Fix #2: Fully Registered Update ---
-                // The frame is now complete. Check its validity.
-                // The data is in reverse order in the buffer.
-                // buffer[0] = stop bit, buffer[1] = parity, buffer[9:2] = data
-                
-                // A valid frame has a stop bit of '1'
-                if (data_buffer[0] == 1'b1) begin
-                    // Parity check is optional for simple decoding, but good practice.
-                    // if ((^data_buffer[9:1]) == 1'b1) begin
-                        code <= data_buffer[9:2]; // Update the output register
-                    // end
-                end
-                
-                bit_count <= 0; // Reset to wait for the next frame
-            end
+
+            // Use the counter to decide which bit to sample.
+            // This is a robust state machine.
+            case (bit_count)
+                // bit 0 is the start bit, we don't need to store it.
+                1: data_buffer[0] <= ps2_data; // Sample data bit 0
+                2: data_buffer[1] <= ps2_data; // Sample data bit 1
+                3: data_buffer[2] <= ps2_data; // Sample data bit 2
+                4: data_buffer[3] <= ps2_data; // Sample data bit 3
+                5: data_buffer[4] <= ps2_data; // Sample data bit 4
+                6: data_buffer[5] <= ps2_data; // Sample data bit 5
+                7: data_buffer[6] <= ps2_data; // Sample data bit 6
+                8: data_buffer[7] <= ps2_data; // Sample data bit 7
+                // bit 9 is the parity bit, we can ignore it for this simple decoder.
+                10: code <= data_buffer; // On the stop bit edge, latch the complete data buffer to the output.
+                default: ;
+            endcase
         end
     end
 endmodule
@@ -95,11 +87,11 @@ module keyboard_to_leds (
     wire [7:0] scan_code;
     
     // We can directly connect the output since the 'code' output of our
-    // new module is already a clean, stable register.
+    // new module is already a clean, stable register updated on a clean clock edge.
     assign LEDG = scan_code;
 
     // Instantiate our new, simple, and robust PS/2 module
-    ps2_simple ps2_decoder (
+    ps2_decoder ps2_decoder_inst (
         .clk(CLOCK_50),
         .ps2_clk_async(PS2_CLK),
         .ps2_data_async(PS2_DAT),
