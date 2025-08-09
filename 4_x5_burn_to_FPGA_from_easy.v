@@ -336,22 +336,15 @@ begin
 	if (!reset_n)
 	begin
 	  pc <=0;
-	  jp <=0;
-	  //ir <=0;
-	  //imm <=0;
-          rram[0] <= 64'h0;  // x0 恒为 0 
-	  rram[1] <=0; rram[2] <=0; rram[3] <=0; rram[30] <=0; rram[31] <=0;
-	  for (integer i = 0; i < 32; i = i + 1)  //!!初始化零否则新启用寄存器就不灵
-	      rram[i] <= 64'h0;
-	      current_privilege_mode <= M_mode; // init from M-mode for all RISCV processor
+	  current_privilege_mode <= M_mode; // init from M-mode for all RISCV processor
+	  for (integer i = 0; i < 32; i = i + 1) rram[i] <= 64'h0;  //!!初始化零否则新启用寄存器就不灵
 	end
 	else
         // 开始指令节拍  // Did every circle have to clean registers like upper !! initial?
 	begin
            // 取指令 + 分析指令 + 执行 | 或 准备数据 (分析且备好该指令所需的数据）
-	   //current_privilege_mode <= current_privilege_mode; // update mode
 	   pc <= pc +4 ;// Default: advance PC for most instructions; override in jumps/branches/traps
-    	   ir <= wire_ir ; 
+    	   //ir <= wire_ir ; 
            csr_id = csr_index(wire_csr); // ----------------------------SYSTEM 
     	   casez(wire_ir)  // casez ignore "?"
            // Load-class
