@@ -30,7 +30,7 @@ module s4 (
 
     // Instruction decoding
     wire [31:0] w_ir = {irom[pc+3], irom[pc+2], irom[pc+1], irom[pc]};
-    wire [6:0] wire_op = w_ir[6:0];
+    wire [6:0] w_op = w_ir[6:0];
     wire [4:0] w_rd = w_ir[11:7];
     wire [4:0] w_rs1 = w_ir[19:15];
     wire [4:0] w_rs2 = w_ir[24:20];
@@ -48,7 +48,7 @@ module s4 (
     // Outputs
     assign oir = w_ir;
     assign opc = pc;
-    assign oop = wire_op;
+    assign oop = w_op;
     assign of3 = wire_f3;
     assign of7 = wire_f7;
     assign oimm = w_imm;
