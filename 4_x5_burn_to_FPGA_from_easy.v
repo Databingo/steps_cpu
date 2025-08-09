@@ -1,7 +1,6 @@
 // 声明指令控制线
 reg Lui, Auipc, Lb, Lbu, Lh, Lhu, Lw, Lwu, Ld, Sb, Sh, Sw, Sd, Add, Sub, Sll, Slt, Sltu, Xor, Srl, Sra, Or, And, Addi, Slti, Sltiu, Ori, Andi, Xori, Slli, Srli, Srai, Addiw, Slliw, Srliw, Sraiw, Addw, Subw, Sllw, Srlw, Sraw, Jal, Jalr, Beq, Bne, Blt, Bge, Bltu, Bgeu, Fence, Fencei, Ecall, Ebreak, Csrrw, Csrrs, Csrrc, Csrrwi, Csrrsi, Csrrci;
 
-
 localparam M_mode = 2'b11;
 localparam S_mode = 2'b01;
 localparam U_mode = 2'b00;
@@ -56,8 +55,6 @@ integer menvcfgh = 12'h31A;     // 0x31A MRW Additional machine env. conf. regis
 integer mseccfg = 12'h747;      // 0x747 MRW Machine security configuration register
 integer mseccfgh = 12'h757;     // 0x757 MRW Additional machine security conf. register, RV32 only
 
-
-
 // 定义 csr 选择器
 function [4:0] csr_index;
  input [11:0] csr_wire;
@@ -103,9 +100,7 @@ function [4:0] csr_index;
 	//12'h3B1: csr_index = 5'd33;	                           // 0x3B1 MRW pmpaddr0
 	//                          	                           // ...
 	//12'h3EF: csr_index = 5'd34;	                           // 0x3EF MRW pmpaddr0
-
 	12'h100: csr_index = 5'd31;	                           // 0x3AF MRW pmpcfg15  
-
     default: csr_index = 5'b00000;
   endcase
  end
@@ -159,7 +154,6 @@ reg [2:0] jp;  // 程序节寄存拍器
 
 // 程序指令寄存器: 32 位宽度
 reg [31:0] ir; 
-
 
 // 指令显示器
 output [31:0] oir;
@@ -328,7 +322,6 @@ begin
  srliw_s1 = rram[wire_rs1][31:0] >> wire_shamt[4:0]; 
  sraiw_s1 = $signed(rram[wire_rs1][31:0]) >>> wire_shamt[4:0]; 
 end 
-
 
 always @(posedge clock or negedge reset_n)
 begin
