@@ -766,7 +766,6 @@ begin
 	    	   endcase
                    rram[0] <= 64'h0;  // x0 恒为 0
                    //pc <= pc + 4; 
-	    	   //jp <=1;
                    //jp <=0;
 	       end
 	    endcase
