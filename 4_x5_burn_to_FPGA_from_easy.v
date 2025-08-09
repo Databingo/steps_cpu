@@ -885,142 +885,24 @@ begin
 	    	   //             jp <=0;
                    //           end
 		   32'b???????_?????_?????_???_?????_1101111: begin rram[wire_rd] <= pc + 4; pc <= pc +  {{43{wire_jimm[20]}}, wire_jimm}; end // Jal
-	           //7'b1100111:begin 
-                   //             Jalr <= 1'b1; // set Jalr Flag 
-		   //             //jump PC to address imm(rs1) and place return address PC+4 in rd (no need padding last 0 not as JAL)
-		   //     	rram[wire_rd] <= pc + 4;
-		   //     	pc <= (rram[wire_rs1] +  {{52{wire_imm[11]}}, wire_imm}) & 64'hFFFFFFFFFFFFFFFE ;
-	    	   //             jp <=0;
-                   //           end
 		   32'b???????_?????_?????_???_?????_1100111: begin rram[wire_rd] <= pc + 4; pc <= (rram[wire_rs1] +  {{52{wire_imm[11]}}, wire_imm}) & 64'hFFFFFFFFFFFFFFFE ; end // Jalr
                    // Branch class
-	        //   7'b1100011:begin 
-		//	        case(wire_f3) // func3
-		//		  3'b000:begin
-		//		         Beq  <= 1'b1; // set Beq  Flag 
-		//		         //  take branch if rs1 rs2 equal to PC+(sign-extend imm_0)
-		//			 if (rram[wire_rs1] == rram[wire_rs2]) pc <= pc + sign_extended_bimm;
-		//			 else pc <= pc + 4; 
-	    	//                         jp <=0;
-		//		         end
 		   32'b???????_?????_?????_000_?????_1100011: begin if (rram[wire_rs1] == rram[wire_rs2]) pc <= pc + sign_extended_bimm; else pc <= pc + 4; end // Beq
-		//		  3'b001:begin 
-		//			 Bne  <= 1'b1; // set Bne  Flag 
-		//		         //  take branch if rs1 rs2 not equal to PC+(sign-extend imm_0)
-		//			 if (rram[wire_rs1] != rram[wire_rs2]) pc <= pc + sign_extended_bimm;
-		//			 else pc <= pc + 4; 
-	    	//                         jp <=0;
-		//		         end
 		   32'b???????_?????_?????_001_?????_1100011: begin if (rram[wire_rs1] != rram[wire_rs2]) pc <= pc + sign_extended_bimm; else pc <= pc + 4; end // Bne
-		//		  3'b100:begin 
-		//			 Blt  <= 1'b1; // set Blt  Flag 
-		//		         //  take branch if rs1 smaller than rs2 to PC+(sign-extend imm_0)
-		//			 if ($signed(rram[wire_rs1]) < $signed(rram[wire_rs2])) pc <= pc + sign_extended_bimm;
-		//			  else pc <= pc + 4;
-	    	//                         jp <=0;
-		//		         end
 		   32'b???????_?????_?????_100_?????_1100011: begin if ($signed(rram[wire_rs1]) < $signed(rram[wire_rs2])) pc <= pc + sign_extended_bimm; else pc <= pc + 4; end // Blt
-		//		  3'b101:begin 
-		//			 Bge  <= 1'b1; // set Bge  Flag 
-		//		         //  take branch if rs1 bigger than or equite to rs2 to PC+(sign-extend imm_0)
-		//			 if ($signed(rram[wire_rs1]) >= $signed(rram[wire_rs2])) pc <= pc + sign_extended_bimm;
-		//			  else pc <= pc + 4;
-	    	//                         jp <=0;
-		//			 end
 		   32'b???????_?????_?????_101_?????_1100011: begin if ($signed(rram[wire_rs1]) >= $signed(rram[wire_rs2])) pc <= pc + sign_extended_bimm; else pc <= pc + 4; end // Bge
-		//		  3'b110:begin
-		//			 Bltu <= 1'b1; // set Bltu Flag 
-		//			 //take branch if rs1 < rs2 in unsigned comparison 
-		//			    if (rram[wire_rs1] < rram[wire_rs2]) pc <= pc + sign_extended_bimm;
-		//			    else pc <= pc + 4;
-	    	//                            jp <=0;
-		//		         end 
 		   32'b???????_?????_?????_110_?????_1100011: begin if (rram[wire_rs1] < rram[wire_rs2]) pc <= pc + sign_extended_bimm; else pc <= pc + 4; end // Bltu
-		//		  3'b111:begin
-		//			 Bgeu <= 1'b1; // set Bgeu Flag 
-		//			 //take branch if rs1 >= rs2 in unsigned comparison 
-		//			    if (rram[wire_rs1] >= rram[wire_rs2]) pc <= pc + sign_extended_bimm;
-		//			    else pc <= pc + 4;
-	    	//                            jp <=0;
-		//		         end 
-		//		endcase
-		//              end
 		   32'b???????_?????_?????_111_?????_1100011: begin if (rram[wire_rs1] >= rram[wire_rs2]) pc <= pc + sign_extended_bimm; else pc <= pc + 4; end // Bgeu
-                   // Fence class
-	        //   7'b0001111:begin
-		//	        case(irom[pc][14:12]) // func3
-		//	          3'b000: Fence  <= 1'b1; // set Fence Flag 
 		   32'b???????_?????_?????_000_?????_0001111: begin end // Fence
-		//	          3'b001: Fencei <= 1'b1; // set Fencei Flag 
-		//		endcase
-		//              end
 		   32'b???????_?????_?????_001_?????_0001111: begin end // Fencei
-		   // ----------------------------SYSTEM 
-	        //   7'b1110011:begin // SYSTEM 
-		//                csr_id =  csr_index(wire_csr);
-		//	        case(wire_f3) // func3
-                //                  // CSRRW  |csr.12|rs1.5|001.3|rd.5|1110011.7| atomic write, put 0-extend csr value! in rd(if rd=x0 not read), then put sr1 to csr
-		//		  // csrr rd, csr -> csrrs rd, csr, x0 | read
-		//		  // csrw csr, rs -> csrrw x0, csr, rs | write
-		//		  3'b001:begin
-		//		         Csrrw  <= 1'b1; // set Csrrw  Flag 
-		//			 if (wire_rd !== 5'b00000) rram[wire_rd] <= csrram[csr_id];
-		//			 csrram[csr_id] <= rram[wire_rs1];
-		//                         pc <= pc + 4; 
-                //                         jp <=0;
-		//		         end
-		   // ----------------------------SYSTEM 
-                   csr_id =  csr_index(wire_csr);
-		   32'b???????_?????_?????_001_?????_1110011: begin if (wire_rd !== 5'b00000) rram[wire_rd] <= csrram[csr_id]; csrram[csr_id] <= rram[wire_rs1]; end // CSRRW
-                                  // CSRRS  |csr.12|rs1.5|001.3|rd.5|1110011.7| atomic set, put 0-extend csr in rd, sr1(if sr1=x0 not write) as 1 mask set csr 1 correspond
-                                  // csrs csr, rs -> csrrs x0, csr, rs
-				  3'b010:begin
-				         Csrrs  <= 1'b1; // set Csrrs  Flag 
-					 rram[wire_rd] <= csrram[csr_id];
-					 if (wire_rs1 !== 5'b00000) csrram[csr_id] <= rram[wire_rs1] | csrram[csr_id];
-		                         pc <= pc + 4; 
-                                         jp <=0;
-				         end
-                                  // CSRRC  |csr.12|rs1.5|011.3|rd.5|1110011.7| atomic clear, put 0-extend csr in rd, sr1(if sr1=x0 not write) as 1 mask set csr 0 under
-                                  // csrc csr, rs -> csrrc x0, csr, rs
-				  3'b011:begin
-				         Csrrc  <= 1'b1; // set Csrrc  Flag 
-					 rram[wire_rd] <= csrram[csr_id];
-					 if (wire_rs1 !== 5'b00000) csrram[csr_id] <= ~rram[wire_rs1] & csrram[csr_id];
-		                         pc <= pc + 4; 
-                                         jp <=0;
-				         end
-                                  // CSRRWI |csr.12|zim.5|101.3|rd.5|1110011.7| atomic write, put 0-extend csr in rd(if rd=x0 not read), 0-extend 5unsigned zimm to csr 
-                                  // csrwi csr, imm -> csrrwi x0, csr, imm
-				  3'b101:begin
-				         Csrrwi <= 1'b1; // set Csrrwi Flag 
-					 if (wire_rd !== 5'b00000) rram[wire_rd] <= csrram[csr_id];
-					 csrram[csr_id] <= {59'b0, wire_zimm};
-		                         pc <= pc + 4; 
-                                         jp <=0;
-				         end
-                                  // CSRRSI |csr.12|zim.5|110.3|rd.5|1110011.7| atomic set, 0-extend csr in rd, 0-extended 5unsigned zimm(if zimm == 0 not write) as 1 mask set csr 1
-                                  // csrsi csr, imm -> csrrsi x0, csr, imm
-				  3'b110:begin 
-				         Csrrsi <= 1'b1; // set Csrrsi Flag 
-					 rram[wire_rd] <= csrram[csr_id];
-					 if (wire_zimm !== 5'b00000) csrram[csr_id] <= {59'b0, wire_zimm } | csrram[csr_id];
-		                         pc <= pc + 4; 
-                                         jp <=0;
-				         end
-                                  // CSRRCI |csr.12|zim.5|111.3|rd.5|1110011.7| atomic clear, 0-extend csr in rd, 0-extended 5unsigned zimm(if zimm == 0 not write) as 1 mask set csr0
-                                  // csrci csr, imm -> csrrci x0, csr, imm
-				  3'b111:begin
-				         Csrrci <= 1'b1; // set Csrrci Flag 
-					 rram[wire_rd] <= irom[wire_csr];
-					 if (wire_zimm !== 5'b00000) csrram[csr_id] <= ~{59'b0, wire_zimm } & csrram[csr_id];
-		                         pc <= pc + 4; 
-                                         jp <=0;
-				         end
-				  3'b000: begin // priv
-				          case(wire_f12) // func12
-					    12'b000000000000:begin 
-					               Ecall  <= 1'b1; // set Ecall  Flag 
+                   csr_id =  csr_index(wire_csr);// ----------------------------SYSTEM 
+		   32'b???????_?????_?????_001_?????_1110011: begin if (wire_rd !== 5'b00000) rram[wire_rd] <= csrram[csr_id]; csrram[csr_id] <= rram[wire_rs1]; end // Csrrw
+		   32'b???????_?????_?????_010_?????_1110011: begin rram[wire_rd] <= csrram[csr_id]; if (wire_rs1 !== 5'b00000) csrram[csr_id] <= rram[wire_rs1] | csrram[csr_id]; end // Csrrs
+		   32'b???????_?????_?????_011_?????_1110011: begin rram[wire_rd] <= csrram[csr_id]; if (wire_rs1 !== 5'b00000) csrram[csr_id] <= ~rram[wire_rs1] & csrram[csr_id]; end // Csrrc
+		   32'b???????_?????_?????_101_?????_1110011: begin if (wire_rd !== 5'b00000) rram[wire_rd] <= csrram[csr_id]; csrram[csr_id] <= {59'b0, wire_zimm}; end // Csrrwi
+		   32'b???????_?????_?????_110_?????_1110011: begin rram[wire_rd] <= csrram[csr_id]; if (wire_zimm !== 5'b00000) csrram[csr_id] <= {59'b0, wire_zimm } | csrram[csr_id]; end // csrrsi
+		   32'b???????_?????_?????_111_?????_1110011: begin rram[wire_rd] <= irom[wire_csr]; if (wire_zimm !== 5'b00000) csrram[csr_id] <= ~{59'b0, wire_zimm } & csrram[csr_id]; end // Csrrci
+		   32'b0000000_00000_?????_000_?????_1110011: begin  // func12 // Ecall
                                                        // Trap into S-mode
 			                               if (current_privilege_mode == U_mode && medeleg[8] == 1)
 						       begin
@@ -1049,11 +931,8 @@ begin
 							   current_privilege_mode <= M_mode;  // set current privilege mode
 						       end
 						       end
-					    12'b000000000001:begin 
-					               Ebreak <= 1'b1; // set Ebreak Flag 
-						       end
-					    12'b000100000010:begin 
-					               //Sret <= 1'b1; // set Sret Flag 
+		   32'b0000000_00001_?????_000_?????_1110011: begin  end // Ebreak
+		   32'b0001000_00010_?????_000_?????_1110011: begin      // Sret
 						       if (csrram[sstatus][8] == 0) current_privilege_mode <= U_mode;
 						       if (csrram[sstatus][8] == 1) current_privilege_mode <= S_mode;
 						       csrram[sstatus][1] <= csrram[sstatus][5]; // set back interrupt enable(SIE) by SPIE 
@@ -1061,8 +940,7 @@ begin
 						       csrram[sstatus][8] <= 0; // set previous privilege mode(SPP) to be 0 (U-mode)
 						       pc <=  csrram[sepc]; // sepc was +4 by the software handler and written back to sepc
 						       end
-					    12'b001100000010:begin 
-					               //Mret <= 1'b1; // set Mret Flag 
+		   32'b0011000_00010_?????_000_?????_1110011: begin  // Mret
 						       csrram[mstatus][3] <= csrram[mstatus][7]; // set back interrupt enable(MIE) by MPIE 
 						       csrram[mstatus][7] <= 1; // set previous interrupt enable(MIE) to be 1 (enable)
 						       if (csrram[mstatus][12:11] < M_mode) csrram[mstatus][17] <= 0; // set mprv to 0
@@ -1070,17 +948,10 @@ begin
 						       csrram[mstatus][12:11] <= 2'b00; // set previous privilege mode(MPP) to be 00 (U-mode)
 						       pc <=  csrram[mepc]; // mepc was +4 by the software handler and written back to sepc
 						       end
-				          endcase
-				         end 
-				endcase
-		              end
 
 
 	    	   endcase
-	    	   //jp <=1;
                    rram[0] <= 64'h0;  // x0 恒为 0
-                   //pc <= pc + 4; 
-                   //jp <=0;
 	       end
 	    //######## // 指令执行 // Close Flage
 	    //1: begin 
