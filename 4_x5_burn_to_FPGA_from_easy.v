@@ -355,120 +355,32 @@ begin
 	else
         // 开始指令节拍  // Did every circle have to clean registers like upper !! initial?
 	begin
-	    case(jp)
-	    0: begin // 取指令 + 分析指令 + 执行 | 或 准备数据 (分析且备好该指令所需的数据）
-	 	   //current_privilege_mode <= current_privilege_mode; // update mode
+	           // 取指令 + 分析指令 + 执行 | 或 准备数据 (分析且备好该指令所需的数据）
+		   //current_privilege_mode <= current_privilege_mode; // update mode
+		   pc <= pc +4 ;// Default: advance PC for most instructions; override in jumps/branches/traps
 	    	   ir <= wire_ir ; 
-		   // parse: op->func3->func7
-	    	   //case(wire_op)
-	    	   case(wire_ir)
+                   csr_id =  csr_index(wire_csr);// ----------------------------SYSTEM 
+	    	   casez(wire_ir)  // casez ignore "?"
                    // Load-class
-		   //7'b0110111:begin
-		   //             Lui <= 1'b1; // set Lui Flag
-		   //     	//put 20 bits immediate to upper 20 bits of rd left lower 12 bits 0, sext to 64
-		   //     	rram[wire_rd] <= {{32{wire_upimm[19]}}, wire_upimm, 12'b0};
-		   //     	pc <= pc + 4; 
-	    	   //             jp <=0;
-		   //           end
 	           32'b????????????????????_?????_0110111: begin rram[wire_rd] <= {{32{wire_upimm[19]}}, wire_upimm, 12'b0}; end // Lui
-		   //7'b0010111:begin
-		   //             Auipc <= 1'b1; // set Auipc Flag
-		   //     	//left shift 20 bits immediate 12bits sext to 64 add pc then put to rd
-		   //     	rram[wire_rd] <= pc + {{32{wire_upimm[19]}}, wire_upimm, 12'b0};
-		   //     	pc <= pc + 4; 
-	    	   //             jp <=0;
-		   //end
 		   32'b????????????????????_?????_0010111: begin rram[wire_rd] <= pc + {{32{wire_upimm[19]}}, wire_upimm, 12'b0}; end // Auipc
-		   //7'b0000011:begin
-	    	   //             case(wire_f3) // func3 case(ir[14:12])
-		   //     	  3'b000:begin 
-		   //     	           //lb/lbu/lh/lhu/lw/lwu/ld rd, rs1, simm12  
-		   //     	           Lb  <= 1'b1; // set Lb  Flag 
-		   //     	           //load 8 bite sign extend to 64 bits at imm(s1) to rd
-		   //     	           rram[wire_rd] <= {{56{drom[rram[wire_rs1]+ {{52{wire_imm[11]}},wire_imm}][7]}}, 
-		   //     		                         drom[rram[wire_rs1]+ {{52{wire_imm[11]}},wire_imm}]}; 
-		   //     	           //rram[wire_rd] <= 48;
-		   //     	           pc <= pc + 4; 
-	    	   //                        jp <=0;
-		   //     	         end 
 		   32'b????????????_?????_000_?????_0000011: begin rram[wire_rd] <= {{56{drom[rram[wire_rs1]+ {{52{wire_imm[11]}},wire_imm}][7]}}, 
 		                                                                         drom[rram[wire_rs1]+ {{52{wire_imm[11]}},wire_imm}]};end  // Lb
-		//		  3'b100:begin 
-		//		           Lbu  <= 1'b1; // set Lbu  Flag 
-		//		           //load 8 bite unsign to 64 bits at imm(s1) to rd
-		//		           rram[wire_rd] <= {56'b0, drom[rram[wire_rs1]+{{52{wire_imm[11]}},wire_imm}]}; 
-		//		           pc <= pc + 4; 
-	    	//                           jp <=0;
-		//		         end 
 		   32'b????????????_?????_100_?????_0000011: begin rram[wire_rd] <= {56'b0, drom[rram[wire_rs1]+{{52{wire_imm[11]}},wire_imm}]}; end // Lbu
-		//		  3'b001:begin 
-                //                           Lh  <= 1'b1; // set Lh  Flag 
-		//		           //load 16 bite sign extend to 64 bits at imm(s1) to rd
-		//		           rram[wire_rd] <= {{48{drom[rram[wire_rs1]+{{52{wire_imm[11]}},wire_imm}+ 1][7]}}, 
-		//			                         drom[rram[wire_rs1]+{{52{wire_imm[11]}},wire_imm}+ 1], 
-		//						 drom[rram[wire_rs1]+{{52{wire_imm[11]}},wire_imm}] }; 
-		//		           pc <= pc + 4; 
-	    	//                           jp <=0;
-		//		         end 
 		   32'b????????????_?????_001_?????_0000011: begin rram[wire_rd] <= {{48{drom[rram[wire_rs1]+{{52{wire_imm[11]}},wire_imm}+ 1][7]}}, 
 					                                                 drom[rram[wire_rs1]+{{52{wire_imm[11]}},wire_imm}+ 1], 
 											 drom[rram[wire_rs1]+{{52{wire_imm[11]}},wire_imm}] }; end // Lh
-		//		  3'b101:begin 
-                //                           Lhu <= 1'b1; // set Lhu Flag  
-		//		           //load 16 bite unsign to 64 bits at imm(s1) to rd
-		//		           rram[wire_rd] <= {48'b0, drom[rram[wire_rs1]+{{52{wire_imm[11]}},wire_imm}+ 1], 
-		//			                            drom[rram[wire_rs1]+{{52{wire_imm[11]}},wire_imm}]}; 
-		//		           pc <= pc + 4; 
-	    	//                           jp <=0;
-		//		         end 
 		   32'b????????????_?????_101_?????_0000011: begin rram[wire_rd] <= {48'b0, drom[rram[wire_rs1]+{{52{wire_imm[11]}},wire_imm}+ 1], 
 		                                                                            drom[rram[wire_rs1]+{{52{wire_imm[11]}},wire_imm}]}; end // Lhu
-		//		  3'b010:begin 
-                //                           Lw  <= 1'b1; // set Lw  Flag
-		//			   //load 32 bite sign extend to 64 bits at imm(s1) to rd
-	        //                           rram[wire_rd] <= {{32{drom[rram[wire_rs1]+{{52{wire_imm[11]}},wire_imm}+ 3][7]}}, 
-	        //                                                 drom[rram[wire_rs1]+{{52{wire_imm[11]}},wire_imm}+3], 
-	        //                         			 drom[rram[wire_rs1]+{{52{wire_imm[11]}},wire_imm}+2], 
-	        //                         			 drom[rram[wire_rs1]+{{52{wire_imm[11]}},wire_imm}+1], 
-	        //                         			 drom[rram[wire_rs1]+{{52{wire_imm[11]}},wire_imm}]}; 
-		//		           pc <= pc + 4; 
-	    	//                           jp <=0;
-		//		         end 
 		   32'b????????????_?????_010_?????_0000011: begin rram[wire_rd] <= {{32{drom[rram[wire_rs1]+{{52{wire_imm[11]}},wire_imm}+ 3][7]}}, 
 	                                                         drom[rram[wire_rs1]+{{52{wire_imm[11]}},wire_imm}+3], 
 	                                 			 drom[rram[wire_rs1]+{{52{wire_imm[11]}},wire_imm}+2], 
 	                                 			 drom[rram[wire_rs1]+{{52{wire_imm[11]}},wire_imm}+1], 
 								 drom[rram[wire_rs1]+{{52{wire_imm[11]}},wire_imm}]}; end // Lw
-		//		  3'b110:begin 
-                //                           Lwu <= 1'b1; // set Lwu Flag 
-		//			   //load 32 bite unsign to 64 bits at imm(s1) to rd
-	        //                           rram[wire_rd] <= {32'b0, drom[rram[wire_rs1]+{{52{wire_imm[11]}},wire_imm}+3], 
-	        //                                                    drom[rram[wire_rs1]+{{52{wire_imm[11]}},wire_imm}+2], 
-	        //                                                    drom[rram[wire_rs1]+{{52{wire_imm[11]}},wire_imm}+1], 
-	        //                                                    drom[rram[wire_rs1]+{{52{wire_imm[11]}},wire_imm}]}; 
-		//		           pc <= pc + 4; 
-	    	//                           jp <=0;
-		//		         end 
 		   32'b????????????_?????_110_?????_0000011: begin rram[wire_rd] <= {32'b0, drom[rram[wire_rs1]+{{52{wire_imm[11]}},wire_imm}+3], 
 	                                                            drom[rram[wire_rs1]+{{52{wire_imm[11]}},wire_imm}+2], 
 	                                                            drom[rram[wire_rs1]+{{52{wire_imm[11]}},wire_imm}+1], 
 								    drom[rram[wire_rs1]+{{52{wire_imm[11]}},wire_imm}]}; end // Lwu
-		//		  3'b011:begin 
-                //                           Ld  <= 1'b1; // set Ld  Flag 
-		//			   //load 64 bite sign to 64 bits at imm(s1) to rd
-	        //                           rram[wire_rd] <= {drom[rram[wire_rs1]+{{52{wire_imm[11]}},wire_imm}+7], 
-	        //                                             drom[rram[wire_rs1]+{{52{wire_imm[11]}},wire_imm}+6], 
-	        //                                             drom[rram[wire_rs1]+{{52{wire_imm[11]}},wire_imm}+5], 
-	        //                                             drom[rram[wire_rs1]+{{52{wire_imm[11]}},wire_imm}+4],
-	        //                                             drom[rram[wire_rs1]+{{52{wire_imm[11]}},wire_imm}+3], 
-	        //                                             drom[rram[wire_rs1]+{{52{wire_imm[11]}},wire_imm}+2], 
-	        //                                             drom[rram[wire_rs1]+{{52{wire_imm[11]}},wire_imm}+1], 
-	        //                                             drom[rram[wire_rs1]+{{52{wire_imm[11]}},wire_imm}  ]}; 
-		//		           pc <= pc + 4; 
-	    	//                           jp <=0;
-		//		         end 
-		//	        endcase
-		//              end 
 		   32'b????????????_?????_011_?????_0000011: begin rram[wire_rd] <= {drom[rram[wire_rs1]+{{52{wire_imm[11]}},wire_imm}+7], 
 	                                                     drom[rram[wire_rs1]+{{52{wire_imm[11]}},wire_imm}+6], 
 	                                                     drom[rram[wire_rs1]+{{52{wire_imm[11]}},wire_imm}+5], 
@@ -478,59 +390,13 @@ begin
 	                                                     drom[rram[wire_rs1]+{{52{wire_imm[11]}},wire_imm}+1], 
 							     drom[rram[wire_rs1]+{{52{wire_imm[11]}},wire_imm}  ]}; end // Ld
                    // Store-class  // ld and sb are different direction: 
-		   // lb rd,  imm(rs1); rd  <- rs1+imm
-		   // sb rs2, imm(rs1); rs2 -> rs1+imm
-	        //   7'b0100011:begin
-	    	//                case(wire_f3) // func3 case(ir[14:12])
-		//		  3'b000:begin 
-		//		           //sb/sh/sw rs2, rs1, simm12  
-		//			   //store byte, write low 8 bits of rs2 to rs1's imm.12
-		//		           Sb  <= 1'b1; // set Sb  Flag 
-		//			   drom[rram[wire_rs1]+{{52{wire_simm[11]}},wire_simm}] <= rram[wire_rs2][7:0];
-		//		           pc <= pc + 4; 
-	    	//                           jp <=0;
-		//		         end 
 		   32'b????????????_?????_000_?????_0100011: begin drom[rram[wire_rs1]+{{52{wire_simm[11]}},wire_simm}] <= rram[wire_rs2][7:0]; end // Sb
-		//		  3'b001:begin 
-		//		           //store half word, write low 16 bits of rs2 to rs1's imm.12 
-		//		           Sh  <= 1'b1; // set Sh  Flag 
-		//			   drom[rram[wire_rs1]+{{52{wire_simm[11]}},wire_simm}] <= rram[wire_rs2][7:0];
-		//			   drom[rram[wire_rs1]+{{52{wire_simm[11]}},wire_simm}+1] <= rram[wire_rs2][15:8];
-		//		           pc <= pc + 4; 
-	    	//                           jp <=0;
-		//		         end 
 		   32'b????????????_?????_001_?????_0100011: begin drom[rram[wire_rs1]+{{52{wire_simm[11]}},wire_simm}] <= rram[wire_rs2][7:0];
 		                                                   drom[rram[wire_rs1]+{{52{wire_simm[11]}},wire_simm}+1] <= rram[wire_rs2][15:8]; end // Sh
-		//		  3'b010:begin 
-		//		           //store word, write low 16 bits of rs2 to rs1's imm.12
-		//		           Sw  <= 1'b1; // set Sw  Flag  
-		//			   drom[rram[wire_rs1]+{{52{wire_simm[11]}},wire_simm}] <= rram[wire_rs2][7:0];
-		//			   drom[rram[wire_rs1]+{{52{wire_simm[11]}},wire_simm}+1] <= rram[wire_rs2][15:8];
-		//			   drom[rram[wire_rs1]+{{52{wire_simm[11]}},wire_simm}+2] <= rram[wire_rs2][23:16];
-		//			   drom[rram[wire_rs1]+{{52{wire_simm[11]}},wire_simm}+3] <= rram[wire_rs2][31:24];
-		//		           pc <= pc + 4; 
-	    	//                           jp <=0;
-		//		         end 
 		   32'b????????????_?????_010_?????_0100011: begin drom[rram[wire_rs1]+{{52{wire_simm[11]}},wire_simm}] <= rram[wire_rs2][7:0];
 					   drom[rram[wire_rs1]+{{52{wire_simm[11]}},wire_simm}+1] <= rram[wire_rs2][15:8];
 					   drom[rram[wire_rs1]+{{52{wire_simm[11]}},wire_simm}+2] <= rram[wire_rs2][23:16];
 					   drom[rram[wire_rs1]+{{52{wire_simm[11]}},wire_simm}+3] <= rram[wire_rs2][31:24]; end // Sw
-		//		  3'b011:begin 
-		//		           //store double words, write 64 bits of rs2 to rs1's imm.12
-		//		           Sd  <= 1'b1; // set Sd  Flag  
-		//			   drom[rram[wire_rs1]+{{52{wire_simm[11]}},wire_simm}] <= rram[wire_rs2][7:0];
-		//			   drom[rram[wire_rs1]+{{52{wire_simm[11]}},wire_simm}+1] <= rram[wire_rs2][15:8];
-		//			   drom[rram[wire_rs1]+{{52{wire_simm[11]}},wire_simm}+2] <= rram[wire_rs2][23:16];
-		//			   drom[rram[wire_rs1]+{{52{wire_simm[11]}},wire_simm}+3] <= rram[wire_rs2][31:24];
-		//			   drom[rram[wire_rs1]+{{52{wire_simm[11]}},wire_simm}+4] <= rram[wire_rs2][39:32];
-		//			   drom[rram[wire_rs1]+{{52{wire_simm[11]}},wire_simm}+5] <= rram[wire_rs2][47:40];
-		//			   drom[rram[wire_rs1]+{{52{wire_simm[11]}},wire_simm}+6] <= rram[wire_rs2][55:48];
-		//			   drom[rram[wire_rs1]+{{52{wire_simm[11]}},wire_simm}+7] <= rram[wire_rs2][63:56];
-		//		           pc <= pc + 4; 
-	    	//                           jp <=0;
-		//		         end 
-		//		endcase
-		//	      end
 		   32'b????????????_?????_011_?????_0100011: begin drom[rram[wire_rs1]+{{52{wire_simm[11]}},wire_simm}] <= rram[wire_rs2][7:0];
 					   drom[rram[wire_rs1]+{{52{wire_simm[11]}},wire_simm}+1] <= rram[wire_rs2][15:8];
 					   drom[rram[wire_rs1]+{{52{wire_simm[11]}},wire_simm}+2] <= rram[wire_rs2][23:16];
@@ -540,23 +406,6 @@ begin
 					   drom[rram[wire_rs1]+{{52{wire_simm[11]}},wire_simm}+6] <= rram[wire_rs2][55:48];
 					   drom[rram[wire_rs1]+{{52{wire_simm[11]}},wire_simm}+7] <= rram[wire_rs2][63:56]; end // Sd
                    // Math-Logic-Shift-Register class
-	        //   7'b0110011:begin 
-		//	        case(wire_f3) // func3
-		//		  3'b000:begin
-		//		          case(wire_f7) // func7
-		//		            7'b0000000:begin 
-		//		                     Add  <= 1'b1; // set Add Flag
-		//				      // 执行加法:
-		//		                     rram[wire_rd] <= rram[wire_rs1] + rram[wire_rs2]; 
-		//				      
-		//		                     if ((rram[wire_rs1][63] ~^ rram[wire_rs2][63]) && (rram[wire_rs1][63] ^ sum[63])) 
-		//				     begin
-	    	//                                      rram[3] <= 1; // 溢出标志
-	    	//                                      rram[4] <= rram[wire_rs1][63]; // 溢出值
-		//				     end
-		//		                     pc <= pc + 4; 
-	    	//                                     jp <=0;
-		//		                   end 
 		   32'b0000000_?????_?????_000_?????_0110011: begin rram[wire_rd] <= rram[wire_rs1] + rram[wire_rs2]; 
 						     // 溢出判断：
 				                     if ((rram[wire_rs1][63] ~^ rram[wire_rs2][63]) && (rram[wire_rs1][63] ^ sum[63])) 
@@ -564,20 +413,6 @@ begin
 	    	                                      rram[3] <= 1; rram[4] <= rram[wire_rs1][63]; // 溢出值
 						      end
 						     end  // Add
-		//			    7'b0100000:begin
-		//		                     Sub  <= 1'b1; // set Sub Flag  
-		//		                     rram[wire_rd] <= sub;
-		//				     // 溢出判断：
-		//		                     if ((rram[wire_rs1][63] ~^ mirro_rs2 [63]) && (rram[wire_rs1][63] ^ sub[63])) 
-		//				     begin
-	    	//                                      rram[3] <= 1; // 溢出标志
-	    	//                                      rram[4] <= rram[wire_rs1][63]; // 溢出值
-		//				     end
-		//		                     pc <= pc + 4; 
-	    	//                                     jp <=0;
-		//		                   end 
-		//		          endcase
-		//		        end 
 		   32'b0100000_?????_?????_000_?????_0110011: begin rram[wire_rd] <= sub;
 						     // 溢出判断：
 				                     if ((rram[wire_rs1][63] ~^ mirro_rs2 [63]) && (rram[wire_rs1][63] ^ sub[63])) 
@@ -585,25 +420,6 @@ begin
 	    	                                      rram[3] <= 1; rram[4] <= rram[wire_rs1][63]; // 溢出值
 						     end
 						     end // Sub
-		//		  3'b010:begin 
-		//		           Slt  <= 1'b1; // set Slt Flag 
-		//		           // if rs1 less than rs2 both as sign-extended then put 1 in rd else 0
-		//			   // 电路方式: 一周期实现比较 
-		//			   // 计算 rs1 - rs2 < 0  转化 Sub -> Add
-		//			   // 同号相加, 号即大小: 1: rs1 小于 rs2
-		//			    if ((rram[wire_rs1][63] ~^ mirro_rs2[63]) && rram[wire_rs1][63] == 1)
-                //                                     rram[wire_rd] <= 1'b1; 
-		//			   // 异号相加, 果即大小 |1: rs1 小于 rs2 |000: 相等 |0xxx: rs1 大于 rs2
-		//			    else if ((rram[wire_rs1][63] ^ mirro_rs2[63]) && (sub[63] == 1))
-                //                                     rram[wire_rd] <= 1'b1; 
-                //                           // 否则 rs1 大于 rs2
-		//			    else rram[wire_rd] <= 1'b0;
-		//			   // 代码模式 
-		//			   // if (rram[wire_rs1] - rram[wire_rs2] < 0 ) rram[wire_rd] <= 1'b1; 
-		//		           pc <= pc + 4; 
-	    	//                           jp <=0;
-		//		         end 
-		   //32'b0000000_?????_?????_010_?????_0110011: begin 
 		   32'b???????_?????_?????_010_?????_0110011: begin 
 					    if ((rram[wire_rs1][63] ~^ mirro_rs2[63]) && rram[wire_rs1][63] == 1)
                                                      rram[wire_rd] <= 1'b1; 
@@ -611,279 +427,45 @@ begin
                                                      rram[wire_rd] <= 1'b1; 
 					    else rram[wire_rd] <= 1'b0;
 					    end // Slt
-			//	    3'b011:begin 
-			//	           Sltu <= 1'b1; // set Sltu Flag  
-			//	           // if rs1 less than rs2 both as unsign then put 1 in rd else 0
-			//		   if (rram[wire_rs1] < rram[wire_rs2]) rram[wire_rd] <= 1'b1; 
-			//		   else rram[wire_rd] <= 1'b0;
-			//	           pc <= pc + 4; 
-	    	        //                   jp <=0;
-			//	         end 
 		   32'b???????_?????_?????_011_?????_0110011: begin if (rram[wire_rs1] < rram[wire_rs2]) rram[wire_rd] <= 1'b1; else rram[wire_rd] <= 1'b0; end // Sltu
-			//	    3'b110:begin
-			//		   Or   <= 1'b1; // set Or Flag 
-                        //                   // bitwise OR  rs1 and rs2 then put reslut in rd
-			//		   rram[wire_rd] <= (rram[wire_rs1] | rram[wire_rs2]); 
-			//	           pc <= pc + 4; 
-	    	        //                   jp <=0;
-			//		   end
 		   32'b???????_?????_?????_110_?????_0110011: begin rram[wire_rd] <= (rram[wire_rs1] | rram[wire_rs2]); end // Or
-			//	   3'b111:begin 
-			//		   And  <= 1'b1; // set And Flag 
-                        //                   // bitwise AND  rs1 and rs2 then put reslut in rd
-			//		   rram[wire_rd] <= (rram[wire_rs1] & rram[wire_rs2]); 
-			//	           pc <= pc + 4; 
-	    	        //                   jp <=0;
-			//		   end
 		   32'b???????_?????_?????_111_?????_0110011: begin rram[wire_rd] <= (rram[wire_rs1] & rram[wire_rs2]); end // And
-			//	   3'b100:begin 
-			//		   Xor  <= 1'b1; // set Xor Flag
-                        //                   // bitwise XOR  rs1 and rs2 then put reslut in rd
-			//		   rram[wire_rd] <= (rram[wire_rs1] ^ rram[wire_rs2]); 
-			//	           pc <= pc + 4; 
-	    	        //                   jp <=0;
-			//		   end
 		   32'b???????_?????_?????_100_?????_0110011: begin rram[wire_rd] <= (rram[wire_rs1] ^ rram[wire_rs2]); end // Xor
-			//	    3'b001:begin 
-			//	           Sll  <= 1'b1; // set Sll Flag 
-			//		   // shift lift  logicl rs1 by rs2's value [low5/6.unsign] padding 0 to rd
-			//		   rram[wire_rd] <= rram[wire_rs1] << rram[wire_rs2][5:0]; 
-			//	           pc <= pc + 4; 
-	    	        //                   jp <=0;
-			//		   end
 		   32'b???????_?????_?????_001_?????_0110011: begin rram[wire_rd] <= rram[wire_rs1] << rram[wire_rs2][5:0]; end // Sll
-			//	  3'b101:begin 
-			//	          case(wire_f7) // func7
-			//		    7'b0000000:begin
-			//		               Srl  <= 1'b1; // set Srl Flag 
-			//		               // shift right logicl rs1 by rs2[low5/6.unsign] padding 0 to rd
-			//		               rram[wire_rd] <= (rram[wire_rs1] >> rram[wire_rs2][5:0]); 
-			//	                       pc <= pc + 4; 
-	    	        //                               jp <=0;
-			//			       end
 	           32'b0000000_?????_?????_101_?????_0110011: begin rram[wire_rd] <= (rram[wire_rs1] >> rram[wire_rs2][5:0]); end // Srl
-			//		    7'b0100000:begin 
-			//		               Sra  <= 1'b1; // set Sra Flag  
-			//		               // shift right arithmatical rs1 by imm.12[low5.unsign] padding 0 to rd
-			//		               rram[wire_rd] <= ($signed(rram[wire_rs1]) >>> rram[wire_rs2][5:0]); 
-			//	                       pc <= pc + 4; 
-	    	        //                               jp <=0;
-			//			       end
-			//	          endcase
-			//	         end 
-			//	endcase
-			//      end
 		   32'b0100000_?????_?????_101_?????_0110011: begin rram[wire_rd] <= ($signed(rram[wire_rs1]) >>> rram[wire_rs2][5:0]); end // Sra
                    // Math-Logic-Shift-Immediate class
-	        ///   7'b0010011:begin 
-		///	        case(wire_f3) // func3
-		///		  3'b000:begin
-		///		         Addi  <= 1'b1; // set Addi  Flag 
-		///		         //sign-extend imm.12 to 64 add to sr1, send overflow ingnored result to rd 
-		///		         // 执行加法:
-		///		         rram[wire_rd] <= rram[wire_rs1] + {{52{wire_imm[11]}}, wire_imm}; 
-		///		         // 溢出判断：
-		///		         if ((rram[wire_rs1][63] ~^ wire_imm[11]) && (rram[wire_rs1][63] ^ sum_imm[63])) 
-		///		           begin
-	    	///                           rram[3] <= 1; // 溢出标志
-	    	///                           rram[4] <= rram[wire_rs1][63]; // 溢出值
-		///		           end
-		///		         pc <= pc + 4; 
-	    	///                         jp <=0;
-		///		         end
 		   32'b????????????_?????_000_?????_0010011: begin rram[wire_rd] <= rram[wire_rs1] + {{52{wire_imm[11]}}, wire_imm}; 
 				         if ((rram[wire_rs1][63] ~^ wire_imm[11]) && (rram[wire_rs1][63] ^ sum_imm[63])) 
 				           begin // 溢出标志
 	    	                           rram[3] <= 1; rram[4] <= rram[wire_rs1][63]; // 溢出值
 				           end
 				           end // Addi
-		//		 3'b010:begin
-		//			  Slti  <= 1'b1; // set Slti  Flag 
-		//		           // if rs1 is less than imm.12 both as sign-extended then put 1 in rd else 0
-		//			   // 电路方式: 一周期实现比较 
-		//			   // 计算 rs1 - imm < 0  转化 Sub -> Add
-		//			   // 同号相加, 号即大小: 1: rs1 小于 imm 
-		//			    if ((rram[wire_rs1][63] ~^ mirro_imm[63]) && rram[wire_rs1][63] == 1)
-                //                                     rram[wire_rd] <= 1'b1; 
-		//			   // 异号相加, 果即大小：1: rs1 小于 imm
-		//			    else if ((rram[wire_rs1][63] ^ mirro_imm[63]) && (sub_imm[63] == 1))
-                //                                     rram[wire_rd] <= 1'b1; 
-                //                           // 否则 rs1 大于 imm 
-		//			    else rram[wire_rd] <= 1'b0;
-		//			   // 代码模式 
-		//			   // if (rram[wire_rs1] - imm < 0 ) rram[wire_rd] <= 1'b1; 
-		//		           pc <= pc + 4; 
-	    	//                           jp <=0;
-		//		         end 
 		   32'b????????????_?????_010_?????_0010011: begin if ((rram[wire_rs1][63] ~^ mirro_imm[63]) && rram[wire_rs1][63] == 1)
                                                      rram[wire_rd] <= 1'b1; 
 					    else if ((rram[wire_rs1][63] ^ mirro_imm[63]) && (sub_imm[63] == 1))
                                                      rram[wire_rd] <= 1'b1; 
 					    else rram[wire_rd] <= 1'b0;
 					    end // Slti
-			//	 3'b011:begin
-			//		   Sltiu <= 1'b1; // set Sltiu Flag 
-			//	           // if rs1 less than imm both as unsign then put 1 in rd else 0
-			//		   if (rram[wire_rs1] < {{52{wire_imm[11]}}, wire_imm} ) rram[wire_rd] <= 1'b1; 
-			//		   else rram[wire_rd] <= 1'b0; 
-			//	           pc <= pc + 4; 
-	    	        //                   jp <=0;
-			//	         end 
 		   32'b????????????_?????_011_?????_0010011: begin if (rram[wire_rs1] < {{52{wire_imm[11]}}, wire_imm} ) rram[wire_rd] <= 1'b1; else rram[wire_rd] <= 1'b0; end // Sltiu
-			//	 3'b110:begin 
-			//	           Ori   <= 1'b1; // set Ori   Flag 
-                        //                   // bitwise OR  rs1 and sign-extend imm.12 put reslut in rd
-			//		   rram[wire_rd] <= (rram[wire_rs1] | {{52{wire_imm[11]}}, wire_imm}); 
-			//	           pc <= pc + 4; 
-	    	        //                   jp <=0;
-			//		   end
 		   32'b????????????_?????_110_?????_0010011: begin rram[wire_rd] <= (rram[wire_rs1] | {{52{wire_imm[11]}}, wire_imm}); end // Ori
-			//	 3'b111:begin 
-			//	           Andi  <= 1'b1; // set Andi  Flag 
-                        //                   // bitwise AND rs1 and sign-extend imm.12 put reslut in rd
-			//		   rram[wire_rd] <= (rram[wire_rs1] & {{52{wire_imm[11]}}, wire_imm}); 
-			//	           pc <= pc + 4; 
-	    	        //                   jp <=0;
-			//		   end
 		   32'b????????????_?????_111_?????_0010011: begin rram[wire_rd] <= (rram[wire_rs1] & {{52{wire_imm[11]}}, wire_imm}); end // Andi
-			//	 3'b100:begin 
-			//	           Xori  <= 1'b1; // set Xori  Flag 
-                        //                   // bitwise XORI  rs1 and rs2 then put reslut in rd
-			//		   rram[wire_rd] <= (rram[wire_rs1] ^ {{52{wire_imm[11]}}, wire_imm}); 
-			//	           pc <= pc + 4; 
-	    	        //                   jp <=0;
-			//		   end
 		   32'b????????????_?????_100_?????_0010011: begin rram[wire_rd] <= (rram[wire_rs1] ^ {{52{wire_imm[11]}}, wire_imm}); end // Xori
-			//	 3'b001:begin// func3 001 for left 
-			//		   Slli  <= 1'b1; // set Slli  Flag  // 32-->64 one more bit
-			//		   // shift lift  logicl rs1 by imm.12[low6.unsign] padding 0 to rd
-			//		   rram[wire_rd] <= (rram[wire_rs1] << wire_shamt ); 
-			//	           pc <= pc + 4; 
-	    	        //                   jp <=0;
-			//		   end
 		   32'b????????????_?????_001_?????_0010011: begin rram[wire_rd] <= (rram[wire_rs1] << wire_shamt ); end // Slli
-			//	  3'b101: begin // func3 101 for right
-			//	          case(wire_f7[6:1]) // func7->6 // rv64 shame take wire_f7[0]
-			//		  //7'b0000000:begin
-			//		    7'b000000:begin
-			//		               Srli  <= 1'b1; // set Srli  Flag // 32-->64 one more bit64
-			//		               // shift right logicl rs1 by imm.12[low6.unsign] padding 0 to rd
-			//		               rram[wire_rd] <= (rram[wire_rs1] >> wire_shamt ); 
-			//	                       pc <= pc + 4; 
-	    	        //                               jp <=0;
-			//			       end
 		   32'b000000?_?????_?????_101_?????_0010011: begin rram[wire_rd] <= (rram[wire_rs1] >> wire_shamt ); end // Srli // func7->6 // rv64 shame take wire_f7[0]
-		//			   //7'b0100000:begin 
-		//			     7'b010000:begin 
-		//			               Srai  <= 1'b1; // set Srai  Flag // 32-->64 one more bit64
-		//			               // shift right arithmatical rs1 by imm.12[low6.unsign] padding?
-		//			               rram[wire_rd] <= ($signed(rram[wire_rs1]) >>> wire_shamt ); 
-		//		                       pc <= pc + 4; 
-	    	//                                       jp <=0;
-		//				       end
-		//		          endcase
-		//		         end 
-		//		endcase
-		//	      end
 		   32'b010000?_?????_?????_101_?????_0010011: begin rram[wire_rd] <= ($signed(rram[wire_rs1]) >>> wire_shamt ); end // Srai
                    // Math-Logic-Shift-Immediate-64 class
-	        //   7'b0011011:begin 
-		//	        case(wire_f3) // func3
-		//		  3'b000: begin
-		//		         Addiw  <= 1'b1; // set Addiw  Flag 
-		//		         //sign-extend imm.12 to 32 add to sr1.low32, sign-extend to 64 to rd 
-		//		         rram[wire_rd] <=   {{32{sum_imm_32[31]}}, rram[wire_rs1][31:0] + {{20{wire_imm[11]}}, wire_imm}}; 
-		//		         pc <= pc + 4; 
-	    	//                         jp <=0;
-		//		         end
-		   32'b???????_?????_?????_000_?????_0011011: begin rram[wire_rd] <=   {{32{sum_imm_32[31]}}, rram[wire_rs1][31:0] + {{20{wire_imm[11]}}, wire_imm}}; end // Addiw
-			// 	 3'b001:begin// func3 001 for left 
-			// 		   Slliw  <= 1'b1; // set Slliw  Flag  
-			// 		   // shift lift  logicl rs1.low32 by imm.12[low5.unsign] padding 0 to rd
-			// 		   rram[wire_rd] <= {{32{slliw_s1[31]}}, slliw_s1[31:0]};
-			// 	           pc <= pc + 4; 
-	    	        //                    jp <=0;
-			// 		   end
+		   32'b???????_?????_?????_000_?????_0011011: begin rram[wire_rd] <= {{32{sum_imm_32[31]}}, rram[wire_rs1][31:0] + {{20{wire_imm[11]}}, wire_imm}}; end // Addiw
 		   32'b???????_?????_?????_001_?????_0011011: begin rram[wire_rd] <= {{32{slliw_s1[31]}}, slliw_s1[31:0]}; end // Slliw
-			//	  3'b101: begin
-			//	          case(wire_f7) // func7
-			//		      7'b0000000:begin 
-			//			Srliw  <= 1'b1; // set Srliw  Flag 
-			//		        rram[wire_rd] <= {{32{srliw_s1[31]}}, srliw_s1[31:0]};
-			//	                pc <= pc + 4; 
-	    	        //                        jp <=0;
-			//		        end
 		   32'b0000000_?????_?????_101_?????_0011011: begin rram[wire_rd] <= {{32{srliw_s1[31]}}, srliw_s1[31:0]}; end // Srliw
-		//			      7'b0100000:begin 
-		//				Sraiw <= 1'b1; // set Sraiw  Flag 
-		//			        rram[wire_rd] <= {{32{sraiw_s1[31]}}, sraiw_s1[31:0]};
-		//		                pc <= pc + 4; 
-	    	//                                jp <=0;
-		//			        end
-		//		          endcase
-		//		         end 
-		//		endcase
-		//              end
 		   32'b0100000_?????_?????_101_?????_0011011: begin rram[wire_rd] <= {{32{sraiw_s1[31]}}, sraiw_s1[31:0]}; end // Sraiw
                    // Math-Logic-Shift-Register-64 class
-	        //   7'b0111011:begin 
-		//	        case(wire_f3) // func3
-		//		  3'b000: begin
-		//		          case(wire_f7) // func7
-		//			      7'b0000000: begin 
-		//			                  Addw  <= 1'b1; // set Addw  Flag 
-		//		                          rram[wire_rd] <= {{32{sum[31]}}, rram[wire_rs1][31:0] + rram[wire_rs2][31:0]}; 
-		//		                          pc <= pc + 4; 
-	    	//                                          jp <=0;
-		//				          end
 		   32'b0000000_?????_?????_000_?????_0111011: begin rram[wire_rd] <= {{32{sum[31]}}, rram[wire_rs1][31:0] + rram[wire_rs2][31:0]}; end // Addw
-				//	      7'b0100000: begin
-				//			  Subw  <= 1'b1; // set Subw  Flag 
-				//                          rram[wire_rd] <= {{32{sub[31]}}, rram[wire_rs1][31:0] - rram[wire_rs2][31:0]}; 
-				//                          pc <= pc + 4; 
-	    	                //                          jp <=0;
-				//		          end
-				//          endcase
-				//         end 
 		   32'b0100000_?????_?????_000_?????_0111011: begin rram[wire_rd] <= {{32{sub[31]}}, rram[wire_rs1][31:0] - rram[wire_rs2][31:0]}; end // Subw
-				//  3'b001: begin
-				//           Sllw  <= 1'b1; // set Sllw Flag 
-				//	   // shift lift  logicl rs1.32 by rs2's value [low5.unsign], take the l32 sext to 64 put into rd
-				//	   rram[wire_rd] <= {{32{rram[wire_rs1][31-rram[wire_rs2][4:0]]}}, (rram[wire_rs1][31:0] << rram[wire_rs2][4:0])}; 
-				//           pc <= pc + 4; 
-	    	                //           jp <=0;
-				//          end
 		   32'b???????_?????_?????_001_?????_0111011: begin rram[wire_rd] <= {{32{rram[wire_rs1][31-rram[wire_rs2][4:0]]}}, (rram[wire_rs1][31:0] << rram[wire_rs2][4:0])}; end // Sllw
-			//	  3'b101: begin
-			//	          case(wire_f7) // func7
-			//		    7'b0000000: begin
-			//			        Srlw  <= 1'b1; // set Srlw  Flag 
-			//		                if (rram[wire_rs2][4:0] == 0) rram[wire_rd] <= {{32{rram[wire_rs1][31]}}, rram[wire_rs1][31:0]}; 
-			//		                else rram[wire_rd] <= (rram[wire_rs1][31:0] >> rram[wire_rs2][4:0]); 
-			//	                        pc <= pc + 4; 
-	    	        //                                jp <=0;
-			//		                end
 		   32'b0000000_?????_?????_101_?????_0111011: begin if (rram[wire_rs2][4:0] == 0) rram[wire_rd] <= {{32{rram[wire_rs1][31]}}, rram[wire_rs1][31:0]}; 
 		                                              else rram[wire_rd] <= (rram[wire_rs1][31:0] >> rram[wire_rs2][4:0]); end // Srlw
-		//			    7'b0100000: begin
-		//				       Sraw  <= 1'b1; // set Sraw  Flag 
-		//			               // shift right arithmatical rs1.l32 by sr2[low5.unsign] cut 32 sext 64 to rd
-		//			               rram[wire_rd] <= {{32{rram[wire_rs1][31]}}, ($signed(rram[wire_rs1][31:0]) >>> rram[wire_rs2][4:0])}; 
-		//		                       pc <= pc + 4; 
-	    	//                                       jp <=0;
-		//				       end
-		//		          endcase
-		//		         end 
-		//		endcase
-		//              end
 		   32'b0100000_?????_?????_101_?????_0111011: begin rram[wire_rd] <= {{32{rram[wire_rs1][31]}}, ($signed(rram[wire_rs1][31:0]) >>> rram[wire_rs2][4:0])}; end // Sraw
-	           //7'b1101111:begin 
-                   //             Jal <= 1'b1; // set Jal Flag 
-		   //     	//jump PC to PC+imm(padding 0) and place return address PC+4 in rd
-		   //     	rram[wire_rd] <= pc + 4;
-		   //     	pc <= pc +  {{43{wire_jimm[20]}}, wire_jimm};
-	    	   //             jp <=0;
-                   //           end
 		   32'b???????_?????_?????_???_?????_1101111: begin rram[wire_rd] <= pc + 4; pc <= pc +  {{43{wire_jimm[20]}}, wire_jimm}; end // Jal
 		   32'b???????_?????_?????_???_?????_1100111: begin rram[wire_rd] <= pc + 4; pc <= (rram[wire_rs1] +  {{52{wire_imm[11]}}, wire_imm}) & 64'hFFFFFFFFFFFFFFFE ; end // Jalr
                    // Branch class
@@ -895,7 +477,7 @@ begin
 		   32'b???????_?????_?????_111_?????_1100011: begin if (rram[wire_rs1] >= rram[wire_rs2]) pc <= pc + sign_extended_bimm; else pc <= pc + 4; end // Bgeu
 		   32'b???????_?????_?????_000_?????_0001111: begin end // Fence
 		   32'b???????_?????_?????_001_?????_0001111: begin end // Fencei
-                   csr_id =  csr_index(wire_csr);// ----------------------------SYSTEM 
+                   //csr_id <=  csr_index(wire_csr);// ----------------------------SYSTEM 
 		   32'b???????_?????_?????_001_?????_1110011: begin if (wire_rd !== 5'b00000) rram[wire_rd] <= csrram[csr_id]; csrram[csr_id] <= rram[wire_rs1]; end // Csrrw
 		   32'b???????_?????_?????_010_?????_1110011: begin rram[wire_rd] <= csrram[csr_id]; if (wire_rs1 !== 5'b00000) csrram[csr_id] <= rram[wire_rs1] | csrram[csr_id]; end // Csrrs
 		   32'b???????_?????_?????_011_?????_1110011: begin rram[wire_rd] <= csrram[csr_id]; if (wire_rs1 !== 5'b00000) csrram[csr_id] <= ~rram[wire_rs1] & csrram[csr_id]; end // Csrrc
@@ -952,11 +534,6 @@ begin
 
 	    	   endcase
                    rram[0] <= 64'h0;  // x0 恒为 0
-	       end
-	    //######## // 指令执行 // Close Flage
-	    //1: begin 
-	    //   end
-	    endcase
         end
-end
+    end
 endmodule
