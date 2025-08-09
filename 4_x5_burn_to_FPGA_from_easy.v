@@ -106,13 +106,6 @@ function [4:0] csr_index;
 
 	12'h100: csr_index = 5'd31;	                           // 0x3AF MRW pmpcfg15  
 
-
-
-
-
-   
-   
-   
     default: csr_index = 5'b00000;
   endcase
  end
@@ -339,7 +332,7 @@ end
 
 always @(posedge clock or negedge reset_n)
 begin
-	//#### 初始化各项 0 值
+	//start #### 初始化各项 0 值
 	if (!reset_n)
 	begin
 	  pc <=0;
@@ -355,185 +348,168 @@ begin
 	else
         // 开始指令节拍  // Did every circle have to clean registers like upper !! initial?
 	begin
-	           // 取指令 + 分析指令 + 执行 | 或 准备数据 (分析且备好该指令所需的数据）
-		   //current_privilege_mode <= current_privilege_mode; // update mode
-		   pc <= pc +4 ;// Default: advance PC for most instructions; override in jumps/branches/traps
-	    	   ir <= wire_ir ; 
-                   csr_id =  csr_index(wire_csr);// ----------------------------SYSTEM 
-	    	   casez(wire_ir)  // casez ignore "?"
-                   // Load-class
-	           32'b????????????????????_?????_0110111: begin rram[wire_rd] <= {{32{wire_upimm[19]}}, wire_upimm, 12'b0}; end // Lui
-		   32'b????????????????????_?????_0010111: begin rram[wire_rd] <= pc + {{32{wire_upimm[19]}}, wire_upimm, 12'b0}; end // Auipc
-		   32'b????????????_?????_000_?????_0000011: begin rram[wire_rd] <= {{56{drom[rram[wire_rs1]+ {{52{wire_imm[11]}},wire_imm}][7]}}, 
-		                                                                         drom[rram[wire_rs1]+ {{52{wire_imm[11]}},wire_imm}]};end  // Lb
-		   32'b????????????_?????_100_?????_0000011: begin rram[wire_rd] <= {56'b0, drom[rram[wire_rs1]+{{52{wire_imm[11]}},wire_imm}]}; end // Lbu
-		   32'b????????????_?????_001_?????_0000011: begin rram[wire_rd] <= {{48{drom[rram[wire_rs1]+{{52{wire_imm[11]}},wire_imm}+ 1][7]}}, 
-					                                                 drom[rram[wire_rs1]+{{52{wire_imm[11]}},wire_imm}+ 1], 
-											 drom[rram[wire_rs1]+{{52{wire_imm[11]}},wire_imm}] }; end // Lh
-		   32'b????????????_?????_101_?????_0000011: begin rram[wire_rd] <= {48'b0, drom[rram[wire_rs1]+{{52{wire_imm[11]}},wire_imm}+ 1], 
-		                                                                            drom[rram[wire_rs1]+{{52{wire_imm[11]}},wire_imm}]}; end // Lhu
-		   32'b????????????_?????_010_?????_0000011: begin rram[wire_rd] <= {{32{drom[rram[wire_rs1]+{{52{wire_imm[11]}},wire_imm}+ 3][7]}}, 
-	                                                         drom[rram[wire_rs1]+{{52{wire_imm[11]}},wire_imm}+3], 
-	                                 			 drom[rram[wire_rs1]+{{52{wire_imm[11]}},wire_imm}+2], 
-	                                 			 drom[rram[wire_rs1]+{{52{wire_imm[11]}},wire_imm}+1], 
-								 drom[rram[wire_rs1]+{{52{wire_imm[11]}},wire_imm}]}; end // Lw
-		   32'b????????????_?????_110_?????_0000011: begin rram[wire_rd] <= {32'b0, drom[rram[wire_rs1]+{{52{wire_imm[11]}},wire_imm}+3], 
-	                                                            drom[rram[wire_rs1]+{{52{wire_imm[11]}},wire_imm}+2], 
-	                                                            drom[rram[wire_rs1]+{{52{wire_imm[11]}},wire_imm}+1], 
-								    drom[rram[wire_rs1]+{{52{wire_imm[11]}},wire_imm}]}; end // Lwu
-		   32'b????????????_?????_011_?????_0000011: begin rram[wire_rd] <= {drom[rram[wire_rs1]+{{52{wire_imm[11]}},wire_imm}+7], 
-	                                                     drom[rram[wire_rs1]+{{52{wire_imm[11]}},wire_imm}+6], 
-	                                                     drom[rram[wire_rs1]+{{52{wire_imm[11]}},wire_imm}+5], 
-	                                                     drom[rram[wire_rs1]+{{52{wire_imm[11]}},wire_imm}+4],
-	                                                     drom[rram[wire_rs1]+{{52{wire_imm[11]}},wire_imm}+3], 
-	                                                     drom[rram[wire_rs1]+{{52{wire_imm[11]}},wire_imm}+2], 
-	                                                     drom[rram[wire_rs1]+{{52{wire_imm[11]}},wire_imm}+1], 
-							     drom[rram[wire_rs1]+{{52{wire_imm[11]}},wire_imm}  ]}; end // Ld
-                   // Store-class  // ld and sb are different direction: 
-		   32'b????????????_?????_000_?????_0100011: begin drom[rram[wire_rs1]+{{52{wire_simm[11]}},wire_simm}] <= rram[wire_rs2][7:0]; end // Sb
-		   32'b????????????_?????_001_?????_0100011: begin drom[rram[wire_rs1]+{{52{wire_simm[11]}},wire_simm}] <= rram[wire_rs2][7:0];
-		                                                   drom[rram[wire_rs1]+{{52{wire_simm[11]}},wire_simm}+1] <= rram[wire_rs2][15:8]; end // Sh
-		   32'b????????????_?????_010_?????_0100011: begin drom[rram[wire_rs1]+{{52{wire_simm[11]}},wire_simm}] <= rram[wire_rs2][7:0];
-					   drom[rram[wire_rs1]+{{52{wire_simm[11]}},wire_simm}+1] <= rram[wire_rs2][15:8];
-					   drom[rram[wire_rs1]+{{52{wire_simm[11]}},wire_simm}+2] <= rram[wire_rs2][23:16];
-					   drom[rram[wire_rs1]+{{52{wire_simm[11]}},wire_simm}+3] <= rram[wire_rs2][31:24]; end // Sw
-		   32'b????????????_?????_011_?????_0100011: begin drom[rram[wire_rs1]+{{52{wire_simm[11]}},wire_simm}] <= rram[wire_rs2][7:0];
-					   drom[rram[wire_rs1]+{{52{wire_simm[11]}},wire_simm}+1] <= rram[wire_rs2][15:8];
-					   drom[rram[wire_rs1]+{{52{wire_simm[11]}},wire_simm}+2] <= rram[wire_rs2][23:16];
-					   drom[rram[wire_rs1]+{{52{wire_simm[11]}},wire_simm}+3] <= rram[wire_rs2][31:24];
-					   drom[rram[wire_rs1]+{{52{wire_simm[11]}},wire_simm}+4] <= rram[wire_rs2][39:32];
-					   drom[rram[wire_rs1]+{{52{wire_simm[11]}},wire_simm}+5] <= rram[wire_rs2][47:40];
-					   drom[rram[wire_rs1]+{{52{wire_simm[11]}},wire_simm}+6] <= rram[wire_rs2][55:48];
-					   drom[rram[wire_rs1]+{{52{wire_simm[11]}},wire_simm}+7] <= rram[wire_rs2][63:56]; end // Sd
-                   // Math-Logic-Shift-Register class
-		   32'b0000000_?????_?????_000_?????_0110011: begin rram[wire_rd] <= rram[wire_rs1] + rram[wire_rs2]; 
-						     // 溢出判断：
-				                     if ((rram[wire_rs1][63] ~^ rram[wire_rs2][63]) && (rram[wire_rs1][63] ^ sum[63])) 
-						      begin // 溢出标志
-	    	                                      rram[3] <= 1; rram[4] <= rram[wire_rs1][63]; // 溢出值
-						      end
-						     end  // Add
-		   32'b0100000_?????_?????_000_?????_0110011: begin rram[wire_rd] <= sub;
-						     // 溢出判断：
-				                     if ((rram[wire_rs1][63] ~^ mirro_rs2 [63]) && (rram[wire_rs1][63] ^ sub[63])) 
-						     begin// 溢出标志
-	    	                                      rram[3] <= 1; rram[4] <= rram[wire_rs1][63]; // 溢出值
-						     end
-						     end // Sub
-		   32'b???????_?????_?????_010_?????_0110011: begin 
-					    if ((rram[wire_rs1][63] ~^ mirro_rs2[63]) && rram[wire_rs1][63] == 1)
-                                                     rram[wire_rd] <= 1'b1; 
-					    else if ((rram[wire_rs1][63] ^ mirro_rs2[63]) && (sub[63] == 1))
-                                                     rram[wire_rd] <= 1'b1; 
-					    else rram[wire_rd] <= 1'b0;
-					    end // Slt
-		   32'b???????_?????_?????_011_?????_0110011: begin if (rram[wire_rs1] < rram[wire_rs2]) rram[wire_rd] <= 1'b1; else rram[wire_rd] <= 1'b0; end // Sltu
-		   32'b???????_?????_?????_110_?????_0110011: begin rram[wire_rd] <= (rram[wire_rs1] | rram[wire_rs2]); end // Or
-		   32'b???????_?????_?????_111_?????_0110011: begin rram[wire_rd] <= (rram[wire_rs1] & rram[wire_rs2]); end // And
-		   32'b???????_?????_?????_100_?????_0110011: begin rram[wire_rd] <= (rram[wire_rs1] ^ rram[wire_rs2]); end // Xor
-		   32'b???????_?????_?????_001_?????_0110011: begin rram[wire_rd] <= rram[wire_rs1] << rram[wire_rs2][5:0]; end // Sll
-	           32'b0000000_?????_?????_101_?????_0110011: begin rram[wire_rd] <= (rram[wire_rs1] >> rram[wire_rs2][5:0]); end // Srl
-		   32'b0100000_?????_?????_101_?????_0110011: begin rram[wire_rd] <= ($signed(rram[wire_rs1]) >>> rram[wire_rs2][5:0]); end // Sra
-                   // Math-Logic-Shift-Immediate class
-		   32'b????????????_?????_000_?????_0010011: begin rram[wire_rd] <= rram[wire_rs1] + {{52{wire_imm[11]}}, wire_imm}; 
-				         if ((rram[wire_rs1][63] ~^ wire_imm[11]) && (rram[wire_rs1][63] ^ sum_imm[63])) 
-				           begin // 溢出标志
-	    	                           rram[3] <= 1; rram[4] <= rram[wire_rs1][63]; // 溢出值
-				           end
-				           end // Addi
-		   32'b????????????_?????_010_?????_0010011: begin if ((rram[wire_rs1][63] ~^ mirro_imm[63]) && rram[wire_rs1][63] == 1)
-                                                     rram[wire_rd] <= 1'b1; 
-					    else if ((rram[wire_rs1][63] ^ mirro_imm[63]) && (sub_imm[63] == 1))
-                                                     rram[wire_rd] <= 1'b1; 
-					    else rram[wire_rd] <= 1'b0;
-					    end // Slti
-		   32'b????????????_?????_011_?????_0010011: begin if (rram[wire_rs1] < {{52{wire_imm[11]}}, wire_imm} ) rram[wire_rd] <= 1'b1; else rram[wire_rd] <= 1'b0; end // Sltiu
-		   32'b????????????_?????_110_?????_0010011: begin rram[wire_rd] <= (rram[wire_rs1] | {{52{wire_imm[11]}}, wire_imm}); end // Ori
-		   32'b????????????_?????_111_?????_0010011: begin rram[wire_rd] <= (rram[wire_rs1] & {{52{wire_imm[11]}}, wire_imm}); end // Andi
-		   32'b????????????_?????_100_?????_0010011: begin rram[wire_rd] <= (rram[wire_rs1] ^ {{52{wire_imm[11]}}, wire_imm}); end // Xori
-		   32'b????????????_?????_001_?????_0010011: begin rram[wire_rd] <= (rram[wire_rs1] << wire_shamt ); end // Slli
-		   32'b000000?_?????_?????_101_?????_0010011: begin rram[wire_rd] <= (rram[wire_rs1] >> wire_shamt ); end // Srli // func7->6 // rv64 shame take wire_f7[0]
-		   32'b010000?_?????_?????_101_?????_0010011: begin rram[wire_rd] <= ($signed(rram[wire_rs1]) >>> wire_shamt ); end // Srai
-                   // Math-Logic-Shift-Immediate-64 class
-		   32'b???????_?????_?????_000_?????_0011011: begin rram[wire_rd] <= {{32{sum_imm_32[31]}}, rram[wire_rs1][31:0] + {{20{wire_imm[11]}}, wire_imm}}; end // Addiw
-		   32'b???????_?????_?????_001_?????_0011011: begin rram[wire_rd] <= {{32{slliw_s1[31]}}, slliw_s1[31:0]}; end // Slliw
-		   32'b0000000_?????_?????_101_?????_0011011: begin rram[wire_rd] <= {{32{srliw_s1[31]}}, srliw_s1[31:0]}; end // Srliw
-		   32'b0100000_?????_?????_101_?????_0011011: begin rram[wire_rd] <= {{32{sraiw_s1[31]}}, sraiw_s1[31:0]}; end // Sraiw
-                   // Math-Logic-Shift-Register-64 class
-		   32'b0000000_?????_?????_000_?????_0111011: begin rram[wire_rd] <= {{32{sum[31]}}, rram[wire_rs1][31:0] + rram[wire_rs2][31:0]}; end // Addw
-		   32'b0100000_?????_?????_000_?????_0111011: begin rram[wire_rd] <= {{32{sub[31]}}, rram[wire_rs1][31:0] - rram[wire_rs2][31:0]}; end // Subw
-		   32'b???????_?????_?????_001_?????_0111011: begin rram[wire_rd] <= {{32{rram[wire_rs1][31-rram[wire_rs2][4:0]]}}, (rram[wire_rs1][31:0] << rram[wire_rs2][4:0])}; end // Sllw
-		   32'b0000000_?????_?????_101_?????_0111011: begin if (rram[wire_rs2][4:0] == 0) rram[wire_rd] <= {{32{rram[wire_rs1][31]}}, rram[wire_rs1][31:0]}; 
-		                                              else rram[wire_rd] <= (rram[wire_rs1][31:0] >> rram[wire_rs2][4:0]); end // Srlw
-		   32'b0100000_?????_?????_101_?????_0111011: begin rram[wire_rd] <= {{32{rram[wire_rs1][31]}}, ($signed(rram[wire_rs1][31:0]) >>> rram[wire_rs2][4:0])}; end // Sraw
-		   32'b???????_?????_?????_???_?????_1101111: begin rram[wire_rd] <= pc + 4; pc <= pc +  {{43{wire_jimm[20]}}, wire_jimm}; end // Jal
-		   32'b???????_?????_?????_???_?????_1100111: begin rram[wire_rd] <= pc + 4; pc <= (rram[wire_rs1] +  {{52{wire_imm[11]}}, wire_imm}) & 64'hFFFFFFFFFFFFFFFE ; end // Jalr
-                   // Branch class
-		   32'b???????_?????_?????_000_?????_1100011: begin if (rram[wire_rs1] == rram[wire_rs2]) pc <= pc + sign_extended_bimm; else pc <= pc + 4; end // Beq
-		   32'b???????_?????_?????_001_?????_1100011: begin if (rram[wire_rs1] != rram[wire_rs2]) pc <= pc + sign_extended_bimm; else pc <= pc + 4; end // Bne
-		   32'b???????_?????_?????_100_?????_1100011: begin if ($signed(rram[wire_rs1]) < $signed(rram[wire_rs2])) pc <= pc + sign_extended_bimm; else pc <= pc + 4; end // Blt
-		   32'b???????_?????_?????_101_?????_1100011: begin if ($signed(rram[wire_rs1]) >= $signed(rram[wire_rs2])) pc <= pc + sign_extended_bimm; else pc <= pc + 4; end // Bge
-		   32'b???????_?????_?????_110_?????_1100011: begin if (rram[wire_rs1] < rram[wire_rs2]) pc <= pc + sign_extended_bimm; else pc <= pc + 4; end // Bltu
-		   32'b???????_?????_?????_111_?????_1100011: begin if (rram[wire_rs1] >= rram[wire_rs2]) pc <= pc + sign_extended_bimm; else pc <= pc + 4; end // Bgeu
-		   32'b???????_?????_?????_000_?????_0001111: begin end // Fence
-		   32'b???????_?????_?????_001_?????_0001111: begin end // Fencei
-                   //csr_id <=  csr_index(wire_csr);// ----------------------------SYSTEM 
-		   32'b???????_?????_?????_001_?????_1110011: begin if (wire_rd !== 5'b00000) rram[wire_rd] <= csrram[csr_id]; csrram[csr_id] <= rram[wire_rs1]; end // Csrrw
-		   32'b???????_?????_?????_010_?????_1110011: begin rram[wire_rd] <= csrram[csr_id]; if (wire_rs1 !== 5'b00000) csrram[csr_id] <= rram[wire_rs1] | csrram[csr_id]; end // Csrrs
-		   32'b???????_?????_?????_011_?????_1110011: begin rram[wire_rd] <= csrram[csr_id]; if (wire_rs1 !== 5'b00000) csrram[csr_id] <= ~rram[wire_rs1] & csrram[csr_id]; end // Csrrc
-		   32'b???????_?????_?????_101_?????_1110011: begin if (wire_rd !== 5'b00000) rram[wire_rd] <= csrram[csr_id]; csrram[csr_id] <= {59'b0, wire_zimm}; end // Csrrwi
-		   32'b???????_?????_?????_110_?????_1110011: begin rram[wire_rd] <= csrram[csr_id]; if (wire_zimm !== 5'b00000) csrram[csr_id] <= {59'b0, wire_zimm } | csrram[csr_id]; end // csrrsi
-		   32'b???????_?????_?????_111_?????_1110011: begin rram[wire_rd] <= irom[wire_csr]; if (wire_zimm !== 5'b00000) csrram[csr_id] <= ~{59'b0, wire_zimm } & csrram[csr_id]; end // Csrrci
-		   32'b0000000_00000_?????_000_?????_1110011: begin  // func12 // Ecall
-                                                       // Trap into S-mode
-			                               if (current_privilege_mode == U_mode && medeleg[8] == 1)
-						       begin
-						           csrram[scause][63] <= 0; //63_type 0exception 1interrupt|value
-						           csrram[scause][62:0] <= 8; // 8 indicate Ecall from U-mode; 9 call from S-mode; 11 call from M-mode
-						           csrram[sepc] <= pc;
-						           csrram[sstatus][8] <= 0; // save previous privilege mode(user0 super1) to SPP 
-						           csrram[sstatus][5] <= csrram[sstatus][1]; // save interrupt enable(SIE) to SPIE 
-						           csrram[sstatus][1] <= 0; // clear SIE
-						           //if ((csrram[scause][63]==1'b1) && (csrram[stvec][1:0]== 2'b01)) pc <= (csrram[stvec][63:2] << 2) + (csrram[scause][62:0] << 2);
-						           pc <= (csrram[stvec][63:2] << 2);
-							   current_privilege_mode <= S_mode;
-						       end
-						       // Trap into M-mode
-						       else 
-						       begin
-						           csrram[mcause][63] <= 0; //63_type 0exception 1interrupt|value
-						           csrram[mepc] <= pc;
-						           csrram[mstatus][7] <= csrram[mstatus][3]; // save interrupt enable(MIE) to MPIE 
-						           csrram[mstatus][3] <= 0; // clear MIE (not enabled)
-						           pc <= (csrram[mtvec][63:2] << 2);
-			                                   if (current_privilege_mode == U_mode && medeleg[8] == 0) csrram[mcause][62:0] <= 8; // save cause 
-			                                   if (current_privilege_mode == S_mode) csrram[mcause][62:0] <= 9; 
-						           if (current_privilege_mode == M_mode) csrram[mcause][62:0] <= 11; 
-							   csrram[mstatus][12:11] <= current_privilege_mode; // save privilege mode to MPP 
-							   current_privilege_mode <= M_mode;  // set current privilege mode
-						       end
-						       end
-		   32'b0000000_00001_?????_000_?????_1110011: begin  end // Ebreak
-		   32'b0001000_00010_?????_000_?????_1110011: begin      // Sret
-						       if (csrram[sstatus][8] == 0) current_privilege_mode <= U_mode;
-						       if (csrram[sstatus][8] == 1) current_privilege_mode <= S_mode;
-						       csrram[sstatus][1] <= csrram[sstatus][5]; // set back interrupt enable(SIE) by SPIE 
-						       csrram[sstatus][5] <= 1; // set previous interrupt enable(SIE) to be 1 (enable)
-						       csrram[sstatus][8] <= 0; // set previous privilege mode(SPP) to be 0 (U-mode)
-						       pc <=  csrram[sepc]; // sepc was +4 by the software handler and written back to sepc
-						       end
-		   32'b0011000_00010_?????_000_?????_1110011: begin  // Mret
-						       csrram[mstatus][3] <= csrram[mstatus][7]; // set back interrupt enable(MIE) by MPIE 
-						       csrram[mstatus][7] <= 1; // set previous interrupt enable(MIE) to be 1 (enable)
-						       if (csrram[mstatus][12:11] < M_mode) csrram[mstatus][17] <= 0; // set mprv to 0
-						       current_privilege_mode  <= csrram[mstatus][12:11]; // set back previous mode
-						       csrram[mstatus][12:11] <= 2'b00; // set previous privilege mode(MPP) to be 00 (U-mode)
-						       pc <=  csrram[mepc]; // mepc was +4 by the software handler and written back to sepc
-						       end
-
-
-	    	   endcase
-                   rram[0] <= 64'h0;  // x0 恒为 0
+           // 取指令 + 分析指令 + 执行 | 或 准备数据 (分析且备好该指令所需的数据）
+	   //current_privilege_mode <= current_privilege_mode; // update mode
+	   pc <= pc +4 ;// Default: advance PC for most instructions; override in jumps/branches/traps
+    	   ir <= wire_ir ; 
+           csr_id = csr_index(wire_csr); // ----------------------------SYSTEM 
+    	   casez(wire_ir)  // casez ignore "?"
+           // Load-class
+           32'b????????????????????_?????_0110111: begin rram[wire_rd] <= {{32{wire_upimm[19]}}, wire_upimm, 12'b0}; end // Lui
+	   32'b????????????????????_?????_0010111: begin rram[wire_rd] <= pc + {{32{wire_upimm[19]}}, wire_upimm, 12'b0}; end // Auipc
+	   32'b????????????_?????_000_?????_0000011: begin rram[wire_rd] <= {{56{drom[rram[wire_rs1]+ {{52{wire_imm[11]}},wire_imm}][7]}}, drom[rram[wire_rs1]+ {{52{wire_imm[11]}},wire_imm}]};end  // Lb
+	   32'b????????????_?????_100_?????_0000011: begin rram[wire_rd] <= {56'b0, drom[rram[wire_rs1]+{{52{wire_imm[11]}},wire_imm}]}; end // Lbu
+	   32'b????????????_?????_001_?????_0000011: begin rram[wire_rd] <= {{48{drom[rram[wire_rs1]+{{52{wire_imm[11]}},wire_imm}+ 1][7]}}, 
+				                                                 drom[rram[wire_rs1]+{{52{wire_imm[11]}},wire_imm}+ 1], 
+										 drom[rram[wire_rs1]+{{52{wire_imm[11]}},wire_imm}] }; end // Lh
+	   32'b????????????_?????_101_?????_0000011: begin rram[wire_rd] <= {48'b0, drom[rram[wire_rs1]+{{52{wire_imm[11]}},wire_imm}+ 1], drom[rram[wire_rs1]+{{52{wire_imm[11]}},wire_imm}]}; end // Lhu
+	   32'b????????????_?????_010_?????_0000011: begin rram[wire_rd] <= {{32{drom[rram[wire_rs1]+{{52{wire_imm[11]}},wire_imm}+ 3][7]}}, 
+                                                                                 drom[rram[wire_rs1]+{{52{wire_imm[11]}},wire_imm}+3], 
+                                 			                         drom[rram[wire_rs1]+{{52{wire_imm[11]}},wire_imm}+2], 
+                                 			                         drom[rram[wire_rs1]+{{52{wire_imm[11]}},wire_imm}+1], 
+							                         drom[rram[wire_rs1]+{{52{wire_imm[11]}},wire_imm}]}; end // Lw
+	   32'b????????????_?????_110_?????_0000011: begin rram[wire_rd] <= {32'b0, drom[rram[wire_rs1]+{{52{wire_imm[11]}},wire_imm}+3], 
+                                                                                    drom[rram[wire_rs1]+{{52{wire_imm[11]}},wire_imm}+2], 
+                                                                                    drom[rram[wire_rs1]+{{52{wire_imm[11]}},wire_imm}+1], 
+							                            drom[rram[wire_rs1]+{{52{wire_imm[11]}},wire_imm}]}; end // Lwu
+	   32'b????????????_?????_011_?????_0000011: begin rram[wire_rd] <= {drom[rram[wire_rs1]+{{52{wire_imm[11]}},wire_imm}+7], 
+                                                                             drom[rram[wire_rs1]+{{52{wire_imm[11]}},wire_imm}+6], 
+                                                                             drom[rram[wire_rs1]+{{52{wire_imm[11]}},wire_imm}+5], 
+                                                                             drom[rram[wire_rs1]+{{52{wire_imm[11]}},wire_imm}+4],
+                                                                             drom[rram[wire_rs1]+{{52{wire_imm[11]}},wire_imm}+3], 
+                                                                             drom[rram[wire_rs1]+{{52{wire_imm[11]}},wire_imm}+2], 
+                                                                             drom[rram[wire_rs1]+{{52{wire_imm[11]}},wire_imm}+1], 
+						                             drom[rram[wire_rs1]+{{52{wire_imm[11]}},wire_imm}  ]}; end // Ld
+           // Store-class  // ld and sb are different direction: 
+	   32'b????????????_?????_000_?????_0100011: begin drom[rram[wire_rs1]+{{52{wire_simm[11]}},wire_simm}]   <= rram[wire_rs2][7:0]; end // Sb
+	   32'b????????????_?????_001_?????_0100011: begin drom[rram[wire_rs1]+{{52{wire_simm[11]}},wire_simm}]   <= rram[wire_rs2][7:0];
+	                                                   drom[rram[wire_rs1]+{{52{wire_simm[11]}},wire_simm}+1] <= rram[wire_rs2][15:8]; end // Sh
+	   32'b????????????_?????_010_?????_0100011: begin drom[rram[wire_rs1]+{{52{wire_simm[11]}},wire_simm}]   <= rram[wire_rs2][7:0];
+				                           drom[rram[wire_rs1]+{{52{wire_simm[11]}},wire_simm}+1] <= rram[wire_rs2][15:8];
+				                           drom[rram[wire_rs1]+{{52{wire_simm[11]}},wire_simm}+2] <= rram[wire_rs2][23:16];
+				                           drom[rram[wire_rs1]+{{52{wire_simm[11]}},wire_simm}+3] <= rram[wire_rs2][31:24]; end // Sw
+	   32'b????????????_?????_011_?????_0100011: begin drom[rram[wire_rs1]+{{52{wire_simm[11]}},wire_simm}]   <= rram[wire_rs2][7:0];
+				                           drom[rram[wire_rs1]+{{52{wire_simm[11]}},wire_simm}+1] <= rram[wire_rs2][15:8];
+				                           drom[rram[wire_rs1]+{{52{wire_simm[11]}},wire_simm}+2] <= rram[wire_rs2][23:16];
+				                           drom[rram[wire_rs1]+{{52{wire_simm[11]}},wire_simm}+3] <= rram[wire_rs2][31:24];
+				                           drom[rram[wire_rs1]+{{52{wire_simm[11]}},wire_simm}+4] <= rram[wire_rs2][39:32];
+				                           drom[rram[wire_rs1]+{{52{wire_simm[11]}},wire_simm}+5] <= rram[wire_rs2][47:40];
+				                           drom[rram[wire_rs1]+{{52{wire_simm[11]}},wire_simm}+6] <= rram[wire_rs2][55:48];
+				                           drom[rram[wire_rs1]+{{52{wire_simm[11]}},wire_simm}+7] <= rram[wire_rs2][63:56]; end // Sd
+           // Math-Logic-Shift-Register class
+	   32'b0000000_?????_?????_000_?????_0110011: begin rram[wire_rd] <= rram[wire_rs1] + rram[wire_rs2]; 
+			                              if ((rram[wire_rs1][63] ~^ rram[wire_rs2][63]) && (rram[wire_rs1][63] ^ sum[63])) 
+					              begin rram[3] <= 1; rram[4] <= rram[wire_rs1][63]; end
+					              end  // Add
+	   32'b0100000_?????_?????_000_?????_0110011: begin rram[wire_rd] <= sub;
+			                              if ((rram[wire_rs1][63] ~^ mirro_rs2 [63]) && (rram[wire_rs1][63] ^ sub[63])) 
+					              begin rram[3] <= 1; rram[4] <= rram[wire_rs1][63]; end
+					              end // Sub
+	   32'b???????_?????_?????_010_?????_0110011: begin 
+				                      if ((rram[wire_rs1][63] ~^ mirro_rs2[63]) && rram[wire_rs1][63] == 1) rram[wire_rd] <= 1'b1; 
+				                      else if ((rram[wire_rs1][63] ^ mirro_rs2[63]) && (sub[63] == 1)) rram[wire_rd] <= 1'b1; 
+				                      else rram[wire_rd] <= 1'b0;
+				                      end // Slt
+	   32'b???????_?????_?????_011_?????_0110011: begin if (rram[wire_rs1] < rram[wire_rs2]) rram[wire_rd] <= 1'b1; else rram[wire_rd] <= 1'b0; end // Sltu
+	   32'b???????_?????_?????_110_?????_0110011: begin rram[wire_rd] <= (rram[wire_rs1] | rram[wire_rs2]); end // Or
+	   32'b???????_?????_?????_111_?????_0110011: begin rram[wire_rd] <= (rram[wire_rs1] & rram[wire_rs2]); end // And
+	   32'b???????_?????_?????_100_?????_0110011: begin rram[wire_rd] <= (rram[wire_rs1] ^ rram[wire_rs2]); end // Xor
+	   32'b???????_?????_?????_001_?????_0110011: begin rram[wire_rd] <= rram[wire_rs1] << rram[wire_rs2][5:0]; end // Sll
+           32'b0000000_?????_?????_101_?????_0110011: begin rram[wire_rd] <= (rram[wire_rs1] >> rram[wire_rs2][5:0]); end // Srl
+	   32'b0100000_?????_?????_101_?????_0110011: begin rram[wire_rd] <= ($signed(rram[wire_rs1]) >>> rram[wire_rs2][5:0]); end // Sra
+           // Math-Logic-Shift-Immediate class
+	   32'b????????????_?????_000_?????_0010011: begin rram[wire_rd] <= rram[wire_rs1] + {{52{wire_imm[11]}}, wire_imm}; 
+			                             if ((rram[wire_rs1][63] ~^ wire_imm[11]) && (rram[wire_rs1][63] ^ sum_imm[63])) 
+			                             begin rram[3] <= 1; rram[4] <= rram[wire_rs1][63]; end
+			                             end // Addi
+	   32'b????????????_?????_010_?????_0010011: begin if ((rram[wire_rs1][63] ~^ mirro_imm[63]) && rram[wire_rs1][63] == 1) rram[wire_rd] <= 1'b1; 
+				                     else if ((rram[wire_rs1][63] ^ mirro_imm[63]) && (sub_imm[63] == 1)) rram[wire_rd] <= 1'b1; 
+				                     else rram[wire_rd] <= 1'b0; end // Slti
+	   32'b????????????_?????_011_?????_0010011: begin if (rram[wire_rs1] < {{52{wire_imm[11]}}, wire_imm} ) rram[wire_rd] <= 1'b1; else rram[wire_rd] <= 1'b0; end // Sltiu
+	   32'b????????????_?????_110_?????_0010011: begin rram[wire_rd] <= (rram[wire_rs1] | {{52{wire_imm[11]}}, wire_imm}); end // Ori
+	   32'b????????????_?????_111_?????_0010011: begin rram[wire_rd] <= (rram[wire_rs1] & {{52{wire_imm[11]}}, wire_imm}); end // Andi
+	   32'b????????????_?????_100_?????_0010011: begin rram[wire_rd] <= (rram[wire_rs1] ^ {{52{wire_imm[11]}}, wire_imm}); end // Xori
+	   32'b????????????_?????_001_?????_0010011: begin rram[wire_rd] <= (rram[wire_rs1] << wire_shamt ); end // Slli
+	   32'b000000?_?????_?????_101_?????_0010011: begin rram[wire_rd] <= (rram[wire_rs1] >> wire_shamt ); end // Srli // func7->6 // rv64 shame take wire_f7[0]
+	   32'b010000?_?????_?????_101_?????_0010011: begin rram[wire_rd] <= ($signed(rram[wire_rs1]) >>> wire_shamt ); end // Srai
+           // Math-Logic-Shift-Immediate-64 class
+	   32'b???????_?????_?????_000_?????_0011011: begin rram[wire_rd] <= {{32{sum_imm_32[31]}}, rram[wire_rs1][31:0] + {{20{wire_imm[11]}}, wire_imm}}; end // Addiw
+	   32'b???????_?????_?????_001_?????_0011011: begin rram[wire_rd] <= {{32{slliw_s1[31]}}, slliw_s1[31:0]}; end // Slliw
+	   32'b0000000_?????_?????_101_?????_0011011: begin rram[wire_rd] <= {{32{srliw_s1[31]}}, srliw_s1[31:0]}; end // Srliw
+	   32'b0100000_?????_?????_101_?????_0011011: begin rram[wire_rd] <= {{32{sraiw_s1[31]}}, sraiw_s1[31:0]}; end // Sraiw
+           // Math-Logic-Shift-Register-64 class
+	   32'b0000000_?????_?????_000_?????_0111011: begin rram[wire_rd] <= {{32{sum[31]}}, rram[wire_rs1][31:0] + rram[wire_rs2][31:0]}; end // Addw
+	   32'b0100000_?????_?????_000_?????_0111011: begin rram[wire_rd] <= {{32{sub[31]}}, rram[wire_rs1][31:0] - rram[wire_rs2][31:0]}; end // Subw
+	   32'b???????_?????_?????_001_?????_0111011: begin rram[wire_rd] <= {{32{rram[wire_rs1][31-rram[wire_rs2][4:0]]}}, (rram[wire_rs1][31:0] << rram[wire_rs2][4:0])}; end // Sllw
+	   32'b0000000_?????_?????_101_?????_0111011: begin if (rram[wire_rs2][4:0] == 0) rram[wire_rd] <= {{32{rram[wire_rs1][31]}}, rram[wire_rs1][31:0]}; 
+	                                              else rram[wire_rd] <= (rram[wire_rs1][31:0] >> rram[wire_rs2][4:0]); end // Srlw
+	   32'b0100000_?????_?????_101_?????_0111011: begin rram[wire_rd] <= {{32{rram[wire_rs1][31]}}, ($signed(rram[wire_rs1][31:0]) >>> rram[wire_rs2][4:0])}; end // Sraw
+	   32'b???????_?????_?????_???_?????_1101111: begin rram[wire_rd] <= pc + 4; pc <= pc +  {{43{wire_jimm[20]}}, wire_jimm}; end // Jal
+	   32'b???????_?????_?????_???_?????_1100111: begin rram[wire_rd] <= pc + 4; pc <= (rram[wire_rs1] +  {{52{wire_imm[11]}}, wire_imm}) & 64'hFFFFFFFFFFFFFFFE ; end // Jalr
+           // Branch class
+	   32'b???????_?????_?????_000_?????_1100011: begin if (rram[wire_rs1] == rram[wire_rs2]) pc <= pc + sign_extended_bimm; else pc <= pc + 4; end // Beq
+	   32'b???????_?????_?????_001_?????_1100011: begin if (rram[wire_rs1] != rram[wire_rs2]) pc <= pc + sign_extended_bimm; else pc <= pc + 4; end // Bne
+	   32'b???????_?????_?????_100_?????_1100011: begin if ($signed(rram[wire_rs1]) < $signed(rram[wire_rs2])) pc <= pc + sign_extended_bimm; else pc <= pc + 4; end // Blt
+	   32'b???????_?????_?????_101_?????_1100011: begin if ($signed(rram[wire_rs1]) >= $signed(rram[wire_rs2])) pc <= pc + sign_extended_bimm; else pc <= pc + 4; end // Bge
+	   32'b???????_?????_?????_110_?????_1100011: begin if (rram[wire_rs1] < rram[wire_rs2]) pc <= pc + sign_extended_bimm; else pc <= pc + 4; end // Bltu
+	   32'b???????_?????_?????_111_?????_1100011: begin if (rram[wire_rs1] >= rram[wire_rs2]) pc <= pc + sign_extended_bimm; else pc <= pc + 4; end // Bgeu
+	   32'b???????_?????_?????_000_?????_0001111: begin end // Fence
+	   32'b???????_?????_?????_001_?????_0001111: begin end // Fencei
+           //csr_id <=  csr_index(wire_csr);// ----------------------------SYSTEM 
+	   32'b???????_?????_?????_001_?????_1110011: begin if (wire_rd !== 5'b00000) rram[wire_rd] <= csrram[csr_id]; csrram[csr_id] <= rram[wire_rs1]; end // Csrrw
+	   32'b???????_?????_?????_010_?????_1110011: begin rram[wire_rd] <= csrram[csr_id]; if (wire_rs1 !== 5'b00000) csrram[csr_id] <= rram[wire_rs1] | csrram[csr_id]; end // Csrrs
+	   32'b???????_?????_?????_011_?????_1110011: begin rram[wire_rd] <= csrram[csr_id]; if (wire_rs1 !== 5'b00000) csrram[csr_id] <= ~rram[wire_rs1] & csrram[csr_id]; end // Csrrc
+	   32'b???????_?????_?????_101_?????_1110011: begin if (wire_rd !== 5'b00000) rram[wire_rd] <= csrram[csr_id]; csrram[csr_id] <= {59'b0, wire_zimm}; end // Csrrwi
+	   32'b???????_?????_?????_110_?????_1110011: begin rram[wire_rd] <= csrram[csr_id]; if (wire_zimm !== 5'b00000) csrram[csr_id] <= {59'b0, wire_zimm } | csrram[csr_id]; end // csrrsi
+	   32'b???????_?????_?????_111_?????_1110011: begin rram[wire_rd] <= irom[wire_csr]; if (wire_zimm !== 5'b00000) csrram[csr_id] <= ~{59'b0, wire_zimm } & csrram[csr_id]; end // Csrrci
+	   32'b0000000_00000_?????_000_?????_1110011: begin  // func12 // Ecall
+                                               // Trap into S-mode
+		                               if (current_privilege_mode == U_mode && medeleg[8] == 1)
+					       begin
+					           csrram[scause][63] <= 0; //63_type 0exception 1interrupt|value
+					           csrram[scause][62:0] <= 8; // 8 indicate Ecall from U-mode; 9 call from S-mode; 11 call from M-mode
+					           csrram[sepc] <= pc;
+					           csrram[sstatus][8] <= 0; // save previous privilege mode(user0 super1) to SPP 
+					           csrram[sstatus][5] <= csrram[sstatus][1]; // save interrupt enable(SIE) to SPIE 
+					           csrram[sstatus][1] <= 0; // clear SIE
+					           //if ((csrram[scause][63]==1'b1) && (csrram[stvec][1:0]== 2'b01)) pc <= (csrram[stvec][63:2] << 2) + (csrram[scause][62:0] << 2);
+					           pc <= (csrram[stvec][63:2] << 2);
+						   current_privilege_mode <= S_mode;
+					       end
+					       // Trap into M-mode
+					       else 
+					       begin
+					           csrram[mcause][63] <= 0; //63_type 0exception 1interrupt|value
+					           csrram[mepc] <= pc;
+					           csrram[mstatus][7] <= csrram[mstatus][3]; // save interrupt enable(MIE) to MPIE 
+					           csrram[mstatus][3] <= 0; // clear MIE (not enabled)
+					           pc <= (csrram[mtvec][63:2] << 2);
+		                                   if (current_privilege_mode == U_mode && medeleg[8] == 0) csrram[mcause][62:0] <= 8; // save cause 
+		                                   if (current_privilege_mode == S_mode) csrram[mcause][62:0] <= 9; 
+					           if (current_privilege_mode == M_mode) csrram[mcause][62:0] <= 11; 
+						   csrram[mstatus][12:11] <= current_privilege_mode; // save privilege mode to MPP 
+						   current_privilege_mode <= M_mode;  // set current privilege mode
+					       end
+					       end
+	   32'b0000000_00001_?????_000_?????_1110011: begin  end // Ebreak
+	   32'b0001000_00010_?????_000_?????_1110011: begin      // Sret
+					       if (csrram[sstatus][8] == 0) current_privilege_mode <= U_mode;
+					       if (csrram[sstatus][8] == 1) current_privilege_mode <= S_mode;
+					       csrram[sstatus][1] <= csrram[sstatus][5]; // set back interrupt enable(SIE) by SPIE 
+					       csrram[sstatus][5] <= 1; // set previous interrupt enable(SIE) to be 1 (enable)
+					       csrram[sstatus][8] <= 0; // set previous privilege mode(SPP) to be 0 (U-mode)
+					       pc <=  csrram[sepc]; // sepc was +4 by the software handler and written back to sepc
+					       end
+	   32'b0011000_00010_?????_000_?????_1110011: begin  // Mret
+					       csrram[mstatus][3] <= csrram[mstatus][7]; // set back interrupt enable(MIE) by MPIE 
+					       csrram[mstatus][7] <= 1; // set previous interrupt enable(MIE) to be 1 (enable)
+					       if (csrram[mstatus][12:11] < M_mode) csrram[mstatus][17] <= 0; // set mprv to 0
+					       current_privilege_mode  <= csrram[mstatus][12:11]; // set back previous mode
+					       csrram[mstatus][12:11] <= 2'b00; // set previous privilege mode(MPP) to be 00 (U-mode)
+					       pc <=  csrram[mepc]; // mepc was +4 by the software handler and written back to sepc
+					       end
+    	   endcase
+           rram[0] <= 64'h0;  // x0 恒为 0
         end
     end
 endmodule
