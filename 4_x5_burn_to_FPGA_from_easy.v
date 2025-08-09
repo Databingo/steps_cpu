@@ -585,24 +585,24 @@ begin
 	    	                                      rram[3] <= 1; rram[4] <= rram[wire_rs1][63]; // 溢出值
 						     end
 						     end // Sub
-				  3'b010:begin 
-				           Slt  <= 1'b1; // set Slt Flag 
-				           // if rs1 less than rs2 both as sign-extended then put 1 in rd else 0
-					   // 电路方式: 一周期实现比较 
-					   // 计算 rs1 - rs2 < 0  转化 Sub -> Add
-					   // 同号相加, 号即大小: 1: rs1 小于 rs2
-					    if ((rram[wire_rs1][63] ~^ mirro_rs2[63]) && rram[wire_rs1][63] == 1)
-                                                     rram[wire_rd] <= 1'b1; 
-					   // 异号相加, 果即大小 |1: rs1 小于 rs2 |000: 相等 |0xxx: rs1 大于 rs2
-					    else if ((rram[wire_rs1][63] ^ mirro_rs2[63]) && (sub[63] == 1))
-                                                     rram[wire_rd] <= 1'b1; 
-                                           // 否则 rs1 大于 rs2
-					    else rram[wire_rd] <= 1'b0;
-					   // 代码模式 
-					   // if (rram[wire_rs1] - rram[wire_rs2] < 0 ) rram[wire_rd] <= 1'b1; 
-				           pc <= pc + 4; 
-	    	                           jp <=0;
-				         end 
+		//		  3'b010:begin 
+		//		           Slt  <= 1'b1; // set Slt Flag 
+		//		           // if rs1 less than rs2 both as sign-extended then put 1 in rd else 0
+		//			   // 电路方式: 一周期实现比较 
+		//			   // 计算 rs1 - rs2 < 0  转化 Sub -> Add
+		//			   // 同号相加, 号即大小: 1: rs1 小于 rs2
+		//			    if ((rram[wire_rs1][63] ~^ mirro_rs2[63]) && rram[wire_rs1][63] == 1)
+                //                                     rram[wire_rd] <= 1'b1; 
+		//			   // 异号相加, 果即大小 |1: rs1 小于 rs2 |000: 相等 |0xxx: rs1 大于 rs2
+		//			    else if ((rram[wire_rs1][63] ^ mirro_rs2[63]) && (sub[63] == 1))
+                //                                     rram[wire_rd] <= 1'b1; 
+                //                           // 否则 rs1 大于 rs2
+		//			    else rram[wire_rd] <= 1'b0;
+		//			   // 代码模式 
+		//			   // if (rram[wire_rs1] - rram[wire_rs2] < 0 ) rram[wire_rd] <= 1'b1; 
+		//		           pc <= pc + 4; 
+	    	//                           jp <=0;
+		//		         end 
 		   //32'b0000000_?????_?????_010_?????_0110011: begin 
 		   32'b???????_?????_?????_010_?????_0110011: begin 
 					    if ((rram[wire_rs1][63] ~^ mirro_rs2[63]) && rram[wire_rs1][63] == 1)
@@ -826,122 +826,135 @@ begin
 		//              end
 		   32'b0100000_?????_?????_101_?????_0011011: begin rram[wire_rd] <= {{32{sraiw_s1[31]}}, sraiw_s1[31:0]}; end // Sraiw
                    // Math-Logic-Shift-Register-64 class
-	           7'b0111011:begin 
-			        case(wire_f3) // func3
-				  3'b000: begin
-				          case(wire_f7) // func7
-					      7'b0000000: begin 
-					                  Addw  <= 1'b1; // set Addw  Flag 
-				                          rram[wire_rd] <= {{32{sum[31]}}, rram[wire_rs1][31:0] + rram[wire_rs2][31:0]}; 
-				                          pc <= pc + 4; 
-	    	                                          jp <=0;
-						          end
-					      7'b0100000: begin
-							  Subw  <= 1'b1; // set Subw  Flag 
-				                          rram[wire_rd] <= {{32{sub[31]}}, rram[wire_rs1][31:0] - rram[wire_rs2][31:0]}; 
-				                          pc <= pc + 4; 
-	    	                                          jp <=0;
-						          end
-				          endcase
-				         end 
-				  3'b001: begin
-				           Sllw  <= 1'b1; // set Sllw Flag 
-					   // shift lift  logicl rs1.32 by rs2's value [low5.unsign], take the l32 sext to 64 put into rd
-					   rram[wire_rd] <= {{32{rram[wire_rs1][31-rram[wire_rs2][4:0]]}}, (rram[wire_rs1][31:0] << rram[wire_rs2][4:0])}; 
-				           pc <= pc + 4; 
-	    	                           jp <=0;
-				          end
-				  3'b101: begin
-				          case(wire_f7) // func7
-					    7'b0000000: begin
-						        Srlw  <= 1'b1; // set Srlw  Flag 
-					                if (rram[wire_rs2][4:0] == 0) rram[wire_rd] <= {{32{rram[wire_rs1][31]}}, rram[wire_rs1][31:0]}; 
-					                else rram[wire_rd] <= (rram[wire_rs1][31:0] >> rram[wire_rs2][4:0]); 
-				                        pc <= pc + 4; 
-	    	                                        jp <=0;
-					                end
-					    7'b0100000: begin
-						       Sraw  <= 1'b1; // set Sraw  Flag 
-					               // shift right arithmatical rs1.l32 by sr2[low5.unsign] cut 32 sext 64 to rd
-					               rram[wire_rd] <= {{32{rram[wire_rs1][31]}}, ($signed(rram[wire_rs1][31:0]) >>> rram[wire_rs2][4:0])}; 
-				                       pc <= pc + 4; 
-	    	                                       jp <=0;
-						       end
-				          endcase
-				         end 
-				endcase
-		              end
-                   // Jump
-	           7'b1101111:begin 
-                                Jal <= 1'b1; // set Jal Flag 
-				//jump PC to PC+imm(padding 0) and place return address PC+4 in rd
-				rram[wire_rd] <= pc + 4;
-				pc <= pc +  {{43{wire_jimm[20]}}, wire_jimm};
-	    	                jp <=0;
-                              end
-                   // RJump
-	           7'b1100111:begin 
-                                Jalr <= 1'b1; // set Jalr Flag 
-		                //jump PC to address imm(rs1) and place return address PC+4 in rd (no need padding last 0 not as JAL)
-				rram[wire_rd] <= pc + 4;
-				pc <= (rram[wire_rs1] +  {{52{wire_imm[11]}}, wire_imm}) & 64'hFFFFFFFFFFFFFFFE ;
-	    	                jp <=0;
-                              end
+	        //   7'b0111011:begin 
+		//	        case(wire_f3) // func3
+		//		  3'b000: begin
+		//		          case(wire_f7) // func7
+		//			      7'b0000000: begin 
+		//			                  Addw  <= 1'b1; // set Addw  Flag 
+		//		                          rram[wire_rd] <= {{32{sum[31]}}, rram[wire_rs1][31:0] + rram[wire_rs2][31:0]}; 
+		//		                          pc <= pc + 4; 
+	    	//                                          jp <=0;
+		//				          end
+		   32'b0000000_?????_?????_000_?????_0111011: begin rram[wire_rd] <= {{32{sum[31]}}, rram[wire_rs1][31:0] + rram[wire_rs2][31:0]}; end // Addw
+				//	      7'b0100000: begin
+				//			  Subw  <= 1'b1; // set Subw  Flag 
+				//                          rram[wire_rd] <= {{32{sub[31]}}, rram[wire_rs1][31:0] - rram[wire_rs2][31:0]}; 
+				//                          pc <= pc + 4; 
+	    	                //                          jp <=0;
+				//		          end
+				//          endcase
+				//         end 
+		   32'b0100000_?????_?????_000_?????_0111011: begin rram[wire_rd] <= {{32{sub[31]}}, rram[wire_rs1][31:0] - rram[wire_rs2][31:0]}; end // Subw
+				//  3'b001: begin
+				//           Sllw  <= 1'b1; // set Sllw Flag 
+				//	   // shift lift  logicl rs1.32 by rs2's value [low5.unsign], take the l32 sext to 64 put into rd
+				//	   rram[wire_rd] <= {{32{rram[wire_rs1][31-rram[wire_rs2][4:0]]}}, (rram[wire_rs1][31:0] << rram[wire_rs2][4:0])}; 
+				//           pc <= pc + 4; 
+	    	                //           jp <=0;
+				//          end
+		   32'b???????_?????_?????_001_?????_0111011: begin rram[wire_rd] <= {{32{rram[wire_rs1][31-rram[wire_rs2][4:0]]}}, (rram[wire_rs1][31:0] << rram[wire_rs2][4:0])}; end // Sllw
+			//	  3'b101: begin
+			//	          case(wire_f7) // func7
+			//		    7'b0000000: begin
+			//			        Srlw  <= 1'b1; // set Srlw  Flag 
+			//		                if (rram[wire_rs2][4:0] == 0) rram[wire_rd] <= {{32{rram[wire_rs1][31]}}, rram[wire_rs1][31:0]}; 
+			//		                else rram[wire_rd] <= (rram[wire_rs1][31:0] >> rram[wire_rs2][4:0]); 
+			//	                        pc <= pc + 4; 
+	    	        //                                jp <=0;
+			//		                end
+		   32'b0000000_?????_?????_101_?????_0111011: begin if (rram[wire_rs2][4:0] == 0) rram[wire_rd] <= {{32{rram[wire_rs1][31]}}, rram[wire_rs1][31:0]}; 
+		                                              else rram[wire_rd] <= (rram[wire_rs1][31:0] >> rram[wire_rs2][4:0]); end // Srlw
+		//			    7'b0100000: begin
+		//				       Sraw  <= 1'b1; // set Sraw  Flag 
+		//			               // shift right arithmatical rs1.l32 by sr2[low5.unsign] cut 32 sext 64 to rd
+		//			               rram[wire_rd] <= {{32{rram[wire_rs1][31]}}, ($signed(rram[wire_rs1][31:0]) >>> rram[wire_rs2][4:0])}; 
+		//		                       pc <= pc + 4; 
+	    	//                                       jp <=0;
+		//				       end
+		//		          endcase
+		//		         end 
+		//		endcase
+		//              end
+		   32'b0100000_?????_?????_101_?????_0111011: begin rram[wire_rd] <= {{32{rram[wire_rs1][31]}}, ($signed(rram[wire_rs1][31:0]) >>> rram[wire_rs2][4:0])}; end // Sraw
+	           //7'b1101111:begin 
+                   //             Jal <= 1'b1; // set Jal Flag 
+		   //     	//jump PC to PC+imm(padding 0) and place return address PC+4 in rd
+		   //     	rram[wire_rd] <= pc + 4;
+		   //     	pc <= pc +  {{43{wire_jimm[20]}}, wire_jimm};
+	    	   //             jp <=0;
+                   //           end
+		   32'b???????_?????_?????_???_?????_1101111: begin rram[wire_rd] <= pc + 4; pc <= pc +  {{43{wire_jimm[20]}}, wire_jimm}; end // Jal
+	           //7'b1100111:begin 
+                   //             Jalr <= 1'b1; // set Jalr Flag 
+		   //             //jump PC to address imm(rs1) and place return address PC+4 in rd (no need padding last 0 not as JAL)
+		   //     	rram[wire_rd] <= pc + 4;
+		   //     	pc <= (rram[wire_rs1] +  {{52{wire_imm[11]}}, wire_imm}) & 64'hFFFFFFFFFFFFFFFE ;
+	    	   //             jp <=0;
+                   //           end
+		   32'b???????_?????_?????_???_?????_1100111: begin rram[wire_rd] <= pc + 4; pc <= (rram[wire_rs1] +  {{52{wire_imm[11]}}, wire_imm}) & 64'hFFFFFFFFFFFFFFFE ; end // Jalr
                    // Branch class
-	           7'b1100011:begin 
-			        case(wire_f3) // func3
-				  3'b000:begin
-				         Beq  <= 1'b1; // set Beq  Flag 
-				         //  take branch if rs1 rs2 equal to PC+(sign-extend imm_0)
-					 if (rram[wire_rs1] == rram[wire_rs2]) pc <= pc + sign_extended_bimm;
-					 else pc <= pc + 4; 
-	    	                         jp <=0;
-				         end
-				  3'b001:begin 
-					 Bne  <= 1'b1; // set Bne  Flag 
-				         //  take branch if rs1 rs2 not equal to PC+(sign-extend imm_0)
-					 if (rram[wire_rs1] != rram[wire_rs2]) pc <= pc + sign_extended_bimm;
-					 else pc <= pc + 4; 
-	    	                         jp <=0;
-				         end
-				  3'b100:begin 
-					 Blt  <= 1'b1; // set Blt  Flag 
-				         //  take branch if rs1 smaller than rs2 to PC+(sign-extend imm_0)
-					 if ($signed(rram[wire_rs1]) < $signed(rram[wire_rs2])) pc <= pc + sign_extended_bimm;
-					  else pc <= pc + 4;
-	    	                         jp <=0;
-				         end
-				  3'b101:begin 
-					 Bge  <= 1'b1; // set Bge  Flag 
-				         //  take branch if rs1 bigger than or equite to rs2 to PC+(sign-extend imm_0)
-					 if ($signed(rram[wire_rs1]) >= $signed(rram[wire_rs2])) pc <= pc + sign_extended_bimm;
-					  else pc <= pc + 4;
-	    	                         jp <=0;
-					 end
-				  3'b110:begin
-					 Bltu <= 1'b1; // set Bltu Flag 
-					 //take branch if rs1 < rs2 in unsigned comparison 
-					    if (rram[wire_rs1] < rram[wire_rs2]) pc <= pc + sign_extended_bimm;
-					    else pc <= pc + 4;
-	    	                            jp <=0;
-				         end 
-					 
-				  3'b111:begin
-					 Bgeu <= 1'b1; // set Bgeu Flag 
-					 //take branch if rs1 >= rs2 in unsigned comparison 
-					    if (rram[wire_rs1] >= rram[wire_rs2]) pc <= pc + sign_extended_bimm;
-					    else pc <= pc + 4;
-	    	                            jp <=0;
-				         end 
-				endcase
-		              end
+	        //   7'b1100011:begin 
+		//	        case(wire_f3) // func3
+		//		  3'b000:begin
+		//		         Beq  <= 1'b1; // set Beq  Flag 
+		//		         //  take branch if rs1 rs2 equal to PC+(sign-extend imm_0)
+		//			 if (rram[wire_rs1] == rram[wire_rs2]) pc <= pc + sign_extended_bimm;
+		//			 else pc <= pc + 4; 
+	    	//                         jp <=0;
+		//		         end
+		   32'b???????_?????_?????_000_?????_1100011: begin if (rram[wire_rs1] == rram[wire_rs2]) pc <= pc + sign_extended_bimm; else pc <= pc + 4; end // Beq
+		//		  3'b001:begin 
+		//			 Bne  <= 1'b1; // set Bne  Flag 
+		//		         //  take branch if rs1 rs2 not equal to PC+(sign-extend imm_0)
+		//			 if (rram[wire_rs1] != rram[wire_rs2]) pc <= pc + sign_extended_bimm;
+		//			 else pc <= pc + 4; 
+	    	//                         jp <=0;
+		//		         end
+		   32'b???????_?????_?????_001_?????_1100011: begin if (rram[wire_rs1] != rram[wire_rs2]) pc <= pc + sign_extended_bimm; else pc <= pc + 4; end // Bne
+		//		  3'b100:begin 
+		//			 Blt  <= 1'b1; // set Blt  Flag 
+		//		         //  take branch if rs1 smaller than rs2 to PC+(sign-extend imm_0)
+		//			 if ($signed(rram[wire_rs1]) < $signed(rram[wire_rs2])) pc <= pc + sign_extended_bimm;
+		//			  else pc <= pc + 4;
+	    	//                         jp <=0;
+		//		         end
+		   32'b???????_?????_?????_100_?????_1100011: begin if ($signed(rram[wire_rs1]) < $signed(rram[wire_rs2])) pc <= pc + sign_extended_bimm; else pc <= pc + 4; end // Blt
+		//		  3'b101:begin 
+		//			 Bge  <= 1'b1; // set Bge  Flag 
+		//		         //  take branch if rs1 bigger than or equite to rs2 to PC+(sign-extend imm_0)
+		//			 if ($signed(rram[wire_rs1]) >= $signed(rram[wire_rs2])) pc <= pc + sign_extended_bimm;
+		//			  else pc <= pc + 4;
+	    	//                         jp <=0;
+		//			 end
+		   32'b???????_?????_?????_101_?????_1100011: begin if ($signed(rram[wire_rs1]) >= $signed(rram[wire_rs2])) pc <= pc + sign_extended_bimm; else pc <= pc + 4; end // Bge
+		//		  3'b110:begin
+		//			 Bltu <= 1'b1; // set Bltu Flag 
+		//			 //take branch if rs1 < rs2 in unsigned comparison 
+		//			    if (rram[wire_rs1] < rram[wire_rs2]) pc <= pc + sign_extended_bimm;
+		//			    else pc <= pc + 4;
+	    	//                            jp <=0;
+		//		         end 
+		   32'b???????_?????_?????_110_?????_1100011: begin if (rram[wire_rs1] < rram[wire_rs2]) pc <= pc + sign_extended_bimm; else pc <= pc + 4; end // Bltu
+		//		  3'b111:begin
+		//			 Bgeu <= 1'b1; // set Bgeu Flag 
+		//			 //take branch if rs1 >= rs2 in unsigned comparison 
+		//			    if (rram[wire_rs1] >= rram[wire_rs2]) pc <= pc + sign_extended_bimm;
+		//			    else pc <= pc + 4;
+	    	//                            jp <=0;
+		//		         end 
+		//		endcase
+		//              end
+		   32'b???????_?????_?????_111_?????_1100011: begin if (rram[wire_rs1] >= rram[wire_rs2]) pc <= pc + sign_extended_bimm; else pc <= pc + 4; end // Bgeu
                    // Fence class
-	           7'b0001111:begin
-			        case(irom[pc][14:12]) // func3
-			          3'b000: Fence  <= 1'b1; // set Fence Flag 
-			          3'b001: Fencei <= 1'b1; // set Fencei Flag 
-				endcase
-		              end
+	        //   7'b0001111:begin
+		//	        case(irom[pc][14:12]) // func3
+		//	          3'b000: Fence  <= 1'b1; // set Fence Flag 
+		   32'b???????_?????_?????_000_?????_0001111: begin end // Fence
+		//	          3'b001: Fencei <= 1'b1; // set Fencei Flag 
+		//		endcase
+		//              end
+		   32'b???????_?????_?????_001_?????_0001111: begin end // Fencei
 		   // ----------------------------
 	           7'b1110011:begin // system 
 		                csr_id =  csr_index(wire_csr);
