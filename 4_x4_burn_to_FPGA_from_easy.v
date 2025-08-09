@@ -1,14 +1,8 @@
-// 声明指令控制线
-reg Lui, Auipc, Lb, Lbu, Lh, Lhu, Lw, Lwu, Ld, Sb, Sh, Sw, Sd, Add, Sub, Sll, Slt, Sltu, Xor, Srl, Sra, Or, And, Addi, Slti, Sltiu, Ori, Andi, Xori, Slli, Srli, Srai, Addiw, Slliw, Srliw, Sraiw, Addw, Subw, Sllw, Srlw, Sraw, Jal, Jalr, Beq, Bne, Blt, Bge, Bltu, Bgeu, Fence, Fencei, Ecall, Ebreak, Csrrw, Csrrs, Csrrc, Csrrwi, Csrrsi, Csrrci;
-
-
 localparam M_mode = 2'b11;
 localparam S_mode = 2'b01;
 localparam U_mode = 2'b00;
 reg [1:0] current_privilege_mode;
 
-// CSR pre 00 user 01 super 10 hyper 11 machine
-// Supervisor Trap Setup
 integer sstatus = 12'h100; // 63_SD|WPRI|33:32_UXL10|WPRI|19_MXR|18_SUM|17_WPRI|16:15_XS10|14:13_FS10|WPRI|8_SPP|7_WPRI|6_UBE|5_SPIE|WPRI|1_SIE|0_WPRI
 integer sedeleg = 12'h102;
 integer sideleg = 12'h103;
@@ -107,11 +101,6 @@ function [4:0] csr_index;
 	12'h100: csr_index = 5'd31;	                           // 0x3AF MRW pmpcfg15  
 
 
-
-
-
-   
-   
    
     default: csr_index = 5'b00000;
   endcase
@@ -120,29 +109,6 @@ endfunction
 
 reg [4:0] csr_id; 
 reg [11:0] csr_nu; 
-
-module s4 (reset_n, clock, oir, opc, ojp, oop, of3, of7,
-oimm, oupimm,oshamt, 
-ox1, ox2, ox3, ox4, ox5, ox6, ox7, ox8, ox9, ox10, ox11, ox12, ox13, ox14, ox15, ox16, ox17, ox18, ox19, ox20, ox21, ox22, ox23, ox24, ox25, ox26, ox27, ox28, ox29, ox30, ox31,
-osign_extended_bimm,
-oLui, oAuipc,
-oLb, oLbu, oLh, oLhu, oLw, oLwu, oLd,
-oSb, oSh, oSw, oSd,
-oAdd, oSub, oSlt, oSltu, oOr, oAnd, oXor, oSll, oSrl, oSra,
-oAddi, oSlti, oSltiu, oOri, oAndi, oXori, oSlli, oSrli, oSrai,
-oAddiw, oSlliw, oSrliw, oSraiw,
-oAddw, oSubw, oSllw, oSrlw, oSraw,
-oJal, oJalr,
-oBeq, oBne, oBlt, oBge, oBltu, oBgeu,
-oFence, oFencei,
-oEcall, oEbreak, oCsrrw, oCsrrs, oCsrrc, oCsrrwi, oCsrrsi, oCsrrci
-);
-
-// 自动顺序读取程序机-> [带跳转的]自动顺序读取程序机
-// jal rd, imm       # rd = pc+4; pc = pc  + imm_0
-// jal x1, 0
-// jalr rd, rs1, imm # rd = pc+4; pc = rs1 + imm
-// return: jalr x0, x1, 0
 
 //  程序存储器 
 reg [7:0] irom [0:9999];// 8 位宽度，400 行深度
@@ -287,27 +253,6 @@ assign ox29 = rram[29];
 assign ox30 = rram[30];
 assign ox31 = rram[31];
 
-assign osign_extended_bimm = sign_extended_bimm[63:0];
-assign oLui = Lui; assign oAuipc = Auipc;
-assign oLb = Lb; assign oLbu = Lbu; assign oLh = Lh; assign oLhu = Lhu; assign oLw = Lw; assign oLwu = Lwu; assign oLd = Ld;
-assign oSb = Sb; assign oSh = Sh; assign oSw = Sw; assign oSd = Sd;
-assign oAdd  = Add; assign oSub  = Sub; assign oSll  = Sll; assign oSlt  = Slt; assign oSltu = Sltu; assign oXor  = Xor; assign oSrl  = Srl; assign oSra  = Sra; assign oOr   = Or; assign oAnd  = And;
-assign oAddi = Addi; assign oSlti = Slti; assign oSltiu=Sltiu; assign oOri  =  Ori; assign oAndi = Andi; assign oXori = Xori; assign oSlli = Slli; assign oSrli = Srli; assign oSrai = Srai;
-assign oAddiw= Addiw; assign oSlliw= Slliw; assign oSrliw= Srliw; assign oSraiw= Sraiw;
-assign oAddw= Addw; assign oSubw= Subw; assign oSllw= Sllw; assign oSrlw= Srlw; assign oSraw= Sraw;
-assign oJal=Jal; assign oJalr=Jalr;
-assign oBeq=Beq; assign oBne=Bne; assign oBlt=Blt; assign oBge=Bge; assign oBltu=Bltu; assign oBgeu=Bgeu;
-assign oFence=Fence; assign oFencei=Fencei;
-assign oEcall= Ecall; assign oEbreak=Ebreak; assign oCsrrw= Csrrw; assign oCsrrs= Csrrs; assign oCsrrc= Csrrc; assign oCsrrwi=Csrrwi; assign oCsrrsi=Csrrsi; assign oCsrrci=Csrrci;
-
-// 从文件读取程序到 irom
-//initial $readmemb("./programb.txt", irom);
-initial $readmemb("./binary_instructions.txt", irom);
-//initial $readmemb("./firmware.out", irom);
-//initial $readmemb("./data.txt", drom);
-//initial $readmemh("./data_lb.txt", drom);
-initial $readmemh("./data_test.txt", drom);
-
 reg [63:0] sum; // 加法结果组合逻辑寄存器
 reg [63:0] sum_imm; // 加法结果组合逻辑寄存器
 reg [31:0] sum_imm_32; // 32位加法结果组合逻辑寄存器
@@ -344,8 +289,6 @@ begin
 	begin
 	  pc <=0;
 	  jp <=0;
-	  //ir <=0;
-	  //imm <=0;
           rram[0] <= 64'h0;  // x0 恒为 0 
 	  rram[1] <=0; rram[2] <=0; rram[3] <=0; rram[30] <=0; rram[31] <=0;
 	  for (integer i = 0; i < 32; i = i + 1)  //!!初始化零否则新启用寄存器就不灵
@@ -353,29 +296,23 @@ begin
 	      current_privilege_mode <= M_mode; // init from M-mode for all RISCV processor
 	end
 	else
-        // 开始指令节拍  // Did every circle have to clean registers like upper !! initial?
 	begin
 	    case(jp)
 	    0: begin // 取指令 + 分析指令 + 执行 | 或 准备数据 (分析且备好该指令所需的数据）
 	 	   //current_privilege_mode <= current_privilege_mode; // update mode
 	    	   ir <= wire_ir ; 
-		   // parse: op->func3->func7
 	    	   case(wire_op)
                    // Load-class
-		   7'b0110111:begin
-		                Lui <= 1'b1; // set Lui Flag
-				//put 20 bits immediate to upper 20 bits of rd left lower 12 bits 0, sext to 64
+		   7'b0110111:begin // Lui 
 				rram[wire_rd] <= {{32{wire_upimm[19]}}, wire_upimm, 12'b0};
 				pc <= pc + 4; 
 	    	                jp <=0;
 		              end
-		   7'b0010111:begin
-		                Auipc <= 1'b1; // set Auipc Flag
-				//left shift 20 bits immediate 12bits sext to 64 add pc then put to rd
+		   7'b0010111:begin // Auipc
 				rram[wire_rd] <= pc + {{32{wire_upimm[19]}}, wire_upimm, 12'b0};
 				pc <= pc + 4; 
 	    	                jp <=0;
-		   end
+		              end
 		   7'b0000011:begin
 	    	                case(wire_f3) // func3 case(ir[14:12])
 				  3'b000:begin 
