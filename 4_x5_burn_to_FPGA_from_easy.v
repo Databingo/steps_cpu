@@ -956,64 +956,9 @@ begin
 		//              end
 		   32'b???????_?????_?????_001_?????_0001111: begin end // Fencei
 		   // ----------------------------
-	           7'b1110011:begin // system 
+	           7'b1110011:begin // SYSTEM 
 		                csr_id =  csr_index(wire_csr);
 			        case(wire_f3) // func3
-				  3'b000: begin // priv
-				          case(wire_f12) // func12
-					    12'b000000000000:begin 
-					               Ecall  <= 1'b1; // set Ecall  Flag 
-                                                       // Trap into S-mode
-			                               if (current_privilege_mode == U_mode && medeleg[8] == 1)
-						       begin
-						           csrram[scause][63] <= 0; //63_type 0exception 1interrupt|value
-						           csrram[scause][62:0] <= 8; // 8 indicate Ecall from U-mode; 9 call from S-mode; 11 call from M-mode
-						           csrram[sepc] <= pc;
-						           csrram[sstatus][8] <= 0; // save previous privilege mode(user0 super1) to SPP 
-						           csrram[sstatus][5] <= csrram[sstatus][1]; // save interrupt enable(SIE) to SPIE 
-						           csrram[sstatus][1] <= 0; // clear SIE
-						           //if ((csrram[scause][63]==1'b1) && (csrram[stvec][1:0]== 2'b01)) pc <= (csrram[stvec][63:2] << 2) + (csrram[scause][62:0] << 2);
-						           pc <= (csrram[stvec][63:2] << 2);
-							   current_privilege_mode <= S_mode;
-						       end
-						       // Trap into M-mode
-						       else 
-						       begin
-						           csrram[mcause][63] <= 0; //63_type 0exception 1interrupt|value
-						           csrram[mepc] <= pc;
-						           csrram[mstatus][7] <= csrram[mstatus][3]; // save interrupt enable(MIE) to MPIE 
-						           csrram[mstatus][3] <= 0; // clear MIE (not enabled)
-						           pc <= (csrram[mtvec][63:2] << 2);
-			                                   if (current_privilege_mode == U_mode && medeleg[8] == 0) csrram[mcause][62:0] <= 8; // save cause 
-			                                   if (current_privilege_mode == S_mode) csrram[mcause][62:0] <= 9; 
-						           if (current_privilege_mode == M_mode) csrram[mcause][62:0] <= 11; 
-							   csrram[mstatus][12:11] <= current_privilege_mode; // save privilege mode to MPP 
-							   current_privilege_mode <= M_mode;  // set current privilege mode
-						       end
-						       end
-					    12'b000000000001:begin 
-					               Ebreak <= 1'b1; // set Ebreak Flag 
-						       end
-					    12'b000100000010:begin 
-					               //Sret <= 1'b1; // set Sret Flag 
-						       if (csrram[sstatus][8] == 0) current_privilege_mode <= U_mode;
-						       if (csrram[sstatus][8] == 1) current_privilege_mode <= S_mode;
-						       csrram[sstatus][1] <= csrram[sstatus][5]; // set back interrupt enable(SIE) by SPIE 
-						       csrram[sstatus][5] <= 1; // set previous interrupt enable(SIE) to be 1 (enable)
-						       csrram[sstatus][8] <= 0; // set previous privilege mode(SPP) to be 0 (U-mode)
-						       pc <=  csrram[sepc]; // sepc was +4 by the software handler and written back to sepc
-						       end
-					    12'b001100000010:begin 
-					               //Mret <= 1'b1; // set Mret Flag 
-						       csrram[mstatus][3] <= csrram[mstatus][7]; // set back interrupt enable(MIE) by MPIE 
-						       csrram[mstatus][7] <= 1; // set previous interrupt enable(MIE) to be 1 (enable)
-						       if (csrram[mstatus][12:11] < M_mode) csrram[mstatus][17] <= 0; // set mprv to 0
-						       current_privilege_mode  <= csrram[mstatus][12:11]; // set back previous mode
-						       csrram[mstatus][12:11] <= 2'b00; // set previous privilege mode(MPP) to be 00 (U-mode)
-						       pc <=  csrram[mepc]; // mepc was +4 by the software handler and written back to sepc
-						       end
-				          endcase
-				         end 
                                   // CSRRW  |csr.12|rs1.5|001.3|rd.5|1110011.7| atomic write, put 0-extend csr value! in rd(if rd=x0 not read), then put sr1 to csr
 				  // csrr rd, csr -> csrrs rd, csr, x0 | read
 				  // csrw csr, rs -> csrrw x0, csr, rs | write
@@ -1069,6 +1014,61 @@ begin
 		                         pc <= pc + 4; 
                                          jp <=0;
 				         end
+				  3'b000: begin // priv
+				          case(wire_f12) // func12
+					    12'b000000000000:begin 
+					               Ecall  <= 1'b1; // set Ecall  Flag 
+                                                       // Trap into S-mode
+			                               if (current_privilege_mode == U_mode && medeleg[8] == 1)
+						       begin
+						           csrram[scause][63] <= 0; //63_type 0exception 1interrupt|value
+						           csrram[scause][62:0] <= 8; // 8 indicate Ecall from U-mode; 9 call from S-mode; 11 call from M-mode
+						           csrram[sepc] <= pc;
+						           csrram[sstatus][8] <= 0; // save previous privilege mode(user0 super1) to SPP 
+						           csrram[sstatus][5] <= csrram[sstatus][1]; // save interrupt enable(SIE) to SPIE 
+						           csrram[sstatus][1] <= 0; // clear SIE
+						           //if ((csrram[scause][63]==1'b1) && (csrram[stvec][1:0]== 2'b01)) pc <= (csrram[stvec][63:2] << 2) + (csrram[scause][62:0] << 2);
+						           pc <= (csrram[stvec][63:2] << 2);
+							   current_privilege_mode <= S_mode;
+						       end
+						       // Trap into M-mode
+						       else 
+						       begin
+						           csrram[mcause][63] <= 0; //63_type 0exception 1interrupt|value
+						           csrram[mepc] <= pc;
+						           csrram[mstatus][7] <= csrram[mstatus][3]; // save interrupt enable(MIE) to MPIE 
+						           csrram[mstatus][3] <= 0; // clear MIE (not enabled)
+						           pc <= (csrram[mtvec][63:2] << 2);
+			                                   if (current_privilege_mode == U_mode && medeleg[8] == 0) csrram[mcause][62:0] <= 8; // save cause 
+			                                   if (current_privilege_mode == S_mode) csrram[mcause][62:0] <= 9; 
+						           if (current_privilege_mode == M_mode) csrram[mcause][62:0] <= 11; 
+							   csrram[mstatus][12:11] <= current_privilege_mode; // save privilege mode to MPP 
+							   current_privilege_mode <= M_mode;  // set current privilege mode
+						       end
+						       end
+					    12'b000000000001:begin 
+					               Ebreak <= 1'b1; // set Ebreak Flag 
+						       end
+					    12'b000100000010:begin 
+					               //Sret <= 1'b1; // set Sret Flag 
+						       if (csrram[sstatus][8] == 0) current_privilege_mode <= U_mode;
+						       if (csrram[sstatus][8] == 1) current_privilege_mode <= S_mode;
+						       csrram[sstatus][1] <= csrram[sstatus][5]; // set back interrupt enable(SIE) by SPIE 
+						       csrram[sstatus][5] <= 1; // set previous interrupt enable(SIE) to be 1 (enable)
+						       csrram[sstatus][8] <= 0; // set previous privilege mode(SPP) to be 0 (U-mode)
+						       pc <=  csrram[sepc]; // sepc was +4 by the software handler and written back to sepc
+						       end
+					    12'b001100000010:begin 
+					               //Mret <= 1'b1; // set Mret Flag 
+						       csrram[mstatus][3] <= csrram[mstatus][7]; // set back interrupt enable(MIE) by MPIE 
+						       csrram[mstatus][7] <= 1; // set previous interrupt enable(MIE) to be 1 (enable)
+						       if (csrram[mstatus][12:11] < M_mode) csrram[mstatus][17] <= 0; // set mprv to 0
+						       current_privilege_mode  <= csrram[mstatus][12:11]; // set back previous mode
+						       csrram[mstatus][12:11] <= 2'b00; // set previous privilege mode(MPP) to be 00 (U-mode)
+						       pc <=  csrram[mepc]; // mepc was +4 by the software handler and written back to sepc
+						       end
+				          endcase
+				         end 
 				endcase
 		              end
 
