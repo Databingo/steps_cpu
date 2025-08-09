@@ -955,20 +955,23 @@ begin
 		//		endcase
 		//              end
 		   32'b???????_?????_?????_001_?????_0001111: begin end // Fencei
-		   // ----------------------------
-	           7'b1110011:begin // SYSTEM 
-		                csr_id =  csr_index(wire_csr);
-			        case(wire_f3) // func3
-                                  // CSRRW  |csr.12|rs1.5|001.3|rd.5|1110011.7| atomic write, put 0-extend csr value! in rd(if rd=x0 not read), then put sr1 to csr
-				  // csrr rd, csr -> csrrs rd, csr, x0 | read
-				  // csrw csr, rs -> csrrw x0, csr, rs | write
-				  3'b001:begin
-				         Csrrw  <= 1'b1; // set Csrrw  Flag 
-					 if (wire_rd !== 5'b00000) rram[wire_rd] <= csrram[csr_id];
-					 csrram[csr_id] <= rram[wire_rs1];
-		                         pc <= pc + 4; 
-                                         jp <=0;
-				         end
+		   // ----------------------------SYSTEM 
+	        //   7'b1110011:begin // SYSTEM 
+		//                csr_id =  csr_index(wire_csr);
+		//	        case(wire_f3) // func3
+                //                  // CSRRW  |csr.12|rs1.5|001.3|rd.5|1110011.7| atomic write, put 0-extend csr value! in rd(if rd=x0 not read), then put sr1 to csr
+		//		  // csrr rd, csr -> csrrs rd, csr, x0 | read
+		//		  // csrw csr, rs -> csrrw x0, csr, rs | write
+		//		  3'b001:begin
+		//		         Csrrw  <= 1'b1; // set Csrrw  Flag 
+		//			 if (wire_rd !== 5'b00000) rram[wire_rd] <= csrram[csr_id];
+		//			 csrram[csr_id] <= rram[wire_rs1];
+		//                         pc <= pc + 4; 
+                //                         jp <=0;
+		//		         end
+		   // ----------------------------SYSTEM 
+                   csr_id =  csr_index(wire_csr);
+		   32'b???????_?????_?????_001_?????_1110011: begin if (wire_rd !== 5'b00000) rram[wire_rd] <= csrram[csr_id]; csrram[csr_id] <= rram[wire_rs1]; end // CSRRW
                                   // CSRRS  |csr.12|rs1.5|001.3|rd.5|1110011.7| atomic set, put 0-extend csr in rd, sr1(if sr1=x0 not write) as 1 mask set csr 1 correspond
                                   // csrs csr, rs -> csrrs x0, csr, rs
 				  3'b010:begin
