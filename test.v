@@ -34,8 +34,8 @@ module s4 (
     wire [4:0] w_rd = w_ir[11:7];
     wire [4:0] w_rs1 = w_ir[19:15];
     wire [4:0] w_rs2 = w_ir[24:20];
-    wire [2:0] wire_f3 = w_ir[14:12];
-    wire [6:0] wire_f7 = w_ir[31:25];
+    wire [2:0] w_f3 = w_ir[14:12];
+    wire [6:0] w_f7 = w_ir[31:25];
     wire [11:0] w_imm = w_ir[31:20];
     wire [19:0] w_upimm = w_ir[31:12];
     wire [20:0] w_jimm = {w_ir[31], w_ir[19:12], w_ir[20], w_ir[30:21], 1'b0};
@@ -49,8 +49,8 @@ module s4 (
     assign oir = w_ir;
     assign opc = pc;
     assign oop = w_op;
-    assign of3 = wire_f3;
-    assign of7 = wire_f7;
+    assign of3 = w_f3;
+    assign of7 = w_f7;
     assign oimm = w_imm;
     assign oupimm = w_upimm;
     assign oshamt = w_shamt;
