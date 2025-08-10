@@ -400,16 +400,18 @@ begin
         //                                                                             drom[re[w_rs1]+{{52{w_imm[11]}},w_imm}+1], 
 	//						                             drom[re[w_rs1]+{{52{w_imm[11]}},w_imm}]}; end // Lwu
 	   32'b???????_?????_?????_110_?????_0000011: begin re[w_rd] <= {32'b0, drom[l_addr+3], drom[l_addr+2], drom[l_addr+1], drom[l_addr]}; end // Lwu
-	   32'b???????_?????_?????_011_?????_0000011: begin re[w_rd] <= {drom[re[w_rs1]+{{52{w_imm[11]}},w_imm}+7], 
-                                                                              drom[re[w_rs1]+{{52{w_imm[11]}},w_imm}+6], 
-                                                                              drom[re[w_rs1]+{{52{w_imm[11]}},w_imm}+5], 
-                                                                              drom[re[w_rs1]+{{52{w_imm[11]}},w_imm}+4],
-                                                                              drom[re[w_rs1]+{{52{w_imm[11]}},w_imm}+3], 
-                                                                              drom[re[w_rs1]+{{52{w_imm[11]}},w_imm}+2], 
-                                                                              drom[re[w_rs1]+{{52{w_imm[11]}},w_imm}+1], 
-						                              drom[re[w_rs1]+{{52{w_imm[11]}},w_imm}  ]}; end // Ld
+	//   32'b???????_?????_?????_011_?????_0000011: begin re[w_rd] <= {drom[re[w_rs1]+{{52{w_imm[11]}},w_imm}+7], 
+        //                                                                      drom[re[w_rs1]+{{52{w_imm[11]}},w_imm}+6], 
+        //                                                                      drom[re[w_rs1]+{{52{w_imm[11]}},w_imm}+5], 
+        //                                                                      drom[re[w_rs1]+{{52{w_imm[11]}},w_imm}+4],
+        //                                                                      drom[re[w_rs1]+{{52{w_imm[11]}},w_imm}+3], 
+        //                                                                      drom[re[w_rs1]+{{52{w_imm[11]}},w_imm}+2], 
+        //                                                                      drom[re[w_rs1]+{{52{w_imm[11]}},w_imm}+1], 
+	//					                              drom[re[w_rs1]+{{52{w_imm[11]}},w_imm}  ]}; end // Ld
+	   32'b???????_?????_?????_011_?????_0000011: re[w_rd] <= {drom[l_addr+7], drom[l_addr+6], drom[l_addr+5], drom[l_addr+4], drom[l_addr+3], drom[l_addr+2], drom[l_addr+1], drom[l_addr]}; // Ld
            // Store-class  // ld and sb are different direction: 
-	   32'b???????_?????_?????_000_?????_0100011: begin drom[re[w_rs1]+{{52{w_simm[11]}},w_simm}]   <= re[w_rs2][7:0]; end // Sb
+	   //32'b???????_?????_?????_000_?????_0100011: begin drom[re[w_rs1]+{{52{w_simm[11]}},w_simm}]   <= re[w_rs2][7:0]; end // Sb
+	   32'b???????_?????_?????_000_?????_0100011: drom[s_addr] <= re[w_rs2][7:0]; // Sb
 	   32'b???????_?????_?????_001_?????_0100011: begin drom[re[w_rs1]+{{52{w_simm[11]}},w_simm}]   <= re[w_rs2][7:0];
 	                                                    drom[re[w_rs1]+{{52{w_simm[11]}},w_simm}+1] <= re[w_rs2][15:8]; end // Sh
 	   32'b???????_?????_?????_010_?????_0100011: begin drom[re[w_rs1]+{{52{w_simm[11]}},w_simm}]   <= re[w_rs2][7:0];
