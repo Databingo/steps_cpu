@@ -361,9 +361,10 @@ begin
 	   32'b???????_?????_?????_010_?????_0100011: for (integer i=0;i<4;i++) drom[s_addr+i] <= re[w_rs2][i*8 +: 8]; // Sw
 	   32'b???????_?????_?????_011_?????_0100011: for (integer i=0;i<8;i++) drom[s_addr+i] <= re[w_rs2][i*8 +: 8]; // Sd
            // Math-Logic-Shift-Register class
-	   32'b0000000_?????_?????_000_?????_0110011: begin re[w_rd] <= re[w_rs1] + re[w_rs2]; 
-			                              if ((re[w_rs1][63] ~^ re[w_rs2][63]) && (re[w_rs1][63] ^ sum[63])) 
-					              begin re[3] <= 1; re[4] <= re[w_rs1][63]; end end  // Add
+	//   32'b0000000_?????_?????_000_?????_0110011: begin re[w_rd] <= re[w_rs1] + re[w_rs2]; 
+	//		                              if ((re[w_rs1][63] ~^ re[w_rs2][63]) && (re[w_rs1][63] ^ sum[63])) 
+	//				              begin re[3] <= 1; re[4] <= re[w_rs1][63]; end end  // Add
+	   32'b0000000_?????_?????_000_?????_0110011: re[w_rd] <= re[w_rs1] + re[w_rs2];  // Add
 	   32'b0100000_?????_?????_000_?????_0110011: begin re[w_rd] <= sub;
 			                              if ((re[w_rs1][63] ~^ mirro_rs2 [63]) && (re[w_rs1][63] ^ sub[63])) 
 					              begin re[3] <= 1; re[4] <= re[w_rs1][63]; end end // Sub

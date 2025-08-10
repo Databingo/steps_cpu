@@ -22,8 +22,8 @@ echo "" > binary_instructions.txt
 #go run rvas.go lh_lhu.s &&
 #go run rvas.go lw_lwu.s &&
 #go run rvas.go ld.s &&
-go run rvas.go s.s &&
-#go run rvas.go add_sub.s &&
+#go run rvas.go s.s &&
+go run rvas.go add_sub.s &&
 #go run rvas.go slt_u.s &&
 #go run rvas.go slti_u.s &&
 #go run rvas.go gate.s &&
