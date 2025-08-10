@@ -412,20 +412,30 @@ begin
            // Store-class  // ld and sb are different direction: 
 	   //32'b???????_?????_?????_000_?????_0100011: begin drom[re[w_rs1]+{{52{w_simm[11]}},w_simm}]   <= re[w_rs2][7:0]; end // Sb
 	   32'b???????_?????_?????_000_?????_0100011: drom[s_addr] <= re[w_rs2][7:0]; // Sb
-	   32'b???????_?????_?????_001_?????_0100011: begin drom[re[w_rs1]+{{52{w_simm[11]}},w_simm}]   <= re[w_rs2][7:0];
-	                                                    drom[re[w_rs1]+{{52{w_simm[11]}},w_simm}+1] <= re[w_rs2][15:8]; end // Sh
-	   32'b???????_?????_?????_010_?????_0100011: begin drom[re[w_rs1]+{{52{w_simm[11]}},w_simm}]   <= re[w_rs2][7:0];
-				                            drom[re[w_rs1]+{{52{w_simm[11]}},w_simm}+1] <= re[w_rs2][15:8];
-				                            drom[re[w_rs1]+{{52{w_simm[11]}},w_simm}+2] <= re[w_rs2][23:16];
-				                            drom[re[w_rs1]+{{52{w_simm[11]}},w_simm}+3] <= re[w_rs2][31:24]; end // Sw
-	   32'b???????_?????_?????_011_?????_0100011: begin drom[re[w_rs1]+{{52{w_simm[11]}},w_simm}]   <= re[w_rs2][7:0];
-				                            drom[re[w_rs1]+{{52{w_simm[11]}},w_simm}+1] <= re[w_rs2][15:8];
-				                            drom[re[w_rs1]+{{52{w_simm[11]}},w_simm}+2] <= re[w_rs2][23:16];
-				                            drom[re[w_rs1]+{{52{w_simm[11]}},w_simm}+3] <= re[w_rs2][31:24];
-				                            drom[re[w_rs1]+{{52{w_simm[11]}},w_simm}+4] <= re[w_rs2][39:32];
-				                            drom[re[w_rs1]+{{52{w_simm[11]}},w_simm}+5] <= re[w_rs2][47:40];
-				                            drom[re[w_rs1]+{{52{w_simm[11]}},w_simm}+6] <= re[w_rs2][55:48];
-				                            drom[re[w_rs1]+{{52{w_simm[11]}},w_simm}+7] <= re[w_rs2][63:56]; end // Sd
+	   //32'b???????_?????_?????_001_?????_0100011: begin drom[re[w_rs1]+{{52{w_simm[11]}},w_simm}]   <= re[w_rs2][7:0];
+	   //                                                 drom[re[w_rs1]+{{52{w_simm[11]}},w_simm}+1] <= re[w_rs2][15:8]; end // Sh
+	   32'b???????_?????_?????_001_?????_0100011: begin drom[s_addr] <= re[w_rs2][7:0]; drom[s_addr+1] <= re[w_rs2][15:8]; end // Sh
+	//   32'b???????_?????_?????_010_?????_0100011: begin drom[re[w_rs1]+{{52{w_simm[11]}},w_simm}]   <= re[w_rs2][7:0];
+	//			                            drom[re[w_rs1]+{{52{w_simm[11]}},w_simm}+1] <= re[w_rs2][15:8];
+	//			                            drom[re[w_rs1]+{{52{w_simm[11]}},w_simm}+2] <= re[w_rs2][23:16];
+	//			                            drom[re[w_rs1]+{{52{w_simm[11]}},w_simm}+3] <= re[w_rs2][31:24]; end // Sw
+	   32'b???????_?????_?????_010_?????_0100011: begin drom[s_addr]<= re[w_rs2][7:0]; drom[s_addr+1]<= re[w_rs2][15:8]; drom[s_addr+2]<= re[w_rs2][23:16]; drom[s_addr+3]<= re[w_rs2][31:24]; end // Sw
+	//   32'b???????_?????_?????_011_?????_0100011: begin drom[re[w_rs1]+{{52{w_simm[11]}},w_simm}]   <= re[w_rs2][7:0];
+	//			                            drom[re[w_rs1]+{{52{w_simm[11]}},w_simm}+1] <= re[w_rs2][15:8];
+	//			                            drom[re[w_rs1]+{{52{w_simm[11]}},w_simm}+2] <= re[w_rs2][23:16];
+	//			                            drom[re[w_rs1]+{{52{w_simm[11]}},w_simm}+3] <= re[w_rs2][31:24];
+	//			                            drom[re[w_rs1]+{{52{w_simm[11]}},w_simm}+4] <= re[w_rs2][39:32];
+	//			                            drom[re[w_rs1]+{{52{w_simm[11]}},w_simm}+5] <= re[w_rs2][47:40];
+	//			                            drom[re[w_rs1]+{{52{w_simm[11]}},w_simm}+6] <= re[w_rs2][55:48];
+	//			                            drom[re[w_rs1]+{{52{w_simm[11]}},w_simm}+7] <= re[w_rs2][63:56]; end // Sd
+	   32'b???????_?????_?????_011_?????_0100011: begin drom[s_addr]<= re[w_rs2][7:0];
+				                            drom[s_addr+1]<=re[w_rs2][15:8];
+				                            drom[s_addr+2]<=re[w_rs2][23:16];
+				                            drom[s_addr+3]<=re[w_rs2][31:24];
+				                            drom[s_addr+4]<=re[w_rs2][39:32];
+				                            drom[s_addr+5]<=re[w_rs2][47:40];
+				                            drom[s_addr+6]<=re[w_rs2][55:48];
+				                            drom[s_addr+7]<=re[w_rs2][63:56]; end // Sd
            // Math-Logic-Shift-Register class
 	   32'b0000000_?????_?????_000_?????_0110011: begin re[w_rd] <= re[w_rs1] + re[w_rs2]; 
 			                              if ((re[w_rs1][63] ~^ re[w_rs2][63]) && (re[w_rs1][63] ^ sum[63])) 

@@ -1,8 +1,386 @@
 _start:
 #     li x5, 0
 addi x5, x0, 0x0
-ld  x31, 16(x5)           # Load double: x31 = MEM[0 + 16]
-#     li  x30, 0x1122334455667788 
+#     li  x6, 0                 
+addi x6, x0, 0x0
+sb  x6, 80(x5)            # Store byte to Addr 80 (0x50)
+lb  x31, 80(x5)           # Load back signed
+#     li  x30, 0                 
+addi x30, x0, 0x0
+#     li  x11, 1                 
+addi x11, x0, 0x0
+ori x11, x11, 0x1
+#     li  x11, 0                 
+addi x11, x0, 0x0
+lbu x31, 80(x5)           # Load back unsigned
+#     li  x30, 0                 
+addi x30, x0, 0x0
+#     li  x11, 1                 
+addi x11, x0, 0x0
+ori x11, x11, 0x1
+#     li  x11, 0                 
+addi x11, x0, 0x0
+#     li  x6, 0x5A              
+addi x6, x0, 0x0
+ori x6, x6, 0x5a
+sb  x6, 81(x5)            # Store byte to Addr 81 (0x51)
+lb  x31, 81(x5)           # Load back signed
+#     li  x30, 0x5A              
+addi x30, x0, 0x0
+ori x30, x30, 0x5a
+#     li  x11, 1                 
+addi x11, x0, 0x0
+ori x11, x11, 0x1
+#     li  x11, 0                 
+addi x11, x0, 0x0
+lbu x31, 81(x5)           # Load back unsigned
+#     li  x30, 0x5A              
+addi x30, x0, 0x0
+ori x30, x30, 0x5a
+#     li  x11, 1                 
+addi x11, x0, 0x0
+ori x11, x11, 0x1
+#     li  x11, 0                 
+addi x11, x0, 0x0
+#     li  x6, 0xFFFFFFFFFFFFC3 
+addi x6, x0, 0x0
+lui x6, 0xfff
+srli x6, x6, 0x1
+ori x6, x6, 0x7ff
+slli x6, x6, 0xb
+ori x6, x6, 0x7ff
+slli x6, x6, 0xb
+ori x6, x6, 0x7ff
+slli x6, x6, 0xb
+ori x6, x6, 0x7c3
+sb  x6, 82(x5)            # Store byte (0xC3) to Addr 82 (0x52)
+lb  x31, 82(x5)           # Load back signed
+#     li  x30, 0xFFFFFFFFFFFFFFC3 
+addi x30, x0, 0x0
+lui x30, 0xfffff
+srli x30, x30, 0x1
+ori x30, x30, 0x7ff
+slli x30, x30, 0xb
+ori x30, x30, 0x7ff
+slli x30, x30, 0xb
+ori x30, x30, 0x7ff
+slli x30, x30, 0xb
+ori x30, x30, 0x7c3
+#     li  x11, 1                 
+addi x11, x0, 0x0
+ori x11, x11, 0x1
+#     li  x11, 0                 
+addi x11, x0, 0x0
+lbu x31, 82(x5)           # Load back unsigned
+#     li  x30, 0xC3              
+addi x30, x0, 0x0
+ori x30, x30, 0xc3
+#     li  x11, 1                 
+addi x11, x0, 0x0
+ori x11, x11, 0x1
+#     li  x11, 0                 
+addi x11, x0, 0x0
+#     li  x6, -1                
+addi x6, x0, 0x0
+ori x6, x6, 0x1
+xori x6, x6, -1
+addi x6, x6, 1
+sb  x6, 83(x5)            # Store byte (0xFF) to Addr 83 (0x53)
+lb  x31, 83(x5)           # Load back signed
+#     li  x30, -1                
+addi x30, x0, 0x0
+ori x30, x30, 0x1
+xori x30, x30, -1
+addi x30, x30, 1
+#     li  x11, 1                 
+addi x11, x0, 0x0
+ori x11, x11, 0x1
+#     li  x11, 0                 
+addi x11, x0, 0x0
+lbu x31, 83(x5)           # Load back unsigned
+#     li  x30, 0xFF              
+addi x30, x0, 0x0
+ori x30, x30, 0xff
+#     li  x11, 1                 
+addi x11, x0, 0x0
+ori x11, x11, 0x1
+#     li  x11, 0                 
+addi x11, x0, 0x0
+#     li  x6, 0
+addi x6, x0, 0x0
+sh  x6, 84(x5)            # Store half to Addr 84 (0x54)
+lh  x31, 84(x5)           # Load back signed
+#     li  x30, 0
+addi x30, x0, 0x0
+#     li  x11, 1                 
+addi x11, x0, 0x0
+ori x11, x11, 0x1
+#     li  x11, 0
+addi x11, x0, 0x0
+lhu x31, 84(x5)           # Load back unsigned
+#     li  x30, 0
+addi x30, x0, 0x0
+#     li  x11, 1                 
+addi x11, x0, 0x0
+ori x11, x11, 0x1
+#     li  x11, 0
+addi x11, x0, 0x0
+#     li  x6, 0x1234
+addi x6, x0, 0x0
+slli x6, x6, 0x16
+ori x6, x6, 0x2
+slli x6, x6, 0xb
+ori x6, x6, 0x234
+sh  x6, 86(x5)            # Store half to Addr 86 (0x56)
+lh  x31, 86(x5)           # Load back signed
+#     li  x30, 0x1234
+addi x30, x0, 0x0
+slli x30, x30, 0x16
+ori x30, x30, 0x2
+slli x30, x30, 0xb
+ori x30, x30, 0x234
+#     li  x11, 1                 
+addi x11, x0, 0x0
+ori x11, x11, 0x1
+#     li  x11, 0
+addi x11, x0, 0x0
+lhu x31, 86(x5)           # Load back unsigned
+#     li  x30, 0x1234
+addi x30, x0, 0x0
+slli x30, x30, 0x16
+ori x30, x30, 0x2
+slli x30, x30, 0xb
+ori x30, x30, 0x234
+#     li  x11, 1                 
+addi x11, x0, 0x0
+ori x11, x11, 0x1
+#     li  x11, 0
+addi x11, x0, 0x0
+#     li  x6, 0xFFFFFFFFFFFFABCD 
+addi x6, x0, 0x0
+lui x6, 0xfffff
+srli x6, x6, 0x1
+ori x6, x6, 0x7ff
+slli x6, x6, 0xb
+ori x6, x6, 0x7ff
+slli x6, x6, 0xb
+ori x6, x6, 0x7f5
+slli x6, x6, 0xb
+ori x6, x6, 0x3cd
+sh  x6, 88(x5)            # Store half (0xABCD) to Addr 88 (0x58)
+lh  x31, 88(x5)           # Load back signed
+#     li  x30, 0xFFFFFFFFFFFFABCD 
+addi x30, x0, 0x0
+lui x30, 0xfffff
+srli x30, x30, 0x1
+ori x30, x30, 0x7ff
+slli x30, x30, 0xb
+ori x30, x30, 0x7ff
+slli x30, x30, 0xb
+ori x30, x30, 0x7f5
+slli x30, x30, 0xb
+ori x30, x30, 0x3cd
+#     li  x11, 1                 
+addi x11, x0, 0x0
+ori x11, x11, 0x1
+#     li  x11, 0
+addi x11, x0, 0x0
+lhu x31, 88(x5)           # Load back unsigned
+#     li  x30, 0xABCD            
+addi x30, x0, 0x0
+slli x30, x30, 0x16
+ori x30, x30, 0x15
+slli x30, x30, 0xb
+ori x30, x30, 0x3cd
+#     li  x11, 1                 
+addi x11, x0, 0x0
+ori x11, x11, 0x1
+#     li  x11, 0
+addi x11, x0, 0x0
+#     li  x6, -1
+addi x6, x0, 0x0
+ori x6, x6, 0x1
+xori x6, x6, -1
+addi x6, x6, 1
+sh  x6, 90(x5)            # Store half (0xFFFF) to Addr 90 (0x5A)
+lh  x31, 90(x5)           # Load back signed
+#     li  x30, -1
+addi x30, x0, 0x0
+ori x30, x30, 0x1
+xori x30, x30, -1
+addi x30, x30, 1
+#     li  x11, 1                 
+addi x11, x0, 0x0
+ori x11, x11, 0x1
+#     li  x11, 0
+addi x11, x0, 0x0
+lhu x31, 90(x5)           # Load back unsigned
+#     li  x30, 0xFFFF
+addi x30, x0, 0x0
+slli x30, x30, 0x16
+ori x30, x30, 0x1f
+slli x30, x30, 0xb
+ori x30, x30, 0x7ff
+#     li  x11, 1                 
+addi x11, x0, 0x0
+ori x11, x11, 0x1
+#     li  x11, 0
+addi x11, x0, 0x0
+#     li  x6, 0
+addi x6, x0, 0x0
+sw  x6, 92(x5)            # Store word to Addr 92 (0x5C)
+lw  x31, 92(x5)           # Load back signed
+#     li  x30, 0
+addi x30, x0, 0x0
+#     li  x11, 1                 
+addi x11, x0, 0x0
+ori x11, x11, 0x1
+#     li  x11, 0
+addi x11, x0, 0x0
+lwu x31, 92(x5)           # Load back unsigned
+#     li  x30, 0
+addi x30, x0, 0x0
+#     li  x11, 1                 
+addi x11, x0, 0x0
+ori x11, x11, 0x1
+#     li  x11, 0
+addi x11, x0, 0x0
+#     li  x6, 0x12345678
+addi x6, x0, 0x0
+slli x6, x6, 0xb
+ori x6, x6, 0x48
+slli x6, x6, 0xb
+ori x6, x6, 0x68a
+slli x6, x6, 0xb
+ori x6, x6, 0x678
+sw  x6, 96(x5)            # Store word to Addr 96 (0x60)
+lw  x31, 96(x5)           # Load back signed
+#     li  x30, 0x12345678
+addi x30, x0, 0x0
+slli x30, x30, 0xb
+ori x30, x30, 0x48
+slli x30, x30, 0xb
+ori x30, x30, 0x68a
+slli x30, x30, 0xb
+ori x30, x30, 0x678
+#     li  x11, 1                 
+addi x11, x0, 0x0
+ori x11, x11, 0x1
+#     li  x11, 0
+addi x11, x0, 0x0
+lwu x31, 96(x5)           # Load back unsigned
+#     li  x30, 0x12345678
+addi x30, x0, 0x0
+slli x30, x30, 0xb
+ori x30, x30, 0x48
+slli x30, x30, 0xb
+ori x30, x30, 0x68a
+slli x30, x30, 0xb
+ori x30, x30, 0x678
+#     li  x11, 1                 
+addi x11, x0, 0x0
+ori x11, x11, 0x1
+#     li  x11, 0
+addi x11, x0, 0x0
+#     li  x6, 0xFFFFFFFFDEADBEEF 
+addi x6, x0, 0x0
+lui x6, 0xfffff
+srli x6, x6, 0x1
+ori x6, x6, 0x7ff
+slli x6, x6, 0xb
+ori x6, x6, 0x77a
+slli x6, x6, 0xb
+ori x6, x6, 0x5b7
+slli x6, x6, 0xb
+ori x6, x6, 0x6ef
+sw  x6, 100(x5)           # Store word (0xDEADBEEF) to Addr 100 (0x64)
+lw  x31, 100(x5)          # Load back signed
+#     li  x30, 0xFFFFFFFFDEADBEEF 
+addi x30, x0, 0x0
+lui x30, 0xfffff
+srli x30, x30, 0x1
+ori x30, x30, 0x7ff
+slli x30, x30, 0xb
+ori x30, x30, 0x77a
+slli x30, x30, 0xb
+ori x30, x30, 0x5b7
+slli x30, x30, 0xb
+ori x30, x30, 0x6ef
+#     li  x11, 1                 
+addi x11, x0, 0x0
+ori x11, x11, 0x1
+#     li  x11, 0
+addi x11, x0, 0x0
+lwu x31, 100(x5)          # Load back unsigned
+#     li  x30, 0xDEADBEEF        
+addi x30, x0, 0x0
+slli x30, x30, 0xb
+ori x30, x30, 0x37a
+slli x30, x30, 0xb
+ori x30, x30, 0x5b7
+slli x30, x30, 0xb
+ori x30, x30, 0x6ef
+#     li  x11, 1                 
+addi x11, x0, 0x0
+ori x11, x11, 0x1
+#     li  x11, 0
+addi x11, x0, 0x0
+#     li  x6, -1
+addi x6, x0, 0x0
+ori x6, x6, 0x1
+xori x6, x6, -1
+addi x6, x6, 1
+sw  x6, 104(x5)           # Store word (0xFFFFFFFF) to Addr 104 (0x68)
+lw  x31, 104(x5)          # Load back signed
+#     li  x30, -1
+addi x30, x0, 0x0
+ori x30, x30, 0x1
+xori x30, x30, -1
+addi x30, x30, 1
+#     li  x11, 1                 
+addi x11, x0, 0x0
+ori x11, x11, 0x1
+#     li  x11, 0
+addi x11, x0, 0x0
+lwu x31, 104(x5)          # Load back unsigned
+#     li  x30, 0xFFFFFFFF
+addi x30, x0, 0x0
+slli x30, x30, 0xb
+ori x30, x30, 0x3ff
+slli x30, x30, 0xb
+ori x30, x30, 0x7ff
+slli x30, x30, 0xb
+ori x30, x30, 0x7ff
+#     li  x11, 1                 
+addi x11, x0, 0x0
+ori x11, x11, 0x1
+#     li  x11, 0
+addi x11, x0, 0x0
+#     li  x6, 0
+addi x6, x0, 0x0
+sd  x6, 108(x5)           # Store double to Addr 108 (0x6C)
+ld  x31, 108(x5)          # Load back
+#     li  x30, 0
+addi x30, x0, 0x0
+#     li  x11, 1                 
+addi x11, x0, 0x0
+ori x11, x11, 0x1
+#     li  x11, 0
+addi x11, x0, 0x0
+#     li  x6, 0x1122334455667788
+addi x6, x0, 0x0
+lui x6, 0x11223
+srli x6, x6, 0x1
+ori x6, x6, 0x1a2
+slli x6, x6, 0xb
+ori x6, x6, 0x155
+slli x6, x6, 0xb
+ori x6, x6, 0x4ce
+slli x6, x6, 0xb
+ori x6, x6, 0x788
+sd  x6, 80(x5)            # Store double to Addr 80 (0x50) - Overwrite start of store area
+ld  x31, 80(x5)           # Load back
+#     li  x30, 0x1122334455667788
 addi x30, x0, 0x0
 lui x30, 0x11223
 srli x30, x30, 0x1
@@ -16,10 +394,22 @@ ori x30, x30, 0x788
 #     li  x11, 1                 
 addi x11, x0, 0x0
 ori x11, x11, 0x1
-#     li  x11, 0                 
+#     li  x11, 0
 addi x11, x0, 0x0
-ld  x31, 24(x5)           # Load double: x31 = MEM[0 + 24]
-#     li  x30, 0xAABBCCDDEEFF0011 
+#     li  x6, 0xAABBCCDDEEFF0011
+addi x6, x0, 0x0
+lui x6, 0xaabbc
+srli x6, x6, 0x1
+ori x6, x6, 0x66e
+slli x6, x6, 0xb
+ori x6, x6, 0x7bb
+slli x6, x6, 0xb
+ori x6, x6, 0x7e0
+slli x6, x6, 0xb
+ori x6, x6, 0x11
+sd  x6, 88(x5)            # Store double to Addr 88 (0x58) - Overwrite more
+ld  x31, 88(x5)           # Load back
+#     li  x30, 0xAABBCCDDEEFF0011
 addi x30, x0, 0x0
 lui x30, 0xaabbc
 srli x30, x30, 0x1
@@ -33,74 +423,50 @@ ori x30, x30, 0x11
 #     li  x11, 1                 
 addi x11, x0, 0x0
 ori x11, x11, 0x1
-#     li  x11, 0                 
+#     li  x11, 0
 addi x11, x0, 0x0
-ld  x31, 32(x5)           # Load double: x31 = MEM[0 + 32]
-#     li  x30, 0xFFFFFFFFFFFFFFFF 
+#     li  x6, -1
+addi x6, x0, 0x0
+ori x6, x6, 0x1
+xori x6, x6, -1
+addi x6, x6, 1
+sd  x6, 96(x5)            # Store double to Addr 96 (0x60) - Overwrite more
+ld  x31, 96(x5)           # Load back
+#     li  x30, -1
 addi x30, x0, 0x0
-addi x30, x0, 0x1
+ori x30, x30, 0x1
 xori x30, x30, -1
 addi x30, x30, 1
 #     li  x11, 1                 
 addi x11, x0, 0x0
 ori x11, x11, 0x1
-#     li  x11, 0                 
+#     li  x11, 0
 addi x11, x0, 0x0
-ld  x31, 40(x5)           # Load double: x31 = MEM[0 + 40]
-#     li  x30, 0x7FFFFFFFFFFFFFFF 
-addi x30, x0, 0x0
-lui x30, 0x7ffff
-srli x30, x30, 0x1
-ori x30, x30, 0x7ff
-slli x30, x30, 0xb
-ori x30, x30, 0x7ff
-slli x30, x30, 0xb
-ori x30, x30, 0x7ff
-slli x30, x30, 0xb
-ori x30, x30, 0x7ff
-#     li  x11, 1                 
-addi x11, x0, 0x0
-ori x11, x11, 0x1
-#     li  x11, 0                 
-addi x11, x0, 0x0
-ld  x31, 48(x5)           # Load double: x31 = MEM[0 + 48]
-#     li  x30, 0x8000000000000000 
-addi x30, x0, 0x0
-lui x30, 0x80000
-srli x30, x30, 0x1
-slli x30, x30, 0x21
-#     li  x11, 1                 
-addi x11, x0, 0x0
-ori x11, x11, 0x1
-#     li  x11, 0                 
-addi x11, x0, 0x0
-ld  x31, 56(x5)           # Load double: x31 = MEM[0 + 56]
-#     li  x30, 0x0000000000000000 
-addi x30, x0, 0x0
-#     li  x11, 1                 
-addi x11, x0, 0x0
-ori x11, x11, 0x1
-#     li  x11, 0                 
-addi x11, x0, 0x0
-#     li  x5, 24                
+#     li  x6, 0xCAFEBABE
+addi x6, x0, 0x0
+slli x6, x6, 0xb
+ori x6, x6, 0x32b
+slli x6, x6, 0xb
+ori x6, x6, 0x7d7
+slli x6, x6, 0xb
+ori x6, x6, 0x2be
+#     li  x5, 100               
 addi x5, x0, 0x0
-ori x5, x5, 0x18
-ld  x31, -8(x5)           # Load double: x31 = MEM[24 + (-8)] = MEM[16]
-#     li  x30, 0x1122334455667788 
-addi x30, x0, 0x0
-lui x30, 0x11223
-srli x30, x30, 0x1
-ori x30, x30, 0x1a2
-slli x30, x30, 0xb
-ori x30, x30, 0x155
-slli x30, x30, 0xb
-ori x30, x30, 0x4ce
-slli x30, x30, 0xb
-ori x30, x30, 0x788
-#     li  x11, 1                 
-addi x11, x0, 0x0
-ori x11, x11, 0x1
-#     li  x11, 0                 
-addi x11, x0, 0x0
+ori x5, x5, 0x64
+sw  x6, -4(x5)            # Store word to MEM[100 - 4] = MEM[96]
 #     li  x5, 0                 
 addi x5, x0, 0x0
+lwu x31, 96(x5)           # Load back verification (unsigned)
+#     li  x30, 0xCAFEBABE        
+addi x30, x0, 0x0
+slli x30, x30, 0xb
+ori x30, x30, 0x32b
+slli x30, x30, 0xb
+ori x30, x30, 0x7d7
+slli x30, x30, 0xb
+ori x30, x30, 0x2be
+#     li  x11, 1                 
+addi x11, x0, 0x0
+ori x11, x11, 0x1
+#     li  x11, 0
+addi x11, x0, 0x0
