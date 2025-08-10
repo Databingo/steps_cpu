@@ -1,133 +1,128 @@
 _start:
 #     li x5, 0
 addi x5, x0, 0x0
-#     li x6, 0
-addi x6, x0, 0x0
-#     li x7, 0 
-addi x7, x0, 0x0
-#     j setup_jalr_zero_offset    
-jal x0, setup_jalr_zero_offset
-target_jalr_zero_offset:
-#     li x31, 1                   
-addi x31, x0, 0x0
-ori x31, x31, 0x1
-#     j verify_jalr_zero_offset  
-jal x0, verify_jalr_zero_offset
-setup_jalr_zero_offset:
-auipc x5, 0                 # x5 = PC of auipc (A)
-addi x5, x5, -8             # x5 = Address of target_jalr_zero_offset 
-jalr x0, x5, 0              # Jump to address in x5 (Target)运气to li.2(addi xori)
-#     li x31, 999                 
-addi x31, x0, 0x0
-ori x31, x31, 0x3e7
-verify_jalr_zero_offset:
-#     li x30, 1                   
+lw  x31, 8(x5)            # Load word: x31 = MEM[0 + 8] sign-extended
+#     li  x30, 0x0000000012345678 
 addi x30, x0, 0x0
-ori x30, x30, 0x1
-#     li x11, 1
+slli x30, x30, 0xb
+ori x30, x30, 0x48
+slli x30, x30, 0xb
+ori x30, x30, 0x68a
+slli x30, x30, 0xb
+ori x30, x30, 0x678
+#     li  x11, 1                 
 addi x11, x0, 0x0
 ori x11, x11, 0x1
-#     li x11, 0
+#     li  x11, 0                 
 addi x11, x0, 0x0
-#     j setup_jalr_pos_offset
-jal x0, setup_jalr_pos_offset
-target_jalr_pos_offset:
-#     li x31, 2                   
-addi x31, x0, 0x0
-ori x31, x31, 0x2
-#     j verify_jalr_pos_offset
-jal x0, verify_jalr_pos_offset
-setup_jalr_pos_offset:
-auipc x5, 0                 # x5 = PC of auipc (A = approx T+8)
-addi x5, x5, -24           # x5 = A - 20
-jalr x0, x5, 12             # Use positive offset 12
-#     li x31, 888                 
-addi x31, x0, 0x0
-ori x31, x31, 0x378
-verify_jalr_pos_offset:
-#     li x30, 2                   
+lw  x31, 12(x5)           # Load word: x31 = MEM[0 + 12] sign-extended
+#     li  x30, 0xFFFFFFFF80000000 
 addi x30, x0, 0x0
-ori x30, x30, 0x2
-#     li x11, 1
+lui x30, 0xfffff
+srli x30, x30, 0x1
+ori x30, x30, 0x7ff
+slli x30, x30, 0xb
+ori x30, x30, 0x600
+slli x30, x30, 0x16
+#     li  x11, 1                 
 addi x11, x0, 0x0
 ori x11, x11, 0x1
-#     li x11, 0
+#     li  x11, 0                 
 addi x11, x0, 0x0
-#     j setup_jalr_neg_offset     
-jal x0, setup_jalr_neg_offset
-target_jalr_neg_offset:
-#     li x31, 3                   
-addi x31, x0, 0x0
-ori x31, x31, 0x3
-#     j verify_jalr_neg_offset
-jal x0, verify_jalr_neg_offset
-setup_jalr_neg_offset:
-auipc x5, 0                 # x5 = PC of auipc (A = approx T+8)
-addi x5, x5, 4              # x5 = A + 4
-jalr x0, x5, -12            # Use negative offset -12
-#     li x31, 777                 
-addi x31, x0, 0x0
-ori x31, x31, 0x309
-verify_jalr_neg_offset:
-#     li x30, 3                   
+lw  x31, 40(x5)           # Load word: x31 = MEM[0 + 40] sign-extended
+#     li  x30, 0xFFFFFFFFFFFFFFFF 
 addi x30, x0, 0x0
-ori x30, x30, 0x3
-#     li x11, 1
+addi x30, x0, 0x1
+xori x30, x30, -1
+addi x30, x30, 1
+#     li  x11, 1                 
 addi x11, x0, 0x0
 ori x11, x11, 0x1
-#     li x11, 0
+#     li  x11, 0                 
 addi x11, x0, 0x0
-#     j setup_jalr_link_ret
-jal x0, setup_jalr_link_ret
-target_jalr_link_ret:
-addi x7, x7, 1              # Modify x7 just to show work
-jalr x0, ra, 0              # RETURN using link register 'ra' (x1)
-#     li x31, 555
-addi x31, x0, 0x0
-ori x31, x31, 0x22b
-setup_jalr_link_ret:
-auipc x5, 0                 # x5 = PC of auipc (A)
-addi x5, x5, -16            # x5 = A + 16 = Address of target_jalr_link_ret
-jalr ra, x5, 0
-#     li x31, 4                   
-addi x31, x0, 0x0
-ori x31, x31, 0x4
-#     j verify_jalr_link_ret
-jal x0, verify_jalr_link_ret
-#     li x31, 666
-addi x31, x0, 0x0
-ori x31, x31, 0x29a
-verify_jalr_link_ret:
-#     li x30, 4                   
+lw  x31, 44(x5)           # Load word: x31 = MEM[0 + 44] sign-extended
+#     li  x30, 0x000000007FFFFFFF 
 addi x30, x0, 0x0
-ori x30, x30, 0x4
-#     li x11, 1
+slli x30, x30, 0xb
+ori x30, x30, 0x1ff
+slli x30, x30, 0xb
+ori x30, x30, 0x7ff
+slli x30, x30, 0xb
+ori x30, x30, 0x7ff
+#     li  x11, 1                 
 addi x11, x0, 0x0
 ori x11, x11, 0x1
-#     li x11, 0
+#     li  x11, 0                 
 addi x11, x0, 0x0
-#     j setup_jalr_lsb
-jal x0, setup_jalr_lsb
-target_jalr_lsb:
-#     li x31, 5                   
-addi x31, x0, 0x0
-ori x31, x31, 0x5
-#     j verify_jalr_lsb
-jal x0, verify_jalr_lsb
-setup_jalr_lsb:
-auipc x6, 0                 # x6 = PC of auipc (A)
-addi x6, x6, -12             # x6 = A + 16 = Address of target_jalr_lsb
-addi x5, x6, -1             # x5 = Target - 1 (Odd Address)
-jalr x0, x5, 1              # Calculated Target = Target(Even)+1=Odd. Should jump to Target(Even).
-#     li x31, 333                 
-addi x31, x0, 0x0
-ori x31, x31, 0x14d
-verify_jalr_lsb:
-#     li x30, 5                   
+lwu x31, 8(x5)            # Load word: x31 = MEM[0 + 8] zero-extended
+#     li  x30, 0x0000000012345678 
 addi x30, x0, 0x0
-ori x30, x30, 0x5
-#     li x11, 1
+slli x30, x30, 0xb
+ori x30, x30, 0x48
+slli x30, x30, 0xb
+ori x30, x30, 0x68a
+slli x30, x30, 0xb
+ori x30, x30, 0x678
+#     li  x11, 1                 
 addi x11, x0, 0x0
 ori x11, x11, 0x1
-#     li x11, 0
+#     li  x11, 0                 
 addi x11, x0, 0x0
+lwu x31, 12(x5)           # Load word: x31 = MEM[0 + 12] zero-extended
+#     li  x30, 0x0000000080000000 
+addi x30, x0, 0x0
+slli x30, x30, 0xb
+ori x30, x30, 0x200
+slli x30, x30, 0x16
+#     li  x11, 1                 
+addi x11, x0, 0x0
+ori x11, x11, 0x1
+#     li  x11, 0                 
+addi x11, x0, 0x0
+lwu x31, 40(x5)           # Load word: x31 = MEM[0 + 40] zero-extended
+#     li  x30, 0x00000000FFFFFFFF 
+addi x30, x0, 0x0
+slli x30, x30, 0xb
+ori x30, x30, 0x3ff
+slli x30, x30, 0xb
+ori x30, x30, 0x7ff
+slli x30, x30, 0xb
+ori x30, x30, 0x7ff
+#     li  x11, 1                 
+addi x11, x0, 0x0
+ori x11, x11, 0x1
+#     li  x11, 0                 
+addi x11, x0, 0x0
+lwu x31, 44(x5)           # Load word: x31 = MEM[0 + 44] zero-extended
+#     li  x30, 0x000000007FFFFFFF 
+addi x30, x0, 0x0
+slli x30, x30, 0xb
+ori x30, x30, 0x1ff
+slli x30, x30, 0xb
+ori x30, x30, 0x7ff
+slli x30, x30, 0xb
+ori x30, x30, 0x7ff
+#     li  x11, 1                 
+addi x11, x0, 0x0
+ori x11, x11, 0x1
+#     li  x11, 0                 
+addi x11, x0, 0x0
+#     li  x5, 12                
+addi x5, x0, 0x0
+ori x5, x5, 0xc
+lw  x31, -4(x5)           # Load word: x31 = MEM[12 + (-4)] = MEM[8]
+#     li  x30, 0x0000000012345678 
+addi x30, x0, 0x0
+slli x30, x30, 0xb
+ori x30, x30, 0x48
+slli x30, x30, 0xb
+ori x30, x30, 0x68a
+slli x30, x30, 0xb
+ori x30, x30, 0x678
+#     li  x11, 1                 
+addi x11, x0, 0x0
+ori x11, x11, 0x1
+#     li  x11, 0                 
+addi x11, x0, 0x0
+#     li  x5, 0                 
+addi x5, x0, 0x0
