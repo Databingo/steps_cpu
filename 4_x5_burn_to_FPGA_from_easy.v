@@ -323,40 +323,8 @@ begin
  sraiw_s1 = $signed(re[w_rs1][31:0]) >>> w_shamt[4:0]; 
 end 
 
-//// Load helper
-//function [63:0] load_data(input [63:0] addr, input [2:0] f3); 
-//    reg [63:0] data;
-//    reg sign_bit;
-//    integer i, bytes;
-//    begin // 000 Lb 100 Lbu 001 Lh 101 Lhu 010 Lw 110 Lwu 011 Ld
-//        data = 64'b0;
-//        sign_bit = 1'b0;
-//	bytes = (f3 == 3'b011) ? 8 : (f3[1:0] == 2'b10) ? 4 : (f3[1:0] == 2'b01) ? 2 : 1;
-//	for (i=0; i<bytes; i++) data[i*8 +: 8] = drom[addr+i];
-//	if (f3[2] == 1'b0 && bytes < 8) sign_bit = drom[addr+bytes-1][7];
-//        //if (sign_bit) data[63:bytes*8] = {64-bytes*8{1'b1}};
-//	case (bytes)
-//	    1: if (sign_bit) data[63:8] = 56'hFFFFFFFFFFFFFF;
-//	    2: if (sign_bit) data[63:16] = 48'hFFFFFFFFFFFF;
-//	    4: if (sign_bit) data[63:32] = 32'hFFFFFFFF;
-//        endcase;
-//	load_data = data;
-//    end
-//endfunction
-//
-//// Store helper
-//function store_data(input [63:0] addr, input [63:0] value, input [2:0] f3);
-//    integer i, bytes;
-//    begin
-//	bytes = (f3 == 3'b011) ? 8 : (f3[1:0] == 2'b10) ? 4 : (f3[1:0] == 2'b01) ? 2 : 1;
-//	for (i=0; i<bytes; i++) drom[addr+i] = value[i*8 +: 8];
-//    end
-//endfunction
-	
-
 reg [63:0] l_addr;
 reg [63:0] s_addr;
-integer i;
 
 always @(posedge clock or negedge reset_n)
 begin
@@ -390,7 +358,7 @@ begin
            // Store
 	   32'b???????_?????_?????_000_?????_0100011: drom[s_addr] <= re[w_rs2][7:0]; // Sb
 	   32'b???????_?????_?????_001_?????_0100011: begin drom[s_addr] <= re[w_rs2][7:0]; drom[s_addr+1] <= re[w_rs2][15:8]; end // Sh
-	   32'b???????_?????_?????_010_?????_0100011: begin drom[s_addr]<= re[w_rs2][7:0]; drom[s_addr+1]<= re[w_rs2][15:8]; drom[s_addr+2]<= re[w_rs2][23:16]; drom[s_addr+3]<= re[w_rs2][31:24]; end // Sw
+	   32'b???????_?????_?????_010_?????_0100011: for (integer i=0;i<4;i++) drom[s_addr+i] <= re[w_rs2][i*8 +: 8]; // Sw
 	   32'b???????_?????_?????_011_?????_0100011: for (integer i=0;i<8;i++) drom[s_addr+i] <= re[w_rs2][i*8 +: 8]; // Sd
            // Math-Logic-Shift-Register class
 	   32'b0000000_?????_?????_000_?????_0110011: begin re[w_rd] <= re[w_rs1] + re[w_rs2]; 
