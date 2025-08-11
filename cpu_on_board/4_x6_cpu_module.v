@@ -336,7 +336,7 @@ endmodule
 module Board (
     input wire CLOCK_50,
     input wire KEY0,
-    output wire [7:0] LEDR
+    output wire [7:0] LEDG
     );
     
     wire clk_1hz;
@@ -373,10 +373,10 @@ module Board (
     always @(posedge clk_1hz)begin
 	mux_cnt <= mux_cnt + 1;
 	case (mux_cnt)
-	    0: LEDR <= instruction[7:0];
-	    1: LEDR <= instruction[15:8];
-	    2: LEDR <= instruction[23:16];
-	    3: LEDR <= instruction[31:24];
+	    0: LEDG <= instruction[7:0];
+	    1: LEDG <= instruction[15:8];
+	    2: LEDG <= instruction[23:16];
+	    3: LEDG <= instruction[31:24];
 	endcase
     end
 endmodule
