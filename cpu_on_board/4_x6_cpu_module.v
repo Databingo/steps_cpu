@@ -365,7 +365,8 @@ module Board (
 	mem_data_in <= mem[mem_addr];
     end
     
-    assign instruction = mem[cpu_inst.pc];
+    //assign instruction = mem[cpu_inst.pc];
+    assign instruction = {mem[cpu_inst.pc+3], mem[cpu_inst.pc+2], mem[cpu_inst.pc+1], mem[cpu_inst.pc]};
 
 
     // LED display
