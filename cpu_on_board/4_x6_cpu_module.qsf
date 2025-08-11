@@ -1,8 +1,5 @@
 set_location_assignment PIN_L1 -to CLOCK_50
-set_location_assignment PIN_L1 -to CLOCK_50
 set_location_assignment PIN_R22 -to KEY0
-#set_location_assignment PIN_H15 -to PS2_CLK
-#set_location_assignment PIN_J14 -to PS2_DAT
 set_location_assignment PIN_U22 -to LEDG[0]
 set_location_assignment PIN_U21 -to LEDG[1]
 set_location_assignment PIN_V22 -to LEDG[2]
@@ -12,6 +9,8 @@ set_location_assignment PIN_W21 -to LEDG[5]
 set_location_assignment PIN_Y22 -to LEDG[6]
 set_location_assignment PIN_Y21 -to LEDG[7]
 
+#set_location_assignment PIN_H15 -to PS2_CLK
+#set_location_assignment PIN_J14 -to PS2_DAT
 #LEDG[0] PIN_U22 LED Green[0]  
 #LEDG[1] PIN_U21 LED Green[1]  
 #LEDG[2] PIN_V22 LED Green[2]  
