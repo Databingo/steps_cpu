@@ -1,13 +1,13 @@
 module cpu (  
     input wire clock,
     input wire reset_n,
-    //input wire enable,              // 1 for running 0 for halt 
+    //input wire enable,            // 1 for running 0 for halt 
     input wire [31:0] ir,           // 32-bit instruction
     output reg [63:0] mem_addr,     // Memory address for load/store
     output reg [63:0] mem_data_out, // Data to write to memory (store)
     output reg mem_we,              // Memory write enable
     input wire [63:0] mem_data_in   // Data read from memory (load)
-    //output reg [31:0] led_ir        // Testing: LEDs for instruction display
+    //output reg [31:0] led_ir      // Testing: LEDs for instruction display
     ); 
   
     //assign led_ir = ir;
@@ -357,7 +357,7 @@ module Board (
         .mem_we(mem_we)
     );
 
-    (* ram_style = "block" *) reg [63:0] mem [0:19999]; // Unified Memory
+    (* ram_style = "block" *) reg [63:0] mem [0:19999] = {default:0}; // Unified Memory
     initial $readmemh("mem.mif", mem);
 
     always @(posedge clk_1hz) begin
