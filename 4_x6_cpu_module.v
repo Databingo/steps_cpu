@@ -1,4 +1,4 @@
-module risv64 (  
+module cpu (  
     input wire clock,
     input wire reset_n,
     input wire [31:0] ir,           // 32-bit instruction
@@ -15,7 +15,7 @@ module risv64 (
     reg [1:0] current_privilege_mode;
 
     // --- CSR Registers ---
-    reg [63:0] csre [0:4096];
+    reg [63:0] csre [0:4096]; // Maximal 12-bit = 4096
     // Supervisor Trap Setup
     integer sstatus = 12'h100; // 63_SD|WPRI|33:32_UXL10|WPRI|19_MXR|18_SUM|17_WPRI|16:15_XS10|14:13_FS10|WPRI|8_SPP|7_WPRI|6_UBE|5_SPIE|WPRI|1_SIE|0_WPRI
     integer sedeleg = 12'h102;
