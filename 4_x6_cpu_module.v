@@ -1,13 +1,17 @@
 module cpu (  
     input wire clock,
     input wire reset_n,
+    input wire enable,              // 1 for running 0 for halt 
     input wire [31:0] ir,           // 32-bit instruction
     output reg [63:0] mem_addr,     // Memory address for load/store
     output reg [63:0] mem_data_out, // Data to write to memory (store)
     output reg mem_we,              // Memory write enable
     input wire [63:0] mem_data_in   // Data read from memory (load)
+    //output reg [31:0] led_ir        // Testing: LEDs for instruction display
     ); 
   
+    //assign led_ir = ir;
+
     // --- Privilege Modes ---
     localparam M_mode = 2'b11;
     localparam S_mode = 2'b01;
@@ -16,29 +20,15 @@ module cpu (
 
     // --- CSR Registers ---
     reg [63:0] csre [0:4096]; // Maximal 12-bit = 4096
-    // Supervisor Trap Setup
-    integer sstatus = 12'h100; // 63_SD|WPRI|33:32_UXL10|WPRI|19_MXR|18_SUM|17_WPRI|16:15_XS10|14:13_FS10|WPRI|8_SPP|7_WPRI|6_UBE|5_SPIE|WPRI|1_SIE|0_WPRI
-    integer sedeleg = 12'h102;
-    integer sideleg = 12'h103;
-    integer sie = 12'h104;   // Supervisor interrupt-enable register
-    integer stvec = 12'h105;//Supervisor Trap Vector Base Address//63-2_BASE|1-0_MODE|(auto padding last 00base) Mode:00direct to base<<2; 01vectord to base if ecall base+4*scause[62:0] if interrupt;10,11
-    integer scounteren = 12'h106; //Supervisor counter enable
-    // Supervisor Trap Handling
-    integer sscratch = 12'h140;
-    integer sepc = 12'h141; //
-    integer scause = 12'h142;//  //63_type 0exception 1interrupt|value
-    integer stval = 12'h143; 
-    integer sip = 12'h144; // Supervisor interrupt pending
-    // Supervisor Protection and Translation
-    integer satp = 12'h180; // Supervisor address translation and protection
-    // Debug/Trace Registers
-    integer scontext = 12'h5a8; // Supervisor-mode context register
+      
+    // Mini set for working RV64I with M/S/U modes
+    // --- Machine Mode ---
     // Machine Information Registers
     integer mvendorid = 12'hF11;    // 0xF11 MRO Vendor ID
-    integer marchid= 'hF12; 	// 0xF12 MRO Architecture ID
-    integer mimpid= 'hF13; 	        // 0xF13 MRO Implementation ID
-    integer mhartid= 'hF14; 	// 0xF14 MRO Hardware thread ID
-    integer mconfigptr= 'hF11; 	// 0xF15 MRO Pointer to configuration data structure
+    integer marchid = 'hF12; 	// 0xF12 MRO Architecture ID
+    integer mimpid = 'hF13; 	        // 0xF13 MRO Implementation ID
+    integer mhartid = 'hF14; 	// 0xF14 MRO Hardware thread ID
+    integer mconfigptr = 'hF15; 	// 0xF15 MRO Pointer to configuration data structure
     // Machine Trap Setup
     integer mstatus = 12'h300;     // 0x300 MRW Machine status reg   // 63_SD|37_MBE|36_SBE|35:34_SXL10|22_TSR|21_TW|20_TVW|17_MPRV|12:11_MPP10|7_MPIE|3_MIE|1_SIE|0_WPRI
     integer misa = 12'h301;         // 0x301 MRW ISA and extensions
@@ -62,6 +52,24 @@ module cpu (
     integer menvcfgh = 12'h31A;     // 0x31A MRW Additional machine env. conf. register, RV32 only
     integer mseccfg = 12'h747;      // 0x747 MRW Machine security configuration register
     integer mseccfgh = 12'h757;     // 0x757 MRW Additional machine security conf. register, RV32 only
+    // --- Supervisor Mode ---
+    // Supervisor Trap Setup
+    integer sstatus = 12'h100; // 63_SD|WPRI|33:32_UXL10|WPRI|19_MXR|18_SUM|17_WPRI|16:15_XS10|14:13_FS10|WPRI|8_SPP|7_WPRI|6_UBE|5_SPIE|WPRI|1_SIE|0_WPRI
+    integer sedeleg = 12'h102;
+    integer sideleg = 12'h103;
+    integer sie = 12'h104;   // Supervisor interrupt-enable register
+    integer stvec = 12'h105;//Supervisor Trap Vector Base Address//63-2_BASE|1-0_MODE|(auto padding last 00base) Mode:00direct to base<<2; 01vectord to base if ecall base+4*scause[62:0] if interrupt;10,11
+    integer scounteren = 12'h106; //Supervisor counter enable
+    // Supervisor Trap Handling
+    integer sscratch = 12'h140;
+    integer sepc = 12'h141; //
+    integer scause = 12'h142;//  //63_type 0exception 1interrupt|value
+    integer stval = 12'h143; 
+    integer sip = 12'h144; // Supervisor interrupt pending
+    // Supervisor Protection and Translation
+    integer satp = 12'h180; // Supervisor address translation and protection
+    // Debug/Trace Registers
+    integer scontext = 12'h5a8; // Supervisor-mode context register
 
     // --- CSR Index Function ---
     function [4:0] csr_index;
@@ -91,7 +99,7 @@ module cpu (
     	12'h344: csr_index = 5'd19;	                           // 0x344 MRW mip Machine interrupt pending *
     	12'h34A: csr_index = 5'd20;	                           // 0x34A MRW mtinst Machine trap instruction (transformed)
     	12'h34B: csr_index = 5'd21;	                           // 0x34B MRW mtval2 Machine bad guset physical address
-                                        	                           // Machine Configuration
+                                       	                           // Machine Configuration
     	12'h30A: csr_index = 5'd22;	                           // 0x30A MRW menvcfg Machine environment configuration register
     	12'h31A: csr_index = 5'd23;	                           // 0x31A MRW menvcfgh Additional machine env. conf. register, RV32 only
     	12'h747: csr_index = 5'd24;	                           // 0x747 MRW mseccfg Machine security configuration register
@@ -113,10 +121,14 @@ module cpu (
       endcase
      end
     endfunction
+
     // --- Regisers and Memories ---
     reg [63:0] re [0:31] // General-purpose registers (x0-x31)
-    (* ram_style = "block" *) reg [7:0] drom [0:9999]; // Data memory (8-bit, 10,000 bytes)
     reg [63:0] pc; // Program counter
+    (* ram_style = "block" *) reg [7:0] irom [0:9999]; // Instruction BRAM
+    (* ram_style = "block" *) reg [7:0] drom [0:9999]; // Data memory (8-bit, 10,000 bytes)
+    initial $readmemb("irom.mif", irom);
+    //qsf: set_global_assignment -name MEMORY_INITIALIZATION_FILE irom.mif -section irom
 
     // --- Instruction Decoding ---
     // parse instruction by type
@@ -130,7 +142,7 @@ module cpu (
     //|imm[31:12]                    |rd         |op |U
     //|imm[20|10:1|11|19:12]         |rd         |op |UJ
     //````````````````````````````````````````````````
-    //assign w_ir = {irom[pc+3], irom[pc+2], irom[pc+1], irom[pc]};  // Little endian
+    wire [31:0] ir;           // 32-bit instruction
     wire [ 6:0] w_op = ir[6:0];
     wire [ 4:0] w_rd = ir[11:7];
     wire [ 2:0] w_f3 = ir[14:12]; 
@@ -148,28 +160,20 @@ module cpu (
     wire [ 4:0] w_zimm = ir[19:15];  // CSR zimm
 
     // --- Combinational Logic (Immediate)---
-    reg [63:0] sum, sum_imm, mirro_rs2, mirro_imm, sub, sub_imm, sign_extended_bimm;
-    reg [31:0] sum_imm_32, slliw_s1, srliw_s1, sraiw_s1;
-    always @(*) begin
-        sum = re[w_rs1] + re[w_rs2];
-        sum_imm = re[w_rs1] + {{52{w_imm[11]}}, w_imm};
-        sum_imm_32 = re[w_rs1][31:0] + {{20{w_imm[11]}}, w_imm};
-        mirro_rs2 = ~re[w_rs2] + 1;
-        mirro_imm = ~{{52{w_imm[11]}}, w_imm} + 1;
-        sub = re[w_rs1] + mirro_rs2;
-        sub_imm = re[w_rs1] + mirro_imm;
-        sign_extended_bimm = {{51{w_ir[31]}}, w_bimm};  //bimm is 13 bits length
-        slliw_s1 = re[w_rs1][31:0] << w_shamt[4:0]; 
-        srliw_s1 = re[w_rs1][31:0] >> w_shamt[4:0]; 
-        sraiw_s1 = $signed(re[w_rs1][31:0]) >>> w_shamt[4:0]; 
-    end 
+    wire [63:0]    sum = re[w_rs1] + re[w_rs2];
+    wire [63:0]    sum_imm = re[w_rs1] + {{52{w_imm[11]}}, w_imm};
+    wire [31:0]    sum_imm_32 = re[w_rs1][31:0] + {{20{w_imm[11]}}, w_imm};
+    wire [63:0]    sub = re[w_rs1] - re[w_rs2];
+    wire [63:0]    sub_imm = re[w_rs1] - {{52{w_imm[11]}}, w_imm};
+    wire [63:0]    sign_extended_bimm = {{51{w_ir[31]}}, w_bimm};  //bimm is 13 bits length
+    wire [31:0]    slliw_s1 = re[w_rs1][31:0] << w_shamt[4:0]; 
+    wire [31:0]    srliw_s1 = re[w_rs1][31:0] >> w_shamt[4:0]; 
+    wire [31:0]    sraiw_s1 = $signed(re[w_rs1][31:0]) >>> w_shamt[4:0]; 
 
     // --- Memory Access ---
-    reg [63:0] l_addr, s_addr;
-    always @(*) begin
-        l_addr = re[w_rs1]+ {{52{w_imm[11]}},w_imm}; // Load address
-        s_addr = re[w_rs1]+ {{52{w_imm[11]}},w_simm}; // Store address
-    end
+    wire [63:0] l_addr = re[w_rs1] + {{52{w_imm[11]}}, w_imm}; // Load address
+    wire [63:0] s_addr = re[w_rs1] + {{52{w_imm[11]}}, w_simm}; // Store address
+
     // --- Instruction Execution ---
     reg [4:0] csr_id; 
     always @(posedge clock or negedge reset_n) begin
@@ -180,11 +184,11 @@ module cpu (
 	    mem_we <= 0;
             mem_addr <= 0;
 	    mem_data_out <= 0;
-	end else begin // 取指令 + 分析指令 + 执行 | 或 准备数据 (分析且备好该指令所需的数据）
+	end else if (enable) begin // 取指令 + 分析指令 + 执行 | 或 准备数据 (分析且备好该指令所需的数据）
+            //ir = {irom[pc+3], irom[pc+2], irom[pc+1], irom[pc]};  // Little endian
 	    pc <= pc +4 ;// Default: advance PC for most instructions; override in jumps/branches/traps //ir <= w_ir ; 
-            csr_id = csr_index(w_csr); // ----------------------------SYSTEM 
 	    mem_we <= 0; // Default: no memeory write
-
+            csr_id = csr_index(w_csr); // ----------------------------SYSTEM 
     	    casez(ir) 
 	    // U-type
             32'b???????_?????_?????_???_?????_0110111: re[w_rd] <= {{32{w_upimm[19]}}, w_upimm, 12'b0}; // Lui
