@@ -96,6 +96,7 @@ endmodule
 
 module clock_divider(
     input wire clk_in,
+    input wire reset_n,
     output reg clk_out
     );
     reg [24:0] counter;
@@ -119,8 +120,12 @@ module board (
     wire clk_1hz;
     clock_divider clk_inst (
 	.clk_in(CLOCK_50),
+	.reset_n(KEY0),
 	.clk_out(clk_1hz)
     );
+
+    (* ram_style = "block" *) reg [31:0] mem [0:2999]; // Unified Memory
+    initial $readmemb("mem.mif", mem);
 
     //
     wire [31:0] i_mem_data_in;
@@ -129,7 +134,6 @@ module board (
     wire [63:0] mem_addr, mem_data_in, mem_data_out;
     wire mem_we;
     wire [31:0] ir_show;
-
     cpu cpu_inst (
 	.clock(clk_1hz),
 	.reset_n(KEY0),
@@ -144,8 +148,6 @@ module board (
         .mem_we(mem_we)
     );
 
-    (* ram_style = "block" *) reg [63:0] mem [0:2999]; // Unified Memory
-    initial $readmemh("mem.mif", mem);
 
     //always @(posedge clk_1hz) begin
     //    if (mem_we) mem[mem_addr] <= mem_data_out;
