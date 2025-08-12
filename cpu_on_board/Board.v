@@ -187,7 +187,7 @@ module cpu (
             mem_addr <= 0;
 	    mem_data_out <= 0;
 	end else begin // 取指令 + 分析指令 + 执行 | 或 准备数据 (分析且备好该指令所需的数据）
-            pc <= pc +4 ;// Default: advance PC for most instructions; override in jumps/branches/traps 
+            pc <= pc + 4 ;// Default: advance PC for most instructions; override in jumps/branches/traps 
 	    if (bubble) begin 
 		bubble <= 1'b0; // Flush this cycle & Clear flush signal for the next cycle
 	    end else begin 
