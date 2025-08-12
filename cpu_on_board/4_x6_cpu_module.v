@@ -186,7 +186,7 @@ module cpu (
 	end
     end
 
-    // ---  Stage 2: decode & execute & set PC ---
+    // ---  Stage 2: Execute (decode & execute & set PC) ---
     reg [4:0] csr_id; 
     always @(posedge clock or negedge reset_n) begin
 	//jump_or_branch_taken <= 1'b0;
@@ -200,7 +200,7 @@ module cpu (
 	    mem_data_out <= 0;
 	end else begin // 取指令 + 分析指令 + 执行 | 或 准备数据 (分析且备好该指令所需的数据）
 	    if (bubble) begin 
-		bubble <= 1'b0; // Flush this cycle & Set to no-flush for next cycle
+		bubble <= 1'b0; // Flush this cycle & Clear flush signal for the next cycle
 	    end else begin 
 	        pc <= pc +4 ;// Default: advance PC for most instructions; override in jumps/branches/traps //ir <= w_ir ; 
 	        mem_we <= 0; // Default: no memeory write
