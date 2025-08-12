@@ -345,7 +345,7 @@ module clock_divider(
 endmodule
 
 
-module Board (
+module board (
     input wire CLOCK_50,
     input wire KEY0,
     output wire [7:0] LEDG
