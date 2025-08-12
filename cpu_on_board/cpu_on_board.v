@@ -4,7 +4,7 @@
 // This design creates a binary counter and displays its value on the LEDs.
 // ===========================================================================
 
-module board (
+module cpu_on_board (
     input wire CLOCK_50,   // 50 MHz system clock from the on-board oscillator
     input wire KEY0,       // Active-low reset button
     output reg [7:0] LEDG  // 8 green LEDs (declared as 'reg' because we assign to it in an 'always' block)
