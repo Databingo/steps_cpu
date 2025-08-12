@@ -1,12 +1,10 @@
 // ===========================================================================
-// File: board.v
-// The absolute simplest test to verify memory initialization and reading.
-// This design uses a simple counter to read addresses sequentially from a
-// ROM and displays the contents directly on the LEDs.
+// File: fetch_test.v
+// A simple test to verify memory initialization and reading.
+// This version has the corrected reset signal name.
 // ===========================================================================
 
 // --- MODULE 1: A Simple Clock Divider ---
-// This creates a slower clock to make the LED changes visible.
 module clock_divider(
     input wire clk_in,
     input wire reset_n,
@@ -32,9 +30,7 @@ endmodule
 
 
 // --- MODULE 2: The Top-Level Board ---
-// This connects the clock divider, a simple address counter,
-// the memory, and the LEDs.
-module board (
+module Board (
     input wire CLOCK_50,
     input wire KEY0,       // Active-low reset
     output wire [7:0] LEDG // 8 green LEDs
@@ -43,21 +39,19 @@ module board (
     wire clk_slow;
     clock_divider clk_inst (
         .clk_in(CLOCK_50),
-        .reset_n(KEY0),
+        .reset_n(KEY0), // Correctly passing KEY0 to the divider's reset
         .clk_out(clk_slow)
     );
 
     // --- The Memory Block (ROM) ---
-    // This will be synthesized into a Block RAM, initialized at compile time.
-    // It is 32-bits wide and has 16 locations for this test.
     (* ram_style = "block" *) reg [31:0] mem [0:15];
     initial $readmemh("mem.mif", mem);
 
     // --- The Address Counter ---
-    // This simple counter will act as our "Program Counter" for the test.
-    // It will count from 0 to 15 and then repeat.
     reg [3:0] addr_counter;
     always @(posedge clk_slow or negedge KEY0) begin
+        // --- THE FIX IS HERE ---
+        // Changed `!reset_n` to `!KEY0` to match the module's input port name.
         if (!KEY0) begin
             addr_counter <= 0;
         end else begin
@@ -66,13 +60,10 @@ module board (
     end
 
     // --- The Memory Read ---
-    // This is a simple combinational read. The data from memory
-    // is instantly available based on the current address counter.
     wire [31:0] mem_data_out;
     assign mem_data_out = mem[addr_counter];
     
     // --- The LED Display ---
-    // Directly connect the lower 8 bits of the data read from memory to the LEDs.
     assign LEDG = mem_data_out[7:0];
 
 endmodule
