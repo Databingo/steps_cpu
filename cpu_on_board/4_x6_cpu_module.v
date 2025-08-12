@@ -127,18 +127,12 @@ module cpu (
     reg [63:0] re [0:31]; // General-purpose registers (x0-x31)
     reg [63:0] pc; // Program counter
 
-    //(* ram_style = "block" *) reg [7:0] irom [0:9999]; // Instruction BRAM
-    //(* ram_style = "block" *) reg [7:0] drom [0:9999]; // Data memory (8-bit, 10,000 bytes)
-    //initial $readmemb("irom.mif", irom);
-    //qsf: set_global_assignment -name MEMORY_INITIALIZATION_FILE irom.mif -section irom
-    
 //    --- Immediate decoders --- 
 //    wire signed [63:0] w_imm_i = {{52{ir[31]}}, ir[31:20]};   // I-type immediate Lb Lh Lw Lbu Lhu Lwu Ld Jalr Addi Slti Sltiu Xori Ori Andi Addiw
 //    wire signed [63:0] w_imm_s = {{52{ir[31]}}, ir[31:25], ir[11:7]};  // S-type immediate Sb Sh Sw Sd
 //    wire signed [63:0] w_imm_b = {{51{ir[31]}}, ir[7],  ir[30:25], ir[11:8], 1'b0}; // SB-type immediate Beq Bne Blt Bge Bltu Bgeu // read immediate & padding last 0, total 12 + 1 = 13 bits
 //    wire signed [63:0] w_imm_u = {{32{ir[31]}}, ir[31:12], 12'b0}; // U-type immediate Lui Auipc
 //    wire signed [63:0] w_imm_j = {{43{ir[31]}}, ir[19:12], ir[20], ir[30:21], 1'b0}; // UJ-type immediate Jal  // read immediate & padding last 0, total 20 + 1 = 21 bits
-  
   
     // --- Instruction Decoding ---
     wire [ 6:0] w_op = ir[6:0];
@@ -231,7 +225,7 @@ module cpu (
 	        32'b???????_?????_?????_001_?????_0110011: re[w_rd] <= re[w_rs1] << re[w_rs2][5:0]; // Sll
                 32'b0000000_?????_?????_101_?????_0110011: re[w_rd] <= re[w_rs1] >> re[w_rs2][5:0]; // Srl
 	        32'b0100000_?????_?????_101_?????_0110011: re[w_rd] <= $signed(re[w_rs1]) >>> re[w_rs2][5:0]; // Sra
-                // Math-R 64
+                // Math-R (Word)
 	        32'b0000000_?????_?????_000_?????_0111011: re[w_rd] <= {{32{sum[31]}}, sum[31:0]}; // Addw
 	        32'b0100000_?????_?????_000_?????_0111011: re[w_rd] <= {{32{sub[31]}}, sub[31:0]}; // Subw
 	        32'b???????_?????_?????_001_?????_0111011: re[w_rd] <= {{32{re[w_rs1][31-re[w_rs2][4:0]]}}, (re[w_rs1][31:0] << re[w_rs2][4:0])}; // Sllw
@@ -262,7 +256,6 @@ module cpu (
 		32'b???????_?????_?????_101_?????_1100011: begin if ($signed(re[w_rs1]) >= $signed(re[w_rs2])) begin pc <= pc + sign_extended_bimm; bubble <= 1'b1; end end // Bge
 		32'b???????_?????_?????_110_?????_1100011: begin if (re[w_rs1] < re[w_rs2]) begin pc <= pc + sign_extended_bimm; bubble <= 1'b1; end end // Bltu
 		32'b???????_?????_?????_111_?????_1100011: begin if (re[w_rs1] >= re[w_rs2]) begin pc <= pc + sign_extended_bimm; bubble <= 1'b1; end end // Bgeu
-	        //----------SYSTEM---------
                 // CSR
 	        32'b???????_?????_?????_001_?????_1110011: begin if (w_rd !== 5'b00000) re[w_rd] <= csre[csr_id]; csre[csr_id] <= re[w_rs1]; end // Csrrw
 	        32'b???????_?????_?????_010_?????_1110011: begin re[w_rd] <= csre[csr_id]; if (w_rs1 !== 5'b00000) csre[csr_id] <= re[w_rs1] | csre[csr_id]; end // Csrrs
@@ -413,8 +406,4 @@ endmodule
 //set_location_assignment PIN_W21 -to LEDG[5]
 //set_location_assignment PIN_Y22 -to LEDG[6]
 //set_location_assignment PIN_Y21 -to LEDG[7]
-
-
-
-
 
