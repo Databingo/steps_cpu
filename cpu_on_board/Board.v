@@ -388,10 +388,10 @@ module Board (
     always @(posedge clk_1hz)begin
 	cnt <= cnt + 1;
 	case (cnt)
-	    0: LEDG <= mem_data_in[7:0];
-	    1: LEDG <= mem_data_in[15:8];
-	    2: LEDG <= mem_data_in[23:16];
-	    3: LEDG <= mem_data_in[31:24];
+	    0: LEDG <= i_mem_data_in[7:0];
+	    1: LEDG <= i_mem_data_in[15:8];
+	    2: LEDG <= i_mem_data_in[23:16];
+	    3: LEDG <= i_mem_data_in[31:24];
 	endcase
     end
 endmodule
