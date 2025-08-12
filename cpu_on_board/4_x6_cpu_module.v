@@ -369,7 +369,7 @@ module Board (
         .mem_we(mem_we)
     );
 
-    (* ram_style = "block" *) reg [63:0] mem [0:19999] = {default:0}; // Unified Memory
+    (* ram_style = "block" *) reg [63:0] mem [0:19999]; // Unified Memory
     initial $readmemh("mem.mif", mem);
 
     always @(posedge clk_1hz) begin
