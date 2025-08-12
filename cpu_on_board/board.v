@@ -9,7 +9,7 @@ module cpu (
     output reg [63:0] mem_addr,     // Memory address for load/store
     output reg [63:0] mem_data_out, // Data to write to memory (store)
     output reg mem_we,              // Memory write enable
-    input wire [63:0] mem_data_in,   // Data read from memory (load)
+    input wire [63:0] mem_data_in   // Data read from memory (load)
     ); 
   
 
