@@ -9,7 +9,7 @@ module cpu (
     output reg [63:0] mem_addr,     // Memory address for load/store
     output reg [63:0] mem_data_out, // Data to write to memory (store)
     output reg mem_we,              // Memory write enable
-    input wire [63:0] mem_data_in   // Data read from memory (load)
+    input wire [63:0] mem_data_in,   // Data read from memory (load)
     ); 
   
 
@@ -119,12 +119,20 @@ module board (
 	.clk_out(clk_1hz)
     );
 
+    //
+    wire [31:0] i_mem_data_in;
+    wire [63:0] i_mem_addr;
+
     wire [63:0] mem_addr, mem_data_in, mem_data_out;
     wire mem_we;
 
     cpu cpu_inst (
 	.clock(clk_1hz),
 	.reset_n(KEY0),
+	//
+        .i_mem_addr(i_mem_addr),
+        .i_mem_data_in(i_mem_data_in),
+	//
 	.mem_addr(mem_addr),
 	.mem_data_in(mem_data_in),
 	.mem_data_out(mem_data_out),
@@ -134,22 +142,27 @@ module board (
     (* ram_style = "block" *) reg [63:0] mem [0:2999]; // Unified Memory
     initial $readmemh("mem.mif", mem);
 
-    always @(posedge clk_1hz) begin
-        if (mem_we) mem[mem_addr] <= mem_data_out;
-        mem_data_in <= mem[mem_addr];
-    end
+    //always @(posedge clk_1hz) begin
+    //    if (mem_we) mem[mem_addr] <= mem_data_out;
+    //    mem_data_in <= mem[mem_addr];
+    //    i_mem_data_in <= mem[mem_addr];
+    //end
+
+    assign i_mem_data_in = mem[i_mem_addr >> 2];
 
     // LED display
-    reg [1:0] mux_cnt;
-    always @(posedge clk_1hz)begin
-	mux_cnt <= mux_cnt + 1;
-	case (mux_cnt)
-	    0: LEDG <= mem_data_in[7:0];
-	    1: LEDG <= mem_data_in[15:8];
-	    2: LEDG <= mem_data_in[23:16];
-	    3: LEDG <= mem_data_in[31:24];
-	endcase
-    end
+    assign LEDG = cpu_inst.ir[7:0];
+
+    //reg [1:0] mux_cnt;
+    //always @(posedge clk_1hz)begin
+    //    mux_cnt <= mux_cnt + 1;
+    //    case (mux_cnt)
+    //        0: LEDG <= mem_data_in[7:0];
+    //        1: LEDG <= mem_data_in[15:8];
+    //        2: LEDG <= mem_data_in[23:16];
+    //        3: LEDG <= mem_data_in[31:24];
+    //    endcase
+    //end
 endmodule
 
 //psf
