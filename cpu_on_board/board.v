@@ -172,7 +172,7 @@ module cpu (
 	    ir <= 32'h00000013;  // On reset load NOP 
 	end else begin
 	    mem_addr <= pc;    // sent out current PC to instruction memeory
-	    ir <= mem_data_in[63:0]; // latch the PC-refered instruciton back in cpu
+	    ir <= mem_data_in[31:0]; // latch the PC-refered instruciton back in cpu
 	end
     end
 
