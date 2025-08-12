@@ -2,7 +2,7 @@
 module cpu (  
     input wire clock,
     input wire reset_n,
-    // for memory access
+    // for memory access Von Neumann style
     output reg [63:0] mem_addr,     // Memory address for load/store
     output reg [63:0] mem_data_out, // Data to write to memory (store)
     output reg mem_we,              // Memory write enable
@@ -172,7 +172,7 @@ module cpu (
 	    ir <= 32'h00000013;  // On reset load NOP 
 	end else begin
 	    mem_addr <= pc;    // sent out current PC to instruction memeory
-	    ir <= mem_data_in; // latch the PC-refered instruciton back in cpu
+	    ir <= mem_data_in[63:0]; // latch the PC-refered instruciton back in cpu
 	end
     end
 
