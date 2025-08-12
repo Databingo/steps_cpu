@@ -68,7 +68,6 @@ module cpu (
 	if (!reset_n) begin
 	    bubble <= 1'b0;
 	    pc <= 64'h0;
-	    current_privilege_mode <= M_mode; // init from M-mode for all RISCV processor
 	    for (integer i = 0; i < 32; i = i + 1) re[i] <= 64'h0;  //!!初始化零否则新启用寄存器就不灵
 	    mem_we <= 0;
             mem_addr <= 0;
