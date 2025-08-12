@@ -360,25 +360,27 @@ module Board (
     wire [31:0] instruction;
     wire [63:0] mem_addr, mem_data_in, mem_data_out;
     wire mem_we;
+    reg instruction [63:0];
     cpu cpu_inst (
 	.clock(clk_1hz),
 	.reset_n(KEY0),
 	.mem_addr(mem_addr),
 	.mem_data_in(mem_data_in),
 	.mem_data_out(mem_data_out),
-        .mem_we(mem_we)
+        .mem_we(mem_we),
+	.re(instruction)
     );
 
     (* ram_style = "block" *) reg [63:0] mem [0:19999]; // Unified Memory
     initial $readmemh("mem.mif", mem);
 
     always @(posedge clk_1hz) begin
-	if (mem_we) mem[mem_addr] <= mem_data_out;
-	mem_data_in <= mem[mem_addr];
+        if (mem_we) mem[mem_addr] <= mem_data_out;
+        mem_data_in <= mem[mem_addr];
     end
-    
-    //assign instruction = mem[cpu_inst.pc];
-    assign instruction = {mem[cpu_inst.pc+3], mem[cpu_inst.pc+2], mem[cpu_inst.pc+1], mem[cpu_inst.pc]};
+    //
+    assign instruction = mem_data_in;
+    //assign instruction = {mem[cpu_inst.pc+3], mem[cpu_inst.pc+2], mem[cpu_inst.pc+1], mem[cpu_inst.pc]};
 
 
     // LED display
