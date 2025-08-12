@@ -357,7 +357,7 @@ module Board (
 	.clk_out(clk_1hz)
     );
 
-    wire [31:0] instruction;
+    //wire [31:0] instruction;
     wire [63:0] mem_addr, mem_data_in, mem_data_out;
     wire mem_we;
     reg instruction [63:0];
