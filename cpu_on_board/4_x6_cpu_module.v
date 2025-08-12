@@ -163,7 +163,7 @@ module cpu (
     wire [31:0]    sum_imm_32 = re[w_rs1][31:0] + {{20{w_imm[11]}}, w_imm};
     wire [63:0]    sub = re[w_rs1] - re[w_rs2];
     wire [63:0]    sub_imm = re[w_rs1] - {{52{w_imm[11]}}, w_imm};
-    wire [63:0]    sign_extended_bimm = {{51{w_ir[31]}}, w_bimm};  //bimm is 13 bits length
+    wire [63:0]    sign_extended_bimm = {{51{ir[31]}}, w_bimm};  //bimm is 13 bits length
     wire [31:0]    slliw_s1 = re[w_rs1][31:0] << w_shamt[4:0]; 
     wire [31:0]    srliw_s1 = re[w_rs1][31:0] >> w_shamt[4:0]; 
     wire [31:0]    sraiw_s1 = $signed(re[w_rs1][31:0]) >>> w_shamt[4:0]; 
@@ -216,7 +216,7 @@ module cpu (
 	        32'b???????_?????_?????_101_?????_0000011: begin mem_addr <= l_addr; re[w_rd] <= {48'b0, mem_data_in[15:0]}; end // Lhu
 	        32'b???????_?????_?????_010_?????_0000011: begin mem_addr <= l_addr; re[w_rd] <= {{32{mem_data_in[31]}}, mem_data_in[31:0]}; // Lw
 	        32'b???????_?????_?????_110_?????_0000011: begin mem_addr <= l_addr; re[w_rd] <= {32'b0, mem_data_in[31:0]}; // Lwu
-	        32'b???????_?????_?????_011_?????_0000011: begin mem_addr <= l_addr; re[w_rd] <= meme_data_in; // Ld
+	        32'b???????_?????_?????_011_?????_0000011: begin mem_addr <= l_addr; re[w_rd] <= mem_data_in; // Ld
                 // Store
 	        32'b???????_?????_?????_000_?????_0100011: begin mem_addr <= s_addr; mem_we <= 1; mem_data_out <= re[w_rs2][7:0]; end // Sb
 	        32'b???????_?????_?????_001_?????_0100011: begin mem_addr <= s_addr; mem_we <= 1; mem_data_out <= re[w_rs2][15:0]; end// Sh
