@@ -9,7 +9,9 @@ module cpu (
     output reg [63:0] mem_addr,     // Memory address for load/store
     output reg [63:0] mem_data_out, // Data to write to memory (store)
     output reg mem_we,              // Memory write enable
-    input wire [63:0] mem_data_in   // Data read from memory (load)
+    input wire [63:0] mem_data_in,   // Data read from memory (load)
+
+    output reg [31:0] ir_out // Address of instruction
     ); 
   
 
@@ -17,6 +19,7 @@ module cpu (
     reg [31:0] ir; // Instruction register
     reg [63:0] re [0:31]; // General-purpose registers (x0-x31)
     reg [63:0] pc; // Program counter
+    assign ir_out = ir;
   
     // --- Instruction Decoding ---
     wire [ 6:0] w_op = ir[6:0];
@@ -125,6 +128,7 @@ module board (
 
     wire [63:0] mem_addr, mem_data_in, mem_data_out;
     wire mem_we;
+    wire [31:0] ir_show;
 
     cpu cpu_inst (
 	.clock(clk_1hz),
@@ -133,6 +137,7 @@ module board (
         .i_mem_addr(i_mem_addr),
         .i_mem_data_in(i_mem_data_in),
 	//
+	.ir_out(ir_show),
 	.mem_addr(mem_addr),
 	.mem_data_in(mem_data_in),
 	.mem_data_out(mem_data_out),
@@ -151,7 +156,7 @@ module board (
     assign i_mem_data_in = mem[i_mem_addr >> 2];
 
     // LED display
-    assign LEDG = cpu_inst.ir[7:0];
+    assign LEDG = ir_show[7:0];
 
     //reg [1:0] mux_cnt;
     //always @(posedge clk_1hz)begin
