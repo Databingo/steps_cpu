@@ -357,10 +357,8 @@ module Board (
 	.clk_out(clk_1hz)
     );
 
-    //wire [31:0] instruction;
     wire [63:0] mem_addr, mem_data_in, mem_data_out;
     wire mem_we;
-    reg instruction [63:0];
     cpu cpu_inst (
 	.clock(clk_1hz),
 	.reset_n(KEY0),
@@ -379,14 +377,11 @@ module Board (
     end
     //
    
-    //assign instruction = {mem[cpu_inst.pc+3], mem[cpu_inst.pc+2], mem[cpu_inst.pc+1], mem[cpu_inst.pc]};
-
-
     // LED display
-    reg [1:0] mux_cnt;
+    reg [1:0] cnt;
     always @(posedge clk_1hz)begin
-	mux_cnt <= mux_cnt + 1;
-	case (mux_cnt)
+	cnt <= cnt + 1;
+	case (cnt)
 	    0: LEDG <= mem_data_in[7:0];
 	    1: LEDG <= mem_data_in[15:8];
 	    2: LEDG <= mem_data_in[23:16];
@@ -408,3 +403,12 @@ endmodule
 //set_location_assignment PIN_Y22 -to LEDG[6]
 //set_location_assignment PIN_Y21 -to LEDG[7]
 
+//mem.mif
+//00000001
+//00000011
+//00000111
+//00001111
+//00011111
+//00111111
+//01111111
+//11111111
