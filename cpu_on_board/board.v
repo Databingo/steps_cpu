@@ -30,7 +30,7 @@ endmodule
 
 
 // --- MODULE 2: The Top-Level Board ---
-module Board (
+module board (
     input wire CLOCK_50,
     input wire KEY0,       // Active-low reset
     output wire [7:0] LEDG // 8 green LEDs
