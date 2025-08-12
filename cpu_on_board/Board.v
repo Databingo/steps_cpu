@@ -378,7 +378,7 @@ module Board (
         mem_data_in <= mem[mem_addr];
     end
     //
-    assign instruction = mem_data_in;
+   
     //assign instruction = {mem[cpu_inst.pc+3], mem[cpu_inst.pc+2], mem[cpu_inst.pc+1], mem[cpu_inst.pc]};
 
 
@@ -387,10 +387,10 @@ module Board (
     always @(posedge clk_1hz)begin
 	mux_cnt <= mux_cnt + 1;
 	case (mux_cnt)
-	    0: LEDG <= instruction[7:0];
-	    1: LEDG <= instruction[15:8];
-	    2: LEDG <= instruction[23:16];
-	    3: LEDG <= instruction[31:24];
+	    0: LEDG <= mem_data_in[7:0];
+	    1: LEDG <= mem_data_in[15:8];
+	    2: LEDG <= mem_data_in[23:16];
+	    3: LEDG <= mem_data_in[31:24];
 	endcase
     end
 endmodule
