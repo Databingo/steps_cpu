@@ -359,13 +359,18 @@ module Board (
 
     wire [63:0] mem_addr, mem_data_in, mem_data_out;
     wire mem_we;
+
+    wire [63:0] i_mem_addr,   // Address of instruction
+    wire [31:0] i_mem_data_in, // Instruction backs from memory
     cpu cpu_inst (
 	.clock(clk_1hz),
 	.reset_n(KEY0),
 	.mem_addr(mem_addr),
 	.mem_data_in(mem_data_in),
 	.mem_data_out(mem_data_out),
-        .mem_we(mem_we)
+        .mem_we(mem_we),
+	.i_mem_addr(i_mem_addr),
+	.i_mem_data_in(i_mem_data_in)
     );
 
     (* ram_style = "block" *) reg [63:0] mem [0:3999]; // Unified Memory
@@ -374,6 +379,7 @@ module Board (
     always @(posedge clk_1hz) begin
         if (mem_we) mem[mem_addr] <= mem_data_out;
         mem_data_in <= mem[mem_addr];
+        i_mem_data_in <= mem[i_mem_addr];
     end
     //
    
