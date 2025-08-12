@@ -1,16 +1,18 @@
+// Two-Stage (Fetch/Execute) Pipelined CPU
 module cpu (  
     input wire clock,
     input wire reset_n,
-    //input wire enable,            // 1 for running 0 for halt 
-    input wire [31:0] ir,           // 32-bit instruction
+    // for instruction
+    output reg [63:0] i_mem_addr;   // Address of instruction
+    input wire [31:0] i_mem_data_in; // Instruction backs from memory
+    // for data
     output reg [63:0] mem_addr,     // Memory address for load/store
     output reg [63:0] mem_data_out, // Data to write to memory (store)
     output reg mem_we,              // Memory write enable
     input wire [63:0] mem_data_in   // Data read from memory (load)
-    //output reg [31:0] led_ir      // Testing: LEDs for instruction display
     ); 
   
-    //assign led_ir = ir;
+    reg [31:0] ir;
 
     // --- Privilege Modes ---
     localparam M_mode = 2'b11;
@@ -21,7 +23,6 @@ module cpu (
     // --- CSR Registers ---
     reg [63:0] csre [0:4096]; // Maximal 12-bit = 4096
       
-    // Mini set for working RV64I with M/S/U modes
     // --- Machine Mode ---
     // Machine Information Registers
     integer mvendorid = 12'hF11;    // 0xF11 MRO Vendor ID
@@ -125,24 +126,21 @@ module cpu (
     // --- Regisers and Memories ---
     reg [63:0] re [0:31] // General-purpose registers (x0-x31)
     reg [63:0] pc; // Program counter
-    (* ram_style = "block" *) reg [7:0] irom [0:9999]; // Instruction BRAM
-    (* ram_style = "block" *) reg [7:0] drom [0:9999]; // Data memory (8-bit, 10,000 bytes)
-    initial $readmemb("irom.mif", irom);
-    //qsf: set_global_assignment -name MEMORY_INITIALIZATION_FILE irom.mif -section irom
 
+    //(* ram_style = "block" *) reg [7:0] irom [0:9999]; // Instruction BRAM
+    //(* ram_style = "block" *) reg [7:0] drom [0:9999]; // Data memory (8-bit, 10,000 bytes)
+    //initial $readmemb("irom.mif", irom);
+    //qsf: set_global_assignment -name MEMORY_INITIALIZATION_FILE irom.mif -section irom
+    
+//    --- Immediate decoders --- 
+//    wire signed [63:0] w_imm_i = {{52{ir[31]}}, ir[31:20]};   // I-type immediate Lb Lh Lw Lbu Lhu Lwu Ld Jalr Addi Slti Sltiu Xori Ori Andi Addiw
+//    wire signed [63:0] w_imm_s = {{52{ir[31]}}, ir[31:25], ir[11:7]};  // S-type immediate Sb Sh Sw Sd
+//    wire signed [63:0] w_imm_b = {{51{ir[31]}}, ir[7],  ir[30:25], ir[11:8], 1'b0}; // SB-type immediate Beq Bne Blt Bge Bltu Bgeu // read immediate & padding last 0, total 12 + 1 = 13 bits
+//    wire signed [63:0] w_imm_u = {{32{ir[31]}}, ir[31:12], 12'b0}; // U-type immediate Lui Auipc
+//    wire signed [63:0] w_imm_j = {{43{ir[31]}}, ir[19:12], ir[20], ir[30:21], 1'b0}; // UJ-type immediate Jal  // read immediate & padding last 0, total 20 + 1 = 21 bits
+  
+  
     // --- Instruction Decoding ---
-    // parse instruction by type
-    // 7-5-5-3-5-7
-    // ______________________________________________
-    //|31        25 24 20 19 15 14 12 11        7 6 0|
-    //|func7       |rs2  |rs1  |func3|rd         |op |R
-    //|imm[11:0]         |rs1  |func3|rd         |op |I
-    //|imm[11:5]   |rs2  |rs1  |func3|imm[4:0]   |op |S
-    //|imm[12|10:5]|rs2  |rs1  |func3|imm[4:1|11]|op |SB
-    //|imm[31:12]                    |rd         |op |U
-    //|imm[20|10:1|11|19:12]         |rd         |op |UJ
-    //````````````````````````````````````````````````
-    //wire [31:0] ir;           // 32-bit instruction
     wire [ 6:0] w_op = ir[6:0];
     wire [ 4:0] w_rd = ir[11:7];
     wire [ 2:0] w_f3 = ir[14:12]; 
@@ -171,146 +169,165 @@ module cpu (
     wire [31:0]    sraiw_s1 = $signed(re[w_rs1][31:0]) >>> w_shamt[4:0]; 
 
     // --- Memory Access ---
-    wire [63:0] l_addr = re[w_rs1] + {{52{w_imm[11]}}, w_imm}; // Load address
-    wire [63:0] s_addr = re[w_rs1] + {{52{w_imm[11]}}, w_simm}; // Store address
+    //wire [63:0] l_addr = re[w_rs1] + {{52{w_imm[11]}}, w_imm}; // Load address
+    //wire [63:0] s_addr = re[w_rs1] + {{52{w_imm[11]}}, w_simm}; // Store address
+    //wire jump_or_branch_taken;
+      
+    // --- Flush signal ---
+    reg bubble;
 
-    // --- Instruction Execution ---
-    reg [4:0] csr_id; 
+    // ---  Stage 1: IF (instruction fetch by PC) ---
     always @(posedge clock or negedge reset_n) begin
 	if (!reset_n) begin
-	    pc <=0;
+	    ir <= 32'h00000013;  // On reset load NOP 
+	end else begin
+	    i_mem_addr <= pc;    // sent out current PC to instruction memeory
+	    ir <= i_mem_data_in; // latch the PC-refered instruciton back in cpu
+	end
+    end
+
+    // ---  Stage 2: decode & execute & set PC ---
+    reg [4:0] csr_id; 
+    always @(posedge clock or negedge reset_n) begin
+	//jump_or_branch_taken <= 1'b0;
+	if (!reset_n) begin
+	    bubble <= 1'b0;
+	    pc <= 64'h0;
 	    current_privilege_mode <= M_mode; // init from M-mode for all RISCV processor
 	    for (integer i = 0; i < 32; i = i + 1) re[i] <= 64'h0;  //!!初始化零否则新启用寄存器就不灵
 	    mem_we <= 0;
             mem_addr <= 0;
 	    mem_data_out <= 0;
 	end else begin // 取指令 + 分析指令 + 执行 | 或 准备数据 (分析且备好该指令所需的数据）
-            //ir = {irom[pc+3], irom[pc+2], irom[pc+1], irom[pc]};  // Little endian
-	    pc <= pc +4 ;// Default: advance PC for most instructions; override in jumps/branches/traps //ir <= w_ir ; 
-	    mem_we <= 0; // Default: no memeory write
-            csr_id = csr_index(w_csr); // ----------------------------SYSTEM 
-    	    casez(ir) 
-	    // U-type
-            32'b???????_?????_?????_???_?????_0110111: re[w_rd] <= {{32{w_upimm[19]}}, w_upimm, 12'b0}; // Lui
-	    32'b???????_?????_?????_???_?????_0010111: re[w_rd] <= pc + {{32{w_upimm[19]}}, w_upimm, 12'b0}; // Auipc
-            // Load
-	    32'b???????_?????_?????_000_?????_0000011: begin mem_addr <= l_addr; re[w_rd] <= {{56{mem_data_in[7]}}, mem_data_in[7:0]}; end // Lb
-	    32'b???????_?????_?????_100_?????_0000011: begin mem_addr <= l_addr; re[w_rd] <= {56'b0, mem_data_in[7:0]}; // Lbu
-	    32'b???????_?????_?????_001_?????_0000011: begin mem_addr <= l_addr; re[w_rd] <= {{48{mem_data_in[15]}}, mem_data_in[15:0]}; end // Lh
-	    32'b???????_?????_?????_101_?????_0000011: begin mem_addr <= l_addr; re[w_rd] <= {48'b0, mem_data_in[15:0]}; end // Lhu
-	    32'b???????_?????_?????_010_?????_0000011: begin mem_addr <= l_addr; re[w_rd] <= {{32{mem_data_in[31]}}, mem_data_in[31:0]}; // Lw
-	    32'b???????_?????_?????_110_?????_0000011: begin mem_addr <= l_addr; re[w_rd] <= {32'b0, mem_data_in[31:0]}; // Lwu
-	    32'b???????_?????_?????_011_?????_0000011: begin mem_addr <= l_addr; re[w_rd] <= meme_data_in; // Ld
-            // Store
-	    32'b???????_?????_?????_000_?????_0100011: begin mem_addr <= s_addr; mem_we <= 1; mem_data_out <= re[w_rs2][7:0]; end // Sb
-	    32'b???????_?????_?????_001_?????_0100011: begin mem_addr <= s_addr; mem_we <= 1; mem_data_out <= re[w_rs2][15:0]; end// Sh
-	    32'b???????_?????_?????_010_?????_0100011: begin mem_addr <= s_addr; mem_we <= 1; mem_data_out <= re[w_rs2][31:0]; end// Sw
-	    32'b???????_?????_?????_011_?????_0100011: begin mem_addr <= s_addr; mem_we <= 1; mem_data_out <= re[w_rs2]; end// Sd
-            // Math-R
-	    32'b0000000_?????_?????_000_?????_0110011: re[w_rd] <= re[w_rs1] + re[w_rs2];  // Add
-	    32'b0100000_?????_?????_000_?????_0110011: re[w_rd] <= re[w_rs1] - re[w_rs2];  // Sub;
-	    32'b???????_?????_?????_010_?????_0110011: re[w_rd] <= ($signed(re[w_rs1]) < $signed(re[w_rs2])) ? 64'h1: 64'h0;  // Slt
-	    32'b???????_?????_?????_011_?????_0110011: re[w_rd] <= re[w_rs1] < re[w_rs2] ? 64'h1 : 64'h0; // Sltu
-	    32'b???????_?????_?????_110_?????_0110011: re[w_rd] <= re[w_rs1] | re[w_rs2]; // Or
-	    32'b???????_?????_?????_111_?????_0110011: re[w_rd] <= re[w_rs1] & re[w_rs2]; // And
-	    32'b???????_?????_?????_100_?????_0110011: re[w_rd] <= re[w_rs1] ^ re[w_rs2]; // Xor
-	    32'b???????_?????_?????_001_?????_0110011: re[w_rd] <= re[w_rs1] << re[w_rs2][5:0]; // Sll
-            32'b0000000_?????_?????_101_?????_0110011: re[w_rd] <= re[w_rs1] >> re[w_rs2][5:0]; // Srl
-	    32'b0100000_?????_?????_101_?????_0110011: re[w_rd] <= $signed(re[w_rs1]) >>> re[w_rs2][5:0]; // Sra
-            // Math-R 64
-	    32'b0000000_?????_?????_000_?????_0111011: re[w_rd] <= {{32{sum[31]}}, sum[31:0]}; // Addw
-	    32'b0100000_?????_?????_000_?????_0111011: re[w_rd] <= {{32{sub[31]}}, sub[31:0]}; // Subw
-	    32'b???????_?????_?????_001_?????_0111011: re[w_rd] <= {{32{re[w_rs1][31-re[w_rs2][4:0]]}}, (re[w_rs1][31:0] << re[w_rs2][4:0])}; // Sllw
-            32'b0000000_?????_?????_101_?????_0111011: re[w_rd] <= (re[w_rs2][4:0] == 0) ? {{32{re[w_rs1][31]}}, re[w_rs1][31:0]} : (re[w_rs1][31:0] >> re[w_rs2][4:0]); // Srlw
-	    32'b0100000_?????_?????_101_?????_0111011: re[w_rd] <= {{32{re[w_rs1][31]}}, ($signed(re[w_rs1][31:0]) >>> re[w_rs2][4:0])}; // Sraw
-            // Math-I
-	    32'b???????_?????_?????_000_?????_0010011: re[w_rd] <= re[w_rs1] + {{52{w_imm[11]}}, w_imm};  // Addi
-	    32'b???????_?????_?????_010_?????_0010011: re[w_rd] <= ($signed(re[w_rs1]) < $signed({{52{w_imm[11]}}, w_imm})) ? 64'h1 : 64'h0 ; // Slti
-	    32'b???????_?????_?????_011_?????_0010011: re[w_rd] <= (re[w_rs1] < {{52{w_imm[11]}}, w_imm}) ?  64'h1 : 64'h0; // Sltiu
-	    32'b???????_?????_?????_110_?????_0010011: re[w_rd] <= re[w_rs1] | {{52{w_imm[11]}}, w_imm}; // Ori
-	    32'b???????_?????_?????_111_?????_0010011: re[w_rd] <= re[w_rs1] & {{52{w_imm[11]}}, w_imm}; // Andi
-	    32'b???????_?????_?????_100_?????_0010011: re[w_rd] <= re[w_rs1] ^ {{52{w_imm[11]}}, w_imm}; // Xori
-	    32'b???????_?????_?????_001_?????_0010011: re[w_rd] <= re[w_rs1] << w_shamt; // Slli
-	    32'b000000?_?????_?????_101_?????_0010011: re[w_rd] <= re[w_rs1] >> w_shamt; // Srli // func7->6 // rv64 shame take w_f7[0]
-	    32'b010000?_?????_?????_101_?????_0010011: re[w_rd] <= $signed(re[w_rs1]) >>> w_shamt; // Srai
-            // Math-I (Word)
-	    32'b???????_?????_?????_000_?????_0011011: re[w_rd] <= {{32{sum_imm_32[31]}}, sum_imm_32}; // Addiw
-	    32'b???????_?????_?????_001_?????_0011011: re[w_rd] <= {{32{slliw_s1[31]}}, slliw_s1}; // Slliw
-	    32'b0000000_?????_?????_101_?????_0011011: re[w_rd] <= {{32{srliw_s1[31]}}, srliw_s1}; // Srliw
-	    32'b0100000_?????_?????_101_?????_0011011: re[w_rd] <= {{32{sraiw_s1[31]}}, sraiw_s1}; // Sraiw
-	    // Jamp
-	    32'b???????_?????_?????_???_?????_1101111: begin re[w_rd] <= pc + 4; pc <= pc +  {{43{w_jimm[20]}}, w_jimm}; end // Jal
-	    32'b???????_?????_?????_???_?????_1100111: begin re[w_rd] <= pc + 4; pc <= (re[w_rs1] +  {{52{w_imm[11]}}, w_imm}) & 64'hFFFFFFFFFFFFFFFE ; end // Jalr
-            // Branch 
-	    32'b???????_?????_?????_000_?????_1100011: pc <= (re[w_rs1] == re[w_rs2]) ? pc + sign_extended_bimm : pc <= pc + 4; // Beq
-	    32'b???????_?????_?????_001_?????_1100011: pc <= (re[w_rs1] != re[w_rs2]) ? pc + sign_extended_bimm : pc <= pc + 4; // Bne
-	    32'b???????_?????_?????_100_?????_1100011: pc <= ($signed(re[w_rs1]) < $signed(re[w_rs2])) ? pc + sign_extended_bimm : pc + 4; // Blt
-	    32'b???????_?????_?????_101_?????_1100011: pc <= ($signed(re[w_rs1]) >= $signed(re[w_rs2])) ? pc + sign_extended_bimm : pc + 4; // Bge
-	    32'b???????_?????_?????_110_?????_1100011: pc <= (re[w_rs1] < re[w_rs2]) ? pc + sign_extended_bimm : pc + 4; // Bltu
-	    32'b???????_?????_?????_111_?????_1100011: pc <= (re[w_rs1] >= re[w_rs2]) ? pc + sign_extended_bimm : pc + 4; // Bgeu
-	    //----------SYSTEM---------
-            // CSR
-	    32'b???????_?????_?????_001_?????_1110011: begin if (w_rd !== 5'b00000) re[w_rd] <= csre[csr_id]; csre[csr_id] <= re[w_rs1]; end // Csrrw
-	    32'b???????_?????_?????_010_?????_1110011: begin re[w_rd] <= csre[csr_id]; if (w_rs1 !== 5'b00000) csre[csr_id] <= re[w_rs1] | csre[csr_id]; end // Csrrs
-	    32'b???????_?????_?????_011_?????_1110011: begin re[w_rd] <= csre[csr_id]; if (w_rs1 !== 5'b00000) csre[csr_id] <= ~re[w_rs1] & csre[csr_id]; end // Csrrc
-	    32'b???????_?????_?????_101_?????_1110011: begin if (w_rd !== 5'b00000) re[w_rd] <= csre[csr_id]; csre[csr_id] <= {59'b0, w_zimm}; end // Csrrwi
-	    32'b???????_?????_?????_110_?????_1110011: begin re[w_rd] <= csre[csr_id]; if (w_zimm !== 5'b00000) csre[csr_id] <= {59'b0, w_zimm } | csre[csr_id]; end // csrrsi
-	    32'b???????_?????_?????_111_?????_1110011: begin re[w_rd] <= irom[w_csr]; if (w_zimm !== 5'b00000) csre[csr_id] <= ~{59'b0, w_zimm } & csre[csr_id]; end // Csrrci
-	    // Fence
-	    32'b???????_?????_?????_000_?????_0001111: begin end // Fence
-	    32'b???????_?????_?????_001_?????_0001111: begin end // Fencei
-            // Ecall
-	    32'b0000000_00000_?????_000_?????_1110011: begin  // func12 
-                                                // Trap into S-mode
-	                                        if (current_privilege_mode == U_mode && medeleg[8] == 1)
-	         			       begin
-	         			           csre[scause][63] <= 0; //63_type 0exception 1interrupt|value
-	         			           csre[scause][62:0] <= 8; // 8 indicate Ecall from U-mode; 9 call from S-mode; 11 call from M-mode
-	         			           csre[sepc] <= pc;
-	         			           csre[sstatus][8] <= 0; // save previous privilege mode(user0 super1) to SPP 
-	         			           csre[sstatus][5] <= csre[sstatus][1]; // save interrupt enable(SIE) to SPIE 
-	         			           csre[sstatus][1] <= 0; // clear SIE
-	         			           //if ((csre[scause][63]==1'b1) && (csre[stvec][1:0]== 2'b01)) pc <= (csre[stvec][63:2] << 2) + (csre[scause][62:0] << 2);
-	         			           pc <= (csre[stvec][63:2] << 2);
-	         				   current_privilege_mode <= S_mode;
-	         			       end
-	         			       // Trap into M-mode
-	         			       else 
-	         			       begin
-	         			           csre[mcause][63] <= 0; //63_type 0exception 1interrupt|value
-	         			           csre[mepc] <= pc;
-	         			           csre[mstatus][7] <= csre[mstatus][3]; // save interrupt enable(MIE) to MPIE 
-	         			           csre[mstatus][3] <= 0; // clear MIE (not enabled)
-	         			           pc <= (csre[mtvec][63:2] << 2);
-	                                            if (current_privilege_mode == U_mode && medeleg[8] == 0) csre[mcause][62:0] <= 8; // save cause 
-	                                            if (current_privilege_mode == S_mode) csre[mcause][62:0] <= 9; 
-	         			           if (current_privilege_mode == M_mode) csre[mcause][62:0] <= 11; 
-	         				   csre[mstatus][12:11] <= current_privilege_mode; // save privilege mode to MPP 
-	         				   current_privilege_mode <= M_mode;  // set current privilege mode
-	         			       end
-	         			       end
-            // Ebreak
-	    32'b0000000_00001_?????_000_?????_1110011: begin  end
-	    // Sret
-	    32'b0001000_00010_?????_000_?????_1110011: begin      
-	         			       if (csre[sstatus][8] == 0) current_privilege_mode <= U_mode;
-	         			       if (csre[sstatus][8] == 1) current_privilege_mode <= S_mode;
-	         			       csre[sstatus][1] <= csre[sstatus][5]; // set back interrupt enable(SIE) by SPIE 
-	         			       csre[sstatus][5] <= 1; // set previous interrupt enable(SIE) to be 1 (enable)
-	         			       csre[sstatus][8] <= 0; // set previous privilege mode(SPP) to be 0 (U-mode)
-	         			       pc <=  csre[sepc]; // sepc was +4 by the software handler and written back to sepc
-	         			       end
-            // Mret
-	    32'b0011000_00010_?????_000_?????_1110011: begin  
-	         			       csre[mstatus][3] <= csre[mstatus][7]; // set back interrupt enable(MIE) by MPIE 
-	         			       csre[mstatus][7] <= 1; // set previous interrupt enable(MIE) to be 1 (enable)
-	         			       if (csre[mstatus][12:11] < M_mode) csre[mstatus][17] <= 0; // set mprv to 0
-	         			       current_privilege_mode  <= csre[mstatus][12:11]; // set back previous mode
-	         			       csre[mstatus][12:11] <= 2'b00; // set previous privilege mode(MPP) to be 00 (U-mode)
-	         			       pc <=  csre[mepc]; // mepc was +4 by the software handler and written back to sepc
-	         			       end
-    	    endcase
-            re[0] <= 64'h0;  // x0 恒为 0
+	    if (bubble) begin 
+		bubble <= 1'b0; // Flush this cycle & Set to no-flush for next cycle
+	    end else begin 
+	        pc <= pc +4 ;// Default: advance PC for most instructions; override in jumps/branches/traps //ir <= w_ir ; 
+	        mem_we <= 0; // Default: no memeory write
+                csr_id = csr_index(w_csr); // ----------------------------SYSTEM 
+    	        casez(ir) 
+	        // U-type
+                32'b???????_?????_?????_???_?????_0110111: re[w_rd] <= {{32{w_upimm[19]}}, w_upimm, 12'b0}; // Lui
+	        32'b???????_?????_?????_???_?????_0010111: re[w_rd] <= pc + {{32{w_upimm[19]}}, w_upimm, 12'b0}; // Auipc
+                // Load
+	        32'b???????_?????_?????_000_?????_0000011: begin mem_addr <= l_addr; re[w_rd] <= {{56{mem_data_in[7]}}, mem_data_in[7:0]}; end // Lb
+	        32'b???????_?????_?????_100_?????_0000011: begin mem_addr <= l_addr; re[w_rd] <= {56'b0, mem_data_in[7:0]}; // Lbu
+	        32'b???????_?????_?????_001_?????_0000011: begin mem_addr <= l_addr; re[w_rd] <= {{48{mem_data_in[15]}}, mem_data_in[15:0]}; end // Lh
+	        32'b???????_?????_?????_101_?????_0000011: begin mem_addr <= l_addr; re[w_rd] <= {48'b0, mem_data_in[15:0]}; end // Lhu
+	        32'b???????_?????_?????_010_?????_0000011: begin mem_addr <= l_addr; re[w_rd] <= {{32{mem_data_in[31]}}, mem_data_in[31:0]}; // Lw
+	        32'b???????_?????_?????_110_?????_0000011: begin mem_addr <= l_addr; re[w_rd] <= {32'b0, mem_data_in[31:0]}; // Lwu
+	        32'b???????_?????_?????_011_?????_0000011: begin mem_addr <= l_addr; re[w_rd] <= meme_data_in; // Ld
+                // Store
+	        32'b???????_?????_?????_000_?????_0100011: begin mem_addr <= s_addr; mem_we <= 1; mem_data_out <= re[w_rs2][7:0]; end // Sb
+	        32'b???????_?????_?????_001_?????_0100011: begin mem_addr <= s_addr; mem_we <= 1; mem_data_out <= re[w_rs2][15:0]; end// Sh
+	        32'b???????_?????_?????_010_?????_0100011: begin mem_addr <= s_addr; mem_we <= 1; mem_data_out <= re[w_rs2][31:0]; end// Sw
+	        32'b???????_?????_?????_011_?????_0100011: begin mem_addr <= s_addr; mem_we <= 1; mem_data_out <= re[w_rs2]; end// Sd
+                // Math-R
+	        32'b0000000_?????_?????_000_?????_0110011: re[w_rd] <= re[w_rs1] + re[w_rs2];  // Add
+	        32'b0100000_?????_?????_000_?????_0110011: re[w_rd] <= re[w_rs1] - re[w_rs2];  // Sub;
+	        32'b???????_?????_?????_010_?????_0110011: re[w_rd] <= ($signed(re[w_rs1]) < $signed(re[w_rs2])) ? 64'h1: 64'h0;  // Slt
+	        32'b???????_?????_?????_011_?????_0110011: re[w_rd] <= re[w_rs1] < re[w_rs2] ? 64'h1 : 64'h0; // Sltu
+	        32'b???????_?????_?????_110_?????_0110011: re[w_rd] <= re[w_rs1] | re[w_rs2]; // Or
+	        32'b???????_?????_?????_111_?????_0110011: re[w_rd] <= re[w_rs1] & re[w_rs2]; // And
+	        32'b???????_?????_?????_100_?????_0110011: re[w_rd] <= re[w_rs1] ^ re[w_rs2]; // Xor
+	        32'b???????_?????_?????_001_?????_0110011: re[w_rd] <= re[w_rs1] << re[w_rs2][5:0]; // Sll
+                32'b0000000_?????_?????_101_?????_0110011: re[w_rd] <= re[w_rs1] >> re[w_rs2][5:0]; // Srl
+	        32'b0100000_?????_?????_101_?????_0110011: re[w_rd] <= $signed(re[w_rs1]) >>> re[w_rs2][5:0]; // Sra
+                // Math-R 64
+	        32'b0000000_?????_?????_000_?????_0111011: re[w_rd] <= {{32{sum[31]}}, sum[31:0]}; // Addw
+	        32'b0100000_?????_?????_000_?????_0111011: re[w_rd] <= {{32{sub[31]}}, sub[31:0]}; // Subw
+	        32'b???????_?????_?????_001_?????_0111011: re[w_rd] <= {{32{re[w_rs1][31-re[w_rs2][4:0]]}}, (re[w_rs1][31:0] << re[w_rs2][4:0])}; // Sllw
+                32'b0000000_?????_?????_101_?????_0111011: re[w_rd] <= (re[w_rs2][4:0] == 0) ? {{32{re[w_rs1][31]}}, re[w_rs1][31:0]} : (re[w_rs1][31:0] >> re[w_rs2][4:0]); // Srlw
+	        32'b0100000_?????_?????_101_?????_0111011: re[w_rd] <= {{32{re[w_rs1][31]}}, ($signed(re[w_rs1][31:0]) >>> re[w_rs2][4:0])}; // Sraw
+                // Math-I
+	        32'b???????_?????_?????_000_?????_0010011: re[w_rd] <= re[w_rs1] + {{52{w_imm[11]}}, w_imm};  // Addi
+	        32'b???????_?????_?????_010_?????_0010011: re[w_rd] <= ($signed(re[w_rs1]) < $signed({{52{w_imm[11]}}, w_imm})) ? 64'h1 : 64'h0 ; // Slti
+	        32'b???????_?????_?????_011_?????_0010011: re[w_rd] <= (re[w_rs1] < {{52{w_imm[11]}}, w_imm}) ?  64'h1 : 64'h0; // Sltiu
+	        32'b???????_?????_?????_110_?????_0010011: re[w_rd] <= re[w_rs1] | {{52{w_imm[11]}}, w_imm}; // Ori
+	        32'b???????_?????_?????_111_?????_0010011: re[w_rd] <= re[w_rs1] & {{52{w_imm[11]}}, w_imm}; // Andi
+	        32'b???????_?????_?????_100_?????_0010011: re[w_rd] <= re[w_rs1] ^ {{52{w_imm[11]}}, w_imm}; // Xori
+	        32'b???????_?????_?????_001_?????_0010011: re[w_rd] <= re[w_rs1] << w_shamt; // Slli
+	        32'b000000?_?????_?????_101_?????_0010011: re[w_rd] <= re[w_rs1] >> w_shamt; // Srli // func7->6 // rv64 shame take w_f7[0]
+	        32'b010000?_?????_?????_101_?????_0010011: re[w_rd] <= $signed(re[w_rs1]) >>> w_shamt; // Srai
+                // Math-I (Word)
+	        32'b???????_?????_?????_000_?????_0011011: re[w_rd] <= {{32{sum_imm_32[31]}}, sum_imm_32}; // Addiw
+	        32'b???????_?????_?????_001_?????_0011011: re[w_rd] <= {{32{slliw_s1[31]}}, slliw_s1}; // Slliw
+	        32'b0000000_?????_?????_101_?????_0011011: re[w_rd] <= {{32{srliw_s1[31]}}, srliw_s1}; // Srliw
+	        32'b0100000_?????_?????_101_?????_0011011: re[w_rd] <= {{32{sraiw_s1[31]}}, sraiw_s1}; // Sraiw
+	        // Jamp
+	        32'b???????_?????_?????_???_?????_1101111: begin re[w_rd] <= pc + 4; pc <= pc +  {{43{w_jimm[20]}}, w_jimm}; bubble <= 1'b1; end // Jal
+	        32'b???????_?????_?????_???_?????_1100111: begin re[w_rd] <= pc + 4; pc <= (re[w_rs1] +  {{52{w_imm[11]}}, w_imm}) & 64'hFFFFFFFFFFFFFFFE ; bubble <= 1'b1; end // Jalr
+                // Branch 
+		32'b???????_?????_?????_000_?????_1100011: begin pc <= (re[w_rs1] == re[w_rs2]) ? pc + sign_extended_bimm : pc <= pc + 4; bubble <= 1'b1; end // Beq
+	        32'b???????_?????_?????_001_?????_1100011: begin pc <= (re[w_rs1] != re[w_rs2]) ? pc + sign_extended_bimm : pc <= pc + 4; bubble <= 1'b1; end // Bne
+	        32'b???????_?????_?????_100_?????_1100011: begin pc <= ($signed(re[w_rs1]) < $signed(re[w_rs2])) ? pc + sign_extended_bimm : pc + 4; bubble <= 1'b1; end // Blt
+	        32'b???????_?????_?????_101_?????_1100011: begin pc <= ($signed(re[w_rs1]) >= $signed(re[w_rs2])) ? pc + sign_extended_bimm : pc + 4; bubble <= 1'b1; end // Bge
+	        32'b???????_?????_?????_110_?????_1100011: begin pc <= (re[w_rs1] < re[w_rs2]) ? pc + sign_extended_bimm : pc + 4; bubble <= 1'b1; end // Bltu
+	        32'b???????_?????_?????_111_?????_1100011: begin pc <= (re[w_rs1] >= re[w_rs2]) ? pc + sign_extended_bimm : pc + 4; bubble <= 1'b1; end // Bgeu
+	        //----------SYSTEM---------
+                // CSR
+	        32'b???????_?????_?????_001_?????_1110011: begin if (w_rd !== 5'b00000) re[w_rd] <= csre[csr_id]; csre[csr_id] <= re[w_rs1]; end // Csrrw
+	        32'b???????_?????_?????_010_?????_1110011: begin re[w_rd] <= csre[csr_id]; if (w_rs1 !== 5'b00000) csre[csr_id] <= re[w_rs1] | csre[csr_id]; end // Csrrs
+	        32'b???????_?????_?????_011_?????_1110011: begin re[w_rd] <= csre[csr_id]; if (w_rs1 !== 5'b00000) csre[csr_id] <= ~re[w_rs1] & csre[csr_id]; end // Csrrc
+	        32'b???????_?????_?????_101_?????_1110011: begin if (w_rd !== 5'b00000) re[w_rd] <= csre[csr_id]; csre[csr_id] <= {59'b0, w_zimm}; end // Csrrwi
+	        32'b???????_?????_?????_110_?????_1110011: begin re[w_rd] <= csre[csr_id]; if (w_zimm !== 5'b00000) csre[csr_id] <= {59'b0, w_zimm } | csre[csr_id]; end // csrrsi
+	        32'b???????_?????_?????_111_?????_1110011: begin re[w_rd] <= irom[w_csr]; if (w_zimm !== 5'b00000) csre[csr_id] <= ~{59'b0, w_zimm } & csre[csr_id]; end // Csrrci
+	        // Fence
+	        32'b???????_?????_?????_000_?????_0001111: begin end // Fence
+	        32'b???????_?????_?????_001_?????_0001111: begin end // Fencei
+                // Ecall
+	        32'b0000000_00000_?????_000_?????_1110011: begin  // func12 
+                                                    // Trap into S-mode
+	                                            if (current_privilege_mode == U_mode && medeleg[8] == 1)
+	             			       begin
+	             			           csre[scause][63] <= 0; //63_type 0exception 1interrupt|value
+	             			           csre[scause][62:0] <= 8; // 8 indicate Ecall from U-mode; 9 call from S-mode; 11 call from M-mode
+	             			           csre[sepc] <= pc;
+	             			           csre[sstatus][8] <= 0; // save previous privilege mode(user0 super1) to SPP 
+	             			           csre[sstatus][5] <= csre[sstatus][1]; // save interrupt enable(SIE) to SPIE 
+	             			           csre[sstatus][1] <= 0; // clear SIE
+	             			           //if ((csre[scause][63]==1'b1) && (csre[stvec][1:0]== 2'b01)) pc <= (csre[stvec][63:2] << 2) + (csre[scause][62:0] << 2);
+	             			           pc <= (csre[stvec][63:2] << 2);
+	             				   current_privilege_mode <= S_mode;
+	             			       end
+	             			       // Trap into M-mode
+	             			       else 
+	             			       begin
+	             			           csre[mcause][63] <= 0; //63_type 0exception 1interrupt|value
+	             			           csre[mepc] <= pc;
+	             			           csre[mstatus][7] <= csre[mstatus][3]; // save interrupt enable(MIE) to MPIE 
+	             			           csre[mstatus][3] <= 0; // clear MIE (not enabled)
+	             			           pc <= (csre[mtvec][63:2] << 2);
+	                                                if (current_privilege_mode == U_mode && medeleg[8] == 0) csre[mcause][62:0] <= 8; // save cause 
+	                                                if (current_privilege_mode == S_mode) csre[mcause][62:0] <= 9; 
+	             			           if (current_privilege_mode == M_mode) csre[mcause][62:0] <= 11; 
+	             				   csre[mstatus][12:11] <= current_privilege_mode; // save privilege mode to MPP 
+	             				   current_privilege_mode <= M_mode;  // set current privilege mode
+	             			       end
+	             			       end
+                // Ebreak
+	        32'b0000000_00001_?????_000_?????_1110011: begin  end
+	        // Sret
+	        32'b0001000_00010_?????_000_?????_1110011: begin      
+	             			       if (csre[sstatus][8] == 0) current_privilege_mode <= U_mode;
+	             			       if (csre[sstatus][8] == 1) current_privilege_mode <= S_mode;
+	             			       csre[sstatus][1] <= csre[sstatus][5]; // set back interrupt enable(SIE) by SPIE 
+	             			       csre[sstatus][5] <= 1; // set previous interrupt enable(SIE) to be 1 (enable)
+	             			       csre[sstatus][8] <= 0; // set previous privilege mode(SPP) to be 0 (U-mode)
+	             			       pc <=  csre[sepc]; // sepc was +4 by the software handler and written back to sepc
+	             			       end
+                // Mret
+	        32'b0011000_00010_?????_000_?????_1110011: begin  
+	             			       csre[mstatus][3] <= csre[mstatus][7]; // set back interrupt enable(MIE) by MPIE 
+	             			       csre[mstatus][7] <= 1; // set previous interrupt enable(MIE) to be 1 (enable)
+	             			       if (csre[mstatus][12:11] < M_mode) csre[mstatus][17] <= 0; // set mprv to 0
+	             			       current_privilege_mode  <= csre[mstatus][12:11]; // set back previous mode
+	             			       csre[mstatus][12:11] <= 2'b00; // set previous privilege mode(MPP) to be 00 (U-mode)
+	             			       pc <=  csre[mepc]; // mepc was +4 by the software handler and written back to sepc
+	             			       end
+    	        endcase
+                //re[0] <= 64'h0;  // x0 hardwared 0
+	   end
         end
     end
 endmodule
