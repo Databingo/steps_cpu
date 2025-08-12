@@ -3,8 +3,8 @@ module cpu (
     input wire clock,
     input wire reset_n,
     // for instruction
-    output reg [63:0] i_mem_addr;   // Address of instruction
-    input wire [31:0] i_mem_data_in; // Instruction backs from memory
+    output reg [63:0] i_mem_addr,   // Address of instruction
+    input wire [31:0] i_mem_data_in, // Instruction backs from memory
     // for data
     output reg [63:0] mem_addr,     // Memory address for load/store
     output reg [63:0] mem_data_out, // Data to write to memory (store)
@@ -81,7 +81,7 @@ module cpu (
     	12'hF12: csr_index = 5'd2; 	                           // 0xF12 MRO marchid Architecture ID
     	12'hF13: csr_index = 5'd3; 	                           // 0xF13 MRO mimpid Implementation ID
     	12'hF14: csr_index = 5'd4; 	                           // 0xF14 MRO mhartid Hardware thread ID
-    	12'hF11: csr_index = 5'd5; 	                           // 0xF15 MRO mconfigptr Pointer to configuration data structure
+    	12'hF15: csr_index = 5'd5; 	                           // 0xF15 MRO mconfigptr Pointer to configuration data structure
     	                              	                           // Machine Trap Setup
     	12'h300: csr_index = 5'd6;	                           // 0x300 MRW mstatus Machine status register *
     	12'h301: csr_index = 5'd7;	                           // 0x301 MRW misa ISA and extensions
@@ -124,7 +124,7 @@ module cpu (
     endfunction
 
     // --- Regisers and Memories ---
-    reg [63:0] re [0:31] // General-purpose registers (x0-x31)
+    reg [63:0] re [0:31]; // General-purpose registers (x0-x31)
     reg [63:0] pc; // Program counter
 
     //(* ram_style = "block" *) reg [7:0] irom [0:9999]; // Instruction BRAM
@@ -169,8 +169,8 @@ module cpu (
     wire [31:0]    sraiw_s1 = $signed(re[w_rs1][31:0]) >>> w_shamt[4:0]; 
 
     // --- Memory Access ---
-    //wire [63:0] l_addr = re[w_rs1] + {{52{w_imm[11]}}, w_imm}; // Load address
-    //wire [63:0] s_addr = re[w_rs1] + {{52{w_imm[11]}}, w_simm}; // Store address
+    wire [63:0] l_addr = re[w_rs1] + {{52{w_imm[11]}}, w_imm}; // Load address
+    wire [63:0] s_addr = re[w_rs1] + {{52{w_imm[11]}}, w_simm}; // Store address
     //wire jump_or_branch_taken;
       
     // --- Flush signal ---
@@ -199,10 +199,10 @@ module cpu (
             mem_addr <= 0;
 	    mem_data_out <= 0;
 	end else begin // 取指令 + 分析指令 + 执行 | 或 准备数据 (分析且备好该指令所需的数据）
+            pc <= pc +4 ;// Default: advance PC for most instructions; override in jumps/branches/traps 
 	    if (bubble) begin 
 		bubble <= 1'b0; // Flush this cycle & Clear flush signal for the next cycle
 	    end else begin 
-	        pc <= pc +4 ;// Default: advance PC for most instructions; override in jumps/branches/traps //ir <= w_ir ; 
 	        mem_we <= 0; // Default: no memeory write
                 csr_id = csr_index(w_csr); // ----------------------------SYSTEM 
     	        casez(ir) 
@@ -211,12 +211,12 @@ module cpu (
 	        32'b???????_?????_?????_???_?????_0010111: re[w_rd] <= pc + {{32{w_upimm[19]}}, w_upimm, 12'b0}; // Auipc
                 // Load
 	        32'b???????_?????_?????_000_?????_0000011: begin mem_addr <= l_addr; re[w_rd] <= {{56{mem_data_in[7]}}, mem_data_in[7:0]}; end // Lb
-	        32'b???????_?????_?????_100_?????_0000011: begin mem_addr <= l_addr; re[w_rd] <= {56'b0, mem_data_in[7:0]}; // Lbu
+		32'b???????_?????_?????_100_?????_0000011: begin mem_addr <= l_addr; re[w_rd] <= {56'b0, mem_data_in[7:0]}; end // Lbu
 	        32'b???????_?????_?????_001_?????_0000011: begin mem_addr <= l_addr; re[w_rd] <= {{48{mem_data_in[15]}}, mem_data_in[15:0]}; end // Lh
 	        32'b???????_?????_?????_101_?????_0000011: begin mem_addr <= l_addr; re[w_rd] <= {48'b0, mem_data_in[15:0]}; end // Lhu
-	        32'b???????_?????_?????_010_?????_0000011: begin mem_addr <= l_addr; re[w_rd] <= {{32{mem_data_in[31]}}, mem_data_in[31:0]}; // Lw
-	        32'b???????_?????_?????_110_?????_0000011: begin mem_addr <= l_addr; re[w_rd] <= {32'b0, mem_data_in[31:0]}; // Lwu
-	        32'b???????_?????_?????_011_?????_0000011: begin mem_addr <= l_addr; re[w_rd] <= mem_data_in; // Ld
+		32'b???????_?????_?????_010_?????_0000011: begin mem_addr <= l_addr; re[w_rd] <= {{32{mem_data_in[31]}}, mem_data_in[31:0]}; end // Lw
+		32'b???????_?????_?????_110_?????_0000011: begin mem_addr <= l_addr; re[w_rd] <= {32'b0, mem_data_in[31:0]}; end // Lwu
+		32'b???????_?????_?????_011_?????_0000011: begin mem_addr <= l_addr; re[w_rd] <= mem_data_in; end // Ld
                 // Store
 	        32'b???????_?????_?????_000_?????_0100011: begin mem_addr <= s_addr; mem_we <= 1; mem_data_out <= re[w_rs2][7:0]; end // Sb
 	        32'b???????_?????_?????_001_?????_0100011: begin mem_addr <= s_addr; mem_we <= 1; mem_data_out <= re[w_rs2][15:0]; end// Sh
@@ -258,8 +258,8 @@ module cpu (
 	        32'b???????_?????_?????_???_?????_1101111: begin re[w_rd] <= pc + 4; pc <= pc +  {{43{w_jimm[20]}}, w_jimm}; bubble <= 1'b1; end // Jal
 	        32'b???????_?????_?????_???_?????_1100111: begin re[w_rd] <= pc + 4; pc <= (re[w_rs1] +  {{52{w_imm[11]}}, w_imm}) & 64'hFFFFFFFFFFFFFFFE ; bubble <= 1'b1; end // Jalr
                 // Branch 
-		32'b???????_?????_?????_000_?????_1100011: begin pc <= (re[w_rs1] == re[w_rs2]) ? pc + sign_extended_bimm : pc <= pc + 4; bubble <= 1'b1; end // Beq
-	        32'b???????_?????_?????_001_?????_1100011: begin pc <= (re[w_rs1] != re[w_rs2]) ? pc + sign_extended_bimm : pc <= pc + 4; bubble <= 1'b1; end // Bne
+		32'b???????_?????_?????_000_?????_1100011: begin pc <= (re[w_rs1] == re[w_rs2]) ? pc + sign_extended_bimm : pc + 4; bubble <= 1'b1; end // Beq
+	        32'b???????_?????_?????_001_?????_1100011: begin pc <= (re[w_rs1] != re[w_rs2]) ? pc + sign_extended_bimm : pc + 4; bubble <= 1'b1; end // Bne
 	        32'b???????_?????_?????_100_?????_1100011: begin pc <= ($signed(re[w_rs1]) < $signed(re[w_rs2])) ? pc + sign_extended_bimm : pc + 4; bubble <= 1'b1; end // Blt
 	        32'b???????_?????_?????_101_?????_1100011: begin pc <= ($signed(re[w_rs1]) >= $signed(re[w_rs2])) ? pc + sign_extended_bimm : pc + 4; bubble <= 1'b1; end // Bge
 	        32'b???????_?????_?????_110_?????_1100011: begin pc <= (re[w_rs1] < re[w_rs2]) ? pc + sign_extended_bimm : pc + 4; bubble <= 1'b1; end // Bltu
@@ -271,7 +271,7 @@ module cpu (
 	        32'b???????_?????_?????_011_?????_1110011: begin re[w_rd] <= csre[csr_id]; if (w_rs1 !== 5'b00000) csre[csr_id] <= ~re[w_rs1] & csre[csr_id]; end // Csrrc
 	        32'b???????_?????_?????_101_?????_1110011: begin if (w_rd !== 5'b00000) re[w_rd] <= csre[csr_id]; csre[csr_id] <= {59'b0, w_zimm}; end // Csrrwi
 	        32'b???????_?????_?????_110_?????_1110011: begin re[w_rd] <= csre[csr_id]; if (w_zimm !== 5'b00000) csre[csr_id] <= {59'b0, w_zimm } | csre[csr_id]; end // csrrsi
-	        32'b???????_?????_?????_111_?????_1110011: begin re[w_rd] <= irom[w_csr]; if (w_zimm !== 5'b00000) csre[csr_id] <= ~{59'b0, w_zimm } & csre[csr_id]; end // Csrrci
+	        32'b???????_?????_?????_111_?????_1110011: begin re[w_rd] <= csre[csr_id]; if (w_zimm !== 5'b00000) csre[csr_id] <= ~{59'b0, w_zimm } & csre[csr_id]; end // Csrrci
 	        // Fence
 	        32'b???????_?????_?????_000_?????_0001111: begin end // Fence
 	        32'b???????_?????_?????_001_?????_0001111: begin end // Fencei
@@ -289,6 +289,7 @@ module cpu (
 	             			           //if ((csre[scause][63]==1'b1) && (csre[stvec][1:0]== 2'b01)) pc <= (csre[stvec][63:2] << 2) + (csre[scause][62:0] << 2);
 	             			           pc <= (csre[stvec][63:2] << 2);
 	             				   current_privilege_mode <= S_mode;
+						   bubble <= 1'b1;
 	             			       end
 	             			       // Trap into M-mode
 	             			       else 
@@ -303,6 +304,7 @@ module cpu (
 	             			           if (current_privilege_mode == M_mode) csre[mcause][62:0] <= 11; 
 	             				   csre[mstatus][12:11] <= current_privilege_mode; // save privilege mode to MPP 
 	             				   current_privilege_mode <= M_mode;  // set current privilege mode
+						   bubble <= 1'b1;
 	             			       end
 	             			       end
                 // Ebreak
@@ -315,6 +317,7 @@ module cpu (
 	             			       csre[sstatus][5] <= 1; // set previous interrupt enable(SIE) to be 1 (enable)
 	             			       csre[sstatus][8] <= 0; // set previous privilege mode(SPP) to be 0 (U-mode)
 	             			       pc <=  csre[sepc]; // sepc was +4 by the software handler and written back to sepc
+					       bubble <= 1'b1;
 	             			       end
                 // Mret
 	        32'b0011000_00010_?????_000_?????_1110011: begin  
@@ -324,10 +327,11 @@ module cpu (
 	             			       current_privilege_mode  <= csre[mstatus][12:11]; // set back previous mode
 	             			       csre[mstatus][12:11] <= 2'b00; // set previous privilege mode(MPP) to be 00 (U-mode)
 	             			       pc <=  csre[mepc]; // mepc was +4 by the software handler and written back to sepc
+					       bubble <= 1'b1;
 	             			       end
     	        endcase
-                //re[0] <= 64'h0;  // x0 hardwared 0
 	   end
+           re[0] <= 64'h0;  // x0 hardwared 0
         end
     end
 endmodule
