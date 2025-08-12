@@ -58,7 +58,7 @@ module board (
     // It will count from 0 to 15 and then repeat.
     reg [3:0] addr_counter;
     always @(posedge clk_slow or negedge KEY0) begin
-        if (!reset_n) begin
+        if (!KEY0) begin
             addr_counter <= 0;
         end else begin
             addr_counter <= addr_counter + 1;
