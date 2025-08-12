@@ -1,0 +1,45 @@
+set_global_assignment -name TOP_LEVEL_ENTITY Board
+set_location_assignment PIN_L1 -to CLOCK_50
+set_location_assignment PIN_R22 -to KEY0
+set_location_assignment PIN_U22 -to LEDG[0]
+set_location_assignment PIN_U21 -to LEDG[1]
+set_location_assignment PIN_V22 -to LEDG[2]
+set_location_assignment PIN_V21 -to LEDG[3]
+set_location_assignment PIN_W22 -to LEDG[4]
+set_location_assignment PIN_W21 -to LEDG[5]
+set_location_assignment PIN_Y22 -to LEDG[6]
+set_location_assignment PIN_Y21 -to LEDG[7]
+
+#set_location_assignment PIN_H15 -to PS2_CLK
+#set_location_assignment PIN_J14 -to PS2_DAT
+#LEDG[0] PIN_U22 LED Green[0]  
+#LEDG[1] PIN_U21 LED Green[1]  
+#LEDG[2] PIN_V22 LED Green[2]  
+#LEDG[3] PIN_V21 LED Green[3]  
+#LEDG[4] PIN_W22 LED Green[4]  
+#LEDG[5] PIN_W21 LED Green[5]  
+#LEDG[6] PIN_Y22 LED Green[6]  
+#LEDG[7] PIN_Y21 LED Green[7]
+#PS2_CLK PIN_H15 PS/2 Clock  
+#PS2_DAT PIN_J14 PS/2 Data
+#KEY0 PIN_R22
+#KEY1 PIN_R21
+#KEY2 PIN_T22
+#KEY3 PIN_T21
+
+set_global_assignment -name LAST_QUARTUS_VERSION "13.0 SP1"
+set_global_assignment -name PROJECT_OUTPUT_DIRECTORY output_files
+set_global_assignment -name MIN_CORE_JUNCTION_TEMP 0
+set_global_assignment -name MAX_CORE_JUNCTION_TEMP 85
+set_global_assignment -name DEVICE EP2C20F484C7
+set_global_assignment -name FAMILY "Cyclone II"
+set_global_assignment -name ERROR_CHECK_FREQUENCY_DIVISOR 1
+set_global_assignment -name PARTITION_NETLIST_TYPE SOURCE -section_id Top
+set_global_assignment -name PARTITION_FITTER_PRESERVATION_LEVEL PLACEMENT_AND_ROUTING -section_id Top
+set_global_assignment -name PARTITION_COLOR 16764057 -section_id Top
+set_global_assignment -name VERILOG_INPUT_VERSION SYSTEMVERILOG_2005
+set_global_assignment -name VERILOG_SHOW_LMF_MAPPING_MESSAGES OFF
+set_global_assignment -name POWER_PRESET_COOLING_SOLUTION "23 MM HEAT SINK WITH 200 LFPM AIRFLOW"
+set_global_assignment -name POWER_BOARD_THERMAL_MODEL "NONE (CONSERVATIVE)"
+set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
+set_global_assignment -name VERILOG_FILE board.v
