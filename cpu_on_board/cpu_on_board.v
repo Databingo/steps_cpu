@@ -10,10 +10,12 @@ module cpu_on_board (
     always @(posedge CLOCK_50 or negedge KEY0) begin
         if (!KEY0) begin
             counter <= 0;
+	    LEDG <= 8'h00;
         end
         else begin
             if (counter == 25000000 - 1) begin
                 counter <= 0;
+		LEDG <= ~LEDG;
             end else begin
                 counter <= counter + 1;
             end
@@ -25,7 +27,7 @@ module cpu_on_board (
     // The LEDs will be ON for the first half of the count cycle,
     // and OFF for the second half.
     // We use a simple comparison with the halfway point of the counter.
-    assign LEDG = (counter < 25000000) ? 8'hFF : 8'h00;
+    //assign LEDG = (counter < 25000000) ? 8'hFF : 8'h00;
     
     // Whoops, that's not quite right. Let's make it even simpler.
     // We will use a single register to hold the blinking state.
