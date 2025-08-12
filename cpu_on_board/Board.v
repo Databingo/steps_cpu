@@ -367,8 +367,7 @@ module Board (
 	.mem_addr(mem_addr),
 	.mem_data_in(mem_data_in),
 	.mem_data_out(mem_data_out),
-        .mem_we(mem_we),
-	.re(instruction)
+        .mem_we(mem_we)
     );
 
     (* ram_style = "block" *) reg [63:0] mem [0:19999]; // Unified Memory
