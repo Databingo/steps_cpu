@@ -312,14 +312,14 @@ module cpu (
 	        //     			       end
                 //// Mret
 	        //32'b0011000_00010_?????_000_?????_1110011: begin  
-	             			       csre[mstatus][3] <= csre[mstatus][7]; // set back interrupt enable(MIE) by MPIE 
-	             			       csre[mstatus][7] <= 1; // set previous interrupt enable(MIE) to be 1 (enable)
-	             			       if (csre[mstatus][12:11] < M_mode) csre[mstatus][17] <= 0; // set mprv to 0
-	             			       current_privilege_mode  <= csre[mstatus][12:11]; // set back previous mode
-	             			       csre[mstatus][12:11] <= 2'b00; // set previous privilege mode(MPP) to be 00 (U-mode)
-	             			       pc <=  csre[mepc]; // mepc was +4 by the software handler and written back to sepc
-					       bubble <= 1'b1;
-	             			       end
+	        //   			       csre[mstatus][3] <= csre[mstatus][7]; // set back interrupt enable(MIE) by MPIE 
+	        //   			       csre[mstatus][7] <= 1; // set previous interrupt enable(MIE) to be 1 (enable)
+	        //   			       if (csre[mstatus][12:11] < M_mode) csre[mstatus][17] <= 0; // set mprv to 0
+	        //   			       current_privilege_mode  <= csre[mstatus][12:11]; // set back previous mode
+	        //   			       csre[mstatus][12:11] <= 2'b00; // set previous privilege mode(MPP) to be 00 (U-mode)
+	        //   			       pc <=  csre[mepc]; // mepc was +4 by the software handler and written back to sepc
+		//      		       bubble <= 1'b1;
+	        //   			       end
     	        endcase
 	   end
            re[0] <= 64'h0;  // x0 hardwared 0
