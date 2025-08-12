@@ -171,7 +171,6 @@ module cpu (
     // --- Memory Access ---
     wire [63:0] l_addr = re[w_rs1] + {{52{w_imm[11]}}, w_imm}; // Load address
     wire [63:0] s_addr = re[w_rs1] + {{52{w_simm[11]}}, w_simm}; // Store address
-    //wire jump_or_branch_taken;
       
     // --- Flush signal ---
     reg bubble;
@@ -189,7 +188,6 @@ module cpu (
     // ---  Stage 2: Execute (decode & execute & set PC) ---
     reg [4:0] csr_id; 
     always @(posedge clock or negedge reset_n) begin
-	//jump_or_branch_taken <= 1'b0;
 	if (!reset_n) begin
 	    bubble <= 1'b0;
 	    pc <= 64'h0;
