@@ -360,8 +360,8 @@ module Board (
     wire [63:0] mem_addr, mem_data_in, mem_data_out;
     wire mem_we;
 
-    wire [63:0] i_mem_addr,   // Address of instruction
-    wire [31:0] i_mem_data_in, // Instruction backs from memory
+    wire [63:0] i_mem_addr;   // Address of instruction
+    wire [31:0] i_mem_data_in; // Instruction backs from memory
     cpu cpu_inst (
 	.clock(clk_1hz),
 	.reset_n(KEY0),
