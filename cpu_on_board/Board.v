@@ -371,7 +371,7 @@ module Board (
     );
 
     (* ram_style = "block" *) reg [63:0] mem [0:3999]; // Unified Memory
-    initial $readmemh("mem.mif", mem);
+    initial $readmemb("mem.mif", mem);
 
     always @(posedge clk_1hz) begin
         if (mem_we) mem[mem_addr] <= mem_data_out;
