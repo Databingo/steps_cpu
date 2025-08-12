@@ -1,21 +1,17 @@
-
 // ===========================================================================
 // File: board.v
-// Simple LED blink pattern from memory
+// Fixed version with working LED blinking
 // ===========================================================================
 
-// --- MODULE 1: Millisecond-Based Clock Divider ---
-module clock_divider #(
-    parameter CLK_FREQ_HZ = 50_000_000, // input clock frequency
-    parameter BLINK_MS    = 200         // toggle period in milliseconds
-)(
-    input  wire clk_in,
-    input  wire reset_n,  // active-low reset
-    output reg  clk_out
+// --- MODULE 1: Fixed Clock Divider ---
+module clock_divider(
+    input wire clk_in,     // 50 MHz input clock
+    input wire reset_n,    // Active-low reset
+    output reg clk_out     // ~1 Hz output clock
 );
-    // Number of cycles for half-period
-    localparam HALF_PERIOD = (CLK_FREQ_HZ / 1000) * (BLINK_MS / 2);
-    reg [$clog2(HALF_PERIOD)-1:0] counter;
+    // Use 25-bit counter (needs to count to 25,000,000)
+    reg [24:0] counter;
+    localparam HALF_PERIOD = 25000000; // For 1 Hz clock (50MHz/50e6 = 1Hz)
 
     always @(posedge clk_in) begin
         if (!reset_n) begin
@@ -24,7 +20,7 @@ module clock_divider #(
         end else begin
             if (counter == HALF_PERIOD - 1) begin
                 counter <= 0;
-                clk_out <= ~clk_out; // Toggle output clock
+                clk_out <= ~clk_out; // Toggle clock
             end else begin
                 counter <= counter + 1;
             end
@@ -32,41 +28,41 @@ module clock_divider #(
     end
 endmodule
 
-// --- MODULE 2: Top-Level Board ---
-module board (
-    input  wire CLOCK_50,  // 50 MHz clock
-    input  wire KEY0,      // Active-low reset
-    output wire [7:0] LEDG // Green LEDs
-);
-    wire clk_slow;
 
-    // Slow clock for LED updates
-    clock_divider #(
-        .CLK_FREQ_HZ(50_000_000),
-        .BLINK_MS(200) // pattern change every 200 ms
-    ) clk_inst (
+// --- MODULE 2: The Top-Level Board ---
+module board (
+    input wire CLOCK_50,   // 50 MHz clock
+    input wire KEY0,       // Active-low reset (0 = reset)
+    output wire [7:0] LEDG // 8 green LEDs
+);
+    wire clk_slow;         // Slow clock (1 Hz)
+    
+    // Instantiate clock divider with 25-bit counter
+    clock_divider clk_inst (
         .clk_in(CLOCK_50),
         .reset_n(KEY0),
         .clk_out(clk_slow)
     );
 
-    // Memory block with LED patterns
+    // --- ROM Memory Block ---
     (* ram_style = "block" *) reg [31:0] mem [0:15];
-    initial $readmemh("mem.hex", mem); // Use .hex file format
+    initial $readmemh("mem.mif", mem);
 
-    // Address counter
+    // --- Address Counter with Synchronous Reset ---
     reg [3:0] addr_counter;
     always @(posedge clk_slow) begin
-        if (!KEY0)
+        if (!KEY0) begin         // Active-low reset check
             addr_counter <= 0;
-        else
+        end else begin
             addr_counter <= addr_counter + 1;
+        end
     end
 
-    // Output from memory
+    // --- Memory Read ---
     wire [31:0] mem_data_out;
     assign mem_data_out = mem[addr_counter];
-
-    // Drive LEDs
+    
+    // --- LED Output ---
     assign LEDG = mem_data_out[7:0];
+
 endmodule
