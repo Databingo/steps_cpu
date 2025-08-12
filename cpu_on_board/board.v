@@ -125,7 +125,7 @@ module board (
     );
 
     (* ram_style = "block" *) reg [31:0] mem [0:2999]; // Unified Memory
-    initial $readmemb("mem.mif", mem);
+    initial $readmemh("mem.mif", mem);
 
     //
     wire [31:0] i_mem_data_in;
