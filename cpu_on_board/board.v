@@ -3,7 +3,7 @@
 // The absolute simplest test to read from initialized memory and display on LEDs.
 // ===========================================================================
 
-module Board (
+module board (
     input wire CLOCK_50,   // 50 MHz system clock
     input wire KEY0,       // Active-low reset button
     output wire [7:0] LEDG // 8 green LEDs
