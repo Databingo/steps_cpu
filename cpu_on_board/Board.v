@@ -2,10 +2,6 @@
 module cpu (  
     input wire clock,
     input wire reset_n,
-    // for instruction
-    output reg [63:0] i_mem_addr,   // Address of instruction
-    input wire [31:0] i_mem_data_in, // Instruction backs from memory
-    // for data
     output reg [63:0] mem_addr,     // Memory address for load/store
     output reg [63:0] mem_data_out, // Data to write to memory (store)
     output reg mem_we,              // Memory write enable
@@ -174,8 +170,8 @@ module cpu (
 	if (!reset_n) begin
 	    ir <= 32'h00000013;  // On reset load NOP 
 	end else begin
-	    i_mem_addr <= pc;    // sent out current PC to instruction memeory
-	    ir <= i_mem_data_in; // latch the PC-refered instruciton back in cpu
+	    mem_addr <= pc;    // sent out current PC to instruction memeory
+	    ir <= mem_data_in; // latch the PC-refered instruciton back in cpu
 	end
     end
 
@@ -360,8 +356,6 @@ module Board (
     wire [63:0] mem_addr, mem_data_in, mem_data_out;
     wire mem_we;
 
-    wire [63:0] i_mem_addr;   // Address of instruction
-    wire [31:0] i_mem_data_in; // Instruction backs from memory
     cpu cpu_inst (
 	.clock(clk_1hz),
 	.reset_n(KEY0),
@@ -369,17 +363,14 @@ module Board (
 	.mem_data_in(mem_data_in),
 	.mem_data_out(mem_data_out),
         .mem_we(mem_we),
-	.i_mem_addr(i_mem_addr),
-	.i_mem_data_in(i_mem_data_in)
     );
 
     (* ram_style = "block" *) reg [63:0] mem [0:3999]; // Unified Memory
     initial $readmemb("mem.mif", mem);
 
     always @(posedge clk_1hz) begin
-        if (mem_we) mem[mem_addr] <= mem_data_out;
-        mem_data_in <= mem[mem_addr];
-        i_mem_data_in <= mem[i_mem_addr];
+        mem_data_in <= mem[mem_addr];  // read into cpu according to addr
+        if (mem_we) mem[mem_addr] <= mem_data_out;  // write into memory according to addr
     end
     //
    
@@ -388,10 +379,10 @@ module Board (
     always @(posedge clk_1hz)begin
 	cnt <= cnt + 1;
 	case (cnt)
-	    0: LEDG <= i_mem_data_in[7:0];
-	    1: LEDG <= i_mem_data_in[15:8];
-	    2: LEDG <= i_mem_data_in[23:16];
-	    3: LEDG <= i_mem_data_in[31:24];
+	    0: LEDG <= mem_data_in[7:0];
+	    1: LEDG <= mem_data_in[15:8];
+	    2: LEDG <= mem_data_in[23:16];
+	    3: LEDG <= mem_data_in[31:24];
 	endcase
     end
 endmodule
