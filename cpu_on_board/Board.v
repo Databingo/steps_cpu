@@ -2,6 +2,10 @@
 module cpu (  
     input wire clock,
     input wire reset_n,
+    // for instruction
+    output reg [63:0] i_mem_addr,   // Address of instruction
+    input wire [31:0] i_mem_data_in, // Instruction backs from memory
+    // for data
     output reg [63:0] mem_addr,     // Memory address for load/store
     output reg [63:0] mem_data_out, // Data to write to memory (store)
     output reg mem_we,              // Memory write enable
@@ -170,8 +174,8 @@ module cpu (
 	if (!reset_n) begin
 	    ir <= 32'h00000013;  // On reset load NOP 
 	end else begin
-	    mem_addr <= pc;    // sent out current PC to instruction memeory
-	    ir <= mem_data_in; // latch the PC-refered instruciton back in cpu
+	    i_mem_addr <= pc;    // sent out current PC to instruction memeory
+	    ir <= i_mem_data_in; // latch the PC-refered instruciton back in cpu
 	end
     end
 
@@ -187,7 +191,7 @@ module cpu (
             mem_addr <= 0;
 	    mem_data_out <= 0;
 	end else begin // 取指令 + 分析指令 + 执行 | 或 准备数据 (分析且备好该指令所需的数据）
-            pc <= pc + 4 ;// Default: advance PC for most instructions; override in jumps/branches/traps 
+            pc <= pc +4 ;// Default: advance PC for most instructions; override in jumps/branches/traps 
 	    if (bubble) begin 
 		bubble <= 1'b0; // Flush this cycle & Clear flush signal for the next cycle
 	    end else begin 
@@ -308,14 +312,14 @@ module cpu (
 	        //     			       end
                 //// Mret
 	        //32'b0011000_00010_?????_000_?????_1110011: begin  
-	        //   			       csre[mstatus][3] <= csre[mstatus][7]; // set back interrupt enable(MIE) by MPIE 
-	        //   			       csre[mstatus][7] <= 1; // set previous interrupt enable(MIE) to be 1 (enable)
-	        //   			       if (csre[mstatus][12:11] < M_mode) csre[mstatus][17] <= 0; // set mprv to 0
-	        //   			       current_privilege_mode  <= csre[mstatus][12:11]; // set back previous mode
-	        //   			       csre[mstatus][12:11] <= 2'b00; // set previous privilege mode(MPP) to be 00 (U-mode)
-	        //   			       pc <=  csre[mepc]; // mepc was +4 by the software handler and written back to sepc
-		//      		       bubble <= 1'b1;
-	        //   			       end
+	             			       csre[mstatus][3] <= csre[mstatus][7]; // set back interrupt enable(MIE) by MPIE 
+	             			       csre[mstatus][7] <= 1; // set previous interrupt enable(MIE) to be 1 (enable)
+	             			       if (csre[mstatus][12:11] < M_mode) csre[mstatus][17] <= 0; // set mprv to 0
+	             			       current_privilege_mode  <= csre[mstatus][12:11]; // set back previous mode
+	             			       csre[mstatus][12:11] <= 2'b00; // set previous privilege mode(MPP) to be 00 (U-mode)
+	             			       pc <=  csre[mepc]; // mepc was +4 by the software handler and written back to sepc
+					       bubble <= 1'b1;
+	             			       end
     	        endcase
 	   end
            re[0] <= 64'h0;  // x0 hardwared 0
@@ -353,36 +357,40 @@ module Board (
 	.clk_out(clk_1hz)
     );
 
+    wire [31:0] instruction;
     wire [63:0] mem_addr, mem_data_in, mem_data_out;
     wire mem_we;
-
+    reg instruction [63:0];
     cpu cpu_inst (
 	.clock(clk_1hz),
 	.reset_n(KEY0),
 	.mem_addr(mem_addr),
 	.mem_data_in(mem_data_in),
 	.mem_data_out(mem_data_out),
-        .mem_we(mem_we),
+        .mem_we(mem_we)
     );
 
-    (* ram_style = "block" *) reg [63:0] mem [0:3999]; // Unified Memory
-    initial $readmemb("mem.mif", mem);
+    (* ram_style = "block" *) reg [63:0] mem [0:19999]; // Unified Memory
+    initial $readmemh("mem.mif", mem);
 
     always @(posedge clk_1hz) begin
-        mem_data_in <= mem[mem_addr];  // read into cpu according to addr
-        if (mem_we) mem[mem_addr] <= mem_data_out;  // write into memory according to addr
+        if (mem_we) mem[mem_addr] <= mem_data_out;
+        mem_data_in <= mem[mem_addr];
     end
     //
-   
+    assign instruction = mem_data_in;
+    //assign instruction = {mem[cpu_inst.pc+3], mem[cpu_inst.pc+2], mem[cpu_inst.pc+1], mem[cpu_inst.pc]};
+
+
     // LED display
-    reg [1:0] cnt;
+    reg [1:0] mux_cnt;
     always @(posedge clk_1hz)begin
-	cnt <= cnt + 1;
-	case (cnt)
-	    0: LEDG <= mem_data_in[7:0];
-	    1: LEDG <= mem_data_in[15:8];
-	    2: LEDG <= mem_data_in[23:16];
-	    3: LEDG <= mem_data_in[31:24];
+	mux_cnt <= mux_cnt + 1;
+	case (mux_cnt)
+	    0: LEDG <= instruction[7:0];
+	    1: LEDG <= instruction[15:8];
+	    2: LEDG <= instruction[23:16];
+	    3: LEDG <= instruction[31:24];
 	endcase
     end
 endmodule
@@ -400,12 +408,3 @@ endmodule
 //set_location_assignment PIN_Y22 -to LEDG[6]
 //set_location_assignment PIN_Y21 -to LEDG[7]
 
-//mem.mif
-//00000001
-//00000011
-//00000111
-//00001111
-//00011111
-//00111111
-//01111111
-//11111111
