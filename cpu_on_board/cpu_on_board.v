@@ -27,9 +27,10 @@ module cpu_on_board (
         else begin
             if (counter == 25000000 - 1) begin
                 counter <= 0;
-	        LEDG <= ~LEDG;
+	        //LEDG <= ~LEDG;
+	        LEDR0 <= ~LEDR0; // heartbeat
+	        LEDG <= mem[addr_pc][7:0];
 		addr_pc <= addr_pc + 1;
-	        LEDR0 <= 1'b1;
             end else begin
                 counter <= counter + 1;
             end
