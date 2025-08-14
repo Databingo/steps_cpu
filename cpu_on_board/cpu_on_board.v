@@ -3,7 +3,7 @@ module cpu_on_board (
     (* chip_pin = "PIN_R22" *) input wire KEY0,     // Active-low reset button
     (* chip_pin = "PIN_U22, PIN_U21, PIN_V22, PIN_V21, PIN_W22, PIN_W21, PIN_Y22, PIN_Y21" *) 
     output reg [7:0] LEDG, // 8 green LEDs
-    (* chip_pin = "PIN_R20" *) output reg [0] LEDR // 1 red LEDs  
+    (* chip_pin = "PIN_R19, PIN_R20" *) output reg [1:0] LEDR // 2 red LEDs  
 
 
     //(* chip_pin = "PIN_R17, PIN_R18, PIN_U18, PIN_Y18, PIN_V19, PIN_T18, PIN_Y19, PIN_U19, PIN_R19, PIN_R20" *) output reg [9:0] LEDR // 10 red LEDs  
