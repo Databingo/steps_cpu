@@ -23,14 +23,14 @@ module cpu_on_board (
             counter <= 0;
 	    LEDG <= 8'h00;
 	    LEDR0 <= 1'b0;
-	    addr_pc <= 1'b0;
+	    addr_pc <= 1'h3;
         end
         else begin
             if (counter == 25000000 - 1) begin
                 counter <= 0;
 	        //LEDG <= ~LEDG;
 	        LEDR0 <= ~LEDR0; // heartbeat
-	        LEDG <= mem[addr_pc][7:0];
+	        LEDG <= mem[addr_pc];//[7:0];
 		addr_pc <= addr_pc + 4;
             end else begin
                 counter <= counter + 1;
