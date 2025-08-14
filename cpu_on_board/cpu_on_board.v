@@ -15,14 +15,15 @@ module cpu_on_board (
     initial $readmemb("mem.mif", mem);
 
     reg [24:0] counter;
-    reg [4:0] addr_pc;
+    reg [31:0] addr_pc;
 
 
     always @(posedge CLOCK_50 or negedge KEY0) begin
         if (!KEY0) begin
             counter <= 0;
-	        LEDG <= 8'h00;
-		LEDR0 <= 1'b0;
+	    LEDG <= 8'h00;
+	    LEDR0 <= 1'b0;
+	    addr_pc <= 1'b0;
         end
         else begin
             if (counter == 25000000 - 1) begin
