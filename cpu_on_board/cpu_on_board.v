@@ -20,7 +20,7 @@ module cpu_on_board (
             if (counter == 25000000 - 1) begin
                 counter <= 0;
 		LEDG <= ~LEDG;
-		LEDR <= mem[0];
+		//LEDR <= mem[0];
             end else begin
                 counter <= counter + 1;
             end
