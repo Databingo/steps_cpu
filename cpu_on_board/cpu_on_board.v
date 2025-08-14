@@ -31,7 +31,7 @@ module cpu_on_board (
 	        //LEDG <= ~LEDG;
 	        LEDR0 <= ~LEDR0; // heartbeat
 	        LEDG <= mem[addr_pc][7:0];
-		addr_pc <= addr_pc + 1;
+		addr_pc <= addr_pc + 4;
             end else begin
                 counter <= counter + 1;
             end
