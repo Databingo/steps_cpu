@@ -23,7 +23,7 @@ module cpu_on_board (
             counter <= 0;
 	    LEDG <= 8'h00;
 	    LEDR0 <= 1'b0;
-	    addr_pc <= 1'h3;
+	    addr_pc <= 3;
         end
         else begin
             if (counter == 25000000 - 1) begin
