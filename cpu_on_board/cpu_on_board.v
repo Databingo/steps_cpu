@@ -19,14 +19,14 @@ module cpu_on_board (
     always @(posedge CLOCK_50 or negedge KEY0) begin
         if (!KEY0) begin
             counter <= 0;
-	         LEDG <= 8'h00;
-				LEDR0 <= 1'b1;
+	        LEDG <= 8'h00;
+		LEDR0 <= 1'b0;
         end
         else begin
             if (counter == 25000000 - 1) begin
                 counter <= 0;
-		          LEDG <= ~LEDG;
-		          LEDR0 <= ~LEDR0;
+	        LEDG <= ~LEDG;
+	        LEDR0 <= mem[0][0];
             end else begin
                 counter <= counter + 1;
             end
