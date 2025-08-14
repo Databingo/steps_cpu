@@ -29,7 +29,7 @@ module cpu_on_board (
                 counter <= 0;
 	        LEDG <= ~LEDG;
 		addr_pc <= addr_pc + 1;
-	        LEDR0 <= mem[addr_pc][8];
+	        LEDR0 <= 1'b1;
             end else begin
                 counter <= counter + 1;
             end
