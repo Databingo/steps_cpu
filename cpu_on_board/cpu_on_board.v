@@ -40,6 +40,7 @@ module cpu_on_board (
 
 module clock_slower(
     input wire clk_in,
+    input wire reset_n,
     output reg clk_out
     );
 
