@@ -24,7 +24,7 @@ module cpu_on_board (
 	.reset_n(KEY0)
     );
 
-    // IF
+    // IF ir
     always @(posedge clock_1hz or negedge KEY0) begin
         if (!KEY0) begin
 	    //LEDG <= 8'h00;
@@ -45,7 +45,7 @@ module cpu_on_board (
         end
     end
 
-    // EXE
+    // EXE pc
     always @(posedge clock_1hz or negedge KEY0) begin
         if (!KEY0) begin
 	    pc <=3;
@@ -57,12 +57,6 @@ module cpu_on_board (
     end
 
    assign LEDG = ir[7:0];
-
-
-
-
-
-
 endmodule
 
 
