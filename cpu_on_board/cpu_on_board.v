@@ -24,30 +24,52 @@ module cpu_on_board (
     );
 
     //always @(posedge CLOCK_50 or negedge KEY0) begin
+    //// IF
     always @(posedge clock_1hz or negedge KEY0) begin
         if (!KEY0) begin
-            counter <= 0;
+            //counter <= 0;
 	    LEDG <= 8'h00;
 	    LEDR0 <= 1'b0;
 	    addr_pc <= 3;
+
+	    //
+	    //ir <= 32'h00000013;
         end
         else begin
-            if (counter == 25000000 - 1) begin
-                counter <= 0;
-	        //LEDG <= ~LEDG;
+            //if (counter == 25000000 - 1) begin
+            //    counter <= 0;
+	    //    //LEDG <= ~LEDG;
 	        LEDR0 <= ~LEDR0; // heartbeat
 	        LEDG <= mem[addr_pc];//[7:0];
 		addr_pc <= addr_pc + 4;
-            end else begin
-               counter <= counter + 1;
-            end
+        //    end else begin
+        //       counter <= counter + 1;
+        //    end
         end
     end
-    
+
+    // EXE
+    always @(posedge, clock_1hz or negedge KEY0) begin
+        if (!KEY0) begin
+	    pc <=0;
+	end
+	else begin
+	    pc <= pc + 4;
+	end
+    end
+
+
+
+
+
 
 
 
 endmodule
+
+
+
+
 
 module clock_slower(
     input wire clk_in,
