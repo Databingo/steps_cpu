@@ -56,7 +56,7 @@ module cpu_on_board (
 	end
     end
 
-   assign LEDG = ir;
+   assign LEDG = ir[7:0];
 
 
 
