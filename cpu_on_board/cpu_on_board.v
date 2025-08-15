@@ -76,6 +76,7 @@ module clock_slower(
     input wire reset_n,
     output reg clk_out
     );
+
     reg [24:0] counter; 
 
     initial begin
@@ -90,6 +91,7 @@ module clock_slower(
 	end
 	else begin
 	    if (counter == 25000000 - 1) begin
+		counter <= 0;
 		clk_out <= ~clk_out;
 	    end
 	    else begin
