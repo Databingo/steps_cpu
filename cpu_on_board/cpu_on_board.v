@@ -57,6 +57,13 @@ module cpu_on_board (
     end
 
    assign LEDG = ir[7:0];
+
+
+
+    // Memory controller 
+    //always @(posedge clock_1hz or negedge KEY0) begin
+    //end
+
 endmodule
 
 
