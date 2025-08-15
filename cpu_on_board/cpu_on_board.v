@@ -14,6 +14,8 @@ module cpu_on_board (
 
     reg [24:0] counter;
     reg [31:0] addr_pc;
+    reg [7:0] ir;
+    reg [31:0] pc;
 
     wire clock_1hz;
     clock_slower clock_ins(
@@ -22,8 +24,6 @@ module cpu_on_board (
 	.reset_n(KEY0)
     );
 
-    reg ir [7:0];
-    reg pc [31:0];
     // IF
     always @(posedge clock_1hz or negedge KEY0) begin
         if (!KEY0) begin
