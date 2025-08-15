@@ -22,31 +22,40 @@ module cpu_on_board (
 	.reset_n(KEY0)
     );
 
-    //always @(posedge CLOCK_50 or negedge KEY0) begin
-    //// IF
+    reg ir [7:0];
+    reg pc [31:0];
+    // IF
     always @(posedge clock_1hz or negedge KEY0) begin
         if (!KEY0) begin
 	    LEDG <= 8'h00;
 	    LEDR0 <= 1'b0;
 	    addr_pc <= 3;
+       
+	    //
+	    ir <= 32'h00000013;
         end
         else begin
 	        LEDR0 <= ~LEDR0; // heartbeat
-	        LEDG <= mem[addr_pc];//[7:0];
+	        //LEDG <= mem[addr_pc];//[7:0];
 		addr_pc <= addr_pc + 4;
+		  
+		//
+		ir <= mem[pc];
+
         end
     end
 
-// EXE
-//    always @(posedge, clock_1hz or negedge KEY0) begin
-//        if (!KEY0) begin
-//	    pc <=0;
-//	end
-//	else begin
-//	    pc <= pc + 4;
-//	end
-//    end
-//
+    // EXE
+    always @(posedge, clock_1hz or negedge KEY0) begin
+        if (!KEY0) begin
+	    pc <=3;
+	end
+	else begin
+	    pc <= pc + 4;
+	    LEDG <= ir;
+	end
+    end
+
 
 
 
