@@ -52,11 +52,11 @@ module cpu_on_board (
 	end
 	else begin
 	    pc <= pc + 4;
-	    LEDG <= ir;
+	    //LEDG <= ir;
 	end
     end
 
-
+   assign LEDG = ir;
 
 
 
