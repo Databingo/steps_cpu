@@ -9,7 +9,6 @@ module cpu_on_board (
     //(* chip_pin = "R17, R18, U18, Y18, V19, T18, Y19, U19, R19, R20" *) output reg [9:0] LEDR // 10 red LEDs  
 );
 
-  
     (* ram_style = "block" *) reg [7:0] mem [0:2999]; // Unified Memory
     //initial $readmemh("mem.mif", mem);
     initial $readmemb("mem.mif", mem);
@@ -33,12 +32,43 @@ module cpu_on_board (
 	        LEDG <= mem[addr_pc];//[7:0];
 		addr_pc <= addr_pc + 4;
             end else begin
-                counter <= counter + 1;
+               counter <= counter + 1;
             end
         end
     end
+    endmodule
+
+module clock_slower(
+    input wire clk_in,
+    output reg clk_out
+    );
+
+    reg [24:0] counter; 
+    initial begin
+	clk_out <= 0;
+	counter <=0;
+        LEDR0 <= 1'b0; // 呼吸灯
+	pc <= 0;
+    end
+    always @(posedge clk_in or negedge reset_n) begin
+	if (!reset_n) begin
+	    clk_out <= 0;
+	    counter <=0;
+            LEDR0 <= 1'b0; // 呼吸灯
+	    //pc <= 0;
+	end
+	else begin
+	    if (counter == 25000000 - 1) begin
+		LEDR0 <= ~LEDR0;
+		clk_out <= ~clk_out;
+		//pc <= pc + 4;
+	    end
+	    else begin
+		counter <= counter + 1;
+	    end
+	end
+    end
+    endmodule
 
 
 
-
-endmodule
