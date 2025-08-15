@@ -17,7 +17,7 @@ module cpu_on_board (
     reg [31:0] addr_pc;
 
     wire clock_1hz;
-    clock_slower clock_1hz(
+    clock_slower clock_ins(
 	.clk_in(CLOCK_50),
 	.clk_out(clock_1hz),
 	.reset_n(KEY0)
