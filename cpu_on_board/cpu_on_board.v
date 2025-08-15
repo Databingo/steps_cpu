@@ -16,8 +16,15 @@ module cpu_on_board (
     reg [24:0] counter;
     reg [31:0] addr_pc;
 
+    wire clock_1hz;
+    clock_slower clock_1hz(
+	.clk_in(CLOCK_50),
+	.clk_out(clock_1hz),
+	.reset_n(KEY0)
+    );
 
-    always @(posedge CLOCK_50 or negedge KEY0) begin
+    //always @(posedge CLOCK_50 or negedge KEY0) begin
+    always @(posedge clock_1hz or negedge KEY0) begin
         if (!KEY0) begin
             counter <= 0;
 	    LEDG <= 8'h00;
@@ -36,40 +43,39 @@ module cpu_on_board (
             end
         end
     end
-    endmodule
+    
+
+
+
+endmodule
 
 module clock_slower(
     input wire clk_in,
     input wire reset_n,
     output reg clk_out
     );
-
     reg [24:0] counter; 
+
     initial begin
 	clk_out <= 0;
 	counter <=0;
-        //LEDR0 <= 1'b0; // 呼吸灯
-	//pc <= 0;
     end
+
     always @(posedge clk_in or negedge reset_n) begin
 	if (!reset_n) begin
 	    clk_out <= 0;
 	    counter <=0;
-            //LEDR0 <= 1'b0; // 呼吸灯
-	    //pc <= 0;
 	end
 	else begin
 	    if (counter == 25000000 - 1) begin
-		//LEDR0 <= ~LEDR0;
 		clk_out <= ~clk_out;
-		//pc <= pc + 4;
 	    end
 	    else begin
 		counter <= counter + 1;
 	    end
 	end
     end
-    endmodule
+endmodule
 
 
 
