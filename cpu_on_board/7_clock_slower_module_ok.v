@@ -10,7 +10,6 @@ module cpu_on_board (
 );
 
     (* ram_style = "block" *) reg [7:0] mem [0:2999]; // Unified Memory
-    //initial $readmemh("mem.mif", mem);
     initial $readmemb("mem.mif", mem);
 
     reg [24:0] counter;
@@ -24,36 +23,49 @@ module cpu_on_board (
     );
 
     //always @(posedge CLOCK_50 or negedge KEY0) begin
+    //// IF
     always @(posedge clock_1hz or negedge KEY0) begin
         if (!KEY0) begin
-            counter <= 0;
 	    LEDG <= 8'h00;
 	    LEDR0 <= 1'b0;
 	    addr_pc <= 3;
         end
         else begin
-            if (counter == 25000000 - 1) begin
-                counter <= 0;
-	        //LEDG <= ~LEDG;
 	        LEDR0 <= ~LEDR0; // heartbeat
 	        LEDG <= mem[addr_pc];//[7:0];
 		addr_pc <= addr_pc + 4;
-            end else begin
-               counter <= counter + 1;
-            end
         end
     end
-    
+
+// EXE
+//    always @(posedge, clock_1hz or negedge KEY0) begin
+//        if (!KEY0) begin
+//	    pc <=0;
+//	end
+//	else begin
+//	    pc <= pc + 4;
+//	end
+//    end
+//
+
+
+
+
 
 
 
 endmodule
+
+
+
+
 
 module clock_slower(
     input wire clk_in,
     input wire reset_n,
     output reg clk_out
     );
+
     reg [24:0] counter; 
 
     initial begin
@@ -68,6 +80,7 @@ module clock_slower(
 	end
 	else begin
 	    if (counter == 25000000 - 1) begin
+		counter <= 0;
 		clk_out <= ~clk_out;
 	    end
 	    else begin
