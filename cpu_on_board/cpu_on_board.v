@@ -47,19 +47,19 @@ module clock_slower(
     initial begin
 	clk_out <= 0;
 	counter <=0;
-        LEDR0 <= 1'b0; // 呼吸灯
-	pc <= 0;
+        //LEDR0 <= 1'b0; // 呼吸灯
+	//pc <= 0;
     end
     always @(posedge clk_in or negedge reset_n) begin
 	if (!reset_n) begin
 	    clk_out <= 0;
 	    counter <=0;
-            LEDR0 <= 1'b0; // 呼吸灯
+            //LEDR0 <= 1'b0; // 呼吸灯
 	    //pc <= 0;
 	end
 	else begin
 	    if (counter == 25000000 - 1) begin
-		LEDR0 <= ~LEDR0;
+		//LEDR0 <= ~LEDR0;
 		clk_out <= ~clk_out;
 		//pc <= pc + 4;
 	    end
