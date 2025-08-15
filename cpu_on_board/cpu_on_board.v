@@ -46,7 +46,7 @@ module cpu_on_board (
     end
 
     // EXE
-    always @(posedge, clock_1hz or negedge KEY0) begin
+    always @(posedge clock_1hz or negedge KEY0) begin
         if (!KEY0) begin
 	    pc <=3;
 	end
