@@ -35,7 +35,7 @@ module cpu_on_board (
         end
     end
 
-    // EXE pc
+    // EXE pc (only one always driver a net)
     always @(posedge clock_1hz or negedge KEY0) begin
         if (!KEY0) begin 
 	    pc <=0;
