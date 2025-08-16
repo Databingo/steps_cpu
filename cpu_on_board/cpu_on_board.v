@@ -32,14 +32,14 @@ module cpu_on_board (
         if (!KEY0) begin LEDR0 <= 1'b0; ir <= 32'h00000000; end
         else begin
 	        LEDR0 <= ~LEDR0; // heartbeat
-		//ir <= mem[pc];
+		ir <= mem[pc];
 		//ir[15:8] <= mem[pc+1];
 		//ir[23:16] <= mem[pc+2];
-		b1 <= mem[pc];
-		b2 <= mem[pc+1];
-		b3 <= mem[pc+2];
-		b4 <= mem[pc+3];
-		ir <= {b1, b2, b3, b4};
+		//b1 <= mem[pc];
+		//b2 <= mem[pc+1];
+		//b3 <= mem[pc+2];
+		//b4 <= mem[pc+3];
+		//ir <= {b1, b2, b3, b4};
         end
     end
 
