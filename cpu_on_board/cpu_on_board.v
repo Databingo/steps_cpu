@@ -54,7 +54,7 @@ module cpu_on_board (
 	    addr_pc <= 3;
        
 	    //
-	    ir <= 8'b00000000;
+	    ir <= 32'h00000000;
         end
         else begin
 	        LEDR0 <= ~LEDR0; // heartbeat
