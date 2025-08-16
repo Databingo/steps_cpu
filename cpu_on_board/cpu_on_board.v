@@ -29,6 +29,7 @@ module cpu_on_board (
         else begin
 	        LEDR0 <= ~LEDR0; // heartbeat
 		ir <= mem[pc];
+		ir[15:8] <= mem[pc+1];
         end
     end
 
