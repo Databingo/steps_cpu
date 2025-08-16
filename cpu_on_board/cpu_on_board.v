@@ -63,7 +63,7 @@ module cpu_on_board (
 		  
 		//
 		//ir <= {mem[pc+3], mem[pc+2], mem[pc+1], mem[pc]};
-		ir <= mem[pc];
+		ir[7:0]<= mem[pc];
 
         end
     end
