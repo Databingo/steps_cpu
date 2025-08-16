@@ -14,10 +14,6 @@ module cpu_on_board (
     //
     reg [31:0] ir;
     reg [31:0] pc;
-    reg [7:0] b1;
-    reg [7:0] b2;
-    reg [7:0] b3;
-    reg [7:0] b4;
 //    reg [63:0] re [0:31]; // General-purpose registers (x0-x31)
 
     wire clock_1hz;
@@ -29,7 +25,10 @@ module cpu_on_board (
 
     // IF ir
     always @(posedge clock_1hz or negedge KEY0) begin
-        if (!KEY0) begin LEDR0 <= 1'b0; ir <= 32'h00000000; end
+        if (!KEY0) begin 
+	    LEDR0 <= 1'b0; 
+	    ir <= 32'h00000000; 
+	end
         else begin
 	        LEDR0 <= ~LEDR0; // heartbeat
 		ir <= mem[pc];
@@ -47,7 +46,7 @@ module cpu_on_board (
     always @(posedge clock_1hz or negedge KEY0) begin
         if (!KEY0) begin pc <=0; end
 	else begin
-	    pc <= pc + 4;
+	    pc <= pc + 1;
     	    //casez(ir) 
 	    //// U-type
             ////32'b???????_?????_?????_???_?????_0110111: re[w_rd] <= w_imm_u; // Lui
