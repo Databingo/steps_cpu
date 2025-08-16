@@ -28,6 +28,7 @@ module cpu_on_board (
         if (!KEY0) begin 
 	    LEDR0 <= 1'b0; 
 	    ir <= 32'h00000000; 
+	    LEDR9 <= 1'b0;
 	end
         else begin
 	        LEDR0 <= ~LEDR0; // heartbeat
