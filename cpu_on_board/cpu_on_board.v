@@ -23,24 +23,26 @@ module cpu_on_board (
 	.reset_n(KEY0)
     );
 
-    // IF ir
+    // IF ir (only fetch)
     always @(posedge clock_1hz or negedge KEY0) begin
         if (!KEY0) begin 
 	    LEDR0 <= 1'b0; 
 	    ir <= 32'h00000000; 
-	    LEDR9 <= 1'b0;
 	end
         else begin
-	        LEDR0 <= ~LEDR0; // heartbeat
-		ir <= mem[pc];
+	    LEDR0 <= ~LEDR0; // heartbeat
+	    ir <= mem[pc>>2];
         end
     end
 
     // EXE pc
     always @(posedge clock_1hz or negedge KEY0) begin
-        if (!KEY0) begin pc <=0; end
+        if (!KEY0) begin 
+	    pc <=0;
+	    LEDR9 <= 1'b0;
+	end
 	else begin
-	    pc <= pc + 1;
+	    pc <= pc + 4;
     	    casez(ir) 
 	    // U-type
             //32'b???????_?????_?????_???_?????_0110111: re[w_rd] <= w_imm_u; // Lui
