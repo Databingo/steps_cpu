@@ -3,7 +3,7 @@ module cpu_on_board (
     (* chip_pin = "PIN_R22" *) input wire KEY0,     // Active-low reset button
     (* chip_pin = "PIN_Y21, PIN_Y22, PIN_W21, PIN_W22, PIN_V21, PIN_V22, PIN_U21, PIN_U22" *) output wire [7:0] LEDG, // 8 green LEDs
     (* chip_pin = "R20" *) output reg LEDR0, // red LEDs  
-    (* chip_pin = "R17" *) output reg LEDR9 // red LEDs  
+    (* chip_pin = "R17" *) output wire LEDR9 // red LEDs  
 );
 
     (* ram_style = "block" *) reg [31:0] mem [0:2999]; // Unified Memory
