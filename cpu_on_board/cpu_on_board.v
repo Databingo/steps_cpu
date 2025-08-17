@@ -13,6 +13,11 @@ module cpu_on_board (
     reg [31:0] addr_pc;
     //
     reg [31:0] ir;
+    wire [31:0] ir_bd;
+    assign ir_bd = mem[pc>>2];
+    wire [31:0] ir_ld;
+    assign ir_ld = {ir_bd[7:0], ir_bd[15:8], ir_bd[23:16], ir_bd[31:24]};
+
     reg [31:0] pc;
 //    reg [63:0] re [0:31]; // General-purpose registers (x0-x31)
 
@@ -31,7 +36,8 @@ module cpu_on_board (
 	end
         else begin
 	    LEDR0 <= ~LEDR0; // heartbeat
-	    ir <= {mem[pc>>2][7:0], mem[pc>>2][15:8], mem[pc>>2][23:16], mem[pc>>2][31:24]};
+	    //ir <= mem[pc>>2];
+	    ir <= ir_ld;
         end
     end
 
