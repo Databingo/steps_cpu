@@ -79,7 +79,8 @@ module cpu_on_board (
     end
 
    assign LEDG = ir[7:0];
-   assign LEDR7_0 = re[31][19:12];
+   //assign LEDR7_0 = re[31][19:12];
+   assign LEDR7_0 = re[31][7:0];
 
 
 
