@@ -42,11 +42,12 @@ module cpu_on_board (
     always @(posedge clock_1hz or negedge KEY0) begin
         if (!KEY0) begin 
 	    pc <=0;
-	    LEDR9 <= 1'b0;
+	    //LEDR9 <= 1'b0;
 	end
 	else begin
 	    pc <= pc + 4;
-	    LEDR9 <= 1'b0;
+	    //LEDR9 <= 1'b0;
+            re[0] <= 1'b0;
     	    casez(ir) 
 	    // U-type
             //32'b???????_?????_?????_???_?????_0110111: re[w_rd] <= w_imm_u; // Lui
@@ -58,7 +59,7 @@ module cpu_on_board (
     end
 
    assign LEDG = ir[7:0];
-   assign LEDR9 = re[0];
+   assign LEDR9 = re[0][0];
 
 
 
