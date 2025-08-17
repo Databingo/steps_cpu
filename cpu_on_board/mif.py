@@ -3,7 +3,8 @@ with open('../binary_instructions.txt', 'r') as f, open ('mem.mif', 'w') as out:
     addr = 0
     for line in f:
         byte = line.split("//")[0]
-        byte = byte.strip()
+        #byte = byte.strip()
+        byte = byte.replace(" ", "")
         if byte:
             #out.write(f"{addr} : {byte};\n")
             out.write(f"{byte}\n")
