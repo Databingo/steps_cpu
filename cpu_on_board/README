@@ -1,0 +1,12 @@
+# for run quartus
+for install quartus II 13.0.1.232(support for cyclone II lowest version)
+debian-lxqt:
+dpkg --add-architecture i386
+apt upgrade
+sudo apt-get install libstdc++6:i386 libc6:i386 libx11-dev:i386 libxext-dev:i386 libxau-dev:i386 libfreetype6:i386 fontconfig:i386 expat:i386
+
+# for run qsys
+apt-get install libxtst6:i386
+apt-get install libxi6:i386
+
+
