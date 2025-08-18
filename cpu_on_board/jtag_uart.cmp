@@ -1,0 +1,14 @@
+	component jtag_uart is
+		port (
+			avalon_slave_0_chipselect  : in  std_logic                     := 'X';             -- chipselect
+			avalon_slave_0_address     : in  std_logic                     := 'X';             -- address
+			avalon_slave_0_read_n      : in  std_logic                     := 'X';             -- read_n
+			avalon_slave_0_readdata    : out std_logic_vector(31 downto 0);                    -- readdata
+			avalon_slave_0_write_n     : in  std_logic                     := 'X';             -- write_n
+			avalon_slave_0_writedata   : in  std_logic_vector(31 downto 0) := (others => 'X'); -- writedata
+			avalon_slave_0_waitrequest : out std_logic;                                        -- waitrequest
+			clk_in_clk                 : in  std_logic                     := 'X';             -- clk
+			reset_in_reset             : in  std_logic                     := 'X'              -- reset
+		);
+	end component jtag_uart;
+

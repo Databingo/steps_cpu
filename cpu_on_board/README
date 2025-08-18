@@ -8,5 +8,4 @@ sudo apt-get install libstdc++6:i386 libc6:i386 libx11-dev:i386 libxext-dev:i386
 # for run qsys
 apt-get install libxtst6:i386
 apt-get install libxi6:i386
-
-
+apt-get install libxcrypt-compat
