@@ -51,14 +51,18 @@ module simple_jtag_uart_tx (
     wire fifo_empty = (fifo_wptr == fifo_rptr);
     wire fifo_full  = (fifo_wptr == fifo_rptr + 1);
     always @(posedge clk or negedge reset_n) begin
-        // CORRECTED: No semicolon after the closing brace '}'
-        if (!reset_n) {fifo_wptr <= 0; fifo_rptr <= 0;}
-        // CORRECTED: No semicolon after the closing brace '}'
-        else if (write_en && !fifo_full) { fifo[fifo_wptr] <= write_data; fifo_wptr <= fifo_wptr + 1; }
+        if (!reset_n) begin
+            fifo_wptr <= 0;
+            fifo_rptr <= 0;
+        end else if (write_en && !fifo_full) begin
+            fifo[fifo_wptr] <= write_data;
+            fifo_wptr <= fifo_wptr + 1;
+        end
     end
     always @(posedge tck) begin
-        // CORRECTED: No semicolon after the closing brace '}'
-        if (tap_state == UDR && is_user1 && !fifo_empty) { fifo_rptr <= fifo_rptr + 1; }
+        if (tap_state == UDR && is_user1 && !fifo_empty) begin
+            fifo_rptr <= fifo_rptr + 1;
+        end
     end
     // --- Part 4: JTAG Data Register (DR) ---
     reg [7:0] dr;
