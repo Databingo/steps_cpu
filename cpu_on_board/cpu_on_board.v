@@ -51,11 +51,11 @@ module simple_jtag_uart_tx (
     wire fifo_empty = (fifo_wptr == fifo_rptr);
     wire fifo_full  = (fifo_wptr == fifo_rptr + 1);
     always @(posedge clk or negedge reset_n) begin
-        if (!reset_n) {fifo_wptr <= 0; fifo_rptr <= 0;};
-        else if (write_en && !fifo_full) { fifo[fifo_wptr] <= write_data; fifo_wptr <= fifo_wptr + 1 ;};
+        if (!reset_n) {fifo_wptr <= 0; fifo_rptr <= 0;}
+        else if (write_en && !fifo_full) { fifo[fifo_wptr] <= write_data; fifo_wptr <= fifo_wptr + 1; }
     end
     always @(posedge tck) begin
-        if (tap_state == UDR && is_user1 && !fifo_empty) { fifo_rptr <= fifo_rptr + 1 ;};
+        if (tap_state == UDR && is_user1 && !fifo_empty) { fifo_rptr <= fifo_rptr + 1; }
     end
     // --- Part 4: JTAG Data Register (DR) ---
     reg [7:0] dr;
@@ -70,8 +70,25 @@ endmodule
 
 
 // --- YOUR clock_slower module (Unchanged) ---
-module clock_slower( /* ... your code ... */ );
-// ...
+module clock_slower(
+    input clk_in,
+    input reset_n,
+    output reg clk_out
+);
+    reg [25:0] counter;
+    always @(posedge clk_in or negedge reset_n) begin
+        if (!reset_n) begin
+            counter <= 0;
+            clk_out <= 0;
+        end else begin
+            if (counter == 25'd24999999) begin // For 50MHz -> 1Hz
+                counter <= 0;
+                clk_out <= ~clk_out;
+            end else begin
+                counter <= counter + 1;
+            end
+        end
+    end
 endmodule
 
 
@@ -95,10 +112,12 @@ module cpu_on_board (
     wire clock_1hz;
     clock_slower clock_ins( .clk_in(CLOCK_50), .clk_out(clock_1hz), .reset_n(KEY0) );
 
-    // --- CPU Wires (simplified for this example) ---
-    wire [63:0] mem_addr, mem_data_in, mem_data_out;
-    wire        mem_we;
-    
+    // --- CPU Wires ---
+    reg  [63:0] mem_addr;
+    reg  [63:0] mem_data_out;
+    reg         mem_we;
+    wire [31:0] i_mem_data_in;
+
     // --- NEW: JTAG UART Instantiation ---
     // We will map the UART to any address where the 31st bit is high.
     // E.g., 0x80000000.
@@ -118,7 +137,7 @@ module cpu_on_board (
     // --- CPU Pipeline ---
     // Fetch Stage
     always @(posedge clock_1hz or negedge KEY0) begin
-        if (!KEY0) ir <= 32'h13;
+        if (!KEY0) ir <= 32'h13; // NOP
         else if (bubble) ir <= 32'h13; // Insert NOP
         else ir <= i_mem_data_in;
     end
@@ -139,10 +158,6 @@ module cpu_on_board (
                 mem_we <= 1'b0;
                 bubble <= 1'b0;
 
-                // Your full case statement goes here...
-                // e.g., case(ir[6:0]) ...
-                // For this example, we will just have one instruction: STORE
-                
                 // For a STORE instruction
                 if (ir[6:0] == 7'b0100011) begin // STORE opcode
                     mem_addr <= re[ir[19:15]] + {{52{ir[31]}}, {ir[31:25], ir[11:7]}};
