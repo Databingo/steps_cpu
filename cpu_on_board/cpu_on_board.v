@@ -12,7 +12,7 @@ module cpu_on_board (
     initial $readmemb("mem.mif", mem);
 
     reg [31:0] pc; // Byte-addressed PC
-    reg [31:0] ir; // Instruction register (changed to reg for synchronous read)
+    reg [31:0] ir; // Instruction register (synchronous for RAM inference)
     reg [31:0] re; // Register file (example)
     wire clock_1hz;
 
@@ -156,7 +156,7 @@ module clock_slower (
         counter <= 0;
     end
     always @(posedge clk_in or negedge reset_n) begin
-        if (!rst_n) begin
+        if (!reset_n) begin
             clk_out <= 0;
             counter <= 0;
         end
