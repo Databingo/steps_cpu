@@ -125,7 +125,6 @@ module simple_jtag_uart_tx (
     always @(posedge clk or negedge reset_n) begin
         if (!reset_n) begin
             fifo_wptr <= 0;
-            fifo_rptr <= 0;
         end else if (write_en && !fifo_full) begin
             fifo[fifo_wptr] <= write_data;
             fifo_wptr <= fifo_wptr + 1;
