@@ -11,7 +11,7 @@ module cpu_on_board (
     initial $readmemb("mem.mif", mem);
 
     reg [31:0] pc; // Byte-addressed PC
-    wire [31:32] ir; // Instruction as wire
+    wire [31:0] ir; // Instruction as wire
     reg [31:0] re; // Register file (example)
     wire clock_1hz;
 
