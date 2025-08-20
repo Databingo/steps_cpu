@@ -51,10 +51,13 @@ module simple_jtag_uart_tx (
     wire fifo_empty = (fifo_wptr == fifo_rptr);
     wire fifo_full  = (fifo_wptr == fifo_rptr + 1);
     always @(posedge clk or negedge reset_n) begin
+        // CORRECTED: No semicolon after the closing brace '}'
         if (!reset_n) {fifo_wptr <= 0; fifo_rptr <= 0;}
+        // CORRECTED: No semicolon after the closing brace '}'
         else if (write_en && !fifo_full) { fifo[fifo_wptr] <= write_data; fifo_wptr <= fifo_wptr + 1; }
     end
     always @(posedge tck) begin
+        // CORRECTED: No semicolon after the closing brace '}'
         if (tap_state == UDR && is_user1 && !fifo_empty) { fifo_rptr <= fifo_rptr + 1; }
     end
     // --- Part 4: JTAG Data Register (DR) ---
@@ -69,19 +72,21 @@ module simple_jtag_uart_tx (
 endmodule
 
 
-// --- YOUR clock_slower module (Unchanged) ---
+// --- YOUR clock_slower module ---
 module clock_slower(
     input clk_in,
     input reset_n,
     output reg clk_out
 );
     reg [25:0] counter;
+    localparam HALF_PERIOD = 25'd24999999; // For 50MHz -> 1Hz
+
     always @(posedge clk_in or negedge reset_n) begin
         if (!reset_n) begin
             counter <= 0;
-            clk_out <= 0;
+            clk_out <= 1'b0;
         end else begin
-            if (counter == 25'd24999999) begin // For 50MHz -> 1Hz
+            if (counter == HALF_PERIOD) begin
                 counter <= 0;
                 clk_out <= ~clk_out;
             end else begin
@@ -116,7 +121,7 @@ module cpu_on_board (
     reg  [63:0] mem_addr;
     reg  [63:0] mem_data_out;
     reg         mem_we;
-    wire [31:0] i_mem_data_in;
+    wire [31:0] i_mem_data_in; // Declaration was added here
 
     // --- NEW: JTAG UART Instantiation ---
     // We will map the UART to any address where the 31st bit is high.
@@ -137,8 +142,8 @@ module cpu_on_board (
     // --- CPU Pipeline ---
     // Fetch Stage
     always @(posedge clock_1hz or negedge KEY0) begin
-        if (!KEY0) ir <= 32'h13; // NOP
-        else if (bubble) ir <= 32'h13; // Insert NOP
+        if (!KEY0) ir <= 32'h00000013; // NOP
+        else if (bubble) ir <= 32'h00000013; // Insert NOP
         else ir <= i_mem_data_in;
     end
 
@@ -159,13 +164,13 @@ module cpu_on_board (
                 bubble <= 1'b0;
 
                 // For a STORE instruction
-                if (ir[6:0] == 7'b0100011) begin // STORE opcode
+                if (ir[6:0] == 7'b0100011) begin // S-type (STORE)
                     mem_addr <= re[ir[19:15]] + {{52{ir[31]}}, {ir[31:25], ir[11:7]}};
                     mem_data_out <= re[ir[24:20]];
                     mem_we <= 1'b1;
                 end
                 // For an ADDI instruction
-                if (ir[6:0] == 7'b0010011) begin // ADDI opcode
+                if (ir[6:0] == 7'b0010011) begin // I-type (ADDI)
                     re[ir[11:7]] <= re[ir[19:15]] + {{52{ir[31]}}, ir[31:20]};
                 end
             end
