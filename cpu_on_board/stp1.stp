@@ -85,7 +85,7 @@
         <trigger_in_editor/>
         <trigger_out_editor/>
       </presentation>
-      <trigger attribute_mem_mode="false" gap_record="true" global_temp="1" name="trigger: 2025/08/20 14:34:22  #0" position="pre" power_up_trigger_mode="false" record_data_gap="true" segment_size="1" storage_mode="off" storage_qualifier_disabled="no" storage_qualifier_port_is_pin="false" storage_qualifier_port_name="auto_stp_external_storage_qualifier" storage_qualifier_port_tap_mode="classic" trigger_type="circular">
+      <trigger attribute_mem_mode="false" gap_record="true" global_temp="1" name="trigger: 2025/08/20 17:03:05  #0" position="pre" power_up_trigger_mode="false" record_data_gap="true" segment_size="1" storage_mode="off" storage_qualifier_disabled="no" storage_qualifier_port_is_pin="false" storage_qualifier_port_name="auto_stp_external_storage_qualifier" storage_qualifier_port_tap_mode="classic" trigger_type="circular">
         <power_up_trigger position="pre" storage_qualifier_disabled="no"/>
         <events use_custom_flow_control="no">
           <level enabled="yes" name="condition1" type="basic">'LEDG[0]' == high &amp;&amp; 'LEDG[1]' == high &amp;&amp; 'LEDG[2]' == high &amp;&amp; 'LEDG[3]' == low &amp;&amp; 'LEDG[4]' == high &amp;&amp; 'LEDG[5]' == high &amp;&amp; 'LEDG[6]' == low &amp;&amp; 'LEDG[7]' == high
