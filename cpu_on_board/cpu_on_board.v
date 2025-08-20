@@ -7,11 +7,12 @@ module cpu_on_board (
     (* chip_pin = "R17" *) output reg LEDR9    // Red LED
 );
 
-    (* ram_style = "block" *) reg [31:0] mem [0:2999]; // Word-addressable BRAM
+    // BRAM with explicit attributes for M4K inference
+    (* ramstyle = "M4K" *) reg [31:0] mem [0:2999]; // 32-bit x 3000 words
     initial $readmemb("mem.mif", mem);
 
     reg [31:0] pc; // Byte-addressed PC
-    wire [31:0] ir; // Instruction as wire
+    reg [31:0] ir; // Instruction register (changed to reg for synchronous read)
     reg [31:0] re; // Register file (example)
     wire clock_1hz;
 
@@ -37,8 +38,15 @@ module cpu_on_board (
         .reset_n(KEY0)
     );
 
-    // IF stage: Fetch instruction
-    assign ir = mem[pc >> 2]; // Little-endian
+    // Synchronous memory read to ensure RAM inference
+    always @(posedge clock_1hz or negedge KEY0) begin
+        if (!KEY0) begin
+            ir <= 32'b0;
+        end
+        else begin
+            ir <= mem[pc >> 2]; // Little-endian, word-addressed
+        end
+    end
 
     // Update PC, re, and JTAG trigger
     always @(posedge clock_1hz or negedge KEY0) begin
@@ -148,7 +156,7 @@ module clock_slower (
         counter <= 0;
     end
     always @(posedge clk_in or negedge reset_n) begin
-        if (!reset_n) begin
+        if (!rst_n) begin
             clk_out <= 0;
             counter <= 0;
         end
