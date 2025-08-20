@@ -51,11 +51,11 @@ module simple_jtag_uart_tx (
     wire fifo_empty = (fifo_wptr == fifo_rptr);
     wire fifo_full  = (fifo_wptr == fifo_rptr + 1);
     always @(posedge clk or negedge reset_n) begin
-        if (!reset_n) {fifo_wptr <= 0; fifo_rptr <= 0};
-        else if (write_en && !fifo_full) { fifo[fifo_wptr] <= write_data; fifo_wptr <= fifo_wptr + 1 };
+        if (!reset_n) {fifo_wptr <= 0; fifo_rptr <= 0;};
+        else if (write_en && !fifo_full) { fifo[fifo_wptr] <= write_data; fifo_wptr <= fifo_wptr + 1 ;};
     end
     always @(posedge tck) begin
-        if (tap_state == UDR && is_user1 && !fifo_empty) { fifo_rptr <= fifo_rptr + 1 };
+        if (tap_state == UDR && is_user1 && !fifo_empty) { fifo_rptr <= fifo_rptr + 1 ;};
     end
     // --- Part 4: JTAG Data Register (DR) ---
     reg [7:0] dr;
