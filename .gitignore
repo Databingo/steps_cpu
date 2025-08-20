@@ -13,3 +13,4 @@ llama2.c/kernel.elf
 llama2.c/*.bin
 llama2.c/*.safetensors
 *.txt
+cpu_on_board/py
