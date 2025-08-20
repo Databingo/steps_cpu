@@ -127,7 +127,11 @@ module cpu_on_board (
     (* chip_pin = "PIN_R22" *) input  wire KEY0,
     (* chip_pin = "PIN_Y21, PIN_Y22, PIN_W21, PIN_W22, PIN_V21, PIN_V22, PIN_U21, PIN_U22" *)
     output wire [7:0] LEDG,
-    (* chip_pin = "R17" *) output wire LEDR9
+    (* chip_pin = "R17" *) output wire LEDR9,
+    (* chip_pin = "PIN_A15" *) output wire TCK,
+    (* chip_pin = "PIN_B15" *) output wire TMS,
+    (* chip_pin = "PIN_C15" *) output wire TDI,
+    (* chip_pin = "PIN_B16" *) output wire TDO
 );
     // memory
     (* ram_style = "block" *) reg [31:0] mem [0:2999];
@@ -159,7 +163,10 @@ module cpu_on_board (
 
     // NOTE: tck/tms/tdi/tdo are unconnected here; this is a placeholder.
     simple_jtag_uart_tx jtag_uart_inst (
-        .tck(1'b0), .tms(1'b0), .tdi(1'b0), .tdo(),   // TODO: replace with a real JTAG/Virtual JTAG
+        .tck(TCK), 
+	.tms(TMS), 
+	.tdi(TDI), 
+	.tdo(TDO),   // TODO: replace with a real JTAG/Virtual JTAG
         .clk(CLOCK_50),
         .reset_n(KEY0),
         .write_en(uart_write_en),
