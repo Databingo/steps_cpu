@@ -18,18 +18,18 @@
 // altera message_level Level1 
 // altera message_off 10034 10035 10036 10037 10230 10240 10030 
 
-module jtag_uart_jtag_uart_0_sim_scfifo_w (
-                                            // inputs:
-                                             clk,
-                                             fifo_wdata,
-                                             fifo_wr,
+module jtag_uart_system_jtag_uart_0_sim_scfifo_w (
+                                                   // inputs:
+                                                    clk,
+                                                    fifo_wdata,
+                                                    fifo_wr,
 
-                                            // outputs:
-                                             fifo_FF,
-                                             r_dat,
-                                             wfifo_empty,
-                                             wfifo_used
-                                          )
+                                                   // outputs:
+                                                    fifo_FF,
+                                                    r_dat,
+                                                    wfifo_empty,
+                                                    wfifo_used
+                                                 )
 ;
 
   output           fifo_FF;
@@ -74,20 +74,20 @@ endmodule
 // altera message_level Level1 
 // altera message_off 10034 10035 10036 10037 10230 10240 10030 
 
-module jtag_uart_jtag_uart_0_scfifo_w (
-                                        // inputs:
-                                         clk,
-                                         fifo_clear,
-                                         fifo_wdata,
-                                         fifo_wr,
-                                         rd_wfifo,
+module jtag_uart_system_jtag_uart_0_scfifo_w (
+                                               // inputs:
+                                                clk,
+                                                fifo_clear,
+                                                fifo_wdata,
+                                                fifo_wr,
+                                                rd_wfifo,
 
-                                        // outputs:
-                                         fifo_FF,
-                                         r_dat,
-                                         wfifo_empty,
-                                         wfifo_used
-                                      )
+                                               // outputs:
+                                                fifo_FF,
+                                                r_dat,
+                                                wfifo_empty,
+                                                wfifo_used
+                                             )
 ;
 
   output           fifo_FF;
@@ -107,7 +107,7 @@ module jtag_uart_jtag_uart_0_scfifo_w (
 
 //synthesis translate_off
 //////////////// SIMULATION-ONLY CONTENTS
-  jtag_uart_jtag_uart_0_sim_scfifo_w the_jtag_uart_jtag_uart_0_sim_scfifo_w
+  jtag_uart_system_jtag_uart_0_sim_scfifo_w the_jtag_uart_system_jtag_uart_0_sim_scfifo_w
     (
       .clk         (clk),
       .fifo_FF     (fifo_FF),
@@ -159,18 +159,18 @@ endmodule
 // altera message_level Level1 
 // altera message_off 10034 10035 10036 10037 10230 10240 10030 
 
-module jtag_uart_jtag_uart_0_sim_scfifo_r (
-                                            // inputs:
-                                             clk,
-                                             fifo_rd,
-                                             rst_n,
+module jtag_uart_system_jtag_uart_0_sim_scfifo_r (
+                                                   // inputs:
+                                                    clk,
+                                                    fifo_rd,
+                                                    rst_n,
 
-                                            // outputs:
-                                             fifo_EF,
-                                             fifo_rdata,
-                                             rfifo_full,
-                                             rfifo_used
-                                          )
+                                                   // outputs:
+                                                    fifo_EF,
+                                                    fifo_rdata,
+                                                    rfifo_full,
+                                                    rfifo_used
+                                                 )
 ;
 
   output           fifo_EF;
@@ -237,21 +237,21 @@ endmodule
 // altera message_level Level1 
 // altera message_off 10034 10035 10036 10037 10230 10240 10030 
 
-module jtag_uart_jtag_uart_0_scfifo_r (
-                                        // inputs:
-                                         clk,
-                                         fifo_clear,
-                                         fifo_rd,
-                                         rst_n,
-                                         t_dat,
-                                         wr_rfifo,
+module jtag_uart_system_jtag_uart_0_scfifo_r (
+                                               // inputs:
+                                                clk,
+                                                fifo_clear,
+                                                fifo_rd,
+                                                rst_n,
+                                                t_dat,
+                                                wr_rfifo,
 
-                                        // outputs:
-                                         fifo_EF,
-                                         fifo_rdata,
-                                         rfifo_full,
-                                         rfifo_used
-                                      )
+                                               // outputs:
+                                                fifo_EF,
+                                                fifo_rdata,
+                                                rfifo_full,
+                                                rfifo_used
+                                             )
 ;
 
   output           fifo_EF;
@@ -272,7 +272,7 @@ module jtag_uart_jtag_uart_0_scfifo_r (
 
 //synthesis translate_off
 //////////////// SIMULATION-ONLY CONTENTS
-  jtag_uart_jtag_uart_0_sim_scfifo_r the_jtag_uart_jtag_uart_0_sim_scfifo_r
+  jtag_uart_system_jtag_uart_0_sim_scfifo_r the_jtag_uart_system_jtag_uart_0_sim_scfifo_r
     (
       .clk        (clk),
       .fifo_EF    (fifo_EF),
@@ -324,23 +324,23 @@ endmodule
 // altera message_level Level1 
 // altera message_off 10034 10035 10036 10037 10230 10240 10030 
 
-module jtag_uart_jtag_uart_0 (
-                               // inputs:
-                                av_address,
-                                av_chipselect,
-                                av_read_n,
-                                av_write_n,
-                                av_writedata,
-                                clk,
-                                rst_n,
+module jtag_uart_system_jtag_uart_0 (
+                                      // inputs:
+                                       av_address,
+                                       av_chipselect,
+                                       av_read_n,
+                                       av_write_n,
+                                       av_writedata,
+                                       clk,
+                                       rst_n,
 
-                               // outputs:
-                                av_irq,
-                                av_readdata,
-                                av_waitrequest,
-                                dataavailable,
-                                readyfordata
-                             )
+                                      // outputs:
+                                       av_irq,
+                                       av_readdata,
+                                       av_waitrequest,
+                                       dataavailable,
+                                       readyfordata
+                                    )
   /* synthesis ALTERA_ATTRIBUTE = "SUPPRESS_DA_RULE_INTERNAL=\"R101,C106,D101,D103\"" */ ;
 
   output           av_irq;
@@ -401,7 +401,7 @@ module jtag_uart_jtag_uart_0 (
   assign rd_wfifo = r_ena & ~wfifo_empty;
   assign wr_rfifo = t_ena & ~rfifo_full;
   assign fifo_clear = ~rst_n;
-  jtag_uart_jtag_uart_0_scfifo_w the_jtag_uart_jtag_uart_0_scfifo_w
+  jtag_uart_system_jtag_uart_0_scfifo_w the_jtag_uart_system_jtag_uart_0_scfifo_w
     (
       .clk         (clk),
       .fifo_FF     (fifo_FF),
@@ -414,7 +414,7 @@ module jtag_uart_jtag_uart_0 (
       .wfifo_used  (wfifo_used)
     );
 
-  jtag_uart_jtag_uart_0_scfifo_r the_jtag_uart_jtag_uart_0_scfifo_r
+  jtag_uart_system_jtag_uart_0_scfifo_r the_jtag_uart_system_jtag_uart_0_scfifo_r
     (
       .clk        (clk),
       .fifo_EF    (fifo_EF),
@@ -550,7 +550,7 @@ module jtag_uart_jtag_uart_0 (
 
 //synthesis translate_on
 //synthesis read_comments_as_HDL on
-//  alt_jtag_atlantic jtag_uart_jtag_uart_0_alt_jtag_atlantic
+//  alt_jtag_atlantic jtag_uart_system_jtag_uart_0_alt_jtag_atlantic
 //    (
 //      .clk (clk),
 //      .r_dat (r_dat),
@@ -563,10 +563,10 @@ module jtag_uart_jtag_uart_0 (
 //      .t_pause (t_pause)
 //    );
 //
-//  defparam jtag_uart_jtag_uart_0_alt_jtag_atlantic.INSTANCE_ID = 0,
-//           jtag_uart_jtag_uart_0_alt_jtag_atlantic.LOG2_RXFIFO_DEPTH = 6,
-//           jtag_uart_jtag_uart_0_alt_jtag_atlantic.LOG2_TXFIFO_DEPTH = 6,
-//           jtag_uart_jtag_uart_0_alt_jtag_atlantic.SLD_AUTO_INSTANCE_INDEX = "YES";
+//  defparam jtag_uart_system_jtag_uart_0_alt_jtag_atlantic.INSTANCE_ID = 0,
+//           jtag_uart_system_jtag_uart_0_alt_jtag_atlantic.LOG2_RXFIFO_DEPTH = 6,
+//           jtag_uart_system_jtag_uart_0_alt_jtag_atlantic.LOG2_TXFIFO_DEPTH = 6,
+//           jtag_uart_system_jtag_uart_0_alt_jtag_atlantic.SLD_AUTO_INSTANCE_INDEX = "YES";
 //
 //  always @(posedge clk or negedge rst_n)
 //    begin

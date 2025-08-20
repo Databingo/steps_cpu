@@ -6,21 +6,10 @@
    version="1.0"
    description=""
    tags=""
-   categories="System" />
+   categories="" />
  <parameter name="bonusData"><![CDATA[bonusData 
 {
-   element $${FILENAME}
-   {
-   }
-   element clk_1
-   {
-      datum _sortIndex
-      {
-         value = "2";
-         type = "int";
-      }
-   }
-   element jtag_uart_0
+   element clk_0
    {
       datum _sortIndex
       {
@@ -28,7 +17,7 @@
          type = "int";
       }
    }
-   element reset_bridge_0
+   element jtag_uart_0
    {
       datum _sortIndex
       {
@@ -48,23 +37,25 @@
  <parameter name="globalResetBus" value="false" />
  <parameter name="hdlLanguage" value="VERILOG" />
  <parameter name="maxAdditionalLatency" value="1" />
- <parameter name="projectName" value="cpu_on_board.qpf" />
+ <parameter name="projectName" value="" />
  <parameter name="sopcBorderPoints" value="false" />
  <parameter name="systemHash" value="1" />
- <parameter name="timeStamp" value="1755528496903" />
+ <parameter name="timeStamp" value="1755704761194" />
  <parameter name="useTestBenchNamingPattern" value="false" />
  <instanceScript></instanceScript>
+ <interface name="clk" internal="clk_0.clk_in" type="clock" dir="end" />
+ <interface name="reset" internal="clk_0.clk_in_reset" type="reset" dir="end" />
  <interface
-   name="avalon_slave_0"
+   name="jtag_uart_0_avalon_jtag_slave"
    internal="jtag_uart_0.avalon_jtag_slave"
    type="avalon"
    dir="end" />
- <interface name="clk_in" internal="clk_1.clk_in" type="clock" dir="end" />
- <interface
-   name="reset_in"
-   internal="reset_bridge_0.in_reset"
-   type="reset"
-   dir="end" />
+ <module kind="clock_source" version="13.0" enabled="1" name="clk_0">
+  <parameter name="clockFrequency" value="50000000" />
+  <parameter name="clockFrequencyKnown" value="true" />
+  <parameter name="inputClockFrequency" value="0" />
+  <parameter name="resetSynchronousEdges" value="NONE" />
+ </module>
  <module
    kind="altera_avalon_jtag_uart"
    version="13.0.1.99.2"
@@ -83,38 +74,12 @@
   <parameter name="writeIRQThreshold" value="8" />
   <parameter name="avalonSpec" value="2.0" />
  </module>
- <module kind="clock_source" version="13.0" enabled="1" name="clk_1">
-  <parameter name="clockFrequency" value="50000000" />
-  <parameter name="clockFrequencyKnown" value="true" />
-  <parameter name="inputClockFrequency" value="0" />
-  <parameter name="resetSynchronousEdges" value="NONE" />
- </module>
- <module
-   kind="altera_reset_bridge"
-   version="13.0"
-   enabled="1"
-   name="reset_bridge_0">
-  <parameter name="ACTIVE_LOW_RESET" value="0" />
-  <parameter name="SYNCHRONOUS_EDGES" value="deassert" />
-  <parameter name="NUM_RESET_OUTPUTS" value="1" />
-  <parameter name="AUTO_CLK_CLOCK_RATE" value="50000000" />
- </module>
- <connection kind="clock" version="13.0" start="clk_1.clk" end="jtag_uart_0.clk" />
+ <connection kind="clock" version="13.0" start="clk_0.clk" end="jtag_uart_0.clk" />
  <connection
    kind="reset"
    version="13.0"
-   start="reset_bridge_0.out_reset"
+   start="clk_0.clk_reset"
    end="jtag_uart_0.reset" />
- <connection
-   kind="clock"
-   version="13.0"
-   start="clk_1.clk"
-   end="reset_bridge_0.clk" />
- <connection
-   kind="reset"
-   version="13.0"
-   start="reset_bridge_0.out_reset"
-   end="clk_1.clk_in_reset" />
  <interconnectRequirement for="$system" name="qsys_mm.clockCrossingAdapter" value="HANDSHAKE" />
  <interconnectRequirement for="$system" name="qsys_mm.maxAdditionalLatency" value="1" />
 </system>

@@ -128,10 +128,10 @@ module cpu_on_board (
     (* chip_pin = "PIN_Y21, PIN_Y22, PIN_W21, PIN_W22, PIN_V21, PIN_V22, PIN_U21, PIN_U22" *)
     output wire [7:0] LEDG,
     (* chip_pin = "R17" *) output wire LEDR9,
-    (* chip_pin = "PIN_A15" *) output wire TCK,
-    (* chip_pin = "PIN_B15" *) output wire TMS,
-    (* chip_pin = "PIN_C15" *) output wire TDI,
-    (* chip_pin = "PIN_B16" *) output wire TDO
+    (* chip_pin = "A15" *) output wire TCK,
+    (* chip_pin = "B15" *) output wire TMS,
+    (* chip_pin = "C15" *) output wire TDI,
+    (* chip_pin = "B16" *) output wire TDO
 );
     // memory
     (* ram_style = "block" *) reg [31:0] mem [0:2999];
