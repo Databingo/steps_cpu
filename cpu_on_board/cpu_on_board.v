@@ -62,26 +62,25 @@ module simple_jtag_uart_tx (
     wire fifo_empty = (fifo_wptr == fifo_rptr);
     wire fifo_full  = ((fifo_wptr + 4'd1) == fifo_rptr);
 
-    // write side (clk)
-    always @(posedge clk or negedge reset_n) begin
-        if (!reset_n) begin
-            fifo_wptr <= 4'd0;
-            fifo_rptr <= 4'd0;
-        end else if (write_en && !fifo_full) begin
-            fifo[fifo_wptr] <= write_data;
-            fifo_wptr <= fifo_wptr + 4'd1;
-        end
-    end
 
-    // read side (tck)
-    always @(posedge tck or negedge reset_n) begin
-        if (!reset_n) begin
-            // keep rptr at reset value
-        end else if (tap_state == UDR && is_user1 && !fifo_empty) begin
-            fifo_rptr <= fifo_rptr + 4'd1;
-        end
+// WRITE pointer (system clock domain)
+always @(posedge clk or negedge reset_n) begin
+    if (!reset_n) begin
+        fifo_wptr <= 0;
+    end else if (write_en && !fifo_full) begin
+        fifo[fifo_wptr] <= write_data;
+        fifo_wptr <= fifo_wptr + 1;
     end
+end
 
+// READ pointer (JTAG clock domain)
+always @(posedge tck or negedge reset_n) begin
+    if (!reset_n) begin
+        fifo_rptr <= 0;
+    end else if (tap_state == UDR && is_user1 && !fifo_empty) begin
+        fifo_rptr <= fifo_rptr + 1;
+    end
+end
     // --- DR shift ---
     reg [7:0] dr;
     assign tdo = dr[0];
