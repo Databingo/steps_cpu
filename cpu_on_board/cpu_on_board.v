@@ -114,7 +114,7 @@ module clock_slower(
         clk_out <= 0;
         counter <= 0;
     end
-    always @(posedge clock_in or negedge reset_n) begin
+    always @(posedge clk_in or negedge reset_n) begin
         if (!reset_n) begin
             clk_out <= 0;
             counter <= 0;
