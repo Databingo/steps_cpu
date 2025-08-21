@@ -40,6 +40,8 @@ module cpu_on_board (
     wire        avalon_write;
     wire [31:0] avalon_writedata;
 
+    reg [31:0] data;
+
     // --- Qsys System Instantiation (Unchanged from previous JTAG version) ---
     jtag_uart_system my_jtag_system (
         .clk_clk                             (CLOCK_50),
@@ -70,6 +72,7 @@ module cpu_on_board (
             pc <= pc + 4;
             re[31] <= 1'b0; // This was in your original code
             
+	    data <= 32'h48;
             casez(ir) 
                 32'b???????_?????_?????_???_?????_0110111:  re[w_rd] <= w_imm_u; // Lui
             endcase
@@ -98,7 +101,8 @@ module cpu_on_board (
    
    assign avalon_write     = force_write_reg; // Force the write signal high every cycle
    assign avalon_address   = 1'b0;            // Always write to the data register (address 0)
-   assign avalon_writedata = 32'h48;          // Force the data to be 0x48, which is the ASCII code for 'H'
+   //assign avalon_writedata = 32'h48;          // Force the data to be 0x48, which is the ASCII code for 'H'
+   assign avalon_writedata = data;          // Force the data to be 0x48, which is the ASCII code for 'H'
 
 endmodule
 
