@@ -91,54 +91,14 @@ module cpu_on_board (
 
 endmodule
 
-<<<<<<< HEAD
-=======
-// --- TOP ---
-module cpu_on_board (
-    (* chip_pin = "PIN_L1" *)  input  wire CLOCK_50,
-    (* chip_pin = "PIN_R22" *) input  wire KEY0,
-    (* chip_pin = "PIN_Y21, PIN_Y22, PIN_W21, PIN_W22, PIN_V21, PIN_V22, PIN_U21, PIN_U22" *)
-    output wire [7:0] LEDG,
-    (* chip_pin = "R17" *) output wire LEDR9,
-    (* chip_pin = "A15" *) output wire TCK,
-    (* chip_pin = "B15" *) output wire TMS,
-    (* chip_pin = "C15" *) output wire TDI,
-    (* chip_pin = "B16" *) output wire TDO
-);
-    // memory
-    (* ram_style = "block" *) reg [31:0] mem [0:2999];
-    initial $readmemb("mem.mif", mem);
->>>>>>> 2de6e021648c076659e79e006d9d25c97af50a74
 
 
 
-<<<<<<< HEAD
 
 module clock_slower(
     input wire clk_in,
     input wire reset_n,
     output reg clk_out
-=======
-    // simple “bus”
-    reg  [63:0] mem_addr;
-    reg  [63:0] mem_data_out;
-    reg         mem_we;
-    wire [31:0] i_mem_data_in;
-
-    // “UART” write when addr[31]==1
-    wire uart_write_en = mem_we && mem_addr[31];
-
-    // NOTE: tck/tms/tdi/tdo are unconnected here; this is a placeholder.
-    simple_jtag_uart_tx jtag_uart_inst (
-        .tck(TCK), 
-	.tms(TMS), 
-	.tdi(TDI), 
-	.tdo(TDO),   // TODO: replace with a real JTAG/Virtual JTAG
-        .clk(CLOCK_50),
-        .reset_n(KEY0),
-        .write_en(uart_write_en),
-        .write_data(mem_data_out[7:0])
->>>>>>> 2de6e021648c076659e79e006d9d25c97af50a74
     );
 
     reg [24:0] counter; 
