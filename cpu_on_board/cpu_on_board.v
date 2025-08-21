@@ -68,16 +68,14 @@ module cpu_on_board (
     always @(posedge clock_1hz or negedge KEY0) begin
         if (!KEY0) begin 
             pc <= 0;
-	    force_write_reg <= 1'b0;
         end else begin
             pc <= pc + 4;
             re[31] <= 1'b0; // This was in your original code
             
 	    data <= 32'h48;
-	    force_write_reg <= 1'b0;
             casez(ir) 
 		//32'b???????_?????_?????_???_?????_0110111:  re[w_rd] <= w_imm_u; // Lui
-		32'b???????_?????_?????_???_?????_0110111:  begin re[w_rd] <= w_imm_u; data <= 32'h41; force_write_reg <= 1'b1; end
+		32'b???????_?????_?????_???_?????_0110111:  begin re[w_rd] <= w_imm_u; data <= 32'h41; end
             endcase
         end
     end
@@ -90,19 +88,21 @@ module cpu_on_board (
    // <<< CHANGED: This is the only part we are modifying for the test.
    // We will force a write of the character 'H' on EVERY rising edge of the 1Hz clock.
    
-   reg force_write_reg;
+   reg clock_1hz_dly;
    
    // This small always block generates a single-cycle pulse on every 1Hz clock tick.
    // It's active as long as the CPU is not in reset.
-//   always @(posedge clock_1hz or negedge KEY0) begin
-//        if (!KEY0) begin
-//            force_write_reg <= 1'b0;
-//        end else begin
-//            force_write_reg <= 1'b1;
-//        end
-//   end
+   always @(posedge CLOCK_50 or negedge KEY0) begin
+        if (!KEY0) begin
+            clock_1hz_dly <= 1'b0;
+        end else begin
+            clock_1hz_dly <= clock_1hz;
+        end
+   end
    
-   assign avalon_write     = force_write_reg; // Force the write signal high every cycle
+   wire clock_1hz_rising_edge = clock_1hz && !clock_1hz_dly; 
+
+   assign avalon_write     = clock_1hz_rising_edge; // Force the write signal high every cycle
    assign avalon_address   = 1'b0;            // Always write to the data register (address 0)
    //assign avalon_writedata = 32'h48;          // Force the data to be 0x48, which is the ASCII code for 'H'
    assign avalon_writedata = data;          // Force the data to be 0x48, which is the ASCII code for 'H'
