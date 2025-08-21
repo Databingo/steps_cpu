@@ -68,11 +68,13 @@ module cpu_on_board (
     always @(posedge clock_1hz or negedge KEY0) begin
         if (!KEY0) begin 
             pc <= 0;
+	    force_write_reg <= 1'b0;
         end else begin
             pc <= pc + 4;
             re[31] <= 1'b0; // This was in your original code
             
 	    data <= 32'h48;
+	    force_write_reg <= 1'b1;
             casez(ir) 
 		//32'b???????_?????_?????_???_?????_0110111:  re[w_rd] <= w_imm_u; // Lui
 		32'b???????_?????_?????_???_?????_0110111:  begin re[w_rd] <= w_imm_u; data <= 32'h41; end
@@ -92,13 +94,13 @@ module cpu_on_board (
    
    // This small always block generates a single-cycle pulse on every 1Hz clock tick.
    // It's active as long as the CPU is not in reset.
-   always @(posedge clock_1hz or negedge KEY0) begin
-        if (!KEY0) begin
-            force_write_reg <= 1'b0;
-        end else begin
-            force_write_reg <= 1'b1;
-        end
-   end
+//   always @(posedge clock_1hz or negedge KEY0) begin
+//        if (!KEY0) begin
+//            force_write_reg <= 1'b0;
+//        end else begin
+//            force_write_reg <= 1'b1;
+//        end
+//   end
    
    assign avalon_write     = force_write_reg; // Force the write signal high every cycle
    assign avalon_address   = 1'b0;            // Always write to the data register (address 0)
