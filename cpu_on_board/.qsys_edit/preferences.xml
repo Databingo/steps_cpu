@@ -3,7 +3,7 @@
  <debug showDebugMenu="0" />
  <systemtable>
   <columns>
-   <connections preferredWidth="63" />
+   <connections preferredWidth="47" />
    <irq preferredWidth="34" />
   </columns>
  </systemtable>
@@ -15,6 +15,6 @@
   </columns>
  </clocktable>
  <library
-   expandedCategories="Library/Interface Protocols,Library/Bridges,Library,Project,Library/Clock and Reset,Library/Interface Protocols/Serial" />
+   expandedCategories="Library,Project/System,Project,Library/Interface Protocols,Library/Interface Protocols/Serial" />
  <window width="1100" height="747" x="259" y="0" />
 </preferences>
