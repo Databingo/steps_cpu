@@ -69,25 +69,25 @@ endmodule
 // ---------------------------------------------------------------------------
 // The Top-Level Module (This is correct and does not need to change)
 // ---------------------------------------------------------------------------
-module keyboard_to_leds (
-    input        CLOCK_50,
-    input        PS2_CLK,
-    input        PS2_DAT,
-    output [7:0] LEDG
-);
-
-    wire [7:0] scan_code;
-
-    // We can directly connect the output since the 'code' output of our
-    // new module is already a clean, stable register.
-    assign LEDG = scan_code;
-
-    // Instantiate our new, tutorial-based PS/2 module
-    ps2_decoder ps2_decoder_inst (
-        .clk(CLOCK_50),
-        .ps2_clk_async(PS2_CLK),
-        .ps2_data_async(PS2_DAT),
-        .code(scan_code)
-    );
-    
-endmodule
+//module keyboard_to_leds (
+//    input        CLOCK_50,
+//    input        PS2_CLK,
+//    input        PS2_DAT,
+//    output [7:0] LEDG
+//);
+//
+//    wire [7:0] scan_code;
+//
+//    // We can directly connect the output since the 'code' output of our
+//    // new module is already a clean, stable register.
+//    assign LEDG = scan_code;
+//
+//    // Instantiate our new, tutorial-based PS/2 module
+//    ps2_decoder ps2_decoder_inst (
+//        .clk(CLOCK_50),
+//        .ps2_clk_async(PS2_CLK),
+//        .ps2_data_async(PS2_DAT),
+//        .code(scan_code)
+//    );
+//    
+//endmodule

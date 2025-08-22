@@ -7,7 +7,10 @@ module cpu_on_board (
     (* chip_pin = "PIN_R22" *) input wire KEY0,     // Active-low reset button
     (* chip_pin = "PIN_Y21, PIN_Y22, PIN_W21, PIN_W22, PIN_V21, PIN_V22, PIN_U21, PIN_U22" *) output wire [7:0] LEDG, // 8 green LEDs
     (* chip_pin = "R17" *) output reg LEDR9, // 1 red LEDs breath left most 
-    (* chip_pin = "U18, Y18, V19, T18, Y19, U19, R19, R20" *) output wire [7:0] LEDR7_0 // 8 red LEDs right
+    (* chip_pin = "U18, Y18, V19, T18, Y19, U19, R19, R20" *) output wire [7:0] LEDR7_0, // 8 red LEDs right
+
+    (* chip_pin = "PIN_H15" *)  input wire PS2_CLK, 
+    (* chip_pin = "PIN_J14" *)  input wire PS2_DAT 
 );
 
     // --- Memory and Original CPU State (Unchanged) ---
@@ -72,10 +75,10 @@ module cpu_on_board (
             pc <= pc + 4;
             re[31] <= 1'b0; // This was in your original code
             
-	    data <= 32'h48;
+	    //data <= 32'h48;
             casez(ir) 
-		//32'b???????_?????_?????_???_?????_0110111:  re[w_rd] <= w_imm_u; // Lui
-		32'b???????_?????_?????_???_?????_0110111:  begin re[w_rd] <= w_imm_u; data <= 32'h41; end
+		32'b???????_?????_?????_???_?????_0110111:  re[w_rd] <= w_imm_u; // Lui
+		//32'b???????_?????_?????_???_?????_0110111:  begin re[w_rd] <= w_imm_u; data <= 32'h41; end
             endcase
         end
     end
@@ -135,3 +138,16 @@ module clock_slower(
         end
     end
 endmodule
+
+
+
+//wire [7:0] scan_code;
+//assign LEDG = scan_code;
+
+ps2_decoder ps2_decoder_inst (
+    .clk(CLOCK_50),
+    .ps2_clk_async(PS2_CLK),
+    .ps2_data_async(PS2_DAT),
+    //.code(scan_code)
+    .code(data)
+);
