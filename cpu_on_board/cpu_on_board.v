@@ -9,8 +9,8 @@ module cpu_on_board (
     (* chip_pin = "R17" *) output reg LEDR9, // 1 red LEDs breath left most 
     (* chip_pin = "U18, Y18, V19, T18, Y19, U19, R19, R20" *) output wire [7:0] LEDR7_0, // 8 red LEDs right
 
-    (* chip_pin = "PIN_H15" *)  input wire PS2_CLK, 
-    (* chip_pin = "PIN_J14" *)  input wire PS2_DAT 
+    (* chip_pin = "H15" *)  input wire PS2_CLK, 
+    (* chip_pin = "J14" *)  input wire PS2_DAT 
 );
 
     // --- Memory and Original CPU State (Unchanged) ---
