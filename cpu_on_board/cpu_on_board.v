@@ -110,6 +110,16 @@ module cpu_on_board (
    //assign avalon_writedata = 32'h48;          // Force the data to be 0x48, which is the ASCII code for 'H'
    assign avalon_writedata = data;          // Force the data to be 0x48, which is the ASCII code for 'H'
 
+//wire [7:0] scan_code;
+//assign LEDG = scan_code;
+
+ps2_decoder ps2_decoder_inst (
+    .clk(CLOCK_50),
+    .ps2_clk_async(PS2_CLK),
+    .ps2_data_async(PS2_DAT),
+    //.code(scan_code)
+    .code(data)
+);
 endmodule
 
 
@@ -141,13 +151,3 @@ endmodule
 
 
 
-//wire [7:0] scan_code;
-//assign LEDG = scan_code;
-
-ps2_decoder ps2_decoder_inst (
-    .clk(CLOCK_50),
-    .ps2_clk_async(PS2_CLK),
-    .ps2_data_async(PS2_DAT),
-    //.code(scan_code)
-    .code(data)
-);
