@@ -118,7 +118,7 @@ ps2_decoder ps2_decoder_inst (
     .ps2_clk_async(PS2_CLK),
     .ps2_data_async(PS2_DAT),
     //.code(scan_code)
-    .code(data)
+    .code(data[7:0])
 );
 endmodule
 
