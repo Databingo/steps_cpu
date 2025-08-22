@@ -108,7 +108,7 @@ module cpu_on_board (
    assign avalon_write     = clock_1hz_rising_edge; // Force the write signal high every cycle
    assign avalon_address   = 1'b0;            // Always write to the data register (address 0)
    //assign avalon_writedata = 32'h48;          // Force the data to be 0x48, which is the ASCII code for 'H'
-   assign avalon_writedata = data;          // Force the data to be 0x48, which is the ASCII code for 'H'
+   assign avalon_writedata = {24'b0, scan_to_ascii(data)};          // Force the data to be 0x48, which is the ASCII code for 'H'
 
 //wire [7:0] scan_code;
 //assign LEDG = scan_code;
@@ -150,4 +150,20 @@ module clock_slower(
 endmodule
 
 
+function [7:0] scan_to_ascii;
+    input [7:0] scan;
+    case (scan)
+        8'h16: scan_to_ascii = "1";
+        8'h1E: scan_to_ascii = "2";
+        8'h26: scan_to_ascii = "3";
+        8'h25: scan_to_ascii = "4";
+        8'h2E: scan_to_ascii = "5";
+        8'h36: scan_to_ascii = "6";
+        8'h3D: scan_to_ascii = "7";
+        8'h3E: scan_to_ascii = "8";
+        8'h46: scan_to_ascii = "9";
+        8'h45: scan_to_ascii = "0";
+        default: scan_to_ascii = "?"; // fallback
+    endcase
+endfunction
 
