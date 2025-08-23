@@ -2,7 +2,7 @@ module ps2_decoder (
     input        clk,            // System clock (was clk_in)
     input        ps2_clk_async,  // Asynchronous PS/2 clock (was key_clk)
     input        ps2_data_async, // Asynchronous PS/2 data (was key_data)
-    output reg [7:0] code,        // The final, stable 8-bit scan code (was key_byte)
+    output reg [7:0] scan_code,        // The final, stable 8-bit scan code (was key_byte)
     output reg [7:0] ascii_code,  
     output reg key_pressed,
     output reg key_released
@@ -79,7 +79,7 @@ module ps2_decoder (
 	        if (ignore_next) begin 
 		    ignore_next <= 1'b0; 
 	            break_code <= 1'b1;
-	            code <= temp_data[8:1];
+	            scan_code <= temp_data[8:1];
 		    // Handle key release
 		    if (temp_data[8:1] != 8'hE0 && temp_data[8:1] != 8'hF0) begin key_released <= 1'b1; end
 		    // Handle shife key release
@@ -87,26 +87,44 @@ module ps2_decoder (
 		end
 	        else begin
 		    break_code <= 1'b0;
-	            code <= temp_data[8:1];
+	            scan_code <= temp_data[8:1];
 	            case (temp_data[8:1]) 
 			8'hE0: begin extended <= 1'b1; ignore_next <= 1'b1; end // Extended code
 	                8'hF0: ignore_next <= 1'b0; // Break code
 	                8'h12, 8'h59: shift_pressed <= 1'b1; // Left or Right Shift
-	                8'h59: caps_lock <= ~caps_lock;
+	                8'h59: caps_lock <= ~caps_lock; // Caps Lock
 	                default: key_pressed <= 1'b1;
 	            endcase
 	        end
 	    end
         end
 
-	// Handle shift key releases (need to track break codes 8'hF0 for shift)
-        if (cnt == 10 && ps2_clk_falling_edge && ignore_next) begin
-	    if (temp_data[0] == 1'b0 && temp_data[10]==1'b1 && (^temp_data[9:1]==1'b1)) begin
-	        if (temp_data[8:1] == 8'h12 || temp_data[8:1] == 8'h59) shift_pressed <= 1'b0;
-	        ignore_next <= 1'b0;
-	    end
-        end
-    end
+//// Handle shift key releases (need to track break codes 8'hF0 for shift)
+  //      if (cnt == 10 && ps2_clk_falling_edge && ignore_next) begin
+  //          if (temp_data[0] == 1'b0 && temp_data[10]==1'b1 && (^temp_data[9:1]==1'b1)) begin
+  //              if (temp_data[8:1] == 8'h12 || temp_data[8:1] == 8'h59) shift_pressed <= 1'b0;
+  //              ignore_next <= 1'b0;
+  //          end
+  //      end
+  //  end
+wire shift_active = shift_pressed ^ caps_lock;    
+
+always @(*) begin
+    ascii_code = scan_code // Default to scan code if no ASCII mapping
+
+    case(scan_code)
+	8'h16: ascii_code = shift_active ? 8'h21 : 8'h31; // ! 1
+	8'h1E: ascii_code = shift_active ? 8'h40 : 8'h32; // @ 2
+	8'h26: ascii_code = shift_active ? 8'h23 : 8'h33; // # 3
+	8'h25: ascii_code = shift_active ? 8'h24 : 8'h34; // $ 4
+	8'h2E: ascii_code = shift_active ? 8'h25 : 8'h35; // % 5
+	8'h36: ascii_code = shift_active ? 8'h5E : 8'h36; // ^ 6
+	8'h3D: ascii_code = shift_active ? 8'h26 : 8'h37; // & 7
+	8'h3E: ascii_code = shift_active ? 8'h2A : 8'h38; // * 8
+	8'h46: ascii_code = shift_active ? 8'h28 : 8'h39; // ( 9
+	8'h45: ascii_code = shift_active ? 8'h29 : 8'h30; // ) 0
+end
+ 
 
 endmodule
 
