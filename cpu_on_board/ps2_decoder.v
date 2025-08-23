@@ -34,7 +34,6 @@ module ps2_decoder (
 
     // This is the core state machine for capturing the 11-bit frame.
     always @(posedge clk) begin
-        if (cnt == 0) extended <= 1'b0; // Reset extended flag after processing
         if (ps2_clk_falling_edge) begin
             if (cnt >= 10) begin
                 cnt <= 0;
@@ -51,6 +50,7 @@ module ps2_decoder (
 	key_pressed <= 0;
 	key_released <= 0;
 	// Output latching logci with shift/caps tracking
+        if (cnt == 0) extended <= 1'b0; // Reset extended flag after processing
         if (cnt == 10 && ps2_clk_falling_edge) begin
             // the received data parity is 1
 	    if (temp_data[0] == 1'b0 && temp_data[10]==1'b1 && (^temp_data[9:1]==1'b1)) begin
