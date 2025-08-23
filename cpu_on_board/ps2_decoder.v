@@ -50,9 +50,9 @@ module ps2_decoder (
 	key_pressed <= 0;
 	key_released <= 0;
 	// Output latching logci with shift/caps tracking
-        if (cnt == 0) extended <= 1'b0; // Reset extended flag after processing
+        if (cnt == 0 && ps2_clk_falling_edge) extended <= 1'b0; // Reset extended flag after processing
         if (cnt == 10 && ps2_clk_falling_edge) begin
-            // the received data parity is 1
+            // Check the received data valid frame: start bit=0, stop bit=1, odd  parity is 1
 	    if (temp_data[0] == 1'b0 && temp_data[10]==1'b1 && (^temp_data[9:1]==1'b1)) begin
 	        if (ignore_next) begin 
 		    ignore_next <= 1'b0; 
@@ -68,9 +68,9 @@ module ps2_decoder (
 	            scan_code <= temp_data[8:1];
 	            case (temp_data[8:1]) 
 			8'hE0: begin extended <= 1'b1; ignore_next <= 1'b1; end // Extended code
-	                8'hF0: ignore_next <= 1'b0; // Break code
+	                8'hF0: ignore_next <= 1'b1; // Break code (wait for next byte)
 	                8'h12, 8'h59: shift_pressed <= 1'b1; // Left or Right Shift
-	                8'h59: caps_lock <= ~caps_lock; // Caps Lock
+	                8'h58: caps_lock <= ~caps_lock; // Caps Lock
 	                default: key_pressed <= 1'b1;
 	            endcase
 	        end
