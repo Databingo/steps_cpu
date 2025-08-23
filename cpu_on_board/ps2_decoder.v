@@ -29,7 +29,7 @@ module ps2_decoder (
     reg ignore_next = 0;
     reg shift_pressed = 0;
     reg caps_lock = 0;
-    reg extend = 0;
+    reg extended = 0;
     reg break_code = 0;
 
     // This is the core state machine for capturing the 11-bit frame.
@@ -81,7 +81,7 @@ module ps2_decoder (
 	            break_code <= 1'b1;
 	            code <= temp_data[8:1];
 		    // Handle key release
-		    if (temp_data[8:1] != 8'hE0 && temp_data[8:1] != 8'hF0) begin key_release <= 1'b1; end
+		    if (temp_data[8:1] != 8'hE0 && temp_data[8:1] != 8'hF0) begin key_released <= 1'b1; end
 		    // Handle shife key release
 		    if (temp_data[8:1] == 8'h12 || temp_data[8:1] == 8'h59) begin shift_pressed <= 1'b0; end
 		end
