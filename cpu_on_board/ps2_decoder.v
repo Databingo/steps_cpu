@@ -75,7 +75,7 @@ module ps2_decoder (
 	            case (temp_data[8:1]) 
 	                8'h12, 8'h59: shift_pressed <= 1'b1; // Left or Right Shift
 	                8'hF0: ignore_next <= 1'b0; // Break code
-	                8'h59: caps_lock >= 1'b1; 
+	                8'h59: caps_lock <= 1'b1; 
 	                default; begin
 	         	   code <= temp_data[8:1];
 	                end
