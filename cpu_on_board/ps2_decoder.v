@@ -98,6 +98,7 @@ module ps2_decoder (
 	        end
 	    end
         end
+    end
 
 // Handle shift key releases (need to track break codes 8'hF0 for shift)
   //      if (cnt == 10 && ps2_clk_falling_edge && ignore_next) begin
