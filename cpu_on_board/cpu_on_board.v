@@ -153,6 +153,7 @@ endmodule
 function [7:0] scan_to_ascii;
     input [7:0] scan;
     case (scan)
+	// Main keyboard numbers
         8'h16: scan_to_ascii = "1";
         8'h1E: scan_to_ascii = "2";
         8'h26: scan_to_ascii = "3";
@@ -163,6 +164,19 @@ function [7:0] scan_to_ascii;
         8'h3E: scan_to_ascii = "8";
         8'h46: scan_to_ascii = "9";
         8'h45: scan_to_ascii = "0";
+	// Number pad numbers (with Num Lock on)o
+	8'h69: scan_to_ascii = 8'h31; // 1
+        8'h72: scan_to_ascii = 8'h32; // 2
+        8'h7A: scan_to_ascii = 8'h33; // 3
+        8'h6B: scan_to_ascii = 8'h34; // 4
+        8'h73: scan_to_ascii = 8'h35; // 5
+        8'h74: scan_to_ascii = 8'h36; // 6
+        8'h6C: scan_to_ascii = 8'h37; // 7
+        8'h75: scan_to_ascii = 8'h38; // 8
+        8'h7D: scan_to_ascii = 8'h39; // 9
+        8'h70: scan_to_ascii = 8'h30; // 0
+
+
         default: scan_to_ascii = "?"; // fallback
     endcase
 endfunction

@@ -2,7 +2,8 @@ module ps2_decoder (
     input        clk,            // System clock (was clk_in)
     input        ps2_clk_async,  // Asynchronous PS/2 clock (was key_clk)
     input        ps2_data_async, // Asynchronous PS/2 data (was key_data)
-    output reg [7:0] code        // The final, stable 8-bit scan code (was key_byte)
+    output reg [7:0] code,        // The final, stable 8-bit scan code (was key_byte)
+    output reg code_valid
 );
 
     // --- Synchronizer Stage (from tutorial) ---
@@ -21,8 +22,11 @@ module ps2_decoder (
     wire ps2_clk_falling_edge = ps2_clk_r1 & (~ps2_clk_r0);
 
     // --- Data Capture Logic ---
-    reg [3:0] cnt;
+    reg [3:0] cnt = 0;
     reg [10:0] temp_data;
+    reg ignore_next = 0;
+    reg shift_pressed = 0;
+    reg caps_lock = 0;
 
     // This is the core state machine for capturing the 11-bit frame.
     always @(posedge clk) begin
@@ -32,22 +36,23 @@ module ps2_decoder (
             end else begin
                 cnt <= cnt + 1;
             end
+	    temp_data[cnt] <= ps2_data_r1;
 
-            case (cnt)
-                // We only care about bits 1-8 (the data bits)
-                0: temp_data[0] <= ps2_data_r1; // Start bit:0
-                1: temp_data[1] <= ps2_data_r1;
-                2: temp_data[2] <= ps2_data_r1;
-                3: temp_data[3] <= ps2_data_r1;
-                4: temp_data[4] <= ps2_data_r1;
-                5: temp_data[5] <= ps2_data_r1;
-                6: temp_data[6] <= ps2_data_r1;
-                7: temp_data[7] <= ps2_data_r1;
-                8: temp_data[8] <= ps2_data_r1;
-                9: temp_data[9] <= ps2_data_r1; // Parity bit
-               10: temp_data[10] <= ps2_data_r1; // Stop bit:1
-                default: ;
-            endcase
+            //case (cnt)
+            //    // We only care about bits 1-8 (the data bits)
+            //    0: temp_data[0] <= ps2_data_r1; // Start bit:0
+            //    1: temp_data[1] <= ps2_data_r1;
+            //    2: temp_data[2] <= ps2_data_r1;
+            //    3: temp_data[3] <= ps2_data_r1;
+            //    4: temp_data[4] <= ps2_data_r1;
+            //    5: temp_data[5] <= ps2_data_r1;
+            //    6: temp_data[6] <= ps2_data_r1;
+            //    7: temp_data[7] <= ps2_data_r1;
+            //    8: temp_data[8] <= ps2_data_r1;
+            //    9: temp_data[9] <= ps2_data_r1; // Parity bit
+            //   10: temp_data[10] <= ps2_data_r1; // Stop bit:1
+            //    default: ;
+            //endcase
         end
     end
 
