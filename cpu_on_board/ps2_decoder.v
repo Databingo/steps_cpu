@@ -124,6 +124,7 @@ always @(*) begin
 	8'h3E: ascii_code = shift_active ? 8'h2A : 8'h38; // * 8
 	8'h46: ascii_code = shift_active ? 8'h28 : 8'h39; // ( 9
 	8'h45: ascii_code = shift_active ? 8'h29 : 8'h30; // ) 0
+    endcase
 end
  
 
