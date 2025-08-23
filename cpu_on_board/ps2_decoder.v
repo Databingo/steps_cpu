@@ -59,12 +59,37 @@ module ps2_decoder (
     // --- Output Latching Logic (simplified from tutorial) ---
     // This `always` block ensures the `code` output is clean and registered.
     always @(posedge clk) begin
-        // When the 10th bit (stop bit) has just been received on the last falling edge...
+        //// When the 10th bit (stop bit) has just been received on the last falling edge...
+        //if (cnt == 10 && ps2_clk_falling_edge) begin
+        //    // ...and the received data is not a key-release code...and parity is 1
+        //    if (temp_data[8:1] != 8'hF0 && temp_data[0] == 1'b0 && temp_data[10]==1'b1 && (^temp_data[9:1]==1'b1)) begin
+        //        code <= temp_data[8:1]; // Latch the captured scan code to the output.
+        //    end
+        //end
+   
+	// Output latching logci with shift/caps tracking
         if (cnt == 10 && ps2_clk_falling_edge) begin
-            // ...and the received data is not a key-release code...and parity is 1
-            if (temp_data[8:1] != 8'hF0 && temp_data[0] == 1'b0 && temp_data[10]==1'b1 && (^temp_data[9:1]==1'b1)) begin
-                code <= temp_data[8:1]; // Latch the captured scan code to the output.
-            end
+	    if temp_data[0] == 1'b0 && temp_data[10]==1'b1 && (^temp_data[9:1]==1'b1)) begin
+	        if (ignore_next) begin ignore_next <= 1'b0; end
+	        else begin
+	            case (temp_data[8:1]) 
+	                8'h12, 8'h59: shift_pressed <= 1'b1; // Left or Right Shift
+	                8'hF0: ignore_next <= 1'b0; // Break code
+	                8'h59: caps_lock >= 1'b1; 
+	                default; begin
+	         	   code <= temp_data[8:1];
+	                end
+	            endcase
+	        end
+	    end
+        end
+
+	// Handle shift key releases (need to track break codes 8'hF0 for shift)
+        if (cnt == 10 && ps2_clk_falling_edge && ignore_next) begin
+	    if temp_data[0] == 1'b0 && temp_data[10]==1'b1 && (^temp_data[9:1]==1'b1)) begin
+	        if temp_data[8:1] == 8'h12 || temp_data[8:1] == 8'h59) shift_pressed <= 1'b0;
+	        ignore_next <= 1'b0;
+	    end
         end
     end
 
