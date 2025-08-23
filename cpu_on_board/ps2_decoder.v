@@ -69,7 +69,7 @@ module ps2_decoder (
    
 	// Output latching logci with shift/caps tracking
         if (cnt == 10 && ps2_clk_falling_edge) begin
-	    if temp_data[0] == 1'b0 && temp_data[10]==1'b1 && (^temp_data[9:1]==1'b1)) begin
+	    if (temp_data[0] == 1'b0 && temp_data[10]==1'b1 && (^temp_data[9:1]==1'b1)) begin
 	        if (ignore_next) begin ignore_next <= 1'b0; end
 	        else begin
 	            case (temp_data[8:1]) 
@@ -86,8 +86,8 @@ module ps2_decoder (
 
 	// Handle shift key releases (need to track break codes 8'hF0 for shift)
         if (cnt == 10 && ps2_clk_falling_edge && ignore_next) begin
-	    if temp_data[0] == 1'b0 && temp_data[10]==1'b1 && (^temp_data[9:1]==1'b1)) begin
-	        if temp_data[8:1] == 8'h12 || temp_data[8:1] == 8'h59) shift_pressed <= 1'b0;
+	    if (temp_data[0] == 1'b0 && temp_data[10]==1'b1 && (^temp_data[9:1]==1'b1)) begin
+	        if (temp_data[8:1] == 8'h12 || temp_data[8:1] == 8'h59) shift_pressed <= 1'b0;
 	        ignore_next <= 1'b0;
 	    end
         end
