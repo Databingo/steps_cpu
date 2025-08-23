@@ -1,7 +1,3 @@
-// =================================================================================
-// Original CPU file with minimal changes to force-send 'H' every clock cycle.
-// =================================================================================
-
 module cpu_on_board (
     // -- Pin --
     (* chip_pin = "PIN_L1" *)  input wire CLOCK_50, // 50 MHz clock
@@ -18,6 +14,7 @@ module cpu_on_board (
     (* ram_style = "block" *) reg [31:0] mem [0:2999]; // Unified Memory
     initial $readmemb("mem.mif", mem);
 
+    wire [31:0] pc;
     wire [31:0] ir_bd; assign ir_bd = mem[pc>>2];
     wire [31:0] ir_ld; assign ir_ld = {ir_bd[7:0], ir_bd[15:8], ir_bd[23:16], ir_bd[31:24]}; // Endianness swap
 
