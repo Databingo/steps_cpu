@@ -3,7 +3,9 @@ module ps2_decoder (
     input        ps2_clk_async,  // Asynchronous PS/2 clock (was key_clk)
     input        ps2_data_async, // Asynchronous PS/2 data (was key_data)
     output reg [7:0] code,        // The final, stable 8-bit scan code (was key_byte)
-    output reg code_valid
+    output reg [7:0] ascii_code,  
+    output reg key_pressed,
+    output reg key_released
 );
 
     // --- Synchronizer Stage (from tutorial) ---
@@ -27,6 +29,8 @@ module ps2_decoder (
     reg ignore_next = 0;
     reg shift_pressed = 0;
     reg caps_lock = 0;
+    reg extend = 0;
+    reg break_code = 0;
 
     // This is the core state machine for capturing the 11-bit frame.
     always @(posedge clk) begin
@@ -67,16 +71,29 @@ module ps2_decoder (
         //    end
         //end
    
+	key_pressed <= 0;
+	key_released <= 0;
 	// Output latching logci with shift/caps tracking
         if (cnt == 10 && ps2_clk_falling_edge) begin
 	    if (temp_data[0] == 1'b0 && temp_data[10]==1'b1 && (^temp_data[9:1]==1'b1)) begin
-	        if (ignore_next) begin ignore_next <= 1'b0; end
+	        if (ignore_next) begin 
+		    ignore_next <= 1'b0; 
+	            break_code <= 1'b1;
+	            code <= temp_data[8:1];
+		    // Handle key release
+		    if (temp_data[8:1] != 8'hE0 && temp_data[8:1] != 8'hF0) begin key_release <= 1'b1; end
+		    // Handle shife key release
+		    if (temp_data[8:1] == 8'h12 || temp_data[8:1] == 8'h59) begin shift_pressed <= 1'b0; end
+		end
 	        else begin
+		    break_code <= 1'b0;
+	            code <= temp_data[8:1];
 	            case (temp_data[8:1]) 
-	                8'h12, 8'h59: shift_pressed <= 1'b1; // Left or Right Shift
+			8'hE0: begin extended <= 1'b1; ignore_next <= 1'b1; end // Extended code
 	                8'hF0: ignore_next <= 1'b0; // Break code
-	                8'h59: caps_lock <= 1'b1; 
-	                default: code <= temp_data[8:1];
+	                8'h12, 8'h59: shift_pressed <= 1'b1; // Left or Right Shift
+	                8'h59: caps_lock <= ~caps_lock;
+	                default: key_pressed <= 1'b1;
 	            endcase
 	        end
 	    end
