@@ -111,7 +111,7 @@ module ps2_decoder (
 wire shift_active = shift_pressed ^ caps_lock;    
 
 always @(*) begin
-    ascii_code = scan_code // Default to scan code if no ASCII mapping
+    ascii_code = scan_code; // Default to scan code if no ASCII mapping
 
     case(scan_code)
 	8'h16: ascii_code = shift_active ? 8'h21 : 8'h31; // ! 1
