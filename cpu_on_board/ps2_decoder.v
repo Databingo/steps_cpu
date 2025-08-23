@@ -172,7 +172,7 @@ always @(*) begin
 
 
     endcase
-    if (cnt == 0) extended <= 1'b0; // Reset extended flag after processing
+    //if (cnt == 0) extended <= 1'b0; // Reset extended flag after processing
 end
  
 
