@@ -108,8 +108,8 @@ module cpu_on_board (
    assign avalon_write     = clock_1hz_rising_edge; // Force the write signal high every cycle
    assign avalon_address   = 1'b0;            // Always write to the data register (address 0)
    //assign avalon_writedata = 32'h48;          // Force the data to be 0x48, which is the ASCII code for 'H'
-   //assign avalon_writedata = {24'b0, scan_to_ascii(data)};          // Force the data to be 0x48, which is the ASCII code for 'H'
-   assign avalon_writedata = {24'b0, data};          // Force the data to be 0x48, which is the ASCII code for 'H'
+   assign avalon_writedata = {24'b0, scan_to_ascii(data)};          // Force the data to be 0x48, which is the ASCII code for 'H'
+   //assign avalon_writedata = {24'b0, data};          // Force the data to be 0x48, which is the ASCII code for 'H'
 
 //wire [7:0] scan_code;
 //assign LEDG = scan_code;
