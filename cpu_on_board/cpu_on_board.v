@@ -3,6 +3,7 @@
 // =================================================================================
 
 module cpu_on_board (
+    // -- Pin --
     (* chip_pin = "PIN_L1" *)  input wire CLOCK_50, // 50 MHz clock
     (* chip_pin = "PIN_R22" *) input wire KEY0,     // Active-low reset button
     (* chip_pin = "PIN_Y21, PIN_Y22, PIN_W21, PIN_W22, PIN_V21, PIN_V22, PIN_U21, PIN_U22" *) output wire [7:0] LEDG, // 8 green LEDs
@@ -13,25 +14,28 @@ module cpu_on_board (
     (* chip_pin = "J14" *)  input wire PS2_DAT 
 );
 
-    // --- Memory and Original CPU State (Unchanged) ---
+    // -- RAM --
     (* ram_style = "block" *) reg [31:0] mem [0:2999]; // Unified Memory
     initial $readmemb("mem.mif", mem);
 
-    reg [24:0] counter; // Original, unused counter
-    reg [31:0] addr_pc; // Original, unused pc
+    //reg [24:0] counter; // Original, unused counter
+    //reg [31:0] addr_pc; // Original, unused pc
     
-    reg [31:0] ir;
+    //reg [31:0] ir;
     wire [31:0] ir_bd; assign ir_bd = mem[pc>>2];
     wire [31:0] ir_ld; assign ir_ld = {ir_bd[7:0], ir_bd[15:8], ir_bd[23:16], ir_bd[31:24]}; // Endianness swap
 
-    reg [31:0] pc;
-    reg [63:0] re [0:31]; // General-purpose registers (x0-x31)
+    //reg [31:0] pc;
+    //reg [63:0] re [0:31]; // General-purpose registers (x0-x31)
 
-    // --- Immediate decoders (Unchanged) --- 
-    wire signed [63:0] w_imm_u = {{32{ir[31]}}, ir[31:12], 12'b0};
-    wire [4:0] w_rd  = ir[11:7];
+riscv64 cpu (
+    .clk(clock_1hz), 
+    .reset(KEY0),     // Active-low reset button
+    .instruction(ir_ld),
+    .pc(pc)
+);
    
-    // -- clock --
+    // -- Clock --
     wire clock_1hz;
     clock_slower clock_ins(
         .clk_in(CLOCK_50),
@@ -40,52 +44,36 @@ module cpu_on_board (
     );
 
     
-    // IF ir (Unchanged)
-    always @(posedge clock_1hz or negedge KEY0) begin
-        if (!KEY0) begin 
-            LEDR9 <= 1'b0; 
-            ir <= 32'h00000000; 
-        end else begin
-            LEDR9 <= ~LEDR9; // heartbeat
-            ir <= ir_ld;
-        end
-    end
+    //// IF ir (Unchanged)
+    //always @(posedge clock_1hz or negedge KEY0) begin
+    //    if (!KEY0) begin 
+    //        LEDR9 <= 1'b0; 
+    //        ir <= 32'h00000000; 
+    //    end else begin
+    //        LEDR9 <= ~LEDR9; // heartbeat
+    //        ir <= ir_ld;
+    //    end
+    //end
 
-    // EXE pc (Unchanged, CPU runs normally)
-    always @(posedge clock_1hz or negedge KEY0) begin
-        if (!KEY0) begin 
-            pc <= 0;
-        end else begin
-            pc <= pc + 4;
-            re[31] <= 1'b0; // This was in your original code
-            
-	    //data <= 32'h48;
-            casez(ir) 
-		32'b???????_?????_?????_???_?????_0110111:  re[w_rd] <= w_imm_u; // Lui
-		//32'b???????_?????_?????_???_?????_0110111:  begin re[w_rd] <= w_imm_u; data <= 32'h41; end
-            endcase
-        end
-    end
+    //// EXE pc (Unchanged, CPU runs normally)
+    //always @(posedge clock_1hz or negedge KEY0) begin
+    //    if (!KEY0) begin 
+    //        pc <= 0;
+    //    end else begin
+    //        pc <= pc + 4;
+    //        re[31] <= 1'b0; // This was in your original code
+    //        
+    //        //data <= 32'h48;
+    //        casez(ir) 
+    //    	32'b???????_?????_?????_???_?????_0110111:  re[w_rd] <= w_imm_u; // Lui
+    //    	//32'b???????_?????_?????_???_?????_0110111:  begin re[w_rd] <= w_imm_u; data <= 32'h41; end
+    //        endcase
+    //    end
+    //end
 
    // LED Assignments (Unchanged)
-   assign LEDG = ir[7:0];
-   assign LEDR7_0 = re[31][19:12];
-   
-   // --- Avalon Bus Driver Logic ---
-   // <<< CHANGED: This is the only part we are modifying for the test.
-   // We will force a write of the character 'H' on EVERY rising edge of the 1Hz clock.
-   
-   //reg clock_1hz_dly;
-   //
-   //// This small always block generates a single-cycle pulse on every 1Hz clock tick.
-   //// It's active as long as the CPU is not in reset.
-   //always @(posedge CLOCK_50 or negedge KEY0) begin
-   //     if (!KEY0) begin
-   //         clock_1hz_dly <= 1'b0;
-   //     end else begin
-   //         clock_1hz_dly <= clock_1hz;
-   //     end
-   //end
+   //assign LEDG = ir[7:0];
+   //assign LEDR7_0 = re[31][19:12];
    
 
    reg [31:0] data;
