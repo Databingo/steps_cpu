@@ -34,8 +34,8 @@ riscv64 cpu (
     .instruction(ir_ld),
 
     .pc(pc),
-    .ir_our(ir),
-    .re_our(rd),
+    .ir_out(ir),
+    .re_out(rd),
     .heartbeat(LEDR9)
 );
    reg [31:0] ir;
