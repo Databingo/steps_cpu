@@ -32,8 +32,18 @@ riscv64 cpu (
     .clk(clock_1hz), 
     .reset(KEY0),     // Active-low reset button
     .instruction(ir_ld),
-    .pc(pc)
+
+    .pc(pc),
+    .ir_our(ir),
+    .re_our(rd),
+    .heartbeat(LEDR9)
 );
+   reg [31:0] ir;
+   reg [63:0] re;
+   // LED Assignments (Unchanged)
+   assign LEDG = ir[7:0];
+   assign LEDR7_0 = re[19:12];
+   
    
     // -- Clock --
     wire clock_1hz;
@@ -71,10 +81,6 @@ riscv64 cpu (
     //    end
     //end
 
-   // LED Assignments (Unchanged)
-   //assign LEDG = ir[7:0];
-   //assign LEDR7_0 = re[31][19:12];
-   
 
    reg [31:0] data;
    wire key_pressed;

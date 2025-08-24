@@ -7,7 +7,10 @@ module riscv64(
     input wire reset,     // Active-low reset button
     input wire [31:0] instruction,
     output reg [31:0] pc,
-    output wire [63:0] data
+    output wire [63:0] data,
+    output wire [31:0] ir_out,
+    output wire [63:0] re_out,
+    output wire  heartbeat
 );
 
     reg [31:0] ir;
@@ -22,11 +25,11 @@ module riscv64(
 
     // IF ir (Unchanged)
     always @(posedge clk or negedge reset) begin
-        if (!KEY0) begin 
-            LEDR9 <= 1'b0; 
+        if (!reset) begin 
+            heartbeat <= 1'b0; 
             ir <= 32'h00000000; 
         end else begin
-            LEDR9 <= ~LEDR9; // heartbeat
+            heartbeat <= ~heartbeat; // heartbeat
             //ir <= ir_ld;
             ir <= instruction;
         end
@@ -34,7 +37,7 @@ module riscv64(
 
     // EXE pc (Unchanged, CPU runs normally)
     always @(posedge clk or negedge reset) begin
-        if (!KEY0) begin 
+        if (!reset) begin 
             pc <= 0;
         end else begin
             pc <= pc + 4;
@@ -49,6 +52,6 @@ module riscv64(
     end
 
    // LED Assignments (Unchanged)
-   assign LEDG = ir[7:0];
-   assign LEDR7_0 = re[31][19:12];
+   assign ir_out = ir[7:0];
+   assign re_out = re[31];
 endmodule
