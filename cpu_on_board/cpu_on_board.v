@@ -27,35 +27,11 @@ module cpu_on_board (
     reg [31:0] pc;
     reg [63:0] re [0:31]; // General-purpose registers (x0-x31)
 
-    wire clock_1hz;
-    clock_slower clock_ins(
-        .clk_in(CLOCK_50),
-        .clk_out(clock_1hz),
-        .reset_n(KEY0)
-    );
-
     // --- Immediate decoders (Unchanged) --- 
     wire signed [63:0] w_imm_u = {{32{ir[31]}}, ir[31:12], 12'b0};
     wire [4:0] w_rd  = ir[11:7];
 
-    // --- Wires for Avalon-MM Interface (Unchanged from previous JTAG version) ---
-    wire [0:0]  avalon_address;
-    wire        avalon_write;
-    wire [31:0] avalon_writedata;
-
-    reg [31:0] data;
-
-    // --- Qsys System Instantiation (Unchanged from previous JTAG version) ---
-    jtag_uart_system my_jtag_system (
-        .clk_clk                             (CLOCK_50),
-        .reset_reset_n                       (KEY0),
-        .jtag_uart_0_avalon_jtag_slave_address   (avalon_address),
-        .jtag_uart_0_avalon_jtag_slave_writedata (avalon_writedata),
-        .jtag_uart_0_avalon_jtag_slave_write_n   (~avalon_write),
-        .jtag_uart_0_avalon_jtag_slave_chipselect(1'b1),
-        .jtag_uart_0_avalon_jtag_slave_read_n    (1'b1)
-    );
-
+    
     // IF ir (Unchanged)
     always @(posedge clock_1hz or negedge KEY0) begin
         if (!KEY0) begin 
@@ -91,72 +67,60 @@ module cpu_on_board (
    // <<< CHANGED: This is the only part we are modifying for the test.
    // We will force a write of the character 'H' on EVERY rising edge of the 1Hz clock.
    
-   reg clock_1hz_dly;
+   //reg clock_1hz_dly;
+   //
+   //// This small always block generates a single-cycle pulse on every 1Hz clock tick.
+   //// It's active as long as the CPU is not in reset.
+   //always @(posedge CLOCK_50 or negedge KEY0) begin
+   //     if (!KEY0) begin
+   //         clock_1hz_dly <= 1'b0;
+   //     end else begin
+   //         clock_1hz_dly <= clock_1hz;
+   //     end
+   //end
    
-   // This small always block generates a single-cycle pulse on every 1Hz clock tick.
-   // It's active as long as the CPU is not in reset.
-   always @(posedge CLOCK_50 or negedge KEY0) begin
-        if (!KEY0) begin
-            clock_1hz_dly <= 1'b0;
-        end else begin
-            clock_1hz_dly <= clock_1hz;
-        end
-   end
-   
-   wire clock_1hz_rising_edge = clock_1hz && !clock_1hz_dly; 
+    wire clock_1hz;
+    clock_slower clock_ins(
+        .clk_in(CLOCK_50),
+        .clk_out(clock_1hz),
+        .reset_n(KEY0)
+    );
 
+
+   reg [31:0] data;
    wire key_pressed;
    wire key_released;
    reg key_pressed_delay;
    always @(posedge CLOCK_50) begin key_pressed_delay <= key_pressed; end
+   ps2_decoder ps2_decoder_inst (
+       .clk(CLOCK_50),
+       .ps2_clk_async(PS2_CLK),
+       .ps2_data_async(PS2_DAT),
+       //.scan_code(data[7:0])
+       .ascii_code(data[7:0]),
+       .key_pressed(key_pressed),
+       .key_released(key_released)
+   );
+
+    // --- Wires for Avalon-MM Interface (Unchanged from previous JTAG version) ---
+    wire [0:0]  avalon_address;
+    wire        avalon_write;
+    wire [31:0] avalon_writedata;
+
+    // --- Qsys System Instantiation (Unchanged from previous JTAG version) ---
+    jtag_uart_system my_jtag_system (
+        .clk_clk                             (CLOCK_50),
+        .reset_reset_n                       (KEY0),
+        .jtag_uart_0_avalon_jtag_slave_address   (avalon_address),
+        .jtag_uart_0_avalon_jtag_slave_writedata (avalon_writedata),
+        .jtag_uart_0_avalon_jtag_slave_write_n   (~avalon_write),
+        .jtag_uart_0_avalon_jtag_slave_chipselect(1'b1),
+        .jtag_uart_0_avalon_jtag_slave_read_n    (1'b1)
+    );
+
    wire key_pressed_edge = key_pressed && !key_pressed_delay;
-
-
-   //assign avalon_write     = clock_1hz_rising_edge; // Force the write signal high every cycle
    assign avalon_write     = key_pressed_edge; // Force the write signal high every cycle
    assign avalon_address   = 1'b0;            // Always write to the data register (address 0)
-   //assign avalon_writedata = 32'h48;          // Force the data to be 0x48, which is the ASCII code for 'H'
-   //assign avalon_writedata = {24'b0, scan_to_ascii(data)};          // Force the data to be 0x48, which is the ASCII code for 'H'
    assign avalon_writedata = {24'b0, data};    
 
-//wire [7:0] scan_code;
-//assign LEDG = scan_code;
-
-ps2_decoder ps2_decoder_inst (
-    .clk(CLOCK_50),
-    .ps2_clk_async(PS2_CLK),
-    .ps2_data_async(PS2_DAT),
-    //.scan_code(data[7:0])
-    .ascii_code(data[7:0]),
-    .key_pressed(key_pressed),
-    .key_released(key_released)
-);
 endmodule
-
-
-// clock_slower module (Unchanged)
-module clock_slower(
-    input wire clk_in,
-    input wire reset_n,
-    output reg clk_out
-);
-    reg [24:0] counter; 
-    initial begin
-        clk_out <= 0;
-        counter <= 0;
-    end
-    always @(posedge clk_in or negedge reset_n) begin
-        if (!reset_n) begin
-            clk_out <= 0;
-            counter <= 0;
-        end else begin
-            if (counter == 25000000 - 1) begin
-                counter <= 0;
-                clk_out <= ~clk_out;
-            end else begin
-                counter <= counter + 1;
-            end
-        end
-    end
-endmodule
-
