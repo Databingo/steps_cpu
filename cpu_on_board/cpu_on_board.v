@@ -78,6 +78,3 @@ riscv64 cpu (
    assign avalon_writedata = {24'b0, data};    
 
 endmodule
-
-
-
