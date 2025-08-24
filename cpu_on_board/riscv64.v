@@ -6,12 +6,12 @@ module riscv64(
     input wire clk, 
     input wire reset,     // Active-low reset button
     input wire [31:0] instruction,
-    output wire [63:0] pc,
+    output reg [31:0] pc,
     output wire [63:0] data
 );
 
     reg [31:0] ir;
-    reg [31:0] pc;
+    //reg [31:0] pc;
     reg [63:0] re [0:31]; // General-purpose registers (x0-x31)
     
     // --- Immediate decoders (Unchanged) --- 
