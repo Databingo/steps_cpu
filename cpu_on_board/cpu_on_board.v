@@ -26,13 +26,13 @@ riscv64 cpu (
     .reset(KEY0),     // Active-low reset button
     .instruction(ir_ld),
     .pc(pc),
-    .ir_out(ir),
-    .re_out(re),
+    .ir(LEDG),
+    //.re(re),
     .heartbeat(LEDR9)
 );
 
-   assign LEDG = ir[7:0];
-   assign LEDR7_0 = re[31][19:12];
+   //assign LEDG = ir[7:0];
+   //assign LEDR7_0 = re[31][19:12];
    
 module riscv64(
     input wire clk, 
