@@ -18,20 +18,17 @@ module cpu_on_board (
     wire [31:0] ir_bd; assign ir_bd = mem[pc>>2];
     wire [31:0] ir_ld; assign ir_ld = {ir_bd[7:0], ir_bd[15:8], ir_bd[23:16], ir_bd[31:24]}; // Endianness swap
 
-riscv64 cpu (
-    .clk(clock_1hz), 
-    .reset(KEY0),     // Active-low reset button
-    .instruction(ir_ld),
-    .pc(pc),
-    .ir(LEDG),
-    //.re(re),
-    .heartbeat(LEDR9)
-);
+    // -- CPU --
+    riscv64 cpu (
+        .clk(clock_1hz), 
+        .reset(KEY0),     // Active-low reset button
+        .instruction(ir_ld),
+        .pc(pc),
+        .ir(LEDG),
+        //.re(re),
+        .heartbeat(LEDR9)
+    );
 
-   //assign LEDG = ir[7:0];
-   //assign LEDR7_0 = re[31][19:12];
-   
-   
     // -- Clock --
     wire clock_1hz;
     clock_slower clock_ins(
@@ -40,7 +37,7 @@ riscv64 cpu (
         .reset_n(KEY0)
     );
 
-    
+   // -- Keyboard -- 
    reg [31:0] data;
    wire key_pressed;
    wire key_released;
@@ -56,7 +53,7 @@ riscv64 cpu (
        .key_released(key_released)
    );
 
-    // --- Wires for Avalon-MM Interface (Unchanged from previous JTAG version) ---
+   // -- Monitor --
     wire [0:0]  avalon_address;
     wire        avalon_write;
     wire [31:0] avalon_writedata;
