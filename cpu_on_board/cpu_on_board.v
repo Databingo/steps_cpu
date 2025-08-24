@@ -18,32 +18,66 @@ module cpu_on_board (
     (* ram_style = "block" *) reg [31:0] mem [0:2999]; // Unified Memory
     initial $readmemb("mem.mif", mem);
 
-    //reg [24:0] counter; // Original, unused counter
-    //reg [31:0] addr_pc; // Original, unused pc
-    
-    //reg [31:0] ir;
     wire [31:0] ir_bd; assign ir_bd = mem[pc>>2];
     wire [31:0] ir_ld; assign ir_ld = {ir_bd[7:0], ir_bd[15:8], ir_bd[23:16], ir_bd[31:24]}; // Endianness swap
-
-    //reg [31:0] pc;
-    //reg [63:0] re [0:31]; // General-purpose registers (x0-x31)
 
 riscv64 cpu (
     .clk(clock_1hz), 
     .reset(KEY0),     // Active-low reset button
     .instruction(ir_ld),
-
     .pc(pc),
     .ir_out(ir),
-    .re_out(rd),
+    .re_out(re),
     .heartbeat(LEDR9)
 );
-   reg [31:0] ir;
-   reg [63:0] re;
-   // LED Assignments (Unchanged)
+
    assign LEDG = ir[7:0];
-   assign LEDR7_0 = re[19:12];
+   assign LEDR7_0 = re[31][19:12];
    
+module riscv64(
+    input wire clk, 
+    input wire reset,     // Active-low reset button
+    input wire [31:0] instruction,
+    output reg [31:0] pc,
+    output reg [31:0] ir,
+    output reg [63:0] re [0:31],
+    output wire  heartbeat
+);
+
+    
+    // --- Immediate decoders (Unchanged) --- 
+    wire signed [63:0] w_imm_u = {{32{ir[31]}}, ir[31:12], 12'b0};
+    wire [4:0] w_rd  = ir[11:7];
+
+    // IF ir (Unchanged)
+    always @(posedge clk or negedge reset) begin
+        if (!reset) begin 
+            heartbeat <= 1'b0; 
+            ir <= 32'h00000000; 
+        end else begin
+            heartbeat <= ~heartbeat; // heartbeat
+            //ir <= ir_ld;
+            ir <= instruction;
+        end
+    end
+
+    // EXE pc (Unchanged, CPU runs normally)
+    always @(posedge clk or negedge reset) begin
+        if (!reset) begin 
+            pc <= 0;
+        end else begin
+            pc <= pc + 4;
+            re[31] <= 1'b0; // This was in your original code
+            
+	    //data <= 32'h48;
+            casez(ir) 
+		32'b???????_?????_?????_???_?????_0110111:  re[w_rd] <= w_imm_u; // Lui
+		//32'b???????_?????_?????_???_?????_0110111:  begin re[w_rd] <= w_imm_u; data <= 32'h41; end
+            endcase
+        end
+    end
+
+endmodule
    
     // -- Clock --
     wire clock_1hz;
@@ -54,34 +88,6 @@ riscv64 cpu (
     );
 
     
-    //// IF ir (Unchanged)
-    //always @(posedge clock_1hz or negedge KEY0) begin
-    //    if (!KEY0) begin 
-    //        LEDR9 <= 1'b0; 
-    //        ir <= 32'h00000000; 
-    //    end else begin
-    //        LEDR9 <= ~LEDR9; // heartbeat
-    //        ir <= ir_ld;
-    //    end
-    //end
-
-    //// EXE pc (Unchanged, CPU runs normally)
-    //always @(posedge clock_1hz or negedge KEY0) begin
-    //    if (!KEY0) begin 
-    //        pc <= 0;
-    //    end else begin
-    //        pc <= pc + 4;
-    //        re[31] <= 1'b0; // This was in your original code
-    //        
-    //        //data <= 32'h48;
-    //        casez(ir) 
-    //    	32'b???????_?????_?????_???_?????_0110111:  re[w_rd] <= w_imm_u; // Lui
-    //    	//32'b???????_?????_?????_???_?????_0110111:  begin re[w_rd] <= w_imm_u; data <= 32'h41; end
-    //        endcase
-    //    end
-    //end
-
-
    reg [31:0] data;
    wire key_pressed;
    wire key_released;
