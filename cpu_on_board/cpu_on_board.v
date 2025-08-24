@@ -58,7 +58,6 @@ module cpu_on_board (
     wire        avalon_write;
     wire [31:0] avalon_writedata;
 
-    // --- Qsys System Instantiation (Unchanged from previous JTAG version) ---
     jtag_uart_system my_jtag_system (
         .clk_clk                             (CLOCK_50),
         .reset_reset_n                       (KEY0),
@@ -69,6 +68,7 @@ module cpu_on_board (
         .jtag_uart_0_avalon_jtag_slave_read_n    (1'b1)
     );
 
+   // -- Bus --
    wire key_pressed_edge = key_pressed && !key_pressed_delay;
    assign avalon_write     = key_pressed_edge; // Force the write signal high every cycle
    assign avalon_address   = 1'b0;            // Always write to the data register (address 0)
