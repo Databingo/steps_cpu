@@ -30,6 +30,14 @@ module cpu_on_board (
     // --- Immediate decoders (Unchanged) --- 
     wire signed [63:0] w_imm_u = {{32{ir[31]}}, ir[31:12], 12'b0};
     wire [4:0] w_rd  = ir[11:7];
+   
+    // -- clock --
+    wire clock_1hz;
+    clock_slower clock_ins(
+        .clk_in(CLOCK_50),
+        .clk_out(clock_1hz),
+        .reset_n(KEY0)
+    );
 
     
     // IF ir (Unchanged)
@@ -79,13 +87,6 @@ module cpu_on_board (
    //     end
    //end
    
-    wire clock_1hz;
-    clock_slower clock_ins(
-        .clk_in(CLOCK_50),
-        .clk_out(clock_1hz),
-        .reset_n(KEY0)
-    );
-
 
    reg [31:0] data;
    wire key_pressed;
