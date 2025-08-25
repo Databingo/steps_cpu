@@ -92,9 +92,16 @@ module cpu_on_board (
     wire [63:0] bus_read_data;
     // -- Bus controller --
     // -- interrupt controller --
+    // -- Timer --
+    // -- CSRs --
+    // -- BOIS/bootloader --
+    // -- Caches --
+    // -- MMU(Memory Manamgement Unit) --
+    // -- DMA(Direct Memory Access) --?
 
 endmodule
 
+// Road Map
 // Cyclone II FPGA Starter Board EP2C20F484C7 
 // Onchip M4K 239616~=29.95 KB
 // add cpu 
