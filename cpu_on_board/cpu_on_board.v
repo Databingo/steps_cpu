@@ -11,15 +11,15 @@ module cpu_on_board (
 );
 
     // -- ROM --
-    (* ram_style = "block" *) reg [31:0] mem [0:1023]; // 4KB ROM
-    initial $readmemb("mem.mif", mem);
+    (* ram_style = "block" *) reg [31:0] Rom [0:1023]; // 4KB ROM
+    initial $readmemb("rom.mif", Rom);
 
     // -- RAM --
-    (* ram_style = "block" *) reg [31:0] mem [0:2999]; // Unified Memory
-    initial $readmemb("mem.mif", mem);
+    (* ram_style = "block" *) reg [31:0] Ram [0:2999]; // Unified Memory
+    initial $readmemb("ram.mif", Ram);
 
     wire [31:0] pc;
-    wire [31:0] ir_bd; assign ir_bd = mem[pc>>2];
+    wire [31:0] ir_bd; assign ir_bd = Ram[pc>>2];
     wire [31:0] ir_ld; assign ir_ld = {ir_bd[7:0], ir_bd[15:8], ir_bd[23:16], ir_bd[31:24]}; // Endianness swap
 
     // -- CPU --
