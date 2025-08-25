@@ -92,3 +92,8 @@ module cpu_on_board (
    assign avalon_writedata = {24'b0, data};    
 
 endmodule
+
+
+
+// Cyclone II FPGA Starter Board EP2C20F484C7 
+// Onchip M4K 239616~=29.95 KB
