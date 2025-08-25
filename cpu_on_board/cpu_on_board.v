@@ -95,3 +95,18 @@ endmodule
 
 // Cyclone II FPGA Starter Board EP2C20F484C7 
 // Onchip M4K 239616~=29.95 KB
+// add cpu 
+// add board
+// add ram
+// add keyboard,let board blink keyboard key strokes
+// add monitor, let board blink and print cpu arbitary number
+// connect keyboard and monitor, let moniter print keyboard press
+// add bus, let data through bus
+// add bus controller(B) and interrupt controller(I), let keyboard trigger I to B to Cpu to Moniter
+// add timer
+// add rom
+// add bios and bootloader
+// add shell
+// add kernel and os
+// add linux
+// add bare neural-network
