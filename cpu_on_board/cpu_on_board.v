@@ -10,11 +10,11 @@ module cpu_on_board (
     (* chip_pin = "J14" *)  input wire PS2_DAT 
 );
 
-    // -- ROM --
+    // -- ROM -- for Boot Program
     (* ram_style = "block" *) reg [31:0] Rom [0:1023]; // 4KB Read Only Memory
     initial $readmemb("rom.mif", Rom);
 
-    // -- RAM --
+    // -- RAM -- for Load Program
     (* ram_style = "block" *) reg [31:0] Ram [0:2047]; // 8KB Radom Access Memory
     initial $readmemb("ram.mif", Ram);
 
@@ -49,10 +49,11 @@ module cpu_on_board (
      
     // -- Keyboard -- 
     reg [31:0] data;
+    reg key_pressed_delay;
     wire key_pressed;
     wire key_released;
-    reg key_pressed_delay;
-    always @(posedge CLOCK_50) begin key_pressed_delay <= key_pressed; end
+    wire key_pressed_edge = key_pressed && !key_pressed_delay;
+
     ps2_decoder ps2_decoder_inst (
         .clk(CLOCK_50),
         .ps2_clk_async(PS2_CLK),
@@ -62,35 +63,67 @@ module cpu_on_board (
         .key_pressed(key_pressed),
         .key_released(key_released)
      );
+    // Drive Keyboard
+    always @(posedge CLOCK_50) begin key_pressed_delay <= key_pressed; end
+    // Connect Keyboard to Bus
+    assign bus_write_enable     = key_pressed_edge; // Force the write signal high every cycle
+    assign bus_address   = 1'b0;            // Always write to the data register (address 0)
+    assign bus_write_data = {24'b0, data};    
 
-    // -- Monitor --
-    wire [0:0]  avalon_address;
-    wire        avalon_write;
-    wire [31:0] avalon_writedata;
-
+    // -- Monitor -- Connect Monitor to Bus
+    //wire [0:0]  avalon_address;
+    //wire        avalon_write;
+    //wire [31:0] avalon_writedata;
+    // 
     jtag_uart_system my_jtag_system (
         .clk_clk                             (CLOCK_50),
         .reset_reset_n                       (KEY0),
-        .jtag_uart_0_avalon_jtag_slave_address   (avalon_address),
-        .jtag_uart_0_avalon_jtag_slave_writedata (avalon_writedata),
-        .jtag_uart_0_avalon_jtag_slave_write_n   (~avalon_write),
+        .jtag_uart_0_avalon_jtag_slave_address   (bus_address),
+        .jtag_uart_0_avalon_jtag_slave_writedata (bus_write_data),
+        .jtag_uart_0_avalon_jtag_slave_write_n   (~but_write_enable),
         .jtag_uart_0_avalon_jtag_slave_chipselect(1'b1),
         .jtag_uart_0_avalon_jtag_slave_read_n    (1'b1)
     );
+    //jtag_uart_system my_jtag_system (
+    //    .clk_clk                             (CLOCK_50),
+    //    .reset_reset_n                       (KEY0),
+    //    .jtag_uart_0_avalon_jtag_slave_address   (avalon_address),
+    //    .jtag_uart_0_avalon_jtag_slave_writedata (avalon_writedata),
+    //    .jtag_uart_0_avalon_jtag_slave_write_n   (~avalon_write),
+    //    .jtag_uart_0_avalon_jtag_slave_chipselect(1'b1),
+    //    .jtag_uart_0_avalon_jtag_slave_read_n    (1'b1)
+    //);
 
     // -- Bus --
-    wire key_pressed_edge = key_pressed && !key_pressed_delay;
-    assign avalon_write     = key_pressed_edge; // Force the write signal high every cycle
-    assign avalon_address   = 1'b0;            // Always write to the data register (address 0)
-    assign avalon_writedata = {24'b0, data};    
+    //wire key_pressed_edge = key_pressed && !key_pressed_delay;
+    //assign avalon_write     = key_pressed_edge; // Force the write signal high every cycle
+    //assign avalon_address   = 1'b0;            // Always write to the data register (address 0)
+    //assign avalon_writedata = {24'b0, data};    
 
     // -- Bus --
     wire [63:0] bus_address;
+    wire [63:0] bus_read_data;
+    wire        bus_read_enable;
     wire [63:0] bus_write_data;
     wire        bus_write_enable;
-    wire        bus_read_enable;
-    wire [63:0] bus_read_data;
-    // -- Bus controller --
+
+    //// -- Bus controller --
+    //localparam Rom_base = 32'h0000_0000;
+    //localparam Rom_size = 32'h0000_1000; // 4KB ROM
+    //localparam Ram_base = 32'h0000_1000;
+    //localparam Ram_size = 32'h0000_2000; // 8KB RAM
+    //localparam Stk_base = 32'h0000_3000;
+    //localparam Stk_size = 32'h0000_1000; // 4KB STACK
+    //localparam Art_base = 32'h8000_0000; // qemu UART base
+    //localparam Key_base = 32'h8000_0010; 
+    //wire Rom_selected = 1'b0;
+    //wire Ram_selected = 1'b0;
+    //wire Stk_selected = 1'b0;
+    //wire Art_selected = 1'b0;
+    //wire Key_selected = 1'b0;
+
+      
+      
     // -- interrupt controller --
     // -- Timer --
     // -- CSRs --
