@@ -67,7 +67,7 @@ module cpu_on_board (
     always @(posedge CLOCK_50) begin key_pressed_delay <= key_pressed; end
     // Connect Keyboard to Bus
     assign bus_write_enable     = key_pressed_edge; // Force the write signal high every cycle
-    assign bus_address   = 1'b0;            // Always write to the data register (address 0)
+    assign bus_address   = 64'b0;            // Always write to the data register (address 0)
     assign bus_write_data = {24'b0, data};    
 
     // -- Monitor -- Connect Monitor to Bus
@@ -78,8 +78,8 @@ module cpu_on_board (
     jtag_uart_system my_jtag_system (
         .clk_clk                             (CLOCK_50),
         .reset_reset_n                       (KEY0),
-        .jtag_uart_0_avalon_jtag_slave_address   (bus_address),
-        .jtag_uart_0_avalon_jtag_slave_writedata (bus_write_data),
+        .jtag_uart_0_avalon_jtag_slave_address   (bus_address[0:0]),
+        .jtag_uart_0_avalon_jtag_slave_writedata (bus_write_data[31:0]),
         .jtag_uart_0_avalon_jtag_slave_write_n   (~but_write_enable),
         .jtag_uart_0_avalon_jtag_slave_chipselect(1'b1),
         .jtag_uart_0_avalon_jtag_slave_read_n    (1'b1)
