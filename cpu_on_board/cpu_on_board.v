@@ -128,9 +128,7 @@ module cpu_on_board (
         Stk_selected <= 1'b0;
         Art_selected <= 1'b0;
         Key_selected <= 1'b0;
-	if (bus_address == Art_base) begin
-	    Art_selected <= 1'b1;
-	end
+	if (bus_address == Art_base) Art_selected <= 1'b1;
     end
 
       
