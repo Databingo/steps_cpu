@@ -107,13 +107,13 @@ endmodule
 // add cpu 
 // add board
 // add ram
+// add rom
 // add keyboard,let board blink keyboard key strokes
 // add monitor, let board blink and print cpu arbitary number
 // connect keyboard and monitor, let moniter print keyboard press
 // add bus, let data through bus
 // add bus controller(B) and interrupt controller(I), let keyboard trigger I to B to Cpu to Moniter
 // add timer
-// add rom
 // add CSR mechanism
 // add bios and bootloader
 // add shell
