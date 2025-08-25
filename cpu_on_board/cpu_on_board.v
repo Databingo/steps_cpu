@@ -65,16 +65,12 @@ module cpu_on_board (
      );
     // Drive Keyboard
     always @(posedge CLOCK_50) begin key_pressed_delay <= key_pressed; end
-    // Connect Keyboard to Bus
+    // Connected to Bus
     assign bus_write_enable  = key_pressed_edge && Art_selected; 
     assign bus_address   = Art_base + 64'b0;            // Always write to the data register (address 0)
     assign bus_write_data = {24'b0, data[7:0]};    
 
-    // -- Monitor -- Connect Monitor to Bus
-    //wire [0:0]  avalon_address;
-    //wire        avalon_write;
-    //wire [31:0] avalon_writedata;
-    // 
+    // -- Monitor -- Connected to Bus
     jtag_uart_system my_jtag_system (
         .clk_clk                             (CLOCK_50),
         .reset_reset_n                       (KEY0),
@@ -84,21 +80,6 @@ module cpu_on_board (
         .jtag_uart_0_avalon_jtag_slave_chipselect(1'b1),
         .jtag_uart_0_avalon_jtag_slave_read_n    (1'b1)
     );
-    //jtag_uart_system my_jtag_system (
-    //    .clk_clk                             (CLOCK_50),
-    //    .reset_reset_n                       (KEY0),
-    //    .jtag_uart_0_avalon_jtag_slave_address   (avalon_address),
-    //    .jtag_uart_0_avalon_jtag_slave_writedata (avalon_writedata),
-    //    .jtag_uart_0_avalon_jtag_slave_write_n   (~avalon_write),
-    //    .jtag_uart_0_avalon_jtag_slave_chipselect(1'b1),
-    //    .jtag_uart_0_avalon_jtag_slave_read_n    (1'b1)
-    //);
-
-    // -- Bus --
-    //wire key_pressed_edge = key_pressed && !key_pressed_delay;
-    //assign avalon_write     = key_pressed_edge; // Force the write signal high every cycle
-    //assign avalon_address   = 1'b0;            // Always write to the data register (address 0)
-    //assign avalon_writedata = {24'b0, data};    
 
     // -- Bus --
     wire [63:0] bus_address;
@@ -116,20 +97,12 @@ module cpu_on_board (
     localparam Stk_size = 32'h0000_1000; // 4KB STACK
     localparam Art_base = 32'h8000_0000; // qemu UART base
     localparam Key_base = 32'h8000_0010; 
-    wire Rom_selected;
-    wire Ram_selected;
-    wire Stk_selected;
-    wire Art_selected;
-    wire Key_selected;
-
-    always @(*) begin
-        Rom_selected <= 1'b0;
-        Ram_selected <= 1'b0;
-        Stk_selected <= 1'b0;
-        Art_selected <= 1'b0;
-        Key_selected <= 1'b0;
-	if (bus_address == Art_base) Art_selected <= 1'b1;
-    end
+    wire Rom_selected, Ram_selected, Stk_selected, Art_selected, Key_selected;
+    assign Rom_selected  = (bus_address == Rom_base) ? 1 : 0;
+    assign Ram_selected  = (bus_address == Ram_base) ? 1 : 0;
+    assign Stk_selected  = (bus_address == Stk_base) ? 1 : 0;
+    assign Art_selected  = (bus_address == Art_base) ? 1 : 0;
+    assign Key_selected  = (bus_address == Key_base) ? 1 : 0;
 
       
       
