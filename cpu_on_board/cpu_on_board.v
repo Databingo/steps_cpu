@@ -18,6 +18,14 @@ module cpu_on_board (
     (* ram_style = "block" *) reg [31:0] Ram [0:2047]; // 8KB Radom Access Memory
     initial $readmemb("ram.mif", Ram);
 
+    // -- Clock --
+    wire clock_1hz;
+    clock_slower clock_ins(
+        .clk_in(CLOCK_50),
+        .clk_out(clock_1hz),
+        .reset_n(KEY0)
+    );
+
     wire [31:0] pc;
     wire [31:0] ir_bd; assign ir_bd = Ram[pc>>2];
     wire [31:0] ir_ld; assign ir_ld = {ir_bd[7:0], ir_bd[15:8], ir_bd[23:16], ir_bd[31:24]}; // Endianness swap
@@ -39,14 +47,6 @@ module cpu_on_board (
         .bus_read_data(bus_read_data)
     );
      
-    // -- Clock --
-    wire clock_1hz;
-    clock_slower clock_ins(
-        .clk_in(CLOCK_50),
-        .clk_out(clock_1hz),
-        .reset_n(KEY0)
-    );
-
     // -- Keyboard -- 
     reg [31:0] data;
     wire key_pressed;
