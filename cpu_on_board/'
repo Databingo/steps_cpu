@@ -115,5 +115,4 @@ endmodule
 // add CUDA
 // Next level toward deep: Draw digital map of basic sytem such as adder
 // Next lever toward deep: Mathmatical thoeries of digital culculation
-// cpu, neural network, compiler, Build Your Computer to Run Neural Network
-// BYC2RNN
+// cpu, neural network, compiler, Build a computer to run neural network
