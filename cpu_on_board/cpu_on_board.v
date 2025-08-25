@@ -105,10 +105,11 @@ endmodule
 // add bus controller(B) and interrupt controller(I), let keyboard trigger I to B to Cpu to Moniter
 // add timer
 // add rom
+// add CSR mechanism
 // add bios and bootloader
 // add shell
 // add kernel and os
 // add linux
 // add bare neural-network
-// add GPU Vectore instruction
+// add GPU Vector instructions
 // add CUDA
