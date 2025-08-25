@@ -110,3 +110,5 @@ endmodule
 // add kernel and os
 // add linux
 // add bare neural-network
+// add GPU Vectore instruction
+// add CUDA
