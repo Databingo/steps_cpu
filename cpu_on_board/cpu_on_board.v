@@ -40,11 +40,11 @@ module cpu_on_board (
         //.re(re),
         .heartbeat(LEDR9),
 
-        .bus_address(bus_address),
-        .bus_write_data(bus_write_data),
-        .bus_write_enable(bus_write_enable),
-        .bus_read_enable(bus_read_enable),
-        .bus_read_data(bus_read_data)
+        //.bus_address(bus_address),
+        //.bus_write_data(bus_write_data),
+        //.bus_write_enable(bus_write_enable),
+        //.bus_read_enable(bus_read_enable),
+        //.bus_read_data(bus_read_data)
     );
      
     // -- Keyboard -- 
@@ -68,7 +68,7 @@ module cpu_on_board (
     // Connect Keyboard to Bus
     assign bus_write_enable     = key_pressed_edge; // Force the write signal high every cycle
     assign bus_address   = 64'b0;            // Always write to the data register (address 0)
-    assign bus_write_data = {24'b0, data};    
+    assign bus_write_data = {24'b0, data[7:0]};    
 
     // -- Monitor -- Connect Monitor to Bus
     //wire [0:0]  avalon_address;
@@ -80,7 +80,7 @@ module cpu_on_board (
         .reset_reset_n                       (KEY0),
         .jtag_uart_0_avalon_jtag_slave_address   (bus_address[0:0]),
         .jtag_uart_0_avalon_jtag_slave_writedata (bus_write_data[31:0]),
-        .jtag_uart_0_avalon_jtag_slave_write_n   (~but_write_enable),
+        .jtag_uart_0_avalon_jtag_slave_write_n   (~bus_write_enable),
         .jtag_uart_0_avalon_jtag_slave_chipselect(1'b1),
         .jtag_uart_0_avalon_jtag_slave_read_n    (1'b1)
     );
