@@ -66,8 +66,8 @@ module cpu_on_board (
     // Drive Keyboard
     always @(posedge CLOCK_50) begin key_pressed_delay <= key_pressed; end
     // Connect Keyboard to Bus
-    assign bus_write_enable     = key_pressed_edge; // Force the write signal high every cycle
-    assign bus_address   = 64'b0;            // Always write to the data register (address 0)
+    assign bus_write_enable  = key_pressed_edge && Art_selected; 
+    assign bus_address   = Art_base + 64'b0;            // Always write to the data register (address 0)
     assign bus_write_data = {24'b0, data[7:0]};    
 
     // -- Monitor -- Connect Monitor to Bus
@@ -107,20 +107,26 @@ module cpu_on_board (
     wire [63:0] bus_write_data;
     wire        bus_write_enable;
 
-    //// -- Bus controller --
-    //localparam Rom_base = 32'h0000_0000;
-    //localparam Rom_size = 32'h0000_1000; // 4KB ROM
-    //localparam Ram_base = 32'h0000_1000;
-    //localparam Ram_size = 32'h0000_2000; // 8KB RAM
-    //localparam Stk_base = 32'h0000_3000;
-    //localparam Stk_size = 32'h0000_1000; // 4KB STACK
-    //localparam Art_base = 32'h8000_0000; // qemu UART base
-    //localparam Key_base = 32'h8000_0010; 
-    //wire Rom_selected = 1'b0;
-    //wire Ram_selected = 1'b0;
-    //wire Stk_selected = 1'b0;
-    //wire Art_selected = 1'b0;
-    //wire Key_selected = 1'b0;
+    // -- Bus controller --
+    localparam Rom_base = 32'h0000_0000;
+    localparam Rom_size = 32'h0000_1000; // 4KB ROM
+    localparam Ram_base = 32'h0000_1000;
+    localparam Ram_size = 32'h0000_2000; // 8KB RAM
+    localparam Stk_base = 32'h0000_3000;
+    localparam Stk_size = 32'h0000_1000; // 4KB STACK
+    localparam Art_base = 32'h8000_0000; // qemu UART base
+    localparam Key_base = 32'h8000_0010; 
+    wire Rom_selected = 1'b0;
+    wire Ram_selected = 1'b0;
+    wire Stk_selected = 1'b0;
+    wire Art_selected = 1'b0;
+    wire Key_selected = 1'b0;
+
+    always @(*) begin
+	if (bus_address == Art_base) begin
+	    Art_selected <= 1'b1;
+	end
+    end
 
       
       
