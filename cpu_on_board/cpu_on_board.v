@@ -10,6 +10,10 @@ module cpu_on_board (
     (* chip_pin = "J14" *)  input wire PS2_DAT 
 );
 
+    // -- ROM --
+    (* ram_style = "block" *) reg [31:0] mem [0:1023]; // 4KB ROM
+    initial $readmemb("mem.mif", mem);
+
     // -- RAM --
     (* ram_style = "block" *) reg [31:0] mem [0:2999]; // Unified Memory
     initial $readmemb("mem.mif", mem);
