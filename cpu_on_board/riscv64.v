@@ -3,19 +3,17 @@ module riscv64(
     input wire reset,     // Active-low reset button
     input wire [31:0] instruction,
     output reg [31:0] pc,
+    output reg [31:0] ir,
+    output reg [63:0] re [0:31],
+    output wire  heartbeat,
 
     output wire [63:0] bus_address,
     output wire [63:0] bus_write_data,
     output wire        bus_write_enable,
     output wire        bus_read_enable,
-    input  wire [63:0] bus_read_data,
+    input  wire [63:0] bus_read_data
 
 
-
-
-    output reg [31:0] ir,
-    output reg [63:0] re [0:31],
-    output wire  heartbeat
 );
 
     

@@ -26,8 +26,21 @@ module cpu_on_board (
         .pc(pc),
         .ir(LEDG),
         //.re(re),
-        .heartbeat(LEDR9)
+        .heartbeat(LEDR9),
+
+        .bus_address(bus_address),
+        .bus_write_data(bus_write_data),
+        .bus_write_enable(bus_write_enable),
+        .bus_read_enable(bus_read_enable),
+        .bus_read_data(bus_read_data)
     );
+     
+    // -- Bus --
+    wire [63:0] bus_address,
+    wire [63:0] bus_write_data,
+    wire        bus_write_enable,
+    wire        bus_read_enable,
+    wire [63:0] bus_read_data
 
     // -- Clock --
     wire clock_1hz;
