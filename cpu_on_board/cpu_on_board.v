@@ -90,6 +90,8 @@ module cpu_on_board (
     wire        bus_write_enable;
     wire        bus_read_enable;
     wire [63:0] bus_read_data;
+    // -- Bus controller --
+    // -- interrupt controller --
 
 endmodule
 
