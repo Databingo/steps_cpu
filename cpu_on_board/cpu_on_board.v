@@ -116,13 +116,18 @@ module cpu_on_board (
     localparam Stk_size = 32'h0000_1000; // 4KB STACK
     localparam Art_base = 32'h8000_0000; // qemu UART base
     localparam Key_base = 32'h8000_0010; 
-    wire Rom_selected = 1'b0;
-    wire Ram_selected = 1'b0;
-    wire Stk_selected = 1'b0;
-    wire Art_selected = 1'b0;
-    wire Key_selected = 1'b0;
+    wire Rom_selected;
+    wire Ram_selected;
+    wire Stk_selected;
+    wire Art_selected;
+    wire Key_selected;
 
     always @(*) begin
+        Rom_selected <= 1'b0;
+        Ram_selected <= 1'b0;
+        Stk_selected <= 1'b0;
+        Art_selected <= 1'b0;
+        Key_selected <= 1'b0;
 	if (bus_address == Art_base) begin
 	    Art_selected <= 1'b1;
 	end
