@@ -98,9 +98,9 @@ module cpu_on_board (
     localparam Art_base = 32'h8000_0000; // qemu UART base
     localparam Key_base = 32'h8000_0010; 
     wire Rom_selected, Ram_selected, Stk_selected, Art_selected, Key_selected;
-    assign Rom_selected  = (bus_address == Rom_base) ? 1 : 0;
-    assign Ram_selected  = (bus_address == Ram_base) ? 1 : 0;
-    assign Stk_selected  = (bus_address == Stk_base) ? 1 : 0;
+    assign Rom_selected  = (bus_address >= Rom_base && bus_address < Rom_base + Rom_size) ? 1 : 0;
+    assign Ram_selected  = (bus_address >= Ram_base && bus_address < Ram_base + Ram_size) ? 1 : 0;
+    assign Stk_selected  = (bus_address == Stk_base && bus_address < Stk_base + Stk_size) ? 1 : 0;
     assign Art_selected  = (bus_address == Art_base) ? 1 : 0;
     assign Key_selected  = (bus_address == Key_base) ? 1 : 0;
 
