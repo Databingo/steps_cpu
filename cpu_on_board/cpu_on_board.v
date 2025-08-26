@@ -104,6 +104,12 @@ module cpu_on_board (
 			   Rom_selected ? {32'd0, Rom[bus_address[11:2]]}:
 			   64'hDEADBEEF_DEADBEEF) : 0;
     wire uart_write_trigger = bus_write_enable && Art_selected;
+    always @(posedge CLOCK_50 or negedge KEY0) begin
+	if (!KEY0) uart_write_trigger = 0;
+	else begin
+	    if (uart_write_trigger == 1) uart_write_trigger  = 0;
+	end
+    end
 
 
     // -- interrupt controller --
