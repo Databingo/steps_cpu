@@ -28,7 +28,7 @@ module riscv64(
 	    bus_write_data <= 64'h41; // A
 	    bus_write_enable <= 1;
 	end
-    end;
+    end
     
     // --- Immediate decoders (Unchanged) --- 
     wire signed [63:0] w_imm_u = {{32{ir[31]}}, ir[31:12], 12'b0};
