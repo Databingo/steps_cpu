@@ -10,3 +10,29 @@ apt-get install libxtst6:i386
 apt-get install libxi6:i386
 dpkg --add-architecture i386
 apt-get install libcrypt1:i386
+
+// Road Map
+// Cyclone II FPGA Starter Board EP2C20F484C7 
+// Onchip M4K 239616~=29.95 KB
+// add cpu 
+// add board
+// add ram
+// add rom
+// add keyboard,let board blink keyboard key strokes
+// add monitor, let board blink and print cpu arbitary number
+// connect keyboard and monitor, let moniter print keyboard press
+// add bus, let data through bus
+// add bus controller(B) and interrupt controller(I), let keyboard trigger I to B to Cpu to Moniter
+// add timer
+// add CSR mechanism
+// add bios and bootloader
+// add shell
+// add kernel and os
+// add linux
+// add bare neural-network
+// add GPU Vector instructions
+// add CUDA
+// Next level toward deep: Draw digital map of basic sytem such as adder
+// Next lever toward deep: Mathmatical thoeries of digital culculation
+// cpu, neural network, compiler, Build Your Computer to Run Neural Network
+// BYC2RNN

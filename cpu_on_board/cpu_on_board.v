@@ -54,7 +54,6 @@ module cpu_on_board (
     reg key_pressed_delay;
     wire key_pressed;
     wire key_released;
-    wire key_pressed_edge = key_pressed && !key_pressed_delay;
 
     ps2_decoder ps2_decoder_inst (
         .clk(CLOCK_50),
@@ -67,6 +66,7 @@ module cpu_on_board (
      );
     // Drive Keyboard
     always @(posedge CLOCK_50) begin key_pressed_delay <= key_pressed; end
+    wire key_pressed_edge = key_pressed && !key_pressed_delay;
     // Connected to Bus
     //assign bus_write_enable  = key_pressed_edge && Art_selected; 
     //assign bus_address   = Art_base + 64'b0;            // Always write to the data register (address 0)
@@ -118,9 +118,6 @@ module cpu_on_board (
     wire [3:0] interrupt_vector;
     assign interrupt_vector = (key_pressed_edge) ? 1 : 0;
       
-      
-      
-      
     // -- Timer --
     // -- CSRs --
     // -- BOIS/bootloader --
@@ -129,29 +126,3 @@ module cpu_on_board (
     // -- DMA(Direct Memory Access) --?
 
 endmodule
-
-// Road Map
-// Cyclone II FPGA Starter Board EP2C20F484C7 
-// Onchip M4K 239616~=29.95 KB
-// add cpu 
-// add board
-// add ram
-// add rom
-// add keyboard,let board blink keyboard key strokes
-// add monitor, let board blink and print cpu arbitary number
-// connect keyboard and monitor, let moniter print keyboard press
-// add bus, let data through bus
-// add bus controller(B) and interrupt controller(I), let keyboard trigger I to B to Cpu to Moniter
-// add timer
-// add CSR mechanism
-// add bios and bootloader
-// add shell
-// add kernel and os
-// add linux
-// add bare neural-network
-// add GPU Vector instructions
-// add CUDA
-// Next level toward deep: Draw digital map of basic sytem such as adder
-// Next lever toward deep: Mathmatical thoeries of digital culculation
-// cpu, neural network, compiler, Build Your Computer to Run Neural Network
-// BYC2RNN
