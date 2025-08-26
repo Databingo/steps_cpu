@@ -40,11 +40,13 @@ module cpu_on_board (
         //.re(re),
         .heartbeat(LEDR9),
 
-        //.bus_address(bus_address),
-        //.bus_write_data(bus_write_data),
-        //.bus_write_enable(bus_write_enable),
-        //.bus_read_enable(bus_read_enable),
-        //.bus_read_data(bus_read_data)
+	.interrupt_vector(interrupt_vector),
+
+        .bus_address(bus_address),
+        .bus_write_data(bus_write_data),
+        .bus_write_enable(bus_write_enable),
+        .bus_read_enable(bus_read_enable),
+        .bus_read_data(bus_read_data)
     );
      
     // -- Keyboard -- 
@@ -66,9 +68,9 @@ module cpu_on_board (
     // Drive Keyboard
     always @(posedge CLOCK_50) begin key_pressed_delay <= key_pressed; end
     // Connected to Bus
-    assign bus_write_enable  = key_pressed_edge && Art_selected; 
-    assign bus_address   = Art_base + 64'b0;            // Always write to the data register (address 0)
-    assign bus_write_data = {24'b0, data[7:0]};    
+    //assign bus_write_enable  = key_pressed_edge && Art_selected; 
+    //assign bus_address   = Art_base + 64'b0;            // Always write to the data register (address 0)
+    //assign bus_write_data = {24'b0, data[7:0]};    
 
     // -- Monitor -- Connected to Bus
     jtag_uart_system my_jtag_system (
@@ -76,7 +78,7 @@ module cpu_on_board (
         .reset_reset_n                       (KEY0),
         .jtag_uart_0_avalon_jtag_slave_address   (bus_address[0:0]),
         .jtag_uart_0_avalon_jtag_slave_writedata (bus_write_data[31:0]),
-        .jtag_uart_0_avalon_jtag_slave_write_n   (~bus_write_enable),
+        .jtag_uart_0_avalon_jtag_slave_write_n   (~(bus_write_enable && Art_selected)),
         .jtag_uart_0_avalon_jtag_slave_chipselect(1'b1),
         .jtag_uart_0_avalon_jtag_slave_read_n    (1'b1)
     );
@@ -104,9 +106,21 @@ module cpu_on_board (
     assign Art_selected  = (bus_address == Art_base) ? 1 : 0;
     assign Key_selected  = (bus_address == Key_base) ? 1 : 0;
 
-      
-      
+    // -- write router --
+    //always @(posedge CLOCK_50) begin
+    //    if (bus_write_enable && Art_selected)
+    //end
+
+
+
     // -- interrupt controller --
+    //localparam keyboard_interrupt = 1;
+    wire [3:0] interrupt_vector;
+    assign interrupt_vector = (key_pressed_edge) ? 1 : 0;
+      
+      
+      
+      
     // -- Timer --
     // -- CSRs --
     // -- BOIS/bootloader --
