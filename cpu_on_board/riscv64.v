@@ -19,7 +19,7 @@ module riscv64(
 );
 
     // -- Interrupter --
-    always @(posedge clk or negedge reset) begin
+    always @(*) begin
 	bus_address <= 0 ;
 	bus_write_data <= 0;
 	bus_write_enable <= 0;
