@@ -115,8 +115,11 @@ module cpu_on_board (
 
     // -- interrupt controller --
     //localparam keyboard_interrupt = 1;
-    wire [3:0] interrupt_vector;
-    assign interrupt_vector = (key_pressed_edge) ? 1 : 0;
+    reg [3:0] interrupt_vector;
+    //assign interrupt_vector = (key_pressed_edge) ? 1 : 0;
+    always @(posedge CLOCK_50) begin
+        if (key_pressed_edge) interrupt_vector <= 1;
+    end
       
     // -- Timer --
     // -- CSRs --

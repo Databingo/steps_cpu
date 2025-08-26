@@ -19,12 +19,13 @@ module riscv64(
 );
 
     // -- Interrupter --
-    reg [3:0] interrupt_vector_prev;
+    //reg [3:0] interrupt_vector_prev;
     always @(posedge clk or negedge reset) begin
 	bus_address <= 0 ;
 	bus_write_data <= 0;
 	bus_write_enable <= 0;
-	if (interrupt_vector == 1 && interrupt_vector != 1) begin
+	//if (interrupt_vector == 1 && interrupt_vector != 1) begin
+	if (interrupt_vector == 1) begin
 	    bus_address <= 32'h8000_0000; // Art_base ;
 	    bus_write_data <= 64'h41; // A
 	    bus_write_enable <= 1;
