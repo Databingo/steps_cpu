@@ -7,7 +7,7 @@ module riscv64(
     output reg [63:0] re [0:31],
     output wire  heartbeat,
 
-    input wire [3:0] interrupt_vector,
+    input reg [3:0] interrupt_vector,
 
     output wire [63:0] bus_address,
     output wire [63:0] bus_write_data,
@@ -19,11 +19,11 @@ module riscv64(
 );
 
     // -- Interrupter --
-    always @(*) begin
+    always @(posedge clk or negedge reset) begin
 	bus_address <= 0 ;
 	bus_write_data <= 0;
 	bus_write_enable <= 0;
-	if (interrupt_vector == 4'b0001) begin
+	if (interrupt_vector == 1) begin
 	    bus_address <= 32'h8000_0000; // Art_base ;
 	    bus_write_data <= 64'h41; // A
 	    bus_write_enable <= 1;
