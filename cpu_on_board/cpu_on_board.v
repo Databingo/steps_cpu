@@ -118,7 +118,7 @@ module cpu_on_board (
     // -- interrupt controller --
     //localparam keyboard_interrupt = 1;
     reg [3:0] interrupt_vector;
-    reg interrupt_done;
+    reg interrupt_done = 1'b0;
     //assign interrupt_vector = (key_pressed_edge) ? 1 : 0;
     always @(posedge CLOCK_50) begin
         if (key_pressed_edge) interrupt_vector <= 1;
