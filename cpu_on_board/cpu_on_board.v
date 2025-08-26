@@ -102,8 +102,7 @@ module cpu_on_board (
 	                   Key_selected ? {56'd0, data[7:0]}:
 	                   Ram_selected ? {32'd0, Ram[bus_address[11:2]]}:
 			   Rom_selected ? {32'd0, Rom[bus_address[11:2]]}:
-			   64'hDEADBEEF_DEADBEEF
-		           ) : 0;
+			   64'hDEADBEEF_DEADBEEF) : 0;
     wire uart_write_trigger = bus_write_enable && Art_selected;
 
 
@@ -121,6 +120,7 @@ module cpu_on_board (
             interrupt_done_sync2 <= interrupt_done_sync1;
             if (key_pressed_edge) interrupt_vector <= 1;
             if (interrupt_done_sync2) interrupt_vector <= 0;
+	end
     end
 
     //// -- interrupt controller --
