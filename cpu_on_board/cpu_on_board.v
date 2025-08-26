@@ -32,7 +32,8 @@ module cpu_on_board (
 
     // -- CPU --
     riscv64 cpu (
-        .clk(clock_1hz), 
+        //.clk(clock_1hz), 
+        .clk(CLOCK_50), 
         .reset(KEY0),     // Active-low reset button
         .instruction(ir_ld),
         .pc(pc),
@@ -96,30 +97,15 @@ module cpu_on_board (
     localparam Ram_base = 32'h0000_1000, Ram_size = 32'h0000_2000; // 8KB RAM
     localparam Stk_base = 32'h0000_3000, Stk_size = 32'h0000_1000; // 4KB STACK
     localparam Art_base = 32'h8000_0000, Key_base = 32'h8000_0010; 
-    //wire Rom_selected, Ram_selected, Stk_selected, Art_selected, Key_selected;
-    //assign Rom_selected  = (bus_address >= Rom_base && bus_address < Rom_base + Rom_size) ? 1 : 0;
-    //assign Ram_selected  = (bus_address >= Ram_base && bus_address < Ram_base + Ram_size) ? 1 : 0;
-    //assign Stk_selected  = (bus_address == Stk_base && bus_address < Stk_base + Stk_size) ? 1 : 0;
-    //assign Art_selected  = (bus_address == Art_base) ? 1 : 0;
-    //assign Key_selected  = (bus_address == Key_base) ? 1 : 0;
     wire Rom_selected = (bus_address >= Rom_base && bus_address < Rom_base + Rom_size);
     wire Ram_selected = (bus_address >= Ram_base && bus_address < Ram_base + Ram_size);
     wire Stk_selected = (bus_address == Stk_base && bus_address < Stk_base + Stk_size);
     wire Art_selected = (bus_address == Art_base);
     wire Key_selected = (bus_address == Key_base);
 
-    // -- write router --
-    //always @(posedge CLOCK_50) begin
-    //    if (bus_write_enable && Art_selected)
-    //end
-
-
-
     // -- interrupt controller --
-    //localparam keyboard_interrupt = 1;
     reg [3:0] interrupt_vector;
     reg interrupt_done = 1'b0;
-    //assign interrupt_vector = (key_pressed_edge) ? 1 : 0;
     always @(posedge CLOCK_50) begin
         if (key_pressed_edge) interrupt_vector <= 1;
         if (interrupt_done) interrupt_vector <= 0;
@@ -149,9 +135,9 @@ module riscv64(
     input wire [3:0] interrupt_vector,
     output reg interrupt_done,
 
-    output wire [63:0] bus_address,
-    output wire [63:0] bus_write_data,
-    output wire        bus_write_enable,
+    output reg [63:0] bus_address,
+    output reg [63:0] bus_write_data,
+    output reg        bus_write_enable,
     output wire        bus_read_enable,
     input  wire [63:0] bus_read_data
 
