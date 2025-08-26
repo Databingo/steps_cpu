@@ -118,17 +118,18 @@ module cpu_on_board (
     // -- interrupt controller --
     reg [3:0] interrupt_vector;
     wire interrupt_done;
-    reg interrupt_done_sync1, interrupt_done_sync2;
+   // reg interrupt_done_sync1, interrupt_done_sync2;
     always @(posedge CLOCK_50 or negedge KEY0) begin
 	if (!KEY0) begin
 	    interrupt_vector <= 0;
-            interrupt_done_sync1 <= 0;
-	    interrupt_done_sync2 <= 0;
+            //interrupt_done_sync1 <= 0;
+	    //interrupt_done_sync2 <= 0;
 	end else begin
-            interrupt_done_sync1 <= interrupt_done;
-            interrupt_done_sync2 <= interrupt_done_sync1;
+            //interrupt_done_sync1 <= interrupt_done;
+            //interrupt_done_sync2 <= interrupt_done_sync1;
             if (key_pressed_edge) interrupt_vector <= 1;
-            if (interrupt_done_sync2) interrupt_vector <= 0;
+            //if (interrupt_done_sync2) interrupt_vector <= 0;
+            if (interrupt_done) interrupt_vector <= 0;
 	end
     end
 
