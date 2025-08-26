@@ -101,10 +101,16 @@ module cpu_on_board (
     wire Stk_selected = (bus_address == Stk_base && bus_address < Stk_base + Stk_size);
     wire Art_selected = (bus_address == Art_base);
     wire Key_selected = (bus_address == Key_base);
+    assign bus_read_data = Key_selected ? {56'd0, data[7:0]}:
+	                   Ram_selected ? {32'd0, Ram[bus_address[11:2]]}:
+			   Rom_selected ? {32'd0, Rom[bus_address[11:2]]}:
+			   64'hDEADBEEF_DEADBEEF;
+    wire uart_write_trigger = bus_write_enable && Art_selected;
+
 
     // -- interrupt controller --
     reg [3:0] interrupt_vector;
-    reg interrupt_done = 1'b0;
+    wire interrupt_done;
     always @(posedge clock_1hz) begin
         if (key_pressed_edge) interrupt_vector <= 1;
         if (interrupt_done) interrupt_vector <= 0;
@@ -143,20 +149,24 @@ module riscv64(
 
 );
 
+    //reg [63:0] keyboard_data_reg;
     // -- Interrupter --
     always @(posedge clk or negedge reset) begin
 	if (!reset) begin
-	    bus_address <= 0 ;
-	    bus_write_data <= 0;
+	    bus_read_enable <= 0;
 	    bus_write_enable <= 0;
+	    interrupt_done <= 0;
 	end else begin
-	    bus_address <= 0 ;
-	    bus_write_data <= 0;
+	    bus_read_enable <= 0;
 	    bus_write_enable <= 0;
+	    interrupt_done <= 0;
 	    if (interrupt_vector == 1) begin
+	        bus_address <= 32'h8000_1000; // Key_base ;
+	        bus_read_enable <= 1;
+	    end else if (bus_read_enable) begin
+                //keyboard_data_reg <= bus_read_data;
 	        bus_address <= 32'h8000_0000; // Art_base ;
-	        //bus_write_data <= {56'b0, data[7:0]}; // A
-	        bus_write_data <= 64'h41; // A
+	        bus_write_data <= bus_read_data;
 	        bus_write_enable <= 1;
 		interrupt_done <=1;
 	    end
