@@ -105,7 +105,7 @@ module cpu_on_board (
     // -- interrupt controller --
     reg [3:0] interrupt_vector;
     reg interrupt_done = 1'b0;
-    always @(posedge CLOCK_50) begin
+    always @(posedge clock_1hz) begin
         if (key_pressed_edge) interrupt_vector <= 1;
         if (interrupt_done) interrupt_vector <= 0;
     end
@@ -144,7 +144,7 @@ module riscv64(
 );
 
     // -- Interrupter --
-    always @(posedge clock_1hz or negedge reset) begin
+    always @(posedge clk or negedge reset) begin
 	if (!reset) begin
 	    bus_address <= 0 ;
 	    bus_write_data <= 0;
