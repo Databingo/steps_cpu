@@ -76,7 +76,8 @@ module cpu_on_board (
         .jtag_uart_0_avalon_jtag_slave_address   (bus_address[0:0]),
         .jtag_uart_0_avalon_jtag_slave_writedata (bus_write_data[31:0]),
         //.jtag_uart_0_avalon_jtag_slave_write_n   (~(bus_write_enable && Art_selected)),
-        .jtag_uart_0_avalon_jtag_slave_write_n   (~uart_write_trigger),
+        //.jtag_uart_0_avalon_jtag_slave_write_n   (~uart_write_trigger),
+        .jtag_uart_0_avalon_jtag_slave_write_n   (~uart_write_trigger_pulse),
         .jtag_uart_0_avalon_jtag_slave_chipselect(1'b1),
         .jtag_uart_0_avalon_jtag_slave_read_n    (1'b1)
     );
@@ -104,12 +105,14 @@ module cpu_on_board (
 			   Rom_selected ? {32'd0, Rom[bus_address[11:2]]}:
 			   64'hDEADBEEF_DEADBEEF) : 0;
     wire uart_write_trigger = bus_write_enable && Art_selected;
+    reg uart_write_trigger_dly;
+    wire uart_write_trigger_pulse;
     always @(posedge CLOCK_50 or negedge KEY0) begin
-	if (!KEY0) uart_write_trigger = 0;
-	else begin
-	    if (uart_write_trigger == 1) uart_write_trigger  = 0;
-	end
+	if (!KEY0) uart_write_trigger_dly <= 0;
+	else uart_write_trigger_dly <= uart_write_trigger;
     end
+
+    assign uart_write_trigger_pulse = uart_write_trigger  && !uart_write_trigger_dly;
 
 
     // -- interrupt controller --
