@@ -41,6 +41,7 @@ module cpu_on_board (
         .heartbeat(LEDR9),
 
 	.interrupt_vector(interrupt_vector),
+	.interrupt_done(interrupt_done),
 
         .bus_address(bus_address),
         .bus_write_data(bus_write_data),
@@ -91,20 +92,21 @@ module cpu_on_board (
     wire        bus_write_enable;
 
     // -- Bus controller --
-    localparam Rom_base = 32'h0000_0000;
-    localparam Rom_size = 32'h0000_1000; // 4KB ROM
-    localparam Ram_base = 32'h0000_1000;
-    localparam Ram_size = 32'h0000_2000; // 8KB RAM
-    localparam Stk_base = 32'h0000_3000;
-    localparam Stk_size = 32'h0000_1000; // 4KB STACK
-    localparam Art_base = 32'h8000_0000; // qemu UART base
-    localparam Key_base = 32'h8000_0010; 
-    wire Rom_selected, Ram_selected, Stk_selected, Art_selected, Key_selected;
-    assign Rom_selected  = (bus_address >= Rom_base && bus_address < Rom_base + Rom_size) ? 1 : 0;
-    assign Ram_selected  = (bus_address >= Ram_base && bus_address < Ram_base + Ram_size) ? 1 : 0;
-    assign Stk_selected  = (bus_address == Stk_base && bus_address < Stk_base + Stk_size) ? 1 : 0;
-    assign Art_selected  = (bus_address == Art_base) ? 1 : 0;
-    assign Key_selected  = (bus_address == Key_base) ? 1 : 0;
+    localparam Rom_base = 32'h0000_0000, Rom_size = 32'h0000_1000; // 4KB ROM
+    localparam Ram_base = 32'h0000_1000, Ram_size = 32'h0000_2000; // 8KB RAM
+    localparam Stk_base = 32'h0000_3000, Stk_size = 32'h0000_1000; // 4KB STACK
+    localparam Art_base = 32'h8000_0000, Key_base = 32'h8000_0010; 
+    //wire Rom_selected, Ram_selected, Stk_selected, Art_selected, Key_selected;
+    //assign Rom_selected  = (bus_address >= Rom_base && bus_address < Rom_base + Rom_size) ? 1 : 0;
+    //assign Ram_selected  = (bus_address >= Ram_base && bus_address < Ram_base + Ram_size) ? 1 : 0;
+    //assign Stk_selected  = (bus_address == Stk_base && bus_address < Stk_base + Stk_size) ? 1 : 0;
+    //assign Art_selected  = (bus_address == Art_base) ? 1 : 0;
+    //assign Key_selected  = (bus_address == Key_base) ? 1 : 0;
+    wire Rom_selected = (bus_address >= Rom_base && bus_address < Rom_base + Rom_size);
+    wire Ram_selected = (bus_address >= Ram_base && bus_address < Ram_base + Ram_size);
+    wire Stk_selected = (bus_address == Stk_base && bus_address < Stk_base + Stk_size);
+    wire Art_selected = (bus_address == Art_base):
+    wire Key_selected = (bus_address == Key_base);
 
     // -- write router --
     //always @(posedge CLOCK_50) begin
@@ -116,9 +118,11 @@ module cpu_on_board (
     // -- interrupt controller --
     //localparam keyboard_interrupt = 1;
     reg [3:0] interrupt_vector;
+    reg interrupt_done;
     //assign interrupt_vector = (key_pressed_edge) ? 1 : 0;
     always @(posedge CLOCK_50) begin
-        interrupt_vector <= key_pressed_edge ? 1 : 0;
+        if (key_pressed_edge) interrupt_vector <= 1;
+        if (interrupt_done) interrupt_vector <= 0;
     end
       
     // -- Timer --
@@ -143,6 +147,7 @@ module riscv64(
     output wire  heartbeat,
 
     input wire [3:0] interrupt_vector,
+    output reg interrupt_done,
 
     output wire [63:0] bus_address,
     output wire [63:0] bus_write_data,
@@ -168,6 +173,7 @@ module riscv64(
 	        //bus_write_data <= {56'b0, data[7:0]}; // A
 	        bus_write_data <= 64'h41; // A
 	        bus_write_enable <= 1;
+		interrupt_done <=1;
 	    end
 	end
     end
