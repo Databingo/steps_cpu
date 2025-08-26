@@ -112,6 +112,28 @@ module cpu_on_board (
         if (key_pressed_edge) interrupt_vector <= 1;
         if (interrupt_done) interrupt_vector <= 0;
     end
+
+    //// -- interrupt controller --
+    //reg [3:0] interrupt_vector;
+    //wire interrupt_done;
+    //
+    //// Add synchronizer for keyboard interrupt to CPU clock domain
+    //reg [2:0] key_sync;
+    //always @(posedge clock_1hz or negedge KEY0) begin
+    //    if (!KEY0) begin
+    //        key_sync <= 3'b0;
+    //        interrupt_vector <= 0;
+    //    end else begin
+    //        key_sync <= {key_sync[1:0], key_pressed_edge};
+    //        // Detect rising edge in CPU clock domain
+    //        if (key_sync[2] && !key_sync[1]) begin
+    //            interrupt_vector <= 1;
+    //        end
+    //        if (interrupt_done) begin
+    //            interrupt_vector <= 0;
+    //        end
+    //    end
+    //end
       
     // -- Timer --
     // -- CSRs --
@@ -160,12 +182,13 @@ module riscv64(
 	    if (interrupt_vector == 1) begin
 	        bus_address <= 32'h8000_0010; // Key_base ;
 	        bus_read_enable <= 1;
-	    end else if (bus_read_enable) begin
-                //keyboard_data_reg <= bus_read_data;
-	        bus_address <= 32'h8000_0000; // Art_base ;
-	        bus_write_data <= bus_read_data;
-	        bus_write_enable <= 1;
-		interrupt_done <=1;
+	        if (bus_read_enable) begin
+                    //keyboard_data_reg <= bus_read_data;
+	            bus_address <= 32'h8000_0000; // Art_base ;
+	            bus_write_data <= bus_read_data;
+	            bus_write_enable <= 1;
+		    interrupt_done <=1;
+	         end
 	    end
 	end
     end
