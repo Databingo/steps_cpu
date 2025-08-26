@@ -32,8 +32,7 @@ module cpu_on_board (
 
     // -- CPU --
     riscv64 cpu (
-        //.clk(clock_1hz), 
-        .clk(CLOCK_50), 
+        .clk(clock_1hz), 
         .reset(KEY0),     // Active-low reset button
         .instruction(ir_ld),
         .pc(pc),
@@ -145,7 +144,7 @@ module riscv64(
 );
 
     // -- Interrupter --
-    always @(posedge clk or negedge reset) begin
+    always @(posedge clk_1hz or negedge reset) begin
 	if (!reset) begin
 	    bus_address <= 0 ;
 	    bus_write_data <= 0;
