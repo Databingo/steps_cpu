@@ -25,9 +25,9 @@ module riscv64(
 	bus_write_data <= 0;
 	bus_write_enable <= 0;
 	interrupt_vector_prev <= interrupt_vector;
-	if (interrupt_vector_prev == 1 && interrupt_vector != 1) begin
+	//if (interrupt_vector_prev == 1 && interrupt_vector != 1) begin
 	//if (interrupt_vector == 1) begin
-	//if (interrupt_vector_prev == 1) begin
+	if (interrupt_vector_prev == 1) begin
 	    bus_address <= 32'h8000_0000; // Art_base ;
 	    bus_write_data <= 64'h41; // A
 	    bus_write_enable <= 1;
