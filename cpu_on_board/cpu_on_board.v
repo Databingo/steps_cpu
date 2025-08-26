@@ -144,7 +144,7 @@ module riscv64(
 );
 
     // -- Interrupter --
-    always @(posedge clk_1hz or negedge reset) begin
+    always @(posedge clock_1hz or negedge reset) begin
 	if (!reset) begin
 	    bus_address <= 0 ;
 	    bus_write_data <= 0;
