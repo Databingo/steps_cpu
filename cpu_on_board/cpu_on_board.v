@@ -98,19 +98,29 @@ module cpu_on_board (
     wire Stk_selected = (bus_address == Stk_base && bus_address < Stk_base + Stk_size);
     wire Art_selected = (bus_address == Art_base);
     wire Key_selected = (bus_address == Key_base);
-    assign bus_read_data = Key_selected ? {56'd0, data[7:0]}:
+    assign bus_read_data = bus_read_enable ? (
+	                   Key_selected ? {56'd0, data[7:0]}:
 	                   Ram_selected ? {32'd0, Ram[bus_address[11:2]]}:
 			   Rom_selected ? {32'd0, Rom[bus_address[11:2]]}:
 			   64'hDEADBEEF_DEADBEEF;
+		           ) : 0;
     wire uart_write_trigger = bus_write_enable && Art_selected;
 
 
     // -- interrupt controller --
     reg [3:0] interrupt_vector;
     wire interrupt_done;
-    always @(posedge CLOCK_50) begin
-        if (key_pressed_edge) interrupt_vector <= 1;
-        if (interrupt_done) interrupt_vector <= 0;
+    reg interrupt_done_sync1, interrupt_done_sync2;
+    always @(posedge CLOCK_50 or negedge KEY0) begin
+	if (!KEY0) begin
+	    interrupt_vector <= 0;
+            interrupt_done_sync1 <= 0;
+	    interrupt_done_sync2 <= 0;
+	end else begin
+            interrupt_done_sync1 <= interrupt_done;
+            interrupt_done_sync2 <= interrupt_done_sync1;
+            if (key_pressed_edge) interrupt_vector <= 1;
+            if (interrupt_done_sync2) interrupt_vector <= 0;
     end
 
     //// -- interrupt controller --
