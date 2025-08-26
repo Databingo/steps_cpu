@@ -68,10 +68,6 @@ module cpu_on_board (
     // Drive Keyboard
     always @(posedge CLOCK_50) begin key_pressed_delay <= key_pressed; end
     wire key_pressed_edge = key_pressed && !key_pressed_delay;
-    // Connected to Bus
-    //assign bus_write_enable  = key_pressed_edge && Art_selected; 
-    //assign bus_address   = Art_base + 64'b0;            // Always write to the data register (address 0)
-    //assign bus_write_data = {24'b0, data[7:0]};    
 
     // -- Monitor -- Connected to Bus
     jtag_uart_system my_jtag_system (
@@ -79,7 +75,8 @@ module cpu_on_board (
         .reset_reset_n                       (KEY0),
         .jtag_uart_0_avalon_jtag_slave_address   (bus_address[0:0]),
         .jtag_uart_0_avalon_jtag_slave_writedata (bus_write_data[31:0]),
-        .jtag_uart_0_avalon_jtag_slave_write_n   (~(bus_write_enable && Art_selected)),
+        //.jtag_uart_0_avalon_jtag_slave_write_n   (~(bus_write_enable && Art_selected)),
+        .jtag_uart_0_avalon_jtag_slave_write_n   (~uart_write_trigger),
         .jtag_uart_0_avalon_jtag_slave_chipselect(1'b1),
         .jtag_uart_0_avalon_jtag_slave_read_n    (1'b1)
     );
@@ -111,7 +108,7 @@ module cpu_on_board (
     // -- interrupt controller --
     reg [3:0] interrupt_vector;
     wire interrupt_done;
-    always @(posedge clock_1hz) begin
+    always @(posedge CLOCK_50) begin
         if (key_pressed_edge) interrupt_vector <= 1;
         if (interrupt_done) interrupt_vector <= 0;
     end
