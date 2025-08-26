@@ -75,8 +75,6 @@ module cpu_on_board (
         .reset_reset_n                       (KEY0),
         .jtag_uart_0_avalon_jtag_slave_address   (bus_address[0:0]),
         .jtag_uart_0_avalon_jtag_slave_writedata (bus_write_data[31:0]),
-        //.jtag_uart_0_avalon_jtag_slave_write_n   (~(bus_write_enable && Art_selected)),
-        //.jtag_uart_0_avalon_jtag_slave_write_n   (~uart_write_trigger),
         .jtag_uart_0_avalon_jtag_slave_write_n   (~uart_write_trigger_pulse),
         .jtag_uart_0_avalon_jtag_slave_chipselect(1'b1),
         .jtag_uart_0_avalon_jtag_slave_read_n    (1'b1)
@@ -118,43 +116,15 @@ module cpu_on_board (
     // -- interrupt controller --
     reg [3:0] interrupt_vector;
     wire interrupt_done;
-   // reg interrupt_done_sync1, interrupt_done_sync2;
     always @(posedge CLOCK_50 or negedge KEY0) begin
 	if (!KEY0) begin
 	    interrupt_vector <= 0;
-            //interrupt_done_sync1 <= 0;
-	    //interrupt_done_sync2 <= 0;
 	end else begin
-            //interrupt_done_sync1 <= interrupt_done;
-            //interrupt_done_sync2 <= interrupt_done_sync1;
             if (key_pressed_edge) interrupt_vector <= 1;
-            //if (interrupt_done_sync2) interrupt_vector <= 0;
             if (interrupt_done) interrupt_vector <= 0;
 	end
     end
 
-    //// -- interrupt controller --
-    //reg [3:0] interrupt_vector;
-    //wire interrupt_done;
-    //
-    //// Add synchronizer for keyboard interrupt to CPU clock domain
-    //reg [2:0] key_sync;
-    //always @(posedge clock_1hz or negedge KEY0) begin
-    //    if (!KEY0) begin
-    //        key_sync <= 3'b0;
-    //        interrupt_vector <= 0;
-    //    end else begin
-    //        key_sync <= {key_sync[1:0], key_pressed_edge};
-    //        // Detect rising edge in CPU clock domain
-    //        if (key_sync[2] && !key_sync[1]) begin
-    //            interrupt_vector <= 1;
-    //        end
-    //        if (interrupt_done) begin
-    //            interrupt_vector <= 0;
-    //        end
-    //    end
-    //end
-      
     // -- Timer --
     // -- CSRs --
     // -- BOIS/bootloader --
