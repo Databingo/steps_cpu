@@ -8,10 +8,11 @@ module riscv64(
     output wire  heartbeat,
 
     input wire [3:0] interrupt_vector,
+    output reg interrupt_done,
 
-    output wire [63:0] bus_address,
-    output wire [63:0] bus_write_data,
-    output wire        bus_write_enable,
+    output reg [63:0] bus_address,
+    output reg [63:0] bus_write_data,
+    output reg        bus_write_enable,
     output wire        bus_read_enable,
     input  wire [63:0] bus_read_data
 
@@ -21,17 +22,23 @@ module riscv64(
     // -- Interrupter --
     always @(posedge clk or negedge reset) begin
 	if (!reset) begin
-	    bus_address <= 0 ;
-	    bus_write_data <= 0;
+	    bus_read_enable <= 0;
 	    bus_write_enable <= 0;
+	    interrupt_done <= 0;
 	end else begin
-	    bus_address <= 0 ;
-	    bus_write_data <= 0;
+	    bus_read_enable <= 0;
 	    bus_write_enable <= 0;
+	    interrupt_done <= 0;
 	    if (interrupt_vector == 1) begin
-	        bus_address <= 32'h8000_0000; // Art_base ;
-	        bus_write_data <= 64'h41; // A
-	        bus_write_enable <= 1;
+	        bus_address <= 32'h8000_0010; // Key_base ;
+	        bus_read_enable <= 1;
+	        if (bus_read_enable) begin
+                    //keyboard_data_reg <= bus_read_data;
+	            bus_address <= 32'h8000_0000; // Art_base ;
+	            bus_write_data <= bus_read_data;
+	            bus_write_enable <= 1;
+		    interrupt_done <=1;
+	         end
 	    end
 	end
     end
