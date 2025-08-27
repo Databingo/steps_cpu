@@ -86,7 +86,7 @@ module ps2_decoder (
     end
 
 
-// -- convert to ASCII --
+// -- Scan Code Set 2 to ASCII --
 wire shift_active = shift_pressed ^ caps_lock;    
 
 always @(*) begin
