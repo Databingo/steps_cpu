@@ -35,22 +35,21 @@ module ps2_decoder (
     reg ctrl_pressed = 0;
     reg tab_pressed = 0;
 
-    // This is the core state machine for capturing the 11-bit frame.
-    // PS/2 protocol deserilizer
-    //
-    // time_out is drived by 50Hz and count in middle frame every bit internal 
-    // cnt reset to 0 if time_out overflow  
-    // time_out reset to 1 by every ps2_clk_falling_edge with out race with 50Hz on cnt.
-    //
-    reg [15:0] time_out; // 2^16-1 = 65535: about 1ms at 50MHz |PS2 10kHz, 11 bits take 1.1ms
+    // Robust Deployment PS/2 protocol deserilizer for 11-bit frame.
+    // time_out is drived by 50Hz for count in middle frame every bit internal OR reset to 1 by ps2_clk
+    // cnt is drived by ps2_clk OR by 50MHz reset to 0 if time_out overflow, 
+    // this drop broken frame
+    reg [15:0] time_out; // 2^16-1 = 65535: about 1ms at 50MHz | PS2 10kHz, 11 bits take 1.1ms
     always @(posedge clk) begin
         if (ps2_clk_falling_edge) begin //start at frame bit 0
 	    time_out <= 1;
             if (cnt >= 10) cnt <= 0;
             else cnt <= cnt + 1;
 	    temp_data[cnt] <= ps2_data_r1;
-        end else if (cnt > 0) time_out <= time_out + 1;
-	if (time_out == 0) cnt <= 0;
+        end else begin
+	    if (cnt > 0) time_out <= time_out + 1; // like IF-EXE working same time but need one cycle to effect with each other
+	    if (time_out == 0) cnt <= 0; // paused at cnt=0, time_out=1
+        end
     end
 
     // --- Decode, Output Latching Logic (simplified from tutorial) ---
