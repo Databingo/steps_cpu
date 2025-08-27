@@ -20,26 +20,15 @@ module ps2_decoder (
         ps2_data_r1 <= ps2_data_r0;
     end
 
-    // Falling edge detector for the synchronized clock (from tutorial)
-    wire ps2_clk_falling_edge = ps2_clk_r1 & (~ps2_clk_r0);
-
-    // --- Data Capture Logic ---
-    reg [3:0] cnt = 0;
-    reg [10:0] temp_data;
-    reg ignore_next = 0;
-    reg shift_pressed = 0;
-    reg caps_lock = 0;
-    reg extended = 0;
-    reg break_code = 0;
-    reg alt_pressed = 0;
-    reg ctrl_pressed = 0;
-    reg tab_pressed = 0;
-
     // *-- Robust Deployment PS/2 protocol deserilizer for 11-bit frame --*
-    // time_out is drived by 50Hz for count in middle frame every bit internal OR reset to 1 by ps2_clk
+    // time_out is drived by 50Hz for count in middle frame every bit internal OR reset to 1 by ps2_clk_falling edge
     // cnt is drived by ps2_clk OR by 50MHz reset to 0 if time_out overflow, 
     // this drop broken frame
+    wire ps2_clk_falling_edge = ps2_clk_r1 & (~ps2_clk_r0);
+    reg [3:0] cnt = 0;
+    reg [10:0] temp_data;
     reg [15:0] time_out; // 2^16-1 = 65535: about 1ms at 50MHz | PS2 10kHz, 11 bits take 1.1ms
+
     always @(posedge clk) begin
         if (ps2_clk_falling_edge) begin //start at frame bit 0
 	    time_out <= 1;
@@ -52,7 +41,16 @@ module ps2_decoder (
         end
     end
 
-    // --- Decode, Output Latching Logic (simplified from tutorial) ---
+    // -- Decode to Scan Code Set 2 --
+    reg ignore_next = 0;
+    reg shift_pressed = 0;
+    reg caps_lock = 0;
+    reg extended = 0;
+    reg break_code = 0;
+    reg alt_pressed = 0;
+    reg ctrl_pressed = 0;
+    reg tab_pressed = 0;
+
     always @(posedge clk) begin
 	key_pressed <= 0;
 	key_released <= 0;
@@ -87,6 +85,8 @@ module ps2_decoder (
         end
     end
 
+
+// -- convert to ASCII --
 wire shift_active = shift_pressed ^ caps_lock;    
 
 always @(*) begin
@@ -149,7 +149,6 @@ always @(*) begin
 	8'h4A: if (!extended) ascii_code = shift_active ? 8'h3F : 8'h2F; // / ?
     endcase
 end
- 
 
 endmodule
 
