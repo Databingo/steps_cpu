@@ -49,7 +49,9 @@ module ps2_decoder (
             if (cnt >= 10) cnt <= 0;
             else cnt <= cnt + 1;
 	    temp_data[cnt] <= ps2_data_r1;
-        end else if (cnt > 0) time_out <= time_out + 1;
+        end else begin
+	    if (cnt > 0) time_out <= time_out + 1;
+	end
 	if (time_out == 0) cnt <= 0;
     end
 
