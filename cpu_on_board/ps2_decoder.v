@@ -31,22 +31,21 @@ module ps2_decoder (
     reg caps_lock = 0;
     reg extended = 0;
     reg break_code = 0;
+    reg alt_pressed = 0;
+    reg ctrl_pressed = 0;
+    reg tab_pressed = 0;
 
     // This is the core state machine for capturing the 11-bit frame.
     always @(posedge clk) begin
         if (ps2_clk_falling_edge) begin
-            if (cnt >= 10) begin
-                cnt <= 0;
-            end else begin
-                cnt <= cnt + 1;
-            end
+            if (cnt >= 10) cnt <= 0;
+            else cnt <= cnt + 1;
 	    temp_data[cnt] <= ps2_data_r1;
-
         end
     end
 
-    // --- Output Latching Logic (simplified from tutorial) ---
-    always @(posedge clk) begin
+    // --- Decode, Output Latching Logic (simplified from tutorial) ---
+    always @(pedge clk) begin
 	key_pressed <= 0;
 	key_released <= 0;
 	// Output latching logci with shift/caps tracking
@@ -58,7 +57,7 @@ module ps2_decoder (
 		    ignore_next <= 1'b0; 
 	            break_code <= 1'b1;
 	            scan_code <= temp_data[8:1];
-		    // Handle key release
+		    // Handle key release // hE0 extended prefix         // hF0 break code
 		    if (temp_data[8:1] != 8'hE0 && temp_data[8:1] != 8'hF0) begin key_released <= 1'b1; end
 		    // Handle shife key release
 		    if (temp_data[8:1] == 8'h12 || temp_data[8:1] == 8'h59) begin shift_pressed <= 1'b0; end
@@ -71,7 +70,9 @@ module ps2_decoder (
 	                8'hF0: ignore_next <= 1'b1; // Break code (wait for next byte)
 	                8'h12, 8'h59: shift_pressed <= 1'b1; // Left or Right Shift
 	                8'h58: caps_lock <= ~caps_lock; // Caps Lock
-	                default: key_pressed <= 1'b1;
+			//8'h14: ctrl_pressed <= ~break_code; // Left Ctrl
+			//8'h14: alt_pressed <= ~break_code; // Left Alt
+	                default: if (!extend) key_pressed <= 1'b1;
 	            endcase
 	        end
 	    end
@@ -166,3 +167,10 @@ endmodule
         //8'h75: scan_to_ascii = 8'h38; // 8
         //8'h7D: scan_to_ascii = 8'h39; // 9
         //8'h70: scan_to_ascii = 8'h30; // 0
+   
+   
+// Standard Keyboard map
+//1.Make Code: Sent when a key is pressed. press A code 1C (printable)
+//2.Break Code: Sent when a key is released. release A code F0 1C
+//3.Extend Code: Special keys prefixed with 0xE0. press special key Arraw code E0 74 release  E0 F0 74
+//4.Modifier Keys: Shift, Ctrl, Alt, CapsLock, NumLock, ScrollLock -> Combination presses via track modifiers: Control code: Ctrl+A=0x01 ...
