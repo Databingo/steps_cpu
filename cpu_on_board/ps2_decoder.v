@@ -168,7 +168,7 @@ endmodule
         //8'h7D: scan_to_ascii = 8'h39; // 9
         //8'h70: scan_to_ascii = 8'h30; // 0
    
-   
+// Keyboard Protocol
 // Standard Keyboard map
 //1.Make Code: Sent when a key is pressed. press A code 1C (printable)
 //2.Break Code: Sent when a key is released. release A code F0 1C
