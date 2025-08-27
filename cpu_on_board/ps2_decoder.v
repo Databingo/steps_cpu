@@ -49,9 +49,7 @@ module ps2_decoder (
             if (cnt >= 10) cnt <= 0;
             else cnt <= cnt + 1;
 	    temp_data[cnt] <= ps2_data_r1;
-        end else begin
-	    if (cnt > 0) time_out <= time_out + 1;
-	end
+        end else if (cnt > 0) time_out <= time_out + 1;
 	if (time_out == 0) cnt <= 0;
     end
 
@@ -83,7 +81,7 @@ module ps2_decoder (
 	                8'h58: caps_lock <= ~caps_lock; // Caps Lock
 			//8'h14: ctrl_pressed <= ~break_code; // Left Ctrl
 			//8'h14: alt_pressed <= ~break_code; // Left Alt
-	                default: if (!extend) key_pressed <= 1'b1;
+	                default: if (!extended) key_pressed <= 1'b1;
 	            endcase
 	        end
 	    end
