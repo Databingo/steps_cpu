@@ -47,9 +47,13 @@ module ps2_decoder (
     reg caps_lock = 0;
     reg extended = 0;
     reg break_code = 0;
-    reg alt_pressed = 0;
-    reg ctrl_pressed = 0;
-    reg tab_pressed = 0;
+
+    reg alt = 0;
+    reg ctrl = 0;
+    reg tab = 0;
+    reg num_lock = 0;
+    reg scroll_lock = 0;
+    reg [7:0] last_key;
 
     always @(posedge clk) begin
 	key_pressed <= 0;

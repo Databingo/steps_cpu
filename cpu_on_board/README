@@ -36,3 +36,45 @@ apt-get install libcrypt1:i386
 // Next lever toward deep: Mathmatical thoeries of digital culculation
 // cpu, neural network, compiler, Build Your Computer to Run Neural Network
 // BYC2RNN
+
+
+
+main protocol:
+AXI4
+DDR
+SD
+USB
+HDMI
+MAC
+
+open source:
+vexRiscv cva6
+verilog-axi (Alex Forencich)
+liteDRAM
+verilog-sdc
+LiteX
+
+AI open source:
+NVDLA
+FINN
+VTA
+
+
+ASIC open source tools:
+Synthesis:Yosys 
+Fitter:Nextpnr,OpenROAD,Magic
+Verification&Signoff:Magic, Netgen, OpenSTA
+Tapeout:GDSII to foundry TMSC SMIC Samsung
+LowcostStart:Efabless, MOSIS, Europractice, 
+FreeStart:SkyWater130PDK
+Tutorials:zerotoasic, TinyTapeout
+Opensource FPGA: TangPrimer, Lattice ECP5/iCE 40: ULX3S, Xilinx 7 Series
+
+open source friendly FPGA Board Tie1:
+Enclustra Mercury+ KX2 / Radiona.ulx4s  with Xilinx Kintex UltraScale+  1500 USD
+ULX3S
+Tie2:
+Digilent Genesys ZU
+Terasic DE10-Pro
+Tie3:
+Digilent Nexys Video
