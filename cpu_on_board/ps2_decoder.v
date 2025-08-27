@@ -35,7 +35,7 @@ module ps2_decoder (
     reg ctrl_pressed = 0;
     reg tab_pressed = 0;
 
-    // Robust Deployment PS/2 protocol deserilizer for 11-bit frame.
+    // *-- Robust Deployment PS/2 protocol deserilizer for 11-bit frame --*
     // time_out is drived by 50Hz for count in middle frame every bit internal OR reset to 1 by ps2_clk
     // cnt is drived by ps2_clk OR by 50MHz reset to 0 if time_out overflow, 
     // this drop broken frame
