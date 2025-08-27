@@ -36,12 +36,21 @@ module ps2_decoder (
     reg tab_pressed = 0;
 
     // This is the core state machine for capturing the 11-bit frame.
+    // PS/2 protocol deserilizer
+    //
+    // time_out is drived by 50Hz and count in middle frame every bit internal 
+    // cnt reset to 0 if time_out overflow  
+    // time_out reset to 1 by every ps2_clk_falling_edge with out race with 50Hz on cnt.
+    //
+    reg [15:0] time_out; // 2^16-1 = 65535: about 1ms at 50MHz |PS2 10kHz, 11 bits take 1.1ms
     always @(posedge clk) begin
-        if (ps2_clk_falling_edge) begin
+        if (ps2_clk_falling_edge) begin //start at frame bit 0
+	    time_out <= 1;
             if (cnt >= 10) cnt <= 0;
             else cnt <= cnt + 1;
 	    temp_data[cnt] <= ps2_data_r1;
-        end
+        end else if (cnt > 0) time_out <= time_out + 1;
+	if (time_out == 0) cnt <= 0;
     end
 
     // --- Decode, Output Latching Logic (simplified from tutorial) ---
@@ -51,7 +60,7 @@ module ps2_decoder (
 	// Output latching logci with shift/caps tracking
         if (cnt == 0 && ps2_clk_falling_edge) extended <= 1'b0; // Reset extended flag after processing
         if (cnt == 10 && ps2_clk_falling_edge) begin
-            // Check the received data valid frame: start bit=0, stop bit=1, odd  parity is 1
+            // Check the received data valid frame: start bit=0, data 8-bits, parity 1-bit, stop bit=1, odd parity calcu be 1
 	    if (temp_data[0] == 1'b0 && temp_data[10]==1'b1 && (^temp_data[9:1]==1'b1)) begin
 	        if (ignore_next) begin 
 		    ignore_next <= 1'b0; 
@@ -168,9 +177,9 @@ endmodule
         //8'h7D: scan_to_ascii = 8'h39; // 9
         //8'h70: scan_to_ascii = 8'h30; // 0
    
-// Keyboard Protocol
-// Standard Keyboard map
+// PS2 protocol --> 11 bits frame sequences --> Scan code Set 2
+// Keyboard Protocol --> Scan code to ASCII code
 //1.Make Code: Sent when a key is pressed. press A code 1C (printable)
 //2.Break Code: Sent when a key is released. release A code F0 1C
-//3.Extend Code: Special keys prefixed with 0xE0. press special key Arraw code E0 74 release  E0 F0 74
+//3.Extend Code: Special keys prefixed with 0xE0(added to IBM PC keyboard). press special key Arraw code E0 74 release  E0 F0 74
 //4.Modifier Keys: Shift, Ctrl, Alt, CapsLock, NumLock, ScrollLock -> Combination presses via track modifiers: Control code: Ctrl+A=0x01 ...
