@@ -56,7 +56,7 @@ module ps2_decoder (
     end
 
     // --- Decode, Output Latching Logic (simplified from tutorial) ---
-    always @(pedge clk) begin
+    always @(posedge clk) begin
 	key_pressed <= 0;
 	key_released <= 0;
 	// Output latching logci with shift/caps tracking
