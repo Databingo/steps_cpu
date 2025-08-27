@@ -185,7 +185,8 @@ endmodule
 
 // PS2 protocol --> 11 bits frame sequences --> Scan code Set 2
 // Keyboard Protocol --> Scan code to ASCII code
-//1.Make Code: Sent when a key is pressed. press A code 1C (printable)
-//2.Break Code: Sent when a key is released. release A code F0 1C
-//3.Extend Code: Special keys prefixed with 0xE0(added to IBM PC keyboard). press special key Arraw code E0 74 release  E0 F0 74
-//4.Modifier Keys: Shift, Ctrl, Alt, CapsLock, NumLock, ScrollLock -> Combination presses via track modifiers: Control code: Ctrl+A=0x01 ...
+// 1.Make Code: Sent when a key is pressed. press A code 1C (printable)
+// 2.Break Code: Sent when a key is released. release A code F0 1C
+// 3.Extend Code: Special keys prefixed with 0xE0(added to IBM PC keyboard). press special key Arraw code E0 74 release  E0 F0 74
+// 4.Modifier Keys: Shift, Ctrl, Alt, CapsLock, NumLock, ScrollLock -> Combination presses via track modifiers: Control code: Ctrl+A=0x01 ...
+// https://tigerheli.mameworld.info/encoder/scancodesset2.htm
