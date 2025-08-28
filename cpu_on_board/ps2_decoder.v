@@ -199,8 +199,6 @@ always @(*) begin
 	endcase
     end
 end
-
-
 //assign key_pressed = (ascii_code != 8'h00);
 endmodule
 
