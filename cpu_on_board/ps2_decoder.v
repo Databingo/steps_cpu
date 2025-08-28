@@ -4,8 +4,7 @@ module ps2_decoder (
     input        ps2_data_async, // Asynchronous PS/2 data (was key_data)
     output reg [7:0] scan_code,  // The final, stable 8-bit scan code (was key_byte)
     output reg [7:0] ascii_code, // Turn into ASCII code if possible 
-    //output reg key_pressed,
-    output wire key_pressed,
+    output reg key_pressed,
     output reg key_released
 );
 
@@ -180,7 +179,7 @@ end
 end
 
 
-assign key_pressed = (ascii_code != 8'h00);
+//assign key_pressed = (ascii_code != 8'h00);
 endmodule
 
 // PS2 protocol --> 11 bits frame sequences --> Scan code Set 2
