@@ -5,7 +5,11 @@ module ps2_decoder (
     output reg [7:0] scan_code,  // The final, stable 8-bit scan code (was key_byte)
     output reg [7:0] ascii_code, // Turn into ASCII code if possible 
     output reg key_pressed,
-    output reg key_released
+    output reg key_released,
+    output reg error,
+    output wire sft_active,
+    output wire alt_active,
+    output wire ctr_active
 );
 
     // --- Synchronizer Stage (from tutorial) ---
@@ -27,7 +31,7 @@ module ps2_decoder (
     wire ps2_clk_falling_edge = ps2_clk_r1 & (~ps2_clk_r0);
     reg [3:0] cnt = 0;
     reg [10:0] temp_data;
-    reg [15:0] time_out; // 2^16-1 = 65535: about 1ms at 50MHz | PS2 10kHz, 11 bits take 1.1ms
+    reg [16:0] time_out; // 2^17-1 = 65536*2-1: about 2.62ms at 50MHz | PS2 10kHz, 11 bits take 1.1ms, 5kHz take 2.2ms
 
     always @(posedge clk) begin
         if (ps2_clk_falling_edge) begin //start at frame bit 0
@@ -62,6 +66,7 @@ module ps2_decoder (
         if (cnt == 10 && ps2_clk_falling_edge) begin
             // Verify received data frame: start bit=0, data 8-bits, parity 1-bit, stop bit=1, odd parity calculate be 1
 	    if (temp_data[0] == 1'b0 && temp_data[10]==1'b1 && (^temp_data[9:1]==1'b1)) begin
+		error <= 0;
                 scan_code <= temp_data[8:1];
 	        if (break_code) begin 
 	            break_code <= 0;
@@ -88,8 +93,7 @@ module ps2_decoder (
 	            if (temp_data[8:1] != 8'hE0 && temp_data[8:1] != 8'hF0) key_pressed <=1;
 		    if (extended && temp_data[8:1] != 8'hF0) extended <= 0;
 	        end
-	        // short cut (key_pressed && ascii_code == "C" && ctr_active) Ctr+C
-	    end
+	    end else error <= 1;
         end
     end
 
@@ -104,31 +108,31 @@ wire alt_active = alt_l || alt_r;
 always @(*) begin
     ascii_code = 8'h00; // Default to 0 for non-printable keys: F1-F12 etc.
     if (!break_code && !extended) begin
-        case(scan_code)
+        case(scan_code) // with ASCII Control code support
             // Number 
             8'h16: ascii_code = sft_active ? 8'h21 : 8'h31; // ! 1
             8'h1E: ascii_code = sft_active ? 8'h40 : 8'h32; // @ 2
             8'h26: ascii_code = sft_active ? 8'h23 : 8'h33; // # 3
             8'h25: ascii_code = sft_active ? 8'h24 : 8'h34; // $ 4
             8'h2E: ascii_code = sft_active ? 8'h25 : 8'h35; // % 5
-            8'h36: ascii_code = sft_active ? 8'h5E : 8'h36; // ^ 6
+            8'h36: ascii_code = ctr_active ? 8'h1E : (shift_active ? 8'h5E : 8'h36); // ^ 6
             8'h3D: ascii_code = sft_active ? 8'h26 : 8'h37; // & 7
             8'h3E: ascii_code = sft_active ? 8'h2A : 8'h38; // * 8
             8'h46: ascii_code = sft_active ? 8'h28 : 8'h39; // ( 9
             8'h45: ascii_code = sft_active ? 8'h29 : 8'h30; // ) 0
-            // Symbol
+            // Symbol 
             8'h0E: ascii_code = sft_active ? 8'h7E : 8'h60; // ~ `
-            8'h4E: ascii_code = sft_active ? 8'h5F : 8'h2D; // _ -
+            8'h4E: ascii_code = ctr_active ? 8'h1F : (shift_active ? 8'h5F : 8'h2D); // _ -
             8'h55: ascii_code = sft_active ? 8'h2B : 8'h3D; // + =
-            8'h54: ascii_code = sft_active ? 8'h7B : 8'h5B; // { [
-            8'h5B: ascii_code = sft_active ? 8'h7D : 8'h5D; // } ]
-            8'h5D: ascii_code = sft_active ? 8'h7C : 8'h5C; // | \
+            8'h54: ascii_code = ctr_active ? 8'h1B : (shift_active ? 8'h7B : 8'h5B); // { [
+            8'h5B: ascii_code = ctr_active ? 8'h1D : (shift_active ? 8'h7D : 8'h5D); // } ]
+            8'h5D: ascii_code = ctr_active ? 8'h1C : (shift_active ? 8'h7C : 8'h5C); // | \
             8'h4C: ascii_code = sft_active ? 8'h3A : 8'h3B; // : ;
             8'h52: ascii_code = sft_active ? 8'h22 : 8'h27; // " '
             8'h41: ascii_code = sft_active ? 8'h3C : 8'h2C; // < ,
             8'h49: ascii_code = sft_active ? 8'h3E : 8'h2E; // > .
-            8'h4A: ascii_code = sft_active ? 8'h3F : 8'h2F; // ? /
-            // Letter with Control support
+            8'h4A: ascii_code = ctr_active ? 8'h7F : (shift_active ? 8'h3F : 8'h2F); // ? /
+            // Letter
             8'h1C: ascii_code = ctr_active ? 8'h01 : (shift_active ? 8'h41 : 8'h61); // A a 
             8'h32: ascii_code = ctr_active ? 8'h02 : (shift_active ? 8'h42 : 8'h62); // B b
             8'h21: ascii_code = ctr_active ? 8'h03 : (shift_active ? 8'h43 : 8'h63); // C c
@@ -195,7 +199,6 @@ always @(*) begin
 	endcase
     end
 end
-end
 
 
 //assign key_pressed = (ascii_code != 8'h00);
@@ -208,3 +211,4 @@ endmodule
 // 3.Extend Code: Special keys prefixed with 0xE0(added to IBM PC keyboard). press special key Arraw code E0 74 release  E0 F0 74
 // 4.Modifier Keys: Shift, Ctrl, Alt, CapsLock, NumLock, ScrollLock -> Combination presses via track modifiers: Control code: Ctrl+A=0x01 ...
 // https://tigerheli.mameworld.info/encoder/scancodesset2.htm
+// fn?
