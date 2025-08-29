@@ -52,7 +52,8 @@ module cpu_on_board (
      
     // -- Keyboard -- 
     reg [31:0] data;
-    wire [7:0] ascii = data[7:0];
+    wire [7:0] ascii;
+    assign ascii = data[7:0];
     wire [7:0] scan;
     reg key_pressed_delay;
     wire key_pressed;
