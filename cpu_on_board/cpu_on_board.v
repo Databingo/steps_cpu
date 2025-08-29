@@ -52,6 +52,8 @@ module cpu_on_board (
      
     // -- Keyboard -- 
     reg [31:0] data;
+    wire [7:0] ascii = data[7:0];
+    wire [7:0] scan;
     reg key_pressed_delay;
     wire key_pressed;
     wire key_released;
@@ -61,7 +63,9 @@ module cpu_on_board (
         .ps2_clk_async(PS2_CLK),
         .ps2_data_async(PS2_DAT),
         //.scan_code(data[7:0])
-        .ascii_code(data[7:0]),
+        //.ascii_code(data[7:0]),
+        .scan_code(scan),
+        .ascii_code(ascii),
         .key_pressed(key_pressed),
         .key_released(key_released)
      );
@@ -98,7 +102,8 @@ module cpu_on_board (
     wire Art_selected = (bus_address == Art_base);
     wire Key_selected = (bus_address == Key_base);
     assign bus_read_data = bus_read_enable ? (
-	                   Key_selected ? {56'd0, data[7:0]}:
+	                   //Key_selected ? {56'd0, data[7:0]}:
+	                   Key_selected ? {56'd0, ascii}:
 	                   Ram_selected ? {32'd0, Ram[bus_address[11:2]]}:
 			   Rom_selected ? {32'd0, Rom[bus_address[11:2]]}:
 			   64'hDEADBEEF_DEADBEEF) : 0;
@@ -120,7 +125,7 @@ module cpu_on_board (
 	if (!KEY0) begin
 	    interrupt_vector <= 0;
 	end else begin
-            if (key_pressed_edge) interrupt_vector <= 1;
+            if (key_pressed_edge && ascii) interrupt_vector <= 1;
             if (interrupt_done) interrupt_vector <= 0;
 	end
     end
