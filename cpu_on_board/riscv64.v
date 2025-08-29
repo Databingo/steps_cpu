@@ -29,6 +29,7 @@ module riscv64(
 	    bus_read_enable <= 0;
 	    bus_write_enable <= 0;
 	    interrupt_done <= 0;
+	    // different interrupte vector
 	    if (interrupt_vector == 1) begin
 	        bus_address <= 32'h8000_0010; // Key_base ;
 	        bus_read_enable <= 1;
