@@ -99,11 +99,11 @@ module ps2_decoder (
 
 
 // -- Scan Code Set 2 to ASCII --
-wire sft_active = sft_l || sft_r;
-wire cap_active = cap_lock;    
-wire shift_active = sft_active ^ cap_active;
-wire ctr_active = ctr_l || ctr_r;
-wire alt_active = alt_l || alt_r;
+assign sft_active = sft_l || sft_r;
+assign cap_active = cap_lock;    
+assign shift_active = sft_active ^ cap_active;
+assign ctr_active = ctr_l || ctr_r;
+assign alt_active = alt_l || alt_r;
 
 always @(*) begin
     ascii_code = 8'h00; // Default to 0 for non-printable keys: F1-F12 etc.
