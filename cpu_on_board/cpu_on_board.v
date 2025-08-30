@@ -101,8 +101,10 @@ module cpu_on_board (
     wire Stk_selected = (bus_address >= Stk_base && bus_address < Stk_base + Stk_size);
     wire Art_selected = (bus_address == Art_base);
     wire Key_selected = (bus_address == Key_base);
+
     wire [63:0] bus_read_data = Key_selected ? {56'd0, data[7:0]}:
 	                   //Key_selected ? {56'd0, ascii}:
+	                   //Art_selected ? {56'd0, ascii}:
 	                   Ram_selected ? {32'd0, Ram[bus_address[11:2]]}:
 			   Rom_selected ? {32'd0, Rom[bus_address[11:2]]}:
 			   64'hDEADBEEF_DEADBEEF;
