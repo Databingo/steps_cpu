@@ -32,8 +32,8 @@ module cpu_on_board (
 
     // -- CPU --
     riscv64 cpu (
-        //.clk(clock_1hz), 
-        .clk(CLOCK_50), 
+        .clk(clock_1hz), 
+        //.clk(CLOCK_50), 
         .reset(KEY0),     // Active-low reset button
         .instruction(ir_ld),
         .pc(pc),
@@ -124,7 +124,7 @@ module cpu_on_board (
 	if (!KEY0) begin
 	    interrupt_vector <= 0;
 	end else begin
-            if (key_pressed_edge) interrupt_vector <= 1;
+            if (key_pressed_edge && data[7:0]) interrupt_vector <= 1;
             if (interrupt_done) interrupt_vector <= 0;
 	end
     end

@@ -30,35 +30,10 @@ module riscv64(
     wire mie_MEIE = csr[mie][11];
     wire mip_MEIP = csr[mie][11];
  
-    //// -- Interrupter --
-    //always @(posedge clk or negedge reset) begin
-    //    if (!reset) begin
-    //        bus_read_enable <= 0;
-    //        bus_write_enable <= 0;
-    //        interrupt_done <= 0;
-    //    end else begin
-    //        bus_read_enable <= 0;
-    //        bus_write_enable <= 0;
-    //        interrupt_done <= 0;
-    //        // Handler interrupt according to different interrupte vector
-    //        if (interrupt_vector == 1) begin
-    //            bus_address <= 32'h8000_0010; // Key_base ;
-    //            bus_read_enable <= 1;
-    //            if (bus_read_enable) begin
-    //                //keyboard_data_reg <= bus_read_data;
-    //                bus_address <= 32'h8000_0000; // Art_base ;
-    //                bus_write_data <= bus_read_data;
-    //                bus_write_enable <= 1;
-    //    	    interrupt_done <=1;
-    //             end
-    //        end
-    //    end
-    //end
     
     // -- Immediate decoders (Unchanged) -- 
     wire signed [63:0] w_imm_u = {{32{ir[31]}}, ir[31:12], 12'b0};
     wire [4:0] w_rd  = ir[11:7];
-
     // -- Bubble signal --
     reg bubble;
 
@@ -78,7 +53,7 @@ module riscv64(
         if (!reset) begin 
 	    bubble <= 1'b0;
             pc <= 0;
-            // Interrupt
+            // Interrupter
 	    bus_read_enable <= 0;
 	    bus_write_enable <= 0;
 	    interrupt_done <= 0;
@@ -93,10 +68,12 @@ module riscv64(
 	        bus_address <= 32'h8000_0010; // Key_base ;
 	        bus_read_enable <= 1;
 	        if (bus_read_enable) begin
-	            bus_address <= 32'h8000_0000; // Art_base ;
 	            bus_write_data <= bus_read_data;
+
+	            bus_address <= 32'h8000_0000; // Art_base ;
 	            bus_write_enable <= 1;
 		    interrupt_done <=1;
+
                     pc <= 0; // jump to ISR addr
 		    bubble <= 1'b1; // bubble wrong fetche instruciton by IF
 	         end
