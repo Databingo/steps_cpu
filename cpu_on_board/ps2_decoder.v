@@ -161,7 +161,7 @@ always @(*) begin
             8'h1A: ascii_code = ctr_active ? 8'h1A : (shift_active ? 8'h5A : 8'h7A); // Z z
             // Special characters
             8'h29: ascii_code = 8'h20; // Space
-            8'h66: ascii_code = 8'h08; // Backspcae
+            8'h66: ascii_code = 8'h08; // Backspace
             8'h5A: ascii_code = 8'h0D; // Enter
             8'h76: ascii_code = 8'h1B; // Escape
             8'h0D: ascii_code = 8'h09; // Tab

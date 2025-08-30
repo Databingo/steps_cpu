@@ -97,15 +97,14 @@ module cpu_on_board (
     localparam Art_base = 32'h8000_0000, Key_base = 32'h8000_0010; 
     wire Rom_selected = (bus_address >= Rom_base && bus_address < Rom_base + Rom_size);
     wire Ram_selected = (bus_address >= Ram_base && bus_address < Ram_base + Ram_size);
-    wire Stk_selected = (bus_address == Stk_base && bus_address < Stk_base + Stk_size);
+    wire Stk_selected = (bus_address >= Stk_base && bus_address < Stk_base + Stk_size);
     wire Art_selected = (bus_address == Art_base);
     wire Key_selected = (bus_address == Key_base);
-    assign bus_read_data = bus_read_enable ? (
-	                   Key_selected ? {56'd0, data[7:0]}:
+    assign bus_read_data = Key_selected ? {56'd0, data[7:0]}:
 	                   //Key_selected ? {56'd0, ascii}:
 	                   Ram_selected ? {32'd0, Ram[bus_address[11:2]]}:
 			   Rom_selected ? {32'd0, Rom[bus_address[11:2]]}:
-			   64'hDEADBEEF_DEADBEEF) : 0;
+			   64'hDEADBEEF_DEADBEEF);
     wire uart_write_trigger = bus_write_enable && Art_selected;
     reg uart_write_trigger_dly;
     wire uart_write_trigger_pulse;
