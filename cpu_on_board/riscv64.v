@@ -71,13 +71,16 @@ module riscv64(
 	            bus_write_data <= bus_read_data;
 	            bus_read_enable <= 0;
 
-	            //bus_address <= 32'h8000_0000; // Art_base ;
-	            //bus_write_enable <= 1;
+	            bus_address <= 32'h8000_0000; // Art_base ;
+	            bus_write_enable <= 1;
 		    interrupt_done <=1;
 
                     pc <= 0; // jump to ISR addr
 		    bubble <= 1'b1; // bubble wrong fetche instruciton by IF
 	         end
+		 if (bus_write_enable) begin 
+		     bus_write_enable <= 0;
+		 end
 	    end else if (bubble) bubble <= 1'b0; // Flush this cycle & Clear bubble signal for the next cycle
 	    else begin 
 	    // IR
