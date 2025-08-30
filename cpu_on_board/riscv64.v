@@ -53,7 +53,7 @@ module riscv64(
         if (!reset) begin 
 	    bubble <= 1'b0;
             pc <= 0;
-            // Interrupter
+            // Interrupt
 	    bus_read_enable <= 0;
 	    bus_write_enable <= 0;
 	    interrupt_done <= 0;
