@@ -86,7 +86,7 @@ module cpu_on_board (
 
     // -- Bus --
     wire [63:0] bus_address;
-    wire [63:0] bus_read_data;
+    //wire [63:0] bus_read_data;
     wire        bus_read_enable;
     wire [63:0] bus_write_data;
     wire        bus_write_enable;
@@ -101,7 +101,7 @@ module cpu_on_board (
     wire Stk_selected = (bus_address >= Stk_base && bus_address < Stk_base + Stk_size);
     wire Art_selected = (bus_address == Art_base);
     wire Key_selected = (bus_address == Key_base);
-    assign bus_read_data = Key_selected ? {56'd0, data[7:0]}:
+    wire [63:0] bus_read_data = Key_selected ? {56'd0, data[7:0]}:
 	                   //Key_selected ? {56'd0, ascii}:
 	                   Ram_selected ? {32'd0, Ram[bus_address[11:2]]}:
 			   Rom_selected ? {32'd0, Rom[bus_address[11:2]]}:
