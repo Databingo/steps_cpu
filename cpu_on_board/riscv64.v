@@ -72,7 +72,7 @@ module riscv64(
 	            bus_read_enable <= 0;
 
 	            //bus_address <= 32'h8000_0000; // Art_base ;
-	            bus_write_enable <= 1;
+	            //bus_write_enable <= 1;
 		    interrupt_done <=1;
 
                     pc <= 0; // jump to ISR addr
