@@ -61,16 +61,17 @@ module riscv64(
 	    // PC default +4
             pc <= pc + 4;
             // Interrupt
-	    bus_read_enable <= 0;
-	    bus_write_enable <= 0;
-	    interrupt_done <= 0;
-	    if (interrupt_vector == 1) begin
+	    //bus_read_enable <= 0;
+	    //bus_write_enable <= 0;
+	    //interrupt_done <= 0;
+	    if (interrupt_vector == 1 && !interrupt_done) begin
 	        bus_address <= 32'h8000_0010; // Key_base ;
 	        bus_read_enable <= 1;
 	        if (bus_read_enable) begin
 	            bus_write_data <= bus_read_data;
+	            bus_read_enable <= 0;
 
-	            bus_address <= 32'h8000_0000; // Art_base ;
+	            //bus_address <= 32'h8000_0000; // Art_base ;
 	            bus_write_enable <= 1;
 		    interrupt_done <=1;
 
