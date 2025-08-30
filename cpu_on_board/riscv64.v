@@ -91,6 +91,7 @@ module riscv64(
 	            bus_write_data <= bus_read_data;
 	            bus_write_enable <= 1;
 		    interrupt_done <=1;
+		    // Jump to ISR addr
                     pc <= 0;
 	         end
 	    end else begin
