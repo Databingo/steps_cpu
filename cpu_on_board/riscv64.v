@@ -83,6 +83,9 @@ module riscv64(
 	    bus_write_enable <= 0;
 	    interrupt_done <= 0;
         end else begin
+	    // PC default +4
+            pc <= pc + 4;
+
             // Interrupt
 	    bus_read_enable <= 0;
 	    bus_write_enable <= 0;
@@ -96,15 +99,15 @@ module riscv64(
 	            bus_write_enable <= 1;
 		    interrupt_done <=1;
 		    // Jump to ISR addr
-                    pc <= 0; bubble <= 1'b1;
+                    pc <= 0; 
+		    bubble <= 1'b1;
 	         end
 	    end else if (bubble) bubble <= 1'b0; 
 	    else begin // Flush this cycle & Clear flush signal for the next cycle
 
-	    // PC default +4
-            pc <= pc + 4;
             //re[31] <= 1'b0; // This was in your original code
-            
+       
+	    // IR
             casez(ir) 
 		32'b???????_?????_?????_???_?????_0110111:  re[w_rd] <= w_imm_u; // Lui
 		//32'b???????_?????_?????_???_?????_0110111:  begin re[w_rd] <= w_imm_u; data <= 32'h41; end
