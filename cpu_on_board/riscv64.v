@@ -66,12 +66,11 @@ module riscv64(
             ir <= 32'h00000000; 
         end else begin
             heartbeat <= ~heartbeat; // heartbeat
-            //ir <= ir_ld;
             ir <= instruction;
         end
     end
 
-    // EXE pc (Unchanged, CPU runs normally)
+    // EXE
     always @(posedge clk or negedge reset) begin
         if (!reset) begin 
             pc <= 0;
@@ -79,7 +78,6 @@ module riscv64(
 	    bus_read_enable <= 0;
 	    bus_write_enable <= 0;
 	    interrupt_done <= 0;
-	    // ----
         end else begin
             // Interrupt
 	    bus_read_enable <= 0;
@@ -89,14 +87,14 @@ module riscv64(
 	        bus_address <= 32'h8000_0010; // Key_base ;
 	        bus_read_enable <= 1;
 	        if (bus_read_enable) begin
-                    //keyboard_data_reg <= bus_read_data;
 	            bus_address <= 32'h8000_0000; // Art_base ;
 	            bus_write_data <= bus_read_data;
 	            bus_write_enable <= 1;
 		    interrupt_done <=1;
+                    pc <= 0;
 	         end
 	    end else begin
-	    // ----
+	    // Ir
             pc <= pc + 4;
             re[31] <= 1'b0; // This was in your original code
             
