@@ -75,7 +75,6 @@ module riscv64(
     always @(posedge clk or negedge reset) begin
         if (!reset) begin 
             pc <= 0;
-
             // Interrupt
 	    bus_read_enable <= 0;
 	    bus_write_enable <= 0;
@@ -83,6 +82,9 @@ module riscv64(
 	    // ----
         end else begin
             // Interrupt
+	    bus_read_enable <= 0;
+	    bus_write_enable <= 0;
+	    interrupt_done <= 0;
 	    if (interrupt_vector == 1) begin
 	        bus_address <= 32'h8000_0010; // Key_base ;
 	        bus_read_enable <= 1;
@@ -93,7 +95,7 @@ module riscv64(
 	            bus_write_enable <= 1;
 		    interrupt_done <=1;
 	         end
-	    end
+	    end else begin
 	    // ----
             pc <= pc + 4;
             re[31] <= 1'b0; // This was in your original code
@@ -102,6 +104,7 @@ module riscv64(
 		32'b???????_?????_?????_???_?????_0110111:  re[w_rd] <= w_imm_u; // Lui
 		//32'b???????_?????_?????_???_?????_0110111:  begin re[w_rd] <= w_imm_u; data <= 32'h41; end
             endcase
+	    end
         end
     end
 
