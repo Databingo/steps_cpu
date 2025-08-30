@@ -30,30 +30,30 @@ module riscv64(
     wire mie_MEIE = csr[mie][11];
     wire mip_MEIP = csr[mie][11];
  
-    // -- Interrupter --
-    always @(posedge clk or negedge reset) begin
-	if (!reset) begin
-	    bus_read_enable <= 0;
-	    bus_write_enable <= 0;
-	    interrupt_done <= 0;
-	end else begin
-	    bus_read_enable <= 0;
-	    bus_write_enable <= 0;
-	    interrupt_done <= 0;
-	    // Handler interrupt according to different interrupte vector
-	    if (interrupt_vector == 1) begin
-	        bus_address <= 32'h8000_0010; // Key_base ;
-	        bus_read_enable <= 1;
-	        if (bus_read_enable) begin
-                    //keyboard_data_reg <= bus_read_data;
-	            bus_address <= 32'h8000_0000; // Art_base ;
-	            bus_write_data <= bus_read_data;
-	            bus_write_enable <= 1;
-		    interrupt_done <=1;
-	         end
-	    end
-	end
-    end
+    //// -- Interrupter --
+    //always @(posedge clk or negedge reset) begin
+    //    if (!reset) begin
+    //        bus_read_enable <= 0;
+    //        bus_write_enable <= 0;
+    //        interrupt_done <= 0;
+    //    end else begin
+    //        bus_read_enable <= 0;
+    //        bus_write_enable <= 0;
+    //        interrupt_done <= 0;
+    //        // Handler interrupt according to different interrupte vector
+    //        if (interrupt_vector == 1) begin
+    //            bus_address <= 32'h8000_0010; // Key_base ;
+    //            bus_read_enable <= 1;
+    //            if (bus_read_enable) begin
+    //                //keyboard_data_reg <= bus_read_data;
+    //                bus_address <= 32'h8000_0000; // Art_base ;
+    //                bus_write_data <= bus_read_data;
+    //                bus_write_enable <= 1;
+    //    	    interrupt_done <=1;
+    //             end
+    //        end
+    //    end
+    //end
     
     // --- Immediate decoders (Unchanged) --- 
     wire signed [63:0] w_imm_u = {{32{ir[31]}}, ir[31:12], 12'b0};
@@ -75,7 +75,26 @@ module riscv64(
     always @(posedge clk or negedge reset) begin
         if (!reset) begin 
             pc <= 0;
+
+            // Interrupt
+	    bus_read_enable <= 0;
+	    bus_write_enable <= 0;
+	    interrupt_done <= 0;
+	    // ----
         end else begin
+            // Interrupt
+	    if (interrupt_vector == 1) begin
+	        bus_address <= 32'h8000_0010; // Key_base ;
+	        bus_read_enable <= 1;
+	        if (bus_read_enable) begin
+                    //keyboard_data_reg <= bus_read_data;
+	            bus_address <= 32'h8000_0000; // Art_base ;
+	            bus_write_data <= bus_read_data;
+	            bus_write_enable <= 1;
+		    interrupt_done <=1;
+	         end
+	    end
+	    // ----
             pc <= pc + 4;
             re[31] <= 1'b0; // This was in your original code
             
