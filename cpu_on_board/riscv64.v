@@ -61,9 +61,9 @@ module riscv64(
 	    // PC default +4
             pc <= pc + 4;
             // Interrupt
-	    //bus_read_enable <= 0;
-	    //bus_write_enable <= 0;
-	    //interrupt_done <= 0;
+	    bus_read_enable <= 0;
+	    bus_write_enable <= 0;
+	    interrupt_done <= 0;
 	    if (interrupt_vector == 1) begin
 	        bus_address <= 32'h8000_0010; // Key_base ;
 	        bus_read_enable <= 1;
@@ -78,10 +78,10 @@ module riscv64(
                     pc <= 0; // jump to ISR addr
 		    bubble <= 1'b1; // bubble wrong fetche instruciton by IF
 	         end
-		 if (bus_write_enable) begin 
-		     bus_write_enable <= 0;
-		    interrupt_done <=0;
-		 end
+		 //if (bus_write_enable) begin 
+		 //    bus_write_enable <= 0;
+		 //   interrupt_done <=0;
+		 //end
 	    end else if (bubble) bubble <= 1'b0; // Flush this cycle & Clear bubble signal for the next cycle
 	    else begin 
 	    // IR
