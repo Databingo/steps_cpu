@@ -80,6 +80,7 @@ module riscv64(
 	         end
 		 if (bus_write_enable) begin 
 		     bus_write_enable <= 0;
+		    interrupt_done <=0;
 		 end
 	    end else if (bubble) bubble <= 1'b0; // Flush this cycle & Clear bubble signal for the next cycle
 	    else begin 
