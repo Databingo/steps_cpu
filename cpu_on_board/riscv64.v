@@ -100,8 +100,8 @@ module riscv64(
                     pc <= 0; // jump to ISR addr
 		    bubble <= 1'b1; // bubble wrong fetche instruciton by IF
 	         end
-	    end else if (bubble) bubble <= 1'b0; 
-	    else begin // Flush this cycle & Clear flush signal for the next cycle
+	    end else if (bubble) bubble <= 1'b0; // Flush this cycle & Clear bubble signal for the next cycle
+	    else begin 
 	    // IR
             casez(ir) 
 		32'b???????_?????_?????_???_?????_0110111:  re[w_rd] <= w_imm_u; // Lui
