@@ -99,7 +99,7 @@ module riscv64(
                     pc <= 0; bubble <= 1'b1;
 	         end
 	    end else if (bubble) bubble <= 1'b0; 
-	    end else begin // Flush this cycle & Clear flush signal for the next cycle
+	    else begin // Flush this cycle & Clear flush signal for the next cycle
 
 	    // PC default +4
             pc <= pc + 4;
