@@ -104,7 +104,7 @@ module cpu_on_board (
 	                   //Key_selected ? {56'd0, ascii}:
 	                   Ram_selected ? {32'd0, Ram[bus_address[11:2]]}:
 			   Rom_selected ? {32'd0, Rom[bus_address[11:2]]}:
-			   64'hDEADBEEF_DEADBEEF);
+			   64'hDEADBEEF_DEADBEEF;
     wire uart_write_trigger = bus_write_enable && Art_selected;
     reg uart_write_trigger_dly;
     wire uart_write_trigger_pulse;
