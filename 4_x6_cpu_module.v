@@ -71,7 +71,7 @@ module cpu (
     // Debug/Trace Registers
     integer scontext = 12'h5a8; // Supervisor-mode context register
 
-    // --- CSR Index Function ---
+    // --- CSR Index Function --- could to be wire
     function [4:0] csr_index;
      input [11:0] csr_wire;
      begin
