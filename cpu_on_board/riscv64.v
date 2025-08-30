@@ -55,9 +55,12 @@ module riscv64(
     //    end
     //end
     
-    // --- Immediate decoders (Unchanged) --- 
+    // -- Immediate decoders (Unchanged) -- 
     wire signed [63:0] w_imm_u = {{32{ir[31]}}, ir[31:12], 12'b0};
     wire [4:0] w_rd  = ir[11:7];
+
+    // -- Bubble signal --
+    reg bubble;
 
     // IF ir (Unchanged)
     always @(posedge clk or negedge reset) begin
@@ -73,6 +76,7 @@ module riscv64(
     // EXE
     always @(posedge clk or negedge reset) begin
         if (!reset) begin 
+	    bubble <= 1'b0;
             pc <= 0;
             // Interrupt
 	    bus_read_enable <= 0;
@@ -92,12 +96,14 @@ module riscv64(
 	            bus_write_enable <= 1;
 		    interrupt_done <=1;
 		    // Jump to ISR addr
-                    pc <= 0;
+                    pc <= 0; bubble <= 1'b1;
 	         end
-	    end else begin
-	    // Ir
+	    end else begin if (bubble) bubble <= 1'b0; 
+	    end else begin// Flush this cycle & Clear flush signal for the next cycle
+
+	    // PC default +4
             pc <= pc + 4;
-            re[31] <= 1'b0; // This was in your original code
+            //re[31] <= 1'b0; // This was in your original code
             
             casez(ir) 
 		32'b???????_?????_?????_???_?????_0110111:  re[w_rd] <= w_imm_u; // Lui
