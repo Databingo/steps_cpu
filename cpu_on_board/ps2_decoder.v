@@ -14,23 +14,23 @@ module ps2_decoder (
 
     // --- Synchronizer Stage (from tutorial) ---
     // This is the essential double-flop synchronizer.
-    reg ps2_clk_r0 = 1'b1, ps2_clk_r1 = 1'b1;//, ps2_clk_r2 = 1'b1;
-    reg ps2_data_r0 = 1'b1, ps2_data_r1 = 1'b1;//, ps2_data_r2 = 1'b1;
+    reg ps2_clk_r0 = 1'b1, ps2_clk_r1 = 1'b1, ps2_clk_r2 = 1'b1;
+    reg ps2_data_r0 = 1'b1, ps2_data_r1 = 1'b1, ps2_data_r2 = 1'b1;
 
     always @(posedge clk) begin
         ps2_clk_r0 <= ps2_clk_async;
         ps2_clk_r1 <= ps2_clk_r0;
-        //ps2_clk_r2 <= ps2_clk_r1;
+        ps2_clk_r2 <= ps2_clk_r1;
         ps2_data_r0 <= ps2_data_async;
         ps2_data_r1 <= ps2_data_r0;
-        //ps2_data_r2 <= ps2_data_r1;
+        ps2_data_r2 <= ps2_data_r1;
     end
 
     // *-- Robust Deployment PS/2 protocol deserilizer for 11-bit frame --*
     // time_out is drived by 50MHz for count in middle frame every bit internal OR reset to 1 by ps2_clk_falling edge
     // cnt is drived by ps2_clk OR by 50MHz reset to 0 if time_out overflow, 
     // this drop broken frame
-    wire ps2_clk_falling_edge = ps2_clk_r1 & (~ps2_clk_r0);
+    wire ps2_clk_falling_edge = ps2_clk_r2 & (~ps2_clk_r1);
     reg [3:0] cnt = 0;
     reg [10:0] temp_data;
     reg [16:0] time_out; // 2^17-1 = 65536*2-1: about 2.62ms at 50MHz | PS2 10kHz, 11 bits take 1.1ms, 5kHz take 2.2ms
@@ -41,7 +41,7 @@ module ps2_decoder (
             //if (cnt >= 10) cnt <= 0;
             if (cnt == 10) cnt <= 0;
             else cnt <= cnt + 1;
-	    temp_data[cnt] <= ps2_data_r1;
+	    temp_data[cnt] <= ps2_data_r2;
         end else begin
 	    if (cnt > 0) time_out <= time_out + 1; // like IF-EXE working same time but need one cycle to effect with each other
 	    if (time_out == 0) cnt <= 0; // paused at cnt=0, time_out=1
