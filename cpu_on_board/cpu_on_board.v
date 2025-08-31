@@ -128,7 +128,8 @@ module cpu_on_board (
 	end else begin
             if (key_pressed_edge && data[7:0]) interrupt_vector <= 1;
             //if (key_pressed_edge) interrupt_vector <= 1;
-            if (interrupt_done) interrupt_vector <= 0;
+            //if (interrupt_done) interrupt_vector <= 0;
+            if (interrupt_vector != 0) interrupt_vector <= 0; // only sent once
 	end
     end
 
