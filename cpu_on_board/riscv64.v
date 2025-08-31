@@ -36,6 +36,7 @@ module riscv64(
     wire [4:0] w_rd  = ir[11:7];
     // -- Bubble signal --
     reg bubble;
+    reg lb_step;
 
     // IF ir (Unchanged)
     always @(posedge clk or negedge reset) begin
@@ -53,6 +54,7 @@ module riscv64(
         if (!reset) begin 
 	    bubble <= 1'b0;
             pc <= 0;
+	    lb_step <= 0;
             // Interrupt
 	    bus_read_enable <= 0;
 	    bus_write_enable <= 0;
@@ -62,30 +64,55 @@ module riscv64(
             pc <= pc + 4;
 
             // Interrupt
-	    bus_read_enable <= 0;
-	    bus_write_enable <= 0;
-	    interrupt_done <= 0;
-	    if (interrupt_vector == 1) begin
-	        bus_address <= 32'h8000_0010; // Key_base ;
-	        bus_read_enable <= 1;
-	        if (bus_read_enable) begin
-	            bus_write_data <= bus_read_data;
-	            bus_read_enable <= 0;
+	    //bus_read_enable <= 0;
+	    //bus_write_enable <= 0;
+	    //interrupt_done <= 0;
+	    if (interrupt_vector == 1 && interrupte_pending !=1) begin
+	        //bus_address <= 32'h8000_0010; // Key_base ;
+	        //bus_read_enable <= 1;
+	        //if (bus_read_enable) begin
+	        //    bus_write_data <= bus_read_data;
+	        //    bus_read_enable <= 0;
 
-	            bus_address <= 32'h8000_0000; // Art_base ;
-	            bus_write_enable <= 1;
-		    interrupt_done <=1;
+	        //    bus_address <= 32'h8000_0000; // Art_base ;
+	        //    bus_write_enable <= 1;
+		//    interrupt_done <=1;
 
-                    pc <= 0; // jump to ISR addr
+                    pc <= 1; // jump to ISR addr
 		    bubble <= 1'b1; // bubble wrong fetche instruciton by IF
-	         end
+		//    interrupt_done <=1;
+	        // end
 	    end else if (bubble) bubble <= 1'b0; // Flush this cycle & Clear bubble signal for the next cycle
 
 	    // IR
 	    else begin 
             casez(ir) 
 		32'b???????_?????_?????_???_?????_0110111:  re[w_rd] <= w_imm_u; // Lui
-		//32'b???????_?????_?????_???_?????_0110111:  begin re[w_rd] <= w_imm_u; data <= 32'h41; end
+                // Load
+	        //32'b???????_?????_?????_000_?????_0000011: begin mem_addr <= l_addr; re[w_rd] <= {{56{mem_data_in[7]}}, mem_data_in[7:0]}; end // Lb
+	        //32'b???????_?????_?????_000_?????_0000011: begin //mem_addr <= l_addr; re[w_rd] <= {{56{mem_data_in[7]}}, mem_data_in[7:0]}; end // Lb
+	        32'b1111111_11111_11111_111_11111_1111111: begin //mem_addr <= l_addr; re[w_rd] <= {{56{mem_data_in[7]}}, mem_data_in[7:0]}; end // Lb
+	    if (lb_step == 0) begin
+	        bus_address <= 32'h8000_0010; // Key_base ;
+	        bus_read_enable <= 1;
+		lb_step <= 1;
+		pc <= pc;
+		bubble <= 1;
+		interrupte_pending <= 1;
+	        if (bus_read_enable) begin //lb_step 1
+	            //bus_write_data <= bus_read_data;
+	            bus_write_data <= 32'h41;
+	            bus_read_enable <= 0;
+	            bus_address <= 32'h8000_0000; // Art_base ;
+	            bus_write_enable <= 1;
+		    interrupt_done <=1;
+		    lb_step <= 0;
+		    interrupte_pending <= 0;
+		end
+	    end
+	end
+                // Store
+	        //32'b???????_?????_?????_000_?????_0100011: begin mem_addr <= s_addr; mem_we <= 1; mem_data_out <= re[w_rs2][7:0]; end // Sb
             endcase
 	    end
         end
