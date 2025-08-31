@@ -37,7 +37,7 @@ module riscv64(
     // -- Bubble signal --
     reg bubble;
     reg lb_step;
-
+    reg interrupte_pending 
     // IF ir (Unchanged)
     always @(posedge clk or negedge reset) begin
         if (!reset) begin 
