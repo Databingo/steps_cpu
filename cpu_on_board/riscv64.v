@@ -2,7 +2,7 @@ module riscv64(
     input wire clk, 
     input wire reset,     // Active-low reset button
     input wire [31:0] instruction,
-    output reg [31:0] pc,
+    output reg [31:0] pc = 11,
     output reg [31:0] ir,
     output reg [63:0] re [0:31],
     output wire  heartbeat,
