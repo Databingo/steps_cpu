@@ -92,25 +92,31 @@ module riscv64(
 	        //32'b???????_?????_?????_000_?????_0000011: begin mem_addr <= l_addr; re[w_rd] <= {{56{mem_data_in[7]}}, mem_data_in[7:0]}; end // Lb
 	        //32'b???????_?????_?????_000_?????_0000011: begin //mem_addr <= l_addr; re[w_rd] <= {{56{mem_data_in[7]}}, mem_data_in[7:0]}; end // Lb
 	        32'b1111111_11111_11111_111_11111_1111111: begin //mem_addr <= l_addr; re[w_rd] <= {{56{mem_data_in[7]}}, mem_data_in[7:0]}; end // Lb
-	    if (lb_step == 0) begin
-	        bus_address <= 32'h8000_0010; // Key_base ;
-	        bus_read_enable <= 1;
-		lb_step <= 1;
-		pc <= pc;
-		bubble <= 1;
-		interrupte_pending <= 1;
-	        if (bus_read_enable) begin //lb_step 1
+	        if (lb_step == 0) begin
+	            bus_address <= 32'h8000_0010; // Key_base ;
+	            bus_read_enable <= 1;
+	            lb_step <= 1;
+	            pc <= pc;
+	            bubble <= 1;
+	            interrupte_pending <= 1;
+	        end
+	        if (lb_step == 1) begin //lb_step 1
 	            //bus_write_data <= bus_read_data;
-	            bus_write_data <= 32'h41;
 	            bus_read_enable <= 0;
+	            bus_write_data <= 32'h41;
 	            bus_address <= 32'h8000_0000; // Art_base ;
 	            bus_write_enable <= 1;
+		    lb_step <= 2;
+	            pc <= pc;
+	            bubble <= 1;
+		end
+	        if (lb_step == 2) begin //lb_step 1
+	            bus_write_enable <= 0;
 		    interrupt_done <=1;
 		    lb_step <= 0;
 		    interrupte_pending <= 0;
 		end
 	    end
-	end
                 // Store
 	        //32'b???????_?????_?????_000_?????_0100011: begin mem_addr <= s_addr; mem_we <= 1; mem_data_out <= re[w_rs2][7:0]; end // Sb
             endcase
