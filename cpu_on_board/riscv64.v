@@ -54,7 +54,7 @@ module riscv64(
         if (!reset) begin 
 	    bubble <= 1'b0;
             //pc <= 0;
-            pc <= 10; //0-10 rom; 11- ram
+            pc <= 11; //0-10 rom; 11- ram
 	    lb_step <= 0;
             // Interrupt
 	    bus_read_enable <= 0;
