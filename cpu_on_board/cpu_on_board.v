@@ -42,7 +42,7 @@ module cpu_on_board (
         .heartbeat(LEDR9),
 
 	.interrupt_vector(interrupt_vector),
-	.interrupt_done(interrupt_done),
+	//.interrupt_done(interrupt_done),
 
         .bus_address(bus_address),
         .bus_write_data(bus_write_data),
