@@ -53,7 +53,8 @@ module riscv64(
     always @(posedge clk or negedge reset) begin
         if (!reset) begin 
 	    bubble <= 1'b0;
-            pc <= 0;
+            //pc <= 0;
+            pc <= 10; //0-10 rom; 11- ram
 	    lb_step <= 0;
             // Interrupt
 	    bus_read_enable <= 0;
@@ -78,7 +79,7 @@ module riscv64(
 	        //    bus_write_enable <= 1;
 		//    interrupt_done <=1;
 
-                    pc <= 1; // jump to ISR addr
+                    pc <= 0; // jump to ISR addr
 		    bubble <= 1'b1; // bubble wrong fetche instruciton by IF
 		//    interrupt_done <=1;
 	        // end
