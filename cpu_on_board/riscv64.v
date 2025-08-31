@@ -94,7 +94,7 @@ module riscv64(
                 // Load
 	        //32'b???????_?????_?????_000_?????_0000011: begin mem_addr <= l_addr; re[w_rd] <= {{56{mem_data_in[7]}}, mem_data_in[7:0]}; end // Lb
 	        //32'b???????_?????_?????_000_?????_0000011: begin //mem_addr <= l_addr; re[w_rd] <= {{56{mem_data_in[7]}}, mem_data_in[7:0]}; end // Lb
-		32'b0000000_00000_00000_000_00000_0000000: begin pc <= 11; bubble <= 1; end // mret minimal
+		32'b0000000_00000_00000_000_00000_0000000: begin pc <= 44; bubble <= 1; end // mret minimal
 	        32'b1111111_11111_11111_111_11111_1111111: begin //mem_addr <= l_addr; re[w_rd] <= {{56{mem_data_in[7]}}, mem_data_in[7:0]}; end // Lb
 	            bus_address <= 32'h8000_0000; // Art_base ;
 	            bus_write_data <= 32'h41;
