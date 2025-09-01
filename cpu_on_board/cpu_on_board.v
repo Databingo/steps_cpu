@@ -5,6 +5,7 @@ module cpu_on_board (
     (* chip_pin = "PIN_Y21, PIN_Y22, PIN_W21, PIN_W22, PIN_V21, PIN_V22, PIN_U21, PIN_U22" *) output wire [7:0] LEDG, // 8 green LEDs
     (* chip_pin = "R17" *) output reg LEDR9, // 1 red LEDs breath left most 
     (* chip_pin = "U18, Y18, V19, T18, Y19, U19, R19, R20" *) output wire [7:0] LEDR7_0, // 8 red LEDs right
+    (* chip_pin = "R20" *) output wire [7:0] LEDR7, // 8 red LEDs right
 
     (* chip_pin = "H15" *)  input wire PS2_CLK, 
     (* chip_pin = "J14" *)  input wire PS2_DAT 
@@ -130,7 +131,11 @@ module cpu_on_board (
 	if (!KEY0) begin
 	    interrupt_vector <= 0;
 	end else begin
-            if (key_pressed_edge && data[7:0]) interrupt_vector <= 1;
+            if (key_pressed_edge && data[7:0]) 
+		begin
+		    interrupt_vector <= 1;
+		    LEDR7 <= 1;
+		end
             //if (key_pressed_edge) interrupt_vector <= 1;
             //if (interrupt_done) interrupt_vector <= 0;
             if (interrupt_vector != 0) interrupt_vector <= 0; // only sent once
