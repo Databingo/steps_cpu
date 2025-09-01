@@ -65,7 +65,6 @@ module riscv64(
 	    bus_read_enable <= 0;
 	    bus_write_enable <= 0;
         end else begin
-	    bus_write_enable <= 0; 
 	    // PC default +4 (1.Could be overide 2.Take effect next cycle) 
             pc <= pc + 4;
 
@@ -81,13 +80,14 @@ module riscv64(
 
 	    // IR
 	    else begin 
+	    bus_write_enable <= 0; 
             casez(ir) 
 		// Lui
 		32'b???????_?????_?????_???_?????_0110111:  re[w_rd] <= w_imm_u;
 		// Mret 
 		32'b0000000_00000_00000_000_00000_0000000: begin 
 		    pc <= mepc; 
-		    bubble <= 1; 
+		    //bubble <= 1; 
 	            interrupt_pending <= 0;
 		    interrupt_done <= 1;
 		end 
@@ -96,7 +96,7 @@ module riscv64(
 	            bus_address <= 32'h8000_0000; // Art_base ;
 	            bus_write_data <= 32'h41;
 	            bus_write_enable <= 1;
-	            interrupt_pending <= 0;
+	            //interrupt_pending <= 0;
 	        end
                 // Store
             endcase
