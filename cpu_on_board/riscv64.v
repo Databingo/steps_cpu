@@ -87,7 +87,7 @@ module riscv64(
 		// Mret 
 		32'b0000000_00000_00000_000_00000_0000000: begin 
 		    pc <= mepc; 
-		    //bubble <= 1; 
+		    bubble <= 1; 
 	            interrupt_pending <= 0;
 		    interrupt_done <= 1;
 		end 
