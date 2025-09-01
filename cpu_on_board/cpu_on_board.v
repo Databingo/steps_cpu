@@ -143,7 +143,7 @@ module cpu_on_board (
 	    //if (interrupt_vector !=0 && interrupt_pending == 0) begin
 	    //if (interrupt_vector !=0 && interrupt_done == 1) begin
 	    itp_1 <= interrupt_pending;
-	    itp_2 <= itp_1
+	    itp_2 <= itp_1;
 	    if (itp2 ==1 && itp1 == 0) begin
 		interrupt_vector <= 0; // only sent once
 		LEDR7 <= 0;
