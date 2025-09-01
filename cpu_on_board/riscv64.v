@@ -8,7 +8,7 @@ module riscv64(
     output wire  heartbeat,
 
     input wire [3:0] interrupt_vector,
-    //output reg interrupt_done,
+    output reg  interrupt_pending,
 
     output reg [63:0] bus_address,
     output reg [63:0] bus_write_data,
@@ -37,7 +37,6 @@ module riscv64(
     // -- Bubble signal --
     reg bubble;
     reg lb_step;
-    reg interrupt_pending;
     reg [31:0] mepc; 
 
 
