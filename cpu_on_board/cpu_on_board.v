@@ -27,7 +27,7 @@ module cpu_on_board (
     );
 
     wire [31:0] pc;
-    wire [31:0] ir_bd; //assign ir_bd = Ram[pc>>2];
+    reg [31:0] ir_bd; //assign ir_bd = Ram[pc>>2];
     always @(posedge CLOCK_50) begin
 	ir_bd = Ram[pc>>2];
     end
