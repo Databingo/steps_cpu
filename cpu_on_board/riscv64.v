@@ -46,7 +46,7 @@ module riscv64(
     always @(posedge clk or negedge reset) begin
         if (!reset) begin 
             heartbeat <= 1'b0; 
-            ir <= 32'h00000000; 
+            ir <= 32'h00010000; 
         end else begin
             heartbeat <= ~heartbeat; // heartbeat
             ir <= instruction;
