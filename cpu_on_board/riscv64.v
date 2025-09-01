@@ -9,7 +9,7 @@ module riscv64(
 
     input  reg [3:0] interrupt_vector,
     output reg  interrupt_pending,
-    output reg  interrupt_done,
+    output reg  interrupt_ack,
 
     output reg [63:0] bus_address,
     output reg [63:0] bus_write_data,
@@ -61,6 +61,7 @@ module riscv64(
 	    lb_step <= 0;
             // Interrupt reset
 	    interrupt_pending <= 0;
+	    interrupt_ack <= 0;
 	    //interrupt_done <= 0;
 	    bus_read_enable <= 0;
 	    bus_write_enable <= 0;
@@ -69,11 +70,12 @@ module riscv64(
             pc <= pc + 4;
 
             // Interrupt
-	    if (interrupt_vector == 1 && interrupt_pending !=1 ) begin
+	    if (interrupt_vector == 1 && interrupt_pending !=1) begin
 		    mepc <= pc; // save pc
                     pc <= 0; // jump to ISR addr
 		    bubble <= 1'b1; // bubble wrong fetche instruciton by IF
 	            interrupt_pending <= 1;
+		    interrupt_ack <= 1;
 
             // Bubble
 	    end else if (bubble) bubble <= 1'b0; // Flush this cycle & Clear bubble signal for the next cycle
@@ -88,7 +90,7 @@ module riscv64(
 		32'b0000000_00000_00000_000_00000_0000000: begin 
 		    pc <= mepc; 
 		    bubble <= 1; 
-	            interrupt_pending <= 2;
+	            interrupt_pending <= 0;
 		end 
                 // Load
 	        32'b1111111_11111_11111_111_11111_1111111: begin
