@@ -37,7 +37,7 @@ module riscv64(
     // -- Bubble signal --
     reg bubble;
     reg lb_step;
-    reg interrupt_pending = 0;
+    reg interrupt_pending;
     reg [31:0] mepc; 
 
 
@@ -60,6 +60,7 @@ module riscv64(
             pc <= 44; //
 	    lb_step <= 0;
             // Interrupt reset
+	    interrupt_pending <= 0;
 	    bus_read_enable <= 0;
 	    bus_write_enable <= 0;
         end else begin
