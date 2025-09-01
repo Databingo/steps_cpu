@@ -47,7 +47,7 @@ module cpu_on_board (
         .heartbeat(LEDR9),
 
 	.interrupt_vector(interrupt_vector),
-	.interrupt_pending(interrupt_pending),
+	.interrupt_done(interrupt_done),
 
         .bus_address(bus_address),
         .bus_write_data(bus_write_data),
@@ -126,20 +126,17 @@ module cpu_on_board (
 
     // -- interrupt controller --
     reg [3:0] interrupt_vector;
-    wire interrupt_pending;
+    wire interrupt_done;
     always @(posedge CLOCK_50 or negedge KEY0) begin
 	if (!KEY0) begin
 	    interrupt_vector <= 0;
 	    LEDR7 <= 0;
 	end else begin
-            if (key_pressed_edge && data[7:0]) 
-		begin
+            if (key_pressed_edge && data[7:0]) begin
 		    interrupt_vector <= 1;
 		    LEDR7 <= 1;
-		end
-            //if (key_pressed_edge) interrupt_vector <= 1;
-            //if (interrupt_pending) interrupt_vector <= 0;
-	    if (interrupt_vector !=0 && interrupt_pending == 0) begin
+	    end
+	    if (interrupt_vector !=0 && interrupt_done == 0) begin
 		interrupt_vector <= 0; // only sent once
 		LEDR7 <= 0;
 		end

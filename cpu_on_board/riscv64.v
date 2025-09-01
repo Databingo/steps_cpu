@@ -9,6 +9,7 @@ module riscv64(
 
     input wire [3:0] interrupt_vector,
     output reg  interrupt_pending,
+    output reg  interrupt_done,
 
     output reg [63:0] bus_address,
     output reg [63:0] bus_write_data,
@@ -60,6 +61,7 @@ module riscv64(
 	    lb_step <= 0;
             // Interrupt reset
 	    interrupt_pending <= 0;
+	    interrupt_done <= 0;
 	    bus_read_enable <= 0;
 	    bus_write_enable <= 0;
         end else begin
@@ -87,6 +89,7 @@ module riscv64(
 		    pc <= mepc; 
 		    bubble <= 1; 
 	            interrupt_pending <= 0;
+		    interrupt_done <= 1;
 		end 
                 // Load
 	        32'b1111111_11111_11111_111_11111_1111111: begin
