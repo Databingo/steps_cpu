@@ -68,6 +68,7 @@ module riscv64(
         end else begin
 	    // PC default +4 (1.Could be overide 2.Take effect next cycle) 
             pc <= pc + 4;
+	    interrupt_ack <= 0;
 
             // Interrupt
 	    if (interrupt_vector == 1 && interrupt_pending !=1) begin
