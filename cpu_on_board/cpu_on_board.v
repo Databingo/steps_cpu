@@ -138,7 +138,7 @@ module cpu_on_board (
 		end
             //if (key_pressed_edge) interrupt_vector <= 1;
             //if (interrupt_pending) interrupt_vector <= 0;
-	    if (interrupt_pending == 0) begin
+	    if (interrupt_vector !=0 && interrupt_pending == 0) begin
 		interrupt_vector <= 0; // only sent once
 		LEDR7 <= 0;
 		end

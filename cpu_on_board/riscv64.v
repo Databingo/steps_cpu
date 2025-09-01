@@ -86,6 +86,7 @@ module riscv64(
 		32'b0000000_00000_00000_000_00000_0000000: begin 
 		    pc <= mepc; 
 		    bubble <= 1; 
+	            interrupt_pending <= 0;
 		end 
                 // Load
 	        32'b1111111_11111_11111_111_11111_1111111: begin
