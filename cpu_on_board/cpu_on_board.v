@@ -92,8 +92,8 @@ module cpu_on_board (
     wire        bus_write_enable;
 
     // -- Bus controller --
-    localparam Rom_base = 32'h0000_0000, Rom_size = 32'h0000_1000; // 4KB ROM
-    localparam Ram_base = 32'h0000_1000, Ram_size = 32'h0000_2000; // 8KB RAM
+    localparam Ram_base = 32'h0000_0000, Ram_size = 32'h0000_1000; // 4KB RAM
+    localparam Rom_base = 32'h0000_1000, Rom_size = 32'h0000_2000; // 8KB ROM
     localparam Stk_base = 32'h0000_3000, Stk_size = 32'h0000_1000; // 4KB STACK
     localparam Art_base = 32'h8000_0000, Key_base = 32'h8000_0010; 
     wire Rom_selected = (bus_address >= Rom_base && bus_address < Rom_base + Rom_size);
