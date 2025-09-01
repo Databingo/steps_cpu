@@ -1,0 +1,91 @@
+# for run quartus
+for install quartus II 13.0.1.232(support for cyclone II lowest version)
+debian-lxqt:
+dpkg --add-architecture i386
+apt upgrade
+sudo apt-get install libstdc++6:i386 libc6:i386 libx11-dev:i386 libxext-dev:i386 libxau-dev:i386 libfreetype6:i386 fontconfig:i386 expat:i386
+
+# for run qsys
+apt-get install libxtst6:i386
+apt-get install libxi6:i386
+dpkg --add-architecture i386
+apt-get install libcrypt1:i386
+
+// Road Map
+// Cyclone II FPGA Starter Board EP2C20F484C7 
+// Onchip M4K 239616~=29.95 KB
+// add cpu 
+// add board
+// add ram
+// add rom
+// add keyboard,let board blink keyboard key strokes
+// add monitor, let board blink and print cpu arbitary number
+// connect keyboard and monitor, let moniter print keyboard press
+// add bus, let data through bus
+// add bus controller(B) and interrupt controller(I), let keyboard trigger I to B to Cpu to Moniter
+// add timer
+// add CSR mechanism
+// add bios and bootloader
+// add shell
+// add kernel and os
+// add linux
+// add bare neural-network
+// add GPU Vector instructions
+// add CUDA
+// Next level toward deep: Draw digital map of basic sytem such as adder
+// Next lever toward deep: Mathmatical thoeries of digital culculation
+// cpu, neural network, compiler, Build Your Computer to Run Neural Network
+// BYC2RNN
+
+
+
+main protocol:
+AXI4
+DDR
+SD
+USB
+HDMI
+MAC
+
+open source:
+vexRiscv cva6
+verilog-axi (Alex Forencich)
+liteDRAM
+verilog-sdc
+LiteX
+
+AI open source:
+NVDLA
+FINN
+VTA
+
+
+ASIC open source tools:
+Synthesis:Yosys 
+Fitter:Nextpnr,OpenROAD,Magic
+Verification&Signoff:Magic, Netgen, OpenSTA
+Tapeout:GDSII to foundry TMSC SMIC Samsung
+LowcostStart:Efabless, MOSIS, Europractice, 
+FreeStart:SkyWater130PDK
+Tutorials:zerotoasic, TinyTapeout
+Opensource FPGA: TangPrimer, Lattice ECP5/iCE 40: ULX3S, Xilinx 7 Series
+
+open source friendly FPGA Board Tie1:
+Enclustra Mercury+ KX2 / Radiona.ulx4s  with Xilinx Kintex UltraScale+  1500 USD
+ULX3S
+Tie2:
+Digilent Genesys ZU
+Terasic DE10-Pro
+Tie3:
+Digilent Nexys Video
+
+
+Route: OpenLane(docker) zerotoasiccourse.com tinytapeout.com
+1. verilog without verdor IP/block
+2. Yosys
+3. Floorplaining: OpenROAD ioPlacer pdnGen
+4. Placement: OpenROAD RePlace
+5. ClockTreeSynthesis: OpenROAD TritonCTS
+6. Routing: OpenROAD TritonRoute
+7. GDSII generating: Magic
+8. Verification: Magic, Netgen, OpenSTA
