@@ -39,8 +39,6 @@ module riscv64(
     reg bubble;
     reg lb_step;
     reg [31:0] mepc; 
-    reg vec_1;
-    reg vec_2;
 
 
 
@@ -63,7 +61,7 @@ module riscv64(
 	    lb_step <= 0;
             // Interrupt reset
 	    interrupt_pending <= 0;
-	    interrupt_done <= 0;
+	    //interrupt_done <= 0;
 	    bus_read_enable <= 0;
 	    bus_write_enable <= 0;
         end else begin
@@ -71,11 +69,7 @@ module riscv64(
             pc <= pc + 4;
 
             // Interrupt
-	    vec_1 <= interrupt_vector;
-	    vec_2 <= vec_1;
-	    //if (interrupt_vector == 1 && interrupt_pending ==0) begin
-	    //if (vec_2 == 1 && vec_1 == 1 && interrupt_pending ==0) begin
-	    if (vec_2 == 1 && vec_1 == 1) begin
+	    if (interrupt_vector == 1 && interrupt_pending !=1 )) begin
 		    mepc <= pc; // save pc
                     pc <= 0; // jump to ISR addr
 		    bubble <= 1'b1; // bubble wrong fetche instruciton by IF
@@ -94,14 +88,13 @@ module riscv64(
 		32'b0000000_00000_00000_000_00000_0000000: begin 
 		    pc <= mepc; 
 		    bubble <= 1; 
-	            interrupt_pending <= 0;
+	            interrupt_pending <= 2;
 		end 
                 // Load
 	        32'b1111111_11111_11111_111_11111_1111111: begin
 	            bus_address <= 32'h8000_0000; // Art_base ;
 	            bus_write_data <= 32'h41;
 	            bus_write_enable <= 1;
-	            //interrupt_pending <= 0;
 	        end
                 // Store
             endcase

@@ -128,8 +128,6 @@ module cpu_on_board (
     wire [3:0] interrupt_vector;
     wire interrupt_done;
     wire interrupt_pending;
-    reg itp_1;
-    reg itp_2;
     always @(posedge CLOCK_50 or negedge KEY0) begin
 	if (!KEY0) begin
 	    interrupt_vector <= 0;
@@ -139,12 +137,7 @@ module cpu_on_board (
 		    interrupt_vector <= 1;
 		    LEDR7 <= 1;
 	    end
-	    //if (interrupt_done == 1) begin
-	    //if (interrupt_vector !=0 && interrupt_pending == 0) begin
-	    //if (interrupt_vector !=0 && interrupt_done == 1) begin
-	    itp_1 <= interrupt_pending;
-	    itp_2 <= itp_1;
-	    if (itp_2 ==1 && itp_1 == 0) begin
+	    if (interrupt_vector != 0 && interrupt_pending == 2) begin
 		interrupt_vector <= 0; // only sent once
 		LEDR7 <= 0;
 		end
