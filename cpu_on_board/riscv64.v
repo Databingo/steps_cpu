@@ -7,7 +7,7 @@ module riscv64(
     output reg [63:0] re [0:31],
     output wire  heartbeat,
 
-    input wire [3:0] interrupt_vector,
+    input  reg [3:0] interrupt_vector,
     output reg  interrupt_pending,
     output reg  interrupt_done,
 
