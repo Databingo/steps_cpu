@@ -38,7 +38,7 @@ module riscv64(
     reg bubble;
     reg lb_step;
     reg interrupt_pending = 0;
-    reg mepc; 
+    reg [31:0] mepc; 
 
 
 
@@ -63,7 +63,8 @@ module riscv64(
 	    bus_read_enable <= 0;
 	    bus_write_enable <= 0;
         end else begin
-	    // PC default +4
+	    bus_write_enable <= 0; 
+	    // PC default +4 (1.Could be overide 2.Take effect next cycle) 
             pc <= pc + 4;
 
             // Interrupt
@@ -79,48 +80,21 @@ module riscv64(
 	    // IR
 	    else begin 
             casez(ir) 
-		32'b???????_?????_?????_???_?????_0110111:  re[w_rd] <= w_imm_u; // Lui
-                // Load
-	        //32'b???????_?????_?????_000_?????_0000011: begin mem_addr <= l_addr; re[w_rd] <= {{56{mem_data_in[7]}}, mem_data_in[7:0]}; end // Lb
-	        //32'b???????_?????_?????_000_?????_0000011: begin //mem_addr <= l_addr; re[w_rd] <= {{56{mem_data_in[7]}}, mem_data_in[7:0]}; end // Lb
+		// Lui
+		32'b???????_?????_?????_???_?????_0110111:  re[w_rd] <= w_imm_u;
+		// Mret 
 		32'b0000000_00000_00000_000_00000_0000000: begin 
-		    bus_write_enable <= 0; 
 		    pc <= mepc; 
 		    bubble <= 1; 
-		end // mret minimal
-	        32'b1111111_11111_11111_111_11111_1111111: begin //mem_addr <= l_addr; re[w_rd] <= {{56{mem_data_in[7]}}, mem_data_in[7:0]}; end // Lb
+		end 
+                // Load
+	        32'b1111111_11111_11111_111_11111_1111111: begin
 	            bus_address <= 32'h8000_0000; // Art_base ;
 	            bus_write_data <= 32'h41;
 	            bus_write_enable <= 1;
 	            interrupt_pending <= 0;
-
-	        //if (lb_step == 0) begin
-	        //    bus_address <= 32'h8000_0010; // Key_base ;
-	        //    bus_read_enable <= 1;
-	        //    lb_step <= 1;
-	        //    pc <= pc;
-	        //    bubble <= 1;
-	        //    interrupt_pending <= 1;
-	        //end
-	        //if (lb_step == 1) begin //lb_step 1
-	        //    //bus_write_data <= bus_read_data;
-	        //    bus_read_enable <= 0;
-	        //    bus_write_data <= 32'h41;
-	        //    bus_address <= 32'h8000_0000; // Art_base ;
-	        //    bus_write_enable <= 1;
-		//    lb_step <= 2;
-	        //    pc <= pc;
-	        //    bubble <= 1;
-		//end
-	        //if (lb_step == 2) begin //lb_step 1
-	        //    bus_write_enable <= 0;
-		//    interrupt_done <=1;
-		//    lb_step <= 0;
-		//    interrupt_pending <= 0;
-		//end
-	    end
+	        end
                 // Store
-	        //32'b???????_?????_?????_000_?????_0100011: begin mem_addr <= s_addr; mem_we <= 1; mem_data_out <= re[w_rs2][7:0]; end // Sb
             endcase
 	    end
         end
