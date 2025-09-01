@@ -136,7 +136,7 @@ module cpu_on_board (
 		    interrupt_vector <= 1;
 		    LEDR7 <= 1;
 	    end
-	    if (interrupt_vector !=0 && interrupt_done == 0) begin
+	    if (interrupt_vector !=0 && interrupt_done == 1) begin
 		interrupt_vector <= 0; // only sent once
 		LEDR7 <= 0;
 		end
