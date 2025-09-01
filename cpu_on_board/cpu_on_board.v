@@ -130,6 +130,7 @@ module cpu_on_board (
     always @(posedge CLOCK_50 or negedge KEY0) begin
 	if (!KEY0) begin
 	    interrupt_vector <= 0;
+	    LEDR7 <= 0;
 	end else begin
             if (key_pressed_edge && data[7:0]) 
 		begin
