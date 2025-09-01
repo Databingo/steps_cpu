@@ -39,6 +39,8 @@ module riscv64(
     reg bubble;
     reg lb_step;
     reg [31:0] mepc; 
+    reg vec_1;
+    reg vec_2;
 
 
 
@@ -69,7 +71,11 @@ module riscv64(
             pc <= pc + 4;
 
             // Interrupt
-	    if (interrupt_vector == 1 && interrupt_pending !=1) begin
+	    vec_1 <= interrupt_vector;
+	    vec_2 <= vec_1;
+	    //if (interrupt_vector == 1 && interrupt_pending ==0) begin
+	    //if (vec_2 == 1 && vec_1 == 1 && interrupt_pending ==0) begin
+	    if (vec_2 == 1 && vec_1 == 1) begin
 		    mepc <= pc; // save pc
                     pc <= 0; // jump to ISR addr
 		    bubble <= 1'b1; // bubble wrong fetche instruciton by IF
@@ -89,7 +95,6 @@ module riscv64(
 		    pc <= mepc; 
 		    bubble <= 1; 
 	            interrupt_pending <= 0;
-		    interrupt_done <= 1;
 		end 
                 // Load
 	        32'b1111111_11111_11111_111_11111_1111111: begin
