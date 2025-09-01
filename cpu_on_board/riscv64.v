@@ -69,6 +69,7 @@ module riscv64(
 
             // Interrupt
 	    if (interrupt_vector == 1 && interrupt_pending !=1) begin
+		    ir <= 32'b0000000_00000_00000_000_00000_0000000;
 		    mepc <= pc; // save pc
                     pc <= 0; // jump to ISR addr
 		    bubble <= 1'b1; // bubble wrong fetche instruciton by IF
