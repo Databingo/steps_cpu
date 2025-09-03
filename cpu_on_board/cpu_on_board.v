@@ -16,8 +16,12 @@ module cpu_on_board (
     //initial $readmemb("rom.mif", Rom);
 
     // -- RAM -- for Load Program
+      
+      
+           
+    // -- MEM -- for all
     (* ram_style = "block" *) reg [31:0] Ram [0:2047]; // 8KB Radom Access Memory
-    initial $readmemb("ram.mif", Ram);
+    initial $readmemb("mem.mif", Ram);
 
     // -- Clock --
     wire clock_1hz;
@@ -111,7 +115,7 @@ module cpu_on_board (
 	                   //Key_selected ? {56'd0, ascii}:
 	                   //Art_selected ? {56'd0, ascii}:
 	                   Ram_selected ? {32'd0, Ram[bus_address[11:2]]}:
-			   Rom_selected ? {32'd0, Rom[bus_address[11:2]]}:
+			   Rom_selected ? {32'd0, Ram[bus_address[11:2]]}:
 			   64'hDEADBEEF_DEADBEEF;
     wire uart_write_trigger = bus_write_enable && Art_selected;
     reg uart_write_trigger_dly;
