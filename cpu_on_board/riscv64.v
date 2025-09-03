@@ -107,6 +107,7 @@ module riscv64(
 	            bus_write_data <= 32'h41;
 	            bus_write_enable <= 1;
 		    lb_step <= 0;
+		    end
 	        end
                 // Store
             endcase
