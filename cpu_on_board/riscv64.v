@@ -96,7 +96,7 @@ module riscv64(
                 // Load
 	        32'b1111111_11111_11111_111_11111_1111111: begin
 		    if (lb_step == 0) begin
-	            bus_address <= 32'h8000_1000; // Keyboard_base ;
+	            bus_address <= 32'h8000_0010; // Keyboard_base ;
 	            bus_read_enable <= 1;
 		    pc <= pc;
 		    bubble <= 1;
