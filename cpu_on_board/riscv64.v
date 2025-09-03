@@ -96,10 +96,17 @@ module riscv64(
                 // Load
 	        32'b1111111_11111_11111_111_11111_1111111: begin
 		    if (lb_step == 0) begin
+	            bus_address <= 32'h8000_1000; // Keyboard_base ;
+	            bus_read_enable <= 1;
+		    pc <= pc;
+		    bubble <= 1;
+		    lb_step <= 1;
+		    end
+		    if (lb_step == 1) begin
 	            bus_address <= 32'h8000_0000; // Art_base ;
 	            bus_write_data <= 32'h41;
 	            bus_write_enable <= 1;
-		    end
+		    lb_step <= 0;
 	        end
                 // Store
             endcase
