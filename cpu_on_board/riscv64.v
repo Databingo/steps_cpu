@@ -103,6 +103,8 @@ module riscv64(
 		    lb_step <= 1;
 		    end
 		    if (lb_step == 1) begin
+	            bus_read_enable <= 0;
+
 	            bus_address <= 32'h8000_0000; // Art_base ;
 	            bus_write_data <= bus_read_data; //32'h41;
 	            bus_write_enable <= 1;
