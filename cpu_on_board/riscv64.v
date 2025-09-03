@@ -38,6 +38,7 @@ module riscv64(
     // -- Bubble signal --
     reg bubble;
     reg lb_step;
+    reg sb_step;
     reg [31:0] mepc; 
 
 
@@ -59,6 +60,7 @@ module riscv64(
 	    bubble <= 1'b0;
             pc <= 44; //
 	    lb_step <= 0;
+            sb_step <= 0;
             // Interrupt reset
 	    interrupt_pending <= 0;
 	    interrupt_ack <= 0;
@@ -104,13 +106,30 @@ module riscv64(
 		    lb_step <= 1;
 		    end
 		    if (lb_step == 1) begin
-	            bus_address <= 32'h8000_0000; // Art_base ;
-	            bus_write_data <= bus_read_data; //32'h41;
-	            bus_write_enable <= 1;
+	            //bus_address <= 32'h8000_0000; // Art_base ;
+	            //bus_write_data <= bus_read_data; //32'h41;
+	            re[5]<= bus_read_data; //32'h41;
+	            //bus_write_enable <= 1;
 		    lb_step <= 0;
 		    end
 	        end
                 // Store
+	        32'b1111111_11111_11111_111_11110_1111111: begin
+		    if (sb_step == 0) begin
+	            bus_address <= 32'h8000_0000; // Art_base ;
+	            bus_write_data <= re[5];
+	            bus_write_enable <= 1;
+		    //pc <= pc;
+		    //bubble <= 1;
+		    //sb_step <= 1;
+		    //end
+		    //if (lb_step == 1) begin
+	            //bus_address <= 32'h8000_0000; // Art_base ;
+	            //bus_write_data <= bus_read_data; //32'h41;
+	            //bus_write_enable <= 1;
+		    //lb_step <= 0;
+		    end
+	        end
             endcase
 	    end
         end
