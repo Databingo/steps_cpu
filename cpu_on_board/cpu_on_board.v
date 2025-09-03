@@ -20,7 +20,7 @@ module cpu_on_board (
       
            
     // -- MEM -- for all
-    (* ram_style = "block" *) reg [31:0] Ram [0:2047]; // 8KB Radom Access Memory
+    (* ram_style = "block" *) reg [31:0] Ram [0:4096]; // 8KB Radom Access Memory
     initial $readmemb("mem.mif", Ram);
 
     // -- Clock --
