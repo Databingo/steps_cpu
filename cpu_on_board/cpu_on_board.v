@@ -145,9 +145,10 @@ module cpu_on_board (
         if (bus_write_enable) begin
             Cache[bus_address[11:2]] <= bus_write_data;
         end 
-	if (bus_read_enable) 
+	if (bus_read_enable) begin 
             addr_reg <= bus_address[11:2];
 	    reading <= 1;
+	end
 	if (addr_reg) begin
             bus_read_data <= {32'd0, Cache[addr_reg]};
 	    reading <= 0;
