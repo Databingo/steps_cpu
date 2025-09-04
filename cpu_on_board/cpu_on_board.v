@@ -6,9 +6,10 @@ module cpu_on_board (
     (* chip_pin = "PIN_R22" *) input wire KEY0,     // Active-low reset button
     (* chip_pin = "PIN_Y21, PIN_Y22, PIN_W21, PIN_W22, PIN_V21, PIN_V22, PIN_U21, PIN_U22" *) output wire [7:0] LEDG, // 8 green LEDs
     (* chip_pin = "R17" *) output reg LEDR9, // 1 red LEDs breath left most 
-    //(* chip_pin = "U18, Y18, V19, T18, Y19, U19, R19, R20" *) output wire [7:0] LEDR7_0, // 8 red LEDs right
-    (* chip_pin = "R20" *) output wire LEDR7, // 
-    (* chip_pin = "R19" *) output wire LEDR6, // 
+    //(* chip_pin = "U18, Y18, V19, T18, Y19, U19, R19, R20" *) output wire [7:0] LEDR0_0, // 8 red LEDs right
+    (* chip_pin = "R20" *) output wire LEDR0, // 
+    (* chip_pin = "R19" *) output wire LEDR1, // 
+    (* chip_pin = "U18, Y18, V19, T18, Y19, U19" *) output wire [5:0] LEDR_PC, // 8 red LEDs right
 
     (* chip_pin = "H15" *)  input wire PS2_CLK, 
     (* chip_pin = "J14" *)  input wire PS2_DAT 
@@ -33,6 +34,7 @@ module cpu_on_board (
 	ir_bd <= Cache[pc>>2];
     end
     wire [31:0] ir_ld; assign ir_ld = {ir_bd[7:0], ir_bd[15:8], ir_bd[23:16], ir_bd[31:24]}; // Endianness swap
+    assign LEDR_PC = pc;
 
     // -- CPU --
     riscv64 cpu (
@@ -103,7 +105,7 @@ module cpu_on_board (
     ////wire Stk_selected = (bus_address >= Stk_base && bus_address < Stk_base + Stk_size);
     wire Art_selected = (bus_address == `Art_base);
     wire Key_selected = (bus_address == `Key_base);
-    assign  LEDR6 = Key_selected;
+    assign  LEDR1 = Key_selected;
 
     wire [63:0] bus_addr;
     always @(posedge CLOCK_50) begin
@@ -138,15 +140,15 @@ module cpu_on_board (
     always @(posedge CLOCK_50 or negedge KEY0) begin
 	if (!KEY0) begin
 	    interrupt_vector <= 0;
-	    LEDR7 <= 0;
+	    LEDR0 <= 0;
 	end else begin
             if (key_pressed_edge && data[7:0]) begin
 		    interrupt_vector <= 1;
-		    LEDR7 <= 1;
+		    LEDR0 <= 1;
 	    end
 	    if (interrupt_vector != 0 && interrupt_ack == 1) begin
 		interrupt_vector <= 0; // only sent once
-		LEDR7 <= 0;
+		LEDR0 <= 0;
 		end
 		
 	end
