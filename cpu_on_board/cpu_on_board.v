@@ -104,11 +104,11 @@ module cpu_on_board (
     localparam Art_base = 32'h8000_0000; 
     localparam Key_base = 32'h8000_0010; 
     //localparam Stk_base = 32'h0000_3000, Stk_size = 32'h0000_1000; // 4KB STACK
-    wire Rom_selected = (bus_address >= Rom_base && bus_address < Rom_base + Rom_size);
-    wire Ram_selected = (bus_address >= Ram_base && bus_address < Ram_base + Ram_size);
-    //wire Stk_selected = (bus_address >= Stk_base && bus_address < Stk_base + Stk_size);
-    wire Art_selected = (bus_address == Art_base);
-    wire Key_selected = (bus_address == Key_base);
+    //wire Rom_selected = (bus_address >= Rom_base && bus_address < Rom_base + Rom_size);
+    //wire Ram_selected = (bus_address >= Ram_base && bus_address < Ram_base + Ram_size);
+    ////wire Stk_selected = (bus_address >= Stk_base && bus_address < Stk_base + Stk_size);
+    //wire Art_selected = (bus_address == Art_base);
+    //wire Key_selected = (bus_address == Key_base);
 
 //    wire [63:0] bus_read_data = Key_selected ? {56'd0, data[7:0]}:
 //	                   //Key_selected ? {56'd0, ascii}:
@@ -120,21 +120,23 @@ module cpu_on_board (
 //  // Bus read
     always @(posedge CLOCK_50) begin
 	if (bus_read_enable) begin
-	    if (Key_selected) bus_read_data <= {56'd0, data[7:0]};
-	    else if (Rom_selected) bus_read_data <= {32'd0, Rom[bus_address[11:2]]};
-	    else if (Ram_selected) bus_read_data <= {32'd0, Ram[bus_address[11:2]]};
+	         if (bus_address == Key_base) bus_read_data <= {56'd0, data[7:0]};
+	    else if (bus_address >= Rom_base && bus_address < Rom_base + Rom_size) bus_read_data <= {32'd0, Rom[bus_address[11:2]]};
+	    else if (bus_address >= Ram_base && bus_address < Ram_base + Ram_size) bus_read_data <= {32'd0, Ram[bus_address[11:2]]};
 	end
     end
     // Bus write
     always @(posedge CLOCK_50) begin
 	if (bus_write_enable) begin
-	    if (Ram_selected) Ram[bus_address[11:2]] <= bus_write_data;
+	         if (bus_address >= Ram_base && bus_address < Ram_base + Ram_size) Ram[bus_address[11:2]] <= bus_write_data;
+	    else if (bus_address == Art_base) uart_write_trigger <= 1; 
 	end
     end
 
 
 
-    wire uart_write_trigger = bus_write_enable && Art_selected;
+    //wire uart_write_trigger = bus_write_enable && Art_selected;
+    reg uart_write_trigger;
     reg uart_write_trigger_dly;
     wire uart_write_trigger_pulse;
     always @(posedge CLOCK_50 or negedge KEY0) begin
