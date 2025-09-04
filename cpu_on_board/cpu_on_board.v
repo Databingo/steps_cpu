@@ -31,7 +31,9 @@ module cpu_on_board (
     //wire [31:0] ir_bd; assign ir_bd = Ram[pc>>2];
     reg [31:0] ir_bd;
     always @(posedge CLOCK_50) begin
-        ir_bd = Ram[pc>>2];
+	if (pc >= Rom_base && pc < Rom_base + Rom_size) 
+	    ir_bd = Rom[pc>>2]; 
+	else ir_bd = Ram[pc>>2];
     end
     wire [31:0] ir_ld; assign ir_ld = {ir_bd[7:0], ir_bd[15:8], ir_bd[23:16], ir_bd[31:24]}; // Endianness swap
 
@@ -91,28 +93,47 @@ module cpu_on_board (
 
     // -- Bus --
     wire [63:0] bus_address;
-    //wire [63:0] bus_read_data;
+    reg [63:0] bus_read_data;
     wire        bus_read_enable;
     wire [63:0] bus_write_data;
     wire        bus_write_enable;
 
     // -- Bus controller --
-    localparam Ram_base = 32'h0000_0000, Ram_size = 32'h0000_1000; // 4KB RAM
-    localparam Rom_base = 32'h0000_1000, Rom_size = 32'h0000_2000; // 8KB ROM
-    localparam Stk_base = 32'h0000_3000, Stk_size = 32'h0000_1000; // 4KB STACK
-    localparam Art_base = 32'h8000_0000, Key_base = 32'h8000_0010; 
+    localparam Rom_base = 32'h0000_0000, Rom_size = 32'h0000_1000; // 4KB ROM
+    localparam Ram_base = 32'h0000_1000, Ram_size = 32'h0000_2000; // 8KB RAM
+    localparam Art_base = 32'h8000_0000, 
+    localparam Key_base = 32'h8000_0010; 
+    //localparam Stk_base = 32'h0000_3000, Stk_size = 32'h0000_1000; // 4KB STACK
     wire Rom_selected = (bus_address >= Rom_base && bus_address < Rom_base + Rom_size);
     wire Ram_selected = (bus_address >= Ram_base && bus_address < Ram_base + Ram_size);
-    wire Stk_selected = (bus_address >= Stk_base && bus_address < Stk_base + Stk_size);
+    //wire Stk_selected = (bus_address >= Stk_base && bus_address < Stk_base + Stk_size);
     wire Art_selected = (bus_address == Art_base);
     wire Key_selected = (bus_address == Key_base);
 
-    wire [63:0] bus_read_data = Key_selected ? {56'd0, data[7:0]}:
-	                   //Key_selected ? {56'd0, ascii}:
-	                   //Art_selected ? {56'd0, ascii}:
-	                   Ram_selected ? {32'd0, Ram[bus_address[11:2]]}:
-			   Rom_selected ? {32'd0, Rom[bus_address[11:2]]}:
-			   64'hDEADBEEF_DEADBEEF;
+//    wire [63:0] bus_read_data = Key_selected ? {56'd0, data[7:0]}:
+//	                   //Key_selected ? {56'd0, ascii}:
+//	                   //Art_selected ? {56'd0, ascii}:
+//	                   Ram_selected ? {32'd0, Ram[bus_address[11:2]]}:
+//			   Rom_selected ? {32'd0, Rom[bus_address[11:2]]}:
+//			   64'hDEADBEEF_DEADBEEF;
+//
+//  // Bus read
+    always @(posedge CLOCK_50) begin
+	if (bus_read_enable) begin
+	    if (Key_selected) bus_read_data <= {56'd0, data[7:0]};
+	    if (Rom_selected) bus_read_data <= {32'd0, Rom[bus_address[11:2]]};
+	    if (Ram_selected) bus_read_data <= {32'd0, Ram[bus_address[11:2]]}:
+	end
+    end
+    // Bus write
+    always @(posedge CLOCK_50) begin
+	if (bus_write_enable) begin
+	    if (Ram_selected) Ram[bus_address[11:2]] <= bus_write_data;
+	end
+    end
+
+
+
     wire uart_write_trigger = bus_write_enable && Art_selected;
     reg uart_write_trigger_dly;
     wire uart_write_trigger_pulse;
@@ -151,128 +172,5 @@ module cpu_on_board (
     // -- Caches --
     // -- MMU(Memory Manamgement Unit) --
     // -- DMA(Direct Memory Access) --?
-
-endmodule
-
-
-
-module riscv64(
-    input wire clk, 
-    input wire reset,     // Active-low reset button
-    input wire [31:0] instruction,
-    output reg [31:0] pc = 44,
-    output reg [31:0] ir,
-    output reg [63:0] re [0:31],
-    output wire  heartbeat,
-
-    input  reg [3:0] interrupt_vector,
-    output reg  interrupt_pending,
-    output reg  interrupt_ack,
-
-    output reg [63:0] bus_address,
-    output reg [63:0] bus_write_data,
-    output reg        bus_write_enable,
-    output reg        bus_read_enable,
-    input  wire [63:0] bus_read_data
-
-
-);
-    // -- CSR Registers --
-    reg [63:0] csr [0:4096]; // Maximal 12-bit length = 4096
-    integer mstatus = 12'h300;      // 0x300 MRW Machine status reg   // 63_SD|37_MBE|36_SBE|35:34_SXL10|22_TSR|21_TW|20_TVW|17_MPRV|12:11_MPP10|7_MPIE|3_MIE|1_SIE|0_WPRI
-    integer mie = 12'h304;          // 0x304 MRW Machine interrupt-enable register *
-    integer mip = 12'h344;          // 0x344 MRW Machine interrupt pending *
-    integer mtvec = 12'h305;        // 0x305 MRW Machine trap-handler base address *
-    integer mcause = 12'h342;       // 0x342 MRW Machine trap casue *
-    // -- CSR Bits --
-    wire mstatus_MIE = csr[mstatus][3];
-    wire mie_MEIE = csr[mie][11];
-    wire mip_MEIP = csr[mie][11];
- 
-    
-    // -- Immediate decoders (Unchanged) -- 
-    wire signed [63:0] w_imm_u = {{32{ir[31]}}, ir[31:12], 12'b0};
-    wire [4:0] w_rd  = ir[11:7];
-    // -- Bubble signal --
-    reg bubble;
-    reg lb_step;
-    reg [31:0] mepc; 
-
-
-
-    // IF ir (Unchanged)
-    always @(posedge clk or negedge reset) begin
-        if (!reset) begin 
-            heartbeat <= 1'b0; 
-            ir <= 32'h00000001; 
-        end else begin
-            heartbeat <= ~heartbeat; // heartbeat
-            ir <= instruction;
-        end
-    end
-
-    // EXE
-    always @(posedge clk or negedge reset) begin
-        if (!reset) begin 
-	    bubble <= 1'b0;
-            pc <= 44; //
-	    lb_step <= 0;
-            // Interrupt reset
-	    interrupt_pending <= 0;
-	    interrupt_ack <= 0;
-	    //interrupt_done <= 0;
-	    bus_read_enable <= 0;
-	    bus_write_enable <= 0;
-        end else begin
-	    // PC default +4 (1.Could be overide 2.Take effect next cycle) 
-            pc <= pc + 4;
-	    interrupt_ack <= 0;
-
-            // Interrupt
-	    if (interrupt_vector == 1 && interrupt_pending !=1) begin
-		    mepc <= pc; // save pc
-                    pc <= 0; // jump to ISR addr
-		    bubble <= 1'b1; // bubble wrong fetche instruciton by IF
-	            interrupt_pending <= 1;
-		    interrupt_ack <= 1;
-
-            // Bubble
-	    end else if (bubble) bubble <= 1'b0; // Flush this cycle & Clear bubble signal for the next cycle
-
-	    // IR
-	    else begin 
-	    bus_write_enable <= 0; 
-            casez(ir) 
-		// Lui
-		32'b???????_?????_?????_???_?????_0110111:  re[w_rd] <= w_imm_u;
-		// Mret 
-		32'b0000000_00000_00000_000_00000_0000000: begin 
-		    pc <= mepc; 
-		    bubble <= 1; 
-	            interrupt_pending <= 0;
-		end 
-                // Load
-	        32'b1111111_11111_11111_111_11111_1111111: begin
-		    if (lb_step == 0) begin
-	            bus_address <= 32'h8000_0010; // Keyboard_base ;
-	            bus_read_enable <= 1;
-		    pc <= pc;
-		    bubble <= 1;
-		    lb_step <= 1;
-		    end
-		    if (lb_step == 1) begin
-	            bus_read_enable <= 0;
-
-	            bus_address <= 32'h8000_0000; // Art_base ;
-	            bus_write_data <= bus_read_data; //32'h41;
-	            bus_write_enable <= 1;
-		    lb_step <= 0;
-		    end
-	        end
-                // Store
-            endcase
-	    end
-        end
-    end
 
 endmodule
