@@ -144,7 +144,7 @@ module cpu_on_board (
     always @(posedge CLOCK_50) begin
         if (bus_write_enable) begin
             //Cache[bus_address[11:2]] <= bus_write_data;
-            Cache[bus_address] <= bus_write_data;
+            Cache[bus_address[:]] <= bus_write_data;
         end 
 	//if (bus_read_enable) begin 
         //    addr_reg <= bus_address[11:2];
