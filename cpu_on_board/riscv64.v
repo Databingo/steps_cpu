@@ -127,15 +127,15 @@ module riscv64(
 	            //bus_address <= `Art_base;
 	            bus_write_data <= re[5];
 	            bus_write_enable <= 1;
-		    //pc <= pc;
-		    //bubble <= 1;
-		    //sb_step <= 1;
-		    //end
-		    //if (lb_step == 1) begin
+		    pc <= pc;
+		    bubble <= 1;
+		    sb_step <= 1;
+		    end
+		    if (sb_step == 1) begin
 	            //bus_address <= 32'h8000_0000; // Art_base ;
 	            //bus_write_data <= bus_read_data; //32'h41;
 	            //bus_write_enable <= 1;
-		    //lb_step <= 0;
+		    sb_step <= 0;
 		    end
 	        end
             endcase
