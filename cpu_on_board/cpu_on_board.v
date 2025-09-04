@@ -139,19 +139,22 @@ module cpu_on_board (
     //    end
     //end
     reg [63:0] cache_read;
-    reg [9:0] addr_reg;
+    //reg [9:0] addr_reg;
     reg reading;
     always @(posedge CLOCK_50) begin
         if (bus_write_enable) begin
             Cache[bus_address[11:2]] <= bus_write_data;
         end 
+	//if (bus_read_enable) begin 
+        //    addr_reg <= bus_address[11:2];
+	//    reading <= 1;
+	//end
+	//if (reading) begin
+        //    bus_read_data <= {32'd0, Cache[addr_reg]};
+	//    reading <= 0;
+	//end
 	if (bus_read_enable) begin 
-            addr_reg <= bus_address[11:2];
-	    reading <= 1;
-	end
-	if (reading) begin
-            bus_read_data <= {32'd0, Cache[addr_reg]};
-	    reading <= 0;
+            bus_read_data <= {32'd0, Cache[bus_address]};
 	end
     end
     
