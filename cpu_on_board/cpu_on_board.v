@@ -162,7 +162,7 @@ module cpu_on_board (
 
 
     wire uart_write_trigger = bus_write_enable && Art_selected;
-    reg uart_write_trigger;
+    //reg uart_write_trigger;
     reg uart_write_trigger_dly;
     wire uart_write_trigger_pulse;
     always @(posedge CLOCK_50 or negedge KEY0) begin
