@@ -48,6 +48,8 @@ module cpu_on_board (
 	.interrupt_vector(interrupt_vector),
 	.interrupt_ack(interrupt_ack),
 
+        .bus_addr(bus_addr),
+
         .bus_address(bus_address),
         .bus_write_data(bus_write_data),
         .bus_write_enable(bus_write_enable),
@@ -96,18 +98,18 @@ module cpu_on_board (
     wire        bus_write_enable;
 
     // -- Bus controller --
-    wire [63:0] bus_addr;
-    assign bus_addr = bus_address<<2;
-    wire Rom_selected = (bus_addr >= `Rom_base && bus_addr < `Rom_base + `Rom_size);
-    wire Ram_selected = (bus_addr >= `Ram_base && bus_addr < `Ram_base + `Ram_size);
+    wire Rom_selected = (bus_address >= `Rom_base && bus_address < `Rom_base + `Rom_size);
+    wire Ram_selected = (bus_address >= `Ram_base && bus_address < `Ram_base + `Ram_size);
     ////wire Stk_selected = (bus_address >= Stk_base && bus_address < Stk_base + Stk_size);
-    wire Art_selected = (bus_addr == `Art_base);
-    wire Key_selected = (bus_addr == `Key_base);
+    wire Art_selected = (bus_address == `Art_base);
+    wire Key_selected = (bus_address == `Key_base);
     assign  LEDR6 = Art_selected;
 
+    wire [63:0] bus_addr;
     always @(posedge CLOCK_50) begin
         if (bus_write_enable) begin
-            Cache[bus_address[9:0]] <= bus_write_data;
+            //Cache[bus_addr[9:0]] <= bus_write_data;
+            Cache[bus_addr] <= bus_write_data;
         end 
 	else if (bus_read_enable) begin 
             bus_read_data <= {32'd0, Cache[bus_address]};

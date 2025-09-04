@@ -14,6 +14,8 @@ module riscv64(
     output reg  interrupt_pending,
     output reg  interrupt_ack,
 
+    output reg [63:0] bus_addr,
+
     output reg [63:0] bus_address,
     output reg [63:0] bus_write_data,
     output reg        bus_write_enable,
@@ -71,7 +73,8 @@ module riscv64(
 	    //interrupt_done <= 0;
 	    bus_read_enable <= 0;
 	    bus_write_enable <= 0;
-	    bus_address <= 0;
+	    bus_address <= `Ram_base;
+	    bus_addr <= `Ram_base;
         end else begin
 	    // PC default +4 (1.Could be overide 2.Take effect next cycle) 
             pc <= pc + 4;
@@ -104,8 +107,8 @@ module riscv64(
                 // Load
 	        32'b1111111_11111_11111_111_11111_1111111: begin
 		    if (lb_step == 0) begin
-	            bus_address <= `Key_base>>2;
-	            //bus_address <= `Key_base;
+	            bus_address <= `Key_base;
+	            bus_addr <= `Key_base>>2;
 	            bus_read_enable <= 1;
 		    pc <= pc;
 		    bubble <= 1;
@@ -123,8 +126,8 @@ module riscv64(
                 // Store
 	        32'b1111111_11111_11111_111_11110_1111111: begin
 		    if (sb_step == 0) begin
-	            bus_address <= `Art_base>>2 ;
-	            //bus_address <= `Art_base;
+	            bus_address <= `Art_base;
+	            bus_addr <= `Art_base>>2 ;
 	            bus_write_data <= re[5];
 	            bus_write_enable <= 1;
 		    pc <= pc;
