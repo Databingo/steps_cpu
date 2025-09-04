@@ -23,7 +23,7 @@ module cpu_on_board (
 
     // -- MEM -- minic L1 cache
     (* ram_style = "block" *) reg [31:0] Cache [0:2047]; // 2048x4=8KB L1 cache to 0x2000
-    initial $readmemb("rom.mif", Cache, 0); // 1024x4=4KB ROM to 0x1000
+    initial $readmemb("rom.mif", Cache, 0); // 1024x4=4KB ROM untill 0x1000
     initial $readmemb("ram.mif", Cache, 1024); // RAM to 0x2000
 
     // -- Clock --
@@ -149,7 +149,7 @@ module cpu_on_board (
             addr_reg <= bus_address[11:2];
 	    reading <= 1;
 	end
-	if (addr_reg) begin
+	if (reading) begin
             bus_read_data <= {32'd0, Cache[addr_reg]};
 	    reading <= 0;
 	end
