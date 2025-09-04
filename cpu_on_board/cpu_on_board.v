@@ -112,11 +112,12 @@ module cpu_on_board (
     //localparam Art_base = 32'h0000_ffff; 
     //localparam Key_base = 32'h0000_fffe; 
     //localparam Stk_base = 32'h0000_3000, Stk_size = 32'h0000_1000; // 4KB STACK
-    wire Rom_selected = (bus_address >= `Rom_base && bus_address < `Rom_base + `Rom_size);
-    wire Ram_selected = (bus_address >= `Ram_base && bus_address < `Ram_base + `Ram_size);
+    wire bus_addr = bus_address<<2;
+    wire Rom_selected = (bus_addr >= `Rom_base && bus_addr < `Rom_base + `Rom_size);
+    wire Ram_selected = (bus_addr >= `Ram_base && bus_addr < `Ram_base + `Ram_size);
     ////wire Stk_selected = (bus_address >= Stk_base && bus_address < Stk_base + Stk_size);
-    wire Art_selected = (bus_address == `Art_base);
-    wire Key_selected = (bus_address == `Key_base);
+    wire Art_selected = (bus_addr == `Art_base);
+    wire Key_selected = (bus_addr == `Key_base);
 
 //    wire [63:0] bus_read_data = Key_selected ? {56'd0, data[7:0]}:
 //	                   //Key_selected ? {56'd0, ascii}:
@@ -141,16 +142,15 @@ module cpu_on_board (
     //reg [63:0] cache_read;
     //reg [9:0] addr_reg;
     //reg reading;
-    wire [9:0] bus_addr = bus_address[11:2];
     always @(posedge CLOCK_50) begin
         if (bus_write_enable) begin
-            //Cache[bus_address[9:0]] <= bus_write_data;
+            Cache[bus_address[9:0]] <= bus_write_data;
             //Cache[bus_address] <= bus_write_data;
-            Cache[bus_addr] <= bus_write_data;
+            //Cache[bus_addr] <= bus_write_data;
         end 
 	else if (bus_read_enable) begin 
-            //bus_read_data <= {32'd0, Cache[bus_address]};
-            bus_read_data <= {32'd0, Cache[bus_addr]};
+            bus_read_data <= {32'd0, Cache[bus_address]};
+            //bus_read_data <= {32'd0, Cache[bus_addr]};
 	end
     end
     
