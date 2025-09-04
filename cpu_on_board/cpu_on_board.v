@@ -112,7 +112,7 @@ module cpu_on_board (
     //localparam Art_base = 32'h0000_ffff; 
     //localparam Key_base = 32'h0000_fffe; 
     //localparam Stk_base = 32'h0000_3000, Stk_size = 32'h0000_1000; // 4KB STACK
-    wire Rom_selected = ((bus_address >= `Rom_base) && (bus_address < `Rom_base + `Rom_size));
+    wire Rom_selected = (bus_address >= `Rom_base && bus_address < `Rom_base + `Rom_size);
     //wire Ram_selected = (bus_address >= Ram_base && bus_address < Ram_base + Ram_size);
     ////wire Stk_selected = (bus_address >= Stk_base && bus_address < Stk_base + Stk_size);
     //wire Art_selected = (bus_address == Art_base);
