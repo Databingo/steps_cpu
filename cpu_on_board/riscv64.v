@@ -71,6 +71,7 @@ module riscv64(
 	    //interrupt_done <= 0;
 	    bus_read_enable <= 0;
 	    bus_write_enable <= 0;
+	    bus_address <= 0;
         end else begin
 	    // PC default +4 (1.Could be overide 2.Take effect next cycle) 
             pc <= pc + 4;

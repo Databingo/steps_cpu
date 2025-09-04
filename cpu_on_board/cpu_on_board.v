@@ -14,14 +14,6 @@ module cpu_on_board (
     (* chip_pin = "J14" *)  input wire PS2_DAT 
 );
 
-    //// -- ROM -- for Boot Program
-    //(* ram_style = "block" *) reg [31:0] Rom [0:1023]; // 4KB Read Only Memory
-    //initial $readmemb("rom.mif", Rom);
-
-    //// -- RAM -- for Load Program
-    //(* ram_style = "block" *) reg [31:0] Ram [0:2047]; // 8KB Radom Access Memory
-    //initial $readmemb("ram.mif", Ram);
-
     // -- MEM -- minic L1 cache
     (* ram_style = "block" *) reg [31:0] Cache [0:2047]; // 2048x4=8KB L1 cache to 0x2000
     initial $readmemb("rom.mif", Cache, 0); // 1024x4=4KB ROM untill 0x1000
@@ -36,12 +28,8 @@ module cpu_on_board (
     );
 
     wire [31:0] pc;
-    //wire [31:0] ir_bd; assign ir_bd = Ram[pc>>2];
     reg [31:0] ir_bd;
     always @(posedge CLOCK_50) begin
-	//if (pc >= Rom_base && pc < Rom_base + Rom_size) 
-	//    ir_bd = Rom[pc>>2]; else 
-	//ir_bd = Ram[pc>>2];
 	ir_bd = Cache[pc>>2];
     end
     wire [31:0] ir_ld; assign ir_ld = {ir_bd[7:0], ir_bd[15:8], ir_bd[23:16], ir_bd[31:24]}; // Endianness swap
@@ -108,11 +96,6 @@ module cpu_on_board (
     wire        bus_write_enable;
 
     // -- Bus controller --
-    //localparam Rom_base = 32'h0000_0000, Rom_size = 32'h0000_1000; // 4KB ROM
-    //localparam Ram_base = 32'h0000_1000, Ram_size = 32'h0000_2000; // 4KB RAM
-    //localparam Art_base = 32'h0000_ffff; 
-    //localparam Key_base = 32'h0000_fffe; 
-    //localparam Stk_base = 32'h0000_3000, Stk_size = 32'h0000_1000; // 4KB STACK
     wire [63:0] bus_addr;
     assign bus_addr = bus_address<<2;
     wire Rom_selected = (bus_addr >= `Rom_base && bus_addr < `Rom_base + `Rom_size);
@@ -122,38 +105,12 @@ module cpu_on_board (
     wire Key_selected = (bus_addr == `Key_base);
     assign  LEDR6 = Art_selected;
 
-//    wire [63:0] bus_read_data = Key_selected ? {56'd0, data[7:0]}:
-//	                   //Key_selected ? {56'd0, ascii}:
-//	                   //Art_selected ? {56'd0, ascii}:
-//	                   Ram_selected ? {32'd0, Ram[bus_address[11:2]]}:
-//			   Rom_selected ? {32'd0, Rom[bus_address[11:2]]}:
-//			   64'hDEADBEEF_DEADBEEF;
-//
-//  // Bus read
-    //always @(posedge CLOCK_50) begin
-    //    if (bus_read_enable) begin
-    //             if (bus_address == `Key_base) bus_read_data <= {56'd0, data[7:0]};
-    //        else if (bus_address >= `Rom_base && bus_address < `Rom_base + `Rom_size) bus_read_data <= {32'd0, Cache[bus_address[11:2]]};
-    //        //else if (Rom_selected) bus_read_data <= {32'd0, Cache[bus_address[11:2]]};
-    //        else if (bus_address >= `Ram_base && bus_address < `Ram_base + `Ram_size) bus_read_data <= {32'd0, Cache[bus_address[11:2]]};
-    //    end
-    //    else if (bus_write_enable) begin
-    //             if (bus_address >= `Ram_base && bus_address < `Ram_base + `Ram_size) Cache[bus_address[11:2]] <= bus_write_data;
-    //        else if (bus_address == `Art_base) uart_write_trigger <= 1; 
-    //    end
-    //end
-    //reg [63:0] cache_read;
-    //reg [9:0] addr_reg;
-    //reg reading;
     always @(posedge CLOCK_50) begin
         if (bus_write_enable) begin
             Cache[bus_address[9:0]] <= bus_write_data;
-            //Cache[bus_address] <= bus_write_data;
-            //Cache[bus_addr] <= bus_write_data;
         end 
 	else if (bus_read_enable) begin 
             bus_read_data <= {32'd0, Cache[bus_address]};
-            //bus_read_data <= {32'd0, Cache[bus_addr]};
 	end
     end
     
