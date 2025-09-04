@@ -129,7 +129,7 @@ module cpu_on_board (
     always @(posedge CLOCK_50) begin
 	if (bus_read_enable) begin
 	         if (bus_address == `Key_base) bus_read_data <= {56'd0, data[7:0]};
-	    else if (bus_address >= Rom_base && bus_address < Rom_base + Rom_size) bus_read_data <= {32'd0, Cache[bus_address[11:2]]};
+	    else if (bus_address >= `Rom_base && bus_address < `Rom_base + `Rom_size) bus_read_data <= {32'd0, Cache[bus_address[11:2]]};
 	    //else if (Rom_selected) bus_read_data <= {32'd0, Cache[bus_address[11:2]]};
 	    else if (bus_address >= `Ram_base && bus_address < `Ram_base + `Ram_size) bus_read_data <= {32'd0, Cache[bus_address[11:2]]};
 	end
