@@ -101,7 +101,7 @@ module cpu_on_board (
     // -- Bus controller --
     localparam Rom_base = 32'h0000_0000, Rom_size = 32'h0000_1000; // 4KB ROM
     localparam Ram_base = 32'h0000_1000, Ram_size = 32'h0000_2000; // 8KB RAM
-    localparam Art_base = 32'h8000_0000, 
+    localparam Art_base = 32'h8000_0000; 
     localparam Key_base = 32'h8000_0010; 
     //localparam Stk_base = 32'h0000_3000, Stk_size = 32'h0000_1000; // 4KB STACK
     wire Rom_selected = (bus_address >= Rom_base && bus_address < Rom_base + Rom_size);
