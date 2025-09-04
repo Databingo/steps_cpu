@@ -1,3 +1,5 @@
+`include "header.vh"
+
 module cpu_on_board (
     // -- Pin --
     (* chip_pin = "PIN_L1" *)  input wire CLOCK_50, // 50 MHz clock
@@ -110,7 +112,7 @@ module cpu_on_board (
     //localparam Art_base = 32'h0000_ffff; 
     //localparam Key_base = 32'h0000_fffe; 
     //localparam Stk_base = 32'h0000_3000, Stk_size = 32'h0000_1000; // 4KB STACK
-    wire Rom_selected = (bus_address >= Rom_base && bus_address < Rom_base + Rom_size);
+    wire Rom_selected = (bus_address >= `Rom_base && bus_address < `Rom_base + `Rom_size);
     //wire Ram_selected = (bus_address >= Ram_base && bus_address < Ram_base + Ram_size);
     ////wire Stk_selected = (bus_address >= Stk_base && bus_address < Stk_base + Stk_size);
     //wire Art_selected = (bus_address == Art_base);
@@ -126,17 +128,17 @@ module cpu_on_board (
 //  // Bus read
     always @(posedge CLOCK_50) begin
 	if (bus_read_enable) begin
-	         if (bus_address == Key_base) bus_read_data <= {56'd0, data[7:0]};
+	         if (bus_address == `Key_base) bus_read_data <= {56'd0, data[7:0]};
 	    //else if (bus_address >= Rom_base && bus_address < Rom_base + Rom_size) bus_read_data <= {32'd0, Cache[bus_address[11:2]]};
 	    else if (Rom_selected) bus_read_data <= {32'd0, Cache[bus_address[11:2]]};
-	    else if (bus_address >= Ram_base && bus_address < Ram_base + Ram_size) bus_read_data <= {32'd0, Cache[bus_address[11:2]]};
+	    else if (bus_address >= `Ram_base && bus_address < `Ram_base + `Ram_size) bus_read_data <= {32'd0, Cache[bus_address[11:2]]};
 	end
     end
     // Bus write
     always @(posedge CLOCK_50) begin
         if (bus_write_enable) begin
-                 if (bus_address >= Ram_base && bus_address < Ram_base + Ram_size) Cache[bus_address[11:2]] <= bus_write_data;
-            else if (bus_address == Art_base) uart_write_trigger <= 1; 
+                 if (bus_address >= `Ram_base && bus_address < `Ram_base + `Ram_size) Cache[bus_address[11:2]] <= bus_write_data;
+            else if (bus_address == `Art_base) uart_write_trigger <= 1; 
         end
     end
 
