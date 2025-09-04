@@ -2,5 +2,5 @@
 `define Rom_size  32'h0000_1000
 `define Ram_base  32'h0000_1000
 `define Ram_size  32'h0000_1000
-`define Art_base  32'h8000_0000
-`define Key_base  32'h8000_0010
+`define Art_base  32'h0000_1111
+`define Key_base  32'h0000_1110
