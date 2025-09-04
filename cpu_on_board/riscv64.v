@@ -64,8 +64,8 @@ module riscv64(
         if (!reset) begin 
 	    bubble <= 1'b0;
             //pc <= 44; //
-	    //pc <= 32'h1000; //
-	    pc <= 32'h0000; //
+	    pc <= 32'h1000; //
+	    //pc <= 32'h0000; //
 	    lb_step <= 0;
             sb_step <= 0;
             // Interrupt reset

@@ -34,7 +34,7 @@ module cpu_on_board (
 	ir_bd <= Cache[pc>>2];
     end
     wire [31:0] ir_ld; assign ir_ld = {ir_bd[7:0], ir_bd[15:8], ir_bd[23:16], ir_bd[31:24]}; // Endianness swap
-    assign LEDR_PC = pc;
+    assign LEDR_PC = pc>>2;
 
     // -- CPU --
     riscv64 cpu (
