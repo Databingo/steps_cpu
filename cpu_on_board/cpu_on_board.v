@@ -30,7 +30,7 @@ module cpu_on_board (
     wire [31:0] pc;
     reg [31:0] ir_bd;
     always @(posedge CLOCK_50) begin
-	ir_bd = Cache[pc>>2];
+	ir_bd <= Cache[pc>>2];
     end
     wire [31:0] ir_ld; assign ir_ld = {ir_bd[7:0], ir_bd[15:8], ir_bd[23:16], ir_bd[31:24]}; // Endianness swap
 
@@ -103,7 +103,7 @@ module cpu_on_board (
     ////wire Stk_selected = (bus_address >= Stk_base && bus_address < Stk_base + Stk_size);
     wire Art_selected = (bus_address == `Art_base);
     wire Key_selected = (bus_address == `Key_base);
-    assign  LEDR6 = Art_selected;
+    assign  LEDR6 = Key_selected;
 
     wire [63:0] bus_addr;
     always @(posedge CLOCK_50) begin
