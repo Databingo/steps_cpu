@@ -120,7 +120,7 @@ module riscv64(
                 // Store
 	        32'b1111111_11111_11111_111_11110_1111111: begin
 		    if (sb_step == 0) begin
-	            bus_address <= `Art_base>> ;
+	            bus_address <= `Art_base>>2 ;
 	            bus_write_data <= re[5];
 	            bus_write_enable <= 1;
 		    //pc <= pc;
