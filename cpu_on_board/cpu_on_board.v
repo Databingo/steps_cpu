@@ -98,8 +98,8 @@ module cpu_on_board (
     wire        bus_write_enable;
 
     // -- Bus controller --
-    wire Rom_selected = (bus_address >= `Rom_base && bus_address < `Rom_base + `Rom_size);
-    wire Ram_selected = (bus_address >= `Ram_base && bus_address < `Ram_base + `Ram_size);
+    //wire Rom_selected = (bus_address >= `Rom_base && bus_address < `Rom_base + `Rom_size);
+    //wire Ram_selected = (bus_address >= `Ram_base && bus_address < `Ram_base + `Ram_size);
     ////wire Stk_selected = (bus_address >= Stk_base && bus_address < Stk_base + Stk_size);
     wire Art_selected = (bus_address == `Art_base);
     wire Key_selected = (bus_address == `Key_base);
