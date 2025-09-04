@@ -138,7 +138,7 @@ module cpu_on_board (
     //        else if (bus_address == `Art_base) uart_write_trigger <= 1; 
     //    end
     //end
-    reg [63;0] cache_read;
+    reg [63:0] cache_read;
     always @(posedge CLOCK_50) begin
         if (bus_write_enable && Ram_selected) begin
             Cache[bus_address[11:2]] <= bus_write_data;
