@@ -8,6 +8,7 @@ module cpu_on_board (
     (* chip_pin = "R17" *) output reg LEDR9, // 1 red LEDs breath left most 
     //(* chip_pin = "U18, Y18, V19, T18, Y19, U19, R19, R20" *) output wire [7:0] LEDR7_0, // 8 red LEDs right
     (* chip_pin = "R20" *) output wire LEDR7, // 
+    (* chip_pin = "R19" *) output wire LEDR6, // 
 
     (* chip_pin = "H15" *)  input wire PS2_CLK, 
     (* chip_pin = "J14" *)  input wire PS2_DAT 
@@ -118,6 +119,7 @@ module cpu_on_board (
     ////wire Stk_selected = (bus_address >= Stk_base && bus_address < Stk_base + Stk_size);
     wire Art_selected = (bus_addr == `Art_base);
     wire Key_selected = (bus_addr == `Key_base);
+    assign  LEDR6 = Art_selected;
 
 //    wire [63:0] bus_read_data = Key_selected ? {56'd0, data[7:0]}:
 //	                   //Key_selected ? {56'd0, ascii}:
