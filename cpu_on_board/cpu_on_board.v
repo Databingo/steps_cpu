@@ -121,8 +121,8 @@ module cpu_on_board (
     always @(posedge CLOCK_50) begin
 	if (bus_read_enable) begin
 	    if (Key_selected) bus_read_data <= {56'd0, data[7:0]};
-	    if (Rom_selected) bus_read_data <= {32'd0, Rom[bus_address[11:2]]};
-	    if (Ram_selected) bus_read_data <= {32'd0, Ram[bus_address[11:2]]}:
+	    else if (Rom_selected) bus_read_data <= {32'd0, Rom[bus_address[11:2]]};
+	    else if (Ram_selected) bus_read_data <= {32'd0, Ram[bus_address[11:2]]};
 	end
     end
     // Bus write
