@@ -108,7 +108,7 @@ module cpu_on_board (
     wire [63:0] bus_addr;
     always @(posedge CLOCK_50) begin
         if (bus_write_enable) begin
-            Cache[bus_addr[9:0]] <= bus_write_data;
+            Cache[bus_addr[31:0]] <= bus_write_data;
             //Cache[bus_addr] <= bus_write_data;
         end 
 	else if (bus_read_enable) begin 
