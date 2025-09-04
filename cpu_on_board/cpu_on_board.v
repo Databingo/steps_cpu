@@ -133,10 +133,7 @@ module cpu_on_board (
 	    //else if (Rom_selected) bus_read_data <= {32'd0, Cache[bus_address[11:2]]};
 	    else if (bus_address >= `Ram_base && bus_address < `Ram_base + `Ram_size) bus_read_data <= {32'd0, Cache[bus_address[11:2]]};
 	end
-    end
-    // Bus write
-    always @(posedge CLOCK_50) begin
-        if (bus_write_enable) begin
+        else if (bus_write_enable) begin
                  if (bus_address >= `Ram_base && bus_address < `Ram_base + `Ram_size) Cache[bus_address[11:2]] <= bus_write_data;
             else if (bus_address == `Art_base) uart_write_trigger <= 1; 
         end
