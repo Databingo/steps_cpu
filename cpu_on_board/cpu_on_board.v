@@ -126,12 +126,12 @@ module cpu_on_board (
 	end
     end
     // Bus write
-    always @(posedge CLOCK_50) begin
-        if (bus_write_enable) begin
-                 if (bus_address >= Ram_base && bus_address < Ram_base + Ram_size) Ram[bus_address[11:2]] <= bus_write_data;
-            else if (bus_address == Art_base) uart_write_trigger <= 1; 
-        end
-    end
+    //always @(posedge CLOCK_50) begin
+    //    if (bus_write_enable) begin
+    //             if (bus_address >= Ram_base && bus_address < Ram_base + Ram_size) Ram[bus_address[11:2]] <= bus_write_data;
+    //        else if (bus_address == Art_base) uart_write_trigger <= 1; 
+    //    end
+    //end
 
 
 
