@@ -31,9 +31,9 @@ module cpu_on_board (
     //wire [31:0] ir_bd; assign ir_bd = Ram[pc>>2];
     reg [31:0] ir_bd;
     always @(posedge CLOCK_50) begin
-	if (pc >= Rom_base && pc < Rom_base + Rom_size) 
-	    ir_bd = Rom[pc>>2]; 
-	else ir_bd = Ram[pc>>2];
+	//if (pc >= Rom_base && pc < Rom_base + Rom_size) 
+	//    ir_bd = Rom[pc>>2]; else 
+	ir_bd = Ram[pc>>2];
     end
     wire [31:0] ir_ld; assign ir_ld = {ir_bd[7:0], ir_bd[15:8], ir_bd[23:16], ir_bd[31:24]}; // Endianness swap
 
@@ -126,12 +126,12 @@ module cpu_on_board (
 	end
     end
     // Bus write
-    //always @(posedge CLOCK_50) begin
-    //    if (bus_write_enable) begin
-    //             if (bus_address >= Ram_base && bus_address < Ram_base + Ram_size) Ram[bus_address[11:2]] <= bus_write_data;
-    //        else if (bus_address == Art_base) uart_write_trigger <= 1; 
-    //    end
-    //end
+    always @(posedge CLOCK_50) begin
+        if (bus_write_enable) begin
+                 if (bus_address >= Ram_base && bus_address < Ram_base + Ram_size) Ram[bus_address[11:2]] <= bus_write_data;
+            else if (bus_address == Art_base) uart_write_trigger <= 1; 
+        end
+    end
 
 
 
