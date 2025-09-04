@@ -150,7 +150,6 @@ module cpu_on_board (
 	    reading <= 1;
 	if (addr_reg) begin
             bus_read_data <= {32'd0, Cache[addr_reg]};
-	    addr_reg <= 0;
 	    reading <= 0;
 	end
     end
