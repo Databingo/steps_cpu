@@ -145,7 +145,7 @@ module cpu_on_board (
         end 
 	//if (bus_read_enable && Ram_selected) begin
             //bus_read_data <= {32'd0, Cache[bus_address[11:2]]};
-            cache_read <= {32'd0, Cache[bus_address[11:2]]};
+        else    cache_read <= {32'd0, Cache[bus_address[11:2]]};
         //end
     end
 
