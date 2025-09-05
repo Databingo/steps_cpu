@@ -17,8 +17,8 @@ module cpu_on_board (
 
     // -- MEM -- minic L1 cache
     (* ram_style = "block" *) reg [31:0] Cache [0:2047]; // 2048x4=8KB L1 cache to 0x2000
-    initial $readmemb("rom.mif", Cache, 0); // 1024x4=4KB ROM untill 0x1000
-    initial $readmemb("ram.mif", Cache, 1024); // RAM to 0x2000
+    initial $readmemb("rom.mif", Cache, 32'h0); // 1024x4=4KB ROM untill 0x1000
+    initial $readmemb("ram.mif", Cache, 32'h1000); // RAM to 0x2000
 
     // -- Clock --
     wire clock_1hz;
