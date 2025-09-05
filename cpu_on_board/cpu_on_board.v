@@ -108,7 +108,13 @@ module cpu_on_board (
     ////wire Stk_selected = (bus_address >= Stk_base && bus_address < Stk_base + Stk_size);
     wire Art_selected = (bus_address == `Art_base);
     wire Key_selected = (bus_address == `Key_base);
-    assign  LEDR1 = Key_selected;
+    reg Key_selected_reg;
+    always @(posedge CLOCK_50) begin
+	  Key_selected_reg <= Key_selected;
+      end
+
+
+    assign  LEDR1 = Key_selected_reg;
 
     wire [63:0] bus_addr;
     always @(posedge CLOCK_50) begin
