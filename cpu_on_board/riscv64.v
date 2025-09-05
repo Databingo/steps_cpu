@@ -16,7 +16,7 @@ module riscv64(
 
     output reg [63:0] bus_addr,
 
-    output reg [63:0] bus_address,
+    output reg [63:0] bus_address,  // 48 bit for real standard?
     output reg [63:0] bus_write_data,
     output reg        bus_write_enable,
     output reg        bus_read_enable,
