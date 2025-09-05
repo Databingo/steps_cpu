@@ -63,17 +63,12 @@ module riscv64(
     always @(posedge clk or negedge reset) begin
         if (!reset) begin 
 	    bubble <= 1'b0;
-            //pc <= 44; //
-	    //pc <= 32'h1000; //
 	    pc <= `Ram_base;
-	    //pc <= 4096; //
-	    //pc <= 32'h0000; //
 	    lb_step <= 0;
             sb_step <= 0;
             // Interrupt reset
 	    interrupt_pending <= 0;
 	    interrupt_ack <= 0;
-	    //interrupt_done <= 0;
 	    bus_read_enable <= 0;
 	    bus_write_enable <= 0;
 	    bus_address <= `Ram_base;
@@ -120,8 +115,8 @@ module riscv64(
 		    if (lb_step == 1) begin
 	            //bus_address <= 32'h8000_0000; // Art_base ;
 	            //bus_write_data <= bus_read_data; //32'h41;
-	            re[5]<= bus_read_data; //32'h41;
-	            //re[5]<=32'h41;
+	            //re[5]<= bus_read_data; //32'h41;
+	            re[5]<=32'h41;
 	            //bus_write_enable <= 1;
 		    lb_step <= 0;
 		    end
