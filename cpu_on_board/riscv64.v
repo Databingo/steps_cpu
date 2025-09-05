@@ -65,7 +65,8 @@ module riscv64(
 	    bubble <= 1'b0;
             //pc <= 44; //
 	    //pc <= 32'h1000; //
-	    pc <= 4096; //
+	    pc <= `Ram_base;
+	    //pc <= 4096; //
 	    //pc <= 32'h0000; //
 	    lb_step <= 0;
             sb_step <= 0;
