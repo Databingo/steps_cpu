@@ -31,7 +31,7 @@ module cpu_on_board (
         .reset_n(KEY0)
     );
 
-    wire [31:0] pc;
+    wire [63:0] pc;
     reg [31:0] ir_bd;
     always @(posedge CLOCK_50) begin
 	ir_bd <= Cache[pc>>2];
@@ -108,13 +108,7 @@ module cpu_on_board (
     ////wire Stk_selected = (bus_address >= Stk_base && bus_address < Stk_base + Stk_size);
     wire Art_selected = (bus_address == `Art_base);
     wire Key_selected = (bus_address == `Key_base);
-    reg Key_selected_reg;
-    always @(posedge CLOCK_50) begin
-	  Key_selected_reg <= Key_selected;
-      end
-
-
-    assign  LEDR1 = Key_selected_reg;
+    assign  LEDR1 = Key_selected;
 
     wire [63:0] bus_addr;
     always @(posedge CLOCK_50) begin
