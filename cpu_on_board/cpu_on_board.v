@@ -118,7 +118,7 @@ module cpu_on_board (
 	    //
         end 
 	else if (bus_read_enable) begin 
-            bus_read_data <= {32'd0, Cache[bus_address[63:2]]};
+            bus_read_data <= {32'd0, Cache[bus_address[9:2]]};
 	end
     end
     
