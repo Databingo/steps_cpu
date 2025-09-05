@@ -119,12 +119,17 @@ module riscv64(
 	        end
                 // Store
 	        32'b1111111_11111_11111_111_11110_1111111: begin
-	            bus_address <= `Art_base;
-	            bus_addr <= `Art_base>>2 ;
-	            bus_write_data <= re[5];
-	            bus_write_enable <= 1;
-		    pc <= pc;
-		    bubble <= 1; // take 1 cycle; bus write also
+		    if (sb_step == 0) begin
+	                bus_address <= `Art_base;
+	                bus_addr <= `Art_base>>2 ;
+	                bus_write_data <= re[5];
+	                bus_write_enable <= 1;
+		        pc <= pc;
+		        bubble <= 1; // take 1 cycle; bus write also
+		    end
+		    if (sb_step == 1) begin // deal the second pc self point
+			sb_step <= 0;
+		    end
 	        end
             endcase
 	    end
