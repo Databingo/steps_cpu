@@ -53,8 +53,6 @@ module cpu_on_board (
 	.interrupt_vector(interrupt_vector),
 	.interrupt_ack(interrupt_ack),
 
-        .bus_addr(bus_addr),
-
         .bus_address(bus_address),
         .bus_write_data(bus_write_data),
         .bus_write_enable(bus_write_enable),
@@ -110,14 +108,13 @@ module cpu_on_board (
     wire Key_selected = (bus_address == `Key_base);
     assign  LEDR1 = Key_selected;
 
-    wire [63:0] bus_addr;
     always @(posedge CLOCK_50) begin
         if (bus_write_enable) begin
-            Cache[bus_address[9:0]] <= bus_write_data;
+            Cache[bus_address<<2[9:0]] <= bus_write_data;
             //Cache[bus_addr] <= bus_write_data;
         end 
 	else if (bus_read_enable) begin 
-            bus_read_data <= {32'd0, Cache[bus_address]};
+            bus_read_data <= {32'd0, Cache[bus_address<<2]};
 	end
     end
     
