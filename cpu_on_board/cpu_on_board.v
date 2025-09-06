@@ -16,7 +16,8 @@ module cpu_on_board (
 );
 
     // -- MEM -- minic L1 cache
-    (* ram_style = "block" *) reg [31:0] Cache [0:2047]; // 2048x4=8KB L1 cache to 0x2000
+    //(* ram_style = "block" *) reg [31:0] Cache [0:2047]; // 2048x4=8KB L1 cache to 0x2000
+    (* ram_style = "block" *) reg [31:0] Cache [0:3071]; // 2048x4=8KB L1 cache to 0x2000
     integer i;
     initial begin
         $readmemb("rom.mif", Cache, `Rom_base>>2);
@@ -103,14 +104,33 @@ module cpu_on_board (
     wire        bus_write_enable;
 
     // -- Bus controller --
-    //wire Rom_selected = (bus_address >= `Rom_base && bus_address < `Rom_base + `Rom_size);
-    //wire Ram_selected = (bus_address >= `Ram_base && bus_address < `Ram_base + `Ram_size);
+    wire Rom_selected = (bus_address >= `Rom_base && bus_address < `Rom_base + `Rom_size);
+    wire Ram_selected = (bus_address >= `Ram_base && bus_address < `Ram_base + `Ram_size);
     ////wire Stk_selected = (bus_address >= Stk_base && bus_address < Stk_base + Stk_size);
     wire Art_selected = (bus_address == `Art_base);
     wire Key_selected = (bus_address == `Key_base);
     assign  LEDR1 = Key_selected;
 
     wire [63:0] bus_addr;
+    reg [63:0] port_b_data_out;
+    // Read-During-Write (read get old data in same cycle with write)
+    always @(posedge CLOCK_50) begin
+        if (bus_write_enable) begin
+            Cache[bus_addr[9:0]] <= bus_write_data;
+        end 
+        port_b_data_out <= {32'd0, Cache[bus_addr]};
+        //bus_read_data <= {32'd0, Cache[bus_addr]};
+    end
+    // MUX
+    always @(posedge CLOCK_50) begin
+        if (bus_read_enable) begin 
+           if (Ram_selected) bus_read_data <= {32'd0, port_b_data_out}; // 
+           else if (Key_selected) bus_read_data <= {32'd0, 24'd0, data[7:0]}; // keyboard ASCII
+    end
+    end
+
+
+
     //always @(posedge CLOCK_50) begin
     //    if (bus_write_enable) begin
     //        Cache[bus_addr[9:0]] <= bus_write_data;
@@ -123,20 +143,20 @@ module cpu_on_board (
     //    end
     //end
     
-    always @(posedge CLOCK_50) begin
-        if (bus_write_enable) begin
-            Cache[bus_addr[9:0]] <= bus_write_data;
-            //Cache[bus_addr] <= bus_write_data;
-	    //
-        end 
-    end
+    //always @(posedge CLOCK_50) begin
+    //    if (bus_write_enable) begin
+    //        Cache[bus_addr[9:0]] <= bus_write_data;
+    //        //Cache[bus_addr] <= bus_write_data;
+    //        //
+    //    end 
+    //end
 
-    always @(posedge CLOCK_50) begin
-	if (bus_read_enable) begin 
-	    if (Key_selected) bus_read_data <= {32'd0, 24'd0, data[7:0]}; // keyboard ASCII
-            else bus_read_data <= {32'd0, Cache[bus_addr]};
-	end
-    end
+    //always @(posedge CLOCK_50) begin
+    //    if (bus_read_enable) begin 
+    //        if (Key_selected) bus_read_data <= {32'd0, 24'd0, data[7:0]}; // keyboard ASCII
+    //        else bus_read_data <= {32'd0, Cache[bus_addr]};
+    //    end
+    //end
 
 
 

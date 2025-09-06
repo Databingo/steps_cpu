@@ -102,33 +102,37 @@ module riscv64(
 		    bubble <= 1; 
 	            interrupt_pending <= 0;
 		end 
-                // Load
+                // Load  3 cycles to finish re<=data
 	        32'b1111111_11111_11111_111_11111_1111111: begin
 		    if (lb_step == 0) begin
 	                bus_address <= `Key_base;
 	                bus_addr <= `Key_base>>2;
 	                bus_read_enable <= 1;
 		        pc <= pc;
-		        bubble <= 1; //!! take 1 cycle, bus read also
+		        bubble <= 1; //!! take over 1 cycle, meanwhile ON OTHER PART bus read SIMULTANEOUSLY
 		        lb_step <= 1;
 		    end
 		    if (lb_step == 1) begin
 	                re[5]<= bus_read_data; //32'h41;
 		        lb_step <= 0;
+	                bus_address <= 0; // clean bus
+	                bus_addr <= 0; // clean bus
 		    end
 	        end
-                // Store
+
+
+                // Store 1 cycles to finish settting data<=re (next cycle bus write to data)
 	        32'b1111111_11111_11111_111_11110_1111111: begin
 		    if (sb_step == 0) begin
 	                bus_address <= `Art_base;
 	                bus_addr <= `Art_base>>2 ;
 	                bus_write_data <= re[5];
 	                bus_write_enable <= 1;
-		        pc <= pc;
-		        bubble <= 1; // take 1 cycle; bus write also
-		    end
-		    if (sb_step == 1) begin // deal the second pc self point
-			sb_step <= 0;
+		//        pc <= pc;
+		//        bubble <= 1; // take 1 cycle; board bus write also
+		//    end
+		//    if (sb_step == 1) begin // deal the second pc self point pc=pc
+		//	sb_step <= 0;
 		    end
 	        end
             endcase
