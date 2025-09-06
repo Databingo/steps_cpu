@@ -128,11 +128,12 @@ module cpu_on_board (
     reg [31:0] port_b_data_out;
     // Read-During-Write (read get old data in same cycle with write)
     always @(posedge CLOCK_50) begin
-        port_b_data_out <= {32'd0, Cache[bus_address[11:2]]};         // Read path
-        if (bus_write_enable) Cache[bus_address/4] <= bus_write_data; // Write path
+        // Write path
+        if (bus_write_enable) Cache[bus_address/4] <= bus_write_data; 
+        // Read path
+        port_b_data_out <= {32'd0, Cache[bus_address[11:2]]};
     end
-
-    // MUX
+    // MUX Router read
     assign bus_read_data = (bus_read_enable && Ram_selected) ? {32'd0, port_b_data_out}:
                            (bus_read_enable && Rom_selected) ? {32'd0, port_b_data_out}:
                            (bus_read_enable && Key_selected) ? {32'd0, 24'd0, data[7:0]}:
