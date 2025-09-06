@@ -113,7 +113,7 @@ module cpu_on_board (
     assign  LEDR1 = Key_selected;
 
     wire [63:0] bus_addr;
-    reg [63:0] port_b_data_out;
+    reg [31:0] port_b_data_out;
     // Read-During-Write (read get old data in same cycle with write)
     always @(posedge CLOCK_50) begin
         if (bus_write_enable) begin
