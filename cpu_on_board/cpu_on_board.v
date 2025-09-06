@@ -143,7 +143,7 @@ module cpu_on_board (
 
     always @(posedge CLOCK_50) begin //!!
 	if (bus_read_enable && Key_selected) bus_read_data  <= {32'd0, 24'd0, data[7:0]};
-	else if (bus_read_enable && (Rom_selected || Ram_selected) bus_read_data  <= {32'd0, port_b_data_out};
+	else if (bus_read_enable && (Rom_selected || Ram_selected)) bus_read_data  <= {32'd0, port_b_data_out};
 	else bus_read_data <= 64'h00000000;
     end
 
