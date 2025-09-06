@@ -72,7 +72,7 @@ module riscv64(
 	    bus_read_enable <= 0;
 	    bus_write_enable <= 0;
 	    bus_address <= `Ram_base;
-	    bus_addr <= `Ram_base;
+	    //bus_addr <= `Ram_base;
         end else begin
 	    // PC default +4 (1.Could be overide 2.Take effect next cycle) 
             pc <= pc + 4;
@@ -106,7 +106,7 @@ module riscv64(
 	        32'b1111111_11111_11111_111_11111_1111111: begin
 		    if (lb_step == 0) begin
 	                bus_address <= `Key_base;
-	                bus_addr <= `Key_base>>2;
+	                //bus_addr <= `Key_base>>2;
 	                bus_read_enable <= 1;
 		        pc <= pc;
 		        bubble <= 1; //!! take over 1 cycle, meanwhile ON OTHER PART bus read SIMULTANEOUSLY
@@ -116,7 +116,7 @@ module riscv64(
 	                re[5]<= bus_read_data; //32'h41;
 		        lb_step <= 0;
 	                bus_address <= 0; // clean bus
-	                bus_addr <= 0; // clean bus
+	                //bus_addr <= 0; // clean bus
 		    end
 	        end
 
@@ -125,7 +125,7 @@ module riscv64(
 	        32'b1111111_11111_11111_111_11110_1111111: begin
 		    if (sb_step == 0) begin
 	                bus_address <= `Art_base;
-	                bus_addr <= `Art_base>>2 ;
+	                //bus_addr <= `Art_base>>2 ;
 	                bus_write_data <= re[5];
 	                bus_write_enable <= 1;
 		//        pc <= pc;

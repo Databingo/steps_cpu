@@ -11,8 +11,11 @@ module cpu_on_board (
     (* chip_pin = "R19" *) output wire LEDR1, // 
     (* chip_pin = "U18, Y18, V19, T18, Y19, U19" *) output wire [5:0] LEDR_PC, // 8 red LEDs right
 
+    (* chip_pin = "J2" *)  output wire HEX0,
+
     (* chip_pin = "H15" *)  input wire PS2_CLK, 
     (* chip_pin = "J14" *)  input wire PS2_DAT 
+
 );
 
     // -- MEM -- minic L1 cache
@@ -111,58 +114,22 @@ module cpu_on_board (
     wire Art_selected = (bus_address == `Art_base);
     wire Key_selected = (bus_address == `Key_base);
     assign  LEDR1 = Key_selected;
+    assign  HEX0 = Art_selected;
 
     wire [63:0] bus_addr;
     reg [31:0] port_b_data_out;
+
     // Read-During-Write (read get old data in same cycle with write)
     always @(posedge CLOCK_50) begin
-        if (bus_write_enable) begin
-            //Cache[bus_addr[9:0]] <= bus_write_data;
-            Cache[bus_address/4] <= bus_write_data;
-        end 
-        port_b_data_out <= {32'd0, Cache[bus_address[11:2]]};
+        port_b_data_out <= {32'd0, Cache[bus_address[11:2]]};         // Read path
+        if (bus_write_enable) Cache[bus_address/4] <= bus_write_data; // Write path
     end
+
     // MUX
-    //always @(posedge CLOCK_50) begin
-    //    if (bus_read_enable) begin 
-    //       if (Ram_selected) bus_read_data <= {32'd0, port_b_data_out}; // 
-    //       else if (Key_selected) bus_read_data <= {32'd0, 24'd0, data[7:0]}; // keyboard ASCII
-    //    end
-    //end
     assign bus_read_data = (bus_read_enable && Ram_selected) ? {32'd0, port_b_data_out}:
                            (bus_read_enable && Rom_selected) ? {32'd0, port_b_data_out}:
                            (bus_read_enable && Key_selected) ? {32'd0, 24'd0, data[7:0]}:
 			   64'h00000000;
-
-
-
-    //always @(posedge CLOCK_50) begin
-    //    if (bus_write_enable) begin
-    //        Cache[bus_addr[9:0]] <= bus_write_data;
-    //        //Cache[bus_addr] <= bus_write_data;
-    //        //
-    //    end 
-    //    else if (bus_read_enable) begin 
-    //        if (Key_selected) bus_read_data <= {32'd0, 24'd0, data[7:0]}; // keyboard ASCII
-    //        else bus_read_data <= {32'd0, Cache[bus_addr]};
-    //    end
-    //end
-    
-    //always @(posedge CLOCK_50) begin
-    //    if (bus_write_enable) begin
-    //        Cache[bus_addr[9:0]] <= bus_write_data;
-    //        //Cache[bus_addr] <= bus_write_data;
-    //        //
-    //    end 
-    //end
-
-    //always @(posedge CLOCK_50) begin
-    //    if (bus_read_enable) begin 
-    //        if (Key_selected) bus_read_data <= {32'd0, 24'd0, data[7:0]}; // keyboard ASCII
-    //        else bus_read_data <= {32'd0, Cache[bus_addr]};
-    //    end
-    //end
-
 
 
     wire uart_write_trigger = bus_write_enable && Art_selected;
