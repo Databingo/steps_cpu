@@ -119,10 +119,10 @@ module cpu_on_board (
     wire Key_selected = (bus_address == `Key_base);
     wire read_has_data = |bus_read_data;
     wire write_has_data = |bus_write_data;
-    assign HEX00 = ~Key_selected;
-    assign HEX10 = ~read_has_data;
-    assign HEX20 = ~Art_selected;
-    assign HEX30 = ~write_has_data;
+    assign HEX30 = ~Key_selected;
+    assign HEX20 = ~read_has_data;
+    assign HEX10 = ~Art_selected;
+    assign HEX00 = ~write_has_data;
 
     wire [63:0] bus_addr;
     reg [31:0] port_b_data_out;
