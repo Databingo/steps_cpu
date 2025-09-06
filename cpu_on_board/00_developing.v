@@ -1,27 +1,34 @@
+`include "header.vh"
+
 module cpu_on_board (
     // -- Pin --
     (* chip_pin = "PIN_L1" *)  input wire CLOCK_50, // 50 MHz clock
     (* chip_pin = "PIN_R22" *) input wire KEY0,     // Active-low reset button
     (* chip_pin = "PIN_Y21, PIN_Y22, PIN_W21, PIN_W22, PIN_V21, PIN_V22, PIN_U21, PIN_U22" *) output wire [7:0] LEDG, // 8 green LEDs
     (* chip_pin = "R17" *) output reg LEDR9, // 1 red LEDs breath left most 
-    //(* chip_pin = "U18, Y18, V19, T18, Y19, U19, R19, R20" *) output wire [7:0] LEDR7_0, // 8 red LEDs right
-    (* chip_pin = "R20" *) output wire LEDR7, // 
+    //(* chip_pin = "U18, Y18, V19, T18, Y19, U19, R19, R20" *) output wire [7:0] LEDR0_0, // 8 red LEDs right
+    (* chip_pin = "R20" *) output wire LEDR0, // 
+    (* chip_pin = "R19" *) output wire LEDR1, // 
+    (* chip_pin = "U18, Y18, V19, T18, Y19, U19" *) output wire [5:0] LEDR_PC, // 8 red LEDs right
+
+    (* chip_pin = "F4" *)  output wire HEX30,
+    (* chip_pin = "G5" *)  output wire HEX20,
+    (* chip_pin = "E1" *)  output wire HEX10,
+    (* chip_pin = "J2" *)  output wire HEX00,
 
     (* chip_pin = "H15" *)  input wire PS2_CLK, 
     (* chip_pin = "J14" *)  input wire PS2_DAT 
+
 );
 
-    // -- ROM -- for Boot Program
-    //(* ram_style = "block" *) reg [31:0] Rom [0:1023]; // 4KB Read Only Memory
-    //initial $readmemb("rom.mif", Rom);
-
-    // -- RAM -- for Load Program
-      
-      
-           
-    // -- MEM -- for all
-    (* ram_style = "block" *) reg [31:0] Ram [0:4096]; // 8KB Radom Access Memory
-    initial $readmemb("mem.mif", Ram);
+    // -- MEM -- minic L1 cache
+    //(* ram_style = "block" *) reg [31:0] Cache [0:2047]; // 2048x4=8KB L1 cache to 0x2000
+    (* ram_style = "block" *) reg [31:0] Cache [0:3071]; // 2048x4=8KB L1 cache to 0x2000
+    integer i;
+    initial begin
+        $readmemb("rom.mif", Cache, `Rom_base>>2);
+        $readmemb("ram.mif", Cache, `Ram_base>>2);
+    end
 
     // -- Clock --
     wire clock_1hz;
@@ -31,13 +38,13 @@ module cpu_on_board (
         .reset_n(KEY0)
     );
 
-    wire [31:0] pc;
-    //wire [31:0] ir_bd; assign ir_bd = Ram[pc>>2];
+    wire [63:0] pc;
     reg [31:0] ir_bd;
     always @(posedge CLOCK_50) begin
-        ir_bd = Ram[pc>>2];
+	ir_bd <= Cache[pc>>2];
     end
     wire [31:0] ir_ld; assign ir_ld = {ir_bd[7:0], ir_bd[15:8], ir_bd[23:16], ir_bd[31:24]}; // Endianness swap
+    assign LEDR_PC = pc/4;
 
     // -- CPU --
     riscv64 cpu (
@@ -52,6 +59,8 @@ module cpu_on_board (
 
 	.interrupt_vector(interrupt_vector),
 	.interrupt_ack(interrupt_ack),
+
+        .bus_addr(bus_addr),
 
         .bus_address(bus_address),
         .bus_write_data(bus_write_data),
@@ -87,7 +96,7 @@ module cpu_on_board (
         .clk_clk                             (CLOCK_50),
         .reset_reset_n                       (KEY0),
         .jtag_uart_0_avalon_jtag_slave_address   (bus_address[0:0]),
-        .jtag_uart_0_avalon_jtag_slave_writedata (bus_write_data[31:0]),
+        .jtag_uart_0_avalon_jtag_slave_writedata (bus_write_data[63:0]),
         .jtag_uart_0_avalon_jtag_slave_write_n   (~uart_write_trigger_pulse),
         .jtag_uart_0_avalon_jtag_slave_chipselect(1'b1),
         .jtag_uart_0_avalon_jtag_slave_read_n    (1'b1)
@@ -95,32 +104,50 @@ module cpu_on_board (
 
     // -- Bus --
     wire [63:0] bus_address;
+    reg [63:0] bus_read_data;
     //wire [63:0] bus_read_data;
     wire        bus_read_enable;
     wire [63:0] bus_write_data;
     wire        bus_write_enable;
 
+
     // -- Bus controller --
-    localparam Ram_base = 32'h0000_0000, Ram_size = 32'h0000_1000; // 4KB RAM
-    localparam Rom_base = 32'h0000_1000, Rom_size = 32'h0000_2000; // 8KB ROM
-    localparam Stk_base = 32'h0000_3000, Stk_size = 32'h0000_1000; // 4KB STACK
-    localparam Art_base = 32'h8000_0000, Key_base = 32'h8000_0010; 
-    wire Rom_selected = (bus_address >= Rom_base && bus_address < Rom_base + Rom_size);
-    wire Ram_selected = (bus_address >= Ram_base && bus_address < Ram_base + Ram_size);
-    wire Stk_selected = (bus_address >= Stk_base && bus_address < Stk_base + Stk_size);
-    wire Art_selected = (bus_address == Art_base);
-    wire Key_selected = (bus_address == Key_base);
+    wire Rom_selected = (bus_address >= `Rom_base && bus_address < `Rom_base + `Rom_size);
+    wire Ram_selected = (bus_address >= `Ram_base && bus_address < `Ram_base + `Ram_size);
+    ////wire Stk_selected = (bus_address >= Stk_base && bus_address < Stk_base + Stk_size);
+    wire Art_selected = (bus_address == `Art_base);
+    wire Key_selected = (bus_address == `Key_base);
+    wire read_has_data = |bus_read_data;
+    wire write_has_data = |bus_write_data;
+    assign HEX30 = ~Key_selected;
+    assign HEX20 = ~read_has_data;
+    assign HEX10 = ~write_has_data;
+    assign HEX00 = ~Art_selected;
 
-    wire [63:0] bus_read_data = Key_selected ? {56'd0, data[7:0]}:
-	                   //Key_selected ? {56'd0, ascii}:
-	                   //Art_selected ? {56'd0, ascii}:
-	                   Ram_selected ? {32'd0, Ram[bus_address[11:2]]}:
-			   Rom_selected ? {32'd0, Ram[bus_address[11:2]]}:
-			   64'hDEADBEEF_DEADBEEF;
+    wire [63:0] bus_addr;
+    reg [31:0] port_b_data_out;
+    // Read-During-Write (read get old data in same cycle with write)
+    always @(posedge CLOCK_50) begin
+        // Write path
+        if (bus_write_enable) Cache[bus_address/4] <= bus_write_data; 
+        // Read path
+        //port_b_data_out <= {32'd0, Cache[bus_address[11:2]]};
+    end
+    // MUX Router read
+    //reg bus_read_enable_former;
+    //always @(posedge CLOCK_50) begin
+    //    if (!KEY0)  bus_read_enable_former <=0;
+    //    else  bus_read_enable_former  <= bus_read_enable;
+    //end
+    //assign bus_read_enable_50 =  bus_read_enable && ! bus_read_enable_former;
 
+    always @(posedge CLOCK_50) begin //!!
+	if (bus_read_enable && Key_selected) bus_read_data  <= {32'd0, 24'd0, data[7:0]};
+    end
 
 
     wire uart_write_trigger = bus_write_enable && Art_selected;
+    //reg uart_write_trigger;
     reg uart_write_trigger_dly;
     wire uart_write_trigger_pulse;
     always @(posedge CLOCK_50 or negedge KEY0) begin
@@ -138,15 +165,15 @@ module cpu_on_board (
     always @(posedge CLOCK_50 or negedge KEY0) begin
 	if (!KEY0) begin
 	    interrupt_vector <= 0;
-	    LEDR7 <= 0;
+	    LEDR0 <= 0;
 	end else begin
             if (key_pressed_edge && data[7:0]) begin
 		    interrupt_vector <= 1;
-		    LEDR7 <= 1;
+		    LEDR0 <= 1;
 	    end
 	    if (interrupt_vector != 0 && interrupt_ack == 1) begin
 		interrupt_vector <= 0; // only sent once
-		LEDR7 <= 0;
+		LEDR0 <= 0;
 		end
 		
 	end
@@ -160,14 +187,14 @@ module cpu_on_board (
     // -- DMA(Direct Memory Access) --?
 
 endmodule
-
-
+`include "header.vh"
 
 module riscv64(
     input wire clk, 
     input wire reset,     // Active-low reset button
     input wire [31:0] instruction,
-    output reg [31:0] pc = 44,
+    //output reg [31:0] pc = 44,
+    output reg [63:0] pc,// = 32'h1000,
     output reg [31:0] ir,
     output reg [63:0] re [0:31],
     output wire  heartbeat,
@@ -176,7 +203,9 @@ module riscv64(
     output reg  interrupt_pending,
     output reg  interrupt_ack,
 
-    output reg [63:0] bus_address,
+    output reg [63:0] bus_addr,
+
+    output reg [63:0] bus_address,  // 48 bit for real standard?
     output reg [63:0] bus_write_data,
     output reg        bus_write_enable,
     output reg        bus_read_enable,
@@ -223,79 +252,66 @@ module riscv64(
     always @(posedge clk or negedge reset) begin
         if (!reset) begin 
 	    bubble <= 1'b0;
-            pc <= 44; //
+	    pc <= `Ram_base;
 	    lb_step <= 0;
             sb_step <= 0;
+	    bus_read_enable <= 0;
+	    bus_write_enable <= 0;
+	    bus_write_data <= 0;
+	    bus_address <= `Ram_base;
             // Interrupt reset
 	    interrupt_pending <= 0;
 	    interrupt_ack <= 0;
-	    //interrupt_done <= 0;
-	    bus_read_enable <= 0;
-	    bus_write_enable <= 0;
+
         end else begin
-	    // PC default +4 (1.Could be overide 2.Take effect next cycle) 
+
+	    // PC default +4    (1.Could be overide 2.Take effect next cycle) 
             pc <= pc + 4;
 	    interrupt_ack <= 0;
 
             // Interrupt
 	    if (interrupt_vector == 1 && interrupt_pending !=1) begin
-		    mepc <= pc; // save pc
-                    pc <= 0; // jump to ISR addr
-		    bubble <= 1'b1; // bubble wrong fetche instruciton by IF
-	            interrupt_pending <= 1;
-		    interrupt_ack <= 1;
+	        mepc <= pc; // save pc
+                pc <= 0; // jump to ISR addr
+		bubble <= 1'b1; // bubble wrong fetche instruciton by IF
+	        interrupt_pending <= 1;
+		interrupt_ack <= 1;
 
             // Bubble
 	    end else if (bubble) bubble <= 1'b0; // Flush this cycle & Clear bubble signal for the next cycle
 
 	    // IR
 	    else begin 
-	    bus_read_enable <= 0;
-	    bus_write_enable <= 0; 
-            casez(ir) 
-		// Lui
-		32'b???????_?????_?????_???_?????_0110111:  re[w_rd] <= w_imm_u;
-		// Mret 
-		32'b0000000_00000_00000_000_00000_0000000: begin 
-		    pc <= mepc; 
-		    bubble <= 1; 
-	            interrupt_pending <= 0;
-		end 
-                // Load
-	        32'b1111111_11111_11111_111_11111_1111111: begin
-		    if (lb_step == 0) begin
-	            bus_address <= 32'h8000_0010; // Keyboard_base ;
-	            bus_read_enable <= 1;
-		    pc <= pc;
-		    bubble <= 1;
-		    lb_step <= 1;
-		    end
-		    if (lb_step == 1) begin
-	            //bus_address <= 32'h8000_0000; // Art_base ;
-	            //bus_write_data <= bus_read_data; //32'h41;
-	            re[5]<= bus_read_data; //32'h41;
-	            //bus_write_enable <= 1;
-		    lb_step <= 0;
-		    end
-	        end
-                // Store
-	        32'b1111111_11111_11111_111_11110_1111111: begin
-		    if (sb_step == 0) begin
-	            bus_address <= 32'h8000_0000; // Art_base ;
-	            bus_write_data <= re[5];
-	            bus_write_enable <= 1;
-		    //pc <= pc;
-		    //bubble <= 1;
-		    //sb_step <= 1;
-		    //end
-		    //if (lb_step == 1) begin
-	            //bus_address <= 32'h8000_0000; // Art_base ;
-	            //bus_write_data <= bus_read_data; //32'h41;
-	            //bus_write_enable <= 1;
-		    //lb_step <= 0;
-		    end
-	        end
-            endcase
+	        bus_read_enable <= 0;
+	        bus_write_enable <= 0; 
+	        bus_write_data <= 0;
+	        bus_address <= `Ram_base;
+                casez(ir) 
+	            32'b???????_?????_?????_???_?????_0110111:  re[w_rd] <= w_imm_u; // Lui
+	            32'b0000000_00000_00000_000_00000_0000000: begin // Mret 
+	                pc <= mepc; 
+	                bubble <= 1; 
+	                interrupt_pending <= 0;
+	            end 
+	            32'b1111111_11111_11111_111_11111_1111111: begin // Load  3 cycles to finish re<=data
+	                if (lb_step == 0) begin
+	                    bus_address <= `Key_base; // cycle 1 setting read enable
+	                    bus_read_enable <= 1;
+	                    pc <= pc;
+	                    bubble <= 1; //!! take over cycle 2, meanwhile bus read 
+	                    lb_step <= 1;
+	                end
+	                if (lb_step == 1) begin  
+	                    re[5]<= bus_read_data; // cycle 3 save to cpu's register
+	                    lb_step <= 0;
+	                end
+	            end
+	            32'b1111111_11111_11111_111_11110_1111111: begin // Store 1 cycles to finish settting data<=re (next cycle bus write to data)
+	               bus_address <= `Art_base;
+	               bus_write_data <= re[5];
+	               bus_write_enable <= 1;
+	            end
+                endcase
 	    end
         end
     end
