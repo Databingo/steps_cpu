@@ -111,8 +111,8 @@ module riscv64(
 	                    lb_step <= 1;
 	                end
 	                if (lb_step == 1) begin
-	                    //re[5]<= bus_read_data; //32'h41;
-	                    re[5]<= 32'h41;
+	                    re[5]<= bus_read_data; //32'h41;
+	                    //re[5]<= 32'h41;
 	                    lb_step <= 0;
 	                end
 	            end
