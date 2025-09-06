@@ -11,7 +11,8 @@ module cpu_on_board (
     (* chip_pin = "R19" *) output wire LEDR1, // 
     (* chip_pin = "U18, Y18, V19, T18, Y19, U19" *) output wire [5:0] LEDR_PC, // 8 red LEDs right
 
-    (* chip_pin = "J2" *)  output wire HEX0,
+    (* chip_pin = "F4" *)  output wire HEX30,
+    (* chip_pin = "J2" *)  output wire HEX00,
 
     (* chip_pin = "H15" *)  input wire PS2_CLK, 
     (* chip_pin = "J14" *)  input wire PS2_DAT 
@@ -107,6 +108,7 @@ module cpu_on_board (
     wire [63:0] bus_write_data;
     wire        bus_write_enable;
 
+
     // -- Bus controller --
     wire Rom_selected = (bus_address >= `Rom_base && bus_address < `Rom_base + `Rom_size);
     wire Ram_selected = (bus_address >= `Ram_base && bus_address < `Ram_base + `Ram_size);
@@ -114,11 +116,12 @@ module cpu_on_board (
     wire Art_selected = (bus_address == `Art_base);
     wire Key_selected = (bus_address == `Key_base);
     assign  LEDR1 = Key_selected;
-    assign  HEX0 = Art_selected;
+    assign  HEX30 = Art_selected;
+    wire has_data = |bus_read_data;
+    assign HEX00 = ~has_data;
 
     wire [63:0] bus_addr;
     reg [31:0] port_b_data_out;
-
     // Read-During-Write (read get old data in same cycle with write)
     always @(posedge CLOCK_50) begin
         port_b_data_out <= {32'd0, Cache[bus_address[11:2]]};         // Read path
