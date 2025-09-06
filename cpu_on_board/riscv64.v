@@ -73,8 +73,10 @@ module riscv64(
             // Interrupt reset
 	    interrupt_pending <= 0;
 	    interrupt_ack <= 0;
+
         end else begin
-	    // PC default +4 (1.Could be overide 2.Take effect next cycle) 
+
+	    // PC default +4    (1.Could be overide 2.Take effect next cycle) 
             pc <= pc + 4;
 	    interrupt_ack <= 0;
 
@@ -104,15 +106,14 @@ module riscv64(
 	            end 
 	            32'b1111111_11111_11111_111_11111_1111111: begin // Load  3 cycles to finish re<=data
 	                if (lb_step == 0) begin
-	                    bus_address <= `Key_base;
+	                    bus_address <= `Key_base; // cycle 1 setting read enable
 	                    bus_read_enable <= 1;
 	                    pc <= pc;
-	                    bubble <= 1; //!! take over 1 cycle, meanwhile ON OTHER PART bus read SIMULTANEOUSLY
+	                    bubble <= 1; //!! take over cycle 2, meanwhile bus read 
 	                    lb_step <= 1;
 	                end
-	                if (lb_step == 1) begin
-	                    re[5]<= bus_read_data; //32'h41;
-	                    //re[5]<= 32'h41;
+	                if (lb_step == 1) begin  
+	                    re[5]<= bus_read_data; // cycle 3 save to cpu's register
 	                    lb_step <= 0;
 	                end
 	            end
