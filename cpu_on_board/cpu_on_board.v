@@ -98,7 +98,8 @@ module cpu_on_board (
 
     // -- Bus --
     wire [63:0] bus_address;
-    reg [63:0] bus_read_data;
+    //reg [63:0] bus_read_data;
+    wire [63:0] bus_read_data;
     wire        bus_read_enable;
     wire [63:0] bus_write_data;
     wire        bus_write_enable;
@@ -126,8 +127,12 @@ module cpu_on_board (
         if (bus_read_enable) begin 
            if (Ram_selected) bus_read_data <= {32'd0, port_b_data_out}; // 
            else if (Key_selected) bus_read_data <= {32'd0, 24'd0, data[7:0]}; // keyboard ASCII
+        end
     end
-    end
+    assign bus_read_data = (bus_read_enable && Ram_selected) ? {32'd0, port_b_data_out}:
+                           (bus_read_enable && Rom_selected) ? {32'd0, port_b_data_out}:
+                           (bus_read_enable && Key_selected) ? {32'd0, 24'd0, data[7:0]}:
+			   64'h00000000;
 
 
 
