@@ -122,12 +122,6 @@ module riscv64(
 		            bus_address <= `Art_base;
 	                    bus_write_data <= re[5];
 	                    bus_write_enable <= 1;
-	                    pc <= pc;
-	                    bubble <= 1; //!! take over cycle 2, meanwhile bus write
-	                    sb_step <= 1;
-			end
-		        if (sb_step == 1) begin 
-			    sb_step <=0;
 			end
 	            end
                 endcase
