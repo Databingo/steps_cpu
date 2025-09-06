@@ -117,8 +117,10 @@ module cpu_on_board (
     // Read-During-Write (read get old data in same cycle with write)
     always @(posedge CLOCK_50) begin
         if (bus_write_enable) begin
-            Cache[bus_addr[9:0]] <= bus_write_data;
+            //Cache[bus_addr[9:0]] <= bus_write_data;
+            Cache[bus_address>>2] <= bus_write_data;
         end 
+        //port_b_data_out <= {32'd0, Cache[bus_addr]};
         port_b_data_out <= {32'd0, Cache[bus_address>>2]};
     end
     // MUX
