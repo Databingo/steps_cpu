@@ -131,7 +131,7 @@ module cpu_on_board (
         // Write path
         if (bus_write_enable && (Ram_selected || Art_selected)) Cache[bus_address/4] <= bus_write_data; 
         // Read path
-        if (Rom_selected || Ram_selected) port_b_data_out <= {32'd0, Cache[bus_address[11:2]]};
+        //if (Rom_selected || Ram_selected) port_b_data_out <= {32'd0, Cache[bus_address[11:2]]};
     end
     // MUX Router read
     //reg bus_read_enable_former;
@@ -143,8 +143,8 @@ module cpu_on_board (
 
     always @(posedge CLOCK_50) begin //!!
 	if (bus_read_enable && Key_selected) bus_read_data  <= {32'd0, 24'd0, data[7:0]};
-	else if (bus_read_enable && (Rom_selected || Ram_selected)) bus_read_data <= {32'd0, port_b_data_out};
-	else bus_read_data <= 64'h00000000;
+	//else if (bus_read_enable && (Rom_selected || Ram_selected)) bus_read_data <= {32'd0, port_b_data_out};
+	//else bus_read_data <= 64'h00000000;
     end
 
 
