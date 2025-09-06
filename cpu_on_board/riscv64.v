@@ -112,7 +112,7 @@ module riscv64(
 	                    bubble <= 1; //!! take over cycle 2, meanwhile bus read 
 	                    lb_step <= 1;
 	                end
-	                else if (lb_step == 1) begin  
+	                if (lb_step == 1) begin  
 	                    re[5]<= bus_read_data; // cycle 3 save to cpu's register
 	                    lb_step <= 0;
 	                end
