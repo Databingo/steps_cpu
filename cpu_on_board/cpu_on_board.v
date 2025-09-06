@@ -134,10 +134,6 @@ module cpu_on_board (
         port_b_data_out <= {32'd0, Cache[bus_address[11:2]]};
     end
     // MUX Router read
-//    assign bus_read_data = (bus_read_enable && Ram_selected) ? {32'd0, port_b_data_out}:
-//                           (bus_read_enable && Rom_selected) ? {32'd0, port_b_data_out}:
-//                           (bus_read_enable && Key_selected) ? {32'd0, 24'd0, data[7:0]}:
-//			   64'h00000000;
     always @(posedge CLOCK_50) begin
 	if (bus_read_enable && Key_selected) bus_read_data  <= {32'd0, 24'd0, data[7:0]};
     end
