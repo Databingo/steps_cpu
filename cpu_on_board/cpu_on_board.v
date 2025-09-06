@@ -134,8 +134,15 @@ module cpu_on_board (
         port_b_data_out <= {32'd0, Cache[bus_address[11:2]]};
     end
     // MUX Router read
-    always @(*) begin
-	if (bus_read_enable && Key_selected) bus_read_data  <= {32'd0, 24'd0, data[7:0]};
+    reg bus_read_enable_former;
+    always @(posedge CLOCK_50) begin
+	if (!KEY0)  bus_read_enable_former <=0;
+	else  bus_read_enable_former  <= bus_read_enable;
+    end
+    assign bus_read_enable_50 =  bus_read_enable && ! bus_read_enable_former;
+
+    always @(posedge CLOCK_50) begin
+	if (bus_read_enable_50 && Key_selected) bus_read_data  <= {32'd0, 24'd0, data[7:0]};
     end
 
 
