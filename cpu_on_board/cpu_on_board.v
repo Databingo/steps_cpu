@@ -118,10 +118,11 @@ module cpu_on_board (
     always @(posedge CLOCK_50) begin
         if (bus_write_enable) begin
             //Cache[bus_addr[9:0]] <= bus_write_data;
-            Cache[bus_address[11:2]] <= bus_write_data;
+            //Cache[bus_address[11:2]] <= bus_write_data;
+            Cache[bus_address/4] <= bus_write_data;
         end 
         //port_b_data_out <= {32'd0, Cache[bus_addr]};
-        port_b_data_out <= {32'd0, Cache[bus_address>>2]};
+        port_b_data_out <= {32'd0, Cache[bus_address/4]};
     end
     // MUX
     //always @(posedge CLOCK_50) begin
