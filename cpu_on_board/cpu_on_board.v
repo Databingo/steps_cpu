@@ -123,12 +123,12 @@ module cpu_on_board (
         //bus_read_data <= {32'd0, Cache[bus_addr]};
     end
     // MUX
-    always @(posedge CLOCK_50) begin
-        if (bus_read_enable) begin 
-           if (Ram_selected) bus_read_data <= {32'd0, port_b_data_out}; // 
-           else if (Key_selected) bus_read_data <= {32'd0, 24'd0, data[7:0]}; // keyboard ASCII
-        end
-    end
+    //always @(posedge CLOCK_50) begin
+    //    if (bus_read_enable) begin 
+    //       if (Ram_selected) bus_read_data <= {32'd0, port_b_data_out}; // 
+    //       else if (Key_selected) bus_read_data <= {32'd0, 24'd0, data[7:0]}; // keyboard ASCII
+    //    end
+    //end
     assign bus_read_data = (bus_read_enable && Ram_selected) ? {32'd0, port_b_data_out}:
                            (bus_read_enable && Rom_selected) ? {32'd0, port_b_data_out}:
                            (bus_read_enable && Key_selected) ? {32'd0, 24'd0, data[7:0]}:
