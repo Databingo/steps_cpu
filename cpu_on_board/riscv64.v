@@ -66,13 +66,13 @@ module riscv64(
 	    pc <= `Ram_base;
 	    lb_step <= 0;
             sb_step <= 0;
+	    bus_read_enable <= 0;
+	    bus_write_enable <= 0;
+	    bus_write_data <= 0;
+	    bus_address <= `Ram_base;
             // Interrupt reset
 	    interrupt_pending <= 0;
 	    interrupt_ack <= 0;
-	    bus_read_enable <= 0;
-	    bus_write_enable <= 0;
-	    bus_address <= `Ram_base;
-	    //bus_addr <= `Ram_base;
         end else begin
 	    // PC default +4 (1.Could be overide 2.Take effect next cycle) 
             pc <= pc + 4;
@@ -80,51 +80,48 @@ module riscv64(
 
             // Interrupt
 	    if (interrupt_vector == 1 && interrupt_pending !=1) begin
-		    mepc <= pc; // save pc
-                    pc <= 0; // jump to ISR addr
-		    bubble <= 1'b1; // bubble wrong fetche instruciton by IF
-	            interrupt_pending <= 1;
-		    interrupt_ack <= 1;
+	        mepc <= pc; // save pc
+                pc <= 0; // jump to ISR addr
+		bubble <= 1'b1; // bubble wrong fetche instruciton by IF
+	        interrupt_pending <= 1;
+		interrupt_ack <= 1;
 
             // Bubble
 	    end else if (bubble) bubble <= 1'b0; // Flush this cycle & Clear bubble signal for the next cycle
 
 	    // IR
 	    else begin 
-	    bus_read_enable <= 0;
-	    bus_write_enable <= 0; 
-	    bus_write_data <= 0;
-	    bus_address <= `Ram_base;
-            casez(ir) 
-		// Lui
-		32'b???????_?????_?????_???_?????_0110111:  re[w_rd] <= w_imm_u;
-		// Mret 
-		32'b0000000_00000_00000_000_00000_0000000: begin 
-		    pc <= mepc; 
-		    bubble <= 1; 
-	            interrupt_pending <= 0;
-		end 
-                // Load  3 cycles to finish re<=data
-	        32'b1111111_11111_11111_111_11111_1111111: begin
-		    if (lb_step == 0) begin
-	                bus_address <= `Key_base;
-	                bus_read_enable <= 1;
-		        pc <= pc;
-		        bubble <= 1; //!! take over 1 cycle, meanwhile ON OTHER PART bus read SIMULTANEOUSLY
-		        lb_step <= 1;
-		    end
-		    if (lb_step == 1) begin
-	                re[5]<= bus_read_data; //32'h41;
-		        lb_step <= 0;
-		    end
-	        end
-                // Store 1 cycles to finish settting data<=re (next cycle bus write to data)
-	        32'b1111111_11111_11111_111_11110_1111111: begin
-	           bus_address <= `Art_base;
-	           bus_write_data <= re[5];
-	           bus_write_enable <= 1;
-	        end
-            endcase
+	        bus_read_enable <= 0;
+	        bus_write_enable <= 0; 
+	        bus_write_data <= 0;
+	        bus_address <= `Ram_base;
+                casez(ir) 
+	            32'b???????_?????_?????_???_?????_0110111:  re[w_rd] <= w_imm_u; // Lui
+	            32'b0000000_00000_00000_000_00000_0000000: begin // Mret 
+	                pc <= mepc; 
+	                bubble <= 1; 
+	                interrupt_pending <= 0;
+	            end 
+	            32'b1111111_11111_11111_111_11111_1111111: begin // Load  3 cycles to finish re<=data
+	                if (lb_step == 0) begin
+	                    bus_address <= `Key_base;
+	                    bus_read_enable <= 1;
+	                    pc <= pc;
+	                    bubble <= 1; //!! take over 1 cycle, meanwhile ON OTHER PART bus read SIMULTANEOUSLY
+	                    lb_step <= 1;
+	                end
+	                if (lb_step == 1) begin
+	                    //re[5]<= bus_read_data; //32'h41;
+	                    re[5]<= 32'h41;
+	                    lb_step <= 0;
+	                end
+	            end
+	            32'b1111111_11111_11111_111_11110_1111111: begin // Store 1 cycles to finish settting data<=re (next cycle bus write to data)
+	               bus_address <= `Art_base;
+	               bus_write_data <= re[5];
+	               bus_write_enable <= 1;
+	            end
+                endcase
 	    end
         end
     end
