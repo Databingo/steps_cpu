@@ -96,7 +96,7 @@ module cpu_on_board (
         .clk_clk                             (CLOCK_50),
         .reset_reset_n                       (KEY0),
         .jtag_uart_0_avalon_jtag_slave_address   (bus_address[0:0]),
-        .jtag_uart_0_avalon_jtag_slave_writedata (bus_write_data[31:0]),
+        .jtag_uart_0_avalon_jtag_slave_writedata (bus_write_data[63:0]),
         .jtag_uart_0_avalon_jtag_slave_write_n   (~uart_write_trigger_pulse),
         .jtag_uart_0_avalon_jtag_slave_chipselect(1'b1),
         .jtag_uart_0_avalon_jtag_slave_read_n    (1'b1)
