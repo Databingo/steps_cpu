@@ -94,7 +94,7 @@ module riscv64(
 	    bus_read_enable <= 0;
 	    bus_write_enable <= 0; 
 	    bus_write_data <= 0;
-	    bus_address <= 0;
+	    bus_address <= `Ram_base;
             casez(ir) 
 		// Lui
 		32'b???????_?????_?????_???_?????_0110111:  re[w_rd] <= w_imm_u;
@@ -117,7 +117,7 @@ module riscv64(
 		    if (lb_step == 1) begin
 	                re[5]<= bus_read_data; //32'h41;
 		        lb_step <= 0;
-	                bus_address <= 0; // clean bus
+	                //bus_address <= 0; // clean bus
 	                //bus_addr <= 0; // clean bus
 		    end
 	        end
@@ -126,7 +126,8 @@ module riscv64(
 		    if (sb_step == 0) begin
 	                bus_address <= `Art_base;
 	                //bus_addr <= `Art_base>>2 ;
-	                bus_write_data <= 32'h41; //re[5];
+	                //bus_write_data <= 32'h41; //re[5];
+	                bus_write_data <= re[5];
 	                bus_write_enable <= 1;
 		//        pc <= pc;
 		//        bubble <= 1; // take 1 cycle; board bus write also
