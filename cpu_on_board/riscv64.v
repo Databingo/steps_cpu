@@ -118,9 +118,17 @@ module riscv64(
 	                end
 	            end
 	            32'b1111111_11111_11111_111_11110_1111111: begin // Store 1 cycles to finish settting data<=re (next cycle bus write to data)
-	               bus_address <= `Art_base;
-	               bus_write_data <= re[5];
-	               bus_write_enable <= 1;
+		        if (sb_step == 0) begin 
+		            bus_address <= `Art_base;
+	                    bus_write_data <= re[5];
+	                    bus_write_enable <= 1;
+	                    pc <= pc;
+	                    bubble <= 1; //!! take over cycle 2, meanwhile bus write
+	                    sb_step <= 1;
+			end
+		        if (sb_step == 1) begin 
+			    sb_step <=0;
+			end
 	            end
                 endcase
 	    end
