@@ -114,6 +114,7 @@ module riscv64(
 	                    pc <= pc;
 	                    bubble <= 1; 
 	                    lb_step <= 2;
+	                    bus_read_enable <= 1;
 	                end
 	                if (lb_step == 2) begin  
 	                    re[5]<= bus_read_data; // cycle 3 save to cpu's register
