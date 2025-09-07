@@ -127,3 +127,17 @@ module riscv64(
     end
 
 endmodule
+
+
+
+//interrupt
+//N+0 see interrupt and set isr pc
+//N+1 bubble branch take over
+//Lb
+//N+2 execute load:step_0 setting read bubble1 lb_step1
+//N+3 bubble branch take over (BUT bus read data into bus_read_data)
+//N+4 execute load:step_1 save bus_read_data into re
+//Sb
+//N+5 save re to bus_write_data
+//mret
+//N+6 mret (BUT URAT get data for print).   //
