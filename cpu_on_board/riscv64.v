@@ -14,6 +14,8 @@ module riscv64(
     output reg  interrupt_pending,
     output reg  interrupt_ack,
 
+    output reg [63:0] bus_addr,
+
     output reg [63:0] bus_address,  // 48 bit for real standard?
     output reg [63:0] bus_write_data,
     output reg        bus_write_enable,
@@ -73,8 +75,7 @@ module riscv64(
 	    interrupt_ack <= 0;
 
         end else begin
-
-	    // PC default +4    (1.Could be overide 2.Take effect next cycle) 
+	    // Default PC+4    (1.Could be overide 2.Take effect next cycle) 
             pc <= pc + 4;
 	    interrupt_ack <= 0;
 
@@ -103,7 +104,7 @@ module riscv64(
 	                if (lb_step == 0) begin
 	                    bus_address <= `Key_base; // cycle 1 setting read enable
 	                    bus_read_enable <= 1;
-	                    pc <= pc;
+	                    pc <= pc - 4;
 	                    bubble <= 1; //!! take over cycle 2, meanwhile bus read 
 	                    lb_step <= 1;
 	                end
@@ -139,3 +140,8 @@ endmodule
 //N+5 save re to bus_write_data
 //mret
 //N+6 mret (BUT URAT get data for print).   //
+   
+//in cycle N0, IF fetching sb, EXE ir is lb, bubble is setting 1, pc is re-setting to pc, lb_step is setting to 1;
+//in N1, IF fetching lb, Bubble flushed ir sb, bubble <=0, Default pc is setting to lb+4(sb);
+//in N2, IF fetching sb, EXE ir is lb, lb_step is 1, bus_read_data is saving to re, lb_step is setting to 0;
+//in N3, IF fethcing mret, EXE ir is sb, re is saving to bus_write_data, bus_write_enable is setting to 1;

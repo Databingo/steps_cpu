@@ -135,7 +135,6 @@ module cpu_on_board (
         end
         //else if (bus_read_enable==0) bus_read_data <= 0; // clean data
         else bus_read_data <= 0; // clean data
-        end
     end
 
     // 4.-- UART Writer Trigger --
