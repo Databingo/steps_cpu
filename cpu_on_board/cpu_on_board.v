@@ -168,7 +168,6 @@ module cpu_on_board (
 	    if (interrupt_vector != 0 && interrupt_ack == 1) begin
 		interrupt_vector <= 0; // only sent once
 		LEDR0 <= 0;
-		end
 	    end
 	end
     end
