@@ -207,4 +207,9 @@ module cpu_on_board (
     // SD for Linux Kernel busybox (SRAM use SPI(IP) read kernel_initramfs from SD(IP) to SDRAM within 3s)
     // zImage .dtb initramfs.gz Buildroot:no network/deviceDrivers/FileSystem/kernekHacking
     // build and qemu test first
+    // 
+    // simplify:
+    // BRAM for bootloader
+    // FLASH for Linux kernel
+    // SDRAM for ram
 endmodule
