@@ -96,7 +96,7 @@ module cpu_on_board (
         .clk_clk                             (CLOCK_50),
         .reset_reset_n                       (KEY0),
         .jtag_uart_0_avalon_jtag_slave_address   (bus_address[0:0]),
-        .jtag_uart_0_avalon_jtag_slave_writedata (bus_write_data[63:0]),
+        .jtag_uart_0_avalon_jtag_slave_writedata (bus_write_data[31:0]),
         .jtag_uart_0_avalon_jtag_slave_write_n   (~uart_write_trigger_pulse),
         .jtag_uart_0_avalon_jtag_slave_chipselect(1'b1),
         .jtag_uart_0_avalon_jtag_slave_read_n    (1'b1)
@@ -129,20 +129,15 @@ module cpu_on_board (
     // Read-During-Write (read get old data in same cycle with write)
     always @(posedge CLOCK_50) begin
         // Write path
-        if (bus_write_enable) Cache[bus_address/4] <= bus_write_data; 
+        if (bus_write_enable && (Ram_selected || Art_selected)) Cache[bus_address/4] <= bus_write_data; 
         // Read path
-        //port_b_data_out <= {32'd0, Cache[bus_address[11:2]]};
+        if (Rom_selected || Ram_selected) port_b_data_out <= {32'd0, Cache[bus_address[11:2]]};
     end
     // MUX Router read
-    //reg bus_read_enable_former;
-    //always @(posedge CLOCK_50) begin
-    //    if (!KEY0)  bus_read_enable_former <=0;
-    //    else  bus_read_enable_former  <= bus_read_enable;
-    //end
-    //assign bus_read_enable_50 =  bus_read_enable && ! bus_read_enable_former;
-
     always @(posedge CLOCK_50) begin //!!
 	if (bus_read_enable && Key_selected) bus_read_data  <= {32'd0, 24'd0, data[7:0]};
+	else if (bus_read_enable && (Rom_selected || Ram_selected)) bus_read_data <= {32'd0, port_b_data_out};
+	//else bus_read_data <= 64'h00000000; // at 50MHz will override 
     end
 
 
@@ -307,9 +302,11 @@ module riscv64(
 	                end
 	            end
 	            32'b1111111_11111_11111_111_11110_1111111: begin // Store 1 cycles to finish settting data<=re (next cycle bus write to data)
-	               bus_address <= `Art_base;
-	               bus_write_data <= re[5];
-	               bus_write_enable <= 1;
+		        if (sb_step == 0) begin 
+		            bus_address <= `Art_base;
+	                    bus_write_data <= re[5];
+	                    bus_write_enable <= 1;
+			end
 	            end
                 endcase
 	    end

@@ -135,7 +135,8 @@ module cpu_on_board (
     end
     // MUX Router read
     always @(posedge CLOCK_50) begin //!!
-	if (bus_read_enable && Key_selected) bus_read_data  <= {32'd0, 24'd0, data[7:0]};
+	//if (bus_read_enable && Key_selected) bus_read_data  <= {32'd0, 24'd0, data[7:0]};
+	if (bus_read_enable && Key_selected) bus_read_data  <= {32'd0, 24'd0, keyboard_captured};
 	else if (bus_read_enable && (Rom_selected || Ram_selected)) bus_read_data <= {32'd0, port_b_data_out};
 	//else bus_read_data <= 64'h00000000; // at 50MHz will override 
     end
@@ -153,6 +154,7 @@ module cpu_on_board (
     assign uart_write_trigger_pulse = uart_write_trigger  && !uart_write_trigger_dly;
 
 
+    reg [7:0] keyboard_captured;
     // -- interrupt controller --
     wire [3:0] interrupt_vector;
     wire interrupt_ack;
@@ -160,10 +162,12 @@ module cpu_on_board (
     always @(posedge CLOCK_50 or negedge KEY0) begin
 	if (!KEY0) begin
 	    interrupt_vector <= 0;
+	    keyboard_captured <= 0;
 	    LEDR0 <= 0;
 	end else begin
             if (key_pressed_edge && data[7:0]) begin
 		    interrupt_vector <= 1;
+		    keyboard_captured <= data[7:0];
 		    LEDR0 <= 1;
 	    end
 	    if (interrupt_vector != 0 && interrupt_ack == 1) begin
