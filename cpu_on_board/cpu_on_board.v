@@ -186,4 +186,25 @@ module cpu_on_board (
     // -- MMU(Memory Manamgement Unit) --
     // -- DMA(Direct Memory Access) --?
 
+    // isr table
+    // IMA set
+    // M/S/U mode
+    // MMU (Sv39 standard) satp
+    // CLINT mtime mtimecmp
+    // PLIC meip seip mip
+    // openSBI/u-boot/berkeleyBootLoader
+    // linux kernel S mode
+    //
+    //
+    // 16550A UART
+    // AXI-lite BUS
+    //
+    // Cyclone II FPGA Starter Board Resource
+    // BRAM 30KB for Cache L1
+    // SRAM 512KB for Booting(load from FLASH)
+    // FLASH 4MB for Rom(opensbi_50KB/u-boot_100-200KB)
+    // SDRAM 8MB for Ram
+    // SD for Linux Kernel busybox (SRAM use SPI(IP) read kernel_initramfs from SD(IP) to SDRAM within 3s)
+    // zImage .dtb initramfs.gz Buildroot:no network/deviceDrivers/FileSystem/kernekHacking
+    // build and qemu test first
 endmodule
