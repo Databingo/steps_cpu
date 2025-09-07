@@ -132,7 +132,7 @@ module cpu_on_board (
 	   if (Key_selected) bus_read_data  <= {32'd0, 24'd0, keyboard_captured};
 	   else if (bus_read_enable && (Rom_selected || Ram_selected)) bus_read_data <= {32'd0, port_b_data_out};
 	//else bus_read_data <= 64'h00000000; // at 50MHz will override 
-        else bus_read_data <= 0; // clean data
+        else if (bus_read_enable==0) bus_read_data <= 0; // clean data
         end
     end
 
@@ -147,14 +147,6 @@ module cpu_on_board (
     end
 
     assign uart_write_trigger_pulse = uart_write_trigger  && !uart_write_trigger_dly;
-
-    // 5. -- Debug LEDs --
-    assign HEX30 = ~Key_selected;
-    assign HEX20 = ~|bus_read_data;
-    assign HEX10 = ~|bus_write_data;
-    assign HEX00 = ~Art_selected;
-
-
 
 
     reg [7:0] keyboard_captured;
@@ -188,6 +180,12 @@ module cpu_on_board (
 	    end
 	end
     end
+
+    // 5. -- Debug LEDs --
+    assign HEX30 = ~Key_selected;
+    assign HEX20 = ~|bus_read_data;
+    assign HEX10 = ~|bus_write_data;
+    assign HEX00 = ~Art_selected;
 
     // -- Timer --
     // -- CSRs --
