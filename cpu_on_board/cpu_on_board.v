@@ -150,8 +150,6 @@ module cpu_on_board (
 
 
     reg [7:0] keyboard_captured;
-    reg key_pressed_prev;
-    reg interrupt_handled;
     // -- interrupt controller --
     wire [3:0] interrupt_vector;
     wire interrupt_ack;
@@ -160,23 +158,17 @@ module cpu_on_board (
 	if (!KEY0) begin
 	    interrupt_vector <= 0;
 	    keyboard_captured <= 0;
-	    key_pressed_prev <= 0;
-	    interrupt_handled <= 0;
 	    LEDR0 <= 0;
 	end else begin
-	    key_pressed_prev <= key_pressed;
-            if (key_pressed && !key_pressed_prev && data[7:0] && !interrupt_handled) begin
+            if (key_pressed && data[7:0]) begin
 		    interrupt_vector <= 1;
 		    keyboard_captured <= data[7:0];
-		    interrupt_handled <= 1;
 		    LEDR0 <= 1;
 	    end
 	    if (interrupt_vector != 0 && interrupt_ack == 1) begin
 		interrupt_vector <= 0; // only sent once
 		LEDR0 <= 0;
 		end
-	    if (!key_pressed) begin
-		interrupt_handled <= 0; // Reset when key is released
 	    end
 	end
     end
