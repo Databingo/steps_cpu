@@ -60,8 +60,6 @@ module cpu_on_board (
 	.interrupt_vector(interrupt_vector),
 	.interrupt_ack(interrupt_ack),
 
-        .bus_addr(bus_addr),
-
         .bus_address(bus_address),
         .bus_write_data(bus_write_data),
         .bus_write_enable(bus_write_enable),
@@ -110,7 +108,6 @@ module cpu_on_board (
     wire [63:0] bus_write_data;
     wire        bus_write_enable;
 
-
     // == Bus controller ==
     // 1.-- Address Decoding --
     wire Rom_selected = (bus_address >= `Rom_base && bus_address < `Rom_base + `Rom_size);
@@ -119,7 +116,6 @@ module cpu_on_board (
     wire Art_selected = (bus_address == `Art_base);
     wire Key_selected = (bus_address == `Key_base);
 
-    wire [63:0] bus_addr;
     // 2.-- Port B of the On-Chip Memeory (Cache L1) --
     reg [31:0] port_b_data_out;
     // Read-During-Write (read get old data in same cycle with write)

@@ -14,8 +14,6 @@ module riscv64(
     output reg  interrupt_pending,
     output reg  interrupt_ack,
 
-    output reg [63:0] bus_addr,
-
     output reg [63:0] bus_address,  // 48 bit for real standard?
     output reg [63:0] bus_write_data,
     output reg        bus_write_enable,
