@@ -135,7 +135,8 @@ module cpu_on_board (
     end
     // MUX Router read
     always @(posedge CLOCK_50) begin //!!
-	if (bus_read_enable && Key_selected) bus_read_data  <= {32'd0, 24'd0, data[7:0]};
+	//if (bus_read_enable && Key_selected) bus_read_data  <= {32'd0, 24'd0, data[7:0]};
+	if (bus_read_enable && Key_selected) bus_read_data  <= {32'd0, 24'd0, keyboard_captured};
 	else if (bus_read_enable && (Rom_selected || Ram_selected)) bus_read_data <= {32'd0, port_b_data_out};
 	//else bus_read_data <= 64'h00000000; // at 50MHz will override 
     end
@@ -153,6 +154,9 @@ module cpu_on_board (
     assign uart_write_trigger_pulse = uart_write_trigger  && !uart_write_trigger_dly;
 
 
+    reg [7:0] keyboard_captured;
+    reg key_pressed_prev;
+    reg interrupt_handled;
     // -- interrupt controller --
     wire [3:0] interrupt_vector;
     wire interrupt_ack;
@@ -160,17 +164,25 @@ module cpu_on_board (
     always @(posedge CLOCK_50 or negedge KEY0) begin
 	if (!KEY0) begin
 	    interrupt_vector <= 0;
+	    keyboard_captured <= 0;
+	    key_pressed_prev <= 0;
+	    interrupt_handled <= 0;
 	    LEDR0 <= 0;
 	end else begin
-            if (key_pressed_edge && data[7:0]) begin
+	    key_pressed_prev <= key_pressed;
+            if (key_pressed && !key_pressed_prev && data[7:0] && !interrupt_handled) begin
 		    interrupt_vector <= 1;
+		    keyboard_captured <= data[7:0];
+		    interrupt_handled <= 1;
 		    LEDR0 <= 1;
 	    end
 	    if (interrupt_vector != 0 && interrupt_ack == 1) begin
 		interrupt_vector <= 0; // only sent once
 		LEDR0 <= 0;
 		end
-		
+	    if (!key_pressed) begin
+		interrupt_handled <= 0; // Reset when key is released
+	    end
 	end
     end
 
@@ -268,7 +280,7 @@ module riscv64(
 	    if (interrupt_vector == 1 && interrupt_pending !=1) begin
 	        mepc <= pc; // save pc
                 pc <= 0; // jump to ISR addr
-		bubble <= 1'b1; // bubble wrong fetche instruciton by IF
+		bubble <= 1'b1; // bubble wrong fetched instruciton by IF
 	        interrupt_pending <= 1;
 		interrupt_ack <= 1;
 
@@ -284,10 +296,7 @@ module riscv64(
                 casez(ir) 
 	            32'b???????_?????_?????_???_?????_0110111:  re[w_rd] <= w_imm_u; // Lui
 	            32'b0000000_00000_00000_000_00000_0000000: begin // Mret 
-	                pc <= mepc; 
-	                bubble <= 1; 
-	                interrupt_pending <= 0;
-	            end 
+	                pc <= mepc; bubble <= 1; interrupt_pending <= 0; end 
 	            32'b1111111_11111_11111_111_11111_1111111: begin // Load  3 cycles to finish re<=data
 	                if (lb_step == 0) begin
 	                    bus_address <= `Key_base; // cycle 1 setting read enable
@@ -314,3 +323,17 @@ module riscv64(
     end
 
 endmodule
+
+
+
+//interrupt
+//N+0 see interrupt and set isr pc
+//N+1 bubble branch take over
+//Lb
+//N+2 execute load:step_0 setting read bubble1 lb_step1
+//N+3 bubble branch take over (BUT bus read data into bus_read_data)
+//N+4 execute load:step_1 save bus_read_data into re
+//Sb
+//N+5 save re to bus_write_data
+//mret
+//N+6 mret (BUT URAT get data for print).   //

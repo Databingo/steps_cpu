@@ -111,47 +111,53 @@ module cpu_on_board (
     wire        bus_write_enable;
 
 
-    // -- Bus controller --
+    // == Bus controller ==
+    // 1.-- Address Decoding --
     wire Rom_selected = (bus_address >= `Rom_base && bus_address < `Rom_base + `Rom_size);
     wire Ram_selected = (bus_address >= `Ram_base && bus_address < `Ram_base + `Ram_size);
     ////wire Stk_selected = (bus_address >= Stk_base && bus_address < Stk_base + Stk_size);
     wire Art_selected = (bus_address == `Art_base);
     wire Key_selected = (bus_address == `Key_base);
-    wire read_has_data = |bus_read_data;
-    wire write_has_data = |bus_write_data;
-    assign HEX30 = ~Key_selected;
-    assign HEX20 = ~read_has_data;
-    assign HEX10 = ~write_has_data;
-    assign HEX00 = ~Art_selected;
 
     wire [63:0] bus_addr;
+    // 2.-- Port B of the On-Chip Memeory (Cache L1) --
     reg [31:0] port_b_data_out;
     // Read-During-Write (read get old data in same cycle with write)
     always @(posedge CLOCK_50) begin
-        // Write path
+        // Write path (Conditional)
         if (bus_write_enable && (Ram_selected || Art_selected)) Cache[bus_address/4] <= bus_write_data; 
-        // Read path
-        if (Rom_selected || Ram_selected) port_b_data_out <= {32'd0, Cache[bus_address[11:2]]};
+        // Read path (Unconditional)
+        port_b_data_out <= {32'd0, Cache[bus_address[11:2]]};
     end
-    // MUX Router read
+    // 3.-- Synchronous Read Data Multiplexer --
     always @(posedge CLOCK_50) begin //!!
 	//if (bus_read_enable && Key_selected) bus_read_data  <= {32'd0, 24'd0, data[7:0]};
-	if (bus_read_enable && Key_selected) bus_read_data  <= {32'd0, 24'd0, keyboard_captured};
-	else if (bus_read_enable && (Rom_selected || Ram_selected)) bus_read_data <= {32'd0, port_b_data_out};
+	if (bus_read_enable) begin
+	   if (Key_selected) bus_read_data  <= {32'd0, 24'd0, keyboard_captured};
+	   end else if (bus_read_enable && (Rom_selected || Ram_selected)) bus_read_data <= {32'd0, port_b_data_out};
 	//else bus_read_data <= 64'h00000000; // at 50MHz will override 
+        end
     end
 
-
+    // 4.-- UART Writer Trigger --
     wire uart_write_trigger = bus_write_enable && Art_selected;
     //reg uart_write_trigger;
     reg uart_write_trigger_dly;
-    wire uart_write_trigger_pulse;
+    //wire uart_write_trigger_pulse;
     always @(posedge CLOCK_50 or negedge KEY0) begin
 	if (!KEY0) uart_write_trigger_dly <= 0;
 	else uart_write_trigger_dly <= uart_write_trigger;
     end
 
     assign uart_write_trigger_pulse = uart_write_trigger  && !uart_write_trigger_dly;
+
+    // 5. -- Debug LEDs --
+    assign HEX30 = ~Key_selected;
+    assign HEX20 = ~|bus_read_data;
+    assign HEX10 = ~|bus_write_data;
+    assign HEX00 = ~Art_selected;
+
+
 
 
     reg [7:0] keyboard_captured;
