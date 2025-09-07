@@ -10,17 +10,16 @@ module riscv64(
     output reg [63:0] re [0:31],
     output wire  heartbeat,
 
-    input  reg [3:0] interrupt_vector,
-    output reg  interrupt_pending,
-    output reg  interrupt_ack,
+    input  reg [3:0] interrupt_vector, // out notice
+    output reg  interrupt_ack,         // reply to outside
+    output reg  interrupt_pending,     // inner signal
 
-    output reg [63:0] bus_addr,
-
-    output reg [63:0] bus_address,  // 48 bit for real standard?
+    output reg [63:0] bus_address,     // 39 bit for real standard?
     output reg [63:0] bus_write_data,
     output reg        bus_write_enable,
     output reg        bus_read_enable,
-    input  wire [63:0] bus_read_data
+
+    input  wire [63:0] bus_read_data   // from outside
 
 
 );
@@ -85,7 +84,7 @@ module riscv64(
                 pc <= 0; // jump to ISR addr
 		bubble <= 1'b1; // bubble wrong fetched instruciton by IF
 	        interrupt_pending <= 1;
-		interrupt_ack <= 1;
+		interrupt_ack <= 1; // reply to outside
 
             // Bubble
 	    end else if (bubble) bubble <= 1'b0; // Flush this cycle & Clear bubble signal for the next cycle
@@ -140,7 +139,7 @@ endmodule
 //N+5 save re to bus_write_data
 //mret
 //N+6 mret (BUT URAT get data for print).   //
-   
+// -- 
 //in cycle N0, IF fetching sb, EXE ir is lb, bubble is setting 1, pc is re-setting to pc, lb_step is setting to 1;
 //in N1, IF fetching lb, Bubble flushed ir sb, bubble <=0, Default pc is setting to lb+4(sb);
 //in N2, IF fetching sb, EXE ir is lb, lb_step is 1, bus_read_data is saving to re, lb_step is setting to 0;
