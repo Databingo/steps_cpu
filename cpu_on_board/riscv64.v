@@ -93,7 +93,7 @@ module riscv64(
 
 	    // IR
 	    else begin 
-	        //bus_read_enable <= 0;
+	        bus_read_enable <= 0;
 	        bus_write_enable <= 0; 
 	        bus_write_data <= 0;
 	        bus_address <= `Ram_base;
@@ -112,7 +112,6 @@ module riscv64(
 	                if (lb_step == 1) begin  
 	                    re[5]<= bus_read_data; // cycle 3 save to cpu's register
 	                    lb_step <= 0;
-	                    bus_read_enable <= 0;
 	                end
 	            end
 	            32'b1111111_11111_11111_111_11110_1111111: begin // Store 1 cycles to finish settting data<=re (next cycle bus write to data)
