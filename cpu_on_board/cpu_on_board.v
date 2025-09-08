@@ -68,7 +68,6 @@ module cpu_on_board (
     );
      
     // -- Keyboard -- 
-    //reg [31:0] data;
     reg [7:0] ascii;
     reg [7:0] scan;
     reg key_pressed_delay;
@@ -100,9 +99,8 @@ module cpu_on_board (
     );
 
     // -- Bus --
+    reg  [63:0] bus_read_data;
     wire [63:0] bus_address;
-    reg [63:0] bus_read_data;
-    //wire [63:0] bus_read_data;
     wire        bus_read_enable;
     wire [63:0] bus_write_data;
     wire        bus_write_enable;
@@ -118,7 +116,6 @@ module cpu_on_board (
     // 2.-- Port B of the On-Chip Memeory (Cache L1) --
     reg [31:0] port_b_data_out;
     always @(posedge CLOCK_50) begin // Read-During-Write (read get old data in same cycle with write)
-        // Write path (Conditional)
         if (bus_write_enable && (Ram_selected || Art_selected)) Cache[bus_address/4] <= bus_write_data; 
         // Read path (Unconditional)
         port_b_data_out <= {32'd0, Cache[bus_address[11:2]]};
@@ -126,22 +123,17 @@ module cpu_on_board (
 
     // 3.-- Synchronous Read Data Multiplexer --
     always @(posedge CLOCK_50) begin //!!
-	//if (bus_read_enable && Key_selected) bus_read_data  <= {32'd0, 24'd0, data[7:0]};
 	if (bus_read_enable) begin
-	   //if (Key_selected) bus_read_data  <= {32'd0, 24'd0, keyboard_captured};
 	   if (Key_selected) bus_read_data  <= {32'd0, 24'd0, ascii};
 	   else if (bus_read_enable && (Rom_selected || Ram_selected)) bus_read_data <= {32'd0, port_b_data_out};
-	//else bus_read_data <= 64'h00000000; // at 50MHz will override 
+	   //else bus_read_data <= 64'h00000000; // at 50MHz will override 
         end
-        //else if (bus_read_enable==0) bus_read_data <= 0; // clean data
         else bus_read_data <= 0; // clean data
     end
 
     // 4.-- UART Writer Trigger --
     wire uart_write_trigger = bus_write_enable && Art_selected;
-    //reg uart_write_trigger;
     reg uart_write_trigger_dly;
-    //wire uart_write_trigger_pulse;
     always @(posedge CLOCK_50 or negedge KEY0) begin
 	if (!KEY0) uart_write_trigger_dly <= 0;
 	else uart_write_trigger_dly <= uart_write_trigger;
@@ -149,8 +141,6 @@ module cpu_on_board (
 
     assign uart_write_trigger_pulse = uart_write_trigger  && !uart_write_trigger_dly;
 
-
-    //reg [7:0] keyboard_captured;
     // -- interrupt controller --
     wire [3:0] interrupt_vector;
     wire interrupt_ack;
@@ -158,12 +148,10 @@ module cpu_on_board (
     always @(posedge CLOCK_50 or negedge KEY0) begin
 	if (!KEY0) begin
 	    interrupt_vector <= 0;
-	    //keyboard_captured <= 0;
 	    LEDR0 <= 0;
 	end else begin
             if (key_pressed && ascii) begin
 		    interrupt_vector <= 1;
-		    //keyboard_captured <= data[7:0];
 		    LEDR0 <= 1;
 	    end
 	    if (interrupt_vector != 0 && interrupt_ack == 1) begin
