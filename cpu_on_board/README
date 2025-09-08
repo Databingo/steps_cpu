@@ -89,3 +89,7 @@ Route: OpenLane(docker) zerotoasiccourse.com tinytapeout.com
 6. Routing: OpenROAD TritonRoute
 7. GDSII generating: Magic
 8. Verification: Magic, Netgen, OpenSTA
+
+
+
+Buildroot bootlin
