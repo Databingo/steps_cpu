@@ -9,3 +9,4 @@ qemu-system-x86_64 -cdrom BusyBoxLinux.iso
 #make qemu_riscv64_virt_defconfig
 #make
 #brew install gcc
+#brew install texinfo
