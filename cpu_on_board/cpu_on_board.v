@@ -23,7 +23,7 @@ module cpu_on_board (
 
     // -- MEM -- minic L1 cache
     //(* ram_style = "block" *) reg [31:0] Cache [0:2047]; // 2048x4=8KB L1 cache to 0x2000
-    (* ram_style = "block" *) reg [31:0] Cache [0:3071]; // 2048x4=8KB L1 cache to 0x2000
+    (* ram_style = "block" *) reg [31:0] Cache [0:3071];
     integer i;
     initial begin
         $readmemb("rom.mif", Cache, `Rom_base>>2);
@@ -54,7 +54,6 @@ module cpu_on_board (
         .instruction(ir_ld),
         .pc(pc),
         .ir(LEDG),
-        //.re(re),
         .heartbeat(LEDR9),
 
 	.interrupt_vector(interrupt_vector),
@@ -117,8 +116,7 @@ module cpu_on_board (
     reg [31:0] port_b_data_out;
     always @(posedge CLOCK_50) begin // Read-During-Write (read get old data in same cycle with write)
         if (bus_write_enable && (Ram_selected || Art_selected)) Cache[bus_address/4] <= bus_write_data; 
-        // Read path (Unconditional)
-        port_b_data_out <= {32'd0, Cache[bus_address[11:2]]};
+        port_b_data_out <= {32'd0, Cache[bus_address[11:2]]}; // Read path (Unconditional)
     end
 
     // 3.-- Synchronous Read Data Multiplexer --
@@ -128,7 +126,7 @@ module cpu_on_board (
 	   else if (bus_read_enable && (Rom_selected || Ram_selected)) bus_read_data <= {32'd0, port_b_data_out};
 	   //else bus_read_data <= 64'h00000000; // at 50MHz will override 
         end
-        else bus_read_data <= 0; // clean data
+        else bus_read_data <= 0; // clean
     end
 
     // 4.-- UART Writer Trigger --
@@ -182,8 +180,6 @@ module cpu_on_board (
     // PLIC meip seip mip
     // openSBI/u-boot/berkeleyBootLoader
     // linux kernel S mode
-    //
-    //
     // 16550A UART
     // AXI-lite BUS
     //
