@@ -68,7 +68,8 @@ module cpu_on_board (
     );
      
     // -- Keyboard -- 
-    reg [31:0] data;
+    //reg [31:0] data;
+    reg [7:0] ascii;
     reg [7:0] scan;
     reg key_pressed_delay;
     wire key_pressed;
@@ -78,10 +79,8 @@ module cpu_on_board (
         .clk(CLOCK_50),
         .ps2_clk_async(PS2_CLK),
         .ps2_data_async(PS2_DAT),
-        //.scan_code(data[7:0])
-        //.ascii_code(data[7:0]),
         .scan_code(scan),
-        .ascii_code(data[7:0]),
+        .ascii_code(ascii),
         .key_pressed(key_pressed),
         .key_released(key_released)
      );
@@ -130,7 +129,7 @@ module cpu_on_board (
 	//if (bus_read_enable && Key_selected) bus_read_data  <= {32'd0, 24'd0, data[7:0]};
 	if (bus_read_enable) begin
 	   //if (Key_selected) bus_read_data  <= {32'd0, 24'd0, keyboard_captured};
-	   if (Key_selected) bus_read_data  <= {32'd0, 24'd0, data[7:0]};
+	   if (Key_selected) bus_read_data  <= {32'd0, 24'd0, ascii};
 	   else if (bus_read_enable && (Rom_selected || Ram_selected)) bus_read_data <= {32'd0, port_b_data_out};
 	//else bus_read_data <= 64'h00000000; // at 50MHz will override 
         end
@@ -162,7 +161,7 @@ module cpu_on_board (
 	    //keyboard_captured <= 0;
 	    LEDR0 <= 0;
 	end else begin
-            if (key_pressed && data[7:0]) begin
+            if (key_pressed && ascii) begin
 		    interrupt_vector <= 1;
 		    //keyboard_captured <= data[7:0];
 		    LEDR0 <= 1;
