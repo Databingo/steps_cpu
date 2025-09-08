@@ -194,4 +194,6 @@ module cpu_on_board (
     // BRAM for bootloader(tested in qemu)
     // FLASH for Linux kernel(tested in qemu)
     // SDRAM for ram
+    //
+    // Run naked neural network on riscv64
 endmodule
