@@ -15,5 +15,5 @@ llama2.c/*.safetensors
 *.txt
 cpu_on_board/py
 cpu_on_board/py/
-create_mini_linux/linux
+create_mini_linux/riscv64-linux
 create_mini_linux/busybox
