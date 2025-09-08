@@ -192,6 +192,6 @@ module cpu_on_board (
     // 
     // simplify:
     // BRAM for bootloader
-    // FLASH for Linux kernel
+    // FLASH for Linux kernel(tested in qemu)
     // SDRAM for ram
 endmodule
