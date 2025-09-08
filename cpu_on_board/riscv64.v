@@ -37,7 +37,7 @@ module riscv64(
     wire [4:0] w_rd  = ir[11:7];
 
     // -- Innerl signal --
-    reg interrupt_pending,  
+    reg interrupt_pending;  
     reg bubble;
     reg lb_step;
     reg sb_step;
