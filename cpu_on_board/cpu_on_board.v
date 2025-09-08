@@ -82,7 +82,7 @@ module cpu_on_board (
         .key_pressed(key_pressed),
         .key_released(key_released)
      );
-    // Drive Keyboard
+    // Keyboard signal
     always @(posedge CLOCK_50) begin key_pressed_delay <= key_pressed; end
     wire key_pressed_edge = key_pressed && !key_pressed_delay;
 
@@ -120,7 +120,7 @@ module cpu_on_board (
     end
 
     // 3.-- Synchronous Read Data Multiplexer --
-    always @(posedge CLOCK_50) begin //!!
+    always @(posedge CLOCK_50) begin
 	if (bus_read_enable) begin
 	   if (Key_selected) bus_read_data  <= {32'd0, 24'd0, ascii};
 	   else if (bus_read_enable && (Rom_selected || Ram_selected)) bus_read_data <= {32'd0, port_b_data_out};
@@ -136,13 +136,11 @@ module cpu_on_board (
 	if (!KEY0) uart_write_trigger_dly <= 0;
 	else uart_write_trigger_dly <= uart_write_trigger;
     end
-
     assign uart_write_trigger_pulse = uart_write_trigger  && !uart_write_trigger_dly;
 
     // -- interrupt controller --
     wire [3:0] interrupt_vector;
     wire interrupt_ack;
-    wire interrupt_pending;
     always @(posedge CLOCK_50 or negedge KEY0) begin
 	if (!KEY0) begin
 	    interrupt_vector <= 0;
