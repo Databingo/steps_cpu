@@ -4,15 +4,13 @@ module riscv64(
     input wire clk, 
     input wire reset,     // Active-low reset button
     input wire [31:0] instruction,
-    //output reg [31:0] pc = 44,
-    output reg [63:0] pc,// = 32'h1000,
+    output reg [63:0] pc,
     output reg [31:0] ir,
-    output reg [63:0] re [0:31],
+    output reg [63:0] re [0:31], // General Registers 32s
     output wire  heartbeat,
 
-    input  reg [3:0] interrupt_vector, // out notice
+    input  reg [3:0] interrupt_vector, // notice from outside
     output reg  interrupt_ack,         // reply to outside
-    output reg  interrupt_pending,     // inner signal
 
     output reg [63:0] bus_address,     // 39 bit for real standard?
     output reg [63:0] bus_write_data,
@@ -20,8 +18,6 @@ module riscv64(
     output reg        bus_read_enable,
 
     input  wire [63:0] bus_read_data   // from outside
-
-
 );
     // -- CSR Registers --
     reg [63:0] csr [0:4096]; // Maximal 12-bit length = 4096
@@ -34,18 +30,17 @@ module riscv64(
     wire mstatus_MIE = csr[mstatus][3];
     wire mie_MEIE = csr[mie][11];
     wire mip_MEIP = csr[mie][11];
+    reg [31:0] mepc; //csr?
  
-    
-    // -- Immediate decoders (Unchanged) -- 
+    // -- Immediate decoders  -- 
     wire signed [63:0] w_imm_u = {{32{ir[31]}}, ir[31:12], 12'b0};
     wire [4:0] w_rd  = ir[11:7];
-    // -- Bubble signal --
+
+    // -- Innerl signal --
+    reg interrupt_pending,  
     reg bubble;
     reg lb_step;
     reg sb_step;
-    reg [31:0] mepc; 
-
-
 
     // IF ir (Unchanged)
     always @(posedge clk or negedge reset) begin
@@ -125,8 +120,6 @@ module riscv64(
     end
 
 endmodule
-
-
 
 //interrupt
 //N+0 see interrupt and set isr pc
