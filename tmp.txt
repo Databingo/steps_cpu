@@ -17,10 +17,9 @@ ori x6, x6, 0x200
 slli x6, x6, 0x16
 ori x6, x6, 0x10
 lb  x31, 0(x6) # load addr_saved value into x31
-#     li  x7, 0x80000010 
+#     li  x7, 0x80000000 
 addi x7, x0, 0x0
 slli x7, x7, 0xb
 ori x7, x7, 0x200
 slli x7, x7, 0x16
-ori x7, x7, 0x10
 sb  x31, 0(x7) # save x31 to uart_map_address 
