@@ -11,24 +11,25 @@ int main() {
     system("/bin/busybox mount -t devtmpfs none /dev");
     
     // 设置控制台
-    int console = open("/dev/console", O_RDWR);
-    if (console >= 0) {
-        dup2(console, 0); // 标准输入
-        dup2(console, 1); // 标准输出
-        dup2(console, 2); // 标准错误
-        close(console);
-    }
+    //int console = open("/dev/console", O_RDWR);
+    //if (console >= 0) {
+    //    dup2(console, 0); // 标准输入
+    //    dup2(console, 1); // 标准输出
+    //    dup2(console, 2); // 标准错误
+    //    close(console);
+    //}
     
     // 设置环境变量
-    setenv("PATH", "/bin:/sbin:/usr/bin:/usr/sbin", 1);
+    //setenv("PATH", "/bin:/sbin:/usr/bin:/usr/sbin", 1);
     
     printf("Simple init program started successfully!\n");
     printf("Mounting completed. Starting shell...\n");
     
+    system("/bin/busybox --install -s");
+
     // 启动 shell
     execl("/bin/busybox", "busybox", "sh", NULL);
 
-    system("/bin/busybox --install -s");
 
     // 如果 execl 失败，执行备用方案
     perror("Failed to start shell");
