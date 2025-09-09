@@ -1,6 +1,5 @@
 #
-# A minimal .config for a generic RISC-V 64-bit SoC
-# Goal: Drastically reduce compile time by disabling non-essential features.
+# A CORRECTED minimal .config for the QEMU RISC-V 64-bit 'virt' machine
 #
 
 #
@@ -16,7 +15,6 @@ CONFIG_RISCV_ISA_F=y
 CONFIG_RISCV_ISA_D=y
 CONFIG_RISCV_M_MODE=y
 CONFIG_RISCV_S_MODE=y
-# Using the Sv39 MMU scheme is standard for 64-bit systems
 CONFIG_RISCV_MMU_V39=y
 
 #
@@ -24,9 +22,7 @@ CONFIG_RISCV_MMU_V39=y
 #
 CONFIG_EXPERIMENTAL=y
 CONFIG_INIT_ENV_ARG_LIMIT=32
-CONFIG_KERNEL_LZO=y
 CONFIG_KERNEL_GZIP=y
-CONFIG_PARTITION_ADVANCED=y
 CONFIG_CMDLINE_EXTEND=y
 CONFIG_CMDLINE=""
 CONFIG_INITRAMFS_SOURCE=""
@@ -34,37 +30,38 @@ CONFIG_INITRAMFS_ROOT_UID=0
 CONFIG_INITRAMFS_ROOT_GID=0
 CONFIG_INITRAMFS_COMPRESSION_GZIP=y
 CONFIG_CROSS_COMPILE="riscv64-unknown-linux-gnu-"
-# This tells the compiler to optimize for a smaller binary size
 CONFIG_CC_OPTIMIZE_FOR_SIZE=y
-# This is critical for your BusyBox boot strategy
-CONFIG_BLK_DEV_INITRD=y
 
 #
-# 3. Disable Loadable Modules (MAJOR Compile Time Reduction)
-#
-# By disabling modules, we build everything directly into the kernel.
-# This avoids compiling thousands of .ko files and simplifies the system.
+# 3. Disable Loadable Modules (Still a huge win)
 #
 CONFIG_MODULES=n
 
 #
-# 4. Disable Networking (MAJOR Compile Time Reduction)
+# 4. Disable Networking
 #
 CONFIG_NET=n
 
 #
-# 5. Disable most Device Drivers (MAJOR Compile Time Reduction)
+# 5. ESSENTIAL Drivers for QEMU 'virt' machine
 #
 CONFIG_BLOCK=y
-# Keep RAM block device support for initramfs
-CONFIG_BLK_DEV_RAM=y
-CONFIG_BLK_DEV_RAM_COUNT=16
-CONFIG_BLK_DEV_RAM_SIZE=4096
-# The only driver we need is for the serial console (UART)
+# --- NEW: Enable VirtIO drivers ---
+CONFIG_VIRTIO=y
+CONFIG_VIRTIO_MENU=y
+CONFIG_VIRTIO_MMIO=y
+CONFIG_VIRTIO_MMIO_CMDLINE_DEVICES=y
+# --- NEW: Enable VirtIO Block Device (for your disk) ---
+CONFIG_VIRTIO_BLK=y
+# --- NEW: SiFive PLIC is the standard Interrupt Controller for QEMU 'virt' ---
+CONFIG_IRQ_Sifive_PLIC=y
+# Serial console driver remains essential
 CONFIG_SERIAL_EARLYCON=y
 CONFIG_SERIAL_8250=y
 CONFIG_SERIAL_8250_CONSOLE=y
-# Disable everything else: I2C, SPI, GPIO, USB, Sound, Graphics, etc.
+# We need the basic character device interface
+CONFIG_TTY=y
+# Disable everything else
 CONFIG_I2C=n
 CONFIG_SPI=n
 CONFIG_GPIO_LIB=n
@@ -74,27 +71,30 @@ CONFIG_VT=n
 CONFIG_VGA_CONSOLE=n
 
 #
-# 6. Disable most Filesystems
-#
-# We only need the virtual filesystems used by a running kernel.
+# 6. Filesystems (Now including VirtIO FS support)
 #
 CONFIG_PROC_FS=y
 CONFIG_SYSFS=y
 CONFIG_TMPFS=y
-# Disable all on-disk filesystems like ext4, btrfs, etc.
+CONFIG_VIRTIO_FS=y  # <-- NEW: VirtIO Filesystem
+# Disable on-disk filesystems
 CONFIG_EXT4_FS=n
 CONFIG_BTRFS_FS=n
 CONFIG_XFS_FS=n
 CONFIG_FAT_FS=n
+CONFIG_BLK_DEV_INITRD=y
 
 #
-# 7. Disable Kernel Hacking / Debugging (Significant Size & Time Reduction)
+# 7. Kernel Hacking / Debugging (Enable printk for now!)
 #
-# A final kernel for a device should not have debug features enabled.
+# --- CHANGE: Enable printk so we can see boot messages! ---
+# This is the MOST IMPORTANT change for debugging.
+# Once it boots, you can disable this again to save space.
 #
-CONFIG_DEBUG_KERNEL=n
-CONFIG_PRINTK=n
-CONFIG_BUG=n
+CONFIG_PRINTK=y
+CONFIG_BUG=y
+CONFIG_DEBUG_KERNEL=y
+# Disable the rest
 CONFIG_MAGIC_SYSRQ=n
 CONFIG_PROFILING=n
 CONFIG_STACKTRACE=n

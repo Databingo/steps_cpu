@@ -27,7 +27,7 @@
 #cd busybox && CROSS_COMPILE=/usr/local/projects/bin/riscv64-lp64d--glibc--bleeding-edge-2025.08-1/bin/riscv64-buildroot-linux-gnu- make defconfig && cd -
 #cd busybox && CROSS_COMPILE=/usr/local/projects/bin/riscv64-lp64d--glibc--bleeding-edge-2025.08-1/bin/riscv64-buildroot-linux-gnu- make -j $(nproc) && cd -
 
-/usr/local/projects/bin/riscv64-lp64d--glibc--bleeding-edge-2025.08-1/bin/riscv64-buildroot-linux-gnu-gcc -static init.c -o init
+#/usr/local/projects/bin/riscv64-lp64d--glibc--bleeding-edge-2025.08-1/bin/riscv64-buildroot-linux-gnu-gcc -static init.c -o init
 
 ##qemu-system-riscv64 -nographic -machine virt \
 ##    -m 512M \
@@ -35,3 +35,9 @@
 ##    -drive file=busybox,format=raw,id=hd0 \
 ##    -device virtio-blk-device,drive=hd0
 
+qemu-system-riscv64 -nographic -machine virt \
+    -m 512M \
+    -bios fw_dynamic.bin \
+    -kernel Image.gz \
+    -initrd initramfs.cpio \
+    -append "root=/dev/vda ro console=ttyS0 init=/bin/sh" \
