@@ -27,7 +27,7 @@
 #cd riscv64-linux/linux && make clean && cd -
 #cd riscv64-linux/linux && make ARCH=riscv CROSS_COMPILE=/usr/local/projects/bin/riscv64-lp64d--glibc--bleeding-edge-2025.08-1/bin/riscv64-buildroot-linux-gnu- defconfig && cd -
 #cd riscv64-linux/linux && make ARCH=riscv CROSS_COMPILE=/usr/local/projects/bin/riscv64-lp64d--glibc--bleeding-edge-2025.08-1/bin/riscv64-buildroot-linux-gnu- menuconfig && cd -
-cd riscv64-linux/linux && make ARCH=riscv CROSS_COMPILE=/usr/local/projects/bin/riscv64-lp64d--glibc--bleeding-edge-2025.08-1/bin/riscv64-buildroot-linux-gnu- -j $(nproc) && cd -
+#cd riscv64-linux/linux && make ARCH=riscv CROSS_COMPILE=/usr/local/projects/bin/riscv64-lp64d--glibc--bleeding-edge-2025.08-1/bin/riscv64-buildroot-linux-gnu- -j $(nproc) && cd -
 #
 # cd buildroot && make qemu_riscv64_virt_defconfig
 # cd buildroot &&  make menuconfig
@@ -57,10 +57,10 @@ cd riscv64-linux/linux && make ARCH=riscv CROSS_COMPILE=/usr/local/projects/bin/
 #     -drive file=bybox,format=raw,id=hd-1 \
 #     -device virtio-blk-device,drive=hd-1
 #
-#qemu-system-riscv64 -nographic \
-#    -machine virt \
-#    -m 512M \
-#    -kernel Image \
-#    -initrd rootfs.cpip.gz \
-#    -append "root=/dev/ram0 rw console=ttyS0" 
-#
+qemu-system-riscv64 -nographic \
+    -machine virt \
+    -m 512M \
+    -kernel Image_des \
+    -initrd rootfs.cpip.gz \
+    -append "root=/dev/ram0 rw console=ttyS0" 
+
