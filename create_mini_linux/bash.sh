@@ -56,7 +56,8 @@
 #
 qemu-system-riscv64 -nographic \
     -machine virt \
+    -m 512M \
     -kernel Image \
-    -initrd initramfs.cpio \
+    -initrd rootfs.cpip.gz \
     -append "root=/dev/ram0 rw console=ttyS0" 
 

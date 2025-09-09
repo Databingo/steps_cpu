@@ -1,4 +1,5 @@
-# A CORRECTED minimal .config for the QEMU RISC-V 64-bit 'virt' machine
+#
+# FINAL CORRECTED minimal .config for QEMU RISC-V 64-bit with initramfs
 #
 
 #
@@ -17,19 +18,23 @@ CONFIG_RISCV_S_MODE=y
 CONFIG_RISCV_MMU_V39=y
 
 #
-# 2. General Setup (Stripped Down)
+# 2. General Setup (With initramfs support)
 #
 CONFIG_EXPERIMENTAL=y
 CONFIG_INIT_ENV_ARG_LIMIT=32
 CONFIG_KERNEL_GZIP=y
 CONFIG_CMDLINE_EXTEND=y
 CONFIG_CMDLINE=""
+CONFIG_CROSS_COMPILE="riscv64-unknown-linux-gnu-"
+CONFIG_CC_OPTIMIZE_FOR_SIZE=y
+# --- ### CRITICAL FIX ### ---
+# This enables the kernel's ability to be linked with an initramfs.
+CONFIG_BUILD_ARM64_APPENDED_DTB_IMAGE_SEPARATE=y # Dependency for initramfs
+CONFIG_BUILD_ARM64_DT_OVERLAY=y # Dependency for initramfs
 CONFIG_INITRAMFS_SOURCE=""
 CONFIG_INITRAMFS_ROOT_UID=0
 CONFIG_INITRAMFS_ROOT_GID=0
 CONFIG_INITRAMFS_COMPRESSION_GZIP=y
-CONFIG_CROSS_COMPILE="riscv64-unknown-linux-gnu-"
-CONFIG_CC_OPTIMIZE_FOR_SIZE=y
 
 #
 # 3. Disable Loadable Modules (Still a huge win)
@@ -45,50 +50,46 @@ CONFIG_NET=n
 # 5. ESSENTIAL Drivers for QEMU 'virt' machine
 #
 CONFIG_BLOCK=y
-# --- NEW: Enable VirtIO drivers ---
+# --- ### CRITICAL FIX ### ---
+# Enable the older RAM block device as a fallback and for initrd.
+CONFIG_BLK_DEV_RAM=y
+CONFIG_BLK_DEV_RAM_COUNT=16
+CONFIG_BLK_DEV_RAM_SIZE=4096
+# VirtIO drivers remain necessary for a robust QEMU setup.
 CONFIG_VIRTIO=y
 CONFIG_VIRTIO_MENU=y
 CONFIG_VIRTIO_MMIO=y
-CONFIG_VIRTIO_MMIO_CMDLINE_DEVICES=y
-# --- NEW: Enable VirtIO Block Device (for your disk) ---
 CONFIG_VIRTIO_BLK=y
-# --- NEW: SiFive PLIC is the standard Interrupt Controller for QEMU 'virt' ---
+# PLIC Interrupt Controller is essential.
 CONFIG_IRQ_Sifive_PLIC=y
-# Serial console driver remains essential
+# Serial console driver remains essential.
 CONFIG_SERIAL_EARLYCON=y
 CONFIG_SERIAL_8250=y
 CONFIG_SERIAL_8250_CONSOLE=y
-# We need the basic character device interface
+# We need the basic character device interface.
 CONFIG_TTY=y
-# Disable everything else
-CONFIG_I2C=n
-CONFIG_SPI=n
-CONFIG_GPIO_LIB=n
+# Disable everything else.
 CONFIG_USB_SUPPORT=n
 CONFIG_SOUND=n
 CONFIG_VT=n
-CONFIG_VGA_CONSOLE=n
 
 #
-# 6. Filesystems (Now including VirtIO FS support)
+# 6. Filesystems
 #
 CONFIG_PROC_FS=y
 CONFIG_SYSFS=y
 CONFIG_TMPFS=y
-CONFIG_VIRTIO_FS=y  # <-- NEW: VirtIO Filesystem
-# Disable on-disk filesystems
+# --- ### CRITICAL FIX ### ---
+# This is the MOST IMPORTANT option. It enables the initramfs/initrd functionality.
+CONFIG_BLK_DEV_INITRD=y
+# Disable on-disk filesystems.
 CONFIG_EXT4_FS=n
 CONFIG_BTRFS_FS=n
 CONFIG_XFS_FS=n
 CONFIG_FAT_FS=n
-CONFIG_BLK_DEV_INITRD=y
 
 #
-# 7. Kernel Hacking / Debugging (Enable printk for now!)
-#
-# --- CHANGE: Enable printk so we can see boot messages! ---
-# This is the MOST IMPORTANT change for debugging.
-# Once it boots, you can disable this again to save space.
+# 7. Kernel Hacking / Debugging
 #
 CONFIG_PRINTK=y
 CONFIG_BUG=y
