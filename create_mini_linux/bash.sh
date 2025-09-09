@@ -57,6 +57,6 @@
 qemu-system-riscv64 -nographic \
     -machine virt \
     -kernel Image \
-    -append "console=ttyS0 root=/dev/vda ro init=/bin/sh" \
+    -append "console=ttyS0 rdinit=/bin/sh" \
     -initrd initramfs.cpio
 
