@@ -26,10 +26,9 @@
 #cd riscv64-linux/linux && make ARCH=riscv CROSS_COMPILE=/usr/local/projects/bin/riscv64-lp64d--glibc--bleeding-edge-2025.08-1/bin/riscv64-buildroot-linux-gnu- olddefconfig && cd -
 #cd riscv64-linux/linux && make ARCH=riscv CROSS_COMPILE=/usr/local/projects/bin/riscv64-lp64d--glibc--bleeding-edge-2025.08-1/bin/riscv64-buildroot-linux-gnu- -j $(nproc) && cd -
 #
-# cd buildroot
-# make qemu_riscv64_virt_defconfig
-# make meufconfig
-# FORCE_UNSAFE_CONFITURE=1 make busybox-meufconfig
+# cd buildroot && make qemu_riscv64_virt_defconfig
+# cd buildroot &&  make menuconfig
+cd buildroot &&  FORCE_UNSAFE_CONFIGURE=1 make busybox-menuconfig
 # select Build busybox as static binary
 # make linux-menuconfig
 #
