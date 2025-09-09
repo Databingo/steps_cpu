@@ -35,9 +35,9 @@
 ##    -drive file=busybox,format=raw,id=hd0 \
 ##    -device virtio-blk-device,drive=hd0
 
-qemu-system-riscv64 -nographic -machine virt \
-    -m 512M \
-    -bios fw_dynamic.bin \
-    -kernel Image.gz \
-    -initrd initramfs.cpio \
-    -append "root=/dev/vda ro console=ttyS0 init=/bin/sh" \
+#qemu-system-riscv64 -nographic -machine virt \
+#    -m 512M \
+#    -bios fw_dynamic.bin \
+#    -kernel Image.gz \
+#    -initrd initramfs.cpio \
+#    -append "root=/dev/vda ro console=ttyS0 init=/bin/sh" \

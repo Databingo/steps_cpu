@@ -1,102 +1,330 @@
 #
-# A CORRECTED minimal .config for the QEMU RISC-V 64-bit 'virt' machine
+# Minimal Linux 6.17.0-rc5 RISC-V configuration for QEMU virt machine
+# This config is specifically designed for your use case:
+# qemu-system-riscv64 -nographic -machine virt -m 512M 
+# -kernel Image.gz -append "root=/dev/vda ro console=ttyS0 init=/bin/sh"
+# -drive file=busybox,format=raw,id=hd0 -device virtio-blk-device,drive=hd0
 #
 
 #
-# 1. Core RISC-V Architecture Settings (Essential)
+# Platform & Architecture
 #
 CONFIG_RISCV=y
 CONFIG_64BIT=y
-CONFIG_ARCH_SUPPORTS_INT128=y
+CONFIG_ARCH_RV64I=y
+CONFIG_ARCH_RV_ISA_A=y
+CONFIG_ARCH_RV_ISA_C=y
+CONFIG_ARCH_RV_ISA_F=y
+CONFIG_ARCH_RV_ISA_D=y
 CONFIG_MMU=y
-CONFIG_RISCV_ISA_C=y
-CONFIG_RISCV_ISA_A=y
-CONFIG_RISCV_ISA_F=y
-CONFIG_RISCV_ISA_D=y
-CONFIG_RISCV_M_MODE=y
-CONFIG_RISCV_S_MODE=y
-CONFIG_RISCV_MMU_V39=y
 
 #
-# 2. General Setup (Stripped Down)
+# Platform selection (QEMU virt machine)
 #
-CONFIG_EXPERIMENTAL=y
-CONFIG_INIT_ENV_ARG_LIMIT=32
-CONFIG_KERNEL_GZIP=y
-CONFIG_CMDLINE_EXTEND=y
-CONFIG_CMDLINE=""
-CONFIG_INITRAMFS_SOURCE=""
-CONFIG_INITRAMFS_ROOT_UID=0
-CONFIG_INITRAMFS_ROOT_GID=0
-CONFIG_INITRAMFS_COMPRESSION_GZIP=y
-CONFIG_CROSS_COMPILE="riscv64-unknown-linux-gnu-"
-CONFIG_CC_OPTIMIZE_FOR_SIZE=y
+CONFIG_SOC_VIRT=y
 
 #
-# 3. Disable Loadable Modules (Still a huge win)
+# Base system features  
 #
+CONFIG_SMP=y
+CONFIG_NR_CPUS=8
+CONFIG_RISCV_SBI=y
+CONFIG_EFI_STUB=y
+
+#
+# General setup - Keep essentials only
+#
+CONFIG_LOCALVERSION=""
+CONFIG_DEFAULT_HOSTNAME="riscv-linux"
+CONFIG_CROSS_COMPILE="riscv64-linux-gnu-"
+CONFIG_COMPILE_TEST=n
+CONFIG_WERROR=n
+
+# Essential for boot
+CONFIG_EXPERT=y
+CONFIG_MULTIUSER=y
+CONFIG_SGETMASK_SYSCALL=y
+CONFIG_SYSFS_SYSCALL=y
+CONFIG_FHANDLE=y
+CONFIG_POSIX_TIMERS=y
+CONFIG_PRINTK=y
+CONFIG_BUG=y
+CONFIG_ELF_CORE=y
+CONFIG_BASE_FULL=y
+CONFIG_FUTEX=y
+CONFIG_SIGNALFD=y
+CONFIG_TIMERFD=y
+CONFIG_EVENTFD=y
+CONFIG_SHMEM=y
+CONFIG_AIO=y
+
+# Disable unnecessary features for minimal build
 CONFIG_MODULES=n
-
-#
-# 4. Disable Networking
-#
+CONFIG_BLOCK_LEGACY_AUTOLOAD=n
 CONFIG_NET=n
+CONFIG_WIRELESS=n
+CONFIG_RFKILL=n
 
 #
-# 5. ESSENTIAL Drivers for QEMU 'virt' machine
+# Executable file formats
+#
+CONFIG_BINFMT_ELF=y
+CONFIG_BINFMT_SCRIPT=y
+
+#
+# Memory management - minimal
+#
+CONFIG_FLATMEM=y
+CONFIG_SPLIT_PTLOCK_CPUS=4
+CONFIG_COMPACTION=n
+CONFIG_MIGRATION=n
+CONFIG_BOUNCE=n
+CONFIG_VIRT_TO_BUS=n
+
+#
+# GCOV-based kernel profiling - all disabled
+#
+CONFIG_GCOV_KERNEL=n
+
+#
+# Timers subsystem
+#
+CONFIG_NO_HZ_COMMON=y
+CONFIG_NO_HZ_IDLE=y
+CONFIG_HIGH_RES_TIMERS=y
+
+#
+# CPU/Task time and stats accounting
+#
+CONFIG_TICK_CPU_ACCOUNTING=y
+CONFIG_TASKSTATS=n
+CONFIG_TASK_DELAY_ACCT=n
+CONFIG_TASK_XACCT=n
+CONFIG_TASK_IO_ACCOUNTING=n
+
+#
+# Kernel Performance Events And Counters
+#
+CONFIG_PERF_EVENTS=n
+
+#
+# Memory pressure notifier - disabled
+#
+CONFIG_PSI=n
+
+#
+# CPU Frequency scaling - disabled for minimal
+#
+CONFIG_CPU_FREQ=n
+CONFIG_CPU_IDLE=n
+
+#
+# Kernel hacking - minimal debug
+#
+CONFIG_MAGIC_SYSRQ=y
+CONFIG_MAGIC_SYSRQ_DEFAULT_ENABLE=0x1
+CONFIG_DEBUG_KERNEL=y
+CONFIG_DEBUG_INFO_NONE=y
+CONFIG_FRAME_POINTER=n
+CONFIG_DEBUG_BUGVERBOSE=y
+CONFIG_PANIC_ON_OOPS=n
+CONFIG_PANIC_TIMEOUT=0
+
+#
+# Block layer - essential for storage
 #
 CONFIG_BLOCK=y
-# --- NEW: Enable VirtIO drivers ---
+CONFIG_BLOCK_LEGACY_AUTOLOAD=n
+CONFIG_BLK_DEV_BSG_COMMON=y
+
+#
+# Partition Types - keep basic
+#
+CONFIG_PARTITION_ADVANCED=y
+CONFIG_MSDOS_PARTITION=y
+CONFIG_EFI_PARTITION=y
+
+#
+# IO Schedulers
+#
+CONFIG_MQ_IOSCHED_DEADLINE=y
+CONFIG_MQ_IOSCHED_KYBER=n
+CONFIG_IOSCHED_BFQ=n
+
+#
+# Executable file formats
+#
+CONFIG_BINFMT_ELF=y
+CONFIG_BINFMT_SCRIPT=y
+CONFIG_COREDUMP=y
+
+#
+# Library routines
+#
+CONFIG_BITREVERSE=y
+CONFIG_CRC_CCITT=n
+CONFIG_CRC16=n
+CONFIG_CRC_T10DIF=n
+CONFIG_CRC_ITU_T=n
+CONFIG_CRC32=y
+CONFIG_CRC32_SLICEBY8=y
+CONFIG_CRC64=n
+CONFIG_CRC4=n
+CONFIG_CRC7=n
+CONFIG_LIBCRC32C=n
+CONFIG_CRC8=n
+CONFIG_RANDOM32_SELFTEST=n
+CONFIG_XZ_DEC=y
+
+#
+# Device Drivers - Minimal set for QEMU
+#
+
+# Generic Driver Options
+CONFIG_UEVENT_HELPER=n
+CONFIG_DEVTMPFS=y
+CONFIG_DEVTMPFS_MOUNT=y
+CONFIG_STANDALONE=y
+CONFIG_PREVENT_FIRMWARE_BUILD=y
+CONFIG_FW_LOADER=n
+
+# Character devices
+CONFIG_TTY=y
+CONFIG_VT=y
+CONFIG_VT_CONSOLE=y
+CONFIG_VT_HW_CONSOLE_BINDING=y
+CONFIG_UNIX98_PTYS=y
+CONFIG_LEGACY_PTYS=n
+
+# Serial drivers - Essential for console
+CONFIG_SERIAL_EARLYCON=y
+CONFIG_SERIAL_8250=y
+CONFIG_SERIAL_8250_CONSOLE=y
+CONFIG_SERIAL_8250_NR_UARTS=4
+CONFIG_SERIAL_8250_RUNTIME_UARTS=4
+CONFIG_SERIAL_OF_PLATFORM=y
+
+# Hardware Random Number Generator
+CONFIG_HW_RANDOM=n
+
+# I2C support - disabled
+CONFIG_I2C=n
+
+# SPI support - disabled  
+CONFIG_SPI=n
+
+# GPIO Support - disabled
+CONFIG_GPIOLIB=n
+
+# Power management - disabled
+CONFIG_POWER_SUPPLY=n
+
+# Hardware Monitoring support - disabled
+CONFIG_HWMON=n
+
+# Thermal drivers - disabled
+CONFIG_THERMAL=n
+
+# Watchdog Timer Support - disabled
+CONFIG_WATCHDOG=n
+
+# Multifunction device drivers - disabled
+CONFIG_MFD_CORE=n
+
+# Graphics support - disabled
+CONFIG_VGA_ARB=n
+CONFIG_DRM=n
+CONFIG_FB=n
+
+# Sound card support - disabled
+CONFIG_SOUND=n
+
+# USB support - disabled
+CONFIG_USB_SUPPORT=n
+
+#
+# VirtIO drivers - CRITICAL for QEMU
+#
 CONFIG_VIRTIO=y
 CONFIG_VIRTIO_MENU=y
 CONFIG_VIRTIO_MMIO=y
 CONFIG_VIRTIO_MMIO_CMDLINE_DEVICES=y
-# --- NEW: Enable VirtIO Block Device (for your disk) ---
 CONFIG_VIRTIO_BLK=y
-# --- NEW: SiFive PLIC is the standard Interrupt Controller for QEMU 'virt' ---
-CONFIG_IRQ_Sifive_PLIC=y
-# Serial console driver remains essential
-CONFIG_SERIAL_EARLYCON=y
-CONFIG_SERIAL_8250=y
-CONFIG_SERIAL_8250_CONSOLE=y
-# We need the basic character device interface
-CONFIG_TTY=y
-# Disable everything else
-CONFIG_I2C=n
-CONFIG_SPI=n
-CONFIG_GPIO_LIB=n
-CONFIG_USB_SUPPORT=n
-CONFIG_SOUND=n
-CONFIG_VT=n
-CONFIG_VGA_CONSOLE=n
+CONFIG_VIRTIO_CONSOLE=y
 
 #
-# 6. Filesystems (Now including VirtIO FS support)
+# IOMMU Hardware Support - disabled
 #
+CONFIG_IOMMU_SUPPORT=n
+
+#
+# SCSI device support - minimal
+#
+CONFIG_SCSI_MOD=n
+CONFIG_SCSI=n
+
+#
+# Block devices
+#
+CONFIG_BLK_DEV_RAM=y
+CONFIG_BLK_DEV_RAM_COUNT=16
+CONFIG_BLK_DEV_RAM_SIZE=4096
+
+#
+# NVME Support - disabled
+#
+CONFIG_NVME_CORE=n
+
+#
+# File systems - Essential only
+#
+CONFIG_FILE_LOCKING=y
+CONFIG_FSNOTIFY=y
+CONFIG_DNOTIFY=y
+CONFIG_INOTIFY_USER=y
 CONFIG_PROC_FS=y
+CONFIG_PROC_SYSCTL=y
 CONFIG_SYSFS=y
 CONFIG_TMPFS=y
-CONFIG_VIRTIO_FS=y  # <-- NEW: VirtIO Filesystem
-# Disable on-disk filesystems
-CONFIG_EXT4_FS=n
+CONFIG_TMPFS_POSIX_ACL=n
+CONFIG_TMPFS_XATTR=n
+CONFIG_CONFIGFS_FS=n
+
+# Essential filesystem for your rootfs
+CONFIG_EXT4_FS=y
+CONFIG_EXT4_FS_POSIX_ACL=n
+CONFIG_EXT4_FS_SECURITY=n
+CONFIG_EXT4_DEBUG=n
+
+# Other filesystems - disabled
 CONFIG_BTRFS_FS=n
 CONFIG_XFS_FS=n
 CONFIG_FAT_FS=n
-CONFIG_BLK_DEV_INITRD=y
+CONFIG_NTFS_FS=n
+CONFIG_ISO9660_FS=n
+CONFIG_JOLIET=n
+CONFIG_ZISOFS=n
 
 #
-# 7. Kernel Hacking / Debugging (Enable printk for now!)
+# Pseudo filesystems  
 #
-# --- CHANGE: Enable printk so we can see boot messages! ---
-# This is the MOST IMPORTANT change for debugging.
-# Once it boots, you can disable this again to save space.
+CONFIG_PROC_KCORE=n
+CONFIG_PROC_VMCORE=n
+
 #
-CONFIG_PRINTK=y
-CONFIG_BUG=y
-CONFIG_DEBUG_KERNEL=y
-# Disable the rest
-CONFIG_MAGIC_SYSRQ=n
-CONFIG_PROFILING=n
-CONFIG_STACKTRACE=n
-CONFIG_KPROBES=n
-CONFIG_FTRACE=n
+# Security options - minimal
+#
+CONFIG_KEYS=n
+CONFIG_SECURITY_DMESG_RESTRICT=n
+CONFIG_SECURITY=n
+CONFIG_SECURITYFS=n
+CONFIG_LSM="lockdown,yama,loadpin,safesetid,bpf"
+
+#
+# Crypto API - minimal
+#
+CONFIG_CRYPTO=y
+CONFIG_CRYPTO_ALGAPI=y
+CONFIG_CRYPTO_HASH=y
+CONFIG_CRYPTO_HASH2=y
+CONFIG_CRYPTO_CRC32C=y
