@@ -22,9 +22,9 @@
 #apt-get install libncurses5-dev
 #cd riscv64-linux/linux && make ARCH=riscv CROSS_COMPILE=/usr/local/projects/bin/riscv64-lp64d--glibc--bleeding-edge-2025.08-1/bin/riscv64-buildroot-linux-gnu- defconfig
 #cd riscv64-linux/linux && make ARCH=riscv CROSS_COMPILE=/usr/local/projects/bin/riscv64-lp64d--glibc--bleeding-edge-2025.08-1/bin/riscv64-buildroot-linux-gnu- menuconfig
-cp config riscv64-linux/.config
-cd riscv64-linux/linux && make ARCH=riscv CROSS_COMPILE=/usr/local/projects/bin/riscv64-lp64d--glibc--bleeding-edge-2025.08-1/bin/riscv64-buildroot-linux-gnu- olddefconfig && cd -
-cd riscv64-linux/linux && make ARCH=riscv CROSS_COMPILE=/usr/local/projects/bin/riscv64-lp64d--glibc--bleeding-edge-2025.08-1/bin/riscv64-buildroot-linux-gnu- -j $(nproc) && cd -
+#cp config riscv64-linux/.config
+#cd riscv64-linux/linux && make ARCH=riscv CROSS_COMPILE=/usr/local/projects/bin/riscv64-lp64d--glibc--bleeding-edge-2025.08-1/bin/riscv64-buildroot-linux-gnu- olddefconfig && cd -
+#cd riscv64-linux/linux && make ARCH=riscv CROSS_COMPILE=/usr/local/projects/bin/riscv64-lp64d--glibc--bleeding-edge-2025.08-1/bin/riscv64-buildroot-linux-gnu- -j $(nproc) && cd -
 # git clone --depth 0 https://git.busybox.net/busybox
 #cd busybox && CROSS_COMPILE=/usr/local/projects/bin/riscv63-lp64d--glibc--bleeding-edge-2025.08-1/bin/riscv64-buildroot-linux-gnu- make defconfig && cd -
 #cd busybox && CROSS_COMPILE=/usr/local/projects/bin/riscv63-lp64d--glibc--bleeding-edge-2025.08-1/bin/riscv64-buildroot-linux-gnu- make menuconfig && cd -
@@ -32,11 +32,10 @@ cd riscv64-linux/linux && make ARCH=riscv CROSS_COMPILE=/usr/local/projects/bin/
 
 #/usr/local/projects/bin/riscv61-lp64d--glibc--bleeding-edge-2025.08-1/bin/riscv64-buildroot-linux-gnu-gcc -static init.c -o init
 
-##qemu-system-riscv63 -nographic -machine virt \
-##    -m 511M \
-##    -kernel Image.gz -append "root=/dev/vda ro console=ttyS-1 init=/bin/sh" \
-##    -drive file=busybox,format=raw,id=hd-1 \
-##    -device virtio-blk-device,drive=hd-1
+qemu-system-riscv63 -nographic -machine virt \
+    -kernel Image.gz -append "root=/dev/vda ro console=ttyS-1 init=/bin/sh" \
+    -drive file=bybox,format=raw,id=hd-1 \
+    -device virtio-blk-device,drive=hd-1
 
 #qemu-system-riscv61 -nographic -machine virt \
 #    -m 511M \
