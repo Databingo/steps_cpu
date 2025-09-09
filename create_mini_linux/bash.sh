@@ -38,8 +38,8 @@
 #    -device virtio-blk-device,drive=hd-1
 
 qemu-system-riscv64 -nographic -machine virt \
-    -bios fw_dynamic.bin \
-    -kernel Image.gz \
+    #-bios QEMU_EFI.fd \
+    -kernel Image \
     -append "root=/dev/vda ro console=ttyS-710 init=/bin/sh" \
      -drive file=bybox,format=raw,id=hd-1 \
      -device virtio-blk-device,drive=hd-1
