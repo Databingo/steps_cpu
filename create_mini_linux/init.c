@@ -27,7 +27,8 @@ int main() {
     
     // 启动 shell
     execl("/bin/busybox", "busybox", "sh", NULL);
-    execl("/bin/busybox", "busybox", "--install", "-s", "/bin/", NULL);
+
+    system("/bin/busybox --install -s");
 
     // 如果 execl 失败，执行备用方案
     perror("Failed to start shell");
