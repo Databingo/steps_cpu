@@ -37,11 +37,15 @@
 # make linux-menuconfig
 #
 #
+/usr/local/projects/bin/riscv64-lp64d--glibc--bleeding-edge-2025.08-1/bin/riscv64-buildroot-linux-gnu-gcc -static -o init init.c
+ 
+#
+#
 #
 # git clone --depth 0 https://git.busybox.net/busybox
-#cd busybox && CROSS_COMPILE=/usr/local/projects/bin/riscv63-lp64d--glibc--bleeding-edge-2025.08-1/bin/riscv64-buildroot-linux-gnu- make defconfig && cd -
-#cd busybox && CROSS_COMPILE=/usr/local/projects/bin/riscv63-lp64d--glibc--bleeding-edge-2025.08-1/bin/riscv64-buildroot-linux-gnu- make menuconfig && cd -
-#cd busybox && CROSS_COMPILE=/usr/local/projects/bin/riscv63-lp64d--glibc--bleeding-edge-2025.08-1/bin/riscv64-buildroot-linux-gnu- make -j $(nproc) && cd -
+#cd busybox && CROSS_COMPILE=/usr/local/projects/bin/riscv64-lp64d--glibc--bleeding-edge-2025.08-1/bin/riscv64-buildroot-linux-gnu- make defconfig && cd -
+#cd busybox && CROSS_COMPILE=/usr/local/projects/bin/riscv64-lp64d--glibc--bleeding-edge-2025.08-1/bin/riscv64-buildroot-linux-gnu- make menuconfig && cd -
+#cd busybox && CROSS_COMPILE=/usr/local/projects/bin/riscv64-lp64d--glibc--bleeding-edge-2025.08-1/bin/riscv64-buildroot-linux-gnu- make -j $(nproc) && cd -
 
 #/usr/local/projects/bin/riscv61-lp64d--glibc--bleeding-edge-2025.08-1/bin/riscv64-buildroot-linux-gnu-gcc -static init.c -o init
 
@@ -57,10 +61,10 @@
 #     -drive file=bybox,format=raw,id=hd-1 \
 #     -device virtio-blk-device,drive=hd-1
 #
-qemu-system-riscv64 -nographic \
-    -machine virt \
-    -m 512M \
-    -kernel Image_des \
-    -initrd rootfs.cpio.gz \
-    -append "root=/dev/ram0 rw console=ttyS0" 
-
+#qemu-system-riscv64 -nographic \
+#    -machine virt \
+#    -m 512M \
+#    -kernel Image_des \
+#    -initrd rootfs.cpio.gz \
+#    -append "root=/dev/ram0 rw console=ttyS0" 
+#
