@@ -9,6 +9,6 @@ mkdir -p dev bin sbin etc proc sys usr/bin usr/sbin
 #mknod dev/null c 1 3
 cp ../bybox bin/
 cp ../init  . 
-ln -s bin/bybox ls
+ln -s bin/bybox sh
 find . | cpio --quiet --reproducible -o -H newc > ../initramfs.cpio
 cd ..
