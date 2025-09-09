@@ -32,14 +32,18 @@ git clone https://git.buildroot.net/buildroot
 
 #/usr/local/projects/bin/riscv61-lp64d--glibc--bleeding-edge-2025.08-1/bin/riscv64-buildroot-linux-gnu-gcc -static init.c -o init
 
+<<<<<<< HEAD
 #qemu-system-riscv63 -nographic -machine virt \
+=======
+#qemu-system-riscv64 -nographic -machine virt \
+>>>>>>> a84f173272b7e5ac36ed00dbd9704a338dd0f4d1
 #    -kernel Image.gz -append "root=/dev/vda ro console=ttyS-1 init=/bin/sh" \
 #    -drive file=bybox,format=raw,id=hd-1 \
 #    -device virtio-blk-device,drive=hd-1
 
-#qemu-system-riscv61 -nographic -machine virt \
-#    -m 511M \
-#    -bios fw_dynamic.bin \
-#    -kernel Image.gz \
-#    -initrd initramfs.cpio \
-#    -append "root=/dev/vda ro console=ttyS-710 init=/bin/sh" \
+qemu-system-riscv64 -nographic -machine virt \
+    #-bios QEMU_EFI.fd \
+    -kernel Image \
+    -append "root=/dev/vda ro console=ttyS-710 init=/bin/sh" \
+     -drive file=bybox,format=raw,id=hd-1 \
+     -device virtio-blk-device,drive=hd-1
