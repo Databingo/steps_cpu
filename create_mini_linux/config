@@ -1,101 +1,121 @@
-# A CORRECTED minimal .config for the QEMU RISC-V 64-bit 'virt' machine
+#
+# Minimal .config for Linux kernel 6.17.0-rc5 on RISC-V 64-bit for QEMU 'virt' machine
+# Goal: Boot to BusyBox shell with virtio-blk root device (/dev/vda) and serial console.
+# Based on official kernel documentation and guides for RISC-V QEMU virt.
+# Starts from tinyconfig or defconfig, but stripped to essentials to reduce compile time.
+# Key updates for 6.17-rc5: No major config changes from 6.6 for basic virt boot (per kernel docs and release notes).
+# Use 'make ARCH=riscv olddefconfig' after saving this as .config, then customize with 'make menuconfig' if needed.
+# Enable only required for your command: serial console, virtio-blk, basic FS, no modules/net/debug extras.
 #
 
 #
-# 1. Core RISC-V Architecture Settings (Essential)
+# 1. Core RISC-V Architecture Settings (Essential for riscv64-lp64d)
 #
 CONFIG_RISCV=y
 CONFIG_64BIT=y
-CONFIG_ARCH_SUPPORTS_INT128=y
+CONFIG_ARCH_SUPPORTS_INT128=y  # Available in 6.17 for math ops
 CONFIG_MMU=y
-CONFIG_RISCV_ISA_C=y
+CONFIG_RISCV_ISA_C=y  # Compressed instructions for smaller size
 CONFIG_RISCV_ISA_A=y
-CONFIG_RISCV_ISA_F=y
-CONFIG_RISCV_ISA_D=y
+CONFIG_RISCV_ISA_F=y  # Floating point (single)
+CONFIG_RISCV_ISA_D=y  # Floating point (double, for lp64d)
 CONFIG_RISCV_M_MODE=y
 CONFIG_RISCV_S_MODE=y
-CONFIG_RISCV_MMU_V39=y
+CONFIG_RISCV_SV39=y  # Sv39 MMU scheme for 64-bit (updated name in recent kernels; was RISCV_MMU_V39 in older)
 
 #
-# 2. General Setup (Stripped Down)
+# 2. General Setup (Minimal, optimized for size)
 #
-CONFIG_EXPERIMENTAL=y
+CONFIG_EXPERT=y
+CONFIG_EMBEDDED=y
 CONFIG_INIT_ENV_ARG_LIMIT=32
-CONFIG_KERNEL_GZIP=y
-CONFIG_CMDLINE_EXTEND=y
-CONFIG_CMDLINE=""
-CONFIG_INITRAMFS_SOURCE=""
-CONFIG_INITRAMFS_ROOT_UID=0
-CONFIG_INITRAMFS_ROOT_GID=0
-CONFIG_INITRAMFS_COMPRESSION_GZIP=y
-CONFIG_CROSS_COMPILE="riscv64-unknown-linux-gnu-"
-CONFIG_CC_OPTIMIZE_FOR_SIZE=y
+CONFIG_CC_OPTIMIZE_FOR_SIZE=y  # Smaller binary
+CONFIG_KERNEL_GZIP=y  # For Image.gz compression
+CONFIG_CMDLINE_BOOL=y
+CONFIG_CMDLINE="root=/dev/vda ro console=ttyS0 init=/bin/sh"  # Built-in append args (optional; override in QEMU if needed)
+CONFIG_BLK_DEV_INITRD=n  # Disable if using disk root; enable for initramfs alternative
+CONFIG_RD_GZIP=n  # No extra compression needed
+CONFIG_PARTITION_ADVANCED=y  # For advanced root partition handling
 
 #
-# 3. Disable Loadable Modules (Still a huge win)
+# 3. Disable Loadable Modules (Reduces compile time and size)
 #
 CONFIG_MODULES=n
 
 #
-# 4. Disable Networking
+# 4. Disable Networking (Not needed for your command)
 #
 CONFIG_NET=n
 
 #
-# 5. ESSENTIAL Drivers for QEMU 'virt' machine
+# 5. Device Drivers (Only essentials for QEMU virt)
 #
 CONFIG_BLOCK=y
-# --- NEW: Enable VirtIO drivers ---
+CONFIG_BLK_DEV=y
+CONFIG_BLK_DEV_RAM=n  # Disable ramdisk if using virtio-blk
+# Virtio support for /dev/vda
+CONFIG_PCI=y  # Required for virtio-pci in virt machine
 CONFIG_VIRTIO=y
 CONFIG_VIRTIO_MENU=y
-CONFIG_VIRTIO_MMIO=y
-CONFIG_VIRTIO_MMIO_CMDLINE_DEVICES=y
-# --- NEW: Enable VirtIO Block Device (for your disk) ---
+CONFIG_VIRTIO_PCI=y
 CONFIG_VIRTIO_BLK=y
-# --- NEW: SiFive PLIC is the standard Interrupt Controller for QEMU 'virt' ---
-CONFIG_IRQ_Sifive_PLIC=y
-# Serial console driver remains essential
+# Serial console for ttyS0
+CONFIG_SERIAL=y
 CONFIG_SERIAL_EARLYCON=y
 CONFIG_SERIAL_8250=y
 CONFIG_SERIAL_8250_CONSOLE=y
-# We need the basic character device interface
-CONFIG_TTY=y
-# Disable everything else
+CONFIG_SERIAL_OF_PLATFORM=y  # For DT-based serial in virt
+# Disable unnecessary drivers
 CONFIG_I2C=n
 CONFIG_SPI=n
-CONFIG_GPIO_LIB=n
+CONFIG_GPIO_SYSFS=n
 CONFIG_USB_SUPPORT=n
 CONFIG_SOUND=n
-CONFIG_VT=n
+CONFIG_DRM=n  # No graphics
 CONFIG_VGA_CONSOLE=n
 
 #
-# 6. Filesystems (Now including VirtIO FS support)
+# 6. File Systems (Minimal; assume ext2 for raw busybox image)
 #
-CONFIG_PROC_FS=y
-CONFIG_SYSFS=y
-CONFIG_TMPFS=y
-CONFIG_VIRTIO_FS=y  # <-- NEW: VirtIO Filesystem
-# Disable on-disk filesystems
+CONFIG_PROC_FS=y  # For /proc
+CONFIG_SYSFS=y  # For /sys
+CONFIG_TMPFS=y  # For /tmp
+CONFIG_EXT2_FS=y  # For ext2 formatted raw image; change to EXT4_FS if using ext4
+# Disable others
+CONFIG_EXT3_FS=n
 CONFIG_EXT4_FS=n
 CONFIG_BTRFS_FS=n
 CONFIG_XFS_FS=n
 CONFIG_FAT_FS=n
-CONFIG_BLK_DEV_INITRD=y
+CONFIG_NTFS_FS=n
 
 #
-# 7. Kernel Hacking / Debugging (Enable printk for now!)
+# 7. Kernel Hacking/Debug (Disabled for minimal; enable PRINTK for troubleshooting)
 #
-# --- CHANGE: Enable printk so we can see boot messages! ---
-# This is the MOST IMPORTANT change for debugging.
-# Once it boots, you can disable this again to save space.
-#
-CONFIG_PRINTK=y
-CONFIG_BUG=y
-CONFIG_DEBUG_KERNEL=y
-# Disable the rest
+CONFIG_PRINTK=y  # Enable to see boot logs; set n for production minimal
+CONFIG_DEBUG_KERNEL=n
+CONFIG_BUG=n
 CONFIG_MAGIC_SYSRQ=n
 CONFIG_PROFILING=n
 CONFIG_STACKTRACE=n
 CONFIG_KPROBES=n
 CONFIG_FTRACE=n
+CONFIG_SLUB_DEBUG=n
+
+#
+# 8. Executable Formats (For BusyBox binaries)
+#
+CONFIG_BINFMT_ELF=y
+CONFIG_BINFMT_SCRIPT=y
+
+#
+# 9. Power Management and Other Extras (Disabled)
+#
+CONFIG_PM=n
+CONFIG_ACPI=n  # Not needed for QEMU virt basic boot
+CONFIG_CPU_FREQ=n
+CONFIG_CPU_IDLE=n
+
+# End of config. Disable all other unmentioned options with =n to keep minimal.
+# Compile with: make ARCH=riscv CROSS_COMPILE=riscv64-unknown-linux-gnu- -j$(nproc)
+# If menuconfig differs, search for equivalents (e.g., RISCV_SV39 instead of older MMU names).
