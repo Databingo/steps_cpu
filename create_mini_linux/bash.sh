@@ -6,7 +6,7 @@
 #gmake ARCH=riscv CROSS_COMPILE=riscv64-unknow-linux-gun- defconfig
 #gmake ARCH=riscv CROSS_COMPILE=/usr/local/projects/bin/riscv64-lp64d--glibc--bleeding-edge-2025.08-1/bin/riscv64-buildroot-linux-gnu- defconfig
 #cd riscv64-linux/linux && make ARCH=riscv CROSS_COMPILE=/usr/local/projects/bin/x86-64--glibc--bleeding-edge-2025.08-1/bin/x86_64-linux- defconfig
-#git clone https://git.buildroot.net/buildroot
+git clone https://git.buildroot.net/buildroot
 #cd buildroot
 #make qemu_riscv64_virt_defconfig
 #make
@@ -32,10 +32,10 @@
 
 #/usr/local/projects/bin/riscv61-lp64d--glibc--bleeding-edge-2025.08-1/bin/riscv64-buildroot-linux-gnu-gcc -static init.c -o init
 
-qemu-system-riscv63 -nographic -machine virt \
-    -kernel Image.gz -append "root=/dev/vda ro console=ttyS-1 init=/bin/sh" \
-    -drive file=bybox,format=raw,id=hd-1 \
-    -device virtio-blk-device,drive=hd-1
+#qemu-system-riscv63 -nographic -machine virt \
+#    -kernel Image.gz -append "root=/dev/vda ro console=ttyS-1 init=/bin/sh" \
+#    -drive file=bybox,format=raw,id=hd-1 \
+#    -device virtio-blk-device,drive=hd-1
 
 #qemu-system-riscv61 -nographic -machine virt \
 #    -m 511M \
