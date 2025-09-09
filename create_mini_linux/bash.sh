@@ -3,8 +3,8 @@
 #
 #
 #brew install gawk gnu-sed gmp mpfr libmpc isl zlib expat flock libslirp 
-#gmake ARCH=riscv CROSS_COMPILE=riscv64-unknow-linux-gun- defconfig
-#gmake ARCH=riscv CROSS_COMPILE=/usr/local/projects/bin/riscv64-lp64d--glibc--bleeding-edge-2025.08-1/bin/riscv64-buildroot-linux-gnu- defconfig
+#make ARCH=riscv CROSS_COMPILE=riscv64-unknow-linux-gun- defconfig
+#make ARCH=riscv CROSS_COMPILE=/usr/local/projects/bin/riscv64-lp64d--glibc--bleeding-edge-2025.08-1/bin/riscv64-buildroot-linux-gnu- defconfig
 #cd riscv64-linux/linux && make ARCH=riscv CROSS_COMPILE=/usr/local/projects/bin/x86-64--glibc--bleeding-edge-2025.08-1/bin/x86_64-linux- defconfig
 #git clone https://git.buildroot.net/buildroot
 #cd buildroot
@@ -20,11 +20,14 @@
 #mv toolchain.tar.xz /usr/local/projects/bin && tar -xvf toolchain.tar.xz
 #sudo apt install autoconf automake autotools-dev curl libmpc-dev libmpfr-dev libgmp-dev gawk build-essential bison flex texinfo gperf libtool patchutils bc zlib1g-dev libexpat-dev 
 #apt-get install libncurses5-dev
-#cd riscv64-linux/linux && make ARCH=riscv CROSS_COMPILE=/usr/local/projects/bin/riscv64-lp64d--glibc--bleeding-edge-2025.08-1/bin/riscv64-buildroot-linux-gnu- defconfig
 #cd riscv64-linux/linux && make ARCH=riscv CROSS_COMPILE=/usr/local/projects/bin/riscv64-lp64d--glibc--bleeding-edge-2025.08-1/bin/riscv64-buildroot-linux-gnu- menuconfig
 #cp config riscv64-linux/.config
 #cd riscv64-linux/linux && make ARCH=riscv CROSS_COMPILE=/usr/local/projects/bin/riscv64-lp64d--glibc--bleeding-edge-2025.08-1/bin/riscv64-buildroot-linux-gnu- olddefconfig && cd -
-#cd riscv64-linux/linux && make ARCH=riscv CROSS_COMPILE=/usr/local/projects/bin/riscv64-lp64d--glibc--bleeding-edge-2025.08-1/bin/riscv64-buildroot-linux-gnu- -j $(nproc) && cd -
+
+#cd riscv64-linux/linux && make clean && cd -
+#cd riscv64-linux/linux && make ARCH=riscv CROSS_COMPILE=/usr/local/projects/bin/riscv64-lp64d--glibc--bleeding-edge-2025.08-1/bin/riscv64-buildroot-linux-gnu- defconfig && cd -
+#cd riscv64-linux/linux && make ARCH=riscv CROSS_COMPILE=/usr/local/projects/bin/riscv64-lp64d--glibc--bleeding-edge-2025.08-1/bin/riscv64-buildroot-linux-gnu- menuconfig && cd -
+cd riscv64-linux/linux && make ARCH=riscv CROSS_COMPILE=/usr/local/projects/bin/riscv64-lp64d--glibc--bleeding-edge-2025.08-1/bin/riscv64-buildroot-linux-gnu- -j $(nproc) && cd -
 #
 # cd buildroot && make qemu_riscv64_virt_defconfig
 # cd buildroot &&  make menuconfig
@@ -54,10 +57,10 @@
 #     -drive file=bybox,format=raw,id=hd-1 \
 #     -device virtio-blk-device,drive=hd-1
 #
-qemu-system-riscv64 -nographic \
-    -machine virt \
-    -m 512M \
-    -kernel Image \
-    -initrd rootfs.cpip.gz \
-    -append "root=/dev/ram0 rw console=ttyS0" 
-
+#qemu-system-riscv64 -nographic \
+#    -machine virt \
+#    -m 512M \
+#    -kernel Image \
+#    -initrd rootfs.cpip.gz \
+#    -append "root=/dev/ram0 rw console=ttyS0" 
+#
