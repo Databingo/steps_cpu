@@ -9,7 +9,7 @@ int main() {
     system("/bin/busybox mount -t proc none /proc");
     system("/bin/busybox mount -t sysfs none /sys");
     system("/bin/busybox mount -t devtmpfs none /dev");
-    system("/bin/busybox --install -s /bin");
+    //system("/bin/busybox --install -s /bin");
     
     printf("Welcome to STEPS_CPU!\n");
 
