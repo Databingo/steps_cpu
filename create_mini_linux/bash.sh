@@ -23,4 +23,6 @@
 cp config /usr/local/projects/steps_cpu/create_mini_linux/riscv64-linux/linux/.config
 cd riscv64-linux/linux && make ARCH=riscv CROSS_COMPILE=/usr/local/projects/bin/riscv64-lp64d--glibc--bleeding-edge-2025.08-1/bin/riscv64-buildroot-linux-gnu- olddefconfig
 #cd riscv64-linux/linux && make ARCH=riscv CROSS_COMPILE=/usr/local/projects/bin/riscv64-lp64d--glibc--bleeding-edge-2025.08-1/bin/riscv64-buildroot-linux-gnu- -j $(nproc)
+ 
+# git clone --depth 1 https://git.busybox.net/busybox
 
