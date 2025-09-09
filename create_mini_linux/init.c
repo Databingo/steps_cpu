@@ -29,7 +29,7 @@ int main() {
    // system("/bin/busybox --install -s");
 
    // // 启动 shell
-   // execl("/bin/busybox", "busybox", "sh", NULL);
+    execl("/bin/busybox", "busybox", "sh", NULL);
 
 
    // // 如果 execl 失败，执行备用方案
