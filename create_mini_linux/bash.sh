@@ -28,6 +28,7 @@
 #
 # cd buildroot && make qemu_riscv64_virt_defconfig
 # cd buildroot &&  make menuconfig
+# set externel toolchain
 cd buildroot &&  FORCE_UNSAFE_CONFIGURE=1 make busybox-menuconfig
 # select Build busybox as static binary
 # make linux-menuconfig
