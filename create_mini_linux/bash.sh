@@ -30,6 +30,7 @@ git clone https://git.buildroot.net/buildroot
 # make qemu_riscv64_virt_defconfig
 # make meufconfig
 # FORCE_UNSAFE_CONFITURE=1 make busybox-meufconfig
+# select Build busybox as static binary
 #
 #
 #
