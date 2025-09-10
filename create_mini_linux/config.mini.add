@@ -5,7 +5,21 @@
 # A functional minimal .config for the QEMU RISC-V 64-bit 'virt' machine
 # Based on your tinyconfig, with critical drivers re-enabled.
 #
-
+# Enable FPU support if CPU has 'F'/'D' extensions
+CONFIG_FPU=y
+# Enable compressed instructions (C extension)
+CONFIG_RISCV_ISA_C=y
+# Use SBI-based early console (not 8250)
+CONFIG_SERIAL_EARLYCON_RISCV_SBI=y
+CONFIG_SERIAL_8250=n
+# Ensure SBI support is enabled
+CONFIG_RISCV_SBI=y
+# Enable support for H-extension (hypervisor) if needed
+CONFIG_RISCV_SBI_V01=y
+# Enable SMP (even for single-core) for proper CPU initialization
+CONFIG_SMP=y
+# Ensure MMU support
+CONFIG_MMU=y
 #
 # 1. Core RISC-V Architecture Settings (Essential)
 #
