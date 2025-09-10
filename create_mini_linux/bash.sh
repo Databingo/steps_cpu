@@ -82,6 +82,6 @@
 qemu-system-riscv64 -nographic \
     -machine virt \
     -m 512M \
-    -kernel Image_mini \
+    -kernel Image_mini3 \
     -initrd rootfs.cpio.gz \
     -append "console=ttyS0 earlycon=uart8250,mmio,0x10000000 rdinit=/init"
