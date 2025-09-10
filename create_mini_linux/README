@@ -5,7 +5,7 @@ https://risc-v-machines.readthedocs.io/en/latest/linux/simple/
 https://risc-v-getting-started-guide.readthedocs.io/en/latest/linux-qemu.html
 https://cylab.be/blog/320/build-a-kernel-initramfs-and-busybox-to-create-your-own-micro-linux?accept-cookies=1
 
-Mac-UTM-LXQT-builtrootToolChain_riscv64_linux
+Mac-UTM-LXQTdebian-builtrootToolChain_riscv64_linux
 Mac-qemu git
 bash.sh compile linux kernel
 bash.sh compile busybox
