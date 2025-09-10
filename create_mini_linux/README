@@ -4,3 +4,12 @@ https://github.com/EN10/TinyBoxLinux
 https://risc-v-machines.readthedocs.io/en/latest/linux/simple/
 https://risc-v-getting-started-guide.readthedocs.io/en/latest/linux-qemu.html
 https://cylab.be/blog/320/build-a-kernel-initramfs-and-busybox-to-create-your-own-micro-linux?accept-cookies=1
+
+bash.sh compile linux kernel
+bash.sh compile busybox
+init.c creat init
+f.sh creat root file system /
+bash.sh run qemu
+
+all in one and 
+more simple
