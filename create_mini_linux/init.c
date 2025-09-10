@@ -19,6 +19,9 @@ int main() {
         close(console);
     }
     
+    // 设置环境变量
+    setenv("PATH", "/bin:/sbin:/usr/bin:/usr/sbin", 1);
+    
     printf("Simple init program started successfully!\n");
     printf("Mounting completed. Starting shell...\n");
     

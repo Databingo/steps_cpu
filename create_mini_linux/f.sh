@@ -5,6 +5,7 @@ cp ../buzybox  bin/busybox
 cp ../init init
 chmod +x bin/busybox
 chmod +x init
+./bin/busybox --install -s
 
 find . | cpio -H newc -o | gzip > ../rootfs.cpio.gz 
 
