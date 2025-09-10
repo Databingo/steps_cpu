@@ -4,7 +4,81 @@
  #
 # A functional minimal .config for the QEMU RISC-V 64-bit 'virt' machine
 # Based on your tinyconfig, with critical drivers re-enabled.
+##
+# A functional minimal .config for the QEMU RISC-V 64-bit 'virt' machine
+# Based on your tinyconfig, with critical drivers re-enabled.
 #
+
+#
+# 1. Core RISC-V Architecture Settings (Essential)
+#
+CONFIG_RISCV=y
+CONFIG_64BIT=y
+CONFIG_MMU=y
+CONFIG_RISCV_ISA_C=y
+CONFIG_RISCV_M_MODE=y
+CONFIG_RISCV_S_MODE=y
+CONFIG_RISCV_MMU_V39=y
+# --- CRITICAL FIX: Enable Symmetric Multi-Processing (SMP) ---
+CONFIG_SMP=y
+# --- CRITICAL FIX: Enable Floating Point Unit (FPU) support and required extensions ---
+CONFIG_FPU=y
+CONFIG_RISCV_ISA_A=y
+CONFIG_RISCV_ISA_F=y
+CONFIG_RISCV_ISA_D=y
+
+#
+# 2. General Setup (With initramfs support)
+#
+CONFIG_EXPERIMENTAL=y
+CONFIG_INIT_ENV_ARG_LIMIT=32
+CONFIG_KERNEL_GZIP=y
+CONFIG_INITRAMFS_SOURCE=""
+CONFIG_CC_OPTIMIZE_FOR_SIZE=y
+CONFIG_BLK_DEV_INITRD=y
+
+#
+# 3. Disable Loadable Modules
+#
+CONFIG_MODULES=n
+
+#
+# 4. ESSENTIAL Drivers for QEMU 'virt' machine
+#
+CONFIG_BLOCK=y
+# --- CRITICAL FIX: Enable the SiFive PLIC Interrupt Controller ---
+CONFIG_SIFIVE_PLIC=y
+# --- CRITICAL FIX: Enable the standard Serial Port driver ---
+CONFIG_SERIAL_8250=y
+CONFIG_SERIAL_8250_CONSOLE=y
+# --- CRITICAL FIX: Enable VirtIO bus and devices ---
+CONFIG_VIRTIO=y
+CONFIG_VIRTIO_MMIO=y
+CONFIG_VIRTIO_BLK=y      # Needed for disk
+CONFIG_VIRTIO_CONSOLE=y  # Needed for an efficient console
+# We need the basic character device interface
+CONFIG_TTY=y
+# Disable everything else
+CONFIG_NET=n
+CONFIG_USB_SUPPORT=n
+CONFIG_SOUND=n
+
+#
+# 5. Filesystems
+#
+# --- CRITICAL FIX: Enable essential virtual filesystems ---
+CONFIG_PROC_FS=y
+CONFIG_SYSFS=y
+CONFIG_TMPFS=y
+# Disable on-disk filesystems if you are only using initramfs
+CONFIG_EXT4_FS=n
+
+#
+# 6. Kernel Hacking / Debugging
+#
+# --- CRITICAL FIX: Enable printk so we can see boot messages! ---
+CONFIG_PRINTK=y
+CONFIG_BUG=y
 # Enable FPU support if CPU has 'F'/'D' extensions
 CONFIG_FPU=y
 # Enable compressed instructions (C extension)
