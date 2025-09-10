@@ -10,11 +10,4 @@ cp ../init init
 chmod +x bin/busybox
 chmod +x init
 
-#ln -s /bin/busybox  bin/ls
-#ln -s /bin/busybox  bin/mv
-#ln -s /bin/busybox  bin/cp
-#ln -s /bin/busybox  bin/rm
-#ln -s /bin/busybox  bin/cat
-
-
 find . | cpio -H newc -o | gzip > ../rootfs.cpio.gz 
