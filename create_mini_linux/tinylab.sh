@@ -16,7 +16,7 @@ sudo mknod initrd/dev/console c 5 1
 
 
 #Build kernel
-#cd riscv64-linux/linux && make clean && cd -
+cd riscv64-linux/linux && make clean && cd -
 #cd riscv64-linux/linux && make defconfig && cd -
 cd riscv64-linux/linux && make tinyconfig && cd -
 cd riscv64-linux/linux && make menuconfig && cd -
