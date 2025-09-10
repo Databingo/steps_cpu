@@ -69,5 +69,9 @@
 #    -kernel Image_des \
 #    -initrd rootfs.cpio.gz \
 #    -append "root=/dev/ram0 rw console=ttyS0" 
-
-qemu-system-riscv64 -kernel Image_mini \
+qemu-system-riscv64 -nographic \ 
+    -machine virt \ 
+    -m 512M \ 
+    -kernel Image_mini \ 
+    -initrd rootfs.cpio.gz \ 
+    -append "console=ttyS0 earlycon=uart8250,mmio,0x10000000 rdinit=/init"
