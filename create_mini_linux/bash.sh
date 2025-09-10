@@ -61,10 +61,10 @@
 #     -drive file=bybox,format=raw,id=hd-1 \
 #     -device virtio-blk-device,drive=hd-1
 #
-#qemu-system-riscv64 -nographic \
-#    -machine virt \
-#    -m 512M \
-#    -kernel Image_des \
-#    -initrd rootfs.cpio.gz \
-#    -append "root=/dev/ram0 rw console=ttyS0" 
+qemu-system-riscv64 -nographic \
+    -machine virt \
+    -m 512M \
+    -kernel Image_des \
+    -initrd rootfs.cpio.gz \
+    -append "root=/dev/ram0 rw console=ttyS0" 
 
