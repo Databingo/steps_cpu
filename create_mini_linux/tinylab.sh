@@ -4,6 +4,7 @@ export ARCH="riscv"
 export CROSS_COMPILE="/usr/local/projects/bin/riscv64-lp64d--glibc--bleeding-edge-2025.08-1/bin/riscv64-buildroot-linux-gnu-"
 export CFLAGS="-march=rv64imafd -mabi=lp64d"
 
+rm -rf initrd
 mkdir initrd
 
 $CROSS_COMPILE"gcc" -static init.c -o initrd/init
