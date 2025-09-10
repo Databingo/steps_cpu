@@ -5,5 +5,48 @@
 cd riscv64-linux/linux && make ARCH=riscv CROSS_COMPILE=/usr/local/projects/bin/riscv64-lp64d--glibc--bleeding-edge-2025.08-1/bin/riscv64-buildroot-linux-gnu- -j $(nproc) && cd -
 
 
-
-
+#```
+## Linux Kernel: bzImage
+#git clone --depth 1 https://github.com/torvalds/linux.git
+#cd linux
+#make tinyconfig
+## </> for Search
+#make menuconfig
+#make -j 8
+#docker cp CONTAINER_ID:/root/linux/arch/x86/boot/bzImage ./
+#```
+#
+##### Linux/x84_64 6.12.y Kernel Configuration  </> for Search
+#* 64-<ins>**b**</ins>it kernel
+#* <ins>**G**</ins>eneral setup - <ins>**I**</ins>nitial RAM filesystem and RAM disk - <ins>**S**</ins>upport initial ramdisk/ramfs compressed using gzip
+#* <ins>**G**</ins>eneral setup - <ins>**C**</ins>onfigure standard kernel features - <ins>**E**</ins>nable support for printk
+#* <ins>**G**</ins>eneral setup - <ins>**C**</ins>onfigure standard kernel features - <ins>**E**</ins>nable futex support 
+#* <ins>**E**</ins>xecutable file formats -  <ins>**K**</ins>ernel support for ELF binaries
+#* <ins>**E**</ins>xecutable file formats -  <ins>**K**</ins>ernel support for scripts starting with #!
+#* N<ins>**e**</ins>tworking support - N<ins>**e**</ins>tworking options - <ins>**U**</ins>nix domain sockets 
+#* N<ins>**e**</ins>tworking support - N<ins>**e**</ins>tworking options - <ins>**T**</ins>CP/IP networking
+#* <ins>**D**</ins>evice Drivers - <ins>**P**</ins>CI support 
+#* <ins>**D**</ins>evice Drivers - <ins>**G**</ins>enric Driver Options - M**a**intain a devtmpfs filesystem to mount at /dev - **A**utomount devtmpfs at /dev, after the kernel mounted the rootfs
+#* <ins>**D**</ins>evice Drivers - <ins>**C**</ins>haracter devices - <ins>**E**</ins>nable TTY
+#* <ins>**D**</ins>evice Drivers - <ins>**C**</ins>haracter devices - <ins>**S**</ins>erial drivers -  8250/16550 and compatible serial support - Console on 8250/16550 and compatible serial port
+#* <ins>**D**</ins>evice Drivers - N<ins>**e**</ins>twork device support - <ins>**E**</ins>thernet driver support - <ins>**I**</ins>ntel devices - **I**ntel(R) PRO/1000 Gigabit Ethernet support  
+#* <ins>**F**</ins>ile systems - <ins>**p**</ins>seudo filesystems - /proc file system support  
+#* <ins>**F**</ins>ile systems - <ins>**p**</ins>seudo filesystems - sysfs file system support  
+#
+#Based on [Building a tiny Linux kernel](https://weeraman.com/building-a-tiny-linux-kernel)
+#
+#* `TTY` enables Console
+#* `8250` enable `console=ttyS0` on Windows Terminal
+#* `printk` enables kernel output on boot
+#*  `futex` required by elinks
+#*  `initial ramdisk gzip` enables init.cpio.gz
+#*  `ELF` enables /bin/sh
+#*  `#! scripts` enables init with /bin/sh
+#*  `Intel PRO/1000 & PCI` drivers for e1000 (default QEMU network device) through the PCI bus
+#*  `sysfs` makes eth0 visable in /sys
+#*  `Unix Socket & TCP/IP` enables networking software
+#*  `/proc` enables ps
+#
+#
+#
+#
