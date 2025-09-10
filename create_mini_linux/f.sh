@@ -9,9 +9,7 @@ cp ../buzybox  bin/busybox
 cp ../init init
 chmod +x bin/busybox
 chmod +x init
-for a in $(bin/busybox --list); do
-    ln -s /bin/busybox  bin/$a
-done
-#ln -s /bin/busybox  bin/ls
+
+ln -s /bin/busybox  bin/ls
 
 find . | cpio -H newc -o | gzip > ../rootfs.cpio.gz 
