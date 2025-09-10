@@ -27,10 +27,7 @@ int main() {
     
     // 启动 shell
     execl("/bin/busybox", "busybox", "sh", NULL);
-
-     // Ask BusyBox to self-install all applets as symlinks
-    char *argv[] = { "/bin/busybox", "--install", "-s", "/bin", NULL };
-    execv(argv[0], argv);   
+    execl("/bin/busybox", "busybox", "--install", "-s", "/bin/", NULL);
 
     // 如果 execl 失败，执行备用方案
     perror("Failed to start shell");
