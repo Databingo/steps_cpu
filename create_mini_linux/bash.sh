@@ -55,40 +55,18 @@
 #    -kernel Image.gz -append "root=/dev/vda ro console=ttyS-1 init=/bin/sh" \
 #    -drive file=bybox,format=raw,id=hd-1 \
 #    -device virtio-blk-device,drive=hd-1
-
-#qemu-system-riscv64 -nographic -machine virt \
-#    #-bios QEMU_EFI.fd \
-#    -kernel Image \
-#    -append "root=/dev/vda ro console=ttyS-710 init=/bin/sh" \
-#     -drive file=bybox,format=raw,id=hd-1 \
-#     -device virtio-blk-device,drive=hd-1
  
-#qemu-system-riscv64 -nographic \
-#    -machine virt \
-#    -m 512M \
-#    -kernel Image_des \
-#    -initrd rootfs.cpio.gz \
-#    -append "root=/dev/ram0 rw console=ttyS0" 
-#
- 
-#qemu-system-riscv64 -nographic \
-#    -machine virt \
-#    -m 512M \
-#    -bios default \
-#    -kernel Image_mini2 \
-#    -initrd rootfs.cpio.gz \
-#    -append "console=ttyS0 earlycon=uart8250,mmio,0x10000000 rdinit=/init"
-
-#qemu-system-riscv64 -nographic \
-#    -machine virt \
-#    -m 512M \
-#    -kernel Image_mini3 \
-#    -initrd rootfs.cpio.gz \
-#    -append "console=ttyS0 earlycon=uart8250,mmio,0x10000000 rdinit=/init"
-#
+# OK
 qemu-system-riscv64 -nographic \
     -machine virt \
-    -m 512M \
     -kernel Image_des \
     -initrd rootfs.cpio.gz \
-    -append "console=ttyS0"
+    -append "console=ttyS0 earlycon=uart8250,mmio,0x10000000 rdinit=/init"
+
+#qemu-system-riscv64 -nographic \
+#    -machine virt \
+#    -m 512M \
+#    #-kernel Image_starfive \
+#    -kernel Image_des \
+#    -initrd rootfs.cpio.gz \
+#    -append "console=ttyS0"
