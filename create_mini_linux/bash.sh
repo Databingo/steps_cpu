@@ -66,6 +66,5 @@
 # Test
 qemu-system-riscv64 -nographic \
     -machine virt \
-    -kernel Image_starfive \
-    -initrd rootfs.cpio.gz \
-    -append "console=ttyS0 earlycon=uart8250,mmio,0x10000000 rdinit=/init"
+    -kernel Image_tinyconfig_up1 \
+    -append "console=ttyS0"
