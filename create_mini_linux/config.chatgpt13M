@@ -111,8 +111,7 @@ CONFIG_RISCV_ISA_VENDOR_EXT=n
 # Optimizations
 CONFIG_OPTIMIZE_INLINING=y
 
-
-
+# -- fix for hanging after openSBI --
 # Device tree / FDT
 CONFIG_DTC=y
 CONFIG_OF=y
