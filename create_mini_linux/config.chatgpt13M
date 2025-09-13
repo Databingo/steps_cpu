@@ -1,13 +1,17 @@
 # Minimal RISC-V 64-bit Linux kernel config for BusyBox initramfs under QEMU
 # Based on your provided config, reduced with Stages 1-3
 
+# Essential architecture
 CONFIG_64BIT=y
 CONFIG_RISCV=y
 CONFIG_ARCH_VIRT=y
 CONFIG_MMU=y
+
+# Core Kernel feature 
 CONFIG_CC_OPTIMIZE_FOR_SIZE=y
 CONFIG_PRINTK=y
 CONFIG_BUG=y
+CONFIG_SYSCTL=y
 
 # Initramfs support
 CONFIG_BLK_DEV_INITRD=y
@@ -106,7 +110,6 @@ CONFIG_RISCV_ISA_VENDOR_EXT=n
 
 # Optimizations
 CONFIG_OPTIMIZE_INLINING=y
-CONFIG_SYSCTL=y
 
 
 
