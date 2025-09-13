@@ -1,102 +1,60 @@
-#
-# FINAL CORRECTED minimal .config for QEMU RISC-V 64-bit with initramfs
-#
-
-#
-# 1. Core RISC-V Architecture Settings (Essential)
-#
-CONFIG_RISCV=y
+# --- Core Architecture (DO NOT CHANGE) ---
 CONFIG_64BIT=y
-CONFIG_ARCH_SUPPORTS_INT128=y
+CONFIG_RISCV=y
 CONFIG_MMU=y
+CONFIG_RISCV_SBI=y
+CONFIG_SMP=y
+CONFIG_FPU=y
 CONFIG_RISCV_ISA_C=y
 CONFIG_RISCV_ISA_A=y
 CONFIG_RISCV_ISA_F=y
 CONFIG_RISCV_ISA_D=y
-CONFIG_RISCV_M_MODE=y
-CONFIG_RISCV_S_MODE=y
-CONFIG_RISCV_MMU_V39=y
+CONFIG_CMODEL_MEDANY=y
 
-#
-# 2. General Setup (With initramfs support)
-#
-CONFIG_EXPERIMENTAL=y
+# --- General Setup ---
 CONFIG_INIT_ENV_ARG_LIMIT=32
 CONFIG_KERNEL_GZIP=y
-CONFIG_CMDLINE_EXTEND=y
-CONFIG_CMDLINE=""
-CONFIG_CROSS_COMPILE="riscv64-unknown-linux-gnu-"
 CONFIG_CC_OPTIMIZE_FOR_SIZE=y
-# --- ### CRITICAL FIX ### ---
-# This enables the kernel's ability to be linked with an initramfs.
-CONFIG_BUILD_ARM64_APPENDED_DTB_IMAGE_SEPARATE=y # Dependency for initramfs
-CONFIG_BUILD_ARM64_DT_OVERLAY=y # Dependency for initramfs
+CONFIG_PRINTK=y
+CONFIG_BUG=y
+
+# --- Initramfs support (Essential) ---
+CONFIG_BLK_DEV_INITRD=y
 CONFIG_INITRAMFS_SOURCE=""
-CONFIG_INITRAMFS_ROOT_UID=0
-CONFIG_INITRAMFS_ROOT_GID=0
-CONFIG_INITRAMFS_COMPRESSION_GZIP=y
+CONFIG_RD_GZIP=y
 
-#
-# 3. Disable Loadable Modules (Still a huge win)
-#
-CONFIG_MODULES=n
-
-#
-# 4. Disable Networking
-#
-CONFIG_NET=n
-
-#
-# 5. ESSENTIAL Drivers for QEMU 'virt' machine
-#
-CONFIG_BLOCK=y
-# --- ### CRITICAL FIX ### ---
-# Enable the older RAM block device as a fallback and for initrd.
-CONFIG_BLK_DEV_RAM=y
-CONFIG_BLK_DEV_RAM_COUNT=16
-CONFIG_BLK_DEV_RAM_SIZE=4096
-# VirtIO drivers remain necessary for a robust QEMU setup.
-CONFIG_VIRTIO=y
-CONFIG_VIRTIO_MENU=y
-CONFIG_VIRTIO_MMIO=y
-CONFIG_VIRTIO_BLK=y
-# PLIC Interrupt Controller is essential.
-CONFIG_IRQ_Sifive_PLIC=y
-# Serial console driver remains essential.
-CONFIG_SERIAL_EARLYCON=y
-CONFIG_SERIAL_8250=y
-CONFIG_SERIAL_8250_CONSOLE=y
-# We need the basic character device interface.
-CONFIG_TTY=y
-# Disable everything else.
-CONFIG_USB_SUPPORT=n
-CONFIG_SOUND=n
-CONFIG_VT=n
-
-#
-# 6. Filesystems
-#
+# --- Essential Virtual Filesystems (DO NOT CHANGE) ---
 CONFIG_PROC_FS=y
 CONFIG_SYSFS=y
 CONFIG_TMPFS=y
-# --- ### CRITICAL FIX ### ---
-# This is the MOST IMPORTANT option. It enables the initramfs/initrd functionality.
-CONFIG_BLK_DEV_INITRD=y
-# Disable on-disk filesystems.
-CONFIG_EXT4_FS=n
-CONFIG_BTRFS_FS=n
-CONFIG_XFS_FS=n
-CONFIG_FAT_FS=n
 
-#
-# 7. Kernel Hacking / Debugging
-#
-CONFIG_PRINTK=y
-CONFIG_BUG=y
-CONFIG_DEBUG_KERNEL=y
-# Disable the rest
-CONFIG_MAGIC_SYSRQ=n
-CONFIG_PROFILING=n
-CONFIG_STACKTRACE=n
-CONFIG_KPROBES=n
-CONFIG_FTRACE=n
+# --- Essential Executable Formats ---
+CONFIG_BINFMT_ELF=y
+CONFIG_BINFMT_SCRIPT=y
+
+# --- Essential Drivers for QEMU 'virt' machine (DO NOT CHANGE) ---
+CONFIG_SIFIVE_PLIC=y
+CONFIG_SERIAL_8250=y
+CONFIG_SERIAL_8250_CONSOLE=y
+CONFIG_VIRTIO=y
+CONFIG_VIRTIO_MMIO=y
+CONFIG_VIRTIO_CONSOLE=y
+CONFIG_TTY=y
+
+# --- All other features disabled ---
+CONFIG_MODULES=n
+CONFIG_NET=n
+CONFIG_BLOCK=n
+CONFIG_INPUT=n
+CONFIG_VT=n
+CONFIG_PCI=n
+CONFIG_USB_SUPPORT=n
+CONFIG_KALLSYMS=n
+CONFIG_DEBUG_KERNEL=n
+CONFIG_NAMESPACES=n
+CONFIG_SYSVIPC=n
+CONFIG_CGROUPS=n
+CONFIG_PERF_EVENTS=n
+CONFIG_BPF_SYSCALL=n
+CONFIG_PM=n
+CONFIG_TINY_RCU=y```
