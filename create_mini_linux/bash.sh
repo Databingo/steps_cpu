@@ -66,6 +66,6 @@
 # Test
 qemu-system-riscv64 -nographic \
     -machine virt \
-    -kernel Image_grok4_mini \
+    -kernel Image_des_sub3.1 \
     -initrd rootfs.cpio.gz \
     -append "console=ttyS0"
