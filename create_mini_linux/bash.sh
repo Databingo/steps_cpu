@@ -63,10 +63,16 @@
 #    -initrd rootfs.cpio.gz \
 #    -append "console=ttyS0 earlycon=uart8250,mmio,0x10000000 rdinit=/init"
  
+## OK
+#qemu-system-riscv64 -nographic \
+#    -machine virt \
+#    -kernel Image_chatgpt11Mok \
+#    -initrd rootfs.cpio.gz \
+#    -append "console=ttyS0"
+
 # Test
 qemu-system-riscv64 -nographic \
     -machine virt \
-    #-kernel Image_des_sub5 \
-    -kernel Image_tiny_up3 \
+    -kernel Image_des_sub5 \
     -initrd rootfs.cpio.gz \
     -append "console=ttyS0"
