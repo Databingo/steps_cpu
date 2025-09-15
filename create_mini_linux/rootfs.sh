@@ -10,8 +10,8 @@ mkdir -p my_rootfs/usr/{bin,sbin}
 mkdir -p my_rootfs/proc/sys/kernel
 
 cd my_rootfs
-cp ../buzybox3  bin/busybox
-cp ../init init
+cp ../buzybox  bin/busybox
+cp ../init.sh init
 chmod +x bin/busybox
 chmod +x init
 
