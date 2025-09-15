@@ -4,12 +4,12 @@
 # Now use init bash
 #
 # Create initramfs 
-rm -rf my_rootfs
-mkdir -p my_rootfs/{bin,sbin,home,mnt,usr,tmp,etc,proc,sys,dev}
-mkdir -p my_rootfs/usr/{bin,sbin}
-mkdir -p my_rootfs/proc/sys/kernel
+rm -rf rootfs
+mkdir -p rootfs/{bin,sbin,home,mnt,usr,tmp,etc,proc,sys,dev}
+mkdir -p rootfs/usr/{bin,sbin}
+mkdir -p rootfs/proc/sys/kernel
 
-cd my_rootfs
+cd rootfs
 cp ../buzybox  bin/busybox
 cp ../init.sh init
 chmod +x bin/busybox
