@@ -67,6 +67,9 @@
 qemu-system-riscv64 -nographic \
     -machine virt \
     #-kernel Image_des_sub5 \
-    -kernel Image_tiny_up3 \
+    #-kernel Image_tiny_up3 \
+    #-kernel Image_test \
+    -kernel Image_ \
     -initrd rootfs.cpio.gz \
-    -append "console=ttyS0"
+    #-append "console=ttyS0"
+    -append "console=ttyS0 root=/dev/ram"
