@@ -1,4 +1,0 @@
-SBI HSM extension detected
-Kernel command line: console=ttyS0 earlycon=uart8250,mmio,0x10000000 rdinit=/init
-Run /init as init process
-init[1]: unhandled signal 4 code 0x1 at 0x0000000000010ad8 in init[ad8,10000+81000]
