@@ -70,9 +70,16 @@
 #    -initrd rootfs.cpio.gz \
 #    -append "console=ttyS0"
 
-# Test
+# OK
+#qemu-system-riscv64 -nographic \
+#    -machine virt \
+#    -kernel Image_test \
+#    -initrd rootfs.cpio.gz \
+#    -append "console=ttyS0"
+
+
 qemu-system-riscv64 -nographic \
     -machine virt \
-    -kernel Image_test \
+    -kernel Image_tiny_up4_ok \
     -initrd rootfs.cpio.gz \
     -append "console=ttyS0"
