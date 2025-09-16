@@ -6,7 +6,7 @@
 #cd busybox && CROSS_COMPILE=/usr/local/projects/bin/riscv64-lp64d--glibc--bleeding-edge-2025.08-1/bin/riscv64-buildroot-linux-gnu- make -j $(nproc) && cd -
 
 
-
+# ISA=imafd
 set -e
 
 export ARCH="riscv"
