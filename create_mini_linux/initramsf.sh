@@ -1,3 +1,7 @@
+# Compile init.c
+/usr/local/projects/bin/riscv64-lp64d--glibc--bleeding-edge-2025.08-1/bin/riscv64-buildroot-linux-gnu-gcc -static init.c -o init
+#
+#
 # Create initramfs 
 rm -rf my_rootfs
 mkdir -p my_rootfs/{bin,sbin,home,mnt,usr,tmp,etc,proc,sys,dev}
@@ -5,7 +9,7 @@ mkdir -p my_rootfs/usr/{bin,sbin}
 mkdir -p my_rootfs/proc/sys/kernel
 
 cd my_rootfs
-cp ../buzybox2  bin/busybox
+cp ../buzybox3  bin/busybox
 cp ../init init
 chmod +x bin/busybox
 chmod +x init
