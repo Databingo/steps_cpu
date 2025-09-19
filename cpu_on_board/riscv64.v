@@ -42,7 +42,7 @@ module riscv64(
     reg lb_step;
     reg sb_step;
 
-    // IF ir (Unchanged)
+    // IF
     always @(posedge clk or negedge reset) begin
         if (!reset) begin 
             heartbeat <= 1'b0; 
