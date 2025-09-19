@@ -21,7 +21,7 @@ module riscv64(
 );
     // -- CSR Registers --
     reg [63:0] csr [0:4096]; // Maximal 12-bit length = 4096
-    integer mstatus = 12'h300;      // 0x300 MRW Machine status reg   // 63_SD|37_MBE|36_SBE|35:34_SXL10|22_TSR|21_TW|20_TVW|17_MPRV|12:11_MPP10|7_MPIE|3_MIE|1_SIE|0_WPRI
+    //integer mstatus = 12'h300;      // 0x300 MRW Machine status reg   // 63_SD|37_MBE|36_SBE|35:34_SXL10|22_TSR|21_TW|20_TVW|17_MPRV|12:11_MPP10|7_MPIE|3_MIE|1_SIE|0_WPRI
     integer mie = 12'h304;          // 0x304 MRW Machine interrupt-enable register *
     integer mip = 12'h344;          // 0x344 MRW Machine interrupt pending *
     integer mtvec = 12'h305;        // 0x305 MRW Machine trap-handler base address *
@@ -29,7 +29,8 @@ module riscv64(
     integer mepc = 12'h341;         // 0x341 MRW Machine exception program counter *
 
     // -- CSR Bits --
-    wire mstatus_MIE = csr[mstatus][3]; // Machine Interrupt Enable
+    //wire mstatus_MIE = csr[mstatus][3]; // Machine Interrupt Enable
+    wire mstatus_MIE = mstatus[3]; // Machine Interrupt Enable
     //wire mstatus_MPIE = csr[mstatus][7]; // 
     //wire mie_MEIE = csr[mie][11];
     //wire mip_MEIP = csr[mie][11];
