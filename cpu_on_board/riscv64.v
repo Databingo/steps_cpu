@@ -34,6 +34,7 @@ module riscv64(
     //wire mie_MEIE = csr[mie][11];
     //wire mip_MEIP = csr[mie][11];
     //reg [31:0] mepc; // Machine Exception Program Counter
+    reg [63:0] mstatus; // Machine Exception Program Counter
  
     // -- Immediate decoders  -- 
     wire signed [63:0] w_imm_u = {{32{ir[31]}}, ir[31:12], 12'b0};
@@ -83,8 +84,10 @@ module riscv64(
 	        //mepc <= pc; // save pc
 	        csr[mepc] <= pc; // save pc
 		csr[mcause] <= 64'h800000000000000B; // MSB 1 for Interrupts 0 for exceptions, Casue = 11 (Machine External Interrupt)
-		csr[mstatus][7] <= csr[mstatus][3]; // mstatus.MPIC = mstatus.MIE
-		csr[mstatus][3] <= 1'b0; //mstatus.MIE = 0
+		//csr[mstatus][7] <= csr[mstatus][3]; // mstatus.MPIC = mstatus.MIE
+		//csr[mstatus][3] <= 1'b0; //mstatus.MIE = 0
+		mstatus[7] <= mstatus[3]; // mstatus.MPIC = mstatus.MIE
+		mstatus[3] <= 1'b0; //mstatus.MIE = 0
 		//pc <= {csr[mtvec][63:2], 2'b00} // jump to dispatch handler(which save contect to stack & read mcause to choose ISR)
                 pc <= 0; // jump to ISR addr
 
@@ -105,12 +108,14 @@ module riscv64(
                 casez(ir) 
 	            32'b???????_?????_?????_???_?????_0110111:  re[w_rd] <= w_imm_u; // Lui
 	            32'b0000000_00000_00000_000_00000_0000000: begin // Mret 
-		        csr[mstatus][3] <= csr[mstatus][7]; // mstatus.MIE = mstatus.MPIC 
-		        csr[mstatus][7] <= 1'b1; //mstatus.MIE = 1
+	                //pc <= mepc; bubble <= 1; interrupt_pending <= 0; end 
+		        //csr[mstatus][3] <= csr[mstatus][7]; // mstatus.MIE = mstatus.MPIC 
+		        //csr[mstatus][7] <= 1'b1; //mstatus.MIE = 1
+		        mstatus[3] <= mstatus[7]; // mstatus.MIE = mstatus.MPIC 
+		        mstatus[7] <= 1'b1; //mstatus.MIE = 1
 			pc <= csr[mepc];
 			bubble <= 1; 
 		        end
-	                //pc <= mepc; bubble <= 1; interrupt_pending <= 0; end 
 	            32'b1111111_11111_11111_111_11111_1111111: begin // Load  3 cycles to finish re<=data
 	                if (lb_step == 0) begin
 	                    bus_address <= `Key_base; // cycle 1 setting read enable
