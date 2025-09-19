@@ -26,11 +26,12 @@ module riscv64(
     integer mip = 12'h344;          // 0x344 MRW Machine interrupt pending *
     integer mtvec = 12'h305;        // 0x305 MRW Machine trap-handler base address *
     integer mcause = 12'h342;       // 0x342 MRW Machine trap casue *
+    //integer mepc = 12'h341;         // 0x341 MRW Machine exception program counter *
     // -- CSR Bits --
     wire mstatus_MIE = csr[mstatus][3]; // Machine Interrupt Enable
     wire mie_MEIE = csr[mie][11];
     wire mip_MEIP = csr[mie][11];
-    reg [31:0] mepc; //csr?
+    reg [31:0] mepc; // Machine Exception Program Counter
  
     // -- Immediate decoders  -- 
     wire signed [63:0] w_imm_u = {{32{ir[31]}}, ir[31:12], 12'b0};
