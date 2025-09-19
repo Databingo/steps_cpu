@@ -68,7 +68,7 @@ module riscv64(
 	    bus_write_data <= 0;
 	    bus_address <= `Ram_base;
             // Interrupt reset
-	    interrupt_pending <= 0;
+	    //interrupt_pending <= 0;
 	    interrupt_ack <= 0;
 
         end else begin
@@ -108,6 +108,7 @@ module riscv64(
 		        csr[mstatus][3] <= csr[mstatus][7]; // mstatus.MIE = mstatus.MPIC 
 		        csr[mstatus][7] <= 1'b1; //mstatus.MIE = 1
 			pc <= csr[mepc];
+			bubble <= 1; 
 		    end
 
 	            32'b1111111_11111_11111_111_11111_1111111: begin // Load  3 cycles to finish re<=data
