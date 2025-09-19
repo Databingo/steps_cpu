@@ -112,8 +112,8 @@ module riscv64(
 	                //pc <= mepc; bubble <= 1; interrupt_pending <= 0; end 
 		        //csr[mstatus][3] <= csr[mstatus][7]; // mstatus.MIE = mstatus.MPIC 
 		        //csr[mstatus][7] <= 1'b1; //mstatus.MIE = 1
-		        mstatus[3] <= mstatus[7]; // mstatus.MIE = mstatus.MPIC 
-		        mstatus[7] <= 1'b1; //mstatus.MIE = 1
+		        //mstatus[3] <= mstatus[7]; // mstatus.MIE = mstatus.MPIC 
+		        //mstatus[7] <= 1'b1; //mstatus.MIE = 1
 			pc <= csr[mepc];
 			bubble <= 1; 
 		        end
