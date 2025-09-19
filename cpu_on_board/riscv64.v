@@ -43,16 +43,16 @@ module riscv64(
     reg lb_step;
     reg sb_step;
 
-    // IF ir (Unchanged)
-    always @(posedge clk or negedge reset) begin
-        if (!reset) begin 
-            heartbeat <= 1'b0; 
-            ir <= 32'h00000001; 
             integer i;
             initial begin
                 for (i = 0; i < 4096; i = i + 1)
                     csr[i] = 64'd0;
             end
+    // IF ir (Unchanged)
+    always @(posedge clk or negedge reset) begin
+        if (!reset) begin 
+            heartbeat <= 1'b0; 
+            ir <= 32'h00000001; 
         end else begin
             heartbeat <= ~heartbeat; // heartbeat
             ir <= instruction;
