@@ -77,6 +77,7 @@ module riscv64(
             // Interrupt
 	    if (interrupt_vector == 1 && interrupt_pending !=1) begin
 	        mepc <= pc; // save pc
+		csr[mepc_] <= pc;
                 pc <= 0; // jump to ISR addr
 		bubble <= 1'b1; // bubble wrong fetched instruciton by IF
 	        interrupt_pending <= 1;
@@ -94,7 +95,10 @@ module riscv64(
                 casez(ir) 
 	            32'b???????_?????_?????_???_?????_0110111:  re[w_rd] <= w_imm_u; // Lui
 	            32'b0000000_00000_00000_000_00000_0000000: begin // Mret 
-	                pc <= mepc; bubble <= 1; interrupt_pending <= 0; end 
+	                pc <= mepc; 
+			pc <= csr[mepc_];
+			bubble <= 1; 
+			interrupt_pending <= 0; end 
 	            32'b1111111_11111_11111_111_11111_1111111: begin // Load  3 cycles to finish re<=data
 	                if (lb_step == 0) begin
 	                    bus_address <= `Key_base; // cycle 1 setting read enable
