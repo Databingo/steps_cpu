@@ -114,7 +114,7 @@ module riscv64(
 		        //csr[mstatus][7] <= 1'b1; //mstatus.MIE = 1
 		        //mstatus[3] <= mstatus[7]; // mstatus.MIE = mstatus.MPIC 
 		        //mstatus[7] <= 1'b1; //mstatus.MIE = 1
-			pc <= csr[mepc];
+			//pc <= csr[mepc];
 			bubble <= 1; 
 		        end
 	            32'b1111111_11111_11111_111_11111_1111111: begin // Load  3 cycles to finish re<=data
