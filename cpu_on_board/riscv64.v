@@ -27,7 +27,7 @@ module riscv64(
     integer mtvec = 12'h305;        // 0x305 MRW Machine trap-handler base address *
     integer mcause = 12'h342;       // 0x342 MRW Machine trap casue *
     // -- CSR Bits --
-    wire mstatus_MIE = csr[mstatus][3];
+    wire mstatus_MIE = csr[mstatus][3]; // Machine Interrupt Enable
     wire mie_MEIE = csr[mie][11];
     wire mip_MEIP = csr[mie][11];
     reg [31:0] mepc; //csr?
