@@ -31,7 +31,7 @@ module riscv64(
     wire mstatus_MIE = csr[mstatus][3];
     wire mie_MEIE = csr[mie][11];
     wire mip_MEIP = csr[mie][11];
-    reg [31:0] mepc; //csr?
+    //reg [31:0] mepc; //csr?
  
     // -- Immediate decoders  -- 
     wire signed [63:0] w_imm_u = {{32{ir[31]}}, ir[31:12], 12'b0};
@@ -76,7 +76,7 @@ module riscv64(
 
             // Interrupt
 	    if (interrupt_vector == 1 && interrupt_pending !=1) begin
-	        mepc <= pc; // save pc
+	        //mepc <= pc; // save pc
 		csr[mepc_] <= pc;
                 pc <= 0; // jump to ISR addr
 		bubble <= 1'b1; // bubble wrong fetched instruciton by IF
@@ -95,7 +95,7 @@ module riscv64(
                 casez(ir) 
 	            32'b???????_?????_?????_???_?????_0110111:  re[w_rd] <= w_imm_u; // Lui
 	            32'b0000000_00000_00000_000_00000_0000000: begin // Mret 
-	                pc <= mepc; 
+	                //pc <= mepc; 
 			pc <= csr[mepc_];
 			bubble <= 1; 
 			interrupt_pending <= 0; end 
@@ -119,7 +119,7 @@ module riscv64(
 	                    bus_write_enable <= 1;
 			end
 	            end
-		    default: begin end
+		    default:;
                 endcase
 	    end
         end
