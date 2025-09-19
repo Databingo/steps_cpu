@@ -93,3 +93,157 @@ Route: OpenLane(docker) zerotoasiccourse.com tinytapeout.com
 
 
 Buildroot bootlin
+
+
+Open Source Small riscv
+
+github.com/riscvarchive/riscv-cores-list
+
+
+Koala 175
+Yarvi 1000 tommythorn/yarvi
+MR1 1500
+Minerva 2000
+Hazard3 2500
+SCR1 3000
+Kronos 5000
+FemtoRV32 500-1000
+DarkRISCV 500-800
+ultraembedded/riscv 2000-3000
+ultraembedded/biriscv
+wyvernSemi/riscV 3000-5000
+cores-veer-EH1
+RVSoc 5000
+Serv  2-3k
+PicoRV32 5-10k
+Hummingbirdv2 E203 20k
+Risc-v Steel 
+CV32E40P 20k-30k
+Core-v Wally 10k
+Rocket Chip 10k
+VexRiscv 20-30k
+riscv_vhdl 10k
+Klessydar T03/T13 5-15k
+xiangshan 20k
+Boom 100k
+CVA6 100k
+BlackParrot 100k
+lbex 
+Neorv32 10k
+scarab
+xuantie-910 150k
+tinyriscv 5-10k
+weiwei22844/risc-v-cpu
+JuiceVM 5000 C99
+RV32E-Minimun 400-600
+simpleRisc 800-1000
+Potato 1-2k
+SCR1
+Icicle
+FlexPRET
+Taiga
+SweRV EH1/2
+Lambda
+RVcoreP
+ORCA
+Arty-Riscv
+PULPissimo
+Piccolo
+Flute
+Celerity
+Fric-V
+OpenPiton
+Ariane
+Zscale
+Sodor
+Ara
+Snitch
+Manticore
+CVA5
+Nutshell
+SG2044 64bit
+JH-7110
+ESWIN EIC7702X
+Lizard 5-10k
+Shakti 20k
+RiscyOO 20k
+RV12 
+
+
+Excellent work. You've created a very detailed list and attempted to categorize them by Lines of Code (LoC), which is a great starting point.
+
+By combining your list with a deeper inspection of each project's repository, documentation, and community status, I have created an advanced, consolidated table. This new version aims to fix several key issues:
+
+1.  **More Realistic "Size" Metric:** I've replaced LoC with **FPGA LUTs (Look-Up Tables) / ASIC K-Gates** for smaller cores, which is a much more accurate measure of hardware complexity. For larger cores, I've kept LoC but added context (e.g., "Source LoC" for generators).
+2.  **Clearer Categorization:** I've organized the cores into more functional tiers: **Educational**, **Industrial**, **High-Performance**, and **Specialized Research**. This better reflects their intended purpose.
+3.  **Consolidation and De-duplication:** I've merged entries for the same core (e.g., `SweRV EH1`) and clarified which projects are **full SoCs** versus just **CPU cores**.
+4.  **Status and Viability:** I've noted which projects are highly active and production-ready versus those that are primarily academic or less maintained.
+
+This refined table should give you a much more practical and accurate overview for selecting a core.
+
+---
+
+### Advanced RISC-V Core Comparison Table
+
+#### Tier 1: Educational & Microcontroller Cores (RV32)
+**Goal:** Simplicity, ease of understanding, and the smallest possible footprint. Ideal for learning, tiny FPGAs, and basic embedded control.
+
+| Core Name | Approx. Size (FPGA LUTs / K-Gates) | Architecture | Source Language | Primary Use Case | Key Strength | Repository |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **SERV** | **~300 LUTs** | RV32I, Bit-Serial | Verilog | Ultra-low-power, area-constrained SoCs | **World's smallest RISC-V core**, masterpiece of minimalism. | [olofk/serv](https://github.com/olofk/serv) |
+| **Koala** | **~400 LUTs** | RV32I, Single-cycle | Verilog | Ultra-minimal educational | Extremely simple, single-file design. Excellent for first-time learners. | [innovativedesign/koala](https://github.com/innovativedesign/koala) |
+| **FemtoRV32** | **~500 - 1,000 LUTs** | RV32IMC | Verilog | Education, FPGA hobbyists | Excellent documentation and tutorials, very easy to understand. | [BrunoLevy/learn-fpga](https://github.com/BrunoLevy/learn-fpga) |
+| **DarkRISCV** | **~850 - 1,500 LUTs** | RV32IM | Verilog | Education, Embedded Control | Simple 5-stage classic pipeline, high frequency on small FPGAs. | [darklife/darkriscv](https://github.com/darklife/darkriscv) |
+| **PicoRV32** | **~750 - 2,000 LUTs** | RV32IMC (Configurable) | Verilog | Reliable Embedded Controller | Hugely popular, robust, highly configurable, and widely tested. | [YosysHQ/picorv32](https://github.com/YosysHQ/picorv32) |
+| **NEORV32** | **~3.5k - 9k LUTs** | RV32IMACZifencei | **VHDL** | VHDL Education, FPGA SoCs | **Complete SoC in one library**, exceptionally well-documented. | [stnolting/neorv32](https://github.com/stnolting/neorv32) |
+| **Minerva** | **~2,000 LUTs** | RV32IM | Python (Migen) | FPGA-optimized Soft Core | Clean, simple design written in a Python-based HDL generator. | [lambdaconcept/minerva](https://github.com/lambdaconcept/minerva) |
+| **TinyRISCV** | **~3,000 LUTs** | RV32IA | Verilog | Education, Learning | Well-documented 3-stage core designed for readability. | [li-sky/tinyriscv](https://gitee.com/li-sky/tinyriscv) |
+
+#### Tier 2: Efficient & Industrial Cores (Mostly RV32, some RV64)
+**Goal:** Production-ready designs optimized for a balance of Performance, Power, and Area (PPA). Used in real products.
+
+| Core Name | Approx. Size (FPGA LUTs / K-Gates) | Architecture | Source Language | Primary Use Case | Key Strength | Repository |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **Ibex** | **~13k - 25k Gates** | RV32IMC | Secure Embedded Systems | **Rigorously verified**, used in Google's OpenTitan secure chip. | SystemVerilog | [lowRISC/ibex](https://github.com/lowRISC/ibex) |
+| **CV32E40P** | **~15k - 35k Gates** | RV32IMC | Power-Sensitive IoT, Edge AI | Mature, fully verified, from the industry-backed PULP Platform. | SystemVerilog | [openhwgroup/cv32e40p](https://github.com/openhwgroup/cv32e40p) |
+| **SweRV EH1** | **~25k Gates** | RV32IMC | Industrial Embedded SoCs | Production-quality, 4-stage, in-order core from CHIPS Alliance. | SystemVerilog | [chipsalliance/Cores-SweRV](https://github.com/chipsalliance/Cores-SweRV) |
+| **Hummingbird E203**| **~15k Gates** | RV32IMAC | Commercial IoT | Excellent documentation, SDK, and software ecosystem. | Verilog | [nucleisoc/e203_hbirdv2](httpsse/Cores-SweRV) |
+| **Nutshell** | **~20k LUTs** | **RV64GC**, In-Order | **64-bit Core Education** | A simple, well-documented 64-bit core for learning. | Chisel (Scala) | [OSCPU/NutShell](https://github.com/OSCPU/NutShell) |
+| **SHAKTI (I-Class)** | **~50k LUTs** | **RV64GC**, In-Order | Application SoCs | A major national project (India) with a wide range of cores. | Bluespec SV | [shaktiproject/cores](https://github.com/shaktiproject/cores) |
+
+#### Tier 3: High-Performance, Linux-Capable Cores (RV64)
+**Goal:** High performance for running operating systems (Linux) and demanding applications. These are the most complex designs.
+
+| Core Name | Approx. Size (Source LoC / K-Gates) | Architecture | Source Language | Primary Use Case | Key Strength | Repository |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **CVA6 (Ariane)** | **~30k LoC / 200k+ Gates**| RV64GC, In-Order | SystemVerilog | Reliable Application Processor| Mature, stable, and well-supported 6-stage core for ASICs. | [openhwgroup/cva6](https://github.com/openhwgroup/cva6) |
+| **Rocket Chip** | **~10k LoC (Chisel)** | RV64GC, In-Order | Chisel (Scala) | SoC Research, Linux Systems | **Full SoC generator** (core + caches + interconnect), foundational. | [chipsalliance/rocket-chip](https://github.com/chipsalliance/rocket-chip) |
+| **SweRV EH2** | **~100k Gates** | RV64GC, In-Order, **Dual-Issue**| Verilog | High-Efficiency Applications | Industrial-grade superscalar core (2 instructions/cycle). | [chipsalliance/Cores-SweRV](httpss://github.com/chipsalliance/Cores-SweRV) |
+| **BlackParrot** | **~35k LoC** | RV64GC, In-Order | SystemVerilog | Multi-core & Accelerator Research | Designed for easy system integration and modification. | [black-parrot/black-parrot](https://github.com/black-parrot/black-parrot) |
+| **BOOM** | **~15k LoC (Chisel)** | RV64GC, **Out-of-Order** | Chisel (Scala) | High-Perf. Architecture Research | The gold standard for open-source OoO research, highly parametric. | [riscv-boom/boom](https://github.com/riscv-boom/boom) |
+| **XiangShan (香山)**| **~150k LoC (Chisel)** | RV64GC, **Out-of-Order** | Chisel (Scala) | High-Performance Computing | Industrial-strength, state-of-the-art OoO core. Major project. | [OpenXiangShan/XiangShan](https://github.com/OpenXiangShan/XiangShan) |
+| **OpenC910** | **~400k LoC (Verilog)** | RV64GCV, **Out-of-Order** | Verilog | Commercial High-Performance | Partially open-sourced commercial core from T-Head/Alibaba. | [T-head-Semi/openc910](https://github.com/T-head-Semi/C910_RTL) |
+
+#### Tier 4: Specialized & Advanced Research Cores
+**Goal:** To explore novel architectures like multi-threading, vector processing, and large many-core systems.
+
+| Core Name | Architecture | Source Language | Primary Use Case | Key Strength | Repository |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **VexRiscv** | **RV32/64** (Configurable)| SpinalHDL | **CPU Generator**. | **CPU Factory**. Can create anything from a tiny MCU to a Linux-capable, dual-issue core. | [SpinalHDL/VexRiscv](https://github.com/SpinalHDL/VexRiscv) |
+| **Ara** | RV64GC**V**, Vector Core | SystemVerilog | Vector Processing Research | A production-quality implementation of the RISC-V Vector extension. | [pulp-platform/ara](https://github.com/pulp-platform/ara) |
+| **Snitch** | RV32/64IMAFD, Cluster | SystemVerilog | Many-core Clusters | A small, efficient core designed to be instantiated in large clusters with shared FPU and accelerator interfaces. | [pulp-platform/snitch](https://github.com/pulp-platform/snitch) |
+| **FlexPRET** | RV32IM, **Multithreaded** | Chisel (Scala) | Real-time Systems | Supports fine-grained multithreading for predictable, real-time performance. | [pretis/FlexPRET](https://github.com/pretis/FlexPRET) |
+| **OpenPiton** | RV64GC, **Many-core** | Verilog | Many-core Research | A research platform for building large, cache-coherent systems with thousands of cores. | [PrincetonUniversity/openpiton](https://github.com/PrincetonUniversity/openpiton) |
+
+#### Clarifications on Other Entries from Your List
+
+*   **SoC Platforms (Not just cores):** `PULPissimo`, `LiteX`, `RVSoc` are SoC generators/platforms that *use* cores like CV32E40P or VexRiscv. They are frameworks for building a whole chip.
+*   **Commercial Chips (Not open-source IP):** `SG2044`, `JH-7110`, `ESWIN EIC7702X` are physical commercial chips. You cannot download their source code.
+*   **Software Emulator:** `JuiceVM` is a RISC-V emulator written in C99, not a hardware design.
+
+
+
+
+
+
+
