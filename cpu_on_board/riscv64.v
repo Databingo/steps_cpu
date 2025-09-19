@@ -119,6 +119,7 @@ module riscv64(
 	                    bus_write_enable <= 1;
 			end
 	            end
+		    default: begin end
                 endcase
 	    end
         end
