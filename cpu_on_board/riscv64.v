@@ -75,6 +75,8 @@ module riscv64(
         if (!reset) begin 
             heartbeat <= 1'b0; 
             ir <= 32'h00000001; 
+	    csr_mstatus[MIE] <= 1;;
+
         end else begin
             heartbeat <= ~heartbeat; // heartbeat
             ir <= instruction;
