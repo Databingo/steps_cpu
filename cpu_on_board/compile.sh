@@ -20,9 +20,12 @@ echo "Project: $PROJECT_NAME"
 echo "========================================="
 echo ""
 
+SV_VERSION="systemverilog_2005"
+
+
 # Step 1: Analysis & Synthesis (quartus_map)
 echo "[1/3] Running Analysis & Synthesis..."
-quartus_map --read_settings_files=on --write_settings_files=off ${PROJECT_NAME} -c ${PROJECT_NAME}
+quartus_map --read_settings_files=on --write_settings_files=off ${PROJECT_NAME} -c ${PROJECT_NAME} --verilog_input_version=${SV_VERSION}
 echo "Analysis & Synthesis complete."
 echo ""
 
