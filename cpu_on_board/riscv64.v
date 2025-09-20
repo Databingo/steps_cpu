@@ -150,7 +150,8 @@ module riscv64(
 	                pc <= csr_read(mepc); 
 			bubble <= 1; 
 			//interrupt_pending <= 0; 
-	                csr_mstatus[MIE] <= 1;
+		        csr_mstatus[MIE] <= csr_mstatus[MPIE];
+		        csr_mstatus[MPIE] <= 1;
 		    end 
 	            32'b1111111_11111_11111_111_11111_1111111: begin // Load  3 cycles to finish re<=data
 	                if (lb_step == 0) begin
