@@ -19,7 +19,8 @@ echo "Starting Quartus II Compilation Flow..."
 echo "Project: $PROJECT_NAME"
 echo "========================================="
 echo ""
-quartus_sh --flow comiple ${PROJECT_NAME} --set_file_type riscv64.v=systemverilog
+#quartus_sh --flow compile ${PROJECT_NAME} --set_file_type riscv64.v=systemverilog
+quartus_sh ${PROJECT_NAME} --set_file_type riscv64.v=systemverilog
 
 # Step 1: Analysis & Synthesis (quartus_map)
 echo "[1/3] Running Analysis & Synthesis..."
