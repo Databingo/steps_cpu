@@ -26,15 +26,43 @@ module riscv64(
     integer mip = 12'h344;          // 0x344 MRW Machine interrupt pending *
     integer mtvec = 12'h305;        // 0x305 MRW Machine trap-handler base address *
     integer mcause = 12'h342;       // 0x342 MRW Machine trap casue *
+    integer mepc = 12'h341;   
     // -- CSR Bits --
     wire mstatus_MIE = csr[mstatus][3];
     wire mie_MEIE = csr[mie][11];
     wire mip_MEIP = csr[mie][11];
-    reg [63:0] mepc; //csr?
+    //reg [63:0] mepc; //csr?
+
+    reg [63:0] csr_mepc; //csr?
+    // -- CSR bus --
+    wire [11:0] csr_index;
+    wire csr_we;
+    wire [63:0] csr_wdate;
+    reg [63:0] csr_rdate;
  
     // -- Immediate decoders  -- 
     wire signed [63:0] w_imm_u = {{32{ir[31]}}, ir[31:12], 12'b0};
     wire [4:0] w_rd  = ir[11:7];
+
+     
+    //always @(*) begin
+    //    csr_rdata = 64'd0;
+    //    case (csr_index)
+    //        //12'h341: csr_rdata = csr_we ? csr_wdata : csr_mepc;
+    //        12'h341: csr_rdata = csr_mepc;
+    //    default: csr_rdata = 64'd0;
+    //    endcase
+    //end
+    function [63:0] csr_read;
+	input [11:0] csr_index;
+	begin
+	    case (csr_index)
+            12'h341: csr_read = csr_mepc;
+            default: csr_read = 64'd0;
+	    endcase
+	end
+    endfunction
+
 
     // -- Innerl signal --
     reg interrupt_pending;  
@@ -75,7 +103,8 @@ module riscv64(
 
             // Interrupt
 	    if (interrupt_vector == 1 && interrupt_pending !=1) begin
-	        mepc <= pc; // save pc
+	        //mepc <= pc; // save pc
+	        csr_mepc <= pc; // save pc
                 pc <= 0; // jump to ISR addr
 		bubble <= 1'b1; // bubble wrong fetched instruciton by IF
 	        interrupt_pending <= 1;
@@ -93,7 +122,10 @@ module riscv64(
                 casez(ir) 
 	            32'b???????_?????_?????_???_?????_0110111:  re[w_rd] <= w_imm_u; // Lui
 	            32'b0000000_00000_00000_000_00000_0000000: begin // Mret 
-	                pc <= mepc; bubble <= 1; interrupt_pending <= 0; end 
+	                //pc <= mepc; 
+	                pc <= csr_read(mepc); 
+			bubble <= 1; 
+			interrupt_pending <= 0; end 
 	            32'b1111111_11111_11111_111_11111_1111111: begin // Load  3 cycles to finish re<=data
 	                if (lb_step == 0) begin
 	                    bus_address <= `Key_base; // cycle 1 setting read enable
