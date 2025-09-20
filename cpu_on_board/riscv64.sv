@@ -62,6 +62,18 @@ module riscv64(
 	    csr_bit = csr_value[bit_position];
 	end
     endfunction
+    // -- CSR Writer -- 
+    function csr_write;
+	input [11:0] csr_index;
+	input [63:0] csr_wdata;
+	begin
+	    case (csr_index)
+            12'h341: csr_mepc = csr_wdata;
+            12'h300: csr_mstatus = csr_wdata;
+            default: ;
+	    endcase
+	end
+    endfunction
 
 
     // -- Innerl signal --
@@ -104,7 +116,8 @@ module riscv64(
 
             // Interrupt
 	    //if (interrupt_vector == 1 && interrupt_pending !=1) begin
-	    if (interrupt_vector == 1 && csr_bit(mstatus, MIE) ==1) begin //mstatus[3] MIE
+	    //if (interrupt_vector == 1 && csr_bit(mstatus, MIE) ==1) begin //mstatus[3] MIE
+	    if (interrupt_vector == 1 && csr_read(mstatus)[MIE] ==1) begin //mstatus[3] MIE
 	        //mepc <= pc; // save pc
 	        csr_mepc <= pc; // save pc
                 pc <= 0; // jump to ISR addr
