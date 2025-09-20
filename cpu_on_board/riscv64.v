@@ -28,36 +28,25 @@ module riscv64(
     integer mcause = 12'h342;       // 0x342 MRW Machine trap casue *
     integer mepc = 12'h341;   
     // -- CSR Bits --
-    wire mstatus_MIE = csr[mstatus][3];
+    integer MIE  = 3;
+    wire status_MIE = csr[mstatus][3];
     wire mie_MEIE = csr[mie][11];
     wire mip_MEIP = csr[mie][11];
-    //reg [63:0] mepc; //csr?
 
-    reg [63:0] csr_mepc; //csr?
-    // -- CSR bus --
-    wire [11:0] csr_index;
-    wire csr_we;
-    wire [63:0] csr_wdate;
-    reg [63:0] csr_rdate;
- 
     // -- Immediate decoders  -- 
     wire signed [63:0] w_imm_u = {{32{ir[31]}}, ir[31:12], 12'b0};
     wire [4:0] w_rd  = ir[11:7];
 
-     
-    //always @(*) begin
-    //    csr_rdata = 64'd0;
-    //    case (csr_index)
-    //        //12'h341: csr_rdata = csr_we ? csr_wdata : csr_mepc;
-    //        12'h341: csr_rdata = csr_mepc;
-    //    default: csr_rdata = 64'd0;
-    //    endcase
-    //end
+    // CSRs
+    reg [63:0] csr_mepc;
+    reg [63:0] csr_mstatus;
+    // -- CSR Reader -- 
     function [63:0] csr_read;
 	input [11:0] csr_index;
 	begin
 	    case (csr_index)
             12'h341: csr_read = csr_mepc;
+            12'h300: csr_read = csr_mstatus;
             default: csr_read = 64'd0;
 	    endcase
 	end
@@ -102,7 +91,8 @@ module riscv64(
 	    interrupt_ack <= 0;
 
             // Interrupt
-	    if (interrupt_vector == 1 && interrupt_pending !=1) begin
+	    //if (interrupt_vector == 1 && interrupt_pending !=1) begin
+	    if (interrupt_vector == 1 && csr_read(mstatus)[MIE] ==1) begin //mstatus[3] MIE
 	        //mepc <= pc; // save pc
 	        csr_mepc <= pc; // save pc
                 pc <= 0; // jump to ISR addr
