@@ -130,7 +130,7 @@ module riscv64(
 		csr_mstatus[MIE] <= 0;
 
                 //pc <= 0; // jump to ISR addr
-		pc <= csr_mtvec // jump to mtvec addrss (default 0, need C or Assembly code of handler)
+		pc <= csr_mtvec; // jump to mtvec addrss (default 0, need C or Assembly code of handler)
 		bubble <= 1'b1; // bubble wrong fetched instruciton by IF
 	        //interrupt_pending <= 1;
 	        csr_mstatus[MIE] <= 0;
