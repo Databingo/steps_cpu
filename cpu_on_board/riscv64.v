@@ -42,6 +42,7 @@ module riscv64(
     // -- CSR Registers --
     reg [63:0] csr_mepc;
     reg [63:0] csr_mstatus;
+    reg [63:0] csr_mcasue;
     // -- CSR Reader -- 
     function [63:0] csr_read;
 	input [11:0] csr_index;
