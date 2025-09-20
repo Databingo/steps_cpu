@@ -70,13 +70,11 @@ module riscv64(
     reg lb_step;
     reg sb_step;
 
-    // IF ir (Unchanged)
+    // IF ir (Only drive IR no others)
     always @(posedge clk or negedge reset) begin
         if (!reset) begin 
             heartbeat <= 1'b0; 
             ir <= 32'h00000001; 
-	    csr_mstatus[MIE] <= 1'b1;
-
         end else begin
             heartbeat <= ~heartbeat; // heartbeat
             ir <= instruction;
