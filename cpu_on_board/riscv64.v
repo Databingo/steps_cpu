@@ -58,7 +58,8 @@ module riscv64(
 	input [11:0] csr_index;
 	input integer bit_position;
 	begin
-	    csr_bit = csr_read(csr_index)[bit_position];
+	    csr_value = csr_read(csr_index);
+	    csr_bit = csr_value[bit_position];
 	end
     endfunction
 
