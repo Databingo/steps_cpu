@@ -22,15 +22,15 @@ module riscv64(
     // -- CSR Registers --
     //reg [63:0] csr [0:4096]; // Maximal 12-bit length = 4096
     // -- CSR Index--
-    localparam mstatus = 12'h300;      // 0x300 MRW Machine status reg   // 63_SD|37_MBE|36_SBE|35:34_SXL10|22_TSR|21_TW|20_TVW|17_MPRV|12:11_MPP10|7_MPIE|3_MIE|1_SIE|0_WPRI
+    localparam mstatus = 12'h300;   // 0x300 MRW Machine status reg   // 63_SD|37_MBE|36_SBE|35:34_SXL10|22_TSR|21_TW|20_TVW|17_MPRV|12:11_MPP10|7_MPIE|3_MIE|1_SIE|0_WPRI
     integer mie = 12'h304;          // 0x304 MRW Machine interrupt-enable register *
     integer mip = 12'h344;          // 0x344 MRW Machine interrupt pending *
     integer mtvec = 12'h305;        // 0x305 MRW Machine trap-handler base address *
-    localparam mcause = 12'h342;       // 0x342 MRW Machine trap casue *
+    localparam mcause = 12'h342;    // 0x342 MRW Machine trap casue *
     localparam mepc = 12'h341;   
     // -- CSR Bits --
     localparam MIE  = 3; // mstatus.MIE
-    //wire status_MIE = csr[mstatus][3];
+    localparam MPIE  = 7; // mstatus.MPIE
     //wire mie_MEIE = csr[mie][11];
     //wire mip_MEIP = csr[mie][11];
 
@@ -70,7 +70,7 @@ module riscv64(
     reg lb_step;
     reg sb_step;
 
-    // IF ir (Only drive IR no others)
+    // IF ir (Only drive IR)
     always @(posedge clk or negedge reset) begin
         if (!reset) begin 
             heartbeat <= 1'b0; 
