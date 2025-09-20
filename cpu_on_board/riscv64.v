@@ -65,7 +65,7 @@ module riscv64(
 
 
     // -- Innerl signal --
-    reg interrupt_pending;  
+    //reg interrupt_pending;  
     reg bubble;
     reg lb_step;
     reg sb_step;
@@ -75,7 +75,7 @@ module riscv64(
         if (!reset) begin 
             heartbeat <= 1'b0; 
             ir <= 32'h00000001; 
-	    csr_mstatus[MIE] <= 1;;
+	    csr_mstatus[MIE] <= 1;
 
         end else begin
             heartbeat <= ~heartbeat; // heartbeat
@@ -94,8 +94,9 @@ module riscv64(
 	    bus_write_enable <= 0;
 	    bus_write_data <= 0;
 	    bus_address <= `Ram_base;
-            // Interrupt reset
-	    interrupt_pending <= 0;
+            // Interrupt re-enable
+	    csr_mstatus[MIE] <= 1;
+	    //interrupt_pending <= 0;
 	    interrupt_ack <= 0;
 
         end else begin
@@ -110,7 +111,8 @@ module riscv64(
 	        csr_mepc <= pc; // save pc
                 pc <= 0; // jump to ISR addr
 		bubble <= 1'b1; // bubble wrong fetched instruciton by IF
-	        interrupt_pending <= 1;
+	        //interrupt_pending <= 1;
+	        csr_mstatus[MIE] <= 0;
 		interrupt_ack <= 1; // reply to outside
 
             // Bubble
@@ -128,7 +130,9 @@ module riscv64(
 	                //pc <= mepc; 
 	                pc <= csr_read(mepc); 
 			bubble <= 1; 
-			interrupt_pending <= 0; end 
+			//interrupt_pending <= 0; 
+	                csr_mstatus[MIE] <= 1;
+		    end 
 	            32'b1111111_11111_11111_111_11111_1111111: begin // Load  3 cycles to finish re<=data
 	                if (lb_step == 0) begin
 	                    bus_address <= `Key_base; // cycle 1 setting read enable
