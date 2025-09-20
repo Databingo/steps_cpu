@@ -53,6 +53,15 @@ module riscv64(
 	end
     endfunction
 
+    // -- CSR Bit-- 
+    function csr_bit;
+	input [11:0] csr_index;
+	input integer bit_position;
+	begin
+	    csr_bit = csr_read(csr_index)[bit_position];
+	end
+    endfunction
+
 
     // -- Innerl signal --
     reg interrupt_pending;  
@@ -93,7 +102,7 @@ module riscv64(
 
             // Interrupt
 	    //if (interrupt_vector == 1 && interrupt_pending !=1) begin
-	    if (interrupt_vector == 1 && csr_read(mstatus)[MIE] ==1) begin //mstatus[3] MIE
+	    if (interrupt_vector == 1 && csr_bit(mstatus)[MIE] ==1) begin //mstatus[3] MIE
 	        //mepc <= pc; // save pc
 	        csr_mepc <= pc; // save pc
                 pc <= 0; // jump to ISR addr
