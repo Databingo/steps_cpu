@@ -43,6 +43,7 @@ module riscv64(
     reg [63:0] csr_mepc;
     reg [63:0] csr_mstatus;
     reg [63:0] csr_mcasue;
+    reg [63:0] csr_mtvec = 64'd0;
     // -- CSR Reader -- 
     function [63:0] csr_read;
 	input [11:0] csr_index;
@@ -128,7 +129,8 @@ module riscv64(
 		csr_mstatus[MPIE] <= csr_mstatus[MIE];
 		csr_mstatus[MIE] <= 0;
 
-                pc <= 0; // jump to ISR addr
+                //pc <= 0; // jump to ISR addr
+		pc <= csr_mtvec // jump to mtvec addrss (default 0, need C or Assembly code of handler)
 		bubble <= 1'b1; // bubble wrong fetched instruciton by IF
 	        //interrupt_pending <= 1;
 	        csr_mstatus[MIE] <= 0;
