@@ -20,24 +20,25 @@ module riscv64(
     input  wire [63:0] bus_read_data   // from outside
 );
     // -- CSR Registers --
-    reg [63:0] csr [0:4096]; // Maximal 12-bit length = 4096
-    integer mstatus = 12'h300;      // 0x300 MRW Machine status reg   // 63_SD|37_MBE|36_SBE|35:34_SXL10|22_TSR|21_TW|20_TVW|17_MPRV|12:11_MPP10|7_MPIE|3_MIE|1_SIE|0_WPRI
+    //reg [63:0] csr [0:4096]; // Maximal 12-bit length = 4096
+    // -- CSR Index--
+    localparam mstatus = 12'h300;      // 0x300 MRW Machine status reg   // 63_SD|37_MBE|36_SBE|35:34_SXL10|22_TSR|21_TW|20_TVW|17_MPRV|12:11_MPP10|7_MPIE|3_MIE|1_SIE|0_WPRI
     integer mie = 12'h304;          // 0x304 MRW Machine interrupt-enable register *
     integer mip = 12'h344;          // 0x344 MRW Machine interrupt pending *
     integer mtvec = 12'h305;        // 0x305 MRW Machine trap-handler base address *
-    integer mcause = 12'h342;       // 0x342 MRW Machine trap casue *
-    integer mepc = 12'h341;   
+    localparam mcause = 12'h342;       // 0x342 MRW Machine trap casue *
+    localparam mepc = 12'h341;   
     // -- CSR Bits --
-    integer MIE  = 3;
-    wire status_MIE = csr[mstatus][3];
-    wire mie_MEIE = csr[mie][11];
-    wire mip_MEIP = csr[mie][11];
+    localparam MIE  = 3; // mstatus.MIE
+    //wire status_MIE = csr[mstatus][3];
+    //wire mie_MEIE = csr[mie][11];
+    //wire mip_MEIP = csr[mie][11];
 
     // -- Immediate decoders  -- 
     wire signed [63:0] w_imm_u = {{32{ir[31]}}, ir[31:12], 12'b0};
     wire [4:0] w_rd  = ir[11:7];
 
-    // CSRs
+    // -- CSR Registers --
     reg [63:0] csr_mepc;
     reg [63:0] csr_mstatus;
     // -- CSR Reader -- 
