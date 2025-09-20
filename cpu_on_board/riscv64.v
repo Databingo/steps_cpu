@@ -1,3 +1,4 @@
+// synthesis VERILOG_INPUT_VERSION SYSTEMVERILOG_2005
 `include "header.vh"
 
 module riscv64(
