@@ -102,7 +102,7 @@ module riscv64(
 
             // Interrupt
 	    //if (interrupt_vector == 1 && interrupt_pending !=1) begin
-	    if (interrupt_vector == 1 && csr_bit(mstatus)[MIE] ==1) begin //mstatus[3] MIE
+	    if (interrupt_vector == 1 && csr_bit(mstatus, MIE) ==1) begin //mstatus[3] MIE
 	        //mepc <= pc; // save pc
 	        csr_mepc <= pc; // save pc
                 pc <= 0; // jump to ISR addr
