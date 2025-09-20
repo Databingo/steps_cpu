@@ -33,6 +33,7 @@ module riscv64(
     localparam MPIE  = 7; // mstatus.MPIE
     //wire mie_MEIE = csr[mie][11];
     //wire mip_MEIP = csr[mie][11];
+    wire mstatus_MIE = csr_mstatus[MIE];
 
     // -- Immediate decoders  -- 
     wire signed [63:0] w_imm_u = {{32{ir[31]}}, ir[31:12], 12'b0};
@@ -105,7 +106,7 @@ module riscv64(
 	    bus_write_data <= 0;
 	    bus_address <= `Ram_base;
             // Interrupt re-enable
-	    csr_mstatus[MIE] <= 1'b1;
+	    csr_mstatus[MIE] <= 1;
 	    //interrupt_pending <= 0;
 	    interrupt_ack <= 0;
 
@@ -117,13 +118,14 @@ module riscv64(
             // Interrupt
 	    //if (interrupt_vector == 1 && interrupt_pending !=1) begin
 	    //if (interrupt_vector == 1 && csr_bit(mstatus, MIE) ==1) begin //mstatus[3] MIE
-	    if (interrupt_vector == 1 && csr_read(mstatus)[MIE] ==1) begin //mstatus[3] MIE
+	    if (interrupt_vector == 1 && mstatus_MIE == 1) begin //mstatus[3] MIE
+	    //if (interrupt_vector == 1 && csr_read(mstatus)[MIE] ==1) begin //mstatus[3] MIE
 	        //mepc <= pc; // save pc
 	        csr_mepc <= pc; // save pc
                 pc <= 0; // jump to ISR addr
 		bubble <= 1'b1; // bubble wrong fetched instruciton by IF
 	        //interrupt_pending <= 1;
-	        csr_mstatus[MIE] <= 1'b0;
+	        csr_mstatus[MIE] <= 0;
 		interrupt_ack <= 1; // reply to outside
 
             // Bubble
@@ -142,7 +144,7 @@ module riscv64(
 	                pc <= csr_read(mepc); 
 			bubble <= 1; 
 			//interrupt_pending <= 0; 
-	                csr_mstatus[MIE] <= 1'b1;
+	                csr_mstatus[MIE] <= 1;
 		    end 
 	            32'b1111111_11111_11111_111_11111_1111111: begin // Load  3 cycles to finish re<=data
 	                if (lb_step == 0) begin
