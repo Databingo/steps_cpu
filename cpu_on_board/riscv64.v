@@ -122,6 +122,11 @@ module riscv64(
 	    //if (interrupt_vector == 1 && csr_read(mstatus)[MIE] ==1) begin //mstatus[3] MIE
 	        //mepc <= pc; // save pc
 	        csr_mepc <= pc; // save pc
+
+		csr_mcasue <= 64'h800000000000000B; // MSB 1 for interrupts 0 for exceptions, Cause 11 for Machine External Interrupt
+		csr_mstatus[MPIE] <= csr_mstatus[MIE];
+		csr_mstatus[MIE] <= 0;
+
                 pc <= 0; // jump to ISR addr
 		bubble <= 1'b1; // bubble wrong fetched instruciton by IF
 	        //interrupt_pending <= 1;
