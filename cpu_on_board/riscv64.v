@@ -52,11 +52,11 @@ module riscv64(
 	    endcase
 	end
     endfunction
-wire [63:0] csr_value;
     // -- CSR Bit-- 
     function csr_bit;
 	input [11:0] csr_index;
 	input integer bit_position;
+        reg [63:0] csr_value;
 	begin
 	    csr_value = csr_read(csr_index);
 	    csr_bit = csr_value[bit_position];
