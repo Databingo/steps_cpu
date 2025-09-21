@@ -1276,6 +1276,11 @@ func main() {
 				os.Exit(0)
 			}
 			// check if imm has a constant definition
+		case "mret":
+			if len(code) != 1 {
+				fmt.Println("Too many arguments on line: ", lineCounter)
+				os.Exit(0)
+			}
 
 		default:
 			fmt.Println("1 Syntax Error on line: ", lineCounter, switchOnOp, line)
@@ -1625,6 +1630,12 @@ func main() {
 			}
 
 		case "ecall", "ebreak":
+			if len(code) != 1 {
+				fmt.Println("Too many arguments on line: ", lineCounter)
+				os.Exit(0)
+			}
+			instruction = opBin[code[0]]
+		case "mret":
 			if len(code) != 1 {
 				fmt.Println("Too many arguments on line: ", lineCounter)
 				os.Exit(0)
