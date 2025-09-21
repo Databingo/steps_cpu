@@ -11,10 +11,10 @@ trap_handler:
    #bne t0, t1, not_my_interrupt
 handler_external_interrupt:
     # load key base address
-    li t0, 0x00002004
+   #li t0, 0x00002004
     # load data 
    #ld t1, 0(t0)
-    ld t1, 0(t0)
+    ld t1, 0x204(x0)
     j end_of_trap
 not_my_interrupt:
 end_of_trap:
