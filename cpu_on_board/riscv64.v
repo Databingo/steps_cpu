@@ -175,8 +175,8 @@ module riscv64(
 		    // imm[11:0] | rs1 | func3=011 | rd | opcode=0000011
 		    32'b???????_?????_?????_011_?????_0000011: begin 
 	                if (lb_step == 0) begin
-	                    bus_address <= `Key_base; // cycle 1 setting read enable
-	                    //bus_address <= re[w_rs1] + w_imm_i ;
+	                    //bus_address <= `Key_base; // cycle 1 setting read enable
+	                    bus_address <= re[w_rs1] + w_imm_i ;
 
 	                    bus_read_enable <= 1;
 	                    pc <= pc - 4;

@@ -1,2 +1,3 @@
-    ld t1, 0x204(x0)
+    lui t1, 0x2
+    ld t0, 0(t1)
     mret
