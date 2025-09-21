@@ -1,6 +1,12 @@
 trap_handler:
 handler_external_interrupt:
-ld t1, 0(x0)
+#     li t0, 0x00002004
+addi t0, x0, 0x0
+slli t0, t0, 0x16
+ori t0, t0, 0x4
+slli t0, t0, 0xb
+ori t0, t0, 0x4
+ld t1, 0(t0)
 #     j end_of_trap
 jal x0, end_of_trap
 not_my_interrupt:
