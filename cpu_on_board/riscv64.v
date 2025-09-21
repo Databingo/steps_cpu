@@ -184,8 +184,8 @@ module riscv64(
 	                    lb_step <= 1;
 	                end
 	                if (lb_step == 1) begin  
-	                    re[5]<= bus_read_data; // cycle 3 save to cpu's register
-	                    //re[w_rd]<= bus_read_data; // cycle 3 save to cpu's register
+	                    //re[5]<= bus_read_data; // cycle 3 save to cpu's register
+	                    re[w_rd]<= bus_read_data; // cycle 3 save to cpu's register
 	                    lb_step <= 0;
 	                end
 		    //mem_addr <= l_addr; re[w_rd] <= mem_data_in; 
