@@ -150,7 +150,8 @@ module riscv64(
 	        bus_address <= `Ram_base;
                 casez(ir) 
 	            32'b???????_?????_?????_???_?????_0110111:  re[w_rd] <= w_imm_u; // Lui
-	            32'b0000000_00000_00000_000_00000_0000000: begin // Mret 
+	            //32'b0000000_00000_00000_000_00000_0000000: begin // Mret 
+	            32'b0011000_00010_?????_000_?????_1110011: begin   // Mret
 	                //pc <= mepc; 
 	                pc <= csr_read(mepc); 
 			bubble <= 1; 
