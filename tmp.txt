@@ -1,8 +1,2 @@
-trap_handler:
-handler_external_interrupt:
 ld t1, 0x204(x0)
-#     j end_of_trap
-jal x0, end_of_trap
-not_my_interrupt:
-end_of_trap:
 mret
