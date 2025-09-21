@@ -37,7 +37,10 @@ module riscv64(
 
     // -- Immediate decoders  -- 
     wire signed [63:0] w_imm_u = {{32{ir[31]}}, ir[31:12], 12'b0};
+    wire signed [63:0] w_imm_i = {{52{ir[31]}}, ir[31:20]};   // I-type immediate Lb Lh Lw Lbu Lhu Lwu Ld Jalr Addi Slti Sltiu Xori Ori Andi Addiw
     wire [4:0] w_rd  = ir[11:7];
+    wire [4:0] w_rs1 = ir[19:15];
+	
 
     // -- CSR Registers --
     reg [63:0] csr_mepc;
@@ -168,6 +171,27 @@ module riscv64(
 	                    lb_step <= 0;
 	                end
 	            end
+		    // Real LD
+		    // imm[11:0] | rs1 | func3=011 | rd | opcode=0000011
+		    32'b???????_?????_?????_011_?????_0000011: begin 
+	                if (lb_step == 0) begin
+	                    //bus_address <= `Key_base; // cycle 1 setting read enable
+	                    bus_address <= re[w_rs1] + w_imm_i ;
+
+	                    bus_read_enable <= 1;
+	                    pc <= pc - 4;
+	                    bubble <= 1; //!! take over cycle 2, meanwhile bus read 
+	                    lb_step <= 1;
+	                end
+	                if (lb_step == 1) begin  
+	                    //re[5]<= bus_read_data; // cycle 3 save to cpu's register
+	                    re[w_rd]<= bus_read_data; // cycle 3 save to cpu's register
+	                    lb_step <= 0;
+	                end
+		    //mem_addr <= l_addr; re[w_rd] <= mem_data_in; 
+		    end // Ld
+
+
 	            32'b1111111_11111_11111_111_11110_1111111: begin // Store 1 cycles to finish settting data<=re (next cycle bus write to data)
 		        if (sb_step == 0) begin 
 		            bus_address <= `Art_base;
