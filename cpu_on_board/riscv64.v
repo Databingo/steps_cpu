@@ -208,6 +208,10 @@ module riscv64(
 
 endmodule
 
+//PLIC
+//CLINT
+  
+  
 //interrupt
 //N+0 see interrupt and set isr pc
 //N+1 bubble branch take over
