@@ -19,8 +19,6 @@ module riscv64(
 
     input  wire [63:0] bus_read_data   // from outside
 );
-    // -- CSR Registers --
-    //reg [63:0] csr [0:4096]; // Maximal 12-bit length = 4096
     // -- CSR Index--
     localparam mstatus = 12'h300;   // 0x300 MRW Machine status reg   // 63_SD|37_MBE|36_SBE|35:34_SXL10|22_TSR|21_TW|20_TVW|17_MPRV|12:11_MPP10|7_MPIE|3_MIE|1_SIE|0_WPRI
     integer mie = 12'h304;          // 0x304 MRW Machine interrupt-enable register *
@@ -50,6 +48,8 @@ module riscv64(
     reg [63:0] csr_mstatus;
     reg [63:0] csr_mcasue;
     reg [63:0] csr_mtvec = 64'd0;
+    // -- CSR Other Registers -- use BRAM in FPGA then SRAM in ASIC
+    //reg [63:0] other_csr [0:4096]; // Maximal 12-bit length = 4096 
     // -- CSR Reader -- 
     function [63:0] csr_read;
 	input [11:0] csr_index;
@@ -163,12 +163,10 @@ module riscv64(
 	                    lb_step <= 0;
 	                end
 		    end 
-	            //32'b1111111_11111_11111_111_11110_1111111: begin // Store 1 cycles to finish settting data<=re (next cycle bus write to data)
 	            32'b???????_?????_?????_011_?????_0100011: begin // Sd
 		        if (sb_step == 0) begin 
 		            //bus_address <= `Art_base;
 	                    bus_address <= re[w_rs1] + w_imm_s ;
-	                    //bus_write_data <= re[5];
 	                    bus_write_data <= re[w_rs2];
 	                    bus_write_enable <= 1;
 			end
