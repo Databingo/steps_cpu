@@ -36,10 +36,13 @@ module riscv64(
     wire mstatus_MIE = csr_mstatus[MIE];
 
     // -- Immediate decoders  -- 
-    wire signed [63:0] w_imm_u = {{32{ir[31]}}, ir[31:12], 12'b0};
+    wire signed [63:0] w_imm_u = {{32{ir[31]}}, ir[31:12], 12'b0};  // U-type immediate Lui Auipc
     wire signed [63:0] w_imm_i = {{52{ir[31]}}, ir[31:20]};   // I-type immediate Lb Lh Lw Lbu Lhu Lwu Ld Jalr Addi Slti Sltiu Xori Ori Andi Addiw
+    wire signed [63:0] w_imm_s = {{52{ir[31]}}, ir[31:25], ir[11:7]};  // S-type immediate Sb Sh Sw Sd
+    // -- Instruction Decoding --
     wire [4:0] w_rd  = ir[11:7];
     wire [4:0] w_rs1 = ir[19:15];
+    wire [4:0] w_rs2 = ir[24:20];
 	
 
     // -- CSR Registers --
@@ -163,8 +166,10 @@ module riscv64(
 	            //32'b1111111_11111_11111_111_11110_1111111: begin // Store 1 cycles to finish settting data<=re (next cycle bus write to data)
 	            32'b???????_?????_?????_011_?????_0100011: begin // Sd
 		        if (sb_step == 0) begin 
-		            bus_address <= `Art_base;
-	                    bus_write_data <= re[5];
+		            //bus_address <= `Art_base;
+	                    bus_address <= re[w_rs1] + w_imm_s ;
+	                    //bus_write_data <= re[5];
+	                    bus_write_data <= re[w_rs2];
 	                    bus_write_enable <= 1;
 			end
 	            end
