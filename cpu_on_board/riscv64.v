@@ -154,7 +154,7 @@ module riscv64(
 	                if (lb_step == 0) begin
 	                    bus_address <= re[w_rs1] + w_imm_i ;
 	                    bus_read_enable <= 1;
-	                    pc <= pc - 4;
+	                    pc <= pc - 4; // Key of pipeline
 	                    bubble <= 1; //!! take over cycle 2, meanwhile bus read 
 	                    lb_step <= 1;
 	                end

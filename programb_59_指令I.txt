@@ -237,4 +237,7 @@ SFENCE.VMA supervisor fence virtual memory address
 
 
 
+lui check 12 bit if 1 hi20+1 then addi lo12 else 0 hi20 addi lo12
+lui always based on a 32-bit signed number to do his upper moving and sign-extending.
+li just put the number into register without sign-extending.
 
