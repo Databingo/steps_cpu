@@ -87,7 +87,7 @@ module riscv64(
     // -- Innerl signal --
     reg bubble;
     reg lb_step;
-    reg sb_step;
+    reg sd_step;
 
     // IF ir (Only drive IR)
     always @(posedge clk or negedge reset) begin
@@ -106,7 +106,7 @@ module riscv64(
 	    bubble <= 1'b0;
 	    pc <= `Ram_base;
 	    lb_step <= 0;
-            sb_step <= 0;
+            sd_step <= 0;
 	    bus_read_enable <= 0;
 	    bus_write_enable <= 0;
 	    bus_write_data <= 0;
@@ -164,11 +164,20 @@ module riscv64(
 	                end
 		    end 
 	            32'b???????_?????_?????_011_?????_0100011: begin // Sd
-		        if (sb_step == 0) begin 
+		        if (sd_step == 0) begin 
 		            //bus_address <= `Art_base;
 	                    bus_address <= re[w_rs1] + w_imm_s ;
 	                    bus_write_data <= re[w_rs2];
 	                    bus_write_enable <= 1;
+
+			    //--wait bus write--
+	                    pc <= pc - 4; // Key of pipeline
+	                    bubble <= 1; //!! take over cycle 2, meanwhile bus read 
+	                    sd_step <= 1;
+
+			end
+		        if (sd_step == 1) begin 
+	                    sd_step <= 0;
 			end
 	            end
 	            32'b???????_?????_?????_000_?????_0010011: re[w_rd] <= re[w_rs1] + w_imm_i;  // Addi
