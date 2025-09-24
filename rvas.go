@@ -1377,6 +1377,7 @@ func main() {
 	f, err := os.Create("add.o")       //("asm-tests/asm-u-bin/beq-mc-u.txt")
 	ff, err := os.Create("combined.o") //("asm-tests/asm-u-bin/beq-mc-u.txt")
 	fff, err := os.Create("caled.o") //("asm-tests/asm-u-bin/beq-mc-u.txt")
+	write2f("", "binary_instructions.txt") // clean
 	if err != nil {
 		log.Fatal(err)
 	}
