@@ -1,4 +1,3 @@
     lui t1, 0x2
-    ld t0, 0(t1)
+    addi t0, t0, 0x31
     sd t0, 4(t1)
-    mret
