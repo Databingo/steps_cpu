@@ -1,10 +1,5 @@
 lui t1, 0x2
 ld t0, 0(t1)
-#     li t1, 0x2004
-addi t1, x0, 0x0
-slli t1, t1, 0x16
-ori t1, t1, 0x4
-slli t1, t1, 0xb
-ori t1, t1, 0x4
+addi t1, t1, 0x4
 sd t0, 0(t1)
 mret

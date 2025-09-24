@@ -171,6 +171,7 @@ module riscv64(
 	                    bus_write_enable <= 1;
 			end
 	            end
+	            32'b???????_?????_?????_000_?????_0010011: re[w_rd] <= re[w_rs1] + w_imm_i;  // Addi
                 endcase
 	    end
         end
