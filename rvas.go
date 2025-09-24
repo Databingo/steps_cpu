@@ -1378,6 +1378,7 @@ func main() {
 	ff, err := os.Create("combined.o") //("asm-tests/asm-u-bin/beq-mc-u.txt")
 	fff, err := os.Create("caled.o") //("asm-tests/asm-u-bin/beq-mc-u.txt")
 	write2f("", "binary_instructions.txt") // clean
+	write2f("", "bin.txt") // clean
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -1652,6 +1653,7 @@ func main() {
 		addrd := fmt.Sprintf("%05d", address)
 		little_endian_ins := ins[24:32] + " " + ins[16:24] + " " + ins[8:16] + " " + ins[0:8]
 		append2f(little_endian_ins+" // Addr: "+addrd+" "+addr+" "+ins+" "+line, "binary_instructions.txt")
+		append2f(strings.Replace(little_endian_ins, " ", "", -1), "bin.txt")
 		lineCounter++
 		address += 4
 
