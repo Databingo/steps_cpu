@@ -170,7 +170,7 @@ module riscv64(
 	                    bus_write_data <= re[w_rs2];
 	                    bus_write_enable <= 1;
 
-			    //--wait bus write--
+			    //--wait bus write-- bubble next(pc+4), finish in next-next(pc)
 	                    pc <= pc - 4; // Key of pipeline
 	                    bubble <= 1; //!! take over cycle 2, meanwhile bus read 
 	                    sd_step <= 1;
