@@ -171,13 +171,13 @@ module riscv64(
 	                    bus_write_enable <= 1;
 
 			    //--wait bus write-- bubble next(pc+4), finish in next-next(pc)
-	                    pc <= pc - 4; // Key of pipeline
+	                    pc <= pc;// - 4; // Key of pipeline
 	                    bubble <= 1; //!! take over cycle 2, meanwhile bus read 
-	                    sd_step <= 1;
+	                //    sd_step <= 1;
 
-			end
-		        if (sd_step == 1) begin 
-	                    sd_step <= 0;
+			//end
+		        //if (sd_step == 1) begin 
+	                //    sd_step <= 0;
 			end
 	            end
 	            32'b???????_?????_?????_000_?????_0010011: re[w_rd] <= re[w_rs1] + w_imm_i;  // Addi
