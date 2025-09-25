@@ -121,9 +121,6 @@ module riscv64(
             pc <= pc + 4;
 	    interrupt_ack <= 0;
 
-	    bus_read_enable <= 0;
-	    bus_write_enable <= 0;
-
             // Interrupt
 	    if (interrupt_vector == 1 && mstatus_MIE == 1) begin //mstatus[3] MIE
 	        csr_mepc <= pc; // save pc

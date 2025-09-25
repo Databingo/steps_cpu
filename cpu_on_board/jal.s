@@ -15,7 +15,7 @@ test_passed:
     lui t1, 0x2
     sd a0, 4(t1)
 
-    addi a0, x0, 75  # ASCII for 'K'
+    addi a0, x0, 79  #75 ASCII for 'K'
     sd a0, 4(t1) # UART address is still in t1
 hang:
     j hang
