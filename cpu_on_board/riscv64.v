@@ -154,10 +154,10 @@ module riscv64(
 	                if (lb_step == 0) begin
 	                    bus_address <= re[w_rs1] + w_imm_i ;
 	                    bus_read_enable <= 1;
-	                    pc <= pc - 4; // Key of pipeline
+	                    pc <= pc - 4; // Core of pipeline: pc-4 due to at executing SB cycle, the pc is already pc+4, have to -4 to keep pc as SB; And IF get ir of pc+4 tenaciously need a bubble flush
 	                    bubble <= 1; //!! take over cycle 2, meanwhile bus read 
 	                    lb_step <= 1;
-	                end
+	                end // bubble cycle happenly for bus to read data according to bus_address
 	                if (lb_step == 1) begin  
 	                    re[w_rd]<= bus_read_data; // cycle 3 save to cpu's register
 	                    lb_step <= 0;
@@ -169,15 +169,9 @@ module riscv64(
 	                    bus_address <= re[w_rs1] + w_imm_s ;
 	                    bus_write_data <= re[w_rs2];
 	                    bus_write_enable <= 1;
-
-			    //--wait bus write-- bubble next(pc+4), finish in next-next(pc)
-	                    pc <= pc;// - 4; // Key of pipeline
-	                    bubble <= 1; //!! take over cycle 2, meanwhile bus read 
-	                //    sd_step <= 1;
-
-			//end
-		        //if (sd_step == 1) begin 
-	                //    sd_step <= 0;
+			    //--wait bus write-- now pc value is already sb+4 and IF is getting sb+4 and change pc setting from pc+4(sb+4+4) to pc so next cycle bubble ir (sb+4), getting sb+4, the next.
+	                    pc <= pc;
+	                    bubble <= 1;
 			end
 	            end
 	            32'b???????_?????_?????_000_?????_0010011: re[w_rd] <= re[w_rs1] + w_imm_i;  // Addi
