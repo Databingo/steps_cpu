@@ -176,9 +176,13 @@ module riscv64(
 			end
 	            end
 	            32'b???????_?????_?????_000_?????_0010011: re[w_rd] <= re[w_rs1] + w_imm_i;  // Addi
-	            32'b???????_?????_?????_???_?????_1101111: begin 
-		        pc <= pc + w_imm_j;  // Jump 
-		        if (w_rd != 5'b0) re[w_rd] <= pc + 4;  // Link (keep x0 0 for j)
+	            32'b???????_?????_?????_???_?????_1101111: begin  
+                    //at N-1, IF is fetching jar, EXE is setting pc to jar+4, so at the END of N-1 cycle, pc is jar+4
+                    //at N,   IF is fetching jar+4, EXE default setting pc to jar+4+4, which we IR override pc to be jar+4-4+w_imm_j now
+                    //at N+1, IF is fetching jar+w_imm_j, EXE bubble, but default still setting pc to be jar+w_imm_j+4
+                    //at N+2, jump into jar+w_imm_j
+		        pc <= pc - 4 + w_imm_j;  // Jump 
+		        if (w_rd != 5'b0) re[w_rd] <= pc;  // Link (if for keep x0 remain 0)
 		        bubble <= 1'b1; 
 		    end // Jal
                 endcase
