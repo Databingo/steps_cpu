@@ -37,6 +37,7 @@ module riscv64(
     wire signed [63:0] w_imm_u = {{32{ir[31]}}, ir[31:12], 12'b0};  // U-type immediate Lui Auipc
     wire signed [63:0] w_imm_i = {{52{ir[31]}}, ir[31:20]};   // I-type immediate Lb Lh Lw Lbu Lhu Lwu Ld Jalr Addi Slti Sltiu Xori Ori Andi Addiw
     wire signed [63:0] w_imm_s = {{52{ir[31]}}, ir[31:25], ir[11:7]};  // S-type immediate Sb Sh Sw Sd
+    wire signed [63:0] w_imm_j = {{43{ir[31]}}, ir[19:12], ir[20], ir[30:21], 1'b0}; // UJ-type immediate Jal  // read immediate & padding last 0, total 20 + 1 = 21 bits
     // -- Instruction Decoding --
     wire [4:0] w_rd  = ir[11:7];
     wire [4:0] w_rs1 = ir[19:15];
@@ -175,6 +176,11 @@ module riscv64(
 			end
 	            end
 	            32'b???????_?????_?????_000_?????_0010011: re[w_rd] <= re[w_rs1] + w_imm_i;  // Addi
+	            32'b???????_?????_?????_???_?????_1101111: begin 
+		        pc <= pc + w_imm_j;  // Jump 
+		        if (w_rd != 5'b0) re[w_rd] <= pc + 4;  // Link (keep x0 0 for j)
+		        bubble <= 1'b1; 
+		    end // Jal
                 endcase
 	    end
         end
