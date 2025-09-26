@@ -186,7 +186,7 @@ module riscv64(
 		        bubble <= 1'b1; 
 		    end // Jal
 	            32'b???????_?????_?????_???_?????_1100111: begin 
-		        re[w_rd] <= pc; // present pc value is jarl+4
+		        if (w_rd != 5'b0) re[w_rd] <= pc; // present pc value is jarl+4
 			pc <= (re[w_rs1] + w_imm_i) & 64'hFFFFFFFFFFFFFFFE; // Align with at least 2-bytes compressed instruction.Alert "Misaligned Addr"?
 			bubble <= 1'b1; 
 		    end // Jalr
