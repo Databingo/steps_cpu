@@ -368,12 +368,11 @@ func main() {
 	check(err)
 	defer file.Close()
 
-	////////
+	//-------0pass ------------------
 	// 0pass parse directive
 	// .section
 	// .text .data .rodata .bss
 	// .symtab .strtab .shstrtab
-	//
 	// .byte .string .half .word .dword .zero .align .equ 8
 	fmt.Println("start 0pass.")
 	fmt.Println("ELF header inital:")
@@ -755,6 +754,7 @@ func main() {
 
 	//scanner := bufio.NewScanner(strings.NewReader(real_instr.String()))
 	//scanner.Split(bufio.ScanLines)
+	//-------1pass ------------------
 	// 1pass trans pseudo to real
 	//scanner1 := bufio.NewScanner(file) // stores content from file
 	//scanner1.Split(bufio.ScanLines)
@@ -1119,6 +1119,7 @@ func main() {
 	fmt.Println(real_instr.String())
 	write2f(real_instr.String(), "tmp.txt")
 
+	//-------2pass ------------------
 	// 2pass count label address; check grammar
 	fmt.Println("start 2pass.")
 	scanner := bufio.NewScanner(strings.NewReader(real_instr.String()))
@@ -1295,6 +1296,7 @@ func main() {
 		fmt.Println("Key:", key, "Element:", element)
 	}
 
+	//-------2.5pass ------------------
 	// 2.5pass create entry of .rela.text
 	fmt.Println("start 2.5pass.")
 	address = 0
@@ -1432,6 +1434,8 @@ func main() {
 	// 		0x00, 0x00, // number of entries in the section header table
 	// 		0x00, 0x00, // index of the section header table entry that contains the section names
 	// 	})
+
+	//-------3pass ------------------
 	// 3pass trans assembly to binary
 	fmt.Println("start 3pass.")
 	address = 0
