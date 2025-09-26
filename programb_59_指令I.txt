@@ -58,9 +58,9 @@
 //00000000 00000000 01100000 01100011 //0_000000_00000_00000_110_0000_0_1100011 //*BLTU   |imm.7[12|10:5]|rs2.5|rs1.5|100.3|imm.5[4:1|11]|1100011.7| take branch if rs1 < rs2 in unsigned comparison 
 //00000000 00000000 01110000 01100011 //0_000000_00000_00000_111_0000_0_1100011 //*BGEU   |imm.7[12|10:5]|rs2.5|rs1.5|111.3|imm.5[4:1|11]|1100011.7| take branch if rs1 >= rs2 in unsigned comparison 
 //// Ijump PC跳转 PC+立即数 1 (都有立即数)
-//00000000 00000000 00000000 01101111 //__0_0000000000_0_00000000_00000_1101111 //*JAL    |imm.21[20|10:1|11|19:12]|rd.5|1101111.7| jump PC to PC+imm(20 paddingr 0) and place return address PC+4 in rd
+//00000000 00000000 00000000 01101111 //__0_0000000000_0_00000000_00000_1101111 //*JAL    |imm.21[20|10:1|11|19:12]|rd.5|1101111.7|jump PC to PC+imm(20 padding 0),put return address PC+4 in rd:jal rd imm
 //// Rjump 寄存器跳转 寄存器+立即数 1 (都有立即数)
-//00000000 00000000 00000000 01100111 //___000000000000_00000_000_00000_1100111 //*JALR   |imm.12|rs1.5|000|rd.5|1100111.7|        jump PC to address imm(rs1) and place return address PC+4 in rd 
+//00000000 00000000 00000000 01100111 //___000000000000_00000_000_00000_1100111 //*JALR   |imm.12|rs1.5|000|rd.5|1100111.7| jump PC to address imm(rs1) and place return address PC+4 in rd:jalr rd,rs1,imm 
 //// Control 控制 10
 //00000000 00000000 00000000 00001111 //_0000_0000_0000_00000_000_00000_0001111 // FENCE  |0.4|pred.4|succ.4|0.5|000.3|0.5|0001111.7| sure RW I/O and memory completed before FENCE for successor
 //00000000 00000000 00010000 00001111 //_0000_0000_0000_00000_001_00000_0001111 // FENCE.I|0.4|0000.4|0000.4|0.5|001.3|0.5|0001111.7| sure instruction operation completed before FENCE.I
