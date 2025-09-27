@@ -16,7 +16,7 @@
 
 echo "" > binary_instructions.txt
 #go run rvas.go test.s &&
-#go run rvas.go li.s &&
+go run rvas.go li.s &&
 #go run rvas.go lui.s &&
 #go run rvas.go lb_lbu.s &&
 #go run rvas.go lh_lhu.s &&
@@ -33,7 +33,7 @@ echo "" > binary_instructions.txt
 #go run rvas.go b.s &&
 #go run rvas.go auipc.s &&
 #go run rvas.go j.s &&
-go run rvas.go isr.s &&
+#go run rvas.go isr.s &&
 #
 #go run rvas.go jr.s && #>> binary_instructions.txt
 # s4.2

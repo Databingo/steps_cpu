@@ -805,7 +805,7 @@ func main() {
 			}
 			sign, imm, err := isValidImmediate_u(code[2])
 			if err != nil {
-				fmt.Printf("~Error on line %d: %s, %s \n", lineCounter, err, line)
+				fmt.Printf("~Error on line %d: %s, %s \n", lineCounter, err, line, sign)
 				os.Exit(0)
 			}
 			ins := fmt.Sprintf("# %s\n", line)
@@ -817,97 +817,120 @@ func main() {
 			/////////////////////////-- deploy 3
 			// lui +0x800>>12; addi -(a<<12)#for h32; srli 11; ori 11; srli 11; ori 11; srli 10, ori 10; r sub 2 instruction for main
 			/////////////////////////-- deploy 2
-			ins = fmt.Sprintf("addi %s, %s, %#x\n", code[1], "x0", 0) // for 0 or clean reg
-			real_instr.WriteString(ins)
-			if imm == 0xffffffffffffffff {
-				ins = fmt.Sprintf("addi %s, %s, %#x\n", code[1], "x0", 1) // for 0 or clean reg
-				real_instr.WriteString(ins)
-				ins = fmt.Sprintf("xori %s, %s, -1\naddi %s, %s, 1\n", code[1], code[1], code[1], code[1])
-				real_instr.WriteString(ins)
-				continue
+			//ins = fmt.Sprintf("addi %s, %s, %#x\n", code[1], "x0", 0) // for 0 or clean reg
+			//real_instr.WriteString(ins)
+			//if imm == 0xffffffffffffffff {
+			//	ins = fmt.Sprintf("addi %s, %s, %#x\n", code[1], "x0", 1) // for 0 or clean reg
+			//	real_instr.WriteString(ins)
+			//	ins = fmt.Sprintf("xori %s, %s, -1\naddi %s, %s, 1\n", code[1], code[1], code[1], code[1])
+			//	real_instr.WriteString(ins)
+			//	continue
 
-			}
-			// 高 20 位
-			h20 := imm >> 44 & 0xfffff
-			if h20 != 0 {
-				ins = fmt.Sprintf("lui %s, %#x\n", code[1], h20)
-				real_instr.WriteString(ins)
-				ins = fmt.Sprintf("srli %s, %s, %#x\n", code[1], code[1], 1) // righ shift to concat with 11 to 12
-				real_instr.WriteString(ins)
-			}
-			// 次 11 位
-			c11 := imm >> 33 & 0x7ff
-			if c11 != 0 {
-				ins = fmt.Sprintf("ori %s, %s, %#x\n", code[1], code[1], c11)
-				real_instr.WriteString(ins)
-			}
-			// 中 11 位
-			sf := 11
-			z11 := imm >> 22 & 0x7ff
-			if z11 != 0 {
-				ins = fmt.Sprintf("slli %s, %s, %#x\n", code[1], code[1], sf)
-				real_instr.WriteString(ins)
-				ins = fmt.Sprintf("ori %s, %s, %#x\n", code[1], code[1], z11)
-				real_instr.WriteString(ins)
-				sf = 0
-			}
-			// 低 11 位
-			sf += 11
-			d11 := imm >> 11 & 0x7ff
-			if d11 != 0 {
-				ins = fmt.Sprintf("slli %s, %s, %#x\n", code[1], code[1], sf)
-				real_instr.WriteString(ins)
-				ins = fmt.Sprintf("ori %s, %s, %#x\n", code[1], code[1], d11)
-				real_instr.WriteString(ins)
-				sf = 0
-			}
-			// 末 11 位
-			sf += 11
-			m11 := imm & 0x7ff
-			if m11 != 0 && (d11 != 0 || z11 != 0 || c11 != 0 || h20 != 0) {
-				ins = fmt.Sprintf("slli %s, %s, %#x\n", code[1], code[1], sf)
-				real_instr.WriteString(ins)
-			}
-			if m11 != 0 {
-				ins = fmt.Sprintf("ori %s, %s, %#x\n", code[1], code[1], m11)
-				real_instr.WriteString(ins)
-				sf = 0
-			}
-			// 左移
-			if sf != 0 && imm != 0 {
-				ins = fmt.Sprintf("slli %s, %s, %#x\n", code[1], code[1], sf)
-				real_instr.WriteString(ins)
+			//}
+			//// 高 20 位
+			//h20 := imm >> 44 & 0xfffff
+			//if h20 != 0 {
+			//	ins = fmt.Sprintf("lui %s, %#x\n", code[1], h20)
+			//	real_instr.WriteString(ins)
+			//	ins = fmt.Sprintf("srli %s, %s, %#x\n", code[1], code[1], 1) // righ shift to concat with 11 to 12
+			//	real_instr.WriteString(ins)
+			//}
+			//// 次 11 位
+			//c11 := imm >> 33 & 0x7ff
+			//if c11 != 0 {
+			//	ins = fmt.Sprintf("ori %s, %s, %#x\n", code[1], code[1], c11)
+			//	real_instr.WriteString(ins)
+			//}
+			//// 中 11 位
+			//sf := 11
+			//z11 := imm >> 22 & 0x7ff
+			//if z11 != 0 {
+			//	ins = fmt.Sprintf("slli %s, %s, %#x\n", code[1], code[1], sf)
+			//	real_instr.WriteString(ins)
+			//	ins = fmt.Sprintf("ori %s, %s, %#x\n", code[1], code[1], z11)
+			//	real_instr.WriteString(ins)
+			//	sf = 0
+			//}
+			//// 低 11 位
+			//sf += 11
+			//d11 := imm >> 11 & 0x7ff
+			//if d11 != 0 {
+			//	ins = fmt.Sprintf("slli %s, %s, %#x\n", code[1], code[1], sf)
+			//	real_instr.WriteString(ins)
+			//	ins = fmt.Sprintf("ori %s, %s, %#x\n", code[1], code[1], d11)
+			//	real_instr.WriteString(ins)
+			//	sf = 0
+			//}
+			//// 末 11 位
+			//sf += 11
+			//m11 := imm & 0x7ff
+			//if m11 != 0 && (d11 != 0 || z11 != 0 || c11 != 0 || h20 != 0) {
+			//	ins = fmt.Sprintf("slli %s, %s, %#x\n", code[1], code[1], sf)
+			//	real_instr.WriteString(ins)
+			//}
+			//if m11 != 0 {
+			//	ins = fmt.Sprintf("ori %s, %s, %#x\n", code[1], code[1], m11)
+			//	real_instr.WriteString(ins)
+			//	sf = 0
+			//}
+			//// 左移
+			//if sf != 0 && imm != 0 {
+			//	ins = fmt.Sprintf("slli %s, %s, %#x\n", code[1], code[1], sf)
+			//	real_instr.WriteString(ins)
 
-			}
+			//}
 
-			// 取补码还原负数
-			if sign == 1 {
-				ins = fmt.Sprintf("xori %s, %s, -1\naddi %s, %s, 1\n", code[1], code[1], code[1], code[1])
-				real_instr.WriteString(ins)
+			//// 取补码还原负数
+			//if sign == 1 {
+			//	ins = fmt.Sprintf("xori %s, %s, -1\naddi %s, %s, 1\n", code[1], code[1], code[1], code[1])
+			//	real_instr.WriteString(ins)
 
-			}
+			//}
 			////// deploy 5 (2 or 6 instructions)
 //li t1 A64:
 //A_lo32 := A64 <<32>>32
+//A_lo32 := imm <<32 >> 32 & 0xfffff
+A_lo32 := imm & 0xffffffff
 //
 //prepare lo32 in t1:
 //if A_lo32_lo12 & 0x800 !=0 { A_lo32_h20 += 1}
 //lui t1, A_lo32_h20
 //addi t1, t1, A_lo32_lo12
+A_lo32_h20 := A_lo32 >> 12
+//A_lo32_lo12 := A_lo32<<20>>32
+A_lo32_lo12 := A_lo32 & 0xfff
+if A_lo32_lo12 & 0x800 !=0 { A_lo32_h20 += 1}
+				ins = fmt.Sprintf("lui %s, %#x\n", code[1], A_lo32_h20)
+				real_instr.WriteString(ins)
+				ins = fmt.Sprintf("addi %s, %s, %#x\n", code[1], code[1], A_lo32_lo12)
+				real_instr.WriteString(ins)
 //
-//A_hi32 := A64 >> 32
 //if A_lo32 & 0x80000000 !=0 { A_hi32 +=1 }
 //then if A_hi32 != 0
 //her wise t1 is A64 already
+A_hi32 := imm >> 32
+if A_lo32 & 0x80000000 !=0 { A_hi32 +=1 }
+if A_hi32 != 0 {continue}
+
+A_hi32_h20 := A_hi32 >> 12
+//A_hi32_lo12 := A_hi32<<20>>32
+A_hi32_lo12 := A_hi32 & 0xfff
 //
 //prepare hi32 in t2:
 //if A_hi32_lo12 & 0x800 !=0 { A_hi32_h20 += 1}
 //lui t2, A_hi32_h20
 //addi t2, t2, A_hi32_lo12
 //slli t2 t2, 32
+if A_hi32_lo12 & 0x800 !=0 { A_hi32_h20 += 1}
+				ins = fmt.Sprintf("lui %s, %#x\n", "x2", A_hi32_h20)
+				real_instr.WriteString(ins)
+				ins = fmt.Sprintf("addi %s, %s, %#x\n", "x2", "x2", A_hi32_lo12)
+				real_instr.WriteString(ins)
 //
 //combination hi32 t1 and lo32 t2 as 64 bit A:
 //add t1, t1, t2
+				ins = fmt.Sprintf("add %s, %s, %s\n", code[1], code[1], "x2")
+				real_instr.WriteString(ins)
 
 
 		case "j": // PC尾跳转 j offset|jump to pc+offset
