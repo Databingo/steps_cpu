@@ -143,7 +143,7 @@ module riscv64(
 	        bus_write_enable <= 0; 
 	        bus_write_data <= 0;
 	        bus_address <= `Ram_base;
-                casez(ir) 
+                casez(ir)  // lui ld sd addi jal jalr mret 
 	            32'b???????_?????_?????_???_?????_0110111:  re[w_rd] <= w_imm_u; // Lui
 	            32'b0011000_00010_?????_000_?????_1110011: begin   // Mret
 	                pc <= csr_read(mepc); 
