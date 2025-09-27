@@ -242,6 +242,9 @@ func isValidImmediate_u(s string) (int64, uint64, error) {
 
 	if strings.HasPrefix(s, "-") {
 		sign = 1
+		imm1 = ^imm1 + 1
+		imm2 = ^imm2 + 1
+		imm3 = ^imm3 + 1
 	}
 
 	if err1 != nil && err2 != nil && err3 != nil {
@@ -804,6 +807,7 @@ func main() {
 				os.Exit(0)
 			}
 			sign, imm, err := isValidImmediate_u(code[2])
+			//imm, err := isValidImmediate(code[2])
 			if err != nil {
 				fmt.Printf("~Error on line %d: %s, %s \n", lineCounter, err, line, sign)
 				os.Exit(0)
@@ -1503,10 +1507,10 @@ func main() {
 				fmt.Printf("-Error on line %d: %s\n", lineCounter, err)
 				os.Exit(0)
 			}
-			if imm < -0x80000 || imm > 0xfffff { // for assembler create lui 0x800 in li
-				fmt.Printf("Lui: Error on line %d: Immediate value %d=0x%X out of range (should be between 0x%X and 0x7ffff )\n", lineCounter, imm, imm, -0x80000)
-				os.Exit(0)
-			}
+			//if imm < -0x80000 || imm > 0xfffff { // for assembler create lui 0x800 in li
+			//	fmt.Printf("Lui: Error on line %d: Immediate value %d=0x%X out of range (should be between 0x%X and 0x7ffff )\n", lineCounter, imm, imm, -0x80000)
+			//	os.Exit(0)
+			//}
 			if !opFound || !rdFound {
 				fmt.Println("Invalid register on line", lineCounter)
 				os.Exit(0)
@@ -1613,10 +1617,10 @@ func main() {
 				os.Exit(0)
 			}
 			//if imm > 0xfff || imm < -2048 { //0x7ff -0x1000  0xfff for sltiu
-			if imm > 2047 || imm < -2048 { //0x7ff -0x800
-				fmt.Printf("Error on line %d: Immediate value out of range (should be between -2048=-0x1000 and 4094=0xfff) with %d \n", lineCounter, imm)
-				os.Exit(0)
-			}
+			//if imm > 2047 || imm < -2048 { //0x7ff -0x800
+			//	fmt.Printf("Error on line %d: Immediate value out of range (should be between -2048=-0x1000 and 4094=0xfff) with %d \n", lineCounter, imm)
+			//	os.Exit(0)
+			//}
 			op, opFound := opBin[code[0]]
 			rd, rdFound := regBin[code[1]]
 			rs1, rs1Found := regBin[code[2]]
