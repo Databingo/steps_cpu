@@ -1223,7 +1223,7 @@ func main() {
 			}
 
 		case "addi", "addiw", "slti", "sltiu", "xori", "ori", "andi", "jalr": // Instruction format: op rd, rs1, imm     or      label:  op rd, rs1, imm
-			//special form: jalr offset(rs1)?? is real (len(code)==3)
+			//special form: jalr rd offset(rs1)
 			if len(code) != 4 && len(code) != 5 {
 				fmt.Println("addi ori 1 Incorrect argument count on line: ", lineCounter, line)
 				os.Exit(0)
@@ -1567,14 +1567,18 @@ func main() {
 				os.Exit(0)
 			}
 
-		case "addi", "addiw", "slti", "sltiu", "xori", "ori", "andi", "jalr": // op rd, rs1, immediate
+		//case "addi", "addiw", "slti", "sltiu", "xori", "ori", "andi", "jalr": // op rd, rs1, immediate
+		case "addi", "addiw", "slti", "sltiu", "xori", "ori", "andi": // op rd, rs1, immediate
 			if len(code) != 4 {
 				fmt.Println("ori 2 Incorrect argument count on line: ", lineCounter)
 			}
-			fmt.Println(line, code[3])
+
 			imm, err := isValidImmediate(code[3])
+			if switchOnOp == "jalr" { imm, err = isValidImmediate(code[2]) } //special: op rd, imm(rs1)
+
 			if err != nil {
 				fmt.Printf("$Error on line %d: %s\n", lineCounter, err)
+			        fmt.Println(line, code[3])
 				os.Exit(0)
 			}
 			//if imm > 0xfff || imm < -2048 { //0x7ff -0x1000  0xfff for sltiu
@@ -1585,6 +1589,32 @@ func main() {
 			op, opFound := opBin[code[0]]
 			rd, rdFound := regBin[code[1]]
 			rs1, rs1Found := regBin[code[2]]
+			if opFound && rdFound && rs1Found {
+				instruction = uint32(imm)<<20 | rs1<<15 | rd<<7 | op
+			} else if !rdFound || !rs1Found {
+				fmt.Println("Invalid register on line", lineCounter)
+				os.Exit(0)
+			}
+		case "jalr":  //special: op rd, imm(rs1)
+			if len(code) != 4 {
+				fmt.Println("ori 2 Incorrect argument count on line: ", lineCounter)
+			}
+
+			imm, err := isValidImmediate(code[2])
+
+			if err != nil {
+				fmt.Printf("$Error on line %d: %s\n", lineCounter, err)
+			        fmt.Println(line, code[3])
+				os.Exit(0)
+			}
+			//if imm > 0xfff || imm < -2048 { //0x7ff -0x1000  0xfff for sltiu
+			if imm > 2047 || imm < -2048 { //0x7ff -0x800
+				fmt.Printf("Error on line %d: Immediate value out of range (should be between -2048=-0x1000 and 4094=0xfff) with %d \n", lineCounter, imm)
+				os.Exit(0)
+			}
+			op, opFound := opBin[code[0]]
+			rd, rdFound := regBin[code[1]]
+			rs1, rs1Found := regBin[code[3]]
 			if opFound && rdFound && rs1Found {
 				instruction = uint32(imm)<<20 | rs1<<15 | rd<<7 | op
 			} else if !rdFound || !rs1Found {
