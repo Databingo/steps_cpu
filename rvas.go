@@ -1445,7 +1445,7 @@ func main() {
 	scanner.Split(bufio.ScanLines)
 	for scanner.Scan() {
 		line := strings.Split(scanner.Text(), "#")[0] // get any text before the comment "#" and ignore any text after it
-		fmt.Println("ir:", line)
+		fmt.Println("ir:", lineCounter, line,)
 		code = strings.FieldsFunc(line, SplitOn)      // split into  operation, operands, and/or labels
 		if len(code) == 0 {                           // code is whitespace, ignore it
 			lineCounter++
@@ -1571,7 +1571,7 @@ func main() {
 			if len(code) != 4 {
 				fmt.Println("ori 2 Incorrect argument count on line: ", lineCounter)
 			}
-			//fmt.Println(line)
+			fmt.Println(line, code[3])
 			imm, err := isValidImmediate(code[3])
 			if err != nil {
 				fmt.Printf("$Error on line %d: %s\n", lineCounter, err)
