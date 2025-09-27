@@ -886,27 +886,29 @@ func main() {
 				real_instr.WriteString(ins)
 
 			}
-			////// deploy 4 (maximal 6 instructions)
-//li rd A64:
-//A_hi32 := A64 >> 32
+			////// deploy 5 (2 or 6 instructions)
+//li t1 A64:
 //A_lo32 := A64 <<32>>32
-//if A_lo32 & 0x80000000 !=0 { A_hi32 +=1 }
-//then
-//A_hi32_h20 := A>>32>>12
-//A_hi32_lo12 := A<<20>>32
-//A_lo32_h20 := A<<32>>32>>12
-//A_lo32_lo12 := A<<32<<20>>32
-//prepare hi32 in t1:
-//if A_hi32_lo12 & 0x800 !=0 { A_hi32_h20 += 1}
-//lui t1, A_hi32_h20
-//addi t1, t1, A_hi32_lo12
-//slli t1, t1, 32
-//prepare lo32 n t2:
+//
+//prepare lo32 in t1:
 //if A_lo32_lo12 & 0x800 !=0 { A_lo32_h20 += 1}
-//lui t2, A_lo32_h20
-//addi t2, t2, A_lo32_lo12
+//lui t1, A_lo32_h20
+//addi t1, t1, A_lo32_lo12
+//
+//A_hi32 := A64 >> 32
+//if A_lo32 & 0x80000000 !=0 { A_hi32 +=1 }
+//then if A_hi32 != 0
+//her wise t1 is A64 already
+//
+//prepare hi32 in t2:
+//if A_hi32_lo12 & 0x800 !=0 { A_hi32_h20 += 1}
+//lui t2, A_hi32_h20
+//addi t2, t2, A_hi32_lo12
+//slli t2 t2, 32
+//
 //combination hi32 t1 and lo32 t2 as 64 bit A:
 //add t1, t1, t2
+
 
 		case "j": // PC尾跳转 j offset|jump to pc+offset
 			//if len(code) != 2 && len(code) != 3 {
