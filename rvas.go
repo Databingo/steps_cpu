@@ -886,7 +886,7 @@ func main() {
 			//	real_instr.WriteString(ins)
 
 			//}
-			////// deploy 5 (2 or 6 instructions)
+			/////////////////////////-- deploy 5 (2 or 6 instructions)
                         //prepare lo32 in t1:
                         A_lo32 := imm & 0xffffffff
                         A_lo32_h20 := A_lo32 >> 12
@@ -911,6 +911,9 @@ func main() {
 				real_instr.WriteString(ins)
                                 //combination hi32 t1 and lo32 t2 as 64 bit A:
 				ins = fmt.Sprintf("add %s, %s, %s\n", code[1], code[1], "x2")
+				real_instr.WriteString(ins)
+				//slli t2 t2, 32
+				ins = fmt.Sprintf("slli %s, %s, %#x\n", "x2", "x2", 32)
 				real_instr.WriteString(ins)
 
 
