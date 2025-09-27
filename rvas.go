@@ -1000,7 +1000,8 @@ func main() {
 		case "ret": // 从子过程中返回
 			ins := fmt.Sprintf("# %s\n", line)
 			real_instr.WriteString(ins)
-			ins = "jalr x0, x1, 0\n"
+			//ins = "jalr x0, x1, 0\n"
+			ins = "jalr x0, 0(x1)\n"
 			real_instr.WriteString(ins)
 		case "neg": // 取负 neg rd, rs
 			ins := fmt.Sprintf("# %s\n", line)
@@ -1578,7 +1579,7 @@ func main() {
 
 			if err != nil {
 				fmt.Printf("$Error on line %d: %s\n", lineCounter, err)
-			        fmt.Println(line, code[3])
+				fmt.Println(line, "|imm:", code[3])
 				os.Exit(0)
 			}
 			//if imm > 0xfff || imm < -2048 { //0x7ff -0x1000  0xfff for sltiu
@@ -1603,8 +1604,8 @@ func main() {
 			imm, err := isValidImmediate(code[2])
 
 			if err != nil {
-				fmt.Printf("$Error on line %d: %s\n", lineCounter, err)
-			        fmt.Println(line, code[3])
+				fmt.Printf("$$Error on line %d: %s\n", lineCounter, err)
+				fmt.Println(line, "|imm:", code[3])
 				os.Exit(0)
 			}
 			//if imm > 0xfff || imm < -2048 { //0x7ff -0x1000  0xfff for sltiu
