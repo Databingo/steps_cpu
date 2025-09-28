@@ -1005,8 +1005,8 @@ func main() {
 
 			case "call": //auipc x1, offset[31:12]; jalr x1, offset[11:0](x1) 调用远距离过程(save pc+4)  // far_call:auipc near_call:jal
 			ins := fmt.Sprintf("# %s\n", line)
-			real_instr.WriteString(ins)
-			ins = fmt.Sprintf("auipc x1, 0 #R_RISCV_PCREL_HI20 %s\n", code[1])  //x1=ra return address; x10=a0 return value; x2=sp stack pointer
+			real_instr.WriteString(ins) //callee:ra,t0,a0|caller:sp,s0
+			ins = fmt.Sprintf("auipc x1, 0 #R_RISCV_PCREL_HI20 %s\n", code[1])  //x1=ra return address; x10=a0 return value; x2=sp stack pointer; x8=s0 saved resigter 
 			real_instr.WriteString(ins)
 			ins = fmt.Sprintf("jalr x1, 0(x1) #R_RISCV_PCREL_LO20 %s\n", code[1])
 			real_instr.WriteString(ins)
