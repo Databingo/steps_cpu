@@ -949,7 +949,7 @@ func main() {
 		case "jr": // 寄存器尾跳转 jr rs|jump to rs+0 (imm default 0)
 			ins := fmt.Sprintf("# %s\n", line)
 			real_instr.WriteString(ins)
-			ins = fmt.Sprintf("jalr x0, %s, 0\n", code[1])
+			ins = fmt.Sprintf("jalr x0, 0(%s)\n", code[1])
 			real_instr.WriteString(ins)
 		case "jal": // PC跳转 jal offset|jump to pc+imm|save pc+4 to x1 (retrun default x1)
 			if len(code) == 2 { // different from real: jal rd, imm
@@ -1002,12 +1002,13 @@ func main() {
 			//ins = fmt.Sprintf("addi  %s, %s, %%pcrel_lo(%s)\n", code[1], code[1], code[2]) // lo = rela_addr  - (hi << 12)
 			ins = fmt.Sprintf("addi  %s, %s, 0 # R_RISCV_PCREL_LO12_I %s \n", code[1], code[1], code[2]) // lo = rela_addr  - (hi << 12)
 			real_instr.WriteString(ins)
+
 			case "call": //auipc x1, offset[31:12]; jalr x1, offset[11:0](x1) 调用远距离过程(save pc+4)  // far_call:auipc near_call:jal
 			ins := fmt.Sprintf("# %s\n", line)
 			real_instr.WriteString(ins)
-			ins = fmt.Sprintf("auipc x1, 0 # %s\n", code[1])
+			ins = fmt.Sprintf("auipc x1, 0 #R_RISCV_PCREL_HI20 %s\n", code[1])
 			real_instr.WriteString(ins)
-			ins = fmt.Sprintf("jalr x1, x1, 0 # %s\n", code[1])
+			ins = fmt.Sprintf("jalr x1, 0(x1) #R_RISCV_PCREL_LO20 %s\n", code[1])
 			real_instr.WriteString(ins)
 		case "tail": //auipc x6, offset[32:12]; jalr x0, x6, offset[11:0] 尾调用远距离子过程(discard pc+4)
 			ins := fmt.Sprintf("# %s\n", line)
@@ -1500,22 +1501,47 @@ func main() {
 			if len(code) != 3 {
 				fmt.Println("Incorrect argument count on line: ", lineCounter)
 			}
-			imm, err := isValidImmediate(code[2])
 			op, opFound := opBin[code[0]]
 			rd, rdFound := regBin[code[1]]
 			if err != nil {
 				fmt.Printf("-Error on line %d: %s\n", lineCounter, err)
 				os.Exit(0)
 			}
-			//if imm < -0x80000 || imm > 0xfffff { // for assembler create lui 0x800 in li
-			//	fmt.Printf("Lui: Error on line %d: Immediate value %d=0x%X out of range (should be between 0x%X and 0x7ffff )\n", lineCounter, imm, imm, -0x80000)
-			//	os.Exit(0)
-			//}
 			if !opFound || !rdFound {
 				fmt.Println("Invalid register on line", lineCounter)
 				os.Exit(0)
 			}
+
+			//if imm < -0x80000 || imm > 0xfffff { // for assembler create lui 0x800 in li
+			//	fmt.Printf("Lui: Error on line %d: Immediate value %d=0x%X out of range (should be between 0x%X and 0x7ffff )\n", lineCounter, imm, imm, -0x80000)
+			//	os.Exit(0)
+			//}
+
+			// For call
+			//ins = fmt.Sprintf("auipc x1, 0 #R_RISCV_PCREL_HI20 %s\n", code[1])
+			if code[2] == "0"  && strings.Contains(scanner.Text(), "R_RISCV_PCREL_HI20") {
+			    lab := strings.Split(scanner.Text(), " ")[4]
+
+			    label, labelFound := symbolTable[lab]
+
+			    if !labelFound {
+			    	fmt.Println("Error: label not found", label, code)
+			    	os.Exit(0)
+			    }
+			    offset := label - int64(address)
+			    hi20 := uint32(offset) >> 12
+			    lo12 := uint32(offset) & 0xfff 
+                            if lo12 & 0x800 !=0 { hi20 += 1}
+
+			    instruction = uint32(hi20)<<12 | rd<<7 | op
+			} else {
+			imm, err := isValidImmediate(code[2])
+			if err != nil {
+				fmt.Printf("3Error on line %d: %s\n", lineCounter, err)
+				os.Exit(0)
+			}
 			instruction = uint32(imm)<<12 | rd<<7 | op
+		    }
 
 		case "jal":
 			if len(code) != 3 {
@@ -1609,7 +1635,7 @@ func main() {
 			}
 
 			imm, err := isValidImmediate(code[3])
-			if switchOnOp == "jalr" { imm, err = isValidImmediate(code[2]) } //special: op rd, imm(rs1)
+			//if switchOnOp == "jalr" { imm, err = isValidImmediate(code[2]) } //special: op rd, imm(rs1)
 
 			if err != nil {
 				fmt.Printf("$Error on line %d: %s\n", lineCounter, err)
@@ -1635,27 +1661,53 @@ func main() {
 				fmt.Println("ori 2 Incorrect argument count on line: ", lineCounter)
 			}
 
-			imm, err := isValidImmediate(code[2])
+			//imm, err := isValidImmediate(code[2])
 
-			if err != nil {
-				fmt.Printf("$$Error on line %d: %s\n", lineCounter, err)
-				fmt.Println(line, "|imm:", code[3])
-				os.Exit(0)
-			}
-			//if imm > 0xfff || imm < -2048 { //0x7ff -0x1000  0xfff for sltiu
-			if imm > 2047 || imm < -2048 { //0x7ff -0x800
-				fmt.Printf("Error on line %d: Immediate value out of range (should be between -2048=-0x1000 and 4094=0xfff) with %d \n", lineCounter, imm)
-				os.Exit(0)
-			}
+			//if err != nil {
+			//	fmt.Printf("$$Error on line %d: %s\n", lineCounter, err)
+			//	fmt.Println(line, "|imm:", code[3])
+			//	os.Exit(0)
+			//}
+			////if imm > 0xfff || imm < -2048 { //0x7ff -0x1000  0xfff for sltiu
+			//if imm > 2047 || imm < -2048 { //0x7ff -0x800
+			//	fmt.Printf("Error on line %d: Immediate value out of range (should be between -2048=-0x1000 and 4094=0xfff) with %d \n", lineCounter, imm)
+			//	os.Exit(0)
+			//}
 			op, opFound := opBin[code[0]]
 			rd, rdFound := regBin[code[1]]
 			rs1, rs1Found := regBin[code[3]]
-			if opFound && rdFound && rs1Found {
-				instruction = uint32(imm)<<20 | rs1<<15 | rd<<7 | op
-			} else if !rdFound || !rs1Found {
+			if !opFound || !rdFound || !rs1Found {
 				fmt.Println("Invalid register on line", lineCounter)
 				os.Exit(0)
 			}
+			//if opFound && rdFound && rs1Found {
+			//	instruction = uint32(imm)<<20 | rs1<<15 | rd<<7 | op
+			//} 
+
+			//ins = fmt.Sprintf("jalr x0, 0(%s)\n", code[1])
+			//ins = fmt.Sprintf("auipc x1, 0 #R_RISCV_PCREL_HI20 %s\n", code[1])
+			//ins = fmt.Sprintf("jalr x1, 0(x1) #R_RISCV_PCREL_LO20 %s\n", code[1])
+			if code[2] == "0"  && strings.Contains(scanner.Text(), "R_RISCV_PCREL_LO20") {
+			    lab := strings.Split(scanner.Text(), " ")[4]
+
+			    label, labelFound := symbolTable[lab]
+
+			    if !labelFound {
+			    	fmt.Println("Error: label not found", label, code)
+			    	os.Exit(0)
+			    }
+			    auipc_address := int64(address - 4) // based on former auipc address
+			    offset := label - auipc_address
+			    lo12 := uint32(offset) & 0xfff 
+			    instruction = uint32(lo12)<<20 | rs1<<15 |  rd<<7 | op
+			} else {
+			    imm, err := isValidImmediate(code[2])
+			    if err != nil {
+			    	fmt.Printf("3Error on line %d: %s\n", lineCounter, err)
+			    	os.Exit(0)
+			    }
+			    instruction = uint32(imm)<<20 | rs1<<15 |  rd<<7 | op
+		    }
 
 		case "slli", "slliw", "srli", "srliw", "srai", "sraiw": // op rd, rs1, immediate(shamt)
 			if len(code) != 4 {
