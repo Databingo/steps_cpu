@@ -50,6 +50,7 @@ _start:
     addi x0, x0, 0
     addi x0, x0, 0
     ld t2, 0(t0)
+    addi x0, x0, 0
     beq t1, t2, pass_4_nops
 
     # --- Test 5: 5 NOPs ---
@@ -60,6 +61,8 @@ _start:
     addi x0, x0, 0
     addi x0, x0, 0
     ld t2, 0(t0)
+    addi x0, x0, 0
+    addi x0, x0, 0
     beq t1, t2, pass_5_nops
 
     # --- Test 6: 6 NOPs ---
@@ -71,6 +74,9 @@ _start:
     addi x0, x0, 0
     addi x0, x0, 0
     ld t2, 0(t0)
+    addi x0, x0, 0
+    addi x0, x0, 0
+    addi x0, x0, 0
     beq t1, t2, pass_6_nops
 
 # --- Failure: All tests failed ---
