@@ -112,7 +112,7 @@ module cpu_on_board (
     wire Art_selected = (bus_address == `Art_base);
     wire Key_selected = (bus_address == `Key_base);
 
-    // 2.-- Port B of the On-Chip Memeory (Cache L1) --
+    // 2.-- Port B of the On-Chip Memeory (Cache L1) -- port B write with always read
     reg [31:0] port_b_data_out;
     always @(posedge CLOCK_50) begin // Read-During-Write (read get old data in same cycle with write)
         if (bus_write_enable && (Ram_selected || Art_selected)) Cache[bus_address/4] <= bus_write_data; 
@@ -123,7 +123,8 @@ module cpu_on_board (
     always @(posedge CLOCK_50) begin
 	if (bus_read_enable) begin
 	   if (Key_selected) bus_read_data  <= {32'd0, 24'd0, ascii};
-	   else if (bus_read_enable && (Rom_selected || Ram_selected)) bus_read_data <= {32'd0, port_b_data_out};
+	   //else if (bus_read_enable && (Rom_selected || Ram_selected)) bus_read_data <= {32'd0, port_b_data_out};
+	   else if (bus_read_enable && (Rom_selected || Ram_selected)) bus_read_data <= {32'd0, Cache[bus_address[11:2]]};
 	   //else bus_read_data <= 64'h00000000; // at 50MHz will override 
         end
         else bus_read_data <= 0; // clean
