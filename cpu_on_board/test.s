@@ -43,7 +43,9 @@ skip_fail_2:
     # --- Test 4: LUI (Load Upper Immediate) ---
     lui  t0, 0xABCDE         # t0 = 0xABCDE000
     lui  t1, 0xABCDD
-    addi t1, t1, 0x1000      # t1 = 0xABCDD000 + 0x1000 = 0xABCDE000
+    addi t1, t1, 2047
+    addi t1, t1, 2047
+    addi t1, t1, 2 # t1 = 0xABCDD000 + 0x1000 = 0xABCDE000
     addi a0, x0, 4           # Load fail code '4'
     beq  t0, t1, skip_fail_4  # If equal (pass), skip the fail jump.
     jal  x0, fail_handler     # If not equal (fail), jump to handler.
