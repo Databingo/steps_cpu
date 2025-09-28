@@ -15,6 +15,7 @@ module cpu_on_board (
     (* chip_pin = "G5" *)  output wire HEX20,
     (* chip_pin = "E1" *)  output wire HEX10,
     (* chip_pin = "J2" *)  output wire HEX00,
+    (* chip_pin = "J1" *)  output wire HEX01,
 
     (* chip_pin = "H15" *)  input wire PS2_CLK, 
     (* chip_pin = "J14" *)  input wire PS2_DAT 
@@ -164,6 +165,7 @@ module cpu_on_board (
     assign HEX20 = ~|bus_read_data;
     assign HEX10 = ~|bus_write_data;
     assign HEX00 = ~Art_selected;
+    assign HEX01 = ~Ram_selected;
 
     // -- Timer --
     // -- CSRs --
