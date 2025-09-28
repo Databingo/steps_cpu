@@ -124,10 +124,11 @@ module cpu_on_board (
 	if (bus_read_enable) begin
 	   if (Key_selected) bus_read_data  <= {32'd0, 24'd0, ascii};
 	   //else if (bus_read_enable && (Rom_selected || Ram_selected)) bus_read_data <= {32'd0, port_b_data_out};
-	   else if (bus_read_enable && (Rom_selected || Ram_selected)) bus_read_data <= {32'd0, Cache[bus_address[11:2]]};
+	   //if (Rom_selected || Ram_selected)) bus_read_data <= {32'd0, Cache[bus_address[11:2]]};
+	   if (Rom_selected || Ram_selected)) bus_read_data <= 75; // K
 	   //else bus_read_data <= 64'h00000000; // at 50MHz will override 
         end
-        //else bus_read_data <= 0; // clean
+        else bus_read_data <= 0; // clean
     end
 
     // 4.-- UART Writer Trigger --
