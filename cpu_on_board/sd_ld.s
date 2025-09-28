@@ -1,20 +1,21 @@
-# extended_memory_timing_test.s
+# full_extended_memory_timing_test.s (FINAL CORRECTED VERSION)
 #
-# An extended test to diagnose the timing of SD/LD instructions.
-# It checks for delays of 0 to 6 cycles.
-#
-# The program will print one of the following characters to UART (0x2004):
-# '0'-'6' -> The number of NOPs required for success.
-# 'F'     -> The test failed even with 6 NOPs, indicating a functional bug.
+# A comprehensive test to diagnose SD/LD timing, checking for 0 to 6 cycles of delay.
+# Writes to a safe RAM address (0x1800) generated with valid immediates.
 
 .section .text
 .globl _start
 
 _start:
     # --- Setup ---
-    lui t0, 0x1              # t0 = 0x1000 (Memory Address)
-    lui t1, 0x12345          # t1 = 0x12345000
-    addi t1, t1, 0x678       # t1 = 0x12345678 (Test Value)
+    # Set t0 to a safe memory address inside RAM: 0x1800
+    lui t0, 0x1              # t0 = 0x1000
+    addi t0, t0, 2047        # t0 = 0x1000 + 2047 = 0x17FF
+    addi t0, t0, 1           # t0 = 0x17FF + 1 = 0x1800 (Correct Safe Address)
+
+    # t1 will hold the test value to be stored.
+    lui t1, 0x12345
+    addi t1, t1, 0x678       # t1 = 0x12345678
 
     # --- Test 0: 0 NOPs ---
     sd t1, 0(t0)
@@ -23,52 +24,52 @@ _start:
 
     # --- Test 1: 1 NOP ---
     sd t1, 0(t0)
-    addi x0, x0, 0           # NOP
+    addi x0, x0, 0
     ld t2, 0(t0)
     beq t1, t2, pass_1_nop
 
     # --- Test 2: 2 NOPs ---
     sd t1, 0(t0)
-    addi x0, x0, 0           # NOP
-    addi x0, x0, 0           # NOP
+    addi x0, x0, 0
+    addi x0, x0, 0
     ld t2, 0(t0)
     beq t1, t2, pass_2_nops
 
     # --- Test 3: 3 NOPs ---
     sd t1, 0(t0)
-    addi x0, x0, 0           # NOP
-    addi x0, x0, 0           # NOP
-    addi x0, x0, 0           # NOP
+    addi x0, x0, 0
+    addi x0, x0, 0
+    addi x0, x0, 0
     ld t2, 0(t0)
     beq t1, t2, pass_3_nops
 
     # --- Test 4: 4 NOPs ---
     sd t1, 0(t0)
-    addi x0, x0, 0           # NOP
-    addi x0, x0, 0           # NOP
-    addi x0, x0, 0           # NOP
-    addi x0, x0, 0           # NOP
+    addi x0, x0, 0
+    addi x0, x0, 0
+    addi x0, x0, 0
+    addi x0, x0, 0
     ld t2, 0(t0)
     beq t1, t2, pass_4_nops
 
     # --- Test 5: 5 NOPs ---
     sd t1, 0(t0)
-    addi x0, x0, 0           # NOP
-    addi x0, x0, 0           # NOP
-    addi x0, x0, 0           # NOP
-    addi x0, x0, 0           # NOP
-    addi x0, x0, 0           # NOP
+    addi x0, x0, 0
+    addi x0, x0, 0
+    addi x0, x0, 0
+    addi x0, x0, 0
+    addi x0, x0, 0
     ld t2, 0(t0)
     beq t1, t2, pass_5_nops
 
     # --- Test 6: 6 NOPs ---
     sd t1, 0(t0)
-    addi x0, x0, 0           # NOP
-    addi x0, x0, 0           # NOP
-    addi x0, x0, 0           # NOP
-    addi x0, x0, 0           # NOP
-    addi x0, x0, 0           # NOP
-    addi x0, x0, 0           # NOP
+    addi x0, x0, 0
+    addi x0, x0, 0
+    addi x0, x0, 0
+    addi x0, x0, 0
+    addi x0, x0, 0
+    addi x0, x0, 0
     ld t2, 0(t0)
     beq t1, t2, pass_6_nops
 
