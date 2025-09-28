@@ -1528,7 +1528,7 @@ func main() {
 			    	fmt.Println("Error: label not found", label, code)
 			    	os.Exit(0)
 			    }
-			    offset := label - int64(address)
+			    offset := label - int64(address + 4) // auipc use next pc of auipc itself
 			    hi20 := uint32(offset) >> 12
 			    lo12 := uint32(offset) & 0xfff 
                             if lo12 & 0x800 !=0 { hi20 += 1}
@@ -1696,8 +1696,7 @@ func main() {
 			    	fmt.Println("Error: label not found", label, code)
 			    	os.Exit(0)
 			    }
-			    //auipc_address := int64(address - 4) // based on former auipc address
-			    offset := label - int64(address) // based on former auipc address ??
+			    offset := label - int64(address) // based on auipc + 4 address
 			    lo12 := uint32(offset) & 0xfff 
 			    instruction = uint32(lo12)<<20 | rs1<<15 |  rd<<7 | op
 			} else {
