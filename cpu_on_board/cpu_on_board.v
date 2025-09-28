@@ -16,6 +16,7 @@ module cpu_on_board (
     (* chip_pin = "E1" *)  output wire HEX10,
     (* chip_pin = "J2" *)  output wire HEX00,
     (* chip_pin = "J1" *)  output wire HEX01,
+    (* chip_pin = "H2" *)  output wire HEX02,
 
     (* chip_pin = "H15" *)  input wire PS2_CLK, 
     (* chip_pin = "J14" *)  input wire PS2_DAT 
@@ -113,6 +114,7 @@ module cpu_on_board (
     wire Art_selected = (bus_address == `Art_base);
     wire Key_selected = (bus_address == `Key_base);
 
+    // Write
     // 2.-- Port B of the On-Chip Memeory (Cache L1) -- port B write with always read
     reg [31:0] port_b_data_out;
     always @(posedge CLOCK_50) begin // Read-During-Write (read get old data in same cycle with write)
@@ -120,6 +122,7 @@ module cpu_on_board (
         //port_b_data_out <= {32'd0, Cache[bus_address[11:2]]}; // Read path (Unconditional)
     end
 
+    // Read
     // 3.-- Synchronous Read Data Multiplexer --
     always @(posedge CLOCK_50) begin
 	if (bus_read_enable) begin
@@ -164,8 +167,10 @@ module cpu_on_board (
     assign HEX30 = ~Key_selected;
     assign HEX20 = ~|bus_read_data;
     assign HEX10 = ~|bus_write_data;
+
     assign HEX00 = ~Art_selected;
     assign HEX01 = ~Ram_selected;
+    assign HEX02 = ~Rom_selected;
 
     // -- Timer --
     // -- CSRs --
