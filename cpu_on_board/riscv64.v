@@ -155,6 +155,7 @@ module riscv64(
 			    bubble <= 1'b1; 
 			end 
 		    end 
+	            32'b???????_?????_?????_010_?????_0110011: re[w_rd] <= ($signed(re[w_rs1]) < $signed(re[w_rs2])) ? 1: 0;  // Slt
 	            32'b0011000_00010_?????_000_?????_1110011: begin   // Mret
 	                pc <= csr_read(mepc); 
 			bubble <= 1; 
