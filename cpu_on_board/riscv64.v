@@ -38,6 +38,7 @@ module riscv64(
     wire signed [63:0] w_imm_i = {{52{ir[31]}}, ir[31:20]};   // I-type immediate Lb Lh Lw Lbu Lhu Lwu Ld Jalr Addi Slti Sltiu Xori Ori Andi Addiw
     wire signed [63:0] w_imm_s = {{52{ir[31]}}, ir[31:25], ir[11:7]};  // S-type immediate Sb Sh Sw Sd
     wire signed [63:0] w_imm_j = {{43{ir[31]}}, ir[19:12], ir[20], ir[30:21], 1'b0}; // UJ-type immediate Jal  // read immediate & padding last 0, total 20 + 1 = 21 bits
+    wire signed [63:0] w_imm_b = {{51{ir[31]}}, ir[7],  ir[30:25], ir[11:8], 1'b0}; // B-type immediate Beq Bne Blt Bge Bltu Bgeu // read immediate & padding last 0, total 12 + 1 = 13 bits
     // -- Instruction Decoding --
     wire [4:0] w_rd  = ir[11:7];
     wire [4:0] w_rs1 = ir[19:15];
@@ -145,9 +146,15 @@ module riscv64(
 	        bus_address <= `Ram_base;
                 casez(ir) 
 		    // Pseudo: li call j ret
-		    // I: lui ld sd addi jal jalr mret auipc
+		    // I: lui ld sd addi jal jalr mret auipc beq
 	            32'b???????_?????_?????_???_?????_0110111: re[w_rd] <= w_imm_u; // Lui
 	            32'b???????_?????_?????_???_?????_0010111: re[w_rd] <= pc - 4  +  w_imm_u; // Auipc
+		    32'b???????_?????_?????_000_?????_1100011: begin // Beq
+		        if (re[w_rs1] == re[w_rs2]) begin 
+			    pc <= pc - 4 + w_imm_b; 
+			    bubble <= 1'b1; 
+			end 
+		    end 
 	            32'b0011000_00010_?????_000_?????_1110011: begin   // Mret
 	                pc <= csr_read(mepc); 
 			bubble <= 1; 
@@ -179,7 +186,7 @@ module riscv64(
 			end
 	            end
 	            32'b???????_?????_?????_000_?????_0010011: re[w_rd] <= re[w_rs1] + w_imm_i;  // Addi
-	            32'b???????_?????_?????_???_?????_1101111: begin  
+	            32'b???????_?????_?????_???_?????_1101111: begin  // Jal
                     //at N-1, IF is fetching jar, EXE is setting pc to jar+4, so at the END of N-1 cycle, pc is jar+4
                     //at N,   IF is fetching jar+4, EXE default setting pc to jar+4+4, which we IR override pc to be jar+4-4+w_imm_j now
                     //at N+1, IF is fetching jar+w_imm_j, EXE bubble, but default still setting pc to be jar+w_imm_j+4
@@ -187,12 +194,12 @@ module riscv64(
 		        pc <= pc - 4 + w_imm_j;  // Jump 
 		        if (w_rd != 5'b0) re[w_rd] <= pc;  // Link (if for keep x0 remain 0)
 		        bubble <= 1'b1; 
-		    end // Jal
-	            32'b???????_?????_?????_???_?????_1100111: begin 
+		    end 
+	            32'b???????_?????_?????_???_?????_1100111: begin // Jalr
 		        if (w_rd != 5'b0) re[w_rd] <= pc; // present pc value is jarl+4
 			pc <= (re[w_rs1] + w_imm_i) & 64'hFFFFFFFFFFFFFFFE; // Align with at least 2-bytes compressed instruction.Alert "Misaligned Addr"?
 			bubble <= 1'b1; 
-		    end // Jalr
+		    end 
                 endcase
 	    end
         end
