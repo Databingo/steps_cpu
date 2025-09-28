@@ -1696,8 +1696,8 @@ func main() {
 			    	fmt.Println("Error: label not found", label, code)
 			    	os.Exit(0)
 			    }
-			    auipc_address := int64(address - 4) // based on former auipc address
-			    offset := label - auipc_address
+			    //auipc_address := int64(address - 4) // based on former auipc address
+			    offset := label - int64(address) // based on former auipc address ??
 			    lo12 := uint32(offset) & 0xfff 
 			    instruction = uint32(lo12)<<20 | rs1<<15 |  rd<<7 | op
 			} else {
