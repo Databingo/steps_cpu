@@ -119,7 +119,7 @@ module cpu_on_board (
     reg [31:0] port_b_data_out;
     always @(posedge CLOCK_50) begin // Read-During-Write (read get old data in same cycle with write)
 	if (bus_write_enable) begin
-	   if (Ram_selected || Art_selected)) Cache[bus_address/4] <= bus_write_data; 
+	   if (Ram_selected || Art_selected) Cache[bus_address/4] <= bus_write_data; 
         //port_b_data_out <= {32'd0, Cache[bus_address[11:2]]}; // Read path (Unconditional)
         end
     end
