@@ -43,7 +43,6 @@ module riscv64(
     wire [4:0] w_rd  = ir[11:7];
     wire [4:0] w_rs1 = ir[19:15];
     wire [4:0] w_rs2 = ir[24:20];
-	
 
     // -- CSR Registers --
     reg [63:0] csr_mepc;
@@ -89,7 +88,7 @@ module riscv64(
     // -- Innerl signal --
     reg bubble;
     reg lb_step;
-    reg sd_step;
+    //reg sd_step;
 
     // IF ir (Only drive IR)
     always @(posedge clk or negedge reset) begin
@@ -145,62 +144,19 @@ module riscv64(
 	        bus_write_data <= 0;
 	        bus_address <= `Ram_base;
                 casez(ir) 
-		    // Pseudo: li call j ret
-		    // I: lui ld sd addi jal jalr mret auipc beq slt
+		    // Pseudo: li call j ret // I: lui ld sd addi jal jalr mret auipc beq slt
 	            32'b???????_?????_?????_???_?????_0110111: re[w_rd] <= w_imm_u; // Lui
 	            32'b???????_?????_?????_???_?????_0010111: re[w_rd] <= pc - 4  +  w_imm_u; // Auipc
-		    32'b???????_?????_?????_000_?????_1100011: begin // Beq
-		        if (re[w_rs1] == re[w_rs2]) begin 
-			    pc <= pc - 4 + w_imm_b; 
-			    bubble <= 1'b1; 
-			end 
-		    end 
+		    32'b???????_?????_?????_000_?????_1100011: begin if (re[w_rs1] == re[w_rs2]) begin pc <= pc - 4 + w_imm_b; bubble <= 1'b1; end end // Beq
 	            32'b???????_?????_?????_010_?????_0110011: re[w_rd] <= ($signed(re[w_rs1]) < $signed(re[w_rs2])) ? 1: 0;  // Slt
-	            32'b0011000_00010_?????_000_?????_1110011: begin   // Mret
-	                pc <= csr_read(mepc); 
-			bubble <= 1; 
-		        csr_mstatus[MIE] <= csr_mstatus[MPIE];
-		        csr_mstatus[MPIE] <= 1;
-		    end 
+	            32'b0011000_00010_?????_000_?????_1110011: begin pc <= csr_read(mepc); bubble <= 1; csr_mstatus[MIE] <= csr_mstatus[MPIE]; csr_mstatus[MPIE] <= 1; end  // Mret
 		    32'b???????_?????_?????_011_?????_0000011: begin  // Ld
-	                if (lb_step == 0) begin
-	                    bus_address <= re[w_rs1] + w_imm_i ;
-	                    bus_read_enable <= 1;
-	                    pc <= pc - 4; // Core of pipeline: pc-4 due to at executing SB cycle, the pc is already pc+4, have to -4 to keep pc as SB; And IF get ir of pc+4 tenaciously need a bubble flush
-	                    bubble <= 1; //!! take over cycle 2, meanwhile bus read 
-	                    lb_step <= 1;
-	                end // bubble cycle happenly for bus to read data according to bus_address
-	                if (lb_step == 1) begin  
-	                    re[w_rd]<= bus_read_data; // cycle 3 save to cpu's register
-	                    lb_step <= 0;
-	                end
-		    end 
-	            32'b???????_?????_?????_011_?????_0100011: begin // Sd
-		        if (sd_step == 0) begin 
-		            //bus_address <= `Art_base;
-	                    bus_address <= re[w_rs1] + w_imm_s;
-	                    bus_write_data <= re[w_rs2];
-	                    bus_write_enable <= 1;
-			    //--wait bus write-- now pc value is already sb+4 and IF is getting sb+4 and change pc setting from pc+4(sb+4+4) to pc so next cycle bubble ir (sb+4), getting sb+4, the next.
-	                    pc <= pc;
-	                    bubble <= 1;
-			end
-	            end
+	                if (lb_step == 0) begin bus_address <= re[w_rs1] + w_imm_i ; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; lb_step <= 1; end
+	                if (lb_step == 1) begin re[w_rd]<= bus_read_data; lb_step <= 0; end end 
+	            32'b???????_?????_?????_011_?????_0100011: begin bus_address <= re[w_rs1] + w_imm_s; bus_write_data <= re[w_rs2]; bus_write_enable <= 1; pc <= pc; bubble <= 1; end // Sd
 	            32'b???????_?????_?????_000_?????_0010011: re[w_rd] <= re[w_rs1] + w_imm_i;  // Addi
-	            32'b???????_?????_?????_???_?????_1101111: begin  // Jal
-                    //at N-1, IF is fetching jar, EXE is setting pc to jar+4, so at the END of N-1 cycle, pc is jar+4
-                    //at N,   IF is fetching jar+4, EXE default setting pc to jar+4+4, which we IR override pc to be jar+4-4+w_imm_j now
-                    //at N+1, IF is fetching jar+w_imm_j, EXE bubble, but default still setting pc to be jar+w_imm_j+4
-                    //at N+2, jump into jar+w_imm_j
-		        pc <= pc - 4 + w_imm_j;  // Jump 
-		        if (w_rd != 5'b0) re[w_rd] <= pc;  // Link (if for keep x0 remain 0)
-		        bubble <= 1'b1; 
-		    end 
-	            32'b???????_?????_?????_???_?????_1100111: begin // Jalr
-		        if (w_rd != 5'b0) re[w_rd] <= pc; // present pc value is jarl+4
-			pc <= (re[w_rs1] + w_imm_i) & 64'hFFFFFFFFFFFFFFFE; // Align with at least 2-bytes compressed instruction.Alert "Misaligned Addr"?
-			bubble <= 1'b1; 
-		    end 
+	            32'b???????_?????_?????_???_?????_1101111: begin pc <= pc - 4 + w_imm_j; if (w_rd != 5'b0) re[w_rd] <= pc; bubble <= 1'b1; end // Jal
+	            32'b???????_?????_?????_???_?????_1100111: begin if (w_rd != 5'b0) re[w_rd] <= pc; pc <= (re[w_rs1] + w_imm_i) & 64'hFFFFFFFFFFFFFFFE; bubble <= 1'b1; end // Jalr
                 endcase
 	    end
         end
