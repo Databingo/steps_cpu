@@ -48,6 +48,7 @@ module cpu_on_board (
 
     wire [63:0] pc;
     reg [31:0] ir_bd;
+    // Port A
     always @(posedge CLOCK_50) begin
 	ir_bd <= Cache[pc>>2];
     end
@@ -122,47 +123,20 @@ module cpu_on_board (
     wire Key_selected = (bus_address == `Key_base);
     wire Art_selected = (bus_address == `Art_base);
 
-    // Write
-    // 2.-- Port B of the On-Chip Memeory (Cache L1) -- port B write with always read
-    reg [63:0] port_b_data_out;
-    reg [63:0] read_address_reg;
+    // Write Port B
+    reg [63:0] read_address_reg; // need two register for read & write logically
+    always @(posedge CLOCK_50) read_address_reg <= bus_address_cache;
     always @(posedge CLOCK_50) begin
-           read_address_reg <= bus_address_cache;
-    end
-    always @(posedge CLOCK_50) begin // Read-During-Write (read get old data in same cycle with write)
-        //port_b_data_out <= {32'd0, Cache[read_address_reg]}; // Read path (Unconditional)
 	if (bus_write_enable) begin
-	   //if (Ram_selected || Art_selected) Cache[bus_address/4] <= bus_write_data; 
-	   //if (Ram_selected) Cache[bus_address/4] <= bus_write_data; 
-	   //if (Ram_selected) Cache[bus_address/4] <= bus_write_data[31:0];  // cut fit 32 bit ram
 	   if (Ram_selected) Cache[bus_address_cache] <= bus_write_data[31:0];  // cut fit 32 bit ram //work
-        //port_b_data_out <= {32'd0, Cache[bus_address[11:2]]}; // Read path (Unconditional)
         end
-        //port_b_data_out <= {32'd0, Cache[bus_address_cache]}; // Read path (Unconditional)
     end
 
-    // Read
-    //reg [63:0] read_address_reg;
-    //always @(posedge CLOCK_50) begin
-    //       read_address_reg <= bus_address_cache;
-    //end
-    //wire [63:0] data_from_bram = {32'd0, Cache[read_address_reg]};
-
-    // 3.-- Synchronous Read Data Multiplexer --
+    // Read Port B
     always @(posedge CLOCK_50) begin
 	if (bus_read_enable) begin
-	   if (Key_selected) bus_read_data  <= {32'd0, 24'd0, ascii};
-	   //else if (bus_read_enable && (Rom_selected || Ram_selected)) bus_read_data <= {32'd0, port_b_data_out};
-	   //if (Ram_selected) bus_read_data <= {32'd0, Cache[bus_address[11:2]]}; // 32 ram,cannot/4
-	   //if (Ram_selected) bus_read_data <= {32'd0, Cache[bus_address_cache]}; // 32 ram,cannot/4
-	   //if (Ram_selected) bus_read_data <= port_b_data_out;
+	   if (Key_selected) bus_read_data <= {32'd0, 24'd0, ascii};
 	   if (Ram_selected) bus_read_data <= {32'd0, Cache[read_address_reg]};
-	   //if (Ram_selected) bus_read_data <= data_from_bram; // work
-	   //if (Ram_selected) bus_read_data <= 64'd80;
-	   //if (Ram_selected) bus_read_data <= {32'd0, Cache[bus_address/4]}; // 32 bit ram
-	   //if (Rom_selected || Ram_selected) bus_read_data <= {32'd0, Cache[bus_address[11:2]]};
-	   //if (Rom_selected || Ram_selected) bus_read_data <= 75; // K
-	   //else bus_read_data <= 64'h00000000; // at 50MHz will override 
         end
         //else bus_read_data <= 0; // clean
     end
