@@ -69,7 +69,6 @@ module cpu_on_board (
 	.interrupt_ack(interrupt_ack),
 
         .bus_address(bus_address),
-        .bus_address_cache(bus_address_cache),
         .bus_write_data(bus_write_data),
         .bus_write_enable(bus_write_enable),
         .bus_read_enable(bus_read_enable),
@@ -109,7 +108,6 @@ module cpu_on_board (
 
     // -- Bus --
     reg  [63:0] bus_read_data;
-    wire [63:0] bus_address_cache;
     wire [63:0] bus_address;
     wire        bus_read_enable;
     wire [63:0] bus_write_data;
@@ -124,12 +122,10 @@ module cpu_on_board (
     wire Art_selected = (bus_address == `Art_base);
 
     // Write Port B
-    reg [63:0] read_address_reg; // need two register for read & write logically
-    //always @(posedge CLOCK_50) read_address_reg <= bus_address_cache;
+    reg [63:0] read_address_reg; // need Two register for read & write logically
     always @(posedge CLOCK_50) read_address_reg <= bus_address>>2;
     always @(posedge CLOCK_50) begin
 	if (bus_write_enable) begin
-	   //if (Ram_selected) Cache[bus_address_cache] <= bus_write_data[31:0];  // cut fit 32 bit ram //work
 	   if (Ram_selected) Cache[bus_address>>2] <= bus_write_data[31:0];  // cut fit 32 bit ram //work
         end
     end
