@@ -111,15 +111,15 @@ module cpu_on_board (
     wire Rom_selected = (bus_address >= `Rom_base && bus_address < `Rom_base + `Rom_size);
     wire Ram_selected = (bus_address >= `Ram_base && bus_address < `Ram_base + `Ram_size);
     ////wire Stk_selected = (bus_address >= Stk_base && bus_address < Stk_base + Stk_size);
-    wire Art_selected = (bus_address == `Art_base);
     wire Key_selected = (bus_address == `Key_base);
+    wire Art_selected = (bus_address == `Art_base);
 
     // Write
     // 2.-- Port B of the On-Chip Memeory (Cache L1) -- port B write with always read
     reg [31:0] port_b_data_out;
     always @(posedge CLOCK_50) begin // Read-During-Write (read get old data in same cycle with write)
 	if (bus_write_enable) begin
-	   if (Ram_selected || Art_selected) Cache[bus_address/4] <= bus_write_data; 
+	   if (Ram_selected || Art_selected)) Cache[bus_address/4] <= bus_write_data; 
         //port_b_data_out <= {32'd0, Cache[bus_address[11:2]]}; // Read path (Unconditional)
         end
     end
