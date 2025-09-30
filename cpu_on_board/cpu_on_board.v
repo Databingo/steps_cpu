@@ -126,7 +126,7 @@ module cpu_on_board (
     // 2.-- Port B of the On-Chip Memeory (Cache L1) -- port B write with always read
     reg [63:0] port_b_data_out;
     always @(posedge CLOCK_50) begin // Read-During-Write (read get old data in same cycle with write)
-        port_b_data_out <= {32'd0, Cache[bus_address_cache]}; // Read path (Unconditional)
+        port_b_data_out = {32'd0, Cache[bus_address_cache]}; // Read path (Unconditional)
 	if (bus_write_enable) begin
 	   //if (Ram_selected || Art_selected) Cache[bus_address/4] <= bus_write_data; 
 	   //if (Ram_selected) Cache[bus_address/4] <= bus_write_data; 
