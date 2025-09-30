@@ -68,6 +68,7 @@ module cpu_on_board (
 	.interrupt_ack(interrupt_ack),
 
         .bus_address(bus_address),
+        .bus_address_cache(bus_address_cache),
         .bus_write_data(bus_write_data),
         .bus_write_enable(bus_write_enable),
         .bus_read_enable(bus_read_enable),
@@ -107,6 +108,7 @@ module cpu_on_board (
 
     // -- Bus --
     reg  [63:0] bus_read_data;
+    wire [63:0] bus_address_cache;
     wire [63:0] bus_address;
     wire        bus_read_enable;
     wire [63:0] bus_write_data;
@@ -127,7 +129,8 @@ module cpu_on_board (
 	if (bus_write_enable) begin
 	   //if (Ram_selected || Art_selected) Cache[bus_address/4] <= bus_write_data; 
 	   //if (Ram_selected) Cache[bus_address/4] <= bus_write_data; 
-	   if (Ram_selected) Cache[bus_address/4] <= bus_write_data[31:0];  // cut fit 32 bit ram
+	   //if (Ram_selected) Cache[bus_address/4] <= bus_write_data[31:0];  // cut fit 32 bit ram
+	   if (Ram_selected) Cache[bus_address_cache] <= bus_write_data[31:0];  // cut fit 32 bit ram
         //port_b_data_out <= {32'd0, Cache[bus_address[11:2]]}; // Read path (Unconditional)
         end
     end
@@ -139,7 +142,8 @@ module cpu_on_board (
 	   if (Key_selected) bus_read_data  <= {32'd0, 24'd0, ascii};
 	   //else if (bus_read_enable && (Rom_selected || Ram_selected)) bus_read_data <= {32'd0, port_b_data_out};
 	   //if (Ram_selected) bus_read_data <= {32'd0, Cache[bus_address[11:2]]}; // 32 ram,cannot/4
-	   if (Ram_selected) bus_read_data <= 64'd80;
+	   if (Ram_selected) bus_read_data <= {32'd0, Cache[bus_address_cache]}; // 32 ram,cannot/4
+	   //if (Ram_selected) bus_read_data <= 64'd80;
 	   //if (Ram_selected) bus_read_data <= {32'd0, Cache[bus_address/4]}; // 32 bit ram
 	   //if (Rom_selected || Ram_selected) bus_read_data <= {32'd0, Cache[bus_address[11:2]]};
 	   //if (Rom_selected || Ram_selected) bus_read_data <= 75; // K

@@ -13,6 +13,7 @@ module riscv64(
     output reg  interrupt_ack,         // reply to outside
 
     output reg [63:0] bus_address,     // 39 bit for real standard?
+    output reg [63:0] bus_address_cache,     // 39 bit for real standard?
     output reg [63:0] bus_write_data,
     output reg        bus_write_enable,
     output reg        bus_read_enable,
@@ -113,6 +114,7 @@ module riscv64(
 	    bus_write_enable <= 0;
 	    bus_write_data <= 0;
 	    bus_address <= `Ram_base;
+	    bus_address_cache <= `Ram_base>>2;
             // Interrupt re-enable
 	    csr_mstatus[MIE] <= 1;
 	    interrupt_ack <= 0;
@@ -144,6 +146,7 @@ module riscv64(
 	        bus_write_enable <= 0; 
 	        bus_write_data <= 0;
 	        bus_address <= `Ram_base;
+	        bus_address_cache <= `Ram_base>>2;
                 casez(ir) 
 		    // Pseudo: li call j ret
 		    // I: lui ld sd addi jal jalr mret auipc beq slt
@@ -165,6 +168,7 @@ module riscv64(
 		    32'b???????_?????_?????_011_?????_0000011: begin  // Ld
 	                if (lb_step == 0) begin
 	                    bus_address <= re[w_rs1] + w_imm_i ;
+	                    bus_address_cache <= (re[w_rs1] + w_imm_i)>>2 ;
 	                    bus_read_enable <= 1;
 	                    pc <= pc - 4; // Core of pipeline: pc-4 due to at executing SB cycle, the pc is already pc+4, have to -4 to keep pc as SB; And IF get ir of pc+4 tenaciously need a bubble flush
 	                    bubble <= 1; //!! take over cycle 2, meanwhile bus read 
@@ -179,6 +183,7 @@ module riscv64(
 		        if (sd_step == 0) begin 
 		            //bus_address <= `Art_base;
 	                    bus_address <= re[w_rs1] + w_imm_s;
+	                    bus_address_cache <= (re[w_rs1] + w_imm_s)>>2;
 	                    bus_write_data <= re[w_rs2];
 	                    bus_write_enable <= 1;
 			    //--wait bus write-- now pc value is already sb+4 and IF is getting sb+4 and change pc setting from pc+4(sb+4+4) to pc so next cycle bubble ir (sb+4), getting sb+4, the next.
