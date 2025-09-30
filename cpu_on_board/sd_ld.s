@@ -14,9 +14,9 @@ _start:
     addi t0, t0, 1           # t0 = 0x17FF + 1 = 0x1800 (Correct Safe Address)
 
     # t1 will hold the test value to be stored.
-   #lui t1, 0x12345
-   #addi t1, t1, 0x678       # t1 = 0x12345678
-    addi t1, t1, 80       # t1 = "P"
+    lui t1, 0x12345
+    addi t1, t1, 0x678       # t1 = 0x12345678
+   #addi t1, t1, 80       # t1 = "P"
 
     # --- Test 0: 0 NOPs ---
     sd t1, 0(t0)
