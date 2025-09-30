@@ -126,7 +126,6 @@ module cpu_on_board (
     // 2.-- Port B of the On-Chip Memeory (Cache L1) -- port B write with always read
     reg [63:0] port_b_data_out;
     always @(posedge CLOCK_50) begin // Read-During-Write (read get old data in same cycle with write)
-        port_b_data_out = {32'd0, Cache[bus_address_cache]}; // Read path (Unconditional)
 	if (bus_write_enable) begin
 	   //if (Ram_selected || Art_selected) Cache[bus_address/4] <= bus_write_data; 
 	   //if (Ram_selected) Cache[bus_address/4] <= bus_write_data; 
@@ -138,11 +137,11 @@ module cpu_on_board (
     end
 
     // Read
-    //reg [63:0] read_address_reg;
-    //always @(posedge CLOCK_50) begin
-    //       read_address_reg <= bus_address_cache;
-    //end
-    //wire [63:0] data_from_bram = {32'd0, Cache[read_address_reg]};
+    reg [63:0] read_address_reg;
+    always @(posedge CLOCK_50) begin
+           read_address_reg <= bus_address_cache;
+    end
+    wire [63:0] data_from_bram = {32'd0, Cache[read_address_reg]};
 
     // 3.-- Synchronous Read Data Multiplexer --
     always @(posedge CLOCK_50) begin
@@ -151,8 +150,8 @@ module cpu_on_board (
 	   //else if (bus_read_enable && (Rom_selected || Ram_selected)) bus_read_data <= {32'd0, port_b_data_out};
 	   //if (Ram_selected) bus_read_data <= {32'd0, Cache[bus_address[11:2]]}; // 32 ram,cannot/4
 	   //if (Ram_selected) bus_read_data <= {32'd0, Cache[bus_address_cache]}; // 32 ram,cannot/4
-	   if (Ram_selected) bus_read_data <= port_b_data_out;
-	   //-if (Ram_selected) bus_read_data <= data_from_bram; // work
+	   //if (Ram_selected) bus_read_data <= port_b_data_out;
+	   if (Ram_selected) bus_read_data <= data_from_bram; // work
 	   //if (Ram_selected) bus_read_data <= 64'd80;
 	   //if (Ram_selected) bus_read_data <= {32'd0, Cache[bus_address/4]}; // 32 bit ram
 	   //if (Rom_selected || Ram_selected) bus_read_data <= {32'd0, Cache[bus_address[11:2]]};
