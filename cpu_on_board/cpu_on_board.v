@@ -125,10 +125,13 @@ module cpu_on_board (
 
     // Write Port B
     reg [63:0] read_address_reg; // need two register for read & write logically
-    always @(posedge CLOCK_50) read_address_reg <= bus_address_cache;
+    //always @(posedge CLOCK_50) read_address_reg <= bus_address_cache;
+    always @(posedge CLOCK_50) read_address_reg <= bus_address>>2;
     always @(posedge CLOCK_50) begin
 	if (bus_write_enable) begin
-	   if (Ram_selected) Cache[bus_address_cache] <= bus_write_data[31:0];  // cut fit 32 bit ram //work
+	   //if (Ram_selected) Cache[bus_address_cache] <= bus_write_data[31:0];  // cut fit 32 bit ram //work
+	   //if (Ram_selected) Cache[bus_address>>2] <= bus_write_data[31:0];  // cut fit 32 bit ram //work
+	   if (Ram_selected) Cache[read_address_reg] <= bus_write_data[31:0];  // cut fit 32 bit ram //work
         end
     end
 
