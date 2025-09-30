@@ -125,7 +125,9 @@ module cpu_on_board (
     reg [31:0] port_b_data_out;
     always @(posedge CLOCK_50) begin // Read-During-Write (read get old data in same cycle with write)
 	if (bus_write_enable) begin
-	   if (Ram_selected || Art_selected) Cache[bus_address/4] <= bus_write_data; 
+	   //if (Ram_selected || Art_selected) Cache[bus_address/4] <= bus_write_data; 
+	   //if (Ram_selected) Cache[bus_address/4] <= bus_write_data; 
+	   if (Ram_selected) Cache[bus_address/4] <= bus_write_data[32:0]; 
         //port_b_data_out <= {32'd0, Cache[bus_address[11:2]]}; // Read path (Unconditional)
         end
     end
@@ -136,12 +138,13 @@ module cpu_on_board (
 	if (bus_read_enable) begin
 	   if (Key_selected) bus_read_data  <= {32'd0, 24'd0, ascii};
 	   //else if (bus_read_enable && (Rom_selected || Ram_selected)) bus_read_data <= {32'd0, port_b_data_out};
-	   if (Ram_selected) bus_read_data <= {32'd0, Cache[bus_address[11:2]]};
+	   //if (Ram_selected) bus_read_data <= {32'd0, Cache[bus_address[11:2]]};
+	   if (Ram_selected) bus_read_data <= Cache[bus_address[11:2]][32:0];
 	   //if (Rom_selected || Ram_selected) bus_read_data <= {32'd0, Cache[bus_address[11:2]]};
 	   //if (Rom_selected || Ram_selected) bus_read_data <= 75; // K
 	   //else bus_read_data <= 64'h00000000; // at 50MHz will override 
         end
-        else bus_read_data <= 0; // clean
+        //else bus_read_data <= 0; // clean
     end
 
 

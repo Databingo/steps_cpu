@@ -177,8 +177,8 @@ module riscv64(
 		    end 
 	            32'b???????_?????_?????_011_?????_0100011: begin // Sd
 		        if (sd_step == 0) begin 
-		            bus_address <= `Art_base;
-	                    //bus_address <= re[w_rs1] + w_imm_s;
+		            //bus_address <= `Art_base;
+	                    bus_address <= re[w_rs1] + w_imm_s;
 	                    bus_write_data <= re[w_rs2];
 	                    bus_write_enable <= 1;
 			    //--wait bus write-- now pc value is already sb+4 and IF is getting sb+4 and change pc setting from pc+4(sb+4+4) to pc so next cycle bubble ir (sb+4), getting sb+4, the next.
