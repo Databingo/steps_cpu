@@ -130,9 +130,8 @@ module cpu_on_board (
 
     // 3. Read Port B
     reg [63:0] read_address_reg; // need Two register for read & write logically
-    //always @(posedge CLOCK_50) read_address_reg <= bus_address>>2;
+    always @(posedge CLOCK_50) read_address_reg <= bus_address>>2;
     always @(posedge CLOCK_50) begin
-	read_address_reg <= bus_address>>2;
 	if (bus_read_enable) begin
 	   if (Key_selected) bus_read_data <= {32'd0, 24'd0, ascii};
 	   if (Ram_selected) bus_read_data <= {32'd0, Cache[read_address_reg]};
