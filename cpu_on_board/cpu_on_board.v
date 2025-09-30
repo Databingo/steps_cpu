@@ -12,11 +12,17 @@ module cpu_on_board (
     (* chip_pin = "U18, Y18, V19, T18, Y19, U19" *) output wire [5:0] LEDR_PC, // 8 red LEDs right
 
     (* chip_pin = "F4" *)  output wire HEX30,
+
     (* chip_pin = "G5" *)  output wire HEX20,
+    (* chip_pin = "G6" *)  output wire HEX21,
+
     (* chip_pin = "E1" *)  output wire HEX10,
+    (* chip_pin = "H6" *)  output wire HEX11,
+
     (* chip_pin = "J2" *)  output wire HEX00,
     (* chip_pin = "J1" *)  output wire HEX01,
     (* chip_pin = "H2" *)  output wire HEX02,
+    (* chip_pin = "H1" *)  output wire HEX03,
 
     (* chip_pin = "H15" *)  input wire PS2_CLK, 
     (* chip_pin = "J14" *)  input wire PS2_DAT 
@@ -171,8 +177,12 @@ module cpu_on_board (
 
     // 5. -- Debug LEDs --
     assign HEX30 = ~Key_selected;
+
     assign HEX20 = ~|bus_read_data;
+    assign HEX21 = ~bus_read_enable;
+
     assign HEX10 = ~|bus_write_data;
+    assign HEX11 = ~bus_write_enable;
 
     assign HEX00 = ~Art_selected;
     assign HEX01 = ~Ram_selected;
