@@ -60,15 +60,15 @@ module riscv64(
 	end
     endfunction
     // -- CSR Bit-- 
-    function csr_bit;
-	input [11:0] csr_index;
-	input integer bit_position;
-        reg [63:0] csr_value;
-	begin
-	    csr_value = csr_read(csr_index);
-	    csr_bit = csr_value[bit_position];
-	end
-    endfunction
+    //function csr_bit;
+    //    input [11:0] csr_index;
+    //    input integer bit_position;
+    //    reg [63:0] csr_value;
+    //    begin
+    //        csr_value = csr_read(csr_index);
+    //        csr_bit = csr_value[bit_position];
+    //    end
+    //endfunction
     // -- CSR Writer -- 
     function csr_write;
 	input [11:0] csr_index;
