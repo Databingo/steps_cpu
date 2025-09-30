@@ -130,12 +130,12 @@ module cpu_on_board (
            read_address_reg <= bus_address_cache;
     end
     always @(posedge CLOCK_50) begin // Read-During-Write (read get old data in same cycle with write)
+        port_b_data_out <= {32'd0, Cache[read_address_reg]}; // Read path (Unconditional)
 	if (bus_write_enable) begin
 	   //if (Ram_selected || Art_selected) Cache[bus_address/4] <= bus_write_data; 
 	   //if (Ram_selected) Cache[bus_address/4] <= bus_write_data; 
 	   //if (Ram_selected) Cache[bus_address/4] <= bus_write_data[31:0];  // cut fit 32 bit ram
-	   //if (Ram_selected) Cache[bus_address_cache] <= bus_write_data[31:0];  // cut fit 32 bit ram //work
-	   if (Ram_selected) Cache[read_address_reg] <= bus_write_data[31:0];  // cut fit 32 bit ram
+	   if (Ram_selected) Cache[bus_address_cache] <= bus_write_data[31:0];  // cut fit 32 bit ram //work
         //port_b_data_out <= {32'd0, Cache[bus_address[11:2]]}; // Read path (Unconditional)
         end
         //port_b_data_out <= {32'd0, Cache[bus_address_cache]}; // Read path (Unconditional)
