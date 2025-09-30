@@ -133,10 +133,16 @@ module cpu_on_board (
 	   if (Ram_selected) Cache[bus_address_cache] <= bus_write_data[31:0];  // cut fit 32 bit ram
         //port_b_data_out <= {32'd0, Cache[bus_address[11:2]]}; // Read path (Unconditional)
         end
-        port_b_data_out <= {32'd0, Cache[bus_address_cache]}; // Read path (Unconditional)
+        //port_b_data_out <= {32'd0, Cache[bus_address_cache]}; // Read path (Unconditional)
     end
 
     // Read
+    reg [63:0] read_address_reg;
+    always @(posedge CLOCK_50) begin
+	   read_address_reg <= bus_address_cache;
+    end
+    wire [63:0] data_from_bram = {32'd0, Cache[read_address_reg]};
+
     // 3.-- Synchronous Read Data Multiplexer --
     always @(posedge CLOCK_50) begin
 	if (bus_read_enable) begin
@@ -144,7 +150,8 @@ module cpu_on_board (
 	   //else if (bus_read_enable && (Rom_selected || Ram_selected)) bus_read_data <= {32'd0, port_b_data_out};
 	   //if (Ram_selected) bus_read_data <= {32'd0, Cache[bus_address[11:2]]}; // 32 ram,cannot/4
 	   //if (Ram_selected) bus_read_data <= {32'd0, Cache[bus_address_cache]}; // 32 ram,cannot/4
-	   if (Ram_selected) bus_read_data <= port_b_data_out;
+	   //if (Ram_selected) bus_read_data <= port_b_data_out;
+	   if (Ram_selected) bus_read_data <= data_from_bram;
 	   //if (Ram_selected) bus_read_data <= 64'd80;
 	   //if (Ram_selected) bus_read_data <= {32'd0, Cache[bus_address/4]}; // 32 bit ram
 	   //if (Rom_selected || Ram_selected) bus_read_data <= {32'd0, Cache[bus_address[11:2]]};
