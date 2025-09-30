@@ -122,8 +122,6 @@ module cpu_on_board (
     wire Art_selected = (bus_address == `Art_base);
 
     // 2. Write Port B
-    reg [63:0] read_address_reg; // need Two register for read & write logically
-    always @(posedge CLOCK_50) read_address_reg <= bus_address>>2;
     always @(posedge CLOCK_50) begin
 	if (bus_write_enable) begin
 	   if (Ram_selected) Cache[bus_address>>2] <= bus_write_data[31:0];  // cut fit 32 bit ram //work
@@ -131,7 +129,10 @@ module cpu_on_board (
     end
 
     // 3. Read Port B
+    reg [63:0] read_address_reg; // need Two register for read & write logically
+    //always @(posedge CLOCK_50) read_address_reg <= bus_address>>2;
     always @(posedge CLOCK_50) begin
+	read_address_reg <= bus_address>>2;
 	if (bus_read_enable) begin
 	   if (Key_selected) bus_read_data <= {32'd0, 24'd0, ascii};
 	   if (Ram_selected) bus_read_data <= {32'd0, Cache[read_address_reg]};
