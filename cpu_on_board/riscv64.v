@@ -8,15 +8,12 @@ module riscv64(
     output reg [31:0] ir,
     output reg [63:0] re [0:31], // General Registers 32s
     output wire  heartbeat,
-
     input  reg [3:0] interrupt_vector, // notice from outside
     output reg  interrupt_ack,         // reply to outside
-
-    output reg [63:0] bus_address,     // 39 bit for real standard?
+    output reg [63:0] bus_address,     // 39 bit for real standard? 64 bit now
     output reg [63:0] bus_write_data,
     output reg        bus_write_enable,
     output reg        bus_read_enable,
-
     input  wire [63:0] bus_read_data   // from outside
 );
     // -- CSR Index--
@@ -107,7 +104,7 @@ module riscv64(
 	    bubble <= 1'b0;
 	    pc <= `Ram_base;
 	    lb_step <= 0;
-            sd_step <= 0;
+            //sd_step <= 0;
 	    bus_read_enable <= 0;
 	    bus_write_enable <= 0;
 	    bus_write_data <= 0;
@@ -143,16 +140,14 @@ module riscv64(
 	        bus_write_enable <= 0; 
 	        bus_write_data <= 0;
 	        bus_address <= `Ram_base;
-                casez(ir) 
-		    // Pseudo: li call j ret // I: lui ld sd addi jal jalr mret auipc beq slt
+                casez(ir) // Pseudo: li call j ret // I: lui ld sd addi jal jalr mret auipc beq slt
 	            32'b???????_?????_?????_???_?????_0110111: re[w_rd] <= w_imm_u; // Lui
 	            32'b???????_?????_?????_???_?????_0010111: re[w_rd] <= pc - 4  +  w_imm_u; // Auipc
 		    32'b???????_?????_?????_000_?????_1100011: begin if (re[w_rs1] == re[w_rs2]) begin pc <= pc - 4 + w_imm_b; bubble <= 1'b1; end end // Beq
 	            32'b???????_?????_?????_010_?????_0110011: re[w_rd] <= ($signed(re[w_rs1]) < $signed(re[w_rs2])) ? 1: 0;  // Slt
 	            32'b0011000_00010_?????_000_?????_1110011: begin pc <= csr_read(mepc); bubble <= 1; csr_mstatus[MIE] <= csr_mstatus[MPIE]; csr_mstatus[MPIE] <= 1; end  // Mret
-		    32'b???????_?????_?????_011_?????_0000011: begin  // Ld
-	                if (lb_step == 0) begin bus_address <= re[w_rs1] + w_imm_i ; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; lb_step <= 1; end
-	                if (lb_step == 1) begin re[w_rd]<= bus_read_data; lb_step <= 0; end end 
+		    32'b???????_?????_?????_011_?????_0000011: begin if (lb_step == 0) begin bus_address <= re[w_rs1] + w_imm_i ; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; lb_step <= 1; end
+	                                                             if (lb_step == 1) begin re[w_rd]<= bus_read_data; lb_step <= 0; end end  // Ld
 	            32'b???????_?????_?????_011_?????_0100011: begin bus_address <= re[w_rs1] + w_imm_s; bus_write_data <= re[w_rs2]; bus_write_enable <= 1; pc <= pc; bubble <= 1; end // Sd
 	            32'b???????_?????_?????_000_?????_0010011: re[w_rd] <= re[w_rs1] + w_imm_i;  // Addi
 	            32'b???????_?????_?????_???_?????_1101111: begin pc <= pc - 4 + w_imm_j; if (w_rd != 5'b0) re[w_rd] <= pc; bubble <= 1'b1; end // Jal
