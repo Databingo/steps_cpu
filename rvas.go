@@ -891,7 +891,7 @@ func main() {
 			//	real_instr.WriteString(ins)
 
 			//}
-			/////////////////////////-- deploy 5 (2 or 6 instructions)
+			/////////////////////////-- deploy 5 (max 6 instructions)
                         //prepare lo32 in t1:
                         A_lo32 := imm & 0xffffffff
                         A_lo32_h20 := A_lo32 >> 12
