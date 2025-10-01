@@ -13,6 +13,8 @@ print_f:
 print_p:
     addi t1, x0, 80         # ASCII P
     sd t1, 4(t0)
+hang:
+    j hang
 add_five:
     addi a0, a0, 5      # a0 = a0 + 5. (5 + 5 = 10). The result is now in a0.
     ret                 # 'ret' is a pseudo-instruction for 'jalr x0, ra, 0'.
