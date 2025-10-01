@@ -8,15 +8,16 @@
 _start:
     # --- Setup Phase (using only ADDI) ---
 
-    # 1. Get the RAM address (0x1000) into t0.
-    #    This pseudo-instruction assembles to: addi t0, x0, 4096
-    addi t0, x0, 0x1000
+    # 1. Get the RAM address into t0.
+    addi t0, x0, 2047
+    addi t0, t0, 2047
+    addi t0, t0, 2047
     
     # 2. Get the test character 'P' (ASCII 86) into t1.
     addi t1, x0, 80
     
     # --- Write to RAM (using trusted SD) ---
-    # Store 'P' at address 0x1000.
+    # Store 'P' at t0
     sd t1, 0(t0)
     
     # --- Action Phase: The Instruction Under Test (LD) ---
@@ -24,7 +25,7 @@ _start:
     # 3. Clear the destination register t2 to ensure we're not seeing a stale value.
     addi t2, x0, 0
     
-    # 4. Load the value from address 0x1000 into t2.
+    # 4. Load the value 
     #    If 'ld' works, t2 should now contain 86.
     ld t2, 0(t0)
     
