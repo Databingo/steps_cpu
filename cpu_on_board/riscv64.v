@@ -41,13 +41,12 @@ module riscv64(
     wire [4:0] w_rd  = ir[11:7];
     wire [4:0] w_rs1 = ir[19:15];
     wire [4:0] w_rs2 = ir[24:20];
-
     // -- CSR Registers --
     reg [63:0] csr_mepc;
     reg [63:0] csr_mstatus;
     reg [63:0] csr_mcasue;
     reg [63:0] csr_mtvec = 64'd0;
-    // -- CSR Other Registers -- use BRAM in FPGA then SRAM in ASIC
+    // -- CSR Other Registers -- use BRAM in FPGA then SRAM in ASIC port?
     //reg [63:0] other_csr [0:4096]; // Maximal 12-bit length = 4096 
     // -- CSR Reader -- 
     function [63:0] csr_read;
