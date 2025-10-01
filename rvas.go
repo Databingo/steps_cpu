@@ -898,23 +898,26 @@ func main() {
                         A_lo32_lo12 := A_lo32 & 0xfff
                         if A_lo32_lo12 & 0x800 !=0 { A_lo32_h20 += 1}
                         if A_lo32_h20 != 0 { ins = fmt.Sprintf("lui %s, %#x\n", code[1], A_lo32_h20) 
-			                     real_instr.WriteString(ins) }
-			ins = fmt.Sprintf("addi %s, %s, %#x\n", code[1], code[1], A_lo32_lo12)
-			real_instr.WriteString(ins)
-                        //if A_hi32 == 0 rd is A64 already
+			                     real_instr.WriteString(ins)
+			                     ins = fmt.Sprintf("addi %s, %s, %#x\n", code[1], code[1], A_lo32_lo12)
+			                     real_instr.WriteString(ins)
+                        } else { ins = fmt.Sprintf("addi %s, x0, %#x\n", code[1], A_lo32_lo12)
+			         real_instr.WriteString(ins) }
                         A_hi32 := imm >> 32
                         if A_lo32 & 0x80000000 !=0 { A_hi32 +=1 }
-                        if A_hi32 == 0 {continue}
+                        if A_hi32 == 0 { continue } //if A_hi32 == 0 rd is A64 already
 
                         //prepare hi32 in x2:
                         A_hi32_h20 := A_hi32 >> 12
                         A_hi32_lo12 := A_hi32 & 0xfff
                         if A_hi32_lo12 & 0x800 !=0 { A_hi32_h20 += 1}
                         if A_hi32_h20 != 0 { ins = fmt.Sprintf("lui %s, %#x\n", "x2", A_hi32_h20) 
-			                     real_instr.WriteString(ins) }
-			ins = fmt.Sprintf("addi %s, %s, %#x\n", "x2", "x2", A_hi32_lo12)
-			real_instr.WriteString(ins)
-			//shift x2 32 to left logic
+			                     real_instr.WriteString(ins)
+			                     ins = fmt.Sprintf("addi %s, %s, %#x\n", "x2", "x2", A_hi32_lo12)
+			                     real_instr.WriteString(ins)
+                        } else { ins = fmt.Sprintf("addi %s, x0, %#x\n", "x2",  A_hi32_lo12)
+			         real_instr.WriteString(ins) }
+			//shift to hi32
 			ins = fmt.Sprintf("slli %s, %s, %#x\n", "x2", "x2", 32)
 			real_instr.WriteString(ins)
 
