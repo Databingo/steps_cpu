@@ -62,6 +62,3 @@ _start:
     addi t1, t1, -50
     # Verification Point 5: Print '!'
     sd t1, 4(t0)       # Write '!'
-
-done:
-    j done              # Infinite loop to halt the processor.

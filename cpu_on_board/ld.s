@@ -1,0 +1,46 @@
+# RISC-V Assembly: True Minimal 'ld' Test
+# Goal: Write 'P' to RAM, load it back with 'ld', and print the result to UART.
+# Instructions used: ONLY addi, sd, ld.
+
+.section .text
+.globl _start
+
+_start:
+    # --- Setup Phase (using only ADDI) ---
+
+    # 1. Get the RAM address (0x1000) into t0.
+    #    This pseudo-instruction assembles to: addi t0, x0, 4096
+    addi t0, x0, 0x1000
+    
+    # 2. Get the test character 'P' (ASCII 86) into t1.
+    addi t1, x0, 80
+    
+    # --- Write to RAM (using trusted SD) ---
+    # Store 'P' at address 0x1000.
+    sd t1, 0(t0)
+    
+    # --- Action Phase: The Instruction Under Test (LD) ---
+    
+    # 3. Clear the destination register t2 to ensure we're not seeing a stale value.
+    addi t2, x0, 0
+    
+    # 4. Load the value from address 0x1000 into t2.
+    #    If 'ld' works, t2 should now contain 86.
+    ld t2, 0(t0)
+    
+    # --- Verification Phase: Print the Result ---
+    
+    # 5. Get the UART address (0x2004) into t3.
+    #    (Using a sequence of addi instructions as before)
+    addi t3, x0, 2047
+    addi t3, t3, 2047
+    addi t3, t3, 2047
+    addi t3, t3, 2047
+    addi t3, t3, 8      # t3 = 8196 (0x2004)
+    
+    # 6. Store the value we loaded from RAM (now in t2) to the UART.
+    sd t2, 0(t3)
+    
+done:
+    # Halt the processor.
+    j done
