@@ -1,6 +1,4 @@
-# RISC-V Assembly: Comprehensive ADDI Test using only ADDI and SD
 # Goal: Perform a series of ADDI tests and print "PASS!" to the UART.
-#       Each character is stored to a different UART address to prevent overwriting.
 
 .section .text
 .globl _start
@@ -21,8 +19,6 @@ _start:
     # --- Test 1: Basic Positive Immediate ---
     # Expected result: t1 = 100
     addi t1, t1, 100
-    # Store the result to check later if needed (optional)
-    # sd t1, 0(sp) 
 
     # --- Test 2: Chaining and Zero Immediate ---
     # Expected result: t1 = 100 (no change)
@@ -45,7 +41,6 @@ _start:
     # Expected result: t1 = 2127 + (-2048) = 80 - 1 = 79
     addi t1, t1, -2048
     
-    # At this point, t1 should hold 79. Let's adjust it to an ASCII value.
     # Expected result: t1 = 79 - 14 = 65. ASCII for 'A' is 65.
     addi t1, t1, -14
     # Verification Point 2: Print 'A'
