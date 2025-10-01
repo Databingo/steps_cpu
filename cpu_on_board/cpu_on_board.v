@@ -69,6 +69,7 @@ module cpu_on_board (
 	.interrupt_ack(interrupt_ack),
 
         .bus_address(bus_address),
+        .bus_address_read(bus_address_read),
         .bus_write_data(bus_write_data),
         .bus_write_enable(bus_write_enable),
         .bus_read_enable(bus_read_enable),
@@ -109,6 +110,7 @@ module cpu_on_board (
     // -- Bus --
     reg  [63:0] bus_read_data;
     wire [63:0] bus_address;
+    wire [63:0] bus_address_read;
     wire        bus_read_enable;
     wire [63:0] bus_write_data;
     wire        bus_write_enable;
@@ -139,18 +141,28 @@ module cpu_on_board (
     //    end
     //end
 
+    //// 3. Read Port B
+    //reg [63:0] read_address_reg; // need Two register for read & write logically
+    //always @(posedge CLOCK_50) read_address_reg <= bus_address>>2;
+    //wire [63:0] data_from_bram = {32'b0, Cache[read_address_reg]};
+    //always @(posedge CLOCK_50) begin
+    //    //read_address_reg <= bus_address>>2;
+    //    if (bus_read_enable) begin
+    //       if (Key_selected) bus_read_data <= {32'd0, 24'd0, ascii};
+    //       if (Ram_selected) bus_read_data <= data_from_bram;
+    //    end
+    //end
+
     // 3. Read Port B
-    reg [63:0] read_address_reg; // need Two register for read & write logically
-    always @(posedge CLOCK_50) read_address_reg <= bus_address>>2;
-    wire [63:0] data_from_bram = {32'b0, Cache[read_address_reg]};
     always @(posedge CLOCK_50) begin
         //read_address_reg <= bus_address>>2;
         if (bus_read_enable) begin
            if (Key_selected) bus_read_data <= {32'd0, 24'd0, ascii};
-           if (Ram_selected) bus_read_data <= data_from_bram;
+           if (Ram_selected) bus_read_data <= {32'd0, Cache[bus_address_read]};
         end
     end
-
+      
+      
     // 4.-- UART Writer Trigger --
     wire uart_write_trigger = bus_write_enable && Art_selected;
     reg uart_write_trigger_dly;

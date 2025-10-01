@@ -11,6 +11,7 @@ module riscv64(
     input  reg [3:0] interrupt_vector, // notice from outside
     output reg  interrupt_ack,         // reply to outside
     output reg [63:0] bus_address,     // 39 bit for real standard? 64 bit now
+    output reg [63:0] bus_address_read,     // 39 bit for real standard? 64 bit now
     output reg [63:0] bus_write_data,
     output reg        bus_write_enable,
     output reg        bus_read_enable,
@@ -108,6 +109,7 @@ module riscv64(
 	    bus_write_enable <= 0;
 	    bus_write_data <= 0;
 	    bus_address <= `Ram_base;
+	    bus_address_read <= `Ram_base;
             // Interrupt re-enable
 	    csr_mstatus[MIE] <= 1;
 	    interrupt_ack <= 0;
@@ -144,7 +146,8 @@ module riscv64(
 	            32'b???????_?????_?????_???_?????_0110111: re[w_rd] <= w_imm_u; // Lui
 	            32'b???????_?????_?????_???_?????_0010111: re[w_rd] <= pc - 4  +  w_imm_u; // Auipc
                     // Load
-		    32'b???????_?????_?????_011_?????_0000011: begin if (lb_step == 0) begin bus_address <= re[w_rs1] + w_imm_i ; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; lb_step <= 1; end
+		    32'b???????_?????_?????_011_?????_0000011: begin if (lb_step == 0) begin bus_address <= re[w_rs1] + w_imm_i ; bus_address_read <= re[w_rs1] + w_imm_i ;
+		    bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; lb_step <= 1; end
 	                                                             if (lb_step == 1) begin re[w_rd]<= bus_read_data; lb_step <= 0; end end  // Ld
 		    //32'b???????_?????_?????_100_?????_0000011: begin mem_addr <= l_addr; re[w_rd] <= {56'b0, mem_data_in[7:0]}; end // Lbu
 	            //32'b???????_?????_?????_001_?????_0000011: begin mem_addr <= l_addr; re[w_rd] <= {{48{mem_data_in[15]}}, mem_data_in[15:0]}; end // Lh
