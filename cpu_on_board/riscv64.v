@@ -11,7 +11,7 @@ module riscv64(
     input  reg [3:0] interrupt_vector, // notice from outside
     output reg  interrupt_ack,         // reply to outside
     output reg [63:0] bus_address,     // 39 bit for real standard? 64 bit now
-    output reg [63:0] bus_address_read,     // 39 bit for real standard? 64 bit now
+    output wire [63:0] bus_address_read,     // 39 bit for real standard? 64 bit now
     output reg [63:0] bus_write_data,
     output reg        bus_write_enable,
     output reg        bus_read_enable,

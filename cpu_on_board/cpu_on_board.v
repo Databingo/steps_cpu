@@ -110,7 +110,7 @@ module cpu_on_board (
     // -- Bus --
     reg  [63:0] bus_read_data;
     wire [63:0] bus_address;
-    wire [63:0] bus_address_read;
+    reg [63:0] bus_address_read;
     wire        bus_read_enable;
     wire [63:0] bus_write_data;
     wire        bus_write_enable;
