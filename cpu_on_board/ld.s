@@ -41,7 +41,3 @@ _start:
     
     # 6. Store the value we loaded from RAM (now in t2) to the UART.
     sd t2, 0(t3)
-    
-done:
-    # Halt the processor.
-    j done
