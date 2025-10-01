@@ -81,7 +81,6 @@ module riscv64(
 	    endcase
 	end
     endfunction
-
     // -- Innerl signal --
     reg bubble;
     reg lb_step;
