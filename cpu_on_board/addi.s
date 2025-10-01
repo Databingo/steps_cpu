@@ -1,20 +1,34 @@
-# Test ADDI: Calculates 2 + 3 = 5, prints '5' (ASCII 0x35)
+# RISC-V Assembly: Ultimate Minimal 'sd' Test with UART Verification
+# Goal: Write the character 'P' to the UART at address 0x2004.
+# Instructions used: ONLY ADDI and SD.
 
-# --- Test Logic ---
-addi t0, x0, 2      # t0 = 2
-addi t0, t0, 3      # t0 = t0 + 3 = 5
+.section .text
+.globl _start
 
-# --- Convert result to printable ASCII ---
-# ASCII for '0' is 48 (0x30). We add this to our result.
-addi a0, t0, 48     # a0 = 5 + 48 = 53 (ASCII for '5')
+_start:
+    # --- Setup Phase (using ONLY ADDI) ---
 
-# --- Print the character in a0 to the UART ---
-# Load the UART base address (0x2000) into t1
-lui  t1, 0x2
-# Store the character from a0 to the UART data register at address 0x2004
-sd   a0, 4(t1)
+    # 1. Construct the UART address (0x2004) in a base register (t0).
+    #    We will do this by adding 2048 + 2048 + 2048 + 4 = 8196 = 0x2004
+    #    The immediate in ADDI is 12 bits, so the max is 2047.
+    
+    addi t0, x0, 2047   # t0 = 2047
+    addi t0, t0, 2047   # t0 = 4094
+    addi t0, t0, 2047   # t0 = 6141
+    addi t0, t0, 2047   # t0 = 8188 (0x1FFC)
+    addi t0, t0, 8      # t0 = 8196 (0x2004). The address is ready.
+    
+    # 2. Load the data we want to write ('P') into a source register (t1).
+    #    The ASCII code for 'P' is 80.
+    addi t1, x0, 80     # t1 = 80
+    
+    # --- Action Phase: The Instruction Under Test ---
 
-# --- End of program ---
-# Infinite loop to halt the CPU after the test is done.
-hang:
-    j hang
+    # 3. Store the value from t1 ('P') into the memory address pointed to by t0 (0x2004).
+    #    This should send the character to the UART.
+    #    Instruction: sd rs2, offset(rs1)
+    #    Here:        sd t1, 0(t0)
+    sd t1, 0(t0)
+
+done:
+    j done              # Infinite loop to halt the processor.
