@@ -161,7 +161,7 @@ module cpu_on_board (
            if (Key_selected) bus_read_data <= {32'd0, 24'd0, ascii};
            //if (Ram_selected) bus_read_data <= {32'd0, Cache[read_address_reg]};
            //if (Ram_selected) bus_read_data <= {32'd0, Cache[bus_address>>2]};
-           if (Ram_selected) bus_read_data <= {32'd0, bus_read_data]};
+           if (Ram_selected) bus_read_data <= {32'd0, bus_read_data};
         end
     end
       
