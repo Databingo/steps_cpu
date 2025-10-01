@@ -131,7 +131,7 @@ module riscv64(
 		interrupt_ack <= 1; // reply to outside
 
             // Bubble
-	    end else if (bubble) bubble <= 1'b0; bus_write_enable <=0; // Flush this cycle & Clear bubble signal for the next cycle
+	    end else if (bubble) begin bubble <= 1'b0; bus_write_enable <=0; end // Flush this cycle & Clear bubble signal for the next cycle
 
 	    // IR
 	    else begin 
