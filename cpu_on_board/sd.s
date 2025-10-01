@@ -11,7 +11,8 @@ print_f:
     addi t1, x0, 70         # ASCII F
     sd t1, 4(t0)
 print_p:
-    addi t1, x0, 80         # ASCII P
+    #addi t1, x0, 80         # ASCII P
+    li t1, 80         # ASCII P
     sd t1, 4(t0)
 hang:
     j hang

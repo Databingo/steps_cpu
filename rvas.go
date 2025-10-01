@@ -897,29 +897,31 @@ func main() {
                         A_lo32_h20 := A_lo32 >> 12
                         A_lo32_lo12 := A_lo32 & 0xfff
                         if A_lo32_lo12 & 0x800 !=0 { A_lo32_h20 += 1}
-				ins = fmt.Sprintf("lui %s, %#x\n", code[1], A_lo32_h20)
-				real_instr.WriteString(ins)
-				ins = fmt.Sprintf("addi %s, %s, %#x\n", code[1], code[1], A_lo32_lo12)
-				real_instr.WriteString(ins)
+                        if A_lo32_h20 != 0 { ins = fmt.Sprintf("lui %s, %#x\n", code[1], A_lo32_h20) 
+			                     real_instr.WriteString(ins) }
+			ins = fmt.Sprintf("addi %s, %s, %#x\n", code[1], code[1], A_lo32_lo12)
+			real_instr.WriteString(ins)
                         //if A_hi32 == 0 t1 is A64 already
                         A_hi32 := imm >> 32
                         if A_lo32 & 0x80000000 !=0 { A_hi32 +=1 }
-                        if A_hi32 != 0 {continue}
+                        if A_hi32 == 0 {continue}
 
                         //prepare hi32 in t2:
                         A_hi32_h20 := A_hi32 >> 12
                         A_hi32_lo12 := A_hi32 & 0xfff
                         if A_hi32_lo12 & 0x800 !=0 { A_hi32_h20 += 1}
-				ins = fmt.Sprintf("lui %s, %#x\n", "x2", A_hi32_h20)
-				real_instr.WriteString(ins)
-				ins = fmt.Sprintf("addi %s, %s, %#x\n", "x2", "x2", A_hi32_lo12)
-				real_instr.WriteString(ins)
-                                //combination hi32 t1 and lo32 t2 as 64 bit A:
-				ins = fmt.Sprintf("add %s, %s, %s\n", code[1], code[1], "x2")
-				real_instr.WriteString(ins)
-				//slli t2 t2, 32
-				ins = fmt.Sprintf("slli %s, %s, %#x\n", "x2", "x2", 32)
-				real_instr.WriteString(ins)
+                        if A_hi32_h20 != 0 { ins = fmt.Sprintf("lui %s, %#x\n", "x2", A_hi32_h20) 
+			                     real_instr.WriteString(ins) }
+			ins = fmt.Sprintf("addi %s, %s, %#x\n", "x2", "x2", A_hi32_lo12)
+			real_instr.WriteString(ins)
+
+			//slli t2 t2, 32
+			ins = fmt.Sprintf("slli %s, %s, %#x\n", "x2", "x2", 32)
+			real_instr.WriteString(ins)
+
+                        //combination hi32 t1 and lo32 t2 as 64 bit A:
+			ins = fmt.Sprintf("add %s, %s, %s\n", code[1], code[1], "x2")
+			real_instr.WriteString(ins)
 
 
 		case "j": // PC尾跳转 j offset|jump to pc+offset
