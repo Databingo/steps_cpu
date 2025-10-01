@@ -157,9 +157,9 @@ module cpu_on_board (
     always @(posedge CLOCK_50) begin
         //read_address_reg <= bus_address>>2;
         //bus_read_data <= {32'd0, Cache[bus_address>>2]};
-	if (bus_write_enable) begin
-	   if (Ram_selected) Cache[bus_address>>2] <= bus_write_data[31:0];  // cut fit 32 bit ram //work
-        end
+	//if (bus_write_enable) begin
+	//   if (Ram_selected) Cache[bus_address>>2] <= bus_write_data[31:0];  // cut fit 32 bit ram //work
+        //end
         read_data <= {32'd0, Cache[bus_address>>2]};
         if (bus_read_enable) begin
            if (Key_selected) bus_read_data <= {32'd0, 24'd0, ascii};
