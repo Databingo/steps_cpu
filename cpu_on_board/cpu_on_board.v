@@ -153,10 +153,10 @@ module cpu_on_board (
     //end
 
     // 3. Read Port B
-    //reg [63:0] read_address_reg;
+    reg [63:0] read_data;
     always @(posedge CLOCK_50) begin
         //read_address_reg <= bus_address>>2;
-        bus_read_data <= {32'd0, Cache[bus_address>>2]};
+        read_data <= {32'd0, Cache[bus_address>>2]};
     end
     always @(posedge CLOCK_50) begin
         //read_address_reg <= bus_address>>2;
@@ -165,7 +165,7 @@ module cpu_on_board (
            if (Key_selected) bus_read_data <= {32'd0, 24'd0, ascii};
            //if (Ram_selected) bus_read_data <= {32'd0, Cache[read_address_reg]};
            //if (Ram_selected) bus_read_data <= {32'd0, Cache[bus_address>>2]};
-           if (Ram_selected) bus_read_data <= {32'd0, bus_read_data};
+           if (Ram_selected) bus_read_data <= {32'd0, read_data};
         end
     end
       
