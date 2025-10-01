@@ -54,7 +54,6 @@ _start:
     # Verification Point 3: Print 'S'
     sd t1, 4(t0)       # Write 'S'
     
-    addi t6, t6, 0
     # Verification Point 4: Print another 'S'
     sd t1, 4(t0)       # Write 'S'
 
