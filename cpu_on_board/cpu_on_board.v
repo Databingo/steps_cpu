@@ -165,7 +165,7 @@ module cpu_on_board (
            if (Ram_selected) bus_read_data <= read_data;
         end
 	if (bus_write_enable) begin
-	   if (Ram_selected) Cache[bus_address>>2] <= bus_write_data[31:0];  // cut fit 32 bit ram //work
+	   if (Ram_selected) Cache[bus_address[11:2]] <= bus_write_data[31:0];  // cut fit 32 bit ram //work
         end
     end
       
