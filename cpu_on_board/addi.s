@@ -49,22 +49,22 @@ _start:
     # Expected result: t1 = 79 - 14 = 65. ASCII for 'A' is 65.
     addi t1, t1, -14
     # Verification Point 2: Print 'A'
-    sd t1, 8(t0)        # Write 'A' to address 0x2008
+    sd t1, 4(t0)        # Write 'A'
     
     # --- Test 6: Adding to a non-zero register ---
     # Expected result: t1 = 65 + 18 = 83. ASCII for 'S' is 83.
     addi t1, t1, 18
     # Verification Point 3: Print 'S'
-    sd t1, 12(t0)       # Write 'S' to address 0x200C
+    sd t1, 4(t0)       # Write 'S'
     
     # Verification Point 4: Print another 'S'
-    sd t1, 16(t0)       # Write 'S' to address 0x2010
+    sd t1, 4(t0)       # Write 'S'
 
     # --- Final Test: Create '!' ---
     # Expected result: t1 = 83 - 50 = 33. ASCII for '!' is 33.
     addi t1, t1, -50
     # Verification Point 5: Print '!'
-    sd t1, 20(t0)       # Write '!' to address 0x2014
+    sd t1, 4(t0)       # Write '!'
 
 done:
     j done              # Infinite loop to halt the processor.
