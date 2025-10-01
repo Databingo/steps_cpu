@@ -153,7 +153,7 @@ module cpu_on_board (
     //end
 
     // 3. Read Port B
-    //reg [63:0] read_data;
+    reg [63:0] read_data;
     always @(posedge CLOCK_50) begin
         //read_address_reg <= bus_address>>2;
         //bus_read_data <= {32'd0, Cache[bus_address>>2]};
