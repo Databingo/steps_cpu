@@ -1,34 +1,70 @@
-# RISC-V Assembly: Ultimate Minimal 'sd' Test with UART Verification
-# Goal: Write the character 'P' to the UART at address 0x2004.
-# Instructions used: ONLY ADDI and SD.
+# RISC-V Assembly: Comprehensive ADDI Test using only ADDI and SD
+# Goal: Perform a series of ADDI tests and print "PASS!" to the UART.
+#       Each character is stored to a different UART address to prevent overwriting.
 
 .section .text
 .globl _start
 
 _start:
-    # --- Setup Phase (using ONLY ADDI) ---
-
-    # 1. Construct the UART address (0x2004) in a base register (t0).
-    #    We will do this by adding 2048 + 2048 + 2048 + 4 = 8196 = 0x2004
-    #    The immediate in ADDI is 12 bits, so the max is 2047.
-    
+    # --- Setup Phase ---
+    # We will use t0 as our UART base address pointer.
+    # We construct the base address 0x2000 using only ADDI.
     addi t0, x0, 2047   # t0 = 2047
     addi t0, t0, 2047   # t0 = 4094
     addi t0, t0, 2047   # t0 = 6141
     addi t0, t0, 2047   # t0 = 8188 (0x1FFC)
-    addi t0, t0, 8      # t0 = 8196 (0x2004). The address is ready.
-    
-    # 2. Load the data we want to write ('P') into a source register (t1).
-    #    The ASCII code for 'P' is 80.
-    addi t1, x0, 80     # t1 = 80
-    
-    # --- Action Phase: The Instruction Under Test ---
+    addi t0, t0, 4      # t0 = 8192 (0x2000). UART base address is ready.
 
-    # 3. Store the value from t1 ('P') into the memory address pointed to by t0 (0x2004).
-    #    This should send the character to the UART.
-    #    Instruction: sd rs2, offset(rs1)
-    #    Here:        sd t1, 0(t0)
-    sd t1, 0(t0)
+    # We will use t1 as our test register.
+    addi t1, x0, 0      # Start with t1 = 0.
+
+    # --- Test 1: Basic Positive Immediate ---
+    # Expected result: t1 = 100
+    addi t1, t1, 100
+    # Store the result to check later if needed (optional)
+    # sd t1, 0(sp) 
+
+    # --- Test 2: Chaining and Zero Immediate ---
+    # Expected result: t1 = 100 (no change)
+    addi t1, t1, 0
+    
+    # --- Test 3: Basic Negative Immediate (Subtraction) ---
+    # Expected result: t1 = 100 - 20 = 80
+    addi t1, t1, -20
+
+    # At this point, t1 should hold 80. The ASCII for 'P' is 80.
+    # Verification Point 1: Print 'P'
+    sd t1, 4(t0)        # Write 'P' to address 0x2004
+
+    # --- Test 4: Large Positive Immediate ---
+    # Expected result: t1 = 80 + 2047 = 2127
+    addi t1, t1, 2047
+    
+    # --- Test 5: Large Negative Immediate ---
+    # This will test the sign extension of the 12-bit immediate.
+    # Expected result: t1 = 2127 + (-2048) = 80 - 1 = 79
+    addi t1, t1, -2048
+    
+    # At this point, t1 should hold 79. Let's adjust it to an ASCII value.
+    # Expected result: t1 = 79 - 14 = 65. ASCII for 'A' is 65.
+    addi t1, t1, -14
+    # Verification Point 2: Print 'A'
+    sd t1, 8(t0)        # Write 'A' to address 0x2008
+    
+    # --- Test 6: Adding to a non-zero register ---
+    # Expected result: t1 = 65 + 18 = 83. ASCII for 'S' is 83.
+    addi t1, t1, 18
+    # Verification Point 3: Print 'S'
+    sd t1, 12(t0)       # Write 'S' to address 0x200C
+    
+    # Verification Point 4: Print another 'S'
+    sd t1, 16(t0)       # Write 'S' to address 0x2010
+
+    # --- Final Test: Create '!' ---
+    # Expected result: t1 = 83 - 50 = 33. ASCII for '!' is 33.
+    addi t1, t1, -50
+    # Verification Point 5: Print '!'
+    sd t1, 20(t0)       # Write '!' to address 0x2014
 
 done:
     j done              # Infinite loop to halt the processor.
