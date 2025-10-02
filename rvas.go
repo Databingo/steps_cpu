@@ -1543,15 +1543,14 @@ func main() {
 			    hi20 := uint32(offset) >> 12
 			    lo12 := uint32(offset) & 0xfff 
                             if lo12 & 0x800 !=0 { hi20 += 1}
-
 			    instruction = uint32(hi20)<<12 | rd<<7 | op
 			} else {
-			imm, err := isValidImmediate(code[2])
-			if err != nil {
-				fmt.Printf("3Error on line %d: %s\n", lineCounter, err)
-				os.Exit(0)
+			     imm, err := isValidImmediate(code[2])
+			     if err != nil {
+			     	fmt.Printf("3Error on line %d: %s\n", lineCounter, err)
+			     	os.Exit(0)
+			     instruction = uint32(imm)<<12 | rd<<7 | op
 			}
-			instruction = uint32(imm)<<12 | rd<<7 | op
 		    }
 
 		case "jal":
@@ -1698,6 +1697,7 @@ func main() {
 			//ins = fmt.Sprintf("jalr x0, 0(%s)\n", code[1])
 			//ins = fmt.Sprintf("auipc x1, 0 #R_RISCV_PCREL_HI20 %s\n", code[1])
 			//ins = fmt.Sprintf("jalr x1, 0(x1) #R_RISCV_PCREL_LO20 %s\n", code[1])
+			// for call
 			if code[2] == "0"  && strings.Contains(scanner.Text(), "R_RISCV_PCREL_LO20") {
 			    lab := strings.Split(scanner.Text(), " ")[4]
 
