@@ -77,8 +77,9 @@
 _start:
     lui t0, 0x2
     addi t0, t0, 4          # UART t0 = 0x2004
-    addi t1, x0, 20
-    jalr x0, 0(t1)          # Jump to address 20
+    lui t1, 1
+    addi t1, t1, 24
+    jalr x0, 0(t1)          # Jump to address 0x1000 + 24, 0x1000 is ram base
 
 jump_fail_loop:
     beq x0, x0, jump_fail_loop # Should be skipped.
