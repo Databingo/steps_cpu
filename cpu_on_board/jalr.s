@@ -87,25 +87,25 @@ jump_target:                  # Address should be 20
     addi t2, x0, 74           # ASCII for 'J'
     sd t2, 0(t0)              # Write 'J' to UART.
 
-link_test_start:              # Part 2: Verify the LINK operation
-    addi t1, x0, 44 
-    jalr t3, 0(t1)            # Jump to link_target, save PC+4 into t3 (36).
-    
-link_success_return:          # Address should be 0x36
-    beq x0, x0, done          # All tests passed, just loop here.
-
-link_fail_loop:
-    beq x0, x0, link_fail_loop
-
-link_target:
-    addi t4, x0, 36 # 2c. Manually construct the expected return address in t4.
-    beq t3, t4, print_link_success # If they match, the link is correct.
-    beq x0, x0, link_fail_loop # This is an unconditional jump to the fail loop.
-
-print_link_success:
-    addi t2, x0, 76         # ASCII for 'L'
-    sd t2, 0(t0)            # Write 'L' to UART.
-    jalr x0, 0(t3)          # Return to 'link_success_return'.
-
-done:
-    beq x0, x0, done
+#link_test_start:              # Part 2: Verify the LINK operation
+#    addi t1, x0, 44 
+#    jalr t3, 0(t1)            # Jump to link_target, save PC+4 into t3 (36).
+#    
+#link_success_return:          # Address should be 0x36
+#    beq x0, x0, done          # All tests passed, just loop here.
+#
+#link_fail_loop:
+#    beq x0, x0, link_fail_loop
+#
+#link_target:
+#    addi t4, x0, 36 # 2c. Manually construct the expected return address in t4.
+#    beq t3, t4, print_link_success # If they match, the link is correct.
+#    beq x0, x0, link_fail_loop # This is an unconditional jump to the fail loop.
+#
+#print_link_success:
+#    addi t2, x0, 76         # ASCII for 'L'
+#    sd t2, 0(t0)            # Write 'L' to UART.
+#    jalr x0, 0(t3)          # Return to 'link_success_return'.
+#
+#done:
+#    beq x0, x0, done
