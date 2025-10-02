@@ -1549,8 +1549,8 @@ func main() {
 			     if err != nil {
 			     	fmt.Printf("3Error on line %d: %s\n", lineCounter, err)
 			     	os.Exit(0)
-			     instruction = uint32(imm)<<12 | rd<<7 | op
 			}
+			     instruction = uint32(imm)<<12 | rd<<7 | op
 		    }
 
 		case "jal":
@@ -1695,12 +1695,11 @@ func main() {
 			//} 
 
 			//ins = fmt.Sprintf("jalr x0, 0(%s)\n", code[1])
-			//ins = fmt.Sprintf("auipc x1, 0 #R_RISCV_PCREL_HI20 %s\n", code[1])
-			//ins = fmt.Sprintf("jalr x1, 0(x1) #R_RISCV_PCREL_LO20 %s\n", code[1])
 			// for call
+			//ins = fmt.Sprintf("auipc x1, 0 #R_RISCV_PCREL_HI20 %s\n", code[1]) need check hi20+1 in auipc
+			//ins = fmt.Sprintf("jalr x1, 0(x1) #R_RISCV_PCREL_LO20 %s\n", code[1]) 
 			if code[2] == "0"  && strings.Contains(scanner.Text(), "R_RISCV_PCREL_LO20") {
 			    lab := strings.Split(scanner.Text(), " ")[4]
-
 			    label, labelFound := symbolTable[lab]
 
 			    if !labelFound {
@@ -1784,7 +1783,9 @@ func main() {
 		addr := fmt.Sprintf("%08b", address)
 		addrd := fmt.Sprintf("%05d", address)
 		little_endian_ins := ins[24:32] + " " + ins[16:24] + " " + ins[8:16] + " " + ins[0:8]
-		append2f(little_endian_ins+" // Addr: "+addrd+" "+addr+" "+ins+" "+line, "binary_instructions.txt")
+		//append2f(little_endian_ins+" // Addr: "+addrd+" "+addr+" "+ins+" "+line, "binary_instructions.txt")
+		append2f(little_endian_ins+" // Addr: "+addrd+" "+addr+" "+ins+" "+scanner.Text(), "binary_instructions.txt")
+
 		append2f(strings.Replace(little_endian_ins, " ", "", -1), "bin.txt")
 		lineCounter++
 		address += 4
