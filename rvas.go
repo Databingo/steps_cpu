@@ -1710,7 +1710,7 @@ func main() {
 			    offset := label - int64(address - 4) // offset based on auipc address
 			    lo12 := uint32(offset) & 0xfff 
 			    instruction = uint32(lo12)<<20 | rs1<<15 |  rd<<7 | op
-			    line = fmt.Sprintf("jalr %s, %#x(%s)\n", code[1], lo12, code[2])
+			    line = fmt.Sprintf("jalr %s, %#x(%s)\n", code[1], lo12, code[3])
 			} else {
 			    imm, err := isValidImmediate(code[2])
 			    if err != nil {
