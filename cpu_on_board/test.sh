@@ -11,8 +11,8 @@ cat bin.txt > rom.mif  # write ROM program
 #go run ../rvas.go li32.s
 #go run ../rvas.go li.s  #
 #go run ../rvas.go jalr.s
-go run ../rvas.go jal.s
-#go run ../rvas.go j_jr_ret.s  #
+#go run ../rvas.go jal.s
+go run ../rvas.go j_jr_ret.s  #
 #go run ../rvas.go auipc.s
 #go run ../rvas.go call.s #
 #go run ../rvas.go sd_ld.s
