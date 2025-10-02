@@ -18,8 +18,8 @@ my_function:                # Addr 0x10
 main_test_routine:          # Addr 0x14
     jal ra, my_function
     lui t1 0x1
-    addi t1, t1, 44       # Addr 0x18. Load the REAL address of 'pass'.
-    jr t1                   # Addr 0x1C. Jump to address 44 + ram base 0x1000
+    addi t1, t1, 40       # Addr 0x18. Load the REAL address of 'pass'.
+    jr t1                   # Addr 0x1C. Jump to address 40 + ram base 0x1000
 
 fail_loop_2:                # Addr 0x20
     beq x0, x0, fail_loop_2
@@ -28,4 +28,3 @@ pass:                       # Addr 0x24
     sd t1, 0(t0)            # Write 'P' to UART.
     
 pass_loop:
-    
