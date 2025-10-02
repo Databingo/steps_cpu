@@ -1544,6 +1544,7 @@ func main() {
 			    lo12 := uint32(offset) & 0xfff 
                             if lo12 & 0x800 !=0 { hi20 += 1}
 			    instruction = uint32(hi20)<<12 | rd<<7 | op
+			    line = fmt.Sprintf("auipc %s, %#x\n", code[1], hi20)
 			} else {
 			     imm, err := isValidImmediate(code[2])
 			     if err != nil {
@@ -1709,6 +1710,7 @@ func main() {
 			    offset := label - int64(address - 4) // offset based on auipc address
 			    lo12 := uint32(offset) & 0xfff 
 			    instruction = uint32(lo12)<<20 | rs1<<15 |  rd<<7 | op
+			    line = fmt.Sprintf("jalr %s, %#x(%s)\n", code[1], lo12, code[2])
 			} else {
 			    imm, err := isValidImmediate(code[2])
 			    if err != nil {
@@ -1783,8 +1785,8 @@ func main() {
 		addr := fmt.Sprintf("%08b", address)
 		addrd := fmt.Sprintf("%05d", address)
 		little_endian_ins := ins[24:32] + " " + ins[16:24] + " " + ins[8:16] + " " + ins[0:8]
-		//append2f(little_endian_ins+" // Addr: "+addrd+" "+addr+" "+ins+" "+line, "binary_instructions.txt")
-		append2f(little_endian_ins+" // Addr: "+addrd+" "+addr+" "+ins+" "+scanner.Text(), "binary_instructions.txt")
+		append2f(little_endian_ins+" // Addr: "+addrd+" "+addr+" "+ins+" "+line, "binary_instructions.txt")
+		//append2f(little_endian_ins+" // Addr: "+addrd+" "+addr+" "+ins+" "+scanner.Text(), "binary_instructions.txt")
 
 		append2f(strings.Replace(little_endian_ins, " ", "", -1), "bin.txt")
 		lineCounter++
