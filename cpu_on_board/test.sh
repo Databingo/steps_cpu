@@ -8,7 +8,8 @@ cat bin.txt > rom.mif  # write ROM program
 #go run ../rvas.go beq.s
 #go run ../rvas.go add.s
 #go run ../rvas.go slli.s
-go run ../rvas.go li32.s
+#go run ../rvas.go li32.s
+go run ../rvas.go li.s
 #
 #go run ../rvas.go sd_ld.s
 #go run ../rvas.go test.s
