@@ -892,6 +892,12 @@ func main() {
 
 			//}
 			/////////////////////////-- deploy 5 (max 6 instructions)
+			if imm == 0 {
+                                 ins = fmt.Sprintf("addi %s, x0, %#x\n", code[1], 0)
+			         real_instr.WriteString(ins) }
+				 continue
+			}
+
                         //prepare lo32 in t1:
                         A_lo32 := imm & 0xffffffff
                         A_lo32_h20 := A_lo32 >> 12
