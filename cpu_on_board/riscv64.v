@@ -162,7 +162,7 @@ module riscv64(
 			    load_step <= 1; 
 			end if (load_step == 1) begin 
 			    re[w_rd]<= bus_read_data; 
-			    bus_address <= re[w_rs1] + w_imm_i + 4; 
+			    bus_address <= re[w_rs1] + w_imm_i + 4;  // hight 32 bit data in next line
 			    bus_read_enable <= 1; 
 			    pc <= pc - 4; 
 			    bubble <= 1; 
@@ -182,7 +182,7 @@ module riscv64(
 			    bubble <= 1; 
 			    load_step <= 1; 
 			    //bus_byte_position <= re[w_rs1][1:0] + w_imm_i[1:0];  // byte_start_position in 32 bit data
-			    bus_byte_position <= (re[w_rs1] + w_imm_i)[1:0];  // byte_start_position in 32 bit data
+			    bus_byte_position <= (re[w_rs1] + w_imm_i) | 64'b11;  // byte_start_position in 32 bit data
 			    //bus_byte_position <= w_bus_address[1:0];  // byte_start_position in 32 bit data
 			end
 	                if (load_step == 1) begin 
