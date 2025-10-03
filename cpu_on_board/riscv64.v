@@ -181,12 +181,9 @@ module riscv64(
 			    pc <= pc - 4; 
 			    bubble <= 1; 
 			    load_step <= 1; 
-			    //bus_byte_position <= re[w_rs1][1:0] + w_imm_i[1:0];  // byte_start_position in 32 bit data
 			    bus_byte_position <= (re[w_rs1] + w_imm_i) | 64'b11;  // byte_start_position in 32 bit data
-			    //bus_byte_position <= w_bus_address[1:0];  // byte_start_position in 32 bit data
 			end
 	                if (load_step == 1) begin 
-			    //re[w_rd]<= $signed(bus_read_data[bus_byte_position*8+7:bus_byte_position*8]); 
 			    if (bus_byte_position == 0) re[w_rd]<= $signed(bus_read_data[7:0]); 
 			    if (bus_byte_position == 1) re[w_rd]<= $signed(bus_read_data[15:8]); 
 			    if (bus_byte_position == 2) re[w_rd]<= $signed(bus_read_data[23:16]); 
@@ -237,11 +234,15 @@ module riscv64(
 		            pc <= pc - 4; 
 		            bubble <= 1; 
 		            store_step <= 1; 
-			    bus_byte_position <= w_bus_address[1:0];  // byte_start_position in 32 bit data
+			    bus_byte_position <= (re[w_rs1] + w_imm_i) | 64'b11;  // byte_start_position in 32 bit data
 		        end
                         if (store_step == 1) begin 
 	                    bus_address <= re[w_rs1] + w_imm_s; 
-			    bus_write_data <= (re[w_rd][7:0]<<bus_byte_position*8) | (bus_read_data[31:0] & ~(32'b11111111<<bus_byte_position*8) );
+			    //bus_write_data <= (re[w_rd][7:0]<<bus_byte_position*8) | (bus_read_data[31:0] & ~(32'b11111111<<bus_byte_position*8) );
+			    if (bus_byte_position == 0) bus_write_data <= (re[w_rd][7:0]<<0) | (bus_read_data[31:0] & ~(32'b11111111<<0) );
+			    if (bus_byte_position == 1) bus_write_data <= (re[w_rd][7:0]<<8) | (bus_read_data[31:0] & ~(32'b11111111<<8) );
+			    if (bus_byte_position == 2) bus_write_data <= (re[w_rd][7:0]<<16) | (bus_read_data[31:0] & ~(32'b11111111<<16) );
+			    if (bus_byte_position == 3) bus_write_data <= (re[w_rd][7:0]<<24) | (bus_read_data[31:0] & ~(32'b11111111<<24) );
 			    bus_write_enable <= 1;
 		            store_step <= 0;  
 			    bus_byte_position <= 0;
