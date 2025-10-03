@@ -83,8 +83,8 @@ module riscv64(
     endfunction
     // -- Innerl signal --
     reg bubble;
-    reg lb_step;
-    //reg sd_step;
+    reg load_step;
+    reg store_step;
 
     // IF ir (Only drive IR)
     always @(posedge clk or negedge reset) begin
@@ -102,8 +102,8 @@ module riscv64(
         if (!reset) begin 
 	    bubble <= 1'b0;
 	    pc <= `Ram_base;
-	    lb_step <= 0;
-            //sd_step <= 0;
+	    load_step <= 0;
+	    store_step <= 0;
 	    bus_read_enable <= 0;
 	    bus_write_enable <= 0;
 	    bus_write_data <= 0;
@@ -143,27 +143,51 @@ module riscv64(
 	            // U-type
 	            32'b???????_?????_?????_???_?????_0110111: re[w_rd] <= w_imm_u; // Lui
 	            32'b???????_?????_?????_???_?????_0010111: re[w_rd] <= w_imm_u + (pc - 4); // Auipc
+
                     // Load
-		    32'b???????_?????_?????_011_?????_0000011: begin if (lb_step == 0) begin bus_address <= re[w_rs1] + w_imm_i; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; lb_step <= 1; end
-	                                                             if (lb_step == 1) begin re[w_rd]<= bus_read_data; lb_step <= 0; end end  // Ld
+		    32'b???????_?????_?????_011_?????_0000011: begin if (load_step == 0) begin bus_address <= re[w_rs1] + w_imm_i; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; end
+	                                                             if (load_step == 1) begin re[w_rd]<= bus_read_data; load_step <= 0; end end  // Ld
 
-		    32'b???????_?????_?????_011_?????_0000011: begin if (lb_step == 0) begin bus_address <= re[w_rs1] + w_imm_i; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; lb_step <= 1; end
-	                                                             if (lb_step == 1) begin re[w_rd]<= $signed(bus_read_data][7:0]); lb_step <= 0; end end  // Lb
-		    32'b???????_?????_?????_011_?????_0000011: begin if (lb_step == 0) begin bus_address <= re[w_rs1] + w_imm_i; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; lb_step <= 1; end
-	                                                             if (lb_step == 1) begin re[w_rd]<= bus_read_data][7:0]; lb_step <= 0; end end  // Lbu
+		    32'b???????_?????_?????_000_?????_0000011: begin if (load_step == 0) begin bus_address <= re[w_rs1] + w_imm_i; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; end
+	                                                             if (load_step == 1) begin re[w_rd]<= $signed(bus_read_data[7:0]); load_step <= 0; end end  // Lb
+		    32'b???????_?????_?????_100_?????_0000011: begin if (load_step == 0) begin bus_address <= re[w_rs1] + w_imm_i; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; end
+	                                                             if (load_step == 1) begin re[w_rd]<= bus_read_data[7:0]; load_step <= 0; end end  // Lbu
 
-		    32'b???????_?????_?????_011_?????_0000011: begin if (lb_step == 0) begin bus_address <= re[w_rs1] + w_imm_i; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; lb_step <= 1; end
-	                                                             if (lb_step == 1) begin re[w_rd]<= $signed(bus_read_data][15:0]); lb_step <= 0; end end  // Lh
-		    32'b???????_?????_?????_011_?????_0000011: begin if (lb_step == 0) begin bus_address <= re[w_rs1] + w_imm_i; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; lb_step <= 1; end
-	                                                             if (lb_step == 1) begin re[w_rd]<= bus_read_data][15:0]; lb_step <= 0; end end  // Lhu
+		    32'b???????_?????_?????_001_?????_0000011: begin if (load_step == 0) begin bus_address <= re[w_rs1] + w_imm_i; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; end
+	                                                             if (load_step == 1) begin re[w_rd]<= $signed(bus_read_data[15:0]); load_step <= 0; end end  // Lh
+		    32'b???????_?????_?????_101_?????_0000011: begin if (load_step == 0) begin bus_address <= re[w_rs1] + w_imm_i; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; end
+	                                                             if (load_step == 1) begin re[w_rd]<= bus_read_data[15:0]; load_step <= 0; end end  // Lhu
 
-		    32'b???????_?????_?????_011_?????_0000011: begin if (lb_step == 0) begin bus_address <= re[w_rs1] + w_imm_i; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; lb_step <= 1; end
-	                                                             if (lb_step == 1) begin re[w_rd]<= $signed(bus_read_data][31:0]); lb_step <= 0; end end  // Lw
-		    32'b???????_?????_?????_011_?????_0000011: begin if (lb_step == 0) begin bus_address <= re[w_rs1] + w_imm_i; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; lb_step <= 1; end
-	                                                             if (lb_step == 1) begin re[w_rd]<= bus_read_data][31:0]; lb_step <= 0; end end  // Lwu
+		    32'b???????_?????_?????_010_?????_0000011: begin if (load_step == 0) begin bus_address <= re[w_rs1] + w_imm_i; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; end
+	                                                             if (load_step == 1) begin re[w_rd]<= $signed(bus_read_data[31:0]); load_step <= 0; end end  // Lw
+		    32'b???????_?????_?????_110_?????_0000011: begin if (load_step == 0) begin bus_address <= re[w_rs1] + w_imm_i; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; end
+	                                                             if (load_step == 1) begin re[w_rd]<= bus_read_data[31:0]; load_step <= 0; end end  // Lwu
+
                     // Store
-	            //32'b???????_?????_?????_011_?????_0100011: begin bus_address <= re[w_rs1] + w_imm_s; bus_write_data <= re[w_rs2]; bus_write_enable <= 1; pc <= pc; bubble <= 1; end // Sd
-	            32'b???????_?????_?????_011_?????_0100011: begin bus_address <= re[w_rs1] + w_imm_s; bus_write_data <= re[w_rs2]; bus_write_enable <= 1; end // Sd //! 32-32 multip cycles
+	            //32'b???????_?????_?????_011_?????_0100011: begin bus_address <= re[w_rs1] + w_imm_s; bus_write_data <= re[w_rs2]; bus_write_enable <= 1; end // Sd //! 32-32 multip cycles
+	            32'b???????_?????_?????_011_?????_0100011: begin 
+		        if (store_step == 0) begin;
+		            bus_address <= re[w_rs1] + w_imm_s; 
+		            bus_write_data <= re[w_rs2][31:0]; 
+		            bus_write_enable <= 1; 
+
+			    pc <= pc - 4;
+			    bubble <= 1;
+                            store_step <= 1;
+		        end 
+		        if (store_step == 1) begin;
+		            bus_address <= re[w_rs1] + w_imm_s + 4; 
+		            bus_write_data <= re[w_rs2][63:32]; 
+		            bus_write_enable <= 1; 
+                            store_step <= 0;
+		        end 
+		    end
+		    
+		    // Sd //! 32-32 multip cycles
+
+
+
+
 	            //32'b???????_?????_?????_000_?????_0100011: begin mem_addr <= s_addr; mem_we <= 1; mem_data_out <= re[w_rs2][7:0]; end // Sb
 	            //32'b???????_?????_?????_001_?????_0100011: begin mem_addr <= s_addr; mem_we <= 1; mem_data_out <= re[w_rs2][15:0]; end// Sh
 	            //32'b???????_?????_?????_010_?????_0100011: begin mem_addr <= s_addr; mem_we <= 1; mem_data_out <= re[w_rs2][31:0]; end// Sw
@@ -244,7 +268,7 @@ endmodule
 //N+0 see interrupt and set isr pc
 //N+1 bubble branch take over
 //Lb
-//N+2 execute load:step_0 setting read bubble1 lb_step1
+//N+2 execute load:step_0 setting read bubble1 load_step1
 //N+3 bubble branch take over (BUT bus read data into bus_read_data)
 //N+4 execute load:step_1 save bus_read_data into re
 //Sb
@@ -252,7 +276,7 @@ endmodule
 //mret
 //N+6 mret (BUT URAT get data for print).   //
 // -- 
-//in cycle N0, IF fetching sb, EXE ir is lb, bubble is setting 1, pc is re-setting to pc, lb_step is setting to 1;
+//in cycle N0, IF fetching sb, EXE ir is lb, bubble is setting 1, pc is re-setting to pc, load_step is setting to 1;
 //in N1, IF fetching lb, Bubble flushed ir sb, bubble <=0, Default pc is setting to lb+4(sb);
-//in N2, IF fetching sb, EXE ir is lb, lb_step is 1, bus_read_data is saving to re, lb_step is setting to 0;
+//in N2, IF fetching sb, EXE ir is lb, load_step is 1, bus_read_data is saving to re, load_step is setting to 0;
 //in N3, IF fethcing mret, EXE ir is sb, re is saving to bus_write_data, bus_write_enable is setting to 1;
