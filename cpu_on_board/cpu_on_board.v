@@ -114,6 +114,7 @@ module cpu_on_board (
     wire [63:0] bus_write_data;
     wire        bus_write_enable;
     wire [1:0]  bus_bytes;
+    assign bytes_position = bus_bytes << bus_address[1:0];
 
     // == Bus controller ==
     // 1.-- Address Decoding --
@@ -133,9 +134,9 @@ module cpu_on_board (
         end
 	if (bus_write_enable) begin // Write
 	    if (Ram_selected) begin
-	       if (bus_bytes == 0) Cache[bus_address[63:2]] <= bus_write_data[31:0];  // cut fit 32 bit ram //work
-	       if (bus_bytes == 1) Cache[bus_address[63:2]][bus_address[1:0]+7:bus_address[1:0]] <= bus_write_data[7:0];  // 
-	       if (bus_bytes == 2) Cache[bus_address[63:2]][bus_address[1:0]+15:bus_address[1:0]] <= bus_write_data[15:0];  //
+	       if (bytes_position == 4'b1111) Cache[bus_address[63:2]] <= bus_write_data[31:0];  // cut fit 32 bit ram //work
+	       if (bytes_position == 4'b0001) Cache[bus_address[63:2]][7:0] <= bus_write_data[7:0];  // 
+	       if (bytes_position == 4'b0011) Cache[bus_address[63:2]][15:0] <= bus_write_data[15:0];  //
 	   end
         end
     end
