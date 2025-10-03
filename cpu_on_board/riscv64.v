@@ -181,7 +181,7 @@ module riscv64(
 			    pc <= pc - 4; 
 			    bubble <= 1; 
 			    load_step <= 1; 
-			    bus_byte_position <= (re[w_rs1] + w_imm_i) | 64'b11;  // byte_start_position in 32 bit data
+			    bus_byte_position <= (re[w_rs1] + w_imm_i) & 64'b11;  // byte_start_position in 32 bit data
 			end
 	                if (load_step == 1) begin 
 			    if (bus_byte_position == 0) re[w_rd]<= $signed(bus_read_data[7:0]); 
@@ -234,7 +234,7 @@ module riscv64(
 		            pc <= pc - 4; 
 		            bubble <= 1; 
 		            store_step <= 1; 
-			    bus_byte_position <= (re[w_rs1] + w_imm_i) | 64'b11;  // byte_start_position in 32 bit data
+			    bus_byte_position <= (re[w_rs1] + w_imm_i) & 64'b11;  // byte_start_position in 32 bit data
 		        end
                         if (store_step == 1) begin 
 	                    bus_address <= re[w_rs1] + w_imm_s; 
