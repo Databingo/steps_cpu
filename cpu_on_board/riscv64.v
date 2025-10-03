@@ -172,6 +172,7 @@ module riscv64(
 			    load_step <= 0; 
 			end 
 		    end  // Ld
+
 		    //32'b???????_?????_?????_000_?????_0000011: begin if (load_step == 0) begin bus_address <= re[w_rs1] + w_imm_i; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; end
 	            //                                                 if (load_step == 1) begin re[w_rd]<= $signed(bus_read_data[7:0]); load_step <= 0; end end  // Lb
 		    32'b???????_?????_?????_000_?????_0000011: begin 
