@@ -81,4 +81,6 @@ pass_loop:
     beq x0, x0, pass_loop
 
 fail:
+    li t6, 80           # ASCII 'F'
+    sd t6, 0(t5)
     beq x0, x0, fail
