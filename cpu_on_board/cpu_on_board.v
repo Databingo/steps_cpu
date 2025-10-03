@@ -136,6 +136,7 @@ module cpu_on_board (
 	       if (bus_bytes == 0) Cache[bus_address[63:2]] <= bus_write_data[31:0];  // cut fit 32 bit ram //work
 	       if (bus_bytes == 1) Cache[bus_address[63:2]][bus_address[1:0]+7:bus_address[1:0]] <= bus_write_data[7:0];  // 
 	       if (bus_bytes == 2) Cache[bus_address[63:2]][bus_address[1:0]+15:bus_address[1:0]] <= bus_write_data[15:0];  //
+	   end
         end
     end
       
