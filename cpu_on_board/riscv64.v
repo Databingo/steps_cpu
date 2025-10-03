@@ -146,12 +146,21 @@ module riscv64(
                     // Load
 		    32'b???????_?????_?????_011_?????_0000011: begin if (lb_step == 0) begin bus_address <= re[w_rs1] + w_imm_i; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; lb_step <= 1; end
 	                                                             if (lb_step == 1) begin re[w_rd]<= bus_read_data; lb_step <= 0; end end  // Ld
-		    //32'b???????_?????_?????_100_?????_0000011: begin mem_addr <= l_addr; re[w_rd] <= {56'b0, mem_data_in[7:0]}; end // Lbu
-	            //32'b???????_?????_?????_001_?????_0000011: begin mem_addr <= l_addr; re[w_rd] <= {{48{mem_data_in[15]}}, mem_data_in[15:0]}; end // Lh
-	            //32'b???????_?????_?????_101_?????_0000011: begin mem_addr <= l_addr; re[w_rd] <= {48'b0, mem_data_in[15:0]}; end // Lhu
-		    //32'b???????_?????_?????_010_?????_0000011: begin mem_addr <= l_addr; re[w_rd] <= {{32{mem_data_in[31]}}, mem_data_in[31:0]}; end // Lw
-		    //32'b???????_?????_?????_110_?????_0000011: begin mem_addr <= l_addr; re[w_rd] <= {32'b0, mem_data_in[31:0]}; end // Lwu
-		    //32'b???????_?????_?????_011_?????_0000011: begin mem_addr <= l_addr; re[w_rd] <= mem_data_in; end // Ld
+
+		    32'b???????_?????_?????_011_?????_0000011: begin if (lb_step == 0) begin bus_address <= re[w_rs1] + w_imm_i; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; lb_step <= 1; end
+	                                                             if (lb_step == 1) begin re[w_rd]<= $signed(bus_read_data][7:0]); lb_step <= 0; end end  // Lb
+		    32'b???????_?????_?????_011_?????_0000011: begin if (lb_step == 0) begin bus_address <= re[w_rs1] + w_imm_i; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; lb_step <= 1; end
+	                                                             if (lb_step == 1) begin re[w_rd]<= bus_read_data][7:0]; lb_step <= 0; end end  // Lbu
+
+		    32'b???????_?????_?????_011_?????_0000011: begin if (lb_step == 0) begin bus_address <= re[w_rs1] + w_imm_i; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; lb_step <= 1; end
+	                                                             if (lb_step == 1) begin re[w_rd]<= $signed(bus_read_data][15:0]); lb_step <= 0; end end  // Lh
+		    32'b???????_?????_?????_011_?????_0000011: begin if (lb_step == 0) begin bus_address <= re[w_rs1] + w_imm_i; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; lb_step <= 1; end
+	                                                             if (lb_step == 1) begin re[w_rd]<= bus_read_data][15:0]; lb_step <= 0; end end  // Lhu
+
+		    32'b???????_?????_?????_011_?????_0000011: begin if (lb_step == 0) begin bus_address <= re[w_rs1] + w_imm_i; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; lb_step <= 1; end
+	                                                             if (lb_step == 1) begin re[w_rd]<= $signed(bus_read_data][31:0]); lb_step <= 0; end end  // Lw
+		    32'b???????_?????_?????_011_?????_0000011: begin if (lb_step == 0) begin bus_address <= re[w_rs1] + w_imm_i; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; lb_step <= 1; end
+	                                                             if (lb_step == 1) begin re[w_rd]<= bus_read_data][31:0]; lb_step <= 0; end end  // Lwu
                     // Store
 	            //32'b???????_?????_?????_011_?????_0100011: begin bus_address <= re[w_rs1] + w_imm_s; bus_write_data <= re[w_rs2]; bus_write_enable <= 1; pc <= pc; bubble <= 1; end // Sd
 	            32'b???????_?????_?????_011_?????_0100011: begin bus_address <= re[w_rs1] + w_imm_s; bus_write_data <= re[w_rs2]; bus_write_enable <= 1; end // Sd //! 32-32 multip cycles
