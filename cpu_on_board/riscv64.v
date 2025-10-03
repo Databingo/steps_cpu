@@ -220,7 +220,7 @@ module riscv64(
                             store_step <= 1;
 		        end 
 		        if (store_step == 1) begin;
-		            bus_address <= re[w_rs1] + w_imm_s + 4; 
+		            bus_address <= re[w_rs1] + w_imm_s + 4; // high 32 bit
 		            bus_write_data <= re[w_rs2][63:32]; 
 		            bus_write_enable <= 1; 
                             store_step <= 0;
