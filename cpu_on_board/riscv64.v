@@ -86,6 +86,7 @@ module riscv64(
     reg bubble;
     reg load_step;
     reg store_step;
+    reg [1:0] bus_byte_position;
 
     // IF ir (Only drive IR)
     always @(posedge clk or negedge reset) begin
@@ -169,8 +170,30 @@ module riscv64(
 			    load_step <= 0; 
 			end 
 		    end  // Ld
-		    32'b???????_?????_?????_000_?????_0000011: begin if (load_step == 0) begin bus_address <= re[w_rs1] + w_imm_i; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; end
-	                                                             if (load_step == 1) begin re[w_rd]<= $signed(bus_read_data[7:0]); load_step <= 0; end end  // Lb
+		    //32'b???????_?????_?????_000_?????_0000011: begin if (load_step == 0) begin bus_address <= re[w_rs1] + w_imm_i; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; end
+	            //                                                 if (load_step == 1) begin re[w_rd]<= $signed(bus_read_data[7:0]); load_step <= 0; end end  // Lb
+		    32'b???????_?????_?????_000_?????_0000011: begin 
+		        if (load_step == 0) begin 
+			    bus_address <= re[w_rs1] + w_imm_i; 
+			    bus_read_enable <= 1; 
+			    pc <= pc - 4; 
+			    bubble <= 1; 
+			    load_step <= 1; 
+			    bus_byte_position <= (re[w_rs1] + w_imm_i)[1:0]  // byte_start_position in 32 bit data
+			end
+	                if (load_step == 1) begin 
+			    re[w_rd]<= $signed(bus_read_data[bus_byte_position*8+7:bus_byte_position*8]); 
+			    load_step <= 0; 
+			    bus_byte_position < = 0;
+			end 
+		    end  // Lb
+
+
+
+
+
+
+
 		    32'b???????_?????_?????_100_?????_0000011: begin if (load_step == 0) begin bus_address <= re[w_rs1] + w_imm_i; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; end
 	                                                             if (load_step == 1) begin re[w_rd]<= bus_read_data[7:0]; load_step <= 0; end end  // Lbu
 
@@ -202,8 +225,27 @@ module riscv64(
 		            bus_write_enable <= 1; 
                             store_step <= 0;
 		        end 
-		    end // Sd //! 32-32 multip cycles
-	            32'b???????_?????_?????_000_?????_0100011: begin bus_address <= re[w_rs1] + w_imm_s; bus_write_data <= re[w_rs2][7:0]; bus_write_enable <= 1; bus_bytes <= 2'b01; end // Sb
+		    end // Sd 
+	            //32'b???????_?????_?????_000_?????_0100011: begin bus_address <= re[w_rs1] + w_imm_s; bus_write_data <= re[w_rs2][7:0]; bus_write_enable <= 1; end // Sb
+	            32'b???????_?????_?????_000_?????_0100011: begin 
+		        if (store_step == 0) begin 
+		            bus_address <= re[w_rs1] + w_imm_i; 
+		            bus_read_enable <= 1; 
+		            pc <= pc - 4; 
+		            bubble <= 1; 
+		            store_step <= 1; 
+			    bus_byte_position <= (re[w_rs1] + w_imm_i)[1:0]  // byte_start_position in 32 bit data
+		        end
+                        if (store_step == 1) begin 
+	                    bus_address <= re[w_rs1] + w_imm_s; 
+			    bus_write_data <= (re[w_rd][7:0]<<bus_byte_position*8) | (bus_read_data[31:0] & ~(32'b11111111<<bus_byte_position*8) )
+			    bus_write_enable <= 1;
+		            store_step <= 0;  
+			    bus_byte_position <= 0;
+			end 
+		    end // Sb
+
+
 	            32'b???????_?????_?????_001_?????_0100011: begin bus_address <= re[w_rs1] + w_imm_s; bus_write_data <= re[w_rs2][15:0]; bus_write_enable <= 1;bus_bytes <= 2'b11; end // Sh
 	            32'b???????_?????_?????_010_?????_0100011: begin bus_address <= re[w_rs1] + w_imm_s; bus_write_data <= re[w_rs2][31:0]; bus_write_enable <= 1; end // Sw
                     // Math-I
