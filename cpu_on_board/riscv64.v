@@ -201,12 +201,25 @@ module riscv64(
 		    //32'b???????_?????_?????_101_?????_1100011: begin if ($signed(re[w_rs1]) >= $signed(re[w_rs2])) begin pc <= pc + sign_extended_bimm; bubble <= 1'b1; end end // Bge
 		    //32'b???????_?????_?????_110_?????_1100011: begin if (re[w_rs1] < re[w_rs2]) begin pc <= pc + sign_extended_bimm; bubble <= 1'b1; end end // Bltu
 		    //32'b???????_?????_?????_111_?????_1100011: begin if (re[w_rs1] >= re[w_rs2]) begin pc <= pc + sign_extended_bimm; bubble <= 1'b1; end end // Bgeu
-		    // CSR 
-                    // Machine
+		    // System-CSR 
+                    // System-Machine
 	            32'b0011000_00010_?????_000_?????_1110011: begin pc <= csr_read(mepc); bubble <= 1; csr_mstatus[MIE] <= csr_mstatus[MPIE]; csr_mstatus[MPIE] <= 1; end  // Mret
-		    // Fence
 		    // Ecall
 		    // Ebreak
+		    // Fence
+		    // Fence.i
+		    // RV64IMAFD(G)C  RVA23U64
+		    // M mul mulh mulhsu mulhu div divu rem remu mulw divw divuw remuw
+		    // A lr.w sc.w lr.d sc.d
+		    // amoswap amoadd amoxor amoand amoor
+		    // amomin amomax amominu amomaxu
+		    // F (reg f0-f31)
+		    // flw fsw fadd.s fsub.s fmul.s fdiv.s fsqrt.s fmadd.s
+		    // fmsub.s fnmsub.s fcvt.w.s fcvt.wu.s fcvt.s.w fcvt.s.wu
+		    // fmv.x.w fclass.s feq.s flt.s fle.s fsgnj.s fsgnjn.s
+		    // fsgnjx.s fmin.s fmax.s
+		    // D fld fsd fadd.d fsub.d fdiv.d fsqrt.d fmadd.s fcvt.d.s fcvt.s.d
+		    // C
                 endcase
 	    end
         end
