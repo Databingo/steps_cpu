@@ -87,6 +87,8 @@ module riscv64(
     reg load_step;
     reg store_step;
     reg [1:0] bus_byte_position;
+    assign w_bus_address = re[w_rs1] + w_imm_i; 
+
 
     // IF ir (Only drive IR)
     always @(posedge clk or negedge reset) begin
@@ -173,7 +175,6 @@ module riscv64(
 		    //32'b???????_?????_?????_000_?????_0000011: begin if (load_step == 0) begin bus_address <= re[w_rs1] + w_imm_i; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; end
 	            //                                                 if (load_step == 1) begin re[w_rd]<= $signed(bus_read_data[7:0]); load_step <= 0; end end  // Lb
 		    32'b???????_?????_?????_000_?????_0000011: begin 
-		    assign w_bus_address = re[w_rs1] + w_imm_i; 
 		        if (load_step == 0) begin 
 			    bus_address <= re[w_rs1] + w_imm_i; 
 			    bus_read_enable <= 1; 
@@ -231,7 +232,7 @@ module riscv64(
 		            pc <= pc - 4; 
 		            bubble <= 1; 
 		            store_step <= 1; 
-			    bus_byte_position <= (re[w_rs1] + w_imm_i)[1:0];  // byte_start_position in 32 bit data
+			    bus_byte_position <= w_bus_address[1:0];  // byte_start_position in 32 bit data
 		        end
                         if (store_step == 1) begin 
 	                    bus_address <= re[w_rs1] + w_imm_s; 
