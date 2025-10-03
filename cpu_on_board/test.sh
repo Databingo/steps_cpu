@@ -3,7 +3,7 @@ cat bin.txt > rom.mif  # write ROM program
 
 
 #go run ../rvas.go addi_sd.s
-go run ../rvas.go ld.s
+#go run ../rvas.go ld.s
 #go run ../rvas.go lui.s
 #go run ../rvas.go beq.s
 #go run ../rvas.go add.s
@@ -15,7 +15,7 @@ go run ../rvas.go ld.s
 #go run ../rvas.go j_jr_ret.s  #
 #go run ../rvas.go auipc.s
 #go run ../rvas.go call.s #
-#go run ../rvas.go load.s #
+go run ../rvas.go load.s #
 #go run ../rvas.go sd_ld.s
 #go run ../rvas.go sd.s
 #go run ../rvas.go jal_ra.s
