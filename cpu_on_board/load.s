@@ -29,8 +29,8 @@ _start:
     # 0x1007   0x88
 
     # --- Test 1: LD (Load Doubleword) ---
-    #ld t2, 0(t0)        # Load the full 64 bits from 0x1000.
-    #bne t1, t2, fail    # Should be equal to the original value.
+    ld t2, 0(t0)        # Load the full 64 bits from 0x1000.
+    bne t1, t2, fail    # Should be equal to the original value.
 
     # --- Test 2: LB (Load Byte, signed) ---
     # Load the byte at 0x1007, which is 0x88 (a negative number).

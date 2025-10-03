@@ -145,8 +145,44 @@ module riscv64(
 	            32'b???????_?????_?????_???_?????_0010111: re[w_rd] <= w_imm_u + (pc - 4); // Auipc
 
                     // Load
-		    32'b???????_?????_?????_011_?????_0000011: begin if (load_step == 0) begin bus_address <= re[w_rs1] + w_imm_i; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; end
-	                                                             if (load_step == 1) begin re[w_rd]<= bus_read_data; load_step <= 0; end end  // Ld
+		    ///32'b???????_?????_?????_011_?????_0000011: begin if (load_step == 0) begin bus_address <= re[w_rs1] + w_imm_i; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; end
+	            ///                                                 if (load_step == 1) begin re[w_rd]<= bus_read_data; load_step <= 0; end end  // Ld
+		    32'b???????_?????_?????_011_?????_0000011: begin 
+		        if (load_step == 0) begin 
+			    bus_address <= re[w_rs1] + w_imm_i; 
+			    bus_read_enable <= 1; 
+			    pc <= pc - 4; 
+			    bubble <= 1; 
+			    load_step <= 1; 
+			end
+                        if (load_step == 1) begin 
+			    re[w_rd]<= bus_read_data; 
+
+			    bus_address <= re[w_rs1] + w_imm_i + 4; 
+			    bus_read_enable <= 1; 
+			    pc <= pc - 4; 
+			    bubble <= 1; 
+			    load_step <= 2; 
+			end 
+                        if (load_step == 2) begin 
+			    re[w_rd]<= {bus_read_data[31:0], re[w_rd][31:0]}; 
+			    load_step <= 0; 
+			end 
+
+
+
+
+
+
+
+
+
+		    end  // Ld
+
+
+
+
+
 
 		    32'b???????_?????_?????_000_?????_0000011: begin if (load_step == 0) begin bus_address <= re[w_rs1] + w_imm_i; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; end
 	                                                             if (load_step == 1) begin re[w_rd]<= $signed(bus_read_data[7:0]); load_step <= 0; end end  // Lb
