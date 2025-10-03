@@ -182,13 +182,13 @@ module riscv64(
 			    pc <= pc - 4; 
 			    bubble <= 1; 
 			    load_step <= 1; 
-			    bus_byte_position <= (re[w_rs1] + w_imm_i) & 64'b11;  // byte_start_position in 32 bit data
+			    //bus_byte_position <= (re[w_rs1] + w_imm_i) & 64'b11;  // byte_start_position in 32 bit data
 			end
 	                if (load_step == 1) begin 
-			    if (bus_byte_position == 0) re[w_rd]<= $signed(bus_read_data[7:0]); 
-			    if (bus_byte_position == 1) re[w_rd]<= $signed(bus_read_data[15:8]); 
-			    if (bus_byte_position == 2) re[w_rd]<= $signed(bus_read_data[23:16]); 
-			    if (bus_byte_position == 3) re[w_rd]<= $signed(bus_read_data[31:24]); 
+			    if ((re[w_rs1] + w_imm_i) & 64'b11 == 0) re[w_rd]<= $signed(bus_read_data[7:0]); 
+			    if ((re[w_rs1] + w_imm_i) & 64'b11 == 1) re[w_rd]<= $signed(bus_read_data[15:8]); 
+			    if ((re[w_rs1] + w_imm_i) & 64'b11 == 2) re[w_rd]<= $signed(bus_read_data[23:16]); 
+			    if ((re[w_rs1] + w_imm_i) & 64'b11 == 3) re[w_rd]<= $signed(bus_read_data[31:24]); 
 			    load_step <= 0; 
 			    bus_byte_position <= 0;
 			end 
