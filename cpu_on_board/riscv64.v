@@ -155,14 +155,14 @@ module riscv64(
 	            ///                                                 if (load_step == 1) begin re[w_rd]<= bus_read_data; load_step <= 0; end end  // Ld
 		    32'b???????_?????_?????_011_?????_0000011: begin 
 		        if (load_step == 0) begin 
-			    bus_address <= re[w_rs1] + w_imm_i; 
+			    bus_address <= re[w_rs1] + w_imm_i; // Low 32 bit data in first line
 			    bus_read_enable <= 1; 
 			    pc <= pc - 4; 
 			    bubble <= 1; 
 			    load_step <= 1; 
 			end if (load_step == 1) begin 
 			    re[w_rd]<= bus_read_data; 
-			    bus_address <= re[w_rs1] + w_imm_i + 4;  // hight 32 bit data in next line
+			    bus_address <= re[w_rs1] + w_imm_i + 4;  // Hight 32 bit data in next line
 			    bus_read_enable <= 1; 
 			    pc <= pc - 4; 
 			    bubble <= 1; 
@@ -220,7 +220,7 @@ module riscv64(
                             store_step <= 1;
 		        end 
 		        if (store_step == 1) begin;
-		            bus_address <= re[w_rs1] + w_imm_s + 4; // high 32 bit
+		            bus_address <= re[w_rs1] + w_imm_s + 4; // High 32 bit
 		            bus_write_data <= re[w_rs2][63:32]; 
 		            bus_write_enable <= 1; 
                             store_step <= 0;
