@@ -194,17 +194,18 @@ module riscv64(
 			end 
 		    end  // Lb 3 cycles
 
+		    32'b???????_?????_?????_001_?????_0000011: begin if (load_step == 0) begin bus_address <= re[w_rs1] + w_imm_i; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; end
+	                                                             if (load_step == 1) begin re[w_rd]<= $signed(bus_read_data[15:0]); load_step <= 0; end end  // Lh
+
+		    32'b???????_?????_?????_010_?????_0000011: begin if (load_step == 0) begin bus_address <= re[w_rs1] + w_imm_i; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; end
+	                                                             if (load_step == 1) begin re[w_rd]<= $signed(bus_read_data[31:0]); load_step <= 0; end end  // Lw
 
 		    32'b???????_?????_?????_100_?????_0000011: begin if (load_step == 0) begin bus_address <= re[w_rs1] + w_imm_i; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; end
 	                                                             if (load_step == 1) begin re[w_rd]<= bus_read_data[7:0]; load_step <= 0; end end  // Lbu
 
-		    32'b???????_?????_?????_001_?????_0000011: begin if (load_step == 0) begin bus_address <= re[w_rs1] + w_imm_i; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; end
-	                                                             if (load_step == 1) begin re[w_rd]<= $signed(bus_read_data[15:0]); load_step <= 0; end end  // Lh
 		    32'b???????_?????_?????_101_?????_0000011: begin if (load_step == 0) begin bus_address <= re[w_rs1] + w_imm_i; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; end
 	                                                             if (load_step == 1) begin re[w_rd]<= bus_read_data[15:0]; load_step <= 0; end end  // Lhu
 
-		    32'b???????_?????_?????_010_?????_0000011: begin if (load_step == 0) begin bus_address <= re[w_rs1] + w_imm_i; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; end
-	                                                             if (load_step == 1) begin re[w_rd]<= $signed(bus_read_data[31:0]); load_step <= 0; end end  // Lw
 		    32'b???????_?????_?????_110_?????_0000011: begin if (load_step == 0) begin bus_address <= re[w_rs1] + w_imm_i; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; end
 	                                                             if (load_step == 1) begin re[w_rd]<= bus_read_data[31:0]; load_step <= 0; end end  // Lwu
 
