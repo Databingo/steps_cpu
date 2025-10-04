@@ -3,8 +3,9 @@ cat bin.txt > rom.mif  # write ROM program
 
 
 #go run ../rvas.go addi_sw.s 
-go run ../rvas.go srli.s
-#go run ../rvas.go lui.s
+#go run ../rvas.go srli.s
+go run ../rvas.go lui.s
+
 #go run ../rvas.go sw.s # full
 
 #go run ../rvas.go lw.s 
