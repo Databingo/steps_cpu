@@ -250,11 +250,11 @@ module riscv64(
 		        end
                         if (store_step == 1) begin 
 	                    bus_address <= re[w_rs1] + w_imm_s; 
-			    //bus_write_data <= (re[w_rd][7:0]<<bus_byte_position*8) | (bus_read_data[31:0] & ~(32'b11111111<<bus_byte_position*8) );
-			    if ((re[w_rs1] + w_imm_i) & 64'b11 == 0) bus_write_data <= (re[w_rd][7:0]<<0)  | (bus_read_data[31:0] & ~(32'b11111111<<0) );
-			    if ((re[w_rs1] + w_imm_i) & 64'b11 == 1) bus_write_data <= (re[w_rd][7:0]<<8)  | (bus_read_data[31:0] & ~(32'b11111111<<8) );
-			    if ((re[w_rs1] + w_imm_i) & 64'b11 == 2) bus_write_data <= (re[w_rd][7:0]<<16) | (bus_read_data[31:0] & ~(32'b11111111<<16) );
-			    if ((re[w_rs1] + w_imm_i) & 64'b11 == 3) bus_write_data <= (re[w_rd][7:0]<<24) | (bus_read_data[31:0] & ~(32'b11111111<<24) );
+			    bus_write_data <= bus_read_data[31:0];
+			    //if ((re[w_rs1] + w_imm_i) & 64'b11 == 0) bus_write_data <= (re[w_rd][7:0]<<0)  | (bus_read_data[31:0] & ~(32'b11111111<<0) );
+			    //if ((re[w_rs1] + w_imm_i) & 64'b11 == 1) bus_write_data <= (re[w_rd][7:0]<<8)  | (bus_read_data[31:0] & ~(32'b11111111<<8) );
+			    //if ((re[w_rs1] + w_imm_i) & 64'b11 == 2) bus_write_data <= (re[w_rd][7:0]<<16) | (bus_read_data[31:0] & ~(32'b11111111<<16) );
+			    //if ((re[w_rs1] + w_imm_i) & 64'b11 == 3) bus_write_data <= (re[w_rd][7:0]<<24) | (bus_read_data[31:0] & ~(32'b11111111<<24) );
 			    bus_write_enable <= 1;
 		            store_step <= 0;  
 			    //bus_byte_position <= 0;

@@ -1,112 +1,42 @@
-## RISC-V Assembly: 'sb' (Store Byte) Alignment Test
-## Goal: Verify that 'sb' correctly modifies each of the four byte positions within a word.
-#
-#.section .text
-#.globl _start
-#
-#_start:
-#    # --- Setup Phase ---
-#    li t0, 0x1000       # RAM base address for our test data
-#    li t5, 0x2004       # UART address
-#
-#    # 1. Construct and store a background pattern: 0xCCCCCCCC
-#    li t1, 0xCCCCCCCC
-#    sw t1, 0(t0)        # Write the background pattern to address 0x1000.
-#    
-#    # --- Action Phase: Test each byte position ---
-#
-#    # --- Test 1: Store to offset 0 ---
-#    # Memory should become: 0xCCCCCC11
-#    li t1, 0x11
-#    sb t1, 0(t0)
-#
-#    # --- Test 2: Store to offset 1 ---
-#    # Memory should become: 0xCCCC2211
-#    li t1, 0x22
-#    sb t1, 1(t0)
-#
-#    # --- Test 3: Store to offset 2 ---
-#    # Memory should become: 0xCC332211
-#    li t1, 0x33
-#    sb t1, 2(t0)
-#    
-#    # --- Test 4: Store to offset 3 ---
-#    # Memory should become: 0x44332211
-#    li t1, 0x44
-#    sb t1, 3(t0)
-#
-#    # --- Verification Phase ---
-#    
-#    # 1. Load the entire modified word back from memory.
-#    lw t2, 0(t0)
-#    
-#    # 2. Manually construct the final expected value: 0x44332211
-#    li t3, 0x44332211
-#    
-#    # 3. Compare the loaded word (t2) with the expected value (t3).
-#    beq t2, t3, pass
-#
-#fail:
-#    # If the values are not equal, the program gets stuck here.
-#    # This means one of the 'sb' operations corrupted an adjacent byte
-#    # or failed to write to the correct position.
-#    li t6, 70           # ASCII 'F'
-#    sd t6, 0(t5)
-#    beq x0, x0, fail
-#
-#pass:
-#    # If the values are equal, all tests succeeded. Print 'P'.
-#    li t6, 80           # ASCII 'P'
-#    sd t6, 0(t5)
-#pass_loop:
-#    beq x0, x0, pass_loop
-
-
-
-
-
-# RISC-V Assembly: Minimal 'sb' and 'lb' round-trip test
-# Goal: Store a byte with 'sb', load it back with 'lb', and print the result.
-# Instructions used: sb, lb (under test), addi, sd (trusted helpers).
+# Sb test
 
 .section .text
 .globl _start
 
 _start:
     # --- Setup Phase ---
-    # Get RAM address (0x1000) into t0.
-    addi t0, x0, 0x1000
-    
-    # Get UART address (0x2004) into t3.
-    addi t3, x0, 2047
-    addi t3, t3, 2047
-    addi t3, t3, 2047
-    addi t3, t3, 2047
-    addi t3, t3, 8      # t3 = 8196 (0x2004)
+    # Get the UART address (0x2004) into t3.
+    #    (Using a sequence of addi instructions as before)
+    addi t0, x0, 2047
+    addi t0, t0, 2047
+    addi t0, t0, 2047
+    addi t0, t0, 2047
+    addi t0, t0, 8      # t3 = 8196 (0x2004)
 
-    # Prepare the test character 'T' (ASCII 84) in t1.
-    addi t1, x0, 84
-    
-    # --- Action Phase 1: The 'sb' Instruction Under Test ---
-    
-    # 1. Store the byte 'T' to address 0x1001.
-    #    We use a non-zero offset to also test address calculation.
-    sb t1, 1(t0)
-    
-    # --- Action Phase 2: The 'lb' Instruction Under Test ---
-    
-    # 2. Clear the destination register to be certain of the result.
-    addi t2, x0, 0
-    
-    # 3. Load the byte from address 0x1001 back into t2.
-    #    If both 'sb' and 'lb' work, t2 should now contain 84.
-    lb t2, 1(t0)
 
-    # --- Verification Phase: Print the Result ---
+    # --- Action Phase ---
+    # Construct the test value 0x50415353 ('P' 'A' 'S' 'S') in register t1. 'P' = 0x50, 'A' = 0x41, 'S' = 0x53.
+    lui t1, 0x50415
+    addi t1, t1, 0x353  # t1 = 0x50415353.
+
+    sw t1, -16(t0)   # save t1 value to ram -16(t0)
+    addi t5, x0, 0x50  # t5 = 0x50 "P"
+    sb t5, -16(t0)   # save t5 value to ram -16(t0)
+
+    addi t1, x0, 0   # clean t1 to 0
+    lw t1, -16(t0)    # loab back the saved value from -16(t0) to t1
+
+    # -- Print 'P' --
+    srli t2, t1, 24     # Isolate 'P' (0x50)
+    sw t2, 0(t0)        # Print 'P'
     
-    # 4. Store the value we loaded from RAM (now in t2) to the UART.
-    sw t2, 0(t3)
+    # -- Print 'A' --
+    srli t3, t1, 16     # Isolate 'A' (0x41)
+    sw t3, 0(t0)        # Print 'A'
     
-done:
-    # Halt the processor. We can use beq as a pure 'j'.
-    beq x0, x0, done
+    # -- Print 'S' --
+    srli t4, t1, 8      # Isolate 'S' (0x53)
+    sw t4, 0(t0)        # Print 'S'
+    
+    # -- Print final 'S', now become "P" --
+    sw t1, 0(t0)        # Print the lowest byte 'P'
