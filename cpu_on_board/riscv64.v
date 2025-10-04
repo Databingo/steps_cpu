@@ -86,8 +86,8 @@ module riscv64(
     reg bubble;
     reg [1:0] load_step;
     reg store_step;
-    reg [1:0] bus_byte_position;
-    assign w_bus_address = re[w_rs1] + w_imm_i; 
+    //reg [1:0] bus_byte_position;
+    //assign w_bus_address = re[w_rs1] + w_imm_i; 
 
 
     // IF ir (Only drive IR)
@@ -151,6 +151,9 @@ module riscv64(
 	            32'b???????_?????_?????_???_?????_0010111: re[w_rd] <= w_imm_u + (pc - 4); // Auipc
 
                     // Load
+		    32'b???????_?????_?????_010_?????_0000011: begin if (load_step == 0) begin bus_address <= re[w_rs1] + w_imm_i; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; end
+	                                                             if (load_step == 1) begin re[w_rd]<= $signed(bus_read_data[31:0]); load_step <= 0; end end  // Lw
+
 		    ///32'b???????_?????_?????_011_?????_0000011: begin if (load_step == 0) begin bus_address <= re[w_rs1] + w_imm_i; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; end
 	            ///                                                 if (load_step == 1) begin re[w_rd]<= bus_read_data; load_step <= 0; end end  // Ld
 		    32'b???????_?????_?????_011_?????_0000011: begin 
@@ -197,9 +200,6 @@ module riscv64(
 		    32'b???????_?????_?????_001_?????_0000011: begin if (load_step == 0) begin bus_address <= re[w_rs1] + w_imm_i; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; end
 	                                                             if (load_step == 1) begin re[w_rd]<= $signed(bus_read_data[15:0]); load_step <= 0; end end  // Lh
 
-		    32'b???????_?????_?????_010_?????_0000011: begin if (load_step == 0) begin bus_address <= re[w_rs1] + w_imm_i; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; end
-	                                                             if (load_step == 1) begin re[w_rd]<= $signed(bus_read_data[31:0]); load_step <= 0; end end  // Lw
-
 		    32'b???????_?????_?????_100_?????_0000011: begin if (load_step == 0) begin bus_address <= re[w_rs1] + w_imm_i; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; end
 	                                                             if (load_step == 1) begin re[w_rd]<= bus_read_data[7:0]; load_step <= 0; end end  // Lbu
 
@@ -238,18 +238,18 @@ module riscv64(
 		            pc <= pc - 4; 
 		            bubble <= 1; 
 		            store_step <= 1; 
-			    bus_byte_position <= (re[w_rs1] + w_imm_i) & 64'b11;  // byte_start_position in 32 bit data
+			    //bus_byte_position <= (re[w_rs1] + w_imm_i) & 64'b11;  // byte_start_position in 32 bit data
 		        end
                         if (store_step == 1) begin 
 	                    bus_address <= re[w_rs1] + w_imm_s; 
 			    //bus_write_data <= (re[w_rd][7:0]<<bus_byte_position*8) | (bus_read_data[31:0] & ~(32'b11111111<<bus_byte_position*8) );
-			    if (bus_byte_position == 0) bus_write_data <= (re[w_rd][7:0]<<0) | (bus_read_data[31:0] & ~(32'b11111111<<0) );
-			    if (bus_byte_position == 1) bus_write_data <= (re[w_rd][7:0]<<8) | (bus_read_data[31:0] & ~(32'b11111111<<8) );
-			    if (bus_byte_position == 2) bus_write_data <= (re[w_rd][7:0]<<16) | (bus_read_data[31:0] & ~(32'b11111111<<16) );
-			    if (bus_byte_position == 3) bus_write_data <= (re[w_rd][7:0]<<24) | (bus_read_data[31:0] & ~(32'b11111111<<24) );
+			    if (re[w_rs1] + w_imm_i) & 64'b11 == 0) bus_write_data <= (re[w_rd][7:0]<<0) | (bus_read_data[31:0] & ~(32'b11111111<<0) );
+			    if (re[w_rs1] + w_imm_i) & 64'b11 == 1) bus_write_data <= (re[w_rd][7:0]<<8) | (bus_read_data[31:0] & ~(32'b11111111<<8) );
+			    if (re[w_rs1] + w_imm_i) & 64'b11 == 2) bus_write_data <= (re[w_rd][7:0]<<16) | (bus_read_data[31:0] & ~(32'b11111111<<16) );
+			    if (re[w_rs1] + w_imm_i) & 64'b11 == 3) bus_write_data <= (re[w_rd][7:0]<<24) | (bus_read_data[31:0] & ~(32'b11111111<<24) );
 			    bus_write_enable <= 1;
 		            store_step <= 0;  
-			    bus_byte_position <= 0;
+			    //bus_byte_position <= 0;
 			end 
 		    end // Sb 3 cycles
 
