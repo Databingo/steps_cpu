@@ -210,7 +210,15 @@ module riscv64(
 	                                                             if (load_step == 1) begin re[w_rd]<= bus_read_data[31:0]; load_step <= 0; end end  // Lwu
 
                     // Store
-	            32'b???????_?????_?????_010_?????_0100011: begin bus_address <= re[w_rs1] + w_imm_s; bus_write_data <= re[w_rs2][31:0]; bus_write_enable <= 1; end // Sw
+	            32'b???????_?????_?????_010_?????_0100011: begin 
+		        bus_address <= re[w_rs1] + w_imm_s; 
+			bus_write_data <= re[w_rs2][31:0]; 
+			bus_write_enable <= 1; 
+
+			pc <= pc; // for close bus_write_enable then UART would trigger change side.
+			bubble <= 1;
+
+		    end // Sw
 
 	            //32'b???????_?????_?????_011_?????_0100011: begin bus_address <= re[w_rs1] + w_imm_s; bus_write_data <= re[w_rs2]; bus_write_enable <= 1; end // Sd //! 32-32 multip cycles
 	            32'b???????_?????_?????_011_?????_0100011: begin 
