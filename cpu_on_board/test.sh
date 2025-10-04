@@ -2,10 +2,10 @@ go run ../rvas.go isr.s
 cat bin.txt > rom.mif  # write ROM program
 
 
-go run ../rvas.go addi_sw.s 
-#go run ../rvas.go addi_sd.s  # sw first better
+#go run ../rvas.go addi_sw.s 
+
+go run ../rvas.go lw.s 
 #go run ../rvas.go sw.s #
-#go run ../rvas.go ld.s # lw first better
 #go run ../rvas.go lui.s
 #go run ../rvas.go beq.s
 #go run ../rvas.go add.s

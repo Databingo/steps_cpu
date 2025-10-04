@@ -1,6 +1,6 @@
-# RISC-V Assembly: True Minimal 'ld' Test
-# Goal: Write 'P' to RAM, load it back with 'ld', and print the result to UART.
-# Instructions used: ONLY addi, sd, ld.
+# RISC-V Assembly: True Minimal 'lw' Test
+# Goal: Write 'P' to RAM, load it back with 'lw', and print the result to UART.
+# Instructions used: ONLY addi, sw, lw.
 
 .section .text
 .globl _start
@@ -18,7 +18,7 @@ _start:
     
     # --- Write to RAM (using trusted SD) ---
     # Store 'P' at t0
-    sd t1, 0(t0)
+    sw t1, 0(t0)
     
     # --- Action Phase: The Instruction Under Test (LD) ---
     
@@ -26,8 +26,8 @@ _start:
     addi t2, x0, 0
     
     # 4. Load the value 
-    #    If 'ld' works, t2 should now contain 86.
-    ld t2, 0(t0)
+    #    If 'lw' works, t2 shoulw now contain 86.
+    lw t2, 0(t0)
     
     # --- Verification Phase: Print the Result ---
     
@@ -40,4 +40,4 @@ _start:
     addi t3, t3, 8      # t3 = 8196 (0x2004)
     
     # 6. Store the value we loaded from RAM (now in t2) to the UART.
-    sd t2, 0(t3)
+    sw t2, 0(t3)
