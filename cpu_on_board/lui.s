@@ -1,7 +1,7 @@
 # RISC-V Assembly: Minimal LUI Test
 # Goal: Use LUI to construct a value, store/load it, and print it to the UART.
 #       Then, print a known-good value for comparison.
-# Instructions used: LUI (under test), addi, sd, ld (trusted helpers).
+# Instructions used: LUI (under test), addi, sw, ld (trusted helpers).
 
 .section .text
 .globl _start
@@ -42,7 +42,7 @@ _start:
     # --- Verification Phase ---
 
     # 3. Store the LUI-generated value to RAM.
-    sd t1, 0(t0)        # Store 0x10050 to address t0
+    sw t1, 0(t0)        # Store 0x10050 to address t0
     
     # 4. Clear a register and load the value back.
     addi t2, x0, 0
@@ -50,11 +50,11 @@ _start:
 
     # 5. Print the loaded value to the UART.
     #    The UART will only see the lower 8 bits, which is 80 ('P').
-    sd t2, 0(t3)        # This should print the FIRST 'P'.
+    sw t2, 0(t3)        # This should print the FIRST 'P'.
 
     # 6. Now, create the known-good value 80 using only ADDI.
     addi t4, x0, 80
     
     # 7. Print the known-good value to the UART.
-    sd t4, 0(t3)        # This should print the SECOND 'P'.
+    sw t4, 0(t3)        # This should print the SECOND 'P'.
 
