@@ -263,11 +263,14 @@ module riscv64(
 	                    bus_address <= re[w_rs1] + w_imm_s; 
 			    //bus_write_data <= bus_read_data[31:0];
 			    case ((re[w_rs1] + w_imm_i) & 64'b11)
+			        0: bus_write_data <= {bus_read_data[31:8], re[w_rs2][7:0]};
+			        1: bus_write_data <= {bus_read_data[31:16], re[w_rs2][7:0], bus_read_data[7:0]};
+			        2: bus_write_data <= {bus_read_data[31:24], re[w_rs2][7:0], bus_read_data[15:0]};
+			        3: bus_write_data <= {re[w_rs2][7:0], bus_read_data[23:0]};
 			        //0: bus_write_data <= (re[w_rs2][7:0]<<0)  | (bus_read_data[31:0] & ~(32'b11111111<<0) );
-			        0: bus_write_data <= re[w_rs2][7:0]<<0;
-			        1: bus_write_data <= (re[w_rs2][7:0]<<8)  | (bus_read_data[31:0] & ~(32'b11111111<<8) );
-			        2: bus_write_data <= (re[w_rs2][7:0]<<16) | (bus_read_data[31:0] & ~(32'b11111111<<16) );
-			        3: bus_write_data <= (re[w_rs2][7:0]<<24) | (bus_read_data[31:0] & ~(32'b11111111<<24) );
+			        //1: bus_write_data <= (re[w_rs2][7:0]<<8)  | (bus_read_data[31:0] & ~(32'b11111111<<8) );
+			        //2: bus_write_data <= (re[w_rs2][7:0]<<16) | (bus_read_data[31:0] & ~(32'b11111111<<16) );
+			        //3: bus_write_data <= (re[w_rs2][7:0]<<24) | (bus_read_data[31:0] & ~(32'b11111111<<24) );
 			    endcase
 			    bus_write_enable <= 1;
 		            store_step <= 0;  
