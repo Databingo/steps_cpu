@@ -26,18 +26,26 @@ _start:
 
      addi t1, x0, 0   # clean t1 to 0
      lw t1, -16(t0)    # loab back the saved value from -16(t0) to t1
-#
-#    # -- Print 'P' --
-#    srli t2, t1, 24     # Isolate 'P' (0x50)
-#    sw t2, 0(t0)        # Print 'P'
-#    
-#    # -- Print 'A' --
-#    srli t3, t1, 16     # Isolate 'A' (0x41)
-#    sw t3, 0(t0)        # Print 'A'
-#    
-#    # -- Print 'S' --
-#    srli t4, t1, 8      # Isolate 'S' (0x53)
-#    sw t4, 0(t0)        # Print 'S'
-#    
+ 
+     addi t6, x0,  48 #0 
+     sw t6, 0(t0) 
+     # -- Print 'P' --
+     srli t2, t1, 24     # Isolate 'P' (0x50)
+     sw t2, 0(t0)        # Print 'P'
+     
+     addi t6, x0,  49 #1 
+     sw t6, 0(t0) 
+     # -- Print 'A' --
+     srli t3, t1, 16     # Isolate 'A' (0x41)
+     sw t3, 0(t0)        # Print 'A'
+     
+     addi t6, x0,  50 #2 
+     sw t6, 0(t0) 
+     # -- Print 'S' --
+     srli t4, t1, 8      # Isolate 'S' (0x53)
+     sw t4, 0(t0)        # Print 'S'
+     
+     addi t6, x0,  51 #3 
+     sw t6, 0(t0) 
     # -- Print final 'S', now become "E" --
     sw t1, 0(t0)        # Print the lowest byte 'E'
