@@ -1,51 +1,29 @@
-# RISC-V Assembly: 'lb' (Load Byte) Alignment and Sign-Extension Test
-# Goal: Verify that 'lb' works correctly for all four byte offsets within a word.
+# RISC-V Assembly: 'lb' Test Part 1 (Positive Byte)
+# Instructions used: lb (under test), lui, addi, sw.
 
 .section .text
 .globl _start
 
 _start:
     # --- Setup Phase ---
-    li t0, 0x1000       # RAM base address for our test data
-    li t5, 0x2004       # UART address
-
-    # 1. Construct and store our 32-bit test pattern: 0x807F108A
-    li t1, 0x807F108A
-    sw t1, 0(t0)        # Use 'sw' to store the 32-bit word.
+    # Get RAM address (0x1000).
+    lui t0, 0x1
+    # addi t0, t0, 0 -> Redundant, lui is enough.
     
-    # --- Test Phase ---
+    # Get UART address (0x2004).
+    lui t3, 0x2
+    addi t3, t3, 4
 
-    # --- Test 1: Load from offset 0 (Byte value 0x8A -> -118) ---
-    lb t2, 0(t0)
-    li t3, -118
-    bne t2, t3, fail
-
-    # --- Test 2: Load from offset 1 (Byte value 0x10 -> 16) ---
-    lb t2, 1(t0)
-    li t3, 16
-    bne t2, t3, fail
-
-    # --- Test 3: Load from offset 2 (Byte value 0x7F -> 127) ---
+    # 1. Construct and store test pattern: 0x80418042
+    lui t1, 0x80418
+    addi t1, t1, 0x42
+    sw t1, 0(t0)        # Store 0x80418042 to address 0x1000.
+    
+    # --- Action & Verification: Test Offset +2 ---
+    
+    # 2. Load the byte from address 0x1002. This is the byte with value 0x41 ('A').
     lb t2, 2(t0)
-    li t3, 127
-    bne t2, t3, fail
-
-    # --- Test 4: Load from offset 3 (Byte value 0x80 -> -128) ---
-    lb t2, 3(t0)
-    li t3, -128
-    bne t2, t3, fail
-
-    # If we get here, all four alignment tests passed.
-pass:
-    li t6, 80           # ASCII 'P'
-    sd t6, 0(t5)
-pass_loop:
-    beq x0, x0, pass_loop
-
-fail:
-    # Optional: Print 'F' to know that a failure occurred.
-    li t6, 70
-    sd t6, 0(t5)
-fail_loop:
-    beq x0, x0, fail_loop
-
+    
+    # 3. Print the result. 'lb' on a positive byte (0x41) should result in
+    #    0x...0041 in t2. The UART will print 'A'.
+    sw t2, 0(t3)
