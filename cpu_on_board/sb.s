@@ -50,6 +50,8 @@ fail:
     # If the values are not equal, the program gets stuck here.
     # This means one of the 'sb' operations corrupted an adjacent byte
     # or failed to write to the correct position.
+    li t6, 70           # ASCII 'F'
+    sd t6, 0(t5)
     beq x0, x0, fail
 
 pass:
