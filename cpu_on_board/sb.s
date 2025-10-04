@@ -20,8 +20,9 @@ _start:
     addi t1, t1, 0x353  # t1 = 0x50415353.
 
     sw t1, -16(t0)   # save t1 value to ram -16(t0)
-    addi t5, x0, 0x45  # t5 = "F"
-    sb t5, -16(t0)   # save t5 value to ram -16(t0)
+
+    addi t5, x0, 0x45  # change lowest byte 16*4+5 = 69 to "E"
+    sb t5, -16(t0)   # save byte value to ram -16(t0)  -------------
 
     addi t1, x0, 0   # clean t1 to 0
     lw t1, -16(t0)    # loab back the saved value from -16(t0) to t1
@@ -38,5 +39,5 @@ _start:
     srli t4, t1, 8      # Isolate 'S' (0x53)
     sw t4, 0(t0)        # Print 'S'
     
-    # -- Print final 'S', now become "F" --
-    sw t1, 0(t0)        # Print the lowest byte 'F'
+    # -- Print final 'S', now become "E" --
+    sw t1, 0(t0)        # Print the lowest byte 'E'
