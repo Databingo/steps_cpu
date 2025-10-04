@@ -1,43 +1,40 @@
-# RISC-V Assembly: True Minimal 'lw' Test
-# Goal: Write 'P' to RAM, load it back with 'lw', and print the result to UART.
-# Instructions used: ONLY addi, sw, lw.
+# Lw test
 
 .section .text
 .globl _start
 
 _start:
-    # --- Setup Phase (using only ADDI) ---
-
-    # 1. Get the RAM address into t0.
+    # --- Setup Phase ---
+    # Get the UART address (0x2004) into t3.
+    #    (Using a sequence of addi instructions as before)
     addi t0, x0, 2047
     addi t0, t0, 2047
     addi t0, t0, 2047
+    addi t0, t0, 2047
+    addi t0, t0, 8      # t3 = 8196 (0x2004)
+
+
+    # --- Action Phase ---
+    # Construct the test value 0x50415353 ('P' 'A' 'S' 'S') in register t1. 'P' = 0x50, 'A' = 0x41, 'S' = 0x53.
+    lui t1, 0x50415
+    addi t1, t1, 0x353  # t1 = 0x50415353.
+
+    sw t1, -16(t0)   # save t1 value to ram -16(t0)
+    addi t1, x0, 0   # clean t1 to 0
+    lw t1, 16(t0)    # loab back the saved value from -16(t0) to t1
+
+
+    # -- Print 'P' --
+    srli t2, t1, 24     # Isolate 'P' (0x50)
+    sw t2, 0(t0)        # Print 'P'
     
-    # 2. Get the test character 'P' (ASCII 86) into t1.
-    addi t1, x0, 80
+    # -- Print 'A' --
+    srli t3, t1, 16     # Isolate 'A' (0x41)
+    sw t3, 0(t0)        # Print 'A'
     
-    # --- Write to RAM (using trusted SD) ---
-    # Store 'P' at t0
-    sw t1, 0(t0)
+    # -- Print 'S' --
+    srli t4, t1, 8      # Isolate 'S' (0x53)
+    sw t4, 0(t0)        # Print 'S'
     
-    # --- Action Phase: The Instruction Under Test (LD) ---
-    
-    # 3. Clear the destination register t2 to ensure we're not seeing a stale value.
-    addi t2, x0, 0
-    
-    # 4. Load the value 
-    #    If 'lw' works, t2 shoulw now contain 86.
-    lw t2, 0(t0)
-    
-    # --- Verification Phase: Print the Result ---
-    
-    # 5. Get the UART address (0x2004) into t3.
-    #    (Using a sequence of addi instructions as before)
-    addi t3, x0, 2047
-    addi t3, t3, 2047
-    addi t3, t3, 2047
-    addi t3, t3, 2047
-    addi t3, t3, 8      # t3 = 8196 (0x2004)
-    
-    # 6. Store the value we loaded from RAM (now in t2) to the UART.
-    sw t2, 0(t3)
+    # -- Print final 'S' --
+    sw t1, 0(t0)        # Print the lowest byte 'S'
