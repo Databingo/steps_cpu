@@ -190,7 +190,7 @@ module riscv64(
 			    if ((re[w_rs1] + w_imm_i) & 64'b11 == 2) re[w_rd]<= $signed(bus_read_data[23:16]); 
 			    if ((re[w_rs1] + w_imm_i) & 64'b11 == 3) re[w_rd]<= $signed(bus_read_data[31:24]); 
 			    load_step <= 0; 
-			    bus_byte_position <= 0;
+			    //bus_byte_position <= 0;
 			end 
 		    end  // Lb 3 cycles
 
