@@ -151,8 +151,19 @@ module riscv64(
 	            32'b???????_?????_?????_???_?????_0010111: re[w_rd] <= w_imm_u + (pc - 4); // Auipc
 
                     // Load
-		    32'b???????_?????_?????_010_?????_0000011: begin if (load_step == 0) begin bus_address <= re[w_rs1] + w_imm_i; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; end
-	                                                             if (load_step == 1) begin re[w_rd]<= $signed(bus_read_data[31:0]); load_step <= 0; end end  // Lw
+		    32'b???????_?????_?????_010_?????_0000011: begin 
+		        if (load_step == 0) begin 
+			    bus_address <= re[w_rs1] + w_imm_i; 
+			    bus_read_enable <= 1; 
+			    pc <= pc - 4; 
+			    bubble <= 1; 
+			    load_step <= 1; 
+			end
+			if (load_step == 1) begin 
+			    re[w_rd]<= $signed(bus_read_data[31:0]); 
+			    load_step <= 0; 
+			end 
+		    end  // Lw
 
 		    ///32'b???????_?????_?????_011_?????_0000011: begin if (load_step == 0) begin bus_address <= re[w_rs1] + w_imm_i; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; end
 	            ///                                                 if (load_step == 1) begin re[w_rd]<= bus_read_data; load_step <= 0; end end  // Ld
@@ -251,10 +262,13 @@ module riscv64(
                         if (store_step == 1) begin 
 	                    bus_address <= re[w_rs1] + w_imm_s; 
 			    //bus_write_data <= bus_read_data[31:0];
-			    if ((re[w_rs1] + w_imm_i) & 64'b11 == 0) bus_write_data <= (re[w_rs2][7:0]<<0)  | (bus_read_data[31:0] & ~(32'b11111111<<0) );
-			    if ((re[w_rs1] + w_imm_i) & 64'b11 == 1) bus_write_data <= (re[w_rs2][7:0]<<8)  | (bus_read_data[31:0] & ~(32'b11111111<<8) );
-			    if ((re[w_rs1] + w_imm_i) & 64'b11 == 2) bus_write_data <= (re[w_rs2][7:0]<<16) | (bus_read_data[31:0] & ~(32'b11111111<<16) );
-			    if ((re[w_rs1] + w_imm_i) & 64'b11 == 3) bus_write_data <= (re[w_rs2][7:0]<<24) | (bus_read_data[31:0] & ~(32'b11111111<<24) );
+			    case ((re[w_rs1] + w_imm_i) & 64'b11)
+			        //0: bus_write_data <= (re[w_rs2][7:0]<<0)  | (bus_read_data[31:0] & ~(32'b11111111<<0) );
+			        0: bus_write_data <= re[w_rs2][7:0]<<0;
+			        1: bus_write_data <= (re[w_rs2][7:0]<<8)  | (bus_read_data[31:0] & ~(32'b11111111<<8) );
+			        2: bus_write_data <= (re[w_rs2][7:0]<<16) | (bus_read_data[31:0] & ~(32'b11111111<<16) );
+			        3: bus_write_data <= (re[w_rs2][7:0]<<24) | (bus_read_data[31:0] & ~(32'b11111111<<24) );
+			    endcase
 			    bus_write_enable <= 1;
 		            store_step <= 0;  
 			    //bus_byte_position <= 0;
