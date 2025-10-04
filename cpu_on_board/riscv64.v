@@ -234,7 +234,7 @@ module riscv64(
 	            //32'b???????_?????_?????_011_?????_0100011: begin bus_address <= re[w_rs1] + w_imm_s; bus_write_data <= re[w_rs2]; bus_write_enable <= 1; end // Sd //! 32-32 multip cycles
 	            32'b???????_?????_?????_011_?????_0100011: begin 
 		        if (store_step == 0) begin;
-		            bus_address <= re[w_rs1] + w_imm_s; 
+		            bus_address <= re[w_rs1] + w_imm_s;  // Wirte Low 32 bit
 		            bus_write_data <= re[w_rs2][31:0]; 
 		            bus_write_enable <= 1; 
 			    pc <= pc - 4;
@@ -242,7 +242,7 @@ module riscv64(
                             store_step <= 1;
 		        end 
 		        if (store_step == 1) begin;
-		            bus_address <= re[w_rs1] + w_imm_s + 4; // High 32 bit
+		            bus_address <= re[w_rs1] + w_imm_s + 4; // Write High 32 bit
 		            bus_write_data <= re[w_rs2][63:32]; 
 		            bus_write_enable <= 1; 
                             store_step <= 0;
@@ -252,12 +252,12 @@ module riscv64(
 	            //32'b???????_?????_?????_000_?????_0100011: begin bus_address <= re[w_rs1] + w_imm_s; bus_write_data <= re[w_rs2][7:0]; bus_write_enable <= 1; end // Sb
 	            32'b???????_?????_?????_000_?????_0100011: begin 
 		        if (store_step == 0) begin 
-		            bus_address <= re[w_rs1] + w_imm_i; 
+		            bus_address <= re[w_rs1] + w_imm_s; // should change i to s type !!
 		            bus_read_enable <= 1; 
 		            pc <= pc - 4; 
 		            bubble <= 1; 
 		            store_step <= 1; 
-			    bus_byte_position <= (re[w_rs1] + w_imm_i) & 64'b11;  // byte_start_position in 32 bit data
+			    bus_byte_position <= (re[w_rs1] + w_imm_s) & 64'b11;  // byte_start_position in 32 bit data
 		        end
                         if (store_step == 1) begin 
 	                    bus_address <= re[w_rs1] + w_imm_s; 
