@@ -105,7 +105,7 @@ _start:
     # --- Verification Phase: Print the Result ---
     
     # 4. Store the value we loaded from RAM (now in t2) to the UART.
-    sd t2, 0(t3)
+    sw t2, 0(t3)
     
 done:
     # Halt the processor. We can use beq as a pure 'j'.
