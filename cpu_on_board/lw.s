@@ -21,7 +21,7 @@ _start:
 
     sw t1, -16(t0)   # save t1 value to ram -16(t0)
     addi t1, x0, 0   # clean t1 to 0
-    lw t1, 16(t0)    # loab back the saved value from -16(t0) to t1
+    lw t1, -16(t0)    # loab back the saved value from -16(t0) to t1
 
 
     # -- Print 'P' --
