@@ -85,8 +85,8 @@ module riscv64(
     // -- Innerl signal --
     reg bubble;
     reg [1:0] load_step;
-    reg store_step;
-    reg [1:0] bus_byte_position;
+    reg [1:0] store_step;
+    //reg [1:0] bus_byte_position;
     //assign w_bus_address = re[w_rs1] + w_imm_i; 
 
 
@@ -142,7 +142,7 @@ module riscv64(
 	    else begin 
 	        bus_read_enable <= 0;
 	        bus_write_enable <= 0; 
-	        bus_write_data <= 0;
+	        //bus_write_data <= 0;
 	        bus_address <= `Ram_base;
 	        bus_bytes <= 0;
                 casez(ir) // Pseudo: li j jr ret call // I: lui ld sd addi jal jalr mret auipc beq slt
@@ -221,15 +221,70 @@ module riscv64(
 	                                                             if (load_step == 1) begin re[w_rd]<= bus_read_data[31:0]; load_step <= 0; end end  // Lwu
 
                     // Store
+	            //32'b???????_?????_?????_010_?????_0100011: begin bus_address <= re[w_rs1] + w_imm_s; bus_write_data <= re[w_rs2][31:0]; bus_write_enable <= 1; pc <= pc; bubble <= 1; end // Sw
 	            32'b???????_?????_?????_010_?????_0100011: begin 
-		        bus_address <= re[w_rs1] + w_imm_s; 
-			bus_write_data <= re[w_rs2][31:0]; 
-			bus_write_enable <= 1; 
-
-			pc <= pc; // for close bus_write_enable then UART would trigger change side.
-			bubble <= 1;
-
+		        if (store_step == 0) begin;  // read data 1
+		            bus_address <= re[w_rs1] + w_imm_s; 
+		            bus_read_enable <= 1; 
+		            pc <= pc - 4; 
+		            bubble <= 1; 
+		            store_step <= 1; 
+			end if (store_step == 1) begin  // write data 1'
+	                    bus_address <= re[w_rs1] + w_imm_s; 
+			    case ((re[w_rs1] + w_imm_s) & 64'b11)
+			        0: bus_write_data <= re[w_rs2];
+			        1: bus_write_data <= {re[w_rs2][23:0], bus_read_data[7:0]};
+			        2: bus_write_data <= {re[w_rs2][15:0], bus_read_data[15:0]};
+			        3: bus_write_data <= {re[w_rs2][7:0], bus_read_data[23:0]};
+			    endcase
+			    bus_write_enable <= 1;
+			    pc <= pc - 4; 
+			    bubble <= 1;
+		            store_step <= 2;  
+			end if (store_step == 2) begin  // read data 2
+		            bus_address <= re[w_rs1] + w_imm_s + 4; 
+		            bus_read_enable <= 1; 
+		            pc <= pc - 4; 
+		            bubble <= 1; 
+		            store_step <= 3; 
+			end if (store_step == 3) begin  // write data 2'
+	                    bus_address <= re[w_rs1] + w_imm_s + 4; 
+			    case ((re[w_rs1] + w_imm_s) & 64'b11)
+			        0: bus_write_data <= bus_read_data;
+			        1: bus_write_data <= {bus_read_data[31:8], re[w_rs2][31:24]};
+			        2: bus_write_data <= {bus_read_data[31:16], re[w_rs2][31:16]};
+			        3: bus_write_data <= {bus_read_data[31:24], re[w_rs2][31:8]};
+			    endcase
+			    bus_write_enable <= 1;
+		            store_step <= 0;  
+			end 
 		    end // Sw
+
+	            //32'b???????_?????_?????_000_?????_0100011: begin bus_address <= re[w_rs1] + w_imm_s; bus_write_data <= re[w_rs2][7:0]; bus_write_enable <= 1; end // Sb
+	            32'b???????_?????_?????_000_?????_0100011: begin 
+		        if (store_step == 0) begin 
+		            bus_address <= re[w_rs1] + w_imm_s; // should change i to s type !!
+		            bus_read_enable <= 1; 
+		            pc <= pc - 4; 
+		            bubble <= 1; 
+		            store_step <= 1; 
+			    //bus_byte_position <= (re[w_rs1] + w_imm_s) & 64'b11;  // byte_start_position in 32 bit data
+		        end
+                        if (store_step == 1) begin 
+	                    bus_address <= re[w_rs1] + w_imm_s; 
+			    case ((re[w_rs1] + w_imm_i) & 64'b11)
+			    //case (bus_byte_position)
+			        0: bus_write_data <= {bus_read_data[31:8], re[w_rs2][7:0]};
+			        1: bus_write_data <= {bus_read_data[31:16], re[w_rs2][7:0], bus_read_data[7:0]};
+			        2: bus_write_data <= {bus_read_data[31:24], re[w_rs2][7:0], bus_read_data[15:0]};
+			        3: bus_write_data <= {re[w_rs2][7:0], bus_read_data[23:0]};
+			    endcase
+			    bus_write_enable <= 1;
+		            store_step <= 0;  
+			    //bus_byte_position <= 0;
+			end 
+		    end // Sb 3 cycles
+	            32'b???????_?????_?????_001_?????_0100011: begin bus_address <= re[w_rs1] + w_imm_s; bus_write_data <= re[w_rs2][15:0]; bus_write_enable <= 1;bus_bytes <= 2'b11; end // Sh
 
 	            //32'b???????_?????_?????_011_?????_0100011: begin bus_address <= re[w_rs1] + w_imm_s; bus_write_data <= re[w_rs2]; bus_write_enable <= 1; end // Sd //! 32-32 multip cycles
 	            32'b???????_?????_?????_011_?????_0100011: begin 
@@ -249,39 +304,6 @@ module riscv64(
 		        end 
 		    end // Sd 3 cycles
 
-	            //32'b???????_?????_?????_000_?????_0100011: begin bus_address <= re[w_rs1] + w_imm_s; bus_write_data <= re[w_rs2][7:0]; bus_write_enable <= 1; end // Sb
-	            32'b???????_?????_?????_000_?????_0100011: begin 
-		        if (store_step == 0) begin 
-		            bus_address <= re[w_rs1] + w_imm_s; // should change i to s type !!
-		            bus_read_enable <= 1; 
-		            pc <= pc - 4; 
-		            bubble <= 1; 
-		            store_step <= 1; 
-			    bus_byte_position <= (re[w_rs1] + w_imm_s) & 64'b11;  // byte_start_position in 32 bit data
-		        end
-                        if (store_step == 1) begin 
-	                    bus_address <= re[w_rs1] + w_imm_s; 
-			    //bus_write_data <= bus_read_data[31:0];
-			    //case ((re[w_rs1] + w_imm_i) & 64'b11)
-			    case (bus_byte_position)
-			        //0: bus_write_data <= 32'h50415345; //PASF{bus_read_data[31:8], re[w_rs2][7:0]};
-			        0: bus_write_data <= {bus_read_data[31:8], re[w_rs2][7:0]};
-			        1: bus_write_data <= {bus_read_data[31:16], re[w_rs2][7:0], bus_read_data[7:0]};
-			        2: bus_write_data <= {bus_read_data[31:24], re[w_rs2][7:0], bus_read_data[15:0]};
-			        3: bus_write_data <= {re[w_rs2][7:0], bus_read_data[23:0]};
-			        //0: bus_write_data <= (re[w_rs2][7:0]<<0)  | (bus_read_data[31:0] & ~(32'b11111111<<0) );
-			        //1: bus_write_data <= (re[w_rs2][7:0]<<8)  | (bus_read_data[31:0] & ~(32'b11111111<<8) );
-			        //2: bus_write_data <= (re[w_rs2][7:0]<<16) | (bus_read_data[31:0] & ~(32'b11111111<<16) );
-			        //3: bus_write_data <= (re[w_rs2][7:0]<<24) | (bus_read_data[31:0] & ~(32'b11111111<<24) );
-			    endcase
-			    bus_write_enable <= 1;
-		            store_step <= 0;  
-			    bus_byte_position <= 0;
-			end 
-		    end // Sb 3 cycles
-
-
-	            32'b???????_?????_?????_001_?????_0100011: begin bus_address <= re[w_rs1] + w_imm_s; bus_write_data <= re[w_rs2][15:0]; bus_write_enable <= 1;bus_bytes <= 2'b11; end // Sh
                     // Math-I
 	            32'b???????_?????_?????_000_?????_0010011: re[w_rd] <= re[w_rs1] + w_imm_i;  // Addi
 	            32'b000000?_?????_?????_101_?????_0010011: re[w_rd] <= re[w_rs1] >> w_shamt; // Srli // func7->6 // rv64 shame take w_f7[0]
