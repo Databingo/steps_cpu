@@ -51,7 +51,8 @@ fail:
     # This means one of the 'sb' operations corrupted an adjacent byte
     # or failed to write to the correct position.
     li t6, 70           # ASCII 'F'
-    sd t6, 0(t5)
+    sw t6, 0(t5)
+    sw t2, 0(t5)        # lowest byte of t2
     beq x0, x0, fail
 
 pass:
