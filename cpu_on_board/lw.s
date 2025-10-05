@@ -15,9 +15,9 @@ _start:
 
 
     # --- Action Phase ---
-    # Construct the test value 0x50415353 ('P' 'A' 'S' 'S') in register t1. 'P' = 0x50, 'A' = 0x41, 'S' = 0x53.
-    lui t1, 0x50415
-    addi t1, t1, 0x353  # t1 = 0x50415353.
+    # Construct the test value 0x50417353 ('P' 'A' 's' 'S') in register t1. 'P' = 0x50, 'A' = 0x41, 'S' = 0x53.
+    lui t1, 0x50417
+    addi t1, t1, 0x353  # t1 = 0x50417353.
 
     sw t1, -14(t0)   # save t1 value to ram -14(t0) unaligned
     addi t1, x0, 0   # clean t1 to 0
@@ -33,8 +33,8 @@ _start:
     sb t3, 0(t0)        # Print 'A'
     
     # -- Print 'S' --
-    srli t4, t1, 8      # Isolate 'S' (0x53)
-    sb t4, 0(t0)        # Print 'S'
+    srli t4, t1, 8      # Isolate 's' (0x73)
+    sb t4, 0(t0)        # Print 's'
     
     # -- Print final 'S' --
     sb t1, 0(t0)        # Print the lowest byte 'S'
