@@ -30,7 +30,7 @@ _start:
 
     # At this point, t1 should hold 80. The ASCII for 'P' is 80.
     # Verification Point 1: Print 'P'
-    sw t1, 0(t0)        # Write 'P' to address 0x2004
+    sb t1, 0(t0)        # Write 'P' to address 0x2004
 
     # --- Test 4: Large Positive Immediate ---
     # Expected result: t1 = 80 + 2047 = 2127
@@ -44,19 +44,19 @@ _start:
     # Expected result: t1 = 79 - 14 = 65. ASCII for 'A' is 65.
     addi t1, t1, -14
     # Verification Point 2: Print 'A'
-    sw t1, 0(t0)        # Write 'A'
+    sb t1, 0(t0)        # Write 'A'
     
     # --- Test 6: Adding to a non-zero register ---
     # Expected result: t1 = 65 + 18 = 83. ASCII for 'S' is 83.
     addi t1, t1, 18
     # Verification Point 3: Print 'S'
-    sw t1, 0(t0)       # Write 'S'
+    sb t1, 0(t0)       # Write 'S'
     
     # Verification Point 4: Print another 'S'
-    sw t1, 0(t0)       # Write 'S'
+    sb t1, 0(t0)       # Write 'S'
 
     # --- Final Test: Create '!' ---
     # Expected result: t1 = 83 - 50 = 33. ASCII for '!' is 33.
     addi t1, t1, -50
     # Verification Point 5: Print '!'
-    sw t1, 0(t0)       # Write '!'
+    sb t1, 0(t0)       # Write '!'
