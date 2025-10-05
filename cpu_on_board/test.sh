@@ -15,11 +15,10 @@ cat bin.txt > rom.mif  # write ROM program
 #go run ../rvas.go ld.s       # lui addi slli addi sd ld sb uart for test
 #go run ../rvas.go lbu.s      # addi -1 sb lb sb uart #include lbu lhu lwu     
 #----tested again---
-#go run ../rvas.go beq.s
-#go run ../rvas.go add.s
-#
+#go run ../rvas.go beq.s ok
+#go run ../rvas.go add.s ok
 #go run ../rvas.go li32.s
-go run ../rvas.go li.s  #
+#go run ../rvas.go li.s  # ok
 #go run ../rvas.go jalr.s
 #go run ../rvas.go jal.s
 #go run ../rvas.go j_jr_ret.s  #
@@ -27,10 +26,6 @@ go run ../rvas.go li.s  #
 #go run ../rvas.go call.s # ok
 
 
- 
- 
- 
- 
  
 #go run ../rvas.go load.s #
 #go run ../rvas.go sd_ld.s
