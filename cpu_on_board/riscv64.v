@@ -165,7 +165,7 @@ module riscv64(
 		        end 
 		    end  // Lw
 
-		    // -- Support unalined Lw --- 
+		    // -- Support Unaligned Lw --- 
 		    //32'b???????_?????_?????_010_?????_0000011: begin 
 		    //    if (load_step == 0) begin 
 		    //        bus_address <= re[w_rs1] + w_imm_i; 
@@ -229,17 +229,15 @@ module riscv64(
 			    pc <= pc - 4; 
 			    bubble <= 1; 
 			    load_step <= 1; 
-			    //bus_byte_position <= (re[w_rs1] + w_imm_i) & 64'b11;  // byte_start_position in 32 bit data
 			end
 	                if (load_step == 1) begin // byte_start_position in 32 bit data
-			    case ((re[w_rs1] + w_imm_i) & 64'b11)
+			    case ((re[w_rs1] + w_imm_i) & 2'b11)
 			        0: re[w_rd]<= $signed(bus_read_data[7:0]); 
 			        1: re[w_rd]<= $signed(bus_read_data[15:8]); 
 			        2: re[w_rd]<= $signed(bus_read_data[23:16]); 
 			        3: re[w_rd]<= $signed(bus_read_data[31:24]); 
 			    endcase
 			    load_step <= 0; 
-			    //bus_byte_position <= 0;
 			end 
 		    end  // Lb 3 cycles
 
@@ -258,7 +256,7 @@ module riscv64(
                     // Store
 	            32'b???????_?????_?????_010_?????_0100011: begin bus_address <= re[w_rs1] + w_imm_s; bus_write_data <= re[w_rs2][31:0]; bus_write_enable <= 1; pc <= pc; bubble <= 1; end // Sw
 
-		    // -- Support unalined Sw --- 
+		    // -- Support Unaligned Sw --- 
 	            //32'b???????_?????_?????_010_?????_0100011: begin 
 		    //    if (store_step == 0) begin;  // read data 1
 		    //        bus_address <= re[w_rs1] + w_imm_s; 
@@ -305,12 +303,10 @@ module riscv64(
 		            pc <= pc - 4; 
 		            bubble <= 1; 
 		            store_step <= 1; 
-			    //bus_byte_position <= (re[w_rs1] + w_imm_s) & 64'b11;  // byte_start_position in 32 bit data
 		        end
                         if (store_step == 1) begin 
 	                    bus_address <= re[w_rs1] + w_imm_s; 
-			    case ((re[w_rs1] + w_imm_s) & 64'b11)
-			    //case (bus_byte_position)
+			    case ((re[w_rs1] + w_imm_s) & 2'b11)
 			        0: bus_write_data <= {bus_read_data[31:8], re[w_rs2][7:0]};
 			        1: bus_write_data <= {bus_read_data[31:16], re[w_rs2][7:0], bus_read_data[7:0]};
 			        2: bus_write_data <= {bus_read_data[31:24], re[w_rs2][7:0], bus_read_data[15:0]};
@@ -318,7 +314,6 @@ module riscv64(
 			    endcase
 			    bus_write_enable <= 1;
 		            store_step <= 0;  
-			    //bus_byte_position <= 0;
 			end 
 		    end // Sb 3 cycles
 	            32'b???????_?????_?????_001_?????_0100011: begin bus_address <= re[w_rs1] + w_imm_s; bus_write_data <= re[w_rs2][15:0]; bus_write_enable <= 1;bus_bytes <= 2'b11; end // Sh
