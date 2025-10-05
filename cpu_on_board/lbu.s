@@ -1,4 +1,5 @@
 # RISC-V Assembly: Lbu
+# include lhu lwu
 
 .section .text
 .globl _start
