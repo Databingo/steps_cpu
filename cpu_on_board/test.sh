@@ -21,7 +21,7 @@ cat bin.txt > rom.mif  # write ROM program
 #go run ../rvas.go auipc.s
 go run ../rvas.go call.s #
 #
-#
+# sh lh lhu lwu sd ld     
 #
 #
 #
