@@ -15,6 +15,7 @@ cat bin.txt > rom.mif  # write ROM program
 #go run ../rvas.go sd.s       # lui addi slli addi sd lw sb uart for test
 #go run ../rvas.go ld.s       # lui addi slli addi sd ld sb uart for test
 # lbu lhu lwu     
+go run ../rvas.go lbu.s       # addi -1 sb lb sb uart 
 #
 #
 #
