@@ -19,7 +19,17 @@ _start:
     lb t2, -16(t0)        # Load 80 to t2
     sb t2, 0(t0)          # Print  
 
-    addi t1, x0, 41
-    sb t1, -15(t0)        # Store 41 A to address 0x2004-15.
-    lb t2, -15(t0)        # Load 41 to t2
+    addi t1, x0, 64 
+    sb t1, -15(t0)        # Store 64 A to address 0x2004-15.
+    lb t2, -15(t0)        # Load 64 to t2
+    sb t2, 0(t0)          # Print  
+
+    addi t1, x0, 115 
+    sb t1, -13(t0)        # Store 115 s to address 0x2004-13.
+    lb t2, -13(t0)        # Load to t2
+    sb t2, 0(t0)          # Print  
+
+    addi t1, x0, 83 
+    sb t1, -14(t0)        # Store 83 S to address 0x2004-14.
+    lb t2, -14(t0)        # Load to t2
     sb t2, 0(t0)          # Print  
