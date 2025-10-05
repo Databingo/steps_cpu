@@ -274,7 +274,7 @@ module riscv64(
 		        end
                         if (store_step == 1) begin 
 	                    bus_address <= re[w_rs1] + w_imm_s; 
-			    case ((re[w_rs1] + w_imm_i) & 64'b11)
+			    case ((re[w_rs1] + w_imm_s) & 64'b11)
 			    //case (bus_byte_position)
 			        0: bus_write_data <= {bus_read_data[31:8], re[w_rs2][7:0]};
 			        1: bus_write_data <= {bus_read_data[31:16], re[w_rs2][7:0], bus_read_data[7:0]};

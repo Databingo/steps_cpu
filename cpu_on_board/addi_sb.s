@@ -60,3 +60,11 @@ _start:
     addi t1, t1, -50
     # Verification Point 5: Print '!'
     sb t1, 0(t0)       # Write '!'
+
+
+
+
+
+
+
+
