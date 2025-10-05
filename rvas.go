@@ -1605,6 +1605,19 @@ func main() {
 				fmt.Printf("!!Error on line %d: %s\n", lineCounter, err)
 				os.Exit(0)
 			}
+			opr := code[0]
+			if ((opr == "lh" || opr == "lhu") && imm % 2 != 0) {
+				fmt.Printf("@Error on line %d: %s target address not aligned with 2 bytes %d \n", lineCounter, opr, imm)
+				os.Exit(0)
+			    }
+			if ((opr == "lw" || opr == "lwu" ) && imm % 4 != 0) {
+				fmt.Printf("@Error on line %d: %s target address not aligned with 4 bytes %d \n", lineCounter, opr, imm)
+				os.Exit(0)
+			    }
+			if (opr == "ld" && imm % 8 != 0) {
+				fmt.Printf("@Error on line %d: %s target address not aligned with 8 bytes %d \n", lineCounter, opr, imm)
+				os.Exit(0)
+			    }
 			op, opFound := opBin[code[0]]
 			rd, rdFound := regBin[code[1]]
 			rs1, rs1Found := regBin[code[3]]
@@ -1629,6 +1642,19 @@ func main() {
 				fmt.Printf("@Error on line %d: %s\n", lineCounter, err)
 				os.Exit(0)
 			}
+			opr := code[0]
+			if (opr == "sh" && imm % 2 != 0) {
+				fmt.Printf("@Error on line %d: %s target address not aligned with 2 bytes %d \n", lineCounter, opr, imm)
+				os.Exit(0)
+			    }
+			if (opr == "sw" && imm % 4 != 0) {
+				fmt.Printf("@Error on line %d: %s target address not aligned with 4 bytes %d \n", lineCounter, opr, imm)
+				os.Exit(0)
+			    }
+			if (opr == "sd" && imm % 8 != 0) {
+				fmt.Printf("@Error on line %d: %s target address not aligned with 8 bytes %d \n", lineCounter, opr, imm)
+				os.Exit(0)
+			    }
 			op, opFound := opBin[code[0]]
 			rs2, rs2Found := regBin[code[1]]
 			rs1, rs1Found := regBin[code[3]]
