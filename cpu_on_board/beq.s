@@ -41,6 +41,6 @@ fail_loop_2:
 
 all_tests_passed:
     addi t1, x0, 80           # ASCII 'P'
-    sd t1, 0(t0)        # Write 'P' to UART.
+    sb t1, 0(t0)        # Write 'P' to UART.
 pass_loop:
     beq x0, x0, pass_loop # Halt on success.
