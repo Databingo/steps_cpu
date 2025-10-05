@@ -19,9 +19,10 @@ _start:
     lui t1, 0x50417
     addi t1, t1, 0x353  # t1 = 0x50417353.
 
-    sw t1, -14(t0)   # save t1 value to ram -14(t0) unaligned
+    #sw t1, -14(t0)   # save t1 value to ram -14(t0) unaligned
+    sw t1, -16(t0)   # save t1 value to ram -16(t0) aligned
     addi t1, x0, 0   # clean t1 to 0
-    lw t1, -14(t0)    # loab back the saved value from -14(t0) to t1
+    lw t1, -16(t0)    # loab back the saved value from -16(t0) to t1
 
 
     # -- Print 'P' --
