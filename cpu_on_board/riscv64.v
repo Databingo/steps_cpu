@@ -164,7 +164,8 @@ module riscv64(
 		            load_step <= 0; 
 		        end 
 		    end  // Lw
-		    
+
+		    // -- Support unalined Lw --- 
 		    //32'b???????_?????_?????_010_?????_0000011: begin 
 		    //    if (load_step == 0) begin 
 		    //        bus_address <= re[w_rs1] + w_imm_i; 
@@ -256,6 +257,8 @@ module riscv64(
 
                     // Store
 	            32'b???????_?????_?????_010_?????_0100011: begin bus_address <= re[w_rs1] + w_imm_s; bus_write_data <= re[w_rs2][31:0]; bus_write_enable <= 1; pc <= pc; bubble <= 1; end // Sw
+
+		    // -- Support unalined Sw --- 
 	            //32'b???????_?????_?????_010_?????_0100011: begin 
 		    //    if (store_step == 0) begin;  // read data 1
 		    //        bus_address <= re[w_rs1] + w_imm_s; 
