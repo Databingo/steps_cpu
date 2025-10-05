@@ -1,6 +1,6 @@
 # RISC-V Assembly: 'add' Test (Pure BEQ Version)
 # Goal: Verify the functionality of the add instruction.
-# Instructions used: add (under test), lui, li, addi, sd, beq (trusted helpers).
+# Instructions used: add (under test), lui, li, addi, sw, beq (trusted helpers).
 
 .section .text
 .globl _start
@@ -64,7 +64,7 @@ all_tests_passed:
     # If all tests succeed, we end up here.
     # Print 'P' for Pass.
     addi t1, x0, 80           # ASCII for 'P'
-    sd t1, 0(t0)        # Write 'P' to UART.
+    sw t1, 0(t0)        # Write 'P' to UART.
     
 pass_loop:
     # Halt on success.

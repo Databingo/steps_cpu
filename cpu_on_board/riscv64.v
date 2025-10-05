@@ -11,7 +11,6 @@ module riscv64(
     input  reg [3:0] interrupt_vector, // notice from outside
     output reg  interrupt_ack,         // reply to outside
     output reg [63:0] bus_address,     // 39 bit for real standard? 64 bit now
-    output reg [1:0]  bus_bytes,       // 0 sw, 1 sb, 2 sh, 3 sd, 3 sd??
     output reg [63:0] bus_write_data,
     output reg        bus_write_enable,
     output reg        bus_read_enable,
@@ -112,7 +111,6 @@ module riscv64(
 	    bus_write_enable <= 0;
 	    bus_write_data <= 0;
 	    bus_address <= `Ram_base;
-	    bus_bytes <= 0;
             // Interrupt re-enable
 	    csr_mstatus[MIE] <= 1;
 	    interrupt_ack <= 0;
@@ -144,7 +142,6 @@ module riscv64(
 	        bus_write_enable <= 0; 
 	        //bus_write_data <= 0;
 	        bus_address <= `Ram_base;
-	        bus_bytes <= 0;
                 casez(ir) // Pseudo: li j jr ret call // I: lui ld sd addi jal jalr mret auipc beq slt
 	            // U-type
 	            32'b???????_?????_?????_???_?????_0110111: re[w_rd] <= w_imm_u; // Lui
@@ -198,27 +195,6 @@ module riscv64(
 		    //    end 
 		    //end  // Lw 5 cycles
 
-		    ///32'b???????_?????_?????_011_?????_0000011: begin if (load_step == 0) begin bus_address <= re[w_rs1] + w_imm_i; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; end
-	            ///                                                 if (load_step == 1) begin re[w_rd]<= bus_read_data; load_step <= 0; end end  // Ld
-		    32'b???????_?????_?????_011_?????_0000011: begin 
-		        if (load_step == 0) begin 
-			    bus_address <= re[w_rs1] + w_imm_i; // Low 32 bit data in first line
-			    bus_read_enable <= 1; 
-			    pc <= pc - 4; 
-			    bubble <= 1; 
-			    load_step <= 1; 
-			end if (load_step == 1) begin 
-			    re[w_rd]<= bus_read_data; 
-			    bus_address <= re[w_rs1] + w_imm_i + 4;  // Hight 32 bit data in next line
-			    bus_read_enable <= 1; 
-			    pc <= pc - 4; 
-			    bubble <= 1; 
-			    load_step <= 2; 
-			end if (load_step == 2) begin 
-			    re[w_rd]<= {bus_read_data[31:0], re[w_rd][31:0]}; 
-			    load_step <= 0; 
-			end 
-		    end  // Ld 5 cycles
 
 		    //32'b???????_?????_?????_000_?????_0000011: begin if (load_step == 0) begin bus_address <= re[w_rs1] + w_imm_i; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; end
 	            //                                                 if (load_step == 1) begin re[w_rd]<= $signed(bus_read_data[7:0]); load_step <= 0; end end  // Lb
@@ -241,15 +217,73 @@ module riscv64(
 			end 
 		    end  // Lb 3 cycles
 
-		    32'b???????_?????_?????_001_?????_0000011: begin if (load_step == 0) begin bus_address <= re[w_rs1] + w_imm_i; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; end
-	                                                             if (load_step == 1) begin re[w_rd]<= $signed(bus_read_data[15:0]); load_step <= 0; end end  // Lh
+		    //32'b???????_?????_?????_001_?????_0000011: begin if (load_step == 0) begin bus_address <= re[w_rs1] + w_imm_i; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; end
+	            //                                                 if (load_step == 1) begin re[w_rd]<= $signed(bus_read_data[15:0]); load_step <= 0; end end  // Lh
+		    32'b???????_?????_?????_001_?????_0000011: begin 
+		        if (load_step == 0) begin 
+			    bus_address <= re[w_rs1] + w_imm_i; 
+			    bus_read_enable <= 1; 
+			    pc <= pc - 4; 
+			    bubble <= 1; 
+			    load_step <= 1; 
+			end
+	                if (load_step == 1) begin 
+			    case ((re[w_rs1] + w_imm_i) & 2'b11)
+			        0: re[w_rd]<= $signed(bus_read_data[15:0]); 
+			        1: ; // Error Unaligned
+			        2: re[w_rd]<= $signed(bus_read_data[31:16]); 
+			        3: ; // Error Unaligned
+			    endcase
+			    load_step <= 0; 
+			end 
+		    end  // Lh 3 cycles
+
+		    ///32'b???????_?????_?????_011_?????_0000011: begin if (load_step == 0) begin bus_address <= re[w_rs1] + w_imm_i; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; end
+	            ///                                                 if (load_step == 1) begin re[w_rd]<= bus_read_data; load_step <= 0; end end  // Ld
+		    32'b???????_?????_?????_011_?????_0000011: begin 
+		        if (load_step == 0) begin 
+			    bus_address <= re[w_rs1] + w_imm_i; // Low 32 bit data in first line
+			    bus_read_enable <= 1; 
+			    pc <= pc - 4; 
+			    bubble <= 1; 
+			    load_step <= 1; 
+			end if (load_step == 1) begin 
+			    re[w_rd]<= bus_read_data; 
+			    bus_address <= re[w_rs1] + w_imm_i + 4;  // Hight 32 bit data in next line
+			    bus_read_enable <= 1; 
+			    pc <= pc - 4; 
+			    bubble <= 1; 
+			    load_step <= 2; 
+			end if (load_step == 2) begin 
+			    re[w_rd]<= {bus_read_data[31:0], re[w_rd][31:0]}; 
+			    load_step <= 0; 
+			end 
+		    end  // Ld 5 cycles
 
 		    32'b???????_?????_?????_100_?????_0000011: begin if (load_step == 0) begin bus_address <= re[w_rs1] + w_imm_i; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; end
 	                                                             if (load_step == 1) begin re[w_rd]<= bus_read_data[7:0]; load_step <= 0; end end  // Lbu
 
-		    32'b???????_?????_?????_101_?????_0000011: begin if (load_step == 0) begin bus_address <= re[w_rs1] + w_imm_i; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; end
-	                                                             if (load_step == 1) begin re[w_rd]<= bus_read_data[15:0]; load_step <= 0; end end  // Lhu
-
+		    //32'b???????_?????_?????_101_?????_0000011: begin if (load_step == 0) begin bus_address <= re[w_rs1] + w_imm_i; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; end
+	            //                                                 if (load_step == 1) begin re[w_rd]<= bus_read_data[15:0]; load_step <= 0; end end  // Lhu
+		    32'b???????_?????_?????_101_?????_0000011: begin 
+		        if (load_step == 0) begin 
+			    bus_address <= re[w_rs1] + w_imm_i; 
+			    bus_read_enable <= 1; 
+			    pc <= pc - 4; 
+			    bubble <= 1; 
+			    load_step <= 1; 
+			end
+	                if (load_step == 1) begin 
+			    case ((re[w_rs1] + w_imm_i) & 2'b11)
+			        0: re[w_rd]<= bus_read_data[15:0]; 
+			        1: ; // Error Unaligned
+			        2: re[w_rd]<= bus_read_data[31:16]; 
+			        3: ; // Error Unaligned
+			    endcase
+			    load_step <= 0; 
+			end 
+		    end  // Lhu 3 cycles
+	                                                            
 		    32'b???????_?????_?????_110_?????_0000011: begin if (load_step == 0) begin bus_address <= re[w_rs1] + w_imm_i; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; end
 	                                                             if (load_step == 1) begin re[w_rd]<= bus_read_data[31:0]; load_step <= 0; end end  // Lwu
 
@@ -316,7 +350,28 @@ module riscv64(
 		            store_step <= 0;  
 			end 
 		    end // Sb 3 cycles
-	            32'b???????_?????_?????_001_?????_0100011: begin bus_address <= re[w_rs1] + w_imm_s; bus_write_data <= re[w_rs2][15:0]; bus_write_enable <= 1;bus_bytes <= 2'b11; end // Sh
+
+	            //32'b???????_?????_?????_001_?????_0100011: begin bus_address <= re[w_rs1] + w_imm_s; bus_write_data <= re[w_rs2][15:0]; bus_write_enable <= 1;end // Sh
+	            32'b???????_?????_?????_001_?????_0100011: begin 
+		        if (store_step == 0) begin 
+		            bus_address <= re[w_rs1] + w_imm_s;
+		            bus_read_enable <= 1; 
+		            pc <= pc - 4; 
+		            bubble <= 1; 
+		            store_step <= 1; 
+		        end
+                        if (store_step == 1) begin 
+	                    bus_address <= re[w_rs1] + w_imm_s; 
+			    case ((re[w_rs1] + w_imm_s) & 2'b11)
+			        0: bus_write_data <= {bus_read_data[31:16], re[w_rs2][15:0]};
+			        1: ; // Error Unaligned
+			        2: bus_write_data <= {re[w_rs2][15:0], bus_read_data[15:0]};
+			        3: ; // Error Unaligned
+			    endcase
+			    bus_write_enable <= 1;
+		            store_step <= 0;  
+			end 
+		    end // Sh 3 cycles
 
 	            //32'b???????_?????_?????_011_?????_0100011: begin bus_address <= re[w_rs1] + w_imm_s; bus_write_data <= re[w_rs2]; bus_write_enable <= 1; end // Sd //! 32-32 multip cycles
 	            32'b???????_?????_?????_011_?????_0100011: begin 
