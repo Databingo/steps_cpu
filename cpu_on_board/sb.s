@@ -1,4 +1,4 @@
-# Sb test
+# Sb test (Based on addi, srli)
 
 .section .text
 .globl _start
@@ -16,36 +16,29 @@ _start:
 
     # --- Action Phase ---
     # Construct the test value 0x50415353 ('P' 'A' 'S' 'S') in register t1. 'P' = 0x50, 'A' = 0x41, 'S' = 0x53.
-    lui t1, 0x50415
-    addi t1, t1, 0x353  # t1 = 0x50415353.
+    #lui t1, 0x50415
+    #addi t1, t1, 0x353  # t1 = 0x50415353.
+    addi t1, x0, -2  # t1 = 0xFFFFFFFE
 
-    sw t1, -16(t0)   # save t1 value to ram -16(t0)
-
-    addi t5, x0, 0x45  # change lowest byte 16*4+5 = 69 to "E"
-    sb t5, -16(t0)   # save byte value to ram -16(t0)  -------------
-
-     addi t1, x0, 0   # clean t1 to 0
-     lw t1, -16(t0)    # loab back the saved value from -16(t0) to t1
- 
      addi t6, x0,  48 #0 
-     sw t6, 0(t0) 
+     sb t6, 0(t0) 
      # -- Print 'P' --
      srli t2, t1, 24     # Isolate 'P' (0x50)
-     sw t2, 0(t0)        # Print 'P'
+     sb t2, 0(t0)        # Print 'P'
      
      addi t6, x0,  49 #1 
-     sw t6, 0(t0) 
+     sb t6, 0(t0) 
      # -- Print 'A' --
      srli t3, t1, 16     # Isolate 'A' (0x41)
-     sw t3, 0(t0)        # Print 'A'
+     sb t3, 0(t0)        # Print 'A'
      
      addi t6, x0,  50 #2 
-     sw t6, 0(t0) 
+     sb t6, 0(t0) 
      # -- Print 'S' --
      srli t4, t1, 8      # Isolate 'S' (0x53)
-     sw t4, 0(t0)        # Print 'S'
+     sb t4, 0(t0)        # Print 'S'
      
      addi t6, x0,  51 #3 
-     sw t6, 0(t0) 
+     sb t6, 0(t0) 
     # -- Print final 'S', now become "E" --
-    sw t1, 0(t0)        # Print the lowest byte 'E'
+     sb t1, 0(t0)        # Print the lowest byte 'E'

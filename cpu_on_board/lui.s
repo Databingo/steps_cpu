@@ -1,6 +1,6 @@
 # RISC-V Assembly: 'LUI' Test via Character Printing (Pure Version)
 # Goal: Verify 'lui' and 'addi' can construct a 32-bit value.
-# Instructions used: LUI (under test), addi, sw, srli, beq (trusted helpers).
+# Instructions used: LUI (under test), addi, sb, srli
 
 .section .text
 .globl _start
@@ -23,15 +23,15 @@ _start:
 
     # -- Print 'P' --
     srli t2, t1, 24     # Isolate 'P' (0x50)
-    sw t2, 0(t0)        # Print 'P'
+    sb t2, 0(t0)        # Print 'P'
     
     # -- Print 'A' --
     srli t3, t1, 16     # Isolate 'A' (0x41)
-    sw t3, 0(t0)        # Print 'A'
+    sb t3, 0(t0)        # Print 'A'
     
     # -- Print 'S' --
     srli t4, t1, 8      # Isolate 'S' (0x53)
-    sw t4, 0(t0)        # Print 'S'
+    sb t4, 0(t0)        # Print 'S'
     
     # -- Print final 'S' --
-    sw t1, 0(t0)        # Print the lowest byte 'S'
+    sb t1, 0(t0)        # Print the lowest byte 'S'
