@@ -1,6 +1,6 @@
 # RISC-V Assembly: Minimal 'srli' Test (Corrected)
 # Goal: Verify that 'srli' correctly performs a logical shift right.
-# Instructions used: srli (under test), addi, sw, beq (trusted helpers).
+# Instructions used: srli (under test), addi, sb
 
 .section .text
 .globl _start
@@ -32,4 +32,4 @@ _start:
     #    15 + 65 = 80 (ASCII for 'P')
     addi t1, t1, 65
     
-    sw t1, 0(t0)        # This should print 'P'.
+    sb t1, 0(t0)        # This should print 'P'.
