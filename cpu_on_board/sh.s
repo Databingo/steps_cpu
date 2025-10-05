@@ -38,7 +38,7 @@ _start:
     # -- Print final 'S' --
     sb t1, 0(t0)        # Print the lowest byte 'S'
 
-    addi t2, x0, 0x0A
+    addi t2, x0, 0x0A  # Print newline for sure
     sb t2, 0(t0)      
 
 
