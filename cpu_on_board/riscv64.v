@@ -147,7 +147,7 @@ module riscv64(
 	            32'b???????_?????_?????_???_?????_0110111: re[w_rd] <= w_imm_u; // Lui
 	            32'b???????_?????_?????_???_?????_0010111: re[w_rd] <= w_imm_u + (pc - 4); // Auipc
 
-                    // Load
+                    // Load // Lb 3 cycles
 		    32'b???????_?????_?????_000_?????_0000011: begin 
 		        if (load_step == 0) begin 
 			    bus_address <= re[w_rs1] + w_imm_i; 
@@ -165,8 +165,8 @@ module riscv64(
 			    endcase
 			    load_step <= 0; 
 			end 
-		    end  // Lb 3 cycles
-
+		    end  
+                    // Lh 3 cycles
 		    32'b???????_?????_?????_001_?????_0000011: begin 
 		        if (load_step == 0) begin 
 			    bus_address <= re[w_rs1] + w_imm_i; 
@@ -183,8 +183,8 @@ module riscv64(
 			    endcase
 			    load_step <= 0; 
 			end 
-		    end  // Lh 3 cycles
-
+		    end
+                    // Lw
 		    32'b???????_?????_?????_010_?????_0000011: begin 
 		        if (load_step == 0) begin 
 		            bus_address <= re[w_rs1] + w_imm_i; 
@@ -197,7 +197,7 @@ module riscv64(
 		            re[w_rd]<= $signed(bus_read_data[31:0]); 
 		            load_step <= 0; 
 		        end 
-		    end  // Lw
+		    end
 
 		    // -- Support Unaligned Lw --- 
 		    //32'b???????_?????_?????_010_?????_0000011: begin 
@@ -232,6 +232,7 @@ module riscv64(
 		    //    end 
 		    //end  // Lw 5 cycles
 
+		    // Ld 5 cycles
 		    32'b???????_?????_?????_011_?????_0000011: begin 
 		        if (load_step == 0) begin 
 			    bus_address <= re[w_rs1] + w_imm_i; // Low 32 bit data in first line
@@ -252,6 +253,7 @@ module riscv64(
 			end 
 		    end  // Ld 5 cycles
 
+		    // Lbu 3 cycles
 		    32'b???????_?????_?????_100_?????_0000011: begin 
 		        if (load_step == 0) begin 
 			    bus_address <= re[w_rs1] + w_imm_i; 
@@ -271,6 +273,7 @@ module riscv64(
 			end 
 		    end  // Lbu 3 cycles
 
+		    // Lhu 3 cycles
 		    32'b???????_?????_?????_101_?????_0000011: begin 
 		        if (load_step == 0) begin 
 			    bus_address <= re[w_rs1] + w_imm_i; 
@@ -289,6 +292,7 @@ module riscv64(
 			end 
 		    end  // Lhu 3 cycles
 	                                                            
+		    // Lwu
 		    32'b???????_?????_?????_110_?????_0000011: begin 
 		        if (load_step == 0) begin 
 		            bus_address <= re[w_rs1] + w_imm_i; 
@@ -303,7 +307,7 @@ module riscv64(
 		        end 
 		    end  // Lwu
 
-                    // Store
+                    // Store // Sb 3 cycles
 	            32'b???????_?????_?????_000_?????_0100011: begin 
 		        if (store_step == 0) begin 
 		            bus_address <= re[w_rs1] + w_imm_s; // should change i to s type !!
@@ -325,6 +329,7 @@ module riscv64(
 			end 
 		    end // Sb 3 cycles
 
+		    // Sh 3 cycles
 	            32'b???????_?????_?????_001_?????_0100011: begin 
 		        if (store_step == 0) begin 
 		            bus_address <= re[w_rs1] + w_imm_s;
@@ -386,6 +391,7 @@ module riscv64(
 		    //    end 
 		    //end // Sw 7 cycles
 
+		    // Sd 3 cycles
 	            32'b???????_?????_?????_011_?????_0100011: begin 
 		        if (store_step == 0) begin;
 		            bus_address <= re[w_rs1] + w_imm_s;  // Wirte Low 32 bit
