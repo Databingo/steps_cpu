@@ -367,12 +367,12 @@ func main() {
 		"ebreak": 0b00000000000100000000000001110011,
 
 		// --new
-		"csrrw": 0b0,  
-		"csrrs": 0b0,  
-		"csrrc": 0b0,  
-		"csrrwi": 0b0,  
-		"csrrsi": 0b0,  
-		"csrrci": 0b0,  
+		"csrrw":  0b00000000000000000001000001110011 ,  
+		"csrrs":  0b00000000000000000010000001110011 ,  
+		"csrrc":  0b00000000000000000011000001110011 ,  
+		"csrrwi": 0b00000000000000000101000001110011 ,  
+		"csrrsi": 0b00000000000000000110000001110011 ,  
+		"csrrci": 0b00000000000000000111000001110011 ,  
 		// --new
 
 		// privilege
@@ -1835,6 +1835,7 @@ func main() {
 			rs1, rs1Found := regBin[code[3]]
 			if opFound && rdFound && csrFound && rs1Found {
 				instruction = csr<<20 | rs1<<15 | rd<<7 | op // code[0]=op, code[1]=rd, code[2]=rs1 code[3]=rs2
+			    }
 		case "csrrwi", "csrrsi", "csrrci": // Instruction format: op rd, csr, imm or label: op rd, csr, imm
 			op, opFound := opBin[code[0]]
 			rd, rdFound := regBin[code[1]]
@@ -1845,7 +1846,8 @@ func main() {
 				os.Exit(0)
 			}
 			if opFound && rdFound && csrFound {
-				instruction = csr<<20 | imm<<15 | rd<<7 | op // code[0]=op, code[1]=rd, code[2]=rs1 code[3]=rs2
+				instruction = csr<<20 | uint32(imm)<<15 | rd<<7 | op // code[0]=op, code[1]=rd, code[2]=rs1 code[3]=rs2
+			    }
 		//-------------new
 
 		default:
