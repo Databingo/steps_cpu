@@ -69,6 +69,8 @@ _start:
 
     # If we fall through here, one of the tests failed.
 fail:
+    li t1, 70           # ASCII 'F'
+    sd t1, 0(t0)
     beq x0, x0, fail
 
 all_tests_passed:
