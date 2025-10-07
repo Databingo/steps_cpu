@@ -66,8 +66,8 @@
 //00000000 00000000 00010000 00001111 //_0000_0000_0000_00000_001_00000_0001111 // FENCE.I|0.4|0000.4|0000.4|0.5|001.3|0.5|0001111.7| sure instruction operation completed before FENCE.I
 //00000000 00000000 00000000 01110011 //___000000000000_00000_000_00000_1110011 // ECALL  |0.12|0.4|000.3|0.5|1110011.7| system enviroment call, put break in pc and save pc to rg
 //00000000 00010000 00000000 01110011 //___000000000001_00000_000_00000_1110011 // EBREAK |k.12|0.4|000.3|0.5|1110011.7| system break call, put break in pc and save pc to rg
-//00000000 00000000 00010000 01110011 //___000000000000_00000_001_00000_1110011 // CSRRW  |csr.12|rs1.5|001.3|rd.5|1110011.7| atomic write, put 0-extend csr in rd, then put sr1 to csr 
-//00000000 00000000 00100000 01110011 //___000000000000_00000_010_00000_1110011 // CSRRS  |csr.12|rs1.5|001.3|rd.5|1110011.7| atomic set, put 0-extend csr in rd, sr1 as 1 mask  set csr 1 correspond
+//00000000 00000000 00010000 01110011 //___000000000000_00000_001_00000_1110011 // CSRRW  |csr.12|rs1.5|001.3|rd.5|1110011.7| atomic write, put 0-extend csr in rd, then put sr1 to csr//csrrw rd,csr,rs1
+//00000000 00000000 00100000 01110011 //___000000000000_00000_010_00000_1110011 // CSRRS  |csr.12|rs1.5|001.3|rd.5|1110011.7| atomic set, put 0-extend csr in rd, sr1 as 1 mask set csr 1 correspond
 //00000000 00000000 00110000 01110011 //___000000000000_00000_011_00000_1110011 // CSRRC  |csr.12|rs1.5|011.3|rd.5|1110011.7| atomic clear, put 0-extend csr in rd, sr1 as 1 mask set csr 0 under
 //00000000 00000000 01010000 01110011 //___000000000000_00000_101_00000_1110011 // CSRRWI |csr.12|zim.5|101.3|rd.5|1110011.7| atomic write, put 0-extend csr in rd, 0-extend 5unsigned zimm to csr 
 //00000000 00000000 01100000 01110011 //___000000000000_00000_110_00000_1110011 // CSRRSI |csr.12|zim.5|110.3|rd.5|1110011.7| atomic set, 0-extend csr in rd, 0-extended 5unsigned zimm as 1 mask set csr 1

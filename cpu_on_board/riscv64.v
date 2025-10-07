@@ -16,6 +16,27 @@ module riscv64(
     output reg        bus_read_enable,
     input  wire [63:0] bus_read_data   // from outside
 );
+
+    // -- Immediate decoders  -- 
+    wire signed [63:0] w_imm_u = {{32{ir[31]}}, ir[31:12], 12'b0};  // U-type immediate Lui Auipc
+    wire signed [63:0] w_imm_i = {{52{ir[31]}}, ir[31:20]};   // I-type immediate Lb Lh Lw Lbu Lhu Lwu Ld Jalr Addi Slti Sltiu Xori Ori Andi Addiw 
+    wire signed [63:0] w_imm_s = {{52{ir[31]}}, ir[31:25], ir[11:7]};  // S-type immediate Sb Sh Sw Sd
+    wire signed [63:0] w_imm_j = {{43{ir[31]}}, ir[19:12], ir[20], ir[30:21], 1'b0}; // UJ-type immediate Jal  // read immediate & padding last 0, total 20 + 1 = 21 bits
+    wire signed [63:0] w_imm_b = {{51{ir[31]}}, ir[7],  ir[30:25], ir[11:8], 1'b0}; // B-type immediate Beq Bne Blt Bge Bltu Bgeu // read immediate & padding last 0, total 12 + 1 = 13 bits
+    wire        [63:0] w_imm_z = {59'b0, ir[19:15]};  // CSR zimm zero-extending unsigned
+    wire [5:0] w_shamt = ir[25:20]; // If 6 bits the highest is always 0??
+    // -- Instruction Decoding --
+    wire [4:0] w_rd  = ir[11:7];
+    wire [4:0] w_rs1 = ir[19:15];
+    wire [4:0] w_rs2 = ir[24:20];
+
+    wire [11:0] w_csr = ir[31:20];   // CSR address
+    //wire [11:0] w_f12 = ir[31:20];   // ecall 0, ebreak 1
+    // -- CSR Registers --
+    reg [63:0] csr_mepc;
+    reg [63:0] csr_mstatus;
+    reg [63:0] csr_mcasue;
+    reg [63:0] csr_mtvec = 64'd0;
     // -- CSR Index--
     localparam mstatus = 12'h300;   // 0x300 MRW Machine status reg   // 63_SD|37_MBE|36_SBE|35:34_SXL10|22_TSR|21_TW|20_TVW|17_MPRV|12:11_MPP10|7_MPIE|3_MIE|1_SIE|0_WPRI
     integer mie = 12'h304;          // 0x304 MRW Machine interrupt-enable register *
@@ -29,23 +50,6 @@ module riscv64(
     //wire mie_MEIE = csr[mie][11];
     //wire mip_MEIP = csr[mie][11];
     wire mstatus_MIE = csr_mstatus[MIE];
-
-    // -- Immediate decoders  -- 
-    wire signed [63:0] w_imm_u = {{32{ir[31]}}, ir[31:12], 12'b0};  // U-type immediate Lui Auipc
-    wire signed [63:0] w_imm_i = {{52{ir[31]}}, ir[31:20]};   // I-type immediate Lb Lh Lw Lbu Lhu Lwu Ld Jalr Addi Slti Sltiu Xori Ori Andi Addiw 
-    wire signed [63:0] w_imm_s = {{52{ir[31]}}, ir[31:25], ir[11:7]};  // S-type immediate Sb Sh Sw Sd
-    wire signed [63:0] w_imm_j = {{43{ir[31]}}, ir[19:12], ir[20], ir[30:21], 1'b0}; // UJ-type immediate Jal  // read immediate & padding last 0, total 20 + 1 = 21 bits
-    wire signed [63:0] w_imm_b = {{51{ir[31]}}, ir[7],  ir[30:25], ir[11:8], 1'b0}; // B-type immediate Beq Bne Blt Bge Bltu Bgeu // read immediate & padding last 0, total 12 + 1 = 13 bits
-    wire [5:0] w_shamt = ir[25:20]; // If 6 bits the highest is always 0??
-    // -- Instruction Decoding --
-    wire [4:0] w_rd  = ir[11:7];
-    wire [4:0] w_rs1 = ir[19:15];
-    wire [4:0] w_rs2 = ir[24:20];
-    // -- CSR Registers --
-    reg [63:0] csr_mepc;
-    reg [63:0] csr_mstatus;
-    reg [63:0] csr_mcasue;
-    reg [63:0] csr_mtvec = 64'd0;
     // -- CSR Other Registers -- use BRAM in FPGA then SRAM in ASIC port?
     //reg [63:0] other_csr [0:4096]; // Maximal 12-bit length = 4096 
     // -- CSR Reader -- 
@@ -59,16 +63,6 @@ module riscv64(
 	    endcase
 	end
     endfunction
-    // -- CSR Bit-- 
-    //function csr_bit;
-    //    input [11:0] csr_index;
-    //    input integer bit_position;
-    //    reg [63:0] csr_value;
-    //    begin
-    //        csr_value = csr_read(csr_index);
-    //        csr_bit = csr_value[bit_position];
-    //    end
-    //endfunction
     // -- CSR Writer -- 
     function csr_write;
 	input [11:0] csr_index;
@@ -85,9 +79,6 @@ module riscv64(
     reg bubble;
     reg [1:0] load_step;
     reg [1:0] store_step;
-    //reg [1:0] bus_byte_position;
-    //assign w_bus_address = re[w_rs1] + w_imm_i; 
-
 
     // IF ir (Only drive IR)
     always @(posedge clk or negedge reset) begin
@@ -238,6 +229,12 @@ module riscv64(
 		    32'b???????_?????_?????_110_?????_1100011: begin if (re[w_rs1] < re[w_rs2]) begin pc <= pc - 4 + w_imm_b; bubble <= 1'b1; end end // Bltu
 		    32'b???????_?????_?????_111_?????_1100011: begin if (re[w_rs1] >= re[w_rs2]) begin pc <= pc - 4 + w_imm_b; bubble <= 1'b1; end end // Bgeu
 		    // System-CSR 
+	            32'b???????_?????_?????_001_?????_1110011: begin if (w_rd != 0) re[w_rd] <= csr_read(w_csr); csr_write(w_csr,  re[w_rs1]); end // Csrrw
+	            32'b???????_?????_?????_010_?????_1110011: begin if (w_rd != 0) re[w_rd] <= csr_read(w_csr); if (w_rs1 != 0 )  csr_write(w_csr, csr_read(w_csr) |  re[w_rs1]); end // Csrrs
+	            32'b???????_?????_?????_011_?????_1110011: begin if (w_rd != 0) re[w_rd] <= csr_read(w_csr); if (w_rs1 != 0 )  csr_write(w_csr, csr_read(w_csr) & ~re[w_rs1]); end // Csrrc
+	            32'b???????_?????_?????_101_?????_1110011: begin if (w_rd != 0) re[w_rd] <= csr_read(w_csr); csr_write(w_csr,  w_imm_z); end // Csrrwi
+	            32'b???????_?????_?????_110_?????_1110011: begin if (w_rd != 0) re[w_rd] <= csr_read(w_csr); if (w_imm_z != 0) csr_write(w_csr, csr_read(w_csr) |  w_imm_z); end // csrrsi
+	            32'b???????_?????_?????_111_?????_1110011: begin if (w_rd != 0) re[w_rd] <= csr_read(w_csr); if (w_imm_z != 0) csr_write(w_csr, csr_read(w_csr) & ~w_imm_z); end // Csrrci
                     // System-Machine
 	            32'b0011000_00010_?????_000_?????_1110011: begin pc <= csr_read(mepc); bubble <= 1; csr_mstatus[MIE] <= csr_mstatus[MPIE]; csr_mstatus[MPIE] <= 1; end  // Mret
 		    // Ecall
@@ -256,6 +253,7 @@ module riscv64(
 		    // fsgnjx.s fmin.s fmax.s
 		    // D fld fsd fadd.d fsub.d fdiv.d fsqrt.d fmadd.s fcvt.d.s fcvt.s.d
 		    // C
+		    default: $display("unknow instruction %h, %b", ir, ir);
                 endcase
 	    end
         end
