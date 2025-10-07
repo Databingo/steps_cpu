@@ -46,17 +46,17 @@ module riscv64(
     reg [63:0] csr_mideleg ; localparam mideleg = 12'h303;    //
     // Supervisor CSR
     reg [63:0] csr_sstatus; localparam sstatus =  12'h100; 
-    reg [63:0] csr_satp; localparam satp = 12'h180; // Supervisor address translation and protection
-    reg [63:0] csr_stvec ; localparam stvec =12'h105;
-    reg [63:0] csr_sepc ; localparam sepc =12'h141; //
-    reg [63:0] csr_scause ; localparam scause = 12'h142;//  //63_type 0exception 1interrupt|value
-    reg [63:0] csr_sscratch ; localparam sscratch =12'h140;
-    reg [63:0] csr_sip ; localparam sip = 12'h144; // Supervisor interrupt pending
     reg [63:0] csr_sie ; localparam sie = 12'h104;   // Supervisor interrupt-enable register
+    reg [63:0] csr_stvec ; localparam stvec =12'h105;
+    reg [63:0] csr_satp; localparam satp = 12'h180; // Supervisor address translation and protection satp.MODE=8:on|0:off SV39 vpn2:9 vpn1:9 vpn0:9 pageoffset:12 satp[43:0]:root page table
+    reg [63:0] csr_sscratch ; localparam sscratch =12'h140;
+    reg [63:0] csr_sepc ; localparam sepc =12'h141; //
+    reg [63:0] csr_scause ; localparam scause = 12'h142;// 
+    reg [63:0] csr_stval ; localparam stval = 12'h143;//
+    reg [63:0] csr_sip ; localparam sip = 12'h144; // Supervisor interrupt pending
     //integer sedeleg = 12'h102;
     //integer sideleg = 12'h103;
     //integer scounteren = 12'h106;
-    //integer stval = 12'h143; 
     //integer scontext = 12'h5a8; 
     // -- new --
 
@@ -264,23 +264,77 @@ module riscv64(
 	            32'b???????_?????_?????_111_?????_1110011: begin if (w_rd != 0) re[w_rd] <= csr_read(w_csr); if (w_imm_z != 0) csr_write(w_csr, csr_read(w_csr) & ~w_imm_z); end // Csrrci
                     // System-Machine
 	            32'b0011000_00010_?????_000_?????_1110011: begin pc <= csr_read(mepc); bubble <= 1; csr_mstatus[MIE] <= csr_mstatus[MPIE]; csr_mstatus[MPIE] <= 1; end  // Mret
-		    // Ecall
-		    // Ebreak
-		    // Fence
-		    // Fence.i
-		    // RV64IMAFD(G)C  RVA23U64
-		    // M mul mulh mulhsu mulhu div divu rem remu mulw divw divuw remuw
-		    // A lr.w sc.w lr.d sc.d
-		    // amoswap amoadd amoxor amoand amoor
-		    // amomin amomax amominu amomaxu
-		    // F (reg f0-f31)
-		    // flw fsw fadd.s fsub.s fmul.s fdiv.s fsqrt.s fmadd.s
-		    // fmsub.s fnmsub.s fcvt.w.s fcvt.wu.s fcvt.s.w fcvt.s.wu
-		    // fmv.x.w fclass.s feq.s flt.s fle.s fsgnj.s fsgnjn.s
-		    // fsgnjx.s fmin.s fmax.s
-		    // D fld fsd fadd.d fsub.d fdiv.d fsqrt.d fmadd.s fcvt.d.s fcvt.s.d
-		    // C
-		    default: $display("unknow instruction %h, %b", ir, ir);
+                    //// Mret
+	            //32'b0011000_00010_?????_000_?????_1110011: begin  
+	            //   			       csre[mstatus][3] <= csre[mstatus][7]; // set back interrupt enable(MIE) by MPIE 
+	            //   			       csre[mstatus][7] <= 1; // set previous interrupt enable(MIE) to be 1 (enable)
+	            //   			       if (csre[mstatus][12:11] < M_mode) csre[mstatus][17] <= 0; // set mprv to 0
+	            //   			       current_privilege_mode  <= csre[mstatus][12:11]; // set back previous mode
+	            //   			       csre[mstatus][12:11] <= 2'b00; // set previous privilege mode(MPP) to be 00 (U-mode)
+	            //   			       pc <=  csre[mepc]; // mepc was +4 by the software handler and written back to sepc
+		    //      		       bubble <= 1'b1;
+	            //   			       end
+		        // Ecall
+                    //// Ecall
+	            //32'b0000000_00000_?????_000_?????_1110011: begin  // func12 
+                    //                                    // Trap into S-mode
+	            //                                    if (current_privilege_mode == U_mode && medeleg[8] == 1)
+	            //     			       begin
+	            //     			           csre[scause][63] <= 0; //63_type 0exception 1interrupt|value
+	            //     			           csre[scause][62:0] <= 8; // 8 indicate Ecall from U-mode; 9 call from S-mode; 11 call from M-mode
+	            //     			           csre[sepc] <= pc;
+	            //     			           csre[sstatus][8] <= 0; // save previous privilege mode(user0 super1) to SPP 
+	            //     			           csre[sstatus][5] <= csre[sstatus][1]; // save interrupt enable(SIE) to SPIE 
+	            //     			           csre[sstatus][1] <= 0; // clear SIE
+	            //     			           //if ((csre[scause][63]==1'b1) && (csre[stvec][1:0]== 2'b01)) pc <= (csre[stvec][63:2] << 2) + (csre[scause][62:0] << 2);
+	            //     			           pc <= (csre[stvec][63:2] << 2);
+	            //     				   current_privilege_mode <= S_mode;
+		    //				   bubble <= 1'b1;
+	            //     			       end
+	            //     			       // Trap into M-mode
+	            //     			       else 
+	            //     			       begin
+	            //     			           csre[mcause][63] <= 0; //63_type 0exception 1interrupt|value
+	            //     			           csre[mepc] <= pc;
+	            //     			           csre[mstatus][7] <= csre[mstatus][3]; // save interrupt enable(MIE) to MPIE 
+	            //     			           csre[mstatus][3] <= 0; // clear MIE (not enabled)
+	            //     			           pc <= (csre[mtvec][63:2] << 2);
+	            //                                        if (current_privilege_mode == U_mode && medeleg[8] == 0) csre[mcause][62:0] <= 8; // save cause 
+	            //                                        if (current_privilege_mode == S_mode) csre[mcause][62:0] <= 9; 
+	            //     			           if (current_privilege_mode == M_mode) csre[mcause][62:0] <= 11; 
+	            //     				   csre[mstatus][12:11] <= current_privilege_mode; // save privilege mode to MPP 
+	            //     				   current_privilege_mode <= M_mode;  // set current privilege mode
+		    //				   bubble <= 1'b1;
+	            //     			       end
+	            //     			       end
+                    //// Ebreak
+	            //32'b0000000_00001_?????_000_?????_1110011: begin  end
+	            //// Sret
+	            //32'b0001000_00010_?????_000_?????_1110011: begin      
+	            //     			       if (csre[sstatus][8] == 0) current_privilege_mode <= U_mode;
+	            //     			       if (csre[sstatus][8] == 1) current_privilege_mode <= S_mode;
+	            //     			       csre[sstatus][1] <= csre[sstatus][5]; // set back interrupt enable(SIE) by SPIE 
+	            //     			       csre[sstatus][5] <= 1; // set previous interrupt enable(SIE) to be 1 (enable)
+	            //     			       csre[sstatus][8] <= 0; // set previous privilege mode(SPP) to be 0 (U-mode)
+	            //     			       pc <=  csre[sepc]; // sepc was +4 by the software handler and written back to sepc
+		    //			       bubble <= 1'b1;
+	            //     			       end
+		     // Ebreak
+		     // Fence
+		     // Fence.i
+		     // RV64IMAFD(G)C  RVA23U64
+		     // M mul mulh mulhsu mulhu div divu rem remu mulw divw divuw remuw
+		     // A lr.w sc.w lr.d sc.d
+		     // amoswap amoadd amoxor amoand amoor
+		     // amomin amomax amominu amomaxu
+		     // F (reg f0-f31)
+		     // flw fsw fadd.s fsub.s fmul.s fdiv.s fsqrt.s fmadd.s
+		     // fmsub.s fnmsub.s fcvt.w.s fcvt.wu.s fcvt.s.w fcvt.s.wu
+		     // fmv.x.w fclass.s feq.s flt.s fle.s fsgnj.s fsgnjn.s
+		     // fsgnjx.s fmin.s fmax.s
+		     // D fld fsd fadd.d fsub.d fdiv.d fsqrt.d fmadd.s fcvt.d.s fcvt.s.d
+		     // C
+		     default: $display("unknow instruction %h, %b", ir, ir);
                 endcase
 	    end
         end
