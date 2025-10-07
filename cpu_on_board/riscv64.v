@@ -33,11 +33,32 @@ module riscv64(
     wire [11:0] w_csr = ir[31:20];   // CSR address
     //wire [11:0] w_f12 = ir[31:20];   // ecall 0, ebreak 1
     // -- CSR Registers --
-    reg [63:0] csr_mstatus; localparam mstatus = 12'h300;   // 0x300 MRW Machine status reg   // 63_SD|37_MBE|36_SBE|35:34_SXL10|22_TSR|21_TW|20_TVW|17_MPRV|12:11_MPP10|7_MPIE|3_MIE|1_SIE|0_WPRI
+    reg [63:0] csr_mstatus; localparam mstatus = 12'h300;  // 0x300 MRW Machine status reg   // 63_SD|37_MBE|36_SBE|35:34_SXL10|22_TSR|21_TW|20_TVW|17_MPRV|12:11_MPP10|7_MPIE|3_MIE|1_SIE|0_WPRI
     reg [63:0] csr_mtvec = 64'd0; integer mtvec = 12'h305; // 0x305 MRW Machine trap-handler base address *
     reg [63:0] csr_mscratch; localparam mscratch = 12'h340; // 
     reg [63:0] csr_mepc; localparam mepc = 12'h341;   
     reg [63:0] csr_mcause; localparam mcause = 12'h342;    // 0x342 MRW Machine trap casue *
+    // -- new --
+    reg [63:0] csr_mie; localparam mie = 12'h304;    //
+    reg [63:0] csr_mip; localparam mip = 12'h344;    //
+
+    reg [63:0] csr_medeleg ; localparam medeleg = 12'h302;    //
+    reg [63:0] csr_mideleg ; localparam mideleg = 12'h303;    //
+    // Supervisor CSR
+    reg [63:0] csr_sstatus; localparam sstatus =  12'h100; 
+    reg [63:0] csr_satp; localparam satp = 12'h180; // Supervisor address translation and protection
+    reg [63:0] csr_stvec ; localparam stvec =12'h105;
+    reg [63:0] csr_sepc ; localparam sepc =12'h141; //
+    reg [63:0] csr_scause ; localparam scause = 12'h142;//  //63_type 0exception 1interrupt|value
+    reg [63:0] csr_sscratch ; localparam sscratch =12'h140;
+    reg [63:0] csr_sip ; localparam sip = 12'h144; // Supervisor interrupt pending
+    reg [63:0] csr_sie ; localparam sie = 12'h104;   // Supervisor interrupt-enable register
+    //integer sedeleg = 12'h102;
+    //integer sideleg = 12'h103;
+    //integer scounteren = 12'h106;
+    //integer stval = 12'h143; 
+    //integer scontext = 12'h5a8; 
+    // -- new --
 
     // -- CSR Index--
     integer mie = 12'h304;          // 0x304 MRW Machine interrupt-enable register *

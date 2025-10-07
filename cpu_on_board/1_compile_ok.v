@@ -39,7 +39,7 @@ module cpu (
     integer mtvec = 12'h305;        // 0x305 MRW Machine trap-handler base address *
     integer mcounteren = 12'h306;   // 0x306 MRW Machine counter enable
     integer mtvt = 12'h307;         // 0x307 MRW Machine Trap-Handler vector table base address
-    integer mstatush = 12'h310;     // 0x310 MRW Additional machine status register, RV32 only
+    integer mstatus = 12'h310;     // 0x310 MRW Additional machine status register, RV32 only
     // Machine Trap Handling
     integer mscratch = 12'h340;     // 0x340 MRW Scratch register for machine trap handlers *
     integer mepc = 12'h341;         // 0x341 MRW Machine exception program counter *
@@ -91,7 +91,7 @@ module cpu (
     	12'h305: csr_index = 5'd11;	                           // 0x305 MRW mtvec Machine trap-handler base address *
     	12'h306: csr_index = 5'd12;	                           // 0x306 MRW mcounteren Machine counter enable
     	12'h307: csr_index = 5'd13;	                           // 0x307 MRW mtvt Machine Trap-Handler vector table base address
-    	12'h310: csr_index = 5'd14;	                           // 0x310 MRW mstatush Additional machine status register, RV32 only
+    	12'h310: csr_index = 5'd14;	                           // 0x310 MRW mstatus Additional machine status register, RV32 only
     	                          	                           // Machine Trap Handling
     	12'h340: csr_index = 5'd15;	                           // 0x340 MRW mscratch Scratch register for machine trap handlers *
     	12'h341: csr_index = 5'd16;	                           // 0x341 MRW mepc Machine exception program counter *
