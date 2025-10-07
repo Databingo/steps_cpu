@@ -11,6 +11,8 @@ _start:
     li t1, 0x12345678
     csrrw x0, mscratch, t1  # Write t1 to mscratch, discard old value.
     csrrw t2, mscratch, x0  # Read mscratch into t2, write 0 back.
+    li t6, 49          # 1
+    sd t6, 0(t0)
     bne t1, t2, fail        # Check if what we read back is correct.
     
     # --- Test 2: CSRRS with non-zero rs1 ---
@@ -22,11 +24,15 @@ _start:
     csrrs t3, mscratch, t1  # Atomically read old (t3) and set bits.
     
     # Verify the read part. t3 should be the old value.
+    li t6, 50          # 1
+    sd t6, 0(t0)
     bne t3, t2, fail
     
     # Verify the write part. Read mscratch again. It should be the new value.
     csrrw t4, mscratch, x0  # Read into t4, clear mscratch.
     li t5, 0x1234567F      # Expected new value (0x...70 | 0x...0F)
+    li t6, 51          # 1
+    sd t6, 0(t0)
     bne t4, t5, fail
     
     # --- Test 3: CSRRS with x0 (Read-Only) ---
@@ -38,10 +44,14 @@ _start:
     csrrs t2, mscratch, x0
     
     # Check that t2 has the correct read value.
+    li t6, 52          # 1
+    sd t6, 0(t0)
     bne t2, t1, fail
     
     # Now, read mscratch again to prove it was not changed.
     csrrw t3, mscratch, x0
+    li t6, 53          # 1
+    sd t6, 0(t0)
     bne t3, t1, fail
     
     # If all tests passed...
@@ -52,4 +62,6 @@ pass_loop:
     beq x0, x0, pass_loop
 
 fail:
+    li t6, 70           # ASCII 'P'
+    sd t6, 0(t0)
     beq x0, x0, fail
