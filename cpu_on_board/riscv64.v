@@ -146,67 +146,53 @@ module riscv64(
 	            // U-type
 	            32'b???????_?????_?????_???_?????_0110111: re[w_rd] <= w_imm_u; // Lui
 	            32'b???????_?????_?????_???_?????_0010111: re[w_rd] <= w_imm_u + (pc - 4); // Auipc
-                    // Lb
-		    32'b???????_?????_?????_000_?????_0000011: begin 
+		    32'b???????_?????_?????_000_?????_0000011: begin  // Lb  3 cycles
 		        if (load_step == 0) begin bus_address <= re[w_rs1] + w_imm_i; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; end
 	                if (load_step == 1) begin case ((re[w_rs1] + w_imm_i) & 2'b11)
 			        0: re[w_rd]<= $signed(bus_read_data[7:0]);   1: re[w_rd]<= $signed(bus_read_data[15:8]); 
 			        2: re[w_rd]<= $signed(bus_read_data[23:16]); 3: re[w_rd]<= $signed(bus_read_data[31:24]); 
-			    endcase load_step <= 0; end end // Lb  3 cycles
-                    // Lh
-		    32'b???????_?????_?????_001_?????_0000011: begin 
+			        endcase load_step <= 0; end end
+		    32'b???????_?????_?????_001_?????_0000011: begin  // Lh 3 cycles
 		        if (load_step == 0) begin bus_address <= re[w_rs1] + w_imm_i; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; end
 	                if (load_step == 1) begin case ((re[w_rs1] + w_imm_i) & 2'b11)
 			        0: re[w_rd]<= $signed(bus_read_data[15:0]); 2: re[w_rd]<= $signed(bus_read_data[31:16]); 1,3:; 
-			    endcase load_step <= 0; end end // Lh 3 cycles
-                    // Lw
-		    32'b???????_?????_?????_010_?????_0000011: begin 
+			        endcase load_step <= 0; end end
+		    32'b???????_?????_?????_010_?????_0000011: begin  // Lw 3 cycles
 		        if (load_step == 0) begin bus_address <= re[w_rs1] + w_imm_i; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; end
-		        if (load_step == 1) begin re[w_rd]<= $signed(bus_read_data[31:0]); load_step <= 0; end end // Lw 3 cycles
-		    // Ld 
-		    32'b???????_?????_?????_011_?????_0000011: begin 
+		        if (load_step == 1) begin re[w_rd]<= $signed(bus_read_data[31:0]); load_step <= 0; end end
+		    32'b???????_?????_?????_011_?????_0000011: begin   // Ld 5 cycles
 		        if (load_step == 0) begin bus_address <= re[w_rs1] + w_imm_i; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; 
 			end if (load_step == 1) begin re[w_rd]<= bus_read_data; bus_address <= re[w_rs1] + w_imm_i + 4;  bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 2; 
-			end if (load_step == 2) begin re[w_rd]<= {bus_read_data[31:0], re[w_rd][31:0]}; load_step <= 0; end end  // Ld 5 cycles
-		    // Lbu
-		    32'b???????_?????_?????_100_?????_0000011: begin 
+			end if (load_step == 2) begin re[w_rd]<= {bus_read_data[31:0], re[w_rd][31:0]}; load_step <= 0; end end
+		    32'b???????_?????_?????_100_?????_0000011: begin   // Lbu 3 cycles
 		        if (load_step == 0) begin bus_address <= re[w_rs1] + w_imm_i; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; end
 	                if (load_step == 1) begin case ((re[w_rs1] + w_imm_i) & 2'b11)
 			        0: re[w_rd]<= bus_read_data[7:0];   1: re[w_rd]<= bus_read_data[15:8]; 
 			        2: re[w_rd]<= bus_read_data[23:16]; 3: re[w_rd]<= bus_read_data[31:24]; 
-			    endcase load_step <= 0; end end  // Lbu 3 cycles
-		    // Lhu 
-		    32'b???????_?????_?????_101_?????_0000011: begin 
+			        endcase load_step <= 0; end end
+		    32'b???????_?????_?????_101_?????_0000011: begin   // Lhu 3 cycles
 		        if (load_step == 0) begin bus_address <= re[w_rs1] + w_imm_i; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; end
 	                if (load_step == 1) begin case ((re[w_rs1] + w_imm_i) & 2'b11)
 			        0: re[w_rd]<= bus_read_data[15:0]; 2: re[w_rd]<= bus_read_data[31:16]; 1,3: ;
-			    endcase load_step <= 0; end end  // Lhu 3 cycles
-		    // Lwu
-		    32'b???????_?????_?????_110_?????_0000011: begin 
+			        endcase load_step <= 0; end end
+		    32'b???????_?????_?????_110_?????_0000011: begin   // Lwu 3 cycles
 		        if (load_step == 0) begin bus_address <= re[w_rs1] + w_imm_i; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; end
-		        if (load_step == 1) begin re[w_rd]<= bus_read_data[31:0]; load_step <= 0; end end  // Lwu 3 cycles
-                    // Sb
-	            32'b???????_?????_?????_000_?????_0100011: begin 
+		        if (load_step == 1) begin re[w_rd]<= bus_read_data[31:0]; load_step <= 0; end end
+	            32'b???????_?????_?????_000_?????_0100011: begin  // Sb 3 cycles
 		        if (store_step == 0) begin bus_address <= re[w_rs1] + w_imm_s; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; store_step <= 1; end
-                        if (store_step == 1) begin bus_address <= re[w_rs1] + w_imm_s; 
-			    case ((re[w_rs1] + w_imm_s) & 2'b11)
+                        if (store_step == 1) begin bus_address <= re[w_rs1] + w_imm_s; case ((re[w_rs1] + w_imm_s) & 2'b11)
 			        0: bus_write_data <= {bus_read_data[31:8], re[w_rs2][7:0]}; 1: bus_write_data <= {bus_read_data[31:16], re[w_rs2][7:0], bus_read_data[7:0]};
 			        2: bus_write_data <= {bus_read_data[31:24], re[w_rs2][7:0], bus_read_data[15:0]}; 3: bus_write_data <= {re[w_rs2][7:0], bus_read_data[23:0]};
-			    endcase bus_write_enable <= 1; store_step <= 0;  end end // Sb 3 cycles
-		    // Sh
-	            32'b???????_?????_?????_001_?????_0100011: begin 
+			        endcase bus_write_enable <= 1; store_step <= 0;  end end
+	            32'b???????_?????_?????_001_?????_0100011: begin  // Sh 3 cycles
 		        if (store_step == 0) begin bus_address <= re[w_rs1] + w_imm_s; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; store_step <= 1; end
-                        if (store_step == 1) begin bus_address <= re[w_rs1] + w_imm_s; 
-			    case ((re[w_rs1] + w_imm_s) & 2'b11)
+                        if (store_step == 1) begin bus_address <= re[w_rs1] + w_imm_s; case ((re[w_rs1] + w_imm_s) & 2'b11)
 			        0: bus_write_data <= {bus_read_data[31:16], re[w_rs2][15:0]}; 2: bus_write_data <= {re[w_rs2][15:0], bus_read_data[15:0]}; 1,3:;
-			    endcase bus_write_enable <= 1; store_step <= 0;  end end // Sh 3 cycles
-                    // Sw
+			        endcase bus_write_enable <= 1; store_step <= 0;  end end
 	            32'b???????_?????_?????_010_?????_0100011: begin bus_address <= re[w_rs1] + w_imm_s; bus_write_data <= re[w_rs2][31:0]; bus_write_enable <= 1; pc <= pc; bubble <= 1; end // Sw 1 cycle
-		    // Sd 
-	            32'b???????_?????_?????_011_?????_0100011: begin 
+	            32'b???????_?????_?????_011_?????_0100011: begin  // Sd 3 cycles
 		        if (store_step == 0) begin; bus_address <= re[w_rs1] + w_imm_s; bus_write_data <= re[w_rs2][31:0]; bus_write_enable <= 1; pc <= pc - 4; bubble <= 1; store_step <= 1; end 
-		        if (store_step == 1) begin; bus_address <= re[w_rs1] + w_imm_s + 4; bus_write_data <= re[w_rs2][63:32]; bus_write_enable <= 1; store_step <= 0; end end // Sd 3 cycles
-
+		        if (store_step == 1) begin; bus_address <= re[w_rs1] + w_imm_s + 4; bus_write_data <= re[w_rs2][63:32]; bus_write_enable <= 1; store_step <= 0; end end
                     // Math-I
 	            32'b???????_?????_?????_000_?????_0010011: re[w_rd] <= re[w_rs1] + w_imm_i;  // Addi
 	            32'b000000?_?????_?????_101_?????_0010011: re[w_rd] <= re[w_rs1] >> w_shamt; // Srli // func7->6 // rv64 shame take w_f7[0]
@@ -226,13 +212,14 @@ module riscv64(
 	            32'b0000000_?????_?????_000_?????_0110011: re[w_rd] <= re[w_rs1] + re[w_rs2];  // Add
 	            32'b0100000_?????_?????_000_?????_0110011: re[w_rd] <= re[w_rs1] - re[w_rs2];  // Sub;
 	            32'b???????_?????_?????_010_?????_0110011: re[w_rd] <= ($signed(re[w_rs1]) < $signed(re[w_rs2])) ? 1: 0;  // Slt
-	            //32'b???????_?????_?????_011_?????_0110011: re[w_rd] <= re[w_rs1] < re[w_rs2] ? 1:0; // Sltu
-	            //32'b???????_?????_?????_110_?????_0110011: re[w_rd] <= re[w_rs1] | re[w_rs2]; // Or
-	            //32'b???????_?????_?????_111_?????_0110011: re[w_rd] <= re[w_rs1] & re[w_rs2]; // And
-	            //32'b???????_?????_?????_100_?????_0110011: re[w_rd] <= re[w_rs1] ^ re[w_rs2]; // Xor
-	            //32'b???????_?????_?????_001_?????_0110011: re[w_rd] <= re[w_rs1] << re[w_rs2][5:0]; // Sll
-                    //32'b0000000_?????_?????_101_?????_0110011: re[w_rd] <= re[w_rs1] >> re[w_rs2][5:0]; // Srl
-	            //32'b0100000_?????_?????_101_?????_0110011: re[w_rd] <= $signed(re[w_rs1]) >>> re[w_rs2][5:0]; // Sra
+
+	            32'b???????_?????_?????_011_?????_0110011: re[w_rd] <= re[w_rs1] < re[w_rs2] ? 1:0; // Sltu
+	            32'b???????_?????_?????_110_?????_0110011: re[w_rd] <= re[w_rs1] | re[w_rs2]; // Or
+	            32'b???????_?????_?????_111_?????_0110011: re[w_rd] <= re[w_rs1] & re[w_rs2]; // And
+	            32'b???????_?????_?????_100_?????_0110011: re[w_rd] <= re[w_rs1] ^ re[w_rs2]; // Xor
+	            32'b???????_?????_?????_001_?????_0110011: re[w_rd] <= re[w_rs1] << re[w_rs2][5:0]; // Sll
+                    32'b0000000_?????_?????_101_?????_0110011: re[w_rd] <= re[w_rs1] >> re[w_rs2][5:0]; // Srl
+	            32'b0100000_?????_?????_101_?????_0110011: re[w_rd] <= $signed(re[w_rs1]) >>> re[w_rs2][5:0]; // Sra
                     //// Math-R (Word)
 	            //32'b0000000_?????_?????_000_?????_0111011: re[w_rd] <= {{32{sum[31]}}, sum[31:0]}; // Addw
 	            //32'b0100000_?????_?????_000_?????_0111011: re[w_rd] <= {{32{sub[31]}}, sub[31:0]}; // Subw
