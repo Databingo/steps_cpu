@@ -55,8 +55,12 @@ module riscv64(
 	input [11:0] csr_index;
 	begin
 	    case (csr_index)
-            12'h341: csr_read = csr_mepc;
             12'h300: csr_read = csr_mstatus;
+            12'h305: csr_read = csr_mtvec;
+            12'h340: csr_read = csr_mscratch;
+            12'h341: csr_read = csr_mepc;
+            12'h342: csr_read = csr_mcause;
+
             default: csr_read = 64'd0;
 	    endcase
 	end
@@ -67,8 +71,12 @@ module riscv64(
 	input [63:0] csr_wdata;
 	begin
 	    case (csr_index)
-            12'h341: csr_mepc = csr_wdata;
-            12'h300: csr_mstatus = csr_wdata;
+            12'h300: csr_mstatus  = csr_wdata;
+            12'h305: csr_mtvec    = csr_wdata;
+            12'h340: csr_mscratch = csr_wdata;
+            12'h341: csr_mepc     = csr_wdata;
+            12'h342: csr_mcause   = csr_wdata;
+
             default: ;
 	    endcase
 	end
