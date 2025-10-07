@@ -26,7 +26,8 @@ cat bin.txt > rom.mif  # write ROM program
 #go run ../rvas.go call.s # ok
 #go run ../rvas.go ori.s # ok inlcude ori xori srai slti sltiu andi
 #go run ../rvas.go or.s # ok inlcude and or xor sll srl sra sltu
-go run ../rvas.go addiw.s # ok inlcude addiw slliw srliw sraiw
+#go run ../rvas.go addiw.s # ok inlcude addiw slliw srliw sraiw
+go run ../rvas.go addw.s # ok inlcude addw sllw srlw sraw
 
 
  
