@@ -62,7 +62,7 @@ module riscv64(
 	end
     endfunction
     // -- CSR Writer -- 
-    function csr_write;
+    task csr_write;
 	input [11:0] csr_index;
 	input [63:0] csr_wdata;
 	begin

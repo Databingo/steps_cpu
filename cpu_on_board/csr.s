@@ -4,13 +4,10 @@
 .globl _start
 
 _start:
-    # --- Setup Phase ---
     li t0, 0x2004       # UART address
     
-    # We will use 'mscratch' (0x340) for this test.
 
     # --- Test 1: CSRRW ---
-    # Write a magic number to mscratch and read it back.
     li t1, 0x12345678
     csrrw x0, mscratch, t1  # Write t1 to mscratch, discard old value.
     csrrw t2, mscratch, x0  # Read mscratch into t2, write 0 back.
