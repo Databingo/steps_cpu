@@ -72,7 +72,7 @@ module riscv64(
             default: ;
 	    endcase
 	end
-    endfunction
+    endtask
     // -- Innerl signal --
     reg bubble;
     reg [1:0] load_step;
