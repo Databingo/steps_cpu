@@ -298,6 +298,13 @@ func main() {
 		"x30": 0b11110, "t5": 0b11110, // tmp
 		"x31": 0b11111, "t6": 0b11111, // tmp
 	}
+	csrBin := map[string]uint32{ 
+		"mstatus":  0x300, 
+		"mtvec":    0x305, 
+		"mscratch": 0x340, 
+		"mepc":     0x341,
+		"mcause":   0x342, 
+	    }
 
 	opBin := map[string]uint32{
 		"lui":   0b00000000000000000000000000110111,
@@ -358,6 +365,15 @@ func main() {
 
 		"ecall":  0b00000000000000000000000001110011,
 		"ebreak": 0b00000000000100000000000001110011,
+
+		// --new
+		"csrrw": 0b0,  
+		"csrrs": 0b0,  
+		"csrrc": 0b0,  
+		"csrrwi": 0b0,  
+		"csrrsi": 0b0,  
+		"csrrci": 0b0,  
+		// --new
 
 		// privilege
 		"sret": 0b00010000001000000000000001110011,
@@ -1329,6 +1345,15 @@ func main() {
 				fmt.Println("Too many arguments on line: ", lineCounter)
 				os.Exit(0)
 			}
+		case "csrrw", "csrrs", "csrrc", "csrrwi", "csrrsi", "csrrci": // Instruction format: op rd, csr, rs1/imm or label: op rd, csr, rs1/imm
+			if len(code) != 4 && len(code) != 5 {
+				fmt.Println("Incorrect argument count on line: ", lineCounter)
+				os.Exit(0)
+			}
+			if len(code) == 5 && !strings.HasSuffix(code[0], ":") && len(code[0]) > 1 {
+				fmt.Printf("%s not a valid label\n", code[0])
+				os.Exit(0)
+			}
 
 		default:
 			fmt.Println("1 Syntax Error on line: ", lineCounter, switchOnOp, line)
@@ -1802,6 +1827,26 @@ func main() {
 				os.Exit(0)
 			}
 			instruction = opBin[code[0]]
+		//-------------new
+		case "csrrw", "csrrs", "csrrc": // Instruction format: op rd, csr, rs1 or label: op rd, csr, rs1
+			op, opFound := opBin[code[0]]
+			rd, rdFound := regBin[code[1]]
+			csr, csrFound := csrBin[code[2]]
+			rs1, rs1Found := regBin[code[3]]
+			if opFound && rdFound && csrFound && rs1Found {
+				instruction = csr<<20 | rs1<<15 | rd<<7 | op // code[0]=op, code[1]=rd, code[2]=rs1 code[3]=rs2
+		case "csrrwi", "csrrsi", "csrrci": // Instruction format: op rd, csr, imm or label: op rd, csr, imm
+			op, opFound := opBin[code[0]]
+			rd, rdFound := regBin[code[1]]
+			csr, csrFound := csrBin[code[2]]
+			imm, err := isValidImmediate(code[3]) // for 5 !
+			if err != nil {
+				fmt.Printf("!Error on line %d: %s\n", lineCounter, err)
+				os.Exit(0)
+			}
+			if opFound && rdFound && csrFound {
+				instruction = csr<<20 | imm<<15 | rd<<7 | op // code[0]=op, code[1]=rd, code[2]=rs1 code[3]=rs2
+		//-------------new
 
 		default:
 			fmt.Println("2 Syntax Error on line: ", lineCounter, switchOnOp)
