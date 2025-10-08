@@ -32,23 +32,21 @@ module riscv64(
 
     wire [11:0] w_csr = ir[31:20];   // CSR address
     //wire [11:0] w_f12 = ir[31:20];   // ecall 0, ebreak 1
-    // -- CSR Registers --
+    // --Machine CSR --
     reg [63:0] csr_mstatus; localparam mstatus = 12'h300;  // 0x300 MRW Machine status reg   // 63_SD|37_MBE|36_SBE|35:34_SXL10|22_TSR|21_TW|20_TVW|17_MPRV|12:11_MPP10|7_MPIE|3_MIE|1_SIE|0_WPRI
     reg [63:0] csr_mtvec = 64'd0; integer mtvec = 12'h305; // 0x305 MRW Machine trap-handler base address *
     reg [63:0] csr_mscratch; localparam mscratch = 12'h340; // 
     reg [63:0] csr_mepc; localparam mepc = 12'h341;   
     reg [63:0] csr_mcause; localparam mcause = 12'h342;    // 0x342 MRW Machine trap casue *
-    // -- new --
     reg [63:0] csr_mie; localparam mie = 12'h304;    //
     reg [63:0] csr_mip; localparam mip = 12'h344;    //
-
     reg [63:0] csr_medeleg ; localparam medeleg = 12'h302;    //
     reg [63:0] csr_mideleg ; localparam mideleg = 12'h303;    //
     // Supervisor CSR
     reg [63:0] csr_sstatus; localparam sstatus =  12'h100; 
     reg [63:0] csr_sie ; localparam sie = 12'h104;   // Supervisor interrupt-enable register
     reg [63:0] csr_stvec ; localparam stvec =12'h105;
-    reg [63:0] csr_satp; localparam satp = 12'h180; // Supervisor address translation and protection satp.MODE=8:on|0:off SV39 vpn2:9 vpn1:9 vpn0:9 pageoffset:12 satp[43:0]:root page table
+    reg [63:0] csr_satp; localparam satp = 12'h180; // Supervisor address translation and protection satp[63:60].MODE=0:off|8:SV39 satp[59:44].asid vpn2:9 vpn1:9 vpn0:9 satp[43:0]:rootpage physical addr
     reg [63:0] csr_sscratch ; localparam sscratch =12'h140;
     reg [63:0] csr_sepc ; localparam sepc =12'h141; //
     reg [63:0] csr_scause ; localparam scause = 12'h142;// 
@@ -58,11 +56,6 @@ module riscv64(
     //integer sideleg = 12'h103;
     //integer scounteren = 12'h106;
     //integer scontext = 12'h5a8; 
-    // -- new --
-
-    // -- CSR Index--
-    integer mie = 12'h304;          // 0x304 MRW Machine interrupt-enable register *
-    integer mip = 12'h344;          // 0x344 MRW Machine interrupt pending *
     // -- CSR Bits --
     localparam MIE  = 3; // mstatus.MIE
     localparam MPIE  = 7; // mstatus.MPIE
@@ -175,9 +168,16 @@ module riscv64(
 	                if (load_step == 1) begin case ((re[w_rs1] + w_imm_i) & 2'b11)
 			        0: re[w_rd]<= $signed(bus_read_data[15:0]); 2: re[w_rd]<= $signed(bus_read_data[31:16]); 1,3:; 
 			        endcase load_step <= 0; end end
-		    32'b???????_?????_?????_010_?????_0000011: begin  // Lw 3 cycles
+		    //32'b???????_?????_?????_010_?????_0000011: begin  // Lw 3 cycles
+		    //    if (load_step == 0) begin bus_address <= re[w_rs1] + w_imm_i; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; end
+		    //    if (load_step == 1) begin re[w_rd]<= $signed(bus_read_data[31:0]); load_step <= 0; end end
+		    32'b???????_?????_?????_010_?????_0000011: begin  // Lw_mmu 3 cycles
+		        //if (csr_read(satp)[63:60] == 8 ) begin end // mmu
 		        if (load_step == 0) begin bus_address <= re[w_rs1] + w_imm_i; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; end
-		        if (load_step == 1) begin re[w_rd]<= $signed(bus_read_data[31:0]); load_step <= 0; end end
+		        //if (load_step == 1 && csr_read(satp)[63:60] == 8 && mmu == 0) begin pc <= pc - 4; bubble <= 1; end // mmu working
+		        //if (load_step == 1 && csr_read(satp)[63:60] == 8 && mmu == 1) begin pc <= pc - 4; bubble <= 1; load_step <= 2; end // mmu ok bus ok?
+		        if (load_step == 1 && bus == 0) begin pc <= pc - 4; bubble <= 1; end // bus working
+		        if (load_step == 1 && bus == 1) begin re[w_rd]<= $signed(bus_read_data[31:0]); load_step <= 0; end end // bus ok and execute
 		    32'b???????_?????_?????_011_?????_0000011: begin   // Ld 5 cycles
 		        if (load_step == 0) begin bus_address <= re[w_rs1] + w_imm_i; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; 
 			end if (load_step == 1) begin re[w_rd]<= bus_read_data; bus_address <= re[w_rs1] + w_imm_i + 4;  bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 2; 
