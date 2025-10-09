@@ -1,11 +1,12 @@
 module mmu_d (
     // MMU-D SV39
-    wire [63:0] va;
-    reg  [63:0] pa;
-    reg tlb_hit;
-    reg valid;
-    reg sfentce;
-    reg priv_s;
+    input wire [63:0] va,
+    input sfentce,
+    input priv_s,
+    input wire satp,
+    output reg  [63:0] pa,
+    output reg tlb_hit,
+    output reg valid
     );
 
     parameter PAGE_OFFSET_BITS = 12;
