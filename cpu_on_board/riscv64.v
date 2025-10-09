@@ -14,7 +14,7 @@ module riscv64(
     output reg [63:0] bus_write_data,
     output reg        bus_write_enable,
     output reg        bus_read_enable,
-    input  wire bus_read_done, //  
+    input  reg bus_read_done,
     input  wire [63:0] bus_read_data   // from outside
 );
 
@@ -173,9 +173,12 @@ module riscv64(
 		    //    if (load_step == 0) begin bus_address <= re[w_rs1] + w_imm_i; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; end
 		    //    if (load_step == 1) begin re[w_rd]<= $signed(bus_read_data[31:0]); load_step <= 0; end end
 		    32'b???????_?????_?????_010_?????_0000011: begin  // Lw_mmu 3 cycles
+		        //if (csr_read(satp)[63:60] == 8 ) begin end // mmu
 		        if (load_step == 0) begin bus_address <= re[w_rs1] + w_imm_i; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; end
-		        if (load_step == 1 && bus_read_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus(and mmu) working
-		        if (load_step == 1 && bus_read_done == 1) begin re[w_rd]<= $signed(bus_read_data[31:0]); load_step <= 0; end end // bus ok so execute
+		        //if (load_step == 1 && csr_read(satp)[63:60] == 8 && mmu == 0) begin pc <= pc - 4; bubble <= 1; end // mmu working
+		        //if (load_step == 1 && csr_read(satp)[63:60] == 8 && mmu == 1) begin pc <= pc - 4; bubble <= 1; load_step <= 2; end // mmu ok bus ok?
+		        if (load_step == 1 && bus_read_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working
+		        if (load_step == 1 && bus_read_done == 1) begin re[w_rd]<= $signed(bus_read_data[31:0]); load_step <= 0; end end // bus ok and execute
 		    32'b???????_?????_?????_011_?????_0000011: begin   // Ld 5 cycles
 		        if (load_step == 0) begin bus_address <= re[w_rs1] + w_imm_i; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; 
 			end if (load_step == 1) begin re[w_rd]<= bus_read_data; bus_address <= re[w_rs1] + w_imm_i + 4;  bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 2; 
