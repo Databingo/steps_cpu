@@ -14,7 +14,7 @@ module riscv64(
     output reg [63:0] bus_write_data,
     output reg        bus_write_enable,
     output reg        bus_read_enable,
-    input  reg bus_read_done,
+    input  reg        bus_read_done,
     input  wire [63:0] bus_read_data   // from outside
 );
 

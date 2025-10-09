@@ -72,6 +72,7 @@ module cpu_on_board (
         .bus_write_data(bus_write_data),
         .bus_write_enable(bus_write_enable),
         .bus_read_enable(bus_read_enable),
+
         .bus_read_done(bus_read_done),
         .bus_read_data(bus_read_data)
     );
