@@ -24,7 +24,7 @@
 
     always @(posedge CLOCK_50) begin
 	if (!reset) begin
-	    valid <=0; tlb_hit<=0,tlb_replace_index<=0;
+	    valid <=0; tlb_hit<=0; tlb_replace_index<=0;
 	    for (i=0;i<TLB_ENTRIES;i=i+1) tlb_valid[i]<=0;
 	end else if (sfence) begin
 	    for (i=0;i<TLB_ENTRIES;i=i+1) tlb_valid[i]<=0; // Flush all TLB entries
@@ -39,7 +39,7 @@
 			pa <= {tlb_ppn[i], offset};
 			valid <= 1;
 			tlb_hit <=1;
-	                mmu <= 1
+	                mmu <= 1;
 		    end
 	        end
 	    end
