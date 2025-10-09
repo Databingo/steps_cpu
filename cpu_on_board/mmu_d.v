@@ -23,7 +23,7 @@
     reg [2:0] tlb_replace_index;
                 
     always @(posedge CLOCK_50 or negedge KEY0) begin
-	if (!reset) begin
+	if (!KEY0) begin
 	    valid <=0; tlb_hit<=0; tlb_replace_index<=0;
 	    for (i=0;i<TLB_ENTRIES;i=i+1) tlb_valid[i]<=0;
 	end else if (sfence) begin
