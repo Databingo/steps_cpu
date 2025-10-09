@@ -12,7 +12,7 @@
     wire [VPN_BITS-1:0] vpn = va[31:12];
     wire [PAGE_OFFSET_BITS-1:0] offset = va[11:0];
     // VPN
-    wire [8:0] vpn2 = va[38:30]
+    wire [8:0] vpn2 = va[38:30];
     // TLB
     reg [VPN_BITS-1:0] tlb_vpn [0:TLB_ENTRIES-1];
     reg [19:0] tlb_ppn [0:TLB_ENTRIES-1];
@@ -21,8 +21,8 @@
 
     integer i;
     reg [2:0] tlb_replace_index;
-
-    always @(posedge CLOCK_50) begin
+                
+    always @(posedge CLOCK_50 or negedge KEY0) begin
 	if (!reset) begin
 	    valid <=0; tlb_hit<=0; tlb_replace_index<=0;
 	    for (i=0;i<TLB_ENTRIES;i=i+1) tlb_valid[i]<=0;
