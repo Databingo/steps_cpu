@@ -7,8 +7,8 @@ module mmu_d (
     input priv_s,
     input wire satp,
     output reg  [63:0] pa,
-    output reg tlb_hit,
-    output reg valid
+    output reg valid,
+    output reg tlb_hit
     );
 
     parameter PAGE_OFFSET_BITS = 12;

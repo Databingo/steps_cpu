@@ -108,14 +108,18 @@ module cpu_on_board (
     );
 
     // -- mmu_d --
-    wire mmu_hit;
+    wire tlb_hit;
+    wire [63:0] virtual_address;
+    wire [63:0] physical_address;
+    wire [63:0] satp;
     mmu_d mmud (
     .clk (CLOCK_50),
     .reset (KEY0),
     .virtual_address (bus_address),
     .physical_address (bus_address),
-    .mmu_hit (mmu_hit)
+    .tlb_hit (tlb_hit)
     );
+    // --  ---
 
     // -- Bus --
     reg  [63:0] bus_read_data;
