@@ -3,7 +3,7 @@ module mmu_d (
     input wire clk,
     input wire reset,
     input wire [63:0] va,
-    input sfentce,
+    input sfence,
     input priv_s,
     input wire satp,
     output reg  [63:0] pa,
