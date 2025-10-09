@@ -5,8 +5,8 @@ module mmu_d (
     input wire [63:0] va,
     input sfence,
     input priv_s,
-    input wire satp,
-    output reg  [63:0] pa,
+    input wire [63:0] satp,
+    output reg [63:0] pa,
     output reg valid,
     output reg tlb_hit
     );
