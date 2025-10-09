@@ -72,6 +72,7 @@ module cpu_on_board (
         .bus_write_data(bus_write_data),
         .bus_write_enable(bus_write_enable),
         .bus_read_enable(bus_read_enable),
+        .bus_read_done(bus_read_done),
         .bus_read_data(bus_read_data)
     );
      
@@ -106,12 +107,23 @@ module cpu_on_board (
         .jtag_uart_0_avalon_jtag_slave_read_n    (1'b1)
     );
 
+    // -- mmu_d --
+    wire mmu_hit;
+    mmu_d mmud (
+    .clk (CLOCK_50),
+    .reset (KEY0),
+    .virtual_address (bus_address),
+    .physical_address (bus_address),
+    .mmu_hit (mmu_hit)
+    );
+
     // -- Bus --
     reg  [63:0] bus_read_data;
     wire [63:0] bus_address;
     wire        bus_read_enable;
     wire [63:0] bus_write_data;
     wire        bus_write_enable;
+    reg   bus_read_done;
 
     // == Bus controller ==
     // 1.-- Address Decoding --
@@ -125,67 +137,19 @@ module cpu_on_board (
     reg [63:0] bus_address_reg;
     always @(posedge CLOCK_50) begin
         bus_address_reg <= bus_address>>2; // BRAM read need this reg address if has condition in circle
-        //if (bus_read_enable) begin // Read
-        //   if (Key_selected) bus_read_data <= {32'd0, 24'd0, ascii};
-        //   if (Ram_selected) bus_read_data <= {32'd0, Cache[bus_address_reg]};
-        //end
-        if (bus_read_enable && mmu) begin // Read mmu
-	    if (Key_selected) begin bus_read_data <= {32'd0, 24'd0, ascii}; bus <= 1; end  // bus 1 ready
-	    if (Ram_selected) begin bus_read_data <= {32'd0, Cache[bus_address_reg]}; bus <= 1; end
+        if (bus_read_enable) begin // Read
+	    if (Key_selected) begin bus_read_data <= {32'd0, 24'd0, ascii}; bus_read_done <= 1; end
+	    if (Ram_selected) begin bus_read_data <= {32'd0, Cache[bus_address_reg]}; bus_read_done <= 1; end
         end
+        //if (bus_read_enable && mmu_hit) begin // Read /mmu
+	//    if (Key_selected) begin bus_read_data <= {32'd0, 24'd0, ascii}; bus <= 1; end  // bus 1 ready
+	//    if (Ram_selected) begin bus_read_data <= {32'd0, Cache[bus_address_reg]}; bus <= 1; end
+        //end
 	if (bus_write_enable) begin // Write
-	   if (Ram_selected) Cache[bus_address[63:2]] <= bus_write_data[31:0];  // cut fit 32 bit ram //work
+	    if (Ram_selected) Cache[bus_address[63:2]] <= bus_write_data[31:0];  // cut fit 32 bit ram //work
         end
     end
       
-    // MMU SV32
-    wire [31:0] va 
-    reg  [31:0] pa;
-    //wire [8:0] tlb2 = vpn[26:18];
-    //wire [8:0] tlb1 = vpn[17:9];
-    //wire [8:0] tlb0 = vpn[8:0];
-    reg tlb_hit;
-    reg valid;
-    reg sfentce;
-    reg priv_s;
-    parameter PAGE_OFFSET_BITS = 12;
-    parameter VPN_BITS = 20;
-    parameter TLB_ENTRIES = 8; //small tlb
-    wire [VPN_BITS-1:0] vpn = va[31:12];
-    wire [PAGE_OFFSET_BITS-1:0] offset = va[11:0];
-    // TLB
-    reg [VPN_BITS-1:0] tlb_vpn [0:TLB_ENTRIES-1]
-    reg [19:0] tlb_ppn [0:TLB_ENTRIES-1]
-    reg  tlb_valid [0:TLB_ENTRIES-1]
-    reg  tlb_u [0:TLB_ENTRIES-1] // user/supervisor bit
-    integer i;
-    reg [2:0] tlb_replace_index;
-
-    always @(posedge CLOCK_50) begin
-	if (!reset) begin
-	    valid <=0; tlb_hit<=0,tlb_replace_index<=0;
-	    for (i=0;i<TLB_ENTRIES;i=i+1) tlb_valid[i]<=0;
-	end else if (sfence) begin
-	    for (i=0;i<TLB_ENTRIES;i=i+1) tlb_valid[i]<=0; // Flush all TLB entries
-	end else begin
-	    valid <=0;
-	    tlb_hit<=0; // Search
-	    for (i=0;i<TLB_ENTRIES;i=i+1) begin
-		if (tlb_valid[i] && tlb_vpn[i]==vpn) begin
-		    if (!priv_s && !tlb_u[i]) begin
-			valid <=0;
-		    end	else begin
-			pa <= {tlb_ppn[i], offset}
-			valid <= 1;
-			tlb_hit <=1;
-	                mmu <= 1
-		    end
-	        end
-	    end
-	    if (!tlb_hit) begin
-	    end
-        end
-    end
       
     // 4.-- UART Writer Trigger --
     wire uart_write_trigger = bus_write_enable && Art_selected;
