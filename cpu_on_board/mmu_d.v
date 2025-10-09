@@ -1,5 +1,5 @@
     // MMU-D SV39
-    wire [63:0] va 
+    wire [63:0] va;
     reg  [63:0] pa;
     reg tlb_hit;
     reg valid;
@@ -14,12 +14,10 @@
     // VPN
     wire [8:0] vpn2 = va[38:30]
     // TLB
-    reg [VPN_BITS-1:0] tlb_vpn [0:TLB_ENTRIES-1]
-    reg [19:0] tlb_ppn [0:TLB_ENTRIES-1]
-    reg  tlb_valid [0:TLB_ENTRIES-1]
-    reg  tlb_u [0:TLB_ENTRIES-1] // user/supervisor bit
-
-
+    reg [VPN_BITS-1:0] tlb_vpn [0:TLB_ENTRIES-1];
+    reg [19:0] tlb_ppn [0:TLB_ENTRIES-1];
+    reg  tlb_valid [0:TLB_ENTRIES-1];
+    reg  tlb_u [0:TLB_ENTRIES-1]; // user/supervisor bit
 
     integer i;
     reg [2:0] tlb_replace_index;
@@ -38,7 +36,7 @@
 		    if (!priv_s && !tlb_u[i]) begin
 			valid <=0;
 		    end	else begin
-			pa <= {tlb_ppn[i], offset}
+			pa <= {tlb_ppn[i], offset};
 			valid <= 1;
 			tlb_hit <=1;
 	                mmu <= 1
