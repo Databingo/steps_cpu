@@ -1,5 +1,7 @@
 module mmu_d (
     // MMU-D SV39
+    input wire clk,
+    input wire reset,
     input wire [63:0] va,
     input sfentce,
     input priv_s,
@@ -25,8 +27,8 @@ module mmu_d (
     integer i;
     reg [2:0] tlb_replace_index;
                 
-    always @(posedge CLOCK_50 or negedge KEY0) begin
-	if (!KEY0) begin
+    always @(posedge clk or negedge reset) begin
+	if (!reset) begin
 	    valid <=0; tlb_hit<=0; tlb_replace_index<=0;
 	    for (i=0;i<TLB_ENTRIES;i=i+1) tlb_valid[i]<=0;
 	end else if (sfence) begin
@@ -42,7 +44,7 @@ module mmu_d (
 			pa <= {tlb_ppn[i], offset};
 			valid <= 1;
 			tlb_hit <=1;
-	                mmu <= 1;
+	                //mmu <= 1;
 		    end
 	        end
 	    end
