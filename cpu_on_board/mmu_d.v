@@ -6,6 +6,7 @@ module mmu_d (
     reg valid;
     reg sfentce;
     reg priv_s;
+    );
 
     parameter PAGE_OFFSET_BITS = 12;
     parameter VPN_BITS = 20;
@@ -49,4 +50,4 @@ module mmu_d (
         end
     end
 
-    )
+endmodule
