@@ -1,0 +1,15 @@
+set_global_assignment -entity "spi" -library "spi" -name IP_TOOL_NAME "Qsys"
+set_global_assignment -entity "spi" -library "spi" -name IP_TOOL_VERSION "13.0sp1"
+set_global_assignment -entity "spi" -library "spi" -name IP_TOOL_ENV "Qsys"
+set_global_assignment -library "spi" -name SOPCINFO_FILE [file join $::quartus(qip_path) "../../spi.sopcinfo"]
+set_instance_assignment -entity "spi" -library "spi" -name SLD_INFO "QSYS_NAME spi HAS_SOPCINFO 1 GENERATION_ID 1760109852"
+set_global_assignment -library "spi" -name MISC_FILE [file join $::quartus(qip_path) "../../spi.cmp"]
+set_global_assignment -name SYNTHESIS_ONLY_QIP ON
+set_global_assignment -library "spi" -name MISC_FILE [file join $::quartus(qip_path) "../../spi.qsys"]
+
+set_global_assignment -library "spi" -name VERILOG_FILE [file join $::quartus(qip_path) "spi.v"]
+set_global_assignment -library "spi" -name VERILOG_FILE [file join $::quartus(qip_path) "submodules/spi_spi_0.v"]
+
+set_global_assignment -entity "spi_spi_0" -library "spi" -name IP_TOOL_NAME "altera_avalon_spi"
+set_global_assignment -entity "spi_spi_0" -library "spi" -name IP_TOOL_VERSION "13.0.1.99.2"
+set_global_assignment -entity "spi_spi_0" -library "spi" -name IP_TOOL_ENV "Qsys"
