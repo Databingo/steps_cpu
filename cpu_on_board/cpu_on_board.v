@@ -169,13 +169,34 @@ module cpu_on_board (
       
       
     // 4.-- UART Writer Trigger --
-    wire uart_write_trigger = bus_write_enable && Art_selected;
-    reg uart_write_trigger_dly;
-    always @(posedge CLOCK_50 or negedge KEY0) begin
-	if (!KEY0) uart_write_trigger_dly <= 0;
-	else uart_write_trigger_dly <= uart_write_trigger;
+//    wire uart_write_trigger = bus_write_enable && Art_selected;
+//    reg uart_write_trigger_dly;
+//    always @(posedge CLOCK_50 or negedge KEY0) begin
+//	if (!KEY0) uart_write_trigger_dly <= 0;
+//	else uart_write_trigger_dly <= uart_write_trigger;
+//    end
+//    assign uart_write_trigger_pulse = uart_write_trigger  && !uart_write_trigger_dly;
+
+
+reg uart_write_pending;
+always @(posedge CLOCK_50 or negedge KEY0) begin
+  if (!KEY0) begin
+    uart_write_pending <= 0;
+    uart_write_trigger_dly <= 0;
+  end else begin
+    if (uart_write_trigger && !uart_write_pending) begin
+       uart_write_pending <= 1;         // start pending
+    end else if (uart_write_pending) begin
+       uart_write_pending <= 0;         // complete next cycle
     end
-    assign uart_write_trigger_pulse = uart_write_trigger  && !uart_write_trigger_dly;
+    uart_write_trigger_dly <= uart_write_trigger;
+  end
+end
+wire uart_write_trigger_pulse = uart_write_pending;
+
+
+
+
 
     // -- interrupt controller --
     wire [3:0] interrupt_vector;
@@ -213,7 +234,7 @@ module cpu_on_board (
     // 6. -- SPI --
    wire [15:0] spi_read_data_wire;
    spi my_spi_system (
-       .clk_clk                       (CLOCK50),
+       .clk_clk                       (CLOCK_50),
        .reset_reset_n                 (KEY0),
        .spi_0_reset_reset_n           (KEY0),
        .spi_0_spi_control_port_chipselect (Spi_selected), // Connection

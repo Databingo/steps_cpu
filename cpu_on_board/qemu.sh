@@ -83,27 +83,58 @@
 
 
 
+#qemu-system-x86_64 \
+#  -accel hvf \
+#  -cpu host \
+#  -machine q35 \
+#  -m 4096 \
+#  -smp 4 \
+#  -device qemu-xhci,id=xhci \
+#  -device usb-tablet,bus=xhci.0 \
+#  -device usb-kbd,bus=xhci.0 \
+#  -device virtio-gpu-pci \
+#  -display cocoa,show-cursor=on \
+#  -netdev user,id=net0,hostfwd=tcp::2222-:22 \
+#  -device virtio-net-pci,netdev=net0 \
+#  -drive file=/Volumes/macos/debian-13-nocloud-amd64.qcow2,if=virtio \
+#  -boot c
+
+
+# install
 qemu-system-x86_64 \
   -accel hvf \
-  -cpu host \
   -machine q35 \
-  -m 4096 \
+  -cpu host \
   -smp 4 \
+  -m 4096 \
+  -device virtio-gpu-pci \
+  -display cocoa \
   -device qemu-xhci,id=xhci \
   -device usb-tablet,bus=xhci.0 \
   -device usb-kbd,bus=xhci.0 \
-  -device virtio-gpu-pci \
-  -display cocoa,show-cursor=on \
   -netdev user,id=net0,hostfwd=tcp::2222-:22 \
   -device virtio-net-pci,netdev=net0 \
-  -drive file=.qcow2,if=virtio \
+  -drive file=debian-lxqt.qcow2,if=virtio,format=qcow2 \
+  -cdrom ~/Downloads/debian-live-12.11.0-amd64-lxqt.iso \
+  -boot d
+
+
+# run
+qemu-system-x86_64 \
+  -accel hvf \
+  -machine q35 \
+  -cpu host \
+  -smp 4 \
+  -m 4096 \
+  -device virtio-gpu-pci \
+  -display cocoa \
+  -device qemu-xhci,id=xhci \
+  -device usb-tablet,bus=xhci.0 \
+  -device usb-kbd,bus=xhci.0 \
+  -netdev user,id=net0,hostfwd=tcp::2222-:22 \
+  -device virtio-net-pci,netdev=net0 \
+  -drive file=debian-lxqt.qcow2,if=virtio,format=qcow2 \
   -boot c
-
-
-
-
-
-
 
 
 
