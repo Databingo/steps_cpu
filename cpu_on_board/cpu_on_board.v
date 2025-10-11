@@ -28,10 +28,10 @@ module cpu_on_board (
     (* chip_pin = "J14" *)  input wire PS2_DAT,
 
 
-    output wire SPI_SCLK,
-    output wire SPI_MOSI,
-    input wire SPI_MISO,
-    output wire SPI_SS_n
+    (* chip_pin = "V20" *)  output wire SPI_SCLK, //SD_CLK
+    (* chip_pin = "Y20" *)  output wire SPI_MOSI, // SD_CMD
+    (* chip_pin = "W20" *)  input wire SPI_MISO,// SD_DAT
+    (* chip_pin = "U20" *)  output wire SPI_SS_n // SD_DAT3
 
 
     
@@ -147,6 +147,11 @@ module cpu_on_board (
     wire Key_selected = (bus_address == `Key_base);
     wire Art_selected = (bus_address == `Art_base);
     wire Spi_selected = (bus_address >= `Spi_base && bus_address < `Spi_base + `Spi_size);
+    reg Spi_selected_reg;
+    always @(posedge CLOCK_50) begin
+        Spi_selected_reg <= Spi_selected;
+    end
+
 
     // 3. Port B read & write BRAM
     reg [63:0] bus_address_reg;
@@ -155,11 +160,8 @@ module cpu_on_board (
         if (bus_read_enable) begin // Read
 	    if (Key_selected) begin bus_read_data <= {32'd0, 24'd0, ascii}; bus_read_done <= 1; end
 	    if (Ram_selected) begin bus_read_data <= {32'd0, Cache[bus_address_reg]}; bus_read_done <= 1; end
+	    if (Spi_selected_reg) begin bus_read_data <= {56'd0, spi_read_data_wire}; bus_read_done <= 1; end
         end
-        //if (bus_read_enable && mmu_hit) begin // Read /mmu
-	//    if (Key_selected) begin bus_read_data <= {32'd0, 24'd0, ascii}; bus <= 1; end  // bus 1 ready
-	//    if (Ram_selected) begin bus_read_data <= {32'd0, Cache[bus_address_reg]}; bus <= 1; end
-        //end
 	if (bus_write_enable) begin // Write
 	    if (Ram_selected) Cache[bus_address[63:2]] <= bus_write_data[31:0];  // cut fit 32 bit ram //work
         end
@@ -209,31 +211,18 @@ module cpu_on_board (
 
 
     // 6. -- SPI --
-		input  wire        clk_clk,                           //                    clk.clk
-		input  wire        reset_reset_n,                     //                  reset.reset_n
-		input  wire        spi_0_reset_reset_n,               //            spi_0_reset.reset_n
-		input  wire [15:0] spi_0_spi_control_port_writedata,  // spi_0_spi_control_port.writedata
-		output wire [15:0] spi_0_spi_control_port_readdata,   //                       .readdata
-		input  wire [2:0]  spi_0_spi_control_port_address,    //                       .address
-		input  wire        spi_0_spi_control_port_read_n,     //                       .read_n
-		input  wire        spi_0_spi_control_port_chipselect, //                       .chipselect
-		input  wire        spi_0_spi_control_port_write_n,    //                       .write_n
-		input  wire        spi_0_external_MISO,               //         spi_0_external.MISO
-		output wire        spi_0_external_MOSI,               //                       .MOSI
-		output wire        spi_0_external_SCLK,               //                       .SCLK
-		output wire        spi_0_external_SS_n                //                       .SS_n
-
+   wire [15:0] spi_read_data_wire;
    spi my_spi_system (
        .clk_clk                       (CLOCK50),
        .reset_reset_n                 (KEY0),
        .spi_0_reset_reste_n           (KEY0),
-       .spi_0_control_port_writedata  (but_write_data[15:0]),  // 16-bit wide?
+       .spi_0_control_port_chipselect (Spi_selected), // Connection
+       .spi_0_control_port_address    (bus_address[4:2]), //? 0123..
+       .spi_0_control_port_read_n     (~(bus_read_enable && Spi_selected)), // Read
        .spi_0_control_port_readdata   (spi_read_data_wire),
-       .spi_0_control_port_address    (bus_address[4:2]), //?
-       .spi_0_control_port_read_n     (~bus_read_enable),
-       .spi_0_control_port_chipselect (spi_selected),
-       .spi_0_control_port_write_n    (~bus_write_enable),
-       .spi_0_external_MISO           (SPI_MISO),
+       .spi_0_control_port_write_n    (~(bus_write_enable && Spi_selected)), // Write
+       .spi_0_control_port_writedata  (bus_write_data[7:0]),  // 8-bit wide
+       .spi_0_external_MISO           (SPI_MISO), // Map to Physical pins
        .spi_0_external_MOSI           (SPI_MOSI),
        .spi_0_external_SCLK           (SPI_SCLK),
        .spi_0_external_SS_n           (SPI_SS_n),
