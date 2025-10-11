@@ -66,8 +66,8 @@ module cpu_on_board (
 
     // -- CPU --
     riscv64 cpu (
-        .clk(clock_1hz), 
-        //.clk(CLOCK_50), 
+        //.clk(clock_1hz), 
+        .clk(CLOCK_50), 
         .reset(KEY0),     // Active-low reset button
         .instruction(ir_ld),
         .pc(pc),
