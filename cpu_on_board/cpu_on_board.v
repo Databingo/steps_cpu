@@ -169,8 +169,8 @@ module cpu_on_board (
       
       
     // 4.-- UART Writer Trigger --
-//    wire uart_write_trigger = bus_write_enable && Art_selected;
-//    reg uart_write_trigger_dly;
+    wire uart_write_trigger = bus_write_enable && Art_selected;
+    reg uart_write_trigger_dly;
 //    always @(posedge CLOCK_50 or negedge KEY0) begin
 //	if (!KEY0) uart_write_trigger_dly <= 0;
 //	else uart_write_trigger_dly <= uart_write_trigger;
