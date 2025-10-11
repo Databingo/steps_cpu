@@ -25,7 +25,16 @@ module cpu_on_board (
     (* chip_pin = "H1" *)  output wire HEX03,
 
     (* chip_pin = "H15" *)  input wire PS2_CLK, 
-    (* chip_pin = "J14" *)  input wire PS2_DAT 
+    (* chip_pin = "J14" *)  input wire PS2_DAT,
+
+
+    output wire SPI_SCLK,
+    output wire SPI_MOSI,
+    input wire SPI_MISO,
+    output wire SPI_SS_n
+
+
+    
 
 );
 
@@ -99,8 +108,8 @@ module cpu_on_board (
 
     // -- Monitor -- Connected to Bus
     jtag_uart_system my_jtag_system (
-        .clk_clk                             (CLOCK_50),
-        .reset_reset_n                       (KEY0),
+        .clk_clk                                 (CLOCK_50),
+        .reset_reset_n                           (KEY0),
         .jtag_uart_0_avalon_jtag_slave_address   (bus_address[0:0]),
         .jtag_uart_0_avalon_jtag_slave_writedata (bus_write_data[31:0]),
         .jtag_uart_0_avalon_jtag_slave_write_n   (~uart_write_trigger_pulse),
@@ -137,6 +146,7 @@ module cpu_on_board (
     ////wire Stk_selected = (bus_address >= Stk_base && bus_address < Stk_base + Stk_size);
     wire Key_selected = (bus_address == `Key_base);
     wire Art_selected = (bus_address == `Art_base);
+    wire Spi_selected = (bus_address >= `Spi_base && bus_address < `Spi_base + `Spi_size);
 
     // 3. Port B read & write BRAM
     reg [63:0] bus_address_reg;
@@ -196,6 +206,43 @@ module cpu_on_board (
     assign HEX00 = ~Art_selected;
     assign HEX01 = ~Ram_selected;
     assign HEX02 = ~Rom_selected;
+
+
+    // 6. -- SPI --
+		input  wire        clk_clk,                           //                    clk.clk
+		input  wire        reset_reset_n,                     //                  reset.reset_n
+		input  wire        spi_0_reset_reset_n,               //            spi_0_reset.reset_n
+		input  wire [15:0] spi_0_spi_control_port_writedata,  // spi_0_spi_control_port.writedata
+		output wire [15:0] spi_0_spi_control_port_readdata,   //                       .readdata
+		input  wire [2:0]  spi_0_spi_control_port_address,    //                       .address
+		input  wire        spi_0_spi_control_port_read_n,     //                       .read_n
+		input  wire        spi_0_spi_control_port_chipselect, //                       .chipselect
+		input  wire        spi_0_spi_control_port_write_n,    //                       .write_n
+		input  wire        spi_0_external_MISO,               //         spi_0_external.MISO
+		output wire        spi_0_external_MOSI,               //                       .MOSI
+		output wire        spi_0_external_SCLK,               //                       .SCLK
+		output wire        spi_0_external_SS_n                //                       .SS_n
+
+   spi my_spi_system (
+       .clk_clk                       (CLOCK50),
+       .reset_reset_n                 (KEY0),
+       .spi_0_reset_reste_n           (KEY0),
+       .spi_0_control_port_writedata  (but_write_data[15:0]),  // 16-bit wide?
+       .spi_0_control_port_readdata   (spi_read_data_wire),
+       .spi_0_control_port_address    (bus_address[4:2]), //?
+       .spi_0_control_port_read_n     (~bus_read_enable),
+       .spi_0_control_port_chipselect (spi_selected),
+       .spi_0_control_port_write_n    (~bus_write_enable),
+       .spi_0_external_MISO           (SPI_MISO),
+       .spi_0_external_MOSI           (SPI_MOSI),
+       .spi_0_external_SCLK           (SPI_SCLK),
+       .spi_0_external_SS_n           (SPI_SS_n),
+   ); 
+      
+    
+
+
+
 
     // -- Timer --
     // -- CSRs --
