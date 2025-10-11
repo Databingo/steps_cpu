@@ -168,33 +168,33 @@ module cpu_on_board (
     end
       
       
-    // 4.-- UART Writer Trigger --
-    //wire uart_write_trigger = bus_write_enable && Art_selected;
-    //reg uart_write_trigger_dly;
-//    always @(posedge CLOCK_50 or negedge KEY0) begin
-//	if (!KEY0) uart_write_trigger_dly <= 0;
-//	else uart_write_trigger_dly <= uart_write_trigger;
+     //  4.-- UART Writer Trigger --
+      wire uart_write_trigger = bus_write_enable && Art_selected;
+      reg uart_write_trigger_dly;
+      always @(posedge CLOCK_50 or negedge KEY0) begin
+  	if (!KEY0) uart_write_trigger_dly <= 0;
+  	else uart_write_trigger_dly <= uart_write_trigger;
+      end
+      assign uart_write_trigger_pulse = uart_write_trigger  && !uart_write_trigger_dly;
+
+
+//wire uart_write_trigger = bus_write_enable && Art_selected;
+//reg uart_write_trigger_dly;
+//reg uart_write_pending;
+//always @(posedge CLOCK_50 or negedge KEY0) begin
+//  if (!KEY0) begin
+//    uart_write_pending <= 0;
+//    uart_write_trigger_dly <= 0;
+//  end else begin
+//    if (uart_write_trigger && !uart_write_pending) begin
+//       uart_write_pending <= 1;         // start pending
+//    end else if (uart_write_pending) begin
+//       uart_write_pending <= 0;         // complete next cycle
 //    end
-//    assign uart_write_trigger_pulse = uart_write_trigger  && !uart_write_trigger_dly;
-
-
-wire uart_write_trigger = bus_write_enable && Art_selected;
-reg uart_write_trigger_dly;
-reg uart_write_pending;
-always @(posedge CLOCK_50 or negedge KEY0) begin
-  if (!KEY0) begin
-    uart_write_pending <= 0;
-    uart_write_trigger_dly <= 0;
-  end else begin
-    if (uart_write_trigger && !uart_write_pending) begin
-       uart_write_pending <= 1;         // start pending
-    end else if (uart_write_pending) begin
-       uart_write_pending <= 0;         // complete next cycle
-    end
-    uart_write_trigger_dly <= uart_write_trigger;
-  end
-end
-wire uart_write_trigger_pulse = uart_write_pending;
+//    uart_write_trigger_dly <= uart_write_trigger;
+//  end
+//end
+//wire uart_write_trigger_pulse = uart_write_pending;
 
 
 
