@@ -215,22 +215,19 @@ module cpu_on_board (
    spi my_spi_system (
        .clk_clk                       (CLOCK50),
        .reset_reset_n                 (KEY0),
-       .spi_0_reset_reste_n           (KEY0),
-       .spi_0_control_port_chipselect (Spi_selected), // Connection
-       .spi_0_control_port_address    (bus_address[4:2]), //? 0123..
-       .spi_0_control_port_read_n     (~(bus_read_enable && Spi_selected)), // Read
-       .spi_0_control_port_readdata   (spi_read_data_wire),
-       .spi_0_control_port_write_n    (~(bus_write_enable && Spi_selected)), // Write
-       .spi_0_control_port_writedata  (bus_write_data[7:0]),  // 8-bit wide
+       .spi_0_spi_reset_reset_n           (KEY0),
+       .spi_0_spi_control_port_chipselect (Spi_selected), // Connection
+       .spi_0_spi_control_port_address    (bus_address[4:2]), //? 0123..
+       .spi_0_spi_control_port_read_n     (~(bus_read_enable && Spi_selected)), // Read
+       .spi_0_spi_control_port_readdata   (spi_read_data_wire),
+       .spi_0_spi_control_port_write_n    (~(bus_write_enable && Spi_selected)), // Write
+       .spi_0_spi_control_port_writedata  (bus_write_data[7:0]),  // 8-bit wide
        .spi_0_external_MISO           (SPI_MISO), // Map to Physical pins
        .spi_0_external_MOSI           (SPI_MOSI),
        .spi_0_external_SCLK           (SPI_SCLK),
        .spi_0_external_SS_n           (SPI_SS_n),
    ); 
       
-    
-
-
 
 
     // -- Timer --
