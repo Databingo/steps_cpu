@@ -178,8 +178,8 @@ module cpu_on_board (
 //    assign uart_write_trigger_pulse = uart_write_trigger  && !uart_write_trigger_dly;
 
 
-    wire uart_write_trigger = bus_write_enable && Art_selected;
-    reg uart_write_trigger_dly;
+wire uart_write_trigger = bus_write_enable && Art_selected;
+reg uart_write_trigger_dly;
 reg uart_write_pending;
 always @(posedge CLOCK_50 or negedge KEY0) begin
   if (!KEY0) begin
