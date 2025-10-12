@@ -35,14 +35,10 @@ module cpu_on_board (
 
 
     
-    input  wire CLOCK_50,        // 50 MHz
-    input  wire KEY0,            // Active low reset
-
     //output reg  SPI_SCLK,        // SD CLK  (V20)
     //output reg  SPI_MOSI,        // SD CMD  (Y20)
     //input  wire SPI_MISO,        // SD DAT0 (W20)
     //output reg  SPI_SS_n,        // SD DAT3 (U20) -> CS
-    output reg  LEDR0            // Status LED
 );
 
     // Clock divider: 50 MHz -> 400 kHz for SD init
