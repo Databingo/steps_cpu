@@ -1,11 +1,25 @@
 module cpu_on_board (
-    input  wire CLOCK_50,        // 50 MHz
-    input  wire KEY0,            // Active low reset
-    output reg  SPI_SCLK,        // SD CLK  (V20)
-    output reg  SPI_MOSI,        // SD CMD  (Y20)
-    input  wire SPI_MISO,        // SD DAT0 (W20)
-    output reg  SPI_SS_n,        // SD DAT3 (U20)
-    output reg  LEDR0            // Status LED
+    //input  wire CLOCK_50,        // 50 MHz
+    //input  wire KEY0,            // Active low reset
+    //output reg  SPI_SCLK,        // SD CLK  (V20)
+    //output reg  SPI_MOSI,        // SD CMD  (Y20)
+    //input  wire SPI_MISO,        // SD DAT0 (W20)
+    //output reg  SPI_SS_n,        // SD DAT3 (U20)
+    //output reg  LEDR0            // Status LED
+
+    // -- Pin --
+    (* chip_pin = "PIN_L1" *)  input wire CLOCK_50, // 50 MHz clock
+    (* chip_pin = "PIN_R22" *) input wire KEY0,     // Active-low reset button
+    (* chip_pin = "R20" *) output wire LEDR0, // 
+    (* chip_pin = "V20" *)  output wire SPI_SCLK, //SD_CLK
+    (* chip_pin = "Y20" *)  output wire SPI_MOSI, // SD_CMD
+    (* chip_pin = "W20" *)  input wire SPI_MISO,// SD_DAT
+    (* chip_pin = "U20" *)  output wire SPI_SS_n // SD_DAT3
+
+
+
+
+
 );
 
     // -------------------------
