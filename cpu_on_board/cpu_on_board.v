@@ -116,7 +116,7 @@ module cpu_on_board (
     spi my_spi_system (
         .clk_clk(CLOCK_50),
         .reset_reset_n(KEY0),
-        .spi_0_reset_reset_n(KEY0),
+        //.spi_0_reset_reset_n(KEY0),
         .spi_0_spi_control_port_chipselect (Spi_selected),
         .spi_0_spi_control_port_address    (bus_address),
         .spi_0_spi_control_port_read_n     (~(bus_read_enable && Spi_selected)),
