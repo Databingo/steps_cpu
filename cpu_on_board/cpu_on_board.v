@@ -105,6 +105,7 @@ module cpu_on_board (
                     bus_read_enable <= 0;
                     state <= 11;
                 end
+		11: begin uart_write <= 0; state <= 2; end
                 default: state <= 11;
             endcase
         end
@@ -134,118 +135,6 @@ module cpu_on_board (
 endmodule
 
 
-
-
-//module cpu_on_board (
-//    input  wire CLOCK_50,
-//    input  wire KEY0,        // Active-low reset
-//    output wire LEDR0,
-//    output wire SPI_SCLK,
-//    output wire SPI_MOSI,
-//    input  wire SPI_MISO,
-//    output wire SPI_SS_n
-//);
-//
-//    // ---------------- UART ----------------
-//    reg  [31:0] uart_data;
-//    reg         uart_write;
-//
-//    jtag_uart_system uart0 (
-//        .clk_clk(CLOCK_50),
-//        .reset_reset_n(KEY0),
-//        .jtag_uart_0_avalon_jtag_slave_address(1'b0),
-//        .jtag_uart_0_avalon_jtag_slave_writedata(uart_data),
-//        .jtag_uart_0_avalon_jtag_slave_write_n(~uart_write),
-//        .jtag_uart_0_avalon_jtag_slave_chipselect(1'b1),
-//        .jtag_uart_0_avalon_jtag_slave_read_n(1'b1)
-//    );
-//
-//    // ---------------- SPI -----------------
-//    wire [15:0] spi_read_data_wire;
-//    reg  [15:0] bus_write_data;
-//    reg  [2:0]  bus_address;
-//    reg         bus_write_enable, bus_read_enable, Spi_selected;
-//
-//    // ---------------- State machine --------
-//    reg [2:0] state;
-//    reg [6:0] counter;
-//    reg [7:0] cmd[0:5];
-//
-//    initial begin
-//        cmd[0]=8'h40; cmd[1]=8'h00; cmd[2]=8'h00;
-//        cmd[3]=8'h00; cmd[4]=8'h00; cmd[5]=8'h95;
-//        state=0; counter=0;
-//    end
-//
-//    always @(posedge CLOCK_50 or negedge KEY0) begin
-//        if(!KEY0) begin
-//            uart_write<=0; Spi_selected<=0;
-//            bus_write_enable<=0; bus_read_enable<=0;
-//            state<=0; counter<=0;
-//        end else begin
-//            uart_write<=0; Spi_selected<=0;
-//            bus_write_enable<=0; bus_read_enable<=0;
-//
-//            case(state)
-//                0: begin
-//                    uart_data<={24'd0,"P"}; uart_write<=1;
-//                    counter<=10;               // 80 dummy clocks
-//                    state<=1;
-//                end
-//                1: begin                     // Send 10 dummy 0xFF bytes
-//                    Spi_selected<=1;
-//                    bus_write_enable<=1;
-//                    bus_address<=3'd1;        // TXDATA
 //                    bus_write_data<=16'hFF;
 //                    if(counter>0) counter<=counter-1;
-//                    else state<=2;
-//                end
-//                2: begin                     // Assert SS low
-//                    Spi_selected<=1;
-//                    bus_write_enable<=1;
-//                    bus_address<=3'd4;        // SLAVESELECT
-//                    bus_write_data<=16'd1;
-//                    counter<=0;
-//                    state<=3;
-//                end
-//                3: begin                     // Send CMD0 bytes
-//                    Spi_selected<=1;
-//                    bus_write_enable<=1;
-//                    bus_address<=3'd1;
-//                    bus_write_data<={8'd0,cmd[counter]};
-//                    if(counter==5) state<=4;
-//                    else counter<=counter+1;
-//                end
-//                4: begin                     // Read response
-//                    Spi_selected<=1;
-//                    bus_read_enable<=1;
-//                    bus_address<=3'd0;        // RXDATA
-//                    uart_data<={24'd0,spi_read_data_wire[7:0]};
-//                    uart_write<=1;
-//                    state<=5;
-//                end
-//                5: state<=5;                 // Halt
-//            endcase
-//        end
-//    end
-//
-//    // ---------------- SPI IP ----------------
-//    spi my_spi_system (
-//        .clk_clk(CLOCK_50),
-//        .reset_reset_n(KEY0),
-//       // .spi_0_reset_reset_n(KEY0),
-//        .spi_0_spi_control_port_chipselect (Spi_selected),
-//        .spi_0_spi_control_port_address    (bus_address),
-//        .spi_0_spi_control_port_read_n     (~(bus_read_enable && Spi_selected)),
-//        .spi_0_spi_control_port_readdata   (spi_read_data_wire),
-//        .spi_0_spi_control_port_write_n    (~(bus_write_enable && Spi_selected)),
-//        .spi_0_spi_control_port_writedata  (bus_write_data),
-//        .spi_0_external_MISO(SPI_MISO),
-//        .spi_0_external_MOSI(SPI_MOSI),
-//        .spi_0_external_SCLK(SPI_SCLK),
-//        .spi_0_external_SS_n(SPI_SS_n)
-//    );
-//
-//    assign LEDR0 = (state<5);   // LED on while active
-//
-//endmodule
+
