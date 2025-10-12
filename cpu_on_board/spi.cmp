@@ -2,7 +2,6 @@
 		port (
 			clk_clk                           : in  std_logic                     := 'X';             -- clk
 			reset_reset_n                     : in  std_logic                     := 'X';             -- reset_n
-			spi_0_reset_reset_n               : in  std_logic                     := 'X';             -- reset_n
 			spi_0_spi_control_port_writedata  : in  std_logic_vector(15 downto 0) := (others => 'X'); -- writedata
 			spi_0_spi_control_port_readdata   : out std_logic_vector(15 downto 0);                    -- readdata
 			spi_0_spi_control_port_address    : in  std_logic_vector(2 downto 0)  := (others => 'X'); -- address

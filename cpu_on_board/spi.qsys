@@ -6,9 +6,12 @@
    version="1.0"
    description=""
    tags=""
-   categories="" />
+   categories="System" />
  <parameter name="bonusData"><![CDATA[bonusData 
 {
+   element $${FILENAME}
+   {
+   }
    element clk_0
    {
       datum _sortIndex
@@ -37,15 +40,14 @@
  <parameter name="globalResetBus" value="false" />
  <parameter name="hdlLanguage" value="VERILOG" />
  <parameter name="maxAdditionalLatency" value="1" />
- <parameter name="projectName" value="" />
+ <parameter name="projectName" value="cpu_on_board.qpf" />
  <parameter name="sopcBorderPoints" value="false" />
  <parameter name="systemHash" value="1" />
- <parameter name="timeStamp" value="1760109656874" />
+ <parameter name="timeStamp" value="1760224895712" />
  <parameter name="useTestBenchNamingPattern" value="false" />
  <instanceScript></instanceScript>
  <interface name="clk" internal="clk_0.clk_in" type="clock" dir="end" />
  <interface name="reset" internal="clk_0.clk_in_reset" type="reset" dir="end" />
- <interface name="spi_0_reset" internal="spi_0.reset" type="reset" dir="end" />
  <interface
    name="spi_0_spi_control_port"
    internal="spi_0.spi_control_port"
@@ -83,6 +85,7 @@
   <parameter name="inputClockRate" value="50000000" />
  </module>
  <connection kind="clock" version="13.0" start="clk_0.clk" end="spi_0.clk" />
+ <connection kind="reset" version="13.0" start="clk_0.clk_reset" end="spi_0.reset" />
  <interconnectRequirement for="$system" name="qsys_mm.clockCrossingAdapter" value="HANDSHAKE" />
  <interconnectRequirement for="$system" name="qsys_mm.maxAdditionalLatency" value="1" />
 </system>

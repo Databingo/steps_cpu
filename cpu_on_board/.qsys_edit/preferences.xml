@@ -3,7 +3,7 @@
  <debug showDebugMenu="0" />
  <systemtable>
   <columns>
-   <connections preferredWidth="47" />
+   <connections preferredWidth="63" />
    <irq preferredWidth="34" />
   </columns>
  </systemtable>
@@ -15,8 +15,8 @@
   </columns>
  </clocktable>
  <library
-   expandedCategories="Library/Interface Protocols/Serial,Library/Interface Protocols,Library,Project" />
- <window width="1100" height="747" x="259" y="0" />
+   expandedCategories="Library,Project,Library/Interface Protocols/Serial,Library/Interface Protocols" />
+ <window width="1100" height="747" x="180" y="0" />
  <hdlexample language="VERILOG" />
  <generation path="spi" />
 </preferences>
