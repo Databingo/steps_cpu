@@ -423,16 +423,11 @@ module cpu_on_board (
                     bus_address <= SPI_RXDATA;
                     
                     if (spi_read_data_wire[7:0] != 8'hFF && counter > 0) begin
-                        // Got a real response!
                         state <= S_PRINT_RESULT;
-                    end else if (counter > 0) {
-                        // Still getting 0xFF, try again
+                    end else if (counter > 0) begin 
                         counter <= counter - 1;
                         state <= S_POLL_WAIT_TRDY;
-                    } else {
-                        // Timed out
-                        state <= S_DONE;
-                    }
+                    end else state <= S_DONE;
                 end
 
                 S_PRINT_RESULT: begin
