@@ -108,32 +108,96 @@ _start:
 # Goal: Send the byte in 't1', and put the received byte into 't2'.
 # --- Setup Phase ---
 # Get UART address (0x2004) into t0.
-lui t6, 0x2
-addi t6, t6, 4      # t0 = 0x2004
+#lui t6, 0x2
+#addi t6, t6, 4      # t0 = 0x2004
+#
+#li t0, 0x2008 # t0 holds the SPI base address (0x2008)
+#li t1, 0xFF # t1 holds the byte to send (e.g., a dummy 0xFF for a read)
+#
+## Write 0 to the control register (offset +12) to ensure it's in a known state.
+#sw x0, 12(t0)
+#
+## --- Step 1: Wait until the transmitter is ready ---
+#wait_tx_ready:
+#    lw t3, 8(t0)       # Read the status register into t3
+#    andi t3, t3, 0x20   # Isolate the TRDY bit (bit 5)
+#    beq t3, x0, wait_tx_ready # If TRDY is 0, loop and wait.
+#    
+## --- Step 2: Write the byte to the transmit register ---
+#sw t1, 4(t0)        # Write the byte from t1 to the txdata register.
+#                    # This starts the 8-clock-pulse SPI transfer.
+#
+## --- Step 3: Wait until the receiver has valid data ---
+#wait_rx_ready:
+#    lw t3, 8(t0)       # Read the status register
+#    andi t3, t3, 0x40   # Isolate the RRDY bit (bit 6)
+#    beq t3, x0, wait_rx_ready # If RRDY is 0, loop and wait.
+#
+## --- Step 4: Read and Print ---
+#    lw t2, 0(t0)       # Read the received byte from rxdata into t2.
+#    sw t2, 0(t6) # print 
 
-li t0, 0x2008 # t0 holds the SPI base address (0x2008)
-li t1, 0xFF # t1 holds the byte to send (e.g., a dummy 0xFF for a read)
 
-# Write 0 to the control register (offset +12) to ensure it's in a known state.
-sw x0, 12(t0)
 
-# --- Step 1: Wait until the transmitter is ready ---
-wait_tx_ready:
-    lw t3, 8(t0)       # Read the status register into t3
-    andi t3, t3, 0x20   # Isolate the TRDY bit (bit 5)
-    beq t3, x0, wait_tx_ready # If TRDY is 0, loop and wait.
+# RISC-V Assembly: SPI Core Loopback Test
+# Goal: Verify the CPU can write to and read from the SPI IP core.
+
+.section .text
+.globl _start
+
+_start:
+    # --- Setup Phase ---
+    li t6, 0x2004       # UART Address
+    li t0, 0x2008       # SPI Base Address
     
-# --- Step 2: Write the byte to the transmit register ---
-sw t1, 4(t0)        # Write the byte from t1 to the txdata register.
-                    # This starts the 8-clock-pulse SPI transfer.
+    # Define register offsets
+    li t4, 0            # rxdata offset = 0
+    li t5, 4            # txdata offset = 4
+    li t6, 8            # status offset = 8
+    li t7, 12           # control offset = 12
 
-# --- Step 3: Wait until the receiver has valid data ---
+    # --- Step 1: Configure the SPI Core for Loopback ---
+    # We need to write '2' (0b0010) to the control register to enable loopback.
+    li t1, 2
+    add t2, t0, t7      # t2 = SPI_BASE + control_offset
+    sw t1, 0(t2)        # Write '2' to the control register
+
+    # --- Step 2: Write a Magic Byte ---
+    # Prepare the magic byte 'X' (ASCII 88).
+    li t1, 88
+
+    # Wait for the transmitter to be ready.
+wait_tx_ready:
+    lw t3, 8(t0)
+    andi t3, t3, 0x20   # Check TRDY bit
+    beq t3, x0, wait_tx_ready
+
+    # Send the magic byte 'X'.
+    sw t1, 4(t0)
+
+    # --- Step 3: Wait for the Receiver ---
 wait_rx_ready:
-    lw t3, 8(t0)       # Read the status register
-    andi t3, t3, 0x40   # Isolate the RRDY bit (bit 6)
-    beq t3, x0, wait_rx_ready # If RRDY is 0, loop and wait.
+    lw t3, 8(t0)
+    andi t3, t3, 0x40   # Check RRDY bit
+    beq t3, x0, wait_rx_ready
 
-# --- Step 4: Read and Print ---
-    lw t2, 0(t0)       # Read the received byte from rxdata into t2.
-    sw t2, 0(t6) # print 
+    # --- Step 4: Read the received byte ---
+    lw t2, 0(t0)       # Read from rxdata. t2 should now hold 'X' (88).
 
+    # --- Step 5: Verify ---
+    # Compare the received byte (t2) with the original magic byte (t1).
+    beq t1, t2, pass
+
+fail:
+    # If the bytes don't match, print 'F'.
+    li t1, 70
+    sw t1, 0(t6)
+fail_loop:
+    beq x0, x0, fail_loop
+    
+pass:
+    # If the bytes match, print 'P'.
+    li t1, 80
+    sw t1, 0(t6)
+pass_loop:
+    beq x0, x0, pass_loop
