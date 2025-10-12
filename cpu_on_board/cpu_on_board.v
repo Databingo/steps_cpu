@@ -366,4 +366,4 @@ module cpu_on_board (
     // LEDR0 is high if not in DONE or ERROR state
     assign LEDR0 = (state != S_DONE_ERROR);
 
-endmodule/
+endmodule
