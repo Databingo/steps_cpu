@@ -154,12 +154,12 @@ _start:
     li t4, 0            # rxdata offset = 0
     li t5, 4            # txdata offset = 4
     li t6, 8            # status offset = 8
-    li t7, 12           # control offset = 12
+    li a7, 12           # control offset = 12
 
     # --- Step 1: Configure the SPI Core for Loopback ---
     # We need to write '2' (0b0010) to the control register to enable loopback.
     li t1, 2
-    add t2, t0, t7      # t2 = SPI_BASE + control_offset
+    add t2, t0, a7      # t2 = SPI_BASE + control_offset
     sw t1, 0(t2)        # Write '2' to the control register
 
     # --- Step 2: Write a Magic Byte ---
