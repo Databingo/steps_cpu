@@ -35,255 +35,106 @@ module cpu_on_board (
 
 
     
+    input  wire CLOCK_50,        // 50 MHz
+    input  wire KEY0,            // Active low reset
 
+    //output reg  SPI_SCLK,        // SD CLK  (V20)
+    //output reg  SPI_MOSI,        // SD CMD  (Y20)
+    //input  wire SPI_MISO,        // SD DAT0 (W20)
+    //output reg  SPI_SS_n,        // SD DAT3 (U20) -> CS
+    output reg  LEDR0            // Status LED
 );
 
-    // -- MEM -- minic L1 cache
-    //(* ram_style = "block" *) reg [31:0] Cache [0:2047]; // 2048x4=8KB L1 cache to 0x2000
-    (* ram_style = "block" *) reg [31:0] Cache [0:3071];
-    integer i;
-    initial begin
-        $readmemb("rom.mif", Cache, `Rom_base>>2);
-        $readmemb("ram.mif", Cache, `Ram_base>>2);
-    end
-
-    // -- Clock --
-    wire clock_1hz;
-    clock_slower clock_ins(
-        .clk_in(CLOCK_50),
-        .clk_out(clock_1hz),
-        .reset_n(KEY0)
-    );
-
-    wire [63:0] pc;
-    reg [31:0] ir_bd;
-    // Port A BRAM
-    always @(posedge CLOCK_50) begin
-	ir_bd <= Cache[pc>>2];
-    end
-    wire [31:0] ir_ld; assign ir_ld = {ir_bd[7:0], ir_bd[15:8], ir_bd[23:16], ir_bd[31:24]}; // Endianness swap
-    assign LEDR_PC = pc/4;
-
-    // -- CPU --
-    riscv64 cpu (
-        .clk(clock_1hz), 
-        //.clk(CLOCK_50), 
-        .reset(KEY0),     // Active-low reset button
-        .instruction(ir_ld),
-        .pc(pc),
-        .ir(LEDG),
-        .heartbeat(LEDR9),
-
-	.interrupt_vector(interrupt_vector),
-	.interrupt_ack(interrupt_ack),
-
-        .bus_address(bus_address),
-        .bus_write_data(bus_write_data),
-        .bus_write_enable(bus_write_enable),
-        .bus_read_enable(bus_read_enable),
-
-        .bus_read_done(bus_read_done),
-        .bus_read_data(bus_read_data)
-    );
-     
-    // -- Keyboard -- 
-    reg [7:0] ascii;
-    reg [7:0] scan;
-    reg key_pressed_delay;
-    wire key_pressed;
-    wire key_released;
-
-    ps2_decoder ps2_decoder_inst (
-        .clk(CLOCK_50),
-        .ps2_clk_async(PS2_CLK),
-        .ps2_data_async(PS2_DAT),
-        .scan_code(scan),
-        .ascii_code(ascii),
-        .key_pressed(key_pressed),
-        .key_released(key_released)
-     );
-    // Keyboard signal
-    always @(posedge CLOCK_50) begin key_pressed_delay <= key_pressed; end
-    wire key_pressed_edge = key_pressed && !key_pressed_delay;
-
-    // -- Monitor -- Connected to Bus
-    jtag_uart_system my_jtag_system (
-        .clk_clk                                 (CLOCK_50),
-        .reset_reset_n                           (KEY0),
-        .jtag_uart_0_avalon_jtag_slave_address   (bus_address[0:0]),
-        .jtag_uart_0_avalon_jtag_slave_writedata (bus_write_data[31:0]),
-        .jtag_uart_0_avalon_jtag_slave_write_n   (~uart_write_trigger_pulse),
-        .jtag_uart_0_avalon_jtag_slave_chipselect(1'b1),
-        .jtag_uart_0_avalon_jtag_slave_read_n    (1'b1)
-    );
-
-    //// -- mmu_d --
-    //wire tlb_hit;
-    //wire [63:0] physical_address;
-    //wire [63:0] satp;
-    //mmu_d mmud (
-    //.clk (CLOCK_50),
-    //.reset (KEY0),
-    //.va (bus_address),
-    //.pa (physical_address),
-    //.satp (satp),
-    //.tlb_hit (tlb_hit)
-    //);
-    // --  ---
-
-    // -- Bus --
-    reg  [63:0] bus_read_data;
-    wire [63:0] bus_address;
-    wire        bus_read_enable;
-    wire [63:0] bus_write_data;
-    wire        bus_write_enable;
-    reg   bus_read_done;
-
-    // == Bus controller ==
-    // 1.-- Address Decoding --
-    wire Rom_selected = (bus_address >= `Rom_base && bus_address < `Rom_base + `Rom_size);
-    wire Ram_selected = (bus_address >= `Ram_base && bus_address < `Ram_base + `Ram_size);
-    ////wire Stk_selected = (bus_address >= Stk_base && bus_address < Stk_base + Stk_size);
-    wire Key_selected = (bus_address == `Key_base);
-    wire Art_selected = (bus_address == `Art_base);
-    wire Spi_selected = (bus_address >= `Spi_base && bus_address < `Spi_base + `Spi_size);
-    reg Spi_selected_reg;
-    always @(posedge CLOCK_50) begin
-        Spi_selected_reg <= Spi_selected;
-    end
-
-
-    // 3. Port B read & write BRAM
-    reg [63:0] bus_address_reg;
-    always @(posedge CLOCK_50) begin
-        bus_address_reg <= bus_address>>2; // BRAM read need this reg address if has condition in circle
-        if (bus_read_enable) begin // Read
-	    if (Key_selected) begin bus_read_data <= {32'd0, 24'd0, ascii}; bus_read_done <= 1; end
-	    if (Ram_selected) begin bus_read_data <= {32'd0, Cache[bus_address_reg]}; bus_read_done <= 1; end
-	    if (Spi_selected_reg) begin bus_read_data <= {48'd0, spi_read_data_wire}; bus_read_done <= 1; end
-        end
-	if (bus_write_enable) begin // Write
-	    if (Ram_selected) Cache[bus_address[63:2]] <= bus_write_data[31:0];  // cut fit 32 bit ram //work
-        end
-    end
-      
-      
-     //  4.-- UART Writer Trigger --
-      wire uart_write_trigger = bus_write_enable && Art_selected;
-      reg uart_write_trigger_dly;
-      always @(posedge CLOCK_50 or negedge KEY0) begin
-  	if (!KEY0) uart_write_trigger_dly <= 0;
-  	else uart_write_trigger_dly <= uart_write_trigger;
-      end
-      assign uart_write_trigger_pulse = uart_write_trigger  && !uart_write_trigger_dly;
-
-
-//wire uart_write_trigger = bus_write_enable && Art_selected;
-//reg uart_write_trigger_dly;
-//reg uart_write_pending;
-//always @(posedge CLOCK_50 or negedge KEY0) begin
-//  if (!KEY0) begin
-//    uart_write_pending <= 0;
-//    uart_write_trigger_dly <= 0;
-//  end else begin
-//    if (uart_write_trigger && !uart_write_pending) begin
-//       uart_write_pending <= 1;         // start pending
-//    end else if (uart_write_pending) begin
-//       uart_write_pending <= 0;         // complete next cycle
-//    end
-//    uart_write_trigger_dly <= uart_write_trigger;
-//  end
-//end
-//wire uart_write_trigger_pulse = uart_write_pending;
-
-
-
-
-
-    // -- interrupt controller --
-    wire [3:0] interrupt_vector;
-    wire interrupt_ack;
+    // Clock divider: 50 MHz -> 400 kHz for SD init
+    // (50,000,000 / (2 * 400,000) = 62)
+    reg [7:0] clk_div;
+    reg spi_clk_en;
     always @(posedge CLOCK_50 or negedge KEY0) begin
-	if (!KEY0) begin
-	    interrupt_vector <= 0;
-	    LEDR0 <= 0;
-	end else begin
-            if (key_pressed && ascii) begin
-		    interrupt_vector <= 1;
-		    LEDR0 <= 1;
-	    end
-	    if (interrupt_vector != 0 && interrupt_ack == 1) begin
-		interrupt_vector <= 0; // only sent once
-		LEDR0 <= 0;
-	    end
-	end
+        if (!KEY0) begin
+            clk_div <= 0;
+            SPI_SCLK <= 0;
+            spi_clk_en <= 0;
+        end else begin
+            clk_div <= clk_div + 1;
+            if (clk_div >= 62) begin
+                clk_div <= 0;
+                SPI_SCLK <= ~SPI_SCLK;
+                spi_clk_en <= 1;
+            end else
+                spi_clk_en <= 0;
+        end
     end
 
-    // 5. -- Debug LEDs --
-    assign HEX30 = ~Key_selected;
+    // Simple SPI state machine
+    reg [7:0] cmd [0:5];  // CMD0 = 0x40 00 00 00 00 95
+    reg [2:0] state;
+    reg [7:0] bit_cnt;
+    reg [7:0] byte_cnt;
+    reg [7:0] response;
+    reg [7:0] miso_shift;
 
-    assign HEX20 = ~|bus_read_data;
-    assign HEX21 = ~bus_read_enable;
+    initial begin
+        cmd[0] = 8'h40; cmd[1] = 8'h00; cmd[2] = 8'h00; cmd[3] = 8'h00; cmd[4] = 8'h00; cmd[5] = 8'h95;
+        SPI_SS_n = 1'b1;
+        SPI_MOSI = 1'b1;
+        SPI_SCLK = 1'b0;
+        LEDR0 = 1'b0;
+        state = 0;
+        byte_cnt = 0;
+        bit_cnt = 7;
+    end
 
-    assign HEX10 = ~|bus_write_data;
-    assign HEX11 = ~bus_write_enable;
+    always @(posedge SPI_SCLK or negedge KEY0) begin
+        if (!KEY0) begin
+            state <= 0;
+            SPI_SS_n <= 1'b1;
+            SPI_MOSI <= 1'b1;
+            LEDR0 <= 1'b0;
+        end else begin
+            case (state)
+                0: begin
+                    // Provide 80 clocks with CS high to enter SPI mode
+                    SPI_SS_n <= 1'b1;
+                    SPI_MOSI <= 1'b1;
+                    if (byte_cnt >= 10) begin
+                        byte_cnt <= 0;
+                        bit_cnt <= 7;
+                        state <= 1;
+                    end else
+                        byte_cnt <= byte_cnt + 1;
+                end
+                1: begin
+                    // Send CMD0
+                    SPI_SS_n <= 1'b0;
+                    SPI_MOSI <= cmd[byte_cnt][bit_cnt];
+                    if (bit_cnt == 0) begin
+                        bit_cnt <= 7;
+                        if (byte_cnt == 5) begin
+                            byte_cnt <= 0;
+                            state <= 2;
+                        end else
+                            byte_cnt <= byte_cnt + 1;
+                    end else
+                        bit_cnt <= bit_cnt - 1;
+                end
+                2: begin
+                    // Wait for response
+                    SPI_MOSI <= 1'b1;
+                    miso_shift <= {miso_shift[6:0], SPI_MISO};
+                    if (miso_shift == 8'h01) begin
+                        LEDR0 <= 1'b1; // got 0x01 = success
+                        state <= 3;
+                    end
+                end
+                3: begin
+                    // Idle
+                    SPI_SS_n <= 1'b1;
+                end
+            endcase
+        end
+    end
 
-    assign HEX00 = ~Art_selected;
-    assign HEX01 = ~Ram_selected;
-    assign HEX02 = ~Rom_selected;
-    assign HEX03 = ~Spi_selected;
-
-
-    // 6. -- SPI --
-   wire [15:0] spi_read_data_wire;
-   spi my_spi_system (
-       .clk_clk                       (CLOCK_50),
-       .reset_reset_n                 (KEY0),
-       .spi_0_reset_reset_n           (KEY0),
-       .spi_0_spi_control_port_chipselect (Spi_selected), // Connection
-       .spi_0_spi_control_port_address    (bus_address[3:1]), // IP is 16 bytes wide data so address align by bytes
-       .spi_0_spi_control_port_read_n     (~(bus_read_enable && Spi_selected)), // Read
-       .spi_0_spi_control_port_readdata   (spi_read_data_wire),
-       .spi_0_spi_control_port_write_n    (~(bus_write_enable && Spi_selected)), // Write
-       .spi_0_spi_control_port_writedata  (bus_write_data[15:0]),  // 16-bytes wide
-       .spi_0_external_MISO           (SPI_MISO), // Map to Physical pins
-       .spi_0_external_MOSI           (SPI_MOSI),
-       .spi_0_external_SCLK           (SPI_SCLK),
-       .spi_0_external_SS_n           (SPI_SS_n),
-   ); 
-      
-
-    // -- Timer --
-    // -- CSRs --
-    // -- BOIS/bootloader --
-    // -- Caches --
-    // -- MMU(Memory Manamgement Unit) --
-    // -- DMA(Direct Memory Access) --?
-
-    // isr table
-    // IMA set
-    // M/S/U mode
-    // MMU (Sv39 standard) satp
-    // CLINT mtime mtimecmp
-    // PLIC meip seip mip
-    // openSBI/u-boot/berkeleyBootLoader
-    // linux kernel S mode
-    // 16550A UART
-    // AXI-lite BUS
-    //
-    // Cyclone II FPGA Starter Board Resource
-    // BRAM 30KB for Cache L1
-    // SRAM 512KB for Booting(load from FLASH)
-    // FLASH 4MB for Rom(opensbi_50KB/u-boot_100-200KB)
-    // SDRAM 8MB for Ram
-    // SD for Linux Kernel busybox (SRAM use SPI(IP) read kernel_initramfs from SD(IP) to SDRAM within 3s)
-    // zImage .dtb initramfs.gz Buildroot:no network/deviceDrivers/FileSystem/kernekHacking
-    // build and qemu test first
-    // 
-    // simplify:
-    // BRAM for bootloader(tested in qemu)
-    // FLASH for Linux kernel(tested in qemu)
-    // SDRAM for ram
-    //
-    // Run naked neural network on riscv64
 endmodule
+
+
+
