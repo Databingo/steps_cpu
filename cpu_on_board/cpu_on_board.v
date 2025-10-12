@@ -240,7 +240,7 @@ module cpu_on_board (
        .reset_reset_n                 (KEY0),
        .spi_0_reset_reset_n           (KEY0),
        .spi_0_spi_control_port_chipselect (Spi_selected), // Connection
-       .spi_0_spi_control_port_address    (bus_address[4:2]), //? 0123..
+       .spi_0_spi_control_port_address    (bus_address[4:0]), //? 0123..
        .spi_0_spi_control_port_read_n     (~(bus_read_enable && Spi_selected)), // Read
        .spi_0_spi_control_port_readdata   (spi_read_data_wire),
        .spi_0_spi_control_port_write_n    (~(bus_write_enable && Spi_selected)), // Write
