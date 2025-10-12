@@ -160,7 +160,7 @@ module cpu_on_board (
         if (bus_read_enable) begin // Read
 	    if (Key_selected) begin bus_read_data <= {32'd0, 24'd0, ascii}; bus_read_done <= 1; end
 	    if (Ram_selected) begin bus_read_data <= {32'd0, Cache[bus_address_reg]}; bus_read_done <= 1; end
-	    if (Spi_selected_reg) begin bus_read_data <= {56'd0, spi_read_data_wire}; bus_read_done <= 1; end
+	    if (Spi_selected_reg) begin bus_read_data <= {48'd0, spi_read_data_wire}; bus_read_done <= 1; end
         end
 	if (bus_write_enable) begin // Write
 	    if (Ram_selected) Cache[bus_address[63:2]] <= bus_write_data[31:0];  // cut fit 32 bit ram //work
@@ -231,6 +231,7 @@ module cpu_on_board (
     assign HEX00 = ~Art_selected;
     assign HEX01 = ~Ram_selected;
     assign HEX02 = ~Rom_selected;
+    assign HEX03 = ~Spi_selected;
 
 
     // 6. -- SPI --
@@ -240,11 +241,11 @@ module cpu_on_board (
        .reset_reset_n                 (KEY0),
        .spi_0_reset_reset_n           (KEY0),
        .spi_0_spi_control_port_chipselect (Spi_selected), // Connection
-       .spi_0_spi_control_port_address    (bus_address[4:0]), //? 0123..
+       .spi_0_spi_control_port_address    (bus_address[3:1]), // IP is 16 bytes wide data so address align by bytes
        .spi_0_spi_control_port_read_n     (~(bus_read_enable && Spi_selected)), // Read
        .spi_0_spi_control_port_readdata   (spi_read_data_wire),
        .spi_0_spi_control_port_write_n    (~(bus_write_enable && Spi_selected)), // Write
-       .spi_0_spi_control_port_writedata  (bus_write_data[7:0]),  // 8-bit wide
+       .spi_0_spi_control_port_writedata  (bus_write_data[15:0]),  // 16-bytes wide
        .spi_0_external_MISO           (SPI_MISO), // Map to Physical pins
        .spi_0_external_MOSI           (SPI_MOSI),
        .spi_0_external_SCLK           (SPI_SCLK),

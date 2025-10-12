@@ -110,9 +110,12 @@ _start:
 # Get UART address (0x2004) into t0.
 lui t6, 0x2
 addi t6, t6, 4      # t0 = 0x2004
-# Get the base address of the SPI controller (e.g., 0x2008) into t0
+
 li t0, 0x2008 # t0 holds the SPI base address (0x2008)
 li t1, 0xFF # t1 holds the byte to send (e.g., a dummy 0xFF for a read)
+
+# Write 0 to the control register (offset +12) to ensure it's in a known state.
+sw x0, 12(t0)
 
 # --- Step 1: Wait until the transmitter is ready ---
 wait_tx_ready:
@@ -121,7 +124,7 @@ wait_tx_ready:
     beq t3, x0, wait_tx_ready # If TRDY is 0, loop and wait.
     
 # --- Step 2: Write the byte to the transmit register ---
-sb t1, 4(t0)        # Write the byte from t1 to the txdata register.
+sw t1, 4(t0)        # Write the byte from t1 to the txdata register.
                     # This starts the 8-clock-pulse SPI transfer.
 
 # --- Step 3: Wait until the receiver has valid data ---
@@ -130,6 +133,7 @@ wait_rx_ready:
     andi t3, t3, 0x40   # Isolate the RRDY bit (bit 6)
     beq t3, x0, wait_rx_ready # If RRDY is 0, loop and wait.
 
-lw t2, 0(t0)       # Read the received byte from rxdata into t2.
-sb t2, 0(t6) # print 
+# --- Step 4: Read and Print ---
+    lw t2, 0(t0)       # Read the received byte from rxdata into t2.
+    sw t2, 0(t6) # print 
 
