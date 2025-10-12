@@ -549,10 +549,248 @@
 
 
 
-// ============================================================
-// Minimal SD-card init test
-// Prints:  "S" then "D1" if CMD0 OK, "D/" if timeout
-// ============================================================
+//// ============================================================
+//// Minimal SD-card init test
+//// Prints:  "S" then "D1" if CMD0 OK, "D/" if timeout
+//// ============================================================
+//module cpu_on_board (
+//    // -- Pins --
+//    (* chip_pin = "PIN_L1"  *) input  wire CLOCK_50,
+//    (* chip_pin = "PIN_R22" *) input  wire KEY0,        // Active-low reset
+//    (* chip_pin = "R20"     *) output wire LEDR0,
+//
+//    (* chip_pin = "V20" *) output wire SPI_SCLK,  // SD_CLK
+//    (* chip_pin = "Y20" *) output wire SPI_MOSI,  // SD_CMD
+//    (* chip_pin = "W20" *) input  wire SPI_MISO,  // SD_DAT0
+//    (* chip_pin = "U20" *) output wire SPI_SS_n   // SD_DAT3 / CS
+//);
+//
+//    // ----------------------------
+//    // UART (JTAG UART simple)
+//    // ----------------------------
+//    reg  [31:0] uart_data;
+//    reg         uart_write;
+//    jtag_uart_system uart0 (
+//        .clk_clk(CLOCK_50),
+//        .reset_reset_n(KEY0),
+//        .jtag_uart_0_avalon_jtag_slave_address(1'b0),
+//        .jtag_uart_0_avalon_jtag_slave_writedata(uart_data),
+//        .jtag_uart_0_avalon_jtag_slave_write_n(~uart_write),
+//        .jtag_uart_0_avalon_jtag_slave_chipselect(1'b1),
+//        .jtag_uart_0_avalon_jtag_slave_read_n(1'b1)
+//    );
+//
+//    // ----------------------------
+//    // SPI bus control signals
+//    // ----------------------------
+//    wire [15:0] spi_read_data_wire;
+//    reg  [15:0] bus_write_data;
+//    reg  [2:0]  bus_address;
+//    reg         bus_write_enable, bus_read_enable, Spi_selected;
+//
+//    // SPI register offsets (Altera core)
+//    localparam SPI_RXDATA      = 3'd0;
+//    localparam SPI_TXDATA      = 3'd1;
+//    localparam SPI_STATUS      = 3'd2;
+//    localparam SPI_SLAVESELECT = 3'd4;
+//
+//    localparam TRDY_BIT = 5;
+//    localparam RRDY_BIT = 6;
+//
+//    // ----------------------------
+//    // State machine
+//    // ----------------------------
+//    localparam S_IDLE         = 0;
+//    localparam S_PRINT_S      = 1;
+//    localparam S_DUMMY_INIT   = 2;
+//    localparam S_WAIT_TRDY    = 3;
+//    localparam S_SEND_DUMMY   = 4;
+//    localparam S_ASSERT_CS    = 5;
+//    localparam S_SEND_CMD     = 6;
+//    localparam S_WAIT_RRDY    = 7;
+//    localparam S_READ_RESP    = 8;
+//    localparam S_CHECK_RESP   = 9;
+//    localparam S_PRINT_RESULT = 10;
+//    localparam S_DONE         = 11;
+//
+//    reg [3:0]  state;
+//    reg [7:0]  cmd[0:5];
+//    reg [7:0]  response;
+//    reg [7:0]  dummy_count;
+//    reg [7:0]  cmd_index;
+//    reg [7:0]  poll_count;
+//    reg [31:0] delay_count;
+//
+//    initial begin
+//        cmd[0] = 8'h40; // CMD0
+//        cmd[1] = 8'h00;
+//        cmd[2] = 8'h00;
+//        cmd[3] = 8'h00;
+//        cmd[4] = 8'h00;
+//        cmd[5] = 8'h95; // CRC for CMD0
+//    end
+//
+//    always @(posedge CLOCK_50 or negedge KEY0) begin
+//        if (!KEY0) begin
+//            uart_data <= 0;
+//            uart_write <= 0;
+//            state <= S_IDLE;
+//            Spi_selected <= 0;
+//            bus_write_enable <= 0;
+//            bus_read_enable  <= 0;
+//            delay_count <= 0;
+//            dummy_count <= 0;
+//            cmd_index <= 0;
+//            poll_count <= 0;
+//            response <= 8'hFF;
+//        end else begin
+//            // defaults
+//            uart_write <= 0;
+//            bus_write_enable <= 0;
+//            bus_read_enable  <= 0;
+//            Spi_selected <= 0;
+//
+//            case (state)
+//                // ------------------------------------------------------
+//                S_IDLE: begin
+//                    if (delay_count < 32'd2_000_000)
+//                        delay_count <= delay_count + 1;
+//                    else begin
+//                        uart_data <= {24'd0, "S"};
+//                        uart_write <= 1;
+//                        delay_count <= 0;
+//                        state <= S_DUMMY_INIT;
+//                        dummy_count <= 10; // 10 bytes * 8 = 80 clocks
+//                    end
+//                end
+//
+//                // ------------------------------------------------------
+//                S_DUMMY_INIT: begin
+//                    Spi_selected <= 1'b1;
+//                    bus_read_enable <= 1'b1;
+//                    bus_address <= SPI_STATUS;
+//                    if (spi_read_data_wire[TRDY_BIT]) begin
+//                        bus_write_enable <= 1'b1;
+//                        bus_address <= SPI_TXDATA;
+//                        bus_write_data <= 16'hFF;
+//                        dummy_count <= dummy_count - 1;
+//                        if (dummy_count == 1)
+//                            state <= S_ASSERT_CS;
+//                    end
+//                end
+//
+//                // ------------------------------------------------------
+//                S_ASSERT_CS: begin
+//                    // Assert chip select (slave 0)
+//                    Spi_selected <= 1'b1;
+//                    bus_write_enable <= 1'b1;
+//                    bus_address <= SPI_SLAVESELECT;
+//                    bus_write_data <= 16'd1;
+//                    cmd_index <= 0;
+//                    state <= S_SEND_CMD;
+//                end
+//
+//                // ------------------------------------------------------
+//                S_SEND_CMD: begin
+//                    Spi_selected <= 1'b1;
+//                    bus_read_enable <= 1'b1;
+//                    bus_address <= SPI_STATUS;
+//                    if (spi_read_data_wire[TRDY_BIT]) begin
+//                        bus_write_enable <= 1'b1;
+//                        bus_address <= SPI_TXDATA;
+//                        bus_write_data <= {8'd0, cmd[cmd_index]};
+//                        if (cmd_index == 5) begin
+//                            poll_count <= 100;
+//                            state <= S_WAIT_RRDY;
+//                        end else
+//                            cmd_index <= cmd_index + 1;
+//                    end
+//                end
+//
+//                // ------------------------------------------------------
+//                S_WAIT_RRDY: begin
+//                    Spi_selected <= 1'b1;
+//                    bus_read_enable <= 1'b1;
+//                    bus_address <= SPI_STATUS;
+//                    if (spi_read_data_wire[RRDY_BIT]) begin
+//                        state <= S_READ_RESP;
+//                    end else if (poll_count == 0)
+//                        state <= S_PRINT_RESULT;
+//                    else begin
+//                        poll_count <= poll_count - 1;
+//                        // send dummy 0xFF to keep clocking
+//                        if (spi_read_data_wire[TRDY_BIT]) begin
+//                            bus_write_enable <= 1'b1;
+//                            bus_address <= SPI_TXDATA;
+//                            bus_write_data <= 16'hFF;
+//                        end
+//                    end
+//                end
+//
+//                // ------------------------------------------------------
+//                S_READ_RESP: begin
+//                    Spi_selected <= 1'b1;
+//                    bus_read_enable <= 1'b1;
+//                    bus_address <= SPI_RXDATA;
+//                    response <= spi_read_data_wire[7:0];
+//                    state <= S_CHECK_RESP;
+//                end
+//
+//                // ------------------------------------------------------
+//                S_CHECK_RESP: begin
+//                    if (response != 8'hFF)
+//                        state <= S_PRINT_RESULT;
+//                    else if (poll_count > 0)
+//                        state <= S_WAIT_RRDY;
+//                    else
+//                        state <= S_PRINT_RESULT;
+//                end
+//
+//                // ------------------------------------------------------
+//                S_PRINT_RESULT: begin
+//                    uart_data <= {24'd0, (response == 8'h01) ? "1" :
+//                                           (response == 8'hFF) ? "/" : "0"};
+//                    uart_write <= 1;
+//                    state <= S_DONE;
+//                end
+//
+//                // ------------------------------------------------------
+//                S_DONE: begin
+//                    // idle forever
+//                    Spi_selected <= 1'b0;
+//                end
+//            endcase
+//        end
+//    end
+//
+//    // ================================================================
+//    // SPI IP instantiation
+//    // ================================================================
+//    spi my_spi_system (
+//        .clk_clk(CLOCK_50),
+//        .reset_reset_n(KEY0),
+//        .spi_0_spi_control_port_chipselect (Spi_selected),
+//        .spi_0_spi_control_port_address    (bus_address),
+//        .spi_0_spi_control_port_read_n     (~(bus_read_enable && Spi_selected)),
+//        .spi_0_spi_control_port_readdata   (spi_read_data_wire),
+//        .spi_0_spi_control_port_write_n    (~(bus_write_enable && Spi_selected)),
+//        .spi_0_spi_control_port_writedata  (bus_write_data),
+//        .spi_0_external_MISO(SPI_MISO),
+//        .spi_0_external_MOSI(SPI_MOSI),
+//        .spi_0_external_SCLK(SPI_SCLK),
+//        .spi_0_external_SS_n(SPI_SS_n)
+//    );
+//
+//    assign LEDR0 = ~state[0]; // activity indicator
+//
+//endmodule
+
+
+
+
+
+
+
 module cpu_on_board (
     // -- Pins --
     (* chip_pin = "PIN_L1"  *) input  wire CLOCK_50,
@@ -581,17 +819,18 @@ module cpu_on_board (
     );
 
     // ----------------------------
-    // SPI bus control signals
+    // SPI control signals
     // ----------------------------
     wire [15:0] spi_read_data_wire;
     reg  [15:0] bus_write_data;
     reg  [2:0]  bus_address;
     reg         bus_write_enable, bus_read_enable, Spi_selected;
 
-    // SPI register offsets (Altera core)
+    // SPI register offsets
     localparam SPI_RXDATA      = 3'd0;
     localparam SPI_TXDATA      = 3'd1;
     localparam SPI_STATUS      = 3'd2;
+    localparam SPI_CONTROL     = 3'd3;
     localparam SPI_SLAVESELECT = 3'd4;
 
     localparam TRDY_BIT = 5;
@@ -600,34 +839,31 @@ module cpu_on_board (
     // ----------------------------
     // State machine
     // ----------------------------
-    localparam S_IDLE         = 0;
-    localparam S_PRINT_S      = 1;
-    localparam S_DUMMY_INIT   = 2;
-    localparam S_WAIT_TRDY    = 3;
-    localparam S_SEND_DUMMY   = 4;
-    localparam S_ASSERT_CS    = 5;
-    localparam S_SEND_CMD     = 6;
-    localparam S_WAIT_RRDY    = 7;
-    localparam S_READ_RESP    = 8;
-    localparam S_CHECK_RESP   = 9;
-    localparam S_PRINT_RESULT = 10;
-    localparam S_DONE         = 11;
+    localparam S_IDLE        = 0;
+    localparam S_INIT_CTRL   = 1;
+    localparam S_PRINT_S     = 2;
+    localparam S_SEND_DUMMY  = 3;
+    localparam S_ASSERT_CS   = 4;
+    localparam S_SEND_CMD    = 5;
+    localparam S_WAIT_RESP   = 6;
+    localparam S_READ_RESP   = 7;
+    localparam S_PRINT_D     = 8;
+    localparam S_DONE        = 9;
 
     reg [3:0]  state;
     reg [7:0]  cmd[0:5];
     reg [7:0]  response;
     reg [7:0]  dummy_count;
     reg [7:0]  cmd_index;
-    reg [7:0]  poll_count;
     reg [31:0] delay_count;
 
     initial begin
-        cmd[0] = 8'h40; // CMD0
+        cmd[0] = 8'h40;
         cmd[1] = 8'h00;
         cmd[2] = 8'h00;
         cmd[3] = 8'h00;
         cmd[4] = 8'h00;
-        cmd[5] = 8'h95; // CRC for CMD0
+        cmd[5] = 8'h95;
     end
 
     always @(posedge CLOCK_50 or negedge KEY0) begin
@@ -637,14 +873,12 @@ module cpu_on_board (
             state <= S_IDLE;
             Spi_selected <= 0;
             bus_write_enable <= 0;
-            bus_read_enable  <= 0;
+            bus_read_enable <= 0;
+            response <= 8'hFF;
             delay_count <= 0;
             dummy_count <= 0;
             cmd_index <= 0;
-            poll_count <= 0;
-            response <= 8'hFF;
         end else begin
-            // defaults
             uart_write <= 0;
             bus_write_enable <= 0;
             bus_read_enable  <= 0;
@@ -653,19 +887,24 @@ module cpu_on_board (
             case (state)
                 // ------------------------------------------------------
                 S_IDLE: begin
-                    if (delay_count < 32'd2_000_000)
-                        delay_count <= delay_count + 1;
-                    else begin
-                        uart_data <= {24'd0, "S"};
-                        uart_write <= 1;
-                        delay_count <= 0;
-                        state <= S_DUMMY_INIT;
-                        dummy_count <= 10; // 10 bytes * 8 = 80 clocks
-                    end
+                    // configure SPI control register
+                    Spi_selected <= 1'b1;
+                    bus_write_enable <= 1'b1;
+                    bus_address <= SPI_CONTROL;
+                    bus_write_data <= 16'h0100; // enable master mode
+                    state <= S_PRINT_S;
                 end
 
                 // ------------------------------------------------------
-                S_DUMMY_INIT: begin
+                S_PRINT_S: begin
+                    uart_data <= {24'd0, "S"};
+                    uart_write <= 1;
+                    dummy_count <= 10;
+                    state <= S_SEND_DUMMY;
+                end
+
+                // ------------------------------------------------------
+                S_SEND_DUMMY: begin
                     Spi_selected <= 1'b1;
                     bus_read_enable <= 1'b1;
                     bus_address <= SPI_STATUS;
@@ -681,11 +920,10 @@ module cpu_on_board (
 
                 // ------------------------------------------------------
                 S_ASSERT_CS: begin
-                    // Assert chip select (slave 0)
                     Spi_selected <= 1'b1;
                     bus_write_enable <= 1'b1;
                     bus_address <= SPI_SLAVESELECT;
-                    bus_write_data <= 16'd1;
+                    bus_write_data <= 16'd1; // select SD card
                     cmd_index <= 0;
                     state <= S_SEND_CMD;
                 end
@@ -700,30 +938,23 @@ module cpu_on_board (
                         bus_address <= SPI_TXDATA;
                         bus_write_data <= {8'd0, cmd[cmd_index]};
                         if (cmd_index == 5) begin
-                            poll_count <= 100;
-                            state <= S_WAIT_RRDY;
-                        end else
+                            state <= S_WAIT_RESP;
+                        end else begin
                             cmd_index <= cmd_index + 1;
+                        end
                     end
                 end
 
                 // ------------------------------------------------------
-                S_WAIT_RRDY: begin
+                S_WAIT_RESP: begin
                     Spi_selected <= 1'b1;
                     bus_read_enable <= 1'b1;
                     bus_address <= SPI_STATUS;
-                    if (spi_read_data_wire[RRDY_BIT]) begin
+                    if (spi_read_data_wire[TRDY_BIT]) begin
+                        bus_write_enable <= 1'b1;
+                        bus_address <= SPI_TXDATA;
+                        bus_write_data <= 16'hFF; // dummy read
                         state <= S_READ_RESP;
-                    end else if (poll_count == 0)
-                        state <= S_PRINT_RESULT;
-                    else begin
-                        poll_count <= poll_count - 1;
-                        // send dummy 0xFF to keep clocking
-                        if (spi_read_data_wire[TRDY_BIT]) begin
-                            bus_write_enable <= 1'b1;
-                            bus_address <= SPI_TXDATA;
-                            bus_write_data <= 16'hFF;
-                        end
                     end
                 end
 
@@ -733,21 +964,11 @@ module cpu_on_board (
                     bus_read_enable <= 1'b1;
                     bus_address <= SPI_RXDATA;
                     response <= spi_read_data_wire[7:0];
-                    state <= S_CHECK_RESP;
+                    state <= S_PRINT_D;
                 end
 
                 // ------------------------------------------------------
-                S_CHECK_RESP: begin
-                    if (response != 8'hFF)
-                        state <= S_PRINT_RESULT;
-                    else if (poll_count > 0)
-                        state <= S_WAIT_RRDY;
-                    else
-                        state <= S_PRINT_RESULT;
-                end
-
-                // ------------------------------------------------------
-                S_PRINT_RESULT: begin
+                S_PRINT_D: begin
                     uart_data <= {24'd0, (response == 8'h01) ? "1" :
                                            (response == 8'hFF) ? "/" : "0"};
                     uart_write <= 1;
@@ -756,8 +977,7 @@ module cpu_on_board (
 
                 // ------------------------------------------------------
                 S_DONE: begin
-                    // idle forever
-                    Spi_selected <= 1'b0;
+                    Spi_selected <= 0;
                 end
             endcase
         end
@@ -781,6 +1001,11 @@ module cpu_on_board (
         .spi_0_external_SS_n(SPI_SS_n)
     );
 
-    assign LEDR0 = ~state[0]; // activity indicator
+    assign LEDR0 = ~state[0];
 
 endmodule
+
+
+
+
+
