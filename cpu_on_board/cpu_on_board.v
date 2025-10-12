@@ -1,5 +1,10 @@
 // 74 cycles 0xFF to MOSI
 // CMD0
+// Assume the register offsets within the SPI core are:
+// 0x0: rxdata (Read-Only)
+// 0x4: txdata (Write-Only)
+// 0x8: status (Read-Only)
+// 0xC: control (Read/Write)
 //
 //
 //
@@ -82,7 +87,7 @@ module cpu_on_board (
                     // Begin SPI CMD0 send
                     Spi_selected <= 1'b1;
                     bus_write_enable <= 1'b1;
-                    bus_address <= 3'd0;
+                    bus_address <= 3'd1; // TXDATA register
                     bus_write_data <= {8'd0, cmd[0]};
                     state <= 4;
                 end
@@ -105,7 +110,7 @@ module cpu_on_board (
                     bus_read_enable <= 0;
                     state <= 11;
                 end
-		11: begin uart_write <= 0; state <= 2; end
+		//11: begin uart_write <= 0; state <= 2; end
                 default: state <= 11;
             endcase
         end
