@@ -317,10 +317,10 @@
 //
 //
 
-// SD card CMD0 test — minimal working sequence (by ChatGPT-5)
-// Sends 80 dummy clocks, enters SPI mode, sends CMD0, prints response
+
 
 module cpu_on_board (
+    // -- Pins --
     (* chip_pin = "PIN_L1"  *) input  wire CLOCK_50,
     (* chip_pin = "PIN_R22" *) input  wire KEY0,        // Active-low reset
     (* chip_pin = "R20"     *) output wire LEDR0,
@@ -331,9 +331,11 @@ module cpu_on_board (
     (* chip_pin = "U20" *) output wire SPI_SS_n   // SD_DAT3 / CS
 );
 
-    // UART
-    reg [31:0] uart_data;
-    reg        uart_write;
+    // ================================================================
+    // UART for debug
+    // ================================================================
+    reg  [31:0] uart_data;
+    reg         uart_write;
 
     jtag_uart_system uart0 (
         .clk_clk(CLOCK_50),
@@ -345,121 +347,174 @@ module cpu_on_board (
         .jtag_uart_0_avalon_jtag_slave_read_n(1'b1)
     );
 
-    // SPI interface wires
+    // ================================================================
+    // SPI control
+    // ================================================================
     wire [15:0] spi_read_data_wire;
     reg  [15:0] bus_write_data;
     reg  [2:0]  bus_address;
     reg         bus_write_enable, bus_read_enable, Spi_selected;
 
-    // CMD0 contents
+    // ================================================================
+    // CMD0 sequence
+    // ================================================================
     reg [7:0] cmd[0:5];
-    reg [3:0] state;
-    reg [31:0] counter;
+    reg [4:0] state;
+    reg [7:0] i;
+    reg [31:0] delay_counter;
     reg [7:0] response;
-    reg [6:0] dummy_count;
+
+    localparam SPI_TXDATA  = 3'd1;
+    localparam SPI_RXDATA  = 3'd0;
+    localparam SPI_STATUS  = 3'd2;
+    localparam SPI_SSREG   = 3'd4;
+    localparam TRDY_BIT    = 5;
+    localparam RRDY_BIT    = 6;
 
     initial begin
-        cmd[0] = 8'h40;  // CMD0
-        cmd[1] = 8'h00;
-        cmd[2] = 8'h00;
-        cmd[3] = 8'h00;
-        cmd[4] = 8'h00;
-        cmd[5] = 8'h95;  // CRC
+        cmd[0] = 8'h40; 
+        cmd[1] = 8'h00; 
+        cmd[2] = 8'h00; 
+        cmd[3] = 8'h00; 
+        cmd[4] = 8'h00; 
+        cmd[5] = 8'h95; 
     end
 
     always @(posedge CLOCK_50 or negedge KEY0) begin
         if (!KEY0) begin
-            state <= 0;
+            uart_data <= 0;
             uart_write <= 0;
             Spi_selected <= 0;
             bus_write_enable <= 0;
             bus_read_enable <= 0;
-            counter <= 0;
-            dummy_count <= 0;
+            state <= 0;
+            i <= 0;
+            delay_counter <= 0;
             response <= 8'hFF;
         end else begin
+            // defaults
             uart_write <= 0;
             bus_write_enable <= 0;
             bus_read_enable <= 0;
-            Spi_selected <= 1'b1;  // Always select bus
+            Spi_selected <= 0;
 
             case (state)
-                // Wait some time after power-up
+                // Wait some time and print 'S'
                 0: begin
-                    if (counter == 32'd2_000_000) begin
-                        uart_data <= {24'd0, "S"}; uart_write <= 1;
-                        counter <= 0; state <= 1;
-                    end else counter <= counter + 1;
+                    delay_counter <= delay_counter + 1;
+                    if (delay_counter == 32'd50_000_000) begin // 1s delay
+                        uart_data <= {24'd0, "S"};
+                        uart_write <= 1;
+                        delay_counter <= 0;
+                        state <= 1;
+                    end
                 end
 
-                // Send 80 dummy clocks (10 bytes of 0xFF with CS high)
+                // Send 80 dummy clocks (10 bytes of 0xFF)
                 1: begin
-                    Spi_selected <= 1'b0; // CS high
-                    if (dummy_count < 10) begin
-                        bus_write_enable <= 1'b1;
-                        bus_address <= 3'd1;  // TXDATA
-                        bus_write_data <= 16'hFF;
-                        dummy_count <= dummy_count + 1;
-                    end else begin
-                        dummy_count <= 0;
-                        state <= 2;
-                    end
+                    Spi_selected <= 1'b1;
+                    bus_write_enable <= 1'b1;
+                    bus_address <= SPI_SSREG;
+                    bus_write_data <= 16'd0; // deassert CS (SS_n high)
+                    i <= 0;
+                    state <= 2;
                 end
 
-                // Assert CS low and start CMD0
                 2: begin
-                    Spi_selected <= 1'b1; // CS low (active)
-                    counter <= 0;
-                    state <= 3;
-                end
-
-                // Send all 6 bytes of CMD0
-                3: begin
-                    if (counter < 6) begin
+                    Spi_selected <= 1'b1;
+                    bus_read_enable <= 1'b1;
+                    bus_address <= SPI_STATUS;
+                    if (spi_read_data_wire[TRDY_BIT]) begin
+                        Spi_selected <= 1'b1;
                         bus_write_enable <= 1'b1;
-                        bus_address <= 3'd1;
-                        bus_write_data <= {8'd0, cmd[counter]};
-                        counter <= counter + 1;
-                    end else begin
-                        counter <= 0;
-                        state <= 4;
+                        bus_address <= SPI_TXDATA;
+                        bus_write_data <= 16'hFF;
+                        i <= i + 1;
+                        if (i == 10) state <= 3;
                     end
                 end
 
-                // Send dummy bytes until response != 0xFF or timeout
-                4: begin
-                    if (counter < 255) begin
-                        bus_write_enable <= 1'b1;
-                        bus_address <= 3'd1;
-                        bus_write_data <= 16'hFF;
-                        bus_read_enable <= 1'b1;
-                        bus_address <= 3'd0;
-                        response <= spi_read_data_wire[7:0];
-                        counter <= counter + 1;
-                        if (response != 8'hFF) state <= 5;
-                    end else state <= 5;
+                // Assert CS low and send CMD0
+                3: begin
+                    Spi_selected <= 1'b1;
+                    bus_write_enable <= 1'b1;
+                    bus_address <= SPI_SSREG;
+                    bus_write_data <= 16'd1; // select slave 0 -> CS low
+                    i <= 0;
+                    state <= 4;
                 end
 
-                // Print result
+                // Wait TRDY, send 6 CMD0 bytes
+                4: begin
+                    Spi_selected <= 1'b1;
+                    bus_read_enable <= 1'b1;
+                    bus_address <= SPI_STATUS;
+                    if (spi_read_data_wire[TRDY_BIT]) begin
+                        Spi_selected <= 1'b1;
+                        bus_write_enable <= 1'b1;
+                        bus_address <= SPI_TXDATA;
+                        bus_write_data <= {8'd0, cmd[i]};
+                        if (i == 5) begin
+                            i <= 0;
+                            state <= 5;
+                        end else i <= i + 1;
+                    end
+                end
+
+                // Poll for response (expect 0x01)
                 5: begin
-                    uart_data <= {24'd0, "D"}; uart_write <= 1;
-                    state <= 6;
+                    Spi_selected <= 1'b1;
+                    bus_read_enable <= 1'b1;
+                    bus_address <= SPI_STATUS;
+                    if (spi_read_data_wire[TRDY_BIT]) begin
+                        Spi_selected <= 1'b1;
+                        bus_write_enable <= 1'b1;
+                        bus_address <= SPI_TXDATA;
+                        bus_write_data <= 16'hFF; // send dummy
+                        state <= 6;
+                    end
                 end
+
                 6: begin
-                    uart_data <= {24'd0, " "}; uart_write <= 1;
-                    state <= 7;
+                    Spi_selected <= 1'b1;
+                    bus_read_enable <= 1'b1;
+                    bus_address <= SPI_STATUS;
+                    if (spi_read_data_wire[RRDY_BIT]) begin
+                        Spi_selected <= 1'b1;
+                        bus_read_enable <= 1'b1;
+                        bus_address <= SPI_RXDATA;
+                        response <= spi_read_data_wire[7:0];
+                        state <= 7;
+                    end
                 end
+
+                // Print response
                 7: begin
-                    uart_data <= {24'd0, response[3:0] + 8'h30};
+                    uart_data <= {24'd0, " "};
                     uart_write <= 1;
                     state <= 8;
                 end
-                default: state <= 8;
+
+                8: begin
+                    uart_data <= {24'd0, response + 8'd48}; // ASCII number
+                    uart_write <= 1;
+                    state <= 9;
+                end
+
+                9: begin
+                    Spi_selected <= 1'b1;
+                    bus_write_enable <= 1'b1;
+                    bus_address <= SPI_SSREG;
+                    bus_write_data <= 16'd0; // CS high
+                    state <= 9; // done
+                end
             endcase
         end
     end
 
-    // SPI IP
+    // ================================================================
+    // SPI core
+    // ================================================================
     spi my_spi_system (
         .clk_clk(CLOCK_50),
         .reset_reset_n(KEY0),
