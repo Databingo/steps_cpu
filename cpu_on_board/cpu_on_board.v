@@ -31,7 +31,7 @@ module cpu_on_board (
     (* chip_pin = "V20" *)  output wire SPI_SCLK, //SD_CLK
     (* chip_pin = "Y20" *)  output wire SPI_MOSI, // SD_CMD
     (* chip_pin = "W20" *)  input wire SPI_MISO,// SD_DAT
-    (* chip_pin = "U20" *)  output wire SPI_SS_n, // SD_DAT3
+    (* chip_pin = "U20" *)  output wire SPI_SS_n // SD_DAT3
 
 
     
