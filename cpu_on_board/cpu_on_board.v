@@ -88,7 +88,7 @@
 //
 //
 //
-
+//
 module cpu_on_board (
     // -- Pins --
     (* chip_pin = "PIN_L1"  *) input  wire CLOCK_50,
@@ -102,41 +102,10 @@ module cpu_on_board (
 );
 
     // ================================================================
-    // 1. UART: print progress messages to JTAG terminal
+    // UART for debug
     // ================================================================
-    reg [31:0] uart_data;
-    reg uart_write;
-    reg [31:0] uart_counter;
-    reg [7:0] uart_step;
-
-    task print_char(input [7:0] c);
-    begin
-        uart_data <= {24'd0, c};
-        uart_write <= 1;
-    end
-    endtask
-
-    always @(posedge CLOCK_50 or negedge KEY0) begin
-        if (!KEY0) begin
-            uart_counter <= 0;
-            uart_write <= 0;
-            uart_step <= 0;
-        end else begin
-            uart_write <= 0;
-            uart_counter <= uart_counter + 1;
-
-            // Print startup banner once
-            if (uart_step == 0 && uart_counter == 32'd2_000_000) begin
-                print_char("S"); uart_step <= 1;
-            end
-            else if (uart_step == 1 && uart_counter == 32'd4_000_000) begin
-                print_char("D"); uart_step <= 2;
-            end
-            else if (uart_step == 2 && uart_counter == 32'd6_000_000) begin
-                print_char(":"); uart_step <= 3;
-            end
-        end
-    end
+    reg  [31:0] uart_data;
+    reg         uart_write;
 
     jtag_uart_system uart0 (
         .clk_clk(CLOCK_50),
@@ -149,80 +118,81 @@ module cpu_on_board (
     );
 
     // ================================================================
-    // 2. SPI Command 0 (CMD0) test using SPI IP core
+    // SPI signals
     // ================================================================
     wire [15:0] spi_read_data_wire;
     reg [15:0] bus_write_data;
     reg [2:0]  bus_address;
     reg        bus_write_enable, bus_read_enable, Spi_selected;
 
+    // ================================================================
+    // CMD0 sequence state machine
+    // ================================================================
     reg [7:0] cmd[0:5];
     reg [3:0] state;
-    reg [15:0] response;
+    reg [31:0] counter;
 
     initial begin
         cmd[0] = 8'h40; cmd[1] = 8'h00; cmd[2] = 8'h00; cmd[3] = 8'h00; cmd[4] = 8'h00; cmd[5] = 8'h95;
-        state = 0;
     end
 
     always @(posedge CLOCK_50 or negedge KEY0) begin
         if (!KEY0) begin
+            uart_data <= 0;
+            uart_write <= 0;
             state <= 0;
+            Spi_selected <= 0;
             bus_write_enable <= 0;
             bus_read_enable <= 0;
-            Spi_selected <= 0;
+            counter <= 0;
         end else begin
+            uart_write <= 0;  // default off
+            counter <= counter + 1;
+
             case (state)
                 0: begin
-                    // Select SPI and send CMD0
+                    // Wait a bit before printing
+                    if (counter == 32'd2_000_000) begin
+                        uart_data <= {24'd0, "S"}; uart_write <= 1; state <= 1;
+                    end
+                end
+                1: begin uart_data <= {24'd0, "D"}; uart_write <= 1; state <= 2; end
+                2: begin uart_data <= {24'd0, " "}; uart_write <= 1; state <= 3; end
+                3: begin
+                    // Begin SPI CMD0 send
                     Spi_selected <= 1'b1;
                     bus_write_enable <= 1'b1;
                     bus_address <= 3'd0;
-                    bus_write_data <= {8'd0, cmd[0]}; // send 0x40 first
-                    state <= 1;
-                end
-                1: begin
-                    bus_write_data <= {8'd0, cmd[1]};
-                    state <= 2;
-                end
-                2: begin
-                    bus_write_data <= {8'd0, cmd[2]};
-                    state <= 3;
-                end
-                3: begin
-                    bus_write_data <= {8'd0, cmd[3]};
+                    bus_write_data <= {8'd0, cmd[0]};
                     state <= 4;
                 end
-                4: begin
-                    bus_write_data <= {8'd0, cmd[4]};
-                    state <= 5;
-                end
-                5: begin
-                    bus_write_data <= {8'd0, cmd[5]};
-                    state <= 6;
-                end
-                6: begin
-                    // Read response
+                4: begin bus_write_data <= {8'd0, cmd[1]}; state <= 5; end
+                5: begin bus_write_data <= {8'd0, cmd[2]}; state <= 6; end
+                6: begin bus_write_data <= {8'd0, cmd[3]}; state <= 7; end
+                7: begin bus_write_data <= {8'd0, cmd[4]}; state <= 8; end
+                8: begin bus_write_data <= {8'd0, cmd[5]}; state <= 9; end
+                9: begin
+                    // Now read back response
                     bus_write_enable <= 0;
                     bus_read_enable <= 1;
-                    response <= spi_read_data_wire;
-                    state <= 7;
+                    state <= 10;
                 end
-                7: begin
-                    // Print the R1 response via UART
-                    uart_data <= {24'd0, response[7:0]};
+                10: begin
+                    // Print response in hex
+                    uart_data <= {24'd0, spi_read_data_wire[7:0] + 8'h30};
                     uart_write <= 1;
-                    state <= 8;
+                    Spi_selected <= 0;
+                    bus_read_enable <= 0;
+                    state <= 11;
                 end
-                8: begin
-                    uart_write <= 0;
-                    state <= 8; // stay idle
-                end
+                default: state <= 11;
             endcase
         end
     end
 
-    // Instantiate SPI IP core
+    // ================================================================
+    // SPI IP instantiation
+    // ================================================================
     spi my_spi_system (
         .clk_clk(CLOCK_50),
         .reset_reset_n(KEY0),
@@ -239,6 +209,6 @@ module cpu_on_board (
         .spi_0_external_SS_n(SPI_SS_n)
     );
 
-    assign LEDR0 = Spi_selected; // shows active SPI
+    assign LEDR0 = Spi_selected;
 
 endmodule
