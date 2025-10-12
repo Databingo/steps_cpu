@@ -116,7 +116,7 @@ li t1, 0xFF # t1 holds the byte to send (e.g., a dummy 0xFF for a read)
 
 # --- Step 1: Wait until the transmitter is ready ---
 wait_tx_ready:
-    lbu t3, 8(t0)       # Read the status register into t3
+    lw t3, 8(t0)       # Read the status register into t3
     andi t3, t3, 0x20   # Isolate the TRDY bit (bit 5)
     beq t3, x0, wait_tx_ready # If TRDY is 0, loop and wait.
     
@@ -126,10 +126,10 @@ sb t1, 4(t0)        # Write the byte from t1 to the txdata register.
 
 # --- Step 3: Wait until the receiver has valid data ---
 wait_rx_ready:
-    lbu t3, 8(t0)       # Read the status register
+    lw t3, 8(t0)       # Read the status register
     andi t3, t3, 0x40   # Isolate the RRDY bit (bit 6)
     beq t3, x0, wait_rx_ready # If RRDY is 0, loop and wait.
 
-lbu t2, 0(t0)       # Read the received byte from rxdata into t2.
+lw t2, 0(t0)       # Read the received byte from rxdata into t2.
 sb t2, 0(t6) # print 
 

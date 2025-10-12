@@ -66,8 +66,8 @@ module cpu_on_board (
 
     // -- CPU --
     riscv64 cpu (
-        //.clk(clock_1hz), 
-        .clk(CLOCK_50), 
+        .clk(clock_1hz), 
+        //.clk(CLOCK_50), 
         .reset(KEY0),     // Active-low reset button
         .instruction(ir_ld),
         .pc(pc),
@@ -117,18 +117,18 @@ module cpu_on_board (
         .jtag_uart_0_avalon_jtag_slave_read_n    (1'b1)
     );
 
-    // -- mmu_d --
-    wire tlb_hit;
-    wire [63:0] physical_address;
-    wire [63:0] satp;
-    mmu_d mmud (
-    .clk (CLOCK_50),
-    .reset (KEY0),
-    .va (bus_address),
-    .pa (physical_address),
-    .satp (satp),
-    .tlb_hit (tlb_hit)
-    );
+    //// -- mmu_d --
+    //wire tlb_hit;
+    //wire [63:0] physical_address;
+    //wire [63:0] satp;
+    //mmu_d mmud (
+    //.clk (CLOCK_50),
+    //.reset (KEY0),
+    //.va (bus_address),
+    //.pa (physical_address),
+    //.satp (satp),
+    //.tlb_hit (tlb_hit)
+    //);
     // --  ---
 
     // -- Bus --
