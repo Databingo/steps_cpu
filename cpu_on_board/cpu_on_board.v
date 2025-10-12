@@ -496,8 +496,7 @@ module cpu_on_board (
                 end
 
                 8: begin
-                    //uart_data <= {24'd0, response + 8'd48}; // ASCII number
-                    uart_data <= {24'd0, response}; // ASCII number
+                    uart_data <= {24'd0, response + 8'd48}; // ASCII number
                     uart_write <= 1;
                     state <= 9;
                 end
