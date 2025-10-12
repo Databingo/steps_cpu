@@ -672,24 +672,28 @@ module cpu_on_board (
     // ================================================================
     // It's critical that the "spi" IP is configured correctly in Platform Designer
     // to match the external pins and its internal register map.
+// ================================================================
+    // SPI IP instantiation
+    // ================================================================
+    // It's critical that the "spi" IP is configured correctly in Platform Designer
+    // to match the external pins and its internal register map.
     spi my_spi_system (
         .clk_clk(CLOCK_50),
         .reset_reset_n(reset_n_sync), // Use debounced reset
         .spi_0_reset_reset_n(reset_n_sync), // SPI IP's specific reset, tie to debounced
         // The chipselect for the Avalon bus slave of the SPI IP, NOT the SD card CS.
         // It should always be high (active) for direct register access from the FSM.
-        .spi_0_avalon_spi_slave_chipselect (1'b1),
-        .spi_0_avalon_spi_slave_address    (bus_address),
-        .spi_0_avalon_spi_slave_read_n     (~bus_read_enable_reg), // Corrected: direct enable
-        .spi_0_avalon_spi_slave_readdata   (spi_read_data_wire),
-        .spi_0_avalon_spi_slave_write_n    (~bus_write_enable_reg), // Corrected: direct enable
-        .spi_0_avalon_spi_slave_writedata  (bus_write_data),
+        .spi_0_spi_control_port_chipselect (1'b1), // Corrected port name
+        .spi_0_spi_control_port_address    (bus_address), // Corrected port name
+        .spi_0_spi_control_port_read_n     (~bus_read_enable_reg), // Corrected port name: active low, directly from FSM
+        .spi_0_spi_control_port_readdata   (spi_read_data_wire), // Corrected port name
+        .spi_0_spi_control_port_write_n    (~bus_write_enable_reg), // Corrected port name: active low, directly from FSM
+        .spi_0_spi_control_port_writedata  (bus_write_data), // Corrected port name
         .spi_0_external_MISO(SPI_MISO),
         .spi_0_external_MOSI(SPI_MOSI),
         .spi_0_external_SCLK(SPI_SCLK),
         .spi_0_external_SS_n(SPI_SS_n) // This is the actual physical SS_n pin, controlled by SPI_SLAVESELECT register
     );
-
     // LEDR0 is high if not in DONE_ERROR state
     assign LEDR0 = (state != S_DONE_ERROR);
 
