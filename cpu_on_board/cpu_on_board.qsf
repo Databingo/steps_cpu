@@ -114,4 +114,4 @@ set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_
 
 
 set_global_assignment -name QIP_FILE spi/synthesis/spi.qip
-set_global_assignment -name CYCLONEII_RESERVE_NCEO_AFTER_CONFIGURATION "USE AS REGULAR IO"
+#set_global_assignment -name CYCLONEII_RESERVE_NCEO_AFTER_CONFIGURATION "USE AS REGULAR IO"
