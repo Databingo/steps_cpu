@@ -1,48 +1,63 @@
 `include "header.vh"
 
 module cpu_on_board (
-    // -- Pin --
-    (* chip_pin = "PIN_L1" *)  input wire CLOCK_50, // 50 MHz clock
-    (* chip_pin = "PIN_R22" *) input wire KEY0,     // Active-low reset button
-    (* chip_pin = "PIN_Y21, PIN_Y22, PIN_W21, PIN_W22, PIN_V21, PIN_V22, PIN_U21, PIN_U22" *) output wire [7:0] LEDG, // 8 green LEDs
-    (* chip_pin = "R17" *) output reg LEDR9, // 1 red LEDs breath left most 
-    //(* chip_pin = "U18, Y18, V19, T18, Y19, U19, R19, R20" *) output wire [7:0] LEDR0_0, // 8 red LEDs right
-    (* chip_pin = "R20" *) output wire LEDR0, // 
-    (* chip_pin = "R19" *) output wire LEDR1, // 
-    (* chip_pin = "U18, Y18, V19, T18, Y19, U19" *) output wire [5:0] LEDR_PC, // 8 red LEDs right
-
-    (* chip_pin = "F4" *)  output wire HEX30,
-
-    (* chip_pin = "G5" *)  output wire HEX20,
-    (* chip_pin = "G6" *)  output wire HEX21,
-
-    (* chip_pin = "E1" *)  output wire HEX10,
-    (* chip_pin = "H6" *)  output wire HEX11,
-
-    (* chip_pin = "J2" *)  output wire HEX00,
-    (* chip_pin = "J1" *)  output wire HEX01,
-    (* chip_pin = "H2" *)  output wire HEX02,
-    (* chip_pin = "H1" *)  output wire HEX03,
-
-    (* chip_pin = "H15" *)  input wire PS2_CLK, 
-    (* chip_pin = "J14" *)  input wire PS2_DAT,
-
-
-    (* chip_pin = "V20" *)  output wire SPI_SCLK, //SD_CLK
-    (* chip_pin = "Y20" *)  output wire SPI_MOSI, // SD_CMD
-    (* chip_pin = "W20" *)  input wire SPI_MISO,// SD_DAT
-    (* chip_pin = "U20" *)  output wire SPI_SS_n // SD_DAT3
-
-
-    
-    //output reg  SPI_SCLK,        // SD CLK  (V20)
-    //output reg  SPI_MOSI,        // SD CMD  (Y20)
-    //input  wire SPI_MISO,        // SD DAT0 (W20)
-    //output reg  SPI_SS_n,        // SD DAT3 (U20) -> CS
+    // -- Pin mapping --
+    (* chip_pin = "PIN_L1" *)  input  wire CLOCK_50,
+    (* chip_pin = "PIN_R22" *) input  wire KEY0,
+    (* chip_pin = "V20" *)     output reg  SPI_SCLK, // SD_CLK
+    (* chip_pin = "Y20" *)     output reg  SPI_MOSI, // SD_CMD
+    (* chip_pin = "W20" *)     input  wire SPI_MISO, // SD_DAT
+    (* chip_pin = "U20" *)     output reg  SPI_SS_n, // SD_DAT3
+    (* chip_pin = "R20" *)     output reg  LEDR0
 );
 
-    // Clock divider: 50 MHz -> 400 kHz for SD init
-    // (50,000,000 / (2 * 400,000) = 62)
+    // -------------------
+    // JTAG UART signals
+    // -------------------
+    wire [31:0] uart_readdata;
+    reg  [31:0] uart_writedata;
+    reg         uart_write_trigger_pulse;
+    wire        uart_waitrequest;
+    wire        uart_chipselect = 1'b1;
+
+    // JTAG UART IP instance
+    jtag_uart_system my_jtag_system (
+        .clk_clk(CLOCK_50),
+        .reset_reset_n(KEY0),
+        .jtag_uart_0_avalon_jtag_slave_address(1'b0),
+        .jtag_uart_0_avalon_jtag_slave_writedata(uart_writedata),
+        .jtag_uart_0_avalon_jtag_slave_write_n(~uart_write_trigger_pulse),
+        .jtag_uart_0_avalon_jtag_slave_chipselect(uart_chipselect),
+        .jtag_uart_0_avalon_jtag_slave_read_n(1'b1)
+    );
+
+    // Simple UART print task (one character per call)
+    task uart_print_char(input [7:0] c);
+    begin
+        uart_writedata <= {24'b0, c};
+        uart_write_trigger_pulse <= 1'b1;
+        @(posedge CLOCK_50);
+        uart_write_trigger_pulse <= 1'b0;
+        repeat (2) @(posedge CLOCK_50);
+    end
+    endtask
+
+    // Helper to print a string
+    task uart_print_string(input [8*32-1:0] str);
+        integer i;
+        reg [7:0] c;
+    begin
+        for (i = 31; i >= 0; i = i - 1) begin
+            c = str[i*8 +: 8];
+            if (c != 8'h00)
+                uart_print_char(c);
+        end
+    end
+    endtask
+
+    // -------------------
+    // SPI Clock Divider
+    // -------------------
     reg [7:0] clk_div;
     reg spi_clk_en;
     always @(posedge CLOCK_50 or negedge KEY0) begin
@@ -61,13 +76,15 @@ module cpu_on_board (
         end
     end
 
-    // Simple SPI state machine
+    // -------------------
+    // SPI Test FSM
+    // -------------------
     reg [7:0] cmd [0:5];  // CMD0 = 0x40 00 00 00 00 95
     reg [2:0] state;
     reg [7:0] bit_cnt;
     reg [7:0] byte_cnt;
-    reg [7:0] response;
     reg [7:0] miso_shift;
+    reg [15:0] timeout;
 
     initial begin
         cmd[0] = 8'h40; cmd[1] = 8'h00; cmd[2] = 8'h00; cmd[3] = 8'h00; cmd[4] = 8'h00; cmd[5] = 8'h95;
@@ -78,6 +95,7 @@ module cpu_on_board (
         state = 0;
         byte_cnt = 0;
         bit_cnt = 7;
+        timeout = 0;
     end
 
     always @(posedge SPI_SCLK or negedge KEY0) begin
@@ -89,12 +107,13 @@ module cpu_on_board (
         end else begin
             case (state)
                 0: begin
-                    // Provide 80 clocks with CS high to enter SPI mode
+                    // 80 dummy clocks with CS high
                     SPI_SS_n <= 1'b1;
                     SPI_MOSI <= 1'b1;
-                    if (byte_cnt >= 10) begin
+                    if (byte_cnt == 10) begin
                         byte_cnt <= 0;
                         bit_cnt <= 7;
+                        uart_print_string("START\n");
                         state <= 1;
                     end else
                         byte_cnt <= byte_cnt + 1;
@@ -108,22 +127,27 @@ module cpu_on_board (
                         if (byte_cnt == 5) begin
                             byte_cnt <= 0;
                             state <= 2;
+                            uart_print_string("CMD0 sent\n");
                         end else
                             byte_cnt <= byte_cnt + 1;
                     end else
                         bit_cnt <= bit_cnt - 1;
                 end
                 2: begin
-                    // Wait for response
+                    // Wait for response (0x01)
                     SPI_MOSI <= 1'b1;
                     miso_shift <= {miso_shift[6:0], SPI_MISO};
+                    timeout <= timeout + 1;
                     if (miso_shift == 8'h01) begin
-                        LEDR0 <= 1'b1; // got 0x01 = success
+                        LEDR0 <= 1'b1;
+                        uart_print_string("CMD0 OK\n");
+                        state <= 3;
+                    end else if (timeout > 16'hFFFF) begin
+                        uart_print_string("TIMEOUT\n");
                         state <= 3;
                     end
                 end
                 3: begin
-                    // Idle
                     SPI_SS_n <= 1'b1;
                 end
             endcase
@@ -131,6 +155,3 @@ module cpu_on_board (
     end
 
 endmodule
-
-
-
