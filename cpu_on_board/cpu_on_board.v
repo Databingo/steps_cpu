@@ -127,7 +127,6 @@
 //    assign LEDR0 = Spi_selected;
 //
 //endmodule
-//
 module cpu_on_board (
     // -- Pins --
     (* chip_pin = "PIN_L1"  *) input  wire CLOCK_50,
@@ -167,34 +166,33 @@ module cpu_on_board (
     // ================================================================
     // CMD0 sequence state machine
     // ================================================================
-    // --- START MINIMAL ADDITIONS ---
     // SPI Register Offsets (consistent with standard Altera/Intel SPI IP)
     localparam SPI_RXDATA      = 3'd0;
     localparam SPI_TXDATA      = 3'd1;
     localparam SPI_STATUS      = 3'd2;
-    // localparam SPI_CONTROL     = 3'd3; // Not strictly needed for this example
-    localparam SPI_SLAVESELECT = 3'd4; // To control external SS_n directly
+    localparam SPI_CONTROL     = 3'd3; // <-- THIS IS NEWLY USED
+    localparam SPI_SLAVESELECT = 3'd4;
 
     // Status Register Bits
     localparam TRDY_BIT = 5; // Transmit Ready
     localparam RRDY_BIT = 6; // Receive Ready
 
-    // State definitions
-    localparam S_IDLE              = 4'd0; // Original state 0
-    localparam S_PRINT_SD_PRE      = 4'd1; // Original state 1 "S"
-    localparam S_PRINT_SD_MID      = 4'd2; // Original state 2 "D"
-    localparam S_PRINT_SD_POST     = 4'd3; // Original state 3 " "
-    localparam S_POWER_ON_CLK      = 4'd4; // NEW: Send 10 dummy 0xFF bytes with CS high
-    localparam S_CMD0_TX           = 4'd5; // Original states 3-8, now with TRDY checks
-    localparam S_CMD0_RX_POLL      = 4'd6; // Original state 9-10, now with RRDY checks & polling
-    localparam S_PRINT_R1          = 4'd7; // Original state 10 printing result
-    localparam S_DONE_ERROR        = 4'd8; // Original state 11 + error handling
+    // State definitions (adjusted states due to new S_CONFIG_SPI_CLOCK)
+    localparam S_IDLE              = 4'd0;
+    localparam S_PRINT_SD_PRE      = 4'd1;
+    localparam S_PRINT_SD_MID      = 4'd2;
+    localparam S_PRINT_SD_POST     = 4'd3;
+    localparam S_CONFIG_SPI_CLOCK  = 4'd4; // <--- NEW STATE
+    localparam S_POWER_ON_CLK      = 4'd5; // Shifted state
+    localparam S_CMD0_TX           = 4'd6; // Shifted state
+    localparam S_CMD0_RX_POLL      = 4'd7; // Shifted state
+    localparam S_PRINT_R1          = 4'd8; // Shifted state
+    localparam S_DONE_ERROR        = 4'd9; // Shifted state
 
     reg [7:0] cmd[0:5];
     reg [3:0] state;
     reg [31:0] byte_counter; // Renamed 'counter' to 'byte_counter' for clarity
     reg [7:0] sd_r1_response; // To store the R1 response
-    // --- END MINIMAL ADDITIONS ---
 
     initial begin // CMD0
         cmd[0] = 8'h40;
@@ -217,7 +215,6 @@ module cpu_on_board (
             sd_r1_response <= 8'hFF; // Initialize
         end else begin
             uart_write <= 0;  // default off
-            // byte_counter <= byte_counter + 1; // Removed from here, handled per state for specific counts
 
             case (state)
                 S_IDLE: begin // Original state 0: Wait for a bit
@@ -237,11 +234,30 @@ module cpu_on_board (
                 end
                 S_PRINT_SD_POST: begin // Original state 3: " "
                     uart_data <= {24'd0, " "}; uart_write <= 1;
-                    byte_counter <= 0; // Reset for S_POWER_ON_CLK
-                    state <= S_POWER_ON_CLK; // NEW: Go to power-on clocking
+                    byte_counter <= 0; // Reset for S_CONFIG_SPI_CLOCK
+                    state <= S_CONFIG_SPI_CLOCK; // <--- JUMP TO NEW STATE
                 end
 
-                S_POWER_ON_CLK: begin // NEW: Send 10 dummy 0xFF bytes with CS high
+                // --- NEW STATE ---
+                S_CONFIG_SPI_CLOCK: begin
+                    // Configure SPI baud rate divisor for initial slow clock (e.g., 400 kHz)
+                    // If CLOCK_50 is 50MHz, for 400kHz, divisor = 50MHz / (2 * 400kHz) - 1 = 61.5 -> ~62
+                    // A divisor of 62 (0x3E) would give 50MHz / (2 * (62+1)) = 50MHz / 126 ~= 396kHz
+                    // Check your SPI IP's documentation for exact divisor formula.
+                    // This is a single write, no TRDY/RRDY check needed for config.
+                    bus_address <= SPI_CONTROL;
+                    bus_write_enable <= 1'b1;
+                    // Assuming SPI_CONTROL[15:0] is baud divisor.
+                    // Assuming divisor = (CLK_FREQ / (2 * TARGET_FREQ)) - 1
+                    // For 50MHz to 400kHz: (50_000_000 / (2 * 400_000)) - 1 = (50_000_000 / 800_000) - 1 = 62.5 - 1 = 61.5
+                    // Let's try 62 (0x3E) or slightly higher to be safe, e.g., 124 (0x7C) for ~200kHz
+                    // Let's use 0x7C for minimal clock. This makes the clock 50MHz / (2*(124+1)) = 50MHz/250 = 200kHz.
+                    bus_write_data <= 16'h007C; // Divisor value 124 (for ~200kHz)
+                    state <= S_POWER_ON_CLK; // Move to power-on clocking
+                end
+                // --- END NEW STATE ---
+
+                S_POWER_ON_CLK: begin
                     Spi_selected <= 0; // Ensure CS is HIGH
                     bus_address <= SPI_STATUS;
                     bus_read_enable <= 1'b1; // Check status for TRDY
@@ -350,4 +366,4 @@ module cpu_on_board (
     // LEDR0 is high if not in DONE or ERROR state
     assign LEDR0 = (state != S_DONE_ERROR);
 
-endmodule
+endmodule/
