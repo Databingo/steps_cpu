@@ -1122,24 +1122,167 @@
 
 
 
+////===========================================================
+//// DE1 SD Card SPI-like test with CMD0 initialization
+////===========================================================
+//module cpu_on_board (
+//    (* chip_pin = "PIN_L1"  *) input  wire CLOCK_50,
+//    (* chip_pin = "PIN_R22" *) input  wire KEY0,        // Active-low reset
+//    (* chip_pin = "R20"     *) output wire LEDR0,
+//
+//    // --- SD card pins ---
+//    (* chip_pin = "V20" *) output wire SD_CLK,
+//    (* chip_pin = "Y20" *) inout  wire SD_CMD,
+//    (* chip_pin = "W20" *) inout  wire SD_DAT0,
+//    (* chip_pin = "U20" *) output wire SD_DAT3
+//);
+//
+////=======================================================
+//// Internal reset and LED blink
+////=======================================================
+//wire reset_n = KEY0;
+//reg [23:0] blink_counter;
+//
+//always @(posedge CLOCK_50 or negedge reset_n)
+//    if (!reset_n)
+//        blink_counter <= 0;
+//    else
+//        blink_counter <= blink_counter + 1'b1;
+//
+//assign LEDR0 = blink_counter[23];
+//
+////=======================================================
+//// UART for debug output
+////=======================================================
+//reg  [31:0] uart_data;
+//reg         uart_write;
+//
+//jtag_uart_system uart0 (
+//    .clk_clk(CLOCK_50),
+//    .reset_reset_n(reset_n),
+//    .jtag_uart_0_avalon_jtag_slave_address(1'b0),
+//    .jtag_uart_0_avalon_jtag_slave_writedata(uart_data),
+//    .jtag_uart_0_avalon_jtag_slave_write_n(~uart_write),
+//    .jtag_uart_0_avalon_jtag_slave_chipselect(1'b1),
+//    .jtag_uart_0_avalon_jtag_slave_read_n(1'b1)
+//);
+//
+////=======================================================
+//// SD card SPI signals (simplified)
+////=======================================================
+//reg [1:0]  sd_address;
+//reg        sd_chipselect;
+//reg        sd_write_n;
+//reg [15:0] sd_writedata;
+//wire [15:0] sd_readdata_cmd;
+//wire [15:0] sd_readdata_dat;
+//wire        sd_out_clk;
+//
+//SD_CLK sd_clk_inst (
+//    .address(sd_address),
+//    .chipselect(sd_chipselect),
+//    .clk(CLOCK_50),
+//    .reset_n(reset_n),
+//    .write_n(sd_write_n),
+//    .writedata(sd_writedata),
+//    .out_port(sd_out_clk)
+//);
+//assign SD_CLK = sd_out_clk;
+//
+//SD_CMD sd_cmd_inst (
+//    .address(sd_address),
+//    .chipselect(sd_chipselect),
+//    .clk(CLOCK_50),
+//    .reset_n(reset_n),
+//    .write_n(sd_write_n),
+//    .writedata(sd_writedata),
+//    .bidir_port(SD_CMD),
+//    .readdata(sd_readdata_cmd)
+//);
+//
+//SD_DAT sd_dat_inst (
+//    .address(sd_address),
+//    .chipselect(sd_chipselect),
+//    .clk(CLOCK_50),
+//    .reset_n(reset_n),
+//    .write_n(sd_write_n),
+//    .writedata(sd_writedata),
+//    .bidir_port(SD_DAT0),
+//    .readdata(sd_readdata_dat)
+//);
+//
+////=======================================================
+//// SD card test state machine
+////=======================================================
+//reg [3:0]  state;
+//reg [31:0] counter;
+//
+//always @(posedge CLOCK_50 or negedge reset_n) begin
+//    if (!reset_n) begin
+//        state <= 0;
+//        counter <= 0;
+//        uart_write <= 0;
+//        sd_chipselect <= 0;
+//        sd_write_n <= 1;
+//        sd_writedata <= 16'd0;
+//        sd_address <= 2'd0;
+//    end else begin
+//        uart_write <= 0;
+//        counter <= counter + 1;
+//
+//        case (state)
+//            0: begin
+//                // Wait 1 second before starting
+//                if (counter == 32'd50_000_000) begin
+//                    uart_data <= {24'd0, "S"}; uart_write <= 1;
+//                    counter <= 0;
+//                    state <= 1;
+//                end
+//            end
+//            1: begin
+//                // Send SD CMD0 (GO_IDLE_STATE) to reset card
+//                uart_data <= {24'd0, "C"}; uart_write <= 1;
+//                sd_chipselect <= 1;
+//                sd_write_n <= 0;
+//                sd_writedata <= 16'h4000; // Example: SPI-like CMD0
+//                sd_address <= 2'd0;
+//                counter <= 0;
+//                state <= 2;
+//            end
+//            2: begin
+//                // Release SD chip select
+//                sd_chipselect <= 0;
+//                sd_write_n <= 1;
+//                uart_data <= {24'd0, "0"}; uart_write <= 1;
+//                state <= 3;
+//            end
+//            3: begin
+//                // Idle
+//                state <= 3;
+//            end
+//        endcase
+//    end
+//end
+//
+//endmodule
+
+
+
+
 //===========================================================
-// DE1 SD Card SPI-like test with CMD0 initialization
+// DE1 SD Card SPI-like test with read of first 512 bytes
 //===========================================================
 module cpu_on_board (
     (* chip_pin = "PIN_L1"  *) input  wire CLOCK_50,
     (* chip_pin = "PIN_R22" *) input  wire KEY0,        // Active-low reset
     (* chip_pin = "R20"     *) output wire LEDR0,
 
-    // --- SD card pins ---
     (* chip_pin = "V20" *) output wire SD_CLK,
     (* chip_pin = "Y20" *) inout  wire SD_CMD,
     (* chip_pin = "W20" *) inout  wire SD_DAT0,
     (* chip_pin = "U20" *) output wire SD_DAT3
 );
 
-//=======================================================
-// Internal reset and LED blink
-//=======================================================
 wire reset_n = KEY0;
 reg [23:0] blink_counter;
 
@@ -1151,9 +1294,6 @@ always @(posedge CLOCK_50 or negedge reset_n)
 
 assign LEDR0 = blink_counter[23];
 
-//=======================================================
-// UART for debug output
-//=======================================================
 reg  [31:0] uart_data;
 reg         uart_write;
 
@@ -1167,9 +1307,6 @@ jtag_uart_system uart0 (
     .jtag_uart_0_avalon_jtag_slave_read_n(1'b1)
 );
 
-//=======================================================
-// SD card SPI signals (simplified)
-//=======================================================
 reg [1:0]  sd_address;
 reg        sd_chipselect;
 reg        sd_write_n;
@@ -1212,10 +1349,11 @@ SD_DAT sd_dat_inst (
 );
 
 //=======================================================
-// SD card test state machine
+// SD card read test
 //=======================================================
-reg [3:0]  state;
+reg [3:0] state;
 reg [31:0] counter;
+reg [8:0] byte_index; // 0-511
 
 always @(posedge CLOCK_50 or negedge reset_n) begin
     if (!reset_n) begin
@@ -1226,13 +1364,13 @@ always @(posedge CLOCK_50 or negedge reset_n) begin
         sd_write_n <= 1;
         sd_writedata <= 16'd0;
         sd_address <= 2'd0;
+        byte_index <= 0;
     end else begin
         uart_write <= 0;
         counter <= counter + 1;
 
         case (state)
             0: begin
-                // Wait 1 second before starting
                 if (counter == 32'd50_000_000) begin
                     uart_data <= {24'd0, "S"}; uart_write <= 1;
                     counter <= 0;
@@ -1240,25 +1378,48 @@ always @(posedge CLOCK_50 or negedge reset_n) begin
                 end
             end
             1: begin
-                // Send SD CMD0 (GO_IDLE_STATE) to reset card
+                // CMD0: reset card
                 uart_data <= {24'd0, "C"}; uart_write <= 1;
                 sd_chipselect <= 1;
                 sd_write_n <= 0;
-                sd_writedata <= 16'h4000; // Example: SPI-like CMD0
+                sd_writedata <= 16'h4000; // simplified SPI CMD0
                 sd_address <= 2'd0;
                 counter <= 0;
                 state <= 2;
             end
             2: begin
-                // Release SD chip select
                 sd_chipselect <= 0;
                 sd_write_n <= 1;
                 uart_data <= {24'd0, "0"}; uart_write <= 1;
+                counter <= 0;
                 state <= 3;
             end
             3: begin
-                // Idle
-                state <= 3;
+                // CMD17: read single block (block 0)
+                uart_data <= {24'd0, "R"}; uart_write <= 1;
+                sd_chipselect <= 1;
+                sd_write_n <= 0;
+                sd_writedata <= 16'h5117; // simplified SPI-like CMD17
+                sd_address <= 2'd0;
+                counter <= 0;
+                byte_index <= 0;
+                state <= 4;
+            end
+            4: begin
+                sd_chipselect <= 0;
+                sd_write_n <= 1;
+                // Read 512 bytes (simplified)
+                if (byte_index < 512) begin
+                    uart_data <= {24'd0, sd_readdata_dat[7:0]}; // read low byte
+                    uart_write <= 1;
+                    byte_index <= byte_index + 1;
+                end else begin
+                    uart_data <= {24'd0, "D"}; uart_write <= 1; // Done
+                    state <= 5;
+                end
+            end
+            5: begin
+                state <= 5; // idle
             end
         endcase
     end
