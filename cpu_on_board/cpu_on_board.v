@@ -4050,6 +4050,110 @@
 
 
 
+//module cpu_on_board (
+//    (* chip_pin = "PIN_L1"  *) input  wire CLOCK_50,
+//    (* chip_pin = "PIN_R22" *) input  wire KEY0,        // Active-low reset
+//    (* chip_pin = "R20"     *) output wire LEDR0,
+//
+//    (* chip_pin = "V20" *) output wire SD_CLK,
+//    (* chip_pin = "Y20" *) inout  wire SD_CMD,
+//    (* chip_pin = "W20" *) inout  wire SD_DAT0,
+//    (* chip_pin = "U20" *) output wire SD_DAT3
+//);
+//
+//    // ===========================
+//    // Heartbeat LED
+//    // ===========================
+//    reg [23:0] blink_counter;
+//    assign LEDR0 = blink_counter[23];
+//    always @(posedge CLOCK_50 or negedge KEY0)
+//        if (!KEY0) blink_counter <= 0;
+//        else blink_counter <= blink_counter + 1;
+//
+//    // ===========================
+//    // JTAG UART for debug
+//    // ===========================
+//    reg [31:0] uart_data;
+//    reg        uart_write;
+//
+//    jtag_uart_system uart0 (
+//        .clk_clk(CLOCK_50),
+//        .reset_reset_n(KEY0),
+//        .jtag_uart_0_avalon_jtag_slave_address(1'b0),
+//        .jtag_uart_0_avalon_jtag_slave_writedata(uart_data),
+//        .jtag_uart_0_avalon_jtag_slave_write_n(~uart_write),
+//        .jtag_uart_0_avalon_jtag_slave_chipselect(1'b1),
+//        .jtag_uart_0_avalon_jtag_slave_read_n(1'b1)
+//    );
+//
+//    // ===========================
+//    // SD interface signals
+//    // ===========================
+//    reg sd_cmd_out, sd_cmd_oe;
+//    reg [5:0] bit_cnt;
+//    reg [47:0] cmd_shift;     // CMD0 command
+//    reg cmd_start;
+//    reg [15:0] clk_div;
+//
+//    assign SD_CMD  = sd_cmd_oe ? sd_cmd_out : 1'bz;
+//    assign SD_CLK  = clk_div[15];  // slow clock
+//    assign SD_DAT3 = 1'b1;         // CS high
+//    wire sd_dat0_in = SD_DAT0;     // read SD_DAT0
+//
+//    // ===========================
+//    // Clock divider and CMD0 FSM
+//    // ===========================
+//    reg [7:0] response;
+//    reg done;
+//
+//    always @(posedge CLOCK_50 or negedge KEY0) begin
+//        if (!KEY0) begin
+//            clk_div <= 0;
+//            cmd_start <= 0;
+//            sd_cmd_oe <= 0;
+//            sd_cmd_out <= 1;
+//            bit_cnt <= 0;
+//            cmd_shift <= 48'h40_00_00_00_00_95; // CMD0 + CRC
+//            uart_write <= 0;
+//            response <= 0;
+//            done <= 0;
+//        end else begin
+//            clk_div <= clk_div + 1;
+//            uart_write <= 0;
+//
+//            // Start CMD0 after ~0.5s
+//            if (blink_counter == 24'd25_000_000)
+//                cmd_start <= 1;
+//
+//            if (cmd_start && !done) begin
+//                sd_cmd_oe <= 1;
+//                sd_cmd_out <= cmd_shift[47];
+//                cmd_shift <= {cmd_shift[46:0],1'b1};
+//                bit_cnt <= bit_cnt + 1;
+//
+//                if (bit_cnt == 47) begin
+//                    sd_cmd_oe <= 0;  // release CMD line
+//                    bit_cnt <= 0;
+//                    cmd_start <= 0;
+//                    done <= 1;
+//                end
+//            end
+//
+//            // After CMD0 sent, try to read response
+//            if (done) begin
+//                // SD cards respond with 0x01 (idle state)
+//                response <= {response[6:0], sd_dat0_in};
+//                uart_data <= {24'd0, response[7:0]};
+//                uart_write <= 1;
+//            end
+//        end
+//    end
+//
+//endmodule
+
+
+
+
 module cpu_on_board (
     (* chip_pin = "PIN_L1"  *) input  wire CLOCK_50,
     (* chip_pin = "PIN_R22" *) input  wire KEY0,        // Active-low reset
@@ -4061,20 +4165,24 @@ module cpu_on_board (
     (* chip_pin = "U20" *) output wire SD_DAT3
 );
 
-    // ===========================
-    // Heartbeat LED
-    // ===========================
+    // =======================================================
+    // LED heartbeat
+    // =======================================================
     reg [23:0] blink_counter;
     assign LEDR0 = blink_counter[23];
-    always @(posedge CLOCK_50 or negedge KEY0)
-        if (!KEY0) blink_counter <= 0;
-        else blink_counter <= blink_counter + 1;
 
-    // ===========================
+    always @(posedge CLOCK_50 or negedge KEY0) begin
+        if (!KEY0)
+            blink_counter <= 0;
+        else
+            blink_counter <= blink_counter + 1'b1;
+    end
+
+    // =======================================================
     // JTAG UART for debug
-    // ===========================
-    reg [31:0] uart_data;
-    reg        uart_write;
+    // =======================================================
+    reg  [31:0] uart_data;
+    reg         uart_write;
 
     jtag_uart_system uart0 (
         .clk_clk(CLOCK_50),
@@ -4086,66 +4194,55 @@ module cpu_on_board (
         .jtag_uart_0_avalon_jtag_slave_read_n(1'b1)
     );
 
-    // ===========================
-    // SD interface signals
-    // ===========================
+    // =======================================================
+    // SD card SPI-like interface (CMD0 test)
+    // =======================================================
     reg sd_cmd_out, sd_cmd_oe;
+    reg sd_dat0_in;
     reg [5:0] bit_cnt;
-    reg [47:0] cmd_shift;     // CMD0 command
+    reg [47:0] cmd_shift;
     reg cmd_start;
     reg [15:0] clk_div;
 
     assign SD_CMD  = sd_cmd_oe ? sd_cmd_out : 1'bz;
-    assign SD_CLK  = clk_div[15];  // slow clock
-    assign SD_DAT3 = 1'b1;         // CS high
-    wire sd_dat0_in = SD_DAT0;     // read SD_DAT0
-
-    // ===========================
-    // Clock divider and CMD0 FSM
-    // ===========================
-    reg [7:0] response;
-    reg done;
+    assign SD_CLK  = clk_div[15];    // Slow clock for initialization (~1.5 kHz)
+    assign SD_DAT3 = 1'b1;           // CS high (not used)
+    assign SD_DAT0 = 1'bz;           // DAT0 is input
+    always @(posedge CLOCK_50) sd_dat0_in <= SD_DAT0;
 
     always @(posedge CLOCK_50 or negedge KEY0) begin
         if (!KEY0) begin
-            clk_div <= 0;
+            clk_div   <= 0;
             cmd_start <= 0;
             sd_cmd_oe <= 0;
             sd_cmd_out <= 1;
-            bit_cnt <= 0;
-            cmd_shift <= 48'h40_00_00_00_00_95; // CMD0 + CRC
-            uart_write <= 0;
-            response <= 0;
-            done <= 0;
+            bit_cnt   <= 0;
+            cmd_shift <= 48'h40_00_00_00_00_95; // CMD0 with CRC
         end else begin
             clk_div <= clk_div + 1;
-            uart_write <= 0;
 
-            // Start CMD0 after ~0.5s
+            // Start CMD0 after 0.5s
             if (blink_counter == 24'd25_000_000)
                 cmd_start <= 1;
 
-            if (cmd_start && !done) begin
+            if (cmd_start) begin
                 sd_cmd_oe <= 1;
                 sd_cmd_out <= cmd_shift[47];
-                cmd_shift <= {cmd_shift[46:0],1'b1};
+                cmd_shift <= {cmd_shift[46:0], 1'b1};
                 bit_cnt <= bit_cnt + 1;
 
                 if (bit_cnt == 47) begin
-                    sd_cmd_oe <= 0;  // release CMD line
-                    bit_cnt <= 0;
+                    sd_cmd_oe <= 0;  // release CMD
                     cmd_start <= 0;
-                    done <= 1;
-                end
-            end
+                    bit_cnt <= 0;
 
-            // After CMD0 sent, try to read response
-            if (done) begin
-                // SD cards respond with 0x01 (idle state)
-                response <= {response[6:0], sd_dat0_in};
-                uart_data <= {24'd0, response[7:0]};
-                uart_write <= 1;
-            end
+                    // Read 8 clock cycles for response
+                    // We'll just sample DAT0 for one byte
+                    uart_data <= {24'd0, sd_dat0_in ? 8'h01 : 8'h00};
+                    uart_write <= 1;
+                end
+            end else
+                uart_write <= 0;
         end
     end
 
