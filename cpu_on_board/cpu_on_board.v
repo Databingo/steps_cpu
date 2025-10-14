@@ -3704,7 +3704,7 @@ SdCardSlave sd0 (
     .begintransfer(sd_begin),
     .SD_CLK(SD_CLK),
     .SD_CMD(SD_CMD),
-    .SD_DAT0(SD_DAT0),
+    .SD_DAT(SD_DAT0),
     .SD_DAT3(SD_DAT3)
 );
 
