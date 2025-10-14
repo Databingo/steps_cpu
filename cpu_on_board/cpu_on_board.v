@@ -3069,30 +3069,298 @@
 // Notes: this is a simple demonstrator. Real card init (SDHC vs SDSC) and ACMD41
 // handling is not implemented; many SD cards will accept CMD0 + CMD17 for simple tests.
 
-module cpu_on_board (
-    (* chip_pin = "PIN_L1"  *) input  wire CLOCK_50,
-    (* chip_pin = "PIN_R22" *) input  wire KEY0,        // active-low reset
-    (* chip_pin = "R20"     *) output wire LEDR0,
+//module cpu_on_board (
+//    (* chip_pin = "PIN_L1"  *) input  wire CLOCK_50,
+//    (* chip_pin = "PIN_R22" *) input  wire KEY0,        // active-low reset
+//    (* chip_pin = "R20"     *) output wire LEDR0,
+//
+//    // SD pins for DE1
+//    (* chip_pin = "V20" *) output reg SD_CLK,   // SD clock
+//    (* chip_pin = "Y20" *) inout  wire SD_CMD,   // SD command (MOSI when driving)
+//    (* chip_pin = "W20" *) inout  wire SD_DAT,   // SD data0 (MISO)
+//    (* chip_pin = "U20" *) output wire SD_DAT3   // tie high or unused
+//);
+//
+//// ---------- basics ----------
+//wire reset_n = KEY0;
+//reg [23:0] blink_counter;
+//always @(posedge CLOCK_50 or negedge reset_n) begin
+//    if (!reset_n) blink_counter <= 0;
+//    else blink_counter <= blink_counter + 1'b1;
+//end
+//assign LEDR0 = blink_counter[23];
+//
+//// ---------- JTAG UART (same interface as your project) ----------
+//reg  [31:0] uart_data;
+//reg         uart_write;
+//jtag_uart_system uart0 (
+//    .clk_clk(CLOCK_50),
+//    .reset_reset_n(reset_n),
+//    .jtag_uart_0_avalon_jtag_slave_address(1'b0),
+//    .jtag_uart_0_avalon_jtag_slave_writedata(uart_data),
+//    .jtag_uart_0_avalon_jtag_slave_write_n(~uart_write),
+//    .jtag_uart_0_avalon_jtag_slave_chipselect(1'b1),
+//    .jtag_uart_0_avalon_jtag_slave_read_n(1'b1)
+//);
+//
+//// ---------- SD IO control (tri-state for MOSI) ----------
+//reg sd_mosi_o;
+//reg sd_mosi_oe;            // when 1 drive SD_CMD with sd_mosi_o
+//assign SD_CMD = sd_mosi_oe ? sd_mosi_o : 1'bz;
+//wire sd_miso = SD_DAT;     // DAT0 is MISO
+//assign SD_DAT3 = 1'b1;     // keep DAT3 high (card detect or cs), or Z if unused
+//
+//// ---------- SPI clock divider (~400 kHz) ----------
+//reg [6:0] clk_div;         // divides 50MHz by 125 -> 400kHz
+//reg spi_edge;              // pulses when we should sample/drive at each half-cycle
+//always @(posedge CLOCK_50 or negedge reset_n) begin
+//    if(!reset_n) begin
+//        clk_div <= 0; spi_edge <= 0;
+//    end else begin
+//        if(clk_div == 62) begin
+//            clk_div <= 0;
+//            spi_edge <= 1;
+//        end else begin
+//            clk_div <= clk_div + 1;
+//            spi_edge <= 0;
+//        end
+//    end
+//end
+//
+//// ---------- state machine and variables ----------
+//localparam IDLE = 0, SEND_CMD = 1, WAIT_RESP = 2, SEND_CMD17 = 3,
+//           WAIT_TOKEN = 4, READ_BYTES = 5, DONE = 6, ERROR = 7;
+//
+//reg [3:0] state;
+//reg [5:0] bitpos;          // 0..47, or 0..7 for byte
+//reg [47:0] shift48;
+//reg [7:0] shift8;
+//reg [8:0] byte_count;
+//reg [15:0] timeout;        // small timeout counters for safety
+//
+//// helper: write single byte to UART (blocking one-cycle request)
+//task uart_put_byte (input [7:0] b);
+//begin
+//    uart_data <= {24'd0, b};
+//    uart_write <= 1;
+//    @(posedge CLOCK_50); // allow handshake pulse to be seen next cycle
+//    uart_write <= 0;
+//end
+//endtask
+//
+//// initialization: a small startup wait, then send CMD0
+//always @(posedge CLOCK_50 or negedge reset_n) begin
+//    if(!reset_n) begin
+//        SD_CLK <= 0;
+//        sd_mosi_o <= 1'b1;
+//        sd_mosi_oe <= 1'b1;
+//        state <= IDLE;
+//        bitpos <= 0;
+//        shift48 <= 0;
+//        shift8 <= 0;
+//        byte_count <= 0;
+//        timeout <= 0;
+//        uart_write <= 0;
+//    end else begin
+//        // only proceed SPI actions on spi_edge (slowed clock)
+//        if(spi_edge) begin
+//            case(state)
+//                IDLE: begin
+//                    // small startup delay to let card power-up (many cycles)
+//                    if(timeout < 16'h7FFF) timeout <= timeout + 1;
+//                    else begin
+//                        // print "S" then prepare CMD0: 0x40 00 00 00 00 95
+//                        uart_data <= {24'd0, "S"};
+//                        uart_write <= 1;
+//                        // load CMD0 into shift48 (MSB first)
+//                        shift48 <= 48'h40_00_00_00_00_95;
+//                        bitpos <= 47;
+//                        sd_mosi_oe <= 1;
+//                        SD_CLK <= 0;
+//                        timeout <= 0;
+//                        state <= SEND_CMD;
+//                    end
+//                end
+//
+//                SEND_CMD: begin
+//                    // toggle SD_CLK and shift bits on MOSI on the rising half
+//                    SD_CLK <= ~SD_CLK;
+//                    if(SD_CLK) begin
+//                        // on rising edge sample MOSI out bit
+//                        sd_mosi_o <= shift48[bitpos];
+//                        if(bitpos == 0) begin
+//                            // finished sending 48 bits
+//                            sd_mosi_oe <= 0; // release line, card drives responses
+//                            bitpos <= 0;
+//                            shift8 <= 8'hFF;
+//                            timeout <= 0;
+//                            state <= WAIT_RESP;
+//                            // print marker once
+//                            uart_data <= {24'd0, "C"};
+//                            uart_write <= 1;
+//                        end else bitpos <= bitpos - 1;
+//                    end
+//                end
+//
+//                WAIT_RESP: begin
+//                    // Keep toggling SD_CLK and shift in bits from MISO,
+//                    // assembling bytes; wait until a byte != 0xFF (response).
+//                    SD_CLK <= ~SD_CLK;
+//                    if(SD_CLK) begin
+//                        // shift in one bit (MSB first)
+//                        shift8 <= {shift8[6:0], sd_miso};
+//                        if(bitpos < 7) bitpos <= bitpos + 1;
+//                        else begin
+//                            // one byte received
+//                            bitpos <= 0;
+//                            if(shift8 != 8'hFF) begin
+//                                // got response (likely 0x01 for CMD0)
+//                                // prepare CMD17 frame: 0x51 + addr(0) + CRC 0xFF
+//                                shift48 <= 48'h51_00_00_00_00_FF; // 0x51 = 0x40|0x11 (CMD17)
+//                                bitpos <= 47;
+//                                sd_mosi_oe <= 1;
+//                                SD_CLK <= 0;
+//                                timeout <= 0;
+//                                state <= SEND_CMD17;
+//                                // mark that response was seen
+//                                uart_data <= {24'd0, "R"};
+//                                uart_write <= 1;
+//                            end else begin
+//                                // still 0xFF; keep waiting
+//                                timeout <= timeout + 1;
+//                                if(timeout == 16'hFFFF) begin
+//                                    // timeout -> error
+//                                    state <= ERROR;
+//                                end
+//                            end
+//                        end
+//                    end
+//                end
+//
+//                SEND_CMD17: begin
+//                    // Shift out CMD17 48 bits similarly to SEND_CMD
+//                    SD_CLK <= ~SD_CLK;
+//                    if(SD_CLK) begin
+//                        sd_mosi_o <= shift48[bitpos];
+//                        if(bitpos == 0) begin
+//                            sd_mosi_oe <= 0; // release MOSI for response/data
+//                            bitpos <= 0;
+//                            shift8 <= 8'hFF;
+//                            timeout <= 0;
+//                            state <= WAIT_TOKEN;
+//                        end else bitpos <= bitpos - 1;
+//                    end
+//                end
+//
+//                WAIT_TOKEN: begin
+//                    // After CMD17, the card may send some 0xFF bytes, then 0xFE token.
+//                    SD_CLK <= ~SD_CLK;
+//                    if(SD_CLK) begin
+//                        shift8 <= {shift8[6:0], sd_miso};
+//                        if(bitpos < 7) bitpos <= bitpos + 1;
+//                        else begin
+//                            bitpos <= 0;
+//                            if(shift8 == 8'hFE) begin
+//                                // token received: start reading 512 bytes
+//                                byte_count <= 0;
+//                                bitpos <= 0;
+//                                timeout <= 0;
+//                                state <= READ_BYTES;
+//                                // optional marker
+//                                uart_data <= {24'd0, "T"}; // token
+//                                uart_write <= 1;
+//                            end else begin
+//                                timeout <= timeout + 1;
+//                                if(timeout == 16'hFFFF) state <= ERROR;
+//                            end
+//                        end
+//                    end
+//                end
+//
+//                READ_BYTES: begin
+//                    // Read 512 bytes; shift bits from sd_miso
+//                    SD_CLK <= ~SD_CLK;
+//                    if(SD_CLK) begin
+//                        shift8 <= {shift8[6:0], sd_miso};
+//                        if(bitpos < 7) bitpos <= bitpos + 1;
+//                        else begin
+//                            // one full byte ready
+//                            bitpos <= 0;
+//                            // stream to UART (non-blocking write request)
+//                            uart_data <= {24'd0, shift8};
+//                            uart_write <= 1;
+//                            byte_count <= byte_count + 1;
+//                            if(byte_count == 9'd511) begin
+//                                state <= DONE;
+//                                timeout <= 0;
+//                            end
+//                        end
+//                    end
+//                end
+//
+//                DONE: begin
+//                    // finished reading 512 bytes; signal done
+//                    uart_data <= {24'd0, "D"};
+//                    uart_write <= 1;
+//                    // hold here
+//                    SD_CLK <= 0;
+//                    sd_mosi_oe <= 0;
+//                    // state stays DONE
+//                end
+//
+//                ERROR: begin
+//                    uart_data <= {24'd0, "E"}; uart_write <= 1;
+//                    SD_CLK <= 0;
+//                    sd_mosi_oe <= 0;
+//                end
+//
+//                default: state <= ERROR;
+//            endcase
+//        end else begin
+//            // not spi edge: clear uart_write pulse to 0 (we pulse it one clock)
+//            uart_write <= 0;
+//        end
+//    end
+//end
+//
+//endmodule
 
-    // SD pins for DE1
-    (* chip_pin = "V20" *) output reg SD_CLK,   // SD clock
-    (* chip_pin = "Y20" *) inout  wire SD_CMD,   // SD command (MOSI when driving)
-    (* chip_pin = "W20" *) inout  wire SD_DAT,   // SD data0 (MISO)
-    (* chip_pin = "U20" *) output wire SD_DAT3   // tie high or unused
+
+
+
+
+module cpu_on_board (
+    input  wire CLOCK_50,
+    input  wire KEY0,         // Active-low reset
+    output wire LEDR0,
+
+    // SD card pins
+    output wire SD_CLK,
+    inout  wire SD_CMD,
+    inout  wire SD_DAT0,
+    output wire SD_DAT3
 );
 
-// ---------- basics ----------
+//=======================================================
+// Reset and LED blink
+//=======================================================
 wire reset_n = KEY0;
 reg [23:0] blink_counter;
-always @(posedge CLOCK_50 or negedge reset_n) begin
-    if (!reset_n) blink_counter <= 0;
-    else blink_counter <= blink_counter + 1'b1;
-end
+
+always @(posedge CLOCK_50 or negedge reset_n)
+    if (!reset_n)
+        blink_counter <= 0;
+    else
+        blink_counter <= blink_counter + 1'b1;
+
 assign LEDR0 = blink_counter[23];
 
-// ---------- JTAG UART (same interface as your project) ----------
+//=======================================================
+// UART debug (JTAG UART)
+//=======================================================
 reg  [31:0] uart_data;
 reg         uart_write;
+
 jtag_uart_system uart0 (
     .clk_clk(CLOCK_50),
     .reset_reset_n(reset_n),
@@ -3103,223 +3371,95 @@ jtag_uart_system uart0 (
     .jtag_uart_0_avalon_jtag_slave_read_n(1'b1)
 );
 
-// ---------- SD IO control (tri-state for MOSI) ----------
-reg sd_mosi_o;
-reg sd_mosi_oe;            // when 1 drive SD_CMD with sd_mosi_o
-assign SD_CMD = sd_mosi_oe ? sd_mosi_o : 1'bz;
-wire sd_miso = SD_DAT;     // DAT0 is MISO
-assign SD_DAT3 = 1'b1;     // keep DAT3 high (card detect or cs), or Z if unused
+//=======================================================
+// Instantiate SD card interface (from your code)
+//=======================================================
+wire [2:0]  sd_addr;
+wire        sd_read, sd_write, sd_begin;
+wire [31:0] sd_wdata;
+wire [31:0] sd_rdata;
 
-// ---------- SPI clock divider (~400 kHz) ----------
-reg [6:0] clk_div;         // divides 50MHz by 125 -> 400kHz
-reg spi_edge;              // pulses when we should sample/drive at each half-cycle
-always @(posedge CLOCK_50 or negedge reset_n) begin
-    if(!reset_n) begin
-        clk_div <= 0; spi_edge <= 0;
-    end else begin
-        if(clk_div == 62) begin
-            clk_div <= 0;
-            spi_edge <= 1;
-        end else begin
-            clk_div <= clk_div + 1;
-            spi_edge <= 0;
-        end
-    end
-end
+SdCardSlave sd0 (
+    .clk(CLOCK_50),
+    .reset(~reset_n),
+    .address(sd_addr),
+    .read(sd_read),
+    .write(sd_write),
+    .writedata(sd_wdata),
+    .readdata(sd_rdata),
+    .begintransfer(sd_begin),
+    .SD_CLK(SD_CLK),
+    .SD_CMD(SD_CMD),
+    .SD_DAT(SD_DAT0),
+    .SD_DAT3(SD_DAT3)
+);
 
-// ---------- state machine and variables ----------
-localparam IDLE = 0, SEND_CMD = 1, WAIT_RESP = 2, SEND_CMD17 = 3,
-           WAIT_TOKEN = 4, READ_BYTES = 5, DONE = 6, ERROR = 7;
-
+//=======================================================
+// Minimal test FSM
+//=======================================================
 reg [3:0] state;
-reg [5:0] bitpos;          // 0..47, or 0..7 for byte
-reg [47:0] shift48;
-reg [7:0] shift8;
-reg [8:0] byte_count;
-reg [15:0] timeout;        // small timeout counters for safety
+reg [31:0] counter;
 
-// helper: write single byte to UART (blocking one-cycle request)
-task uart_put_byte (input [7:0] b);
-begin
-    uart_data <= {24'd0, b};
-    uart_write <= 1;
-    @(posedge CLOCK_50); // allow handshake pulse to be seen next cycle
-    uart_write <= 0;
-end
-endtask
+assign sd_begin = 1'b1;
 
-// initialization: a small startup wait, then send CMD0
+reg [2:0]  addr_r;
+reg        read_r, write_r;
+reg [31:0] wdata_r;
+
+assign sd_addr  = addr_r;
+assign sd_read  = read_r;
+assign sd_write = write_r;
+assign sd_wdata = wdata_r;
+
 always @(posedge CLOCK_50 or negedge reset_n) begin
-    if(!reset_n) begin
-        SD_CLK <= 0;
-        sd_mosi_o <= 1'b1;
-        sd_mosi_oe <= 1'b1;
-        state <= IDLE;
-        bitpos <= 0;
-        shift48 <= 0;
-        shift8 <= 0;
-        byte_count <= 0;
-        timeout <= 0;
+    if (!reset_n) begin
+        state <= 0;
         uart_write <= 0;
+        counter <= 0;
+        addr_r <= 0;
+        read_r <= 0;
+        write_r <= 0;
+        wdata_r <= 0;
     end else begin
-        // only proceed SPI actions on spi_edge (slowed clock)
-        if(spi_edge) begin
-            case(state)
-                IDLE: begin
-                    // small startup delay to let card power-up (many cycles)
-                    if(timeout < 16'h7FFF) timeout <= timeout + 1;
-                    else begin
-                        // print "S" then prepare CMD0: 0x40 00 00 00 00 95
-                        uart_data <= {24'd0, "S"};
-                        uart_write <= 1;
-                        // load CMD0 into shift48 (MSB first)
-                        shift48 <= 48'h40_00_00_00_00_95;
-                        bitpos <= 47;
-                        sd_mosi_oe <= 1;
-                        SD_CLK <= 0;
-                        timeout <= 0;
-                        state <= SEND_CMD;
-                    end
-                end
+        uart_write <= 0;
+        read_r <= 0;
+        write_r <= 0;
+        counter <= counter + 1;
 
-                SEND_CMD: begin
-                    // toggle SD_CLK and shift bits on MOSI on the rising half
-                    SD_CLK <= ~SD_CLK;
-                    if(SD_CLK) begin
-                        // on rising edge sample MOSI out bit
-                        sd_mosi_o <= shift48[bitpos];
-                        if(bitpos == 0) begin
-                            // finished sending 48 bits
-                            sd_mosi_oe <= 0; // release line, card drives responses
-                            bitpos <= 0;
-                            shift8 <= 8'hFF;
-                            timeout <= 0;
-                            state <= WAIT_RESP;
-                            // print marker once
-                            uart_data <= {24'd0, "C"};
-                            uart_write <= 1;
-                        end else bitpos <= bitpos - 1;
-                    end
-                end
+        case (state)
+            0: begin
+                uart_data <= {24'd0, "R"}; uart_write <= 1;
+                state <= 1;
+            end
 
-                WAIT_RESP: begin
-                    // Keep toggling SD_CLK and shift in bits from MISO,
-                    // assembling bytes; wait until a byte != 0xFF (response).
-                    SD_CLK <= ~SD_CLK;
-                    if(SD_CLK) begin
-                        // shift in one bit (MSB first)
-                        shift8 <= {shift8[6:0], sd_miso};
-                        if(bitpos < 7) bitpos <= bitpos + 1;
-                        else begin
-                            // one byte received
-                            bitpos <= 0;
-                            if(shift8 != 8'hFF) begin
-                                // got response (likely 0x01 for CMD0)
-                                // prepare CMD17 frame: 0x51 + addr(0) + CRC 0xFF
-                                shift48 <= 48'h51_00_00_00_00_FF; // 0x51 = 0x40|0x11 (CMD17)
-                                bitpos <= 47;
-                                sd_mosi_oe <= 1;
-                                SD_CLK <= 0;
-                                timeout <= 0;
-                                state <= SEND_CMD17;
-                                // mark that response was seen
-                                uart_data <= {24'd0, "R"};
-                                uart_write <= 1;
-                            end else begin
-                                // still 0xFF; keep waiting
-                                timeout <= timeout + 1;
-                                if(timeout == 16'hFFFF) begin
-                                    // timeout -> error
-                                    state <= ERROR;
-                                end
-                            end
-                        end
-                    end
-                end
+            // Write CMD0 (reset command)
+            1: begin
+                addr_r <= 1; wdata_r <= 32'h00000000; write_r <= 1; // command low
+                state <= 2;
+            end
+            2: begin
+                addr_r <= 2; wdata_r <= 32'h00000000; write_r <= 1; // command high
+                state <= 3;
+            end
+            3: begin
+                addr_r <= 0; wdata_r <= 32'h1; write_r <= 1; // start command
+                state <= 4;
+            end
 
-                SEND_CMD17: begin
-                    // Shift out CMD17 48 bits similarly to SEND_CMD
-                    SD_CLK <= ~SD_CLK;
-                    if(SD_CLK) begin
-                        sd_mosi_o <= shift48[bitpos];
-                        if(bitpos == 0) begin
-                            sd_mosi_oe <= 0; // release MOSI for response/data
-                            bitpos <= 0;
-                            shift8 <= 8'hFF;
-                            timeout <= 0;
-                            state <= WAIT_TOKEN;
-                        end else bitpos <= bitpos - 1;
-                    end
+            // Wait for completion flag
+            4: begin
+                addr_r <= 0; read_r <= 1;
+                if (sd_rdata[1]) begin // CMD finished
+                    uart_data <= {24'd0, "C"}; uart_write <= 1;
+                    state <= 5;
                 end
+            end
 
-                WAIT_TOKEN: begin
-                    // After CMD17, the card may send some 0xFF bytes, then 0xFE token.
-                    SD_CLK <= ~SD_CLK;
-                    if(SD_CLK) begin
-                        shift8 <= {shift8[6:0], sd_miso};
-                        if(bitpos < 7) bitpos <= bitpos + 1;
-                        else begin
-                            bitpos <= 0;
-                            if(shift8 == 8'hFE) begin
-                                // token received: start reading 512 bytes
-                                byte_count <= 0;
-                                bitpos <= 0;
-                                timeout <= 0;
-                                state <= READ_BYTES;
-                                // optional marker
-                                uart_data <= {24'd0, "T"}; // token
-                                uart_write <= 1;
-                            end else begin
-                                timeout <= timeout + 1;
-                                if(timeout == 16'hFFFF) state <= ERROR;
-                            end
-                        end
-                    end
-                end
-
-                READ_BYTES: begin
-                    // Read 512 bytes; shift bits from sd_miso
-                    SD_CLK <= ~SD_CLK;
-                    if(SD_CLK) begin
-                        shift8 <= {shift8[6:0], sd_miso};
-                        if(bitpos < 7) bitpos <= bitpos + 1;
-                        else begin
-                            // one full byte ready
-                            bitpos <= 0;
-                            // stream to UART (non-blocking write request)
-                            uart_data <= {24'd0, shift8};
-                            uart_write <= 1;
-                            byte_count <= byte_count + 1;
-                            if(byte_count == 9'd511) begin
-                                state <= DONE;
-                                timeout <= 0;
-                            end
-                        end
-                    end
-                end
-
-                DONE: begin
-                    // finished reading 512 bytes; signal done
-                    uart_data <= {24'd0, "D"};
-                    uart_write <= 1;
-                    // hold here
-                    SD_CLK <= 0;
-                    sd_mosi_oe <= 0;
-                    // state stays DONE
-                end
-
-                ERROR: begin
-                    uart_data <= {24'd0, "E"}; uart_write <= 1;
-                    SD_CLK <= 0;
-                    sd_mosi_oe <= 0;
-                end
-
-                default: state <= ERROR;
-            endcase
-        end else begin
-            // not spi edge: clear uart_write pulse to 0 (we pulse it one clock)
-            uart_write <= 0;
-        end
+            5: begin
+                uart_data <= {24'd0, "D"}; uart_write <= 1;
+                state <= 5; // stop
+            end
+        endcase
     end
 end
 
