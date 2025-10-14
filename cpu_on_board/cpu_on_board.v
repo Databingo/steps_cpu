@@ -975,7 +975,8 @@
 //===========================================================
 // Minimal DE1 SD Card SPI-like test (Cyclone II Starter)
 //===========================================================
-module sd_card_minimal_test (
+
+module cpu_on_board (
     (* chip_pin = "PIN_L1"  *) input  wire CLOCK_50,
     (* chip_pin = "PIN_R22" *) input  wire KEY0,        // Active-low reset
     (* chip_pin = "R20"     *) output wire LEDR0,
