@@ -3648,10 +3648,10 @@ module cpu_on_board (
     (* chip_pin = "PIN_R22" *) input  wire KEY0,        // Active-low reset
     (* chip_pin = "R20"     *) output wire LEDR0,
 
-    (* chip_pin = "V20" *) output reg  SD_CLK,  // SD_CLK (SPI clock)
-    (* chip_pin = "Y20" *) output reg  SD_CMD,  // SD_CMD (MOSI)
-    (* chip_pin = "W20" *) input  wire SD_DAT0, // SD_DAT0 (MISO)
-    (* chip_pin = "U20" *) output reg  SD_DAT3  // SD_DAT3 (CS)
+    (* chip_pin = "V20" *) output wire SD_CLK,  // SD_CLK
+    (* chip_pin = "Y20" *) inout  wire SD_CMD,  // SD_CMD
+    (* chip_pin = "W20" *) inout  wire SD_DAT0, // SD_DAT0
+    (* chip_pin = "U20" *) output wire SD_DAT3  // SD_DAT3 / CS
 );
 
 //=======================================================
@@ -3682,10 +3682,33 @@ jtag_uart_system uart0 (
     .jtag_uart_0_avalon_jtag_slave_read_n(1'b1)
 );
 
-//------------------------------------------------------
-// SPI bit-bang engine  (single always block driver)
-//------------------------------------------------------
-localparam SPI_DIV = 200; // ≈250 kHz
+//=======================================================
+// SD card interface (slave wrapper)
+//=======================================================
+wire [2:0]  sd_addr;
+wire        sd_read, sd_write, sd_begin;
+wire [31:0] sd_wdata;
+wire [31:0] sd_rdata;
+
+SdCardSlave sd0 (
+    .clk(CLOCK_50),
+    .reset(~reset_n),
+    .address(sd_addr),
+    .read(sd_read),
+    .write(sd_write),
+    .writedata(sd_wdata),
+    .readdata(sd_rdata),
+    .begintransfer(sd_begin),
+    .SD_CLK(SD_CLK),
+    .SD_CMD(SD_CMD),
+    .SD_DAT(SD_DAT0),
+    .SD_DAT3(SD_DAT3)
+);
+
+//=======================================================
+// SPI engine (single driver)
+//=======================================================
+localparam SPI_DIV = 200; // approx 250 kHz
 
 reg [15:0] spi_clkdiv;
 reg [7:0]  spi_tx, spi_rx;
@@ -3694,13 +3717,19 @@ reg        spi_busy;
 reg [7:0]  spi_tx_next;
 reg        spi_start_next;
 wire       spi_done = (!spi_busy && !spi_start_next);
-reg        spi_done_d;   // 1-cycle pulse when a byte finishes
+reg        spi_done_d;
+
+reg SD_CLK_r;
+reg SD_CMD_r;
+
+assign SD_CLK = SD_CLK_r;
+assign SD_CMD = SD_CMD_r;
 
 always @(posedge CLOCK_50 or negedge reset_n) begin
     if (!reset_n) begin
         spi_clkdiv   <= 0;
-        SD_CLK       <= 1'b0;
-        SD_CMD       <= 1'b1;
+        SD_CLK_r     <= 1'b0;
+        SD_CMD_r     <= 1'b1;
         spi_busy     <= 0;
         spi_bit      <= 0;
         spi_tx       <= 8'hFF;
@@ -3722,10 +3751,10 @@ always @(posedge CLOCK_50 or negedge reset_n) begin
             spi_clkdiv <= spi_clkdiv + 1;
             if (spi_clkdiv == SPI_DIV) begin
                 spi_clkdiv <= 0;
-                SD_CLK <= ~SD_CLK;
+                SD_CLK_r <= ~SD_CLK_r;
 
-                if (SD_CLK == 1'b0) begin
-                    SD_CMD <= spi_tx[7];
+                if (SD_CLK_r == 1'b0) begin
+                    SD_CMD_r <= spi_tx[7];
                     spi_tx <= {spi_tx[6:0], 1'b1};
                 end
                 else begin
@@ -3733,8 +3762,8 @@ always @(posedge CLOCK_50 or negedge reset_n) begin
                     spi_bit <= spi_bit - 1;
                     if (spi_bit == 0) begin
                         spi_busy <= 0;
-                        spi_done_d <= 1;   // byte done pulse
-                        SD_CLK <= 1'b0;
+                        spi_done_d <= 1;
+                        SD_CLK_r <= 1'b0;
                     end
                 end
             end
@@ -3743,87 +3772,104 @@ always @(posedge CLOCK_50 or negedge reset_n) begin
 end
 
 //=======================================================
-// SD card initialization FSM
+// FSM for SD initialization test
 //=======================================================
-reg [7:0] state;
-reg [31:0] counter;
+reg [4:0] state;
+reg [2:0] addr_r;
+reg        read_r, write_r;
+reg [31:0] wdata_r;
+
+assign sd_begin  = 1'b1;
+assign sd_addr   = addr_r;
+assign sd_read   = read_r;
+assign sd_write  = write_r;
+assign sd_wdata  = wdata_r;
 
 always @(posedge CLOCK_50 or negedge reset_n) begin
     if (!reset_n) begin
         state <= 0;
         uart_write <= 0;
-        counter <= 0;
-        SD_DAT3 <= 1'b1; // CS high
-        SD_CMD  <= 1'b1; // MOSI idle
-        spi_start <= 0;
-        spi_tx <= 8'hFF;
+        addr_r <= 0;
+        read_r <= 0;
+        write_r <= 0;
+        wdata_r <= 0;
+        spi_tx_next <= 8'hFF;
+        spi_start_next <= 0;
     end else begin
         uart_write <= 0;
-        spi_start <= 0;
+        read_r <= 0;
+        write_r <= 0;
 
         case (state)
             0: begin
                 uart_data <= {24'd0, "R"}; uart_write <= 1;
-                counter <= 0;
                 state <= 1;
             end
 
-            // 80 clocks with CS high
-            1: begin
-                SD_DAT3 <= 1'b1;
-                if (counter < 4000) begin
-                    counter <= counter + 1;
-                end else begin
-                    counter <= 0;
-                    state <= 2;
-                end
-            end
-
             // CMD0
+            1: begin
+                if (spi_done_d) begin
+                    spi_tx_next <= 8'h40; spi_start_next <= 1; state <= 2;
+                end
+            end
             2: begin
-                SD_DAT3 <= 1'b0; // CS low
-                if (!spi_busy) begin
-                    spi_tx <= 8'h40; spi_start <= 1; state <= 3;
+                if (spi_done_d) begin
+                    spi_tx_next <= 8'h00; spi_start_next <= 1; state <= 3;
                 end
             end
-
-            3: if (!spi_busy) begin spi_tx <= 8'h00; spi_start <= 1; state <= 4; end
-            4: if (!spi_busy) begin spi_tx <= 8'h00; spi_start <= 1; state <= 5; end
-            5: if (!spi_busy) begin spi_tx <= 8'h00; spi_start <= 1; state <= 6; end
-            6: if (!spi_busy) begin spi_tx <= 8'h00; spi_start <= 1; state <= 7; end
-            7: if (!spi_busy) begin spi_tx <= 8'h95; spi_start <= 1; state <= 8; end
-
-            // Wait response
-            8: if (!spi_busy) begin spi_tx <= 8'hFF; spi_start <= 1; state <= 9; end
-            9: if (!spi_busy) begin
-                if (spi_rx == 8'h01) begin
+            3: begin
+                if (spi_done_d) begin
+                    spi_tx_next <= 8'h00; spi_start_next <= 1; state <= 4;
+                end
+            end
+            4: begin
+                if (spi_done_d) begin
+                    spi_tx_next <= 8'h00; spi_start_next <= 1; state <= 5;
+                end
+            end
+            5: begin
+                if (spi_done_d) begin
                     uart_data <= {24'd0, "0"}; uart_write <= 1;
-                    state <= 10;
-                end else begin
-                    state <= 8; // keep polling
+                    state <= 6;
                 end
             end
 
-            // CMD8
-            10: if (!spi_busy) begin spi_tx <= 8'h48; spi_start <= 1; state <= 11; end
-            11: if (!spi_busy) begin spi_tx <= 8'h00; spi_start <= 1; state <= 12; end
-            12: if (!spi_busy) begin spi_tx <= 8'h00; spi_start <= 1; state <= 13; end
-            13: if (!spi_busy) begin spi_tx <= 8'h01; spi_start <= 1; state <= 14; end
-            14: if (!spi_busy) begin spi_tx <= 8'hAA; spi_start <= 1; state <= 15; end
-            15: if (!spi_busy) begin spi_tx <= 8'h87; spi_start <= 1; state <= 16; end
-            16: if (!spi_busy) begin spi_tx <= 8'hFF; spi_start <= 1; state <= 17; end
-            17: if (!spi_busy) begin
-                if (spi_rx == 8'h01) begin
-                    uart_data <= {24'd0, "8"}; uart_write <= 1;
-                    state <= 18;
-                end else state <= 16;
+            // CMD55
+            6: begin
+                if (spi_done_d) begin
+                    spi_tx_next <= 8'h77; spi_start_next <= 1; state <= 7;
+                end
+            end
+            7: begin
+                if (spi_done_d) begin
+                    spi_tx_next <= 8'h00; spi_start_next <= 1; state <= 8;
+                end
+            end
+            8: begin
+                if (spi_done_d) begin
+                    uart_data <= {24'd0, "5"}; uart_write <= 1;
+                    state <= 9;
+                end
             end
 
-            // Done
-            18: begin
-                uart_data <= {24'd0, "D"}; uart_write <= 1;
-                state <= 18;
+            // ACMD41
+            9: begin
+                if (spi_done_d) begin
+                    spi_tx_next <= 8'h69; spi_start_next <= 1; state <= 10;
+                end
             end
+            10: begin
+                if (spi_done_d) begin
+                    uart_data <= {24'd0, "A"}; uart_write <= 1;
+                    state <= 11;
+                end
+            end
+            11: begin
+                uart_data <= {24'd0, "D"}; uart_write <= 1;
+                state <= 12;
+            end
+
+            12: state <= 12; // stop
         endcase
     end
 end
