@@ -3330,38 +3330,14 @@
 
 
 module cpu_on_board (
-    //input  wire CLOCK_50,
-    //input  wire KEY0,         // Active-low reset
-    //output wire LEDR0,
-
-    //// SD card pins
-    //output wire SD_CLK,
-    //inout  wire SD_CMD,
-    //inout  wire SD_DAT0,
-    //output wire SD_DAT3
-
-
-
-
     (* chip_pin = "PIN_L1"  *) input  wire CLOCK_50,
     (* chip_pin = "PIN_R22" *) input  wire KEY0,        // Active-low reset
     (* chip_pin = "R20"     *) output wire LEDR0,
 
     (* chip_pin = "V20" *) output wire SD_CLK,  // SD_CLK
     (* chip_pin = "Y20" *) inout  wire SD_CMD,  // SD_CMD
-    (* chip_pin = "W20" *) inout  wire SD_DAT0,  // SD_DAT0
-    (* chip_pin = "U20" *) output wire SD_DAT3 // SD_DAT3 / CS
-
-
-
-
-
-
-
-
-
-
-
+    (* chip_pin = "W20" *) inout  wire SD_DAT0, // SD_DAT0
+    (* chip_pin = "U20" *) output wire SD_DAT3  // SD_DAT3 / CS
 
 
 );
@@ -3470,7 +3446,6 @@ always @(posedge CLOCK_50 or negedge reset_n) begin
                 addr_r <= 0; wdata_r <= 32'h1; write_r <= 1; // start command
                 state <= 4;
             end
-
             // Wait for completion flag
             4: begin
                 addr_r <= 0; read_r <= 1;
@@ -3482,8 +3457,14 @@ always @(posedge CLOCK_50 or negedge reset_n) begin
 
             5: begin
                 uart_data <= {24'd0, "D"}; uart_write <= 1;
-                state <= 5; // stop
+                state <= 6; // new: move to idle
             end
+
+            6: begin
+                // done, hold idle
+                state <= 6;
+            end
+
         endcase
     end
 end
