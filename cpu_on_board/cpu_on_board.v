@@ -3476,12 +3476,12 @@
 module cpu_on_board (
     (* chip_pin = "PIN_L1"  *) input  wire CLOCK_50,
     (* chip_pin = "PIN_R22" *) input  wire KEY0,        // Active-low reset
-    (* chip_pin = "PIN_R20"     *) output wire LEDR0,
+    (* chip_pin = "R20"     *) output wire LEDR0,
 
-    (* chip_pin = "PIN_V20" *) output wire SD_CLK,  // SD_CLK
-    (* chip_pin = "PIN_Y20" *) inout  wire SD_CMD,  // SD_CMD
-    (* chip_pin = "PIN_W20" *) inout  wire SD_DAT0, // SD_DAT0
-    (* chip_pin = "PIN_U20" *) output wire SD_DAT3  // SD_DAT3 / CS
+    (* chip_pin = "V20" *) output wire SD_CLK,  // SD_CLK
+    (* chip_pin = "Y20" *) inout  wire SD_CMD,  // SD_CMD
+    (* chip_pin = "W20" *) inout  wire SD_DAT0, // SD_DAT0
+    (* chip_pin = "U20" *) output wire SD_DAT3  // SD_DAT3 / CS
 );
 
 //=======================================================
