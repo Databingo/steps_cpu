@@ -139,6 +139,7 @@ module cpu_on_board (
 // =======================================================
 reg [23:0] blink_counter;
 assign LEDR0 = blink_counter[23];
+reg cmd_start;
 
 always @(posedge CLOCK_50 or negedge KEY0) begin
     if (!KEY0)
