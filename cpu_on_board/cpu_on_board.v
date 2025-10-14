@@ -828,41 +828,173 @@
 //===========================================================
 // Minimal DE1 SD Card SPI-like test (Cyclone II Starter)
 //===========================================================
-module cpu_on_board (
-    (* chip_pin = "PIN_L1"  *) input  wire CLOCK_50,
-    (* chip_pin = "PIN_R22" *) input  wire KEY0,        // Active-low reset
-    (* chip_pin = "R20"     *) output wire LEDR0,
+//module cpu_on_board (
+//    (* chip_pin = "PIN_L1"  *) input  wire CLOCK_50,
+//    (* chip_pin = "PIN_R22" *) input  wire KEY0,        // Active-low reset
+//    (* chip_pin = "R20"     *) output wire LEDR0,
+//
+//    // --- SD card pins ---
+//    (* chip_pin = "V20" *) output wire SD_CLK,   // SD_CLK
+//    (* chip_pin = "Y20" *) inout  wire SD_CMD,   // SD_CMD
+//    (* chip_pin = "W20" *) inout  wire SD_DAT0,  // SD_DAT0
+//    (* chip_pin = "U20" *) output wire SD_DAT3   // optional CS line
+//);
+//
+//    //=======================================================
+//    // Internal reset and LED blink
+//    //=======================================================
+//    wire reset_n = KEY0;
+//    reg [23:0] blink_counter;
+//
+//    always @(posedge CLOCK_50 or negedge reset_n)
+//        if (!reset_n)
+//            blink_counter <= 0;
+//        else
+//            blink_counter <= blink_counter + 1'b1;
+//
+//    assign LEDR0 = blink_counter[23];
+//
+//    //=======================================================
+//    // UART for debug output
+//    //=======================================================
+//    reg  [31:0] uart_data;
+//    reg         uart_write;
+//
+//    jtag_uart_system uart0 (
+//        .clk_clk(CLOCK_50),
+//        .reset_reset_n(reset_n),
+//        .jtag_uart_0_avalon_jtag_slave_address(1'b0),
+//        .jtag_uart_0_avalon_jtag_slave_writedata(uart_data),
+//        .jtag_uart_0_avalon_jtag_slave_write_n(~uart_write),
+//        .jtag_uart_0_avalon_jtag_slave_chipselect(1'b1),
+//        .jtag_uart_0_avalon_jtag_slave_read_n(1'b1)
+//    );
+//
+//    //=======================================================
+//    // Simple SD controller wiring (mimic SOPC signals)
+//    //=======================================================
+//    reg [1:0]  sd_address;
+//    reg        sd_chipselect;
+//    reg        sd_write_n;
+//    reg [15:0] sd_writedata;
+//    wire [15:0] sd_readdata_cmd;
+//    wire [15:0] sd_readdata_dat;
+//    wire        sd_out_clk;
+//
+//    // --- SD_CLK ---
+//    SD_CLK sd_clk_inst (
+//        .address(sd_address),
+//        .chipselect(sd_chipselect),
+//        .clk(CLOCK_50),
+//        .reset_n(reset_n),
+//        .write_n(sd_write_n),
+//        .writedata(sd_writedata),
+//        .out_port(sd_out_clk)
+//    );
+//    assign SD_CLK = sd_out_clk;
+//
+//    // --- SD_CMD ---
+//    SD_CMD sd_cmd_inst (
+//        .address(sd_address),
+//        .chipselect(sd_chipselect),
+//        .clk(CLOCK_50),
+//        .reset_n(reset_n),
+//        .write_n(sd_write_n),
+//        .writedata(sd_writedata),
+//        .bidir_port(SD_CMD),
+//        .readdata(sd_readdata_cmd)
+//    );
+//
+//    // --- SD_DAT0 ---
+//    SD_DAT sd_dat_inst (
+//        .address(sd_address),
+//        .chipselect(sd_chipselect),
+//        .clk(CLOCK_50),
+//        .reset_n(reset_n),
+//        .write_n(sd_write_n),
+//        .writedata(sd_writedata),
+//        .bidir_port(SD_DAT0),
+//        .readdata(sd_readdata_dat)
+//    );
+//
+//    //=======================================================
+//    // Simple test sequence
+//    //=======================================================
+//    reg [3:0]  state;
+//    reg [31:0] counter;
+//
+//    always @(posedge CLOCK_50 or negedge reset_n) begin
+//        if (!reset_n) begin
+//            state <= 0;
+//            counter <= 0;
+//            uart_write <= 0;
+//            sd_chipselect <= 0;
+//            sd_write_n <= 1;
+//            sd_writedata <= 16'd0;
+//            sd_address <= 2'd0;
+//        end else begin
+//            uart_write <= 0;
+//            counter <= counter + 1;
+//
+//            case (state)
+//                0: begin
+//                    if (counter == 32'd50_000_000) begin // 1 sec
+//                        uart_data <= {24'd0, "S"};
+//                        uart_write <= 1;
+//                        counter <= 0;
+//                        state <= 1;
+//                    end
+//                end
+//                1: begin
+//                    uart_data <= {24'd0, "/"};
+//                    uart_write <= 1;
+//                    sd_chipselect <= 1'b1;
+//                    sd_write_n <= 1'b0;
+//                    sd_writedata <= 16'hFF; // drive clock pulses
+//                    sd_address <= 2'd0;
+//                    state <= 2;
+//                end
+//                2: begin
+//                    sd_chipselect <= 1'b0;
+//                    sd_write_n <= 1'b1;
+//                    uart_data <= {24'd0, "0"};
+//                    uart_write <= 1;
+//                    state <= 3;
+//                end
+//                3: begin
+//                    // stop
+//                    state <= 3;
+//                end
+//            endcase
+//        end
+//    end
+//
+//endmodule
 
-    // --- SD card pins ---
-    (* chip_pin = "V20" *) output wire SD_CLK,   // SD_CLK
-    (* chip_pin = "Y20" *) inout  wire SD_CMD,   // SD_CMD
-    (* chip_pin = "W20" *) inout  wire SD_DAT0,  // SD_DAT0
-    (* chip_pin = "U20" *) output wire SD_DAT3   // optional CS line
+
+
+
+
+// sd_spi_bitbang.v
+// Minimal bit-bang SPI SD init (CMD0) + JTAG UART debug print
+// Targets: DE1 Cyclone II, 50 MHz
+
+module cpu_on_board (
+    input  wire CLOCK_50,
+    input  wire KEY0_n,       // active-low reset
+    output reg  SPI_SCLK,
+    output reg  SPI_MOSI,
+    input  wire SPI_MISO,
+    output reg  SPI_SS_n,
+    output reg  LEDR0
 );
 
-    //=======================================================
-    // Internal reset and LED blink
-    //=======================================================
-    wire reset_n = KEY0;
-    reg [23:0] blink_counter;
-
-    always @(posedge CLOCK_50 or negedge reset_n)
-        if (!reset_n)
-            blink_counter <= 0;
-        else
-            blink_counter <= blink_counter + 1'b1;
-
-    assign LEDR0 = blink_counter[23];
-
-    //=======================================================
-    // UART for debug output
-    //=======================================================
-    reg  [31:0] uart_data;
-    reg         uart_write;
-
+    // --- UART (JTAG) ---
+    reg [31:0] uart_data;
+    reg        uart_write; // 1-cycle pulse means write
     jtag_uart_system uart0 (
         .clk_clk(CLOCK_50),
-        .reset_reset_n(reset_n),
+        .reset_reset_n(KEY0_n),
         .jtag_uart_0_avalon_jtag_slave_address(1'b0),
         .jtag_uart_0_avalon_jtag_slave_writedata(uart_data),
         .jtag_uart_0_avalon_jtag_slave_write_n(~uart_write),
@@ -870,101 +1002,230 @@ module cpu_on_board (
         .jtag_uart_0_avalon_jtag_slave_read_n(1'b1)
     );
 
-    //=======================================================
-    // Simple SD controller wiring (mimic SOPC signals)
-    //=======================================================
-    reg [1:0]  sd_address;
-    reg        sd_chipselect;
-    reg        sd_write_n;
-    reg [15:0] sd_writedata;
-    wire [15:0] sd_readdata_cmd;
-    wire [15:0] sd_readdata_dat;
-    wire        sd_out_clk;
+    // --- Parameters ---
+    parameter CLK_DIV = 200;             // SCLK half-period = CLK_DIV cycles -> SCLK freq ~ 50MHz/(2*CLK_DIV)
+    parameter START_DELAY_CYCLES = 32'd2_500_000; // initial delay before printing "S" (about 0.05s)
+    // State machine
+    localparam S_IDLE         = 4'd0;
+    localparam S_DELAY_START  = 4'd1;
+    localparam S_PRINT_S      = 4'd2;
+    localparam S_80_CLOCKS    = 4'd3;
+    localparam S_CS_LOW       = 4'd4;
+    localparam S_SEND_CMD0    = 4'd5;
+    localparam S_WAIT_RESP    = 4'd6;
+    localparam S_PRINT_RESP   = 4'd7;
+    localparam S_DONE         = 4'd8;
 
-    // --- SD_CLK ---
-    SD_CLK sd_clk_inst (
-        .address(sd_address),
-        .chipselect(sd_chipselect),
-        .clk(CLOCK_50),
-        .reset_n(reset_n),
-        .write_n(sd_write_n),
-        .writedata(sd_writedata),
-        .out_port(sd_out_clk)
-    );
-    assign SD_CLK = sd_out_clk;
+    reg [3:0] state;
+    reg [31:0] start_delay;
 
-    // --- SD_CMD ---
-    SD_CMD sd_cmd_inst (
-        .address(sd_address),
-        .chipselect(sd_chipselect),
-        .clk(CLOCK_50),
-        .reset_n(reset_n),
-        .write_n(sd_write_n),
-        .writedata(sd_writedata),
-        .bidir_port(SD_CMD),
-        .readdata(sd_readdata_cmd)
-    );
+    // CMD0
+    reg [7:0] cmd0 [0:5];
+    initial begin
+        cmd0[0] = 8'h40; cmd0[1] = 8'h00; cmd0[2] = 8'h00; cmd0[3] = 8'h00; cmd0[4] = 8'h00; cmd0[5] = 8'h95;
+    end
 
-    // --- SD_DAT0 ---
-    SD_DAT sd_dat_inst (
-        .address(sd_address),
-        .chipselect(sd_chipselect),
-        .clk(CLOCK_50),
-        .reset_n(reset_n),
-        .write_n(sd_write_n),
-        .writedata(sd_writedata),
-        .bidir_port(SD_DAT0),
-        .readdata(sd_readdata_dat)
-    );
+    // SPI timing and transfer helpers
+    reg [31:0] clkdiv;
+    reg        sclk_tick;      // pulses every CLK_DIV cycles
+    reg [7:0]  out_byte;
+    reg [7:0]  in_byte;
+    reg [2:0]  bit_idx;        // 7..0
+    reg [2:0]  byte_idx;       // for cmd bytes
+    reg [9:0]  clocks80_cnt;   // count for 80 clocks (we output 0xFF bytes)
+    reg [7:0]  resp_byte;
+    reg [3:0]  resp_wait_cnt;
 
-    //=======================================================
-    // Simple test sequence
-    //=======================================================
-    reg [3:0]  state;
-    reg [31:0] counter;
+    // Initialize outputs
+    initial begin
+        SPI_SCLK  = 1'b0;
+        SPI_MOSI  = 1'b1;
+        SPI_SS_n  = 1'b1;
+        LEDR0     = 1'b0;
+        uart_data = 32'd0;
+        uart_write= 1'b0;
+        state     = S_IDLE;
+        start_delay = 0;
+        clkdiv    = 0;
+        sclk_tick = 0;
+        out_byte  = 8'hFF;
+        in_byte   = 8'h00;
+        bit_idx   = 3'd7;
+        byte_idx  = 3'd0;
+        clocks80_cnt = 0;
+        resp_wait_cnt = 0;
+    end
 
-    always @(posedge CLOCK_50 or negedge reset_n) begin
-        if (!reset_n) begin
-            state <= 0;
-            counter <= 0;
-            uart_write <= 0;
-            sd_chipselect <= 0;
-            sd_write_n <= 1;
-            sd_writedata <= 16'd0;
-            sd_address <= 2'd0;
+    // Clock divider to create sclk_tick
+    always @(posedge CLOCK_50 or negedge KEY0_n) begin
+        if (!KEY0_n) begin
+            clkdiv <= 0;
+            sclk_tick <= 0;
         end else begin
+            if (clkdiv == CLK_DIV-1) begin
+                clkdiv <= 0;
+                sclk_tick <= 1;
+            end else begin
+                clkdiv <= clkdiv + 1;
+                sclk_tick <= 0;
+            end
+        end
+    end
+
+    // Main FSM
+    always @(posedge CLOCK_50 or negedge KEY0_n) begin
+        if (!KEY0_n) begin
+            state <= S_IDLE;
+            start_delay <= 0;
             uart_write <= 0;
-            counter <= counter + 1;
+            SPI_SS_n <= 1'b1;
+            SPI_MOSI <= 1'b1;
+            SPI_SCLK <= 1'b0;
+            LEDR0 <= 0;
+            clocks80_cnt <= 0;
+            byte_idx <= 0;
+            bit_idx <= 7;
+            resp_wait_cnt <= 0;
+        end else begin
+            // default clear one-cycle signals
+            uart_write <= 0;
 
             case (state)
-                0: begin
-                    if (counter == 32'd50_000_000) begin // 1 sec
-                        uart_data <= {24'd0, "S"};
-                        uart_write <= 1;
-                        counter <= 0;
-                        state <= 1;
+                S_IDLE: begin
+                    start_delay <= 0;
+                    state <= S_DELAY_START;
+                end
+
+                S_DELAY_START: begin
+                    // wait for UART/JTAG to be up (avoid first write lost)
+                    start_delay <= start_delay + 1;
+                    if (start_delay >= START_DELAY_CYCLES) state <= S_PRINT_S;
+                end
+
+                S_PRINT_S: begin
+                    // print 'S' to indicate start
+                    uart_data <= {24'd0, "S"};
+                    uart_write <= 1;
+                    state <= S_80_CLOCKS;
+                    clocks80_cnt <= 0;
+                    SPI_SS_n <= 1'b1; // CS high while sending 0xFF clocks
+                    SPI_MOSI <= 1'b1;
+                    SPI_SCLK <= 1'b0;
+                end
+
+                S_80_CLOCKS: begin
+                    // Send at least 80 clocks (we send as 10 bytes of 0xFF)
+                    LEDR0 <= 1'b1;
+                    if (sclk_tick) begin
+                        // toggle SCLK and only drive MOSI high (0xFF)
+                        SPI_SCLK <= ~SPI_SCLK;
+                        if (SPI_SCLK == 1'b0) begin
+                            // falling -> drive MOSI (for next half-cycle)
+                            SPI_MOSI <= 1'b1;
+                            clocks80_cnt <= clocks80_cnt + 1;
+                        end
+                    end
+                    if (clocks80_cnt >= 80) begin
+                        SPI_SCLK <= 1'b0;
+                        SPI_MOSI <= 1'b1;
+                        state <= S_CS_LOW;
                     end
                 end
-                1: begin
-                    uart_data <= {24'd0, "/"};
+
+                S_CS_LOW: begin
+                    // Assert CS low to start command frame
+                    SPI_SS_n <= 1'b0;
+                    // prepare to send first byte of CMD0
+                    out_byte <= cmd0[0];
+                    byte_idx <= 0;
+                    bit_idx <= 7;
+                    in_byte <= 0;
+                    state <= S_SEND_CMD0;
+                end
+
+                S_SEND_CMD0: begin
+                    // Bit-bang one bit per sclk_tick: on falling edge drive MOSI; on rising edge sample MISO
+                    if (sclk_tick) begin
+                        SPI_SCLK <= ~SPI_SCLK;
+                        if (SPI_SCLK == 1'b0) begin
+                            // falling -> place MOSI bit
+                            SPI_MOSI <= out_byte[bit_idx];
+                        end else begin
+                            // rising -> sample MISO
+                            in_byte <= {in_byte[6:0], SPI_MISO};
+                            if (bit_idx == 0) begin
+                                // finished this byte
+                                // move to next byte or finish
+                                byte_idx <= byte_idx + 1;
+                                if (byte_idx < 5) begin
+                                    out_byte <= cmd0[byte_idx+1];
+                                    bit_idx <= 7;
+                                end else begin
+                                    // all 6 bytes sent -> go to wait response
+                                    SPI_SCLK <= 1'b0;
+                                    SPI_MOSI <= 1'b1;
+                                    resp_byte <= 8'hFF;
+                                    resp_wait_cnt <= 0;
+                                    state <= S_WAIT_RESP;
+                                end
+                            end else begin
+                                bit_idx <= bit_idx - 1;
+                            end
+                        end
+                    end
+                end
+
+                S_WAIT_RESP: begin
+                    // After command, send 0xFF bytes (drive MOSI=1) and sample incoming MISO bits looking for R1 (non-0xFF)
+                    if (sclk_tick) begin
+                        SPI_SCLK <= ~SPI_SCLK;
+                        if (SPI_SCLK == 1'b0) begin
+                            SPI_MOSI <= 1'b1;
+                        end else begin
+                            // rising: shift in
+                            resp_byte <= {resp_byte[6:0], SPI_MISO};
+                            resp_wait_cnt <= resp_wait_cnt + 1;
+                            // after 8 rising edges we got a byte
+                            if (resp_wait_cnt == 8) begin
+                                // check if this byte is not 0xFF
+                                if (resp_byte != 8'hFF) begin
+                                    // got response
+                                    state <= S_PRINT_RESP;
+                                end else begin
+                                    // keep polling; limit attempts to avoid infinite loop
+                                    resp_wait_cnt <= 0;
+                                    resp_byte <= 8'hFF;
+                                end
+                            end
+                        end
+                    end
+                end
+
+                S_PRINT_RESP: begin
+                    // print ASCII: "R=" and hex nibble
+                    // print simple: R<value ASCII decimal>
+                    uart_data <= {24'd0, "R"};
                     uart_write <= 1;
-                    sd_chipselect <= 1'b1;
-                    sd_write_n <= 1'b0;
-                    sd_writedata <= 16'hFF; // drive clock pulses
-                    sd_address <= 2'd0;
-                    state <= 2;
-                end
-                2: begin
-                    sd_chipselect <= 1'b0;
-                    sd_write_n <= 1'b1;
-                    uart_data <= {24'd0, "0"};
+                    // small gap then print numeric low byte (in hex nibble)
+                    // print low nibble as ASCII hex
+                    // convert to ascii hex (single byte)
+                    // we print resp_byte as decimal char for simplicity:
+                    uart_data <= {24'd0, (resp_byte & 8'hFF)};
                     uart_write <= 1;
-                    state <= 3;
+                    // done: deassert CS
+                    SPI_SS_n <= 1'b1;
+                    SPI_MOSI <= 1'b1;
+                    SPI_SCLK <= 1'b0;
+                    LEDR0 <= 1'b0;
+                    state <= S_DONE;
                 end
-                3: begin
-                    // stop
-                    state <= 3;
+
+                S_DONE: begin
+                    // stay here
+                    state <= S_DONE;
                 end
+
+                default: state <= S_IDLE;
             endcase
         end
     end
