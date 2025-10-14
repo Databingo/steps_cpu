@@ -3905,35 +3905,176 @@
 
 
 
+//module cpu_on_board (
+//    (* chip_pin = "PIN_L1"  *) input  wire CLOCK_50,
+//    (* chip_pin = "PIN_R22" *) input  wire KEY0,        // Active-low reset
+//    (* chip_pin = "R20"     *) output wire LEDR0,
+//
+//    (* chip_pin = "V20" *) output wire SD_CLK,  // SD_CLK
+//    (* chip_pin = "Y20" *) inout  wire SD_CMD,  // SD_CMD
+//    (* chip_pin = "W20" *) inout  wire SD_DAT0, // SD_DAT0
+//    (* chip_pin = "U20" *) output wire SD_DAT3  // SD_DAT3 / CS
+//);
+//
+//    // =======================================================
+//    // Heartbeat LED
+//    // =======================================================
+//    reg [23:0] blink_counter;
+//    assign LEDR0 = blink_counter[23];
+//
+//    always @(posedge CLOCK_50 or negedge KEY0) begin
+//        if (!KEY0)
+//            blink_counter <= 0;
+//        else
+//            blink_counter <= blink_counter + 1'b1;
+//    end
+//
+//    // =======================================================
+//    // JTAG UART for debugging
+//    // =======================================================
+//    reg  [31:0] uart_data;
+//    reg         uart_write;
+//
+//    jtag_uart_system uart0 (
+//        .clk_clk(CLOCK_50),
+//        .reset_reset_n(KEY0),
+//        .jtag_uart_0_avalon_jtag_slave_address(1'b0),
+//        .jtag_uart_0_avalon_jtag_slave_writedata(uart_data),
+//        .jtag_uart_0_avalon_jtag_slave_write_n(~uart_write),
+//        .jtag_uart_0_avalon_jtag_slave_chipselect(1'b1),
+//        .jtag_uart_0_avalon_jtag_slave_read_n(1'b1)
+//    );
+//
+//    // =======================================================
+//    // SD card CMD0 probe
+//    // =======================================================
+//    reg sd_cmd_out;
+//    reg sd_cmd_oe;      // output enable for CMD line
+//    reg [5:0] bit_cnt;
+//    reg [47:0] cmd_shift; // 6-byte CMD0
+//    reg cmd_start;
+//    reg [15:0] clk_div;
+//    reg [7:0] resp_byte;
+//    reg resp_ready;
+//    reg [3:0] resp_nibble;
+//    reg send_high, send_low;
+//
+//    assign SD_CMD = sd_cmd_oe ? sd_cmd_out : 1'bz;
+//    assign SD_CLK = clk_div[15]; // slow clock for SD (~1.5 kHz)
+//    assign SD_DAT3 = 1'b1;       // CS high
+//    assign SD_DAT0 = 1'bz;       // SD_DAT0 input
+//
+//    always @(posedge CLOCK_50 or negedge KEY0) begin
+//        if (!KEY0) begin
+//            clk_div <= 0;
+//            cmd_start <= 0;
+//            sd_cmd_oe <= 0;
+//            sd_cmd_out <= 1;
+//            bit_cnt <= 0;
+//            cmd_shift <= 48'h40_00_00_00_00_95; // CMD0 with CRC
+//            resp_ready <= 0;
+//            resp_byte <= 0;
+//            uart_write <= 0;
+//            resp_nibble <= 0;
+//            send_high <= 1;
+//            send_low <= 0;
+//        end else begin
+//            clk_div <= clk_div + 1;
+//            uart_write <= 0;
+//
+//            // Start CMD0 after ~1s
+//            if (blink_counter == 24'd50_000_000)
+//                cmd_start <= 1;
+//
+//            // Send command
+//            if (cmd_start) begin
+//                sd_cmd_oe <= 1;
+//                sd_cmd_out <= cmd_shift[47];
+//                cmd_shift <= {cmd_shift[46:0], 1'b1};
+//                bit_cnt <= bit_cnt + 1;
+//
+//                if (bit_cnt == 47) begin
+//                    sd_cmd_oe <= 0; // release CMD line
+//                    cmd_start <= 0;
+//                    bit_cnt <= 0;
+//                    resp_ready <= 1; // ready to read response
+//                end
+//            end
+//
+//            // Read response byte
+//            if (resp_ready) begin
+//                resp_byte <= {resp_byte[6:0], SD_DAT0};
+//                bit_cnt <= bit_cnt + 1;
+//
+//                if (bit_cnt == 7) begin
+//                    resp_ready <= 0;
+//                    // Convert to ASCII hex
+//                    resp_nibble <= resp_byte[7:4];
+//                    send_high <= 1;
+//                    send_low <= 0;
+//                end
+//            end
+//
+//            // Send high nibble
+//            if (send_high) begin
+//                uart_data <= {24'd0, nibble2ascii(resp_nibble)};
+//                uart_write <= 1;
+//                send_high <= 0;
+//                send_low <= 1;
+//                resp_nibble <= resp_byte[3:0];
+//            end
+//
+//            // Send low nibble
+//            if (send_low) begin
+//                uart_data <= {24'd0, nibble2ascii(resp_nibble)};
+//                uart_write <= 1;
+//                send_low <= 0;
+//            end
+//        end
+//    end
+//
+//    // =======================================================
+//    // Convert 4-bit nibble to ASCII '0'-'F'
+//    // =======================================================
+//    function [7:0] nibble2ascii;
+//        input [3:0] nib;
+//        begin
+//            if (nib < 10)
+//                nibble2ascii = 8'h30 + nib; // '0'-'9'
+//            else
+//                nibble2ascii = 8'h41 + (nib-4'd10); // 'A'-'F'
+//        end
+//    endfunction
+//
+//endmodule
+
+
+
 module cpu_on_board (
     (* chip_pin = "PIN_L1"  *) input  wire CLOCK_50,
     (* chip_pin = "PIN_R22" *) input  wire KEY0,        // Active-low reset
     (* chip_pin = "R20"     *) output wire LEDR0,
 
-    (* chip_pin = "V20" *) output wire SD_CLK,  // SD_CLK
-    (* chip_pin = "Y20" *) inout  wire SD_CMD,  // SD_CMD
-    (* chip_pin = "W20" *) inout  wire SD_DAT0, // SD_DAT0
-    (* chip_pin = "U20" *) output wire SD_DAT3  // SD_DAT3 / CS
+    (* chip_pin = "V20" *) output wire SD_CLK,
+    (* chip_pin = "Y20" *) inout  wire SD_CMD,
+    (* chip_pin = "W20" *) inout  wire SD_DAT0,
+    (* chip_pin = "U20" *) output wire SD_DAT3
 );
 
-    // =======================================================
+    // ===========================
     // Heartbeat LED
-    // =======================================================
+    // ===========================
     reg [23:0] blink_counter;
     assign LEDR0 = blink_counter[23];
+    always @(posedge CLOCK_50 or negedge KEY0)
+        if (!KEY0) blink_counter <= 0;
+        else blink_counter <= blink_counter + 1;
 
-    always @(posedge CLOCK_50 or negedge KEY0) begin
-        if (!KEY0)
-            blink_counter <= 0;
-        else
-            blink_counter <= blink_counter + 1'b1;
-    end
-
-    // =======================================================
-    // JTAG UART for debugging
-    // =======================================================
-    reg  [31:0] uart_data;
-    reg         uart_write;
+    // ===========================
+    // JTAG UART for debug
+    // ===========================
+    reg [31:0] uart_data;
+    reg        uart_write;
 
     jtag_uart_system uart0 (
         .clk_clk(CLOCK_50),
@@ -3945,24 +4086,25 @@ module cpu_on_board (
         .jtag_uart_0_avalon_jtag_slave_read_n(1'b1)
     );
 
-    // =======================================================
-    // SD card CMD0 probe
-    // =======================================================
-    reg sd_cmd_out;
-    reg sd_cmd_oe;      // output enable for CMD line
+    // ===========================
+    // SD interface signals
+    // ===========================
+    reg sd_cmd_out, sd_cmd_oe;
     reg [5:0] bit_cnt;
-    reg [47:0] cmd_shift; // 6-byte CMD0
+    reg [47:0] cmd_shift;     // CMD0 command
     reg cmd_start;
     reg [15:0] clk_div;
-    reg [7:0] resp_byte;
-    reg resp_ready;
-    reg [3:0] resp_nibble;
-    reg send_high, send_low;
 
-    assign SD_CMD = sd_cmd_oe ? sd_cmd_out : 1'bz;
-    assign SD_CLK = clk_div[15]; // slow clock for SD (~1.5 kHz)
-    assign SD_DAT3 = 1'b1;       // CS high
-    assign SD_DAT0 = 1'bz;       // SD_DAT0 input
+    assign SD_CMD  = sd_cmd_oe ? sd_cmd_out : 1'bz;
+    assign SD_CLK  = clk_div[15];  // slow clock
+    assign SD_DAT3 = 1'b1;         // CS high
+    wire sd_dat0_in = SD_DAT0;     // read SD_DAT0
+
+    // ===========================
+    // Clock divider and CMD0 FSM
+    // ===========================
+    reg [7:0] response;
+    reg done;
 
     always @(posedge CLOCK_50 or negedge KEY0) begin
         if (!KEY0) begin
@@ -3971,79 +4113,40 @@ module cpu_on_board (
             sd_cmd_oe <= 0;
             sd_cmd_out <= 1;
             bit_cnt <= 0;
-            cmd_shift <= 48'h40_00_00_00_00_95; // CMD0 with CRC
-            resp_ready <= 0;
-            resp_byte <= 0;
+            cmd_shift <= 48'h40_00_00_00_00_95; // CMD0 + CRC
             uart_write <= 0;
-            resp_nibble <= 0;
-            send_high <= 1;
-            send_low <= 0;
+            response <= 0;
+            done <= 0;
         end else begin
             clk_div <= clk_div + 1;
             uart_write <= 0;
 
-            // Start CMD0 after ~1s
-            if (blink_counter == 24'd50_000_000)
+            // Start CMD0 after ~0.5s
+            if (blink_counter == 24'd25_000_000)
                 cmd_start <= 1;
 
-            // Send command
-            if (cmd_start) begin
+            if (cmd_start && !done) begin
                 sd_cmd_oe <= 1;
                 sd_cmd_out <= cmd_shift[47];
-                cmd_shift <= {cmd_shift[46:0], 1'b1};
+                cmd_shift <= {cmd_shift[46:0],1'b1};
                 bit_cnt <= bit_cnt + 1;
 
                 if (bit_cnt == 47) begin
-                    sd_cmd_oe <= 0; // release CMD line
-                    cmd_start <= 0;
+                    sd_cmd_oe <= 0;  // release CMD line
                     bit_cnt <= 0;
-                    resp_ready <= 1; // ready to read response
+                    cmd_start <= 0;
+                    done <= 1;
                 end
             end
 
-            // Read response byte
-            if (resp_ready) begin
-                resp_byte <= {resp_byte[6:0], SD_DAT0};
-                bit_cnt <= bit_cnt + 1;
-
-                if (bit_cnt == 7) begin
-                    resp_ready <= 0;
-                    // Convert to ASCII hex
-                    resp_nibble <= resp_byte[7:4];
-                    send_high <= 1;
-                    send_low <= 0;
-                end
-            end
-
-            // Send high nibble
-            if (send_high) begin
-                uart_data <= {24'd0, nibble2ascii(resp_nibble)};
+            // After CMD0 sent, try to read response
+            if (done) begin
+                // SD cards respond with 0x01 (idle state)
+                response <= {response[6:0], sd_dat0_in};
+                uart_data <= {24'd0, response[7:0]};
                 uart_write <= 1;
-                send_high <= 0;
-                send_low <= 1;
-                resp_nibble <= resp_byte[3:0];
-            end
-
-            // Send low nibble
-            if (send_low) begin
-                uart_data <= {24'd0, nibble2ascii(resp_nibble)};
-                uart_write <= 1;
-                send_low <= 0;
             end
         end
     end
-
-    // =======================================================
-    // Convert 4-bit nibble to ASCII '0'-'F'
-    // =======================================================
-    function [7:0] nibble2ascii;
-        input [3:0] nib;
-        begin
-            if (nib < 10)
-                nibble2ascii = 8'h30 + nib; // '0'-'9'
-            else
-                nibble2ascii = 8'h41 + (nib-4'd10); // 'A'-'F'
-        end
-    endfunction
 
 endmodule
