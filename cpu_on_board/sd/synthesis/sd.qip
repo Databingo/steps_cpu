@@ -1,0 +1,31 @@
+set_global_assignment -entity "sd" -library "sd" -name IP_TOOL_NAME "Qsys"
+set_global_assignment -entity "sd" -library "sd" -name IP_TOOL_VERSION "13.0sp1"
+set_global_assignment -entity "sd" -library "sd" -name IP_TOOL_ENV "Qsys"
+set_global_assignment -library "sd" -name SOPCINFO_FILE [file join $::quartus(qip_path) "../../sd.sopcinfo"]
+set_instance_assignment -entity "sd" -library "sd" -name SLD_INFO "QSYS_NAME sd HAS_SOPCINFO 1 GENERATION_ID 1760464475"
+set_global_assignment -library "sd" -name MISC_FILE [file join $::quartus(qip_path) "../../sd.cmp"]
+set_global_assignment -name SYNTHESIS_ONLY_QIP ON
+set_global_assignment -library "sd" -name MISC_FILE [file join $::quartus(qip_path) "../../sd.qsys"]
+
+set_global_assignment -library "sd" -name VERILOG_FILE [file join $::quartus(qip_path) "sd.v"]
+set_global_assignment -library "sd" -name VERILOG_FILE [file join $::quartus(qip_path) "submodules/altera_reset_controller.v"]
+set_global_assignment -library "sd" -name VERILOG_FILE [file join $::quartus(qip_path) "submodules/altera_reset_synchronizer.v"]
+set_global_assignment -library "sd" -name SDC_FILE [file join $::quartus(qip_path) "submodules/altera_reset_controller.sdc"]
+set_global_assignment -library "sd" -name VHDL_FILE [file join $::quartus(qip_path) "submodules/Altera_UP_SD_Card_Avalon_Interface.vhd"]
+set_global_assignment -library "sd" -name VHDL_FILE [file join $::quartus(qip_path) "submodules/Altera_UP_SD_Card_48_bit_Command_Generator.vhd"]
+set_global_assignment -library "sd" -name VHDL_FILE [file join $::quartus(qip_path) "submodules/Altera_UP_SD_Card_Buffer.vhd"]
+set_global_assignment -library "sd" -name VHDL_FILE [file join $::quartus(qip_path) "submodules/Altera_UP_SD_Card_Clock.vhd"]
+set_global_assignment -library "sd" -name VHDL_FILE [file join $::quartus(qip_path) "submodules/Altera_UP_SD_Card_Control_FSM.vhd"]
+set_global_assignment -library "sd" -name VHDL_FILE [file join $::quartus(qip_path) "submodules/Altera_UP_SD_Card_Interface.vhd"]
+set_global_assignment -library "sd" -name QIP_FILE [file join $::quartus(qip_path) "submodules/Altera_UP_SD_Card_Memory_Block.qip"]
+set_global_assignment -library "sd" -name VHDL_FILE [file join $::quartus(qip_path) "submodules/Altera_UP_SD_Card_Response_Receiver.vhd"]
+set_global_assignment -library "sd" -name VHDL_FILE [file join $::quartus(qip_path) "submodules/Altera_UP_SD_CRC16_Generator.vhd"]
+set_global_assignment -library "sd" -name VHDL_FILE [file join $::quartus(qip_path) "submodules/Altera_UP_SD_CRC7_Generator.vhd"]
+set_global_assignment -library "sd" -name VHDL_FILE [file join $::quartus(qip_path) "submodules/Altera_UP_SD_Signal_Trigger.vhd"]
+set_global_assignment -library "sd" -name VHDL_FILE [file join $::quartus(qip_path) "submodules/Altera_UP_SD_Card_Memory_Block.vhd"]
+set_global_assignment -library "sd" -name SOURCE_FILE [file join $::quartus(qip_path) "submodules/Altera_UP_SD_Card_Memory_Block.bsf"]
+set_global_assignment -library "sd" -name SOURCE_FILE [file join $::quartus(qip_path) "submodules/Altera_UP_SD_Card_Memory_Block.cmp"]
+
+set_global_assignment -entity "altera_reset_controller" -library "sd" -name IP_TOOL_NAME "altera_reset_controller"
+set_global_assignment -entity "altera_reset_controller" -library "sd" -name IP_TOOL_VERSION "13.0"
+set_global_assignment -entity "altera_reset_controller" -library "sd" -name IP_TOOL_ENV "Qsys"
