@@ -3329,6 +3329,150 @@
 
 
 
+//module cpu_on_board (
+//    (* chip_pin = "PIN_L1"  *) input  wire CLOCK_50,
+//    (* chip_pin = "PIN_R22" *) input  wire KEY0,        // Active-low reset
+//    (* chip_pin = "R20"     *) output wire LEDR0,
+//
+//    (* chip_pin = "V20" *) output wire SD_CLK,  // SD_CLK
+//    (* chip_pin = "Y20" *) inout  wire SD_CMD,  // SD_CMD
+//    (* chip_pin = "W20" *) inout  wire SD_DAT0, // SD_DAT0
+//    (* chip_pin = "U20" *) output wire SD_DAT3  // SD_DAT3 / CS
+//
+//
+//);
+//
+////=======================================================
+//// Reset and LED blink
+////=======================================================
+//wire reset_n = KEY0;
+//reg [23:0] blink_counter;
+//
+//always @(posedge CLOCK_50 or negedge reset_n)
+//    if (!reset_n)
+//        blink_counter <= 0;
+//    else
+//        blink_counter <= blink_counter + 1'b1;
+//
+//assign LEDR0 = blink_counter[23];
+//
+////=======================================================
+//// UART debug (JTAG UART)
+////=======================================================
+//reg  [31:0] uart_data;
+//reg         uart_write;
+//
+//jtag_uart_system uart0 (
+//    .clk_clk(CLOCK_50),
+//    .reset_reset_n(reset_n),
+//    .jtag_uart_0_avalon_jtag_slave_address(1'b0),
+//    .jtag_uart_0_avalon_jtag_slave_writedata(uart_data),
+//    .jtag_uart_0_avalon_jtag_slave_write_n(~uart_write),
+//    .jtag_uart_0_avalon_jtag_slave_chipselect(1'b1),
+//    .jtag_uart_0_avalon_jtag_slave_read_n(1'b1)
+//);
+//
+////=======================================================
+//// Instantiate SD card interface (from your code)
+////=======================================================
+//wire [2:0]  sd_addr;
+//wire        sd_read, sd_write, sd_begin;
+//wire [31:0] sd_wdata;
+//wire [31:0] sd_rdata;
+//
+//SdCardSlave sd0 (
+//    .clk(CLOCK_50),
+//    .reset(~reset_n),
+//    .address(sd_addr),
+//    .read(sd_read),
+//    .write(sd_write),
+//    .writedata(sd_wdata),
+//    .readdata(sd_rdata),
+//    .begintransfer(sd_begin),
+//    .SD_CLK(SD_CLK),
+//    .SD_CMD(SD_CMD),
+//    .SD_DAT(SD_DAT0),
+//    .SD_DAT3(SD_DAT3)
+//);
+//
+////=======================================================
+//// Minimal test FSM
+////=======================================================
+//reg [3:0] state;
+//reg [31:0] counter;
+//
+//assign sd_begin = 1'b1;
+//
+//reg [2:0]  addr_r;
+//reg        read_r, write_r;
+//reg [31:0] wdata_r;
+//
+//assign sd_addr  = addr_r;
+//assign sd_read  = read_r;
+//assign sd_write = write_r;
+//assign sd_wdata = wdata_r;
+//
+//always @(posedge CLOCK_50 or negedge reset_n) begin
+//    if (!reset_n) begin
+//        state <= 0;
+//        uart_write <= 0;
+//        counter <= 0;
+//        addr_r <= 0;
+//        read_r <= 0;
+//        write_r <= 0;
+//        wdata_r <= 0;
+//    end else begin
+//        uart_write <= 0;
+//        read_r <= 0;
+//        write_r <= 0;
+//        counter <= counter + 1;
+//
+//        case (state)
+//            0: begin
+//                uart_data <= {24'd0, "R"}; uart_write <= 1;
+//                state <= 1;
+//            end
+//
+//            // Write CMD0 (reset command)
+//            1: begin
+//                addr_r <= 1; wdata_r <= 32'h00000000; write_r <= 1; // command low
+//                state <= 2;
+//            end
+//            2: begin
+//                addr_r <= 2; wdata_r <= 32'h00000000; write_r <= 1; // command high
+//                state <= 3;
+//            end
+//            3: begin
+//                addr_r <= 0; wdata_r <= 32'h1; write_r <= 1; // start command
+//                state <= 4;
+//            end
+//            // Wait for completion flag
+//            4: begin
+//                addr_r <= 0; read_r <= 1;
+//                if (sd_rdata[1]) begin // CMD finished
+//                    uart_data <= {24'd0, "C"}; uart_write <= 1;
+//                    state <= 5;
+//                end
+//            end
+//
+//            5: begin
+//                uart_data <= {24'd0, "D"}; uart_write <= 1;
+//                state <= 6; // new: move to idle
+//            end
+//
+//            6: begin
+//                // done, hold idle
+//                state <= 6;
+//            end
+//
+//        endcase
+//    end
+//end
+//
+//endmodule
+
+
+
 module cpu_on_board (
     (* chip_pin = "PIN_L1"  *) input  wire CLOCK_50,
     (* chip_pin = "PIN_R22" *) input  wire KEY0,        // Active-low reset
@@ -3338,8 +3482,6 @@ module cpu_on_board (
     (* chip_pin = "Y20" *) inout  wire SD_CMD,  // SD_CMD
     (* chip_pin = "W20" *) inout  wire SD_DAT0, // SD_DAT0
     (* chip_pin = "U20" *) output wire SD_DAT3  // SD_DAT3 / CS
-
-
 );
 
 //=======================================================
@@ -3347,13 +3489,11 @@ module cpu_on_board (
 //=======================================================
 wire reset_n = KEY0;
 reg [23:0] blink_counter;
-
 always @(posedge CLOCK_50 or negedge reset_n)
     if (!reset_n)
         blink_counter <= 0;
     else
         blink_counter <= blink_counter + 1'b1;
-
 assign LEDR0 = blink_counter[23];
 
 //=======================================================
@@ -3373,7 +3513,7 @@ jtag_uart_system uart0 (
 );
 
 //=======================================================
-// Instantiate SD card interface (from your code)
+// Instantiate SD card interface
 //=======================================================
 wire [2:0]  sd_addr;
 wire        sd_read, sd_write, sd_begin;
@@ -3396,21 +3536,19 @@ SdCardSlave sd0 (
 );
 
 //=======================================================
-// Minimal test FSM
+// SD card command FSM
 //=======================================================
-reg [3:0] state;
+reg [4:0]  state;
 reg [31:0] counter;
-
-assign sd_begin = 1'b1;
-
 reg [2:0]  addr_r;
 reg        read_r, write_r;
 reg [31:0] wdata_r;
 
-assign sd_addr  = addr_r;
-assign sd_read  = read_r;
-assign sd_write = write_r;
-assign sd_wdata = wdata_r;
+assign sd_begin  = 1'b1;
+assign sd_addr   = addr_r;
+assign sd_read   = read_r;
+assign sd_write  = write_r;
+assign sd_wdata  = wdata_r;
 
 always @(posedge CLOCK_50 or negedge reset_n) begin
     if (!reset_n) begin
@@ -3425,7 +3563,6 @@ always @(posedge CLOCK_50 or negedge reset_n) begin
         uart_write <= 0;
         read_r <= 0;
         write_r <= 0;
-        counter <= counter + 1;
 
         case (state)
             0: begin
@@ -3433,38 +3570,71 @@ always @(posedge CLOCK_50 or negedge reset_n) begin
                 state <= 1;
             end
 
-            // Write CMD0 (reset command)
+            // CMD0 (reset)
             1: begin
-                addr_r <= 1; wdata_r <= 32'h00000000; write_r <= 1; // command low
-                state <= 2;
+                addr_r <= 1; wdata_r <= 32'h00000000; write_r <= 1; state <= 2;
             end
             2: begin
-                addr_r <= 2; wdata_r <= 32'h00000000; write_r <= 1; // command high
-                state <= 3;
+                addr_r <= 2; wdata_r <= 32'h00000000; write_r <= 1; state <= 3;
             end
             3: begin
-                addr_r <= 0; wdata_r <= 32'h1; write_r <= 1; // start command
-                state <= 4;
+                addr_r <= 0; wdata_r <= 32'h40 | 0; write_r <= 1; state <= 4; // CMD0
             end
-            // Wait for completion flag
             4: begin
                 addr_r <= 0; read_r <= 1;
-                if (sd_rdata[1]) begin // CMD finished
-                    uart_data <= {24'd0, "C"}; uart_write <= 1;
+                if (sd_rdata[1]) begin
+                    uart_data <= {24'd0, "0"}; uart_write <= 1;
                     state <= 5;
                 end
             end
 
+            // CMD55 (APP_CMD)
             5: begin
-                uart_data <= {24'd0, "D"}; uart_write <= 1;
-                state <= 6; // new: move to idle
+                addr_r <= 1; wdata_r <= 32'h00000000; write_r <= 1; state <= 6;
             end
-
             6: begin
-                // done, hold idle
-                state <= 6;
+                addr_r <= 2; wdata_r <= 32'h00000000; write_r <= 1; state <= 7;
+            end
+            7: begin
+                addr_r <= 0; wdata_r <= 32'h40 | 55; write_r <= 1; state <= 8;
+            end
+            8: begin
+                addr_r <= 0; read_r <= 1;
+                if (sd_rdata[1]) begin
+                    uart_data <= {24'd0, "5"}; uart_write <= 1;
+                    state <= 9;
+                end
             end
 
+            // ACMD41 (init)
+            9: begin
+                addr_r <= 1; wdata_r <= 32'h40300000; write_r <= 1; state <= 10;
+            end
+            10: begin
+                addr_r <= 2; wdata_r <= 32'h00000000; write_r <= 1; state <= 11;
+            end
+            11: begin
+                addr_r <= 0; wdata_r <= 32'h40 | 41; write_r <= 1; state <= 12;
+            end
+            12: begin
+                addr_r <= 0; read_r <= 1;
+                if (sd_rdata[1]) begin
+                    uart_data <= {24'd0, "A"}; uart_write <= 1;
+                    state <= 13;
+                end
+            end
+
+            13: begin
+                uart_data <= {24'd0, "O"}; uart_write <= 1;
+                state <= 14;
+            end
+
+            14: begin
+                uart_data <= {24'd0, "D"}; uart_write <= 1;
+                state <= 15; // stop
+            end
+
+            15: state <= 15; // done
         endcase
     end
 end
