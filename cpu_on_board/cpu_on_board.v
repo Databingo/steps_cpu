@@ -3643,11 +3643,6 @@
 //
 //endmodule
 
-
-
-
-
-
 module cpu_on_board (
     (* chip_pin = "PIN_L1"  *) input  wire CLOCK_50,
     (* chip_pin = "PIN_R22" *) input  wire KEY0,        // Active-low reset
@@ -3688,40 +3683,45 @@ jtag_uart_system uart0 (
 );
 
 //=======================================================
-// Simple SPI master for SD (mode 0)
+// Simple SPI bit-bang engine
 //=======================================================
-reg [7:0] spi_tx;
-reg [7:0] spi_rx;
-reg [5:0] spi_bit;
-reg       spi_active;
-reg [15:0] spi_clkdiv;
+localparam SPI_DIV = 200; // ~250kHz
 
-localparam SPI_DIV = 200; // 50MHz / 200 = 250kHz for init
+reg [15:0] spi_clkdiv;
+reg [7:0]  spi_tx, spi_rx;
+reg [3:0]  spi_bit;
+reg        spi_busy;
+reg        spi_start;
 
 always @(posedge CLOCK_50 or negedge reset_n) begin
     if (!reset_n) begin
         spi_clkdiv <= 0;
         SD_CLK <= 1'b0;
+        spi_busy <= 0;
         spi_bit <= 0;
-        spi_active <= 0;
         spi_rx <= 8'hFF;
+        SD_CMD <= 1'b1;
     end else begin
-        if (spi_active) begin
+        if (spi_start && !spi_busy) begin
+            spi_busy <= 1;
+            spi_bit <= 8;
+            spi_clkdiv <= 0;
+        end else if (spi_busy) begin
             spi_clkdiv <= spi_clkdiv + 1;
             if (spi_clkdiv == SPI_DIV) begin
                 spi_clkdiv <= 0;
                 SD_CLK <= ~SD_CLK;
 
                 if (SD_CLK == 1'b0) begin
-                    // shift on falling edge
+                    // Falling edge: output MOSI
                     SD_CMD <= spi_tx[7];
                     spi_tx <= {spi_tx[6:0], 1'b1};
                 end else begin
-                    // sample on rising edge
+                    // Rising edge: sample MISO
                     spi_rx <= {spi_rx[6:0], SD_DAT0};
-                    spi_bit <= spi_bit + 1;
-                    if (spi_bit == 8) begin
-                        spi_active <= 0;
+                    spi_bit <= spi_bit - 1;
+                    if (spi_bit == 0) begin
+                        spi_busy <= 0;
                         SD_CLK <= 1'b0;
                     end
                 end
@@ -3730,19 +3730,10 @@ always @(posedge CLOCK_50 or negedge reset_n) begin
     end
 end
 
-task spi_send_byte(input [7:0] data);
-begin
-    spi_tx <= data;
-    spi_bit <= 0;
-    spi_active <= 1;
-    while (spi_active) @(posedge CLOCK_50);
-end
-endtask
-
 //=======================================================
-// SD Card SPI-mode initialization FSM
+// SD card initialization FSM
 //=======================================================
-reg [7:0]  state;
+reg [7:0] state;
 reg [31:0] counter;
 
 always @(posedge CLOCK_50 or negedge reset_n) begin
@@ -3751,9 +3742,12 @@ always @(posedge CLOCK_50 or negedge reset_n) begin
         uart_write <= 0;
         counter <= 0;
         SD_DAT3 <= 1'b1; // CS high
-        SD_CMD  <= 1'b1; // MOSI idle high
+        SD_CMD  <= 1'b1; // MOSI idle
+        spi_start <= 0;
+        spi_tx <= 8'hFF;
     end else begin
         uart_write <= 0;
+        spi_start <= 0;
 
         case (state)
             0: begin
@@ -3762,92 +3756,62 @@ always @(posedge CLOCK_50 or negedge reset_n) begin
                 state <= 1;
             end
 
-            // 1. Send 80 clocks with CS=1
+            // 80 clocks with CS high
             1: begin
                 SD_DAT3 <= 1'b1;
-                SD_CMD <= 1'b1;
-                if (counter < 4000) counter <= counter + 1;
-                else begin
-                    state <= 2;
+                if (counter < 4000) begin
+                    counter <= counter + 1;
+                end else begin
                     counter <= 0;
+                    state <= 2;
                 end
             end
 
-            // 2. CMD0 (reset)
+            // CMD0
             2: begin
-                SD_DAT3 <= 1'b0;
-                uart_data <= {24'd0, "0"}; uart_write <= 1;
-                spi_send_byte(8'h40); // CMD0
-                spi_send_byte(8'h00);
-                spi_send_byte(8'h00);
-                spi_send_byte(8'h00);
-                spi_send_byte(8'h00);
-                spi_send_byte(8'h95); // CRC7 valid for CMD0
-                state <= 3;
-            end
-
-            // 3. Wait for R1 response
-            3: begin
-                spi_send_byte(8'hFF);
-                if (spi_rx == 8'h01) begin
-                    uart_data <= {24'd0, "I"}; uart_write <= 1;
-                    state <= 4;
+                SD_DAT3 <= 1'b0; // CS low
+                if (!spi_busy) begin
+                    spi_tx <= 8'h40; spi_start <= 1; state <= 3;
                 end
             end
 
-            // 4. CMD8 (check voltage range)
-            4: begin
-                spi_send_byte(8'h48);
-                spi_send_byte(8'h00);
-                spi_send_byte(8'h00);
-                spi_send_byte(8'h01);
-                spi_send_byte(8'hAA);
-                spi_send_byte(8'h87);
-                state <= 5;
+            3: if (!spi_busy) begin spi_tx <= 8'h00; spi_start <= 1; state <= 4; end
+            4: if (!spi_busy) begin spi_tx <= 8'h00; spi_start <= 1; state <= 5; end
+            5: if (!spi_busy) begin spi_tx <= 8'h00; spi_start <= 1; state <= 6; end
+            6: if (!spi_busy) begin spi_tx <= 8'h00; spi_start <= 1; state <= 7; end
+            7: if (!spi_busy) begin spi_tx <= 8'h95; spi_start <= 1; state <= 8; end
+
+            // Wait response
+            8: if (!spi_busy) begin spi_tx <= 8'hFF; spi_start <= 1; state <= 9; end
+            9: if (!spi_busy) begin
+                if (spi_rx == 8'h01) begin
+                    uart_data <= {24'd0, "0"}; uart_write <= 1;
+                    state <= 10;
+                end else begin
+                    state <= 8; // keep polling
+                end
             end
 
-            // 5. Wait for response to CMD8
-            5: begin
-                spi_send_byte(8'hFF);
+            // CMD8
+            10: if (!spi_busy) begin spi_tx <= 8'h48; spi_start <= 1; state <= 11; end
+            11: if (!spi_busy) begin spi_tx <= 8'h00; spi_start <= 1; state <= 12; end
+            12: if (!spi_busy) begin spi_tx <= 8'h00; spi_start <= 1; state <= 13; end
+            13: if (!spi_busy) begin spi_tx <= 8'h01; spi_start <= 1; state <= 14; end
+            14: if (!spi_busy) begin spi_tx <= 8'hAA; spi_start <= 1; state <= 15; end
+            15: if (!spi_busy) begin spi_tx <= 8'h87; spi_start <= 1; state <= 16; end
+            16: if (!spi_busy) begin spi_tx <= 8'hFF; spi_start <= 1; state <= 17; end
+            17: if (!spi_busy) begin
                 if (spi_rx == 8'h01) begin
                     uart_data <= {24'd0, "8"}; uart_write <= 1;
-                    state <= 6;
-                end
+                    state <= 18;
+                end else state <= 16;
             end
 
-            // 6. Loop ACMD41 until ready
-            6: begin
-                uart_data <= {24'd0, "A"}; uart_write <= 1;
-                // CMD55
-                spi_send_byte(8'h77);
-                spi_send_byte(8'h00);
-                spi_send_byte(8'h00);
-                spi_send_byte(8'h00);
-                spi_send_byte(8'h00);
-                spi_send_byte(8'h65);
-                spi_send_byte(8'hFF);
-                if (spi_rx == 8'h01) begin
-                    // ACMD41
-                    spi_send_byte(8'h69);
-                    spi_send_byte(8'h40);
-                    spi_send_byte(8'h00);
-                    spi_send_byte(8'h00);
-                    spi_send_byte(8'h00);
-                    spi_send_byte(8'h77);
-                    spi_send_byte(8'hFF);
-                    if (spi_rx == 8'h00) begin
-                        uart_data <= {24'd0, "D"}; uart_write <= 1;
-                        state <= 7;
-                    end
-                end
+            // Done
+            18: begin
+                uart_data <= {24'd0, "D"}; uart_write <= 1;
+                state <= 18;
             end
-
-            7: begin
-                uart_data <= {24'd0, "V"}; uart_write <= 1;
-                state <= 8;
-            end
-
-            8: state <= 8; // stop here
         endcase
     end
 end
