@@ -1600,8 +1600,197 @@
 
 
 
+////===========================================================
+//// DE1 SD Card SPI Bit-banged Reader: Read 1st 512-byte block
+////===========================================================
+//module cpu_on_board (
+//    (* chip_pin = "PIN_L1"  *) input  wire CLOCK_50,
+//    (* chip_pin = "PIN_R22" *) input  wire KEY0,        // Active-low reset
+//    (* chip_pin = "R20"     *) output wire LEDR0,
+//
+//    (* chip_pin = "V20" *) output reg SD_CLK,
+//    (* chip_pin = "Y20" *) inout  wire SD_CMD,
+//    (* chip_pin = "W20" *) inout  wire SD_DAT0,
+//    (* chip_pin = "U20" *) output wire SD_DAT3
+//);
+//
+////=======================================================
+//// LED blink
+////=======================================================
+//wire reset_n = KEY0;
+//reg [23:0] blink_counter;
+//always @(posedge CLOCK_50 or negedge reset_n)
+//    if (!reset_n)
+//        blink_counter <= 0;
+//    else
+//        blink_counter <= blink_counter + 1'b1;
+//
+//assign LEDR0 = blink_counter[23];
+//
+////=======================================================
+//// UART
+////=======================================================
+//reg  [31:0] uart_data;
+//reg         uart_write;
+//jtag_uart_system uart0 (
+//    .clk_clk(CLOCK_50),
+//    .reset_reset_n(reset_n),
+//    .jtag_uart_0_avalon_jtag_slave_address(1'b0),
+//    .jtag_uart_0_avalon_jtag_slave_writedata(uart_data),
+//    .jtag_uart_0_avalon_jtag_slave_write_n(~uart_write),
+//    .jtag_uart_0_avalon_jtag_slave_chipselect(1'b1),
+//    .jtag_uart_0_avalon_jtag_slave_read_n(1'b1)
+//);
+//
+////=======================================================
+//// SPI signals
+////=======================================================
+//reg sd_cmd_out;
+//reg sd_cmd_oe;
+//assign SD_CMD = sd_cmd_oe ? sd_cmd_out : 1'bz;
+//wire sd_cmd_in = SD_CMD;
+//
+//wire sd_data_in = SD_DAT0; // read data from SD
+//
+//assign SD_DAT3 = 1'b1; // deselect chip (always high)
+//
+////=======================================================
+//// SPI / SD state machine
+////=======================================================
+//reg [5:0] state;
+//reg [31:0] counter;
+//reg [8:0] bit_index;
+//reg [8:0] byte_index;
+//reg [47:0] shift_reg;
+//reg [7:0] read_byte;
+//reg [8:0] byte_count;
+//reg [7:0] response;
+//reg start_token_received;
+//
+//always @(posedge CLOCK_50 or negedge reset_n) begin
+//    if (!reset_n) begin
+//        SD_CLK <= 0;
+//        sd_cmd_out <= 1;
+//        sd_cmd_oe <= 1;
+//        state <= 0;
+//        counter <= 0;
+//        bit_index <= 0;
+//        byte_index <= 0;
+//        byte_count <= 0;
+//        uart_write <= 0;
+//        response <= 8'hFF;
+//        start_token_received <= 0;
+//    end else begin
+//        uart_write <= 0;
+//        counter <= counter + 1;
+//
+//        case(state)
+//            0: begin
+//                // wait some time and then start CMD0
+//                if(counter > 32'd5_000_000) begin
+//                    uart_data <= {24'd0,"S"}; uart_write <= 1;
+//                    counter <= 0;
+//                    // CMD0: GO_IDLE_STATE
+//                    // CMD format: 0x40 | cmd_index, 32-bit arg, 8-bit CRC
+//                    // We'll just use fixed 48-bit CMD0: 0x40_00_00_00_00_95
+//                    shift_reg <= 48'h400000000095;
+//                    bit_index <= 47;
+//                    SD_CLK <= 0;
+//                    sd_cmd_oe <= 1;
+//                    state <= 1;
+//                end
+//            end
+//            1: begin
+//                // Shift out CMD0
+//                SD_CLK <= ~SD_CLK;
+//                if(SD_CLK) begin
+//                    sd_cmd_out <= shift_reg[bit_index];
+//                    if(bit_index == 0) begin
+//                        state <= 2;
+//                        bit_index <= 0;
+//                    end else begin
+//                        bit_index <= bit_index - 1;
+//                    end
+//                end
+//            end
+//            2: begin
+//                // Release CMD line and wait for response
+//                sd_cmd_oe <= 0;
+//                SD_CLK <= ~SD_CLK;
+//                // wait for response (0x01) from SD card
+//                if(sd_data_in == 0) begin
+//                    response <= 8'h01;
+//                    uart_data <= {24'd0,"C"}; uart_write <= 1;
+//                    // prepare CMD17 to read block 0
+//                    shift_reg <= 48'h5117000000FF; // CMD17 + addr 0 + CRC
+//                    bit_index <= 47;
+//                    SD_CLK <= 0;
+//                    sd_cmd_oe <= 1;
+//                    state <= 3;
+//                end
+//            end
+//            3: begin
+//                // Shift out CMD17
+//                SD_CLK <= ~SD_CLK;
+//                if(SD_CLK) begin
+//                    sd_cmd_out <= shift_reg[bit_index];
+//                    if(bit_index == 0) begin
+//                        state <= 4;
+//                        sd_cmd_oe <= 0;
+//                        byte_count <= 0;
+//                        start_token_received <= 0;
+//                    end else begin
+//                        bit_index <= bit_index - 1;
+//                    end
+//                end
+//            end
+//            4: begin
+//                // Wait for start token 0xFE
+//                SD_CLK <= ~SD_CLK;
+//                if(SD_CLK) begin
+//                    read_byte <= {read_byte[6:0], sd_data_in};
+//                    bit_index <= bit_index + 1;
+//                    if(bit_index == 7) begin
+//                        if(read_byte == 8'hFE) start_token_received <= 1;
+//                        bit_index <= 0;
+//                    end
+//                    if(start_token_received) begin
+//                        byte_index <= 0;
+//                        state <= 5;
+//                    end
+//                end
+//            end
+//            5: begin
+//                // Read 512 bytes
+//                SD_CLK <= ~SD_CLK;
+//                if(SD_CLK) begin
+//                    read_byte <= {read_byte[6:0], sd_data_in};
+//                    bit_index <= bit_index + 1;
+//                    if(bit_index == 7) begin
+//                        uart_data <= {24'd0, read_byte};
+//                        uart_write <= 1;
+//                        byte_index <= byte_index + 1;
+//                        bit_index <= 0;
+//                        if(byte_index == 511) state <= 6;
+//                    end
+//                end
+//            end
+//            6: begin
+//                // Done
+//                uart_data <= {24'd0,"D"}; uart_write <= 1;
+//                state <= 6;
+//            end
+//        endcase
+//    end
+//end
+//
+//endmodule
+
+
+
+
 //===========================================================
-// DE1 SD Card SPI Bit-banged Reader: Read 1st 512-byte block
+// DE1 SD Card SPI Reader (with proper 400 kHz SPI clock)
 //===========================================================
 module cpu_on_board (
     (* chip_pin = "PIN_L1"  *) input  wire CLOCK_50,
@@ -1620,11 +1809,8 @@ module cpu_on_board (
 wire reset_n = KEY0;
 reg [23:0] blink_counter;
 always @(posedge CLOCK_50 or negedge reset_n)
-    if (!reset_n)
-        blink_counter <= 0;
-    else
-        blink_counter <= blink_counter + 1'b1;
-
+    if (!reset_n) blink_counter <= 0;
+    else blink_counter <= blink_counter + 1'b1;
 assign LEDR0 = blink_counter[23];
 
 //=======================================================
@@ -1649,17 +1835,34 @@ reg sd_cmd_out;
 reg sd_cmd_oe;
 assign SD_CMD = sd_cmd_oe ? sd_cmd_out : 1'bz;
 wire sd_cmd_in = SD_CMD;
-
-wire sd_data_in = SD_DAT0; // read data from SD
-
-assign SD_DAT3 = 1'b1; // deselect chip (always high)
+wire sd_data_in = SD_DAT0;
+assign SD_DAT3 = 1'b1; // deselect chip
 
 //=======================================================
-// SPI / SD state machine
+// SPI clock divider (~400 kHz)
+//=======================================================
+reg [6:0] clk_div;
+reg spi_clk_en;
+always @(posedge CLOCK_50 or negedge reset_n) begin
+    if(!reset_n) begin
+        clk_div <= 0;
+        spi_clk_en <= 0;
+    end else begin
+        if(clk_div == 62) begin  // 50MHz / 125 -> 400kHz
+            clk_div <= 0;
+            spi_clk_en <= 1;
+        end else begin
+            clk_div <= clk_div + 1;
+            spi_clk_en <= 0;
+        end
+    end
+end
+
+//=======================================================
+// SD bit-banged SPI state machine
 //=======================================================
 reg [5:0] state;
-reg [31:0] counter;
-reg [8:0] bit_index;
+reg [5:0] bit_index;
 reg [8:0] byte_index;
 reg [47:0] shift_reg;
 reg [7:0] read_byte;
@@ -1668,61 +1871,46 @@ reg [7:0] response;
 reg start_token_received;
 
 always @(posedge CLOCK_50 or negedge reset_n) begin
-    if (!reset_n) begin
+    if(!reset_n) begin
         SD_CLK <= 0;
         sd_cmd_out <= 1;
         sd_cmd_oe <= 1;
         state <= 0;
-        counter <= 0;
         bit_index <= 0;
         byte_index <= 0;
         byte_count <= 0;
         uart_write <= 0;
         response <= 8'hFF;
         start_token_received <= 0;
-    end else begin
+    end else if(spi_clk_en) begin
         uart_write <= 0;
-        counter <= counter + 1;
 
         case(state)
             0: begin
-                // wait some time and then start CMD0
-                if(counter > 32'd5_000_000) begin
-                    uart_data <= {24'd0,"S"}; uart_write <= 1;
-                    counter <= 0;
-                    // CMD0: GO_IDLE_STATE
-                    // CMD format: 0x40 | cmd_index, 32-bit arg, 8-bit CRC
-                    // We'll just use fixed 48-bit CMD0: 0x40_00_00_00_00_95
-                    shift_reg <= 48'h400000000095;
-                    bit_index <= 47;
-                    SD_CLK <= 0;
-                    sd_cmd_oe <= 1;
-                    state <= 1;
-                end
+                // CMD0 setup
+                uart_data <= {24'd0,"S"}; uart_write <= 1;
+                shift_reg <= 48'h400000000095; // CMD0 frame
+                bit_index <= 47;
+                SD_CLK <= 0;
+                sd_cmd_oe <= 1;
+                state <= 1;
             end
             1: begin
                 // Shift out CMD0
                 SD_CLK <= ~SD_CLK;
                 if(SD_CLK) begin
                     sd_cmd_out <= shift_reg[bit_index];
-                    if(bit_index == 0) begin
-                        state <= 2;
-                        bit_index <= 0;
-                    end else begin
-                        bit_index <= bit_index - 1;
-                    end
+                    if(bit_index==0) state <= 2;
+                    else bit_index <= bit_index - 1;
                 end
             end
             2: begin
-                // Release CMD line and wait for response
+                // Release CMD line & wait for response 0x01
                 sd_cmd_oe <= 0;
                 SD_CLK <= ~SD_CLK;
-                // wait for response (0x01) from SD card
                 if(sd_data_in == 0) begin
-                    response <= 8'h01;
                     uart_data <= {24'd0,"C"}; uart_write <= 1;
-                    // prepare CMD17 to read block 0
-                    shift_reg <= 48'h5117000000FF; // CMD17 + addr 0 + CRC
+                    shift_reg <= 48'h5117000000FF; // CMD17 frame
                     bit_index <= 47;
                     SD_CLK <= 0;
                     sd_cmd_oe <= 1;
@@ -1734,14 +1922,13 @@ always @(posedge CLOCK_50 or negedge reset_n) begin
                 SD_CLK <= ~SD_CLK;
                 if(SD_CLK) begin
                     sd_cmd_out <= shift_reg[bit_index];
-                    if(bit_index == 0) begin
-                        state <= 4;
+                    if(bit_index==0) begin
                         sd_cmd_oe <= 0;
-                        byte_count <= 0;
                         start_token_received <= 0;
-                    end else begin
-                        bit_index <= bit_index - 1;
-                    end
+                        byte_index <= 0;
+                        bit_index <= 0;
+                        state <= 4;
+                    end else bit_index <= bit_index - 1;
                 end
             end
             4: begin
@@ -1750,13 +1937,13 @@ always @(posedge CLOCK_50 or negedge reset_n) begin
                 if(SD_CLK) begin
                     read_byte <= {read_byte[6:0], sd_data_in};
                     bit_index <= bit_index + 1;
-                    if(bit_index == 7) begin
-                        if(read_byte == 8'hFE) start_token_received <= 1;
+                    if(bit_index==7) begin
+                        if(read_byte==8'hFE) start_token_received <= 1;
                         bit_index <= 0;
-                    end
-                    if(start_token_received) begin
-                        byte_index <= 0;
-                        state <= 5;
+                        if(start_token_received) begin
+                            byte_index <= 0;
+                            state <= 5;
+                        end
                     end
                 end
             end
@@ -1766,12 +1953,12 @@ always @(posedge CLOCK_50 or negedge reset_n) begin
                 if(SD_CLK) begin
                     read_byte <= {read_byte[6:0], sd_data_in};
                     bit_index <= bit_index + 1;
-                    if(bit_index == 7) begin
+                    if(bit_index==7) begin
                         uart_data <= {24'd0, read_byte};
                         uart_write <= 1;
                         byte_index <= byte_index + 1;
                         bit_index <= 0;
-                        if(byte_index == 511) state <= 6;
+                        if(byte_index==511) state <= 6;
                     end
                 end
             end
