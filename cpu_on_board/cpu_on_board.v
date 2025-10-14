@@ -825,109 +825,40 @@
 
 
 
-// ===============================================================
-// Minimal SD Card SPI interface test for DE1 (Cyclone II Starter)
-// Uses SD_CLK.v, SD_CMD.v, SD_DAT.v from DE1 reference project
-// ===============================================================
+//===========================================================
+// Minimal DE1 SD Card SPI-like test (Cyclone II Starter)
+//===========================================================
 module cpu_on_board (
-    // Clock and Reset
-    (* chip_pin = "PIN_L1"  *) input  wire CLOCK_50,     // 50 MHz clock
-    (* chip_pin = "PIN_R22" *) input  wire KEY0,         // Active-low reset
-    (* chip_pin = "PIN_R20" *) output wire LEDR0,        // Status LED
+    (* chip_pin = "PIN_L1"  *) input  wire CLOCK_50,
+    (* chip_pin = "PIN_R22" *) input  wire KEY0,        // Active-low reset
+    (* chip_pin = "R20"     *) output wire LEDR0,
 
-    // SD-Card physical pins
-    (* chip_pin = "PIN_V20" *) output wire SD_CLK,       // SD clock
-    (* chip_pin = "PIN_Y20" *) inout  wire SD_CMD,       // CMD (MOSI)
-    (* chip_pin = "PIN_W20" *) inout  wire SD_DAT0,      // DAT0 (MISO)
-    (* chip_pin = "PIN_U20" *) inout  wire SD_DAT3       // DAT3 (CS)
+    // --- SD card pins ---
+    (* chip_pin = "V20" *) output wire SD_CLK,   // SD_CLK
+    (* chip_pin = "Y20" *) inout  wire SD_CMD,   // SD_CMD
+    (* chip_pin = "W20" *) inout  wire SD_DAT0,  // SD_DAT0
+    (* chip_pin = "U20" *) output wire SD_DAT3   // optional CS line
 );
 
-    // ===========================================================
-    // Internal reset
-    // ===========================================================
+    //=======================================================
+    // Internal reset and LED blink
+    //=======================================================
     wire reset_n = KEY0;
+    reg [23:0] blink_counter;
 
-    // ===========================================================
-    // Clock divider for visible slow SPI test clock (~100 kHz)
-    // ===========================================================
-    reg [8:0] clk_div;
-    always @(posedge CLOCK_50 or negedge reset_n) begin
+    always @(posedge CLOCK_50 or negedge reset_n)
         if (!reset_n)
-            clk_div <= 0;
+            blink_counter <= 0;
         else
-            clk_div <= clk_div + 1'b1;
-    end
+            blink_counter <= blink_counter + 1'b1;
 
-    wire spi_clk = clk_div[8]; // ~50MHz / 512 = ~97.6 kHz
+    assign LEDR0 = blink_counter[23];
 
-    // ===========================================================
-    // SD I/O modules from DE1 project
-    // ===========================================================
-    // These are bidirectional GPIO-like drivers
-    // Make sure SD_CLK.v, SD_CMD.v, SD_DAT.v are in project
-    wire cmd_dir, cmd_out;
-    wire dat_dir, dat_out;
-    wire cmd_in, dat_in;
-
-    SD_CLK sd_clk_inst (
-        .CLOCK (CLOCK_50),
-        .bidir_port (SD_CLK)
-    );
-
-    SD_CMD sd_cmd_inst (
-        .CLOCK (CLOCK_50),
-        .bidir_port (SD_CMD),
-        .cmd_out (cmd_out),
-        .cmd_in  (cmd_in),
-        .cmd_dir (cmd_dir)
-    );
-
-    SD_DAT sd_dat_inst (
-        .CLOCK (CLOCK_50),
-        .bidir_port (SD_DAT0),
-        .dat_out (dat_out),
-        .dat_in  (dat_in),
-        .dat_dir (dat_dir)
-    );
-
-    // ===========================================================
-    // Simple SPI-like waveform generator for test
-    // Toggles clock and command line
-    // ===========================================================
-    reg [7:0] counter;
-    reg cs_n, cmd_bit;
-
-    always @(posedge spi_clk or negedge reset_n) begin
-        if (!reset_n) begin
-            counter <= 0;
-            cs_n <= 1;
-            cmd_bit <= 1;
-        end else begin
-            counter <= counter + 1;
-            cs_n <= (counter < 100) ? 0 : 1; // low for ~100 cycles
-            cmd_bit <= counter[3];            // toggle CMD pattern
-        end
-    end
-
-    assign cmd_dir = 1'b1;   // output mode for CMD
-    assign cmd_out = cmd_bit;
-    assign dat_dir = 1'b0;   // input mode for DAT0
-    assign dat_out = 1'b1;   // high when idle
-
-    // SD_CLK line driven by spi_clk
-    assign SD_CLK = spi_clk;
-
-    // DAT3 acts as chip select (low active)
-    assign SD_DAT3 = cs_n ? 1'bz : 1'b0;
-
-    // LED lights when CS active
-    assign LEDR0 = ~cs_n;
-
-    // ===========================================================
-    // Optional UART debug (simple JTAG UART print)
-    // ===========================================================
-    reg [31:0] uart_data;
-    reg uart_write;
+    //=======================================================
+    // UART for debug output
+    //=======================================================
+    reg  [31:0] uart_data;
+    reg         uart_write;
 
     jtag_uart_system uart0 (
         .clk_clk(CLOCK_50),
@@ -939,23 +870,102 @@ module cpu_on_board (
         .jtag_uart_0_avalon_jtag_slave_read_n(1'b1)
     );
 
-    reg [23:0] print_counter;
+    //=======================================================
+    // Simple SD controller wiring (mimic SOPC signals)
+    //=======================================================
+    reg [1:0]  sd_address;
+    reg        sd_chipselect;
+    reg        sd_write_n;
+    reg [15:0] sd_writedata;
+    wire [15:0] sd_readdata_cmd;
+    wire [15:0] sd_readdata_dat;
+    wire        sd_out_clk;
+
+    // --- SD_CLK ---
+    SD_CLK sd_clk_inst (
+        .address(sd_address),
+        .chipselect(sd_chipselect),
+        .clk(CLOCK_50),
+        .reset_n(reset_n),
+        .write_n(sd_write_n),
+        .writedata(sd_writedata),
+        .out_port(sd_out_clk)
+    );
+    assign SD_CLK = sd_out_clk;
+
+    // --- SD_CMD ---
+    SD_CMD sd_cmd_inst (
+        .address(sd_address),
+        .chipselect(sd_chipselect),
+        .clk(CLOCK_50),
+        .reset_n(reset_n),
+        .write_n(sd_write_n),
+        .writedata(sd_writedata),
+        .bidir_port(SD_CMD),
+        .readdata(sd_readdata_cmd)
+    );
+
+    // --- SD_DAT0 ---
+    SD_DAT sd_dat_inst (
+        .address(sd_address),
+        .chipselect(sd_chipselect),
+        .clk(CLOCK_50),
+        .reset_n(reset_n),
+        .write_n(sd_write_n),
+        .writedata(sd_writedata),
+        .bidir_port(SD_DAT0),
+        .readdata(sd_readdata_dat)
+    );
+
+    //=======================================================
+    // Simple test sequence
+    //=======================================================
+    reg [3:0]  state;
+    reg [31:0] counter;
+
     always @(posedge CLOCK_50 or negedge reset_n) begin
         if (!reset_n) begin
-            print_counter <= 0;
+            state <= 0;
+            counter <= 0;
             uart_write <= 0;
+            sd_chipselect <= 0;
+            sd_write_n <= 1;
+            sd_writedata <= 16'd0;
+            sd_address <= 2'd0;
         end else begin
-            print_counter <= print_counter + 1;
             uart_write <= 0;
-            if (print_counter == 24'd8_000_000) begin
-                uart_data <= {24'd0, "S"};
-                uart_write <= 1;
-            end
-            if (print_counter == 24'd16_000_000) begin
-                uart_data <= {24'd0, "/"};
-                uart_write <= 1;
-                print_counter <= 0;
-            end
+            counter <= counter + 1;
+
+            case (state)
+                0: begin
+                    if (counter == 32'd50_000_000) begin // 1 sec
+                        uart_data <= {24'd0, "S"};
+                        uart_write <= 1;
+                        counter <= 0;
+                        state <= 1;
+                    end
+                end
+                1: begin
+                    uart_data <= {24'd0, "/"};
+                    uart_write <= 1;
+                    sd_chipselect <= 1'b1;
+                    sd_write_n <= 1'b0;
+                    sd_writedata <= 16'hFF; // drive clock pulses
+                    sd_address <= 2'd0;
+                    state <= 2;
+                end
+                2: begin
+                    sd_chipselect <= 1'b0;
+                    sd_write_n <= 1'b1;
+                    uart_data <= {24'd0, "0"};
+                    uart_write <= 1;
+                    state <= 3;
+                end
+                3: begin
+                    // stop
+                    state <= 3;
+                end
+            endcase
         end
     end
 
