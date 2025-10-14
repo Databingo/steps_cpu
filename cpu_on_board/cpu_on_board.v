@@ -3682,46 +3682,58 @@ jtag_uart_system uart0 (
     .jtag_uart_0_avalon_jtag_slave_read_n(1'b1)
 );
 
-//=======================================================
-// Simple SPI bit-bang engine
-//=======================================================
-localparam SPI_DIV = 200; // ~250kHz
+//------------------------------------------------------
+// SPI bit-bang engine  (single always block driver)
+//------------------------------------------------------
+localparam SPI_DIV = 200; // ≈250 kHz
 
 reg [15:0] spi_clkdiv;
 reg [7:0]  spi_tx, spi_rx;
 reg [3:0]  spi_bit;
 reg        spi_busy;
-reg        spi_start;
+reg [7:0]  spi_tx_next;
+reg        spi_start_next;
+wire       spi_done = (!spi_busy && !spi_start_next);
+reg        spi_done_d;   // 1-cycle pulse when a byte finishes
 
 always @(posedge CLOCK_50 or negedge reset_n) begin
     if (!reset_n) begin
-        spi_clkdiv <= 0;
-        SD_CLK <= 1'b0;
-        spi_busy <= 0;
-        spi_bit <= 0;
-        spi_rx <= 8'hFF;
-        SD_CMD <= 1'b1;
+        spi_clkdiv   <= 0;
+        SD_CLK       <= 1'b0;
+        SD_CMD       <= 1'b1;
+        spi_busy     <= 0;
+        spi_bit      <= 0;
+        spi_tx       <= 8'hFF;
+        spi_rx       <= 8'hFF;
+        spi_start_next <= 0;
+        spi_done_d   <= 0;
     end else begin
-        if (spi_start && !spi_busy) begin
-            spi_busy <= 1;
-            spi_bit <= 8;
-            spi_clkdiv <= 0;
-        end else if (spi_busy) begin
+        spi_done_d <= 0;
+
+        // Start request from FSM
+        if (spi_start_next && !spi_busy) begin
+            spi_tx       <= spi_tx_next;
+            spi_busy     <= 1;
+            spi_bit      <= 8;
+            spi_clkdiv   <= 0;
+            spi_start_next <= 0;
+        end
+        else if (spi_busy) begin
             spi_clkdiv <= spi_clkdiv + 1;
             if (spi_clkdiv == SPI_DIV) begin
                 spi_clkdiv <= 0;
                 SD_CLK <= ~SD_CLK;
 
                 if (SD_CLK == 1'b0) begin
-                    // Falling edge: output MOSI
                     SD_CMD <= spi_tx[7];
                     spi_tx <= {spi_tx[6:0], 1'b1};
-                end else begin
-                    // Rising edge: sample MISO
+                end
+                else begin
                     spi_rx <= {spi_rx[6:0], SD_DAT0};
                     spi_bit <= spi_bit - 1;
                     if (spi_bit == 0) begin
                         spi_busy <= 0;
+                        spi_done_d <= 1;   // byte done pulse
                         SD_CLK <= 1'b0;
                     end
                 end
