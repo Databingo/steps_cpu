@@ -5,7 +5,7 @@
 # ==========================================================
 
 # --- Configuration ---
-PROJECT_NAME="cpu_on_board"
+PROJECT_NAME="DE1_SD_Card_Audio"
 SOF_FILE="output_files/${PROJECT_NAME}.sof"
 # Get the device ID from jtagconfig. Example: 020B30DD
 # You can uncomment and set this for more robust programming.
