@@ -601,7 +601,7 @@ module cpu_on_board (
     // This is a common address for the baud rate divisor register.
     // YOU MUST CONFIRM THIS ADDRESS AND THE WIDTH OF THE VALUE (16'd128)
     // from the documentation of your `spi` core (`my_spi_system`).
-    localparam SPI_BAUD_REG = 16'd128; // **CHANGE THIS IF YOUR SPI CORE HAS A DIFFERENT BAUD_REG ADDRESS**
+    localparam SPI_BAUD_REG = 3'd6; // **CHANGE THIS IF YOUR SPI CORE HAS A DIFFERENT BAUD_REG ADDRESS**
     // --- End Minimal Changes ---
 
     initial begin
