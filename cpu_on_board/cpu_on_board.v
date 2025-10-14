@@ -3580,13 +3580,22 @@ always @(posedge CLOCK_50 or negedge reset_n) begin
             3: begin
                 addr_r <= 0; wdata_r <= 32'h40 | 0; write_r <= 1; state <= 4; // CMD0
             end
-            4: begin
-                addr_r <= 0; read_r <= 1;
-                if (sd_rdata[1]) begin
-                    uart_data <= {24'd0, "0"}; uart_write <= 1;
-                    state <= 5;
-                end
-            end
+//            4: begin
+//                addr_r <= 0; read_r <= 1;
+//                if (sd_rdata[3]) begin
+//                    uart_data <= {24'd0, "0"}; uart_write <= 1;
+//                    state <= 5;
+//                end
+//            end
+4: begin
+    addr_r <= 0; read_r <= 1;
+    uart_data <= {8'h00, 8'h00, 8'h30, sd_rdata[3:0] + 8'h30}; // print low bits as ASCII
+    uart_write <= 1;
+    if (sd_rdata[3]) begin
+        uart_data <= {24'd0, "0"}; uart_write <= 1;
+        state <= 5;
+    end
+end
 
             // CMD55 (APP_CMD)
             5: begin
@@ -3600,7 +3609,7 @@ always @(posedge CLOCK_50 or negedge reset_n) begin
             end
             8: begin
                 addr_r <= 0; read_r <= 1;
-                if (sd_rdata[1]) begin
+                if (sd_rdata[3]) begin
                     uart_data <= {24'd0, "5"}; uart_write <= 1;
                     state <= 9;
                 end
@@ -3618,7 +3627,7 @@ always @(posedge CLOCK_50 or negedge reset_n) begin
             end
             12: begin
                 addr_r <= 0; read_r <= 1;
-                if (sd_rdata[1]) begin
+                if (sd_rdata[3]) begin
                     uart_data <= {24'd0, "A"}; uart_write <= 1;
                     state <= 13;
                 end
