@@ -2162,898 +2162,1165 @@
 //endmodule
 
 
-//===========================================================
-// Minimal DE1 SD Card SPI-like test (Cyclone II Starter)
-//===========================================================
+////===========================================================
+//// Minimal DE1 SD Card SPI-like test (Cyclone II Starter)
+////===========================================================
+//
+//module cpu_on_board (
+//    (* chip_pin = "PIN_L1"  *) input  wire CLOCK_50,
+//    (* chip_pin = "PIN_R22" *) input  wire KEY0,        // Active-low reset
+//    (* chip_pin = "R20"     *) output wire LEDR0,
+//
+//    // --- SD card pins ---
+//    (* chip_pin = "V20" *) output wire SD_CLK,   // SD_CLK
+//    (* chip_pin = "Y20" *) inout  wire SD_CMD,   // SD_CMD
+//    (* chip_pin = "W20" *) inout  wire SD_DAT0,  // SD_DAT0
+//    (* chip_pin = "U20" *) output wire SD_DAT3   // SD_CS (optional, often used as CS)
+//);
+//
+//    //=======================================================
+//    // Internal reset and LED blink
+//    //=======================================================
+//    wire reset_n = KEY0;
+//    reg [23:0] blink_counter;
+//
+//    always @(posedge CLOCK_50 or negedge reset_n)
+//        if (!reset_n)
+//            blink_counter <= 0;
+//        else
+//            blink_counter <= blink_counter + 1'b1;
+//
+//    assign LEDR0 = blink_counter[23]; // Blinks every ~1.6 seconds
+//
+//    //=======================================================
+//    // UART for debug output
+//    //=======================================================
+//    reg  [31:0] uart_tx_data;
+//    reg         uart_tx_valid; // Assert high to send a byte
+//    reg         uart_tx_ready; // Indicates UART is ready to accept data
+//
+//    // Example of a basic JTAG UART sender. In a real system,
+//    // you'd typically have a small FIFO or a more robust driver.
+//    jtag_uart_system uart0 (
+//        .clk_clk(CLOCK_50),
+//        .reset_reset_n(reset_n),
+//        .jtag_uart_0_avalon_jtag_slave_address(1'b0), // Assuming control register
+//        .jtag_uart_0_avalon_jtag_slave_writedata(uart_tx_data),
+//        .jtag_uart_0_avalon_jtag_slave_write_n(~uart_tx_valid), // Active low write
+//        .jtag_uart_0_avalon_jtag_slave_chipselect(1'b1),
+//        .jtag_uart_0_avalon_jtag_slave_read_n(1'b1) // Not reading for this example
+//        // Need to check specific JTAG UART component for ready signal,
+//        // often available from the status register. For simplicity,
+//        // we'll assume it's always ready in this example or poll the status bit.
+//    );
+//
+//    // A simple UART sender for string literals
+//    reg [7:0]   uart_string_data;
+//    reg         uart_string_valid;
+//    reg [3:0]   uart_string_idx;
+//    reg [31:0]  uart_string_current_addr;
+//
+//    localparam UART_BUFFER_SIZE = 32;
+//    reg [7:0]   uart_buffer [0:UART_BUFFER_SIZE-1];
+//
+//    always @(posedge CLOCK_50 or negedge reset_n) begin
+//        if (!reset_n) begin
+//            uart_tx_valid <= 0;
+//        end else begin
+//            // Drive the JTAG UART with current byte
+//            uart_tx_valid <= uart_string_valid;
+//            uart_tx_data <= {24'h00, uart_string_data};
+//        end
+//    end
+//
+//    // Helper for sending a null-terminated string via UART
+//    // Call with uart_send_string = 1, and string_ptr pointing to data
+//    reg         uart_send_string;
+//    reg [31:0]  uart_string_ptr; // Base address for string data (simulated)
+//
+//    always @(posedge CLOCK_50 or negedge reset_n) begin
+//        if (!reset_n) begin
+//            uart_string_idx <= 0;
+//            uart_string_valid <= 0;
+//            uart_string_data <= 0;
+//            uart_send_string <= 0; // Clear on reset
+//        end else if (uart_send_string) begin
+//            // This is a simplified model. In reality, you'd have actual memory
+//            // and an address pointer to fetch bytes. Here, we'll just queue a few hardcoded strings.
+//            uart_string_valid <= 1; // Always try to send when active
+//
+//            // Simplified: if JTAG UART is ready, move to next char
+//            // For this example, assuming JTAG UART is always ready for simplicity
+//            // or we'd need to poll its status register.
+//            if (uart_string_valid == 1) begin // This implies a byte was sent
+//                case (uart_string_idx)
+//                    0:  uart_string_data <= uart_buffer[0];
+//                    1:  uart_string_data <= uart_buffer[1];
+//                    2:  uart_string_data <= uart_buffer[2];
+//                    3:  uart_string_data <= uart_buffer[3];
+//                    4:  uart_string_data <= uart_buffer[4];
+//                    5:  uart_string_data <= uart_buffer[5];
+//                    6:  uart_string_data <= uart_buffer[6];
+//                    7:  uart_string_data <= uart_buffer[7];
+//                    8:  uart_string_data <= uart_buffer[8];
+//                    9:  uart_string_data <= uart_buffer[9];
+//                    10: uart_string_data <= uart_buffer[10];
+//                    11: uart_string_data <= uart_buffer[11];
+//                    12: uart_string_data <= uart_buffer[12];
+//                    13: uart_string_data <= uart_buffer[13];
+//                    14: uart_string_data <= uart_buffer[14];
+//                    15: uart_string_data <= uart_buffer[15];
+//                    // Add more if your messages are longer
+//                    default: begin
+//                        uart_string_valid <= 0; // End of string
+//                        uart_string_idx <= 0;
+//                        uart_send_string <= 0; // Done sending
+//                    end
+//                endcase
+//                // Only increment if a valid character was sent and not null
+//                if (uart_string_data != 8'h00 && uart_string_idx < UART_BUFFER_SIZE) begin
+//                    uart_string_idx <= uart_string_idx + 1;
+//                end else begin
+//                    uart_string_valid <= 0;
+//                    uart_string_idx <= 0;
+//                    uart_send_string <= 0; // Stop sending
+//                end
+//            end
+//        end else begin
+//            uart_string_valid <= 0; // Default off
+//            uart_string_idx <= 0;
+//        end
+//    end
+//
+//    // --- Utility function to copy string to buffer and initiate send ---
+//    task send_uart_string;
+//        input [8*UART_BUFFER_SIZE-1:0] str; // Maximum string length (e.g., 32 chars)
+//        integer i;
+//    begin
+//        for (i = 0; i < UART_BUFFER_SIZE; i = i + 1) begin
+//            uart_buffer[i] = str[i*8 +: 8];
+//            if (str[i*8 +: 8] == 8'h00) break; // Stop at null terminator
+//        end
+//        for (i = i; i < UART_BUFFER_SIZE; i = i + 1) begin // Clear remaining buffer
+//            uart_buffer[i] = 8'h00;
+//        end
+//        uart_string_idx <= 0;
+//        uart_send_string <= 1;
+//    end
+//    endtask
+//
+//    //=======================================================
+//    // Simple SD controller wiring (mimic SOPC signals)
+//    // IMPORTANT: Replace these with actual SD controller logic!
+//    // These are placeholders for illustration.
+//    //=======================================================
+//    reg [1:0]  sd_address;
+//    reg        sd_chipselect;
+//    reg        sd_write_n;
+//    reg [15:0] sd_writedata;
+//    wire [15:0] sd_readdata_cmd; // Data read from SD_CMD
+//    wire [15:0] sd_readdata_dat; // Data read from SD_DAT0
+//    wire        sd_out_clk;
+//
+//    // --- SD_CLK ---
+//    // Placeholder module. In a real system, this would be part of your
+//    // SD controller and include clock generation/division logic.
+//    // For this example, we'll just toggle SD_CLK directly in the state machine
+//    // to simulate an SPI clock.
+//    reg sd_clk_reg;
+//    assign SD_CLK = sd_clk_reg;
+//
+//    // --- SD_CMD --- (MOSI for commands, MISO for responses in SPI mode)
+//    // Assume SD_CMD is configured as an output when sending commands (MOSI)
+//    // and an input when reading responses (MISO).
+//    // In SPI mode, SD_CMD is MOSI, SD_DAT0 is MISO.
+//    reg sd_cmd_output_enable;
+//    reg sd_cmd_out;
+//    wire sd_cmd_in;
+//
+//    assign SD_CMD = sd_cmd_output_enable ? sd_cmd_out : 1'bz;
+//    assign sd_cmd_in = SD_CMD; // Read actual pin value
+//
+//    // --- SD_DAT0 --- (MISO in SPI mode)
+//    // SD_DAT0 is typically MISO in SPI mode, so it's usually an input.
+//    // However, the card can sometimes drive it for busy signals.
+//    reg sd_dat0_output_enable; // Keep it as an option, but usually 0 for MISO
+//    reg sd_dat0_out;
+//    wire sd_dat0_in;
+//
+//    assign SD_DAT0 = sd_dat0_output_enable ? sd_dat0_out : 1'bz;
+//    assign sd_dat0_in = SD_DAT0; // Read actual pin value
+//
+//    // SD_DAT3 is often used as the Chip Select (CS) line for SPI mode.
+//    assign SD_DAT3 = sd_chipselect; // Active low CS, so invert if active high needed
+//
+//    //=======================================================
+//    // SD Card SPI specific registers/signals
+//    //=======================================================
+//    reg [7:0] spi_data_out;
+//    reg [7:0] spi_data_in;
+//    reg [2:0] spi_bit_count;
+//    reg       spi_transfer_in_progress;
+//    reg       sd_cmd_response_expected; // Flag to indicate a response is awaited
+//    reg [7:0] sd_response_byte;
+//
+//    // SD Card State Machine
+//    parameter S_IDLE                = 4'h0,
+//              S_POWER_UP_DELAY      = 4'h1,
+//              S_SEND_CMD0_GO_IDLE   = 4'h2,
+//              S_WAIT_R1_CMD0        = 4'h3,
+//              S_SEND_CMD8_IF_V2     = 4'h4,
+//              S_WAIT_R7_CMD8        = 4'h5,
+//              S_SEND_CMD55          = 4'h6,
+//              S_WAIT_R1_CMD55       = 4'h7,
+//              S_SEND_ACMD41_INIT    = 4'h8,
+//              S_WAIT_R1_ACMD41      = 4'h9,
+//              S_SEND_CMD58_READ_OCR = 4'hA,
+//              S_WAIT_R3_CMD58       = 4'hB,
+//              S_INITIALIZED         = 4'hC,
+//              S_SEND_CMD17_READ_BLOCK = 4'hD,
+//              S_WAIT_R1_CMD17       = 4'hE,
+//              S_READ_DATA_TOKEN_WAIT = 4'hF,
+//              S_READ_DATA_BLOCK     = 4'h10,
+//              S_READ_CRC            = 4'h11,
+//              S_TEST_DONE           = 4'h12;
+//
+//    reg [4:0]  state;
+//    reg [31:0] main_counter;
+//    reg [31:0] delay_counter;
+//    reg [7:0]  sd_rxb_buffer; // Buffer for incoming SD data
+//    reg [7:0]  sd_last_response; // Store the last received R1 response
+//    reg [31:0] sd_ocr_reg;       // OCR register from CMD58
+//    reg [7:0]  sd_read_byte_counter;
+//    reg [7:0]  sd_read_data_byte;
+//    reg [11:0] sd_read_block_byte_index;
+//    reg [7:0]  sd_read_data_block [0:511]; // 512-byte block buffer
+//
+//    // --- SPI Clock Divider ---
+//    // SD card initialization needs a slow clock, max 400kHz.
+//    // 50MHz / 400kHz = 125. So, divide by 125, or 62.5 for rising/falling edge
+//    // A divisor of 250 would make 200kHz.
+//    // Let's use a 12-bit counter for flexibility.
+//    reg [11:0] spi_clk_divider_counter;
+//    reg        spi_clk_enable; // Controls actual SPI clock generation
+//    reg        spi_clk_slow_mode; // Flag to use slow clock for init
+//
+//    localparam SPI_DIV_SLOW = 12'd124; // 50MHz / (2 * (124+1)) = 200kHz (approx)
+//    localparam SPI_DIV_FAST = 12'd1;  // 50MHz / (2 * (1+1)) = 12.5MHz (example, higher possible)
+//
+//    always @(posedge CLOCK_50 or negedge reset_n) begin
+//        if (!reset_n) begin
+//            spi_clk_divider_counter <= 0;
+//            sd_clk_reg <= 0;
+//        end else if (spi_clk_enable) begin
+//            if (spi_clk_divider_counter == (spi_clk_slow_mode ? SPI_DIV_SLOW : SPI_DIV_FAST)) begin
+//                spi_clk_divider_counter <= 0;
+//                sd_clk_reg <= ~sd_clk_reg; // Toggle clock
+//            end else begin
+//                spi_clk_divider_counter <= spi_clk_divider_counter + 1;
+//            end
+//        end else begin
+//            sd_clk_reg <= 0; // Keep clock low when disabled
+//        end
+//    end
+//
+//    // --- SPI Transfer Logic ---
+//    // Assumes SD_CMD is MOSI and SD_DAT0 is MISO
+//    always @(posedge CLOCK_50 or negedge reset_n) begin
+//        if (!reset_n) begin
+//            spi_data_in <= 0;
+//            spi_data_out <= 0;
+//            spi_bit_count <= 0;
+//            spi_transfer_in_progress <= 0;
+//            sd_cmd_output_enable <= 0; // SD_CMD as input by default
+//            sd_cmd_out <= 0;
+//        end else begin
+//            if (spi_transfer_in_progress) begin
+//                if (sd_clk_reg == 1'b0) begin // On falling edge of SD_CLK (or rising, depending on SPI mode)
+//                    // Drive MOSI (SD_CMD) on falling edge, prepare for next bit
+//                    sd_cmd_out <= spi_data_out[7 - spi_bit_count];
+//                    sd_cmd_output_enable <= 1; // Enable output
+//                end else begin // On rising edge of SD_CLK
+//                    // Read MISO (SD_DAT0) on rising edge
+//                    spi_data_in[7 - spi_bit_count] <= sd_dat0_in;
+//
+//                    if (spi_bit_count == 7) begin // Last bit
+//                        spi_bit_count <= 0;
+//                        spi_transfer_in_progress <= 0;
+//                        sd_cmd_output_enable <= 0; // Disable MOSI output, make SD_CMD input again
+//                    end else begin
+//                        spi_bit_count <= spi_bit_count + 1;
+//                    end
+//                end
+//            end else begin
+//                sd_cmd_output_enable <= 0; // Ensure SD_CMD is input when not transmitting
+//            end
+//        end
+//    end
+//
+//    // Function to start an SPI byte transfer
+//    task spi_send_byte;
+//        input [7:0] tx_data;
+//    begin
+//        spi_data_out <= tx_data;
+//        spi_bit_count <= 0;
+//        spi_transfer_in_progress <= 1;
+//    end
+//    endtask
+//
+//    // Main state machine
+//    always @(posedge CLOCK_50 or negedge reset_n) begin
+//        if (!reset_n) begin
+//            state <= S_IDLE;
+//            main_counter <= 0;
+//            delay_counter <= 0;
+//            sd_chipselect <= 1'b1; // CS high (inactive)
+//            spi_clk_enable <= 0;
+//            spi_clk_slow_mode <= 1; // Start with slow clock
+//            sd_last_response <= 8'hFF;
+//            sd_ocr_reg <= 0;
+//            sd_read_block_byte_index <= 0;
+//        end else begin
+//            main_counter <= main_counter + 1; // General purpose counter
+//
+//            // --- UART Debug Output Trigger ---
+//            // Simplified triggering for UART messages
+//            if (uart_send_string == 0) begin // Only if not already sending
+//                case (state)
+//                    S_IDLE: begin
+//                        if (main_counter == 50_000_000) begin // 1 second delay
+//                            send_uart_string({"Starting SD Init\n", 8'h00});
+//                            state <= S_POWER_UP_DELAY;
+//                            main_counter <= 0;
+//                            delay_counter <= 0;
+//                        end
+//                    end
+//                    S_POWER_UP_DELAY: begin
+//                        if (delay_counter == 500_000_000) begin // ~10 seconds power-up delay (adjust as needed)
+//                            send_uart_string({"Power-up delay done\n", 8'h00});
+//                            state <= S_SEND_CMD0_GO_IDLE;
+//                            delay_counter <= 0;
+//                        end else begin
+//                            delay_counter <= delay_counter + 1;
+//                        end
+//                    end
+//                    S_SEND_CMD0_GO_IDLE: begin
+//                        // Trigger sending CMD0
+//                        send_uart_string({"CMD0...\n", 8'h00});
+//                        state <= S_WAIT_R1_CMD0;
+//                        // More explicit SPI handling for SD commands
+//                        // First, hold CS high for 74+ clocks (done during power-up delay)
+//                        // Then, pull CS low.
+//                        sd_chipselect <= 1'b0; // Active low CS
+//                        spi_clk_enable <= 1;   // Start SPI clock
+//                        spi_clk_slow_mode <= 1; // Ensure slow clock for init
+//
+//                        // Send CMD0 (0x40), Arg (0x00000000), CRC (0x95)
+//                        spi_send_byte(8'h40); // Command byte
+//                        state <= S_WAIT_R1_CMD0; // Transition to wait for response
+//                        delay_counter <= 0; // Use delay_counter for SPI bit timing if needed, or separate counter
+//                    end
+//                    S_WAIT_R1_CMD0: begin
+//                        if (!spi_transfer_in_progress) begin // CMD0 byte sent
+//                            // Now send argument bytes and CRC
+//                            spi_send_byte(8'h00); // Arg byte 0
+//                            state <= S_WAIT_R1_CMD0; // Keep state
+//                            delay_counter <= delay_counter + 1; // Use this as byte sent counter
+//                            if (delay_counter == 0) begin // After 1st byte (CMD0)
+//                                spi_send_byte(8'h00);
+//                            end else if (delay_counter == 1) begin // After 2nd byte
+//                                spi_send_byte(8'h00);
+//                            end else if (delay_counter == 2) begin // After 3rd byte
+//                                spi_send_byte(8'h00);
+//                            end else if (delay_counter == 3) begin // After 4th byte
+//                                spi_send_byte(8'h95); // CRC byte
+//                                delay_counter <= 0;
+//                                state <= S_WAIT_R1_CMD0_RESPONSE; // Now wait for actual R1 response
+//                            end
+//                        end
+//                    end
+//                    S_WAIT_R1_CMD0_RESPONSE: begin
+//                        // Read response (R1) byte from SD_DAT0 (MISO)
+//                        // This requires continuous clocking until response is received.
+//                        // A proper SPI controller would handle this, but here we manually clock and sample.
+//                        if (delay_counter < 800) begin // Max 8 bytes / 8 bits per byte = 64 clocks. Plus extra. Max 80 clock cycles.
+//                            if (!spi_transfer_in_progress) begin // One byte has been read
+//                                spi_send_byte(8'hFF); // Send dummy byte to clock in response
+//                                if (spi_data_in[7] == 1'b0) begin // Response bit 7 is 0, indicates valid R1 response
+//                                    sd_last_response <= spi_data_in;
+//                                    send_uart_string({"R1 from CMD0: ", spi_data_in, "\n", 8'h00});
+//                                    if (spi_data_in == 8'h01) begin // Should be 0x01 (Idle state)
+//                                        state <= S_SEND_CMD8_IF_V2;
+//                                        delay_counter <= 0;
+//                                        sd_chipselect <= 1'b1; // De-assert CS after command sequence
+//                                        spi_clk_enable <= 0; // Stop clock
+//                                    end else begin
+//                                        send_uart_string({"CMD0 failed (not 0x01): ", spi_data_in, "\n", 8'h00});
+//                                        state <= S_IDLE; // Reset if failed
+//                                        sd_chipselect <= 1'b1;
+//                                        spi_clk_enable <= 0;
+//                                    end
+//                                end
+//                            end
+//                            delay_counter <= delay_counter + 1;
+//                        end else begin
+//                            send_uart_string({"CMD0 Timeout\n", 8'h00});
+//                            state <= S_IDLE; // Timeout
+//                            sd_chipselect <= 1'b1;
+//                            spi_clk_enable <= 0;
+//                        end
+//                    end
+//
+//                    S_SEND_CMD8_IF_V2: begin
+//                        if (uart_send_string == 0 && delay_counter == 0) begin // Ensure UART is done and not transitioning instantly
+//                            send_uart_string({"CMD8...\n", 8'h00});
+//                            sd_chipselect <= 1'b0;
+//                            spi_clk_enable <= 1;
+//                            spi_send_byte(8'h48); // CMD8 (0x48)
+//                            state <= S_WAIT_R7_CMD8;
+//                            delay_counter <= 1; // Counter for arg/crc bytes
+//                        end
+//                    end
+//                    S_WAIT_R7_CMD8: begin
+//                        if (!spi_transfer_in_progress) begin
+//                            if (delay_counter == 1) begin // Send Arg1 (VHS, 0x01)
+//                                spi_send_byte(8'h00); // Reserved
+//                                delay_counter <= delay_counter + 1;
+//                            end else if (delay_counter == 2) begin // Send Arg2 (VHS, 0x01)
+//                                spi_send_byte(8'h00); // Reserved
+//                                delay_counter <= delay_counter + 1;
+//                            end else if (delay_counter == 3) begin // Send Arg3 (VHS, 0x01)
+//                                spi_send_byte(8'h01); // 2.7-3.6V (VHS)
+//                                delay_counter <= delay_counter + 1;
+//                            end else if (delay_counter == 4) begin // Send Arg4 (Check Pattern, 0xAA)
+//                                spi_send_byte(8'hAA); // Check Pattern
+//                                delay_counter <= delay_counter + 1;
+//                            end else if (delay_counter == 5) begin // Send CRC (0x87)
+//                                spi_send_byte(8'h87); // CRC for CMD8
+//                                delay_counter <= 0;
+//                                state <= S_WAIT_R7_CMD8_RESPONSE;
+//                            end
+//                        end
+//                    end
+//                    S_WAIT_R7_CMD8_RESPONSE: begin
+//                        if (delay_counter < 800) begin
+//                            if (!spi_transfer_in_progress) begin
+//                                spi_send_byte(8'hFF); // Dummy byte to clock in response
+//                                if (spi_data_in[7] == 1'b0) begin // R1 part of R7 response
+//                                    sd_last_response <= spi_data_in;
+//                                    send_uart_string({"R1 from CMD8: ", spi_data_in, "\n", 8'h00});
+//                                    if (spi_data_in == 8'h01) begin // Should be 0x01 (Idle state) or 0x05 (Illegal command if not V2 card)
+//                                        // Read remaining 4 bytes of R7 (32-bit response)
+//                                        state <= S_READ_R7_BYTES;
+//                                        delay_counter <= 0; // Use for R7 byte count
+//                                    end else if (spi_data_in == 8'h05) begin
+//                                        send_uart_string({"CMD8 rejected, V1 card?\n", 8'h00});
+//                                        state <= S_SEND_CMD55; // Proceed as V1 card (skip ACMD41 with HCS)
+//                                        sd_chipselect <= 1'b1;
+//                                        spi_clk_enable <= 0;
+//                                    end else begin
+//                                        send_uart_string({"CMD8 failed (R1 != 0x01/0x05): ", spi_data_in, "\n", 8'h00});
+//                                        state <= S_IDLE; // Reset if failed
+//                                        sd_chipselect <= 1'b1;
+//                                        spi_clk_enable <= 0;
+//                                    end
+//                                end
+//                            end
+//                            delay_counter <= delay_counter + 1;
+//                        end else begin
+//                            send_uart_string({"CMD8 Timeout\n", 8'h00});
+//                            state <= S_IDLE;
+//                            sd_chipselect <= 1'b1;
+//                            spi_clk_enable <= 0;
+//                        end
+//                    end
+//                    S_READ_R7_BYTES: begin
+//                        // Read the 4 additional bytes of R7 (OCR and Check Pattern)
+//                        if (delay_counter < 4) begin
+//                            if (!spi_transfer_in_progress) begin
+//                                spi_send_byte(8'hFF); // Dummy to clock in next byte
+//                                sd_ocr_reg[(3-delay_counter)*8 +: 8] <= spi_data_in; // Store R7 bytes
+//                                delay_counter <= delay_counter + 1;
+//                            end
+//                        end else begin
+//                            send_uart_string({"R7 response received\n", 8'h00});
+//                            send_uart_string({"Check Pattern: ", sd_ocr_reg[7:0], "\n", 8'h00});
+//                            send_uart_string({"Voltage Range: ", sd_ocr_reg[19:16], "\n", 8'h00});
+//                            state <= S_SEND_CMD55; // Next, send CMD55 for ACMD41
+//                            sd_chipselect <= 1'b1;
+//                            spi_clk_enable <= 0;
+//                        end
+//                    end
+//
+//                    S_SEND_CMD55: begin
+//                        if (uart_send_string == 0 && delay_counter == 0) begin
+//                            send_uart_string({"CMD55...\n", 8'h00});
+//                            sd_chipselect <= 1'b0;
+//                            spi_clk_enable <= 1;
+//                            spi_send_byte(8'h77); // CMD55 (0x77)
+//                            state <= S_WAIT_R1_CMD55;
+//                            delay_counter <= 1;
+//                        end
+//                    end
+//                    S_WAIT_R1_CMD55: begin
+//                        if (!spi_transfer_in_progress) begin
+//                            if (delay_counter == 1) begin // Arg (0x00000000)
+//                                spi_send_byte(8'h00);
+//                                delay_counter <= delay_counter + 1;
+//                            end else if (delay_counter == 2) begin
+//                                spi_send_byte(8'h00);
+//                                delay_counter <= delay_counter + 1;
+//                            end else if (delay_counter == 3) begin
+//                                spi_send_byte(8'h00);
+//                                delay_counter <= delay_counter + 1;
+//                            end else if (delay_counter == 4) begin
+//                                spi_send_byte(8'h00);
+//                                delay_counter <= delay_counter + 1;
+//                            end else if (delay_counter == 5) begin // CRC (0x65 for dummy, not really checked)
+//                                spi_send_byte(8'h01); // Dummy CRC or 0x65
+//                                delay_counter <= 0;
+//                                state <= S_WAIT_R1_CMD55_RESPONSE;
+//                            end
+//                        end
+//                    end
+//                    S_WAIT_R1_CMD55_RESPONSE: begin
+//                        if (delay_counter < 800) begin
+//                            if (!spi_transfer_in_progress) begin
+//                                spi_send_byte(8'hFF);
+//                                if (spi_data_in[7] == 1'b0) begin
+//                                    sd_last_response <= spi_data_in;
+//                                    send_uart_string({"R1 from CMD55: ", spi_data_in, "\n", 8'h00});
+//                                    if (spi_data_in == 8'h01) begin // Should be 0x01 (Idle state)
+//                                        state <= S_SEND_ACMD41_INIT;
+//                                        delay_counter <= 0;
+//                                        sd_chipselect <= 1'b1;
+//                                        spi_clk_enable <= 0;
+//                                    end else begin
+//                                        send_uart_string({"CMD55 failed (not 0x01): ", spi_data_in, "\n", 8'h00});
+//                                        state <= S_IDLE;
+//                                        sd_chipselect <= 1'b1;
+//                                        spi_clk_enable <= 0;
+//                                    end
+//                                end
+//                            end
+//                            delay_counter <= delay_counter + 1;
+//                        end else begin
+//                            send_uart_string({"CMD55 Timeout\n", 8'h00});
+//                            state <= S_IDLE;
+//                            sd_chipselect <= 1'b1;
+//                            spi_clk_enable <= 0;
+//                        end
+//                    end
+//
+//                    S_SEND_ACMD41_INIT: begin
+//                        if (uart_send_string == 0 && delay_counter == 0) begin
+//                            send_uart_string({"ACMD41...\n", 8'h00});
+//                            sd_chipselect <= 1'b0;
+//                            spi_clk_enable <= 1;
+//                            spi_send_byte(8'h69); // ACMD41 (0x69)
+//                            state <= S_WAIT_R1_ACMD41;
+//                            delay_counter <= 1;
+//                        end
+//                    end
+//                    S_WAIT_R1_ACMD41: begin
+//                        if (!spi_transfer_in_progress) begin
+//                            if (delay_counter == 1) begin // Arg (0x40000000 for HCS, or 0x00000000 for standard capacity)
+//                                spi_send_byte(8'h40); // HCS (Host Capacity Support)
+//                                delay_counter <= delay_counter + 1;
+//                            end else if (delay_counter == 2) begin
+//                                spi_send_byte(8'h00);
+//                                delay_counter <= delay_counter + 1;
+//                            end else if (delay_counter == 3) begin
+//                                spi_send_byte(8'h00);
+//                                delay_counter <= delay_counter + 1;
+//                            end else if (delay_counter == 4) begin
+//                                spi_send_byte(8'h00);
+//                                delay_counter <= delay_counter + 1;
+//                            end else if (delay_counter == 5) begin // CRC (dummy)
+//                                spi_send_byte(8'h01); // Dummy CRC or 0x77
+//                                delay_counter <= 0;
+//                                state <= S_WAIT_R1_ACMD41_RESPONSE;
+//                            end
+//                        end
+//                    end
+//                    S_WAIT_R1_ACMD41_RESPONSE: begin
+//                        if (delay_counter < 800) begin // Max 800 clock cycles for response (CMD0 timeout)
+//                            if (!spi_transfer_in_progress) begin
+//                                spi_send_byte(8'hFF);
+//                                if (spi_data_in == 8'h00) begin // Should be 0x00 (card initialized and ready)
+//                                    sd_last_response <= spi_data_in;
+//                                    send_uart_string({"R1 from ACMD41: ", spi_data_in, "\n", 8'h00});
+//                                    // Initialization successful
+//                                    send_uart_string({"SD Card Initialized!\n", 8'h00});
+//                                    state <= S_SEND_CMD58_READ_OCR;
+//                                    delay_counter <= 0;
+//                                    sd_chipselect <= 1'b1;
+//                                    spi_clk_enable <= 0;
+//                                    spi_clk_slow_mode <= 0; // Switch to fast clock after init
+//                                end else if (spi_data_in == 8'h01) begin // Still in idle state, keep polling
+//                                    state <= S_SEND_CMD55; // Loop back to CMD55 -> ACMD41
+//                                    delay_counter <= 0;
+//                                    sd_chipselect <= 1'b1;
+//                                    spi_clk_enable <= 0;
+//                                end else begin
+//                                    send_uart_string({"ACMD41 failed (not 0x00/0x01): ", spi_data_in, "\n", 8'h00});
+//                                    state <= S_IDLE;
+//                                    sd_chipselect <= 1'b1;
+//                                    spi_clk_enable <= 0;
+//                                end
+//                            end
+//                            delay_counter <= delay_counter + 1;
+//                        end else begin
+//                            send_uart_string({"ACMD41 Timeout\n", 8'h00});
+//                            state <= S_IDLE;
+//                            sd_chipselect <= 1'b1;
+//                            spi_clk_enable <= 0;
+//                        end
+//                    end
+//
+//                    S_SEND_CMD58_READ_OCR: begin
+//                        if (uart_send_string == 0 && delay_counter == 0) begin
+//                            send_uart_string({"CMD58 (Read OCR)...\n", 8'h00});
+//                            sd_chipselect <= 1'b0;
+//                            spi_clk_enable <= 1;
+//                            spi_send_byte(8'h7A); // CMD58 (0x7A)
+//                            state <= S_WAIT_R3_CMD58;
+//                            delay_counter <= 1;
+//                        end
+//                    end
+//                    S_WAIT_R3_CMD58: begin
+//                        if (!spi_transfer_in_progress) begin
+//                            if (delay_counter == 1) begin // Arg (0x00000000)
+//                                spi_send_byte(8'h00);
+//                                delay_counter <= delay_counter + 1;
+//                            end else if (delay_counter == 2) begin
+//                                spi_send_byte(8'h00);
+//                                delay_counter <= delay_counter + 1;
+//                            end else if (delay_counter == 3) begin
+//                                spi_send_byte(8'h00);
+//                                delay_counter <= delay_counter + 1;
+//                            end else if (delay_counter == 4) begin
+//                                spi_send_byte(8'h00);
+//                                delay_counter <= delay_counter + 1;
+//                            end else if (delay_counter == 5) begin // CRC (dummy)
+//                                spi_send_byte(8'h01);
+//                                delay_counter <= 0;
+//                                state <= S_WAIT_R3_CMD58_RESPONSE;
+//                            end
+//                        end
+//                    end
+//                    S_WAIT_R3_CMD58_RESPONSE: begin
+//                        if (delay_counter < 800) begin
+//                            if (!spi_transfer_in_progress) begin
+//                                spi_send_byte(8'hFF); // Dummy byte for R1
+//                                if (spi_data_in[7] == 1'b0) begin
+//                                    sd_last_response <= spi_data_in;
+//                                    send_uart_string({"R1 from CMD58: ", spi_data_in, "\n", 8'h00});
+//                                    if (spi_data_in == 8'h00) begin // Should be 0x00
+//                                        state <= S_READ_OCR_BYTES; // Read the 4 OCR bytes
+//                                        delay_counter <= 0;
+//                                    end else begin
+//                                        send_uart_string({"CMD58 failed (not 0x00): ", spi_data_in, "\n", 8'h00});
+//                                        state <= S_IDLE;
+//                                        sd_chipselect <= 1'b1;
+//                                        spi_clk_enable <= 0;
+//                                    end
+//                                end
+//                            end
+//                            delay_counter <= delay_counter + 1;
+//                        end else begin
+//                            send_uart_string({"CMD58 Timeout\n", 8'h00});
+//                            state <= S_IDLE;
+//                            sd_chipselect <= 1'b1;
+//                            spi_clk_enable <= 0;
+//                        end
+//                    end
+//                    S_READ_OCR_BYTES: begin
+//                        if (delay_counter < 4) begin
+//                            if (!spi_transfer_in_progress) begin
+//                                spi_send_byte(8'hFF);
+//                                sd_ocr_reg[(3-delay_counter)*8 +: 8] <= spi_data_in; // Store OCR bytes
+//                                delay_counter <= delay_counter + 1;
+//                            end
+//                        end else begin
+//                            send_uart_string({"OCR Value: ", sd_ocr_reg, "\n", 8'h00});
+//                            if (sd_ocr_reg[30] == 1) begin
+//                                send_uart_string({"Card is SDHC/SDXC\n", 8'h00});
+//                            end else begin
+//                                send_uart_string({"Card is Standard Capacity\n", 8'h00});
+//                            end
+//                            state <= S_INITIALIZED;
+//                            sd_chipselect <= 1'b1;
+//                            spi_clk_enable <= 0;
+//                            delay_counter <= 0;
+//                        end
+//                    end
+//
+//                    S_INITIALIZED: begin
+//                        if (uart_send_string == 0 && delay_counter == 0) begin
+//                            send_uart_string({"SD Card Ready! Reading Block 0...\n", 8'h00});
+//                            delay_counter <= 50_000_000; // Delay a bit before reading
+//                            state <= S_SEND_CMD17_READ_BLOCK;
+//                        end else if (uart_send_string == 0 && delay_counter > 0) begin
+//                             delay_counter <= delay_counter - 1;
+//                        end
+//                    end
+//
+//                    S_SEND_CMD17_READ_BLOCK: begin
+//                        if (uart_send_string == 0 && delay_counter == 0) begin
+//                            send_uart_string({"CMD17 (Read Single Block)...\n", 8'h00});
+//                            sd_chipselect <= 1'b0;
+//                            spi_clk_enable <= 1;
+//                            spi_clk_slow_mode <= 0; // Use fast clock now
+//                            spi_send_byte(8'h51); // CMD17 (0x51)
+//                            state <= S_WAIT_R1_CMD17;
+//                            delay_counter <= 1;
+//                        end
+//                    end
+//                    S_WAIT_R1_CMD17: begin
+//                        if (!spi_transfer_in_progress) begin
+//                            if (delay_counter == 1) begin // Arg (Block Address: 0x00000000 for block 0)
+//                                spi_send_byte(8'h00);
+//                                delay_counter <= delay_counter + 1;
+//                            end else if (delay_counter == 2) begin
+//                                spi_send_byte(8'h00);
+//                                delay_counter <= delay_counter + 1;
+//                            end else if (delay_counter == 3) begin
+//                                spi_send_byte(8'h00);
+//                                delay_counter <= delay_counter + 1;
+//                            end else if (delay_counter == 4) begin
+//                                spi_send_byte(8'h00);
+//                                delay_counter <= delay_counter + 1;
+//                            end else if (delay_counter == 5) begin // CRC (dummy)
+//                                spi_send_byte(8'h01); // Dummy CRC or 0xFF
+//                                delay_counter <= 0;
+//                                state <= S_WAIT_R1_CMD17_RESPONSE;
+//                            end
+//                        end
+//                    end
+//                    S_WAIT_R1_CMD17_RESPONSE: begin
+//                        if (delay_counter < 800) begin
+//                            if (!spi_transfer_in_progress) begin
+//                                spi_send_byte(8'hFF);
+//                                if (spi_data_in == 8'h00) begin
+//                                    sd_last_response <= spi_data_in;
+//                                    send_uart_string({"R1 from CMD17: ", spi_data_in, "\n", 8'h00});
+//                                    send_uart_string({"Waiting for data token...\n", 8'h00});
+//                                    state <= S_READ_DATA_TOKEN_WAIT;
+//                                    delay_counter <= 0;
+//                                end else begin
+//                                    send_uart_string({"CMD17 failed (not 0x00): ", spi_data_in, "\n", 8'h00});
+//                                    state <= S_INITIALIZED; // Go back to initialized state for retry/further commands
+//                                    sd_chipselect <= 1'b1;
+//                                    spi_clk_enable <= 0;
+//                                end
+//                            end
+//                            delay_counter <= delay_counter + 1;
+//                        end else begin
+//                            send_uart_string({"CMD17 Timeout\n", 8'h00});
+//                            state <= S_INITIALIZED;
+//                            sd_chipselect <= 1'b1;
+//                            spi_clk_enable <= 0;
+//                        end
+//                    end
+//                    S_READ_DATA_TOKEN_WAIT: begin
+//                        if (delay_counter < 50_000_000) begin // Max 100ms for data token
+//                            if (!spi_transfer_in_progress) begin
+//                                spi_send_byte(8'hFF); // Clock in dummy byte to read MISO
+//                                if (spi_data_in == 8'hFE) begin // Start block token
+//                                    send_uart_string({"Data token received!\n", 8'h00});
+//                                    state <= S_READ_DATA_BLOCK;
+//                                    sd_read_block_byte_index <= 0;
+//                                    delay_counter <= 0;
+//                                end else if (spi_data_in != 8'hFF) begin
+//                                    // Error token or busy signal
+//                                    send_uart_string({"Error/Busy Token: ", spi_data_in, "\n", 8'h00});
+//                                    state <= S_INITIALIZED;
+//                                    sd_chipselect <= 1'b1;
+//                                    spi_clk_enable <= 0;
+//                                end
+//                            end
+//                            delay_counter <= delay_counter + 1;
+//                        end else begin
+//                            send_uart_string({"Data Token Timeout\n", 8'h00});
+//                            state <= S_INITIALIZED;
+//                            sd_chipselect <= 1'b1;
+//                            spi_clk_enable <= 0;
+//                        end
+//                    end
+//                    S_READ_DATA_BLOCK: begin
+//                        if (sd_read_block_byte_index < 512) begin
+//                            if (!spi_transfer_in_progress) begin
+//                                spi_send_byte(8'hFF); // Clock in dummy byte to read MISO
+//                                sd_read_data_block[sd_read_block_byte_index] <= spi_data_in;
+//                                sd_read_block_byte_index <= sd_read_block_byte_index + 1;
+//                            end
+//                        end else begin
+//                            send_uart_string({"Block data read complete.\n", 8'h00});
+//                            state <= S_READ_CRC;
+//                            delay_counter <= 0;
+//                        end
+//                    end
+//                    S_READ_CRC: begin
+//                        if (delay_counter < 2) begin // Read 2 CRC bytes
+//                             if (!spi_transfer_in_progress) begin
+//                                spi_send_byte(8'hFF); // Clock in dummy byte to read MISO
+//                                delay_counter <= delay_counter + 1;
+//                             end
+//                        end else begin
+//                            send_uart_string({"CRC bytes read.\n", 8'h00});
+//                            send_uart_string({"First 16 bytes of Block 0:\n", 8'h00});
+//                            // Print first 16 bytes for verification
+//                            // This would be done by sending individual characters or by loading an array.
+//                            // For simplicity, let's just print a placeholder.
+//                            // send_uart_string({sd_read_data_block[0], sd_read_data_block[1], ...}); (Need a way to print hex)
+//                            send_uart_string({"[Block 0 Data Sample...]\n", 8'h00});
+//                            state <= S_TEST_DONE;
+//                            sd_chipselect <= 1'b1;
+//                            spi_clk_enable <= 0;
+//                        end
+//                    end
+//
+//                    S_TEST_DONE: begin
+//                        if (main_counter == 50_000_000) begin
+//                            send_uart_string({"SD Test Done. Looping...\n", 8'h00});
+//                            main_counter <= 0;
+//                            state <= S_IDLE; // Loop back to start (or S_INITIALIZED for more commands)
+//                        end
+//                    end
+//                endcase
+//            end
+//        end
+//    end
+//
+//endmodule
+//
+//// --- Placeholder for jtag_uart_system ---
+//// You will replace this with your actual Quartus JTAG UART IP.
+//// This is a minimal definition to allow compilation.
+//module jtag_uart_system (
+//    input clk_clk,
+//    input reset_reset_n,
+//    input jtag_uart_0_avalon_jtag_slave_address,
+//    input [31:0] jtag_uart_0_avalon_jtag_slave_writedata,
+//    input jtag_uart_0_avalon_jtag_slave_write_n,
+//    input jtag_uart_0_avalon_jtag_slave_chipselect,
+//    input jtag_uart_0_avalon_jtag_slave_read_n
+//);
+//    // In a real system, this connects to the JTAG UART IP core
+//    // and would have internal logic to handle data.
+//    // For this example, it's just a dummy.
+//endmodule
+//
+//// --- Placeholder for SD_CLK, SD_CMD, SD_DAT modules ---
+//// These are currently not used in the expanded design,
+//// as the SPI logic is implemented directly in cpu_on_board.
+//// You should remove these if you implement the full controller.
+//// If your existing project uses these for IO buffering, ensure they
+//// are tristate buffers properly configured.
+//module SD_CLK (
+//    input [1:0] address,
+//    input chipselect,
+//    input clk,
+//    input reset_n,
+//    input write_n,
+//    input [15:0] writedata,
+//    output out_port
+//);
+//    assign out_port = 1'b0; // Dummy
+//endmodule
+//
+//module SD_CMD (
+//    input [1:0] address,
+//    input chipselect,
+//    input clk,
+//    input reset_n,
+//    input write_n,
+//    input [15:0] writedata,
+//    inout bidir_port,
+//    output [15:0] readdata
+//);
+//    assign bidir_port = 1'bz; // Dummy
+//    assign readdata = 16'hFFFF; // Dummy
+//endmodule
+//
+//module SD_DAT (
+//    input [1:0] address,
+//    input chipselect,
+//    input clk,
+//    input reset_n,
+//    input write_n,
+//    input [15:0] writedata,
+//    inout bidir_port,
+//    output [15:0] readdata
+//);
+//    assign bidir_port = 1'bz; // Dummy
+//    assign readdata = 16'hFFFF; // Dummy
+//endmodule
+
+
+
+// sd_spi_reader.v
+// IP-free SD SPI reader for DE1: reads block 0 and prints bytes via JTAG UART.
+// - Safe init SPI ~400 kHz (50MHz / 125)
+// - Sends CMD0, waits by clocking 0xFF until response != 0xFF
+// - Sends CMD17, waits for 0xFE start token, reads 512 bytes
+// - Streams bytes to jtag UART (single-byte writes)
+// Notes: this is a simple demonstrator. Real card init (SDHC vs SDSC) and ACMD41
+// handling is not implemented; many SD cards will accept CMD0 + CMD17 for simple tests.
 
 module cpu_on_board (
     (* chip_pin = "PIN_L1"  *) input  wire CLOCK_50,
-    (* chip_pin = "PIN_R22" *) input  wire KEY0,        // Active-low reset
+    (* chip_pin = "PIN_R22" *) input  wire KEY0,        // active-low reset
     (* chip_pin = "R20"     *) output wire LEDR0,
 
-    // --- SD card pins ---
-    (* chip_pin = "V20" *) output wire SD_CLK,   // SD_CLK
-    (* chip_pin = "Y20" *) inout  wire SD_CMD,   // SD_CMD
-    (* chip_pin = "W20" *) inout  wire SD_DAT0,  // SD_DAT0
-    (* chip_pin = "U20" *) output wire SD_DAT3   // SD_CS (optional, often used as CS)
+    // SD pins for DE1
+    (* chip_pin = "V20" *) output reg SD_CLK,   // SD clock
+    (* chip_pin = "Y20" *) inout  wire SD_CMD,   // SD command (MOSI when driving)
+    (* chip_pin = "W20" *) inout  wire SD_DAT,   // SD data0 (MISO)
+    (* chip_pin = "U20" *) output wire SD_DAT3   // tie high or unused
 );
 
-    //=======================================================
-    // Internal reset and LED blink
-    //=======================================================
-    wire reset_n = KEY0;
-    reg [23:0] blink_counter;
+// ---------- basics ----------
+wire reset_n = KEY0;
+reg [23:0] blink_counter;
+always @(posedge CLOCK_50 or negedge reset_n) begin
+    if (!reset_n) blink_counter <= 0;
+    else blink_counter <= blink_counter + 1'b1;
+end
+assign LEDR0 = blink_counter[23];
 
-    always @(posedge CLOCK_50 or negedge reset_n)
-        if (!reset_n)
-            blink_counter <= 0;
-        else
-            blink_counter <= blink_counter + 1'b1;
+// ---------- JTAG UART (same interface as your project) ----------
+reg  [31:0] uart_data;
+reg         uart_write;
+jtag_uart_system uart0 (
+    .clk_clk(CLOCK_50),
+    .reset_reset_n(reset_n),
+    .jtag_uart_0_avalon_jtag_slave_address(1'b0),
+    .jtag_uart_0_avalon_jtag_slave_writedata(uart_data),
+    .jtag_uart_0_avalon_jtag_slave_write_n(~uart_write),
+    .jtag_uart_0_avalon_jtag_slave_chipselect(1'b1),
+    .jtag_uart_0_avalon_jtag_slave_read_n(1'b1)
+);
 
-    assign LEDR0 = blink_counter[23]; // Blinks every ~1.6 seconds
+// ---------- SD IO control (tri-state for MOSI) ----------
+reg sd_mosi_o;
+reg sd_mosi_oe;            // when 1 drive SD_CMD with sd_mosi_o
+assign SD_CMD = sd_mosi_oe ? sd_mosi_o : 1'bz;
+wire sd_miso = SD_DAT;     // DAT0 is MISO
+assign SD_DAT3 = 1'b1;     // keep DAT3 high (card detect or cs), or Z if unused
 
-    //=======================================================
-    // UART for debug output
-    //=======================================================
-    reg  [31:0] uart_tx_data;
-    reg         uart_tx_valid; // Assert high to send a byte
-    reg         uart_tx_ready; // Indicates UART is ready to accept data
-
-    // Example of a basic JTAG UART sender. In a real system,
-    // you'd typically have a small FIFO or a more robust driver.
-    jtag_uart_system uart0 (
-        .clk_clk(CLOCK_50),
-        .reset_reset_n(reset_n),
-        .jtag_uart_0_avalon_jtag_slave_address(1'b0), // Assuming control register
-        .jtag_uart_0_avalon_jtag_slave_writedata(uart_tx_data),
-        .jtag_uart_0_avalon_jtag_slave_write_n(~uart_tx_valid), // Active low write
-        .jtag_uart_0_avalon_jtag_slave_chipselect(1'b1),
-        .jtag_uart_0_avalon_jtag_slave_read_n(1'b1) // Not reading for this example
-        // Need to check specific JTAG UART component for ready signal,
-        // often available from the status register. For simplicity,
-        // we'll assume it's always ready in this example or poll the status bit.
-    );
-
-    // A simple UART sender for string literals
-    reg [7:0]   uart_string_data;
-    reg         uart_string_valid;
-    reg [3:0]   uart_string_idx;
-    reg [31:0]  uart_string_current_addr;
-
-    localparam UART_BUFFER_SIZE = 32;
-    reg [7:0]   uart_buffer [0:UART_BUFFER_SIZE-1];
-
-    always @(posedge CLOCK_50 or negedge reset_n) begin
-        if (!reset_n) begin
-            uart_tx_valid <= 0;
+// ---------- SPI clock divider (~400 kHz) ----------
+reg [6:0] clk_div;         // divides 50MHz by 125 -> 400kHz
+reg spi_edge;              // pulses when we should sample/drive at each half-cycle
+always @(posedge CLOCK_50 or negedge reset_n) begin
+    if(!reset_n) begin
+        clk_div <= 0; spi_edge <= 0;
+    end else begin
+        if(clk_div == 62) begin
+            clk_div <= 0;
+            spi_edge <= 1;
         end else begin
-            // Drive the JTAG UART with current byte
-            uart_tx_valid <= uart_string_valid;
-            uart_tx_data <= {24'h00, uart_string_data};
+            clk_div <= clk_div + 1;
+            spi_edge <= 0;
         end
     end
+end
 
-    // Helper for sending a null-terminated string via UART
-    // Call with uart_send_string = 1, and string_ptr pointing to data
-    reg         uart_send_string;
-    reg [31:0]  uart_string_ptr; // Base address for string data (simulated)
+// ---------- state machine and variables ----------
+localparam IDLE = 0, SEND_CMD = 1, WAIT_RESP = 2, SEND_CMD17 = 3,
+           WAIT_TOKEN = 4, READ_BYTES = 5, DONE = 6, ERROR = 7;
 
-    always @(posedge CLOCK_50 or negedge reset_n) begin
-        if (!reset_n) begin
-            uart_string_idx <= 0;
-            uart_string_valid <= 0;
-            uart_string_data <= 0;
-            uart_send_string <= 0; // Clear on reset
-        end else if (uart_send_string) begin
-            // This is a simplified model. In reality, you'd have actual memory
-            // and an address pointer to fetch bytes. Here, we'll just queue a few hardcoded strings.
-            uart_string_valid <= 1; // Always try to send when active
+reg [3:0] state;
+reg [5:0] bitpos;          // 0..47, or 0..7 for byte
+reg [47:0] shift48;
+reg [7:0] shift8;
+reg [8:0] byte_count;
+reg [15:0] timeout;        // small timeout counters for safety
 
-            // Simplified: if JTAG UART is ready, move to next char
-            // For this example, assuming JTAG UART is always ready for simplicity
-            // or we'd need to poll its status register.
-            if (uart_string_valid == 1) begin // This implies a byte was sent
-                case (uart_string_idx)
-                    0:  uart_string_data <= uart_buffer[0];
-                    1:  uart_string_data <= uart_buffer[1];
-                    2:  uart_string_data <= uart_buffer[2];
-                    3:  uart_string_data <= uart_buffer[3];
-                    4:  uart_string_data <= uart_buffer[4];
-                    5:  uart_string_data <= uart_buffer[5];
-                    6:  uart_string_data <= uart_buffer[6];
-                    7:  uart_string_data <= uart_buffer[7];
-                    8:  uart_string_data <= uart_buffer[8];
-                    9:  uart_string_data <= uart_buffer[9];
-                    10: uart_string_data <= uart_buffer[10];
-                    11: uart_string_data <= uart_buffer[11];
-                    12: uart_string_data <= uart_buffer[12];
-                    13: uart_string_data <= uart_buffer[13];
-                    14: uart_string_data <= uart_buffer[14];
-                    15: uart_string_data <= uart_buffer[15];
-                    // Add more if your messages are longer
-                    default: begin
-                        uart_string_valid <= 0; // End of string
-                        uart_string_idx <= 0;
-                        uart_send_string <= 0; // Done sending
-                    end
-                endcase
-                // Only increment if a valid character was sent and not null
-                if (uart_string_data != 8'h00 && uart_string_idx < UART_BUFFER_SIZE) begin
-                    uart_string_idx <= uart_string_idx + 1;
-                end else begin
-                    uart_string_valid <= 0;
-                    uart_string_idx <= 0;
-                    uart_send_string <= 0; // Stop sending
-                end
-            end
-        end else begin
-            uart_string_valid <= 0; // Default off
-            uart_string_idx <= 0;
-        end
-    end
+// helper: write single byte to UART (blocking one-cycle request)
+task uart_put_byte (input [7:0] b);
+begin
+    uart_data <= {24'd0, b};
+    uart_write <= 1;
+    @(posedge CLOCK_50); // allow handshake pulse to be seen next cycle
+    uart_write <= 0;
+end
+endtask
 
-    // --- Utility function to copy string to buffer and initiate send ---
-    task send_uart_string;
-        input [8*UART_BUFFER_SIZE-1:0] str; // Maximum string length (e.g., 32 chars)
-        integer i;
-    begin
-        for (i = 0; i < UART_BUFFER_SIZE; i = i + 1) begin
-            uart_buffer[i] = str[i*8 +: 8];
-            if (str[i*8 +: 8] == 8'h00) break; // Stop at null terminator
-        end
-        for (i = i; i < UART_BUFFER_SIZE; i = i + 1) begin // Clear remaining buffer
-            uart_buffer[i] = 8'h00;
-        end
-        uart_string_idx <= 0;
-        uart_send_string <= 1;
-    end
-    endtask
-
-    //=======================================================
-    // Simple SD controller wiring (mimic SOPC signals)
-    // IMPORTANT: Replace these with actual SD controller logic!
-    // These are placeholders for illustration.
-    //=======================================================
-    reg [1:0]  sd_address;
-    reg        sd_chipselect;
-    reg        sd_write_n;
-    reg [15:0] sd_writedata;
-    wire [15:0] sd_readdata_cmd; // Data read from SD_CMD
-    wire [15:0] sd_readdata_dat; // Data read from SD_DAT0
-    wire        sd_out_clk;
-
-    // --- SD_CLK ---
-    // Placeholder module. In a real system, this would be part of your
-    // SD controller and include clock generation/division logic.
-    // For this example, we'll just toggle SD_CLK directly in the state machine
-    // to simulate an SPI clock.
-    reg sd_clk_reg;
-    assign SD_CLK = sd_clk_reg;
-
-    // --- SD_CMD --- (MOSI for commands, MISO for responses in SPI mode)
-    // Assume SD_CMD is configured as an output when sending commands (MOSI)
-    // and an input when reading responses (MISO).
-    // In SPI mode, SD_CMD is MOSI, SD_DAT0 is MISO.
-    reg sd_cmd_output_enable;
-    reg sd_cmd_out;
-    wire sd_cmd_in;
-
-    assign SD_CMD = sd_cmd_output_enable ? sd_cmd_out : 1'bz;
-    assign sd_cmd_in = SD_CMD; // Read actual pin value
-
-    // --- SD_DAT0 --- (MISO in SPI mode)
-    // SD_DAT0 is typically MISO in SPI mode, so it's usually an input.
-    // However, the card can sometimes drive it for busy signals.
-    reg sd_dat0_output_enable; // Keep it as an option, but usually 0 for MISO
-    reg sd_dat0_out;
-    wire sd_dat0_in;
-
-    assign SD_DAT0 = sd_dat0_output_enable ? sd_dat0_out : 1'bz;
-    assign sd_dat0_in = SD_DAT0; // Read actual pin value
-
-    // SD_DAT3 is often used as the Chip Select (CS) line for SPI mode.
-    assign SD_DAT3 = sd_chipselect; // Active low CS, so invert if active high needed
-
-    //=======================================================
-    // SD Card SPI specific registers/signals
-    //=======================================================
-    reg [7:0] spi_data_out;
-    reg [7:0] spi_data_in;
-    reg [2:0] spi_bit_count;
-    reg       spi_transfer_in_progress;
-    reg       sd_cmd_response_expected; // Flag to indicate a response is awaited
-    reg [7:0] sd_response_byte;
-
-    // SD Card State Machine
-    parameter S_IDLE                = 4'h0,
-              S_POWER_UP_DELAY      = 4'h1,
-              S_SEND_CMD0_GO_IDLE   = 4'h2,
-              S_WAIT_R1_CMD0        = 4'h3,
-              S_SEND_CMD8_IF_V2     = 4'h4,
-              S_WAIT_R7_CMD8        = 4'h5,
-              S_SEND_CMD55          = 4'h6,
-              S_WAIT_R1_CMD55       = 4'h7,
-              S_SEND_ACMD41_INIT    = 4'h8,
-              S_WAIT_R1_ACMD41      = 4'h9,
-              S_SEND_CMD58_READ_OCR = 4'hA,
-              S_WAIT_R3_CMD58       = 4'hB,
-              S_INITIALIZED         = 4'hC,
-              S_SEND_CMD17_READ_BLOCK = 4'hD,
-              S_WAIT_R1_CMD17       = 4'hE,
-              S_READ_DATA_TOKEN_WAIT = 4'hF,
-              S_READ_DATA_BLOCK     = 4'h10,
-              S_READ_CRC            = 4'h11,
-              S_TEST_DONE           = 4'h12;
-
-    reg [4:0]  state;
-    reg [31:0] main_counter;
-    reg [31:0] delay_counter;
-    reg [7:0]  sd_rxb_buffer; // Buffer for incoming SD data
-    reg [7:0]  sd_last_response; // Store the last received R1 response
-    reg [31:0] sd_ocr_reg;       // OCR register from CMD58
-    reg [7:0]  sd_read_byte_counter;
-    reg [7:0]  sd_read_data_byte;
-    reg [11:0] sd_read_block_byte_index;
-    reg [7:0]  sd_read_data_block [0:511]; // 512-byte block buffer
-
-    // --- SPI Clock Divider ---
-    // SD card initialization needs a slow clock, max 400kHz.
-    // 50MHz / 400kHz = 125. So, divide by 125, or 62.5 for rising/falling edge
-    // A divisor of 250 would make 200kHz.
-    // Let's use a 12-bit counter for flexibility.
-    reg [11:0] spi_clk_divider_counter;
-    reg        spi_clk_enable; // Controls actual SPI clock generation
-    reg        spi_clk_slow_mode; // Flag to use slow clock for init
-
-    localparam SPI_DIV_SLOW = 12'd124; // 50MHz / (2 * (124+1)) = 200kHz (approx)
-    localparam SPI_DIV_FAST = 12'd1;  // 50MHz / (2 * (1+1)) = 12.5MHz (example, higher possible)
-
-    always @(posedge CLOCK_50 or negedge reset_n) begin
-        if (!reset_n) begin
-            spi_clk_divider_counter <= 0;
-            sd_clk_reg <= 0;
-        end else if (spi_clk_enable) begin
-            if (spi_clk_divider_counter == (spi_clk_slow_mode ? SPI_DIV_SLOW : SPI_DIV_FAST)) begin
-                spi_clk_divider_counter <= 0;
-                sd_clk_reg <= ~sd_clk_reg; // Toggle clock
-            end else begin
-                spi_clk_divider_counter <= spi_clk_divider_counter + 1;
-            end
-        end else begin
-            sd_clk_reg <= 0; // Keep clock low when disabled
-        end
-    end
-
-    // --- SPI Transfer Logic ---
-    // Assumes SD_CMD is MOSI and SD_DAT0 is MISO
-    always @(posedge CLOCK_50 or negedge reset_n) begin
-        if (!reset_n) begin
-            spi_data_in <= 0;
-            spi_data_out <= 0;
-            spi_bit_count <= 0;
-            spi_transfer_in_progress <= 0;
-            sd_cmd_output_enable <= 0; // SD_CMD as input by default
-            sd_cmd_out <= 0;
-        end else begin
-            if (spi_transfer_in_progress) begin
-                if (sd_clk_reg == 1'b0) begin // On falling edge of SD_CLK (or rising, depending on SPI mode)
-                    // Drive MOSI (SD_CMD) on falling edge, prepare for next bit
-                    sd_cmd_out <= spi_data_out[7 - spi_bit_count];
-                    sd_cmd_output_enable <= 1; // Enable output
-                end else begin // On rising edge of SD_CLK
-                    // Read MISO (SD_DAT0) on rising edge
-                    spi_data_in[7 - spi_bit_count] <= sd_dat0_in;
-
-                    if (spi_bit_count == 7) begin // Last bit
-                        spi_bit_count <= 0;
-                        spi_transfer_in_progress <= 0;
-                        sd_cmd_output_enable <= 0; // Disable MOSI output, make SD_CMD input again
-                    end else begin
-                        spi_bit_count <= spi_bit_count + 1;
+// initialization: a small startup wait, then send CMD0
+always @(posedge CLOCK_50 or negedge reset_n) begin
+    if(!reset_n) begin
+        SD_CLK <= 0;
+        sd_mosi_o <= 1'b1;
+        sd_mosi_oe <= 1'b1;
+        state <= IDLE;
+        bitpos <= 0;
+        shift48 <= 0;
+        shift8 <= 0;
+        byte_count <= 0;
+        timeout <= 0;
+        uart_write <= 0;
+    end else begin
+        // only proceed SPI actions on spi_edge (slowed clock)
+        if(spi_edge) begin
+            case(state)
+                IDLE: begin
+                    // small startup delay to let card power-up (many cycles)
+                    if(timeout < 16'h7FFF) timeout <= timeout + 1;
+                    else begin
+                        // print "S" then prepare CMD0: 0x40 00 00 00 00 95
+                        uart_data <= {24'd0, "S"};
+                        uart_write <= 1;
+                        // load CMD0 into shift48 (MSB first)
+                        shift48 <= 48'h40_00_00_00_00_95;
+                        bitpos <= 47;
+                        sd_mosi_oe <= 1;
+                        SD_CLK <= 0;
+                        timeout <= 0;
+                        state <= SEND_CMD;
                     end
                 end
-            end else begin
-                sd_cmd_output_enable <= 0; // Ensure SD_CMD is input when not transmitting
-            end
-        end
-    end
 
-    // Function to start an SPI byte transfer
-    task spi_send_byte;
-        input [7:0] tx_data;
-    begin
-        spi_data_out <= tx_data;
-        spi_bit_count <= 0;
-        spi_transfer_in_progress <= 1;
-    end
-    endtask
+                SEND_CMD: begin
+                    // toggle SD_CLK and shift bits on MOSI on the rising half
+                    SD_CLK <= ~SD_CLK;
+                    if(SD_CLK) begin
+                        // on rising edge sample MOSI out bit
+                        sd_mosi_o <= shift48[bitpos];
+                        if(bitpos == 0) begin
+                            // finished sending 48 bits
+                            sd_mosi_oe <= 0; // release line, card drives responses
+                            bitpos <= 0;
+                            shift8 <= 8'hFF;
+                            timeout <= 0;
+                            state <= WAIT_RESP;
+                            // print marker once
+                            uart_data <= {24'd0, "C"};
+                            uart_write <= 1;
+                        end else bitpos <= bitpos - 1;
+                    end
+                end
 
-    // Main state machine
-    always @(posedge CLOCK_50 or negedge reset_n) begin
-        if (!reset_n) begin
-            state <= S_IDLE;
-            main_counter <= 0;
-            delay_counter <= 0;
-            sd_chipselect <= 1'b1; // CS high (inactive)
-            spi_clk_enable <= 0;
-            spi_clk_slow_mode <= 1; // Start with slow clock
-            sd_last_response <= 8'hFF;
-            sd_ocr_reg <= 0;
-            sd_read_block_byte_index <= 0;
-        end else begin
-            main_counter <= main_counter + 1; // General purpose counter
-
-            // --- UART Debug Output Trigger ---
-            // Simplified triggering for UART messages
-            if (uart_send_string == 0) begin // Only if not already sending
-                case (state)
-                    S_IDLE: begin
-                        if (main_counter == 50_000_000) begin // 1 second delay
-                            send_uart_string({"Starting SD Init\n", 8'h00});
-                            state <= S_POWER_UP_DELAY;
-                            main_counter <= 0;
-                            delay_counter <= 0;
-                        end
-                    end
-                    S_POWER_UP_DELAY: begin
-                        if (delay_counter == 500_000_000) begin // ~10 seconds power-up delay (adjust as needed)
-                            send_uart_string({"Power-up delay done\n", 8'h00});
-                            state <= S_SEND_CMD0_GO_IDLE;
-                            delay_counter <= 0;
-                        end else begin
-                            delay_counter <= delay_counter + 1;
-                        end
-                    end
-                    S_SEND_CMD0_GO_IDLE: begin
-                        // Trigger sending CMD0
-                        send_uart_string({"CMD0...\n", 8'h00});
-                        state <= S_WAIT_R1_CMD0;
-                        // More explicit SPI handling for SD commands
-                        // First, hold CS high for 74+ clocks (done during power-up delay)
-                        // Then, pull CS low.
-                        sd_chipselect <= 1'b0; // Active low CS
-                        spi_clk_enable <= 1;   // Start SPI clock
-                        spi_clk_slow_mode <= 1; // Ensure slow clock for init
-
-                        // Send CMD0 (0x40), Arg (0x00000000), CRC (0x95)
-                        spi_send_byte(8'h40); // Command byte
-                        state <= S_WAIT_R1_CMD0; // Transition to wait for response
-                        delay_counter <= 0; // Use delay_counter for SPI bit timing if needed, or separate counter
-                    end
-                    S_WAIT_R1_CMD0: begin
-                        if (!spi_transfer_in_progress) begin // CMD0 byte sent
-                            // Now send argument bytes and CRC
-                            spi_send_byte(8'h00); // Arg byte 0
-                            state <= S_WAIT_R1_CMD0; // Keep state
-                            delay_counter <= delay_counter + 1; // Use this as byte sent counter
-                            if (delay_counter == 0) begin // After 1st byte (CMD0)
-                                spi_send_byte(8'h00);
-                            end else if (delay_counter == 1) begin // After 2nd byte
-                                spi_send_byte(8'h00);
-                            end else if (delay_counter == 2) begin // After 3rd byte
-                                spi_send_byte(8'h00);
-                            end else if (delay_counter == 3) begin // After 4th byte
-                                spi_send_byte(8'h95); // CRC byte
-                                delay_counter <= 0;
-                                state <= S_WAIT_R1_CMD0_RESPONSE; // Now wait for actual R1 response
-                            end
-                        end
-                    end
-                    S_WAIT_R1_CMD0_RESPONSE: begin
-                        // Read response (R1) byte from SD_DAT0 (MISO)
-                        // This requires continuous clocking until response is received.
-                        // A proper SPI controller would handle this, but here we manually clock and sample.
-                        if (delay_counter < 800) begin // Max 8 bytes / 8 bits per byte = 64 clocks. Plus extra. Max 80 clock cycles.
-                            if (!spi_transfer_in_progress) begin // One byte has been read
-                                spi_send_byte(8'hFF); // Send dummy byte to clock in response
-                                if (spi_data_in[7] == 1'b0) begin // Response bit 7 is 0, indicates valid R1 response
-                                    sd_last_response <= spi_data_in;
-                                    send_uart_string({"R1 from CMD0: ", spi_data_in, "\n", 8'h00});
-                                    if (spi_data_in == 8'h01) begin // Should be 0x01 (Idle state)
-                                        state <= S_SEND_CMD8_IF_V2;
-                                        delay_counter <= 0;
-                                        sd_chipselect <= 1'b1; // De-assert CS after command sequence
-                                        spi_clk_enable <= 0; // Stop clock
-                                    end else begin
-                                        send_uart_string({"CMD0 failed (not 0x01): ", spi_data_in, "\n", 8'h00});
-                                        state <= S_IDLE; // Reset if failed
-                                        sd_chipselect <= 1'b1;
-                                        spi_clk_enable <= 0;
-                                    end
-                                end
-                            end
-                            delay_counter <= delay_counter + 1;
-                        end else begin
-                            send_uart_string({"CMD0 Timeout\n", 8'h00});
-                            state <= S_IDLE; // Timeout
-                            sd_chipselect <= 1'b1;
-                            spi_clk_enable <= 0;
-                        end
-                    end
-
-                    S_SEND_CMD8_IF_V2: begin
-                        if (uart_send_string == 0 && delay_counter == 0) begin // Ensure UART is done and not transitioning instantly
-                            send_uart_string({"CMD8...\n", 8'h00});
-                            sd_chipselect <= 1'b0;
-                            spi_clk_enable <= 1;
-                            spi_send_byte(8'h48); // CMD8 (0x48)
-                            state <= S_WAIT_R7_CMD8;
-                            delay_counter <= 1; // Counter for arg/crc bytes
-                        end
-                    end
-                    S_WAIT_R7_CMD8: begin
-                        if (!spi_transfer_in_progress) begin
-                            if (delay_counter == 1) begin // Send Arg1 (VHS, 0x01)
-                                spi_send_byte(8'h00); // Reserved
-                                delay_counter <= delay_counter + 1;
-                            end else if (delay_counter == 2) begin // Send Arg2 (VHS, 0x01)
-                                spi_send_byte(8'h00); // Reserved
-                                delay_counter <= delay_counter + 1;
-                            end else if (delay_counter == 3) begin // Send Arg3 (VHS, 0x01)
-                                spi_send_byte(8'h01); // 2.7-3.6V (VHS)
-                                delay_counter <= delay_counter + 1;
-                            end else if (delay_counter == 4) begin // Send Arg4 (Check Pattern, 0xAA)
-                                spi_send_byte(8'hAA); // Check Pattern
-                                delay_counter <= delay_counter + 1;
-                            end else if (delay_counter == 5) begin // Send CRC (0x87)
-                                spi_send_byte(8'h87); // CRC for CMD8
-                                delay_counter <= 0;
-                                state <= S_WAIT_R7_CMD8_RESPONSE;
-                            end
-                        end
-                    end
-                    S_WAIT_R7_CMD8_RESPONSE: begin
-                        if (delay_counter < 800) begin
-                            if (!spi_transfer_in_progress) begin
-                                spi_send_byte(8'hFF); // Dummy byte to clock in response
-                                if (spi_data_in[7] == 1'b0) begin // R1 part of R7 response
-                                    sd_last_response <= spi_data_in;
-                                    send_uart_string({"R1 from CMD8: ", spi_data_in, "\n", 8'h00});
-                                    if (spi_data_in == 8'h01) begin // Should be 0x01 (Idle state) or 0x05 (Illegal command if not V2 card)
-                                        // Read remaining 4 bytes of R7 (32-bit response)
-                                        state <= S_READ_R7_BYTES;
-                                        delay_counter <= 0; // Use for R7 byte count
-                                    end else if (spi_data_in == 8'h05) begin
-                                        send_uart_string({"CMD8 rejected, V1 card?\n", 8'h00});
-                                        state <= S_SEND_CMD55; // Proceed as V1 card (skip ACMD41 with HCS)
-                                        sd_chipselect <= 1'b1;
-                                        spi_clk_enable <= 0;
-                                    end else begin
-                                        send_uart_string({"CMD8 failed (R1 != 0x01/0x05): ", spi_data_in, "\n", 8'h00});
-                                        state <= S_IDLE; // Reset if failed
-                                        sd_chipselect <= 1'b1;
-                                        spi_clk_enable <= 0;
-                                    end
-                                end
-                            end
-                            delay_counter <= delay_counter + 1;
-                        end else begin
-                            send_uart_string({"CMD8 Timeout\n", 8'h00});
-                            state <= S_IDLE;
-                            sd_chipselect <= 1'b1;
-                            spi_clk_enable <= 0;
-                        end
-                    end
-                    S_READ_R7_BYTES: begin
-                        // Read the 4 additional bytes of R7 (OCR and Check Pattern)
-                        if (delay_counter < 4) begin
-                            if (!spi_transfer_in_progress) begin
-                                spi_send_byte(8'hFF); // Dummy to clock in next byte
-                                sd_ocr_reg[(3-delay_counter)*8 +: 8] <= spi_data_in; // Store R7 bytes
-                                delay_counter <= delay_counter + 1;
-                            end
-                        end else begin
-                            send_uart_string({"R7 response received\n", 8'h00});
-                            send_uart_string({"Check Pattern: ", sd_ocr_reg[7:0], "\n", 8'h00});
-                            send_uart_string({"Voltage Range: ", sd_ocr_reg[19:16], "\n", 8'h00});
-                            state <= S_SEND_CMD55; // Next, send CMD55 for ACMD41
-                            sd_chipselect <= 1'b1;
-                            spi_clk_enable <= 0;
-                        end
-                    end
-
-                    S_SEND_CMD55: begin
-                        if (uart_send_string == 0 && delay_counter == 0) begin
-                            send_uart_string({"CMD55...\n", 8'h00});
-                            sd_chipselect <= 1'b0;
-                            spi_clk_enable <= 1;
-                            spi_send_byte(8'h77); // CMD55 (0x77)
-                            state <= S_WAIT_R1_CMD55;
-                            delay_counter <= 1;
-                        end
-                    end
-                    S_WAIT_R1_CMD55: begin
-                        if (!spi_transfer_in_progress) begin
-                            if (delay_counter == 1) begin // Arg (0x00000000)
-                                spi_send_byte(8'h00);
-                                delay_counter <= delay_counter + 1;
-                            end else if (delay_counter == 2) begin
-                                spi_send_byte(8'h00);
-                                delay_counter <= delay_counter + 1;
-                            end else if (delay_counter == 3) begin
-                                spi_send_byte(8'h00);
-                                delay_counter <= delay_counter + 1;
-                            end else if (delay_counter == 4) begin
-                                spi_send_byte(8'h00);
-                                delay_counter <= delay_counter + 1;
-                            end else if (delay_counter == 5) begin // CRC (0x65 for dummy, not really checked)
-                                spi_send_byte(8'h01); // Dummy CRC or 0x65
-                                delay_counter <= 0;
-                                state <= S_WAIT_R1_CMD55_RESPONSE;
-                            end
-                        end
-                    end
-                    S_WAIT_R1_CMD55_RESPONSE: begin
-                        if (delay_counter < 800) begin
-                            if (!spi_transfer_in_progress) begin
-                                spi_send_byte(8'hFF);
-                                if (spi_data_in[7] == 1'b0) begin
-                                    sd_last_response <= spi_data_in;
-                                    send_uart_string({"R1 from CMD55: ", spi_data_in, "\n", 8'h00});
-                                    if (spi_data_in == 8'h01) begin // Should be 0x01 (Idle state)
-                                        state <= S_SEND_ACMD41_INIT;
-                                        delay_counter <= 0;
-                                        sd_chipselect <= 1'b1;
-                                        spi_clk_enable <= 0;
-                                    end else begin
-                                        send_uart_string({"CMD55 failed (not 0x01): ", spi_data_in, "\n", 8'h00});
-                                        state <= S_IDLE;
-                                        sd_chipselect <= 1'b1;
-                                        spi_clk_enable <= 0;
-                                    end
-                                end
-                            end
-                            delay_counter <= delay_counter + 1;
-                        end else begin
-                            send_uart_string({"CMD55 Timeout\n", 8'h00});
-                            state <= S_IDLE;
-                            sd_chipselect <= 1'b1;
-                            spi_clk_enable <= 0;
-                        end
-                    end
-
-                    S_SEND_ACMD41_INIT: begin
-                        if (uart_send_string == 0 && delay_counter == 0) begin
-                            send_uart_string({"ACMD41...\n", 8'h00});
-                            sd_chipselect <= 1'b0;
-                            spi_clk_enable <= 1;
-                            spi_send_byte(8'h69); // ACMD41 (0x69)
-                            state <= S_WAIT_R1_ACMD41;
-                            delay_counter <= 1;
-                        end
-                    end
-                    S_WAIT_R1_ACMD41: begin
-                        if (!spi_transfer_in_progress) begin
-                            if (delay_counter == 1) begin // Arg (0x40000000 for HCS, or 0x00000000 for standard capacity)
-                                spi_send_byte(8'h40); // HCS (Host Capacity Support)
-                                delay_counter <= delay_counter + 1;
-                            end else if (delay_counter == 2) begin
-                                spi_send_byte(8'h00);
-                                delay_counter <= delay_counter + 1;
-                            end else if (delay_counter == 3) begin
-                                spi_send_byte(8'h00);
-                                delay_counter <= delay_counter + 1;
-                            end else if (delay_counter == 4) begin
-                                spi_send_byte(8'h00);
-                                delay_counter <= delay_counter + 1;
-                            end else if (delay_counter == 5) begin // CRC (dummy)
-                                spi_send_byte(8'h01); // Dummy CRC or 0x77
-                                delay_counter <= 0;
-                                state <= S_WAIT_R1_ACMD41_RESPONSE;
-                            end
-                        end
-                    end
-                    S_WAIT_R1_ACMD41_RESPONSE: begin
-                        if (delay_counter < 800) begin // Max 800 clock cycles for response (CMD0 timeout)
-                            if (!spi_transfer_in_progress) begin
-                                spi_send_byte(8'hFF);
-                                if (spi_data_in == 8'h00) begin // Should be 0x00 (card initialized and ready)
-                                    sd_last_response <= spi_data_in;
-                                    send_uart_string({"R1 from ACMD41: ", spi_data_in, "\n", 8'h00});
-                                    // Initialization successful
-                                    send_uart_string({"SD Card Initialized!\n", 8'h00});
-                                    state <= S_SEND_CMD58_READ_OCR;
-                                    delay_counter <= 0;
-                                    sd_chipselect <= 1'b1;
-                                    spi_clk_enable <= 0;
-                                    spi_clk_slow_mode <= 0; // Switch to fast clock after init
-                                end else if (spi_data_in == 8'h01) begin // Still in idle state, keep polling
-                                    state <= S_SEND_CMD55; // Loop back to CMD55 -> ACMD41
-                                    delay_counter <= 0;
-                                    sd_chipselect <= 1'b1;
-                                    spi_clk_enable <= 0;
-                                end else begin
-                                    send_uart_string({"ACMD41 failed (not 0x00/0x01): ", spi_data_in, "\n", 8'h00});
-                                    state <= S_IDLE;
-                                    sd_chipselect <= 1'b1;
-                                    spi_clk_enable <= 0;
-                                end
-                            end
-                            delay_counter <= delay_counter + 1;
-                        end else begin
-                            send_uart_string({"ACMD41 Timeout\n", 8'h00});
-                            state <= S_IDLE;
-                            sd_chipselect <= 1'b1;
-                            spi_clk_enable <= 0;
-                        end
-                    end
-
-                    S_SEND_CMD58_READ_OCR: begin
-                        if (uart_send_string == 0 && delay_counter == 0) begin
-                            send_uart_string({"CMD58 (Read OCR)...\n", 8'h00});
-                            sd_chipselect <= 1'b0;
-                            spi_clk_enable <= 1;
-                            spi_send_byte(8'h7A); // CMD58 (0x7A)
-                            state <= S_WAIT_R3_CMD58;
-                            delay_counter <= 1;
-                        end
-                    end
-                    S_WAIT_R3_CMD58: begin
-                        if (!spi_transfer_in_progress) begin
-                            if (delay_counter == 1) begin // Arg (0x00000000)
-                                spi_send_byte(8'h00);
-                                delay_counter <= delay_counter + 1;
-                            end else if (delay_counter == 2) begin
-                                spi_send_byte(8'h00);
-                                delay_counter <= delay_counter + 1;
-                            end else if (delay_counter == 3) begin
-                                spi_send_byte(8'h00);
-                                delay_counter <= delay_counter + 1;
-                            end else if (delay_counter == 4) begin
-                                spi_send_byte(8'h00);
-                                delay_counter <= delay_counter + 1;
-                            end else if (delay_counter == 5) begin // CRC (dummy)
-                                spi_send_byte(8'h01);
-                                delay_counter <= 0;
-                                state <= S_WAIT_R3_CMD58_RESPONSE;
-                            end
-                        end
-                    end
-                    S_WAIT_R3_CMD58_RESPONSE: begin
-                        if (delay_counter < 800) begin
-                            if (!spi_transfer_in_progress) begin
-                                spi_send_byte(8'hFF); // Dummy byte for R1
-                                if (spi_data_in[7] == 1'b0) begin
-                                    sd_last_response <= spi_data_in;
-                                    send_uart_string({"R1 from CMD58: ", spi_data_in, "\n", 8'h00});
-                                    if (spi_data_in == 8'h00) begin // Should be 0x00
-                                        state <= S_READ_OCR_BYTES; // Read the 4 OCR bytes
-                                        delay_counter <= 0;
-                                    end else begin
-                                        send_uart_string({"CMD58 failed (not 0x00): ", spi_data_in, "\n", 8'h00});
-                                        state <= S_IDLE;
-                                        sd_chipselect <= 1'b1;
-                                        spi_clk_enable <= 0;
-                                    end
-                                end
-                            end
-                            delay_counter <= delay_counter + 1;
-                        end else begin
-                            send_uart_string({"CMD58 Timeout\n", 8'h00});
-                            state <= S_IDLE;
-                            sd_chipselect <= 1'b1;
-                            spi_clk_enable <= 0;
-                        end
-                    end
-                    S_READ_OCR_BYTES: begin
-                        if (delay_counter < 4) begin
-                            if (!spi_transfer_in_progress) begin
-                                spi_send_byte(8'hFF);
-                                sd_ocr_reg[(3-delay_counter)*8 +: 8] <= spi_data_in; // Store OCR bytes
-                                delay_counter <= delay_counter + 1;
-                            end
-                        end else begin
-                            send_uart_string({"OCR Value: ", sd_ocr_reg, "\n", 8'h00});
-                            if (sd_ocr_reg[30] == 1) begin
-                                send_uart_string({"Card is SDHC/SDXC\n", 8'h00});
+                WAIT_RESP: begin
+                    // Keep toggling SD_CLK and shift in bits from MISO,
+                    // assembling bytes; wait until a byte != 0xFF (response).
+                    SD_CLK <= ~SD_CLK;
+                    if(SD_CLK) begin
+                        // shift in one bit (MSB first)
+                        shift8 <= {shift8[6:0], sd_miso};
+                        if(bitpos < 7) bitpos <= bitpos + 1;
+                        else begin
+                            // one byte received
+                            bitpos <= 0;
+                            if(shift8 != 8'hFF) begin
+                                // got response (likely 0x01 for CMD0)
+                                // prepare CMD17 frame: 0x51 + addr(0) + CRC 0xFF
+                                shift48 <= 48'h51_00_00_00_00_FF; // 0x51 = 0x40|0x11 (CMD17)
+                                bitpos <= 47;
+                                sd_mosi_oe <= 1;
+                                SD_CLK <= 0;
+                                timeout <= 0;
+                                state <= SEND_CMD17;
+                                // mark that response was seen
+                                uart_data <= {24'd0, "R"};
+                                uart_write <= 1;
                             end else begin
-                                send_uart_string({"Card is Standard Capacity\n", 8'h00});
-                            end
-                            state <= S_INITIALIZED;
-                            sd_chipselect <= 1'b1;
-                            spi_clk_enable <= 0;
-                            delay_counter <= 0;
-                        end
-                    end
-
-                    S_INITIALIZED: begin
-                        if (uart_send_string == 0 && delay_counter == 0) begin
-                            send_uart_string({"SD Card Ready! Reading Block 0...\n", 8'h00});
-                            delay_counter <= 50_000_000; // Delay a bit before reading
-                            state <= S_SEND_CMD17_READ_BLOCK;
-                        end else if (uart_send_string == 0 && delay_counter > 0) begin
-                             delay_counter <= delay_counter - 1;
-                        end
-                    end
-
-                    S_SEND_CMD17_READ_BLOCK: begin
-                        if (uart_send_string == 0 && delay_counter == 0) begin
-                            send_uart_string({"CMD17 (Read Single Block)...\n", 8'h00});
-                            sd_chipselect <= 1'b0;
-                            spi_clk_enable <= 1;
-                            spi_clk_slow_mode <= 0; // Use fast clock now
-                            spi_send_byte(8'h51); // CMD17 (0x51)
-                            state <= S_WAIT_R1_CMD17;
-                            delay_counter <= 1;
-                        end
-                    end
-                    S_WAIT_R1_CMD17: begin
-                        if (!spi_transfer_in_progress) begin
-                            if (delay_counter == 1) begin // Arg (Block Address: 0x00000000 for block 0)
-                                spi_send_byte(8'h00);
-                                delay_counter <= delay_counter + 1;
-                            end else if (delay_counter == 2) begin
-                                spi_send_byte(8'h00);
-                                delay_counter <= delay_counter + 1;
-                            end else if (delay_counter == 3) begin
-                                spi_send_byte(8'h00);
-                                delay_counter <= delay_counter + 1;
-                            end else if (delay_counter == 4) begin
-                                spi_send_byte(8'h00);
-                                delay_counter <= delay_counter + 1;
-                            end else if (delay_counter == 5) begin // CRC (dummy)
-                                spi_send_byte(8'h01); // Dummy CRC or 0xFF
-                                delay_counter <= 0;
-                                state <= S_WAIT_R1_CMD17_RESPONSE;
-                            end
-                        end
-                    end
-                    S_WAIT_R1_CMD17_RESPONSE: begin
-                        if (delay_counter < 800) begin
-                            if (!spi_transfer_in_progress) begin
-                                spi_send_byte(8'hFF);
-                                if (spi_data_in == 8'h00) begin
-                                    sd_last_response <= spi_data_in;
-                                    send_uart_string({"R1 from CMD17: ", spi_data_in, "\n", 8'h00});
-                                    send_uart_string({"Waiting for data token...\n", 8'h00});
-                                    state <= S_READ_DATA_TOKEN_WAIT;
-                                    delay_counter <= 0;
-                                end else begin
-                                    send_uart_string({"CMD17 failed (not 0x00): ", spi_data_in, "\n", 8'h00});
-                                    state <= S_INITIALIZED; // Go back to initialized state for retry/further commands
-                                    sd_chipselect <= 1'b1;
-                                    spi_clk_enable <= 0;
+                                // still 0xFF; keep waiting
+                                timeout <= timeout + 1;
+                                if(timeout == 16'hFFFF) begin
+                                    // timeout -> error
+                                    state <= ERROR;
                                 end
                             end
-                            delay_counter <= delay_counter + 1;
-                        end else begin
-                            send_uart_string({"CMD17 Timeout\n", 8'h00});
-                            state <= S_INITIALIZED;
-                            sd_chipselect <= 1'b1;
-                            spi_clk_enable <= 0;
                         end
                     end
-                    S_READ_DATA_TOKEN_WAIT: begin
-                        if (delay_counter < 50_000_000) begin // Max 100ms for data token
-                            if (!spi_transfer_in_progress) begin
-                                spi_send_byte(8'hFF); // Clock in dummy byte to read MISO
-                                if (spi_data_in == 8'hFE) begin // Start block token
-                                    send_uart_string({"Data token received!\n", 8'h00});
-                                    state <= S_READ_DATA_BLOCK;
-                                    sd_read_block_byte_index <= 0;
-                                    delay_counter <= 0;
-                                end else if (spi_data_in != 8'hFF) begin
-                                    // Error token or busy signal
-                                    send_uart_string({"Error/Busy Token: ", spi_data_in, "\n", 8'h00});
-                                    state <= S_INITIALIZED;
-                                    sd_chipselect <= 1'b1;
-                                    spi_clk_enable <= 0;
-                                end
-                            end
-                            delay_counter <= delay_counter + 1;
-                        end else begin
-                            send_uart_string({"Data Token Timeout\n", 8'h00});
-                            state <= S_INITIALIZED;
-                            sd_chipselect <= 1'b1;
-                            spi_clk_enable <= 0;
-                        end
-                    end
-                    S_READ_DATA_BLOCK: begin
-                        if (sd_read_block_byte_index < 512) begin
-                            if (!spi_transfer_in_progress) begin
-                                spi_send_byte(8'hFF); // Clock in dummy byte to read MISO
-                                sd_read_data_block[sd_read_block_byte_index] <= spi_data_in;
-                                sd_read_block_byte_index <= sd_read_block_byte_index + 1;
-                            end
-                        end else begin
-                            send_uart_string({"Block data read complete.\n", 8'h00});
-                            state <= S_READ_CRC;
-                            delay_counter <= 0;
-                        end
-                    end
-                    S_READ_CRC: begin
-                        if (delay_counter < 2) begin // Read 2 CRC bytes
-                             if (!spi_transfer_in_progress) begin
-                                spi_send_byte(8'hFF); // Clock in dummy byte to read MISO
-                                delay_counter <= delay_counter + 1;
-                             end
-                        end else begin
-                            send_uart_string({"CRC bytes read.\n", 8'h00});
-                            send_uart_string({"First 16 bytes of Block 0:\n", 8'h00});
-                            // Print first 16 bytes for verification
-                            // This would be done by sending individual characters or by loading an array.
-                            // For simplicity, let's just print a placeholder.
-                            // send_uart_string({sd_read_data_block[0], sd_read_data_block[1], ...}); (Need a way to print hex)
-                            send_uart_string({"[Block 0 Data Sample...]\n", 8'h00});
-                            state <= S_TEST_DONE;
-                            sd_chipselect <= 1'b1;
-                            spi_clk_enable <= 0;
-                        end
-                    end
+                end
 
-                    S_TEST_DONE: begin
-                        if (main_counter == 50_000_000) begin
-                            send_uart_string({"SD Test Done. Looping...\n", 8'h00});
-                            main_counter <= 0;
-                            state <= S_IDLE; // Loop back to start (or S_INITIALIZED for more commands)
+                SEND_CMD17: begin
+                    // Shift out CMD17 48 bits similarly to SEND_CMD
+                    SD_CLK <= ~SD_CLK;
+                    if(SD_CLK) begin
+                        sd_mosi_o <= shift48[bitpos];
+                        if(bitpos == 0) begin
+                            sd_mosi_oe <= 0; // release MOSI for response/data
+                            bitpos <= 0;
+                            shift8 <= 8'hFF;
+                            timeout <= 0;
+                            state <= WAIT_TOKEN;
+                        end else bitpos <= bitpos - 1;
+                    end
+                end
+
+                WAIT_TOKEN: begin
+                    // After CMD17, the card may send some 0xFF bytes, then 0xFE token.
+                    SD_CLK <= ~SD_CLK;
+                    if(SD_CLK) begin
+                        shift8 <= {shift8[6:0], sd_miso};
+                        if(bitpos < 7) bitpos <= bitpos + 1;
+                        else begin
+                            bitpos <= 0;
+                            if(shift8 == 8'hFE) begin
+                                // token received: start reading 512 bytes
+                                byte_count <= 0;
+                                bitpos <= 0;
+                                timeout <= 0;
+                                state <= READ_BYTES;
+                                // optional marker
+                                uart_data <= {24'd0, "T"}; // token
+                                uart_write <= 1;
+                            end else begin
+                                timeout <= timeout + 1;
+                                if(timeout == 16'hFFFF) state <= ERROR;
+                            end
                         end
                     end
-                endcase
-            end
+                end
+
+                READ_BYTES: begin
+                    // Read 512 bytes; shift bits from sd_miso
+                    SD_CLK <= ~SD_CLK;
+                    if(SD_CLK) begin
+                        shift8 <= {shift8[6:0], sd_miso};
+                        if(bitpos < 7) bitpos <= bitpos + 1;
+                        else begin
+                            // one full byte ready
+                            bitpos <= 0;
+                            // stream to UART (non-blocking write request)
+                            uart_data <= {24'd0, shift8};
+                            uart_write <= 1;
+                            byte_count <= byte_count + 1;
+                            if(byte_count == 9'd511) begin
+                                state <= DONE;
+                                timeout <= 0;
+                            end
+                        end
+                    end
+                end
+
+                DONE: begin
+                    // finished reading 512 bytes; signal done
+                    uart_data <= {24'd0, "D"};
+                    uart_write <= 1;
+                    // hold here
+                    SD_CLK <= 0;
+                    sd_mosi_oe <= 0;
+                    // state stays DONE
+                end
+
+                ERROR: begin
+                    uart_data <= {24'd0, "E"}; uart_write <= 1;
+                    SD_CLK <= 0;
+                    sd_mosi_oe <= 0;
+                end
+
+                default: state <= ERROR;
+            endcase
+        end else begin
+            // not spi edge: clear uart_write pulse to 0 (we pulse it one clock)
+            uart_write <= 0;
         end
     end
+end
 
-endmodule
-
-// --- Placeholder for jtag_uart_system ---
-// You will replace this with your actual Quartus JTAG UART IP.
-// This is a minimal definition to allow compilation.
-module jtag_uart_system (
-    input clk_clk,
-    input reset_reset_n,
-    input jtag_uart_0_avalon_jtag_slave_address,
-    input [31:0] jtag_uart_0_avalon_jtag_slave_writedata,
-    input jtag_uart_0_avalon_jtag_slave_write_n,
-    input jtag_uart_0_avalon_jtag_slave_chipselect,
-    input jtag_uart_0_avalon_jtag_slave_read_n
-);
-    // In a real system, this connects to the JTAG UART IP core
-    // and would have internal logic to handle data.
-    // For this example, it's just a dummy.
-endmodule
-
-// --- Placeholder for SD_CLK, SD_CMD, SD_DAT modules ---
-// These are currently not used in the expanded design,
-// as the SPI logic is implemented directly in cpu_on_board.
-// You should remove these if you implement the full controller.
-// If your existing project uses these for IO buffering, ensure they
-// are tristate buffers properly configured.
-module SD_CLK (
-    input [1:0] address,
-    input chipselect,
-    input clk,
-    input reset_n,
-    input write_n,
-    input [15:0] writedata,
-    output out_port
-);
-    assign out_port = 1'b0; // Dummy
-endmodule
-
-module SD_CMD (
-    input [1:0] address,
-    input chipselect,
-    input clk,
-    input reset_n,
-    input write_n,
-    input [15:0] writedata,
-    inout bidir_port,
-    output [15:0] readdata
-);
-    assign bidir_port = 1'bz; // Dummy
-    assign readdata = 16'hFFFF; // Dummy
-endmodule
-
-module SD_DAT (
-    input [1:0] address,
-    input chipselect,
-    input clk,
-    input reset_n,
-    input write_n,
-    input [15:0] writedata,
-    inout bidir_port,
-    output [15:0] readdata
-);
-    assign bidir_port = 1'bz; // Dummy
-    assign readdata = 16'hFFFF; // Dummy
 endmodule
