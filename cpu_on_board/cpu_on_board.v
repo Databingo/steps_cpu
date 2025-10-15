@@ -1121,7 +1121,6 @@
 //
 //endmodule
 
-
 module cpu_on_board (
     (* chip_pin = "PIN_L1"  *) input  wire CLOCK_50,
     (* chip_pin = "PIN_R22" *) input  wire KEY0,        // Active-low reset
@@ -1220,33 +1219,11 @@ module cpu_on_board (
     reg [7:0] current_byte_to_print; // Holds one byte from the 32-bit word
     reg [1:0] hex_print_sub_state = 0; // 0: Idle, 1: Printing high nibble, 2: Delay, 3: Printing low nibble, 4: Delay/Next byte
 
-    // Helper task to write to the sdcard module's memory-mapped interface
-    task write_sdcard_reg;
-        input [15:0] address;
-        input [31:0] data;
-        begin
-            sd_addr_in <= address;
-            sd_data_in <= data;
-            sd_we_in <= 1;
-            @(posedge CLOCK_50);
-            sd_we_in <= 0; // De-assert write enable after one cycle
-            sd_addr_in <= 0; // Reset address
-            sd_data_in <= 0; // Reset data
-        end
-    endtask
+    // --- Removed helper tasks/functions. All logic now directly in the always block. ---
+    // The interaction with sd_addr_in, sd_data_in, sd_we_in is handled directly by state.
 
-    // Helper task to read from the sdcard module's memory-mapped interface
-    function [31:0] read_sdcard_reg;
-        input [15:0] address;
-        begin
-            sd_addr_in <= address;
-            sd_we_in <= 0; // Ensure write enable is low for read
-            @(posedge CLOCK_50); // Give a cycle for spo to update
-            read_sdcard_reg = sd_data_out;
-            sd_addr_in <= 0; // Reset address
-        end
-    endfunction
-
+    // Register to hold the last read 32-bit word from sd_data_out (spo)
+    reg [31:0] last_read_data_word = 0;
 
     always @(posedge CLOCK_50 or negedge KEY0) begin
         if (!KEY0) begin
@@ -1259,8 +1236,11 @@ module cpu_on_board (
             cache_byte_idx <= 0;
             current_byte_to_print <= 0;
             hex_print_sub_state <= 0;
+            last_read_data_word <= 0;
         end else begin
             uart_write <= 0; // Default to no UART write
+            sd_we_in <= 0;   // Default to no write
+            sd_addr_in <= 0; // Default to address 0 for reads if not specified
 
             case (main_state)
                 0: begin // Initial state: Wait for SD card module to be ready internally
@@ -1290,18 +1270,22 @@ module cpu_on_board (
                 end
 
                 3: begin // Set block address to 0x00 (sector 0)
-                    write_sdcard_reg(16'h1000, 32'h00000000); // Set address for R/W
-                    main_state <= 4; // Move to trigger read
+                    sd_addr_in <= 16'h1000;
+                    sd_data_in <= 32'h00000000; // Set address for R/W
+                    sd_we_in <= 1;
+                    main_state <= 4; // Move to trigger read on next cycle
                 end
 
                 4: begin // Trigger a read operation
-                    write_sdcard_reg(16'h1004, 32'd1); // Do a read at the set address
-                    main_state <= 5; // Move to poll ready status
+                    sd_addr_in <= 16'h1004;
+                    sd_data_in <= 32'd1; // Do a read at the set address
+                    sd_we_in <= 1;
+                    main_state <= 5; // Move to poll ready status on next cycle
                 end
 
                 5: begin // Poll 0x2010 (ready) until it's 1
-                    sd_addr_in <= 16'h2010;
-                    sd_we_in <= 0;
+                    sd_addr_in <= 16'h2010; // Request to read ready status
+                    // sd_we_in is 0 by default, so this is a read
                     if (sd_data_out[0] == 1) begin // Check the LSB of spo for ready
                         main_state <= 6; // SD card is ready, start reading cache
                         cache_byte_idx <= 0; // Reset cache index
@@ -1311,53 +1295,53 @@ module cpu_on_board (
 
                 6: begin // Read and print data from cache (0x0000 - 0x01FC)
                     if (cache_byte_idx < NUM_BYTES_TO_READ) begin
-                        // Read 32-bit word, then extract 8-bit bytes
-                        if (hex_print_sub_state == 0) begin // Read new 32-bit word if starting new word printing
-                            if (cache_byte_idx % 4 == 0) begin // Read a new 32-bit word every 4 bytes
-                                sd_addr_in <= {4'h0, cache_byte_idx[8:2]}; // Access block[cache_byte_idx/4]
-                                sd_we_in <= 0; // Ensure it's a read
+                        case (hex_print_sub_state)
+                            0: begin // If starting to process a new 32-bit word
+                                if (cache_byte_idx % 4 == 0) begin
+                                    sd_addr_in <= {4'h0, cache_byte_idx[8:2]}; // Read 32-bit word from cache address
+                                    // sd_we_in is 0, so it's a read
+                                    // The sd_data_out (spo) will update on THIS clock edge,
+                                    // but we need to capture it to 'last_read_data_word'
+                                    // for subsequent cycles.
+                                    last_read_data_word <= sd_data_out;
+                                end
+                                // Extract byte from the 32-bit word based on cache_byte_idx % 4
+                                case (cache_byte_idx[1:0]) // Which byte within the 32-bit word
+                                    2'b00: current_byte_to_print <= last_read_data_word[31:24];
+                                    2'b01: current_byte_to_print <= last_read_data_word[23:16];
+                                    2'b10: current_byte_to_print <= last_read_data_word[15:8];
+                                    2'b11: current_byte_to_print <= last_read_data_word[7:0];
+                                endcase
+                                hex_print_sub_state <= 1; // Move to print high nibble
                             end
-                            // Extract byte from the 32-bit word based on cache_byte_idx % 4
-                            case (cache_byte_idx[1:0]) // Which byte within the 32-bit word
-                                2'b00: current_byte_to_print <= sd_data_out[31:24];
-                                2'b01: current_byte_to_print <= sd_data_out[23:16];
-                                2'b10: current_byte_to_print <= sd_data_out[15:8];
-                                2'b11: current_byte_to_print <= sd_data_out[7:0];
-                            endcase
-                            hex_print_sub_state <= 1; // Move to print high nibble
-                        end
-                        else begin // Print the captured byte
-                            case (hex_print_sub_state)
-                                1: begin // Print high nibble
-                                    uart_data <= {24'd0, (current_byte_to_print[7:4] < 4'd10) ? (8'h30 + current_byte_to_print[7:4]) : (8'h41 + (current_byte_to_print[7:4] - 4'd10))};
+                            1: begin // Print high nibble
+                                uart_data <= {24'd0, (current_byte_to_print[7:4] < 4'd10) ? (8'h30 + current_byte_to_print[7:4]) : (8'h41 + (current_byte_to_print[7:4] - 4'd10))};
+                                uart_write <= 1;
+                                hex_print_sub_state <= 2;
+                            end
+                            2: begin // Print low nibble
+                                uart_data <= {24'd0, (current_byte_to_print[3:0] < 4'd10) ? (8'h30 + current_byte_to_print[3:0]) : (8'h41 + (current_byte_to_print[3:0] - 4'd10))};
+                                uart_write <= 1;
+                                hex_print_sub_state <= 3;
+                            end
+                            3: begin // After printing both hex digits
+                                cache_byte_idx <= cache_byte_idx + 1; // Increment byte counter
+                                // Optionally print a space or newline for readability
+                                if (cache_byte_idx < NUM_BYTES_TO_READ - 1 && (cache_byte_idx + 1) % LINE_BREAK_BYTES == 0) begin
+                                    uart_data <= {24'd0, "\n"}; // Newline for readability
                                     uart_write <= 1;
-                                    hex_print_sub_state <= 2;
-                                end
-                                2: begin // Print low nibble
-                                    uart_data <= {24'd0, (current_byte_to_print[3:0] < 4'd10) ? (8'h30 + current_byte_to_print[3:0]) : (8'h41 + (current_byte_to_print[3:0] - 4'd10))};
+                                end else if (cache_byte_idx < NUM_BYTES_TO_READ - 1) begin
+                                    uart_data <= {24'd0, " "}; // Space between bytes
                                     uart_write <= 1;
-                                    hex_print_sub_state <= 3;
                                 end
-                                3: begin // After printing both hex digits
-                                    cache_byte_idx <= cache_byte_idx + 1; // Increment byte counter
-                                    // Optionally print a space or newline for readability
-                                    if (cache_byte_idx < NUM_BYTES_TO_READ && (cache_byte_idx + 1) % LINE_BREAK_BYTES == 0) begin
-                                        uart_data <= {24'd0, "\n"}; // Newline for readability
-                                        uart_write <= 1;
-                                    end else if (cache_byte_idx < NUM_BYTES_TO_READ) begin
-                                        uart_data <= {24'd0, " "}; // Space between bytes
-                                        uart_write <= 1;
-                                    end
-                                    hex_print_sub_state <= 0; // Go back to wait for the next byte/word from cache
-                                end
-                            endcase
-                        end
+                                hex_print_sub_state <= 0; // Go back to read next byte/word from cache
+                            end
+                        endcase
                     end else begin
-                        // All bytes read, optionally print a final newline
-                        if (cache_byte_idx == NUM_BYTES_TO_READ) begin
-                            uart_data <= {24'd0, "\n"};
-                            uart_write <= 1;
-                            cache_byte_idx <= cache_byte_idx + 1; // To ensure this only happens once
+                        // All bytes read, print a final newline if the last one wasn't a line break
+                        if (cache_byte_idx == NUM_BYTES_TO_READ && (cache_byte_idx % LINE_BREAK_BYTES != 0)) begin
+                             uart_data <= {24'd0, "\n"};
+                             uart_write <= 1;
                         end
                         main_state <= 7; // Done
                     end
