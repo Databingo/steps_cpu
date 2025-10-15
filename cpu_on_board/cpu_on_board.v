@@ -964,7 +964,7 @@
 //endmodule
 
 
-// print long
+//// print long KBC0234004E4020102020000100F000000FF00099C61EF0E1D5000061416000A1
 //module cpu_on_board (
 //    (* chip_pin = "PIN_L1"  *) input  wire CLOCK_50,
 //    (* chip_pin = "PIN_R22" *) input  wire KEY0,        // Active-low reset
@@ -1120,7 +1120,6 @@
 //    end
 //
 //endmodule
-//
 
 
 
@@ -1128,8 +1127,8 @@
 module cpu_on_board (
     (* chip_pin = "PIN_L1"  *) input  wire CLOCK_50,
     (* chip_pin = "PIN_R22" *) input  wire KEY0,        // Active-low reset
-    (* chip_pin = "R20"     *) output wire LEDR0,
 
+    (* chip_pin = "R20"     *) output wire LEDR0,
     (* chip_pin = "V20" *) output wire SD_CLK,  // SD_CLK
     (* chip_pin = "Y20" *) inout  wire SD_CMD,  // SD_CMD (MOSI)
     (* chip_pin = "W20" *) inout  wire SD_DAT0, // SD_DAT0 (MISO)
@@ -1217,7 +1216,7 @@ module cpu_on_board (
     assign SD_CMD  = sd_mosi;
 
     // =======================================================
-    // UART debug: print "K" then print all 512 bytes in hex
+    // UART debug: print "K" then print all 512 bytes in hex until 0x55AA
     // =======================================================
     reg printed_k = 0;
     reg do_read = 0;
@@ -1248,7 +1247,6 @@ module cpu_on_board (
                 printed_k  <= 1;
                 rd_sig     <= 1;       // start read after K
                 byte_index <= 0;
-                do_read    <= 1;       // <--- ensure do_read active
             end
 
             // Stop asserting rd once SD controller leaves IDLE (state != IDLE)
@@ -1256,9 +1254,10 @@ module cpu_on_board (
                 rd_sig <= 0;
 
             // Capture byte on rising edge of byte_available
-            if (sd_byte_available && !sd_byte_available_d && do_read) begin
+            if (sd_byte_available && !sd_byte_available_d) begin
                 captured_byte <= sd_dout;
                 print_hex_state <= 1;
+                do_read <= 1;
             end
 
             // Print captured byte as two hex chars
@@ -1270,13 +1269,11 @@ module cpu_on_board (
                 uart_data  <= {24'd0, (captured_byte[3:0] < 10) ? (8'h30 + captured_byte[3:0]) : (8'h41 + captured_byte[3:0] - 10)};
                 uart_write <= 1;
                 print_hex_state <= 0;
-                byte_index <= byte_index + 1;
 
-                // If more bytes left, request next byte
-                if (byte_index < 511)
+                // Increment byte index and request next byte if not reached 0x55AA
+                byte_index <= byte_index + 1;
+                if (!(byte_index == 510 && captured_byte == 8'h55))  // continue until last byte 0xAA
                     rd_sig <= 1;
-                else
-                    do_read <= 0; // stop after last byte
             end
         end
     end
