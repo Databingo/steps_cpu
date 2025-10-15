@@ -1619,7 +1619,9 @@
 //
 //
 //
-// print 0-15 sectors
+// =======================================================
+// Print SD sectors 0–15 (after safe SD init dummy clocks)
+// =======================================================
 module cpu_on_board (
     (* chip_pin = "PIN_L1"  *) input  wire CLOCK_50,
     (* chip_pin = "PIN_R22" *) input  wire KEY0,        // Active-low reset
@@ -1668,7 +1670,7 @@ module cpu_on_board (
     reg [31:0] mem_d = 0;
     reg mem_we = 0;
     wire sd_ncd = 1'b0;
-    wire sd_wp = 1'b0;
+    wire sd_wp  = 1'b0;
     wire irq;
     wire sd_dat1;
     wire sd_dat2;
@@ -1691,11 +1693,32 @@ module cpu_on_board (
         .irq(irq)
     );
 
-    // Note: Ensure sd_controller.v handles full 6-byte R7 response for CMD8 (R1 + 4-byte echo + CRC)
-    // to avoid deadlock on SDHC cards in SPI mode.
+    // =======================================================
+    // Startup slow clock + 74 dummy cycles
+    // =======================================================
+    reg [15:0] init_counter = 0;
+    reg        slow_clk_en  = 0;
+    reg        init_done    = 0;
+
+    always @(posedge CLOCK_50 or negedge KEY0) begin
+        if (!KEY0) begin
+            init_counter <= 0;
+            slow_clk_en  <= 0;
+            init_done    <= 0;
+        end else if (!init_done) begin
+            // generate 400 kHz ≈ 50 MHz / 125
+            if (init_counter < 16'd125 * 80) begin
+                slow_clk_en <= (init_counter % 125 == 0);
+                init_counter <= init_counter + 1;
+            end else begin
+                init_done <= 1;  // after ~80 toggles (>74)
+                slow_clk_en <= 0;
+            end
+        end
+    end
 
     // =======================================================
-    // UART debug: print "K" then print all 512 bytes in hex for sectors 0-15
+    // UART debug: print "K" then sectors 0–15
     // =======================================================
     reg printed_k = 0;
     reg [8:0] byte_index = 0;       // 0..511
@@ -1718,82 +1741,94 @@ module cpu_on_board (
             mem_we <= 0;
             sub_byte <= 0;
             current_sector <= 0;
-        end else begin
+        end else if (init_done) begin
             uart_write <= 0;
             mem_we <= 0;
 
-            if (fsm_state == 0) begin
-                if (spo[0] && !printed_k) begin
-                    uart_data  <= {24'd0, "K"};
-                    uart_write <= 1;
-                    printed_k  <= 1;
-                    fsm_state  <= 1;
+            case (fsm_state)
+                0: begin
+                    if (spo[0] && !printed_k) begin
+                        uart_data  <= {24'd0, "K"};
+                        uart_write <= 1;
+                        printed_k  <= 1;
+                        fsm_state  <= 1;
+                    end
                 end
-            end else if (fsm_state == 1) begin
-                mem_a   <= 16'h1000;
-                mem_d   <= current_sector;
-                mem_we  <= 1;
-                fsm_state <= 2;
-            end else if (fsm_state == 2) begin
-                mem_a   <= 16'h1004;
-                mem_d   <= 32'h00000001;
-                mem_we  <= 1;
-                fsm_state <= 3;
-            end else if (fsm_state == 3) begin
-                mem_a <= 16'h2010;
-                if (spo[0] == 1) begin
+
+                1: begin
+                    mem_a   <= 16'h1000;
+                    mem_d   <= current_sector;
+                    mem_we  <= 1;
+                    fsm_state <= 2;
+                end
+
+                2: begin
+                    mem_a   <= 16'h1004;
+                    mem_d   <= 32'h00000001;
+                    mem_we  <= 1;
                     fsm_state <= 3;
-                end else begin
-                    fsm_state <= 4;
                 end
-            end else if (fsm_state == 4) begin
-                mem_a <= 16'h2010;
-                if (spo[0] == 0) begin
-                    fsm_state <= 4;
-                end else begin
-                    fsm_state <= 5;
-                    mem_a <= 0;
-                    sub_byte <= 0;
-                    byte_index <= 0;
+
+                3: begin
+                    mem_a <= 16'h2010;
+                    if (spo[0] == 1) fsm_state <= 3;
+                    else fsm_state <= 4;
                 end
-            end else if (fsm_state == 5) begin
-                if (print_hex_state == 0) begin
-                    case (sub_byte)
-                        2'd0: captured_byte <= spo[31:24];
-                        2'd1: captured_byte <= spo[23:16];
-                        2'd2: captured_byte <= spo[15:8];
-                        2'd3: captured_byte <= spo[7:0];
-                    endcase
-                    print_hex_state <= 1;
-                end else if (print_hex_state == 1) begin
-                    uart_data  <= {24'd0, (captured_byte[7:4] < 10) ? (8'h30 + captured_byte[7:4]) : (8'h41 + captured_byte[7:4] - 10)};
-                    uart_write <= 1;
-                    print_hex_state <= 2;
-                end else if (print_hex_state == 2) begin
-                    uart_data  <= {24'd0, (captured_byte[3:0] < 10) ? (8'h30 + captured_byte[3:0]) : (8'h41 + captured_byte[3:0] - 10)};
-                    uart_write <= 1;
-                    print_hex_state <= (byte_index == 511) ? 4'd3 : 4'd0;
-                    if (byte_index != 511) begin
-                        byte_index <= byte_index + 1;
-                        if (sub_byte == 3) begin
-                            sub_byte <= 0;
-                            mem_a <= mem_a + 4;
-                        end else begin
-                            sub_byte <= sub_byte + 1;
+
+                4: begin
+                    mem_a <= 16'h2010;
+                    if (spo[0] == 0) fsm_state <= 4;
+                    else begin
+                        fsm_state <= 5;
+                        mem_a <= 0;
+                        sub_byte <= 0;
+                        byte_index <= 0;
+                    end
+                end
+
+                5: begin
+                    case (print_hex_state)
+                        0: begin
+                            case (sub_byte)
+                                2'd0: captured_byte <= spo[31:24];
+                                2'd1: captured_byte <= spo[23:16];
+                                2'd2: captured_byte <= spo[15:8];
+                                2'd3: captured_byte <= spo[7:0];
+                            endcase
+                            print_hex_state <= 1;
                         end
-                    end
-                end else if (print_hex_state == 3) begin
-                    uart_data  <= {24'd0, 8'h0A};
-                    uart_write <= 1;
-                    print_hex_state <= 0;
-                    if (current_sector == 15) begin
-                        fsm_state <= 6;
-                    end else begin
-                        current_sector <= current_sector + 1;
-                        fsm_state <= 1;
-                    end
+                        1: begin
+                            uart_data  <= {24'd0, (captured_byte[7:4] < 10) ? (8'h30 + captured_byte[7:4]) : (8'h41 + captured_byte[7:4] - 10)};
+                            uart_write <= 1;
+                            print_hex_state <= 2;
+                        end
+                        2: begin
+                            uart_data  <= {24'd0, (captured_byte[3:0] < 10) ? (8'h30 + captured_byte[3:0]) : (8'h41 + captured_byte[3:0] - 10)};
+                            uart_write <= 1;
+                            print_hex_state <= (byte_index == 511) ? 3 : 0;
+                            if (byte_index != 511) begin
+                                byte_index <= byte_index + 1;
+                                if (sub_byte == 3) begin
+                                    sub_byte <= 0;
+                                    mem_a <= mem_a + 4;
+                                end else begin
+                                    sub_byte <= sub_byte + 1;
+                                end
+                            end
+                        end
+                        3: begin
+                            uart_data  <= {24'd0, 8'h0A};
+                            uart_write <= 1;
+                            print_hex_state <= 0;
+                            if (current_sector == 15) fsm_state <= 6;
+                            else begin
+                                current_sector <= current_sector + 1;
+                                fsm_state <= 1;
+                            end
+                        end
+                    endcase
                 end
-            end
+            endcase
         end
     end
 
