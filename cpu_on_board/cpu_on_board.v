@@ -321,325 +321,184 @@ module cpu_on_board (
     (* chip_pin = "W20" *) inout  wire SD_DAT0, // SD_DAT0 (this is the actual SD_DAT from your IP)
     (* chip_pin = "U20" *) output wire SD_DAT3  // SD_DAT3 (this is the actual SD_DAT3 from your IP)
 );
+    // Internal signals for clock and reset
+    wire clk_sys = CLOCK_50;
+    wire reset_n_sys = KEY; // Assuming KEY provides an active-low reset, so direct connection is active-low.
 
-    // =======================================================
-    // Heartbeat LED
-    // =======================================================
-    reg [23:0] blink_counter;
-    assign LEDR0 = blink_counter[23];
-
-    always @(posedge CLOCK_50 or negedge KEY0) begin
-        if (!KEY0)
-            blink_counter <= 0;
-        else
-            blink_counter <= blink_counter + 1'b1;
-    end
-
-    // =======================================================
-    // JTAG UART
-    // =======================================================
-    reg [31:0] uart_data;
-    reg        uart_write;
-
-    // REVERTED TO YOUR ORIGINAL JTAG UART INSTANTIATION
-    jtag_uart_system uart0 (
-        .clk_clk(CLOCK_50),
-        .reset_reset_n(KEY0),
-        .jtag_uart_0_avalon_jtag_slave_address(1'b0),
-        .jtag_uart_0_avalon_jtag_slave_writedata(uart_data),
-        .jtag_uart_0_avalon_jtag_slave_write_n(~uart_write),
-        .jtag_uart_0_avalon_jtag_slave_chipselect(1'b1),
-        .jtag_uart_0_avalon_jtag_slave_read_n(1'b1)
-    );
-
-    // Helper task for printing a single character
-    task print_char;
-        input [7:0] char_to_print;
-        begin
-            uart_data <= {24'b0, char_to_print};
-            uart_write <= 1'b1;
-            // A small delay or a proper handshake with the JTAG UART IP might be needed
-            // For a simple FSM, holding uart_write high for one clock cycle is often sufficient
-            // or adding a delay counter here if the JTAG UART IP has a read_n/write_n handshake
-            // but for this example, we'll assume it's combinatorial or 1-cycle latency.
-        end
-    endtask
-
-
-    // =======================================================
-    // SD IP Avalon-MM wires
-    // =======================================================
-    wire        sd_chipselect;
-    reg  [2:0]  sd_address; // Made reg to control it from FSM
-    reg         sd_read;    // Made reg to control it from FSM
-    reg         sd_write;   // Made reg to control it from FSM
-    wire [3:0]  sd_byteenable = 4'b1111;
-    reg  [31:0] sd_writedata; // Made reg to control it from FSM
+    // Internal signals for SD card Avalon slave interface (these would be driven by a Nios II or custom master)
+    wire sd_chipselect;
+    wire [7:0] sd_address;
+    wire sd_read;
+    wire sd_write;
+    wire [3:0] sd_byteenable;
+    wire [31:0] sd_writedata;
     wire [31:0] sd_readdata;
-    wire        sd_waitrequest; // Your IP does not use this, it should be connected to '0' or left unconnected if Qsys ties it off.
+    wire sd_waitrequest;
 
-    // =======================================================
-    // Instantiate Altera SD Card IP
-    // =======================================================
-    sd u_sd (
-        .clk_clk(CLOCK_50),
-        .reset_reset_n(KEY0),
+    // Internal signals for JTAG UART Avalon slave interface (these would be driven by a Nios II)
+    wire jtag_uart_chipselect;
+    wire jtag_uart_address;
+    wire jtag_uart_read_n;
+    wire [31:0] jtag_uart_readdata;
+    wire jtag_uart_write_n;
+    wire [31:0] jtag_uart_writedata;
+    wire jtag_uart_waitrequest;
 
-        // Physical SD pins
-        .altera_up_sd_card_avalon_interface_0_conduit_end_b_SD_cmd(SD_CMD),
-        // CORRECTED: Your SdCardSlave IP has b_SD_dat, not b_SD_dat0.
-        // Also, the top-level port is SD_DAT0, so it maps to the IP's b_SD_dat.
-        .altera_up_sd_card_avalon_interface_0_conduit_end_b_SD_dat(SD_DAT0),
-        // CORRECTED: Your SdCardSlave IP has b_SD_dat3.
-        .altera_up_sd_card_avalon_interface_0_conduit_end_b_SD_dat3(SD_DAT3),
-        .altera_up_sd_card_avalon_interface_0_conduit_end_o_SD_clock(SD_CLK),
 
-        // Avalon-MM slave
-        .altera_up_sd_card_avalon_interface_0_avalon_sdcard_slave_chipselect(sd_chipselect),
-        .altera_up_sd_card_avalon_interface_0_avalon_sdcard_slave_address(sd_address),
-        .altera_up_sd_card_avalon_interface_0_avalon_sdcard_slave_read(sd_read),
-        .altera_up_sd_card_avalon_interface_0_avalon_sdcard_slave_write(sd_write),
-        .altera_up_sd_card_avalon_interface_0_avalon_sdcard_slave_byteenable(sd_byteenable),
-        .altera_up_sd_card_avalon_interface_0_avalon_sdcard_slave_writedata(sd_writedata),
-        .altera_up_sd_card_avalon_interface_0_avalon_sdcard_slave_readdata(sd_readdata),
-        .altera_up_sd_card_avalon_interface_0_avalon_sdcard_slave_waitrequest(1'b0) // Tie off waitrequest, as SdCardSlave relies on polling
+    // Instantiate the SD Card IP Core
+    sd sd_inst (
+        .clk_clk                                                      (clk_sys),
+        .reset_reset_n                                                (reset_n_sys),
+        .altera_up_sd_card_avalon_interface_0_conduit_end_b_SD_cmd    (SD_CMD),
+        .altera_up_sd_card_avalon_interface_0_conduit_end_b_SD_dat    (SD_DATA),
+        .altera_up_sd_card_avalon_interface_0_conduit_end_b_SD_dat3   (SD_DATA3),
+        .altera_up_sd_card_avalon_interface_0_conduit_end_o_SD_clock  (SD_CLK),
+        // Avalon Slave connections (dummy assignments for this example, would be driven by a master)
+        .altera_up_sd_card_avalon_interface_0_avalon_sdcard_slave_chipselect (sd_chipselect),
+        .altera_up_sd_card_avalon_interface_0_avalon_sdcard_slave_address    (sd_address),
+        .altera_up_sd_card_avalon_interface_0_avalon_sdcard_slave_read       (sd_read),
+        .altera_up_sd_card_avalon_interface_0_avalon_sdcard_slave_write      (sd_write),
+        .altera_up_sd_card_avalon_interface_0_avalon_sdcard_slave_byteenable (sd_byteenable),
+        .altera_up_sd_card_avalon_interface_0_avalon_sdcard_slave_writedata  (sd_writedata),
+        .altera_up_sd_card_avalon_interface_0_avalon_sdcard_slave_readdata   (sd_readdata),
+        .altera_up_sd_card_avalon_interface_0_avalon_sdcard_slave_waitrequest(sd_waitrequest)
     );
 
-    // =======================================================
-    // SD IP status bit definitions (from sd.h / sd.c)
-    // =======================================================
-    localparam SD_CMDFINISHED = (1<<1);
-    localparam SD_RESPONSEFINISHED = (1<<2);
-    localparam SD_IDLEFINISHED = (1<<3);
-    localparam SD_RDFIFOEMPTY = (1<<4);
-    localparam SD_RDFIFOFULL = (1<<5);
+    // Instantiate the JTAG UART
+    jtag_uart_system jtag_uart_inst (
+        .clk_clk                                   (clk_sys),
+        .reset_reset_n                             (reset_n_sys),
+        // Avalon Slave connections (dummy assignments for this example, would be driven by a Nios II)
+        .jtag_uart_0_avalon_jtag_slave_chipselect  (jtag_uart_chipselect),
+        .jtag_uart_0_avalon_jtag_slave_address     (jtag_uart_address),
+        .jtag_uart_0_avalon_jtag_slave_read_n      (jtag_uart_read_n),
+        .jtag_uart_0_avalon_jtag_slave_readdata    (jtag_uart_readdata),
+        .jtag_uart_0_avalon_jtag_slave_write_n     (jtag_uart_write_n),
+        .jtag_uart_0_avalon_jtag_slave_writedata   (jtag_uart_writedata),
+        .jtag_uart_0_avalon_jtag_slave_waitrequest (jtag_uart_waitrequest)
+    );
 
+    // --- Dummy/Minimal Avalon Master for basic interaction (for simulation purposes only) ---
+    // In a real system, a Nios II processor would drive these signals.
+    // For a minimal test, we can try to assert some signals, but it won't actually
+    // perform a meaningful SD card operation without proper protocol handling.
 
-    // =======================================================
-    // SD FSM (Simplified - for demonstration)
-    // =======================================================
-    reg [3:0] state; // More states needed
-    reg [23:0] delay_counter;
-    reg [7:0] sd_cmd_crc;
-    reg [47:0] current_cmd_packet; // To hold the full 48-bit command
-    reg [31:0] cmd_arg;
-    reg [31:0] r3_response_ocr; // Added for holding OCR response
+    // Assign dummy values for Avalon signals to prevent floating inputs in simulation
+    // and to show how they would typically be set (e.g., chipselect always low for single slave)
+    assign sd_chipselect = 1'b0; // Active low chip select for SD card (adjust based on actual system)
+    assign sd_address = 8'h00;   // Example address
+    assign sd_read = 1'b0;       // No read active
+    assign sd_write = 1'b0;      // No write active
+    assign sd_byteenable = 4'b1111; // All bytes enabled
+    assign sd_writedata = 32'h0; // No data written
 
+    assign jtag_uart_chipselect = 1'b0; // Active low chip select for JTAG UART (adjust based on actual system)
+    assign jtag_uart_address = 1'b0;    // Example address
+    assign jtag_uart_read_n = 1'b1;     // No read active (active low)
+    assign jtag_uart_write_n = 1'b1;    // No write active (active low)
+    assign jtag_uart_writedata = 32'h0; // No data written
 
-    // CRC7 calculation (simplified, for demonstration, not fully optimized)
-    function [6:0] calculate_crc7;
-        input [40:0] data_in; // 6 bits cmd_idx + 32 bits argument + 3 dummy bits
-        reg [6:0] crc;
-        reg [40:0] shifted_data;
-        integer i;
-    begin
-        crc = 7'b0;
-        shifted_data = data_in;
-        for (i = 40; i >= 0; i = i - 1) begin
-            crc = crc << 1;
-            if (((crc >> 6) ^ shifted_data[i]) & 1'b1) // Check MSB of CRC + data bit
-                crc = crc ^ 7'h09; // Polynomial for CRC7: x^7 + x^3 + 1 (0x09)
-            crc = crc & 7'h7F; // Keep 7 bits
-        end
-        calculate_crc7 = crc;
-    end
-    endfunction
+    // A simple counter for very basic interaction (highly simplified and not a functional SD driver)
+    reg [2:0] state = 3'd0;
+    reg [7:0] data_to_write;
+    reg read_cmd_issued = 1'b0;
+    reg [31:0] sd_cmd_arg;
+    reg [1:0] sd_cmd_id;
 
-
-    always @(posedge CLOCK_50 or negedge KEY0) begin
-        if (!KEY0) begin
-            state <= 0;
-            delay_counter <= 0;
-            sd_read <= 0;
-            sd_write <= 0;
-            sd_address <= 0;
-            sd_writedata <= 0;
-            uart_data <= 0;
-            uart_write <= 0;
-            current_cmd_packet <= 0;
-            cmd_arg <= 0;
-            r3_response_ocr <= 0;
+    // This section would be replaced by a proper Avalon master (e.g., Nios II)
+    always @(posedge clk_sys or negedge reset_n_sys) begin
+        if (!reset_n_sys) begin
+            state <= 3'd0;
+            sd_chipselect <= 1'b0; // Ensure chip select is off during reset
+            sd_read <= 1'b0;
+            sd_write <= 1'b0;
+            sd_address <= 8'h00;
+            sd_writedata <= 32'h0;
+            read_cmd_issued <= 1'b0;
+            sd_cmd_arg <= 32'h0;
+            sd_cmd_id <= 2'h0;
         end else begin
-            // Clear write pulse after 1 cycle to avoid continuous writing
-            // This is a common pattern for single-cycle peripheral writes
-            if (uart_write) uart_write <= 0;
+            // Simplified state machine to illustrate interaction.
+            // This is NOT a complete SD card driver, but shows Avalon signal interaction.
+            case(state)
+                3'd0: begin // Idle state, wait for a trigger (e.g., from Nios II)
+                    // For a standalone test, you might automatically start.
+                    // For now, let's just transition.
+                    state <= 3'd1;
+                end
+                3'd1: begin // Initialize or setup a command argument
+                    // Example: Set CMD_ARG register (offset 0x22C in Table 2 for Nios II mapping if 0x1000 base)
+                    // Assuming a base address of 0 for the IP core's slave.
+                    // From document P3 Table 2: CMD_ARG offset is 556 (0x22C)
+                    // From document P5 Figure 2: command_argument_register = ((int *)(0x0000122C));
+                    // Let's assume the base address given to the IP core is 0x1000
+                    // So, offset is 0x22C
+                    sd_address <= 8'h22C; // CMD_ARG register offset
+                    sd_writedata <= 32'h00001000; // Example address to read from SD card
+                    sd_chipselect <= 1'b1; // Activate chip select
+                    sd_write <= 1'b1;      // Perform a write
+                    state <= 3'd2;
+                end
+                3'd2: begin // Wait for write to complete and issue command
+                    if (!sd_waitrequest) begin // If previous write is complete
+                        sd_write <= 1'b0; // Deassert write
+                        sd_chipselect <= 1'b0; // Deassert chip select
 
-            // Default to no action on Avalon bus for SD IP
-            sd_read <= 0;
-            sd_write <= 0;
-            sd_chipselect <= 1'b1; // Always select the SD card for this test, assuming no other slaves on the bus
-
-            case (state)
-                0: begin // Initial Power-up Delay + Print 'S'
-                    if (delay_counter < 24'd5_000_000) begin // Approx 100ms @ 50MHz
-                        delay_counter <= delay_counter + 1;
-                    end else begin
-                        print_char("S");
-                        delay_counter <= 0;
-                        state <= 1; // Go to SD card initialization
+                        // Issue READ_BLOCK command (offset 0x230 in Table 2, P5 Figure 2)
+                        sd_address <= 8'h230; // CMD register offset
+                        sd_writedata <= 32'h00000011; // READ_BLOCK command ID (0x11)
+                        sd_chipselect <= 1'b1; // Activate chip select
+                        sd_write <= 1'b1;      // Perform a write
+                        state <= 3'd3;
                     end
                 end
-
-                // --- SD Initialization Sequence (Simplified) ---
-                // (Refer to my previous response for detailed explanation of each state's purpose)
-
-                // State 1: Send CMD0 (GO_IDLE_STATE)
-                1: begin
-                    cmd_arg <= 32'b0;
-                    sd_cmd_crc = calculate_crc7({6'b000000, 32'b0}); // CMD0, arg 0
-                    current_cmd_packet = {1'b0, 6'b000000, 32'b0, sd_cmd_crc, 1'b1}; // Start, CMD0, Arg, CRC7, End
-
-                    sd_address <= 1; // SDCMD0/SDCMD1 are combined in the slave.v for 48-bit command
-                    sd_writedata <= current_cmd_packet[31:0]; // Lower 32 bits (Arg LSB + CRC + End)
-                    sd_write <= 1;
-                    state <= 2; // Move to write upper 16 bits
-                end
-
-                // State 2: Write upper 16 bits of CMD0 and trigger
-                2: begin
-                    sd_address <= 2; // SDCMD1 for CMD ID and Arg MSB
-                    sd_writedata <= {16'b0, current_cmd_packet[47:32]}; // Upper 16 bits of command packet
-                    sd_write <= 1;
-                    state <= 3; // Now trigger the command
-                end
-
-                // State 3: Trigger CMD0
-                3: begin
-                    sd_address <= 0; // SDCNT
-                    sd_writedata <= 32'd1; // Set bit 0 to initiate command (SD_SendCmd in C code does this)
-                    sd_write <= 1;
-                    state <= 4; // Wait for command finished
-                end
-
-                // State 4: Wait for CMD0 to finish (check SDCNT)
-                4: begin
-                    sd_address <= 0; // SDCNT
-                    sd_read <= 1;
-                    if (sd_readdata & SD_CMDFINISHED) begin
-                        print_char("0"); // Indicate CMD0 finished
-                        delay_counter <= 0;
-                        state <= 5; // Move to send CMD55
+                3'd3: begin // Wait for command write to complete
+                    if (!sd_waitrequest) begin
+                        sd_write <= 1'b0;
+                        sd_chipselect <= 1'b0;
+                        read_cmd_issued <= 1'b1; // Indicate a command has been sent
+                        state <= 3'd4;
                     end
                 end
-
-                // State 5: Send CMD55 (APP_CMD)
-                5: begin
-                    cmd_arg <= 32'b0; // RCA is 0 for initial CMD55
-                    sd_cmd_crc = calculate_crc7({6'b110111, 32'b0}); // CMD55 index 55, arg 0
-                    current_cmd_packet = {1'b0, 6'b110111, 32'b0, sd_cmd_crc, 1'b1};
-
-                    sd_address <= 1;
-                    sd_writedata <= current_cmd_packet[31:0];
-                    sd_write <= 1;
-                    state <= 6;
+                3'd4: begin // Poll ASR register for completion (offset 0x234 in Table 2, P5 Figure 2)
+                    sd_address <= 8'h234; // ASR register offset
+                    sd_chipselect <= 1'b1; // Activate chip select
+                    sd_read <= 1'b1;       // Perform a read
+                    state <= 3'd5;
                 end
-
-                // State 6: Write upper 16 bits of CMD55 and trigger
-                6: begin
-                    sd_address <= 2;
-                    sd_writedata <= {16'b0, current_cmd_packet[47:32]};
-                    sd_write <= 1;
-                    state <= 7;
-                end
-
-                // State 7: Trigger CMD55
-                7: begin
-                    sd_address <= 0; // SDCNT
-                    sd_writedata <= 32'd1;
-                    sd_write <= 1;
-                    state <= 8;
-                end
-
-                // State 8: Wait for CMD55 to finish
-                8: begin
-                    sd_address <= 0; // SDCNT
-                    sd_read <= 1;
-                    if (sd_readdata & SD_CMDFINISHED) begin
-                        print_char("5"); // Indicate CMD55 finished
-                        delay_counter <= 0;
-                        state <= 9; // Move to send ACMD41
-                    end
-                end
-
-                // State 9: Send ACMD41 (SD_SEND_OP_COND)
-                9: begin
-                    cmd_arg <= 32'h0FF00000; // VDD voltage window + HCS
-                    sd_cmd_crc = calculate_crc7({6'b101001, cmd_arg}); // ACMD41 index 41
-                    current_cmd_packet = {1'b0, 6'b101001, cmd_arg, sd_cmd_crc, 1'b1};
-
-                    sd_address <= 1;
-                    sd_writedata <= current_cmd_packet[31:0];
-                    sd_write <= 1;
-                    state <= 10;
-                end
-
-                // State 10: Write upper 16 bits of ACMD41 and trigger
-                10: begin
-                    sd_address <= 2;
-                    sd_writedata <= {16'b0, current_cmd_packet[47:32]};
-                    sd_write <= 1;
-                    state <= 11;
-                end
-
-                // State 11: Trigger ACMD41
-                11: begin
-                    sd_address <= 0; // SDCNT
-                    sd_writedata <= 32'd1;
-                    sd_write <= 1;
-                    state <= 12;
-                end
-
-                // State 12: Wait for ACMD41 to finish and read response
-                12: begin
-                    sd_address <= 0; // SDCNT
-                    sd_read <= 1;
-                    if (sd_readdata & SD_CMDFINISHED) begin
-                        // Read Response for R3 (OCR register)
-                        // In SdCardSlave, Response is stored across SDCMD0-SDCMD4.
-                        // For ACMD41 R3, we need the OCR. Your C code extracts it from response[0], which means
-                        // it's probably the lower 32-bits of the 136-bit response, which correspond to SDCMD0
-                        // in the current SdCardSlave mapping based on how SD_WaitResponse is coded.
-                        // Let's read SDCMD0 after the command is finished.
-                        sd_address <= 1; // SDCMD0
-                        sd_read <= 1; // Read SDCMD0 (which is the actual register named SDCMD0 in SdCardSlave.v)
-                        r3_response_ocr <= sd_readdata; // Capture the OCR
-
-                        print_char("A"); // Indicate ACMD41 finished
-                        print_char((r3_response_ocr >> 24) & 8'hFF); // Print MSB of OCR
-                        print_char((r3_response_ocr >> 16) & 8'hFF);
-                        print_char((r3_response_ocr >> 8) & 8'hFF);
-                        print_char(r3_response_ocr & 8'hFF); // Print LSB of OCR
-
-                        // Check the busy bit (bit 31) of the OCR
-                        if (r3_response_ocr & 32'h80000000) begin
-                            state <= 13; // Card is ready
-                            print_char("R"); // Ready
+                3'd5: begin // Read ASR and check bit 2 (command in progress)
+                    if (!sd_waitrequest) begin
+                        sd_read <= 1'b0;
+                        sd_chipselect <= 1'b0;
+                        // Check bit 2 of readdata for "most recently sent command is still in progress"
+                        if ((sd_readdata & 32'h00000004) == 32'h00000000) begin // Command complete
+                            state <= 3'd6; // Command complete, proceed to read data buffer
                         end else begin
-                            // Card still busy, retry ACMD41 (go back to State 5 to send CMD55 again)
-                            delay_counter <= 0; // Reset delay counter
-                            state <= 5; // Loop back for another CMD55/ACMD41 sequence
-                            print_char("B"); // Busy, retrying
+                            state <= 3'd4; // Command still in progress, poll again
                         end
                     end
                 end
-
-                // State 13: SD Card Initialized (Placeholder for reading data)
-                13: begin
-                    print_char("K"); // Indicate successful init
-                    state <= 14; // Move to actual data read
+                3'd6: begin // Read from RXTX_BUFFER (offset 0x000 in Table 2)
+                    sd_address <= 8'h000; // RXTX_BUFFER offset
+                    sd_chipselect <= 1'b1;
+                    sd_read <= 1'b1;
+                    // In a real system, you'd read 512 bytes here.
+                    // For this simple example, we'll just read one value and then stop.
+                    state <= 3'd7;
                 end
-
-                // State 14: Placeholder for actual data read (e.g., CMD17)
-                // This would be similar to CMD0/CMD55/ACMD41, but for CMD17
-                // and then reading from the FIFO at address 6.
-                14: begin
-                    // For now, just stay here.
-                    state <= 14;
+                3'd7: begin // Data read complete
+                    if (!sd_waitrequest) begin
+                        sd_read <= 1'b0;
+                        sd_chipselect <= 1'b0;
+                        // Data from SD card is now in sd_readdata
+                        // You would typically store this in a memory or process it.
+                        // For now, we'll just stay in this state or go back to idle.
+                        state <= 3'd7; // Stay here, or go back to 3'd0 to repeat or wait.
+                    end
                 end
-
-                default: state <= 0; // Should not happen
             endcase
         end
     end
+
 
 endmodule
