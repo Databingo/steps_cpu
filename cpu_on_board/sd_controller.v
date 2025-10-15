@@ -1,5 +1,11 @@
 /* SD Card controller module. Allows reading from and writing to a microSD card
 through SPI mode. */
+// http://web.mit.edu/6.111/www/f2017/tools/sd_controller.v
+// ref: 
+// https://stackoverflow.com/questions/8080718/sdhc-microsd-card-and-spi-initialization
+// https://electronics.stackexchange.com/questions/321491/why-i-cant-issue-commands-after-cmd8-to-an-sdhc-card-in-spi-mode
+// http://chlazza.nfshost.com/sdcardinfo.html
+// (chinese) https://blog.csdn.net/ming1006/article/details/7281597
 
 `timescale 1ns / 1ps
 
@@ -29,13 +35,16 @@ module sd_controller(
     output ready, // HIGH if the SD card is ready for a read or write operation.
     input [31:0] address,   // Memory address for read/write operation. This MUST 
                             // be a multiple of 512 bytes, due to SD sectoring.
-    input clk,  // 25 MHz clock.
-    output [4:0] status // For debug purposes: Current state of controller.
+    input clk,  // normal speed clock
+    input clk_pulse_slow, // pulsed slow clock
+    output [4:0] status, // For debug purposes: Current state of controller.
+    output reg [7:0] recv_data
 );
 
     parameter RST = 0;
     parameter INIT = 1;
     parameter CMD0 = 2;
+    parameter CMD8 = 20;
     parameter CMD55 = 3;
     parameter CMD41 = 4;
     parameter POLL_CMD = 5;
@@ -56,26 +65,38 @@ module sd_controller(
     
     parameter WRITE_DATA_SIZE = 515;
     
-    reg [4:0] state = RST;
+    (*mark_debug = "true"*) reg [4:0] state = RST;
     assign status = state;
     reg [4:0] return_state;
     reg sclk_sig = 0;
-    reg [55:0] cmd_out;
-    reg [7:0] recv_data;
+    reg [55:0] cmd_out = {56{1'b1}};
     reg cmd_mode = 1;
     reg [7:0] data_sig = 8'hFF;
+    reg [2:0] response_type = 3'b1;
     
     reg [9:0] byte_counter;
     reg [9:0] bit_counter;
     
-    reg [26:0] boot_counter = 27'd100_000_000;
+    reg [26:0] boot_counter = 27'd050_000;
+    reg [7:0] reset_counter = 0;
     always @(posedge clk) begin
         if(reset == 1) begin
             state <= RST;
             sclk_sig <= 0;
-            boot_counter <= 27'd100_000_000;
+            //boot_counter <= 27'd100_000_000;
+            boot_counter <= 27'd005_000;
+            //boot_counter <= 27'd001_000;
+            cmd_mode <= 1;
+            cs <= 1;
+            cmd_out <= {56{1'b1}};
+            data_sig <= 8'hFF;
+            if (clk_pulse_slow) begin
+                reset_counter <= reset_counter + 1;
+                if (reset_counter[2]) sclk_sig <= ~sclk_sig;
+            end
         end
         else begin
+            if (clk_pulse_slow) begin
             case(state)
                 RST: begin
                     if(boot_counter == 0) begin
@@ -90,7 +111,10 @@ module sd_controller(
                         state <= INIT;
                     end
                     else begin
+                        // <400KHz startup init
                         boot_counter <= boot_counter - 1;
+                        if (boot_counter[2]) sclk_sig <= ~sclk_sig;
+                        //sclk_sig <= ~sclk_sig; // I added this
                     end
                 end
                 INIT: begin
@@ -104,29 +128,43 @@ module sd_controller(
                     end
                 end
                 CMD0: begin
+                    // cmd format: 01   ......        .*32   ....... 1
+                    //                command bit   argument  CRC7
                     cmd_out <= 56'hFF_40_00_00_00_00_95;
                     bit_counter <= 55;
+                    response_type <= 3'b1;
+                    return_state <= CMD8;
+                    state <= SEND_CMD;
+                end
+                CMD8: begin
+                    // this CMD8 has R7 response (CMD0 and CMD55 has R1)
+                    // so take special care, or SDHC card may deadlock
+                    cmd_out <= 56'hFF_48_00_00_01_AA_87;
+                    bit_counter <= 55;
+                    response_type <= 3'b111;
                     return_state <= CMD55;
                     state <= SEND_CMD;
                 end
                 CMD55: begin
                     cmd_out <= 56'hFF_77_00_00_00_00_01;
                     bit_counter <= 55;
+                    response_type <= 3'b1;
                     return_state <= CMD41;
                     state <= SEND_CMD;
                 end
                 CMD41: begin
-                    cmd_out <= 56'hFF_69_00_00_00_00_01;
+                    cmd_out <= 56'hFF_69_40_00_00_00_01;
                     bit_counter <= 55;
+                    response_type <= 3'b1;
                     return_state <= POLL_CMD;
                     state <= SEND_CMD;
                 end
                 POLL_CMD: begin
                     if(recv_data[0] == 0) begin
-                        state <= IDLE;
+                        state <= IDLE; // response 0x0, OK
                     end
                     else begin
-                        state <= CMD55;
+                        state <= CMD55; // response 0x1, again
                     end
                 end
                 IDLE: begin
@@ -143,6 +181,7 @@ module sd_controller(
                 READ_BLOCK: begin
                     cmd_out <= {16'hFF_51, address, 8'hFF};
                     bit_counter <= 55;
+                    response_type <= 3'b1;
                     return_state <= READ_BLOCK_WAIT;
                     state <= SEND_CMD;
                 end
@@ -191,7 +230,12 @@ module sd_controller(
                     if (sclk_sig == 1) begin
                         if (miso == 0) begin
                             recv_data <= 0;
-                            bit_counter <= 6;
+                            case (response_type)
+                                1: bit_counter <= 6;
+                                7: bit_counter <= 38;
+                                // in R7 most bits will LOST, but don't care
+                                default: bit_counter <= 6;
+                            endcase
                             state <= RECEIVE_BYTE;
                         end
                     end
@@ -214,8 +258,9 @@ module sd_controller(
                     cmd_out <= {16'hFF_58, address, 8'hFF};
                     bit_counter <= 55;
                     return_state <= WRITE_BLOCK_INIT;
+                    response_type <= 1;
                     state <= SEND_CMD;
-		    ready_for_next_byte <= 1;
+                    ready_for_next_byte <= 1;
                 end
                 WRITE_BLOCK_INIT: begin
                     cmd_mode <= 0;
@@ -264,9 +309,10 @@ module sd_controller(
                             cmd_mode <= 1;
                         end
                     end
-                    sclk_sig = ~sclk_sig;
+                    sclk_sig <= ~sclk_sig;
                 end
             endcase
+            end
         end
     end
 

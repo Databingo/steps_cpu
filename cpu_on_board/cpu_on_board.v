@@ -309,39 +309,58 @@
 //endmodule
 
 
+`timescale 1ns / 1ps
 
-// =======================================================
-// DE1 Minimal SD Controller + JTAG UART Test
-// =======================================================
 module cpu_on_board (
-    (* chip_pin = "PIN_L1"  *) input  wire CLOCK_50,
-    (* chip_pin = "PIN_R22" *) input  wire KEY0,        // Active-low reset
-    (* chip_pin = "R20"     *) output wire LEDR0,
+    // =============================================================
+    // DE1 Board Connections (with inline pin assignments)
+    // =============================================================
+    (* chip_pin = "PIN_L1"  *)  input  wire CLOCK_50,  // 50 MHz
+    (* chip_pin = "PIN_R22" *)  input  wire KEY0,      // Active-low reset button
+    (* chip_pin = "R20"     *)  output wire LEDR0,     // LED test
 
-    (* chip_pin = "V20" *) output wire SD_CLK,  // SD_CLK
-    (* chip_pin = "Y20" *) inout  wire SD_CMD,  // SD_CMD (MOSI)
-    (* chip_pin = "W20" *) inout  wire SD_DAT0, // SD_DAT0 (MISO)
-    (* chip_pin = "U20" *) output wire SD_DAT3  // SD_CS
+    // SD Card pins
+    (* chip_pin = "V20" *)  output wire SD_CLK,   // SD Clock
+    (* chip_pin = "Y20" *)  inout  wire SD_CMD,   // SD CMD (MOSI)
+    (* chip_pin = "W20" *)  inout  wire SD_DAT0,  // SD DAT0 (MISO)
+    (* chip_pin = "U20" *)  output wire SD_DAT3   // SD DAT3 (CS)
 );
 
-    // =======================================================
-    // Heartbeat LED
-    // =======================================================
+    // =============================================================
+    // Reset and LED blink
+    // =============================================================
+    wire reset = ~KEY0;  // convert to active-high
     reg [23:0] blink_counter;
     assign LEDR0 = blink_counter[23];
-    always @(posedge CLOCK_50 or negedge KEY0)
-        if (!KEY0) blink_counter <= 0;
-        else       blink_counter <= blink_counter + 1'b1;
 
-    // =======================================================
-    // JTAG UART
-    // =======================================================
-    reg [31:0] uart_data;
-    reg        uart_write;
+    always @(posedge CLOCK_50 or posedge reset) begin
+        if (reset)
+            blink_counter <= 0;
+        else
+            blink_counter <= blink_counter + 1'b1;
+    end
+
+    // =============================================================
+    // Generate slow pulse for SD init (around 195 kHz)
+    // =============================================================
+    reg [7:0] clkdiv = 0;
+    always @(posedge CLOCK_50 or posedge reset) begin
+        if (reset)
+            clkdiv <= 0;
+        else
+            clkdiv <= clkdiv + 1;
+    end
+    wire clk_pulse_slow = (clkdiv == 8'd0);
+
+    // =============================================================
+    // JTAG UART system (for terminal output)
+    // =============================================================
+    reg [7:0] uart_data;
+    reg uart_write;
 
     jtag_uart_system uart0 (
         .clk_clk(CLOCK_50),
-        .reset_reset_n(KEY0),
+        .reset_reset_n(~reset),
         .jtag_uart_0_avalon_jtag_slave_address(1'b0),
         .jtag_uart_0_avalon_jtag_slave_writedata(uart_data),
         .jtag_uart_0_avalon_jtag_slave_write_n(~uart_write),
@@ -349,78 +368,105 @@ module cpu_on_board (
         .jtag_uart_0_avalon_jtag_slave_read_n(1'b1)
     );
 
-    // =======================================================
-    // SD Controller Instance
-    // =======================================================
+    task send_char;
+        input [7:0] c;
+        begin
+            uart_data <= c;
+            uart_write <= 1;
+            #1;
+            uart_write <= 0;
+        end
+    endtask
+
+    // =============================================================
+    // SD Controller instance (use your sd_controller.v)
+    // =============================================================
+    wire [7:0] sd_dout;
+    wire [7:0] sd_din = 8'h00;
+    wire [31:0] sd_addr = 32'd0;
     wire sd_ready;
+    wire sd_rd = 1'b0;
+    wire sd_wr = 1'b0;
+    wire sd_byte_available;
+    wire sd_ready_next;
     wire [4:0] sd_status;
     wire sd_cs, sd_mosi, sd_miso, sd_sclk;
 
     assign SD_CLK  = sd_sclk;
-    assign SD_CMD  = sd_mosi;   // MOSI
-    assign SD_DAT0 = 1'bz;      // Input MISO
-    assign sd_miso = SD_DAT0;
-    assign SD_DAT3 = sd_cs;     // CS
+    assign SD_CMD  = sd_mosi;
+    assign sd_miso = SD_DAT0;   // input line
+    assign SD_DAT3 = sd_cs;     // chip select
 
     sd_controller sd0 (
         .cs(sd_cs),
         .mosi(sd_mosi),
         .miso(sd_miso),
         .sclk(sd_sclk),
-        .rd(1'b0),
-        .dout(),
-        .byte_available(),
-        .wr(1'b0),
-        .din(8'd0),
-        .ready_for_next_byte(),
-        .reset(~KEY0),
+
+        .rd(sd_rd),
+        .dout(sd_dout),
+        .byte_available(sd_byte_available),
+
+        .wr(sd_wr),
+        .din(sd_din),
+        .ready_for_next_byte(sd_ready_next),
+
+        .reset(reset),
         .ready(sd_ready),
-        .address(32'd0),
+        .address(sd_addr),
+
         .clk(CLOCK_50),
         .status(sd_status)
     );
 
-    // =======================================================
-    // Print test through JTAG UART
-    // =======================================================
+    // =============================================================
+    // Simple print test sequence (SDK -> OK)
+    // =============================================================
     reg [3:0] state;
     reg [23:0] delay;
 
-    always @(posedge CLOCK_50 or negedge KEY0) begin
-        if (!KEY0) begin
-            uart_data <= 0;
-            uart_write <= 0;
-            delay <= 0;
+    always @(posedge CLOCK_50 or posedge reset) begin
+        if (reset) begin
             state <= 0;
+            delay <= 0;
+            uart_data <= 8'd0;
+            uart_write <= 0;
         end else begin
             uart_write <= 0;
             case (state)
                 0: begin
                     if (delay == 24'd5_000_000) begin
-                        uart_data <= {24'd0, "S"}; uart_write <= 1;
+                        send_char("S");
                         state <= 1;
+                        delay <= 0;
                     end else delay <= delay + 1;
                 end
                 1: begin
-                    uart_data <= {24'd0, "D"}; uart_write <= 1;
-                    state <= 2;
+                    if (delay == 24'd5_000_000) begin
+                        send_char("D");
+                        state <= 2;
+                        delay <= 0;
+                    end else delay <= delay + 1;
                 end
                 2: begin
-                    uart_data <= {24'd0, "K"}; uart_write <= 1;
-                    state <= 3;
+                    if (delay == 24'd5_000_000) begin
+                        send_char("K");
+                        state <= 3;
+                        delay <= 0;
+                    end else delay <= delay + 1;
                 end
                 3: begin
                     if (sd_ready) begin
-                        uart_data <= {24'd0, "O"}; uart_write <= 1;
+                        send_char("\n");
+                        send_char("O");
+                        send_char("K");
+                        send_char("\n");
                         state <= 4;
                     end
                 end
-                4: begin
-                    uart_data <= {24'd0, "K"}; uart_write <= 1;
-                    state <= 5;
-                end
-                default: state <= 5;
+                4: state <= 4; // hold
             endcase
         end
     end
+
 endmodule
