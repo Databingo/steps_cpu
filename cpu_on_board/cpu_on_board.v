@@ -1619,7 +1619,6 @@
 //
 //
 //
-
 // print 0-15 sectors
 module cpu_on_board (
     (* chip_pin = "PIN_L1"  *) input  wire CLOCK_50,
@@ -1662,18 +1661,6 @@ module cpu_on_board (
     );
 
     // =======================================================
-    // Slow pulse clock for SD init (ensures >74 cycles at <400kHz)
-    // =======================================================
-    reg [8:0] clkdiv = 0;
-    always @(posedge CLOCK_50 or negedge KEY0) begin
-        if (!KEY0)
-            clkdiv <= 0;
-        else
-            clkdiv <= clkdiv + 1;
-    end
-    wire clk_pulse_slow = (clkdiv == 0);
-
-    // =======================================================
     // SD card connection
     // =======================================================
     wire [31:0] spo;
@@ -1701,8 +1688,7 @@ module cpu_on_board (
         .d(mem_d),
         .we(mem_we),
         .spo(spo),
-        .irq(irq),
-        .clk_pulse_slow(clk_pulse_slow)
+        .irq(irq)
     );
 
     // Note: Ensure sd_controller.v handles full 6-byte R7 response for CMD8 (R1 + 4-byte echo + CRC)
