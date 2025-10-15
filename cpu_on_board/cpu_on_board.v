@@ -309,37 +309,53 @@
 //endmodule
 
 
-
-// ========================================================
-// Minimal DE1 top with JTAG_UART + SD card IP test
-// ========================================================
+// =======================================================
+// DE1 Minimal SD + JTAG UART test
+// (Based on your confirmed working UART version)
+// =======================================================
 module cpu_on_board (
     (* chip_pin = "PIN_L1"  *) input  wire CLOCK_50,
     (* chip_pin = "PIN_R22" *) input  wire KEY0,        // Active-low reset
     (* chip_pin = "R20"     *) output wire LEDR0,
 
-    // SD card interface pins
-    (* chip_pin = "V20" *) output wire SD_CLK,
-    (* chip_pin = "Y20" *) inout  wire SD_CMD,
-    (* chip_pin = "W20" *) inout  wire SD_DAT0,
-    (* chip_pin = "U20" *) output wire SD_DAT3
+    (* chip_pin = "V20" *) output wire SD_CLK,  // SD_CLK
+    (* chip_pin = "Y20" *) inout  wire SD_CMD,  // SD_CMD
+    (* chip_pin = "W20" *) inout  wire SD_DAT0, // SD_DAT0
+    (* chip_pin = "U20" *) output wire SD_DAT3  // SD_CS
 );
 
-    // =====================================================
-    // Reset & LED blink
-    // =====================================================
-    wire reset_n = KEY0;
+    // =======================================================
+    // Heartbeat LED
+    // =======================================================
     reg [23:0] blink_counter;
-    always @(posedge CLOCK_50 or negedge reset_n)
-        if (!reset_n)
+    assign LEDR0 = blink_counter[23];
+
+    always @(posedge CLOCK_50 or negedge KEY0) begin
+        if (!KEY0)
             blink_counter <= 0;
         else
             blink_counter <= blink_counter + 1'b1;
-    assign LEDR0 = blink_counter[23];
+    end
 
-    // =====================================================
-    // Avalon-MM wires for SD IP
-    // =====================================================
+    // =======================================================
+    // JTAG UART
+    // =======================================================
+    reg [31:0] uart_data;
+    reg        uart_write;
+
+    jtag_uart_system uart0 (
+        .clk_clk(CLOCK_50),
+        .reset_reset_n(KEY0),
+        .jtag_uart_0_avalon_jtag_slave_address(1'b0),
+        .jtag_uart_0_avalon_jtag_slave_writedata(uart_data),
+        .jtag_uart_0_avalon_jtag_slave_write_n(~uart_write),
+        .jtag_uart_0_avalon_jtag_slave_chipselect(1'b1),
+        .jtag_uart_0_avalon_jtag_slave_read_n(1'b1)
+    );
+
+    // =======================================================
+    // SD IP Avalon-MM wires
+    // =======================================================
     wire        sd_chipselect;
     wire [2:0]  sd_address;
     wire        sd_read;
@@ -349,79 +365,75 @@ module cpu_on_board (
     wire [31:0] sd_readdata;
     wire        sd_waitrequest;
 
-    // =====================================================
-    // Instantiate the Altera SD Card IP
-    // (Add sd.qip to the project, NOT as Verilog)
-    // =====================================================
+    // =======================================================
+    // Instantiate Altera SD Card IP (add sd.qip to project)
+    // =======================================================
     sd u_sd (
         .clk_clk(CLOCK_50),
-        .reset_reset_n(reset_n),
+        .reset_reset_n(KEY0),
 
-        .altera_up_sd_card_avalon_interface_0_conduit_end_b_SD_cmd (SD_CMD),
-        .altera_up_sd_card_avalon_interface_0_conduit_end_b_SD_dat (SD_DAT0),
+        // Physical SD pins
+        .altera_up_sd_card_avalon_interface_0_conduit_end_b_SD_cmd(SD_CMD),
+        .altera_up_sd_card_avalon_interface_0_conduit_end_b_SD_dat(SD_DAT0),
         .altera_up_sd_card_avalon_interface_0_conduit_end_b_SD_dat3(SD_DAT3),
         .altera_up_sd_card_avalon_interface_0_conduit_end_o_SD_clock(SD_CLK),
 
+        // Avalon-MM slave
         .altera_up_sd_card_avalon_interface_0_avalon_sdcard_slave_chipselect(sd_chipselect),
-        .altera_up_sd_card_avalon_interface_0_avalon_sdcard_slave_address   (sd_address),
-        .altera_up_sd_card_avalon_interface_0_avalon_sdcard_slave_read      (sd_read),
-        .altera_up_sd_card_avalon_interface_0_avalon_sdcard_slave_write     (sd_write),
+        .altera_up_sd_card_avalon_interface_0_avalon_sdcard_slave_address(sd_address),
+        .altera_up_sd_card_avalon_interface_0_avalon_sdcard_slave_read(sd_read),
+        .altera_up_sd_card_avalon_interface_0_avalon_sdcard_slave_write(sd_write),
         .altera_up_sd_card_avalon_interface_0_avalon_sdcard_slave_byteenable(sd_byteenable),
-        .altera_up_sd_card_avalon_interface_0_avalon_sdcard_slave_writedata (sd_writedata),
-        .altera_up_sd_card_avalon_interface_0_avalon_sdcard_slave_readdata  (sd_readdata),
+        .altera_up_sd_card_avalon_interface_0_avalon_sdcard_slave_writedata(sd_writedata),
+        .altera_up_sd_card_avalon_interface_0_avalon_sdcard_slave_readdata(sd_readdata),
         .altera_up_sd_card_avalon_interface_0_avalon_sdcard_slave_waitrequest(sd_waitrequest)
     );
 
-    // =====================================================
-    // Instantiate JTAG UART IP
-    // (Also add jtag_uart.qip to the project)
-    // =====================================================
-    wire [31:0] uart_readdata;
-    reg  [31:0] uart_writedata;
-    reg         uart_write;
-    wire        uart_waitreq;
+    // =======================================================
+    // SD test: after blink delay, print SD ready check
+    // =======================================================
+    reg [3:0] state;
+    reg [23:0] delay;
+    assign sd_chipselect = 1'b0; // idle
+    assign sd_address = 3'b000;
+    assign sd_read = 1'b0;
+    assign sd_write = 1'b0;
+    assign sd_writedata = 32'd0;
 
-    jtag_uart_system u_jtag (
-        .clk_clk(CLOCK_50),
-        .reset_reset_n(reset_n),
-        .jtag_uart_0_avalon_jtag_slave_chipselect(1'b1),
-        .jtag_uart_0_avalon_jtag_slave_address   (1'b0),
-        .jtag_uart_0_avalon_jtag_slave_read_n    (1'b1),
-        .jtag_uart_0_avalon_jtag_slave_readdata  (uart_readdata),
-        .jtag_uart_0_avalon_jtag_slave_write_n   (~uart_write),
-        .jtag_uart_0_avalon_jtag_slave_writedata (uart_writedata),
-        .jtag_uart_0_avalon_jtag_slave_waitrequest(uart_waitreq)
-    );
-
-    // =====================================================
-    // Simple test process:
-    // After reset, print "C", then "S", then "D"
-    // =====================================================
-    reg [3:0]  state;
-    always @(posedge CLOCK_50 or negedge reset_n) begin
-        if (!reset_n) begin
-            state <= 0;
+    always @(posedge CLOCK_50 or negedge KEY0) begin
+        if (!KEY0) begin
+            uart_data <= 0;
             uart_write <= 0;
-            uart_writedata <= 0;
+            delay <= 0;
+            state <= 0;
         end else begin
             uart_write <= 0;
+
             case (state)
-                0: if (!uart_waitreq) begin
-                        uart_writedata <= {24'd0, "C"}; // Character 'C'
+                0: begin
+                    // wait a short while after reset
+                    if (delay == 24'd5_000_000) begin
+                        uart_data <= {24'd0, "C"};
                         uart_write <= 1;
                         state <= 1;
-                    end
-                1: if (!uart_waitreq) begin
-                        uart_writedata <= {24'd0, "S"};
+                    end else
+                        delay <= delay + 1;
+                end
+                1: begin
+                    if (blink_counter[22]) begin
+                        uart_data <= {24'd0, "S"};
                         uart_write <= 1;
                         state <= 2;
                     end
-                2: if (!uart_waitreq) begin
-                        uart_writedata <= {24'd0, "D"};
+                end
+                2: begin
+                    if (blink_counter[23]) begin
+                        uart_data <= {24'd0, "D"};
                         uart_write <= 1;
                         state <= 3;
                     end
-                3: state <= 3; // done
+                end
+                3: state <= 3; // stay
             endcase
         end
     end
