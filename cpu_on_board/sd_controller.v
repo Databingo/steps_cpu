@@ -1,6 +1,11 @@
 /* SD Card controller module. Allows reading from and writing to a microSD card
 through SPI mode. */
-// Modified to fix response reception, CCS detection, and data token waiting.
+// http://web.mit.edu/6.111/www/f2017/tools/sd_controller.v
+// ref: 
+// https://stackoverflow.com/questions/8080718/sdhc-microsd-card-and-spi-initialization
+// https://electronics.stackexchange.com/questions/321491/why-i-cant-issue-commands-after-cmd8-to-an-sdhc-card-in-spi-mode
+// http://chlazza.nfshost.com/sdcardinfo.html
+// (chinese) https://blog.csdn.net/ming1006/article/details/7281597
 
 `timescale 1ns / 1ps
 
@@ -46,11 +51,9 @@ module sd_controller(
     
     parameter IDLE = 6;
     parameter READ_BLOCK = 7;
-    parameter WAIT_DATA_TOKEN = 21;
-    parameter WAIT_DATA_TOKEN_CHECK = 22;
+    parameter READ_BLOCK_WAIT = 8;
     parameter READ_BLOCK_DATA = 9;
     parameter READ_BLOCK_CRC = 10;
-    parameter READ_BLOCK_CRC2 = 19;
     parameter SEND_CMD = 11;
     parameter RECEIVE_BYTE_WAIT = 12;
     parameter RECEIVE_BYTE = 13;
@@ -69,14 +72,14 @@ module sd_controller(
     reg [55:0] cmd_out = {56{1'b1}};
     reg cmd_mode = 1;
     reg [7:0] data_sig = 8'hFF;
-    reg [2:0] response_type = 3'b001;
+    reg [2:0] response_type = 3'b1;
     
     reg [9:0] byte_counter;
     reg [9:0] bit_counter;
     
     reg [26:0] boot_counter = 27'd050_000;
     reg [7:0] reset_counter = 0;
-    reg [39:0] response;
+    reg [39:0] response = 0;
     reg ccs = 0;
 
     always @(posedge clk) begin
@@ -148,13 +151,13 @@ module sd_controller(
                 CMD41: begin
                     cmd_out <= 56'hFF_69_40_00_00_00_01;
                     bit_counter <= 55;
-                    response_type <= 3'b111;
+                    response_type <= 3'b111; // R3
                     return_state <= POLL_CMD;
                     state <= SEND_CMD;
                 end
                 POLL_CMD: begin
+                    ccs <= response[30];
                     if(response[32] == 0) begin
-                        ccs <= response[30];
                         state <= IDLE;
                     end
                     else begin
@@ -173,33 +176,25 @@ module sd_controller(
                     end
                 end
                 READ_BLOCK: begin
-                    cmd_out <= {8'hFF, 8'h51, ccs ? (address >> 9) : address, 8'hFF};
+                    cmd_out <= {16'hFF_51, ccs ? address >> 9 : address, 8'hFF};
                     bit_counter <= 55;
                     response_type <= 3'b001;
-                    return_state <= WAIT_DATA_TOKEN;
+                    return_state <= READ_BLOCK_WAIT;
                     state <= SEND_CMD;
                 end
-                WAIT_DATA_TOKEN: begin
-                    return_state <= WAIT_DATA_TOKEN_CHECK;
-                    bit_counter <= 7;
-                    state <= RECEIVE_BYTE;
-                end
-                WAIT_DATA_TOKEN_CHECK: begin
-                    if (recv_data == 8'hFE) begin
-                        byte_counter <= 512;
+                READ_BLOCK_WAIT: begin
+                    if(sclk_sig == 1 && miso == 0) begin
+                        byte_counter <= 511;
                         bit_counter <= 7;
                         return_state <= READ_BLOCK_DATA;
                         state <= RECEIVE_BYTE;
-                    end else if (recv_data == 8'hFF) begin
-                        state <= WAIT_DATA_TOKEN;
-                    end else begin
-                        state <= IDLE; // error
                     end
+                    sclk_sig <= ~sclk_sig;
                 end
                 READ_BLOCK_DATA: begin
                     dout <= recv_data;
                     byte_available <= 1;
-                    if (byte_counter == 1) begin
+                    if (byte_counter == 0) begin
                         bit_counter <= 7;
                         return_state <= READ_BLOCK_CRC;
                         state <= RECEIVE_BYTE;
@@ -212,11 +207,6 @@ module sd_controller(
                     end
                 end
                 READ_BLOCK_CRC: begin
-                    bit_counter <= 7;
-                    return_state <= READ_BLOCK_CRC2;
-                    state <= RECEIVE_BYTE;
-                end
-                READ_BLOCK_CRC2: begin
                     bit_counter <= 7;
                     return_state <= IDLE;
                     state <= RECEIVE_BYTE;
@@ -239,9 +229,9 @@ module sd_controller(
                             recv_data <= 0;
                             response <= 0;
                             case (response_type)
-                                3'b001: bit_counter <= 7;
-                                3'b111: bit_counter <= 39;
-                                default: bit_counter <= 7;
+                                3'b001: bit_counter <= 6;
+                                3'b111: bit_counter <= 38;
+                                default: bit_counter <= 6;
                             endcase
                             state <= RECEIVE_BYTE;
                         end
@@ -263,7 +253,7 @@ module sd_controller(
                     sclk_sig <= ~sclk_sig;
                 end
                 WRITE_BLOCK_CMD: begin
-                    cmd_out <= {8'hFF, 8'h58, ccs ? (address >> 9) : address, 8'hFF};
+                    cmd_out <= {16'hFF_58, ccs ? address >> 9 : address, 8'hFF};
                     bit_counter <= 55;
                     return_state <= WRITE_BLOCK_INIT;
                     response_type <= 3'b001;
@@ -306,8 +296,8 @@ module sd_controller(
                         else begin
                             data_sig <= {data_sig[6:0], 1'b1};
                             bit_counter <= bit_counter - 1;
-                        end
-                    end
+                        end;
+                    end;
                     sclk_sig <= ~sclk_sig;
                 end
                 WRITE_BLOCK_WAIT: begin
@@ -328,3 +318,4 @@ module sd_controller(
     assign mosi = cmd_mode ? cmd_out[55] : data_sig[7];
     assign ready = (state == IDLE);
 endmodule
+
