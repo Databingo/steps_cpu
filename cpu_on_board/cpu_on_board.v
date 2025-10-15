@@ -921,6 +921,8 @@ module cpu_on_board (
     reg printed_byte = 0;
     reg [2:0] print_hex_state = 0;
     reg [7:0] captured_byte;
+    
+    reg [8:0] byte_index;
 
     always @(posedge CLOCK_50 or negedge KEY0) begin
         if (!KEY0) begin
@@ -949,6 +951,11 @@ module cpu_on_board (
                 captured_byte <= sd_dout;
                 printed_byte <= 1;
                 print_hex_state <= 1;
+      
+                byte_index <= byte_index + 1;
+            end
+            if (print_hex_state == 0 && byte_index < 512) begin
+                printed_byte <= 0;
             end
             if (print_hex_state == 1) begin
                 uart_data <= {24'd0, (captured_byte[7:4] < 4'd10) ? (8'h30 + captured_byte[7:4]) : (8'h41 + (captured_byte[7:4] - 4'd10))};
