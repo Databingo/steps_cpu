@@ -1071,6 +1071,7 @@ module cpu_on_board (
     reg [7:0] sig_byte2;
     reg printed_sig = 0;
     reg [3:0] print_sig_state = 0;
+    reg byte_available_prev = 0;
 
     always @(posedge CLOCK_50 or negedge KEY0) begin
         if (!KEY0) begin
@@ -1087,8 +1088,10 @@ module cpu_on_board (
             sig_byte2 <= 0;
             printed_sig <= 0;
             print_sig_state <= 0;
+            byte_available_prev <= 0;
         end else begin
             uart_write <= 0;
+            byte_available_prev <= sd_byte_available;
             if (sd_ready && !printed_k) begin
                 uart_data  <= {24'd0, "K"};  // Print "K" when SD ready
                 uart_write <= 1;
@@ -1100,7 +1103,7 @@ module cpu_on_board (
             end else if (do_read && (sd_status != 6)) begin
                 rd_sig <= 0;
             end
-            if (do_read && sd_byte_available) begin
+            if (do_read && sd_byte_available && !byte_available_prev) begin
                 read_byte_idx <= read_byte_idx + 1;
                 if (read_byte_idx == 0 && !printed_byte) begin
                     captured_byte <= sd_dout;
