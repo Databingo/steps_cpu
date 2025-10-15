@@ -311,28 +311,38 @@
 
 
 // =======================================================
-// DE1 Minimal SD + JTAG UART test (final stable read)
+// DE1 Minimal SD + JTAG UART test (stable detection)
 // =======================================================
 module cpu_on_board (
     (* chip_pin = "PIN_L1"  *) input  wire CLOCK_50,
-    (* chip_pin = "PIN_R22" *) input  wire KEY0,
+    (* chip_pin = "PIN_R22" *) input  wire KEY0,        // Active-low reset
     (* chip_pin = "R20"     *) output wire LEDR0,
-    (* chip_pin = "V20" *) output wire SD_CLK,
-    (* chip_pin = "Y20" *) inout  wire SD_CMD,
-    (* chip_pin = "W20" *) inout  wire SD_DAT0,
-    (* chip_pin = "U20" *) output wire SD_DAT3
+
+    (* chip_pin = "V20" *) output wire SD_CLK,  // SD_CLK
+    (* chip_pin = "Y20" *) inout  wire SD_CMD,  // SD_CMD
+    (* chip_pin = "W20" *) inout  wire SD_DAT0, // SD_DAT0
+    (* chip_pin = "U20" *) output wire SD_DAT3  // SD_CS
 );
 
-    // ---------------- LED heartbeat ----------------
+    // =======================================================
+    // Heartbeat LED
+    // =======================================================
     reg [23:0] blink_counter;
     assign LEDR0 = blink_counter[23];
-    always @(posedge CLOCK_50 or negedge KEY0)
-        if (!KEY0) blink_counter <= 0;
-        else       blink_counter <= blink_counter + 1'b1;
 
-    // ---------------- JTAG UART ----------------
+    always @(posedge CLOCK_50 or negedge KEY0) begin
+        if (!KEY0)
+            blink_counter <= 0;
+        else
+            blink_counter <= blink_counter + 1'b1;
+    end
+
+    // =======================================================
+    // JTAG UART
+    // =======================================================
     reg [31:0] uart_data;
     reg        uart_write;
+
     jtag_uart_system uart0 (
         .clk_clk(CLOCK_50),
         .reset_reset_n(KEY0),
@@ -343,21 +353,27 @@ module cpu_on_board (
         .jtag_uart_0_avalon_jtag_slave_read_n(1'b1)
     );
 
-    // ---------------- SD IP connections ----------------
-    reg         sd_chipselect, sd_read, sd_write;
+    // =======================================================
+    // SD IP Avalon-MM
+    // =======================================================
+    reg         sd_chipselect;
     reg  [2:0]  sd_address;
+    reg         sd_read;
+    reg         sd_write;
+    wire [3:0]  sd_byteenable = 4'b1111;
     reg  [31:0] sd_writedata;
     wire [31:0] sd_readdata;
     wire        sd_waitrequest;
-    wire [3:0]  sd_byteenable = 4'b1111;
 
     sd u_sd (
         .clk_clk(CLOCK_50),
         .reset_reset_n(KEY0),
+
         .altera_up_sd_card_avalon_interface_0_conduit_end_b_SD_cmd (SD_CMD),
         .altera_up_sd_card_avalon_interface_0_conduit_end_b_SD_dat (SD_DAT0),
         .altera_up_sd_card_avalon_interface_0_conduit_end_b_SD_dat3(SD_DAT3),
         .altera_up_sd_card_avalon_interface_0_conduit_end_o_SD_clock(SD_CLK),
+
         .altera_up_sd_card_avalon_interface_0_avalon_sdcard_slave_chipselect(sd_chipselect),
         .altera_up_sd_card_avalon_interface_0_avalon_sdcard_slave_address   (sd_address),
         .altera_up_sd_card_avalon_interface_0_avalon_sdcard_slave_read      (sd_read),
@@ -368,16 +384,18 @@ module cpu_on_board (
         .altera_up_sd_card_avalon_interface_0_avalon_sdcard_slave_waitrequest(sd_waitrequest)
     );
 
-    // ---------------- Test FSM ----------------
+    // =======================================================
+    // SD test FSM
+    // =======================================================
     reg [3:0]  state;
     reg [23:0] delay;
     reg [31:0] sd_data_latched;
-    reg [1:0]  read_delay;
+    reg [23:0] timeout;
 
     always @(posedge CLOCK_50 or negedge KEY0) begin
         if (!KEY0) begin
+            uart_data <= 0;
             uart_write <= 0;
-            uart_data  <= 0;
             delay <= 0;
             state <= 0;
             sd_chipselect <= 0;
@@ -385,52 +403,84 @@ module cpu_on_board (
             sd_write <= 0;
             sd_address <= 0;
             sd_writedata <= 0;
-            read_delay <= 0;
+            timeout <= 0;
         end else begin
             uart_write <= 0;
             sd_chipselect <= 0;
             sd_read <= 0;
 
             case (state)
-                0: if (delay == 24'd5_000_000) begin
-                        uart_data <= {24'd0, "S"}; uart_write <= 1;
-                        delay <= 0; state <= 1;
-                   end else delay <= delay + 1;
+                0: begin
+                    // initial delay after reset
+                    if (delay == 24'd5_000_000) begin
+                        uart_data <= {24'd0, "S"};
+                        uart_write <= 1;
+                        delay <= 0;
+                        state <= 1;
+                    end else
+                        delay <= delay + 1;
+                end
 
-                1: if (delay == 24'd100_000) begin
-                        uart_data <= {24'd0, "D"}; uart_write <= 1;
-                        delay <= 0; state <= 2;
-                   end else delay <= delay + 1;
+                1: begin
+                    // print "D"
+                    if (delay == 24'd200_000) begin
+                        uart_data <= {24'd0, "D"};
+                        uart_write <= 1;
+                        delay <= 0;
+                        state <= 2;
+                    end else
+                        delay <= delay + 1;
+                end
 
                 2: begin
-                        sd_chipselect <= 1; sd_read <= 1; sd_address <= 3'b000;
-                        if (!sd_waitrequest) begin
-                            read_delay <= 2; // wait 2 cycles for data valid
-                            state <= 3;
-                        end
-                   end
+                    // start SD read of status
+                    sd_chipselect <= 1;
+                    sd_read <= 1;
+                    sd_address <= 3'b000;
+                    if (!sd_waitrequest) begin
+                        state <= 3;
+                        timeout <= 0;
+                    end
+                end
 
-                3: if (read_delay != 0) read_delay <= read_delay - 1;
-                   else begin
+                3: begin
+                    // Wait a few cycles for valid data
+                    if (timeout < 24'd2000) begin
+                        timeout <= timeout + 1;
+                    end else begin
                         sd_data_latched <= sd_readdata;
                         state <= 4;
-                   end
+                    end
+                end
 
                 4: begin
-                        if (sd_data_latched[0]) uart_data <= {24'd0, "O"};
-                        else                    uart_data <= {24'd0, "N"};
+                    // evaluate SD status bit
+                    if (sd_data_latched[0]) begin
+                        uart_data <= {24'd0, "O"};
                         uart_write <= 1;
                         state <= 5;
-                   end
-
-                5: begin
-                        uart_data <= {24'd0, "K"};
+                    end else begin
+                        uart_data <= {24'd0, "N"};
                         uart_write <= 1;
                         state <= 6;
-                   end
+                    end
+                end
 
-                6: state <= 6; // done
+                5: begin
+                    uart_data <= {24'd0, "K"};
+                    uart_write <= 1;
+                    state <= 7;
+                end
+
+                6: begin
+                    uart_data <= {24'd0, "O"};
+                    uart_write <= 1;
+                    state <= 7;
+                end
+
+                7: state <= 7; // done
             endcase
         end
     end
+
 endmodule
