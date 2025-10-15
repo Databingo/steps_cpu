@@ -323,7 +323,7 @@ module cpu_on_board (
 );
     // Internal signals for clock and reset
     wire clk_sys = CLOCK_50;
-    wire reset_n_sys = KEY; // Assuming KEY provides an active-low reset, so direct connection is active-low.
+    wire reset_n_sys = KEY0; // Assuming KEY provides an active-low reset, so direct connection is active-low.
 
     // Internal signals for SD card Avalon slave interface (these would be driven by a Nios II or custom master)
     wire sd_chipselect;
