@@ -1122,15 +1122,16 @@
 //endmodule
 
 
+
 module cpu_on_board (
     (* chip_pin = "PIN_L1"  *) input  wire CLOCK_50,
-    (* chip_pin = "PIN_R22" *) input  wire KEY0,        // Active-low reset
+    (* chip_pin = "PIN_R22" *) input  wire KEY0,
     (* chip_pin = "R20"     *) output wire LEDR0,
 
-    (* chip_pin = "V20" *) output wire SD_CLK,   // SD_CLK
-    (* chip_pin = "Y20" *) inout  wire SD_CMD,   // SD_CMD (MOSI)
-    (* chip_pin = "W20" *) inout  wire SD_DAT0,  // SD_DAT0 (MISO)
-    (* chip_pin = "U20" *) output wire SD_DAT3   // SD_CS
+    (* chip_pin = "V20" *) output wire SD_CLK,
+    (* chip_pin = "Y20" *) inout  wire SD_CMD,
+    (* chip_pin = "W20" *) inout  wire SD_DAT0,
+    (* chip_pin = "U20" *) output wire SD_DAT3
 );
 
     // =======================================================
@@ -1139,20 +1140,16 @@ module cpu_on_board (
     reg [23:0] blink_counter;
     assign LEDR0 = blink_counter[23];
     always @(posedge CLOCK_50 or negedge KEY0)
-        if (!KEY0) blink_counter <= 0;
-        else       blink_counter <= blink_counter + 1'b1;
+        if (!KEY0)
+            blink_counter <= 0;
+        else
+            blink_counter <= blink_counter + 1'b1;
 
     // =======================================================
     // JTAG UART
     // =======================================================
     reg [31:0] uart_data;
     reg        uart_write;
-    task uart_print_char(input [7:0] ch);
-    begin
-        uart_data  <= {24'd0, ch};
-        uart_write <= 1'b1;
-    end
-    endtask
 
     jtag_uart_system uart0 (
         .clk_clk(CLOCK_50),
@@ -1164,8 +1161,15 @@ module cpu_on_board (
         .jtag_uart_0_avalon_jtag_slave_read_n(1'b1)
     );
 
+    task uart_char(input [7:0] c);
+    begin
+        uart_data  <= {24'd0, c};
+        uart_write <= 1;
+    end
+    endtask
+
     // =======================================================
-    // SD controller interface
+    // SD controller
     // =======================================================
     wire [7:0] sd_dout;
     wire       sd_ready;
@@ -1174,14 +1178,14 @@ module cpu_on_board (
     wire [7:0] sd_recv_data;
     wire       sd_byte_available;
 
-    reg rd_sig = 0, wr_sig = 0;
+    reg rd_sig = 0;
+    reg wr_sig = 0;
 
     sd_controller sd0 (
         .cs(sd_cs),
         .mosi(sd_mosi),
         .miso(SD_DAT0),
         .sclk(sd_sclk),
-
         .rd(rd_sig),
         .wr(wr_sig),
         .dout(sd_dout),
@@ -1202,93 +1206,75 @@ module cpu_on_board (
     assign SD_CMD  = sd_mosi;
 
     // =======================================================
-    // FSM to wait-for-ready → read sector → print hex
+    // FSM for reading and printing until 0x55AA
     // =======================================================
-    reg [3:0] state = 0;
+    reg printed_k = 0;
+    reg sd_byte_available_d = 0;
     reg [8:0] byte_index = 0;
     reg [7:0] captured_byte;
-    reg [2:0] print_hex_state = 0;
-    reg sd_byte_available_d = 0;
-    reg [15:0] last_two = 16'h0000;   // to detect 0x55AA
-
-    localparam S_WAIT_READY = 0,
-               S_START_READ = 1,
-               S_WAIT_BYTE  = 2,
-               S_PRINT_HI   = 3,
-               S_PRINT_LO   = 4,
-               S_DONE       = 5;
+    reg [15:0] last_two = 0;
+    reg [1:0] state = 0;
+    localparam ST_IDLE = 0, ST_WAIT = 1, ST_PRINT_HI = 2, ST_PRINT_LO = 3;
 
     always @(posedge CLOCK_50 or negedge KEY0) begin
         if (!KEY0) begin
-            state <= S_WAIT_READY;
             uart_write <= 0;
+            printed_k <= 0;
             rd_sig <= 0;
-            wr_sig <= 0;
             byte_index <= 0;
-            captured_byte <= 0;
-            print_hex_state <= 0;
             sd_byte_available_d <= 0;
+            captured_byte <= 0;
             last_two <= 0;
+            state <= ST_IDLE;
         end else begin
             uart_write <= 0;
             sd_byte_available_d <= sd_byte_available;
 
-            case (state)
-                // Wait until controller initialized
-                S_WAIT_READY: begin
-                    if (sd_ready) begin
-                        uart_print_char("K");
-                        state <= S_START_READ;
-                    end
-                end
+            // Step 1: print K once SD ready
+            if (sd_ready && !printed_k) begin
+                uart_char("K");
+                printed_k <= 1;
+                rd_sig <= 1;
+                state <= ST_WAIT;
+            end
 
-                // Start a 512-byte read
-                S_START_READ: begin
-                    rd_sig <= 1;
-                    byte_index <= 0;
-                    state <= S_WAIT_BYTE;
-                end
+            // Step 2: only trigger on rising edge of sd_byte_available
+            if (sd_byte_available && !sd_byte_available_d) begin
+                rd_sig <= 0;
+                captured_byte <= sd_dout;
+                state <= ST_PRINT_HI;
+            end
 
-                // Wait for new byte
-                S_WAIT_BYTE: begin
+            // Step 3: print high nibble
+            if (state == ST_PRINT_HI) begin
+                uart_char((captured_byte[7:4] < 10) ?
+                          (8'h30 + captured_byte[7:4]) :
+                          (8'h41 + captured_byte[7:4] - 10));
+                state <= ST_PRINT_LO;
+            end
+
+            // Step 4: print low nibble, request next
+            else if (state == ST_PRINT_LO) begin
+                uart_char((captured_byte[3:0] < 10) ?
+                          (8'h30 + captured_byte[3:0]) :
+                          (8'h41 + captured_byte[3:0] - 10));
+
+                last_two <= {last_two[7:0], captured_byte};
+                byte_index <= byte_index + 1;
+
+                if (last_two == 16'h55AA) begin
+                    uart_char("!");
                     rd_sig <= 0;
-                    if (sd_byte_available && !sd_byte_available_d) begin
-                        captured_byte <= sd_dout;
-                        print_hex_state <= 1;
-                        state <= S_PRINT_HI;
-                    end
-                end
-
-                // Print high nibble
-                S_PRINT_HI: begin
-                    uart_print_char((captured_byte[7:4] < 10) ?
-                                    (8'h30 + captured_byte[7:4]) :
-                                    (8'h41 + captured_byte[7:4] - 10));
-                    state <= S_PRINT_LO;
-                end
-
-                // Print low nibble, check for end
-                S_PRINT_LO: begin
-                    uart_print_char((captured_byte[3:0] < 10) ?
-                                    (8'h30 + captured_byte[3:0]) :
-                                    (8'h41 + captured_byte[3:0] - 10));
-                    byte_index <= byte_index + 1;
-                    last_two <= {last_two[7:0], captured_byte};
-
-                    if (last_two == 16'h55AA) begin
-                        uart_print_char("!");
-                        state <= S_DONE;
-                    end else if (byte_index < 512)
-                        rd_sig <= 1;    // request next byte
-                    else
-                        state <= S_DONE;
-                end
-
-                // Stop after printing signature or end
-                S_DONE: begin
+                    state <= ST_IDLE;
+                end else if (byte_index < 512) begin
+                    rd_sig <= 1;   // request next byte
+                    state <= ST_WAIT;
+                end else begin
                     rd_sig <= 0;
+                    uart_char("#"); // end marker after 512 bytes
+                    state <= ST_IDLE;
                 end
-            endcase
+            end
         end
     end
 
