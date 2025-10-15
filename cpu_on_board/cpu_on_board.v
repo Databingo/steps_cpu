@@ -965,8 +965,6 @@
 
 
 
-
-// Print KEB
 module cpu_on_board (
     (* chip_pin = "PIN_L1"  *) input  wire CLOCK_50,
     (* chip_pin = "PIN_R22" *) input  wire KEY0,        // Active-low reset
@@ -1059,64 +1057,64 @@ module cpu_on_board (
     assign SD_CMD  = sd_mosi;
 
     // =======================================================
-    // UART debug: print when SD is ready, then read and print first byte in hex
+    // UART debug: print "K" then print all 512 bytes in hex
     // =======================================================
     reg printed_k = 0;
     reg do_read = 0;
-    reg printed_byte = 0;
+    reg [8:0] byte_index = 0;       // 0..511
     reg [2:0] print_hex_state = 0;
     reg [7:0] captured_byte;
-    
-    reg [8:0] byte_index;
-    reg sd_byte_available_d;
+    reg sd_byte_available_d = 0;
 
     always @(posedge CLOCK_50 or negedge KEY0) begin
-    sd_byte_available_d <= sd_byte_available;
         if (!KEY0) begin
             uart_write <= 0;
             printed_k <= 0;
             do_read <= 0;
             rd_sig <= 0;
             wr_sig <= 0;
-            printed_byte <= 0;
+            byte_index <= 0;
             print_hex_state <= 0;
             captured_byte <= 0;
+            sd_byte_available_d <= 0;
         end else begin
             uart_write <= 0;
+            sd_byte_available_d <= sd_byte_available; // store previous state
+
+            // Print "K" when SD ready
             if (sd_ready && !printed_k) begin
-                uart_data  <= {24'd0, "K"};  // Print "K" when SD ready
+                uart_data  <= {24'd0, "K"};
                 uart_write <= 1;
-                printed_k <= 1;
+                printed_k  <= 1;
+                rd_sig     <= 1;       // start read after K
+                byte_index <= 0;
             end
-            if (sd_ready && printed_k && !do_read) begin
-                rd_sig <= 1;
-                do_read <= 1;
-            end else if (do_read && (sd_status != 6)) begin
+
+            // Stop asserting rd once SD controller leaves IDLE (state != IDLE)
+            if (do_read && (sd_status != 6))
                 rd_sig <= 0;
-            end
-            if (do_read && sd_byte_available && !printed_byte && !sd_byte_available_d ) begin
+
+            // Capture byte on rising edge of byte_available
+            if (sd_byte_available && !sd_byte_available_d) begin
                 captured_byte <= sd_dout;
-                printed_byte <= 1;
                 print_hex_state <= 1;
+                do_read <= 1;
             end
-// After printing each byte, increment index and allow next byte
-if (print_hex_state == 0 && byte_index < 511) begin
-    printed_byte <= 0;
-    byte_index <= byte_index + 1;
-end
-            if (print_hex_state == 0 && byte_index < 512) begin
-                printed_byte <= 0;
-            end
+
+            // Print captured byte as two hex chars
             if (print_hex_state == 1) begin
-                uart_data <= {24'd0, (captured_byte[7:4] < 4'd10) ? (8'h30 + captured_byte[7:4]) : (8'h41 + (captured_byte[7:4] - 4'd10))};
+                uart_data  <= {24'd0, (captured_byte[7:4] < 10) ? (8'h30 + captured_byte[7:4]) : (8'h41 + captured_byte[7:4] - 10)};
                 uart_write <= 1;
                 print_hex_state <= 2;
             end else if (print_hex_state == 2) begin
-                print_hex_state <= 3;
-            end else if (print_hex_state == 3) begin
-                uart_data <= {24'd0, (captured_byte[3:0] < 4'd10) ? (8'h30 + captured_byte[3:0]) : (8'h41 + (captured_byte[3:0] - 4'd10))};
+                uart_data  <= {24'd0, (captured_byte[3:0] < 10) ? (8'h30 + captured_byte[3:0]) : (8'h41 + captured_byte[3:0] - 10)};
                 uart_write <= 1;
                 print_hex_state <= 0;
+                byte_index <= byte_index + 1;
+
+                // If more bytes left, request next byte
+                if (byte_index < 511)
+                    rd_sig <= 1;
             end
         end
     end
