@@ -307,117 +307,123 @@
 //end
 //
 //endmodule
-//
-//
-//
-//
-// =======================================================
-// Minimal SD Card Test (using Altera UP SD Card IP)
-// Target: DE1 board
-// Author: ChatGPT (2025-10)
-// =======================================================
-module cpu_on_board (
-    // Clock and reset
-    (* chip_pin = "PIN_L1"  *) input  wire CLOCK_50,
-    (* chip_pin = "PIN_R22" *) input  wire KEY0,  // Active-low reset
 
-    // LED
+
+
+// ========================================================
+// Minimal DE1 top with JTAG_UART + SD card IP test
+// ========================================================
+module cpu_on_board (
+    (* chip_pin = "PIN_L1"  *) input  wire CLOCK_50,
+    (* chip_pin = "PIN_R22" *) input  wire KEY0,        // Active-low reset
     (* chip_pin = "R20"     *) output wire LEDR0,
 
-    // SD card physical pins (DE1 pinout)
-    (* chip_pin = "V20" *) output wire SD_CLK,   // SD_CLK
-    (* chip_pin = "Y20" *) inout  wire SD_CMD,   // SD_CMD
-    (* chip_pin = "W20" *) inout  wire SD_DAT0,  // SD_DAT0
-    (* chip_pin = "U20" *) output wire SD_DAT3   // SD_DAT3 (CS)
+    // SD card interface pins
+    (* chip_pin = "V20" *) output wire SD_CLK,
+    (* chip_pin = "Y20" *) inout  wire SD_CMD,
+    (* chip_pin = "W20" *) inout  wire SD_DAT0,
+    (* chip_pin = "U20" *) output wire SD_DAT3
 );
 
-    // ====================================================
-    // Reset & Clock
-    // ====================================================
-    wire clk = CLOCK_50;
-    wire rst_n = KEY0;   // active low reset
-
-    // ====================================================
-    // Simple LED heartbeat
-    // ====================================================
-    reg [23:0] led_counter;
-    always @(posedge clk or negedge rst_n) begin
-        if (!rst_n)
-            led_counter <= 0;
+    // =====================================================
+    // Reset & LED blink
+    // =====================================================
+    wire reset_n = KEY0;
+    reg [23:0] blink_counter;
+    always @(posedge CLOCK_50 or negedge reset_n)
+        if (!reset_n)
+            blink_counter <= 0;
         else
-            led_counter <= led_counter + 1;
-    end
-    assign LEDR0 = led_counter[23];  // Blink slowly
+            blink_counter <= blink_counter + 1'b1;
+    assign LEDR0 = blink_counter[23];
 
-    // ====================================================
-    // SD Controller Avalon interface wires
-    // ====================================================
+    // =====================================================
+    // Avalon-MM wires for SD IP
+    // =====================================================
     wire        sd_chipselect;
     wire [2:0]  sd_address;
     wire        sd_read;
     wire        sd_write;
-    wire [3:0]  sd_byteenable;
+    wire [3:0]  sd_byteenable = 4'b1111;
     wire [31:0] sd_writedata;
     wire [31:0] sd_readdata;
     wire        sd_waitrequest;
 
-    // ====================================================
-    // Simple test logic (placeholder for CPU bus)
-    // This will just read from the SD controller after reset
-    // ====================================================
-    reg [31:0] test_data;
-    reg [3:0]  state;
+    // =====================================================
+    // Instantiate the Altera SD Card IP
+    // (Add sd.qip to the project, NOT as Verilog)
+    // =====================================================
+    sd u_sd (
+        .clk_clk(CLOCK_50),
+        .reset_reset_n(reset_n),
 
-    localparam IDLE = 0, READ_STATUS = 1, DONE = 2;
-
-    always @(posedge clk or negedge rst_n) begin
-        if (!rst_n) begin
-            state <= IDLE;
-        end else begin
-            case (state)
-                IDLE: state <= READ_STATUS;
-                READ_STATUS: if (!sd_waitrequest) state <= DONE;
-                DONE: state <= DONE;
-            endcase
-        end
-    end
-
-    assign sd_chipselect = (state == READ_STATUS);
-    assign sd_address    = 3'b000;
-    assign sd_read       = (state == READ_STATUS);
-    assign sd_write      = 1'b0;
-    assign sd_byteenable = 4'b1111;
-    assign sd_writedata  = 32'h00000000;
-
-    always @(posedge clk) begin
-        if (!rst_n)
-            test_data <= 0;
-        else if (state == READ_STATUS && !sd_waitrequest)
-            test_data <= sd_readdata;  // capture SD controller data
-    end
-
-    // ====================================================
-    // Instantiate the official Altera UP SD Card IP
-    // ====================================================
-    sd u0 (
-        .clk_clk(clk),
-        .reset_reset_n(rst_n),
-
-        // SD physical lines
-        .altera_up_sd_card_avalon_interface_0_conduit_end_b_SD_cmd(SD_CMD),
-        .altera_up_sd_card_avalon_interface_0_conduit_end_b_SD_dat(SD_DAT0),
+        .altera_up_sd_card_avalon_interface_0_conduit_end_b_SD_cmd (SD_CMD),
+        .altera_up_sd_card_avalon_interface_0_conduit_end_b_SD_dat (SD_DAT0),
         .altera_up_sd_card_avalon_interface_0_conduit_end_b_SD_dat3(SD_DAT3),
         .altera_up_sd_card_avalon_interface_0_conduit_end_o_SD_clock(SD_CLK),
 
-        // Avalon slave connections
         .altera_up_sd_card_avalon_interface_0_avalon_sdcard_slave_chipselect(sd_chipselect),
-        .altera_up_sd_card_avalon_interface_0_avalon_sdcard_slave_address(sd_address),
-        .altera_up_sd_card_avalon_interface_0_avalon_sdcard_slave_read(sd_read),
-        .altera_up_sd_card_avalon_interface_0_avalon_sdcard_slave_write(sd_write),
+        .altera_up_sd_card_avalon_interface_0_avalon_sdcard_slave_address   (sd_address),
+        .altera_up_sd_card_avalon_interface_0_avalon_sdcard_slave_read      (sd_read),
+        .altera_up_sd_card_avalon_interface_0_avalon_sdcard_slave_write     (sd_write),
         .altera_up_sd_card_avalon_interface_0_avalon_sdcard_slave_byteenable(sd_byteenable),
-        .altera_up_sd_card_avalon_interface_0_avalon_sdcard_slave_writedata(sd_writedata),
-        .altera_up_sd_card_avalon_interface_0_avalon_sdcard_slave_readdata(sd_readdata),
+        .altera_up_sd_card_avalon_interface_0_avalon_sdcard_slave_writedata (sd_writedata),
+        .altera_up_sd_card_avalon_interface_0_avalon_sdcard_slave_readdata  (sd_readdata),
         .altera_up_sd_card_avalon_interface_0_avalon_sdcard_slave_waitrequest(sd_waitrequest)
     );
+
+    // =====================================================
+    // Instantiate JTAG UART IP
+    // (Also add jtag_uart.qip to the project)
+    // =====================================================
+    wire [31:0] uart_readdata;
+    reg  [31:0] uart_writedata;
+    reg         uart_write;
+    wire        uart_waitreq;
+
+    jtag_uart u_jtag (
+        .clk_clk(CLOCK_50),
+        .reset_reset_n(reset_n),
+        .jtag_uart_0_avalon_jtag_slave_chipselect(1'b1),
+        .jtag_uart_0_avalon_jtag_slave_address   (1'b0),
+        .jtag_uart_0_avalon_jtag_slave_read_n    (1'b1),
+        .jtag_uart_0_avalon_jtag_slave_readdata  (uart_readdata),
+        .jtag_uart_0_avalon_jtag_slave_write_n   (~uart_write),
+        .jtag_uart_0_avalon_jtag_slave_writedata (uart_writedata),
+        .jtag_uart_0_avalon_jtag_slave_waitrequest(uart_waitreq)
+    );
+
+    // =====================================================
+    // Simple test process:
+    // After reset, print "C", then "S", then "D"
+    // =====================================================
+    reg [3:0]  state;
+    always @(posedge CLOCK_50 or negedge reset_n) begin
+        if (!reset_n) begin
+            state <= 0;
+            uart_write <= 0;
+            uart_writedata <= 0;
+        end else begin
+            uart_write <= 0;
+            case (state)
+                0: if (!uart_waitreq) begin
+                        uart_writedata <= {24'd0, "C"}; // Character 'C'
+                        uart_write <= 1;
+                        state <= 1;
+                    end
+                1: if (!uart_waitreq) begin
+                        uart_writedata <= {24'd0, "S"};
+                        uart_write <= 1;
+                        state <= 2;
+                    end
+                2: if (!uart_waitreq) begin
+                        uart_writedata <= {24'd0, "D"};
+                        uart_write <= 1;
+                        state <= 3;
+                    end
+                3: state <= 3; // done
+            endcase
+        end
+    end
 
 endmodule
