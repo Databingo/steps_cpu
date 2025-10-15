@@ -421,7 +421,6 @@
 
 
 
-
 module cpu_on_board (
     (* chip_pin = "PIN_L1"  *) input  wire CLOCK_50,
     (* chip_pin = "PIN_R22" *) input  wire KEY0,        // Active-low reset
@@ -478,11 +477,14 @@ module cpu_on_board (
     // SD controller connection
     // =======================================================
     wire [7:0] sd_dout;
-    wire sd_byte_available;
     wire sd_ready;
     wire [4:0] sd_status;
     wire sd_cs, sd_mosi, sd_sclk;
-    reg sd_rd;
+    wire [7:0] sd_recv_data;
+    wire sd_byte_available;
+
+    reg rd_sig = 0;
+    reg wr_sig = 0;
 
     sd_controller sd0 (
         .cs(sd_cs),
@@ -490,19 +492,19 @@ module cpu_on_board (
         .miso(SD_DAT0),
         .sclk(sd_sclk),
 
-        .rd(sd_rd),
-        .wr(1'b0),
+        .rd(rd_sig),
+        .wr(wr_sig),
         .dout(sd_dout),
         .byte_available(sd_byte_available),
         .din(8'h00),
         .ready_for_next_byte(),
         .reset(~KEY0),
         .ready(sd_ready),
-        .address(32'h00000000),  // Read from block 0 (sector 0)
+        .address(32'h00000000),
         .clk(CLOCK_50),
         .clk_pulse_slow(clk_pulse_slow),
         .status(sd_status),
-        .recv_data()
+        .recv_data(sd_recv_data)
     );
 
     // Connect physical pins
@@ -511,85 +513,53 @@ module cpu_on_board (
     assign SD_CMD  = sd_mosi;
 
     // =======================================================
-    // State machine: Init -> Read -> Print
+    // UART debug: print when SD is ready, then read and print first byte in hex
     // =======================================================
-    reg [2:0] test_state;
-    reg [31:0] wait_counter;
-    reg [8:0] byte_count;
-    
-    parameter STATE_WAIT_READY = 0;
-    parameter STATE_START_READ = 1;
-    parameter STATE_READING = 2;
-    parameter STATE_PRINT_K = 3;
-    parameter STATE_PRINT_DATA = 4;
-    parameter STATE_DONE = 5;
+    reg printed_k = 0;
+    reg do_read = 0;
+    reg printed_byte = 0;
+    reg [2:0] print_hex_state = 0;
+    reg [7:0] captured_byte;
 
     always @(posedge CLOCK_50 or negedge KEY0) begin
         if (!KEY0) begin
             uart_write <= 0;
-            sd_rd <= 0;
-            test_state <= STATE_WAIT_READY;
-            wait_counter <= 0;
-            byte_count <= 0;
+            printed_k <= 0;
+            do_read <= 0;
+            rd_sig <= 0;
+            wr_sig <= 0;
+            printed_byte <= 0;
+            print_hex_state <= 0;
+            captured_byte <= 0;
         end else begin
             uart_write <= 0;
-            
-            case (test_state)
-                STATE_WAIT_READY: begin
-                    if (sd_ready) begin
-                        test_state <= STATE_START_READ;
-                        wait_counter <= 50_000_000;  // Wait 1 second
-                    end
-                end
-                
-                STATE_START_READ: begin
-                    if (wait_counter == 0) begin
-                        sd_rd <= 1;  // Start read operation
-                        test_state <= STATE_READING;
-                        byte_count <= 0;
-                    end else begin
-                        wait_counter <= wait_counter - 1;
-                    end
-                end
-                
-                STATE_READING: begin
-                    sd_rd <= 0;  // De-assert after one cycle
-                    
-                    if (sd_byte_available) begin
-                        // Got a byte from SD card!
-                        if (byte_count == 0) begin
-                            // Print 'K' first
-                            test_state <= STATE_PRINT_K;
-                        end else begin
-                            // We already have the first byte, print it
-                            test_state <= STATE_PRINT_DATA;
-                        end
-                    end
-                    
-                    if (!sd_ready) begin
-                        // Still reading...
-                        byte_count <= byte_count + 1;
-                    end
-                end
-                
-                STATE_PRINT_K: begin
-                    uart_data <= {24'd0, 8'h4B};  // Print "K"
-                    uart_write <= 1;
-                    test_state <= STATE_READING;  // Go back to get more bytes
-                end
-                
-                STATE_PRINT_DATA: begin
-                    uart_data <= {24'd0, sd_dout};  // Print the byte from SD card
-                    uart_write <= 1;
-                    test_state <= STATE_DONE;
-                end
-                
-                STATE_DONE: begin
-                    // Stay here, done
-                end
-                
-                default: test_state <= STATE_WAIT_READY;
-            endcase
+            if (sd_ready && !printed_k) begin
+                uart_data  <= {24'd0, "K"};  // Print "K" when SD ready
+                uart_write <= 1;
+                printed_k <= 1;
+            end
+            if (sd_ready && printed_k && !do_read) begin
+                rd_sig <= 1;
+                do_read <= 1;
+            end else if (do_read && (sd_status != 6)) begin
+                rd_sig <= 0;
+            end
+            if (do_read && sd_byte_available && !printed_byte) begin
+                captured_byte <= sd_dout;
+                printed_byte <= 1;
+                print_hex_state <= 1;
+            end
+            if (print_hex_state == 1) begin
+                uart_data <= {24'd0, (captured_byte[7:4] < 4'd10) ? (8'h30 + captured_byte[7:4]) : (8'h41 + (captured_byte[7:4] - 4'd10))};
+                uart_write <= 1;
+                print_hex_state <= 2;
+            end else if (print_hex_state == 2) begin
+                print_hex_state <= 3;
+            end else if (print_hex_state == 3) begin
+                uart_data <= {24'd0, (captured_byte[3:0] < 4'd10) ? (8'h30 + captured_byte[3:0]) : (8'h41 + (captured_byte[3:0] - 4'd10))};
+                uart_write <= 1;
+                print_hex_state <= 0;
+            end
         end
     end
 
