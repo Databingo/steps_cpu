@@ -1273,7 +1273,8 @@ module cpu_on_board (
                 byte_index <= byte_index + 1;
 
                 // If more bytes left, request next byte
-                if (byte_index < 511)
+                //if (byte_index < 511)
+                if (byte_index < 1511)
                     rd_sig <= 1;
                 else
                     rd_sig <= 0; // stop after last byte
