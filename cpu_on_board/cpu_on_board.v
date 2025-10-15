@@ -1441,6 +1441,183 @@
 //endmodule
 
 // print 0-15 sectors
+//module cpu_on_board (
+//    (* chip_pin = "PIN_L1"  *) input  wire CLOCK_50,
+//    (* chip_pin = "PIN_R22" *) input  wire KEY0,        // Active-low reset
+//    (* chip_pin = "R20"     *) output wire LEDR0,
+//
+//    (* chip_pin = "V20" *) output wire SD_CLK,  // SD_CLK
+//    (* chip_pin = "Y20" *) inout  wire SD_CMD,  // SD_CMD (MOSI)
+//    (* chip_pin = "W20" *) inout  wire SD_DAT0, // SD_DAT0 (MISO)
+//    (* chip_pin = "U20" *) output wire SD_DAT3  // SD_CS
+//);
+//
+//    // =======================================================
+//    // Heartbeat LED
+//    // =======================================================
+//    reg [23:0] blink_counter;
+//    assign LEDR0 = blink_counter[23];
+//
+//    always @(posedge CLOCK_50 or negedge KEY0) begin
+//        if (!KEY0)
+//            blink_counter <= 0;
+//        else
+//            blink_counter <= blink_counter + 1'b1;
+//    end
+//
+//    // =======================================================
+//    // JTAG UART
+//    // =======================================================
+//    reg [31:0] uart_data;
+//    reg        uart_write;
+//
+//    jtag_uart_system uart0 (
+//        .clk_clk(CLOCK_50),
+//        .reset_reset_n(KEY0),
+//        .jtag_uart_0_avalon_jtag_slave_address(1'b0),
+//        .jtag_uart_0_avalon_jtag_slave_writedata(uart_data),
+//        .jtag_uart_0_avalon_jtag_slave_write_n(~uart_write),
+//        .jtag_uart_0_avalon_jtag_slave_chipselect(1'b1),
+//        .jtag_uart_0_avalon_jtag_slave_read_n(1'b1)
+//    );
+//
+//    // =======================================================
+//    // SD card connection
+//    // =======================================================
+//    wire [31:0] spo;
+//    reg [15:0] mem_a = 16'h2010;
+//    reg [31:0] mem_d = 0;
+//    reg mem_we = 0;
+//    wire sd_ncd = 1'b0;
+//    wire sd_wp = 1'b0;
+//    wire irq;
+//    wire sd_dat1;
+//    wire sd_dat2;
+//
+//    sdcard sd0 (
+//        .clk(CLOCK_50),
+//        .rst(~KEY0),
+//        .sd_dat0(SD_DAT0),
+//        .sd_ncd(sd_ncd),
+//        .sd_wp(sd_wp),
+//        .sd_dat1(sd_dat1),
+//        .sd_dat2(sd_dat2),
+//        .sd_dat3(SD_DAT3),
+//        .sd_cmd(SD_CMD),
+//        .sd_sck(SD_CLK),
+//        .a(mem_a),
+//        .d(mem_d),
+//        .we(mem_we),
+//        .spo(spo),
+//        .irq(irq)
+//    );
+//
+//    // =======================================================
+//    // UART debug: print "K" then print all 512 bytes in hex for sectors 0-15
+//    // =======================================================
+//    reg printed_k = 0;
+//    reg [8:0] byte_index = 0;       // 0..511
+//    reg [3:0] print_hex_state = 0;
+//    reg [7:0] captured_byte;
+//    reg [3:0] fsm_state = 0;
+//    reg [1:0] sub_byte = 0;
+//    reg [4:0] current_sector = 0;
+//
+//    always @(posedge CLOCK_50 or negedge KEY0) begin
+//        if (!KEY0) begin
+//            uart_write <= 0;
+//            printed_k <= 0;
+//            byte_index <= 0;
+//            print_hex_state <= 0;
+//            captured_byte <= 0;
+//            fsm_state <= 0;
+//            mem_a <= 16'h2010;
+//            mem_d <= 0;
+//            mem_we <= 0;
+//            sub_byte <= 0;
+//            current_sector <= 0;
+//        end else begin
+//            uart_write <= 0;
+//            mem_we <= 0;
+//
+//            if (fsm_state == 0) begin
+//                if (spo[0] && !printed_k) begin
+//                    uart_data  <= {24'd0, "K"};
+//                    uart_write <= 1;
+//                    printed_k  <= 1;
+//                    fsm_state  <= 1;
+//                end
+//            end else if (fsm_state == 1) begin
+//                mem_a   <= 16'h1000;
+//                mem_d   <= current_sector;
+//                mem_we  <= 1;
+//                fsm_state <= 2;
+//            end else if (fsm_state == 2) begin
+//                mem_a   <= 16'h1004;
+//                mem_d   <= 32'h00000001;
+//                mem_we  <= 1;
+//                fsm_state <= 3;
+//            end else if (fsm_state == 3) begin
+//                mem_a <= 16'h2010;
+//                if (spo[0] == 1) begin
+//                    fsm_state <= 3;
+//                end else begin
+//                    fsm_state <= 4;
+//                end
+//            end else if (fsm_state == 4) begin
+//                mem_a <= 16'h2010;
+//                if (spo[0] == 0) begin
+//                    fsm_state <= 4;
+//                end else begin
+//                    fsm_state <= 5;
+//                    mem_a <= 0;
+//                    sub_byte <= 0;
+//                    byte_index <= 0;
+//                end
+//            end else if (fsm_state == 5) begin
+//                if (print_hex_state == 0) begin
+//                    case (sub_byte)
+//                        2'd0: captured_byte <= spo[31:24];
+//                        2'd1: captured_byte <= spo[23:16];
+//                        2'd2: captured_byte <= spo[15:8];
+//                        2'd3: captured_byte <= spo[7:0];
+//                    endcase
+//                    print_hex_state <= 1;
+//                end else if (print_hex_state == 1) begin
+//                    uart_data  <= {24'd0, (captured_byte[7:4] < 10) ? (8'h30 + captured_byte[7:4]) : (8'h41 + captured_byte[7:4] - 10)};
+//                    uart_write <= 1;
+//                    print_hex_state <= 2;
+//                end else if (print_hex_state == 2) begin
+//                    uart_data  <= {24'd0, (captured_byte[3:0] < 10) ? (8'h30 + captured_byte[3:0]) : (8'h41 + captured_byte[3:0] - 10)};
+//                    uart_write <= 1;
+//                    print_hex_state <= (byte_index == 511) ? 4'd3 : 4'd0;
+//                    if (byte_index != 511) begin
+//                        byte_index <= byte_index + 1;
+//                        if (sub_byte == 3) begin
+//                            sub_byte <= 0;
+//                            mem_a <= mem_a + 4;
+//                        end else begin
+//                            sub_byte <= sub_byte + 1;
+//                        end
+//                    end
+//                end else if (print_hex_state == 3) begin
+//                    uart_data  <= {24'd0, 8'h0A};
+//                    uart_write <= 1;
+//                    print_hex_state <= 0;
+//                    if (current_sector == 15) begin
+//                        fsm_state <= 6;
+//                    end else begin
+//                        current_sector <= current_sector + 1;
+//                        fsm_state <= 1;
+//                    end
+//                end
+//            end
+//        end
+//    end
+//
+//endmodule
+
+
 module cpu_on_board (
     (* chip_pin = "PIN_L1"  *) input  wire CLOCK_50,
     (* chip_pin = "PIN_R22" *) input  wire KEY0,        // Active-low reset
@@ -1482,17 +1659,17 @@ module cpu_on_board (
     );
 
     // =======================================================
-    // SD card connection
+    // SD card connection (sdcard.v module)
     // =======================================================
-    wire [31:0] spo;
-    reg [15:0] mem_a = 16'h2010;
-    reg [31:0] mem_d = 0;
-    reg mem_we = 0;
-    wire sd_ncd = 1'b0;
-    wire sd_wp = 1'b0;
-    wire irq;
-    wire sd_dat1;
-    wire sd_dat2;
+    wire [31:0] spo;           // Single Port Output (read data)
+    reg [15:0] sd_addr_in = 0; // Address input for memory-mapped SD
+    reg [31:0] sd_data_in = 0; // Write data input for memory-mapped SD
+    reg sd_we_in = 0;          // Write Enable for memory-mapped SD
+    wire sd_ncd = 1'b0;        // Not Card Detect - assumed low (card present)
+    wire sd_wp = 1'b0;         // Write Protect - assumed low (not write protected)
+    wire irq;                  // Interrupt output - not used
+    wire sd_dat1;              // SD_DAT1 - not used for SPI
+    wire sd_dat2;              // SD_DAT2 - not used for SPI
 
     sdcard sd0 (
         .clk(CLOCK_50),
@@ -1502,12 +1679,12 @@ module cpu_on_board (
         .sd_wp(sd_wp),
         .sd_dat1(sd_dat1),
         .sd_dat2(sd_dat2),
-        .sd_dat3(SD_DAT3),
-        .sd_cmd(SD_CMD),
-        .sd_sck(SD_CLK),
-        .a(mem_a),
-        .d(mem_d),
-        .we(mem_we),
+        .sd_dat3(SD_DAT3), // SD_CS
+        .sd_cmd(SD_CMD),   // SD_MOSI
+        .sd_sck(SD_CLK),   // SD_SCLK
+        .a(sd_addr_in),
+        .d(sd_data_in),
+        .we(sd_we_in),
         .spo(spo),
         .irq(irq)
     );
@@ -1515,103 +1692,233 @@ module cpu_on_board (
     // =======================================================
     // UART debug: print "K" then print all 512 bytes in hex for sectors 0-15
     // =======================================================
+    localparam NUM_BYTES_PER_SECTOR = 512;
+    localparam LINE_BREAK_BYTES = 16; // Print a newline every 16 bytes for readability
+    localparam MAX_SECTOR = 15;     // Read sectors 0 to 15
+
+    // FSM States
+    localparam S_INIT_DELAY      = 0;
+    localparam S_PRINT_K         = 1;
+    localparam S_SECTOR_START    = 2; // New state to print "Sector X:"
+    localparam S_SET_ADDR        = 3;
+    localparam S_TRIGGER_READ    = 4;
+    localparam S_WAIT_BUSY_LOW   = 5; // Wait for spo[0] to go low (SD module becomes busy)
+    localparam S_WAIT_READY_HIGH = 6; // Wait for spo[0] to go high (SD module becomes ready)
+    localparam S_READ_CACHE      = 7;
+    localparam S_FINISH_SECTOR   = 8; // New state to handle sector completion/newline
+    localparam S_DONE            = 9;
+
+    reg [3:0] fsm_state = S_INIT_DELAY;
+    reg [31:0] delay_counter = 0;
     reg printed_k = 0;
-    reg [8:0] byte_index = 0;       // 0..511
-    reg [3:0] print_hex_state = 0;
-    reg [7:0] captured_byte;
-    reg [3:0] fsm_state = 0;
-    reg [1:0] sub_byte = 0;
-    reg [4:0] current_sector = 0;
+
+    reg [4:0] current_sector = 0; // 0 to 15
+    reg [10:0] cache_byte_idx = 0; // 0 to 511 (for each sector)
+
+    reg [1:0] hex_print_sub_state = 0; // 0: Idle, 1: High nibble, 2: Low nibble, 3: Space/Newline
+    reg [7:0] current_byte_to_print;
+    reg [31:0] last_read_data_word = 0; // Store the 32-bit word from spo
+
+    // For printing "Sector XX:" header
+    reg [1:0] sector_header_print_sub_state = 0;
+    reg [7:0] sector_digit_char;
 
     always @(posedge CLOCK_50 or negedge KEY0) begin
         if (!KEY0) begin
             uart_write <= 0;
+            sd_addr_in <= 0;
+            sd_data_in <= 0;
+            sd_we_in <= 0;
+            fsm_state <= S_INIT_DELAY;
+            delay_counter <= 0;
             printed_k <= 0;
-            byte_index <= 0;
-            print_hex_state <= 0;
-            captured_byte <= 0;
-            fsm_state <= 0;
-            mem_a <= 16'h2010;
-            mem_d <= 0;
-            mem_we <= 0;
-            sub_byte <= 0;
             current_sector <= 0;
+            cache_byte_idx <= 0;
+            hex_print_sub_state <= 0;
+            current_byte_to_print <= 0;
+            last_read_data_word <= 0;
+            sector_header_print_sub_state <= 0;
+            sector_digit_char <= 0;
         end else begin
-            uart_write <= 0;
-            mem_we <= 0;
+            uart_write <= 0; // Default to no UART write
+            sd_we_in <= 0;   // Default to no write
+            sd_addr_in <= 0; // Default address for reads if not specified by state
 
-            if (fsm_state == 0) begin
-                if (spo[0] && !printed_k) begin
-                    uart_data  <= {24'd0, "K"};
-                    uart_write <= 1;
-                    printed_k  <= 1;
-                    fsm_state  <= 1;
-                end
-            end else if (fsm_state == 1) begin
-                mem_a   <= 16'h1000;
-                mem_d   <= current_sector;
-                mem_we  <= 1;
-                fsm_state <= 2;
-            end else if (fsm_state == 2) begin
-                mem_a   <= 16'h1004;
-                mem_d   <= 32'h00000001;
-                mem_we  <= 1;
-                fsm_state <= 3;
-            end else if (fsm_state == 3) begin
-                mem_a <= 16'h2010;
-                if (spo[0] == 1) begin
-                    fsm_state <= 3;
-                end else begin
-                    fsm_state <= 4;
-                end
-            end else if (fsm_state == 4) begin
-                mem_a <= 16'h2010;
-                if (spo[0] == 0) begin
-                    fsm_state <= 4;
-                end else begin
-                    fsm_state <= 5;
-                    mem_a <= 0;
-                    sub_byte <= 0;
-                    byte_index <= 0;
-                end
-            end else if (fsm_state == 5) begin
-                if (print_hex_state == 0) begin
-                    case (sub_byte)
-                        2'd0: captured_byte <= spo[31:24];
-                        2'd1: captured_byte <= spo[23:16];
-                        2'd2: captured_byte <= spo[15:8];
-                        2'd3: captured_byte <= spo[7:0];
-                    endcase
-                    print_hex_state <= 1;
-                end else if (print_hex_state == 1) begin
-                    uart_data  <= {24'd0, (captured_byte[7:4] < 10) ? (8'h30 + captured_byte[7:4]) : (8'h41 + captured_byte[7:4] - 10)};
-                    uart_write <= 1;
-                    print_hex_state <= 2;
-                end else if (print_hex_state == 2) begin
-                    uart_data  <= {24'd0, (captured_byte[3:0] < 10) ? (8'h30 + captured_byte[3:0]) : (8'h41 + captured_byte[3:0] - 10)};
-                    uart_write <= 1;
-                    print_hex_state <= (byte_index == 511) ? 4'd3 : 4'd0;
-                    if (byte_index != 511) begin
-                        byte_index <= byte_index + 1;
-                        if (sub_byte == 3) begin
-                            sub_byte <= 0;
-                            mem_a <= mem_a + 4;
-                        end else begin
-                            sub_byte <= sub_byte + 1;
-                        end
-                    end
-                end else if (print_hex_state == 3) begin
-                    uart_data  <= {24'd0, 8'h0A};
-                    uart_write <= 1;
-                    print_hex_state <= 0;
-                    if (current_sector == 15) begin
-                        fsm_state <= 6;
+            case (fsm_state)
+                S_INIT_DELAY: begin // Initial state: Wait for SD card module to be ready internally
+                    if (delay_counter < 100_000_000) begin
+                        delay_counter <= delay_counter + 1;
                     end else begin
-                        current_sector <= current_sector + 1;
-                        fsm_state <= 1;
+                        delay_counter <= 0;
+                        fsm_state <= S_PRINT_K;
                     end
                 end
-            end
+
+                S_PRINT_K: begin // Print 'K' (SD Init Done)
+                    if (!printed_k) begin
+                        uart_data <= {24'd0, "K"};
+                        uart_write <= 1;
+                        printed_k <= 1;
+                    end
+                    // Add a small delay after printing 'K' before proceeding
+                    if (delay_counter < 5_000_000) begin // ~100ms delay
+                        delay_counter <= delay_counter + 1;
+                    end else begin
+                        delay_counter <= 0;
+                        fsm_state <= S_SECTOR_START; // Proceed to read first sector
+                    end
+                end
+
+                S_SECTOR_START: begin // Print "Sector XX:" header
+                    case (sector_header_print_sub_state)
+                        0: begin // Print 'S'
+                            uart_data <= {24'd0, "S"}; uart_write <= 1; sector_header_print_sub_state <= 1;
+                        end
+                        1: begin // Print 'e'
+                            uart_data <= {24'd0, "e"}; uart_write <= 1; sector_header_print_sub_state <= 2;
+                        end
+                        2: begin // Print 'c'
+                            uart_data <= {24'd0, "c"}; uart_write <= 1; sector_header_print_sub_state <= 3;
+                        end
+                        3: begin // Print 't'
+                            uart_data <= {24'd0, "t"}; uart_write <= 1; sector_header_print_sub_state <= 4;
+                        end
+                        4: begin // Print 'o'
+                            uart_data <= {24'd0, "o"}; uart_write <= 1; sector_header_print_sub_state <= 5;
+                        end
+                        5: begin // Print 'r'
+                            uart_data <= {24'd0, "r"}; uart_write <= 1; sector_header_print_sub_state <= 6;
+                        end
+                        6: begin // Print ' '
+                            uart_data <= {24'd0, " "}; uart_write <= 1; sector_header_print_sub_state <= 7;
+                        end
+                        7: begin // Print high digit of current_sector
+                            sector_digit_char <= (current_sector / 10 < 10) ? (8'h30 + (current_sector / 10)) : (8'h41 + (current_sector / 10) - 10);
+                            uart_data <= {24'd0, sector_digit_char}; uart_write <= 1; sector_header_print_sub_state <= 8;
+                        end
+                        8: begin // Print low digit of current_sector
+                            sector_digit_char <= (current_sector % 10 < 10) ? (8'h30 + (current_sector % 10)) : (8'h41 + (current_sector % 10) - 10);
+                            uart_data <= {24'd0, sector_digit_char}; uart_write <= 1; sector_header_print_sub_state <= 9;
+                        end
+                        9: begin // Print ':'
+                            uart_data <= {24'd0, ":"}; uart_write <= 1; sector_header_print_sub_state <= 10;
+                        end
+                        10: begin // Print ' '
+                            uart_data <= {24'd0, " "}; uart_write <= 1; sector_header_print_sub_state <= 0; // Reset for next sector
+                            cache_byte_idx <= 0; // Reset byte index for the new sector
+                            hex_print_sub_state <= 0; // Reset hex print state
+                            fsm_state <= S_SET_ADDR; // Move to set address for current_sector
+                        end
+                    endcase
+                end
+
+                S_SET_ADDR: begin // Set block address to current_sector
+                    sd_addr_in <= 16'h1000;
+                    sd_data_in <= {16'h0000, current_sector}; // Set Logical Block Address (LBA)
+                    sd_we_in <= 1;
+                    fsm_state <= S_TRIGGER_READ;
+                end
+
+                S_TRIGGER_READ: begin // Trigger a read operation for the set address
+                    sd_addr_in <= 16'h1004;
+                    sd_data_in <= 32'd1; // Trigger Read (bit 0 high)
+                    sd_we_in <= 1;
+                    fsm_state <= S_WAIT_BUSY_LOW; // Wait for SD module to indicate busy
+                end
+
+                S_WAIT_BUSY_LOW: begin // Poll 0x2010 (ready) until it goes LOW (busy)
+                    sd_addr_in <= 16'h2010; // Read status register
+                    if (spo[0] == 1) begin // Still ready (not busy yet)
+                        fsm_state <= S_WAIT_BUSY_LOW; // Stay here
+                    end else begin // spo[0] is 0, now busy
+                        fsm_state <= S_WAIT_READY_HIGH; // Proceed to wait for ready
+                    end
+                end
+
+                S_WAIT_READY_HIGH: begin // Poll 0x2010 (ready) until it goes HIGH (done reading)
+                    sd_addr_in <= 16'h2010; // Read status register
+                    if (spo[0] == 0) begin // Still busy
+                        fsm_state <= S_WAIT_READY_HIGH; // Stay here
+                    end else begin // spo[0] is 1, operation complete, data in cache
+                        fsm_state <= S_READ_CACHE; // Start reading from cache
+                        cache_byte_idx <= 0; // Reset cache index
+                        hex_print_sub_state <= 0; // Reset printing state
+                    end
+                end
+
+                S_READ_CACHE: begin // Read and print data from cache (512 bytes)
+                    if (cache_byte_idx < NUM_BYTES_PER_SECTOR) begin
+                        case (hex_print_sub_state)
+                            0: begin // If starting to process a new 32-bit word
+                                if (cache_byte_idx % 4 == 0) begin
+                                    sd_addr_in <= {4'h0, cache_byte_idx[8:2]}; // Read 32-bit word from cache (0x0000 - 0x007C)
+                                    // sd_we_in is 0, so it's a read.
+                                    last_read_data_word <= spo; // Capture spo on this cycle
+                                end
+                                // Extract byte from the 32-bit word based on cache_byte_idx % 4
+                                case (cache_byte_idx[1:0])
+                                    2'b00: current_byte_to_print <= last_read_data_word[31:24]; // MSB
+                                    2'b01: current_byte_to_print <= last_read_data_word[23:16];
+                                    2'b10: current_byte_to_print <= last_read_data_word[15:8];
+                                    2'b11: current_byte_to_print <= last_read_data_word[7:0];   // LSB
+                                endcase
+                                hex_print_sub_state <= 1; // Move to print high nibble
+                            end
+                            1: begin // Print high nibble
+                                uart_data <= {24'd0, (current_byte_to_print[7:4] < 4'd10) ? (8'h30 + current_byte_to_print[7:4]) : (8'h41 + (current_byte_to_print[7:4] - 4'd10))};
+                                uart_write <= 1;
+                                hex_print_sub_state <= 2;
+                            end
+                            2: begin // Print low nibble
+                                uart_data <= {24'd0, (current_byte_to_print[3:0] < 4'd10) ? (8'h30 + current_byte_to_print[3:0]) : (8'h41 + (current_byte_to_print[3:0] - 4'd10))};
+                                uart_write <= 1;
+                                hex_print_sub_state <= 3; // Move to print space/newline
+                            end
+                            3: begin // After printing both hex digits, decide on space/newline
+                                if (cache_byte_idx < NUM_BYTES_PER_SECTOR - 1) begin // If not the last byte of the sector
+                                    if ((cache_byte_idx + 1) % LINE_BREAK_BYTES == 0) begin // End of a line, print newline
+                                        uart_data <= {24'd0, "\n"};
+                                        uart_write <= 1;
+                                    end else begin // Print space
+                                        uart_data <= {24'd0, " "};
+                                        uart_write <= 1;
+                                    end
+                                end
+                                cache_byte_idx <= cache_byte_idx + 1; // Increment byte counter
+                                hex_print_sub_state <= 0; // Go back to read next byte/word from cache (or next byte from current word)
+                            end
+                        endcase
+                    end else begin // All bytes of the current sector have been read and printed
+                        fsm_state <= S_FINISH_SECTOR;
+                    end
+                end
+
+                S_FINISH_SECTOR: begin
+                    // Print a final newline if the last byte wasn't a line break
+                    if ((cache_byte_idx % LINE_BREAK_BYTES != 0) || (cache_byte_idx == 0 && NUM_BYTES_PER_SECTOR == 0)) begin // Edge case for 0 bytes or last line not full
+                        uart_data <= {24'd0, "\n"};
+                        uart_write <= 1;
+                    end
+                    // Now, decide if we read the next sector or are done
+                    if (current_sector < MAX_SECTOR) begin
+                        current_sector <= current_sector + 1;
+                        // Add a small delay between sectors for readability and stability
+                        if (delay_counter < 1_000_000) begin // e.g., 20ms delay
+                            delay_counter <= delay_counter + 1;
+                        end else begin
+                            delay_counter <= 0;
+                            fsm_state <= S_SECTOR_START; // Loop back to print header for next sector
+                        end
+                    end else begin
+                        fsm_state <= S_DONE; // All sectors read
+                    end
+                end
+
+                S_DONE: begin
+                    // System halts here, or can be made to repeat, etc.
+                end
+
+            endcase
         end
     end
 
