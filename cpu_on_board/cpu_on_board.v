@@ -1121,15 +1121,16 @@
 //
 //endmodule
 
+
 module cpu_on_board (
     (* chip_pin = "PIN_L1"  *) input  wire CLOCK_50,
     (* chip_pin = "PIN_R22" *) input  wire KEY0,        // Active-low reset
     (* chip_pin = "R20"     *) output wire LEDR0,
 
-    (* chip_pin = "V20" *) output wire SD_CLK,  // SD_CLK
-    (* chip_pin = "Y20" *) inout  wire SD_CMD,  // SD_CMD (MOSI)
-    (* chip_pin = "W20" *) inout  wire SD_DAT0, // SD_DAT0 (MISO)
-    (* chip_pin = "U20" *) output wire SD_DAT3  // SD_CS
+    (* chip_pin = "V20" *) output wire SD_CLK,   // SD_CLK
+    (* chip_pin = "Y20" *) inout  wire SD_CMD,   // SD_CMD (MOSI)
+    (* chip_pin = "W20" *) inout  wire SD_DAT0,  // SD_DAT0 (MISO)
+    (* chip_pin = "U20" *) output wire SD_DAT3   // SD_CS
 );
 
     // =======================================================
@@ -1137,16 +1138,13 @@ module cpu_on_board (
     // =======================================================
     reg [23:0] blink_counter;
     assign LEDR0 = blink_counter[23];
-
     always @(posedge CLOCK_50 or negedge KEY0) begin
-        if (!KEY0)
-            blink_counter <= 0;
-        else
-            blink_counter <= blink_counter + 1'b1;
+        if (!KEY0) blink_counter <= 0;
+        else blink_counter <= blink_counter + 1;
     end
 
     // =======================================================
-    // JTAG UART
+    // UART via JTAG
     // =======================================================
     reg [31:0] uart_data;
     reg        uart_write;
@@ -1162,197 +1160,119 @@ module cpu_on_board (
     );
 
     // =======================================================
-    // SD Card Module Instance
-    // This instance replaces the direct sd_controller connection
+    // SD wrapper instance
     // =======================================================
-    wire sd_ncd_wire = 0; // Assuming card is always inserted for testing
-    wire sd_wp_wire = 0;  // Assuming not write-protected for testing
-    wire sd_dat1_wire;
-    wire sd_dat2_wire;
-    wire sd_cmd_wire;
-    wire sd_sck_wire;
-    wire sd_dat3_wire;
+    wire [31:0] sd_spo;
+    reg [31:0]  sd_d;
+    reg [15:0]  sd_a;
+    reg         sd_we;
 
-    reg [15:0] sd_addr_in = 0;
-    reg [31:0] sd_data_in = 0;
-    reg sd_we_in = 0;
-    wire [31:0] sd_data_out; // This is 'spo' from sdcard module
-    wire sd_irq; // Not used in this example, but available
-
-    sdcard sd_mem_mapped_inst (
+    sdcard sd0 (
         .clk(CLOCK_50),
         .rst(~KEY0),
+        .sd_dat0(SD_DAT0),
+        .sd_ncd(1'b0),
+        .sd_wp(1'b0),
+        .sd_dat1(),
+        .sd_dat2(),
+        .sd_dat3(SD_DAT3),
+        .sd_cmd(SD_CMD),
+        .sd_sck(SD_CLK),
 
-        .sd_dat0(SD_DAT0), // MISO
-        .sd_ncd(sd_ncd_wire),
-        .sd_wp(sd_wp_wire),
-        .sd_dat1(sd_dat1_wire),
-        .sd_dat2(sd_dat2_wire),
-        .sd_dat3(sd_dat3_wire), // CS
-        .sd_cmd(sd_cmd_wire),   // MOSI
-        .sd_sck(sd_sck_wire),   // SCLK
-
-        .a(sd_addr_in),
-        .d(sd_data_in),
-        .we(sd_we_in),
-        .spo(sd_data_out),
-        .irq(sd_irq)
+        .a(sd_a),
+        .d(sd_d),
+        .we(sd_we),
+        .spo(sd_spo)
     );
 
-    // Connect physical SD pins
-    assign SD_CLK  = sd_sck_wire;
-    assign SD_DAT3 = sd_dat3_wire;
-    assign SD_CMD  = sd_cmd_wire;
-    // Note: SD_DAT1 and SD_DAT2 are outputs from sdcard module,
-    // and should be connected to the respective physical pins if used
-    // on a board with full SD interface. For SPI, they are often tied high.
-
     // =======================================================
-    // UART debug: State machine to perform memory-mapped SD operations
+    // Control FSM to read one 512-byte sector
     // =======================================================
-    localparam NUM_BYTES_TO_READ = 512;
-    localparam LINE_BREAK_BYTES = 16; // Print a newline every 16 bytes for readability
+    reg [3:0] state = 0;
+    reg [8:0] byte_index = 0;
+    reg [31:0] temp_word;
+    reg [31:0] sector_address = 32'h00000010; // <-- change this to your sector (e.g., first sector of music.wav)
 
-    reg [3:0] main_state = 0;       // State machine for SD ops
-    reg [31:0] delay_counter = 0;   // General purpose delay
-    reg [10:0] cache_byte_idx = 0;  // Index for reading bytes from cache (0 to 511)
-    reg [7:0] current_byte_to_print; // Holds one byte from the 32-bit word
-    reg [1:0] hex_print_sub_state = 0; // 0: Idle, 1: Printing high nibble, 2: Delay, 3: Printing low nibble, 4: Delay/Next byte
-
-    // --- Removed helper tasks/functions. All logic now directly in the always block. ---
-    // The interaction with sd_addr_in, sd_data_in, sd_we_in is handled directly by state.
-
-    // Register to hold the last read 32-bit word from sd_data_out (spo)
-    reg [31:0] last_read_data_word = 0;
+    localparam S_IDLE     = 0,
+               S_SET_ADDR = 1,
+               S_READ_CMD = 2,
+               S_WAIT_RDY = 3,
+               S_READ_DATA = 4,
+               S_HEX1 = 5,
+               S_HEX2 = 6;
 
     always @(posedge CLOCK_50 or negedge KEY0) begin
         if (!KEY0) begin
+            state <= S_IDLE;
+            sd_a <= 0;
+            sd_d <= 0;
+            sd_we <= 0;
+            byte_index <= 0;
             uart_write <= 0;
-            sd_addr_in <= 0;
-            sd_data_in <= 0;
-            sd_we_in <= 0;
-            main_state <= 0;
-            delay_counter <= 0;
-            cache_byte_idx <= 0;
-            current_byte_to_print <= 0;
-            hex_print_sub_state <= 0;
-            last_read_data_word <= 0;
         end else begin
-            uart_write <= 0; // Default to no UART write
-            sd_we_in <= 0;   // Default to no write
-            sd_addr_in <= 0; // Default to address 0 for reads if not specified
+            uart_write <= 0;
+            sd_we <= 0;
 
-            case (main_state)
-                0: begin // Initial state: Wait for SD card module to be ready internally
-                    // This delay allows the internal sd_controller to initialize
-                    if (delay_counter < 100_000_000) begin // Adjust as needed, longer delay for full init
-                        delay_counter <= delay_counter + 1;
-                    end else begin
-                        delay_counter <= 0;
-                        main_state <= 1; // Proceed to print 'K' and start SD operations
-                    end
-                end
-
-                1: begin // Print 'K' (SD Init Done)
+            case (state)
+                S_IDLE: begin
                     uart_data <= {24'd0, "K"};
                     uart_write <= 1;
-                    delay_counter <= 0; // Reset delay for next step
-                    main_state <= 2;
+                    state <= S_SET_ADDR;
                 end
 
-                2: begin // Delay after 'K' and before first SD command
-                    if (delay_counter < 50_000_000) begin // Delay ~1 second
-                        delay_counter <= delay_counter + 1;
-                    end else begin
-                        delay_counter <= 0;
-                        main_state <= 3; // Move to set address
+                // set <address> (sector number)
+                S_SET_ADDR: begin
+                    sd_a <= 16'h1000;
+                    sd_d <= sector_address;
+                    sd_we <= 1;
+                    state <= S_READ_CMD;
+                end
+
+                // trigger SD read
+                S_READ_CMD: begin
+                    sd_a <= 16'h1004;
+                    sd_d <= 32'h1;
+                    sd_we <= 1;
+                    state <= S_WAIT_RDY;
+                end
+
+                // poll until ready
+                S_WAIT_RDY: begin
+                    sd_a <= 16'h2010;
+                    if (sd_spo[0]) begin
+                        byte_index <= 0;
+                        state <= S_READ_DATA;
                     end
                 end
 
-                3: begin // Set block address to 0x00 (sector 0)
-                    sd_addr_in <= 16'h1000;
-                    sd_data_in <= 32'h00000000; // Set address for R/W
-                    sd_we_in <= 1;
-                    main_state <= 4; // Move to trigger read on next cycle
+                // read 512 bytes, 4 bytes at a time
+                S_READ_DATA: begin
+                    sd_a <= {7'd0, byte_index[8:2], 2'b00};
+                    temp_word <= sd_spo;
+                    state <= S_HEX1;
                 end
 
-                4: begin // Trigger a read operation
-                    sd_addr_in <= 16'h1004;
-                    sd_data_in <= 32'd1; // Do a read at the set address
-                    sd_we_in <= 1;
-                    main_state <= 5; // Move to poll ready status on next cycle
+                // print first nibble
+                S_HEX1: begin
+                    uart_data <= {24'd0, (temp_word[31:28] < 10) ? (8'h30 + temp_word[31:28]) : (8'h41 + temp_word[31:28] - 10)};
+                    uart_write <= 1;
+                    temp_word <= {temp_word[27:0], 4'b0};
+                    state <= S_HEX2;
                 end
 
-                5: begin // Poll 0x2010 (ready) until it's 1
-                    sd_addr_in <= 16'h2010; // Request to read ready status
-                    // sd_we_in is 0 by default, so this is a read
-                    if (sd_data_out[0] == 1) begin // Check the LSB of spo for ready
-                        main_state <= 6; // SD card is ready, start reading cache
-                        cache_byte_idx <= 0; // Reset cache index
-                        hex_print_sub_state <= 0; // Reset printing state
+                // print next nibble(s)
+                S_HEX2: begin
+                    uart_data <= {24'd0, (temp_word[31:28] < 10) ? (8'h30 + temp_word[31:28]) : (8'h41 + temp_word[31:28] - 10)};
+                    uart_write <= 1;
+                    temp_word <= {temp_word[27:0], 4'b0};
+                    if ((byte_index + 1) >= 512)
+                        state <= S_IDLE;
+                    else begin
+                        byte_index <= byte_index + 1;
+                        state <= S_READ_DATA;
                     end
                 end
-
-                6: begin // Read and print data from cache (0x0000 - 0x01FC)
-                    if (cache_byte_idx < NUM_BYTES_TO_READ) begin
-                        case (hex_print_sub_state)
-                            0: begin // If starting to process a new 32-bit word
-                                if (cache_byte_idx % 4 == 0) begin
-                                    sd_addr_in <= {4'h0, cache_byte_idx[8:2]}; // Read 32-bit word from cache address
-                                    // sd_we_in is 0, so it's a read
-                                    // The sd_data_out (spo) will update on THIS clock edge,
-                                    // but we need to capture it to 'last_read_data_word'
-                                    // for subsequent cycles.
-                                    last_read_data_word <= sd_data_out;
-                                end
-                                // Extract byte from the 32-bit word based on cache_byte_idx % 4
-                                case (cache_byte_idx[1:0]) // Which byte within the 32-bit word
-                                    2'b00: current_byte_to_print <= last_read_data_word[31:24];
-                                    2'b01: current_byte_to_print <= last_read_data_word[23:16];
-                                    2'b10: current_byte_to_print <= last_read_data_word[15:8];
-                                    2'b11: current_byte_to_print <= last_read_data_word[7:0];
-                                endcase
-                                hex_print_sub_state <= 1; // Move to print high nibble
-                            end
-                            1: begin // Print high nibble
-                                uart_data <= {24'd0, (current_byte_to_print[7:4] < 4'd10) ? (8'h30 + current_byte_to_print[7:4]) : (8'h41 + (current_byte_to_print[7:4] - 4'd10))};
-                                uart_write <= 1;
-                                hex_print_sub_state <= 2;
-                            end
-                            2: begin // Print low nibble
-                                uart_data <= {24'd0, (current_byte_to_print[3:0] < 4'd10) ? (8'h30 + current_byte_to_print[3:0]) : (8'h41 + (current_byte_to_print[3:0] - 4'd10))};
-                                uart_write <= 1;
-                                hex_print_sub_state <= 3;
-                            end
-                            3: begin // After printing both hex digits
-                                cache_byte_idx <= cache_byte_idx + 1; // Increment byte counter
-                                // Optionally print a space or newline for readability
-                                if (cache_byte_idx < NUM_BYTES_TO_READ - 1 && (cache_byte_idx + 1) % LINE_BREAK_BYTES == 0) begin
-                                    uart_data <= {24'd0, "\n"}; // Newline for readability
-                                    uart_write <= 1;
-                                end else if (cache_byte_idx < NUM_BYTES_TO_READ - 1) begin
-                                    uart_data <= {24'd0, " "}; // Space between bytes
-                                    uart_write <= 1;
-                                end
-                                hex_print_sub_state <= 0; // Go back to read next byte/word from cache
-                            end
-                        endcase
-                    end else begin
-                        // All bytes read, print a final newline if the last one wasn't a line break
-                        if (cache_byte_idx == NUM_BYTES_TO_READ && (cache_byte_idx % LINE_BREAK_BYTES != 0)) begin
-                             uart_data <= {24'd0, "\n"};
-                             uart_write <= 1;
-                        end
-                        main_state <= 7; // Done
-                    end
-                end
-
-                7: begin // Done state
-                    // The system can halt here, or you could add more commands.
-                end
-
             endcase
         end
     end
-
 endmodule
