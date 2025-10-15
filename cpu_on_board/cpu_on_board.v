@@ -339,7 +339,7 @@ module cpu_on_board (
     // JTAG UART
     // =======================================================
     // Renamed from jtag_uart_system to match a common instance name for Qsys generated component
-    jtag_uart_0 uart0 (
+    jtag_uart_system uart0 (
         .clk_clk(CLOCK_50),
         .reset_reset_n(KEY0),
         .avalon_jtag_slave_address(1'b0),
