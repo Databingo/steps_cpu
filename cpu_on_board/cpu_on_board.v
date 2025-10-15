@@ -1347,6 +1347,7 @@ module cpu_on_board (
 
     reg rd_sig = 0;
     reg wr_sig = 0;
+    reg cmd9_sig = 0;  // New: trigger CMD9 for second read
 
     sd_controller sd0 (
         .cs(sd_cs),
@@ -1366,7 +1367,8 @@ module cpu_on_board (
         .clk(CLOCK_50),
         .clk_pulse_slow(clk_pulse_slow),
         .status(sd_status),
-        .recv_data(sd_recv_data)
+        .recv_data(sd_recv_data),
+        .cmd9(cmd9_sig)  // New input
     );
 
     // Connect physical pins
@@ -1375,14 +1377,15 @@ module cpu_on_board (
     assign SD_CMD  = sd_mosi;
 
     // =======================================================
-    // UART debug: print "K" then all 512 bytes in hex
+    // UART debug: print "K" then all 512 bytes in hex, then CSD (16+2 bytes) in hex
     // =======================================================
     reg printed_k = 0;
     reg do_read = 0;
-    reg [8:0] byte_index = 0;       // 0..511
+    reg [9:0] byte_index = 0;       // 0..511 for boot, then 0..17 for CSD
     reg [2:0] print_hex_state = 0;
     reg [7:0] captured_byte;
     reg sd_byte_available_d = 0;
+    reg done_boot = 0;
 
     always @(posedge CLOCK_50 or negedge KEY0) begin
         if (!KEY0) begin
@@ -1395,6 +1398,8 @@ module cpu_on_board (
             print_hex_state <= 0;
             captured_byte <= 0;
             sd_byte_available_d <= 0;
+            done_boot <= 0;
+            cmd9_sig <= 0;
         end else begin
             uart_write <= 0;
             sd_byte_available_d <= sd_byte_available;
@@ -1409,7 +1414,7 @@ module cpu_on_board (
                 do_read    <= 1;
             end
 
-            // Keep requesting next byte until all 512 bytes read
+            // Deassert rd after start
             if (do_read && (sd_status != 6))
                 rd_sig <= 0;
 
@@ -1431,6 +1436,14 @@ module cpu_on_board (
 
                 // Increment byte index
                 byte_index <= byte_index + 1;
+            end
+
+            // After boot sector, trigger CMD9
+            if (byte_index >= 512 && !done_boot) begin
+                done_boot <= 1;
+                cmd9_sig <= 1;
+                rd_sig <= 1;
+                byte_index <= 0;
             end
         end
     end
