@@ -1441,183 +1441,6 @@
 //endmodule
 
 // print 0-15 sectors
-//module cpu_on_board (
-//    (* chip_pin = "PIN_L1"  *) input  wire CLOCK_50,
-//    (* chip_pin = "PIN_R22" *) input  wire KEY0,        // Active-low reset
-//    (* chip_pin = "R20"     *) output wire LEDR0,
-//
-//    (* chip_pin = "V20" *) output wire SD_CLK,  // SD_CLK
-//    (* chip_pin = "Y20" *) inout  wire SD_CMD,  // SD_CMD (MOSI)
-//    (* chip_pin = "W20" *) inout  wire SD_DAT0, // SD_DAT0 (MISO)
-//    (* chip_pin = "U20" *) output wire SD_DAT3  // SD_CS
-//);
-//
-//    // =======================================================
-//    // Heartbeat LED
-//    // =======================================================
-//    reg [23:0] blink_counter;
-//    assign LEDR0 = blink_counter[23];
-//
-//    always @(posedge CLOCK_50 or negedge KEY0) begin
-//        if (!KEY0)
-//            blink_counter <= 0;
-//        else
-//            blink_counter <= blink_counter + 1'b1;
-//    end
-//
-//    // =======================================================
-//    // JTAG UART
-//    // =======================================================
-//    reg [31:0] uart_data;
-//    reg        uart_write;
-//
-//    jtag_uart_system uart0 (
-//        .clk_clk(CLOCK_50),
-//        .reset_reset_n(KEY0),
-//        .jtag_uart_0_avalon_jtag_slave_address(1'b0),
-//        .jtag_uart_0_avalon_jtag_slave_writedata(uart_data),
-//        .jtag_uart_0_avalon_jtag_slave_write_n(~uart_write),
-//        .jtag_uart_0_avalon_jtag_slave_chipselect(1'b1),
-//        .jtag_uart_0_avalon_jtag_slave_read_n(1'b1)
-//    );
-//
-//    // =======================================================
-//    // SD card connection
-//    // =======================================================
-//    wire [31:0] spo;
-//    reg [15:0] mem_a = 16'h2010;
-//    reg [31:0] mem_d = 0;
-//    reg mem_we = 0;
-//    wire sd_ncd = 1'b0;
-//    wire sd_wp = 1'b0;
-//    wire irq;
-//    wire sd_dat1;
-//    wire sd_dat2;
-//
-//    sdcard sd0 (
-//        .clk(CLOCK_50),
-//        .rst(~KEY0),
-//        .sd_dat0(SD_DAT0),
-//        .sd_ncd(sd_ncd),
-//        .sd_wp(sd_wp),
-//        .sd_dat1(sd_dat1),
-//        .sd_dat2(sd_dat2),
-//        .sd_dat3(SD_DAT3),
-//        .sd_cmd(SD_CMD),
-//        .sd_sck(SD_CLK),
-//        .a(mem_a),
-//        .d(mem_d),
-//        .we(mem_we),
-//        .spo(spo),
-//        .irq(irq)
-//    );
-//
-//    // =======================================================
-//    // UART debug: print "K" then print all 512 bytes in hex for sectors 0-15
-//    // =======================================================
-//    reg printed_k = 0;
-//    reg [8:0] byte_index = 0;       // 0..511
-//    reg [3:0] print_hex_state = 0;
-//    reg [7:0] captured_byte;
-//    reg [3:0] fsm_state = 0;
-//    reg [1:0] sub_byte = 0;
-//    reg [4:0] current_sector = 0;
-//
-//    always @(posedge CLOCK_50 or negedge KEY0) begin
-//        if (!KEY0) begin
-//            uart_write <= 0;
-//            printed_k <= 0;
-//            byte_index <= 0;
-//            print_hex_state <= 0;
-//            captured_byte <= 0;
-//            fsm_state <= 0;
-//            mem_a <= 16'h2010;
-//            mem_d <= 0;
-//            mem_we <= 0;
-//            sub_byte <= 0;
-//            current_sector <= 0;
-//        end else begin
-//            uart_write <= 0;
-//            mem_we <= 0;
-//
-//            if (fsm_state == 0) begin
-//                if (spo[0] && !printed_k) begin
-//                    uart_data  <= {24'd0, "K"};
-//                    uart_write <= 1;
-//                    printed_k  <= 1;
-//                    fsm_state  <= 1;
-//                end
-//            end else if (fsm_state == 1) begin
-//                mem_a   <= 16'h1000;
-//                mem_d   <= current_sector;
-//                mem_we  <= 1;
-//                fsm_state <= 2;
-//            end else if (fsm_state == 2) begin
-//                mem_a   <= 16'h1004;
-//                mem_d   <= 32'h00000001;
-//                mem_we  <= 1;
-//                fsm_state <= 3;
-//            end else if (fsm_state == 3) begin
-//                mem_a <= 16'h2010;
-//                if (spo[0] == 1) begin
-//                    fsm_state <= 3;
-//                end else begin
-//                    fsm_state <= 4;
-//                end
-//            end else if (fsm_state == 4) begin
-//                mem_a <= 16'h2010;
-//                if (spo[0] == 0) begin
-//                    fsm_state <= 4;
-//                end else begin
-//                    fsm_state <= 5;
-//                    mem_a <= 0;
-//                    sub_byte <= 0;
-//                    byte_index <= 0;
-//                end
-//            end else if (fsm_state == 5) begin
-//                if (print_hex_state == 0) begin
-//                    case (sub_byte)
-//                        2'd0: captured_byte <= spo[31:24];
-//                        2'd1: captured_byte <= spo[23:16];
-//                        2'd2: captured_byte <= spo[15:8];
-//                        2'd3: captured_byte <= spo[7:0];
-//                    endcase
-//                    print_hex_state <= 1;
-//                end else if (print_hex_state == 1) begin
-//                    uart_data  <= {24'd0, (captured_byte[7:4] < 10) ? (8'h30 + captured_byte[7:4]) : (8'h41 + captured_byte[7:4] - 10)};
-//                    uart_write <= 1;
-//                    print_hex_state <= 2;
-//                end else if (print_hex_state == 2) begin
-//                    uart_data  <= {24'd0, (captured_byte[3:0] < 10) ? (8'h30 + captured_byte[3:0]) : (8'h41 + captured_byte[3:0] - 10)};
-//                    uart_write <= 1;
-//                    print_hex_state <= (byte_index == 511) ? 4'd3 : 4'd0;
-//                    if (byte_index != 511) begin
-//                        byte_index <= byte_index + 1;
-//                        if (sub_byte == 3) begin
-//                            sub_byte <= 0;
-//                            mem_a <= mem_a + 4;
-//                        end else begin
-//                            sub_byte <= sub_byte + 1;
-//                        end
-//                    end
-//                end else if (print_hex_state == 3) begin
-//                    uart_data  <= {24'd0, 8'h0A};
-//                    uart_write <= 1;
-//                    print_hex_state <= 0;
-//                    if (current_sector == 15) begin
-//                        fsm_state <= 6;
-//                    end else begin
-//                        current_sector <= current_sector + 1;
-//                        fsm_state <= 1;
-//                    end
-//                end
-//            end
-//        end
-//    end
-//
-//endmodule
-
-//// print long KBC0234004E4020102020000100F000000FF00099C61EF0E1D5000061416000A1
 module cpu_on_board (
     (* chip_pin = "PIN_L1"  *) input  wire CLOCK_50,
     (* chip_pin = "PIN_R22" *) input  wire KEY0,        // Active-low reset
@@ -1699,8 +1522,6 @@ module cpu_on_board (
     reg [3:0] fsm_state = 0;
     reg [1:0] sub_byte = 0;
     reg [4:0] current_sector = 0;
-    reg [31:0] wait_counter = 0;
-    reg [15:0] data_address = 0;
 
     always @(posedge CLOCK_50 or negedge KEY0) begin
         if (!KEY0) begin
@@ -1715,126 +1536,84 @@ module cpu_on_board (
             mem_we <= 0;
             sub_byte <= 0;
             current_sector <= 0;
-            wait_counter <= 0;
-            data_address <= 0;
         end else begin
             uart_write <= 0;
             mem_we <= 0;
 
-            case (fsm_state)
-                0: begin // Wait for SD card to be ready and print "K"
-                    if (spo[0] && !printed_k) begin
-                        uart_data  <= {24'd0, "K"};
-                        uart_write <= 1;
-                        printed_k  <= 1;
-                        wait_counter <= 0;
-                        fsm_state  <= 1;
-                    end
+            if (fsm_state == 0) begin
+                if (spo[0] && !printed_k) begin
+                    uart_data  <= {24'd0, "K"};
+                    uart_write <= 1;
+                    printed_k  <= 1;
+                    fsm_state  <= 1;
                 end
-                
-                1: begin // Set sector address (low 32 bits)
-                    mem_a   <= 16'h1000;
-                    mem_d   <= {27'b0, current_sector}; // Sector number in lower 5 bits
-                    mem_we  <= 1;
-                    fsm_state <= 2;
-                end
-                
-                2: begin // Issue read command
-                    mem_a   <= 16'h1004;
-                    mem_d   <= 32'h00000001; // Start read operation
-                    mem_we  <= 1;
-                    wait_counter <= 0;
+            end else if (fsm_state == 1) begin
+                mem_a   <= 16'h1000;
+                mem_d   <= current_sector;
+                mem_we  <= 1;
+                fsm_state <= 2;
+            end else if (fsm_state == 2) begin
+                mem_a   <= 16'h1004;
+                mem_d   <= 32'h00000001;
+                mem_we  <= 1;
+                fsm_state <= 3;
+            end else if (fsm_state == 3) begin
+                mem_a <= 16'h2010;
+                if (spo[0] == 1) begin
                     fsm_state <= 3;
+                end else begin
+                    fsm_state <= 4;
                 end
-                
-                3: begin // Wait for operation to start (ready bit goes low)
-                    mem_a <= 16'h2010;
-                    if (spo[0] == 0) begin
-                        fsm_state <= 4;
-                        wait_counter <= 0;
-                    end else if (wait_counter > 1000000) begin
-                        // Timeout - retry
-                        fsm_state <= 1;
-                    end else begin
-                        wait_counter <= wait_counter + 1;
-                    end
+            end else if (fsm_state == 4) begin
+                mem_a <= 16'h2010;
+                if (spo[0] == 0) begin
+                    fsm_state <= 4;
+                end else begin
+                    fsm_state <= 5;
+                    mem_a <= 0;
+                    sub_byte <= 0;
+                    byte_index <= 0;
                 end
-                
-                4: begin // Wait for read completion (ready bit goes high)
-                    mem_a <= 16'h2010;
-                    if (spo[0] == 1) begin
-                        if (spo[1]) begin // Check if read valid
-                            fsm_state <= 5;
-                            data_address <= 0; // Start at beginning of data buffer
+            end else if (fsm_state == 5) begin
+                if (print_hex_state == 0) begin
+                    case (sub_byte)
+                        2'd0: captured_byte <= spo[31:24];
+                        2'd1: captured_byte <= spo[23:16];
+                        2'd2: captured_byte <= spo[15:8];
+                        2'd3: captured_byte <= spo[7:0];
+                    endcase
+                    print_hex_state <= 1;
+                end else if (print_hex_state == 1) begin
+                    uart_data  <= {24'd0, (captured_byte[7:4] < 10) ? (8'h30 + captured_byte[7:4]) : (8'h41 + captured_byte[7:4] - 10)};
+                    uart_write <= 1;
+                    print_hex_state <= 2;
+                end else if (print_hex_state == 2) begin
+                    uart_data  <= {24'd0, (captured_byte[3:0] < 10) ? (8'h30 + captured_byte[3:0]) : (8'h41 + captured_byte[3:0] - 10)};
+                    uart_write <= 1;
+                    print_hex_state <= (byte_index == 511) ? 4'd3 : 4'd0;
+                    if (byte_index != 511) begin
+                        byte_index <= byte_index + 1;
+                        if (sub_byte == 3) begin
                             sub_byte <= 0;
-                            byte_index <= 0;
+                            mem_a <= mem_a + 4;
                         end else begin
-                            // Read not valid, retry
-                            fsm_state <= 1;
+                            sub_byte <= sub_byte + 1;
                         end
-                    end else if (wait_counter > 5000000) begin
-                        // Timeout - move to next sector
+                    end
+                end else if (print_hex_state == 3) begin
+                    uart_data  <= {24'd0, 8'h0A};
+                    uart_write <= 1;
+                    print_hex_state <= 0;
+                    if (current_sector == 15) begin
                         fsm_state <= 6;
                     end else begin
-                        wait_counter <= wait_counter + 1;
+                        current_sector <= current_sector + 1;
+                        fsm_state <= 1;
                     end
                 end
-                
-                5: begin // Read and print data bytes
-                    case (print_hex_state)
-                        0: begin // Set address and read word
-                            mem_a <= data_address;
-                            print_hex_state <= 1;
-                        end
-                        1: begin // Capture byte based on sub_byte
-                            case (sub_byte)
-                                2'd0: captured_byte <= spo[7:0];
-                                2'd1: captured_byte <= spo[15:8];
-                                2'd2: captured_byte <= spo[23:16];
-                                2'd3: captured_byte <= spo[31:24];
-                            endcase
-                            print_hex_state <= 2;
-                        end
-                        2: begin // Print first hex digit
-                            uart_data  <= {24'd0, (captured_byte[7:4] < 10) ? (8'h30 + captured_byte[7:4]) : (8'h41 + captured_byte[7:4] - 10)};
-                            uart_write <= 1;
-                            print_hex_state <= 3;
-                        end
-                        3: begin // Print second hex digit
-                            uart_data  <= {24'd0, (captured_byte[3:0] < 10) ? (8'h30 + captured_byte[3:0]) : (8'h41 + captured_byte[3:0] - 10)};
-                            uart_write <= 1;
-                            
-                            if (byte_index == 511) begin
-                                // Last byte of sector
-                                print_hex_state <= 4;
-                            end else begin
-                                byte_index <= byte_index + 1;
-                                if (sub_byte == 3) begin
-                                    sub_byte <= 0;
-                                    data_address <= data_address + 4; // Next word
-                                end else begin
-                                    sub_byte <= sub_byte + 1;
-                                end
-                                print_hex_state <= 0;
-                            end
-                        end
-                        4: begin // Move to next sector or finish
-                            print_hex_state <= 0;
-                            if (current_sector == 15) begin
-                                fsm_state <= 6; // All sectors done
-                            end else begin
-                                current_sector <= current_sector + 1;
-                                fsm_state <= 1; // Read next sector
-                            end
-                        end
-                    endcase
-                end
-                
-                6: begin // Done - stay here
-                    // All sectors printed
-                end
-            endcase
+            end
         end
     end
 
 endmodule
+
