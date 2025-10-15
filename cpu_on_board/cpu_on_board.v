@@ -381,7 +381,7 @@ module cpu_on_board (
     reg         uart_write;
     wire        uart_waitreq;
 
-    jtag_uart u_jtag (
+    jtag_uart_system u_jtag (
         .clk_clk(CLOCK_50),
         .reset_reset_n(reset_n),
         .jtag_uart_0_avalon_jtag_slave_chipselect(1'b1),
