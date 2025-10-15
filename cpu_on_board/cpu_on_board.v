@@ -1138,16 +1138,21 @@ module cpu_on_board (
     // =======================================================
     reg [23:0] blink_counter;
     assign LEDR0 = blink_counter[23];
-    always @(posedge CLOCK_50 or negedge KEY0) begin
+    always @(posedge CLOCK_50 or negedge KEY0)
         if (!KEY0) blink_counter <= 0;
-        else blink_counter <= blink_counter + 1;
-    end
+        else       blink_counter <= blink_counter + 1'b1;
 
     // =======================================================
-    // UART via JTAG
+    // JTAG UART
     // =======================================================
     reg [31:0] uart_data;
     reg        uart_write;
+    task uart_print_char(input [7:0] ch);
+    begin
+        uart_data  <= {24'd0, ch};
+        uart_write <= 1'b1;
+    end
+    endtask
 
     jtag_uart_system uart0 (
         .clk_clk(CLOCK_50),
@@ -1160,119 +1165,131 @@ module cpu_on_board (
     );
 
     // =======================================================
-    // SD wrapper instance
+    // SD controller interface
     // =======================================================
-    wire [31:0] sd_spo;
-    reg [31:0]  sd_d;
-    reg [15:0]  sd_a;
-    reg         sd_we;
+    wire [7:0] sd_dout;
+    wire       sd_ready;
+    wire [4:0] sd_status;
+    wire       sd_cs, sd_mosi, sd_sclk;
+    wire [7:0] sd_recv_data;
+    wire       sd_byte_available;
 
-    sdcard sd0 (
+    reg rd_sig = 0, wr_sig = 0;
+
+    sd_controller sd0 (
+        .cs(sd_cs),
+        .mosi(sd_mosi),
+        .miso(SD_DAT0),
+        .sclk(sd_sclk),
+
+        .rd(rd_sig),
+        .wr(wr_sig),
+        .dout(sd_dout),
+        .byte_available(sd_byte_available),
+        .din(8'h00),
+        .ready_for_next_byte(),
+        .reset(~KEY0),
+        .ready(sd_ready),
+        .address(32'h00000000),
         .clk(CLOCK_50),
-        .rst(~KEY0),
-        .sd_dat0(SD_DAT0),
-        .sd_ncd(1'b0),
-        .sd_wp(1'b0),
-        .sd_dat1(),
-        .sd_dat2(),
-        .sd_dat3(SD_DAT3),
-        .sd_cmd(SD_CMD),
-        .sd_sck(SD_CLK),
-
-        .a(sd_a),
-        .d(sd_d),
-        .we(sd_we),
-        .spo(sd_spo)
+        .clk_pulse_slow(1'b1),
+        .status(sd_status),
+        .recv_data(sd_recv_data)
     );
 
+    assign SD_CLK  = sd_sclk;
+    assign SD_DAT3 = sd_cs;
+    assign SD_CMD  = sd_mosi;
+
     // =======================================================
-    // Control FSM to read one 512-byte sector
+    // FSM to wait-for-ready → read sector → print hex
     // =======================================================
     reg [3:0] state = 0;
     reg [8:0] byte_index = 0;
-    reg [31:0] temp_word;
-    reg [31:0] sector_address = 32'h00000010; // <-- change this to your sector (e.g., first sector of music.wav)
+    reg [7:0] captured_byte;
+    reg [2:0] print_hex_state = 0;
+    reg sd_byte_available_d = 0;
+    reg [15:0] last_two = 16'h0000;   // to detect 0x55AA
 
-    localparam S_IDLE     = 0,
-               S_SET_ADDR = 1,
-               S_READ_CMD = 2,
-               S_WAIT_RDY = 3,
-               S_READ_DATA = 4,
-               S_HEX1 = 5,
-               S_HEX2 = 6;
+    localparam S_WAIT_READY = 0,
+               S_START_READ = 1,
+               S_WAIT_BYTE  = 2,
+               S_PRINT_HI   = 3,
+               S_PRINT_LO   = 4,
+               S_DONE       = 5;
 
     always @(posedge CLOCK_50 or negedge KEY0) begin
         if (!KEY0) begin
-            state <= S_IDLE;
-            sd_a <= 0;
-            sd_d <= 0;
-            sd_we <= 0;
-            byte_index <= 0;
+            state <= S_WAIT_READY;
             uart_write <= 0;
+            rd_sig <= 0;
+            wr_sig <= 0;
+            byte_index <= 0;
+            captured_byte <= 0;
+            print_hex_state <= 0;
+            sd_byte_available_d <= 0;
+            last_two <= 0;
         end else begin
             uart_write <= 0;
-            sd_we <= 0;
+            sd_byte_available_d <= sd_byte_available;
 
             case (state)
-                S_IDLE: begin
-                    uart_data <= {24'd0, "K"};
-                    uart_write <= 1;
-                    state <= S_SET_ADDR;
-                end
-
-                // set <address> (sector number)
-                S_SET_ADDR: begin
-                    sd_a <= 16'h1000;
-                    sd_d <= sector_address;
-                    sd_we <= 1;
-                    state <= S_READ_CMD;
-                end
-
-                // trigger SD read
-                S_READ_CMD: begin
-                    sd_a <= 16'h1004;
-                    sd_d <= 32'h1;
-                    sd_we <= 1;
-                    state <= S_WAIT_RDY;
-                end
-
-                // poll until ready
-                S_WAIT_RDY: begin
-                    sd_a <= 16'h2010;
-                    if (sd_spo[0]) begin
-                        byte_index <= 0;
-                        state <= S_READ_DATA;
+                // Wait until controller initialized
+                S_WAIT_READY: begin
+                    if (sd_ready) begin
+                        uart_print_char("K");
+                        state <= S_START_READ;
                     end
                 end
 
-                // read 512 bytes, 4 bytes at a time
-                S_READ_DATA: begin
-                    sd_a <= {7'd0, byte_index[8:2], 2'b00};
-                    temp_word <= sd_spo;
-                    state <= S_HEX1;
+                // Start a 512-byte read
+                S_START_READ: begin
+                    rd_sig <= 1;
+                    byte_index <= 0;
+                    state <= S_WAIT_BYTE;
                 end
 
-                // print first nibble
-                S_HEX1: begin
-                    uart_data <= {24'd0, (temp_word[31:28] < 10) ? (8'h30 + temp_word[31:28]) : (8'h41 + temp_word[31:28] - 10)};
-                    uart_write <= 1;
-                    temp_word <= {temp_word[27:0], 4'b0};
-                    state <= S_HEX2;
-                end
-
-                // print next nibble(s)
-                S_HEX2: begin
-                    uart_data <= {24'd0, (temp_word[31:28] < 10) ? (8'h30 + temp_word[31:28]) : (8'h41 + temp_word[31:28] - 10)};
-                    uart_write <= 1;
-                    temp_word <= {temp_word[27:0], 4'b0};
-                    if ((byte_index + 1) >= 512)
-                        state <= S_IDLE;
-                    else begin
-                        byte_index <= byte_index + 1;
-                        state <= S_READ_DATA;
+                // Wait for new byte
+                S_WAIT_BYTE: begin
+                    rd_sig <= 0;
+                    if (sd_byte_available && !sd_byte_available_d) begin
+                        captured_byte <= sd_dout;
+                        print_hex_state <= 1;
+                        state <= S_PRINT_HI;
                     end
+                end
+
+                // Print high nibble
+                S_PRINT_HI: begin
+                    uart_print_char((captured_byte[7:4] < 10) ?
+                                    (8'h30 + captured_byte[7:4]) :
+                                    (8'h41 + captured_byte[7:4] - 10));
+                    state <= S_PRINT_LO;
+                end
+
+                // Print low nibble, check for end
+                S_PRINT_LO: begin
+                    uart_print_char((captured_byte[3:0] < 10) ?
+                                    (8'h30 + captured_byte[3:0]) :
+                                    (8'h41 + captured_byte[3:0] - 10));
+                    byte_index <= byte_index + 1;
+                    last_two <= {last_two[7:0], captured_byte};
+
+                    if (last_two == 16'h55AA) begin
+                        uart_print_char("!");
+                        state <= S_DONE;
+                    end else if (byte_index < 512)
+                        rd_sig <= 1;    // request next byte
+                    else
+                        state <= S_DONE;
+                end
+
+                // Stop after printing signature or end
+                S_DONE: begin
+                    rd_sig <= 0;
                 end
             endcase
         end
     end
+
 endmodule
