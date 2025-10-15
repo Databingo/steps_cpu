@@ -420,6 +420,152 @@
 
 
 
+// Print KEB
+//module cpu_on_board (
+//    (* chip_pin = "PIN_L1"  *) input  wire CLOCK_50,
+//    (* chip_pin = "PIN_R22" *) input  wire KEY0,        // Active-low reset
+//    (* chip_pin = "R20"     *) output wire LEDR0,
+//
+//    (* chip_pin = "V20" *) output wire SD_CLK,  // SD_CLK
+//    (* chip_pin = "Y20" *) inout  wire SD_CMD,  // SD_CMD (MOSI)
+//    (* chip_pin = "W20" *) inout  wire SD_DAT0, // SD_DAT0 (MISO)
+//    (* chip_pin = "U20" *) output wire SD_DAT3  // SD_CS
+//);
+//
+//    // =======================================================
+//    // Heartbeat LED
+//    // =======================================================
+//    reg [23:0] blink_counter;
+//    assign LEDR0 = blink_counter[23];
+//
+//    always @(posedge CLOCK_50 or negedge KEY0) begin
+//        if (!KEY0)
+//            blink_counter <= 0;
+//        else
+//            blink_counter <= blink_counter + 1'b1;
+//    end
+//
+//    // =======================================================
+//    // JTAG UART
+//    // =======================================================
+//    reg [31:0] uart_data;
+//    reg        uart_write;
+//
+//    jtag_uart_system uart0 (
+//        .clk_clk(CLOCK_50),
+//        .reset_reset_n(KEY0),
+//        .jtag_uart_0_avalon_jtag_slave_address(1'b0),
+//        .jtag_uart_0_avalon_jtag_slave_writedata(uart_data),
+//        .jtag_uart_0_avalon_jtag_slave_write_n(~uart_write),
+//        .jtag_uart_0_avalon_jtag_slave_chipselect(1'b1),
+//        .jtag_uart_0_avalon_jtag_slave_read_n(1'b1)
+//    );
+//
+//    // =======================================================
+//    // Slow pulse clock for SD init (~100 kHz)
+//    // =======================================================
+//    reg [8:0] clkdiv = 0;
+//    always @(posedge CLOCK_50 or negedge KEY0) begin
+//        if (!KEY0)
+//            clkdiv <= 0;
+//        else
+//            clkdiv <= clkdiv + 1;
+//    end
+//    wire clk_pulse_slow = (clkdiv == 0);
+//
+//    // =======================================================
+//    // SD controller connection
+//    // =======================================================
+//    wire [7:0] sd_dout;
+//    wire sd_ready;
+//    wire [4:0] sd_status;
+//    wire sd_cs, sd_mosi, sd_sclk;
+//    wire [7:0] sd_recv_data;
+//    wire sd_byte_available;
+//
+//    reg rd_sig = 0;
+//    reg wr_sig = 0;
+//
+//    sd_controller sd0 (
+//        .cs(sd_cs),
+//        .mosi(sd_mosi),
+//        .miso(SD_DAT0),
+//        .sclk(sd_sclk),
+//
+//        .rd(rd_sig),
+//        .wr(wr_sig),
+//        .dout(sd_dout),
+//        .byte_available(sd_byte_available),
+//        .din(8'h00),
+//        .ready_for_next_byte(),
+//        .reset(~KEY0),
+//        .ready(sd_ready),
+//        .address(32'h00000000),
+//        .clk(CLOCK_50),
+//        .clk_pulse_slow(clk_pulse_slow),
+//        .status(sd_status),
+//        .recv_data(sd_recv_data)
+//    );
+//
+//    // Connect physical pins
+//    assign SD_CLK  = sd_sclk;
+//    assign SD_DAT3 = sd_cs;
+//    assign SD_CMD  = sd_mosi;
+//
+//    // =======================================================
+//    // UART debug: print when SD is ready, then read and print first byte in hex
+//    // =======================================================
+//    reg printed_k = 0;
+//    reg do_read = 0;
+//    reg printed_byte = 0;
+//    reg [2:0] print_hex_state = 0;
+//    reg [7:0] captured_byte;
+//
+//    always @(posedge CLOCK_50 or negedge KEY0) begin
+//        if (!KEY0) begin
+//            uart_write <= 0;
+//            printed_k <= 0;
+//            do_read <= 0;
+//            rd_sig <= 0;
+//            wr_sig <= 0;
+//            printed_byte <= 0;
+//            print_hex_state <= 0;
+//            captured_byte <= 0;
+//        end else begin
+//            uart_write <= 0;
+//            if (sd_ready && !printed_k) begin
+//                uart_data  <= {24'd0, "K"};  // Print "K" when SD ready
+//                uart_write <= 1;
+//                printed_k <= 1;
+//            end
+//            if (sd_ready && printed_k && !do_read) begin
+//                rd_sig <= 1;
+//                do_read <= 1;
+//            end else if (do_read && (sd_status != 6)) begin
+//                rd_sig <= 0;
+//            end
+//            if (do_read && sd_byte_available && !printed_byte) begin
+//                captured_byte <= sd_dout;
+//                printed_byte <= 1;
+//                print_hex_state <= 1;
+//            end
+//            if (print_hex_state == 1) begin
+//                uart_data <= {24'd0, (captured_byte[7:4] < 4'd10) ? (8'h30 + captured_byte[7:4]) : (8'h41 + (captured_byte[7:4] - 4'd10))};
+//                uart_write <= 1;
+//                print_hex_state <= 2;
+//            end else if (print_hex_state == 2) begin
+//                print_hex_state <= 3;
+//            end else if (print_hex_state == 3) begin
+//                uart_data <= {24'd0, (captured_byte[3:0] < 4'd10) ? (8'h30 + captured_byte[3:0]) : (8'h41 + (captured_byte[3:0] - 4'd10))};
+//                uart_write <= 1;
+//                print_hex_state <= 0;
+//            end
+//        end
+//    end
+//
+//endmodule
+
+
 
 module cpu_on_board (
     (* chip_pin = "PIN_L1"  *) input  wire CLOCK_50,
@@ -485,6 +631,7 @@ module cpu_on_board (
 
     reg rd_sig = 0;
     reg wr_sig = 0;
+    reg [31:0] address = 0;
 
     sd_controller sd0 (
         .cs(sd_cs),
@@ -500,7 +647,7 @@ module cpu_on_board (
         .ready_for_next_byte(),
         .reset(~KEY0),
         .ready(sd_ready),
-        .address(32'h00000000),
+        .address(address),
         .clk(CLOCK_50),
         .clk_pulse_slow(clk_pulse_slow),
         .status(sd_status),
@@ -513,13 +660,17 @@ module cpu_on_board (
     assign SD_CMD  = sd_mosi;
 
     // =======================================================
-    // UART debug: print when SD is ready, then read and print first byte in hex
+    // Read boot sector, calculate root dir sector, read it, print file name
     // =======================================================
-    reg printed_k = 0;
+    reg [7:0] boot_sector [0:511];
+    reg [7:0] root_dir [0:511];
+    reg [9:0] byte_idx = 0;
     reg do_read = 0;
-    reg printed_byte = 0;
-    reg [2:0] print_hex_state = 0;
-    reg [7:0] captured_byte;
+    reg read_root = 0;
+    reg calculating = 0;
+    reg [31:0] calculated_address = 0;
+    reg printed_k = 0;
+    reg [4:0] print_name_state = 0;
 
     always @(posedge CLOCK_50 or negedge KEY0) begin
         if (!KEY0) begin
@@ -528,37 +679,85 @@ module cpu_on_board (
             do_read <= 0;
             rd_sig <= 0;
             wr_sig <= 0;
-            printed_byte <= 0;
-            print_hex_state <= 0;
-            captured_byte <= 0;
+            byte_idx <= 0;
+            read_root <= 0;
+            calculating <= 0;
+            calculated_address <= 0;
+            print_name_state <= 0;
+            address <= 0;
         end else begin
             uart_write <= 0;
             if (sd_ready && !printed_k) begin
-                uart_data  <= {24'd0, "K"};  // Print "K" when SD ready
+                uart_data <= {24'd0, "K"};  // Print "K" when SD ready
                 uart_write <= 1;
                 printed_k <= 1;
             end
-            if (sd_ready && printed_k && !do_read) begin
+            if (printed_k && !do_read && !read_root) begin
+                address <= 0;
+                rd_sig <= 1;
+                do_read <= 1;
+            end else if (read_root && !do_read) begin
+                address <= calculated_address;
                 rd_sig <= 1;
                 do_read <= 1;
             end else if (do_read && (sd_status != 6)) begin
                 rd_sig <= 0;
             end
-            if (do_read && sd_byte_available && !printed_byte) begin
-                captured_byte <= sd_dout;
-                printed_byte <= 1;
-                print_hex_state <= 1;
+            if (sd_byte_available) begin
+                if (!read_root) begin
+                    boot_sector[byte_idx] <= sd_dout;
+                end else begin
+                    root_dir[byte_idx] <= sd_dout;
+                end
+                byte_idx <= byte_idx + 1;
             end
-            if (print_hex_state == 1) begin
-                uart_data <= {24'd0, (captured_byte[7:4] < 4'd10) ? (8'h30 + captured_byte[7:4]) : (8'h41 + (captured_byte[7:4] - 4'd10))};
-                uart_write <= 1;
-                print_hex_state <= 2;
-            end else if (print_hex_state == 2) begin
-                print_hex_state <= 3;
-            end else if (print_hex_state == 3) begin
-                uart_data <= {24'd0, (captured_byte[3:0] < 4'd10) ? (8'h30 + captured_byte[3:0]) : (8'h41 + (captured_byte[3:0] - 4'd10))};
-                uart_write <= 1;
-                print_hex_state <= 0;
+            if (byte_idx == 512) begin
+                byte_idx <= 0;
+                if (!read_root) begin
+                    calculating <= 1;
+                end else begin
+                    print_name_state <= 1;
+                end
+                do_read <= 0;
+            end
+            if (calculating) begin
+                if (boot_sector[82] == 8'h46) begin  // 'F' for FAT32
+                    calculated_address <= {16'h0000, boot_sector[15], boot_sector[14]} + 
+                                          ({24'h000000, boot_sector[16]} * {boot_sector[39], boot_sector[38], boot_sector[37], boot_sector[36]}) + 
+                                          ({boot_sector[47], boot_sector[46], boot_sector[45], boot_sector[44]} - 32'h00000002) * {24'h000000, boot_sector[13]};
+                end else begin  // FAT16
+                    calculated_address <= {16'h0000, boot_sector[15], boot_sector[14]} + 
+                                          ({24'h000000, boot_sector[16]} * {16'h0000, boot_sector[23], boot_sector[22]});
+                end
+                calculating <= 0;
+                read_root <= 1;
+            end
+            if (print_name_state != 0) begin
+                case (print_name_state)
+                    1: begin uart_data <= {24'd0, root_dir[64]}; uart_write <= 1; print_name_state <= 2; end
+                    2: print_name_state <= 3;
+                    3: begin uart_data <= {24'd0, root_dir[65]}; uart_write <= 1; print_name_state <= 4; end
+                    4: print_name_state <= 5;
+                    5: begin uart_data <= {24'd0, root_dir[66]}; uart_write <= 1; print_name_state <= 6; end
+                    6: print_name_state <= 7;
+                    7: begin uart_data <= {24'd0, root_dir[67]}; uart_write <= 1; print_name_state <= 8; end
+                    8: print_name_state <= 9;
+                    9: begin uart_data <= {24'd0, root_dir[68]}; uart_write <= 1; print_name_state <= 10; end
+                    10: print_name_state <= 11;
+                    11: begin uart_data <= {24'd0, root_dir[69]}; uart_write <= 1; print_name_state <= 12; end
+                    12: print_name_state <= 13;
+                    13: begin uart_data <= {24'd0, root_dir[70]}; uart_write <= 1; print_name_state <= 14; end
+                    14: print_name_state <= 15;
+                    15: begin uart_data <= {24'd0, root_dir[71]}; uart_write <= 1; print_name_state <= 16; end
+                    16: print_name_state <= 17;
+                    17: begin uart_data <= {24'd0, "."}; uart_write <= 1; print_name_state <= 18; end
+                    18: print_name_state <= 19;
+                    19: begin uart_data <= {24'd0, root_dir[72]}; uart_write <= 1; print_name_state <= 20; end
+                    20: print_name_state <= 21;
+                    21: begin uart_data <= {24'd0, root_dir[73]}; uart_write <= 1; print_name_state <= 22; end
+                    22: print_name_state <= 23;
+                    23: begin uart_data <= {24'd0, root_dir[74]}; uart_write <= 1; print_name_state <= 0; end
+                endcase
             end
         end
     end
