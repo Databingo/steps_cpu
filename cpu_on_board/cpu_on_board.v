@@ -308,8 +308,10 @@
 //
 //endmodule
 
+
+
 // =======================================================
-// DE1 Minimal SD + JTAG UART test (with status check)
+// DE1 Minimal SD + JTAG UART test (clean "SDOK"/"SDNO")
 // =======================================================
 module cpu_on_board (
     (* chip_pin = "PIN_L1"  *) input  wire CLOCK_50,
@@ -336,7 +338,7 @@ module cpu_on_board (
     end
 
     // =======================================================
-    // JTAG UART (same as before)
+    // JTAG UART
     // =======================================================
     reg [31:0] uart_data;
     reg        uart_write;
@@ -352,7 +354,7 @@ module cpu_on_board (
     );
 
     // =======================================================
-    // SD IP Avalon-MM wires
+    // SD IP Avalon-MM
     // =======================================================
     reg         sd_chipselect;
     reg  [2:0]  sd_address;
@@ -363,20 +365,15 @@ module cpu_on_board (
     wire [31:0] sd_readdata;
     wire        sd_waitrequest;
 
-    // =======================================================
-    // Instantiate Altera SD Card IP (add sd.qip to project)
-    // =======================================================
     sd u_sd (
         .clk_clk(CLOCK_50),
         .reset_reset_n(KEY0),
 
-        // Physical SD pins
         .altera_up_sd_card_avalon_interface_0_conduit_end_b_SD_cmd (SD_CMD),
         .altera_up_sd_card_avalon_interface_0_conduit_end_b_SD_dat (SD_DAT0),
         .altera_up_sd_card_avalon_interface_0_conduit_end_b_SD_dat3(SD_DAT3),
         .altera_up_sd_card_avalon_interface_0_conduit_end_o_SD_clock(SD_CLK),
 
-        // Avalon-MM slave
         .altera_up_sd_card_avalon_interface_0_avalon_sdcard_slave_chipselect(sd_chipselect),
         .altera_up_sd_card_avalon_interface_0_avalon_sdcard_slave_address   (sd_address),
         .altera_up_sd_card_avalon_interface_0_avalon_sdcard_slave_read      (sd_read),
@@ -388,7 +385,7 @@ module cpu_on_board (
     );
 
     // =======================================================
-    // SD test logic
+    // SD status test
     // =======================================================
     reg [3:0]  state;
     reg [23:0] delay;
@@ -400,7 +397,6 @@ module cpu_on_board (
             uart_write <= 0;
             delay <= 0;
             state <= 0;
-
             sd_chipselect <= 0;
             sd_read <= 0;
             sd_write <= 0;
@@ -408,51 +404,52 @@ module cpu_on_board (
             sd_writedata <= 0;
         end else begin
             uart_write <= 0;
-            sd_read <= 0;
-            sd_write <= 0;
             sd_chipselect <= 0;
+            sd_read <= 0;
 
             case (state)
                 0: begin
-                    // wait a bit for IP to stabilize
                     if (delay == 24'd5_000_000) begin
-                        state <= 1;
+                        uart_data <= {24'd0, "S"};
+                        uart_write <= 1;
                         delay <= 0;
+                        state <= 1;
                     end else
                         delay <= delay + 1;
                 end
 
                 1: begin
-                    // read SD status register
-                    sd_chipselect <= 1;
-                    sd_read <= 1;
-                    sd_address <= 3'b000; // status
-                    if (!sd_waitrequest) begin
+                    if (delay == 24'd100_000) begin
+                        uart_data <= {24'd0, "D"};
+                        uart_write <= 1;
+                        delay <= 0;
                         state <= 2;
-                    end
+                    end else
+                        delay <= delay + 1;
                 end
 
                 2: begin
-                    sd_data_latched <= sd_readdata;
-                    // print status info
-                    uart_data <= {24'd0, "S"};
-                    uart_write <= 1;
-                    state <= 3;
+                    // Request SD status
+                    sd_chipselect <= 1;
+                    sd_read <= 1;
+                    sd_address <= 3'b000;
+                    if (!sd_waitrequest)
+                        state <= 3;
                 end
 
                 3: begin
-                    uart_data <= {24'd0, "D"};
-                    uart_write <= 1;
+                    // Wait one cycle for data to appear
+                    sd_data_latched <= sd_readdata;
                     state <= 4;
                 end
 
                 4: begin
                     if (sd_data_latched[0]) begin
-                        uart_data <= {24'd0, "O"}; // card OK
+                        uart_data <= {24'd0, "O"};
                         uart_write <= 1;
                         state <= 5;
                     end else begin
-                        uart_data <= {24'd0, "N"}; // no card
+                        uart_data <= {24'd0, "N"};
                         uart_write <= 1;
                         state <= 6;
                     end
@@ -470,7 +467,7 @@ module cpu_on_board (
                     state <= 7;
                 end
 
-                7: state <= 7;
+                7: state <= 7; // done
             endcase
         end
     end
