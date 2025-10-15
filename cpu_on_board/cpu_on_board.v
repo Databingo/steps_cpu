@@ -980,7 +980,6 @@ module cpu_on_board (
     // =======================================================
     reg [23:0] blink_counter;
     assign LEDR0 = blink_counter[23];
-
     always @(posedge CLOCK_50 or negedge KEY0) begin
         if (!KEY0)
             blink_counter <= 0;
@@ -1005,7 +1004,7 @@ module cpu_on_board (
     );
 
     // =======================================================
-    // Slow pulse clock for SD (~100 kHz)
+    // Slow pulse clock for SD init (~100 kHz)
     // =======================================================
     reg [8:0] clkdiv = 0;
     always @(posedge CLOCK_50 or negedge KEY0) begin
@@ -1034,7 +1033,6 @@ module cpu_on_board (
         .mosi(sd_mosi),
         .miso(SD_DAT0),
         .sclk(sd_sclk),
-
         .rd(rd_sig),
         .wr(wr_sig),
         .dout(sd_dout),
@@ -1050,20 +1048,18 @@ module cpu_on_board (
         .recv_data(sd_recv_data)
     );
 
-    // Connect physical pins
     assign SD_CLK  = sd_sclk;
     assign SD_DAT3 = sd_cs;
     assign SD_CMD  = sd_mosi;
 
     // =======================================================
-    // Print first 16 bytes from SD card in hex
+    // UART debug: print "K", then read sector 0 until 0x55AA
     // =======================================================
     reg printed_k = 0;
     reg do_read = 0;
-    reg [3:0] byte_idx = 0;
-    reg [7:0] captured_bytes [0:15];
-    reg [1:0] print_hex_state = 0;  // 0=idle,1=upper nibble,2=lower nibble
-    reg [3:0] print_idx = 0;
+    reg [7:0] prev_byte = 0;
+    reg done = 0;
+    reg [1:0] print_hex_state = 0;
 
     always @(posedge CLOCK_50 or negedge KEY0) begin
         if (!KEY0) begin
@@ -1071,56 +1067,49 @@ module cpu_on_board (
             printed_k <= 0;
             do_read <= 0;
             rd_sig <= 0;
-            wr_sig <= 0;
-            byte_idx <= 0;
+            prev_byte <= 0;
+            done <= 0;
             print_hex_state <= 0;
-            print_idx <= 0;
         end else begin
             uart_write <= 0;
 
-            // Print "K" when SD ready
+            // Print "K" when SD is ready
             if (sd_ready && !printed_k) begin
                 uart_data  <= {24'd0, "K"};
                 uart_write <= 1;
                 printed_k  <= 1;
             end
 
-            // Start reading first 16 bytes
-            if (sd_ready && printed_k && !do_read) begin
-                rd_sig   <= 1;
-                do_read  <= 1;
+            // Start reading after "K"
+            if (sd_ready && printed_k && !done && !do_read) begin
+                rd_sig <= 1;
+                do_read <= 1;
             end else begin
                 rd_sig <= 0;
             end
 
-            // Capture bytes from SD
-            if (sd_byte_available && byte_idx < 16) begin
-                captured_bytes[byte_idx] <= sd_dout;
-                byte_idx <= byte_idx + 1;
-            end
+            // Capture bytes when available
+            if (sd_byte_available && do_read && !done) begin
+                // Print upper nibble
+                if (print_hex_state == 0) begin
+                    uart_data <= {24'd0, (sd_dout[7:4] < 10 ? 8'h30 + sd_dout[7:4] : 8'h41 + sd_dout[7:4]-10)};
+                    uart_write <= 1;
+                    print_hex_state <= 1;
+                end 
+                // Print lower nibble
+                else if (print_hex_state == 1) begin
+                    uart_data <= {24'd0, (sd_dout[3:0] < 10 ? 8'h30 + sd_dout[3:0] : 8'h41 + sd_dout[3:0]-10)};
+                    uart_write <= 1;
+                    print_hex_state <= 0;
 
-            // Print captured bytes in hex
-            if (byte_idx == 16 && print_hex_state == 0 && print_idx < 16) begin
-                print_hex_state <= 1; // start printing
-            end
+                    // Check for 0x55AA signature
+                    if (prev_byte == 8'h55 && sd_dout == 8'hAA) begin
+                        done <= 1;
+                    end
 
-            if (print_hex_state == 1) begin
-                uart_data <= {24'd0, (captured_bytes[print_idx][7:4] < 10) ? 
-                              (8'h30 + captured_bytes[print_idx][7:4]) : 
-                              (8'h41 + captured_bytes[print_idx][7:4]-10)};
-                uart_write <= 1;
-                print_hex_state <= 2;
-            end else if (print_hex_state == 2) begin
-                uart_data <= {24'd0, (captured_bytes[print_idx][3:0] < 10) ? 
-                              (8'h30 + captured_bytes[print_idx][3:0]) : 
-                              (8'h41 + captured_bytes[print_idx][3:0]-10)};
-                uart_write <= 1;
-                print_hex_state <= 0;
-                print_idx <= print_idx + 1;
+                    prev_byte <= sd_dout;
+                end
             end
         end
     end
-
 endmodule
-
-
