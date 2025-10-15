@@ -1440,8 +1440,7 @@
 //
 //endmodule
 
-
-// print long KBC0234004E4020102020000100F000000FF00099C61EF0E1D5000061416000A1
+// print 0-15 sectors
 module cpu_on_board (
     (* chip_pin = "PIN_L1"  *) input  wire CLOCK_50,
     (* chip_pin = "PIN_R22" *) input  wire KEY0,        // Active-low reset
@@ -1514,14 +1513,15 @@ module cpu_on_board (
     );
 
     // =======================================================
-    // UART debug: print "K" then print all 512 bytes in hex
+    // UART debug: print "K" then print all 512 bytes in hex for sectors 0-15
     // =======================================================
     reg printed_k = 0;
     reg [8:0] byte_index = 0;       // 0..511
-    reg [2:0] print_hex_state = 0;
+    reg [3:0] print_hex_state = 0;
     reg [7:0] captured_byte;
     reg [3:0] fsm_state = 0;
     reg [1:0] sub_byte = 0;
+    reg [4:0] current_sector = 0;
 
     always @(posedge CLOCK_50 or negedge KEY0) begin
         if (!KEY0) begin
@@ -1535,6 +1535,7 @@ module cpu_on_board (
             mem_d <= 0;
             mem_we <= 0;
             sub_byte <= 0;
+            current_sector <= 0;
         end else begin
             uart_write <= 0;
             mem_we <= 0;
@@ -1548,7 +1549,7 @@ module cpu_on_board (
                 end
             end else if (fsm_state == 1) begin
                 mem_a   <= 16'h1000;
-                mem_d   <= 32'h00000000;
+                mem_d   <= current_sector;
                 mem_we  <= 1;
                 fsm_state <= 2;
             end else if (fsm_state == 2) begin
@@ -1589,16 +1590,25 @@ module cpu_on_board (
                 end else if (print_hex_state == 2) begin
                     uart_data  <= {24'd0, (captured_byte[3:0] < 10) ? (8'h30 + captured_byte[3:0]) : (8'h41 + captured_byte[3:0] - 10)};
                     uart_write <= 1;
-                    print_hex_state <= 0;
-                    byte_index <= byte_index + 1;
-                    if (sub_byte == 3) begin
-                        sub_byte <= 0;
-                        mem_a <= mem_a + 4;
-                    end else begin
-                        sub_byte <= sub_byte + 1;
+                    print_hex_state <= (byte_index == 511) ? 4'd3 : 4'd0;
+                    if (byte_index != 511) begin
+                        byte_index <= byte_index + 1;
+                        if (sub_byte == 3) begin
+                            sub_byte <= 0;
+                            mem_a <= mem_a + 4;
+                        end else begin
+                            sub_byte <= sub_byte + 1;
+                        end
                     end
-                    if (byte_index == 511) begin
+                end else if (print_hex_state == 3) begin
+                    uart_data  <= {24'd0, 8'h0A};
+                    uart_write <= 1;
+                    print_hex_state <= 0;
+                    if (current_sector == 15) begin
                         fsm_state <= 6;
+                    end else begin
+                        current_sector <= current_sector + 1;
+                        fsm_state <= 1;
                     end
                 end
             end
@@ -1606,3 +1616,4 @@ module cpu_on_board (
     end
 
 endmodule
+`
