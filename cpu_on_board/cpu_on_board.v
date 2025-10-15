@@ -1069,9 +1069,9 @@ module cpu_on_board (
     
     reg [8:0] byte_index;
     reg sd_byte_available_d;
-    sd_byte_available_d <= sd_byte_available;
 
     always @(posedge CLOCK_50 or negedge KEY0) begin
+    sd_byte_available_d <= sd_byte_available;
         if (!KEY0) begin
             uart_write <= 0;
             printed_k <= 0;
