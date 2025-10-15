@@ -79,19 +79,17 @@ module sd_controller(
     
     reg [26:0] boot_counter = 27'd050_000;
     reg [7:0] reset_counter = 0;
-    reg [39:0] response = 0;
-    reg ccs = 0;
-
     always @(posedge clk) begin
         if(reset == 1) begin
             state <= RST;
             sclk_sig <= 0;
+            //boot_counter <= 27'd100_000_000;
             boot_counter <= 27'd005_000;
+            //boot_counter <= 27'd001_000;
             cmd_mode <= 1;
             cs <= 1;
             cmd_out <= {56{1'b1}};
             data_sig <= 8'hFF;
-            ccs <= 0;
             if (clk_pulse_slow) begin
                 reset_counter <= reset_counter + 1;
                 if (reset_counter[2]) sclk_sig <= ~sclk_sig;
@@ -113,8 +111,10 @@ module sd_controller(
                         state <= INIT;
                     end
                     else begin
+                        // <400KHz startup init
                         boot_counter <= boot_counter - 1;
                         if (boot_counter[2]) sclk_sig <= ~sclk_sig;
+                        //sclk_sig <= ~sclk_sig; // I added this
                     end
                 end
                 INIT: begin
@@ -128,13 +128,17 @@ module sd_controller(
                     end
                 end
                 CMD0: begin
+                    // cmd format: 01   ......        .*32   ....... 1
+                    //                command bit   argument  CRC7
                     cmd_out <= 56'hFF_40_00_00_00_00_95;
                     bit_counter <= 55;
-                    response_type <= 3'b001;
+                    response_type <= 3'b1;
                     return_state <= CMD8;
                     state <= SEND_CMD;
                 end
                 CMD8: begin
+                    // this CMD8 has R7 response (CMD0 and CMD55 has R1)
+                    // so take special care, or SDHC card may deadlock
                     cmd_out <= 56'hFF_48_00_00_01_AA_87;
                     bit_counter <= 55;
                     response_type <= 3'b111;
@@ -144,24 +148,23 @@ module sd_controller(
                 CMD55: begin
                     cmd_out <= 56'hFF_77_00_00_00_00_01;
                     bit_counter <= 55;
-                    response_type <= 3'b001;
+                    response_type <= 3'b1;
                     return_state <= CMD41;
                     state <= SEND_CMD;
                 end
                 CMD41: begin
                     cmd_out <= 56'hFF_69_40_00_00_00_01;
                     bit_counter <= 55;
-                    response_type <= 3'b111; // R3
+                    response_type <= 3'b1;
                     return_state <= POLL_CMD;
                     state <= SEND_CMD;
                 end
                 POLL_CMD: begin
-                    ccs <= response[30];
-                    if(response[32] == 0) begin
-                        state <= IDLE;
+                    if(recv_data[0] == 0) begin
+                        state <= IDLE; // response 0x0, OK
                     end
                     else begin
-                        state <= CMD55;
+                        state <= CMD55; // response 0x1, again
                     end
                 end
                 IDLE: begin
@@ -176,9 +179,9 @@ module sd_controller(
                     end
                 end
                 READ_BLOCK: begin
-                    cmd_out <= {16'hFF_51, ccs ? address >> 9 : address, 8'hFF};
+                    cmd_out <= {16'hFF_51, address, 8'hFF};
                     bit_counter <= 55;
-                    response_type <= 3'b001;
+                    response_type <= 3'b1;
                     return_state <= READ_BLOCK_WAIT;
                     state <= SEND_CMD;
                 end
@@ -227,10 +230,10 @@ module sd_controller(
                     if (sclk_sig == 1) begin
                         if (miso == 0) begin
                             recv_data <= 0;
-                            response <= 0;
                             case (response_type)
-                                3'b001: bit_counter <= 6;
-                                3'b111: bit_counter <= 38;
+                                1: bit_counter <= 6;
+                                7: bit_counter <= 38;
+                                // in R7 most bits will LOST, but don't care
                                 default: bit_counter <= 6;
                             endcase
                             state <= RECEIVE_BYTE;
@@ -242,7 +245,6 @@ module sd_controller(
                     byte_available <= 0;
                     if (sclk_sig == 1) begin
                         recv_data <= {recv_data[6:0], miso};
-                        response <= {response[38:0], miso};
                         if (bit_counter == 0) begin
                             state <= return_state;
                         end
@@ -253,10 +255,10 @@ module sd_controller(
                     sclk_sig <= ~sclk_sig;
                 end
                 WRITE_BLOCK_CMD: begin
-                    cmd_out <= {16'hFF_58, ccs ? address >> 9 : address, 8'hFF};
+                    cmd_out <= {16'hFF_58, address, 8'hFF};
                     bit_counter <= 55;
                     return_state <= WRITE_BLOCK_INIT;
-                    response_type <= 3'b001;
+                    response_type <= 1;
                     state <= SEND_CMD;
                     ready_for_next_byte <= 1;
                 end
@@ -318,4 +320,3 @@ module sd_controller(
     assign mosi = cmd_mode ? cmd_out[55] : data_sig[7];
     assign ready = (state == IDLE);
 endmodule
-
