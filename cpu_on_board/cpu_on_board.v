@@ -123,187 +123,301 @@
 
 
 
+//module cpu_on_board (
+//    (* chip_pin = "PIN_L1"  *) input  wire CLOCK_50,
+//    (* chip_pin = "PIN_R22" *) input  wire KEY0,        // Active-low reset
+//    (* chip_pin = "R20"     *) output wire LEDR0,
+//
+//    (* chip_pin = "V20" *) output wire SD_CLK,  // SD_CLK
+//    (* chip_pin = "Y20" *) inout  wire SD_CMD,  // SD_CMD
+//    (* chip_pin = "W20" *) inout  wire SD_DAT0, // SD_DAT0
+//    (* chip_pin = "U20" *) output wire SD_DAT3  // SD_CS
+//);
+//
+//// =======================================================
+//// Heartbeat LED
+//// =======================================================
+//reg [23:0] blink_counter;
+//assign LEDR0 = blink_counter[23];
+//reg cmd_start;
+//
+//always @(posedge CLOCK_50 or negedge KEY0) begin
+//    if (!KEY0)
+//        blink_counter <= 0;
+//    else
+//        blink_counter <= blink_counter + 1'b1;
+//end
+//
+//// =======================================================
+//// JTAG UART
+//// =======================================================
+//reg [31:0] uart_data;
+//reg        uart_write;
+//
+//jtag_uart_system uart0 (
+//    .clk_clk(CLOCK_50),
+//    .reset_reset_n(KEY0),
+//    .jtag_uart_0_avalon_jtag_slave_address(1'b0),
+//    .jtag_uart_0_avalon_jtag_slave_writedata(uart_data),
+//    .jtag_uart_0_avalon_jtag_slave_write_n(~uart_write),
+//    .jtag_uart_0_avalon_jtag_slave_chipselect(1'b1),
+//    .jtag_uart_0_avalon_jtag_slave_read_n(1'b1)
+//);
+//
+//// =======================================================
+//// SD SPI lines
+//// =======================================================
+//reg sd_cmd_out;
+//reg sd_cmd_oe;
+//reg [15:0] clk_div;
+//reg sd_clk_reg;
+//
+//assign SD_CMD = sd_cmd_oe ? sd_cmd_out : 1'bz;
+//assign SD_CLK = sd_clk_reg;
+//assign SD_DAT3 = 1'b1;  // CS high
+//assign SD_DAT0 = 1'bz;   // read-only
+//
+//// Slow SD clock ~100 kHz
+//always @(posedge CLOCK_50 or negedge KEY0) begin
+//    if (!KEY0) begin
+//        clk_div <= 0;
+//        sd_clk_reg <= 0;
+//    end else begin
+//        clk_div <= clk_div + 1;
+//        if (clk_div == 250) begin
+//            sd_clk_reg <= ~sd_clk_reg;
+//            clk_div <= 0;
+//        end
+//    end
+//end
+//
+//// =======================================================
+//// SD command FSM
+//// =======================================================
+//reg [7:0]  init_cnt;
+//reg [5:0]  bit_cnt;
+//reg [47:0] cmd_shift;
+//reg [4:0]  state;
+//
+//always @(posedge CLOCK_50 or negedge KEY0) begin
+//    if (!KEY0) begin
+//        init_cnt <= 0;
+//        bit_cnt <= 0;
+//        cmd_shift <= 48'h40_00_00_00_00_95; // CMD0 reset
+//        cmd_start <= 0;
+//        sd_cmd_oe <= 0;
+//        sd_cmd_out <= 1;
+//        uart_write <= 0;
+//        uart_data <= 0;
+//        state <= 0;
+//    end else begin
+//        uart_write <= 0;
+//
+//        case(state)
+//            0: begin
+//                // 80 clocks CMD high before CMD0
+//                if (init_cnt < 80) begin
+//                    sd_cmd_oe <= 1;
+//                    sd_cmd_out <= 1;
+//                    init_cnt <= init_cnt + 1;
+//                end else begin
+//                    state <= 1;
+//                    init_cnt <= 0;
+//                    bit_cnt <= 0;
+//                    cmd_shift <= 48'h40_00_00_00_00_95; // CMD0
+//                end
+//            end
+//
+//            // Send CMD0
+//            1: begin
+//                sd_cmd_oe <= 1;
+//                sd_cmd_out <= cmd_shift[47];
+//                cmd_shift <= {cmd_shift[46:0],1'b1};
+//                bit_cnt <= bit_cnt + 1;
+//                if (bit_cnt == 47) begin
+//                    sd_cmd_oe <= 0;  // release CMD line
+//                    state <= 2;
+//                    init_cnt <= 0;
+//                end
+//            end
+//
+//            // Wait some clocks, print "0"
+//            2: begin
+//                if (init_cnt == 15) begin
+//                    uart_data <= {24'd0, "0"}; uart_write <= 1;
+//                    state <= 3;
+//                end else
+//                    init_cnt <= init_cnt + 1;
+//            end
+//
+//            // CMD55 (APP_CMD)
+//            3: begin
+//                cmd_shift <= 48'h77_00_00_00_00_65; // CMD55
+//                bit_cnt <= 0;
+//                state <= 4;
+//            end
+//
+//            4: begin
+//                sd_cmd_oe <= 1;
+//                sd_cmd_out <= cmd_shift[47];
+//                cmd_shift <= {cmd_shift[46:0],1'b1};
+//                bit_cnt <= bit_cnt + 1;
+//                if (bit_cnt == 47) begin
+//                    sd_cmd_oe <= 0;
+//                    state <= 5;
+//                end
+//            end
+//
+//            5: begin
+//                uart_data <= {24'd0, "5"}; uart_write <= 1;
+//                state <= 6;
+//            end
+//
+//            // ACMD41
+//            6: begin
+//                cmd_shift <= 48'h69_40_00_00_00_00; // ACMD41 simplified
+//                bit_cnt <= 0;
+//                state <= 7;
+//            end
+//
+//            7: begin
+//                sd_cmd_oe <= 1;
+//                sd_cmd_out <= cmd_shift[47];
+//                cmd_shift <= {cmd_shift[46:0],1'b1};
+//                bit_cnt <= bit_cnt + 1;
+//                if (bit_cnt == 47) begin
+//                    sd_cmd_oe <= 0;
+//                    state <= 8;
+//                end
+//            end
+//
+//            8: begin
+//                uart_data <= {24'd0, "A"}; uart_write <= 1;
+//                state <= 9;
+//            end
+//
+//            9: begin
+//                uart_data <= {24'd0, "D"}; uart_write <= 1;
+//                state <= 10;
+//            end
+//
+//            10: state <= 10; // stop
+//        endcase
+//    end
+//end
+//
+//endmodule
+//
+//
+//
+//
+// =======================================================
+// Minimal SD Card Test (using Altera UP SD Card IP)
+// Target: DE1 board
+// Author: ChatGPT (2025-10)
+// =======================================================
 module cpu_on_board (
+    // Clock and reset
     (* chip_pin = "PIN_L1"  *) input  wire CLOCK_50,
-    (* chip_pin = "PIN_R22" *) input  wire KEY0,        // Active-low reset
+    (* chip_pin = "PIN_R22" *) input  wire KEY0,  // Active-low reset
+
+    // LED
     (* chip_pin = "R20"     *) output wire LEDR0,
 
-    (* chip_pin = "V20" *) output wire SD_CLK,  // SD_CLK
-    (* chip_pin = "Y20" *) inout  wire SD_CMD,  // SD_CMD
-    (* chip_pin = "W20" *) inout  wire SD_DAT0, // SD_DAT0
-    (* chip_pin = "U20" *) output wire SD_DAT3  // SD_CS
+    // SD card physical pins (DE1 pinout)
+    (* chip_pin = "V20" *) output wire SD_CLK,   // SD_CLK
+    (* chip_pin = "Y20" *) inout  wire SD_CMD,   // SD_CMD
+    (* chip_pin = "W20" *) inout  wire SD_DAT0,  // SD_DAT0
+    (* chip_pin = "U20" *) output wire SD_DAT3   // SD_DAT3 (CS)
 );
 
-// =======================================================
-// Heartbeat LED
-// =======================================================
-reg [23:0] blink_counter;
-assign LEDR0 = blink_counter[23];
-reg cmd_start;
+    // ====================================================
+    // Reset & Clock
+    // ====================================================
+    wire clk = CLOCK_50;
+    wire rst_n = KEY0;   // active low reset
 
-always @(posedge CLOCK_50 or negedge KEY0) begin
-    if (!KEY0)
-        blink_counter <= 0;
-    else
-        blink_counter <= blink_counter + 1'b1;
-end
+    // ====================================================
+    // Simple LED heartbeat
+    // ====================================================
+    reg [23:0] led_counter;
+    always @(posedge clk or negedge rst_n) begin
+        if (!rst_n)
+            led_counter <= 0;
+        else
+            led_counter <= led_counter + 1;
+    end
+    assign LEDR0 = led_counter[23];  // Blink slowly
 
-// =======================================================
-// JTAG UART
-// =======================================================
-reg [31:0] uart_data;
-reg        uart_write;
+    // ====================================================
+    // SD Controller Avalon interface wires
+    // ====================================================
+    wire        sd_chipselect;
+    wire [2:0]  sd_address;
+    wire        sd_read;
+    wire        sd_write;
+    wire [3:0]  sd_byteenable;
+    wire [31:0] sd_writedata;
+    wire [31:0] sd_readdata;
+    wire        sd_waitrequest;
 
-jtag_uart_system uart0 (
-    .clk_clk(CLOCK_50),
-    .reset_reset_n(KEY0),
-    .jtag_uart_0_avalon_jtag_slave_address(1'b0),
-    .jtag_uart_0_avalon_jtag_slave_writedata(uart_data),
-    .jtag_uart_0_avalon_jtag_slave_write_n(~uart_write),
-    .jtag_uart_0_avalon_jtag_slave_chipselect(1'b1),
-    .jtag_uart_0_avalon_jtag_slave_read_n(1'b1)
-);
+    // ====================================================
+    // Simple test logic (placeholder for CPU bus)
+    // This will just read from the SD controller after reset
+    // ====================================================
+    reg [31:0] test_data;
+    reg [3:0]  state;
 
-// =======================================================
-// SD SPI lines
-// =======================================================
-reg sd_cmd_out;
-reg sd_cmd_oe;
-reg [15:0] clk_div;
-reg sd_clk_reg;
+    localparam IDLE = 0, READ_STATUS = 1, DONE = 2;
 
-assign SD_CMD = sd_cmd_oe ? sd_cmd_out : 1'bz;
-assign SD_CLK = sd_clk_reg;
-assign SD_DAT3 = 1'b1;  // CS high
-assign SD_DAT0 = 1'bz;   // read-only
-
-// Slow SD clock ~100 kHz
-always @(posedge CLOCK_50 or negedge KEY0) begin
-    if (!KEY0) begin
-        clk_div <= 0;
-        sd_clk_reg <= 0;
-    end else begin
-        clk_div <= clk_div + 1;
-        if (clk_div == 250) begin
-            sd_clk_reg <= ~sd_clk_reg;
-            clk_div <= 0;
+    always @(posedge clk or negedge rst_n) begin
+        if (!rst_n) begin
+            state <= IDLE;
+        end else begin
+            case (state)
+                IDLE: state <= READ_STATUS;
+                READ_STATUS: if (!sd_waitrequest) state <= DONE;
+                DONE: state <= DONE;
+            endcase
         end
     end
-end
 
-// =======================================================
-// SD command FSM
-// =======================================================
-reg [7:0]  init_cnt;
-reg [5:0]  bit_cnt;
-reg [47:0] cmd_shift;
-reg [4:0]  state;
+    assign sd_chipselect = (state == READ_STATUS);
+    assign sd_address    = 3'b000;
+    assign sd_read       = (state == READ_STATUS);
+    assign sd_write      = 1'b0;
+    assign sd_byteenable = 4'b1111;
+    assign sd_writedata  = 32'h00000000;
 
-always @(posedge CLOCK_50 or negedge KEY0) begin
-    if (!KEY0) begin
-        init_cnt <= 0;
-        bit_cnt <= 0;
-        cmd_shift <= 48'h40_00_00_00_00_95; // CMD0 reset
-        cmd_start <= 0;
-        sd_cmd_oe <= 0;
-        sd_cmd_out <= 1;
-        uart_write <= 0;
-        uart_data <= 0;
-        state <= 0;
-    end else begin
-        uart_write <= 0;
-
-        case(state)
-            0: begin
-                // 80 clocks CMD high before CMD0
-                if (init_cnt < 80) begin
-                    sd_cmd_oe <= 1;
-                    sd_cmd_out <= 1;
-                    init_cnt <= init_cnt + 1;
-                end else begin
-                    state <= 1;
-                    init_cnt <= 0;
-                    bit_cnt <= 0;
-                    cmd_shift <= 48'h40_00_00_00_00_95; // CMD0
-                end
-            end
-
-            // Send CMD0
-            1: begin
-                sd_cmd_oe <= 1;
-                sd_cmd_out <= cmd_shift[47];
-                cmd_shift <= {cmd_shift[46:0],1'b1};
-                bit_cnt <= bit_cnt + 1;
-                if (bit_cnt == 47) begin
-                    sd_cmd_oe <= 0;  // release CMD line
-                    state <= 2;
-                    init_cnt <= 0;
-                end
-            end
-
-            // Wait some clocks, print "0"
-            2: begin
-                if (init_cnt == 15) begin
-                    uart_data <= {24'd0, "0"}; uart_write <= 1;
-                    state <= 3;
-                end else
-                    init_cnt <= init_cnt + 1;
-            end
-
-            // CMD55 (APP_CMD)
-            3: begin
-                cmd_shift <= 48'h77_00_00_00_00_65; // CMD55
-                bit_cnt <= 0;
-                state <= 4;
-            end
-
-            4: begin
-                sd_cmd_oe <= 1;
-                sd_cmd_out <= cmd_shift[47];
-                cmd_shift <= {cmd_shift[46:0],1'b1};
-                bit_cnt <= bit_cnt + 1;
-                if (bit_cnt == 47) begin
-                    sd_cmd_oe <= 0;
-                    state <= 5;
-                end
-            end
-
-            5: begin
-                uart_data <= {24'd0, "5"}; uart_write <= 1;
-                state <= 6;
-            end
-
-            // ACMD41
-            6: begin
-                cmd_shift <= 48'h69_40_00_00_00_00; // ACMD41 simplified
-                bit_cnt <= 0;
-                state <= 7;
-            end
-
-            7: begin
-                sd_cmd_oe <= 1;
-                sd_cmd_out <= cmd_shift[47];
-                cmd_shift <= {cmd_shift[46:0],1'b1};
-                bit_cnt <= bit_cnt + 1;
-                if (bit_cnt == 47) begin
-                    sd_cmd_oe <= 0;
-                    state <= 8;
-                end
-            end
-
-            8: begin
-                uart_data <= {24'd0, "A"}; uart_write <= 1;
-                state <= 9;
-            end
-
-            9: begin
-                uart_data <= {24'd0, "D"}; uart_write <= 1;
-                state <= 10;
-            end
-
-            10: state <= 10; // stop
-        endcase
+    always @(posedge clk) begin
+        if (!rst_n)
+            test_data <= 0;
+        else if (state == READ_STATUS && !sd_waitrequest)
+            test_data <= sd_readdata;  // capture SD controller data
     end
-end
+
+    // ====================================================
+    // Instantiate the official Altera UP SD Card IP
+    // ====================================================
+    sd u0 (
+        .clk_clk(clk),
+        .reset_reset_n(rst_n),
+
+        // SD physical lines
+        .altera_up_sd_card_avalon_interface_0_conduit_end_b_SD_cmd(SD_CMD),
+        .altera_up_sd_card_avalon_interface_0_conduit_end_b_SD_dat(SD_DAT0),
+        .altera_up_sd_card_avalon_interface_0_conduit_end_b_SD_dat3(SD_DAT3),
+        .altera_up_sd_card_avalon_interface_0_conduit_end_o_SD_clock(SD_CLK),
+
+        // Avalon slave connections
+        .altera_up_sd_card_avalon_interface_0_avalon_sdcard_slave_chipselect(sd_chipselect),
+        .altera_up_sd_card_avalon_interface_0_avalon_sdcard_slave_address(sd_address),
+        .altera_up_sd_card_avalon_interface_0_avalon_sdcard_slave_read(sd_read),
+        .altera_up_sd_card_avalon_interface_0_avalon_sdcard_slave_write(sd_write),
+        .altera_up_sd_card_avalon_interface_0_avalon_sdcard_slave_byteenable(sd_byteenable),
+        .altera_up_sd_card_avalon_interface_0_avalon_sdcard_slave_writedata(sd_writedata),
+        .altera_up_sd_card_avalon_interface_0_avalon_sdcard_slave_readdata(sd_readdata),
+        .altera_up_sd_card_avalon_interface_0_avalon_sdcard_slave_waitrequest(sd_waitrequest)
+    );
 
 endmodule
