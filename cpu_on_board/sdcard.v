@@ -1,10 +1,3 @@
-/**
- * File              : sdcard.v
- * License           : GPL-3.0-or-later
- * Author            : Peter Gu <github.com/ustcpetergu>
- * Date              : 2021.01.19
- * Last Modified Date: 2021.01.19
- */
 `timescale 1ns / 1ps
 // pComputer memory mapped SPI mode SD card driver
 //
@@ -31,7 +24,6 @@
 // read 0x2010: ready, used for polling
 // read 0x2014: dirty?
 
-// TODO: ready/rd for cache!
 module sdcard
     (
         input clk,
@@ -40,6 +32,7 @@ module sdcard
 
         input sd_dat0,
         input sd_ncd,
+        input sd_wp,
         output sd_dat1,
         output sd_dat2,
         output sd_dat3,
@@ -51,31 +44,24 @@ module sdcard
         input [15:0]a,
         input [31:0]d,
         input we,
-        output [31:0]spo,
+        output reg [31:0]spo,
 
         output reg irq = 0
     );
 
-	reg [31:0]regspo;
-	wire [31:0]data = {d[7:0], d[15:8], d[23:16], d[31:24]};
-	//wire [31:0]data = d;
-	assign spo = regspo;
-	//assign spo = {regspo[7:0], regspo[15:8], regspo[23:16], regspo[31:24]};
-
     // slow clock
     reg [4:0]clkcounter = 0;
     always @ (posedge clk) begin
-        //if (rst) clkcounter <= 5'b0;
-        //else 
-        clkcounter <= clkcounter + 1;
+        if (rst) clkcounter <= 5'b0;
+        else clkcounter <= clkcounter + 1;
     end
-    wire clk_pulse_slow = (clkcounter[0:0] == 0);
+    wire clk_pulse_slow = (clkcounter == 5'b0);
 
     assign sd_dat1 = 1;
     assign sd_dat2 = 1;
     //assign sd_reset = 0;
 
-    (*mark_debug = "true"*) reg [31:0]sd_address = 32'hffffffff; // init as an invalid address
+    reg [31:0]sd_address = 32'hffffffff; // init as an invalid address
     reg [31:0]block[127:0];
     reg dirty = 0;
 
@@ -130,7 +116,7 @@ module sdcard
     reg reading = 0;
     reg writing = 0;
     reg [9:0]counter = 0;
-    //wire [31:0]cache = block[counter[8:2]];
+    wire [31:0]cache = block[counter[8:2]];
     reg [7:0]cache1;
     reg [7:0]cache2;
     reg [7:0]cache3;
@@ -147,10 +133,9 @@ module sdcard
             if (sd_ready_real) begin
                 if (we) begin
                     case (a[15:0])
-						// pay attention to endian here
-                        16'h1000: sd_address <= data;
-                        16'h1004: sd_rd <= data[0];
-                        16'h1008: sd_wr <= data[0];
+                        16'h1000: sd_address <= d;
+                        16'h1004: sd_rd <= d[0];
+                        16'h1008: sd_wr <= d[0];
                         default: ;
                     endcase
                 end
@@ -184,16 +169,16 @@ module sdcard
             end
             else if (writing & sd_writenext_posedge) begin
                 case (counter[1:0])
-                    2'b00: sd_din <= blockcounterspo[31:24];
-                    2'b01: sd_din <= blockcounterspo[23:16];
-                    2'b10: sd_din <= blockcounterspo[15:8];
-                    2'b11: sd_din <= blockcounterspo[7:0];
+                    2'b00: sd_din <= block[counter[8:2]][31:24];
+                    2'b01: sd_din <= block[counter[8:2]][23:16];
+                    2'b10: sd_din <= block[counter[8:2]][15:8];
+                    2'b11: sd_din <= block[counter[8:2]][7:0];
                 endcase
                 counter <= counter + 1;
             end
             else if (we) begin
                 if (a[15:12] == 0) begin
-					block[a[8:2]] <= d; // pay attention to endian here
+                    block[a[8:2]] <= d;
                     dirty <= 1;
                 end
             end
@@ -201,22 +186,15 @@ module sdcard
     end
 
     // handle non-relevant control address reading
-	// TODO: fix this
-	reg [31:0]blockaspo;
-	reg [31:0]blockcounterspo;
-	always @ (*) begin
-		//if (a[15:12] == 0) blockaspo = block[a[8:2]];
-		blockaspo = block[a[8:2]];
-		blockcounterspo = block[counter[8:2]];
-	end
     always @ (*) begin
-        regspo = 0;
-        if (a[15:12] == 0) regspo = blockaspo;
+        spo = 0;
+        if (a[15:12] == 0) spo = block[a[8:2]];
         else case (a[15:0])
-            16'h1000: regspo = {sd_address[7:0], sd_address[15:8], sd_address[23:16], sd_address[31:24]};
-            16'h2000: regspo = {7'b0, sd_ncd, 24'b0};
-            16'h2010: regspo = {7'b0, sd_ready_real, 24'b0};
-            16'h2014: regspo = {7'b0, dirty, 24'b0};
+            16'h1000: spo = sd_address;
+            16'h2000: spo = sd_ncd;
+            16'h2004: spo = sd_wp;
+            16'h2010: spo = sd_ready_real;
+            16'h2014: spo = dirty;
             default: ;
         endcase
     end
