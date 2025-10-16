@@ -1624,6 +1624,9 @@
 
 /// developing
 //// print long KBC0234004E4020102020000100F000000FF00099C61EF0E1D5000061416000A1
+//EB3C904253442020342E3400024001000200020000F000012000FF0000000000000000000000000000000000000000000000000000000000000000000000000000000000000055AA
+// EB 3C 90 x86 JMP
+// 42 53 44 BSD
 module cpu_on_board (
     (* chip_pin = "PIN_L1"  *) input  wire CLOCK_50,
     (* chip_pin = "PIN_R22" *) input  wire KEY0,        // Active-low reset
@@ -1642,10 +1645,8 @@ module cpu_on_board (
     assign LEDR0 = blink_counter[23];
 
     always @(posedge CLOCK_50 or negedge KEY0) begin
-        if (!KEY0)
-            blink_counter <= 0;
-        else
-            blink_counter <= blink_counter + 1'b1;
+        if (!KEY0) blink_counter <= 0;
+        else blink_counter <= blink_counter + 1'b1;
     end
 
     // =======================================================
@@ -1669,10 +1670,8 @@ module cpu_on_board (
     // =======================================================
     reg [8:0] clkdiv = 0;
     always @(posedge CLOCK_50 or negedge KEY0) begin
-        if (!KEY0)
-            clkdiv <= 0;
-        else
-            clkdiv <= clkdiv + 1;
+        if (!KEY0) clkdiv <= 0;
+        else clkdiv <= clkdiv + 1;
     end
     wire clk_pulse_slow = (clkdiv == 0);
 
@@ -1695,10 +1694,10 @@ module cpu_on_board (
         .miso(SD_DAT0),
         .sclk(sd_sclk),
 
-        .rd(rd_sig),
+        .rd(rd_sig), // start 512 byte block reading
         .wr(wr_sig),
         .dout(sd_dout),
-        .byte_available(sd_byte_available),
+        .byte_available(sd_byte_available),  // one of the 512 byte is ready for read
         .din(8'h00),
         .ready_for_next_byte(),
         .reset(~KEY0),
@@ -1719,7 +1718,8 @@ module cpu_on_board (
     // UART debug: print "K" then print all 512 bytes in hex
     // =======================================================
     reg printed_k = 0;
-    reg do_read = 0;
+    //reg do_read = 0;
+    reg do_printing = 0;
     reg [8:0] byte_index = 0;       // 0..511
     reg [5:0] print_hex_state = 0;
     reg [7:0] captured_byte;
@@ -1730,6 +1730,7 @@ module cpu_on_board (
             uart_write <= 0;
             printed_k <= 0;
             do_read <= 0;
+            do_printing <= 0;
             rd_sig <= 0;
             wr_sig <= 0;
             byte_index <= 0;
@@ -1749,22 +1750,26 @@ module cpu_on_board (
                 byte_index <= 0;
             end
 
-            // Stop asserting rd once SD controller leaves IDLE (state != IDLE)
-            if (do_read && (sd_status != 6))
+            // Stop asserting rd once SD controller leaves IDLE (state != IDLE) 
+            //if (do_read && (sd_status != 6))
+            //    rd_sig <= 0;
+            // drop rd_sig after controller starts working
+            if (rd_sig && (sd_status != 6))
                 rd_sig <= 0;
 
             // Capture byte on rising edge of byte_available
             if (sd_byte_available && !sd_byte_available_d) begin
                 captured_byte <= sd_dout;
                 print_hex_state <= 1;
-                do_read <= 1;
+                //do_read <= 1;
+                do_printing <= 1;
             end
 
                 //uart_data  <= {24'd0, (byte_index[9:8] < 10) ? (8'h30 + byte_index[9:8]) : (8'h41 + byte_index[9:8] - 10)};
 
             // Print captured byte as two hex chars
             if (print_hex_state == 1) begin
-                uart_data  <= {24'd0, 8'h41};
+                uart_data  <= {24'd0, "A"};
                 uart_write <= 1;
                 print_hex_state <= 2;
             end else if (print_hex_state == 2) begin
@@ -1778,8 +1783,8 @@ module cpu_on_board (
                 byte_index <= byte_index + 1;
 
                 // If more bytes left, request next byte
-                if (byte_index < 511)
-                    rd_sig <= 1;
+                //if (byte_index < 511)
+                //    rd_sig <= 1;
             end
         end
     end
