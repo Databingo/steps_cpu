@@ -1718,7 +1718,7 @@ module cpu_on_board (
     // UART debug: print "K" then print all 512 bytes in hex
     // =======================================================
     reg printed_k = 0;
-    //reg do_read = 0;
+    reg do_read = 0;
     reg do_printing = 0;
     reg [8:0] byte_index = 0;       // 0..511
     reg [5:0] print_hex_state = 0;
