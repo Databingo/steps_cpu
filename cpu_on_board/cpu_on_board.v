@@ -1761,6 +1761,7 @@ module cpu_on_board (
             end
 
                 //uart_data  <= {24'd0, (byte_index[9:8] < 10) ? (8'h30 + byte_index[9:8]) : (8'h41 + byte_index[9:8] - 10)};
+
             // Print captured byte as two hex chars
             if (print_hex_state == 1) begin
                 uart_data  <= {24'd0, 8'h41};
