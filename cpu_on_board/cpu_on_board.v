@@ -1761,7 +1761,7 @@ module cpu_on_board (
             //    rd_sig <= 0;
 
             // Capture byte on rising edge of byte_available
-            if (sd_byte_available && !sd_byte_available_d) begin
+            if (sd_byte_available && !sd_byte_available_d && print_hex_state == 0) begin
                 captured_byte <= sd_dout;
                 print_hex_state <= 1;
                 do_read <= 1;
