@@ -1721,7 +1721,7 @@ module cpu_on_board (
     reg printed_k = 0;
     reg do_read = 0;
     reg [8:0] byte_index = 0;       // 0..511
-    reg [2:0] print_hex_state = 0;
+    reg [5:0] print_hex_state = 0;
     reg [7:0] captured_byte;
     reg sd_byte_available_d = 0;
 
