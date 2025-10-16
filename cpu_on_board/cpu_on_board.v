@@ -1762,7 +1762,7 @@ module cpu_on_board (
             end
 
             // Print captured byte as two hex chars
-            else if (print_hex_state == 1) begin // 0+number/A+alphabet in ascii to represent the byte in XX
+            if (print_hex_state == 1) begin // 0+number/A+alphabet in ascii to represent the byte in XX
                 uart_data  <= {24'd0, (byte_index[9:8] < 10) ? (8'h30 + byte_index[9:8]) : (8'h41 + byte_index[9:8] - 10)};
                 uart_write <= 1;
                 print_hex_state <= 2;
