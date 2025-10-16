@@ -1623,7 +1623,7 @@
 
 
 /// developing
-// print long KBC0234004E4020102020000100F000000FF00099C61EF0E1D5000061416000A1
+//// print long KBC0234004E4020102020000100F000000FF00099C61EF0E1D5000061416000A1
 module cpu_on_board (
     (* chip_pin = "PIN_L1"  *) input  wire CLOCK_50,
     (* chip_pin = "PIN_R22" *) input  wire KEY0,        // Active-low reset
@@ -1698,12 +1698,12 @@ module cpu_on_board (
         .rd(rd_sig),
         .wr(wr_sig),
         .dout(sd_dout),
-        .byte_available(sd_byte_available),  // for read
+        .byte_available(sd_byte_available),
         .din(8'h00),
-        .ready_for_next_byte(),   // for write
+        .ready_for_next_byte(),
         .reset(~KEY0),
-        .ready(sd_ready),         // for IDLE
-        .address(32'h00000000),   // for sector(512 byte align)
+        .ready(sd_ready),
+        .address(32'h00000000),
         .clk(CLOCK_50),
         .clk_pulse_slow(clk_pulse_slow),
         .status(sd_status),
@@ -1720,8 +1720,8 @@ module cpu_on_board (
     // =======================================================
     reg printed_k = 0;
     reg do_read = 0;
-    reg [9:0] byte_index = 0;       // 0..511
-    reg [5:0] print_hex_state = 0;
+    reg [8:0] byte_index = 0;       // 0..511
+    reg [2:0] print_hex_state = 0;
     reg [7:0] captured_byte;
     reg sd_byte_available_d = 0;
 
@@ -1737,7 +1737,6 @@ module cpu_on_board (
             captured_byte <= 0;
             sd_byte_available_d <= 0;
         end else begin
-            // Defalut per cycle
             uart_write <= 0;
             sd_byte_available_d <= sd_byte_available; // store previous state
 
@@ -1761,30 +1760,13 @@ module cpu_on_board (
                 do_read <= 1;
             end
 
+                //uart_data  <= {24'd0, (byte_index[9:8] < 10) ? (8'h30 + byte_index[9:8]) : (8'h41 + byte_index[9:8] - 10)};
             // Print captured byte as two hex chars
-            if (print_hex_state == 1) begin // 0+number/A+alphabet in ascii to represent the byte in XX
-                uart_data  <= {24'd0, (byte_index[9:8] < 10) ? (8'h30 + byte_index[9:8]) : (8'h41 + byte_index[9:8] - 10)};
-                uart_write <= 1;
-                print_hex_state <= 2;
-            end else if (print_hex_state == 2) begin 
-                uart_data  <= {24'd0, (byte_index[7:4] < 10) ? (8'h30 + byte_index[7:4]) : (8'h41 + byte_index[7:4] - 10)};
-                uart_write <= 1;
-                print_hex_state <= 3;
-            end else if (print_hex_state == 3) begin 
-                uart_data  <= {24'd0, (byte_index[3:0] < 10) ? (8'h30 + byte_index[3:0]) : (8'h41 + byte_index[3:0] - 10)};
-                uart_write <= 1;
-                print_hex_state <= 4;
-            end else if (print_hex_state == 4) begin 
-                uart_data  <= {24'd0, 8'h20}; // space
-                uart_write <= 1;
-                print_hex_state <= 5;
-
-
-            end else if (print_hex_state == 5) begin // 0+number/A+alphabet in ascii to represent the byte in XX
+            if (print_hex_state == 1) begin
                 uart_data  <= {24'd0, (captured_byte[7:4] < 10) ? (8'h30 + captured_byte[7:4]) : (8'h41 + captured_byte[7:4] - 10)};
                 uart_write <= 1;
-                print_hex_state <= 6;
-            end else if (print_hex_state == 6) begin
+                print_hex_state <= 2;
+            end else if (print_hex_state == 2) begin
                 uart_data  <= {24'd0, (captured_byte[3:0] < 10) ? (8'h30 + captured_byte[3:0]) : (8'h41 + captured_byte[3:0] - 10)};
                 uart_write <= 1;
                 print_hex_state <= 0;
@@ -1793,10 +1775,6 @@ module cpu_on_board (
                 // If more bytes left, request next byte
                 if (byte_index < 511)
                     rd_sig <= 1;
-                //else begin
-                //    rd_sig <= 0;
-                //    do_read <=0;
-                //end
             end
         end
     end
