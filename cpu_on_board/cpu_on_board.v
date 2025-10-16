@@ -1766,7 +1766,7 @@ module cpu_on_board (
                 uart_data  <= {24'd0, 8'h41};
                 uart_write <= 1;
                 print_hex_state <= 2;
-            if (print_hex_state == 2) begin
+            end else if (print_hex_state == 2) begin
                 uart_data  <= {24'd0, (captured_byte[7:4] < 10) ? (8'h30 + captured_byte[7:4]) : (8'h41 + captured_byte[7:4] - 10)};
                 uart_write <= 1;
                 print_hex_state <= 3;
