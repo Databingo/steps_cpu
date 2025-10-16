@@ -6,9 +6,12 @@
    version="1.0"
    description=""
    tags=""
-   categories="" />
+   categories="System" />
  <parameter name="bonusData"><![CDATA[bonusData 
 {
+   element $${FILENAME}
+   {
+   }
    element clk_0
    {
       datum _sortIndex
@@ -37,10 +40,10 @@
  <parameter name="globalResetBus" value="false" />
  <parameter name="hdlLanguage" value="VERILOG" />
  <parameter name="maxAdditionalLatency" value="1" />
- <parameter name="projectName" value="" />
+ <parameter name="projectName" value="cpu_on_board.qpf" />
  <parameter name="sopcBorderPoints" value="false" />
  <parameter name="systemHash" value="1" />
- <parameter name="timeStamp" value="1755704761194" />
+ <parameter name="timeStamp" value="1760607163076" />
  <parameter name="useTestBenchNamingPattern" value="false" />
  <instanceScript></instanceScript>
  <interface name="clk" internal="clk_0.clk_in" type="clock" dir="end" />
@@ -63,23 +66,23 @@
    name="jtag_uart_0">
   <parameter name="allowMultipleConnections" value="false" />
   <parameter name="hubInstanceID" value="0" />
-  <parameter name="readBufferDepth" value="64" />
+  <parameter name="readBufferDepth" value="512" />
   <parameter name="readIRQThreshold" value="8" />
   <parameter name="simInputCharacterStream" value="" />
   <parameter name="simInteractiveOptions">NO_INTERACTIVE_WINDOWS</parameter>
   <parameter name="useRegistersForReadBuffer" value="false" />
   <parameter name="useRegistersForWriteBuffer" value="false" />
   <parameter name="useRelativePathForSimFile" value="false" />
-  <parameter name="writeBufferDepth" value="64" />
+  <parameter name="writeBufferDepth" value="512" />
   <parameter name="writeIRQThreshold" value="8" />
   <parameter name="avalonSpec" value="2.0" />
  </module>
- <connection kind="clock" version="13.0" start="clk_0.clk" end="jtag_uart_0.clk" />
  <connection
    kind="reset"
    version="13.0"
    start="clk_0.clk_reset"
    end="jtag_uart_0.reset" />
+ <connection kind="clock" version="13.0" start="clk_0.clk" end="jtag_uart_0.clk" />
  <interconnectRequirement for="$system" name="qsys_mm.clockCrossingAdapter" value="HANDSHAKE" />
  <interconnectRequirement for="$system" name="qsys_mm.maxAdditionalLatency" value="1" />
 </system>

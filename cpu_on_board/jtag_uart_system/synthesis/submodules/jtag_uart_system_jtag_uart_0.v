@@ -35,7 +35,7 @@ module jtag_uart_system_jtag_uart_0_sim_scfifo_w (
   output           fifo_FF;
   output  [  7: 0] r_dat;
   output           wfifo_empty;
-  output  [  5: 0] wfifo_used;
+  output  [  8: 0] wfifo_used;
   input            clk;
   input   [  7: 0] fifo_wdata;
   input            fifo_wr;
@@ -43,7 +43,7 @@ module jtag_uart_system_jtag_uart_0_sim_scfifo_w (
   wire             fifo_FF;
   wire    [  7: 0] r_dat;
   wire             wfifo_empty;
-  wire    [  5: 0] wfifo_used;
+  wire    [  8: 0] wfifo_used;
 
 //synthesis translate_off
 //////////////// SIMULATION-ONLY CONTENTS
@@ -54,7 +54,7 @@ module jtag_uart_system_jtag_uart_0_sim_scfifo_w (
     end
 
 
-  assign wfifo_used = {6{1'b0}};
+  assign wfifo_used = {9{1'b0}};
   assign r_dat = {8{1'b0}};
   assign fifo_FF = 1'b0;
   assign wfifo_empty = 1'b1;
@@ -93,7 +93,7 @@ module jtag_uart_system_jtag_uart_0_scfifo_w (
   output           fifo_FF;
   output  [  7: 0] r_dat;
   output           wfifo_empty;
-  output  [  5: 0] wfifo_used;
+  output  [  8: 0] wfifo_used;
   input            clk;
   input            fifo_clear;
   input   [  7: 0] fifo_wdata;
@@ -103,7 +103,7 @@ module jtag_uart_system_jtag_uart_0_scfifo_w (
   wire             fifo_FF;
   wire    [  7: 0] r_dat;
   wire             wfifo_empty;
-  wire    [  5: 0] wfifo_used;
+  wire    [  8: 0] wfifo_used;
 
 //synthesis translate_off
 //////////////// SIMULATION-ONLY CONTENTS
@@ -137,11 +137,11 @@ module jtag_uart_system_jtag_uart_0_scfifo_w (
 //    );
 //
 //  defparam wfifo.lpm_hint = "RAM_BLOCK_TYPE=AUTO",
-//           wfifo.lpm_numwords = 64,
+//           wfifo.lpm_numwords = 512,
 //           wfifo.lpm_showahead = "OFF",
 //           wfifo.lpm_type = "scfifo",
 //           wfifo.lpm_width = 8,
-//           wfifo.lpm_widthu = 6,
+//           wfifo.lpm_widthu = 9,
 //           wfifo.overflow_checking = "OFF",
 //           wfifo.underflow_checking = "OFF",
 //           wfifo.use_eab = "ON";
@@ -176,7 +176,7 @@ module jtag_uart_system_jtag_uart_0_sim_scfifo_r (
   output           fifo_EF;
   output  [  7: 0] fifo_rdata;
   output           rfifo_full;
-  output  [  5: 0] rfifo_used;
+  output  [  8: 0] rfifo_used;
   input            clk;
   input            fifo_rd;
   input            rst_n;
@@ -187,9 +187,9 @@ module jtag_uart_system_jtag_uart_0_sim_scfifo_r (
   wire    [  7: 0] fifo_rdata;
   wire             new_rom;
   wire    [ 31: 0] num_bytes;
-  wire    [  6: 0] rfifo_entries;
+  wire    [  9: 0] rfifo_entries;
   wire             rfifo_full;
-  wire    [  5: 0] rfifo_used;
+  wire    [  8: 0] rfifo_used;
 
 //synthesis translate_off
 //////////////// SIMULATION-ONLY CONTENTS
@@ -215,9 +215,9 @@ module jtag_uart_system_jtag_uart_0_sim_scfifo_r (
 
 
   assign fifo_EF = bytes_left == 32'b0;
-  assign rfifo_full = bytes_left > 7'h40;
-  assign rfifo_entries = (rfifo_full) ? 7'h40 : bytes_left;
-  assign rfifo_used = rfifo_entries[5 : 0];
+  assign rfifo_full = bytes_left > 10'h200;
+  assign rfifo_entries = (rfifo_full) ? 10'h200 : bytes_left;
+  assign rfifo_used = rfifo_entries[8 : 0];
   assign new_rom = 1'b0;
   assign num_bytes = 32'b0;
   assign fifo_rdata = 8'b0;
@@ -257,7 +257,7 @@ module jtag_uart_system_jtag_uart_0_scfifo_r (
   output           fifo_EF;
   output  [  7: 0] fifo_rdata;
   output           rfifo_full;
-  output  [  5: 0] rfifo_used;
+  output  [  8: 0] rfifo_used;
   input            clk;
   input            fifo_clear;
   input            fifo_rd;
@@ -268,7 +268,7 @@ module jtag_uart_system_jtag_uart_0_scfifo_r (
   wire             fifo_EF;
   wire    [  7: 0] fifo_rdata;
   wire             rfifo_full;
-  wire    [  5: 0] rfifo_used;
+  wire    [  8: 0] rfifo_used;
 
 //synthesis translate_off
 //////////////// SIMULATION-ONLY CONTENTS
@@ -302,11 +302,11 @@ module jtag_uart_system_jtag_uart_0_scfifo_r (
 //    );
 //
 //  defparam rfifo.lpm_hint = "RAM_BLOCK_TYPE=AUTO",
-//           rfifo.lpm_numwords = 64,
+//           rfifo.lpm_numwords = 512,
 //           rfifo.lpm_showahead = "OFF",
 //           rfifo.lpm_type = "scfifo",
 //           rfifo.lpm_width = 8,
-//           rfifo.lpm_widthu = 6,
+//           rfifo.lpm_widthu = 9,
 //           rfifo.overflow_checking = "OFF",
 //           rfifo.underflow_checking = "OFF",
 //           rfifo.use_eab = "ON";
@@ -383,7 +383,7 @@ module jtag_uart_system_jtag_uart_0 (
   reg              read_0;
   reg              readyfordata;
   wire             rfifo_full;
-  wire    [  5: 0] rfifo_used;
+  wire    [  8: 0] rfifo_used;
   reg              rvalid;
   reg              sim_r_ena;
   reg              sim_t_dat;
@@ -394,7 +394,7 @@ module jtag_uart_system_jtag_uart_0 (
   wire             t_ena;
   wire             t_pause;
   wire             wfifo_empty;
-  wire    [  5: 0] wfifo_used;
+  wire    [  8: 0] wfifo_used;
   reg              woverflow;
   wire             wr_rfifo;
   //avalon_jtag_slave, which is an e_avalon_slave
@@ -477,7 +477,7 @@ module jtag_uart_system_jtag_uart_0 (
       else 
         begin
           fifo_AE <= {fifo_FF,wfifo_used} <= 8;
-          fifo_AF <= (7'h40 - {rfifo_full,rfifo_used}) <= 8;
+          fifo_AF <= (10'h200 - {rfifo_full,rfifo_used}) <= 8;
           fifo_wr <= 1'b0;
           read_0 <= 1'b0;
           av_waitrequest <= ~(av_chipselect & (~av_write_n | ~av_read_n) & av_waitrequest);
@@ -512,7 +512,7 @@ module jtag_uart_system_jtag_uart_0 (
 
   assign fifo_wdata = av_writedata[7 : 0];
   assign fifo_rd = (av_chipselect & ~av_read_n & av_waitrequest & ~av_address) ? ~fifo_EF : 1'b0;
-  assign av_readdata = read_0 ? { {9{1'b0}},rfifo_full,rfifo_used,rvalid,woverflow,~fifo_FF,~fifo_EF,1'b0,ac,ipen_AE,ipen_AF,fifo_rdata } : { {9{1'b0}},(7'h40 - {fifo_FF,wfifo_used}),rvalid,woverflow,~fifo_FF,~fifo_EF,1'b0,ac,ipen_AE,ipen_AF,{6{1'b0}},ien_AE,ien_AF };
+  assign av_readdata = read_0 ? { {6{1'b0}},rfifo_full,rfifo_used,rvalid,woverflow,~fifo_FF,~fifo_EF,1'b0,ac,ipen_AE,ipen_AF,fifo_rdata } : { {6{1'b0}},(10'h200 - {fifo_FF,wfifo_used}),rvalid,woverflow,~fifo_FF,~fifo_EF,1'b0,ac,ipen_AE,ipen_AF,{6{1'b0}},ien_AE,ien_AF };
   always @(posedge clk or negedge rst_n)
     begin
       if (rst_n == 0)
@@ -564,8 +564,8 @@ module jtag_uart_system_jtag_uart_0 (
 //    );
 //
 //  defparam jtag_uart_system_jtag_uart_0_alt_jtag_atlantic.INSTANCE_ID = 0,
-//           jtag_uart_system_jtag_uart_0_alt_jtag_atlantic.LOG2_RXFIFO_DEPTH = 6,
-//           jtag_uart_system_jtag_uart_0_alt_jtag_atlantic.LOG2_TXFIFO_DEPTH = 6,
+//           jtag_uart_system_jtag_uart_0_alt_jtag_atlantic.LOG2_RXFIFO_DEPTH = 9,
+//           jtag_uart_system_jtag_uart_0_alt_jtag_atlantic.LOG2_TXFIFO_DEPTH = 9,
 //           jtag_uart_system_jtag_uart_0_alt_jtag_atlantic.SLD_AUTO_INSTANCE_INDEX = "YES";
 //
 //  always @(posedge clk or negedge rst_n)
