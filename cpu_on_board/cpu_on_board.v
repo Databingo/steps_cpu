@@ -1823,6 +1823,7 @@ module cpu_on_board (
                     print_hex_state <= 0;
                     byte_index <= byte_index + 1;
                     print_hex_state  <= 0;
+                end
                 default: print_hex_state <= 0;
         end
     end
