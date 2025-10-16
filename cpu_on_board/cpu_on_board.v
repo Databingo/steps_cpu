@@ -1804,7 +1804,7 @@ module cpu_on_board (
                    if (sd_byte_available && !sd_byte_available_d && byte_index < 512) begin
                        captured_byte <= sd_dout;
                        print_hex_state <= 1;
-                       do_read <= 1;
+                       do_read <= 1; // SD slow?
                        //do_printing <= 1;
                    end
                 end
