@@ -1724,6 +1724,7 @@ module cpu_on_board (
     reg [5:0] print_hex_state = 0;
     reg [7:0] captured_byte;
     reg sd_byte_available_d = 0;
+    reg [7:0] uart_delay = 0;
 
     always @(posedge CLOCK_50 or negedge KEY0) begin
         if (!KEY0) begin
@@ -1738,6 +1739,8 @@ module cpu_on_board (
             captured_byte <= 0;
             sd_byte_available_d <= 0;
         end else begin
+            if (uart_delay != 0) uart_delay <= uart_delay -1;
+            else begin
             uart_write <= 0;
             sd_byte_available_d <= sd_byte_available; // store previous state
 
@@ -1763,6 +1766,7 @@ module cpu_on_board (
                 print_hex_state <= 1;
                 do_read <= 1;
                 do_printing <= 1;
+                uart_delay <= 30;
             end
 
                 //uart_data  <= {24'd0, (byte_index[9:8] < 10) ? (8'h30 + byte_index[9:8]) : (8'h41 + byte_index[9:8] - 10)};
@@ -1772,21 +1776,25 @@ module cpu_on_board (
                 uart_data  <= {24'd0, "A"};
                 uart_write <= 1;
                 print_hex_state <= 2;
+                uart_delay <= 30;
             end else if (print_hex_state == 2) begin
                 uart_data  <= {24'd0, (captured_byte[7:4] < 10) ? (8'h30 + captured_byte[7:4]) : (8'h41 + captured_byte[7:4] - 10)};
                 uart_write <= 1;
                 print_hex_state <= 3;
+                uart_delay <= 30;
             end else if (print_hex_state == 3) begin
                 uart_data  <= {24'd0, (captured_byte[3:0] < 10) ? (8'h30 + captured_byte[3:0]) : (8'h41 + captured_byte[3:0] - 10)};
                 uart_write <= 1;
                 print_hex_state <= 0;
                 byte_index <= byte_index + 1;
+                uart_delay <= 30;
 
                 // If more bytes left, request next byte
                 //if (byte_index < 511)
                 //    rd_sig <= 1;
             end
         end
+        end 
     end
 
 endmodule
