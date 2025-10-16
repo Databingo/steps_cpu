@@ -1751,17 +1751,17 @@ module cpu_on_board (
             end
 
             // Stop asserting rd once SD controller leaves IDLE (state != IDLE) 
-            //if (do_read && (sd_status != 6))
-            //    rd_sig <= 0;
-            // drop rd_sig after controller starts working
-            if (rd_sig && (sd_status != 6))
+            if (do_read && (sd_status != 6))
                 rd_sig <= 0;
+            // drop rd_sig after controller starts working
+            //if (rd_sig && (sd_status != 6))
+            //    rd_sig <= 0;
 
             // Capture byte on rising edge of byte_available
             if (sd_byte_available && !sd_byte_available_d) begin
                 captured_byte <= sd_dout;
                 print_hex_state <= 1;
-                //do_read <= 1;
+                do_read <= 1;
                 do_printing <= 1;
             end
 
