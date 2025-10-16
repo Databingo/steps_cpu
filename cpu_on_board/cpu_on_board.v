@@ -1825,6 +1825,7 @@ module cpu_on_board (
                     print_hex_state  <= 0;
                 end
                 default: print_hex_state <= 0;
+                endcase
         end
     end
 
