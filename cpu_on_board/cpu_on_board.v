@@ -1780,10 +1780,6 @@ module cpu_on_board (
                 print_hex_state <= 5;
 
 
-
-
-
-
             end else if (print_hex_state == 5) begin // 0+number/A+alphabet in ascii to represent the byte in XX
                 uart_data  <= {24'd0, (captured_byte[7:4] < 10) ? (8'h30 + captured_byte[7:4]) : (8'h41 + captured_byte[7:4] - 10)};
                 uart_write <= 1;
@@ -1797,10 +1793,10 @@ module cpu_on_board (
                 // If more bytes left, request next byte
                 if (byte_index < 511)
                     rd_sig <= 1;
-                else begin
-                    rd_sig <= 0;
-                    do_read <=0;
-                end
+                //else begin
+                //    rd_sig <= 0;
+                //    do_read <=0;
+                //end
             end
         end
     end
