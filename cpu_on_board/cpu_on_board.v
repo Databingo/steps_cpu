@@ -1798,12 +1798,13 @@ module cpu_on_board (
                        byte_index <= 0;
                    end
                    // Stop asserting rd once SD controller leaves IDLE (state != IDLE) 
-                   if (rd_sig && (sd_status != 6)) rd_sig <= 0;
+                   //if (rd_sig && (sd_status != 6)) rd_sig <= 0;
+                   if (do_read && (sd_status != 6)) rd_sig <= 0;
                    // Capture byte and start to print process
                    if (sd_byte_available && !sd_byte_available_d && byte_index < 512) begin
                        captured_byte <= sd_dout;
                        print_hex_state <= 1;
-                       //do_read <= 1;
+                       do_read <= 1;
                        //do_printing <= 1;
                    end
                 end
