@@ -1763,10 +1763,14 @@ module cpu_on_board (
                 //uart_data  <= {24'd0, (byte_index[9:8] < 10) ? (8'h30 + byte_index[9:8]) : (8'h41 + byte_index[9:8] - 10)};
             // Print captured byte as two hex chars
             if (print_hex_state == 1) begin
-                uart_data  <= {24'd0, (captured_byte[7:4] < 10) ? (8'h30 + captured_byte[7:4]) : (8'h41 + captured_byte[7:4] - 10)};
+                uart_data  <= {24'd0, 8'h41};
                 uart_write <= 1;
                 print_hex_state <= 2;
-            end else if (print_hex_state == 2) begin
+            if (print_hex_state == 2) begin
+                uart_data  <= {24'd0, (captured_byte[7:4] < 10) ? (8'h30 + captured_byte[7:4]) : (8'h41 + captured_byte[7:4] - 10)};
+                uart_write <= 1;
+                print_hex_state <= 3;
+            end else if (print_hex_state == 3) begin
                 uart_data  <= {24'd0, (captured_byte[3:0] < 10) ? (8'h30 + captured_byte[3:0]) : (8'h41 + captured_byte[3:0] - 10)};
                 uart_write <= 1;
                 print_hex_state <= 0;
