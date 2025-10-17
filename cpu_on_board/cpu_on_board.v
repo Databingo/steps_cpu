@@ -1777,7 +1777,6 @@ module cpu_on_board (
                     uart_write <= 1;
                     print_hex_state <= 0;
                     byte_index <= byte_index + 1;
-                    print_hex_state  <= 0;
                 end
                 default: print_hex_state <= 0;
                 endcase
