@@ -1742,52 +1742,6 @@ module cpu_on_board (
             uart_write <= 0;
             sd_byte_available_d <= sd_byte_available; // store previous state
 
-            //// Print "K" when SD ready
-            //if (sd_ready && !printed_k) begin
-            //    uart_data  <= {24'd0, "K"};
-            //    uart_write <= 1;
-            //    printed_k  <= 1;
-            //    rd_sig     <= 1;       // start read after K
-            //    byte_index <= 0;
-            //end
-
-            //// Stop asserting rd once SD controller leaves IDLE (state != IDLE) 
-            //if (do_read && (sd_status != 6))
-            //    rd_sig <= 0;
-            //// drop rd_sig after controller starts working
-            ////if (rd_sig && (sd_status != 6))
-            ////    rd_sig <= 0;
-
-            //// Capture byte on rising edge of byte_available
-            //if (sd_byte_available && !sd_byte_available_d && print_hex_state == 0) begin
-            //    captured_byte <= sd_dout;
-            //    print_hex_state <= 1;
-            //    do_read <= 1;
-            //    do_printing <= 1;
-            //end
-
-            //    //uart_data  <= {24'd0, (byte_index[9:8] < 10) ? (8'h30 + byte_index[9:8]) : (8'h41 + byte_index[9:8] - 10)};
-
-            //// Print captured byte as two hex chars
-            //if (print_hex_state == 1) begin
-            //    uart_data  <= {24'd0, "A"};
-            //    uart_write <= 1;
-            //    print_hex_state <= 2;
-            //end else if (print_hex_state == 2) begin
-            //    uart_data  <= {24'd0, (captured_byte[7:4] < 10) ? (8'h30 + captured_byte[7:4]) : (8'h41 + captured_byte[7:4] - 10)};
-            //    uart_write <= 1;
-            //    print_hex_state <= 3;
-            //end else if (print_hex_state == 3) begin
-            //    uart_data  <= {24'd0, (captured_byte[3:0] < 10) ? (8'h30 + captured_byte[3:0]) : (8'h41 + captured_byte[3:0] - 10)};
-            //    uart_write <= 1;
-            //    print_hex_state <= 0;
-            //    byte_index <= byte_index + 1;
-
-            //    // If more bytes left, request next byte
-            //    //if (byte_index < 511)
-            //    //    rd_sig <= 1;
-            //end
-
             case (print_hex_state)
                 0: begin 
                    if (sd_ready && !printed_k) begin
@@ -1797,15 +1751,15 @@ module cpu_on_board (
                        rd_sig     <= 1;       // start read after K
                        byte_index <= 0;
                    end
+
                    // Stop asserting rd once SD controller leaves IDLE (state != IDLE) 
-                   //if (rd_sig && (sd_status != 6)) rd_sig <= 0;
                    if (do_read && (sd_status != 6)) rd_sig <= 0;
+
                    // Capture byte and start to print process
                    if (sd_byte_available && !sd_byte_available_d && byte_index < 512) begin
                        captured_byte <= sd_dout;
                        print_hex_state <= 1;
                        do_read <= 1; // SD slow?
-                       //do_printing <= 1;
                    end
                 end
                 1: begin
