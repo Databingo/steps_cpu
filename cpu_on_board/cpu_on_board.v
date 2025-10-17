@@ -1652,8 +1652,168 @@
 //Offsets 62-509: Boot code (x86 assembly, including the error message "Non-system disk\r\nPress any key to reboot\r\n" at offsets 0x13E-0x178 in ASCII).
 //Offsets 510-511: Signature (55 AA).
 
+//module cpu_on_board (
+//    (* chip_pin = "PIN_L1"  *) input  wire CLOCK_50,
+//    (* chip_pin = "PIN_R22" *) input  wire KEY0,        // Active-low reset
+//    (* chip_pin = "R20"     *) output wire LEDR0,
+//
+//    (* chip_pin = "V20" *) output wire SD_CLK,  // SD_CLK
+//    (* chip_pin = "Y20" *) inout  wire SD_CMD,  // SD_CMD (MOSI)
+//    (* chip_pin = "W20" *) inout  wire SD_DAT0, // SD_DAT0 (MISO)
+//    (* chip_pin = "U20" *) output wire SD_DAT3  // SD_CS
+//);
+//
+//    // =======================================================
+//    // Heartbeat LED
+//    // =======================================================
+//    reg [23:0] blink_counter;
+//    assign LEDR0 = blink_counter[23];
+//
+//    always @(posedge CLOCK_50 or negedge KEY0) begin
+//        if (!KEY0) blink_counter <= 0;
+//        else blink_counter <= blink_counter + 1'b1;
+//    end
+//
+//    // =======================================================
+//    // JTAG UART
+//    // =======================================================
+//    reg [31:0] uart_data;
+//    reg        uart_write;
+//
+//    jtag_uart_system uart0 (
+//        .clk_clk(CLOCK_50),
+//        .reset_reset_n(KEY0),
+//        .jtag_uart_0_avalon_jtag_slave_address(1'b0),
+//        .jtag_uart_0_avalon_jtag_slave_writedata(uart_data),
+//        .jtag_uart_0_avalon_jtag_slave_write_n(~uart_write),
+//        .jtag_uart_0_avalon_jtag_slave_chipselect(1'b1),
+//        .jtag_uart_0_avalon_jtag_slave_read_n(1'b1)
+//    );
+//
+//    // =======================================================
+//    // Slow pulse clock for SD init (~100 kHz)
+//    // =======================================================
+//    reg [8:0] clkdiv = 0;
+//    always @(posedge CLOCK_50 or negedge KEY0) begin
+//        if (!KEY0) clkdiv <= 0;
+//        else clkdiv <= clkdiv + 1;
+//    end
+//    wire clk_pulse_slow = (clkdiv == 0);
+//
+//    // =======================================================
+//    // SD controller connection
+//    // =======================================================
+//    wire [7:0] sd_dout;
+//    wire sd_ready;
+//    wire [4:0] sd_status;
+//    wire sd_cs, sd_mosi, sd_sclk;
+//    wire [7:0] sd_recv_data;
+//    wire sd_byte_available;
+//
+//    reg rd_sig = 0;
+//    reg wr_sig = 0;
+//
+//    sd_controller sd0 (
+//        .cs(sd_cs),
+//        .mosi(sd_mosi),
+//        .miso(SD_DAT0),
+//        .sclk(sd_sclk),
+//
+//        .rd(rd_sig), // start 512 byte block reading
+//        .wr(wr_sig),
+//        .dout(sd_dout),
+//        .byte_available(sd_byte_available),  // one of the 512 byte is ready for read
+//        .din(8'h00),
+//        .ready_for_next_byte(),
+//        .reset(~KEY0),
+//        .ready(sd_ready),
+//        .address(32'h00000000),
+//        .clk(CLOCK_50),
+//        .clk_pulse_slow(clk_pulse_slow),
+//        .status(sd_status),
+//        .recv_data(sd_recv_data)
+//    );
+//
+//    // Connect physical pins
+//    assign SD_CLK  = sd_sclk;
+//    assign SD_DAT3 = sd_cs;
+//    assign SD_CMD  = sd_mosi;
+//
+//    // =======================================================
+//    // UART debug: print "K" then print all 512 bytes in hex
+//    // =======================================================
+//    reg printed_k = 0;
+//    reg do_read = 0;
+//    reg do_printing = 0;
+//    reg [8:0] byte_index = 0;       // 0..511
+//    reg [5:0] print_hex_state = 0;
+//    reg [7:0] captured_byte;
+//    reg sd_byte_available_d = 0;
+//    reg [7:0] uart_delay = 0;
+//
+//    always @(posedge CLOCK_50 or negedge KEY0) begin
+//        if (!KEY0) begin
+//            uart_write <= 0;
+//            printed_k <= 0;
+//            do_read <= 0;
+//            do_printing <= 0;
+//            rd_sig <= 0;
+//            wr_sig <= 0;
+//            byte_index <= 0;
+//            print_hex_state <= 0;
+//            captured_byte <= 0;
+//            sd_byte_available_d <= 0;
+//        end else begin
+//            uart_write <= 0;
+//            sd_byte_available_d <= sd_byte_available; // store previous state
+//
+//            case (print_hex_state)
+//                0: begin 
+//                   if (sd_ready && !printed_k) begin
+//                       uart_data  <= {24'd0, "K"};
+//                       uart_write <= 1;
+//                       printed_k  <= 1;
+//                       rd_sig     <= 1;       // start read after K
+//                       byte_index <= 0;
+//                   end
+//
+//                   // Stop asserting rd once SD controller leaves IDLE (state != IDLE) 
+//                   if (do_read && (sd_status != 6)) rd_sig <= 0;
+//
+//                   // Capture byte and start to print process
+//                   if (sd_byte_available && !sd_byte_available_d && byte_index < 512) begin
+//                       captured_byte <= sd_dout;
+//                       print_hex_state <= 1;
+//                       do_read <= 1; // SD slow?
+//                   end
+//                end
+//                1: begin
+//                    uart_data  <= {24'd0, "A"};
+//                    uart_write <= 1;
+//                    print_hex_state <= 2;
+//                end
+//                2: begin // pring upper nibble of captured_byte
+//                    uart_data  <= {24'd0, (captured_byte[7:4] < 10) ? (8'h30 + captured_byte[7:4]) : (8'h41 + captured_byte[7:4] - 10)};
+//                    uart_write <= 1;
+//                    print_hex_state <= 3;
+//                end
+//                3: begin // pring lower nibble of captured_byte
+//                    uart_data  <= {24'd0, (captured_byte[3:0] < 10) ? (8'h30 + captured_byte[3:0]) : (8'h41 + captured_byte[3:0] - 10)};
+//                    uart_write <= 1;
+//                    print_hex_state <= 0;
+//                    byte_index <= byte_index + 1;
+//                end
+//                default: print_hex_state <= 0;
+//                endcase
+//        end
+//    end
+//
+//endmodule
 
 
+
+
+// use sdcard print long same
 module cpu_on_board (
     (* chip_pin = "PIN_L1"  *) input  wire CLOCK_50,
     (* chip_pin = "PIN_R22" *) input  wire KEY0,        // Active-low reset
@@ -1672,8 +1832,10 @@ module cpu_on_board (
     assign LEDR0 = blink_counter[23];
 
     always @(posedge CLOCK_50 or negedge KEY0) begin
-        if (!KEY0) blink_counter <= 0;
-        else blink_counter <= blink_counter + 1'b1;
+        if (!KEY0)
+            blink_counter <= 0;
+        else
+            blink_counter <= blink_counter + 1'b1;
     end
 
     // =======================================================
@@ -1693,120 +1855,119 @@ module cpu_on_board (
     );
 
     // =======================================================
-    // Slow pulse clock for SD init (~100 kHz)
+    // SD card connection
     // =======================================================
-    reg [8:0] clkdiv = 0;
-    always @(posedge CLOCK_50 or negedge KEY0) begin
-        if (!KEY0) clkdiv <= 0;
-        else clkdiv <= clkdiv + 1;
-    end
-    wire clk_pulse_slow = (clkdiv == 0);
+    wire [31:0] spo;
+    reg [15:0] mem_a = 16'h2010;
+    reg [31:0] mem_d = 0;
+    reg mem_we = 0;
+    wire sd_ncd = 1'b0;
+    wire sd_wp = 1'b0;
+    wire irq;
+    wire sd_dat1;
+    wire sd_dat2;
 
-    // =======================================================
-    // SD controller connection
-    // =======================================================
-    wire [7:0] sd_dout;
-    wire sd_ready;
-    wire [4:0] sd_status;
-    wire sd_cs, sd_mosi, sd_sclk;
-    wire [7:0] sd_recv_data;
-    wire sd_byte_available;
-
-    reg rd_sig = 0;
-    reg wr_sig = 0;
-
-    sd_controller sd0 (
-        .cs(sd_cs),
-        .mosi(sd_mosi),
-        .miso(SD_DAT0),
-        .sclk(sd_sclk),
-
-        .rd(rd_sig), // start 512 byte block reading
-        .wr(wr_sig),
-        .dout(sd_dout),
-        .byte_available(sd_byte_available),  // one of the 512 byte is ready for read
-        .din(8'h00),
-        .ready_for_next_byte(),
-        .reset(~KEY0),
-        .ready(sd_ready),
-        .address(32'h00000000),
+    sdcard sd0 (
         .clk(CLOCK_50),
-        .clk_pulse_slow(clk_pulse_slow),
-        .status(sd_status),
-        .recv_data(sd_recv_data)
+        .rst(~KEY0),
+        .sd_dat0(SD_DAT0),
+        .sd_ncd(sd_ncd),
+        .sd_wp(sd_wp),
+        .sd_dat1(sd_dat1),
+        .sd_dat2(sd_dat2),
+        .sd_dat3(SD_DAT3),
+        .sd_cmd(SD_CMD),
+        .sd_sck(SD_CLK),
+        .a(mem_a),
+        .d(mem_d),
+        .we(mem_we),
+        .spo(spo),
+        .irq(irq)
     );
-
-    // Connect physical pins
-    assign SD_CLK  = sd_sclk;
-    assign SD_DAT3 = sd_cs;
-    assign SD_CMD  = sd_mosi;
 
     // =======================================================
     // UART debug: print "K" then print all 512 bytes in hex
     // =======================================================
     reg printed_k = 0;
-    reg do_read = 0;
-    reg do_printing = 0;
     reg [8:0] byte_index = 0;       // 0..511
-    reg [5:0] print_hex_state = 0;
+    reg [2:0] print_hex_state = 0;
     reg [7:0] captured_byte;
-    reg sd_byte_available_d = 0;
-    reg [7:0] uart_delay = 0;
+    reg [3:0] fsm_state = 0;
+    reg [1:0] sub_byte = 0;
 
     always @(posedge CLOCK_50 or negedge KEY0) begin
         if (!KEY0) begin
             uart_write <= 0;
             printed_k <= 0;
-            do_read <= 0;
-            do_printing <= 0;
-            rd_sig <= 0;
-            wr_sig <= 0;
             byte_index <= 0;
             print_hex_state <= 0;
             captured_byte <= 0;
-            sd_byte_available_d <= 0;
+            fsm_state <= 0;
+            mem_a <= 16'h2010;
+            mem_d <= 0;
+            mem_we <= 0;
+            sub_byte <= 0;
         end else begin
             uart_write <= 0;
-            sd_byte_available_d <= sd_byte_available; // store previous state
+            mem_we <= 0;
 
-            case (print_hex_state)
-                0: begin 
-                   if (sd_ready && !printed_k) begin
-                       uart_data  <= {24'd0, "K"};
-                       uart_write <= 1;
-                       printed_k  <= 1;
-                       rd_sig     <= 1;       // start read after K
-                       byte_index <= 0;
-                   end
-
-                   // Stop asserting rd once SD controller leaves IDLE (state != IDLE) 
-                   if (do_read && (sd_status != 6)) rd_sig <= 0;
-
-                   // Capture byte and start to print process
-                   if (sd_byte_available && !sd_byte_available_d && byte_index < 512) begin
-                       captured_byte <= sd_dout;
-                       print_hex_state <= 1;
-                       do_read <= 1; // SD slow?
-                   end
-                end
-                1: begin
-                    uart_data  <= {24'd0, "A"};
+            if (fsm_state == 0) begin
+                if (spo[0] && !printed_k) begin
+                    uart_data  <= {24'd0, "K"};
                     uart_write <= 1;
-                    print_hex_state <= 2;
+                    printed_k  <= 1;
+                    fsm_state  <= 1;
                 end
-                2: begin // pring upper nibble of captured_byte
+            end else if (fsm_state == 1) begin
+                mem_a   <= 16'h1000;
+                mem_d   <= 32'h00000000;
+                mem_we  <= 1;
+                fsm_state <= 2;
+            end else if (fsm_state == 2) begin
+                mem_a   <= 16'h1004;
+                mem_d   <= 32'h00000001;
+                mem_we  <= 1;
+                fsm_state <= 3;
+            end else if (fsm_state == 3) begin
+                mem_a <= 16'h2010;
+                if (!spo[0]) begin
+                    fsm_state <= 4;
+                end
+            end else if (fsm_state == 4) begin
+                mem_a <= 16'h2010;
+                if (spo[0]) begin
+                    fsm_state <= 5;
+                    mem_a <= 0;
+                    sub_byte <= 0;
+                    byte_index <= 0;
+                end
+            end else if (fsm_state == 5) begin
+                if (print_hex_state == 0) begin
+                    case (sub_byte)
+                        2'd0: captured_byte <= spo[31:24];
+                        2'd1: captured_byte <= spo[23:16];
+                        2'd2: captured_byte <= spo[15:8];
+                        2'd3: captured_byte <= spo[7:0];
+                    endcase
+                    print_hex_state <= 1;
+                end else if (print_hex_state == 1) begin
                     uart_data  <= {24'd0, (captured_byte[7:4] < 10) ? (8'h30 + captured_byte[7:4]) : (8'h41 + captured_byte[7:4] - 10)};
                     uart_write <= 1;
-                    print_hex_state <= 3;
-                end
-                3: begin // pring lower nibble of captured_byte
+                    print_hex_state <= 2;
+                end else if (print_hex_state == 2) begin
                     uart_data  <= {24'd0, (captured_byte[3:0] < 10) ? (8'h30 + captured_byte[3:0]) : (8'h41 + captured_byte[3:0] - 10)};
                     uart_write <= 1;
                     print_hex_state <= 0;
                     byte_index <= byte_index + 1;
+                    sub_byte <= sub_byte + 1;
+                    if (sub_byte == 3) begin
+                        mem_a <= mem_a + 4;
+                    end
+                    if (byte_index == 511) begin
+                        fsm_state <= 6;
+                    end
                 end
-                default: print_hex_state <= 0;
-                endcase
+            end
         end
     end
 
