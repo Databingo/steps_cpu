@@ -1629,6 +1629,31 @@
 // EB 3C 90 x86 JMP
 // 42 53 44 BSD
 // 55AA boot sector signature at offset 510-511 sector 0
+//Offsets 0-2: Jump instruction (EB 3C 90, a short jump over the BPB to the boot code).
+//Offsets 3-10: OEM name ("BSD  4.4", indicating it was likely formatted by FreeBSD's newfs_msdos tool or a similar BSD-derived utility for MS-DOS/FAT compatibility).
+//Offsets 11-12: Bytes per sector (0x0200 = 512).
+//Offset 13: Sectors per cluster (0x40 = 64).
+//Offsets 14-15: Reserved sectors (0x0001 = 1, including this boot sector).
+//Offset 16: Number of FATs (0x02 = 2).
+//Offsets 17-18: Root directory entries (0x0200 = 512).
+//Offsets 19-20: Total sectors (small) (0x0000, indicating use of the 32-bit total sectors field later).
+//Offset 21: Media descriptor (0xF0, common for removable media like SD cards).
+//Offsets 22-23: Sectors per FAT (0x0100 = 256).
+//Offsets 24-25: Sectors per track (0x0020 = 32).
+//Offsets 26-27: Number of heads (0x00FF = 255).
+//Offsets 28-31: Hidden sectors (0x00000000 = 0).
+//Offsets 32-35: Total sectors (large) (0x003FFF60 ≈ 4,193,952 sectors, or about 2 GB at 512 bytes/sector).
+//Offset 36: Drive number (0x00).
+//Offset 37: Reserved (0x00).
+//Offset 38: Extended boot signature (0x29, indicating the following fields are valid).
+//Offsets 39-42: Volume serial number (0x31761C09).
+//Offsets 43-53: Volume label ("NO NAME    ").
+//Offsets 54-61: File system type ("FAT16   ").
+//Offsets 62-509: Boot code (x86 assembly, including the error message "Non-system disk\r\nPress any key to reboot\r\n" at offsets 0x13E-0x178 in ASCII).
+//Offsets 510-511: Signature (55 AA).
+
+
+
 module cpu_on_board (
     (* chip_pin = "PIN_L1"  *) input  wire CLOCK_50,
     (* chip_pin = "PIN_R22" *) input  wire KEY0,        // Active-low reset
