@@ -1987,22 +1987,32 @@ module cpu_on_board (
                 end
                 1: begin
                     uart_data  <= {24'd0, "A"};
-                    uart_write <= 1;
                     print_hex_state <= 2;
                 end
                 2: begin
-                    // Wait one cycle to ensure UART processes the character
-                    uart_write <= 0;
+                    uart_write <= 1;
                     print_hex_state <= 3;
                 end
                 3: begin
+                    uart_write <= 0;
                     uart_data  <= {24'd0, (captured_byte[7:4] < 10) ? (8'h30 + captured_byte[7:4]) : (8'h41 + captured_byte[7:4] - 10)};
-                    uart_write <= 1;
                     print_hex_state <= 4;
                 end
                 4: begin
-                    uart_data  <= {24'd0, (captured_byte[3:0] < 10) ? (8'h30 + captured_byte[3:0]) : (8'h41 + captured_byte[3:0] - 10)};
                     uart_write <= 1;
+                    print_hex_state <= 5;
+                end
+                5: begin
+                    uart_write <= 0;
+                    uart_data  <= {24'd0, (captured_byte[3:0] < 10) ? (8'h30 + captured_byte[3:0]) : (8'h41 + captured_byte[3:0] - 10)};
+                    print_hex_state <= 6;
+                end
+                6: begin
+                    uart_write <= 1;
+                    print_hex_state <= 7;
+                end
+                7: begin
+                    uart_write <= 0;
                     print_hex_state <= 0;
                     byte_index <= byte_index + 1;
                     sub_byte <= sub_byte + 1;
