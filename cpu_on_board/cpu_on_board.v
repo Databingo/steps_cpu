@@ -1985,8 +1985,18 @@ module cpu_on_board (
                     endcase
                     print_hex_state <= 1;
                 end
+                //1: begin
+                //    uart_data  <= {24'd0, "A"};
+                //    uart_write <= 1;
+                //    print_hex_state <= 2;
+                //end
+                //2: begin
+                //    // Wait one cycle to ensure UART processes the character
+                //    uart_write <= 0;
+                //    print_hex_state <= 3;
+                //end
                 1: begin
-                    uart_data  <= {24'd0, "A"};
+                    uart_data  <= {24'd0, (captured_byte[7:4] < 10) ? (8'h30 + captured_byte[7:4]) : (8'h41 + captured_byte[7:4] - 10)};
                     uart_write <= 1;
                     print_hex_state <= 2;
                 end
@@ -1996,16 +2006,6 @@ module cpu_on_board (
                     print_hex_state <= 3;
                 end
                 3: begin
-                    uart_data  <= {24'd0, (captured_byte[7:4] < 10) ? (8'h30 + captured_byte[7:4]) : (8'h41 + captured_byte[7:4] - 10)};
-                    uart_write <= 1;
-                    print_hex_state <= 4;
-                end
-                4: begin
-                    // Wait one cycle to ensure UART processes the character
-                    uart_write <= 0;
-                    print_hex_state <= 5;
-                end
-                5: begin
                     uart_data  <= {24'd0, (captured_byte[3:0] < 10) ? (8'h30 + captured_byte[3:0]) : (8'h41 + captured_byte[3:0] - 10)};
                     uart_write <= 1;
                     print_hex_state <= 0;
