@@ -1870,20 +1870,40 @@ module cpu_on_board (
     sdcard sd0 (
         .clk(CLOCK_50),
         .rst(~KEY0),
-        .sd_dat0(SD_DAT0),
-        .sd_ncd(sd_ncd),
-        .sd_wp(sd_wp),
-        .sd_dat1(sd_dat1),
-        .sd_dat2(sd_dat2),
-        .sd_dat3(SD_DAT3),
-        .sd_cmd(SD_CMD),
-        .sd_sck(SD_CLK),
-        .a(mem_a),
-        .d(mem_d),
+        .sd_dat0(SD_DAT0), // MISO
+        .sd_ncd(sd_ncd),  // negative card detect: 0 if card present
+        .sd_wp(sd_wp),    // write-protect status  1 if protected
+        .sd_dat1(sd_dat1), // fixed high SPI
+        .sd_dat2(sd_dat2), // fixed high SPI
+        .sd_dat3(SD_DAT3), // Chip Select
+        .sd_cmd(SD_CMD), // MOSI
+        .sd_sck(SD_CLK),  // SPI Clock
+        // memory interface
+        .a(mem_a),  // memory address
+        .d(mem_d),  // memory data
         .we(mem_we),
-        .spo(spo),
+        .spo(spo),  // single port output for read
         .irq(irq)
     );
+//    sd_controller sd0 (
+//        .cs(sd_cs),
+//        .mosi(sd_mosi),
+//        .miso(SD_DAT0),
+//        .sclk(sd_sclk),
+//        .rd(rd_sig), // start 512 byte block reading
+//        .wr(wr_sig),
+//        .dout(sd_dout),
+//        .byte_available(sd_byte_available),  // one of the 512 byte is ready for read
+//        .din(8'h00),
+//        .ready_for_next_byte(),
+//        .reset(~KEY0),
+//        .ready(sd_ready),
+//        .address(32'h00000000),
+//        .clk(CLOCK_50),
+//        .clk_pulse_slow(clk_pulse_slow),
+//        .status(sd_status),
+//        .recv_data(sd_recv_data)
+//    );
 
     // =======================================================
     // UART debug: print "K" then print all 512 bytes in hex
@@ -1911,29 +1931,40 @@ module cpu_on_board (
             uart_write <= 0;
             mem_we <= 0;
 
-            if (fsm_state == 0) begin
+            case (fsm_state)
+            //if (fsm_state == 0) begin
+            0: begin
                 if (spo[0] && !printed_k) begin
                     uart_data  <= {24'd0, "K"};
                     uart_write <= 1;
                     printed_k  <= 1;
                     fsm_state  <= 1;
                 end
-            end else if (fsm_state == 1) begin
+            end
+            //end else if (fsm_state == 1) begin
+            1: begin
                 mem_a   <= 16'h1000;
                 mem_d   <= 32'h00000000;
                 mem_we  <= 1;
                 fsm_state <= 2;
-            end else if (fsm_state == 2) begin
+            end
+            //end else if (fsm_state == 2) begin
+            2: begin
                 mem_a   <= 16'h1004;
                 mem_d   <= 32'h00000001;
                 mem_we  <= 1;
                 fsm_state <= 3;
-            end else if (fsm_state == 3) begin
+            end
+            //end else if (fsm_state == 3) begin
+            3: begin
+                mem_a   <= 16'h1004;
                 mem_a <= 16'h2010;
                 if (!spo[0]) begin
                     fsm_state <= 4;
                 end
-            end else if (fsm_state == 4) begin
+            end
+            //end else if (fsm_state == 4) begin
+            4: begin
                 mem_a <= 16'h2010;
                 if (spo[0]) begin
                     fsm_state <= 5;
@@ -1941,7 +1972,9 @@ module cpu_on_board (
                     sub_byte <= 0;
                     byte_index <= 0;
                 end
-            end else if (fsm_state == 5) begin
+            end
+            //end else if (fsm_state == 5) begin
+            5: begin
                 if (print_hex_state == 0) begin
                     case (sub_byte)
                         2'd0: captured_byte <= spo[31:24];
@@ -1968,6 +2001,7 @@ module cpu_on_board (
                     end
                 end
             end
+        endcase
         end
     end
 
