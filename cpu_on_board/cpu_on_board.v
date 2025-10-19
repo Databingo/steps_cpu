@@ -2132,16 +2132,15 @@ module cpu_on_board (
                 0_5: begin
                     if (!uart_waitrequest) begin
                         uart_control <= uart_readdata;
-                        if (uart_readdata[16] == 1) {  // FIFO has space (bit 16)
+                        if (uart_readdata[16] == 1) begin  // FIFO has space (bit 16)
                             uart_address <= 0;
                             uart_data <= {24'd0, "K"};
                             uart_write <= 1;
                             printed_k <= 1;
                             fsm_state <= 1;
-                        } else {
+                        end else 
                             // Poll again if no space
                             uart_read <= 1;
-                        }
                     end
                 end
                 1: begin
@@ -2188,14 +2187,13 @@ module cpu_on_board (
                         1: begin
                             if (!uart_waitrequest) begin
                                 uart_control <= uart_readdata;
-                                if (uart_readdata[16] == 1) {  // Space available
+                                if (uart_readdata[16] == 1) begin  // Space available
                                     uart_address <= 0;
                                     uart_data <= {24'd0, (captured_byte[7:4] < 10) ? (8'h30 + captured_byte[7:4]) : (8'h41 + captured_byte[7:4] - 10)};
                                     uart_write <= 1;
                                     print_hex_state <= 2;
-                                } else {
+                                end else 
                                     uart_read <= 1;  // Poll again
-                                }
                             end
                         end
                         2: begin
@@ -2206,7 +2204,7 @@ module cpu_on_board (
                         3: begin
                             if (!uart_waitrequest) begin
                                 uart_control <= uart_readdata;
-                                if (uart_readdata[16] == 1) {  // Space available
+                                if (uart_readdata[16] == 1) begin  // Space available
                                     uart_address <= 0;
                                     uart_data <= {24'd0, (captured_byte[3:0] < 10) ? (8'h30 + captured_byte[3:0]) : (8'h41 + captured_byte[3:0] - 10)};
                                     uart_write <= 1;
@@ -2219,9 +2217,8 @@ module cpu_on_board (
                                     if (byte_index == 511) begin
                                         fsm_state <= 6;
                                     end
-                                } else {
+                                end else 
                                     uart_read <= 1;  // Poll again
-                                }
                             end
                         end
                     endcase
