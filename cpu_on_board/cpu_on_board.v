@@ -320,8 +320,8 @@ module cpu_on_board (
             end
             1: begin
                 mem_a   <= 16'h1000;
-                //mem_d   <= 32'h00000000;
-                mem_d   <= 32'd512;
+                mem_d   <= 32'h00000000;
+                //mem_d   <= 32'd512;
                 mem_we  <= 1;
                 fsm_state <= 2;
             end
