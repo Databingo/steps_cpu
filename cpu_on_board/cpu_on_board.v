@@ -1879,8 +1879,15 @@ module cpu_on_board (
         .sd_cmd(SD_CMD), // MOSI
         .sd_sck(SD_CLK),  // SPI Clock
         // memory interface
-        .a(mem_a),  // memory address
-        .d(mem_d),  // memory data
+        .a(mem_a),  // memory address operation mapping 0x0000-0x01fc:128x32=518BytesSectorCache 
+                    // 0x1000getSetAddress512Aligned 
+                    // 0x1004Read  mem_d:1-sd_rd
+                    // 0x1008Write mem_d:1-sd_wr
+                    // 0x2000Sd_ncd
+                    // 0x2004Sd_wp
+                    // 0x2010readyforpoll 
+                    // 0x2014dirty
+        .d(mem_d),  // memory data operation 
         .we(mem_we),
         .spo(spo),  // single port output for read
         .irq(irq)
@@ -1932,7 +1939,6 @@ module cpu_on_board (
             mem_we <= 0;
 
             case (fsm_state)
-            //if (fsm_state == 0) begin
             0: begin
                 if (spo[0] && !printed_k) begin
                     uart_data  <= {24'd0, "K"};
@@ -1941,29 +1947,24 @@ module cpu_on_board (
                     fsm_state  <= 1;
                 end
             end
-            //end else if (fsm_state == 1) begin
             1: begin
                 mem_a   <= 16'h1000;
                 mem_d   <= 32'h00000000;
                 mem_we  <= 1;
                 fsm_state <= 2;
             end
-            //end else if (fsm_state == 2) begin
             2: begin
                 mem_a   <= 16'h1004;
                 mem_d   <= 32'h00000001;
                 mem_we  <= 1;
                 fsm_state <= 3;
             end
-            //end else if (fsm_state == 3) begin
             3: begin
-                mem_a   <= 16'h1004;
                 mem_a <= 16'h2010;
                 if (!spo[0]) begin
                     fsm_state <= 4;
                 end
             end
-            //end else if (fsm_state == 4) begin
             4: begin
                 mem_a <= 16'h2010;
                 if (spo[0]) begin
@@ -1973,9 +1974,9 @@ module cpu_on_board (
                     byte_index <= 0;
                 end
             end
-            //end else if (fsm_state == 5) begin
             5: begin
-                if (print_hex_state == 0) begin
+                case (print_hex_state) 
+                0: begin
                     case (sub_byte)
                         2'd0: captured_byte <= spo[31:24];
                         2'd1: captured_byte <= spo[23:16];
@@ -1983,11 +1984,13 @@ module cpu_on_board (
                         2'd3: captured_byte <= spo[7:0];
                     endcase
                     print_hex_state <= 1;
-                end else if (print_hex_state == 1) begin
+                end
+                1: begin
                     uart_data  <= {24'd0, (captured_byte[7:4] < 10) ? (8'h30 + captured_byte[7:4]) : (8'h41 + captured_byte[7:4] - 10)};
                     uart_write <= 1;
                     print_hex_state <= 2;
-                end else if (print_hex_state == 2) begin
+                end
+                2: begin
                     uart_data  <= {24'd0, (captured_byte[3:0] < 10) ? (8'h30 + captured_byte[3:0]) : (8'h41 + captured_byte[3:0] - 10)};
                     uart_write <= 1;
                     print_hex_state <= 0;
@@ -2000,6 +2003,7 @@ module cpu_on_board (
                         fsm_state <= 6;
                     end
                 end
+                endcase
             end
         endcase
         end
