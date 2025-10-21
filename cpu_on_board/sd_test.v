@@ -250,7 +250,8 @@ module cpu_on_board (
         .sd_cmd(SD_CMD), // MOSI
         .sd_sck(SD_CLK),  // SPI Clock
         // memory interface
-        .a(mem_a),  // memory address operation mapping 0x0000-0x01fc:128x32=518BytesSectorCache 
+        .a(mem_a),  // memory address operation mapping 
+	            // 0x0000-0x01fc:128x32=518BytesSectorCache 
                     // 0x1000getSetAddress512Aligned 
                     // 0x1004Read  mem_d:1-sd_rd
                     // 0x1008Write mem_d:1-sd_wr

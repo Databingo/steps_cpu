@@ -28,10 +28,13 @@ module cpu_on_board (
     (* chip_pin = "J14" *)  input wire PS2_DAT,
 
 
-    (* chip_pin = "V20" *)  output wire SPI_SCLK, //SD_CLK
-    (* chip_pin = "Y20" *)  output wire SPI_MOSI, // SD_CMD
-    (* chip_pin = "W20" *)  input wire SPI_MISO,// SD_DAT
-    (* chip_pin = "U20" *)  output wire SPI_SS_n // SD_DAT3
+    //(* chip_pin = "V20" *)  output wire SPI_SCLK, //SD_CLK
+    //(* chip_pin = "Y20" *)  output wire SPI_MOSI, // SD_CMD
+    //(* chip_pin = "W20" *)  input wire SPI_MISO,// SD_DAT
+    (* chip_pin = "V20" *)  output wire SD_CLK, //SD_CLK
+    (* chip_pin = "Y20" *)  output wire SD_CMD, // SD_CMD
+    (* chip_pin = "W20" *)  input wire SD_DAT0, // SD_DAT
+    (* chip_pin = "U20" *)  output wire SD_DAT3 // SD_DAT3
 
 
     
@@ -234,23 +237,60 @@ module cpu_on_board (
     assign HEX03 = ~Spi_selected;
 
 
-    // 6. -- SPI --
-   wire [15:0] spi_read_data_wire;
-   spi my_spi_system (
-       .clk_clk                       (CLOCK_50),
-       .reset_reset_n                 (KEY0),
-       //.spi_0_reset_reset_n           (KEY0),
-       .spi_0_spi_control_port_chipselect (Spi_selected), // Connection
-       .spi_0_spi_control_port_address    (bus_address[3:1]), // IP is 16 bytes wide data so address align by bytes
-       .spi_0_spi_control_port_read_n     (~(bus_read_enable && Spi_selected)), // Read
-       .spi_0_spi_control_port_readdata   (spi_read_data_wire),
-       .spi_0_spi_control_port_write_n    (~(bus_write_enable && Spi_selected)), // Write
-       .spi_0_spi_control_port_writedata  (bus_write_data[15:0]),  // 16-bytes wide
-       .spi_0_external_MISO           (SPI_MISO), // Map to Physical pins
-       .spi_0_external_MOSI           (SPI_MOSI),
-       .spi_0_external_SCLK           (SPI_SCLK),
-       .spi_0_external_SS_n           (SPI_SS_n),
-   ); 
+   // // 6. -- SPI --
+   //wire [15:0] spi_read_data_wire;
+   //spi my_spi_system (
+   //    .clk_clk                       (CLOCK_50),
+   //    .reset_reset_n                 (KEY0),
+   //    //.spi_0_reset_reset_n           (KEY0),
+   //    .spi_0_spi_control_port_chipselect (Spi_selected), // Connection
+   //    .spi_0_spi_control_port_address    (bus_address[3:1]), // IP is 16 bytes wide data so address align by bytes
+   //    .spi_0_spi_control_port_read_n     (~(bus_read_enable && Spi_selected)), // Read
+   //    .spi_0_spi_control_port_readdata   (spi_read_data_wire),
+   //    .spi_0_spi_control_port_write_n    (~(bus_write_enable && Spi_selected)), // Write
+   //    .spi_0_spi_control_port_writedata  (bus_write_data[15:0]),  // 16-bytes wide
+   //    .spi_0_external_MISO           (SPI_MISO), // Map to Physical pins
+   //    .spi_0_external_MOSI           (SPI_MOSI),
+   //    .spi_0_external_SCLK           (SPI_SCLK),
+   //    .spi_0_external_SS_n           (SPI_SS_n),
+   //); 
+   // 7. -- SD Card --
+    wire [31:0] spo;
+    reg [15:0] mem_a = 32'h0000_3010;
+    reg [31:0] mem_d = 0;
+    reg mem_we = 0;
+    wire sd_ncd = 0;
+    wire sd_wp = 0;
+    wire irq;
+    wire sd_dat1;
+    wire sd_dat2;
+
+    sdcard sd0 (
+	.clk(CLOCK_50),
+	.rst(KEY0), // ?
+	.sd_dat0(SD_DAT0), // MISO
+	.sd_ncd(sd_ncd), 
+	.sd_wp(sd_wp), 
+	.sd_dat1(sd_dat1), 
+	.sd_dat2(sd_dat2), 
+	.sd_dat3(SD_DAT3),  // chip select
+	.sd_cmd(SD_CMD),  // MOSI
+	.sd_sck(SD_CLK),  // SPI Clock
+	// memory map
+	.a(mem_a),
+	            // 0x0000-0x01fc:128x32=518BytesSectorCache 
+                    // 0x1000getSetAddress512Aligned 
+                    // 0x1004Read  mem_d:1-sd_rd
+                    // 0x1008Write mem_d:1-sd_wr
+                    // 0x2000Sd_ncd
+                    // 0x2004Sd_wp
+                    // 0x2010readyforpoll 
+                    // 0x2014dirty
+	.d(mem_d),
+	.we(mem_we),
+	.spo(spo),
+	.irq(irq)
+    );
       
 
     // -- Timer --
