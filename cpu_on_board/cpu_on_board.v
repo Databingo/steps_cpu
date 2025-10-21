@@ -278,14 +278,14 @@ module cpu_on_board (
 	.sd_sck(SD_CLK),  // SPI Clock
 	// memory map
 	.a(mem_a),
-	            // 0x0000-0x01fc:128x32=518BytesSectorCache 
-                    // 0x1000getSetAddress512Aligned 
-                    // 0x1004Read  mem_d:1-sd_rd
-                    // 0x1008Write mem_d:1-sd_wr
-                    // 0x2000Sd_ncd
-                    // 0x2004Sd_wp
-                    // 0x2010readyforpoll 
-                    // 0x2014dirty
+	            // 0x4000-0x41fc 0x0000-0x01fc:128x32=518BytesSectorCache 
+                    // 0x3000 0x1000getSetAddress512Aligned 
+                    // 0x3004 0x1004Read  mem_d:1-sd_rd
+                    // 0x3008 0x1008Write mem_d:1-sd_wr
+                    // 0x3012 0x2000Sd_ncd
+                    // 0x3016 0x2004Sd_wp
+                    // 0x3020 0x2010readyforpoll 
+                    // 0x3024 0x2014dirty
 	.d(mem_d),
 	.we(mem_we),
 	.spo(spo),
