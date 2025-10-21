@@ -133,9 +133,12 @@ module sdcard
             if (sd_ready_real) begin
                 if (we) begin
                     case (a[15:0])
-                        16'h1000: sd_address <= d;
-                        16'h1004: sd_rd <= d[0];
-                        16'h1008: sd_wr <= d[0];
+                        //16'h1000: sd_address <= d;
+                        //16'h1004: sd_rd <= d[0];
+                        //16'h1008: sd_wr <= d[0];
+                        16'h3000: sd_address <= d;
+                        16'h3004: sd_rd <= d[0];
+                        16'h3008: sd_wr <= d[0];
                         default: ;
                     endcase
                 end
@@ -188,13 +191,19 @@ module sdcard
     // handle non-relevant control address reading
     always @ (*) begin
         spo = 0;
-        if (a[15:12] == 0) spo = block[a[8:2]];
+        //if (a[15:12] == 0) spo = block[a[8:2]];
+        if (a[15:12] == 4) spo = block[a[8:2]];
         else case (a[15:0])
-            16'h1000: spo = sd_address;
-            16'h2000: spo = sd_ncd;
-            16'h2004: spo = sd_wp;
-            16'h2010: spo = sd_ready_real;
-            16'h2014: spo = dirty;
+            //16'h1000: spo = sd_address;
+            //16'h2000: spo = sd_ncd;
+            //16'h2004: spo = sd_wp;
+            //16'h2010: spo = sd_ready_real;
+            //16'h2014: spo = dirty;
+            16'h3000: spo = sd_address;
+            16'h3012: spo = sd_ncd;
+            16'h3016: spo = sd_wp;
+            16'h3020: spo = sd_ready_real;
+            16'h3024: spo = dirty;
             default: ;
         endcase
     end
