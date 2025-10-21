@@ -163,7 +163,7 @@ module cpu_on_board (
         if (bus_read_enable) begin // Read
 	    if (Key_selected) begin bus_read_data <= {32'd0, 24'd0, ascii}; bus_read_done <= 1; end
 	    if (Ram_selected) begin bus_read_data <= {32'd0, Cache[bus_address_reg]}; bus_read_done <= 1; end
-	    if (Spi_selected_reg) begin bus_read_data <= {48'd0, spi_read_data_wire}; bus_read_done <= 1; end
+	    //if (Spi_selected_reg) begin bus_read_data <= {48'd0, spi_read_data_wire}; bus_read_done <= 1; end
         end
 	if (bus_write_enable) begin // Write
 	    if (Ram_selected) Cache[bus_address[63:2]] <= bus_write_data[31:0];  // cut fit 32 bit ram //work
