@@ -149,26 +149,79 @@ module cpu_on_board (
     ////wire Stk_selected = (bus_address >= Stk_base && bus_address < Stk_base + Stk_size);
     wire Key_selected = (bus_address == `Key_base);
     wire Art_selected = (bus_address == `Art_base);
-    wire Spi_selected = (bus_address >= `Spi_base && bus_address < `Spi_base + `Spi_size);
-    reg Spi_selected_reg;
-    always @(posedge CLOCK_50) begin
-        Spi_selected_reg <= Spi_selected;
-    end
+    //wire Spi_selected = (bus_address >= `Spi_base && bus_address < `Spi_base + `Spi_size);
+    //reg Spi_selected_reg;
+    //always @(posedge CLOCK_50) begin
+    //    Spi_selected_reg <= Spi_selected;
+    //end
+    wire Sdc_selected = (bus_address >= `Sdc_base && bus_address <= `Sdc_dirty);
 
 
     // 3. Port B read & write BRAM
     reg [63:0] bus_address_reg;
     always @(posedge CLOCK_50) begin
+	mem_we <= 0; // Sd write
         bus_address_reg <= bus_address>>2; // BRAM read need this reg address if has condition in circle
-        if (bus_read_enable) begin // Read
+        // Write
+	if (bus_write_enable) begin 
+	    if (Ram_selected) Cache[bus_address[63:2]] <= bus_write_data[31:0];  // cut fit 32 bit ram //work
+	    // Sd write
+	    if (Sdc_selected) begin 
+		if (bus_address == `Sdc_ready) begin
+		    mem_a <= `Sdc_ready; mem_we <= 1;
+		end
+	    end
+	end 
+        // Read
+        if (bus_read_enable) begin 
 	    if (Key_selected) begin bus_read_data <= {32'd0, 24'd0, ascii}; bus_read_done <= 1; end
 	    if (Ram_selected) begin bus_read_data <= {32'd0, Cache[bus_address_reg]}; bus_read_done <= 1; end
 	    //if (Spi_selected_reg) begin bus_read_data <= {48'd0, spi_read_data_wire}; bus_read_done <= 1; end
-        end
-	if (bus_write_enable) begin // Write
-	    if (Ram_selected) Cache[bus_address[63:2]] <= bus_write_data[31:0];  // cut fit 32 bit ram //work
+	    // Sd read
+	    if (Sdc_selected) begin 
+                if (bus_address == `Sdc_ready)
+		    bus_read_data <= {32'd0, spo}; bus_read_done <= 1; 
+	    end
         end
     end
+      
+   // 7. -- SD Card --
+    wire [31:0] spo;
+    reg [15:0] mem_a = 32'h0000_3220;
+    reg [31:0] mem_d = 0;
+    reg mem_we = 0;
+    wire sd_ncd = 0;
+    wire sd_wp = 0;
+    wire irq;
+    wire sd_dat1;
+    wire sd_dat2;
+
+    sdcard sd0 (
+	.clk(CLOCK_50),
+	.rst(KEY0), // ?
+	.sd_dat0(SD_DAT0), // MISO
+	.sd_ncd(sd_ncd), 
+	.sd_wp(sd_wp), 
+	.sd_dat1(sd_dat1), 
+	.sd_dat2(sd_dat2), 
+	.sd_dat3(SD_DAT3),  // chip select
+	.sd_cmd(SD_CMD),  // MOSI
+	.sd_sck(SD_CLK),  // SPI Clock
+	// memory map
+	.a(mem_a),
+	            // 0x3000-0x31fc 0x0000-0x01fc:128x32=518BytesSectorCache 
+                    // 0x3200 0x1000getSetAddress512Aligned 
+                    // 0x3204 0x1004Read  mem_d:1-sd_rd
+                    // 0x3208 0x1008Write mem_d:1-sd_wr
+                    // 0x3212 0x2000Sd_ncd
+                    // 0x3216 0x2004Sd_wp
+                    // 0x3220 0x2010readyforpoll 
+                    // 0x3224 0x2014dirty
+	.d(mem_d),
+	.we(mem_we),
+	.spo(spo),
+	.irq(irq)
+    );
       
       
      //  4.-- UART Writer Trigger --
@@ -254,44 +307,6 @@ module cpu_on_board (
    //    .spi_0_external_SCLK           (SPI_SCLK),
    //    .spi_0_external_SS_n           (SPI_SS_n),
    //); 
-   // 7. -- SD Card --
-    wire [31:0] spo;
-    reg [15:0] mem_a = 32'h0000_3010;
-    reg [31:0] mem_d = 0;
-    reg mem_we = 0;
-    wire sd_ncd = 0;
-    wire sd_wp = 0;
-    wire irq;
-    wire sd_dat1;
-    wire sd_dat2;
-
-    sdcard sd0 (
-	.clk(CLOCK_50),
-	.rst(KEY0), // ?
-	.sd_dat0(SD_DAT0), // MISO
-	.sd_ncd(sd_ncd), 
-	.sd_wp(sd_wp), 
-	.sd_dat1(sd_dat1), 
-	.sd_dat2(sd_dat2), 
-	.sd_dat3(SD_DAT3),  // chip select
-	.sd_cmd(SD_CMD),  // MOSI
-	.sd_sck(SD_CLK),  // SPI Clock
-	// memory map
-	.a(mem_a),
-	            // 0x4000-0x41fc 0x0000-0x01fc:128x32=518BytesSectorCache 
-                    // 0x3000 0x1000getSetAddress512Aligned 
-                    // 0x3004 0x1004Read  mem_d:1-sd_rd
-                    // 0x3008 0x1008Write mem_d:1-sd_wr
-                    // 0x3012 0x2000Sd_ncd
-                    // 0x3016 0x2004Sd_wp
-                    // 0x3020 0x2010readyforpoll 
-                    // 0x3024 0x2014dirty
-	.d(mem_d),
-	.we(mem_we),
-	.spo(spo),
-	.irq(irq)
-    );
-      
 
     // -- Timer --
     // -- CSRs --

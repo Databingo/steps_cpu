@@ -137,8 +137,8 @@ module sdcard
                         //16'h1004: sd_rd <= d[0];
                         //16'h1008: sd_wr <= d[0];
                         16'h3000: sd_address <= d;
-                        16'h3004: sd_rd <= d[0];
-                        16'h3008: sd_wr <= d[0];
+                        16'h3204: sd_rd <= d[0];
+                        16'h3208: sd_wr <= d[0];
                         default: ;
                     endcase
                 end
@@ -200,10 +200,10 @@ module sdcard
             //16'h2010: spo = sd_ready_real;
             //16'h2014: spo = dirty;
             16'h3000: spo = sd_address;
-            16'h3012: spo = sd_ncd;
-            16'h3016: spo = sd_wp;
-            16'h3020: spo = sd_ready_real;
-            16'h3024: spo = dirty;
+            16'h3112: spo = sd_ncd;
+            16'h3116: spo = sd_wp;
+            16'h3120: spo = sd_ready_real;
+            16'h3124: spo = dirty;
             default: ;
         endcase
     end
