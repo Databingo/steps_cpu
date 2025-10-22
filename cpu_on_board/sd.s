@@ -1,4 +1,7 @@
-#`define Sdc_base  32'h0000_3000
+#`define Sdc_base  32'h0000_3000 (3000-31fc 128*32 = 512 bytes readed)
+#`define Sdc_addr  32'h0000_3200
+#`define Sdc_read  32'h0000_3204
+#`define Sdc_write 32'h0000_3208
 #`define Sdc_ready 32'h0000_3220
 #`define Sdc_dirty 32'h0000_3224
 .globl _start
@@ -9,7 +12,24 @@ _start:
 # Get UART address (0x2004) into t6.
 lui t6, 0x2
 addi t6, t6, 4      # t0 = 0x2004
-#
+
+## sd_ready address
+#lui t0, 0x3
+#addi t0, t0, 0x220       # t0 = 0x3220
+#sw t1, 4(t0)        # Write the byte from t1 to the txdata register.
+
+lui t0, 0x3
+addi t0, t0, 0x200  # address operator 0x3200   
+addi t1, x0, 0 # sector 0
+sw t1, 0(t0)  # set address setctor 0
+
+lui t3, 0x3
+addi t3, t3, 0x204  # read operator 0x3204
+addi t2, x0, 0x1
+sw t2, 0(t3) # do a read
+
+
+
 #li t0, 0x2008 # t0 holds the SPI base address (0x2008)
 #li t1, 0xFF # t1 holds the byte to send (e.g., a dummy 0xFF for a read)
 #

@@ -170,6 +170,9 @@ module cpu_on_board (
 		if (bus_address == `Sdc_ready) begin
 		    mem_a <= `Sdc_ready; mem_we <= 1;
 		end
+		if (bus_address == `Sdc_read) begin
+		    mem_a <= `Sdc_read;
+		end
 	    end
 	end 
         // Read
