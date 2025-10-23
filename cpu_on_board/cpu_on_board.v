@@ -167,11 +167,20 @@ module cpu_on_board (
 	    if (Ram_selected) Cache[bus_address[63:2]] <= bus_write_data[31:0];  // cut fit 32 bit ram //work
 	    // Sd write
 	    if (Sdc_selected) begin 
-		if (bus_address == `Sdc_ready) begin
-		    mem_a <= `Sdc_ready; mem_we <= 1;
+		if (bus_address == `Sdc_addr) begin
+		    mem_a <= `Sdc_addr; 
+		    mem_d <= bus_write_data[31:0];
+		    mem_we <= 1;
 		end
 		if (bus_address == `Sdc_read) begin
-		    mem_a <= `Sdc_read;
+		    mem_a <= `Sdc_read; 
+		    mem_d <= 1;
+		    mem_we <= 1;
+		end
+		if (bus_address == `Sdc_write) begin
+		    mem_a <= `Sdc_write; 
+		    mem_d <= 1;
+		    mem_we <= 1;
 		end
 	    end
 	end 
@@ -179,11 +188,19 @@ module cpu_on_board (
         if (bus_read_enable) begin 
 	    if (Key_selected) begin bus_read_data <= {32'd0, 24'd0, ascii}; bus_read_done <= 1; end
 	    if (Ram_selected) begin bus_read_data <= {32'd0, Cache[bus_address_reg]}; bus_read_done <= 1; end
-	    //if (Spi_selected_reg) begin bus_read_data <= {48'd0, spi_read_data_wire}; bus_read_done <= 1; end
 	    // Sd read
 	    if (Sdc_selected) begin 
-                if (bus_address == `Sdc_ready)
-		    bus_read_data <= {32'd0, spo}; bus_read_done <= 1; 
+		if (bus_address == `Sdc_ready) begin
+		    mem_a <= `Sdc_ready;
+		    bus_read_data <= {32'd0, spo}; 
+		    bus_read_done <= 1; 
+		end
+		if (bus_address >= `Sdc_base && bus_address < (`Sdc_base+512)) begin
+		    mem_a <= bus_address;
+		    bus_read_data <= {32'd0, spo}; 
+		    bus_read_done <= 1; 
+		end
+
 	    end
         end
     end

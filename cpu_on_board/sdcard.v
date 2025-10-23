@@ -136,7 +136,7 @@ module sdcard
                         //16'h1000: sd_address <= d;
                         //16'h1004: sd_rd <= d[0];
                         //16'h1008: sd_wr <= d[0];
-                        16'h3000: sd_address <= d;
+                        16'h3200: sd_address <= d;
                         16'h3204: sd_rd <= d[0];
                         16'h3208: sd_wr <= d[0];
                         default: ;
@@ -192,18 +192,20 @@ module sdcard
     always @ (*) begin
         spo = 0;
         //if (a[15:12] == 0) spo = block[a[8:2]];
-        if (a[15:12] == 4) spo = block[a[8:2]];
+        //if (a[15:12] == 4) spo = block[a[8:2]];
+        //if (a[11:8] == 0) spo = block[a[8:2]]; // h3000 not 32xx
+        if (a[15:12] == 3 && a[11:8] < 2) spo = block[a[8:2]]; // h3000~h31ff 128 words
         else case (a[15:0])
             //16'h1000: spo = sd_address;
             //16'h2000: spo = sd_ncd;
             //16'h2004: spo = sd_wp;
             //16'h2010: spo = sd_ready_real;
             //16'h2014: spo = dirty;
-            16'h3000: spo = sd_address;
-            16'h3112: spo = sd_ncd;
-            16'h3116: spo = sd_wp;
-            16'h3120: spo = sd_ready_real;
-            16'h3124: spo = dirty;
+            16'h3200: spo = sd_address;
+            16'h3212: spo = sd_ncd;
+            16'h3216: spo = sd_wp;
+            16'h3220: spo = sd_ready_real;
+            16'h3224: spo = dirty;
             default: ;
         endcase
     end
