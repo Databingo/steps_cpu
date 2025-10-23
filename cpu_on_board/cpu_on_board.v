@@ -307,7 +307,7 @@ module cpu_on_board (
     assign HEX00 = ~Art_selected;
     assign HEX01 = ~Ram_selected;
     assign HEX02 = ~Rom_selected;
-    assign HEX03 = ~Spi_selected;
+    assign HEX03 = ~Sdc_selected;
 
 
    // // 6. -- SPI --
