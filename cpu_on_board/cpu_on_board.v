@@ -35,7 +35,8 @@ module cpu_on_board (
     // =======================================================
     // -- MEM --
     // =======================================================
-    (* ram_style = "block" *) reg [31:0] Cache [0:3071];
+    //(* ram_style = "block" *) reg [31:0] Cache [0:3071];
+    (* ram_style = "M4K" *) reg [31:0] Cache [0:2047];
     initial begin
         $readmemb("rom.mif", Cache, `Rom_base>>2);
         $readmemb("ram.mif", Cache, `Ram_base>>2);
