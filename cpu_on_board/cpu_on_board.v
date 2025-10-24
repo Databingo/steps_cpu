@@ -210,7 +210,7 @@ module cpu_on_board (
 	               sd_read_step <=1; 
 	               end
 	        if (sd_read_step == 1) begin 
-		       bus_read_data <= {32'd0, spo};
+		       //bus_read_data <= {32'd0, spo};
 	               bus_read_done <= 1; 
 	               sd_read_step <= 0;
 	               end
