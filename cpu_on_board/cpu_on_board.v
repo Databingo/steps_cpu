@@ -28,8 +28,8 @@ module cpu_on_board (
     (* chip_pin = "J14" *)  input wire PS2_DAT,
 
     (* chip_pin = "V20" *)  output wire SD_CLK, //SD_CLK
-    (* chip_pin = "Y20" *)  output wire SD_CMD, // SD_CMD
-    (* chip_pin = "W20" *)  input wire SD_DAT0, // SD_DAT
+    (* chip_pin = "Y20" *)  inout wire SD_CMD, // SD_CMD
+    (* chip_pin = "W20" *)  inout wire SD_DAT0, // SD_DAT
     (* chip_pin = "U20" *)  output wire SD_DAT3 // SD_DAT3
 
 
