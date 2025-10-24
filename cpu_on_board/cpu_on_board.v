@@ -202,16 +202,16 @@ module cpu_on_board (
         if (bus_read_enable) begin 
 	    if (Key_selected) begin bus_read_data <= {32'd0, 24'd0, ascii}; bus_read_done <= 1; end
 	    if (Ram_selected) begin bus_read_data <= {32'd0, Cache[bus_address_reg]}; bus_read_done <= 1; end
-	    // Sd read
-	    if (Sdc_ready_selected) begin
-		    mem_a <= `Sdc_ready; bus_read_data <= {32'd0, spo}; bus_read_done <= 1;
-	    end
-	    if (Sdc_cache_selected) begin
-		case (sd_read_step)
-		    0: begin mem_a <= bus_address[15:0];sd_read_step <=1; end
-		    1: begin bus_read_data <= {32'd0, spo};sd_read_step <= 0;bus_read_done <= 1; end
-		endcase
-	    end
+	    //// Sd read
+	    //if (Sdc_ready_selected) begin
+	    //        mem_a <= `Sdc_ready; bus_read_data <= {32'd0, spo}; bus_read_done <= 1;
+	    //end
+	    //if (Sdc_cache_selected) begin
+	    //    case (sd_read_step)
+	    //        0: begin mem_a <= bus_address[15:0];sd_read_step <=1; end
+	    //        1: begin bus_read_data <= {32'd0, spo};sd_read_step <= 0;bus_read_done <= 1; end
+	    //    endcase
+	    //end
 
         end
     end
