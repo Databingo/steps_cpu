@@ -181,17 +181,17 @@ module cpu_on_board (
 	    if (Ram_selected) Cache[bus_address[63:2]] <= bus_write_data[31:0];  // cut fit 32 bit ram //work
 	    // Sd write
 	    if (Sdc_addr_selected) begin 
-	        mem_a <= `Sdc_addr[15:0]; 
+	        mem_a <= `Sdc_addr; 
 	        mem_d <= bus_write_data[31:0];
 	        mem_we <= 1;
 	    end
 	    if (Sdc_read_selected) begin
-	        mem_a <= `Sdc_read[15:0]; 
+	        mem_a <= `Sdc_read; 
 	        mem_d <= 1;
 	        mem_we <= 1;
 	    end
 	    if (Sdc_write_selected) begin
-	        mem_a <= `Sdc_write[15:0]; 
+	        mem_a <= `Sdc_write; 
 	        mem_d <= 1;
 	        mem_we <= 1;
 	    end
@@ -205,7 +205,7 @@ module cpu_on_board (
 	    // Sd read
 	    if (Sdc_ready_selected) begin
 		case (sd_read_step)
-		    0: begin mem_a <= `Sdc_ready[15:0]; sd_read_step <= 1; end
+		    0: begin mem_a <= `Sdc_ready; sd_read_step <= 1; end
 		    1: begin bus_read_data <= {32'd0, spo};sd_read_step <= 0;bus_read_done <= 1;end
 		endcase
 	    end
