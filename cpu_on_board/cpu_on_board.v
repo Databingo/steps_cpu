@@ -146,34 +146,36 @@ module cpu_on_board (
     wire Key_selected = (bus_address == `Key_base);
     wire Art_selected = (bus_address == `Art_base);
     wire Sdc_selected = (bus_address >= `Sdc_base && bus_address <= `Sdc_dirty);
+    wire Sdc_addr_selected = (bus_address == `Sdc_addr);
+    wire Sdc_read_selected = (bus_address == `Sdc_read);
+    wire Sdc_write_selected = (bus_address == `Sdc_write);
 
     // 3. Port B read & write BRAM
     reg [63:0] bus_address_reg;
-    reg [31:0] sd_spo;
+    //reg [31:0] sd_spo;
     always @(posedge CLOCK_50) begin
 	mem_we <= 0; // Sd write
         bus_address_reg <= bus_address>>2; // BRAM read need this reg address if has condition in circle
-	sd_spo <= spo;
+	//sd_spo <= spo;
         // Write
 	if (bus_write_enable) begin 
 	    if (Ram_selected) Cache[bus_address[63:2]] <= bus_write_data[31:0];  // cut fit 32 bit ram //work
 	    // Sd write
-	    //if (Sdc_selected) begin 
-	    //    if (bus_address == `Sdc_addr) begin
-	    //        mem_a <= `Sdc_addr; 
-	    //        mem_d <= bus_write_data[31:0];
-	    //        mem_we <= 1;
-	    //    end
-	    //    if (bus_address == `Sdc_read) begin
-	    //        mem_a <= `Sdc_read; 
-	    //        mem_d <= 1;
-	    //        mem_we <= 1;
-	    //    end
-	    //    if (bus_address == `Sdc_write) begin
-	    //        mem_a <= `Sdc_write; 
-	    //        mem_d <= 1;
-	    //        mem_we <= 1;
-	    //    end
+	    if (Sdc_addr_selected) begin 
+	            mem_a <= `Sdc_addr; 
+	            mem_d <= bus_write_data[31:0];
+	            mem_we <= 1;
+	    end
+	    if (Sdc_read_selected) begin
+	        mem_a <= `Sdc_read; 
+	        mem_d <= 1;
+	        mem_we <= 1;
+	    end
+	    if (Sdc_write_selected) begin
+	        mem_a <= `Sdc_write; 
+	        mem_d <= 1;
+	        mem_we <= 1;
+	    end
 	    //end
 
 	end 
@@ -200,7 +202,7 @@ module cpu_on_board (
       
    // 7. -- SD Card --
     wire [31:0] spo;
-    reg [15:0] mem_a = 32'h0000_3220;
+    reg [15:0] mem_a = 16'h3220;
     reg [31:0] mem_d = 0;
     reg mem_we = 0;
     wire sd_ncd = 0;
