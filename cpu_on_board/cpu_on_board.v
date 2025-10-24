@@ -194,8 +194,8 @@ module cpu_on_board (
 	    end
 	    if (Sdc_cache_selected) begin
 		case (sd_read_step)
-		    0: mem_a <= bus_address;sd_read_step <=1; end
-		    1: bus_read_data <= {32'd0, spo};sd_read_step <= 0;bus_read_done <= 1; end
+		    0: begin mem_a <= bus_address;sd_read_step <=1; end
+		    1: begin bus_read_data <= {32'd0, spo};sd_read_step <= 0;bus_read_done <= 1; end
 		endcase
 	    end
 
