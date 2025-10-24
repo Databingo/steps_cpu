@@ -206,7 +206,7 @@ module cpu_on_board (
 	    end
 	    if (Sdc_cache_selected) begin
 	        if (sd_read_step == 0) begin 
-		       //mem_a <= bus_address[15:0];
+		       mem_a <= bus_address[15:0];
 	               sd_read_step <=1; 
 	               end
 	        if (sd_read_step == 1) begin 
