@@ -167,7 +167,7 @@ module cpu_on_board (
     wire Sdc_read_selected = (bus_address == `Sdc_read);
     wire Sdc_write_selected = (bus_address == `Sdc_write);
     wire Sdc_ready_selected = (bus_address == `Sdc_ready);
-    wire Sdc_cache_selected = (bus_address >= (`Sdc_base[15:0]) && bus_address < (`Sdc_base + 512 ) );
+    wire Sdc_cache_selected = (bus_address >= `Sdc_base && bus_address < (`Sdc_base + 512 ) );
 
     // 3. Port B read & write BRAM
     reg [63:0] bus_address_reg;
@@ -206,12 +206,12 @@ module cpu_on_board (
 	    if (Sdc_ready_selected) begin
 	            mem_a <= `Sdc_ready; bus_read_data <= {32'd0, spo}; bus_read_done <= 1;
 	    end
-	    //if (Sdc_cache_selected) begin
-	    //    case (sd_read_step)
-	    //        0: begin mem_a <= bus_address[15:0];sd_read_step <=1; end
-	    //        1: begin bus_read_data <= {32'd0, spo};sd_read_step <= 0;bus_read_done <= 1; end
-	    //    endcase
-	    //end
+	    else if (Sdc_cache_selected) begin
+	        case (sd_read_step)
+	            0: begin mem_a <= bus_address[15:0];sd_read_step <=1; end
+	            1: begin bus_read_data <= {32'd0, spo};sd_read_step <= 0;bus_read_done <= 1; end
+	        endcase
+	    end
 
         end
     end
