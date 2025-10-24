@@ -37,7 +37,9 @@ module cpu_on_board (
 
 );
 
+    // =======================================================
     // -- MEM -- minic L1 cache
+    // =======================================================//
     //(* ram_style = "block" *) reg [31:0] Cache [0:2047]; // 2048x4=8KB L1 cache to 0x2000
     (* ram_style = "block" *) reg [31:0] Cache [0:3071];
     integer i;
@@ -46,7 +48,9 @@ module cpu_on_board (
         $readmemb("ram.mif", Cache, `Ram_base>>2);
     end
 
+    // =======================================================
     // -- Clock --
+    // =======================================================
     wire clock_1hz;
     clock_slower clock_ins(
         .clk_in(CLOCK_50),
@@ -54,6 +58,9 @@ module cpu_on_board (
         .reset_n(KEY0)
     );
 
+    // =======================================================
+    // -- PC/IR --
+    // =======================================================
     wire [63:0] pc;
     reg [31:0] ir_bd;
     // Port A BRAM
@@ -63,7 +70,9 @@ module cpu_on_board (
     wire [31:0] ir_ld; assign ir_ld = {ir_bd[7:0], ir_bd[15:8], ir_bd[23:16], ir_bd[31:24]}; // Endianness swap
     assign LEDR_PC = pc/4;
 
+    // =======================================================
     // -- CPU --
+    // =======================================================
     riscv64 cpu (
         .clk(clock_1hz), 
         //.clk(CLOCK_50), 
@@ -85,7 +94,9 @@ module cpu_on_board (
         .bus_read_data(bus_read_data)
     );
      
+    // =======================================================
     // -- Keyboard -- 
+    // =======================================================
     reg [7:0] ascii;
     reg [7:0] scan;
     reg key_pressed_delay;
@@ -105,7 +116,9 @@ module cpu_on_board (
     always @(posedge CLOCK_50) begin key_pressed_delay <= key_pressed; end
     wire key_pressed_edge = key_pressed && !key_pressed_delay;
 
-    // -- Monitor -- Connected to Bus
+    // =======================================================
+    // JTAG_UART
+    // =======================================================
     jtag_uart_system my_jtag_system (
         .clk_clk                                 (CLOCK_50),
         .reset_reset_n                           (KEY0),
@@ -116,7 +129,9 @@ module cpu_on_board (
         .jtag_uart_0_avalon_jtag_slave_read_n    (1'b1)
     );
 
+    // =======================================================
     //// -- mmu_d --
+    // =======================================================
     //wire tlb_hit;
     //wire [63:0] physical_address;
     //wire [63:0] satp;
@@ -130,7 +145,9 @@ module cpu_on_board (
     //);
     // --  ---
 
+    // =======================================================
     // -- Bus --
+    // =======================================================
     reg  [63:0] bus_read_data;
     wire [63:0] bus_address;
     wire        bus_read_enable;
@@ -202,7 +219,9 @@ module cpu_on_board (
         end
     end
       
-   // 7. -- SD Card --
+    // =======================================================
+   // 7. -- SD Card Interface --
+    // =======================================================
     wire [31:0] spo;
     reg [15:0] mem_a = 16'h3220;
     reg [31:0] mem_d = 0;
@@ -233,7 +252,9 @@ module cpu_on_board (
     );
       
       
+    // =======================================================
      //  4.-- UART Writer Trigger --
+    // =======================================================
       wire uart_write_trigger = bus_write_enable && Art_selected;
       reg uart_write_trigger_dly;
       always @(posedge CLOCK_50 or negedge KEY0) begin
@@ -243,7 +264,9 @@ module cpu_on_board (
       assign uart_write_trigger_pulse = uart_write_trigger  && !uart_write_trigger_dly;
 
 
+    // =======================================================
     // -- interrupt controller --
+    // =======================================================
     wire [3:0] interrupt_vector;
     wire interrupt_ack;
     always @(posedge CLOCK_50 or negedge KEY0) begin
@@ -262,7 +285,9 @@ module cpu_on_board (
 	end
     end
 
+    // =======================================================
     // 5. -- Debug LEDs --
+    // =======================================================
     assign HEX30 = ~Key_selected;
 
     assign HEX20 = ~|bus_read_data;
