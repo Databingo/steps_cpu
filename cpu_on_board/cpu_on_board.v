@@ -175,7 +175,6 @@ module cpu_on_board (
     always @(posedge CLOCK_50) begin
 	mem_we <= 0; // Sd write
         bus_address_reg <= bus_address>>2; // BRAM read need this reg address if has condition in circle
-        sd_spo <= spo;
         // Write
 	if (bus_write_enable) begin 
 	    if (Ram_selected) Cache[bus_address[63:2]] <= bus_write_data[31:0];  // cut fit 32 bit ram //work
