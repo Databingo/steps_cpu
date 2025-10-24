@@ -149,10 +149,12 @@ module cpu_on_board (
     wire Sdc_addr_selected = (bus_address == `Sdc_addr);
     wire Sdc_read_selected = (bus_address == `Sdc_read);
     wire Sdc_write_selected = (bus_address == `Sdc_write);
+    wire Sdc_ready_selected = (bus_address == `Sdc_ready);
+    wire Sdc_cache_selected = (bus_address >= `Sdc_base && bus_address < (`Sdc_base + 512 ) );
 
     // 3. Port B read & write BRAM
     reg [63:0] bus_address_reg;
-    //reg [31:0] sd_spo;
+    reg [2:0]  sd_read_step = 0;
     always @(posedge CLOCK_50) begin
 	mem_we <= 0; // Sd write
         bus_address_reg <= bus_address>>2; // BRAM read need this reg address if has condition in circle
@@ -162,9 +164,9 @@ module cpu_on_board (
 	    if (Ram_selected) Cache[bus_address[63:2]] <= bus_write_data[31:0];  // cut fit 32 bit ram //work
 	    // Sd write
 	    if (Sdc_addr_selected) begin 
-	            mem_a <= `Sdc_addr; 
-	            mem_d <= bus_write_data[31:0];
-	            mem_we <= 1;
+	        mem_a <= `Sdc_addr; 
+	        mem_d <= bus_write_data[31:0];
+	        mem_we <= 1;
 	    end
 	    if (Sdc_read_selected) begin
 	        mem_a <= `Sdc_read; 
@@ -184,18 +186,17 @@ module cpu_on_board (
 	    if (Key_selected) begin bus_read_data <= {32'd0, 24'd0, ascii}; bus_read_done <= 1; end
 	    if (Ram_selected) begin bus_read_data <= {32'd0, Cache[bus_address_reg]}; bus_read_done <= 1; end
 	    // Sd read
-	    //if (Sdc_selected) begin 
-	    //    if (bus_address == `Sdc_ready) begin
-	    //        mem_a <= `Sdc_ready;
-	    //        bus_read_data <= {32'd0, sd_spo}; 
-	    //        bus_read_done <= 1; 
-	    //    end
-	    //    if (bus_address >= `Sdc_base && bus_address < (`Sdc_base+512)) begin
-	    //        mem_a <= bus_address;
-	    //        bus_read_data <= {32'd0, sd_spo}; 
-	    //        bus_read_done <= 1; 
-	    //    end
-	    //end
+	    if (Sdc_ready_selected) begin
+		case (sd_read_step)
+		    0: begin mem_a <= `Sdc_ready; sd_read_step <= 1; end
+		    1: begin bus_read_data <= {32'd0, spo};sd_read_step <= 0;bus_read_done <= 1;end
+		endcase
+	    end
+	    if (Sdc_cache_selected) begin
+		case (sd_read_step)
+		    0: mem_a <= bus_address;sd_read_step <=1; end
+		    1: bus_read_data <= {32'd0, spo};sd_read_step <= 0;bus_read_done <= 1; end
+	    end
 
         end
     end
