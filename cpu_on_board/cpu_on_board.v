@@ -196,6 +196,7 @@ module cpu_on_board (
 		case (sd_read_step)
 		    0: mem_a <= bus_address;sd_read_step <=1; end
 		    1: bus_read_data <= {32'd0, spo};sd_read_step <= 0;bus_read_done <= 1; end
+		endcase
 	    end
 
         end
