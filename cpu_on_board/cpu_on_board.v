@@ -162,7 +162,7 @@ module cpu_on_board (
     ////wire Stk_selected = (bus_address >= Stk_base && bus_address < Stk_base + Stk_size);
     wire Key_selected = (bus_address == `Key_base);
     wire Art_selected = (bus_address == `Art_base);
-    wire Sdc_selected = (bus_address >= `Sdc_base && bus_address <= `Sdc_dirty);
+    //wire Sdc_selected = (bus_address >= `Sdc_base && bus_address <= `Sdc_dirty);
     wire Sdc_addr_selected = (bus_address == `Sdc_addr);
     wire Sdc_read_selected = (bus_address == `Sdc_read);
     wire Sdc_write_selected = (bus_address == `Sdc_write);
@@ -181,17 +181,17 @@ module cpu_on_board (
 	    if (Ram_selected) Cache[bus_address[63:2]] <= bus_write_data[31:0];  // cut fit 32 bit ram //work
 	    // Sd write
 	    if (Sdc_addr_selected) begin 
-	        mem_a <= `Sdc_addr; 
+	        mem_a <= `Sdc_addr[15:0]; 
 	        mem_d <= bus_write_data[31:0];
 	        mem_we <= 1;
 	    end
 	    if (Sdc_read_selected) begin
-	        mem_a <= `Sdc_read; 
+	        mem_a <= `Sdc_read[15:0]; 
 	        mem_d <= 1;
 	        mem_we <= 1;
 	    end
 	    if (Sdc_write_selected) begin
-	        mem_a <= `Sdc_write; 
+	        mem_a <= `Sdc_write[15:0]; 
 	        mem_d <= 1;
 	        mem_we <= 1;
 	    end
@@ -205,13 +205,13 @@ module cpu_on_board (
 	    // Sd read
 	    if (Sdc_ready_selected) begin
 		case (sd_read_step)
-		    0: begin mem_a <= `Sdc_ready; sd_read_step <= 1; end
+		    0: begin mem_a <= `Sdc_ready[15:0]; sd_read_step <= 1; end
 		    1: begin bus_read_data <= {32'd0, spo};sd_read_step <= 0;bus_read_done <= 1;end
 		endcase
 	    end
 	    if (Sdc_cache_selected) begin
 		case (sd_read_step)
-		    0: begin mem_a <= bus_address;sd_read_step <=1; end
+		    0: begin mem_a <= bus_address[15:0];sd_read_step <=1; end
 		    1: begin bus_read_data <= {32'd0, spo};sd_read_step <= 0;bus_read_done <= 1; end
 		endcase
 	    end
@@ -299,7 +299,7 @@ module cpu_on_board (
     assign HEX00 = ~Art_selected;
     assign HEX01 = ~Ram_selected;
     assign HEX02 = ~Rom_selected;
-    assign HEX03 = ~Sdc_selected;
+    //assign HEX03 = ~Sdc_selected;
 
 
     // -- Timer --
