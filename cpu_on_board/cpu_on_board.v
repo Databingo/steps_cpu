@@ -27,31 +27,27 @@ module cpu_on_board (
     (* chip_pin = "H15" *)  input wire PS2_CLK, 
     (* chip_pin = "J14" *)  input wire PS2_DAT,
 
-    (* chip_pin = "V20" *)  output wire SD_CLK, //SD_CLK
-    (* chip_pin = "Y20" *)  inout wire SD_CMD, // SD_CMD (MOSI)
-    (* chip_pin = "W20" *)  inout wire SD_DAT0, // SD_DAT (MISO)
-    (* chip_pin = "U20" *)  output wire SD_DAT3 // SD_DAT3
+
+    (* chip_pin = "V20" *)  output wire SPI_SCLK, //SD_CLK
+    (* chip_pin = "Y20" *)  output wire SPI_MOSI, // SD_CMD
+    (* chip_pin = "W20" *)  input wire SPI_MISO,// SD_DAT
+    (* chip_pin = "U20" *)  output wire SPI_SS_n // SD_DAT3
 
 
     
 
 );
 
-    // =======================================================
     // -- MEM -- minic L1 cache
-    // =======================================================//
-    //(* ram_style = "block" *) reg [31:0] Cache [0:1024]; // 2048x4=8KB L1 cache to 0x2000
-    (* ram_style = "block" *) reg [31:0] Cache [0:2047]; // 2048x4=8KB L1 cache to 0x2000
-    //(* ram_style = "block" *) reg [31:0] Cache [0:3071];
+    //(* ram_style = "block" *) reg [31:0] Cache [0:2047]; // 2048x4=8KB L1 cache to 0x2000
+    (* ram_style = "block" *) reg [31:0] Cache [0:3071];
     integer i;
     initial begin
         $readmemb("rom.mif", Cache, `Rom_base>>2);
         $readmemb("ram.mif", Cache, `Ram_base>>2);
     end
 
-    // =======================================================
     // -- Clock --
-    // =======================================================
     wire clock_1hz;
     clock_slower clock_ins(
         .clk_in(CLOCK_50),
@@ -59,9 +55,6 @@ module cpu_on_board (
         .reset_n(KEY0)
     );
 
-    // =======================================================
-    // -- PC/IR --
-    // =======================================================
     wire [63:0] pc;
     reg [31:0] ir_bd;
     // Port A BRAM
@@ -71,9 +64,7 @@ module cpu_on_board (
     wire [31:0] ir_ld; assign ir_ld = {ir_bd[7:0], ir_bd[15:8], ir_bd[23:16], ir_bd[31:24]}; // Endianness swap
     assign LEDR_PC = pc/4;
 
-    // =======================================================
     // -- CPU --
-    // =======================================================
     riscv64 cpu (
         .clk(clock_1hz), 
         //.clk(CLOCK_50), 
@@ -95,9 +86,7 @@ module cpu_on_board (
         .bus_read_data(bus_read_data)
     );
      
-    // =======================================================
     // -- Keyboard -- 
-    // =======================================================
     reg [7:0] ascii;
     reg [7:0] scan;
     reg key_pressed_delay;
@@ -117,9 +106,7 @@ module cpu_on_board (
     always @(posedge CLOCK_50) begin key_pressed_delay <= key_pressed; end
     wire key_pressed_edge = key_pressed && !key_pressed_delay;
 
-    // =======================================================
-    // JTAG_UART
-    // =======================================================
+    // -- Monitor -- Connected to Bus
     jtag_uart_system my_jtag_system (
         .clk_clk                                 (CLOCK_50),
         .reset_reset_n                           (KEY0),
@@ -130,9 +117,7 @@ module cpu_on_board (
         .jtag_uart_0_avalon_jtag_slave_read_n    (1'b1)
     );
 
-    // =======================================================
     //// -- mmu_d --
-    // =======================================================
     //wire tlb_hit;
     //wire [63:0] physical_address;
     //wire [63:0] satp;
@@ -146,9 +131,7 @@ module cpu_on_board (
     //);
     // --  ---
 
-    // =======================================================
     // -- Bus --
-    // =======================================================
     reg  [63:0] bus_read_data;
     wire [63:0] bus_address;
     wire        bus_read_enable;
@@ -163,117 +146,29 @@ module cpu_on_board (
     ////wire Stk_selected = (bus_address >= Stk_base && bus_address < Stk_base + Stk_size);
     wire Key_selected = (bus_address == `Key_base);
     wire Art_selected = (bus_address == `Art_base);
-    ////wire Sdc_selected = (bus_address >= `Sdc_base && bus_address <= `Sdc_dirty);
-    //wire Sdc_addr_selected = (bus_address == `Sdc_addr);
-    //wire Sdc_read_selected = (bus_address == `Sdc_read);
-    //wire Sdc_write_selected = (bus_address == `Sdc_write);
-    //wire Sdc_ready_selected = (bus_address == `Sdc_ready);
-    //wire Sdc_cache_selected = (bus_address[15:0] >= `Sdc_base && bus_address[15:0] < 16'h3200 );
+    wire Spi_selected = (bus_address >= `Spi_base && bus_address < `Spi_base + `Spi_size);
+    reg Spi_selected_reg;
+    always @(posedge CLOCK_50) begin
+        Spi_selected_reg <= Spi_selected;
+    end
+
 
     // 3. Port B read & write BRAM
     reg [63:0] bus_address_reg;
-    //reg [2:0]  sd_read_step = 0;
-    //reg [15:0] bus_sd;
     always @(posedge CLOCK_50) begin
         bus_address_reg <= bus_address>>2; // BRAM read need this reg address if has condition in circle
-	//mem_we <= 0; // Sd write
-	//bus_sd <= bus_address[15:0];
-        // Write
-	if (bus_write_enable) begin 
-	    if (Ram_selected) Cache[bus_address[63:2]] <= bus_write_data[31:0];  // cut fit 32 bit ram //work
-	    //// Sd write
-	    //if (Sdc_addr_selected) begin 
-	    //    mem_a <= `Sdc_addr; 
-	    //    mem_d <= bus_write_data[31:0];
-	    //    mem_we <= 1;
-	    //end
-	    //if (Sdc_read_selected) begin
-	    //    mem_a <= `Sdc_read; 
-	    //    mem_d <= 1;
-	    //    mem_we <= 1;
-	    //end
-	    //if (Sdc_write_selected) begin
-	    //    mem_a <= `Sdc_write; 
-	    //    mem_d <= 1;
-	    //    mem_we <= 1;
-	    //end
-	end 
-
-        // Read
-        if (bus_read_enable) begin 
+        if (bus_read_enable) begin // Read
 	    if (Key_selected) begin bus_read_data <= {32'd0, 24'd0, ascii}; bus_read_done <= 1; end
 	    if (Ram_selected) begin bus_read_data <= {32'd0, Cache[bus_address_reg]}; bus_read_done <= 1; end
-	    //// Sd read
-	    //if (Sdc_ready_selected) begin
-	    //        mem_a <= `Sdc_ready; bus_read_data <= {32'd0, spo}; bus_read_done <= 1;
-	    //end
-	    //if (Sdc_cache_selected) begin
-	    //    if (sd_read_step == 0) begin 
-	    //           //mem_a <= bus_address[15:0];
-	    //           mem_a <= bus_sd;
-	    //           sd_read_step <=1; 
-	    //           end
-	    //    if (sd_read_step == 1) begin 
-	    //           bus_read_data <= {32'd0, spo};
-	    //           bus_read_done <= 1; 
-	    //           sd_read_step <= 0;
-	    //           end
-	    //end
-	    //if (Sdc_ready_selected || Sdc_cache_selected) begin
-	    //    case(sd_read_step)
-	    //        0: begin
-	    //           mem_a <= Sdc_ready_selected ? `Sdc_ready : bus_sd;
-	    //           sd_read_step <=1; 
-	    //        end
-	    //        1: sd_read_step <= 2;
-	    //        2: begin
-            //           bus_read_data <= {32'd0, spo};
-	    //           bus_read_done <= 1; 
-	    //           sd_read_step <= 0;
-	    //        end
-	    //    endcase
-	    //end
-
-
+	    if (Spi_selected_reg) begin bus_read_data <= {48'd0, spi_read_data_wire}; bus_read_done <= 1; end
+        end
+	if (bus_write_enable) begin // Write
+	    if (Ram_selected) Cache[bus_address[63:2]] <= bus_write_data[31:0];  // cut fit 32 bit ram //work
         end
     end
       
-    //// =======================================================
-    //// 7. -- SD Card Interface --
-    //// =======================================================
-    //wire [31:0] spo;
-    //reg [15:0] mem_a = 16'h3220;
-    //reg [31:0] mem_d = 0;
-    //reg mem_we = 0;
-    //wire sd_ncd = 0;
-    //wire sd_wp = 0;
-    //wire irq;
-    //wire sd_dat1;
-    //wire sd_dat2;
-
-    //sdcard sd0 (
-    //    .clk(CLOCK_50),
-    //    .rst(~KEY0), // ?
-    //    .sd_dat0(SD_DAT0), // MISO
-    //    .sd_ncd(sd_ncd), 
-    //    .sd_wp(sd_wp), 
-    //    .sd_dat1(sd_dat1), 
-    //    .sd_dat2(sd_dat2), 
-    //    .sd_dat3(SD_DAT3), // chip select
-    //    .sd_cmd(SD_CMD),   // MOSI
-    //    .sd_sck(SD_CLK),   // SPI Clock
-    //    // memory map
-    //    .a(mem_a),//0x3000-0x31fc:128x32=518BytesSectorCache 0x3200:getSetAddress512 0x3204:Read mem_d:1-sd_rd 0x3208:Write mem_d:1-sd_wr 0x3212:Sd_ncd 0x3216:Sd_wp 0x3220:readyforpoll 0x3224:dirty
-    //    .d(mem_d),
-    //    .we(mem_we),
-    //    .spo(spo)
-    //    //.irq(irq)
-    //);
       
-      
-    // =======================================================
      //  4.-- UART Writer Trigger --
-    // =======================================================
       wire uart_write_trigger = bus_write_enable && Art_selected;
       reg uart_write_trigger_dly;
       always @(posedge CLOCK_50 or negedge KEY0) begin
@@ -283,9 +178,29 @@ module cpu_on_board (
       assign uart_write_trigger_pulse = uart_write_trigger  && !uart_write_trigger_dly;
 
 
-    // =======================================================
+//wire uart_write_trigger = bus_write_enable && Art_selected;
+//reg uart_write_trigger_dly;
+//reg uart_write_pending;
+//always @(posedge CLOCK_50 or negedge KEY0) begin
+//  if (!KEY0) begin
+//    uart_write_pending <= 0;
+//    uart_write_trigger_dly <= 0;
+//  end else begin
+//    if (uart_write_trigger && !uart_write_pending) begin
+//       uart_write_pending <= 1;         // start pending
+//    end else if (uart_write_pending) begin
+//       uart_write_pending <= 0;         // complete next cycle
+//    end
+//    uart_write_trigger_dly <= uart_write_trigger;
+//  end
+//end
+//wire uart_write_trigger_pulse = uart_write_pending;
+
+
+
+
+
     // -- interrupt controller --
-    // =======================================================
     wire [3:0] interrupt_vector;
     wire interrupt_ack;
     always @(posedge CLOCK_50 or negedge KEY0) begin
@@ -304,9 +219,7 @@ module cpu_on_board (
 	end
     end
 
-    // =======================================================
     // 5. -- Debug LEDs --
-    // =======================================================
     assign HEX30 = ~Key_selected;
 
     assign HEX20 = ~|bus_read_data;
@@ -318,8 +231,27 @@ module cpu_on_board (
     assign HEX00 = ~Art_selected;
     assign HEX01 = ~Ram_selected;
     assign HEX02 = ~Rom_selected;
-    //assign HEX03 = ~Sdc_selected;
+    assign HEX03 = ~Spi_selected;
 
+
+    // 6. -- SPI --
+   wire [15:0] spi_read_data_wire;
+   spi my_spi_system (
+       .clk_clk                       (CLOCK_50),
+       .reset_reset_n                 (KEY0),
+       .spi_0_reset_reset_n           (KEY0),
+       .spi_0_spi_control_port_chipselect (Spi_selected), // Connection
+       .spi_0_spi_control_port_address    (bus_address[3:1]), // IP is 16 bytes wide data so address align by bytes
+       .spi_0_spi_control_port_read_n     (~(bus_read_enable && Spi_selected)), // Read
+       .spi_0_spi_control_port_readdata   (spi_read_data_wire),
+       .spi_0_spi_control_port_write_n    (~(bus_write_enable && Spi_selected)), // Write
+       .spi_0_spi_control_port_writedata  (bus_write_data[15:0]),  // 16-bytes wide
+       .spi_0_external_MISO           (SPI_MISO), // Map to Physical pins
+       .spi_0_external_MOSI           (SPI_MOSI),
+       .spi_0_external_SCLK           (SPI_SCLK),
+       .spi_0_external_SS_n           (SPI_SS_n),
+   ); 
+      
 
     // -- Timer --
     // -- CSRs --
