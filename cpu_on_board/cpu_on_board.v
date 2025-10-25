@@ -183,7 +183,7 @@ module cpu_on_board (
     // =======================================================
     reg [31:0] sd_addr = 0;           // NEW
     reg [8:0]  sd_byte_index = 0;     // NEW
-    reg sd_rd_start;              // NEW
+    //reg sd_rd_start;              // NEW
 
     wire [7:0] sd_dout;           // NEW
     wire sd_ready;                // NEW
