@@ -18,4 +18,5 @@ lw a2, 0(a1)
 addi a3, x0, 1
 bne a2, a3, sd_ready
 
-sw a2, 0(t6) # print
+addi t1, x0, 65  # A
+sw t1, 0(t6) # print
