@@ -1,13 +1,3 @@
-
-      
-
-
-
-
-
-
-
-
 `include "header.vh"
 
 module cpu_on_board (
