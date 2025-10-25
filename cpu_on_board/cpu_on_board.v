@@ -184,7 +184,7 @@ module cpu_on_board (
 	    if (Sdc_ready_selected || Sdc_cache_selected) begin
 	        case(sd_read_step)
 	            0: begin
-	               mem_a <= Sdc_ready_selected ? `Sdc_ready : bus_address;
+	               mem_a <= Sdc_ready_selected ? `Sdc_ready : bus_address[15:0];
 	               sd_read_step <=1; 
 	            end
 	            1: sd_read_step <= 2;
