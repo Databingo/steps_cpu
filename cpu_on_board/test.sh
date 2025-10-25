@@ -30,7 +30,7 @@ go run ../rvas.go sw.s       # lui addi sw lb sb uart for test
 #go run ../rvas.go addw.s # ok inlcude addw sllw srlw sraw
 #go run ../rvas.go bne.s # ok inlcude bne blt bge bltu bgeu
 #go run ../rvas.go csr.s # 
-go run ../rvas.go SD.s # 
+#go run ../rvas.go SD.s # 
 
 
 
