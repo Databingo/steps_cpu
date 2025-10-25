@@ -40,7 +40,8 @@ module cpu_on_board (
     // =======================================================
     // -- MEM -- minic L1 cache
     // =======================================================//
-    (* ram_style = "block" *) reg [31:0] Cache [0:2047]; // 2048x4=8KB L1 cache to 0x2000
+    (* ram_style = "block" *) reg [31:0] Cache [0:1024]; // 2048x4=8KB L1 cache to 0x2000
+    //(* ram_style = "block" *) reg [31:0] Cache [0:2047]; // 2048x4=8KB L1 cache to 0x2000
     //(* ram_style = "block" *) reg [31:0] Cache [0:3071];
     integer i;
     initial begin
