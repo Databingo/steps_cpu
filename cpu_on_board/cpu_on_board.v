@@ -155,107 +155,79 @@ module cpu_on_board (
 
 
     // 3. Port B read & write BRAM
-    //reg [63:0] bus_address_reg;
-    //reg [1:0] sd_read_step;
-    //always @(posedge CLOCK_50) begin
-    //    bus_address_reg <= bus_address>>2; // BRAM read need this reg address if has condition in circle
-    //    if (bus_read_enable) begin // Read
-    //        if (Key_selected) begin bus_read_data <= {32'd0, 24'd0, ascii}; bus_read_done <= 1; end
-    //        if (Ram_selected) begin bus_read_data <= {32'd0, Cache[bus_address_reg]}; bus_read_done <= 1; end
-
-    //        //// Sd read
-    //        if (Sdc_ready_selected || Sdc_cache_selected) begin
-    //            case(sd_read_step)
-    //                0: begin
-    //                   mem_a <= Sdc_ready_selected ? `Sdc_ready : bus_address[15:0];
-    //                   sd_read_step <=1; 
-    //                end
-    //                1: sd_read_step <= 2;
-    //                2: begin
-    //                   bus_read_data <= {32'd0, spo};
-    //                   bus_read_done <= 1; 
-    //                   sd_read_step <= 0;
-    //                end
-    //            endcase
-    //        end
-
-    //    end
-    //    if (bus_write_enable) begin // Write
-    //        if (Ram_selected) Cache[bus_address[63:2]] <= bus_write_data[31:0];  // cut fit 32 bit ram //work
-
-    //        // Sd write
-    //        if (Sdc_addr_selected) begin 
-    //            mem_a <= `Sdc_addr; 
-    //            mem_d <= bus_write_data[31:0];
-    //            mem_we <= 1;
-    //        end
-    //        if (Sdc_read_selected) begin
-    //            mem_a <= `Sdc_read; 
-    //            mem_d <= 1;
-    //            mem_we <= 1;
-    //        end
-    //        if (Sdc_write_selected) begin
-    //            mem_a <= `Sdc_write; 
-    //            mem_d <= 1;
-    //            mem_we <= 1;
-    //        end
-
-
-    //    end
-    //end
     reg [63:0] bus_address_reg;
-    always @(posedge CLOCK_50) bus_address_reg <= bus_address >> 2;
+    reg sd_rd_start;
+    always @(posedge CLOCK_50) begin
+        bus_address_reg <= bus_address>>2; // BRAM read need this reg address if has condition in circle
+	sd_rd_start <= 0;
+
+	// Read
+        if (bus_read_enable) begin 
+            if (Key_selected) begin bus_read_data <= {32'd0, 24'd0, ascii}; bus_read_done <= 1; end
+            if (Ram_selected) begin bus_read_data <= {32'd0, Cache[bus_address_reg]}; bus_read_done <= 1; end
+            // Sd 
+            if (Sdc_ready_selected) begin bus_read_data <= {63'd0, sd_ready}; bus_read_done <= 1; end
+            if (Sdc_cache_selected) begin bus_read_data <= {56'd0, sd_dout}; bus_read_done <= 1; end //bus_read_done <= sd_byte_available;
+        end
+	// Write
+        if (bus_write_enable) begin 
+            if (Ram_selected) Cache[bus_address[63:2]] <= bus_write_data[31:0];  // cut fit 32 bit ram //work
+            // Sd
+            if (Sdc_addr_selected) sd_addr <= bus_write_data[31:0];
+            if (Sdc_read_selected) sd_rd_start <= 1;
+        end
+    end
 
     // =======================================================
     // NEW: Simple SD Controller Bridge
     // =======================================================
-    reg [31:0] sd_addr;           // NEW
-    reg [8:0]  sd_byte_index;     // NEW
+    reg [31:0] sd_addr = 0;           // NEW
+    reg [8:0]  sd_byte_index = 0;     // NEW
     reg sd_rd_start;              // NEW
 
     wire [7:0] sd_dout;           // NEW
     wire sd_ready;                // NEW
     wire sd_byte_available;       // NEW
 
-    always @(posedge CLOCK_50 or negedge KEY0) begin
-        if (!KEY0) begin
-            sd_addr <= 0;
-            sd_byte_index <= 0;
-            sd_rd_start <= 0;
-            bus_read_done <= 0;
-        end else begin
-            bus_read_done <= 0;
-            sd_rd_start <= 0;
+    //always @(posedge CLOCK_50 or negedge KEY0) begin
+    //    if (!KEY0) begin
+    //        sd_addr <= 0;
+    //        sd_byte_index <= 0;
+    //        sd_rd_start <= 0;
+    //        bus_read_done <= 0;
+    //    end else begin
+    //        bus_read_done <= 0;
+    //        sd_rd_start <= 0;
 
-            if (bus_write_enable) begin
-                if (Sdc_addr_selected)
-                    sd_addr <= bus_write_data[31:0];
-                if (Sdc_read_selected)
-                    sd_rd_start <= 1;
-                if (Ram_selected)
-                    Cache[bus_address[63:2]] <= bus_write_data[31:0];
-            end
+    //        if (bus_write_enable) begin
+    //            if (Sdc_addr_selected)
+    //                sd_addr <= bus_write_data[31:0];
+    //            if (Sdc_read_selected)
+    //                sd_rd_start <= 1;
+    //            if (Ram_selected)
+    //                Cache[bus_address[63:2]] <= bus_write_data[31:0];
+    //        end
 
-            if (bus_read_enable) begin
-                if (Key_selected) begin
-                    bus_read_data <= {32'd0, 24'd0, ascii};
-                    bus_read_done <= 1;
-                end
-                if (Ram_selected) begin
-                    bus_read_data <= {32'd0, Cache[bus_address_reg]};
-                    bus_read_done <= 1;
-                end
-                if (Sdc_ready_selected) begin
-                    bus_read_data <= {63'd0, sd_ready};
-                    bus_read_done <= 1;
-                end
-                if (Sdc_cache_selected) begin
-                    bus_read_data <= {56'd0, sd_dout};
-                    bus_read_done <= sd_byte_available;
-                end
-            end
-        end
-    end
+    //        if (bus_read_enable) begin
+    //            if (Key_selected) begin
+    //                bus_read_data <= {32'd0, 24'd0, ascii};
+    //                bus_read_done <= 1;
+    //            end
+    //            if (Ram_selected) begin
+    //                bus_read_data <= {32'd0, Cache[bus_address_reg]};
+    //                bus_read_done <= 1;
+    //            end
+    //            if (Sdc_ready_selected) begin
+    //                bus_read_data <= {63'd0, sd_ready};
+    //                bus_read_done <= 1;
+    //            end
+    //            if (Sdc_cache_selected) begin
+    //                bus_read_data <= {56'd0, sd_dout};
+    //                bus_read_done <= sd_byte_available;
+    //            end
+    //        end
+    //    end
+    //end
       
      //  4.-- UART Writer Trigger --
       wire uart_write_trigger = bus_write_enable && Art_selected;
