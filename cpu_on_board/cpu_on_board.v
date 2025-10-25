@@ -172,11 +172,11 @@ module cpu_on_board (
     // 3. Port B read & write BRAM
     reg [63:0] bus_address_reg;
     reg [2:0]  sd_read_step = 0;
-    reg [15:0] mem_a_reg;
+    reg [15:0] bus_sd;
     always @(posedge CLOCK_50) begin
 	mem_we <= 0; // Sd write
         bus_address_reg <= bus_address>>2; // BRAM read need this reg address if has condition in circle
-	mem_a_reg <= bus_address[15:0];
+	bus_sd <= bus_address[15:0];
         // Write
 	if (bus_write_enable) begin 
 	    if (Ram_selected) Cache[bus_address[63:2]] <= bus_write_data[31:0];  // cut fit 32 bit ram //work
@@ -209,7 +209,7 @@ module cpu_on_board (
 	    if (Sdc_cache_selected) begin
 	        if (sd_read_step == 0) begin 
 		       //mem_a <= bus_address[15:0];
-		       mem_a <= mem_a_reg;
+		       mem_a <= bus_sd;
 	               sd_read_step <=1; 
 	               end
 	        if (sd_read_step == 1) begin 
