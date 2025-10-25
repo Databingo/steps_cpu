@@ -125,3 +125,9 @@ set_global_assignment -name QIP_FILE sd/synthesis/sd.qip
 set_global_assignment -name FITTER_EFFORT "STANDARD FIT"
 set_global_assignment -name ROUTER_EFFORT_MULTIPLIER 3
 set_global_assignment -name PHYSICAL_SYNTHESIS_EFFORT EXTRA
+set_global_assignment -name SEED 3
+set_global_assignment -name FITTER_AGGRESSIVE_ROUTABILITY ON
+set_global_assignment -name FITTER_MAX_ATTEMPTS 1
+set_global_assignment -name EARLY_TIMING_ESTIMATE ON
+set_global_assignment -name OPTIMIZE_POWER_DURING_FITTING "EXTRA EFFORT"
+set_global_assignment -name OPTIMIZE_HOLD_TIMING "ALL PATHS"
