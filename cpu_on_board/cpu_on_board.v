@@ -1,3 +1,13 @@
+
+      
+
+
+
+
+
+
+
+
 `include "header.vh"
 
 module cpu_on_board (
@@ -28,10 +38,10 @@ module cpu_on_board (
     (* chip_pin = "J14" *)  input wire PS2_DAT,
 
 
-    (* chip_pin = "V20" *)  output wire SPI_SCLK, //SD_CLK
-    (* chip_pin = "Y20" *)  output wire SPI_MOSI, // SD_CMD
-    (* chip_pin = "W20" *)  input wire SPI_MISO,// SD_DAT
-    (* chip_pin = "U20" *)  output wire SPI_SS_n // SD_DAT3
+    (* chip_pin = "V20" *)  output wire SD_CLK, //SD_CLK
+    (* chip_pin = "Y20" *)  inout wire SD_CMD, // SD_CMD (MOSI)
+    (* chip_pin = "W20" *)  inout wire SD_DAT0, // SD_DAT (MISO)
+    (* chip_pin = "U20" *)  output wire SD_DAT3 // SD_DAT3
 
 
     
@@ -146,24 +156,78 @@ module cpu_on_board (
     ////wire Stk_selected = (bus_address >= Stk_base && bus_address < Stk_base + Stk_size);
     wire Key_selected = (bus_address == `Key_base);
     wire Art_selected = (bus_address == `Art_base);
-    wire Spi_selected = (bus_address >= `Spi_base && bus_address < `Spi_base + `Spi_size);
-    reg Spi_selected_reg;
-    always @(posedge CLOCK_50) begin
-        Spi_selected_reg <= Spi_selected;
-    end
+
+    wire Sdc_addr_selected = (bus_address == `Sdc_addr);
+    wire Sdc_read_selected = (bus_address == `Sdc_read);
+    wire Sdc_write_selected = (bus_address == `Sdc_write);
+    wire Sdc_ready_selected = (bus_address == `Sdc_ready);
+    wire Sdc_cache_selected = (bus_address >= `Sdc_base && bus_address < (`Sdc_base + 512 ) );
 
 
     // 3. Port B read & write BRAM
     reg [63:0] bus_address_reg;
+    reg [1:0] sd_read_step;
     always @(posedge CLOCK_50) begin
         bus_address_reg <= bus_address>>2; // BRAM read need this reg address if has condition in circle
         if (bus_read_enable) begin // Read
 	    if (Key_selected) begin bus_read_data <= {32'd0, 24'd0, ascii}; bus_read_done <= 1; end
 	    if (Ram_selected) begin bus_read_data <= {32'd0, Cache[bus_address_reg]}; bus_read_done <= 1; end
-	    if (Spi_selected_reg) begin bus_read_data <= {48'd0, spi_read_data_wire}; bus_read_done <= 1; end
+
+
+
+	    //// Sd read
+	    //if (Sdc_ready_selected) begin
+	    //        mem_a <= `Sdc_ready; bus_read_data <= {32'd0, spo}; bus_read_done <= 1;
+	    //end
+	    //if (Sdc_cache_selected) begin
+	    //    if (sd_read_step == 0) begin 
+	    //           //mem_a <= bus_address[15:0];
+	    //           mem_a <= bus_sd;
+	    //           sd_read_step <=1; 
+	    //           end
+	    //    if (sd_read_step == 1) begin 
+	    //           bus_read_data <= {32'd0, spo};
+	    //           bus_read_done <= 1; 
+	    //           sd_read_step <= 0;
+	    //           end
+	    //end
+	    if (Sdc_ready_selected || Sdc_cache_selected) begin
+	        case(sd_read_step)
+	            0: begin
+	               mem_a <= Sdc_ready_selected ? `Sdc_ready : bus_address;
+	               sd_read_step <=1; 
+	            end
+	            1: sd_read_step <= 2;
+	            2: begin
+                       bus_read_data <= {32'd0, spo};
+	               bus_read_done <= 1; 
+	               sd_read_step <= 0;
+	            end
+	        endcase
+	    end
+
         end
 	if (bus_write_enable) begin // Write
 	    if (Ram_selected) Cache[bus_address[63:2]] <= bus_write_data[31:0];  // cut fit 32 bit ram //work
+
+	    // Sd write
+	    if (Sdc_addr_selected) begin 
+	        mem_a <= `Sdc_addr; 
+	        mem_d <= bus_write_data[31:0];
+	        mem_we <= 1;
+	    end
+	    if (Sdc_read_selected) begin
+	        mem_a <= `Sdc_read; 
+	        mem_d <= 1;
+	        mem_we <= 1;
+	    end
+	    if (Sdc_write_selected) begin
+	        mem_a <= `Sdc_write; 
+	        mem_d <= 1;
+	        mem_we <= 1;
+	    end
+
+
         end
     end
       
@@ -197,6 +261,37 @@ module cpu_on_board (
 //wire uart_write_trigger_pulse = uart_write_pending;
 
 
+    // =======================================================
+    // 7. -- SD Card Interface --
+    // =======================================================
+    wire [31:0] spo;
+    reg [15:0] mem_a = 16'h3220;
+    reg [31:0] mem_d = 0;
+    reg mem_we = 0;
+    wire sd_ncd = 0;
+    wire sd_wp = 0;
+    wire irq;
+    wire sd_dat1;
+    wire sd_dat2;
+
+    sdcard sd0 (
+	.clk(CLOCK_50),
+	.rst(~KEY0), // ?
+	.sd_dat0(SD_DAT0), // MISO
+	.sd_ncd(sd_ncd), 
+	.sd_wp(sd_wp), 
+	.sd_dat1(sd_dat1), 
+	.sd_dat2(sd_dat2), 
+	.sd_dat3(SD_DAT3), // chip select
+	.sd_cmd(SD_CMD),   // MOSI
+	.sd_sck(SD_CLK),   // SPI Clock
+	// memory map
+	.a(mem_a),//0x3000-0x31fc:128x32=518BytesSectorCache 0x3200:getSetAddress512 0x3204:Read mem_d:1-sd_rd 0x3208:Write mem_d:1-sd_wr 0x3212:Sd_ncd 0x3216:Sd_wp 0x3220:readyforpoll 0x3224:dirty
+	.d(mem_d),
+	.we(mem_we),
+	.spo(spo)
+	//.irq(irq)
+    );
 
 
 
@@ -231,27 +326,8 @@ module cpu_on_board (
     assign HEX00 = ~Art_selected;
     assign HEX01 = ~Ram_selected;
     assign HEX02 = ~Rom_selected;
-    assign HEX03 = ~Spi_selected;
+    //assign HEX03 = ~Spi_selected;
 
-
-    // 6. -- SPI --
-   wire [15:0] spi_read_data_wire;
-   spi my_spi_system (
-       .clk_clk                       (CLOCK_50),
-       .reset_reset_n                 (KEY0),
-       //.spi_0_reset_reset_n           (KEY0),
-       .spi_0_spi_control_port_chipselect (Spi_selected), // Connection
-       .spi_0_spi_control_port_address    (bus_address[3:1]), // IP is 16 bytes wide data so address align by bytes
-       .spi_0_spi_control_port_read_n     (~(bus_read_enable && Spi_selected)), // Read
-       .spi_0_spi_control_port_readdata   (spi_read_data_wire),
-       .spi_0_spi_control_port_write_n    (~(bus_write_enable && Spi_selected)), // Write
-       .spi_0_spi_control_port_writedata  (bus_write_data[15:0]),  // 16-bytes wide
-       .spi_0_external_MISO           (SPI_MISO), // Map to Physical pins
-       .spi_0_external_MOSI           (SPI_MOSI),
-       .spi_0_external_SCLK           (SPI_SCLK),
-       .spi_0_external_SS_n           (SPI_SS_n),
-   ); 
-      
 
     // -- Timer --
     // -- CSRs --

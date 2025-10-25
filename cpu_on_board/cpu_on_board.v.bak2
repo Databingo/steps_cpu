@@ -239,7 +239,7 @@ module cpu_on_board (
    spi my_spi_system (
        .clk_clk                       (CLOCK_50),
        .reset_reset_n                 (KEY0),
-       .spi_0_reset_reset_n           (KEY0),
+       //.spi_0_reset_reset_n           (KEY0),
        .spi_0_spi_control_port_chipselect (Spi_selected), // Connection
        .spi_0_spi_control_port_address    (bus_address[3:1]), // IP is 16 bytes wide data so address align by bytes
        .spi_0_spi_control_port_read_n     (~(bus_read_enable && Spi_selected)), // Read
