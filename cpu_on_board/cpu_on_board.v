@@ -167,7 +167,7 @@ module cpu_on_board (
             if (Ram_selected) begin bus_read_data <= {32'd0, Cache[bus_address_reg]}; bus_read_done <= 1; end
             // Sd 
             if (Sdc_ready_selected) begin bus_read_data <= {63'd0, sd_ready}; bus_read_done <= 1; end
-            if (Sdc_cache_selected) begin bus_read_data <= {56'd0, sd_dout}; bus_read_done <= 1; end //bus_read_done <= sd_byte_available;
+            if (Sdc_cache_selected) begin bus_read_data <= {56'd0, sd_dout}; bus_read_done <= sd_byte_available; end  // make cpu wait for valid byte
         end
 	// Write
         if (bus_write_enable) begin 
