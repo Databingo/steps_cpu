@@ -62,8 +62,8 @@ module sdcard
     //assign sd_reset = 0;
 
     reg [31:0]sd_address = 32'hffffffff; // init as an invalid address
-    //reg [31:0]block[127:0];
-    (* ram_style = "block" *) reg [31:0] block [0:127];
+    reg [31:0]block[127:0];
+    //(* ram_style = "block" *) reg [31:0] block [0:127];
     reg dirty = 0;
 
     reg sd_rd = 0;

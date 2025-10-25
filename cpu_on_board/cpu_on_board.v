@@ -40,8 +40,8 @@ module cpu_on_board (
     // =======================================================
     // -- MEM -- minic L1 cache
     // =======================================================//
-    (* ram_style = "block" *) reg [31:0] Cache [0:1024]; // 2048x4=8KB L1 cache to 0x2000
-    //(* ram_style = "block" *) reg [31:0] Cache [0:2047]; // 2048x4=8KB L1 cache to 0x2000
+    //(* ram_style = "block" *) reg [31:0] Cache [0:1024]; // 2048x4=8KB L1 cache to 0x2000
+    (* ram_style = "block" *) reg [31:0] Cache [0:2047]; // 2048x4=8KB L1 cache to 0x2000
     //(* ram_style = "block" *) reg [31:0] Cache [0:3071];
     integer i;
     initial begin
@@ -163,40 +163,40 @@ module cpu_on_board (
     ////wire Stk_selected = (bus_address >= Stk_base && bus_address < Stk_base + Stk_size);
     wire Key_selected = (bus_address == `Key_base);
     wire Art_selected = (bus_address == `Art_base);
-    //wire Sdc_selected = (bus_address >= `Sdc_base && bus_address <= `Sdc_dirty);
-    wire Sdc_addr_selected = (bus_address == `Sdc_addr);
-    wire Sdc_read_selected = (bus_address == `Sdc_read);
-    wire Sdc_write_selected = (bus_address == `Sdc_write);
-    wire Sdc_ready_selected = (bus_address == `Sdc_ready);
-    wire Sdc_cache_selected = (bus_address[15:0] >= `Sdc_base && bus_address[15:0] < 16'h3200 );
+    ////wire Sdc_selected = (bus_address >= `Sdc_base && bus_address <= `Sdc_dirty);
+    //wire Sdc_addr_selected = (bus_address == `Sdc_addr);
+    //wire Sdc_read_selected = (bus_address == `Sdc_read);
+    //wire Sdc_write_selected = (bus_address == `Sdc_write);
+    //wire Sdc_ready_selected = (bus_address == `Sdc_ready);
+    //wire Sdc_cache_selected = (bus_address[15:0] >= `Sdc_base && bus_address[15:0] < 16'h3200 );
 
     // 3. Port B read & write BRAM
     reg [63:0] bus_address_reg;
-    reg [2:0]  sd_read_step = 0;
-    reg [15:0] bus_sd;
+    //reg [2:0]  sd_read_step = 0;
+    //reg [15:0] bus_sd;
     always @(posedge CLOCK_50) begin
 	mem_we <= 0; // Sd write
         bus_address_reg <= bus_address>>2; // BRAM read need this reg address if has condition in circle
-	bus_sd <= bus_address[15:0];
+	//bus_sd <= bus_address[15:0];
         // Write
 	if (bus_write_enable) begin 
 	    if (Ram_selected) Cache[bus_address[63:2]] <= bus_write_data[31:0];  // cut fit 32 bit ram //work
-	    // Sd write
-	    if (Sdc_addr_selected) begin 
-	        mem_a <= `Sdc_addr; 
-	        mem_d <= bus_write_data[31:0];
-	        mem_we <= 1;
-	    end
-	    if (Sdc_read_selected) begin
-	        mem_a <= `Sdc_read; 
-	        mem_d <= 1;
-	        mem_we <= 1;
-	    end
-	    if (Sdc_write_selected) begin
-	        mem_a <= `Sdc_write; 
-	        mem_d <= 1;
-	        mem_we <= 1;
-	    end
+	    //// Sd write
+	    //if (Sdc_addr_selected) begin 
+	    //    mem_a <= `Sdc_addr; 
+	    //    mem_d <= bus_write_data[31:0];
+	    //    mem_we <= 1;
+	    //end
+	    //if (Sdc_read_selected) begin
+	    //    mem_a <= `Sdc_read; 
+	    //    mem_d <= 1;
+	    //    mem_we <= 1;
+	    //end
+	    //if (Sdc_write_selected) begin
+	    //    mem_a <= `Sdc_write; 
+	    //    mem_d <= 1;
+	    //    mem_we <= 1;
+	    //end
 	end 
 
         // Read
@@ -219,56 +219,56 @@ module cpu_on_board (
 	    //           sd_read_step <= 0;
 	    //           end
 	    //end
-	    if (Sdc_ready_selected || Sdc_cache_selected) begin
-	        case(sd_read_step)
-	            0: begin
-	               mem_a <= Sdc_ready_selected ? `Sdc_ready : bus_sd;
-	               sd_read_step <=1; 
-	            end
-	            1: sd_read_step <= 2;
-	            2: begin
-                       bus_read_data <= {32'd0, spo};
-	               bus_read_done <= 1; 
-	               sd_read_step <= 0;
-	            end
-	        endcase
-	    end
+	    //if (Sdc_ready_selected || Sdc_cache_selected) begin
+	    //    case(sd_read_step)
+	    //        0: begin
+	    //           mem_a <= Sdc_ready_selected ? `Sdc_ready : bus_sd;
+	    //           sd_read_step <=1; 
+	    //        end
+	    //        1: sd_read_step <= 2;
+	    //        2: begin
+            //           bus_read_data <= {32'd0, spo};
+	    //           bus_read_done <= 1; 
+	    //           sd_read_step <= 0;
+	    //        end
+	    //    endcase
+	    //end
 
 
         end
     end
       
-    // =======================================================
-   // 7. -- SD Card Interface --
-    // =======================================================
-    wire [31:0] spo;
-    reg [15:0] mem_a = 16'h3220;
-    reg [31:0] mem_d = 0;
-    reg mem_we = 0;
-    wire sd_ncd = 0;
-    wire sd_wp = 0;
-    wire irq;
-    wire sd_dat1;
-    wire sd_dat2;
+    //// =======================================================
+    //// 7. -- SD Card Interface --
+    //// =======================================================
+    //wire [31:0] spo;
+    //reg [15:0] mem_a = 16'h3220;
+    //reg [31:0] mem_d = 0;
+    //reg mem_we = 0;
+    //wire sd_ncd = 0;
+    //wire sd_wp = 0;
+    //wire irq;
+    //wire sd_dat1;
+    //wire sd_dat2;
 
-    sdcard sd0 (
-	.clk(CLOCK_50),
-	.rst(~KEY0), // ?
-	.sd_dat0(SD_DAT0), // MISO
-	.sd_ncd(sd_ncd), 
-	.sd_wp(sd_wp), 
-	.sd_dat1(sd_dat1), 
-	.sd_dat2(sd_dat2), 
-	.sd_dat3(SD_DAT3), // chip select
-	.sd_cmd(SD_CMD),   // MOSI
-	.sd_sck(SD_CLK),   // SPI Clock
-	// memory map
-	.a(mem_a),//0x3000-0x31fc:128x32=518BytesSectorCache 0x3200:getSetAddress512 0x3204:Read mem_d:1-sd_rd 0x3208:Write mem_d:1-sd_wr 0x3212:Sd_ncd 0x3216:Sd_wp 0x3220:readyforpoll 0x3224:dirty
-	.d(mem_d),
-	.we(mem_we),
-	.spo(spo)
-	//.irq(irq)
-    );
+    //sdcard sd0 (
+    //    .clk(CLOCK_50),
+    //    .rst(~KEY0), // ?
+    //    .sd_dat0(SD_DAT0), // MISO
+    //    .sd_ncd(sd_ncd), 
+    //    .sd_wp(sd_wp), 
+    //    .sd_dat1(sd_dat1), 
+    //    .sd_dat2(sd_dat2), 
+    //    .sd_dat3(SD_DAT3), // chip select
+    //    .sd_cmd(SD_CMD),   // MOSI
+    //    .sd_sck(SD_CLK),   // SPI Clock
+    //    // memory map
+    //    .a(mem_a),//0x3000-0x31fc:128x32=518BytesSectorCache 0x3200:getSetAddress512 0x3204:Read mem_d:1-sd_rd 0x3208:Write mem_d:1-sd_wr 0x3212:Sd_ncd 0x3216:Sd_wp 0x3220:readyforpoll 0x3224:dirty
+    //    .d(mem_d),
+    //    .we(mem_we),
+    //    .spo(spo)
+    //    //.irq(irq)
+    //);
       
       
     // =======================================================
