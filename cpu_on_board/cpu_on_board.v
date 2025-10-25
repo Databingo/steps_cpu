@@ -175,8 +175,8 @@ module cpu_on_board (
     //reg [2:0]  sd_read_step = 0;
     //reg [15:0] bus_sd;
     always @(posedge CLOCK_50) begin
-	mem_we <= 0; // Sd write
         bus_address_reg <= bus_address>>2; // BRAM read need this reg address if has condition in circle
+	//mem_we <= 0; // Sd write
 	//bus_sd <= bus_address[15:0];
         // Write
 	if (bus_write_enable) begin 
