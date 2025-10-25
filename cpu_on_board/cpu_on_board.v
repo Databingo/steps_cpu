@@ -226,7 +226,7 @@ module cpu_on_board (
 	            end
 	            1: sd_read_step <= 2;
 	            2: begin
-                       bus_read_data <= {32'd0, sd_spo};
+                       bus_read_data <= {32'd0, spo};
 	               bus_read_done <= 1; 
 	               sd_read_step <= 0;
 	            end
