@@ -155,107 +155,72 @@ module cpu_on_board (
 
 
     // 3. Port B read & write BRAM
-    //reg [63:0] bus_address_reg;
-    //reg [1:0] sd_read_step;
-    //always @(posedge CLOCK_50) begin
-    //    bus_address_reg <= bus_address>>2; // BRAM read need this reg address if has condition in circle
-    //    if (bus_read_enable) begin // Read
-    //        if (Key_selected) begin bus_read_data <= {32'd0, 24'd0, ascii}; bus_read_done <= 1; end
-    //        if (Ram_selected) begin bus_read_data <= {32'd0, Cache[bus_address_reg]}; bus_read_done <= 1; end
-
-    //        //// Sd read
-    //        if (Sdc_ready_selected || Sdc_cache_selected) begin
-    //            case(sd_read_step)
-    //                0: begin
-    //                   mem_a <= Sdc_ready_selected ? `Sdc_ready : bus_address[15:0];
-    //                   sd_read_step <=1; 
-    //                end
-    //                1: sd_read_step <= 2;
-    //                2: begin
-    //                   bus_read_data <= {32'd0, spo};
-    //                   bus_read_done <= 1; 
-    //                   sd_read_step <= 0;
-    //                end
-    //            endcase
-    //        end
-
-    //    end
-    //    if (bus_write_enable) begin // Write
-    //        if (Ram_selected) Cache[bus_address[63:2]] <= bus_write_data[31:0];  // cut fit 32 bit ram //work
-
-    //        // Sd write
-    //        if (Sdc_addr_selected) begin 
-    //            mem_a <= `Sdc_addr; 
-    //            mem_d <= bus_write_data[31:0];
-    //            mem_we <= 1;
-    //        end
-    //        if (Sdc_read_selected) begin
-    //            mem_a <= `Sdc_read; 
-    //            mem_d <= 1;
-    //            mem_we <= 1;
-    //        end
-    //        if (Sdc_write_selected) begin
-    //            mem_a <= `Sdc_write; 
-    //            mem_d <= 1;
-    //            mem_we <= 1;
-    //        end
-
-
-    //    end
-    //end
     reg [63:0] bus_address_reg;
-    always @(posedge CLOCK_50) bus_address_reg <= bus_address >> 2;
+    reg [1:0] sd_read_step;
+    always @(posedge CLOCK_50) begin
+        bus_address_reg <= bus_address>>2; // BRAM read need this reg address if has condition in circle
+        if (bus_read_enable) begin // Read
+	    if (Key_selected) begin bus_read_data <= {32'd0, 24'd0, ascii}; bus_read_done <= 1; end
+	    if (Ram_selected) begin bus_read_data <= {32'd0, Cache[bus_address_reg]}; bus_read_done <= 1; end
 
-    // =======================================================
-    // NEW: Simple SD Controller Bridge
-    // =======================================================
-    reg [31:0] sd_addr;           // NEW
-    reg [8:0]  sd_byte_index;     // NEW
-    reg sd_rd_start;              // NEW
 
-    wire [7:0] sd_dout;           // NEW
-    wire sd_ready;                // NEW
-    wire sd_byte_available;       // NEW
 
-    always @(posedge CLOCK_50 or negedge KEY0) begin
-        if (!KEY0) begin
-            sd_addr <= 0;
-            sd_byte_index <= 0;
-            sd_rd_start <= 0;
-            bus_read_done <= 0;
-        end else begin
-            bus_read_done <= 0;
-            sd_rd_start <= 0;
+	    //// Sd read
+	    //if (Sdc_ready_selected) begin
+	    //        mem_a <= `Sdc_ready; bus_read_data <= {32'd0, spo}; bus_read_done <= 1;
+	    //end
+	    //if (Sdc_cache_selected) begin
+	    //    if (sd_read_step == 0) begin 
+	    //           //mem_a <= bus_address[15:0];
+	    //           mem_a <= bus_sd;
+	    //           sd_read_step <=1; 
+	    //           end
+	    //    if (sd_read_step == 1) begin 
+	    //           bus_read_data <= {32'd0, spo};
+	    //           bus_read_done <= 1; 
+	    //           sd_read_step <= 0;
+	    //           end
+	    //end
+	    if (Sdc_ready_selected || Sdc_cache_selected) begin
+	        case(sd_read_step)
+	            0: begin
+	               mem_a <= Sdc_ready_selected ? `Sdc_ready : bus_address[15:0];
+	               sd_read_step <=1; 
+	            end
+	            1: sd_read_step <= 2;
+	            2: begin
+                       bus_read_data <= {32'd0, spo};
+	               bus_read_done <= 1; 
+	               sd_read_step <= 0;
+	            end
+	        endcase
+	    end
 
-            if (bus_write_enable) begin
-                if (Sdc_addr_selected)
-                    sd_addr <= bus_write_data[31:0];
-                if (Sdc_read_selected)
-                    sd_rd_start <= 1;
-                if (Ram_selected)
-                    Cache[bus_address[63:2]] <= bus_write_data[31:0];
-            end
+        end
+	if (bus_write_enable) begin // Write
+	    if (Ram_selected) Cache[bus_address[63:2]] <= bus_write_data[31:0];  // cut fit 32 bit ram //work
 
-            if (bus_read_enable) begin
-                if (Key_selected) begin
-                    bus_read_data <= {32'd0, 24'd0, ascii};
-                    bus_read_done <= 1;
-                end
-                if (Ram_selected) begin
-                    bus_read_data <= {32'd0, Cache[bus_address_reg]};
-                    bus_read_done <= 1;
-                end
-                if (Sdc_ready_selected) begin
-                    bus_read_data <= {63'd0, sd_ready};
-                    bus_read_done <= 1;
-                end
-                if (Sdc_cache_selected) begin
-                    bus_read_data <= {56'd0, sd_dout};
-                    bus_read_done <= sd_byte_available;
-                end
-            end
+	    // Sd write
+	    if (Sdc_addr_selected) begin 
+	        mem_a <= `Sdc_addr; 
+	        mem_d <= bus_write_data[31:0];
+	        mem_we <= 1;
+	    end
+	    if (Sdc_read_selected) begin
+	        mem_a <= `Sdc_read; 
+	        mem_d <= 1;
+	        mem_we <= 1;
+	    end
+	    if (Sdc_write_selected) begin
+	        mem_a <= `Sdc_write; 
+	        mem_d <= 1;
+	        mem_we <= 1;
+	    end
+
+
         end
     end
+      
       
      //  4.-- UART Writer Trigger --
       wire uart_write_trigger = bus_write_enable && Art_selected;
@@ -266,31 +231,59 @@ module cpu_on_board (
       end
       assign uart_write_trigger_pulse = uart_write_trigger  && !uart_write_trigger_dly;
 
-    // =======================================================
-    // NEW: SD Controller (from MIT 6.111)
-    // =======================================================
-    sd_controller sdctrl (
-        .cs(SD_DAT3),
-        .mosi(SD_CMD),
-        .miso(SD_DAT0),
-        .sclk(SD_CLK),
 
-        .rd(sd_rd_start),
-        .wr(1'b0),
-        .dout(sd_dout),
-        .byte_available(sd_byte_available),
+//wire uart_write_trigger = bus_write_enable && Art_selected;
+//reg uart_write_trigger_dly;
+//reg uart_write_pending;
+//always @(posedge CLOCK_50 or negedge KEY0) begin
+//  if (!KEY0) begin
+//    uart_write_pending <= 0;
+//    uart_write_trigger_dly <= 0;
+//  end else begin
+//    if (uart_write_trigger && !uart_write_pending) begin
+//       uart_write_pending <= 1;         // start pending
+//    end else if (uart_write_pending) begin
+//       uart_write_pending <= 0;         // complete next cycle
+//    end
+//    uart_write_trigger_dly <= uart_write_trigger;
+//  end
+//end
+//wire uart_write_trigger_pulse = uart_write_pending;
 
-        .din(8'd0),
-        .ready_for_next_byte(),
-        .reset(~KEY0),
-        .ready(sd_ready),
-        .address(sd_addr),
-        .clk(CLOCK_50),
-        .clk_pulse_slow(clock_1hz), // reused slow tick for init
-        .status(),
-        .recv_data()
+
+    // =======================================================
+    // 7. -- SD Card Interface --
+    // =======================================================
+    wire [31:0] spo;
+    reg [15:0] mem_a = 16'h3220;
+    reg [31:0] mem_d = 0;
+    reg mem_we = 0;
+    wire sd_ncd = 0;
+    wire sd_wp = 0;
+    wire irq;
+    wire sd_dat1;
+    wire sd_dat2;
+
+    sdcard sd0 (
+	.clk(CLOCK_50),
+	.rst(~KEY0), // ?
+	.sd_dat0(SD_DAT0), // MISO
+	.sd_ncd(sd_ncd), 
+	.sd_wp(sd_wp), 
+	.sd_dat1(sd_dat1), 
+	.sd_dat2(sd_dat2), 
+	.sd_dat3(SD_DAT3), // chip select
+	.sd_cmd(SD_CMD),   // MOSI
+	.sd_sck(SD_CLK),   // SPI Clock
+	// memory map
+	.a(mem_a),//0x3000-0x31fc:128x32=518BytesSectorCache 0x3200:getSetAddress512 0x3204:Read mem_d:1-sd_rd 0x3208:Write mem_d:1-sd_wr 0x3212:Sd_ncd 0x3216:Sd_wp 0x3220:readyforpoll 0x3224:dirty
+	.d(mem_d),
+	.we(mem_we),
+	.spo(spo)
+	//.irq(irq)
     );
-    // =======================================================
+
+
 
     // -- interrupt controller --
     wire [3:0] interrupt_vector;
