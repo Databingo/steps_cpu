@@ -168,7 +168,7 @@ module cpu_on_board (
     wire Sdc_read_selected = (bus_address == `Sdc_read);
     wire Sdc_write_selected = (bus_address == `Sdc_write);
     wire Sdc_ready_selected = (bus_address == `Sdc_ready);
-    wire Sdc_cache_selected = (bus_address >= `Sdc_base && bus_address < (`Sdc_base + 512 ) );
+    wire Sdc_cache_selected = (bus_address[15:0] >= `Sdc_base && bus_address[15:0] < 16'h3200 );
 
     // 3. Port B read & write BRAM
     reg [63:0] bus_address_reg;
