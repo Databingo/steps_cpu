@@ -122,13 +122,31 @@ set_global_assignment -name CYCLONEII_RESERVE_NCEO_AFTER_CONFIGURATION "USE AS R
 #set_global_assignment -name VERILOG_FILE SdCardSlave.v
 #set_global_assignment -name VERILOG_FILE SdCardRdFifo.v
 set_global_assignment -name QIP_FILE sd/synthesis/sd.qip
-#set_global_assignment -name FITTER_EFFORT "STANDARD FIT"
-set_global_assignment -name FITTER_EFFORT "FAST FIT"
-set_global_assignment -name ROUTER_EFFORT_MULTIPLIER 3
+
+#set_global_assignment -name FITTER_EFFORT "FAST FIT"
+#set_global_assignment -name ROUTER_EFFORT_MULTIPLIER 3
+#set_global_assignment -name PHYSICAL_SYNTHESIS_EFFORT EXTRA
+#set_global_assignment -name SEED 3
+#set_global_assignment -name OPTIMIZE_POWER_DURING_FITTING "EXTRA EFFORT"
+#set_global_assignment -name OPTIMIZE_HOLD_TIMING "ALL PATHS"
+
+
+# Primary Settings for Routing Issues
+set_global_assignment -name FITTER_EFFORT "STANDARD FIT"
+set_global_assignment -name ROUTER_EFFORT_MULTIPLIER 4
+set_global_assignment -name PLACEMENT_EFFORT_MULTIPLIER 4
+set_global_assignment -name ROUTER_TIMING_OPTIMIZATION_LEVEL MAXIMUM
+
+# Physical Synthesis Help
 set_global_assignment -name PHYSICAL_SYNTHESIS_EFFORT EXTRA
-set_global_assignment -name SEED 3
-#set_global_assignment -name FITTER_AGGRESSIVE_ROUTABILITY ON
-#set_global_assignment -name FITTER_MAX_ATTEMPTS 1
-#set_global_assignment -name EARLY_TIMING_ESTIMATE ON
-set_global_assignment -name OPTIMIZE_POWER_DURING_FITTING "EXTRA EFFORT"
-set_global_assignment -name OPTIMIZE_HOLD_TIMING "ALL PATHS"
+set_global_assignment -name PHYSICAL_SYNTHESIS_COMBO_LOGIC_FOR_AREA ON
+set_global_assignment -name PHYSICAL_SYNTHESIS_REGISTER_RETIMING ON
+
+# Area Optimization
+set_global_assignment -name OPTIMIZATION_MODE "AGGRESSIVE AREA"
+set_global_assignment -name ALLOW_REGISTER_RETIMING ON
+set_global_assignment -name ADV_NETLIST_OPT_SYNTH_WYSIWYG_REMAP ON
+
+# Advanced Router
+set_global_assignment -name FITTER_AGGRESSIVE_ROUTABILITY_OPTIMIZATION ON
+set_global_assignment -name ROUTER_REGISTER_DUPLICATION_AUTO ON
