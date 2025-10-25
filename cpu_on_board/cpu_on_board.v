@@ -40,8 +40,8 @@ module cpu_on_board (
     // =======================================================
     // -- MEM -- minic L1 cache
     // =======================================================//
-    //(* ram_style = "block" *) reg [31:0] Cache [0:2047]; // 2048x4=8KB L1 cache to 0x2000
-    (* ram_style = "block" *) reg [31:0] Cache [0:3071];
+    (* ram_style = "block" *) reg [31:0] Cache [0:2047]; // 2048x4=8KB L1 cache to 0x2000
+    //(* ram_style = "block" *) reg [31:0] Cache [0:3071];
     integer i;
     initial begin
         $readmemb("rom.mif", Cache, `Rom_base>>2);
@@ -203,35 +203,35 @@ module cpu_on_board (
 	    if (Key_selected) begin bus_read_data <= {32'd0, 24'd0, ascii}; bus_read_done <= 1; end
 	    if (Ram_selected) begin bus_read_data <= {32'd0, Cache[bus_address_reg]}; bus_read_done <= 1; end
 	    //// Sd read
-	    if (Sdc_ready_selected) begin
-	            mem_a <= `Sdc_ready; bus_read_data <= {32'd0, spo}; bus_read_done <= 1;
-	    end
-	    if (Sdc_cache_selected) begin
-	        if (sd_read_step == 0) begin 
-		       //mem_a <= bus_address[15:0];
-		       mem_a <= bus_sd;
-	               sd_read_step <=1; 
-	               end
-	        if (sd_read_step == 1) begin 
-		       bus_read_data <= {32'd0, spo};
-	               bus_read_done <= 1; 
-	               sd_read_step <= 0;
-	               end
-	    end
-	    //if (Sdc_ready_selected || Sdc_cache_selected) begin
-	    //    case(sd_read_step)
-	    //        0: begin
-	    //           mem_a <= Sdc_ready_selected ? `Sdc_ready : bus_address[15:0];
+	    //if (Sdc_ready_selected) begin
+	    //        mem_a <= `Sdc_ready; bus_read_data <= {32'd0, spo}; bus_read_done <= 1;
+	    //end
+	    //if (Sdc_cache_selected) begin
+	    //    if (sd_read_step == 0) begin 
+	    //           //mem_a <= bus_address[15:0];
+	    //           mem_a <= bus_sd;
 	    //           sd_read_step <=1; 
-	    //        end
-	    //        1: sd_read_step <= 2;
-	    //        2: begin
-            //           bus_read_data <= {32'd0, sd_spo};
+	    //           end
+	    //    if (sd_read_step == 1) begin 
+	    //           bus_read_data <= {32'd0, spo};
 	    //           bus_read_done <= 1; 
 	    //           sd_read_step <= 0;
-	    //        end
-	    //    endcase
+	    //           end
 	    //end
+	    if (Sdc_ready_selected || Sdc_cache_selected) begin
+	        case(sd_read_step)
+	            0: begin
+	               mem_a <= Sdc_ready_selected ? `Sdc_ready : bus_sd;
+	               sd_read_step <=1; 
+	            end
+	            1: sd_read_step <= 2;
+	            2: begin
+                       bus_read_data <= {32'd0, sd_spo};
+	               bus_read_done <= 1; 
+	               sd_read_step <= 0;
+	            end
+	        endcase
+	    end
 
 
         end
