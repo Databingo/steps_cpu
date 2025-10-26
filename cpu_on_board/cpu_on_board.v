@@ -159,6 +159,7 @@ module cpu_on_board (
     reg sd_cache_available = 0;
     reg sd_byte_available_d = 0;
     reg do_read = 0;
+    wire [4:0] sd_status;
     always @(posedge CLOCK_50 or negedge KEY0) begin
 	if (!KEY0) begin
 	    //sd_rd_start <= 0;
@@ -227,7 +228,7 @@ module cpu_on_board (
         .address(sd_addr),
         .clk(CLOCK_50),
         .clk_pulse_slow(clk_pulse_slow),
-        .status(),
+        .status(sd_status),
         .recv_data()
     );
 
