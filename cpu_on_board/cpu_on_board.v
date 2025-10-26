@@ -152,6 +152,7 @@ module cpu_on_board (
     wire Sdc_write_selected = (bus_address == `Sdc_write);
     wire Sdc_ready_selected = (bus_address == `Sdc_ready);
     wire Sdc_cache_selected = (bus_address >= `Sdc_base && bus_address < (`Sdc_base + 512 ) );
+    wire Sdc_avail_selected = (bus_address == `Sdc_avail);
 
 
     // 3. Port B read & write BRAM
@@ -167,7 +168,9 @@ module cpu_on_board (
             if (Ram_selected) begin bus_read_data <= {32'd0, Cache[bus_address_reg]}; bus_read_done <= 1; end
             // Sd 
             if (Sdc_ready_selected) begin bus_read_data <= {63'd0, sd_ready}; bus_read_done <= 1; end
-            if (Sdc_cache_selected) begin bus_read_data <= {56'd0, sd_dout}; bus_read_done <= sd_byte_available; end  // make cpu wait for valid byte
+            //if (Sdc_cache_selected) begin bus_read_data <= {56'd0, sd_dout}; bus_read_done <= sd_byte_available; end  // make cpu wait for valid byte
+            if (Sdc_cache_selected) begin bus_read_data <= {56'd0, sd_dout}; bus_read_done <= 1; end 
+            if (Sdc_avail_selected) begin bus_read_data <= {63'd0, sd_byte_avaible}; bus_read_done <= 1; end 
         end
 	// Write
         if (bus_write_enable) begin 

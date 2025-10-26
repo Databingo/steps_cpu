@@ -15,3 +15,4 @@
 `define Sdc_wp    32'h0000_3216
 `define Sdc_ready 32'h0000_3220
 `define Sdc_dirty 32'h0000_3224
+`define Sdc_avail 32'h0000_3228

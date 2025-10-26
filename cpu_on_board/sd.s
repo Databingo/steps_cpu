@@ -4,6 +4,8 @@
 #`define Sdc_write 32'h0000_3208
 #`define Sdc_ready 32'h0000_3220
 #`define Sdc_dirty 32'h0000_3224
+#`define Sdc_avail 32'h0000_3228
+
 .globl _start
 _start:
 
@@ -32,6 +34,13 @@ sw a3, 0x204(a1)
 sd_ready_2:
 lw a2, 0x220(a1)    # a2 0x3220 ready
 beq a2, x0, sd_ready_2
+
+avail:
+lw a2, 0x228(a1)    # a2 0x3228 byte_avaible
+beq a2, x0, avail
+
+addi t1, x0, 66  # B
+sw t1, 0(t0)     # print
 
 lw t2, 0(a1)           # load first byte at 0x3000
 andi t2, t2, 0xFF   # Isolate byte value
