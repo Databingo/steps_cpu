@@ -181,13 +181,25 @@ module cpu_on_board (
         end
     end
 
-    // slow clock
-    reg [4:0]clkcounter = 0;
-    always @ (posedge CLOCK_50) begin
-        if (KEY0) clkcounter <= 5'b0;
-        else clkcounter <= clkcounter + 1;
+    //// slow clock
+    //reg [4:0]clkcounter = 0;
+    //always @ (posedge CLOCK_50) begin
+    //    if (KEY0) clkcounter <= 5'b0;
+    //    else clkcounter <= clkcounter + 1;
+    //end
+    //wire clk_pulse_slow = (clkcounter == 5'b0);
+
+
+    // =======================================================
+    // Slow pulse clock for SD init (~100 kHz)
+    // =======================================================
+    reg [8:0] clkdiv = 0;
+    always @(posedge CLOCK_50 or negedge KEY0) begin
+        if (!KEY0) clkdiv <= 0;
+        else clkdiv <= clkdiv + 1;
     end
-    wire clk_pulse_slow = (clkcounter == 5'b0);
+    wire clk_pulse_slow = (clkdiv == 0);
+
 
     // =======================================================
     // NEW: Simple SD Controller Bridge
