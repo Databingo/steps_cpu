@@ -1157,19 +1157,21 @@ func main() {
 				origin_instr = strings.TrimLeft(origin_instr, " ")
 				real_instr.WriteString(origin_instr)
 			}
-	//	case "sb", "sh", "sw", "sd": // 写全局符号 sb rd, symbol, rt (+- 2GB)
-	//		_, err := strconv.Atoi(code[2])
-	//		if err != nil { // different from real: sb rd, imm(rs)
-	//			ins := fmt.Sprintf("# %s\n", line)
-	//			real_instr.WriteString(ins)
-	//			ins = fmt.Sprintf("auipc %s, 0 # %s\n", code[3], code[2])
-	//			real_instr.WriteString(ins)
-	//			ins = fmt.Sprintf("%s %s, 0(%s) # %s\n", code[0], code[1], code[3], code[2])
-	//			real_instr.WriteString(ins)
-	//		} else {
-	//			origin_instr = strings.TrimLeft(origin_instr, " ")
-	//			real_instr.WriteString(origin_instr)
-	//		}
+		case "sb", "sh", "sw", "sd": // 写全局符号 sb rd, symbol, rt (+- 2GB)
+			_, errDec := strconv.Atoi(code[2])
+			_, errHex := strconv.ParseInt(strings.Replace(code[2], "0x", "", 1), 16, 64)
+			///if err != nil { // different from real: sb rd, imm(rs)
+			if errDec != nil && errHex != nil { // different from real: sb rd, imm(rs)
+				ins := fmt.Sprintf("# %s\n", line)
+				real_instr.WriteString(ins)
+				ins = fmt.Sprintf("auipc %s, 0 # %s\n", code[3], code[2])
+				real_instr.WriteString(ins)
+				ins = fmt.Sprintf("%s %s, 0(%s) # %s\n", code[0], code[1], code[3], code[2])
+				real_instr.WriteString(ins)
+			} else {
+				origin_instr = strings.TrimLeft(origin_instr, " ")
+				real_instr.WriteString(origin_instr)
+			}
 		default:
 			origin_instr = strings.TrimLeft(origin_instr, " ")
 			real_instr.WriteString(origin_instr)
