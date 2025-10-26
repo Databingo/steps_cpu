@@ -35,11 +35,14 @@ sd_ready_2:
 lw a2, 0x220(a1)    # a2 0x3220 ready
 beq a2, x0, sd_ready_2
 
+addi t1, x0, 66  # B
+sw t1, 0(t0)     # print
+
 avail:
 lw a2, 0x228(a1)    # a2 0x3228 byte_avaible
 beq a2, x0, avail
 
-addi t1, x0, 66  # B
+addi t1, x0, 67  # C
 sw t1, 0(t0)     # print
 
 lw t2, 0(a1)           # load first byte at 0x3000
