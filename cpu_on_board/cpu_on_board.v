@@ -190,7 +190,7 @@ module cpu_on_board (
     reg do_read = 0;
     always @(posedge CLOCK_50 or negedge KEY0) begin
 	if (!KEY0) begin
-	    sd_rd_start <= 0;
+	    //sd_rd_start <= 0;
 	    byte_index <= 0;
 	    do_read <=0;
 	    sd_cache_available <= 0;
