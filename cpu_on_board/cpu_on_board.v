@@ -334,7 +334,7 @@ module cpu_on_board (
 
     always @(posedge CLOCK_50 or negedge KEY0) begin
         if (!KEY0) begin
-            uart_write <= 0;
+            //uart_write <= 0;
             printed_k <= 0;
             do_read <= 0;
             do_printing <= 0;
@@ -345,14 +345,14 @@ module cpu_on_board (
             captured_byte <= 0;
             sd_byte_available_d <= 0;
         end else begin
-            uart_write <= 0;
+            //uart_write <= 0;
             sd_byte_available_d <= sd_byte_available; // store previous state
 
             case (print_hex_state)
                 0: begin 
                    if (sd_ready && !printed_k) begin
-                       uart_data  <= {24'd0, "K"};
-                       uart_write <= 1;
+                       bus_read_data  <= {24'd0, "K"};
+                       //uart_write <= 1;
                        printed_k  <= 1;
                        rd_sig     <= 1;       // start read after K
                        byte_index <= 0;
@@ -369,18 +369,18 @@ module cpu_on_board (
                    end
                 end
                 1: begin
-                    uart_data  <= {24'd0, "A"};
-                    uart_write <= 1;
+                     bus_read_data<= {24'd0, "A"};
+                    //uart_write <= 1;
                     print_hex_state <= 2;
                 end
                 2: begin // pring upper nibble of captured_byte
-                    uart_data  <= {24'd0, (captured_byte[7:4] < 10) ? (8'h30 + captured_byte[7:4]) : (8'h41 + captured_byte[7:4] - 10)};
-                    uart_write <= 1;
+                     bus_read_data<= {24'd0, (captured_byte[7:4] < 10) ? (8'h30 + captured_byte[7:4]) : (8'h41 + captured_byte[7:4] - 10)};
+                    //uart_write <= 1;
                     print_hex_state <= 3;
                 end
                 3: begin // pring lower nibble of captured_byte
-                    uart_data  <= {24'd0, (captured_byte[3:0] < 10) ? (8'h30 + captured_byte[3:0]) : (8'h41 + captured_byte[3:0] - 10)};
-                    uart_write <= 1;
+                    bus_read_data<= {24'd0, (captured_byte[3:0] < 10) ? (8'h30 + captured_byte[3:0]) : (8'h41 + captured_byte[3:0] - 10)};
+                    //uart_write <= 1;
                     print_hex_state <= 0;
                     byte_index <= byte_index + 1;
                 end
