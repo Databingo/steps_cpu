@@ -1,4 +1,4 @@
-#`define Sdc_base  32'h0000_3000 (3000-31fc 128*32 = 512 bytes readed)
+#`define Sdc_base  32'h0000_3000 (3000-31ff 512 bytes index) 
 #`define Sdc_addr  32'h0000_3200
 #`define Sdc_read  32'h0000_3204
 #`define Sdc_write 32'h0000_3208
