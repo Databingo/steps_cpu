@@ -39,8 +39,9 @@ addi t1, x0, 66  # B
 sw t1, 0(t0)     # print
 
 avail:
+lw a4, 0x228(a1)    # a2 0x3228 byte_avaible
 lw a2, 0x228(a1)    # a2 0x3228 byte_avaible
-beq a2, x0, avail
+beq a2, x4, avail
 
 addi t1, x0, 67  # C
 sw t1, 0(t0)     # print
