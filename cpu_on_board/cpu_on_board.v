@@ -128,6 +128,69 @@ module cpu_on_board (
     wire Sdc_cache_selected = (bus_address >= `Sdc_base && bus_address < (`Sdc_base + 512));
     wire Sdc_avail_selected = (bus_address == `Sdc_avail);
 
+    // Port B read & write BRAM
+    reg [63:0] bus_address_reg;
+    always @(posedge CLOCK_50) begin
+        bus_address_reg <= bus_address>>2;
+        sd_rd_start <= 0;
+
+        // Read
+        if (bus_read_enable) begin 
+            if (Key_selected) begin bus_read_data <= {32'd0, 24'd0, ascii}; bus_read_done <= 1; end
+            if (Ram_selected) begin bus_read_data <= {32'd0, Cache[bus_address_reg]}; bus_read_done <= 1; end
+            if (Sdc_ready_selected) begin bus_read_data <= {63'd0, sd_ready}; bus_read_done <= 1; end
+            //if (Sdc_cache_selected) begin bus_read_data <= {56'd0, sd_dout}; bus_read_done <= 1; end
+            //if (Sdc_avail_selected) begin bus_read_data <= {63'd0, sd_byte_available}; bus_read_done <= 1; end
+            if (Sdc_cache_selected) begin bus_read_data <= {56'd0, sd_cache[cid]}; bus_read_done <= 1; end 
+            if (Sdc_avail_selected) begin bus_read_data <= {63'd0, sd_cache_available}; bus_read_done <= 1; end 
+        end
+
+        // Write
+        if (bus_write_enable) begin 
+            if (Ram_selected) Cache[bus_address[63:2]] <= bus_write_data[31:0];
+            if (Sdc_addr_selected) sd_addr <= bus_write_data[31:0];
+            if (Sdc_read_selected) sd_rd_start <= 1;
+        end
+    end
+
+    wire [11:0] cid = (bus_address-`Sdc_base);
+    reg [7:0] sd_cache [0:511];
+    reg [8:0] byte_index = 0;
+    reg sd_cache_available = 0;
+    reg sd_byte_available_d = 0;
+    reg do_read = 0;
+    always @(posedge CLOCK_50 or negedge KEY0) begin
+	if (!KEY0) begin
+	    //sd_rd_start <= 0;
+	    byte_index <= 0;
+	    do_read <=0;
+	    sd_cache_available <= 0;
+	    //sd_byte_available <= 0;
+	    sd_byte_available_d <= 0;
+	end
+	else begin
+	sd_cache_available <= 0;
+        sd_byte_available_d  <= sd_byte_available;
+        if (sd_byte_available && !sd_byte_available_d) begin
+	    sd_cache[byte_index] <= sd_dout;
+	    byte_index <= byte_index + 1;
+	    do_read <=1;
+	end
+	//if (do_read && sd_status !=6) begin 
+	if (byte_index == 511) begin 
+	    //sd_rd_start <= 0;
+	    byte_index <= 0;
+	    do_read <=0;
+	    sd_cache_available <= 1;
+	end
+    end
+    end
+
+
+
+
+
+
     // Slow pulse clock for SD init (~100 kHz)
     reg [8:0] clkdiv = 0;
     always @(posedge CLOCK_50 or negedge KEY0) begin
@@ -167,28 +230,6 @@ module cpu_on_board (
         .recv_data()
     );
 
-    // Port B read & write BRAM
-    reg [63:0] bus_address_reg;
-    always @(posedge CLOCK_50) begin
-        bus_address_reg <= bus_address>>2;
-        sd_rd_start <= 0;
-
-        // Read
-        if (bus_read_enable) begin 
-            if (Key_selected) begin bus_read_data <= {32'd0, 24'd0, ascii}; bus_read_done <= 1; end
-            if (Ram_selected) begin bus_read_data <= {32'd0, Cache[bus_address_reg]}; bus_read_done <= 1; end
-            if (Sdc_ready_selected) begin bus_read_data <= {63'd0, sd_ready}; bus_read_done <= 1; end
-            if (Sdc_cache_selected) begin bus_read_data <= {56'd0, sd_dout}; bus_read_done <= 1; end
-            if (Sdc_avail_selected) begin bus_read_data <= {63'd0, sd_byte_available}; bus_read_done <= 1; end
-        end
-
-        // Write
-        if (bus_write_enable) begin 
-            if (Ram_selected) Cache[bus_address[63:2]] <= bus_write_data[31:0];
-            if (Sdc_addr_selected) sd_addr <= bus_write_data[31:0];
-            if (Sdc_read_selected) sd_rd_start <= 1;
-        end
-    end
 
     // UART Writer Trigger
     wire uart_write_trigger = bus_write_enable && Art_selected;
