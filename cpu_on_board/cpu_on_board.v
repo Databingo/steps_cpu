@@ -179,6 +179,8 @@ module cpu_on_board (
             if (Ram_selected) Cache[bus_address[63:2]] <= bus_write_data[31:0];  // cut fit 32 bit ram //work
             if (Sdc_addr_selected) sd_addr <= bus_write_data[31:0];
             if (Sdc_read_selected) sd_rd_start <= 1;
+    	    if (byte_index == 511) sd_rd_start <= 0;
+
         end
     end
 
@@ -206,7 +208,7 @@ module cpu_on_board (
 	end
 	//if (do_read && sd_status !=6) begin 
 	if (byte_index == 511) begin 
-	    sd_rd_start <= 0;
+	    //sd_rd_start <= 0;
 	    byte_index <= 0;
 	    do_read <=0;
 	    sd_cache_available <= 1;
