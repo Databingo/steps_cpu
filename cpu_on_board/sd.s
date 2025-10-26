@@ -20,8 +20,7 @@ lw a2, 0x220(a1)    # a2 0x3220 ready
 beq a2, x0, sd_ready
 
 addi t1, x0, 65  # A
-sw t1, 0(t0) # print
-
+sw t1, 0(t0)     # print
 
 # Sector address value to address 0x3200
 sw x0, 0x200(a1)
@@ -34,7 +33,7 @@ sd_ready_2:
 lw a2, 0x220(a1)    # a2 0x3220 ready
 beq a2, x0, sd_ready_2
 
-lw t2, a1           # load first byte at 0x3000
+lw t2, 0(a1)           # load first byte at 0x3000
 andi t2, t2, 0xFF   # Isolate byte value
 
 srli t3, t2, 4      # get high nibble
