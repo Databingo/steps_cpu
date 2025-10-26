@@ -159,7 +159,7 @@ module cpu_on_board (
     reg [63:0] bus_address_reg;
     always @(posedge CLOCK_50) begin
         bus_address_reg <= bus_address>>2; // BRAM read need this reg address if has condition in circle
-	sd_rd_start <= 0;
+	//sd_rd_start <= 0;
 
 	// Read
         if (bus_read_enable) begin 
@@ -196,17 +196,18 @@ module cpu_on_board (
     reg [8:0]  sd_byte_index = 0;     // NEW
     reg sd_rd_start;              // NEW
 
-    wire [7:0] sd_dout;           // NEW
-    wire sd_ready;                // NEW
-    wire sd_byte_available;       // NEW
+    wire [7:0] sd_dout;         
+    wire sd_ready;             
+    wire sd_byte_available;   
+    // sd_recv_data; sd_status
     // =======================================================
     // NEW: SD Controller (from MIT 6.111)
     // =======================================================
     sd_controller sdctrl (
-        .cs(SD_DAT3),
-        .mosi(SD_CMD),
-        .miso(SD_DAT0),
-        .sclk(SD_CLK),
+        .cs(SD_DAT3), // sd_cs
+        .mosi(SD_CMD), // sd_mosi
+        .miso(SD_DAT0), 
+        .sclk(SD_CLK), // sd_sclk
 
         .rd(sd_rd_start),
         .wr(1'b0),
@@ -269,6 +270,7 @@ module cpu_on_board (
     assign HEX01 = ~Ram_selected;
     assign HEX02 = ~Rom_selected;
     //assign HEX03 = ~Spi_selected;
+    assign HEX03 = ~sd_byte_available;
 
 
     // -- Timer --
