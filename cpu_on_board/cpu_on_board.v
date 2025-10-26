@@ -158,28 +158,28 @@ module cpu_on_board (
     // 3. Port B read & write BRAM
     reg [63:0] bus_address_reg;
     reg sd_rd_start;
-    always @(posedge CLOCK_50) begin
-        bus_address_reg <= bus_address>>2; // BRAM read need this reg address if has condition in circle
-	sd_rd_start <= 0;
+    //always @(posedge CLOCK_50) begin
+    //    bus_address_reg <= bus_address>>2; // BRAM read need this reg address if has condition in circle
+    //    sd_rd_start <= 0;
 
-	// Read
-        if (bus_read_enable) begin 
-            if (Key_selected) begin bus_read_data <= {32'd0, 24'd0, ascii}; bus_read_done <= 1; end
-            if (Ram_selected) begin bus_read_data <= {32'd0, Cache[bus_address_reg]}; bus_read_done <= 1; end
-            // Sd 
-            if (Sdc_ready_selected) begin bus_read_data <= {63'd0, sd_ready}; bus_read_done <= 1; end
-            //if (Sdc_cache_selected) begin bus_read_data <= {56'd0, sd_dout}; bus_read_done <= sd_byte_available; end  // make cpu wait for valid byte
-            if (Sdc_cache_selected) begin bus_read_data <= {56'd0, sd_dout}; bus_read_done <= 1; end 
-            if (Sdc_avail_selected) begin bus_read_data <= {63'd0, sd_byte_available}; bus_read_done <= 1; end 
-        end
-	// Write
-        if (bus_write_enable) begin 
-            if (Ram_selected) Cache[bus_address[63:2]] <= bus_write_data[31:0];  // cut fit 32 bit ram //work
-            // Sd
-            if (Sdc_addr_selected) sd_addr <= bus_write_data[31:0];
-            if (Sdc_read_selected) sd_rd_start <= 1;
-        end
-    end
+    //    // Read
+    //    if (bus_read_enable) begin 
+    //        if (Key_selected) begin bus_read_data <= {32'd0, 24'd0, ascii}; bus_read_done <= 1; end
+    //        if (Ram_selected) begin bus_read_data <= {32'd0, Cache[bus_address_reg]}; bus_read_done <= 1; end
+    //        // Sd 
+    //        if (Sdc_ready_selected) begin bus_read_data <= {63'd0, sd_ready}; bus_read_done <= 1; end
+    //        //if (Sdc_cache_selected) begin bus_read_data <= {56'd0, sd_dout}; bus_read_done <= sd_byte_available; end  // make cpu wait for valid byte
+    //        if (Sdc_cache_selected) begin bus_read_data <= {56'd0, sd_dout}; bus_read_done <= 1; end 
+    //        if (Sdc_avail_selected) begin bus_read_data <= {63'd0, sd_byte_available}; bus_read_done <= 1; end 
+    //    end
+    //    // Write
+    //    if (bus_write_enable) begin 
+    //        if (Ram_selected) Cache[bus_address[63:2]] <= bus_write_data[31:0];  // cut fit 32 bit ram //work
+    //        // Sd
+    //        if (Sdc_addr_selected) sd_addr <= bus_write_data[31:0];
+    //        if (Sdc_read_selected) sd_rd_start <= 1;
+    //    end
+    //end
       
      //  4.-- UART Writer Trigger --
       wire uart_write_trigger = bus_write_enable && Art_selected;
