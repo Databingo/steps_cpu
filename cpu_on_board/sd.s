@@ -48,14 +48,27 @@ sw t1, 0(t0)     # print
 lw t2, 0(a1)           # load first byte at 0x3000
 andi t2, t2, 0xFF   # Isolate byte value
 
+
 srli t3, t2, 4      # get high nibble
+slti t5, t3, 10     # if < 10 number
+beq t5, x0, letter_h
+addi t3, t3, 48     # 0 is "0" ascii 48
+j print_h_hex
+letter_h:
 addi t3, t3, 55     # 10 is "A" ascii 65 ..
+print_h_hex:
 sw t3, 0(t0)
 
-andi t4, t2, 0x0F      # get low nibble
-addi t4, t4, 55        # 10 is "A" ascii 65 ..
-sw t4, 0(t0)
 
+andi t4, t2, 0x0F      # get low nibble
+slti t5, t4, 10     # if < 10 number
+beq t5, x0, letter_l
+addi t4, t4, 48     # 0 is "0" ascii 48
+j print_l_hex
+letter_l:
+addi t4, t4, 55        # 10 is "A" ascii 65 ..
+print_l_hex:
+sw t4, 0(t0)
 
 
 
