@@ -71,6 +71,3 @@ print_l_hex:
 sw t4, 0(t0)
 
 
-
-
-
