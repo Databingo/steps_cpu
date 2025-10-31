@@ -39,13 +39,21 @@ addi t1, x0, 66  # B
 sw t1, 0(t0)     # print
 
 avail:
-lw a2, 0x228(a1)    # a2 0x3228 byte_avaible
+lw a2, 0x228(a1)    # a2 0x3228 cache_avaible
 beq a2, x0, avail
 
 addi t1, x0, 67  # C
 sw t1, 0(t0)     # print
 
-lw t2, 0(a1)           # load first byte at 0x3000
+li t1, 0   # byte index
+li t6, 511 # max byte index
+
+print_loop:
+add a4, a1, t1 
+addi t1, t1, 1
+
+
+lw t2, 0(a4)           # load byte at 0x3000 a1+t1
 andi t2, t2, 0xFF   # Isolate byte value
 
 
@@ -71,3 +79,4 @@ print_l_hex:
 sw t4, 0(t0)
 
 
+bge t6, t1, print_loop
