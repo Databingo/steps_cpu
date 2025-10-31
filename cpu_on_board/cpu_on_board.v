@@ -132,7 +132,7 @@ module cpu_on_board (
     reg [63:0] bus_address_reg;
     always @(posedge CLOCK_50) begin
         bus_address_reg <= bus_address>>2;
-        //sd_rd_start <= 0;
+        sd_rd_start <= 0;
 
         // Read
         if (bus_read_enable) begin 
@@ -149,7 +149,8 @@ module cpu_on_board (
         if (bus_write_enable) begin 
             if (Ram_selected) Cache[bus_address[63:2]] <= bus_write_data[31:0];
             if (Sdc_addr_selected) sd_addr <= bus_write_data[31:0];
-            if (Sdc_read_selected) sd_rd_start <= 1;
+            //if (Sdc_read_selected) sd_rd_start <= 1;
+            if (Sdc_read_selected) sd_rd <= 1;
         end
     end
 
@@ -162,7 +163,7 @@ module cpu_on_board (
     wire [4:0] sd_status;
     always @(posedge CLOCK_50 or negedge KEY0) begin
 	if (!KEY0) begin
-	    //sd_rd_start <= 0;
+	    sd_rd_start <= 0;
 	    byte_index <= 0;
 	    do_read <=0;
 	    sd_cache_available <= 0;
@@ -178,6 +179,7 @@ module cpu_on_board (
 	        do_read <=1;
 	    end
 	    //if (byte_index == 10) sd_cache_available <= 0;
+	    if (sd_rd == 1) sd_rd_start <= 1;
 	    if (do_read && sd_status !=6) sd_rd_start <= 0;
 	    //if (do_read && sd_status !=6) begin 
 	    ////if (do_read && sd_status == 6) begin  // 6 is IDLE wait
@@ -206,6 +208,7 @@ module cpu_on_board (
     // SD Controller Bridge
     reg [31:0] sd_addr = 0;           // Sector address
     reg sd_rd_start;                  // Trigger rd
+    reg sd_rd;                  // Trigger rd on bus
 
     wire [7:0] sd_dout;
     wire sd_ready;
