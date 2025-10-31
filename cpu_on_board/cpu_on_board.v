@@ -179,8 +179,8 @@ module cpu_on_board (
 	    end
 	    if (byte_index == 10) sd_cache_available <= 0;
 	    //if (do_read && sd_status !=6) begin 
-	    if (do_read && sd_status == 6) begin  // 6 is IDLE wait
-	    //if (byte_index == 511) begin 
+	    //if (do_read && sd_status == 6) begin  // 6 is IDLE wait
+	    if (byte_index == 511) begin 
 	        //sd_rd_start <= 0;
 	        byte_index <= 0;
 	        do_read <=0;
