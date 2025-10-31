@@ -132,7 +132,7 @@ module cpu_on_board (
     reg [63:0] bus_address_reg;
     always @(posedge CLOCK_50) begin
         bus_address_reg <= bus_address>>2;
-        sd_rd_start <= 0;
+        //sd_rd_start <= 0;
 
         // Read
         if (bus_read_enable) begin 
