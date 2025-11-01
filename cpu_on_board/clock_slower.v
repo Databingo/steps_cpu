@@ -13,7 +13,8 @@ module clock_slower(
             clk_out <= 0;
             counter <= 0;
         end else begin
-            if (counter == 25000000 - 1) begin
+            //if (counter == 25000000 - 1) begin
+            if (counter == 2500000 - 1) begin
                 counter <= 0;
                 clk_out <= ~clk_out;
             end else begin
