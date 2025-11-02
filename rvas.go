@@ -946,7 +946,7 @@ func main() {
                         //combination hi32:x2 and lo32:rd to rd as 64 bit A:
 			ins = fmt.Sprintf("add %s, %s, %s\n", code[1], "x2", code[1])
 			real_instr.WriteString(ins)
-
+			// lui addi slli add
 
 		case "j": // PC尾跳转 j offset|jump to pc+offset
 			//if len(code) != 2 && len(code) != 3 {
