@@ -95,6 +95,18 @@ lw t2, 0(t1)
 andi t2, t2, 0xffff
 mv s3, t2    # s3 = root_entries
 
+addi t1, x0, 70  # F
+sw t1, 0(t0)     # print
+
+li s10, 8 # index bit 
+print_bin:
+addi s10, s10, -1
+srl s11, s3, s10
+andi s11, s11, 1
+addi s11, s11, 48  # 0 to "0"
+sw s11, 0(t0)     # print
+bne s10, x0, print_bin
+
 addi t1, a1, 0x16
 lw t2, 0(t1)
 andi t2, t2, 0xffff
