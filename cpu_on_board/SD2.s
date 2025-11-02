@@ -65,6 +65,16 @@ sw t1, 0(t0)     # print
 # 0x2c                  root cluster (fat32 only)
 # 0x36 8    FAT16 FAT32 FAT label string 
 
+# Entries 32 bytes  FAT16 8.3 format for name.extension
+# offset size meaning 
+# 0x00 8 name 
+# 0x80 3 extension
+# 0x0B 1 attributes
+# 0x0E 2 time last modified
+# 0x10 2 date
+# 0x1A 2 first cluster
+# 0x1C 4 file size bytes
+
 addi t1, a1, 0x0B
 lw t2, 0(t1)
 andi t2, t2, 0xffff
@@ -98,42 +108,90 @@ mv s5, t2    # s5 = root_cluster
 beq s3, x0, is_fat32  # root_entries == 0
 beq s4, x0, is_fat32  #  sectors_per_fat == 0
 
+# -- FAT16 --
+is_fat16:
+# root_dir_start_sector = reserved_sectors + (num_FATs * sectors_per_FAT)
+mul t3, s2, s4
+add t3, t3, s1
+mv s6, t3     # s6 = root_start_sector
 
+# set SD read address
+sw s6, 0x200(a1)
+li a3, 1
+sw a3, 0x204(a1)
 
+sd_ready_3
+lw a2, 0x220(a1)    # a2 0x3220 ready
+beq a2, x0, sd_ready_3
 
+addi t1, x0, 68  # D
+sw t1, 0(t0)     # print
 
-li t1, 0   # byte index
-li t6, 511 # max byte index
+# Wait for cache available
+avail_3:
+lw a2, 0x228(a1)    # a2 0x3228 cache_avaible
+beq a2, x0, avail_3
+
+addi t1, x0, 69  # E
+sw t1, 0(t0)     # print
+
+j print_name
+
+# -- FAT 32 --
+
+print_name:
+li t1,0 # offset
+li t6,7 # 8 chars
 
 print_loop:
-add a4, a1, t1 
+add a4, a1, t1
+lw t2, 0(a4)
+andi t2, t2, 0xff
+sw t2, 0(t0)
 addi t1, t1, 1
+ble t1, t6, print_loop
+done:
+j done
 
 
-lw t2, 0(a4)           # load byte at 0x3000 a1+t1
-andi t2, t2, 0xFF   # Isolate byte value
 
 
-srli t3, t2, 4      # get high nibble
-slti t5, t3, 10     # if < 10 number
-beq t5, x0, letter_h
-addi t3, t3, 48     # 0 is "0" ascii 48
-j print_h_hex
-letter_h:
-addi t3, t3, 55     # 10 is "A" ascii 65 ..
-print_h_hex:
-sw t3, 0(t0)
 
 
-andi t4, t2, 0x0F      # get low nibble
-slti t5, t4, 10     # if < 10 number
-beq t5, x0, letter_l
-addi t4, t4, 48     # 0 is "0" ascii 48
-j print_l_hex
-letter_l:
-addi t4, t4, 55        # 10 is "A" ascii 65 ..
-print_l_hex:
-sw t4, 0(t0)
 
 
-bge t6, t1, print_loop
+#li t1, 0   # byte index
+#li t6, 511 # max byte index
+#
+#print_loop:
+#add a4, a1, t1 
+#addi t1, t1, 1
+#
+#
+#lw t2, 0(a4)           # load byte at 0x3000 a1+t1
+#andi t2, t2, 0xFF   # Isolate byte value
+#
+#
+#srli t3, t2, 4      # get high nibble
+#slti t5, t3, 10     # if < 10 number
+#beq t5, x0, letter_h
+#addi t3, t3, 48     # 0 is "0" ascii 48
+#j print_h_hex
+#letter_h:
+#addi t3, t3, 55     # 10 is "A" ascii 65 ..
+#print_h_hex:
+#sw t3, 0(t0)
+#
+#
+#andi t4, t2, 0x0F      # get low nibble
+#slti t5, t4, 10     # if < 10 number
+#beq t5, x0, letter_l
+#addi t4, t4, 48     # 0 is "0" ascii 48
+#j print_l_hex
+#letter_l:
+#addi t4, t4, 55        # 10 is "A" ascii 65 ..
+#print_l_hex:
+#sw t4, 0(t0)
+#
+#
+#bge t6, t1, print_loop
