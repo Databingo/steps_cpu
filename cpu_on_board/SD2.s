@@ -111,7 +111,8 @@ beq s4, x0, is_fat32  #  sectors_per_fat == 0
 # -- FAT16 --
 is_fat16:
 # root_dir_start_sector = reserved_sectors + (num_FATs * sectors_per_FAT)
-mv t4, t2
+mv t4, s2
+li t3, 0
 mul:
 add t3, t3, s4
 addi t4, t4, -1
