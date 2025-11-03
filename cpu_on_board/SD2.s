@@ -182,8 +182,14 @@ jal print_bin_f
 
 addi t1, a1, 0x17
 lw t2, 0(t1)
+slli t2, t2, 8 # little-endian
 andi t2, t2, 0xffff
-mv s4, t2    # s4 = sectors_per_fat16
+mv s4, t2    # s4 = sectors_per_fat16 high
+
+addi t1, a1, 0x16
+lw t2, 0(t1)
+andi t2, t2, 0x00ff
+or s4, s4, t2 # s4 = sectors_per_fat16
 
 li a0, 80 # P
 jal print_char
@@ -253,7 +259,7 @@ add a4, a1, t1
 addi t1, t1, 1
 
 
-lw t2, 0(a4)           # load byte at 0x3000 a1+t1
+lw t2, 0(a4)        # load byte at 0x3000 a1+t1
 andi t2, t2, 0xFF   # Isolate byte value
 
 
