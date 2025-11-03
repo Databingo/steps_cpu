@@ -126,7 +126,7 @@ sw t1, 0(t0)     # print
 # 0x1A 2 first cluster
 # 0x1C 4 file size bytes
 
-addi t1, a1, 0x0B
+addi t1, a1, 0x0C  # 0x0b-0x0c
 lw t2, 0(t1)
 andi t2, t2, 0xffff
 mv s0, t2    # s0 = bytes_per_sector
