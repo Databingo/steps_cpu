@@ -157,7 +157,6 @@ mv s1, t2    # s1 = reserved
 
 li a0, 82 # R
 jal print_char
-
 mv a0, s1
 jal print_bin_f
 
@@ -166,16 +165,32 @@ lw t2, 0(t1)
 andi t2, t2, 0xffff
 mv s2, t2    # s2 = num_fats
 
-addi t1, a1, 0x11
+li a0, 70 # F
+jal print_char
+mv a0, s2
+jal print_bin_f
+
+addi t1, a1, 0x12
 lw t2, 0(t1)
 andi t2, t2, 0xffff
 mv s3, t2    # s3 = root_entries
 
+li a0, 82 # R
+jal print_char
+mv a0, s3
+jal print_bin_f
 
-addi t1, a1, 0x16
+addi t1, a1, 0x17
 lw t2, 0(t1)
 andi t2, t2, 0xffff
 mv s4, t2    # s4 = sectors_per_fat16
+
+li a0, 80 # P
+jal print_char
+mv a0, s4
+jal print_bin_f
+
+
 
 addi t1, a1, 0x2C
 lw t2, 0(t1)
