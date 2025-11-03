@@ -155,6 +155,12 @@ lw t2, 0(t1)
 andi t2, t2, 0xffff
 mv s1, t2    # s1 = reserved
 
+li a0, 82 # R
+jal print_char
+
+mv a0, s1
+jal print_bin_f
+
 addi t1, a1, 0x10
 lw t2, 0(t1)
 andi t2, t2, 0xffff
@@ -272,3 +278,23 @@ j done
 #
 #
 #bge t6, t1, print_loop
+
+
+
+# funciton print_bin(a0) print 9 bits of a0 at t0 UART
+print_bin_f:
+li t1, 8 # number of bits
+print_binf_loop:
+addi t1, t1, -1
+srl t2, a0, t1
+andi t2, t2, 1
+addi t2, t2, 48  # 0 to "0"
+sw t2, 0(t0)     # print
+bne t1, x0, print_binf_loop
+ret
+# ---------
+
+# function print_char(a0)
+print_char:
+sw a0, 0(t0)
+ret
