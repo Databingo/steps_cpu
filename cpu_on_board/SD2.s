@@ -59,42 +59,42 @@ sw t1, 0(t0)     # print
 
 
 
-# print sector 0 512 bytes
-
-li t1, 0   # byte index
-li t6, 511 # max byte index
-
-print_loop:
-add a4, a1, t1 
-addi t1, t1, 1
-
-
-lw t2, 0(a4)           # load byte at 0x3000 a1+t1
-andi t2, t2, 0xFF   # Isolate byte value
-
-
-srli t3, t2, 4      # get high nibble
-slti t5, t3, 10     # if < 10 number
-beq t5, x0, letter_h
-addi t3, t3, 48     # 0 is "0" ascii 48
-j print_h_hex
-letter_h:
-addi t3, t3, 55     # 10 is "A" ascii 65 ..
-print_h_hex:
-sw t3, 0(t0)
-
-
-andi t4, t2, 0x0F      # get low nibble
-slti t5, t4, 10     # if < 10 number
-beq t5, x0, letter_l
-addi t4, t4, 48     # 0 is "0" ascii 48
-j print_l_hex
-letter_l:
-addi t4, t4, 55        # 10 is "A" ascii 65 ..
-print_l_hex:
-sw t4, 0(t0)
-
-bge t6, t1, print_loop
+## print sector 0 512 bytes
+#
+#li t1, 0   # byte index
+#li t6, 511 # max byte index
+#
+#print_loop:
+#add a4, a1, t1 
+#addi t1, t1, 1
+#
+#
+#lw t2, 0(a4)           # load byte at 0x3000 a1+t1
+#andi t2, t2, 0xFF   # Isolate byte value
+#
+#
+#srli t3, t2, 4      # get high nibble
+#slti t5, t3, 10     # if < 10 number
+#beq t5, x0, letter_h
+#addi t3, t3, 48     # 0 is "0" ascii 48
+#j print_h_hex
+#letter_h:
+#addi t3, t3, 55     # 10 is "A" ascii 65 ..
+#print_h_hex:
+#sw t3, 0(t0)
+#
+#
+#andi t4, t2, 0x0F      # get low nibble
+#slti t5, t4, 10     # if < 10 number
+#beq t5, x0, letter_l
+#addi t4, t4, 48     # 0 is "0" ascii 48
+#j print_l_hex
+#letter_l:
+#addi t4, t4, 55        # 10 is "A" ascii 65 ..
+#print_l_hex:
+#sw t4, 0(t0)
+#
+#bge t6, t1, print_loop
 
 
 
@@ -131,6 +131,25 @@ lw t2, 0(t1)
 andi t2, t2, 0xffff
 mv s0, t2    # s0 = bytes_per_sector
 
+# print ---------
+addi t1, x0, 90  # Z
+sw t1, 0(t0)     # print
+
+li s10, 8 # index bit 
+print_bin:
+addi s10, s10, -1
+srl s11, s0, s10
+andi s11, s11, 1
+addi s11, s11, 48  # 0 to "0"
+sw s11, 0(t0)     # print
+bne s10, x0, print_bin
+# ---------
+
+# -- print --
+addi t1, x0, 124  # |
+sw t1, 0(t0)     # print
+# -- print end --
+
 addi t1, a1, 0x0E
 lw t2, 0(t1)
 andi t2, t2, 0xffff
@@ -146,17 +165,6 @@ lw t2, 0(t1)
 andi t2, t2, 0xffff
 mv s3, t2    # s3 = root_entries
 
-addi t1, x0, 70  # F
-sw t1, 0(t0)     # print
-
-li s10, 8 # index bit 
-print_bin:
-addi s10, s10, -1
-srl s11, s3, s10
-andi s11, s11, 1
-addi s11, s11, 48  # 0 to "0"
-sw s11, 0(t0)     # print
-bne s10, x0, print_bin
 
 addi t1, a1, 0x16
 lw t2, 0(t1)
