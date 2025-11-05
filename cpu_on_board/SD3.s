@@ -26,85 +26,81 @@ sd_ready:
 lw a2, 0x220(a1)    # a2 0x3220 ready
 beq a2, x0, sd_ready
 
+# -- Read Boot Sector 0 -- 
+li a2, 0
+jal sd_read_sector
+
+#li t1, 'A'
 addi t1, x0, 65  # A
 sw t1, 0(t0)     # print
 
-# Write Sector index value to address 0x3200
-sw x0, 0x200(a1)
-li a3, 1
-# Trigger read at 0x3204
-sw a3, 0x204(a1)
+# -- Parse BPB -- little-endian
 
-sd_ready_2:
-lw a2, 0x220(a1)    # a2 0x3220 ready
-beq a2, x0, sd_ready_2
+# bytes_per_sector offset 0x0b-0x0c 2 bytes
+addi t1, a1, 0x0B 
+lw t2, 0(t1)
+andi t2, t2, 0xff
 
-addi t1, x0, 66  # B
-sw t1, 0(t0)     # print
+addi t1, a1, 0x0C  
+lw t3, 0(t1)
+andi t3, t3, 0xff
 
-mul t2, t1, t1
-mulh t2, t1, t1
-# Wait for cache available
-avail:
-lw a2, 0x228(a1)    # a2 0x3228 cache_avaible
-beq a2, x0, avail
+slli t3, t3, 8
+or t2, t2, t3
+mv s0, t2    
+ 
+# sec per clus offset 0x0d 1 byte
+addi t1, a1, 0x0D
+lw t2, 0(t1)
+andi t2, t2, 0xff
+mv s1, t2    
 
-addi t1, x0, 67  # C
-sw t1, 0(t0)     # print
+# reserved_sectors offset 0x0e-0x0f 2 bytes
+addi t1, a1, 0x0E
+lw t2, 0(t1)
+andi t2, t2, 0xff
 
+addi t1, a1, 0x0F 
+lw t3, 0(t1)
+andi t3, t3, 0xff
 
-
-
-
-
-
-
-
-
-## print sector 0 512 bytes
-#
-#li t1, 0   # byte index
-#li t6, 511 # max byte index
-#
-#print_loop:
-#add a4, a1, t1 
-#addi t1, t1, 1
-#
-#
-#lw t2, 0(a4)           # load byte at 0x3000 a1+t1
-#andi t2, t2, 0xFF   # Isolate byte value
-#
-#
-#srli t3, t2, 4      # get high nibble
-#slti t5, t3, 10     # if < 10 number
-#beq t5, x0, letter_h
-#addi t3, t3, 48     # 0 is "0" ascii 48
-#j print_h_hex
-#letter_h:
-#addi t3, t3, 55     # 10 is "A" ascii 65 ..
-#print_h_hex:
-#sw t3, 0(t0)
-#
-#
-#andi t4, t2, 0x0F      # get low nibble
-#slti t5, t4, 10     # if < 10 number
-#beq t5, x0, letter_l
-#addi t4, t4, 48     # 0 is "0" ascii 48
-#j print_l_hex
-#letter_l:
-#addi t4, t4, 55        # 10 is "A" ascii 65 ..
-#print_l_hex:
-#sw t4, 0(t0)
-#
-#bge t6, t1, print_loop
+slli t3, t3, 8
+or t2, t2, t3
+mv s2, t2    
 
 
+# num_fats offset 0x10 1 bytes
+addi t1, a1, 0x10
+lw t2, 0(t1)
+andi t2, t2, 0xff
+mv s3, t2  
 
 
+# root_entries offset 0x11-0x12 2 bytes
+addi t1, a1, 0x11
+lw t2, 0(t1)
+andi t2, t2, 0xff
 
+addi t1, a1, 0x12
+lw t3, 0(t1)
+andi t3, t3, 0xff
 
+slli t3, t3, 8
+or t2, t2, t3
+mv s4, t2    
 
-# Parse BPB t6a7s11
+# sectors_per_fat16 high offset 0x16-0x17 2 bytes
+addi t1, a1, 0x16
+lw t2, 0(t1)
+andi t2, t2, 0xff
+
+addi t1, a1, 0x17
+lw t3, 0(t1)
+andi t3, t3, 0xff
+
+slli t3, t3, 8
+or t2, t2, t3
+mv s5, t2    
 
 # BPB (BIOS Parameter Block) in sector 0
 # offset size FAT16 FAT32 filed 
@@ -128,165 +124,25 @@ sw t1, 0(t0)     # print
 # 0x1A 2 first cluster
 # 0x1C 4 file size bytes
 
-addi t1, a1, 0x0C  # 0x0b-0x0c
-lw t2, 0(t1)
-andi t2, t2, 0xffff
-mv s0, t2    # s0 = bytes_per_sector
+## Detect FAT type
+#beq s3, x0, is_fat32  # root_entries == 0
+#beq s4, x0, is_fat32  #  sectors_per_fat == 0
 
-# print ---------
-addi t1, x0, 90  # Z
-sw t1, 0(t0)     # print
-
-li s10, 8 # index bit 
-print_bin:
-addi s10, s10, -1
-srl s11, s0, s10
-andi s11, s11, 1
-addi s11, s11, 48  # 0 to "0"
-sw s11, 0(t0)     # print
-bne s10, x0, print_bin
-# ---------
-
-# -- print --
-addi t1, x0, 124  # |
-sw t1, 0(t0)     # print
-# -- print end --
-
-addi t1, a1, 0x0E
-lw t2, 0(t1)
-andi t2, t2, 0xffff
-mv s1, t2    # s1 = reserved
-
-li a0, 82 # R
-jal print_char
-mv a0, s1
-jal print_bin_f
-
-addi t1, a1, 0x10
-lw t2, 0(t1)
-andi t2, t2, 0xffff
-mv s2, t2    # s2 = num_fats
-
-li a0, 70 # F
-jal print_char
-mv a0, s2
-jal print_bin_f
-
-addi t1, a1, 0x12
-lw t2, 0(t1)
-andi t2, t2, 0xffff
-mv s3, t2    # s3 = root_entries
-
-li a0, 82 # R
-jal print_char
-mv a0, s3
-jal print_bin_f
-
-addi t1, a1, 0x17
-lw t2, 0(t1)
-slli t2, t2, 8 # little-endian
-andi t2, t2, 0xffff
-mv s4, t2    # s4 = sectors_per_fat16 high
-
-addi t1, a1, 0x16
-lw t2, 0(t1)
-andi t2, t2, 0x00ff
-or s4, s4, t2 # s4 = sectors_per_fat16
-
-li a0, 80 # P
-jal print_char
-mv a0, s4
-jal print_bin_f
-
-
-
-addi t1, a1, 0x2C
-lw t2, 0(t1)
-mv s5, t2    # s5 = root_cluster
-
-# Detect FAT type
-beq s3, x0, is_fat32  # root_entries == 0
-beq s4, x0, is_fat32  #  sectors_per_fat == 0
-
-# -- FAT16 --
-is_fat16:
-# root_dir_start_sector = reserved_sectors + (num_FATs * sectors_per_FAT)
-mv t4, s2
-li t3, 0
-mul:
-add t3, t3, s4
-addi t4, t4, -1
-bne t4, x0, mul
-
-add t3, t3, s1
+# -- compute Root Dir Start sector
+# root_dir_start_sector = reserved_sectors + (num_fats * sectors_per_fat16)
+# s2 + s3 * s5
+mul t3, s3, s5
+add t3, t3, s2
 mv s6, t3     # s6 = root_start_sector
 
-li a0, 79 # O
-jal print_char
-mv a0, s6
-jal print_bin_f
+# -- Read Root Dir first sector --
+mv a2, s6
+jal sd_read_sector
 
-# set SD read address
-sw s6, 0x200(a1)
-li a3, 1
-sw a3, 0x204(a1)
-
-sd_ready_3:
-lw a2, 0x220(a1)    # a2 0x3220 ready
-beq a2, x0, sd_ready_3
-
-addi t1, x0, 68  # D
+li t1, 66 # B
 sw t1, 0(t0)     # print
 
-# Wait for cache available
-avail_3:
-lw a2, 0x228(a1)    # a2 0x3228 cache_avaible
-beq a2, x0, avail_3
-
-addi t1, x0, 69  # E
-sw t1, 0(t0)     # print
-
-
-
-
-
-
-# print sector 0 512 bytes
-
-li t1, 0   # byte index
-li t6, 511 # max byte index
-
-print_loop:
-add a4, a1, t1 
-addi t1, t1, 1
-
-
-lw t2, 0(a4)        # load byte at 0x3000 a1+t1
-andi t2, t2, 0xFF   # Isolate byte value
-
-
-srli t3, t2, 4      # get high nibble
-slti t5, t3, 10     # if < 10 number
-beq t5, x0, letter_h
-addi t3, t3, 48     # 0 is "0" ascii 48
-j print_h_hex
-letter_h:
-addi t3, t3, 55     # 10 is "A" ascii 65 ..
-print_h_hex:
-sw t3, 0(t0)
-
-
-andi t4, t2, 0x0F      # get low nibble
-slti t5, t4, 10     # if < 10 number
-beq t5, x0, letter_l
-addi t4, t4, 48     # 0 is "0" ascii 48
-j print_l_hex
-letter_l:
-addi t4, t4, 55        # 10 is "A" ascii 65 ..
-print_l_hex:
-sw t4, 0(t0)
-
-bge t6, t1, print_loop
+# div
 
 
 
@@ -294,41 +150,39 @@ bge t6, t1, print_loop
 
 
 
-
-
-
-
-
-
-
-
-
-
-j print_name
-
-# -- FAT 32 --
-
-print_name:
-li t1,0 # offset
-li t6,7 # 8 chars
-
-print_loop_n:
-add a4, a1, t1
-lw t2, 0(a4)
-andi t2, t2, 0xff
-sw t2, 0(t0)
-addi t1, t1, 1
-ble t1, t6, print_loop_n
-done:
-j done
-
-
-
-
-
-
-
-
+#
+#li a0, 79 # O
+#jal print_char
+#mv a0, s6
+#jal print_bin_f
+#
+## set SD read address
+#sw s6, 0x200(a1)
+#li a3, 1
+#sw a3, 0x204(a1)
+#
+#sd_ready_3:
+#lw a2, 0x220(a1)    # a2 0x3220 ready
+#beq a2, x0, sd_ready_3
+#
+#addi t1, x0, 68  # D
+#sw t1, 0(t0)     # print
+#
+## Wait for cache available
+#avail_3:
+#lw a2, 0x228(a1)    # a2 0x3228 cache_avaible
+#beq a2, x0, avail_3
+#
+#addi t1, x0, 69  # E
+#sw t1, 0(t0)     # print
+#
+#
+#
+#
+#
+#
+## print sector 0 512 bytes
+#
 #li t1, 0   # byte index
 #li t6, 511 # max byte index
 #
@@ -337,7 +191,7 @@ j done
 #addi t1, t1, 1
 #
 #
-#lw t2, 0(a4)           # load byte at 0x3000 a1+t1
+#lw t2, 0(a4)        # load byte at 0x3000 a1+t1
 #andi t2, t2, 0xFF   # Isolate byte value
 #
 #
@@ -362,25 +216,116 @@ j done
 #print_l_hex:
 #sw t4, 0(t0)
 #
-#
 #bge t6, t1, print_loop
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#j print_name
+#
+## -- FAT 32 --
+#
+#print_name:
+#li t1,0 # offset
+#li t6,7 # 8 chars
+#
+#print_loop_n:
+#add a4, a1, t1
+#lw t2, 0(a4)
+#andi t2, t2, 0xff
+#sw t2, 0(t0)
+#addi t1, t1, 1
+#ble t1, t6, print_loop_n
+#done:
+#j done
+#
+#
+#
+#
+#
+#
+#
+#
+##li t1, 0   # byte index
+##li t6, 511 # max byte index
+##
+##print_loop:
+##add a4, a1, t1 
+##addi t1, t1, 1
+##
+##
+##lw t2, 0(a4)           # load byte at 0x3000 a1+t1
+##andi t2, t2, 0xFF   # Isolate byte value
+##
+##
+##srli t3, t2, 4      # get high nibble
+##slti t5, t3, 10     # if < 10 number
+##beq t5, x0, letter_h
+##addi t3, t3, 48     # 0 is "0" ascii 48
+##j print_h_hex
+##letter_h:
+##addi t3, t3, 55     # 10 is "A" ascii 65 ..
+##print_h_hex:
+##sw t3, 0(t0)
+##
+##
+##andi t4, t2, 0x0F      # get low nibble
+##slti t5, t4, 10     # if < 10 number
+##beq t5, x0, letter_l
+##addi t4, t4, 48     # 0 is "0" ascii 48
+##j print_l_hex
+##letter_l:
+##addi t4, t4, 55        # 10 is "A" ascii 65 ..
+##print_l_hex:
+##sw t4, 0(t0)
+##
+##
+##bge t6, t1, print_loop
+#
+#
+#
+## funciton print_bin(a0) print 9 bits of a0 at t0 UART
+#print_bin_f:
+#li t1, 8 # number of bits
+#print_binf_loop:
+#addi t1, t1, -1
+#srl t2, a0, t1
+#andi t2, t2, 1
+#addi t2, t2, 48  # 0 to "0"
+#sw t2, 0(t0)     # print
+#bne t1, x0, print_binf_loop
+#ret
+## ---------
+#
+## function print_char(a0)
+#print_char:
+#sw a0, 0(t0)
+#ret
 
 
 
-# funciton print_bin(a0) print 9 bits of a0 at t0 UART
-print_bin_f:
-li t1, 8 # number of bits
-print_binf_loop:
-addi t1, t1, -1
-srl t2, a0, t1
-andi t2, t2, 1
-addi t2, t2, 48  # 0 to "0"
-sw t2, 0(t0)     # print
-bne t1, x0, print_binf_loop
-ret
-# ---------
-
-# function print_char(a0)
-print_char:
-sw a0, 0(t0)
+# ---  sd_read_sector ---
+sd_read_sector:
+sw a2, 0x200(a1) # Write Sector index value to address 0x3200
+li t1, 1
+sw t1, 0x204(a1) # Trigger read at 0x3204
+wait_ready:
+lw t2, 0x220(a1)    # t2 0x3220 ready
+beq t2, x0, wait_ready
+wait_cache:
+lw t2, 0x228(a1)    # t2 0x3228 cache_avaible
+beq t2, x0, wait_cache
 ret
