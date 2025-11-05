@@ -366,6 +366,10 @@ func main() {
 		"ecall":  0b00000000000000000000000001110011,
 		"ebreak": 0b00000000000100000000000001110011,
 
+		// M
+		"mul":  0b00000010000000000000000000110011,
+		"mulh": 0b00000010000000000001000000110011,
+
 		// --new
 		"csrrw":  0b00000000000000000001000001110011 ,  
 		"csrrs":  0b00000000000000000010000001110011 ,  
@@ -1322,7 +1326,7 @@ func main() {
 				}
 			}
 
-		case "add", "addw", "sub", "subw", "sll", "sllw", "slt", "sltu", "xor", "srl", "srlw", "sra", "sraw", "or", "and": // Instruction format: op rd, rs1, rs2       or      label: op rd, rs1, rs2
+		case "add", "addw", "sub", "subw", "sll", "sllw", "slt", "sltu", "xor", "srl", "srlw", "sra", "sraw", "or", "and", "mul", "mulh": // Instruction format: op rd, rs1, rs2       or      label: op rd, rs1, rs2
 			if len(code) != 4 && len(code) != 5 {
 				fmt.Println("Incorrect argument count on line: ", lineCounter)
 				os.Exit(0)
@@ -1801,7 +1805,7 @@ func main() {
 				os.Exit(0)
 			}
 
-		case "add", "addw", "sub", "subw", "sll", "sllw", "slt", "sltu", "xor", "srl", "srlw", "sra", "sraw", "or", "and": // op rd, rs1, rs2
+			case "add", "addw", "sub", "subw", "sll", "sllw", "slt", "sltu", "xor", "srl", "srlw", "sra", "sraw", "or", "and", "mul", "mulh": // op rd, rs1, rs2
 			if len(code) != 4 {
 				fmt.Println("Incorrect argument count on line: ", lineCounter)
 				os.Exit(0)
