@@ -263,7 +263,7 @@ func isValidImmediate_u(s string) (int64, uint64, error) {
 	}
 }
 
-func main() {
+func main() { //t6a7s11
 	regBin := map[string]uint32{ // t0-6 a0-7 could bu use
 		"x0": 0b00000, "zero": 0b00000,
 		"x1": 0b00001, "ra": 0b00001, // return address
@@ -1641,10 +1641,10 @@ func main() {
 				fmt.Printf("@Error on line %d: %s target address not aligned with 2 bytes %d \n", lineCounter, opr, imm)
 				os.Exit(0)
 			    }
-			if ((opr == "lw" || opr == "lwu" ) && imm % 4 != 0) {
-				fmt.Printf("@Error on line %d: %s target address not aligned with 4 bytes %d \n", lineCounter, opr, imm)
-				os.Exit(0)
-			    }
+			//if ((opr == "lw" || opr == "lwu" ) && imm % 4 != 0) {
+			//	fmt.Printf("@Error on line %d: %s target address not aligned with 4 bytes %d \n", lineCounter, opr, imm)
+			//	os.Exit(0)
+			//    }
 			if (opr == "ld" && imm % 8 != 0) {
 				fmt.Printf("@Error on line %d: %s target address not aligned with 8 bytes %d \n", lineCounter, opr, imm)
 				os.Exit(0)
