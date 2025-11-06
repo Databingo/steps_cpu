@@ -7,6 +7,11 @@
 #`define Sdc_avail 32'h0000_3228
 # UART 0x2004
 
+# FAT File Allocaiton Table
+# ReservedSectors(including root sector 0)|FAT|rootDirectorySectors(entry32bytes*cnt/512=sectores)|Cluster2...(Data)
+# FirstSectorOfCluster(N)=FirstDataSector + (N - 2) * SectorsPerCluster
+# RootEntry0x1A-0x1B file's firstClusterNumber
+
 # Boot Sector: Sector 0 LBA
 # root_dir_sector = reserved_sectors + (num_FATs * sectors_per_FAT)
 
@@ -69,13 +74,13 @@ slli t3, t3, 8
 or t2, t2, t3
 mv s0, t2    
  
-# sec per clus offset 0x0d 1 byte
+# sectors per cluster offset 0x0d 1 byte
 addi t1, a1, 0x0D
 lw t2, 0(t1)
 andi t2, t2, 0xff
 mv s1, t2    
 
-# reserved_sectors offset 0x0e-0x0f 2 bytes
+# reserved_sectors offset 0x0e-0x0f 2 bytes (including root sector 0)
 addi t1, a1, 0x0E
 lw t2, 0(t1)
 andi t2, t2, 0xff
@@ -88,13 +93,11 @@ slli t3, t3, 8
 or t2, t2, t3
 mv s2, t2    
 
-
 # num_fats offset 0x10 1 bytes
 addi t1, a1, 0x10
 lw t2, 0(t1)
 andi t2, t2, 0xff
 mv s3, t2  
-
 
 # root_entries offset 0x11-0x12 2 bytes
 addi t1, a1, 0x11
@@ -174,7 +177,7 @@ beq t4, x0, done_entries # 0x00 no more entries in dir
 li t1, 0xE5
 beq t4, t1, next_entry # 0xE5 deleted entry, skip
 
-# attribute at +11
+# attribute at 0x0B(11)
 lw t5, 11(t3)
 li t1, 0x0F
 beq t5, t1, next_entry # 0x0F LFN entry, skip
@@ -182,15 +185,25 @@ beq t5, t1, next_entry # 0x0F LFN entry, skip
 andi t6, t5, 0x08
 bne t6, x0, next_entry # Bit 3 set Volume lable, skip 
 
+# first cluster at 0x1A-0x1B 2 bytes
+# file size at 0x1C-0x1D-0x1E-0x1F 4 bytes
+
 # print 8.3 name
 li a3, 0 # a3 = name char index
 li a6, 8 # a6 = exit char index
+li a7, 0 # name_chars
+li a2, 0x4D55534943202020  # MUSIC___
+
 print_name_loop:
 add a4, t3, a3 # a4 = name char address
 lw a5, 0(a4)   # a5 = name char
 sw a5, 0(t0)
+
+slli a7, a7, 8
+or a7, a7, a5
 addi a3, a3, 1
 blt a3, a6, print_name_loop
+beq a7, a2, find_file
 
 next_entry:
 addi s8, s8, 1
@@ -200,6 +213,11 @@ done_entries:
 li t1, 90  # Z
 sw t1, 0(t0)
 j done_entries
+
+find_file:
+li t1, 89  # Y
+sw t1, 0(t0)
+j find_file
 
 
 # ---  sd_read_sector ---
