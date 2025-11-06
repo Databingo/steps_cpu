@@ -190,7 +190,7 @@ add a4, t3, a3 # a4 = name char address
 lw a5, 0(a4)   # a5 = name char
 sw a5, 0(t0)
 addi a3, a3, 1
-bne a3, a6, print_name_loop
+blt a3, a6, print_name_loop
 
 next_entry:
 addi s8, s8, 1
