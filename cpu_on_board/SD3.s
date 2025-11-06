@@ -142,6 +142,7 @@ jal sd_read_sector
 li t1, 66 # B
 sw t1, 0(t0)     # print
 
+# -- Scan Entries --
 # div
 
 
