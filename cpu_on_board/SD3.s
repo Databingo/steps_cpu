@@ -265,11 +265,55 @@ sw t1, 0(t0) # print
 
 # calculate root_dir_sectors 
 li t1, 32
-mul t2, s4, t1
+mul t4, s4, t1
 addi t3, s0, -1
-add t2, t3, t2
-div t3, t2, s0
+add t4, t3, t4
+div t3, t4, s0
 mv s11, t3 # s11 = root_dir_sectors
+
+
+# ------
+# print rootEntryCnt * 32
+mul t4, s4, t1
+
+li t1, 40  # (
+sw t1, 0(t0) # print
+srli t2, t4, 8
+jal print_hex_b
+mv t2, t4
+jal print_hex_b
+li t1, 41  # )
+sw t1, 0(t0) # print
+
+# ------
+# print  t4 + 512 - 1
+add t4, t4, s0
+addi t4, t4, -1
+
+li t1, 40  # (
+sw t1, 0(t0) # print
+srli t2, t4, 8
+jal print_hex_b
+mv t2, t4
+jal print_hex_b
+li t1, 41  # )
+sw t1, 0(t0) # print
+
+# ------
+# print  t4/s0
+div t4, t4, s0
+
+li t1, 40  # (
+sw t1, 0(t0) # print
+srli t2, t4, 8
+jal print_hex_b
+mv t2, t4
+jal print_hex_b
+li t1, 41  # )
+sw t1, 0(t0) # print
+
+
+
 
 # file_cluster_start_number
 # bytes_per_sector
@@ -280,15 +324,6 @@ mv s11, t3 # s11 = root_dir_sectors
 # {00BD}[0200][40][0200][43FF](7434) 
 # s10     s0   s1  s4    s11
 
-## print t2
-#li t1, 91  # [
-#sw t1, 0(t0) # print
-#srli t2, t2, 8
-#jal print_hex_b
-#mv t2, t2
-#jal print_hex_b
-#li t1, 93  # ]
-#sw t1, 0(t0) # print
 
 # print root_dir_sectors
 li t1, 91  # [
