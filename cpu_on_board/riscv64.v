@@ -256,8 +256,8 @@ module riscv64(
                     // M extension
 		    32'b0000001_?????_?????_000_?????_0110011: re[w_rd] <= $signed(re[w_rs1]) * $signed(re[w_rs2]);  // Mul
                     32'b0000001_?????_?????_001_?????_0110011: re[w_rd] <= ($signed(re[w_rs1]) * $signed(re[w_rs2]))>>>64;//[127:64];  // Mulh 
-                    32'b0000001_?????_?????_100_?????_0110011: re[w_rd] <= (re[w_rs2]==0||(re[w_rs1]==64'h8000_0000_0000_0000 && re[w_rs2] == -1)) ? -1 : $signed(re[w_rs1]) / $signed(re[w_rs2]);  // Div
-                    //32'b0000001_?????_?????_101_?????_0110011: re[w_rd] <= (re[w_rs2]==0) ? -1 : $unsigned(re[w_rs1]) / $unsigned(re[w_rs2]);  // Divu
+                    //32'b0000001_?????_?????_100_?????_0110011: re[w_rd] <= (re[w_rs2]==0||(re[w_rs1]==64'h8000_0000_0000_0000 && re[w_rs2] == -1)) ? -1 : $signed(re[w_rs1]) / $signed(re[w_rs2]);  // Div
+                    32'b0000001_?????_?????_101_?????_0110011: re[w_rd] <= (re[w_rs2]==0) ? -1 : $unsigned(re[w_rs1]) / $unsigned(re[w_rs2]);  // Divu
 
 		    // System-CSR 
 	            32'b???????_?????_?????_001_?????_1110011: begin if (w_rd != 0) re[w_rd] <= csr_read(w_csr); csr_write(w_csr,  re[w_rs1]); end // Csrrw

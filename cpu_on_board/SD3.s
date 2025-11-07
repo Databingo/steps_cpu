@@ -310,7 +310,7 @@ sw t1, 0(t0) # print
 
 # ------
 # print  t4/s0
-div t4, t4, s0
+divu t4, t4, s0
 
 li t1, 40  # (
 sw t1, 0(t0) # print
@@ -327,7 +327,7 @@ li t1, 32
 mul t4, s4, t1
 addi t3, s0, -1
 add t4, t4, t3
-div t3, t4, s0
+divu t3, t4, s0
 mv s11, t3 # s11 = root_dir_sectors
 
 
