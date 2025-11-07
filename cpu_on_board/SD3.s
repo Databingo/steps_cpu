@@ -296,11 +296,15 @@ sw t1, 0(t0) # print
 li t1, 124  # |
 sw t1, 0(t0) # print
 # print  t4
+srli t2, t4, 8
+jal print_hex_b
 mv t2, t4
 jal print_hex_b
 li t1, 124  # |
 sw t1, 0(t0) # print
 # print  s0
+srli t2, s0, 8
+jal print_hex_b
 mv t2, s0
 jal print_hex_b
 li t1, 124  # |
