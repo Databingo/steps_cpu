@@ -237,18 +237,6 @@ or t2, t2, t4
 mv s10, t2   # s10 = file_first_cluster_number
 
 
-# FAT16 Raw Construction
-# ReservedSectors(including root sector 0)|FAT|rootDirectorySectors(entry32bytes*cnt/512=sectores)|Clusters(First cluster is 2)
-# sector0 = initial information
-# root_dir_sector = reserved_sectors + (num_FATs * sectors_per_FAT)
-# RootDirEntry0x1A-0x1B = file's firstClusterNumber(N)
-# DataRegionStart(FirstDataSector) = root_dir_start_sector + root_dir_sectors
-# FirstSectorOfCluster(N)=FirstDataSector + (N - 2) * SectorsPerCluster
-
-
-
-
-
 
 
 
@@ -266,7 +254,7 @@ beq t2, x0, wait_cache
 ret
 
 
-
+# BPB
 #Field,Value
 #Jump Instruction,EB3C90
 #OEM Name,BSD  4.4
@@ -292,7 +280,6 @@ ret
 #Boot Signature,55AA
 
 
-
 #| Entry | Type    | Short Name          | Attribute | Notes                                             |
 #| :---: | :------ | :------------------ | :-------: | :------------------------------------------------ |
 #|   0   | Invalid | –                   |    0x0F   | garbage / deleted LFN                             |
@@ -308,15 +295,13 @@ ret
 #|  10+  | Empty   | —                   |    0x00   | end of directory                                  |
 
 
-# Entry of Root Directory Sector
-#| Offset | Size    | Field             | Description                                           |
-#| ------ | ------- | ----------------- | ----------------------------------------------------- |
-#| `0x00` | 8 bytes | **Name**          | File or directory name (padded with spaces `' '`)     |
-#| `0x08` | 3 bytes | **Extension**     | File extension (padded with spaces `' '`)             |
-#| `0x0B` | 1 byte  | **Attribute**     | File attributes (bits for read-only, directory, etc.) |
-#| `0x1A` | 2 bytes | **First cluster** | Starting cluster number                               |
-#| `0x1C` | 4 bytes | **File size**     | In bytes                                              |
-
+# FAT16 Raw Construction
+# ReservedSectors(including root sector 0)|FAT|rootDirectorySectors(entry32bytes*cnt/512=sectores)|Clusters(First cluster is 2)
+# sector0 = initial information
+# root_dir_sector = reserved_sectors + (num_FATs * sectors_per_FAT)
+# RootDirEntry0x1A-0x1B = file's firstClusterNumber(N)
+# DataRegionStart(FirstDataSector) = root_dir_start_sector + root_dir_sectors
+# FirstSectorOfCluster(N)=FirstDataSector + (N - 2) * SectorsPerCluster
 
 
 
