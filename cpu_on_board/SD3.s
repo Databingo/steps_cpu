@@ -7,36 +7,6 @@
 #`define Sdc_avail 32'h0000_3228
 # UART 0x2004
 
-# FAT File Allocaiton Table
-# ReservedSectors(including root sector 0)|FAT|rootDirectorySectors(entry32bytes*cnt/512=sectores)|Cluster2...(Data first cluster is 2)
-# FirstSectorOfCluster(N)=FirstDataSector + (N - 2) * SectorsPerCluster
-# RootEntry0x1A-0x1B file's firstClusterNumber
-
-# Boot Sector: Sector 0 LBA
-# root_dir_sector = reserved_sectors + (num_FATs * sectors_per_FAT)
-
-# BPB (BIOS Parameter Block) in sector 0
-# offset size FAT16 FAT32 filed 
-# 0x0b 2    512   512   bytes per secter
-# 0x0d 2                sectors per cluster 
-# 0x0e 2    1     32    reserverd sectors
-# 0x10 1    2     2     numbers of FATs
-# 0x11 2    512   0     root entries
-# 0x16 2    9     0     sectors per FAT
-# 0x24 4    0     0x9f0 sectors per FAT (fat32 only)
-# 0x2c                  root cluster (fat32 only)
-# 0x36 8    FAT16 FAT32 FAT label string 
-
-# Entries 32 bytes  FAT16 8.3 format for name.extension
-# offset size meaning 
-# 0x00 8 name 
-# 0x80 3 extension
-# 0x0B 1 attributes
-# 0x0E 2 time last modified
-# 0x10 2 date
-# 0x1A 2 first cluster
-# 0x1C 4 file size bytes
-
 .globl _start
 _start:
 
@@ -72,13 +42,13 @@ andi t3, t3, 0xff
 
 slli t3, t3, 8
 or t2, t2, t3
-mv s0, t2    
+mv s0, t2    # s0 = bytes_per_sector offset 0x0b-0x0c 2 bytes
  
 # sectors per cluster offset 0x0d 1 byte
 addi t1, a1, 0x0D
 lw t2, 0(t1)
 andi t2, t2, 0xff
-mv s1, t2    
+mv s1, t2    # s1 = sectors per cluster offset 0x0d 1 byte
 
 # reserved_sectors offset 0x0e-0x0f 2 bytes (including root sector 0)
 addi t1, a1, 0x0E
@@ -91,13 +61,13 @@ andi t3, t3, 0xff
 
 slli t3, t3, 8
 or t2, t2, t3
-mv s2, t2    
+mv s2, t2    # s2 = reserved_sectors offset 0x0e-0x0f 2 bytes (including root sector 0)
 
 # num_fats offset 0x10 1 bytes
 addi t1, a1, 0x10
 lw t2, 0(t1)
 andi t2, t2, 0xff
-mv s3, t2  
+mv s3, t2  # s3 = num_fats offset 0x10 1 bytes
 
 # root_entries offset 0x11-0x12 2 bytes
 addi t1, a1, 0x11
@@ -110,7 +80,7 @@ andi t3, t3, 0xff
 
 slli t3, t3, 8
 or t2, t2, t3
-mv s4, t2    
+mv s4, t2    # s4 = root_entries offset 0x11-0x12 2 bytes
 
 # sectors_per_fat16 high offset 0x16-0x17 2 bytes
 addi t1, a1, 0x16
@@ -123,14 +93,12 @@ andi t3, t3, 0xff
 
 slli t3, t3, 8
 or t2, t2, t3
-mv s5, t2    
+mv s5, t2    # s5 = sectors_per_fat16 high offset 0x16-0x17 2 bytes
 
-
-# -- Compute Root Dir Start sector
-# root_dir_start_sector = reserved_sectors + (num_fats * sectors_per_fat16) # s2 + s3 * s5
+# root_dir_sector_start = reserved_sectors + (num_fats * sectors_per_fat16)
 mul t4, s3, s5
 add t4, t4, s2
-mv s6, t4     # s6 = root_start_sector
+mv s6, t4     # s6 = root_dir_sector_start
 
 # -- Read Root Dir first sector --
 mv a2, s6
@@ -234,8 +202,28 @@ lw t4, 0(t1)
 andi t4, t4, 0xff
 slli t4, t4, 8
 or t2, t2, t4
-mv s10, t2   # s10 = file_first_cluster_number
+mv s10, t2   # s10 = file_cluster_start_number
 
+
+# s1 = sectors per cluster
+# s2 = reserved_sectors
+# s3 = num_fats
+# s4 = root_entries
+# s5 = sectors_per_fat16
+# s6 = root_dir_sector_start
+# s7 = entries_per_sector (512/32=16)
+# s8 = entry_index
+# s9 = file_size_bytes  
+# s10 = file_cluster_start_number
+
+# root_dir_sector_start = reserved_sectors + (num_FATs * sectors_per_FAT)
+# root_dir_sectors = (RootEntryCount * 32 + BytesPerSector -1 )/ BytesPerSector
+# FirstDataSector = root_dir_sector_start + root_dir_sectors 
+# FirstSectorOfCluster(N)=FirstDataSector + (N - 2) * SectorsPerCluster
+
+# print file's first sector
+# root_dir_sectors
+subi t1, s1, 1
 
 
 
@@ -304,7 +292,6 @@ ret
 # FirstSectorOfCluster(N)=FirstDataSector + (N - 2) * SectorsPerCluster
 
 
-
 # FAT16 Raw Data Layout
 #| Region                     | Description                                                    | Formula / Range                                                     |
 #| :------------------------- | :------------------------------------------------------------- | :------------------------------------------------------------------ |
@@ -336,10 +323,23 @@ ret
 #| `0x24` | —    | (More fields in FAT32 only)     | —                              | —               |
 #| `0x36` | 11   | Volume Label / File System Type | "NO NAME    " / "FAT16   "     | —               |
 
+# BPB (BIOS Parameter Block) in sector 0
+# offset size FAT16 FAT32 filed 
+# 0x0b 2    512   512   bytes per secter
+# 0x0d 2                sectors per cluster 
+# 0x0e 2    1     32    reserverd sectors
+# 0x10 1    2     2     numbers of FATs
+# 0x11 2    512   0     root entries
+# 0x16 2    9     0     sectors per FAT
+# 0x24 4    0     0x9f0 sectors per FAT (fat32 only)
+# 0x2c                  root cluster (fat32 only)
+# 0x36 8    FAT16 FAT32 FAT label string 
+
+
 # Entry Layout(in Root Directory)
 #| Offset | Size | Field                             | Description                  | Example      |
 #| :----- | :--- | :-------------------------------- | :--------------------------- | :----------- |
-#| `0x00` | 8    | **Filename**                      | 8 chars (space padded)       | `"MUSIC   "` |
+#| `0x00` | 8    | **Filename**                      | 8 chars (space padded)       | `"MUSIC   "` | FAT16 8.3 format for name.extension
 #| `0x08` | 3    | **Extension**                     | 3 chars (space padded)       | `"WAV"`      |
 #| `0x0B` | 1    | **Attributes**                    | Bit flags (see below)        | 0x20         |
 #| `0x0C` | 1    | Reserved                          | For Windows NT               | 0            |
