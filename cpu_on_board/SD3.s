@@ -262,7 +262,7 @@ sw t1, 0(t0) # print
 # FirstDataSector = root_dir_sector_start + root_dir_sectors 
 # FirstSectorOfCluster(N)=FirstDataSector + (N - 2) * SectorsPerCluster
 
-#(4030)(0232)(0232)
+#(.4000)(41FF)(0232)
 # ------
 # print RootEntryCount * 32
 li t1, 32
@@ -279,7 +279,7 @@ jal print_hex_b
 li t1, 41  # )
 sw t1, 0(t0) # print
 
-# ------
+# ------ (41ff 16895)
 # print  t6 + 512 - 1
 add t6, t6, s0
 addi t6, t6, -1
@@ -310,11 +310,11 @@ mv s11, t3 # s11 = root_dir_sectors
 # root_entries
 # root_dir_sectors
 # file_first_sector
-# {00BD}[0200][40][0200][43FF](7434) 
+# {00BD}[0200][40][0200][41FF](30E1) 
 # s10     s0   s1  s4    s11
 
 
-# print root_dir_sectors
+# print root_dir_sectors 0x0020
 li t1, 91  # [
 sw t1, 0(t0) # print
 srli t2, s11, 8
@@ -332,7 +332,7 @@ addi t2, s10, -2
 mul t3, t2, s1
 add t6, t1, t3 # t6 = file's first sector
 
-# print file_first_sector
+# print file_first_sector 0x30E1)
 li t1, 40  # (
 sw t1, 0(t0) # print
 srli t2, t6, 8
@@ -341,8 +341,6 @@ mv t2, t6
 jal print_hex_b
 li t1, 41  # )
 sw t1, 0(t0) # print
-
-
 
 # read & print
 mv a2, t6
