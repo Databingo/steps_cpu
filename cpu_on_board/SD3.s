@@ -8,7 +8,7 @@
 # UART 0x2004
 
 # FAT File Allocaiton Table
-# ReservedSectors(including root sector 0)|FAT|rootDirectorySectors(entry32bytes*cnt/512=sectores)|Cluster2...(Data)
+# ReservedSectors(including root sector 0)|FAT|rootDirectorySectors(entry32bytes*cnt/512=sectores)|Cluster2...(Data first cluster is 2)
 # FirstSectorOfCluster(N)=FirstDataSector + (N - 2) * SectorsPerCluster
 # RootEntry0x1A-0x1B file's firstClusterNumber
 
@@ -144,25 +144,6 @@ sw t1, 0(t0)     # print
 srli s7, s0, 5 # s7 = entries_per_sector (512/32=16)
 li s8, 0       # s8 = entry_index
 
-# attribute at 0x0B(11)
-#| Attribute | Meaning               | Example entry        |
-#| :-------: | :-------------------- | :------------------- |
-#|   `0x0F`  | Long file name (LFN)  | `xx xx xx xx ... 0F` |
-#|   `0x20`  | Archive (normal file) | `"MUSIC   WAV"`      |
-#|   `0x10`  | Directory             | `"FOLDER  "`         |
-#|   `0x08`  | Volume label          | `"NO NAME "`         |
-#|   `0x00`  | Unused entry          | empty/deleted        |
-
-#| Bit | Mask   | Meaning          |
-#| --- | ------ | ---------------- |
-#| 0   | `0x01` | Read-only        |
-#| 1   | `0x02` | Hidden           |
-#| 2   | `0x04` | System           |
-#| 3   | `0x08` | **Volume label** |
-#| 4   | `0x10` | Subdirectory     |
-#| 5   | `0x20` | Archive          |
-#| 6   | `0x40` | Device (unused)  |
-#| 7   | `0x80` | Unused           |
 entry_loop:
 bge s8, s7, done_entries
 
@@ -217,7 +198,58 @@ j done_entries
 find_file:
 li t1, 89  # Y
 sw t1, 0(t0)
-j find_file
+#j find_file
+
+# file size at 0x1C-0x1D-0x1E-0x1F 4 bytes
+addi t1, t3, 0x1C
+lw t2, 0(t1)
+andi t2, t2, 0xff
+
+addi t1, t3, 0x1D
+lw t4, 0(t1)
+andi t4, t4, 0xff
+slli t4, t4, 8
+or t2, t2, t4
+
+addi t1, t3, 0x1E
+lw t4, 0(t1)
+andi t4, t4, 0xff
+slli t4, t4, 16
+or t2, t2, t4
+
+addi t1, t3, 0x1F
+lw t4, 0(t1)
+andi t4, t4, 0xff
+slli t4, t4, 24
+or t2, t2, t4
+mv s9, t2   # s9 = file_size_bytes  
+
+# first cluster at 0x1A-0x1B 2 bytes
+addi t1, t3, 0x1A
+lw t2, 0(t1)
+andi t2, t2, 0xff
+
+addi t1, t3, 0x1B
+lw t4, 0(t1)
+andi t4, t4, 0xff
+slli t4, t4, 8
+or t2, t2, t4
+mv s10, t2   # s10 = file_first_cluster_number
+
+
+# FAT16 Raw Construction
+# ReservedSectors(including root sector 0)|FAT|rootDirectorySectors(entry32bytes*cnt/512=sectores)|Clusters(First cluster is 2)
+# sector0 = initial information
+# root_dir_sector = reserved_sectors + (num_FATs * sectors_per_FAT)
+# RootDirEntry0x1A-0x1B = file's firstClusterNumber(N)
+# DataRegionStart(FirstDataSector) = root_dir_start_sector + root_dir_sectors
+# FirstSectorOfCluster(N)=FirstDataSector + (N - 2) * SectorsPerCluster
+
+
+
+
+
+
 
 
 # ---  sd_read_sector ---
@@ -284,3 +316,105 @@ ret
 #| `0x0B` | 1 byte  | **Attribute**     | File attributes (bits for read-only, directory, etc.) |
 #| `0x1A` | 2 bytes | **First cluster** | Starting cluster number                               |
 #| `0x1C` | 4 bytes | **File size**     | In bytes                                              |
+
+
+
+
+# FAT16 Raw Data Layout
+#| Region                     | Description                                                    | Formula / Range                                                     |
+#| :------------------------- | :------------------------------------------------------------- | :------------------------------------------------------------------ |
+#| **Boot Sector (BPB)**      | Sector 0 — contains BIOS Parameter Block (filesystem metadata) | Sector 0                                                            |
+#| **Reserved Sectors**       | Includes boot sector + any reserved sectors                    | 0 → (ReservedSectors − 1)                                           |
+#| **FAT Region**             | Contains cluster chain tables                                  | `ReservedSectors → ReservedSectors + (NumFATs * SectorsPerFAT) − 1` |
+#| **Root Directory Region**  | Contains fixed 32-byte directory entries                       | `RootDirStartSector = ReservedSectors + (NumFATs * SectorsPerFAT)`  |
+#| **Data Region (Clusters)** | File and directory data stored here                            | `DataRegionStart = RootDirStartSector + RootDirSectors`             |
+
+#RootDirSectors = RootEntries * 32 /BytesPerSector
+
+# Sector 0 Layout # BPB (BIOS Parameter Block) in sector 0
+#| Offset | Size | Field                           | Meaning                        | Example (FAT16) |
+#| :----- | :--- | :------------------------------ | :----------------------------- | :-------------- |
+#| `0x00` | 3    | Jump Instruction                | JMP to boot code               | EB 3C 90        |
+#| `0x03` | 8    | OEM Name                        | Text label                     | "MSDOS5.0"      |
+#| `0x0B` | 2    | **Bytes per sector**            | Usually 512                    | 0x0200          |
+#| `0x0D` | 1    | **Sectors per cluster**         | Cluster size (e.g. 1,2,4,8,16) | 1               |
+#| `0x0E` | 2    | **Reserved sectors**            | Includes boot sector           | 1               |
+#| `0x10` | 1    | **Number of FATs**              | Typically 2                    | 2               |
+#| `0x11` | 2    | **Root entries**                | Count of directory entries     | 512             |
+#| `0x13` | 2    | **Total sectors (16-bit)**      | If zero, use 0x20–0x23         | 2880            |
+#| `0x15` | 1    | **Media descriptor**            | 0xF8 (fixed disk)              | F8              |
+#| `0x16` | 2    | **Sectors per FAT**             | FAT size                       | 9               |
+#| `0x18` | 2    | **Sectors per track**           | BIOS info                      | 18              |
+#| `0x1A` | 2    | **Number of heads**             | BIOS info                      | 2               |
+#| `0x1C` | 4    | **Hidden sectors**              | Partition offset               | 0               |
+#| `0x20` | 4    | **Total sectors (32-bit)**      | Large volumes                  | 0               |
+#| `0x24` | —    | (More fields in FAT32 only)     | —                              | —               |
+#| `0x36` | 11   | Volume Label / File System Type | "NO NAME    " / "FAT16   "     | —               |
+
+# Entry Layout(in Root Directory)
+#| Offset | Size | Field                             | Description                  | Example      |
+#| :----- | :--- | :-------------------------------- | :--------------------------- | :----------- |
+#| `0x00` | 8    | **Filename**                      | 8 chars (space padded)       | `"MUSIC   "` |
+#| `0x08` | 3    | **Extension**                     | 3 chars (space padded)       | `"WAV"`      |
+#| `0x0B` | 1    | **Attributes**                    | Bit flags (see below)        | 0x20         |
+#| `0x0C` | 1    | Reserved                          | For Windows NT               | 0            |
+#| `0x0D` | 1    | Creation time (tenths)            | Optional                     | —            |
+#| `0x0E` | 2    | Creation time                     | —                            | —            |
+#| `0x10` | 2    | Creation date                     | —                            | —            |
+#| `0x12` | 2    | Last access date                  | —                            | —            |
+#| `0x14` | 2    | High word of cluster (FAT32 only) | —                            | —            |
+#| `0x16` | 2    | Last modified time                | —                            | —            |
+#| `0x18` | 2    | Last modified date                | —                            | —            |
+#| `0x1A` | 2    | **First cluster (low word)**      | Cluster number (starts at 2) | 0x0002       |
+#| `0x1C` | 4    | **File size (bytes)**             | File length                  | 4096         |
+
+# Attribute at 0x0B(11)
+#| Attribute | Meaning               | Example entry        |
+#| :-------: | :-------------------- | :------------------- |
+#|   `0x0F`  | Long file name (LFN)  | `xx xx xx xx ... 0F` |
+#|   `0x20`  | Archive (normal file) | `"MUSIC   WAV"`      |
+#|   `0x10`  | Directory             | `"FOLDER  "`         |
+#|   `0x08`  | Volume label          | `"NO NAME "`         |
+#|   `0x00`  | Unused entry          | empty/deleted        |
+
+# Attribute Type Bits(0x0B)
+#| Bit | Mask | Meaning               |
+#| :-- | :--- | :-------------------- |
+#| 0   | 0x01 | Read-only             |
+#| 1   | 0x02 | Hidden                |
+#| 2   | 0x04 | System                |
+#| 3   | 0x08 | Volume label          |
+#| 4   | 0x10 | Subdirectory          |
+#| 5   | 0x20 | Archive (normal file) |
+#| 6   | 0x40 | Device (unused)       |
+#| 7   | 0x80 | Unused                |
+
+# FAT Table(Cluster->NextCluster Map) Each entry (2 bytes) in FAT corresponds to one cluster in the data area.
+#|No| Next Cluster      | Meaning of FAT entry (16-bit value) |
+#|- | :---------------- | :---------------------------------- |
+#|0 | `0x0000`          | Reserved Media description          |
+#|1 | `0x0000`          | Reserved                            |
+#|x | `0x0002`          | First uasble cluster                |
+#|2 | `0x0003`          | Second uasble cluster               |
+#|4.| `0x0004`–`0xFFEF` | Next cluster number in chain        |
+#|x | `0xFFF0`–`0xFFF6` | Reserved values                     |
+#|x | `0xFFF7`          | Bad cluster                         |
+#|x | `0xFFF8`–`0xFFFF` | End of file (EOF marker)            |
+
+# FATEntryOffset = N * 2
+# Which sector contained this FAT entry:
+# FATSector = ReservedSectors + (FATEntryOffset / BytesPerSector)
+# OffsetInSector = FATEntryOffset % BytesPerSector
+
+# root_dir_sector_start = reserved_sectors + (num_FATs * sectors_per_FAT)
+# root_dir_sectors = RootEntryCount * 32 + BytesPerSector -1 )/ BytesPerSector
+# FirstDataSector = root_dir_sector_start + root_dir_sectors 
+# FirstSectorOfCluster(N)=FirstDataSector + (N - 2) * SectorsPerCluster
+
+
+
+
+
+
+
+
