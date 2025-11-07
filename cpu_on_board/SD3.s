@@ -263,17 +263,10 @@ sw t1, 0(t0) # print
 # FirstDataSector = root_dir_sector_start + root_dir_sectors 
 # FirstSectorOfCluster(N)=FirstDataSector + (N - 2) * SectorsPerCluster
 
-# calculate root_dir_sectors 
-li t1, 32
-mul t4, s4, t1
-addi t3, s0, -1
-add t4, t3, t4
-div t3, t4, s0
-mv s11, t3 # s11 = root_dir_sectors
-
-
+#(4030)(0232)(0232)
 # ------
-# print rootEntryCnt * 32
+# print RootEntryCount * 32
+li t1, 32
 mul t4, s4, t1
 
 li t1, 40  # (
@@ -312,6 +305,14 @@ jal print_hex_b
 li t1, 41  # )
 sw t1, 0(t0) # print
 
+
+# calculate root_dir_sectors 
+li t1, 32
+mul t4, s4, t1
+addi t3, s0, -1
+add t4, t4, t3
+div t3, t4, s0
+mv s11, t3 # s11 = root_dir_sectors
 
 
 
