@@ -292,6 +292,22 @@ jal print_hex_b
 li t1, 41  # )
 sw t1, 0(t0) # print
 
+# ------ t4, s0
+li t1, 124  # |
+sw t1, 0(t0) # print
+# print  t4
+mv t2, t4
+jal print_hex_b
+li t1, 124  # |
+sw t1, 0(t0) # print
+# print  s0
+mv t2, s0
+jal print_hex_b
+li t1, 124  # |
+sw t1, 0(t0) # print
+
+
+
 # ------
 # print  t4/s0
 div t4, t4, s0
