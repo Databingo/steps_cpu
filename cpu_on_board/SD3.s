@@ -208,10 +208,12 @@ mv s10, t2   # s10 = file_cluster_start_number
 
 li t1, 123  # {
 sw t1, 0(t0)
-mv a0, s10
-jal print_bin_f
-srli a0, a0, 8
-jal print_bin_f
+
+mv t2, s10
+jal print_hex_b
+srli t2, t2, 8
+jal print_hex_b
+
 li t1, 125  # }
 sw t1, 0(t0)
 
@@ -480,33 +482,43 @@ ret
 
 
 
-# print_hex_of_byte(a0)
-#lw t2, 0(a4)           # load byte at 0x3000 a1+t1
-#andi t2, t2, 0xFF   # Isolate byte value
-#
-#
-#srli t3, t2, 4      # get high nibble
-#slti t5, t3, 10     # if < 10 number
-#beq t5, x0, letter_h
-#addi t3, t3, 48     # 0 is "0" ascii 48
-#j print_h_hex
-#letter_h:
-#addi t3, t3, 55     # 10 is "A" ascii 65 ..
-#print_h_hex:
-#sw t3, 0(t0)
-#
-#
-#andi t4, t2, 0x0F      # get low nibble
-#slti t5, t4, 10     # if < 10 number
-#beq t5, x0, letter_l
-#addi t4, t4, 48     # 0 is "0" ascii 48
-#j print_l_hex
-#letter_l:
-#addi t4, t4, 55        # 10 is "A" ascii 65 ..
-#print_l_hex:
-#sw t4, 0(t0)
+# print_hex_b(t2)
+print_hex_b:
+andi t2, t2, 0xFF   # Isolate byte value
+
+srli t3, t2, 4      # get high nibble
+slti t5, t3, 10     # if < 10 number
+beq t5, x0, letter_h
+addi t3, t3, 48     # 0 is "0" ascii 48
+j print_h_hex
+letter_h:
+addi t3, t3, 55     # 10 is "A" ascii 65 ..
+print_h_hex:
+sw t3, 0(t0)
+
+andi t4, t2, 0x0F      # get low nibble
+slti t5, t4, 10     # if < 10 number
+beq t5, x0, letter_l
+addi t4, t4, 48     # 0 is "0" ascii 48
+j print_l_hex
+letter_l:
+addi t4, t4, 55        # 10 is "A" ascii 65 ..
+print_l_hex:
+sw t4, 0(t0)
+ret
 
 
 
 # raw root_dir_sector_start:
 #42300030000000FFFFFFFF0F0021FFFFFFFFFFFFFFFFFFFFFFFF0000FFFFFFFF012E00530070006F0074000F00216C0069006700680074002D0000005600310053504F544C497E312020201200591AA44E5B4E5B00001AA44E5B020000000000412E0066007300650076000F00DA65006E0074007300640000000000FFFFFFFF46534556454E7E3120202012009B7AA6625B625B00007AA6625B0400000000004D555349432020205741562018277D924E5B625B00007D924E5BBD00C4E10F00412E005F006D00750073000F004C690063002E0077006100760000000000FFFF5F4D5553497E31205741562200280CB24F5B625B00000CB24F5BBC0000100000412E0054007200610073000F00256800650073000000FFFFFFFF0000FFFFFFFF5452415348457E312020201200BBE1B14F5B4F5B0000E1B14F5B1B0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000B00�
+#| Offset | Bytes                     | Meaning                                              |
+#| ------ | ------------------------- | ---------------------------------------------------- |
+#| 00–07  | `4D 55 53 49 43 20 20 20` | “MUSIC   ”                                           |
+#| 08–0A  | `57 41 56`                | “WAV”                                                |
+#| 0B     | `20`                      | Attribute 0x20 → normal file                         |
+#| 0C–0D  | `18 27`                   | creation time/date (not relevant now)                |
+#| 1A–1B  | `BD 00`                   | **First cluster = 0x00BD = 189** ✅                   |
+#| 1C–1F  | `C4 E1 0F 00`             | **File size = 0x000FE1C4 = 651,076 bytes (~636 KB)** |
+
+
+
