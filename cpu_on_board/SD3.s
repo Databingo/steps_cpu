@@ -103,6 +103,7 @@ mv s6, t4     # s6 = root_dir_sector_start
 # -- Read Root Dir first sector --
 mv a2, s6
 jal sd_read_sector
+jal print_sector
 
 li t1, 66 # B
 sw t1, 0(t0)     # print
@@ -203,6 +204,11 @@ andi t4, t4, 0xff
 slli t4, t4, 8
 or t2, t2, t4
 mv s10, t2   # s10 = file_cluster_start_number
+
+li t1, 124  # |
+sw t1, 0(t0)
+sw s10, 0(t0)
+
 
 
 # s0 = bytes_per_sector
@@ -420,7 +426,6 @@ ret
 
 
 
-
 print_sector:
 # print sector 0 512 bytes
 li t1, 0   # byte index
@@ -451,4 +456,5 @@ addi t4, t4, 55        # 10 is "A" ascii 65 ..
 print_l_hex:
 sw t4, 0(t0)
 bge t6, t1, print_loop
+ret
 # -- end print_sector --
