@@ -205,9 +205,12 @@ slli t4, t4, 8
 or t2, t2, t4
 mv s10, t2   # s10 = file_cluster_start_number
 
-li t1, 124  # |
+li t1, 123  # {
 sw t1, 0(t0)
-sw s10, 0(t0)
+mv a0, s10
+jal print_bin_f
+li t1, 125  # }
+sw t1, 0(t0)
 
 
 
@@ -458,3 +461,16 @@ sw t4, 0(t0)
 bge t6, t1, print_loop
 ret
 # -- end print_sector --
+
+
+# funciton print_bin(a0) print 8 bits of a0 at t0 UART
+print_bin_f:
+li t1, 8 # number of bits
+print_binf_loop:
+addi t1, t1, -1
+srl t2, a0, t1
+andi t2, t2, 1
+addi t2, t2, 48  # 0 to "0"
+sw t2, 0(t0)     # print
+bne t1, x0, print_binf_loop
+ret
