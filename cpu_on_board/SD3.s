@@ -44,7 +44,7 @@ slli t3, t3, 8
 or t2, t2, t3
 mv s0, t2    # s0 = bytes_per_sector offset 0x0b-0x0c 2 bytes
  
-# sectors per cluster offset 0x0d 1 byte
+# sectors_per_cluster offset 0x0d 1 byte
 addi t1, a1, 0x0D
 lw t2, 0(t1)
 andi t2, t2, 0xff
@@ -219,7 +219,7 @@ sw t1, 0(t0) # print
 
 
 # s0 = bytes_per_sector
-# s1 = sectors per cluster
+# s1 = sectors_per_cluster
 # s2 = reserved_sectors
 # s3 = num_fats
 # s4 = root_entries
@@ -230,6 +230,35 @@ sw t1, 0(t0) # print
 # s9 = file_size_bytes  
 # s10 = file_cluster_start_number
 # s11 = root_dir_sectors
+
+# print bytes_per_sector
+li t1, 91  # [
+sw t1, 0(t0) # print
+srli t2, s0, 8
+jal print_hex_b
+mv t2, s0
+jal print_hex_b
+li t1, 93  # ]
+sw t1, 0(t0) # print
+
+# print  sectors_per_cluster
+li t1, 91  # [
+sw t1, 0(t0) # print
+mv t2, s1
+jal print_hex_b
+li t1, 93  # ]
+sw t1, 0(t0) # print
+
+# print root_entries
+li t1, 91  # [
+sw t1, 0(t0) # print
+srli t2, s4, 8
+jal print_hex_b
+mv t2, s4
+jal print_hex_b
+li t1, 93  # ]
+sw t1, 0(t0) # print
+
 
 # root_dir_sector_start = reserved_sectors + (num_FATs * sectors_per_FAT)
 # root_dir_sectors = (RootEntryCount * 32 + BytesPerSector -1 )/ BytesPerSector
@@ -244,6 +273,16 @@ addi t2, t2, -1
 div t3, t2, s0
 mv s11, t3 # s11 = root_dir_sectors
 
+# print root_dir_sectors
+li t1, 91  # [
+sw t1, 0(t0) # print
+srli t2, s11, 8
+jal print_hex_b
+mv t2, s11
+jal print_hex_b
+li t1, 93  # ]
+sw t1, 0(t0) # print
+
 # calculate first data sector
 add t1, s6, s11
 
@@ -253,13 +292,13 @@ mul t3, t2, s1
 add t4, t1, t3 # t4 = file's first sector
 
 # print file first sector
-li t1, 123  # {
+li t1, 40  # (
 sw t1, 0(t0) # print
+srli t2, t4, 8
+jal print_hex_b
 mv t2, t4
 jal print_hex_b
-srli t2, t2, 8
-jal print_hex_b
-li t1, 125  # }
+li t1, 41  # )
 sw t1, 0(t0) # print
 
 
