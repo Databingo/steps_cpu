@@ -78,5 +78,9 @@ addi t4, t4, 55        # 10 is "A" ascii 65 ..
 print_l_hex:
 sw t4, 0(t0)
 
-
 bge t6, t1, print_loop
+
+
+
+
+

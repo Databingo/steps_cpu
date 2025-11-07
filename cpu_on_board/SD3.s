@@ -262,7 +262,7 @@ sw t1, 0(t0) # print
 # FirstDataSector = root_dir_sector_start + root_dir_sectors 
 # FirstSectorOfCluster(N)=FirstDataSector + (N - 2) * SectorsPerCluster
 
-#(.4000)(41FF)(0232)
+#(.4000)(41FF)()
 # ------
 # print RootEntryCount * 32
 li t1, 32
@@ -345,7 +345,10 @@ sw t1, 0(t0) # print
 # read & print
 mv a2, t6
 jal sd_read_sector
-j print_sector
+jal print_sector
+
+done:
+j done
 
 
 
@@ -629,3 +632,38 @@ ret
 # file first sector
 # {00BD}[0200][40][0200][43FF](7434) 
 
+
+#sudo dd if=/dev/disk2 bs=512 skip=12513 count=1 |hexdump -C
+#512 bytes transferred in 0.001376 secs (372116 bytes/sec)
+#00000000  52 49 46 46 bc e1 0f 00  57 41 56 45 66 6d 74 20  |RIFF....WAVEfmt |
+#00000010  10 00 00 00 01 00 02 00  44 ac 00 00 10 b1 02 00  |........D.......|
+#00000020  04 00 10 00 64 61 74 61  98 e1 0f 00 3d f7 fb f6  |....data....=...|
+#00000030  f7 f7 3e f7 b7 f8 83 f7  7b f9 cc f7 3e fa 1c f8  |..>.....{...>...|
+#00000040  fd fa 74 f8 b5 fb d5 f8  62 fc 45 f9 ff fc c6 f9  |..t.....b.E.....|
+#00000050  8a fd 5a fa 05 fe fb fa  71 fe a2 fb d0 fe 49 fc  |..Z.....q.....I.|
+#00000060  25 ff e8 fc 76 ff 78 fd  cc ff f3 fd 2d 00 58 fe  |%...v.x.....-.X.|
+#00000070  9c 00 a9 fe 19 01 e8 fe  a6 01 18 ff 44 02 42 ff  |............D.B.|
+#00000080  f0 02 6d ff a1 03 a2 ff  53 04 e5 ff 04 05 38 00  |..m.....S.....8.|
+#00000090  ad 05 9b 00 49 06 0b 01  d5 06 85 01 51 07 01 02  |....I.......Q...|
+#000000a0  c1 07 7d 02 24 08 f9 02  7a 08 74 03 c3 08 ec 03  |..}.$...z.t.....|
+#000000b0  ff 08 64 04 2c 09 e0 04  49 09 60 05 59 09 e2 05  |..d.,...I.`.Y...|
+#000000c0  60 09 63 06 5e 09 e1 06  53 09 58 07 41 09 c2 07  |`.c.^...S.X.A...|
+#000000d0  2b 09 1a 08 14 09 5d 08  f9 08 8c 08 da 08 aa 08  |+.....].........|
+#000000e0  b8 08 b7 08 94 08 b5 08  6b 08 a7 08 3d 08 95 08  |........k...=...|
+#000000f0  0a 08 82 08 d3 07 71 08  97 07 64 08 56 07 5d 08  |......q...d.V.].|
+#00000100  12 07 5f 08 cb 06 6a 08  7d 06 7c 08 26 06 95 08  |.._...j.}.|.&...|
+#00000110  c7 05 b5 08 5f 05 d9 08  e9 04 f8 08 5f 04 0b 09  |...._......._...|
+#00000120  bf 03 0d 09 0a 03 fb 08  3c 02 ce 08 55 01 80 08  |........<...U...|
+#00000130  56 00 08 08 49 ff 64 07  36 fe 93 06 26 fd 92 05  |V...I.d.6...&...|
+#00000140  1f fc 62 04 2a fb 06 03  52 fa 84 01 9b f9 e6 ff  |..b.*...R.......|
+#00000150  08 f9 3a fe 97 f8 8e fc  47 f8 f0 fa 12 f8 6b f9  |..:.....G.....k.|
+#00000160  ef f7 0a f8 d6 f7 d4 f6  bc f7 ce f5 98 f7 f9 f4  |................|
+#00000170  68 f7 51 f4 29 f7 d1 f3  da f6 73 f3 80 f6 2f f3  |h.Q.).....s.../.|
+#00000180  22 f6 01 f3 ca f5 e5 f2  7e f5 db f2 41 f5 e5 f2  |".......~...A...|
+#00000190  16 f5 ff f2 05 f5 2c f3  10 f5 6d f3 37 f5 c2 f3  |......,...m.7...|
+#000001a0  76 f5 26 f4 c9 f5 94 f4  30 f6 08 f5 ac f6 81 f5  |v.&.....0.......|
+#000001b0  37 f7 f9 f5 ce f7 6b f6  69 f8 d5 f6 08 f9 37 f7  |7.....k.i.....7.|
+#000001c0  a6 f9 96 f7 3e fa f6 f7  cb fa 5d f8 4a fb d2 f8  |....>.....].J...|
+#000001d0  b9 fb 58 f9 19 fc ef f9  67 fc 97 fa a0 fc 49 fb  |..X.....g.....I.|
+#000001e0  c5 fc 01 fc db fc b8 fc  e8 fc 67 fd f5 fc 09 fe  |..........g.....|
+#000001f0  07 fd 9c fe 27 fd 21 ff  58 fd 9b ff 9d fd 0c 00  |....'.!.X.......|
