@@ -280,15 +280,15 @@ mv s11, t3 # s11 = root_dir_sectors
 # {00BD}[0200][40][0200][43FF](7434) 
 # s10     s0   s1  s4    s11
 
-# print t2
-li t1, 91  # [
-sw t1, 0(t0) # print
-srli t2, t2, 8
-jal print_hex_b
-mv t2, t2
-jal print_hex_b
-li t1, 93  # ]
-sw t1, 0(t0) # print
+## print t2
+#li t1, 91  # [
+#sw t1, 0(t0) # print
+#srli t2, t2, 8
+#jal print_hex_b
+#mv t2, t2
+#jal print_hex_b
+#li t1, 93  # ]
+#sw t1, 0(t0) # print
 
 # print root_dir_sectors
 li t1, 91  # [
