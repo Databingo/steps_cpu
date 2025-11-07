@@ -257,7 +257,6 @@ jal print_hex_b
 li t1, 93  # ]
 sw t1, 0(t0) # print
 
-
 # root_dir_sector_start = reserved_sectors + (num_FATs * sectors_per_FAT)
 # root_dir_sectors = (RootEntryCount * 32 + BytesPerSector -1 )/ BytesPerSector
 # FirstDataSector = root_dir_sector_start + root_dir_sectors 
@@ -284,40 +283,6 @@ sw t1, 0(t0) # print
 # print  t4 + 512 - 1
 add t4, t4, s0
 addi t4, t4, -1
-
-li t1, 40  # (
-sw t1, 0(t0) # print
-srli t2, t4, 8
-jal print_hex_b
-mv t2, t4
-jal print_hex_b
-li t1, 41  # )
-sw t1, 0(t0) # print
-
-# ------ t4, s0
-mul t4, s4, t1
-li t1, 124  # |
-sw t1, 0(t0) # print
-# print  t4
-srli t2, t4, 8
-jal print_hex_b
-mv t2, t4
-jal print_hex_b
-li t1, 124  # |
-sw t1, 0(t0) # print
-# print  s0
-srli t2, s0, 8
-jal print_hex_b
-mv t2, s0
-jal print_hex_b
-li t1, 124  # |
-sw t1, 0(t0) # print
-
-
-
-# ------
-# print  t4/s0
-divu t4, t4, s0
 
 li t1, 40  # (
 sw t1, 0(t0) # print
@@ -604,6 +569,9 @@ andi t2, t2, 1
 addi t2, t2, 48  # 0 to "0"
 sw t2, 0(t0)     # print
 bne t1, x0, print_binf_loop
+# clean middle re
+addi t1, x0, 0
+addi t2, x0, 0
 ret
 
 
@@ -631,6 +599,11 @@ letter_l:
 addi t4, t4, 55        # 10 is "A" ascii 65 ..
 print_l_hex:
 sw t4, 0(t0)
+
+# clean middle re
+addi t3, x0, 0
+addi t4, x0, 0
+addi t5, x0, 0
 ret
 
 
