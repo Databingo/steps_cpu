@@ -266,8 +266,8 @@ sw t1, 0(t0) # print
 # calculate root_dir_sectors 
 li t1, 32
 mul t2, s4, t1
-add t2, t2, s0
-addi t2, t2, -1
+addi t3, s0, -1
+add t2, t3, t2
 div t3, t2, s0
 mv s11, t3 # s11 = root_dir_sectors
 
