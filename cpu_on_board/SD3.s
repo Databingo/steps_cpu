@@ -216,21 +216,25 @@ mv s10, t2   # s10 = file_cluster_start_number
 # s8 = entry_index
 # s9 = file_size_bytes  
 # s10 = file_cluster_start_number
+# s11 = root_dir_sectors
 
 # root_dir_sector_start = reserved_sectors + (num_FATs * sectors_per_FAT)
 # root_dir_sectors = (RootEntryCount * 32 + BytesPerSector -1 )/ BytesPerSector
 # FirstDataSector = root_dir_sector_start + root_dir_sectors 
 # FirstSectorOfCluster(N)=FirstDataSector + (N - 2) * SectorsPerCluster
 
-addi t1, s1, -1
-li t5, 32
-mul t2, s4, t5
-add t3, t1, t2
-div t4, t3, s0
-mv s11, t4 # s11 = root_dir_sectors
+# calculate root_dir_sectors 
+li t1, 32
+mul t2, s4, t1
+add t2, t2, s0
+addi t2, t2, -1
+div t3, t2, s0
+mv s11, t3 # s11 = root_dir_sectors
+
+# calculate first data sector
+add t1, s6, s11
 
 # calculate file's first sector
-add t1, s6, s11
 addi t2, s10, -2
 mul t3, t2, s1
 add t4, t1, t3 # t4 = file's first sector
