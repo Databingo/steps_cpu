@@ -266,29 +266,29 @@ sw t1, 0(t0) # print
 # ------
 # print RootEntryCount * 32
 li t1, 32
-mul t4, s4, t1
+mul t6, s4, t1
 
 li t1, 40  # (
 sw t1, 0(t0) # print
 li t1, 46  # .
 sw t1, 0(t0) # print
-srli t2, t4, 8
+srli t2, t6, 8
 jal print_hex_b
-mv t2, t4
+mv t2, t6
 jal print_hex_b
 li t1, 41  # )
 sw t1, 0(t0) # print
 
 # ------
-# print  t4 + 512 - 1
-add t4, t4, s0
-addi t4, t4, -1
+# print  t6 + 512 - 1
+add t6, t6, s0
+addi t6, t6, -1
 
 li t1, 40  # (
 sw t1, 0(t0) # print
-srli t2, t4, 8
+srli t2, t6, 8
 jal print_hex_b
-mv t2, t4
+mv t2, t6
 jal print_hex_b
 li t1, 41  # )
 sw t1, 0(t0) # print
@@ -330,14 +330,14 @@ add t1, s6, s11
 # calculate file_first_sector
 addi t2, s10, -2
 mul t3, t2, s1
-add t4, t1, t3 # t4 = file's first sector
+add t6, t1, t3 # t6 = file's first sector
 
 # print file_first_sector
 li t1, 40  # (
 sw t1, 0(t0) # print
-srli t2, t4, 8
+srli t2, t6, 8
 jal print_hex_b
-mv t2, t4
+mv t2, t6
 jal print_hex_b
 li t1, 41  # )
 sw t1, 0(t0) # print
@@ -345,7 +345,7 @@ sw t1, 0(t0) # print
 
 
 # read & print
-mv a2, t4
+mv a2, t6
 jal sd_read_sector
 j print_sector
 
