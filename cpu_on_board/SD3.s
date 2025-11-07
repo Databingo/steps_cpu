@@ -153,7 +153,7 @@ slli a7, a7, 8
 or a7, a7, a5
 addi a3, a3, 1
 blt a3, a6, print_name_loop
-beq a7, a2, find_file
+beq a7, a2, find_file_entry
 
 next_entry:
 addi s8, s8, 1
@@ -164,7 +164,7 @@ li t1, 90  # Z
 sw t1, 0(t0)
 j done_entries
 
-find_file:
+find_file_entry:
 li t1, 89  # Y
 sw t1, 0(t0)
 #j find_file
@@ -206,16 +206,15 @@ slli t4, t4, 8
 or t2, t2, t4
 mv s10, t2   # s10 = file_cluster_start_number
 
+# print file_cluster_start_number
 li t1, 123  # {
-sw t1, 0(t0)
-
+sw t1, 0(t0) # print
 mv t2, s10
 jal print_hex_b
 srli t2, t2, 8
 jal print_hex_b
-
 li t1, 125  # }
-sw t1, 0(t0)
+sw t1, 0(t0) # print
 
 
 
@@ -252,6 +251,18 @@ add t1, s6, s11
 addi t2, s10, -2
 mul t3, t2, s1
 add t4, t1, t3 # t4 = file's first sector
+
+# print file first sector
+li t1, 123  # {
+sw t1, 0(t0) # print
+mv t2, t4
+jal print_hex_b
+srli t2, t2, 8
+jal print_hex_b
+li t1, 125  # }
+sw t1, 0(t0) # print
+
+
 
 # read & print
 mv a2, t4
@@ -517,7 +528,7 @@ ret
 #| 08–0A  | `57 41 56`                | “WAV”                                                |
 #| 0B     | `20`                      | Attribute 0x20 → normal file                         |
 #| 0C–0D  | `18 27`                   | creation time/date (not relevant now)                |
-#| 1A–1B  | `BD 00`                   | **First cluster = 0x00BD = 189** ✅                   |
+#| 1A–1B  | `BD 00`                   | **First cluster = 0x00BD = 189 = 10111101 **         |
 #| 1C–1F  | `C4 E1 0F 00`             | **File size = 0x000FE1C4 = 651,076 bytes (~636 KB)** |
 
 
