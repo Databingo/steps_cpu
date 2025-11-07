@@ -271,6 +271,8 @@ mul t4, s4, t1
 
 li t1, 40  # (
 sw t1, 0(t0) # print
+li t1, 46  # .
+sw t1, 0(t0) # print
 srli t2, t4, 8
 jal print_hex_b
 mv t2, t4
@@ -293,6 +295,7 @@ li t1, 41  # )
 sw t1, 0(t0) # print
 
 # ------ t4, s0
+mul t4, s4, t1
 li t1, 124  # |
 sw t1, 0(t0) # print
 # print  t4
