@@ -582,22 +582,22 @@ andi t2, t2, 0xFF   # Isolate byte value
 
 srli t3, t2, 4      # get high nibble
 slti t5, t3, 10     # if < 10 number
-beq t5, x0, letter_h
+beq t5, x0, letterh
 addi t3, t3, 48     # 0 is "0" ascii 48
-j print_h_hex
-letter_h:
+j print_hhex
+letterh:
 addi t3, t3, 55     # 10 is "A" ascii 65 ..
-print_h_hex:
+print_hhex:
 sw t3, 0(t0)
 
 andi t4, t2, 0x0F      # get low nibble
 slti t5, t4, 10     # if < 10 number
-beq t5, x0, letter_l
+beq t5, x0, letterl
 addi t4, t4, 48     # 0 is "0" ascii 48
-j print_l_hex
-letter_l:
+j print_lhex
+letterl:
 addi t4, t4, 55        # 10 is "A" ascii 65 ..
-print_l_hex:
+print_lhex:
 sw t4, 0(t0)
 
 # clean middle re
