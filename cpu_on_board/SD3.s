@@ -103,7 +103,7 @@ mv s6, t4     # s6 = root_dir_sector_start
 # -- Read Root Dir first sector --
 mv a2, s6
 jal sd_read_sector
-#jal print_sector
+jal print_sector
 
 li t1, 66 # B
 sw t1, 0(t0)     # print
@@ -342,50 +342,10 @@ jal print_hex_b
 li t1, 41  # )
 sw t1, 0(t0) # print
 
-## make big-endian of 0x30E1
-#srli t2, t6, 8
-#andi t2, t2, 0xff
-#slli t3, t6, 8
-#andi t3, t3, 0xff00
-#or t4, t3, t2
-
-# read & print
+# read & print file_first_sector 
 mv a2, t6
 jal sd_read_sector
-#jal print_sector
-
-li t1, 0   # byte index
-li t2, 0
-li t3, 0
-li t4, 0
-li t5, 0
-li t6, 511 # max byte index
-print_loop:
-li a3, 32     # space 
-sw a3, 0(t0)  # print start space per byte
-add a4, a1, t1 
-addi t1, t1, 1
-lw t2, 0(a4)           # load byte at 0x3000 a1+t1
-andi t2, t2, 0xFF   # Isolate byte value
-srli t3, t2, 4      # get high nibble
-slti t5, t3, 10     # if < 10 number
-beq t5, x0, letter_h
-addi t3, t3, 48     # 0 is "0" ascii 48
-j print_h_hex
-letter_h:
-addi t3, t3, 55     # 10 is "A" ascii 65 ..
-print_h_hex:
-sw t3, 0(t0)
-andi t4, t2, 0x0F      # get low nibble
-slti t5, t4, 10     # if < 10 number
-beq t5, x0, letter_l
-addi t4, t4, 48     # 0 is "0" ascii 48
-j print_l_hex
-letter_l:
-addi t4, t4, 55        # 10 is "A" ascii 65 ..
-print_l_hex:
-sw t4, 0(t0)
-bge t6, t1, print_loop
+jal print_sector
 
 
 
@@ -563,8 +523,8 @@ ret
 
 
 
-print_sector:
 # print sector 0 512 bytes
+print_sector:
 li t1, 0   # byte index
 li t6, 511 # max byte index
 print_loop:
