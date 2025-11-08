@@ -342,8 +342,15 @@ jal print_hex_b
 li t1, 41  # )
 sw t1, 0(t0) # print
 
+# make big-endian of 0x30E1
+srli t2, t6, 8
+andi t2, t2, 0xff
+slli t3, t6, 8
+andi t3, t3, 0xff00
+or t4, t3, t2
+
 # read & print
-mv a2, t6
+mv a2, t4
 jal sd_read_sector
 #jal print_sector
 
