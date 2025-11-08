@@ -29,7 +29,7 @@ jal sd_read_sector
 li t1, 65        # A
 sw t1, 0(t0)     # print
 
-jal print_sector
+#jal print_sector
 
 # -- Parse BPB -- little-endian
 
@@ -108,7 +108,7 @@ jal sd_read_sector
 
 li t1, 66 # B
 sw t1, 0(t0)     # print
-jal print_sector
+#jal print_sector
 
 # -- Scan Entries --
 # entries_per_sector = bytes_per_sector / 32 -> srli 5
