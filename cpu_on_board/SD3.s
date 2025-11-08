@@ -29,6 +29,8 @@ jal sd_read_sector
 li t1, 65        # A
 sw t1, 0(t0)     # print
 
+jal print_sector
+
 # -- Parse BPB -- little-endian
 
 # bytes_per_sector offset 0x0b-0x0c 2 bytes
@@ -103,10 +105,10 @@ mv s6, t4     # s6 = root_dir_sector_start
 # -- Read Root Dir first sector --
 mv a2, s6
 jal sd_read_sector
-jal print_sector
 
 li t1, 66 # B
 sw t1, 0(t0)     # print
+jal print_sector
 
 # -- Scan Entries --
 # entries_per_sector = bytes_per_sector / 32 -> srli 5
