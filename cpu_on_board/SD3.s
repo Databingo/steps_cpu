@@ -530,8 +530,8 @@ print_sector:
 li t1, 0   # byte index
 li t6, 511 # max byte index
 print_loop:
-li a3, 32     # space 
-sw a3, 0(t0)  # print start space per byte
+#li a3, 32     # space 
+#sw a3, 0(t0)  # print start space per byte
 add a4, a1, t1 
 addi t1, t1, 1
 lw t2, 0(a4)           # load byte at 0x3000 a1+t1
