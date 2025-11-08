@@ -276,3 +276,6 @@ module cpu_on_board (
     //assign HEX03 = ~Sdc_selected;
 
 endmodule
+
+
+// lb sdlb listring printstring
