@@ -154,8 +154,8 @@ module cpu_on_board (
 	            //3'b100: begin bus_read_data <= {{56{1'b0}}, data[7:0]}; bus_read_done <= 1; end // Lbu
 	            3'b100: begin  bus_read_data <= {56'd0, (Cache[bus_address_reg] >> (8*bus_address_reg_full[1:0]))[7:0]}; bus_read_done <= 1; end // read once
         	    default: begin bus_read_data <= {32'd0, Cache[bus_address_reg]}; bus_read_done <= 1; end 
-	        //endcase
-	    //end
+	        endcase
+	    end
             if (Sdc_ready_selected) begin bus_read_data <= {63'd0, sd_ready}; bus_read_done <= 1; end
             if (Sdc_cache_selected) begin bus_read_data <= {56'd0, sd_cache[cid]}; bus_read_done <= 1; end 
             if (Sdc_avail_selected) begin bus_read_data <= {63'd0, sd_cache_available}; bus_read_done <= 1; end 
