@@ -141,19 +141,21 @@ module cpu_on_board (
         bus_address_reg <= bus_address>>2;
         bus_address_reg_full <= bus_address;
 
+	bus_read_done <= 0;
+
         sd_rd_start <= 0;
 
         // Read
         if (bus_read_enable) begin 
-        bus_address_reg <= bus_address>>2;
-        bus_address_reg_full <= bus_address;
-	start_read <= 1;
+        //bus_address_reg <= bus_address>>2;
+        //bus_address_reg_full <= bus_address;
+	    start_read <= 1;
             if (Key_selected) begin bus_read_data <= {32'd0, 24'd0, ascii}; bus_read_done <= 1; end
 	    if (Ram_selected && start_read ==1) begin 
 	        casez(bus_read_type)
 	            3'b011: begin 
 		        if (ld == 0) begin bus_read_data[31:0]  <= Cache[bus_address_reg]; bus_address_reg <= bus_address_reg +1; ld <= 1; end
-		        if (ld == 1) begin bus_read_data[63:32] <= Cache[bus_address_reg]; ld <= 0; bus_read_done <= 1; start_read <= 0; end
+		        if (ld == 1) begin bus_read_data[63:32] <= Cache[bus_address_reg]; ld <= 0; bus_read_done <= 1; start_read <= 0;bus_read_done <= 1 end
 		    end // 011Ld
 		    default: begin bus_read_data <= Cache[bus_address_reg] >> (8*bus_address_reg_full[1:0]); bus_read_done <= 1; end // 000Lb 100Lbu 001Lh 101Lhu 010Lw 110Lwu
 		endcase
