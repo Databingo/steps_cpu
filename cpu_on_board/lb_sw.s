@@ -30,3 +30,6 @@ _start:
 
     lw t2, -16(t0)        # Load P to t2
     sw t2, 0(t0)          # Print  
+
+    ld t2, -16(t0)        # Load P to t2
+    sw t2, 0(t0)          # Print  

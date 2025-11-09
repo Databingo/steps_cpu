@@ -135,6 +135,7 @@ module cpu_on_board (
     reg [63:0] bus_address_reg;
     reg [63:0] bus_address_reg_full;
     reg [63:0] data;
+    reg ld = 0;
     always @(posedge CLOCK_50) begin
         bus_address_reg <= bus_address>>2;
         bus_address_reg_full <= bus_address;
@@ -144,19 +145,12 @@ module cpu_on_board (
         // Read
         if (bus_read_enable) begin 
             if (Key_selected) begin bus_read_data <= {32'd0, 24'd0, ascii}; bus_read_done <= 1; end
-            //if (Ram_selected) begin bus_read_data <= {32'd0, Cache[bus_address_reg]}; bus_read_done <= 1; end 
-            //if (Ram_selected) begin 
-	    //    //data = Cache[bus_address_reg]; // read once
-	    //    data = Cache[bus_address_reg] >> (8*bus_address_reg_full[1:0]); // read once
-	    //    case(bus_read_type)
-	    //        3'b000: begin bus_read_data <= {{56{data[7]}}, data[7:0]}; bus_read_done <= 1; end // Lb
-	    //        3'b100: begin bus_read_data <= {{56{1'b0}}, data[7:0]}; bus_read_done <= 1; end // Lbu
-            //        default: begin bus_read_data <= {32'd0, Cache[bus_address_reg]}; bus_read_done <= 1; end 
-	    //    endcase
-	    //end
 	    if (Ram_selected) begin 
 	        casez(bus_read_type)
-	            3'b011: begin bus_read_done <= 1; end // Ld
+	            3'b011: begin 
+		        if (ld == 0) begin bus_read_data[31:0]  <= Cache[bus_address_reg]; ld <= 1; end
+		        if (ld == 1) begin bus_read_data[63:32] <= Cache[bus_address_reg+1]; ld <= 0; bus_read_done <= 1; end
+		    end // 011Ld
 		    default: begin bus_read_data <= Cache[bus_address_reg] >> (8*bus_address_reg_full[1:0]); bus_read_done <= 1; end // 000Lb 100Lbu 001Lh 101Lhu 010Lw 110Lwu
 		endcase
 	    end
