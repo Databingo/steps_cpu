@@ -147,7 +147,7 @@ module cpu_on_board (
             //if (Ram_selected) begin bus_read_data <= {32'd0, Cache[bus_address_reg]}; bus_read_done <= 1; end 
             if (Ram_selected) begin 
 		//data = Cache[bus_address_reg]; // read once
-		bus_read_data <= Cache[bus_address_reg] >> (8*bus_address_reg_full[1:0]); bus_read_done <= 1; end // read once
+		bus_read_data <= $signed((Cache[bus_address_reg] >> (8*bus_address_reg_full[1:0]))[7:0]); bus_read_done <= 1; end // read once
 	        //case(bus_read_type)
 	        //    3'b000: begin bus_read_data <= {{56{data[7]}}, data[7:0]}; bus_read_done <= 1; end // Lb
 	        //    3'b100: begin bus_read_data <= {{56{1'b0}}, data[7:0]}; bus_read_done <= 1; end // Lbu
