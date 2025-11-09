@@ -121,7 +121,7 @@ set_global_assignment -name CYCLONEII_RESERVE_NCEO_AFTER_CONFIGURATION "USE AS R
 #set_global_assignment -name VERILOG_FILE SD_DAT.v
 #set_global_assignment -name VERILOG_FILE SdCardSlave.v
 #set_global_assignment -name VERILOG_FILE SdCardRdFifo.v
-set_global_assignment -name QIP_FILE sd/synthesis/sd.qip
+#set_global_assignment -name QIP_FILE sd/synthesis/sd.qip
 
 #set_global_assignment -name FITTER_EFFORT "FAST FIT"
 #set_global_assignment -name ROUTER_EFFORT_MULTIPLIER 3
