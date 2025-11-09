@@ -59,8 +59,8 @@ module cpu_on_board (
 
     // -- CPU --
     riscv64 cpu (
-        //.clk(clock_1hz), 
-        .clk(CLOCK_50), 
+        .clk(clock_1hz), 
+        //.clk(CLOCK_50), 
         .reset(KEY0),     
         .instruction(ir_ld),
         .pc(pc),
@@ -141,12 +141,12 @@ module cpu_on_board (
     always @(posedge CLOCK_50) begin
         bus_address_reg <= bus_address>>2;
         bus_address_reg_full <= bus_address;
-	bus_read_done <= 0;
+	//bus_read_done <= 0;
 
         sd_rd_start <= 0;
 
 
-	if (bus_read_enable && !start_read) start_read <= 1;
+	if (bus_read_enable && !start_read) begin start_read <= 1; bus_read_done <= 0; end
 
         // Read
         if (bus_read_enable) begin 
