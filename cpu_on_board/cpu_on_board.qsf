@@ -149,4 +149,4 @@ set_global_assignment -name PHYSICAL_SYNTHESIS_REGISTER_RETIMING ON
 set_global_assignment -name ADV_NETLIST_OPT_SYNTH_WYSIWYG_REMAP ON
 
 # Log
-set_global_assignment -name HEL_MESSAGE_LEVEL Level3
+set_global_assignment -name HDL_MESSAGE_LEVEL Level3
