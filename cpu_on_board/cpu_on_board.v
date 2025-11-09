@@ -59,7 +59,8 @@ module cpu_on_board (
 
     // -- CPU --
     riscv64 cpu (
-        .clk(clock_1hz), 
+        //.clk(clock_1hz), 
+        .clk(CLOCK_50), 
         .reset(KEY0),     
         .instruction(ir_ld),
         .pc(pc),
@@ -154,7 +155,7 @@ module cpu_on_board (
 	        casez(bus_read_type)
 	            3'b011: begin 
 		        if (ld == 0) begin bus_read_data[31:0]  <= Cache[bus_address_reg]; bus_address_reg <= bus_address_reg +1; ld <= 1; end
-		        else if (ld == 1) begin bus_read_data[63:32] <= Cache[bus_address_reg]; ld <= 0; start_read <= 0; bus_read_done <= 1; end
+		        if (ld == 1) begin bus_read_data[63:32] <= Cache[bus_address_reg]; ld <= 0; start_read <= 0; bus_read_done <= 1; end
 		    end // 011Ld
 		    default: begin bus_read_data <= Cache[bus_address_reg] >> (8*bus_address_reg_full[1:0]); bus_read_done <= 1; end // 000Lb 100Lbu 001Lh 101Lhu 010Lw 110Lwu
 		endcase
