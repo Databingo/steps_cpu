@@ -156,7 +156,7 @@ module cpu_on_board (
 	            3'b011: begin 
 		        //if (bus_read_done == 1) bus_read_data[31:0] <= Cache[bus_address_reg]; end
 		        //if (bus_read_done == 1) bus_read_data[63:0] <= {Cache[bus_address_reg], bus_read_data[31:0]}; bus_read_done <= 1; end // Ld
-		    
+			end
         	    default: begin bus_read_data <= Cache[bus_address_reg] >> (8*bus_address_reg_full[1:0]); bus_read_done <= 1; end // 000Lb 100Lbu 001Lh 101Lhu 010Lw 110Lwu
 	        endcase
 	    end
