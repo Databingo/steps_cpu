@@ -153,6 +153,5 @@ set_global_assignment -name ADV_NETLIST_OPT_SYNTH_WYSIWYG_REMAP ON
 # Log
 # Turn on all message levels
 # ---- Verbose / Debug Options (compatible with Quartus II) ----
-set_global_assignment -name SHOW_ALL_MESSAGES ON
-set_global_assignment -name ENABLE_ADVANCED_MSG ON
-set_global_assignment -name IGNORE_MIN_WARNING OFF
+set_global_assignment -name FLOW_ENABLE_ASSEMBLER_DEBUGGING on
+set_global_assignment -name FLOW_ENABLE_FITTER_DEBUGGING on
