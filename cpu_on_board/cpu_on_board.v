@@ -150,11 +150,14 @@ module cpu_on_board (
 		//bus_read_data <= $signed((Cache[bus_address_reg] >> (8*bus_address_reg_full[1:0]))[7:0]); bus_read_done <= 1; end // read once
 		//bus_read_data <= Cache[bus_address_reg] >> (8*bus_address_reg_full[1:0]);
 		//data = Cache[bus_address_reg] >> (8*bus_address_reg_full[1:0]);
-	        case(bus_read_type)
+	        casez(bus_read_type)
 	            //3'b000: begin bus_read_data <= {{56{data[7]}}, data[7:0]}; bus_read_done <= 1; end // Lb
-	            3'b000: begin bus_read_data <= Cache[bus_address_reg] >> (8*bus_address_reg_full[1:0]); bus_read_done <= 1; end // Lb
-	            //3'b100: begin bus_read_data <= {{56{1'b0}}, data[7:0]}; bus_read_done <= 1; end // Lbu
-        	    default: begin bus_read_data <= {32'd0, Cache[bus_address_reg]}; bus_read_done <= 1; end 
+	            //3'b?0?: begin bus_read_data <= Cache[bus_address_reg] >> (8*bus_address_reg_full[1:0]); bus_read_done <= 1; end // 000Lb 100Lbu 001Lh 101Lhu 010Lw 110Lwu 011Ld
+	            3'b011: begin 
+		        //if (bus_read_done == 1) bus_read_data[31:0] <= Cache[bus_address_reg]; end
+		        //if (bus_read_done == 1) bus_read_data[63:0] <= {Cache[bus_address_reg], bus_read_data[31:0]}; bus_read_done <= 1; end // Ld
+		    
+        	    default: begin bus_read_data <= Cache[bus_address_reg] >> (8*bus_address_reg_full[1:0]); bus_read_done <= 1; end // 000Lb 100Lbu 001Lh 101Lhu 010Lw 110Lwu
 	        endcase
 	    end
             if (Sdc_ready_selected) begin bus_read_data <= {63'd0, sd_ready}; bus_read_done <= 1; end

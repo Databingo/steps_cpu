@@ -16,14 +16,14 @@ _start:
     
     li t1, 0x53734150 # set t1 = SsAP
     sw t1, -16(t0)        # Store PAsS to address 0x2004-16.
-    lb t2, -16(t0)        # Load P to t2
+    lh t2, -16(t0)        # Load P to t2
     sw t2, 0(t0)          # Print  
 
     lb t2, -15(t0)        # Load A to t2
     sw t2, 0(t0)          # Print  
 
-    lb t2, -14(t0)        # Load s to t2
+    lhu t2, -14(t0)        # Load s to t2
     sw t2, 0(t0)          # Print  
 
-    lb t2, -13(t0)        # Load S to t2
+    lbu t2, -13(t0)        # Load S to t2
     sw t2, 0(t0)          # Print  
