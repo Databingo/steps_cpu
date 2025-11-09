@@ -134,29 +134,25 @@ module cpu_on_board (
     // Port B read & write BRAM
     reg [63:0] bus_address_reg;
     reg [63:0] bus_address_reg_full;
+    reg [63:0] data;
     always @(posedge CLOCK_50) begin
         bus_address_reg <= bus_address>>2;
-        bus_address_reg_full <= bus_address>>2;
+        bus_address_reg_full <= bus_address;
 
         sd_rd_start <= 0;
 
         // Read
         if (bus_read_enable) begin 
             if (Key_selected) begin bus_read_data <= {32'd0, 24'd0, ascii}; bus_read_done <= 1; end
+            //if (Ram_selected) begin bus_read_data <= {32'd0, Cache[bus_address_reg]}; bus_read_done <= 1; end 
             if (Ram_selected) begin 
-		case(bus_read_type)
-		    3'b000: begin 
-		                case(bus_address_reg_full[1:0])
-		                    0: bus_read_data <= {{56{Cache[bus_address_reg][7]}}, Cache[bus_address_reg][7:0]}; 
-		                    1: bus_read_data <= {{56{Cache[bus_address_reg][15]}}, Cache[bus_address_reg][15:8]}; 
-		                    2: bus_read_data <= {{56{Cache[bus_address_reg][23]}}, Cache[bus_address_reg][23:16]}; 
-		                    3: bus_read_data <= {{56{Cache[bus_address_reg][31]}}, Cache[bus_address_reg][31:24]}; 
-		                    default: bus_read_data <= {32'd0, Cache[bus_address_reg]}; 
-		                endcase
-		                bus_read_done <= 1; 
-		            end
-	  	    default: bus_read_data <= {32'd0, Cache[bus_address_reg]}; 
-		endcase
+		//data = Cache[bus_address_reg]; // read once
+		data = Cache[bus_address_reg] >> (8*bus_address_reg_full[1:0]); // read once
+	        case(bus_read_type)
+	            3'b000: begin bus_read_data <= {{56{data[7]}}, data[7:0]}; bus_read_done <= 1; end // Lb
+	            3'b100: begin bus_read_data <= {{56{1'b0}}, data[7:0]}; bus_read_done <= 1; end // Lbu
+        	    default: begin bus_read_data <= {32'd0, Cache[bus_address_reg]}; bus_read_done <= 1; end 
+	        endcase
 	    end
             if (Sdc_ready_selected) begin bus_read_data <= {63'd0, sd_ready}; bus_read_done <= 1; end
             if (Sdc_cache_selected) begin bus_read_data <= {56'd0, sd_cache[cid]}; bus_read_done <= 1; end 
