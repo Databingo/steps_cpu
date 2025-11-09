@@ -160,7 +160,7 @@ module riscv64(
 	        //bus_read_enable <= 0;
 	        bus_write_enable <= 0; 
 	        //bus_write_data <= 0;
-	        bus_address <= `Ram_base;
+	        //bus_address <= `Ram_base;
                 casez(ir) // Pseudo: li j jr ret call // I: addi sb sh sw sd lb lw ld lbu lhu lwu lui jal jalr auipc beq slt mret 
 	            // U-type
 	            32'b???????_?????_?????_???_?????_0110111: re[w_rd] <= w_imm_u; // Lui
