@@ -27,3 +27,6 @@ _start:
 
     lbu t2, -13(t0)        # Load S to t2
     sw t2, 0(t0)          # Print  
+
+    lw t2, -16(t0)        # Load P to t2
+    sw t2, 0(t0)          # Print  
