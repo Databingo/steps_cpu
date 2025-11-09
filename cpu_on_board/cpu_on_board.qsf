@@ -148,3 +148,15 @@ set_global_assignment -name PHYSICAL_SYNTHESIS_REGISTER_RETIMING ON
 # Area Optimization
 set_global_assignment -name ADV_NETLIST_OPT_SYNTH_WYSIWYG_REMAP ON
 
+
+
+# Log
+set_global_assignment -name VERILOG_SHOW_LMF_MESSAGES ON
+set_global_assignment -name VERILOG_SHOW_LMF_INFO_MESSAGES ON
+set_global_assignment -name ENABLE_MSG_DEBUGGING ON
+set_global_assignment -name MSG_DEBUG_LEVEL "HIGH"
+set_global_assignment -name EDA_SHOW_ALL_MESSAGES ON
+set_global_assignment -name ENABLE_SYNTHESIS_MESSAGES ON
+set_global_assignment -name DISPLAY_ALL_WARNINGS ON
+set_global_assignment -name ERROR_REPORTING_LEVEL ALL
+set_global_assignment -name FLOW_ENABLE_DETAIL_REPORTING ON
