@@ -155,8 +155,8 @@ module cpu_on_board (
 	    //    endcase
 	    //end
 	    if (Ram_selected) begin 
-	        if (bus_read_type == 3'b011)  bus_read_done <= 1;
-		else begin bus_read_data <= Cache[bus_address_reg] >> (8*bus_address_reg_full[1:0]); bus_read_done <= 1; end // 000Lb 100Lbu 001Lh 101Lhu 010Lw 110Lwu
+		bus_read_data <= Cache[bus_address_reg] >> (8*bus_address_reg_full[1:0]);
+		bus_read_done <= 1; // 000Lb 100Lbu 001Lh 101Lhu 010Lw 110Lwu
 	    end
 
 
