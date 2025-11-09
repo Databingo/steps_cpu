@@ -151,7 +151,6 @@ set_global_assignment -name ADV_NETLIST_OPT_SYNTH_WYSIWYG_REMAP ON
 
 
 # Log
-# Turn on all message levels
-# ---- Verbose / Debug Options (compatible with Quartus II) ----
-set_global_assignment -name FLOW_ENABLE_ASSEMBLER_DEBUGGING on
-set_global_assignment -name FLOW_ENABLE_FITTER_DEBUGGING on
+# Safe, old Quartus II compatible debug/logging options
+set_global_assignment -name FLOW_ENABLE_TRACE ON
+set_global_assignment -name FLOW_VERBOSE_REPORT ON
