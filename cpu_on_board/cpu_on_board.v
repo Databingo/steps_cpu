@@ -144,9 +144,11 @@ module cpu_on_board (
 
         sd_rd_start <= 0;
 
+
+	if (bus_read_enable && !start_read) start_read <= 1;
+
         // Read
         if (bus_read_enable) begin 
-	    start_read <= 1;
             if (Key_selected) begin bus_read_data <= {32'd0, 24'd0, ascii}; bus_read_done <= 1; end
 	    if (Ram_selected && start_read ==1) begin 
 	        casez(bus_read_type)
