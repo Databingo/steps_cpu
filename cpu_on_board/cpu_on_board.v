@@ -147,10 +147,10 @@ module cpu_on_board (
 		case(bus_read_type)
 		    3'b000: begin 
 		                case(bus_address_reg_full[1:0])
-		                    0: bus_read_data <= {32'd0, Cache[bus_address_reg][7:0]}; 
-		                    1: bus_read_data <= {32'd0, Cache[bus_address_reg][15:8]}; 
-		                    2: bus_read_data <= {32'd0, Cache[bus_address_reg][23:16]}; 
-		                    3: bus_read_data <= {32'd0, Cache[bus_address_reg][31:24]}; 
+		                    0: bus_read_data <= {{56{Cache[bus_address_reg][7]}}, Cache[bus_address_reg][7:0]}; 
+		                    1: bus_read_data <= {{56{Cache[bus_address_reg][15]}}, Cache[bus_address_reg][15:8]}; 
+		                    2: bus_read_data <= {{56{Cache[bus_address_reg][23]}}, Cache[bus_address_reg][23:16]}; 
+		                    3: bus_read_data <= {{56{Cache[bus_address_reg][31]}}, Cache[bus_address_reg][31:24]}; 
 		                    default: bus_read_data <= {32'd0, Cache[bus_address_reg]}; 
 		                endcase
 		                bus_read_done <= 1; 
