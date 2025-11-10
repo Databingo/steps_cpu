@@ -19,13 +19,22 @@
 #  -usb -device usb-tablet \
 #  -nic user,model=virtio-net-pci
 
-qemu-system-x86_64 \
+#qemu-system-x86_64 \
+#  -accel hvf \
+#  -m 4096 -smp 4 \
+#  -drive file=~/Downloads/debian-13-nocloud-amd64.qcow2,format=qcow2 \
+#  -vga virtio \
+#  -display cocoa,show-cursor=on \
+#  -usb -device usb-tablet \
+#  -nic user,model=virtio-net-pci
+
+sudo qemu-system-x86_64 \
   -accel hvf \
   -m 4096 -smp 4 \
   -drive file=~/Downloads/debian-13-nocloud-amd64.qcow2,format=qcow2 \
   -vga virtio \
   -display cocoa,show-cursor=on \
+  -device qemu-xhci,id=xhci \
+  -device usb-host,vendorid=0x0781,productid=0x5581,bus=xhci.0 \
   -usb -device usb-tablet \
   -nic user,model=virtio-net-pci
-
-
