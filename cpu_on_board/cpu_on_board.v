@@ -118,6 +118,7 @@ module cpu_on_board (
     wire [63:0] bus_write_data;
     wire        bus_write_enable;
     wire [2:0]  bus_read_type; // lb lbu...
+    wire [2:0]  bus_write_type; // sb sbu...
 
     // Address Decoding --
     wire Rom_selected = (bus_address >= `Rom_base && bus_address < `Rom_base + `Rom_size);
@@ -136,8 +137,10 @@ module cpu_on_board (
     reg [63:0] bus_address_reg_full;
     reg [63:0] data;
     reg ld = 0;
+    reg sd = 0;
     //reg start_read = 0;
     reg bus_read_done = 1;
+    reg bus_write_done = 1;
     always @(posedge CLOCK_50) begin
         bus_address_reg <= bus_address>>2;
         bus_address_reg_full <= bus_address;
@@ -161,8 +164,6 @@ module cpu_on_board (
 		    default: begin bus_read_data <= Cache[bus_address_reg] >> (8*bus_address_reg_full[1:0]); bus_read_done <= 1; end // 000Lb 100Lbu 001Lh 101Lhu 010Lw 110Lwu
 		endcase
 	    end
-
-
 
             if (Sdc_ready_selected) begin bus_read_data <= {63'd0, sd_ready}; bus_read_done <= 1; end
             if (Sdc_cache_selected) begin bus_read_data <= {56'd0, sd_cache[cid]}; bus_read_done <= 1; end 
