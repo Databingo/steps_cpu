@@ -135,9 +135,9 @@ module cpu_on_board (
     reg [63:0] bus_address_reg;
     reg [63:0] bus_address_reg_full;
     reg [63:0] data;
-    //reg ld = 0;
-    reg start_read = 0;
-    reg   bus_read_done = 1;
+    reg ld = 0;
+    //reg start_read = 0;
+    reg bus_read_done = 1;
     always @(posedge CLOCK_50) begin
         bus_address_reg <= bus_address>>2;
         bus_address_reg_full <= bus_address;
