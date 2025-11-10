@@ -157,7 +157,7 @@ module riscv64(
 
 	    // IR
 	    else begin 
-	        //bus_read_enable <= 0;
+	        bus_read_enable <= 0;
 	        bus_write_enable <= 0; 
 	        //bus_write_data <= 0;
 	        //bus_address <= `Ram_base;

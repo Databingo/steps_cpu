@@ -117,7 +117,7 @@ module cpu_on_board (
     wire        bus_read_enable;
     wire [63:0] bus_write_data;
     wire        bus_write_enable;
-    reg   bus_read_done;
+    reg   bus_read_done = 0;
     wire [2:0]  bus_read_type; // lb lbu...
 
     // Address Decoding --
@@ -138,19 +138,21 @@ module cpu_on_board (
     reg [63:0] data;
     reg ld = 0;
     reg start_read = 0;
+    reg bus_read_done_hold_1 = 0;
+    reg bus_read_done_hold_2 = 0;
     always @(posedge CLOCK_50) begin
         bus_address_reg <= bus_address>>2;
         bus_address_reg_full <= bus_address;
 	//bus_read_done <= 0;
-
         sd_rd_start <= 0;
 
 
 	if (bus_read_enable && !start_read) begin start_read <= 1; bus_read_done <= 0; end
 
         // Read
-        if (bus_read_enable) begin 
-            if (Key_selected) begin bus_read_data <= {32'd0, 24'd0, ascii}; bus_read_done <= 1; end
+        //if (bus_read_enable) begin 
+	//    bus_read_done <= 0;
+        //    if (Key_selected) begin bus_read_data <= {32'd0, 24'd0, ascii}; bus_read_done <= 1; end
 	    if (Ram_selected && start_read ==1) begin 
 	        casez(bus_read_type)
 	            3'b011: begin 
@@ -166,7 +168,7 @@ module cpu_on_board (
             if (Sdc_ready_selected) begin bus_read_data <= {63'd0, sd_ready}; bus_read_done <= 1; end
             if (Sdc_cache_selected) begin bus_read_data <= {56'd0, sd_cache[cid]}; bus_read_done <= 1; end 
             if (Sdc_avail_selected) begin bus_read_data <= {63'd0, sd_cache_available}; bus_read_done <= 1; end 
-        end
+        //end
 
         // Write
         if (bus_write_enable) begin 
