@@ -165,20 +165,7 @@ module riscv64(
 	            // U-type
 	            32'b???????_?????_?????_???_?????_0110111: re[w_rd] <= w_imm_u; // Lui
 	            32'b???????_?????_?????_???_?????_0010111: re[w_rd] <= w_imm_u + (pc - 4); // Auipc
-		//    32'b???????_?????_?????_000_?????_0000011: begin  // Lb  3 cycles
-		//        if (load_step == 0) begin bus_address <= re[w_rs1] + w_imm_i; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; end
-	        //        if (load_step == 1) begin case ((re[w_rs1] + w_imm_i) & 2'b11)
-		//	        0: re[w_rd]<= $signed(bus_read_data[7:0]);   1: re[w_rd]<= $signed(bus_read_data[15:8]); 
-		//	        2: re[w_rd]<= $signed(bus_read_data[23:16]); 3: re[w_rd]<= $signed(bus_read_data[31:24]); 
-		//	        endcase load_step <= 0; end end
-		//    32'b???????_?????_?????_001_?????_0000011: begin  // Lh 3 cycles
-		//        if (load_step == 0) begin bus_address <= re[w_rs1] + w_imm_i; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; end
-	        //        if (load_step == 1) begin case ((re[w_rs1] + w_imm_i) & 2'b11)
-		//	        0: re[w_rd]<= $signed(bus_read_data[15:0]); 2: re[w_rd]<= $signed(bus_read_data[31:16]); 1,3:; 
-		//	        endcase load_step <= 0; end end
-		    //32'b???????_?????_?????_010_?????_0000011: begin  // Lw 3 cycles
-		    //    if (load_step == 0) begin bus_address <= re[w_rs1] + w_imm_i; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; end
-		    //    if (load_step == 1) begin re[w_rd]<= $signed(bus_read_data[31:0]); load_step <= 0; end end
+
 		    32'b???????_?????_?????_000_?????_0000011: begin  // Lb  3 cycles
 		        if (load_step == 0) begin bus_address <= re[w_rs1] + w_imm_i; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; bus_read_type <= w_func3; end
 		        if (load_step == 1 && bus_read_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working
@@ -207,6 +194,22 @@ module riscv64(
 		        if (load_step == 0) begin bus_address <= re[w_rs1] + w_imm_i; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; bus_read_type <= w_func3; end
 		        if (load_step == 1 && bus_read_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working 3
 		        if (load_step == 1 && bus_read_done == 1) begin re[w_rd]<= bus_read_data; load_step <= 0; bus_read_enable <= 0; end end // bus ok and execute
+
+		//    32'b???????_?????_?????_000_?????_0000011: begin  // Lb  3 cycles
+		//        if (load_step == 0) begin bus_address <= re[w_rs1] + w_imm_i; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; end
+	        //        if (load_step == 1) begin case ((re[w_rs1] + w_imm_i) & 2'b11)
+		//	        0: re[w_rd]<= $signed(bus_read_data[7:0]);   1: re[w_rd]<= $signed(bus_read_data[15:8]); 
+		//	        2: re[w_rd]<= $signed(bus_read_data[23:16]); 3: re[w_rd]<= $signed(bus_read_data[31:24]); 
+		//	        endcase load_step <= 0; end end
+		//    32'b???????_?????_?????_001_?????_0000011: begin  // Lh 3 cycles
+		//        if (load_step == 0) begin bus_address <= re[w_rs1] + w_imm_i; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; end
+	        //        if (load_step == 1) begin case ((re[w_rs1] + w_imm_i) & 2'b11)
+		//	        0: re[w_rd]<= $signed(bus_read_data[15:0]); 2: re[w_rd]<= $signed(bus_read_data[31:16]); 1,3:; 
+		//	        endcase load_step <= 0; end end
+		    //32'b???????_?????_?????_010_?????_0000011: begin  // Lw 3 cycles
+		    //    if (load_step == 0) begin bus_address <= re[w_rs1] + w_imm_i; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; end
+		    //    if (load_step == 1) begin re[w_rd]<= $signed(bus_read_data[31:0]); load_step <= 0; end end
+		    //
 		    //32'b???????_?????_?????_011_?????_0000011: begin   // Ld 5 cycles
 		    //    if (load_step == 0) begin bus_address <= re[w_rs1] + w_imm_i; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; 
 		    //    end if (load_step == 1) begin re[w_rd]<= bus_read_data; bus_address <= re[w_rs1] + w_imm_i + 4;  bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 2; 
