@@ -153,7 +153,7 @@ module riscv64(
 		interrupt_ack <= 1; // reply to outside
 
             // Bubble
-	    end else if (bubble) begin bubble <= 1'b0; bus_write_enable <=0; end // Flush this cycle & Clear bubble signal for the next cycle
+	    end else if (bubble) begin bubble <= 1'b0; bus_write_enable <=0; bus_read_enable <= 0; end // Flush this cycle & Clear bubble signal for the next cycle
 
 	    // IR
 	    else begin 
@@ -192,7 +192,7 @@ module riscv64(
 		        if (load_step == 1 && bus_read_done == 1) begin re[w_rd]<= $unsigned(bus_read_data[31:0]); load_step <= 0; bus_read_enable <= 0; end end // bus ok and execute
 		    32'b???????_?????_?????_011_?????_0000011: begin   // Ld 3 cycles
 		        if (load_step == 0) begin bus_address <= re[w_rs1] + w_imm_i; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; bus_read_type <= w_func3; end
-		        if (load_step == 1 && bus_read_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working 3
+		        if (load_step == 1 && bus_read_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working 1 bubble2 this3
 		        if (load_step == 1 && bus_read_done == 1) begin re[w_rd]<= bus_read_data; load_step <= 0; bus_read_enable <= 0; end end // bus ok and execute
 
 		//    32'b???????_?????_?????_000_?????_0000011: begin  // Lb  3 cycles
