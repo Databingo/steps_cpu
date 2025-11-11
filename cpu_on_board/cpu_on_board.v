@@ -139,7 +139,7 @@ module cpu_on_board (
     reg ld = 0;
     reg sd = 0;
     reg bus_read_done = 1;
-    reg bus_write_done = 1;
+    //reg bus_write_done = 1;
     //reg [3:0] we;
 
 
@@ -151,7 +151,7 @@ module cpu_on_board (
 
 
         if (bus_read_enable) begin bus_read_done <= 0; end
-        if (bus_write_enable) begin bus_write_done <= 0; end
+        //if (bus_write_enable) begin bus_write_done <= 0; end
 
         // Read
         if (bus_read_done==0) begin 
