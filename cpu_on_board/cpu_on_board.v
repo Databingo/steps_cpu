@@ -184,7 +184,7 @@ module cpu_on_board (
 			    1: Cache[bus_address[63:2]][15:8] <= bus_write_data[7:0];
 			    2: Cache[bus_address[63:2]][23:16] <= bus_write_data[7:0];
 			    3: Cache[bus_address[63:2]][31:24] <= bus_write_data[7:0];
-			endcase
+			endcase end
 		    default: Cache[bus_address[63:2]] <= bus_write_data[31:0];
 	        endcase
 	    end
