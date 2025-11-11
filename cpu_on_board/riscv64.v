@@ -217,7 +217,7 @@ module riscv64(
 	            32'b???????_?????_?????_000_?????_0100011: begin  // Sb 3 cycles
         if (store_step == 0) begin bus_address <= re[w_rs1] + w_imm_s; bus_write_data <= re[w_rs2]; bus_write_enable <= 1; pc <= pc - 4; bubble <= 1; store_step <= 1; bus_write_type <= w_func3; end
         if (store_step == 1 && bus_write_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working
-	if (store_step == 1 && bus_write_done == 1) begin store_step <= 0; end end
+	if (store_step == 1 && bus_write_done == 1) begin store_step <= 0; bus_write_enable <=0; end end
 	            //32'b???????_?????_?????_011_?????_0100011: begin  // Sd 3 cycles
 		    //    if (store_step == 0) begin; bus_address <= re[w_rs1] + w_imm_s; bus_write_data <= re[w_rs2][31:0]; bus_write_enable <= 1; pc <= pc - 4; bubble <= 1; store_step <= 1; end 
 		    //    if (store_step == 1) begin; bus_address <= re[w_rs1] + w_imm_s + 4; bus_write_data <= re[w_rs2][63:32]; bus_write_enable <= 1; store_step <= 0; end end
