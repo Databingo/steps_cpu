@@ -179,12 +179,11 @@ module cpu_on_board (
 	    if (Ram_selected) begin 
 		casez(bus_write_type) // 000sb 001sh 010sw 011sd
 		    3'b000: begin
-			case(bus_address[1:0])
-			    0: Cache[bus_address[63:2]][7:0] <= bus_write_data[7:0];
-			    1: Cache[bus_address[63:2]][15:8] <= bus_write_data[7:0];
-			    2: Cache[bus_address[63:2]][23:16] <= bus_write_data[7:0];
-			    3: Cache[bus_address[63:2]][31:24] <= bus_write_data[7:0];
-			endcase end
+			if (bus_address[1:0] == 0) Cache[bus_address[63:2]][7:0] <= bus_write_data[7:0];
+			if (bus_address[1:0] == 1) Cache[bus_address[63:2]][15:8] <= bus_write_data[7:0];
+			if (bus_address[1:0] == 2) Cache[bus_address[63:2]][23:16] <= bus_write_data[7:0];
+			if (bus_address[1:0] == 3) Cache[bus_address[63:2]][31:24] <= bus_write_data[7:0];
+			end
 		    default: Cache[bus_address[63:2]] <= bus_write_data[31:0];
 	        endcase
 	    end
