@@ -135,6 +135,7 @@ module cpu_on_board (
     // Port B read & write BRAM
     reg [63:0] bus_address_reg;
     reg [63:0] bus_address_reg_full;
+    reg [63:0] bus_address_reg_2;
     reg [63:0] data;
     reg ld = 0;
     reg sd = 0;
@@ -160,8 +161,8 @@ module cpu_on_board (
 	        casez(bus_read_type)
 	            3'b011: begin // 011Ld
 		        case(ld)
-			    0: begin bus_read_data[31:0]  <= Cache[bus_address_reg]; ld<=1;end//bus_address_reg <= bus_address_reg +1; ld <= 1; end
-		            1: begin bus_read_data[63:32] <= Cache[bus_address_reg+1]; ld <= 0; bus_read_done <= 1; end
+			    0: begin bus_read_data[31:0]  <= Cache[bus_address_reg]; bus_address_reg_2 <= bus_address_reg +1; ld <= 1; end
+		            1: begin bus_read_data[63:32] <= Cache[bus_address_reg_2]; ld <= 0; bus_read_done <= 1; end
 			endcase
 		    end 
 		    default: begin bus_read_data <= Cache[bus_address_reg] >> (8*bus_address_reg_full[1:0]); bus_read_done <= 1; end // 000Lb 100Lbu 001Lh 101Lhu 010Lw 110Lwu
