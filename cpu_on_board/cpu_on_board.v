@@ -196,8 +196,9 @@ module cpu_on_board (
 		    3'b010: begin Cache[bus_address[63:2]] <= bus_write_data[31:0]; end//bus_write_done <= 1; end//sw 
 		    3'b011: begin //sd
 		        case(sd)
-		            0: begin Cache[bus_address[63:2]] <= bus_write_data[31:0]; sd <= 1; end
-			    1: begin Cache[bus_address[63:2]+1] <= bus_write_data[63:32]; sd <= 0; end //bus_write_done <= 1; end
+		            0: begin Cache[bus_address_reg] <= bus_write_data[31:0]; bus_address_reg <= bus_address_reg + 1; sd <= 1; end
+			    //1: begin Cache[bus_address_reg] <= bus_write_data[63:32]; sd <= 0; end //bus_write_done <= 1; end
+			    1: begin Cache[bus_address_reg] <= 32'h61626364; sd <= 0; end //bus_write_done <= 1; end
 			endcase
 			end
 	        endcase
