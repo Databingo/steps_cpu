@@ -1,86 +1,66 @@
-#`define Sdc_base  32'h0000_3000 (3000-31ff 512 bytes index) 
-#`define Sdc_addr  32'h0000_3200
-#`define Sdc_read  32'h0000_3204
-#`define Sdc_write 32'h0000_3208
-#`define Sdc_ready 32'h0000_3220
-#`define Sdc_dirty 32'h0000_3224
-#`define Sdc_avail 32'h0000_3228
+# RISC-V Assembly: Ld 
 
+.section .text
 .globl _start
+
 _start:
+    # --- Setup Phase ---
+    # Get UART address (0x2004) into t0.
+    lui t0, 0x2
+    addi t0, t0, 4      # t0 = 0x2004
 
-# Get UART address (0x2004) into t6.
-lui t0, 0x2
-addi t0, t0, 4      # t0 = 0x2004
+    # --- Test 1: Basic Shift ---
+    # We expect t1 = 0x5373415050417353 SsAPPAsS
+   #lui  t1, 0x53734
+   #addi t1, t1, 0x150
+   #slli t1, t1, 8   
+   #addi t1, t1, 0x50 
+   #slli t1, t1, 8   
+   #addi t1, t1, 0x41 
+   #slli t1, t1, 8   
+   #addi t1, t1, 0x73 
+   #slli t1, t1, 8   
+   #addi t1, t1, 0x53 
 
-# SD base
-lui a1, 0x3         # a1 = 0x3000 base
+   
+   #sd t1, -16(t0) # save
+   #ld t2, -16(t0) # load back to t2
 
-
-sd_ready:
-lw a2, 0x220(a1)    # a2 0x3220 ready
-beq a2, x0, sd_ready
-
-addi t1, x0, 65  # A
-sw t1, 0(t0)     # print
-
-# Sector address value to address 0x3200
-sw x0, 0x200(a1)
-
-# Trigger read at 0x3204
-addi a3, x0, 1
-sw a3, 0x204(a1)
-
-sd_ready_2:
-lw a2, 0x220(a1)    # a2 0x3220 ready
-beq a2, x0, sd_ready_2
-
-addi t1, x0, 66  # B
-sw t1, 0(t0)     # print
-
-avail:
-lw a2, 0x228(a1)    # a2 0x3228 cache_avaible
-beq a2, x0, avail
-
-addi t1, x0, 67  # C
-sw t1, 0(t0)     # print
-
-li t1, 0   # byte index
-li t6, 511 # max byte index
-
-print_loop:
-add a4, a1, t1 
-addi t1, t1, 1
+   #srli t4, t2, 24 # P
+   #sb t4, 0(t0) 
+   #srli t4, t2, 16 # A
+   #sb t4, 0(t0)
+   #srli t4, t2, 8  # s
+   #sb t4, 0(t0)
+   #sb t2, 0(t0)    # S
 
 
-lw t2, 0(a4)           # load byte at 0x3000 a1+t1
-andi t2, t2, 0xFF   # Isolate byte value
+   #srli t4, t2, 56 # S
+   #sb t4, 0(t0) 
+   #srli t4, t2, 48 # s
+   #sb t4, 0(t0)
+   #srli t4, t2, 40  # A
+   #sb t4, 0(t0)
+   #srli t4, t2, 32  # P
+   #sb t4, 0(t0)    
 
-
-srli t3, t2, 4      # get high nibble
-slti t5, t3, 10     # if < 10 number
-beq t5, x0, letter_h
-addi t3, t3, 48     # 0 is "0" ascii 48
-j print_h_hex
-letter_h:
-addi t3, t3, 55     # 10 is "A" ascii 65 ..
-print_h_hex:
-sw t3, 0(t0)
-
-
-andi t4, t2, 0x0F      # get low nibble
-slti t5, t4, 10     # if < 10 number
-beq t5, x0, letter_l
-addi t4, t4, 48     # 0 is "0" ascii 48
-j print_l_hex
-letter_l:
-addi t4, t4, 55        # 10 is "A" ascii 65 ..
-print_l_hex:
-sw t4, 0(t0)
-
-bge t6, t1, print_loop
-
-
+    li t1, 0x6162636465666768 #abcdefjh
+    sd t1, -8(t0) # save
+    lb t2, -8(t0) #  h load back to t2
+    sb t2, 0(t0)    
+    lb t2, -7(t0)  # j
+    sb t2, 0(t0)    
+    lb t2, -6(t0)  # f
+    sb t2, 0(t0)    
+    lb t2, -5(t0)  # e
+    sb t2, 0(t0)    
+    lb t2, -4(t0)  # d
+    sb t2, 0(t0)    
+    lb t2, -3(t0)  # c
+    sb t2, 0(t0)    
+    lb t2, -2(t0)  # b
+    sb t2, 0(t0)    
+    lb t2, -1(t0)  # a
 
 
 
