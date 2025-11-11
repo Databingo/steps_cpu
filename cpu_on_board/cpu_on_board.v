@@ -199,7 +199,7 @@ module cpu_on_board (
 		        case(sd)
 		            //0: begin Cache[bus_address[63:2]] <= bus_write_data[31:0]; sd <= 1; end
 			    //1: begin Cache[bus_address[63:2]+1] <= bus_write_data[63:32]; sd <= 0; end //bus_write_done <= 1; end
-		            0: begin Cache[bus_address[63:2]] <= bus_write_data[63:32]; sd <= 1; next_addr <= bus_address[63:2]+1; end
+		            0: begin Cache[bus_address[63:2]] <= bus_write_data[31:0]; sd <= 1; next_addr <= bus_address[63:2]+1; end
 			    1: begin Cache[next_addr] <= bus_write_data[63:32]; sd <= 0; end //bus_write_done <= 1; end
 			endcase
 			end
