@@ -156,12 +156,3 @@ set_global_assignment -name HDL_MESSAGE_LEVEL Level3
 # Cyclone II – Byte-enable BRAM settings
 # ==============================================
 set_global_assignment -name ALLOW_ANY_RAM_SIZE_FOR_RECOGNITION ON
-set_global_assignment -name ALLOW_ANY_SIZE_FOR_AUTO_RAM ON
-set_global_assignment -name AUTO_RAM_RECOGNITION ON
-
-# Cyclone II only has tiny M4K blocks (512×8 or 4K×1)
-# Force Quartus to use them with byte enables
-set_global_assignment -name RAMSTYLE M4K
-
-# Optional but recommended: turn off "strict" RAM checks
-set_global_assignment -name OPTIMIZATION_MODE "AGGRESSIVE AREA"
