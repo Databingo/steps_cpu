@@ -1,3 +1,7 @@
+<<<<<<< HEAD
+=======
+#host sudo purge
+>>>>>>> 621cc05f9f7605be488d22c40a3c5593e69b7f6c
 sudo sync
 sudo sh -c 'echo 3 > /proc/sys/vm/drop_caches'
 sudo systemctl stop cups avahi-daemon bluetooth
