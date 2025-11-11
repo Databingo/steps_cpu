@@ -2,7 +2,7 @@ go run ../rvas.go isr.s
 cat bin.txt > rom.mif  # write ROM program
 
 
-go run ../rvas.go addi_sb.s  # sb just for UART need full test future
+#go run ../rvas.go addi_sb.s  # sb just for UART need full test future
 #go run ../rvas.go lb.s       # addi sb lb uart for test (sb tested too)
 #go run ../rvas.go lb_sw.s       # 
 #go run ../rvas.go srli.s     # addi -2 srli sb
@@ -14,7 +14,7 @@ go run ../rvas.go addi_sb.s  # sb just for UART need full test future
 #go run ../rvas.go lh.s       # lui addi sw lh sb uart for test
 #go run ../rvas.go slli.s     # lui addi slli sb uart
 #go run ../rvas.go sd.s       # lui addi slli addi sd lw sb uart for test
-#go run ../rvas.go ld.s       # lui addi slli addi sd ld sb uart for test
+go run ../rvas.go ld.s       # lui addi slli addi sd ld sb uart for test
 #go run ../rvas.go lbu.s      # addi -1 sb lb sb uart #include lbu lhu lwu     
 #----tested again---
 #go run ../rvas.go beq.s ok
