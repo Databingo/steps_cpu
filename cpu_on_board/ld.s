@@ -21,30 +21,47 @@ _start:
    #addi t1, t1, 0x73 
    #slli t1, t1, 8   
    #addi t1, t1, 0x53 
-   li t1, 0x6162636465666768 #abcdefjh
 
    
+   #sd t1, -16(t0) # save
+   #ld t2, -16(t0) # load back to t2
+
+   #srli t4, t2, 24 # P
+   #sb t4, 0(t0) 
+   #srli t4, t2, 16 # A
+   #sb t4, 0(t0)
+   #srli t4, t2, 8  # s
+   #sb t4, 0(t0)
+   #sb t2, 0(t0)    # S
+
+
+   #srli t4, t2, 56 # S
+   #sb t4, 0(t0) 
+   #srli t4, t2, 48 # s
+   #sb t4, 0(t0)
+   #srli t4, t2, 40  # A
+   #sb t4, 0(t0)
+   #srli t4, t2, 32  # P
+   #sb t4, 0(t0)    
+
+    li t1, 0x6162636465666768 #abcdefjh
     sd t1, -16(t0) # save
     ld t2, -16(t0) # load back to t2
-
-    srli t4, t2, 24 # P
+    srli t4, t2, 56 # a
     sb t4, 0(t0) 
-    srli t4, t2, 16 # A
+    srli t4, t2, 48 # b
     sb t4, 0(t0)
-    srli t4, t2, 8  # s
+    srli t4, t2, 40  # c
     sb t4, 0(t0)
-    sb t2, 0(t0)    # S
-
-
-    srli t4, t2, 56 # S
-    sb t4, 0(t0) 
-    srli t4, t2, 48 # s
-    sb t4, 0(t0)
-    srli t4, t2, 40  # A
-    sb t4, 0(t0)
-    srli t4, t2, 32  # P
+    srli t4, t2, 32  # d
     sb t4, 0(t0)    
-
+    srli t4, t2, 24 # e
+    sb t4, 0(t0) 
+    srli t4, t2, 16 # f
+    sb t4, 0(t0)
+    srli t4, t2, 8  # g
+    sb t4, 0(t0)
+    sb t2, 0(t0)    # h
 
 
 
