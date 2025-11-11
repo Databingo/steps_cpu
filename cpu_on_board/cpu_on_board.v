@@ -187,6 +187,7 @@ module cpu_on_board (
 		    default: Cache[bus_address[63:2]] <= bus_write_data[31:0];
 	        endcase
 	    end
+
             if (Sdc_addr_selected) sd_addr <= bus_write_data[31:0];
             if (Sdc_read_selected) sd_rd_start <= 1;
         end
