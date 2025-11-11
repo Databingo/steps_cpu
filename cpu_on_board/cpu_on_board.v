@@ -138,9 +138,11 @@ module cpu_on_board (
     reg [63:0] data;
     reg ld = 0;
     reg sd = 0;
-    //reg start_read = 0;
     reg bus_read_done = 1;
     reg bus_write_done = 1;
+    reg [3:0] we;
+
+
     always @(posedge CLOCK_50) begin
         bus_address_reg <= bus_address>>2;
         bus_address_reg_full <= bus_address;
@@ -149,6 +151,7 @@ module cpu_on_board (
 
 
         if (bus_read_enable) begin bus_read_done <= 0; end
+        if (bus_write_enable) begin bus_write_done <= 0; end
 
         // Read
         if (bus_read_done==0) begin 
@@ -172,7 +175,19 @@ module cpu_on_board (
 
         // Write
         if (bus_write_enable) begin 
-            if (Ram_selected) Cache[bus_address[63:2]] <= bus_write_data[31:0];
+            //if (Ram_selected) Cache[bus_address[63:2]] <= bus_write_data[31:0];
+	    if (Ram_selected) begin 
+		casez(bus_write_type) // 000sb 001sh 010sw 011sd
+		    3'b000: begin
+			case(bus_address[1:0])
+			    0: Cache[bus_address[63:2]][7:0] <= bus_write_data[7:0];
+			    1: Cache[bus_address[63:2]][15:8] <= bus_write_data[7:0];
+			    2: Cache[bus_address[63:2]][23:16] <= bus_write_data[7:0];
+			    3: Cache[bus_address[63:2]][31:24] <= bus_write_data[7:0];
+			endcase
+		    default: Cache[bus_address[63:2]] <= bus_write_data[31:0];
+	        endcase
+	    end
             if (Sdc_addr_selected) sd_addr <= bus_write_data[31:0];
             if (Sdc_read_selected) sd_rd_start <= 1;
         end
