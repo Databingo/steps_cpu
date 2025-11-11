@@ -176,7 +176,8 @@ module cpu_on_board (
         // Write
         //if (bus_write_enable) begin 
             //if (Ram_selected) Cache[bus_address[63:2]] <= bus_write_data[31:0];
-        if (bus_write_enable || bus_write_done==0) begin 
+        //if (bus_write_enable || bus_write_done==0) begin 
+        if (bus_write_enable || sd!=0 ) begin 
 	    if (Ram_selected) begin 
 		casez(bus_write_type) // 000sb 001sh 010sw 011sd
 		    3'b000: begin //sb
@@ -184,25 +185,27 @@ module cpu_on_board (
 			if (bus_address[1:0] == 1) Cache[bus_address[63:2]][15:8] <= bus_write_data[7:0];
 			if (bus_address[1:0] == 2) Cache[bus_address[63:2]][23:16] <= bus_write_data[7:0];
 			if (bus_address[1:0] == 3) Cache[bus_address[63:2]][31:24] <= bus_write_data[7:0];
-                        bus_write_done <= 1;
+                        //bus_write_done <= 1;
 			end
 		    3'b001: begin //sh
 			if (bus_address[1:0] == 0) Cache[bus_address[63:2]][15:0] <= bus_write_data[15:0];
 			if (bus_address[1:0] == 2) Cache[bus_address[63:2]][31:16] <= bus_write_data[15:0];
-                        bus_write_done <= 1;
+                        //bus_write_done <= 1;
 			end
-		    3'b010: begin Cache[bus_address[63:2]] <= bus_write_data[31:0]; bus_write_done <= 1; end//sw 
+		    3'b010: begin Cache[bus_address[63:2]] <= bus_write_data[31:0]; end//bus_write_done <= 1; end//sw 
 		    3'b011: begin //sd
 		        case(sd)
 		            0: begin Cache[bus_address[63:2]] <= bus_write_data[31:0]; sd <= 1; end
-		            1: begin Cache[bus_address[63:2]+1] <= bus_write_data[63:32]; sd <= 0; bus_write_done <= 1; end
+			    1: begin Cache[bus_address[63:2]+1] <= bus_write_data[63:32]; sd <= 0; end //bus_write_done <= 1; end
 			endcase
 			end
 	        endcase
 	    end
 
-	    if (Sdc_addr_selected) begin sd_addr <= bus_write_data[31:0]; bus_write_done <= 1; end
-            if (Sdc_read_selected) begin sd_rd_start <= 1; bus_write_done <= 1; end
+	    //if (Sdc_addr_selected) begin sd_addr <= bus_write_data[31:0]; bus_write_done <= 1; end
+            //if (Sdc_read_selected) begin sd_rd_start <= 1; bus_write_done <= 1; end
+	    if (Sdc_addr_selected) sd_addr <= bus_write_data[31:0];
+            if (Sdc_read_selected) sd_rd_start <= 1;
         end
     end
 
@@ -292,6 +295,7 @@ module cpu_on_board (
     always @(posedge CLOCK_50 or negedge KEY0) begin
         if (!KEY0) uart_write_trigger_dly <= 0;
         else uart_write_trigger_dly <= uart_write_trigger;
+	//if (uart_write_trigger_pulse) bus_write_done <= 1;
     end
     assign uart_write_trigger_pulse = uart_write_trigger  && !uart_write_trigger_dly;
 
