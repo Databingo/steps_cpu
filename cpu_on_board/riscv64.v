@@ -213,10 +213,10 @@ module riscv64(
 		    //            0: bus_write_data <= {bus_read_data[31:16], re[w_rs2][15:0]}; 2: bus_write_data <= {re[w_rs2][15:0], bus_read_data[15:0]}; 1,3:;
 		    //            endcase bus_write_enable <= 1; store_step <= 0;  end end
 		    //// Sw 1 cycle
-	            32'b???????_?????_?????_000_?????_0100011: begin bus_address <= re[w_rs1] + w_imm_s; bus_write_data <= re[w_rs2][7:0]; bus_write_enable <= 1; pc <= pc; bubble <= 1; end // Sb 1 cycles
-	            32'b???????_?????_?????_001_?????_0100011: begin bus_address <= re[w_rs1] + w_imm_s; bus_write_data <= re[w_rs2][15:0]; bus_write_enable <= 1; pc <= pc; bubble <= 1; end // Sh 1 cycles
-	            32'b???????_?????_?????_010_?????_0100011: begin bus_address <= re[w_rs1] + w_imm_s; bus_write_data <= re[w_rs2][31:0]; bus_write_enable <= 1; pc <= pc; bubble <= 1; end // Sw
-	            32'b???????_?????_?????_011_?????_0100011: begin bus_address <= re[w_rs1] + w_imm_s; bus_write_data <= re[w_rs2]; bus_write_enable <= 1; pc <= pc; bubble <= 1; end  // Sd 3 cycles
+	            32'b???????_?????_?????_000_?????_0100011: begin bus_address <= re[w_rs1] + w_imm_s;bus_write_data<=re[w_rs2][7:0];bus_write_enable<=1;pc<=pc;bubble<=1;bus_write_type<=w_func3;end//Sb
+	            32'b???????_?????_?????_001_?????_0100011: begin bus_address <= re[w_rs1] + w_imm_s;bus_write_data<=re[w_rs2][15:0];bus_write_enable<=1;pc<=pc;bubble<=1;bus_write_type<=w_func3;end//Sh
+	            32'b???????_?????_?????_010_?????_0100011: begin bus_address <= re[w_rs1] + w_imm_s;bus_write_data<=re[w_rs2][31:0];bus_write_enable<=1;pc<=pc;bubble<=1;bus_write_type<=w_func3;end//Sw
+	            32'b???????_?????_?????_011_?????_0100011: begin bus_address <= re[w_rs1] + w_imm_s;bus_write_data<=re[w_rs2];bus_write_enable<=1;pc<=pc;bubble<=1;bus_write_type<=w_func3;end//Sd
         //if (store_step == 0) begin bus_address <= re[w_rs1] + w_imm_s; bus_write_data <= re[w_rs2]; bus_write_enable <= 1; pc <= pc - 4; bubble <= 1; store_step <= 1; bus_write_type <= w_func3; end
         //if (store_step == 1 && bus_write_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working
 	//if (store_step == 1 && bus_write_done == 1) begin store_step <= 0; bus_write_enable <=0; end end

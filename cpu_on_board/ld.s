@@ -11,16 +11,18 @@ _start:
 
     # --- Test 1: Basic Shift ---
     # We expect t1 = 0x5373415050417353 SsAPPAsS
-    lui  t1, 0x53734
-    addi t1, t1, 0x150
-    slli t1, t1, 8   
-    addi t1, t1, 0x50 
-    slli t1, t1, 8   
-    addi t1, t1, 0x41 
-    slli t1, t1, 8   
-    addi t1, t1, 0x73 
-    slli t1, t1, 8   
-    addi t1, t1, 0x53 
+   #lui  t1, 0x53734
+   #addi t1, t1, 0x150
+   #slli t1, t1, 8   
+   #addi t1, t1, 0x50 
+   #slli t1, t1, 8   
+   #addi t1, t1, 0x41 
+   #slli t1, t1, 8   
+   #addi t1, t1, 0x73 
+   #slli t1, t1, 8   
+   #addi t1, t1, 0x53 
+   li t1, 0x6162636465666768 #abcdefjh
+
    
     sd t1, -16(t0) # save
     ld t2, -16(t0) # load back to t2
