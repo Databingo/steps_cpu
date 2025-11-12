@@ -171,20 +171,21 @@ module cpu_on_board (
 	    end
 
             if (Sdc_ready_selected) begin bus_read_data <= {63'd0, sd_ready}; bus_read_done <= 1; end
-	    //if (Sdc_cache_selected) begin bus_read_data <= {56'd0, sd_cache[cid:cid+1]}; bus_read_done <= 1; end
-            if (Sdc_cache_selected && cid < 512) begin 
-	        casez(bus_read_type)
-		    3'b000: bus_read_data <= {{56{sd_cache[cid][7]}}, sd_cache[cid]};  // lb
-		    3'b100: bus_read_data <= {56'b0, sd_cache[cid]};           // lbu
-		    3'b001: bus_read_data <= {{48{sd_cache[cid+1][7]}}, sd_cache[cid+1], sd_cache[cid]};  // lh
-		    3'b101: bus_read_data <= {48'b0, sd_cache[cid+1], sd_cache[cid]};           // lhu
-		    3'b010: bus_read_data <= {{32{sd_cache[cid+3][7]}}, sd_cache[cid+3], sd_cache[cid+2], sd_cache[cid+1], sd_cache[cid]};  // lw
-		    3'b110: bus_read_data <= {32'b0, sd_cache[cid+3], sd_cache[cid+2], sd_cache[cid+1], sd_cache[cid]};  // lwu
-		    3'b011: bus_read_data <= {sd_cache[cid+7], sd_cache[cid+6], sd_cache[cid+5], sd_cache[cid+4], sd_cache[cid+3], sd_cache[cid+2], sd_cache[cid+1], sd_cache[cid]};  // ld
-		    default:;// 3'b111 bus_read_data <= 64'hxxxxxxxx_xxxxxxxx for debuging
-		endcase
-		bus_read_done <= 1; 
-	    end 
+	    //if (Sdc_cache_selected) begin bus_read_data <= {56'd0, sd_cache[cid]}; bus_read_done <= 1; end
+	    if(Sdc_cache_selected)begin bus_read_data<={sd_cache[cid+7],sd_cache[cid+6],sd_cache[cid+5],sd_cache[cid+4],sd_cache[cid+3],sd_cache[cid+2],sd_cache[cid+1],sd_cache[cid]};bus_read_done<=1;//ld
+            //if (Sdc_cache_selected && cid < 512) begin   // resource only 18752.                                              
+	    //    casez(bus_read_type)
+	    //        3'b000: bus_read_data <= {{56{sd_cache[cid][7]}}, sd_cache[cid]};  // lb
+	    //        3'b100: bus_read_data <= {56'b0, sd_cache[cid]};           // lbu
+	    //        3'b001: bus_read_data <= {{48{sd_cache[cid+1][7]}}, sd_cache[cid+1], sd_cache[cid]};  // lh
+	    //        3'b101: bus_read_data <= {48'b0, sd_cache[cid+1], sd_cache[cid]};           // lhu
+	    //        3'b010: bus_read_data <= {{32{sd_cache[cid+3][7]}}, sd_cache[cid+3], sd_cache[cid+2], sd_cache[cid+1], sd_cache[cid]};  // lw
+	    //        3'b110: bus_read_data <= {32'b0, sd_cache[cid+3], sd_cache[cid+2], sd_cache[cid+1], sd_cache[cid]};  // lwu
+	    //        3'b011: bus_read_data <= {sd_cache[cid+7], sd_cache[cid+6], sd_cache[cid+5], sd_cache[cid+4], sd_cache[cid+3], sd_cache[cid+2], sd_cache[cid+1], sd_cache[cid]};  // ld
+	    //        default:;// 3'b111 bus_read_data <= 64'hxxxxxxxx_xxxxxxxx for debuging
+	    //    endcase
+	    //    bus_read_done <= 1; 
+	    //end 
             if (Sdc_avail_selected) begin bus_read_data <= {63'd0, sd_cache_available}; bus_read_done <= 1; end 
         end
 
