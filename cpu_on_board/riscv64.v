@@ -211,7 +211,6 @@ module riscv64(
 				3'b101: re[w_rd]<= $unsigned(bus_read_data[15:0]);// Lhu
 				3'b010: re[w_rd]<= $signed(bus_read_data[31:0]);  // Lw
 				3'b110: re[w_rd]<= $unsigned(bus_read_data[31:0]);// Lwu
-				3'b011: ; // Ld pass
 			    endcase 
 			    load_step <= 0; 
 			end
@@ -247,7 +246,6 @@ module riscv64(
 	            32'b0100000_?????_?????_101_?????_0110011: re[w_rd] <= $signed(re[w_rs1]) >>> re[w_rs2][5:0]; // Sra 6 length
 	            32'b???????_?????_?????_010_?????_0110011: re[w_rd] <= ($signed(re[w_rs1]) < $signed(re[w_rs2])) ? 1: 0;  // Slt
 	            32'b???????_?????_?????_011_?????_0110011: re[w_rd] <= re[w_rs1] < re[w_rs2] ? 1:0; // Sltu
-
                     //// Math-R (Word)
 	            32'b0000000_?????_?????_000_?????_0111011: re[w_rd] <= $signed(re[w_rs1][31:0] + re[w_rs2][31:0]);  // Addw
 	            32'b0100000_?????_?????_000_?????_0111011: re[w_rd] <= $signed(re[w_rs1][31:0] - re[w_rs2][31:0]);  // Subw
