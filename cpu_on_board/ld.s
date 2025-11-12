@@ -54,9 +54,9 @@ _start:
     srli t4, t2, 40  # c
     sb t4, 0(t0)
     srli t4, t2, 32  # d
-    sb t4, 0(t0)    
+    sh t4, 0(t0)    
     srli t4, t2, 24 # e
-    sb t4, 0(t0) 
+    sw t4, 0(t0) 
     srli t4, t2, 16 # f
     sb t4, 0(t0)
     srli t4, t2, 8  # g
