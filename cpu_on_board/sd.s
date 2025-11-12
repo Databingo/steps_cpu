@@ -45,24 +45,24 @@ _start:
    #sb t4, 0(t0)    
 
     li t1, 0x6162636465666768 #abcdefjh
-    sd t1, -8(t0) # save
+    sd t1, -16(t0) # save
     addi t6, x0, 0
 
-    lb t2, -8(t0) #  h load back to t2
+    lb t2, -16(t0) #  h load back to t2
     sb t2, 0(t0)    
-    lb t2, -7(t0)  # j
+    lb t2, -15(t0)  # j
     sb t2, 0(t0)    
-    lb t2, -6(t0)  # f
+    lb t2, -14(t0)  # f
     sb t2, 0(t0)    
-    lb t2, -5(t0)  # e
+    lb t2, -13(t0)  # e
     sb t2, 0(t0)    
-    lb t2, -4(t0)  # d
+    lb t2, -12(t0)  # d
     sb t2, 0(t0)    
-    lb t2, -3(t0)  # c
+    lb t2, -11(t0)  # c
     sb t2, 0(t0)    
-    lb t2, -2(t0)  # b
+    lb t2, -10(t0)  # b
     sb t2, 0(t0)    
-    lb t2, -1(t0)  # a
+    lb t2, -9(t0)  # a
     sb t2, 0(t0)    
 
 
