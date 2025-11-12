@@ -46,7 +46,6 @@ _start:
 
     li t1, 0x6162636465666768 #abcdefjh
     sd t1, -16(t0) # save
-    addi t6, x0, 0
 
     lb t2, -16(t0) #  h load back to t2
     sb t2, 0(t0)    
