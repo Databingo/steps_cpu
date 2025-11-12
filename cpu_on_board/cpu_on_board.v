@@ -172,7 +172,8 @@ module cpu_on_board (
 
             if (Sdc_ready_selected) begin bus_read_data <= {63'd0, sd_ready}; bus_read_done <= 1; end
 	    //if (Sdc_cache_selected) begin bus_read_data <= {56'd0, sd_cache[cid]}; bus_read_done <= 1; end
-	    if(Sdc_cache_selected)begin bus_read_data<={sd_cache[cid+7],sd_cache[cid+6],sd_cache[cid+5],sd_cache[cid+4],sd_cache[cid+3],sd_cache[cid+2],sd_cache[cid+1],sd_cache[cid]};bus_read_done<=1;end
+	   //if(Sdc_cache_selected)begin bus_read_data<={sd_cache[cid+7],sd_cache[cid+6],sd_cache[cid+5],sd_cache[cid+4],sd_cache[cid+3],sd_cache[cid+2],sd_cache[cid+1],sd_cache[cid]};bus_read_done<=1;end
+	    if(Sdc_cache_selected)begin bus_read_data<={sd_cache[cid7],sd_cache[cid6],sd_cache[cid5],sd_cache[cid4],sd_cache[cid3],sd_cache[cid2],sd_cache[cid1],sd_cache[cid]};bus_read_done<=1;end
             //if (Sdc_cache_selected && cid < 512) begin   // resource only 18752.                                              
 	    //    casez(bus_read_type)
 	    //        3'b000: bus_read_data <= {{56{sd_cache[cid][7]}}, sd_cache[cid]};  // lb
@@ -219,6 +220,13 @@ module cpu_on_board (
     end
 
     wire [11:0] cid = (bus_address-`Sdc_base);
+    wire [11:0] cid1 = (bus_address-`Sdc_base)+1;
+    wire [11:0] cid2 = (bus_address-`Sdc_base)+2;
+    wire [11:0] cid3 = (bus_address-`Sdc_base)+3;
+    wire [11:0] cid4 = (bus_address-`Sdc_base)+4;
+    wire [11:0] cid5 = (bus_address-`Sdc_base)+5;
+    wire [11:0] cid6 = (bus_address-`Sdc_base)+6;
+    wire [11:0] cid7 = (bus_address-`Sdc_base)+7;
     reg [7:0] sd_cache [0:511];
     reg [9:0] byte_index = 0;
     reg sd_cache_available = 0;
