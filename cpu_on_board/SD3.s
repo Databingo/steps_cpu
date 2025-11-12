@@ -534,7 +534,8 @@ print_loop:
 #sw a3, 0(t0)  # print start space per byte
 add a4, a1, t1 
 addi t1, t1, 1
-lw t2, 0(a4)           # load byte at 0x3000 a1+t1
+#lw t2, 0(a4)           # load byte at 0x3000 a1+t1
+lb t2, 0(a4)           # load byte at 0x3000 a1+t1
 andi t2, t2, 0xFF   # Isolate byte value
 srli t3, t2, 4      # get high nibble
 slti t5, t3, 10     # if < 10 number

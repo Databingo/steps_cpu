@@ -171,14 +171,24 @@ module cpu_on_board (
 	    end
 
             if (Sdc_ready_selected) begin bus_read_data <= {63'd0, sd_ready}; bus_read_done <= 1; end
-            if (Sdc_cache_selected) begin bus_read_data <= {56'd0, sd_cache[cid]}; bus_read_done <= 1; end 
+	    //if (Sdc_cache_selected) begin bus_read_data <= {56'd0, sd_cache[cid:cid+1]}; bus_read_done <= 1; end
+            if (Sdc_cache_selected && cid < 512) begin 
+	        casez(bus_read_type)
+		    3'b000: bus_read_data <= {{56{sd_cache[cid][7]}}, sd_cache[cid]};  // lb
+		    3'b100: bus_read_data <= {56'b0, sd_cache[cid]};           // lbu
+		    3'b001: bus_read_data <= {{48{sd_cache[cid+1][7]}}, sd_cache[cid+1], sd_cache[cid]};  // lh
+		    3'b101: bus_read_data <= {48'b0, sd_cache[cid+1], sd_cache[cid]};           // lhu
+		    3'b010: bus_read_data <= {{32{sd_cache[cid+3][7]}}, sd_cache[cid+3], sd_cache[cid+2], sd_cache[cid+1], sd_cache[cid]};  // lw
+		    3'b110: bus_read_data <= {32'b0, sd_cache[cid+3], sd_cache[cid+2], sd_cache[cid+1], sd_cache[cid]};  // lwu
+		    3'b011: bus_read_data <= {sd_cache[cid+7], sd_cache[cid+6], sd_cache[cid+5], sd_cache[cid+4], sd_cache[cid+3], sd_cache[cid+2], sd_cache[cid+1], sd_cache[cid]};  // ld
+		    default:;// 3'b111 bus_read_data <= 64'hxxxxxxxx_xxxxxxxx for debuging
+		endcase
+		bus_read_done <= 1; 
+	    end 
             if (Sdc_avail_selected) begin bus_read_data <= {63'd0, sd_cache_available}; bus_read_done <= 1; end 
         end
 
         // Write
-        //if (bus_write_enable) begin 
-            //if (Ram_selected) Cache[bus_address[63:2]] <= bus_write_data[31:0];
-        //if (bus_write_enable || bus_write_done==0) begin 
         if (bus_write_enable || sd!=0 ) begin 
 	    if (Ram_selected) begin 
 		casez(bus_write_type) // 000sb 001sh 010sw 011sd
@@ -187,18 +197,14 @@ module cpu_on_board (
 			if (bus_address[1:0] == 1) Cache[bus_address[63:2]][15:8] <= bus_write_data[7:0];
 			if (bus_address[1:0] == 2) Cache[bus_address[63:2]][23:16] <= bus_write_data[7:0];
 			if (bus_address[1:0] == 3) Cache[bus_address[63:2]][31:24] <= bus_write_data[7:0];
-                        //bus_write_done <= 1;
 			end
 		    3'b001: begin //sh
 			if (bus_address[1:0] == 0) Cache[bus_address[63:2]][15:0] <= bus_write_data[15:0];
 			if (bus_address[1:0] == 2) Cache[bus_address[63:2]][31:16] <= bus_write_data[15:0];
-                        //bus_write_done <= 1;
 			end
 		    3'b010: begin Cache[bus_address[63:2]] <= bus_write_data[31:0]; end//bus_write_done <= 1; end//sw 
 		    3'b011: begin //sd
 		        case(sd)
-		            //0: begin Cache[bus_address[63:2]] <= bus_write_data[31:0]; sd <= 1; end
-			    //1: begin Cache[bus_address[63:2]+1] <= bus_write_data[63:32]; sd <= 0; end //bus_write_done <= 1; end
 		            0: begin Cache[bus_address[63:2]] <= bus_write_data[31:0]; sd <= 1; next_addr <= bus_address[63:2]+1; end
 			    1: begin Cache[next_addr] <= bus_write_data[63:32]; sd <= 0; end //bus_write_done <= 1; end
 			endcase
@@ -206,8 +212,6 @@ module cpu_on_board (
 	        endcase
 	    end
 
-	    //if (Sdc_addr_selected) begin sd_addr <= bus_write_data[31:0]; bus_write_done <= 1; end
-            //if (Sdc_read_selected) begin sd_rd_start <= 1; bus_write_done <= 1; end
 	    if (Sdc_addr_selected) sd_addr <= bus_write_data[31:0];
             if (Sdc_read_selected) sd_rd_start <= 1;
         end
