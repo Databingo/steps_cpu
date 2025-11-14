@@ -9,23 +9,17 @@ module cpu_on_board (
     (* chip_pin = "R20" *) output wire LEDR0, // 
     (* chip_pin = "R19" *) output wire LEDR1, // 
     (* chip_pin = "U18, Y18, V19, T18, Y19, U19" *) output wire [5:0] LEDR_PC, // 8 red LEDs right
-
     (* chip_pin = "F4" *)  output wire HEX30,
-
     (* chip_pin = "G5" *)  output wire HEX20,
     (* chip_pin = "G6" *)  output wire HEX21,
-
     (* chip_pin = "E1" *)  output wire HEX10,
     (* chip_pin = "H6" *)  output wire HEX11,
-
     (* chip_pin = "J2" *)  output wire HEX00,
     (* chip_pin = "J1" *)  output wire HEX01,
     (* chip_pin = "H2" *)  output wire HEX02,
     (* chip_pin = "H1" *)  output wire HEX03,
-
     (* chip_pin = "H15" *)  input wire PS2_CLK, 
     (* chip_pin = "J14" *)  input wire PS2_DAT,
-
     (* chip_pin = "V20" *)  output wire SD_CLK, //SD_CLK
     (* chip_pin = "Y20" *)  inout wire SD_CMD, // SD_CMD (MOSI)
     (* chip_pin = "W20" *)  inout wire SD_DAT0, // SD_DAT (MISO)
@@ -50,10 +44,8 @@ module cpu_on_board (
 
     wire [63:0] pc;
     reg [31:0] ir_bd;
-    // Port A BRAM
-    always @(posedge CLOCK_50) begin
-	ir_bd <= Cache[pc>>2];
-    end
+    // IR_LD BRAM Port A read
+    always @(posedge CLOCK_50) begin ir_bd <= Cache[pc>>2]; end
     wire [31:0] ir_ld; assign ir_ld = {ir_bd[7:0], ir_bd[15:8], ir_bd[23:16], ir_bd[31:24]}; // Endianness swap
     assign LEDR_PC = pc/4;
 
@@ -79,7 +71,6 @@ module cpu_on_board (
         .bus_write_type(bus_write_type), // sb sh sw sd 
         .bus_read_done(bus_read_done),
         .bus_read_data(bus_read_data)
-
     );
 
     // -- Keyboard -- 
@@ -133,7 +124,7 @@ module cpu_on_board (
     wire Sdc_cache_selected = (bus_address >= `Sdc_base && bus_address < (`Sdc_base + 512));
     wire Sdc_avail_selected = (bus_address == `Sdc_avail);
 
-    // Port B read & write BRAM
+    // Read & Write BRAM Port B 
     reg [63:0] bus_address_reg;
     reg [63:0] bus_address_reg_full;
     reg [63:0] data;
@@ -141,16 +132,12 @@ module cpu_on_board (
     reg sd = 0;
     reg bus_read_done = 1;
     //reg bus_write_done = 1;
-    //reg [3:0] we;
     reg [63:0] next_addr;
-
 
     always @(posedge CLOCK_50) begin
         bus_address_reg <= bus_address>>2;
         bus_address_reg_full <= bus_address;
-	//bus_read_done <= 0;
         sd_rd_start <= 0;
-
 
         if (bus_read_enable) begin bus_read_done <= 0; end
         //if (bus_write_enable) begin bus_write_done <= 0; end
@@ -171,7 +158,7 @@ module cpu_on_board (
 	    end
 
             if (Sdc_ready_selected) begin bus_read_data <= {63'd0, sd_ready}; bus_read_done <= 1; end
-	    if (Sdc_cache_selected) begin bus_read_data <= {56'd0, sd_cache[cid]}; bus_read_done <= 1; end
+	    if (Sdc_cache_selected) begin bus_read_data <= {56'd0, sd_cache[cid]}; bus_read_done <= 1; end // one byte for all load
 	   //if(Sdc_cache_selected)begin bus_read_data<={sd_cache[cid+7],sd_cache[cid+6],sd_cache[cid+5],sd_cache[cid+4],sd_cache[cid+3],sd_cache[cid+2],sd_cache[cid+1],sd_cache[cid]};bus_read_done<=1;end
             //if (Sdc_cache_selected && cid < 512) begin   // resource only 18752.                                              
 	    //    casez(bus_read_type)
@@ -203,11 +190,11 @@ module cpu_on_board (
 			if (bus_address[1:0] == 0) Cache[bus_address[63:2]][15:0] <= bus_write_data[15:0];
 			if (bus_address[1:0] == 2) Cache[bus_address[63:2]][31:16] <= bus_write_data[15:0];
 			end
-		    3'b010: begin Cache[bus_address[63:2]] <= bus_write_data[31:0]; end//bus_write_done <= 1; end//sw 
+		    3'b010: begin Cache[bus_address[63:2]] <= bus_write_data[31:0]; end
 		    3'b011: begin //sd
 		        case(sd)
 		            0: begin Cache[bus_address[63:2]] <= bus_write_data[31:0]; sd <= 1; next_addr <= bus_address[63:2]+1; end
-			    1: begin Cache[next_addr] <= bus_write_data[63:32]; sd <= 0; end //bus_write_done <= 1; end
+			    1: begin Cache[next_addr] <= bus_write_data[63:32]; sd <= 0; end
 			endcase
 			end
 	        endcase
@@ -218,6 +205,7 @@ module cpu_on_board (
         end
     end
 
+    // -- SD Card --
     wire [11:0] cid = (bus_address-`Sdc_base);
     reg [7:0] sd_cache [0:511];
     reg [9:0] byte_index = 0;
@@ -252,11 +240,6 @@ module cpu_on_board (
 	    end
         end
     end
-
-
-
-
-
 
     // Slow pulse clock for SD init (~100 kHz)
     reg [8:0] clkdiv = 0;
@@ -304,7 +287,6 @@ module cpu_on_board (
     always @(posedge CLOCK_50 or negedge KEY0) begin
         if (!KEY0) uart_write_trigger_dly <= 0;
         else uart_write_trigger_dly <= uart_write_trigger;
-	//if (uart_write_trigger_pulse) bus_write_done <= 1;
     end
     assign uart_write_trigger_pulse = uart_write_trigger  && !uart_write_trigger_dly;
 
@@ -329,19 +311,12 @@ module cpu_on_board (
 
     // Debug LEDs
     assign HEX30 = ~Key_selected;
-
     assign HEX20 = ~|bus_read_data;
     assign HEX21 = ~bus_read_enable;
-
     assign HEX10 = ~|bus_write_data;
     assign HEX11 = ~bus_write_enable;
-
     assign HEX00 = ~Art_selected;
     assign HEX01 = ~Ram_selected;
     assign HEX02 = ~Rom_selected;
     //assign HEX03 = ~Sdc_selected;
-
 endmodule
-
-
-// lb sdlb listring printstring
