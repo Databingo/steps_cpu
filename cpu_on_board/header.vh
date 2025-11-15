@@ -16,4 +16,4 @@
 `define Sdc_avail  32'h0000_3228
 
 `define Sdram_min  32'h1000_0000
-`define Sdram_max  32'h1080_0000 # 8MB
+`define Sdram_max  32'h1080_0000
