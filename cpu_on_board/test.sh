@@ -34,7 +34,8 @@ cat bin.txt > rom.mif  # write ROM program
 #go run ../rvas.go csr.s # 
 #go run ../rvas.go SD.s # 
 #go run ../rvas.go SD2.s # 
-go run ../rvas.go SD3.s # 
+#go run ../rvas.go SD3.s # 
+go run ../rvas.go sdram.s
 
 
 
