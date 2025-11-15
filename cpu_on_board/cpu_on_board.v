@@ -66,7 +66,7 @@ sdram sdram_instance (
     );
 assign DRAM_CLK = CLOCK_50; // Or use PLL for phase-shifted clock
 wire [21:0] sdram_address = bus_address[21:0];
-wire sdram_chipselect = Sdram_selected&& (bus_read_enable || !bus_read_done);
+wire sdram_chipselect = Sdram_selected;
 wire sdram_read_n  = ~(Sdram_selected && (bus_read_enable || !bus_read_done)); 
 wire sdram_write_n = ~(Sdram_selected && (bus_write_enable|| !bus_write_done));   
 wire [15:0] sdram_writedata = bus_write_data[15:0]; 
@@ -205,8 +205,7 @@ wire sdram_waitrequest;
 
 
 
-    always @(posedge CLOCK_50 or negedge KEY0) begin
-	//if (!KEY0) begin bus_read_done <= 1; bus_write_done <= 0; end 
+    always @(posedge CLOCK_50) begin
         bus_address_reg <= bus_address>>2;
         bus_address_reg_full <= bus_address;
         sd_rd_start <= 0;
