@@ -227,9 +227,6 @@ wire sdram_waitrequest;
 		    default: begin bus_read_data <= Cache[bus_address_reg] >> (8*bus_address_reg_full[1:0]); bus_read_done <= 1; end // 000Lb 100Lbu 001Lh 101Lhu 010Lw 110Lwu
 		endcase
 	    end
-	    if (Sdram_selected && bus_read_done == 0) begin
-		if (sdram_readdatavalid) begin bus_read_data <= {48'b0, sdram_readdata}; bus_read_done <= 1;
-	    end
 
             if (Sdc_ready_selected) begin bus_read_data <= {63'd0, sd_ready}; bus_read_done <= 1; end
 	    if (Sdc_cache_selected) begin bus_read_data <= {56'd0, sd_cache[cid]}; bus_read_done <= 1; end // one byte for all load
@@ -249,6 +246,9 @@ wire sdram_waitrequest;
 	    //end 
             if (Sdc_avail_selected) begin bus_read_data <= {63'd0, sd_cache_available}; bus_read_done <= 1; end 
 
+	    if (Sdram_selected && bus_read_done == 0) begin
+		if (sdram_readdatavalid) begin bus_read_data <= {48'b0, sdram_readdata}; bus_read_done <= 1; end
+	    end
 
 
 
