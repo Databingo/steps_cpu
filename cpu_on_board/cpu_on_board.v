@@ -77,8 +77,10 @@ sdram sdram_instance (
 assign DRAM_CLK = CLOCK_50; // Or use PLL for phase-shifted clock
 wire [21:0] sdram_address = bus_address - `Sdram_min;
 wire sdram_chipselect = Sdram_selected;
-wire sdram_read_n  = ~(Sdram_selected && (bus_read_enable || !bus_read_done)); 
-wire sdram_write_n = ~(Sdram_selected && (bus_write_enable|| !bus_write_done));   
+//wire sdram_read_n  = ~(Sdram_selected && (bus_read_enable || !bus_read_done)); 
+//wire sdram_write_n = ~(Sdram_selected && (bus_write_enable|| !bus_write_done));   
+wire sdram_read_n  = ~(Sdram_selected && bus_read_enable); 
+wire sdram_write_n = ~(Sdram_selected && bus_write_enable);   
 wire [15:0] sdram_writedata = bus_write_data[15:0]; 
 wire [1:0] sdram_byteenable_n = 2'b00; // Enable all bytes (active low)
 
@@ -294,6 +296,7 @@ wire sdram_waitrequest;
 	    if (Sdc_read_selected) begin sd_rd_start <= 1; bus_write_done <= 1; end
 
 	    if (Sdram_selected) begin if (!sdram_waitrequest) bus_write_done <= 1; end
+	    //if (Sdram_selected) begin bus_write_done <= 1; end
         end
     end
 
@@ -411,6 +414,7 @@ wire sdram_waitrequest;
     assign HEX01 = ~Ram_selected;
     assign HEX02 = ~Rom_selected;
     //assign HEX03 = ~Sdram_selected ;
+    assign HEX03 = (bus_address >= `Sdram_min && bus_address < `Sdram_max);
 
     assign HEX31 = ~Sdram_selected;
     assign HEX32 = ~sdram_readdatavalid;
