@@ -25,22 +25,10 @@ module cpu_on_board (
     (* chip_pin = "W20" *)  inout wire SD_DAT0, // SD_DAT (MISO)
     (* chip_pin = "U20" *)  output wire SD_DAT3, // SD_DAT3
 //);
-    
-    // -- SDRAM pins (add these to your pin assignments) --
-    //(* chip_pin = "..." *) output wire [11:0] DRAM_ADDR,
-    //(* chip_pin = "..." *) inout  wire [15:0] DRAM_DQ,
-    //(* chip_pin = "..." *) output wire [1:0]  DRAM_BA,
-    //(* chip_pin = "..." *) output wire        DRAM_CAS_N,
-    //(* chip_pin = "..." *) output wire        DRAM_RAS_N,
-    //(* chip_pin = "..." *) output wire        DRAM_CLK,
-    //(* chip_pin = "..." *) output wire        DRAM_WE_N
-    //(* chip_pin = "..." *) output wire        DRAM_CS_N,
-    //(* chip_pin = "..." *) output wire        DRAM_CKE,
-    //
-    //(* chip_pin = "..." *) output wire [1:0]  DRAM_DQM,
 
+    // -- SDRAM pins -- 
     (* chip_pin = "N6, W3, N4, P3, P5, P6, R5, R6, Y4, Y3, W5, W4" *)  output wire [11:0] DRAM_ADDR,
-    (* chip_pin = "T2, T1, R2, R1, P2, P1, N2, N1, Y2, Y1, W2, W1, V2, V1, U2, U1" *)  output wire [15:0] DRAM_DQ,
+    (* chip_pin = "T2, T1, R2, R1, P2, P1, N2, N1, Y2, Y1, W2, W1, V2, V1, U2, U1" *)  inout wire [15:0] DRAM_DQ,
     (* chip_pin = "V4, U3" *)  output wire [1:0] DRAM_BA, // Bank address
     (* chip_pin = "T3" *)  output wire DRAM_CAS_N, // Column address strobe
     (* chip_pin = "T5" *)  output wire DRAM_RAS_N, // Row address strobe
@@ -49,8 +37,6 @@ module cpu_on_board (
     (* chip_pin = "R8" *)  output wire DRAM_WE_N, // write enable
     (* chip_pin = "T6" *)  output wire DRAM_CS_N,  // chip selected
     (* chip_pin = "M5, R7" *)  output wire [1:0] DRAM_DQM   // High-low byte data mask
-    //(* chip_pin = "PIN_R7" *)  output wire DRAM_LDQM,  // Low byte data mask
-    //(* chip_pin = "PIN_M5" *)  output wire DRAM_UDQM   // High byte data mask
 );
 
 // -- sdram end--
@@ -80,15 +66,25 @@ sdram sdram_instance (
     );
 assign DRAM_CLK = CLOCK_50; // Or use PLL for phase-shifted clock
 wire [21:0] sdram_address = bus_address[21:0];
-//assign sdram_byteenable_n)
-//assign sdram_chipselect), 
-//assign sdram_writedata),  
-//assign sdram_read_n),     
-//assign sdram_write_n),    
-//assign sdram_readdata),   
-//assign sdram_readdatavalid
-//assign sdram_waitrequest),
+wire sdram_chipselect = Sdram_selected;
+wire sdram_read_n  = ~(Sdram_selected && (bus_read_enable || !bus_read_done)); 
+wire sdram_write_n = ~(Sdram_selected && (bus_write_enable|| !bus_write_done));   
+wire [15:0] sdram_writedata = bus_write_data[15:0]; 
+wire [1:0] sdram_byteenable_n = 2'b00; // Enable all bytes (active low)
 
+wire [15:0] sdram_readdata;   
+wire sdram_readdatavalid;
+wire sdram_waitrequest;
+
+    //// -- sdram pll --
+    //sdram_pll u0 (
+    //    .clk_clk                        (),                        //                     clk.clk
+    //    .reset_reset_n                  (),                  //                   reset.reset_n
+    //    .altpll_0_c0_clk                (),                //             altpll_0_c0.clk
+    //    .altpll_0_c1_clk                (),                //             altpll_0_c1.clk
+    //    .altpll_0_areset_conduit_export (), // altpll_0_areset_conduit.export
+    //    .altpll_0_locked_conduit_export ()  // altpll_0_locked_conduit.export
+    //);
 
 
 
@@ -192,6 +188,7 @@ wire [21:0] sdram_address = bus_address[21:0];
     wire Sdc_ready_selected = (bus_address == `Sdc_ready);
     wire Sdc_cache_selected = (bus_address >= `Sdc_base && bus_address < (`Sdc_base + 512));
     wire Sdc_avail_selected = (bus_address == `Sdc_avail);
+    wire Sdram_selected = (bus_address >= `Sdram_min && bus_address < `Sdram_max);
 
     // Read & Write BRAM Port B 
     reg [63:0] bus_address_reg;
@@ -200,8 +197,13 @@ wire [21:0] sdram_address = bus_address[21:0];
     reg ld = 0;
     reg sd = 0;
     reg bus_read_done = 1;
-    //reg bus_write_done = 1;
+    reg bus_write_done = 1;
     reg [63:0] next_addr;
+
+    //reg bus_read_start = 0;
+    //reg bus_write_start = 0;
+
+
 
     always @(posedge CLOCK_50) begin
         bus_address_reg <= bus_address>>2;
@@ -209,7 +211,7 @@ wire [21:0] sdram_address = bus_address[21:0];
         sd_rd_start <= 0;
 
         if (bus_read_enable) begin bus_read_done <= 0; end
-        //if (bus_write_enable) begin bus_write_done <= 0; end
+        if (bus_write_enable) begin bus_write_done <= 0; end
 
         // Read
         if (bus_read_done==0) begin 
@@ -224,6 +226,9 @@ wire [21:0] sdram_address = bus_address[21:0];
 		    end 
 		    default: begin bus_read_data <= Cache[bus_address_reg] >> (8*bus_address_reg_full[1:0]); bus_read_done <= 1; end // 000Lb 100Lbu 001Lh 101Lhu 010Lw 110Lwu
 		endcase
+	    end
+	    if (Sdram_selected && bus_read_done == 0) begin
+		if (sdram_readdatavalid) begin bus_read_data <= {48'b0, sdram_readdata}; bus_read_done <= 1;
 	    end
 
             if (Sdc_ready_selected) begin bus_read_data <= {63'd0, sd_ready}; bus_read_done <= 1; end
@@ -243,11 +248,17 @@ wire [21:0] sdram_address = bus_address[21:0];
 	    //    bus_read_done <= 1; 
 	    //end 
             if (Sdc_avail_selected) begin bus_read_data <= {63'd0, sd_cache_available}; bus_read_done <= 1; end 
+
+
+
+
         end
 
         // Write
-        if (bus_write_enable || sd!=0 ) begin 
+        //if (bus_write_enable || sd!=0 ) begin 
+        if (bus_write_done == 0) begin 
 	    if (Ram_selected) begin 
+		bus_write_done <= 1;
 		casez(bus_write_type) // 000sb 001sh 010sw 011sd
 		    3'b000: begin //sb
 			if (bus_address[1:0] == 0) Cache[bus_address[63:2]][7:0] <= bus_write_data[7:0];
@@ -262,15 +273,17 @@ wire [21:0] sdram_address = bus_address[21:0];
 		    3'b010: begin Cache[bus_address[63:2]] <= bus_write_data[31:0]; end
 		    3'b011: begin //sd
 		        case(sd)
-		            0: begin Cache[bus_address[63:2]] <= bus_write_data[31:0]; sd <= 1; next_addr <= bus_address[63:2]+1; end
+		            0: begin Cache[bus_address[63:2]] <= bus_write_data[31:0]; sd <= 1; next_addr <= bus_address[63:2]+1; bus_write_done <= 0; end
 			    1: begin Cache[next_addr] <= bus_write_data[63:32]; sd <= 0; end
 			endcase
 			end
 	        endcase
 	    end
 
-	    if (Sdc_addr_selected) sd_addr <= bus_write_data[31:0];
-            if (Sdc_read_selected) sd_rd_start <= 1;
+	    if (Sdc_addr_selected) begin sd_addr <= bus_write_data[31:0]; bus_write_done <= 1; end
+	    if (Sdc_read_selected) begin sd_rd_start <= 1; bus_write_done <= 1; end
+
+	    if (Sdram_selected && bus_write_done == 0) begin if (!sdram_waitrequest) bus_write_done <= 1; end
         end
     end
 
