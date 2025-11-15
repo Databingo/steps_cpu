@@ -15,8 +15,8 @@
   </columns>
  </clocktable>
  <library
-   expandedCategories="Library,Library/University Program/Memory,Project,Library/University Program" />
+   expandedCategories="Library/Memories and Memory Controllers,Library,Library/Memories and Memory Controllers/External Memory Interfaces,Library/Memories and Memory Controllers/External Memory Interfaces/SDRAM Interfaces,Project" />
  <window width="1100" height="747" x="180" y="0" />
  <hdlexample language="VERILOG" />
- <generation path="_PROJECT_NAME_" />
+ <generation path="sdram" />
 </preferences>
