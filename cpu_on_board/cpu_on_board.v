@@ -9,15 +9,25 @@ module cpu_on_board (
     (* chip_pin = "R20" *) output wire LEDR0, // 
     (* chip_pin = "R19" *) output wire LEDR1, // 
     (* chip_pin = "U18, Y18, V19, T18, Y19, U19" *) output wire [5:0] LEDR_PC, // 8 red LEDs right
-    (* chip_pin = "F4" *)  output wire HEX30,
-    (* chip_pin = "G5" *)  output wire HEX20,
-    (* chip_pin = "G6" *)  output wire HEX21,
-    (* chip_pin = "E1" *)  output wire HEX10,
-    (* chip_pin = "H6" *)  output wire HEX11,
     (* chip_pin = "J2" *)  output wire HEX00,
     (* chip_pin = "J1" *)  output wire HEX01,
     (* chip_pin = "H2" *)  output wire HEX02,
     (* chip_pin = "H1" *)  output wire HEX03,
+    (* chip_pin = "E1" *)  output wire HEX10,
+    (* chip_pin = "H6" *)  output wire HEX11,
+    (* chip_pin = "H5" *)  output wire HEX12,
+    (* chip_pin = "H4" *)  output wire HEX13,
+    (* chip_pin = "G5" *)  output wire HEX20,
+    (* chip_pin = "G6" *)  output wire HEX21,
+    (* chip_pin = "C2" *)  output wire HEX22,
+    (* chip_pin = "C1" *)  output wire HEX23,
+    (* chip_pin = "F4" *)  output wire HEX30,
+    (* chip_pin = "D5" *)  output wire HEX31,
+    (* chip_pin = "D6" *)  output wire HEX32,
+    (* chip_pin = "J4" *)  output wire HEX33,
+    (* chip_pin = "L8" *)  output wire HEX34,
+    (* chip_pin = "F3" *)  output wire HEX35,
+    (* chip_pin = "D4" *)  output wire HEX36,
     (* chip_pin = "H15" *)  input wire PS2_CLK, 
     (* chip_pin = "J14" *)  input wire PS2_DAT,
     (* chip_pin = "V20" *)  output wire SD_CLK, //SD_CLK
@@ -400,5 +410,14 @@ wire sdram_waitrequest;
     assign HEX00 = ~Art_selected;
     assign HEX01 = ~Ram_selected;
     assign HEX02 = ~Rom_selected;
-    //assign HEX03 = ~Sdc_selected;
+    //assign HEX03 = ~Sdram_selected ;
+
+    assign HEX31 = ~Sdram_selected;
+    assign HEX32 = ~sdram_readdatavalid;
+    assign HEX33 = ~sdram_read_n;
+    assign HEX34 = ~sdram_write_n;
+    assign HEX35 = ~sdram_waitrequest;
+    assign HEX36 = ~|sdram_readdata;
+
+
 endmodule

@@ -140,7 +140,6 @@ module riscv64(
 	    // Default PC+4    (1.Could be overide 2.Take effect next cycle) 
             pc <= pc + 4;
 	    interrupt_ack <= 0;
-
 	    bus_read_enable <= 0;
 	    bus_write_enable <= 0; 
 
