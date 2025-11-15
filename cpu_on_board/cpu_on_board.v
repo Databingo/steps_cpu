@@ -39,16 +39,16 @@ module cpu_on_board (
     //
     //(* chip_pin = "..." *) output wire [1:0]  DRAM_DQM,
 
-    (* chip_pin = "PIN_N6, PIN_W3, PIN_N4, PIN_P3, PIN_P5, PIN_P6, PIN_R5, PIN_R6, PIN_Y4, PIN_Y3, PIN_W5, PIN_W4" *)  output wire [11:0] DRAM_ADDR,
-    (* chip_pin = "PIN_T2, PIN_T1, PIN_R2, PIN_R1, PIN_P2, PIN_P1, PIN_N2, PIN_N1, PIN_Y2, PIN_Y1, PIN_W2, PIN_W1, PIN_V2, PIN_V1, PIN_U2, PIN_U1" *)  output wire [15:0] DRAM_DQ,
-    (* chip_pin = "PIN_V4, PIN_U3" *)  output wire [1:0] DRAM_BA, // Bank address
-    (* chip_pin = "PIN_T3" *)  output wire DRAM_CAS_N, // Column address strobe
-    (* chip_pin = "PIN_T5" *)  output wire DRAM_RAS_N, // Row address strobe
-    (* chip_pin = "PIN_U4" *)  output wire DRAM_CLK, 
-    (* chip_pin = "PIN_N3" *)  output wire DRAM_CKE,  // Clock enable
-    (* chip_pin = "PIN_R8" *)  output wire DRAM_WE_N, // write enable
-    (* chip_pin = "PIN_T6" *)  output wire DRAM_CS_N,  // chip selected
-    (* chip_pin = "PIN_M5, PIN_R7" *)  output wire [1:0] DRAM_DQM   // High-low byte data mask
+    (* chip_pin = "N6, W3, N4, P3, P5, P6, R5, R6, Y4, Y3, W5, W4" *)  output wire [11:0] DRAM_ADDR,
+    (* chip_pin = "T2, T1, R2, R1, P2, P1, N2, N1, Y2, Y1, W2, W1, V2, V1, U2, U1" *)  output wire [15:0] DRAM_DQ,
+    (* chip_pin = "V4, U3" *)  output wire [1:0] DRAM_BA, // Bank address
+    (* chip_pin = "T3" *)  output wire DRAM_CAS_N, // Column address strobe
+    (* chip_pin = "T5" *)  output wire DRAM_RAS_N, // Row address strobe
+    (* chip_pin = "U4" *)  output wire DRAM_CLK, 
+    (* chip_pin = "N3" *)  output wire DRAM_CKE,  // Clock enable
+    (* chip_pin = "R8" *)  output wire DRAM_WE_N, // write enable
+    (* chip_pin = "T6" *)  output wire DRAM_CS_N,  // chip selected
+    (* chip_pin = "M5, R7" *)  output wire [1:0] DRAM_DQM   // High-low byte data mask
     //(* chip_pin = "PIN_R7" *)  output wire DRAM_LDQM,  // Low byte data mask
     //(* chip_pin = "PIN_M5" *)  output wire DRAM_UDQM   // High byte data mask
 );
