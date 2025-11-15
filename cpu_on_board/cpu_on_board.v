@@ -23,7 +23,7 @@ module cpu_on_board (
     (* chip_pin = "V20" *)  output wire SD_CLK, //SD_CLK
     (* chip_pin = "Y20" *)  inout wire SD_CMD, // SD_CMD (MOSI)
     (* chip_pin = "W20" *)  inout wire SD_DAT0, // SD_DAT (MISO)
-    (* chip_pin = "U20" *)  output wire SD_DAT3 // SD_DAT3
+    (* chip_pin = "U20" *)  output wire SD_DAT3, // SD_DAT3
 //);
     
     // -- SDRAM pins (add these to your pin assignments) --
@@ -79,8 +79,7 @@ sdram sdram_instance (
         .new_sdram_controller_0_wire_we_n        (DRAM_WE_N)         //                            .we_n
     );
 assign DRAM_CLK = CLOCK_50; // Or use PLL for phase-shifted clock
-wire [21:0] sdram_address;
-assign sdram_address = bus_address[21:0];
+wire [21:0] sdram_address = bus_address[21:0];
 //assign sdram_byteenable_n)
 //assign sdram_chipselect), 
 //assign sdram_writedata),  
