@@ -79,7 +79,8 @@ sdram sdram_instance (
         .new_sdram_controller_0_wire_we_n        (DRAM_WE_N)         //                            .we_n
     );
 assign DRAM_CLK = CLOCK_50; // Or use PLL for phase-shifted clock
-assign sdram_address [21:0] = bus_address[21:0];
+wire [21:0] sdram_address;
+assign sdram_address = bus_address[21:0];
 //assign sdram_byteenable_n)
 //assign sdram_chipselect), 
 //assign sdram_writedata),  
