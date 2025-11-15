@@ -3,7 +3,7 @@
  <debug showDebugMenu="0" />
  <systemtable>
   <columns>
-   <connections preferredWidth="47" />
+   <connections preferredWidth="95" />
    <irq preferredWidth="34" />
   </columns>
  </systemtable>
@@ -14,7 +14,7 @@
    <frequency preferredWidth="248" />
   </columns>
  </clocktable>
- <library expandedCategories="Project,Library,Library/PLL" />
+ <library expandedCategories="Library,Project,Library/PLL" />
  <window width="1100" height="747" x="77" y="77" />
  <hdlexample language="VERILOG" />
  <generation path="sdram" />
