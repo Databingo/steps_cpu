@@ -24,7 +24,76 @@ module cpu_on_board (
     (* chip_pin = "Y20" *)  inout wire SD_CMD, // SD_CMD (MOSI)
     (* chip_pin = "W20" *)  inout wire SD_DAT0, // SD_DAT (MISO)
     (* chip_pin = "U20" *)  output wire SD_DAT3 // SD_DAT3
+//);
+    
+    // -- SDRAM pins (add these to your pin assignments) --
+    //(* chip_pin = "..." *) output wire [11:0] DRAM_ADDR,
+    //(* chip_pin = "..." *) inout  wire [15:0] DRAM_DQ,
+    //(* chip_pin = "..." *) output wire [1:0]  DRAM_BA,
+    //(* chip_pin = "..." *) output wire        DRAM_CAS_N,
+    //(* chip_pin = "..." *) output wire        DRAM_RAS_N,
+    //(* chip_pin = "..." *) output wire        DRAM_CLK,
+    //(* chip_pin = "..." *) output wire        DRAM_WE_N
+    //(* chip_pin = "..." *) output wire        DRAM_CS_N,
+    //(* chip_pin = "..." *) output wire        DRAM_CKE,
+    //
+    //(* chip_pin = "..." *) output wire [1:0]  DRAM_DQM,
+
+    (* chip_pin = "PIN_N6, PIN_W3, PIN_N4, PIN_P3, PIN_P5, PIN_P6, PIN_R5, PIN_R6, PIN_Y4, PIN_Y3, PIN_W5, PIN_W4" *)  output wire [11:0] DRAM_ADDR,
+    (* chip_pin = "PIN_T2, PIN_T1, PIN_R2, PIN_R1, PIN_P2, PIN_P1, PIN_N2, PIN_N1, PIN_Y2, PIN_Y1, PIN_W2, PIN_W1, PIN_V2, PIN_V1, PIN_U2, PIN_U1" *)  output wire [15:0] DRAM_DQ,
+    (* chip_pin = "PIN_V4, PIN_U3" *)  output wire [1:0] DRAM_BA, // Bank address
+    (* chip_pin = "PIN_T3" *)  output wire DRAM_CAS_N, // Column address strobe
+    (* chip_pin = "PIN_T5" *)  output wire DRAM_RAS_N, // Row address strobe
+    (* chip_pin = "PIN_U4" *)  output wire DRAM_CLK, 
+    (* chip_pin = "PIN_N3" *)  output wire DRAM_CKE,  // Clock enable
+    (* chip_pin = "PIN_R8" *)  output wire DRAM_WE_N, // write enable
+    (* chip_pin = "PIN_T6" *)  output wire DRAM_CS_N,  // chip selected
+    (* chip_pin = "PIN_M5, PIN_R7" *)  output wire [1:0] DRAM_DQM   // High-low byte data mask
+    //(* chip_pin = "PIN_R7" *)  output wire DRAM_LDQM,  // Low byte data mask
+    //(* chip_pin = "PIN_M5" *)  output wire DRAM_UDQM   // High byte data mask
 );
+
+// -- sdram end--
+sdram sdram_instance (
+        .clk_clk                                 (CLOCK_50),  
+        .reset_reset_n                           (KEY0),                //                       reset.reset_n
+	// to bus
+        .new_sdram_controller_0_s1_address       (sdram_address),       //   new_sdram_controller_0_s1.address
+        .new_sdram_controller_0_s1_byteenable_n  (sdram_byteenable_n),  //                            .byteenable_n
+        .new_sdram_controller_0_s1_chipselect    (sdram_chipselect),    //                            .chipselect
+        .new_sdram_controller_0_s1_writedata     (sdram_writedata),     //                            .writedata
+        .new_sdram_controller_0_s1_read_n        (sdram_read_n),        //                            .read_n
+        .new_sdram_controller_0_s1_write_n       (sdram_write_n),       //                            .write_n
+        .new_sdram_controller_0_s1_readdata      (sdram_readdata),      //                            .readdata
+        .new_sdram_controller_0_s1_readdatavalid (sdram_readdatavalid), //                            .readdatavalid
+        .new_sdram_controller_0_s1_waitrequest   (sdram_waitrequest),   //                            .waitrequest
+        // to pin
+        .new_sdram_controller_0_wire_addr        (DRAM_ADDR),        // new_sdram_controller_0_wire.addr
+        .new_sdram_controller_0_wire_ba          (DRAM_BA),          //                            .ba
+        .new_sdram_controller_0_wire_cas_n       (DRAM_CAS_N),       //                            .cas_n
+        .new_sdram_controller_0_wire_cke         (DRAM_CKE),         //                            .cke
+        .new_sdram_controller_0_wire_cs_n        (DRAM_CS_N),        //                            .cs_n
+        .new_sdram_controller_0_wire_dq          (DRAM_DQ),          //                            .dq
+        .new_sdram_controller_0_wire_dqm         (DRAM_DQM),         //                            .dqm
+        .new_sdram_controller_0_wire_ras_n       (DRAM_RAS_N),       //                            .ras_n
+        .new_sdram_controller_0_wire_we_n        (DRAM_WE_N)         //                            .we_n
+    );
+assign DRAM_CLK = CLOCK_50; // Or use PLL for phase-shifted clock
+assign sdram_address [21:0] = bus_address[21:0];
+//assign sdram_byteenable_n)
+//assign sdram_chipselect), 
+//assign sdram_writedata),  
+//assign sdram_read_n),     
+//assign sdram_write_n),    
+//assign sdram_readdata),   
+//assign sdram_readdatavalid
+//assign sdram_waitrequest),
+
+
+
+
+
+
 
     // -- MEM -- minic L1 cache
     (* ram_style = "block" *) reg [31:0] Cache [0:3071];
