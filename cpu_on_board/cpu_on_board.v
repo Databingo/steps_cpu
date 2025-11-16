@@ -76,7 +76,8 @@ sdram sdram_instance (
     );
 //assign DRAM_CLK = CLOCK_50; // Or use PLL for phase-shifted clock
 wire [21:0] sdram_address = bus_address - `Sdram_min;
-wire sdram_chipselect = Sdram_selected;
+//wire sdram_chipselect = Sdram_selected;
+wire sdram_chipselect = Sdram_selected && (bus_read_enable || bus_write_enable || !bus_read_done || !bus_write_done);
 //wire sdram_read_n  = ~(Sdram_selected && (bus_read_enable || !bus_read_done)); 
 //wire sdram_write_n = ~(Sdram_selected && (bus_write_enable|| !bus_write_done));   
 wire sdram_read_n  = ~(Sdram_selected && bus_read_enable); 
@@ -91,20 +92,27 @@ wire sdram_waitrequest;
 wire sys_clk;
 wire sdram_clk;
 
-    // -- sdram pll --
-    sdram_pll sdrampll (
-        .clk_clk                        (CLOCK_50),               //                     clk.clk
-        .reset_reset_n                  (KEY0),                   //                   reset.reset_n
-        .altpll_0_c0_clk                (sys_clk),                //             altpll_0_c0.clk
-        .altpll_0_c1_clk                (sdram_clk),              //             altpll_0_c1.clk
-        .altpll_0_areset_conduit_export (), // altpll_0_areset_conduit.export
-        .altpll_0_locked_conduit_export ()  // altpll_0_locked_conduit.export
+    //// -- sdram pll --
+    //sdram_pll sdrampll (
+    //    .clk_clk                        (CLOCK_50),               //                     clk.clk
+    //    .reset_reset_n                  (KEY0),                   //                   reset.reset_n
+    //    .altpll_0_c0_clk                (sys_clk),                //             altpll_0_c0.clk
+    //    .altpll_0_c1_clk                (sdram_clk),              //             altpll_0_c1.clk
+    //    .altpll_0_areset_conduit_export (), // altpll_0_areset_conduit.export
+    //    .altpll_0_locked_conduit_export ()  // altpll_0_locked_conduit.export
+    //);
+
+
+  // -- up pll --
+    upclk u0 (
+        .clk_clk                   (CLOCK_50),                   //                   clk.clk
+        .reset_reset_n             (KEY0),             //                 reset.reset_n
+        .up_clocks_0_sdram_clk_clk (sdram_clk), // up_clocks_0_sdram_clk.clk
+        .up_clocks_0_sys_clk_clk   (sys_clk)    //   up_clocks_0_sys_clk.clk
     );
+
+
 assign DRAM_CLK=sdram_clk;
-
-
-
-
 
 
     // -- MEM -- minic L1 cache
@@ -299,8 +307,8 @@ assign DRAM_CLK=sdram_clk;
 	    if (Sdc_addr_selected) begin sd_addr <= bus_write_data[31:0]; bus_write_done <= 1; end
 	    if (Sdc_read_selected) begin sd_rd_start <= 1; bus_write_done <= 1; end
 
-	    //if (Sdram_selected) begin if (!sdram_waitrequest) bus_write_done <= 1; end
-	    if (Sdram_selected) begin bus_write_done <= 1; end
+	    if (Sdram_selected) begin if (!sdram_waitrequest) bus_write_done <= 1; end
+	    //if (Sdram_selected) begin bus_write_done <= 1; end
         end
     end
 
@@ -422,8 +430,8 @@ assign DRAM_CLK=sdram_clk;
 
     assign HEX31 = ~Sdram_selected;
     assign HEX32 = ~sdram_readdatavalid;
-    assign HEX33 = ~sdram_read_n;
-    assign HEX34 = ~sdram_write_n;
+    assign HEX33 = sdram_read_n;
+    assign HEX34 = sdram_write_n;
     assign HEX35 = ~sdram_waitrequest;
     assign HEX36 = ~|sdram_readdata;
 

@@ -118,6 +118,7 @@ set_global_assignment -name CYCLONEII_RESERVE_NCEO_AFTER_CONFIGURATION "USE AS R
 
 set_global_assignment -name QIP_FILE sdram/synthesis/sdram.qip
 set_global_assignment -name QIP_FILE sdram_pll/sdram/synthesis/sdram_pll.qip
+set_global_assignment -name QIP_FILE upclk/synthesis/upclk.qip
 
 #set_global_assignment -name VERILOG_FILE SD_CMD.v
 #set_global_assignment -name VERILOG_FILE SD_CLK.v
