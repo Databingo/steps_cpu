@@ -1,0 +1,18 @@
+set_global_assignment -entity "upclk" -library "upclk" -name IP_TOOL_NAME "Qsys"
+set_global_assignment -entity "upclk" -library "upclk" -name IP_TOOL_VERSION "13.0sp1"
+set_global_assignment -entity "upclk" -library "upclk" -name IP_TOOL_ENV "Qsys"
+set_global_assignment -library "upclk" -name SOPCINFO_FILE [file join $::quartus(qip_path) "../../upclk.sopcinfo"]
+set_instance_assignment -entity "upclk" -library "upclk" -name SLD_INFO "QSYS_NAME upclk HAS_SOPCINFO 1 GENERATION_ID 1763261162"
+set_global_assignment -library "upclk" -name MISC_FILE [file join $::quartus(qip_path) "../../upclk.cmp"]
+set_global_assignment -name SYNTHESIS_ONLY_QIP ON
+set_global_assignment -library "upclk" -name MISC_FILE [file join $::quartus(qip_path) "../../upclk.qsys"]
+
+set_global_assignment -library "upclk" -name VERILOG_FILE [file join $::quartus(qip_path) "upclk.v"]
+set_global_assignment -library "upclk" -name VERILOG_FILE [file join $::quartus(qip_path) "submodules/altera_reset_controller.v"]
+set_global_assignment -library "upclk" -name VERILOG_FILE [file join $::quartus(qip_path) "submodules/altera_reset_synchronizer.v"]
+set_global_assignment -library "upclk" -name SDC_FILE [file join $::quartus(qip_path) "submodules/altera_reset_controller.sdc"]
+set_global_assignment -library "upclk" -name VERILOG_FILE [file join $::quartus(qip_path) "submodules/upclk_up_clocks_0.v"]
+
+set_global_assignment -entity "altera_reset_controller" -library "upclk" -name IP_TOOL_NAME "altera_reset_controller"
+set_global_assignment -entity "altera_reset_controller" -library "upclk" -name IP_TOOL_VERSION "13.0"
+set_global_assignment -entity "altera_reset_controller" -library "upclk" -name IP_TOOL_ENV "Qsys"
