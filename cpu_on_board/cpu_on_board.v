@@ -162,7 +162,7 @@ assign DRAM_CLK=sdram_clk;
         .bus_read_data(bus_read_data)
     );
 
-    // -- Keyboard -- 
+    CLOCK_50// -- Keyboard -- 
     reg [7:0] ascii;
     reg [7:0] scan;
     reg key_pressed_delay;
@@ -307,8 +307,8 @@ assign DRAM_CLK=sdram_clk;
 	    if (Sdc_addr_selected) begin sd_addr <= bus_write_data[31:0]; bus_write_done <= 1; end
 	    if (Sdc_read_selected) begin sd_rd_start <= 1; bus_write_done <= 1; end
 
-	    if (Sdram_selected) begin if (!sdram_waitrequest) bus_write_done <= 1; end
-	    //if (Sdram_selected) begin bus_write_done <= 1; end
+	    //if (Sdram_selected) begin if (!sdram_waitrequest) bus_write_done <= 1; end
+	    if (Sdram_selected) begin bus_write_done <= 1; end
         end
     end
 
