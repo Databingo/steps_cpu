@@ -92,7 +92,7 @@ wire sys_clk;
 wire sdram_clk;
 
     // -- sdram pll --
-    sdram_pll u0 (
+    sdram_pll sdrampll (
         .clk_clk                        (CLOCK_50),               //                     clk.clk
         .reset_reset_n                  (KEY0),                   //                   reset.reset_n
         .altpll_0_c0_clk                (sys_clk),                //             altpll_0_c0.clk
