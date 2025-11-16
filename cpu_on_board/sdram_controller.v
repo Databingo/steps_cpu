@@ -43,7 +43,9 @@ wire init_RefMax;
 assign init_RefMax = (init_ref_cnt == 3'b111) ? 1'b1 : 1'b0;
 
 always @(posedge sys_clk, negedge rstn) begin
-	if(!rstn || cur[4:0] == IWAIT[4:0])
+	if(!rstn )
+		init_ref_cnt[2:0] <= 3'b000;
+	else if(cur[4:0] == IWAIT[4:0])
 		init_ref_cnt[2:0] <= 3'b000;
 	else if(cur[4:0] == IDELAY3[4:0])
 		init_ref_cnt[2:0] <= init_ref_cnt[2:0] + 1'b1;
@@ -59,7 +61,9 @@ reg [8:0] ref_cnt;
 parameter RefMax=9'd390;
 
 always @(posedge sys_clk, negedge rstn) begin
-	if(!rstn || cur[4:0] == FREF[4:0])
+	if(!rstn)
+		ref_cnt[8:0] <= 9'd0;
+	else if(cur[4:0] == FREF[4:0])
 		ref_cnt[8:0] <= 9'd0;
 	else 
 		ref_cnt[8:0] <= ref_cnt[8:0] + 1'b1;
