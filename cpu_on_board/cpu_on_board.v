@@ -218,12 +218,14 @@ assign DRAM_CKE = 1; // always enable
     wire key_pressed_edge = key_pressed && !key_pressed_delay;
 
     // -- Monitor -- Connected to Bus
+    reg uart_write_pulse;
     jtag_uart_system my_jtag_system (
         .clk_clk                                 (CLOCK_50),
         .reset_reset_n                           (KEY0),
         .jtag_uart_0_avalon_jtag_slave_address   (bus_address[0:0]),
         .jtag_uart_0_avalon_jtag_slave_writedata (bus_write_data[31:0]),
-        .jtag_uart_0_avalon_jtag_slave_write_n   (~uart_write_trigger_pulse),
+        //.jtag_uart_0_avalon_jtag_slave_write_n   (~uart_write_trigger_pulse),
+        .jtag_uart_0_avalon_jtag_slave_write_n   (~uart_write_pulse),
         .jtag_uart_0_avalon_jtag_slave_chipselect(1'b1),
         .jtag_uart_0_avalon_jtag_slave_read_n    (1'b1)
     );
@@ -275,10 +277,12 @@ assign DRAM_CKE = 1; // always enable
 	    ld <= 0;
 	    sd <= 0;
 	    bus_read_data <= 0;
+	    uart_write_pulse <= 0;
 	end else begin
         bus_address_reg <= bus_address>>2;
         bus_address_reg_full <= bus_address;
         sd_rd_start <= 0;
+        uart_write_pulse <= 0;
 
         if (bus_read_enable) begin bus_read_done <= 0; end
         if (bus_write_enable) begin bus_write_done <= 0; end
@@ -353,6 +357,8 @@ assign DRAM_CKE = 1; // always enable
 
 	    if (Sdc_addr_selected) begin sd_addr <= bus_write_data[31:0]; bus_write_done <= 1; end
 	    if (Sdc_read_selected) begin sd_rd_start <= 1; bus_write_done <= 1; end
+
+	    if (Art_selected) begin uart_write_pulse <= 1; bus_write_done <=1; end
 
 	    //if (Sdram_selected) begin if (!sdram_waitrequest) bus_write_done <= 1; end
 	    //if (Sdram_selected) begin bus_write_done <= 1; end
@@ -437,14 +443,14 @@ end
     );
 
 
-    // UART Writer Trigger
-    wire uart_write_trigger = bus_write_enable && Art_selected;
-    reg uart_write_trigger_dly;
-    always @(posedge CLOCK_50 or negedge KEY0) begin
-        if (!KEY0) uart_write_trigger_dly <= 0;
-        else uart_write_trigger_dly <= uart_write_trigger;
-    end
-    assign uart_write_trigger_pulse = uart_write_trigger  && !uart_write_trigger_dly;
+    //// UART Writer Trigger
+    //wire uart_write_trigger = bus_write_enable && Art_selected;
+    //reg uart_write_trigger_dly;
+    //always @(posedge CLOCK_50 or negedge KEY0) begin
+    //    if (!KEY0) uart_write_trigger_dly <= 0;
+    //    else uart_write_trigger_dly <= uart_write_trigger;
+    //end
+    //assign uart_write_trigger_pulse = uart_write_trigger  && !uart_write_trigger_dly;
 
     // Interrupt controller
     wire [3:0] interrupt_vector;
