@@ -17,6 +17,19 @@ _start:
     
     # Print it
     sb t2, 0(t0)         # Should print 'X'
+    sb t2, 0(t0)         # Should print 'X'
+    sb t2, 0(t0)         # Should print 'X'
     
+    # Write one byte
+    li t1, 0x41          # 'A'
+    sh t1, 0(s0)
+    
+    # Read it back
+    lbu t2, 0(s0)
+    
+    # Print it
+    sb t2, 0(t0)         # Should print 'A'
+    sb t2, 0(t0)         # Should print 'A'
+    sb t2, 0(t0)         # Should print 'A'
 done:
     j done
