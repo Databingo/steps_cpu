@@ -158,8 +158,10 @@ assign DRAM_CLK=sdram_clk;
 
         .bus_read_type(bus_read_type), // lb lh lw ld lbu lhu lwu 
         .bus_write_type(bus_write_type), // sb sh sw sd 
+
+        .bus_read_data(bus_read_data),
         .bus_read_done(bus_read_done),
-        .bus_read_data(bus_read_data)
+        .bus_write_done(bus_write_done)
     );
 
     // -- Keyboard -- 
