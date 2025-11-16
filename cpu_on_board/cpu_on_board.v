@@ -359,7 +359,7 @@ assign DRAM_CKE = 1; // always enable
 	    if (Sdram_selected) begin if (sdram_req_wait==0) bus_write_done <= 1; end
         end
     end
-//end
+end
 
     // -- SD Card --
     wire [11:0] cid = (bus_address-`Sdc_base);
