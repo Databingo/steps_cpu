@@ -226,8 +226,22 @@ assign DRAM_CLK=sdram_clk;
     reg bus_write_done = 1;
     reg [63:0] next_addr;
 
+    //reg bus_read_start = 0;
+    //reg bus_write_start = 0;
+
+
 
     always @(posedge sys_clk) begin
+        if (!KEY0) begin
+            bus_read_done <= 1;
+            bus_write_done <= 1;
+	    bus_address_reg <= 0;
+	    bus_address_reg_full <= 0;
+	    next_addr <= 0;
+	    ld <= 0;
+	    sd <= 0;
+	    bus_read_data <= 0;
+	end else begin
         bus_address_reg <= bus_address>>2;
         bus_address_reg_full <= bus_address;
         sd_rd_start <= 0;
@@ -305,10 +319,11 @@ assign DRAM_CLK=sdram_clk;
 	    if (Sdc_addr_selected) begin sd_addr <= bus_write_data[31:0]; bus_write_done <= 1; end
 	    if (Sdc_read_selected) begin sd_rd_start <= 1; bus_write_done <= 1; end
 
-	    if (Sdram_selected) begin if (!sdram_waitrequest) bus_write_done <= 1; end
-	    //if (Sdram_selected) begin bus_write_done <= 1; end
+	    //if (Sdram_selected) begin if (!sdram_waitrequest) bus_write_done <= 1; end
+	    if (Sdram_selected) begin bus_write_done <= 1; end
         end
     end
+end
 
     // -- SD Card --
     wire [11:0] cid = (bus_address-`Sdc_base);
