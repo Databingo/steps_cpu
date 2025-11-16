@@ -162,7 +162,7 @@ assign DRAM_CLK=sdram_clk;
         .bus_read_data(bus_read_data)
     );
 
-    CLOCK_50// -- Keyboard -- 
+    // -- Keyboard -- 
     reg [7:0] ascii;
     reg [7:0] scan;
     reg key_pressed_delay;
