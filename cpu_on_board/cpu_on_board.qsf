@@ -117,6 +117,7 @@ set_global_assignment -name QIP_FILE spi/synthesis/spi.qip
 set_global_assignment -name CYCLONEII_RESERVE_NCEO_AFTER_CONFIGURATION "USE AS REGULAR IO"
 
 set_global_assignment -name QIP_FILE sdram/synthesis/sdram.qip
+set_global_assignment -name QIP_FILE sdram_pll/synthesis/sdram_pll.qip
 
 #set_global_assignment -name VERILOG_FILE SD_CMD.v
 #set_global_assignment -name VERILOG_FILE SD_CLK.v
