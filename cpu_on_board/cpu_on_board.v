@@ -266,16 +266,16 @@ assign DRAM_CKE = 1; // always enable
 
 
     always @(posedge CLOCK_50) begin
-        //if (!KEY0) begin
-        //    bus_read_done <= 1;
-        //    bus_write_done <= 1;
-	//    bus_address_reg <= 0;
-	//    bus_address_reg_full <= 0;
-	//    next_addr <= 0;
-	//    ld <= 0;
-	//    sd <= 0;
-	//    bus_read_data <= 0;
-	//end else begin
+        if (!KEY0) begin
+            bus_read_done <= 1;
+            bus_write_done <= 1;
+	    bus_address_reg <= 0;
+	    bus_address_reg_full <= 0;
+	    next_addr <= 0;
+	    ld <= 0;
+	    sd <= 0;
+	    bus_read_data <= 0;
+	end else begin
         bus_address_reg <= bus_address>>2;
         bus_address_reg_full <= bus_address;
         sd_rd_start <= 0;
