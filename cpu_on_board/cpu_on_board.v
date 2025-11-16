@@ -51,7 +51,7 @@ module cpu_on_board (
 
 // -- sdram end--
 sdram sdram_instance (
-        .clk_clk                                 (CLOCK_50),  
+        .clk_clk                                 (sys_clk),  
         .reset_reset_n                           (KEY0),                //                       reset.reset_n
 	// to bus
         .new_sdram_controller_0_s1_address       (sdram_address),       //   new_sdram_controller_0_s1.address
@@ -74,7 +74,7 @@ sdram sdram_instance (
         .new_sdram_controller_0_wire_ras_n       (DRAM_RAS_N),       //                            .ras_n
         .new_sdram_controller_0_wire_we_n        (DRAM_WE_N)         //                            .we_n
     );
-assign DRAM_CLK = CLOCK_50; // Or use PLL for phase-shifted clock
+//assign DRAM_CLK = CLOCK_50; // Or use PLL for phase-shifted clock
 wire [21:0] sdram_address = bus_address - `Sdram_min;
 wire sdram_chipselect = Sdram_selected;
 //wire sdram_read_n  = ~(Sdram_selected && (bus_read_enable || !bus_read_done)); 
@@ -88,15 +88,19 @@ wire [15:0] sdram_readdata;
 wire sdram_readdatavalid;
 wire sdram_waitrequest;
 
-    //// -- sdram pll --
-    //sdram_pll u0 (
-    //    .clk_clk                        (),                        //                     clk.clk
-    //    .reset_reset_n                  (),                  //                   reset.reset_n
-    //    .altpll_0_c0_clk                (),                //             altpll_0_c0.clk
-    //    .altpll_0_c1_clk                (),                //             altpll_0_c1.clk
-    //    .altpll_0_areset_conduit_export (), // altpll_0_areset_conduit.export
-    //    .altpll_0_locked_conduit_export ()  // altpll_0_locked_conduit.export
-    //);
+wire sys_clk;
+wire sdram_clk;
+
+    // -- sdram pll --
+    sdram_pll u0 (
+        .clk_clk                        (CLOCK_50),               //                     clk.clk
+        .reset_reset_n                  (KEY0),                   //                   reset.reset_n
+        .altpll_0_c0_clk                (sys_clk),                //             altpll_0_c0.clk
+        .altpll_0_c1_clk                (sdram_clk),              //             altpll_0_c1.clk
+        .altpll_0_areset_conduit_export (), // altpll_0_areset_conduit.export
+        .altpll_0_locked_conduit_export ()  // altpll_0_locked_conduit.export
+    );
+assign DRAM_CLK=sdram_clk;
 
 
 
@@ -295,8 +299,8 @@ wire sdram_waitrequest;
 	    if (Sdc_addr_selected) begin sd_addr <= bus_write_data[31:0]; bus_write_done <= 1; end
 	    if (Sdc_read_selected) begin sd_rd_start <= 1; bus_write_done <= 1; end
 
-	    if (Sdram_selected) begin if (!sdram_waitrequest) bus_write_done <= 1; end
-	    //if (Sdram_selected) begin bus_write_done <= 1; end
+	    //if (Sdram_selected) begin if (!sdram_waitrequest) bus_write_done <= 1; end
+	    if (Sdram_selected) begin bus_write_done <= 1; end
         end
     end
 
