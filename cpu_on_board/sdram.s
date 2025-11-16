@@ -18,7 +18,7 @@ _start:
     # Print it
     sb t2, 0(t0)         # Should print 'X'
     sb t2, 0(t0)         # Should print 'X'
-    sb t2, 0(t0)         # Should print 'X'
+    sh t2, 0(t0)         # Should print 'X'
     
     # Write one byte
     li t1, 0x41          # 'A'
@@ -29,8 +29,8 @@ _start:
     
     # Print it
     sb t3, 0(t0)         # Should print 'A'
-    sb t2, 0(t0)         # Should print 'X'
+    sh t2, 0(t0)         # Should print 'X'
     sb t3, 0(t0)         # Should print 'A'
-    sb t3, 0(t0)         # Should print 'A'
+    sh t3, 0(t0)         # Should print 'A'
 done:
     j done
