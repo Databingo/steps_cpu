@@ -403,10 +403,11 @@ assign DRAM_CKE = 1; // always enable
 		       case(step)
 			   0: begin sdram_addr <= bus_address[22:1]; sdram_wrdata <= bus_write_data[15:0]; 
 			            sdram_byte_en <= (bus_ls_type == 3'b000) ? (bus_address[0] ? 2'b10 : 2'b01) : 2'b11; sdram_write_en <= 1; step <= 1; end
-			    1: begin if (sdram_req_wait==0) begin bus_write_done <= 1; step <= 0; end end // sb000 sh001
+			   1: begin if (sdram_req_wait==0) begin bus_write_done <= 1; step <= 0; end end // sb000 sh001
 		       endcase
 	           end
 	       endcase
+	   end
         end
     end
 end
