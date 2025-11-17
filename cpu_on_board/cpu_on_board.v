@@ -392,7 +392,7 @@ assign DRAM_CKE = 1; // always enable
 		   end
 	           3'b011: begin // sd
 		       case(step)
-			   0: begin sdram_addr <= bus_address[22:1]; sdram_wrdata <= bus_write_data[15:0]; sdram_byte_en <= 2'b11; sdram_write_en <= 1; step <= 1; end end
+			   0: begin sdram_addr <= bus_address[22:1]; sdram_wrdata <= bus_write_data[15:0]; sdram_byte_en <= 2'b11; sdram_write_en <= 1; step <= 1; end
 			   1: begin if (sdram_req_wait==0) begin sdram_addr <= bus_address[22:1]+1; sdram_wrdata <= bus_write_data[31:16]; sdram_byte_en <= 2'b11; sdram_write_en <= 1; step <= 2; end end
 			   2: begin if (sdram_req_wait==0) begin sdram_addr <= bus_address[22:1]+2; sdram_wrdata <= bus_write_data[47:32]; sdram_byte_en <= 2'b11; sdram_write_en <= 1; step <= 3; end end
 			   3: begin if (sdram_req_wait==0) begin sdram_addr <= bus_address[22:1]+3; sdram_wrdata <= bus_write_data[63:48]; sdram_byte_en <= 2'b11; sdram_write_en <= 1; step <= 4; end end
