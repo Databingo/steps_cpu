@@ -199,20 +199,30 @@ module riscv64(
 		        if (load_step == 1 && bus_read_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working 1 bubble2 this3
 			if (load_step == 1 && bus_read_done == 1) begin re[w_rd]<= bus_read_data; load_step <= 0; end end //bus_read_enable <= 0; end end // bus ok and execute
                     // Store
-	            32'b???????_?????_?????_000_?????_0100011: begin bus_address <= re[w_rs1] + w_imm_s;bus_write_data<=re[w_rs2][7:0]; bus_write_enable<=1;bus_write_type<=w_func3;end//Sb bus1 cycles
-	            //32'b???????_?????_?????_000_?????_0100011: begin 
-		    //    if (store_step == 0) begin bus_address <= re[w_rs1] + w_imm_s; bus_write_data<=re[w_rs2][7:0];bus_write_enable<=1;pc<=pc-4;bubble<=1;store_step<=1;bus_write_type<=w_func3; end
-		    //    if (store_step == 1 && bus_write_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working 1 bubble2 this3
-		    //    if (store_step == 1 && bus_write_done == 1) store_step <= 0;
-		    //    end //Sb bus1 cycles
+	            //32'b???????_?????_?????_000_?????_0100011: begin bus_address <= re[w_rs1] + w_imm_s;bus_write_data<=re[w_rs2][7:0]; bus_write_enable<=1;bus_write_type<=w_func3;end//Sb bus1 cycles
 	            //32'b???????_?????_?????_001_?????_0100011: begin bus_address <= re[w_rs1] + w_imm_s;bus_write_data<=re[w_rs2][15:0];bus_write_enable<=1;bus_write_type<=w_func3;end//Sh bus1
+	            //32'b???????_?????_?????_010_?????_0100011: begin bus_address <= re[w_rs1] + w_imm_s;bus_write_data<=re[w_rs2][31:0];bus_write_enable<=1;bus_write_type<=w_func3;end//Sw bus1
+	            //32'b???????_?????_?????_011_?????_0100011: begin bus_address <= re[w_rs1] + w_imm_s;bus_write_data<=re[w_rs2];bus_write_enable<=1;pc<=pc;bubble<=1;bus_write_type<=w_func3;end//Sdbus2
+	            32'b???????_?????_?????_000_?????_0100011: begin 
+		        if (store_step == 0) begin bus_address <= re[w_rs1] + w_imm_s; bus_write_data<=re[w_rs2][7:0];bus_write_enable<=1;pc<=pc-4;bubble<=1;store_step<=1;bus_write_type<=w_func3; end
+		        if (store_step == 1 && bus_write_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working 1 bubble2 this3
+		        if (store_step == 1 && bus_write_done == 1) store_step <= 0;
+		        end //Sb bus1 cycles
 	            32'b???????_?????_?????_001_?????_0100011: begin
 		        if (store_step == 0) begin bus_address <= re[w_rs1] + w_imm_s; bus_write_data<=re[w_rs2][15:0];bus_write_enable<=1;pc<=pc-4;bubble<=1;store_step<=1;bus_write_type<=w_func3; end
 		        if (store_step == 1 && bus_write_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working 1 bubble2 this3
 		        if (store_step == 1 && bus_write_done == 1) store_step <= 0;
 		        end //Sh
-	            32'b???????_?????_?????_010_?????_0100011: begin bus_address <= re[w_rs1] + w_imm_s;bus_write_data<=re[w_rs2][31:0];bus_write_enable<=1;bus_write_type<=w_func3;end//Sw bus1
-	            32'b???????_?????_?????_011_?????_0100011: begin bus_address <= re[w_rs1] + w_imm_s;bus_write_data<=re[w_rs2];bus_write_enable<=1;pc<=pc;bubble<=1;bus_write_type<=w_func3;end//Sd bus2
+	            32'b???????_?????_?????_010_?????_0100011: begin
+		        if (store_step == 0) begin bus_address <= re[w_rs1] + w_imm_s; bus_write_data<=re[w_rs2][31:0];bus_write_enable<=1;pc<=pc-4;bubble<=1;store_step<=1;bus_write_type<=w_func3; end
+		        if (store_step == 1 && bus_write_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working 1 bubble2 this3
+		        if (store_step == 1 && bus_write_done == 1) store_step <= 0;
+		        end //Sw
+	            32'b???????_?????_?????_011_?????_0100011: begin 
+		        if (store_step == 0) begin bus_address <= re[w_rs1] + w_imm_s; bus_write_data<=re[w_rs2];bus_write_enable<=1;pc<=pc-4;bubble<=1;store_step<=1;bus_write_type<=w_func3; end
+		        if (store_step == 1 && bus_write_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working 1 bubble2 this3
+		        if (store_step == 1 && bus_write_done == 1) store_step <= 0;
+		        end //Sd
                     // Math-I
 	            32'b???????_?????_?????_000_?????_0010011: re[w_rd] <= re[w_rs1] + w_imm_i;  // Addi
 	            32'b???????_?????_?????_100_?????_0010011: re[w_rd] <= re[w_rs1] ^ w_imm_i ; // Xori
