@@ -315,6 +315,7 @@ assign DRAM_CKE = 1; // always enable
 	    //if (Sdram_selected && bus_read_done == 0) begin
 	    //    if (sdram_req_wait==0) begin bus_read_data <= {48'b0, sdram_rddata}; bus_read_done <= 1; end
 	    //end
+	    sdram_read_en <= 0;
 	    if (Sdram_selected && bus_read_done == 0) begin
 		case(bus_ls_type)
 	            3'b000: begin
