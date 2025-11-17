@@ -326,7 +326,7 @@ assign DRAM_CKE = 1; // always enable
 				   0: begin bus_read_data <= {48'b0, sdram_rddata[7:0]}; bus_read_done <= 1; step <= 0; end  // byte 01
 			           1: begin bus_read_data <= {48'b0, sdram_rddata[15:8]}; bus_read_done <= 1; step <= 0; end // byte 10
 			       endcase
-		           end
+			   end end
 		        endcase
 		    end
 	            3'b001: begin
