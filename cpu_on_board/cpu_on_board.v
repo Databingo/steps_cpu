@@ -84,14 +84,14 @@ module cpu_on_board (
 //wire sdram_readdatavalid;
 //wire sdram_waitrequest;
 //
-//wire CLOCK_50;
+//wire sys_clk;
 //wire sdram_clk;
 //
 //    //// -- sdram pll --
 //    //sdram_pll sdrampll (
 //    //    .clk_clk                        (CLOCK_50),               //                     clk.clk
 //    //    .reset_reset_n                  (KEY0),                   //                   reset.reset_n
-//    //    .altpll_0_c0_clk                (CLOCK_50),                //             altpll_0_c0.clk
+//    //    .altpll_0_c0_clk                (sys_clk),                //             altpll_0_c0.clk
 //    //    .altpll_0_c1_clk                (sdram_clk),              //             altpll_0_c1.clk
 //    //    .altpll_0_areset_conduit_export (), // altpll_0_areset_conduit.export
 //    //    .altpll_0_locked_conduit_export ()  // altpll_0_locked_conduit.export
@@ -103,59 +103,21 @@ module cpu_on_board (
 //        .clk_clk                   (CLOCK_50),                   //                   clk.clk
 //        .reset_reset_n             (KEY0),             //                 reset.reset_n
 //        .up_clocks_0_sdram_clk_clk (sdram_clk), // up_clocks_0_sdram_clk.clk
-//        .up_clocks_0_CLOCK_50_clk   (CLOCK_50)    //   up_clocks_0_CLOCK_50.clk
+//        .up_clocks_0_CLOCK_50_clk   (sys_clk)    //   up_clocks_0_CLOCK_50.clk
 //    );
+//
+//
 //assign DRAM_CLK=sdram_clk;
  
 
-//// Bus to SDRAM
-////wire [21:0] sdram_addr = bus_address - `Sdram_min;
-//wire [21:0] sdram_addr = bus_address[21:0];
-//wire [15:0] sdram_wrdata= bus_write_data[15:0];
-//wire [1:0]  sdram_byte_en = 2'b11; // Enable all bytes (active low);
-//// Control
-//wire        sdram_write_en = (Sdram_selected && bus_write_enable);
-//wire        sdram_read_en = (Sdram_selected && bus_read_enable);
-
-reg [21:0] sdram_addr;
-reg [15:0] sdram_wrdata;
-reg [1:0]  sdram_byte_en; // Enable all bytes (active low);
+// Bus to SDRAM
+//wire [21:0] sdram_addr = bus_address - `Sdram_min;
+wire [21:0] sdram_addr = bus_address[21:0];
+wire [15:0] sdram_wrdata= bus_write_data[15:0];
+wire [1:0]  sdram_byte_en = 2'b11; // Enable all bytes (active low);
 // Control
-//reg sdram_write_en;
-//reg sdram_read_en;
-wire sdram_write_en;
-wire sdram_read_en;
-// --- Combinatorial SDRAM Request Logic (Fixes the timing delay) ---
-// This always block generates the one-cycle request pulse for the controller instantly
-// based on the FSM state (step == 0) and the ongoing bus stall (bus_read/write_done == 0).
-always @(*) begin
-    sdram_write_en = 0;
-    sdram_read_en = 0;
-    
-    // Check Read Request
-    if (Sdram_selected && bus_read_done == 0) begin
-        // Only assert the request if we are in the initial setup state (step 0)
-        if (step == 0) begin
-            case(bus_ls_type)
-                3'b000: sdram_read_en = 1; // lb
-                3'b001: sdram_read_en = 1; // lh
-                // Add lw/ld/lbu/lhu/lwu later if implemented
-            endcase
-        end
-    end
-
-    // Check Write Request
-    if (Sdram_selected && bus_write_done == 0) begin
-        // Only assert the request if we are in the initial setup state (step 0)
-        if (step == 0) begin
-            case(bus_ls_type)
-                3'b000: sdram_write_en = 1; // sb
-                3'b001: sdram_write_en = 1; // sh
-                // Add sw/sd later if implemented
-            endcase
-        end
-    end
-end
+wire        sdram_write_en = (Sdram_selected && bus_write_enable);
+wire        sdram_read_en = (Sdram_selected && bus_read_enable);
 
 wire [15:0] sdram_rddata;   
 wire        sdram_req_wait;
@@ -228,7 +190,8 @@ assign DRAM_CKE = 1; // always enable
         .bus_write_enable(bus_write_enable),
         .bus_read_enable(bus_read_enable),
 
-        .bus_ls_type(bus_ls_type), // lb lh lw ld lbu lhu lwu sb sh sw sd 
+        .bus_ls_type(bus_ls_type), // lb lh lw ld lbu lhu lwu 
+        //.bus_ls_type(bus_ls_type), // sb sh sw sd 
 
         .bus_read_data(bus_read_data),
         .bus_read_done(bus_read_done),
@@ -273,7 +236,8 @@ assign DRAM_CKE = 1; // always enable
     wire        bus_read_enable;
     wire [63:0] bus_write_data;
     wire        bus_write_enable;
-    wire [2:0]  bus_ls_type; // lb lbu...sbhwd...
+    wire [2:0]  bus_ls_type; // lb lbu...
+    //wire [2:0]  bus_ls_type; // sbhwd...
 
     // Address Decoding --
     wire Rom_selected = (bus_address >= `Rom_base && bus_address < `Rom_base + `Rom_size);
@@ -294,7 +258,6 @@ assign DRAM_CKE = 1; // always enable
     reg [63:0] data;
     reg ld = 0;
     reg sd = 0;
-    reg [2:0] step = 0;
     reg bus_read_done = 1;
     reg bus_write_done = 1;
     reg [63:0] next_addr;
@@ -341,34 +304,25 @@ assign DRAM_CKE = 1; // always enable
 
             if (Sdc_ready_selected) begin bus_read_data <= {63'd0, sd_ready}; bus_read_done <= 1; end
 	    if (Sdc_cache_selected) begin bus_read_data <= {56'd0, sd_cache[cid]}; bus_read_done <= 1; end // one byte for all load
+	   //if(Sdc_cache_selected)begin bus_read_data<={sd_cache[cid+7],sd_cache[cid+6],sd_cache[cid+5],sd_cache[cid+4],sd_cache[cid+3],sd_cache[cid+2],sd_cache[cid+1],sd_cache[cid]};bus_read_done<=1;end
+            //if (Sdc_cache_selected && cid < 512) begin   // resource only 18752.                                              
+	    //    casez(bus_ls_type)
+	    //        3'b000: bus_read_data <= {{56{sd_cache[cid][7]}}, sd_cache[cid]};  // lb
+	    //        3'b100: bus_read_data <= {56'b0, sd_cache[cid]};           // lbu
+	    //        3'b001: bus_read_data <= {{48{sd_cache[cid+1][7]}}, sd_cache[cid+1], sd_cache[cid]};  // lh
+	    //        3'b101: bus_read_data <= {48'b0, sd_cache[cid+1], sd_cache[cid]};           // lhu
+	    //        3'b010: bus_read_data <= {{32{sd_cache[cid+3][7]}}, sd_cache[cid+3], sd_cache[cid+2], sd_cache[cid+1], sd_cache[cid]};  // lw
+	    //        3'b110: bus_read_data <= {32'b0, sd_cache[cid+3], sd_cache[cid+2], sd_cache[cid+1], sd_cache[cid]};  // lwu
+	    //        3'b011: bus_read_data <= {sd_cache[cid+7], sd_cache[cid+6], sd_cache[cid+5], sd_cache[cid+4], sd_cache[cid+3], sd_cache[cid+2], sd_cache[cid+1], sd_cache[cid]};  // ld
+	    //        default:;// 3'b111 bus_read_data <= 64'hxxxxxxxx_xxxxxxxx for debuging
+	    //    endcase
+	    //    bus_read_done <= 1; 
+	    //end 
             if (Sdc_avail_selected) begin bus_read_data <= {63'd0, sd_cache_available}; bus_read_done <= 1; end 
 
-	    //if (Sdram_selected && bus_read_done == 0) begin
-	    //    if (sdram_req_wait==0) begin bus_read_data <= {48'b0, sdram_rddata}; bus_read_done <= 1; end
-	    //end
-	    
-	     
-	    //sdram_read_en <= 0;
 	    if (Sdram_selected && bus_read_done == 0) begin
-		case(bus_ls_type)
-	            3'b000: begin
-			case(step)
-			   0: begin sdram_addr <= bus_address[22:1]; sdram_byte_en <= bus_address[0] ? 2'b10 : 2'b01; step <= 1; end
-	                   1: begin if (sdram_req_wait==0) begin 
-			       case(bus_address[0])
-				   0: begin bus_read_data <= {56'b0, sdram_rddata[7:0]}; bus_read_done <= 1; step <= 0; end  // byte 01
-			           1: begin bus_read_data <= {56'b0, sdram_rddata[15:8]}; bus_read_done <= 1; step <= 0; end // byte 10
-			       endcase
-			   end end
-		        endcase
-		    end
-	            3'b001: begin
-			case(step)
-			   0: begin sdram_addr <= bus_address[22:1]; sdram_byte_en <= 2'b11; step <= 1; end
-	                   1: begin if (sdram_req_wait==0) begin bus_read_data <= {48'b0, sdram_rddata[15:0]}; bus_read_done <= 1; step <= 0; end end // sh
-		        endcase
-		    end
-		endcase
+		//if (sdram_readdatavalid) begin bus_read_data <= {48'b0, sdram_readdata}; bus_read_done <= 1; end
+		if (sdram_req_wait==0) begin bus_read_data <= {48'b0, sdram_rddata}; bus_read_done <= 1; end
 	    end
 
 
@@ -406,26 +360,9 @@ assign DRAM_CKE = 1; // always enable
 
 	    if (Art_selected) begin uart_write_pulse <= 1; bus_write_done <=1; end
 
-	    //if (Sdram_selected) begin if (sdram_req_wait==0) bus_write_done <= 1; end
-	    
-	    //sdram_write_en <= 0;
-	    if (Sdram_selected) begin 
-		case(bus_ls_type)
-	            3'b000: begin
-			case(step)
-			   0: begin sdram_addr<=bus_address[22:1];sdram_wrdata<={bus_write_data[7:0],bus_write_data[7:0]};step <= 1; sdram_byte_en <= bus_address[0] ? 2'b10 : 2'b01; end
-	                   1: begin if (sdram_req_wait==0) begin bus_write_done <= 1; step <= 0; end end // sb000 
-			//if (sdram_req_wait==0) bus_write_done <= 1; end
-		        endcase
-		    end
-		    3'b001: begin
-			case(step)
-			   0: begin sdram_addr <= bus_address[22:1]; sdram_wrdata <= bus_write_data[15:0]; step <= 1; sdram_byte_en <= 2'b11; end
-	                   1: begin if (sdram_req_wait==0) begin bus_write_done <= 1; step <= 0; end end // sh001 
-		        endcase
-		    end
-	        endcase
-	    end
+	    //if (Sdram_selected) begin if (!sdram_waitrequest) bus_write_done <= 1; end
+	    //if (Sdram_selected) begin bus_write_done <= 1; end
+	    if (Sdram_selected) begin if (sdram_req_wait==0) bus_write_done <= 1; end
         end
     end
 end
@@ -553,7 +490,7 @@ end
     //assign HEX34 = sdram_write_n;
     assign HEX34 = sdram_write_en;
     //assign HEX35 = ~sdram_waitrequest;
-    assign HEX35 = sdram_req_wait;
+    assign HEX35 = ~sdram_req_wait;
     //assign HEX36 = ~|sdram_readdata;
     assign HEX36 = ~|sdram_rddata;
 
