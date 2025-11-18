@@ -112,7 +112,7 @@ module cpu_on_board (
 
 // Bus to SDRAM
 //wire [21:0] sdram_addr = bus_address - `Sdram_min;
-wire [21:0] sdram_addr = bus_address[21:0];
+//wire [21:0] sdram_addr = bus_address[21:0];
 wire [15:0] sdram_wrdata= bus_write_data[15:0];
 wire [1:0]  sdram_byte_en = 2'b11; // Enable all bytes (active low);
 // Control
@@ -121,6 +121,15 @@ wire        sdram_read_en = (Sdram_selected && bus_read_enable);
 
 wire [15:0] sdram_rddata;   
 wire        sdram_req_wait;
+
+
+wire [21:0] sdram_addr;
+always @(*) begin
+    case(step) begin
+	0:sdram_addr = bus_address[21:0];
+	1:sdram_addr = bus_address[21:0]+2;
+    endcase
+end
 
 sdram_controller sdram_ctrl (
     .sys_clk(CLOCK_50),
@@ -258,6 +267,7 @@ assign DRAM_CKE = 1; // always enable
     reg [63:0] data;
     reg ld = 0;
     reg sd = 0;
+    reg [2:0] step = 0;
     reg bus_read_done = 1;
     reg bus_write_done = 1;
     reg [63:0] next_addr;
@@ -362,7 +372,13 @@ assign DRAM_CKE = 1; // always enable
 
 	    //if (Sdram_selected) begin if (!sdram_waitrequest) bus_write_done <= 1; end
 	    //if (Sdram_selected) begin bus_write_done <= 1; end
-	    if (Sdram_selected) begin if (sdram_req_wait==0) bus_write_done <= 1; end
+	    //if (Sdram_selected) begin if (sdram_req_wait==0) bus_write_done <= 1; end
+	    if (Sdram_selected) begin 
+		if (step==0) begin if (sdram_req_wait==0) begin bus_write_done <= 0; step <=1; end end;
+		if (step==1) begin if (sdram_req_wait==0) begin bus_write_done <= 1; step <=0; end end
+	    end
+
+
         end
     end
 end
