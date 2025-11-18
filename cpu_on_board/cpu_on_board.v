@@ -388,7 +388,7 @@ assign DRAM_CKE = 1; // always enable
 				   sdram_wrdata<={bus_write_data[7:0],bus_write_data[7:0]};
 				   sdram_write_en<=1;
 				   if (sdram_req_wait==0) step <= 1; 
-				   sdram_byte_en <= bus_address[0] ? 2'b10 : 2'b01; end 
+				   sdram_byte_en <= bus_address[0] ? 2'b10 : 2'b01; 
 			       end
 	                   1: begin sdram_write_en <= 0; if (sdram_req_wait==0) begin bus_write_done <= 1; step <= 0; end end // sb000 
 			//if (sdram_req_wait==0) bus_write_done <= 1; end
