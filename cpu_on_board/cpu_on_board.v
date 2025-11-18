@@ -317,7 +317,7 @@ assign DRAM_CKE = 1; // always enable
 	    //end
 	    
 	     
-	    //sdram_read_en <= 0;
+	    sdram_read_en <= 0;
 	    if (Sdram_selected && bus_read_done == 0) begin
 		case(bus_ls_type)
 	            3'b000: begin
@@ -377,7 +377,7 @@ assign DRAM_CKE = 1; // always enable
 
 	    //if (Sdram_selected) begin if (sdram_req_wait==0) bus_write_done <= 1; end
 	    
-	    //sdram_write_en <= 0;
+	    sdram_write_en <= 0;
 	    if (Sdram_selected) begin 
 		case(bus_ls_type)
 	            3'b000: begin
