@@ -315,7 +315,7 @@ assign DRAM_CKE = 1; // always enable
 	    //if (Sdram_selected && bus_read_done == 0) begin
 	    //    if (sdram_req_wait==0) begin bus_read_data <= {48'b0, sdram_rddata}; bus_read_done <= 1; end
 	    //end
-	    sdram_read_en <= 0;
+	    
 	    if (Sdram_selected && bus_read_done == 0) begin
 		case(bus_ls_type)
 	            3'b000: begin
@@ -324,7 +324,7 @@ assign DRAM_CKE = 1; // always enable
 	                   1: begin if (sdram_req_wait==0) begin 
 			       case(bus_address[0])
 				   0: begin bus_read_data <= {56'b0, sdram_rddata[7:0]}; bus_read_done <= 1; step <= 0; end  // byte 01
-			           1: begin bus_read_data <= {56'b0, sdram_rddata[15:8]}; bus_read_done <= 1; step <= 0; end // byte 10
+			           1: begin bus_read_data <= {56'b0, sdram_rddata[15:8]}; bus_read_done <= 1; sdram_read_en <= 0; step <= 0; end // byte 10
 			       endcase
 			   end end
 		        endcase
@@ -332,7 +332,7 @@ assign DRAM_CKE = 1; // always enable
 	            3'b001: begin
 			case(step)
 			   0: begin sdram_addr <= bus_address[22:1]; sdram_read_en <= 1; sdram_byte_en <= 2'b11; step <= 1; end
-	                   1: begin if (sdram_req_wait==0) begin bus_read_data <= {48'b0, sdram_rddata[15:0]}; bus_read_done <= 1; step <= 0; end end // sh
+	                   1: begin if (sdram_req_wait==0) begin bus_read_data <= {48'b0, sdram_rddata[15:0]}; bus_read_done <= 1; sdram_read_en <= 0; step <= 0; end end // sh
 		        endcase
 		    end
 		endcase
