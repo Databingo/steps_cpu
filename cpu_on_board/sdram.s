@@ -25,7 +25,8 @@ _start:
     sh t1, 0(s0)
     
     # Read it back
-    lbu t3, 0(s0)
+    #lbu t3, 0(s0)
+    lbu t3, 2(s0)
     
     # Print it
     sb t3, 0(t0)         # Should print 'A'
