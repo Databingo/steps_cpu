@@ -273,7 +273,7 @@ assign DRAM_CKE = 1; // always enable
 
 
 
-    always @(posedge CLOCK_50) begin
+    always @(posedge CLOCK_50 or negedge KEY0) begin
         if (!KEY0) begin
             bus_read_done <= 1;
             bus_write_done <= 1;
