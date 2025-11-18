@@ -284,7 +284,6 @@ assign DRAM_CKE = 1; // always enable
 	    sd <= 0;
 	    step <= 0;
 	    bus_read_data <= 0;
-	    bus_ls_type <= 0;
 	    uart_write_pulse <= 0;
 	end else begin
         bus_address_reg <= bus_address>>2;
