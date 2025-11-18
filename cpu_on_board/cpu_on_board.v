@@ -321,7 +321,7 @@ assign DRAM_CKE = 1; // always enable
 	    if (Sdram_selected && bus_read_done == 0) begin
 		case(bus_ls_type)
 	            3'b000: begin
-			   sdram_addr <= bus_address[21:0]; sdram_byte_en <= bus_address[0] ? 2'b10 : 2'b01; sdram_read_en <= 1; 
+			   sdram_addr <= bus_address[22:1]; sdram_byte_en <= bus_address[0] ? 2'b10 : 2'b01; sdram_read_en <= 1; 
 			   if (sdram_req_wait==0) begin 
 			       case(bus_address[0])
 				   0: begin bus_read_data <= {56'b0, sdram_rddata[7:0]}; end  // byte 01
@@ -332,7 +332,7 @@ assign DRAM_CKE = 1; // always enable
 			   end
 		    end
 	            default: begin // sh sw sd
-			   sdram_addr <= bus_address[21:0]; sdram_byte_en <= 2'b11; sdram_read_en <= 1; 
+			   sdram_addr <= bus_address[22:1]; sdram_byte_en <= 2'b11; sdram_read_en <= 1; 
 			   if (sdram_req_wait==0) begin sdram_read_en <= 0; bus_read_data <= {48'b0, sdram_rddata[15:0]}; bus_read_done <= 1; end
 		    end
 		endcase
@@ -380,14 +380,14 @@ assign DRAM_CKE = 1; // always enable
 	    if (Sdram_selected && bus_write_done==0) begin 
 		case(bus_ls_type)
 	            3'b000: begin
-		        sdram_addr<=bus_address[21:0];
+		        sdram_addr<=bus_address[22:1];
 		        sdram_wrdata<={bus_write_data[7:0],bus_write_data[7:0]};
 		        sdram_write_en<=1;
 		        sdram_byte_en <= bus_address[0] ? 2'b10 : 2'b01; 
 		        if (sdram_req_wait==0) begin sdram_write_en <= 0; bus_write_done <= 1; end 
 		    end
 		    default: begin
-		        sdram_addr <= bus_address[21:0]; sdram_wrdata <= bus_write_data[15:0]; sdram_write_en <= 1; sdram_byte_en <= 2'b11;
+		        sdram_addr <= bus_address[22:1]; sdram_wrdata <= bus_write_data[15:0]; sdram_write_en <= 1; sdram_byte_en <= 2'b11;
 			if (sdram_req_wait==0) begin sdram_write_en <= 0; bus_write_done <= 1; end
 		    end
 	        endcase
