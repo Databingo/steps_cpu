@@ -161,7 +161,7 @@ wire [15:0] sdram_rddata;
 wire        sdram_req_wait;
 
 sdram_controller sdram_ctrl (
-    .CLOCK_50(CLOCK_50),
+    .sys_clk(CLOCK_50),
     .rstn(KEY0),
     // to bus (software)
     .avl_addr(sdram_addr),
