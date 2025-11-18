@@ -125,7 +125,7 @@ wire        sdram_req_wait;
 
 wire [21:0] sdram_addr;
 always @(*) begin
-    case(step) begin
+    case(step)
 	0:sdram_addr = bus_address[21:0];
 	1:sdram_addr = bus_address[21:0]+2;
     endcase
