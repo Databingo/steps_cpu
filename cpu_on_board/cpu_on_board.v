@@ -51,7 +51,7 @@ module cpu_on_board (
 
 //// -- sdram end--
 //sdram sdram_instance (
-//        .clk_clk                                 (sys_clk),  
+//        .clk_clk                                 (CLOCK_50),  
 //        .reset_reset_n                           (KEY0),                //                       reset.reset_n
 //	// to bus
 //        .new_sdram_controller_0_s1_address       (sdram_address),       //   new_sdram_controller_0_s1.address
@@ -84,28 +84,28 @@ module cpu_on_board (
 //wire sdram_readdatavalid;
 //wire sdram_waitrequest;
 //
-//wire sys_clk;
+//wire CLOCK_50;
 //wire sdram_clk;
 //
 //    //// -- sdram pll --
 //    //sdram_pll sdrampll (
-//    //    .clk_clk                        (sys_clk),               //                     clk.clk
+//    //    .clk_clk                        (CLOCK_50),               //                     clk.clk
 //    //    .reset_reset_n                  (KEY0),                   //                   reset.reset_n
-//    //    .altpll_0_c0_clk                (sys_clk),                //             altpll_0_c0.clk
+//    //    .altpll_0_c0_clk                (CLOCK_50),                //             altpll_0_c0.clk
 //    //    .altpll_0_c1_clk                (sdram_clk),              //             altpll_0_c1.clk
 //    //    .altpll_0_areset_conduit_export (), // altpll_0_areset_conduit.export
 //    //    .altpll_0_locked_conduit_export ()  // altpll_0_locked_conduit.export
 //    //);
 //
 //
-  // -- up pll --
-    upclk u0 (
-        .clk_clk                   (CLOCK_50),                   //                   clk.clk
-        .reset_reset_n             (KEY0),             //                 reset.reset_n
-        .up_clocks_0_sdram_clk_clk (sdram_clk), // up_clocks_0_sdram_clk.clk
-        .up_clocks_0_sys_clk_clk   (sys_clk)    //   up_clocks_0_sys_clk.clk
-    );
-assign DRAM_CLK=sdram_clk;
+//  // -- up pll --
+//    upclk u0 (
+//        .clk_clk                   (CLOCK_50),                   //                   clk.clk
+//        .reset_reset_n             (KEY0),             //                 reset.reset_n
+//        .up_clocks_0_sdram_clk_clk (sdram_clk), // up_clocks_0_sdram_clk.clk
+//        .up_clocks_0_CLOCK_50_clk   (CLOCK_50)    //   up_clocks_0_CLOCK_50.clk
+//    );
+//assign DRAM_CLK=sdram_clk;
  
 
 //// Bus to SDRAM
@@ -121,14 +121,47 @@ reg [21:0] sdram_addr;
 reg [15:0] sdram_wrdata;
 reg [1:0]  sdram_byte_en; // Enable all bytes (active low);
 // Control
-reg sdram_write_en;
-reg sdram_read_en;
+//reg sdram_write_en;
+//reg sdram_read_en;
+wire sdram_write_en;
+wire sdram_read_en;
+// --- Combinatorial SDRAM Request Logic (Fixes the timing delay) ---
+// This always block generates the one-cycle request pulse for the controller instantly
+// based on the FSM state (step == 0) and the ongoing bus stall (bus_read/write_done == 0).
+always @(*) begin
+    sdram_write_en = 0;
+    sdram_read_en = 0;
+    
+    // Check Read Request
+    if (Sdram_selected && bus_read_done == 0) begin
+        // Only assert the request if we are in the initial setup state (step 0)
+        if (step == 0) begin
+            case(bus_ls_type)
+                3'b000: sdram_read_en = 1; // lb
+                3'b001: sdram_read_en = 1; // lh
+                // Add lw/ld/lbu/lhu/lwu later if implemented
+            endcase
+        end
+    end
+
+    // Check Write Request
+    if (Sdram_selected && bus_write_done == 0) begin
+        // Only assert the request if we are in the initial setup state (step 0)
+        if (step == 0) begin
+            case(bus_ls_type)
+                3'b000: sdram_write_en = 1; // sb
+                3'b001: sdram_write_en = 1; // sh
+                // Add sw/sd later if implemented
+            endcase
+        end
+    end
+end
 
 wire [15:0] sdram_rddata;   
 wire        sdram_req_wait;
 
 sdram_controller sdram_ctrl (
-    .sys_clk(sys_clk),
+    .CLOCK_50(CLOCK_50),
     .rstn(KEY0),
     // to bus (software)
     .avl_addr(sdram_addr),
@@ -148,7 +181,7 @@ sdram_controller sdram_ctrl (
     .RASn(DRAM_RAS_N),       //                            .ras_n
     .WEn(DRAM_WE_N)         //                            .we_n
 );
-//assign DRAM_CLK = sys_clk;
+assign DRAM_CLK = CLOCK_50;
 assign DRAM_CKE = 1; // always enable
 
   
@@ -165,7 +198,7 @@ assign DRAM_CKE = 1; // always enable
     // -- Clock --
     wire clock_1hz;
     clock_slower clock_ins(
-        .clk_in(sys_clk),
+        .clk_in(CLOCK_50),
         .clk_out(clock_1hz),
         .reset_n(KEY0)
     );
@@ -173,14 +206,14 @@ assign DRAM_CKE = 1; // always enable
     wire [63:0] pc;
     reg [31:0] ir_bd;
     // IR_LD BRAM Port A read
-    always @(posedge sys_clk) begin ir_bd <= Cache[pc>>2]; end
+    always @(posedge CLOCK_50) begin ir_bd <= Cache[pc>>2]; end
     wire [31:0] ir_ld; assign ir_ld = {ir_bd[7:0], ir_bd[15:8], ir_bd[23:16], ir_bd[31:24]}; // Endianness swap
     assign LEDR_PC = pc/4;
 
     // -- CPU --
     riscv64 cpu (
         .clk(clock_1hz), 
-        //.clk(sys_clk), 
+        //.clk(CLOCK_50), 
         .reset(KEY0),     
         .instruction(ir_ld),
         .pc(pc),
@@ -210,7 +243,7 @@ assign DRAM_CKE = 1; // always enable
     wire key_released;
 
     ps2_decoder ps2_decoder_inst (
-        .clk(sys_clk),
+        .clk(CLOCK_50),
         .ps2_clk_async(PS2_CLK),
         .ps2_data_async(PS2_DAT),
         .scan_code(scan),
@@ -218,13 +251,13 @@ assign DRAM_CKE = 1; // always enable
         .key_pressed(key_pressed),
         .key_released(key_released)
      );
-    always @(posedge sys_clk) begin key_pressed_delay <= key_pressed; end
+    always @(posedge CLOCK_50) begin key_pressed_delay <= key_pressed; end
     wire key_pressed_edge = key_pressed && !key_pressed_delay;
 
     // -- Monitor -- Connected to Bus
     reg uart_write_pulse;
     jtag_uart_system my_jtag_system (
-        .clk_clk                                 (sys_clk),
+        .clk_clk                                 (CLOCK_50),
         .reset_reset_n                           (KEY0),
         .jtag_uart_0_avalon_jtag_slave_address   (bus_address[0:0]),
         .jtag_uart_0_avalon_jtag_slave_writedata (bus_write_data[31:0]),
@@ -271,7 +304,7 @@ assign DRAM_CKE = 1; // always enable
 
 
 
-    always @(posedge sys_clk) begin
+    always @(posedge CLOCK_50) begin
         if (!KEY0) begin
             bus_read_done <= 1;
             bus_write_done <= 1;
@@ -315,24 +348,24 @@ assign DRAM_CKE = 1; // always enable
 	    //end
 	    
 	     
-	    sdram_read_en <= 0;
+	    //sdram_read_en <= 0;
 	    if (Sdram_selected && bus_read_done == 0) begin
 		case(bus_ls_type)
 	            3'b000: begin
 			case(step)
-			   0: begin sdram_addr <= bus_address[22:1]; sdram_read_en <= 1; sdram_byte_en <= bus_address[0] ? 2'b10 : 2'b01; step <= 1; end
+			   0: begin sdram_addr <= bus_address[22:1]; sdram_byte_en <= bus_address[0] ? 2'b10 : 2'b01; step <= 1; end
 	                   1: begin if (sdram_req_wait==0) begin 
 			       case(bus_address[0])
-				   0: begin bus_read_data <= {56'b0, sdram_rddata[7:0]}; bus_read_done <= 1; sdram_read_en <= 0; step <= 0; end  // byte 01
-			           1: begin bus_read_data <= {56'b0, sdram_rddata[15:8]}; bus_read_done <= 1; sdram_read_en <= 0; step <= 0; end // byte 10
+				   0: begin bus_read_data <= {56'b0, sdram_rddata[7:0]}; bus_read_done <= 1; step <= 0; end  // byte 01
+			           1: begin bus_read_data <= {56'b0, sdram_rddata[15:8]}; bus_read_done <= 1; step <= 0; end // byte 10
 			       endcase
 			   end end
 		        endcase
 		    end
 	            3'b001: begin
 			case(step)
-			   0: begin sdram_addr <= bus_address[22:1]; sdram_read_en <= 1; sdram_byte_en <= 2'b11; step <= 1; end
-	                   1: begin if (sdram_req_wait==0) begin bus_read_data <= {48'b0, sdram_rddata[15:0]}; bus_read_done <= 1; sdram_read_en <= 0; step <= 0; end end // sh
+			   0: begin sdram_addr <= bus_address[22:1]; sdram_byte_en <= 2'b11; step <= 1; end
+	                   1: begin if (sdram_req_wait==0) begin bus_read_data <= {48'b0, sdram_rddata[15:0]}; bus_read_done <= 1; step <= 0; end end // sh
 		        endcase
 		    end
 		endcase
@@ -375,20 +408,20 @@ assign DRAM_CKE = 1; // always enable
 
 	    //if (Sdram_selected) begin if (sdram_req_wait==0) bus_write_done <= 1; end
 	    
-	    sdram_write_en <= 0;
+	    //sdram_write_en <= 0;
 	    if (Sdram_selected) begin 
 		case(bus_ls_type)
 	            3'b000: begin
 			case(step)
-			   0: begin sdram_addr<=bus_address[22:1];sdram_wrdata<={bus_write_data[7:0],bus_write_data[7:0]};sdram_write_en<=1;step <= 1; sdram_byte_en <= bus_address[0] ? 2'b10 : 2'b01; end
-	                   1: begin if (sdram_req_wait==0) begin bus_write_done <= 1; sdram_write_en <= 0; step <= 0; end end // sb000 
+			   0: begin sdram_addr<=bus_address[22:1];sdram_wrdata<={bus_write_data[7:0],bus_write_data[7:0]};step <= 1; sdram_byte_en <= bus_address[0] ? 2'b10 : 2'b01; end
+	                   1: begin if (sdram_req_wait==0) begin bus_write_done <= 1; step <= 0; end end // sb000 
 			//if (sdram_req_wait==0) bus_write_done <= 1; end
 		        endcase
 		    end
 		    3'b001: begin
 			case(step)
-			   0: begin sdram_addr <= bus_address[22:1]; sdram_wrdata <= bus_write_data[15:0]; sdram_write_en <= 1; step <= 1; sdram_byte_en <= 2'b11; end
-	                   1: begin if (sdram_req_wait==0) begin bus_write_done <= 1; sdram_write_en <= 0; step <= 0; end end // sh001 
+			   0: begin sdram_addr <= bus_address[22:1]; sdram_wrdata <= bus_write_data[15:0]; step <= 1; sdram_byte_en <= 2'b11; end
+	                   1: begin if (sdram_req_wait==0) begin bus_write_done <= 1; step <= 0; end end // sh001 
 		        endcase
 		    end
 	        endcase
@@ -405,7 +438,7 @@ end
     reg sd_byte_available_d = 0;
     reg do_read = 0;
     wire [4:0] sd_status;
-    always @(posedge sys_clk or negedge KEY0) begin
+    always @(posedge CLOCK_50 or negedge KEY0) begin
 	if (!KEY0) begin
 	    //sd_rd_start <= 0;
 	    byte_index <= 0;
@@ -435,7 +468,7 @@ end
 
     // Slow pulse clock for SD init (~100 kHz)
     reg [8:0] clkdiv = 0;
-    always @(posedge sys_clk or negedge KEY0) begin
+    always @(posedge CLOCK_50 or negedge KEY0) begin
         if (!KEY0) clkdiv <= 0;
         else clkdiv <= clkdiv + 1;
     end
@@ -466,7 +499,7 @@ end
         .reset(~KEY0),
         .ready(sd_ready),
         .address(sd_addr),
-        .clk(sys_clk),
+        .clk(CLOCK_50),
         .clk_pulse_slow(clk_pulse_slow),
         .status(sd_status),
         .recv_data()
@@ -476,7 +509,7 @@ end
     //// UART Writer Trigger
     //wire uart_write_trigger = bus_write_enable && Art_selected;
     //reg uart_write_trigger_dly;
-    //always @(posedge sys_clk or negedge KEY0) begin
+    //always @(posedge CLOCK_50 or negedge KEY0) begin
     //    if (!KEY0) uart_write_trigger_dly <= 0;
     //    else uart_write_trigger_dly <= uart_write_trigger;
     //end
@@ -485,7 +518,7 @@ end
     // Interrupt controller
     wire [3:0] interrupt_vector;
     wire interrupt_ack;
-    always @(posedge sys_clk or negedge KEY0) begin
+    always @(posedge CLOCK_50 or negedge KEY0) begin
         if (!KEY0) begin
             interrupt_vector <= 0;
             LEDR0 <= 0;
