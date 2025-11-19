@@ -334,7 +334,7 @@ assign DRAM_CKE = 1; // always enable
 	            3'b?01: begin // lh lhu
 			   sdram_addr <= bus_address[22:1]; sdram_byte_en <= 2'b11; sdram_read_en <= 1; 
 			   if (sdram_req_wait==0) begin sdram_read_en<=0;
-			   bus_read_data<=bus_ls_type==3'b001?{{48{sdram_rddata[15]}},sdram_rddata[15:0]}:{48'b0, sdram_rddata[15:0]};bus_read_done<=1; end
+			   bus_read_data<=bus_ls_type==3'b001 ? {{48{sdram_rddata[15]}},sdram_rddata[15:0]}:{48'b0, sdram_rddata[15:0]};bus_read_done<=1; end
 		    end
 	            3'b?10: begin // lw lwu
 		        case(step)
