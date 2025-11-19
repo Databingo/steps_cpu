@@ -21,8 +21,8 @@ _start:
     sh t2, 0(t0)         # Should print 'X'
     
     # Write one byte
-    li t1, 0x4141         # 'AA'
-    sw t1, 0(s0)         # 2 'A'
+    li t1, 0x4241         # 'BA'
+    sw t1, 0(s0)         
     
     # Read it back
     lbu t3, 0(s0)
@@ -31,6 +31,6 @@ _start:
     # Print it
     sb t3, 0(t0)         # Should print 'A'
     sh t2, 0(t0)         # Should print 'X'
-    sh t4, 0(t0)         # Should print 'A'
+    sh t4, 0(t0)         # Should print 'B'
 done:
     j done
