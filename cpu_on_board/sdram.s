@@ -36,5 +36,31 @@ _start:
     sb t5, 0(t0)         # Should print 'C'
     sb t6, 0(t0)         # Should print 'D'
     sb t2, 0(t0)         # Should print 'X'
+
+    # Write one byte
+    li t1, 0x4847464544434241         # 'HGFEDCBA'
+    sd t1, 0(s0)         
+
+    # Read it back
+    lb a0, 0(s0) # A
+    lb a1, 1(s0) # B
+    lb a2, 2(s0) # C
+    lb a3, 3(s0) # D
+    lb a4, 4(s0) # E
+    lb a5, 5(s0) # F
+    lb a6, 6(s0) # G
+    lb a7, 7(s0) # H
+
+    # Print it
+    sb a0, 0(t0)         # Should print 'A'
+    sb a1, 0(t0)         # Should print 'B'
+    sb a2, 0(t0)         # Should print 'C'
+    sb a3, 0(t0)         # Should print 'D'
+    sb a4, 0(t0)         # Should print 'E'
+    sb a5, 0(t0)         # Should print 'F'
+    sb a6, 0(t0)         # Should print 'G'
+    sb a7, 0(t0)         # Should print 'H'
+
+
 done:
     j done
