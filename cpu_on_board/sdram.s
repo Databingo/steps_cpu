@@ -25,10 +25,10 @@ _start:
     sw t1, 0(s0)         
     
     # Read it back
-    lbu t3, 0(s0) # A
-    lbu t4, 1(s0) # B
-    lbu t5, 2(s0) # C
-    lbu t6, 3(s0) # D
+    lb t3, 0(s0) # A
+    lb t4, 1(s0) # B
+    lb t5, 2(s0) # C
+    lb t6, 3(s0) # D
     
     # Print it
     sb t3, 0(t0)         # Should print 'A'
