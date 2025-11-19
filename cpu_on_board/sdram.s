@@ -21,16 +21,20 @@ _start:
     sh t2, 0(t0)         # Should print 'X'
     
     # Write one byte
-    li t1, 0x4241         # 'BA'
+    li t1, 0x44434241         # 'DCBA'
     sw t1, 0(s0)         
     
     # Read it back
     lbu t3, 0(s0)
-    lbu t4, 2(s0)
+    lbu t4, 1(s0)
+    lbu t5, 2(s0)
+    lbu t6, 3(s0)
     
     # Print it
     sb t3, 0(t0)         # Should print 'A'
-    sh t2, 0(t0)         # Should print 'X'
-    sh t4, 0(t0)         # Should print 'B'
+    sb t4, 1(t0)         # Should print 'B'
+    sb t5, 2(t0)         # Should print 'C'
+    sb t6, 3(t0)         # Should print 'D'
+    sb t2, 0(t0)         # Should print 'X'
 done:
     j done

@@ -324,8 +324,8 @@ assign DRAM_CKE = 1; // always enable
 			   sdram_addr <= bus_address[22:1]; sdram_byte_en <= bus_address[0] ? 2'b10 : 2'b01; sdram_read_en <= 1; 
 			   if (sdram_req_wait==0) begin 
 			       case(bus_address[0])
-				   0: begin bus_read_data <= {56'b0, sdram_rddata[7:0]}; end  // byte 01
-			           1: begin bus_read_data <= {56'b0, sdram_rddata[15:8]}; end // byte 10
+				   0: begin bus_read_data <= {56'b0, sdram_rddata[7:0]}; end  // byte 0
+			           1: begin bus_read_data <= {56'b0, sdram_rddata[15:8]}; end // byte 1
 			       endcase
 			       sdram_read_en <= 0; 
 			       bus_read_done <= 1;
