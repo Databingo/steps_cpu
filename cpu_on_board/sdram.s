@@ -22,16 +22,14 @@ _start:
     
     # Write one byte
     li t1, 0x41          # 'A'
-    sw t1, 0(s0)
+    sw t1, 0(s0)         # 2 'A'
     
     # Read it back
-    #lbu t3, 0(s0)
-    lbu t3, 2(s0)
+    lbu t3, 0(s0)
+    lbu t4, 2(s0)
     
     # Print it
     sb t3, 0(t0)         # Should print 'A'
-    sh t2, 0(t0)         # Should print 'X'
-    sb t3, 0(t0)         # Should print 'A'
-    sh t3, 0(t0)         # Should print 'A'
+    sh t4, 0(t0)         # Should print 'A'
 done:
     j done
