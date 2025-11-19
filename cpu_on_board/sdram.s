@@ -21,7 +21,7 @@ _start:
     sh t2, 0(t0)         # Should print 'X'
     
     # Write one byte
-    li t1, 0x41          # 'A'
+    li t1, 0x4141         # 'AA'
     sw t1, 0(s0)         # 2 'A'
     
     # Read it back
