@@ -22,7 +22,7 @@ _start:
     
     # Write one byte
     li t1, 0x41          # 'A'
-    sh t1, 0(s0)
+    sw t1, 0(s0)
     
     # Read it back
     #lbu t3, 0(s0)
