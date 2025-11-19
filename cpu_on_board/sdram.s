@@ -10,24 +10,24 @@ _start:
     
     # Write one byte
     li t1, 0x58          # 'X'
-    sh t1, 0(s0)
+    sb t1, 0(s0)
     
     # Read it back
-    lbu t2, 0(s0)
+    lb t2, 0(s0)
     
     # Print it
     sb t2, 0(t0)         # Should print 'X'
     sb t2, 0(t0)         # Should print 'X'
     sh t2, 0(t0)         # Should print 'X'
     
-    # Write one byte
+    # Write 4 byte
     li t1, 0x44434241         # 'DCBA'
     sw t1, 0(s0)         
     
     # Read it back
-    lb t3, 0(s0) # A
+    lh t3, 0(s0) # A
     lb t4, 1(s0) # B
-    lb t5, 2(s0) # C
+    lw t5, 2(s0) # C
     lb t6, 3(s0) # D
     
     # Print it
@@ -37,7 +37,7 @@ _start:
     sb t6, 0(t0)         # Should print 'D'
     sb t2, 0(t0)         # Should print 'X'
 
-    # Write one byte
+    # Write 8 byte
     li t1, 0x4847464544434241         # 'HGFEDCBA'
     sd t1, 0(s0)         
 
@@ -60,7 +60,31 @@ _start:
     sb a5, 0(t0)         # Should print 'F'
     sb a6, 0(t0)         # Should print 'G'
     sb a7, 0(t0)         # Should print 'H'
+    sb t2, 0(t0)         # Should print 'X'
 
+    # Write one byte
+    li t1, 0x4847464544434241         # 'HGFEDCBA'
+    sd t1, 0(s0)         
+
+    # Read it back
+    ld a0, 0(s0)
+
+
+    sb a0, 0(t0)         # Should print 'A'
+    srli a0, a0, 8
+    sb a0, 0(t0)         # Should print 'B'
+    srli a0, a0, 8
+    sb a0, 0(t0)         # Should print 'C'
+    srli a0, a0, 8
+    sb a0, 0(t0)         # Should print 'D'
+    srli a0, a0, 8
+    sb a0, 0(t0)         # Should print 'E'
+    srli a0, a0, 8
+    sb a0, 0(t0)         # Should print 'F'
+    srli a0, a0, 8
+    sb a0, 0(t0)         # Should print 'G'
+    srli a0, a0, 8
+    sb a0, 0(t0)         # Should print 'H'
 
 done:
     j done
