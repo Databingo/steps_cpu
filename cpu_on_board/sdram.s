@@ -88,15 +88,15 @@ _start:
     sb t2, 0(t0)         # Should print 'X'
 
     # Write one byte
-    li t1, 0x41         # 'A'
+    li t1, 0x41          # 'A'
     sb t1, 0(s0)         # test sdarm sb
-    li t1, 0x42         # 'B'
-    sb t1, 1(s0)         # test sdarm sb
+    li t1, 0x42          # 'B'
+    sb t1, 1(s0)         # test sdarm sb+1
 
-    # Read it back       # test sdram ld
-    lh a0, 0(s0)
+    # Read it back       
+    lb a0, 0(s0)         # test sdram ld
     sb a0, 0(t0)         # Should print 'A'
-    srli a0, a0, 8
+    lb a0, 1(s0)         # test sdram ld+1
     sb a0, 0(t0)         # Should print 'B'
 
 done:
