@@ -10,10 +10,10 @@ _start:
     
     # Write one byte
     li t1, 0x58          # 'X'
-    sb t1, 0(s0)
+    sb t1, 0(s0)         # test sdram sb/sh
     
     # Read it back
-    lb t2, 0(s0)
+    lb t2, 0(s0)         # test sdram lb
     
     # Print it
     sb t2, 0(t0)         # Should print 'X'
@@ -21,11 +21,11 @@ _start:
     sh t2, 0(t0)         # Should print 'X'
     
     # Write 4 byte
-    li t1, 0x44434241         # 'DCBA'
-    sw t1, 0(s0)         
+    li t1, 0x44434241    # 'DCBA'
+    sw t1, 0(s0)         # test sdram sw
     
     # Read it back
-    lh t3, 0(s0) # A
+    lh t3, 0(s0) # A    # test sdram lh lw
     lb t4, 1(s0) # B
     lw t5, 2(s0) # C
     lb t6, 3(s0) # D
@@ -39,7 +39,7 @@ _start:
 
     # Write 8 byte
     li t1, 0x4847464544434241         # 'HGFEDCBA'
-    sd t1, 0(s0)         
+    sd t1, 0(s0)         # test sdram sd
 
     # Read it back
     lb a0, 0(s0) # A
@@ -66,7 +66,7 @@ _start:
     li t1, 0x4847464544434241         # 'HGFEDCBA'
     sd t1, 0(s0)         
 
-    # Read it back
+    # Read it back       # test sdram ld
     ld a0, 0(s0)
 
 
@@ -85,6 +85,19 @@ _start:
     sb a0, 0(t0)         # Should print 'G'
     srli a0, a0, 8
     sb a0, 0(t0)         # Should print 'H'
+    sb t2, 0(t0)         # Should print 'X'
+
+    # Write one byte
+    li t1, 0x41         # 'A'
+    sb t1, 0(s0)         # test sdarm sb
+    li t1, 0x42         # 'B'
+    sb t1, 1(s0)         # test sdarm sb
+
+    # Read it back       # test sdram ld
+    lh a0, 0(s0)
+    sb a0, 0(t0)         # Should print 'A'
+    srli a0, a0, 8
+    sb a0, 0(t0)         # Should print 'B'
 
 done:
     j done
