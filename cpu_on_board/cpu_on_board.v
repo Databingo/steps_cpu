@@ -320,27 +320,29 @@ assign DRAM_CKE = 1; // always enable
 	     
 	    if (Sdram_selected && bus_read_done == 0) begin
 		case(bus_ls_type)
-	            3'b000: begin //lb
+	            3'b?00: begin //lb lbu
 			   sdram_addr <= bus_address[22:1]; sdram_byte_en <= bus_address[0] ? 2'b10 : 2'b01; sdram_read_en <= 1; 
 			   if (sdram_req_wait==0) begin 
 			       case(bus_address[0])
-				   0: begin bus_read_data <= {56'b0, sdram_rddata[7:0]}; end  // byte 0
-			           1: begin bus_read_data <= {56'b0, sdram_rddata[15:8]}; end // byte 1
+				   0: begin bus_read_data <= bus_ls_type==3'b000 ? {{56{sdram_rddata[7]}}, sdram_rddata[7:0]}:{56'b0, sdram_rddata[7:0]}; end  // byte 0
+			           1: begin bus_read_data <= bus_ls_type==3'b000 ? {{56{sdram_rddata[15]}}, sdram_rddata[15:8]}:{56'b0, sdram_rddata[15:8]}; end // byte 1
 			       endcase
 			       sdram_read_en <= 0; 
 			       bus_read_done <= 1;
 			   end
 		    end
-	            3'b001: begin // lh 
+	            3'b?01: begin // lh lhu
 			   sdram_addr <= bus_address[22:1]; sdram_byte_en <= 2'b11; sdram_read_en <= 1; 
-			   if (sdram_req_wait==0) begin sdram_read_en <= 0; bus_read_data <= {48'b0, sdram_rddata[15:0]}; bus_read_done <= 1; end
+			   if (sdram_req_wait==0) begin sdram_read_en<=0;
+			   bus_read_data<=bus_ls_type==3'b001?{{48{sdram_rddata[15]}},sdram_rddata[15:0]}:{48'b0, sdram_rddata[15:0]};bus_read_done<=1; end
 		    end
-	            3'b010: begin // lw 
+	            3'b?10: begin // lw lwu
 		        case(step)
 		            0: begin sdram_addr <= bus_address[22:1]; sdram_byte_en <= 2'b11; sdram_read_en <= 1; 
 			       if (sdram_req_wait==0) begin sdram_read_en <= 0; bus_read_data<= {48'b0, sdram_rddata[15:0]};bus_read_done <= 0; step <=1; end end
 		            1: begin sdram_addr <= bus_address[22:1]+1; sdram_byte_en <= 2'b11; sdram_read_en <= 1; 
-			       if (sdram_req_wait==0) begin sdram_read_en <= 0; bus_read_data[31:16] <= sdram_rddata[15:0]; bus_read_done <= 1; step <=0; end end
+			       if (sdram_req_wait==0) begin sdram_read_en <= 0;
+			       bus_read_data[63:16]<=bus_ls_type==3'b010 ? {{32{sdram_rddata[15]}},sdram_rddata[15:0]}:{32'b0, sdram_rddata[15:0]};bus_read_done<=1;step<=0;end end
 			endcase
 		    end
 	            3'b011: begin // ld 

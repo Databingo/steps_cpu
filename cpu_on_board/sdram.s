@@ -13,7 +13,7 @@ _start:
     sb t1, 0(s0)         # test sdram sb/sh
     
     # Read it back
-    lb t2, 0(s0)         # test sdram lb
+    lbu t2, 0(s0)         # test sdram lbu
     
     # Print it
     sb t2, 0(t0)         # Should print 'X'
@@ -25,10 +25,10 @@ _start:
     sw t1, 0(s0)         # test sdram sw
     
     # Read it back
-    lh t3, 0(s0) # A    # test sdram lh lw
-    lb t4, 1(s0) # B
-    lw t5, 2(s0) # C
-    lb t6, 3(s0) # D
+    lhu t3, 0(s0) # A    # test sdram lhu lwu
+    lbu t4, 1(s0) # B
+    lwu t5, 2(s0) # C
+    lbu t6, 3(s0) # D
     
     # Print it
     sb t3, 0(t0)         # Should print 'A'
@@ -42,14 +42,14 @@ _start:
     sd t1, 0(s0)         # test sdram sd
 
     # Read it back
-    lb a0, 0(s0) # A
-    lb a1, 1(s0) # B
-    lb a2, 2(s0) # C
-    lb a3, 3(s0) # D
-    lb a4, 4(s0) # E
-    lb a5, 5(s0) # F
-    lb a6, 6(s0) # G
-    lb a7, 7(s0) # H
+    lbu a0, 0(s0) # A
+    lbu a1, 1(s0) # B
+    lbu a2, 2(s0) # C
+    lbu a3, 3(s0) # D
+    lbu a4, 4(s0) # E
+    lbu a5, 5(s0) # F
+    lbu a6, 6(s0) # G
+    lbu a7, 7(s0) # H
 
     # Print it
     sb a0, 0(t0)         # Should print 'A'
@@ -94,9 +94,9 @@ _start:
     sb t1, 1(s0)         # test sdarm sb+1
 
     # Read it back       
-    lb a0, 0(s0)         # test sdram ld
+    lbu a0, 0(s0)         # test sdram ld
     sb a0, 0(t0)         # Should print 'A'
-    lb a0, 1(s0)         # test sdram ld+1
+    lbu a0, 1(s0)         # test sdram ld+1
     sb a0, 0(t0)         # Should print 'B'
 
 done:
