@@ -30,6 +30,7 @@ _start:
     
     # Print it
     sb t3, 0(t0)         # Should print 'A'
+    sh t2, 0(t0)         # Should print 'X'
     sh t4, 0(t0)         # Should print 'A'
 done:
     j done
