@@ -320,7 +320,7 @@ assign DRAM_CKE = 1; // always enable
 	     
 	    if (Sdram_selected && bus_read_done == 0) begin
 		case(bus_ls_type)
-	            3'b000: begin
+	            3'b000: begin //lb
 			   sdram_addr <= bus_address[22:1]; sdram_byte_en <= bus_address[0] ? 2'b10 : 2'b01; sdram_read_en <= 1; 
 			   if (sdram_req_wait==0) begin 
 			       case(bus_address[0])

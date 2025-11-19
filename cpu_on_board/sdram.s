@@ -25,16 +25,16 @@ _start:
     sw t1, 0(s0)         
     
     # Read it back
-    lbu t3, 0(s0)
-    lbu t4, 1(s0)
-    lbu t5, 2(s0)
-    lbu t6, 3(s0)
+    lbu t3, 0(s0) # A
+    lbu t4, 1(s0) # B
+    lbu t5, 2(s0) # C
+    lbu t6, 3(s0) # D
     
     # Print it
     sb t3, 0(t0)         # Should print 'A'
-    sb t4, 1(t0)         # Should print 'B'
-    sb t5, 2(t0)         # Should print 'C'
-    sb t6, 3(t0)         # Should print 'D'
+    sb t4, 0(t0)         # Should print 'B'
+    sb t5, 0(t0)         # Should print 'C'
+    sb t6, 0(t0)         # Should print 'D'
     sb t2, 0(t0)         # Should print 'X'
 done:
     j done
