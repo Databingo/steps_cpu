@@ -1,3 +1,10 @@
+// satp: Room address
+// vpn2: Shelf number in Room
+// vpn1: Book number in Shelf
+// vpn0: Page number in Book
+// each table contain 512 entries(PTEs) per 8 bytes(64 bits). 8*512=4096 4KB per Page
+
+
 module mmu_d (
     // MMU-D SV39
     input wire clk,

@@ -60,16 +60,14 @@ wire        sdram_req_wait;
 sdram_controller sdram_ctrl (
     .sys_clk(CLOCK_50),
     .rstn(KEY0),
-    // to bus (software)
-    .avl_addr(sdram_addr),
+    .avl_addr(sdram_addr), // to bus (software)
     .avl_byte_en(sdram_byte_en),
     .avl_WRITEen(sdram_write_en),
     .avl_READen(sdram_read_en),
     .avl_WRDATA(sdram_wrdata),
     .avl_RDDATA(sdram_rddata),
     .avl_req_wait(sdram_req_wait),
-    // to pin (hardware)
-    .addr(DRAM_ADDR),        
+    .addr(DRAM_ADDR),      // to pin (hardware)
     .BA(DRAM_BA),          
     .CASn(DRAM_CAS_N),     
     .CSn(DRAM_CS_N),      
@@ -79,7 +77,7 @@ sdram_controller sdram_ctrl (
     .WEn(DRAM_WE_N)   
 );
 assign DRAM_CLK = CLOCK_50;
-assign DRAM_CKE = 1; // always enable
+assign DRAM_CKE = 1;      // always enable
 
 
     // -- MEM -- minic L1 cache
@@ -122,9 +120,7 @@ assign DRAM_CKE = 1; // always enable
         .bus_write_data(bus_write_data),
         .bus_write_enable(bus_write_enable),
         .bus_read_enable(bus_read_enable),
-
         .bus_ls_type(bus_ls_type), // lb lh lw ld lbu lhu lwu sb sh sw sd 
-
         .bus_read_data(bus_read_data),
         .bus_read_done(bus_read_done),
         .bus_write_done(bus_write_done)
