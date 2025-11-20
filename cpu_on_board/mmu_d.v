@@ -6,6 +6,7 @@
 // satp Mode63:60 1 sv39||43:0 RootPageTable's physical page number X
 // VA 25|9vpn2|9vpn1|9vpn0|12offset
 // RootPageTable address = X*4KB
+`timescale 1ns / 1ps
 
 
 module mmu(
@@ -79,8 +80,8 @@ end
         initial begin
             force clk = 0;
             forever begin
-                #5 force clk = 1; // Drive High
-                #5 force clk = 0; // Drive Low
+                #10 force clk = 1; // Drive High
+                #10 force clk = 0; // Drive Low
             end
         end
 
@@ -96,13 +97,13 @@ end
             force va = 64'h0;
             
             // Reset Sequence
-            #10 force rst = 1; // Release reset
+            #20 force rst = 1; // Release reset
             
             // Test Case 1
-            #10 force va = 64'h1000;
+            #20 force va = 64'h1000;
             
             // Wait for clock edge (Clock period is 10ns)
-            #10; 
+            #20; 
             $display("Time:%0t | VA: %h | PA: %h", $time, va, pa);
             
             if (pa === 64'h1001) 
@@ -111,8 +112,8 @@ end
                 $display("\033[31m[FAIL] Expected 1001, Got %h\033[0m", pa);
 
             // Test Case 2
-            #10 force va = 64'h9999;
-            #10;
+            #20 force va = 64'h9999;
+            #20;
             $display("Time:%0t | VA: %h | PA: %h", $time, va, pa);
 
             $finish;
