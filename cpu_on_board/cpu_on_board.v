@@ -163,8 +163,9 @@ assign DRAM_CKE = 1;      // always enable
 
     // -- Bus --
     reg  [63:0] bus_read_data;
-    wire [63:0] bus_address;
+    //wire [63:0] bus_address;
     wire [63:0] bus_address_va;
+    reg  [63:0] bus_address;
     wire        bus_read_enable;
     wire [63:0] bus_write_data;
     wire        bus_write_enable;
@@ -220,8 +221,8 @@ assign DRAM_CKE = 1;      // always enable
 	// MMu
         if (mmu_acting) begin
 	    bus_address <= bus_address_va;
-            //bus_address_reg <= bus_address_va>>2;
-            //bus_address_reg_full <= bus_address_va;
+            bus_address_reg <= bus_address_va>>2;
+            bus_address_reg_full <= bus_address_va;
 	    mmu_acting <= 0;
 	end
 
