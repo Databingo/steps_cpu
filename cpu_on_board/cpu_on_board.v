@@ -225,7 +225,7 @@ assign DRAM_CKE = 1;      // always enable
 	end
 
         // Read
-        else if (!mmu_acting && !bus_read_enable && bus_read_done==0) begin 
+        if (!mmu_acting && !bus_read_enable && bus_read_done==0) begin 
             if (Key_selected) begin bus_read_data <= {32'd0, 24'd0, ascii}; bus_read_done <= 1; end
 	    if (Ram_selected) begin 
 	        casez(bus_ls_type)
@@ -306,7 +306,7 @@ assign DRAM_CKE = 1;      // always enable
         end
 
         // Write
-        else if (!mmu_acting && !bus_write_enable && bus_write_done == 0) begin 
+        if (!mmu_acting && !bus_write_enable && bus_write_done == 0) begin 
 	    if (Ram_selected) begin 
 		bus_write_done <= 1;
 		casez(bus_ls_type) // 000sb 001sh 010sw 011sd
