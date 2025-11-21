@@ -163,15 +163,16 @@ assign DRAM_CKE = 1;      // always enable
 
     // -- Bus --
     reg  [63:0] bus_read_data;
-    //wire [63:0] bus_address;
+    wire [63:0] bus_address;
     wire [63:0] bus_address_va;
-    reg  [63:0] bus_address;
+    reg  [63:0] bus_address_pa;
     wire        bus_read_enable;
     wire [63:0] bus_write_data;
     wire        bus_write_enable;
     wire [2:0]  bus_ls_type; // lb lbu...sbhwd...
     wire mmu_working;
     reg  mmu_acting;
+    assign bus_address = bus_address_pa;
 
     // Address Decoding --
     wire Rom_selected = (bus_address >= `Rom_base && bus_address < `Rom_base + `Rom_size);
@@ -220,7 +221,7 @@ assign DRAM_CKE = 1;      // always enable
         if (mmu_working) mmu_acting <= 1;
 	// MMu
         if (mmu_acting) begin
-	    bus_address <= bus_address_va;
+	    bus_address_pa <= bus_address_va;
             bus_address_reg <= bus_address_va>>2;
             bus_address_reg_full <= bus_address_va;
 	    mmu_acting <= 0;
