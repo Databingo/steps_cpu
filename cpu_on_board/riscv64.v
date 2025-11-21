@@ -28,7 +28,7 @@ module riscv64(
 );
 
 // -- new --
-assign satp = csr_read(satp)
+assign satp = csr_read(satp);
 // -- new end --
 
 
