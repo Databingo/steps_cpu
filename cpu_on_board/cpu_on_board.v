@@ -123,7 +123,9 @@ assign DRAM_CKE = 1;      // always enable
         .bus_ls_type(bus_ls_type), // lb lh lw ld lbu lhu lwu sb sh sw sd 
         .bus_read_data(bus_read_data),
         .bus_read_done(bus_read_done),
-        .bus_write_done(bus_write_done)
+        .bus_write_done(bus_write_done),
+
+        .mmu_working(mmu_working)
     );
 
     // -- Keyboard -- 
@@ -161,10 +163,13 @@ assign DRAM_CKE = 1;      // always enable
     // -- Bus --
     reg  [63:0] bus_read_data;
     wire [63:0] bus_address;
+    wire [63:0] bus_address_va;
     wire        bus_read_enable;
     wire [63:0] bus_write_data;
     wire        bus_write_enable;
     wire [2:0]  bus_ls_type; // lb lbu...sbhwd...
+    wire mmu_working;
+    reg  mmu_acting;
 
     // Address Decoding --
     wire Rom_selected = (bus_address >= `Rom_base && bus_address < `Rom_base + `Rom_size);
@@ -210,9 +215,17 @@ assign DRAM_CKE = 1;      // always enable
 
         if (bus_read_enable) begin bus_read_done <= 0; end
         if (bus_write_enable) begin bus_write_done <= 0; end
+        if (mmu_working) mmu_acting <= 1;
+	// MMu
+        if (mmu_acting) begin
+	    bus_address <= bus_address_va;
+            bus_address_reg <= bus_address_va>>2;
+            bus_address_reg_full <= bus_address_va;
+	    mmu_acting <= 0;
+	end
 
         // Read
-        if (!bus_read_enable && bus_read_done==0) begin 
+        if (!mmu_acting && !bus_read_enable && bus_read_done==0) begin 
             if (Key_selected) begin bus_read_data <= {32'd0, 24'd0, ascii}; bus_read_done <= 1; end
 	    if (Ram_selected) begin 
 	        casez(bus_ls_type)
@@ -293,7 +306,7 @@ assign DRAM_CKE = 1;      // always enable
         end
 
         // Write
-        if (!bus_write_enable && bus_write_done == 0) begin 
+        if (!mmu_acting && !bus_write_enable && bus_write_done == 0) begin 
 	    if (Ram_selected) begin 
 		bus_write_done <= 1;
 		casez(bus_ls_type) // 000sb 001sh 010sw 011sd
