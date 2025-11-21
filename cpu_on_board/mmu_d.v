@@ -16,8 +16,6 @@ module mmu(
     input wire [63:0] va,
     //input wire start, 
 
-
-
     output reg mmu_walking, // bus_read_enable || bus_write_enable, mmu using SDRAM
     output reg [63:0] pa,
     //output reg done

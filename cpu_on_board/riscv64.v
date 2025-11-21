@@ -15,27 +15,21 @@ module riscv64(
     output reg        bus_write_enable,
     output reg        bus_read_enable,
     output reg [2:0]  bus_ls_type, // lb lh lw ld lbu lhu lwu // sb sh sw sd sbu shu swu 
-    //output reg [2:0]  bus_ls_type, // sb sh sw sd sbu shu swu 
+    // --new --
+    output reg        mmu_working, 
+    output reg [63:0] csr_satp, 
+    // -- new end --
+      
+      
+      
     input  reg        bus_read_done,
     input  reg        bus_write_done,
     input  wire [63:0] bus_read_data   // from outside
 );
 
 // -- new --
-  
-mmu mmu_d(
-    .clk(clk),
-    .rst(reset),
-    .satp(csr_read(satp)),
-    .va(bus_address),
-    .mmu_walking(mmu_walking), // bus_read_enable || bus_write_enable, mmu using SDRAM
-    .pa(bus_address_pa),
-    .bus
-);
-  
+assign satp = csr_read(satp)
 // -- new end --
-
-
 
 
 
@@ -80,7 +74,8 @@ mmu mmu_d(
     reg [63:0] csr_sstatus; localparam sstatus =  12'h100; 
     reg [63:0] csr_sie ; localparam sie = 12'h104;   // Supervisor interrupt-enable register
     reg [63:0] csr_stvec ; localparam stvec =12'h105;
-    reg [63:0] csr_satp; localparam satp = 12'h180; // Supervisor address translation and protection satp[63:60].MODE=0:off|8:SV39 satp[59:44].asid vpn2:9 vpn1:9 vpn0:9 satp[43:0]:rootpage physical addr
+    //reg [63:0] csr_satp; 
+    localparam satp = 12'h180; // Supervisor address translation and protection satp[63:60].MODE=0:off|8:SV39 satp[59:44].asid vpn2:9 vpn1:9 vpn0:9 satp[43:0]:rootpage physical addr
     reg [63:0] csr_sscratch ; localparam sscratch =12'h140;
     reg [63:0] csr_sepc ; localparam sepc =12'h141; //
     reg [63:0] csr_scause ; localparam scause = 12'h142;// 
