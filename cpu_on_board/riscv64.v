@@ -18,6 +18,7 @@ module riscv64(
     // --new --
     output reg        mmu_working, 
     output reg [63:0] csr_satp, 
+    output wire [63:0] w_satp, 
     // -- new end --
       
       
@@ -28,7 +29,7 @@ module riscv64(
 );
 
 // -- new --
-//assign satp = csr_read(satp);
+assign w_satp = csr_satp;
 // -- new end --
 
 
