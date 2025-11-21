@@ -225,7 +225,7 @@ assign DRAM_CKE = 1;      // always enable
 	end
 
         // Read
-        if (!mmu_acting && !bus_read_enable && bus_read_done==0) begin 
+        else if (!mmu_acting && !bus_read_enable && bus_read_done==0) begin 
             if (Key_selected) begin bus_read_data <= {32'd0, 24'd0, ascii}; bus_read_done <= 1; end
 	    if (Ram_selected) begin 
 	        casez(bus_ls_type)
@@ -306,7 +306,7 @@ assign DRAM_CKE = 1;      // always enable
         end
 
         // Write
-        if (!mmu_acting && !bus_write_enable && bus_write_done == 0) begin 
+        else if (!mmu_acting && !bus_write_enable && bus_write_done == 0) begin 
 	    if (Ram_selected) begin 
 		bus_write_done <= 1;
 		casez(bus_ls_type) // 000sb 001sh 010sw 011sd
@@ -334,7 +334,7 @@ assign DRAM_CKE = 1;      // always enable
 	    if (Art_selected) begin uart_write_pulse <= 1; bus_write_done <=1; end
         end
             // Sdram write
-	    if (Sdram_selected && bus_write_done==0) begin 
+	    if (!mmu_acting && Sdram_selected && bus_write_done==0) begin 
 		case(bus_ls_type) //000sb 001sh 010sw 011sd
 	            3'b000: begin //sb
 		        sdram_addr<=bus_address[22:1];
