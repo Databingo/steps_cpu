@@ -21,6 +21,30 @@ module riscv64(
     input  wire [63:0] bus_read_data   // from outside
 );
 
+// -- new --
+  
+mmu mmu_d(
+    .clk(clk),
+    .rst(reset),
+    .satp(csr_read(satp)),
+    .va(bus_address),
+    .mmu_walking(mmu_walking), // bus_read_enable || bus_write_enable, mmu using SDRAM
+    .pa(bus_address_pa),
+    .bus
+);
+  
+// -- new end --
+
+
+
+
+
+
+
+
+
+
+
     // -- Immediate decoders  -- 
     wire signed [63:0] w_imm_u = {{32{ir[31]}}, ir[31:12], 12'b0};  // U-type immediate Lui Auipc
     wire signed [63:0] w_imm_i = {{52{ir[31]}}, ir[31:20]};   // I-type immediate Lb Lh Lw Lbu Lhu Lwu Ld Jalr Addi Slti Sltiu Xori Ori Andi Addiw 
@@ -84,6 +108,7 @@ module riscv64(
             12'h340: csr_read = csr_mscratch;
             12'h341: csr_read = csr_mepc;
             12'h342: csr_read = csr_mcause;
+            12'h180: csr_read = csr_satp;
 
             default: csr_read = 64'd0;
 	    endcase

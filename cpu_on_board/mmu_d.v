@@ -18,9 +18,16 @@ module mmu(
 
 
 
-    output reg mmu_walking, // bus_read_enable || bus_write_enable
-    output reg [63:0] pa
+    output reg mmu_walking, // bus_read_enable || bus_write_enable, mmu using SDRAM
+    output reg [63:0] pa,
     //output reg done
+      
+output reg [21:0] mmu_sdram_addr,
+output reg [1:0] mmu_sdram_byte_en,
+output reg mmu_sdram_read_en,
+output reg [15:0] mmu_sdram_rddata,
+output reg mmu_sdram_req_wait
+      
 );
 
 wire [8:0] vpn [0:2];
@@ -32,17 +39,18 @@ reg [1:0] level;
 reg [43:0] active_ppn;
 reg state; // 0=IDLE; 1=WALKING
 
-
+assign mmu_sdram_byte_en = 2'b11;
 
 
 
 always @(posedge clk or negedge rst) begin
-    if (!rst) 
+    if (!rst) begin
 	pa <= 0;
         mmu_walking <= 0;
 	state <= 0;
 	level <= 2;
 	active_ppn <= 0;
+    end
     else begin
 	if (mmu_walking) begin
 	    case(state) begin
