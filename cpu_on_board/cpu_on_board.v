@@ -116,7 +116,8 @@ assign DRAM_CKE = 1;      // always enable
         .interrupt_vector(interrupt_vector),
         .interrupt_ack(interrupt_ack),
 
-        .bus_address(bus_address),
+        //.bus_address(bus_address),
+        .bus_address(bus_address_va),
         .bus_write_data(bus_write_data),
         .bus_write_enable(bus_write_enable),
         .bus_read_enable(bus_read_enable),
@@ -219,8 +220,8 @@ assign DRAM_CKE = 1;      // always enable
 	// MMu
         if (mmu_acting) begin
 	    bus_address <= bus_address_va;
-            bus_address_reg <= bus_address_va>>2;
-            bus_address_reg_full <= bus_address_va;
+            //bus_address_reg <= bus_address_va>>2;
+            //bus_address_reg_full <= bus_address_va;
 	    mmu_acting <= 0;
 	end
 
