@@ -162,6 +162,7 @@ assign satp = csr_read(satp)
 	    interrupt_ack <= 0;
 	    bus_read_enable <= 0;
 	    bus_write_enable <= 0; 
+	    mmu_working <= 0;
 
             // Interrupt
 	    if (interrupt_vector == 1 && mstatus_MIE == 1) begin //mstatus[3] MIE
