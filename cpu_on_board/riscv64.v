@@ -23,7 +23,7 @@ module riscv64(
 );
 
 // -- new --
-reg shadowing = 0;
+reg shadowing;
 reg [63:0] saved_user_pc;
 reg [63:0] pa;
 reg [63:0] va;
@@ -54,12 +54,12 @@ reg init_enter = 1;
     wire        [63:0] w_imm_z = {59'b0, ir[19:15]};  // CSR zimm zero-extending unsigned
     wire [5:0] w_shamt = ir[25:20]; // If 6 bits the highest is always 0??
     // -- Register decoder --
-    //wire [4:0] w_rd  = ir[11:7];
-    //wire [4:0] w_rs1 = ir[19:15];
-    //wire [4:0] w_rs2 = ir[24:20];
-    wire [5:0] w_rd  = {shadowing, ir[11:7]};
-    wire [5:0] w_rs1 = {shadowing, ir[19:15]};
-    wire [5:0] w_rs2 = {shadowing, ir[24:20]};
+    wire [4:0] w_rd  = ir[11:7];
+    wire [4:0] w_rs1 = ir[19:15];
+    wire [4:0] w_rs2 = ir[24:20];
+    //wire [5:0] w_rd  = {shadowing, ir[11:7]};
+    //wire [5:0] w_rs1 = {shadowing, ir[19:15]};
+    //wire [5:0] w_rs2 = {shadowing, ir[24:20]};
     // -- Func decoder --
     wire [2:0] w_func3   = ir[14:12];
     wire [6:0] w_func7   = ir[31:25]; 
