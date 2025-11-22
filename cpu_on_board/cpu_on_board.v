@@ -126,8 +126,8 @@ assign DRAM_CKE = 1;      // always enable
         .bus_read_done(bus_read_done),
         .bus_write_done(bus_write_done),
 
-        .mmu_working(mmu_working),
-	.w_satp(w_satp)
+        //.mmu_working(mmu_working),
+	//.w_satp(w_satp)
     );
 
     // -- Keyboard -- 
