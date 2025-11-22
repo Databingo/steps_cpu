@@ -124,7 +124,7 @@ assign DRAM_CKE = 1;      // always enable
         .bus_ls_type(bus_ls_type), // lb lh lw ld lbu lhu lwu sb sh sw sd 
         .bus_read_data(bus_read_data),
         .bus_read_done(bus_read_done),
-        .bus_write_done(bus_write_done),
+        .bus_write_done(bus_write_done)
 
         //.mmu_working(mmu_working),
 	//.w_satp(w_satp)
