@@ -126,7 +126,8 @@ assign DRAM_CKE = 1;      // always enable
         .bus_read_done(bus_read_done),
         .bus_write_done(bus_write_done),
 
-        .mmu_working(mmu_working)
+        .mmu_working(mmu_working),
+	.w_satp(w_satp)
     );
 
     // -- Keyboard -- 
@@ -165,14 +166,29 @@ assign DRAM_CKE = 1;      // always enable
     reg  [63:0] bus_read_data;
     wire [63:0] bus_address;
     wire [63:0] bus_address_va;
-    reg  [63:0] bus_address_pa;
     wire        bus_read_enable;
     wire [63:0] bus_write_data;
     wire        bus_write_enable;
     wire [2:0]  bus_ls_type; // lb lbu...sbhwd...
+    // -- Mmu -- hijack bus
     wire mmu_working;
     reg  mmu_acting;
-    assign bus_address = bus_address_pa;
+    reg  [63:0] bus_address_pa; assign bus_address = bus_address_pa;
+    reg  [63:0] mmu_walking_pa;
+    wire w_satp;
+    wire [8:0] vpn [0:4]; //capable for sv39 sv48 sv57
+    reg [2:0] vpn_level;
+    assign vpn[2] = bus_address_va[38:30];
+    assign vpn[1] = bus_address_va[29:21];
+    assign vpn[0] = bus_address_va[20:12];
+    reg [43:0] active_ppn;
+    reg mmu_state;
+    reg [63:0] vpn_entry; // 8 bytes vpn entry
+    reg [21:0] mmu_sdram_addr;
+    reg [1:0] mmu_sdram_byte_en;
+    reg [15:0] mmu_sdram_rddata;
+    reg mmu_sdram_read_en = 2'b11;
+    reg mmu_sdram_req_wait;
 
     // Address Decoding --
     wire Rom_selected = (bus_address >= `Rom_base && bus_address < `Rom_base + `Rom_size);
@@ -219,13 +235,30 @@ assign DRAM_CKE = 1;      // always enable
         if (bus_read_enable) begin bus_read_done <= 0; end
         if (bus_write_enable) begin bus_write_done <= 0; end
         if (mmu_working) mmu_acting <= 1;
+
 	// MMu
         if (mmu_acting) begin
-	    bus_address_pa <= bus_address_va;
-            bus_address_reg <= bus_address_va>>2;
-            bus_address_reg_full <= bus_address_va;
-	    mmu_acting <= 0;
+	    if (satp[63:60] == 0) begin // directly mapping
+	        bus_address_pa <= bus_address_va;
+                bus_address_reg <= bus_address_va>>2;
+                bus_address_reg_full <= bus_address_va;
+	        mmu_acting <= 0;
+	    end
+	    //if (satp[63:60] == 8) begin //Sv39(3vpn 3*9 +12offset)|9|9|9|12 sv48(4*9+12)sv57(5*9+12)
+	    //    case(mmu_state) begin
+	    //        0:begin active_ppn <= satp[43:0]; mmu_state <= 1; end //load Root Table 
+	    //        1:begin
+	    //    	mmu_walking_pa<= {active_ppn, 12'b0}+(vpn[vpn_level] << 3);//ppn*4096+vpn*8
+	    //    	vpn_entry[15:0] <= sdram
+	    //        end
+	    //        2;begin
+	    //        end
+	    //    end
+
+	    //end
 	end
+
+
 
         // Read
         if (!mmu_acting && !bus_read_enable && bus_read_done==0) begin 

@@ -17,7 +17,7 @@ module riscv64(
     output reg [2:0]  bus_ls_type, // lb lh lw ld lbu lhu lwu // sb sh sw sd sbu shu swu 
     // --new --
     output reg        mmu_working, 
-    output reg [63:0] csr_satp, 
+    //output reg [63:0] csr_satp, 
     output wire [63:0] w_satp, 
     // -- new end --
       
@@ -75,8 +75,7 @@ assign w_satp = csr_satp;
     reg [63:0] csr_sstatus; localparam sstatus =  12'h100; 
     reg [63:0] csr_sie ; localparam sie = 12'h104;   // Supervisor interrupt-enable register
     reg [63:0] csr_stvec ; localparam stvec =12'h105;
-    //reg [63:0] csr_satp; 
-    localparam satp = 12'h180; // Supervisor address translation and protection satp[63:60].MODE=0:off|8:SV39 satp[59:44].asid vpn2:9 vpn1:9 vpn0:9 satp[43:0]:rootpage physical addr
+    reg [63:0] csr_satp; localparam satp = 12'h180; // Supervisor address translation and protection satp[63:60].MODE=0:off|8:SV39 satp[59:44].asid vpn2:9 vpn1:9 vpn0:9 satp[43:0]:rootpage physical addr
     reg [63:0] csr_sscratch ; localparam sscratch =12'h140;
     reg [63:0] csr_sepc ; localparam sepc =12'h141; //
     reg [63:0] csr_scause ; localparam scause = 12'h142;// 
