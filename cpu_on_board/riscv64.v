@@ -44,7 +44,7 @@ module riscv64(
     endfunction
 
 
-    wire [5:0] w_rd  = (shadowing) ? {1'b1, ir[11:7]} :ir[11:7]};
+    wire [5:0] w_rd  = (shadowing) ? {1'b1, ir[11:7]} :ir[11:7];
     wire [5:0] w_rs1 = (shadowing) ? {1'b1, ir[19:15]}:ir[19:15];
     wire [5:0] w_rs2 = (shadowing) ? {1'b1, ir[24:20]}:ir[24:20];
 // -- newend --
