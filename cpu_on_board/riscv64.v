@@ -6,7 +6,8 @@ module riscv64(
     input wire [31:0] instruction,
     output reg [63:0] pc,
     output reg [31:0] ir,
-    output reg [63:0] re [0:31], // General Registers 32s
+    //output reg [63:0] re [0:31], // General Registers 32s
+    output reg [63:0] re [0:63], // General Registers 32s + 32 shadow registers
     output wire  heartbeat,
     input  reg [3:0] interrupt_vector, // notice from outside
     output reg  interrupt_ack,         // reply to outside
@@ -21,6 +22,25 @@ module riscv64(
     input  wire [63:0] bus_read_data   // from outside
 );
 
+// -- new --
+reg shadowing;
+reg [63:0] saved_user_pc;
+function [31:0] get_shadow_ir; // 0-5 mmu 
+    input [63:0] spc;
+    begin
+	case(spc)
+	    0: get_shadow_ir  = 32'b00000000000000000010001010110111; // lui t0, 0x2
+	    4: get_shadow_ir  = 32'b00000000010000101000001010010011; // addi t0, t0, 0x4
+	    8: get_shadow_ir  = 32'b00000101111000000000001100010011; // addi t1, x0, 0x5e
+	    12: get_shadow_ir = 32'b00000000011000101011000000100011; //sd t1, 0(t0) print ^
+	    16: get_shadow_ir = 32'b00110000001000000000000001110011; //mret
+	    default: get_shadow_ir = 32'h00000013; //NOP:addi x0, x0, 0
+	endcase
+    end
+endfunction
+// -- newend --
+  
+  
     // -- Immediate decoders  -- 
     wire signed [63:0] w_imm_u = {{32{ir[31]}}, ir[31:12], 12'b0};  // U-type immediate Lui Auipc
     wire signed [63:0] w_imm_i = {{52{ir[31]}}, ir[31:20]};   // I-type immediate Lb Lh Lw Lbu Lhu Lwu Ld Jalr Addi Slti Sltiu Xori Ori Andi Addiw 
