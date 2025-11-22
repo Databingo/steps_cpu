@@ -21,6 +21,11 @@ module riscv64(
     input  reg        bus_write_done,
     input  wire [63:0] bus_read_data   // from outside
 );
+    reg shadowing;
+    reg [63:0] saved_user_pc;
+    reg [63:0] pa;
+    reg [63:0] va;
+    reg init_enter;
 
     // -- Immediate decoders  -- 
     wire signed [63:0] w_imm_u = {{32{ir[31]}}, ir[31:12], 12'b0};  // U-type immediate Lui Auipc
