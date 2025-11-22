@@ -19,7 +19,7 @@ module riscv64(
     // --new --
     output reg        mmu_working, 
     //output reg [63:0] csr_satp, 
-    output wire [63:0] w_satp, 
+    //output wire [63:0] w_satp, 
     output shadowing,
     // -- new end --
       
@@ -31,10 +31,8 @@ module riscv64(
 );
 
 // -- new --
-assign w_satp = csr_satp;
-
+//assign w_satp = csr_satp;
 reg [63:0] saved_user_pc;
-
 function [31:0] get_shadow_ir; // 0-5 mmu 
     input [63:0] spc;
     begin
@@ -49,12 +47,7 @@ function [31:0] get_shadow_ir; // 0-5 mmu
     end
 endfunction
 
-
 // -- new end --
-
-
-
-
 
 
 
@@ -243,7 +236,7 @@ endfunction
 		//        if (load_step == 1 && bus_read_done == 1) begin re[w_rd]<= $signed(bus_read_data[7:0]); load_step <= 0; end end //bus_read_enable <= 0; end end // bus ok and execute
 		    32'b???????_?????_?????_000_?????_0000011: begin  // Lb  3 cycles but wait to 5
 		        if (init_enter) begin shadowing <=1; mmu_working <= 1; va <= re[w_rs1]+w_imm_i; end
-		        else if (load_step==0) begin bus_address <= (!shadowing && !init_enter) ? pa:re[w_rs1]+w_imm_i; bus_read_enable<=1; pc<= pc-4; bubble<=1; load_step<= 1;bus_ls_type<=w_func3; end
+		        else if (load_step==0) begin bus_address <= (!shadowing && !init_enter) ? pa : re[w_rs1]+w_imm_i; bus_read_enable<=1; pc<= pc-4; bubble<=1; load_step<= 1;bus_ls_type<=w_func3; end
 		        else if (load_step == 1 && bus_read_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working
 			else if (load_step == 1 && bus_read_done == 1) begin re[w_rd]<= $signed(bus_read_data[7:0]); load_step <= 0; if (!shadowing && !init_enter) init_enter<=1; end 
 		    end //bus_read_enable <= 0; end end // bus ok and execute

@@ -171,24 +171,24 @@ assign DRAM_CKE = 1;      // always enable
     wire        bus_write_enable;
     wire [2:0]  bus_ls_type; // lb lbu...sbhwd...
     // -- Mmu -- hijack bus
-    wire mmu_working;
-    reg  mmu_acting;
-    reg  [63:0] bus_address_pa; assign bus_address = bus_address_pa;
-    reg  [63:0] mmu_walking_pa;
-    wire w_satp;
-    wire [8:0] vpn [0:4]; //capable for sv39 sv48 sv57
-    reg [2:0] vpn_level;
-    assign vpn[2] = bus_address_va[38:30];
-    assign vpn[1] = bus_address_va[29:21];
-    assign vpn[0] = bus_address_va[20:12];
-    reg [43:0] active_ppn;
-    reg mmu_state;
-    reg [63:0] vpn_entry; // 8 bytes vpn entry
-    reg [21:0] mmu_sdram_addr;
-    reg [1:0] mmu_sdram_byte_en;
-    reg [15:0] mmu_sdram_rddata;
-    reg mmu_sdram_read_en = 2'b11;
-    reg mmu_sdram_req_wait;
+    //wire mmu_working;
+    //reg  mmu_acting;
+    //reg  [63:0] bus_address_pa; assign bus_address = bus_address_pa;
+    //reg  [63:0] mmu_walking_pa;
+    //wire w_satp;
+    //wire [8:0] vpn [0:4]; //capable for sv39 sv48 sv57
+    //reg [2:0] vpn_level;
+    //assign vpn[2] = bus_address_va[38:30];
+    //assign vpn[1] = bus_address_va[29:21];
+    //assign vpn[0] = bus_address_va[20:12];
+    //reg [43:0] active_ppn;
+    //reg mmu_state;
+    //reg [63:0] vpn_entry; // 8 bytes vpn entry
+    //reg [21:0] mmu_sdram_addr;
+    //reg [1:0] mmu_sdram_byte_en;
+    //reg [15:0] mmu_sdram_rddata;
+    //reg mmu_sdram_read_en = 2'b11;
+    //reg mmu_sdram_req_wait;
 
     // Address Decoding --
     wire Rom_selected = (bus_address >= `Rom_base && bus_address < `Rom_base + `Rom_size);
