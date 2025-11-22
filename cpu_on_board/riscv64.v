@@ -7,7 +7,7 @@ module riscv64(
     output reg [63:0] pc,
     output reg [31:0] ir,
     //output reg [63:0] re [0:31], // General Registers 32s
-    output reg [63:0] re [0:63], // General Registers 32s + 32 shadow registers
+    output reg [63:0] re [0:63], // General Registers 32s
     output wire  heartbeat,
     input  reg [3:0] interrupt_vector, // notice from outside
     output reg  interrupt_ack,         // reply to outside
@@ -22,28 +22,6 @@ module riscv64(
     input  wire [63:0] bus_read_data   // from outside
 );
 
-// -- new --
-reg shadowing;
-reg [63:0] saved_user_pc;
-reg [63:0] pa;
-reg [63:0] va;
-
-//function [31:0] get_shadow_ir; // 0-5 mmu 
-//    input [63:0] spc;
-//    begin
-//	case(spc)
-//	    0: get_shadow_ir  = 32'b00000000000000000010001010110111; // lui t0, 0x2
-//	    4: get_shadow_ir  = 32'b00000000010000101000001010010011; // addi t0, t0, 0x4
-//	    8: get_shadow_ir  = 32'b00000101111000000000001100010011; // addi t1, x0, 0x5e
-//	    12: get_shadow_ir = 32'b00000000011000101011000000100011; //sd t1, 0(t0) print ^
-//	    16: get_shadow_ir = 32'b00110000001000000000000001110011; //mret
-//	    default: get_shadow_ir = 32'h00000013; //NOP:addi x0, x0, 0
-//	endcase
-//    end
-//endfunction
-// -- newend --
-  
-  
     // -- Immediate decoders  -- 
     wire signed [63:0] w_imm_u = {{32{ir[31]}}, ir[31:12], 12'b0};  // U-type immediate Lui Auipc
     wire signed [63:0] w_imm_i = {{52{ir[31]}}, ir[31:20]};   // I-type immediate Lb Lh Lw Lbu Lhu Lwu Ld Jalr Addi Slti Sltiu Xori Ori Andi Addiw 
@@ -53,12 +31,9 @@ reg [63:0] va;
     wire        [63:0] w_imm_z = {59'b0, ir[19:15]};  // CSR zimm zero-extending unsigned
     wire [5:0] w_shamt = ir[25:20]; // If 6 bits the highest is always 0??
     // -- Register decoder --
-    //wire [4:0] w_rd  = ir[11:7];
-    //wire [4:0] w_rs1 = ir[19:15];
-    //wire [4:0] w_rs2 = ir[24:20];
-    wire [5:0] w_rd  = {shadowing, ir[11:7]};
-    wire [5:0] w_rs1 = {shadowing, ir[19:15]};
-    wire [5:0] w_rs2 = {shadowing, ir[24:20]};
+    wire [4:0] w_rd  = ir[11:7];
+    wire [4:0] w_rs1 = ir[19:15];
+    wire [4:0] w_rs2 = ir[24:20];
     // -- Func decoder --
     wire [2:0] w_func3   = ir[14:12];
     wire [6:0] w_func7   = ir[31:25]; 
@@ -161,7 +136,6 @@ reg [63:0] va;
             // Interrupt re-enable
 	    csr_mstatus[MIE] <= 1;
 	    interrupt_ack <= 0;
-	    shadowing<=0;
 
         end else begin
 	    // Default PC+4    (1.Could be overide 2.Take effect next cycle) 
@@ -169,7 +143,6 @@ reg [63:0] va;
 	    interrupt_ack <= 0;
 	    bus_read_enable <= 0;
 	    bus_write_enable <= 0; 
-	    shadowing<=0;
 
             // Interrupt
 	    if (interrupt_vector == 1 && mstatus_MIE == 1) begin //mstatus[3] MIE
@@ -201,7 +174,7 @@ reg [63:0] va;
 		    32'b???????_?????_?????_000_?????_0000011: begin  // Lb  3 cycles but wait to 5
 		        if (load_step == 0) begin bus_address <= re[w_rs1] + w_imm_i; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; bus_ls_type <= w_func3; end
 		        if (load_step == 1 && bus_read_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working
-		        if (load_step == 1 && bus_read_done == 1) begin re[w_rd]<= $signed(bus_read_data[7:0]); load_step <= 0; end end //bus_read_enable <= 0; end end // bus ok and execute
+			if (load_step == 1 && bus_read_done == 1) begin re[w_rd]<= $signed(bus_read_data[7:0]); load_step <= 0; end end //bus_read_enable <= 0; end end // bus ok and execute
 		    32'b???????_?????_?????_100_?????_0000011: begin  // Lbu  3 cycles
 		        if (load_step == 0) begin bus_address <= re[w_rs1] + w_imm_i; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; bus_ls_type <= w_func3; end
 		        if (load_step == 1 && bus_read_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working
@@ -406,3 +379,4 @@ endmodule
 //in N1, IF fetching lb, Bubble flushed ir sb, bubble <=0, Default pc is setting to lb+4(sb);
 //in N2, IF fetching sb, EXE ir is lb, load_step is 1, bus_read_data is saving to re, load_step is setting to 0;
 //in N3, IF fethcing mret, EXE ir is sb, re is saving to bus_write_data, bus_write_enable is setting to 1;
+  
