@@ -162,6 +162,7 @@ reg init_enter = 1;
             // Interrupt re-enable
 	    csr_mstatus[MIE] <= 1;
 	    interrupt_ack <= 0;
+	    shadowing<=0;
 
         end else begin
 	    // Default PC+4    (1.Could be overide 2.Take effect next cycle) 
