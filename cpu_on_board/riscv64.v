@@ -27,7 +27,7 @@ reg shadowing;
 reg [63:0] saved_user_pc;
 reg [63:0] pa;
 reg [63:0] va;
-reg init_enter = 1;
+reg init_enter;
 
 //function [31:0] get_shadow_ir; // 0-5 mmu 
 //    input [63:0] spc;
@@ -163,6 +163,7 @@ reg init_enter = 1;
 	    csr_mstatus[MIE] <= 1;
 	    interrupt_ack <= 0;
 	    shadowing<=0;
+	    init_enter<=1;
 
         end else begin
 	    // Default PC+4    (1.Could be overide 2.Take effect next cycle) 
