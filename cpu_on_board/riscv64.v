@@ -169,6 +169,7 @@ reg [63:0] va;
 	    interrupt_ack <= 0;
 	    bus_read_enable <= 0;
 	    bus_write_enable <= 0; 
+	    shadowing<=0;
 
             // Interrupt
 	    if (interrupt_vector == 1 && mstatus_MIE == 1) begin //mstatus[3] MIE
