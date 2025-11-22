@@ -27,7 +27,6 @@ reg shadowing;
 reg [63:0] saved_user_pc;
 reg [63:0] pa;
 reg [63:0] va;
-reg init_enter;
 
 //function [31:0] get_shadow_ir; // 0-5 mmu 
 //    input [63:0] spc;
@@ -163,7 +162,6 @@ reg init_enter;
 	    csr_mstatus[MIE] <= 1;
 	    interrupt_ack <= 0;
 	    shadowing<=0;
-	    init_enter<=1;
 
         end else begin
 	    // Default PC+4    (1.Could be overide 2.Take effect next cycle) 
@@ -204,8 +202,6 @@ reg init_enter;
 		    //    if (load_step == 1 && bus_read_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working
 		    //    if (load_step == 1 && bus_read_done == 1) begin re[w_rd]<= $signed(bus_read_data[7:0]); load_step <= 0; end end //bus_read_enable <= 0; end end // bus ok and execute
 		    32'b???????_?????_?????_000_?????_0000011: begin  // Lb  3 cycles but wait to 5
-		        if (init_enter) shadowing <= 1;
-			if (!shadowing && !init_enter) init_enter <= 1;
 		        if (load_step == 0) begin bus_address <= re[w_rs1] + w_imm_i; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; bus_ls_type <= w_func3; end
 		        if (load_step == 1 && bus_read_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working
 		        if (load_step == 1 && bus_read_done == 1) begin re[w_rd]<= $signed(bus_read_data[7:0]); load_step <= 0; end end //bus_read_enable <= 0; end end // bus ok and execute
