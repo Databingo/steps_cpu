@@ -116,8 +116,8 @@ assign DRAM_CKE = 1;      // always enable
         .interrupt_vector(interrupt_vector),
         .interrupt_ack(interrupt_ack),
 
-        //.bus_address(bus_address),
-        .bus_address(bus_address_va),
+        .bus_address(bus_address),
+        //.bus_address(bus_address_va),
         .bus_write_data(bus_write_data),
         .bus_write_enable(bus_write_enable),
         .bus_read_enable(bus_read_enable),
@@ -234,34 +234,35 @@ assign DRAM_CKE = 1;      // always enable
 
         if (bus_read_enable) begin bus_read_done <= 0; end
         if (bus_write_enable) begin bus_write_done <= 0; end
-        if (mmu_working) mmu_acting <= 1;
+        //if (mmu_working) mmu_acting <= 1;
 
-	// MMu
-        if (mmu_acting) begin
-	    if (satp[63:60] == 0) begin // directly mapping
-	        bus_address_pa <= bus_address_va;
-                bus_address_reg <= bus_address_va>>2;
-                bus_address_reg_full <= bus_address_va;
-	        mmu_acting <= 0;
-	    end
-	    //if (satp[63:60] == 8) begin //Sv39(3vpn 3*9 +12offset)|9|9|9|12 sv48(4*9+12)sv57(5*9+12)
-	    //    case(mmu_state) begin
-	    //        0:begin active_ppn <= satp[43:0]; mmu_state <= 1; end //load Root Table 
-	    //        1:begin
-	    //    	mmu_walking_pa<= {active_ppn, 12'b0}+(vpn[vpn_level] << 3);//ppn*4096+vpn*8
-	    //    	vpn_entry[15:0] <= sdram
-	    //        end
-	    //        2;begin
-	    //        end
-	    //    end
+	//// MMu
+        //if (!mmu_working && mmu_acting) begin
+	//    if (satp[63:60] == 0) begin // directly mapping
+	//        bus_address_pa <= bus_address_va;
+        //        bus_address_reg <= bus_address_va>>2;
+        //        bus_address_reg_full <= bus_address_va;
+	//        mmu_acting <= 0;
+	//    end
+	//    //if (satp[63:60] == 8) begin //Sv39(3vpn 3*9 +12offset)|9|9|9|12 sv48(4*9+12)sv57(5*9+12)
+	//    //    case(mmu_state) begin
+	//    //        0:begin active_ppn <= satp[43:0]; mmu_state <= 1; end //load Root Table 
+	//    //        1:begin
+	//    //    	mmu_walking_pa<= {active_ppn, 12'b0}+(vpn[vpn_level] << 3);//ppn*4096+vpn*8
+	//    //    	vpn_entry[15:0] <= sdram
+	//    //        end
+	//    //        2;begin
+	//    //        end
+	//    //    end
 
-	    //end
-	end
+	//    //end
+	//end
 
 
 
         // Read
-        if (!mmu_acting && !bus_read_enable && bus_read_done==0) begin 
+        //if (!mmu_acting && !bus_read_enable && bus_read_done==0) begin 
+        if (!bus_read_enable && bus_read_done==0) begin 
             if (Key_selected) begin bus_read_data <= {32'd0, 24'd0, ascii}; bus_read_done <= 1; end
 	    if (Ram_selected) begin 
 	        casez(bus_ls_type)
@@ -342,7 +343,8 @@ assign DRAM_CKE = 1;      // always enable
         end
 
         // Write
-        if (!mmu_acting && !bus_write_enable && bus_write_done == 0) begin 
+        //if (!mmu_acting && !bus_write_enable && bus_write_done == 0) begin 
+        if (!bus_write_enable && bus_write_done == 0) begin 
 	    if (Ram_selected) begin 
 		bus_write_done <= 1;
 		casez(bus_ls_type) // 000sb 001sh 010sw 011sd
@@ -370,7 +372,8 @@ assign DRAM_CKE = 1;      // always enable
 	    if (Art_selected) begin uart_write_pulse <= 1; bus_write_done <=1; end
         end
             // Sdram write
-	    if (!mmu_acting && Sdram_selected && bus_write_done==0) begin 
+	    //if (!mmu_acting && Sdram_selected && bus_write_done==0) begin 
+	    if (Sdram_selected && bus_write_done==0) begin 
 		case(bus_ls_type) //000sb 001sh 010sw 011sd
 	            3'b000: begin //sb
 		        sdram_addr<=bus_address[22:1];

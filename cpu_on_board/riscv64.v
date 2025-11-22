@@ -6,7 +6,8 @@ module riscv64(
     input wire [31:0] instruction,
     output reg [63:0] pc,
     output reg [31:0] ir,
-    output reg [63:0] re [0:31], // General Registers 32s
+    //output reg [63:0] re [0:31], // General Registers 32s
+    output reg [63:0] re [0:63], // General Registers 32s + 32 shadow registers
     output wire  heartbeat,
     input  reg [3:0] interrupt_vector, // notice from outside
     output reg  interrupt_ack,         // reply to outside
@@ -154,6 +155,9 @@ endfunction
     reg bubble;
     reg [1:0] load_step;
     reg [1:0] store_step;
+    reg [63:0] pa;
+    reg [63:0] va;
+    reg init_enter = 1;
 
     // IF ir (Only drive IR)
     always @(posedge clk or negedge reset) begin
@@ -194,16 +198,19 @@ endfunction
 
             // Shadowing
 	    if (shadowing) begin 
-	        saved_user_pc <= pc; // save pc
+	        saved_user_pc <= pc - 4; // save pc
 		//if (mmu_working) pc <= 0; // mmu handle from 0
 		pc <= 0; // simplest default to mmu
 	 	bubble <= 1'b1; // bubble wrong fetched instruciton by IF
+		init_enter <= 0;
+		re[63]<= va;
 	    end else if (shadowing && ir == 32'h30200073) begin // hiject mret
 		pc <= saved_user_pc; // recover from shadow when see Mret
+		pa <= re[63]; // save mmu returned pa ( inner assembly use x63 to save mmu calculated physical address pa)
 		shadowing <= 0;
 		bubble <= 1;
 		
-            // Interrupt
+            // Interrupt (save then very next pc so it's pc not pc-4)
 	    end else if (interrupt_vector == 1 && mstatus_MIE == 1) begin //mstatus[3] MIE
 	        csr_mepc <= pc; // save pc
 
@@ -230,10 +237,16 @@ endfunction
 	            32'b???????_?????_?????_???_?????_0110111: re[w_rd] <= w_imm_u; // Lui
 	            32'b???????_?????_?????_???_?????_0010111: re[w_rd] <= w_imm_u + (pc - 4); // Auipc
 
+		//    32'b???????_?????_?????_000_?????_0000011: begin  // Lb  3 cycles but wait to 5
+		//        if (load_step == 0) begin bus_address <= re[w_rs1] + w_imm_i; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; bus_ls_type <= w_func3; mmu_working <= 1; end
+		//        if (load_step == 1 && bus_read_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working
+		//        if (load_step == 1 && bus_read_done == 1) begin re[w_rd]<= $signed(bus_read_data[7:0]); load_step <= 0; end end //bus_read_enable <= 0; end end // bus ok and execute
 		    32'b???????_?????_?????_000_?????_0000011: begin  // Lb  3 cycles but wait to 5
-		        if (load_step == 0) begin bus_address <= re[w_rs1] + w_imm_i; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; bus_ls_type <= w_func3; mmu_working <= 1; end
-		        if (load_step == 1 && bus_read_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working
-			if (load_step == 1 && bus_read_done == 1) begin re[w_rd]<= $signed(bus_read_data[7:0]); load_step <= 0; end end //bus_read_enable <= 0; end end // bus ok and execute
+		        if (init_enter) begin shadowing <=1; mmu_working <= 1; va <= re[w_rs1]+w_imm_i; end
+		        else if (load_step==0) begin bus_address <= (!shadowing && !init_enter) ? pa:re[w_rs1]+w_imm_i; bus_read_enable<=1; pc<= pc-4; bubble<=1; load_step<= 1;bus_ls_type<=w_func3; end
+		        else if (load_step == 1 && bus_read_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working
+			else if (load_step == 1 && bus_read_done == 1) begin re[w_rd]<= $signed(bus_read_data[7:0]); load_step <= 0; if (!shadowing && !init_enter) init_enter<=1; end 
+		    end //bus_read_enable <= 0; end end // bus ok and execute
 		    32'b???????_?????_?????_100_?????_0000011: begin  // Lbu  3 cycles
 		        if (load_step == 0) begin bus_address <= re[w_rs1] + w_imm_i; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; bus_ls_type <= w_func3; mmu_working <= 1; end
 		        if (load_step == 1 && bus_read_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working
