@@ -163,6 +163,7 @@ module riscv64(
 	    interrupt_ack <= 0;
 	    shadowing <= 0;
 	    init_enter <= 1;
+	    integer i; for (i=0;i<=31;i=i+1) begin sre[i]<= re[0]; end
 
         end else begin
 	    // Default PC+4    (1.Could be overide 2.Take effect next cycle) 
@@ -173,16 +174,19 @@ module riscv64(
 
             // Shadowing
 	    if (shadowing) begin 
-	        saved_user_pc <= pc - 4; // save pc
+	        saved_user_pc <= pc; // save pc
 		pc <= 0; // simplest default to mmu //if (mmu_working) pc <= 0; // mmu handle from 0
 	 	bubble <= 1'b1; // bubble wrong fetched instruciton by IF
 		init_enter <= 0;
-		sre[31]<= va; // pass va to sx32
+		integer i; for (i=0;i<=31;i=i+1) begin sre[i]<= re[1]; end // save usr re
+		re[31]<= va; // pass va to x32
+		// then inner assembly for mmu wroking to calculate pa via va load and bus, put pa to x32
 	    end else if (shadowing && ir == 32'h30200073) begin // hiject mret
 		pc <= saved_user_pc; // recover from shadow when see Mret
-		pa <= sre[31]; // save inner assembly calculated physical address to sx32 
+		pa <= re[31]; // save inner assembly calculated physical address to pa
 		shadowing <= 0; // end shadowing
 		bubble <= 1; // bubble pre-fetched shadow ir
+		integer i; for (i=0;i<=31;i=i+1) begin re[i]<= sre[1]; end // recover usr re
 		
             // Interrupt
 	    //if (interrupt_vector == 1 && mstatus_MIE == 1) begin //mstatus[3] MIE
@@ -217,14 +221,15 @@ module riscv64(
 		    //    if (load_step == 1 && bus_read_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working
 		    //    if (load_step == 1 && bus_read_done == 1) begin re[w_rd]<= $signed(bus_read_data[7:0]); load_step <= 0; end end //bus_read_enable <= 0; end end // bus ok and execute
 		    32'b???????_?????_?????_000_?????_0000011: begin  // Lb  3 cycles but wait to 5
-			if (init_enter==1) begin shadowing<=1; va <= re[w_rs1] + w_imm_i; end // for enter
+			if (init_enter==1) begin shadowing<=1; va <= re[w_rs1] + w_imm_i; pc <= pc -4; end // for enter | hiject Lb, pass lb pc, bus_address to mmu va
 			else begin 
 
 		        if (load_step == 0) begin bus_address <= re[w_rs1] + w_imm_i; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; bus_ls_type <= w_func3; end
 		        if (load_step == 1 && bus_read_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working
 		        if (load_step == 1 && bus_read_done == 1) begin re[w_rd]<= $signed(bus_read_data[7:0]); load_step <= 0; end //end //bus_read_enable <= 0; end end // bus ok and execute
 
-			if (!shadowing && !init_enter) begin init_enter<=1; bus_address <= pa; end // for finish
+			if (!shadowing && !init_enter) begin bus_address <= pa; end // for start pa_ed lb | overwrite bus_address by pa
+			if (!shadowing && bus_read_done) begin init_enter<=1;end // for finish
 		        end
 		    end
 		    32'b???????_?????_?????_100_?????_0000011: begin  // Lbu  3 cycles
