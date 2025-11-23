@@ -6,8 +6,8 @@ module riscv64(
     input wire [31:0] instruction,
     output reg [63:0] pc,
     output reg [31:0] ir,
-    //output reg [63:0] re [0:31], // General Registers 32s
-    output reg [63:0] re [0:63], // General Registers 32s
+    output reg [63:0] re [0:31], // General Registers 32s
+    output reg [63:0] sre [0:31], // Shadow Registers 32s
     output wire  heartbeat,
     input  reg [3:0] interrupt_vector, // notice from outside
     output reg  interrupt_ack,         // reply to outside
@@ -43,10 +43,6 @@ module riscv64(
         end
     endfunction
 
-
-    wire [5:0] w_rd  = (shadowing) ? {1'b1, ir[11:7]} :ir[11:7];
-    wire [5:0] w_rs1 = (shadowing) ? {1'b1, ir[19:15]}:ir[19:15];
-    wire [5:0] w_rs2 = (shadowing) ? {1'b1, ir[24:20]}:ir[24:20];
 // -- newend --
 
     // -- Immediate decoders  -- 
@@ -58,9 +54,9 @@ module riscv64(
     wire        [63:0] w_imm_z = {59'b0, ir[19:15]};  // CSR zimm zero-extending unsigned
     wire [5:0] w_shamt = ir[25:20]; // If 6 bits the highest is always 0??
     // -- Register decoder --
-    //wire [4:0] w_rd  = ir[11:7];
-    //wire [4:0] w_rs1 = ir[19:15];
-    //wire [4:0] w_rs2 = ir[24:20];
+    wire [4:0] w_rd  = ir[11:7];
+    wire [4:0] w_rs1 = ir[19:15];
+    wire [4:0] w_rs2 = ir[24:20];
     // -- Func decoder --
     wire [2:0] w_func3   = ir[14:12];
     wire [6:0] w_func7   = ir[31:25]; 
@@ -198,10 +194,16 @@ module riscv64(
 	            32'b???????_?????_?????_???_?????_0110111: re[w_rd] <= w_imm_u; // Lui
 	            32'b???????_?????_?????_???_?????_0010111: re[w_rd] <= w_imm_u + (pc - 4); // Auipc
 
+		    //32'b???????_?????_?????_000_?????_0000011: begin  // Lb  3 cycles but wait to 5
+		    //    if (load_step == 0) begin bus_address <= re[w_rs1] + w_imm_i; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; bus_ls_type <= w_func3; end
+		    //    if (load_step == 1 && bus_read_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working
+		    //    if (load_step == 1 && bus_read_done == 1) begin re[w_rd]<= $signed(bus_read_data[7:0]); load_step <= 0; end end //bus_read_enable <= 0; end end // bus ok and execute
 		    32'b???????_?????_?????_000_?????_0000011: begin  // Lb  3 cycles but wait to 5
 		        if (load_step == 0) begin bus_address <= re[w_rs1] + w_imm_i; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; bus_ls_type <= w_func3; end
 		        if (load_step == 1 && bus_read_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working
-			if (load_step == 1 && bus_read_done == 1) begin re[w_rd]<= $signed(bus_read_data[7:0]); load_step <= 0; end end //bus_read_enable <= 0; end end // bus ok and execute
+		        if (load_step == 1 && bus_read_done == 1) begin re[w_rd]<= $signed(bus_read_data[7:0]); load_step <= 0; end end //bus_read_enable <= 0; end end // bus ok and execute
+			if (init_enter==1) begin shadowing<=1; bus_read_enable <=0; end // for enter
+			if (!shadowing && !init_enter) begin init_enter<=1; bus_address <= pa; end // for finish
 		    32'b???????_?????_?????_100_?????_0000011: begin  // Lbu  3 cycles
 		        if (load_step == 0) begin bus_address <= re[w_rs1] + w_imm_i; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; bus_ls_type <= w_func3; end
 		        if (load_step == 1 && bus_read_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working
