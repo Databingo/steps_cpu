@@ -7,7 +7,7 @@ module riscv64(
     //output reg [63:0] pc,
     output reg [39:0] pc,
     output reg [31:0] ir,
-    output reg [63:0] re [0:31], // General Registers 32s
+    //output reg [63:0] re [0:31], // General Registers 32s
     output wire  heartbeat,
     input  reg [3:0] interrupt_vector, // notice from outside
     output reg  interrupt_ack,         // reply to outside
@@ -24,6 +24,7 @@ module riscv64(
 );
 
 // -- new --
+    reg [63:0] re [0:31]; // General Registers 32s
     reg [63:0] sre [0:7]; // Shadow Registers 8s a0-a7 x10-x17
     reg shadowing=0;
     reg [63:0] saved_user_pc;
