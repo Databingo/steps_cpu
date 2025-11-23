@@ -4,14 +4,15 @@ module riscv64(
     input wire clk, 
     input wire reset,     // Active-low reset button
     input wire [31:0] instruction,
-    output reg [63:0] pc,
+    //output reg [63:0] pc,
+    output reg [39:0] pc,
     output reg [31:0] ir,
     output reg [63:0] re [0:31], // General Registers 32s
-    output reg [63:0] sre [0:7], // Shadow Registers 8s a0-a7 x10-x17
     output wire  heartbeat,
     input  reg [3:0] interrupt_vector, // notice from outside
     output reg  interrupt_ack,         // reply to outside
-    output reg [63:0] bus_address,     // 39 bit for real standard? 64 bit now
+    //output reg [63:0] bus_address,     // 39 bit for real standard? 64 bit now
+    output reg [38:0] bus_address,     // 39 bit for real Sv39 standard?
     output reg [63:0] bus_write_data,
     output reg        bus_write_enable,
     output reg        bus_read_enable,
@@ -23,6 +24,7 @@ module riscv64(
 );
 
 // -- new --
+    reg [63:0] sre [0:7]; // Shadow Registers 8s a0-a7 x10-x17
     reg shadowing=0;
     reg [63:0] saved_user_pc;
     reg [63:0] pa;
@@ -174,7 +176,7 @@ module riscv64(
 	    bus_write_enable <= 0; 
 
             // Shadowing
-	    if (shadowing) begin 
+	    if (shadowing && init_enter) begin 
 	        saved_user_pc <= pc; // save pc
 		pc <= 0; // simplest default to mmu //if (mmu_working) pc <= 0; // mmu handle from 0
 	 	bubble <= 1'b1; // bubble wrong fetched instruciton by IF
@@ -325,10 +327,10 @@ module riscv64(
 		    32'b???????_?????_?????_110_?????_1100011: begin if (re[w_rs1] < re[w_rs2]) begin pc <= pc - 4 + w_imm_b; bubble <= 1'b1; end end // Bltu
 		    32'b???????_?????_?????_111_?????_1100011: begin if (re[w_rs1] >= re[w_rs2]) begin pc <= pc - 4 + w_imm_b; bubble <= 1'b1; end end // Bgeu
                     // M extension
-		    32'b0000001_?????_?????_000_?????_0110011: re[w_rd] <= $signed(re[w_rs1]) * $signed(re[w_rs2]);  // Mul
-                    32'b0000001_?????_?????_001_?????_0110011: re[w_rd] <= ($signed(re[w_rs1]) * $signed(re[w_rs2]))>>>64;//[127:64];  // Mulh 
-                    //32'b0000001_?????_?????_100_?????_0110011: re[w_rd] <= (re[w_rs2]==0||(re[w_rs1]==64'h8000_0000_0000_0000 && re[w_rs2] == -1)) ? -1 : $signed(re[w_rs1]) / $signed(re[w_rs2]);  // Div
-                    32'b0000001_?????_?????_101_?????_0110011: re[w_rd] <= (re[w_rs2]==0) ? -1 : $unsigned(re[w_rs1]) / $unsigned(re[w_rs2]);  // Divu
+		    //32'b0000001_?????_?????_000_?????_0110011: re[w_rd] <= $signed(re[w_rs1]) * $signed(re[w_rs2]);  // Mul
+                    //32'b0000001_?????_?????_001_?????_0110011: re[w_rd] <= ($signed(re[w_rs1]) * $signed(re[w_rs2]))>>>64;//[127:64];  // Mulh 
+                    ////32'b0000001_?????_?????_100_?????_0110011: re[w_rd] <= (re[w_rs2]==0||(re[w_rs1]==64'h8000_0000_0000_0000 && re[w_rs2] == -1)) ? -1 : $signed(re[w_rs1]) / $signed(re[w_rs2]);  // Div
+                    //32'b0000001_?????_?????_101_?????_0110011: re[w_rd] <= (re[w_rs2]==0) ? -1 : $unsigned(re[w_rs1]) / $unsigned(re[w_rs2]);  // Divu
 
 		    // System-CSR 
 	            32'b???????_?????_?????_001_?????_1110011: begin if (w_rd != 0) re[w_rd] <= csr_read(w_csr); csr_write(w_csr,  re[w_rs1]); end // Csrrw
