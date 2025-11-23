@@ -118,40 +118,40 @@ module riscv64(
     // -- CSR Other Registers -- use BRAM in FPGA then SRAM in ASIC port?
     //reg [63:0] other_csr [0:4096]; // Maximal 12-bit length = 4096 
     // -- CSR Reader -- 
-    function [63:0] csr_read;
-	input [11:0] csr_index;
-	begin
-	    case (csr_index)
-            12'h300: csr_read = csr_mstatus;
-            12'h305: csr_read = csr_mtvec;
-            12'h340: csr_read = csr_mscratch;
-            12'h341: csr_read = csr_mepc;
-            12'h342: csr_read = csr_mcause;
+    //function [63:0] csr_read;
+    //    input [11:0] csr_index;
+    //    begin
+    //        case (csr_index)
+    //        12'h300: csr_read = csr_mstatus;
+    //        12'h305: csr_read = csr_mtvec;
+    //        12'h340: csr_read = csr_mscratch;
+    //        12'h341: csr_read = csr_mepc;
+    //        12'h342: csr_read = csr_mcause;
 
-            12'h180: csr_read = csr_satp;
+    //        12'h180: csr_read = csr_satp;
 
-            default: csr_read = 64'd0;
-	    endcase
-	end
-    endfunction
-    // -- CSR Writer -- 
-    task csr_write;
-	input [11:0] csr_index;
-	input [63:0] csr_wdata;
-	begin
-	    case (csr_index)
-            12'h300: csr_mstatus  = csr_wdata;
-            12'h305: csr_mtvec    = csr_wdata;
-            12'h340: csr_mscratch = csr_wdata;
-            12'h341: csr_mepc     = csr_wdata;
-            12'h342: csr_mcause   = csr_wdata;
+    //        default: csr_read = 64'd0;
+    //        endcase
+    //    end
+    //endfunction
+    //// -- CSR Writer -- 
+    //task csr_write;
+    //    input [11:0] csr_index;
+    //    input [63:0] csr_wdata;
+    //    begin
+    //        case (csr_index)
+    //        12'h300: csr_mstatus  = csr_wdata;
+    //        12'h305: csr_mtvec    = csr_wdata;
+    //        12'h340: csr_mscratch = csr_wdata;
+    //        12'h341: csr_mepc     = csr_wdata;
+    //        12'h342: csr_mcause   = csr_wdata;
 
-            12'h180: csr_satp     = csr_wdata;
+    //        12'h180: csr_satp     = csr_wdata;
 
-            default: ;
-	    endcase
-	end
-    endtask
+    //        default: ;
+    //        endcase
+    //    end
+    //endtask
     // -- Innerl signal --
     reg bubble;
     reg [1:0] load_step;
