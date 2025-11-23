@@ -27,7 +27,7 @@ module riscv64(
     reg [63:0] saved_user_pc;
     reg [63:0] pa;
     reg [63:0] va;
-    reg init_enter;
+    reg init_enter=1;
 
     function [31:0] get_shadow_ir; // 0-5 mmu 
         input [63:0] spc;
@@ -141,7 +141,9 @@ module riscv64(
             ir <= 32'h00000001; 
         end else begin
             heartbeat <= ~heartbeat; // heartbeat
-            ir <= instruction;
+            //ir <= instruction;
+	    if (shadowing) ir <= get_shadow_ir(pc);
+            else ir <= instruction;
         end
     end
 
@@ -159,6 +161,8 @@ module riscv64(
             // Interrupt re-enable
 	    csr_mstatus[MIE] <= 1;
 	    interrupt_ack <= 0;
+	    shadowing <= 0;
+	    init_enter <= 1;
 
         end else begin
 	    // Default PC+4    (1.Could be overide 2.Take effect next cycle) 
@@ -167,8 +171,22 @@ module riscv64(
 	    bus_read_enable <= 0;
 	    bus_write_enable <= 0; 
 
+            // Shadowing
+	    if (shadowing) begin 
+	        saved_user_pc <= pc - 4; // save pc
+		pc <= 0; // simplest default to mmu //if (mmu_working) pc <= 0; // mmu handle from 0
+	 	bubble <= 1'b1; // bubble wrong fetched instruciton by IF
+		init_enter <= 0;
+		sre[31]<= va; // pass va to sx32
+	    end else if (shadowing && ir == 32'h30200073) begin // hiject mret
+		pc <= saved_user_pc; // recover from shadow when see Mret
+		pa <= sre[31]; // save inner assembly calculated physical address to sx32 
+		shadowing <= 0; // end shadowing
+		bubble <= 1; // bubble pre-fetched shadow ir
+		
             // Interrupt
-	    if (interrupt_vector == 1 && mstatus_MIE == 1) begin //mstatus[3] MIE
+	    //if (interrupt_vector == 1 && mstatus_MIE == 1) begin //mstatus[3] MIE
+	    end else if (interrupt_vector == 1 && mstatus_MIE == 1) begin //mstatus[3] MIE
 	        csr_mepc <= pc; // save pc
 
 		csr_mcause <= 64'h800000000000000B; // MSB 1 for interrupts 0 for exceptions, Cause 11 for Machine External Interrupt
@@ -199,11 +217,15 @@ module riscv64(
 		    //    if (load_step == 1 && bus_read_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working
 		    //    if (load_step == 1 && bus_read_done == 1) begin re[w_rd]<= $signed(bus_read_data[7:0]); load_step <= 0; end end //bus_read_enable <= 0; end end // bus ok and execute
 		    32'b???????_?????_?????_000_?????_0000011: begin  // Lb  3 cycles but wait to 5
+			if (init_enter==1) begin shadowing<=1; va <= re[w_rs1] + w_imm_i; end // for enter
+			else begin 
+
 		        if (load_step == 0) begin bus_address <= re[w_rs1] + w_imm_i; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; bus_ls_type <= w_func3; end
 		        if (load_step == 1 && bus_read_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working
 		        if (load_step == 1 && bus_read_done == 1) begin re[w_rd]<= $signed(bus_read_data[7:0]); load_step <= 0; end //end //bus_read_enable <= 0; end end // bus ok and execute
-			if (init_enter==1) begin shadowing<=1; bus_read_enable <=0; end // for enter
+
 			if (!shadowing && !init_enter) begin init_enter<=1; bus_address <= pa; end // for finish
+		        end
 		    end
 		    32'b???????_?????_?????_100_?????_0000011: begin  // Lbu  3 cycles
 		        if (load_step == 0) begin bus_address <= re[w_rs1] + w_imm_i; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; bus_ls_type <= w_func3; end
