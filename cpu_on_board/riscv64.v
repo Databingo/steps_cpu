@@ -73,12 +73,15 @@ module riscv64(
 
     reg [63:0] Csrs [0:20];
     wire [11:0] w_csr = ir[31:20];   // CSR address
-    wire [5:0] w_csr_id = (w_csr == 12'h180) ? 1 : // stap
+    wire [5:0] w_csr_id = (w_csr == 12'h180) ? 1 : // satp
 	                  (w_csr == 12'h300) ? 2 : // mstatus
 	                  (w_csr == 12'h305) ? 3 : // mtvec
 	                  (w_csr == 12'h340) ? 4 : // mscratch
 			   0;
     wire [63:0] csr_satp = Csrs[1];
+    wire [3:0]  satp_mode = csr_satp[63:60]; // 0:bare, 8:sv39, 9:sv48  satp.MODE!=0, privilegae is not M-mode, mstatus.MPRN is not set or in MPP's mode?
+    wire [15:0] satp_asid = csr_satp[59:44]; // Address Space ID for TLB
+    wire [43:0] satp_ppn  = csr_satp[43:0];  // Root Page Table PPN physical page number
     //wire [11:0] w_f12 = ir[31:20];   // ecall 0, ebreak 1
     // --Machine CSR --
     reg [63:0] csr_mstatus; localparam mstatus = 12'h300;  // 0x300 MRW Machine status reg   // 63_SD|37_MBE|36_SBE|35:34_SXL10|22_TSR|21_TW|20_TVW|17_MPRV|12:11_MPP10|7_MPIE|3_MIE|1_SIE|0_WPRI
@@ -111,9 +114,6 @@ module riscv64(
     //wire mip_MEIP = csr[mie][11];
     wire mstatus_MIE = csr_mstatus[MIE];
 
-    wire satp_mode = csr_satp[63:60]; // 0:bare, 8:sv39, 9:sv48  satp.MODE!=0, privilegae is not M-mode, mstatus.MPRN is not set or in MPP's mode?
-    wire satp_said = csr_satp[59:44]; // Address Space ID for TLB
-    wire satp_ppn  = csr_satp[43:0];  // Root Page Table PPN physical page number
 
     // -- CSR Other Registers -- use BRAM in FPGA then SRAM in ASIC port?
     //reg [63:0] other_csr [0:4096]; // Maximal 12-bit length = 4096 
