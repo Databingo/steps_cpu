@@ -28,6 +28,7 @@ module riscv64(
     reg [63:0] pa;
     reg [63:0] va;
     reg init_enter=1;
+    integer i; 
 
     function [31:0] get_shadow_ir; // 0-5 mmu 
         input [63:0] spc;
@@ -163,7 +164,7 @@ module riscv64(
 	    interrupt_ack <= 0;
 	    shadowing <= 0;
 	    init_enter <= 1;
-	    integer i; for (i=0;i<=31;i=i+1) begin sre[i]<= re[0]; end
+	    for (i=0;i<=31;i=i+1) begin sre[i]<= re[0]; end
 
         end else begin
 	    // Default PC+4    (1.Could be overide 2.Take effect next cycle) 
@@ -178,7 +179,7 @@ module riscv64(
 		pc <= 0; // simplest default to mmu //if (mmu_working) pc <= 0; // mmu handle from 0
 	 	bubble <= 1'b1; // bubble wrong fetched instruciton by IF
 		init_enter <= 0;
-		integer i; for (i=0;i<=31;i=i+1) begin sre[i]<= re[1]; end // save usr re
+		for (i=0;i<=31;i=i+1) begin sre[i]<= re[1]; end // save usr re
 		re[31]<= va; // pass va to x32
 		// then inner assembly for mmu wroking to calculate pa via va load and bus, put pa to x32
 	    end else if (shadowing && ir == 32'h30200073) begin // hiject mret
@@ -186,7 +187,7 @@ module riscv64(
 		pa <= re[31]; // save inner assembly calculated physical address to pa
 		shadowing <= 0; // end shadowing
 		bubble <= 1; // bubble pre-fetched shadow ir
-		integer i; for (i=0;i<=31;i=i+1) begin re[i]<= sre[1]; end // recover usr re
+		for (i=0;i<=31;i=i+1) begin re[i]<= sre[1]; end // recover usr re
 		
             // Interrupt
 	    //if (interrupt_vector == 1 && mstatus_MIE == 1) begin //mstatus[3] MIE
