@@ -71,13 +71,24 @@ module riscv64(
 
 
 
-    reg [63:0] Csrs [0:20];
-    wire [11:0] w_csr = ir[31:20];   // CSR address
-    wire [5:0] w_csr_id = (w_csr == 12'h180) ? 1 : // satp
-	                  (w_csr == 12'h300) ? 2 : // mstatus
-	                  (w_csr == 12'h305) ? 3 : // mtvec
-	                  (w_csr == 12'h340) ? 4 : // mscratch
-			   0;
+    reg [63:0] Csrs [0:20]; // 20 csr for now
+    wire [11:0] w_csr = ir[31:20];   // CSR official address
+//    wire [5:0] w_csr_id = (w_csr == 12'h180) ? 1 : // satp
+//	                  (w_csr == 12'h300) ? 2 : // mstatus
+//	                  (w_csr == 12'h305) ? 3 : // mtvec
+//	                  (w_csr == 12'h340) ? 4 : // mscratch
+//			   0;
+    reg [5:0] w_csr_id;
+    always @(*) begin
+	case(w_csr)
+            satp:w_csr_id = 1; 
+            mstatus:w_csr_id = 2; 
+            mtvec:w_csr_id = 3; 
+            mscratch:w_csr_id = 4; 
+	    default:w_csr_id = 0; 
+	endcase
+    end
+
     wire [63:0] csr_satp = Csrs[1];
     wire [3:0]  satp_mode = csr_satp[63:60]; // 0:bare, 8:sv39, 9:sv48  satp.MODE!=0, privilegae is not M-mode, mstatus.MPRN is not set or in MPP's mode?
     wire [15:0] satp_asid = csr_satp[59:44]; // Address Space ID for TLB
@@ -97,7 +108,8 @@ module riscv64(
     reg [63:0] csr_sstatus; localparam sstatus =  12'h100; 
     reg [63:0] csr_sie ; localparam sie = 12'h104;   // Supervisor interrupt-enable register
     reg [63:0] csr_stvec ; localparam stvec =12'h105;
-    //reg [63:0] csr_satp; localparam satp = 12'h180; // Supervisor address translation and protection satp[63:60].MODE=0:off|8:SV39 satp[59:44].asid vpn2:9 vpn1:9 vpn0:9 satp[43:0]:rootpage physical addr
+    //reg [63:0] csr_satp; 
+    localparam satp = 12'h180; // Supervisor address translation and protection satp[63:60].MODE=0:off|8:SV39 satp[59:44].asid vpn2:9 vpn1:9 vpn0:9 satp[43:0]:rootpage physical addr
     reg [63:0] csr_sscratch ; localparam sscratch =12'h140;
     reg [63:0] csr_sepc ; localparam sepc =12'h141; //
     reg [63:0] csr_scause ; localparam scause = 12'h142;// 
@@ -187,6 +199,7 @@ module riscv64(
 	    shadowing <= 0;
 	    init_enter <= 1;
 	    for (i=0;i<=31;i=i+1) begin sre[i]<= 64'b0; end
+	    for (i=0;i<=20;i=i+1) begin Csrs[i]<= 64'b0; end
 
         end else begin
 	    // Default PC+4    (1.Could be overide 2.Take effect next cycle) 
