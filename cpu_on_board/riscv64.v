@@ -121,6 +121,8 @@ module riscv64(
             12'h341: csr_read = csr_mepc;
             12'h342: csr_read = csr_mcause;
 
+            12'h180: csr_read = csr_satp;
+
             default: csr_read = 64'd0;
 	    endcase
 	end
@@ -136,6 +138,8 @@ module riscv64(
             12'h340: csr_mscratch = csr_wdata;
             12'h341: csr_mepc     = csr_wdata;
             12'h342: csr_mcause   = csr_wdata;
+
+            12'h180: csr_satp     = csr_wdata;
 
             default: ;
 	    endcase

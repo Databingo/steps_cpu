@@ -99,7 +99,7 @@ _start:
 
     # MMU enabled
     li a1, 8              
-    slli a1, a1, 60          # mmu mode sv39 #li a1, 0x8000000000000000 # mmu mode sv39               
+    slli a1, a1, 60          # mmu mode sv39 #li a1, 0x8000000000000000 # mmu mode sv39
     csrrw a3, 0x180, a1      # set satp csr index 0x180
 
 
