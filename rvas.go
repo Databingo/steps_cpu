@@ -304,6 +304,7 @@ func main() { //t6a7s11
 		"mscratch": 0x340, 
 		"mepc":     0x341,
 		"mcause":   0x342, 
+		"0x180":   0x180, 
 	    }
 
 	opBin := map[string]uint32{
@@ -1837,12 +1838,15 @@ func main() { //t6a7s11
 			instruction = opBin[code[0]]
 		//-------------new
 		case "csrrw", "csrrs", "csrrc": // Instruction format: op rd, csr, rs1 or label: op rd, csr, rs1
+		        //os.Exit(1)
 			op, opFound := opBin[code[0]]
 			rd, rdFound := regBin[code[1]]
 			csr, csrFound := csrBin[code[2]]
 			rs1, rs1Found := regBin[code[3]]
 			if opFound && rdFound && csrFound && rs1Found {
 				instruction = csr<<20 | rs1<<15 | rd<<7 | op // code[0]=op, code[1]=rd, code[2]=rs1 code[3]=rs2
+				//fmt.Println(instruction )
+		                //os.Exit(1)
 			    }
 		case "csrrwi", "csrrsi", "csrrci": // Instruction format: op rd, csr, imm or label: op rd, csr, imm
 			op, opFound := opBin[code[0]]

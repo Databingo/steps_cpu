@@ -96,6 +96,13 @@ _start:
     # Read it back       
     lb a0, 0(s0)         # test sdram ld
     sb a0, 0(t0)         # Should print 'A'
+
+    # MMU enabled
+    li a1, 8              
+    slli a1, a1, 60          # mmu mode sv39 #li a1, 0x8000000000000000 # mmu mode sv39               
+    csrrw a3, 0x180, a1      # set satp csr index 0x180
+
+
     lb a0, 1(s0)         # test sdram ld+1
     sb a0, 0(t0)         # Should print 'B'
 
