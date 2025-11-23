@@ -71,8 +71,14 @@ module riscv64(
 
 
 
-    (* ram_style = "block" *) reg [63:0] Csrs [0:4096];
+    reg [63:0] Csrs [0:20];
     wire [11:0] w_csr = ir[31:20];   // CSR address
+    wire [5:0] w_csr_id = (w_csr == 12'h180) ? 1 : // stap
+	                  (w_csr == 12'h300) ? 2 : // mstatus
+	                  (w_csr == 12'h305) ? 3 : // mtvec
+	                  (w_csr == 12'h340) ? 4 : // mscratch
+			   0;
+    wire [63:0] csr_satp = Csrs[1];
     //wire [11:0] w_f12 = ir[31:20];   // ecall 0, ebreak 1
     // --Machine CSR --
     reg [63:0] csr_mstatus; localparam mstatus = 12'h300;  // 0x300 MRW Machine status reg   // 63_SD|37_MBE|36_SBE|35:34_SXL10|22_TSR|21_TW|20_TVW|17_MPRV|12:11_MPP10|7_MPIE|3_MIE|1_SIE|0_WPRI
@@ -88,7 +94,7 @@ module riscv64(
     reg [63:0] csr_sstatus; localparam sstatus =  12'h100; 
     reg [63:0] csr_sie ; localparam sie = 12'h104;   // Supervisor interrupt-enable register
     reg [63:0] csr_stvec ; localparam stvec =12'h105;
-    reg [63:0] csr_satp; localparam satp = 12'h180; // Supervisor address translation and protection satp[63:60].MODE=0:off|8:SV39 satp[59:44].asid vpn2:9 vpn1:9 vpn0:9 satp[43:0]:rootpage physical addr
+    //reg [63:0] csr_satp; localparam satp = 12'h180; // Supervisor address translation and protection satp[63:60].MODE=0:off|8:SV39 satp[59:44].asid vpn2:9 vpn1:9 vpn0:9 satp[43:0]:rootpage physical addr
     reg [63:0] csr_sscratch ; localparam sscratch =12'h140;
     reg [63:0] csr_sepc ; localparam sepc =12'h141; //
     reg [63:0] csr_scause ; localparam scause = 12'h142;// 
@@ -354,7 +360,7 @@ module riscv64(
 	            //32'b???????_?????_?????_110_?????_1110011: begin if (w_rd != 0) re[w_rd] <= csr_read(w_csr); if (w_imm_z != 0) csr_write(w_csr, csr_read(w_csr) |  w_imm_z); end // csrrsi
 	            //32'b???????_?????_?????_111_?????_1110011: begin if (w_rd != 0) re[w_rd] <= csr_read(w_csr); if (w_imm_z != 0) csr_write(w_csr, csr_read(w_csr) & ~w_imm_z); end // Csrrci
 
-	            32'b???????_?????_?????_001_?????_1110011: begin if (w_rd != 0) re[w_rd] <= Csrs[w_csr]; Csrs[w_csr] <= rs1; end // Csrrw
+	            32'b???????_?????_?????_001_?????_1110011: begin if (w_rd != 0) re[w_rd] <= Csrs[w_csr_id]; Csrs[w_csr_id] <= rs1; end // Csrrw  bram read first old data
 
 	            //32'b???????_?????_?????_010_?????_1110011: begin if (w_rd != 0) re[w_rd] <= csr_read(w_csr); if (w_rs1 != 0 )  csr_write(w_csr, csr_read(w_csr) |  rs1); end // Csrrs
 	            //32'b???????_?????_?????_011_?????_1110011: begin if (w_rd != 0) re[w_rd] <= csr_read(w_csr); if (w_rs1 != 0 )  csr_write(w_csr, csr_read(w_csr) & ~rs1); end // Csrrc
