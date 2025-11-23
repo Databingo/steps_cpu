@@ -64,7 +64,7 @@ module riscv64(
     wire [2:0] w_func3   = ir[14:12];
     wire [6:0] w_func7   = ir[31:25]; 
     wire [11:0] w_func12 = ir[31:20]; 
-    // -- rs1 rs2 --
+    // -- rs1 rs2 value --
     wire [63:0] rs1 = (w_rs1 == 0) ? 0 : re[w_rs1];
     wire [63:0] rs2 = (w_rs2 == 0) ? 0 : re[w_rs2];
 
