@@ -1841,7 +1841,7 @@ func main() { //t6a7s11
 		        //os.Exit(1)
 			op, opFound := opBin[code[0]]
 			rd, rdFound := regBin[code[1]]
-			csr, csrFound := csrBin[code[2]]
+			csr, csrFound := csrBin[code[2]]  // code2 to int then <=0<=4096 ?
 			rs1, rs1Found := regBin[code[3]]
 			if opFound && rdFound && csrFound && rs1Found {
 				instruction = csr<<20 | rs1<<15 | rd<<7 | op // code[0]=op, code[1]=rd, code[2]=rs1 code[3]=rs2
