@@ -94,9 +94,9 @@ _start:
     sb t1, 1(s0)         # test sdarm sb+1
 
     # Read it back       
-    lbu a0, 0(s0)         # test sdram ld
+    lb a0, 0(s0)         # test sdram ld
     sb a0, 0(t0)         # Should print 'A'
-    lbu a0, 1(s0)         # test sdram ld+1
+    lb a0, 1(s0)         # test sdram ld+1
     sb a0, 0(t0)         # Should print 'B'
 
 done:
