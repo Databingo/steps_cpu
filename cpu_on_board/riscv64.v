@@ -299,6 +299,7 @@ module riscv64(
 		        // for post mmu_da only
 			if (satp_mode && !mmu_da && !init_enter && !mmu_pc) begin bus_address <= pa; end // for start pa_ed lb | overwrite bus_address by pa
 			if (satp_mode && !mmu_da && bus_read_done && !mmu_pc) begin init_enter<=1;end // for finish va-pa-lb
+			// XXXABCDXABCDEFGHXABCDEFGHXA***^*B^*****B^*****B^*****B^*****B^*****
 		        end
 		    end
 		    32'b???????_?????_?????_100_?????_0000011: begin  // Lbu  3 cycles
