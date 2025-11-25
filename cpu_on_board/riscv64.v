@@ -26,7 +26,7 @@ module riscv64(
 // -- new --
     reg [63:0] re [0:31]; // General Registers 32s
     reg [63:0] sre [0:31]; // Shadow Registers 32s
-    reg mmu_d=0;
+    reg mmu_da=0;
     reg [63:0] saved_user_pc;
     reg [63:0] pa;
     reg [63:0] va;
@@ -37,12 +37,19 @@ module riscv64(
         input [63:0] spc;
         begin
     	case(spc)
-    	    0: get_shadow_ir  = 32'b00000000000000000010001010110111; // lui t0, 0x2
-    	    4: get_shadow_ir  = 32'b00000000010000101000001010010011; // addi t0, t0, 0x4
-    	    8: get_shadow_ir  = 32'b00000101111000000000001100010011; // addi t1, x0, 0x5e
-    	    12: get_shadow_ir = 32'b00000000011000101011000000100011; //sd t1, 0(t0) print ^
-    	    16: get_shadow_ir = 32'b00110000001000000000000001110011; //mret
-    	    default: get_shadow_ir = 32'h00000013; //NOP:addi x0, x0, 0
+	    // mmu_da
+    	    0:  get_shadow_ir = 32'b00000000000000000010001010110111; // lui t0, 0x2
+    	    4:  get_shadow_ir = 32'b00000000010000101000001010010011; // addi t0, t0, 0x4
+    	    8:  get_shadow_ir = 32'b00000101111000000000001100010011; // addi t1, x0, 0x5e
+    	    12: get_shadow_ir = 32'b00000000011000101011000000100011; // sd t1, 0(t0) print ^
+    	    16: get_shadow_ir = 32'b00110000001000000000000001110011; // mret
+            // mmu_pc
+    	    20: get_shadow_ir = 32'b00000000000000000010001010110111; // lui t0, 0x2
+    	    24: get_shadow_ir = 32'b00000000010000101000001010010011; // addi t0, t0, 0x4
+    	    28: get_shadow_ir = 32'b00000010101000000000001100010011; // addi t1, x0, 42
+    	    32: get_shadow_ir = 32'b00000000011000101011000000100011; // sd t1, 0(t0) print *
+    	    36: get_shadow_ir = 32'b00110000001000000000000001110011; // mret
+    	    default: get_shadow_ir = 32'h00000013; // NOP:addi x0, x0, 0
     	endcase
         end
     endfunction
@@ -182,7 +189,7 @@ module riscv64(
         end else begin
             heartbeat <= ~heartbeat; // heartbeat
             //ir <= instruction;
-	    if (mmu_d || mmu_pc) ir <= get_shadow_ir(pc);
+	    if (mmu_da || mmu_pc) ir <= get_shadow_ir(pc);
             else ir <= instruction;
         end
     end
@@ -201,7 +208,7 @@ module riscv64(
             // Interrupt re-enable
 	    csr_mstatus[MIE] <= 1;
 	    interrupt_ack <= 0;
-	    mmu_d <= 0;
+	    mmu_da <= 0;
 	    init_enter <= 1;
 	    for (i=0;i<=31;i=i+1) begin sre[i]<= 64'b0; end
 	    for (i=0;i<=20;i=i+1) begin Csrs[i]<= 64'b0; end
@@ -216,15 +223,15 @@ module riscv64(
 	    is_ppc <= 0;
 
 	    // vpc2ppc
-	    if (satp_mode && !mmu_pc && !mmu_d && !is_ppc) begin 
+	    if (satp_mode && !mmu_pc && !mmu_da && !is_ppc) begin 
 		//new_vpc <= 0;
-	        pc <= 0; // trap in to mmu
+	        pc <= 20; // trap in to mmu_pc
 	 	bubble <= 1'b1; // bubble wrong fetched instruciton by IF
 		mmu_pc <= 1; // for no tarp mmu always in mmu
 		for (i=0;i<=31;i=i+1) begin sre[i]<= re[i]; end // save usr re
 		re[30]<= pc - 4; // pass vpc to x30 (next pc based on instruciton "csrrw into satp", it should be vpc since we are just change in mmu mode)
 		// then inner assembly for mmu wroking to calculate ppc via vpc load and bus, put ppa to x30
-	    end else if (mmu_pc && ir == 32'h30200073 && !mmu_d) begin // hiject mret
+	    end else if (mmu_pc && ir == 32'h30200073 && !mmu_da) begin // hiject mret
 		pc <= re[30]; // save inner assembly calculated physical address to pc
 		mmu_pc <= 0; // finish mmu_pc
 	 	bubble <= 1'b1; // bubble wrong fetched instruciton by IF
@@ -233,7 +240,7 @@ module riscv64(
 		//new_vpc <= 1; // open for next vpc
 
             // vda2pda
-	    end else if (!mmu_pc && mmu_d && init_enter) begin 
+	    end else if (!mmu_pc && mmu_da && init_enter) begin 
 	        saved_user_pc <= pc; // save pc
 		pc <= 0; // simplest default to mmu //if (mmu_working) pc <= 0; // mmu handle from 0
 	 	bubble <= 1'b1; // bubble wrong fetched instruciton by IF
@@ -241,10 +248,10 @@ module riscv64(
 		for (i=0;i<=31;i=i+1) begin sre[i]<= re[i]; end // save usr re
 		re[31]<= va; // pass va to x31
 		// then inner assembly for mmu wroking to calculate pa via va load and bus, put pa to x31
-	    end else if (!mmu_pc && mmu_d && ir == 32'h30200073) begin // hiject mret
+	    end else if (!mmu_pc && mmu_da && ir == 32'h30200073) begin // hiject mret
 		pc <= saved_user_pc; // recover from shadow when see Mret
 		pa <= re[31]; // save inner assembly calculated physical address to pa
-		mmu_d <= 0; // end mmu_d
+		mmu_da <= 0; // end mmu_da
 		bubble <= 1; // bubble pre-fetched shadow ir
 		for (i=0;i<=31;i=i+1) begin re[i]<= sre[i]; end // recover usr re
 		
@@ -281,15 +288,17 @@ module riscv64(
 		    //    if (load_step == 1 && bus_read_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working
 		    //    if (load_step == 1 && bus_read_done == 1) begin re[w_rd]<= $signed(bus_read_data[7:0]); load_step <= 0; end end //bus_read_enable <= 0; end end // bus ok and execute
 		    32'b???????_?????_?????_000_?????_0000011: begin  // Lb  3 cycles but wait to 5
-			if (satp_mode && init_enter==1 && !mmu_pc) begin mmu_d<=1; va <= rs1 + w_imm_i; pc <= pc -4; end // for enter | hiject Lb, pass lb pc, bus_address to mmu va
-			else begin  
+		        // start mmu-da only
+			if (satp_mode && init_enter==1 && !mmu_pc) begin mmu_da<=1; va <= rs1 + w_imm_i; pc <= pc -4; end // for enter | hiject Lb, pass lb pc, bus_address to mmu va
+			else begin
 
 		        if (load_step == 0) begin bus_address <= rs1 + w_imm_i; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; bus_ls_type <= w_func3; end
 		        if (load_step == 1 && bus_read_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working
 		        if (load_step == 1 && bus_read_done == 1) begin re[w_rd]<= $signed(bus_read_data[7:0]); load_step <= 0; end //end //bus_read_enable <= 0; end end // bus ok and execute
-
-			if (satp_mode && !mmu_d && !init_enter && !mmu_pc) begin bus_address <= pa; end // for start pa_ed lb | overwrite bus_address by pa
-			if (satp_mode && !mmu_d && bus_read_done && !mmu_pc) begin init_enter<=1;end // for finish
+                        
+		        // for post mmu_da only
+			if (satp_mode && !mmu_da && !init_enter && !mmu_pc) begin bus_address <= pa; end // for start pa_ed lb | overwrite bus_address by pa
+			if (satp_mode && !mmu_da && bus_read_done && !mmu_pc) begin init_enter<=1;end // for finish va-pa-lb
 		        end
 		    end
 		    32'b???????_?????_?????_100_?????_0000011: begin  // Lbu  3 cycles
