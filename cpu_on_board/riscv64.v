@@ -46,6 +46,9 @@ module riscv64(
     	endcase
         end
     endfunction
+    // vpc
+    reg new_vpc;
+    reg [39:0] vpc;
 
 // -- newend --
 
@@ -208,8 +211,22 @@ module riscv64(
 	    bus_read_enable <= 0;
 	    bus_write_enable <= 0; 
 
+	    // vpc2ppc
+	    if (satp_mode && new_vpc) begin 
+		new_vpc <= 0;
+	        vpc <= pc - 4; // save next pc based on instruciton "csrrw into satp", it should be vpc since we are just change in mmu mode
+	 	bubble <= 1'b1; // bubble wrong fetched instruciton by IF
+		for (i=0;i<=31;i=i+1) begin sre[i]<= re[i]; end // save usr re
+		re[30]<= pc; // pass vpc to x30
+		// then inner assembly for mmu wroking to calculate ppc via vpc load and bus, put ppa to x30
+	    end else if (satp_mode && ir == 32'h30200073) begin // hiject mret
+		pc <= re[30]; // save inner assembly calculated physical address to pc
+	 	bubble <= 1'b1; // bubble wrong fetched instruciton by IF
+		for (i=0;i<=31;i=i+1) begin re[i]<= sre[i]; end // recover usr re
+		new_vpc <= 1; // open for next vpc
+
             // Shadowing
-	    if (shadowing && init_enter) begin 
+	    end else if (shadowing && init_enter) begin 
 	        saved_user_pc <= pc; // save pc
 		pc <= 0; // simplest default to mmu //if (mmu_working) pc <= 0; // mmu handle from 0
 	 	bubble <= 1'b1; // bubble wrong fetched instruciton by IF
