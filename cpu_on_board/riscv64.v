@@ -257,7 +257,7 @@ module riscv64(
 		for (i=0;i<=31;i=i+1) begin re[i]<= sre[i]; end // recover usr re
 		
             // Bubble
-	    end else if (bubble) begin bubble <= 1'b0; is_ppc <= is_ppc; end //  bus_write_enable <=0; bus_read_enable <= 0; end // Flush this cycle & Clear bubble signal for the next cycle
+	    end else if (bubble) begin bubble <= 1'b0; is_ppc <= is_ppc; //  bus_write_enable <=0; bus_read_enable <= 0; end // Flush this cycle & Clear bubble signal for the next cycle
 
             // Interrupt
 	    //if (interrupt_vector == 1 && mstatus_MIE == 1) begin //mstatus[3] MIE
@@ -273,8 +273,9 @@ module riscv64(
 	        csr_mstatus[MIE] <= 0;
 		interrupt_ack <= 1; // reply to outside
 
+            // Upper are hijects of executing ir for handler special state
 	    // IR
-	    else begin 
+	    end else begin 
 	        //bus_read_enable <= 0;
 	        //bus_write_enable <= 0; 
 	        //bus_write_data <= 0;
