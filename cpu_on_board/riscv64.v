@@ -47,7 +47,8 @@ module riscv64(
         end
     endfunction
     // vpc
-    reg new_vpc;
+    reg mmu_pc = 0;
+    //reg new_vpc = 1;
     reg [39:0] vpc;
 
 // -- newend --
@@ -180,7 +181,7 @@ module riscv64(
         end else begin
             heartbeat <= ~heartbeat; // heartbeat
             //ir <= instruction;
-	    if (shadowing) ir <= get_shadow_ir(pc);
+	    if (shadowing || mmu_pc) ir <= get_shadow_ir(pc);
             else ir <= instruction;
         end
     end
@@ -212,18 +213,20 @@ module riscv64(
 	    bus_write_enable <= 0; 
 
 	    // vpc2ppc
-	    if (satp_mode && new_vpc) begin 
-		new_vpc <= 0;
+	    if (satp_mode && !mmu_pc) begin 
+		mmu_pc <= 1;
+		//new_vpc <= 0;
 	        vpc <= pc - 4; // save next pc based on instruciton "csrrw into satp", it should be vpc since we are just change in mmu mode
 	 	bubble <= 1'b1; // bubble wrong fetched instruciton by IF
 		for (i=0;i<=31;i=i+1) begin sre[i]<= re[i]; end // save usr re
 		re[30]<= pc; // pass vpc to x30
 		// then inner assembly for mmu wroking to calculate ppc via vpc load and bus, put ppa to x30
-	    end else if (satp_mode && ir == 32'h30200073) begin // hiject mret
+	    end else if (mmu_pc && ir == 32'h30200073) begin // hiject mret
 		pc <= re[30]; // save inner assembly calculated physical address to pc
 	 	bubble <= 1'b1; // bubble wrong fetched instruciton by IF
 		for (i=0;i<=31;i=i+1) begin re[i]<= sre[i]; end // recover usr re
-		new_vpc <= 1; // open for next vpc
+		//new_vpc <= 1; // open for next vpc
+		mmu_pc <= 0; // finish mmu_pc
 
             // Shadowing
 	    end else if (shadowing && init_enter) begin 
