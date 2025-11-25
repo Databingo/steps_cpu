@@ -50,6 +50,7 @@ module riscv64(
     reg mmu_pc = 0;
     //reg new_vpc = 1;
     reg [39:0] vpc;
+    reg is_ppc;
 
 // -- newend --
 
@@ -212,13 +213,14 @@ module riscv64(
 	    interrupt_ack <= 0;
 	    bus_read_enable <= 0;
 	    bus_write_enable <= 0; 
+	    is_ppc <= 0;
 
 	    // vpc2ppc
-	    if (satp_mode && !mmu_pc && !mmu_d) begin 
+	    if (satp_mode && !mmu_pc && !mmu_d && !is_ppc) begin 
 		//new_vpc <= 0;
 	        pc <= 0; // trap in to mmu
 	 	bubble <= 1'b1; // bubble wrong fetched instruciton by IF
-		mmu_pc <= 1;
+		mmu_pc <= 1; // for no tarp mmu always in mmu
 		for (i=0;i<=31;i=i+1) begin sre[i]<= re[i]; end // save usr re
 		re[30]<= pc - 4; // pass vpc to x30 (next pc based on instruciton "csrrw into satp", it should be vpc since we are just change in mmu mode)
 		// then inner assembly for mmu wroking to calculate ppc via vpc load and bus, put ppa to x30
@@ -226,6 +228,7 @@ module riscv64(
 		pc <= re[30]; // save inner assembly calculated physical address to pc
 		mmu_pc <= 0; // finish mmu_pc
 	 	bubble <= 1'b1; // bubble wrong fetched instruciton by IF
+		is_ppc <= 1; // for no trap mmu always when finish vpc to ppc checking
 		for (i=0;i<=31;i=i+1) begin re[i]<= sre[i]; end // recover usr re
 		//new_vpc <= 1; // open for next vpc
 
@@ -260,7 +263,7 @@ module riscv64(
 		interrupt_ack <= 1; // reply to outside
 
             // Bubble
-	    end else if (bubble) begin bubble <= 1'b0; end //  bus_write_enable <=0; bus_read_enable <= 0; end // Flush this cycle & Clear bubble signal for the next cycle
+	    end else if (bubble) begin bubble <= 1'b0; is_ppc <= is_ppc; end //  bus_write_enable <=0; bus_read_enable <= 0; end // Flush this cycle & Clear bubble signal for the next cycle
 
 	    // IR
 	    else begin 
@@ -279,7 +282,7 @@ module riscv64(
 		    //    if (load_step == 1 && bus_read_done == 1) begin re[w_rd]<= $signed(bus_read_data[7:0]); load_step <= 0; end end //bus_read_enable <= 0; end end // bus ok and execute
 		    32'b???????_?????_?????_000_?????_0000011: begin  // Lb  3 cycles but wait to 5
 			if (satp_mode && init_enter==1 && !mmu_pc) begin mmu_d<=1; va <= rs1 + w_imm_i; pc <= pc -4; end // for enter | hiject Lb, pass lb pc, bus_address to mmu va
-			else begin 
+			else begin  
 
 		        if (load_step == 0) begin bus_address <= rs1 + w_imm_i; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; bus_ls_type <= w_func3; end
 		        if (load_step == 1 && bus_read_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working
