@@ -204,6 +204,7 @@ module riscv64(
 	    init_enter <= 1;
 	    for (i=0;i<=31;i=i+1) begin sre[i]<= 64'b0; end
 	    for (i=0;i<=20;i=i+1) begin Csrs[i]<= 64'b0; end
+	    mmu_pc <= 0;
 
         end else begin
 	    // Default PC+4    (1.Could be overide 2.Take effect next cycle) 
@@ -213,7 +214,7 @@ module riscv64(
 	    bus_write_enable <= 0; 
 
 	    // vpc2ppc
-	    if (satp_mode && !mmu_pc) begin 
+	    if (satp_mode && !mmu_pc && !shadowing) begin 
 		mmu_pc <= 1;
 		//new_vpc <= 0;
 	        vpc <= pc - 4; // save next pc based on instruciton "csrrw into satp", it should be vpc since we are just change in mmu mode
@@ -221,7 +222,7 @@ module riscv64(
 		for (i=0;i<=31;i=i+1) begin sre[i]<= re[i]; end // save usr re
 		re[30]<= pc; // pass vpc to x30
 		// then inner assembly for mmu wroking to calculate ppc via vpc load and bus, put ppa to x30
-	    end else if (mmu_pc && ir == 32'h30200073) begin // hiject mret
+	    end else if (mmu_pc && ir == 32'h30200073 && !shadowing) begin // hiject mret
 		pc <= re[30]; // save inner assembly calculated physical address to pc
 	 	bubble <= 1'b1; // bubble wrong fetched instruciton by IF
 		for (i=0;i<=31;i=i+1) begin re[i]<= sre[i]; end // recover usr re
@@ -277,15 +278,15 @@ module riscv64(
 		    //    if (load_step == 1 && bus_read_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working
 		    //    if (load_step == 1 && bus_read_done == 1) begin re[w_rd]<= $signed(bus_read_data[7:0]); load_step <= 0; end end //bus_read_enable <= 0; end end // bus ok and execute
 		    32'b???????_?????_?????_000_?????_0000011: begin  // Lb  3 cycles but wait to 5
-			if (satp_mode && init_enter==1) begin shadowing<=1; va <= rs1 + w_imm_i; pc <= pc -4; end // for enter | hiject Lb, pass lb pc, bus_address to mmu va
+			if (satp_mode && init_enter==1 && !mmu_pc) begin shadowing<=1; va <= rs1 + w_imm_i; pc <= pc -4; end // for enter | hiject Lb, pass lb pc, bus_address to mmu va
 			else begin 
 
 		        if (load_step == 0) begin bus_address <= rs1 + w_imm_i; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; bus_ls_type <= w_func3; end
 		        if (load_step == 1 && bus_read_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working
 		        if (load_step == 1 && bus_read_done == 1) begin re[w_rd]<= $signed(bus_read_data[7:0]); load_step <= 0; end //end //bus_read_enable <= 0; end end // bus ok and execute
 
-			if (satp_mode && !shadowing && !init_enter) begin bus_address <= pa; end // for start pa_ed lb | overwrite bus_address by pa
-			if (satp_mode && !shadowing && bus_read_done) begin init_enter<=1;end // for finish
+			if (satp_mode && !shadowing && !init_enter && !mmu_pc) begin bus_address <= pa; end // for start pa_ed lb | overwrite bus_address by pa
+			if (satp_mode && !shadowing && bus_read_done && !mmu_pc) begin init_enter<=1;end // for finish
 		        end
 		    end
 		    32'b???????_?????_?????_100_?????_0000011: begin  // Lbu  3 cycles
