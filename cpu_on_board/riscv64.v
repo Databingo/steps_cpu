@@ -229,7 +229,7 @@ module riscv64(
 		mmu_pc <= 0; // finish mmu_pc
 
             // Shadowing
-	    end else if (shadowing && init_enter) begin 
+	    end else if (!mmu_pc && shadowing && init_enter) begin 
 	        saved_user_pc <= pc; // save pc
 		pc <= 0; // simplest default to mmu //if (mmu_working) pc <= 0; // mmu handle from 0
 	 	bubble <= 1'b1; // bubble wrong fetched instruciton by IF
@@ -237,7 +237,7 @@ module riscv64(
 		for (i=0;i<=31;i=i+1) begin sre[i]<= re[i]; end // save usr re
 		re[31]<= va; // pass va to x31
 		// then inner assembly for mmu wroking to calculate pa via va load and bus, put pa to x31
-	    end else if (shadowing && ir == 32'h30200073) begin // hiject mret
+	    end else if (!mmu_pc && shadowing && ir == 32'h30200073) begin // hiject mret
 		pc <= saved_user_pc; // recover from shadow when see Mret
 		pa <= re[31]; // save inner assembly calculated physical address to pa
 		shadowing <= 0; // end shadowing
