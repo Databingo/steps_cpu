@@ -245,7 +245,7 @@ module riscv64(
 	    end else if (go_mmu_da) begin 
 		go_mmu_da <= 0;
 		mmu_da <= 1;
-	        saved_user_pc <= pc - 4; // save pc
+	        saved_user_pc <= pc; // save pc
 		pc <= 0; // handler
 	 	bubble <= 1'b1; // bubble
 		//is_pda <= 1; // now we in mmu_da consider handler assembler's address as physical address
@@ -295,7 +295,7 @@ module riscv64(
 		    //    if (load_step == 1 && bus_read_done == 1) begin re[w_rd]<= $signed(bus_read_data[7:0]); load_step <= 0; end end //bus_read_enable <= 0; end end // bus ok and execute
 		    32'b???????_?????_?????_000_?????_0000011: begin  // Lb  3 cycles but wait to 5
 		        // start mmu-da only  MMU_DA ON
-			if (satp_mode && !mmu_da && !mmu_pc && !is_pda) begin go_mmu_da<=1; va <= rs1 + w_imm_i; pc <= pc -4; end // for enter | hiject Lb, pass lb pc, bus_address to mmu va
+			if (satp_mode && !mmu_da && !mmu_pc && !is_pda) begin go_mmu_da<=1; mmu_da<=1; va <= rs1 + w_imm_i; pc <= pc -4; end // for enter | hiject Lb, pass lb pc, bus_address to mmu va
 		   else begin
 		        if (load_step == 0) begin bus_address <= rs1 + w_imm_i; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; bus_ls_type <= w_func3; end
 		        if (load_step == 1 && bus_read_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working
