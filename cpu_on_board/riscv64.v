@@ -27,7 +27,6 @@ module riscv64(
     reg [63:0] re [0:31]; // General Registers 32s
     reg [63:0] sre [0:31]; // Shadow Registers 32s
     reg mmu_da=0;
-    reg go_mmu_da=0;
     reg [63:0] saved_user_pc;
     reg [63:0] pa;
     reg [63:0] va;
@@ -228,38 +227,32 @@ module riscv64(
 	    //is_ppc <= 0;
 	    //is_pda <= 0;
 
+            // Bubble
+	    if (bubble) begin bubble <= 1'b0; // Flush this cycle & Clear bubble signal for the next cycle
+
 	    //  mmu_pc
-	    if (mmu_mode && !mmu_pc && !mmu_da && !is_ppc) begin  // OPEN
+	    end else if (mmu_mode && !mmu_pc && !mmu_da && !is_ppc) begin  // OPEN
 		mmu_pc <= 1; // MMU_PC ON 
 	        pc <= 20; // handler
 	 	bubble <= 1'b1; // bubble 
 		for (i=0;i<=31;i=i+1) begin sre[i]<= re[i]; end // save re
-		re[30]<= pc - 4; // pass vpc to x30
-	    end else if (mmu_pc && ir == 32'b00110000001000000000000001110011) begin // end hiject mret  // CLOSE
-		pc <= re[30]; // get ppc & recover from shadow when see Mret
+		re[30]<= pc - 4; // save vpc to x30
+	    end else if (mmu_pc && ir == 32'b00110000001000000000000001110011) begin // end hiject mret & recover from shadow when see Mret
+		pc <= re[30]; // get ppc and turn to ppc'ir
 	 	bubble <= 1'b1; // bubble
 		for (i=0;i<=31;i=i+1) begin re[i]<= sre[i]; end // recover usr re
 		is_ppc <= 1; // we are ppc
 		mmu_pc <= 0; // MMU_PC OFF
 
-            //  mmu_da OPEN_2
-	    //end else if (mmu_da && !is_pda) begin 
-	    //end else if (go_mmu_da) begin 
-	    //end else if ((bus_read_enable || bus_write_enable) && !mmu_pc && !mmu_da && !is_pda) begin 
+            //  mmu_da 
 	    end else if (mmu_mode && (op == 7'b0000011 || op == 7'b0100011) && !mmu_pc && !mmu_da && !is_pda) begin  // load/store
-		//go_mmu_da <= 0;
 		mmu_da <= 1; // MMU_DA ON
-	        //saved_user_pc <= pc; // save pc l/s directly from OPEN_1
 	        saved_user_pc <= pc-4; // save pc l/s
 		pc <= 0; // handler
 	 	bubble <= 1'b1; // bubble
-		//is_pda <= 1; // now we in mmu_da consider handler assembler's address as physical address
 		for (i=0;i<=31;i=i+1) begin sre[i]<= re[i]; end // save re
-		//re[31]<= va; // pass va to x31
-		//re[31]<= bus_address; // pass va to x31
-		re[31]<= (op == 7'b0000011) ? (rs1 + w_imm_i):(rs1 + w_imm_s); // pass va to x31
-		// then inner assembly for mmu wroking to calculate pa via va load and bus, put pa to x31
-	    end else if (mmu_da && ir == 32'b00110000001000000000000001110011) begin // hiject mret // CLOSE
+		re[31] <= (op == 7'b0000011) ? (rs1 + w_imm_i):(rs1 + w_imm_s); // save vpa to x31
+	    end else if (mmu_da && ir == 32'b00110000001000000000000001110011) begin // hiject mret 
 		pa <= re[31]; // get pda
 		pc <= saved_user_pc; // recover from shadow when see Mret
 		bubble <= 1; // bubble
@@ -267,9 +260,6 @@ module riscv64(
 		is_pda <= 1; // we are pa
 		mmu_da <= 0; // MMU_DA OFF
 		
-            // Bubble
-	    end else if (bubble) begin bubble <= 1'b0; //is_ppc <= is_ppc; is_pda <= is_pda;//  bus_write_enable <=0; bus_read_enable <= 0; end // Flush this cycle & Clear bubble signal for the next cycle
-
             // Interrupt
 	    //if (interrupt_vector == 1 && mstatus_MIE == 1) begin //mstatus[3] MIE
 	    end else if (interrupt_vector == 1 && mstatus_MIE == 1) begin //mstatus[3] MIE
@@ -284,20 +274,6 @@ module riscv64(
 	        csr_mstatus[MIE] <= 0;
 		interrupt_ack <= 1; // reply to outside
 
-           // // PPC reset
-	   //end else if (!mmu_pc && !mmu_da && is_ppc) begin
-	   //    wire page_cross = (pc[11:0]==12'hFFC); // 4092+4 = 4096 bord
-	   //    case(op)
-	   //        // 7'b1100011: is_ppc <= 0  // Branch for test, no check compare result, just reset.
-	   //        7'b1100011, 7'b1101111, 7'b1100111: begin 
-	   //            is_ppc <= 0; // jar/jalr
-	   //            pc <= pc; // trans the next branch/jar/jarl targe pc address;
-	   //            // next direct turn to mmu_pc similar as bubble's effect
-	   //        end
-	   //        default: if (page_cross) is_ppc <= 0;
-	   //    endcase
-	   //    //bubble <= 1;
-
             // Upper are hijects of executing ir for handler special state
 	    // IR
 	    end else begin 
@@ -306,7 +282,7 @@ module riscv64(
 	        //bus_write_data <= 0;
 	        //bus_address <= `Ram_base;
 	        //is_ppc <= 0;
-		if (is_ppc && pc[11:0]==12'hFFC) is_ppc <= 0;
+		if (is_ppc && pc[11:0]==12'hFFC) is_ppc <= 0; //page_cross 4096 Bytes
                 casez(ir) // Pseudo: li j jr ret call // I: addi sb sh sw sd lb lw ld lbu lhu lwu lui jal jalr auipc beq slt mret 
 	            // U-type
 	            32'b???????_?????_?????_???_?????_0110111: re[w_rd] <= w_imm_u; // Lui
@@ -331,18 +307,11 @@ module riscv64(
 		    //    end
 		    //end
 		    32'b???????_?????_?????_000_?????_0000011: begin  // Lb  3 cycles but wait to 5
-		        // start mmu-da only  MMU_DA ON //for enter|hiject Lb, pass lb pc,bus_address to mmu va
-			//if (mmu_mode && need_mmu_da_translate) begin mmu_da<=1; va<=rs1 + w_imm_i; pc<= pc-4;end else begin
-
-		        //if (load_step == 0) begin if (is_pda) is_pda<=0; bus_address <= (is_pda) ? pa : rs1+w_imm_i; bus_read_enable<=1; pc<=pc-4; bubble<=1; load_step<=1; bus_ls_type<=w_func3; end
 			if (load_step == 0) begin bus_address <= rs1 + w_imm_i; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; bus_ls_type <= w_func3; //end
 			                    if (is_pda) bus_address <= pa; end
 		        if (load_step == 1 && bus_read_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working
 		        if (load_step == 1 && bus_read_done == 1) begin re[w_rd]<= $signed(bus_read_data[7:0]); load_step <= 0; //end //end //bus_read_enable <= 0; end end // bus ok and execute
 			                    if (is_pda) is_pda <= 0; end 
-                        
-			// pa override 
-			//if (load_step == 0 && is_pda) begin bus_address <= pa; is_pda <= 0; end
 		        end
 		    //end
 		    32'b???????_?????_?????_100_?????_0000011: begin  // Lbu  3 cycles
@@ -376,7 +345,6 @@ module riscv64(
 	            //32'b???????_?????_?????_011_?????_0100011: begin bus_address <= rs1 + w_imm_s;bus_write_data<=rs2;bus_write_enable<=1;pc<=pc;bubble<=1;bus_ls_type<=w_func3;end//Sdbus2
 	            32'b???????_?????_?????_000_?????_0100011: begin 
 		        if (store_step == 0) begin bus_address <= rs1 + w_imm_s; bus_write_data<=rs2[7:0];bus_write_enable<=1;pc<=pc-4;bubble<=1;store_step<=1;bus_ls_type<=w_func3; //end
-			                    //if (is_pda) begin bus_address <= pa; is_pda <= 0; end end
 			                    if (is_pda) bus_address <= pa; end
 		        if (store_step == 1 && bus_write_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working 1 bubble2 this3
 			if (store_step == 1 && bus_write_done == 1) begin store_step <= 0;
