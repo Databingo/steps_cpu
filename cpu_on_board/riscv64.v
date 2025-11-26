@@ -27,6 +27,7 @@ module riscv64(
     reg [63:0] re [0:31]; // General Registers 32s
     reg [63:0] sre [0:31]; // Shadow Registers 32s
     reg mmu_da=0;
+    reg go_mmu_da=0;
     reg [63:0] saved_user_pc;
     reg [63:0] pa;
     reg [63:0] va;
@@ -225,30 +226,33 @@ module riscv64(
 	    is_ppc <= 0;
 	    is_pda <= 0;
 
-	    // vpc2ppc
-	    if (satp_mode && !mmu_pc && !is_ppc && !mmu_da) begin  // OPEN
+	    //  mmu_pc
+	    if (satp_mode && !mmu_pc && !mmu_da && !is_ppc) begin  // OPEN
 		mmu_pc <= 1; // MMU_PC ON 
 	        pc <= 20; // handler
 	 	bubble <= 1'b1; // bubble 
 		for (i=0;i<=31;i=i+1) begin sre[i]<= re[i]; end // save re
 		re[30]<= pc - 4; // pass vpc to x30
-	    end else if (mmu_pc && ir == 32'b00110000001000000000000001110011 && !mmu_da) begin // end hiject mret  // CLOSE
+	    end else if (mmu_pc && ir == 32'b00110000001000000000000001110011) begin // end hiject mret  // CLOSE
 		pc <= re[30]; // get ppc & recover from shadow when see Mret
 	 	bubble <= 1'b1; // bubble
 		for (i=0;i<=31;i=i+1) begin re[i]<= sre[i]; end // recover usr re
 		mmu_pc <= 0; // MMU_PC OFF
 		is_ppc <= 1; // we are ppc
 
-            // vda2pda
-	    end else if (mmu_da && !is_pda && !mmu_pc) begin 
-	        saved_user_pc <= pc; // save pc
+            //  mmu_da OPEN_2
+	    //end else if (mmu_da && !is_pda) begin 
+	    end else if (go_mmu_da) begin 
+		go_mmu_da <= 0;
+		mmu_da <= 1;
+	        saved_user_pc <= pc - 4; // save pc
 		pc <= 0; // handler
 	 	bubble <= 1'b1; // bubble
 		//is_pda <= 1; // now we in mmu_da consider handler assembler's address as physical address
 		for (i=0;i<=31;i=i+1) begin sre[i]<= re[i]; end // save re
 		re[31]<= va; // pass va to x31
 		// then inner assembly for mmu wroking to calculate pa via va load and bus, put pa to x31
-	    end else if (mmu_da && ir == 32'b00110000001000000000000001110011 && !mmu_pc) begin // hiject mret // CLOSE
+	    end else if (mmu_da && ir == 32'b00110000001000000000000001110011) begin // hiject mret // CLOSE
 		pa <= re[31]; // get pda
 		pc <= saved_user_pc; // recover from shadow when see Mret
 		bubble <= 1; // bubble
@@ -291,7 +295,7 @@ module riscv64(
 		    //    if (load_step == 1 && bus_read_done == 1) begin re[w_rd]<= $signed(bus_read_data[7:0]); load_step <= 0; end end //bus_read_enable <= 0; end end // bus ok and execute
 		    32'b???????_?????_?????_000_?????_0000011: begin  // Lb  3 cycles but wait to 5
 		        // start mmu-da only  MMU_DA ON
-			if (satp_mode && !mmu_da && !mmu_pc && !is_pda) begin mmu_da<=1; va <= rs1 + w_imm_i; pc <= pc -4; end // for enter | hiject Lb, pass lb pc, bus_address to mmu va
+			if (satp_mode && !mmu_da && !mmu_pc && !is_pda) begin go_mmu_da<=1; va <= rs1 + w_imm_i; pc <= pc -4; end // for enter | hiject Lb, pass lb pc, bus_address to mmu va
 		   else begin
 		        if (load_step == 0) begin bus_address <= rs1 + w_imm_i; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; bus_ls_type <= w_func3; end
 		        if (load_step == 1 && bus_read_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working
@@ -299,7 +303,7 @@ module riscv64(
                         
 		        // for post mmu_da only ( overwrite normal value of address)
 			if (satp_mode && !mmu_da && is_pda && !mmu_pc && load_step==0 && bus_read_done==0) begin bus_address <= pa; end // for start pa_ed lb | overwrite bus_address; bind with step 0
-			if (satp_mode && !mmu_da && is_pda && !mmu_pc && load_step==1 && bus_read_done==1) begin is_pda<=0;end // for finish va-pa-lb reset is_pda to 0; bind with step 1,1
+			if (satp_mode && !mmu_da && is_pda && !mmu_pc && load_step==1 && bus_read_done==1) begin is_pda <= 0;end // for finish va-pa-lb reset is_pda to 0; bind with step 1,1
 			// XXXABCDXABCDEFGHXABCDEFGHXA***^*B^*****B^*****B^*****B^*****B^*****
 		        end
 		    end
