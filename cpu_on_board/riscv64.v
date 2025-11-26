@@ -223,11 +223,11 @@ module riscv64(
 	    interrupt_ack <= 0;
 	    bus_read_enable <= 0;
 	    bus_write_enable <= 0; 
-	    is_ppc <= 0;
-	    is_pda <= 0;
+	    //is_ppc <= 0;
+	    //is_pda <= 0;
 
 	    //  mmu_pc
-	    if (satp_mode && !mmu_pc && !mmu_da && !is_ppc) begin  // OPEN
+	    if (satp_mode && !mmu_pc && !mmu_da && !go_mmu_da && !is_ppc) begin  // OPEN
 		mmu_pc <= 1; // MMU_PC ON 
 	        pc <= 20; // handler
 	 	bubble <= 1'b1; // bubble 
@@ -245,7 +245,7 @@ module riscv64(
 	    end else if (go_mmu_da) begin 
 		go_mmu_da <= 0;
 		mmu_da <= 1;
-	        saved_user_pc <= pc; // save pc
+	        saved_user_pc <= pc; // save pc l/s directly from OPEN_1
 		pc <= 0; // handler
 	 	bubble <= 1'b1; // bubble
 		//is_pda <= 1; // now we in mmu_da consider handler assembler's address as physical address
@@ -261,7 +261,7 @@ module riscv64(
 		is_pda <= 1; // we are pa
 		
             // Bubble
-	    end else if (bubble) begin bubble <= 1'b0; is_ppc <= is_ppc; is_pda <= is_pda;//  bus_write_enable <=0; bus_read_enable <= 0; end // Flush this cycle & Clear bubble signal for the next cycle
+	    end else if (bubble) begin bubble <= 1'b0; //is_ppc <= is_ppc; is_pda <= is_pda;//  bus_write_enable <=0; bus_read_enable <= 0; end // Flush this cycle & Clear bubble signal for the next cycle
 
             // Interrupt
 	    //if (interrupt_vector == 1 && mstatus_MIE == 1) begin //mstatus[3] MIE
@@ -284,6 +284,7 @@ module riscv64(
 	        //bus_write_enable <= 0; 
 	        //bus_write_data <= 0;
 	        //bus_address <= `Ram_base;
+	        is_ppc <= 0;
                 casez(ir) // Pseudo: li j jr ret call // I: addi sb sh sw sd lb lw ld lbu lhu lwu lui jal jalr auipc beq slt mret 
 	            // U-type
 	            32'b???????_?????_?????_???_?????_0110111: re[w_rd] <= w_imm_u; // Lui
@@ -293,17 +294,31 @@ module riscv64(
 		    //    if (load_step == 0) begin bus_address <= rs1 + w_imm_i; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; bus_ls_type <= w_func3; end
 		    //    if (load_step == 1 && bus_read_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working
 		    //    if (load_step == 1 && bus_read_done == 1) begin re[w_rd]<= $signed(bus_read_data[7:0]); load_step <= 0; end end //bus_read_enable <= 0; end end // bus ok and execute
+		    //32'b???????_?????_?????_000_?????_0000011: begin  // Lb  3 cycles but wait to 5
+		    //    // start mmu-da only  MMU_DA ON
+		    //    if (satp_mode && !mmu_da && !mmu_pc && !is_pda) begin go_mmu_da<=1; mmu_da<=1; va <= rs1 + w_imm_i; pc <= pc -4; end // for enter | hiject Lb, pass lb pc, bus_address to mmu va
+		    //else begin
+		    //    if (load_step == 0) begin bus_address <= rs1 + w_imm_i; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; bus_ls_type <= w_func3; end
+		    //    if (load_step == 1 && bus_read_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working
+		    //    if (load_step == 1 && bus_read_done == 1) begin re[w_rd]<= $signed(bus_read_data[7:0]); load_step <= 0; end //end //bus_read_enable <= 0; end end // bus ok and execute
+                    //    
+		    //    // for post mmu_da only ( overwrite normal value of address)
+		    //    if (satp_mode && !mmu_da && is_pda && !mmu_pc && load_step==0 && bus_read_done==0) begin bus_address <= pa; end // for start pa_ed lb | overwrite bus_address; bind with step 0
+		    //    if (satp_mode && !mmu_da && is_pda && !mmu_pc && load_step==1 && bus_read_done==1) begin is_pda <= 0;end // for finish va-pa-lb reset is_pda to 0; bind with step 1,1
+		    //    // XXXABCDXABCDEFGHXABCDEFGHXA***^*B^*****B^*****B^*****B^*****B^*****
+		    //    end
+		    //end
 		    32'b???????_?????_?????_000_?????_0000011: begin  // Lb  3 cycles but wait to 5
 		        // start mmu-da only  MMU_DA ON
-			if (satp_mode && !mmu_da && !mmu_pc && !is_pda) begin go_mmu_da<=1; mmu_da<=1; va <= rs1 + w_imm_i; pc <= pc -4; end // for enter | hiject Lb, pass lb pc, bus_address to mmu va
+			if (satp_mode && !mmu_da && !mmu_pc && !is_pda) begin go_mmu_da<=1; va<=rs1 + w_imm_i; pc<= pc-4;end //for enter|hiject Lb, pass lb pc,bus_address to mmu va
 		   else begin
-		        if (load_step == 0) begin bus_address <= rs1 + w_imm_i; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; bus_ls_type <= w_func3; end
+		        if (load_step == 0) begin if (is_pda) is_pda<=0; bus_address<=(is_pda) ? pa:rs1+w_imm_i; bus_read_enable<=1; pc<=pc-4; bubble<=1; load_step<=1; bus_ls_type<=w_func3; end
 		        if (load_step == 1 && bus_read_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working
 		        if (load_step == 1 && bus_read_done == 1) begin re[w_rd]<= $signed(bus_read_data[7:0]); load_step <= 0; end //end //bus_read_enable <= 0; end end // bus ok and execute
                         
 		        // for post mmu_da only ( overwrite normal value of address)
-			if (satp_mode && !mmu_da && is_pda && !mmu_pc && load_step==0 && bus_read_done==0) begin bus_address <= pa; end // for start pa_ed lb | overwrite bus_address; bind with step 0
-			if (satp_mode && !mmu_da && is_pda && !mmu_pc && load_step==1 && bus_read_done==1) begin is_pda <= 0;end // for finish va-pa-lb reset is_pda to 0; bind with step 1,1
+			//if (satp_mode && !mmu_da && is_pda && !mmu_pc && load_step==0 && bus_read_done==0) begin bus_address <= pa; end // for start pa_ed lb | overwrite bus_address; bind with step 0
+			//if (satp_mode && !mmu_da && is_pda && !mmu_pc && load_step==1 && bus_read_done==1) begin is_pda <= 0;end // for finish va-pa-lb reset is_pda to 0; bind with step 1,1
 			// XXXABCDXABCDEFGHXABCDEFGHXA***^*B^*****B^*****B^*****B^*****B^*****
 		        end
 		    end
