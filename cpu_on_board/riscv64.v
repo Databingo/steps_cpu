@@ -33,6 +33,7 @@ module riscv64(
     reg is_pda=0;
     integer i; 
 
+    // MMU
     function [31:0] get_shadow_ir; // 0-5 mmu 
         input [63:0] spc;
         begin
@@ -225,38 +226,35 @@ module riscv64(
 	    is_pda <= 0;
 
 	    // vpc2ppc
-	    if (satp_mode && !mmu_pc && !is_ppc && !mmu_da) begin 
-	    //if (satp_mode && !mmu_pc && !mmu_da) begin  // start 
-		mmu_pc <= 1; // MMU_PC ON trap in to mmu_pc
-	        pc <= 20; // mmu_pc handler
-	 	bubble <= 1'b1; // bubble wrong fetched instruciton by IF
-		for (i=0;i<=31;i=i+1) begin sre[i]<= re[i]; end // save usr re
-		re[30]<= pc - 4; // pass vpc to x30 (next pc based on instruciton "csrrw into satp", it should be vpc since we are just change in mmu mode)
-		// then inner assembly for mmu_pc wroking to calculate ppc via vpc load and bus, put ppa to x30
-		is_ppc <= 1; // for no trap mmu_pc always when finish vpc to ppc checking
-	    end else if (mmu_pc && ir == 32'h30200073 && !mmu_da) begin // end hiject mret
-		mmu_pc <= 0; // MMU_PC OFF
-		pc <= re[30]; // ppc, save inner assembly calculated physical address to pc
-	 	bubble <= 1'b1; // bubble wrong fetched instruciton by IF
-		is_ppc <= 1; // for no trap mmu_pc always when finish vpc to ppc checking
+	    if (satp_mode && !mmu_pc && !is_ppc && !mmu_da) begin  // OPEN
+		mmu_pc <= 1; // MMU_PC ON 
+	        pc <= 20; // handler
+	 	bubble <= 1'b1; // bubble 
+		for (i=0;i<=31;i=i+1) begin sre[i]<= re[i]; end // save re
+		re[30]<= pc - 4; // pass vpc to x30
+	    end else if (mmu_pc && ir == 32'b00110000001000000000000001110011 && !mmu_da) begin // end hiject mret  // CLOSE
+		pc <= re[30]; // get ppc & recover from shadow when see Mret
+	 	bubble <= 1'b1; // bubble
 		for (i=0;i<=31;i=i+1) begin re[i]<= sre[i]; end // recover usr re
+		mmu_pc <= 0; // MMU_PC OFF
+		is_ppc <= 1; // we are ppc
 
             // vda2pda
 	    end else if (mmu_da && !is_pda && !mmu_pc) begin 
 	        saved_user_pc <= pc; // save pc
-		pc <= 0; // simplest default to mmu //if (mmu_working) pc <= 0; // mmu handle from 0
-	 	bubble <= 1'b1; // bubble wrong fetched instruciton by IF
-		is_pda <= 1; // now we in mmu_da consider handler assembler's address as physical address
-		for (i=0;i<=31;i=i+1) begin sre[i]<= re[i]; end // save usr re
+		pc <= 0; // handler
+	 	bubble <= 1'b1; // bubble
+		//is_pda <= 1; // now we in mmu_da consider handler assembler's address as physical address
+		for (i=0;i<=31;i=i+1) begin sre[i]<= re[i]; end // save re
 		re[31]<= va; // pass va to x31
 		// then inner assembly for mmu wroking to calculate pa via va load and bus, put pa to x31
-	    end else if (mmu_da && ir == 32'h30200073 && !mmu_pc) begin // hiject mret
+	    end else if (mmu_da && ir == 32'b00110000001000000000000001110011 && !mmu_pc) begin // hiject mret // CLOSE
+		pa <= re[31]; // get pda
 		pc <= saved_user_pc; // recover from shadow when see Mret
-		bubble <= 1; // bubble pre-fetched shadow ir
-		pa <= re[31]; // save inner assembly calculated physical address to pa
-		mmu_da <= 0; //MMU_DA OFF
+		bubble <= 1; // bubble
 		for (i=0;i<=31;i=i+1) begin re[i]<= sre[i]; end // recover usr re
-		is_pda <= 1; // we get pa
+		mmu_da <= 0; // MMU_DA OFF
+		is_pda <= 1; // we are pa
 		
             // Bubble
 	    end else if (bubble) begin bubble <= 1'b0; is_ppc <= is_ppc; is_pda <= is_pda;//  bus_write_enable <=0; bus_read_enable <= 0; end // Flush this cycle & Clear bubble signal for the next cycle
@@ -293,7 +291,7 @@ module riscv64(
 		    //    if (load_step == 1 && bus_read_done == 1) begin re[w_rd]<= $signed(bus_read_data[7:0]); load_step <= 0; end end //bus_read_enable <= 0; end end // bus ok and execute
 		    32'b???????_?????_?????_000_?????_0000011: begin  // Lb  3 cycles but wait to 5
 		        // start mmu-da only  MMU_DA ON
-			if (satp_mode && !mmu_da && !is_pda && !mmu_pc) begin mmu_da<=1; va <= rs1 + w_imm_i; pc <= pc -4; end // for enter | hiject Lb, pass lb pc, bus_address to mmu va
+			if (satp_mode && !mmu_da && !mmu_pc && !is_pda) begin mmu_da<=1; va <= rs1 + w_imm_i; pc <= pc -4; end // for enter | hiject Lb, pass lb pc, bus_address to mmu va
 		   else begin
 		        if (load_step == 0) begin bus_address <= rs1 + w_imm_i; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; bus_ls_type <= w_func3; end
 		        if (load_step == 1 && bus_read_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working
