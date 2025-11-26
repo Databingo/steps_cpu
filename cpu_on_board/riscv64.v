@@ -83,7 +83,7 @@ module riscv64(
     wire [63:0] rs1 = re[w_rs1];
     wire [63:0] rs2 = re[w_rs2];
     // -- op --
-    wire [7:0] op = ir[7:0];
+    wire [6:0] op = ir[6:0];
 
 
 
@@ -246,7 +246,7 @@ module riscv64(
 	    //end else if (mmu_da && !is_pda) begin 
 	    //end else if (go_mmu_da) begin 
 	    //end else if ((bus_read_enable || bus_write_enable) && !mmu_pc && !mmu_da && !is_pda) begin 
-	    end else if (mmu_mode && op == 8'b0?000011 && !mmu_pc && !mmu_da && !is_pda) begin  // load/store
+	    end else if (mmu_mode && op == 7'b0?00011 && !mmu_pc && !mmu_da && !is_pda) begin  // load/store
 		//go_mmu_da <= 0;
 		mmu_da <= 1; // MMU_DA ON
 	        //saved_user_pc <= pc; // save pc l/s directly from OPEN_1
@@ -321,9 +321,10 @@ module riscv64(
 
 		        //if (load_step == 0) begin if (is_pda) is_pda<=0; bus_address <= (is_pda) ? pa : rs1+w_imm_i; bus_read_enable<=1; pc<=pc-4; bubble<=1; load_step<=1; bus_ls_type<=w_func3; end
 			if (load_step == 0) begin bus_address <= rs1 + w_imm_i; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; bus_ls_type <= w_func3; //end
-			                    if (is_pda) begin bus_address <= pa; is_pda <= 0; end end
+			                    if (is_pda) bus_address <= pa; end
 		        if (load_step == 1 && bus_read_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working
-		        if (load_step == 1 && bus_read_done == 1) begin re[w_rd]<= $signed(bus_read_data[7:0]); load_step <= 0; end //end //bus_read_enable <= 0; end end // bus ok and execute
+		        if (load_step == 1 && bus_read_done == 1) begin re[w_rd]<= $signed(bus_read_data[7:0]); load_step <= 0; //end //end //bus_read_enable <= 0; end end // bus ok and execute
+			                    if (is_pda) is_pda <= 0; end 
                         
 			// pa override 
 			//if (load_step == 0 && is_pda) begin bus_address <= pa; is_pda <= 0; end
@@ -360,9 +361,11 @@ module riscv64(
 	            //32'b???????_?????_?????_011_?????_0100011: begin bus_address <= rs1 + w_imm_s;bus_write_data<=rs2;bus_write_enable<=1;pc<=pc;bubble<=1;bus_ls_type<=w_func3;end//Sdbus2
 	            32'b???????_?????_?????_000_?????_0100011: begin 
 		        if (store_step == 0) begin bus_address <= rs1 + w_imm_s; bus_write_data<=rs2[7:0];bus_write_enable<=1;pc<=pc-4;bubble<=1;store_step<=1;bus_ls_type<=w_func3; //end
-			                    if (is_pda) begin bus_address <= pa; is_pda <= 0; end end
+			                    //if (is_pda) begin bus_address <= pa; is_pda <= 0; end end
+			                    if (is_pda) bus_address <= pa; end
 		        if (store_step == 1 && bus_write_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working 1 bubble2 this3
 		        if (store_step == 1 && bus_write_done == 1) store_step <= 0;
+			                    if (is_pda) is_pda <= 0; end 
 		        end //Sb bus1 cycles
 	            32'b???????_?????_?????_001_?????_0100011: begin
 		        if (store_step == 0) begin bus_address <= rs1 + w_imm_s; bus_write_data<=rs2[15:0];bus_write_enable<=1;pc<=pc-4;bubble<=1;store_step<=1;bus_ls_type<=w_func3; end
