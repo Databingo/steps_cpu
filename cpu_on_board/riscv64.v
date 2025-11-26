@@ -322,7 +322,7 @@ module riscv64(
 			// override by pa
 			if (load_step == 0 && is_pda) begin bus_address <= pa; is_pda <= 0; end
 		        end
-		    end
+		    //end
 		    32'b???????_?????_?????_100_?????_0000011: begin  // Lbu  3 cycles
 		        if (load_step == 0) begin bus_address <= rs1 + w_imm_i; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; bus_ls_type <= w_func3; end
 		        if (load_step == 1 && bus_read_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working
