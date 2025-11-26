@@ -222,6 +222,7 @@ module riscv64(
 	    bus_read_enable <= 0;
 	    bus_write_enable <= 0; 
 	    is_ppc <= 0;
+	    is_pda <= 0;
 
 	    // vpc2ppc
 	    if (satp_mode && !mmu_pc && !is_ppc && !mmu_da) begin 
@@ -232,6 +233,7 @@ module riscv64(
 		for (i=0;i<=31;i=i+1) begin sre[i]<= re[i]; end // save usr re
 		re[30]<= pc - 4; // pass vpc to x30 (next pc based on instruciton "csrrw into satp", it should be vpc since we are just change in mmu mode)
 		// then inner assembly for mmu_pc wroking to calculate ppc via vpc load and bus, put ppa to x30
+		is_ppc <= 1; // for no trap mmu_pc always when finish vpc to ppc checking
 	    end else if (mmu_pc && ir == 32'h30200073 && !mmu_da) begin // end hiject mret
 		mmu_pc <= 0; // MMU_PC OFF
 		pc <= re[30]; // ppc, save inner assembly calculated physical address to pc
@@ -252,12 +254,12 @@ module riscv64(
 		pc <= saved_user_pc; // recover from shadow when see Mret
 		bubble <= 1; // bubble pre-fetched shadow ir
 		pa <= re[31]; // save inner assembly calculated physical address to pa
-		//MMU_DA OFF
-		mmu_da <= 0; // end mmu_da
+		mmu_da <= 0; //MMU_DA OFF
 		for (i=0;i<=31;i=i+1) begin re[i]<= sre[i]; end // recover usr re
+		is_pda <= 1; // we get pa
 		
             // Bubble
-	    end else if (bubble) begin bubble <= 1'b0; is_ppc <= is_ppc; //  bus_write_enable <=0; bus_read_enable <= 0; end // Flush this cycle & Clear bubble signal for the next cycle
+	    end else if (bubble) begin bubble <= 1'b0; is_ppc <= is_ppc; is_pda <= is_pda;//  bus_write_enable <=0; bus_read_enable <= 0; end // Flush this cycle & Clear bubble signal for the next cycle
 
             // Interrupt
 	    //if (interrupt_vector == 1 && mstatus_MIE == 1) begin //mstatus[3] MIE
@@ -292,15 +294,14 @@ module riscv64(
 		    32'b???????_?????_?????_000_?????_0000011: begin  // Lb  3 cycles but wait to 5
 		        // start mmu-da only  MMU_DA ON
 			if (satp_mode && !mmu_da && !is_pda && !mmu_pc) begin mmu_da<=1; va <= rs1 + w_imm_i; pc <= pc -4; end // for enter | hiject Lb, pass lb pc, bus_address to mmu va
-			else begin
-
+		   else begin
 		        if (load_step == 0) begin bus_address <= rs1 + w_imm_i; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; bus_ls_type <= w_func3; end
 		        if (load_step == 1 && bus_read_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working
 		        if (load_step == 1 && bus_read_done == 1) begin re[w_rd]<= $signed(bus_read_data[7:0]); load_step <= 0; end //end //bus_read_enable <= 0; end end // bus ok and execute
                         
 		        // for post mmu_da only ( overwrite normal value of address)
-			if (satp_mode && !mmu_da && is_pda && !mmu_pc) begin bus_address <= pa; end // for start pa_ed lb | overwrite bus_address by pa
-			if (satp_mode && !mmu_da && bus_read_done && !mmu_pc) begin is_pda<=0;end // for finish va-pa-lb reset is_pda to 0
+			if (satp_mode && !mmu_da && is_pda && !mmu_pc && load_step==0 && bus_read_done==0) begin bus_address <= pa; end // for start pa_ed lb | overwrite bus_address; bind with step 0
+			if (satp_mode && !mmu_da && is_pda && !mmu_pc && load_step==1 && bus_read_done==1) begin is_pda<=0;end // for finish va-pa-lb reset is_pda to 0; bind with step 1,1
 			// XXXABCDXABCDEFGHXABCDEFGHXA***^*B^*****B^*****B^*****B^*****B^*****
 		        end
 		    end
