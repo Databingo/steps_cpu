@@ -246,7 +246,7 @@ module riscv64(
 	    //end else if (mmu_da && !is_pda) begin 
 	    //end else if (go_mmu_da) begin 
 	    //end else if ((bus_read_enable || bus_write_enable) && !mmu_pc && !mmu_da && !is_pda) begin 
-	    end else if (mmu_mode && op == 7'b0?00011 && !mmu_pc && !mmu_da && !is_pda) begin  // load/store
+	    end else if (mmu_mode && (op == 7'b0000011 || op == 7'b0100011) && !mmu_pc && !mmu_da && !is_pda) begin  // load/store
 		//go_mmu_da <= 0;
 		mmu_da <= 1; // MMU_DA ON
 	        //saved_user_pc <= pc; // save pc l/s directly from OPEN_1
@@ -257,7 +257,7 @@ module riscv64(
 		for (i=0;i<=31;i=i+1) begin sre[i]<= re[i]; end // save re
 		//re[31]<= va; // pass va to x31
 		//re[31]<= bus_address; // pass va to x31
-		re[31]<= rs1 + w_imm_i; // pass va to x31
+		re[31]<= (op == 7'b0000011) ? (rs1 + w_imm_i):(rs1 + w_imm_s); // pass va to x31
 		// then inner assembly for mmu wroking to calculate pa via va load and bus, put pa to x31
 	    end else if (mmu_da && ir == 32'b00110000001000000000000001110011) begin // hiject mret // CLOSE
 		pa <= re[31]; // get pda
@@ -284,6 +284,20 @@ module riscv64(
 	        csr_mstatus[MIE] <= 0;
 		interrupt_ack <= 1; // reply to outside
 
+           // // PPC reset
+	   //end else if (!mmu_pc && !mmu_da && is_ppc) begin
+	   //    wire page_cross = (pc[11:0]==12'hFFC); // 4092+4 = 4096 bord
+	   //    case(op)
+	   //        // 7'b1100011: is_ppc <= 0  // Branch for test, no check compare result, just reset.
+	   //        7'b1100011, 7'b1101111, 7'b1100111: begin 
+	   //            is_ppc <= 0; // jar/jalr
+	   //            pc <= pc; // trans the next branch/jar/jarl targe pc address;
+	   //            // next direct turn to mmu_pc similar as bubble's effect
+	   //        end
+	   //        default: if (page_cross) is_ppc <= 0;
+	   //    endcase
+	   //    //bubble <= 1;
+
             // Upper are hijects of executing ir for handler special state
 	    // IR
 	    end else begin 
@@ -291,7 +305,8 @@ module riscv64(
 	        //bus_write_enable <= 0; 
 	        //bus_write_data <= 0;
 	        //bus_address <= `Ram_base;
-	        is_ppc <= 0;
+	        //is_ppc <= 0;
+		if (is_ppc && pc[11:0]==12'hFFC) is_ppc <= 0;
                 casez(ir) // Pseudo: li j jr ret call // I: addi sb sh sw sd lb lw ld lbu lhu lwu lui jal jalr auipc beq slt mret 
 	            // U-type
 	            32'b???????_?????_?????_???_?????_0110111: re[w_rd] <= w_imm_u; // Lui
@@ -415,15 +430,15 @@ module riscv64(
                     32'b0000000_?????_?????_101_?????_0111011: re[w_rd] <= $signed(rs1[31:0] >> rs2[4:0]);  // Srlw 5 length
 	            32'b0100000_?????_?????_101_?????_0111011: re[w_rd] <= $signed(rs1[31:0]) >>> rs2[4:0]; // Sraw 5 length
                     // Jump
-	            32'b???????_?????_?????_???_?????_1101111: begin pc <= pc - 4 + w_imm_j; if (w_rd != 5'b0) re[w_rd] <= pc; bubble <= 1'b1; end // Jal
-	            32'b???????_?????_?????_???_?????_1100111: begin pc <= (rs1 + w_imm_i) & 64'hFFFFFFFFFFFFFFFE; if (w_rd != 5'b0) re[w_rd] <= pc; bubble <= 1; end // Jalr
+	            32'b???????_?????_?????_???_?????_1101111: begin pc <= pc - 4 + w_imm_j; if (w_rd != 5'b0) re[w_rd] <= pc; bubble <= 1'b1; if (is_ppc) is_ppc <= 0; end // Jal
+	            32'b???????_?????_?????_???_?????_1100111: begin pc <= (rs1 + w_imm_i) & 64'hFFFFFFFFFFFFFFFE; if (w_rd != 5'b0) re[w_rd] <= pc; bubble <= 1; if (is_ppc) is_ppc <= 0; end // Jalr
                     // Branch 
-		    32'b???????_?????_?????_000_?????_1100011: begin if (rs1 == rs2) begin pc <= pc - 4 + w_imm_b; bubble <= 1'b1; end end // Beq
-		    32'b???????_?????_?????_001_?????_1100011: begin if (rs1 != rs2) begin pc <= pc - 4 + w_imm_b; bubble <= 1'b1; end end // Bne
-		    32'b???????_?????_?????_100_?????_1100011: begin if ($signed(rs1) < $signed(rs2)) begin pc <= pc - 4 + w_imm_b; bubble <= 1'b1; end end // Blt
-		    32'b???????_?????_?????_101_?????_1100011: begin if ($signed(rs1) >= $signed(rs2)) begin pc <= pc - 4 + w_imm_b; bubble <= 1'b1; end end // Bge
-		    32'b???????_?????_?????_110_?????_1100011: begin if (rs1 < rs2) begin pc <= pc - 4 + w_imm_b; bubble <= 1'b1; end end // Bltu
-		    32'b???????_?????_?????_111_?????_1100011: begin if (rs1 >= rs2) begin pc <= pc - 4 + w_imm_b; bubble <= 1'b1; end end // Bgeu
+		    32'b???????_?????_?????_000_?????_1100011: begin if (rs1 == rs2) begin pc <= pc - 4 + w_imm_b; bubble <= 1'b1; if (is_ppc) is_ppc <= 0; end end // Beq
+		    32'b???????_?????_?????_001_?????_1100011: begin if (rs1 != rs2) begin pc <= pc - 4 + w_imm_b; bubble <= 1'b1; if (is_ppc) is_ppc <= 0; end end // Bne
+		    32'b???????_?????_?????_100_?????_1100011: begin if ($signed(rs1) < $signed(rs2)) begin pc <= pc - 4 + w_imm_b; bubble <= 1'b1; if (is_ppc) is_ppc <= 0; end end // Blt
+		    32'b???????_?????_?????_101_?????_1100011: begin if ($signed(rs1) >= $signed(rs2)) begin pc <= pc - 4 + w_imm_b; bubble <= 1'b1; if (is_ppc) is_ppc <= 0; end end // Bge
+		    32'b???????_?????_?????_110_?????_1100011: begin if (rs1 < rs2) begin pc <= pc - 4 + w_imm_b; bubble <= 1'b1; if (is_ppc) is_ppc <= 0; end end // Bltu
+		    32'b???????_?????_?????_111_?????_1100011: begin if (rs1 >= rs2) begin pc <= pc - 4 + w_imm_b; bubble <= 1'b1; if (is_ppc) is_ppc <= 0; end end // Bgeu
                     // M extension
 		    //32'b0000001_?????_?????_000_?????_0110011: re[w_rd] <= $signed(rs1) * $signed(rs2);  // Mul
                     //32'b0000001_?????_?????_001_?????_0110011: re[w_rd] <= ($signed(rs1) * $signed(rs2))>>>64;//[127:64];  // Mulh 
