@@ -89,78 +89,70 @@ module riscv64(
     // -- op --
     wire [6:0] op = ir[6:0];
     //wire [11:0] w_f12 = ir[31:20];   // ecall 0, ebreak 1
-
-
-
-//    wire [5:0] w_csr_id = (w_csr == 12'h180) ? 1 : // satp
-//	                  (w_csr == 12'h300) ? 2 : // mstatus
-//	                  (w_csr == 12'h305) ? 3 : // mtvec
-//	                  (w_csr == 12'h340) ? 4 : // mscratch
-//			   0;
+    //-- csr --
     wire [11:0] w_csr = ir[31:20];   // CSR official address
+
+    // --Machine CSR --
+   localparam mstatus    = 0 ;  // 0x300 MRW Machine status reg   // 63_SD|37_MBE|36_SBE|35:34_SXL10|22_TSR|21_TW|20_TVW|17_MPRV|12:11_MPP10|7_MPIE|3_MIE|1_SIE|0_WPRI
+   localparam mtvec      = 1 ;  // 0x305 MRW Machine trap-handler base address *
+   localparam mscratch   = 2 ;  // 
+   localparam mepc       = 3 ;  
+   localparam mcause     = 4 ;  // 0x342 MRW Machine trap casue *
+   localparam mie        = 5 ;  //
+   localparam mip        = 6 ;  //
+   localparam medeleg    = 7 ;  //
+   localparam mideleg    = 8 ;  //
+   localparam sstatus    = 9 ;  // Supervisor CSR
+   localparam sedeleg    = 10;  
+   localparam sideleg    = 11;  
+   localparam sie        = 12;  // Supervisor interrupt-enable register
+   localparam stvec      = 13;  
+   localparam scounteren = 14;  
+   localparam sscratch   = 15;  
+   localparam sepc       = 16;  
+   localparam scause     = 17;  
+   localparam stval      = 18;  
+   localparam sip        = 19;  // Supervisor interrupt pending
+   localparam satp       = 20;  // Supervisor address translation and protection satp[63:60].MODE=0:off|8:SV39 satp[59:44].asid vpn2:9 vpn1:9 vpn0:9 satp[43:0]:rootpage physical addr
+    //integer scontext = 12'h5a8; 
     reg  [6:0] w_csr_id;             // CSR id (64)
     always @(*) begin
 	case(w_csr)
-            12'h300:w_csr_id = 0;     // mstatus
-            12'h305:w_csr_id = 1;     // mtvec
-            12'h340:w_csr_id = 2;     // mscratch
-            12'h341:w_csr_id = 3;     // mepc 
-            12'h342:w_csr_id = 4;     // mcause 
-            12'h304:w_csr_id = 5;     // mie
-            12'h344:w_csr_id = 6;     // mip
-            12'h302:w_csr_id = 7;     // medeleg
-            12'h303:w_csr_id = 8;     // mideleg
-            12'h100:w_csr_id = 9;     // sstatus 
-            12'h102:w_csr_id = 10;    // sedeleg 
-            12'h103:w_csr_id = 11;    // sideleg 
-            12'h104:w_csr_id = 12;    // sie
-            12'h105:w_csr_id = 13;    // stvec 
-            12'h106:w_csr_id = 14;    // scounteren 
-            12'h140:w_csr_id = 15;    // sscratch 
-            12'h141:w_csr_id = 16;    // sepc 
-            12'h142:w_csr_id = 17;    // scause 
-            12'h143:w_csr_id = 18;    // stval 
-            12'h144:w_csr_id = 19;    // sip 
-            12'h180:w_csr_id = 20;    // satp
-
-	    default:w_csr_id = 64; 
+            12'h300 : w_csr_id = mstatus    ;    
+            12'h305 : w_csr_id = mtvec      ;    
+            12'h340 : w_csr_id = mscratch   ;    
+            12'h341 : w_csr_id = mepc       ;    
+            12'h342 : w_csr_id = mcause     ;    
+            12'h304 : w_csr_id = mie        ;    
+            12'h344 : w_csr_id = mip        ;    
+            12'h302 : w_csr_id = medeleg    ;    
+            12'h303 : w_csr_id = mideleg    ;    
+            12'h100 : w_csr_id = sstatus    ;    
+            12'h102 : w_csr_id = sedeleg    ;   
+            12'h103 : w_csr_id = sideleg    ;   
+            12'h104 : w_csr_id = sie        ;   
+            12'h105 : w_csr_id = stvec      ;   
+            12'h106 : w_csr_id = scounteren ;   
+            12'h140 : w_csr_id = sscratch   ;   
+            12'h141 : w_csr_id = sepc       ;   
+            12'h142 : w_csr_id = scause     ;   
+            12'h143 : w_csr_id = stval      ;   
+            12'h144 : w_csr_id = sip        ;   
+            12'h180 : w_csr_id = satp       ;   
+	    default : w_csr_id = 64; 
 	endcase
     end
 
     reg [63:0] Csrs [0:63]; // 64 CSRs for now
-    // --Machine CSR --
-    wire [63:0] csr_mstatus  = Csrs[0]; // 0x300 MRW Machine status reg   // 63_SD|37_MBE|36_SBE|35:34_SXL10|22_TSR|21_TW|20_TVW|17_MPRV|12:11_MPP10|7_MPIE|3_MIE|1_SIE|0_WPRI
-    wire [63:0] csr_mtvec    = Csrs[1];// 0x305 MRW Machine trap-handler base address *
-    wire [63:0] csr_mscratch = Csrs[2];// 
-    wire [63:0] csr_mepc     = Csrs[3];
-    wire [63:0] csr_mcause   = Csrs[4];// 0x342 MRW Machine trap casue *
-    wire [63:0] csr_mie      = Csrs[5];//
-    wire [63:0] csr_mip      = Csrs[6];//
-    wire [63:0] csr_medeleg  = Csrs[7];//
-    wire [63:0] csr_mideleg  = Csrs[8];//
-    // Supervisor CSR
-    wire [63:0] csr_sstatus  = Csrs[9];
-    wire [63:0] csr_sedeleg  = Csrs[10];
-    wire [63:0] csr_sideleg  = Csrs[11];
-    wire [63:0] csr_sie      = Csrs[12];// Supervisor interrupt-enable register
-    wire [63:0] csr_stvec    = Csrs[13];
-    wire [63:0] csr_scounteren = Csrs[14];
-    wire [63:0] csr_sscratch = Csrs[15];
-    wire [63:0] csr_sepc     = Csrs[16];
-    wire [63:0] csr_scause   = Csrs[17];
-    wire [63:0] csr_stval    = Csrs[18];
-    wire [63:0] csr_sip      = Csrs[19];// Supervisor interrupt pending
-    wire [63:0] csr_satp     = Csrs[20];// Supervisor address translation and protection satp[63:60].MODE=0:off|8:SV39 satp[59:44].asid vpn2:9 vpn1:9 vpn0:9 satp[43:0]:rootpage physical addr
-    //integer scontext = 12'h5a8; 
     // -- CSR Bits --
     localparam MIE  = 3; // mstatus.MIE
     localparam MPIE  = 7; // mstatus.MPIE
     //wire mie_MEIE = csr[mie][11];
     //wire mip_MEIP = csr[mie][11];
-    wire [3:0]  satp_mmu  = Csrs[1][63:60]; // 0:bare, 8:sv39, 9:sv48  satp.MODE!=0, privilegae is not M-mode, mstatus.MPRN is not set or in MPP's mode?
-    wire [15:0] satp_asid = Csrs[1][59:44]; // Address Space ID for TLB
-    wire [43:0] satp_ppn  = Csrs[1][43:0];  // Root Page Table PPN physical page number
-    wire mstatus_MIE = csr_mstatus[MIE];
+    wire [3:0]  satp_mmu  = Csrs[satp][63:60]; // 0:bare, 8:sv39, 9:sv48  satp.MODE!=0, privilegae is not M-mode, mstatus.MPRN is not set or in MPP's mode?
+    wire [15:0] satp_asid = Csrs[satp][59:44]; // Address Space ID for TLB
+    wire [43:0] satp_ppn  = Csrs[satp][43:0];  // Root Page Table PPN physical page number
+    wire mstatus_MIE = Csrs[mstatus][MIE];
 
     // -- CSR Other Registers -- use BRAM in FPGA then SRAM in ASIC port?
     //reg [63:0] other_csr [0:4096]; // Maximal 12-bit length = 4096 
