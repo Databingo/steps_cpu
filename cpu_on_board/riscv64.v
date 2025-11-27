@@ -242,13 +242,13 @@ module riscv64(
             // Interrupt
 	    //if (interrupt_vector == 1 && mstatus_MIE == 1) begin //mstatus[3] MIE
 	    end else if (interrupt_vector == 1 && mstatus_MIE == 1) begin //mstatus[3] MIE
-	        csr_mepc <= pc; // save pc
+	        Csrs[mepc] <= pc; // save pc
 
-		csr_mcause <= 64'h800000000000000B; // MSB 1 for interrupts 0 for exceptions, Cause 11 for Machine External Interrupt
+		Csrs[mcause] <= 64'h800000000000000B; // MSB 1 for interrupts 0 for exceptions, Cause 11 for Machine External Interrupt
 		Csrs[mstatus][MPIE] <= Csrs[mstatus][MIE];
 		Csrs[mstatus][MIE] <= 0;
 
-		pc <= csr_mtvec; // jump to mtvec addrss (default 0, need C or Assembly code of handler)
+		pc <= Csrs[mtvec]; // jump to mtvec addrss (default 0, need C or Assembly code of handler)
 		bubble <= 1'b1; // bubble wrong fetched instruciton by IF
 	        Csrs[mstatus][MIE] <= 0;
 		interrupt_ack <= 1; // reply to outside
