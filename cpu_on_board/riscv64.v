@@ -39,7 +39,6 @@ module riscv64(
         begin
     	case(spc) /// only x0-x9 could use, x9 is the value passer
 	    // mmu_da
-    	    //0:  get_shadow_ir = 32'b00000000000000000010001010110111; // lui t0, 0x2
     	    //4:  get_shadow_ir = 32'b00000000010000101000001010010011; // addi t0, t0, 0x4
     	    //8:  get_shadow_ir = 32'b00000101111000000000001100010011; // addi t1, x0, 0x5e
     	    //12: get_shadow_ir = 32'b00000000011000101011000000100011; // sd t1, 0(t0) print ^
