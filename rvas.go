@@ -1034,7 +1034,7 @@ func main() { //t6a7s11
 				 Elf64_Sxword r_addend: 0 for PC-relative 0x0000000000000000
 				 `)
 			//ins = fmt.Sprintf("addi  %s, %s, %%pcrel_lo(%s)\n", code[1], code[1], code[2]) // lo = rela_addr  - (hi << 12)
-			ins = fmt.Sprintf("addi  %s, %s, 0 # R_RISCV_PCREL_LO12_I %s \n", code[1], code[1], code[2]) // lo = rela_addr  - (hi << 12)
+			ins = fmt.Sprintf("addi %s, %s, 0 # R_RISCV_PCREL_LO12_I %s \n", code[1], code[1], code[2]) // lo = rela_addr  - (hi << 12)
 			real_instr.WriteString(ins)
 
 			case "call": //auipc x1, offset[31:12]; jalr x1, offset[11:0](x1) 调用远距离过程(save pc+4)  // far_call:auipc near_call:jal
@@ -1042,7 +1042,7 @@ func main() { //t6a7s11
 			real_instr.WriteString(ins) //callee:ra,t0,a0|caller:sp,s0
 			ins = fmt.Sprintf("auipc x1, 0 # R_RISCV_PCREL_HI20 %s\n", code[1])  //x1=ra return address; x10=a0 return value; x2=sp stack pointer; x8=s0 saved resigter 
 			real_instr.WriteString(ins)
-			ins = fmt.Sprintf("jalr x1, 0(x1) # R_RISCV_PCREL_LO20 %s\n", code[1])
+			ins = fmt.Sprintf("jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I %s\n", code[1])
 			real_instr.WriteString(ins)
 		case "tail": //auipc x6, offset[32:12]; jalr x0, x6, offset[11:0] 尾调用远距离子过程(discard pc+4)
 			ins := fmt.Sprintf("# %s\n", line)
@@ -1597,7 +1597,7 @@ func main() { //t6a7s11
 			//	os.Exit(0)
 			//}
 
-			// For call
+			// For call/la
 			//ins = fmt.Sprintf("auipc x1, 0 # R_RISCV_PCREL_HI20 %s\n", code[1])
 			if code[2] == "0"  && strings.Contains(scanner.Text(), "R_RISCV_PCREL_HI20") {
 			    lab := strings.Split(scanner.Text(), " ")[5]
@@ -1608,9 +1608,12 @@ func main() { //t6a7s11
 			    	fmt.Println("Error: label not found", label, code)
 			    	os.Exit(0)
 			    }
-			    offset := label - int64(address) 
-			    hi20 := uint32(offset) >> 12
-			    lo12 := uint32(offset) & 0xfff 
+			    //offset := label - int64(address) 
+			    //hi20 := uint32(offset) >> 12
+			    //lo12 := uint32(offset) & 0xfff 
+			    abs := label
+			    hi20 := uint32(abs) >> 12
+			    lo12 := uint32(abs) & 0xfff 
                             if lo12 & 0x800 !=0 { hi20 += 1}
 			    instruction = uint32(hi20)<<12 | rd<<7 | op
 			    line = fmt.Sprintf("auipc %s, %#x\n", code[1], hi20)
@@ -1757,8 +1760,36 @@ func main() { //t6a7s11
 			rd, rdFound := regBin[code[1]]
 			rs1, rs1Found := regBin[code[2]]
 			if opFound && rdFound && rs1Found {
+
+			// For la
+			//addi reg, reg 0 # R_RISCV_PCREL_LO12_I arg
+			if switchOnOp == "addi" && code[3] == "0"  && strings.Contains(scanner.Text(), "R_RISCV_PCREL_LO12_I") {
+			    lab := strings.Split(scanner.Text(), " ")[6]
+
+			    label, labelFound := symbolTable[lab]
+
+			    if !labelFound {
+				fmt.Println("Error: label not found:", scanner.Text(), "|", lab, label, code)
+			    	os.Exit(0)
+			    }
+			    //offset := label - int64(address) 
+			    //fmt.Println("addi LO12 offset:", offset)
+			    //hi20 := uint32(offset) >> 12
+			    //lo12 := uint32(offset) & 0xfff 
+			    absolute_addr := label
+			    fmt.Println("addi LO12 ab:", absolute_addr)
+			    hi20 := uint32(absolute_addr) >> 12
+			    lo12 := uint32(absolute_addr) & 0xfff 
+                            if lo12 & 0x800 !=0 { hi20 += 1}
+			    instruction = uint32(lo12)<<20 | rs1<<15 | rd<<7 | op
+			    line = fmt.Sprintf("addi %s, %s, %#x\n", code[1], code[2], lo12)
+			} else {
+			//op, opFound := opBin[code[0]]
+			//rd, rdFound := regBin[code[1]]
+			//rs1, rs1Found := regBin[code[2]]
+			//if opFound && rdFound && rs1Found {
 				instruction = uint32(imm)<<20 | rs1<<15 | rd<<7 | op
-			} else if !rdFound || !rs1Found {
+			}} else if !rdFound || !rs1Found {
 				fmt.Println("Invalid register on line", lineCounter)
 				os.Exit(0)
 			}
@@ -1793,9 +1824,9 @@ func main() { //t6a7s11
 			//ins = fmt.Sprintf("jalr x0, 0(%s)\n", code[1])
 			// for call
 			//ins = fmt.Sprintf("auipc x1, 0 # R_RISCV_PCREL_HI20 %s\n", code[1]) need check hi20+1 in auipc
-			//ins = fmt.Sprintf("jalr x1, 0(x1) # R_RISCV_PCREL_LO20 %s\n", code[1]) 
-			if code[2] == "0"  && strings.Contains(scanner.Text(), "R_RISCV_PCREL_LO20") {
-			    lab := strings.Split(scanner.Text(), " ")[4]
+			//ins = fmt.Sprintf("jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I %s\n", code[1]) 
+			if code[2] == "0"  && strings.Contains(scanner.Text(), "R_RISCV_PCREL_LO12_I") {
+			    lab := strings.Split(scanner.Text(), " ")[5]
 			    label, labelFound := symbolTable[lab]
 
 			    if !labelFound {
