@@ -1,4 +1,4 @@
-li t0, 0x2004
-li t1, 0x5e # ^
-sd t1, 0(t0)
+li x1, 0x2004
+li x2, 42 # ^
+sd x2, 0(x1)
 mret
