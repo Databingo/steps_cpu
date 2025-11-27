@@ -30,7 +30,7 @@ module riscv64(
     reg [63:0] saved_user_pc;
     reg [63:0] pa;
     reg [63:0] va;
-    reg is_pda=0;
+    reg got_pda=0;
     integer i; 
 
     // MMU
@@ -212,7 +212,7 @@ module riscv64(
 	    csr_mstatus[MIE] <= 1;
 	    interrupt_ack <= 0;
 	    mmu_da <= 0;
-	    is_pda <= 0;
+	    got_pda <= 0;
 	    for (i=0;i<=31;i=i+1) begin sre[i]<= 64'b0; end
 	    for (i=0;i<=20;i=i+1) begin Csrs[i]<= 64'b0; end
 	    mmu_pc <= 0;
@@ -225,7 +225,7 @@ module riscv64(
 	    bus_read_enable <= 0;
 	    bus_write_enable <= 0; 
 	    //is_ppc <= 0;
-	    //is_pda <= 0;
+	    //got_pda <= 0;
 
             // Bubble
 	    if (bubble) begin bubble <= 1'b0; // Flush this cycle & Clear bubble signal for the next cycle
@@ -245,7 +245,7 @@ module riscv64(
 		mmu_pc <= 0; // MMU_PC OFF
 
             //  mmu_da 
-	    end else if (mmu_mode && (op == 7'b0000011 || op == 7'b0100011) && !mmu_pc && !mmu_da && !is_pda) begin  // load/store
+	    end else if (mmu_mode && (op == 7'b0000011 || op == 7'b0100011) && !mmu_pc && !mmu_da && !got_pda) begin  // load/store
 		mmu_da <= 1; // MMU_DA ON
 	        saved_user_pc <= pc-4; // save pc l/s
 		pc <= 0; // handler
@@ -257,7 +257,7 @@ module riscv64(
 		pc <= saved_user_pc; // recover from shadow when see Mret
 		bubble <= 1; // bubble
 		for (i=0;i<=31;i=i+1) begin re[i]<= sre[i]; end // recover usr re
-		is_pda <= 1; // we are pa
+		got_pda <= 1; // we are pa
 		mmu_da <= 0; // MMU_DA OFF
 		
             // Interrupt
@@ -294,24 +294,24 @@ module riscv64(
 		    //    if (load_step == 1 && bus_read_done == 1) begin re[w_rd]<= $signed(bus_read_data[7:0]); load_step <= 0; end end //bus_read_enable <= 0; end end // bus ok and execute
 		    //32'b???????_?????_?????_000_?????_0000011: begin  // Lb  3 cycles but wait to 5
 		    //    // start mmu-da only  MMU_DA ON
-		    //    if (mmu_mode && !mmu_da && !mmu_pc && !is_pda) begin go_mmu_da<=1; mmu_da<=1; va <= rs1 + w_imm_i; pc <= pc -4; end // for enter | hiject Lb, pass lb pc, bus_address to mmu va
+		    //    if (mmu_mode && !mmu_da && !mmu_pc && !got_pda) begin go_mmu_da<=1; mmu_da<=1; va <= rs1 + w_imm_i; pc <= pc -4; end // for enter | hiject Lb, pass lb pc, bus_address to mmu va
 		    //else begin
 		    //    if (load_step == 0) begin bus_address <= rs1 + w_imm_i; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; bus_ls_type <= w_func3; end
 		    //    if (load_step == 1 && bus_read_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working
 		    //    if (load_step == 1 && bus_read_done == 1) begin re[w_rd]<= $signed(bus_read_data[7:0]); load_step <= 0; end //end //bus_read_enable <= 0; end end // bus ok and execute
                     //    
 		    //    // for post mmu_da only ( overwrite normal value of address)
-		    //    if (mmu_mode && !mmu_da && is_pda && !mmu_pc && load_step==0 && bus_read_done==0) begin bus_address <= pa; end // for start pa_ed lb | overwrite bus_address; bind with step 0
-		    //    if (mmu_mode && !mmu_da && is_pda && !mmu_pc && load_step==1 && bus_read_done==1) begin is_pda <= 0;end // for finish va-pa-lb reset is_pda to 0; bind with step 1,1
+		    //    if (mmu_mode && !mmu_da && got_pda && !mmu_pc && load_step==0 && bus_read_done==0) begin bus_address <= pa; end // for start pa_ed lb | overwrite bus_address; bind with step 0
+		    //    if (mmu_mode && !mmu_da && got_pda && !mmu_pc && load_step==1 && bus_read_done==1) begin got_pda <= 0;end // for finish va-pa-lb reset got_pda to 0; bind with step 1,1
 		    //    // XXXABCDXABCDEFGHXABCDEFGHXA***^*B^*****B^*****B^*****B^*****B^*****
 		    //    end
 		    //end
 		    32'b???????_?????_?????_000_?????_0000011: begin  // Lb  3 cycles but wait to 5
 			if (load_step == 0) begin bus_address <= rs1 + w_imm_i; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; bus_ls_type <= w_func3; //end
-			                    if (is_pda) bus_address <= pa; end
+			                    if (got_pda) bus_address <= pa; end
 		        if (load_step == 1 && bus_read_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working
 		        if (load_step == 1 && bus_read_done == 1) begin re[w_rd]<= $signed(bus_read_data[7:0]); load_step <= 0; //end //end //bus_read_enable <= 0; end end // bus ok and execute
-			                    if (is_pda) is_pda <= 0; end 
+			                    if (got_pda) got_pda <= 0; end 
 		        end
 		    //end
 		    32'b???????_?????_?????_100_?????_0000011: begin  // Lbu  3 cycles
@@ -345,10 +345,10 @@ module riscv64(
 	            //32'b???????_?????_?????_011_?????_0100011: begin bus_address <= rs1 + w_imm_s;bus_write_data<=rs2;bus_write_enable<=1;pc<=pc;bubble<=1;bus_ls_type<=w_func3;end//Sdbus2
 	            32'b???????_?????_?????_000_?????_0100011: begin 
 		        if (store_step == 0) begin bus_address <= rs1 + w_imm_s; bus_write_data<=rs2[7:0];bus_write_enable<=1;pc<=pc-4;bubble<=1;store_step<=1;bus_ls_type<=w_func3; //end
-			                    if (is_pda) bus_address <= pa; end
+			                    if (got_pda) bus_address <= pa; end
 		        if (store_step == 1 && bus_write_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working 1 bubble2 this3
 			if (store_step == 1 && bus_write_done == 1) begin store_step <= 0;
-			                    if (is_pda) is_pda <= 0; end 
+			                    if (got_pda) got_pda <= 0; end 
 		        end //Sb bus1 cycles
 	            32'b???????_?????_?????_001_?????_0100011: begin
 		        if (store_step == 0) begin bus_address <= rs1 + w_imm_s; bus_write_data<=rs2[15:0];bus_write_enable<=1;pc<=pc-4;bubble<=1;store_step<=1;bus_ls_type<=w_func3; end
@@ -398,15 +398,23 @@ module riscv64(
                     32'b0000000_?????_?????_101_?????_0111011: re[w_rd] <= $signed(rs1[31:0] >> rs2[4:0]);  // Srlw 5 length
 	            32'b0100000_?????_?????_101_?????_0111011: re[w_rd] <= $signed(rs1[31:0]) >>> rs2[4:0]; // Sraw 5 length
                     // Jump
-	            32'b???????_?????_?????_???_?????_1101111: begin pc <= pc - 4 + w_imm_j; if (w_rd != 5'b0) re[w_rd] <= pc; bubble <= 1'b1; if (is_ppc) is_ppc <= 0; end // Jal
-	            32'b???????_?????_?????_???_?????_1100111: begin pc <= (rs1 + w_imm_i) & 64'hFFFFFFFFFFFFFFFE; if (w_rd != 5'b0) re[w_rd] <= pc; bubble <= 1; if (is_ppc) is_ppc <= 0; end // Jalr
+	            32'b???????_?????_?????_???_?????_1101111: begin pc <= pc - 4 + w_imm_j; if (w_rd != 5'b0) re[w_rd] <= pc; bubble <= 1'b1; 
+		                                               if (is_ppc && pc != pc - 4 + w_imm_j) is_ppc <= 0; end // Jal
+	            32'b???????_?????_?????_???_?????_1100111: begin pc <= (rs1 + w_imm_i) & 64'hFFFFFFFFFFFFFFFE; if (w_rd != 5'b0) re[w_rd] <= pc; bubble <= 1; 
+		                                               if (is_ppc && pc != rs1 + w_imm_j) is_ppc <= 0; end // Jalr
                     // Branch 
-		    32'b???????_?????_?????_000_?????_1100011: begin if (rs1 == rs2) begin pc <= pc - 4 + w_imm_b; bubble <= 1'b1; if (is_ppc) is_ppc <= 0; end end // Beq
-		    32'b???????_?????_?????_001_?????_1100011: begin if (rs1 != rs2) begin pc <= pc - 4 + w_imm_b; bubble <= 1'b1; if (is_ppc) is_ppc <= 0; end end // Bne
-		    32'b???????_?????_?????_100_?????_1100011: begin if ($signed(rs1) < $signed(rs2)) begin pc <= pc - 4 + w_imm_b; bubble <= 1'b1; if (is_ppc) is_ppc <= 0; end end // Blt
-		    32'b???????_?????_?????_101_?????_1100011: begin if ($signed(rs1) >= $signed(rs2)) begin pc <= pc - 4 + w_imm_b; bubble <= 1'b1; if (is_ppc) is_ppc <= 0; end end // Bge
-		    32'b???????_?????_?????_110_?????_1100011: begin if (rs1 < rs2) begin pc <= pc - 4 + w_imm_b; bubble <= 1'b1; if (is_ppc) is_ppc <= 0; end end // Bltu
-		    32'b???????_?????_?????_111_?????_1100011: begin if (rs1 >= rs2) begin pc <= pc - 4 + w_imm_b; bubble <= 1'b1; if (is_ppc) is_ppc <= 0; end end // Bgeu
+		    32'b???????_?????_?????_000_?????_1100011: begin if (rs1 == rs2) begin pc <= pc - 4 + w_imm_b; bubble <= 1'b1; 
+		                                               if (is_ppc && pc != pc - 4 + w_imm_b) is_ppc <= 0; end end // Beq
+		    32'b???????_?????_?????_001_?????_1100011: begin if (rs1 != rs2) begin pc <= pc - 4 + w_imm_b; bubble <= 1'b1; 
+		                                               if (is_ppc && pc != pc - 4 + w_imm_b) is_ppc <= 0; end end // Bne
+		    32'b???????_?????_?????_100_?????_1100011: begin if ($signed(rs1) < $signed(rs2)) begin pc <= pc - 4 + w_imm_b; bubble <= 1'b1; 
+		                                               if (is_ppc && pc != pc - 4 + w_imm_b) is_ppc <= 0; end end // Blt
+		    32'b???????_?????_?????_101_?????_1100011: begin if ($signed(rs1) >= $signed(rs2)) begin pc <= pc - 4 + w_imm_b; bubble <= 1'b1; 
+		                                               if (is_ppc && pc != pc - 4 + w_imm_b) is_ppc <= 0; end end // Bge
+		    32'b???????_?????_?????_110_?????_1100011: begin if (rs1 < rs2) begin pc <= pc - 4 + w_imm_b; bubble <= 1'b1; 
+		                                               if (is_ppc && pc != pc - 4 + w_imm_b) is_ppc <= 0; end end // Bltu
+		    32'b???????_?????_?????_111_?????_1100011: begin if (rs1 >= rs2) begin pc <= pc - 4 + w_imm_b; bubble <= 1'b1; 
+		                                               if (is_ppc && pc != pc - 4 + w_imm_b) is_ppc <= 0; end end // Bgeu
                     // M extension
 		    //32'b0000001_?????_?????_000_?????_0110011: re[w_rd] <= $signed(rs1) * $signed(rs2);  // Mul
                     //32'b0000001_?????_?????_001_?????_0110011: re[w_rd] <= ($signed(rs1) * $signed(rs2))>>>64;//[127:64];  // Mulh 
