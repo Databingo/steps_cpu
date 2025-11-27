@@ -5,7 +5,7 @@ module riscv64(
     input wire reset,     // Active-low reset button
     input wire [31:0] instruction,
     //output reg [63:0] pc,
-    output reg [39:0] pc,
+    output reg [38:0] pc,
     output reg [31:0] ir,
     //output reg [63:0] re [0:31], // General Registers 32s
     output wire  heartbeat,
@@ -27,9 +27,9 @@ module riscv64(
     reg [63:0] re [0:31]; // General Registers 32s
     reg [63:0] sre [0:9]; // Shadow Registers 10s
     reg mmu_da=0;
-    reg [63:0] saved_user_pc;
-    reg [63:0] pa;
-    reg [63:0] va;
+    reg [38:0] saved_user_pc;
+    reg [38:0] pa;
+    reg [38:0] va;
     reg got_pda=0;
     integer i; 
 
@@ -57,7 +57,7 @@ module riscv64(
     // vpc
     reg mmu_pc = 0;
     //reg new_vpc = 1;
-    reg [39:0] vpc;
+    reg [38:0] vpc;
     reg is_ppc;
 
     // --- Privilege Modes ---
@@ -203,8 +203,6 @@ module riscv64(
 	    interrupt_ack <= 0;
 	    bus_read_enable <= 0;
 	    bus_write_enable <= 0; 
-	    //is_ppc <= 0;
-	    //got_pda <= 0;
 
             // Bubble
 	    if (bubble) begin bubble <= 1'b0; // Flush this cycle & Clear bubble signal for the next cycle
