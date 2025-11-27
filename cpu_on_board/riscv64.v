@@ -86,14 +86,13 @@ module riscv64(
 
 
 
-    reg [63:0] Csrs [0:20]; // 20 csr for now
-    wire [11:0] w_csr = ir[31:20];   // CSR official address
 //    wire [5:0] w_csr_id = (w_csr == 12'h180) ? 1 : // satp
 //	                  (w_csr == 12'h300) ? 2 : // mstatus
 //	                  (w_csr == 12'h305) ? 3 : // mtvec
 //	                  (w_csr == 12'h340) ? 4 : // mscratch
 //			   0;
-    reg [5:0] w_csr_id;
+    wire [11:0] w_csr = ir[31:20];   // CSR official address
+    reg [5:0] w_csr_id;              // CSR id
     always @(*) begin
 	case(w_csr)
             12'h180:w_csr_id = 1;  // satp
@@ -104,7 +103,11 @@ module riscv64(
 	endcase
     end
 
-    wire [63:0] csr_satp = Csrs[1];
+    reg [63:0] Csrs [0:20]; // 20 CSRs for now
+    wire [63:0] csr_satp = Csrs[1]; // CSR name
+
+
+
     wire [3:0]  mmu_mode = csr_satp[63:60]; // 0:bare, 8:sv39, 9:sv48  satp.MODE!=0, privilegae is not M-mode, mstatus.MPRN is not set or in MPP's mode?
     wire [15:0] satp_asid = csr_satp[59:44]; // Address Space ID for TLB
     wire [43:0] satp_ppn  = csr_satp[43:0];  // Root Page Table PPN physical page number
