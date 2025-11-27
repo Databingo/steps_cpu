@@ -97,19 +97,37 @@ module riscv64(
 //	                  (w_csr == 12'h340) ? 4 : // mscratch
 //			   0;
     wire [11:0] w_csr = ir[31:20];   // CSR official address
-    reg  [11:0] w_csr_id;            // CSR id
+    reg  [6:0] w_csr_id;             // CSR id (64)
     always @(*) begin
 	case(w_csr)
-            12'h180:w_csr_id = 1;  // satp
-            12'h300:w_csr_id = 2;  // mstatus
-            12'h305:w_csr_id = 3;  // mtvec
-            12'h340:w_csr_id = 4;  // mscratch
-	    default:w_csr_id = 0; 
+            12'h300:w_csr_id = 0;     // mstatus
+            12'h180:w_csr_id = 1;     // satp
+            //12'h300:w_csr_id = 2;   // 
+            12'h305:w_csr_id = 3;     // mtvec
+            12'h340:w_csr_id = 4;     // mscratch
+
+            12'h341:w_csr_id = 5;     // mepc 
+            12'h342:w_csr_id = 6;     // mcause // 0x342 MRW Machine trap casue *
+            12'h304:w_csr_id = 7;     // mie  //
+            12'h344:w_csr_id = 8;     // mip //
+            12'h302:w_csr_id = 9;     // medeleg //
+            12'h303:w_csr_id = 10;    // mideleg //
+            12'h100:w_csr_id = 11;    // sstatus 
+            12'h104:w_csr_id = 12;    // sie // Supervisor interrupt-enable register
+            12'h105:w_csr_id = 13;    // stvec 
+            12'h140:w_csr_id = 14;    // sscratch 
+            12'h141:w_csr_id = 15;    // sepc 
+            12'h142:w_csr_id = 16;    // scause 
+            12'h143:w_csr_id = 17;    // stval 
+            12'h144:w_csr_id = 18;    // sip  Supervisor interrupt pending
+
+	    default:w_csr_id = 64; 
 	endcase
     end
 
     reg [63:0] Csrs [0:20]; // 20 CSRs for now
     //csr_satp slice (syc so BRAM asyc cannot)
+    wire [63:0] csr_satp  = Csrs[1];
     wire [3:0]  satp_mmu  = Csrs[1][63:60]; // 0:bare, 8:sv39, 9:sv48  satp.MODE!=0, privilegae is not M-mode, mstatus.MPRN is not set or in MPP's mode?
     wire [15:0] satp_asid = Csrs[1][59:44]; // Address Space ID for TLB
     wire [43:0] satp_ppn  = Csrs[1][43:0];  // Root Page Table PPN physical page number
