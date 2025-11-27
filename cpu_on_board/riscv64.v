@@ -60,7 +60,12 @@ module riscv64(
     reg [39:0] vpc;
     reg is_ppc;
 
-// -- newend --
+    // --- Privilege Modes ---
+    localparam M_mode = 2'b11;
+    localparam S_mode = 2'b01;
+    localparam U_mode = 2'b00;
+    reg [1:0] current_privilege_mode;
+    // -- newend --
 
     // -- Immediate decoders  -- 
     wire signed [63:0] w_imm_u = {{32{ir[31]}}, ir[31:12], 12'b0};  // U-type immediate Lui Auipc
