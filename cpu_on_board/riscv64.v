@@ -399,22 +399,22 @@ module riscv64(
 	            32'b0100000_?????_?????_101_?????_0111011: re[w_rd] <= $signed(rs1[31:0]) >>> rs2[4:0]; // Sraw 5 length
                     // Jump
 	            32'b???????_?????_?????_???_?????_1101111: begin pc <= pc - 4 + w_imm_j; if (w_rd != 5'b0) re[w_rd] <= pc; bubble <= 1'b1; 
-		                                               if (is_ppc && pc != pc - 4 + w_imm_j) is_ppc <= 0; end // Jal
+		                                               if (is_ppc && pc - 4 != pc - 4 + w_imm_j) is_ppc <= 0; end // Jal
 	            32'b???????_?????_?????_???_?????_1100111: begin pc <= (rs1 + w_imm_i) & 64'hFFFFFFFFFFFFFFFE; if (w_rd != 5'b0) re[w_rd] <= pc; bubble <= 1; 
-		                                               if (is_ppc && pc != rs1 + w_imm_j) is_ppc <= 0; end // Jalr
+		                                               if (is_ppc && pc - 4 != rs1 + w_imm_j) is_ppc <= 0; end // Jalr
                     // Branch 
 		    32'b???????_?????_?????_000_?????_1100011: begin if (rs1 == rs2) begin pc <= pc - 4 + w_imm_b; bubble <= 1'b1; 
-		                                               if (is_ppc && pc != pc - 4 + w_imm_b) is_ppc <= 0; end end // Beq
+		                                               if (is_ppc && pc - 4 != pc - 4 + w_imm_b) is_ppc <= 0; end end // Beq
 		    32'b???????_?????_?????_001_?????_1100011: begin if (rs1 != rs2) begin pc <= pc - 4 + w_imm_b; bubble <= 1'b1; 
-		                                               if (is_ppc && pc != pc - 4 + w_imm_b) is_ppc <= 0; end end // Bne
+		                                               if (is_ppc && pc - 4 != pc - 4 + w_imm_b) is_ppc <= 0; end end // Bne
 		    32'b???????_?????_?????_100_?????_1100011: begin if ($signed(rs1) < $signed(rs2)) begin pc <= pc - 4 + w_imm_b; bubble <= 1'b1; 
-		                                               if (is_ppc && pc != pc - 4 + w_imm_b) is_ppc <= 0; end end // Blt
+		                                               if (is_ppc && pc - 4 != pc - 4 + w_imm_b) is_ppc <= 0; end end // Blt
 		    32'b???????_?????_?????_101_?????_1100011: begin if ($signed(rs1) >= $signed(rs2)) begin pc <= pc - 4 + w_imm_b; bubble <= 1'b1; 
-		                                               if (is_ppc && pc != pc - 4 + w_imm_b) is_ppc <= 0; end end // Bge
+		                                               if (is_ppc && pc - 4 != pc - 4 + w_imm_b) is_ppc <= 0; end end // Bge
 		    32'b???????_?????_?????_110_?????_1100011: begin if (rs1 < rs2) begin pc <= pc - 4 + w_imm_b; bubble <= 1'b1; 
-		                                               if (is_ppc && pc != pc - 4 + w_imm_b) is_ppc <= 0; end end // Bltu
+		                                               if (is_ppc && pc - 4 != pc - 4 + w_imm_b) is_ppc <= 0; end end // Bltu
 		    32'b???????_?????_?????_111_?????_1100011: begin if (rs1 >= rs2) begin pc <= pc - 4 + w_imm_b; bubble <= 1'b1; 
-		                                               if (is_ppc && pc != pc - 4 + w_imm_b) is_ppc <= 0; end end // Bgeu
+		                                               if (is_ppc && pc - 4 != pc - 4 + w_imm_b) is_ppc <= 0; end end // Bgeu
                     // M extension
 		    //32'b0000001_?????_?????_000_?????_0110011: re[w_rd] <= $signed(rs1) * $signed(rs2);  // Mul
                     //32'b0000001_?????_?????_001_?????_0110011: re[w_rd] <= ($signed(rs1) * $signed(rs2))>>>64;//[127:64];  // Mulh 
