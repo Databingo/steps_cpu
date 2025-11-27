@@ -25,7 +25,7 @@ module riscv64(
 
 // -- new --
     reg [63:0] re [0:31]; // General Registers 32s
-    reg [63:0] sre [0:4]; // Shadow Registers 10s
+    reg [63:0] sre [0:9]; // Shadow Registers 10s
     reg mmu_da=0;
     reg [63:0] saved_user_pc;
     reg [63:0] pa;
