@@ -188,7 +188,7 @@ module riscv64(
 	    bus_write_data <= 0;
 	    bus_address <= `Ram_base;
             // Interrupt re-enable
-	    csr_mstatus[MIE] <= 1;
+	    Csrs[mstatus][MIE] <= 1;
 	    interrupt_ack <= 0;
 	    mmu_da <= 0;
 	    got_pda <= 0;
@@ -245,12 +245,12 @@ module riscv64(
 	        csr_mepc <= pc; // save pc
 
 		csr_mcause <= 64'h800000000000000B; // MSB 1 for interrupts 0 for exceptions, Cause 11 for Machine External Interrupt
-		csr_mstatus[MPIE] <= csr_mstatus[MIE];
-		csr_mstatus[MIE] <= 0;
+		Csrs[mstatus][MPIE] <= Csrs[mstatus][MIE];
+		Csrs[mstatus][MIE] <= 0;
 
 		pc <= csr_mtvec; // jump to mtvec addrss (default 0, need C or Assembly code of handler)
 		bubble <= 1'b1; // bubble wrong fetched instruciton by IF
-	        csr_mstatus[MIE] <= 0;
+	        Csrs[mstatus][MIE] <= 0;
 		interrupt_ack <= 1; // reply to outside
 
             // Upper are hijects of executing ir for handler special state
@@ -413,7 +413,7 @@ module riscv64(
 	            32'b???????_?????_?????_111_?????_1110011: begin if (w_rd != 0) re[w_rd] <= Csrs[w_csr_id]; if (w_imm_z != 0) Csrs[w_csr_id] <= (Csrs[w_csr_id] & ~w_imm_z); end // Csrrci
 
                     // System-Machine
-	            //32'b0011000_00010_?????_000_?????_1110011: begin pc <= csr_read(mepc); bubble <= 1; csr_mstatus[MIE] <= csr_mstatus[MPIE]; csr_mstatus[MPIE] <= 1; end  // Mret
+	            //32'b0011000_00010_?????_000_?????_1110011: begin pc <= csr_read(mepc); bubble <= 1; Csrs[mstatus][MIE] <= Csrs[mstatus][MPIE]; Csrs[mstatus][MPIE] <= 1; end  // Mret
                     //// Mret
 	            //32'b0011000_00010_?????_000_?????_1110011: begin  
 	            //   			       csre[mstatus][3] <= csre[mstatus][7]; // set back interrupt enable(MIE) by MPIE 
