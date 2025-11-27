@@ -25,7 +25,7 @@ module riscv64(
 
 // -- new --
     reg [63:0] re [0:31]; // General Registers 32s
-    reg [63:0] sre [0:31]; // Shadow Registers 32s
+    reg [63:0] sre [0:4]; // Shadow Registers 5s
     reg mmu_da=0;
     reg [63:0] saved_user_pc;
     reg [63:0] pa;
@@ -37,7 +37,7 @@ module riscv64(
     function [31:0] get_shadow_ir; // 0-5 mmu 
         input [63:0] spc;
         begin
-    	case(spc)
+    	case(spc) /// only x0-x4 could use, x1 is the value passer
 	    // mmu_da
     	    0:  get_shadow_ir = 32'b00000000000000000010001010110111; // lui t0, 0x2
     	    4:  get_shadow_ir = 32'b00000000010000101000001010010011; // addi t0, t0, 0x4
@@ -115,7 +115,7 @@ module riscv64(
    localparam sip        = 19;  // Supervisor interrupt pending
    localparam satp       = 20;  // Supervisor address translation and protection satp[63:60].MODE=0:off|8:SV39 satp[59:44].asid vpn2:9 vpn1:9 vpn0:9 satp[43:0]:rootpage physical addr
     //integer scontext = 12'h5a8; 
-    reg  [4:0] w_csr_id;             // CSR id (16)
+    reg  [5:0] w_csr_id;             // CSR id (32)
     always @(*) begin
 	case(w_csr)
             12'h300 : w_csr_id = mstatus    ;    
@@ -143,7 +143,7 @@ module riscv64(
 	endcase
     end
 
-    reg [63:0] Csrs [0:15]; // 16 CSRs for now
+    reg [63:0] Csrs [0:31]; // 32 CSRs for now
     // -- CSR Bits --
     localparam MIE  = 3; // mstatus.MIE
     localparam MPIE  = 7; // mstatus.MPIE
@@ -192,8 +192,8 @@ module riscv64(
 	    interrupt_ack <= 0;
 	    mmu_da <= 0;
 	    got_pda <= 0;
-	    for (i=0;i<=31;i=i+1) begin sre[i]<= 64'b0; end
-	    for (i=0;i<=20;i=i+1) begin Csrs[i]<= 64'b0; end
+	    for (i=0;i<=4;i=i+1) begin sre[i]<= 64'b0; end
+	    for (i=0;i<=32;i=i+1) begin Csrs[i]<= 64'b0; end
 	    mmu_pc <= 0;
 	    is_ppc <= 0; // current using address is physical addr
 
@@ -214,12 +214,12 @@ module riscv64(
 		mmu_pc <= 1; // MMU_PC ON 
 	        pc <= 20; // handler
 	 	bubble <= 1'b1; // bubble 
-		for (i=0;i<=31;i=i+1) begin sre[i]<= re[i]; end // save re
-		re[30]<= pc - 4; // save vpc to x30
+		for (i=0;i<=4;i=i+1) begin sre[i]<= re[i]; end // save re
+		re[1]<= pc - 4; // save vpc to x1
 	    end else if (mmu_pc && ir == 32'b00110000001000000000000001110011) begin // end hiject mret & recover from shadow when see Mret
-		pc <= re[30]; // get ppc and turn to ppc'ir
+		pc <= re[1]; // get ppc and turn to ppc'ir
 	 	bubble <= 1'b1; // bubble
-		for (i=0;i<=31;i=i+1) begin re[i]<= sre[i]; end // recover usr re
+		for (i=0;i<=4;i=i+1) begin re[i]<= sre[i]; end // recover usr re
 		is_ppc <= 1; // we are ppc
 		mmu_pc <= 0; // MMU_PC OFF
 
@@ -229,13 +229,13 @@ module riscv64(
 	        saved_user_pc <= pc-4; // save pc l/s
 		pc <= 0; // handler
 	 	bubble <= 1'b1; // bubble
-		for (i=0;i<=31;i=i+1) begin sre[i]<= re[i]; end // save re
-		re[31] <= (op == 7'b0000011) ? (rs1 + w_imm_i):(rs1 + w_imm_s); // save vpa to x31
+		for (i=0;i<=4;i=i+1) begin sre[i]<= re[i]; end // save re
+		re[1] <= (op == 7'b0000011) ? (rs1 + w_imm_i):(rs1 + w_imm_s); // save vpa to x1
 	    end else if (mmu_da && ir == 32'b00110000001000000000000001110011) begin // hiject mret 
-		pa <= re[31]; // get pda
+		pa <= re[1]; // get pda
 		pc <= saved_user_pc; // recover from shadow when see Mret
 		bubble <= 1; // bubble
-		for (i=0;i<=31;i=i+1) begin re[i]<= sre[i]; end // recover usr re
+		for (i=0;i<=4;i=i+1) begin re[i]<= sre[i]; end // recover usr re
 		got_pda <= 1; // we are pa
 		mmu_da <= 0; // MMU_DA OFF
 		
