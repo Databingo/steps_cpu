@@ -299,12 +299,28 @@ func main() { //t6a7s11
 		"x31": 0b11111, "t6": 0b11111, // tmp
 	}
 	csrBin := map[string]uint32{ 
-		"mstatus":  0x300, 
-		"mtvec":    0x305, 
-		"mscratch": 0x340, 
-		"mepc":     0x341,
-		"mcause":   0x342, 
-		"0x180":   0x180, 
+            "mstatus"    : 0x300,    
+            "mtvec"      : 0x305,    
+            "mscratch"   : 0x340,    
+            "mepc"       : 0x341,    
+            "mcause"     : 0x342,    
+            "mie"        : 0x304,    
+            "mip"        : 0x344,    
+            "medeleg"    : 0x302,    
+            "mideleg"    : 0x303,    
+            "sstatus"    : 0x100,    
+            "sedeleg"    : 0x102,   
+            "sideleg"    : 0x103,   
+            "sie"        : 0x104,   
+            "stvec"      : 0x105,   
+            "scounteren" : 0x106,   
+            "sscratch"   : 0x140,   
+            "sepc"       : 0x141,   
+            "scause"     : 0x142,   
+            "stval"      : 0x143,   
+            "sip"        : 0x144,   
+            "satp"       : 0x180,   
+	    "0x180"      : 0x180, 
 	    }
 
 	opBin := map[string]uint32{
