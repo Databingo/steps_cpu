@@ -192,8 +192,8 @@ module riscv64(
 	    interrupt_ack <= 0;
 	    mmu_da <= 0;
 	    got_pda <= 0;
-	    for (i=0;i<=9;i=i+1) begin sre[i]<= 64'b0; end
-	    for (i=0;i<=32;i=i+1) begin Csrs[i]<= 64'b0; end
+	    for (i=0;i<10;i=i+1) begin sre[i]<= 64'b0; end
+	    for (i=0;i<32;i=i+1) begin Csrs[i]<= 64'b0; end
 	    mmu_pc <= 0;
 	    is_ppc <= 0; // current using address is physical addr
 
