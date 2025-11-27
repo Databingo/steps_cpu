@@ -1040,9 +1040,9 @@ func main() { //t6a7s11
 			case "call": //auipc x1, offset[31:12]; jalr x1, offset[11:0](x1) 调用远距离过程(save pc+4)  // far_call:auipc near_call:jal
 			ins := fmt.Sprintf("# %s\n", line)
 			real_instr.WriteString(ins) //callee:ra,t0,a0|caller:sp,s0
-			ins = fmt.Sprintf("auipc x1, 0 #R_RISCV_PCREL_HI20 %s\n", code[1])  //x1=ra return address; x10=a0 return value; x2=sp stack pointer; x8=s0 saved resigter 
+			ins = fmt.Sprintf("auipc x1, 0 # R_RISCV_PCREL_HI20 %s\n", code[1])  //x1=ra return address; x10=a0 return value; x2=sp stack pointer; x8=s0 saved resigter 
 			real_instr.WriteString(ins)
-			ins = fmt.Sprintf("jalr x1, 0(x1) #R_RISCV_PCREL_LO20 %s\n", code[1])
+			ins = fmt.Sprintf("jalr x1, 0(x1) # R_RISCV_PCREL_LO20 %s\n", code[1])
 			real_instr.WriteString(ins)
 		case "tail": //auipc x6, offset[32:12]; jalr x0, x6, offset[11:0] 尾调用远距离子过程(discard pc+4)
 			ins := fmt.Sprintf("# %s\n", line)
@@ -1179,6 +1179,41 @@ func main() { //t6a7s11
 				origin_instr = strings.TrimLeft(origin_instr, " ")
 				real_instr.WriteString(origin_instr)
 			}
+		case "csrr": // csr read 
+			ins := fmt.Sprintf("# %s\n", line)
+			real_instr.WriteString(ins) 
+			ins = fmt.Sprintf("csrrs %s, %s, x0\n", code[1], code[2])
+			real_instr.WriteString(ins)
+		case "csrw": // csr write
+			ins := fmt.Sprintf("# %s\n", line)
+			real_instr.WriteString(ins) 
+			ins = fmt.Sprintf("csrrw x0, %s, %s\n", code[1], code[2])
+			real_instr.WriteString(ins)
+		case "csrs": // csr set
+			ins := fmt.Sprintf("# %s\n", line)
+			real_instr.WriteString(ins) 
+			ins = fmt.Sprintf("csrrs x0, %s, %s\n", code[1], code[2])
+			real_instr.WriteString(ins)
+		case "csrc": // csr clean
+			ins := fmt.Sprintf("# %s\n", line)
+			real_instr.WriteString(ins) 
+			ins = fmt.Sprintf("csrrc x0, %s, %s\n", code[1], code[2])
+			real_instr.WriteString(ins)
+		case "csrwi": // 
+			ins := fmt.Sprintf("# %s\n", line)
+			real_instr.WriteString(ins) 
+			ins = fmt.Sprintf("csrrw x0, %s, %s\n", code[1], code[2])
+			real_instr.WriteString(ins)
+		case "csrsi": // 
+			ins := fmt.Sprintf("# %s\n", line)
+			real_instr.WriteString(ins) 
+			ins = fmt.Sprintf("csrrs x0, %s, %s\n", code[1], code[2])
+			real_instr.WriteString(ins)
+		case "csrci": // 
+			ins := fmt.Sprintf("# %s\n", line)
+			real_instr.WriteString(ins) 
+			ins = fmt.Sprintf("csrrc x0, %s, %s\n", code[1], code[2])
+			real_instr.WriteString(ins)
 		default:
 			origin_instr = strings.TrimLeft(origin_instr, " ")
 			real_instr.WriteString(origin_instr)
@@ -1563,9 +1598,9 @@ func main() { //t6a7s11
 			//}
 
 			// For call
-			//ins = fmt.Sprintf("auipc x1, 0 #R_RISCV_PCREL_HI20 %s\n", code[1])
+			//ins = fmt.Sprintf("auipc x1, 0 # R_RISCV_PCREL_HI20 %s\n", code[1])
 			if code[2] == "0"  && strings.Contains(scanner.Text(), "R_RISCV_PCREL_HI20") {
-			    lab := strings.Split(scanner.Text(), " ")[4]
+			    lab := strings.Split(scanner.Text(), " ")[5]
 
 			    label, labelFound := symbolTable[lab]
 
@@ -1757,8 +1792,8 @@ func main() { //t6a7s11
 
 			//ins = fmt.Sprintf("jalr x0, 0(%s)\n", code[1])
 			// for call
-			//ins = fmt.Sprintf("auipc x1, 0 #R_RISCV_PCREL_HI20 %s\n", code[1]) need check hi20+1 in auipc
-			//ins = fmt.Sprintf("jalr x1, 0(x1) #R_RISCV_PCREL_LO20 %s\n", code[1]) 
+			//ins = fmt.Sprintf("auipc x1, 0 # R_RISCV_PCREL_HI20 %s\n", code[1]) need check hi20+1 in auipc
+			//ins = fmt.Sprintf("jalr x1, 0(x1) # R_RISCV_PCREL_LO20 %s\n", code[1]) 
 			if code[2] == "0"  && strings.Contains(scanner.Text(), "R_RISCV_PCREL_LO20") {
 			    lab := strings.Split(scanner.Text(), " ")[4]
 			    label, labelFound := symbolTable[lab]
