@@ -115,7 +115,7 @@ module riscv64(
    localparam sip        = 19;  // Supervisor interrupt pending
    localparam satp       = 20;  // Supervisor address translation and protection satp[63:60].MODE=0:off|8:SV39 satp[59:44].asid vpn2:9 vpn1:9 vpn0:9 satp[43:0]:rootpage physical addr
     //integer scontext = 12'h5a8; 
-    reg  [5:0] w_csr_id;             // CSR id (32)
+    reg  [4:0] w_csr_id;             // CSR id (16)
     always @(*) begin
 	case(w_csr)
             12'h300 : w_csr_id = mstatus    ;    
@@ -143,7 +143,7 @@ module riscv64(
 	endcase
     end
 
-    reg [63:0] Csrs [0:31]; // 32 CSRs for now
+    reg [63:0] Csrs [0:15]; // 16 CSRs for now
     // -- CSR Bits --
     localparam MIE  = 3; // mstatus.MIE
     localparam MPIE  = 7; // mstatus.MPIE
