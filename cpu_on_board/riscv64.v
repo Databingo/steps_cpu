@@ -96,10 +96,10 @@ module riscv64(
     reg [5:0] w_csr_id;
     always @(*) begin
 	case(w_csr)
-            satp:w_csr_id = 1; 
-            mstatus:w_csr_id = 2; 
-            mtvec:w_csr_id = 3; 
-            mscratch:w_csr_id = 4; 
+            12'h180:w_csr_id = 1;  // satp
+            12'h300:w_csr_id = 2;  // mstatus
+            12'h305:w_csr_id = 3;  // mtvec
+            12'h340:w_csr_id = 4;  // mscratch
 	    default:w_csr_id = 0; 
 	endcase
     end
