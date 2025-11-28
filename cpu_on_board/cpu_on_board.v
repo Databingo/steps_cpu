@@ -198,6 +198,8 @@ assign DRAM_CKE = 1; // always enable
         .bus_read_enable(bus_read_enable),
 
         .bus_ls_type(bus_ls_type), // lb lh lw ld lbu lhu lwu sb sh sw sd 
+	.mtime(mtime),
+	.mtimecmp(mtimecmp),
 
         .bus_read_data(bus_read_data),
         .bus_read_done(bus_read_done),
@@ -243,6 +245,8 @@ assign DRAM_CKE = 1; // always enable
     wire [63:0] bus_write_data;
     wire        bus_write_enable;
     wire [2:0]  bus_ls_type; // lb lbu...sbhwd...
+    wire [63:0] mtime;
+    wire [63:0] mtimecmp;
 
     // Address Decoding --
     wire Rom_selected = (bus_address >= `Rom_base && bus_address < `Rom_base + `Rom_size);
@@ -256,6 +260,8 @@ assign DRAM_CKE = 1; // always enable
     wire Sdc_cache_selected = (bus_address >= `Sdc_base && bus_address < (`Sdc_base + 512));
     wire Sdc_avail_selected = (bus_address == `Sdc_avail);
     wire Sdram_selected = (bus_address >= `Sdram_min && bus_address < `Sdram_max);
+    wire Mtime_selected = (bus_address == `Mtime);
+    wire Mtimecmp_selected = (bus_address == `Mtimecmp);
 
     // Read & Write BRAM Port B 
     reg [63:0] bus_address_reg;
@@ -312,6 +318,9 @@ assign DRAM_CKE = 1; // always enable
             if (Sdc_ready_selected) begin bus_read_data <= {63'd0, sd_ready}; bus_read_done <= 1; end
 	    if (Sdc_cache_selected) begin bus_read_data <= {56'd0, sd_cache[cid]}; bus_read_done <= 1; end // one byte for all load
             if (Sdc_avail_selected) begin bus_read_data <= {63'd0, sd_cache_available}; bus_read_done <= 1; end 
+
+            if (Mtime_selected) begin bus_read_data <= mtime; bus_read_done <= 1; end 
+            if (Mtimecmp_selected) begin bus_read_data <= mtimecmp; bus_read_done <= 1; end 
 
 	    //if (Sdram_selected && bus_read_done == 0) begin
 	    //    if (sdram_req_wait==0) begin bus_read_data <= {48'b0, sdram_rddata}; bus_read_done <= 1; end
@@ -416,6 +425,8 @@ assign DRAM_CKE = 1; // always enable
 
 	    if (Art_selected) begin uart_write_pulse <= 1; bus_write_done <=1; end
 
+	    if (Mtime_selected) begin mtime <= bus_write_data; bus_write_done <= 1; end
+	    if (Mtimecmp_selected) begin mtimecmp <= bus_write_data; bus_write_done <= 1; end
 	    //if (Sdram_selected) begin if (sdram_req_wait==0) bus_write_done <= 1; end
 	    
         end

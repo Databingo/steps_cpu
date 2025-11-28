@@ -17,3 +17,6 @@
 
 `define Sdram_min  32'h1000_0000
 `define Sdram_max  32'h1080_0000
+
+`define Mtime      32'h0200_bff8
+`define Mtimecmp   32'h0200_4000

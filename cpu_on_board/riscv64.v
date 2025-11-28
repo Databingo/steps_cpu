@@ -18,6 +18,11 @@ module riscv64(
     output reg        bus_read_enable,
     output reg [2:0]  bus_ls_type, // lb lh lw ld lbu lhu lwu // sb sh sw sd sbu shu swu 
     //output reg [2:0]  bus_ls_type, // sb sh sw sd sbu shu swu 
+      
+    output reg [63:0] mtime,    // map to 0x0200_bff8    
+    output reg [63:0] mtimecmp, // map to 0x0200_4000 + 8byte*hartid
+      
+      
     input  reg        bus_read_done,
     input  reg        bus_write_done,
     input  wire [63:0] bus_read_data   // from outside
@@ -102,8 +107,8 @@ module riscv64(
    localparam mscratch   = 2 ;  // 
    localparam mepc       = 3 ;  
    localparam mcause     = 4 ; localparam INTERRUPT=63,CAUSE=0; // 0x342 MRW Machine trap casue *  63InterruptAsync/ErrorSync|62:0CauseCode
-   localparam mie        = 5 ;  //
-   localparam mip        = 6 ;  //
+   localparam mie        = 5 ; localparam SGEIE=12,MEIE=11,VSEIE=10,SEIE=9,MTIE=7,VSTIE=6,STIE=5,MSIE=3,VSSIE=2,SSIE=1; // Machine Interrupt Register
+   localparam mip        = 6 ; localparam SGEIP=12,MEIP=11,VSEIP=10,SEIP=9,MTIP=7,VSTIP=6,STIP=5,MSIP=3,VSSIP=2,SSIP=1; // Machine Interrupt Register
    localparam medeleg    = 7 ; localparam MECALL=11,SECALL=9,UECALL=8,BREAK=3; // bit_index=mcause_value 8UECALL|9SECALL
    localparam mideleg    = 8 ;  //
    localparam sstatus    = 9 ; localparam SD=63,UXL=32,MXR=19,SUM=18,XS=15,FS=13,VS=9,UBE=6; //SPP=8,SPIE=5,SIE=1,//63SD|33:32UXL|19MXR|18SUM|16:15XS|14:13FS|10:9VS|8SPP|6UBE|5SPIE|1SIE
@@ -169,13 +174,14 @@ module riscv64(
       
       
     // -- Timer --
-    reg [63:0] mtime;      
-    reg [63:0] mtimecmp;      
-    wire timer_interrupt = (mtime >= mtimecmp);
+    //reg [63:0] mtime;    // map to 0x0200_bff8    
+    //reg [63:0] mtimecmp; // map to 0x0200_4000 + 8*hartid
     always @(posedge clk or negedge reset) begin 
 	if (!reset) mtime <= 0;
-	else mtime <= mtime + 1 
-    end
+	else mtime <= mtime + 1 end
+    wire timer_interrupt = (mtime >= mtimecmp);
+    always @(posedge clk) Csrs[mip][MTIP] <= timer_interrupt;
+      
       
     // -- Innerl signal --
     reg bubble;
