@@ -434,7 +434,7 @@ module riscv64(
 	            32'b0000000_00000_?????_000_?????_1110011: begin  // func12 
 	                                                if      (current_privilege_mode == U_mode) CAUSE_CODE <= 8; // 8 indicate Ecall from U-mode; 9 call from S-mode; 11 call from M-mode
 	                                                else if (current_privilege_mode == S_mode) CAUSE_CODE <= 9;
-	                                                else    (current_privilege_mode == M_mode) CAUSE_CODE <= 11;
+	                                                else if (current_privilege_mode == M_mode) CAUSE_CODE <= 11;
 						        if (Csrs[medeleg][CAUSE_CODE] == 1) // UECALL8 SECALL9 MECALL11 delegate to S-mode
                                                         // Trap into S-mode
 	                 			        begin
@@ -464,7 +464,7 @@ module riscv64(
 	                 				   current_privilege_mode <= M_mode;  // set current privilege mode
 		    				           bubble <= 1'b1;
 	                 			       end
-	                 			       end
+	                 			   end
                     //// Ebreak
 	            //32'b0000000_00001_?????_000_?????_1110011: begin  end
 	            //// Sret
