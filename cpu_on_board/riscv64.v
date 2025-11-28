@@ -174,7 +174,7 @@ module riscv64(
     //reg [63:0] mtimecmp; // map to 0x0200_4000 + 8*hartid
     always @(posedge clk or negedge reset) begin 
 	if (!reset) mtime <= 0;
-	else mtime <= mtime + 1 end
+	else mtime <= mtime + 1; end
     wire timer_interrupt = (mtime >= mtimecmp);
     always @(posedge clk) Csrs[mip][MTIP] <= timer_interrupt;
       
