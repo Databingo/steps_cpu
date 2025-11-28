@@ -106,15 +106,15 @@ module riscv64(
    localparam mip        = 6 ;  //
    localparam medeleg    = 7 ; localparam UECALL=8,SECALL=9; // bit_index=mcause_value 8UECALL|9SECALL
    localparam mideleg    = 8 ;  //
-   localparam sstatus    = 9 ; localparam SD=63,UXL=32,MXR=19,SUM=18,XS=15,FS=13,VS=9,SPP=8,UBE=6,SPIE=5,SIE=1; //63SD|33:32UXL|19MXR|18SUM|16:15XS|14:13FS|10:9VS|8SPP|6UBE|5SPIE|1SIE
+   localparam sstatus    = 9 ; localparam SD=63,UXL=32,MXR=19,SUM=18,XS=15,FS=13,VS=9,UBE=6; //SPP=8,SPIE=5,SIE=1,//63SD|33:32UXL|19MXR|18SUM|16:15XS|14:13FS|10:9VS|8SPP|6UBE|5SPIE|1SIE
    localparam sedeleg    = 10;  
    localparam sideleg    = 11;  
    localparam sie        = 12;  // Supervisor interrupt-enable register
-   localparam stvec      = 13; localparam BASE=2,MODE=0; // 63:2BASE|1:0MDOE Supervisor trap handler base address
+   localparam stvec      = 13; localparam ; //BASE=2,MODE=0 63:2BASE|1:0MDOE Supervisor trap handler base address
    localparam scounteren = 14;  
    localparam sscratch   = 15;  
    localparam sepc       = 16;  
-   localparam scause     = 17; localparam INTERRUPT=63,CAUSE=0; // *  63InterruptAsync/ErrorSync|62:0CauseCode// 
+   localparam scause     = 17; localparam ; //INTERRUPT=63,CAUSE=0 *  63InterruptAsync/ErrorSync|62:0CauseCode// 
    localparam stval      = 18;  
    localparam sip        = 19;  // Supervisor interrupt pending
    localparam satp       = 20;  // Supervisor address translation and protection satp[63:60].MODE=0:off|8:SV39 satp[59:44].asid vpn2:9 vpn1:9 vpn0:9 satp[43:0]:rootpage physical addr
@@ -432,9 +432,9 @@ module riscv64(
 		        // Ecall
                     //// Ecall
 	            32'b0000000_00000_?????_000_?????_1110011: begin  // func12 
-	                                                if      (current_privilege_mode == U_mode) && CAUSE_CODE <= 8; // 8 indicate Ecall from U-mode; 9 call from S-mode; 11 call from M-mode
-	                                                else if (current_privilege_mode == S_mode) && CAUSE_CODE <= 9;
-	                                                else    (current_privilege_mode == M_mode) && CAUSE_CODE <= 11;
+	                                                if      (current_privilege_mode == U_mode) CAUSE_CODE <= 8; // 8 indicate Ecall from U-mode; 9 call from S-mode; 11 call from M-mode
+	                                                else if (current_privilege_mode == S_mode) CAUSE_CODE <= 9;
+	                                                else    (current_privilege_mode == M_mode) CAUSE_CODE <= 11;
 						        if (Csrs[medeleg][CAUSE_CODE] == 1) // UECALL8 SECALL9 MECALL11 delegate to S-mode
                                                         // Trap into S-mode
 	                 			        begin
