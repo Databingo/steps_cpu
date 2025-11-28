@@ -19,7 +19,7 @@ module riscv64(
     output reg [2:0]  bus_ls_type, // lb lh lw ld lbu lhu lwu // sb sh sw sd sbu shu swu 
     //output reg [2:0]  bus_ls_type, // sb sh sw sd sbu shu swu 
       
-    inout reg [63:0] mtime,    // map to 0x0200_bff8   ! riscv64 MMIP only suppor 32 bits r/w 
+    inout reg [63:0] mtime,    // map to 0x0200_bff8 
     inout reg [63:0] mtimecmp, // map to 0x0200_4000 + 8byte*hartid
       
       
