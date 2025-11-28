@@ -120,8 +120,8 @@ module riscv64(
    localparam satp       = 20;  // Supervisor address translation and protection satp[63:60].MODE=0:off|8:SV39 satp[59:44].asid vpn2:9 vpn1:9 vpn0:9 satp[43:0]:rootpage physical addr
    localparam mtval      = 21;  // Machine Trap Value Register (bad address or instruction)
     //integer scontext = 12'h5a8; 
-   //reg [62:0] CAUSE_CODE;
-    reg  [5:0] w_csr_id;             // CSR id (32)
+   reg [62:0] CAUSE_CODE;
+   reg  [5:0] w_csr_id;             // CSR id (32)
     always @(*) begin
 	case(w_csr)
             12'h300 : w_csr_id = mstatus    ;    
@@ -419,11 +419,9 @@ module riscv64(
 
                     // Ecall
 	            32'b0000000_00000_?????_000_?????_1110011: begin 
-	                                                //if      (current_privilege_mode == U_mode) CAUSE_CODE = UECALL; // 8 indicate Ecall from U-mode; 9 call from S-mode; 11 call from M-mode
-	                                                //else if (current_privilege_mode == S_mode) CAUSE_CODE = SECALL;
-	                                                //else if (current_privilege_mode == M_mode) CAUSE_CODE = MECALL;
-							wire CAUSE_CODE = (current_privilege_mode == U_mode) ? UECALL :
-							                  (current_privilege_mode == S_mode) ? SECALL : MECALL;
+	                                                if      (current_privilege_mode == U_mode) CAUSE_CODE = UECALL; // 8 indicate Ecall from U-mode; 9 call from S-mode; 11 call from M-mode
+	                                                else if (current_privilege_mode == S_mode) CAUSE_CODE = SECALL;
+	                                                else if (current_privilege_mode == M_mode) CAUSE_CODE = MECALL;
 						        if (Csrs[medeleg][CAUSE_CODE] == 1) // UECALL8 SECALL9 MECALL11 delegate to S-mode
 	                 			        begin // Trap into S-mode
 	                 			           Csrs[scause][INTERRUPT] <= 0; //63_type 0exception 1interrupt|value
