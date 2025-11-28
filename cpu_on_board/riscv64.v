@@ -176,7 +176,6 @@ module riscv64(
 	if (!reset) mtime <= 0;
 	else mtime <= mtime + 1; end
     wire timer_interrupt = (mtime >= mtimecmp);
-    always @(posedge clk) Csrs[mip][MTIP] <= timer_interrupt;
       
       
     // -- Innerl signal --
@@ -226,6 +225,7 @@ module riscv64(
 	    interrupt_ack <= 0;
 	    bus_read_enable <= 0;
 	    bus_write_enable <= 0; 
+            Csrs[mip][MTIP] <= timer_interrupt;
 
             // Bubble
 	    if (bubble) begin bubble <= 1'b0; // Flush this cycle & Clear bubble signal for the next cycle
