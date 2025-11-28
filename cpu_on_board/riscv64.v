@@ -104,7 +104,7 @@ module riscv64(
    localparam mcause     = 4 ; localparam INTERRUPT=63,CAUSE=0; // 0x342 MRW Machine trap casue *  63InterruptAsync/ErrorSync|62:0CauseCode
    localparam mie        = 5 ;  //
    localparam mip        = 6 ;  //
-   localparam medeleg    = 7 ; localparam UECALL=8,SECALL=9; // bit_index=mcause_value 8UECALL|9SECALL
+   localparam medeleg    = 7 ; localparam MECALL=11,SECALL=9,UECALL=8,BREAK=3; // bit_index=mcause_value 8UECALL|9SECALL
    localparam mideleg    = 8 ;  //
    localparam sstatus    = 9 ; localparam SD=63,UXL=32,MXR=19,SUM=18,XS=15,FS=13,VS=9,UBE=6; //SPP=8,SPIE=5,SIE=1,//63SD|33:32UXL|19MXR|18SUM|16:15XS|14:13FS|10:9VS|8SPP|6UBE|5SPIE|1SIE
    localparam sedeleg    = 10;  
@@ -120,7 +120,7 @@ module riscv64(
    localparam satp       = 20;  // Supervisor address translation and protection satp[63:60].MODE=0:off|8:SV39 satp[59:44].asid vpn2:9 vpn1:9 vpn0:9 satp[43:0]:rootpage physical addr
    localparam mtval      = 21;  // Machine Trap Value Register (bad address or instruction)
     //integer scontext = 12'h5a8; 
-   reg [62:0] CAUSE_CODE;
+   //reg [62:0] CAUSE_CODE;
     reg  [5:0] w_csr_id;             // CSR id (32)
     always @(*) begin
 	case(w_csr)
@@ -417,27 +417,15 @@ module riscv64(
 	            32'b???????_?????_?????_110_?????_1110011: begin if (w_rd != 0) re[w_rd] <= Csrs[w_csr_id]; if (w_imm_z != 0) Csrs[w_csr_id] <= (Csrs[w_csr_id] |  w_imm_z); end // csrrsi
 	            32'b???????_?????_?????_111_?????_1110011: begin if (w_rd != 0) re[w_rd] <= Csrs[w_csr_id]; if (w_imm_z != 0) Csrs[w_csr_id] <= (Csrs[w_csr_id] & ~w_imm_z); end // Csrrci
 
-                    // System-Machine
-	            //32'b0011000_00010_?????_000_?????_1110011: begin pc <= csr_read(mepc); bubble <= 1; Csrs[mstatus][MIE] <= Csrs[mstatus][MPIE]; Csrs[mstatus][MPIE] <= 1; end  // Mret
-                    // Mret
-	            32'b0011000_00010_?????_000_?????_1110011: begin  
-	               			       Csrs[mstatus][MIE] <= Csrs[mstatus][MPIE]; // set back interrupt enable(MIE) by MPIE 
-	               			       Csrs[mstatus][MPIE] <= 1; // set previous interrupt enable(MIE) to be 1 (enable)
-	               			       if (Csrs[mstatus][MPP+1:MPP] < M_mode) Csrs[mstatus][MPRV] <= 0; // set mprv to 0
-	               			       current_privilege_mode  <= Csrs[mstatus][MPP+1:MPP]; // set back previous mode
-	               			       Csrs[mstatus][MPP+1:MPP] <= 2'b00; // set previous privilege mode(MPP) to be 00 (U-mode)
-	               			       pc <=  Csrs[mepc]; // mepc was +4 by the software handler and written back to sepc
-		          		       bubble <= 1'b1;
-	               			       end
-		        // Ecall
-                    //// Ecall
-	            32'b0000000_00000_?????_000_?????_1110011: begin  // func12 
-	                                                if      (current_privilege_mode == U_mode) CAUSE_CODE <= 8; // 8 indicate Ecall from U-mode; 9 call from S-mode; 11 call from M-mode
-	                                                else if (current_privilege_mode == S_mode) CAUSE_CODE <= 9;
-	                                                else if (current_privilege_mode == M_mode) CAUSE_CODE <= 11;
+                    // Ecall
+	            32'b0000000_00000_?????_000_?????_1110011: begin 
+	                                                //if      (current_privilege_mode == U_mode) CAUSE_CODE = UECALL; // 8 indicate Ecall from U-mode; 9 call from S-mode; 11 call from M-mode
+	                                                //else if (current_privilege_mode == S_mode) CAUSE_CODE = SECALL;
+	                                                //else if (current_privilege_mode == M_mode) CAUSE_CODE = MECALL;
+							wire CAUSE_CODE = (current_privilege_mode == U_mode) ? UECALL :
+							                  (current_privilege_mode == S_mode) ? SECALL : MECALL;
 						        if (Csrs[medeleg][CAUSE_CODE] == 1) // UECALL8 SECALL9 MECALL11 delegate to S-mode
-                                                        // Trap into S-mode
-	                 			        begin
+	                 			        begin // Trap into S-mode
 	                 			           Csrs[scause][INTERRUPT] <= 0; //63_type 0exception 1interrupt|value
 	                 			           Csrs[scause][CAUSE+62:CAUSE] <= CAUSE_CODE; // 8 indicate Ecall from U-mode; 9 call from S-mode; 11 call from M-mode
 	                 			           Csrs[sepc] <= pc - 4;  // Ecall is sycronized, back and repeat pc
@@ -450,14 +438,13 @@ module riscv64(
 	                 				   current_privilege_mode <= S_mode;
 		    				           bubble <= 1'b1;
 	                 			       end
-	                 			       // Trap into M-mode
-	                 			       else begin
+	                 			       else begin // Trap into M-mode
 	                 			           Csrs[mcause][INTERRUPT] <= 0; //63_type 0exception 1interrupt|value
 	                 			           Csrs[mcause][CAUSE+62:CAUSE] <= CAUSE_CODE; // 8 indicate Ecall from U-mode; 9 call from S-mode; 11 call from M-mode
 	                 			           Csrs[mepc] <= pc - 4; 
 							   Csrs[mtval] <= 0;
 	                 			           Csrs[mstatus][MPIE] <= Csrs[mstatus][MIE]; // save interrupt enable(MIE) to MPIE 
-	                 			           Csrs[mstatus][MIE] <= 0; // clear MIE (not enabled)
+	                 			           Csrs[mstatus][MIE] <= 0; // clear MIE (not enabled, blocked when trap)
 							   if (Csrs[mtvec][MODE+1:MODE] == 0) pc <= (Csrs[mtvec][BASE+61:BASE] << 2); // directly
 							   else  pc <= (Csrs[mtvec][BASE+61:BASE] << 2) + (CAUSE_CODE << 2); // vectorily
 	                 				   Csrs[mstatus][MPP+1:MPP] <= current_privilege_mode; // save privilege mode to MPP 
@@ -465,18 +452,59 @@ module riscv64(
 		    				           bubble <= 1'b1;
 	                 			       end
 	                 			   end
+                    // Ebreak
+	            32'b0000000_00001_?????_000_?????_1110011: begin 
+	                                                //CAUSE_CODE <= 3; // Breakpoint is 3
+						        if (Csrs[medeleg][BREAK] == 1) // BREAK3 UECALL8 SECALL9 MECALL11 delegate to S-mode
+	                 			        begin // Trap into S-mode
+	                 			           Csrs[scause][INTERRUPT] <= 0; //63_type 0exception 1interrupt|value
+	                 			           Csrs[scause][CAUSE+62:CAUSE] <= BREAK; // 8 indicate Ecall from U-mode; 9 call from S-mode; 11 call from M-mode
+	                 			           Csrs[sepc] <= pc - 4;  // Ecall is sycronized, back and repeat pc
+							   Csrs[stval] <= 0; // mandatory
+	                 			           Csrs[sstatus][SPP] <= (current_privilege_mode == U_mode ? 0 : 1); // save previous privilege mode(user0 super1) to SPP 
+	                 			           Csrs[sstatus][SPIE] <= Csrs[sstatus][SIE]; // save interrupt enable(SIE) to SPIE 
+	                 			           Csrs[sstatus][SIE] <= 0; // clear SIE
+							   if (Csrs[stvec][MODE+1:MODE] == 0) pc <= (Csrs[stvec][BASE+61:BASE] << 2); // directly  
+							   else  pc <= (Csrs[stvec][BASE+61:BASE] << 2) + (BREAK << 2); // vectorily BASE & CAUSE_CODE are 4 bytes aligned already number need << 2
+	                 				   current_privilege_mode <= S_mode;
+		    				           bubble <= 1'b1;
+	                 			       end
+	                 			       else begin // Trap into M-mode
+	                 			           Csrs[mcause][INTERRUPT] <= 0; //63_type 0exception 1interrupt|value
+	                 			           Csrs[mcause][CAUSE+62:CAUSE] <= BREAK; // 8 indicate Ecall from U-mode; 9 call from S-mode; 11 call from M-mode
+	                 			           Csrs[mepc] <= pc - 4; 
+							   Csrs[mtval] <= 0;
+	                 			           Csrs[mstatus][MPIE] <= Csrs[mstatus][MIE]; // save interrupt enable(MIE) to MPIE 
+	                 			           Csrs[mstatus][MIE] <= 0; // clear MIE (not enabled, blocked when trap)
+							   if (Csrs[mtvec][MODE+1:MODE] == 0) pc <= (Csrs[mtvec][BASE+61:BASE] << 2); // directly
+							   else  pc <= (Csrs[mtvec][BASE+61:BASE] << 2) + (BREAK << 2); // vectorily
+	                 				   Csrs[mstatus][MPP+1:MPP] <= current_privilege_mode; // save privilege mode to MPP 
+	                 				   current_privilege_mode <= M_mode;  // set current privilege mode
+		    				           bubble <= 1'b1;
+	                 			       end
+	                 			   end
+                    // Mret
+	            32'b0011000_00010_?????_000_?????_1110011: begin  
+	               			       Csrs[mstatus][MIE] <= Csrs[mstatus][MPIE]; // set back interrupt enable(MIE) by MPIE 
+	               			       Csrs[mstatus][MPIE] <= 1; // set previous interrupt enable(MIE) to be 1 (enable)
+	               			       if (Csrs[mstatus][MPP+1:MPP] < M_mode) Csrs[mstatus][MPRV] <= 0; // set mprv to 0, modified privilege, 1 using in MPP not current
+	               			       current_privilege_mode  <= Csrs[mstatus][MPP+1:MPP]; // set back previous mode
+	               			       Csrs[mstatus][MPP+1:MPP] <= 2'b00; // set previous privilege mode(MPP) to be 00 (U-mode)
+	               			       pc <=  Csrs[mepc]; // mepc was +4 by the software handler and written back to sepc
+		          		       bubble <= 1'b1;
+	               			       end
+                    // Sret
+	            32'b0001000_00010_?????_000_?????_1110011: begin      
+	               			       Csrs[sstatus][SIE] <= Csrs[sstatus][SPIE]; // restore interrupt enable(SIE) by SPIE 
+	               			       Csrs[sstatus][SPIE] <= 1; // next trap will have SPIE=1
+	               			       if (Csrs[sstatus][SPP] == 0) current_privilege_mode <= U_mode;
+					       else current_privilege_mode  <= S_mode;
+	               			       Csrs[sstatus][SPP] <= 0; // set previous privilege mode(SPP) to be 0 (U-mode)
+	               			       pc <=  Csrs[sepc]; // sepc was +4 by the software handler and written back to sepc
+		          		       bubble <= 1'b1;
+	               			       end
                     //// Ebreak
 	            //32'b0000000_00001_?????_000_?????_1110011: begin  end
-	            //// Sret
-	            //32'b0001000_00010_?????_000_?????_1110011: begin      
-	            //     			       if (csre[sstatus][8] == 0) current_privilege_mode <= U_mode;
-	            //     			       if (csre[sstatus][8] == 1) current_privilege_mode <= S_mode;
-	            //     			       csre[sstatus][1] <= csre[sstatus][5]; // set back interrupt enable(SIE) by SPIE 
-	            //     			       csre[sstatus][5] <= 1; // set previous interrupt enable(SIE) to be 1 (enable)
-	            //     			       csre[sstatus][8] <= 0; // set previous privilege mode(SPP) to be 0 (U-mode)
-	            //     			       pc <=  csre[sepc]; // sepc was +4 by the software handler and written back to sepc
-		    //			       bubble <= 1'b1;
-	            //     			       end
 		     // Ebreak
 		     // Fence
 		     // Fence.i
