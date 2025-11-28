@@ -104,7 +104,7 @@ module riscv64(
    localparam mcause     = 4 ;  // 0x342 MRW Machine trap casue *  63AsyncInterrupt/SyncError|62:0CauseCode
    localparam mie        = 5 ;  //
    localparam mip        = 6 ;  //
-   localparam medeleg    = 7 ;  // bit_index=mcause_value 8UECALL|9SECALL
+   localparam medeleg    = 7 ; localparam UECALL=8, SECALL=9; // bit_index=mcause_value 8UECALL|9SECALL
    localparam mideleg    = 8 ;  //
    localparam sstatus    = 9 ; localparam SD=63,UXL=32,MXR=19,SUM=18,XS=15,FS=13,VS=9,SPP=8,UBE=6,SPIE=5,SIE=1; //63SD|33:32UXL|19MXR|18SUM|16:15XS|14:13FS|10:9VS|8SPP|6UBE|5SPIE|1SIE
    localparam sedeleg    = 10;  
@@ -429,7 +429,7 @@ module riscv64(
                     //// Ecall
 	            32'b0000000_00000_?????_000_?????_1110011: begin  // func12 
                                                         // Trap into S-mode
-	                                                if (current_privilege_mode == U_mode && medeleg[8] == 1)
+	                                                if (current_privilege_mode == U_mode && medeleg[UECALL] == 1)
 	                 			        begin
 	                 			           Csrs[scause][63] <= 0; //63_type 0exception 1interrupt|value
 	                 			           Csrs[scause][62:0] <= 8; // 8 indicate Ecall from U-mode; 9 call from S-mode; 11 call from M-mode
