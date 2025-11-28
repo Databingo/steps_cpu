@@ -110,11 +110,11 @@ module riscv64(
    localparam sedeleg    = 10;  
    localparam sideleg    = 11;  
    localparam sie        = 12;  // Supervisor interrupt-enable register
-   localparam stvec      = 13; localparam ; //BASE=2,MODE=0 63:2BASE|1:0MDOE Supervisor trap handler base address
+   localparam stvec      = 13; //localparam ; //BASE=2,MODE=0 63:2BASE|1:0MDOE Supervisor trap handler base address
    localparam scounteren = 14;  
    localparam sscratch   = 15;  
    localparam sepc       = 16;  
-   localparam scause     = 17; localparam ; //INTERRUPT=63,CAUSE=0 *  63InterruptAsync/ErrorSync|62:0CauseCode// 
+   localparam scause     = 17; //localparam ; //INTERRUPT=63,CAUSE=0 *  63InterruptAsync/ErrorSync|62:0CauseCode// 
    localparam stval      = 18;  
    localparam sip        = 19;  // Supervisor interrupt pending
    localparam satp       = 20;  // Supervisor address translation and protection satp[63:60].MODE=0:off|8:SV39 satp[59:44].asid vpn2:9 vpn1:9 vpn0:9 satp[43:0]:rootpage physical addr
