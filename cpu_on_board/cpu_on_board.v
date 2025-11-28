@@ -425,7 +425,7 @@ assign DRAM_CKE = 1; // always enable
 
 	    if (Art_selected) begin uart_write_pulse <= 1; bus_write_done <=1; end
 
-	    if (Mtime_selected) begin mtime <= bus_write_data; bus_write_done <= 1; end
+	    //if (Mtime_selected) begin mtime <= bus_write_data; bus_write_done <= 1; end
 	    if (Mtimecmp_selected) begin mtimecmp <= bus_write_data; bus_write_done <= 1; end
 	    //if (Sdram_selected) begin if (sdram_req_wait==0) bus_write_done <= 1; end
 	    
