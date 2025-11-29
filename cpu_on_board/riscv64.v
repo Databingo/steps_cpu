@@ -517,9 +517,6 @@ module riscv64(
 	               			       pc <=  Csrs[sepc]; // sepc was +4 by the software handler and written back to sepc
 		          		       bubble <= 1'b1;
 	               			       end
-                    //// Ebreak
-	            //32'b0000000_00001_?????_000_?????_1110011: begin  end
-		     // Ebreak
 		     // Fence
 		     // Fence.i
 		     // RV64IMAFD(G)C  RVA23U64
@@ -544,8 +541,22 @@ module riscv64(
 
 endmodule
 
+// Linux needs:
+// Privilege RV
+// mret/sret/ecall/ebreak
 //PLIC
-//CLINT
+//CLINT timer
+//UART 16550
+//Map DRAM 0x80000000/0x40000000
+//OpenSBI at 0x80000000 ?
+//lr.w|d/sc.w|d Atom amo...
+//sfence.vma TLE flush could be NOP
+//sv39 mmu ! Accessed/Direct bit in PTE(Page Table Entry)
+//exception handler: page faults/illegal ir/misaligned ls/timer interrutp/external interrupt/breakpoint/ecallUSM
+//SBI interface: OpenSBI run first
+//fence fence.i
+//cache !  // SDRAM to cache(BRAM)
+// Device Tree
   
   
 //interrupt
@@ -565,3 +576,5 @@ endmodule
 //in N2, IF fetching sb, EXE ir is lb, load_step is 1, bus_read_data is saving to re, load_step is setting to 0;
 //in N3, IF fethcing mret, EXE ir is sb, re is saving to bus_write_data, bus_write_enable is setting to 1;
   
+
+
