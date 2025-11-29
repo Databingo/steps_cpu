@@ -20,3 +20,7 @@
 
 `define Mtime      32'h0200_bff8
 `define Mtimecmp   32'h0200_4000
+
+`define Plic_base 32'h0C00_0000
+`define Plic_msip 32'h0200_0000
+

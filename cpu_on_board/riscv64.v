@@ -21,6 +21,9 @@ module riscv64(
       
     output reg [63:0] mtime,    // map to 0x0200_bff8 
     inout reg [63:0] mtimecmp, // map to 0x0200_4000 + 8byte*hartid
+
+    input wire meip_interrupt, // from PLIC
+    input wire msip_interrupt, // from Software
       
       
     input  reg        bus_read_done,
@@ -107,8 +110,8 @@ module riscv64(
    localparam mscratch   = 2 ;  // 
    localparam mepc       = 3 ;  
    localparam mcause     = 4 ; localparam INTERRUPT=63,CAUSE=0; // 0x342 MRW Machine trap casue *  63InterruptAsync/ErrorSync|62:0CauseCode
-   localparam mie        = 5 ; localparam SGEIE=12,MEIE=11,VSEIE=10,SEIE=9,MTIE=7,VSTIE=6,STIE=5,MSIE=3,VSSIE=2,SSIE=1; // Machine Interrupt Register
-   localparam mip        = 6 ; localparam SGEIP=12,MEIP=11,VSEIP=10,SEIP=9,MTIP=7,VSTIP=6,STIP=5,MSIP=3,VSSIP=2,SSIP=1; // Machine Interrupt Register
+   localparam mie        = 5 ; localparam SGEIE=12,MEIE=11,VSEIE=10,SEIE=9,MTIE=7,VSTIE=6,STIE=5,MSIE=3,VSSIE=2,SSIE=1; // Machine Interrupt Enable from OS software set enable
+   localparam mip        = 6 ; localparam SGEIP=12,MEIP=11,VSEIP=10,SEIP=9,MTIP=7,VSTIP=6,STIP=5,MSIP=3,VSSIP=2,SSIP=1; // Machine Interrupt Pending from HardWare timer,uart,PLIC..11Exter 7Time 3Software
    localparam medeleg    = 7 ; localparam MECALL=11,SECALL=9,UECALL=8,BREAK=3; // bit_index=mcause_value 8UECALL|9SECALL
    localparam mideleg    = 8 ;  //
    localparam sstatus    = 9 ; localparam SD=63,UXL=32,MXR=19,SUM=18,XS=15,FS=13,VS=9,UBE=6; //SPP=8,SPIE=5,SIE=1,//63SD|33:32UXL|19MXR|18SUM|16:15XS|14:13FS|10:9VS|8SPP|6UBE|5SPIE|1SIE
@@ -175,7 +178,7 @@ module riscv64(
     always @(posedge clk or negedge reset) begin 
 	if (!reset) mtime <= 0;
 	else mtime <= mtime + 1; end
-    wire timer_interrupt = (mtime >= mtimecmp);
+    wire time_interrupt = (mtime >= mtimecmp);
       
       
     // -- Innerl signal --
@@ -225,7 +228,9 @@ module riscv64(
 	    interrupt_ack <= 0;
 	    bus_read_enable <= 0;
 	    bus_write_enable <= 0; 
-            Csrs[mip][MTIP] <= timer_interrupt;
+            //Csrs[mip][MTIP] <= time_interrupt; // MTIP linux will see then jump to its handler
+            //Csrs[mip][MEIP] <= meip_interrupt; // MEIP
+            //Csrs[mip][MSIP] <= msip_interrupt; // MSIP
 
             // Bubble
 	    if (bubble) begin bubble <= 1'b0; // Flush this cycle & Clear bubble signal for the next cycle
@@ -275,18 +280,29 @@ module riscv64(
 	//	interrupt_ack <= 1; // reply to outside
 
             // Interrupt PLIC full (Platform-Level-Interrupt-Control)  MMIO
-	    //if (interrupt_vector == 1 && mstatus_MIE == 1) begin //mstatus[3] MIE
-	    end else if (interrupt_vector == 1 && Csrs[mstatus][MIE]==1) begin //mstatus[3] MIE
-	        Csrs[mepc] <= pc; // save pc
+	    //if (interrupt_vector == 1 && mstatus_MIE == 1) begin //mstatus[3] MIE      // sstatus[SIE]?
+	    //end else if ((Csrs[mip][MTIP] || Csrs[mip][MEIP] || Csrs[mip][MSIP]) && Csrs[mstatus][MIE]==1) begin //mstatus[3] MIE
+	    end else if ((time_interrupt || meip_interrupt || msip_interrupt) && Csrs[mstatus][MIE]==1) begin //mstatus[3] MIE
+                Csrs[mip][MTIP] <= time_interrupt; // MTIP linux will see then jump to its handler
+                Csrs[mip][MEIP] <= meip_interrupt; // MEIP
+                Csrs[mip][MSIP] <= msip_interrupt; // MSIP
 
-		Csrs[mcause] <= 64'h800000000000000B; // MSB 1 for interrupts 0 for exceptions, Cause 11 for Machine External Interrupt
+		Csrs[mcause][INTERRUPT] <= 1; // MSB 1 for interrupts 0 for exceptions
+                if (msip_interrupt) Csrs[mcause][CAUSE+62:CAUSE] <= 3; // Cause 3 for Sofeware Interrupt
+                if (time_interrupt) Csrs[mcause][CAUSE+62:CAUSE] <= 7; // Cause 7 for Timer Interrupt
+                if (meip_interrupt) Csrs[mcause][CAUSE+62:CAUSE] <= 11; // Cause 11 for External Interrupt
+
+	        Csrs[mepc] <= pc; // save next pc (interrupt asynchronize)
 		Csrs[mstatus][MPIE] <= Csrs[mstatus][MIE];
 		Csrs[mstatus][MIE] <= 0;
-
-		pc <= Csrs[mtvec]; // jump to mtvec addrss (default 0, need C or Assembly code of handler)
+		Csrs[mstatus][MPP+1:MPP] <= current_privilege_mode; // MPP = old mode
+		if (Csrs[mtvec][MODE+1:MODE] == 1) begin // vec-mode 1
+                    if (msip_interrupt) pc <= (Csrs[mtvec][BASE+61:BASE] << 2) + (MSIP << 2); // vectorily BASE & CAUSE_CODE are 4 bytes aligned already number need << 2
+                    if (time_interrupt) pc <= (Csrs[mtvec][BASE+61:BASE] << 2) + (MTIP << 2);
+                    if (meip_interrupt) pc <= (Csrs[mtvec][BASE+61:BASE] << 2) + (MEIP << 2); 
+		end else pc <= (Csrs[mtvec][BASE+61:BASE] << 2);// jump to mtvec addrss (directly mode 0, need C or Assembly code of handlers deciding) 
 		bubble <= 1'b1; // bubble wrong fetched instruciton by IF
-	        Csrs[mstatus][MIE] <= 0;
-		interrupt_ack <= 1; // reply to outside
+		//interrupt_ack <= 1; // reply to outside
 
             // Upper are hijects of executing ir for handler special state
 	    // IR
@@ -450,7 +466,7 @@ module riscv64(
                     // Ecall
 	            32'b0000000_00000_?????_000_?????_1110011: begin 
 	                                                if      (current_privilege_mode == U_mode) CAUSE_CODE = UECALL; // 8 indicate Ecall from U-mode; 9 call from S-mode; 11 call from M-mode
-	                                                else if (current_privilege_mode == S_mode) CAUSE_CODE = SECALL;
+	                                                else if (current_privilege_mode == S_mode) CAUSE_CODE = SECALL; // block assign attaintion!
 	                                                else if (current_privilege_mode == M_mode) CAUSE_CODE = MECALL;
 						        if (Csrs[medeleg][CAUSE_CODE] == 1) // UECALL8 SECALL9 MECALL11 delegate to S-mode
 	                 			        begin // Trap into S-mode
