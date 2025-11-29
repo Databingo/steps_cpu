@@ -19,7 +19,7 @@ module riscv64(
     output reg [2:0]  bus_ls_type, // lb lh lw ld lbu lhu lwu // sb sh sw sd sbu shu swu 
     //output reg [2:0]  bus_ls_type, // sb sh sw sd sbu shu swu 
       
-    inout reg [63:0] mtime,    // map to 0x0200_bff8 
+    output reg [63:0] mtime,    // map to 0x0200_bff8 
     inout reg [63:0] mtimecmp, // map to 0x0200_4000 + 8byte*hartid
       
       
@@ -260,7 +260,21 @@ module riscv64(
 		got_pda <= 1; // we are pa
 		mmu_da <= 0; // MMU_DA OFF
 		
-            // Interrupt
+        //    // Interrupt
+	//    //if (interrupt_vector == 1 && mstatus_MIE == 1) begin //mstatus[3] MIE
+	//    end else if (interrupt_vector == 1 && Csrs[mstatus][MIE]==1) begin //mstatus[3] MIE
+	//        Csrs[mepc] <= pc; // save pc
+
+	//	Csrs[mcause] <= 64'h800000000000000B; // MSB 1 for interrupts 0 for exceptions, Cause 11 for Machine External Interrupt
+	//	Csrs[mstatus][MPIE] <= Csrs[mstatus][MIE];
+	//	Csrs[mstatus][MIE] <= 0;
+
+	//	pc <= Csrs[mtvec]; // jump to mtvec addrss (default 0, need C or Assembly code of handler)
+	//	bubble <= 1'b1; // bubble wrong fetched instruciton by IF
+	//        Csrs[mstatus][MIE] <= 0;
+	//	interrupt_ack <= 1; // reply to outside
+
+            // Interrupt PLIC full (Platform-Level-Interrupt-Control)  MMIO
 	    //if (interrupt_vector == 1 && mstatus_MIE == 1) begin //mstatus[3] MIE
 	    end else if (interrupt_vector == 1 && Csrs[mstatus][MIE]==1) begin //mstatus[3] MIE
 	        Csrs[mepc] <= pc; // save pc
