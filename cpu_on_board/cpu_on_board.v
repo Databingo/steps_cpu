@@ -248,6 +248,15 @@ assign DRAM_CKE = 1; // always enable
     wire [63:0] mtime;
     wire [63:0] mtimecmp;
 
+
+    // -- PLIC --
+    reg [2:0]  Plic_priority [0:5];  // per source
+    reg [2:0]  Plic_threshold; // per hart
+    reg [31:0] Plic_enable;  // per source
+    reg [31:0] Plic_pending_word; // per source
+    reg [31:0] Plic_claim;  // per source
+
+
     // Address Decoding --
     wire Rom_selected = (bus_address >= `Rom_base && bus_address < `Rom_base + `Rom_size);
     wire Ram_selected = (bus_address >= `Ram_base && bus_address < `Ram_base + `Ram_size);
@@ -262,6 +271,12 @@ assign DRAM_CKE = 1; // always enable
     wire Sdram_selected = (bus_address >= `Sdram_min && bus_address < `Sdram_max);
     wire Mtime_selected = (bus_address == `Mtime);
     wire Mtimecmp_selected = (bus_address == `Mtimecmp);
+    // Plic mapping
+    wire Plic_priority_selected = (bus_address >= `Plic_base && bus_address < `Plic_pending_word);
+    wire Plic_pending_selected = (bus_address >= `Plic_pending_word && bus_address < `Plic_enable);
+    wire Plic_enable_selected = (bus_address >= `Plic_enable && bus_address < `Plic_threshold);
+    wire Plic_threshold_selected = (bus_address >= `Plic_threshold && bus_address < `Plic_claim);
+    wire Plic_claim_selected = (bus_address >= `Plic_claim && bus_address < `Plic_claim + 4*(`HARTS-1));
 
     // Read & Write BRAM Port B 
     reg [63:0] bus_address_reg;
@@ -390,6 +405,11 @@ assign DRAM_CKE = 1; // always enable
 		// 100Lbu 101Lhu 110Lwu
 	    end
 
+	    if (Plic_priority_selected) begin 
+		reg [4:0] id = (bus_address - `Plic_base) >> 2; // id = offset /4
+		bus_read_data <= Plic_priority[id]; end
+
+	
 
 
         end

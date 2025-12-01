@@ -303,6 +303,15 @@ module riscv64(
 		end else pc <= (Csrs[mtvec][BASE+61:BASE] << 2);// jump to mtvec addrss (directly mode 0, need C or Assembly code of handlers deciding) 
 		bubble <= 1'b1; // bubble wrong fetched instruciton by IF
 		//interrupt_ack <= 1; // reply to outside
+		//
+		//
+		// 0x0C00_0000 base  
+		// 0x0C00_000? priority (base + 4 * id)
+		// 0x0C00_2000 pending bits
+		// 0x0C20_0000 enable bits
+		// 0x0C20_2000 threshold
+		// 0x0C20_2004 claim/complete
+		// id: UART1 KEYBOARD SPI GPIO...
 
             // Upper are hijects of executing ir for handler special state
 	    // IR
