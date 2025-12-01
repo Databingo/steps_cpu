@@ -21,9 +21,9 @@
 `define Mtime      32'h0200_bff8
 `define Mtimecmp   32'h0200_4000
 
-`define Plic_base         32'h0C00_0000  //# PRIORITY(id) = base + 4 * id
-`define Plic_pending_word 32'h0C00_1000  //# id 1-32
-`define Plic_enable       32'h0C00_2000  //# base + 0x2000 + (hart * 0x80) + (word_id*4) |2:hart1S-m
-`define Plic_threshold    32'h0C20_0000  //# base + 0x200000 + (hart * 0x1000)
-`define Plic_claim        32'h0C20_0004  //# base + 0x200004 + (hart * 0x1000)
+`define Plic_base         32'h0C00_0000  //# PER PRIORITY(id) = base + 4 * id (000-fff) array
+`define Plic_pending      32'h0C00_1000  //# base + 0x1000 id 1-32 ... bitmap
+`define Plic_enable       32'h0C00_2000  //# base + 0x2000 + ContextID*0x80 0hart0M 1hart0S... bitmap
+`define Plic_threshold    32'h0C20_0000  //# base + 0x200000 + ContextID*0x1000 0hart0M 1hart0S...4B 
+`define Plic_claim        32'h0C20_0004  //# base + 0x200004 + ContextID*0x1000 0hart0M 1hart0S...4B
 `define HARTS 1

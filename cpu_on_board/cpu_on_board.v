@@ -253,8 +253,16 @@ assign DRAM_CKE = 1; // always enable
     reg [2:0]  Plic_priority [0:5];  // per source
     reg [2:0]  Plic_threshold; // per hart
     reg [31:0] Plic_enable;  // per source
-    reg [31:0] Plic_pending_word; // per source
+    reg [31:0] Plic_pending; // per source
     reg [31:0] Plic_claim;  // per source
+//say hart0 M mode UART id 1 give an interrupt, then what happen accordingly?
+//1.base+4*1 set to be 7( suppose higher priority of id 1 interrupt) (address mapping to array of reg)
+//2.pending base+0x1000's bit 1 (not 0) to be 1 means id 1 is pending (address mapping to 32bits regs)
+//3.enable base +0x2000's bit 1 to be 1 means it is enabled (address mapping to 32bits regs)
+//4.threshold base +0x200000 4 bytes to be set  (address mapping to 32bits regs, one reg for one context?)
+//5.when PLIC find it worth then trigger to cpu (set SEIP MEIP .etc)
+//6.CPU check claim for id, PLIC checkout pending value to CPU, then PLIC clean pending
+//7. then cpu handler to finish then set claim register to be 1, PLIC know cpu finished.
 
 
     // Address Decoding --
@@ -272,8 +280,8 @@ assign DRAM_CKE = 1; // always enable
     wire Mtime_selected = (bus_address == `Mtime);
     wire Mtimecmp_selected = (bus_address == `Mtimecmp);
     // Plic mapping
-    wire Plic_priority_selected = (bus_address >= `Plic_base && bus_address < `Plic_pending_word);
-    wire Plic_pending_selected = (bus_address >= `Plic_pending_word && bus_address < `Plic_enable);
+    wire Plic_priority_selected = (bus_address >= `Plic_base && bus_address < `Plic_pending);
+    wire Plic_pending_selected = (bus_address >= `Plic_pending && bus_address < `Plic_enable);
     wire Plic_enable_selected = (bus_address >= `Plic_enable && bus_address < `Plic_threshold);
     wire Plic_threshold_selected = (bus_address >= `Plic_threshold && bus_address < `Plic_claim);
     wire Plic_claim_selected = (bus_address >= `Plic_claim && bus_address < `Plic_claim + 4*(`HARTS-1));
@@ -406,11 +414,12 @@ assign DRAM_CKE = 1; // always enable
                 // 000Lb 001Lh 010Lw  011Ld
 		// 100Lbu 101Lhu 110Lwu
 	    end
-
-	    if (Plic_priority_selected) begin 
-		bus_read_data <= Plic_priority[plic_id]; end
-
-	
+            // Plic read
+	    if (Plic_priority_selected) begin bus_read_data <= Plic_priority[plic_id]; end
+	    else if (Plic_pending_selected) begin bus_read_data <= Plic_pending; end
+	    else if (Plic_enable_selected) begin bus_read_data <= Plic_enable; end
+	    else if (Plic_threshold_selected) begin bus_read_data <= Plic_threshold; end
+	    else if (Plic_claim_selected) begin bus_read_data <= Plic_claim; end
 
 
         end
@@ -448,6 +457,12 @@ assign DRAM_CKE = 1; // always enable
 
 	    if (Mtimecmp_selected) begin mtimecmp <= bus_write_data; bus_write_done <= 1; end
 	    //if (Sdram_selected) begin if (sdram_req_wait==0) bus_write_done <= 1; end
+	    
+            // Plic write
+	    if (Plic_priority_selected) begin Plic_priority[plic_id] <= bus_write_data; end
+	    else if (Plic_enable_selected) begin Plic_enable <= bus_write_data; end
+	    else if (Plic_threshold_selected) begin Plic_threshold <= bus_write_data; end
+	    else if (Plic_claim_selected) begin Plic_pending[bus_write_data] <= 0 ; end
 	    
         end
 
