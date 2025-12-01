@@ -406,7 +406,7 @@ assign DRAM_CKE = 1; // always enable
 	    end
 
 	    if (Plic_priority_selected) begin 
-		reg [4:0] id = (bus_address - `Plic_base) >> 2; // id = offset /4
+		wire [4:0] id = (bus_address - `Plic_base) >> 2; // id = offset /4
 		bus_read_data <= Plic_priority[id]; end
 
 	
