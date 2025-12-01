@@ -291,6 +291,7 @@ assign DRAM_CKE = 1; // always enable
 
     //reg bus_read_start = 0;
     //reg bus_write_start = 0;
+    reg [4:0] plic_id;
 
 
 
@@ -311,6 +312,7 @@ assign DRAM_CKE = 1; // always enable
         bus_address_reg_full <= bus_address;
         sd_rd_start <= 0;
         uart_write_pulse <= 0;
+	plic_id <= (bus_address - `Plic_base) >> 2; // id = offset /4
 
         if (bus_read_enable) begin bus_read_done <= 0; cid <= (bus_address-`Sdc_base); end 
         if (bus_write_enable) begin bus_write_done <= 0; end
@@ -406,7 +408,6 @@ assign DRAM_CKE = 1; // always enable
 	    end
 
 	    if (Plic_priority_selected) begin 
-		wire [4:0] id = (bus_address - `Plic_base) >> 2; // id = offset /4
 		bus_read_data <= Plic_priority[id]; end
 
 	
