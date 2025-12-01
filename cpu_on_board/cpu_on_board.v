@@ -408,7 +408,7 @@ assign DRAM_CKE = 1; // always enable
 	    end
 
 	    if (Plic_priority_selected) begin 
-		bus_read_data <= Plic_priority[id]; end
+		bus_read_data <= Plic_priority[plic_id]; end
 
 	
 
