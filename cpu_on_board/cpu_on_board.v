@@ -201,7 +201,7 @@ assign DRAM_CKE = 1; // always enable
 	.mtime(mtime),
 	.mtimecmp(mtimecmp),
 	.meip_interrupt(meip_interrupt),
-	.seip_interrupt(seip_interrupt),
+	.msip_interrupt(msip_interrupt),
 
         .bus_read_data(bus_read_data),
         .bus_read_done(bus_read_done),
@@ -310,11 +310,12 @@ assign DRAM_CKE = 1; // always enable
 	        end
 	    end
 	end
+	if (uart_irq) Plic_pending[1] <= 1;
     end
     //reg meip_interrupt;
-    //reg seip_interrupt;
+    //reg msip_interrupt;
     assign meip_interrupt = (claim_id_calc[0] != 0);
-    assign seip_interrupt = (claim_id_calc[1] != 0);
+    assign msip_interrupt = (claim_id_calc[1] != 0);
     wire uart_irq;
     wire [31:0] uart_readdata;
 
