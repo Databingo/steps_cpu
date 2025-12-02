@@ -294,7 +294,7 @@ assign DRAM_CKE = 1; // always enable
     always @(*) begin
 	for (ctx=0,ctx<2,ctx=ctx+1) begin
 	    claim_id_calc[ctx]=0;
-	    for (c=1,c<32,c=c+1) begin
+	    for (c=1;c<32;c=c+1) begin
 		if (Plic_pending[c] &&
 		    Plic_enable[ctx][c] && 
 		    Plic_priority[c] > Plic_threshold[ctx]) begin claim_id_calc[ctx] = c; end
