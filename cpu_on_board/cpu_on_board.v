@@ -301,7 +301,7 @@ assign DRAM_CKE = 1; // always enable
 	for (ctx=0;ctx<2;ctx=ctx+1) begin
 	    claim_id_calc[ctx]=0;
 	    current_max_prio = Plic_threshold[ctx];
-	    for (c=1;c<32;c=c+1) begin
+	    for (c=1;c<7;c=c+1) begin
 		if (Plic_pending[c] && Plic_enable[ctx][c]) begin  
 		    if (Plic_priority[c] > current_max_prio) begin
 		        current_max_prio = Plic_priority[c];
