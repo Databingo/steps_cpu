@@ -250,11 +250,11 @@ assign DRAM_CKE = 1; // always enable
 
 
     // -- PLIC --
-    reg [2:0]  Plic_priority [0:5];  // per source
-    reg [2:0]  Plic_threshold; // per hart
-    reg [31:0] Plic_enable;  // per source
-    reg [31:0] Plic_pending; // per source
-    reg [31:0] Plic_claim;  // per source
+    reg [2:0]  Plic_priority [0:5];  // 0x000 + 4 per id
+    reg [31:0] Plic_pending; // 0x1000 Global pending Bitmap 
+    reg [31:0] Plic_enable [0:1];  // 0x2000 per context +0x80
+    reg [2:0]  Plic_threshold [0:1]; // 0x200000 4B per hart
+    //reg [31:0] Plic_claim [0:1];  // 0x200004 4B per hart
 //say hart0 M mode UART id 1 give an interrupt, then what happen accordingly?
 //1.base+4*1 set to be 7( suppose higher priority of id 1 interrupt) (address mapping to array of reg)
 //2.pending base+0x1000's bit 1 (not 0) to be 1 means id 1 is pending (address mapping to 32bits regs)
@@ -281,10 +281,26 @@ assign DRAM_CKE = 1; // always enable
     wire Mtimecmp_selected = (bus_address == `Mtimecmp);
     // Plic mapping
     wire Plic_priority_selected = (bus_address >= `Plic_base && bus_address < `Plic_pending);
-    wire Plic_pending_selected = (bus_address >= `Plic_pending && bus_address < `Plic_enable);
-    wire Plic_enable_selected = (bus_address >= `Plic_enable && bus_address < `Plic_threshold);
-    wire Plic_threshold_selected = (bus_address >= `Plic_threshold && bus_address < `Plic_claim);
-    wire Plic_claim_selected = (bus_address >= `Plic_claim && bus_address < `Plic_claim + 4*(`HARTS-1));
+    wire Plic_pending_selected = (bus_address == `Plic_pending);
+    wire Plic_enable_ctx0_selected = (bus_address == `Plic_enable);
+    wire Plic_enable_ctx1_selected = (bus_address == `Plic_enable + 32'h80);
+    wire Plic_threshold_ctx0_selected = (bus_address == `Plic_threshold);
+    wire Plic_threshold_ctx1_selected = (bus_address == `Plic_threshold + 32'h1000);
+    wire Plic_claim_ctx0_selected = (bus_address == `Plic_claim );
+    wire Plic_claim_ctx1_selected = (bus_address == `Plic_claim + 32'h1000);
+    //wire Plic_claim_ctx0_selected = (bus_address >= `Plic_claim && bus_address < `Plic_claim+1024*0x1000+4);
+    reg [31:0] claim_id_calc [0:1]; // 0 for hart0M 1 for hart0S
+    integer c, ctx;
+    always @(*) begin
+	for (ctx=0,ctx<2,ctx=ctx+1) begin
+	    claim_id_calc[ctx]=0;
+	    for (c=1,c<32,c=c+1) begin
+		if (Plic_pending[c] &&
+		    Plic_enable[ctx][c] && 
+		    Plic_priority[c] > Plic_threshold[ctx]) begin claim_id_calc[ctx] = c; end
+	    end
+	end
+    end
 
     // Read & Write BRAM Port B 
     reg [63:0] bus_address_reg;
@@ -417,9 +433,15 @@ assign DRAM_CKE = 1; // always enable
             // Plic read
 	    if (Plic_priority_selected) begin bus_read_data <= Plic_priority[plic_id]; end
 	    else if (Plic_pending_selected) begin bus_read_data <= Plic_pending; end
-	    else if (Plic_enable_selected) begin bus_read_data <= Plic_enable; end
-	    else if (Plic_threshold_selected) begin bus_read_data <= Plic_threshold; end
-	    else if (Plic_claim_selected) begin bus_read_data <= Plic_claim; end
+	    // context 0 M-mode
+	    else if (Plic_enable_ctx0_selected) begin bus_read_data <= Plic_enable[0]; end
+	    else if (Plic_threshold_ctx0_selected) begin bus_read_data <= Plic_threshold[0]; end
+	    //else if (Plic_claim_ctx0_selected) begin bus_read_data <= Plic_claim[0]; end
+	    else if (Plic_claim_ctx0_selected) begin bus_read_data <= claim_id_calc[0];  Plic_pending[claim_id_calc[0]]<=0; end
+	    // context 1 S-mode
+	    else if (Plic_enable_ctx1_selected) begin bus_read_data <= Plic_enable[1]; end
+	    else if (Plic_threshold_ctx1_selected) begin bus_read_data <= Plic_threshold[1]; end
+	    else if (Plic_claim_ctx1_selected) begin bus_read_data <= claim_id_calc[1];  Plic_pending[claim_id_calc[1]]<=0; end
 
 
         end
@@ -460,9 +482,14 @@ assign DRAM_CKE = 1; // always enable
 	    
             // Plic write
 	    if (Plic_priority_selected) begin Plic_priority[plic_id] <= bus_write_data; end
-	    else if (Plic_enable_selected) begin Plic_enable <= bus_write_data; end
-	    else if (Plic_threshold_selected) begin Plic_threshold <= bus_write_data; end
-	    else if (Plic_claim_selected) begin Plic_pending[bus_write_data] <= 0 ; end
+	    // context 0
+	    else if (Plic_enable_ctx0_selected) begin Plic_enable[0] <= bus_write_data; end
+	    else if (Plic_threshold_ctx0_selected) begin Plic_threshold[0] <= bus_write_data; end
+	    //else if (Plic_claim_ctx0_selected) begin Plic_pending[bus_write_data] <= 0 ; end
+	    // context 1
+	    else if (Plic_enable_ctx1_selected) begin Plic_enable[1] <= bus_write_data; end
+	    else if (Plic_threshold_ctx1_selected) begin Plic_threshold[1] <= bus_write_data; end
+	    //else if (Plic_claim_ctx1_selected) begin Plic_pending[bus_write_data] <= 0 ; end
 	    
         end
 

@@ -113,6 +113,11 @@ _start:
     li t1, 1
     sw t1, 0(t0)
    
+    # Set enable bits = irq_id, so enable bit = (1 << id) 
+    li, t0, 0x0C002000
+    li, t1, 2 #( 1<<1 = 2)
+    sw, t1, 0(t0)
+
     # by PLIC hardware
     ## Set pending bits = irq_id, so enable bit = (1 << id) 
     #li, t0, 0x0C002000
@@ -124,7 +129,7 @@ _start:
     li, t1, 0 
     sw, t1, 0(t0)
   
-    # Enable mie.MEIE (enternal interrupt)
+    # Enable MEIE (mie.MEIE enternal interrupt)
     li, t0, 0x800 # bit 11=MEIE
     csrs, mie, t0
 
@@ -132,15 +137,15 @@ _start:
     li t0, 8  # (bit 3 mstatus.MIE)
     csrs mstatus, t0
     
-    # Handler
-    # Read claim
+    # -- Handler --
+    # Read claim (ask PLIC who triggered this?)
     li t0, 0x0C202004   
-    lw t1, 0(t0)
+    lw t1, 0(t0) # side effect: clear pending bit for id 1
     
     beqz t1, no_irq 
     
     # Finish
-    li t1, 0(t0)
+    sw t1, 0(t0) # write id back to claim tell PLIC I am done
 
     no_irq:
         mret 
