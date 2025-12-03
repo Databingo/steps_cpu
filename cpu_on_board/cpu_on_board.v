@@ -229,18 +229,21 @@ assign DRAM_CKE = 1; // always enable
 
     // -- Monitor -- Connected to Bus
     reg uart_write_pulse;
+    reg uart_read_pulse;
+    wire [31:0] uart_readdata;
     jtag_uart_system my_jtag_system (
         .clk_clk                                 (CLOCK_50),
         .reset_reset_n                           (KEY0),
-        .jtag_uart_0_avalon_jtag_slave_address   (bus_address[0:0]),
+        //.jtag_uart_0_avalon_jtag_slave_address   (bus_address[0:0]),
+        .jtag_uart_0_avalon_jtag_slave_address   (bus_address[2]), // 0x00 for Data, 0x04 for Control
         .jtag_uart_0_avalon_jtag_slave_writedata (bus_write_data[31:0]),
         //.jtag_uart_0_avalon_jtag_slave_write_n   (~uart_write_trigger_pulse),
         .jtag_uart_0_avalon_jtag_slave_write_n   (~uart_write_pulse),
         .jtag_uart_0_avalon_jtag_slave_chipselect(1'b1),
-        .jtag_uart_0_avalon_jtag_slave_read_n    (1'b1),
-        //.jtag_uart_0_avalon_jtag_slave_readdata    (),
+        .jtag_uart_0_avalon_jtag_slave_read_n    (~uart_read_pulse),
+        .jtag_uart_0_avalon_jtag_slave_readdata    (uart_readdata),
         //.jtag_uart_0_avalon_jtag_slave_waitrequest (),
-	//.jtag_uart_0_irq_irq()                        
+	.jtag_uart_0_irq_irq(uart_irq)                        
     );
 
     // -- Bus --
@@ -348,11 +351,13 @@ assign DRAM_CKE = 1; // always enable
 	    step <= 0;
 	    bus_read_data <= 0;
 	    uart_write_pulse <= 0;
+	    uart_read_pulse <= 0;
 	end else begin
         bus_address_reg <= bus_address>>2;
         bus_address_reg_full <= bus_address;
         sd_rd_start <= 0;
         uart_write_pulse <= 0;
+	uart_read_pulse <= 0;
 	plic_id <= (bus_address - `Plic_base) >> 2; // id = offset /4
 
         if (bus_read_enable) begin bus_read_done <= 0; cid <= (bus_address-`Sdc_base); end 
@@ -379,6 +384,8 @@ assign DRAM_CKE = 1; // always enable
 
             if (Mtime_selected) begin bus_read_data <= mtime; bus_read_done <= 1; end 
             if (Mtimecmp_selected) begin bus_read_data <= mtimecmp; bus_read_done <= 1; end 
+
+	    if (Art_selected) begin uart_read_pulse <= 1; bus_read_data <= uart_readdata; bus_read_done <=1; end
 
 	    //if (Sdram_selected && bus_read_done == 0) begin
 	    //    if (sdram_req_wait==0) begin bus_read_data <= {48'b0, sdram_rddata}; bus_read_done <= 1; end
