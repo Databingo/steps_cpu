@@ -229,7 +229,7 @@ assign DRAM_CKE = 1; // always enable
 
     // -- Monitor -- Connected to Bus
     reg uart_write_pulse;
-    //reg uart_read_pulse;
+    reg uart_read_pulse;
     jtag_uart_system my_jtag_system (
         .clk_clk                                 (CLOCK_50),
         .reset_reset_n                           (KEY0),
