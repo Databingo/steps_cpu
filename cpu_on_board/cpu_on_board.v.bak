@@ -230,6 +230,7 @@ assign DRAM_CKE = 1; // always enable
     // -- Monitor -- Connected to Bus
     reg uart_write_pulse;
     reg uart_read_pulse;
+    wire uart_waitrequest;
     jtag_uart_system my_jtag_system (
         .clk_clk                                 (CLOCK_50),
         .reset_reset_n                           (KEY0),
@@ -239,7 +240,6 @@ assign DRAM_CKE = 1; // always enable
         //.jtag_uart_0_avalon_jtag_slave_write_n   (~uart_write_trigger_pulse),
         .jtag_uart_0_avalon_jtag_slave_write_n   (~uart_write_pulse),
         .jtag_uart_0_avalon_jtag_slave_chipselect(1'b1),
-        //.jtag_uart_0_avalon_jtag_slave_read_n    (~uart_read_pulse),
         .jtag_uart_0_avalon_jtag_slave_read_n    (~(bus_read_done==0 && Art_selected)),
         .jtag_uart_0_avalon_jtag_slave_readdata    (uart_readdata),
         .jtag_uart_0_avalon_jtag_slave_waitrequest (uart_waitrequest),
@@ -277,7 +277,7 @@ assign DRAM_CKE = 1; // always enable
     wire Rom_selected = (bus_address >= `Rom_base && bus_address < `Rom_base + `Rom_size);
     wire Ram_selected = (bus_address >= `Ram_base && bus_address < `Ram_base + `Ram_size);
     wire Key_selected = (bus_address == `Key_base);
-    wire Art_selected = (bus_address == `Art_base || bus_address == `ArtC_base);
+    wire Art_selected = (bus_address == `Art_base || bus_address == `Art_base);
     wire Sdc_addr_selected = (bus_address == `Sdc_addr);
     wire Sdc_read_selected = (bus_address == `Sdc_read);
     wire Sdc_write_selected = (bus_address == `Sdc_write);
@@ -314,13 +314,11 @@ assign DRAM_CKE = 1; // always enable
 	    end
 	end
     end
-
     //reg meip_interrupt;
     //reg msip_interrupt;
     assign meip_interrupt = (claim_id_calc[0] != 0);
     assign msip_interrupt = (claim_id_calc[1] != 0);
     wire uart_irq;
-    wire uart_waitrequest;
     wire [31:0] uart_readdata;
 
 
@@ -363,7 +361,6 @@ assign DRAM_CKE = 1; // always enable
 	plic_id <= (bus_address - `Plic_base) >> 2; // id = offset /4
 	if (uart_irq) Plic_pending[1] <= 1;
 
-
         if (bus_read_enable) begin bus_read_done <= 0; cid <= (bus_address-`Sdc_base); end 
         if (bus_write_enable) begin bus_write_done <= 0; end
 
@@ -389,8 +386,7 @@ assign DRAM_CKE = 1; // always enable
             if (Mtime_selected) begin bus_read_data <= mtime; bus_read_done <= 1; end 
             if (Mtimecmp_selected) begin bus_read_data <= mtimecmp; bus_read_done <= 1; end 
 
-	    //if (Art_selected && !uart_waitrequest) begin uart_read_pulse <= 1; bus_read_data <= uart_readdata; bus_read_done <=1; end
-	    if (Art_selected && !uart_waitrequest) begin bus_read_data <= uart_readdata; bus_read_done <=1; end
+	    if (Art_selected) begin uart_read_pulse <= 1; bus_read_data <= uart_readdata; bus_read_done <=1; end
 
 	    //if (Sdram_selected && bus_read_done == 0) begin
 	    //    if (sdram_req_wait==0) begin bus_read_data <= {48'b0, sdram_rddata}; bus_read_done <= 1; end
@@ -504,7 +500,7 @@ assign DRAM_CKE = 1; // always enable
 	    if (Sdc_addr_selected) begin sd_addr <= bus_write_data[31:0]; bus_write_done <= 1; end
 	    if (Sdc_read_selected) begin sd_rd_start <= 1; bus_write_done <= 1; end
 
-	    if (Art_selected && !uart_waitrequest) begin uart_write_pulse <= 1; bus_write_done <=1; end
+	    if (Art_selected) begin uart_write_pulse <= 1; bus_write_done <=1; end
 
 	    if (Mtimecmp_selected) begin mtimecmp <= bus_write_data; bus_write_done <= 1; end
 	    //if (Sdram_selected) begin if (sdram_req_wait==0) bus_write_done <= 1; end
@@ -693,6 +689,7 @@ end
     assign HEX35 = ~sdram_req_wait;
     //assign HEX36 = ~|sdram_readdata;
     assign HEX36 = ~|sdram_rddata;
+    assign HEX04 = uart_irq;
 
 
 endmodule
