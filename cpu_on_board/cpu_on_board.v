@@ -239,7 +239,7 @@ assign DRAM_CKE = 1; // always enable
         //.jtag_uart_0_avalon_jtag_slave_write_n   (~uart_write_trigger_pulse),
         .jtag_uart_0_avalon_jtag_slave_write_n   (~uart_write_pulse),
         .jtag_uart_0_avalon_jtag_slave_chipselect(1'b1),
-        //.jtag_uart_0_avalon_jtag_slave_read_n    (~uart_read_pulse),
+        .jtag_uart_0_avalon_jtag_slave_read_n    (~uart_read_pulse),
         //.jtag_uart_0_avalon_jtag_slave_readdata    (uart_readdata),
         //.jtag_uart_0_avalon_jtag_slave_waitrequest (),
 	.jtag_uart_0_irq_irq(uart_irq)                        
