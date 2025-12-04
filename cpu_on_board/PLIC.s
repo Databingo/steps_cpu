@@ -166,6 +166,7 @@ irq_handler:
    beqz t1, no_irq 
    
    # Handle
+   li t0, 0x2004 # uart write toprint
    lw t3, 0(t0)
    sw t3, 0(t0) # write id back print
 

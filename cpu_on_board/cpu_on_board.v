@@ -243,7 +243,7 @@ assign DRAM_CKE = 1; // always enable
         .jtag_uart_0_avalon_jtag_slave_read_n    (~(bus_read_done==0 && Art_selected)),
         .jtag_uart_0_avalon_jtag_slave_readdata    (uart_readdata),
         .jtag_uart_0_avalon_jtag_slave_waitrequest (uart_waitrequest),
-	.jtag_uart_0_irq_irq(~uart_irq)                        
+	.jtag_uart_0_irq_irq(uart_irq)                        
     );
 
     // -- Bus --
@@ -352,6 +352,7 @@ assign DRAM_CKE = 1; // always enable
 	    bus_read_data <= 0;
 	    uart_write_pulse <= 0;
 	    uart_read_pulse <= 0;
+	    uart_irq <= 0;
 	end else begin
         bus_address_reg <= bus_address>>2;
         bus_address_reg_full <= bus_address;
