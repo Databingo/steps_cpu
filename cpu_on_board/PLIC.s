@@ -151,6 +151,11 @@ _start:
     li t2, 8  # (bit 3 mstatus.MIE)
     csrs mstatus, t2
 
+  
+    li t3, 124 # |
+    sw t3, 0(t0) # to plic
+
+
 wait_loop:
     j wait_loop
 

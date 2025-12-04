@@ -243,7 +243,7 @@ assign DRAM_CKE = 1; // always enable
         .jtag_uart_0_avalon_jtag_slave_read_n    (~(bus_read_done==0 && Art_selected)),
         .jtag_uart_0_avalon_jtag_slave_readdata    (uart_readdata),
         .jtag_uart_0_avalon_jtag_slave_waitrequest (uart_waitrequest),
-	.jtag_uart_0_irq_irq(uart_irq)                        
+	.jtag_uart_0_irq_irq(~uart_irq)                        
     );
 
     // -- Bus --
@@ -689,6 +689,7 @@ end
     assign HEX35 = ~sdram_req_wait;
     //assign HEX36 = ~|sdram_readdata;
     assign HEX36 = ~|sdram_rddata;
+    assign HEX04 = uart_irq;
 
 
 endmodule
