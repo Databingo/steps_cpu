@@ -114,7 +114,7 @@ _start:
     # -----plic test---
     # Enable UART read from terminal
     li t1, 1
-    sw t1, 4(t0) # write to 0x2004 UART control
+    sw t1, 4(t0) # write to 0x2008 UART control
 
     # Set handler
     la t2, irq_handler
