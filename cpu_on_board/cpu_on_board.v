@@ -352,7 +352,6 @@ assign DRAM_CKE = 1; // always enable
 	    bus_read_data <= 0;
 	    uart_write_pulse <= 0;
 	    uart_read_pulse <= 0;
-	    uart_irq <= 0;
 	end else begin
         bus_address_reg <= bus_address>>2;
         bus_address_reg_full <= bus_address;
