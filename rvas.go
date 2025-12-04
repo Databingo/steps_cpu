@@ -1410,6 +1410,11 @@ func main() { //t6a7s11
 				fmt.Println("Too many arguments on line: ", lineCounter)
 				os.Exit(0)
 			}
+		case "wfi":
+			if len(code) != 1 {
+				fmt.Println("Too many arguments on line: ", lineCounter)
+				os.Exit(0)
+			}
 		case "csrrw", "csrrs", "csrrc", "csrrwi", "csrrsi", "csrrci": // Instruction format: op rd, csr, rs1/imm or label: op rd, csr, rs1/imm
 			if len(code) != 4 && len(code) != 5 {
 				fmt.Println("Incorrect argument count on line: ", lineCounter)
@@ -1924,6 +1929,11 @@ func main() { //t6a7s11
 			}
 			instruction = opBin[code[0]]
 		case "sret":
+			if len(code) != 1 {
+				fmt.Println("Too many arguments on line: ", lineCounter)
+				os.Exit(0)
+			}
+		case "wfi":
 			if len(code) != 1 {
 				fmt.Println("Too many arguments on line: ", lineCounter)
 				os.Exit(0)
