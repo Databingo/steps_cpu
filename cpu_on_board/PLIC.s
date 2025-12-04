@@ -106,71 +106,71 @@ _start:
     lb a0, 1(s0)         # test sdram ld+1
     sb a0, 0(t0)         # Should print 'B'
     
-#    # MMU un-enabled
-#    li a1, 0              
-#    slli a1, a1, 60          # mmu mode sv39 #li a1, 0x8000000000000000 # mmu mode sv39
-#    csrrw a3, 0x180, a1      # set satp csr index 0x180
-#
-#    # -----plic test---
-#    # Enable UART read from terminal
-#    li t1, 1
-#    sw t1, 4(t0) # write to 0x2008 UART control
-#
-#    # Set handler
-#    la t2, irq_handler
-#    csrw mtvec, t2
-#
-#
-#    # PLIC test
-#    # Set priority[1] = 1 # [1] is UART
-#    li t2, 0x0C000004 # `define Plic_base 32'h0C00_0000  # PRIORITY(id) = base + 4 * id
-#    li t3, 1
-#    sw t3, 0(t2)
-#   
-#    # Set enable bits = irq_id, so enable bit = (1 << id) 
-#    li, t2, 0x0C002000
-#    li, t1, 2 #( 1<<1 = 2)
-#    sw, t1, 0(t2)
-#
-#    # by PLIC hardware
-#    ## Set pending bits = irq_id, so enable bit = (1 << id) 
-#    #li, t0, 0x0C002000
-#    #li, t1, 2 #( 1<<1 = 2)
-#    #sw, t1, 0(t0)
-# 
-#    # Set shreshold 0
-#    li, t2, 0x0C200000  # base +0x200000+hard_id<<12
-#    li, t1, 0 
-#    sw, t1, 0(t2)
-#  
-#    # Enable MEIE (mie.MEIE enternal interrupt)
-#    li, t2, 0x800 # bit 11=MEIE
-#    csrs, mie, t2
-#
-#    # Enalbe MIE
-#    li t2, 8  # (bit 3 mstatus.MIE)
-#    csrs mstatus, t2
-#
-#wait_loop:
-#    wfi
-#    j wait_loop
-#
-#irq_handler:
-#   li t2, 0x0C200004 
-#   lw t1, 0(t2)
-#
-#   beqz t1, no_irq 
-#   
-#   # Handle
-#   lw t3, 0(t0)
-#   sw t3, 0(t0) # write id back print
-#
-#   # Finish
-#   sw t1, 0(t2) # write id back to ctx0claim
-#
-#no_irq:
-#   mret 
-#
-#
-#done:
-#    j done
+    # MMU un-enabled
+    li a1, 0              
+    slli a1, a1, 60          # mmu mode sv39 #li a1, 0x8000000000000000 # mmu mode sv39
+    csrrw a3, 0x180, a1      # set satp csr index 0x180
+
+    # -----plic test---
+    # Enable UART read from terminal
+    li t1, 1
+    sw t1, 4(t0) # write to 0x2008 UART control
+
+    # Set handler
+    la t2, irq_handler
+    csrw mtvec, t2
+
+
+    # PLIC test
+    # Set priority[1] = 1 # [1] is UART
+    li t2, 0x0C000004 # `define Plic_base 32'h0C00_0000  # PRIORITY(id) = base + 4 * id
+    li t3, 1
+    sw t3, 0(t2)
+   
+    # Set enable bits = irq_id, so enable bit = (1 << id) 
+    li, t2, 0x0C002000
+    li, t1, 2 #( 1<<1 = 2)
+    sw, t1, 0(t2)
+
+    # by PLIC hardware
+    ## Set pending bits = irq_id, so enable bit = (1 << id) 
+    #li, t0, 0x0C002000
+    #li, t1, 2 #( 1<<1 = 2)
+    #sw, t1, 0(t0)
+ 
+    # Set shreshold 0
+    li, t2, 0x0C200000  # base +0x200000+hard_id<<12
+    li, t1, 0 
+    sw, t1, 0(t2)
+  
+    # Enable MEIE (mie.MEIE enternal interrupt)
+    li, t2, 0x800 # bit 11=MEIE
+    csrs, mie, t2
+
+    # Enalbe MIE
+    li t2, 8  # (bit 3 mstatus.MIE)
+    csrs mstatus, t2
+
+wait_loop:
+    wfi
+    j wait_loop
+
+irq_handler:
+   li t2, 0x0C200004 
+   lw t1, 0(t2)
+
+   beqz t1, no_irq 
+   
+   # Handle
+   lw t3, 0(t0)
+   sw t3, 0(t0) # write id back print
+
+   # Finish
+   sw t1, 0(t2) # write id back to ctx0claim
+
+no_irq:
+   mret 
+
+
+done:
+    j done
