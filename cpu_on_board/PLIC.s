@@ -152,7 +152,6 @@ _start:
     csrs mstatus, t2
 
 wait_loop:
-    wfi
     j wait_loop
 
 irq_handler:
