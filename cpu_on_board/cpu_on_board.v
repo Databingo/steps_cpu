@@ -230,6 +230,7 @@ assign DRAM_CKE = 1; // always enable
     // -- Monitor -- Connected to Bus
     reg uart_write_pulse;
     reg uart_read_pulse;
+    wire uart_waitrequest;
     jtag_uart_system my_jtag_system (
         .clk_clk                                 (CLOCK_50),
         .reset_reset_n                           (KEY0),
@@ -239,9 +240,9 @@ assign DRAM_CKE = 1; // always enable
         //.jtag_uart_0_avalon_jtag_slave_write_n   (~uart_write_trigger_pulse),
         .jtag_uart_0_avalon_jtag_slave_write_n   (~uart_write_pulse),
         .jtag_uart_0_avalon_jtag_slave_chipselect(1'b1),
-        .jtag_uart_0_avalon_jtag_slave_read_n    (~uart_read_pulse),
-        //.jtag_uart_0_avalon_jtag_slave_readdata    (uart_readdata),
-        //.jtag_uart_0_avalon_jtag_slave_waitrequest (),
+        .jtag_uart_0_avalon_jtag_slave_read_n    (~(bus_read_done==0 && Art_selected)),
+        .jtag_uart_0_avalon_jtag_slave_readdata    (uart_readdata),
+        .jtag_uart_0_avalon_jtag_slave_waitrequest (uart_waitrequest),
 	.jtag_uart_0_irq_irq(uart_irq)                        
     );
 
@@ -276,7 +277,7 @@ assign DRAM_CKE = 1; // always enable
     wire Rom_selected = (bus_address >= `Rom_base && bus_address < `Rom_base + `Rom_size);
     wire Ram_selected = (bus_address >= `Ram_base && bus_address < `Ram_base + `Ram_size);
     wire Key_selected = (bus_address == `Key_base);
-    wire Art_selected = (bus_address == `Art_base);
+    wire Art_selected = (bus_address == `Art_base || bus_address == `Art_base);
     wire Sdc_addr_selected = (bus_address == `Sdc_addr);
     wire Sdc_read_selected = (bus_address == `Sdc_read);
     wire Sdc_write_selected = (bus_address == `Sdc_write);
