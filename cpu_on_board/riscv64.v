@@ -555,7 +555,9 @@ module riscv64(
 	               			       Csrs[sstatus][SPP] <= 0; // set previous privilege mode(SPP) to be 0 (U-mode)
 	               			       pc <=  Csrs[sepc]; // sepc was +4 by the software handler and written back to sepc
 		          		       bubble <= 1'b1;
-	               			       end
+	               			       end 
+		    // Wfi
+		    32'b00010000010100000000000001110011: begin end
 		     // Fence
 		     // Fence.i
 		     // RV64IMAFD(G)C  RVA23U64
