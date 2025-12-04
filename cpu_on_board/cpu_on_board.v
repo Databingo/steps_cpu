@@ -233,8 +233,8 @@ assign DRAM_CKE = 1; // always enable
     jtag_uart_system my_jtag_system (
         .clk_clk                                 (CLOCK_50),
         .reset_reset_n                           (KEY0),
-        .jtag_uart_0_avalon_jtag_slave_address   (bus_address[0:0]),
-        //.jtag_uart_0_avalon_jtag_slave_address   (bus_address[2]), // 0x00 for Data, 0x04 for Control
+        //.jtag_uart_0_avalon_jtag_slave_address   (bus_address[0:0]),
+        .jtag_uart_0_avalon_jtag_slave_address   (bus_address[2]), // 0x00 for Data, 0x04 for Control
         .jtag_uart_0_avalon_jtag_slave_writedata (bus_write_data[31:0]),
         //.jtag_uart_0_avalon_jtag_slave_write_n   (~uart_write_trigger_pulse),
         .jtag_uart_0_avalon_jtag_slave_write_n   (~uart_write_pulse),
