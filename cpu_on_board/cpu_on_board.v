@@ -358,8 +358,10 @@ assign DRAM_CKE = 1; // always enable
         sd_rd_start <= 0;
         uart_write_pulse <= 0;
 	uart_read_pulse <= 0;
+	// Plic
 	plic_id <= (bus_address - `Plic_base) >> 2; // id = offset /4
 	if (uart_irq) Plic_pending[1] <= 1;
+	if (key_pressed_edge) Plic_pending[1] <= 1;
 
         if (bus_read_enable) begin bus_read_done <= 0; cid <= (bus_address-`Sdc_base); end 
         if (bus_write_enable) begin bus_write_done <= 0; end
@@ -690,6 +692,6 @@ end
     //assign HEX36 = ~|sdram_readdata;
     assign HEX36 = ~|sdram_rddata;
     assign HEX04 = uart_irq;
-
+    assign HEX05 = key_pressed_edge;
 
 endmodule

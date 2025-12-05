@@ -132,12 +132,6 @@ _start:
     li, t1, 2 #( 1<<1 = 2)
     sw, t1, 0(t2)
 
-    # by PLIC hardware
-    ## Set pending bits = irq_id, so enable bit = (1 << id) 
-    #li, t0, 0x0C002000
-    #li, t1, 2 #( 1<<1 = 2)
-    #sw, t1, 0(t0)
- 
     # Set shreshold 0
     li, t2, 0x0C200000  # base +0x200000+hard_id<<12
     li, t1, 0 
@@ -151,9 +145,8 @@ _start:
     li t2, 8  # (bit 3 mstatus.MIE)
     csrs mstatus, t2
 
-  
     li t3, 124 # |
-    sw t3, 0(t0) # to plic
+    sb t3, 0(t0) # to plic
 
 
 wait_loop:
