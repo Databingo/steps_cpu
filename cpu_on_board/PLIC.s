@@ -117,7 +117,7 @@ _start:
     # -----PLIC TEST---
     li t0, 0x2004 # UART data
 
-    # Enable UART read from terminal
+    # Enable UART read from terminal as irq
     li t1, 1
     sw t1, 4(t0) # write to 0x2008 UART control
 
@@ -184,6 +184,9 @@ wait_loop:
     j wait_loop
 
 irq_handler:
+    li t3, 124 # |
+    sb t3, 0(t0) # to plic
+
    # Read claim
    li t2, 0x0C200004 
    lw t1, 0(t2)
