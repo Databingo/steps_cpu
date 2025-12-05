@@ -317,8 +317,8 @@ assign DRAM_CKE = 1; // always enable
 	    end
 	end
     end
-    //reg meip_interrupt;
-    //reg msip_interrupt;
+    wire meip_interrupt;
+    wire msip_interrupt;
     assign meip_interrupt = (claim_id_calc[0] != 0);
     assign msip_interrupt = (claim_id_calc[1] != 0);
     wire uart_irq;
@@ -696,5 +696,6 @@ end
     assign HEX36 = ~|sdram_rddata;
     assign HEX04 = ~uart_irq;
     assign HEX05 = ~key_pressed;
+    assign HEX06 = ~meip_interrupt;
 
 endmodule
