@@ -197,7 +197,6 @@ irq_handler:
    li t2, 0x0C200004 
    lw t1, 0(t2)
 
-
    addi t4, t1, 48 
    sb t4, 0(t0) # show interrupt id
 
