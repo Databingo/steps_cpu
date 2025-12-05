@@ -301,22 +301,29 @@ assign DRAM_CKE = 1; // always enable
     wire Plic_claim_ctx1_selected = (bus_address == `Plic_claim + 32'h1000);
     //wire Plic_claim_ctx0_selected = (bus_address >= `Plic_claim && bus_address < `Plic_claim+1024*0x1000+4);
     reg [31:0] claim_id_calc [0:1]; // 0 for hart0M 1 for hart0S
-    reg [2:0] current_max_prio;
-    integer c, ctx;
+    //reg [2:0] current_max_prio;
+    //integer c, ctx;
+    //always @(*) begin
+    //    for (ctx=0;ctx<2;ctx=ctx+1) begin
+    //        claim_id_calc[ctx]=0;
+    //        current_max_prio = Plic_threshold[ctx];
+    //        for (c=1;c<6;c=c+1) begin
+    //    	if (Plic_pending[c] && Plic_enable[ctx][c]) begin  
+    //    	    if (Plic_priority[c] > current_max_prio) begin
+    //    	        current_max_prio = Plic_priority[c];
+    //    	        claim_id_calc[ctx] = c; 
+    //    	    end
+    //            end
+    //        end
+    //    end
+    //end
     always @(*) begin
-	for (ctx=0;ctx<2;ctx=ctx+1) begin
-	    claim_id_calc[ctx]=0;
-	    current_max_prio = Plic_threshold[ctx];
-	    for (c=1;c<6;c=c+1) begin
-		if (Plic_pending[c] && Plic_enable[ctx][c]) begin  
-		    if (Plic_priority[c] > current_max_prio) begin
-		        current_max_prio = Plic_priority[c];
-		        claim_id_calc[ctx] = c; 
-		    end
-	        end
-	    end
-	end
+        if (Plic_pending[1] && Plic_enable[0][1]) claim_id_calc[0] = 1; 
+        if (Plic_pending[1] && Plic_enable[1][1]) claim_id_calc[1] = 1; 
     end
+
+
+
     wire meip_interrupt;
     wire msip_interrupt;
     assign meip_interrupt = (claim_id_calc[0] != 0);

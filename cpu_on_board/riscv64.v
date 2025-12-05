@@ -212,7 +212,7 @@ module riscv64(
 	    bus_write_data <= 0;
 	    bus_address <= `Ram_base;
             // Interrupt re-enable
-	    Csrs[mstatus][MIE] <= 1;
+	    Csrs[mstatus][MIE] <= 0;
 	    interrupt_ack <= 0;
 	    mmu_da <= 0;
 	    got_pda <= 0;
