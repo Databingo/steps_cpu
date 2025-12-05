@@ -694,7 +694,7 @@ end
     assign HEX35 = ~sdram_req_wait;
     //assign HEX36 = ~|sdram_readdata;
     assign HEX36 = ~|sdram_rddata;
-    assign HEX04 = uart_irq;
-    assign HEX05 = key_pressed_edge;
+    assign HEX04 = ~uart_irq;
+    assign HEX05 = ~key_pressed_edge;
 
 endmodule
