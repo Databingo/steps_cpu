@@ -1637,7 +1637,8 @@ func main() { //t6a7s11
 			    //offset := label - int64(address) 
 			    //hi20 := uint32(offset) >> 12
 			    //lo12 := uint32(offset) & 0xfff 
-			    abs := label
+			    //abs := label // ??
+			    abs := label - int64(address) // ??
 			    hi20 := uint32(abs) >> 12
 			    lo12 := uint32(abs) & 0xfff 
                             if lo12 & 0x800 !=0 { hi20 += 1}
@@ -1802,7 +1803,8 @@ func main() { //t6a7s11
 			    //fmt.Println("addi LO12 offset:", offset)
 			    //hi20 := uint32(offset) >> 12
 			    //lo12 := uint32(offset) & 0xfff 
-			    absolute_addr := label
+			    //absolute_addr := label // ??
+			    absolute_addr := label - int64(address - 4)  // ? -4 for align to former pair auipc's address
 			    fmt.Println("addi LO12 ab:", absolute_addr)
 			    hi20 := uint32(absolute_addr) >> 12
 			    lo12 := uint32(absolute_addr) & 0xfff 

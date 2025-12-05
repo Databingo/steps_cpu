@@ -186,13 +186,12 @@ _start:
     li t3, 55 # 7
     sb t3, 0(t0) # to plic
 
-
 wait_loop:
     j wait_loop
 
 irq_handler:
-    li t3, 124 # |
-    sb t3, 0(t0) # to plic
+   li t3, 124 # |
+   sb t3, 0(t0) # to plic
 
    # Read claim
    li t2, 0x0C200004 
