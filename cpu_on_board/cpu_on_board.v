@@ -695,6 +695,6 @@ end
     //assign HEX36 = ~|sdram_readdata;
     assign HEX36 = ~|sdram_rddata;
     assign HEX04 = ~uart_irq;
-    assign HEX05 = ~key_pressed_edge;
+    assign HEX05 = ~key_pressed;
 
 endmodule
