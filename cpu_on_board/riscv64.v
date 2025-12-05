@@ -301,8 +301,8 @@ module riscv64(
                 //    if (time_interrupt) pc <= (Csrs[mtvec][BASE+61:BASE] << 2) + (MTIP << 2);
                 //    if (meip_interrupt) pc <= (Csrs[mtvec][BASE+61:BASE] << 2) + (MEIP << 2); 
 		//end else pc <= (Csrs[mtvec][BASE+61:BASE] << 2);// jump to mtvec addrss (directly mode 0, need C or Assembly code of handlers deciding) 
-		pc <= 0;
-                //pc <= (Csrs[mtvec][BASE+61:BASE] << 2); 
+		//pc <= 0;
+                pc <= (Csrs[mtvec][BASE+61:BASE] << 2); 
 		bubble <= 1'b1; // bubble wrong fetched instruciton by IF
 		//interrupt_ack <= 1; // reply to outside
 		//
