@@ -320,7 +320,7 @@ func main() { //t6a7s11
             "stval"      : 0x143,   
             "sip"        : 0x144,   
             "satp"       : 0x180,   
-	    "0x180"      : 0x180, 
+	    //"0x180"      : 0x180, 
 	    }
 
 	opBin := map[string]uint32{

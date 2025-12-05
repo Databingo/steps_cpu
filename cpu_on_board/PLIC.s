@@ -100,7 +100,7 @@ _start:
     # MMU enabled
     li a1, 8              
     slli a1, a1, 60          # mmu mode sv39 #li a1, 0x8000000000000000 # mmu mode sv39
-    csrrw a3, 0x180, a1      # set satp csr index 0x180
+    csrrw a3, satp, a1      # set satp csr index 0x180
 
 
     lb a0, 1(s0)         # test sdram ld+1
@@ -109,7 +109,7 @@ _start:
     # MMU un-enabled
     li a1, 0              
     slli a1, a1, 60          # mmu mode sv39 #li a1, 0x8000000000000000 # mmu mode sv39
-    csrrw a3, 0x180, a1      # set satp csr index 0x180
+    csrrw a3, satp, a1      # set satp csr index 0x180
 
     li t3, 124 # |
     sb t3, 0(t0) # to plic
