@@ -364,7 +364,7 @@ assign DRAM_CKE = 1; // always enable
 	// Plic
 	plic_id <= (bus_address - `Plic_base) >> 2; // id = offset /4
 	if (uart_irq) Plic_pending[1] <= 1;
-	if (key_pressed_edge) Plic_pending[1] <= 1;
+	//if (key_pressed_edge) Plic_pending[1] <= 1;
 
         if (bus_read_enable) begin bus_read_done <= 0; cid <= (bus_address-`Sdc_base); end 
         if (bus_write_enable) begin bus_write_done <= 0; end
