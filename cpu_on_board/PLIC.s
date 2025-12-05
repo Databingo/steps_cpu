@@ -197,6 +197,10 @@ irq_handler:
    li t2, 0x0C200004 
    lw t1, 0(t2)
 
+
+   addi t4, t1, 48 
+   sb t4, 0(t0) # show interrupt id
+
    li t3, 56 # 8
    sb t3, 0(t0) # to plic
 
@@ -211,6 +215,10 @@ irq_handler:
 
    # Finish
    sw t1, 0(t2) # write id back to ctx0claim
+
+   li t3, 97 # a
+   sb t3, 0(t0) #  finished
+   mret
 
 no_irq:
    mret 
