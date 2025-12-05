@@ -213,6 +213,7 @@ irq_handler:
    sb t3, 0(t0) # to plic
 
    # Finish
+   li t2, 0x0C200004 
    sw t1, 0(t2) # write id back to ctx0claim
 
    li t3, 97 # a
@@ -220,6 +221,8 @@ irq_handler:
    mret
 
 no_irq:
+   li t3, 78 # N
+   sb t3, 0(t0) #  No irq
    mret 
 
 
