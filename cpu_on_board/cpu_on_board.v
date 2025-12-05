@@ -461,17 +461,17 @@ assign DRAM_CKE = 1; // always enable
 		// 100Lbu 101Lhu 110Lwu
 	    end
             // Plic read
-	    if (Plic_priority_selected) begin bus_read_data <= Plic_priority[plic_id]; end
-	    else if (Plic_pending_selected) begin bus_read_data <= Plic_pending; end
+	    if (Plic_priority_selected) begin bus_read_data <= Plic_priority[plic_id]; bus_read_done <= 1; end
+	    else if (Plic_pending_selected) begin bus_read_data <= Plic_pending; bus_read_done <= 1; end
 	    // context 0 M-mode
-	    else if (Plic_enable_ctx0_selected) begin bus_read_data <= Plic_enable[0]; end
-	    else if (Plic_threshold_ctx0_selected) begin bus_read_data <= Plic_threshold[0]; end
+	    else if (Plic_enable_ctx0_selected) begin bus_read_data <= Plic_enable[0]; bus_read_done <= 1; end
+	    else if (Plic_threshold_ctx0_selected) begin bus_read_data <= Plic_threshold[0]; bus_read_done <= 1; end
 	    //else if (Plic_claim_ctx0_selected) begin bus_read_data <= Plic_claim[0]; end
-	    else if (Plic_claim_ctx0_selected) begin bus_read_data <= claim_id_calc[0]; Plic_pending[claim_id_calc[0]]<=0; end
+	    else if (Plic_claim_ctx0_selected) begin bus_read_data <= claim_id_calc[0]; Plic_pending[claim_id_calc[0]]<=0; bus_read_done <= 1; end
 	    // context 1 S-mode
-	    else if (Plic_enable_ctx1_selected) begin bus_read_data <= Plic_enable[1]; end
-	    else if (Plic_threshold_ctx1_selected) begin bus_read_data <= Plic_threshold[1]; end
-	    else if (Plic_claim_ctx1_selected) begin bus_read_data <= claim_id_calc[1]; Plic_pending[claim_id_calc[1]]<=0; end
+	    else if (Plic_enable_ctx1_selected) begin bus_read_data <= Plic_enable[1]; bus_read_done <= 1; end
+	    else if (Plic_threshold_ctx1_selected) begin bus_read_data <= Plic_threshold[1]; bus_read_done <= 1; end
+	    else if (Plic_claim_ctx1_selected) begin bus_read_data <= claim_id_calc[1]; Plic_pending[claim_id_calc[1]]<=0; bus_read_done <= 1; end
 
 
         end
@@ -511,14 +511,14 @@ assign DRAM_CKE = 1; // always enable
 	    //if (Sdram_selected) begin if (sdram_req_wait==0) bus_write_done <= 1; end
 	    
             // Plic write
-	    if (Plic_priority_selected) begin Plic_priority[plic_id] <= bus_write_data; end
+	    if (Plic_priority_selected) begin Plic_priority[plic_id] <= bus_write_data; bus_write_done <= 1; end
 	    // context 0
-	    else if (Plic_enable_ctx0_selected) begin Plic_enable[0] <= bus_write_data; end
-	    else if (Plic_threshold_ctx0_selected) begin Plic_threshold[0] <= bus_write_data; end
+	    else if (Plic_enable_ctx0_selected) begin Plic_enable[0] <= bus_write_data; bus_write_done <= 1; end
+	    else if (Plic_threshold_ctx0_selected) begin Plic_threshold[0] <= bus_write_data; bus_write_done <= 1; end
 	    //else if (Plic_claim_ctx0_selected) begin Plic_pending[bus_write_data] <= 0 ; end
 	    // context 1
-	    else if (Plic_enable_ctx1_selected) begin Plic_enable[1] <= bus_write_data; end
-	    else if (Plic_threshold_ctx1_selected) begin Plic_threshold[1] <= bus_write_data; end
+	    else if (Plic_enable_ctx1_selected) begin Plic_enable[1] <= bus_write_data; bus_write_done <= 1; end
+	    else if (Plic_threshold_ctx1_selected) begin Plic_threshold[1] <= bus_write_data; bus_write_done <= 1; end
 	    //else if (Plic_claim_ctx1_selected) begin Plic_pending[bus_write_data] <= 0 ; end
 	    
         end
