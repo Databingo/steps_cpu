@@ -280,7 +280,7 @@ assign DRAM_CKE = 1; // always enable
     wire Rom_selected = (bus_address >= `Rom_base && bus_address < `Rom_base + `Rom_size);
     wire Ram_selected = (bus_address >= `Ram_base && bus_address < `Ram_base + `Ram_size);
     wire Key_selected = (bus_address == `Key_base);
-    wire Art_selected = (bus_address == `Art_base || bus_address == `Art_base);
+    wire Art_selected = (bus_address == `Art_base || bus_address == `ArtC_base);
     wire Sdc_addr_selected = (bus_address == `Sdc_addr);
     wire Sdc_read_selected = (bus_address == `Sdc_read);
     wire Sdc_write_selected = (bus_address == `Sdc_write);
