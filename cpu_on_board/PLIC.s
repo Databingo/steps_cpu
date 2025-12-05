@@ -119,7 +119,7 @@ _start:
 
     # Enable UART read from terminal as irq
     li t1, 1
-    sw t1, 4(t0) # write to 0x2008 UART control
+    sw t1, 4(t0) # write 1 to 0x2008 UART control means readable
 
     li t3, 48 # 0
     sb t3, 0(t0)
