@@ -111,41 +111,72 @@ _start:
     slli a1, a1, 60          # mmu mode sv39 #li a1, 0x8000000000000000 # mmu mode sv39
     csrrw a3, 0x180, a1      # set satp csr index 0x180
 
-    # -----plic test---
+    li t3, 124 # |
+    sb t3, 0(t0) # to plic
+
+    # -----PLIC TEST---
+    li t0, 0x2004 # UART data
+
     # Enable UART read from terminal
     li t1, 1
     sw t1, 4(t0) # write to 0x2008 UART control
+
+    li t3, 48 # 0
+    sb t3, 0(t0)
 
     # Set handler
     la t2, irq_handler
     csrw mtvec, t2
 
+    li t3, 49 # 1
+    sb t3, 0(t0)
 
-    # PLIC test
+    # PLIC setting
     # Set priority[1] = 1 # [1] is UART
     li t2, 0x0C000004 # `define Plic_base 32'h0C00_0000  # PRIORITY(id) = base + 4 * id
     li t3, 1
     sw t3, 0(t2)
    
+    li t3, 50 # 2
+    sb t3, 0(t0)
+
     # Set enable bits = irq_id, so enable bit = (1 << id) 
-    li, t2, 0x0C002000
-    li, t1, 2 #( 1<<1 = 2)
-    sw, t1, 0(t2)
+    li t2, 0x0C002000
+    li t1, 2 #( 1<<1 = 2)
+    sw t1, 0(t2)
+
+    li t3, 51 # 3
+    sb t3, 0(t0)
 
     # Set shreshold 0
-    li, t2, 0x0C200000  # base +0x200000+hard_id<<12
-    li, t1, 0 
-    sw, t1, 0(t2)
+    li t2, 0x0C200000  # base +0x200000+hard_id<<12
+    li t1, 0 
+    sw t1, 0(t2)
+
+    li t3, 52 # 4
+    sb t3, 0(t0)
+
   
+    # Set shreshold 1
+    li t2, 0x0C201000  # base +0x200000+hard_id<<12
+    li t1, 0 
+    sw t1, 0(t2)
+
+    li t3, 53 # 5
+    sb t3, 0(t0)
+
     # Enable MEIE (mie.MEIE enternal interrupt)
-    li, t2, 0x800 # bit 11=MEIE
-    csrs, mie, t2
+    li t2, 0x800 # bit 11=MEIE
+    csrs mie, t2
+
+    li t3, 54 # 6
+    sb t3, 0(t0)
 
     # Enalbe MIE
     li t2, 8  # (bit 3 mstatus.MIE)
     csrs mstatus, t2
 
-    li t3, 124 # |
+    li t3, 55 # 7
     sb t3, 0(t0) # to plic
 
 
@@ -153,15 +184,21 @@ wait_loop:
     j wait_loop
 
 irq_handler:
+   # Read claim
    li t2, 0x0C200004 
    lw t1, 0(t2)
+
+   li t3, 56 # 8
+   sb t3, 0(t0) # to plic
 
    beqz t1, no_irq 
    
    # Handle
-   li t0, 0x2004 # uart write toprint
    lw t3, 0(t0)
    sw t3, 0(t0) # write id back print
+
+   li t3, 57 # 9
+   sb t3, 0(t0) # to plic
 
    # Finish
    sw t1, 0(t2) # write id back to ctx0claim
