@@ -327,6 +327,7 @@ assign DRAM_CKE = 1; // always enable
     wire meip_interrupt = (claim_interrupt_id_ctx[0] != 0);
     wire msip_interrupt = (claim_interrupt_id_ctx[1] != 0);
     wire uart_irq;
+    reg uart_irq_pre;
     wire [31:0] uart_readdata;
 
 
@@ -361,6 +362,7 @@ assign DRAM_CKE = 1; // always enable
 	    uart_write_pulse <= 0;
 	    uart_read_pulse <= 0;
 	    mtimecmp <=  32'h80000000;
+	    uart_irq_pre <= 0;
 	end else begin
         bus_address_reg <= bus_address>>2;
         bus_address_reg_full <= bus_address;
@@ -369,7 +371,8 @@ assign DRAM_CKE = 1; // always enable
 	uart_read_pulse <= 0;
 	// Plic
 	plic_id <= (bus_address - `Plic_base) >> 2; // id = offset /4
-	if (uart_irq) Plic_pending[1] <= 1;
+	uart_irq_pre <= uart_irq;
+	if (uart_irq && !uart_irq_pre) Plic_pending[1] <= 1;
 	//if (key_pressed_edge) Plic_pending[1] <= 1;
 
         if (bus_read_enable) begin bus_read_done <= 0; cid <= (bus_address-`Sdc_base); end 
