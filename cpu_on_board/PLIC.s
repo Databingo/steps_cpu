@@ -211,6 +211,8 @@ uart_read_loop:
    
 finish:
    li t2, 0x0C200004 
+   
+   li t1, 1
    sw t1, 0(t2) # write id back to ctx0claim to clear pending id
 
    sw t3, 0(t0) # print key value

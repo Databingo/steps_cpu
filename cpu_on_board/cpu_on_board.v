@@ -320,10 +320,10 @@ assign DRAM_CKE = 1; // always enable
     always @(*) begin
         //claim_id_calc[0] = 0; 
         //claim_id_calc[1] = 0; 
-        if (!Plic_pending[1]) claim_id_calc[0] <= 0; 
-        if (!Plic_pending[1]) claim_id_calc[1] <= 0; 
-        if (Plic_pending[1] && Plic_enable[0][1]) claim_id_calc[0] <= 1; 
-        if (Plic_pending[1] && Plic_enable[1][1]) claim_id_calc[1] <= 1; 
+        if (!Plic_pending[1]) claim_id_calc[0] = 0; 
+        if (!Plic_pending[1]) claim_id_calc[1] = 0; 
+        if (Plic_pending[1] && Plic_enable[0][1]) claim_id_calc[0] = 1; 
+        if (Plic_pending[1] && Plic_enable[1][1]) claim_id_calc[1] = 1; 
     end
 
     wire meip_interrupt = (claim_id_calc[0] != 0);
