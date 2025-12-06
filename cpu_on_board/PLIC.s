@@ -216,7 +216,7 @@ irq_handler:
    li t2, 0x0C200004 
    sw t1, 0(t2) # write id back to ctx0claim
 
-   li t3, 97 # a
+   li t3, 182 # ¶
    sb t3, 0(t0) #  finished
    mret
 
@@ -224,7 +224,6 @@ no_irq:
    li t3, 78 # N
    sb t3, 0(t0) #  No irq
    mret 
-
 
 done:
     j done

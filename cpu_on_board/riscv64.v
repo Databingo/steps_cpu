@@ -221,6 +221,7 @@ module riscv64(
 	    Csrs[medeleg] <= 64'hb1af;
 	    mmu_pc <= 0;
 	    is_ppc <= 0; // current using address is physical addr
+	    mtimecmp <=  32'h80000000;
 
         end else begin
 	    // Default PC+4    (1.Could be overide 2.Take effect next cycle) 
@@ -282,8 +283,8 @@ module riscv64(
             // Interrupt PLIC full (Platform-Level-Interrupt-Control)  MMIO
 	    //if (interrupt_vector == 1 && mstatus_MIE == 1) begin //mstatus[3] MIE      // sstatus[SIE]?
 	    //end else if ((Csrs[mip][MTIP] || Csrs[mip][MEIP] || Csrs[mip][MSIP]) && Csrs[mstatus][MIE]==1) begin //mstatus[3] MIE
-	    //end else if ((time_interrupt || meip_interrupt || msip_interrupt) && Csrs[mstatus][MIE]==1) begin //mstatus[3] MIE
-	    end else if ((meip_interrupt || msip_interrupt) && Csrs[mstatus][MIE]==1) begin //mstatus[3] MIE
+	    end else if ((time_interrupt || meip_interrupt || msip_interrupt) && Csrs[mstatus][MIE]==1) begin //mstatus[3] MIE
+	    //end else if ((meip_interrupt || msip_interrupt) && Csrs[mstatus][MIE]==1) begin //mstatus[3] MIE
                 Csrs[mip][MTIP] <= time_interrupt; // MTIP linux will see then jump to its handler
                 Csrs[mip][MEIP] <= meip_interrupt; // MEIP
                 Csrs[mip][MSIP] <= msip_interrupt; // MSIP
@@ -297,13 +298,13 @@ module riscv64(
 		Csrs[mstatus][MPIE] <= Csrs[mstatus][MIE];
 		Csrs[mstatus][MIE] <= 0;
 		Csrs[mstatus][MPP+1:MPP] <= current_privilege_mode; // MPP = old mode
-		//if (Csrs[mtvec][MODE+1:MODE] == 1) begin // vec-mode 1
-                //    if (msip_interrupt) pc <= (Csrs[mtvec][BASE+61:BASE] << 2) + (MSIP << 2); // vectorily BASE & CAUSE_CODE are 4 bytes aligned already number need << 2
-                //    if (time_interrupt) pc <= (Csrs[mtvec][BASE+61:BASE] << 2) + (MTIP << 2);
-                //    if (meip_interrupt) pc <= (Csrs[mtvec][BASE+61:BASE] << 2) + (MEIP << 2); 
-		//end else pc <= (Csrs[mtvec][BASE+61:BASE] << 2);// jump to mtvec addrss (directly mode 0, need C or Assembly code of handlers deciding) 
+		if (Csrs[mtvec][MODE+1:MODE] == 1) begin // vec-mode 1
+                    if (msip_interrupt) pc <= (Csrs[mtvec][BASE+61:BASE] << 2) + (MSIP << 2); // vectorily BASE & CAUSE_CODE are 4 bytes aligned already number need << 2
+                    if (time_interrupt) pc <= (Csrs[mtvec][BASE+61:BASE] << 2) + (MTIP << 2);
+                    if (meip_interrupt) pc <= (Csrs[mtvec][BASE+61:BASE] << 2) + (MEIP << 2); 
+		end else pc <= (Csrs[mtvec][BASE+61:BASE] << 2);// jump to mtvec addrss (directly mode 0, need C or Assembly code of handlers deciding) 
 		//pc <= 0;
-                pc <= (Csrs[mtvec][BASE+61:BASE] << 2); 
+                //pc <= (Csrs[mtvec][BASE+61:BASE] << 2); 
 		bubble <= 1'b1; // bubble wrong fetched instruciton by IF
 		//interrupt_ack <= 1; // reply to outside
 		//
