@@ -320,8 +320,10 @@ assign DRAM_CKE = 1; // always enable
     always @(*) begin
         //claim_id_calc[0] = 0; 
         //claim_id_calc[1] = 0; 
-        if (Plic_pending[1] && Plic_enable[0][1]) claim_id_calc[0] = 1; 
-        if (Plic_pending[1] && Plic_enable[1][1]) claim_id_calc[1] = 1; 
+        if (!Plic_pending[1]) claim_id_calc[0] <= 0; 
+        if (!Plic_pending[1]) claim_id_calc[1] <= 0; 
+        if (Plic_pending[1] && Plic_enable[0][1]) claim_id_calc[0] <= 1; 
+        if (Plic_pending[1] && Plic_enable[1][1]) claim_id_calc[1] <= 1; 
     end
 
     wire meip_interrupt = (claim_id_calc[0] != 0);
@@ -473,6 +475,7 @@ assign DRAM_CKE = 1; // always enable
 	    else if (Plic_enable_ctx0_selected) begin bus_read_data <= Plic_enable[0]; bus_read_done <= 1; end
 	    else if (Plic_threshold_ctx0_selected) begin bus_read_data <= Plic_threshold[0]; bus_read_done <= 1; end
 	    //else if (Plic_claim_ctx0_selected) begin bus_read_data <= Plic_claim[0]; end
+	    //else if (Plic_claim_ctx0_selected) begin bus_read_data <= claim_id_calc[0]; Plic_pending[claim_id_calc[0]]<=0; claim_id_calc[0] <= 0; bus_read_done <= 1; end
 	    else if (Plic_claim_ctx0_selected) begin bus_read_data <= claim_id_calc[0]; Plic_pending[claim_id_calc[0]]<=0; bus_read_done <= 1; end
 	    // context 1 S-mode
 	    else if (Plic_enable_ctx1_selected) begin bus_read_data <= Plic_enable[1]; bus_read_done <= 1; end
