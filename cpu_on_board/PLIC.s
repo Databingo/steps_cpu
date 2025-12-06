@@ -208,12 +208,12 @@ uart_read_loop:
    lw t3, 0(t0) # read from UART FIFO
    sw t3, 0(t0) # print key value
 
-   li t2, 0x0C200004 
-   sw t1, 0(t2) # write id back to ctx0claim to clear pending id
-
    j uart_read_loop
    
 finish:
+   li t2, 0x0C200004 
+   sw t1, 0(t2) # write id back to ctx0claim to clear pending id
+
    li t3, 47 # /
    sb t3, 0(t0) #  finished
    mret
