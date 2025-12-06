@@ -190,9 +190,11 @@ wait_loop:
     j wait_loop
 
 irq_handler:
+   li t0, 0x2004 # UART data print/read
    li t3, 124 # |
-   sb t3, 0(t0) # to plic
+   sb t3, 0(t0) # in plic handler
 
+uart_read_loop:
    # Read claim
    li t2, 0x0C200004 
    lw t1, 0(t2)
@@ -200,22 +202,18 @@ irq_handler:
    addi t4, t1, 48 
    sb t4, 0(t0) # show interrupt id
 
-   li t3, 56 # 8
-   sb t3, 0(t0) # to plic
-
-   beqz t1, no_irq 
+   beqz t1, finish
    
    # Handle
    lw t3, 0(t0) # read from UART FIFO
-   #sw t3, 0(t0) # write id back print ??x
+   sw t3, 0(t0) # print key value
 
-   li t3, 57 # 9
-   sb t3, 0(t0) # to plic
-
-   # Finish
    li t2, 0x0C200004 
    sw t1, 0(t2) # write id back to ctx0claim to clear pending id
 
+   j uart_read_loop
+   
+finish:
    li t3, 47 # /
    sb t3, 0(t0) #  finished
    mret
