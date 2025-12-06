@@ -525,13 +525,13 @@ assign DRAM_CKE = 1; // always enable
 	    // context 0
 	    else if (Plic_enable_ctx0_selected) begin Plic_enable[0] <= bus_write_data; bus_write_done <= 1; end
 	    else if (Plic_threshold_ctx0_selected) begin Plic_threshold[0] <= bus_write_data; bus_write_done <= 1; end
-	    else if (Plic_claim_ctx0_selected) begin bus_write_done <= 1; end // set to 0 when read already
-	    //else if (Plic_claim_ctx0_selected) begin Plic_pending[bus_write_data] <= 0 ; end
+	    //else if (Plic_claim_ctx0_selected) begin bus_write_done <= 1; end // set to 0 when read already
+	    else if (Plic_claim_ctx0_selected) begin Plic_pending[bus_write_data] <= 0; bus_write_done <= 1; end
 	    // context 1
 	    else if (Plic_enable_ctx1_selected) begin Plic_enable[1] <= bus_write_data; bus_write_done <= 1; end
 	    else if (Plic_threshold_ctx1_selected) begin Plic_threshold[1] <= bus_write_data; bus_write_done <= 1; end
-	    else if (Plic_claim_ctx1_selected) begin bus_write_done <= 1; end // set to 0 when read already
-	    //else if (Plic_claim_ctx1_selected) begin Plic_pending[bus_write_data] <= 0 ; end
+	    //else if (Plic_claim_ctx1_selected) begin bus_write_done <= 1; end // set to 0 when read already
+	    else if (Plic_claim_ctx1_selected) begin Plic_pending[bus_write_data] <= 0; bus_write_done <= 1; end
 	    
         end
 

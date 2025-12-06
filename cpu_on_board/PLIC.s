@@ -214,7 +214,7 @@ irq_handler:
 
    # Finish
    li t2, 0x0C200004 
-   sw t1, 0(t2) # write id back to ctx0claim
+   sw t1, 0(t2) # write id back to ctx0claim to clear pending id
 
    li t3, 182 # ¶
    sb t3, 0(t0) #  finished
