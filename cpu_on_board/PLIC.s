@@ -189,6 +189,9 @@ _start:
 wait_loop:
     j wait_loop
 
+done:
+    j done
+
 irq_handler:
    li t0, 0x2004 # UART data for print/read
    li t2, 0x0C200004  # PLIC Claim context 0 register
@@ -219,6 +222,3 @@ exit_irq:
    li t3, 69 # E
    sb t3, 0(t0) #  Exit irq
    mret 
-
-done:
-    j done
