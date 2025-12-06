@@ -324,12 +324,8 @@ assign DRAM_CKE = 1; // always enable
         if (Plic_pending[1] && Plic_enable[1][1]) claim_id_calc[1] = 1; 
     end
 
-
-
-    wire meip_interrupt;
-    wire msip_interrupt;
-    assign meip_interrupt = (claim_id_calc[0] != 0);
-    assign msip_interrupt = (claim_id_calc[1] != 0);
+    wire meip_interrupt = (claim_id_calc[0] != 0);
+    wire msip_interrupt = (claim_id_calc[1] != 0);
     wire uart_irq;
     wire [31:0] uart_readdata;
 

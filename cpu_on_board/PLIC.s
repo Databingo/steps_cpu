@@ -206,8 +206,8 @@ irq_handler:
    beqz t1, no_irq 
    
    # Handle
-   lw t3, 0(t0)
-   sw t3, 0(t0) # write id back print
+   lw t3, 0(t0) # read from UART FIFO
+   #sw t3, 0(t0) # write id back print ??x
 
    li t3, 57 # 9
    sb t3, 0(t0) # to plic
@@ -216,7 +216,7 @@ irq_handler:
    li t2, 0x0C200004 
    sw t1, 0(t2) # write id back to ctx0claim to clear pending id
 
-   li t3, 182 # ¶
+   li t3, 47 # /
    sb t3, 0(t0) #  finished
    mret
 
