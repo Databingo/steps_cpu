@@ -20,7 +20,7 @@ module riscv64(
     //output reg [2:0]  bus_ls_type, // sb sh sw sd sbu shu swu 
       
     output reg [63:0] mtime,    // map to 0x0200_bff8 
-    inout reg [63:0] mtimecmp, // map to 0x0200_4000 + 8byte*hartid
+    inout wire [63:0] mtimecmp, // map to 0x0200_4000 + 8byte*hartid
 
     input wire meip_interrupt, // from PLIC
     input wire msip_interrupt, // from Software
@@ -221,7 +221,6 @@ module riscv64(
 	    Csrs[medeleg] <= 64'hb1af;
 	    mmu_pc <= 0;
 	    is_ppc <= 0; // current using address is physical addr
-	    mtimecmp <=  32'h80000000;
 
         end else begin
 	    // Default PC+4    (1.Could be overide 2.Take effect next cycle) 

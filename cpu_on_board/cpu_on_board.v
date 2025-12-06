@@ -257,7 +257,7 @@ assign DRAM_CKE = 1; // always enable
     wire        bus_write_enable;
     wire [2:0]  bus_ls_type; // lb lbu...sbhwd...
     wire [63:0] mtime;
-    wire [63:0] mtimecmp;
+    reg  [63:0] mtimecmp;
 
 
     // -- PLIC --
@@ -364,6 +364,7 @@ assign DRAM_CKE = 1; // always enable
 	    bus_read_data <= 0;
 	    uart_write_pulse <= 0;
 	    uart_read_pulse <= 0;
+	    mtimecmp <=  32'h80000000;
 	end else begin
         bus_address_reg <= bus_address>>2;
         bus_address_reg_full <= bus_address;
