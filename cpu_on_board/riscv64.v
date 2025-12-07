@@ -293,7 +293,8 @@ module riscv64(
                 if (time_interrupt) Csrs[mcause][CAUSE+62:CAUSE] <= 7; // Cause 7 for Timer Interrupt
                 if (meip_interrupt) Csrs[mcause][CAUSE+62:CAUSE] <= 11; // Cause 11 for External Interrupt
 
-	        Csrs[mepc] <= pc; // save next pc (interrupt asynchronize)
+	        //Csrs[mepc] <= pc; // save next pc (interrupt asynchronize)
+	        Csrs[mepc] <= pc-4; // save interruptec pc (interrupt asynchronize) ??
 		Csrs[mstatus][MPIE] <= Csrs[mstatus][MIE];
 		Csrs[mstatus][MIE] <= 0;
 		Csrs[mstatus][MPP+1:MPP] <= current_privilege_mode; // MPP = old mode
