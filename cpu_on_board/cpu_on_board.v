@@ -404,15 +404,15 @@ assign DRAM_CKE = 1; // always enable
             if (Mtime_selected) begin bus_read_data <= mtime; bus_read_done <= 1; end 
             if (Mtimecmp_selected) begin bus_read_data <= mtimecmp; bus_read_done <= 1; end 
 
-	    //if (Art_selected) begin 
-	    //    if (uart_read_step ==0) begin uart_read_pulse <= 1; uart_read_step <= 1; end
-	    //    if (uart_read_step ==1 && !uart_waitrequest) begin bus_read_data <= uart_readdata; uart_read_step <= 0; bus_read_done <=1; end
-	    //end
-
 	    if (Art_selected) begin 
-		uart_read_pulse <= 1;
-	        if (uart_read_pulse && !uart_waitrequest) begin bus_read_data <= uart_readdata; bus_read_done <=1; end
+	        if (uart_read_step ==0) begin uart_read_pulse <= 1; uart_read_step <= 1; end
+	        if (uart_read_step ==1 && !uart_waitrequest) begin bus_read_data <= uart_readdata; uart_read_step <= 0; bus_read_done <=1; end
 	    end
+
+	    //if (Art_selected) begin 
+	    //    uart_read_pulse <= 1;
+	    //    if (uart_read_pulse && !uart_waitrequest) begin bus_read_data <= uart_readdata; bus_read_done <=1; end
+	    //end
 
 	    //if (Sdram_selected && bus_read_done == 0) begin
 	    //    if (sdram_req_wait==0) begin bus_read_data <= {48'b0, sdram_rddata}; bus_read_done <= 1; end
