@@ -232,6 +232,7 @@ assign DRAM_CKE = 1; // always enable
 
     // -- Monitor -- Connected to Bus
     reg uart_write_pulse;
+    reg uart_write_step;
     reg uart_read_pulse;
     reg uart_read_step;
     wire uart_waitrequest;
@@ -525,7 +526,11 @@ assign DRAM_CKE = 1; // always enable
 	    if (Sdc_addr_selected) begin sd_addr <= bus_write_data[31:0]; bus_write_done <= 1; end
 	    if (Sdc_read_selected) begin sd_rd_start <= 1; bus_write_done <= 1; end
 
-	    if (Art_selected) begin uart_write_pulse <= 1; bus_write_done <=1; end
+	    //if (Art_selected) begin uart_write_pulse <= 1; bus_write_done <=1; end
+	    if (Art_selected) begin 
+	        if (uart_write_step ==0) begin uart_write_pulse <= 1; uart_write_step <= 1; end
+	        if (uart_write_step ==1 && !uart_waitrequest) begin uart_write_step <= 0; bus_write_done <=1; end
+	    end
 
 	    if (Mtimecmp_selected) begin mtimecmp <= bus_write_data; bus_write_done <= 1; end
 	    //if (Sdram_selected) begin if (sdram_req_wait==0) bus_write_done <= 1; end
