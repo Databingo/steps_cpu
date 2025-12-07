@@ -233,6 +233,7 @@ assign DRAM_CKE = 1; // always enable
     // -- Monitor -- Connected to Bus
     reg uart_write_pulse;
     reg uart_read_pulse;
+    reg uart_read_step;
     wire uart_waitrequest;
     jtag_uart_system my_jtag_system (
         .clk_clk                                 (CLOCK_50),
@@ -243,7 +244,9 @@ assign DRAM_CKE = 1; // always enable
         //.jtag_uart_0_avalon_jtag_slave_write_n   (~uart_write_trigger_pulse),
         .jtag_uart_0_avalon_jtag_slave_write_n   (~uart_write_pulse),
         .jtag_uart_0_avalon_jtag_slave_chipselect(1'b1),
-        .jtag_uart_0_avalon_jtag_slave_read_n    (~(bus_read_done==0 && Art_selected)),
+        //.jtag_uart_0_avalon_jtag_slave_read_n    (~(bus_read_done==0 && Art_selected)),
+        .jtag_uart_0_avalon_jtag_slave_read_n    (~uart_read_pulse),
+	
         .jtag_uart_0_avalon_jtag_slave_readdata    (uart_readdata),
         .jtag_uart_0_avalon_jtag_slave_waitrequest (uart_waitrequest),
 	.jtag_uart_0_irq_irq(uart_irq)                        
@@ -344,7 +347,9 @@ assign DRAM_CKE = 1; // always enable
 
     //reg bus_read_start = 0;
     //reg bus_write_start = 0;
-    reg [4:0] plic_id;
+    //reg [4:0] plic_id;
+    // Plic
+    wire [4:0] plic_id = (bus_address - `Plic_base) >> 2; // id = offset /4
 
 
 
@@ -361,6 +366,7 @@ assign DRAM_CKE = 1; // always enable
 	    bus_read_data <= 0;
 	    uart_write_pulse <= 0;
 	    uart_read_pulse <= 0;
+	    uart_read_step <= 0;
 	    mtimecmp <=  32'h80000000;
 	    uart_irq_pre <= 0;
 	end else begin
@@ -369,8 +375,6 @@ assign DRAM_CKE = 1; // always enable
         sd_rd_start <= 0;
         uart_write_pulse <= 0;
 	uart_read_pulse <= 0;
-	// Plic
-	plic_id <= (bus_address - `Plic_base) >> 2; // id = offset /4
 	uart_irq_pre <= uart_irq;
 	if (uart_irq && !uart_irq_pre) Plic_pending[1] <= 1;
 	//if (key_pressed_edge) Plic_pending[1] <= 1;
@@ -400,7 +404,15 @@ assign DRAM_CKE = 1; // always enable
             if (Mtime_selected) begin bus_read_data <= mtime; bus_read_done <= 1; end 
             if (Mtimecmp_selected) begin bus_read_data <= mtimecmp; bus_read_done <= 1; end 
 
-	    if (Art_selected) begin uart_read_pulse <= 1; bus_read_data <= uart_readdata; bus_read_done <=1; end
+	    //if (Art_selected) begin 
+	    //    if (uart_read_step ==0) begin uart_read_pulse <= 1; uart_read_step <= 1; end
+	    //    if (uart_read_step ==1 && !uart_waitrequest) begin bus_read_data <= uart_readdata; uart_read_step <= 0; bus_read_done <=1; end
+	    //end
+
+	    if (Art_selected) begin 
+		uart_read_pulse <= 1;
+	        if (uart_read_pulse && !uart_waitrequest) begin bus_read_data <= uart_readdata; bus_read_done <=1; end
+	    end
 
 	    //if (Sdram_selected && bus_read_done == 0) begin
 	    //    if (sdram_req_wait==0) begin bus_read_data <= {48'b0, sdram_rddata}; bus_read_done <= 1; end
@@ -523,13 +535,13 @@ assign DRAM_CKE = 1; // always enable
 	    // context 0
 	    else if (Plic_enable_ctx0_selected) begin Plic_enable[0] <= bus_write_data; bus_write_done <= 1; end
 	    else if (Plic_threshold_ctx0_selected) begin Plic_threshold[0] <= bus_write_data; bus_write_done <= 1; end
-	    //else if (Plic_claim_ctx0_selected) begin bus_write_done <= 1; end // set to 0 when read already
-	    else if (Plic_claim_ctx0_selected) begin Plic_pending[bus_write_data] <= 0; bus_write_done <= 1; end
+	    else if (Plic_claim_ctx0_selected) begin bus_write_done <= 1; end // set to 0 when read already
+	    //else if (Plic_claim_ctx0_selected) begin Plic_pending[bus_write_data] <= 0; bus_write_done <= 1; end
 	    // context 1
 	    else if (Plic_enable_ctx1_selected) begin Plic_enable[1] <= bus_write_data; bus_write_done <= 1; end
 	    else if (Plic_threshold_ctx1_selected) begin Plic_threshold[1] <= bus_write_data; bus_write_done <= 1; end
-	    //else if (Plic_claim_ctx1_selected) begin bus_write_done <= 1; end // set to 0 when read already
-	    else if (Plic_claim_ctx1_selected) begin Plic_pending[bus_write_data] <= 0; bus_write_done <= 1; end
+	    else if (Plic_claim_ctx1_selected) begin bus_write_done <= 1; end // set to 0 when read already
+	    //else if (Plic_claim_ctx1_selected) begin Plic_pending[bus_write_data] <= 0; bus_write_done <= 1; end
 	    
         end
 

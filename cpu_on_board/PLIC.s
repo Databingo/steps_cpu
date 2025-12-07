@@ -148,13 +148,13 @@ _start:
     li t3, 51 # 3
     sb t3, 0(t0)
 
-    # Set enable bits = irq_id, so enable bit = (1 << id) ctx 1
-    li t2, 0x0C002080
-    li t1, 2 #( 1<<1 = 2)
-    sw t1, 0(t2)
+    ## Set enable bits = irq_id, so enable bit = (1 << id) ctx 1
+    #li t2, 0x0C002080
+    #li t1, 2 #( 1<<1 = 2)
+    #sw t1, 0(t2)
 
-    li t3, 51 # 3
-    sb t3, 0(t0)
+    #li t3, 51 # 3
+    #sb t3, 0(t0)
 
     # Set shreshold 0
     li t2, 0x0C200000  # base +0x200000+hard_id<<12
