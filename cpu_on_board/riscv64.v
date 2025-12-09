@@ -253,22 +253,28 @@ module riscv64(
             // Bubble
 	    if (bubble) begin bubble <= 1'b0; // Flush this cycle & Clear bubble signal for the next cycle
 
-	    //  mmu_pc
-	    end else if (satp_mmu && !mmu_pc && !mmu_da && !is_ppc) begin  // OPEN
+	    //  mmu_pc  need: !mmu_pc/!mmu_da & !is_ppc
+	    end else if (satp_mmu && !mmu_pc && !mmu_da && !is_ppc) begin  // OPEN mmu_pc/mmu_da/is_ppc not open mmu walk translate all jump-like pc:jump/branch/trap/handler need tranlate
 		mmu_pc <= 1; // MMU_PC ON 
 	        pc <= 20; // handler
 	 	bubble <= 1'b1; // bubble 
 		for (i=0;i<=9;i=i+1) begin sre[i]<= re[i]; end // save re
 		re[9]<= pc - 4; // save vpc to x1
+		Csrs[mstatus][MPIE] <= Csrs[mstatus][MIE]; // disable interrupt during shadow mmu walking
+		Csrs[mstatus][MIE] <= 0;
 	    end else if (mmu_pc && ir == 32'b00110000001000000000000001110011) begin // end hiject mret & recover from shadow when see Mret
 		pc <= re[9]; // get ppc and turn to ppc'ir
 	 	bubble <= 1'b1; // bubble
 		for (i=0;i<=9;i=i+1) begin re[i]<= sre[i]; end // recover usr re
 		is_ppc <= 1; // we are ppc
 		mmu_pc <= 0; // MMU_PC OFF
+		Csrs[mstatus][MIE] <= Csrs[mstatus][MPIE]; // set back interrupt status
 
             //  mmu_da 
-	    end else if (satp_mmu && (op == 7'b0000011 || op == 7'b0100011 || op == 7'b0101111) && !mmu_pc && !mmu_da && !got_pda) begin  // load/store/atom
+	    end else if (satp_mmu 
+		&& (op == 7'b0000011 || op == 7'b0100011 || op == 7'b0101111)  // load/store/atom
+	        && !(op == 7'b0101111 && w_func5 == 5'b00011 && (!reserve_valid || reserve_addr != rsi) // exclude failed sc.w/sc.d to run into mmu
+		&& !mmu_pc && !mmu_da && !got_pda) begin  
 		mmu_da <= 1; // MMU_DA ON
 	        saved_user_pc <= pc-4; // save pc l/s
 		pc <= 0; // handler
@@ -278,6 +284,8 @@ module riscv64(
 		if (op == 7'b0000011) re[9] <= (rs1 + w_imm_i);
 		if (op == 7'b0100011) re[9] <= (rs1 + w_imm_s);
 		if (op == 7'b0101111) re[9] <=  rs1; // save vpa to x1
+		Csrs[mstatus][MPIE] <= Csrs[mstatus][MIE]; // disable interrupt during shadow mmu walking
+		Csrs[mstatus][MIE] <= 0;
 	    end else if (mmu_da && ir == 32'b00110000001000000000000001110011) begin // hiject mret 
 		pa <= re[9]; // get pda
 		pc <= saved_user_pc; // recover from shadow when see Mret
@@ -285,6 +293,7 @@ module riscv64(
 		for (i=0;i<=9;i=i+1) begin re[i]<= sre[i]; end // recover usr re
 		got_pda <= 1; // we are pa
 		mmu_da <= 0; // MMU_DA OFF
+		Csrs[mstatus][MIE] <= Csrs[mstatus][MPIE]; // set back interrupt status
 		
         //    // Interrupt
 	//    //if (interrupt_vector == 1 && mstatus_MIE == 1) begin //mstatus[3] MIE
@@ -327,6 +336,9 @@ module riscv64(
 		//pc <= 0;
                 //pc <= (Csrs[mtvec][BASE+61:BASE] << 2); 
 		bubble <= 1'b1; // bubble wrong fetched instruciton by IF
+
+		reserve_valid <= 0;// Interrupt clear lr.w/lr.d
+		is_ppc <= 0; // Interrupt jump to new va(if mmu enabled)
 		//interrupt_ack <= 1; // reply to outside
 		//
 		//
@@ -591,12 +603,6 @@ module riscv64(
 		     // M mul mulh mulhsu mulhu div divu rem remu mulw divw divuw remuw
 		     // A lr.w sc.w lr.d sc.d
 		     // ATOMIC instructions (A-extension) opcode: 0101111
-		    32'b???????_?????_?????_010_?????_0000011: begin  // Lw_mmu 3 cycles
-		        if (load_step == 0) begin bus_address <= rs1 + w_imm_i; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; bus_ls_type <= w_func3; //end
-			                    if (got_pda) bus_address <= pa; end
-		        if (load_step == 1 && bus_read_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working
-			if (load_step == 1 && bus_read_done == 1) begin re[w_rd]<= $signed(bus_read_data[31:0]); load_step <= 0; //end end //bus_read_enable <= 0; end end // bus ok and execute
-			                    if (got_pda) got_pda <= 0; end end
 		    // lr.w
 		    32'b00010_??_?????_?????_010_?????_0101111: begin  // Lr.w_mmu 3 cycles
 		        if (load_step == 0) begin bus_address <= rs1; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; bus_ls_type <= w_func3; //end
@@ -605,7 +611,26 @@ module riscv64(
 		        if (load_step == 1 && bus_read_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working
 			if (load_step == 1 && bus_read_done == 1) begin re[w_rd]<= $signed(bus_read_data[31:0]); load_step <= 0; //end end //bus_read_enable <= 0; end end // bus ok and execute
 			                    if (got_pda) got_pda <= 0; end end
-		     
+		    // sw 
+	            32'b???????_?????_?????_010_?????_0100011: begin
+		        if (store_step == 0) begin bus_address <= rs1 + w_imm_s; bus_write_data<=rs2[31:0];bus_write_enable<=1;pc<=pc-4;bubble<=1;store_step<=1;bus_ls_type<=w_func3; //end
+			                    if (got_pda) bus_address <= pa; end
+		        if (store_step == 1 && bus_write_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working 1 bubble2 this3
+			if (store_step == 1 && bus_write_done == 1) begin store_step <= 0;
+			                    if (got_pda) got_pda <= 0; end 
+		        end 
+		    // sc.w 
+	            32'b00011_??_?????_?????_010_?????_0101111: begin
+		        if (store_step == 0) begin 
+			    if (!reserve_valid || reserve_addr != rs1) begin re[w_rd] <= 1; reserve_valid <= 0; if (got_pda) got_pda <= 0; end // finish 1 cycle without bubble & clear reserve
+			    else begin bus_address <= rs1; bus_write_data<=rs2[31:0];bus_write_enable<=1;pc<=pc-4;bubble<=1;store_step<=1;bus_ls_type<=w_func3; 
+			                    if (got_pda) bus_address <= pa;
+			                    reserve_valid <= 0; end // consumed
+			end 
+		        if (store_step == 1 && bus_write_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working 1 bubble2 this3
+			if (store_step == 1 && bus_write_done == 1) begin store_step <= 0; re[w_rd] <= 0; // sc.w successed return 0 in rd
+			                    if (got_pda) got_pda <= 0; end 
+		    end 
 		     // amoswap amoadd amoxor amoand amoor
 		     // amomin amomax amominu amomaxu
 		     // F (reg f0-f31)
