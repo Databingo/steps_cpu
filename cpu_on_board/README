@@ -269,14 +269,16 @@ https://dcenet.fel.cvut.cz/edu/fpga/install_en.aspx
 http://web.mit.edu/6.111/volume2/www/f2018/tools/sd_controller.v
 
 
-timer
-plic
+-timer
+-plic
 mmu full sv39 page table walker
 page fault
 atom lr.w/sc.w/amoswap.w/amoadd.w/lr.d/sc.d
-fence.i
-mideleg/medeleg
-ssatus/..
+-fence
+-fence.i
+sfence.vma ?
+-mideleg/medeleg
+sstatus/..
 uart_16550
 device tree
 map to 0x80000000

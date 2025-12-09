@@ -93,6 +93,7 @@ module riscv64(
     wire [4:0] w_rs2 = ir[24:20];
     // -- Func decoder --
     wire [2:0] w_func3   = ir[14:12];
+    wire [4:0] w_func5   = ir[31:27];
     wire [6:0] w_func7   = ir[31:25]; 
     wire [11:0] w_func12 = ir[31:20]; 
     // -- rs1 rs2 value --
@@ -186,6 +187,13 @@ module riscv64(
     reg [1:0] load_step;
     reg [1:0] store_step;
 
+
+    // -- Atomic & Sync state --
+    reg [1:0]  atom_step;
+    reg [63:0] atom_tmp_value;
+    reg [63:0] reserve_addr;
+    reg        reserve_valid;
+
     // IF Instruction (Only drive IR)
     always @(posedge clk or negedge reset) begin
         if (!reset) begin 
@@ -218,9 +226,19 @@ module riscv64(
 	    got_pda <= 0;
 	    for (i=0;i<10;i=i+1) begin sre[i]<= 64'b0; end
 	    for (i=0;i<32;i=i+1) begin Csrs[i]<= 64'b0; end
-	    Csrs[medeleg] <= 64'hb1af;
+	    Csrs[medeleg] <= 64'hb1af; // delegate to S-mode 1011000110101111 // see VII 3.1.15 mcasue exceptions
+	    Csrs[mideleg] <= 64'h0222; // delegate to S-mode 0000001000100010 see VII 3.1.15 mcasue interrupt 1/5/9 SSIP(supervisor software interrupt) STIP(time) SEIP(external)
 	    mmu_pc <= 0;
 	    is_ppc <= 0; // current using address is physical addr
+
+            atom_step <= 0;
+            atom_tmp_value <= 0;
+            reserve_addr <= 0;
+            reserve_valid <= 0;
+
+
+
+
 
         end else begin
 	    // Default PC+4    (1.Could be overide 2.Take effect next cycle) 
@@ -250,13 +268,16 @@ module riscv64(
 		mmu_pc <= 0; // MMU_PC OFF
 
             //  mmu_da 
-	    end else if (satp_mmu && (op == 7'b0000011 || op == 7'b0100011) && !mmu_pc && !mmu_da && !got_pda) begin  // load/store
+	    end else if (satp_mmu && (op == 7'b0000011 || op == 7'b0100011 || op == 7'b0101111) && !mmu_pc && !mmu_da && !got_pda) begin  // load/store/atom
 		mmu_da <= 1; // MMU_DA ON
 	        saved_user_pc <= pc-4; // save pc l/s
 		pc <= 0; // handler
 	 	bubble <= 1'b1; // bubble
 		for (i=0;i<=9;i=i+1) begin sre[i]<= re[i]; end // save re
-		re[9] <= (op == 7'b0000011) ? (rs1 + w_imm_i):(rs1 + w_imm_s); // save vpa to x1
+		//re[9] <= (op == 7'b0000011) ? (rs1 + w_imm_i):(rs1 + w_imm_s); // save vpa to x1
+		if (op == 7'b0000011) re[9] <= (rs1 + w_imm_i);
+		if (op == 7'b0100011) re[9] <= (rs1 + w_imm_s);
+		if (op == 7'b0101111) re[9] <=  rs1; // save vpa to x1
 	    end else if (mmu_da && ir == 32'b00110000001000000000000001110011) begin // hiject mret 
 		pa <= re[9]; // get pda
 		pc <= saved_user_pc; // recover from shadow when see Mret
@@ -563,10 +584,28 @@ module riscv64(
 		    // Wfi
 		    32'b00010000010100000000000001110011: begin end
 		     // Fence
+		    32'b?????????????????_000_?????_0001111: begin end
 		     // Fence.i
+		    32'b?????????????????_001_?????_0001111: begin bubble <= 1; end
 		     // RV64IMAFD(G)C  RVA23U64
 		     // M mul mulh mulhsu mulhu div divu rem remu mulw divw divuw remuw
 		     // A lr.w sc.w lr.d sc.d
+		     // ATOMIC instructions (A-extension) opcode: 0101111
+		    32'b???????_?????_?????_010_?????_0000011: begin  // Lw_mmu 3 cycles
+		        if (load_step == 0) begin bus_address <= rs1 + w_imm_i; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; bus_ls_type <= w_func3; //end
+			                    if (got_pda) bus_address <= pa; end
+		        if (load_step == 1 && bus_read_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working
+			if (load_step == 1 && bus_read_done == 1) begin re[w_rd]<= $signed(bus_read_data[31:0]); load_step <= 0; //end end //bus_read_enable <= 0; end end // bus ok and execute
+			                    if (got_pda) got_pda <= 0; end end
+		    // lr.w
+		    32'b00010_??_?????_?????_010_?????_0101111: begin  // Lr.w_mmu 3 cycles
+		        if (load_step == 0) begin bus_address <= rs1; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; bus_ls_type <= w_func3; //end
+			                          reserve_addr <= rs1; reserve_valid <= 1;
+			                    if (got_pda) bus_address <= pa; end
+		        if (load_step == 1 && bus_read_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working
+			if (load_step == 1 && bus_read_done == 1) begin re[w_rd]<= $signed(bus_read_data[31:0]); load_step <= 0; //end end //bus_read_enable <= 0; end end // bus ok and execute
+			                    if (got_pda) got_pda <= 0; end end
+		     
 		     // amoswap amoadd amoxor amoand amoor
 		     // amomin amomax amominu amomaxu
 		     // F (reg f0-f31)
