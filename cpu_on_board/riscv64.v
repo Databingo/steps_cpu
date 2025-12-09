@@ -273,7 +273,7 @@ module riscv64(
             //  mmu_da 
 	    end else if (satp_mmu 
 		&& (op == 7'b0000011 || op == 7'b0100011 || op == 7'b0101111)  // load/store/atom
-	        && !(op == 7'b0101111 && w_func5 == 5'b00011 && (!reserve_valid || reserve_addr != rsi)) // exclude failed sc.w/sc.d to run into mmu
+	        && !(op == 7'b0101111 && w_func5 == 5'b00011 && (!reserve_valid || reserve_addr != rs1)) // exclude failed sc.w/sc.d to run into mmu
 		&& !mmu_pc && !mmu_da && !got_pda) begin  
 		mmu_da <= 1; // MMU_DA ON
 	        saved_user_pc <= pc-4; // save pc l/s
