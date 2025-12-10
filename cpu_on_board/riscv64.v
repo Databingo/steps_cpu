@@ -194,6 +194,62 @@ module riscv64(
     reg [63:0] reserve_addr;
     reg        reserve_valid;
 
+    // -- TLB --
+    reg [26:0] tlb_vpn [0:3]; // vpn number VA[38:12]  Sv39
+    reg [43:0] tlb_ppn [0:3]; // ppn number PA[55:12]
+    reg tlb_valid [0:3];
+    // i
+    wire [26:0] pc_vpn = pc[38:12];
+    reg [43:0] pc_ppn;
+    reg tlb_i_hit;
+    
+    // TLB i hit
+    always @(*) begin
+	tlb_i_hit = 0;
+	pc_ppn = 0;
+	if      (tlb_valid[0] && tlb_vpn[0] == pc_vpn) begin tlb_i_hit = 1; pc_ppn = tlb_ppn[0]; end
+	else if (tlb_valid[1] && tlb_vpn[1] == pc_vpn) begin tlb_i_hit = 1; pc_ppn = tlb_ppn[1]; end
+	else if (tlb_valid[2] && tlb_vpn[2] == pc_vpn) begin tlb_i_hit = 1; pc_ppn = tlb_ppn[2]; end
+	else if (tlb_valid[3] && tlb_vpn[3] == pc_vpn) begin tlb_i_hit = 1; pc_ppn = tlb_ppn[3]; end
+    end
+
+    // d
+    reg [38:0] ls_va;
+    always @(*) begin
+        case(op)
+	   7'b0000011: ls_va = rs1 + w_imm_i; // load address
+	   7'b0100011: ls_va = rs1 + w_imm_s; // store address
+	   7'b0101111: ls_va = rs1;           // atomic address
+	   default: ls_va = 0;
+       endcase
+    end
+    wire [26:0] data_vpn = ls_va[38:12];
+    reg [43:0] data_ppn;
+    reg tlb_d_hit;
+    // TLB d hit
+    always @(*) begin
+	 tlb_d_hit = 0;
+	 data_ppn = 0;
+	 if      (tlb_valid[0] && tlb_vpn[0] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[0]; end
+	 else if (tlb_valid[1] && tlb_vpn[1] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[1]; end
+	 else if (tlb_valid[2] && tlb_vpn[2] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[2]; end
+	 else if (tlb_valid[3] && tlb_vpn[3] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[3]; end
+     end
+     // concat physical address
+     wire need_trans = satp_mmu && !mmu_pc && !mmu_da;
+     wire [55:0] ppc = need_trans ? { pc_ppn, pc[11:0]} : pc;
+     wire [55:0] pda = need_trans ? { data_ppn,ls_va[11:0]} : ls_va;
+     // cache hit request
+     wire [9:0] c_index = ppc[11:2]
+     wire [19:0] c_tag_req = ppc[31:12]
+
+     wire [31:0] cache_data = I_Cache[c_index];
+     wire [20:0] tag_data = I_Tag[c_index];
+
+     wire cache_hit = tag_data[20] && (tag_data[19:0] == c_tag_reg) && (need_trans ? tlb_i_hit : 1);
+
+
+
     // IF Instruction (Only drive IR)
     always @(posedge clk or negedge reset) begin
         if (!reset) begin 
@@ -201,9 +257,10 @@ module riscv64(
             ir <= 32'h00000001; 
         end else begin
             heartbeat <= ~heartbeat; // heartbeat
-            //ir <= instruction;
-	    if (mmu_da || mmu_pc) ir <= get_shadow_ir(pc);
-            else ir <= instruction;
+	    if (mmu_da || mmu_pc) ir <= get_shadow_ir(pc);  // Runing shadow code
+            else ir <= instruction; // 
+            //else if (cache_hit) ir <= cache_data; // Cache hit
+	    //else ir <= 32'h00000013; // TLB miss or Cache miss: Nop(stall)
         end
     end
 
