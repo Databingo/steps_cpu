@@ -194,7 +194,7 @@ module riscv64(
     reg [63:0] reserve_addr;
     reg        reserve_valid;
 
-    // -- TLB --
+    // -- TLB -- 8 pages?
     reg [26:0] tlb_vpn [0:3]; // vpn number VA[38:12]  Sv39
     reg [43:0] tlb_ppn [0:3]; // ppn number PA[55:12]
     reg tlb_valid [0:3];
