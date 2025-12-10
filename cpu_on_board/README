@@ -272,6 +272,8 @@ http://web.mit.edu/6.111/volume2/www/f2018/tools/sd_controller.v
 -timer
 -plic
 mmu full sv39 page table walker
+TLB translation lookaside buffer
+VA->TLB(assembly->MMU->SDRAM->TLB)->PA->Cache(assembly->SDRAM->Cache)->ir/data
 page fault
 -atom lr.w/sc.w
 amoswap.w/amoadd.w/lr.d/sc.d
