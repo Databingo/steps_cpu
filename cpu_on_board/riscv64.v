@@ -240,8 +240,8 @@ module riscv64(
      wire [55:0] ppc = need_trans ? { pc_ppn, pc[11:0]} : pc;
      wire [55:0] pda = need_trans ? { data_ppn,ls_va[11:0]} : ls_va;
      // cache hit request
-     wire [9:0] c_index = ppc[11:2]
-     wire [19:0] c_tag_req = ppc[31:12]
+     wire [9:0] c_index = ppc[11:2];
+     wire [19:0] c_tag_req = ppc[31:12];
 
      wire [31:0] cache_data = I_Cache[c_index];
      wire [20:0] tag_data = I_Tag[c_index];
