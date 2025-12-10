@@ -249,7 +249,7 @@ module riscv64(
      wire [31:0] cache_data = I_Cache[c_index];
      wire [20:0] tag_data = I_Tag[c_index];
 
-     wire cache_hit = tag_data[20] && (tag_data[19:0] == c_tag_reg) && (need_trans ? tlb_i_hit : 1);
+     wire cache_hit = tag_data[20] && (tag_data[19:0] == c_tag_req) && (need_trans ? tlb_i_hit : 1);
 
 
 
