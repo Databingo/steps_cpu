@@ -243,6 +243,9 @@ module riscv64(
      wire [9:0] c_index = ppc[11:2];
      wire [19:0] c_tag_req = ppc[31:12];
 
+    (* ram_style = "block" *) reg [63:0] I_Cache [0:2047];
+    (* ram_style = "block" *) reg [20:0] I_Tag [0:511];
+
      wire [31:0] cache_data = I_Cache[c_index];
      wire [20:0] tag_data = I_Tag[c_index];
 
