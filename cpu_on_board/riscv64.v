@@ -365,7 +365,7 @@ module riscv64(
 	//	Csrs[mstatus][MIE] <= Csrs[mstatus][MPIE]; // set back interrupt status
 		
             //  mmu_cache I-Cache Miss Trap
-	    end else if (!mmu_pc && !mmu_da && !mmu_cache_refill && tbl_i_hit && !cache_hit) begin
+	    end else if (!mmu_pc && !mmu_da && !mmu_cache_refill && tlb_i_hit && !cache_hit) begin
 		mmu_cache_refill <= 1;
 		re[9] <= ppc;
 		pc <= 0; // jump to Cache_Refill Handler
