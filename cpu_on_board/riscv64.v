@@ -195,9 +195,9 @@ module riscv64(
     reg        reserve_valid;
 
     // -- TLB -- 8 pages?
-    reg [26:0] tlb_vpn [0:3]; // vpn number VA[38:12]  Sv39
-    reg [43:0] tlb_ppn [0:3]; // ppn number PA[55:12]
-    reg tlb_valid [0:3];
+    reg [26:0] tlb_vpn [0:7]; // vpn number VA[38:12]  Sv39
+    reg [43:0] tlb_ppn [0:7]; // ppn number PA[55:12]
+    reg tlb_valid [0:7];
     // i
     wire [26:0] pc_vpn = pc[38:12];
     reg [43:0] pc_ppn;
@@ -211,6 +211,10 @@ module riscv64(
 	else if (tlb_valid[1] && tlb_vpn[1] == pc_vpn) begin tlb_i_hit = 1; pc_ppn = tlb_ppn[1]; end
 	else if (tlb_valid[2] && tlb_vpn[2] == pc_vpn) begin tlb_i_hit = 1; pc_ppn = tlb_ppn[2]; end
 	else if (tlb_valid[3] && tlb_vpn[3] == pc_vpn) begin tlb_i_hit = 1; pc_ppn = tlb_ppn[3]; end
+	else if (tlb_valid[4] && tlb_vpn[4] == pc_vpn) begin tlb_i_hit = 1; pc_ppn = tlb_ppn[4]; end
+	else if (tlb_valid[5] && tlb_vpn[5] == pc_vpn) begin tlb_i_hit = 1; pc_ppn = tlb_ppn[5]; end
+	else if (tlb_valid[6] && tlb_vpn[6] == pc_vpn) begin tlb_i_hit = 1; pc_ppn = tlb_ppn[6]; end
+	else if (tlb_valid[7] && tlb_vpn[7] == pc_vpn) begin tlb_i_hit = 1; pc_ppn = tlb_ppn[7]; end
     end
 
     // d
@@ -234,6 +238,10 @@ module riscv64(
 	 else if (tlb_valid[1] && tlb_vpn[1] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[1]; end
 	 else if (tlb_valid[2] && tlb_vpn[2] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[2]; end
 	 else if (tlb_valid[3] && tlb_vpn[3] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[3]; end
+	 else if (tlb_valid[4] && tlb_vpn[4] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[4]; end
+	 else if (tlb_valid[5] && tlb_vpn[5] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[5]; end
+	 else if (tlb_valid[6] && tlb_vpn[6] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[6]; end
+	 else if (tlb_valid[7] && tlb_vpn[7] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[7]; end
      end
      // concat physical address
      wire need_trans = satp_mmu && !mmu_pc && !mmu_da;
