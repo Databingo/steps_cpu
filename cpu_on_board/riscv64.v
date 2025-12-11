@@ -244,16 +244,16 @@ module riscv64(
      end
      // concat physical address
      wire need_trans = satp_mmu && !mmu_pc && !mmu_da;
-     wire [55:0] ppc = need_trans ? { pc_ppn, pc[11:0]} : pc;
-     wire [55:0] pda = need_trans ? { data_ppn,ls_va[11:0]} : ls_va;
+     wire [55:0] ppc = need_trans ? {pc_ppn, pc[11:0]} : pc;
+     wire [55:0] pda = need_trans ? {data_ppn,ls_va[11:0]} : ls_va;
      // cache hit request
      wire [9:0] c_index = ppc[11:2];
-     wire [19:0] c_tag_req = ppc[31:12];
-     // Cache
+     wire [19:0] c_tag = ppc[31:12];
+    // Cache hit
+     wire cache_hit = tag_data[20] && (tag_data[19:0] == c_tag) && (need_trans ? tlb_i_hit : 1);
+     // I_Cache
     (* ram_style = "block" *) reg [63:0] I_Cache [0:2047];
     (* ram_style = "block" *) reg [20:0] I_Tag [0:511];
-    // Cache hit
-     wire cache_hit = tag_data[20] && (tag_data[19:0] == c_tag_req) && (need_trans ? tlb_i_hit : 1);
      wire [31:0] cache_data = I_Cache[c_index];
      wire [20:0] tag_data = I_Tag[c_index];
 
@@ -436,12 +436,12 @@ module riscv64(
 	            32'b???????_?????_?????_???_?????_0110111: re[w_rd] <= w_imm_u; // Lui
 	            32'b???????_?????_?????_???_?????_0010111: re[w_rd] <= w_imm_u + (pc - 4); // Auipc
 
-		    32'b???????_?????_?????_000_?????_0000011: begin  // Lb  3 cycles but wait to 5
-			if (load_step == 0) begin bus_address <= rs1 + w_imm_i; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; bus_ls_type <= w_func3; //end
-			                    if (got_pda) bus_address <= pa; end
-		        if (load_step == 1 && bus_read_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working
-		        if (load_step == 1 && bus_read_done == 1) begin re[w_rd]<= $signed(bus_read_data[7:0]); load_step <= 0; //end end //bus_read_enable <= 0; end end // bus ok and execute
-			                    if (got_pda) got_pda <= 0; end end
+		//    32'b???????_?????_?????_000_?????_0000011: begin  // Lb  3 cycles but wait to 5
+		//	if (load_step == 0) begin bus_address <= rs1 + w_imm_i; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; bus_ls_type <= w_func3; //end
+		//	                    if (got_pda) bus_address <= pa; end
+		//        if (load_step == 1 && bus_read_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working
+		//        if (load_step == 1 && bus_read_done == 1) begin re[w_rd]<= $signed(bus_read_data[7:0]); load_step <= 0; //end end //bus_read_enable <= 0; end end // bus ok and execute
+		//	                    if (got_pda) got_pda <= 0; end end
 		//    32'b???????_?????_?????_100_?????_0000011: begin  // Lbu  3 cycles
 		//        if (load_step == 0) begin bus_address <= rs1 + w_imm_i; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; bus_ls_type <= w_func3; //end
 		//	                    if (got_pda) bus_address <= pa; end
