@@ -294,6 +294,11 @@ assign DRAM_CKE = 1; // always enable
     wire Sdram_selected = (bus_address >= `Sdram_min && bus_address < `Sdram_max);
     wire Mtime_selected = (bus_address == `Mtime);
     wire Mtimecmp_selected = (bus_address == `Mtimecmp);
+    wire CacheI_selected = (bus_address == `CacheI);
+    wire Tlb_selected = (bus_address == `Tlb);
+
+
+
     // Plic mapping
     wire Plic_priority_selected = (bus_address >= `Plic_base && bus_address < `Plic_pending);
     wire Plic_pending_selected = (bus_address == `Plic_pending);
@@ -534,6 +539,9 @@ assign DRAM_CKE = 1; // always enable
 
 	    if (Mtimecmp_selected) begin mtimecmp <= bus_write_data; bus_write_done <= 1; end
 	    //if (Sdram_selected) begin if (sdram_req_wait==0) bus_write_done <= 1; end
+
+            if (Tlb_selected) bus_write_done <= 0; 
+	    if (CacheI_selected) bus_write_done <= 0; 
 	    
             // Plic write
 	    if (Plic_priority_selected) begin Plic_priority[plic_id] <= bus_write_data; bus_write_done <= 1; end

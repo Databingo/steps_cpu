@@ -38,7 +38,8 @@ cat bin.txt > rom.mif  # write ROM program
 #go run ../rvas.go sdram.s
 #go run ../rvas.go shadow.s
 #go run ../rvas.go mopensbi.s
-go run ../rvas.go PLIC.s
+#go run ../rvas.go PLIC.s
+go run ../rvas.go TLB.s
 
 
 

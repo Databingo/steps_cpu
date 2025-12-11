@@ -48,10 +48,6 @@ module riscv64(
         begin
     	case(spc) /// only x0-x9 could use, x9 is the value passer
 	    // mmu_da
-    	    //4:  get_shadow_ir = 32'b00000000010000101000001010010011; // addi t0, t0, 0x4
-    	    //8:  get_shadow_ir = 32'b00000101111000000000001100010011; // addi t1, x0, 0x5e
-    	    //12: get_shadow_ir = 32'b00000000011000101011000000100011; // sd t1, 0(t0) print ^
-    	    //16: get_shadow_ir = 32'b00110000001000000000000001110011; // mret
             0:  get_shadow_ir = 32'b00000000000000000010000010110111; // lui x1, 0x2
             4:  get_shadow_ir = 32'b00000000010000001000000010010011; // addi x1, x1, 0x4
             8:  get_shadow_ir = 32'b00000101111000000000000100010011; // addi x2, x0, 0x5e
@@ -63,6 +59,20 @@ module riscv64(
     	    28: get_shadow_ir = 32'b00000010101000000000000100010011; // addi x2, x0, 0x2a
     	    32: get_shadow_ir = 32'b00000000001000001011000000100011; // sd x2, 0(x1)      print *
     	    36: get_shadow_ir = 32'b00110000001000000000000001110011; // mret             
+	    // I-TLB Handler
+            40: get_shadow_ir = 32'hf0000437; // lui x8, 0xf0000
+            44: get_shadow_ir = 32'h00943023; // sd x9, 0(x8)
+            48: get_shadow_ir = 32'h30200073; // mret
+	    // D-TLB Handler
+            60: get_shadow_ir = 32'hf0000437; // lui x8, 0xf0000
+            64: get_shadow_ir = 32'h00943023; // sd x9, 0(x8)
+            68: get_shadow_ir = 32'h30200073; // mret
+	    // CacheI Handler
+            100: get_shadow_ir = 32'h0004b383; // ld x7, 0(x9) 
+            104: get_shadow_ir = 32'hf0001437; // lui x8, 0xf0001
+            108: get_shadow_ir = 32'h00743023; // sd x7, 0(x8) 
+            112: get_shadow_ir = 32'h30200073; // mret
+
     	    default: get_shadow_ir = 32'h00000013; // NOP:addi x0, x0, 0
     	endcase
         end
@@ -198,7 +208,7 @@ module riscv64(
     // -- TLB -- 8 pages
     reg [26:0] tlb_vpn [0:7]; // vpn number VA[38:12]  Sv39
     reg [43:0] tlb_ppn [0:7]; // ppn number PA[55:12]
-    reg tlb_valid [0:7];
+    reg tlb_vld [0:7];
     // i map
     wire [26:0] pc_vpn = pc[38:12];
     reg [43:0] pc_ppn;
@@ -207,14 +217,14 @@ module riscv64(
     always @(*) begin
 	tlb_i_hit = 0;
 	pc_ppn = 0;
-	if      (tlb_valid[0] && tlb_vpn[0] == pc_vpn) begin tlb_i_hit = 1; pc_ppn = tlb_ppn[0]; end
-	else if (tlb_valid[1] && tlb_vpn[1] == pc_vpn) begin tlb_i_hit = 1; pc_ppn = tlb_ppn[1]; end
-	else if (tlb_valid[2] && tlb_vpn[2] == pc_vpn) begin tlb_i_hit = 1; pc_ppn = tlb_ppn[2]; end
-	else if (tlb_valid[3] && tlb_vpn[3] == pc_vpn) begin tlb_i_hit = 1; pc_ppn = tlb_ppn[3]; end
-	else if (tlb_valid[4] && tlb_vpn[4] == pc_vpn) begin tlb_i_hit = 1; pc_ppn = tlb_ppn[4]; end
-	else if (tlb_valid[5] && tlb_vpn[5] == pc_vpn) begin tlb_i_hit = 1; pc_ppn = tlb_ppn[5]; end
-	else if (tlb_valid[6] && tlb_vpn[6] == pc_vpn) begin tlb_i_hit = 1; pc_ppn = tlb_ppn[6]; end
-	else if (tlb_valid[7] && tlb_vpn[7] == pc_vpn) begin tlb_i_hit = 1; pc_ppn = tlb_ppn[7]; end
+	if      (tlb_vld[0] && tlb_vpn[0] == pc_vpn) begin tlb_i_hit = 1; pc_ppn = tlb_ppn[0]; end
+	else if (tlb_vld[1] && tlb_vpn[1] == pc_vpn) begin tlb_i_hit = 1; pc_ppn = tlb_ppn[1]; end
+	else if (tlb_vld[2] && tlb_vpn[2] == pc_vpn) begin tlb_i_hit = 1; pc_ppn = tlb_ppn[2]; end
+	else if (tlb_vld[3] && tlb_vpn[3] == pc_vpn) begin tlb_i_hit = 1; pc_ppn = tlb_ppn[3]; end
+	else if (tlb_vld[4] && tlb_vpn[4] == pc_vpn) begin tlb_i_hit = 1; pc_ppn = tlb_ppn[4]; end
+	else if (tlb_vld[5] && tlb_vpn[5] == pc_vpn) begin tlb_i_hit = 1; pc_ppn = tlb_ppn[5]; end
+	else if (tlb_vld[6] && tlb_vpn[6] == pc_vpn) begin tlb_i_hit = 1; pc_ppn = tlb_ppn[6]; end
+	else if (tlb_vld[7] && tlb_vpn[7] == pc_vpn) begin tlb_i_hit = 1; pc_ppn = tlb_ppn[7]; end
     end
     // d map
     reg [38:0] ls_va;
@@ -233,30 +243,46 @@ module riscv64(
     always @(*) begin
 	 tlb_d_hit = 0;
 	 data_ppn = 0;
-	 if      (tlb_valid[0] && tlb_vpn[0] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[0]; end
-	 else if (tlb_valid[1] && tlb_vpn[1] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[1]; end
-	 else if (tlb_valid[2] && tlb_vpn[2] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[2]; end
-	 else if (tlb_valid[3] && tlb_vpn[3] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[3]; end
-	 else if (tlb_valid[4] && tlb_vpn[4] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[4]; end
-	 else if (tlb_valid[5] && tlb_vpn[5] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[5]; end
-	 else if (tlb_valid[6] && tlb_vpn[6] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[6]; end
-	 else if (tlb_valid[7] && tlb_vpn[7] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[7]; end
+	 if      (tlb_vld[0] && tlb_vpn[0] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[0]; end
+	 else if (tlb_vld[1] && tlb_vpn[1] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[1]; end
+	 else if (tlb_vld[2] && tlb_vpn[2] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[2]; end
+	 else if (tlb_vld[3] && tlb_vpn[3] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[3]; end
+	 else if (tlb_vld[4] && tlb_vpn[4] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[4]; end
+	 else if (tlb_vld[5] && tlb_vpn[5] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[5]; end
+	 else if (tlb_vld[6] && tlb_vpn[6] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[6]; end
+	 else if (tlb_vld[7] && tlb_vpn[7] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[7]; end
      end
      // concat physical address
      wire need_trans = satp_mmu && !mmu_pc && !mmu_da;
      wire [55:0] ppc = need_trans ? {pc_ppn, pc[11:0]} : pc;
-     wire [55:0] pda = need_trans ? {data_ppn,ls_va[11:0]} : ls_va;
-     // cache hit request
-     wire [9:0] c_index = ppc[11:2];
-     wire [19:0] c_tag = ppc[31:12];
-    // Cache hit
-     wire cache_hit = tag_data[20] && (tag_data[19:0] == c_tag) && (need_trans ? tlb_i_hit : 1);
+     wire [55:0] pda = need_trans ? {data_ppn, ls_va[11:0]} : ls_va;
      // I_Cache
-    (* ram_style = "block" *) reg [63:0] I_Cache [0:2047];
-    (* ram_style = "block" *) reg [20:0] I_Tag [0:511];
-     wire [31:0] cache_data = I_Cache[c_index];
-     wire [20:0] tag_data = I_Tag[c_index];
+    (* ram_style = "block" *) reg [63:0] I_Cache [0:2047]; // 11 bits address  16KB Cache
+    (* ram_style = "block" *) reg [20:0] I_Tag [0:511]; // 9 bits address
+     // Read Indices
+     wire [10:0] data_index = ppc[13:3]; // 11 bits for 2048 entries
+     wire [8:0]  tag_index = ppc[13:5];  // 9 bits for 512 lines(4 entries= 4*8=32 bytes/line)
+     wire [17:0] tag_req = ppc[31:14];  // Tag is upper bits
+     // Hardware read
+     wire [63:0] cache_block = I_Cache[data_index];
+     wire [18:0] tag_vld = I_Tag[tag_index]; // [18]valid [17:0]tag
+    //  Hit Calculation
+     wire cache_hit = tag_vld[18] && (tag_vld[17:0] == tag_req) && (need_trans ? tlb_i_hit : 1);
+     wire [31:0] cache_data = ppc[2] ? cache_block[63:32] : cache_block[31:0];
 
+    // TLB Refill
+    reg [2:0] tlb_ptr = 0; // 8 entries TLB
+    always @(posedge clk or negedge reset) begin
+	if (!reset) tlb_ptr <= 0;
+	else if (bus_write_enable && bus_address == `Tlb) begin
+	    tlb_vpn[tlb_ptr] <= re[9][38:12]; // VA from x9 trapped by mmu_pc/mmu_da
+	    tlb_ppn[tlb_ptr] <= {24'b0, re[9][38:12]}; // mimic copy now
+	    tlb_vld[tlb_ptr] <= 1;
+	    tlb_ptr <= tlb_ptr + 1; end
+        else if (bus_write_enable && bus_address == `CacheI) begin
+	    I_Cache[re[9][13:3]] <= bus_write_data; // 64 bits use Sd
+	    I_Tag[re[9][13:5]] <= {1'b1, re[9][31:14]}; end
+    end
 
 
     // IF Instruction (Only drive IR)
@@ -322,7 +348,8 @@ module riscv64(
 	    //  mmu_pc  I-TLB miss Trap
 	    end else if (satp_mmu && !mmu_pc && !mmu_da && !mmu_cache_refill && !tlb_i_hit) begin //OPEN 
 		mmu_pc <= 1; // MMU_PC ON 
-	        pc <= 20; // I-TLB refill Handler
+	        //pc <= 20; // I-TLB refill Handler
+	        pc <= 40; // I-TLB refill Handler
 	 	bubble <= 1'b1; // bubble 
 	        saved_user_pc <= pc-4; // save pc 
 		for (i=0;i<=9;i=i+1) begin sre[i]<= re[i]; end // save re
@@ -337,7 +364,8 @@ module riscv64(
 		&& !tlb_d_hit) begin  
 		mmu_da <= 1; // MMU_DA ON
 	        saved_user_pc <= pc-4; // save pc l/s
-		pc <= 0; // D-TLB refill Handler
+		//pc <= 0; // D-TLB refill Handler
+		pc <= 60; // D-TLB refill Handler
 	 	bubble <= 1'b1; // bubble
 		for (i=0;i<=9;i=i+1) begin sre[i]<= re[i]; end // save re
 		re[9] <= ls_va; //save va to x1
@@ -345,10 +373,13 @@ module riscv64(
 		Csrs[mstatus][MIE] <= 0;
 		
             //  mmu_cache I-Cache Miss Trap
-	    end else if (!mmu_pc && !mmu_da && !mmu_cache_refill && tlb_i_hit && !cache_hit) begin
+	    end else if (!mmu_pc && !mmu_da && !mmu_cache_refill 
+		&& (tlb_i_hit || !satp_mmu) // Allow if hit or bare mode
+	        && !cache_hit) begin
 		mmu_cache_refill <= 1;
 		re[9] <= ppc;
-		pc <= 60; // jump to Cache_Refill Handler
+		//pc <= 60; // jump to Cache_Refill Handler
+		pc <= 100; // jump to Cache_Refill Handler
 		bubble <= 1;
 	        saved_user_pc <= pc-4; // save pc 
 		for (i=0;i<=9;i=i+1) begin sre[i]<= re[i]; end // save re
@@ -739,14 +770,6 @@ module riscv64(
 		    //    if (load_step == 1 && bus_read_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working
 		    //    if (load_step == 1 && bus_read_done == 1) begin re[w_rd]<= $signed(bus_read_data[31:0]); load_step <= 0; //end end //bus_read_enable <= 0; end end // bus ok and execute
 		    //                        if (got_pda) got_pda <= 0; end end
-		    //// sw 
-	            //32'b???????_?????_?????_010_?????_0100011: begin
-		    //    if (store_step == 0) begin bus_address <= rs1 + w_imm_s; bus_write_data<=rs2[31:0];bus_write_enable<=1;pc<=pc-4;bubble<=1;store_step<=1;bus_ls_type<=w_func3; //end
-		    //                        if (got_pda) bus_address <= pa; end
-		    //    if (store_step == 1 && bus_write_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working 1 bubble2 this3
-		    //    if (store_step == 1 && bus_write_done == 1) begin store_step <= 0;
-		    //                        if (got_pda) got_pda <= 0; end 
-		    //    end 
 		    //// sc.w 
 	            //32'b00011_??_?????_?????_010_?????_0101111: begin
 		    //    if (store_step == 0) begin 

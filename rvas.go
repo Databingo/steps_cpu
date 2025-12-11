@@ -1974,8 +1974,9 @@ func main() { //t6a7s11
 		ins := fmt.Sprintf("%032b", instruction)
 		addr := fmt.Sprintf("%08b", address)
 		addrd := fmt.Sprintf("%05d", address)
+		ins_h := fmt.Sprintf("%08x", instruction)
 		little_endian_ins := ins[24:32] + " " + ins[16:24] + " " + ins[8:16] + " " + ins[0:8]
-		append2f(little_endian_ins+" // Addr: "+addrd+" "+addr+" "+ins+" "+line, "binary_instructions.txt")
+		append2f(little_endian_ins+" // Addr: "+addrd+" "+addr+" "+ins+" "+ins_h+" "+line, "binary_instructions.txt")
 		//append2f(little_endian_ins+" // Addr: "+addrd+" "+addr+" "+ins+" "+scanner.Text(), "binary_instructions.txt")
 
 		append2f(strings.Replace(little_endian_ins, " ", "", -1), "bin.txt")

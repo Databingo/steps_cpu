@@ -28,3 +28,7 @@
 `define Plic_threshold    32'h0C20_0000  //# base + 0x200000 + ContextID*0x1000 0hart0M 1hart0S...4B 
 `define Plic_claim        32'h0C20_0004  //# base + 0x200004 + ContextID*0x1000 0hart0M 1hart0S...4B
 `define HARTS 1
+
+
+`define Tlb    32'hf000_0000
+`define CacheI 32'hf000_1000
