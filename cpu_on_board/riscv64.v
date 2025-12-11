@@ -319,73 +319,51 @@ module riscv64(
             // Bubble
 	    if (bubble) begin bubble <= 1'b0; // Flush this cycle & Clear bubble signal for the next cycle
 
-	    //end else if (satp_mmu && !mmu_pc && !mmu_da && !is_ppc) begin  // OPEN mmu_pc/mmu_da/is_ppc not open mmu walk translate all jump-like pc:jump/branch/trap/handler need tranlate
 	    //  mmu_pc  I-TLB miss Trap
 	    end else if (satp_mmu && !mmu_pc && !mmu_da && !mmu_cache_refill && !tlb_i_hit) begin //OPEN 
 		mmu_pc <= 1; // MMU_PC ON 
-	        pc <= 20; // handler
+	        pc <= 20; // I-TLB refill Handler
 	 	bubble <= 1'b1; // bubble 
+	        saved_user_pc <= pc-4; // save pc 
 		for (i=0;i<=9;i=i+1) begin sre[i]<= re[i]; end // save re
 		re[9]<= pc - 4; // save vpc to x1
 		Csrs[mstatus][MPIE] <= Csrs[mstatus][MIE]; // disable interrupt during shadow mmu walking
 		Csrs[mstatus][MIE] <= 0;
-	    //end else if (mmu_pc && ir == 32'b00110000001000000000000001110011) begin // end hiject mret & recover from shadow when see Mret
-	    //    pc <= re[9]; // get ppc and turn to ppc'ir
-	    //    bubble <= 1'b1; // bubble
-	    //    for (i=0;i<=9;i=i+1) begin re[i]<= sre[i]; end // recover usr re
-	    //    is_ppc <= 1; // we are ppc
-	    //    mmu_pc <= 0; // MMU_PC OFF
-	    //    Csrs[mstatus][MIE] <= Csrs[mstatus][MPIE]; // set back interrupt status
 
             //  mmu_da  D-TLB miss Trap
 	    end else if (satp_mmu && !mmu_pc && !mmu_da && !mmu_cache_refill
-		//&& !mmu_pc && !mmu_da && !got_pda) begin  
 		&& (op == 7'b0000011 || op == 7'b0100011 || op == 7'b0101111)  // load/store/atom
-	        //&& !(op == 7'b0101111 && w_func5 == 5'b00011 && (!reserve_valid || reserve_addr != rs1)) // exclude failed sc.w/sc.d to run into mmu
 	        && !(op == 7'b0101111 && w_func5 == 5'b00011 && (!reserve_valid || reserve_addr != pda)) // exclude failed sc.w/sc.d to run into mmu
 		&& !tlb_d_hit) begin  
 		mmu_da <= 1; // MMU_DA ON
 	        saved_user_pc <= pc-4; // save pc l/s
-		pc <= 0; // handler
+		pc <= 0; // D-TLB refill Handler
 	 	bubble <= 1'b1; // bubble
 		for (i=0;i<=9;i=i+1) begin sre[i]<= re[i]; end // save re
-		//if (op == 7'b0000011) re[9] <= (rs1 + w_imm_i);
-		//if (op == 7'b0100011) re[9] <= (rs1 + w_imm_s);
-		//if (op == 7'b0101111) re[9] <=  rs1; // save vpa to x1
 		re[9] <= ls_va; //save va to x1
 		Csrs[mstatus][MPIE] <= Csrs[mstatus][MIE]; // disable interrupt during shadow mmu walking
 		Csrs[mstatus][MIE] <= 0;
-	//    end else if (mmu_da && ir == 32'b00110000001000000000000001110011) begin // hiject mret 
-	//	pa <= re[9]; // get pda
-	//	pc <= saved_user_pc; // recover from shadow when see Mret
-	//	bubble <= 1; // bubble
-	//	for (i=0;i<=9;i=i+1) begin re[i]<= sre[i]; end // recover usr re
-	//	got_pda <= 1; // we are pa
-	//	mmu_da <= 0; // MMU_DA OFF
-	//	Csrs[mstatus][MIE] <= Csrs[mstatus][MPIE]; // set back interrupt status
 		
             //  mmu_cache I-Cache Miss Trap
 	    end else if (!mmu_pc && !mmu_da && !mmu_cache_refill && tlb_i_hit && !cache_hit) begin
 		mmu_cache_refill <= 1;
 		re[9] <= ppc;
-		pc <= 0; // jump to Cache_Refill Handler
+		pc <= 60; // jump to Cache_Refill Handler
 		bubble <= 1;
 	        saved_user_pc <= pc-4; // save pc 
 		for (i=0;i<=9;i=i+1) begin sre[i]<= re[i]; end // save re
 		Csrs[mstatus][MPIE] <= Csrs[mstatus][MIE]; // disable interrupt during shadow mmu walking
 		Csrs[mstatus][MIE] <= 0;
-            // return from shadow mret hiject
+
+            // uni-return from shadow (mret hiject)
 	    end else if ((mmu_pc || mmu_da || mmu_cache_refill) && ir == 32'b00110000001000000000000001110011) begin // hiject mret 
-		//pa <= re[9]; // get pda
 		pc <= saved_user_pc; // recover from shadow when see Mret
 		bubble <= 1; // bubble
 		for (i=0;i<=9;i=i+1) begin re[i]<= sre[i]; end // recover usr re
-		//got_pda <= 1; // we are pa
 		mmu_pc <= 0;  // Off
 		mmu_da <= 0; // MMU_DA OFF
 		mmu_cache_refill <= 0; // OFF
 		Csrs[mstatus][MIE] <= Csrs[mstatus][MPIE]; // set back interrupt status
-
 
 
 
