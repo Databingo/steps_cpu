@@ -6,7 +6,6 @@ module riscv64(
     input wire [31:0] instruction,
     //output reg [63:0] pc,
     output reg [38:0] pc,
-    //output wire [55:0] ppc = need_trans ? {pc_ppn, pc[11:0]} : pc,
     output reg [31:0] ir,
     //output reg [63:0] re [0:31], // General Registers 32s
     output wire  heartbeat,
@@ -211,7 +210,6 @@ module riscv64(
     reg [26:0] tlb_vpn [0:7]; // vpn number VA[38:12]  Sv39
     reg [43:0] tlb_ppn [0:7]; // ppn number PA[55:12]
     reg tlb_vld [0:7];
-
     // i hit
     wire [26:0] pc_vpn = pc[38:12];
     reg [43:0] pc_ppn;
@@ -263,8 +261,9 @@ module riscv64(
     //wire [55:0] current_ppc_base = {ppc[55:5], 5'b0};
     //wire cache_hit = (Tag_base == current_ppc_base) && (need_trans ? tlb_i_hit : 1);
     //wire [31:0] cache_data = I_Cache[ppc[4:2]];
-     reg [55:0] Tag_base;
-     wire cache_hit = (Tag_base == ppc) && (need_trans ? tlb_i_hit : 1);
+     reg [55:0] Tag_base = 56'hffffffffffffff;
+     //wire cache_hit = (Tag_base == ppc) && (need_trans ? tlb_i_hit : 1);
+     wire cache_hit = (Tag_base == ppc);
      wire [31:0] cache_data = I_Cache;
 
     // TLB Refill
@@ -323,6 +322,10 @@ module riscv64(
 	    mmu_pc <= 0;
 	    is_ppc <= 0; // current using address is physical addr
 	    never_mmu <= 1;
+	    cache_hit <= 0;
+	    tlb_i_hit <= 0;
+	    tlb_d_hit <= 0;
+	    Tag_base <= 0;
 
             atom_step <= 0;
             atom_tmp_value <= 0;
@@ -345,7 +348,6 @@ module riscv64(
 
 	    //  mmu_pc  I-TLB miss Trap
 	    end else if (satp_mmu && !mmu_pc && !mmu_da && !mmu_cache_refill && !tlb_i_hit) begin //OPEN 
-	    //end else if (satp_mmu && !mmu_pc && !mmu_da && (never_mmu || pc[11:0]==12'hFFC || op == 7'b1101111|| op == 7'b1100111|| op == 7'b1100011)) begin //OPEN //jal/jalr/branch/page_boarder4092->6
        		mmu_pc <= 1; // MMU_PC ON 
        	        pc <= 40; // I-TLB refill Handler
        	 	bubble <= 1'b1; // bubble 
@@ -361,13 +363,8 @@ module riscv64(
 		mmu_pc <= 0; // MMU_PC OFF
 		Csrs[mstatus][MIE] <= Csrs[mstatus][MPIE]; // set back interrupt status
 
-            //  mmu_da  D-TLB miss Trap
-	    //end else if (satp_mmu && !mmu_pc && !mmu_da && !mmu_cache_refill
-	    end else if (satp_mmu && !mmu_pc && !mmu_da && !mmu_cache_refill && !tlb_d_hit
-	    //end else if (satp_mmu && !mmu_pc && !mmu_da && !got_pda && (op == 7'b0000011 || op == 7'b0100011 || op == 7'b0101111)  // load/store/atom
-	        //&& !(op == 7'b0101111 && w_func5 == 5'b00011 && (!reserve_valid || reserve_addr != pda)) // exclude failed sc.w/sc.d to run into mmu
-	        && (op == 7'b0000011 || op == 7'b0100011 || op == 7'b0101111)  // load/store/atom
-		) begin  
+            //  mmu_da  D-TLB miss Trap // load/store/atom
+	    end else if (satp_mmu && !mmu_pc && !mmu_da && !mmu_cache_refill && !tlb_d_hit && (op == 7'b0000011 || op == 7'b0100011 || op == 7'b0101111) ) begin  
 		mmu_da <= 1; // MMU_DA ON
 	        saved_user_pc <= pc-4; // save pc l/s
 		pc <= 60; // D-TLB refill Handler
@@ -383,9 +380,8 @@ module riscv64(
 		mmu_da <= 0; // MMU_DA OFF
 		Csrs[mstatus][MIE] <= Csrs[mstatus][MPIE]; // set back interrupt status
 		
-            //  mmu_cache I-Cache Miss Trap
-	    end else if (!mmu_pc && !mmu_da && !mmu_cache_refill && (tlb_i_hit || !satp_mmu) // Allow if hit or bare mode
-	        && !cache_hit) begin
+            //  mmu_cache I-Cache Miss Trap // Allow if hit or bare mode
+	    end else if (!mmu_pc && !mmu_da && !mmu_cache_refill && (tlb_i_hit || !satp_mmu) && !cache_hit) begin
 		mmu_cache_refill <= 1;
 		re[9] <= ppc;
 		pc <= 100; // jump to Cache_Refill Handler
