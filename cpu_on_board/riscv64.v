@@ -290,7 +290,7 @@ module riscv64(
             ir <= 32'h00000001; 
         end else begin
             heartbeat <= ~heartbeat; // heartbeat
-	    if (mmu_da || mmu_pc) ir <= get_shadow_ir(pc);  // Runing shadow code
+	    if (mmu_da || mmu_pc || mmu_cache_refill) ir <= get_shadow_ir(pc);  // Runing shadow code
             //else ir <= instruction; // 
             else if (cache_hit) ir <= cache_data; // Cache hit
             //else ir <= instruction; // 
