@@ -69,10 +69,10 @@ module riscv64(
             64: get_shadow_ir = 32'h00943023; // sd x9, 0(x8)
             68: get_shadow_ir = 32'h30200073; // mret
 	    // CacheI Handler
-            100: get_shadow_ir = 32'h0004b383; // ld x7, 0(x9) 
-            104: get_shadow_ir = 32'hf0001437; // lui x8, 0xf0001
-            108: get_shadow_ir = 32'h00743023; // sd x7, 0(x8) 
-            112: get_shadow_ir = 32'h30200073; // mret
+            100: get_shadow_ir = 32'hf0001437; // lui x8, 0xf0001
+            104: get_shadow_ir = 32'h0004a383; // lw x7, 0(x9)   
+            108: get_shadow_ir = 32'h00743023; // sd x7, 0(x8)   
+            112: get_shadow_ir = 32'h30200073; // mret           
 
     	    default: get_shadow_ir = 32'h00000013; // NOP:addi x0, x0, 0
     	endcase
@@ -256,21 +256,15 @@ module riscv64(
      // concat physical address
      wire need_trans = satp_mmu && !mmu_pc && !mmu_da;
      wire [55:0] ppc = need_trans ? {pc_ppn, pc[11:0]} : pc;
-     //wire [55:0] pda = need_trans ? {data_ppn, ls_va[11:0]} : ls_va;
-     reg [55:0] pda;
-    // // I_Cache
-    //(* ram_style = "block" *) reg [63:0] I_Cache [0:2047]; // 11 bits address  16KB Cache
-    //(* ram_style = "block" *) reg [20:0] I_Tag [0:511]; // 9 bits address
-    // // Read Indices
-    // wire [10:0] data_index = ppc[13:3]; // 11 bits for 2048 entries
-    // wire [8:0]  tag_index = ppc[13:5];  // 9 bits for 512 lines(4 entries= 4*8=32 bytes/line)
-    // wire [17:0] tag_req = ppc[31:14];  // Tag is upper bits
-    // // Hardware read
-    // wire [63:0] cache_block = I_Cache[data_index];
-    // wire [18:0] tag_vld = I_Tag[tag_index]; // [18]valid [17:0]tag
-    ////  Hit Calculation
-    // wire cache_hit = tag_vld[18] && (tag_vld[17:0] == tag_req) && (need_trans ? tlb_i_hit : 1);
-    // wire [31:0] cache_data = ppc[2] ? cache_block[63:32] : cache_block[31:0];
+     wire [55:0] pda = need_trans ? {data_ppn, ls_va[11:0]} : ls_va;
+     // CacheI
+     reg [31:0] I_Cache; // [0:7]; // 
+    // reg [55:0] Tag_base;
+    //wire [55:0] current_ppc_base = {ppc[55:5], 5'b0};
+    //wire cache_hit = (Tag_base == current_ppc_base) && (need_trans ? tlb_i_hit : 1);
+    //wire [31:0] cache_data = I_Cache[ppc[4:2]];
+     reg [55:0] Tag_base;
+     wire cache_hit = (Tag_base == ppc) && (need_trans ? tlb_i_hit : 1);
 
     // TLB Refill
     reg [2:0] tlb_ptr = 0; // 8 entries TLB
@@ -281,9 +275,11 @@ module riscv64(
 	    tlb_ppn[tlb_ptr] <= {24'b0, re[9][38:12]}; // mimic copy now | real need walking assembly
 	    tlb_vld[tlb_ptr] <= 1;
 	    tlb_ptr <= tlb_ptr + 1; end
-        //else if (bus_write_enable && bus_address == `CacheI) begin  // for fill: sd data, CacheI
-	//    I_Cache[re[9][13:3]] <= bus_write_data; // 64 bits use Sd
-	//    I_Tag[re[9][13:5]] <= {1'b1, re[9][31:14]}; end
+        else if (bus_write_enable && bus_address == `CacheI) begin  // for fill: sw data, CacheI
+	    //I_Cache[re[9][4:2]] <= bus_write_data[31:0]; // 32 bits use Sw
+	    //Tag_base <= {re[9][55:5], 5'b0}; end //
+	    I_Cache <= bus_write_data[31:0]; // 32 bits use Sw
+	    Tag_base <= {re[9][55:0]}; end //
     end
 
 
@@ -295,9 +291,10 @@ module riscv64(
         end else begin
             heartbeat <= ~heartbeat; // heartbeat
 	    if (mmu_da || mmu_pc) ir <= get_shadow_ir(pc);  // Runing shadow code
-            else ir <= instruction; // 
-            //else if (cache_hit) ir <= cache_data; // Cache hit
-	    //else ir <= 32'h00000013; // TLB miss or Cache miss: Nop(stall)
+            //else ir <= instruction; // 
+            else if (cache_hit) ir <= cache_data; // Cache hit
+            //else ir <= instruction; // 
+	    else ir <= 32'h00000013; // TLB miss or Cache miss: Nop(stall)
         end
     end
 
@@ -332,9 +329,6 @@ module riscv64(
             reserve_valid <= 0;
 
 
-
-
-
         end else begin
 	    // Default PC+4    (1.Could be overide 2.Take effect next cycle) 
             pc <= pc + 4;
@@ -344,86 +338,71 @@ module riscv64(
             //Csrs[mip][MTIP] <= time_interrupt; // MTIP linux will see then jump to its handler
             //Csrs[mip][MEIP] <= meip_interrupt; // MEIP
             //Csrs[mip][MSIP] <= msip_interrupt; // MSIP
+	      
+	    CacheI_read_index <= (pc-4)[12:2];
+	    cache_data <= I_Cache[CacheI_read_index];
 
             // Bubble
 	    if (bubble) begin bubble <= 1'b0; // Flush this cycle & Clear bubble signal for the next cycle
 
 	    //  mmu_pc  I-TLB miss Trap
-	    //end else if (satp_mmu && !mmu_pc && !mmu_da && !mmu_cache_refill && !tlb_i_hit) begin //OPEN 
-	    //end else if (satp_mmu && !mmu_pc && !mmu_da && !tlb_i_hit) begin //OPEN 
-	    end else if (satp_mmu && !mmu_pc && !mmu_da && (never_mmu || pc[11:0]==12'hFFC || op == 7'b1101111|| op == 7'b1100111|| op == 7'b1100011)) begin //OPEN //jal/jalr/branch/page_boarder4092->6
-		never_mmu <= 0;
+	    end else if (satp_mmu && !mmu_pc && !mmu_da && !mmu_cache_refill && !tlb_i_hit) begin //OPEN 
+	    //end else if (satp_mmu && !mmu_pc && !mmu_da && (never_mmu || pc[11:0]==12'hFFC || op == 7'b1101111|| op == 7'b1100111|| op == 7'b1100011)) begin //OPEN //jal/jalr/branch/page_boarder4092->6
        		mmu_pc <= 1; // MMU_PC ON 
-       	        //pc <= 20; // I-TLB refill Handler
        	        pc <= 40; // I-TLB refill Handler
        	 	bubble <= 1'b1; // bubble 
 	        saved_user_pc <= pc-4; // save pc 
 		for (i=0;i<=9;i=i+1) begin sre[i]<= re[i]; end // save re
-		if (pc[11:0]==12'hFFC) re[9] <= pc - 4; // page_cross         save vpc to x1
-	        if (op == 7'b1101111)  re[9] <= pc - 4 + w_imm_j; // jal
-		if (op == 7'b1100111)  re[9] <= pc - 4 + w_imm_i; // jalr
-		if (op == 7'b1100011)  re[9] <= pc - 4 + w_imm_b; // branch
+		re[9] <= pc - 4; // save vpc to x1
 		Csrs[mstatus][MPIE] <= Csrs[mstatus][MIE]; // disable interrupt during shadow mmu walking
 		Csrs[mstatus][MIE] <= 0;
 	    end else if (mmu_pc && ir == 32'b00110000001000000000000001110011) begin // end hiject mret & recover from shadow when see Mret
-		pc <= re[9]; // get ppc and turn to ppc'ir
-		//pc <= ppc;  // get ppc from mmu handler 
+		pc <= saved_user_pc; // recover from shadow when see Mret
 	 	bubble <= 1'b1; // bubble
 		for (i=0;i<=9;i=i+1) begin re[i]<= sre[i]; end // recover usr re
-		//is_ppc <= 1; // we are ppc
 		mmu_pc <= 0; // MMU_PC OFF
 		Csrs[mstatus][MIE] <= Csrs[mstatus][MPIE]; // set back interrupt status
 
             //  mmu_da  D-TLB miss Trap
 	    //end else if (satp_mmu && !mmu_pc && !mmu_da && !mmu_cache_refill
-	    //end else if (satp_mmu && !mmu_pc && !mmu_da && !tlb_d_hit
-	    end else if (satp_mmu && !mmu_pc && !mmu_da && !got_pda && (op == 7'b0000011 || op == 7'b0100011 || op == 7'b0101111)  // load/store/atom
+	    end else if (satp_mmu && !mmu_pc && !mmu_da && !mmu_cache_refill && !tlb_d_hit
+	    //end else if (satp_mmu && !mmu_pc && !mmu_da && !got_pda && (op == 7'b0000011 || op == 7'b0100011 || op == 7'b0101111)  // load/store/atom
 	        //&& !(op == 7'b0101111 && w_func5 == 5'b00011 && (!reserve_valid || reserve_addr != pda)) // exclude failed sc.w/sc.d to run into mmu
+	        && (op == 7'b0000011 || op == 7'b0100011 || op == 7'b0101111)  // load/store/atom
 		) begin  
 		mmu_da <= 1; // MMU_DA ON
 	        saved_user_pc <= pc-4; // save pc l/s
-		//pc <= 0; // D-TLB refill Handler
 		pc <= 60; // D-TLB refill Handler
 	 	bubble <= 1'b1; // bubble
 		for (i=0;i<=9;i=i+1) begin sre[i]<= re[i]; end // save re
-		//re[9] <= ls_va; //save va to x1
-		if (op == 7'b0000011) re[9] <= rs1 + w_imm_i;  // load
-		if (op == 7'b0100011) re[9] <= rs1 + w_imm_s;  // store
-		if (op == 7'b0101111) re[9] <= rs1;            // atom
+		re[9] <= ls_va; //save va to x1
 		Csrs[mstatus][MPIE] <= Csrs[mstatus][MIE]; // disable interrupt during shadow mmu walking
 		Csrs[mstatus][MIE] <= 0;
 	    end else if (mmu_da && ir == 32'b00110000001000000000000001110011) begin // hiject mret 
-		pda <= re[9]; // get pda
 		pc <= saved_user_pc; // recover from shadow when see Mret
 		bubble <= 1; // bubble
 		for (i=0;i<=9;i=i+1) begin re[i]<= sre[i]; end // recover usr re
-		got_pda <= 1; // we are pa
 		mmu_da <= 0; // MMU_DA OFF
 		Csrs[mstatus][MIE] <= Csrs[mstatus][MPIE]; // set back interrupt status
 		
-        //    //  mmu_cache I-Cache Miss Trap
-	//    end else if (!mmu_pc && !mmu_da && !mmu_cache_refill 
-	//	&& (tlb_i_hit || !satp_mmu) // Allow if hit or bare mode
-	//        && !cache_hit) begin
-	//	mmu_cache_refill <= 1;
-	//	re[9] <= ppc;
-	//	//pc <= 60; // jump to Cache_Refill Handler
-	//	pc <= 100; // jump to Cache_Refill Handler
-	//	bubble <= 1;
-	//        saved_user_pc <= pc-4; // save pc 
-	//	for (i=0;i<=9;i=i+1) begin sre[i]<= re[i]; end // save re
-	//	Csrs[mstatus][MPIE] <= Csrs[mstatus][MIE]; // disable interrupt during shadow mmu walking
-	//	Csrs[mstatus][MIE] <= 0;
-
-            // uni-return from shadow (mret hiject)
-	//    end else if ((mmu_pc || mmu_da || mmu_cache_refill) && ir == 32'b00110000001000000000000001110011) begin // hiject mret 
-	//	pc <= saved_user_pc; // recover from shadow when see Mret
-	//	bubble <= 1; // bubble
-	//	for (i=0;i<=9;i=i+1) begin re[i]<= sre[i]; end // recover usr re
-	//	mmu_pc <= 0;  // Off
-	//	mmu_da <= 0; // MMU_DA OFF
-	//	mmu_cache_refill <= 0; // OFF
-	//	Csrs[mstatus][MIE] <= Csrs[mstatus][MPIE]; // set back interrupt status
+            //  mmu_cache I-Cache Miss Trap
+	    end else if (!mmu_pc && !mmu_da && !mmu_cache_refill 
+		&& (tlb_i_hit || !satp_mmu) // Allow if hit or bare mode
+	        && !cache_hit) begin
+		mmu_cache_refill <= 1;
+		re[9] <= ppc;
+		pc <= 100; // jump to Cache_Refill Handler
+		bubble <= 1;
+	        saved_user_pc <= pc-4; // save pc 
+		for (i=0;i<=9;i=i+1) begin sre[i]<= re[i]; end // save re
+		Csrs[mstatus][MPIE] <= Csrs[mstatus][MIE]; // disable interrupt during shadow mmu walking
+		Csrs[mstatus][MIE] <= 0;
+	    end else if (mmu_cache_refill && ir == 32'b00110000001000000000000001110011) begin // hiject mret 
+		pc <= saved_user_pc; // recover from shadow when see Mret
+		bubble <= 1; // bubble
+		for (i=0;i<=9;i=i+1) begin re[i]<= sre[i]; end // recover usr re
+		mmu_cache_refill <= 0; // OFF
+		Csrs[mstatus][MIE] <= Csrs[mstatus][MPIE]; // set back interrupt status
 
 
 
@@ -491,7 +470,7 @@ module riscv64(
 	        //bus_address <= `Ram_base;
 	        //is_ppc <= 0;
 		if (is_ppc && pc[11:0]==12'hFFC) is_ppc <= 0; //page_cross 4096 Bytes
-	        if (!mmu_pc && !mmu_da && got_pda && (op == 7'b0000011 || op == 7'b0100011 || op == 7'b0101111)) got_pda <= 0; // load/store/atom
+	        //if (!mmu_pc && !mmu_da && got_pda && (op == 7'b0000011 || op == 7'b0100011 || op == 7'b0101111)) got_pda <= 0; // load/store/atom
                 casez(ir) // Pseudo: li j jr ret call // I: addi sb sh sw sd lb lw ld lbu lhu lwu lui jal jalr auipc beq slt mret 
 	            // U-type
 	            32'b???????_?????_?????_???_?????_0110111: re[w_rd] <= w_imm_u; // Lui
