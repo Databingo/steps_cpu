@@ -68,10 +68,10 @@ module riscv64(
             64: get_shadow_ir = 32'h00943023; // sd x9, 0(x8)
             68: get_shadow_ir = 32'h30200073; // mret
 	    // CacheI Handler
-            100: get_shadow_ir = 32'hf0001437; // lui x8, 0xf0001
-            104: get_shadow_ir = 32'h0004a383; // lw x7, 0(x9)   
-            108: get_shadow_ir = 32'h00743023; // sd x7, 0(x8)   
-            112: get_shadow_ir = 32'h30200073; // mret           
+            100: get_shadow_ir = 32'b11110000000000000001010000110111; // f0001437 lui x8, 0xf0001
+            104: get_shadow_ir = 32'b00000000000001001010001110000011; // 0004a383 lw x7, 0(x9)   
+            108: get_shadow_ir = 32'b00000000011101000010000000100011; // 00742023 sw x7, 0(x8)   
+            112: get_shadow_ir = 32'b00110000001000000000000001110011; // 30200073 mret           
 
     	    default: get_shadow_ir = 32'h00000013; // NOP:addi x0, x0, 0
     	endcase
