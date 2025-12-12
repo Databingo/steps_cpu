@@ -284,7 +284,6 @@ module riscv64(
         //else if (bus_write_enable && bus_address == `CacheI) begin  // for fill: sd data, CacheI
 	//    I_Cache[re[9][13:3]] <= bus_write_data; // 64 bits use Sd
 	//    I_Tag[re[9][13:5]] <= {1'b1, re[9][31:14]}; end
-	if (!bubble && !mmu_pc && !mmu_da && got_pda && (op == 7'b0000011 || op == 7'b0100011 || op == 7'b0101111)) got_pda <= 0; // load/store/atom
     end
 
 
@@ -492,6 +491,7 @@ module riscv64(
 	        //bus_address <= `Ram_base;
 	        //is_ppc <= 0;
 		if (is_ppc && pc[11:0]==12'hFFC) is_ppc <= 0; //page_cross 4096 Bytes
+	        if (!mmu_pc && !mmu_da && got_pda && (op == 7'b0000011 || op == 7'b0100011 || op == 7'b0101111)) got_pda <= 0; // load/store/atom
                 casez(ir) // Pseudo: li j jr ret call // I: addi sb sh sw sd lb lw ld lbu lhu lwu lui jal jalr auipc beq slt mret 
 	            // U-type
 	            32'b???????_?????_?????_???_?????_0110111: re[w_rd] <= w_imm_u; // Lui
