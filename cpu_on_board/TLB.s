@@ -192,11 +192,11 @@ _start:
     #sd x9, 0(x8)
     #mret
 
-    ## Refill ICache
-    #lui x8, 0xf0001
-    #lw x7, 0(x9) # load 32-bit data from SDRAM by ppc in x9 traped by mmu_cache
-    #sd x7, 0(x8) # save to Cache
-    #mret
+    # Refill ICache
+    lui x8, 0xf0001
+    lw x7, 0(x9) # load 32-bit data from SDRAM by ppc in x9 traped by mmu_cache
+    sw x7, 0(x8) # save to Cache
+    mret
 
 
 
