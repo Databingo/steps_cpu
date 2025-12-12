@@ -186,17 +186,17 @@ _start:
     li t3, 55 # 7
     sb t3, 0(t0) # to plic
 
-    # TLB-Cache testing
-    # Refill TLB i/d
-    lui x8, 0xf0000
-    sd x9, 0(x8)
-    mret
+    ## TLB-Cache testing
+    ## Refill TLB i/d
+    #lui x8, 0xf0000
+    #sd x9, 0(x8)
+    #mret
 
-    # Refill ICache
-    ld x7, 0(x9) # load 64-bit data from SDRAM by ppc in x9 traped by mmu_cache
-    lui x8, 0xf0001
-    sd x7, 0(x8) # save to Cache
-    mret
+    ## Refill ICache
+    #ld x7, 0(x9) # load 64-bit data from SDRAM by ppc in x9 traped by mmu_cache
+    #lui x8, 0xf0001
+    #sd x7, 0(x8) # save to Cache
+    #mret
 
 
 

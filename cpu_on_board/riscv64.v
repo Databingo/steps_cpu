@@ -6,6 +6,7 @@ module riscv64(
     input wire [31:0] instruction,
     //output reg [63:0] pc,
     output reg [38:0] pc,
+    output wire [55:0] ppc = need_trans ? {pc_ppn, pc[11:0]} : pc,
     output reg [31:0] ir,
     //output reg [63:0] re [0:31], // General Registers 32s
     output wire  heartbeat,
@@ -209,52 +210,51 @@ module riscv64(
     reg [26:0] tlb_vpn [0:7]; // vpn number VA[38:12]  Sv39
     reg [43:0] tlb_ppn [0:7]; // ppn number PA[55:12]
     reg tlb_vld [0:7];
-    // i
+
+    // i hit
     wire [26:0] pc_vpn = pc[38:12];
     reg [43:0] pc_ppn;
-    // TLB i hit
     reg tlb_i_hit;
     always @(*) begin
-	tlb_i_hit = 0;
-	pc_ppn = 0;
-	if      (tlb_vld[0] && tlb_vpn[0] == pc_vpn) begin tlb_i_hit = 1; pc_ppn = tlb_ppn[0]; end
-	else if (tlb_vld[1] && tlb_vpn[1] == pc_vpn) begin tlb_i_hit = 1; pc_ppn = tlb_ppn[1]; end
-	else if (tlb_vld[2] && tlb_vpn[2] == pc_vpn) begin tlb_i_hit = 1; pc_ppn = tlb_ppn[2]; end
-	else if (tlb_vld[3] && tlb_vpn[3] == pc_vpn) begin tlb_i_hit = 1; pc_ppn = tlb_ppn[3]; end
-	else if (tlb_vld[4] && tlb_vpn[4] == pc_vpn) begin tlb_i_hit = 1; pc_ppn = tlb_ppn[4]; end
-	else if (tlb_vld[5] && tlb_vpn[5] == pc_vpn) begin tlb_i_hit = 1; pc_ppn = tlb_ppn[5]; end
-	else if (tlb_vld[6] && tlb_vpn[6] == pc_vpn) begin tlb_i_hit = 1; pc_ppn = tlb_ppn[6]; end
-	else if (tlb_vld[7] && tlb_vpn[7] == pc_vpn) begin tlb_i_hit = 1; pc_ppn = tlb_ppn[7]; end
+        tlb_i_hit = 0;
+        pc_ppn = 0;
+        if      (tlb_vld[0] && tlb_vpn[0] == pc_vpn) begin tlb_i_hit = 1; pc_ppn = tlb_ppn[0]; end
+        else if (tlb_vld[1] && tlb_vpn[1] == pc_vpn) begin tlb_i_hit = 1; pc_ppn = tlb_ppn[1]; end
+        else if (tlb_vld[2] && tlb_vpn[2] == pc_vpn) begin tlb_i_hit = 1; pc_ppn = tlb_ppn[2]; end
+        else if (tlb_vld[3] && tlb_vpn[3] == pc_vpn) begin tlb_i_hit = 1; pc_ppn = tlb_ppn[3]; end
+        else if (tlb_vld[4] && tlb_vpn[4] == pc_vpn) begin tlb_i_hit = 1; pc_ppn = tlb_ppn[4]; end
+        else if (tlb_vld[5] && tlb_vpn[5] == pc_vpn) begin tlb_i_hit = 1; pc_ppn = tlb_ppn[5]; end
+        else if (tlb_vld[6] && tlb_vpn[6] == pc_vpn) begin tlb_i_hit = 1; pc_ppn = tlb_ppn[6]; end
+        else if (tlb_vld[7] && tlb_vpn[7] == pc_vpn) begin tlb_i_hit = 1; pc_ppn = tlb_ppn[7]; end
     end
-    // d
+    // d hit
     reg [38:0] ls_va;
-    always @(*) begin
-        case(op)
-	   7'b0000011: ls_va = rs1 + w_imm_i; // load address
-	   7'b0100011: ls_va = rs1 + w_imm_s; // store address
-	   7'b0101111: ls_va = rs1;           // atomic address
-	   default: ls_va = 0;
-       endcase
-    end
     wire [26:0] data_vpn = ls_va[38:12];
     reg [43:0] data_ppn;
-    // TLB d hit
+    always @(*) begin
+        case(op)
+           7'b0000011: ls_va = rs1 + w_imm_i; // load address
+           7'b0100011: ls_va = rs1 + w_imm_s; // store address
+           7'b0101111: ls_va = rs1;           // atomic address
+           default: ls_va = 0;
+       endcase
+    end
     reg tlb_d_hit;
     always @(*) begin
-	 tlb_d_hit = 0;
-	 data_ppn = 0;
-	 if      (tlb_vld[0] && tlb_vpn[0] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[0]; end
-	 else if (tlb_vld[1] && tlb_vpn[1] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[1]; end
-	 else if (tlb_vld[2] && tlb_vpn[2] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[2]; end
-	 else if (tlb_vld[3] && tlb_vpn[3] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[3]; end
-	 else if (tlb_vld[4] && tlb_vpn[4] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[4]; end
-	 else if (tlb_vld[5] && tlb_vpn[5] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[5]; end
-	 else if (tlb_vld[6] && tlb_vpn[6] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[6]; end
-	 else if (tlb_vld[7] && tlb_vpn[7] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[7]; end
+         tlb_d_hit = 0;
+         data_ppn = 0;
+         if      (tlb_vld[0] && tlb_vpn[0] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[0]; end
+         else if (tlb_vld[1] && tlb_vpn[1] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[1]; end
+         else if (tlb_vld[2] && tlb_vpn[2] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[2]; end
+         else if (tlb_vld[3] && tlb_vpn[3] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[3]; end
+         else if (tlb_vld[4] && tlb_vpn[4] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[4]; end
+         else if (tlb_vld[5] && tlb_vpn[5] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[5]; end
+         else if (tlb_vld[6] && tlb_vpn[6] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[6]; end
+         else if (tlb_vld[7] && tlb_vpn[7] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[7]; end
      end
      // concat physical address
      wire need_trans = satp_mmu && !mmu_pc && !mmu_da;
-     wire [55:0] ppc = need_trans ? {pc_ppn, pc[11:0]} : pc;
+     //wire [55:0] ppc = need_trans ? {pc_ppn, pc[11:0]} : pc;
      wire [55:0] pda = need_trans ? {data_ppn, ls_va[11:0]} : ls_va;
     // // I_Cache
     //(* ram_style = "block" *) reg [63:0] I_Cache [0:2047]; // 11 bits address  16KB Cache
@@ -273,13 +273,13 @@ module riscv64(
     // TLB Refill
     reg [2:0] tlb_ptr = 0; // 8 entries TLB
     always @(posedge clk or negedge reset) begin
-	if (!reset) tlb_ptr <= 0;
-	else if (bus_write_enable && bus_address == `Tlb) begin
-	    tlb_vpn[tlb_ptr] <= re[9][38:12]; // VA from x9 trapped by mmu_pc/mmu_da
-	    tlb_ppn[tlb_ptr] <= {24'b0, re[9][38:12]}; // mimic copy now
+	if (!reset) tlb_ptr <= 0; // hit->trap(save va to x9)->refill assembly(fetch pa to x9)-> sd x9, `Tlb -> here to refill tlb
+	else if (bus_write_enable && bus_address == `Tlb) begin // for the last fill: sd ppa, Tlb
+	    tlb_vpn[tlb_ptr] <= re[9][38:12]; // VA from x9 saved by trapp mmu_pc/mmu_da
+	    tlb_ppn[tlb_ptr] <= {24'b0, re[9][38:12]}; // mimic copy now | real need walking assembly
 	    tlb_vld[tlb_ptr] <= 1;
 	    tlb_ptr <= tlb_ptr + 1; end
-        //else if (bus_write_enable && bus_address == `CacheI) begin
+        //else if (bus_write_enable && bus_address == `CacheI) begin  // for fill: sd data, CacheI
 	//    I_Cache[re[9][13:3]] <= bus_write_data; // 64 bits use Sd
 	//    I_Tag[re[9][13:5]] <= {1'b1, re[9][31:14]}; end
     end
@@ -360,10 +360,10 @@ module riscv64(
 
             //  mmu_da  D-TLB miss Trap
 	    //end else if (satp_mmu && !mmu_pc && !mmu_da && !mmu_cache_refill
-	    end else if (satp_mmu && !mmu_pc && !mmu_da 
+	    end else if (satp_mmu && !mmu_pc && !mmu_da && !tlb_d_hit
 		&& (op == 7'b0000011 || op == 7'b0100011 || op == 7'b0101111)  // load/store/atom
 	        && !(op == 7'b0101111 && w_func5 == 5'b00011 && (!reserve_valid || reserve_addr != pda)) // exclude failed sc.w/sc.d to run into mmu
-		&& !tlb_d_hit) begin  
+		) begin  
 		mmu_da <= 1; // MMU_DA ON
 	        saved_user_pc <= pc-4; // save pc l/s
 		//pc <= 0; // D-TLB refill Handler
