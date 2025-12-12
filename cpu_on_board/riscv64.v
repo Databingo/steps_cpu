@@ -265,6 +265,7 @@ module riscv64(
     //wire [31:0] cache_data = I_Cache[ppc[4:2]];
      reg [55:0] Tag_base;
      wire cache_hit = (Tag_base == ppc) && (need_trans ? tlb_i_hit : 1);
+     wire [31:0] cache_data = I_Cache;
 
     // TLB Refill
     reg [2:0] tlb_ptr = 0; // 8 entries TLB
