@@ -294,8 +294,8 @@ module riscv64(
 	    if (mmu_da || mmu_pc) ir <= get_shadow_ir(pc);  // Runing shadow code
             //else ir <= instruction; // 
             else if (cache_hit) ir <= cache_data; // Cache hit
-            //else ir <= instruction; // 
-	    else ir <= 32'h00000013; // TLB miss or Cache miss: Nop(stall)
+            else ir <= instruction; // 
+	    //else ir <= 32'h00000013; // TLB miss or Cache miss: Nop(stall)
         end
     end
 
@@ -384,8 +384,7 @@ module riscv64(
 		Csrs[mstatus][MIE] <= Csrs[mstatus][MPIE]; // set back interrupt status
 		
             //  mmu_cache I-Cache Miss Trap
-	    end else if (!mmu_pc && !mmu_da && !mmu_cache_refill 
-		&& (tlb_i_hit || !satp_mmu) // Allow if hit or bare mode
+	    end else if (!mmu_pc && !mmu_da && !mmu_cache_refill && (tlb_i_hit || !satp_mmu) // Allow if hit or bare mode
 	        && !cache_hit) begin
 		mmu_cache_refill <= 1;
 		re[9] <= ppc;
