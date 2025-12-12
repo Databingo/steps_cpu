@@ -322,7 +322,7 @@ module riscv64(
 	    mmu_pc <= 0;
 	    is_ppc <= 0; // current using address is physical addr
 	    never_mmu <= 1;
-	    cache_hit <= 0;
+	    //cache_hit <= 0;
 	    //tlb_i_hit <= 0;
 	    //tlb_d_hit <= 0;
 	    //Tag_base <= 0;
