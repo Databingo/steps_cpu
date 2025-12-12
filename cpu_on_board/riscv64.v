@@ -347,15 +347,18 @@ module riscv64(
 
 	    //  mmu_pc  I-TLB miss Trap
 	    //end else if (satp_mmu && !mmu_pc && !mmu_da && !mmu_cache_refill && !tlb_i_hit) begin //OPEN 
-	    end else if (satp_mmu && !mmu_pc && !mmu_da && !tlb_i_hit) begin //OPEN 
-	    //end else if (satp_mmu && !mmu_pc && !mmu_da && !tlb_i_hit && (op == 7'b1101111|| op == 7'b1100111|| op == 7'b1100011 || pc[11:0]==12'hFFC)) begin //OPEN //jal/jalr/branch/page_boarder4092->6
+	    //end else if (satp_mmu && !mmu_pc && !mmu_da && !tlb_i_hit) begin //OPEN 
+	    end else if (satp_mmu && !mmu_pc && !mmu_da && (op == 7'b1101111|| op == 7'b1100111|| op == 7'b1100011 || pc[11:0]==12'hFFC)) begin //OPEN //jal/jalr/branch/page_boarder4092->6
        		mmu_pc <= 1; // MMU_PC ON 
        	        //pc <= 20; // I-TLB refill Handler
        	        pc <= 40; // I-TLB refill Handler
        	 	bubble <= 1'b1; // bubble 
 	        saved_user_pc <= pc-4; // save pc 
 		for (i=0;i<=9;i=i+1) begin sre[i]<= re[i]; end // save re
-		re[9]<= pc - 4; // save vpc to x1
+	        if (op == 7'b1101111) re[9]<=pc - 4 + w_imm_j; // jal
+		if (op == 7'b1100111) re[9]<=pc - 4 + w_imm_i; // jalr
+		if (op == 7'b1100011) re[9]<=pc - 4 + w_imm_b; // branch
+		if (pc[11:0]==12'hFFC) re[9]<= pc - 4; // page_cross         save vpc to x1
 		Csrs[mstatus][MPIE] <= Csrs[mstatus][MIE]; // disable interrupt during shadow mmu walking
 		Csrs[mstatus][MIE] <= 0;
 	    end else if (mmu_pc && ir == 32'b00110000001000000000000001110011) begin // end hiject mret & recover from shadow when see Mret
@@ -369,7 +372,8 @@ module riscv64(
 
             //  mmu_da  D-TLB miss Trap
 	    //end else if (satp_mmu && !mmu_pc && !mmu_da && !mmu_cache_refill
-	    end else if (satp_mmu && !mmu_pc && !mmu_da && !tlb_d_hit
+	    //end else if (satp_mmu && !mmu_pc && !mmu_da && !tlb_d_hit
+	    end else if (satp_mmu && !mmu_pc && !mmu_da
 		&& (op == 7'b0000011 || op == 7'b0100011 || op == 7'b0101111)  // load/store/atom
 	        && !(op == 7'b0101111 && w_func5 == 5'b00011 && (!reserve_valid || reserve_addr != pda)) // exclude failed sc.w/sc.d to run into mmu
 		) begin  
