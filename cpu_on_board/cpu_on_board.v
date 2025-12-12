@@ -540,8 +540,8 @@ assign DRAM_CKE = 1; // always enable
 	    if (Mtimecmp_selected) begin mtimecmp <= bus_write_data; bus_write_done <= 1; end
 	    //if (Sdram_selected) begin if (sdram_req_wait==0) bus_write_done <= 1; end
 
-            if (Tlb_selected) bus_write_done <= 0; 
-	    if (CacheI_selected) bus_write_done <= 0; 
+            if (Tlb_selected) bus_write_done <= 1; 
+	    if (CacheI_selected) bus_write_done <= 1; 
 	    
             // Plic write
 	    if (Plic_priority_selected) begin Plic_priority[plic_id] <= bus_write_data; bus_write_done <= 1; end
