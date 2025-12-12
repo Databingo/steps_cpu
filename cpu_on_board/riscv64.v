@@ -366,8 +366,8 @@ module riscv64(
 		Csrs[mstatus][MPIE] <= Csrs[mstatus][MIE]; // disable interrupt during shadow mmu walking
 		Csrs[mstatus][MIE] <= 0;
 	    end else if (mmu_pc && ir == 32'b00110000001000000000000001110011) begin // end hiject mret & recover from shadow when see Mret
-		//pc <= re[9]; // get ppc and turn to ppc'ir
-		pc <= ppc;  // get ppc from mmu handler
+		pc <= re[9]; // get ppc and turn to ppc'ir
+		//pc <= ppc;  // get ppc from mmu handler 
 	 	bubble <= 1'b1; // bubble
 		for (i=0;i<=9;i=i+1) begin re[i]<= sre[i]; end // recover usr re
 		//is_ppc <= 1; // we are ppc
