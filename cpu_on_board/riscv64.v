@@ -284,7 +284,7 @@ module riscv64(
         //else if (bus_write_enable && bus_address == `CacheI) begin  // for fill: sd data, CacheI
 	//    I_Cache[re[9][13:3]] <= bus_write_data; // 64 bits use Sd
 	//    I_Tag[re[9][13:5]] <= {1'b1, re[9][31:14]}; end
-	if (!bubble && got_pda && (op == 7'b0000011 || op == 7'b0100011 || op == 7'b0101111) got_pda <= 0; // load/store/atom
+	if (!bubble && !mmu_pc && !mmu_da && got_pda && (op == 7'b0000011 || op == 7'b0100011 || op == 7'b0101111)) got_pda <= 0; // load/store/atom
     end
 
 
