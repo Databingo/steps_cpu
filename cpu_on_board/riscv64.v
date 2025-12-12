@@ -339,9 +339,6 @@ module riscv64(
             //Csrs[mip][MEIP] <= meip_interrupt; // MEIP
             //Csrs[mip][MSIP] <= msip_interrupt; // MSIP
 	      
-	    CacheI_read_index <= (pc-4)[12:2];
-	    cache_data <= I_Cache[CacheI_read_index];
-
             // Bubble
 	    if (bubble) begin bubble <= 1'b0; // Flush this cycle & Clear bubble signal for the next cycle
 
