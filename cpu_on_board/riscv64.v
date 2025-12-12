@@ -293,8 +293,8 @@ module riscv64(
 	    if (mmu_da || mmu_pc) ir <= get_shadow_ir(pc);  // Runing shadow code
             //else ir <= instruction; // 
             else if (cache_hit) ir <= cache_data; // Cache hit
-            else ir <= instruction; // 
-	    //else ir <= 32'h00000013; // TLB miss or Cache miss: Nop(stall)
+            //else ir <= instruction; // 
+	    else ir <= 32'h00000013; // TLB miss or Cache miss: Nop(stall)
         end
     end
 
@@ -323,9 +323,9 @@ module riscv64(
 	    is_ppc <= 0; // current using address is physical addr
 	    never_mmu <= 1;
 	    cache_hit <= 0;
-	    tlb_i_hit <= 0;
-	    tlb_d_hit <= 0;
-	    Tag_base <= 0;
+	    //tlb_i_hit <= 0;
+	    //tlb_d_hit <= 0;
+	    //Tag_base <= 0;
 
             atom_step <= 0;
             atom_tmp_value <= 0;
