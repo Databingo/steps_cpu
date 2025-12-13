@@ -1,7 +1,7 @@
-binclude "header.vh"
+include "header.vh"
 
-bodule riscv64(
-b   input wire clk, 
+module riscv64(
+    input wire clk, 
     input wire reset,     // Active-low reset button
     input wire [31:0] instruction,
     //output reg [63:0] pc,

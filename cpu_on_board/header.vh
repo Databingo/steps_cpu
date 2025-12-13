@@ -29,6 +29,5 @@
 `define Plic_claim        32'h0C20_0004  //# base + 0x200004 + ContextID*0x1000 0hart0M 1hart0S...4B
 `define HARTS 1
 
-
 `define Tlb    32'h2000_0000
 `define CacheI 32'h2000_1000
