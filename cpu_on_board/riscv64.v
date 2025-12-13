@@ -395,7 +395,7 @@ module riscv64(
 		Csrs[mstatus][MIE] <= Csrs[mstatus][MPIE]; // set back interrupt status
 		
             //  mmu_cache I-Cache Miss Trap // Allow if hit or bare mode
-	    end else if (!mmu_pc && !mmu_da && !mmu_cache_refill && (tlb_i_hit || !satp_mmu) && !cache_hit) begin
+	    end else if (!bubble && !mmu_pc && !mmu_da && !mmu_cache_refill && (tlb_i_hit || !satp_mmu) && !cache_hit) begin
 		mmu_cache_refill <= 1;
 		pc <= 200; // jump to Cache_Refill Handler
 		bubble <= 1;
@@ -405,8 +405,8 @@ module riscv64(
 		Csrs[mstatus][MPIE] <= Csrs[mstatus][MIE]; // disable interrupt during shadow mmu walking
 		Csrs[mstatus][MIE] <= 0;
 	    end else if (mmu_cache_refill && ir == 32'b00110000001000000000000001110011) begin // hiject mret 
-		pc <= saved_user_pc; // recover from shadow when see Mret
-		//bubble <= 1; // bubble Does mret from I-Cache refill no need bubble <=1, since it's register on cache_data, no deed to wait?
+		pc <= saved_user_pc - 4; //for bubble +? recover from shadow when see Mret
+		bubble <= 1; // bubble
 		for (i=0;i<=9;i=i+1) begin re[i]<= sre[i]; end // recover usr re
 		mmu_cache_refill <= 0; // OFF
 		Csrs[mstatus][MIE] <= Csrs[mstatus][MPIE]; // set back interrupt status
