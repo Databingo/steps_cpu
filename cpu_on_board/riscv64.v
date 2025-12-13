@@ -351,7 +351,7 @@ module riscv64(
        		mmu_pc <= 1; // MMU_PC ON 
        	        pc <= 40; // I-TLB refill Handler
        	 	bubble <= 1'b1; // bubble 
-	        saved_user_pc <= pc-4; // save pc 
+	        saved_user_pc <= pc; // save pc IF 
 		for (i=0;i<=9;i=i+1) begin sre[i]<= re[i]; end // save re
 		re[9] <= pc - 4; // save vpc to x1
 		Csrs[mstatus][MPIE] <= Csrs[mstatus][MIE]; // disable interrupt during shadow mmu walking
@@ -366,7 +366,7 @@ module riscv64(
             //  mmu_da  D-TLB miss Trap // load/store/atom
 	    end else if (satp_mmu && !mmu_pc && !mmu_da && !mmu_cache_refill && !tlb_d_hit && (op == 7'b0000011 || op == 7'b0100011 || op == 7'b0101111) ) begin  
 		mmu_da <= 1; // MMU_DA ON
-	        saved_user_pc <= pc-4; // save pc l/s
+	        saved_user_pc <= pc-4; // save pc EXE l/s
 		pc <= 60; // D-TLB refill Handler
 	 	bubble <= 1'b1; // bubble
 		for (i=0;i<=9;i=i+1) begin sre[i]<= re[i]; end // save re
@@ -386,7 +386,7 @@ module riscv64(
 		re[9] <= ppc;
 		pc <= 100; // jump to Cache_Refill Handler
 		bubble <= 1;
-	        saved_user_pc <= pc-4; // save pc 
+	        saved_user_pc <= pc; // save pc IF 
 		for (i=0;i<=9;i=i+1) begin sre[i]<= re[i]; end // save re
 		Csrs[mstatus][MPIE] <= Csrs[mstatus][MIE]; // disable interrupt during shadow mmu walking
 		Csrs[mstatus][MIE] <= 0;
