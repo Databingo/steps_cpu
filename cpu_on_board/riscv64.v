@@ -6,6 +6,7 @@ module riscv64(
     input wire [31:0] instruction,
     //output reg [63:0] pc,
     output reg [38:0] pc,
+    output wire [38:0] pppc = ppc,
     output reg [31:0] ir,
     //output reg [63:0] re [0:31], // General Registers 32s
     output wire  heartbeat,
@@ -305,10 +306,10 @@ module riscv64(
         end else begin
             heartbeat <= ~heartbeat; // heartbeat
 	    if (mmu_pc || mmu_da || mmu_cache_refill) ir <= get_shadow_ir(pc);  // Runing shadow code
-            //else ir <= instruction; // 
-            else if (cache_hit) ir <= cache_data; // Cache hit
-            //else ir <= instruction; // 
-	    else ir <= 32'h00000013; // TLB miss or Cache miss: Nop(stall)
+            else ir <= instruction; // 
+            //else if (cache_hit) ir <= cache_data; // Cache hit
+            ////else ir <= instruction; // 
+	    //else ir <= 32'h00000013; // TLB miss or Cache miss: Nop(stall)
         end
     end
 
@@ -394,22 +395,22 @@ module riscv64(
 		mmu_da <= 0; // MMU_DA OFF
 		Csrs[mstatus][MIE] <= Csrs[mstatus][MPIE]; // set back interrupt status
 		
-            //  mmu_cache I-Cache Miss Trap // Allow if hit or bare mode
-	    end else if (!bubble && !mmu_pc && !mmu_da && !mmu_cache_refill && (tlb_i_hit || !satp_mmu) && !cache_hit) begin
-		mmu_cache_refill <= 1;
-		pc <= 200; // jump to Cache_Refill Handler
-		bubble <= 1;
-	        saved_user_pc <= pc; // save pc IF 
-		for (i=0;i<=9;i=i+1) begin sre[i]<= re[i]; end // save re
-		re[9] <= ppc;  // save the missed-cache ppc
-		Csrs[mstatus][MPIE] <= Csrs[mstatus][MIE]; // disable interrupt during shadow mmu walking
-		Csrs[mstatus][MIE] <= 0;
-	    end else if (mmu_cache_refill && ir == 32'b00110000001000000000000001110011) begin // hiject mret 
-		pc <= saved_user_pc - 4; //for bubble +? recover from shadow when see Mret
-		bubble <= 1; // bubble
-		for (i=0;i<=9;i=i+1) begin re[i]<= sre[i]; end // recover usr re
-		mmu_cache_refill <= 0; // OFF
-		Csrs[mstatus][MIE] <= Csrs[mstatus][MPIE]; // set back interrupt status
+        //    //  mmu_cache I-Cache Miss Trap // Allow if hit or bare mode
+	//    end else if (!bubble && !mmu_pc && !mmu_da && !mmu_cache_refill && (tlb_i_hit || !satp_mmu) && !cache_hit) begin
+	//	mmu_cache_refill <= 1;
+	//	pc <= 200; // jump to Cache_Refill Handler
+	//	bubble <= 1;
+	//        saved_user_pc <= pc; // save pc IF 
+	//	for (i=0;i<=9;i=i+1) begin sre[i]<= re[i]; end // save re
+	//	re[9] <= ppc;  // save the missed-cache ppc
+	//	Csrs[mstatus][MPIE] <= Csrs[mstatus][MIE]; // disable interrupt during shadow mmu walking
+	//	Csrs[mstatus][MIE] <= 0;
+	//    end else if (mmu_cache_refill && ir == 32'b00110000001000000000000001110011) begin // hiject mret 
+	//	pc <= saved_user_pc; // recover from shadow when see Mret
+	//	bubble <= 1; // bubble
+	//	for (i=0;i<=9;i=i+1) begin re[i]<= sre[i]; end // recover usr re
+	//	mmu_cache_refill <= 0; // OFF
+	//	Csrs[mstatus][MIE] <= Csrs[mstatus][MPIE]; // set back interrupt status
 
 
 

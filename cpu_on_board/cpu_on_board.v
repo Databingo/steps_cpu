@@ -188,7 +188,8 @@ assign DRAM_CKE = 1; // always enable
         //.clk(CLOCK_50), 
         .reset(KEY0),     
         .instruction(ir_ld),
-        .pc(pc),
+        //.pc(pc),
+        .pppc(pc),
         .ir(LEDG),
         .heartbeat(LEDR9),
 
