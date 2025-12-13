@@ -6,7 +6,7 @@ module riscv64(
     input wire [31:0] instruction,
     //output reg [63:0] pc,
     output reg [38:0] pc,
-    output wire [38:0] pppc = ppc,
+    output wire [55:0] ppc,
     output reg [31:0] ir,
     //output reg [63:0] re [0:31], // General Registers 32s
     output wire  heartbeat,
@@ -267,7 +267,8 @@ module riscv64(
      end
      // concat physical address
      wire need_trans = satp_mmu && !mmu_pc && !mmu_da && !mmu_cache_refill;
-     wire [55:0] ppc = need_trans ? {pc_ppn, pc[11:0]} : pc;
+     //wire [55:0] ppc = need_trans ? {pc_ppn, pc[11:0]} : pc;
+     assign ppc = need_trans ? {pc_ppn, pc[11:0]} : pc;
      wire [55:0] pda = need_trans ? {data_ppn, ls_va[11:0]} : ls_va;
      // CacheI
      reg [31:0] I_Cache; // [0:7]; // 
