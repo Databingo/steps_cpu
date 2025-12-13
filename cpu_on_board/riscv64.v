@@ -1,7 +1,7 @@
-`include "header.vh"
+binclude "header.vh"
 
-module riscv64(
-    input wire clk, 
+bodule riscv64(
+b   input wire clk, 
     input wire reset,     // Active-low reset button
     input wire [31:0] instruction,
     //output reg [63:0] pc,
@@ -60,15 +60,15 @@ module riscv64(
     	    32: get_shadow_ir = 32'b00000000001000001011000000100011; // sd x2, 0(x1)      print *
     	    36: get_shadow_ir = 32'b00110000001000000000000001110011; // mret             
 	    // I-TLB Handler
-            40: get_shadow_ir = 32'hf0000437; // lui x8, 0xf0000
-            44: get_shadow_ir = 32'h00943023; // sd x9, 0(x8)
-            48: get_shadow_ir = 32'h30200073; // mret
+            40: get_shadow_ir = 32'b00100000000000000000010000110111; // 20000437 lui x8, 0x20000
+            44: get_shadow_ir = 32'b00000000100101000010000000100011; // 00942023 sw x9, 0(x8)   
+            48: get_shadow_ir = 32'b00110000001000000000000001110011; // 30200073 mret           
 	    // D-TLB Handler
-            60: get_shadow_ir = 32'hf0000437; // lui x8, 0xf0000
-            64: get_shadow_ir = 32'h00943023; // sd x9, 0(x8)
-            68: get_shadow_ir = 32'h30200073; // mret
+            60: get_shadow_ir = 32'b00100000000000000000010000110111; // 20000437 lui x8, 0x20000
+            64: get_shadow_ir = 32'b00000000100101000010000000100011; // 00942023 sw x9, 0(x8)   
+            68: get_shadow_ir = 32'b00110000001000000000000001110011; // 30200073 mret           
 	    // CacheI Handler
-            100: get_shadow_ir = 32'b11110000000000000001010000110111; // f0001437 lui x8, 0xf0001
+            100: get_shadow_ir = 32'b00100000000000000001010000110111; // 20001437 lui x8, 0x20001
             104: get_shadow_ir = 32'b00000000000001001010001110000011; // 0004a383 lw x7, 0(x9)   
             108: get_shadow_ir = 32'b00000000011101000010000000100011; // 00742023 sw x7, 0(x8)   
             112: get_shadow_ir = 32'b00110000001000000000000001110011; // 30200073 mret           

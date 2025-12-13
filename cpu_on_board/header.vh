@@ -30,5 +30,5 @@
 `define HARTS 1
 
 
-`define Tlb    32'hf000_0000
-`define CacheI 32'hf000_1000
+`define Tlb    32'h2000_0000
+`define CacheI 32'h2000_1000
