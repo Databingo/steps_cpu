@@ -1,4 +1,4 @@
-include "header.vh"
+`include "header.vh"
 
 module riscv64(
     input wire clk, 
