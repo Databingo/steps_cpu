@@ -288,11 +288,12 @@ module riscv64(
 	    tlb_ppn[tlb_ptr] <= {24'b0, re[9][38:12]}; // mimic copy now | real need walking assembly
 	    tlb_vld[tlb_ptr] <= 1;
 	    tlb_ptr <= tlb_ptr + 1; end
+    // ICache Refill
         else if (bus_write_enable && bus_address == `CacheI) begin  // for fill: sw data, CacheI
 	    //I_Cache[re[9][4:2]] <= bus_write_data[31:0]; // 32 bits use Sw
 	    //Tag_base <= {re[9][55:5], 5'b0}; end //
 	    I_Cache <= bus_write_data[31:0]; // 32 bits use Sw
-	    Tag_base <= {re[9][55:0]}; end //
+	    Tag_base <= re[9][55:0]; end //
     end
 
 
@@ -396,16 +397,16 @@ module riscv64(
             //  mmu_cache I-Cache Miss Trap // Allow if hit or bare mode
 	    end else if (!mmu_pc && !mmu_da && !mmu_cache_refill && (tlb_i_hit || !satp_mmu) && !cache_hit) begin
 		mmu_cache_refill <= 1;
-		re[9] <= ppc;
 		pc <= 200; // jump to Cache_Refill Handler
 		bubble <= 1;
 	        saved_user_pc <= pc; // save pc IF 
 		for (i=0;i<=9;i=i+1) begin sre[i]<= re[i]; end // save re
+		re[9] <= ppc;  // save the missed-cache ppc
 		Csrs[mstatus][MPIE] <= Csrs[mstatus][MIE]; // disable interrupt during shadow mmu walking
 		Csrs[mstatus][MIE] <= 0;
 	    end else if (mmu_cache_refill && ir == 32'b00110000001000000000000001110011) begin // hiject mret 
 		pc <= saved_user_pc; // recover from shadow when see Mret
-		bubble <= 1; // bubble
+		//bubble <= 1; // bubble Does mret from I-Cache refill no need bubble <=1, since it's register on cache_data, no deed to wait?
 		for (i=0;i<=9;i=i+1) begin re[i]<= sre[i]; end // recover usr re
 		mmu_cache_refill <= 0; // OFF
 		Csrs[mstatus][MIE] <= Csrs[mstatus][MPIE]; // set back interrupt status
