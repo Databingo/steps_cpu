@@ -48,37 +48,43 @@ module riscv64(
         begin
     	case(spc) /// only x0-x9 could use, x9 is the value passer
 	    // mmu_da
-            0:  get_shadow_ir = 32'b00000000000000000010000010110111; // lui x1, 0x2
-            4:  get_shadow_ir = 32'b00000000010000001000000010010011; // addi x1, x1, 0x4
-            8:  get_shadow_ir = 32'b00000101111000000000000100010011; // addi x2, x0, 0x5e
-            12: get_shadow_ir = 32'b00000000001000001011000000100011; // sd x2, 0(x1)      print ^
-            16: get_shadow_ir = 32'b00110000001000000000000001110011; // mret                         
-	    // mmu_pc
-    	    20: get_shadow_ir = 32'b00000000000000000010000010110111; // lui x1, 0x2     
-    	    24: get_shadow_ir = 32'b00000000010000001000000010010011; // addi x1, x1, 0x4 
-    	    28: get_shadow_ir = 32'b00000010101000000000000100010011; // addi x2, x0, 0x2a
-    	    32: get_shadow_ir = 32'b00000000001000001011000000100011; // sd x2, 0(x1)      print *
-    	    36: get_shadow_ir = 32'b00110000001000000000000001110011; // mret             
+            //0:  get_shadow_ir = 32'b00000000000000000010000010110111; // lui x1, 0x2
+            //4:  get_shadow_ir = 32'b00000000010000001000000010010011; // addi x1, x1, 0x4
+            //8:  get_shadow_ir = 32'b00000101111000000000000100010011; // addi x2, x0, 0x5e
+            //12: get_shadow_ir = 32'b00000000001000001011000000100011; // sd x2, 0(x1)      print ^
+            //16: get_shadow_ir = 32'b00110000001000000000000001110011; // mret                         
+	    //// mmu_pc
+    	    //20: get_shadow_ir = 32'b00000000000000000010000010110111; // lui x1, 0x2     
+    	    //24: get_shadow_ir = 32'b00000000010000001000000010010011; // addi x1, x1, 0x4 
+    	    //28: get_shadow_ir = 32'b00000010101000000000000100010011; // addi x2, x0, 0x2a
+    	    //32: get_shadow_ir = 32'b00000000001000001011000000100011; // sd x2, 0(x1)      print *
+    	    //36: get_shadow_ir = 32'b00110000001000000000000001110011; // mret             
 
 	    // I-TLB Handler
-    	    40: get_shadow_ir = 32'b00000010101000000000000100010011; // addi x2, x0, 0x2a
-    	    44: get_shadow_ir = 32'b00000000001000001011000000100011; // sd x2, 0(x1)      print *
-            48: get_shadow_ir = 32'b00100000000000000000010000110111; // 20000437 lui x8, 0x20000
-            52: get_shadow_ir = 32'b00000000100101000010000000100011; // 00942023 sw x9, 0(x8)   
-            56: get_shadow_ir = 32'b00110000001000000000000001110011; // 30200073 mret           
+    	    0: get_shadow_ir = 32'b00000000000000000010000010110111; // lui x1, 0x2     
+    	    4: get_shadow_ir = 32'b00000000010000001000000010010011; // addi x1, x1, 0x4 
+    	    8: get_shadow_ir = 32'b00000010101000000000000100010011; // addi x2, x0, 0x2a
+    	    12: get_shadow_ir = 32'b00000000001000001011000000100011; // sd x2, 0(x1)      print *
+            16: get_shadow_ir = 32'b00100000000000000000010000110111; // 20000437 lui x8, 0x20000
+            20: get_shadow_ir = 32'b00000000100101000010000000100011; // 00942023 sw x9, 0(x8)   
+            24: get_shadow_ir = 32'b00110000001000000000000001110011; // 30200073 mret           
 	    // D-TLB Handler
-            60: get_shadow_ir = 32'b00000101111000000000000100010011; // addi x2, x0, 0x5e
-            64: get_shadow_ir = 32'b00000000001000001011000000100011; // sd x2, 0(x1)      print ^
-            68: get_shadow_ir = 32'b00100000000000000000010000110111; // 20000437 lui x8, 0x20000
-            72: get_shadow_ir = 32'b00000000100101000010000000100011; // 00942023 sw x9, 0(x8)   
-            76: get_shadow_ir = 32'b00110000001000000000000001110011; // 30200073 mret           
+    	    100: get_shadow_ir = 32'b00000000000000000010000010110111; // lui x1, 0x2     
+    	    104: get_shadow_ir = 32'b00000000010000001000000010010011; // addi x1, x1, 0x4 
+            108: get_shadow_ir = 32'b00000101111000000000000100010011; // addi x2, x0, 0x5e
+            112: get_shadow_ir = 32'b00000000001000001011000000100011; // sd x2, 0(x1)      print ^
+            116: get_shadow_ir = 32'b00100000000000000000010000110111; // 20000437 lui x8, 0x20000
+            120: get_shadow_ir = 32'b00000000100101000010000000100011; // 00942023 sw x9, 0(x8)   
+            124: get_shadow_ir = 32'b00110000001000000000000001110011; // 30200073 mret           
 	    // CacheI Handler
-            100: get_shadow_ir = 32'b00000101111000000000000100010011; // addi x2, x0, 0x7c
-            104: get_shadow_ir = 32'b00000000001000001011000000100011; // sd x2, 0(x1)      print |
-            108: get_shadow_ir = 32'b00100000000000000001010000110111; // 20001437 lui x8, 0x20001
-            112: get_shadow_ir = 32'b00000000000001001010001110000011; // 0004a383 lw x7, 0(x9)   
-            116: get_shadow_ir = 32'b00000000011101000010000000100011; // 00742023 sw x7, 0(x8)   
-            120: get_shadow_ir = 32'b00110000001000000000000001110011; // 30200073 mret           
+    	    200: get_shadow_ir = 32'b00000000000000000010000010110111; // lui x1, 0x2     
+    	    204: get_shadow_ir = 32'b00000000010000001000000010010011; // addi x1, x1, 0x4 
+            208: get_shadow_ir = 32'b00000101111000000000000100010011; // addi x2, x0, 0x7c
+            212: get_shadow_ir = 32'b00000000001000001011000000100011; // sd x2, 0(x1)      print |
+            216: get_shadow_ir = 32'b00100000000000000001010000110111; // 20001437 lui x8, 0x20001
+            220: get_shadow_ir = 32'b00000000000001001010001110000011; // 0004a383 lw x7, 0(x9)   
+            224: get_shadow_ir = 32'b00000000011101000010000000100011; // 00742023 sw x7, 0(x8)   
+            228: get_shadow_ir = 32'b00110000001000000000000001110011; // 30200073 mret           
 
     	    default: get_shadow_ir = 32'h00000013; // NOP:addi x0, x0, 0
     	endcase
@@ -356,7 +362,7 @@ module riscv64(
 	    //  mmu_pc  I-TLB miss Trap
 	    end else if (satp_mmu && !mmu_pc && !mmu_da && !mmu_cache_refill && !tlb_i_hit) begin //OPEN 
        		mmu_pc <= 1; // MMU_PC ON 
-       	        pc <= 40; // I-TLB refill Handler
+       	        pc <= 0; // I-TLB refill Handler
        	 	bubble <= 1'b1; // bubble 
 	        saved_user_pc <= pc; // save pc IF 
 		for (i=0;i<=9;i=i+1) begin sre[i]<= re[i]; end // save re
@@ -374,7 +380,7 @@ module riscv64(
 	    end else if (satp_mmu && !mmu_pc && !mmu_da && !mmu_cache_refill && !tlb_d_hit && (op == 7'b0000011 || op == 7'b0100011 || op == 7'b0101111) ) begin  
 		mmu_da <= 1; // MMU_DA ON
 	        saved_user_pc <= pc-4; // save pc EXE l/s
-		pc <= 60; // D-TLB refill Handler
+		pc <= 100; // D-TLB refill Handler
 	 	bubble <= 1'b1; // bubble
 		for (i=0;i<=9;i=i+1) begin sre[i]<= re[i]; end // save re
 		re[9] <= ls_va; //save va to x1
@@ -391,7 +397,7 @@ module riscv64(
 	    end else if (!mmu_pc && !mmu_da && !mmu_cache_refill && (tlb_i_hit || !satp_mmu) && !cache_hit) begin
 		mmu_cache_refill <= 1;
 		re[9] <= ppc;
-		pc <= 100; // jump to Cache_Refill Handler
+		pc <= 200; // jump to Cache_Refill Handler
 		bubble <= 1;
 	        saved_user_pc <= pc; // save pc IF 
 		for (i=0;i<=9;i=i+1) begin sre[i]<= re[i]; end // save re
