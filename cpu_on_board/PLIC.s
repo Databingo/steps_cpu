@@ -37,6 +37,12 @@ _start:
     sb t6, 0(t0)         # Should print 'D'
     sb t2, 0(t0)         # Should print 'X'
 
+    # MMU enabled
+    li a1, 8              
+    slli a1, a1, 60          # mmu mode sv39 #li a1, 0x8000000000000000 # mmu mode sv39
+    csrrw a3, satp, a1      # set satp csr index 0x180
+
+
     # Write 8 byte
     li t1, 0x4847464544434241         # 'HGFEDCBA'
     sd t1, 0(s0)         # test sdram sd
