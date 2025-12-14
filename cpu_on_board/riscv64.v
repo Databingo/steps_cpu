@@ -329,17 +329,17 @@ module riscv64(
             //Csrs[mip][MSIP] <= msip_interrupt; // MSIP
 
 
-	    //  mmu_pc  I-TLB miss Trap
-	    if (satp_mmu && !mmu_pc && !mmu_da && !tlb_i_hit) begin //OPEN 
-       		mmu_pc <= 1; // MMU_PC ON 
-       	        pc <= 0; // I-TLB refill Handler
-       	 	bubble <= 1'b1; // bubble 
-	        saved_user_pc <= pc; // save pc IF 
-		for (i=0;i<10;i=i+1) begin sre[i]<= re[i]; end // save re
-		re[9] <= pc;// - 4; // save vpc to x1
-		Csrs[mstatus][MPIE] <= Csrs[mstatus][MIE]; // disable interrupt during shadow mmu walking
-		Csrs[mstatus][MIE] <= 0;
-	    end
+	    ////  mmu_pc  I-TLB miss Trap
+	    //if (satp_mmu && !mmu_pc && !mmu_da && !tlb_i_hit) begin //OPEN 
+       	    //    mmu_pc <= 1; // MMU_PC ON 
+       	    //    pc <= 0; // I-TLB refill Handler
+       	    //    bubble <= 1'b1; // bubble 
+	    //    saved_user_pc <= pc; // save pc IF 
+	    //    for (i=0;i<10;i=i+1) begin sre[i]<= re[i]; end // save re
+	    //    re[9] <= pc;// - 4; // save vpc to x1
+	    //    Csrs[mstatus][MPIE] <= Csrs[mstatus][MIE]; // disable interrupt during shadow mmu walking
+	    //    Csrs[mstatus][MIE] <= 0;
+	    //end
 	//    end else if (mmu_pc && ir == 32'b00110000001000000000000001110011) begin // end hiject mret & recover from shadow when see Mret
 	//	pc <= saved_user_pc; // recover from shadow when see Mret
 	// 	bubble <= 1'b1; // bubble
@@ -350,16 +350,16 @@ module riscv64(
             // Bubble
 	    if (bubble) begin bubble <= 1'b0; // Flush this cycle & Clear bubble signal for the next cycle
 
-	//    //  mmu_pc  I-TLB miss Trap
-	//    end else if (satp_mmu && !mmu_pc && !mmu_da && !mmu_cache_refill && !tlb_i_hit) begin //OPEN 
-       	//	mmu_pc <= 1; // MMU_PC ON 
-       	//        pc <= 0; // I-TLB refill Handler
-       	// 	bubble <= 1'b1; // bubble 
-	//        saved_user_pc <= pc; // save pc IF 
-	//	for (i=0;i<=9;i=i+1) begin sre[i]<= re[i]; end // save re
-	//	re[9] <= pc;// - 4; // save vpc to x1
-	//	Csrs[mstatus][MPIE] <= Csrs[mstatus][MIE]; // disable interrupt during shadow mmu walking
-	//	Csrs[mstatus][MIE] <= 0;
+	    //  mmu_pc  I-TLB miss Trap
+	    end else if (satp_mmu && !mmu_pc && !mmu_da && !tlb_i_hit) begin //OPEN 
+       		mmu_pc <= 1; // MMU_PC ON 
+       	        pc <= 0; // I-TLB refill Handler
+       	 	bubble <= 1'b1; // bubble 
+	        saved_user_pc <= pc; // save pc IF 
+		for (i=0;i<=9;i=i+1) begin sre[i]<= re[i]; end // save re
+		re[9] <= pc;// - 4; // save vpc to x1
+		Csrs[mstatus][MPIE] <= Csrs[mstatus][MIE]; // disable interrupt during shadow mmu walking
+		Csrs[mstatus][MIE] <= 0;
 	    end else if (mmu_pc && ir == 32'b00110000001000000000000001110011) begin // end hiject mret & recover from shadow when see Mret
 		pc <= saved_user_pc; // recover from shadow when see Mret
 	 	bubble <= 1'b1; // bubble
