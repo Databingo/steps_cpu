@@ -1,9 +1,0 @@
-	component upclk is
-		port (
-			clk_clk                   : in  std_logic := 'X'; -- clk
-			reset_reset_n             : in  std_logic := 'X'; -- reset_n
-			up_clocks_0_sdram_clk_clk : out std_logic;        -- clk
-			up_clocks_0_sys_clk_clk   : out std_logic         -- clk
-		);
-	end component upclk;
-
