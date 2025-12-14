@@ -4,21 +4,17 @@ module riscv64(
     input wire clk, 
     input wire reset,     // Active-low reset button
     input wire [31:0] instruction,
-    //output reg [63:0] pc,
     output reg [38:0] pc,
     output wire [55:0] ppc,
     output reg [31:0] ir,
-    //output reg [63:0] re [0:31], // General Registers 32s
     output wire  heartbeat,
     input  reg [3:0] interrupt_vector, // notice from outside
     output reg  interrupt_ack,         // reply to outside
-    //output reg [63:0] bus_address,     // 39 bit for real standard? 64 bit now
     output reg [38:0] bus_address,     // 39 bit for real Sv39 standard?
     output reg [63:0] bus_write_data,
     output reg        bus_write_enable,
     output reg        bus_read_enable,
     output reg [2:0]  bus_ls_type, // lb lh lw ld lbu lhu lwu // sb sh sw sd sbu shu swu 
-    //output reg [2:0]  bus_ls_type, // sb sh sw sd sbu shu swu 
       
     output reg [63:0] mtime,    // map to 0x0200_bff8 
     inout wire [63:0] mtimecmp, // map to 0x0200_4000 + 8byte*hartid
@@ -48,19 +44,6 @@ module riscv64(
         input [63:0] spc;
         begin
     	case(spc) /// only x0-x9 could use, x9 is the value passer
-	    // mmu_da
-            //0:  get_shadow_ir = 32'b00000000000000000010000010110111; // lui x1, 0x2
-            //4:  get_shadow_ir = 32'b00000000010000001000000010010011; // addi x1, x1, 0x4
-            //8:  get_shadow_ir = 32'b00000101111000000000000100010011; // addi x2, x0, 0x5e
-            //12: get_shadow_ir = 32'b00000000001000001011000000100011; // sd x2, 0(x1)      print ^
-            //16: get_shadow_ir = 32'b00110000001000000000000001110011; // mret                         
-	    //// mmu_pc
-    	    //20: get_shadow_ir = 32'b00000000000000000010000010110111; // lui x1, 0x2     
-    	    //24: get_shadow_ir = 32'b00000000010000001000000010010011; // addi x1, x1, 0x4 
-    	    //28: get_shadow_ir = 32'b00000010101000000000000100010011; // addi x2, x0, 0x2a
-    	    //32: get_shadow_ir = 32'b00000000001000001011000000100011; // sd x2, 0(x1)      print *
-    	    //36: get_shadow_ir = 32'b00110000001000000000000001110011; // mret             
-
 	    // I-TLB Handler
     	    0: get_shadow_ir = 32'b00000000000000000010000010110111; // lui x1, 0x2     
     	    4: get_shadow_ir = 32'b00000000010000001000000010010011; // addi x1, x1, 0x4 
@@ -77,15 +60,15 @@ module riscv64(
             116: get_shadow_ir = 32'b00100000000000000000010000110111; // 20000437 lui x8, 0x20000
             120: get_shadow_ir = 32'b00000000100101000010000000100011; // 00942023 sw x9, 0(x8)   
             124: get_shadow_ir = 32'b00110000001000000000000001110011; // 30200073 mret           
-	    // I-CacheI Handler
-    	    200: get_shadow_ir = 32'b00000000000000000010000010110111; // lui x1, 0x2     
-    	    204: get_shadow_ir = 32'b00000000010000001000000010010011; // addi x1, x1, 0x4 
-            208: get_shadow_ir = 32'b00000111110000000000000100010011; // addi x2, x0, 0x7c
-            212: get_shadow_ir = 32'b00000000001000001011000000100011; // sd x2, 0(x1)      print |
-            216: get_shadow_ir = 32'b00100000000000000001010000110111; // 20001437 lui x8, 0x20001
-            220: get_shadow_ir = 32'b00000000000001001010001110000011; // 0004a383 lw x7, 0(x9)   
-            224: get_shadow_ir = 32'b00000000011101000010000000100011; // 00742023 sw x7, 0(x8)   
-            228: get_shadow_ir = 32'b00110000001000000000000001110011; // 30200073 mret           
+	    //// I-CacheI Handler
+    	    //200: get_shadow_ir = 32'b00000000000000000010000010110111; // lui x1, 0x2     
+    	    //204: get_shadow_ir = 32'b00000000010000001000000010010011; // addi x1, x1, 0x4 
+            //208: get_shadow_ir = 32'b00000111110000000000000100010011; // addi x2, x0, 0x7c
+            //212: get_shadow_ir = 32'b00000000001000001011000000100011; // sd x2, 0(x1)      print |
+            //216: get_shadow_ir = 32'b00100000000000000001010000110111; // 20001437 lui x8, 0x20001
+            //220: get_shadow_ir = 32'b00000000000001001010001110000011; // 0004a383 lw x7, 0(x9)   
+            //224: get_shadow_ir = 32'b00000000011101000010000000100011; // 00742023 sw x7, 0(x8)   
+            //228: get_shadow_ir = 32'b00110000001000000000000001110011; // 30200073 mret           
 
     	    default: get_shadow_ir = 32'h00000013; // NOP:addi x0, x0, 0
     	endcase
@@ -188,31 +171,17 @@ module riscv64(
     wire [3:0]  satp_mmu  = Csrs[satp][63:60]; // 0:bare, 8:sv39, 9:sv48  satp.MODE!=0, privilegae is not M-mode, mstatus.MPRN is not set or in MPP's mode?
     wire [15:0] satp_asid = Csrs[satp][59:44]; // Address Space ID for TLB
     wire [43:0] satp_ppn  = Csrs[satp][43:0];  // Root Page Table PPN physical page number
-    reg never_mmu = 1;
 
-    // -- CSR Bits --
-   //localparam mstatus    = 0 ;  // 0x300 MRW Machine status reg   // 63_SD|37_MBE|36_SBE|35:34_SXL10|22_TSR|21_TW|20_TVW|17_MPRV|12:11_MPP|8_SPP|7_MPIE|5_SPIE|3_MIE|1_SIE|0_UIE
-    //wire mie_MEIE = csr[mie][11];
-    //wire mip_MEIP = csr[mie][11];
-    //wire mstatus_MIE = Csrs[mstatus][MIE];
-    // -- CSR Other Registers -- use BRAM in FPGA then SRAM in ASIC port?
-    //reg [63:0] other_csr [0:4096]; // Maximal 12-bit length = 4096 
-      
-      
     // -- Timer --
-    //reg [63:0] mtime;    // map to 0x0200_bff8    
-    //reg [63:0] mtimecmp; // map to 0x0200_4000 + 8*hartid
     always @(posedge clk or negedge reset) begin 
 	if (!reset) mtime <= 0;
 	else mtime <= mtime + 1; end
     wire time_interrupt = (mtime >= mtimecmp);
       
-      
     // -- Innerl signal --
     reg bubble;
     reg [1:0] load_step;
     reg [1:0] store_step;
-
 
     // -- Atomic & Sync state --
     reg [1:0]  atom_step;
@@ -270,16 +239,17 @@ module riscv64(
      //wire [55:0] ppc = need_trans ? {pc_ppn, pc[11:0]} : pc;
      assign ppc = need_trans ? {pc_ppn, pc[11:0]} : pc;
      wire [55:0] pda = need_trans ? {data_ppn, ls_va[11:0]} : ls_va;
-     // CacheI
-     reg [31:0] I_Cache; // [0:7]; // 
-    // reg [55:0] Tag_base;
-    //wire [55:0] current_ppc_base = {ppc[55:5], 5'b0};
-    //wire cache_hit = (Tag_base == current_ppc_base) && (need_trans ? tlb_i_hit : 1);
-    //wire [31:0] cache_data = I_Cache[ppc[4:2]];
-     reg [55:0] Tag_base = 56'hffffffffffffff;
-     //wire cache_hit = (Tag_base == ppc) && (need_trans ? tlb_i_hit : 1);
-     wire cache_hit = (Tag_base == ppc);
-     wire [31:0] cache_data = I_Cache;
+     
+    // // CacheI
+    // reg [31:0] I_Cache; // [0:7]; // 
+    //// reg [55:0] Tag_base;
+    ////wire [55:0] current_ppc_base = {ppc[55:5], 5'b0};
+    ////wire cache_hit = (Tag_base == current_ppc_base) && (need_trans ? tlb_i_hit : 1);
+    ////wire [31:0] cache_data = I_Cache[ppc[4:2]];
+    // reg [55:0] Tag_base = 56'hffffffffffffff;
+    // //wire cache_hit = (Tag_base == ppc) && (need_trans ? tlb_i_hit : 1);
+    // wire cache_hit = (Tag_base == ppc);
+    // wire [31:0] cache_data = I_Cache;
 
     // TLB Refill
     reg [2:0] tlb_ptr = 0; // 8 entries TLB
@@ -290,12 +260,12 @@ module riscv64(
 	    tlb_ppn[tlb_ptr] <= {24'b0, re[9][38:12]}; // mimic copy now | real need walking assembly
 	    tlb_vld[tlb_ptr] <= 1;
 	    tlb_ptr <= tlb_ptr + 1; end
-    // ICache Refill
-        else if (bus_write_enable && bus_address == `CacheI) begin  // for fill: sw data, CacheI
-	    //I_Cache[re[9][4:2]] <= bus_write_data[31:0]; // 32 bits use Sw
-	    //Tag_base <= {re[9][55:5], 5'b0}; end //
-	    I_Cache <= bus_write_data[31:0]; // 32 bits use Sw
-	    Tag_base <= re[9][55:0]; end //
+//    // ICache Refill
+//        else if (bus_write_enable && bus_address == `CacheI) begin  // for fill: sw data, CacheI
+//	    //I_Cache[re[9][4:2]] <= bus_write_data[31:0]; // 32 bits use Sw
+//	    //Tag_base <= {re[9][55:5], 5'b0}; end //
+//	    I_Cache <= bus_write_data[31:0]; // 32 bits use Sw
+//	    Tag_base <= re[9][55:0]; end //
     end
 
 
@@ -337,7 +307,6 @@ module riscv64(
 	    Csrs[mideleg] <= 64'h0222; // delegate to S-mode 0000001000100010 see VII 3.1.15 mcasue interrupt 1/5/9 SSIP(supervisor software interrupt) STIP(time) SEIP(external)
 	    mmu_pc <= 0;
 	    is_ppc <= 0; // current using address is physical addr
-	    never_mmu <= 1;
 	    //cache_hit <= 0;
 	    //tlb_i_hit <= 0;
 	    //tlb_d_hit <= 0;
@@ -358,20 +327,39 @@ module riscv64(
             //Csrs[mip][MTIP] <= time_interrupt; // MTIP linux will see then jump to its handler
             //Csrs[mip][MEIP] <= meip_interrupt; // MEIP
             //Csrs[mip][MSIP] <= msip_interrupt; // MSIP
-	      
-            // Bubble
-	    if (bubble) begin bubble <= 1'b0; // Flush this cycle & Clear bubble signal for the next cycle
+
 
 	    //  mmu_pc  I-TLB miss Trap
-	    end else if (satp_mmu && !mmu_pc && !mmu_da && !mmu_cache_refill && !tlb_i_hit) begin //OPEN 
+	    if (satp_mmu && !mmu_pc && !mmu_da && !mmu_cache_refill && !tlb_i_hit) begin //OPEN 
        		mmu_pc <= 1; // MMU_PC ON 
        	        pc <= 0; // I-TLB refill Handler
        	 	bubble <= 1'b1; // bubble 
 	        saved_user_pc <= pc; // save pc IF 
 		for (i=0;i<=9;i=i+1) begin sre[i]<= re[i]; end // save re
-		re[9] <= pc - 4; // save vpc to x1
+		re[9] <= pc;// - 4; // save vpc to x1
 		Csrs[mstatus][MPIE] <= Csrs[mstatus][MIE]; // disable interrupt during shadow mmu walking
 		Csrs[mstatus][MIE] <= 0;
+	    end
+	//    end else if (mmu_pc && ir == 32'b00110000001000000000000001110011) begin // end hiject mret & recover from shadow when see Mret
+	//	pc <= saved_user_pc; // recover from shadow when see Mret
+	// 	bubble <= 1'b1; // bubble
+	//	for (i=0;i<=9;i=i+1) begin re[i]<= sre[i]; end // recover usr re
+	//	mmu_pc <= 0; // MMU_PC OFF
+	//	Csrs[mstatus][MIE] <= Csrs[mstatus][MPIE]; // set back interrupt status
+
+            // Bubble
+	    if (bubble) begin bubble <= 1'b0; // Flush this cycle & Clear bubble signal for the next cycle
+
+	//    //  mmu_pc  I-TLB miss Trap
+	//    end else if (satp_mmu && !mmu_pc && !mmu_da && !mmu_cache_refill && !tlb_i_hit) begin //OPEN 
+       	//	mmu_pc <= 1; // MMU_PC ON 
+       	//        pc <= 0; // I-TLB refill Handler
+       	// 	bubble <= 1'b1; // bubble 
+	//        saved_user_pc <= pc; // save pc IF 
+	//	for (i=0;i<=9;i=i+1) begin sre[i]<= re[i]; end // save re
+	//	re[9] <= pc;// - 4; // save vpc to x1
+	//	Csrs[mstatus][MPIE] <= Csrs[mstatus][MIE]; // disable interrupt during shadow mmu walking
+	//	Csrs[mstatus][MIE] <= 0;
 	    end else if (mmu_pc && ir == 32'b00110000001000000000000001110011) begin // end hiject mret & recover from shadow when see Mret
 		pc <= saved_user_pc; // recover from shadow when see Mret
 	 	bubble <= 1'b1; // bubble
