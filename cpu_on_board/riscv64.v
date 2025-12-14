@@ -355,7 +355,7 @@ module riscv64(
        		mmu_pc <= 1; // MMU_PC ON 
        	        pc <= 0; // I-TLB refill Handler
        	 	bubble <= 1'b1; // bubble 
-	        saved_user_pc <= pc - 4; // save pc (EXE was flushed so record it, previous pc)
+	        saved_user_pc <= pc;// - 4; // save pc (EXE was flushed so record it, previous pc)
 		for (i=0;i<=9;i=i+1) begin sre[i]<= re[i]; end // save re
 		re[9] <= pc;// - 4; // save this vpc to x1
 		Csrs[mstatus][MPIE] <= Csrs[mstatus][MIE]; // disable interrupt during shadow mmu walking
