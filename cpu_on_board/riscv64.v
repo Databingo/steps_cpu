@@ -368,7 +368,7 @@ module riscv64(
 		Csrs[mstatus][MIE] <= Csrs[mstatus][MPIE]; // set back interrupt status
 
             //  mmu_da  D-TLB miss Trap // load/store/atom
-	    end else if (satp_mmu && !mmu_pc && !mmu_da && !mmu_cache_refill && !tlb_d_hit && (op == 7'b0000011 || op == 7'b0100011 || op == 7'b0101111) ) begin  
+	    end else if (satp_mmu && !mmu_pc && !mmu_da && !mmu_cache_refill && tlb_i_hit && !tlb_d_hit && (op == 7'b0000011 || op == 7'b0100011 || op == 7'b0101111) ) begin  
 		mmu_da <= 1; // MMU_DA ON
 	        saved_user_pc <= pc-4; // save pc EXE l/s
 		pc <= 100; // D-TLB refill Handler
