@@ -37,6 +37,12 @@ _start:
     sb t6, 0(t0)         # Should print 'D'
     sb t2, 0(t0)         # Should print 'X'
 
+    # MMU enabled
+    li a1, 8              
+    slli a1, a1, 60          # mmu mode sv39 #li a1, 0x8000000000000000 # mmu mode sv39
+    csrrw a3, satp, a1      # set satp csr index 0x180
+
+
     # Write 8 byte
     li t1, 0x4847464544434241         # 'HGFEDCBA'
     sd t1, 0(s0)         # test sdram sd
@@ -97,19 +103,20 @@ _start:
     lb a0, 0(s0)         # test sdram ld
     sb a0, 0(t0)         # Should print 'A'
 
-    # MMU enabled
-    li a1, 8              
-    slli a1, a1, 60          # mmu mode sv39 #li a1, 0x8000000000000000 # mmu mode sv39
-    csrrw a3, satp, a1      # set satp csr index 0x180
+
+    ## MMU enabled
+    #li a1, 8              
+    #slli a1, a1, 60          # mmu mode sv39 #li a1, 0x8000000000000000 # mmu mode sv39
+    #csrrw a3, satp, a1      # set satp csr index 0x180
 
 
     lb a0, 1(s0)         # test sdram ld+1
     sb a0, 0(t0)         # Should print 'B'
     
-    # MMU un-enabled
-    li a1, 0              
-    slli a1, a1, 60          # mmu mode sv39 #li a1, 0x8000000000000000 # mmu mode sv39
-    csrrw a3, satp, a1      # set satp csr index 0x180
+    ## MMU un-enabled
+    #li a1, 0              
+    #slli a1, a1, 60          # mmu mode sv39 #li a1, 0x8000000000000000 # mmu mode sv39
+    #csrrw a3, satp, a1      # set satp csr index 0x180
 
     li t3, 124 # |
     sb t3, 0(t0) # to plic
@@ -186,27 +193,11 @@ _start:
     li t3, 55 # 7
     sb t3, 0(t0) # to plic
 
-    ## TLB-Cache testing
-    ## Refill TLB i/d
-    #lui x8, 0x20000
-    #sw x9, 0(x8)
-    #mret
-
-    ## Refill ICache
-    #lui x8, 0x20001
-    #lw x7, 0(x9) # load 32-bit data from SDRAM by ppc in x9 traped by mmu_cache
-    #sw x7, 0(x8) # save to Cache
-    #mret
-
-
-
-
-
-
-
-
 wait_loop:
     j wait_loop
+
+done:
+    j done
 
 irq_handler:
    li t0, 0x2004 # UART data for print/read
