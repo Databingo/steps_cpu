@@ -811,7 +811,7 @@ module riscv64(
 		        if (load_step == 1 && bus_read_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working
 			if (load_step == 1 && bus_read_done == 1) begin re[w_rd]<= bus_read_data; load_step <= 0;  // finish load
 		            bus_address <= pda; bus_write_data<=bus_read_data;bus_write_enable<=1;pc<=pc-4;bubble<=1;store_step<=1;bus_ls_type<=w_func3; //start store
-			    if (rs2 > bus_read_data) bus_write_data <= rs2; end
+			    if ($signed(rs2) > $signed(bus_read_data)) bus_write_data <= rs2; end
 		        if (store_step == 1 && bus_write_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working 1 bubble2 this3
 			if (store_step == 1 && bus_write_done == 1) begin store_step <= 0; end end //
 		    // amominu.d
@@ -829,7 +829,7 @@ module riscv64(
 		        if (load_step == 1 && bus_read_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working
 			if (load_step == 1 && bus_read_done == 1) begin re[w_rd]<= bus_read_data; load_step <= 0;  // finish load
 		            bus_address <= pda; bus_write_data<=bus_read_data;bus_write_enable<=1;pc<=pc-4;bubble<=1;store_step<=1;bus_ls_type<=w_func3; //start store
-			    if (rs2 > bus_read_data) bus_write_data <= rs2; end
+			    if ($signed(rs2) > $signed(bus_read_data)) bus_write_data <= rs2; end
 		        if (store_step == 1 && bus_write_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working 1 bubble2 this3
 			if (store_step == 1 && bus_write_done == 1) begin store_step <= 0; end end //
 
