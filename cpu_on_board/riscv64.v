@@ -22,7 +22,6 @@ module riscv64(
     input wire meip_interrupt, // from PLIC
     input wire msip_interrupt, // from Software
       
-      
     input  reg        bus_read_done,
     input  reg        bus_write_done,
     input  wire [63:0] bus_read_data   // from outside
@@ -255,7 +254,8 @@ module riscv64(
     reg [2:0] tlb_ptr = 0; // 8 entries TLB
     always @(posedge clk or negedge reset) begin
 	if (!reset) tlb_ptr <= 0; // hit->trap(save va to x9)->refill assembly(fetch pa to x9)-> sd x9, `Tlb -> here to refill tlb
-	else if (bus_write_enable && bus_address == `Tlb) begin // for the last fill: sd ppa, Tlb
+	//else if (bus_write_enable && bus_address == `Tlb) begin // for the last fill: sd ppa, Tlb
+	else if ((mmu_pc || mmu_da) && bus_write_enable && bus_address == `Tlb) begin // for the last fill: sd ppa, Tlb
 	    tlb_vpn[tlb_ptr] <= re[9][38:12]; // VA from x9 saved by trapp mmu_pc/mmu_da
 	    tlb_ppn[tlb_ptr] <= {24'b0, re[9][38:12]}; // mimic copy now | real need walking assembly
 	    tlb_vld[tlb_ptr] <= 1;
