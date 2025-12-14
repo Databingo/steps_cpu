@@ -181,6 +181,7 @@ module riscv64(
     reg bubble;
     reg [1:0] load_step;
     reg [1:0] store_step;
+    //reg [2:0] step;
 
     // -- Atomic & Sync state --
     reg [1:0]  atom_step;
@@ -661,10 +662,18 @@ module riscv64(
 		    // sc.w 
 	            32'b00011_??_?????_?????_010_?????_0101111: begin
 		        if (store_step == 0) begin 
-			    if (!reserve_valid || reserve_addr != pda) begin re[w_rd] <= 1; reserve_valid <= 0; end // finish failed 1 cycle without bubble & clear reserve
-			    else begin bus_address <= pda; bus_write_data<=rs2[31:0];bus_write_enable<=1;pc<=pc-4;bubble<=1;store_step<=1;bus_ls_type<=w_func3; reserve_valid <= 0; end end // consumed
+			    if (!reserve_valid || reserve_addr != pda) begin re[w_rd] <= 1; reserve_valid <= 0; end // finish failed 1 in rd cycle without bubble & clear reserve
+			    else begin bus_address <= pda; bus_write_data<=rs2[31:0];bus_write_enable<=1;pc<=pc-4;bubble<=1;store_step<=1;bus_ls_type<=w_func3;reserve_valid<=0;end end//consumed
 		        if (store_step == 1 && bus_write_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working 1 bubble2 this3
 			if (store_step == 1 && bus_write_done == 1) begin store_step <= 0; re[w_rd] <= 0; end end // sc.w successed return 0 in rd
+		    // amoswap.w
+	            32'b00001_??_?????_?????_010_?????_0101111: begin
+			if (load_step == 0) begin bus_address <= pda; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; bus_ls_type <= w_func3; end
+		        if (load_step == 1 && bus_read_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working
+			if (load_step == 1 && bus_read_done == 1) begin re[w_rd]<= $signed(bus_read_data[31:0]); load_step <= 0;  // finish load
+		            bus_address <= pda; bus_write_data<=rs2[31:0];bus_write_enable<=1;pc<=pc-4;bubble<=1;store_step<=1;bus_ls_type<=w_func3; end //start store
+		        if (store_step == 1 && bus_write_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working 1 bubble2 this3
+			if (store_step == 1 && bus_write_done == 1) begin store_step <= 0; end end //
 		     // amoswap amoadd amoxor amoand amoor
 		     // amomin amomax amominu amomaxu
 		     // -- ATOMIC end --
