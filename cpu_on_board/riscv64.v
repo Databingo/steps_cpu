@@ -42,8 +42,8 @@ module riscv64(
     function [31:0] get_shadow_ir; // 0-5 mmu 
         input [63:0] spc;
         begin
-    	case(spc) /// only x0-x9 could use, x9 is the value passer
-	    // I-TLB D-TLB Handler
+    	case(spc) /// only x0-x9 could use, x9 is the va value passer
+	    // I-TLB D-TLB Handler (mmu walker)
            //0  : get_shadow_ir = 32'b00011000000000000010001011110011; // 180022f3 csrrs x5, satp, x0
            //4  : get_shadow_ir = 32'b00000001010000101001001010010011; // 01429293 slli x5, x5, 20 
            //8  : get_shadow_ir = 32'b00000000100000101101001010010011; // 0082d293 srli x5, x5, 8  
@@ -73,7 +73,7 @@ module riscv64(
            //104: get_shadow_ir = 32'b00000000101000111101001110010011; // 00a3d393 srli x7, x7, 10  
 	   //108: get_shadow_ir = 32'b00000000110000111001001110010011; // 00c39393 slli x7, x7, 12  
            //112: get_shadow_ir = 32'b11110000000000000010010000110111; // f0002437 lui x8, 0xF0002 
-           //116: get_shadow_ir = 32'b00000000011101000011000000100011; // 00743023 sd x7, 0(x8)   // Real use x7 for ppn
+           //116: get_shadow_ir = 32'b00000000011101000011000000100011; // 00743023 sd x7, 0(x8)// Real use x7 for ppn
            //120: get_shadow_ir = 32'b00110000001000000000000001110011; // 30200073 mret
       
 	   // Identical 1:1 map 
