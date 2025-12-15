@@ -109,10 +109,18 @@ _start:
     #slli a1, a1, 60          # mmu mode sv39 #li a1, 0x8000000000000000 # mmu mode sv39
     #csrrw a3, satp, a1      # set satp csr index 0x180
 
-   # Get root table address from csr satp
+   # 1. Get root table address from csr satp
      csrr x5, satp
      slli x5, x5, 20 # clear high mode+Asid
-     srli x5, x5, 8  # get level 2 ppn + 12 zero positon
+     srli x5, x5, 8  # get level_2 ppn(27 bits) + 12 zero positon
+   # 2. Level 2 walk
+     srli x6, x9, 30 # extract vpn[2] bit 38:30 the first 9 bits
+     andi x6, x6, 0x1ff # Mask 9 bits
+     slli x6, x6, 3  # Multiple by 8 (PTE size 8 bytes)
+     add  x5, x5, x6 # x5 = Address of L2 PTE
+     ld x7, 0(x5)    # Load L2 PTE from memory
+     
+
 
 
 
