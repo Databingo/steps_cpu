@@ -129,10 +129,16 @@ _start:
      srli x5, x5, 12 # x5 = Address of L1 Table
 
    # 5. Level 1 Walk
+     srli x6, x9, 21 # Extract VPN[1] bit 29:21
+     andi x6, x6, 0x1ff # Mask 9 bits
+     slli x6, x6, 3  # Multiple by 8 (PTE size 8 bytes)
+     add  x5, x5, x6 # x5 = Address of L1 PTE
+     ld x7, 0(x5)    # Load L1 PTE from memory
 
 
 FINISH:
-     srli x7, x7, 10  # get PPN from PTE(PTE's data struction?)
+     srli x7, x7, 10  # get PPN from PTE(PTE's data struction?)  64:54Reserved 53:10PPN 
+                      # 9:8RSW 7Dirty 6Accessed 5Global 4User 3Executable 2Write 1Readable 0Valid
      
      # Writ ppn back to hardware mmu trap
      lui x8, 0xF0002 # Magic TLB address
