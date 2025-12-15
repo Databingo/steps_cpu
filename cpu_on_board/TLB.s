@@ -119,6 +119,10 @@ _start:
      slli x6, x6, 3  # Multiple by 8 (PTE size 8 bytes)
      add  x5, x5, x6 # x5 = Address of L2 PTE
      ld x7, 0(x5)    # Load L2 PTE from memory
+   # 3. Check Leaf
+     addi x6, x7, 0xE # bit 3:1 for X/W/R
+     bnez x6, FINIH   # If not zero, it's leaf. We get the address.
+     
      
 
 
