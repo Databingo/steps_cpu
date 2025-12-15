@@ -121,7 +121,23 @@ _start:
      ld x7, 0(x5)    # Load L2 PTE from memory
    # 3. Check Leaf
      addi x6, x7, 0xE # bit 3:1 for X/W/R
-     bnez x6, FINIH   # If not zero, it's leaf. We get the address.
+     bnez x6, FINISH   # If not zero, it's leaf. We get the address.
+
+
+   # 4. Prepare for Level 1
+     srli x5, x7, 10 # Extract PPN from L2 PTE
+     srli x5, x5, 12 # x5 = Address of L1 Table
+
+   # 5. Level 1 Walk
+
+
+FINISH:
+     srli x7, x7, 10  # get PPN from PTE(PTE's data struction?)
+     
+     # Writ ppn back to hardware mmu trap
+     lui x8, 0xF0002 # Magic TLB address
+     sd x7, 0(x8)
+     mret
      
      
 
