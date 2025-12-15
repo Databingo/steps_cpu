@@ -104,25 +104,26 @@ _start:
     sb a0, 0(t0)         # Should print 'A'
 
 
-    ## MMU enabled
-    #li a1, 8              
-    #slli a1, a1, 60          # mmu mode sv39 #li a1, 0x8000000000000000 # mmu mode sv39
-    #csrrw a3, satp, a1      # set satp csr index 0x180
+    # MMU enabled
+    li a1, 8              
+    slli a1, a1, 60          # mmu mode sv39 #li a1, 0x8000000000000000 # mmu mode sv39
+    csrrw a3, satp, a1      # set satp csr index 0x180
 
    # 1. Get root table address from csr satp
      csrr x5, satp
      slli x5, x5, 20 # clear high mode+Asid
      srli x5, x5, 8  # get level_2 ppn(27 bits) + 12 zero positon
+
    # 2. Level 2 walk
      srli x6, x9, 30 # extract vpn[2] bit 38:30 the first 9 bits
      andi x6, x6, 0x1ff # Mask 9 bits
      slli x6, x6, 3  # Multiple by 8 (PTE size 8 bytes)
      add  x5, x5, x6 # x5 = Address of L2 PTE
      ld x7, 0(x5)    # Load L2 PTE from memory
+
    # 3. Check Leaf
      addi x6, x7, 0xE # bit 3:1 for X/W/R
      bnez x6, FINISH   # If not zero, it's leaf. We get the address.
-
 
    # 4. Prepare for Level 1
      srli x5, x7, 10 # Extract PPN from L2 PTE
@@ -135,12 +136,26 @@ _start:
      add  x5, x5, x6 # x5 = Address of L1 PTE
      ld x7, 0(x5)    # Load L1 PTE from memory
 
+   # 6. Check Leaf
+     addi x6, x7, 0xE # bit 3:1 for X/W/R
+     bnez x6, FINISH   # If not zero, it's leaf. We get the address.
+
+   # 7. Prepare for Level 0
+     srli x5, x7, 10 # Extract PPN from L1 PTE
+     srli x5, x5, 12 # x5 = Address of L0 Table
+
+   # 8. Level 0 Walk
+     srli x6, x9, 21 # Extract VPN[0] bit 20:12
+     andi x6, x6, 0x1ff # Mask 9 bits
+     slli x6, x6, 3  # Multiple by 8 (PTE size 8 bytes)
+     add  x5, x5, x6 # x5 = Address of L0 PTE
+     ld x7, 0(x5)    # Load L0 PTE from memory
 
 FINISH:
      srli x7, x7, 10  # get PPN from PTE(PTE's data struction?)  64:54Reserved 53:10PPN 
                       # 9:8RSW 7Dirty 6Accessed 5Global 4User 3Executable 2Write 1Readable 0Valid
      
-     # Writ ppn back to hardware mmu trap
+     # 9. Writ ppn back to hardware mmu trap
      lui x8, 0xF0002 # Magic TLB address
      sd x7, 0(x8)
      mret
@@ -158,10 +173,10 @@ FINISH:
     lb a0, 1(s0)         # test sdram ld+1
     sb a0, 0(t0)         # Should print 'B'
     
-    ## MMU un-enabled
-    #li a1, 0              
-    #slli a1, a1, 60          # mmu mode sv39 #li a1, 0x8000000000000000 # mmu mode sv39
-    #csrrw a3, satp, a1      # set satp csr index 0x180
+    # MMU un-enabled
+    li a1, 0              
+    slli a1, a1, 60          # mmu mode sv39 #li a1, 0x8000000000000000 # mmu mode sv39
+    csrrw a3, satp, a1      # set satp csr index 0x180
 
     li t3, 124 # |
     sb t3, 0(t0) # to plic
