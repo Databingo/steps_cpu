@@ -122,12 +122,12 @@ _start:
      ld x7, 0(x5)    # Load L2 PTE from memory
 
    # 3. Check Leaf
-     addi x6, x7, 0xE # bit 3:1 for X/W/R
+     andi x6, x7, 0xE # bit 3:1 for X/W/R
      bnez x6, FINISH   # If not zero, it's leaf. We get the address.
 
    # 4. Prepare for Level 1
      srli x5, x7, 10 # Extract PPN from L2 PTE
-     srli x5, x5, 12 # x5 = Address of L1 Table
+     slli x5, x5, 12 # x5 = Address of L1 Table
 
    # 5. Level 1 Walk
      srli x6, x9, 21 # Extract VPN[1] bit 29:21
@@ -137,15 +137,15 @@ _start:
      ld x7, 0(x5)    # Load L1 PTE from memory
 
    # 6. Check Leaf
-     addi x6, x7, 0xE # bit 3:1 for X/W/R
+     andi x6, x7, 0xE # bit 3:1 for X/W/R
      bnez x6, FINISH   # If not zero, it's leaf. We get the address.
 
    # 7. Prepare for Level 0
      srli x5, x7, 10 # Extract PPN from L1 PTE
-     srli x5, x5, 12 # x5 = Address of L0 Table
+     slli x5, x5, 12 # x5 = Address of L0 Table
 
    # 8. Level 0 Walk
-     srli x6, x9, 21 # Extract VPN[0] bit 20:12
+     srli x6, x9, 12 # Extract VPN[0] bit 20:12
      andi x6, x6, 0x1ff # Mask 9 bits
      slli x6, x6, 3  # Multiple by 8 (PTE size 8 bytes)
      add  x5, x5, x6 # x5 = Address of L0 PTE
