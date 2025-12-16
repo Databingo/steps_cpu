@@ -12,7 +12,7 @@ cat bin.txt > rom.mif  # write ROM program
 #go run ../rvas.go lw_sw_based.s       # lui addi sw lw sb uart for test
 #go run ../rvas.go sh.s       # lui addi sh lw sb uart for test
 #go run ../rvas.go lh.s       # lui addi sw lh sb uart for test
-#go run ../rvas.go slli.s     # lui addi slli sb uart
+go run ../rvas.go slli.s     # lui addi slli sb uart
 #go run ../rvas.go sd.s       # lui addi slli addi sd lw sb uart for test
 #go run ../rvas.go ld.s       # lui addi slli addi sd ld sb uart for test
 #go run ../rvas.go lbu.s      # addi -1 sb lb sb uart #include lbu lhu lwu     
@@ -38,7 +38,7 @@ cat bin.txt > rom.mif  # write ROM program
 #go run ../rvas.go sdram.s
 #go run ../rvas.go shadow.s
 #go run ../rvas.go mopensbi.s
-go run ../rvas.go PLIC.s
+#go run ../rvas.go PLIC.s
 #go run ../rvas.go TLB.s
 
 

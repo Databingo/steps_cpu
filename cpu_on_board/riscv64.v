@@ -98,7 +98,6 @@ module riscv64(
             //220: get_shadow_ir = 32'b00000000000001001010001110000011; // 0004a383 lw x7, 0(x9)   
             //224: get_shadow_ir = 32'b00000000011101000010000000100011; // 00742023 sw x7, 0(x8)   
             //228: get_shadow_ir = 32'b00110000001000000000000001110011; // 30200073 mret           
-
     	    default: get_shadow_ir = 32'h00000013; // NOP:addi x0, x0, 0
     	endcase
         end
@@ -151,11 +150,11 @@ module riscv64(
    localparam sedeleg    = 10;  
    localparam sideleg    = 11;  
    localparam sie        = 12;  // Supervisor interrupt-enable register
-   localparam stvec      = 13; //localparam ; //BASE=2,MODE=0 63:2BASE|1:0MDOE Supervisor trap handler base address
+   localparam stvec      = 13;  //localparam ; //BASE=2,MODE=0 63:2BASE|1:0MDOE Supervisor trap handler base address
    localparam scounteren = 14;  
    localparam sscratch   = 15;  
    localparam sepc       = 16;  
-   localparam scause     = 17; //localparam ; //INTERRUPT=63,CAUSE=0 *  63InterruptAsync/ErrorSync|62:0CauseCode// 
+   localparam scause     = 17;  //localparam ; //INTERRUPT=63,CAUSE=0 *  63InterruptAsync/ErrorSync|62:0CauseCode// 
    localparam stval      = 18;  
    localparam sip        = 19;  // Supervisor interrupt pending
    localparam satp       = 20;  // Supervisor address translation and protection satp[63:60].MODE=0:off|8:SV39 satp[59:44].asid vpn2:9 vpn1:9 vpn0:9 satp[43:0]:rootpage physical addr
@@ -623,7 +622,7 @@ module riscv64(
 	               			       if (Csrs[mstatus][MPP+1:MPP] < M_mode) Csrs[mstatus][MPRV] <= 0; // set mprv to 0, modified privilege, 1 using in MPP not current
 	               			       current_privilege_mode  <= Csrs[mstatus][MPP+1:MPP]; // set back previous mode
 	               			       Csrs[mstatus][MPP+1:MPP] <= 2'b00; // set previous privilege mode(MPP) to be 00 (U-mode)
-	               			       pc <=  Csrs[mepc]; // mepc was +4 by the software handler and written back to sepc
+	               			       pc <=  Csrs[mepc]; // mepc was by the software handler and written back to sepc
 		          		       bubble <= 1'b1;
 	               			       end
                     // Sret

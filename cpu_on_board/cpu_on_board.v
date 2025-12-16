@@ -194,15 +194,6 @@ assign DRAM_CKE = 1; // always enable
     reg [31:0] Plic_pending; // 0x1000 Global pending Bitmap 
     reg [31:0] Plic_enable [0:1];  // 0x2000 per context +0x80
     reg [2:0]  Plic_threshold [0:1]; // 0x200000 4B per hart
-    //reg [31:0] Plic_claim [0:1];  // 0x200004 4B per hart
-//say hart0 M mode UART id 1 give an interrupt, then what happen accordingly?
-//1.base+4*1 set to be 7( suppose higher priority of id 1 interrupt) (address mapping to array of reg)
-//2.pending base+0x1000's bit 1 (not 0) to be 1 means id 1 is pending (address mapping to 32bits regs)
-//3.enable base +0x2000's bit 1 to be 1 means it is enabled (address mapping to 32bits regs)
-//4.threshold base +0x200000 4 bytes to be set  (address mapping to 32bits regs, one reg for one context?)
-//5.when PLIC find it worth then trigger to cpu (set SEIP MEIP .etc)
-//6.CPU check claim for id, PLIC checkout pending value to CPU, then PLIC clean pending
-//7. then cpu handler to finish then set claim register to be 1, PLIC know cpu finished.
 
     // Address Decoding --
     wire Rom_selected = (bus_address >= `Rom_base && bus_address < `Rom_base + `Rom_size);
@@ -232,22 +223,7 @@ assign DRAM_CKE = 1; // always enable
     wire Plic_claim_ctx1_selected = (bus_address == `Plic_claim + 32'h1000);
     //wire Plic_claim_ctx0_selected = (bus_address >= `Plic_claim && bus_address < `Plic_claim+1024*0x1000+4);
     reg [31:0] claim_interrupt_id_ctx [0:1]; // 0 for hart0M 1 for hart0S
-    //reg [2:0] current_max_prio;
-    //integer c, ctx;
-    //always @(*) begin
-    //    for (ctx=0;ctx<2;ctx=ctx+1) begin
-    //        claim_interrupt_id_ctx[ctx]=0;
-    //        current_max_prio = Plic_threshold[ctx];
-    //        for (c=1;c<6;c=c+1) begin
-    //    	if (Plic_pending[c] && Plic_enable[ctx][c]) begin  
-    //    	    if (Plic_priority[c] > current_max_prio) begin
-    //    	        current_max_prio = Plic_priority[c];
-    //    	        claim_interrupt_id_ctx[ctx] = c; 
-    //    	    end
-    //            end
-    //        end
-    //    end
-    //end
+
     always @(*) begin
         claim_interrupt_id_ctx[0] = 0; 
         claim_interrupt_id_ctx[1] = 0; 
@@ -265,16 +241,11 @@ assign DRAM_CKE = 1; // always enable
     // Read & Write BRAM Port B 
     reg [63:0] bus_address_reg;
     reg [63:0] bus_address_reg_full;
-    reg [63:0] data;
-    reg ld = 0;
-    reg sd = 0;
     reg [2:0] step = 0;
     reg bus_read_done = 1;
     reg bus_write_done = 1;
     reg [63:0] next_addr;
     wire [4:0] plic_id = (bus_address - `Plic_base) >> 2; // id = offset /4
-
-
 
     always @(posedge CLOCK_50 or negedge KEY0) begin
         if (!KEY0) begin
@@ -283,8 +254,6 @@ assign DRAM_CKE = 1; // always enable
 	    bus_address_reg <= 0;
 	    bus_address_reg_full <= 0;
 	    next_addr <= 0;
-	    ld <= 0;
-	    sd <= 0;
 	    step <= 0;
 	    bus_read_data <= 0;
 	    uart_write_pulse <= 0;
@@ -312,9 +281,9 @@ assign DRAM_CKE = 1; // always enable
 	    if (Ram_selected) begin 
 	        casez(bus_ls_type)
 	            3'b011: begin // 011Ld
-		        case(ld)
-			    0: begin bus_read_data[31:0]  <= Cache[bus_address_reg]; bus_address_reg <= bus_address_reg +1; ld <= 1; end
-		            1: begin bus_read_data[63:32] <= Cache[bus_address_reg]; ld <= 0; bus_read_done <= 1; end
+		        case(step)
+			    0: begin bus_read_data[31:0]  <= Cache[bus_address_reg]; bus_address_reg <= bus_address_reg +1; step <= 1; end
+		            1: begin bus_read_data[63:32] <= Cache[bus_address_reg]; step <= 0; bus_read_done <= 1; end
 			endcase
 		    end 
 		    default: begin bus_read_data <= Cache[bus_address_reg] >> (8*bus_address_reg_full[1:0]); bus_read_done <= 1; end // 000Lb 001Lh 010Lw 101Lhu 100Lbu 110Lwu
@@ -333,7 +302,7 @@ assign DRAM_CKE = 1; // always enable
 	        if (uart_read_step ==1 && !uart_waitrequest) begin bus_read_data <= uart_readdata; uart_read_step <= 0; bus_read_done <=1; end
 	    end
 
-	    if (Sdram_selected && bus_read_done == 0) begin
+	    if (Sdram_selected) begin
 		case(bus_ls_type)
 	            3'b000: begin //lb
 			   sdram_addr <= bus_address[22:1]; sdram_byte_en <= bus_address[0] ? 2'b10 : 2'b01; sdram_read_en <= 1; 
@@ -429,9 +398,9 @@ assign DRAM_CKE = 1; // always enable
 			end
 		    3'b010: begin Cache[bus_address[63:2]] <= bus_write_data[31:0]; end
 		    3'b011: begin //sd
-		        case(sd)
-		            0: begin Cache[bus_address[63:2]] <= bus_write_data[31:0]; sd <= 1; next_addr <= bus_address[63:2]+1; bus_write_done <= 0; end
-			    1: begin Cache[next_addr] <= bus_write_data[63:32]; sd <= 0; end
+		        case(step)
+		            0: begin Cache[bus_address[63:2]] <= bus_write_data[31:0]; step <= 1; next_addr <= bus_address[63:2]+1; bus_write_done <= 0; end
+			    1: begin Cache[next_addr] <= bus_write_data[63:32]; step <= 0; end
 			endcase
 			end
 	        endcase
@@ -585,26 +554,6 @@ end
         .status(sd_status),
         .recv_data()
     );
-
-
-    // Interrupt controller
-    wire [3:0] interrupt_vector;
-    wire interrupt_ack;
-    always @(posedge CLOCK_50 or negedge KEY0) begin
-        if (!KEY0) begin
-            interrupt_vector <= 0;
-            LEDR0 <= 0;
-        end else begin
-            if (key_pressed && ascii) begin
-                interrupt_vector <= 1;
-                LEDR0 <= 1;
-            end
-            if (interrupt_vector != 0 && interrupt_ack == 1) begin
-                interrupt_vector <= 0;
-                LEDR0 <= 0;
-            end
-        end
-    end
 
     // Debug LEDs
     assign HEX30 = ~Key_selected;
