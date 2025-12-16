@@ -182,7 +182,7 @@ assign DRAM_CKE = 1; // always enable
 
     // -- Bus --
     reg  [63:0] bus_read_data;
-    wire [38:0] bus_address;
+    wire [63:0] bus_address;
     wire        bus_read_enable;
     wire [63:0] bus_write_data;
     wire        bus_write_enable;
