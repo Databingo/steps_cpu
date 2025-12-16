@@ -719,9 +719,7 @@ module riscv64(
 		    32'b0001001??????????_000_?????_1110011: begin end
 		     // RV64IMAFD(G)C  RVA23U64
 		     // M mul mulh mulhsu mulhu div divu rem remu mulw divw divuw remuw
-		     // A lr.w sc.w lr.d sc.d
-		     // -- ATOMIC instructions (A-extension) opcode: 0101111
-		    // Atomic after TLB
+		     // A Atomic after TLB instructions (A-extension) opcode: 0101111 
 		    // lr.w
 		    32'b00010_??_?????_?????_010_?????_0101111: begin  // Lr.w_mmu 3 cycles
 		        if (load_step == 0) begin bus_address <= pda; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; bus_ls_type <= w_func3; reserve_addr <= pda; reserve_valid <= 1; end
@@ -900,9 +898,6 @@ module riscv64(
 			    if (rs2 > bus_read_data) bus_write_data <= rs2; end
 		        if (store_step == 1 && bus_write_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working 1 bubble2 this3
 			if (store_step == 1 && bus_write_done == 1) begin store_step <= 0; end end //
-
-		     // amoswap amoadd amoxor amoand amoor
-		     // amomin amomax amominu amomaxu
 		     // -- atomic end --
 		     // f (reg f0-f31)
 		     // flw fsw fadd.s fsub.s fmul.s fdiv.s fsqrt.s fmadd.s

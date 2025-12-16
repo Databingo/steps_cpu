@@ -52,76 +52,6 @@ module cpu_on_board (
     (* chip_pin = "M5, R7" *)  output wire [1:0] DRAM_DQM   // High-low byte data mask
 );
 
-//// -- sdram end--
-//sdram sdram_instance (
-//        .clk_clk                                 (CLOCK_50),  
-//        .reset_reset_n                           (KEY0),                //                       reset.reset_n
-//	// to bus
-//        .new_sdram_controller_0_s1_address       (sdram_address),       //   new_sdram_controller_0_s1.address
-//        .new_sdram_controller_0_s1_byteenable_n  (sdram_byteenable_n),  //                            .byteenable_n
-//        .new_sdram_controller_0_s1_chipselect    (sdram_chipselect),    //                            .chipselect
-//        .new_sdram_controller_0_s1_writedata     (sdram_writedata),     //                            .writedata
-//        .new_sdram_controller_0_s1_read_n        (sdram_read_n),        //                            .read_n
-//        .new_sdram_controller_0_s1_write_n       (sdram_write_n),       //                            .write_n
-//        .new_sdram_controller_0_s1_readdata      (sdram_readdata),      //                            .readdata
-//        .new_sdram_controller_0_s1_readdatavalid (sdram_readdatavalid), //                            .readdatavalid
-//        .new_sdram_controller_0_s1_waitrequest   (sdram_waitrequest),   //                            .waitrequest
-//        // to pin
-//        .new_sdram_controller_0_wire_addr        (DRAM_ADDR),        // new_sdram_controller_0_wire.addr
-//        .new_sdram_controller_0_wire_ba          (DRAM_BA),          //                            .ba
-//        .new_sdram_controller_0_wire_cas_n       (DRAM_CAS_N),       //                            .cas_n
-//        .new_sdram_controller_0_wire_cke         (DRAM_CKE),         //                            .cke
-//        .new_sdram_controller_0_wire_cs_n        (DRAM_CS_N),        //                            .cs_n
-//        .new_sdram_controller_0_wire_dq          (DRAM_DQ),          //                            .dq
-//        .new_sdram_controller_0_wire_dqm         (DRAM_DQM),         //                            .dqm
-//        .new_sdram_controller_0_wire_ras_n       (DRAM_RAS_N),       //                            .ras_n
-//        .new_sdram_controller_0_wire_we_n        (DRAM_WE_N)         //                            .we_n
-//    );
-//wire [21:0] sdram_address = bus_address - `Sdram_min;
-//wire sdram_chipselect = Sdram_selected && (bus_read_enable || bus_write_enable || !bus_read_done || !bus_write_done);
-//wire sdram_read_n  = ~(Sdram_selected && bus_read_enable); 
-//wire sdram_write_n = ~(Sdram_selected && bus_write_enable);   
-//wire [15:0] sdram_writedata = bus_write_data[15:0]; 
-//wire [1:0] sdram_byteenable_n = 2'b00; // Enable all bytes (active low)
-//wire [15:0] sdram_readdata;   
-//wire sdram_readdatavalid;
-//wire sdram_waitrequest;
-//
-//wire sys_clk;
-//wire sdram_clk;
-//
-//    //// -- sdram pll --
-//    //sdram_pll sdrampll (
-//    //    .clk_clk                        (CLOCK_50),               //                     clk.clk
-//    //    .reset_reset_n                  (KEY0),                   //                   reset.reset_n
-//    //    .altpll_0_c0_clk                (sys_clk),                //             altpll_0_c0.clk
-//    //    .altpll_0_c1_clk                (sdram_clk),              //             altpll_0_c1.clk
-//    //    .altpll_0_areset_conduit_export (), // altpll_0_areset_conduit.export
-//    //    .altpll_0_locked_conduit_export ()  // altpll_0_locked_conduit.export
-//    //);
-//
-//
-//  // -- up pll --
-//    upclk u0 (
-//        .clk_clk                   (CLOCK_50),                   //                   clk.clk
-//        .reset_reset_n             (KEY0),             //                 reset.reset_n
-//        .up_clocks_0_sdram_clk_clk (sdram_clk), // up_clocks_0_sdram_clk.clk
-//        .up_clocks_0_CLOCK_50_clk   (sys_clk)    //   up_clocks_0_CLOCK_50.clk
-//    );
-//
-//
-//assign DRAM_CLK=sdram_clk;
- 
-
-//// Bus to SDRAM
-////wire [21:0] sdram_addr = bus_address - `Sdram_min;
-//wire [21:0] sdram_addr = bus_address[21:0];
-//wire [15:0] sdram_wrdata= bus_write_data[15:0];
-//wire [1:0]  sdram_byte_en = 2'b11; // Enable all bytes (active low);
-//// Control
-//wire        sdram_write_en = (Sdram_selected && bus_write_enable);
-//wire        sdram_read_en = (Sdram_selected && bus_read_enable);
-
 reg [21:0] sdram_addr;
 reg [15:0] sdram_wrdata;
 reg [1:0]  sdram_byte_en; // Enable all bytes (active low);
@@ -145,19 +75,16 @@ sdram_controller sdram_ctrl (
     .avl_req_wait(sdram_req_wait),
     // to pin (hardware)
     .addr(DRAM_ADDR),        // new_sdram_controller_0_wire.addr
-    .BA(DRAM_BA),          //                            .ba
+    .BA(DRAM_BA),            //                            .ba
     .CASn(DRAM_CAS_N),       //                            .cas_n
-    .CSn(DRAM_CS_N),        //                            .cs_n
-    .DQ(DRAM_DQ),          //                            .dq
-    .DQM(DRAM_DQM),         //                            .dqm
+    .CSn(DRAM_CS_N),         //                            .cs_n
+    .DQ(DRAM_DQ),            //                            .dq
+    .DQM(DRAM_DQM),          //                            .dqm
     .RASn(DRAM_RAS_N),       //                            .ras_n
-    .WEn(DRAM_WE_N)         //                            .we_n
+    .WEn(DRAM_WE_N)          //                            .we_n
 );
 assign DRAM_CLK = CLOCK_50;
 assign DRAM_CKE = 1; // always enable
-
-  
-
 
     // -- MEM -- minic L1 cache
     (* ram_style = "block" *) reg [31:0] Cache [0:2000];
@@ -280,7 +207,6 @@ assign DRAM_CKE = 1; // always enable
 //6.CPU check claim for id, PLIC checkout pending value to CPU, then PLIC clean pending
 //7. then cpu handler to finish then set claim register to be 1, PLIC know cpu finished.
 
-
     // Address Decoding --
     wire Rom_selected = (bus_address >= `Rom_base && bus_address < `Rom_base + `Rom_size);
     wire Ram_selected = (bus_address >= `Ram_base && bus_address < `Ram_base + `Ram_size);
@@ -297,8 +223,6 @@ assign DRAM_CKE = 1; // always enable
     wire Mtimecmp_selected = (bus_address == `Mtimecmp);
     wire CacheI_selected = (bus_address == `CacheI);
     wire Tlb_selected = (bus_address == `Tlb);
-
-
 
     // Plic mapping
     wire Plic_priority_selected = (bus_address >= `Plic_base && bus_address < `Plic_pending);
@@ -351,11 +275,6 @@ assign DRAM_CKE = 1; // always enable
     reg bus_read_done = 1;
     reg bus_write_done = 1;
     reg [63:0] next_addr;
-
-    //reg bus_read_start = 0;
-    //reg bus_write_start = 0;
-    //reg [4:0] plic_id;
-    // Plic
     wire [4:0] plic_id = (bus_address - `Plic_base) >> 2; // id = offset /4
 
 
@@ -417,16 +336,6 @@ assign DRAM_CKE = 1; // always enable
 	        if (uart_read_step ==1 && !uart_waitrequest) begin bus_read_data <= uart_readdata; uart_read_step <= 0; bus_read_done <=1; end
 	    end
 
-	    //if (Art_selected) begin 
-	    //    uart_read_pulse <= 1;
-	    //    if (uart_read_pulse && !uart_waitrequest) begin bus_read_data <= uart_readdata; bus_read_done <=1; end
-	    //end
-
-	    //if (Sdram_selected && bus_read_done == 0) begin
-	    //    if (sdram_req_wait==0) begin bus_read_data <= {48'b0, sdram_rddata}; bus_read_done <= 1; end
-	    //end
-	    
-	     
 	    if (Sdram_selected && bus_read_done == 0) begin
 		case(bus_ls_type)
 	            3'b000: begin //lb
@@ -600,7 +509,6 @@ assign DRAM_CKE = 1; // always enable
 
 
 
-
     end
 end
 
@@ -681,15 +589,6 @@ end
         .recv_data()
     );
 
-
-    //// UART Writer Trigger
-    //wire uart_write_trigger = bus_write_enable && Art_selected;
-    //reg uart_write_trigger_dly;
-    //always @(posedge CLOCK_50 or negedge KEY0) begin
-    //    if (!KEY0) uart_write_trigger_dly <= 0;
-    //    else uart_write_trigger_dly <= uart_write_trigger;
-    //end
-    //assign uart_write_trigger_pulse = uart_write_trigger  && !uart_write_trigger_dly;
 
     // Interrupt controller
     wire [3:0] interrupt_vector;
