@@ -328,7 +328,6 @@ module riscv64(
     // IF Instruction (Only drive IR)
     always @(posedge clk or negedge reset) begin
             if (mmu_pc || mmu_da || mmu_cache_refill) ir_shadow <= get_shadow_ir(pc);  // Runing shadow code
-        end
     end
 
     // IF Instruction (Only drive IR)
