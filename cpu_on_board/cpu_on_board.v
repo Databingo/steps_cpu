@@ -52,76 +52,6 @@ module cpu_on_board (
     (* chip_pin = "M5, R7" *)  output wire [1:0] DRAM_DQM   // High-low byte data mask
 );
 
-//// -- sdram end--
-//sdram sdram_instance (
-//        .clk_clk                                 (CLOCK_50),  
-//        .reset_reset_n                           (KEY0),                //                       reset.reset_n
-//	// to bus
-//        .new_sdram_controller_0_s1_address       (sdram_address),       //   new_sdram_controller_0_s1.address
-//        .new_sdram_controller_0_s1_byteenable_n  (sdram_byteenable_n),  //                            .byteenable_n
-//        .new_sdram_controller_0_s1_chipselect    (sdram_chipselect),    //                            .chipselect
-//        .new_sdram_controller_0_s1_writedata     (sdram_writedata),     //                            .writedata
-//        .new_sdram_controller_0_s1_read_n        (sdram_read_n),        //                            .read_n
-//        .new_sdram_controller_0_s1_write_n       (sdram_write_n),       //                            .write_n
-//        .new_sdram_controller_0_s1_readdata      (sdram_readdata),      //                            .readdata
-//        .new_sdram_controller_0_s1_readdatavalid (sdram_readdatavalid), //                            .readdatavalid
-//        .new_sdram_controller_0_s1_waitrequest   (sdram_waitrequest),   //                            .waitrequest
-//        // to pin
-//        .new_sdram_controller_0_wire_addr        (DRAM_ADDR),        // new_sdram_controller_0_wire.addr
-//        .new_sdram_controller_0_wire_ba          (DRAM_BA),          //                            .ba
-//        .new_sdram_controller_0_wire_cas_n       (DRAM_CAS_N),       //                            .cas_n
-//        .new_sdram_controller_0_wire_cke         (DRAM_CKE),         //                            .cke
-//        .new_sdram_controller_0_wire_cs_n        (DRAM_CS_N),        //                            .cs_n
-//        .new_sdram_controller_0_wire_dq          (DRAM_DQ),          //                            .dq
-//        .new_sdram_controller_0_wire_dqm         (DRAM_DQM),         //                            .dqm
-//        .new_sdram_controller_0_wire_ras_n       (DRAM_RAS_N),       //                            .ras_n
-//        .new_sdram_controller_0_wire_we_n        (DRAM_WE_N)         //                            .we_n
-//    );
-//wire [21:0] sdram_address = bus_address - `Sdram_min;
-//wire sdram_chipselect = Sdram_selected && (bus_read_enable || bus_write_enable || !bus_read_done || !bus_write_done);
-//wire sdram_read_n  = ~(Sdram_selected && bus_read_enable); 
-//wire sdram_write_n = ~(Sdram_selected && bus_write_enable);   
-//wire [15:0] sdram_writedata = bus_write_data[15:0]; 
-//wire [1:0] sdram_byteenable_n = 2'b00; // Enable all bytes (active low)
-//wire [15:0] sdram_readdata;   
-//wire sdram_readdatavalid;
-//wire sdram_waitrequest;
-//
-//wire sys_clk;
-//wire sdram_clk;
-//
-//    //// -- sdram pll --
-//    //sdram_pll sdrampll (
-//    //    .clk_clk                        (CLOCK_50),               //                     clk.clk
-//    //    .reset_reset_n                  (KEY0),                   //                   reset.reset_n
-//    //    .altpll_0_c0_clk                (sys_clk),                //             altpll_0_c0.clk
-//    //    .altpll_0_c1_clk                (sdram_clk),              //             altpll_0_c1.clk
-//    //    .altpll_0_areset_conduit_export (), // altpll_0_areset_conduit.export
-//    //    .altpll_0_locked_conduit_export ()  // altpll_0_locked_conduit.export
-//    //);
-//
-//
-//  // -- up pll --
-//    upclk u0 (
-//        .clk_clk                   (CLOCK_50),                   //                   clk.clk
-//        .reset_reset_n             (KEY0),             //                 reset.reset_n
-//        .up_clocks_0_sdram_clk_clk (sdram_clk), // up_clocks_0_sdram_clk.clk
-//        .up_clocks_0_CLOCK_50_clk   (sys_clk)    //   up_clocks_0_CLOCK_50.clk
-//    );
-//
-//
-//assign DRAM_CLK=sdram_clk;
- 
-
-//// Bus to SDRAM
-////wire [21:0] sdram_addr = bus_address - `Sdram_min;
-//wire [21:0] sdram_addr = bus_address[21:0];
-//wire [15:0] sdram_wrdata= bus_write_data[15:0];
-//wire [1:0]  sdram_byte_en = 2'b11; // Enable all bytes (active low);
-//// Control
-//wire        sdram_write_en = (Sdram_selected && bus_write_enable);
-//wire        sdram_read_en = (Sdram_selected && bus_read_enable);
-
 reg [21:0] sdram_addr;
 reg [15:0] sdram_wrdata;
 reg [1:0]  sdram_byte_en; // Enable all bytes (active low);
@@ -145,19 +75,16 @@ sdram_controller sdram_ctrl (
     .avl_req_wait(sdram_req_wait),
     // to pin (hardware)
     .addr(DRAM_ADDR),        // new_sdram_controller_0_wire.addr
-    .BA(DRAM_BA),          //                            .ba
+    .BA(DRAM_BA),            //                            .ba
     .CASn(DRAM_CAS_N),       //                            .cas_n
-    .CSn(DRAM_CS_N),        //                            .cs_n
-    .DQ(DRAM_DQ),          //                            .dq
-    .DQM(DRAM_DQM),         //                            .dqm
+    .CSn(DRAM_CS_N),         //                            .cs_n
+    .DQ(DRAM_DQ),            //                            .dq
+    .DQM(DRAM_DQM),          //                            .dqm
     .RASn(DRAM_RAS_N),       //                            .ras_n
-    .WEn(DRAM_WE_N)         //                            .we_n
+    .WEn(DRAM_WE_N)          //                            .we_n
 );
 assign DRAM_CLK = CLOCK_50;
 assign DRAM_CKE = 1; // always enable
-
-  
-
 
     // -- MEM -- minic L1 cache
     (* ram_style = "block" *) reg [31:0] Cache [0:2000];
@@ -175,13 +102,13 @@ assign DRAM_CKE = 1; // always enable
         .reset_n(KEY0)
     );
 
-    wire [63:0] pc;
+    wire [38:0] ppc;
     reg [31:0] ir_bd;
     wire bubble;
     // IR_LD BRAM Port A read
-    always @(posedge CLOCK_50) begin if (!bubble) ir_bd <= Cache[pc>>2]; end
+    always @(posedge CLOCK_50) begin ir_bd <= Cache[ppc>>2]; end
     wire [31:0] ir_ld; assign ir_ld = {ir_bd[7:0], ir_bd[15:8], ir_bd[23:16], ir_bd[31:24]}; // Endianness swap
-    assign LEDR_PC = pc/4;
+    assign LEDR_PC = ppc/4;
 
     // -- CPU --
     riscv64 cpu (
@@ -190,13 +117,10 @@ assign DRAM_CKE = 1; // always enable
         .reset(KEY0),     
         .instruction(ir_ld),
         //.pc(pc),
+        .ppc(ppc),
         .bubble(bubble),
-        .ppc(pc),
         .ir(LEDG),
         .heartbeat(LEDR9),
-
-        .interrupt_vector(interrupt_vector),
-        .interrupt_ack(interrupt_ack),
 
         .bus_address(bus_address),
         .bus_write_data(bus_write_data),
@@ -272,16 +196,6 @@ assign DRAM_CKE = 1; // always enable
     reg [31:0] Plic_pending; // 0x1000 Global pending Bitmap 
     reg [31:0] Plic_enable [0:1];  // 0x2000 per context +0x80
     reg [2:0]  Plic_threshold [0:1]; // 0x200000 4B per hart
-    //reg [31:0] Plic_claim [0:1];  // 0x200004 4B per hart
-//say hart0 M mode UART id 1 give an interrupt, then what happen accordingly?
-//1.base+4*1 set to be 7( suppose higher priority of id 1 interrupt) (address mapping to array of reg)
-//2.pending base+0x1000's bit 1 (not 0) to be 1 means id 1 is pending (address mapping to 32bits regs)
-//3.enable base +0x2000's bit 1 to be 1 means it is enabled (address mapping to 32bits regs)
-//4.threshold base +0x200000 4 bytes to be set  (address mapping to 32bits regs, one reg for one context?)
-//5.when PLIC find it worth then trigger to cpu (set SEIP MEIP .etc)
-//6.CPU check claim for id, PLIC checkout pending value to CPU, then PLIC clean pending
-//7. then cpu handler to finish then set claim register to be 1, PLIC know cpu finished.
-
 
     // Address Decoding --
     wire Rom_selected = (bus_address >= `Rom_base && bus_address < `Rom_base + `Rom_size);
@@ -300,8 +214,6 @@ assign DRAM_CKE = 1; // always enable
     wire CacheI_selected = (bus_address == `CacheI);
     wire Tlb_selected = (bus_address == `Tlb);
 
-
-
     // Plic mapping
     wire Plic_priority_selected = (bus_address >= `Plic_base && bus_address < `Plic_pending);
     wire Plic_pending_selected = (bus_address == `Plic_pending);
@@ -313,22 +225,7 @@ assign DRAM_CKE = 1; // always enable
     wire Plic_claim_ctx1_selected = (bus_address == `Plic_claim + 32'h1000);
     //wire Plic_claim_ctx0_selected = (bus_address >= `Plic_claim && bus_address < `Plic_claim+1024*0x1000+4);
     reg [31:0] claim_interrupt_id_ctx [0:1]; // 0 for hart0M 1 for hart0S
-    //reg [2:0] current_max_prio;
-    //integer c, ctx;
-    //always @(*) begin
-    //    for (ctx=0;ctx<2;ctx=ctx+1) begin
-    //        claim_interrupt_id_ctx[ctx]=0;
-    //        current_max_prio = Plic_threshold[ctx];
-    //        for (c=1;c<6;c=c+1) begin
-    //    	if (Plic_pending[c] && Plic_enable[ctx][c]) begin  
-    //    	    if (Plic_priority[c] > current_max_prio) begin
-    //    	        current_max_prio = Plic_priority[c];
-    //    	        claim_interrupt_id_ctx[ctx] = c; 
-    //    	    end
-    //            end
-    //        end
-    //    end
-    //end
+
     always @(*) begin
         claim_interrupt_id_ctx[0] = 0; 
         claim_interrupt_id_ctx[1] = 0; 
@@ -346,21 +243,11 @@ assign DRAM_CKE = 1; // always enable
     // Read & Write BRAM Port B 
     reg [63:0] bus_address_reg;
     reg [63:0] bus_address_reg_full;
-    reg [63:0] data;
-    reg ld = 0;
-    reg sd = 0;
     reg [2:0] step = 0;
     reg bus_read_done = 1;
     reg bus_write_done = 1;
     reg [63:0] next_addr;
-
-    //reg bus_read_start = 0;
-    //reg bus_write_start = 0;
-    //reg [4:0] plic_id;
-    // Plic
     wire [4:0] plic_id = (bus_address - `Plic_base) >> 2; // id = offset /4
-
-
 
     always @(posedge CLOCK_50 or negedge KEY0) begin
         if (!KEY0) begin
@@ -369,8 +256,6 @@ assign DRAM_CKE = 1; // always enable
 	    bus_address_reg <= 0;
 	    bus_address_reg_full <= 0;
 	    next_addr <= 0;
-	    ld <= 0;
-	    sd <= 0;
 	    step <= 0;
 	    bus_read_data <= 0;
 	    uart_write_pulse <= 0;
@@ -392,14 +277,15 @@ assign DRAM_CKE = 1; // always enable
         if (bus_write_enable) begin bus_write_done <= 0; end
 
         // Read
-        if (!bus_read_enable && bus_read_done==0) begin 
+        //if (!bus_read_enable && bus_read_done==0) begin 
+        if (bus_read_done==0) begin 
             if (Key_selected) begin bus_read_data <= {32'd0, 24'd0, ascii}; bus_read_done <= 1; end
 	    if (Ram_selected) begin 
 	        casez(bus_ls_type)
 	            3'b011: begin // 011Ld
-		        case(ld)
-			    0: begin bus_read_data[31:0]  <= Cache[bus_address_reg]; bus_address_reg <= bus_address_reg +1; ld <= 1; end
-		            1: begin bus_read_data[63:32] <= Cache[bus_address_reg]; ld <= 0; bus_read_done <= 1; end
+		        case(step)
+			    0: begin bus_read_data[31:0]  <= Cache[bus_address_reg]; bus_address_reg <= bus_address_reg +1; step <= 1; end
+		            1: begin bus_read_data[63:32] <= Cache[bus_address_reg]; step <= 0; bus_read_done <= 1; end
 			endcase
 		    end 
 		    default: begin bus_read_data <= Cache[bus_address_reg] >> (8*bus_address_reg_full[1:0]); bus_read_done <= 1; end // 000Lb 001Lh 010Lw 101Lhu 100Lbu 110Lwu
@@ -418,17 +304,7 @@ assign DRAM_CKE = 1; // always enable
 	        if (uart_read_step ==1 && !uart_waitrequest) begin bus_read_data <= uart_readdata; uart_read_step <= 0; bus_read_done <=1; end
 	    end
 
-	    //if (Art_selected) begin 
-	    //    uart_read_pulse <= 1;
-	    //    if (uart_read_pulse && !uart_waitrequest) begin bus_read_data <= uart_readdata; bus_read_done <=1; end
-	    //end
-
-	    //if (Sdram_selected && bus_read_done == 0) begin
-	    //    if (sdram_req_wait==0) begin bus_read_data <= {48'b0, sdram_rddata}; bus_read_done <= 1; end
-	    //end
-	    
-	     
-	    if (Sdram_selected && bus_read_done == 0) begin
+	    if (Sdram_selected) begin
 		case(bus_ls_type)
 	            3'b000: begin //lb
 			   sdram_addr <= bus_address[22:1]; sdram_byte_en <= bus_address[0] ? 2'b10 : 2'b01; sdram_read_en <= 1; 
@@ -487,8 +363,7 @@ assign DRAM_CKE = 1; // always enable
 			endcase
 		    end
 		endcase
-                // 000Lb 001Lh 010Lw  011Ld
-		// 100Lbu 101Lhu 110Lwu
+                // 000Lb 001Lh 010Lw  011Ld // 100Lbu 101Lhu 110Lwu
 	    end
             // Plic read
 	    if (Plic_priority_selected) begin bus_read_data <= Plic_priority[plic_id]; bus_read_done <= 1; end
@@ -507,7 +382,8 @@ assign DRAM_CKE = 1; // always enable
 
         // Write
         //if (bus_write_enable || sd!=0 ) begin 
-        if (!bus_write_enable && bus_write_done == 0) begin 
+        //if (!bus_write_enable && bus_write_done == 0) begin 
+        if (bus_write_done == 0) begin 
 	    if (Ram_selected) begin 
 		bus_write_done <= 1;
 		casez(bus_ls_type) // 000sb 001sh 010sw 011sd
@@ -523,9 +399,9 @@ assign DRAM_CKE = 1; // always enable
 			end
 		    3'b010: begin Cache[bus_address[63:2]] <= bus_write_data[31:0]; end
 		    3'b011: begin //sd
-		        case(sd)
-		            0: begin Cache[bus_address[63:2]] <= bus_write_data[31:0]; sd <= 1; next_addr <= bus_address[63:2]+1; bus_write_done <= 0; end
-			    1: begin Cache[next_addr] <= bus_write_data[63:32]; sd <= 0; end
+		        case(step)
+		            0: begin Cache[bus_address[63:2]] <= bus_write_data[31:0]; step <= 1; next_addr <= bus_address[63:2]+1; bus_write_done <= 0; end
+			    1: begin Cache[next_addr] <= bus_write_data[63:32]; step <= 0; end
 			endcase
 			end
 	        endcase
@@ -597,7 +473,6 @@ assign DRAM_CKE = 1; // always enable
 		 //000sb 001sh 010sw 011sd
 	        endcase
 	    end
-
 
 
 
@@ -680,35 +555,6 @@ end
         .status(sd_status),
         .recv_data()
     );
-
-
-    //// UART Writer Trigger
-    //wire uart_write_trigger = bus_write_enable && Art_selected;
-    //reg uart_write_trigger_dly;
-    //always @(posedge CLOCK_50 or negedge KEY0) begin
-    //    if (!KEY0) uart_write_trigger_dly <= 0;
-    //    else uart_write_trigger_dly <= uart_write_trigger;
-    //end
-    //assign uart_write_trigger_pulse = uart_write_trigger  && !uart_write_trigger_dly;
-
-    // Interrupt controller
-    wire [3:0] interrupt_vector;
-    wire interrupt_ack;
-    always @(posedge CLOCK_50 or negedge KEY0) begin
-        if (!KEY0) begin
-            interrupt_vector <= 0;
-            LEDR0 <= 0;
-        end else begin
-            if (key_pressed && ascii) begin
-                interrupt_vector <= 1;
-                LEDR0 <= 1;
-            end
-            if (interrupt_vector != 0 && interrupt_ack == 1) begin
-                interrupt_vector <= 0;
-                LEDR0 <= 0;
-            end
-        end
-    end
 
     // Debug LEDs
     assign HEX30 = ~Key_selected;
