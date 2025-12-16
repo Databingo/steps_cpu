@@ -102,7 +102,7 @@ assign DRAM_CKE = 1; // always enable
         .reset_n(KEY0)
     );
 
-    wire [63:0] ppc;
+    wire [38:0] ppc;
     reg [31:0] ir_bd;
     wire bubble;
     // IR_LD BRAM Port A read
@@ -182,7 +182,7 @@ assign DRAM_CKE = 1; // always enable
 
     // -- Bus --
     reg  [63:0] bus_read_data;
-    wire [63:0] bus_address;
+    wire [38:0] bus_address;
     wire        bus_read_enable;
     wire [63:0] bus_write_data;
     wire        bus_write_enable;

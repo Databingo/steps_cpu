@@ -4,7 +4,7 @@ module riscv64(
     input wire clk, 
     input wire reset,     // Active-low reset button
     input wire [31:0] instruction,
-    output wire [55:0] ppc,
+    output wire [38:0] ppc,
     output wire [31:0] ir,
     output wire  heartbeat,
     output reg bubble,
@@ -15,7 +15,7 @@ module riscv64(
     input wire meip_interrupt, // from PLIC
     input wire msip_interrupt, // from Software
       
-    output reg [55:0] bus_address,     // 39 bit for real Sv39 standard?
+    output reg [38:0] bus_address,     // 39 bit for real Sv39 standard?
     output reg [63:0] bus_write_data,
     output reg        bus_write_enable,
     output reg        bus_read_enable,
@@ -26,7 +26,7 @@ module riscv64(
     input  wire [63:0] bus_read_data   // from outside
 );
 
-    reg [55:0] pc;
+    reg [38:0] pc;
 // -- new --
     reg [63:0] re [0:31]; // General Registers 32s
     reg [63:0] sre [0:9]; // Shadow Registers 10s
@@ -38,7 +38,7 @@ module riscv64(
 
     // MMU
     function [31:0] get_shadow_ir; // 0-5 mmu 
-        input [63:0] spc;
+        input [38:0] spc;
         begin
     	case(spc) /// only x0-x9 could use, x9 is the va value passer
 	    // I-TLB D-TLB Handler (mmu walker)
@@ -262,7 +262,7 @@ module riscv64(
      //wire need_trans = (current_privilege_mode != M_mode) && satp_mmu && !mmu_pc && !mmu_da && !mmu_cache_refill;
      wire need_trans =  satp_mmu && !mmu_pc && !mmu_da && !mmu_cache_refill;
      assign ppc = need_trans ? {pc_ppn, pc[11:0]} : pc;
-     wire [55:0] pda = need_trans ? {data_ppn, ls_va[11:0]} : ls_va;
+     wire [38:0] pda = need_trans ? {data_ppn, ls_va[11:0]} : ls_va;
      
     // TLB Refill
     reg [2:0] tlb_ptr = 0; // 8 entries TLB
