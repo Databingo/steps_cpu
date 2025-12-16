@@ -430,7 +430,8 @@ module riscv64(
                     if (msip_interrupt) pc <= (Csrs[mtvec][BASE+61:BASE] << 2) + (MSIP << 2); // vectorily BASE & CAUSE_CODE are 4 bytes aligned already number need << 2
                     if (time_interrupt) pc <= (Csrs[mtvec][BASE+61:BASE] << 2) + (MTIP << 2);
                     if (meip_interrupt) pc <= (Csrs[mtvec][BASE+61:BASE] << 2) + (MEIP << 2); 
-		end else pc <= (Csrs[mtvec][BASE+61:BASE] << 2);// jump to mtvec addrss (directly mode 0, need C or Assembly code of handlers deciding) 
+		end else 
+		pc <= (Csrs[mtvec][BASE+61:BASE] << 2);// jump to mtvec addrss (directly-mode 0, need C or Assembly code of handlers deciding) 
 		//pc <= 0;
                 //pc <= (Csrs[mtvec][BASE+61:BASE] << 2); 
 		bubble <= 1'b1; // bubble wrong fetched instruciton by IF
