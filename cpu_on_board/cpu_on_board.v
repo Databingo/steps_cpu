@@ -120,9 +120,6 @@ assign DRAM_CKE = 1; // always enable
         .ir(LEDG),
         .heartbeat(LEDR9),
 
-        .interrupt_vector(interrupt_vector),
-        .interrupt_ack(interrupt_ack),
-
         .bus_address(bus_address),
         .bus_write_data(bus_write_data),
         .bus_write_enable(bus_write_enable),
