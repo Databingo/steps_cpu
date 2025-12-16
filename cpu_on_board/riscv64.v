@@ -8,7 +8,6 @@ module riscv64(
     output wire [55:0] ppc,
     //output reg [31:0] ir,
     output wire [31:0] ir,
-    output reg [31:0] ir_shadow,
     output wire  heartbeat,
     input  reg [3:0] interrupt_vector, // notice from outside
     output reg  interrupt_ack,         // reply to outside
@@ -326,6 +325,7 @@ module riscv64(
     //end
 
     // IF Instruction (Only drive IR)
+    reg [31:0] ir_shadow,
     always @(posedge clk or negedge reset) begin
             if (mmu_pc || mmu_da || mmu_cache_refill) ir_shadow <= get_shadow_ir(pc);  // Runing shadow code
     end
