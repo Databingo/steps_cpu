@@ -77,14 +77,14 @@ module riscv64(
            //116: get_shadow_ir = 32'b00000000011101000011000000100011; // 00743023 sd x7, 0(x8)// Real use x7 for ppn
            //120: get_shadow_ir = 32'b00110000001000000000000001110011; // 30200073 mret
       
-	   // Identical 1:1 map 
-    	    0: get_shadow_ir = 32'b00000000000000000010000010110111; // lui x1, 0x2     
-    	    4: get_shadow_ir = 32'b00000000010000001000000010010011; // addi x1, x1, 0x4 
-    	    8: get_shadow_ir = 32'b00000010101000000000000100010011; // addi x2, x0, 0x2a
-    	   12: get_shadow_ir = 32'b00000000001000001011000000100011; // sd x2, 0(x1)      print *
-           16: get_shadow_ir = 32'b00100000000000000000010000110111; // 20000437 lui x8, 0x20000
-           20: get_shadow_ir = 32'b00000000100101000010000000100011; // 00942023 sw x9, 0(x8) 
-           24: get_shadow_ir = 32'b00110000001000000000000001110011; // 30200073 mret           
+	     // Identical 1:1 map 
+    	      0: get_shadow_ir = 32'b00000000000000000010000010110111; // lui x1, 0x2     
+    	      4: get_shadow_ir = 32'b00000000010000001000000010010011; // addi x1, x1, 0x4 
+    	      8: get_shadow_ir = 32'b00000010101000000000000100010011; // addi x2, x0, 0x2a
+    	     12: get_shadow_ir = 32'b00000000001000001011000000100011; // sd x2, 0(x1)      print *
+             16: get_shadow_ir = 32'b00100000000000000000010000110111; // 20000437 lui x8, 0x20000
+             20: get_shadow_ir = 32'b00000000100101000010000000100011; // 00942023 sw x9, 0(x8) 
+             24: get_shadow_ir = 32'b00110000001000000000000001110011; // 30200073 mret           
 	    // D-TLB Handler
     	    100: get_shadow_ir = 32'b00000000000000000010000010110111; // lui x1, 0x2     
     	    104: get_shadow_ir = 32'b00000000010000001000000010010011; // addi x1, x1, 0x4 
@@ -107,11 +107,7 @@ module riscv64(
     	endcase
         end
     endfunction
-    // vpc
     reg mmu_pc = 0;
-    //reg new_vpc = 1;
-    reg [38:0] vpc;
-    reg is_ppc;
 
     // --- Privilege Modes ---
     localparam M_mode = 2'b11;
@@ -200,7 +196,8 @@ module riscv64(
 	endcase
     end
 
-    (* ram_style = "logic" *) reg [63:0] Csrs [0:31]; // 32 CSRs for now
+    //(* ram_style = "logic" *) reg [63:0] Csrs [0:31]; // 32 CSRs for now
+    reg [63:0] Csrs [0:31]; // 32 CSRs for now
     wire [3:0]  satp_mmu  = Csrs[satp][63:60]; // 0:bare, 8:sv39, 9:sv48  satp.MODE!=0, privilegae is not M-mode, mstatus.MPRN is not set or in MPP's mode?
     wire [15:0] satp_asid = Csrs[satp][59:44]; // Address Space ID for TLB
     wire [43:0] satp_ppn  = Csrs[satp][43:0];  // Root Page Table PPN physical page number
@@ -382,7 +379,6 @@ module riscv64(
 	    Csrs[medeleg] <= 64'hb1af; // delegate to S-mode 1011000110101111 // see VII 3.1.15 mcasue exceptions
 	    Csrs[mideleg] <= 64'h0222; // delegate to S-mode 0000001000100010 see VII 3.1.15 mcasue interrupt 1/5/9 SSIP(supervisor software interrupt) STIP(time) SEIP(external)
 	    mmu_pc <= 0;
-	    is_ppc <= 0; // current using address is physical addr
 	    //cache_hit <= 0;
 	    //tlb_i_hit <= 0;
 	    //tlb_d_hit <= 0;
@@ -505,7 +501,6 @@ module riscv64(
 		bubble <= 1'b1; // bubble wrong fetched instruciton by IF
 
 		reserve_valid <= 0;// Interrupt clear lr.w/lr.d
-		is_ppc <= 0; // Interrupt jump to new va(if mmu enabled)
 		//interrupt_ack <= 1; // reply to outside
 		//
 		//
@@ -524,8 +519,6 @@ module riscv64(
 	        //bus_write_enable <= 0; 
 	        //bus_write_data <= 0;
 	        //bus_address <= `Ram_base;
-	        //is_ppc <= 0;
-		if (is_ppc && pc[11:0]==12'hFFC) is_ppc <= 0; //page_cross 4096 Bytes
 	        //if (!mmu_pc && !mmu_da && got_pda && (op == 7'b0000011 || op == 7'b0100011 || op == 7'b0101111)) got_pda <= 0; // load/store/atom
                 casez(ir) // Pseudo: li j jr ret call // I: addi sb sh sw sd lb lw ld lbu lhu lwu lui jal jalr auipc beq slt mret 
 	            // U-type
