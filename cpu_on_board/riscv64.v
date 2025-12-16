@@ -285,7 +285,20 @@ module riscv64(
    //         //else ir <= 32'h00000013; // TLB miss or Cache miss: Nop(stall)
    //     end
    // end
-   assign ir = instruction;
+   //assign ir = instruction;
+    always @(*) begin
+        if (!reset) begin 
+            heartbeat = 1'b0; 
+            ir = 32'h00000001; 
+        end else begin
+            //heartbeat <= ~heartbeat; // heartbeat
+            //if (mmu_pc || mmu_da || mmu_cache_refill) ir <= get_shadow_ir(pc);  // Runing shadow code
+            ir = instruction; // 
+            //else if (cache_hit) ir <= cache_data; // Cache hit
+            ////else ir <= instruction; // 
+            //else ir <= 32'h00000013; // TLB miss or Cache miss: Nop(stall)
+        end
+    end
 
     // EXE Instruction 
     always @(posedge clk or negedge reset) begin
