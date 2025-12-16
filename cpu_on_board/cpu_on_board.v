@@ -363,8 +363,7 @@ assign DRAM_CKE = 1; // always enable
 			endcase
 		    end
 		endcase
-                // 000Lb 001Lh 010Lw  011Ld
-		// 100Lbu 101Lhu 110Lwu
+                // 000Lb 001Lh 010Lw  011Ld // 100Lbu 101Lhu 110Lwu
 	    end
             // Plic read
 	    if (Plic_priority_selected) begin bus_read_data <= Plic_priority[plic_id]; bus_read_done <= 1; end
