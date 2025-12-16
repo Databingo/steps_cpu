@@ -51,7 +51,7 @@
 #     mret
      
 
-# 1:1 identity map
+# I-D-TLB mmu-refill 1:1 identity map
      lui x1, 0x2     
      addi x1, x1, 0x4              
      addi x2, x0, 0x2a
