@@ -346,17 +346,13 @@ module riscv64(
     //end
 
     // IF Instruction (Only drive IR)
-    always @(posedge clk or negedge reset) begin
+    always @(*) begin
         if (!reset) begin 
-            heartbeat <= 1'b0; 
-            ir <= 32'h00000001; 
+            heartbeat = 1'b0; 
+            ir = 32'h00000001; 
         end else begin
-            heartbeat <= ~heartbeat; // heartbeat
-            //if (mmu_pc || mmu_da || mmu_cache_refill) ir <= get_shadow_ir(pc);  // Runing shadow code
-            //else ir <= instruction; // 
-            ////else if (cache_hit) ir <= cache_data; // Cache hit
-            ir <= instruction; // 
-            //else ir <= 32'h00000013; // TLB miss or Cache miss: Nop(stall)
+            //heartbeat <= ~heartbeat; // heartbeat
+            ir = instruction; // 
         end
     end
 
