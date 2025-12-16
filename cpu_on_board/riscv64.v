@@ -6,7 +6,8 @@ module riscv64(
     input wire [31:0] instruction,
     output reg [38:0] pc,
     output wire [55:0] ppc,
-    output reg [31:0] ir,
+    //output reg [31:0] ir,
+    output wire [31:0] ir,
     output wire  heartbeat,
     input  reg [3:0] interrupt_vector, // notice from outside
     output reg  interrupt_ack,         // reply to outside
@@ -274,6 +275,10 @@ module riscv64(
      wire [55:0] pda = need_trans ? {data_ppn, ls_va[11:0]} : ls_va;
      
     // // CacheI
+    // // CacheL = 64 Bytes (16*32bits instructions)
+    //    CacheL1 = 512 CacheLine = 32KB
+    //(* ram_style = "block" *) reg [31:0] CacheI [0:2000];  // address[12:4]
+    //(* ram_style = "block" *) reg [31:0] TagI [0:2000];
     // reg [31:0] I_Cache; // [0:7]; // 
     //// reg [55:0] Tag_base;
     ////wire [55:0] current_ppc_base = {ppc[55:5], 5'b0};
@@ -304,20 +309,38 @@ module riscv64(
     end
 
 
+    //// IF Instruction (Only drive IR)
+    //always @(posedge clk or negedge reset) begin
+    //    if (!reset) begin 
+    //        heartbeat <= 1'b0; 
+    //        ir <= 32'h00000001; 
+    //    end else begin
+    //        heartbeat <= ~heartbeat; // heartbeat
+    //        if (mmu_pc || mmu_da || mmu_cache_refill) ir <= get_shadow_ir(pc);  // Runing shadow code
+    //        else ir <= instruction; // 
+    //        //else if (cache_hit) ir <= cache_data; // Cache hit
+    //        ////else ir <= instruction; // 
+    //        //else ir <= 32'h00000013; // TLB miss or Cache miss: Nop(stall)
+    //    end
+    //end
+
+
     // IF Instruction (Only drive IR)
-    always @(posedge clk or negedge reset) begin
+    always @(*) begin
         if (!reset) begin 
-            heartbeat <= 1'b0; 
-            ir <= 32'h00000001; 
+            heartbeat = 1'b0; 
+            ir = 32'h00000001; 
         end else begin
-            heartbeat <= ~heartbeat; // heartbeat
-	    if (mmu_pc || mmu_da || mmu_cache_refill) ir <= get_shadow_ir(pc);  // Runing shadow code
-            else ir <= instruction; // 
+            heartbeat = ~heartbeat; // heartbeat
+	    if (mmu_pc || mmu_da || mmu_cache_refill) ir = get_shadow_ir(pc);  // Runing shadow code
+            else ir = instruction; // 
             //else if (cache_hit) ir <= cache_data; // Cache hit
             ////else ir <= instruction; // 
 	    //else ir <= 32'h00000013; // TLB miss or Cache miss: Nop(stall)
         end
     end
+
+
 
     // EXE Instruction 
     always @(posedge clk or negedge reset) begin
