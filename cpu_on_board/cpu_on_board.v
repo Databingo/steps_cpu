@@ -184,8 +184,8 @@ assign DRAM_CKE = 1; // always enable
 
     // -- CPU --
     riscv64 cpu (
-        .clk(clock_1hz), 
-        //.clk(CLOCK_50), 
+        //.clk(clock_1hz), 
+        .clk(CLOCK_50), 
         .reset(KEY0),     
         .instruction(ir_ld),
         //.pc(pc),
