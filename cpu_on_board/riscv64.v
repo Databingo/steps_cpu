@@ -7,6 +7,7 @@ module riscv64(
     output wire [55:0] ppc,
     output wire [31:0] ir,
     output wire  heartbeat,
+    output reg bubble,
 
     output reg [63:0] mtime,    // map to 0x0200_bff8 
     inout wire [63:0] mtimecmp, // map to 0x0200_4000 + 8byte*hartid
@@ -202,7 +203,7 @@ module riscv64(
     wire time_interrupt = (mtime >= mtimecmp);
       
     // -- Innerl signal --
-    reg bubble;
+    //reg bubble;
     reg [1:0] load_step;
     reg [1:0] store_step;
 
