@@ -270,7 +270,7 @@ module riscv64(
      end
      // concat physical address
      //wire need_trans = (current_privilege_mode != M_mode) && satp_mmu && !mmu_pc && !mmu_da && !mmu_cache_refill;
-     wire need_trans = satp_mmu && !mmu_pc && !mmu_da && !mmu_cache_refill;
+     wire need_trans =  satp_mmu && !mmu_pc && !mmu_da && !mmu_cache_refill;
      //wire [55:0] ppc = need_trans ? {pc_ppn, pc[11:0]} : pc;
      assign ppc = need_trans ? {pc_ppn, pc[11:0]} : pc;
      wire [55:0] pda = need_trans ? {data_ppn, ls_va[11:0]} : ls_va;
@@ -346,16 +346,17 @@ module riscv64(
     //    end
     //end
 
-    // IF Instruction (Only drive IR)
-    always @(*) begin
-        if (!reset) begin 
-            heartbeat = 1'b0; 
-            ir = 32'h00000001; 
-        end else begin
-            //heartbeat <= ~heartbeat; // heartbeat
-            ir = instruction; // 
-        end
-    end
+    //// IF Instruction (Only drive IR)
+    //always @(*) begin
+    //    if (!reset) begin 
+    //        heartbeat = 1'b0; 
+    //        ir = 32'h00000001; 
+    //    end else begin
+    //        //heartbeat <= ~heartbeat; // heartbeat
+    //        ir = instruction; // 
+    //    end
+    //end
+    assign ir = instruction;
 
 
 
