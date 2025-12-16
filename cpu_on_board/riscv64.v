@@ -28,7 +28,7 @@ module riscv64(
 
     reg [55:0] pc;
 // -- new --
-    (* ram_style = "logic" *) reg [63:0] re [0:31]; // General Registers 32s
+    reg [63:0] re [0:31]; // General Registers 32s
     reg [63:0] sre [0:9]; // Shadow Registers 10s
     reg mmu_pc = 0;
     reg mmu_da = 0;
@@ -191,7 +191,7 @@ module riscv64(
 	endcase
     end
 
-    (* ram_style = "logic" *) reg [63:0] Csrs [0:31]; // 32 CSRs for now
+    reg [63:0] Csrs [0:31]; // 32 CSRs for now
     //reg [63:0] Csrs [0:31]; // 32 CSRs for now
     wire [3:0]  satp_mmu  = Csrs[satp][63:60]; // 0:bare, 8:sv39, 9:sv48  satp.MODE!=0, privilegae is not M-mode, mstatus.MPRN is not set or in MPP's mode?
     wire [15:0] satp_asid = Csrs[satp][59:44]; // Address Space ID for TLB
@@ -493,7 +493,7 @@ module riscv64(
 		        if (store_step == 1 && bus_write_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working 1 bubble2 this3
 			if (store_step == 1 && bus_write_done == 1) store_step <= 0; end //Sw
 	            32'b???????_?????_?????_011_?????_0100011: begin 
-		        if (store_step == 0) begin bus_address <= pda; bus_write_data<=rs2;bus_write_enable<=1;pc<=pc-4;bubble<=1;bus_ls_type<=w_func3;store_step<=1; end
+		        if (store_step == 0) begin bus_address <= pda; bus_write_data<=rs2;      bus_write_enable<=1;pc<=pc-4;bubble<=1;bus_ls_type<=w_func3;store_step<=1; end
 		        if (store_step == 1 && bus_write_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working 1 bubble2 this3
 			if (store_step == 1 && bus_write_done == 1) store_step <= 0; end //Sd
                     // Math-I
