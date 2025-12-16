@@ -9,8 +9,6 @@ module riscv64(
     //output reg [31:0] ir,
     output wire [31:0] ir,
     output wire  heartbeat,
-    input  reg [3:0] interrupt_vector, // notice from outside
-    output reg  interrupt_ack,         // reply to outside
     output reg [38:0] bus_address,     // 39 bit for real Sv39 standard?
     output reg [63:0] bus_write_data,
     output reg        bus_write_enable,
@@ -31,12 +29,10 @@ module riscv64(
 // -- new --
     reg [63:0] re [0:31]; // General Registers 32s
     reg [63:0] sre [0:9]; // Shadow Registers 10s
-    reg mmu_da=0;
+    reg mmu_pc = 0;
+    reg mmu_da = 0;
     reg mmu_cache_refill=0;
     reg [38:0] saved_user_pc;
-    reg [38:0] pa;
-    reg [38:0] va;
-    reg got_pda=0;
     integer i; 
 
     // MMU
@@ -107,7 +103,6 @@ module riscv64(
     	endcase
         end
     endfunction
-    reg mmu_pc = 0;
 
     // --- Privilege Modes ---
     localparam M_mode = 2'b11;
@@ -212,7 +207,6 @@ module riscv64(
     reg bubble;
     reg [1:0] load_step;
     reg [1:0] store_step;
-    //reg [2:0] step;
 
     // -- Atomic & Sync state --
     reg [1:0]  atom_step;
@@ -272,21 +266,6 @@ module riscv64(
      assign ppc = need_trans ? {pc_ppn, pc[11:0]} : pc;
      wire [55:0] pda = need_trans ? {data_ppn, ls_va[11:0]} : ls_va;
      
-    // // CacheI
-    // // CacheL = 64 Bytes (16*32bits instructions)
-    //    CacheL1 = 512 CacheLine = 32KB
-    //(* ram_style = "block" *) reg [31:0] CacheI [0:2000];  // address[12:4]
-    //(* ram_style = "block" *) reg [31:0] TagI [0:2000];
-    // reg [31:0] I_Cache; // [0:7]; // 
-    //// reg [55:0] Tag_base;
-    ////wire [55:0] current_ppc_base = {ppc[55:5], 5'b0};
-    ////wire cache_hit = (Tag_base == current_ppc_base) && (need_trans ? tlb_i_hit : 1);
-    ////wire [31:0] cache_data = I_Cache[ppc[4:2]];
-    // reg [55:0] Tag_base = 56'hffffffffffffff;
-    // //wire cache_hit = (Tag_base == ppc) && (need_trans ? tlb_i_hit : 1);
-    // wire cache_hit = (Tag_base == ppc);
-    // wire [31:0] cache_data = I_Cache;
-
     // TLB Refill
     reg [2:0] tlb_ptr = 0; // 8 entries TLB
     always @(posedge clk or negedge reset) begin
@@ -298,14 +277,7 @@ module riscv64(
 	    tlb_ppn[tlb_ptr] <= bus_write_data[38:12];
 	    tlb_vld[tlb_ptr] <= 1;
 	    tlb_ptr <= tlb_ptr + 1; end
-//    // ICache Refill
-//        else if (bus_write_enable && bus_address == `CacheI) begin  // for fill: sw data, CacheI
-//	    //I_Cache[re[9][4:2]] <= bus_write_data[31:0]; // 32 bits use Sw
-//	    //Tag_base <= {re[9][55:5], 5'b0}; end //
-//	    I_Cache <= bus_write_data[31:0]; // 32 bits use Sw
-//	    Tag_base <= re[9][55:0]; end //
     end
-
 
     //// IF Instruction (Only drive IR)
     //always @(posedge clk or negedge reset) begin
@@ -342,17 +314,6 @@ module riscv64(
     //        //else ir <= 32'h00000013; // TLB miss or Cache miss: Nop(stall)
     //    end
     //end
-
-    //// IF Instruction (Only drive IR)
-    //always @(*) begin
-    //    if (!reset) begin 
-    //        heartbeat = 1'b0; 
-    //        ir = 32'h00000001; 
-    //    end else begin
-    //        //heartbeat <= ~heartbeat; // heartbeat
-    //        ir = instruction; // 
-    //    end
-    //end
     assign ir = instruction;
 
 
@@ -371,9 +332,7 @@ module riscv64(
 	    bus_address <= `Ram_base;
             // Interrupt re-enable
 	    Csrs[mstatus][MIE] <= 0;
-	    interrupt_ack <= 0;
 	    mmu_da <= 0;
-	    got_pda <= 0;
 	    for (i=0;i<10;i=i+1) begin sre[i]<= 64'b0; end
 	    for (i=0;i<32;i=i+1) begin Csrs[i]<= 64'b0; end
 	    Csrs[medeleg] <= 64'hb1af; // delegate to S-mode 1011000110101111 // see VII 3.1.15 mcasue exceptions
@@ -393,13 +352,8 @@ module riscv64(
         end else begin
 	    // Default PC+4    (1.Could be overide 2.Take effect next cycle) 
             pc <= pc + 4;
-	    interrupt_ack <= 0;
 	    bus_read_enable <= 0;
 	    bus_write_enable <= 0; 
-            //Csrs[mip][MTIP] <= time_interrupt; // MTIP linux will see then jump to its handler
-            //Csrs[mip][MEIP] <= meip_interrupt; // MEIP
-            //Csrs[mip][MSIP] <= msip_interrupt; // MSIP
-
 
             // Bubble
 	    if (bubble) begin bubble <= 1'b0; // Flush this cycle & Clear bubble signal for the next cycle
@@ -456,25 +410,6 @@ module riscv64(
 	//	mmu_cache_refill <= 0; // OFF
 	//	Csrs[mstatus][MIE] <= Csrs[mstatus][MPIE]; // set back interrupt status
 
-
-
-        //    // Interrupt
-	//    //if (interrupt_vector == 1 && mstatus_MIE == 1) begin //mstatus[3] MIE
-	//    end else if (interrupt_vector == 1 && Csrs[mstatus][MIE]==1) begin //mstatus[3] MIE
-	//        Csrs[mepc] <= pc; // save pc
-
-	//	Csrs[mcause] <= 64'h800000000000000B; // MSB 1 for interrupts 0 for exceptions, Cause 11 for Machine External Interrupt
-	//	Csrs[mstatus][MPIE] <= Csrs[mstatus][MIE];
-	//	Csrs[mstatus][MIE] <= 0;
-
-	//	pc <= Csrs[mtvec]; // jump to mtvec addrss (default 0, need C or Assembly code of handler)
-	//	bubble <= 1'b1; // bubble wrong fetched instruciton by IF
-	//        Csrs[mstatus][MIE] <= 0;
-	//	interrupt_ack <= 1; // reply to outside
-
-	    //if (interrupt_vector == 1 && mstatus_MIE == 1) begin //mstatus[3] MIE      // sstatus[SIE]?
-	    //end else if ((Csrs[mip][MTIP] || Csrs[mip][MEIP] || Csrs[mip][MSIP]) && Csrs[mstatus][MIE]==1) begin //mstatus[3] MIE
-	    //end else if ((time_interrupt || meip_interrupt || msip_interrupt) && Csrs[mstatus][MIE]==1) begin //mstatus[3] MIE
             // Interrupt PLIC full (Platform-Level-Interrupt-Control)  MMIO
 	    end else if ((meip_interrupt || msip_interrupt) && Csrs[mstatus][MIE]==1) begin //mstatus[3] MIE
                 Csrs[mip][MTIP] <= time_interrupt; // MTIP linux will see then jump to its handler
@@ -501,9 +436,6 @@ module riscv64(
 		bubble <= 1'b1; // bubble wrong fetched instruciton by IF
 
 		reserve_valid <= 0;// Interrupt clear lr.w/lr.d
-		//interrupt_ack <= 1; // reply to outside
-		//
-		//
 		// 0x0C00_0000 base  
 		// 0x0C00_000? priority (base + 4 * id)
 		// 0x0C00_2000 pending bits
@@ -515,16 +447,10 @@ module riscv64(
             // Upper are hijects of executing ir for handler special state
 	    // IR
 	    end else begin 
-	        //bus_read_enable <= 0;
-	        //bus_write_enable <= 0; 
-	        //bus_write_data <= 0;
-	        //bus_address <= `Ram_base;
-	        //if (!mmu_pc && !mmu_da && got_pda && (op == 7'b0000011 || op == 7'b0100011 || op == 7'b0101111)) got_pda <= 0; // load/store/atom
                 casez(ir) // Pseudo: li j jr ret call // I: addi sb sh sw sd lb lw ld lbu lhu lwu lui jal jalr auipc beq slt mret 
 	            // U-type
 	            32'b???????_?????_?????_???_?????_0110111: re[w_rd] <= w_imm_u; // Lui
 	            32'b???????_?????_?????_???_?????_0010111: re[w_rd] <= w_imm_u + (pc - 4); // Auipc
-
                     // Load after TLB
 		    32'b???????_?????_?????_000_?????_0000011: begin  // Lb  3 cycles but wait to 5
 			if (load_step == 0) begin bus_address <= pda; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; bus_ls_type <= w_func3; end
@@ -932,24 +858,3 @@ endmodule
 //fence fence.i
 //cache !  // SDRAM to cache(BRAM)
 // Device Tree
-  
-  
-//interrupt
-//N+0 see interrupt and set isr pc
-//N+1 bubble branch take over
-//Lb
-//N+2 execute load:step_0 setting read bubble1 load_step1
-//N+3 bubble branch take over (BUT bus read data into bus_read_data)
-//N+4 execute load:step_1 save bus_read_data into re
-//Sb
-//N+5 save re to bus_write_data
-//mret
-//N+6 mret (BUT URAT get data for print).   //
-// -- 
-//in cycle N0, IF fetching sb, EXE ir is lb, bubble is setting 1, pc is re-setting to pc, load_step is setting to 1;
-//in N1, IF fetching lb, Bubble flushed ir sb, bubble <=0, Default pc is setting to lb+4(sb);
-//in N2, IF fetching sb, EXE ir is lb, load_step is 1, bus_read_data is saving to re, load_step is setting to 0;
-//in N3, IF fethcing mret, EXE ir is sb, re is saving to bus_write_data, bus_write_enable is setting to 1;
-  
-
-
