@@ -85,14 +85,14 @@ module riscv64(
            16: get_shadow_ir = 32'b00100000000000000000010000110111; // 20000437 lui x8, 0x20000
            20: get_shadow_ir = 32'b00000000100101000010000000100011; // 00942023 sw x9, 0(x8) 
            24: get_shadow_ir = 32'b00110000001000000000000001110011; // 30200073 mret           
-	    //// D-TLB Handler
-    	    //100: get_shadow_ir = 32'b00000000000000000010000010110111; // lui x1, 0x2     
-    	    //104: get_shadow_ir = 32'b00000000010000001000000010010011; // addi x1, x1, 0x4 
-            //108: get_shadow_ir = 32'b00000101111000000000000100010011; // addi x2, x0, 0x5e
-            //112: get_shadow_ir = 32'b00000000001000001011000000100011; // sd x2, 0(x1)      print ^
-            //116: get_shadow_ir = 32'b00100000000000000000010000110111; // 20000437 lui x8, 0x20000
-            //120: get_shadow_ir = 32'b00000000100101000010000000100011; // 00942023 sw x9, 0(x8)   
-            //124: get_shadow_ir = 32'b00110000001000000000000001110011; // 30200073 mret           
+	    // D-TLB Handler
+    	    100: get_shadow_ir = 32'b00000000000000000010000010110111; // lui x1, 0x2     
+    	    104: get_shadow_ir = 32'b00000000010000001000000010010011; // addi x1, x1, 0x4 
+            108: get_shadow_ir = 32'b00000101111000000000000100010011; // addi x2, x0, 0x5e
+            112: get_shadow_ir = 32'b00000000001000001011000000100011; // sd x2, 0(x1)      print ^
+            116: get_shadow_ir = 32'b00100000000000000000010000110111; // 20000437 lui x8, 0x20000
+            120: get_shadow_ir = 32'b00000000100101000010000000100011; // 00942023 sw x9, 0(x8)   
+            124: get_shadow_ir = 32'b00110000001000000000000001110011; // 30200073 mret           
 	    //// I-CacheI Handler
     	    //200: get_shadow_ir = 32'b00000000000000000010000010110111; // lui x1, 0x2     
     	    //204: get_shadow_ir = 32'b00000000010000001000000010010011; // addi x1, x1, 0x4 
@@ -200,7 +200,7 @@ module riscv64(
 	endcase
     end
 
-    reg [63:0] Csrs [0:31]; // 32 CSRs for now
+    (* ram_style = "logic" ) reg [63:0] Csrs [0:31]; // 32 CSRs for now
     wire [3:0]  satp_mmu  = Csrs[satp][63:60]; // 0:bare, 8:sv39, 9:sv48  satp.MODE!=0, privilegae is not M-mode, mstatus.MPRN is not set or in MPP's mode?
     wire [15:0] satp_asid = Csrs[satp][59:44]; // Address Space ID for TLB
     wire [43:0] satp_ppn  = Csrs[satp][43:0];  // Root Page Table PPN physical page number
@@ -413,7 +413,7 @@ module riscv64(
        		mmu_pc <= 1; // MMU_PC ON 
        	        pc <= 0; // I-TLB refill Handler
        	 	bubble <= 1'b1; // bubble 
-	        saved_user_pc <= pc - 4; // !!! save pc (EXE was flushed so record it, previous pc)
+	        saved_user_pc <= pc - 4; // !!! save pc (EXE was takend so record it, previous pc)
 		for (i=0;i<=9;i=i+1) begin sre[i]<= re[i]; end // save re
 		re[9] <= pc;// - 4; // save this vpc to x1
 		//!!!! We also need to refill pc - 4' ppc for re-executeing pc-4, with hit(if satp in for very next sfence.vma) 
@@ -430,7 +430,7 @@ module riscv64(
 	    end else if (satp_mmu && !mmu_pc && !mmu_da && tlb_i_hit && !tlb_d_hit && (op == 7'b0000011 || op == 7'b0100011 || op == 7'b0101111) ) begin  
 		mmu_da <= 1; // MMU_DA ON
 	        saved_user_pc <= pc-4; // save pc EXE l/s
-		pc <= 0; // D-TLB refill Handler
+		pc <= 100; // D-TLB refill Handler
 	 	bubble <= 1'b1; // bubble
 		for (i=0;i<10;i=i+1) begin sre[i]<= re[i]; end // save re
 		re[9] <= ls_va; //save va to x1

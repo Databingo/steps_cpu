@@ -175,12 +175,12 @@ assign DRAM_CKE = 1; // always enable
         .reset_n(KEY0)
     );
 
-    wire [63:0] pc;
+    wire [63:0] ppc;
     reg [31:0] ir_bd;
     // IR_LD BRAM Port A read
-    always @(posedge CLOCK_50) begin ir_bd <= Cache[pc>>2]; end
+    always @(posedge CLOCK_50) begin ir_bd <= Cache[ppc>>2]; end
     wire [31:0] ir_ld; assign ir_ld = {ir_bd[7:0], ir_bd[15:8], ir_bd[23:16], ir_bd[31:24]}; // Endianness swap
-    assign LEDR_PC = pc/4;
+    assign LEDR_PC = ppc/4;
 
     // -- CPU --
     riscv64 cpu (
@@ -189,7 +189,7 @@ assign DRAM_CKE = 1; // always enable
         .reset(KEY0),     
         .instruction(ir_ld),
         //.pc(pc),
-        .ppc(pc),
+        .ppc(ppc),
         .ir(LEDG),
         .heartbeat(LEDR9),
 
