@@ -51,11 +51,19 @@
 #     mret
      
 
-# I-D-TLB mmu-refill 1:1 identity map
+# I-TLB mmu-refill 1:1 identity map
      lui x1, 0x2     
      addi x1, x1, 0x4              
      addi x2, x0, 0x2a
      sd x2, 0(x1)    #  print *
+     lui x8, 0x20000
+     sw x9, 0(x8) 
+     mret           
+# D-TLB mmu-refill
+     lui x1, 0x2     
+     addi x1, x1, 0x4              
+     addi x2, x0, 0x5e
+     sd x2, 0(x1)    #  print ^
      lui x8, 0x20000
      sw x9, 0(x8) 
      mret           
