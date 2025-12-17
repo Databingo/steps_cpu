@@ -33,11 +33,9 @@ module riscv64(
     reg [63:0] re [0:31]; // General Registers 32s
     reg [63:0] sre [0:9]; // Shadow Registers 10s
     reg mmu_da=0;
+    reg mmu_pc = 0;
     reg mmu_cache_refill=0;
     reg [38:0] saved_user_pc;
-    reg [38:0] pa;
-    reg [38:0] va;
-    reg got_pda=0;
     integer i; 
 
     // MMU
@@ -75,11 +73,7 @@ module riscv64(
     	endcase
         end
     endfunction
-    // vpc
-    reg mmu_pc = 0;
-    //reg new_vpc = 1;
-    reg [38:0] vpc;
-    reg is_ppc;
+
 
     // --- Privilege Modes ---
     localparam M_mode = 2'b11;
@@ -287,13 +281,11 @@ module riscv64(
 	    Csrs[mstatus][MIE] <= 0;
 	    interrupt_ack <= 0;
 	    mmu_da <= 0;
-	    got_pda <= 0;
 	    for (i=0;i<10;i=i+1) begin sre[i]<= 64'b0; end
 	    for (i=0;i<32;i=i+1) begin Csrs[i]<= 64'b0; end
 	    Csrs[medeleg] <= 64'hb1af; // delegate to S-mode 1011000110101111 // see VII 3.1.15 mcasue exceptions
 	    Csrs[mideleg] <= 64'h0222; // delegate to S-mode 0000001000100010 see VII 3.1.15 mcasue interrupt 1/5/9 SSIP(supervisor software interrupt) STIP(time) SEIP(external)
 	    mmu_pc <= 0;
-	    is_ppc <= 0; // current using address is physical addr
 
             atom_step <= 0;
             atom_tmp_value <= 0;
@@ -371,7 +363,6 @@ module riscv64(
 		end else pc <= (Csrs[mtvec][BASE+61:BASE] << 2);// jump to mtvec addrss (directly mode 0, need C or Assembly code of handlers deciding) 
 		bubble <= 1'b1; // bubble wrong fetched instruciton by IF
 		reserve_valid <= 0;// Interrupt clear lr.w/lr.d
-		is_ppc <= 0; // Interrupt jump to new va(if mmu enabled)
 
 	    // IR
 	    end else begin 
@@ -785,22 +776,4 @@ endmodule
 //fence fence.i
 //cache !  // SDRAM to cache(BRAM)
 // Device Tree
-  
-  
-//interrupt
-//N+0 see interrupt and set isr pc
-//N+1 bubble branch take over
-//Lb
-//N+2 execute load:step_0 setting read bubble1 load_step1
-//N+3 bubble branch take over (BUT bus read data into bus_read_data)
-//N+4 execute load:step_1 save bus_read_data into re
-//Sb
-//N+5 save re to bus_write_data
-//mret
-//N+6 mret (BUT URAT get data for print).   //
-// -- 
-//in cycle N0, IF fetching sb, EXE ir is lb, bubble is setting 1, pc is re-setting to pc, load_step is setting to 1;
-//in N1, IF fetching lb, Bubble flushed ir sb, bubble <=0, Default pc is setting to lb+4(sb);
-//in N2, IF fetching sb, EXE ir is lb, load_step is 1, bus_read_data is saving to re, load_step is setting to 0;
-//in N3, IF fethcing mret, EXE ir is sb, re is saving to bus_write_data, bus_write_enable is setting to 1;
   
