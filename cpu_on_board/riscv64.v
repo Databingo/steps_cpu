@@ -382,7 +382,7 @@ module riscv64(
 		for (i=0;i<10;i=i+1) begin sre[i]<= re[i]; end // save re
 		//re[9] <= ls_va; //save va to x1
 		if (op == 7'b0000011) re[09] <= rs1 + w_imm_i;
-		if (op == 7'b0100011) re[09] <= rs1 + s_imm_i;
+		if (op == 7'b0100011) re[09] <= rs1 + w_imm_s;
 		if (op == 7'b0101111) re[09] <= rs1;
 
 		Csrs[mstatus][MPIE] <= Csrs[mstatus][MIE]; // disable interrupt during shadow mmu walking
