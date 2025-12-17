@@ -210,27 +210,17 @@ module riscv64(
         else if (tlb_vld[6] && tlb_vpn[6] == pc_vpn) begin tlb_i_hit = 1; pc_ppn = tlb_ppn[6]; end
         else if (tlb_vld[7] && tlb_vpn[7] == pc_vpn) begin tlb_i_hit = 1; pc_ppn = tlb_ppn[7]; end
     end
-    //always @(*) begin
-    //    case(op)
-    //       7'b0000011: ls_va = rs1 + w_imm_i; // load address
-    //       7'b0100011: ls_va = rs1 + w_imm_s; // store address
-    //       7'b0101111: ls_va = rs1;           // atomic address
-    //       default: ls_va = 0;
-    //   endcase
-    //end
-    //assign data_vpn = ls_va[38:12];
     // d hit
     reg [63:0] ls_va;
     reg [43:0] data_ppn;
     reg [26:0] data_vpn;
+    wire [55:0] pda;
     reg tlb_d_hit;
     always @(*) begin
          tlb_d_hit = 0;
          data_ppn = 0;
-	 // load/jalr/store/atom
-	 ls_va = (op == 7'b0000011) ? (rs1 + w_imm_i) : (op == 7'b0100011) ? (rs1 + w_imm_s) : (op == 7'b0101111) ? rs1 : 0;
+	 ls_va = (op == 7'b0000011) ? (rs1 + w_imm_i) : (op == 7'b0100011) ? (rs1 + w_imm_s) : (op == 7'b0101111) ? rs1 : 0; // load/jalr/store/atom
 	 data_vpn = ls_va[38:12];
-	
          if      (tlb_vld[0] && tlb_vpn[0] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[0]; end
          else if (tlb_vld[1] && tlb_vpn[1] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[1]; end
          else if (tlb_vld[2] && tlb_vpn[2] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[2]; end
@@ -242,10 +232,8 @@ module riscv64(
      end
      // concat physical address
      wire need_trans = satp_mmu && !mmu_pc && !mmu_da && !mmu_cache_refill;
-     //wire [55:0] ppc = need_trans ? {pc_ppn, pc[11:0]} : pc;
-     assign      ppc = need_trans ? {pc_ppn, pc[11:0]} : pc;
-     wire [55:0] pda = need_trans ? {data_ppn, ls_va[11:0]} : ls_va;
-     //wire [55:0] pda = ls_va;
+     assign ppc = need_trans ? {pc_ppn, pc[11:0]} : pc;
+     assign pda = need_trans ? {data_ppn, ls_va[11:0]} : ls_va;
      
     // // CacheI    
     // Cache_line 64B-16instruction [5:0] 
