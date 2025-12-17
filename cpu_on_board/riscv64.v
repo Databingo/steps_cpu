@@ -16,7 +16,7 @@ module riscv64(
     output reg        bus_write_enable,
     output reg        bus_read_enable,
     output reg [2:0]  bus_ls_type, // lb lh lw ld lbu lhu lwu // sb sh sw sd sbu shu swu 
-    output reg bubble,
+   // output reg bubble,
       
     output reg [63:0] mtime,    // map to 0x0200_bff8 
     inout wire [63:0] mtimecmp, // map to 0x0200_4000 + 8byte*hartid

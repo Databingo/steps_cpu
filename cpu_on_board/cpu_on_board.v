@@ -104,7 +104,7 @@ assign DRAM_CKE = 1; // always enable
 
     wire [38:0] ppc;
     reg [31:0] ir_bd;
-    wire bubble;
+    //wire bubble;
     // IR_LD BRAM Port A read
     always @(posedge CLOCK_50) begin ir_bd <= Cache[ppc>>2]; end
     wire [31:0] ir_ld; assign ir_ld = {ir_bd[7:0], ir_bd[15:8], ir_bd[23:16], ir_bd[31:24]}; // Endianness swap
@@ -118,7 +118,7 @@ assign DRAM_CKE = 1; // always enable
         .instruction(ir_ld),
         //.pc(pc),
         .ppc(ppc),
-        .bubble(bubble),
+        //.bubble(bubble),
         .ir(LEDG),
         .heartbeat(LEDR9),
 
