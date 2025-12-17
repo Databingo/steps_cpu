@@ -567,11 +567,6 @@ module riscv64(
 		     // Sfence.vma
 		    32'b0001001??????????_000_?????_1110011: begin end
 		     // RV64IMAFD(G)C  RVA23U64
-                    // M extension // M mul mulh mulhsu mulhu div divu rem remu mulw divw divuw remuw
-		    //32'b0000001_?????_?????_000_?????_0110011: re[w_rd] <= $signed(rs1) * $signed(rs2);  // Mul
-                    //32'b0000001_?????_?????_001_?????_0110011: re[w_rd] <= ($signed(rs1) * $signed(rs2))>>>64;//[127:64];  // Mulh 
-                    ////32'b0000001_?????_?????_100_?????_0110011: re[w_rd] <= (rs2==0||(rs1==64'h8000_0000_0000_0000 && rs2 == -1)) ? -1 : $signed(rs1) / $signed(rs2);  // Div
-                    //32'b0000001_?????_?????_101_?????_0110011: re[w_rd] <= (rs2==0) ? -1 : $unsigned(rs1) / $unsigned(rs2);  // Divu
 		    // Atomic after TLB // -- ATOMIC instructions (A-extension) opcode: 0101111
 		    // lr.w
 		    32'b00010_??_?????_?????_010_?????_0101111: begin  // Lr.w_mmu 3 cycles
@@ -752,6 +747,11 @@ module riscv64(
 		        if (store_step == 1 && bus_write_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working 1 bubble2 this3
 			if (store_step == 1 && bus_write_done == 1) begin store_step <= 0; end end //
 		     // -- ATOMIC end --
+                     // M extension // M mul mulh mulhsu mulhu div divu rem remu mulw divw divuw remuw
+		     // 32'b0000001_?????_?????_000_?????_0110011: re[w_rd] <= $signed(rs1) * $signed(rs2);  // Mul
+                     // 32'b0000001_?????_?????_001_?????_0110011: re[w_rd] <= ($signed(rs1) * $signed(rs2))>>>64;//[127:64];  // Mulh 
+                     // 32'b0000001_?????_?????_100_?????_0110011: re[w_rd] <= (rs2==0||(rs1==64'h8000_0000_0000_0000 && rs2 == -1)) ? -1 : $signed(rs1) / $signed(rs2);  // Div
+                     // 32'b0000001_?????_?????_101_?????_0110011: re[w_rd] <= (rs2==0) ? -1 : $unsigned(rs1) / $unsigned(rs2);  // Divu
 		     // F (reg f0-f31)
 		     // flw fsw fadd.s fsub.s fmul.s fdiv.s fsqrt.s fmadd.s
 		     // fmsub.s fnmsub.s fcvt.w.s fcvt.wu.s fcvt.s.w fcvt.s.wu
