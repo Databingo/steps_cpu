@@ -213,20 +213,24 @@ module riscv64(
     // d hit
     reg [63:0] ls_va;
     reg [43:0] data_ppn;
-    always @(*) begin
-        case(op)
-           7'b0000011: ls_va = rs1 + w_imm_i; // load address
-           7'b0100011: ls_va = rs1 + w_imm_s; // store address
-           7'b0101111: ls_va = rs1;           // atomic address
-           default: ls_va = 0;
-       endcase
-    end
-    wire [26:0] data_vpn;
-    assign data_vpn = ls_va[38:12];
+    //always @(*) begin
+    //    case(op)
+    //       7'b0000011: ls_va = rs1 + w_imm_i; // load address
+    //       7'b0100011: ls_va = rs1 + w_imm_s; // store address
+    //       7'b0101111: ls_va = rs1;           // atomic address
+    //       default: ls_va = 0;
+    //   endcase
+    //end
+    reg [26:0] data_vpn;
+    //assign data_vpn = ls_va[38:12];
     reg tlb_d_hit;
     always @(*) begin
          tlb_d_hit = 0;
          data_ppn = 0;
+
+	 ls_va = (op == 7'b0000011) ? (rs1 + w_imm_i) : (op == 7'b0100011) ? (rs1 + w_imm_s): rs1;
+	 data_vpn = ls_va[38:12];
+	
          if      (tlb_vld[0] && tlb_vpn[0] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[0]; end
          else if (tlb_vld[1] && tlb_vpn[1] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[1]; end
          else if (tlb_vld[2] && tlb_vpn[2] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[2]; end
