@@ -219,7 +219,7 @@ module riscv64(
            7'b0000011: ls_va = rs1 + w_imm_i; // load address
            7'b0100011: ls_va = rs1 + w_imm_s; // store address
            7'b0101111: ls_va = rs1;           // atomic address
-           default: ls_va = 0;
+           //default: ls_va = 0;
        endcase
     end
     reg tlb_d_hit;
@@ -239,7 +239,8 @@ module riscv64(
      wire need_trans = satp_mmu && !mmu_pc && !mmu_da && !mmu_cache_refill;
      //wire [55:0] ppc = need_trans ? {pc_ppn, pc[11:0]} : pc;
      assign      ppc = need_trans ? {pc_ppn, pc[11:0]} : pc;
-     wire [55:0] pda = need_trans ? {data_ppn, ls_va[11:0]} : ls_va;
+     wire [55:0] pda
+     assign pda = need_trans ? {data_ppn, ls_va[11:0]} : ls_va;
      //wire [55:0] pda = ls_va;
      
     // // CacheI    
@@ -262,7 +263,7 @@ module riscv64(
 	//else if (bus_write_enable && bus_address == `Tlb) begin // for the last fill: sd ppa, Tlb
 	else if ((mmu_pc || mmu_da) && bus_write_enable && bus_address == `Tlb) begin // for the last fill: sd ppa, Tlb
 	    tlb_vpn[tlb_ptr] <= re[9][38:12]; // VA from x9 saved by trapp mmu_pc/mmu_da
-	    tlb_ppn[tlb_ptr] <= {24'b0, re[9][38:12]}; // mimic copy now | real need walking assembly
+	    tlb_ppn[tlb_ptr] <= re[9][38:12]; // mimic copy now | real need walking assembly
 	    tlb_vld[tlb_ptr] <= 1;
 	    tlb_ptr <= tlb_ptr + 1; 
 		//load_step <= 0;
@@ -360,10 +361,8 @@ module riscv64(
        	        pc <= 0; // I-TLB refill Handler
        	 	bubble <= 1'b1; // bubble 
 	        saved_user_pc <= pc - 4; // !!! save pc (EXE was flushed so record-redo it, previous pc)
-	        //saved_user_pc <= pc;// - 4; // !!! save pc (EXE was flushed so record it, previous pc)
 		for (i=0;i<=9;i=i+1) begin sre[i]<= re[i]; end // save re
-		re[9] <= pc;// - 4; // save this vpc to x1
-		//!!!! We also need to refill pc - 4' ppc for re-executeing pc-4, with hit(if satp in for very next sfence.vma) 
+		re[9] <= pc;// - 4; // save this vpc to x1 //!!!! We also need to refill pc - 4' ppc for re-executeing pc-4, with hit(if satp in for very next sfence.vma) 
 		Csrs[mstatus][MPIE] <= Csrs[mstatus][MIE]; // disable interrupt during shadow mmu walking
 		Csrs[mstatus][MIE] <= 0;
 	    end else if (mmu_pc && ir == 32'b00110000001000000000000001110011) begin // end hiject mret & recover from shadow when see Mret
@@ -374,14 +373,13 @@ module riscv64(
 		Csrs[mstatus][MIE] <= Csrs[mstatus][MPIE]; // set back interrupt status
 
             //  mmu_da  D-TLB miss Trap // load/store/atom
-	    //end else if (satp_mmu && !mmu_pc && !mmu_da && tlb_i_hit && !tlb_d_hit && (op == 7'b0000011 || op == 7'b0100011 || op == 7'b0101111) ) begin  
-	    end else if (satp_mmu && !mmu_pc && !mmu_da && !tlb_d_hit && (op == 7'b0000011 || op == 7'b0100011 || op == 7'b0101111) ) begin  
+	    end else if (satp_mmu && !mmu_pc && !mmu_da && tlb_i_hit && !tlb_d_hit && (op == 7'b0000011 || op == 7'b0100011 || op == 7'b0101111) ) begin  
+	    //end else if (satp_mmu && !mmu_pc && !mmu_da && !tlb_d_hit && (op == 7'b0000011 || op == 7'b0100011 || op == 7'b0101111) ) begin  
 		mmu_da <= 1; // MMU_DA ON
-	        saved_user_pc <= pc - 4; // save pc EXE l/s/a
-		pc <= 28; // D-TLB refill Handler
+		//pc <= 28; // D-TLB refill Handler
+		pc <= 0; // D-TLB refill Handler
 	 	bubble <= 1'b1; // bubble
-		//load_step <= 0;
-		//store_step <= 0;
+	        saved_user_pc <= pc - 4; // save pc EXE l/s/a
 		for (i=0;i<10;i=i+1) begin sre[i]<= re[i]; end // save re
 		re[9] <= ls_va; //save va to x1
 		Csrs[mstatus][MPIE] <= Csrs[mstatus][MIE]; // disable interrupt during shadow mmu walking
