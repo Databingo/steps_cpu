@@ -251,8 +251,8 @@ module riscv64(
      wire need_trans = satp_mmu && !mmu_pc && !mmu_da && !mmu_cache_refill;
      //wire [55:0] ppc = need_trans ? {pc_ppn, pc[11:0]} : pc;
      assign ppc = need_trans ? {pc_ppn, pc[11:0]} : pc;
-     //wire [55:0] pda = need_trans ? {data_ppn, ls_va[11:0]} : ls_va;
-     wire [55:0] pda = ls_va;
+     wire [55:0] pda = need_trans ? {data_ppn, ls_va[11:0]} : ls_va;
+     //wire [55:0] pda = ls_va;
      
     // // CacheI    
     // Cache_line 64B-16instruction [5:0] 
@@ -385,7 +385,7 @@ module riscv64(
             //  mmu_da  D-TLB miss Trap // load/store/atom
 	    end else if (satp_mmu && !mmu_pc && !mmu_da && tlb_i_hit && !tlb_d_hit && (op == 7'b0000011 || op == 7'b0100011 || op == 7'b0101111) ) begin  
 		mmu_da <= 1; // MMU_DA ON
-	        saved_user_pc <= pc - 4; // save pc EXE l/s
+	        saved_user_pc <= pc;// - 4; // save pc EXE l/s
 		pc <= 28; // D-TLB refill Handler
 	 	bubble <= 1'b1; // bubble
 		for (i=0;i<10;i=i+1) begin sre[i]<= re[i]; end // save re
