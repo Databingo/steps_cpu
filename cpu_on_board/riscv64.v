@@ -228,7 +228,7 @@ module riscv64(
          tlb_d_hit = 0;
          data_ppn = 0;
 
-	 ls_va = (op == 7'b0000011) ? (rs1 + w_imm_i) : (op == 7'b0100011) ? (rs1 + w_imm_s): rs1;
+	 ls_va = (op == 7'b0000011) ? (rs1 + w_imm_i) : (op == 7'b0100011) ? (rs1 + w_imm_s) : (op == 7'b0101111) ? rs1 : 0;
 	 data_vpn = ls_va[38:12];
 	
          if      (tlb_vld[0] && tlb_vpn[0] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[0]; end
