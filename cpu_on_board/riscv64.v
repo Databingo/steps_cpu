@@ -371,7 +371,6 @@ module riscv64(
 	        saved_user_pc <= pc - 4; // !!! save pc (EXE was flushed so record it, previous pc)
 		for (i=0;i<=9;i=i+1) begin sre[i]<= re[i]; end // save re
 		re[9] <= pc;// - 4; // save this vpc to x1
-		//re[9] <= pc - 4; // save vpc to x1
 		//!!!! We also need to refill pc - 4' ppc for re-executeing pc-4, with hit(if satp in for very next sfence.vma) 
 		Csrs[mstatus][MPIE] <= Csrs[mstatus][MIE]; // disable interrupt during shadow mmu walking
 		Csrs[mstatus][MIE] <= 0;
@@ -383,21 +382,21 @@ module riscv64(
 		Csrs[mstatus][MIE] <= Csrs[mstatus][MPIE]; // set back interrupt status
 
             //  mmu_da  D-TLB miss Trap // load/store/atom
-	//    end else if (satp_mmu && !mmu_pc && !mmu_da && tlb_i_hit && !tlb_d_hit && (op == 7'b0000011 || op == 7'b0100011 || op == 7'b0101111) ) begin  
-	//	mmu_da <= 1; // MMU_DA ON
-	//        saved_user_pc <= pc-4; // save pc EXE l/s
-	//	pc <= 28; // D-TLB refill Handler
-	// 	bubble <= 1'b1; // bubble
-	//	for (i=0;i<10;i=i+1) begin sre[i]<= re[i]; end // save re
-	//	re[9] <= ls_va; //save va to x1
-	//	Csrs[mstatus][MPIE] <= Csrs[mstatus][MIE]; // disable interrupt during shadow mmu walking
-	//	Csrs[mstatus][MIE] <= 0;
-	//    end else if (mmu_da && ir == 32'b00110000001000000000000001110011) begin // hiject mret 
-	//	pc <= saved_user_pc; // recover from shadow when see Mret
-	//	bubble <= 1; // bubble
-	//	for (i=0;i<10;i=i+1) begin re[i]<= sre[i]; end // recover usr re
-	//	mmu_da <= 0; // MMU_DA OFF
-	//	Csrs[mstatus][MIE] <= Csrs[mstatus][MPIE]; // set back interrupt status
+	    end else if (satp_mmu && !mmu_pc && !mmu_da && tlb_i_hit && !tlb_d_hit && (op == 7'b0000011 || op == 7'b0100011 || op == 7'b0101111) ) begin  
+		mmu_da <= 1; // MMU_DA ON
+	        saved_user_pc <= pc - 4; // save pc EXE l/s
+		pc <= 0; // D-TLB refill Handler
+	 	bubble <= 1'b1; // bubble
+		for (i=0;i<10;i=i+1) begin sre[i]<= re[i]; end // save re
+		re[9] <= ls_va; //save va to x1
+		Csrs[mstatus][MPIE] <= Csrs[mstatus][MIE]; // disable interrupt during shadow mmu walking
+		Csrs[mstatus][MIE] <= 0;
+	    end else if (mmu_da && ir == 32'b00110000001000000000000001110011) begin // hiject mret 
+		pc <= saved_user_pc; // recover from shadow when see Mret
+		bubble <= 1; // bubble
+		for (i=0;i<10;i=i+1) begin re[i]<= sre[i]; end // recover usr re
+		mmu_da <= 0; // MMU_DA OFF
+		Csrs[mstatus][MIE] <= Csrs[mstatus][MPIE]; // set back interrupt status
 		
         //    //  mmu_cache I-Cache Miss Trap // Allow if hit or bare mode
 	//    end else if (!bubble && !mmu_pc && !mmu_da && !mmu_cache_refill && (tlb_i_hit || !satp_mmu) && !cache_hit) begin
