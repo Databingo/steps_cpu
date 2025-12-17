@@ -180,7 +180,7 @@ module riscv64(
     wire time_interrupt = (mtime >= mtimecmp);
       
     // -- Innerl signal --
-    //reg bubble;
+    reg bubble;
     reg [1:0] load_step;
     reg [1:0] store_step;
 
