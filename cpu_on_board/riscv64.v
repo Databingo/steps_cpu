@@ -377,7 +377,7 @@ module riscv64(
 	    //end else if (satp_mmu && !mmu_pc && !mmu_da && tlb_i_hit && !tlb_d_hit && (op == 7'b0000011 || op == 7'b0100011 || op == 7'b0101111) ) begin  
 	    end else if (satp_mmu && !mmu_pc && !mmu_da && !tlb_d_hit && (op == 7'b0000011 || op == 7'b0100011 || op == 7'b0101111) ) begin  
 		mmu_da <= 1; // MMU_DA ON
-	        saved_user_pc <= pc - 4; // save pc EXE l/s
+	        saved_user_pc <= pc;// - 4; // save pc EXE l/s
 		pc <= 28; // D-TLB refill Handler
 	 	bubble <= 1'b1; // bubble
 		//load_step <= 0;
