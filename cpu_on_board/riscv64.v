@@ -212,6 +212,7 @@ module riscv64(
     end
     // d hit
     reg [38:0] ls_va;
+    reg [38:0] fault_va;
     wire [26:0] data_vpn = ls_va[38:12];
     reg [43:0] data_ppn;
     always @(*) begin
@@ -239,7 +240,7 @@ module riscv64(
      wire need_trans = satp_mmu && !mmu_pc && !mmu_da && !mmu_cache_refill;
      //wire [55:0] ppc = need_trans ? {pc_ppn, pc[11:0]} : pc;
      assign      ppc = need_trans ? {pc_ppn, pc[11:0]} : pc;
-     wire [55:0] pda
+     wire [55:0] pda;
      assign pda = need_trans ? {data_ppn, ls_va[11:0]} : ls_va;
      //wire [55:0] pda = ls_va;
      
@@ -382,6 +383,7 @@ module riscv64(
 	        saved_user_pc <= pc - 4; // save pc EXE l/s/a
 		for (i=0;i<10;i=i+1) begin sre[i]<= re[i]; end // save re
 		re[9] <= ls_va; //save va to x1
+		fault_va <= ls_va;
 		Csrs[mstatus][MPIE] <= Csrs[mstatus][MIE]; // disable interrupt during shadow mmu walking
 		Csrs[mstatus][MIE] <= 0;
 	    end else if (mmu_da && ir == 32'b00110000001000000000000001110011) begin // hiject mret 
