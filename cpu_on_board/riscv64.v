@@ -352,7 +352,7 @@ module riscv64(
 
 
             // Bubble
-	    if (bubble) begin bubble <= 1'b0; pc <= pc; // Flush this cycle & Clear bubble signal for the next cycle
+	    if (bubble) begin bubble <= 1'b0; // Flush this cycle & Clear bubble signal for the next cycle
 
 	    //  mmu_pc  I-TLB miss Trap
 	    end else if (satp_mmu && !mmu_pc && !mmu_da && !tlb_i_hit) begin //OPEN 
