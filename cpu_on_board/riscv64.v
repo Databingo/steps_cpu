@@ -211,17 +211,18 @@ module riscv64(
         else if (tlb_vld[7] && tlb_vpn[7] == pc_vpn) begin tlb_i_hit = 1; pc_ppn = tlb_ppn[7]; end
     end
     // d hit
-    reg [38:0] ls_va;
-    wire [26:0] data_vpn = ls_va[38:12];
+    reg [63:0] ls_va;
     reg [43:0] data_ppn;
     always @(*) begin
         case(op)
            7'b0000011: ls_va = rs1 + w_imm_i; // load address
            7'b0100011: ls_va = rs1 + w_imm_s; // store address
            7'b0101111: ls_va = rs1;           // atomic address
-           //default: ls_va = 0;
+           default: ls_va = 0;
        endcase
     end
+    wire [26:0] data_vpn;
+    assign data_vpn = ls_va[38:12];
     reg tlb_d_hit;
     always @(*) begin
          tlb_d_hit = 0;
@@ -297,12 +298,7 @@ module riscv64(
             heartbeat = 1'b0; 
             ir = 32'h00000001; 
         end else begin
-            //heartbeat <= ~heartbeat; // heartbeat
-            //if (mmu_pc || mmu_da || mmu_cache_refill) ir <= get_shadow_ir(pc);  // Runing shadow code
-            ir = instruction; // 
-            //else if (cache_hit) ir <= cache_data; // Cache hit
-            ////else ir <= instruction; // 
-            //else ir <= 32'h00000013; // TLB miss or Cache miss: Nop(stall)
+            ir = instruction;
         end
     end
 
