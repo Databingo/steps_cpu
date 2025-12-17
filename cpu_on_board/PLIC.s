@@ -68,6 +68,10 @@ _start:
     sb a7, 0(t0)         # Should print 'H'
     sb t2, 0(t0)         # Should print 'X'
 
+wait_loop:
+    j wait_loop
+
+
 #    # Write 8 byte
 #    li t1, 0x4847464544434241         # 'HGFEDCBA'
 #    sd t1, 0(s0)         

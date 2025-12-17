@@ -210,9 +210,6 @@ module riscv64(
         else if (tlb_vld[6] && tlb_vpn[6] == pc_vpn) begin tlb_i_hit = 1; pc_ppn = tlb_ppn[6]; end
         else if (tlb_vld[7] && tlb_vpn[7] == pc_vpn) begin tlb_i_hit = 1; pc_ppn = tlb_ppn[7]; end
     end
-    // d hit
-    reg [63:0] ls_va;
-    reg [43:0] data_ppn;
     //always @(*) begin
     //    case(op)
     //       7'b0000011: ls_va = rs1 + w_imm_i; // load address
@@ -221,8 +218,11 @@ module riscv64(
     //       default: ls_va = 0;
     //   endcase
     //end
-    reg [26:0] data_vpn;
     //assign data_vpn = ls_va[38:12];
+    // d hit
+    reg [63:0] ls_va;
+    reg [43:0] data_ppn;
+    reg [26:0] data_vpn;
     reg tlb_d_hit;
     always @(*) begin
          tlb_d_hit = 0;
