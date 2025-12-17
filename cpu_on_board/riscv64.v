@@ -368,7 +368,8 @@ module riscv64(
        		mmu_pc <= 1; // MMU_PC ON 
        	        pc <= 0; // I-TLB refill Handler
        	 	bubble <= 1'b1; // bubble 
-	        saved_user_pc <= pc - 4; // !!! save pc (EXE was flushed so record it, previous pc)
+	        //saved_user_pc <= pc - 4; // !!! save pc (EXE was flushed so record it, previous pc)
+	        saved_user_pc <= pc;// - 4; // !!! save pc (EXE was flushed so record it, previous pc)
 		for (i=0;i<=9;i=i+1) begin sre[i]<= re[i]; end // save re
 		re[9] <= pc;// - 4; // save this vpc to x1
 		//!!!! We also need to refill pc - 4' ppc for re-executeing pc-4, with hit(if satp in for very next sfence.vma) 
@@ -385,7 +386,7 @@ module riscv64(
 	    end else if (satp_mmu && !mmu_pc && !mmu_da && tlb_i_hit && !tlb_d_hit && (op == 7'b0000011 || op == 7'b0100011 || op == 7'b0101111) ) begin  
 		mmu_da <= 1; // MMU_DA ON
 	        saved_user_pc <= pc - 4; // save pc EXE l/s
-		pc <= 0; // D-TLB refill Handler
+		pc <= 28; // D-TLB refill Handler
 	 	bubble <= 1'b1; // bubble
 		for (i=0;i<10;i=i+1) begin sre[i]<= re[i]; end // save re
 		re[9] <= ls_va; //save va to x1
