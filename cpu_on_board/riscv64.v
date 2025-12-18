@@ -4,12 +4,14 @@ module riscv64(
     input wire clk, 
     input wire reset,     // Active-low reset button
     input wire [31:0] instruction,
+    output reg [38:0] pc,
     output wire [55:0] ppc,
     //output reg [31:0] ir,
+    output wire [31:0] ir,
     output wire  heartbeat,
-    //input  reg [3:0] interrupt_vector, // notice from outside
-    //output reg  interrupt_ack,         // reply to outside
-    output reg [55:0] bus_address,     // 39 bit for real Sv39 standard?
+    input  reg [3:0] interrupt_vector, // notice from outside
+    output reg  interrupt_ack,         // reply to outside
+    output reg [38:0] bus_address,     // 39 bit for real Sv39 standard?
     output reg [63:0] bus_write_data,
     output reg        bus_write_enable,
     output reg        bus_read_enable,
@@ -27,8 +29,6 @@ module riscv64(
     input  wire [63:0] bus_read_data   // from outside
 );
 
-    reg [55:0] pc;
-    wire [31:0] ir;
 // -- new --
     reg [63:0] re [0:31]; // General Registers 32s
     reg [63:0] sre [0:9]; // Shadow Registers 10s
@@ -38,41 +38,41 @@ module riscv64(
     reg [38:0] saved_user_pc;
     integer i; 
 
-//    // MMU
-//    function [31:0] get_shadow_ir; // 0-5 mmu 
-//        input [63:0] spc;
-//        begin
-//    	case(spc) /// only x0-x9 could use, x9 is the value passer
-//	    // I-TLB Handler
-//    	    0: get_shadow_ir = 32'b00000000000000000010000010110111; // lui x1, 0x2     
-//    	    4: get_shadow_ir = 32'b00000000010000001000000010010011; // addi x1, x1, 0x4 
-//    	    8: get_shadow_ir = 32'b00000010101000000000000100010011; // addi x2, x0, 0x2a
-//    	    12: get_shadow_ir = 32'b00000000001000001011000000100011; // sd x2, 0(x1)      print *
-//            16: get_shadow_ir = 32'b00100000000000000000010000110111; // 20000437 lui x8, 0x20000
-//            20: get_shadow_ir = 32'b00000000100101000010000000100011; // 00942023 sw x9, 0(x8)   
-//            24: get_shadow_ir = 32'b00110000001000000000000001110011; // 30200073 mret           
-//	    // D-TLB Handler
-//    	    100: get_shadow_ir = 32'b00000000000000000010000010110111; // lui x1, 0x2     
-//    	    104: get_shadow_ir = 32'b00000000010000001000000010010011; // addi x1, x1, 0x4 
-//            108: get_shadow_ir = 32'b00000101111000000000000100010011; // addi x2, x0, 0x5e
-//            112: get_shadow_ir = 32'b00000000001000001011000000100011; // sd x2, 0(x1)      print ^
-//            116: get_shadow_ir = 32'b00100000000000000000010000110111; // 20000437 lui x8, 0x20000
-//            120: get_shadow_ir = 32'b00000000100101000010000000100011; // 00942023 sw x9, 0(x8)   
-//            124: get_shadow_ir = 32'b00110000001000000000000001110011; // 30200073 mret           
-//	    //// I-CacheI Handler
-//    	    //200: get_shadow_ir = 32'b00000000000000000010000010110111; // lui x1, 0x2     
-//    	    //204: get_shadow_ir = 32'b00000000010000001000000010010011; // addi x1, x1, 0x4 
-//            //208: get_shadow_ir = 32'b00000111110000000000000100010011; // addi x2, x0, 0x7c
-//            //212: get_shadow_ir = 32'b00000000001000001011000000100011; // sd x2, 0(x1)      print |
-//            //216: get_shadow_ir = 32'b00100000000000000001010000110111; // 20001437 lui x8, 0x20001
-//            //220: get_shadow_ir = 32'b00000000000001001010001110000011; // 0004a383 lw x7, 0(x9)   
-//            //224: get_shadow_ir = 32'b00000000011101000010000000100011; // 00742023 sw x7, 0(x8)   
-//            //228: get_shadow_ir = 32'b00110000001000000000000001110011; // 30200073 mret           
-//
-//    	    default: get_shadow_ir = 32'h00000013; // NOP:addi x0, x0, 0
-//    	endcase
-//        end
-//    endfunction
+    // MMU
+    function [31:0] get_shadow_ir; // 0-5 mmu 
+        input [63:0] spc;
+        begin
+    	case(spc) /// only x0-x9 could use, x9 is the value passer
+	    // I-TLB Handler
+    	    0: get_shadow_ir = 32'b00000000000000000010000010110111; // lui x1, 0x2     
+    	    4: get_shadow_ir = 32'b00000000010000001000000010010011; // addi x1, x1, 0x4 
+    	    8: get_shadow_ir = 32'b00000010101000000000000100010011; // addi x2, x0, 0x2a
+    	    12: get_shadow_ir = 32'b00000000001000001011000000100011; // sd x2, 0(x1)      print *
+            16: get_shadow_ir = 32'b00100000000000000000010000110111; // 20000437 lui x8, 0x20000
+            20: get_shadow_ir = 32'b00000000100101000010000000100011; // 00942023 sw x9, 0(x8)   
+            24: get_shadow_ir = 32'b00110000001000000000000001110011; // 30200073 mret           
+	    // D-TLB Handler
+    	    100: get_shadow_ir = 32'b00000000000000000010000010110111; // lui x1, 0x2     
+    	    104: get_shadow_ir = 32'b00000000010000001000000010010011; // addi x1, x1, 0x4 
+            108: get_shadow_ir = 32'b00000101111000000000000100010011; // addi x2, x0, 0x5e
+            112: get_shadow_ir = 32'b00000000001000001011000000100011; // sd x2, 0(x1)      print ^
+            116: get_shadow_ir = 32'b00100000000000000000010000110111; // 20000437 lui x8, 0x20000
+            120: get_shadow_ir = 32'b00000000100101000010000000100011; // 00942023 sw x9, 0(x8)   
+            124: get_shadow_ir = 32'b00110000001000000000000001110011; // 30200073 mret           
+	    //// I-CacheI Handler
+    	    //200: get_shadow_ir = 32'b00000000000000000010000010110111; // lui x1, 0x2     
+    	    //204: get_shadow_ir = 32'b00000000010000001000000010010011; // addi x1, x1, 0x4 
+            //208: get_shadow_ir = 32'b00000111110000000000000100010011; // addi x2, x0, 0x7c
+            //212: get_shadow_ir = 32'b00000000001000001011000000100011; // sd x2, 0(x1)      print |
+            //216: get_shadow_ir = 32'b00100000000000000001010000110111; // 20001437 lui x8, 0x20001
+            //220: get_shadow_ir = 32'b00000000000001001010001110000011; // 0004a383 lw x7, 0(x9)   
+            //224: get_shadow_ir = 32'b00000000011101000010000000100011; // 00742023 sw x7, 0(x8)   
+            //228: get_shadow_ir = 32'b00110000001000000000000001110011; // 30200073 mret           
+
+    	    default: get_shadow_ir = 32'h00000013; // NOP:addi x0, x0, 0
+    	endcase
+        end
+    endfunction
 
 
     // --- Privilege Modes ---
@@ -179,7 +179,7 @@ module riscv64(
     reg [1:0] store_step;
 
     // -- Atomic & Sync state --
-    reg [55:0] reserve_addr;
+    reg [63:0] reserve_addr;
     reg        reserve_valid;
 
     // -- TLB -- 8 pages
@@ -209,8 +209,8 @@ module riscv64(
     //wire [63:0] ls_va = (op == 7'b0000011) ? (rs1 + w_imm_i) : (op == 7'b0100011) ? (rs1 + w_imm_s) : (op == 7'b0101111) ? rs1 : 0; // load/jalr/store/atom
     //wire [63:0] pda = ls_va;
 
-    wire [55:0] ls_va = (op == 7'b0000011) ? (rs1 + w_imm_i) : (op == 7'b0100011) ? (rs1 + w_imm_s) : (op == 7'b0101111) ? rs1 : 0; // load/jalr/store/atom
-    wire [55:0] pda;
+    wire [63:0] ls_va = (op == 7'b0000011) ? (rs1 + w_imm_i) : (op == 7'b0100011) ? (rs1 + w_imm_s) : (op == 7'b0101111) ? rs1 : 0; // load/jalr/store/atom
+    wire [63:0] pda;
 
     //wire [26:0] data_vpn = ls_va[38:12];
     //reg [43:0] data_ppn;
@@ -240,7 +240,7 @@ module riscv64(
         if (!reset) tlb_ptr <= 0; // hit->trap(save va to x9)->refill assembly(fetch pa to x9)-> sd x9, `Tlb -> here to refill tlb
         else if ((mmu_pc || mmu_da) && bus_write_enable && bus_address == `Tlb) begin // for the last fill: sd ppa, Tlb
             tlb_vpn[tlb_ptr] <= re[9][38:12]; // VA from x9 saved by trapp mmu_pc/mmu_da
-            tlb_ppn[tlb_ptr] <= {17'b0, re[9][38:12]}; // mimic copy now | real need walking assembly 17+27+12=56
+            tlb_ppn[tlb_ptr] <= {17'b0, re[9][38:12]}; // mimic copy now | real need walking assembly
             tlb_vld[tlb_ptr] <= 1;
             tlb_ptr <= tlb_ptr + 1; 
         end
@@ -284,7 +284,7 @@ module riscv64(
 	    bus_address <= `Ram_base;
             // Interrupt re-enable
 	    Csrs[mstatus][MIE] <= 0;
-	    //interrupt_ack <= 0;
+	    interrupt_ack <= 0;
 	    mmu_da <= 0;
 	    for (i=0;i<10;i=i+1) begin sre[i]<= 64'b0; end
 	    for (i=0;i<32;i=i+1) begin Csrs[i]<= 64'b0; end
@@ -297,7 +297,7 @@ module riscv64(
 
         end else begin
             pc <= pc + 4; // Default PC+4    (1.Could be overide 2.Take effect next cycle) 
-	    //interrupt_ack <= 0;
+	    interrupt_ack <= 0;
 	    bus_read_enable <= 0;
 	    bus_write_enable <= 0; 
 
