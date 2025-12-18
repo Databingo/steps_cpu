@@ -225,7 +225,7 @@ module riscv64(
     // end
     // // concat physical address
      wire need_trans = satp_mmu   && !mmu_pc && !mmu_da && !mmu_cache_refill;
-     assign ppc = need_trans ? {pc_ppn, pc[11:0]} : pc[55:0];
+     assign ppc = need_trans ? {pc_ppn, pc[11:0]} : pc;
      //assign pda = need_trans ? {data_ppn, ls_va[11:0]} : ls_va[55:0];
      
     // TLB Refill
