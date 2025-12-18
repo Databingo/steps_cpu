@@ -206,11 +206,11 @@ module riscv64(
 
     // d hit
     // -- directly 1:1 --
-    wire [63:0] ls_va = (op == 7'b0000011) ? (rs1 + w_imm_i) : (op == 7'b0100011) ? (rs1 + w_imm_s) : (op == 7'b0101111) ? rs1 : 0; // load/jalr/store/atom
-    wire [63:0] pda = ls_va;
-
     //wire [63:0] ls_va = (op == 7'b0000011) ? (rs1 + w_imm_i) : (op == 7'b0100011) ? (rs1 + w_imm_s) : (op == 7'b0101111) ? rs1 : 0; // load/jalr/store/atom
-    //wire [63:0] pda;
+    //wire [63:0] pda = ls_va;
+
+    wire [63:0] ls_va = (op == 7'b0000011) ? (rs1 + w_imm_i) : (op == 7'b0100011) ? (rs1 + w_imm_s) : (op == 7'b0101111) ? rs1 : 0; // load/jalr/store/atom
+    wire [63:0] pda;
 
     //wire [26:0] data_vpn = ls_va[38:12];
     //reg [43:0] data_ppn;
@@ -230,21 +230,21 @@ module riscv64(
      // concat physical address
      wire need_trans = satp_mmu   && !mmu_pc && !mmu_da && !mmu_cache_refill;
      assign ppc = need_trans ? {pc_ppn, pc[11:0]} : pc;
-     //assign pda = need_trans ? {data_ppn, ls_va[11:0]} : ls_va;
+    //assign pda = need_trans ? {data_ppn, ls_va[11:0]} : ls_va;
        
-    // assign pda = need_trans ?  ls_va : ls_va;
+     assign pda = need_trans ?  ls_va : ls_va;
      
-    //// TLB Refill
-    //reg [2:0] tlb_ptr = 0; // 8 entries TLB
-    //always @(posedge clk or negedge reset) begin
-    //    if (!reset) tlb_ptr <= 0; // hit->trap(save va to x9)->refill assembly(fetch pa to x9)-> sd x9, `Tlb -> here to refill tlb
-    //    else if ((mmu_pc || mmu_da) && bus_write_enable && bus_address == `Tlb) begin // for the last fill: sd ppa, Tlb
-    //        tlb_vpn[tlb_ptr] <= re[9][38:12]; // VA from x9 saved by trapp mmu_pc/mmu_da
-    //        tlb_ppn[tlb_ptr] <= {17'b0, re[9][38:12]}; // mimic copy now | real need walking assembly
-    //        tlb_vld[tlb_ptr] <= 1;
-    //        tlb_ptr <= tlb_ptr + 1; 
-    //    end
-    //end
+    // TLB Refill
+    reg [2:0] tlb_ptr = 0; // 8 entries TLB
+    always @(posedge clk or negedge reset) begin
+        if (!reset) tlb_ptr <= 0; // hit->trap(save va to x9)->refill assembly(fetch pa to x9)-> sd x9, `Tlb -> here to refill tlb
+        else if ((mmu_pc || mmu_da) && bus_write_enable && bus_address == `Tlb) begin // for the last fill: sd ppa, Tlb
+            tlb_vpn[tlb_ptr] <= re[9][38:12]; // VA from x9 saved by trapp mmu_pc/mmu_da
+            tlb_ppn[tlb_ptr] <= {17'b0, re[9][38:12]}; // mimic copy now | real need walking assembly
+            tlb_vld[tlb_ptr] <= 1;
+            tlb_ptr <= tlb_ptr + 1; 
+        end
+    end
 
    // // IF Instruction (Only drive IR)
    // always @(posedge clk or negedge reset) begin
