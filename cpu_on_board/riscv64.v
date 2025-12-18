@@ -286,7 +286,7 @@ module riscv64(
 	    bus_address <= `Ram_base;
             // Interrupt re-enable
 	    Csrs[mstatus][MIE] <= 0;
-	    interrupt_ack <= 0;
+	    //interrupt_ack <= 0;
 	    mmu_da <= 0;
 	    for (i=0;i<10;i=i+1) begin sre[i]<= 64'b0; end
 	    for (i=0;i<32;i=i+1) begin Csrs[i]<= 64'b0; end
@@ -299,7 +299,7 @@ module riscv64(
 
         end else begin
             pc <= pc + 4; // Default PC+4    (1.Could be overide 2.Take effect next cycle) 
-	    interrupt_ack <= 0;
+	    //interrupt_ack <= 0;
 	    bus_read_enable <= 0;
 	    bus_write_enable <= 0; 
 
