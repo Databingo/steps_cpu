@@ -10,7 +10,7 @@ module riscv64(
     output wire  heartbeat,
     //input  reg [3:0] interrupt_vector, // notice from outside
     //output reg  interrupt_ack,         // reply to outside
-    output reg [63:0] bus_address,     // 39 bit for real Sv39 standard?  Sv39 = 27 +12 = 39 va, 56 pa, page size = 2^12=4K
+    output reg [55:0] bus_address,     // 39 bit for real Sv39 standard?  Sv39 = 27 +12 = 39 va, 56 pa, page size = 2^12=4K
     output reg [63:0] bus_write_data,
     output reg        bus_write_enable,
     output reg        bus_read_enable,
@@ -180,7 +180,7 @@ module riscv64(
     reg [1:0] store_step;
 
     // -- Atomic & Sync state --
-    reg [63:0] reserve_addr;
+    reg [55:0] reserve_addr;
     reg        reserve_valid;
 
     // -- TLB -- 8 pages
@@ -210,8 +210,8 @@ module riscv64(
     //wire [63:0] ls_va = (op == 7'b0000011) ? (rs1 + w_imm_i) : (op == 7'b0100011) ? (rs1 + w_imm_s) : (op == 7'b0101111) ? rs1 : 0; // load/jalr/store/atom
     //wire [63:0] pda = ls_va;
 
-    wire [63:0] ls_va = (op == 7'b0000011) ? (rs1 + w_imm_i) : (op == 7'b0100011) ? (rs1 + w_imm_s) : (op == 7'b0101111) ? rs1 : 0; // load/jalr/store/atom
-    wire [63:0] pda;
+    wire [55:0] ls_va = (op == 7'b0000011) ? (rs1 + w_imm_i) : (op == 7'b0100011) ? (rs1 + w_imm_s) : (op == 7'b0101111) ? rs1 : 0; // load/jalr/store/atom
+    wire [55:0] pda;
 
     wire [26:0] data_vpn = ls_va[38:12];
     reg [43:0] data_ppn;
@@ -232,7 +232,7 @@ module riscv64(
      wire need_trans = satp_mmu   && !mmu_pc && !mmu_da && !mmu_cache_refill;
      assign ppc = need_trans ? {pc_ppn, pc[11:0]} : pc;
      //assign pda = need_trans ?  ls_va : ls_va;
-     assign pda = need_trans ? {8'b0, data_ppn, ls_va[11:0]} : ls_va;
+     assign pda = need_trans ? {data_ppn, ls_va[11:0]} : ls_va;
        
      
     // TLB Refill
