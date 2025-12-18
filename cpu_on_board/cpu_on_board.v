@@ -109,6 +109,7 @@ assign DRAM_CKE = 1; // always enable
     always @(posedge CLOCK_50) begin ir_bd <= Cache[ppc>>2]; end
     wire [31:0] ir_ld; assign ir_ld = {ir_bd[7:0], ir_bd[15:8], ir_bd[23:16], ir_bd[31:24]}; // Endianness swap
     assign LEDR_PC = ppc/4;
+    assign LEDG = ir_ld;
 
     // -- CPU --
     riscv64 cpu (
@@ -119,7 +120,7 @@ assign DRAM_CKE = 1; // always enable
         //.pc(pc),
         .ppc(ppc),
         //.bubble(bubble),
-        .ir(LEDG),
+        //.ir(LEDG),
         .heartbeat(LEDR9),
 
         .bus_address(bus_address),

@@ -4,13 +4,13 @@ module riscv64(
     input wire clk, 
     input wire reset,     // Active-low reset button
     input wire [31:0] instruction,
-    output reg [38:0] pc,
+    //output reg [38:0] pc,
     output wire [55:0] ppc,
     //output reg [31:0] ir,
-    output wire [31:0] ir,
+    //output wire [31:0] ir,
     output wire  heartbeat,
-    input  reg [3:0] interrupt_vector, // notice from outside
-    output reg  interrupt_ack,         // reply to outside
+    //input  reg [3:0] interrupt_vector, // notice from outside
+    //output reg  interrupt_ack,         // reply to outside
     output reg [38:0] bus_address,     // 39 bit for real Sv39 standard?
     output reg [63:0] bus_write_data,
     output reg        bus_write_enable,
@@ -29,6 +29,8 @@ module riscv64(
     input  wire [63:0] bus_read_data   // from outside
 );
 
+    reg [38:0] pc;
+    wire [31:0] ir;
 // -- new --
     reg [63:0] re [0:31]; // General Registers 32s
     reg [63:0] sre [0:9]; // Shadow Registers 10s
@@ -38,41 +40,41 @@ module riscv64(
     reg [38:0] saved_user_pc;
     integer i; 
 
-    // MMU
-    function [31:0] get_shadow_ir; // 0-5 mmu 
-        input [63:0] spc;
-        begin
-    	case(spc) /// only x0-x9 could use, x9 is the value passer
-	    // I-TLB Handler
-    	    0: get_shadow_ir = 32'b00000000000000000010000010110111; // lui x1, 0x2     
-    	    4: get_shadow_ir = 32'b00000000010000001000000010010011; // addi x1, x1, 0x4 
-    	    8: get_shadow_ir = 32'b00000010101000000000000100010011; // addi x2, x0, 0x2a
-    	    12: get_shadow_ir = 32'b00000000001000001011000000100011; // sd x2, 0(x1)      print *
-            16: get_shadow_ir = 32'b00100000000000000000010000110111; // 20000437 lui x8, 0x20000
-            20: get_shadow_ir = 32'b00000000100101000010000000100011; // 00942023 sw x9, 0(x8)   
-            24: get_shadow_ir = 32'b00110000001000000000000001110011; // 30200073 mret           
-	    // D-TLB Handler
-    	    100: get_shadow_ir = 32'b00000000000000000010000010110111; // lui x1, 0x2     
-    	    104: get_shadow_ir = 32'b00000000010000001000000010010011; // addi x1, x1, 0x4 
-            108: get_shadow_ir = 32'b00000101111000000000000100010011; // addi x2, x0, 0x5e
-            112: get_shadow_ir = 32'b00000000001000001011000000100011; // sd x2, 0(x1)      print ^
-            116: get_shadow_ir = 32'b00100000000000000000010000110111; // 20000437 lui x8, 0x20000
-            120: get_shadow_ir = 32'b00000000100101000010000000100011; // 00942023 sw x9, 0(x8)   
-            124: get_shadow_ir = 32'b00110000001000000000000001110011; // 30200073 mret           
-	    //// I-CacheI Handler
-    	    //200: get_shadow_ir = 32'b00000000000000000010000010110111; // lui x1, 0x2     
-    	    //204: get_shadow_ir = 32'b00000000010000001000000010010011; // addi x1, x1, 0x4 
-            //208: get_shadow_ir = 32'b00000111110000000000000100010011; // addi x2, x0, 0x7c
-            //212: get_shadow_ir = 32'b00000000001000001011000000100011; // sd x2, 0(x1)      print |
-            //216: get_shadow_ir = 32'b00100000000000000001010000110111; // 20001437 lui x8, 0x20001
-            //220: get_shadow_ir = 32'b00000000000001001010001110000011; // 0004a383 lw x7, 0(x9)   
-            //224: get_shadow_ir = 32'b00000000011101000010000000100011; // 00742023 sw x7, 0(x8)   
-            //228: get_shadow_ir = 32'b00110000001000000000000001110011; // 30200073 mret           
+    //// MMU
+    //function [31:0] get_shadow_ir; // 0-5 mmu 
+    //    input [63:0] spc;
+    //    begin
+    //	case(spc) /// only x0-x9 could use, x9 is the value passer
+    //        // I-TLB Handler
+    //	    0: get_shadow_ir = 32'b00000000000000000010000010110111; // lui x1, 0x2     
+    //	    4: get_shadow_ir = 32'b00000000010000001000000010010011; // addi x1, x1, 0x4 
+    //	    8: get_shadow_ir = 32'b00000010101000000000000100010011; // addi x2, x0, 0x2a
+    //	    12: get_shadow_ir = 32'b00000000001000001011000000100011; // sd x2, 0(x1)      print *
+    //        16: get_shadow_ir = 32'b00100000000000000000010000110111; // 20000437 lui x8, 0x20000
+    //        20: get_shadow_ir = 32'b00000000100101000010000000100011; // 00942023 sw x9, 0(x8)   
+    //        24: get_shadow_ir = 32'b00110000001000000000000001110011; // 30200073 mret           
+    //        // D-TLB Handler
+    //	    100: get_shadow_ir = 32'b00000000000000000010000010110111; // lui x1, 0x2     
+    //	    104: get_shadow_ir = 32'b00000000010000001000000010010011; // addi x1, x1, 0x4 
+    //        108: get_shadow_ir = 32'b00000101111000000000000100010011; // addi x2, x0, 0x5e
+    //        112: get_shadow_ir = 32'b00000000001000001011000000100011; // sd x2, 0(x1)      print ^
+    //        116: get_shadow_ir = 32'b00100000000000000000010000110111; // 20000437 lui x8, 0x20000
+    //        120: get_shadow_ir = 32'b00000000100101000010000000100011; // 00942023 sw x9, 0(x8)   
+    //        124: get_shadow_ir = 32'b00110000001000000000000001110011; // 30200073 mret           
+    //        //// I-CacheI Handler
+    //	    //200: get_shadow_ir = 32'b00000000000000000010000010110111; // lui x1, 0x2     
+    //	    //204: get_shadow_ir = 32'b00000000010000001000000010010011; // addi x1, x1, 0x4 
+    //        //208: get_shadow_ir = 32'b00000111110000000000000100010011; // addi x2, x0, 0x7c
+    //        //212: get_shadow_ir = 32'b00000000001000001011000000100011; // sd x2, 0(x1)      print |
+    //        //216: get_shadow_ir = 32'b00100000000000000001010000110111; // 20001437 lui x8, 0x20001
+    //        //220: get_shadow_ir = 32'b00000000000001001010001110000011; // 0004a383 lw x7, 0(x9)   
+    //        //224: get_shadow_ir = 32'b00000000011101000010000000100011; // 00742023 sw x7, 0(x8)   
+    //        //228: get_shadow_ir = 32'b00110000001000000000000001110011; // 30200073 mret           
 
-    	    default: get_shadow_ir = 32'h00000013; // NOP:addi x0, x0, 0
-    	endcase
-        end
-    endfunction
+    //	    default: get_shadow_ir = 32'h00000013; // NOP:addi x0, x0, 0
+    //	endcase
+    //    end
+    //endfunction
 
 
     // --- Privilege Modes ---
@@ -212,21 +214,21 @@ module riscv64(
     wire [63:0] ls_va = (op == 7'b0000011) ? (rs1 + w_imm_i) : (op == 7'b0100011) ? (rs1 + w_imm_s) : (op == 7'b0101111) ? rs1 : 0; // load/jalr/store/atom
     wire [63:0] pda;
 
-    //wire [26:0] data_vpn = ls_va[38:12];
-    //reg [43:0] data_ppn;
-    //reg tlb_d_hit;
-    //always @(*) begin
-    //     tlb_d_hit = 0;
-    //     data_ppn = 0;
-    //     if      (tlb_vld[0] && tlb_vpn[0] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[0]; end
-    //     else if (tlb_vld[1] && tlb_vpn[1] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[1]; end
-    //     else if (tlb_vld[2] && tlb_vpn[2] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[2]; end
-    //     else if (tlb_vld[3] && tlb_vpn[3] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[3]; end
-    //     else if (tlb_vld[4] && tlb_vpn[4] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[4]; end
-    //     else if (tlb_vld[5] && tlb_vpn[5] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[5]; end
-    //     else if (tlb_vld[6] && tlb_vpn[6] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[6]; end
-    //     else if (tlb_vld[7] && tlb_vpn[7] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[7]; end
-    // end
+    wire [26:0] data_vpn = ls_va[38:12];
+    reg [43:0] data_ppn;
+    reg tlb_d_hit;
+    always @(*) begin
+         tlb_d_hit = 0;
+         data_ppn = 0;
+         if      (tlb_vld[0] && tlb_vpn[0] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[0]; end
+         else if (tlb_vld[1] && tlb_vpn[1] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[1]; end
+         else if (tlb_vld[2] && tlb_vpn[2] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[2]; end
+         else if (tlb_vld[3] && tlb_vpn[3] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[3]; end
+         else if (tlb_vld[4] && tlb_vpn[4] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[4]; end
+         else if (tlb_vld[5] && tlb_vpn[5] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[5]; end
+         else if (tlb_vld[6] && tlb_vpn[6] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[6]; end
+         else if (tlb_vld[7] && tlb_vpn[7] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[7]; end
+     end
      // concat physical address
      wire need_trans = satp_mmu   && !mmu_pc && !mmu_da && !mmu_cache_refill;
      assign ppc = need_trans ? {pc_ppn, pc[11:0]} : pc;
