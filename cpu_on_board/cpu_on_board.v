@@ -109,7 +109,6 @@ assign DRAM_CKE = 1; // always enable
     always @(posedge CLOCK_50) begin ir_bd <= Cache[ppc>>2]; end
     wire [31:0] ir_ld; assign ir_ld = {ir_bd[7:0], ir_bd[15:8], ir_bd[23:16], ir_bd[31:24]}; // Endianness swap
     assign LEDR_PC = ppc/4;
-    assign LEDG = ir_ld;
 
     // -- CPU --
     riscv64 cpu (
@@ -120,7 +119,7 @@ assign DRAM_CKE = 1; // always enable
         //.pc(pc),
         .ppc(ppc),
         //.bubble(bubble),
-        //.ir(LEDG),
+        .ir(LEDG),
         .heartbeat(LEDR9),
 
         .bus_address(bus_address),
@@ -183,7 +182,7 @@ assign DRAM_CKE = 1; // always enable
 
     // -- Bus --
     reg  [63:0] bus_read_data;
-    wire [55:0] bus_address;
+    wire [63:0] bus_address;
     wire        bus_read_enable;
     wire [63:0] bus_write_data;
     wire        bus_write_enable;
@@ -242,12 +241,12 @@ assign DRAM_CKE = 1; // always enable
 
 
     // Read & Write BRAM Port B 
-    reg [55:0] bus_address_reg;
-    reg [55:0] bus_address_reg_full;
+    reg [63:0] bus_address_reg;
+    reg [63:0] bus_address_reg_full;
     reg [2:0] step = 0;
     reg bus_read_done = 1;
     reg bus_write_done = 1;
-    reg [55:0] next_addr;
+    reg [63:0] next_addr;
     wire [4:0] plic_id = (bus_address - `Plic_base) >> 2; // id = offset /4
 
     always @(posedge CLOCK_50 or negedge KEY0) begin
@@ -389,19 +388,19 @@ assign DRAM_CKE = 1; // always enable
 		bus_write_done <= 1;
 		casez(bus_ls_type) // 000sb 001sh 010sw 011sd
 		    3'b000: begin //sb
-			if (bus_address[1:0] == 0) Cache[bus_address[55:2]][7:0] <= bus_write_data[7:0];
-			if (bus_address[1:0] == 1) Cache[bus_address[55:2]][15:8] <= bus_write_data[7:0];
-			if (bus_address[1:0] == 2) Cache[bus_address[55:2]][23:16] <= bus_write_data[7:0];
-			if (bus_address[1:0] == 3) Cache[bus_address[55:2]][31:24] <= bus_write_data[7:0];
+			if (bus_address[1:0] == 0) Cache[bus_address[63:2]][7:0] <= bus_write_data[7:0];
+			if (bus_address[1:0] == 1) Cache[bus_address[63:2]][15:8] <= bus_write_data[7:0];
+			if (bus_address[1:0] == 2) Cache[bus_address[63:2]][23:16] <= bus_write_data[7:0];
+			if (bus_address[1:0] == 3) Cache[bus_address[63:2]][31:24] <= bus_write_data[7:0];
 			end
 		    3'b001: begin //sh
-			if (bus_address[1:0] == 0) Cache[bus_address[55:2]][15:0] <= bus_write_data[15:0];
-			if (bus_address[1:0] == 2) Cache[bus_address[55:2]][31:16] <= bus_write_data[15:0];
+			if (bus_address[1:0] == 0) Cache[bus_address[63:2]][15:0] <= bus_write_data[15:0];
+			if (bus_address[1:0] == 2) Cache[bus_address[63:2]][31:16] <= bus_write_data[15:0];
 			end
-		    3'b010: begin Cache[bus_address[55:2]] <= bus_write_data[31:0]; end
+		    3'b010: begin Cache[bus_address[63:2]] <= bus_write_data[31:0]; end
 		    3'b011: begin //sd
 		        case(step)
-		            0: begin Cache[bus_address[55:2]] <= bus_write_data[31:0]; step <= 1; next_addr <= bus_address[55:2]+1; bus_write_done <= 0; end
+		            0: begin Cache[bus_address[63:2]] <= bus_write_data[31:0]; step <= 1; next_addr <= bus_address[63:2]+1; bus_write_done <= 0; end
 			    1: begin Cache[next_addr] <= bus_write_data[63:32]; step <= 0; end
 			endcase
 			end
