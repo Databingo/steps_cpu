@@ -206,11 +206,11 @@ module riscv64(
 
     // d hit
     // -- directly 1:1 --
-    //wire [63:0] ls_va = (op == 7'b0000011) ? (rs1 + w_imm_i) : (op == 7'b0100011) ? (rs1 + w_imm_s) : (op == 7'b0101111) ? rs1 : 0; // load/jalr/store/atom
-    //wire [63:0] pda = ls_va;
-
     wire [63:0] ls_va = (op == 7'b0000011) ? (rs1 + w_imm_i) : (op == 7'b0100011) ? (rs1 + w_imm_s) : (op == 7'b0101111) ? rs1 : 0; // load/jalr/store/atom
-    wire [63:0] pda;
+    wire [63:0] pda = ls_va;
+
+    //wire [63:0] ls_va = (op == 7'b0000011) ? (rs1 + w_imm_i) : (op == 7'b0100011) ? (rs1 + w_imm_s) : (op == 7'b0101111) ? rs1 : 0; // load/jalr/store/atom
+    //wire [63:0] pda;
 
     //wire [26:0] data_vpn = ls_va[38:12];
     //reg [43:0] data_ppn;
@@ -232,7 +232,7 @@ module riscv64(
      assign ppc = need_trans ? {pc_ppn, pc[11:0]} : pc;
      //assign pda = need_trans ? {data_ppn, ls_va[11:0]} : ls_va;
        
-     assign pda = need_trans ?  ls_va : ls_va;
+    // assign pda = need_trans ?  ls_va : ls_va;
      
     //// TLB Refill
     //reg [2:0] tlb_ptr = 0; // 8 entries TLB
