@@ -9,8 +9,8 @@ module riscv64(
     //output reg [31:0] ir,
     output wire [31:0] ir,
     output wire  heartbeat,
-    input  reg [3:0] interrupt_vector, // notice from outside
-    output reg  interrupt_ack,         // reply to outside
+    //input  reg [3:0] interrupt_vector, // notice from outside
+    //output reg  interrupt_ack,         // reply to outside
     output reg [63:0] bus_address,     // 39 bit for real Sv39 standard?  Sv39 = 27 +12 = 39 va, 56 pa, page size = 2^12=4K
     output reg [63:0] bus_write_data,
     output reg        bus_write_enable,
@@ -284,7 +284,7 @@ module riscv64(
 	    bus_address <= `Ram_base;
             // Interrupt re-enable
 	    Csrs[mstatus][MIE] <= 0;
-	    interrupt_ack <= 0;
+	    //interrupt_ack <= 0;
 	    mmu_da <= 0;
 	    for (i=0;i<10;i=i+1) begin sre[i]<= 64'b0; end
 	    for (i=0;i<32;i=i+1) begin Csrs[i]<= 64'b0; end
@@ -297,7 +297,7 @@ module riscv64(
 
         end else begin
             pc <= pc + 4; // Default PC+4    (1.Could be overide 2.Take effect next cycle) 
-	    interrupt_ack <= 0;
+	    //interrupt_ack <= 0;
 	    bus_read_enable <= 0;
 	    bus_write_enable <= 0; 
 
