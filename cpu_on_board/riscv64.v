@@ -186,6 +186,7 @@ module riscv64(
     reg [26:0] tlb_vpn [0:7]; // vpn number VA[38:12]  Sv39
     reg [43:0] tlb_ppn [0:7]; // ppn number PA[55:12]
     reg tlb_vld [0:7];
+
     // i hit
     wire [26:0] pc_vpn = pc[38:12];
     reg [43:0] pc_ppn;
@@ -205,10 +206,11 @@ module riscv64(
 
     // d hit
     wire [63:0] ls_va = (op == 7'b0000011) ? (rs1 + w_imm_i) : (op == 7'b0100011) ? (rs1 + w_imm_s) : (op == 7'b0101111) ? rs1 : 0; // load/jalr/store/atom
-    wire [55:0] pda = ls_va;
+    wire [63:0] pda = ls_va;
+    //wire [63:0] ls_va = (op == 7'b0000011) ? (rs1 + w_imm_i) : (op == 7'b0100011) ? (rs1 + w_imm_s) : (op == 7'b0101111) ? rs1 : 0; // load/jalr/store/atom
     //wire [26:0] data_vpn = ls_va[38:12];
     //reg [43:0] data_ppn;
-    reg tlb_d_hit = 1;
+    //reg tlb_d_hit;
     //always @(*) begin
     //     tlb_d_hit = 0;
     //     data_ppn = 0;
@@ -222,9 +224,9 @@ module riscv64(
     //     else if (tlb_vld[7] && tlb_vpn[7] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[7]; end
     // end
     // // concat physical address
-     wire need_trans = satp_mmu && !mmu_pc && !mmu_da && !mmu_cache_refill;
-     assign ppc = need_trans ? {pc_ppn, pc[11:0]} : pc;
-     //assign pda = need_trans ? {data_ppn, ls_va[11:0]} : ls_va;
+     wire need_trans = satp_mmu   && !mmu_pc && !mmu_da && !mmu_cache_refill;
+     assign ppc = need_trans ? {pc_ppn, pc[11:0]} : pc[55:0];
+     //assign pda = need_trans ? {data_ppn, ls_va[11:0]} : ls_va[55:0];
      
     // TLB Refill
     reg [2:0] tlb_ptr = 0; // 8 entries TLB
