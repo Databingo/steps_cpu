@@ -6,7 +6,7 @@ module riscv64(
     input wire [31:0] instruction,
     output wire [55:0] ppc,
     //output reg [31:0] ir,
-    output wire [31:0] ir,
+    //output wire [31:0] ir,
     output wire  heartbeat,
     //input  reg [3:0] interrupt_vector, // notice from outside
     //output reg  interrupt_ack,         // reply to outside
@@ -29,6 +29,7 @@ module riscv64(
 );
 
     reg [38:0] pc;
+    wire [31:0] ir;
 // -- new --
     reg [63:0] re [0:31]; // General Registers 32s
     reg [63:0] sre [0:9]; // Shadow Registers 10s
