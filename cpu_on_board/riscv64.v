@@ -3,7 +3,8 @@
 module riscv64(
     input wire clk, 
     input wire reset,     // Active-low reset button
-    input wire [31:0] instruction,
+    //input wire [31:0] instruction,
+    input wire [31:0] ir,
     //output reg [38:0] pc,
     output wire [55:0] ppc,
     //output reg [31:0] ir,
@@ -30,7 +31,7 @@ module riscv64(
 );
 
     (* keep = 1 *) reg [38:0] pc;
-    wire [31:0] ir;
+    //wire [31:0] ir;
 // -- new --
     reg [63:0] re [0:31]; // General Registers 32s
     reg [63:0] sre [0:9]; // Shadow Registers 10s
@@ -263,14 +264,14 @@ module riscv64(
    //     end
    // end
    //assign ir = instruction;
-    always @(*) begin
-        if (!reset) begin 
-            heartbeat = 1'b0; 
-            ir = 32'h00000001; 
-        end else begin
-            ir = instruction;
-        end
-    end
+    //always @(*) begin
+    //    if (!reset) begin 
+    //        heartbeat = 1'b0; 
+    //        ir = 32'h00000001; 
+    //    end else begin
+    //        ir = instruction;
+    //    end
+    //end
 
     // EXE Instruction 
     always @(posedge clk or negedge reset) begin
