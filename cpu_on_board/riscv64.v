@@ -4,19 +4,13 @@ module riscv64(
     input wire clk, 
     input wire reset,     // Active-low reset button
     input wire [31:0] instruction,
-    //output reg [38:0] pc,
     output wire [63:0] ppc,
-    //output reg [31:0] ir,
-    //output wire [31:0] ir,
     output wire  heartbeat,
-    //input  reg [3:0] interrupt_vector, // notice from outside
-    //output reg  interrupt_ack,         // reply to outside
     output reg [63:0] bus_address,     // 39 bit for real Sv39 standard?
     output reg [63:0] bus_write_data,
     output reg        bus_write_enable,
     output reg        bus_read_enable,
     output reg [2:0]  bus_ls_type, // lb lh lw ld lbu lhu lwu // sb sh sw sd sbu shu swu 
-   // output reg bubble,
       
     output reg [63:0] mtime,    // map to 0x0200_bff8 
     inout wire [63:0] mtimecmp, // map to 0x0200_4000 + 8byte*hartid
@@ -211,7 +205,7 @@ module riscv64(
     //wire [63:0] ls_va = (op == 7'b0000011) ? (rs1 + w_imm_i) : (op == 7'b0100011) ? (rs1 + w_imm_s) : (op == 7'b0101111) ? rs1 : 0; // load/jalr/store/atom
     //wire [63:0] pda = ls_va;
 
-    wire [63:0] ls_va = (op == 7'b0000011) ? (rs1 + w_imm_i) : (op == 7'b0100011) ? (rs1 + w_imm_s) : (op == 7'b0101111) ? rs1 : 0; // load/jalr/store/atom
+    wire [63:0] ls_va = (op == 7'b0000011) ? (rs1 + w_imm_i) : (op == 7'b0100011) ? (rs1 + w_imm_s) : (op == 7'b0101111) ? rs1 : 64'h0; // load/jalr/store/atom
     wire [63:0] pda;
 
     //wire [26:0] data_vpn = ls_va[38:12];
@@ -231,7 +225,7 @@ module riscv64(
     // end
      // concat physical address
      wire need_trans = satp_mmu   && !mmu_pc && !mmu_da && !mmu_cache_refill;
-     assign ppc = need_trans ? {8'b0, pc_ppn, pc[11:0]} : pc;
+     assign ppc = need_trans ? {8'h0, pc_ppn, pc[11:0]} : pc;
     //assign pda = need_trans ? {data_ppn, ls_va[11:0]} : ls_va;
        
      assign pda = need_trans ?  ls_va : ls_va;
@@ -242,7 +236,7 @@ module riscv64(
         if (!reset) tlb_ptr <= 0; // hit->trap(save va to x9)->refill assembly(fetch pa to x9)-> sd x9, `Tlb -> here to refill tlb
         else if ((mmu_pc || mmu_da) && bus_write_enable && bus_address == `Tlb) begin // for the last fill: sd ppa, Tlb
             tlb_vpn[tlb_ptr] <= re[9][38:12]; // VA from x9 saved by trapp mmu_pc/mmu_da
-            tlb_ppn[tlb_ptr] <= {17'b0, re[9][38:12]}; // mimic copy now | real need walking assembly
+            tlb_ppn[tlb_ptr] <= {17'h0, re[9][38:12]}; // mimic copy now | real need walking assembly
             tlb_vld[tlb_ptr] <= 1;
             tlb_ptr <= tlb_ptr + 1; 
         end
