@@ -102,7 +102,7 @@ assign DRAM_CKE = 1; // always enable
         .reset_n(KEY0)
     );
 
-    wire [63:0] ppc;
+    wire [38:0] ppc;
     reg [31:0] ir_bd;
     //wire bubble;
     // IR_LD BRAM Port A read
@@ -219,11 +219,11 @@ assign DRAM_CKE = 1; // always enable
     wire Plic_priority_selected = (bus_address >= `Plic_base && bus_address < `Plic_pending);
     wire Plic_pending_selected = (bus_address == `Plic_pending);
     wire Plic_enable_ctx0_selected = (bus_address == `Plic_enable);
-    wire Plic_enable_ctx1_selected = (bus_address == `Plic_enable + 64'h80);
+    wire Plic_enable_ctx1_selected = (bus_address == `Plic_enable + 32'h80);
     wire Plic_threshold_ctx0_selected = (bus_address == `Plic_threshold);
-    wire Plic_threshold_ctx1_selected = (bus_address == `Plic_threshold + 64'h1000);
+    wire Plic_threshold_ctx1_selected = (bus_address == `Plic_threshold + 32'h1000);
     wire Plic_claim_ctx0_selected = (bus_address == `Plic_claim );
-    wire Plic_claim_ctx1_selected = (bus_address == `Plic_claim + 64'h1000);
+    wire Plic_claim_ctx1_selected = (bus_address == `Plic_claim + 32'h1000);
     //wire Plic_claim_ctx0_selected = (bus_address >= `Plic_claim && bus_address < `Plic_claim+1024*0x1000+4);
     reg [31:0] claim_interrupt_id_ctx [0:1]; // 0 for hart0M 1 for hart0S
 
