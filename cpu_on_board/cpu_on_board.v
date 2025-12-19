@@ -202,7 +202,7 @@ assign DRAM_CKE = 1; // always enable
     //# base + 0x2000 + ContextID*0x80 0hart0M 1hart0S... bitmap
     //# base + 0x200000 + ContextID*0x1000 0hart0M 1hart0S...4B 
     //# base + 0x200004 + ContextID*0x1000 0hart0M 1hart0S...4B
-      
+    //
     // Address Decoding --
     wire Rom_selected = (bus_address >= `Rom_base && bus_address < `Rom_base + `Rom_size);
     wire Ram_selected = (bus_address >= `Ram_base && bus_address < `Ram_base + `Ram_size);
@@ -585,7 +585,7 @@ end
     //assign HEX36 = ~|sdram_readdata;
     assign HEX36 = ~|sdram_rddata;
     assign HEX04 = ~uart_irq;
-    assign HEX05 = ~key_pressed;
+    assign HEX05 = ~Plic_priority_selected;
     assign HEX06 = ~meip_interrupt;
 
 endmodule
