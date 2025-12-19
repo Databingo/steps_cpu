@@ -22,11 +22,11 @@
 `define Mtime      64'h0200_bff8
 `define Mtimecmp   64'h0200_4000
 
-`define Plic_base         64'h0C00_0000  //# PER PRIORITY(id) = base + 4 * id (000-fff) array
-`define Plic_pending      64'h0C00_1000  //# base + 0x1000 id 1-32 ... bitmap
-`define Plic_enable       64'h0C00_2000  //# base + 0x2000 + ContextID*0x80 0hart0M 1hart0S... bitmap
-`define Plic_threshold    64'h0C20_0000  //# base + 0x200000 + ContextID*0x1000 0hart0M 1hart0S...4B 
-`define Plic_claim        64'h0C20_0004  //# base + 0x200004 + ContextID*0x1000 0hart0M 1hart0S...4B
+`define Plic_base         64'h0C00_0000  
+`define Plic_pending      64'h0C00_1000  
+`define Plic_enable       64'h0C00_2000  
+`define Plic_threshold    64'h0C20_0000  
+`define Plic_claim        64'h0C20_0004  
 `define HARTS 1
 
 `define Tlb    64'h2000_0000
