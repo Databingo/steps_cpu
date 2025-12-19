@@ -5,13 +5,13 @@ module riscv64(
     input wire reset,     // Active-low reset button
     input wire [31:0] instruction,
     //output reg [38:0] pc,
-    output wire [55:0] ppc,
+    output wire [63:0] ppc,
     //output reg [31:0] ir,
     //output wire [31:0] ir,
     output wire  heartbeat,
     //input  reg [3:0] interrupt_vector, // notice from outside
     //output reg  interrupt_ack,         // reply to outside
-    output reg [38:0] bus_address,     // 39 bit for real Sv39 standard?
+    output reg [63:0] bus_address,     // 39 bit for real Sv39 standard?
     output reg [63:0] bus_write_data,
     output reg        bus_write_enable,
     output reg        bus_read_enable,
@@ -29,7 +29,7 @@ module riscv64(
     input  wire [63:0] bus_read_data   // from outside
 );
 
-    (* keep = 1 *) reg [38:0] pc;
+    (* keep = 1 *) reg [63:0] pc;
     wire [31:0] ir;
 // -- new --
     reg [63:0] re [0:31]; // General Registers 32s
@@ -37,7 +37,7 @@ module riscv64(
     reg mmu_da=0;
     reg mmu_pc = 0;
     reg mmu_cache_refill=0;
-    reg [38:0] saved_user_pc;
+    reg [63:0] saved_user_pc;
     integer i; 
 
     //// MMU
