@@ -29,7 +29,7 @@ module riscv64(
     input  wire [63:0] bus_read_data   // from outside
 );
 
-    reg [38:0] pc;
+    (* keep = 1 *) reg [38:0] pc;
     wire [31:0] ir;
 // -- new --
     reg [63:0] re [0:31]; // General Registers 32s
