@@ -3,8 +3,7 @@
 module riscv64(
     input wire clk, 
     input wire reset,     // Active-low reset button
-    //input wire [31:0] instruction,
-    input wire [31:0] ir,
+    input wire [31:0] instruction,
     //output reg [38:0] pc,
     output wire [55:0] ppc,
     //output reg [31:0] ir,
@@ -31,7 +30,7 @@ module riscv64(
 );
 
     (* keep = 1 *) reg [38:0] pc;
-    //wire [31:0] ir;
+    wire [31:0] ir;
 // -- new --
     reg [63:0] re [0:31]; // General Registers 32s
     reg [63:0] sre [0:9]; // Shadow Registers 10s
@@ -212,8 +211,8 @@ module riscv64(
     //wire [63:0] ls_va = (op == 7'b0000011) ? (rs1 + w_imm_i) : (op == 7'b0100011) ? (rs1 + w_imm_s) : (op == 7'b0101111) ? rs1 : 0; // load/jalr/store/atom
     //wire [63:0] pda = ls_va;
 
-    (* keep = 1 *) wire [63:0] ls_va = (op == 7'b0000011) ? (rs1 + w_imm_i) : (op == 7'b0100011) ? (rs1 + w_imm_s) : (op == 7'b0101111) ? rs1 : 0; // load/jalr/store/atom
-    (* keep = 1 *) wire [63:0] pda;
+    wire [63:0] ls_va = (op == 7'b0000011) ? (rs1 + w_imm_i) : (op == 7'b0100011) ? (rs1 + w_imm_s) : (op == 7'b0101111) ? rs1 : 0; // load/jalr/store/atom
+    wire [63:0] pda;
 
     //wire [26:0] data_vpn = ls_va[38:12];
     //reg [43:0] data_ppn;
@@ -263,7 +262,7 @@ module riscv64(
    //         //else ir <= 32'h00000013; // TLB miss or Cache miss: Nop(stall)
    //     end
    // end
-   //assign ir = instruction;
+    assign ir = instruction;
     //always @(*) begin
     //    if (!reset) begin 
     //        heartbeat = 1'b0; 
