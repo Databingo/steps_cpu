@@ -207,8 +207,7 @@ module riscv64(
 
    //(* keep = 1 *) wire [63:0] ls_va = (op == 7'b0000011) ? (rs1 + w_imm_i) : (op == 7'b0100011) ? (rs1 + w_imm_s) : (op == 7'b0101111) ? rs1 : 64'h0; // load/jalr/store/atom
    (* keep = 1 *) reg [63:0] ls_va;
-    //wire [63:0] pda;
-   (* keep = 1 *) reg [63:0] pda;
+    wire [63:0] pda;
 
     //wire [26:0] data_vpn = ls_va[38:12];
     reg [43:0] data_ppn;
@@ -229,12 +228,11 @@ module riscv64(
          if (tlb_vld[5] && tlb_vpn[5] == ls_va[38:12]) begin tlb_d_hit = 1; data_ppn=tlb_ppn[5]; end
          if (tlb_vld[6] && tlb_vpn[6] == ls_va[38:12]) begin tlb_d_hit = 1; data_ppn=tlb_ppn[6]; end
          if (tlb_vld[7] && tlb_vpn[7] == ls_va[38:12]) begin tlb_d_hit = 1; data_ppn=tlb_ppn[7]; end
-         pda = need_trans ? {8'h0, data_ppn, ls_va[11:0]} : ls_va;
      end
      // concat physical address
      wire need_trans = satp_mmu   && !mmu_pc && !mmu_da && !mmu_cache_refill;
      assign ppc = need_trans ? {8'h0, pc_ppn, pc[11:0]} : pc;
-     //assign pda = need_trans ? {8'h0, data_ppn, ls_va[11:0]} : ls_va;
+     assign pda = need_trans ? {8'h0, data_ppn, ls_va[11:0]} : ls_va;
        
      //assign pda = need_trans ?  ls_va : ls_va;
      
