@@ -189,7 +189,7 @@ module riscv64(
     reg tlb_i_hit;
     always @(*) begin
         tlb_i_hit = 0;
-        pc_ppn = 44'h0;
+        pc_ppn = 0;
         if      (tlb_vld[0] && tlb_vpn[0] == pc_vpn) begin tlb_i_hit = 1; pc_ppn = tlb_ppn[0]; end
         else if (tlb_vld[1] && tlb_vpn[1] == pc_vpn) begin tlb_i_hit = 1; pc_ppn = tlb_ppn[1]; end
         else if (tlb_vld[2] && tlb_vpn[2] == pc_vpn) begin tlb_i_hit = 1; pc_ppn = tlb_ppn[2]; end
@@ -757,8 +757,8 @@ module riscv64(
                 endcase
 	    end
         end
-	re[0]<=64'h0; 
-	sre[0]<=64'h0;
+	re[0]<=0; 
+	sre[0]<=0;
     end
 
 endmodule
