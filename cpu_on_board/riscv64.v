@@ -757,8 +757,8 @@ module riscv64(
                 endcase
 	    end
         end
-	re[0]<=0; 
-	sre[0]<=0;
+	re[0]<=64'h0; 
+	sre[0]<=64'h0;
     end
 
 endmodule
