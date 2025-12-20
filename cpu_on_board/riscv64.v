@@ -230,14 +230,20 @@ module riscv64(
          if (tlb_vld[7] && tlb_vpn[7] == ls_va[38:12]) begin tlb_d_hit = 1; data_ppn=tlb_ppn[7]; end
      end
      // concat physical address
-     wire need_trans = satp_mmu   && !mmu_pc && !mmu_da) && bus_write_enable && bus_address == `Tlb) begin // for the last fill: sd ppa, Tlb
+     wire need_trans = satp_mmu   && !mmu_pc && !mmu_da && !mmu_cache_refill;
+	 
+    // TLB Refill
+    reg [2:0] tlb_ptr = 0; // 8 entries TLB
+    always @(posedge clk or negedge reset) begin
+        if (!reset) tlb_ptr <= 0; // hit->trap(save va to x9)->refill assembly(fetch pa to x9)-> sd x9, `Tlb -> here to refill tlb
+        else if ((mmu_pc || mmu_da) && bus_write_enable && bus_address == `Tlb) begin // for the last fill: sd ppa, Tlb
             tlb_vpn[tlb_ptr] <= re[9][38:12]; // VA from x9 saved by trapp mmu_pc/mmu_da
             tlb_ppn[tlb_ptr] <= {17'h0, re[9][38:12]}; // mimic copy now | real need walking assembly
             tlb_vld[tlb_ptr] <= 1;
             tlb_ptr <= tlb_ptr + 1; 
         end
     end
-
+	 
    // // IF Instruction (Only drive IR)
    // always @(posedge clk or negedge reset) begin
    //     if (!reset) begin 
