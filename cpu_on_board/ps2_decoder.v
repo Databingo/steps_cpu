@@ -4,7 +4,6 @@ module ps2_decoder (
     input        ps2_data_async, // Asynchronous PS/2 data (was key_data)
     output reg [7:0] scan_code,  // The final, stable 8-bit scan code (was key_byte)
     output reg [7:0] ascii_code, // Turn into ASCII code if possible 
-    output reg [7:0] latched_ascii_code, // Latched ASCII code when key_pressed
     output reg key_pressed,
     output reg key_released,
     output reg error,
@@ -61,7 +60,6 @@ module ps2_decoder (
     reg sft_l = 0, sft_r = 0;
     reg num_lock = 0;
     reg scroll_lock = 0;
-    reg [7:0] latched_ascii_code;
     //reg [7:0] last_key;
 
     always @(posedge clk) begin
@@ -94,10 +92,7 @@ module ps2_decoder (
 			8'h14: if (!extended) ctr_l <= 1; else ctr_r <=1; // ctr_left_make:h14  ctr_right_make:hE0_h14 
 			8'h11: if (!extended) alt_l <= 1; else alt_r <=1; // alt_left_make:h11  alt_right_make:hE0_h11
 	            endcase
-	            if (temp_data[8:1] != 8'hE0 && temp_data[8:1] != 8'hF0) begin
-			key_pressed <=1;
-			latched_ascii_code <= ascii_code; // Latch ascii_code when key_pressed is set
-		    end
+	            if (temp_data[8:1] != 8'hE0 && temp_data[8:1] != 8'hF0) key_pressed <=1;
 		    if (extended && temp_data[8:1] != 8'hF0) extended <= 0;
 	        end
 	    end else error <= 1;
