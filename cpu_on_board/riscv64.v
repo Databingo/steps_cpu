@@ -217,22 +217,35 @@ module riscv64(
          tlb_d_hit = 0;
          data_ppn = 44'h0;
 	 //ls_va = (op == 7'b0000011) ? (rs1 + w_imm_i) : (op == 7'b0100011) ? (rs1 + w_imm_s) : (op == 7'b0101111) ? rs1 : 64'h0; // load/jalr/store/atom
-	 if (op == 7'b0000011)  ls_va = rs1 + w_imm_i;
-	 if (op == 7'b0100011)  ls_va = rs1 + w_imm_s;
-	 if (op == 7'b0101111)  ls_va = rs1;
-         if (tlb_vld[0] && tlb_vpn[0] == ls_va[38:12]) begin tlb_d_hit = 1; data_ppn=tlb_ppn[0]; end
-         if (tlb_vld[1] && tlb_vpn[1] == ls_va[38:12]) begin tlb_d_hit = 1; data_ppn=tlb_ppn[1]; end
-         if (tlb_vld[2] && tlb_vpn[2] == ls_va[38:12]) begin tlb_d_hit = 1; data_ppn=tlb_ppn[2]; end
-         if (tlb_vld[3] && tlb_vpn[3] == ls_va[38:12]) begin tlb_d_hit = 1; data_ppn=tlb_ppn[3]; end
-         if (tlb_vld[4] && tlb_vpn[4] == ls_va[38:12]) begin tlb_d_hit = 1; data_ppn=tlb_ppn[4]; end
-         if (tlb_vld[5] && tlb_vpn[5] == ls_va[38:12]) begin tlb_d_hit = 1; data_ppn=tlb_ppn[5]; end
-         if (tlb_vld[6] && tlb_vpn[6] == ls_va[38:12]) begin tlb_d_hit = 1; data_ppn=tlb_ppn[6]; end
-         if (tlb_vld[7] && tlb_vpn[7] == ls_va[38:12]) begin tlb_d_hit = 1; data_ppn=tlb_ppn[7]; end
+	 //if (op == 7'b0000011)  ls_va = rs1 + w_imm_i;
+	 //if (op == 7'b0100011)  ls_va = rs1 + w_imm_s;
+	 //if (op == 7'b0101111)  ls_va = rs1;
+         //if (tlb_vld[0] && tlb_vpn[0] == ls_va[38:12]) begin tlb_d_hit = 1; data_ppn=tlb_ppn[0]; end
+         //if (tlb_vld[1] && tlb_vpn[1] == ls_va[38:12]) begin tlb_d_hit = 1; data_ppn=tlb_ppn[1]; end
+         //if (tlb_vld[2] && tlb_vpn[2] == ls_va[38:12]) begin tlb_d_hit = 1; data_ppn=tlb_ppn[2]; end
+         //if (tlb_vld[3] && tlb_vpn[3] == ls_va[38:12]) begin tlb_d_hit = 1; data_ppn=tlb_ppn[3]; end
+         //if (tlb_vld[4] && tlb_vpn[4] == ls_va[38:12]) begin tlb_d_hit = 1; data_ppn=tlb_ppn[4]; end
+         //if (tlb_vld[5] && tlb_vpn[5] == ls_va[38:12]) begin tlb_d_hit = 1; data_ppn=tlb_ppn[5]; end
+         //if (tlb_vld[6] && tlb_vpn[6] == ls_va[38:12]) begin tlb_d_hit = 1; data_ppn=tlb_ppn[6]; end
+         //if (tlb_vld[7] && tlb_vpn[7] == ls_va[38:12]) begin tlb_d_hit = 1; data_ppn=tlb_ppn[7]; end
+	 if (op == 7'b0000011) begin for (i=0;i<8;i=i+1) begin
+	     if (tlb_vld[i] && tlb_vpn[i]==(rs1 + w_imm_i)[38:12]) begin tlb_d_hit=1; data_ppn=tlb_ppn[i]; if (need_trans) pda={8'h0, data_ppn, (rs1 + w_imm_i)[11:0]} else pda=(rs1 + w_imm_i); end end 
+	 end
+	 if (op == 7'b0100011) begin for (i=0;i<8;i=i+1) begin 
+	     if (tlb_vld[i] && tlb_vpn[i]==(rs1 + w_imm_s)[38:12]) begin tlb_d_hit=1; data_ppn=tlb_ppn[i]; if (need_trans) pda={8'h0, data_ppn, (rs1 + w_imm_s)[11:0]} else pda=(rs1 + w_imm_s); end end 
+	 end
+	 if (op == 7'b0101111) begin for (i=0;i<8;i=i+1) begin 
+	     if (tlb_vld[i] && tlb_vpn[i]==(rs1          )[38:12]) begin tlb_d_hit=1; data_ppn=tlb_ppn[i]; if (need_trans) pda={8'h0, data_ppn, (rs1          )[11:0]} else pda=(rs1          ); end end 
+	 end
+	 //if (op == 7'b0000011)  ls_va = rs1 + w_imm_i;
+	 //if (op == 7'b0100011)  ls_va = rs1 + w_imm_s;
+	 //if (op == 7'b0101111)  ls_va = rs1;
+
      end
      // concat physical address
      wire need_trans = satp_mmu   && !mmu_pc && !mmu_da && !mmu_cache_refill;
      assign ppc = need_trans ? {8'h0, pc_ppn, pc[11:0]} : pc;
-     assign pda = need_trans ? {8'h0, data_ppn, ls_va[11:0]} : ls_va;
+     //assign pda = need_trans ? {8'h0, data_ppn, ls_va[11:0]} : ls_va;
      //assign pda = need_trans ?  ls_va : ls_va;
 	 
     // TLB Refill
