@@ -102,7 +102,7 @@ assign DRAM_CKE = 1; // always enable
         .reset_n(KEY0)
     );
 
-    wire [63:0] ppc;
+    wire [38:0] ppc;
     reg [31:0] ir_bd;
     //wire bubble;
     // IR_LD BRAM Port A read
@@ -197,12 +197,7 @@ assign DRAM_CKE = 1; // always enable
     reg [31:0] Plic_pending; // 0x1000 Global pending Bitmap 
     reg [31:0] Plic_enable [0:1];  // 0x2000 per context +0x80
     reg [2:0]  Plic_threshold [0:1]; // 0x200000 4B per hart
-    //# PER PRIORITY(id) = base + 4 * id (000-fff) array
-    //# base + 0x1000 id 1-32 ... bitmap
-    //# base + 0x2000 + ContextID*0x80 0hart0M 1hart0S... bitmap
-    //# base + 0x200000 + ContextID*0x1000 0hart0M 1hart0S...4B 
-    //# base + 0x200004 + ContextID*0x1000 0hart0M 1hart0S...4B
-    //
+
     // Address Decoding --
     wire Rom_selected = (bus_address >= `Rom_base && bus_address < `Rom_base + `Rom_size);
     wire Ram_selected = (bus_address >= `Ram_base && bus_address < `Ram_base + `Ram_size);
@@ -224,11 +219,11 @@ assign DRAM_CKE = 1; // always enable
     wire Plic_priority_selected = (bus_address >= `Plic_base && bus_address < `Plic_pending);
     wire Plic_pending_selected = (bus_address == `Plic_pending);
     wire Plic_enable_ctx0_selected = (bus_address == `Plic_enable);
-    wire Plic_enable_ctx1_selected = (bus_address == `Plic_enable + 64'h80);
+    wire Plic_enable_ctx1_selected = (bus_address == `Plic_enable + 32'h80);
     wire Plic_threshold_ctx0_selected = (bus_address == `Plic_threshold);
-    wire Plic_threshold_ctx1_selected = (bus_address == `Plic_threshold + 64'h1000);
+    wire Plic_threshold_ctx1_selected = (bus_address == `Plic_threshold + 32'h1000);
     wire Plic_claim_ctx0_selected = (bus_address == `Plic_claim );
-    wire Plic_claim_ctx1_selected = (bus_address == `Plic_claim + 64'h1000);
+    wire Plic_claim_ctx1_selected = (bus_address == `Plic_claim + 32'h1000);
     //wire Plic_claim_ctx0_selected = (bus_address >= `Plic_claim && bus_address < `Plic_claim+1024*0x1000+4);
     reg [31:0] claim_interrupt_id_ctx [0:1]; // 0 for hart0M 1 for hart0S
 
@@ -267,7 +262,7 @@ assign DRAM_CKE = 1; // always enable
 	    uart_write_pulse <= 0;
 	    uart_read_pulse <= 0;
 	    uart_read_step <= 0;
-	    mtimecmp <=  64'h80000000;
+	    mtimecmp <=  32'h80000000;
 	    uart_irq_pre <= 0;
 	end else begin
         bus_address_reg <= bus_address>>2;
@@ -585,7 +580,7 @@ end
     //assign HEX36 = ~|sdram_readdata;
     assign HEX36 = ~|sdram_rddata;
     assign HEX04 = ~uart_irq;
-    assign HEX05 = ~Plic_priority_selected;
+    assign HEX05 = ~key_pressed;
     assign HEX06 = ~meip_interrupt;
 
 endmodule
