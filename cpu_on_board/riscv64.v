@@ -213,7 +213,7 @@ module riscv64(
     reg [43:0] data_ppn;
     reg tlb_d_hit;
     always @(*) begin
-	 ls_va = 64'h0;
+	 //ls_va = 64'h0;
          tlb_d_hit = 0;
          data_ppn = 44'h0;
 	 //ls_va = (op == 7'b0000011) ? (rs1 + w_imm_i) : (op == 7'b0100011) ? (rs1 + w_imm_s) : (op == 7'b0101111) ? rs1 : 64'h0; // load/jalr/store/atom
