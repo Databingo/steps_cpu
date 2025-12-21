@@ -298,11 +298,8 @@ module riscv64(
 	    bus_read_enable <= 0;
 	    bus_write_enable <= 0; 
 
-            // Bubble
-	    if (bubble) begin bubble <= 1'b0; // Flush this cycle & Clear bubble signal for the next cycle
-
 	    //  mmu_pc  I-TLB miss Trap
-	    end else if (satp_mmu && !mmu_pc && !mmu_da && !tlb_i_hit) begin //OPEN 
+	    if (satp_mmu && !mmu_pc && !mmu_da && !tlb_i_hit) begin //OPEN 
        		mmu_pc <= 1; // MMU_PC ON 
        	        pc <= 0; // I-TLB refill Handler
        	 	bubble <= 1'b1; // bubble 
@@ -312,6 +309,9 @@ module riscv64(
 		//if (op == 7'b1101111|| op == 7'b1100111||op == 7'b1100011) re[9] <= pc - 4; // jal/jalr/brach trap in EXE
 		Csrs[mstatus][MPIE] <= Csrs[mstatus][MIE]; // disable interrupt during shadow mmu walking
 		Csrs[mstatus][MIE] <= 0;
+            // Bubble
+	    end else if (bubble) begin bubble <= 1'b0; // Flush this cycle & Clear bubble signal for the next cycle
+
 	    end else if (mmu_pc && ir == 32'b00110000001000000000000001110011) begin // end hiject mret & recover from shadow when see Mret
 		pc <= saved_user_pc; // recover from shadow when see Mret
 	 	bubble <= 1'b1; // bubble
