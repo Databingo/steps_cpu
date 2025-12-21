@@ -206,14 +206,14 @@ assign DRAM_CKE = 1; // always enable
     // Address Decoding --
     wire Rom_selected = (bus_address >= `Rom_base && bus_address < `Rom_base + `Rom_size);
     wire Ram_selected = (bus_address >= `Ram_base && bus_address < `Ram_base + `Ram_size);
-    wire Key_selected = (bus_address == `Key_base);
+//    wire Key_selected = (bus_address == `Key_base);
     wire Art_selected = (bus_address == `Art_base || bus_address == `ArtC_base);
-    wire Sdc_addr_selected = (bus_address == `Sdc_addr);
-    wire Sdc_read_selected = (bus_address == `Sdc_read);
-    wire Sdc_write_selected = (bus_address == `Sdc_write);
-    wire Sdc_ready_selected = (bus_address == `Sdc_ready);
-    wire Sdc_cache_selected = (bus_address >= `Sdc_base && bus_address < (`Sdc_base + 512));
-    wire Sdc_avail_selected = (bus_address == `Sdc_avail);
+//    wire Sdc_addr_selected = (bus_address == `Sdc_addr);
+//    wire Sdc_read_selected = (bus_address == `Sdc_read);
+//    wire Sdc_write_selected = (bus_address == `Sdc_write);
+//    wire Sdc_ready_selected = (bus_address == `Sdc_ready);
+//    wire Sdc_cache_selected = (bus_address >= `Sdc_base && bus_address < (`Sdc_base + 512));
+//    wire Sdc_avail_selected = (bus_address == `Sdc_avail);
     wire Sdram_selected = (bus_address >= `Sdram_min && bus_address < `Sdram_max);
     wire Mtime_selected = (bus_address == `Mtime);
     wire Mtimecmp_selected = (bus_address == `Mtimecmp);
@@ -272,20 +272,20 @@ assign DRAM_CKE = 1; // always enable
 	end else begin
         bus_address_reg <= bus_address>>2;
         bus_address_reg_full <= bus_address;
-        sd_rd_start <= 0;
+//        sd_rd_start <= 0;
         uart_write_pulse <= 0;
 	uart_read_pulse <= 0;
 	uart_irq_pre <= uart_irq;
 	if (uart_irq && !uart_irq_pre) Plic_pending[1] <= 1;
 	//if (key_pressed_edge) Plic_pending[1] <= 1;
 
-        if (bus_read_enable) begin bus_read_done <= 0; cid <= (bus_address-`Sdc_base); end 
+//        if (bus_read_enable) begin bus_read_done <= 0; cid <= (bus_address-`Sdc_base); end 
         if (bus_write_enable) begin bus_write_done <= 0; end
 
         // Read
         //if (!bus_read_enable && bus_read_done==0) begin 
         if (bus_read_done==0) begin 
-            if (Key_selected) begin bus_read_data <= {32'd0, 24'd0, ascii}; bus_read_done <= 1; end
+//            if (Key_selected) begin bus_read_data <= {32'd0, 24'd0, ascii}; bus_read_done <= 1; end
 	    if (Ram_selected) begin 
 	        casez(bus_ls_type)
 	            3'b011: begin // 011Ld
@@ -298,9 +298,9 @@ assign DRAM_CKE = 1; // always enable
 		endcase
 	    end
 
-            if (Sdc_ready_selected) begin bus_read_data <= {63'd0, sd_ready}; bus_read_done <= 1; end
-	    if (Sdc_cache_selected) begin bus_read_data <= {56'd0, sd_cache[cid]}; bus_read_done <= 1; end // one byte for all load
-            if (Sdc_avail_selected) begin bus_read_data <= {63'd0, sd_cache_available}; bus_read_done <= 1; end 
+//            if (Sdc_ready_selected) begin bus_read_data <= {63'd0, sd_ready}; bus_read_done <= 1; end
+//            if (Sdc_cache_selected) begin bus_read_data <= {56'd0, sd_cache[cid]}; bus_read_done <= 1; end // one byte for all load
+//            if (Sdc_avail_selected) begin bus_read_data <= {63'd0, sd_cache_available}; bus_read_done <= 1; end 
 
             if (Mtime_selected) begin bus_read_data <= mtime; bus_read_done <= 1; end 
             if (Mtimecmp_selected) begin bus_read_data <= mtimecmp; bus_read_done <= 1; end 
@@ -563,7 +563,7 @@ end
 //    );
 
     // Debug LEDs
-    assign HEX30 = ~Key_selected;
+//    assign HEX30 = ~Key_selected;
     assign HEX20 = ~|bus_read_data;
     assign HEX21 = ~bus_read_enable;
     assign HEX10 = ~|bus_write_data;
