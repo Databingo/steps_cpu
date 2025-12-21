@@ -84,7 +84,7 @@ module riscv64(
     wire [63:0] w_imm_s = {{52{ir[31]}}, ir[31:25], ir[11:7]};  // S-type immediate Sb Sh Sw Sd
     wire [63:0] w_imm_j = {{43{ir[31]}}, ir[19:12], ir[20], ir[30:21], 1'b0}; // UJ-type immediate Jal  // read immediate & padding last 0, total 20 + 1 = 21 bits
     wire [63:0] w_imm_b = {{51{ir[31]}}, ir[7],  ir[30:25], ir[11:8], 1'b0}; // B-type immediate Beq Bne Blt Bge Bltu Bgeu // read immediate & padding last 0, total 12 + 1 = 13 bits
-    wire        [63:0] w_imm_z = {59'b0, ir[19:15]};  // CSR zimm zero-extending unsigned
+    wire [63:0] w_imm_z = {59'b0, ir[19:15]};  // CSR zimm zero-extending unsigned
     wire [5:0] w_shamt = ir[25:20]; // If 6 bits the highest is always 0??
     // -- Register decoder --
     wire [4:0] w_rd  = ir[11:7];
@@ -758,8 +758,8 @@ module riscv64(
                 endcase
 	    end
         end
-	re[0]<=0; 
-	sre[0]<=0;
+	re[0]<=64'h0; 
+	sre[0]<=64'h0;
     end
 
 endmodule
