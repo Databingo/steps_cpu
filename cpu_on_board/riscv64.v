@@ -304,7 +304,7 @@ module riscv64(
        	        pc <= 0; // I-TLB refill Handler
        	 	bubble <= 1'b1; // bubble 
 	        saved_user_pc <= pc - 4; // !!! save pc (EXE was flushed so record-redo it, previous pc)
-	        if (bubble) saved_user_pc <= pc ; // !!! save pc (j/b EXE was flushed currectly)
+	        if (bubble) saved_user_pc <= pc ; // !!! save pc (j/b EXE was bubbled currectly)
 		for (i=0;i<=9;i=i+1) begin sre[i]<= re[i]; end // save re
 		re[9] <= pc;// - 4; // save this vpc to x1 //!!!! We only also need to refill pc - 4' ppc for re-executeing pc-4, with hit(if satp in for very next sfence.vma) 
 		Csrs[mstatus][MPIE] <= Csrs[mstatus][MIE]; // disable interrupt during shadow mmu walking
