@@ -363,7 +363,7 @@ module riscv64(
 		for (i=0;i<10;i=i+1) begin re[i]<= sre[i]; end // recover usr re
 		mmu_da <= 0; // MMU_DA OFF
 		Csrs[mstatus][MIE] <= Csrs[mstatus][MPIE]; // set back interrupt status
-		check <= 0;
+		//check <= 0;
 		
             // Interrupt PLIC full (Platform-Level-Interrupt-Control)  MMIO
 	    end else if ((meip_interrupt || msip_interrupt) && Csrs[mstatus][MIE]==1) begin //mstatus[3] MIE
