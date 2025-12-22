@@ -213,10 +213,10 @@ module riscv64(
     always @(*) begin
          //tlb_d_hit = 0;
          //data_ppn = 0;
-         //ls_va = (op == 7'b0000011) ? (rs1 + w_imm_i) : (op == 7'b0100011) ? (rs1 + w_imm_s) : (op == 7'b0101111) ? rs1 : 64'h0; // load/jalr/store/atom
-         if (op == 7'b0101111) ls_va = rs1; // load/jalr/store/atom
-         if (op == 7'b0000011) ls_va = rs1 + w_imm_i;
-	 if (op == 7'b0100011) ls_va = rs1 + w_imm_s;
+         ls_va = (op == 7'b0000011) ? (rs1 + w_imm_i) : (op == 7'b0100011) ? (rs1 + w_imm_s) : (op == 7'b0101111) ? rs1 : 64'h0; // load/jalr/store/atom
+         //if (op == 7'b0101111) ls_va = rs1; // load/jalr/store/atom
+         //if (op == 7'b0000011) ls_va = rs1 + w_imm_i;
+	 //if (op == 7'b0100011) ls_va = rs1 + w_imm_s;
          if      (tlb_vld[0] && tlb_vpn[0] ==ls_va[38:12]) begin tlb_d_hit = 1; data_ppn=tlb_ppn[0]; end
          else if (tlb_vld[1] && tlb_vpn[1] ==ls_va[38:12]) begin tlb_d_hit = 1; data_ppn=tlb_ppn[1]; end
          else if (tlb_vld[2] && tlb_vpn[2] ==ls_va[38:12]) begin tlb_d_hit = 1; data_ppn=tlb_ppn[2]; end
