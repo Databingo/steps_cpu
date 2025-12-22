@@ -204,27 +204,24 @@ module riscv64(
     // -- directly 1:1 --
     //wire [63:0] ls_va = (op == 7'b0000011) ? (rs1 + w_imm_i) : (op == 7'b0100011) ? (rs1 + w_imm_s) : (op == 7'b0101111) ? rs1 : 0; // load/jalr/store/atom
     //wire [63:0] pda = ls_va;
-
-    reg [63:0] ls_va = 64'h0;// = (op == 7'b0000011) ? (rs1 + w_imm_i) : (op == 7'b0100011) ? (rs1 + w_imm_s) : (op == 7'b0101111) ? rs1 : 64'h0; // load/jalr/store/atom
-    wire [63:0] pda;
-    //wire [26:0] data_vpn = ls_va[38:12];
+    reg check = 0;
+    reg [63:0] ls_va;// = (op == 7'b0000011) ? (rs1 + w_imm_i) : (op == 7'b0100011) ? (rs1 + w_imm_s) : (op == 7'b0101111) ? rs1 : 64'h0; // load/jalr/store/atom
     reg [43:0] data_ppn;
     reg tlb_d_hit;
+    wire [63:0] pda;
+    wire [26:0] data_vpn = ls_va[38:12];
+
     always @(*) begin
-         //tlb_d_hit = 0;
-         //data_ppn = 0;
-         ls_va = (op == 7'b0000011) ? (rs1 + w_imm_i) : (op == 7'b0100011) ? (rs1 + w_imm_s) : (op == 7'b0101111) ? rs1 : 64'h0; // load/jalr/store/atom
-         //if (op == 7'b0101111) ls_va = rs1; // load/jalr/store/atom
-         //if (op == 7'b0000011) ls_va = rs1 + w_imm_i;
-	 //if (op == 7'b0100011) ls_va = rs1 + w_imm_s;
-         if      (tlb_vld[0] && tlb_vpn[0] ==ls_va[38:12]) begin tlb_d_hit = 1; data_ppn=tlb_ppn[0]; end
-         else if (tlb_vld[1] && tlb_vpn[1] ==ls_va[38:12]) begin tlb_d_hit = 1; data_ppn=tlb_ppn[1]; end
-         else if (tlb_vld[2] && tlb_vpn[2] ==ls_va[38:12]) begin tlb_d_hit = 1; data_ppn=tlb_ppn[2]; end
-         else if (tlb_vld[3] && tlb_vpn[3] ==ls_va[38:12]) begin tlb_d_hit = 1; data_ppn=tlb_ppn[3]; end
-         else if (tlb_vld[4] && tlb_vpn[4] ==ls_va[38:12]) begin tlb_d_hit = 1; data_ppn=tlb_ppn[4]; end
-         else if (tlb_vld[5] && tlb_vpn[5] ==ls_va[38:12]) begin tlb_d_hit = 1; data_ppn=tlb_ppn[5]; end
-         else if (tlb_vld[6] && tlb_vpn[6] ==ls_va[38:12]) begin tlb_d_hit = 1; data_ppn=tlb_ppn[6]; end
-         else if (tlb_vld[7] && tlb_vpn[7] ==ls_va[38:12]) begin tlb_d_hit = 1; data_ppn=tlb_ppn[7]; end
+         tlb_d_hit = 0;
+         data_ppn = 0;
+         if      (tlb_vld[0] && tlb_vpn[0] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[0]; end
+         else if (tlb_vld[1] && tlb_vpn[1] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[1]; end
+         else if (tlb_vld[2] && tlb_vpn[2] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[2]; end
+         else if (tlb_vld[3] && tlb_vpn[3] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[3]; end
+         else if (tlb_vld[4] && tlb_vpn[4] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[4]; end
+         else if (tlb_vld[5] && tlb_vpn[5] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[5]; end
+         else if (tlb_vld[6] && tlb_vpn[6] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[6]; end
+         else if (tlb_vld[7] && tlb_vpn[7] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[7]; end
      end
      // concat physical address
      wire need_trans = satp_mmu   && !mmu_pc && !mmu_da && !mmu_cache_refill;
@@ -322,6 +319,12 @@ module riscv64(
 		mmu_pc <= 0; // MMU_PC OFF
 		Csrs[mstatus][MIE] <= Csrs[mstatus][MPIE]; // set back interrupt status
 
+	    end else if ((satp_mmu && !mmu_pc && !mmu_da && !check && (op == 7'b0000011 || op == 7'b0100011 || op == 7'b0101111) )) begin // end hiject mret & recover from shadow when see Mret
+		pc <= pc - 4; // recover from shadow when see Mret
+	 	bubble <= 1'b1; // bubble
+                ls_va <= (op == 7'b0000011) ? (rs1 + w_imm_i) : (op == 7'b0100011) ? (rs1 + w_imm_s) : (op == 7'b0101111) ? rs1 : 64'h0; // load/jalr/store/atom
+		check <= 1; // MMU_DA ON
+
             //  mmu_da  D-TLB miss Trap // load/store/atom
 	    end else if (satp_mmu && !mmu_pc && !mmu_da && tlb_i_hit && !tlb_d_hit && (op == 7'b0000011 || op == 7'b0100011 || op == 7'b0101111) ) begin  
 		mmu_da <= 1; // MMU_DA ON
@@ -329,10 +332,10 @@ module riscv64(
 	 	bubble <= 1'b1; // bubble
 	        saved_user_pc <= pc - 4; // save pc EXE l/s/a
 		for (i=0;i<10;i=i+1) begin sre[i]<= re[i]; end // save re
-		//re[9] <= ls_va; //save va to x1
-		if (op == 7'b0000011) re[9] <= rs1 + w_imm_i;
-		if (op == 7'b0100011) re[9] <= rs1 + w_imm_s;
-		if (op == 7'b0101111) re[9] <= rs1;
+		re[9] <= ls_va; //save va to x1
+		//if (op == 7'b0000011) re[9] <= rs1 + w_imm_i;
+		//if (op == 7'b0100011) re[9] <= rs1 + w_imm_s;
+		//if (op == 7'b0101111) re[9] <= rs1;
 		Csrs[mstatus][MPIE] <= Csrs[mstatus][MIE]; // disable interrupt during shadow mmu walking
 		Csrs[mstatus][MIE] <= 0;
 	    end else if (mmu_da && ir == 32'b00110000001000000000000001110011) begin // hiject mret 
@@ -341,6 +344,7 @@ module riscv64(
 		for (i=0;i<10;i=i+1) begin re[i]<= sre[i]; end // recover usr re
 		mmu_da <= 0; // MMU_DA OFF
 		Csrs[mstatus][MIE] <= Csrs[mstatus][MPIE]; // set back interrupt status
+		check <= 0;
 		
             // Interrupt PLIC full (Platform-Level-Interrupt-Control)  MMIO
 	    end else if ((meip_interrupt || msip_interrupt) && Csrs[mstatus][MIE]==1) begin //mstatus[3] MIE
