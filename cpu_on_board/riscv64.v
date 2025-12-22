@@ -24,6 +24,7 @@ module riscv64(
 );
 
     (* keep = 1 *) reg [63:0] pc;
+     reg [63:0] check_pc;
     wire [31:0] ir;
 // -- new --
     reg [63:0] re [0:31]; // General Registers 32s
@@ -209,26 +210,26 @@ module riscv64(
     reg [43:0] data_ppn;
     reg tlb_d_hit;
     wire [63:0] pda;
-    wire [26:0] data_vpn = ls_va[38:12];
+    //wire [26:0] data_vpn = ls_va[38:12];
 
     always @(*) begin
          tlb_d_hit = 0;
          data_ppn = 0;
-         if      (tlb_vld[0] && tlb_vpn[0] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[0]; end
-         else if (tlb_vld[1] && tlb_vpn[1] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[1]; end
-         else if (tlb_vld[2] && tlb_vpn[2] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[2]; end
-         else if (tlb_vld[3] && tlb_vpn[3] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[3]; end
-         else if (tlb_vld[4] && tlb_vpn[4] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[4]; end
-         else if (tlb_vld[5] && tlb_vpn[5] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[5]; end
-         else if (tlb_vld[6] && tlb_vpn[6] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[6]; end
-         else if (tlb_vld[7] && tlb_vpn[7] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[7]; end
+         if      (tlb_vld[0] && tlb_vpn[0] ==ls_va[38:12]) begin tlb_d_hit = 1; data_ppn=tlb_ppn[0]; end
+         else if (tlb_vld[1] && tlb_vpn[1] ==ls_va[38:12]) begin tlb_d_hit = 1; data_ppn=tlb_ppn[1]; end
+         else if (tlb_vld[2] && tlb_vpn[2] ==ls_va[38:12]) begin tlb_d_hit = 1; data_ppn=tlb_ppn[2]; end
+         else if (tlb_vld[3] && tlb_vpn[3] ==ls_va[38:12]) begin tlb_d_hit = 1; data_ppn=tlb_ppn[3]; end
+         else if (tlb_vld[4] && tlb_vpn[4] ==ls_va[38:12]) begin tlb_d_hit = 1; data_ppn=tlb_ppn[4]; end
+         else if (tlb_vld[5] && tlb_vpn[5] ==ls_va[38:12]) begin tlb_d_hit = 1; data_ppn=tlb_ppn[5]; end
+         else if (tlb_vld[6] && tlb_vpn[6] ==ls_va[38:12]) begin tlb_d_hit = 1; data_ppn=tlb_ppn[6]; end
+         else if (tlb_vld[7] && tlb_vpn[7] ==ls_va[38:12]) begin tlb_d_hit = 1; data_ppn=tlb_ppn[7]; end
      end
      // concat physical address
      wire need_trans = satp_mmu   && !mmu_pc && !mmu_da && !mmu_cache_refill;
      assign ppc = need_trans ? {8'h0, pc_ppn, pc[11:0]} : pc;
-     assign pda = need_trans ? {8'h0, data_ppn, ls_va[11:0]} : ls_va;
+     //assign pda = need_trans ? {8'h0, data_ppn, ls_va[11:0]} : ls_va;
        
-     //assign pda = need_trans ?  ls_va : ls_va;
+     assign pda = need_trans ?  ls_va : ls_va;
      
     // TLB Refill
     reg [2:0] tlb_ptr = 0; // 8 entries TLB
@@ -296,6 +297,7 @@ module riscv64(
 	    //interrupt_ack <= 0;
 	    bus_read_enable <= 0;
 	    bus_write_enable <= 0; 
+	    if (pc == check_pc +4) check <= 0;
 
 	    //  mmu_pc  I-TLB miss Trap
 	    if (satp_mmu && !mmu_pc && !mmu_da && !tlb_i_hit) begin //OPEN 
@@ -319,11 +321,13 @@ module riscv64(
 		mmu_pc <= 0; // MMU_PC OFF
 		Csrs[mstatus][MIE] <= Csrs[mstatus][MPIE]; // set back interrupt status
 
+            // check 
 	    end else if ((satp_mmu && !mmu_pc && !mmu_da && !check && (op == 7'b0000011 || op == 7'b0100011 || op == 7'b0101111) )) begin // end hiject mret & recover from shadow when see Mret
 		pc <= pc - 4; // recover from shadow when see Mret
 	 	bubble <= 1'b1; // bubble
                 ls_va <= (op == 7'b0000011) ? (rs1 + w_imm_i) : (op == 7'b0100011) ? (rs1 + w_imm_s) : (op == 7'b0101111) ? rs1 : 64'h0; // load/jalr/store/atom
-		check <= 1; // MMU_DA ON
+		check_pc <= pc - 4; // keep checked instruction's pc
+		check <= 1;
 
             //  mmu_da  D-TLB miss Trap // load/store/atom
 	    end else if (satp_mmu && !mmu_pc && !mmu_da && tlb_i_hit && !tlb_d_hit && (op == 7'b0000011 || op == 7'b0100011 || op == 7'b0101111) ) begin  
@@ -344,7 +348,7 @@ module riscv64(
 		for (i=0;i<10;i=i+1) begin re[i]<= sre[i]; end // recover usr re
 		mmu_da <= 0; // MMU_DA OFF
 		Csrs[mstatus][MIE] <= Csrs[mstatus][MPIE]; // set back interrupt status
-		check <= 0;
+		//check <= 0;
 		
             // Interrupt PLIC full (Platform-Level-Interrupt-Control)  MMIO
 	    end else if ((meip_interrupt || msip_interrupt) && Csrs[mstatus][MIE]==1) begin //mstatus[3] MIE
