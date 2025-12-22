@@ -205,7 +205,7 @@ module riscv64(
     //wire [63:0] ls_va = (op == 7'b0000011) ? (rs1 + w_imm_i) : (op == 7'b0100011) ? (rs1 + w_imm_s) : (op == 7'b0101111) ? rs1 : 0; // load/jalr/store/atom
     //wire [63:0] pda = ls_va;
 
-    wire [63:0] ls_va;// = (op == 7'b0000011) ? (rs1 + w_imm_i) : (op == 7'b0100011) ? (rs1 + w_imm_s) : (op == 7'b0101111) ? rs1 : 64'h0; // load/jalr/store/atom
+    reg [63:0] ls_va;// = (op == 7'b0000011) ? (rs1 + w_imm_i) : (op == 7'b0100011) ? (rs1 + w_imm_s) : (op == 7'b0101111) ? rs1 : 64'h0; // load/jalr/store/atom
     wire [63:0] pda;
 
     wire [26:0] data_vpn = ls_va[38:12];
