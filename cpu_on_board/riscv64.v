@@ -340,7 +340,7 @@ module riscv64(
 		Csrs[mstatus][MIE] <= Csrs[mstatus][MPIE]; // set back interrupt status
 
             // check 
-	    end else if ((satp_mmu && !mmu_pc && !mmu_da && !check && (op == 7'b0000011 || op == 7'b0100011 || op == 7'b0101111) )) begin // end hiject mret & recover from shadow when see Mret
+	    end else if (satp_mmu && !mmu_pc && !mmu_da && !check && (op == 7'b0000011 || op == 7'b0100011 || op == 7'b0101111) ) begin // end hiject mret & recover from shadow when see Mret
 		pc <= pc - 4; // recover from shadow when see Mret
 	 	bubble <= 1'b1; // bubble
 	        if (op == 7'b0000011) ls_va <= rs1 + w_imm_i;
