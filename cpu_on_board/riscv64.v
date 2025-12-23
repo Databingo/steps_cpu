@@ -313,6 +313,21 @@ module riscv64(
 		Csrs[mstatus][MPIE] <= Csrs[mstatus][MIE]; // disable interrupt during shadow mmu walking
 		Csrs[mstatus][MIE] <= 0;
 
+	    end else if (check) begin
+                //if      (tlb_vld[0] && tlb_vpn[0] == data_vpn) begin tlb_d_hit <= 1; data_ppn<=tlb_ppn[0]; end
+                //else if (tlb_vld[1] && tlb_vpn[1] == data_vpn) begin tlb_d_hit <= 1; data_ppn<=tlb_ppn[1]; end
+                //else if (tlb_vld[2] && tlb_vpn[2] == data_vpn) begin tlb_d_hit <= 1; data_ppn<=tlb_ppn[2]; end
+                //else if (tlb_vld[3] && tlb_vpn[3] == data_vpn) begin tlb_d_hit <= 1; data_ppn<=tlb_ppn[3]; end
+                //else if (tlb_vld[4] && tlb_vpn[4] == data_vpn) begin tlb_d_hit <= 1; data_ppn<=tlb_ppn[4]; end
+                //else if (tlb_vld[5] && tlb_vpn[5] == data_vpn) begin tlb_d_hit <= 1; data_ppn<=tlb_ppn[5]; end
+                //else if (tlb_vld[6] && tlb_vpn[6] == data_vpn) begin tlb_d_hit <= 1; data_ppn<=tlb_ppn[6]; end
+                //else if (tlb_vld[7] && tlb_vpn[7] == data_vpn) begin tlb_d_hit <= 1; data_ppn<=tlb_ppn[7]; end
+		//if hit
+		pda <= ls_va;
+		check <= 0;
+		bubble < = 0;
+		//if not hit trap to mmu_da
+
             // Bubble
 	    end else if (bubble) begin bubble <= 1'b0; // Flush this cycle & Clear bubble signal for the next cycle
 
@@ -330,20 +345,6 @@ module riscv64(
 	 	bubble <= 1'b1; // bubble
                 ls_va <= (op == 7'b0000011) ? (rs1 + w_imm_i) : (op == 7'b0100011) ? (rs1 + w_imm_s) : (op == 7'b0101111) ? rs1 : 64'h0; // load/jalr/store/atom
 		check <= 1;
-
-	    end else if (check) begin
-                //if      (tlb_vld[0] && tlb_vpn[0] == data_vpn) begin tlb_d_hit <= 1; data_ppn<=tlb_ppn[0]; end
-                //else if (tlb_vld[1] && tlb_vpn[1] == data_vpn) begin tlb_d_hit <= 1; data_ppn<=tlb_ppn[1]; end
-                //else if (tlb_vld[2] && tlb_vpn[2] == data_vpn) begin tlb_d_hit <= 1; data_ppn<=tlb_ppn[2]; end
-                //else if (tlb_vld[3] && tlb_vpn[3] == data_vpn) begin tlb_d_hit <= 1; data_ppn<=tlb_ppn[3]; end
-                //else if (tlb_vld[4] && tlb_vpn[4] == data_vpn) begin tlb_d_hit <= 1; data_ppn<=tlb_ppn[4]; end
-                //else if (tlb_vld[5] && tlb_vpn[5] == data_vpn) begin tlb_d_hit <= 1; data_ppn<=tlb_ppn[5]; end
-                //else if (tlb_vld[6] && tlb_vpn[6] == data_vpn) begin tlb_d_hit <= 1; data_ppn<=tlb_ppn[6]; end
-                //else if (tlb_vld[7] && tlb_vpn[7] == data_vpn) begin tlb_d_hit <= 1; data_ppn<=tlb_ppn[7]; end
-		//if hit
-		pda <= ls_va;
-		check <= 0;
-		//if not hit trap to mmu_da
 
 
 
