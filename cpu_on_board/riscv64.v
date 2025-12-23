@@ -329,6 +329,7 @@ module riscv64(
 		//if not hit trap to mmu_da
 		else begin
 		    mmu_da <= 1; // MMU_DA ON //	pc <= 28; // D-TLB refill Handler
+       	            pc <= 28; // I-TLB refill Handler
 	 	    bubble <= 1'b1; // bubble
 	            saved_user_pc <= pc;// - 4; // save pc EXE l/s/a
 		    for (i=0;i<10;i=i+1) begin sre[i]<= re[i]; end // save re
@@ -354,7 +355,7 @@ module riscv64(
 	    // Check
 	    //end else if (satp_mmu && !mmu_pc && !mmu_da && !check && (op == 7'b0000011 || op == 7'b0100011 || op == 7'b0101111) ) begin // end hiject mret & recover from shadow when see Mret
 	    end else if (!check && (op == 7'b0000011 || op == 7'b0100011 || op == 7'b0101111)) begin // end hiject mret & recover from shadow when see Mret
-		pc <= pc - 4; // recover from shadow when see Mret
+		pc <= pc - 4;
 	 	bubble <= 1'b1; // bubble
                 ls_va <= (op == 7'b0000011) ? (rs1 + w_imm_i) : (op == 7'b0100011) ? (rs1 + w_imm_s) : (op == 7'b0101111) ? rs1 : 64'h0; // load/jalr/store/atom
 		//pdat  <= (op == 7'b0000011) ? (rs1 + w_imm_i) : (op == 7'b0100011) ? (rs1 + w_imm_s) : (op == 7'b0101111) ? rs1 : 64'h0; // load/jalr/store/atom
