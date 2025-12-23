@@ -330,7 +330,7 @@ module riscv64(
 		else begin
 		    mmu_da <= 1; // MMU_DA ON //	pc <= 28; // D-TLB refill Handler
 	 	    bubble <= 1'b1; // bubble
-	            saved_user_pc <= pc - 4; // save pc EXE l/s/a
+	            saved_user_pc <= pc;// - 4; // save pc EXE l/s/a
 		    for (i=0;i<10;i=i+1) begin sre[i]<= re[i]; end // save re
 		    re[9] <= ls_va; //save va to x1
 		    pdat <= ls_va; //save va to x1
