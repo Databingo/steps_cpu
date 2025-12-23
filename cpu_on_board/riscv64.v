@@ -325,7 +325,7 @@ module riscv64(
 		//if hit
 		pda <= ls_va;
 		check <= 0;
-		bubble < = 0;
+		bubble <= 0;
 		//if not hit trap to mmu_da
 
             // Bubble
