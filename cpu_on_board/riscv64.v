@@ -84,7 +84,7 @@ module riscv64(
     wire signed [63:0] w_imm_u = {{32{ir[31]}}, ir[31:12], 12'b0};  // U-type immediate Lui Auipc
     wire signed [63:0] w_imm_i = {{52{ir[31]}}, ir[31:20]};   // I-type immediate Lb Lh Lw Lbu Lhu Lwu Ld Jalr Addi Slti Sltiu Xori Ori Andi Addiw 
     wire signed [63:0] w_imm_s = {{52{ir[31]}}, ir[31:25], ir[11:7]};  // S-type immediate Sb Sh Sw Sd
-    wire signed [63:0] w_imm_j = {{44{ir[31]}}, ir[19:12], ir[20], ir[30:21], 1'b0}; // UJ-type immediate Jal  // read immediate & padding last 0, total 20 + 1 = 21 bits
+    wire signed [63:0] w_imm_j = {{44{ir[31]}}, ir[19:12], ir[20], ir[30:21], 1'b0}; // UJ-type immediate Jal  // read immediate & padding last 0, total 20 + 1 = 21 bits | 44+8+1+10+1=64
     wire signed [63:0] w_imm_b = {{52{ir[31]}}, ir[7],  ir[30:25], ir[11:8], 1'b0}; // B-type immediate Beq Bne Blt Bge Bltu Bgeu // read immediate & padding last 0, total 12 + 1 = 13 bits
     wire        [63:0] w_imm_z = {59'b0, ir[19:15]};  // CSR zimm zero-extending unsigned
     wire [5:0] w_shamt = ir[25:20]; // If 6 bits the highest is always 0??
@@ -210,7 +210,7 @@ module riscv64(
     reg [63:0] ls_va;// = (op == 7'b0000011) ? (rs1 + w_imm_i) : (op == 7'b0100011) ? (rs1 + w_imm_s) : (op == 7'b0101111) ? rs1 : 64'h0; // load/store/atom
     //wire [63:0] pda;
     reg [63:0] pda = 64'h0;
-    reg [63:0] pdat = 64'h0;
+    reg [63:0] pdat;
 
     wire [26:0] data_vpn = ls_va[38:12];
     reg [43:0] data_ppn;
@@ -325,7 +325,8 @@ module riscv64(
                 //else if (tlb_vld[6] && tlb_vpn[6] == data_vpn) begin tlb_d_hit <= 1; data_ppn<=tlb_ppn[6]; end
                 //else if (tlb_vld[7] && tlb_vpn[7] == data_vpn) begin tlb_d_hit <= 1; data_ppn<=tlb_ppn[7]; end
 		//if hit
-		if (pdat == ls_va) begin pda <= ls_va; bubble <= 0; tlb <= 0; end
+		//if (pdat == ls_va) begin pda <= ls_va; bubble <= 0; tlb <= 0; end
+		if (pdat == ls_va) begin pda <= pdat; bubble <= 0; tlb <= 0; end
 		//if not hit trap to mmu_da
 
             // Bubble
