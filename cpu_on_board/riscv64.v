@@ -25,6 +25,7 @@ module riscv64(
 
     (* keep = 1 *) reg [63:0] pc;
     reg check=0;
+    reg tlb=0;
     wire [31:0] ir;
 // -- new --
     reg [63:0] re [0:31]; // General Registers 32s
@@ -313,7 +314,7 @@ module riscv64(
 		Csrs[mstatus][MPIE] <= Csrs[mstatus][MIE]; // disable interrupt during shadow mmu walking
 		Csrs[mstatus][MIE] <= 0;
 
-	    end else if (hit) begin
+	    end else if (tlb) begin
                 //if      (tlb_vld[0] && tlb_vpn[0] == data_vpn) begin tlb_d_hit <= 1; data_ppn<=tlb_ppn[0]; end
                 //else if (tlb_vld[1] && tlb_vpn[1] == data_vpn) begin tlb_d_hit <= 1; data_ppn<=tlb_ppn[1]; end
                 //else if (tlb_vld[2] && tlb_vpn[2] == data_vpn) begin tlb_d_hit <= 1; data_ppn<=tlb_ppn[2]; end
@@ -325,7 +326,7 @@ module riscv64(
 		//if hit
 		pda <= ls_va;
 		bubble <= 0;
-		hit <= 0;
+		tlb <= 0;
 		//if not hit trap to mmu_da
 
             // Bubble
@@ -345,7 +346,7 @@ module riscv64(
 	 	bubble <= 1'b1; // bubble
                 ls_va <= (op == 7'b0000011) ? (rs1 + w_imm_i) : (op == 7'b0100011) ? (rs1 + w_imm_s) : (op == 7'b0101111) ? rs1 : 64'h0; // load/jalr/store/atom
 		check <= 1;
-		hit <= 1;
+		tlb <= 1;
 
 
 
