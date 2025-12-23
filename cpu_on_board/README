@@ -292,3 +292,4 @@ cfb5c680ac73052f15f49f69f4cf72d8dc14232c tlb_i_hit_refill and 64 bits bus/pc/ppc
 6ee114347731a217e55a324e77f166073e984865 fixed i_trap of j/b bubble
 e36659d8b74f1ff0697e8c7706432546207a4e53 ls_va registed work ok
 d4f4e1abccdb7fc8235370e53f881d5424c2db1a use check to registe ls_va ok
+b74f2763c4afba28153d50f3870e4da67235f90e use hit to check simple hit ok
