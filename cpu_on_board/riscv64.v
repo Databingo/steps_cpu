@@ -314,7 +314,7 @@ module riscv64(
 		Csrs[mstatus][MPIE] <= Csrs[mstatus][MIE]; // disable interrupt during shadow mmu walking
 		Csrs[mstatus][MIE] <= 0;
 
-	    end else if (tlb) begin
+	    end else if (tlb && !mmu_da) begin
                 //if      (tlb_vld[0] && tlb_vpn[0] == data_vpn) begin tlb_d_hit <= 1; data_ppn<=tlb_ppn[0]; end
                 //else if (tlb_vld[1] && tlb_vpn[1] == data_vpn) begin tlb_d_hit <= 1; data_ppn<=tlb_ppn[1]; end
                 //else if (tlb_vld[2] && tlb_vpn[2] == data_vpn) begin tlb_d_hit <= 1; data_ppn<=tlb_ppn[2]; end
@@ -324,10 +324,19 @@ module riscv64(
                 //else if (tlb_vld[6] && tlb_vpn[6] == data_vpn) begin tlb_d_hit <= 1; data_ppn<=tlb_ppn[6]; end
                 //else if (tlb_vld[7] && tlb_vpn[7] == data_vpn) begin tlb_d_hit <= 1; data_ppn<=tlb_ppn[7]; end
 		//if hit
-		pda <= ls_va;
-		bubble <= 0;
-		tlb <= 0;
+		if (re[9] == ls_va) begin pda <= re[9]; bubble <= 0; tlb <= 0; end
+		else begin
+
 		//if not hit trap to mmu_da
+		mmu_da <= 1; // MMU_DA ON
+		pc <= 28; // D-TLB refill Handler
+	 	bubble <= 1'b1; // bubble
+	        saved_user_pc <= pc;// - 4; // save ls pc
+		for (i=0;i<10;i=i+1) begin sre[i]<= re[i]; end // save re
+		re[9] <= ls_va; //save va to x1
+		Csrs[mstatus][MPIE] <= Csrs[mstatus][MIE]; // disable interrupt during shadow mmu walking
+		Csrs[mstatus][MIE] <= 0;
+	        end
 
             // Bubble
 	    end else if (bubble) begin bubble <= 1'b0; // Flush this cycle & Clear bubble signal for the next cycle
@@ -365,12 +374,12 @@ module riscv64(
 	//	if (op == 7'b0101111) re[9] <= rs1;
 	//	Csrs[mstatus][MPIE] <= Csrs[mstatus][MIE]; // disable interrupt during shadow mmu walking
 	//	Csrs[mstatus][MIE] <= 0;
-	//    end else if (mmu_da && ir == 32'b00110000001000000000000001110011) begin // hiject mret 
-	//	pc <= saved_user_pc; // recover from shadow when see Mret
-	//	bubble <= 1; // bubble
-	//	for (i=0;i<10;i=i+1) begin re[i]<= sre[i]; end // recover usr re
-	//	mmu_da <= 0; // MMU_DA OFF
-	//	Csrs[mstatus][MIE] <= Csrs[mstatus][MPIE]; // set back interrupt status
+	    end else if (mmu_da && ir == 32'b00110000001000000000000001110011) begin // hiject mret 
+		pc <= saved_user_pc; // recover from shadow when see Mret
+		bubble <= 1; // bubble
+		for (i=0;i<10;i=i+1) begin re[i]<= sre[i]; end // recover usr re
+		mmu_da <= 0; // MMU_DA OFF
+		Csrs[mstatus][MIE] <= Csrs[mstatus][MPIE]; // set back interrupt status
 		
             // Interrupt PLIC full (Platform-Level-Interrupt-Control)  MMIO
 	    end else if ((meip_interrupt || msip_interrupt) && Csrs[mstatus][MIE]==1) begin //mstatus[3] MIE
