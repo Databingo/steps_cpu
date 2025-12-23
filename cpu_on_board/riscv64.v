@@ -24,6 +24,7 @@ module riscv64(
 );
 
     (* keep = 1 *) reg [63:0] pc;
+    reg check=0;
     wire [31:0] ir;
 // -- new --
     reg [63:0] re [0:31]; // General Registers 32s
