@@ -210,7 +210,7 @@ module riscv64(
     reg [63:0] ls_va;// = (op == 7'b0000011) ? (rs1 + w_imm_i) : (op == 7'b0100011) ? (rs1 + w_imm_s) : (op == 7'b0101111) ? rs1 : 64'h0; // load/store/atom
     //wire [63:0] pda;
     reg [63:0] pda = 64'h0;
-    reg [63:0] pdat = 64'h0;
+    reg [63:0] tlb_vda = 64'h0;
 
     wire [26:0] data_vpn = ls_va[38:12];
     reg [43:0] data_ppn;
@@ -315,7 +315,7 @@ module riscv64(
 		Csrs[mstatus][MPIE] <= Csrs[mstatus][MIE]; // disable interrupt during shadow mmu walking
 		Csrs[mstatus][MIE] <= 0;
 
-	    end else if (tlb && !mmu_da) begin
+	    end else if (tlb && !mmu_pc && !mmu_da) begin
                 //if      (tlb_vld[0] && tlb_vpn[0] == data_vpn) begin tlb_d_hit <= 1; data_ppn<=tlb_ppn[0]; end
                 //else if (tlb_vld[1] && tlb_vpn[1] == data_vpn) begin tlb_d_hit <= 1; data_ppn<=tlb_ppn[1]; end
                 //else if (tlb_vld[2] && tlb_vpn[2] == data_vpn) begin tlb_d_hit <= 1; data_ppn<=tlb_ppn[2]; end
@@ -325,15 +325,15 @@ module riscv64(
                 //else if (tlb_vld[6] && tlb_vpn[6] == data_vpn) begin tlb_d_hit <= 1; data_ppn<=tlb_ppn[6]; end
                 //else if (tlb_vld[7] && tlb_vpn[7] == data_vpn) begin tlb_d_hit <= 1; data_ppn<=tlb_ppn[7]; end
 		//if hit
-		if (pdat == ls_va) begin pda <= ls_va; bubble <= 0; tlb <= 0; end 
+		if (tlb_vda == ls_va) begin pda <= ls_va; bubble <= 0; tlb <= 0; end 
 		else begin
 		    mmu_da <= 1; // MMU_DA ON //	pc <= 28; // D-TLB refill Handler
-       	            pc <= 28; // I-TLB refill Handler
+       	            pc <= 0; // I-TLB refill Handler
 	 	    bubble <= 1'b1; // bubble
 	            saved_user_pc <= pc;// - 4; // save pc EXE l/s/a
 		    for (i=0;i<10;i=i+1) begin sre[i]<= re[i]; end // save re
 		    re[9] <= ls_va; //save va to x1
-		    pdat <= ls_va; //save va to x1
+		    tlb_vda <= ls_va; 
 		    //if (op == 7'b0000011) re[9] <= rs1 + w_imm_i;
 		    //if (op == 7'b0100011) re[9] <= rs1 + w_imm_s;
 		    //if (op == 7'b0101111) re[9] <= rs1;
@@ -357,8 +357,7 @@ module riscv64(
 		pc <= pc - 4;
 	 	bubble <= 1'b1; // bubble
                 ls_va <= (op == 7'b0000011) ? (rs1 + w_imm_i) : (op == 7'b0100011) ? (rs1 + w_imm_s) : (op == 7'b0101111) ? rs1 : 64'h0; // load/jalr/store/atom
-		//pdat  <= (op == 7'b0000011) ? (rs1 + w_imm_i) : (op == 7'b0100011) ? (rs1 + w_imm_s) : (op == 7'b0101111) ? rs1 : 64'h0; // load/jalr/store/atom
-		pdat  <= 567 ; // load/jalr/store/atom
+		tlb_vda  <= 567 ; // load/jalr/store/atom
 		check <= 1;
 		tlb <= 1;
 
@@ -398,7 +397,7 @@ module riscv64(
 		for (i=0;i<10;i=i+1) begin re[i]<= sre[i]; end // recover usr re
 		mmu_da <= 0; // MMU_DA OFF
 		Csrs[mstatus][MIE] <= Csrs[mstatus][MPIE]; // set back interrupt status
-		pda <= pdat; 
+		//pda <= pdat; 
 		
             // Interrupt PLIC full (Platform-Level-Interrupt-Control)  MMIO
 	    end else if ((meip_interrupt || msip_interrupt) && Csrs[mstatus][MIE]==1) begin //mstatus[3] MIE
