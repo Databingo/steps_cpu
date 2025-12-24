@@ -239,7 +239,13 @@ module riscv64(
     // TLB Refill
     reg [2:0] tlb_ptr = 0; // 8 entries TLB
     always @(posedge clk or negedge reset) begin
-        if (!reset) tlb_ptr <= 0; // hit->trap(save va to x9)->refill assembly(fetch pa to x9)-> sd x9, `Tlb -> here to refill tlb
+	if (!reset) begin
+	    tlb_ptr <= 0; // hit->trap(save va to x9)->refill assembly(fetch pa to x9)-> sd x9, `Tlb -> here to refill tlb
+	    for (i=0;i<8;i=i+1) begin tlb_vpn[i]<= 27'h0; end
+	    for (i=0;i<8;i=i+1) begin tlb_ppn[i]<= 44'h0; end
+	    for (i=0;i<8;i=i+1) begin tlb_vld[i]<= 1'h0; end
+	    //pc_ppn <= 44'h0;
+	end
         else if ((mmu_pc || mmu_da) && bus_write_enable && bus_address == `Tlb) begin // for the last fill: sd ppa, Tlb
             tlb_vpn[tlb_ptr] <= re[9][38:12]; // VA from x9 saved by trapp mmu_pc/mmu_da
             tlb_ppn[tlb_ptr] <= {17'h0, re[9][38:12]}; // mimic copy now | real need walking assembly
@@ -302,10 +308,6 @@ module riscv64(
 	    saved_user_pc <= 64'h0;
 	    tlb <=0;
 	    check <=0;
-	    for (i=0;i<8;i=i+1) begin tlb_vpn[i]<= 27'h0; end
-	    for (i=0;i<8;i=i+1) begin tlb_ppn[i]<= 44'h0; end
-	    for (i=0;i<8;i=i+1) begin tlb_vld[i]<= 1'h0; end
-	    //pc_ppn <= 44'h0;
 
 
         end else begin
