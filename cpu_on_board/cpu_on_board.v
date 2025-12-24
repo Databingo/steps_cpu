@@ -209,7 +209,7 @@ assign DRAM_CKE = 1; // always enable
     // Address Decoding --
     wire Rom_selected = (bus_address >= `Rom_base && bus_address < `Rom_base + `Rom_size);
     wire Ram_selected = (bus_address >= `Ram_base && bus_address < `Ram_base + `Ram_size);
-    wire Key_selected = (bus_address == `Key_base);
+    //wire Key_selected = (bus_address == `Key_base);
     wire Art_selected = (bus_address == `Art_base || bus_address == `ArtC_base);
     wire Sdc_addr_selected = (bus_address == `Sdc_addr);
     wire Sdc_read_selected = (bus_address == `Sdc_read);
@@ -288,7 +288,7 @@ assign DRAM_CKE = 1; // always enable
         // Read
         //if (!bus_read_enable && bus_read_done==0) begin 
         if (bus_read_done==0) begin 
-            if (Key_selected) begin bus_read_data <= {32'd0, 24'd0, ascii}; bus_read_done <= 1; end
+            //if (Key_selected) begin bus_read_data <= {32'd0, 24'd0, ascii}; bus_read_done <= 1; end
 	    if (Ram_selected) begin 
 	        casez(bus_ls_type)
 	            3'b011: begin // 011Ld
