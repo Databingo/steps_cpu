@@ -209,7 +209,8 @@ module riscv64(
 
     reg [63:0] ls_va;// = (op == 7'b0000011) ? (rs1 + w_imm_i) : (op == 7'b0100011) ? (rs1 + w_imm_s) : (op == 7'b0101111) ? rs1 : 64'h0; // load/store/atom
     //wire [63:0] pda;
-    reg [63:0] pda = 64'h0;
+    //reg [63:0] pda = 64'h0;
+    wire [63:0] pda = 64'h0;
     reg [63:0] pdat;
 
     //wire [26:0] data_vpn = ls_va[38:12];
@@ -343,7 +344,8 @@ module riscv64(
                 //else if (tlb_vld[6] && tlb_vpn[6] == data_vpn) begin tlb_d_hit <= 1; data_ppn<=tlb_ppn[6]; end
                 //else if (tlb_vld[7] && tlb_vpn[7] == data_vpn) begin tlb_d_hit <= 1; data_ppn<=tlb_ppn[7]; end
 		//if hit
-		if (pdat == ls_va) begin pda <= ls_va; bubble <= 0; tlb <= 0; end
+		//if (pdat == ls_va) begin pda <= ls_va; bubble <= 0; tlb <= 0; end
+		if (pdat == ls_va) begin bubble <= 0; tlb <= 0; end
 		//if (pdat == ls_va) begin pda <= pdat; bubble <= 0; tlb <= 0; end
 		//if not hit trap to mmu_da
 
