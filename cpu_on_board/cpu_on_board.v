@@ -107,8 +107,8 @@ assign DRAM_CKE = 1; // always enable
     //wire bubble;
     // IR_LD BRAM Port A read
     always @(posedge CLOCK_50 or negedge KEY0) begin 
-	if (!KEY0) ir_bd <= 32'h00000013; // NOP:addi x0, x0, 0
-	else ir_bd <= Cache[ppc>>2]; 
+//	if (!KEY0) ir_bd <= 32'h00000013; // NOP:addi x0, x0, 0
+	ir_bd <= Cache[ppc>>2]; 
     end
     wire [31:0] ir_ld; assign ir_ld = {ir_bd[7:0], ir_bd[15:8], ir_bd[23:16], ir_bd[31:24]}; // Endianness swap
     assign LEDR_PC = ppc/4;
@@ -142,24 +142,24 @@ assign DRAM_CKE = 1; // always enable
         .bus_write_done(bus_write_done)
     );
 
-    // -- Keyboard -- 
-    reg [7:0] ascii;
-    reg [7:0] scan;
-    reg key_pressed_delay;
-    wire key_pressed;
-    wire key_released;
+    //// -- Keyboard -- 
+    //reg [7:0] ascii;
+    //reg [7:0] scan;
+    //reg key_pressed_delay;
+    //wire key_pressed;
+    //wire key_released;
 
-    ps2_decoder ps2_decoder_inst (
-        .clk(CLOCK_50),
-        .ps2_clk_async(PS2_CLK),
-        .ps2_data_async(PS2_DAT),
-        .scan_code(scan),
-        .ascii_code(ascii),
-        .key_pressed(key_pressed),
-        .key_released(key_released)
-     );
-    always @(posedge CLOCK_50) begin key_pressed_delay <= key_pressed; end
-    wire key_pressed_edge = key_pressed && !key_pressed_delay;
+    //ps2_decoder ps2_decoder_inst (
+    //    .clk(CLOCK_50),
+    //    .ps2_clk_async(PS2_CLK),
+    //    .ps2_data_async(PS2_DAT),
+    //    .scan_code(scan),
+    //    .ascii_code(ascii),
+    //    .key_pressed(key_pressed),
+    //    .key_released(key_released)
+    // );
+    //always @(posedge CLOCK_50) begin key_pressed_delay <= key_pressed; end
+    //wire key_pressed_edge = key_pressed && !key_pressed_delay;
 
     // -- Monitor -- Connected to Bus
     reg uart_write_pulse;
@@ -566,7 +566,7 @@ end
     );
 
     // Debug LEDs
-    assign HEX30 = ~Key_selected;
+    //assign HEX30 = ~Key_selected;
     assign HEX20 = ~|bus_read_data;
     assign HEX21 = ~bus_read_enable;
     assign HEX10 = ~|bus_write_data;

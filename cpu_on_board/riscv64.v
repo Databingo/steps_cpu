@@ -294,7 +294,6 @@ module riscv64(
 	    Csrs[mideleg] <= 64'h0222; // delegate to S-mode 0000001000100010 see VII 3.1.15 mcasue interrupt 1/5/9 SSIP(supervisor software interrupt) STIP(time) SEIP(external)
 	    mmu_pc <= 0;
 	    mmu_da <= 0;
-	    mmu_cache_refill <= 0;
             reserve_addr <= 0;
             reserve_valid <= 0;
 	    pda <= 64'h0;
