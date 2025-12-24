@@ -94,23 +94,19 @@ assign DRAM_CKE = 1; // always enable
         $readmemb("ram.mif", Cache, `Ram_base>>2);
     end
 
-//    // -- Clock --
-//    wire clock_1hz;
-//    clock_slower clock_ins(
-//        .clk_in(CLOCK_50),
-//        .clk_out(clock_1hz),
-//        .reset_n(KEY0)
-//    );
+    // -- Clock --
+    wire clock_1hz;
+    clock_slower clock_ins(
+        .clk_in(CLOCK_50),
+        .clk_out(clock_1hz),
+        .reset_n(KEY0)
+    );
 
     wire [63:0] ppc;
     reg [31:0] ir_bd;
     //wire bubble;
     // IR_LD BRAM Port A read
-    //always @(posedge CLOCK_50 or negedge KEY0) begin 
-    always @(posedge CLOCK_50) begin 
-//	if (!KEY0) ir_bd <= 32'h00000013; // NOP:addi x0, x0, 0
-	ir_bd <= Cache[ppc>>2]; 
-    end
+    always @(posedge CLOCK_50) begin ir_bd <= Cache[ppc>>2]; end
     wire [31:0] ir_ld; assign ir_ld = {ir_bd[7:0], ir_bd[15:8], ir_bd[23:16], ir_bd[31:24]}; // Endianness swap
     assign LEDR_PC = ppc/4;
     assign LEDG = ir_ld;
@@ -143,24 +139,24 @@ assign DRAM_CKE = 1; // always enable
         .bus_write_done(bus_write_done)
     );
 
-    //// -- Keyboard -- 
-    //reg [7:0] ascii;
-    //reg [7:0] scan;
-    //reg key_pressed_delay;
-    //wire key_pressed;
-    //wire key_released;
+    // -- Keyboard -- 
+    reg [7:0] ascii;
+    reg [7:0] scan;
+    reg key_pressed_delay;
+    wire key_pressed;
+    wire key_released;
 
-    //ps2_decoder ps2_decoder_inst (
-    //    .clk(CLOCK_50),
-    //    .ps2_clk_async(PS2_CLK),
-    //    .ps2_data_async(PS2_DAT),
-    //    .scan_code(scan),
-    //    .ascii_code(ascii),
-    //    .key_pressed(key_pressed),
-    //    .key_released(key_released)
-    // );
-    //always @(posedge CLOCK_50) begin key_pressed_delay <= key_pressed; end
-    //wire key_pressed_edge = key_pressed && !key_pressed_delay;
+    ps2_decoder ps2_decoder_inst (
+        .clk(CLOCK_50),
+        .ps2_clk_async(PS2_CLK),
+        .ps2_data_async(PS2_DAT),
+        .scan_code(scan),
+        .ascii_code(ascii),
+        .key_pressed(key_pressed),
+        .key_released(key_released)
+     );
+    always @(posedge CLOCK_50) begin key_pressed_delay <= key_pressed; end
+    wire key_pressed_edge = key_pressed && !key_pressed_delay;
 
     // -- Monitor -- Connected to Bus
     reg uart_write_pulse;
@@ -210,7 +206,7 @@ assign DRAM_CKE = 1; // always enable
     // Address Decoding --
     wire Rom_selected = (bus_address >= `Rom_base && bus_address < `Rom_base + `Rom_size);
     wire Ram_selected = (bus_address >= `Ram_base && bus_address < `Ram_base + `Ram_size);
-    //wire Key_selected = (bus_address == `Key_base);
+    wire Key_selected = (bus_address == `Key_base);
     wire Art_selected = (bus_address == `Art_base || bus_address == `ArtC_base);
     wire Sdc_addr_selected = (bus_address == `Sdc_addr);
     wire Sdc_read_selected = (bus_address == `Sdc_read);
@@ -276,21 +272,20 @@ assign DRAM_CKE = 1; // always enable
 	end else begin
         bus_address_reg <= bus_address>>2;
         bus_address_reg_full <= bus_address;
-        //sd_rd_start <= 0;
+        sd_rd_start <= 0;
         uart_write_pulse <= 0;
 	uart_read_pulse <= 0;
 	uart_irq_pre <= uart_irq;
 	if (uart_irq && !uart_irq_pre) Plic_pending[1] <= 1;
 	//if (key_pressed_edge) Plic_pending[1] <= 1;
 
-        //if (bus_read_enable) begin bus_read_done <= 0; cid <= (bus_address-`Sdc_base); end 
-        if (bus_read_enable) begin bus_read_done <= 0; end 
+        if (bus_read_enable) begin bus_read_done <= 0; cid <= (bus_address-`Sdc_base); end 
         if (bus_write_enable) begin bus_write_done <= 0; end
 
         // Read
         //if (!bus_read_enable && bus_read_done==0) begin 
         if (bus_read_done==0) begin 
-            //if (Key_selected) begin bus_read_data <= {32'd0, 24'd0, ascii}; bus_read_done <= 1; end
+            if (Key_selected) begin bus_read_data <= {32'd0, 24'd0, ascii}; bus_read_done <= 1; end
 	    if (Ram_selected) begin 
 	        casez(bus_ls_type)
 	            3'b011: begin // 011Ld
@@ -303,9 +298,9 @@ assign DRAM_CKE = 1; // always enable
 		endcase
 	    end
 
-//            if (Sdc_ready_selected) begin bus_read_data <= {63'd0, sd_ready}; bus_read_done <= 1; end
-//	    if (Sdc_cache_selected) begin bus_read_data <= {56'd0, sd_cache[cid]}; bus_read_done <= 1; end // one byte for all load
-//            if (Sdc_avail_selected) begin bus_read_data <= {63'd0, sd_cache_available}; bus_read_done <= 1; end 
+            if (Sdc_ready_selected) begin bus_read_data <= {63'd0, sd_ready}; bus_read_done <= 1; end
+	    if (Sdc_cache_selected) begin bus_read_data <= {56'd0, sd_cache[cid]}; bus_read_done <= 1; end // one byte for all load
+            if (Sdc_avail_selected) begin bus_read_data <= {63'd0, sd_cache_available}; bus_read_done <= 1; end 
 
             if (Mtime_selected) begin bus_read_data <= mtime; bus_read_done <= 1; end 
             if (Mtimecmp_selected) begin bus_read_data <= mtimecmp; bus_read_done <= 1; end 
@@ -364,8 +359,7 @@ assign DRAM_CKE = 1; // always enable
 	            3'b011: begin // ld 
 		        case(step)
 		            0: begin sdram_addr <= bus_address[22:1]; sdram_byte_en <= 2'b11; sdram_read_en <= 1; 
-			       //if (sdram_req_wait==0) begin sdram_read_en <= 0; bus_read_data<= {48'b0, sdram_rddata[15:0]};bus_read_done <= 0; step <=1; end end
-			       if (sdram_req_wait==0) begin sdram_read_en <= 0; bus_read_data[15:0]  <= sdram_rddata[15:0]; bus_read_done <= 0; step <=1; end end
+			       if (sdram_req_wait==0) begin sdram_read_en <= 0; bus_read_data<= {48'b0, sdram_rddata[15:0]};bus_read_done <= 0; step <=1; end end
 		            1: begin sdram_addr <= bus_address[22:1]+1; sdram_byte_en <= 2'b11; sdram_read_en <= 1; 
 			       if (sdram_req_wait==0) begin sdram_read_en <= 0; bus_read_data[31:16] <= sdram_rddata[15:0]; bus_read_done <= 0; step <=2; end end
 		            2: begin sdram_addr <= bus_address[22:1]+2; sdram_byte_en <= 2'b11; sdram_read_en <= 1; 
@@ -379,15 +373,15 @@ assign DRAM_CKE = 1; // always enable
 	    end
             // Plic read
 	    if (Plic_priority_selected) begin bus_read_data <= Plic_priority[plic_id]; bus_read_done <= 1; end
-	    if (Plic_pending_selected) begin bus_read_data <= Plic_pending; bus_read_done <= 1; end
+	    else if (Plic_pending_selected) begin bus_read_data <= Plic_pending; bus_read_done <= 1; end
 	    // context 0 M-mode
-	    if (Plic_enable_ctx0_selected) begin bus_read_data <= Plic_enable[0]; bus_read_done <= 1; end
-	    if (Plic_threshold_ctx0_selected) begin bus_read_data <= Plic_threshold[0]; bus_read_done <= 1; end
-	    if (Plic_claim_ctx0_selected) begin bus_read_data <= claim_interrupt_id_ctx[0]; Plic_pending[claim_interrupt_id_ctx[0]]<=0; bus_read_done <= 1; end
+	    else if (Plic_enable_ctx0_selected) begin bus_read_data <= Plic_enable[0]; bus_read_done <= 1; end
+	    else if (Plic_threshold_ctx0_selected) begin bus_read_data <= Plic_threshold[0]; bus_read_done <= 1; end
+	    else if (Plic_claim_ctx0_selected) begin bus_read_data <= claim_interrupt_id_ctx[0]; Plic_pending[claim_interrupt_id_ctx[0]]<=0; bus_read_done <= 1; end
 	    // context 1 S-mode
-	    if (Plic_enable_ctx1_selected) begin bus_read_data <= Plic_enable[1]; bus_read_done <= 1; end
-	    if (Plic_threshold_ctx1_selected) begin bus_read_data <= Plic_threshold[1]; bus_read_done <= 1; end
-	    if (Plic_claim_ctx1_selected) begin bus_read_data <= claim_interrupt_id_ctx[1]; Plic_pending[claim_interrupt_id_ctx[1]]<=0; bus_read_done <= 1; end
+	    else if (Plic_enable_ctx1_selected) begin bus_read_data <= Plic_enable[1]; bus_read_done <= 1; end
+	    else if (Plic_threshold_ctx1_selected) begin bus_read_data <= Plic_threshold[1]; bus_read_done <= 1; end
+	    else if (Plic_claim_ctx1_selected) begin bus_read_data <= claim_interrupt_id_ctx[1]; Plic_pending[claim_interrupt_id_ctx[1]]<=0; bus_read_done <= 1; end
 
 
         end
@@ -419,8 +413,8 @@ assign DRAM_CKE = 1; // always enable
 	        endcase
 	    end
 
-//	    if (Sdc_addr_selected) begin sd_addr <= bus_write_data[31:0]; bus_write_done <= 1; end
-//	    if (Sdc_read_selected) begin sd_rd_start <= 1; bus_write_done <= 1; end
+	    if (Sdc_addr_selected) begin sd_addr <= bus_write_data[31:0]; bus_write_done <= 1; end
+	    if (Sdc_read_selected) begin sd_rd_start <= 1; bus_write_done <= 1; end
 
 	    //if (Art_selected) begin uart_write_pulse <= 1; bus_write_done <=1; end
 	    if (Art_selected) begin 
@@ -472,7 +466,7 @@ assign DRAM_CKE = 1; // always enable
 		    end
 		    3'b011: begin //sd
 		        case(step)
-		            0: begin sdram_addr <= bus_address[22:1];   sdram_wrdata <= bus_write_data[15:0];  sdram_write_en <= 1; sdram_byte_en <= 2'b11;
+		            0: begin sdram_addr <= bus_address[22:1]; sdram_wrdata <= bus_write_data[15:0]; sdram_write_en <= 1; sdram_byte_en <= 2'b11;
 			       if (sdram_req_wait==0) begin sdram_write_en <= 0; bus_write_done <= 0; step <= 1; end end
 		            1: begin sdram_addr <= bus_address[22:1]+1; sdram_wrdata <= bus_write_data[31:16]; sdram_write_en <= 1; sdram_byte_en <= 2'b11;
 			       if (sdram_req_wait==0) begin sdram_write_en <= 0; bus_write_done <= 0; step <= 2; end end
@@ -491,85 +485,85 @@ assign DRAM_CKE = 1; // always enable
     end
 end
 
-//    // -- SD Card --
-//    //wire [11:0] cid = (bus_address-`Sdc_base);
-//    reg [11:0] cid;
-//    //reg [7:0] sd_cache [0:511];
-//    (* ram_style = "block" *) reg [7:0] sd_cache [0:511];
-//    reg [9:0] byte_index = 0;
-//    reg sd_cache_available = 0;
-//    reg sd_byte_available_d = 0;
-//    reg do_read = 0;
-//    wire [4:0] sd_status;
-//    always @(posedge CLOCK_50 or negedge KEY0) begin
-//	if (!KEY0) begin
-//	    //sd_rd_start <= 0;
-//	    byte_index <= 0;
-//	    do_read <=0;
-//	    sd_cache_available <= 0;
-//	    //sd_byte_available <= 0;
-//	    sd_byte_available_d <= 0;
-//	end
-//	else begin
-//	    //sd_cache_available <= 0;
-//            sd_byte_available_d  <= sd_byte_available;
-//            if (sd_byte_available && !sd_byte_available_d) begin
-//	        sd_cache[byte_index] <= sd_dout;
-//	        byte_index <= byte_index + 1;
-//	        do_read <=1;
-//	    end
-//	    if (byte_index == 10) sd_cache_available <= 0;
-//	    //if (do_read && sd_status !=6) begin 
-//	    if (byte_index == 512) begin 
-//	        //sd_rd_start <= 0;
-//	        byte_index <= 0;
-//	        do_read <=0;
-//	        sd_cache_available <= 1;
-//	    end
-//        end
-//    end
-//
-//    // Slow pulse clock for SD init (~100 kHz)
-//    reg [8:0] clkdiv = 0;
-//    always @(posedge CLOCK_50 or negedge KEY0) begin
-//        if (!KEY0) clkdiv <= 0;
-//        else clkdiv <= clkdiv + 1;
-//    end
-//    wire clk_pulse_slow = (clkdiv == 0);
-//
-//    // SD Controller Bridge
-//    reg [31:0] sd_addr = 0;           // Sector address
-//    reg sd_rd_start;                  // Trigger rd
-//
-//    wire [7:0] sd_dout;
-//    wire sd_ready;
-//    wire sd_byte_available;
-//
-//    // SD Controller Instantiation
-//    sd_controller sdctrl (
-//        .cs(SD_DAT3),
-//        .mosi(SD_CMD),
-//        .miso(SD_DAT0),
-//        .sclk(SD_CLK),
-//
-//        .rd(sd_rd_start),
-//        .wr(1'b0),
-//        .dout(sd_dout),
-//        .byte_available(sd_byte_available),
-//
-//        .din(8'd0),
-//        .ready_for_next_byte(),
-//        .reset(~KEY0),
-//        .ready(sd_ready),
-//        .address(sd_addr),
-//        .clk(CLOCK_50),
-//        .clk_pulse_slow(clk_pulse_slow),
-//        .status(sd_status),
-//        .recv_data()
-//    );
-//
+    // -- SD Card --
+    //wire [11:0] cid = (bus_address-`Sdc_base);
+    reg [11:0] cid;
+    //reg [7:0] sd_cache [0:511];
+    (* ram_style = "block" *) reg [7:0] sd_cache [0:511];
+    reg [9:0] byte_index = 0;
+    reg sd_cache_available = 0;
+    reg sd_byte_available_d = 0;
+    reg do_read = 0;
+    wire [4:0] sd_status;
+    always @(posedge CLOCK_50 or negedge KEY0) begin
+	if (!KEY0) begin
+	    //sd_rd_start <= 0;
+	    byte_index <= 0;
+	    do_read <=0;
+	    sd_cache_available <= 0;
+	    //sd_byte_available <= 0;
+	    sd_byte_available_d <= 0;
+	end
+	else begin
+	    //sd_cache_available <= 0;
+            sd_byte_available_d  <= sd_byte_available;
+            if (sd_byte_available && !sd_byte_available_d) begin
+	        sd_cache[byte_index] <= sd_dout;
+	        byte_index <= byte_index + 1;
+	        do_read <=1;
+	    end
+	    if (byte_index == 10) sd_cache_available <= 0;
+	    //if (do_read && sd_status !=6) begin 
+	    if (byte_index == 512) begin 
+	        //sd_rd_start <= 0;
+	        byte_index <= 0;
+	        do_read <=0;
+	        sd_cache_available <= 1;
+	    end
+        end
+    end
+
+    // Slow pulse clock for SD init (~100 kHz)
+    reg [8:0] clkdiv = 0;
+    always @(posedge CLOCK_50 or negedge KEY0) begin
+        if (!KEY0) clkdiv <= 0;
+        else clkdiv <= clkdiv + 1;
+    end
+    wire clk_pulse_slow = (clkdiv == 0);
+
+    // SD Controller Bridge
+    reg [31:0] sd_addr = 0;           // Sector address
+    reg sd_rd_start;                  // Trigger rd
+
+    wire [7:0] sd_dout;
+    wire sd_ready;
+    wire sd_byte_available;
+
+    // SD Controller Instantiation
+    sd_controller sdctrl (
+        .cs(SD_DAT3),
+        .mosi(SD_CMD),
+        .miso(SD_DAT0),
+        .sclk(SD_CLK),
+
+        .rd(sd_rd_start),
+        .wr(1'b0),
+        .dout(sd_dout),
+        .byte_available(sd_byte_available),
+
+        .din(8'd0),
+        .ready_for_next_byte(),
+        .reset(~KEY0),
+        .ready(sd_ready),
+        .address(sd_addr),
+        .clk(CLOCK_50),
+        .clk_pulse_slow(clk_pulse_slow),
+        .status(sd_status),
+        .recv_data()
+    );
+
     // Debug LEDs
-    //assign HEX30 = ~Key_selected;
+    assign HEX30 = ~Key_selected;
     assign HEX20 = ~|bus_read_data;
     assign HEX21 = ~bus_read_enable;
     assign HEX10 = ~|bus_write_data;
