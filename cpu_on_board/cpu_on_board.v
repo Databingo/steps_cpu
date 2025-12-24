@@ -276,14 +276,15 @@ assign DRAM_CKE = 1; // always enable
 	end else begin
         bus_address_reg <= bus_address>>2;
         bus_address_reg_full <= bus_address;
-        sd_rd_start <= 0;
+        //sd_rd_start <= 0;
         uart_write_pulse <= 0;
 	uart_read_pulse <= 0;
 	uart_irq_pre <= uart_irq;
 	if (uart_irq && !uart_irq_pre) Plic_pending[1] <= 1;
 	//if (key_pressed_edge) Plic_pending[1] <= 1;
 
-        if (bus_read_enable) begin bus_read_done <= 0; cid <= (bus_address-`Sdc_base); end 
+        //if (bus_read_enable) begin bus_read_done <= 0; cid <= (bus_address-`Sdc_base); end 
+        if (bus_read_enable) begin bus_read_done <= 0; end 
         if (bus_write_enable) begin bus_write_done <= 0; end
 
         // Read
