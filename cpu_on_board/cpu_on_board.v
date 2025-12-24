@@ -94,13 +94,13 @@ assign DRAM_CKE = 1; // always enable
         $readmemb("ram.mif", Cache, `Ram_base>>2);
     end
 
-    // -- Clock --
-    wire clock_1hz;
-    clock_slower clock_ins(
-        .clk_in(CLOCK_50),
-        .clk_out(clock_1hz),
-        .reset_n(KEY0)
-    );
+//    // -- Clock --
+//    wire clock_1hz;
+//    clock_slower clock_ins(
+//        .clk_in(CLOCK_50),
+//        .clk_out(clock_1hz),
+//        .reset_n(KEY0)
+//    );
 
     wire [63:0] ppc;
     reg [31:0] ir_bd;
@@ -302,9 +302,9 @@ assign DRAM_CKE = 1; // always enable
 		endcase
 	    end
 
-            if (Sdc_ready_selected) begin bus_read_data <= {63'd0, sd_ready}; bus_read_done <= 1; end
-	    if (Sdc_cache_selected) begin bus_read_data <= {56'd0, sd_cache[cid]}; bus_read_done <= 1; end // one byte for all load
-            if (Sdc_avail_selected) begin bus_read_data <= {63'd0, sd_cache_available}; bus_read_done <= 1; end 
+//            if (Sdc_ready_selected) begin bus_read_data <= {63'd0, sd_ready}; bus_read_done <= 1; end
+//	    if (Sdc_cache_selected) begin bus_read_data <= {56'd0, sd_cache[cid]}; bus_read_done <= 1; end // one byte for all load
+//            if (Sdc_avail_selected) begin bus_read_data <= {63'd0, sd_cache_available}; bus_read_done <= 1; end 
 
             if (Mtime_selected) begin bus_read_data <= mtime; bus_read_done <= 1; end 
             if (Mtimecmp_selected) begin bus_read_data <= mtimecmp; bus_read_done <= 1; end 
@@ -418,8 +418,8 @@ assign DRAM_CKE = 1; // always enable
 	        endcase
 	    end
 
-	    if (Sdc_addr_selected) begin sd_addr <= bus_write_data[31:0]; bus_write_done <= 1; end
-	    if (Sdc_read_selected) begin sd_rd_start <= 1; bus_write_done <= 1; end
+//	    if (Sdc_addr_selected) begin sd_addr <= bus_write_data[31:0]; bus_write_done <= 1; end
+//	    if (Sdc_read_selected) begin sd_rd_start <= 1; bus_write_done <= 1; end
 
 	    //if (Art_selected) begin uart_write_pulse <= 1; bus_write_done <=1; end
 	    if (Art_selected) begin 
@@ -490,83 +490,83 @@ assign DRAM_CKE = 1; // always enable
     end
 end
 
-    // -- SD Card --
-    //wire [11:0] cid = (bus_address-`Sdc_base);
-    reg [11:0] cid;
-    //reg [7:0] sd_cache [0:511];
-    (* ram_style = "block" *) reg [7:0] sd_cache [0:511];
-    reg [9:0] byte_index = 0;
-    reg sd_cache_available = 0;
-    reg sd_byte_available_d = 0;
-    reg do_read = 0;
-    wire [4:0] sd_status;
-    always @(posedge CLOCK_50 or negedge KEY0) begin
-	if (!KEY0) begin
-	    //sd_rd_start <= 0;
-	    byte_index <= 0;
-	    do_read <=0;
-	    sd_cache_available <= 0;
-	    //sd_byte_available <= 0;
-	    sd_byte_available_d <= 0;
-	end
-	else begin
-	    //sd_cache_available <= 0;
-            sd_byte_available_d  <= sd_byte_available;
-            if (sd_byte_available && !sd_byte_available_d) begin
-	        sd_cache[byte_index] <= sd_dout;
-	        byte_index <= byte_index + 1;
-	        do_read <=1;
-	    end
-	    if (byte_index == 10) sd_cache_available <= 0;
-	    //if (do_read && sd_status !=6) begin 
-	    if (byte_index == 512) begin 
-	        //sd_rd_start <= 0;
-	        byte_index <= 0;
-	        do_read <=0;
-	        sd_cache_available <= 1;
-	    end
-        end
-    end
-
-    // Slow pulse clock for SD init (~100 kHz)
-    reg [8:0] clkdiv = 0;
-    always @(posedge CLOCK_50 or negedge KEY0) begin
-        if (!KEY0) clkdiv <= 0;
-        else clkdiv <= clkdiv + 1;
-    end
-    wire clk_pulse_slow = (clkdiv == 0);
-
-    // SD Controller Bridge
-    reg [31:0] sd_addr = 0;           // Sector address
-    reg sd_rd_start;                  // Trigger rd
-
-    wire [7:0] sd_dout;
-    wire sd_ready;
-    wire sd_byte_available;
-
-    // SD Controller Instantiation
-    sd_controller sdctrl (
-        .cs(SD_DAT3),
-        .mosi(SD_CMD),
-        .miso(SD_DAT0),
-        .sclk(SD_CLK),
-
-        .rd(sd_rd_start),
-        .wr(1'b0),
-        .dout(sd_dout),
-        .byte_available(sd_byte_available),
-
-        .din(8'd0),
-        .ready_for_next_byte(),
-        .reset(~KEY0),
-        .ready(sd_ready),
-        .address(sd_addr),
-        .clk(CLOCK_50),
-        .clk_pulse_slow(clk_pulse_slow),
-        .status(sd_status),
-        .recv_data()
-    );
-
+//    // -- SD Card --
+//    //wire [11:0] cid = (bus_address-`Sdc_base);
+//    reg [11:0] cid;
+//    //reg [7:0] sd_cache [0:511];
+//    (* ram_style = "block" *) reg [7:0] sd_cache [0:511];
+//    reg [9:0] byte_index = 0;
+//    reg sd_cache_available = 0;
+//    reg sd_byte_available_d = 0;
+//    reg do_read = 0;
+//    wire [4:0] sd_status;
+//    always @(posedge CLOCK_50 or negedge KEY0) begin
+//	if (!KEY0) begin
+//	    //sd_rd_start <= 0;
+//	    byte_index <= 0;
+//	    do_read <=0;
+//	    sd_cache_available <= 0;
+//	    //sd_byte_available <= 0;
+//	    sd_byte_available_d <= 0;
+//	end
+//	else begin
+//	    //sd_cache_available <= 0;
+//            sd_byte_available_d  <= sd_byte_available;
+//            if (sd_byte_available && !sd_byte_available_d) begin
+//	        sd_cache[byte_index] <= sd_dout;
+//	        byte_index <= byte_index + 1;
+//	        do_read <=1;
+//	    end
+//	    if (byte_index == 10) sd_cache_available <= 0;
+//	    //if (do_read && sd_status !=6) begin 
+//	    if (byte_index == 512) begin 
+//	        //sd_rd_start <= 0;
+//	        byte_index <= 0;
+//	        do_read <=0;
+//	        sd_cache_available <= 1;
+//	    end
+//        end
+//    end
+//
+//    // Slow pulse clock for SD init (~100 kHz)
+//    reg [8:0] clkdiv = 0;
+//    always @(posedge CLOCK_50 or negedge KEY0) begin
+//        if (!KEY0) clkdiv <= 0;
+//        else clkdiv <= clkdiv + 1;
+//    end
+//    wire clk_pulse_slow = (clkdiv == 0);
+//
+//    // SD Controller Bridge
+//    reg [31:0] sd_addr = 0;           // Sector address
+//    reg sd_rd_start;                  // Trigger rd
+//
+//    wire [7:0] sd_dout;
+//    wire sd_ready;
+//    wire sd_byte_available;
+//
+//    // SD Controller Instantiation
+//    sd_controller sdctrl (
+//        .cs(SD_DAT3),
+//        .mosi(SD_CMD),
+//        .miso(SD_DAT0),
+//        .sclk(SD_CLK),
+//
+//        .rd(sd_rd_start),
+//        .wr(1'b0),
+//        .dout(sd_dout),
+//        .byte_available(sd_byte_available),
+//
+//        .din(8'd0),
+//        .ready_for_next_byte(),
+//        .reset(~KEY0),
+//        .ready(sd_ready),
+//        .address(sd_addr),
+//        .clk(CLOCK_50),
+//        .clk_pulse_slow(clk_pulse_slow),
+//        .status(sd_status),
+//        .recv_data()
+//    );
+//
     // Debug LEDs
     //assign HEX30 = ~Key_selected;
     assign HEX20 = ~|bus_read_data;
