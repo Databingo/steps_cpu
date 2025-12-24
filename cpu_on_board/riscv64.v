@@ -281,6 +281,9 @@ module riscv64(
         for (i=0;i<32;i=i+1) begin re[i]<= 64'b0; end
         for (i=0;i<10;i=i+1) begin sre[i]<= 64'b0; end
         for (i=0;i<32;i=i+1) begin Csrs[i]<= 64'b0; end
+	for (i=0;i<8;i=i+1) begin tlb_vpn[i]<= 27'h0; end
+	for (i=0;i<8;i=i+1) begin tlb_ppn[i]<= 44'h0; end
+	for (i=0;i<8;i=i+1) begin tlb_vld[i]<= 1'h0; end
     end
 
     // EXE Instruction 
@@ -340,8 +343,8 @@ module riscv64(
                 //else if (tlb_vld[6] && tlb_vpn[6] == data_vpn) begin tlb_d_hit <= 1; data_ppn<=tlb_ppn[6]; end
                 //else if (tlb_vld[7] && tlb_vpn[7] == data_vpn) begin tlb_d_hit <= 1; data_ppn<=tlb_ppn[7]; end
 		//if hit
-		//if (pdat == ls_va) begin pda <= ls_va; bubble <= 0; tlb <= 0; end
-		if (pdat == ls_va) begin pda <= pdat; bubble <= 0; tlb <= 0; end
+		if (pdat == ls_va) begin pda <= ls_va; bubble <= 0; tlb <= 0; end
+		//if (pdat == ls_va) begin pda <= pdat; bubble <= 0; tlb <= 0; end
 		//if not hit trap to mmu_da
 
             // Bubble
