@@ -277,6 +277,11 @@ module riscv64(
     //        ir = instruction;
     //    end
     //end
+    initial begin
+        for (i=0;i<32;i=i+1) begin re[i]<= 64'b0; end
+        for (i=0;i<10;i=i+1) begin sre[i]<= 64'b0; end
+        for (i=0;i<32;i=i+1) begin Csrs[i]<= 64'b0; end
+    end
 
     // EXE Instruction 
     always @(posedge clk or negedge reset) begin
@@ -293,9 +298,6 @@ module riscv64(
             // Interrupt re-enable
 	    Csrs[mstatus][MIE] <= 0;
 	    //interrupt_ack <= 0;
-	    for (i=0;i<10;i=i+1) begin sre[i]<= 64'b0; end
-	    for (i=0;i<32;i=i+1) begin Csrs[i]<= 64'b0; end
-	    for (i=0;i<32;i=i+1) begin re[i]<= 64'b0; end
 	    Csrs[medeleg] <= 64'hb1af; // delegate to S-mode 1011000110101111 // see VII 3.1.15 mcasue exceptions
 	    Csrs[mideleg] <= 64'h0222; // delegate to S-mode 0000001000100010 see VII 3.1.15 mcasue interrupt 1/5/9 SSIP(supervisor software interrupt) STIP(time) SEIP(external)
 	    mmu_pc <= 0;
