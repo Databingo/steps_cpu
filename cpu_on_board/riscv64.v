@@ -210,7 +210,7 @@ module riscv64(
     reg [63:0] ls_va;// = (op == 7'b0000011) ? (rs1 + w_imm_i) : (op == 7'b0100011) ? (rs1 + w_imm_s) : (op == 7'b0101111) ? rs1 : 64'h0; // load/store/atom
     //wire [63:0] pda;
     //reg [63:0] pda = 64'h0;
-    wire [63:0] pda = 64'h0;
+    wire [63:0] pda;// = 64'h0;
     reg [63:0] pdat;
 
     //wire [26:0] data_vpn = ls_va[38:12];
@@ -308,7 +308,7 @@ module riscv64(
 	    mmu_da <= 0;
             reserve_addr <= 0;
             reserve_valid <= 0;
-	    pda <= 64'h0;
+	    //pda <= 64'h0;
 	    pdat <= 64'h0;
 	    ls_va <= 64'h0;
 	    saved_user_pc <= 64'h0;
