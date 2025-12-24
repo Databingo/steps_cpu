@@ -106,7 +106,8 @@ assign DRAM_CKE = 1; // always enable
     reg [31:0] ir_bd;
     //wire bubble;
     // IR_LD BRAM Port A read
-    always @(posedge CLOCK_50 or negedge KEY0) begin 
+    //always @(posedge CLOCK_50 or negedge KEY0) begin 
+    always @(posedge CLOCK_50) begin 
 //	if (!KEY0) ir_bd <= 32'h00000013; // NOP:addi x0, x0, 0
 	ir_bd <= Cache[ppc>>2]; 
     end
