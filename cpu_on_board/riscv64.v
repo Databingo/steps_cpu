@@ -235,7 +235,7 @@ module riscv64(
     //assign pda = need_trans ? {data_ppn, ls_va[11:0]} : ls_va;
        
      //assign pda = need_trans ?  ls_va : ls_va;
-     //assign pda =  ls_va;
+     assign pda =  ls_va;
      
     // TLB Refill
     reg [2:0] tlb_ptr = 0; // 8 entries TLB
