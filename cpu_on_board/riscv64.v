@@ -203,6 +203,7 @@ module riscv64(
     end
 
     // d hit
+    reg [26:0] tlb_vpn_d [0:7]; // vpn number VA[38:12]  Sv39
     // -- directly 1:1 --
     //wire [63:0] ls_va = (op == 7'b0000011) ? (rs1 + w_imm_i) : (op == 7'b0100011) ? (rs1 + w_imm_s) : (op == 7'b0101111) ? rs1 : 0; // load/jalr/store/atom
     //wire [63:0] pda = ls_va;
@@ -318,14 +319,14 @@ module riscv64(
 	    end else if (bubble) begin bubble <= 1'b0; // Flush this cycle & Clear bubble signal for the next cycle
 
 	    end else if (hit && !mmu_pc && !mmu_da) begin
-		if (tlb_vpn[0] == ls_va[38:12]) begin pda <= ls_va; hit <= 0; bubble <= 1; pc <= pc -4; end
+		if (tlb_vpn_d[0] == ls_va[38:12]) begin pda <= ls_va; hit <= 0; bubble <= 1; pc <= pc -4; end
 		else begin
 		    mmu_da <= 1; // MMU_DA ON
 		    pc <= 28; // D-TLB refill Handler
 	 	    bubble <= 1'b1; // bubble
 	            saved_user_pc <= pc - 4; // save pc EXE l/s/a
 		    for (i=0;i<10;i=i+1) begin sre[i]<= re[i]; end // save re
-		    tlb_vpn[0] <= ls_va[38:12]; //save va to x1
+		    tlb_vpn_d[0] <= ls_va[38:12]; //save va to x1
 		    Csrs[mstatus][MPIE] <= Csrs[mstatus][MIE]; // disable interrupt during shadow mmu walking
 		    Csrs[mstatus][MIE] <= 0;
 		end
