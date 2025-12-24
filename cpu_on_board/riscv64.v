@@ -302,6 +302,10 @@ module riscv64(
 	    saved_user_pc <= 64'h0;
 	    tlb <=0;
 	    check <=0;
+	    for (i=0;i<8;i=i+1) begin tlb_vpn[i]<= 27'h0; end
+	    for (i=0;i<8;i=i+1) begin tlb_ppn[i]<= 44'h0; end
+	    for (i=0;i<8;i=i+1) begin tlb_vld[i]<= 1'h0; end
+	    //pc_ppn <= 44'h0;
 
 
         end else begin
