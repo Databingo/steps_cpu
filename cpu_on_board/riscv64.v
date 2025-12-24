@@ -325,7 +325,8 @@ module riscv64(
                 //else if (tlb_vld[6] && tlb_vpn[6] == data_vpn) begin tlb_d_hit <= 1; data_ppn<=tlb_ppn[6]; end
                 //else if (tlb_vld[7] && tlb_vpn[7] == data_vpn) begin tlb_d_hit <= 1; data_ppn<=tlb_ppn[7]; end
 		//if hit
-		if (pdat == ls_va) begin pda <= ls_va; bubble <= 0; tlb <= 0; end
+		//if (pdat == ls_va) begin pda <= ls_va; bubble <= 0; tlb <= 0; end
+		if (pdat == ls_va) begin pda <= pdat; bubble <= 0; tlb <= 0; end
 		//if not hit trap to mmu_da
 
             // Bubble
