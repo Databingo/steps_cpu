@@ -106,7 +106,10 @@ assign DRAM_CKE = 1; // always enable
     reg [31:0] ir_bd;
     //wire bubble;
     // IR_LD BRAM Port A read
-    always @(posedge CLOCK_50) begin ir_bd <= Cache[ppc>>2]; end
+    always @(posedge CLOCK_50 or negedge KEY0) begin 
+	if (!KEYO) ir_bd <= 32'h00000013; // NOP:addi x0, x0, 0
+	else ir_bd <= Cache[ppc>>2]; 
+    end
     wire [31:0] ir_ld; assign ir_ld = {ir_bd[7:0], ir_bd[15:8], ir_bd[23:16], ir_bd[31:24]}; // Endianness swap
     assign LEDR_PC = ppc/4;
     assign LEDG = ir_ld;
