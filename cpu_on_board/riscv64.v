@@ -204,10 +204,17 @@ module riscv64(
     end
 
     // d hit
-    reg [63:0] ls_va;
+    // -- directly 1:1 --
+    //wire [63:0] ls_va = (op == 7'b0000011) ? (rs1 + w_imm_i) : (op == 7'b0100011) ? (rs1 + w_imm_s) : (op == 7'b0101111) ? rs1 : 0; // load/store/atom
+    //wire [63:0] pda = ls_va;
+
+    reg [63:0] ls_va;// = (op == 7'b0000011) ? (rs1 + w_imm_i) : (op == 7'b0100011) ? (rs1 + w_imm_s) : (op == 7'b0101111) ? rs1 : 64'h0; // load/store/atom
     wire [63:0] raw_va = (op == 7'b0000011) ? (rs1 + w_imm_i) : (op == 7'b0100011) ? (rs1 + w_imm_s) : (op == 7'b0101111) ? rs1 : 64'h0; // load/store/atom
+    //wire [63:0] pda;
     wire [63:0] pda;
-    //wire [26:0] data_vpn = ls_va[38:12];
+    reg [63:0] pdat = 64'h0;
+
+    wire [26:0] data_vpn = ls_va[38:12];
     reg [43:0] data_ppn;
     reg tlb_d_hit;
     //always @(*) begin
@@ -321,15 +328,15 @@ module riscv64(
                 //for (i=0;i<8;i=i+1) begin if (data_vpn == tlb_vpn[i]) begin tlb_d_hit = 1; data_ppn=tlb_ppn[i]; bubble <= 1; pc <= pc - 4; tlb <= 0; end end
 		//XXXABCDX*^^ABCDEFHXABCDEDHXAB|01^2^3^
 		tlb_d_hit = 0;
-                if      (tlb_vld[0] && tlb_vpn[0]==ls_va[38:12]) begin tlb_d_hit <= 1; data_ppn<=tlb_ppn[0]; bubble <= 1; pc <= pc - 4; tlb <= 0; end
-                else if (tlb_vld[1] && tlb_vpn[1]==ls_va[38:12]) begin tlb_d_hit <= 1; data_ppn<=tlb_ppn[1]; bubble <= 1; pc <= pc - 4; tlb <= 0; end
-                else if (tlb_vld[2] && tlb_vpn[2]==ls_va[38:12]) begin tlb_d_hit <= 1; data_ppn<=tlb_ppn[2]; bubble <= 1; pc <= pc - 4; tlb <= 0; end
-                else if (tlb_vld[3] && tlb_vpn[3]==ls_va[38:12]) begin tlb_d_hit <= 1; data_ppn<=tlb_ppn[3]; bubble <= 1; pc <= pc - 4; tlb <= 0; end
-                else if (tlb_vld[4] && tlb_vpn[4]==ls_va[38:12]) begin tlb_d_hit <= 1; data_ppn<=tlb_ppn[4]; bubble <= 1; pc <= pc - 4; tlb <= 0; end
-                else if (tlb_vld[5] && tlb_vpn[5]==ls_va[38:12]) begin tlb_d_hit <= 1; data_ppn<=tlb_ppn[5]; bubble <= 1; pc <= pc - 4; tlb <= 0; end
-                else if (tlb_vld[6] && tlb_vpn[6]==ls_va[38:12]) begin tlb_d_hit <= 1; data_ppn<=tlb_ppn[6]; bubble <= 1; pc <= pc - 4; tlb <= 0; end
-                else if (tlb_vld[7] && tlb_vpn[7]==ls_va[38:12]) begin tlb_d_hit <= 1; data_ppn<=tlb_ppn[7]; bubble <= 1; pc <= pc - 4; tlb <= 0; end
-		else begin 
+                if (tlb_vld[0] && tlb_vpn[0] ==ls_va[38:12]) begin tlb_d_hit = 1; data_ppn=tlb_ppn[0]; bubble <= 1; pc <= pc - 4; tlb <= 0; end
+                if (tlb_vld[1] && tlb_vpn[1] ==ls_va[38:12]) begin tlb_d_hit = 1; data_ppn=tlb_ppn[1]; bubble <= 1; pc <= pc - 4; tlb <= 0; end
+                if (tlb_vld[2] && tlb_vpn[2] ==ls_va[38:12]) begin tlb_d_hit = 1; data_ppn=tlb_ppn[2]; bubble <= 1; pc <= pc - 4; tlb <= 0; end
+                if (tlb_vld[3] && tlb_vpn[3] ==ls_va[38:12]) begin tlb_d_hit = 1; data_ppn=tlb_ppn[3]; bubble <= 1; pc <= pc - 4; tlb <= 0; end
+                if (tlb_vld[4] && tlb_vpn[4] ==ls_va[38:12]) begin tlb_d_hit = 1; data_ppn=tlb_ppn[4]; bubble <= 1; pc <= pc - 4; tlb <= 0; end
+                if (tlb_vld[5] && tlb_vpn[5] ==ls_va[38:12]) begin tlb_d_hit = 1; data_ppn=tlb_ppn[5]; bubble <= 1; pc <= pc - 4; tlb <= 0; end
+                if (tlb_vld[6] && tlb_vpn[6] ==ls_va[38:12]) begin tlb_d_hit = 1; data_ppn=tlb_ppn[6]; bubble <= 1; pc <= pc - 4; tlb <= 0; end
+                if (tlb_vld[7] && tlb_vpn[7] ==ls_va[38:12]) begin tlb_d_hit = 1; data_ppn=tlb_ppn[7]; bubble <= 1; pc <= pc - 4; tlb <= 0; end
+		if (!tlb_d_hit) begin 
 		    mmu_da <= 1; // MMU_DA ON
 		    pc <= 28; // D-TLB refill Handler
 	 	    bubble <= 1'b1; // bubble
