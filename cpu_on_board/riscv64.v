@@ -325,16 +325,8 @@ module riscv64(
 		//if hit
          //     if      (tlb_vld[0] && tlb_vpn[0] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[0]; end
 	//	if (tlb_vpn_d[7] == ls_va[38:12]) begin bubble <= 1; tlb <= 0; pc <= pc - 4; end
-                for (i=0;i<=8;i=i+1) begin if (data_vpn == tlb_vld[i]) begin tlb_d_hit = 1; data_ppn=tlb_ppn[i]; bubble <= 1; pc <= pc - 4; tlb <= 0; end end
-		//if      (data_vpn == tlb_vld[0]) begin bubble <= 1; tlb <= 0; pc <= pc - 4; end
-                //else if (data_vpn == tlb_vpn[1]) begin tlb_d_hit = 1; data_ppn=tlb_ppn[1]; end
-                //else if (data_vpn == tlb_vpn[2]) begin tlb_d_hit = 1; data_ppn=tlb_ppn[2]; end
-                //else if (data_vpn == tlb_vpn[3]) begin tlb_d_hit = 1; data_ppn=tlb_ppn[3]; end
-                //else if (data_vpn == tlb_vpn[4]) begin tlb_d_hit = 1; data_ppn=tlb_ppn[4]; end
-                //else if (data_vpn == tlb_vpn[5]) begin tlb_d_hit = 1; data_ppn=tlb_ppn[5]; end
-                //else if (data_vpn == tlb_vpn[6]) begin tlb_d_hit = 1; data_ppn=tlb_ppn[6]; end
-                //else if (data_vpn == tlb_vpn[7]) begin tlb_d_hit = 1; data_ppn=tlb_ppn[7]; end
-		else begin 
+                for (i=0;i<8;i=i+1) begin if (data_vpn == tlb_vpn[i]) begin tlb_d_hit = 1; data_ppn=tlb_ppn[i]; bubble <= 1; pc <= pc - 4; tlb <= 0; end end
+		if (!tlb_d_hit) begin 
 		    mmu_da <= 1; // MMU_DA ON
 		    pc <= 28; // D-TLB refill Handler
 	 	    bubble <= 1'b1; // bubble
