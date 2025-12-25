@@ -182,6 +182,7 @@ module riscv64(
 
     // -- TLB -- 8 pages
     reg [26:0] tlb_vpn [0:7]; // vpn number VA[38:12]  Sv39
+    reg [26:0] tlb_vpn_d [0:7]; // vpn number VA[38:12]  Sv39
     reg [43:0] tlb_ppn [0:7]; // ppn number PA[55:12]
     reg tlb_vld [0:7];
 
@@ -328,7 +329,7 @@ module riscv64(
                 //else if (tlb_vld[6] && tlb_vpn[6] == data_vpn) begin tlb_d_hit <= 1; data_ppn<=tlb_ppn[6]; end
                 //else if (tlb_vld[7] && tlb_vpn[7] == data_vpn) begin tlb_d_hit <= 1; data_ppn<=tlb_ppn[7]; end
 		//if hit
-		if (tlb_vpn[7] == ls_va[38:12]) begin pda <= pdat; bubble <= 1; tlb <= 0; pc <= pc - 4; end
+		if (tlb_vpn_d[7] == ls_va[38:12]) begin pda <= pdat; bubble <= 1; tlb <= 0; pc <= pc - 4; end
 		//if not hit trap to mmu_da
 		else begin
 		    mmu_da <= 1; // MMU_DA ON
@@ -337,7 +338,7 @@ module riscv64(
 	            saved_user_pc <= pc - 4; // save pc EXE l/s/a
 		    for (i=0;i<10;i=i+1) begin sre[i]<= re[i]; end // save re
 		    re[9] <= ls_va; //save va to x1
-		    tlb_vpn[7] <= ls_va[38:12];
+		    tlb_vpn_d[7] <= ls_va[38:12];
 		    Csrs[mstatus][MPIE] <= Csrs[mstatus][MIE]; // disable interrupt during shadow mmu walking
 		    Csrs[mstatus][MIE] <= 0;
 		end
