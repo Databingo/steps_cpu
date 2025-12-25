@@ -331,7 +331,7 @@ module riscv64(
 	            saved_user_pc <= pc - 4; // save pc EXE l/s/a
 		    for (i=0;i<10;i=i+1) begin sre[i]<= re[i]; end // save re
 		    re[9] <= ls_va; //save va to x1
-                    tlb_vpn_d[7] == ls_va[38:12];
+                    tlb_vpn_d[7] <= ls_va[38:12];
 		    //if (op == 7'b0000011) re[9] <= rs1 + w_imm_i;
 		    //if (op == 7'b0100011) re[9] <= rs1 + w_imm_s;
 		    //if (op == 7'b0101111) re[9] <= rs1;
