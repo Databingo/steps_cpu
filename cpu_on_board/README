@@ -296,3 +296,4 @@ b74f2763c4afba28153d50f3870e4da67235f90e use hit to check simple hit ok
 29b2ee3ad11684e4f6689fdb172800baec9691d2 use if hi successful ok
 2024e0d7c1dfef6d38601d1fbfd2148bc9f85e34 load/store for ls_va/check/hit ok
 b23ce398200c10d3d6bc1cecf24f8cc5ad5c1e53 back to pc-4 if hit successful ok
+b7703c3ab89361fb2d5ca15254b82e93a6afee4c pc-4/uni_check/mmu_pc/mmu_da/raw_step/PLIC ok
