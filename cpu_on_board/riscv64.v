@@ -326,15 +326,17 @@ module riscv64(
          //     if      (tlb_vld[0] && tlb_vpn[0] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[0]; end
 	//	if (tlb_vpn_d[7] == ls_va[38:12]) begin bubble <= 1; tlb <= 0; pc <= pc - 4; end
                 //for (i=0;i<8;i=i+1) begin if (data_vpn == tlb_vpn[i]) begin tlb_d_hit = 1; data_ppn=tlb_ppn[i]; bubble <= 1; pc <= pc - 4; tlb <= 0; end end
-                if      (tlb_vld[0] && tlb_vpn[0] == data_vpn) begin tlb_d_hit <= 1; data_ppn<=tlb_ppn[0]; bubble <= 1; pc <= pc - 4; tlb <= 0; end
-                else if (tlb_vld[1] && tlb_vpn[1] == data_vpn) begin tlb_d_hit <= 1; data_ppn<=tlb_ppn[1]; bubble <= 1; pc <= pc - 4; tlb <= 0; end
-                else if (tlb_vld[2] && tlb_vpn[2] == data_vpn) begin tlb_d_hit <= 1; data_ppn<=tlb_ppn[2]; bubble <= 1; pc <= pc - 4; tlb <= 0; end
-                else if (tlb_vld[3] && tlb_vpn[3] == data_vpn) begin tlb_d_hit <= 1; data_ppn<=tlb_ppn[3]; bubble <= 1; pc <= pc - 4; tlb <= 0; end
-                else if (tlb_vld[4] && tlb_vpn[4] == data_vpn) begin tlb_d_hit <= 1; data_ppn<=tlb_ppn[4]; bubble <= 1; pc <= pc - 4; tlb <= 0; end
-                else if (tlb_vld[5] && tlb_vpn[5] == data_vpn) begin tlb_d_hit <= 1; data_ppn<=tlb_ppn[5]; bubble <= 1; pc <= pc - 4; tlb <= 0; end
-                else if (tlb_vld[6] && tlb_vpn[6] == data_vpn) begin tlb_d_hit <= 1; data_ppn<=tlb_ppn[6]; bubble <= 1; pc <= pc - 4; tlb <= 0; end
-                else if (tlb_vld[7] && tlb_vpn[7] == data_vpn) begin tlb_d_hit <= 1; data_ppn<=tlb_ppn[7]; bubble <= 1; pc <= pc - 4; tlb <= 0; end
-		else begin 
+		//XXXABCDX*^^ABCDEFHXABCDEDHXAB|01^2^3^
+		tlb_d_hit = 0;
+                if (tlb_vld[0] && tlb_vpn[0] ==ls_va[38:12]) begin tlb_d_hit = 1; data_ppn=tlb_ppn[0]; bubble <= 1; pc <= pc - 4; tlb <= 0; end
+                if (tlb_vld[1] && tlb_vpn[1] ==ls_va[38:12]) begin tlb_d_hit = 1; data_ppn=tlb_ppn[1]; bubble <= 1; pc <= pc - 4; tlb <= 0; end
+                if (tlb_vld[2] && tlb_vpn[2] ==ls_va[38:12]) begin tlb_d_hit = 1; data_ppn=tlb_ppn[2]; bubble <= 1; pc <= pc - 4; tlb <= 0; end
+                if (tlb_vld[3] && tlb_vpn[3] ==ls_va[38:12]) begin tlb_d_hit = 1; data_ppn=tlb_ppn[3]; bubble <= 1; pc <= pc - 4; tlb <= 0; end
+                if (tlb_vld[4] && tlb_vpn[4] ==ls_va[38:12]) begin tlb_d_hit = 1; data_ppn=tlb_ppn[4]; bubble <= 1; pc <= pc - 4; tlb <= 0; end
+                if (tlb_vld[5] && tlb_vpn[5] ==ls_va[38:12]) begin tlb_d_hit = 1; data_ppn=tlb_ppn[5]; bubble <= 1; pc <= pc - 4; tlb <= 0; end
+                if (tlb_vld[6] && tlb_vpn[6] ==ls_va[38:12]) begin tlb_d_hit = 1; data_ppn=tlb_ppn[6]; bubble <= 1; pc <= pc - 4; tlb <= 0; end
+                if (tlb_vld[7] && tlb_vpn[7] ==ls_va[38:12]) begin tlb_d_hit = 1; data_ppn=tlb_ppn[7]; bubble <= 1; pc <= pc - 4; tlb <= 0; end
+		if (!tlb_d_hit) begin 
 		    mmu_da <= 1; // MMU_DA ON
 		    pc <= 28; // D-TLB refill Handler
 	 	    bubble <= 1'b1; // bubble
@@ -362,7 +364,7 @@ module riscv64(
 		pc <= pc - 4; // recover from shadow when see Mret
 	 	bubble <= 1'b1; // bubble
                 ls_va <= (op == 7'b0000011) ? (rs1 + w_imm_i) : (op == 7'b0100011) ? (rs1 + w_imm_s) : (op == 7'b0101111) ? rs1 : 64'h0; // load/jalr/store/atom
-		pdat  <= (op == 7'b0000011) ? (rs1 + w_imm_i) : (op == 7'b0100011) ? (rs1 + w_imm_s) : (op == 7'b0101111) ? rs1 : 64'h0; // load/jalr/store/atom
+		//pdat  <= (op == 7'b0000011) ? (rs1 + w_imm_i) : (op == 7'b0100011) ? (rs1 + w_imm_s) : (op == 7'b0101111) ? rs1 : 64'h0; // load/jalr/store/atom
 		check <= 1;
 		tlb <= 1;
 
