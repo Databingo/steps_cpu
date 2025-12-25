@@ -315,8 +315,8 @@ module riscv64(
 	        if (bubble) saved_user_pc <= pc ; // !!! save pc (j/b EXE was flushed currectly)
 		for (i=0;i<=9;i=i+1) begin sre[i]<= re[i]; end // save re
 		re[9] <= pc;// - 4; // save this vpc to x1 //!!!! We also need to refill pc - 4' ppc for re-executeing pc-4, with hit(if satp in for very next sfence.vma) 
-		Csrs[mstatus][MPIE] <= Csrs[mstatus][MIE]; // disable interrupt during shadow mmu walking
-		Csrs[mstatus][MIE] <= 0;
+		//Csrs[mstatus][MPIE] <= Csrs[mstatus][MIE]; // disable interrupt during shadow mmu walking
+		//Csrs[mstatus][MIE] <= 0;
 
             // Bubble
 	    end else if (bubble) begin bubble <= 1'b0; // Flush this cycle & Clear bubble signal for the next cycle
@@ -335,8 +335,8 @@ module riscv64(
 		    //if (op == 7'b0000011) re[9] <= rs1 + w_imm_i;
 		    //if (op == 7'b0100011) re[9] <= rs1 + w_imm_s;
 		    //if (op == 7'b0101111) re[9] <= rs1;
-		    Csrs[mstatus][MPIE] <= Csrs[mstatus][MIE]; // disable interrupt during shadow mmu walking
-		    Csrs[mstatus][MIE] <= 0;
+		    //Csrs[mstatus][MPIE] <= Csrs[mstatus][MIE]; // disable interrupt during shadow mmu walking
+		    //Csrs[mstatus][MIE] <= 0;
 		end
 
 	    end else if (mmu_pc && ir == 32'b00110000001000000000000001110011) begin // end hiject mret & recover from shadow when see Mret
@@ -344,7 +344,7 @@ module riscv64(
 	 	bubble <= 1'b1; // bubble
 		for (i=0;i<10;i=i+1) begin re[i]<= sre[i]; end // recover usr re
 		mmu_pc <= 0; // MMU_PC OFF
-		Csrs[mstatus][MIE] <= Csrs[mstatus][MPIE]; // set back interrupt status
+		//Csrs[mstatus][MIE] <= Csrs[mstatus][MPIE]; // set back interrupt status
 
 	    // Check
 	    //end else if (satp_mmu && !mmu_pc && !mmu_da && !check && (op == 7'b0000011 || op == 7'b0100011 || op == 7'b0101111) ) begin // end hiject mret & recover from shadow when see Mret
@@ -376,7 +376,7 @@ module riscv64(
 		bubble <= 1; // bubble
 		for (i=0;i<10;i=i+1) begin re[i]<= sre[i]; end // recover usr re
 		mmu_da <= 0; // MMU_DA OFF
-		Csrs[mstatus][MIE] <= Csrs[mstatus][MPIE]; // set back interrupt status
+		//Csrs[mstatus][MIE] <= Csrs[mstatus][MPIE]; // set back interrupt status
 		
             // Interrupt PLIC full (Platform-Level-Interrupt-Control)  MMIO
 	    end else if ((meip_interrupt || msip_interrupt) && Csrs[mstatus][MIE]==1) begin //mstatus[3] MIE
