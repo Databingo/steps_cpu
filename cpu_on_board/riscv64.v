@@ -182,7 +182,7 @@ module riscv64(
 
     // -- TLB -- 8 pages
     reg [26:0] tlb_vpn [0:7]; // vpn number VA[38:12]  Sv39
-    reg [26:0] tlb_vpn_d [0:7]; // vpn number VA[38:12]  Sv39
+    //reg [26:0] tlb_vpn_d [0:7]; // vpn number VA[38:12]  Sv39
     reg [43:0] tlb_ppn [0:7]; // ppn number PA[55:12]
     reg tlb_vld [0:7];
 
@@ -325,8 +325,16 @@ module riscv64(
 		//if hit
          //     if      (tlb_vld[0] && tlb_vpn[0] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[0]; end
 	//	if (tlb_vpn_d[7] == ls_va[38:12]) begin bubble <= 1; tlb <= 0; pc <= pc - 4; end
-                for (i=0;i<8;i=i+1) begin if (data_vpn == tlb_vpn[i]) begin tlb_d_hit = 1; data_ppn=tlb_ppn[i]; bubble <= 1; pc <= pc - 4; tlb <= 0; end end
-		if (!tlb_d_hit) begin 
+                //for (i=0;i<8;i=i+1) begin if (data_vpn == tlb_vpn[i]) begin tlb_d_hit = 1; data_ppn=tlb_ppn[i]; bubble <= 1; pc <= pc - 4; tlb <= 0; end end
+                if      (tlb_vld[0] && tlb_vpn[0] == data_vpn) begin tlb_d_hit <= 1; data_ppn<=tlb_ppn[0]; bubble <= 1; pc <= pc - 4; tlb <= 0; end
+                else if (tlb_vld[1] && tlb_vpn[1] == data_vpn) begin tlb_d_hit <= 1; data_ppn<=tlb_ppn[1]; bubble <= 1; pc <= pc - 4; tlb <= 0; end
+                else if (tlb_vld[2] && tlb_vpn[2] == data_vpn) begin tlb_d_hit <= 1; data_ppn<=tlb_ppn[2]; bubble <= 1; pc <= pc - 4; tlb <= 0; end
+                else if (tlb_vld[3] && tlb_vpn[3] == data_vpn) begin tlb_d_hit <= 1; data_ppn<=tlb_ppn[3]; bubble <= 1; pc <= pc - 4; tlb <= 0; end
+                else if (tlb_vld[4] && tlb_vpn[4] == data_vpn) begin tlb_d_hit <= 1; data_ppn<=tlb_ppn[4]; bubble <= 1; pc <= pc - 4; tlb <= 0; end
+                else if (tlb_vld[5] && tlb_vpn[5] == data_vpn) begin tlb_d_hit <= 1; data_ppn<=tlb_ppn[5]; bubble <= 1; pc <= pc - 4; tlb <= 0; end
+                else if (tlb_vld[6] && tlb_vpn[6] == data_vpn) begin tlb_d_hit <= 1; data_ppn<=tlb_ppn[6]; bubble <= 1; pc <= pc - 4; tlb <= 0; end
+                else if (tlb_vld[7] && tlb_vpn[7] == data_vpn) begin tlb_d_hit <= 1; data_ppn<=tlb_ppn[7]; bubble <= 1; pc <= pc - 4; tlb <= 0; end
+		else begin 
 		    mmu_da <= 1; // MMU_DA ON
 		    pc <= 28; // D-TLB refill Handler
 	 	    bubble <= 1'b1; // bubble
