@@ -368,7 +368,7 @@ module riscv64(
 	//	if (tlb_vpn_d[7] == ls_va[38:12]) begin bubble <= 1; tlb <= 0; pc <= pc - 4; end
                 //for (i=0;i<8;i=i+1) begin if (data_vpn == tlb_vpn[i]) begin tlb_d_hit = 1; data_ppn=tlb_ppn[i]; bubble <= 1; pc <= pc - 4; tlb <= 0; end end
 		//XXXABCDX*^^ABCDEFHXABCDEDHXAB|01^2^3^
-		tlb_d_hit <= 0;
+		tlb_d_hit <= 0; tlb <= 0; bubble <= 1; pc <= pc - 4;
                 if (tlb_vld[0] && tlb_vpn[0] ==ls_va[38:12]) begin tlb_d_hit <= 1; data_ppn<=tlb_ppn[0]; bubble <= 1; pc <= pc - 4; tlb <= 0; end
                 if (tlb_vld[1] && tlb_vpn[1] ==ls_va[38:12]) begin tlb_d_hit <= 1; data_ppn<=tlb_ppn[1]; bubble <= 1; pc <= pc - 4; tlb <= 0; end
                 if (tlb_vld[2] && tlb_vpn[2] ==ls_va[38:12]) begin tlb_d_hit <= 1; data_ppn<=tlb_ppn[2]; bubble <= 1; pc <= pc - 4; tlb <= 0; end
@@ -444,6 +444,7 @@ module riscv64(
 		for (i=0;i<10;i=i+1) begin re[i]<= sre[i]; end // recover usr re
 		mmu_da <= 0; // MMU_DA OFF
 		//Csrs[mstatus][MIE] <= Csrs[mstatus][MPIE]; // set back interrupt status
+		tlb <= 1;
 		
             // Interrupt PLIC full (Platform-Level-Interrupt-Control)  MMIO
 	    end else if ((meip_interrupt || msip_interrupt) && Csrs[mstatus][MIE]==1) begin //mstatus[3] MIE
