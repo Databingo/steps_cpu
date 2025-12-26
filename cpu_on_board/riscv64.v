@@ -251,6 +251,40 @@ module riscv64(
         end
     end
 
+
+
+    // cache_i_hit 63:14 tag, 13:4 index 3:0 offset Cache line 16B (4 instructions)
+    (* ram_style = "block" *) reg [127:0] Cache_L [0:1024]; // 16KB
+    (* ram_style = "block" *) reg [49:0] Cache_T [0:1024];  // 6.4KB
+    reg [31:0] cache_l [0:3];
+    reg [31:0] cache_i;
+    reg [49:0] cache_t;
+    always @(posedge CLOCK_50) begin 
+	cache_l <= Cache_L[ppc[13:4]]; 
+	cache_t <= Cache_T[ppc[13:4]]; 
+	//cache_l[0] <= Cache_L[ppc[13:4]][31:0]; 
+	//cache_l[1] <= Cache_L[ppc[13:4]][63:32]; 
+	//cache_l[2] <= Cache_L[ppc[13:4]][95:64]; 
+	//cache_l[3] <= Cache_L[ppc[13:4]][127:96]; 
+    end
+	cache_i = cache_l[ppc[3:2]];
+    //always @(*) begin
+    //     tlb_d_hit = 0;
+    //     data_ppn = 0;
+    //     //ls_va = (op == 7'b0000011) ? (rs1 + w_imm_i) : (op == 7'b0100011) ? (rs1 + w_imm_s) : (op == 7'b0101111) ? rs1 : 64'h0; // load/store/atom
+    //     if      (tlb_vld[0] && tlb_vpn[0] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[0]; end
+    //     else if (tlb_vld[1] && tlb_vpn[1] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[1]; end
+    //     else if (tlb_vld[2] && tlb_vpn[2] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[2]; end
+    //     else if (tlb_vld[3] && tlb_vpn[3] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[3]; end
+    //     else if (tlb_vld[4] && tlb_vpn[4] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[4]; end
+    //     else if (tlb_vld[5] && tlb_vpn[5] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[5]; end
+    //     else if (tlb_vld[6] && tlb_vpn[6] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[6]; end
+    //     else if (tlb_vld[7] && tlb_vpn[7] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[7]; end
+    // end
+      
+      
+      
+      
    // // IF Instruction (Only drive IR)
    // always @(posedge clk or negedge reset) begin
    //     if (!reset) begin 
