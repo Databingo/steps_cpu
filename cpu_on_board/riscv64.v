@@ -204,35 +204,19 @@ module riscv64(
     end
 
     // d hit
+    // -- directly 1:1 --
+    //wire [63:0] ls_va = (op == 7'b0000011) ? (rs1 + w_imm_i) : (op == 7'b0100011) ? (rs1 + w_imm_s) : (op == 7'b0101111) ? rs1 : 0; // load/store/atom
+    //wire [63:0] pda = ls_va;
+
     reg [63:0] ls_va;// = (op == 7'b0000011) ? (rs1 + w_imm_i) : (op == 7'b0100011) ? (rs1 + w_imm_s) : (op == 7'b0101111) ? rs1 : 64'h0; // load/store/atom
     wire [63:0] raw_va = (op == 7'b0000011) ? (rs1 + w_imm_i) : (op == 7'b0100011) ? (rs1 + w_imm_s) : (op == 7'b0101111) ? rs1 : 64'h0; // load/store/atom
     //wire [63:0] pda;
     wire [63:0] pda;
     reg [63:0] pdat = 64'h0;
+
     wire [26:0] data_vpn = ls_va[38:12];
     reg [43:0] data_ppn;
     reg tlb_d_hit;
-
-     // concat physical address
-     wire need_trans = satp_mmu   && !mmu_pc && !mmu_da && !mmu_cache_refill;
-     assign ppc = need_trans ? {8'h0, pc_ppn, pc[11:0]} : pc;
-     assign pda = need_trans ? {8'h0, data_ppn, ls_va[11:0]} : raw_va;
-     
-    // TLB Refill
-    reg [2:0] tlb_ptr = 0; // 8 entries TLB
-    always @(posedge clk or negedge reset) begin
-        if (!reset) tlb_ptr <= 0; // hit->trap(save va to x9)->refill assembly(fetch pa to x9)-> sd x9, `Tlb -> here to refill tlb
-        else if ((mmu_pc || mmu_da) && bus_write_enable && bus_address == `Tlb) begin // for the last fill: sd ppa, Tlb
-            tlb_vpn[tlb_ptr] <= re[9][38:12]; // VA from x9 saved by trapp mmu_pc/mmu_da
-            tlb_ppn[tlb_ptr] <= {17'h0, re[9][38:12]}; // mimic copy now | real need walking assembly
-            tlb_vld[tlb_ptr] <= 1;
-            tlb_ptr <= tlb_ptr + 1; 
-        end
-    end
-
-    // cache_i_hit 63:14 tag, 13:4 index 3:0 offset Cache line 16B (4 instructions)
-    (* ram_style = "block" *) reg [127:0] Cache_I [0:1024]; // 16KB
-    (* ram_style = "block" *) reg [50:0] Cache_T [0:1024];  // 6.4KB
     //always @(*) begin
     //     tlb_d_hit = 0;
     //     data_ppn = 0;
@@ -246,6 +230,26 @@ module riscv64(
     //     else if (tlb_vld[6] && tlb_vpn[6] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[6]; end
     //     else if (tlb_vld[7] && tlb_vpn[7] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[7]; end
     // end
+     // concat physical address
+     wire need_trans = satp_mmu   && !mmu_pc && !mmu_da && !mmu_cache_refill;
+     assign ppc = need_trans ? {8'h0, pc_ppn, pc[11:0]} : pc;
+     assign pda = need_trans ? {8'h0, data_ppn, ls_va[11:0]} : raw_va;
+     //assign pda = need_trans ? ls_va : raw_va;
+       
+     //assign pda = need_trans ?  ls_va : ls_va;
+     //assign pda =  ls_va;
+     
+    // TLB Refill
+    reg [2:0] tlb_ptr = 0; // 8 entries TLB
+    always @(posedge clk or negedge reset) begin
+        if (!reset) tlb_ptr <= 0; // hit->trap(save va to x9)->refill assembly(fetch pa to x9)-> sd x9, `Tlb -> here to refill tlb
+        else if ((mmu_pc || mmu_da) && bus_write_enable && bus_address == `Tlb) begin // for the last fill: sd ppa, Tlb
+            tlb_vpn[tlb_ptr] <= re[9][38:12]; // VA from x9 saved by trapp mmu_pc/mmu_da
+            tlb_ppn[tlb_ptr] <= {17'h0, re[9][38:12]}; // mimic copy now | real need walking assembly
+            tlb_vld[tlb_ptr] <= 1;
+            tlb_ptr <= tlb_ptr + 1; 
+        end
+    end
 
    // // IF Instruction (Only drive IR)
    // always @(posedge clk or negedge reset) begin
@@ -318,6 +322,11 @@ module riscv64(
 	    end else if (bubble) begin bubble <= 1'b0; // Flush this cycle & Clear bubble signal for the next cycle
 
 	    end else if (tlb && !mmu_da && !mmu_pc) begin
+		//if hit
+         //     if      (tlb_vld[0] && tlb_vpn[0] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[0]; end
+	//	if (tlb_vpn_d[7] == ls_va[38:12]) begin bubble <= 1; tlb <= 0; pc <= pc - 4; end
+                //for (i=0;i<8;i=i+1) begin if (data_vpn == tlb_vpn[i]) begin tlb_d_hit = 1; data_ppn=tlb_ppn[i]; bubble <= 1; pc <= pc - 4; tlb <= 0; end end
+		//XXXABCDX*^^ABCDEFHXABCDEDHXAB|01^2^3^
 		tlb_d_hit = 0;
                 if (tlb_vld[0] && tlb_vpn[0] ==ls_va[38:12]) begin tlb_d_hit = 1; data_ppn=tlb_ppn[0]; bubble <= 1; pc <= pc - 4; tlb <= 0; end
                 if (tlb_vld[1] && tlb_vpn[1] ==ls_va[38:12]) begin tlb_d_hit = 1; data_ppn=tlb_ppn[1]; bubble <= 1; pc <= pc - 4; tlb <= 0; end
@@ -334,6 +343,10 @@ module riscv64(
 	            saved_user_pc <= pc - 4; // save pc EXE l/s/a
 		    for (i=0;i<10;i=i+1) begin sre[i]<= re[i]; end // save re
 		    re[9] <= ls_va; //save va to x1
+                    //tlb_vpn_d[7] <= ls_va[38:12];
+		    //if (op == 7'b0000011) re[9] <= rs1 + w_imm_i;
+		    //if (op == 7'b0100011) re[9] <= rs1 + w_imm_s;
+		    //if (op == 7'b0101111) re[9] <= rs1;
 		    //Csrs[mstatus][MPIE] <= Csrs[mstatus][MIE]; // disable interrupt during shadow mmu walking
 		    //Csrs[mstatus][MIE] <= 0;
 		end
