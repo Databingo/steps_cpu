@@ -358,23 +358,23 @@ module riscv64(
 		    //Csrs[mstatus][MIE] <= 0;
 		end
 
-	    //  mmu_cache  I miss Trap
-	    if (satp_mmu && !mmu_pc && !mmu_da && !mmu_cache_refill && !cache_i_hit) begin //OPEN 
-       		mmu_cache_refill <= 1; // MMU_PC ON 
-       	        pc <= 0; // Cache-I refill Handler
-       	 	bubble <= 1'b1; // bubble 
-	        saved_user_pc <= pc - 4; // !!! save pc (EXE was flushed so record-redo it, previous pc)
-	        if (bubble) saved_user_pc <= pc ; // !!! save pc (j/b EXE was flushed currectly)
-		for (i=0;i<=9;i=i+1) begin sre[i]<= re[i]; end // save re
-		re[9] <= ppc;//
-		//Csrs[mstatus][MPIE] <= Csrs[mstatus][MIE]; // disable interrupt during shadow mmu walking
-		//Csrs[mstatus][MIE] <= 0;
-	    end else if (mmu_cache_refill && ir == 32'b00110000001000000000000001110011) begin // end hiject mret & recover from shadow when see Mret
-		pc <= saved_user_pc; // recover from shadow when see Mret
-	 	bubble <= 1'b1; // bubble
-		for (i=0;i<10;i=i+1) begin re[i]<= sre[i]; end // recover usr re
-		mmu_cache_refill <= 0; // MMU_CACHE_REFILL OFF
-		//Csrs[mstatus][MIE] <= Csrs[mstatus][MPIE]; // set back interrupt status
+//	    //  mmu_cache  I miss Trap
+//	    if (satp_mmu && !mmu_pc && !mmu_da && !mmu_cache_refill && !cache_i_hit) begin //OPEN 
+//       		mmu_cache_refill <= 1; // MMU_PC ON 
+//       	        pc <= 0; // Cache-I refill Handler
+//       	 	bubble <= 1'b1; // bubble 
+//	        saved_user_pc <= pc - 4; // !!! save pc (EXE was flushed so record-redo it, previous pc)
+//	        if (bubble) saved_user_pc <= pc ; // !!! save pc (j/b EXE was flushed currectly)
+//		for (i=0;i<=9;i=i+1) begin sre[i]<= re[i]; end // save re
+//		re[9] <= ppc;//
+//		//Csrs[mstatus][MPIE] <= Csrs[mstatus][MIE]; // disable interrupt during shadow mmu walking
+//		//Csrs[mstatus][MIE] <= 0;
+//	    end else if (mmu_cache_refill && ir == 32'b00110000001000000000000001110011) begin // end hiject mret & recover from shadow when see Mret
+//		pc <= saved_user_pc; // recover from shadow when see Mret
+//	 	bubble <= 1'b1; // bubble
+//		for (i=0;i<10;i=i+1) begin re[i]<= sre[i]; end // recover usr re
+//		mmu_cache_refill <= 0; // MMU_CACHE_REFILL OFF
+//		//Csrs[mstatus][MIE] <= Csrs[mstatus][MPIE]; // set back interrupt status
 
 
 
