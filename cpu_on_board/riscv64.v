@@ -352,12 +352,8 @@ module riscv64(
 	    end else if (bubble) begin bubble <= 1'b0; // Flush this cycle & Clear bubble signal for the next cycle
 
 	    end else if (tlb && !mmu_da && !mmu_pc) begin
-		//if hit
-         //     if      (tlb_vld[0] && tlb_vpn[0] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[0]; end
-	//	if (tlb_vpn_d[7] == ls_va[38:12]) begin bubble <= 1; tlb <= 0; pc <= pc - 4; end
-                //for (i=0;i<8;i=i+1) begin if (data_vpn == tlb_vpn[i]) begin tlb_d_hit = 1; data_ppn=tlb_ppn[i]; bubble <= 1; pc <= pc - 4; tlb <= 0; end end
-		//XXXABCDX*^^ABCDEFHXABCDEDHXAB|01^2^3^
 		tlb_d_hit = 0;
+		//if hit
                 if (tlb_vld[0] && tlb_vpn[0] ==ls_va[38:12]) begin tlb_d_hit = 1; data_ppn=tlb_ppn[0]; bubble <= 1; pc <= pc - 4; tlb <= 0; end
                 if (tlb_vld[1] && tlb_vpn[1] ==ls_va[38:12]) begin tlb_d_hit = 1; data_ppn=tlb_ppn[1]; bubble <= 1; pc <= pc - 4; tlb <= 0; end
                 if (tlb_vld[2] && tlb_vpn[2] ==ls_va[38:12]) begin tlb_d_hit = 1; data_ppn=tlb_ppn[2]; bubble <= 1; pc <= pc - 4; tlb <= 0; end
@@ -366,6 +362,7 @@ module riscv64(
                 if (tlb_vld[5] && tlb_vpn[5] ==ls_va[38:12]) begin tlb_d_hit = 1; data_ppn=tlb_ppn[5]; bubble <= 1; pc <= pc - 4; tlb <= 0; end
                 if (tlb_vld[6] && tlb_vpn[6] ==ls_va[38:12]) begin tlb_d_hit = 1; data_ppn=tlb_ppn[6]; bubble <= 1; pc <= pc - 4; tlb <= 0; end
                 if (tlb_vld[7] && tlb_vpn[7] ==ls_va[38:12]) begin tlb_d_hit = 1; data_ppn=tlb_ppn[7]; bubble <= 1; pc <= pc - 4; tlb <= 0; end
+		//if not hit
 		if (!tlb_d_hit) begin 
 		    mmu_da <= 1; // MMU_DA ON
 		    pc <= 28; // D-TLB refill Handler
