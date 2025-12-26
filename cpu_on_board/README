@@ -268,6 +268,10 @@ quartus material
 https://dcenet.fel.cvut.cz/edu/fpga/install_en.aspx
 http://web.mit.edu/6.111/volume2/www/f2018/tools/sd_controller.v
 
+Cyclone II FPGA Starter Board with EP2C20F484C7
+BRAM 29.25KB 234Kb
+SRAM 512KB
+SDRAM 8MB
 
 -timer
 -plic
@@ -287,6 +291,10 @@ device tree
 map to 0x80000000
 mini opensbi
 mini linux kernel
+Cyclone II FPGA Starter Board with EP2C20F484C7
+BRAM 29.25KB 234Kb
+SRAM 512KB
+SDRAM 8MB
 c9479d067c156f59db5fe4e486422bcb18495723 tlb_i_hit_refill ok with plic
 cfb5c680ac73052f15f49f69f4cf72d8dc14232c tlb_i_hit_refill and 64 bits bus/pc/ppc ok with plic
 6ee114347731a217e55a324e77f166073e984865 fixed i_trap of j/b bubble
