@@ -236,7 +236,7 @@ module riscv64(
     reg [63:0] ppc_pre;
     (* ram_style = "block" *) reg [127:0] Cache_L [0:1023]; // 16KB
     (* ram_style = "block" *) reg [50:0] Cache_T [0:1023];  // 6.4KB
-    always @(posedge CLOCK_50) begin 
+    always @(posedge clk) begin 
 	// read
 	cache_l <= Cache_L[ppc[13:4]]; 
 	cache_t <= Cache_T[ppc[13:4]]; 
