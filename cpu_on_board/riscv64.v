@@ -251,6 +251,47 @@ module riscv64(
         end
     end
 
+
+
+    // cache_i_hit 63:14 tag, 13:4 index 3:0 offset Cache line 16B (4 instructions)
+    reg [127:0] cache_l;
+    reg [50:0] cache_t;
+    reg [63:0] ppc_pre;
+    (* ram_style = "block" *) reg [127:0] Cache_L [0:1023]; // 16KB
+    (* ram_style = "block" *) reg [50:0] Cache_T [0:1023];  // 6.4KB
+    always @(posedge clk) begin 
+	// read
+	cache_l <= Cache_L[ppc[13:4]]; 
+	cache_t <= Cache_T[ppc[13:4]]; 
+	ppc_pre <= ppc;
+	// write
+        if (mmu_cache_refill && bus_write_enable && bus_address == `CacheI_L) begin // for the last fill: sd ppa, Tlb
+	    Cache_L[re[9][13:4]][63:0] <= bus_write_data; 
+	end
+        if (mmu_cache_refill && bus_write_enable && bus_address == `CacheI_H) begin // for the last fill: sd ppa, Tlb
+	    Cache_L[re[9][13:4]][127:64] <= bus_write_data; 
+	    Cache_T[re[9][13:4]][49:0] <= re[9][63:14]; 
+	    Cache_T[re[9][13:4]][50:50] <= 1; 
+	end
+    end
+    wire cache_i_hit = cache_t[50] && (ppc_pre[63:14] == cache_t[49:0]);
+    wire [31:0] cache_i = cache_l[ppc_pre[3:2]*32 +: 32];
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
    // // IF Instruction (Only drive IR)
    // always @(posedge clk or negedge reset) begin
    //     if (!reset) begin 

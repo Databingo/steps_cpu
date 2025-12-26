@@ -31,3 +31,5 @@
 
 `define Tlb    64'h2000_0000
 `define CacheI 64'h2000_1000
+`define CacheI_L 64'h2000_1004
+`define CacheI_H 64'h2000_1008
