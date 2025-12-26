@@ -67,3 +67,19 @@
      lui x8, 0x20000
      sw x9, 0(x8) 
      mret           
+# I-Cache mmu-refill
+     lui x1, 0x2     
+     addi x1, x1, 0x4              
+     addi x2, x0, 0x2d
+     sd x2, 0(x1)    #  print -
+     # get data
+
+     lui x8, 0x20001 
+     sw x9, 0(x8)    # refill line low 64
+
+     # get data
+
+     lui x8, 0x20001
+     addi x8, x8, 0x8 
+     sw x9, 0(x8)    # refill line high 64  
+     mret           

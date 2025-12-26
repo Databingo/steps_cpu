@@ -204,40 +204,19 @@ module riscv64(
     end
 
     // d hit
-    // -- directly 1:1 --
-    //wire [63:0] ls_va = (op == 7'b0000011) ? (rs1 + w_imm_i) : (op == 7'b0100011) ? (rs1 + w_imm_s) : (op == 7'b0101111) ? rs1 : 0; // load/store/atom
-    //wire [63:0] pda = ls_va;
-
     reg [63:0] ls_va;// = (op == 7'b0000011) ? (rs1 + w_imm_i) : (op == 7'b0100011) ? (rs1 + w_imm_s) : (op == 7'b0101111) ? rs1 : 64'h0; // load/store/atom
     wire [63:0] raw_va = (op == 7'b0000011) ? (rs1 + w_imm_i) : (op == 7'b0100011) ? (rs1 + w_imm_s) : (op == 7'b0101111) ? rs1 : 64'h0; // load/store/atom
     //wire [63:0] pda;
     wire [63:0] pda;
     reg [63:0] pdat = 64'h0;
-
     wire [26:0] data_vpn = ls_va[38:12];
     reg [43:0] data_ppn;
     reg tlb_d_hit;
-    //always @(*) begin
-    //     tlb_d_hit = 0;
-    //     data_ppn = 0;
-    //     //ls_va = (op == 7'b0000011) ? (rs1 + w_imm_i) : (op == 7'b0100011) ? (rs1 + w_imm_s) : (op == 7'b0101111) ? rs1 : 64'h0; // load/store/atom
-    //     if      (tlb_vld[0] && tlb_vpn[0] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[0]; end
-    //     else if (tlb_vld[1] && tlb_vpn[1] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[1]; end
-    //     else if (tlb_vld[2] && tlb_vpn[2] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[2]; end
-    //     else if (tlb_vld[3] && tlb_vpn[3] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[3]; end
-    //     else if (tlb_vld[4] && tlb_vpn[4] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[4]; end
-    //     else if (tlb_vld[5] && tlb_vpn[5] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[5]; end
-    //     else if (tlb_vld[6] && tlb_vpn[6] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[6]; end
-    //     else if (tlb_vld[7] && tlb_vpn[7] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[7]; end
-    // end
+
      // concat physical address
      wire need_trans = satp_mmu   && !mmu_pc && !mmu_da && !mmu_cache_refill;
      assign ppc = need_trans ? {8'h0, pc_ppn, pc[11:0]} : pc;
      assign pda = need_trans ? {8'h0, data_ppn, ls_va[11:0]} : raw_va;
-     //assign pda = need_trans ? ls_va : raw_va;
-       
-     //assign pda = need_trans ?  ls_va : ls_va;
-     //assign pda =  ls_va;
      
     // TLB Refill
     reg [2:0] tlb_ptr = 0; // 8 entries TLB
@@ -251,23 +230,29 @@ module riscv64(
         end
     end
 
-
-
     // cache_i_hit 63:14 tag, 13:4 index 3:0 offset Cache line 16B (4 instructions)
-    (* ram_style = "block" *) reg [127:0] Cache_L [0:1024]; // 16KB
-    (* ram_style = "block" *) reg [49:0] Cache_T [0:1024];  // 6.4KB
-    reg [31:0] cache_l [0:3];
-    reg [31:0] cache_i;
-    reg [49:0] cache_t;
+    reg [127:0] cache_l;
+    reg [50:0] cache_t;
+    reg [63:0] ppc_pre;
+    (* ram_style = "block" *) reg [127:0] Cache_L [0:1023]; // 16KB
+    (* ram_style = "block" *) reg [50:0] Cache_T [0:1023];  // 6.4KB
     always @(posedge CLOCK_50) begin 
+	// read
 	cache_l <= Cache_L[ppc[13:4]]; 
 	cache_t <= Cache_T[ppc[13:4]]; 
-	//cache_l[0] <= Cache_L[ppc[13:4]][31:0]; 
-	//cache_l[1] <= Cache_L[ppc[13:4]][63:32]; 
-	//cache_l[2] <= Cache_L[ppc[13:4]][95:64]; 
-	//cache_l[3] <= Cache_L[ppc[13:4]][127:96]; 
+	ppc_pre <= ppc;
+	// write
+        if (mmu_cache_refill && bus_write_enable && bus_address == `CacheI_L) begin // for the last fill: sd ppa, Tlb
+	    Cache_L[re[9][13:4]][63:0] <= bus_write_data; 
+	end
+        if (mmu_cache_refill && bus_write_enable && bus_address == `CacheI_H) begin // for the last fill: sd ppa, Tlb
+	    Cache_L[re[9][13:4]][127:64] <= bus_write_data; 
+	    Cache_T[re[9][13:4]][49:0] <= re[9][63:14]; 
+	    Cache_T[re[9][13:4]][50:50] <= 1; 
+	end
     end
-	cache_i = cache_l[ppc[3:2]];
+    wire cache_i_hit = cache_t[50] && (ppc_pre[63:14] == cache_t[49:0]);
+    wire [31:0] cache_i = cache_l[ppc_pre[3:2]*32 +: 32];
     //always @(*) begin
     //     tlb_d_hit = 0;
     //     data_ppn = 0;
@@ -281,10 +266,7 @@ module riscv64(
     //     else if (tlb_vld[6] && tlb_vpn[6] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[6]; end
     //     else if (tlb_vld[7] && tlb_vpn[7] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[7]; end
     // end
-      
-      
-      
-      
+
    // // IF Instruction (Only drive IR)
    // always @(posedge clk or negedge reset) begin
    //     if (!reset) begin 
@@ -341,7 +323,7 @@ module riscv64(
 	    bus_write_enable <= 0; 
 
 	    //  mmu_pc  I-TLB miss Trap
-	    if (satp_mmu && !mmu_pc && !mmu_da && !tlb_i_hit) begin //OPEN 
+	    if (satp_mmu && !mmu_pc && !mmu_da && !mmu_cache_refill && !tlb_i_hit) begin //OPEN 
        		mmu_pc <= 1; // MMU_PC ON 
        	        pc <= 0; // I-TLB refill Handler
        	 	bubble <= 1'b1; // bubble 
@@ -355,12 +337,7 @@ module riscv64(
             // Bubble
 	    end else if (bubble) begin bubble <= 1'b0; // Flush this cycle & Clear bubble signal for the next cycle
 
-	    end else if (tlb && !mmu_da && !mmu_pc) begin
-		//if hit
-         //     if      (tlb_vld[0] && tlb_vpn[0] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[0]; end
-	//	if (tlb_vpn_d[7] == ls_va[38:12]) begin bubble <= 1; tlb <= 0; pc <= pc - 4; end
-                //for (i=0;i<8;i=i+1) begin if (data_vpn == tlb_vpn[i]) begin tlb_d_hit = 1; data_ppn=tlb_ppn[i]; bubble <= 1; pc <= pc - 4; tlb <= 0; end end
-		//XXXABCDX*^^ABCDEFHXABCDEDHXAB|01^2^3^
+	    end else if (tlb && !mmu_da && !mmu_pc && !mmu_cache_refill) begin
 		tlb_d_hit = 0;
                 if (tlb_vld[0] && tlb_vpn[0] ==ls_va[38:12]) begin tlb_d_hit = 1; data_ppn=tlb_ppn[0]; bubble <= 1; pc <= pc - 4; tlb <= 0; end
                 if (tlb_vld[1] && tlb_vpn[1] ==ls_va[38:12]) begin tlb_d_hit = 1; data_ppn=tlb_ppn[1]; bubble <= 1; pc <= pc - 4; tlb <= 0; end
@@ -377,13 +354,33 @@ module riscv64(
 	            saved_user_pc <= pc - 4; // save pc EXE l/s/a
 		    for (i=0;i<10;i=i+1) begin sre[i]<= re[i]; end // save re
 		    re[9] <= ls_va; //save va to x1
-                    //tlb_vpn_d[7] <= ls_va[38:12];
-		    //if (op == 7'b0000011) re[9] <= rs1 + w_imm_i;
-		    //if (op == 7'b0100011) re[9] <= rs1 + w_imm_s;
-		    //if (op == 7'b0101111) re[9] <= rs1;
 		    //Csrs[mstatus][MPIE] <= Csrs[mstatus][MIE]; // disable interrupt during shadow mmu walking
 		    //Csrs[mstatus][MIE] <= 0;
 		end
+
+	    //  mmu_cache  I miss Trap
+	    if (satp_mmu && !mmu_pc && !mmu_da && !mmu_cache_refill && !cache_i_hit) begin //OPEN 
+       		mmu_cache_refill <= 1; // MMU_PC ON 
+       	        pc <= 0; // Cache-I refill Handler
+       	 	bubble <= 1'b1; // bubble 
+	        saved_user_pc <= pc - 4; // !!! save pc (EXE was flushed so record-redo it, previous pc)
+	        if (bubble) saved_user_pc <= pc ; // !!! save pc (j/b EXE was flushed currectly)
+		for (i=0;i<=9;i=i+1) begin sre[i]<= re[i]; end // save re
+		re[9] <= ppc;//
+		//Csrs[mstatus][MPIE] <= Csrs[mstatus][MIE]; // disable interrupt during shadow mmu walking
+		//Csrs[mstatus][MIE] <= 0;
+	    end else if (mmu_cache_refill && ir == 32'b00110000001000000000000001110011) begin // end hiject mret & recover from shadow when see Mret
+		pc <= saved_user_pc; // recover from shadow when see Mret
+	 	bubble <= 1'b1; // bubble
+		for (i=0;i<10;i=i+1) begin re[i]<= sre[i]; end // recover usr re
+		mmu_cache_refill <= 0; // MMU_CACHE_REFILL OFF
+		//Csrs[mstatus][MIE] <= Csrs[mstatus][MPIE]; // set back interrupt status
+
+
+
+
+
+
 
 	    end else if (mmu_pc && ir == 32'b00110000001000000000000001110011) begin // end hiject mret & recover from shadow when see Mret
 		pc <= saved_user_pc; // recover from shadow when see Mret
@@ -394,7 +391,7 @@ module riscv64(
 
 	    // Check
 	    //end else if (satp_mmu && !mmu_pc && !mmu_da && !check && (op == 7'b0000011 || op == 7'b0100011 || op == 7'b0101111) ) begin // end hiject mret & recover from shadow when see Mret
-	    end else if (satp_mmu && !mmu_pc && !mmu_da && !check && (op == 7'b0000011 || op == 7'b0100011 || op == 7'b0101111)) begin // end hiject mret & recover from shadow when see Mret
+	    end else if (satp_mmu && !mmu_pc && !mmu_da && !mmu_cache_refill && !check && (op == 7'b0000011 || op == 7'b0100011 || op == 7'b0101111)) begin // end hiject mret & recover from shadow when see Mret
 		pc <= pc - 4; // recover from shadow when see Mret
 	 	bubble <= 1'b1; // bubble
                 ls_va <= (op == 7'b0000011) ? (rs1 + w_imm_i) : (op == 7'b0100011) ? (rs1 + w_imm_s) : (op == 7'b0101111) ? rs1 : 64'h0; // load/jalr/store/atom
