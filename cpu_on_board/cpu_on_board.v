@@ -218,7 +218,8 @@ assign DRAM_CKE = 1; // always enable
     wire Sdram_selected = (bus_address >= `Sdram_min && bus_address < `Sdram_max);
     wire Mtime_selected = (bus_address == `Mtime);
     wire Mtimecmp_selected = (bus_address == `Mtimecmp);
-    wire CacheI_selected = (bus_address == `CacheI);
+    wire CacheI_L_selected = (bus_address == `CacheI_L);
+    wire CacheI_H_selected = (bus_address == `CacheI_H);
     wire Tlb_selected = (bus_address == `Tlb);
 
     // Plic mapping
