@@ -216,7 +216,7 @@ module riscv64(
 
     wire [26:0] data_vpn = ls_va[38:12];
     reg [43:0] data_ppn;
-    reg tlb_d_hit;
+    reg tlb_d_hit = 1;
     //always @(*) begin
     //     tlb_d_hit = 0;
     //     data_ppn = 0;
