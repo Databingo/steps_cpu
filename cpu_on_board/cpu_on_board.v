@@ -87,7 +87,7 @@ assign DRAM_CLK = CLOCK_50;
 assign DRAM_CKE = 1; // always enable
 
     // -- MEM -- minic L1 cache
-    (* ram_style = "block" *) reg [31:0] Cache [0:2000];
+    (* ram_style = "block" *) reg [31:0] Cache [0:1024];
     integer i;
     initial begin
         $readmemb("rom.mif", Cache, `Rom_base>>2);

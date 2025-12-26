@@ -230,9 +230,9 @@ module riscv64(
         end
     end
 
-    // cache_i_hit 63:14 tag, 13:4 index 3:0 offset
-    (* ram_style = "block" *) reg [127:0] Cache_I [0:1024];
-    (* ram_style = "block" *) reg [50:0] Cache_T [0:1024];
+    // cache_i_hit 63:14 tag, 13:4 index 3:0 offset Cache line 16B (4 instructions)
+    (* ram_style = "block" *) reg [127:0] Cache_I [0:1024]; // 16KB
+    (* ram_style = "block" *) reg [50:0] Cache_T [0:1024];  // 6.4KB
     //always @(*) begin
     //     tlb_d_hit = 0;
     //     data_ppn = 0;
