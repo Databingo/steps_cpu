@@ -103,12 +103,11 @@ assign DRAM_CKE = 1; // always enable
     );
 
     wire [63:0] ppc;
-    reg [31:0] ir_bd;
+    reg [31:0] ir_ld;
     //wire bubble;
     // IR_LD BRAM Port A read
-    always @(posedge CLOCK_50) begin ir_bd <= Cache[ppc>>2]; end
+    always @(posedge CLOCK_50) begin ir_ld <= Cache[ppc>>2]; end
     //wire [31:0] ir_ld; assign ir_ld = {ir_bd[7:0], ir_bd[15:8], ir_bd[23:16], ir_bd[31:24]}; // Endianness swap
-    wire [31:0] ir_ld; assign ir_ld = ir_bd; 
     assign LEDR_PC = ppc/4;
     assign LEDG = ir_ld;
 
@@ -218,8 +217,7 @@ assign DRAM_CKE = 1; // always enable
     wire Sdram_selected = (bus_address >= `Sdram_min && bus_address < `Sdram_max);
     wire Mtime_selected = (bus_address == `Mtime);
     wire Mtimecmp_selected = (bus_address == `Mtimecmp);
-    wire CacheI_L_selected = (bus_address == `CacheI_L);
-    wire CacheI_H_selected = (bus_address == `CacheI_H);
+    wire CacheI_selected = (bus_address == `CacheI);
     wire Tlb_selected = (bus_address == `Tlb);
 
     // Plic mapping
@@ -428,8 +426,7 @@ assign DRAM_CKE = 1; // always enable
 	    //if (Sdram_selected) begin if (sdram_req_wait==0) bus_write_done <= 1; end
 
             if (Tlb_selected) bus_write_done <= 1; 
-	    if (CacheI_L_selected) bus_write_done <= 1; 
-	    if (CacheI_H_selected) bus_write_done <= 1; 
+	    if (CacheI_selected) bus_write_done <= 1; 
 	    
             // Plic write
 	    if (Plic_priority_selected) begin Plic_priority[plic_id] <= bus_write_data; bus_write_done <= 1; end
