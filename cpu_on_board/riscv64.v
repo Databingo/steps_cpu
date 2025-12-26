@@ -216,7 +216,7 @@ module riscv64(
 
     wire [26:0] data_vpn = ls_va[38:12];
     reg [43:0] data_ppn;
-    reg tlb_d_hit = 1;
+    reg tlb_d_hit;
     //always @(*) begin
     //     tlb_d_hit = 0;
     //     data_ppn = 0;
@@ -252,41 +252,30 @@ module riscv64(
     end
 
 
-
-//    // cache_i_hit 63:14 tag, 13:4 index 3:0 offset Cache line 16B (4 instructions)
-//    reg [127:0] cache_l;
-//    reg [50:0] cache_t;
-//    reg [63:0] ppc_pre;
-//    (* ram_style = "block" *) reg [127:0] Cache_L [0:1023]; // 16KB
-//    (* ram_style = "block" *) reg [50:0] Cache_T [0:1023];  // 6.4KB
-//    always @(posedge clk) begin 
-//	// read
-//	cache_l <= Cache_L[ppc[13:4]]; 
-//	cache_t <= Cache_T[ppc[13:4]]; 
-//	ppc_pre <= ppc;
-//	// write
-//        if (mmu_cache_refill && bus_write_enable && bus_address == `CacheI_L) begin // for the last fill: sd ppa, Tlb
-//	    Cache_L[re[9][13:4]][63:0] <= bus_write_data; 
-//	end
-//        if (mmu_cache_refill && bus_write_enable && bus_address == `CacheI_H) begin // for the last fill: sd ppa, Tlb
-//	    Cache_L[re[9][13:4]][127:64] <= bus_write_data; 
-//	    Cache_T[re[9][13:4]][49:0] <= re[9][63:14]; 
-//	    Cache_T[re[9][13:4]][50:50] <= 1; 
-//	end
-//    end
-//    wire cache_i_hit = cache_t[50] && (ppc_pre[63:14] == cache_t[49:0]);
-//    wire [31:0] cache_i = cache_l[ppc_pre[3:2]*32 +: 32];
-//
-
-
-
-
-
-
-
-
-
-
+    // cache_i_hit 63:14 tag, 13:4 index 3:0 offset Cache line 16B (4 instructions)
+    reg [127:0] cache_l = 128'h0;
+    reg [50:0] cache_t = 51'h0;
+    reg [63:0] ppc_pre = 64'h0;
+    reg [63:0] ask_data;
+    (* ram_style = "block" *) reg [127:0] Cache_L [0:1023]; // 16KB
+    (* ram_style = "block" *) reg [50:0] Cache_T [0:1023];  // 6.4KB
+    always @(posedge clk) begin 
+	// read
+	cache_l <= Cache_L[ppc[13:4]]; 
+	cache_t <= Cache_T[ppc[13:4]]; 
+	ppc_pre <= ppc;
+	// write
+        if (mmu_cache_refill && bus_write_enable && bus_address == `CacheI_L) begin // for the last fill: sd ppa, Tlb
+	    Cache_L[ask_data[13:4]][63:0] <= bus_write_data; 
+	end
+        if (mmu_cache_refill && bus_write_enable && bus_address == `CacheI_H) begin // for the last fill: sd ppa, Tlb
+	    Cache_L[ask_data[13:4]][127:64] <= bus_write_data; 
+	    Cache_T[ask_data[13:4]][49:0] <= ask_data[63:14]; 
+	    Cache_T[ask_data[13:4]][50:50] <= 1; 
+	end
+    end
+    wire cache_i_hit = cache_t[50] && (ppc_pre[63:14] == cache_t[49:0]);
+    wire [31:0] cache_i = cache_l[ppc_pre[3:2]*32 +: 32];
 
 
 
@@ -368,31 +357,16 @@ module riscv64(
 	//	if (tlb_vpn_d[7] == ls_va[38:12]) begin bubble <= 1; tlb <= 0; pc <= pc - 4; end
                 //for (i=0;i<8;i=i+1) begin if (data_vpn == tlb_vpn[i]) begin tlb_d_hit = 1; data_ppn=tlb_ppn[i]; bubble <= 1; pc <= pc - 4; tlb <= 0; end end
 		//XXXABCDX*^^ABCDEFHXABCDEDHXAB|01^2^3^
-		tlb_d_hit <= 0; tlb <= 0; bubble <= 1; pc <= pc - 4;
-                if (tlb_vld[0] && tlb_vpn[0] ==ls_va[38:12]) begin tlb_d_hit <= 1; data_ppn<=tlb_ppn[0]; bubble <= 1; pc <= pc - 4; tlb <= 0; end
-                if (tlb_vld[1] && tlb_vpn[1] ==ls_va[38:12]) begin tlb_d_hit <= 1; data_ppn<=tlb_ppn[1]; bubble <= 1; pc <= pc - 4; tlb <= 0; end
-                if (tlb_vld[2] && tlb_vpn[2] ==ls_va[38:12]) begin tlb_d_hit <= 1; data_ppn<=tlb_ppn[2]; bubble <= 1; pc <= pc - 4; tlb <= 0; end
-                if (tlb_vld[3] && tlb_vpn[3] ==ls_va[38:12]) begin tlb_d_hit <= 1; data_ppn<=tlb_ppn[3]; bubble <= 1; pc <= pc - 4; tlb <= 0; end
-                if (tlb_vld[4] && tlb_vpn[4] ==ls_va[38:12]) begin tlb_d_hit <= 1; data_ppn<=tlb_ppn[4]; bubble <= 1; pc <= pc - 4; tlb <= 0; end
-                if (tlb_vld[5] && tlb_vpn[5] ==ls_va[38:12]) begin tlb_d_hit <= 1; data_ppn<=tlb_ppn[5]; bubble <= 1; pc <= pc - 4; tlb <= 0; end
-                if (tlb_vld[6] && tlb_vpn[6] ==ls_va[38:12]) begin tlb_d_hit <= 1; data_ppn<=tlb_ppn[6]; bubble <= 1; pc <= pc - 4; tlb <= 0; end
-                if (tlb_vld[7] && tlb_vpn[7] ==ls_va[38:12]) begin tlb_d_hit <= 1; data_ppn<=tlb_ppn[7]; bubble <= 1; pc <= pc - 4; tlb <= 0; end
-		//if (!tlb_d_hit) begin 
-		//    mmu_da <= 1; // MMU_DA ON
-		//    pc <= 28; // D-TLB refill Handler
-	 	//    bubble <= 1'b1; // bubble
-	        //    saved_user_pc <= pc - 4; // save pc EXE l/s/a
-		//    for (i=0;i<10;i=i+1) begin sre[i]<= re[i]; end // save re
-		//    re[9] <= ls_va; //save va to x1
-                //    //tlb_vpn_d[7] <= ls_va[38:12];
-		//    //if (op == 7'b0000011) re[9] <= rs1 + w_imm_i;
-		//    //if (op == 7'b0100011) re[9] <= rs1 + w_imm_s;
-		//    //if (op == 7'b0101111) re[9] <= rs1;
-		//    //Csrs[mstatus][MPIE] <= Csrs[mstatus][MIE]; // disable interrupt during shadow mmu walking
-		//    //Csrs[mstatus][MIE] <= 0;
-		//end
-
-	    end else if (!tlb_d_hit && !mmu_da && !mmu_pc) begin
+		tlb_d_hit = 0;
+                if (tlb_vld[0] && tlb_vpn[0] ==ls_va[38:12]) begin tlb_d_hit = 1; data_ppn=tlb_ppn[0]; bubble <= 1; pc <= pc - 4; tlb <= 0; end
+                if (tlb_vld[1] && tlb_vpn[1] ==ls_va[38:12]) begin tlb_d_hit = 1; data_ppn=tlb_ppn[1]; bubble <= 1; pc <= pc - 4; tlb <= 0; end
+                if (tlb_vld[2] && tlb_vpn[2] ==ls_va[38:12]) begin tlb_d_hit = 1; data_ppn=tlb_ppn[2]; bubble <= 1; pc <= pc - 4; tlb <= 0; end
+                if (tlb_vld[3] && tlb_vpn[3] ==ls_va[38:12]) begin tlb_d_hit = 1; data_ppn=tlb_ppn[3]; bubble <= 1; pc <= pc - 4; tlb <= 0; end
+                if (tlb_vld[4] && tlb_vpn[4] ==ls_va[38:12]) begin tlb_d_hit = 1; data_ppn=tlb_ppn[4]; bubble <= 1; pc <= pc - 4; tlb <= 0; end
+                if (tlb_vld[5] && tlb_vpn[5] ==ls_va[38:12]) begin tlb_d_hit = 1; data_ppn=tlb_ppn[5]; bubble <= 1; pc <= pc - 4; tlb <= 0; end
+                if (tlb_vld[6] && tlb_vpn[6] ==ls_va[38:12]) begin tlb_d_hit = 1; data_ppn=tlb_ppn[6]; bubble <= 1; pc <= pc - 4; tlb <= 0; end
+                if (tlb_vld[7] && tlb_vpn[7] ==ls_va[38:12]) begin tlb_d_hit = 1; data_ppn=tlb_ppn[7]; bubble <= 1; pc <= pc - 4; tlb <= 0; end
+		if (!tlb_d_hit) begin 
 		    mmu_da <= 1; // MMU_DA ON
 		    pc <= 28; // D-TLB refill Handler
 	 	    bubble <= 1'b1; // bubble
@@ -405,6 +379,7 @@ module riscv64(
 		    //if (op == 7'b0101111) re[9] <= rs1;
 		    //Csrs[mstatus][MPIE] <= Csrs[mstatus][MIE]; // disable interrupt during shadow mmu walking
 		    //Csrs[mstatus][MIE] <= 0;
+		end
 
 	    end else if (mmu_pc && ir == 32'b00110000001000000000000001110011) begin // end hiject mret & recover from shadow when see Mret
 		pc <= saved_user_pc; // recover from shadow when see Mret
@@ -444,7 +419,6 @@ module riscv64(
 		for (i=0;i<10;i=i+1) begin re[i]<= sre[i]; end // recover usr re
 		mmu_da <= 0; // MMU_DA OFF
 		//Csrs[mstatus][MIE] <= Csrs[mstatus][MPIE]; // set back interrupt status
-		tlb <= 1;
 		
             // Interrupt PLIC full (Platform-Level-Interrupt-Control)  MMIO
 	    end else if ((meip_interrupt || msip_interrupt) && Csrs[mstatus][MIE]==1) begin //mstatus[3] MIE
