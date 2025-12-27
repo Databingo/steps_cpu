@@ -144,8 +144,8 @@ end
 // Addressing signals
 always @(*) begin
 	if(cur[4:0] == IMODE[4:0])
-		addr[11:0] <= 12'h020; // MRS
-		//addr[11:0] <= 12'h030; // MRS CAS Latency 3
+		//addr[11:0] <= 12'h020; // MRS
+		addr[11:0] <= 12'h030; // MRS CAS Latency 3
 	else if(cur[4:0] == RACT[4:0] || cur[4:0] == WACT[4:0])
 		addr[11:0] <= avl_addr[19:8]; // Row Address
 	else if(cur[4:0] == IPALL[4:0])
