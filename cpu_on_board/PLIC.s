@@ -76,9 +76,31 @@ _start:
     li t1, 0x4847464544434241         # 'HGFEDCBA'
     sd t1, 0(s0)         
 
+    # -- lbu --
+    # Read it back
+    lbu a0, 0(s0) # A
+    lbu a1, 1(s0) # B
+    lbu a2, 2(s0) # C
+    lbu a3, 3(s0) # D
+    lbu a4, 4(s0) # E
+    lbu a5, 5(s0) # F
+    lbu a6, 6(s0) # G
+    lbu a7, 7(s0) # H
+
+    # Print it
+    sb a0, 0(t0)         # Should print 'A'
+    sb a1, 0(t0)         # Should print 'B'
+    sb a2, 0(t0)         # Should print 'C'
+    sb a3, 0(t0)         # Should print 'D'
+    sb a4, 0(t0)         # Should print 'E'
+    sb a5, 0(t0)         # Should print 'F'
+    sb a6, 0(t0)         # Should print 'G'
+    sb a7, 0(t0)         # Should print 'H'
+    sb t2, 0(t0)         # Should print 'X'
+
+    # -- ld --
     # Read it back       # test sdram ld
     ld a0, 0(s0)
-
 
     sb a0, 0(t0)         # Should print 'A'
     srli a0, a0, 8
@@ -100,6 +122,7 @@ _start:
     # Write one byte
     li t1, 0x41          # 'A'
     sb t1, 0(s0)         # test sdarm sb
+    # Write one byte
     li t1, 0x42          # 'B'
     sb t1, 1(s0)         # test sdarm sb+1
 
@@ -113,7 +136,7 @@ _start:
     #slli a1, a1, 60          # mmu mode sv39 #li a1, 0x8000000000000000 # mmu mode sv39
     #csrrw a3, satp, a1      # set satp csr index 0x180
 
-
+    # Read it back       
     lb a0, 1(s0)         # test sdram ld+1
     sb a0, 0(t0)         # Should print 'B'
     
