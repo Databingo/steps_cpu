@@ -26,7 +26,8 @@ module riscv64(
     (* keep = 1 *) reg [63:0] pc;
     reg check=0;
     reg tlb=0;
-    wire [31:0] ir;
+    //wire [31:0] ir;
+    reg [31:0] ir;
 // -- new --
     reg [63:0] re [0:31]; // General Registers 32s
     reg [63:0] sre [0:9]; // Shadow Registers 10s
@@ -295,15 +296,15 @@ module riscv64(
    //         //else ir <= 32'h00000013; // TLB miss or Cache miss: Nop(stall)
    //     end
    // end
-    assign ir = instruction;
-    //always @(*) begin
-    //    if (!reset) begin 
-    //        heartbeat = 1'b0; 
-    //        ir = 32'h00000001; 
-    //    end else begin
-    //        ir = instruction;
-    //    end
-    //end
+    //assign ir = instruction;
+    always @(posedge clk or negedge reset) begin
+        if (!reset) begin 
+            heartbeat <= 1'b0; 
+            ir <= 32'h00000001; 
+        end else begin
+            ir <= instruction;
+        end
+    end
 
     // EXE Instruction 
     always @(posedge clk or negedge reset) begin
