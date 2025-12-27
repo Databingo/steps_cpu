@@ -14,7 +14,7 @@
    <frequency preferredWidth="248" />
   </columns>
  </clocktable>
- <library expandedCategories="Library,Project" />
+ <library expandedCategories="Library/PLL,Project,Library" />
  <window width="1100" height="747" x="77" y="53" />
  <hdlexample language="VERILOG" />
  <generation path="sdram" />
