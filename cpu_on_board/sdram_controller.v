@@ -83,7 +83,7 @@ always @(*) begin
 		IPALL  : next[4:0] <= IDELAY1[4:0];
 		IDELAY1: next[4:0] <= IREF[4:0];
 		IREF   : next[4:0] <= IDELAY2[4:0];
-		IDELAY2: next[4:0] <= IDELAY3[4:0];
+		//IDELAY2: next[4:0] <= IDELAY3[4:0];
 		IDELAY3: next[4:0] <= init_RefMax ? IMODE[4:0] : IDELAY1[4:0];
 		IMODE  : next[4:0] <= HALT[4:0];
 		HALT   : 
