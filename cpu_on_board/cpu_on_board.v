@@ -62,65 +62,29 @@ reg sdram_read_en;
 wire [15:0] sdram_rddata;   
 wire        sdram_req_wait;
 
-//sdram_controller sdram_ctrl (
-//    .sys_clk(CLOCK_50),
-//    .rstn(KEY0),
-//    // to bus (software)
-//    .avl_addr(sdram_addr),
-//    .avl_byte_en(sdram_byte_en),
-//    .avl_WRITEen(sdram_write_en),
-//    .avl_READen(sdram_read_en),
-//    .avl_WRDATA(sdram_wrdata),
-//    .avl_RDDATA(sdram_rddata),
-//    .avl_req_wait(sdram_req_wait),
-//    // to pin (hardware)
-//    .addr(DRAM_ADDR),        // new_sdram_controller_0_wire.addr
-//    .BA(DRAM_BA),            //                            .ba
-//    .CASn(DRAM_CAS_N),       //                            .cas_n
-//    .CSn(DRAM_CS_N),         //                            .cs_n
-//    .DQ(DRAM_DQ),            //                            .dq
-//    .DQM(DRAM_DQM),          //                            .dqm
-//    .RASn(DRAM_RAS_N),       //                            .ras_n
-//    .WEn(DRAM_WE_N)          //                            .we_n
-//);
+sdram_controller sdram_ctrl (
+    .sys_clk(CLOCK_50),
+    .rstn(KEY0),
+    // to bus (software)
+    .avl_addr(sdram_addr),
+    .avl_byte_en(sdram_byte_en),
+    .avl_WRITEen(sdram_write_en),
+    .avl_READen(sdram_read_en),
+    .avl_WRDATA(sdram_wrdata),
+    .avl_RDDATA(sdram_rddata),
+    .avl_req_wait(sdram_req_wait),
+    // to pin (hardware)
+    .addr(DRAM_ADDR),        // new_sdram_controller_0_wire.addr
+    .BA(DRAM_BA),            //                            .ba
+    .CASn(DRAM_CAS_N),       //                            .cas_n
+    .CSn(DRAM_CS_N),         //                            .cs_n
+    .DQ(DRAM_DQ),            //                            .dq
+    .DQM(DRAM_DQM),          //                            .dqm
+    .RASn(DRAM_RAS_N),       //                            .ras_n
+    .WEn(DRAM_WE_N)          //                            .we_n
+);
 assign DRAM_CLK = CLOCK_50;
-//assign DRAM_CKE = 1; // always enable
-
-    sdram u0 (
-        .clk_clk                                 (CLOCK_50),                                 //                         clk.clk
-        .reset_reset_n                           (KEY0),                           //                       reset.reset_n
-        .new_sdram_controller_0_s1_address       (sdram_addr),       //   new_sdram_controller_0_s1.address
-        .new_sdram_controller_0_s1_byteenable_n  (~sdram_byte_en),  //                            .byteenable_n
-        .new_sdram_controller_0_s1_chipselect    (1'b1),    //                            .chipselect
-        .new_sdram_controller_0_s1_writedata     (sdram_wrdata),     //                            .writedata
-        .new_sdram_controller_0_s1_read_n        (~sdram_read_en),        //                            .read_n
-        .new_sdram_controller_0_s1_write_n       (~sdram_write_en),       //                            .write_n
-        .new_sdram_controller_0_s1_readdata      (sdram_rddata),      //                            .readdata
-        .new_sdram_controller_0_s1_readdatavalid (), //                            .readdatavalid
-        .new_sdram_controller_0_s1_waitrequest   (sdram_req_wait),   //                            .waitrequest
-        .new_sdram_controller_0_wire_addr        (DRAM_ADDR),        // new_sdram_controller_0_wire.addr
-        .new_sdram_controller_0_wire_ba          (DRAM_BA),          //                            .ba
-        .new_sdram_controller_0_wire_cas_n       (DRAM_CAS_N),       //                            .cas_n
-        .new_sdram_controller_0_wire_cke         (DRAM_CKE ),         //                            .cke
-        .new_sdram_controller_0_wire_cs_n        (DRAM_CS_N),        //                            .cs_n
-        .new_sdram_controller_0_wire_dq          (DRAM_DQ),          //                            .dq
-        .new_sdram_controller_0_wire_dqm         (DRAM_DQM),         //                            .dqm
-        .new_sdram_controller_0_wire_ras_n       (DRAM_RAS_N),       //                            .ras_n
-        .new_sdram_controller_0_wire_we_n        (DRAM_WE_N)         //                            .we_n
-    );
-
-
-
-
-
-
-
-
-
-
-
-
-
+assign DRAM_CKE = 1; // always enable
 
     // -- MEM -- minic L1 cache
     (* ram_style = "block" *) reg [31:0] Cache [0:2000];
