@@ -26,8 +26,7 @@ module riscv64(
     (* keep = 1 *) reg [63:0] pc;
     reg check=0;
     reg tlb=0;
-    //wire [31:0] ir;
-    reg [31:0] ir;
+    wire [31:0] ir;
 // -- new --
     reg [63:0] re [0:31]; // General Registers 32s
     reg [63:0] sre [0:9]; // Shadow Registers 10s
@@ -173,7 +172,7 @@ module riscv64(
     wire time_interrupt = (mtime >= mtimecmp);
       
     // -- Innerl signal --
-    reg [1:0] bubble;
+    reg bubble;
     reg [1:0] load_step;
     reg [1:0] store_step;
 
@@ -296,21 +295,21 @@ module riscv64(
    //         //else ir <= 32'h00000013; // TLB miss or Cache miss: Nop(stall)
    //     end
    // end
-    //assign ir = instruction;
-    always @(posedge clk or negedge reset) begin
-        if (!reset) begin 
-            heartbeat <= 1'b0; 
-            ir <= 32'h00000001; 
-        end else begin
-            ir <= instruction;
-        end
-    end
+    assign ir = instruction;
+    //always @(*) begin
+    //    if (!reset) begin 
+    //        heartbeat = 1'b0; 
+    //        ir = 32'h00000001; 
+    //    end else begin
+    //        ir = instruction;
+    //    end
+    //end
 
     // EXE Instruction 
     always @(posedge clk or negedge reset) begin
         if (!reset) begin 
 	    current_privilege_mode <= M_mode;
-	    bubble <= 0;
+	    bubble <= 1'b0;
 	    pc <= `Ram_base;
 	    load_step <= 0;
 	    store_step <= 0;
@@ -341,33 +340,36 @@ module riscv64(
 	    if (satp_mmu && !mmu_pc && !mmu_da && !tlb_i_hit) begin //OPEN 
        		mmu_pc <= 1; // MMU_PC ON 
        	        pc <= 0; // I-TLB refill Handler
-       	 	bubble <= 2; // bubble 
+       	 	bubble <= 1'b1; // bubble 
 	        saved_user_pc <= pc - 4; // !!! save pc (EXE was flushed so record-redo it, previous pc)
-	        if (bubble==2) saved_user_pc <= pc ; // !!! save pc (j/b EXE was flushed currectly)
+	        if (bubble) saved_user_pc <= pc ; // !!! save pc (j/b EXE was flushed currectly)
 		for (i=0;i<=9;i=i+1) begin sre[i]<= re[i]; end // save re
 		re[9] <= pc;// - 4; // save this vpc to x1 //!!!! We also need to refill pc - 4' ppc for re-executeing pc-4, with hit(if satp in for very next sfence.vma) 
 		//Csrs[mstatus][MPIE] <= Csrs[mstatus][MIE]; // disable interrupt during shadow mmu walking
 		//Csrs[mstatus][MIE] <= 0;
 
             // Bubble
-	    end else if (bubble) begin bubble <= bubble-1; // Flush this cycle & Clear bubble signal for the next cycle
+	    end else if (bubble) begin bubble <= 1'b0; // Flush this cycle & Clear bubble signal for the next cycle
 
 	    end else if (tlb && !mmu_da && !mmu_pc) begin
-		tlb_d_hit = 0;
 		//if hit
-                if (tlb_vld[0] && tlb_vpn[0] ==ls_va[38:12]) begin tlb_d_hit = 1; data_ppn=tlb_ppn[0]; bubble <= 2; pc <= pc - 4; tlb <= 0; end
-                if (tlb_vld[1] && tlb_vpn[1] ==ls_va[38:12]) begin tlb_d_hit = 1; data_ppn=tlb_ppn[1]; bubble <= 2; pc <= pc - 4; tlb <= 0; end
-                if (tlb_vld[2] && tlb_vpn[2] ==ls_va[38:12]) begin tlb_d_hit = 1; data_ppn=tlb_ppn[2]; bubble <= 2; pc <= pc - 4; tlb <= 0; end
-                if (tlb_vld[3] && tlb_vpn[3] ==ls_va[38:12]) begin tlb_d_hit = 1; data_ppn=tlb_ppn[3]; bubble <= 2; pc <= pc - 4; tlb <= 0; end
-                if (tlb_vld[4] && tlb_vpn[4] ==ls_va[38:12]) begin tlb_d_hit = 1; data_ppn=tlb_ppn[4]; bubble <= 2; pc <= pc - 4; tlb <= 0; end
-                if (tlb_vld[5] && tlb_vpn[5] ==ls_va[38:12]) begin tlb_d_hit = 1; data_ppn=tlb_ppn[5]; bubble <= 2; pc <= pc - 4; tlb <= 0; end
-                if (tlb_vld[6] && tlb_vpn[6] ==ls_va[38:12]) begin tlb_d_hit = 1; data_ppn=tlb_ppn[6]; bubble <= 2; pc <= pc - 4; tlb <= 0; end
-                if (tlb_vld[7] && tlb_vpn[7] ==ls_va[38:12]) begin tlb_d_hit = 1; data_ppn=tlb_ppn[7]; bubble <= 2; pc <= pc - 4; tlb <= 0; end
-		//if not hit
+         //     if      (tlb_vld[0] && tlb_vpn[0] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[0]; end
+	//	if (tlb_vpn_d[7] == ls_va[38:12]) begin bubble <= 1; tlb <= 0; pc <= pc - 4; end
+                //for (i=0;i<8;i=i+1) begin if (data_vpn == tlb_vpn[i]) begin tlb_d_hit = 1; data_ppn=tlb_ppn[i]; bubble <= 1; pc <= pc - 4; tlb <= 0; end end
+		//XXXABCDX*^^ABCDEFHXABCDEDHXAB|01^2^3^
+		tlb_d_hit = 0;
+                if (tlb_vld[0] && tlb_vpn[0] ==ls_va[38:12]) begin tlb_d_hit = 1; data_ppn=tlb_ppn[0]; bubble <= 1; pc <= pc - 4; tlb <= 0; end
+                if (tlb_vld[1] && tlb_vpn[1] ==ls_va[38:12]) begin tlb_d_hit = 1; data_ppn=tlb_ppn[1]; bubble <= 1; pc <= pc - 4; tlb <= 0; end
+                if (tlb_vld[2] && tlb_vpn[2] ==ls_va[38:12]) begin tlb_d_hit = 1; data_ppn=tlb_ppn[2]; bubble <= 1; pc <= pc - 4; tlb <= 0; end
+                if (tlb_vld[3] && tlb_vpn[3] ==ls_va[38:12]) begin tlb_d_hit = 1; data_ppn=tlb_ppn[3]; bubble <= 1; pc <= pc - 4; tlb <= 0; end
+                if (tlb_vld[4] && tlb_vpn[4] ==ls_va[38:12]) begin tlb_d_hit = 1; data_ppn=tlb_ppn[4]; bubble <= 1; pc <= pc - 4; tlb <= 0; end
+                if (tlb_vld[5] && tlb_vpn[5] ==ls_va[38:12]) begin tlb_d_hit = 1; data_ppn=tlb_ppn[5]; bubble <= 1; pc <= pc - 4; tlb <= 0; end
+                if (tlb_vld[6] && tlb_vpn[6] ==ls_va[38:12]) begin tlb_d_hit = 1; data_ppn=tlb_ppn[6]; bubble <= 1; pc <= pc - 4; tlb <= 0; end
+                if (tlb_vld[7] && tlb_vpn[7] ==ls_va[38:12]) begin tlb_d_hit = 1; data_ppn=tlb_ppn[7]; bubble <= 1; pc <= pc - 4; tlb <= 0; end
 		if (!tlb_d_hit) begin 
 		    mmu_da <= 1; // MMU_DA ON
 		    pc <= 28; // D-TLB refill Handler
-	 	    bubble <= 2; // bubble
+	 	    bubble <= 1'b1; // bubble
 	            saved_user_pc <= pc - 4; // save pc EXE l/s/a
 		    for (i=0;i<10;i=i+1) begin sre[i]<= re[i]; end // save re
 		    re[9] <= ls_va; //save va to x1
@@ -381,7 +383,7 @@ module riscv64(
 
 	    end else if (mmu_pc && ir == 32'b00110000001000000000000001110011) begin // end hiject mret & recover from shadow when see Mret
 		pc <= saved_user_pc; // recover from shadow when see Mret
-	 	bubble <= 2; // bubble
+	 	bubble <= 1'b1; // bubble
 		for (i=0;i<10;i=i+1) begin re[i]<= sre[i]; end // recover usr re
 		mmu_pc <= 0; // MMU_PC OFF
 		//Csrs[mstatus][MIE] <= Csrs[mstatus][MPIE]; // set back interrupt status
@@ -390,7 +392,7 @@ module riscv64(
 	    //end else if (satp_mmu && !mmu_pc && !mmu_da && !check && (op == 7'b0000011 || op == 7'b0100011 || op == 7'b0101111) ) begin // end hiject mret & recover from shadow when see Mret
 	    end else if (satp_mmu && !mmu_pc && !mmu_da && !check && (op == 7'b0000011 || op == 7'b0100011 || op == 7'b0101111)) begin // end hiject mret & recover from shadow when see Mret
 		pc <= pc - 4; // recover from shadow when see Mret
-	 	bubble <= 2; // bubble
+	 	bubble <= 1'b1; // bubble
                 ls_va <= (op == 7'b0000011) ? (rs1 + w_imm_i) : (op == 7'b0100011) ? (rs1 + w_imm_s) : (op == 7'b0101111) ? rs1 : 64'h0; // load/jalr/store/atom
 		//pdat  <= (op == 7'b0000011) ? (rs1 + w_imm_i) : (op == 7'b0100011) ? (rs1 + w_imm_s) : (op == 7'b0101111) ? rs1 : 64'h0; // load/jalr/store/atom
 		check <= 1;
@@ -413,7 +415,7 @@ module riscv64(
 //		Csrs[mstatus][MIE] <= 0;
 	    end else if (mmu_da && ir == 32'b00110000001000000000000001110011) begin // hiject mret 
 		pc <= saved_user_pc; // recover from shadow when see Mret
-		bubble <= 2; // bubble
+		bubble <= 1; // bubble
 		for (i=0;i<10;i=i+1) begin re[i]<= sre[i]; end // recover usr re
 		mmu_da <= 0; // MMU_DA OFF
 		//Csrs[mstatus][MIE] <= Csrs[mstatus][MPIE]; // set back interrupt status
@@ -439,7 +441,7 @@ module riscv64(
                     if (time_interrupt) pc <= (Csrs[mtvec][BASE+61:BASE] << 2) + (MTIP << 2);
                     if (meip_interrupt) pc <= (Csrs[mtvec][BASE+61:BASE] << 2) + (MEIP << 2); 
 		end else pc <= (Csrs[mtvec][BASE+61:BASE] << 2);// jump to mtvec addrss (directly mode 0, need C or Assembly code of handlers deciding) 
-		bubble <= 2; // bubble wrong fetched instruciton by IF
+		bubble <= 1'b1; // bubble wrong fetched instruciton by IF
 		reserve_valid <= 0;// Interrupt clear lr.w/lr.d
 
 	    // IR
@@ -451,58 +453,59 @@ module riscv64(
                     // Load after TLB
 		    32'b???????_?????_?????_000_?????_0000011: begin  // Lb  3 cycles but wait to 5
 			//if (load_step == 0 && check == 0) begin ls_va <= rs1 + w_imm_i; check <= 1; bubble <= 1; pc <= pc - 4; end
-			if (load_step == 0) begin bus_address <= pda; bus_read_enable <= 1; pc <= pc - 4; bubble <= 2; load_step <= 1; bus_ls_type <= w_func3; end
-		        if (load_step == 1 && bus_read_done == 0) begin pc <= pc - 4; bubble <= 2; end // bus working
+			if (load_step == 0) begin bus_address <= pda; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; bus_ls_type <= w_func3; end
+		        if (load_step == 1 && bus_read_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working
 		        if (load_step == 1 && bus_read_done == 1) begin re[w_rd]<= $signed(bus_read_data[7:0]); load_step <= 0; if (!mmu_pc && !mmu_da) check <= 0; end end
 		    32'b???????_?????_?????_100_?????_0000011: begin  // Lbu  3 cycles
 			//if (load_step == 0 && check == 0) begin ls_va <= rs1 + w_imm_i; check <= 1; bubble <= 1; pc <= pc - 4; end
-			if (load_step == 0) begin bus_address <= pda; bus_read_enable <= 1; pc <= pc - 4; bubble <= 2; load_step <= 1; bus_ls_type <= w_func3; end
-		        if (load_step == 1 && bus_read_done == 0) begin pc <= pc - 4; bubble <= 2; end // bus working
+			if (load_step == 0) begin bus_address <= pda; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; bus_ls_type <= w_func3; end
+		        if (load_step == 1 && bus_read_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working
 			if (load_step == 1 && bus_read_done == 1) begin re[w_rd]<= $unsigned(bus_read_data[7:0]); load_step <= 0; if (!mmu_pc && !mmu_da) check <= 0; end end 
 		    32'b???????_?????_?????_001_?????_0000011: begin  // Lh 3 cycles
 			//if (load_step == 0 && check == 0) begin ls_va <= rs1 + w_imm_i; check <= 1; bubble <= 1; pc <= pc - 4; end
-			if (load_step == 0) begin bus_address <= pda; bus_read_enable <= 1; pc <= pc - 4; bubble <= 2; load_step <= 1; bus_ls_type <= w_func3; end
-		        if (load_step == 1 && bus_read_done == 0) begin pc <= pc - 4; bubble <= 2; end // bus working
+			if (load_step == 0) begin bus_address <= pda; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; bus_ls_type <= w_func3; end
+		        if (load_step == 1 && bus_read_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working
 			if (load_step == 1 && bus_read_done == 1) begin re[w_rd]<= $signed(bus_read_data[15:0]); load_step <= 0; if (!mmu_pc && !mmu_da) check <= 0; end end
 		    32'b???????_?????_?????_101_?????_0000011: begin   // Lhu 3 cycles
 			//if (load_step == 0 && check == 0) begin ls_va <= rs1 + w_imm_i; check <= 1; bubble <= 1; pc <= pc - 4; end
-			if (load_step == 0) begin bus_address <= pda; bus_read_enable <= 1; pc <= pc - 4; bubble <= 2; load_step <= 1; bus_ls_type <= w_func3; end
-		        if (load_step == 1 && bus_read_done == 0) begin pc <= pc - 4; bubble <= 2; end // bus working
+			if (load_step == 0) begin bus_address <= pda; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; bus_ls_type <= w_func3; end
+		        if (load_step == 1 && bus_read_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working
 			if (load_step == 1 && bus_read_done == 1) begin re[w_rd]<= $unsigned(bus_read_data[15:0]); load_step <= 0; if (!mmu_pc && !mmu_da) check <= 0; end end
 		    32'b???????_?????_?????_010_?????_0000011: begin  // Lw_mmu 3 cycles
-			//if (load_step == 0 && check == 0) begin ls_va <= rs1 + w_imm_i; check <= 1; bubble <= 1; pc <= pc - 4; end if (load_step == 0) begin bus_address <= pda; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; bus_ls_type <= w_func3; end
-		        if (load_step == 1 && bus_read_done == 0) begin pc <= pc - 4; bubble <= 2; end // bus working
+			//if (load_step == 0 && check == 0) begin ls_va <= rs1 + w_imm_i; check <= 1; bubble <= 1; pc <= pc - 4; end
+			if (load_step == 0) begin bus_address <= pda; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; bus_ls_type <= w_func3; end
+		        if (load_step == 1 && bus_read_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working
 			if (load_step == 1 && bus_read_done == 1) begin re[w_rd]<= $signed(bus_read_data[31:0]); load_step <= 0; if (!mmu_pc && !mmu_da) check <= 0; end end
 		    32'b???????_?????_?????_110_?????_0000011: begin  // Lwu_mmu 3 cycles
 			//if (load_step == 0 && check == 0) begin ls_va <= rs1 + w_imm_i; check <= 1; bubble <= 1; pc <= pc - 4; end
-			if (load_step == 0) begin bus_address <= pda; bus_read_enable <= 1; pc <= pc - 4; bubble <= 2; load_step <= 1; bus_ls_type <= w_func3; end
-		        if (load_step == 1 && bus_read_done == 0) begin pc <= pc - 4; bubble <= 2; end // bus working
+			if (load_step == 0) begin bus_address <= pda; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; bus_ls_type <= w_func3; end
+		        if (load_step == 1 && bus_read_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working
 			if (load_step == 1 && bus_read_done == 1) begin re[w_rd]<= $unsigned(bus_read_data[31:0]); load_step <= 0; if (!mmu_pc && !mmu_da) check <= 0; end end
 		    32'b???????_?????_?????_011_?????_0000011: begin   // Ld 5 cycles
 			//if (load_step == 0 && check == 0) begin ls_va <= rs1 + w_imm_i; check <= 1; bubble <= 1; pc <= pc - 4; end
-			if (load_step == 0) begin bus_address <= pda; bus_read_enable <= 1; pc <= pc - 4; bubble <= 2; load_step <= 1; bus_ls_type <= w_func3; end
-		        if (load_step == 1 && bus_read_done == 0) begin pc <= pc - 4; bubble <= 2; end // bus working 1 bubble2 this3
+			if (load_step == 0) begin bus_address <= pda; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; bus_ls_type <= w_func3; end
+		        if (load_step == 1 && bus_read_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working 1 bubble2 this3
 			if (load_step == 1 && bus_read_done == 1) begin re[w_rd]<= bus_read_data; load_step <= 0; if (!mmu_pc && !mmu_da) check <= 0; end end
 		    // Store after TLB
 	            32'b???????_?????_?????_000_?????_0100011: begin 
 			//if (store_step == 0 && check == 0) begin ls_va <= rs1 + w_imm_s; check <= 1; bubble <= 1; pc <= pc - 4; end
-		        if (store_step == 0) begin bus_address <= pda; bus_write_data<=rs2[7:0];bus_write_enable<=1;pc<=pc-4;bubble<=2;store_step<=1;bus_ls_type<=w_func3; end
-		        if (store_step == 1 && bus_write_done == 0) begin pc <= pc - 4; bubble <= 2; end // bus working 1 bubble2 this3
+		        if (store_step == 0) begin bus_address <= pda; bus_write_data<=rs2[7:0];bus_write_enable<=1;pc<=pc-4;bubble<=1;store_step<=1;bus_ls_type<=w_func3; end
+		        if (store_step == 1 && bus_write_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working 1 bubble2 this3
 			if (store_step == 1 && bus_write_done == 1) begin store_step <= 0; if (!mmu_pc && !mmu_da) check <= 0; end end //Sb
 	            32'b???????_?????_?????_001_?????_0100011: begin
 			//if (store_step == 0 && check == 0) begin ls_va <= rs1 + w_imm_s; check <= 1; bubble <= 1; pc <= pc - 4; end
-		        if (store_step == 0) begin bus_address <= pda; bus_write_data<=rs2[15:0];bus_write_enable<=1;pc<=pc-4;bubble<=2;store_step<=1;bus_ls_type<=w_func3; end
-		        if (store_step == 1 && bus_write_done == 0) begin pc <= pc - 4; bubble <= 2; end // bus working 1 bubble2 this3
+		        if (store_step == 0) begin bus_address <= pda; bus_write_data<=rs2[15:0];bus_write_enable<=1;pc<=pc-4;bubble<=1;store_step<=1;bus_ls_type<=w_func3; end
+		        if (store_step == 1 && bus_write_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working 1 bubble2 this3
 			if (store_step == 1 && bus_write_done == 1) begin store_step <= 0; if (!mmu_pc && !mmu_da) check <= 0; end end //Sh
 	            32'b???????_?????_?????_010_?????_0100011: begin
 			//if (store_step == 0 && check == 0) begin ls_va <= rs1 + w_imm_s; check <= 1; bubble <= 1; pc <= pc - 4; end
-		        if (store_step == 0) begin bus_address <= pda; bus_write_data<=rs2[31:0];bus_write_enable<=1;pc<=pc-4;bubble<=2;store_step<=1;bus_ls_type<=w_func3; end
-		        if (store_step == 1 && bus_write_done == 0) begin pc <= pc - 4; bubble <= 2; end // bus working 1 bubble2 this3
+		        if (store_step == 0) begin bus_address <= pda; bus_write_data<=rs2[31:0];bus_write_enable<=1;pc<=pc-4;bubble<=1;store_step<=1;bus_ls_type<=w_func3; end
+		        if (store_step == 1 && bus_write_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working 1 bubble2 this3
 			if (store_step == 1 && bus_write_done == 1) begin store_step <= 0; if (!mmu_pc && !mmu_da) check <= 0; end end //Sw
 	            32'b???????_?????_?????_011_?????_0100011: begin 
 			//if (store_step == 0 && check == 0) begin ls_va <= rs1 + w_imm_s; check <= 1; bubble <= 1; pc <= pc - 4; end
-		        if (store_step == 0) begin bus_address <= pda; bus_write_data<=rs2;bus_write_enable<=1;pc<=pc-4;bubble<=2;store_step<=1;bus_ls_type<=w_func3; end
-		        if (store_step == 1 && bus_write_done == 0) begin pc <= pc - 4; bubble <= 2; end // bus working 1 bubble2 this3
+		        if (store_step == 0) begin bus_address <= pda; bus_write_data<=rs2;bus_write_enable<=1;pc<=pc-4;bubble<=1;store_step<=1;bus_ls_type<=w_func3; end
+		        if (store_step == 1 && bus_write_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working 1 bubble2 this3
 			if (store_step == 1 && bus_write_done == 1) begin store_step <= 0; if (!mmu_pc && !mmu_da) check <= 0; end end //Sd
                 //    // Load after TLB
 		//    32'b???????_?????_?????_000_?????_0000011: begin  // Lb  3 cycles but wait to 5
@@ -583,15 +586,15 @@ module riscv64(
                     32'b0000000_?????_?????_101_?????_0111011: re[w_rd] <= $signed(rs1[31:0] >> rs2[4:0]);  // Srlw 5 length
 	            32'b0100000_?????_?????_101_?????_0111011: re[w_rd] <= $signed(rs1[31:0]) >>> rs2[4:0]; // Sraw 5 length
                     // Jump
-	            32'b???????_?????_?????_???_?????_1101111: begin pc <= pc - 4 + w_imm_j; if (w_rd != 5'b0) re[w_rd] <= pc; bubble <= 2; end // Jal
-	            32'b???????_?????_?????_???_?????_1100111: begin pc <= (re[w_rs1] + w_imm_i) & 64'hFFFFFFFFFFFFFFFE; if (w_rd != 5'b0) re[w_rd] <= pc; bubble <= 2; end // Jalr
+	            32'b???????_?????_?????_???_?????_1101111: begin pc <= pc - 4 + w_imm_j; if (w_rd != 5'b0) re[w_rd] <= pc; bubble <= 1'b1; end // Jal
+	            32'b???????_?????_?????_???_?????_1100111: begin pc <= (re[w_rs1] + w_imm_i) & 64'hFFFFFFFFFFFFFFFE; if (w_rd != 5'b0) re[w_rd] <= pc; bubble <= 1; end // Jalr
                     // Branch 
-		    32'b???????_?????_?????_000_?????_1100011: begin if (re[w_rs1] == re[w_rs2]) begin pc <= pc - 4 + w_imm_b; bubble <= 2; end end // Beq
-		    32'b???????_?????_?????_001_?????_1100011: begin if (re[w_rs1] != re[w_rs2]) begin pc <= pc - 4 + w_imm_b; bubble <= 2; end end // Bne
-		    32'b???????_?????_?????_100_?????_1100011: begin if ($signed(re[w_rs1]) < $signed(re[w_rs2])) begin pc <= pc - 4 + w_imm_b; bubble <= 2; end end // Blt
-		    32'b???????_?????_?????_101_?????_1100011: begin if ($signed(re[w_rs1]) >= $signed(re[w_rs2])) begin pc <= pc - 4 + w_imm_b; bubble <= 2; end end // Bge
-		    32'b???????_?????_?????_110_?????_1100011: begin if ($unsigned(re[w_rs1]) < $unsigned(re[w_rs2])) begin pc <= pc - 4 + w_imm_b; bubble <= 2; end end // Bltu
-		    32'b???????_?????_?????_111_?????_1100011: begin if ($unsigned(re[w_rs1]) >= $unsigned(re[w_rs2])) begin pc <= pc - 4 + w_imm_b; bubble <= 2; end end // Bgeu
+		    32'b???????_?????_?????_000_?????_1100011: begin if (re[w_rs1] == re[w_rs2]) begin pc <= pc - 4 + w_imm_b; bubble <= 1'b1; end end // Beq
+		    32'b???????_?????_?????_001_?????_1100011: begin if (re[w_rs1] != re[w_rs2]) begin pc <= pc - 4 + w_imm_b; bubble <= 1'b1; end end // Bne
+		    32'b???????_?????_?????_100_?????_1100011: begin if ($signed(re[w_rs1]) < $signed(re[w_rs2])) begin pc <= pc - 4 + w_imm_b; bubble <= 1'b1; end end // Blt
+		    32'b???????_?????_?????_101_?????_1100011: begin if ($signed(re[w_rs1]) >= $signed(re[w_rs2])) begin pc <= pc - 4 + w_imm_b; bubble <= 1'b1; end end // Bge
+		    32'b???????_?????_?????_110_?????_1100011: begin if ($unsigned(re[w_rs1]) < $unsigned(re[w_rs2])) begin pc <= pc - 4 + w_imm_b; bubble <= 1'b1; end end // Bltu
+		    32'b???????_?????_?????_111_?????_1100011: begin if ($unsigned(re[w_rs1]) >= $unsigned(re[w_rs2])) begin pc <= pc - 4 + w_imm_b; bubble <= 1'b1; end end // Bgeu
 		    // System-CSR 
 	            32'b???????_?????_?????_001_?????_1110011: begin if (w_rd != 0) re[w_rd] <= Csrs[w_csr_id]; Csrs[w_csr_id] <= rs1; end // Csrrw  bram read first old data
 	            32'b???????_?????_?????_010_?????_1110011: begin if (w_rd != 0) re[w_rd] <= Csrs[w_csr_id]; if (w_rs1 != 0) Csrs[w_csr_id] <= (Csrs[w_csr_id] |  rs1); end // Csrrs
@@ -616,7 +619,7 @@ module riscv64(
 							   if (Csrs[stvec][MODE+1:MODE] == 0) pc <= (Csrs[stvec][BASE+61:BASE] << 2); // directly  
 							   else  pc <= (Csrs[stvec][BASE+61:BASE] << 2) + (CAUSE_CODE << 2); // vectorily BASE & CAUSE_CODE are 4 bytes aligned already number need << 2
 	                 				   current_privilege_mode <= S_mode;
-		    				           bubble <= 2;
+		    				           bubble <= 1'b1;
 	                 			       end
 	                 			       else begin // Trap into M-mode
 	                 			           Csrs[mcause][INTERRUPT] <= 0; //63_type 0exception 1interrupt|value
@@ -629,7 +632,7 @@ module riscv64(
 							   else  pc <= (Csrs[mtvec][BASE+61:BASE] << 2) + (CAUSE_CODE << 2); // vectorily
 	                 				   Csrs[mstatus][MPP+1:MPP] <= current_privilege_mode; // save privilege mode to MPP 
 	                 				   current_privilege_mode <= M_mode;  // set current privilege mode
-		    				           bubble <= 2;
+		    				           bubble <= 1'b1;
 	                 			       end
 	                 			   end
                     // Ebreak
@@ -647,7 +650,7 @@ module riscv64(
 							   if (Csrs[stvec][MODE+1:MODE] == 0) pc <= (Csrs[stvec][BASE+61:BASE] << 2); // directly  
 							   else  pc <= (Csrs[stvec][BASE+61:BASE] << 2) + (BREAK << 2); // vectorily BASE & CAUSE_CODE are 4 bytes aligned already number need << 2
 	                 				   current_privilege_mode <= S_mode;
-		    				           bubble <= 2;
+		    				           bubble <= 1'b1;
 	                 			       end
 	                 			       else begin // Trap into M-mode
 	                 			           Csrs[mcause][INTERRUPT] <= 0; //63_type 0exception 1interrupt|value
@@ -660,7 +663,7 @@ module riscv64(
 							   else  pc <= (Csrs[mtvec][BASE+61:BASE] << 2) + (BREAK << 2); // vectorily
 	                 				   Csrs[mstatus][MPP+1:MPP] <= current_privilege_mode; // save privilege mode to MPP 
 	                 				   current_privilege_mode <= M_mode;  // set current privilege mode
-		    				           bubble <= 2;
+		    				           bubble <= 1'b1;
 	                 			       end
 	                 			   end
                     // Mret
@@ -671,7 +674,7 @@ module riscv64(
 	               			       current_privilege_mode  <= Csrs[mstatus][MPP+1:MPP]; // set back previous mode
 	               			       Csrs[mstatus][MPP+1:MPP] <= 2'b00; // set previous privilege mode(MPP) to be 00 (U-mode)
 	               			       pc <=  Csrs[mepc]; // mepc was +4 by the software handler and written back to sepc
-		          		       bubble <= 2;
+		          		       bubble <= 1'b1;
 	               			       end
                     // Sret
 	            32'b0001000_00010_?????_000_?????_1110011: begin      
@@ -681,7 +684,7 @@ module riscv64(
 					       else current_privilege_mode  <= S_mode;
 	               			       Csrs[sstatus][SPP] <= 0; // set previous privilege mode(SPP) to be 0 (U-mode)
 	               			       pc <=  Csrs[sepc]; // sepc was +4 by the software handler and written back to sepc
-		          		       bubble <= 2;
+		          		       bubble <= 1'b1;
 	               			       end 
 		//    // Wfi
 		//    32'b00010000010100000000000001110011: begin end
