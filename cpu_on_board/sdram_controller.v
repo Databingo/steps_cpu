@@ -87,6 +87,7 @@ always @(*) begin
 		IPALL  : next[4:0] <= IDELAY1[4:0];
 		IDELAY1: next[4:0] <= IREF[4:0];
 		IREF   : next[4:0] <= IDELAY2[4:0];
+		IDELAY2: next[4:0] <= IDELAY3[4:0];
 		IDELAY3: 
 			if(init_RefMax == 1'b1) // the initial refresh opertion will be run eight times
 				next[4:0] <= IMODE[4:0];

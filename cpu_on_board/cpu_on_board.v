@@ -54,7 +54,7 @@ module cpu_on_board (
 
 reg [21:0] sdram_addr;
 reg [15:0] sdram_wrdata;
-reg [1:0]  sdram_byte_en; // Enable all bytes;
+reg [1:0]  sdram_byte_en; // Enable all bytes (active low);
 // Control
 reg sdram_write_en;
 reg sdram_read_en;
@@ -259,8 +259,8 @@ assign DRAM_CKE = 1; // always enable
         if (!KEY0) begin
             bus_read_done <= 1;
             bus_write_done <= 1;
-	    bus_address_reg <= 64'h0;
-	    bus_address_reg_full <= 64'h0;
+	    bus_address_reg <= 0;
+	    bus_address_reg_full <= 0;
 	    next_addr <= 0;
 	    step <= 0;
 	    bus_read_data <= 0;
@@ -313,8 +313,7 @@ assign DRAM_CKE = 1; // always enable
 	    if (Sdram_selected) begin
 		case(bus_ls_type)
 	            3'b000: begin //lb
-			   //sdram_addr <= bus_address[22:1]; sdram_byte_en <= bus_address[0] ? 2'b10 : 2'b01; sdram_read_en <= 1; 
-			   sdram_addr <= bus_address[22:1]; sdram_byte_en <= 2'b11; sdram_read_en <= 1; 
+			   sdram_addr <= bus_address[22:1]; sdram_byte_en <= bus_address[0] ? 2'b10 : 2'b01; sdram_read_en <= 1; 
 			   if (sdram_req_wait==0) begin 
 			       case(bus_address[0])
 				   0: begin bus_read_data <= {{56{sdram_rddata[7]}}, sdram_rddata[7:0]}; end  // byte 0
@@ -324,8 +323,7 @@ assign DRAM_CKE = 1; // always enable
 			   end
 		    end
 	            3'b100: begin //lbu
-			   //sdram_addr <= bus_address[22:1]; sdram_byte_en <= bus_address[0] ? 2'b10 : 2'b01; sdram_read_en <= 1; 
-			   sdram_addr <= bus_address[22:1]; sdram_byte_en <= 2'b11; sdram_read_en <= 1; 
+			   sdram_addr <= bus_address[22:1]; sdram_byte_en <= bus_address[0] ? 2'b10 : 2'b01; sdram_read_en <= 1; 
 			   if (sdram_req_wait==0) begin 
 			       case(bus_address[0])
 				   0: begin bus_read_data <= {56'b0, sdram_rddata[7:0]}; end  // byte 0
