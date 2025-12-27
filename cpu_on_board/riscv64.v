@@ -4,6 +4,7 @@ module riscv64(
     input wire clk, 
     input wire reset,     // Active-low reset button
     input wire [31:0] instruction,
+
     output wire [63:0] ppc,
     output wire  heartbeat,
     output reg [63:0] bus_address,     // 39 bit for real Sv39 standard?
@@ -28,8 +29,8 @@ module riscv64(
     reg tlb=0;
     wire [31:0] ir;
 // -- new --
-    reg [63:0] re [0:31]; // General Registers 32s
-    reg [63:0] sre [0:9]; // Shadow Registers 10s
+   (* ram_style = "logic" * ) reg [63:0] re [0:31]; // General Registers 32s
+   (* ram_style = "logic" * ) reg [63:0] sre [0:9]; // Shadow Registers 10s
     reg mmu_da=0;
     reg mmu_pc = 0;
     reg mmu_cache_refill=0;
@@ -122,7 +123,7 @@ module riscv64(
 	endcase
     end
 
-    reg [63:0] Csrs [0:31]; // 32 CSRs for now
+    (* ram_style = "logic" * ) reg [63:0] Csrs [0:31]; // 32 CSRs for now
     wire [3:0]  satp_mmu  = Csrs[satp][63:60]; // 0:bare, 8:sv39, 9:sv48  satp.MODE!=0, privilegae is not M-mode, mstatus.MPRN is not set or in MPP's mode?
     wire [15:0] satp_asid = Csrs[satp][59:44]; // Address Space ID for TLB
     wire [43:0] satp_ppn  = Csrs[satp][43:0];  // Root Page Table PPN physical page number
