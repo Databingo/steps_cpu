@@ -193,7 +193,7 @@ assign DRAM_CKE = 1; // always enable
 
 
     // -- PLIC --
-    reg [2:0]  Plic_priority [0:5];  // 0x000 + 4 per id
+    (* ram_style = "logic" *) reg [2:0]  Plic_priority [0:5];  // 0x000 + 4 per id
     reg [31:0] Plic_pending; // 0x1000 Global pending Bitmap 
     reg [31:0] Plic_enable [0:1];  // 0x2000 per context +0x80
     reg [2:0]  Plic_threshold [0:1]; // 0x200000 4B per hart
