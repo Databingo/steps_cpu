@@ -79,20 +79,12 @@ end
 
 always @(*) begin
 	case (cur[4:0])
-		IWAIT  : 
-			if(i200cntup == 1'b1) 
-				next[4:0] <= IPALL[4:0];
-			else
-				next[4:0] <= IWAIT[4:0];
+		IWAIT  : next[4:0] <= i200cntup ? IPALL[4:0] : IWAIT[4:0];
 		IPALL  : next[4:0] <= IDELAY1[4:0];
 		IDELAY1: next[4:0] <= IREF[4:0];
-		IREF   : next[4:0] <= IDELAY2[4:0];
-		IDELAY2: next[4:0] <= IDELAY3[4:0];
-		IDELAY3: 
-			if(init_RefMax == 1'b1) // the initial refresh opertion will be run eight times
-				next[4:0] <= IMODE[4:0];
-			else
-				next[4:0] <= IDELAY1[4:0];
+		IREF   : next[4:0] <= IDELAY3[4:0];
+		//IDELAY2: next[4:0] <= IDELAY3[4:0];
+		IDELAY3: next[4:0] <= init_RefMax ? IMODE[4:0] : IDELAY1[4:0];
 		IMODE  : next[4:0] <= HALT[4:0];
 		HALT   : 
 			if(ref_cnt[8:0] >= RefMax[8:0])
@@ -144,8 +136,8 @@ end
 // Addressing signals
 always @(*) begin
 	if(cur[4:0] == IMODE[4:0])
-		//addr[11:0] <= 12'h020; // MRS
-		addr[11:0] <= 12'h030; // MRS CAS Latency 3
+		addr[11:0] <= 12'h020; // MRS
+		//addr[11:0] <= 12'h030; // MRS CAS Latency 3
 	else if(cur[4:0] == RACT[4:0] || cur[4:0] == WACT[4:0])
 		addr[11:0] <= avl_addr[19:8]; // Row Address
 	else if(cur[4:0] == IPALL[4:0])
