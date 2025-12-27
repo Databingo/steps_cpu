@@ -21,7 +21,7 @@ parameter IWAIT=5'd0, IPALL=5'd1, IDELAY1=5'd2, IREF=5'd3, IDELAY2=5'd4, IDELAY3
 parameter RACT=5'd7, RDELAY1=5'd8, RDA=5'd9, RDELAY2=5'd10, RDELAY3=5'd11, HALT=5'd12;
 parameter WACT=5'd13, WDELAY1=5'd14, WRA=5'd15, WDELAY2=5'd16;
 parameter FREF=5'd17, FDELAY=5'd18;
-parameter RDELAY4=5'd19;
+//parameter RDELAY4=5'd19;
 
 reg [4:0] cur, next;
 
@@ -107,8 +107,8 @@ always @(*) begin
 		RDELAY1: next[4:0] <= RDA[4:0];
 		RDA    : next[4:0] <= RDELAY2[4:0];
 		RDELAY2: next[4:0] <= RDELAY3[4:0];
-		RDELAY3: next[4:0] <= RDELAY4[4:0];
-		RDELAY4: next[4:0] <= HALT[4:0];
+		//RDELAY3: next[4:0] <= RDELAY4[4:0];
+		RDELAY3: next[4:0] <= HALT[4:0];
 
 		// Refresh operation
 		FREF   : next[4:0] <= FDELAY[4:0];
@@ -138,8 +138,8 @@ end
 // Addressing signals
 always @(*) begin
 	if(cur[4:0] == IMODE[4:0])
-		//addr[11:0] <= 12'h020; // MRS
-		addr[11:0] <= 12'h030; // MRS CAS Latency 3
+		addr[11:0] <= 12'h020; // MRS
+		//addr[11:0] <= 12'h030; // MRS CAS Latency 3
 	else if(cur[4:0] == RACT[4:0] || cur[4:0] == WACT[4:0])
 		addr[11:0] <= avl_addr[19:8]; // Row Address
 	else if(cur[4:0] == IPALL[4:0])
@@ -166,6 +166,7 @@ end
 assign DQ[15:0] = (cur[4:0] == WRA[4:0]) ? avl_WRDATA[15:0] : 16'hzzzz;
 assign DQM[1:0] = ~avl_byte_en[1:0]; 
 assign avl_RDDATA[15:0] = DQ[15:0];
-assign avl_req_wait = (cur[4:0] == RDELAY4[4:0] || cur[4:0] == WDELAY2[4:0]) ? 1'b0 : 1'b1;
+//assign avl_req_wait = (cur[4:0] == RDELAY4[4:0] || cur[4:0] == WDELAY2[4:0]) ? 1'b0 : 1'b1;
+assign avl_req_wait = (cur[4:0] == RDELAY3[4:0] || cur[4:0] == WDELAY2[4:0]) ? 1'b0 : 1'b1;
 
 endmodule
