@@ -83,7 +83,7 @@ always @(*) begin
 		IPALL  : next[4:0] <= IDELAY1[4:0];
 		IDELAY1: next[4:0] <= IREF[4:0];
 		IREF   : next[4:0] <= IDELAY2[4:0];
-		//IDELAY2: next[4:0] <= IDELAY3[4:0];
+		IDELAY2: next[4:0] <= IDELAY3[4:0];
 		IDELAY3: next[4:0] <= init_RefMax ? IMODE[4:0] : IDELAY1[4:0];
 		IMODE  : next[4:0] <= HALT[4:0];
 		HALT   : 
@@ -115,7 +115,7 @@ always @(*) begin
 	endcase
 end
 
-// SDRAM control signals
+// SDRAM control signals  ChipSelect RowAddressStrobe ColumnAddressStrobe WriteEnable ModeRegisterSet
 always @(*) begin
 	if(cur[4:0] == IMODE[4:0])
 		{CSn, RASn, CASn, WEn} <= 4'b0000; // MRS
@@ -130,7 +130,7 @@ always @(*) begin
 	else if(cur[4:0] == IREF[4:0] || cur[4:0] == FREF[4:0])
 		{CSn, RASn, CASn, WEn} <= 4'b0001; // Refresh operatoin
 	else
-		{CSn, RASn, CASn, WEn} <= 4'b1111;
+		{CSn, RASn, CASn, WEn} <= 4'b1111; // NOP
 end
 
 // Addressing signals
