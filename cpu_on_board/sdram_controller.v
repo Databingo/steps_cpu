@@ -178,7 +178,8 @@ always @(*) begin
 end
 
 // DQ, DQM, Avalon bus signals
-assign DQ[15:0] = (cur[4:0] == WRA[4:0]) ? avl_WRDATA[15:0] : 16'hzzzz;
+//assign DQ[15:0] = (cur[4:0] == WRA[4:0]) ? avl_WRDATA[15:0] : 16'hzzzz;
+assign DQ[15:0] = (cur[4:0] == WRA[4:0] || cur[4:0] == WDELAY2) ? avl_WRDATA[15:0] : 16'hzzzz;
 assign DQM[1:0] = ~avl_byte_en[1:0]; 
 assign avl_RDDATA[15:0] = DQ[15:0];
 assign avl_req_wait = (cur[4:0] == RDELAY4[4:0] || cur[4:0] == WDELAY5[4:0]) ? 1'b0 : 1'b1;
