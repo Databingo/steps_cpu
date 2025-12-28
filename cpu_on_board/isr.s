@@ -58,6 +58,8 @@
      sd x2, 0(x1)    #  print *
      lui x8, 0x20000
      sw x9, 0(x8) 
+     addi x2, x0, 0x2d
+     sd x2, 0(x1)    #  print -
      mret           
 # D-TLB mmu-refill
      lui x1, 0x2     
