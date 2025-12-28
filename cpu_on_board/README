@@ -309,3 +309,4 @@ b6651f409d9a311ee69952f44aa11ff3531999db pc-4/uni_check/mmu_pc/mmu_da/real_step/
 d958b6eb624cac9e0d3c36e01027a1f4521b857f add standlong logic of mmu_cache_refill ok
 b01408e4677bad1b430e5d947f308b33259c18ff fix sdram ld
 4a5bd01a13348cfa582dc6717579e5a4bd2f5e38 fix sdram_controller CAS3 & sdram ld only! s/l no touch
+be3d4f8044994b6be788524a19aca4a0a45445d4 no mmu and CAS3+invertClock sd/ld work
