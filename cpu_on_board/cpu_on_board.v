@@ -2,7 +2,7 @@
 
 module cpu_on_board (
     // -- Pin --
-    (* chip_pin = "PIN_L1" *)  input wire CLOCK_50, // 50 MHz clock
+    (* chip_pin = "PIN_L1" *)  input wire sys_CLK, // 50 MHz clock
     (* chip_pin = "PIN_R22" *) input wire KEY0,     // Active-low reset button
     (* chip_pin = "PIN_Y21, PIN_Y22, PIN_W21, PIN_W22, PIN_V21, PIN_V22, PIN_U21, PIN_U22" *) output wire [7:0] LEDG, // 8 green LEDs
     (* chip_pin = "R17" *) output reg LEDR9, // 1 red LEDs breath left most 
@@ -63,7 +63,7 @@ wire [15:0] sdram_rddata;
 wire        sdram_req_wait;
 
 sdram_controller sdram_ctrl (
-    .sys_clk(CLOCK_50),
+    .sys_clk(sdram_clk),
     .rstn(KEY0),
     // to bus (software)
     .avl_addr(sdram_addr),
@@ -83,7 +83,7 @@ sdram_controller sdram_ctrl (
     .RASn(DRAM_RAS_N),       //                            .ras_n
     .WEn(DRAM_WE_N)          //                            .we_n
 );
-assign DRAM_CLK = CLOCK_50;
+assign DRAM_CLK = sys_CLK;
 assign DRAM_CKE = 1; // always enable
 
     // -- MEM -- minic L1 cache
@@ -97,16 +97,32 @@ assign DRAM_CKE = 1; // always enable
     // -- Clock --
     wire clock_1hz;
     clock_slower clock_ins(
-        .clk_in(CLOCK_50),
+        .clk_in(sys_CLK),
         .clk_out(clock_1hz),
         .reset_n(KEY0)
     );
+
+wire sys_CLK;
+wire sdram_clk;
+
+    // -- sdram pll --
+    sdram_pll sdrampll (
+        .clk_clk                        (sys_CLK),               //                     clk.clk
+        .reset_reset_n                  (KEY0),                   //                   reset.reset_n
+        .altpll_0_c0_clk                (sys_CLK),                //             altpll_0_c0.clk
+        .altpll_0_c1_clk                (sdram_clk),              //             altpll_0_c1.clk
+        .altpll_0_areset_conduit_export (), // altpll_0_areset_conduit.export
+        .altpll_0_locked_conduit_export ()  // altpll_0_locked_conduit.export
+    );
+
+
+
 
     wire [63:0] ppc;
     reg [31:0] ir_bd;
     //wire bubble;
     // IR_LD BRAM Port A read
-    always @(posedge CLOCK_50) begin ir_bd <= Cache[ppc>>2]; end
+    always @(posedge sys_CLK) begin ir_bd <= Cache[ppc>>2]; end
     wire [31:0] ir_ld; assign ir_ld = ir_bd;//{ir_bd[7:0], ir_bd[15:8], ir_bd[23:16], ir_bd[31:24]}; // Endianness swap
     assign LEDR_PC = ppc/4;
     assign LEDG = ir_ld;
@@ -114,7 +130,7 @@ assign DRAM_CKE = 1; // always enable
     // -- CPU --
     riscv64 cpu (
         //.clk(clock_1hz), 
-        .clk(CLOCK_50), 
+        .clk(sys_CLK), 
         .reset(KEY0),     
         .instruction(ir_ld),
         //.pc(pc),
@@ -147,7 +163,7 @@ assign DRAM_CKE = 1; // always enable
     wire key_released;
 
     ps2_decoder ps2_decoder_inst (
-        .clk(CLOCK_50),
+        .clk(sys_CLK),
         .ps2_clk_async(PS2_CLK),
         .ps2_data_async(PS2_DAT),
         .scan_code(scan),
@@ -155,7 +171,7 @@ assign DRAM_CKE = 1; // always enable
         .key_pressed(key_pressed),
         .key_released(key_released)
      );
-    always @(posedge CLOCK_50) begin key_pressed_delay <= key_pressed; end
+    always @(posedge sys_CLK) begin key_pressed_delay <= key_pressed; end
     wire key_pressed_edge = key_pressed && !key_pressed_delay;
 
     // -- Monitor -- Connected to Bus
@@ -165,7 +181,7 @@ assign DRAM_CKE = 1; // always enable
     reg uart_read_step;
     wire uart_waitrequest;
     jtag_uart_system my_jtag_system (
-        .clk_clk                                 (CLOCK_50),
+        .clk_clk                                 (sys_CLK),
         .reset_reset_n                           (KEY0),
         //.jtag_uart_0_avalon_jtag_slave_address   (bus_address[0:0]),
         .jtag_uart_0_avalon_jtag_slave_address   (~bus_address[2]), // 0x00 for Data, 0x04 for Control
@@ -255,7 +271,7 @@ assign DRAM_CKE = 1; // always enable
     reg [63:0] next_addr;
     wire [4:0] plic_id = (bus_address - `Plic_base) >> 2; // id = offset /4
 
-    always @(posedge CLOCK_50 or negedge KEY0) begin
+    always @(posedge sys_CLK or negedge KEY0) begin
         if (!KEY0) begin
             bus_read_done <= 1;
             bus_write_done <= 1;
@@ -522,7 +538,7 @@ end
     reg sd_byte_available_d = 0;
     reg do_read = 0;
     wire [4:0] sd_status;
-    always @(posedge CLOCK_50 or negedge KEY0) begin
+    always @(posedge sys_CLK or negedge KEY0) begin
 	if (!KEY0) begin
 	    //sd_rd_start <= 0;
 	    byte_index <= 0;
@@ -552,7 +568,7 @@ end
 
     // Slow pulse clock for SD init (~100 kHz)
     reg [8:0] clkdiv = 0;
-    always @(posedge CLOCK_50 or negedge KEY0) begin
+    always @(posedge sys_CLK or negedge KEY0) begin
         if (!KEY0) clkdiv <= 0;
         else clkdiv <= clkdiv + 1;
     end
@@ -583,7 +599,7 @@ end
         .reset(~KEY0),
         .ready(sd_ready),
         .address(sd_addr),
-        .clk(CLOCK_50),
+        .clk(sys_CLK),
         .clk_pulse_slow(clk_pulse_slow),
         .status(sd_status),
         .recv_data()
