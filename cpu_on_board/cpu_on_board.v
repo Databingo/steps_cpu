@@ -511,10 +511,12 @@ assign DRAM_CKE = 1; // always enable
 			    10: step <= 2;
 			    2: begin sdram_addr <= bus_address[22:1]+1; sdram_wrdata <= bus_write_data[31:16]; sdram_write_en <= 1; sdram_byte_en <= 2'b11; step <= 3; end
 			    3: if (sdram_req_wait==0) begin sdram_write_en <= 0; bus_write_done <= 0; step <= 11; end
-			    11: step <= 13;
-			    13: step <= 14;
-			    14: step <= 15;
-			    15: step <= 4;
+			    11: step <= 4;
+			    //3: if (sdram_req_wait==0) begin sdram_write_en <= 0; bus_write_done <= 0; step <= 11; end
+			    //11: step <= 13;
+			    //13: step <= 14;
+			    //14: step <= 15;
+			    //15: step <= 4;
 			    4: begin sdram_addr <= bus_address[22:1]+2; sdram_wrdata <= bus_write_data[47:32]; sdram_write_en <= 1; sdram_byte_en <= 2'b11; step <= 5; end
 			    5: if (sdram_req_wait==0) begin sdram_write_en <= 0; bus_write_done <= 0; step <= 12; end 
 			    12: step <= 6;
