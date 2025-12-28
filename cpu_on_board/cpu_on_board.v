@@ -265,7 +265,7 @@ wire sdram_clk;
     // Read & Write BRAM Port B 
     reg [63:0] bus_address_reg;
     reg [63:0] bus_address_reg_full;
-    reg [2:0] step = 0;
+    reg [5:0] step = 0;
     reg bus_read_done = 1;
     reg bus_write_done = 1;
     reg [63:0] next_addr;
