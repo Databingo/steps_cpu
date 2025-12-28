@@ -384,15 +384,15 @@ module riscv64(
 		mmu_pc <= 0; // MMU_PC OFF
 		//Csrs[mstatus][MIE] <= Csrs[mstatus][MPIE]; // set back interrupt status
 
-	    // Check
-	    //end else if (satp_mmu && !mmu_pc && !mmu_da && !check && (op == 7'b0000011 || op == 7'b0100011 || op == 7'b0101111) ) begin // end hiject mret & recover from shadow when see Mret
-	    end else if (satp_mmu && !mmu_pc && !mmu_da && !check && (op == 7'b0000011 || op == 7'b0100011 || op == 7'b0101111)) begin // end hiject mret & recover from shadow when see Mret
-		pc <= pc - 4; // recover from shadow when see Mret
-	 	bubble <= 1'b1; // bubble
-                ls_va <= (op == 7'b0000011) ? (rs1 + w_imm_i) : (op == 7'b0100011) ? (rs1 + w_imm_s) : (op == 7'b0101111) ? rs1 : 64'h0; // load/jalr/store/atom
-		//pdat  <= (op == 7'b0000011) ? (rs1 + w_imm_i) : (op == 7'b0100011) ? (rs1 + w_imm_s) : (op == 7'b0101111) ? rs1 : 64'h0; // load/jalr/store/atom
-		check <= 1;
-		tlb <= 1;
+//	    // Check
+//	    //end else if (satp_mmu && !mmu_pc && !mmu_da && !check && (op == 7'b0000011 || op == 7'b0100011 || op == 7'b0101111) ) begin // end hiject mret & recover from shadow when see Mret
+//	    end else if (satp_mmu && !mmu_pc && !mmu_da && !check && (op == 7'b0000011 || op == 7'b0100011 || op == 7'b0101111)) begin // end hiject mret & recover from shadow when see Mret
+//		pc <= pc - 4; // recover from shadow when see Mret
+//	 	bubble <= 1'b1; // bubble
+//                ls_va <= (op == 7'b0000011) ? (rs1 + w_imm_i) : (op == 7'b0100011) ? (rs1 + w_imm_s) : (op == 7'b0101111) ? rs1 : 64'h0; // load/jalr/store/atom
+//		//pdat  <= (op == 7'b0000011) ? (rs1 + w_imm_i) : (op == 7'b0100011) ? (rs1 + w_imm_s) : (op == 7'b0101111) ? rs1 : 64'h0; // load/jalr/store/atom
+//		check <= 1;
+//		tlb <= 1;
 
 
 //        //    //  mmu_da  D-TLB miss Trap // load/store/atom
