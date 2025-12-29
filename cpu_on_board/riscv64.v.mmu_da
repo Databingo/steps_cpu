@@ -28,8 +28,8 @@ module riscv64(
     reg tlb=0;
     wire [31:0] ir;
 // -- new --
-    (* ram_style = "logic" *) reg [63:0] re [0:31]; // General Registers 32s
-    (* ram_style = "logic" *) reg [63:0] sre [0:9]; // Shadow Registers 10s
+    reg [63:0] re [0:31]; // General Registers 32s
+    reg [63:0] sre [0:9]; // Shadow Registers 10s
     reg mmu_da=0;
     reg mmu_pc = 0;
     reg mmu_cache_refill=0;
@@ -235,7 +235,6 @@ module riscv64(
      assign ppc = need_trans ? {8'h0, pc_ppn, pc[11:0]} : pc;
      assign pda = need_trans ? {8'h0, data_ppn, ls_va[11:0]} : raw_va;
      //assign pda = need_trans ? ls_va : raw_va;
-     //assign pda = need_trans ? raw_va : raw_va;
        
      //assign pda = need_trans ?  ls_va : ls_va;
      //assign pda =  ls_va;
@@ -354,6 +353,10 @@ module riscv64(
 
 	    end else if (tlb && !mmu_da && !mmu_pc) begin
 		//if hit
+         //     if      (tlb_vld[0] && tlb_vpn[0] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[0]; end
+	//	if (tlb_vpn_d[7] == ls_va[38:12]) begin bubble <= 1; tlb <= 0; pc <= pc - 4; end
+                //for (i=0;i<8;i=i+1) begin if (data_vpn == tlb_vpn[i]) begin tlb_d_hit = 1; data_ppn=tlb_ppn[i]; bubble <= 1; pc <= pc - 4; tlb <= 0; end end
+		//XXXABCDX*^^ABCDEFHXABCDEDHXAB|01^2^3^
 		tlb_d_hit = 0;
                 if (tlb_vld[0] && tlb_vpn[0] ==ls_va[38:12]) begin tlb_d_hit = 1; data_ppn=tlb_ppn[0]; bubble <= 1; pc <= pc - 4; tlb <= 0; end
                 if (tlb_vld[1] && tlb_vpn[1] ==ls_va[38:12]) begin tlb_d_hit = 1; data_ppn=tlb_ppn[1]; bubble <= 1; pc <= pc - 4; tlb <= 0; end
@@ -887,8 +890,8 @@ module riscv64(
                 endcase
 	    end
         end
-	re[0]<= 64'h0; 
-	sre[0]<= 64'h0;
+	re[0]<=0; 
+	sre[0]<=0;
     end
 
 endmodule
