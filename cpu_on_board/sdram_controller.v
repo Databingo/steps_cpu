@@ -106,6 +106,15 @@ always @(*) begin
 				next[4:0] <= RACT[4:0];
 			else 
 				next[4:0] <= HALT[4:0];
+                // In HALT next
+                HALT :
+                    if (ref_cnt >= RefMax[8:0]) next = FREF;
+                    else if (req_write_pending) next = WACT;
+                    else if (req_read_pending) next = RACT;
+                    else next = HALT;
+
+
+
 		// Write operation
 		WACT   : next[4:0] <= WDELAY1[4:0];
 		WDELAY1: next[4:0] <= WRA[4:0];
@@ -188,6 +197,19 @@ always @(posedge sys_clk or negedge rstn) begin
     if (!rstn) rdata_reg <= 16'h0;
     else if (cur == RDELAY4) rdata_reg <= DQ;
 end
+
+reg req_write_pending, req_read_pending;
+always @(posedge sys_clk) begin
+    if (cur == HALT) begin
+        req_write_pending <= avl_WRITEen && !avl_READen;
+        req_read_pending <= avl_READen && !avl_WRITEen;
+    end else if (cur == WDELAY2 || cur == RDELAY3) begin
+        req_write_pending <= 0;
+        req_read_pending <= 0;
+    end
+end
+
+
 
 // DQ, DQM, Avalon bus signals
 //assign DQ[15:0] = (cur[4:0] == WRA[4:0]) ? avl_WRDATA[15:0] : 16'hzzzz;
