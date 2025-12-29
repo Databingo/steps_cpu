@@ -26,10 +26,11 @@ parameter WDELAY3=5'd20;
 parameter WDELAY4=5'd21;
 parameter WDELAY5=5'd22;
 parameter WDELAY6=5'd23;
-parameter FDELAY2=5'd24;
-parameter FDELAY3=5'd25;
-parameter FDELAY4=5'd26;
-parameter FDELAY5=5'd27;
+parameter WDELAY7=5'd24;
+parameter FDELAY2=5'd25;
+parameter FDELAY3=5'd26;
+parameter FDELAY4=5'd27;
+parameter FDELAY5=5'd28;
 
 reg [4:0] cur, next;
 
@@ -112,7 +113,8 @@ always @(*) begin
 		WDELAY3: next[4:0] <= WDELAY4[4:0];
 		WDELAY4: next[4:0] <= WDELAY5[4:0];
 		WDELAY5: next[4:0] <= WDELAY6[4:0];
-		WDELAY6: next[4:0] <= HALT[4:0];
+		WDELAY6: next[4:0] <= WDELAY7[4:0];
+		WDELAY7: next[4:0] <= HALT[4:0];
 
 		// Read operation
 		RACT   : next[4:0] <= RDELAY1[4:0];
@@ -184,6 +186,6 @@ end
 assign DQ[15:0] = (cur[4:0] == WDELAY1 || cur[4:0] == WRA[4:0] || cur[4:0] == WDELAY2) ? avl_WRDATA[15:0] : 16'hzzzz;
 assign DQM[1:0] = ~avl_byte_en[1:0]; 
 assign avl_RDDATA[15:0] = DQ[15:0];
-assign avl_req_wait = (cur[4:0] == RDELAY4[4:0] || cur[4:0] == WDELAY6[4:0]) ? 1'b0 : 1'b1;
+assign avl_req_wait = (cur[4:0] == RDELAY4[4:0] || cur[4:0] == WDELAY7[4:0]) ? 1'b0 : 1'b1;
 
 endmodule
