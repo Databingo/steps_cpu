@@ -97,21 +97,25 @@ always @(*) begin
 		IDELAY2: next[4:0] <= IDELAY3[4:0];
 		IDELAY3: next[4:0] <= init_RefMax ? IMODE[4:0] : IDELAY1[4:0];
 		IMODE  : next[4:0] <= HALT[4:0];
-		HALT   : 
-			if(ref_cnt[8:0] >= RefMax[8:0])
-				next[4:0] <= FREF[4:0];
-			else if(avl_WRITEen && !avl_READen)
-				next[4:0] <= WACT[4:0];
-			else if(avl_READen && !avl_WRITEen)
-				next[4:0] <= RACT[4:0];
-			else 
-				next[4:0] <= HALT[4:0];
+		//HALT   : 
+		//	if(ref_cnt[8:0] >= RefMax[8:0])
+		//		next[4:0] <= FREF[4:0];
+		//	else if(avl_WRITEen && !avl_READen)
+		//		next[4:0] <= WACT[4:0];
+		//	else if(avl_READen && !avl_WRITEen)
+		//		next[4:0] <= RACT[4:0];
+		//	else 
+		//		next[4:0] <= HALT[4:0];
                 // In HALT next
                 HALT :
-                    if (ref_cnt >= RefMax[8:0]) next = FREF;
-                    else if (req_write_pending) next = WACT;
-                    else if (req_read_pending) next = RACT;
-                    else next = HALT;
+                    if (ref_cnt[8:0] >= RefMax[8:0]) 
+			next[4:0] = FREF[4:0];
+                    else if (req_write_pending) 
+			next[4:0] = WACT[4:0];
+                    else if (req_read_pending) 
+			next[4:0] = RACT[4:0];
+                    else 
+			next[4:0] = HALT[4:0];
 
 
 
