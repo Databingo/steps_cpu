@@ -196,3 +196,19 @@ set_instance_assignment -name SLEW_RATE 2 -to DRAM_DQ*
 set_instance_assignment -name SLEW_RATE 2 -to DRAM_DQM*
 set_instance_assignment -name SLEW_RATE 2 -to DRAM_RAS_N
 set_instance_assignment -name SLEW_RATE 2 -to DRAM_WE_N
+
+
+
+# Force registers into IO Pads
+set_instance_assignment -name FAST_INPUT_REGISTER ON -to DQ[*]
+set_instance_assignment -name FAST_OUTPUT_REGISTER ON -to DQ[*]
+set_instance_assignment -name FAST_OUTPUT_ENABLE_REGISTER ON -to DQ[*]
+
+set_instance_assignment -name FAST_OUTPUT_REGISTER ON -to addr[*]
+set_instance_assignment -name FAST_OUTPUT_REGISTER ON -to BA[*]
+set_instance_assignment -name FAST_OUTPUT_REGISTER ON -to CSn
+set_instance_assignment -name FAST_OUTPUT_REGISTER ON -to WEn
+set_instance_assignment -name FAST_OUTPUT_REGISTER ON -to RASn
+set_instance_assignment -name FAST_OUTPUT_REGISTER ON -to CASn
+set_instance_assignment -name FAST_OUTPUT_REGISTER ON -to DQM[*]
+# If you have CKE or CLK output pins, add them here too
