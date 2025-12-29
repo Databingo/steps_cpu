@@ -243,12 +243,12 @@ module riscv64(
      wire need_trans = satp_mmu   && !mmu_pc && !mmu_da && !mmu_cache_refill;
      assign ppc = need_trans ? {8'h0, pc_ppn, pc[11:0]} : pc;
      //assign pda = need_trans ? {8'h0, data_ppn, ls_va[11:0]} : raw_va;
-     assign pda = need_trans ? {8'h0, data_ppn, ls_va[11:0]} : ls_va;
+     //assign pda = need_trans ? {8'h0, data_ppn, ls_va[11:0]} : ls_va;
      //assign pda = need_trans ? ls_va : raw_va;
      //assign pda = need_trans ? raw_va : raw_va;
        
      //assign pda = need_trans ?  ls_va : ls_va;
-     //assign pda =  ls_va;
+     assign pda =  ls_va;
      
     // TLB Refill
     reg [2:0] tlb_ptr = 0; // 8 entries TLB
