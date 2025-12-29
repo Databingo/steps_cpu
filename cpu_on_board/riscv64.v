@@ -28,8 +28,10 @@ module riscv64(
     reg tlb=0;
     wire [31:0] ir;
 // -- new --
-    (* ram_style = "logic" *) reg [63:0] re [0:31]; // General Registers 32s
-    (* ram_style = "logic" *) reg [63:0] sre [0:9]; // Shadow Registers 10s
+    //(* ram_style = "logic" *) reg [63:0] re [0:31]; // General Registers 32s
+    //(* ram_style = "logic" *) reg [63:0] sre [0:9]; // Shadow Registers 10s
+    reg [63:0] re [0:31]; // General Registers 32s
+    reg [63:0] sre [0:9]; // Shadow Registers 10s
     reg mmu_da=0;
     reg mmu_pc = 0;
     reg mmu_cache_refill=0;
