@@ -233,8 +233,8 @@ module riscv64(
      // concat physical address
      wire need_trans = satp_mmu   && !mmu_pc && !mmu_da && !mmu_cache_refill;
      assign ppc = need_trans ? {8'h0, pc_ppn, pc[11:0]} : pc;
-     assign pda = need_trans ? {8'h0, data_ppn, ls_va[11:0]} : raw_va;
-     //assign pda = need_trans ? ls_va : raw_va;
+     //assign pda = need_trans ? {8'h0, data_ppn, ls_va[11:0]} : raw_va;
+     assign pda = need_trans ? ls_va : raw_va;
      //assign pda = need_trans ? raw_va : raw_va;
        
      //assign pda = need_trans ?  ls_va : ls_va;
