@@ -201,19 +201,19 @@ always @(posedge sys_clk or negedge rstn) begin
     else if (cur == RDELAY4) rdata_reg <= DQ;
 end
 
-reg req_write_pending, reg_read_pending;
+reg req_write_pending, req_read_pending;
 
 always @(posedge sys_clk or negedge rstn) begin
     if (!rstn) begin  
 	req_write_pending <= 0;
-        reg_read_pending <= 0;
+        req_read_pending <= 0;
     end
     else if (cur == HALT ) begin
 	req_write_pending <= avl_WRITEen && !avl_READen;
-        reg_read_pending <= avl_READen && !avl_WRITEen ;
+        req_read_pending <= avl_READen && !avl_WRITEen ;
     end else if (cur == WDELAY7 || cur == RDELAY5) begin
 	req_write_pending <= 0;
-        reg_read_pending <= 0;
+        req_read_pending <= 0;
     end
 end
 
