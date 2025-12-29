@@ -5,6 +5,7 @@ module riscv64(
     input wire reset,     // Active-low reset button
     input wire [31:0] instruction,
     output wire [63:0] ppc,
+    output wire [63:0] pda,
     output wire  heartbeat,
     output reg [63:0] bus_address,     // 39 bit for real Sv39 standard?
     output reg [63:0] bus_write_data,
@@ -208,27 +209,36 @@ module riscv64(
     //wire [63:0] ls_va = (op == 7'b0000011) ? (rs1 + w_imm_i) : (op == 7'b0100011) ? (rs1 + w_imm_s) : (op == 7'b0101111) ? rs1 : 0; // load/store/atom
     //wire [63:0] pda = ls_va;
 
-    reg [63:0] ls_va;// = (op == 7'b0000011) ? (rs1 + w_imm_i) : (op == 7'b0100011) ? (rs1 + w_imm_s) : (op == 7'b0101111) ? rs1 : 64'h0; // load/store/atom
+    //reg [63:0] ls_va;// = (op == 7'b0000011) ? (rs1 + w_imm_i) : (op == 7'b0100011) ? (rs1 + w_imm_s) : (op == 7'b0101111) ? rs1 : 64'h0; // load/store/atom
     //wire [63:0] raw_va = (op == 7'b0000011) ? (rs1 + w_imm_i) : (op == 7'b0100011) ? (rs1 + w_imm_s) : (op == 7'b0101111) ? rs1 : 64'h0; // load/store/atom
+    wire [63:0] ls_va = (op == 7'b0000011) ? (rs1 + w_imm_i) : (op == 7'b0100011) ? (rs1 + w_imm_s) : (op == 7'b0101111) ? rs1 : 64'h0; // load/store/atom
     //wire [63:0] pda;
-    wire [63:0] pda;
-    reg [63:0] pdat = 64'h0;
+    //wire [63:0] pda;
+    //reg [63:0] pdat = 64'h0;
 
-    wire [26:0] data_vpn = ls_va[38:12];
+    //wire [26:0] data_vpn = ls_va[38:12];
     reg [43:0] data_ppn;
     reg tlb_d_hit;
     always @(*) begin
          tlb_d_hit = 0;
          data_ppn = 0;
-         ls_va = (op == 7'b0000011) ? (rs1 + w_imm_i) : (op == 7'b0100011) ? (rs1 + w_imm_s) : (op == 7'b0101111) ? rs1 : 64'h0; // load/store/atom
-         if      (tlb_vld[0] && tlb_vpn[0] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[0]; end
-         else if (tlb_vld[1] && tlb_vpn[1] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[1]; end
-         else if (tlb_vld[2] && tlb_vpn[2] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[2]; end
-         else if (tlb_vld[3] && tlb_vpn[3] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[3]; end
-         else if (tlb_vld[4] && tlb_vpn[4] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[4]; end
-         else if (tlb_vld[5] && tlb_vpn[5] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[5]; end
-         else if (tlb_vld[6] && tlb_vpn[6] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[6]; end
-         else if (tlb_vld[7] && tlb_vpn[7] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[7]; end
+         //ls_va = (op == 7'b0000011) ? (rs1 + w_imm_i) : (op == 7'b0100011) ? (rs1 + w_imm_s) : (op == 7'b0101111) ? rs1 : 64'h0; // load/store/atom
+         //if      (tlb_vld[0] && tlb_vpn[0] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[0]; end
+         //else if (tlb_vld[1] && tlb_vpn[1] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[1]; end
+         //else if (tlb_vld[2] && tlb_vpn[2] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[2]; end
+         //else if (tlb_vld[3] && tlb_vpn[3] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[3]; end
+         //else if (tlb_vld[4] && tlb_vpn[4] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[4]; end
+         //else if (tlb_vld[5] && tlb_vpn[5] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[5]; end
+         //else if (tlb_vld[6] && tlb_vpn[6] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[6]; end
+         //else if (tlb_vld[7] && tlb_vpn[7] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[7]; end
+         if      (tlb_vld[0] && tlb_vpn[0] ==ls_va[38:12]) begin tlb_d_hit = 1; data_ppn=tlb_ppn[0]; end
+         else if (tlb_vld[1] && tlb_vpn[1] ==ls_va[38:12]) begin tlb_d_hit = 1; data_ppn=tlb_ppn[1]; end
+         else if (tlb_vld[2] && tlb_vpn[2] ==ls_va[38:12]) begin tlb_d_hit = 1; data_ppn=tlb_ppn[2]; end
+         else if (tlb_vld[3] && tlb_vpn[3] ==ls_va[38:12]) begin tlb_d_hit = 1; data_ppn=tlb_ppn[3]; end
+         else if (tlb_vld[4] && tlb_vpn[4] ==ls_va[38:12]) begin tlb_d_hit = 1; data_ppn=tlb_ppn[4]; end
+         else if (tlb_vld[5] && tlb_vpn[5] ==ls_va[38:12]) begin tlb_d_hit = 1; data_ppn=tlb_ppn[5]; end
+         else if (tlb_vld[6] && tlb_vpn[6] ==ls_va[38:12]) begin tlb_d_hit = 1; data_ppn=tlb_ppn[6]; end
+         else if (tlb_vld[7] && tlb_vpn[7] ==ls_va[38:12]) begin tlb_d_hit = 1; data_ppn=tlb_ppn[7]; end
      end
      // concat physical address
      wire need_trans = satp_mmu   && !mmu_pc && !mmu_da && !mmu_cache_refill;
