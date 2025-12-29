@@ -107,16 +107,15 @@ always @(*) begin
 		//	else 
 		//		next[4:0] <= HALT[4:0];
                 // In HALT next
-                HALT :
-                    if (ref_cnt[8:0] >= RefMax[8:0]) 
-			next[4:0] = FREF[4:0];
-                    else if (req_write_pending) 
-			next[4:0] = WACT[4:0];
-                    else if (req_read_pending) 
-			next[4:0] = RACT[4:0];
-                    else 
-			next[4:0] = HALT[4:0];
-
+		HALT :
+                    if (ref_cnt[8:0] >= RefMax[8:0])
+		        next[4:0] = FREF[4:0];
+                    else if (req_write_pending)
+		        next[4:0] = WACT[4:0];
+                    else if (req_read_pending)
+		        next[4:0] = RACT[4:0];
+		    else
+		        next[4:0] = HALT[4:0];
 
 
 		// Write operation
@@ -202,16 +201,31 @@ always @(posedge sys_clk or negedge rstn) begin
     else if (cur == RDELAY4) rdata_reg <= DQ;
 end
 
-reg req_write_pending, req_read_pending;
-always @(posedge sys_clk) begin
-    if (cur == HALT) begin
-        req_write_pending <= avl_WRITEen && !avl_READen;
-        req_read_pending <= avl_READen && !avl_WRITEen;
-    end else if (cur == WDELAY2 || cur == RDELAY3) begin
-        req_write_pending <= 0;
-        req_read_pending <= 0;
+reg req_write_pending, reg_read_pending;
+
+always @(posedge sys_clk or negedge rstn) begin
+    if (!rstn) begin  
+	req_write_pending <= 0;
+        reg_read_pending <= 0;
+    end
+    else if (cur == HALT ) begin
+	req_write_pending <= avl_WRITEen && !avl_READen;
+        reg_read_pending <= avl_READen && !avl_WRITEen ;
+    end else if (cur == WDELAY7 || cur == RDELAY5) begin
+	req_write_pending <= 0;
+        reg_read_pending <= 0;
     end
 end
+
+//always @(posedge sys_clk) begin
+//    if (cur == HALT) begin
+//        req_write_pending <= avl_WRITEen && !avl_READen;
+//        req_read_pending <= avl_READen && !avl_WRITEen;
+//    end else if (cur == WDELAY2 || cur == RDELAY3) begin
+//        req_write_pending <= 0;
+//        req_read_pending <= 0;
+//    end
+//end
 
 
 
