@@ -22,15 +22,16 @@ parameter RACT=5'd7, RDELAY1=5'd8, RDA=5'd9, RDELAY2=5'd10, RDELAY3=5'd11, HALT=
 parameter WACT=5'd13, WDELAY1=5'd14, WRA=5'd15, WDELAY2=5'd16;
 parameter FREF=5'd17, FDELAY=5'd18;
 parameter RDELAY4=5'd19;
-parameter WDELAY3=5'd20;
-parameter WDELAY4=5'd21;
-parameter WDELAY5=5'd22;
-parameter WDELAY6=5'd23;
-parameter WDELAY7=5'd24;
-parameter FDELAY2=5'd25;
-parameter FDELAY3=5'd26;
-parameter FDELAY4=5'd27;
-parameter FDELAY5=5'd28;
+parameter RDELAY5=5'd20;
+parameter WDELAY3=5'd21;
+parameter WDELAY4=5'd22;
+parameter WDELAY5=5'd23;
+parameter WDELAY6=5'd24;
+parameter WDELAY7=5'd25;
+parameter FDELAY2=5'd26;
+parameter FDELAY3=5'd27;
+parameter FDELAY4=5'd28;
+parameter FDELAY5=5'd29;
 
 reg [4:0] cur, next;
 
@@ -122,7 +123,8 @@ always @(*) begin
 		RDA    : next[4:0] <= RDELAY2[4:0];
 		RDELAY2: next[4:0] <= RDELAY3[4:0];
 		RDELAY3: next[4:0] <= RDELAY4[4:0];
-		RDELAY4: next[4:0] <= HALT[4:0];
+		RDELAY4: next[4:0] <= RDELAY5[4:0];
+		RDELAY5: next[4:0] <= HALT[4:0];
 
 		// Refresh operation
 		FREF   : next[4:0] <= FDELAY[4:0];
@@ -181,11 +183,19 @@ always @(*) begin
 		BA[1:0] <= 2'b00;
 end
 
+reg [15:0] rdata_reg;
+always @(posedge sys_clk or negedge rstn) begin
+    if (!rstn) rdata_reg <= 16'h0;
+    else if (cur == RDELAY4) rdata_reg <= DQ;
+end
+
 // DQ, DQM, Avalon bus signals
 //assign DQ[15:0] = (cur[4:0] == WRA[4:0]) ? avl_WRDATA[15:0] : 16'hzzzz;
 assign DQ[15:0] = (cur[4:0] == WDELAY1 || cur[4:0] == WRA[4:0] || cur[4:0] == WDELAY2) ? avl_WRDATA[15:0] : 16'hzzzz;
 assign DQM[1:0] = ~avl_byte_en[1:0]; 
-assign avl_RDDATA[15:0] = DQ[15:0];
-assign avl_req_wait = (cur[4:0] == RDELAY4[4:0] || cur[4:0] == WDELAY7[4:0]) ? 1'b0 : 1'b1;
+//assign avl_RDDATA[15:0] = DQ[15:0];
+//assign avl_req_wait = (cur[4:0] == RDELAY4[4:0] || cur[4:0] == WDELAY7[4:0]) ? 1'b0 : 1'b1;
+assign avl_RDDATA[15:0] = rdata_reg[15:0];
+assign avl_req_wait = (cur[4:0] == RDELAY5[4:0] || cur[4:0] == WDELAY7[4:0]) ? 1'b0 : 1'b1;
 
 endmodule
