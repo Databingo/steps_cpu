@@ -28,8 +28,8 @@ module riscv64(
     reg tlb=0;
     wire [31:0] ir;
 // -- new --
-    (* ram_style = "logic" *) reg [63:0] re [0:31]; // General Registers 32s
-    (* ram_style = "logic" *) reg [63:0] sre [0:9]; // Shadow Registers 10s
+    reg [63:0] re [0:31]; // General Registers 32s
+    reg [63:0] sre [0:9]; // Shadow Registers 10s
     reg mmu_da=0;
     reg mmu_pc = 0;
     reg mmu_cache_refill=0;
@@ -233,9 +233,8 @@ module riscv64(
      // concat physical address
      wire need_trans = satp_mmu   && !mmu_pc && !mmu_da && !mmu_cache_refill;
      assign ppc = need_trans ? {8'h0, pc_ppn, pc[11:0]} : pc;
-     //assign pda = need_trans ? {8'h0, data_ppn, ls_va[11:0]} : raw_va;
-     assign pda = need_trans ? ls_va : raw_va;
-     //assign pda = need_trans ? raw_va : raw_va;
+     assign pda = need_trans ? {8'h0, data_ppn, ls_va[11:0]} : raw_va;
+     //assign pda = need_trans ? ls_va : raw_va;
        
      //assign pda = need_trans ?  ls_va : ls_va;
      //assign pda =  ls_va;
@@ -354,6 +353,10 @@ module riscv64(
 
 	    end else if (tlb && !mmu_da && !mmu_pc) begin
 		//if hit
+         //     if      (tlb_vld[0] && tlb_vpn[0] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[0]; end
+	//	if (tlb_vpn_d[7] == ls_va[38:12]) begin bubble <= 1; tlb <= 0; pc <= pc - 4; end
+                //for (i=0;i<8;i=i+1) begin if (data_vpn == tlb_vpn[i]) begin tlb_d_hit = 1; data_ppn=tlb_ppn[i]; bubble <= 1; pc <= pc - 4; tlb <= 0; end end
+		//XXXABCDX*^^ABCDEFHXABCDEDHXAB|01^2^3^
 		tlb_d_hit = 0;
                 if (tlb_vld[0] && tlb_vpn[0] ==ls_va[38:12]) begin tlb_d_hit = 1; data_ppn=tlb_ppn[0]; bubble <= 1; pc <= pc - 4; tlb <= 0; end
                 if (tlb_vld[1] && tlb_vpn[1] ==ls_va[38:12]) begin tlb_d_hit = 1; data_ppn=tlb_ppn[1]; bubble <= 1; pc <= pc - 4; tlb <= 0; end
@@ -396,20 +399,20 @@ module riscv64(
 		tlb <= 1;
 
 
-//        //    //  mmu_da  D-TLB miss Trap // load/store/atom
-////	    end else if (satp_mmu && !mmu_pc && !mmu_da && tlb_i_hit && !tlb_d_hit && (op == 7'b0000011 || op == 7'b0100011 || op == 7'b0101111) ) begin  
-////		mmu_da <= 1; // MMU_DA ON
-////		pc <= 28; // D-TLB refill Handler
-////	 	bubble <= 1'b1; // bubble
-////	        saved_user_pc <= pc - 4; // save pc EXE l/s/a
-////		for (i=0;i<10;i=i+1) begin sre[i]<= re[i]; end // save re
-////		re[9] <= ls_va; //save va to x1
-////                tlb_vpn_d[7] == ls_va[38:12];
-////		//if (op == 7'b0000011) re[9] <= rs1 + w_imm_i;
-////		//if (op == 7'b0100011) re[9] <= rs1 + w_imm_s;
-////		//if (op == 7'b0101111) re[9] <= rs1;
-////		Csrs[mstatus][MPIE] <= Csrs[mstatus][MIE]; // disable interrupt during shadow mmu walking
-////		Csrs[mstatus][MIE] <= 0;
+        //    //  mmu_da  D-TLB miss Trap // load/store/atom
+//	    end else if (satp_mmu && !mmu_pc && !mmu_da && tlb_i_hit && !tlb_d_hit && (op == 7'b0000011 || op == 7'b0100011 || op == 7'b0101111) ) begin  
+//		mmu_da <= 1; // MMU_DA ON
+//		pc <= 28; // D-TLB refill Handler
+//	 	bubble <= 1'b1; // bubble
+//	        saved_user_pc <= pc - 4; // save pc EXE l/s/a
+//		for (i=0;i<10;i=i+1) begin sre[i]<= re[i]; end // save re
+//		re[9] <= ls_va; //save va to x1
+//                tlb_vpn_d[7] == ls_va[38:12];
+//		//if (op == 7'b0000011) re[9] <= rs1 + w_imm_i;
+//		//if (op == 7'b0100011) re[9] <= rs1 + w_imm_s;
+//		//if (op == 7'b0101111) re[9] <= rs1;
+//		Csrs[mstatus][MPIE] <= Csrs[mstatus][MIE]; // disable interrupt during shadow mmu walking
+//		Csrs[mstatus][MIE] <= 0;
 	    end else if (mmu_da && ir == 32'b00110000001000000000000001110011) begin // hiject mret 
 		pc <= saved_user_pc; // recover from shadow when see Mret
 		bubble <= 1; // bubble
@@ -887,8 +890,8 @@ module riscv64(
                 endcase
 	    end
         end
-	re[0]<= 64'h0; 
-	sre[0]<= 64'h0;
+	re[0]<=0; 
+	sre[0]<=0;
     end
 
 endmodule
