@@ -232,8 +232,20 @@ module riscv64(
     //wire [63:0] pda = ls_va;
 
     //reg [63:0] ls_va;// = (op == 7'b0000011) ? (rs1 + w_imm_i) : (op == 7'b0100011) ? (rs1 + w_imm_s) : (op == 7'b0101111) ? rs1 : 64'h0; // load/store/atom
-    wire [63:0] ls_va = (op == 7'b0000011) ? (rs1 + w_imm_i) : (op == 7'b0100011) ? (rs1 + w_imm_s) : (op == 7'b0101111) ? rs1 : 64'h0; // load/store/atom
+    //wire [63:0] ls_va = (op == 7'b0000011) ? (rs1 + w_imm_i) : (op == 7'b0100011) ? (rs1 + w_imm_s) : (op == 7'b0101111) ? rs1 : 64'h0; // load/store/atom
+    //wire [63:0] ls_va_offset = (op == 7'b0000011) ? w_imm_i : (op == 7'b0100011) ?  w_imm_s : (op == 7'b0101111) ? 64'h0 : 64'h0; // load/store/atom
+    wire [63:0] ls_va_offset = (op == 7'b0000011) ? w_imm_i : (op == 7'b0100011) ?  w_imm_s : 64'h0; // load/store/atom
+    wire [63:0] ls_va = rs1 + ls_va_offset;
     //wire [63:0] raw_va = (op == 7'b0000011) ? (rs1 + w_imm_i) : (op == 7'b0100011) ? (rs1 + w_imm_s) : (op == 7'b0101111) ? rs1 : 64'h0; // load/store/atom
+    //
+
+
+
+
+
+
+      
+      
     //wire [63:0] pda;
     wire [63:0] pda;
     //reg [63:0] pdat = 64'h0;
