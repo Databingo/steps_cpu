@@ -184,128 +184,68 @@ module riscv64(
 
     // -- TLB -- 8 pages
     reg [26:0] tlb_vpn [0:7]; // vpn number VA[38:12]  Sv39
-    //reg [26:0] tlb_vpn_d [0:7]; // vpn number VA[38:12]  Sv39
     reg [43:0] tlb_ppn [0:7]; // ppn number PA[55:12]
     reg tlb_vld [0:7];
 
-    // i hit
+    // tlb i hit
     wire [26:0] pc_vpn = pc[38:12];
     reg [43:0] pc_ppn;
     reg tlb_i_hit;
-    //always @(*) begin
-    //    tlb_i_hit = 0;
-    //    pc_ppn = 44'h0;
-    //    //if      (tlb_vld[0] && tlb_vpn[0] == pc_vpn) begin tlb_i_hit = 1; pc_ppn = tlb_ppn[0]; end
-    //    //else if (tlb_vld[1] && tlb_vpn[1] == pc_vpn) begin tlb_i_hit = 1; pc_ppn = tlb_ppn[1]; end
-    //    //else if (tlb_vld[2] && tlb_vpn[2] == pc_vpn) begin tlb_i_hit = 1; pc_ppn = tlb_ppn[2]; end
-    //    //else if (tlb_vld[3] && tlb_vpn[3] == pc_vpn) begin tlb_i_hit = 1; pc_ppn = tlb_ppn[3]; end
-    //    //else if (tlb_vld[4] && tlb_vpn[4] == pc_vpn) begin tlb_i_hit = 1; pc_ppn = tlb_ppn[4]; end
-    //    //else if (tlb_vld[5] && tlb_vpn[5] == pc_vpn) begin tlb_i_hit = 1; pc_ppn = tlb_ppn[5]; end
-    //    //else if (tlb_vld[6] && tlb_vpn[6] == pc_vpn) begin tlb_i_hit = 1; pc_ppn = tlb_ppn[6]; end
-    //    //else if (tlb_vld[7] && tlb_vpn[7] == pc_vpn) begin tlb_i_hit = 1; pc_ppn = tlb_ppn[7]; end
-    //end
-     wire [7:0] tlb_match_i;
-     assign tlb_match_i[0] = tlb_vld[0] && (tlb_vpn[0] == pc_vpn);
-     assign tlb_match_i[1] = tlb_vld[1] && (tlb_vpn[1] == pc_vpn);
-     assign tlb_match_i[2] = tlb_vld[2] && (tlb_vpn[2] == pc_vpn);
-     assign tlb_match_i[3] = tlb_vld[3] && (tlb_vpn[3] == pc_vpn);
-     assign tlb_match_i[4] = tlb_vld[4] && (tlb_vpn[4] == pc_vpn);
-     assign tlb_match_i[5] = tlb_vld[5] && (tlb_vpn[5] == pc_vpn);
-     assign tlb_match_i[6] = tlb_vld[6] && (tlb_vpn[6] == pc_vpn);
-     assign tlb_match_i[7] = tlb_vld[7] && (tlb_vpn[7] == pc_vpn);
 
-     always @(*) begin
-	 tlb_i_hit = |tlb_match_i;
-	 pc_ppn =   ({44{tlb_match_i[0]}} & tlb_ppn[0]) |
-	            ({44{tlb_match_i[1]}} & tlb_ppn[1]) |
-	            ({44{tlb_match_i[2]}} & tlb_ppn[2]) |
-	            ({44{tlb_match_i[3]}} & tlb_ppn[3]) |
-	            ({44{tlb_match_i[4]}} & tlb_ppn[4]) |
-	            ({44{tlb_match_i[5]}} & tlb_ppn[5]) |
-	            ({44{tlb_match_i[6]}} & tlb_ppn[6]) |
-	            ({44{tlb_match_i[7]}} & tlb_ppn[7]) ;
-     end
+    wire [7:0] tlb_d_match_i;
+    assign tlb_d_match_i[0] = tlb_vld[0] && (tlb_vpn[0] == pc_vpn);
+    assign tlb_d_match_i[1] = tlb_vld[1] && (tlb_vpn[1] == pc_vpn);
+    assign tlb_d_match_i[2] = tlb_vld[2] && (tlb_vpn[2] == pc_vpn);
+    assign tlb_d_match_i[3] = tlb_vld[3] && (tlb_vpn[3] == pc_vpn);
+    assign tlb_d_match_i[4] = tlb_vld[4] && (tlb_vpn[4] == pc_vpn);
+    assign tlb_d_match_i[5] = tlb_vld[5] && (tlb_vpn[5] == pc_vpn);
+    assign tlb_d_match_i[6] = tlb_vld[6] && (tlb_vpn[6] == pc_vpn);
+    assign tlb_d_match_i[7] = tlb_vld[7] && (tlb_vpn[7] == pc_vpn);
+    // pc_ppn hit
+    always @(*) begin
+        tlb_i_hit = |tlb_d_match_i;
+        pc_ppn =   ({44{tlb_d_match_i[0]}} & tlb_ppn[0]) |
+                   ({44{tlb_d_match_i[1]}} & tlb_ppn[1]) |
+                   ({44{tlb_d_match_i[2]}} & tlb_ppn[2]) |
+                   ({44{tlb_d_match_i[3]}} & tlb_ppn[3]) |
+                   ({44{tlb_d_match_i[4]}} & tlb_ppn[4]) |
+                   ({44{tlb_d_match_i[5]}} & tlb_ppn[5]) |
+                   ({44{tlb_d_match_i[6]}} & tlb_ppn[6]) |
+                   ({44{tlb_d_match_i[7]}} & tlb_ppn[7]) ; end
 
-    // d hit
-    // -- directly 1:1 --
-    //wire [63:0] ls_va = (op == 7'b0000011) ? (rs1 + w_imm_i) : (op == 7'b0100011) ? (rs1 + w_imm_s) : (op == 7'b0101111) ? rs1 : 0; // load/store/atom
-    //wire [63:0] pda = ls_va;
-
-    //reg [63:0] ls_va;// = (op == 7'b0000011) ? (rs1 + w_imm_i) : (op == 7'b0100011) ? (rs1 + w_imm_s) : (op == 7'b0101111) ? rs1 : 64'h0; // load/store/atom
-    //wire [63:0] ls_va = (op == 7'b0000011) ? (rs1 + w_imm_i) : (op == 7'b0100011) ? (rs1 + w_imm_s) : (op == 7'b0101111) ? rs1 : 64'h0; // load/store/atom
-    //wire [63:0] ls_va_offset = (op == 7'b0000011) ? w_imm_i : (op == 7'b0100011) ?  w_imm_s : (op == 7'b0101111) ? 64'h0 : 64'h0; // load/store/atom
+    // tlb d hit
     wire [63:0] ls_va_offset = (op == 7'b0000011) ? w_imm_i : (op == 7'b0100011) ?  w_imm_s : 64'h0; // load/store/atom
     wire [63:0] ls_va = rs1 + ls_va_offset;
-    //wire [63:0] raw_va = (op == 7'b0000011) ? (rs1 + w_imm_i) : (op == 7'b0100011) ? (rs1 + w_imm_s) : (op == 7'b0101111) ? rs1 : 64'h0; // load/store/atom
-    //
-
-
-
-
-
-
-      
-      
-    //wire [63:0] pda;
     wire [63:0] pda;
-    //reg [63:0] pdat = 64'h0;
-
-    //wire [26:0] data_vpn = ls_va[38:12];
     reg [43:0] data_ppn;
     reg tlb_d_hit;
-    //always @(*) begin
-    //     tlb_d_hit = 0;
-    //     data_ppn = 0;
-    //     //ls_va = (op == 7'b0000011) ? (rs1 + w_imm_i) : (op == 7'b0100011) ? (rs1 + w_imm_s) : (op == 7'b0101111) ? rs1 : 64'h0; // load/store/atom
-    //     if      (tlb_vld[0] && tlb_vpn[0] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[0]; end
-    //     else if (tlb_vld[1] && tlb_vpn[1] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[1]; end
-    //     else if (tlb_vld[2] && tlb_vpn[2] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[2]; end
-    //     else if (tlb_vld[3] && tlb_vpn[3] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[3]; end
-    //     else if (tlb_vld[4] && tlb_vpn[4] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[4]; end
-    //     else if (tlb_vld[5] && tlb_vpn[5] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[5]; end
-    //     else if (tlb_vld[6] && tlb_vpn[6] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[6]; end
-    //     else if (tlb_vld[7] && tlb_vpn[7] == data_vpn) begin tlb_d_hit = 1; data_ppn=tlb_ppn[7]; end
-    // end
-     // concat physical address
-     wire need_trans = satp_mmu   && !mmu_pc && !mmu_da && !mmu_cache_refill;
-     assign ppc = need_trans ? {8'h0, pc_ppn, pc[11:0]} : pc;
-     //assign pda = need_trans ? {8'h0, data_ppn, ls_va[11:0]} : raw_va;
-     assign pda = need_trans ? {8'h0, data_ppn, ls_va[11:0]} : ls_va;
-     //assign pda = need_trans ? ls_va : raw_va;
-     //assign pda = need_trans ? raw_va : raw_va;
-       
-     //assign pda = need_trans ?  ls_va : ls_va;
-     //assign pda =  ls_va;
-       
-     wire [7:0] tlb_match;
-     assign tlb_match[0] = tlb_vld[0] && (tlb_vpn[0] == ls_va[38:12]);
-     assign tlb_match[1] = tlb_vld[1] && (tlb_vpn[1] == ls_va[38:12]);
-     assign tlb_match[2] = tlb_vld[2] && (tlb_vpn[2] == ls_va[38:12]);
-     assign tlb_match[3] = tlb_vld[3] && (tlb_vpn[3] == ls_va[38:12]);
-     assign tlb_match[4] = tlb_vld[4] && (tlb_vpn[4] == ls_va[38:12]);
-     assign tlb_match[5] = tlb_vld[5] && (tlb_vpn[5] == ls_va[38:12]);
-     assign tlb_match[6] = tlb_vld[6] && (tlb_vpn[6] == ls_va[38:12]);
-     assign tlb_match[7] = tlb_vld[7] && (tlb_vpn[7] == ls_va[38:12]);
 
-     always @(*) begin
-	 tlb_d_hit = |tlb_match;
-	 data_ppn = ({44{tlb_match[0]}} & tlb_ppn[0]) |
-	            ({44{tlb_match[1]}} & tlb_ppn[1]) |
-	            ({44{tlb_match[2]}} & tlb_ppn[2]) |
-	            ({44{tlb_match[3]}} & tlb_ppn[3]) |
-	            ({44{tlb_match[4]}} & tlb_ppn[4]) |
-	            ({44{tlb_match[5]}} & tlb_ppn[5]) |
-	            ({44{tlb_match[6]}} & tlb_ppn[6]) |
-	            ({44{tlb_match[7]}} & tlb_ppn[7]) ;
-     end
-       
-       
-       
-       
-       
-       
-       
-         
+    wire [7:0] tlb_d_match;
+    assign tlb_d_match[0] = tlb_vld[0] && (tlb_vpn[0] == ls_va[38:12]);
+    assign tlb_d_match[1] = tlb_vld[1] && (tlb_vpn[1] == ls_va[38:12]);
+    assign tlb_d_match[2] = tlb_vld[2] && (tlb_vpn[2] == ls_va[38:12]);
+    assign tlb_d_match[3] = tlb_vld[3] && (tlb_vpn[3] == ls_va[38:12]);
+    assign tlb_d_match[4] = tlb_vld[4] && (tlb_vpn[4] == ls_va[38:12]);
+    assign tlb_d_match[5] = tlb_vld[5] && (tlb_vpn[5] == ls_va[38:12]);
+    assign tlb_d_match[6] = tlb_vld[6] && (tlb_vpn[6] == ls_va[38:12]);
+    assign tlb_d_match[7] = tlb_vld[7] && (tlb_vpn[7] == ls_va[38:12]);
+    // data_ppn hit
+    always @(*) begin
+        tlb_d_hit = |tlb_d_match;
+        data_ppn = ({44{tlb_d_match[0]}} & tlb_ppn[0]) |
+                   ({44{tlb_d_match[1]}} & tlb_ppn[1]) |
+                   ({44{tlb_d_match[2]}} & tlb_ppn[2]) |
+                   ({44{tlb_d_match[3]}} & tlb_ppn[3]) |
+                   ({44{tlb_d_match[4]}} & tlb_ppn[4]) |
+                   ({44{tlb_d_match[5]}} & tlb_ppn[5]) |
+                   ({44{tlb_d_match[6]}} & tlb_ppn[6]) |
+                   ({44{tlb_d_match[7]}} & tlb_ppn[7]) ;
+    end
+    // concat physical address
+    wire need_trans = satp_mmu   && !mmu_pc && !mmu_da && !mmu_cache_refill;
+    assign ppc = need_trans ? {8'h0, pc_ppn, pc[11:0]} : pc;
+    assign pda = need_trans ? {8'h0, data_ppn, ls_va[11:0]} : ls_va;
+        
     // TLB Refill
     reg [2:0] tlb_ptr = 0; // 8 entries TLB
     always @(posedge clk or negedge reset) begin
