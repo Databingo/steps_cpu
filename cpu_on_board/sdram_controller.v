@@ -260,6 +260,6 @@ assign DQM[1:0] = ~avl_byte_en[1:0];
 //assign avl_req_wait = (cur[4:0] == RDELAY4[4:0] || cur[4:0] == WDELAY7[4:0]) ? 1'b0 : 1'b1;
 assign avl_RDDATA[15:0] = rdata_reg[15:0];
 assign avl_req_wait = (cur[4:0] == RDELAY5[4:0] || cur[4:0] == WDELAY7[4:0]) ? 1'b0 : 1'b1;
-assign avl_read = (cur[4:0] == HALT ) && (ref_cnt < RefMax);
+assign avl_ready = (cur[4:0] == HALT ) && (ref_cnt < RefMax);
 
 endmodule
