@@ -207,7 +207,7 @@ end
 reg [15:0] rdata_reg;
 always @(posedge sys_clk or negedge rstn) begin
     if (!rstn) rdata_reg <= 16'h0;
-    else if (cur == RDELAY4) rdata_reg <= DQ;
+    else if (cur == RDELAY5) rdata_reg <= DQ;
 end
 
 reg req_write_pending, req_read_pending;
