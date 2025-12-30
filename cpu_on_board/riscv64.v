@@ -162,7 +162,7 @@ module riscv64(
 	endcase
     end
 
-    reg [63:0] Csrs [0:31]; // 32 CSRs for now
+    (* ram_style = "logic" *) reg [63:0] Csrs [0:31]; // 32 CSRs for now
     wire [3:0]  satp_mmu  = Csrs[satp][63:60]; // 0:bare, 8:sv39, 9:sv48  satp.MODE!=0, privilegae is not M-mode, mstatus.MPRN is not set or in MPP's mode?
     wire [15:0] satp_asid = Csrs[satp][59:44]; // Address Space ID for TLB
     wire [43:0] satp_ppn  = Csrs[satp][43:0];  // Root Page Table PPN physical page number
@@ -192,26 +192,26 @@ module riscv64(
     reg [43:0] pc_ppn;
     reg tlb_i_hit;
 
-    wire [7:0] tlb_d_match_i;
-    assign tlb_d_match_i[0] = tlb_vld[0] && (tlb_vpn[0] == pc_vpn);
-    assign tlb_d_match_i[1] = tlb_vld[1] && (tlb_vpn[1] == pc_vpn);
-    assign tlb_d_match_i[2] = tlb_vld[2] && (tlb_vpn[2] == pc_vpn);
-    assign tlb_d_match_i[3] = tlb_vld[3] && (tlb_vpn[3] == pc_vpn);
-    assign tlb_d_match_i[4] = tlb_vld[4] && (tlb_vpn[4] == pc_vpn);
-    assign tlb_d_match_i[5] = tlb_vld[5] && (tlb_vpn[5] == pc_vpn);
-    assign tlb_d_match_i[6] = tlb_vld[6] && (tlb_vpn[6] == pc_vpn);
-    assign tlb_d_match_i[7] = tlb_vld[7] && (tlb_vpn[7] == pc_vpn);
+    wire [7:0] tlb_i_match;
+    assign tlb_i_match[0] = tlb_vld[0] && (tlb_vpn[0] == pc_vpn);
+    assign tlb_i_match[1] = tlb_vld[1] && (tlb_vpn[1] == pc_vpn);
+    assign tlb_i_match[2] = tlb_vld[2] && (tlb_vpn[2] == pc_vpn);
+    assign tlb_i_match[3] = tlb_vld[3] && (tlb_vpn[3] == pc_vpn);
+    assign tlb_i_match[4] = tlb_vld[4] && (tlb_vpn[4] == pc_vpn);
+    assign tlb_i_match[5] = tlb_vld[5] && (tlb_vpn[5] == pc_vpn);
+    assign tlb_i_match[6] = tlb_vld[6] && (tlb_vpn[6] == pc_vpn);
+    assign tlb_i_match[7] = tlb_vld[7] && (tlb_vpn[7] == pc_vpn);
     // pc_ppn hit
     always @(*) begin
-        tlb_i_hit = |tlb_d_match_i;
-        pc_ppn =   ({44{tlb_d_match_i[0]}} & tlb_ppn[0]) |
-                   ({44{tlb_d_match_i[1]}} & tlb_ppn[1]) |
-                   ({44{tlb_d_match_i[2]}} & tlb_ppn[2]) |
-                   ({44{tlb_d_match_i[3]}} & tlb_ppn[3]) |
-                   ({44{tlb_d_match_i[4]}} & tlb_ppn[4]) |
-                   ({44{tlb_d_match_i[5]}} & tlb_ppn[5]) |
-                   ({44{tlb_d_match_i[6]}} & tlb_ppn[6]) |
-                   ({44{tlb_d_match_i[7]}} & tlb_ppn[7]) ; end
+        tlb_i_hit = |tlb_i_match;
+        pc_ppn =   ({44{tlb_i_match[0]}} & tlb_ppn[0]) |
+                   ({44{tlb_i_match[1]}} & tlb_ppn[1]) |
+                   ({44{tlb_i_match[2]}} & tlb_ppn[2]) |
+                   ({44{tlb_i_match[3]}} & tlb_ppn[3]) |
+                   ({44{tlb_i_match[4]}} & tlb_ppn[4]) |
+                   ({44{tlb_i_match[5]}} & tlb_ppn[5]) |
+                   ({44{tlb_i_match[6]}} & tlb_ppn[6]) |
+                   ({44{tlb_i_match[7]}} & tlb_ppn[7]) ; end
 
     // tlb d hit
     wire [63:0] ls_va_offset = (op == 7'b0000011) ? w_imm_i : (op == 7'b0100011) ?  w_imm_s : 64'h0; // load/store/atom
