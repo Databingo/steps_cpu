@@ -312,3 +312,4 @@ b01408e4677bad1b430e5d947f308b33259c18ff fix sdram ld
 be3d4f8044994b6be788524a19aca4a0a45445d4 no mmu and CAS3+invertClock sd/ld work
 358c0e8b7d30589947766bd9068967283bb18151 mmu_pc CAS3+invertClock+WDELAY6+FDELAY5+sd+ld for SDRAM work!
 88fae5eda19e912cec4bf1ce1c2d379883ee6118 mmu_pc+plic+CAS2+normalClock+W6+D5+sd+ld+sdram_controller_pending for SDRAM ld work!
+c2afcd6e6f46efef8182da675788201c11cf4791 print XXXABCDXABCDEFGHX*-^-|:^-ABCDXABCDEFGHXABCDEFGHXAB|01^-2^-
