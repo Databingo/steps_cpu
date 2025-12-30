@@ -207,36 +207,36 @@ end
 reg [15:0] rdata_reg;
 always @(posedge sys_clk or negedge rstn) begin
     if (!rstn) rdata_reg <= 16'h0;
-    else if (cur == RDELAY4) rdata_reg <= DQ;
+    else if (cur == RDELAY5) rdata_reg <= DQ;
 end
 
 reg req_write_pending, req_read_pending;
 
-//always @(posedge sys_clk or negedge rstn) begin
-//    if (!rstn) begin  
-//	req_write_pending <= 0;
-//        req_read_pending <= 0;
-//    end
-//    else begin
-//	if (avl_WRITEen) req_write_pending <= 1;
-//        if (avl_READen) req_read_pending <= 1;
-//        if (cur == WDELAY7) req_write_pending <= 0;
-//        if (cur == RDELAY5) req_read_pending <= 0;
-//    end
-//end
 always @(posedge sys_clk or negedge rstn) begin
     if (!rstn) begin  
 	req_write_pending <= 0;
         req_read_pending <= 0;
     end
-    else if (cur == HALT ) begin
-	req_write_pending <= avl_WRITEen && !avl_READen;
-        req_read_pending <= avl_READen && !avl_WRITEen ;
-    end else if (cur == WDELAY7 || cur == RDELAY5) begin
-	req_write_pending <= 0;
-        req_read_pending <= 0;
+    else begin
+	if (avl_WRITEen) req_write_pending <= 1;
+        if (avl_READen) req_read_pending <= 1;
+        if (cur == WDELAY7) req_write_pending <= 0;
+        if (cur == RDELAY5) req_read_pending <= 0;
     end
 end
+//always @(posedge sys_clk or negedge rstn) begin
+//    if (!rstn) begin  
+//	req_write_pending <= 0;
+//        req_read_pending <= 0;
+//    end
+//    else if (cur == HALT ) begin
+//	req_write_pending <= avl_WRITEen && !avl_READen;
+//        req_read_pending <= avl_READen && !avl_WRITEen ;
+//    end else if (cur == WDELAY7 || cur == RDELAY5) begin
+//	req_write_pending <= 0;
+//        req_read_pending <= 0;
+//    end
+//end
 
 //always @(posedge sys_clk) begin
 //    if (cur == HALT) begin
@@ -253,7 +253,7 @@ end
 // DQ, DQM, Avalon bus signals
 //assign DQ[15:0] = (cur[4:0] == WRA[4:0]) ? avl_WRDATA[15:0] : 16'hzzzz;
 //assign DQ[15:0] = (cur[4:0] == WDELAY1 || cur[4:0] == WRA[4:0] || cur[4:0] == WDELAY2 || cur[4:0] == WDELAY3) ? avl_WRDATA[15:0] : 16'hzzzz;
-assign DQ[15:0] = (cur[4:0] == WDELAY1 || cur[4:0] == WRA[4:0] || cur[4:0] == WDELAY2) ? avl_WRDATA[15:0] : 16'hzzzz;
+assign DQ[15:0] = (cur[4:0] == WACT || cur[4:0] == WDELAY1 || cur[4:0] == WRA[4:0] || cur[4:0] == WDELAY2) ? avl_WRDATA[15:0] : 16'hzzzz;
 assign DQM[1:0] = ~avl_byte_en[1:0]; 
 //assign avl_RDDATA[15:0] = DQ[15:0];
 //assign avl_req_wait = (cur[4:0] == RDELAY4[4:0] || cur[4:0] == WDELAY7[4:0]) ? 1'b0 : 1'b1;
