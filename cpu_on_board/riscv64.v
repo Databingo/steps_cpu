@@ -162,7 +162,7 @@ module riscv64(
 	endcase
     end
 
-    reg [63:0] Csrs [0:31]; // 32 CSRs for now
+    (* ram_style = "logic" *) reg [63:0] Csrs [0:31]; // 32 CSRs for now
     wire [3:0]  satp_mmu  = Csrs[satp][63:60]; // 0:bare, 8:sv39, 9:sv48  satp.MODE!=0, privilegae is not M-mode, mstatus.MPRN is not set or in MPP's mode?
     wire [15:0] satp_asid = Csrs[satp][59:44]; // Address Space ID for TLB
     wire [43:0] satp_ppn  = Csrs[satp][43:0];  // Root Page Table PPN physical page number
@@ -259,31 +259,31 @@ module riscv64(
     end
 
 
-    // cache_i_hit 63:14 tag, 13:4 index 3:0 offset Cache line 16B (4 instructions)
-    reg [127:0] cache_l = 128'h0;
-    reg [50:0] cache_t = 51'h0;
-    reg [63:0] ppc_pre = 64'h0;
-    reg [63:0] ask_data;
-    (* ram_style = "block" *) reg [127:0] Cache_L [0:1023]; // 16KB
-    (* ram_style = "block" *) reg [50:0] Cache_T [0:1023];  // 6.4KB
-    always @(posedge clk) begin 
-	// read
-	cache_l <= Cache_L[ppc[13:4]]; 
-	cache_t <= Cache_T[ppc[13:4]]; 
-	ppc_pre <= ppc;
-	// write
-        if (mmu_cache_refill && bus_write_enable && bus_address == `CacheI_L) begin // for the last fill: sd ppa, Tlb
-	    Cache_L[ask_data[13:4]][63:0] <= bus_write_data; 
-	end
-        if (mmu_cache_refill && bus_write_enable && bus_address == `CacheI_H) begin // for the last fill: sd ppa, Tlb
-	    Cache_L[ask_data[13:4]][127:64] <= bus_write_data; 
-	    Cache_T[ask_data[13:4]][49:0] <= ask_data[63:14]; 
-	    Cache_T[ask_data[13:4]][50:50] <= 1; 
-	end
-    end
-    wire cache_i_hit = cache_t[50] && (ppc_pre[63:14] == cache_t[49:0]);
-    wire [31:0] cache_i = cache_l[ppc_pre[3:2]*32 +: 32];
-
+//    // cache_i_hit 63:14 tag, 13:4 index 3:0 offset Cache line 16B (4 instructions)
+//    reg [127:0] cache_l = 128'h0;
+//    reg [50:0] cache_t = 51'h0;
+//    reg [63:0] ppc_pre = 64'h0;
+//    reg [63:0] ask_data;
+//    (* ram_style = "block" *) reg [127:0] Cache_L [0:1023]; // 16KB
+//    (* ram_style = "block" *) reg [50:0] Cache_T [0:1023];  // 6.4KB
+//    always @(posedge clk) begin 
+//	// read
+//	cache_l <= Cache_L[ppc[13:4]]; 
+//	cache_t <= Cache_T[ppc[13:4]]; 
+//	ppc_pre <= ppc;
+//	// write
+//        if (mmu_cache_refill && bus_write_enable && bus_address == `CacheI_L) begin // for the last fill: sd ppa, Tlb
+//	    Cache_L[ask_data[13:4]][63:0] <= bus_write_data; 
+//	end
+//        if (mmu_cache_refill && bus_write_enable && bus_address == `CacheI_H) begin // for the last fill: sd ppa, Tlb
+//	    Cache_L[ask_data[13:4]][127:64] <= bus_write_data; 
+//	    Cache_T[ask_data[13:4]][49:0] <= ask_data[63:14]; 
+//	    Cache_T[ask_data[13:4]][50:50] <= 1; 
+//	end
+//    end
+//    wire cache_i_hit = cache_t[50] && (ppc_pre[63:14] == cache_t[49:0]);
+//    wire [31:0] cache_i = cache_l[ppc_pre[3:2]*32 +: 32];
+//
 
 
 
