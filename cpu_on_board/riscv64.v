@@ -192,26 +192,39 @@ module riscv64(
     wire [26:0] pc_vpn = pc[38:12];
     reg [43:0] pc_ppn;
     reg tlb_i_hit;
-    always @(*) begin
-        tlb_i_hit = 0;
-        pc_ppn = 44'h0;
-        //if      (tlb_vld[0] && tlb_vpn[0] == pc_vpn) begin tlb_i_hit = 1; pc_ppn = tlb_ppn[0]; end
-        //else if (tlb_vld[1] && tlb_vpn[1] == pc_vpn) begin tlb_i_hit = 1; pc_ppn = tlb_ppn[1]; end
-        //else if (tlb_vld[2] && tlb_vpn[2] == pc_vpn) begin tlb_i_hit = 1; pc_ppn = tlb_ppn[2]; end
-        //else if (tlb_vld[3] && tlb_vpn[3] == pc_vpn) begin tlb_i_hit = 1; pc_ppn = tlb_ppn[3]; end
-        //else if (tlb_vld[4] && tlb_vpn[4] == pc_vpn) begin tlb_i_hit = 1; pc_ppn = tlb_ppn[4]; end
-        //else if (tlb_vld[5] && tlb_vpn[5] == pc_vpn) begin tlb_i_hit = 1; pc_ppn = tlb_ppn[5]; end
-        //else if (tlb_vld[6] && tlb_vpn[6] == pc_vpn) begin tlb_i_hit = 1; pc_ppn = tlb_ppn[6]; end
-        //else if (tlb_vld[7] && tlb_vpn[7] == pc_vpn) begin tlb_i_hit = 1; pc_ppn = tlb_ppn[7]; end
-        if (tlb_vld[0] && tlb_vpn[0] == pc_vpn) begin tlb_i_hit = 1; pc_ppn = tlb_ppn[0]; end
-        if (tlb_vld[1] && tlb_vpn[1] == pc_vpn) begin tlb_i_hit = 1; pc_ppn = tlb_ppn[1]; end
-        if (tlb_vld[2] && tlb_vpn[2] == pc_vpn) begin tlb_i_hit = 1; pc_ppn = tlb_ppn[2]; end
-        if (tlb_vld[3] && tlb_vpn[3] == pc_vpn) begin tlb_i_hit = 1; pc_ppn = tlb_ppn[3]; end
-        if (tlb_vld[4] && tlb_vpn[4] == pc_vpn) begin tlb_i_hit = 1; pc_ppn = tlb_ppn[4]; end
-        if (tlb_vld[5] && tlb_vpn[5] == pc_vpn) begin tlb_i_hit = 1; pc_ppn = tlb_ppn[5]; end
-        if (tlb_vld[6] && tlb_vpn[6] == pc_vpn) begin tlb_i_hit = 1; pc_ppn = tlb_ppn[6]; end
-        if (tlb_vld[7] && tlb_vpn[7] == pc_vpn) begin tlb_i_hit = 1; pc_ppn = tlb_ppn[7]; end
-    end
+    //always @(*) begin
+    //    tlb_i_hit = 0;
+    //    pc_ppn = 44'h0;
+    //    //if      (tlb_vld[0] && tlb_vpn[0] == pc_vpn) begin tlb_i_hit = 1; pc_ppn = tlb_ppn[0]; end
+    //    //else if (tlb_vld[1] && tlb_vpn[1] == pc_vpn) begin tlb_i_hit = 1; pc_ppn = tlb_ppn[1]; end
+    //    //else if (tlb_vld[2] && tlb_vpn[2] == pc_vpn) begin tlb_i_hit = 1; pc_ppn = tlb_ppn[2]; end
+    //    //else if (tlb_vld[3] && tlb_vpn[3] == pc_vpn) begin tlb_i_hit = 1; pc_ppn = tlb_ppn[3]; end
+    //    //else if (tlb_vld[4] && tlb_vpn[4] == pc_vpn) begin tlb_i_hit = 1; pc_ppn = tlb_ppn[4]; end
+    //    //else if (tlb_vld[5] && tlb_vpn[5] == pc_vpn) begin tlb_i_hit = 1; pc_ppn = tlb_ppn[5]; end
+    //    //else if (tlb_vld[6] && tlb_vpn[6] == pc_vpn) begin tlb_i_hit = 1; pc_ppn = tlb_ppn[6]; end
+    //    //else if (tlb_vld[7] && tlb_vpn[7] == pc_vpn) begin tlb_i_hit = 1; pc_ppn = tlb_ppn[7]; end
+    //end
+     wire [7:0] tlb_match_i;
+     assign tlb_match_i[0] = tlb_vld[0] && (tlb_vpn[0] == pc_vpn);
+     assign tlb_match_i[1] = tlb_vld[1] && (tlb_vpn[1] == pc_vpn);
+     assign tlb_match_i[2] = tlb_vld[2] && (tlb_vpn[2] == pc_vpn);
+     assign tlb_match_i[3] = tlb_vld[3] && (tlb_vpn[3] == pc_vpn);
+     assign tlb_match_i[4] = tlb_vld[4] && (tlb_vpn[4] == pc_vpn);
+     assign tlb_match_i[5] = tlb_vld[5] && (tlb_vpn[5] == pc_vpn);
+     assign tlb_match_i[6] = tlb_vld[6] && (tlb_vpn[6] == pc_vpn);
+     assign tlb_match_i[7] = tlb_vld[7] && (tlb_vpn[7] == pc_vpn);
+
+     always @(*) begin
+	 tlb_i_hit = |tlb_match_i;
+	 pc_ppn =   ({44{tlb_match_i[0]}} & tlb_ppn[0]) |
+	            ({44{tlb_match_i[1]}} & tlb_ppn[1]) |
+	            ({44{tlb_match_i[2]}} & tlb_ppn[2]) |
+	            ({44{tlb_match_i[3]}} & tlb_ppn[3]) |
+	            ({44{tlb_match_i[4]}} & tlb_ppn[4]) |
+	            ({44{tlb_match_i[5]}} & tlb_ppn[5]) |
+	            ({44{tlb_match_i[6]}} & tlb_ppn[6]) |
+	            ({44{tlb_match_i[7]}} & tlb_ppn[7]) ;
+     end
 
     // d hit
     // -- directly 1:1 --
