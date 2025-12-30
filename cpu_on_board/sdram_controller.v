@@ -32,6 +32,8 @@ parameter FDELAY2=5'd26;
 parameter FDELAY3=5'd27;
 parameter FDELAY4=5'd28;
 parameter FDELAY5=5'd29;
+parameter IDELAY4=5'd30;
+parameter IDELAY5=5'd31;
 
 reg [4:0] cur, next;
 
@@ -95,8 +97,10 @@ always @(*) begin
 		IDELAY1: next[4:0] <= IREF[4:0];
 		IREF   : next[4:0] <= IDELAY2[4:0];
 		IDELAY2: next[4:0] <= IDELAY3[4:0];
-		IDELAY3: next[4:0] <= init_RefMax ? IMODE[4:0] : IDELAY1[4:0];
-		IMODE  : next[4:0] <= HALT[4:0];
+		IDELAY3: next[4:0] <= IDELAY4[4:0];
+		IDELAY4: next[4:0] <= init_RefMax ? IMODE[4:0] : IDELAY1[4:0];
+		IMODE  : next[4:0] <= IDELAY5[4:0];
+		IDELAY5: next[4:0] <= HALT[4:0];
 		//HALT   : 
 		//	if(ref_cnt[8:0] >= RefMax[8:0])
 		//		next[4:0] <= FREF[4:0];
@@ -253,7 +257,8 @@ end
 // DQ, DQM, Avalon bus signals
 //assign DQ[15:0] = (cur[4:0] == WRA[4:0]) ? avl_WRDATA[15:0] : 16'hzzzz;
 //assign DQ[15:0] = (cur[4:0] == WDELAY1 || cur[4:0] == WRA[4:0] || cur[4:0] == WDELAY2 || cur[4:0] == WDELAY3) ? avl_WRDATA[15:0] : 16'hzzzz;
-assign DQ[15:0] = (cur[4:0] == WACT || cur[4:0] == WDELAY1 || cur[4:0] == WRA[4:0] || cur[4:0] == WDELAY2) ? avl_WRDATA[15:0] : 16'hzzzz;
+//assign DQ[15:0] = (cur[4:0] == WACT || cur[4:0] == WDELAY1 || cur[4:0] == WRA[4:0] || cur[4:0] == WDELAY2) ? avl_WRDATA[15:0] : 16'hzzzz;
+assign DQ[15:0] = (cur[4:0] == WDELAY1 || cur[4:0] == WRA[4:0] || cur[4:0] == WDELAY2 || cur[4:0] == WDELAY3) ? avl_WRDATA[15:0] : 16'hzzzz;
 assign DQM[1:0] = ~avl_byte_en[1:0]; 
 //assign avl_RDDATA[15:0] = DQ[15:0];
 //assign avl_req_wait = (cur[4:0] == RDELAY4[4:0] || cur[4:0] == WDELAY7[4:0]) ? 1'b0 : 1'b1;
