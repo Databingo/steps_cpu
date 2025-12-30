@@ -183,9 +183,6 @@ module riscv64(
     reg        reserve_valid;
 
     // -- TLB -- 8 pages
-    //(* ram_style = "logic" *) reg [26:0] tlb_vpn [0:7]; // vpn number VA[38:12]  Sv39
-    //(* ram_style = "logic" *) reg [43:0] tlb_ppn [0:7]; // ppn number PA[55:12]
-    //(* ram_style = "logic" *) reg tlb_vld [0:7];
     reg [26:0] tlb_vpn [0:7]; // vpn number VA[38:12]  Sv39
     reg [43:0] tlb_ppn [0:7]; // ppn number PA[55:12]
     reg tlb_vld [0:7];
