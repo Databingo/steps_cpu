@@ -53,12 +53,21 @@ module cpu_on_board (
 );
 
   // -- up pll --
-    upclk u0 (
-        .clk_clk                   (CLOCK_50),                   //                   clk.clk
-        .reset_reset_n             (KEY0),             //                 reset.reset_n
-        .up_clocks_0_sdram_clk_clk (sdram_clk), // up_clocks_0_sdram_clk.clk
-        .up_clocks_0_CLOCK_50_clk   (sys_CLK)    //   up_clocks_0_CLOCK_50.clk
-    );
+//    upclk u0 (
+//        .clk_clk                   (CLOCK_50),                   //                   clk.clk
+//        .reset_reset_n             (KEY0),             //                 reset.reset_n
+//        .up_clocks_0_sdram_clk_clk (sdram_clk), // up_clocks_0_sdram_clk.clk
+//        .up_clocks_0_CLOCK_50_clk   (sys_CLK)    //   up_clocks_0_CLOCK_50.clk
+//    );
+// -- sdram pll --
+sdram_pll sdrampll (
+    .clk_clk                        (CLOCK_50),               //                     clk.clk
+    .reset_reset_n                  (KEY0),                   //                   reset.reset_n
+    .altpll_0_c0_clk                (sys_CLK),                //             altpll_0_c0.clk
+    .altpll_0_c1_clk                (sdram_clk),              //             altpll_0_c1.clk
+    .altpll_0_areset_conduit_export (), // altpll_0_areset_conduit.export
+    .altpll_0_locked_conduit_export ()  // altpll_0_locked_conduit.export
+);
 wire sdram_clk;
 wire sys_CLK;
 
