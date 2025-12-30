@@ -61,6 +61,7 @@ reg sdram_read_en;
 
 wire [15:0] sdram_rddata;   
 wire        sdram_req_wait;
+wire sdram_ready;
 
 sdram_controller sdram_ctrl (
     .sys_clk(CLOCK_50),
@@ -73,6 +74,7 @@ sdram_controller sdram_ctrl (
     .avl_WRDATA(sdram_wrdata),
     .avl_RDDATA(sdram_rddata),
     .avl_req_wait(sdram_req_wait),
+    .avl_ready(sdram_ready),
     // to pin (hardware)
     .addr(DRAM_ADDR),        // new_sdram_controller_0_wire.addr
     .BA(DRAM_BA),            //                            .ba
