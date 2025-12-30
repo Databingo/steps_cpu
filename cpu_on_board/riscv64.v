@@ -183,9 +183,9 @@ module riscv64(
     reg        reserve_valid;
 
     // -- TLB -- 8 pages
-    reg [26:0] tlb_vpn [0:7]; // vpn number VA[38:12]  Sv39
-    reg [43:0] tlb_ppn [0:7]; // ppn number PA[55:12]
-    reg tlb_vld [0:7];
+    (* ram_style = "logic" *) reg [26:0] tlb_vpn [0:7]; // vpn number VA[38:12]  Sv39
+    (* ram_style = "logic" *) reg [43:0] tlb_ppn [0:7]; // ppn number PA[55:12]
+    (* ram_style = "logic" *) reg tlb_vld [0:7];
 
     // tlb i hit
     wire [26:0] pc_vpn = pc[38:12];
@@ -212,7 +212,7 @@ module riscv64(
                    ({44{tlb_i_match[5]}} & tlb_ppn[5]) |
                    ({44{tlb_i_match[6]}} & tlb_ppn[6]) |
                    ({44{tlb_i_match[7]}} & tlb_ppn[7]) ; end
-
+    // --------
     // tlb d hit
     wire [63:0] ls_va_offset = (op == 7'b0000011) ? w_imm_i : (op == 7'b0100011) ?  w_imm_s : 64'h0; // load/store/atom
     wire [63:0] ls_va = rs1 + ls_va_offset;
