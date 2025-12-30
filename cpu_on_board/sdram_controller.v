@@ -33,6 +33,8 @@ parameter FDELAY2=5'd26;
 parameter FDELAY3=5'd27;
 parameter FDELAY4=5'd28;
 parameter FDELAY5=5'd29;
+parameter RDELAY6=5'd30;
+parameter RDELAY7=5'd31;
 
 reg [4:0] cur, next;
 
@@ -146,7 +148,9 @@ always @(*) begin
 		RDELAY2: next[4:0] <= RDELAY3[4:0];
 		RDELAY3: next[4:0] <= RDELAY4[4:0];
 		RDELAY4: next[4:0] <= RDELAY5[4:0];
-		RDELAY5: next[4:0] <= HALT[4:0];
+		RDELAY5: next[4:0] <= RDELAY6[4:0];
+		RDELAY6: next[4:0] <= RDELAY7[4:0];
+		RDELAY7: next[4:0] <= HALT[4:0];
 
 		// Refresh operation
 		FREF   : next[4:0] <= FDELAY[4:0];
