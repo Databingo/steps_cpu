@@ -415,11 +415,11 @@ assign DRAM_CKE = 1; // always enable
 		            4: if (sdram_ready) begin sdram_addr <= bus_address[22:1]+2; sdram_byte_en <= 2'b11; sdram_read_en <= 1; step <= 5; end  
 			    //5: if (sdram_req_wait==0) begin sdram_read_en <= 0; bus_read_data[47:32] <= sdram_rddata[15:0]; bus_read_done <= 0; step <=6; end
 			    5: if (sdram_req_wait==0) begin sdram_read_en <= 0; bus_read_data[47:32] <= sdram_rddata[15:0]; bus_read_done <= 0; step <=20; end
-			    15: step <= 16;
-			    16: step <= 17;
-			    17: step <= 18;
-			    18: step <= 19;
-			    19: step <= 4;
+			    20: step <= 21;
+			    21: step <= 22;
+			    22: step <= 23;
+			    23: step <= 24;
+			    24: step <= 6;
 		            6: if (sdram_ready) begin sdram_addr <= bus_address[22:1]+3; sdram_byte_en <= 2'b11; sdram_read_en <= 1; step <= 7; end  
 			    7: if (sdram_req_wait==0) begin sdram_read_en <= 0; bus_read_data[63:48] <= sdram_rddata[15:0]; bus_read_done <= 1; step <=0; end
 			endcase
