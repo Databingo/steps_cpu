@@ -85,7 +85,10 @@ sdram_controller sdram_ctrl (
     .RASn(DRAM_RAS_N),       //                            .ras_n
     .WEn(DRAM_WE_N)          //                            .we_n
 );
-assign DRAM_CLK = CLOCK_50;
+wire invert_clk;
+assign invert_clk = ~CLOCK_50;
+assign DRAM_CLK = invert_clk;
+//assign DRAM_CLK = CLOCK_50;
 assign DRAM_CKE = 1; // always enable
 
     // -- MEM -- minic L1 cache
