@@ -35,7 +35,6 @@ parameter FDELAY4=5'd28;
 parameter FDELAY5=5'd29;
 parameter RDELAY6=5'd30;
 parameter RDELAY7=5'd31;
-parameter FDELAY6=5'd32;
 
 reg [4:0] cur, next;
 
@@ -159,8 +158,8 @@ always @(*) begin
 		FDELAY2: next[4:0] <= FDELAY3[4:0];
 		FDELAY3: next[4:0] <= FDELAY4[4:0];
 		FDELAY4: next[4:0] <= FDELAY5[4:0];
-		FDELAY5: next[4:0] <= FDELAY6[4:0];
-		FDELAY6: next[4:0] <= HALT[4:0];
+		FDELAY5: next[4:0] <= HALT[4:0];
+		//FDELAY : next[4:0] <= HALT[4:0];
 		default: next[4:0] <= HALT[4:0];   
 	endcase
 end
