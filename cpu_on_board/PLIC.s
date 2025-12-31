@@ -254,8 +254,8 @@ _start:
     li t1, 0 
     sw t1, 0(t2)
 
-   #li t3, 53 # 5
-   #sb t3, 0(t0)
+    li t3, 53 # 5
+    sb t3, 0(t0)
 
     # Enable MEIE (mie.MEIE enternal interrupt)
     li t2, 0x800 # bit 11=MEIE
