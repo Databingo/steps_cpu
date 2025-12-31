@@ -297,6 +297,23 @@ SRAM 512KB
 SDRAM 8MB PSC A2V64S40CTP-G7 IS42S16400.pdf
 
 
+// Linux needs:
+// Privilege RV
+// mret/sret/ecall/ebreak
+//PLIC
+//CLINT timer
+//UART 16550
+//Map DRAM 0x80000000/0x40000000
+//OpenSBI at 0x80000000 ?
+//lr.w|d/sc.w|d Atom amo...
+//sfence.vma TLE flush could be NOP
+//sv39 mmu ! Accessed/Direct bit in PTE(Page Table Entry)
+//exception handler: page faults/illegal ir/misaligned ls/timer interrutp/external interrupt/breakpoint/ecallUSM
+//SBI interface: OpenSBI run first
+//fence fence.i
+//cache !  // SDRAM to cache(BRAM)
+// Device Tree
+  
 
 
 
