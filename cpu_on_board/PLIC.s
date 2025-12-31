@@ -68,10 +68,34 @@ _start:
     sb a7, 0(t0)         # Should print 'H'
     sb t2, 0(t0)         # Should print 'X'
 
-    ## MMU enabled
-    #li a1, 8              
-    #slli a1, a1, 60          # mmu mode sv39 #li a1, 0x8000000000000000 # mmu mode sv39
-    #csrrw a3, satp, a1      # set satp csr index 0x180
+    # Read it back       # test sdram ld
+    ld a0, 0(s0)
+
+    sb a0, 0(t0)         # Should print 'A'
+    srli a0, a0, 8
+    sb a0, 0(t0)         # Should print 'B'
+    srli a0, a0, 8
+    sb a0, 0(t0)         # Should print 'C'
+    srli a0, a0, 8
+    sb a0, 0(t0)         # Should print 'D'
+    srli a0, a0, 8
+    sb a0, 0(t0)         # Should print 'E'
+    srli a0, a0, 8
+    sb a0, 0(t0)         # Should print 'F'
+    srli a0, a0, 8
+    sb a0, 0(t0)         # Should print 'G'
+    srli a0, a0, 8
+    sb a0, 0(t0)         # Should print 'H'
+    sb t2, 0(t0)         # Should print 'X'
+
+
+
+    # MMU enabled
+    li a1, 8              
+    slli a1, a1, 60          # mmu mode sv39 #li a1, 0x8000000000000000 # mmu mode sv39
+    csrrw a3, satp, a1      # set satp csr index 0x180
+
+
 
     li t3, 124 # |
     sb t3, 0(t0) # mmu settled
