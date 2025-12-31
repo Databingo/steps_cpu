@@ -171,54 +171,105 @@ set_global_assignment -name OPTIMIZATION_TECHNIQUE AREA
 
 
 
-# --- SDRAM Drive Strength & Slew Rate Settings ---
+## --- SDRAM Drive Strength & Slew Rate Settings ---
+#
+## 1. Set Current Strength to 8mA (Stronger signal)
+#set_instance_assignment -name CURRENT_STRENGTH_NEW 8MA -to DRAM_ADDR*
+#set_instance_assignment -name CURRENT_STRENGTH_NEW 8MA -to DRAM_BA*
+#set_instance_assignment -name CURRENT_STRENGTH_NEW 8MA -to DRAM_CAS_N
+#set_instance_assignment -name CURRENT_STRENGTH_NEW 8MA -to DRAM_CKE
+#set_instance_assignment -name CURRENT_STRENGTH_NEW 8MA -to DRAM_CLK
+#set_instance_assignment -name CURRENT_STRENGTH_NEW 8MA -to DRAM_CS_N
+#set_instance_assignment -name CURRENT_STRENGTH_NEW 8MA -to DRAM_DQ*
+#set_instance_assignment -name CURRENT_STRENGTH_NEW 8MA -to DRAM_DQM*
+#set_instance_assignment -name CURRENT_STRENGTH_NEW 8MA -to DRAM_RAS_N
+#set_instance_assignment -name CURRENT_STRENGTH_NEW 8MA -to DRAM_WE_N
+#
+## 2. Set Slew Rate to 2 (Fast edges) - Helps with timing at 50MHz+
+#set_instance_assignment -name SLEW_RATE 2 -to DRAM_ADDR*
+#set_instance_assignment -name SLEW_RATE 2 -to DRAM_BA*
+#set_instance_assignment -name SLEW_RATE 2 -to DRAM_CAS_N
+#set_instance_assignment -name SLEW_RATE 2 -to DRAM_CKE
+#set_instance_assignment -name SLEW_RATE 2 -to DRAM_CLK
+#set_instance_assignment -name SLEW_RATE 2 -to DRAM_CS_N
+#set_instance_assignment -name SLEW_RATE 2 -to DRAM_DQ*
+#set_instance_assignment -name SLEW_RATE 2 -to DRAM_DQM*
+#set_instance_assignment -name SLEW_RATE 2 -to DRAM_RAS_N
+#set_instance_assignment -name SLEW_RATE 2 -to DRAM_WE_N
+#
+#
+#
+## Force registers into IO Pads
+#set_instance_assignment -name FAST_INPUT_REGISTER ON -to DQ[*]
+#set_instance_assignment -name FAST_OUTPUT_REGISTER ON -to DQ[*]
+#set_instance_assignment -name FAST_OUTPUT_ENABLE_REGISTER ON -to DQ[*]
+#
+#set_instance_assignment -name FAST_OUTPUT_REGISTER ON -to addr[*]
+#set_instance_assignment -name FAST_OUTPUT_REGISTER ON -to BA[*]
+#set_instance_assignment -name FAST_OUTPUT_REGISTER ON -to CSn
+#set_instance_assignment -name FAST_OUTPUT_REGISTER ON -to WEn
+#set_instance_assignment -name FAST_OUTPUT_REGISTER ON -to RASn
+#set_instance_assignment -name FAST_OUTPUT_REGISTER ON -to CASn
+#set_instance_assignment -name FAST_OUTPUT_REGISTER ON -to DQM[*]
+## If you have CKE or CLK output pins, add them here too
+##
+##
+### Force DQ[3] (and others) to be fast
+#set_instance_assignment -name FAST_INPUT_REGISTER ON -to DQ[3]
+#set_instance_assignment -name FAST_OUTPUT_REGISTER ON -to DQ[3]
+#set_instance_assignment -name CURRENT_STRENGTH_NEW "MAXIMUM CURRENT" -to DQ[3]
+#
+## Apply to ALL DQ pins
+#set_instance_assignment -name FAST_INPUT_REGISTER ON -to DQ[*]
+#set_instance_assignment -name FAST_OUTPUT_REGISTER ON -to DQ[*]
+#
+#
+ 
+ # ===================================================================
+# SDRAM PHYSICAL CONSTRAINTS (FIXED)
+# ===================================================================
 
-# 1. Set Current Strength to 8mA (Stronger signal)
-set_instance_assignment -name CURRENT_STRENGTH_NEW 8MA -to DRAM_ADDR*
-set_instance_assignment -name CURRENT_STRENGTH_NEW 8MA -to DRAM_BA*
+# 1. CURRENT STRENGTH (8mA is recommended to reduce ringing/overshoot)
+#    If 8mA is too weak (errors return), try 12mA. Do not use Maximum.
+set_instance_assignment -name CURRENT_STRENGTH_NEW 8MA -to DRAM_ADDR[*]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 8MA -to DRAM_BA[*]
 set_instance_assignment -name CURRENT_STRENGTH_NEW 8MA -to DRAM_CAS_N
 set_instance_assignment -name CURRENT_STRENGTH_NEW 8MA -to DRAM_CKE
 set_instance_assignment -name CURRENT_STRENGTH_NEW 8MA -to DRAM_CLK
 set_instance_assignment -name CURRENT_STRENGTH_NEW 8MA -to DRAM_CS_N
-set_instance_assignment -name CURRENT_STRENGTH_NEW 8MA -to DRAM_DQ*
-set_instance_assignment -name CURRENT_STRENGTH_NEW 8MA -to DRAM_DQM*
+set_instance_assignment -name CURRENT_STRENGTH_NEW 8MA -to DRAM_DQ[*]
+set_instance_assignment -name CURRENT_STRENGTH_NEW 8MA -to DRAM_DQM[*]
 set_instance_assignment -name CURRENT_STRENGTH_NEW 8MA -to DRAM_RAS_N
 set_instance_assignment -name CURRENT_STRENGTH_NEW 8MA -to DRAM_WE_N
 
-# 2. Set Slew Rate to 2 (Fast edges) - Helps with timing at 50MHz+
-set_instance_assignment -name SLEW_RATE 2 -to DRAM_ADDR*
-set_instance_assignment -name SLEW_RATE 2 -to DRAM_BA*
+# 2. SLEW RATE (2 is usually standard fast/medium)
+set_instance_assignment -name SLEW_RATE 2 -to DRAM_ADDR[*]
+set_instance_assignment -name SLEW_RATE 2 -to DRAM_BA[*]
 set_instance_assignment -name SLEW_RATE 2 -to DRAM_CAS_N
 set_instance_assignment -name SLEW_RATE 2 -to DRAM_CKE
 set_instance_assignment -name SLEW_RATE 2 -to DRAM_CLK
 set_instance_assignment -name SLEW_RATE 2 -to DRAM_CS_N
-set_instance_assignment -name SLEW_RATE 2 -to DRAM_DQ*
-set_instance_assignment -name SLEW_RATE 2 -to DRAM_DQM*
+set_instance_assignment -name SLEW_RATE 2 -to DRAM_DQ[*]
+set_instance_assignment -name SLEW_RATE 2 -to DRAM_DQM[*]
 set_instance_assignment -name SLEW_RATE 2 -to DRAM_RAS_N
 set_instance_assignment -name SLEW_RATE 2 -to DRAM_WE_N
 
+# 3. I/O REGISTER PACKING (Crucial for Timing Stability)
+#    Note: Naming must match Top-Level Ports (DRAM_*, not just addr/DQ)
 
+# Fast Input (Fixes Read Errors)
+set_instance_assignment -name FAST_INPUT_REGISTER ON -to DRAM_DQ[*]
 
-# Force registers into IO Pads
-set_instance_assignment -name FAST_INPUT_REGISTER ON -to DQ[*]
-set_instance_assignment -name FAST_OUTPUT_REGISTER ON -to DQ[*]
-set_instance_assignment -name FAST_OUTPUT_ENABLE_REGISTER ON -to DQ[*]
+# Fast Output (Fixes Write/Command Stability)
+set_instance_assignment -name FAST_OUTPUT_REGISTER ON -to DRAM_ADDR[*]
+set_instance_assignment -name FAST_OUTPUT_REGISTER ON -to DRAM_BA[*]
+set_instance_assignment -name FAST_OUTPUT_REGISTER ON -to DRAM_CAS_N
+set_instance_assignment -name FAST_OUTPUT_REGISTER ON -to DRAM_CKE
+set_instance_assignment -name FAST_OUTPUT_REGISTER ON -to DRAM_CS_N
+set_instance_assignment -name FAST_OUTPUT_REGISTER ON -to DRAM_DQ[*]
+set_instance_assignment -name FAST_OUTPUT_REGISTER ON -to DRAM_DQM[*]
+set_instance_assignment -name FAST_OUTPUT_REGISTER ON -to DRAM_RAS_N
+set_instance_assignment -name FAST_OUTPUT_REGISTER ON -to DRAM_WE_N
 
-set_instance_assignment -name FAST_OUTPUT_REGISTER ON -to addr[*]
-set_instance_assignment -name FAST_OUTPUT_REGISTER ON -to BA[*]
-set_instance_assignment -name FAST_OUTPUT_REGISTER ON -to CSn
-set_instance_assignment -name FAST_OUTPUT_REGISTER ON -to WEn
-set_instance_assignment -name FAST_OUTPUT_REGISTER ON -to RASn
-set_instance_assignment -name FAST_OUTPUT_REGISTER ON -to CASn
-set_instance_assignment -name FAST_OUTPUT_REGISTER ON -to DQM[*]
-# If you have CKE or CLK output pins, add them here too
-#
-#
-## Force DQ[3] (and others) to be fast
-set_instance_assignment -name FAST_INPUT_REGISTER ON -to DQ[3]
-set_instance_assignment -name FAST_OUTPUT_REGISTER ON -to DQ[3]
-set_instance_assignment -name CURRENT_STRENGTH_NEW "MAXIMUM CURRENT" -to DQ[3]
-
-# Apply to ALL DQ pins
-set_instance_assignment -name FAST_INPUT_REGISTER ON -to DQ[*]
-set_instance_assignment -name FAST_OUTPUT_REGISTER ON -to DQ[*]
+# Fast Output Enable (For Bi-directional DQ)
+set_instance_assignment -name FAST_OUTPUT_ENABLE_REGISTER ON -to DRAM_DQ[*]
