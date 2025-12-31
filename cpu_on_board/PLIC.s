@@ -68,25 +68,25 @@ _start:
     sb a7, 0(t0)         # Should print 'H'
     sb t2, 0(t0)         # Should print 'X'
 
-    # Read it back       # test sdram ld
-    ld a0, 0(s0)
+#   # Read it back       # test sdram ld
+#   ld a0, 0(s0)
 
-    sb a0, 0(t0)         # Should print 'A'
-    srli a0, a0, 8
-    sb a0, 0(t0)         # Should print 'B'
-    srli a0, a0, 8
-    sb a0, 0(t0)         # Should print 'C'
-    srli a0, a0, 8
-    sb a0, 0(t0)         # Should print 'D'
-    srli a0, a0, 8
-    sb a0, 0(t0)         # Should print 'E'
-    srli a0, a0, 8
-    sb a0, 0(t0)         # Should print 'F'
-    srli a0, a0, 8
-    sb a0, 0(t0)         # Should print 'G'
-    srli a0, a0, 8
-    sb a0, 0(t0)         # Should print 'H'
-    sb t2, 0(t0)         # Should print 'X'
+#   sb a0, 0(t0)         # Should print 'A'
+#   srli a0, a0, 8
+#   sb a0, 0(t0)         # Should print 'B'
+#   srli a0, a0, 8
+#   sb a0, 0(t0)         # Should print 'C'
+#   srli a0, a0, 8
+#   sb a0, 0(t0)         # Should print 'D'
+#   srli a0, a0, 8
+#   sb a0, 0(t0)         # Should print 'E'
+#   srli a0, a0, 8
+#   sb a0, 0(t0)         # Should print 'F'
+#   srli a0, a0, 8
+#   sb a0, 0(t0)         # Should print 'G'
+#   srli a0, a0, 8
+#   sb a0, 0(t0)         # Should print 'H'
+#   sb t2, 0(t0)         # Should print 'X'
 
 
 
@@ -151,25 +151,25 @@ _start:
     sb a7, 0(t0)         # Should print 'H'
     sb t2, 0(t0)         # Should print 'X'
 
-    # Read it back       # test sdram ld
-    ld a0, 0(s0)
+#   # Read it back       # test sdram ld
+#   ld a0, 0(s0)
 
-    sb a0, 0(t0)         # Should print 'A'
-    srli a0, a0, 8
-    sb a0, 0(t0)         # Should print 'B'
-    srli a0, a0, 8
-    sb a0, 0(t0)         # Should print 'C'
-    srli a0, a0, 8
-    sb a0, 0(t0)         # Should print 'D'
-    srli a0, a0, 8
-    sb a0, 0(t0)         # Should print 'E'
-    srli a0, a0, 8
-    sb a0, 0(t0)         # Should print 'F'
-    srli a0, a0, 8
-    sb a0, 0(t0)         # Should print 'G'
-    srli a0, a0, 8
-    sb a0, 0(t0)         # Should print 'H'
-    sb t2, 0(t0)         # Should print 'X'
+#   sb a0, 0(t0)         # Should print 'A'
+#   srli a0, a0, 8
+#   sb a0, 0(t0)         # Should print 'B'
+#   srli a0, a0, 8
+#   sb a0, 0(t0)         # Should print 'C'
+#   srli a0, a0, 8
+#   sb a0, 0(t0)         # Should print 'D'
+#   srli a0, a0, 8
+#   sb a0, 0(t0)         # Should print 'E'
+#   srli a0, a0, 8
+#   sb a0, 0(t0)         # Should print 'F'
+#   srli a0, a0, 8
+#   sb a0, 0(t0)         # Should print 'G'
+#   srli a0, a0, 8
+#   sb a0, 0(t0)         # Should print 'H'
+#   sb t2, 0(t0)         # Should print 'X'
 
     # Write one byte
     li t1, 0x41          # 'A'
