@@ -179,8 +179,8 @@ always @(*) begin
 	else if(cur[4:0] == IREF[4:0] || cur[4:0] == FREF[4:0])
 		{CSn, RASn, CASn, WEn} <= 4'b0001; // Refresh operatoin
 	else
-		//{CSn, RASn, CASn, WEn} <= 4'b1111; // NOP
-		{CSn, RASn, CASn, WEn} <= 4'b0111; // NOP
+		{CSn, RASn, CASn, WEn} <= 4'b1111; // NOP
+		//{CSn, RASn, CASn, WEn} <= 4'b0111; // NOP
 end
 
 // Addressing signals
