@@ -249,13 +249,13 @@ _start:
     li t3, 52 # 4
     sb t3, 0(t0)
   
-   ## Set shreshold 1
-   #li t2, 0x0C201000  # base +0x200000+hard_id<<12
-   #li t1, 0 
-   #sw t1, 0(t2)
+    # Set shreshold 1
+    li t2, 0x0C201000  # base +0x200000+hard_id<<12
+    li t1, 0 
+    sw t1, 0(t2)
 
-   #li t3, 53 # 5
-   #sb t3, 0(t0)
+    li t3, 53 # 5
+    sb t3, 0(t0)
 
     # Enable MEIE (mie.MEIE enternal interrupt)
     li t2, 0x800 # bit 11=MEIE
