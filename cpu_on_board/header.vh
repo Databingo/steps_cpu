@@ -1,7 +1,7 @@
 `define Rom_base   64'h0000_0000
-`define Rom_size   64'h0000_0400
-`define Ram_base   64'h0000_0400
-`define Ram_size   64'h0000_0400
+`define Rom_size   64'h0000_0100
+`define Ram_base   64'h0000_0100
+`define Ram_size   64'h0000_0200
 `define Key_base   64'h0000_2000
 `define Art_base   64'h0000_2004
 `define ArtC_base  64'h0000_2008
