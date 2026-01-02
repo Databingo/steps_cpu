@@ -246,7 +246,7 @@ module riscv64(
     wire cache_i_hit = cache_tag[51] && (ppc_pre[63:13] == cache_tag[50:0]);
     wire [31:0] cache_i = cache_line[ppc_pre[3:2]*32 +: 32];
 
-    assign ir = cache_i_hit ? cache_i : 32'h00000013; // NOP:addi x0, x0, 0;
+    assign ir = (mmu_pc || mmu_da || mmu_cache_refill) ? instruction : cache_i_hit ? cache_i : 32'h00000013; // NOP:addi x0, x0, 0;
     // -----
 
     //assign ir = instruction;
