@@ -246,10 +246,10 @@ module riscv64(
     wire cache_i_hit = cache_tag[51] && (ppc_pre[63:13] == cache_tag[50:0]);
     wire [31:0] cache_i = cache_line[ppc_pre[3:2]*32 +: 32];
 
-    //assign ir = cache_i;
+    assign ir = cache_i_hit ? cache_i : 32'h00000013; // NOP:addi x0, x0, 0;
     // -----
 
-    assign ir = instruction;
+    //assign ir = instruction;
 
     // EXE Instruction 
     always @(posedge clk or negedge reset) begin
@@ -307,15 +307,15 @@ module riscv64(
     
 	    // ----- 
 	    //  mmu_cache_i at EXE stage
-//	    end else if (satp_mmu && !mmu_pc && !mmu_da && !mmu_cache_refill && tlb_i_hit && !cache_i_hit) begin //OPEN 
-//       		mmu_cache_refill <= 1; // 
-//       	        pc <= 72; //
-//       	 	bubble <= 1'b1; // bubble 
-//	        saved_user_pc <= pc - 4; // !!! save pc (EXE was flushed so record-redo it, previous pc)
-//	        if (bubble) saved_user_pc <= pc -4  ; // ??!!! save pc (j/b EXE was flushed currectly)
-//		for (i=0;i<10;i=i+1) begin sre[i]<= re[i]; end // save re
-//		re[9] <= {ppc_pre[63:4], 4'b0};// save missed ppc_pre cache_line address for handler
-//		ask_i_data <= {ppc_pre[63:4], 4'b0};// save missed ppc_pre cache_line address for hardware
+	    end else if (!mmu_pc && !mmu_da && !mmu_cache_refill && tlb_i_hit && !cache_i_hit) begin //OPEN 
+       		mmu_cache_refill <= 1; // 
+       	        pc <= 72; //
+       	 	bubble <= 1'b1; // bubble 
+	        saved_user_pc <= pc - 4; // !!! save pc (EXE was flushed so record-redo it, previous pc)
+	        if (bubble) saved_user_pc <= pc -4  ; // ??!!! save pc (j/b EXE was flushed currectly)
+		for (i=0;i<10;i=i+1) begin sre[i]<= re[i]; end // save re
+		re[9] <= {ppc_pre[63:4], 4'b0};// save missed ppc_pre cache_line address for handler
+		ask_i_data <= {ppc_pre[63:4], 4'b0};// save missed ppc_pre cache_line address for hardware
 	    end else if (mmu_cache_refill && ir == 32'b00110000001000000000000001110011) begin // end hiject mret & recover from shadow when see Mret
 		pc <= saved_user_pc; // recover from shadow when see Mret
 	 	bubble <= 1'b1; // bubble
