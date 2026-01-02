@@ -250,6 +250,7 @@ module riscv64(
     // -----
 
     //assign ir = instruction;
+    //initial begin end !!
 
     // EXE Instruction 
     always @(posedge clk or negedge reset) begin
@@ -306,8 +307,8 @@ module riscv64(
 		//Csrs[mstatus][MIE] <= Csrs[mstatus][MPIE]; // set back interrupt status
     
 	    // ----- 
-	    //  mmu_cache_i at EXE stage
-	    end else if (!mmu_pc && !mmu_da && !mmu_cache_refill && tlb_i_hit && !cache_i_hit) begin //OPEN 
+	    //  mmu_cache_i at EXE stage without stap/tlb_hit sensitive
+	    end else if (!mmu_pc && !mmu_da && !mmu_cache_refill && !cache_i_hit) begin //OPEN 
        		mmu_cache_refill <= 1; // 
        	        pc <= 72; //
        	 	bubble <= 1'b1; // bubble 
