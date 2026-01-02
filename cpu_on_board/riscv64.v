@@ -225,21 +225,22 @@ module riscv64(
     reg [50:0] cache_tag = 51'h0;
     reg [63:0] ppc_pre = 64'h0;
     reg [63:0] ask_i_data;
-    (* ram_style = "block" *) reg [127:0] Cache_L [0:1023]; // 16KB
+    //(* ram_style = "block" *) reg [127:0] Cache_L [0:1023]; // 16KB
+    (* ram_style = "block" *) reg [63:0] Cache_L_Low [0:1023]; // 8KB
+    (* ram_style = "block" *) reg [63:0] Cache_L_High [0:1023]; // 8KB
     (* ram_style = "block" *) reg [50:0] Cache_T [0:1023];  // 6.4KB (addr: 1(valit) + 50(tag) + 10(index) + 4(offset))
     always @(posedge clk) begin 
 	// read
-	cache_line <= Cache_L[ppc[13:4]]; 
+	cache_line <= {Cache_L_High[ppc[13:4]], Cache_L_Low[ppc[13:4]]}; 
 	cache_tag <= Cache_T[ppc[13:4]]; 
 	ppc_pre <= ppc;
 	// write
         if (mmu_cache_refill && bus_write_enable && bus_address == `CacheI_L) begin // for the last fill: sd ppa, Tlb
-	    Cache_L[ask_i_data[13:4]][63:0] <= bus_write_data; 
+	    Cache_L_Low[ask_i_data[13:4]] <= bus_write_data; 
 	end
         if (mmu_cache_refill && bus_write_enable && bus_address == `CacheI_H) begin // for the last fill: sd ppa, Tlb
-	    Cache_L[ask_i_data[13:4]][127:64] <= bus_write_data; 
-	    Cache_T[ask_i_data[13:4]][49:0] <= ask_i_data[63:14]; 
-	    Cache_T[ask_i_data[13:4]][50:50] <= 1; 
+	    Cache_L_High[ask_i_data[13:4]] <= bus_write_data; 
+	    Cache_T[ask_i_data[13:4]] <= {1, ask_i_data[63:14]}; 
 	end
     end
     wire cache_i_hit = cache_tag[50] && (ppc_pre[63:14] == cache_tag[49:0]);
