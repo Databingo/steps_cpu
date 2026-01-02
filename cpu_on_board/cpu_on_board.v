@@ -90,6 +90,7 @@ assign DRAM_CKE = 1; // always enable
 
     // -- MEM -- minic L1 cache
     //(* ram_style = "block" *) reg [31:0] Cache [0:2000];
+    //(* ram_style = "block" *) reg [31:0] Cache [0:511]; // 2KB
     (* ram_style = "block" *) reg [31:0] Cache [0:383]; // 1.5KB
     integer i;
     initial begin
