@@ -225,7 +225,7 @@ module riscv64(
     reg [63:0] ppc_pre = 64'h0;
     reg [63:0] ask_i_data;
     (* ram_style = "block" *) reg [127:0] Cache_L [0:1023]; // 16KB
-    (* ram_style = "block" *) reg [50:0] Cache_T [0:1023];  // 6.4KB
+    (* ram_style = "block" *) reg [50:0] Cache_T [0:1023];  // 6.4KB (addr: 1(valit) + 50(tag) + 10(index) + 4(offset))
     always @(posedge clk) begin 
 	// read
 	cache_line <= Cache_L[ppc[13:4]]; 
@@ -244,7 +244,8 @@ module riscv64(
     wire cache_i_hit = cache_tag[50] && (ppc_pre[63:14] == cache_tag[49:0]);
     wire [31:0] cache_i = cache_line[ppc_pre[3:2]*32 +: 32];
 
-    assign ir = instruction;
+    //assign ir = instruction;
+    assign ir = cache_i;
 
     // EXE Instruction 
     always @(posedge clk or negedge reset) begin
@@ -288,6 +289,7 @@ module riscv64(
 		re[9] <= pc;// - 4; // save this vpc to x1 //!!!! We also need to refill pc - 4' ppc for re-executeing pc-4, with hit(if satp in for very next sfence.vma) 
 		//Csrs[mstatus][MPIE] <= Csrs[mstatus][MIE]; // disable interrupt during shadow mmu walking
 		//Csrs[mstatus][MIE] <= 0;
+		// Infront of bubble just for trapping jump/branch instrucion
 
             // Bubble
 	    end else if (bubble) begin bubble <= 1'b0; // Flush this cycle & Clear bubble signal for the next cycle
@@ -298,6 +300,21 @@ module riscv64(
 		for (i=0;i<10;i=i+1) begin re[i]<= sre[i]; end // recover usr re
 		mmu_pc <= 0; // MMU_PC OFF
 		//Csrs[mstatus][MIE] <= Csrs[mstatus][MPIE]; // set back interrupt status
+    
+	    //  mmu_cache_i 
+	    if (satp_mmu && !mmu_pc && !mmu_da && tlb_i_hit && !cache_i_hit) begin //OPEN 
+       		mmu_cache_refill <= 1; // 
+       	        pc <= 72; //
+       	 	bubble <= 1'b1; // bubble 
+	        saved_user_pc <= pc - 4; // !!! save pc (EXE was flushed so record-redo it, previous pc)
+	        if (bubble) saved_user_pc <= pc ; // !!! save pc (j/b EXE was flushed currectly)
+		for (i=0;i<=9;i=i+1) begin sre[i]<= re[i]; end // save re
+		re[9] <= pc;// - 4; // save this vpc to x1 //!!!! We also need to refill pc - 4' ppc for re-executeing pc-4, with hit(if satp in for very next sfence.vma) 
+	    end else if (mmu_cache_refill && ir == 32'b00110000001000000000000001110011) begin // end hiject mret & recover from shadow when see Mret
+		pc <= saved_user_pc; // recover from shadow when see Mret
+	 	bubble <= 1'b1; // bubble
+		for (i=0;i<10;i=i+1) begin re[i]<= sre[i]; end // recover usr re
+		mmu_cache_refill <= 0; // MMU_PC OFF
 
             //  mmu_da  D-TLB miss Trap // load/store/atom
 	    end else if (satp_mmu && !mmu_pc && !mmu_da && tlb_i_hit && !tlb_d_hit && (op == 7'b0000011 || op == 7'b0100011 || op == 7'b0101111) ) begin  
