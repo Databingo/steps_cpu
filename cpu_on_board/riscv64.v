@@ -308,8 +308,8 @@ module riscv64(
     
 	    // ----- 
 	    //  mmu_cache_i at EXE stage without stap/tlb_hit sensitive
-	    //end else if (!mmu_pc && !mmu_da && !mmu_cache_refill && !cache_i_hit) begin //OPEN 
-	    end else if (!cache_i_hit) begin //OPEN 
+	    end else if (!mmu_pc && !mmu_da && !mmu_cache_refill && !cache_i_hit) begin //OPEN 
+	    //end else if (!cache_i_hit) begin //OPEN 
        		mmu_cache_refill <= 1; // 
        	        pc <= 72; //
        	 	bubble <= 1'b1; // bubble 
