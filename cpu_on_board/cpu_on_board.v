@@ -236,6 +236,10 @@ assign DRAM_CKE = 1; // always enable
     wire Mtime_selected = (bus_address == `Mtime);
     wire Mtimecmp_selected = (bus_address == `Mtimecmp);
     wire CacheI_selected = (bus_address == `CacheI);
+    //---
+    wire CacheI_L_selected = (bus_address == `CacheI_L);
+    wire CacheI_H_selected = (bus_address == `CacheI_H);
+    //---
     wire Tlb_selected = (bus_address == `Tlb);
 
     // Plic mapping
@@ -464,6 +468,8 @@ assign DRAM_CKE = 1; // always enable
 
             if (Tlb_selected) bus_write_done <= 1; 
 	    if (CacheI_selected) bus_write_done <= 1; 
+	    if (CacheI_L_selected) bus_write_done <= 1; 
+	    if (CacheI_H_selected) bus_write_done <= 1; 
 	    
             // Plic write
 	    if (Plic_priority_selected) begin Plic_priority[plic_id] <= bus_write_data; bus_write_done <= 1; end

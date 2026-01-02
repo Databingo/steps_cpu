@@ -219,6 +219,7 @@ module riscv64(
         end
     end
 
+    // -----
     // cache_i_hit 63:14 tag, 13:4 index 3:0 offset Cache line 16B (4 instructions)
     reg [127:0] cache_line = 128'h0;
     reg [50:0] cache_tag = 51'h0;
@@ -244,8 +245,10 @@ module riscv64(
     wire cache_i_hit = cache_tag[50] && (ppc_pre[63:14] == cache_tag[49:0]);
     wire [31:0] cache_i = cache_line[ppc_pre[3:2]*32 +: 32];
 
-    //assign ir = instruction;
     assign ir = cache_i;
+    // -----
+
+    //assign ir = instruction;
 
     // EXE Instruction 
     always @(posedge clk or negedge reset) begin
@@ -301,20 +304,23 @@ module riscv64(
 		mmu_pc <= 0; // MMU_PC OFF
 		//Csrs[mstatus][MIE] <= Csrs[mstatus][MPIE]; // set back interrupt status
     
-	    //  mmu_cache_i 
+	    // ----- 
+	    //  mmu_cache_i at EXE stage
 	    if (satp_mmu && !mmu_pc && !mmu_da && tlb_i_hit && !cache_i_hit) begin //OPEN 
        		mmu_cache_refill <= 1; // 
        	        pc <= 72; //
        	 	bubble <= 1'b1; // bubble 
 	        saved_user_pc <= pc - 4; // !!! save pc (EXE was flushed so record-redo it, previous pc)
-	        if (bubble) saved_user_pc <= pc ; // !!! save pc (j/b EXE was flushed currectly)
-		for (i=0;i<=9;i=i+1) begin sre[i]<= re[i]; end // save re
-		re[9] <= pc;// - 4; // save this vpc to x1 //!!!! We also need to refill pc - 4' ppc for re-executeing pc-4, with hit(if satp in for very next sfence.vma) 
+	        if (bubble) saved_user_pc <= pc -4  ; // ??!!! save pc (j/b EXE was flushed currectly)
+		for (i=0;i<10;i=i+1) begin sre[i]<= re[i]; end // save re
+		re[9] <= {ppc_pre[63:4], 4'b0};// save missed ppc_pre cache_line address for handler
+		ask_i_data <= {ppc_pre[63:4], 4'b0};// save missed ppc_pre cache_line address for hardware
 	    end else if (mmu_cache_refill && ir == 32'b00110000001000000000000001110011) begin // end hiject mret & recover from shadow when see Mret
 		pc <= saved_user_pc; // recover from shadow when see Mret
 	 	bubble <= 1'b1; // bubble
 		for (i=0;i<10;i=i+1) begin re[i]<= sre[i]; end // recover usr re
-		mmu_cache_refill <= 0; // MMU_PC OFF
+		mmu_cache_refill <= 0; // OFF
+	    // -----
 
             //  mmu_da  D-TLB miss Trap // load/store/atom
 	    end else if (satp_mmu && !mmu_pc && !mmu_da && tlb_i_hit && !tlb_d_hit && (op == 7'b0000011 || op == 7'b0100011 || op == 7'b0101111) ) begin  
