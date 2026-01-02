@@ -220,30 +220,30 @@ module riscv64(
     end
 
     // -----
-    // cache_i_hit 63:14 tag, 13:4 index 3:0 offset Cache line 16B (4 instructions)
+    // cache_i_hit 63:13 tag, 12:4 index 3:0 offset Cache line 16B (4 instructions) 512 lines
     reg [127:0] cache_line = 128'h0;
-    reg [50:0] cache_tag = 51'h0;
-    reg [63:0] ppc_pre = 64'h0;
-    reg [63:0] ask_i_data;
+    reg [51:0] cache_tag = 52'h0;
+    reg [63:0] ppc_pre = 64'h0; // for read
+    reg [63:0] ask_i_data; // for write
     //(* ram_style = "block" *) reg [127:0] Cache_L [0:1023]; // 16KB
-    (* ram_style = "block" *) reg [63:0] Cache_L_Low [0:1023]; // 8KB
-    (* ram_style = "block" *) reg [63:0] Cache_L_High [0:1023]; // 8KB
-    (* ram_style = "block" *) reg [50:0] Cache_T [0:1023];  // 6.4KB (addr: 1(valit) + 50(tag) + 10(index) + 4(offset))
+    (* ram_style = "block" *) reg [63:0] Cache_L_Low [0:511]; // 4KB
+    (* ram_style = "block" *) reg [63:0] Cache_L_High [0:511]; // 4KB
+    (* ram_style = "block" *) reg [51:0] Cache_T [0:511];  // ~4KB (addr: 1(valit) + 51(tag) + 9(index) + 4(offset))
     always @(posedge clk) begin 
 	// read
-	cache_line <= {Cache_L_High[ppc[13:4]], Cache_L_Low[ppc[13:4]]}; 
-	cache_tag <= Cache_T[ppc[13:4]]; 
+	cache_line <= {Cache_L_High[ppc[12:4]], Cache_L_Low[ppc[12:4]]}; 
+	cache_tag <= Cache_T[ppc[12:4]]; 
 	ppc_pre <= ppc;
 	// write
         if (mmu_cache_refill && bus_write_enable && bus_address == `CacheI_L) begin // for the last fill: sd ppa, Tlb
-	    Cache_L_Low[ask_i_data[13:4]] <= bus_write_data; 
+	    Cache_L_Low[ask_i_data[12:4]] <= bus_write_data; 
 	end
         if (mmu_cache_refill && bus_write_enable && bus_address == `CacheI_H) begin // for the last fill: sd ppa, Tlb
-	    Cache_L_High[ask_i_data[13:4]] <= bus_write_data; 
-	    Cache_T[ask_i_data[13:4]] <= {1'b1, ask_i_data[63:14]}; 
+	    Cache_L_High[ask_i_data[12:4]] <= bus_write_data; 
+	    Cache_T[ask_i_data[12:4]] <= {1'b1, ask_i_data[63:13]}; 
 	end
     end
-    wire cache_i_hit = cache_tag[50] && (ppc_pre[63:14] == cache_tag[49:0]);
+    wire cache_i_hit = cache_tag[51] && (ppc_pre[63:13] == cache_tag[50:0]);
     wire [31:0] cache_i = cache_line[ppc_pre[3:2]*32 +: 32];
 
     assign ir = cache_i;
