@@ -283,7 +283,7 @@ module riscv64(
 	    bus_write_enable <= 0; 
 
 	    //  mmu_pc  I-TLB miss Trap
-	    if (satp_mmu && !mmu_pc && !mmu_da && !tlb_i_hit) begin //OPEN 
+	    if (satp_mmu && !mmu_pc && !mmu_da && !mmu_cache_refill && !tlb_i_hit) begin //OPEN 
        		mmu_pc <= 1; // MMU_PC ON 
        	        pc <= 0; // I-TLB refill Handler
        	 	bubble <= 1'b1; // bubble 
@@ -307,15 +307,15 @@ module riscv64(
     
 	    // ----- 
 	    //  mmu_cache_i at EXE stage
-	    end else if (satp_mmu && !mmu_pc && !mmu_da && tlb_i_hit && !cache_i_hit) begin //OPEN 
-       		mmu_cache_refill <= 1; // 
-       	        pc <= 72; //
-       	 	bubble <= 1'b1; // bubble 
-	        saved_user_pc <= pc - 4; // !!! save pc (EXE was flushed so record-redo it, previous pc)
-	        if (bubble) saved_user_pc <= pc -4  ; // ??!!! save pc (j/b EXE was flushed currectly)
-		for (i=0;i<10;i=i+1) begin sre[i]<= re[i]; end // save re
-		re[9] <= {ppc_pre[63:4], 4'b0};// save missed ppc_pre cache_line address for handler
-		ask_i_data <= {ppc_pre[63:4], 4'b0};// save missed ppc_pre cache_line address for hardware
+//	    end else if (satp_mmu && !mmu_pc && !mmu_da && !mmu_cache_refill && tlb_i_hit && !cache_i_hit) begin //OPEN 
+//       		mmu_cache_refill <= 1; // 
+//       	        pc <= 72; //
+//       	 	bubble <= 1'b1; // bubble 
+//	        saved_user_pc <= pc - 4; // !!! save pc (EXE was flushed so record-redo it, previous pc)
+//	        if (bubble) saved_user_pc <= pc -4  ; // ??!!! save pc (j/b EXE was flushed currectly)
+//		for (i=0;i<10;i=i+1) begin sre[i]<= re[i]; end // save re
+//		re[9] <= {ppc_pre[63:4], 4'b0};// save missed ppc_pre cache_line address for handler
+//		ask_i_data <= {ppc_pre[63:4], 4'b0};// save missed ppc_pre cache_line address for hardware
 	    end else if (mmu_cache_refill && ir == 32'b00110000001000000000000001110011) begin // end hiject mret & recover from shadow when see Mret
 		pc <= saved_user_pc; // recover from shadow when see Mret
 	 	bubble <= 1'b1; // bubble
@@ -324,7 +324,7 @@ module riscv64(
 	    // -----
 
             //  mmu_da  D-TLB miss Trap // load/store/atom
-	    end else if (satp_mmu && !mmu_pc && !mmu_da && tlb_i_hit && !tlb_d_hit && (op == 7'b0000011 || op == 7'b0100011 || op == 7'b0101111) ) begin  
+	    end else if (satp_mmu && !mmu_pc && !mmu_da && !mmu_cache_refill && tlb_i_hit && !tlb_d_hit && (op == 7'b0000011 || op == 7'b0100011 || op == 7'b0101111) ) begin  
 		mmu_da <= 1; // MMU_DA ON
 		pc <= 36; // D-TLB refill Handler
 	 	bubble <= 1'b1; // bubble
