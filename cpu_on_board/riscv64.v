@@ -306,7 +306,7 @@ module riscv64(
     
 	    // ----- 
 	    //  mmu_cache_i at EXE stage
-	    if (satp_mmu && !mmu_pc && !mmu_da && tlb_i_hit && !cache_i_hit) begin //OPEN 
+	    end else if (satp_mmu && !mmu_pc && !mmu_da && tlb_i_hit && !cache_i_hit) begin //OPEN 
        		mmu_cache_refill <= 1; // 
        	        pc <= 72; //
        	 	bubble <= 1'b1; // bubble 
