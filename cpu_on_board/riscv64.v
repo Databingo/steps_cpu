@@ -240,7 +240,7 @@ module riscv64(
 	end
         if (mmu_cache_refill && bus_write_enable && bus_address == `CacheI_H) begin // for the last fill: sd ppa, Tlb
 	    Cache_L_High[ask_i_data[13:4]] <= bus_write_data; 
-	    Cache_T[ask_i_data[13:4]] <= {1, ask_i_data[63:14]}; 
+	    Cache_T[ask_i_data[13:4]] <= {1'b1, ask_i_data[63:14]}; 
 	end
     end
     wire cache_i_hit = cache_tag[50] && (ppc_pre[63:14] == cache_tag[49:0]);
