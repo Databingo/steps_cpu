@@ -347,7 +347,8 @@ module riscv64(
 		//Csrs[mstatus][MIE] <= Csrs[mstatus][MPIE]; // set back interrupt status
 		
             // Interrupt PLIC full (Platform-Level-Interrupt-Control)  MMIO
-	    end else if ((meip_interrupt || msip_interrupt) && Csrs[mstatus][MIE]==1) begin //mstatus[3] MIE
+	    //end else if ((meip_interrupt || msip_interrupt) && Csrs[mstatus][MIE]==1) begin //mstatus[3] MIE
+	    end else if ((meip_interrupt || msip_interrupt) && Csrs[mstatus][MIE]==1 && !mmu_pc && !mmu_da && !mmu_cache_refill && !load_step && !store_step) begin //mstatus[3] MIE
                 Csrs[mip][MTIP] <= time_interrupt; // MTIP linux will see then jump to its handler
                 Csrs[mip][MEIP] <= meip_interrupt; // MEIP
                 Csrs[mip][MSIP] <= msip_interrupt; // MSIP
