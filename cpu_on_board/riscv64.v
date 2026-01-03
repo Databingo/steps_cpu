@@ -313,11 +313,15 @@ module riscv64(
        		mmu_cache_refill <= 1; // 
        	        pc <= 72; //
        	 	bubble <= 1'b1; // bubble 
-	        saved_user_pc <= pc - 4; // !!! save pc (EXE was flushed so record-redo it, previous pc)
-	        if (bubble) saved_user_pc <= pc -4  ; // ??!!! save pc (j/b EXE was flushed currectly)
 		for (i=0;i<10;i=i+1) begin sre[i]<= re[i]; end // save re
+	        saved_user_pc <= pc -4  ; // ??!!! save pc (j/b EXE was flushed currectly)
 		re[9] <= {ppc_pre[63:4], 4'b0};// save missed ppc_pre cache_line address for handler
 		ask_i_data <= {ppc_pre[63:4], 4'b0};// save missed ppc_pre cache_line address for hardware
+		if (pc == `Ram_base) begin // initial situation
+		    saved_user_pc <= pc; // first pc
+		    re[9] <= {ppc[63:4], 4'b0};// save missed ppc_pre cache_line address for handler
+		    ask_i_data <= {ppc[63:4], 4'b0};// save missed ppc_pre cache_line address for hardware
+		end
 	    end else if (mmu_cache_refill && ir == 32'b00110000001000000000000001110011) begin // end hiject mret & recover from shadow when see Mret
 		pc <= saved_user_pc; // recover from shadow when see Mret
 	 	bubble <= 1'b1; // bubble
