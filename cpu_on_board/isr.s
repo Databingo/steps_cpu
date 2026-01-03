@@ -93,6 +93,6 @@
     #sd x2, 0(x1)    # print #
      sd x3, 8(x8)    # refill line high 64  
 
-     addi x2, x0, 0x2f
-     sd x2, 0(x1)    # print /
+    #addi x2, x0, 0x2f
+    #sd x2, 0(x1)    # print /
      mret           
