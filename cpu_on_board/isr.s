@@ -81,16 +81,16 @@
      lui x8, 0x20001 # base Cache address
      
      ld x3, 0(x9)    # get data
-     addi x2, x0, 0x27
-     sd x2, 0(x1)    # print '
+    #addi x2, x0, 0x27
+    #sd x2, 0(x1)    # print '
 
      sd x3, 0(x8)    # refill line low 64
-     addi x2, x0, 0x22
-     sd x2, 0(x1)    # print "
+    #addi x2, x0, 0x22
+    #sd x2, 0(x1)    # print "
 
      ld x3, 8(x9)    # get data
-     addi x2, x0, 0x23
-     sd x2, 0(x1)    # print #
+    #addi x2, x0, 0x23
+    #sd x2, 0(x1)    # print #
      sd x3, 8(x8)    # refill line high 64  
 
      addi x2, x0, 0x2f
