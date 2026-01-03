@@ -230,15 +230,13 @@ module riscv64(
     (* ram_style = "block" *) reg [63:0] Cache_L_High [0:511]; // 4KB
     (* ram_style = "block" *) reg [51:0] Cache_T [0:511];  // ~4KB (addr: 1(valit) + 51(tag) + 9(index) + 4(offset))
     always @(posedge clk) begin 
-	// read
+	// Read
 	cache_line <= {Cache_L_High[ppc[12:4]], Cache_L_Low[ppc[12:4]]}; 
 	cache_tag <= Cache_T[ppc[12:4]]; 
 	ppc_pre <= ppc;
-	// write
-        if (mmu_cache_refill && bus_write_enable && bus_address == `CacheI_L) begin // for the last fill: sd ppa, Tlb
-	    Cache_L_Low[ask_i_data[12:4]] <= bus_write_data; 
-	end
-        if (mmu_cache_refill && bus_write_enable && bus_address == `CacheI_H) begin // for the last fill: sd ppa, Tlb
+	// Write
+        if (mmu_cache_refill && bus_write_enable && bus_address == `CacheI_L) begin Cache_L_Low[ask_i_data[12:4]] <= bus_write_data; end
+        if (mmu_cache_refill && bus_write_enable && bus_address == `CacheI_H) begin 
 	    Cache_L_High[ask_i_data[12:4]] <= bus_write_data; 
 	    Cache_T[ask_i_data[12:4]] <= {1'b1, ask_i_data[63:13]}; 
 	end

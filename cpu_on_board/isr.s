@@ -84,7 +84,7 @@
      addi x2, x0, 0x27
      sd x2, 0(x1)    # print '
 
-     sd x3, 4(x8)    # refill line low 64
+     sd x3, 0(x8)    # refill line low 64
      addi x2, x0, 0x22
      sd x2, 0(x1)    # print "
 

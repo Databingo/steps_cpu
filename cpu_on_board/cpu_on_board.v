@@ -237,7 +237,7 @@ assign DRAM_CKE = 1; // always enable
     wire Sdram_selected = (bus_address >= `Sdram_min && bus_address < `Sdram_max);
     wire Mtime_selected = (bus_address == `Mtime);
     wire Mtimecmp_selected = (bus_address == `Mtimecmp);
-    wire CacheI_selected = (bus_address == `CacheI);
+    //wire CacheI_selected = (bus_address == `CacheI);
     //---
     wire CacheI_L_selected = (bus_address == `CacheI_L);
     wire CacheI_H_selected = (bus_address == `CacheI_H);
@@ -434,23 +434,24 @@ assign DRAM_CKE = 1; // always enable
         //if (!bus_write_enable && bus_write_done == 0) begin 
         if (bus_write_done == 0) begin 
 	    if (Ram_selected) begin 
-		bus_write_done <= 1;
 		casez(bus_ls_type) // 000sb 001sh 010sw 011sd
 		    3'b000: begin //sb
 			if (bus_address[1:0] == 0) Cache[bus_address[63:2]][7:0] <= bus_write_data[7:0];
 			if (bus_address[1:0] == 1) Cache[bus_address[63:2]][15:8] <= bus_write_data[7:0];
 			if (bus_address[1:0] == 2) Cache[bus_address[63:2]][23:16] <= bus_write_data[7:0];
 			if (bus_address[1:0] == 3) Cache[bus_address[63:2]][31:24] <= bus_write_data[7:0];
+		        bus_write_done <= 1;
 			end
 		    3'b001: begin //sh
 			if (bus_address[1:0] == 0) Cache[bus_address[63:2]][15:0] <= bus_write_data[15:0];
 			if (bus_address[1:0] == 2) Cache[bus_address[63:2]][31:16] <= bus_write_data[15:0];
+		        bus_write_done <= 1;
 			end
-		    3'b010: begin Cache[bus_address[63:2]] <= bus_write_data[31:0]; end
+		    3'b010: begin Cache[bus_address[63:2]] <= bus_write_data[31:0]; bus_write_done <= 1; end
 		    3'b011: begin //sd
 		        case(step)
 		            0: begin Cache[bus_address[63:2]] <= bus_write_data[31:0]; step <= 1; next_addr <= bus_address[63:2]+1; bus_write_done <= 0; end
-			    1: begin Cache[next_addr] <= bus_write_data[63:32]; step <= 0; end
+			    1: begin Cache[next_addr] <= bus_write_data[63:32]; step <= 0; bus_write_done <= 1; end
 			endcase
 			end
 	        endcase
@@ -469,7 +470,7 @@ assign DRAM_CKE = 1; // always enable
 	    //if (Sdram_selected) begin if (sdram_req_wait==0) bus_write_done <= 1; end
 
             if (Tlb_selected) bus_write_done <= 1; 
-	    if (CacheI_selected) bus_write_done <= 1; 
+	    //if (CacheI_selected) bus_write_done <= 1; 
 	    if (CacheI_L_selected) bus_write_done <= 1; 
 	    if (CacheI_H_selected) bus_write_done <= 1; 
 	    

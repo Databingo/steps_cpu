@@ -1743,15 +1743,15 @@ func main() { //t6a7s11
 			}
 			opr := code[0]
 			if (opr == "sh" && imm % 2 != 0) {
-				fmt.Printf("@Error on line %d: %s target address not aligned with 2 bytes %d \n", lineCounter, opr, imm)
+			    fmt.Printf("@Error on line %d: %s target address not aligned with 2 bytes: %d \n", lineCounter, opr, imm)
 				os.Exit(0)
 			    }
 			if (opr == "sw" && imm % 4 != 0) {
-				fmt.Printf("@Error on line %d: %s target address not aligned with 4 bytes %d \n", lineCounter, opr, imm)
+			    fmt.Printf("@Error on line %d: %s target address not aligned with 4 bytes: %d \n", lineCounter, opr, imm)
 				os.Exit(0)
 			    }
 			if (opr == "sd" && imm % 8 != 0) {
-				fmt.Printf("@Error on line %d: %s target address not aligned with 8 bytes %d \n", lineCounter, opr, imm)
+		            fmt.Printf("@Error on line %d: %s target address not aligned with 8 bytes: %d \n", lineCounter, opr, imm)
 				os.Exit(0)
 			    }
 			op, opFound := opBin[code[0]]
