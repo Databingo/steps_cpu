@@ -762,10 +762,13 @@ module riscv64(
 			if (store_step == 1 && bus_write_done == 1) begin store_step <= 0; end end //
 		     // -- ATOMIC end --
                      // M extension // M mul mulh mulhsu mulhu div divu rem remu mulw divw divuw remuw
-		    32'b0000001_?????_?????_000_?????_0110011: re[w_rd] <= $signed(rs1) * $signed(rs2);  // Mul
-                    32'b0000001_?????_?????_001_?????_0110011: re[w_rd] <= ($signed(rs1) * $signed(rs2))>>>64;//[127:64];  // Mulh 
+		    //32'b0000001_?????_?????_000_?????_0110011: re[w_rd] <= $signed(rs1) * $signed(rs2);  // Mul
+                    //32'b0000001_?????_?????_001_?????_0110011: re[w_rd] <= ($signed(rs1) * $signed(rs2))>>>64;//[127:64];  // Mulh 
 		    //32'b0000001_?????_?????_010_?????_0110011: re[w_rd] <= ($signed(rs1) * $unsigned(rs2))>>>64;  // Mulhsu
 		    //32'b0000001_?????_?????_010_?????_0110011: re[w_rd] <= ($signed(rs1) * $signed(rs2))>>>64;  // Mulhsu
+		    //
+		    32'b0000001_?????_?????_000_?????_0110011: re[w_rd] <= mul_base[63:0];  // Mul
+                    32'b0000001_?????_?????_001_?????_0110011: re[w_rd] <= mul_base[127:64];  // Mulh 
     //always @(*) begin
     //    mul_upper_corrected = mul_base[127:64];
     //    if (w_func3 == 3'b011) begin // Mulhu
