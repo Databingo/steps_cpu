@@ -69,11 +69,11 @@ module riscv64(
     //-- csr --
     wire [11:0] w_csr = ir[31:20];   // CSR official address
     // -- mul rela --
-    wire mul_sign_a = (w_func3 == 3'b011) ? 1'b0 : rs1[63]; // 0 for Mulhu
-    wire mul_sign_b = (w_func3 == 3'b011 || w_func3 == 3'b010) ? 1'b0 : rs2[63]; // 0 for Mulhu/Mulhsu
-    wire signed [64:0] mul_op_a = {mul_sign_a, rs1};
-    wire signed [64:0] mul_op_b = {mul_sign_b, rs2};
-    (* multstyle = "dsp" *) wire signed [129:0] mul_full_result = mul_op_a * mul_op_b;
+    //wire mul_sign_a = (w_func3 == 3'b011) ? 1'b0 : rs1[63]; // 0 for Mulhu
+    //wire mul_sign_b = (w_func3 == 3'b011 || w_func3 == 3'b010) ? 1'b0 : rs2[63]; // 0 for Mulhu/Mulhsu
+    //wire signed [64:0] mul_op_a = {mul_sign_a, rs1};
+    //wire signed [64:0] mul_op_b = {mul_sign_b, rs2};
+    //(* multstyle = "dsp" *) wire signed [129:0] mul_full_result = mul_op_a * mul_op_b;
 
     // --Machine CSR --
    localparam mstatus    = 0 ; localparam MPRV=17,MPP=11,SPP=8,MPIE=7,SPIE=5,MIE=3,SIE=1,UIE=0;//63_SD|37_MBE|36_SBE|35:34_SXL10|22_TSR|21_TW|20_TVW|17_MPRV|12:11_MPP|8_SPP|7_MPIE|5_SPIE|3_MIE|1_SIE|0_UIE
@@ -749,17 +749,18 @@ module riscv64(
 			if (store_step == 1 && bus_write_done == 1) begin store_step <= 0; end end //
 		     // -- ATOMIC end --
                      // M extension // M mul mulh mulhsu mulhu div divu rem remu mulw divw divuw remuw
-		    //32'b0000001_?????_?????_000_?????_0110011: re[w_rd] <= $signed(rs1) * $signed(rs2);  // Mul
-                    //32'b0000001_?????_?????_001_?????_0110011: re[w_rd] <= ($signed(rs1) * $signed(rs2))>>>64;//[127:64];  // Mulh 
+		    32'b0000001_?????_?????_000_?????_0110011: re[w_rd] <= $signed(rs1) * $signed(rs2);  // Mul
+                    32'b0000001_?????_?????_001_?????_0110011: re[w_rd] <= ($signed(rs1) * $signed(rs2))>>>64;//[127:64];  // Mulh 
 		    //32'b0000001_?????_?????_010_?????_0110011: re[w_rd] <= ($signed(rs1) * $unsigned(rs2))>>>64;  // Mulhsu
 		    //32'b0000001_?????_?????_011_?????_0110011: re[w_rd] <= ($unsigned(rs1) * $unsigned(rs2))>>>64;  // Mulhu
 		    //32'b0000001_?????_?????_000_?????_0111011: re[w_rd] <= $signed(rs1[31:0]) * $signed(rs2[31:0]);  // Mulw
 
-		    32'b0000001_?????_?????_000_?????_0110011: re[w_rd] <= mul_full_result[63:0];// Mul
-                    32'b0000001_?????_?????_001_?????_0110011: re[w_rd] <= mul_full_result[127:64];  // Mulh 
-		    32'b0000001_?????_?????_010_?????_0110011: re[w_rd] <= mul_full_result[127:64];  // Mulhsu
-		    32'b0000001_?????_?????_011_?????_0110011: re[w_rd] <= mul_full_result[127:64];  // Mulhu
-		    32'b0000001_?????_?????_000_?????_0111011: re[w_rd] <= {{32{mul_full_result[31]}}, mul_full_result[31:0]};  // Mulw
+		    //32'b0000001_?????_?????_000_?????_0110011: re[w_rd] <= mul_full_result[63:0];// Mul
+                    //32'b0000001_?????_?????_001_?????_0110011: re[w_rd] <= mul_full_result[127:64];  // Mulh 
+		    //32'b0000001_?????_?????_010_?????_0110011: re[w_rd] <= mul_full_result[127:64];  // Mulhsu
+		    //32'b0000001_?????_?????_011_?????_0110011: re[w_rd] <= mul_full_result[127:64];  // Mulhu
+		    //32'b0000001_?????_?????_000_?????_0111011: re[w_rd] <= {{32{mul_full_result[31]}}, mul_full_result[31:0]};  // Mulw
+
                     //32'b0000001_?????_?????_100_?????_0110011: re[w_rd] <= (rs2==0||(rs1==64'h8000_0000_0000_0000 && rs2 == -1)) ? -1 : $signed(rs1) / $signed(rs2);  // Div
                     //32'b0000001_?????_?????_101_?????_0110011: re[w_rd] <= (rs2==0) ? -1 : $unsigned(rs1) / $unsigned(rs2);  // Divu
 		    // Rem
