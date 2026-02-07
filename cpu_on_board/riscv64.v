@@ -73,7 +73,7 @@ module riscv64(
     wire mul_sign_b = (w_func3 == 3'b011 || w_func3 == 3'b010) ? 1'b0 : rs2[63]; // 0 for Mulhu/Mulhsu
     wire signed [64:0] mul_op_a = {mul_sign_a, rs1};
     wire signed [64:0] mul_op_b = {mul_sign_b, rs2};
-    wire signed [129:0] mul_full_result = mul_op_a * mul_op_b;
+    (* multstyle = "dsp" *) wire signed [129:0] mul_full_result = mul_op_a * mul_op_b;
 
     // --Machine CSR --
    localparam mstatus    = 0 ; localparam MPRV=17,MPP=11,SPP=8,MPIE=7,SPIE=5,MIE=3,SIE=1,UIE=0;//63_SD|37_MBE|36_SBE|35:34_SXL10|22_TSR|21_TW|20_TVW|17_MPRV|12:11_MPP|8_SPP|7_MPIE|5_SPIE|3_MIE|1_SIE|0_UIE
