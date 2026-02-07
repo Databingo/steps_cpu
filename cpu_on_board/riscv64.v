@@ -764,7 +764,17 @@ module riscv64(
                      // M extension // M mul mulh mulhsu mulhu div divu rem remu mulw divw divuw remuw
 		    32'b0000001_?????_?????_000_?????_0110011: re[w_rd] <= $signed(rs1) * $signed(rs2);  // Mul
                     32'b0000001_?????_?????_001_?????_0110011: re[w_rd] <= ($signed(rs1) * $signed(rs2))>>>64;//[127:64];  // Mulh 
-		    32'b0000001_?????_?????_010_?????_0110011: re[w_rd] <= ($signed(rs1) * $unsigned(rs2))>>>64;  // Mulhsu
+		    //32'b0000001_?????_?????_010_?????_0110011: re[w_rd] <= ($signed(rs1) * $unsigned(rs2))>>>64;  // Mulhsu
+		    32'b0000001_?????_?????_010_?????_0110011: re[w_rd] <= ($signed(rs1) * $signed(rs2))>>>64;  // Mulhsu
+    //always @(*) begin
+    //    mul_upper_corrected = mul_base[127:64];
+    //    if (w_func3 == 3'b011) begin // Mulhu
+    //        if (rs1[63]) mul_upper_corrected = mul_upper_corrected + rs1;
+    //        if (rs2[63]) mul_upper_corrected = mul_upper_corrected + rs2;
+    //    end else if (w_func3 == 3'b010) begin // Mulhsu
+    //        if (rs2[63]) mul_upper_corrected = mul_upper_corrected + rs2;
+    //    end
+    //end
 		    //32'b0000001_?????_?????_011_?????_0110011: re[w_rd] <= ($unsigned(rs1) * $unsigned(rs2))>>>64;  // Mulhu
 		    //32'b0000001_?????_?????_000_?????_0111011: re[w_rd] <= $signed(rs1[31:0]) * $signed(rs2[31:0]);  // Mulw
 
