@@ -75,8 +75,8 @@ module riscv64(
     //wire signed [64:0] mul_op_b = {mul_sign_b, rs2};
     //(* multstyle = "dsp" *) wire signed [129:0] mul_full_result = mul_op_a * mul_op_b;
     //
-    //wire signed [127:0] mul_base = $signed(rs1) * $signed(rs2);
-    //reg [63:0] mul_upper_corrected;
+    wire signed [127:0] mul_base = $signed(rs1) * $signed(rs2);
+    reg [63:0] mul_upper_corrected;
     //always @(*) begin
     //    mul_upper_corrected = mul_base[127:64];
     //    if (w_func3 == 3'b011) begin // Mulhu
