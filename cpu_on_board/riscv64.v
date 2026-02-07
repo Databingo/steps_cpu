@@ -769,11 +769,12 @@ module riscv64(
 		    //
 		    32'b0000001_?????_?????_000_?????_0110011: re[w_rd] <= mul_base[63:0];  // Mul
                     32'b0000001_?????_?????_001_?????_0110011: re[w_rd] <= mul_base[127:64];  // Mulh 
-		    32'b0000001_?????_?????_011_?????_0110011: begin 
-                        if (rs1[63]) re[w_rd] <= mul_base[127:64] + rs1;
-                        if (rs2[63]) re[w_rd] <= mul_base[127:64] + rs2;
-                        if (rs1[63] && rs2[63] ) re[w_rd] <= mul_base[127:64] + rs1 + rs2; // Mulhu
-		    end
+		    32'b0000001_?????_?????_011_?????_0110011: re[w_rd] <= mul_base[127:64];  // Mulhu
+		    //32'b0000001_?????_?????_011_?????_0110011: begin 
+                    //    if (rs1[63]) re[w_rd] <= mul_base[127:64] + rs1;
+                    //    if (rs2[63]) re[w_rd] <= mul_base[127:64] + rs2;
+                    //    if (rs1[63] && rs2[63] ) re[w_rd] <= mul_base[127:64] + rs1 + rs2; // Mulhu
+		    //end
     //always @(*) begin
     //    mul_upper_corrected = mul_base[127:64];
     //    if (w_func3 == 3'b011) begin // Mulhu
