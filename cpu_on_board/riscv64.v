@@ -836,7 +836,7 @@ module riscv64(
 			        bubble <= 1; end
 			    if (mul_count == 64) begin
 			        mul_step <= 2;
-				if (mul_sign) mul_result <= ~mul_result + 1;
+				//if (mul_sign) mul_result <= ~mul_result + 1;
 			    end
 			end
 		        if (mul_step == 2) begin
