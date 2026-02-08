@@ -76,7 +76,7 @@ module riscv64(
     //(* multstyle = "dsp" *) wire signed [129:0] mul_full_result = mul_op_a * mul_op_b;
     //
     wire signed [127:0] mul_base = $signed(rs1) * $signed(rs2);
-    wire signed [128:0] mul_unsigned = $unsigned(rs1) * $unsigned(rs2);
+    //wire signed [128:0] mul_unsigned = $unsigned(rs1) * $unsigned(rs2);
     reg [63:0] mul_upper_corrected;
     reg [127:0] mul_base_reg;
     //always @(posedge clk) begin
@@ -780,7 +780,7 @@ module riscv64(
 		    32'b0000001_?????_?????_000_?????_0110011, 32'b0000001_?????_?????_001_?????_0110011, 32'b0000001_?????_?????_011_?????_0110011: begin
 			if (w_func3 == 3'b000) re[w_rd] <= mul_base[63:0];  // Mul
 			if (w_func3 == 3'b001) re[w_rd] <= mul_base[127:64];  // Mulh 
-		        if (w_func3 == 3'b010) re[w_rd] <= mul_unsigned[127:64];  // Mulhu
+		        if (w_func3 == 3'b010) re[w_rd] <= mul_base[127:64];  // Mulhu
                     end  
 
                     //32'b0000001_?????_?????_100_?????_0110011: re[w_rd] <= (rs2==0||(rs1==64'h8000_0000_0000_0000 && rs2 == -1)) ? -1 : $signed(rs1) / $signed(rs2);  // Div
