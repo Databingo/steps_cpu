@@ -833,8 +833,9 @@ module riscv64(
 			        pc <= pc -4;
 			        bubble <= 1;
 			    end else begin
-			    //    if (mul_type == 3'b000) re[w_rd] <= mul_result[63:0]; // mul low 64 always positive for mul
-			    //    else  re[w_rd] <= mul_result[127:64] ^ {64{mul_sign}};
+			        if (mul_type == 3'b000) re[w_rd] <= mul_result[63:0]; // mul low 64 always positive for mul
+			        else if (mul_sign) re[w_rd] <= ~mul_result[127:64] + 1;
+				else re[w_rd] <= mul_result[127:64];
 			        mul_step <= 0;
 			    end
 			end
