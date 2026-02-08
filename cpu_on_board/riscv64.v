@@ -86,6 +86,8 @@ module riscv64(
     reg mul_sign;
     reg [6:0] mul_count;
     reg [2:0] mul_type; 
+    wire [127:0] mul_final_128;
+    assign mul_final_128 = mul_sign ? (~mul_result + 1'b1) : mul_result;
 
 
 
@@ -835,9 +837,11 @@ module riscv64(
 			    if (mul_count == 64) mul_step <= 2;
 			end
 		        if (mul_step == 2) begin
-			        if (mul_type == 3'b000) re[w_rd] <= mul_result[63:0]; // mul low 64 always positive for mul
+			        //if (mul_type == 3'b000) re[w_rd] <= mul_result[63:0]; // mul low 64 always positive for mul
 			        //else if (mul_sign) re[w_rd] <= ~mul_result[127:64] + (mul_result[63:0]==0);
 				//else re[w_rd] <= mul_result[127:64];
+			        if (mul_type == 3'b000) re[w_rd] <= mul_final_128[63:0]; // mul low 64 always positive for mul
+			        else re[w_rd] <=mul_final_128[127:64];
 			        mul_step <= 0;
 		        end
                     end  
