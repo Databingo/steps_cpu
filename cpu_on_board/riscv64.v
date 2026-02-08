@@ -75,7 +75,7 @@ module riscv64(
     //wire signed [64:0] mul_op_b = {mul_sign_b, rs2};
     //(* multstyle = "dsp" *) wire signed [129:0] mul_full_result = mul_op_a * mul_op_b;
     //
-    //wire signed [127:0] mul_base = $signed(rs1) * $signed(rs2);
+    wire signed [127:0] mul_base = $signed(rs1) * $signed(rs2);
     reg [63:0] mul_upper_corrected;
     reg [127:0] mul_base_reg;
     //always @(posedge clk) begin
@@ -767,15 +767,15 @@ module riscv64(
 			if (store_step == 1 && bus_write_done == 1) begin store_step <= 0; end end //
 		     // -- ATOMIC end --
                      // M extension // M mul mulh mulhsu mulhu div divu rem remu mulw divw divuw remuw
-		    32'b0000001_?????_?????_000_?????_0110011: re[w_rd] <= $signed(rs1) * $signed(rs2);  // Mul
-                    32'b0000001_?????_?????_001_?????_0110011: re[w_rd] <= ($signed(rs1) * $signed(rs2))>>>64;//[127:64];  // Mulh 
+		    //32'b0000001_?????_?????_000_?????_0110011: re[w_rd] <= $signed(rs1) * $signed(rs2);  // Mul
+                    //32'b0000001_?????_?????_001_?????_0110011: re[w_rd] <= ($signed(rs1) * $signed(rs2))>>>64;//[127:64];  // Mulh 
 		    //32'b0000001_?????_?????_010_?????_0110011: re[w_rd] <= ($signed(rs1) * $unsigned(rs2))>>>64;  // Mulhsu
 		    //32'b0000001_?????_?????_010_?????_0110011: re[w_rd] <= ($signed(rs1) * $signed(rs2))>>>64;  // Mulhsu
 		    //
-		    //32'b0000001_?????_?????_000_?????_0110011: re[w_rd] <= mul_base[63:0];  // Mul
-                    //32'b0000001_?????_?????_001_?????_0110011: re[w_rd] <= mul_base[127:64];  // Mulh 
+		    32'b0000001_?????_?????_000_?????_0110011: re[w_rd] <= mul_base[63:0];  // Mul
+                    32'b0000001_?????_?????_001_?????_0110011: re[w_rd] <= mul_base[127:64];  // Mulh 
 		    32'b0000001_?????_?????_011_?????_0110011: begin  // Mulhu
-		        if (mul_step == 0) begin pc <= pc - 4; bubble <= 1; mul_step <= 1; mul_base_reg <= $signed(rs1) * $signed(rs2); end
+		        if (mul_step == 0) begin pc <= pc - 4; bubble <= 1; mul_step <= 1; mul_base_reg <= mul_base; end
 		        if (mul_step == 1) begin 
                             if (rs1[63]) re[w_rd] <= mul_base_reg>>>64 + rs1;
                             if (rs2[63]) re[w_rd] <= mul_base_reg>>>64 + rs2;
