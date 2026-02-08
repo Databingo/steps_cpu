@@ -340,3 +340,8 @@ SDRAM 8MB PSC A2V64S40CTP-G7 IS42S16400.pdf
 // cache !  // SDRAM to cache(BRAM)
 // Device Tree
   
+#fix compile hanging:
+#wget https://yum.oracle.com/repo/OracleLinux/OL7/7/base/x86_64/getPackage/tbb-4.1-9.20130314.el7.i686.rpm 
+#rpm2cpio tbb-4.1-9.20130314.el7.i686.rpm | cpio -idmv
+#sudo cp ./usr/lib/libtbb* /home/ashah/altera/13.0sp1/quartus/linux/
+
