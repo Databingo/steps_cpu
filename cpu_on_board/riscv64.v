@@ -777,9 +777,9 @@ module riscv64(
 		    32'b0000001_?????_?????_011_?????_0110011: begin  // Mulhu
 		        if (mul_step == 0) begin pc <= pc - 4; bubble <= 1; mul_step <= 1; mul_base_reg <= mul_base; end
 		        if (mul_step == 1) begin 
-                            if (rs1[63]) re[w_rd] <= mul_base_reg>>>64 + rs1;
-                            if (rs2[63]) re[w_rd] <= mul_base_reg>>>64 + rs2;
-                            if (rs1[63] && rs2[63] ) re[w_rd] <= mul_base_reg>>>64 + rs1 + rs2; // Mulhu
+                            if (rs1[63]) re[w_rd] <= mul_base_reg[127:64] + rs1;
+                            if (rs2[63]) re[w_rd] <= mul_base_reg[127:64] + rs2;
+                            if (rs1[63] && rs2[63] ) re[w_rd] <= mul_base_reg[127:64] + rs1 + rs2; // Mulhu
 			    mul_step <= 0; 
 		        end
 		    end
