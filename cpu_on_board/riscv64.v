@@ -81,9 +81,10 @@ module riscv64(
     //reg [127:0] mul_base_reg;
     reg [1:0] mul_step; 
     reg [127:0] mul_result;
-    reg [63:0] mul_a, mul_b;
+    reg [127:0] mul_a;
+    reg [63:0] mul_b;
     reg mul_sign;
-    reg [5:0] mul_count;
+    reg [6:0] mul_count;
     reg [2:0] mul_type; 
 
 
@@ -803,7 +804,7 @@ module riscv64(
 				3'b000, 3'b001: begin // mul/mulh
 				    mul_sign <= rs1[63] ^ rs2[63];
 				    mul_a <= rs1[63] ? -rs1 : rs1;
-				    mul_b <= rs2[63] ? -rs2 : rs1;
+				    mul_b <= rs2[63] ? -rs2 : rs2;
 				end
 				3'b010: begin
 				    mul_sign <= rs1[63]; // mulhsu
@@ -821,6 +822,21 @@ module riscv64(
 			    mul_step <= 1;
 			    pc <= pc -4;
 			    bubble <= 1;
+			end
+		        if (mul_step == 1) begin
+			    if (mul_count < 64) begin
+				//if (mul_b[0]) mul_result <= mul_result + (mul_a << mul_cnt);
+				if (mul_b[0]) mul_result <= mul_result + mul_a;
+				mul_a <= mul_a << 1;
+				mul_b <= mul_b >> 1;
+			        mul_count <= mul_count + 1;
+			        pc <= pc -4;
+			        bubble <= 1;
+			    end else begin
+				if (mul_type == 3'b000) re[w_rd] <= mul_result[63:0]; // mul low 64 always positive for mul
+				else  re[w_rd] <= mul_result[127:64] ^ {64{mul_sign}};
+				mul_step <= 0;
+			    end
 			end
                     end  
 
