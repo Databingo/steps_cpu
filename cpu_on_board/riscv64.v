@@ -780,6 +780,7 @@ module riscv64(
                             if (rs2[63]) re[w_rd] <= mul_base_reg[127:64] + rs2;
                             if (rs1[63] && rs2[63] ) re[w_rd] <= mul_base_reg[127:64] + rs1 + rs2; // Mulhu
 			    mul_step <= 0; 
+		        end
 		    end
 		    //32'b0000001_?????_?????_011_?????_0110011: begin 
                     //    if (rs1[63]) re[w_rd] <= mul_base[127:64] + rs1;
