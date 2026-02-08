@@ -276,7 +276,7 @@ set_instance_assignment -name FAST_OUTPUT_ENABLE_REGISTER ON -to DRAM_DQ[*]
 
 
 # Disable parallel compilation to avoid TBB bugs (single-threaded mode)
-set_global_assignment -name NUM_PARALLEL_PROCESSORS 1
+#set_global_assignment -name NUM_PARALLEL_PROCESSORS 1
 #
 # # Optional: Further reduce threading stress (recommended for stability)
 #set_global_assignment -name OPTIMIZATION_MODE "AREA"  # Prioritize area over speed (less aggressive parallel opts)
