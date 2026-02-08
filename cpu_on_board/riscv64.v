@@ -86,8 +86,8 @@ module riscv64(
     reg mul_sign;
     reg [6:0] mul_count;
     reg [2:0] mul_type; 
-    wire [127:0] mul_result_neg = -mul_result;
-    wire [127:0] mul_result_final = mul_sign ? mul_result_neg : mul_result ;
+    //wire [127:0] mul_result_neg = -mul_result;
+    //wire [127:0] mul_result_final = mul_sign ? mul_result_neg : mul_result ;
     //assign mul_final_128 = mul_sign ? (~mul_result + 1'b1) : mul_result;
 
 
