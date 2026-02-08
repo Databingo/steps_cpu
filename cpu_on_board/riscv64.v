@@ -161,6 +161,7 @@ module riscv64(
     reg bubble;
     reg [1:0] load_step;
     reg [1:0] store_step;
+    reg [1:0] mul_step; 
 
     // -- Atomic & Sync state --
     reg [63:0] reserve_addr;
