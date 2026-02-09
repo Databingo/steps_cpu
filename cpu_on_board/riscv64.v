@@ -97,6 +97,20 @@ module riscv64(
     //wire signed [129:0] mul_result_dsp = mul_op_a * mul_op_b;
 
 
+
+
+    wire [63:0] w_div_res = (rs2==0) ? -64'd1 :
+	                    (rs1==64'h8000_0000_0000_0000 && rs2 == -64'd1) ? rs1 : 
+			    $signed(rs1) / $signed(rs2);  // Div
+    wire [63:0] w_divu_res = (rs2==0) ? -64'd1 :
+                            $unsigned(rs1) / $unsigned(rs2);  // Divu
+    wire [63:0] w_rem_res = (rs2==0) ? rs1 :
+	                    (rs1==64'h8000_0000_0000_0000 && rs2 == -64'd1) ? 64'd0 : 
+			    $signed(rs1) % $signed(rs2);  // Rem
+    wire [63:0] w_remu_res = (rs2==0) ? rs1 :
+                            $unsigned(rs1) % $unsigned(rs2);  // Remu
+
+
     //// UNIVERSAL DIVIDER ENGINE (Sequential Shift-and-Subtract)
     //// ============================================================
     //reg [6:0]   div_counter;    // 0 to 64
@@ -861,8 +875,13 @@ module riscv64(
                     //32'b0000001_?????_?????_001_?????_0110011, 32'b0000001_?????_?????_010_?????_0110011, 32'b0000001_?????_?????_011_?????_0110011: re[w_rd] <= mul_result_dsp[127:64];
 		    //32'b0000001_?????_?????_000_?????_0111011: re[w_rd] <= {{32{mul_result_dsp[31]}}, mul_result_dsp[31:0]};  // Mulw
 
-                    32'b0000001_?????_?????_100_?????_0110011: re[w_rd] <= (rs2==0||(rs1==64'h8000_0000_0000_0000 && rs2 == -1)) ? -1 : $signed(rs1) / $signed(rs2);  // Div
-                    32'b0000001_?????_?????_101_?????_0110011: re[w_rd] <= (rs2==0) ? -1 : $unsigned(rs1) / $unsigned(rs2);  // Divu
+                    //32'b0000001_?????_?????_100_?????_0110011: re[w_rd] <= (rs2==0||(rs1==64'h8000_0000_0000_0000 && rs2 == -1)) ? -1 : $signed(rs1) / $signed(rs2);  // Div
+                    //32'b0000001_?????_?????_101_?????_0110011: re[w_rd] <= (rs2==0) ? -1 : $unsigned(rs1) / $unsigned(rs2);  // Divu
+        
+                    32'b0000001_?????_?????_100_?????_0110011: re[w_rd] <= w_div_res  // Div
+                    32'b0000001_?????_?????_101_?????_0110011: re[w_rd] <= w_divu_res // Divu
+                    32'b0000001_?????_?????_110_?????_0110011: re[w_rd] <= w_rem_res  // Rem
+                    32'b0000001_?????_?????_111_?????_0110011: re[w_rd] <= w_remu_res // Remu
         
 		    // M-Extension: Division and Remainder (DIV, DIVU, REM, REMU)
                     // Opcode: 0110011, func3: 100, 101, 110, 111
