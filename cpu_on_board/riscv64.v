@@ -96,19 +96,35 @@ module riscv64(
     //wire signed [64:0] mul_op_b = {sign_b, rs2};
     //wire signed [129:0] mul_result_dsp = mul_op_a * mul_op_b;
 
+// Declarations (same as before)
+reg [1:0] mul_step;
+reg [127:0] mul_result;
+reg [63:0] mul_a, mul_b;
+reg mul_sign;
+reg [6:0] mul_count;
+reg [2:0] mul_type;
+
+// Separate combinational block for mul iteration (outside the big always @(posedge clk))
+always @(*) begin
+    if (mul_step == 1 && mul_count < 64) begin
+        if (mul_b[0]) mul_result = mul_result + mul_a;
+        mul_a = mul_a << 1;
+        mul_b = mul_b >> 1;
+        mul_count = mul_count + 1;
+    end
+end
 
 
-
-    wire [63:0] w_div_res = (rs2==0) ? -64'd1 :
-	                    (rs1==64'h8000_0000_0000_0000 && rs2 == -64'd1) ? rs1 : 
-			    $signed(rs1) / $signed(rs2);  // Div
-    wire [63:0] w_divu_res = (rs2==0) ? -64'd1 :
-                            $unsigned(rs1) / $unsigned(rs2);  // Divu
-    wire [63:0] w_rem_res = (rs2==0) ? rs1 :
-	                    (rs1==64'h8000_0000_0000_0000 && rs2 == -64'd1) ? 64'd0 : 
-			    $signed(rs1) % $signed(rs2);  // Rem
-    wire [63:0] w_remu_res = (rs2==0) ? rs1 :
-                            $unsigned(rs1) % $unsigned(rs2);  // Remu
+//    wire [63:0] w_div_res = (rs2==0) ? -64'd1 :
+//	                    (rs1==64'h8000_0000_0000_0000 && rs2 == -64'd1) ? rs1 : 
+//			    $signed(rs1) / $signed(rs2);  // Div
+//    wire [63:0] w_divu_res = (rs2==0) ? -64'd1 :
+//                            $unsigned(rs1) / $unsigned(rs2);  // Divu
+//    wire [63:0] w_rem_res = (rs2==0) ? rs1 :
+//	                    (rs1==64'h8000_0000_0000_0000 && rs2 == -64'd1) ? 64'd0 : 
+//			    $signed(rs1) % $signed(rs2);  // Rem
+//    wire [63:0] w_remu_res = (rs2==0) ? rs1 :
+//                            $unsigned(rs1) % $unsigned(rs2);  // Remu
 
 
     //// UNIVERSAL DIVIDER ENGINE (Sequential Shift-and-Subtract)
@@ -874,14 +890,52 @@ module riscv64(
 		    //32'b0000001_?????_?????_000_?????_0110011: re[w_rd] <= mul_result_dsp[63:0];  // Mul
                     //32'b0000001_?????_?????_001_?????_0110011, 32'b0000001_?????_?????_010_?????_0110011, 32'b0000001_?????_?????_011_?????_0110011: re[w_rd] <= mul_result_dsp[127:64];
 		    //32'b0000001_?????_?????_000_?????_0111011: re[w_rd] <= {{32{mul_result_dsp[31]}}, mul_result_dsp[31:0]};  // Mulw
-
+		    //
+// Inside the big else begin … casez(ir) in always @(posedge clk)
+32'b0000001_?????_?????_000_?????_0110011,
+32'b0000001_?????_?????_001_?????_0110011,
+32'b0000001_?????_?????_010_?????_0110011,
+32'b0000001_?????_?????_011_?????_0110011: begin
+    if (mul_step == 0) begin
+        mul_type <= w_func3;
+        case (w_func3)
+            3'b000, 3'b001: begin // mul/mulh
+                mul_sign <= rs1[63] ^ rs2[63];
+                mul_a <= rs1[63] ? -rs1 : rs1;
+                mul_b <= rs2[63] ? -rs2 : rs2;
+            end
+            3'b010: begin
+                mul_sign <= rs1[63]; // mulhsu
+                mul_a <= rs1[63] ? -rs1 : rs1;
+                mul_b <= rs2;
+            end
+            3'b011: begin
+                mul_sign <= 0; // mulhu
+                mul_a <= rs1;
+                mul_b <= rs2;
+            end
+        endcase
+        mul_result <= 0;
+        mul_count <= 0;
+        mul_step <= 1;
+        pc <= pc -4;
+        bubble <= 1;
+    end else if (mul_step == 1 && mul_count == 64) begin  // Check finish condition here
+        if (mul_type == 3'b000) re[w_rd] <= mul_result[63:0];
+        else re[w_rd] <= mul_sign ? -mul_result[127:64] : mul_result[127:64];  // Simplified sign
+        mul_step <= 0;
+    end else begin
+        pc <= pc -4;  // Stall if iterating (handled by always@*)
+        bubble <= 1;
+    end
+end
                     //32'b0000001_?????_?????_100_?????_0110011: re[w_rd] <= (rs2==0||(rs1==64'h8000_0000_0000_0000 && rs2 == -1)) ? -1 : $signed(rs1) / $signed(rs2);  // Div
                     //32'b0000001_?????_?????_101_?????_0110011: re[w_rd] <= (rs2==0) ? -1 : $unsigned(rs1) / $unsigned(rs2);  // Divu
         
-                    32'b0000001_?????_?????_100_?????_0110011: re[w_rd] <= w_div_res;  // Div
-                    32'b0000001_?????_?????_101_?????_0110011: re[w_rd] <= w_divu_res; // Divu
-                    32'b0000001_?????_?????_110_?????_0110011: re[w_rd] <= w_rem_res;  // Rem
-                    32'b0000001_?????_?????_111_?????_0110011: re[w_rd] <= w_remu_res; // Remu
+                    //32'b0000001_?????_?????_100_?????_0110011: re[w_rd] <= w_div_res;  // Div
+                    //32'b0000001_?????_?????_101_?????_0110011: re[w_rd] <= w_divu_res; // Divu
+                    //32'b0000001_?????_?????_110_?????_0110011: re[w_rd] <= w_rem_res;  // Rem
+                    //32'b0000001_?????_?????_111_?????_0110011: re[w_rd] <= w_remu_res; // Remu
         
 		    // M-Extension: Division and Remainder (DIV, DIVU, REM, REMU)
                     // Opcode: 0110011, func3: 100, 101, 110, 111
