@@ -854,7 +854,7 @@ module riscv64(
                                 
                                 div_quotient  <= 0;
                                 div_remainder <= 0;
-                                div_cnt       <= 63;  // Start from MSB (64 bits -1)
+                                div_count       <= 63;  // Start from MSB (64 bits -1)
                                 div_step      <= 1;
                                 pc <= pc - 4; bubble <= 1;  // Stall
                             end
@@ -869,11 +869,11 @@ module riscv64(
                                 div_quotient <= div_quotient << 1;
                             end
                             
-                            if (div_cnt == 0) begin
+                            if (div_count == 0) begin
                                 div_remainder <= div_dividend[127:64];  // Final remainder
                                 div_step <= 2;
                             end else begin
-                                div_cnt <= div_cnt - 1;
+                                div_count <= div_count - 1;
                             end
                             pc <= pc - 4; bubble <= 1;  // Continue stalling
                         end else if (div_step == 2) begin
