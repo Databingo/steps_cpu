@@ -749,10 +749,10 @@ module riscv64(
 		    // Store after TLB
 	            32'b???????_?????_?????_???_?????_0100011: begin 
 		        if (store_step == 0) begin bus_address <= pda; bus_write_enable<=1;pc<=pc-4;bubble<=1;store_step<=1;bus_ls_type<=w_func3; 
-			   if (w_func3 == 000) bus_write_data<=rs2[7:0];  // Sb
-			   if (w_func3 == 001) bus_write_data<=rs2[15:0];  // Sh
-			   if (w_func3 == 010) bus_write_data<=rs2[31:0];  // Sw
-			   if (w_func3 == 011) bus_write_data<=rs2;  // Sd
+			   if (w_func3 == 3'b000) bus_write_data<=rs2[7:0];  // Sb
+			   if (w_func3 == 3'b001) bus_write_data<=rs2[15:0];  // Sh
+			   if (w_func3 == 3'b010) bus_write_data<=rs2[31:0];  // Sw
+			   if (w_func3 == 3'b011) bus_write_data<=rs2;  // Sd
 		        end
 		        if (store_step == 1 && bus_write_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working 1 bubble2 this3
 			if (store_step == 1 && bus_write_done == 1) store_step <= 0; end 
