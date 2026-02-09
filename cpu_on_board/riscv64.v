@@ -875,298 +875,188 @@ module riscv64(
 		    // RV64IMAFD(G)C  RVA23U64
 		    // Atomic after TLB // -- ATOMIC instructions (A-extension) opcode: 0101111
 		    // lr.w
-//		    32'b00010_??_?????_?????_010_?????_0101111: begin  // Lr.w_mmu 3 cycles
-//		        if (load_step == 0) begin bus_address <= pda; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; bus_ls_type <= w_func3; reserve_addr <= pda; reserve_valid <= 1; end
-//		        if (load_step == 1 && bus_read_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working
-//			if (load_step == 1 && bus_read_done == 1) begin re[w_rd]<= $signed(bus_read_data[31:0]); load_step <= 0; end end
-//		    // sc.w 
-//	            32'b00011_??_?????_?????_010_?????_0101111: begin
-//		        if (store_step == 0) begin 
-//			    if (!reserve_valid || reserve_addr != pda) begin re[w_rd] <= 1; reserve_valid <= 0; end // finish failed 1 in rd cycle without bubble & clear reserve
-//			    else begin bus_address <= pda; bus_write_data<=rs2[31:0];bus_write_enable<=1;pc<=pc-4;bubble<=1;store_step<=1;bus_ls_type<=w_func3;reserve_valid<=0;end end//consumed
-//		        if (store_step == 1 && bus_write_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working 1 bubble2 this3
-//			if (store_step == 1 && bus_write_done == 1) begin store_step <= 0; re[w_rd] <= 0; end end // sc.w successed return 0 in rd
-//		    // amoswap.w
-//	            32'b00001_??_?????_?????_010_?????_0101111: begin
-//			if (load_step == 0) begin bus_address <= pda; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; bus_ls_type <= w_func3; end
-//		        if (load_step == 1 && bus_read_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working
-//			if (load_step == 1 && bus_read_done == 1) begin re[w_rd]<= $signed(bus_read_data[31:0]); load_step <= 0;  // finish load
-//		            bus_address <= pda; bus_write_data<=rs2[31:0];bus_write_enable<=1;pc<=pc-4;bubble<=1;store_step<=1;bus_ls_type<=w_func3; end //start store
-//		        if (store_step == 1 && bus_write_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working 1 bubble2 this3
-//			if (store_step == 1 && bus_write_done == 1) begin store_step <= 0; end end //
-//		    // amoadd.w
-//	            32'b00000_??_?????_?????_010_?????_0101111: begin
-//			if (load_step == 0) begin bus_address <= pda; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; bus_ls_type <= w_func3; end
-//		        if (load_step == 1 && bus_read_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working
-//			if (load_step == 1 && bus_read_done == 1) begin re[w_rd]<= $signed(bus_read_data[31:0]); load_step <= 0;  // finish load
-//		            bus_address <= pda; bus_write_data<=$signed(bus_read_data[31:0])+$signed(rs2[31:0]);bus_write_enable<=1;pc<=pc-4;bubble<=1;store_step<=1;bus_ls_type<=w_func3; end //start store
-//		        if (store_step == 1 && bus_write_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working 1 bubble2 this3
-//			if (store_step == 1 && bus_write_done == 1) begin store_step <= 0; end end //
-//		    // amoxor.w
-//	            32'b00100_??_?????_?????_010_?????_0101111: begin
-//			if (load_step == 0) begin bus_address <= pda; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; bus_ls_type <= w_func3; end
-//		        if (load_step == 1 && bus_read_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working
-//			if (load_step == 1 && bus_read_done == 1) begin re[w_rd]<= $signed(bus_read_data[31:0]); load_step <= 0;  // finish load
-//		            bus_address <= pda; bus_write_data<=bus_read_data[31:0]^rs2[31:0];bus_write_enable<=1;pc<=pc-4;bubble<=1;store_step<=1;bus_ls_type<=w_func3; end //start store
-//		        if (store_step == 1 && bus_write_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working 1 bubble2 this3
-//			if (store_step == 1 && bus_write_done == 1) begin store_step <= 0; end end //
-//		    // amoand.w
-//	            32'b01100_??_?????_?????_010_?????_0101111: begin
-//			if (load_step == 0) begin bus_address <= pda; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; bus_ls_type <= w_func3; end
-//		        if (load_step == 1 && bus_read_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working
-//			if (load_step == 1 && bus_read_done == 1) begin re[w_rd]<= $signed(bus_read_data[31:0]); load_step <= 0;  // finish load
-//		            bus_address <= pda; bus_write_data<=bus_read_data[31:0]&rs2[31:0];bus_write_enable<=1;pc<=pc-4;bubble<=1;store_step<=1;bus_ls_type<=w_func3; end //start store
-//		        if (store_step == 1 && bus_write_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working 1 bubble2 this3
-//			if (store_step == 1 && bus_write_done == 1) begin store_step <= 0; end end //
-//		    // amoor.w
-//	            32'b01000_??_?????_?????_010_?????_0101111: begin
-//			if (load_step == 0) begin bus_address <= pda; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; bus_ls_type <= w_func3; end
-//		        if (load_step == 1 && bus_read_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working
-//			if (load_step == 1 && bus_read_done == 1) begin re[w_rd]<= $signed(bus_read_data[31:0]); load_step <= 0;  // finish load
-//		            bus_address <= pda; bus_write_data<=bus_read_data[31:0]|rs2[31:0];bus_write_enable<=1;pc<=pc-4;bubble<=1;store_step<=1;bus_ls_type<=w_func3; end //start store
-//		        if (store_step == 1 && bus_write_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working 1 bubble2 this3
-//			if (store_step == 1 && bus_write_done == 1) begin store_step <= 0; end end //
-//		    // amomin.w
-//	            32'b10000_??_?????_?????_010_?????_0101111: begin
-//			if (load_step == 0) begin bus_address <= pda; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; bus_ls_type <= w_func3; end
-//		        if (load_step == 1 && bus_read_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working
-//			if (load_step == 1 && bus_read_done == 1) begin re[w_rd]<= $signed(bus_read_data[31:0]); load_step <= 0;  // finish load
-//		            bus_address <= pda; bus_write_data<=bus_read_data[31:0];bus_write_enable<=1;pc<=pc-4;bubble<=1;store_step<=1;bus_ls_type<=w_func3; //start store
-//			    if ($signed(rs2[31:0]) < $signed(bus_read_data[31:0])) bus_write_data <= rs2[31:0]; end
-//		        if (store_step == 1 && bus_write_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working 1 bubble2 this3
-//			if (store_step == 1 && bus_write_done == 1) begin store_step <= 0; end end //
-//		    // amomax.w
-//	            32'b10100_??_?????_?????_010_?????_0101111: begin
-//			if (load_step == 0) begin bus_address <= pda; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; bus_ls_type <= w_func3; end
-//		        if (load_step == 1 && bus_read_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working
-//			if (load_step == 1 && bus_read_done == 1) begin re[w_rd]<= $signed(bus_read_data[31:0]); load_step <= 0;  // finish load
-//		            bus_address <= pda; bus_write_data<=bus_read_data[31:0];bus_write_enable<=1;pc<=pc-4;bubble<=1;store_step<=1;bus_ls_type<=w_func3; //start store
-//			    if ($signed(rs2[31:0]) > $signed(bus_read_data[31:0])) bus_write_data <= rs2[31:0]; end
-//		        if (store_step == 1 && bus_write_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working 1 bubble2 this3
-//			if (store_step == 1 && bus_write_done == 1) begin store_step <= 0; end end //
-//		    // amominu.w
-//	            32'b11000_??_?????_?????_010_?????_0101111: begin
-//			if (load_step == 0) begin bus_address <= pda; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; bus_ls_type <= w_func3; end
-//		        if (load_step == 1 && bus_read_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working
-//			if (load_step == 1 && bus_read_done == 1) begin re[w_rd]<= bus_read_data[31:0]; load_step <= 0;  // finish load
-//		            bus_address <= pda; bus_write_data<=bus_read_data[31:0];bus_write_enable<=1;pc<=pc-4;bubble<=1;store_step<=1;bus_ls_type<=w_func3; //start store
-//			    if (rs2[31:0] < bus_read_data[31:0]) bus_write_data <= rs2[31:0]; end
-//		        if (store_step == 1 && bus_write_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working 1 bubble2 this3
-//			if (store_step == 1 && bus_write_done == 1) begin store_step <= 0; end end //
-//		    // amomaxu.w
-//	            32'b11100_??_?????_?????_010_?????_0101111: begin
-//			if (load_step == 0) begin bus_address <= pda; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; bus_ls_type <= w_func3; end
-//		        if (load_step == 1 && bus_read_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working
-//			if (load_step == 1 && bus_read_done == 1) begin re[w_rd]<= bus_read_data[31:0]; load_step <= 0;  // finish load
-//		            bus_address <= pda; bus_write_data<=bus_read_data[31:0];bus_write_enable<=1;pc<=pc-4;bubble<=1;store_step<=1;bus_ls_type<=w_func3; //start store
-//			    if (rs2[31:0] > bus_read_data[31:0]) bus_write_data <= rs2[31:0]; end
-//		        if (store_step == 1 && bus_write_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working 1 bubble2 this3
-//			if (store_step == 1 && bus_write_done == 1) begin store_step <= 0; end end //
-//
-//		    // lr.d
-//		    32'b00010_??_?????_?????_011_?????_0101111: begin  // Lr.w_mmu 3 cycles
-//		        if (load_step == 0) begin bus_address <= pda; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; bus_ls_type <= w_func3; reserve_addr <= pda; reserve_valid <= 1; end
-//		        if (load_step == 1 && bus_read_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working
-//			if (load_step == 1 && bus_read_done == 1) begin re[w_rd]<= bus_read_data; load_step <= 0; end end
-//		    // sc.d 
-//	            32'b00011_??_?????_?????_011_?????_0101111: begin
-//		        if (store_step == 0) begin 
-//			    if (!reserve_valid || reserve_addr != pda) begin re[w_rd] <= 1; reserve_valid <= 0; end // finish failed 1 in rd cycle without bubble & clear reserve
-//			    else begin bus_address <= pda; bus_write_data<=rs2;bus_write_enable<=1;pc<=pc-4;bubble<=1;store_step<=1;bus_ls_type<=w_func3;reserve_valid<=0;end end//consumed
-//		        if (store_step == 1 && bus_write_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working 1 bubble2 this3
-//			if (store_step == 1 && bus_write_done == 1) begin store_step <= 0; re[w_rd] <= 0; end end // sc.w successed return 0 in rd
-//		    // amoswap.d
-//	            32'b00001_??_?????_?????_011_?????_0101111: begin
-//			if (load_step == 0) begin bus_address <= pda; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; bus_ls_type <= w_func3; end
-//		        if (load_step == 1 && bus_read_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working
-//			if (load_step == 1 && bus_read_done == 1) begin re[w_rd]<=bus_read_data; load_step <= 0;  // finish load
-//		            bus_address <= pda; bus_write_data<=rs2;bus_write_enable<=1;pc<=pc-4;bubble<=1;store_step<=1;bus_ls_type<=w_func3; end //start store
-//		        if (store_step == 1 && bus_write_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working 1 bubble2 this3
-//			if (store_step == 1 && bus_write_done == 1) begin store_step <= 0; end end //
-//		    // amoadd.d
-//	            32'b00000_??_?????_?????_011_?????_0101111: begin
-//			if (load_step == 0) begin bus_address <= pda; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; bus_ls_type <= w_func3; end
-//		        if (load_step == 1 && bus_read_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working
-//			if (load_step == 1 && bus_read_done == 1) begin re[w_rd]<= bus_read_data; load_step <= 0;  // finish load
-//		            bus_address <= pda; bus_write_data<=bus_read_data+rs2;bus_write_enable<=1;pc<=pc-4;bubble<=1;store_step<=1;bus_ls_type<=w_func3; end //start store
-//		        if (store_step == 1 && bus_write_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working 1 bubble2 this3
-//			if (store_step == 1 && bus_write_done == 1) begin store_step <= 0; end end //
-//		    // amoxor.d
-//	            32'b00100_??_?????_?????_011_?????_0101111: begin
-//			if (load_step == 0) begin bus_address <= pda; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; bus_ls_type <= w_func3; end
-//		        if (load_step == 1 && bus_read_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working
-//			if (load_step == 1 && bus_read_done == 1) begin re[w_rd]<= bus_read_data; load_step <= 0;  // finish load
-//		            bus_address <= pda; bus_write_data<=bus_read_data^rs2;bus_write_enable<=1;pc<=pc-4;bubble<=1;store_step<=1;bus_ls_type<=w_func3; end //start store
-//		        if (store_step == 1 && bus_write_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working 1 bubble2 this3
-//			if (store_step == 1 && bus_write_done == 1) begin store_step <= 0; end end //
-//		    // amoand.d
-//	            32'b01100_??_?????_?????_011_?????_0101111: begin
-//			if (load_step == 0) begin bus_address <= pda; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; bus_ls_type <= w_func3; end
-//		        if (load_step == 1 && bus_read_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working
-//			if (load_step == 1 && bus_read_done == 1) begin re[w_rd]<=bus_read_data; load_step <= 0;  // finish load
-//		            bus_address <= pda; bus_write_data<=bus_read_data&rs2;bus_write_enable<=1;pc<=pc-4;bubble<=1;store_step<=1;bus_ls_type<=w_func3; end //start store
-//		        if (store_step == 1 && bus_write_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working 1 bubble2 this3
-//			if (store_step == 1 && bus_write_done == 1) begin store_step <= 0; end end //
-//		    // amoor.d
-//	            32'b01000_??_?????_?????_011_?????_0101111: begin
-//			if (load_step == 0) begin bus_address <= pda; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; bus_ls_type <= w_func3; end
-//		        if (load_step == 1 && bus_read_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working
-//			if (load_step == 1 && bus_read_done == 1) begin re[w_rd]<=bus_read_data; load_step <= 0;  // finish load
-//		            bus_address <= pda; bus_write_data<=bus_read_data|rs2;bus_write_enable<=1;pc<=pc-4;bubble<=1;store_step<=1;bus_ls_type<=w_func3; end //start store
-//		        if (store_step == 1 && bus_write_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working 1 bubble2 this3
-//			if (store_step == 1 && bus_write_done == 1) begin store_step <= 0; end end //
-//		    // amomin.d
-//	            32'b10000_??_?????_?????_011_?????_0101111: begin
-//			if (load_step == 0) begin bus_address <= pda; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; bus_ls_type <= w_func3; end
-//		        if (load_step == 1 && bus_read_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working
-//			if (load_step == 1 && bus_read_done == 1) begin re[w_rd]<= bus_read_data; load_step <= 0;  // finish load
-//		            bus_address <= pda; bus_write_data<=bus_read_data;bus_write_enable<=1;pc<=pc-4;bubble<=1;store_step<=1;bus_ls_type<=w_func3; //start store
-//			    if ($signed(rs2) < $signed(bus_read_data)) bus_write_data <= rs2; end
-//		        if (store_step == 1 && bus_write_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working 1 bubble2 this3
-//			if (store_step == 1 && bus_write_done == 1) begin store_step <= 0; end end //
-//		    // amomax.d
-//	            32'b10100_??_?????_?????_011_?????_0101111: begin
-//			if (load_step == 0) begin bus_address <= pda; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; bus_ls_type <= w_func3; end
-//		        if (load_step == 1 && bus_read_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working
-//			if (load_step == 1 && bus_read_done == 1) begin re[w_rd]<= bus_read_data; load_step <= 0;  // finish load
-//		            bus_address <= pda; bus_write_data<=bus_read_data;bus_write_enable<=1;pc<=pc-4;bubble<=1;store_step<=1;bus_ls_type<=w_func3; //start store
-//			    if ($signed(rs2) > $signed(bus_read_data)) bus_write_data <= rs2; end
-//		        if (store_step == 1 && bus_write_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working 1 bubble2 this3
-//			if (store_step == 1 && bus_write_done == 1) begin store_step <= 0; end end //
-//		    // amominu.d
-//	            32'b11000_??_?????_?????_011_?????_0101111: begin
-//			if (load_step == 0) begin bus_address <= pda; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; bus_ls_type <= w_func3; end
-//		        if (load_step == 1 && bus_read_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working
-//			if (load_step == 1 && bus_read_done == 1) begin re[w_rd]<= bus_read_data; load_step <= 0;  // finish load
-//		            bus_address <= pda; bus_write_data<=bus_read_data;bus_write_enable<=1;pc<=pc-4;bubble<=1;store_step<=1;bus_ls_type<=w_func3; //start store
-//			    if (rs2 < bus_read_data) bus_write_data <= rs2; end
-//		        if (store_step == 1 && bus_write_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working 1 bubble2 this3
-//			if (store_step == 1 && bus_write_done == 1) begin store_step <= 0; end end //
-//		    // amomaxu.d
-//	            32'b11100_??_?????_?????_011_?????_0101111: begin
-//			if (load_step == 0) begin bus_address <= pda; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; bus_ls_type <= w_func3; end
-//		        if (load_step == 1 && bus_read_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working
-//			if (load_step == 1 && bus_read_done == 1) begin re[w_rd]<= bus_read_data; load_step <= 0;  // finish load
-//		            bus_address <= pda; bus_write_data<=bus_read_data;bus_write_enable<=1;pc<=pc-4;bubble<=1;store_step<=1;bus_ls_type<=w_func3; //start store
-//			    if (rs2 > bus_read_data) bus_write_data <= rs2; end
-//		        if (store_step == 1 && bus_write_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working 1 bubble2 this3
-//			if (store_step == 1 && bus_write_done == 1) begin store_step <= 0; end end //
+		    32'b00010_??_?????_?????_010_?????_0101111: begin  // Lr.w_mmu 3 cycles
+		        if (load_step == 0) begin bus_address <= pda; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; bus_ls_type <= w_func3; reserve_addr <= pda; reserve_valid <= 1; end
+		        if (load_step == 1 && bus_read_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working
+			if (load_step == 1 && bus_read_done == 1) begin re[w_rd]<= $signed(bus_read_data[31:0]); load_step <= 0; end end
+		    // sc.w 
+	            32'b00011_??_?????_?????_010_?????_0101111: begin
+		        if (store_step == 0) begin 
+			    if (!reserve_valid || reserve_addr != pda) begin re[w_rd] <= 1; reserve_valid <= 0; end // finish failed 1 in rd cycle without bubble & clear reserve
+			    else begin bus_address <= pda; bus_write_data<=rs2[31:0];bus_write_enable<=1;pc<=pc-4;bubble<=1;store_step<=1;bus_ls_type<=w_func3;reserve_valid<=0;end end//consumed
+		        if (store_step == 1 && bus_write_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working 1 bubble2 this3
+			if (store_step == 1 && bus_write_done == 1) begin store_step <= 0; re[w_rd] <= 0; end end // sc.w successed return 0 in rd
+		    // amoswap.w
+	            32'b00001_??_?????_?????_010_?????_0101111: begin
+			if (load_step == 0) begin bus_address <= pda; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; bus_ls_type <= w_func3; end
+		        if (load_step == 1 && bus_read_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working
+			if (load_step == 1 && bus_read_done == 1) begin re[w_rd]<= $signed(bus_read_data[31:0]); load_step <= 0;  // finish load
+		            bus_address <= pda; bus_write_data<=rs2[31:0];bus_write_enable<=1;pc<=pc-4;bubble<=1;store_step<=1;bus_ls_type<=w_func3; end //start store
+		        if (store_step == 1 && bus_write_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working 1 bubble2 this3
+			if (store_step == 1 && bus_write_done == 1) begin store_step <= 0; end end //
+		    // amoadd.w
+	            32'b00000_??_?????_?????_010_?????_0101111: begin
+			if (load_step == 0) begin bus_address <= pda; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; bus_ls_type <= w_func3; end
+		        if (load_step == 1 && bus_read_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working
+			if (load_step == 1 && bus_read_done == 1) begin re[w_rd]<= $signed(bus_read_data[31:0]); load_step <= 0;  // finish load
+		            bus_address <= pda; bus_write_data<=$signed(bus_read_data[31:0])+$signed(rs2[31:0]);bus_write_enable<=1;pc<=pc-4;bubble<=1;store_step<=1;bus_ls_type<=w_func3; end //start store
+		        if (store_step == 1 && bus_write_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working 1 bubble2 this3
+			if (store_step == 1 && bus_write_done == 1) begin store_step <= 0; end end //
+		    // amoxor.w
+	            32'b00100_??_?????_?????_010_?????_0101111: begin
+			if (load_step == 0) begin bus_address <= pda; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; bus_ls_type <= w_func3; end
+		        if (load_step == 1 && bus_read_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working
+			if (load_step == 1 && bus_read_done == 1) begin re[w_rd]<= $signed(bus_read_data[31:0]); load_step <= 0;  // finish load
+		            bus_address <= pda; bus_write_data<=bus_read_data[31:0]^rs2[31:0];bus_write_enable<=1;pc<=pc-4;bubble<=1;store_step<=1;bus_ls_type<=w_func3; end //start store
+		        if (store_step == 1 && bus_write_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working 1 bubble2 this3
+			if (store_step == 1 && bus_write_done == 1) begin store_step <= 0; end end //
+		    // amoand.w
+	            32'b01100_??_?????_?????_010_?????_0101111: begin
+			if (load_step == 0) begin bus_address <= pda; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; bus_ls_type <= w_func3; end
+		        if (load_step == 1 && bus_read_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working
+			if (load_step == 1 && bus_read_done == 1) begin re[w_rd]<= $signed(bus_read_data[31:0]); load_step <= 0;  // finish load
+		            bus_address <= pda; bus_write_data<=bus_read_data[31:0]&rs2[31:0];bus_write_enable<=1;pc<=pc-4;bubble<=1;store_step<=1;bus_ls_type<=w_func3; end //start store
+		        if (store_step == 1 && bus_write_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working 1 bubble2 this3
+			if (store_step == 1 && bus_write_done == 1) begin store_step <= 0; end end //
+		    // amoor.w
+	            32'b01000_??_?????_?????_010_?????_0101111: begin
+			if (load_step == 0) begin bus_address <= pda; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; bus_ls_type <= w_func3; end
+		        if (load_step == 1 && bus_read_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working
+			if (load_step == 1 && bus_read_done == 1) begin re[w_rd]<= $signed(bus_read_data[31:0]); load_step <= 0;  // finish load
+		            bus_address <= pda; bus_write_data<=bus_read_data[31:0]|rs2[31:0];bus_write_enable<=1;pc<=pc-4;bubble<=1;store_step<=1;bus_ls_type<=w_func3; end //start store
+		        if (store_step == 1 && bus_write_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working 1 bubble2 this3
+			if (store_step == 1 && bus_write_done == 1) begin store_step <= 0; end end //
+		    // amomin.w
+	            32'b10000_??_?????_?????_010_?????_0101111: begin
+			if (load_step == 0) begin bus_address <= pda; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; bus_ls_type <= w_func3; end
+		        if (load_step == 1 && bus_read_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working
+			if (load_step == 1 && bus_read_done == 1) begin re[w_rd]<= $signed(bus_read_data[31:0]); load_step <= 0;  // finish load
+		            bus_address <= pda; bus_write_data<=bus_read_data[31:0];bus_write_enable<=1;pc<=pc-4;bubble<=1;store_step<=1;bus_ls_type<=w_func3; //start store
+			    if ($signed(rs2[31:0]) < $signed(bus_read_data[31:0])) bus_write_data <= rs2[31:0]; end
+		        if (store_step == 1 && bus_write_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working 1 bubble2 this3
+			if (store_step == 1 && bus_write_done == 1) begin store_step <= 0; end end //
+		    // amomax.w
+	            32'b10100_??_?????_?????_010_?????_0101111: begin
+			if (load_step == 0) begin bus_address <= pda; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; bus_ls_type <= w_func3; end
+		        if (load_step == 1 && bus_read_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working
+			if (load_step == 1 && bus_read_done == 1) begin re[w_rd]<= $signed(bus_read_data[31:0]); load_step <= 0;  // finish load
+		            bus_address <= pda; bus_write_data<=bus_read_data[31:0];bus_write_enable<=1;pc<=pc-4;bubble<=1;store_step<=1;bus_ls_type<=w_func3; //start store
+			    if ($signed(rs2[31:0]) > $signed(bus_read_data[31:0])) bus_write_data <= rs2[31:0]; end
+		        if (store_step == 1 && bus_write_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working 1 bubble2 this3
+			if (store_step == 1 && bus_write_done == 1) begin store_step <= 0; end end //
+		    // amominu.w
+	            32'b11000_??_?????_?????_010_?????_0101111: begin
+			if (load_step == 0) begin bus_address <= pda; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; bus_ls_type <= w_func3; end
+		        if (load_step == 1 && bus_read_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working
+			if (load_step == 1 && bus_read_done == 1) begin re[w_rd]<= bus_read_data[31:0]; load_step <= 0;  // finish load
+		            bus_address <= pda; bus_write_data<=bus_read_data[31:0];bus_write_enable<=1;pc<=pc-4;bubble<=1;store_step<=1;bus_ls_type<=w_func3; //start store
+			    if (rs2[31:0] < bus_read_data[31:0]) bus_write_data <= rs2[31:0]; end
+		        if (store_step == 1 && bus_write_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working 1 bubble2 this3
+			if (store_step == 1 && bus_write_done == 1) begin store_step <= 0; end end //
+		    // amomaxu.w
+	            32'b11100_??_?????_?????_010_?????_0101111: begin
+			if (load_step == 0) begin bus_address <= pda; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; bus_ls_type <= w_func3; end
+		        if (load_step == 1 && bus_read_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working
+			if (load_step == 1 && bus_read_done == 1) begin re[w_rd]<= bus_read_data[31:0]; load_step <= 0;  // finish load
+		            bus_address <= pda; bus_write_data<=bus_read_data[31:0];bus_write_enable<=1;pc<=pc-4;bubble<=1;store_step<=1;bus_ls_type<=w_func3; //start store
+			    if (rs2[31:0] > bus_read_data[31:0]) bus_write_data <= rs2[31:0]; end
+		        if (store_step == 1 && bus_write_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working 1 bubble2 this3
+			if (store_step == 1 && bus_write_done == 1) begin store_step <= 0; end end //
+
+		    // lr.d
+		    32'b00010_??_?????_?????_011_?????_0101111: begin  // Lr.w_mmu 3 cycles
+		        if (load_step == 0) begin bus_address <= pda; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; bus_ls_type <= w_func3; reserve_addr <= pda; reserve_valid <= 1; end
+		        if (load_step == 1 && bus_read_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working
+			if (load_step == 1 && bus_read_done == 1) begin re[w_rd]<= bus_read_data; load_step <= 0; end end
+		    // sc.d 
+	            32'b00011_??_?????_?????_011_?????_0101111: begin
+		        if (store_step == 0) begin 
+			    if (!reserve_valid || reserve_addr != pda) begin re[w_rd] <= 1; reserve_valid <= 0; end // finish failed 1 in rd cycle without bubble & clear reserve
+			    else begin bus_address <= pda; bus_write_data<=rs2;bus_write_enable<=1;pc<=pc-4;bubble<=1;store_step<=1;bus_ls_type<=w_func3;reserve_valid<=0;end end//consumed
+		        if (store_step == 1 && bus_write_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working 1 bubble2 this3
+			if (store_step == 1 && bus_write_done == 1) begin store_step <= 0; re[w_rd] <= 0; end end // sc.w successed return 0 in rd
+		    // amoswap.d
+	            32'b00001_??_?????_?????_011_?????_0101111: begin
+			if (load_step == 0) begin bus_address <= pda; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; bus_ls_type <= w_func3; end
+		        if (load_step == 1 && bus_read_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working
+			if (load_step == 1 && bus_read_done == 1) begin re[w_rd]<=bus_read_data; load_step <= 0;  // finish load
+		            bus_address <= pda; bus_write_data<=rs2;bus_write_enable<=1;pc<=pc-4;bubble<=1;store_step<=1;bus_ls_type<=w_func3; end //start store
+		        if (store_step == 1 && bus_write_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working 1 bubble2 this3
+			if (store_step == 1 && bus_write_done == 1) begin store_step <= 0; end end //
+		    // amoadd.d
+	            32'b00000_??_?????_?????_011_?????_0101111: begin
+			if (load_step == 0) begin bus_address <= pda; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; bus_ls_type <= w_func3; end
+		        if (load_step == 1 && bus_read_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working
+			if (load_step == 1 && bus_read_done == 1) begin re[w_rd]<= bus_read_data; load_step <= 0;  // finish load
+		            bus_address <= pda; bus_write_data<=bus_read_data+rs2;bus_write_enable<=1;pc<=pc-4;bubble<=1;store_step<=1;bus_ls_type<=w_func3; end //start store
+		        if (store_step == 1 && bus_write_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working 1 bubble2 this3
+			if (store_step == 1 && bus_write_done == 1) begin store_step <= 0; end end //
+		    // amoxor.d
+	            32'b00100_??_?????_?????_011_?????_0101111: begin
+			if (load_step == 0) begin bus_address <= pda; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; bus_ls_type <= w_func3; end
+		        if (load_step == 1 && bus_read_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working
+			if (load_step == 1 && bus_read_done == 1) begin re[w_rd]<= bus_read_data; load_step <= 0;  // finish load
+		            bus_address <= pda; bus_write_data<=bus_read_data^rs2;bus_write_enable<=1;pc<=pc-4;bubble<=1;store_step<=1;bus_ls_type<=w_func3; end //start store
+		        if (store_step == 1 && bus_write_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working 1 bubble2 this3
+			if (store_step == 1 && bus_write_done == 1) begin store_step <= 0; end end //
+		    // amoand.d
+	            32'b01100_??_?????_?????_011_?????_0101111: begin
+			if (load_step == 0) begin bus_address <= pda; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; bus_ls_type <= w_func3; end
+		        if (load_step == 1 && bus_read_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working
+			if (load_step == 1 && bus_read_done == 1) begin re[w_rd]<=bus_read_data; load_step <= 0;  // finish load
+		            bus_address <= pda; bus_write_data<=bus_read_data&rs2;bus_write_enable<=1;pc<=pc-4;bubble<=1;store_step<=1;bus_ls_type<=w_func3; end //start store
+		        if (store_step == 1 && bus_write_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working 1 bubble2 this3
+			if (store_step == 1 && bus_write_done == 1) begin store_step <= 0; end end //
+		    // amoor.d
+	            32'b01000_??_?????_?????_011_?????_0101111: begin
+			if (load_step == 0) begin bus_address <= pda; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; bus_ls_type <= w_func3; end
+		        if (load_step == 1 && bus_read_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working
+			if (load_step == 1 && bus_read_done == 1) begin re[w_rd]<=bus_read_data; load_step <= 0;  // finish load
+		            bus_address <= pda; bus_write_data<=bus_read_data|rs2;bus_write_enable<=1;pc<=pc-4;bubble<=1;store_step<=1;bus_ls_type<=w_func3; end //start store
+		        if (store_step == 1 && bus_write_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working 1 bubble2 this3
+			if (store_step == 1 && bus_write_done == 1) begin store_step <= 0; end end //
+		    // amomin.d
+	            32'b10000_??_?????_?????_011_?????_0101111: begin
+			if (load_step == 0) begin bus_address <= pda; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; bus_ls_type <= w_func3; end
+		        if (load_step == 1 && bus_read_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working
+			if (load_step == 1 && bus_read_done == 1) begin re[w_rd]<= bus_read_data; load_step <= 0;  // finish load
+		            bus_address <= pda; bus_write_data<=bus_read_data;bus_write_enable<=1;pc<=pc-4;bubble<=1;store_step<=1;bus_ls_type<=w_func3; //start store
+			    if ($signed(rs2) < $signed(bus_read_data)) bus_write_data <= rs2; end
+		        if (store_step == 1 && bus_write_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working 1 bubble2 this3
+			if (store_step == 1 && bus_write_done == 1) begin store_step <= 0; end end //
+		    // amomax.d
+	            32'b10100_??_?????_?????_011_?????_0101111: begin
+			if (load_step == 0) begin bus_address <= pda; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; bus_ls_type <= w_func3; end
+		        if (load_step == 1 && bus_read_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working
+			if (load_step == 1 && bus_read_done == 1) begin re[w_rd]<= bus_read_data; load_step <= 0;  // finish load
+		            bus_address <= pda; bus_write_data<=bus_read_data;bus_write_enable<=1;pc<=pc-4;bubble<=1;store_step<=1;bus_ls_type<=w_func3; //start store
+			    if ($signed(rs2) > $signed(bus_read_data)) bus_write_data <= rs2; end
+		        if (store_step == 1 && bus_write_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working 1 bubble2 this3
+			if (store_step == 1 && bus_write_done == 1) begin store_step <= 0; end end //
+		    // amominu.d
+	            32'b11000_??_?????_?????_011_?????_0101111: begin
+			if (load_step == 0) begin bus_address <= pda; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; bus_ls_type <= w_func3; end
+		        if (load_step == 1 && bus_read_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working
+			if (load_step == 1 && bus_read_done == 1) begin re[w_rd]<= bus_read_data; load_step <= 0;  // finish load
+		            bus_address <= pda; bus_write_data<=bus_read_data;bus_write_enable<=1;pc<=pc-4;bubble<=1;store_step<=1;bus_ls_type<=w_func3; //start store
+			    if (rs2 < bus_read_data) bus_write_data <= rs2; end
+		        if (store_step == 1 && bus_write_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working 1 bubble2 this3
+			if (store_step == 1 && bus_write_done == 1) begin store_step <= 0; end end //
+		    // amomaxu.d
+	            32'b11100_??_?????_?????_011_?????_0101111: begin
+			if (load_step == 0) begin bus_address <= pda; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; bus_ls_type <= w_func3; end
+		        if (load_step == 1 && bus_read_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working
+			if (load_step == 1 && bus_read_done == 1) begin re[w_rd]<= bus_read_data; load_step <= 0;  // finish load
+		            bus_address <= pda; bus_write_data<=bus_read_data;bus_write_enable<=1;pc<=pc-4;bubble<=1;store_step<=1;bus_ls_type<=w_func3; //start store
+			    if (rs2 > bus_read_data) bus_write_data <= rs2; end
+		        if (store_step == 1 && bus_write_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working 1 bubble2 this3
+			if (store_step == 1 && bus_write_done == 1) begin store_step <= 0; end end //
   
   
   
   
 		     // -- ATOMIC end --
                      // M extension // M mul mulh mulhsu mulhu div divu rem remu mulw divw divuw remuw
-		    //32'b0000001_?????_?????_000_?????_0110011: re[w_rd] <= $signed(rs1) * $signed(rs2);  // Mul
-                    //32'b0000001_?????_?????_001_?????_0110011: re[w_rd] <= ($signed(rs1) * $signed(rs2))>>>64;//[127:64];  // Mulh 
-		    //32'b0000001_?????_?????_010_?????_0110011: re[w_rd] <= ($signed(rs1) * $unsigned(rs2))>>>64;  // Mulhsu
-		    //32'b0000001_?????_?????_011_?????_0110011: re[w_rd] <= mul_unsigned[127:64];  // Mulhu
-		    
-		    //32'b0000001_?????_?????_000_?????_0110011: re[w_rd] <= mul_result_dsp[63:0];  // Mul
-                    //32'b0000001_?????_?????_001_?????_0110011: re[w_rd] <= mul_result_dsp[127:64];  // Mulh 
-		    //32'b0000001_?????_?????_010_?????_0110011: re[w_rd] <= mul_result_dsp[127:64];  // Mulhsu
-		    //32'b0000001_?????_?????_011_?????_0110011: re[w_rd] <= mul_result_dsp[127:64];  // Mulhu
-		      
-		    //32'b0000001_?????_?????_000_?????_0110011: re[w_rd] <= mul_result_dsp[63:0];  // Mul
-                    //32'b0000001_?????_?????_001_?????_0110011, 32'b0000001_?????_?????_010_?????_0110011, 32'b0000001_?????_?????_011_?????_0110011: re[w_rd] <= mul_result_dsp[127:64];
-		    //32'b0000001_?????_?????_000_?????_0111011: re[w_rd] <= {{32{mul_result_dsp[31]}}, mul_result_dsp[31:0]};  // Mulw
-		    //
-//// Inside the big else begin … casez(ir) in always @(posedge clk)
-//32'b0000001_?????_?????_000_?????_0110011,
-//32'b0000001_?????_?????_001_?????_0110011,
-//32'b0000001_?????_?????_010_?????_0110011,
-//32'b0000001_?????_?????_011_?????_0110011: begin
-//    if (mul_step == 0) begin
-//        mul_type <= w_func3;
-//        case (w_func3)
-//            3'b000, 3'b001: begin // mul/mulh
-//                mul_sign <= rs1[63] ^ rs2[63];
-//                mul_a <= rs1[63] ? -rs1 : rs1;
-//                mul_b <= rs2[63] ? -rs2 : rs2;
-//            end
-//            3'b010: begin
-//                mul_sign <= rs1[63]; // mulhsu
-//                mul_a <= rs1[63] ? -rs1 : rs1;
-//                mul_b <= rs2;
-//            end
-//            3'b011: begin
-//                mul_sign <= 0; // mulhu
-//                mul_a <= rs1;
-//                mul_b <= rs2;
-//            end
-//        endcase
-//        mul_result <= 0;
-//        mul_count <= 0;
-//        mul_step <= 1;
-//        pc <= pc -4;
-//        bubble <= 1;
-//    end else if (mul_step == 1 && mul_count == 64) begin  // Check finish condition here
-//        if (mul_type == 3'b000) re[w_rd] <= mul_result[63:0];
-//        else re[w_rd] <= mul_sign ? -mul_result[127:64] : mul_result[127:64];  // Simplified sign
-//        mul_step <= 0;
-//    end else begin
-//        pc <= pc -4;  // Stall if iterating (handled by always@*)
-//        bubble <= 1;
-//    end
-//end
-                    //32'b0000001_?????_?????_100_?????_0110011: re[w_rd] <= (rs2==0||(rs1==64'h8000_0000_0000_0000 && rs2 == -1)) ? -1 : $signed(rs1) / $signed(rs2);  // Div
-                    //32'b0000001_?????_?????_101_?????_0110011: re[w_rd] <= (rs2==0) ? -1 : $unsigned(rs1) / $unsigned(rs2);  // Divu
-        
-                    //32'b0000001_?????_?????_100_?????_0110011: re[w_rd] <= w_div_res;  // Div
-                    //32'b0000001_?????_?????_101_?????_0110011: re[w_rd] <= w_divu_res; // Divu
-                    //32'b0000001_?????_?????_110_?????_0110011: re[w_rd] <= w_rem_res;  // Rem
-                    //32'b0000001_?????_?????_111_?????_0110011: re[w_rd] <= w_remu_res; // Remu
-		    //
-		    //
-		    //
-		    //
-	// In the big else begin … casez(ir) in always @(posedge clk)
-//32'b0000001_?????_?????_000_?????_0110011,
-//32'b0000001_?????_?????_001_?????_0110011,
-//32'b0000001_?????_?????_010_?????_0110011,
-//32'b0000001_?????_?????_011_?????_0110011: begin
-//    if (mul_step == 0) begin
-//        mul_type <= w_func3;
-//        case (w_func3)
-//            3'b000, 3'b001: begin // mul/mulh
-//                mul_sign <= rs1[63] ^ rs2[63];
-//                mul_a <= rs1[63] ? -rs1 : rs1;
-//                mul_b <= rs2[63] ? -rs2 : rs2;
-//            end
-//            3'b010: begin
-//                mul_sign <= rs1[63]; // mulhsu
-//                mul_a <= rs1[63] ? -rs1 : rs1;
-//                mul_b <= rs2;
-//            end
-//            3'b011: begin
-//                mul_sign <= 0; // mulhu
-//                mul_a <= rs1;
-//                mul_b <= rs2;
-//            end
-//        endcase
-//        mul_result <= 0;
-//        mul_count <= 0;
-//        mul_step <= 1;
-//        pc <= pc -4;
-//        bubble <= 1;
-//    end else if (mul_step == 1) begin
-//        if (mul_count < 64) begin
-//            if (mul_b[0]) mul_result <= mul_result + mul_a;
-//            mul_a <= mul_a << 1;
-//            mul_b <= mul_b >> 1;
-//            mul_count <= mul_count + 1;
-//            pc <= pc -4;
-//            bubble <= 1;
-//        end else begin
-//            if (mul_type == 3'b000) re[w_rd] <= mul_result[63:0];
-//            else re[w_rd] <= mul_sign ? -mul_result[127:64] : mul_result[127:64];
-//            mul_step <= 0;
-//        end
-//    end
-//end	    //
-//        // ... inside always @(posedge clk) ... casez(ir) ...
- // ... inside always @(posedge clk) ... casez(ir) ...
-
     // M-Extension: Multiplication (Sequential)
     // Matches 0110011 (Op) + 0000001 (Func7) + Func3 0xx
     // Also matches 0111011 (Op Word) + 0000001 (Func7) + Func3 000 (MULW)
@@ -1192,7 +1082,6 @@ module riscv64(
         end
     end
     
-    // ... Div/Rem logic from previous answer ...   
     // M-Extension: Division and Remainder
     // Opcode: 0110011 (Reg-Reg), Func7: 0000001 (M-Ext)
     // Func3: 100(DIV), 101(DIVU), 110(REM), 111(REMU)
@@ -1210,216 +1099,6 @@ module riscv64(
             // Bubble automatically clears in next cycle, PC proceeds
         end
     end
-
-    // ... rest of instructions ...
-		    // M-Extension: Division and Remainder (DIV, DIVU, REM, REMU)
-                    // Opcode: 0110011, func3: 100, 101, 110, 111
-                    //32'b0000001_?????_?????_1??_?????_0110011: begin 
-                    //    if (div_busy == 0 && load_step == 0) begin
-                    //        // --- START ---
-                    //        
-                    //        // Handle RISC-V Corner Cases immediately (No loop needed)
-                    //        if (rs2 == 0) begin
-                    //            // Divide by Zero
-                    //            if (w_func3[1]) re[w_rd] <= rs1; // REM/REMU returns Dividend
-                    //            else re[w_rd] <= -1;             // DIV/DIVU returns -1 (All 1s)
-                    //        end
-                    //        else if (div_signed && rs1 == 64'h8000000000000000 && rs2 == -1) begin
-                    //            // Signed Overflow (MinInt / -1)
-                    //            if (w_func3[1]) re[w_rd] <= 0;   // REM returns 0
-                    //            else re[w_rd] <= rs1;            // DIV returns MinInt
-                    //        end
-                    //        else begin
-                    //            // Normal Case: Start the Engine
-                    //            div_busy    <= 1;
-                    //            div_counter <= 0;
-                    //            div_b_reg   <= abs_b;
-                    //            div_rem_reg <= {{64{1'b0}}, abs_a}; // Load Dividend into Low 64
-                    //            
-                    //            // Record Signs for Final Correction
-                    //            // DIV: neg if signs different. REM: neg if Dividend (rs1) was neg.
-                    //            div_neg_res <= a_neg ^ b_neg;
-                    //            div_neg_rem <= a_neg;
-                    //            div_is_rem  <= w_func3[1]; // 1 for REM/REMU
-                    //            
-                    //            pc <= pc - 4; // Stall PC
-                    //            bubble <= 1;  // Stall Pipeline
-                    //            load_step <= 1;
-                    //        end
-                    //    end 
-                    //    else if (div_busy) begin
-                    //        // --- WAITING & COMPUTING ---
-                    //        // Logic merged from separate block to avoid multiple constant drivers
-                    //        if (div_counter < 64) begin
-                    //            // Shift Left and Subtract
-                    //            // Check if high part (shifted) >= divisor
-                    //            if (div_rem_reg[126:63] >= div_b_reg) begin
-                    //                // Subtract and set quotient bit to 1
-                    //                div_rem_reg <= {div_rem_reg[126:63] - div_b_reg, div_rem_reg[62:0], 1'b1};
-                    //            end else begin
-                    //                // Just shift
-                    //                div_rem_reg <= {div_rem_reg[126:0], 1'b0};
-                    //            end
-                    //            div_counter <= div_counter + 1;
-                    //        end else begin
-                    //            div_busy <= 0; // Done
-                    //        end
-
-                    //        pc <= pc - 4;
-                    //        bubble <= 1;
-                    //    end 
-                    //    else if (load_step == 1) begin
-                    //        // --- FINISH ---
-                    //        load_step <= 0;
-                    //        bubble <= 0;
-                    //        
-                    //        if (div_is_rem) begin
-                    //            // Remainder (High 64 bits) - Fix Sign
-                    //            re[w_rd] <= div_neg_rem ? -div_rem_reg[127:64] : div_rem_reg[127:64];
-                    //        end else begin
-                    //            // Quotient (Low 64 bits) - Fix Sign
-                    //            re[w_rd] <= div_neg_res ? -div_rem_reg[63:0] : div_rem_reg[63:0];
-                    //        end
-                    //    end
-                    //end  
-
-
-
-
-		    
-		    // Inside the big else begin … casez(ir), add these for div/divu/rem/remu
-                    //32'b0000001_?????_?????_100_?????_0110011,  // div
-                    //32'b0000001_?????_?????_101_?????_0110011,  // divu
-                    //32'b0000001_?????_?????_110_?????_0110011,  // rem
-                    //32'b0000001_?????_?????_111_?????_0110011:  // remu
-                    //begin
-                    //    if (div_step == 0) begin
-                    //        // Step 0: Setup (handle signs, abs values, special cases)
-                    //        div_is_rem <= (w_func3[1]);  // High bit: 1 for rem*, 0 for div*
-                    //        div_is_unsigned <= (w_func3[0]);  // Low bit: 1 for *u, 0 for signed
-                    //
-                    //        if (rs2 == 0) begin
-                    //            // Divide by zero
-                    //            if (!div_is_rem) re[w_rd] <= -64'd1;  // div/divu: -1
-                    //            else re[w_rd] <= rs1;                 // rem/remu: dividend
-                    //            // No stall needed
-                    //        end else if (!div_is_unsigned && rs1 == 64'h8000000000000000 && rs2 == -64'd1) begin
-                    //            // Signed overflow case (-2^63 / -1)
-                    //            if (!div_is_rem) re[w_rd] <= 64'h8000000000000000;  // div: -2^63
-                    //            else re[w_rd] <= 0;                                 // rem: 0
-                    //            // No stall
-                    //        end else begin
-                    //            // Normal case: Prepare abs values
-                    //            div_sign_q <= div_is_unsigned ? 0 : (rs1[63] ^ rs2[63]);
-                    //            div_sign_r <= div_is_unsigned ? 0 : rs1[63];
-                    //            
-                    //            div_dividend <= div_is_unsigned ? {64'b0, rs1} : 
-                    //                            {64'b0, (rs1[63] ? -rs1 : rs1)};  // Abs dividend, extended
-                    //            div_divisor  <= div_is_unsigned ? rs2 : 
-                    //                            (rs2[63] ? -rs2 : rs2);           // Abs divisor
-                    //            
-                    //            div_quotient  <= 0;
-                    //            div_remainder <= 0;
-                    //            div_count       <= 63;  // Start from MSB (64 bits -1)
-                    //            div_step      <= 1;
-                    //            pc <= pc - 4; bubble <= 1;  // Stall
-                    //        end
-                    //    end else if (div_step == 1) begin
-                    //        // Step 1: Iterative shift-subtract (restoring division)
-                    //        div_dividend <= div_dividend << 1;  // Shift left (next bit)
-                    //        
-                    //        if (div_dividend[127:64] >= div_divisor) begin
-                    //            div_dividend[127:64] <= div_dividend[127:64] - div_divisor;
-                    //            div_quotient <= (div_quotient << 1) | 1'b1;
-                    //        end else begin
-                    //            div_quotient <= div_quotient << 1;
-                    //        end
-                    //        
-                    //        if (div_count == 0) begin
-                    //            div_remainder <= div_dividend[127:64];  // Final remainder
-                    //            div_step <= 2;
-                    //        end else begin
-                    //            div_count <= div_count - 1;
-                    //        end
-                    //        pc <= pc - 4; bubble <= 1;  // Continue stalling
-                    //    end else if (div_step == 2) begin
-                    //        // Step 2: Apply signs and write result
-                    //        if (div_is_rem) begin
-                    //            re[w_rd] <= div_sign_r ? -div_remainder : div_remainder;
-                    //        end else begin
-                    //            re[w_rd] <= div_sign_q ? -div_quotient : div_quotient;
-                    //        end
-                    //        div_step <= 0;  // Done, no extra bubble
-                    //    end
-                    //end
-        
-        
-        
-        
-		    //32'b0000001_?????_?????_000_?????_0110011, 32'b0000001_?????_?????_001_?????_0110011, 32'b0000001_?????_?????_011_?????_0110011: begin
-		    //    if (w_func3 == 3'b000) re[w_rd] <= mul_base[63:0];  // Mul
-		    //    if (w_func3 == 3'b001) re[w_rd] <= mul_base[127:64];  // Mulh 
-		    //    if (w_func3 == 3'b010) re[w_rd] <= mul_base[127:64];  // Mulhu
-                    //end  
-		    //32'b0000001_?????_?????_000_?????_0110011, 
-		    //32'b0000001_?????_?????_001_?????_0110011, 
-		    //32'b0000001_?????_?????_011_?????_0110011, 
-		    //32'b0000001_?????_?????_010_?????_0110011: begin
-		    //    if (mul_step == 0) begin
-		    //        mul_type <= w_func3;
-		    //        case (w_func3)
-		    //    	3'b000, 3'b001: begin // mul/mulh
-		    //    	    mul_sign <= rs1[63] ^ rs2[63];
-		    //    	    mul_a <= rs1[63] ? -rs1 : rs1;
-		    //    	    mul_b <= rs2[63] ? -rs2 : rs2;
-		    //    	end
-		    //    	3'b010: begin
-		    //    	    mul_sign <= rs1[63]; // mulhsu
-		    //    	    mul_a <= rs1[63] ? -rs1 : rs1;
-		    //    	    mul_b <= rs2;
-		    //    	end
-		    //    	3'b011: begin
-		    //    	    mul_sign <= 0; // mulhu
-		    //    	    mul_a <= rs1;
-		    //    	    mul_b <= rs2;
-		    //    	end
-		    //        endcase
-		    //        mul_result <= 0;
-		    //        mul_count <= 0;
-		    //        mul_step <= 1;
-		    //        pc <= pc -4;
-		    //        bubble <= 1;
-		    //    end
-		    //    if (mul_step == 1) begin
-		    //        if (mul_count < 64) begin
-		    //            //if (mul_b[0]) mul_result <= mul_result + (mul_a << mul_cnt);
-		    //            if (mul_b[0]) mul_result <= mul_result + mul_a;
-		    //            mul_a <= mul_a << 1;
-		    //            mul_b <= mul_b >> 1;
-		    //            mul_count <= mul_count + 1;
-		    //            pc <= pc -4;
-		    //            bubble <= 1;
-		    //        end else begin
-		    //            if (mul_type == 3'b000) re[w_rd] <= mul_result[63:0]; // mul low 64 always positive for mul
-		    //            //else if (mul_sign) re[w_rd] <= ~mul_result[127:64] + (mul_result[63:0]==0);
-		    //    	//else re[w_rd] <= mul_result[127:64];
-		    //            mul_step <= 0;
-		    //        end
-		    //    end
-		    //    //if (mul_step == 2) begin
-		    //    //        if (mul_type == 3'b000) re[w_rd] <= mul_result[63:0]; // mul low 64 always positive for mul
-		    //    //        //else if (mul_sign) re[w_rd] <= ~mul_result[127:64] + (mul_result[63:0]==0);
-		    //    //	//else re[w_rd] <= mul_result[127:64];
-		    //    //        //if (mul_type == 3'b000) re[w_rd] <= mul_result_final[63:0]; // mul low 64 always positive for mul
-		    //    //        //else re[w_rd] <= mul_result[];
-		    //    //        mul_step <= 0;
-		    //    //end
-                    //end  
-
-                    //32'b0000001_?????_?????_100_?????_0110011: re[w_rd] <= (rs2==0||(rs1==64'h8000_0000_0000_0000 && rs2 == -1)) ? -1 : $signed(rs1) / $signed(rs2);  // Div
-                    //32'b0000001_?????_?????_101_?????_0110011: re[w_rd] <= (rs2==0) ? -1 : $unsigned(rs1) / $unsigned(rs2);  // Divu
-		    // Rem
-		    // Remu
 		     // F (reg f0-f31)
 		     // flw fsw fadd.s fsub.s fmul.s fdiv.s fsqrt.s fmadd.s
 		     // fmsub.s fnmsub.s fcvt.w.s fcvt.wu.s fcvt.s.w fcvt.s.wu
