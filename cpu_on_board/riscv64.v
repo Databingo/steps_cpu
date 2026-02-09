@@ -96,23 +96,23 @@ module riscv64(
     //wire signed [64:0] mul_op_b = {sign_b, rs2};
     //wire signed [129:0] mul_result_dsp = mul_op_a * mul_op_b;
 
-//// Declarations (same as before)
-//reg [1:0] mul_step;
-//reg [127:0] mul_result;
-//reg [63:0] mul_a, mul_b;
-//reg mul_sign;
-//reg [6:0] mul_count;
-//reg [2:0] mul_type;
-//
-//// Separate combinational block for mul iteration (outside the big always @(posedge clk))
-//always @(*) begin
-//    if (mul_step == 1 && mul_count < 64) begin
-//        if (mul_b[0]) mul_result = mul_result + mul_a;
-//        mul_a = mul_a << 1;
-//        mul_b = mul_b >> 1;
-//        mul_count = mul_count + 1;
-//    end
-//end
+// Declarations (same as before)
+reg [1:0] mul_step;
+reg [127:0] mul_result;
+reg [63:0] mul_a, mul_b;
+reg mul_sign;
+reg [6:0] mul_count;
+reg [2:0] mul_type;
+
+// Separate combinational block for mul iteration (outside the big always @(posedge clk))
+always @(*) begin
+    if (mul_step == 1 && mul_count < 64) begin
+        if (mul_b[0]) mul_result = mul_result + mul_a;
+        mul_a = mul_a << 1;
+        mul_b = mul_b >> 1;
+        mul_count = mul_count + 1;
+    end
+end
 // ============================================================
     // SEPARATE DIVIDER ENGINE REGISTERS
     // ============================================================
@@ -1020,6 +1020,54 @@ module riscv64(
                     //32'b0000001_?????_?????_101_?????_0110011: re[w_rd] <= w_divu_res; // Divu
                     //32'b0000001_?????_?????_110_?????_0110011: re[w_rd] <= w_rem_res;  // Rem
                     //32'b0000001_?????_?????_111_?????_0110011: re[w_rd] <= w_remu_res; // Remu
+		    //
+		    //
+		    //
+		    //
+	// In the big else begin … casez(ir) in always @(posedge clk)
+32'b0000001_?????_?????_000_?????_0110011,
+32'b0000001_?????_?????_001_?????_0110011,
+32'b0000001_?????_?????_010_?????_0110011,
+32'b0000001_?????_?????_011_?????_0110011: begin
+    if (mul_step == 0) begin
+        mul_type <= w_func3;
+        case (w_func3)
+            3'b000, 3'b001: begin // mul/mulh
+                mul_sign <= rs1[63] ^ rs2[63];
+                mul_a <= rs1[63] ? -rs1 : rs1;
+                mul_b <= rs2[63] ? -rs2 : rs2;
+            end
+            3'b010: begin
+                mul_sign <= rs1[63]; // mulhsu
+                mul_a <= rs1[63] ? -rs1 : rs1;
+                mul_b <= rs2;
+            end
+            3'b011: begin
+                mul_sign <= 0; // mulhu
+                mul_a <= rs1;
+                mul_b <= rs2;
+            end
+        endcase
+        mul_result <= 0;
+        mul_count <= 0;
+        mul_step <= 1;
+        pc <= pc -4;
+        bubble <= 1;
+    end else if (mul_step == 1) begin
+        if (mul_count < 64) begin
+            if (mul_b[0]) mul_result <= mul_result + mul_a;
+            mul_a <= mul_a << 1;
+            mul_b <= mul_b >> 1;
+            mul_count <= mul_count + 1;
+            pc <= pc -4;
+            bubble <= 1;
+        end else begin
+            if (mul_type == 3'b000) re[w_rd] <= mul_result[63:0];
+            else re[w_rd] <= mul_sign ? -mul_result[127:64] : mul_result[127:64];
+            mul_step <= 0;
+        end
+    end
+end	    //
         // ... inside always @(posedge clk) ... casez(ir) ...
     
     // M-Extension: Division and Remainder
