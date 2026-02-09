@@ -28,8 +28,10 @@ module riscv64(
     reg tlb=0;
     wire [31:0] ir;
 // -- new --
-    (* ram_style = "logic" *) reg [63:0] re [0:31]; // General Registers 32s
-    (* ram_style = "logic" *) reg [63:0] sre [0:9]; // Shadow Registers 10s
+    //(* ram_style = "logic" *) reg [63:0] re [0:31]; // General Registers 32s
+    //(* ram_style = "logic" *) reg [63:0] sre [0:9]; // Shadow Registers 10s
+    reg [63:0] re [0:31]; // General Registers 32s
+    reg [63:0] sre [0:9]; // Shadow Registers 10s
     reg mmu_da=0;
     reg mmu_pc = 0;
     reg mmu_cache_refill=0;
@@ -664,7 +666,7 @@ module riscv64(
        	 	bubble <= 1'b1; // bubble 
 	        saved_user_pc <= pc - 4; // !!! save pc (EXE was flushed so record-redo it, previous pc)
 	        if (bubble) saved_user_pc <= pc ; // !!! save pc (j/b EXE was flushed currectly)
-		for (i=0;i<=9;i=i+1) begin sre[i]<= re[i]; end // save re
+		for (i=0;i<10;i=i+1) begin sre[i]<= re[i]; end // save re
 		re[9] <= pc;// - 4; // save this vpc to x1 //!!!! We also need to refill pc - 4' ppc for re-executeing pc-4, with hit(if satp in for very next sfence.vma) 
 		//Csrs[mstatus][MPIE] <= Csrs[mstatus][MIE]; // disable interrupt during shadow mmu walking
 		//Csrs[mstatus][MIE] <= 0;
