@@ -96,25 +96,109 @@ module riscv64(
     //wire signed [64:0] mul_op_b = {sign_b, rs2};
     //wire signed [129:0] mul_result_dsp = mul_op_a * mul_op_b;
 
-// Declarations (same as before)
-reg [1:0] mul_step;
-reg [127:0] mul_result;
-reg [63:0] mul_a, mul_b;
-reg mul_sign;
-reg [6:0] mul_count;
-reg [2:0] mul_type;
+//// Declarations (same as before)
+//reg [1:0] mul_step;
+//reg [127:0] mul_result;
+//reg [63:0] mul_a, mul_b;
+//reg mul_sign;
+//reg [6:0] mul_count;
+//reg [2:0] mul_type;
+//
+//// Separate combinational block for mul iteration (outside the big always @(posedge clk))
+//always @(*) begin
+//    if (mul_step == 1 && mul_count < 64) begin
+//        if (mul_b[0]) mul_result = mul_result + mul_a;
+//        mul_a = mul_a << 1;
+//        mul_b = mul_b >> 1;
+//        mul_count = mul_count + 1;
+//    end
+//end
+// ============================================================
+    // SEPARATE DIVIDER ENGINE REGISTERS
+    // ============================================================
+    reg [6:0]   div_cnt;        // Counter (0-64)
+    reg [127:0] div_rem;        // Combined {Remainder, Quotient} register
+    reg [63:0]  div_b;          // Divisor register
+    reg         div_active;     // State: 1 = Computing, 0 = Idle
+    reg         div_done;       // Handshake: 1 = Result Ready
+    reg         div_enable;     // Handshake: 1 = Start Request
+    reg         div_sign_q;     // Sign of Quotient
+    reg         div_sign_r;     // Sign of Remainder
+    reg         div_is_rem;     // 1 for REM, 0 for DIV operation
+    reg [63:0]  div_result_out; // Final output buffer
+    
+    // Helper signals for decoding inside the divider
+    wire div_op_signed = !ir[12]; // func3[0] == 0 is signed
+    wire div_op_is_rem = ir[13];  // func3[1] == 1 is rem
+// ============================================================
+    // INDEPENDENT DIVIDER LOGIC (Sequential Shift-and-Subtract)
+    // ============================================================
+    always @(posedge clk or negedge reset) begin
+        if (!reset) begin
+            div_active <= 0;
+            div_done   <= 0;
+            div_cnt    <= 0;
+        end else begin
+            if (div_enable && !div_active && !div_done) begin
+                // --- START PHASE ---
+                div_active <= 1;
+                div_cnt    <= 0;
+                div_is_rem <= div_op_is_rem;
 
-// Separate combinational block for mul iteration (outside the big always @(posedge clk))
-always @(*) begin
-    if (mul_step == 1 && mul_count < 64) begin
-        if (mul_b[0]) mul_result = mul_result + mul_a;
-        mul_a = mul_a << 1;
-        mul_b = mul_b >> 1;
-        mul_count = mul_count + 1;
+                // Handle Corner Cases & Setup in one go to save MUX resources
+                if (rs2 == 0) begin
+                    // Divide by Zero
+                    div_result_out <= div_op_is_rem ? rs1 : -64'd1; 
+                    div_active <= 0; 
+                    div_done   <= 1; // Finish immediately
+                end 
+                else if (div_op_signed && rs1 == 64'h8000000000000000 && rs2 == -64'd1) begin
+                    // Signed Overflow
+                    div_result_out <= div_op_is_rem ? 64'd0 : rs1;
+                    div_active <= 0;
+                    div_done   <= 1; // Finish immediately
+                end 
+                else begin
+                    // Normal Division Setup
+                    // 1. Determine Signs
+                    div_sign_r <= div_op_signed ? rs1[63] : 0;
+                    div_sign_q <= div_op_signed ? (rs1[63] ^ rs2[63]) : 0;
+                    
+                    // 2. Load Absolute Values
+                    div_rem <= {64'd0, (div_op_signed && rs1[63]) ? -rs1 : rs1};
+                    div_b   <= (div_op_signed && rs2[63]) ? -rs2 : rs2;
+                end
+            end 
+            else if (div_active) begin
+                // --- COMPUTE PHASE (64 Cycles) ---
+                if (div_cnt < 64) begin
+                    // Shift Left: div_rem << 1
+                    // Subtract: if High part >= Divisor
+                    // We do this using a temporary calc to keep logic compact
+                    if (div_rem[126:63] >= div_b) begin
+                        div_rem <= {div_rem[126:63] - div_b, div_rem[62:0], 1'b1};
+                    end else begin
+                        div_rem <= {div_rem[126:0], 1'b0};
+                    end
+                    div_cnt <= div_cnt + 1;
+                end else begin
+                    // --- FINISH PHASE ---
+                    div_active <= 0;
+                    div_done   <= 1;
+
+                    // Apply Signs to Result
+                    if (div_is_rem) 
+                        div_result_out <= div_sign_r ? -div_rem[127:64] : div_rem[127:64];
+                    else 
+                        div_result_out <= div_sign_q ? -div_rem[63:0] : div_rem[63:0];
+                end
+            end 
+            else if (!div_enable) begin
+                // --- RESET HANDSHAKE ---
+                div_done <= 0;
+            end
+        end
     end
-end
-
-
 //    wire [63:0] w_div_res = (rs2==0) ? -64'd1 :
 //	                    (rs1==64'h8000_0000_0000_0000 && rs2 == -64'd1) ? rs1 : 
 //			    $signed(rs1) / $signed(rs2);  // Div
@@ -891,44 +975,44 @@ end
                     //32'b0000001_?????_?????_001_?????_0110011, 32'b0000001_?????_?????_010_?????_0110011, 32'b0000001_?????_?????_011_?????_0110011: re[w_rd] <= mul_result_dsp[127:64];
 		    //32'b0000001_?????_?????_000_?????_0111011: re[w_rd] <= {{32{mul_result_dsp[31]}}, mul_result_dsp[31:0]};  // Mulw
 		    //
-// Inside the big else begin … casez(ir) in always @(posedge clk)
-32'b0000001_?????_?????_000_?????_0110011,
-32'b0000001_?????_?????_001_?????_0110011,
-32'b0000001_?????_?????_010_?????_0110011,
-32'b0000001_?????_?????_011_?????_0110011: begin
-    if (mul_step == 0) begin
-        mul_type <= w_func3;
-        case (w_func3)
-            3'b000, 3'b001: begin // mul/mulh
-                mul_sign <= rs1[63] ^ rs2[63];
-                mul_a <= rs1[63] ? -rs1 : rs1;
-                mul_b <= rs2[63] ? -rs2 : rs2;
-            end
-            3'b010: begin
-                mul_sign <= rs1[63]; // mulhsu
-                mul_a <= rs1[63] ? -rs1 : rs1;
-                mul_b <= rs2;
-            end
-            3'b011: begin
-                mul_sign <= 0; // mulhu
-                mul_a <= rs1;
-                mul_b <= rs2;
-            end
-        endcase
-        mul_result <= 0;
-        mul_count <= 0;
-        mul_step <= 1;
-        pc <= pc -4;
-        bubble <= 1;
-    end else if (mul_step == 1 && mul_count == 64) begin  // Check finish condition here
-        if (mul_type == 3'b000) re[w_rd] <= mul_result[63:0];
-        else re[w_rd] <= mul_sign ? -mul_result[127:64] : mul_result[127:64];  // Simplified sign
-        mul_step <= 0;
-    end else begin
-        pc <= pc -4;  // Stall if iterating (handled by always@*)
-        bubble <= 1;
-    end
-end
+//// Inside the big else begin … casez(ir) in always @(posedge clk)
+//32'b0000001_?????_?????_000_?????_0110011,
+//32'b0000001_?????_?????_001_?????_0110011,
+//32'b0000001_?????_?????_010_?????_0110011,
+//32'b0000001_?????_?????_011_?????_0110011: begin
+//    if (mul_step == 0) begin
+//        mul_type <= w_func3;
+//        case (w_func3)
+//            3'b000, 3'b001: begin // mul/mulh
+//                mul_sign <= rs1[63] ^ rs2[63];
+//                mul_a <= rs1[63] ? -rs1 : rs1;
+//                mul_b <= rs2[63] ? -rs2 : rs2;
+//            end
+//            3'b010: begin
+//                mul_sign <= rs1[63]; // mulhsu
+//                mul_a <= rs1[63] ? -rs1 : rs1;
+//                mul_b <= rs2;
+//            end
+//            3'b011: begin
+//                mul_sign <= 0; // mulhu
+//                mul_a <= rs1;
+//                mul_b <= rs2;
+//            end
+//        endcase
+//        mul_result <= 0;
+//        mul_count <= 0;
+//        mul_step <= 1;
+//        pc <= pc -4;
+//        bubble <= 1;
+//    end else if (mul_step == 1 && mul_count == 64) begin  // Check finish condition here
+//        if (mul_type == 3'b000) re[w_rd] <= mul_result[63:0];
+//        else re[w_rd] <= mul_sign ? -mul_result[127:64] : mul_result[127:64];  // Simplified sign
+//        mul_step <= 0;
+//    end else begin
+//        pc <= pc -4;  // Stall if iterating (handled by always@*)
+//        bubble <= 1;
+//    end
+//end
                     //32'b0000001_?????_?????_100_?????_0110011: re[w_rd] <= (rs2==0||(rs1==64'h8000_0000_0000_0000 && rs2 == -1)) ? -1 : $signed(rs1) / $signed(rs2);  // Div
                     //32'b0000001_?????_?????_101_?????_0110011: re[w_rd] <= (rs2==0) ? -1 : $unsigned(rs1) / $unsigned(rs2);  // Divu
         
@@ -936,7 +1020,27 @@ end
                     //32'b0000001_?????_?????_101_?????_0110011: re[w_rd] <= w_divu_res; // Divu
                     //32'b0000001_?????_?????_110_?????_0110011: re[w_rd] <= w_rem_res;  // Rem
                     //32'b0000001_?????_?????_111_?????_0110011: re[w_rd] <= w_remu_res; // Remu
-        
+        // ... inside always @(posedge clk) ... casez(ir) ...
+    
+    // M-Extension: Division and Remainder
+    // Opcode: 0110011 (Reg-Reg), Func7: 0000001 (M-Ext)
+    // Func3: 100(DIV), 101(DIVU), 110(REM), 111(REMU)
+    32'b0000001_?????_?????_1??_?????_0110011: begin 
+        if (!div_done) begin
+            // 1. Request Start
+            div_enable <= 1; 
+            // 2. Stall Pipeline
+            pc <= pc - 4;    
+            bubble <= 1;     
+        end else begin
+            // 3. Result Ready
+            re[w_rd] <= div_result_out; 
+            div_enable <= 0; // Clear Request
+            // Bubble automatically clears in next cycle, PC proceeds
+        end
+    end
+
+    // ... rest of instructions ...
 		    // M-Extension: Division and Remainder (DIV, DIVU, REM, REMU)
                     // Opcode: 0110011, func3: 100, 101, 110, 111
                     //32'b0000001_?????_?????_1??_?????_0110011: begin 
