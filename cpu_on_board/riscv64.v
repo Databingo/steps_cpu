@@ -90,35 +90,34 @@ module riscv64(
     //wire [127:0] mul_result_final = mul_sign ? mul_result_neg : mul_result ;
     //assign mul_final_128 = mul_sign ? (~mul_result + 1'b1) : mul_result;
 
-    wire sign_a = (w_func3 == 3'b011) ? 1'b0 : rs1[63];
-    wire sign_b = (w_func3 == 3'b011 || w_func3 == 3'b010) ? 1'b0 : rs2[63];
-    wire signed [64:0] mul_op_a = {sign_a, rs1};
-    wire signed [64:0] mul_op_b = {sign_b, rs2};
-    wire signed [129:0] mul_result_dsp = mul_op_a * mul_op_b;
+    //wire sign_a = (w_func3 == 3'b011) ? 1'b0 : rs1[63];
+    //wire sign_b = (w_func3 == 3'b011 || w_func3 == 3'b010) ? 1'b0 : rs2[63];
+    //wire signed [64:0] mul_op_a = {sign_a, rs1};
+    //wire signed [64:0] mul_op_b = {sign_b, rs2};
+    //wire signed [129:0] mul_result_dsp = mul_op_a * mul_op_b;
 
 
-// ============================================================
-    // UNIVERSAL DIVIDER ENGINE (Sequential Shift-and-Subtract)
-    // ============================================================
-    reg [6:0]   div_counter;    // 0 to 64
-    reg [127:0] div_rem_reg;    // Holds Remainder (High) and Quotient (Low)
-    reg [63:0]  div_b_reg;      // Divisor
-    reg         div_neg_res;    // Result should be negative?
-    reg         div_neg_rem;    // Remainder should be negative?
-    reg         div_busy;       // Engine Status
-    reg         div_is_rem;     // 1=REM, 0=DIV
+    //// UNIVERSAL DIVIDER ENGINE (Sequential Shift-and-Subtract)
+    //// ============================================================
+    //reg [6:0]   div_counter;    // 0 to 64
+    //reg [127:0] div_rem_reg;    // Holds Remainder (High) and Quotient (Low)
+    //reg [63:0]  div_b_reg;      // Divisor
+    //reg         div_neg_res;    // Result should be negative?
+    //reg         div_neg_rem;    // Remainder should be negative?
+    //reg         div_busy;       // Engine Status
+    //reg         div_is_rem;     // 1=REM, 0=DIV
 
-    // -- 1. Decode Inputs (Combinational) --
-    // Is it a Signed instruction? (DIV=100, REM=110) -> func3[0] is 0
-    wire div_signed = ~w_func3[0]; 
-    
-    // Determine Sign of inputs (If Unsigned, force sign bit to 0)
-    wire a_neg = div_signed && rs1[63];
-    wire b_neg = div_signed && rs2[63];
-    
-    // Get Absolute Values
-    wire [63:0] abs_a = a_neg ? -rs1 : rs1;
-    wire [63:0] abs_b = b_neg ? -rs2 : rs2;
+    //// -- 1. Decode Inputs (Combinational) --
+    //// Is it a Signed instruction? (DIV=100, REM=110) -> func3[0] is 0
+    //wire div_signed = ~w_func3[0]; 
+    //
+    //// Determine Sign of inputs (If Unsigned, force sign bit to 0)
+    //wire a_neg = div_signed && rs1[63];
+    //wire b_neg = div_signed && rs2[63];
+    //
+    //// Get Absolute Values
+    //wire [63:0] abs_a = a_neg ? -rs1 : rs1;
+    //wire [63:0] abs_b = b_neg ? -rs2 : rs2;
 
     //// -- 2. Divider Engine (Clocked) --
     //always @(posedge clk) begin
@@ -858,12 +857,12 @@ module riscv64(
 		    //32'b0000001_?????_?????_010_?????_0110011: re[w_rd] <= mul_result_dsp[127:64];  // Mulhsu
 		    //32'b0000001_?????_?????_011_?????_0110011: re[w_rd] <= mul_result_dsp[127:64];  // Mulhu
 		      
-		    32'b0000001_?????_?????_000_?????_0110011: re[w_rd] <= mul_result_dsp[63:0];  // Mul
-                    32'b0000001_?????_?????_001_?????_0110011, 32'b0000001_?????_?????_010_?????_0110011, 32'b0000001_?????_?????_011_?????_0110011: re[w_rd] <= mul_result_dsp[127:64];
-		    32'b0000001_?????_?????_000_?????_0111011: re[w_rd] <= {{32{mul_result_dsp[31]}}, mul_result_dsp[31:0]};  // Mulw
+		    //32'b0000001_?????_?????_000_?????_0110011: re[w_rd] <= mul_result_dsp[63:0];  // Mul
+                    //32'b0000001_?????_?????_001_?????_0110011, 32'b0000001_?????_?????_010_?????_0110011, 32'b0000001_?????_?????_011_?????_0110011: re[w_rd] <= mul_result_dsp[127:64];
+		    //32'b0000001_?????_?????_000_?????_0111011: re[w_rd] <= {{32{mul_result_dsp[31]}}, mul_result_dsp[31:0]};  // Mulw
 
-                    //32'b0000001_?????_?????_100_?????_0110011: re[w_rd] <= (rs2==0||(rs1==64'h8000_0000_0000_0000 && rs2 == -1)) ? -1 : $signed(rs1) / $signed(rs2);  // Div
-                    //32'b0000001_?????_?????_101_?????_0110011: re[w_rd] <= (rs2==0) ? -1 : $unsigned(rs1) / $unsigned(rs2);  // Divu
+                    32'b0000001_?????_?????_100_?????_0110011: re[w_rd] <= (rs2==0||(rs1==64'h8000_0000_0000_0000 && rs2 == -1)) ? -1 : $signed(rs1) / $signed(rs2);  // Div
+                    32'b0000001_?????_?????_101_?????_0110011: re[w_rd] <= (rs2==0) ? -1 : $unsigned(rs1) / $unsigned(rs2);  // Divu
         
 		    // M-Extension: Division and Remainder (DIV, DIVU, REM, REMU)
                     // Opcode: 0110011, func3: 100, 101, 110, 111
@@ -901,7 +900,23 @@ module riscv64(
                     //        end
                     //    end 
                     //    else if (div_busy) begin
-                    //        // --- WAITING ---
+                    //        // --- WAITING & COMPUTING ---
+                    //        // Logic merged from separate block to avoid multiple constant drivers
+                    //        if (div_counter < 64) begin
+                    //            // Shift Left and Subtract
+                    //            // Check if high part (shifted) >= divisor
+                    //            if (div_rem_reg[126:63] >= div_b_reg) begin
+                    //                // Subtract and set quotient bit to 1
+                    //                div_rem_reg <= {div_rem_reg[126:63] - div_b_reg, div_rem_reg[62:0], 1'b1};
+                    //            end else begin
+                    //                // Just shift
+                    //                div_rem_reg <= {div_rem_reg[126:0], 1'b0};
+                    //            end
+                    //            div_counter <= div_counter + 1;
+                    //        end else begin
+                    //            div_busy <= 0; // Done
+                    //        end
+
                     //        pc <= pc - 4;
                     //        bubble <= 1;
                     //    end 
@@ -919,77 +934,6 @@ module riscv64(
                     //        end
                     //    end
                     //end  
-
-		    // M-Extension: Division and Remainder (DIV, DIVU, REM, REMU)
-                    // Opcode: 0110011, func3: 100, 101, 110, 111
-                    32'b0000001_?????_?????_1??_?????_0110011: begin 
-                        if (div_busy == 0 && load_step == 0) begin
-                            // --- START ---
-                            
-                            // Handle RISC-V Corner Cases immediately (No loop needed)
-                            if (rs2 == 0) begin
-                                // Divide by Zero
-                                if (w_func3[1]) re[w_rd] <= rs1; // REM/REMU returns Dividend
-                                else re[w_rd] <= -1;             // DIV/DIVU returns -1 (All 1s)
-                            end
-                            else if (div_signed && rs1 == 64'h8000000000000000 && rs2 == -1) begin
-                                // Signed Overflow (MinInt / -1)
-                                if (w_func3[1]) re[w_rd] <= 0;   // REM returns 0
-                                else re[w_rd] <= rs1;            // DIV returns MinInt
-                            end
-                            else begin
-                                // Normal Case: Start the Engine
-                                div_busy    <= 1;
-                                div_counter <= 0;
-                                div_b_reg   <= abs_b;
-                                div_rem_reg <= {{64{1'b0}}, abs_a}; // Load Dividend into Low 64
-                                
-                                // Record Signs for Final Correction
-                                // DIV: neg if signs different. REM: neg if Dividend (rs1) was neg.
-                                div_neg_res <= a_neg ^ b_neg;
-                                div_neg_rem <= a_neg;
-                                div_is_rem  <= w_func3[1]; // 1 for REM/REMU
-                                
-                                pc <= pc - 4; // Stall PC
-                                bubble <= 1;  // Stall Pipeline
-                                load_step <= 1;
-                            end
-                        end 
-                        else if (div_busy) begin
-                            // --- WAITING & COMPUTING ---
-                            // Logic merged from separate block to avoid multiple constant drivers
-                            if (div_counter < 64) begin
-                                // Shift Left and Subtract
-                                // Check if high part (shifted) >= divisor
-                                if (div_rem_reg[126:63] >= div_b_reg) begin
-                                    // Subtract and set quotient bit to 1
-                                    div_rem_reg <= {div_rem_reg[126:63] - div_b_reg, div_rem_reg[62:0], 1'b1};
-                                end else begin
-                                    // Just shift
-                                    div_rem_reg <= {div_rem_reg[126:0], 1'b0};
-                                end
-                                div_counter <= div_counter + 1;
-                            end else begin
-                                div_busy <= 0; // Done
-                            end
-
-                            pc <= pc - 4;
-                            bubble <= 1;
-                        end 
-                        else if (load_step == 1) begin
-                            // --- FINISH ---
-                            load_step <= 0;
-                            bubble <= 0;
-                            
-                            if (div_is_rem) begin
-                                // Remainder (High 64 bits) - Fix Sign
-                                re[w_rd] <= div_neg_rem ? -div_rem_reg[127:64] : div_rem_reg[127:64];
-                            end else begin
-                                // Quotient (Low 64 bits) - Fix Sign
-                                re[w_rd] <= div_neg_res ? -div_rem_reg[63:0] : div_rem_reg[63:0];
-                            end
-                        end
-                    end  
 
 
 
