@@ -95,21 +95,64 @@ module riscv64(
     wire signed [64:0] mul_op_a = {sign_a, rs1};
     wire signed [64:0] mul_op_b = {sign_b, rs2};
     wire signed [129:0] mul_result_dsp = mul_op_a * mul_op_b;
+
+
+// ============================================================
+    // UNIVERSAL DIVIDER ENGINE (Sequential Shift-and-Subtract)
+    // ============================================================
+    reg [6:0]   div_counter;    // 0 to 64
+    reg [127:0] div_rem_reg;    // Holds Remainder (High) and Quotient (Low)
+    reg [63:0]  div_b_reg;      // Divisor
+    reg         div_neg_res;    // Result should be negative?
+    reg         div_neg_rem;    // Remainder should be negative?
+    reg         div_busy;       // Engine Status
+    reg         div_is_rem;     // 1=REM, 0=DIV
+
+    // -- 1. Decode Inputs (Combinational) --
+    // Is it a Signed instruction? (DIV=100, REM=110) -> func3[0] is 0
+    wire div_signed = ~w_func3[0]; 
+    
+    // Determine Sign of inputs (If Unsigned, force sign bit to 0)
+    wire a_neg = div_signed && rs1[63];
+    wire b_neg = div_signed && rs2[63];
+    
+    // Get Absolute Values
+    wire [63:0] abs_a = a_neg ? -rs1 : rs1;
+    wire [63:0] abs_b = b_neg ? -rs2 : rs2;
+
+    // -- 2. Divider Engine (Clocked) --
+    always @(posedge clk) begin
+        if (div_busy) begin
+            if (div_counter < 64) begin
+                // Shift Left
+                div_rem_reg = div_rem_reg << 1;
+                // Subtract?
+                if (div_rem_reg[127:64] >= div_b_reg) begin
+                    div_rem_reg[127:64] = div_rem_reg[127:64] - div_b_reg;
+                    div_rem_reg[0] = 1'b1; // Set Quotient bit
+                end
+                div_counter <= div_counter + 1;
+            end else begin
+                div_busy <= 0; // Done
+            end
+        end
+    end
+
     //reg signed [129:0] mul_result_dsp;
     //always @(posedge clk) begin
     //    if (!bubble) mul_result_dsp <=  mul_op_a * mul_op_b;
     //end
-    reg [2:0] div_step;
-    reg [127:0] div_dividend;
-    reg [63:0] div_divisor;   
-    reg [63:0] div_quotient;   
-    reg [63:0] div_remainder;   
-    reg div_sign_q;
-    reg div_sign_r;
-    reg [6:0] div_count;
-    reg div_is_rem;
-    reg div_is_unsigned;
-      
+    //reg [2:0] div_step;
+    //reg [127:0] div_dividend;
+    //reg [63:0] div_divisor;   
+    //reg [63:0] div_quotient;   
+    //reg [63:0] div_remainder;   
+    //reg div_sign_q;
+    //reg div_sign_r;
+    //reg [6:0] div_count;
+    //reg div_is_rem;
+    //reg div_is_unsigned;
+    //  
       
       
       
@@ -821,71 +864,137 @@ module riscv64(
 
                     //32'b0000001_?????_?????_100_?????_0110011: re[w_rd] <= (rs2==0||(rs1==64'h8000_0000_0000_0000 && rs2 == -1)) ? -1 : $signed(rs1) / $signed(rs2);  // Div
                     //32'b0000001_?????_?????_101_?????_0110011: re[w_rd] <= (rs2==0) ? -1 : $unsigned(rs1) / $unsigned(rs2);  // Divu
-		    // Inside the big else begin … casez(ir), add these for div/divu/rem/remu
-                    32'b0000001_?????_?????_100_?????_0110011,  // div
-                    32'b0000001_?????_?????_101_?????_0110011,  // divu
-                    32'b0000001_?????_?????_110_?????_0110011,  // rem
-                    32'b0000001_?????_?????_111_?????_0110011:  // remu
-                    begin
-                        if (div_step == 0) begin
-                            // Step 0: Setup (handle signs, abs values, special cases)
-                            div_is_rem <= (w_func3[1]);  // High bit: 1 for rem*, 0 for div*
-                            div_is_unsigned <= (w_func3[0]);  // Low bit: 1 for *u, 0 for signed
-                    
+        
+		    // M-Extension: Division and Remainder (DIV, DIVU, REM, REMU)
+                    // Opcode: 0110011, func3: 100, 101, 110, 111
+                    32'b0000001_?????_?????_1??_?????_0110011: begin 
+                        if (div_busy == 0 && load_step == 0) begin
+                            // --- START ---
+                            
+                            // Handle RISC-V Corner Cases immediately (No loop needed)
                             if (rs2 == 0) begin
-                                // Divide by zero
-                                if (!div_is_rem) re[w_rd] <= -64'd1;  // div/divu: -1
-                                else re[w_rd] <= rs1;                 // rem/remu: dividend
-                                // No stall needed
-                            end else if (!div_is_unsigned && rs1 == 64'h8000000000000000 && rs2 == -64'd1) begin
-                                // Signed overflow case (-2^63 / -1)
-                                if (!div_is_rem) re[w_rd] <= 64'h8000000000000000;  // div: -2^63
-                                else re[w_rd] <= 0;                                 // rem: 0
-                                // No stall
-                            end else begin
-                                // Normal case: Prepare abs values
-                                div_sign_q <= div_is_unsigned ? 0 : (rs1[63] ^ rs2[63]);
-                                div_sign_r <= div_is_unsigned ? 0 : rs1[63];
+                                // Divide by Zero
+                                if (w_func3[1]) re[w_rd] <= rs1; // REM/REMU returns Dividend
+                                else re[w_rd] <= -1;             // DIV/DIVU returns -1 (All 1s)
+                            end
+                            else if (div_signed && rs1 == 64'h8000000000000000 && rs2 == -1) begin
+                                // Signed Overflow (MinInt / -1)
+                                if (w_func3[1]) re[w_rd] <= 0;   // REM returns 0
+                                else re[w_rd] <= rs1;            // DIV returns MinInt
+                            end
+                            else begin
+                                // Normal Case: Start the Engine
+                                div_busy    <= 1;
+                                div_counter <= 0;
+                                div_b_reg   <= abs_b;
+                                div_rem_reg <= {{64{1'b0}}, abs_a}; // Load Dividend into Low 64
                                 
-                                div_dividend <= div_is_unsigned ? {64'b0, rs1} : 
-                                                {64'b0, (rs1[63] ? -rs1 : rs1)};  // Abs dividend, extended
-                                div_divisor  <= div_is_unsigned ? rs2 : 
-                                                (rs2[63] ? -rs2 : rs2);           // Abs divisor
+                                // Record Signs for Final Correction
+                                // DIV: neg if signs different. REM: neg if Dividend (rs1) was neg.
+                                div_neg_res <= a_neg ^ b_neg;
+                                div_neg_rem <= a_neg;
+                                div_is_rem  <= w_func3[1]; // 1 for REM/REMU
                                 
-                                div_quotient  <= 0;
-                                div_remainder <= 0;
-                                div_count       <= 63;  // Start from MSB (64 bits -1)
-                                div_step      <= 1;
-                                pc <= pc - 4; bubble <= 1;  // Stall
+                                pc <= pc - 4; // Stall PC
+                                bubble <= 1;  // Stall Pipeline
+                                load_step <= 1;
                             end
-                        end else if (div_step == 1) begin
-                            // Step 1: Iterative shift-subtract (restoring division)
-                            div_dividend <= div_dividend << 1;  // Shift left (next bit)
+                        end 
+                        else if (div_busy) begin
+                            // --- WAITING ---
+                            pc <= pc - 4;
+                            bubble <= 1;
+                        end 
+                        else if (load_step == 1) begin
+                            // --- FINISH ---
+                            load_step <= 0;
+                            bubble <= 0;
                             
-                            if (div_dividend[127:64] >= div_divisor) begin
-                                div_dividend[127:64] <= div_dividend[127:64] - div_divisor;
-                                div_quotient <= (div_quotient << 1) | 1'b1;
-                            end else begin
-                                div_quotient <= div_quotient << 1;
-                            end
-                            
-                            if (div_count == 0) begin
-                                div_remainder <= div_dividend[127:64];  // Final remainder
-                                div_step <= 2;
-                            end else begin
-                                div_count <= div_count - 1;
-                            end
-                            pc <= pc - 4; bubble <= 1;  // Continue stalling
-                        end else if (div_step == 2) begin
-                            // Step 2: Apply signs and write result
                             if (div_is_rem) begin
-                                re[w_rd] <= div_sign_r ? -div_remainder : div_remainder;
+                                // Remainder (High 64 bits) - Fix Sign
+                                re[w_rd] <= div_neg_rem ? -div_rem_reg[127:64] : div_rem_reg[127:64];
                             end else begin
-                                re[w_rd] <= div_sign_q ? -div_quotient : div_quotient;
+                                // Quotient (Low 64 bits) - Fix Sign
+                                re[w_rd] <= div_neg_res ? -div_rem_reg[63:0] : div_rem_reg[63:0];
                             end
-                            div_step <= 0;  // Done, no extra bubble
                         end
-                    end
+                    end  
+
+
+
+
+
+
+		    
+		    // Inside the big else begin … casez(ir), add these for div/divu/rem/remu
+                    //32'b0000001_?????_?????_100_?????_0110011,  // div
+                    //32'b0000001_?????_?????_101_?????_0110011,  // divu
+                    //32'b0000001_?????_?????_110_?????_0110011,  // rem
+                    //32'b0000001_?????_?????_111_?????_0110011:  // remu
+                    //begin
+                    //    if (div_step == 0) begin
+                    //        // Step 0: Setup (handle signs, abs values, special cases)
+                    //        div_is_rem <= (w_func3[1]);  // High bit: 1 for rem*, 0 for div*
+                    //        div_is_unsigned <= (w_func3[0]);  // Low bit: 1 for *u, 0 for signed
+                    //
+                    //        if (rs2 == 0) begin
+                    //            // Divide by zero
+                    //            if (!div_is_rem) re[w_rd] <= -64'd1;  // div/divu: -1
+                    //            else re[w_rd] <= rs1;                 // rem/remu: dividend
+                    //            // No stall needed
+                    //        end else if (!div_is_unsigned && rs1 == 64'h8000000000000000 && rs2 == -64'd1) begin
+                    //            // Signed overflow case (-2^63 / -1)
+                    //            if (!div_is_rem) re[w_rd] <= 64'h8000000000000000;  // div: -2^63
+                    //            else re[w_rd] <= 0;                                 // rem: 0
+                    //            // No stall
+                    //        end else begin
+                    //            // Normal case: Prepare abs values
+                    //            div_sign_q <= div_is_unsigned ? 0 : (rs1[63] ^ rs2[63]);
+                    //            div_sign_r <= div_is_unsigned ? 0 : rs1[63];
+                    //            
+                    //            div_dividend <= div_is_unsigned ? {64'b0, rs1} : 
+                    //                            {64'b0, (rs1[63] ? -rs1 : rs1)};  // Abs dividend, extended
+                    //            div_divisor  <= div_is_unsigned ? rs2 : 
+                    //                            (rs2[63] ? -rs2 : rs2);           // Abs divisor
+                    //            
+                    //            div_quotient  <= 0;
+                    //            div_remainder <= 0;
+                    //            div_count       <= 63;  // Start from MSB (64 bits -1)
+                    //            div_step      <= 1;
+                    //            pc <= pc - 4; bubble <= 1;  // Stall
+                    //        end
+                    //    end else if (div_step == 1) begin
+                    //        // Step 1: Iterative shift-subtract (restoring division)
+                    //        div_dividend <= div_dividend << 1;  // Shift left (next bit)
+                    //        
+                    //        if (div_dividend[127:64] >= div_divisor) begin
+                    //            div_dividend[127:64] <= div_dividend[127:64] - div_divisor;
+                    //            div_quotient <= (div_quotient << 1) | 1'b1;
+                    //        end else begin
+                    //            div_quotient <= div_quotient << 1;
+                    //        end
+                    //        
+                    //        if (div_count == 0) begin
+                    //            div_remainder <= div_dividend[127:64];  // Final remainder
+                    //            div_step <= 2;
+                    //        end else begin
+                    //            div_count <= div_count - 1;
+                    //        end
+                    //        pc <= pc - 4; bubble <= 1;  // Continue stalling
+                    //    end else if (div_step == 2) begin
+                    //        // Step 2: Apply signs and write result
+                    //        if (div_is_rem) begin
+                    //            re[w_rd] <= div_sign_r ? -div_remainder : div_remainder;
+                    //        end else begin
+                    //            re[w_rd] <= div_sign_q ? -div_quotient : div_quotient;
+                    //        end
+                    //        div_step <= 0;  // Done, no extra bubble
+                    //    end
+                    //end
+        
+        
+        
+        
 		    //32'b0000001_?????_?????_000_?????_0110011, 32'b0000001_?????_?????_001_?????_0110011, 32'b0000001_?????_?????_011_?????_0110011: begin
 		    //    if (w_func3 == 3'b000) re[w_rd] <= mul_base[63:0];  // Mul
 		    //    if (w_func3 == 3'b001) re[w_rd] <= mul_base[127:64];  // Mulh 
