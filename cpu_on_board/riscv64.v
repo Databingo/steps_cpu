@@ -71,38 +71,38 @@ module riscv64(
     //-- csr --
     wire [11:0] w_csr = ir[31:20];   // CSR official address
 
-    //// Shared Arithmetic Units
-    //wire [63:0] alu_add  = rs1 + rs2;
-    //wire [63:0] alu_sub  = rs1 - rs2;
-    //wire [63:0] alu_xor  = rs1 ^ rs2;
-    //wire [63:0] alu_or   = rs1 | rs2;
-    //wire [63:0] alu_and  = rs1 & rs2;
-    //wire [63:0] alu_sll  = rs1 << rs2[5:0];
-    //wire [63:0] alu_srl  = rs1 >> rs2[5:0];
-    //wire [63:0] alu_sra  = $signed(rs1) >>> rs2[5:0];
-    //wire [63:0] alu_slt  = ($signed(rs1) < $signed(rs2)) ? 1: 0;
-    //wire [63:0] alu_sltu = ($unsigned(rs1) < $unsigned(rs2)) ? 1:0;
+    // Shared Arithmetic Units
+    wire [63:0] alu_add  = rs1 + rs2;
+    wire [63:0] alu_sub  = rs1 - rs2;
+    wire [63:0] alu_xor  = rs1 ^ rs2;
+    wire [63:0] alu_or   = rs1 | rs2;
+    wire [63:0] alu_and  = rs1 & rs2;
+    wire [63:0] alu_sll  = rs1 << rs2[5:0];
+    wire [63:0] alu_srl  = rs1 >> rs2[5:0];
+    wire [63:0] alu_sra  = $signed(rs1) >>> rs2[5:0];
+    wire [63:0] alu_slt  = ($signed(rs1) < $signed(rs2)) ? 1: 0;
+    wire [63:0] alu_sltu = ($unsigned(rs1) < $unsigned(rs2)) ? 1:0;
 
-    //wire [63:0] alu_addw = $signed(rs1[31:0] + rs2[31:0]);  // Addw
-    //wire [63:0] alu_subw = $signed(rs1[31:0] - rs2[31:0]);  // Subw
-    //wire [63:0] alu_sllw = $signed(rs1[31:0] << rs2[4:0]);  // Sllw 5 length
-    //wire [63:0] alu_srlw = $signed(rs1[31:0] >> rs2[4:0]);  // Srlw 5 length
-    //wire [63:0] alu_sraw = $signed(rs1[31:0]) >>> rs2[4:0]; // Sraw 5 length
+    wire [63:0] alu_addw = $signed(rs1[31:0] + rs2[31:0]);  // Addw
+    wire [63:0] alu_subw = $signed(rs1[31:0] - rs2[31:0]);  // Subw
+    wire [63:0] alu_sllw = $signed(rs1[31:0] << rs2[4:0]);  // Sllw 5 length
+    wire [63:0] alu_srlw = $signed(rs1[31:0] >> rs2[4:0]);  // Srlw 5 length
+    wire [63:0] alu_sraw = $signed(rs1[31:0]) >>> rs2[4:0]; // Sraw 5 length
 
-    //wire [63:0] alu_addi = rs1 + w_imm_i;  // Addi
-    //wire [63:0] alu_xori = rs1 ^ w_imm_i ; // Xori
-    //wire [63:0] alu_andi = rs1 & w_imm_i ; // Andi
-    //wire [63:0] alu_ori  = rs1 | w_imm_i ; // Ori
-    //wire [63:0] alu_slli = rs1 << w_shamt; // Slli
-    //wire [63:0] alu_srli = rs1 >> w_shamt; // Srli // func7->6 // rv64 shame take w_f7[0]
-    //wire [63:0] alu_srai = $signed(rs1) >>> w_shamt; // Srai
-    //wire [63:0] alu_slti = $signed(rs1) < w_imm_i ? 1:0; // Slti
-    //wire [63:0] alu_sltiu= ($unsigned(rs1) < w_imm_i) ?  1:0; // Sltiu
+    wire [63:0] alu_addi = rs1 + w_imm_i;  // Addi
+    wire [63:0] alu_xori = rs1 ^ w_imm_i ; // Xori
+    wire [63:0] alu_andi = rs1 & w_imm_i ; // Andi
+    wire [63:0] alu_ori  = rs1 | w_imm_i ; // Ori
+    wire [63:0] alu_slli = rs1 << w_shamt; // Slli
+    wire [63:0] alu_srli = rs1 >> w_shamt; // Srli // func7->6 // rv64 shame take w_f7[0]
+    wire [63:0] alu_srai = $signed(rs1) >>> w_shamt; // Srai
+    wire [63:0] alu_slti = $signed(rs1) < w_imm_i ? 1:0; // Slti
+    wire [63:0] alu_sltiu= ($unsigned(rs1) < w_imm_i) ?  1:0; // Sltiu
 
-    //wire [63:0] alu_addiw = $signed(rs1[31:0] + w_imm_i[31:0]); // Addiw
-    //wire [63:0] alu_slliw = $signed(rs1[31:0] << w_shamt[4:0]); // Slliw
-    //wire [63:0] alu_srliw = $signed(rs1[31:0] >> w_shamt[4:0]); // Srliw
-    //wire [63:0] alu_sraiw = $signed(rs1[31:0]) >>> w_shamt[4:0]; // Sraiw
+    wire [63:0] alu_addiw = $signed(rs1[31:0] + w_imm_i[31:0]); // Addiw
+    wire [63:0] alu_slliw = $signed(rs1[31:0] << w_shamt[4:0]); // Slliw
+    wire [63:0] alu_srliw = $signed(rs1[31:0] >> w_shamt[4:0]); // Srliw
+    wire [63:0] alu_sraiw = $signed(rs1[31:0]) >>> w_shamt[4:0]; // Sraiw
 
 
     // -- Load / Store Data Formatting (Pure Combinational) --
