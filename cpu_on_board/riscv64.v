@@ -27,11 +27,9 @@ module riscv64(
     reg check=0;
     reg tlb=0;
     wire [31:0] ir;
-// -- new --
+            
     (* ram_style = "logic" *) reg [63:0] re [0:31]; // General Registers 32s
     (* ram_style = "logic" *) reg [63:0] sre [0:9]; // Shadow Registers 10s
-    //reg [63:0] re [0:31]; // General Registers 32s
-    //reg [63:0] sre [0:9]; // Shadow Registers 10s
     reg mmu_da=0;
     reg mmu_pc = 0;
     reg mmu_cache_refill=0;
@@ -80,7 +78,7 @@ module riscv64(
     wire [63:0] alu_sll  = rs1 << rs2[5:0];
     wire [63:0] alu_srl  = rs1 >> rs2[5:0];
     wire [63:0] alu_sra  = $signed(rs1) >>> rs2[5:0];
-    wire [63:0] alu_slt  = ($signed(rs1) < $signed(rs2)) ? 1: 0;
+    wire [63:0] alu_slt  = ($signed(rs1) < $signed(rs2)) ? 1:0;
     wire [63:0] alu_sltu = ($unsigned(rs1) < $unsigned(rs2)) ? 1:0;
 
     wire [63:0] alu_addw = $signed(rs1[31:0] + rs2[31:0]);  // Addw
