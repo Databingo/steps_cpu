@@ -71,85 +71,38 @@ module riscv64(
     //-- csr --
     wire [11:0] w_csr = ir[31:20];   // CSR official address
 
-    // -- mul rela --
-    //wire mul_sign_a = (w_func3 == 3'b011) ? 1'b0 : rs1[63]; // 0 for Mulhu
-    //wire mul_sign_b = (w_func3 == 3'b011 || w_func3 == 3'b010) ? 1'b0 : rs2[63]; // 0 for Mulhu/Mulhsu
-    //wire signed [64:0] mul_op_a = {mul_sign_a, rs1};
-    //wire signed [64:0] mul_op_b = {mul_sign_b, rs2};
-    //(* multstyle = "dsp" *) wire signed [129:0] mul_full_result = mul_op_a * mul_op_b;
-    //wire signed [127:0] mul_base = $signed(rs1) * $signed(rs2);
-    ////wire signed [128:0] mul_unsigned = $unsigned(rs1) * $unsigned(rs2);
-    //reg [63:0] mul_upper_corrected;
-    //reg [127:0] mul_base_reg;
-    //reg [1:0] mul_step; 
-    //reg [127:0] mul_result;
-    //reg [127:0] mul_a;
-    //reg [63:0] mul_b;
-    //reg mul_sign;
-    //reg [6:0] mul_count;
-    //reg [2:0] mul_type; 
-    //wire [127:0] mul_result_neg = -mul_result;
-    //wire [127:0] mul_result_final = mul_sign ? mul_result_neg : mul_result ;
-    //assign mul_final_128 = mul_sign ? (~mul_result + 1'b1) : mul_result;
+    //// Shared Arithmetic Units
+    //wire [63:0] alu_add  = rs1 + rs2;
+    //wire [63:0] alu_sub  = rs1 - rs2;
+    //wire [63:0] alu_xor  = rs1 ^ rs2;
+    //wire [63:0] alu_or   = rs1 | rs2;
+    //wire [63:0] alu_and  = rs1 & rs2;
+    //wire [63:0] alu_sll  = rs1 << rs2[5:0];
+    //wire [63:0] alu_srl  = rs1 >> rs2[5:0];
+    //wire [63:0] alu_sra  = $signed(rs1) >>> rs2[5:0];
+    //wire [63:0] alu_slt  = ($signed(rs1) < $signed(rs2)) ? 1: 0;
+    //wire [63:0] alu_sltu = ($unsigned(rs1) < $unsigned(rs2)) ? 1:0;
 
-    //wire sign_a = (w_func3 == 3'b011) ? 1'b0 : rs1[63];
-    //wire sign_b = (w_func3 == 3'b011 || w_func3 == 3'b010) ? 1'b0 : rs2[63];
-    //wire signed [64:0] mul_op_a = {sign_a, rs1};
-    //wire signed [64:0] mul_op_b = {sign_b, rs2};
-    //wire signed [129:0] mul_result_dsp = mul_op_a * mul_op_b;
+    //wire [63:0] alu_addw = $signed(rs1[31:0] + rs2[31:0]);  // Addw
+    //wire [63:0] alu_subw = $signed(rs1[31:0] - rs2[31:0]);  // Subw
+    //wire [63:0] alu_sllw = $signed(rs1[31:0] << rs2[4:0]);  // Sllw 5 length
+    //wire [63:0] alu_srlw = $signed(rs1[31:0] >> rs2[4:0]);  // Srlw 5 length
+    //wire [63:0] alu_sraw = $signed(rs1[31:0]) >>> rs2[4:0]; // Sraw 5 length
 
-//// Declarations (same as before)
-//reg [1:0] mul_step;
-//reg [127:0] mul_result;
-//reg [63:0] mul_a, mul_b;
-//reg mul_sign;
-//reg [6:0] mul_count;
-//reg [2:0] mul_type;
-//
-//// Separate combinational block for mul iteration (outside the big always @(posedge clk))
-//always @(*) begin
-//    if (mul_step == 1 && mul_count < 64) begin
-//        if (mul_b[0]) mul_result = mul_result + mul_a;
-//        mul_a = mul_a << 1;
-//        mul_b = mul_b >> 1;
-//        mul_count = mul_count + 1;
-//    end
-//end
-//
-    // Shared Arithmetic Units
-    wire [63:0] alu_add  = rs1 + rs2;
-    wire [63:0] alu_sub  = rs1 - rs2;
-    wire [63:0] alu_xor  = rs1 ^ rs2;
-    wire [63:0] alu_or   = rs1 | rs2;
-    wire [63:0] alu_and  = rs1 & rs2;
-    wire [63:0] alu_sll  = rs1 << rs2[5:0];
-    wire [63:0] alu_srl  = rs1 >> rs2[5:0];
-    wire [63:0] alu_sra  = $signed(rs1) >>> rs2[5:0];
-    wire [63:0] alu_slt  = ($signed(rs1) < $signed(rs2)) ? 1: 0;
-    wire [63:0] alu_sltu = ($unsigned(rs1) < $unsigned(rs2)) ? 1:0;
+    //wire [63:0] alu_addi = rs1 + w_imm_i;  // Addi
+    //wire [63:0] alu_xori = rs1 ^ w_imm_i ; // Xori
+    //wire [63:0] alu_andi = rs1 & w_imm_i ; // Andi
+    //wire [63:0] alu_ori  = rs1 | w_imm_i ; // Ori
+    //wire [63:0] alu_slli = rs1 << w_shamt; // Slli
+    //wire [63:0] alu_srli = rs1 >> w_shamt; // Srli // func7->6 // rv64 shame take w_f7[0]
+    //wire [63:0] alu_srai = $signed(rs1) >>> w_shamt; // Srai
+    //wire [63:0] alu_slti = $signed(rs1) < w_imm_i ? 1:0; // Slti
+    //wire [63:0] alu_sltiu= ($unsigned(rs1) < w_imm_i) ?  1:0; // Sltiu
 
-    wire [63:0] alu_addw = $signed(rs1[31:0] + rs2[31:0]);  // Addw
-    wire [63:0] alu_subw = $signed(rs1[31:0] - rs2[31:0]);  // Subw
-    wire [63:0] alu_sllw = $signed(rs1[31:0] << rs2[4:0]);  // Sllw 5 length
-    wire [63:0] alu_srlw = $signed(rs1[31:0] >> rs2[4:0]);  // Srlw 5 length
-    wire [63:0] alu_sraw = $signed(rs1[31:0]) >>> rs2[4:0]; // Sraw 5 length
-
-    wire [63:0] alu_addi = rs1 + w_imm_i;  // Addi
-    wire [63:0] alu_xori = rs1 ^ w_imm_i ; // Xori
-    wire [63:0] alu_andi = rs1 & w_imm_i ; // Andi
-    wire [63:0] alu_ori  = rs1 | w_imm_i ; // Ori
-    wire [63:0] alu_slli = rs1 << w_shamt; // Slli
-    wire [63:0] alu_srli = rs1 >> w_shamt; // Srli // func7->6 // rv64 shame take w_f7[0]
-    wire [63:0] alu_srai = $signed(rs1) >>> w_shamt; // Srai
-    wire [63:0] alu_slti = $signed(rs1) < w_imm_i ? 1:0; // Slti
-    wire [63:0] alu_sltiu= ($unsigned(rs1) < w_imm_i) ?  1:0; // Sltiu
-
-    wire [63:0] alu_addiw = $signed(rs1[31:0] + w_imm_i[31:0]); // Addiw
-    wire [63:0] alu_slliw = $signed(rs1[31:0] << w_shamt[4:0]); // Slliw
-    wire [63:0] alu_srliw = $signed(rs1[31:0] >> w_shamt[4:0]); // Srliw
-    wire [63:0] alu_sraiw = $signed(rs1[31:0]) >>> w_shamt[4:0]; // Sraiw
-
-
+    //wire [63:0] alu_addiw = $signed(rs1[31:0] + w_imm_i[31:0]); // Addiw
+    //wire [63:0] alu_slliw = $signed(rs1[31:0] << w_shamt[4:0]); // Slliw
+    //wire [63:0] alu_srliw = $signed(rs1[31:0] >> w_shamt[4:0]); // Srliw
+    //wire [63:0] alu_sraiw = $signed(rs1[31:0]) >>> w_shamt[4:0]; // Sraiw
 
 
     // -- Load / Store Data Formatting (Pure Combinational) --
@@ -218,7 +171,8 @@ module riscv64(
                                       (is_word_op ? {32'b0, rs2[31:0]} : rs2) : // SC
                                       w_amo_calc_data; // AMO
 
-  //// ============================================================
+    // -- mul rela --
+    // ============================================================
     // SEPARATE MULTIPLIER ENGINE REGISTERS
     // ============================================================
     reg [6:0]   mul_cnt;        // Counter (0-64)
@@ -841,19 +795,19 @@ module riscv64(
 		//	    if (w_func3 == 3'b011) re[w_rd]<= bus_read_data; // Ld
 		//	    load_step <= 0; end end
     
-    // Load after TLB
-    32'b???????_?????_?????_???_?????_0000011: begin 
-        if (load_step == 0) begin bus_address <= pda; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; bus_ls_type <= w_func3; end
-        if (load_step == 1 && bus_read_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working
-        if (load_step == 1 && bus_read_done == 1) begin re[w_rd] <= w_load_data; load_step <= 0; end 
-    end
+                    // Load after TLB
+                    32'b???????_?????_?????_???_?????_0000011: begin 
+                        if (load_step == 0) begin bus_address <= pda; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; bus_ls_type <= w_func3; end
+                        if (load_step == 1 && bus_read_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working
+                        if (load_step == 1 && bus_read_done == 1) begin re[w_rd] <= w_load_data; load_step <= 0; end 
+                    end
 
-    // Store after TLB
-    32'b???????_?????_?????_???_?????_0100011: begin 
-        if (store_step == 0) begin bus_address <= pda; bus_write_data <= w_store_data; bus_write_enable <= 1; pc <= pc - 4; bubble <= 1; store_step <= 1; bus_ls_type <= w_func3; end
-        if (store_step == 1 && bus_write_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working
-        if (store_step == 1 && bus_write_done == 1) begin store_step <= 0; end 
-    end   
+                    // Store after TLB
+                    32'b???????_?????_?????_???_?????_0100011: begin 
+                        if (store_step == 0) begin bus_address <= pda; bus_write_data <= w_store_data; bus_write_enable <= 1; pc <= pc - 4; bubble <= 1; store_step <= 1; bus_ls_type <= w_func3; end
+                        if (store_step == 1 && bus_write_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working
+                        if (store_step == 1 && bus_write_done == 1) begin store_step <= 0; end 
+                    end   
     
     
 		//    // Store after TLB
@@ -886,71 +840,69 @@ module riscv64(
 		//	if (store_step == 1 && bus_write_done == 1) store_step <= 0; end 
 
                     // Math-I
-	            //32'b???????_?????_?????_000_?????_0010011: re[w_rd] <= rs1 + w_imm_i;  // Addi
-	            //32'b???????_?????_?????_100_?????_0010011: re[w_rd] <= rs1 ^ w_imm_i ; // Xori
-	            //32'b???????_?????_?????_111_?????_0010011: re[w_rd] <= rs1 & w_imm_i ; // Andi
-	            //32'b???????_?????_?????_110_?????_0010011: re[w_rd] <= rs1 | w_imm_i ; // Ori
-	            //32'b???????_?????_?????_001_?????_0010011: re[w_rd] <= rs1 << w_shamt; // Slli
-	            //32'b000000?_?????_?????_101_?????_0010011: re[w_rd] <= rs1 >> w_shamt; // Srli // func7->6 // rv64 shame take w_f7[0]
-	            //32'b010000?_?????_?????_101_?????_0010011: re[w_rd] <= $signed(rs1) >>> w_shamt; // Srai
-	            //32'b???????_?????_?????_010_?????_0010011: re[w_rd] <= $signed(rs1) < w_imm_i ? 1:0; // Slti
-	            //32'b???????_?????_?????_011_?????_0010011: re[w_rd] <= ($unsigned(rs1) < w_imm_i) ?  1:0; // Sltiu
-
-	            32'b???????_?????_?????_000_?????_0010011: re[w_rd] <= alu_addi;  // Addi
-	            32'b???????_?????_?????_100_?????_0010011: re[w_rd] <= alu_xori; // Xori
-	            32'b???????_?????_?????_111_?????_0010011: re[w_rd] <= alu_andi; // Andi
-	            32'b???????_?????_?????_110_?????_0010011: re[w_rd] <= alu_ori; // Ori
-	            32'b???????_?????_?????_001_?????_0010011: re[w_rd] <= alu_slli; // Slli
-	            32'b000000?_?????_?????_101_?????_0010011: re[w_rd] <= alu_srli; // Srli // func7->6 // rv64 shame take w_f7[0]
-	            32'b010000?_?????_?????_101_?????_0010011: re[w_rd] <= alu_srai; // Srai
-	            32'b???????_?????_?????_010_?????_0010011: re[w_rd] <= alu_slti; // Slti
-	            32'b???????_?????_?????_011_?????_0010011: re[w_rd] <= alu_sltiu; // Sltiu
+	            32'b???????_?????_?????_000_?????_0010011: re[w_rd] <= rs1 + w_imm_i;  // Addi
+	            32'b???????_?????_?????_100_?????_0010011: re[w_rd] <= rs1 ^ w_imm_i ; // Xori
+	            32'b???????_?????_?????_111_?????_0010011: re[w_rd] <= rs1 & w_imm_i ; // Andi
+	            32'b???????_?????_?????_110_?????_0010011: re[w_rd] <= rs1 | w_imm_i ; // Ori
+	            32'b???????_?????_?????_001_?????_0010011: re[w_rd] <= rs1 << w_shamt; // Slli
+	            32'b000000?_?????_?????_101_?????_0010011: re[w_rd] <= rs1 >> w_shamt; // Srli // func7->6 // rv64 shame take w_f7[0]
+	            32'b010000?_?????_?????_101_?????_0010011: re[w_rd] <= $signed(rs1) >>> w_shamt; // Srai
+	            32'b???????_?????_?????_010_?????_0010011: re[w_rd] <= $signed(rs1) < w_imm_i ? 1:0; // Slti
+	            32'b???????_?????_?????_011_?????_0010011: re[w_rd] <= ($unsigned(rs1) < w_imm_i) ?  1:0; // Sltiu
+	            //32'b???????_?????_?????_000_?????_0010011: re[w_rd] <= alu_addi;  // Addi
+	            //32'b???????_?????_?????_100_?????_0010011: re[w_rd] <= alu_xori; // Xori
+	            //32'b???????_?????_?????_111_?????_0010011: re[w_rd] <= alu_andi; // Andi
+	            //32'b???????_?????_?????_110_?????_0010011: re[w_rd] <= alu_ori; // Ori
+	            //32'b???????_?????_?????_001_?????_0010011: re[w_rd] <= alu_slli; // Slli
+	            //32'b000000?_?????_?????_101_?????_0010011: re[w_rd] <= alu_srli; // Srli // func7->6 // rv64 shame take w_f7[0]
+	            //32'b010000?_?????_?????_101_?????_0010011: re[w_rd] <= alu_srai; // Srai
+	            //32'b???????_?????_?????_010_?????_0010011: re[w_rd] <= alu_slti; // Slti
+	            //32'b???????_?????_?????_011_?????_0010011: re[w_rd] <= alu_sltiu; // Sltiu
 
                     // Math-I (Word)
-	            //32'b???????_?????_?????_000_?????_0011011: re[w_rd] <= $signed(rs1[31:0] + w_imm_i[31:0]); // Addiw
-	            //32'b???????_?????_?????_001_?????_0011011: re[w_rd] <= $signed(rs1[31:0] << w_shamt[4:0]); // Slliw
-	            //32'b0000000_?????_?????_101_?????_0011011: re[w_rd] <= $signed(rs1[31:0] >> w_shamt[4:0]); // Srliw
-	            //32'b0100000_?????_?????_101_?????_0011011: re[w_rd] <= $signed(rs1[31:0]) >>> w_shamt[4:0]; // Sraiw
+	            32'b???????_?????_?????_000_?????_0011011: re[w_rd] <= $signed(rs1[31:0] + w_imm_i[31:0]); // Addiw
+	            32'b???????_?????_?????_001_?????_0011011: re[w_rd] <= $signed(rs1[31:0] << w_shamt[4:0]); // Slliw
+	            32'b0000000_?????_?????_101_?????_0011011: re[w_rd] <= $signed(rs1[31:0] >> w_shamt[4:0]); // Srliw
+	            32'b0100000_?????_?????_101_?????_0011011: re[w_rd] <= $signed(rs1[31:0]) >>> w_shamt[4:0]; // Sraiw
+	            //32'b???????_?????_?????_000_?????_0011011: re[w_rd] <= alu_addiw;// Addiw
+	            //32'b???????_?????_?????_001_?????_0011011: re[w_rd] <= alu_slliw;// Slliw
+	            //32'b0000000_?????_?????_101_?????_0011011: re[w_rd] <= alu_srliw;// Srliw
+	            //32'b0100000_?????_?????_101_?????_0011011: re[w_rd] <= alu_sraiw;// Sraiw
 
-	            32'b???????_?????_?????_000_?????_0011011: re[w_rd] <= alu_addiw;// Addiw
-	            32'b???????_?????_?????_001_?????_0011011: re[w_rd] <= alu_slliw;// Slliw
-	            32'b0000000_?????_?????_101_?????_0011011: re[w_rd] <= alu_srliw;// Srliw
-	            32'b0100000_?????_?????_101_?????_0011011: re[w_rd] <= alu_sraiw;// Sraiw
 
+                    // Math-R
+	            32'b0000000_?????_?????_000_?????_0110011: re[w_rd] <= rs1 + rs2;  // Add
+	            32'b0100000_?????_?????_000_?????_0110011: re[w_rd] <= rs1 - rs2;  // Sub;
+	            32'b???????_?????_?????_100_?????_0110011: re[w_rd] <= rs1 ^ rs2;  // Xor
+	            32'b???????_?????_?????_111_?????_0110011: re[w_rd] <= rs1 & rs2;  // And
+	            32'b???????_?????_?????_110_?????_0110011: re[w_rd] <= rs1 | rs2;  // Or
+	            32'b???????_?????_?????_001_?????_0110011: re[w_rd] <= rs1 << rs2[5:0]; // Sll 6 length
+                    32'b0000000_?????_?????_101_?????_0110011: re[w_rd] <= rs1 >> rs2[5:0]; // Srl 6 length
+	            32'b0100000_?????_?????_101_?????_0110011: re[w_rd] <= $signed(rs1) >>> rs2[5:0]; // Sra 6 length
+	            32'b???????_?????_?????_010_?????_0110011: re[w_rd] <= ($signed(rs1) < $signed(rs2)) ? 1: 0;  // Slt
+	            32'b???????_?????_?????_011_?????_0110011: re[w_rd] <= $unsigned(rs1) < $unsigned(rs2) ? 1:0; // Sltu
+	            //32'b0000000_?????_?????_000_?????_0110011: re[w_rd] <= alu_add ;  // Add
+	            //32'b0100000_?????_?????_000_?????_0110011: re[w_rd] <= alu_sub ;  // Sub;
+	            //32'b???????_?????_?????_100_?????_0110011: re[w_rd] <= alu_xor ;  // Xor
+	            //32'b???????_?????_?????_111_?????_0110011: re[w_rd] <= alu_or  ;  // And
+	            //32'b???????_?????_?????_110_?????_0110011: re[w_rd] <= alu_and ;  // Or
+	            //32'b???????_?????_?????_001_?????_0110011: re[w_rd] <= alu_sll ; // Sll 6 length
+                    //32'b0000000_?????_?????_101_?????_0110011: re[w_rd] <= alu_srl ; // Srl 6 length
+	            //32'b0100000_?????_?????_101_?????_0110011: re[w_rd] <= alu_sra ; // Sra 6 length
+	            //32'b???????_?????_?????_010_?????_0110011: re[w_rd] <= alu_slt;  // Slt
+	            //32'b???????_?????_?????_011_?????_0110011: re[w_rd] <= alu_sltu; // Sltu
 
-                    //// Math-R
-	            //32'b0000000_?????_?????_000_?????_0110011: re[w_rd] <= rs1 + rs2;  // Add
-	            //32'b0100000_?????_?????_000_?????_0110011: re[w_rd] <= rs1 - rs2;  // Sub;
-	            //32'b???????_?????_?????_100_?????_0110011: re[w_rd] <= rs1 ^ rs2;  // Xor
-	            //32'b???????_?????_?????_111_?????_0110011: re[w_rd] <= rs1 & rs2;  // And
-	            //32'b???????_?????_?????_110_?????_0110011: re[w_rd] <= rs1 | rs2;  // Or
-	            //32'b???????_?????_?????_001_?????_0110011: re[w_rd] <= rs1 << rs2[5:0]; // Sll 6 length
-                    //32'b0000000_?????_?????_101_?????_0110011: re[w_rd] <= rs1 >> rs2[5:0]; // Srl 6 length
-	            //32'b0100000_?????_?????_101_?????_0110011: re[w_rd] <= $signed(rs1) >>> rs2[5:0]; // Sra 6 length
-	            //32'b???????_?????_?????_010_?????_0110011: re[w_rd] <= ($signed(rs1) < $signed(rs2)) ? 1: 0;  // Slt
-	            //32'b???????_?????_?????_011_?????_0110011: re[w_rd] <= $unsigned(rs1) < $unsigned(rs2) ? 1:0; // Sltu
-	            32'b0000000_?????_?????_000_?????_0110011: re[w_rd] <= alu_add ;  // Add
-	            32'b0100000_?????_?????_000_?????_0110011: re[w_rd] <= alu_sub ;  // Sub;
-	            32'b???????_?????_?????_100_?????_0110011: re[w_rd] <= alu_xor ;  // Xor
-	            32'b???????_?????_?????_111_?????_0110011: re[w_rd] <= alu_or  ;  // And
-	            32'b???????_?????_?????_110_?????_0110011: re[w_rd] <= alu_and ;  // Or
-	            32'b???????_?????_?????_001_?????_0110011: re[w_rd] <= alu_sll ; // Sll 6 length
-                    32'b0000000_?????_?????_101_?????_0110011: re[w_rd] <= alu_srl ; // Srl 6 length
-	            32'b0100000_?????_?????_101_?????_0110011: re[w_rd] <= alu_sra ; // Sra 6 length
-	            32'b???????_?????_?????_010_?????_0110011: re[w_rd] <= alu_slt;  // Slt
-	            32'b???????_?????_?????_011_?????_0110011: re[w_rd] <= alu_sltu; // Sltu
-
-                    //// Math-R (Word)
-	            //32'b0000000_?????_?????_000_?????_0111011: re[w_rd] <= $signed(rs1[31:0] + rs2[31:0]);  // Addw
-	            //32'b0100000_?????_?????_000_?????_0111011: re[w_rd] <= $signed(rs1[31:0] - rs2[31:0]);  // Subw
-	            //32'b???????_?????_?????_001_?????_0111011: re[w_rd] <= $signed(rs1[31:0] << rs2[4:0]);  // Sllw 5 length
-                    //32'b0000000_?????_?????_101_?????_0111011: re[w_rd] <= $signed(rs1[31:0] >> rs2[4:0]);  // Srlw 5 length
-	            //32'b0100000_?????_?????_101_?????_0111011: re[w_rd] <= $signed(rs1[31:0]) >>> rs2[4:0]; // Sraw 5 length
-	            32'b0000000_?????_?????_000_?????_0111011: re[w_rd] <= alu_addw;  // Addw
-	            32'b0100000_?????_?????_000_?????_0111011: re[w_rd] <= alu_subw;  // Subw
-	            32'b???????_?????_?????_001_?????_0111011: re[w_rd] <= alu_sllw;  // Sllw 5 length
-                    32'b0000000_?????_?????_101_?????_0111011: re[w_rd] <= alu_srlw;  // Srlw 5 length
-	            32'b0100000_?????_?????_101_?????_0111011: re[w_rd] <= alu_sraw;  // Sraw 5 length
+                    // Math-R (Word)
+	            32'b0000000_?????_?????_000_?????_0111011: re[w_rd] <= $signed(rs1[31:0] + rs2[31:0]);  // Addw
+	            32'b0100000_?????_?????_000_?????_0111011: re[w_rd] <= $signed(rs1[31:0] - rs2[31:0]);  // Subw
+	            32'b???????_?????_?????_001_?????_0111011: re[w_rd] <= $signed(rs1[31:0] << rs2[4:0]);  // Sllw 5 length
+                    32'b0000000_?????_?????_101_?????_0111011: re[w_rd] <= $signed(rs1[31:0] >> rs2[4:0]);  // Srlw 5 length
+	            32'b0100000_?????_?????_101_?????_0111011: re[w_rd] <= $signed(rs1[31:0]) >>> rs2[4:0]; // Sraw 5 length
+	            //32'b0000000_?????_?????_000_?????_0111011: re[w_rd] <= alu_addw;  // Addw
+	            //32'b0100000_?????_?????_000_?????_0111011: re[w_rd] <= alu_subw;  // Subw
+	            //32'b???????_?????_?????_001_?????_0111011: re[w_rd] <= alu_sllw;  // Sllw 5 length
+                    //32'b0000000_?????_?????_101_?????_0111011: re[w_rd] <= alu_srlw;  // Srlw 5 length
+	            //32'b0100000_?????_?????_101_?????_0111011: re[w_rd] <= alu_sraw;  // Sraw 5 length
                     // Jump
 	            32'b???????_?????_?????_???_?????_1101111: begin pc <= pc - 4 + w_imm_j; if (w_rd != 5'b0) re[w_rd] <= pc; bubble <= 1'b1; end // Jal
 	            32'b???????_?????_?????_???_?????_1100111: begin pc <= (re[w_rs1] + w_imm_i) & 64'hFFFFFFFFFFFFFFFE; if (w_rd != 5'b0) re[w_rd] <= pc; bubble <= 1; end // Jalr
@@ -1296,112 +1248,109 @@ module riscv64(
 		    //    if (store_step == 1 && bus_write_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working 1 bubble2 this3
 		    //    if (store_step == 1 && bus_write_done == 1) begin store_step <= 0; end end //
 
-            // LR (Load Reserved) - Matches .w (010) and .d (011)
-            32'b00010_??_?????_?????_01?_?????_0101111: begin 
-                if (load_step == 0) begin 
-                    bus_address <= pda; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; 
-                    load_step <= 1; bus_ls_type <= w_func3; 
-                    reserve_addr <= pda; reserve_valid <= 1; 
-                end
-                if (load_step == 1 && bus_read_done == 0) begin pc <= pc - 4; bubble <= 1; end
-                if (load_step == 1 && bus_read_done == 1) begin 
-                    // Write back sign-extended loaded value to RD
-                    re[w_rd] <= amo_op_mem; 
-                    load_step <= 0; 
-                end 
-            end
+               // LR (Load Reserved) - Matches .w (010) and .d (011)
+               32'b00010_??_?????_?????_01?_?????_0101111: begin 
+                   if (load_step == 0) begin 
+                       bus_address <= pda; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; 
+                       load_step <= 1; bus_ls_type <= w_func3; 
+                       reserve_addr <= pda; reserve_valid <= 1; 
+                   end
+                   if (load_step == 1 && bus_read_done == 0) begin pc <= pc - 4; bubble <= 1; end
+                   if (load_step == 1 && bus_read_done == 1) begin 
+                       // Write back sign-extended loaded value to RD
+                       re[w_rd] <= amo_op_mem; 
+                       load_step <= 0; 
+                   end 
+               end
 
-            // SC (Store Conditional) - Matches .w (010) and .d (011)
-            32'b00011_??_?????_?????_01?_?????_0101111: begin
-                if (store_step == 0) begin 
-                    if (!reserve_valid || reserve_addr != pda) begin 
-                        re[w_rd] <= 1; // Failed
-                        reserve_valid <= 0; 
-                    end 
-                    else begin 
-                        bus_address <= pda; bus_write_enable <= 1; 
-                        // Use the pre-formatted write data wire
-                        bus_write_data <= w_atomic_write_data; 
-                        pc <= pc - 4; bubble <= 1; store_step <= 1; bus_ls_type <= w_func3; 
-                        reserve_valid <= 0;
-                    end 
-                end
-                if (store_step == 1 && bus_write_done == 0) begin pc <= pc - 4; bubble <= 1; end
-                if (store_step == 1 && bus_write_done == 1) begin 
-                    store_step <= 0; re[w_rd] <= 0; // Success
-                end 
-            end
+               // SC (Store Conditional) - Matches .w (010) and .d (011)
+               32'b00011_??_?????_?????_01?_?????_0101111: begin
+                   if (store_step == 0) begin 
+                       if (!reserve_valid || reserve_addr != pda) begin 
+                           re[w_rd] <= 1; // Failed
+                           reserve_valid <= 0; 
+                       end 
+                       else begin 
+                           bus_address <= pda; bus_write_enable <= 1; 
+                           // Use the pre-formatted write data wire
+                           bus_write_data <= w_atomic_write_data; 
+                           pc <= pc - 4; bubble <= 1; store_step <= 1; bus_ls_type <= w_func3; 
+                           reserve_valid <= 0;
+                       end 
+                   end
+                   if (store_step == 1 && bus_write_done == 0) begin pc <= pc - 4; bubble <= 1; end
+                   if (store_step == 1 && bus_write_done == 1) begin 
+                       store_step <= 0; re[w_rd] <= 0; // Success
+                   end 
+               end
 
-            // AMOs (Swap, Add, Xor, And, Or, Min, Max) - Matches .w and .d
-            // Opcode 0101111, Func5 is NOT LR(00010) or SC(00011)
-            32'b?????_??_?????_?????_01?_?????_0101111: begin
-                if (load_step == 0) begin 
-                    bus_address <= pda; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; 
-                    load_step <= 1; bus_ls_type <= w_func3; 
-                end
-                if (load_step == 1 && bus_read_done == 0) begin pc <= pc - 4; bubble <= 1; end
-                if (load_step == 1 && bus_read_done == 1) begin 
-                    // 1. Finish Load: Write original value to RD
-                    re[w_rd] <= amo_op_mem; 
-                    load_step <= 0;  
-                    
-                    // 2. Start Store: Write calculated value to Memory
-                    bus_address <= pda; 
-                    bus_write_data <= w_atomic_write_data; // Pre-calculated in wires
-                    bus_write_enable <= 1; pc <= pc - 4; bubble <= 1; 
-                    store_step <= 1; bus_ls_type <= w_func3; 
-                end
-                if (store_step == 1 && bus_write_done == 0) begin pc <= pc - 4; bubble <= 1; end
-                if (store_step == 1 && bus_write_done == 1) begin store_step <= 0; end 
-            end
+               // AMOs (Swap, Add, Xor, And, Or, Min, Max) - Matches .w and .d
+               // Opcode 0101111, Func5 is NOT LR(00010) or SC(00011)
+               32'b?????_??_?????_?????_01?_?????_0101111: begin
+                   if (load_step == 0) begin 
+                       bus_address <= pda; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; 
+                       load_step <= 1; bus_ls_type <= w_func3; 
+                   end
+                   if (load_step == 1 && bus_read_done == 0) begin pc <= pc - 4; bubble <= 1; end
+                   if (load_step == 1 && bus_read_done == 1) begin 
+                       // 1. Finish Load: Write original value to RD
+                       re[w_rd] <= amo_op_mem; 
+                       load_step <= 0;  
+                       
+                       // 2. Start Store: Write calculated value to Memory
+                       bus_address <= pda; 
+                       bus_write_data <= w_atomic_write_data; // Pre-calculated in wires
+                       bus_write_enable <= 1; pc <= pc - 4; bubble <= 1; 
+                       store_step <= 1; bus_ls_type <= w_func3; 
+                   end
+                   if (store_step == 1 && bus_write_done == 0) begin pc <= pc - 4; bubble <= 1; end
+                   if (store_step == 1 && bus_write_done == 1) begin store_step <= 0; end 
+               end
 
-
-
-  
 		     // -- ATOMIC end --
                      // M extension // M mul mulh mulhsu mulhu div divu rem remu mulw divw divuw remuw
-    // M-Extension: Multiplication (Sequential)
-    // Matches 0110011 (Op) + 0000001 (Func7) + Func3 0xx
-    // Also matches 0111011 (Op Word) + 0000001 (Func7) + Func3 000 (MULW)
-    32'b0000001_?????_?????_0??_?????_0110011, // MUL, MULH, MULHSU, MULHU
-    32'b0000001_?????_?????_000_?????_0111011: // MULW
-    begin
-        if (!mul_done) begin
-            // 1. Request Start
-            mul_enable <= 1;
-            // 2. Stall Pipeline
-            pc <= pc - 4;
-            bubble <= 1;
-        end else begin
-            // 3. Result Ready
-            mul_enable <= 0;
+            // M-Extension: Multiplication (Sequential)
+            // Matches 0110011 (Op) + 0000001 (Func7) + Func3 0xx
+            // Also matches 0111011 (Op Word) + 0000001 (Func7) + Func3 000 (MULW)
+            32'b0000001_?????_?????_0??_?????_0110011, // MUL, MULH, MULHSU, MULHU
+            32'b0000001_?????_?????_000_?????_0111011: // MULW
+            begin
+                if (!mul_done) begin
+                    // 1. Request Start
+                    mul_enable <= 1;
+                    // 2. Stall Pipeline
+                    pc <= pc - 4;
+                    bubble <= 1;
+                end else begin
+                    // 3. Result Ready
+                    mul_enable <= 0;
+                    
+                    // Select Output based on cached type
+                    if (mul_out_sel == 0)      re[w_rd] <= mul_acc[63:0];   // MUL
+                    else if (mul_out_sel == 1) re[w_rd] <= mul_acc[127:64]; // MULH*
+                    else                       re[w_rd] <= {{32{mul_acc[31]}}, mul_acc[31:0]}; // MULW (Sign Ext)
+                    
+                    // Bubble clears next cycle
+                end
+            end
             
-            // Select Output based on cached type
-            if (mul_out_sel == 0)      re[w_rd] <= mul_acc[63:0];   // MUL
-            else if (mul_out_sel == 1) re[w_rd] <= mul_acc[127:64]; // MULH*
-            else                       re[w_rd] <= {{32{mul_acc[31]}}, mul_acc[31:0]}; // MULW (Sign Ext)
-            
-            // Bubble clears next cycle
-        end
-    end
-    
-    // M-Extension: Division and Remainder
-    // Opcode: 0110011 (Reg-Reg), Func7: 0000001 (M-Ext)
-    // Func3: 100(DIV), 101(DIVU), 110(REM), 111(REMU)
-    32'b0000001_?????_?????_1??_?????_0110011: begin 
-        if (!div_done) begin
-            // 1. Request Start
-            div_enable <= 1; 
-            // 2. Stall Pipeline
-            pc <= pc - 4;    
-            bubble <= 1;     
-        end else begin
-            // 3. Result Ready
-            re[w_rd] <= div_result_out; 
-            div_enable <= 0; // Clear Request
-            // Bubble automatically clears in next cycle, PC proceeds
-        end
-    end
+            // M-Extension: Division and Remainder
+            // Opcode: 0110011 (Reg-Reg), Func7: 0000001 (M-Ext)
+            // Func3: 100(DIV), 101(DIVU), 110(REM), 111(REMU)
+            32'b0000001_?????_?????_1??_?????_0110011: begin 
+                if (!div_done) begin
+                    // 1. Request Start
+                    div_enable <= 1; 
+                    // 2. Stall Pipeline
+                    pc <= pc - 4;    
+                    bubble <= 1;     
+                end else begin
+                    // 3. Result Ready
+                    re[w_rd] <= div_result_out; 
+                    div_enable <= 0; // Clear Request
+                    // Bubble automatically clears in next cycle, PC proceeds
+                end
+            end
 		     // F (reg f0-f31)
 		     // flw fsw fadd.s fsub.s fmul.s fdiv.s fsqrt.s fmadd.s
 		     // fmsub.s fnmsub.s fcvt.w.s fcvt.wu.s fcvt.s.w fcvt.s.wu
