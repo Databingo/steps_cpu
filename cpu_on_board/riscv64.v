@@ -126,7 +126,7 @@ module riscv64(
     wire [63:0] alu_srl  = rs1 >> rs2[5:0];
     wire [63:0] alu_sra  = $signed(rs1) >>> rs2[5:0];
     wire [63:0] alu_slt  = ($signed(rs1) < $signed(rs2)) ? 1: 0;
-    wire [63:0] alu_sltu = ($unsigned(rs1) < $unsigned(rs2) ? 1:0;
+    wire [63:0] alu_sltu = ($unsigned(rs1) < $unsigned(rs2)) ? 1:0;
 
     wire [63:0] alu_addw = $signed(rs1[31:0] + rs2[31:0]);  // Addw
     wire [63:0] alu_subw = $signed(rs1[31:0] - rs2[31:0]);  // Subw
