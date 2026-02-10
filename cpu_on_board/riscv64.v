@@ -265,9 +265,7 @@ module riscv64(
         end
     end
 
-
-
-// ============================================================
+    // ============================================================
     // SEPARATE DIVIDER ENGINE REGISTERS
     // ============================================================
     reg [6:0]   div_cnt;        // Counter (0-64)
@@ -284,7 +282,7 @@ module riscv64(
     // Helper signals for decoding inside the divider
     wire div_op_signed = !ir[12]; // func3[0] == 0 is signed
     wire div_op_is_rem = ir[13];  // func3[1] == 1 is rem
-// ============================================================
+    // ============================================================
     // INDEPENDENT DIVIDER LOGIC (Sequential Shift-and-Subtract)
     // ============================================================
     always @(posedge clk or negedge reset) begin
@@ -353,89 +351,6 @@ module riscv64(
             end
         end
     end
-//    wire [63:0] w_div_res = (rs2==0) ? -64'd1 :
-//	                    (rs1==64'h8000_0000_0000_0000 && rs2 == -64'd1) ? rs1 : 
-//			    $signed(rs1) / $signed(rs2);  // Div
-//    wire [63:0] w_divu_res = (rs2==0) ? -64'd1 :
-//                            $unsigned(rs1) / $unsigned(rs2);  // Divu
-//    wire [63:0] w_rem_res = (rs2==0) ? rs1 :
-//	                    (rs1==64'h8000_0000_0000_0000 && rs2 == -64'd1) ? 64'd0 : 
-//			    $signed(rs1) % $signed(rs2);  // Rem
-//    wire [63:0] w_remu_res = (rs2==0) ? rs1 :
-//                            $unsigned(rs1) % $unsigned(rs2);  // Remu
-
-
-    //// UNIVERSAL DIVIDER ENGINE (Sequential Shift-and-Subtract)
-    //// ============================================================
-    //reg [6:0]   div_counter;    // 0 to 64
-    //reg [127:0] div_rem_reg;    // Holds Remainder (High) and Quotient (Low)
-    //reg [63:0]  div_b_reg;      // Divisor
-    //reg         div_neg_res;    // Result should be negative?
-    //reg         div_neg_rem;    // Remainder should be negative?
-    //reg         div_busy;       // Engine Status
-    //reg         div_is_rem;     // 1=REM, 0=DIV
-
-    //// -- 1. Decode Inputs (Combinational) --
-    //// Is it a Signed instruction? (DIV=100, REM=110) -> func3[0] is 0
-    //wire div_signed = ~w_func3[0]; 
-    //
-    //// Determine Sign of inputs (If Unsigned, force sign bit to 0)
-    //wire a_neg = div_signed && rs1[63];
-    //wire b_neg = div_signed && rs2[63];
-    //
-    //// Get Absolute Values
-    //wire [63:0] abs_a = a_neg ? -rs1 : rs1;
-    //wire [63:0] abs_b = b_neg ? -rs2 : rs2;
-
-    //// -- 2. Divider Engine (Clocked) --
-    //always @(posedge clk) begin
-    //    if (div_busy) begin
-    //        if (div_counter < 64) begin
-    //            // Shift Left
-    //            div_rem_reg = div_rem_reg << 1;
-    //            // Subtract?
-    //            if (div_rem_reg[127:64] >= div_b_reg) begin
-    //                div_rem_reg[127:64] = div_rem_reg[127:64] - div_b_reg;
-    //                div_rem_reg[0] = 1'b1; // Set Quotient bit
-    //            end
-    //            div_counter <= div_counter + 1;
-    //        end else begin
-    //            div_busy <= 0; // Done
-    //        end
-    //    end
-    //end
-
-    //reg signed [129:0] mul_result_dsp;
-    //always @(posedge clk) begin
-    //    if (!bubble) mul_result_dsp <=  mul_op_a * mul_op_b;
-    //end
-    //reg [2:0] div_step;
-    //reg [127:0] div_dividend;
-    //reg [63:0] div_divisor;   
-    //reg [63:0] div_quotient;   
-    //reg [63:0] div_remainder;   
-    //reg div_sign_q;
-    //reg div_sign_r;
-    //reg [6:0] div_count;
-    //reg div_is_rem;
-    //reg div_is_unsigned;
-    //  
-      
-      
-      
-
-
-
-    //always @(*) begin
-    //    mul_upper_corrected = mul_base[127:64];
-    //    if (w_func3 == 3'b011) begin // Mulhu
-    //        if (rs1[63]) mul_upper_corrected = mul_upper_corrected + rs1;
-    //        if (rs2[63]) mul_upper_corrected = mul_upper_corrected + rs2;
-    //    end else if (w_func3 == 3'b010) begin // Mulhsu
-    //        if (rs2[63]) mul_upper_corrected = mul_upper_corrected + rs2;
-    //    end
-    //end
-
 
     // --Machine CSR --
    localparam mstatus    = 0 ; localparam MPRV=17,MPP=11,SPP=8,MPIE=7,SPIE=5,MIE=3,SIE=1,UIE=0;//63_SD|37_MBE|36_SBE|35:34_SXL10|22_TSR|21_TW|20_TVW|17_MPRV|12:11_MPP|8_SPP|7_MPIE|5_SPIE|3_MIE|1_SIE|0_UIE
@@ -781,20 +696,6 @@ module riscv64(
 //		        if (load_step == 1 && bus_read_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working 1 bubble2 this3
 //			if (load_step == 1 && bus_read_done == 1) begin re[w_rd]<= bus_read_data; load_step <= 0; end end
     
-                //    // Load after TLB
-		//    32'b???????_?????_?????_???_?????_0000011: begin  // Lb  3 cycles but wait to 5
-		//	if (load_step == 0) begin bus_address <= pda; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; bus_ls_type <= w_func3; end
-		//        if (load_step == 1 && bus_read_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working
-		//        if (load_step == 1 && bus_read_done == 1) begin 
-		//	    if (w_func3 == 3'b000) re[w_rd]<= $signed(bus_read_data[7:0]);  // Lb
-		//	    if (w_func3 == 3'b100) re[w_rd]<= $unsigned(bus_read_data[7:0]); // Lbu
-		//	    if (w_func3 == 3'b001) re[w_rd]<= $signed(bus_read_data[15:0]);  // Lh
-		//	    if (w_func3 == 3'b101) re[w_rd]<= $unsigned(bus_read_data[15:0]); // Lhu
-		//	    if (w_func3 == 3'b010) re[w_rd]<= $signed(bus_read_data[31:0]); //Lw
-		//	    if (w_func3 == 3'b110) re[w_rd]<= $unsigned(bus_read_data[31:0]); // Lwu
-		//	    if (w_func3 == 3'b011) re[w_rd]<= bus_read_data; // Ld
-		//	    load_step <= 0; end end
-    
                     // Load after TLB
                     32'b???????_?????_?????_???_?????_0000011: begin 
                         if (load_step == 0) begin bus_address <= pda; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; bus_ls_type <= w_func3; end
@@ -808,7 +709,6 @@ module riscv64(
                         if (store_step == 1 && bus_write_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working
                         if (store_step == 1 && bus_write_done == 1) begin store_step <= 0; end 
                     end   
-    
     
 		//    // Store after TLB
 	        //    32'b???????_?????_?????_000_?????_0100011: begin 
@@ -827,17 +727,6 @@ module riscv64(
 		//        if (store_step == 0) begin bus_address <= pda; bus_write_data<=rs2;bus_write_enable<=1;pc<=pc-4;bubble<=1;store_step<=1;bus_ls_type<=w_func3; end
 		//        if (store_step == 1 && bus_write_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working 1 bubble2 this3
 		//	if (store_step == 1 && bus_write_done == 1) store_step <= 0; end //Sd
-
-		//    // Store after TLB
-	        //    32'b???????_?????_?????_???_?????_0100011: begin 
-		//        if (store_step == 0) begin bus_address <= pda; bus_write_enable<=1;pc<=pc-4;bubble<=1;store_step<=1;bus_ls_type<=w_func3; 
-		//	   if (w_func3 == 3'b000) bus_write_data<=rs2[7:0];  // Sb
-		//	   if (w_func3 == 3'b001) bus_write_data<=rs2[15:0];  // Sh
-		//	   if (w_func3 == 3'b010) bus_write_data<=rs2[31:0];  // Sw
-		//	   if (w_func3 == 3'b011) bus_write_data<=rs2;  // Sd
-		//        end
-		//        if (store_step == 1 && bus_write_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working 1 bubble2 this3
-		//	if (store_step == 1 && bus_write_done == 1) store_step <= 0; end 
 
                     // Math-I
 	            //32'b???????_?????_?????_000_?????_0010011: re[w_rd] <= rs1 + w_imm_i;  // Addi
@@ -1307,59 +1196,59 @@ module riscv64(
                    if (store_step == 1 && bus_write_done == 1) begin store_step <= 0; end 
                end
 
-		     // -- ATOMIC end --
-                     // M extension // M mul mulh mulhsu mulhu div divu rem remu mulw divw divuw remuw
-            // M-Extension: Multiplication (Sequential)
-            // Matches 0110011 (Op) + 0000001 (Func7) + Func3 0xx
-            // Also matches 0111011 (Op Word) + 0000001 (Func7) + Func3 000 (MULW)
-            32'b0000001_?????_?????_0??_?????_0110011, // MUL, MULH, MULHSU, MULHU
-            32'b0000001_?????_?????_000_?????_0111011: // MULW
-            begin
-                if (!mul_done) begin
-                    // 1. Request Start
-                    mul_enable <= 1;
-                    // 2. Stall Pipeline
-                    pc <= pc - 4;
-                    bubble <= 1;
-                end else begin
-                    // 3. Result Ready
-                    mul_enable <= 0;
-                    
-                    // Select Output based on cached type
-                    if (mul_out_sel == 0)      re[w_rd] <= mul_acc[63:0];   // MUL
-                    else if (mul_out_sel == 1) re[w_rd] <= mul_acc[127:64]; // MULH*
-                    else                       re[w_rd] <= {{32{mul_acc[31]}}, mul_acc[31:0]}; // MULW (Sign Ext)
-                    
-                    // Bubble clears next cycle
-                end
-            end
-            
-            // M-Extension: Division and Remainder
-            // Opcode: 0110011 (Reg-Reg), Func7: 0000001 (M-Ext)
-            // Func3: 100(DIV), 101(DIVU), 110(REM), 111(REMU)
-            32'b0000001_?????_?????_1??_?????_0110011: begin 
-                if (!div_done) begin
-                    // 1. Request Start
-                    div_enable <= 1; 
-                    // 2. Stall Pipeline
-                    pc <= pc - 4;    
-                    bubble <= 1;     
-                end else begin
-                    // 3. Result Ready
-                    re[w_rd] <= div_result_out; 
-                    div_enable <= 0; // Clear Request
-                    // Bubble automatically clears in next cycle, PC proceeds
-                end
-            end
-		     // F (reg f0-f31)
-		     // flw fsw fadd.s fsub.s fmul.s fdiv.s fsqrt.s fmadd.s
-		     // fmsub.s fnmsub.s fcvt.w.s fcvt.wu.s fcvt.s.w fcvt.s.wu
-		     // fmv.x.w fclass.s feq.s flt.s fle.s fsgnj.s fsgnjn.s
-		     // fsgnjx.s fmin.s fmax.s
-		     // D fld fsd fadd.d fsub.d fdiv.d fsqrt.d fmadd.s fcvt.d.s fcvt.s.d
-		     // C
-		     default: $display("unknow instruction %h, %b", ir, ir);
-                endcase
+	       // -- ATOMIC end --
+               // M extension // M mul mulh mulhsu mulhu div divu rem remu mulw divw divuw remuw
+               // M-Extension: Multiplication (Sequential)
+               // Matches 0110011 (Op) + 0000001 (Func7) + Func3 0xx
+               // Also matches 0111011 (Op Word) + 0000001 (Func7) + Func3 000 (MULW)
+               32'b0000001_?????_?????_0??_?????_0110011, // MUL, MULH, MULHSU, MULHU
+               32'b0000001_?????_?????_000_?????_0111011: // MULW
+               begin
+                   if (!mul_done) begin
+                       // 1. Request Start
+                       mul_enable <= 1;
+                       // 2. Stall Pipeline
+                       pc <= pc - 4;
+                       bubble <= 1;
+                   end else begin
+                       // 3. Result Ready
+                       mul_enable <= 0;
+                       
+                       // Select Output based on cached type
+                       if (mul_out_sel == 0)      re[w_rd] <= mul_acc[63:0];   // MUL
+                       else if (mul_out_sel == 1) re[w_rd] <= mul_acc[127:64]; // MULH*
+                       else                       re[w_rd] <= {{32{mul_acc[31]}}, mul_acc[31:0]}; // MULW (Sign Ext)
+                       
+                       // Bubble clears next cycle
+                   end
+               end
+               
+               // M-Extension: Division and Remainder
+               // Opcode: 0110011 (Reg-Reg), Func7: 0000001 (M-Ext)
+               // Func3: 100(DIV), 101(DIVU), 110(REM), 111(REMU)
+               32'b0000001_?????_?????_1??_?????_0110011: begin 
+                   if (!div_done) begin
+                       // 1. Request Start
+                       div_enable <= 1; 
+                       // 2. Stall Pipeline
+                       pc <= pc - 4;    
+                       bubble <= 1;     
+                   end else begin
+                       // 3. Result Ready
+                       re[w_rd] <= div_result_out; 
+                       div_enable <= 0; // Clear Request
+                       // Bubble automatically clears in next cycle, PC proceeds
+                   end
+               end
+	            // F (reg f0-f31)
+	            // flw fsw fadd.s fsub.s fmul.s fdiv.s fsqrt.s fmadd.s
+	            // fmsub.s fnmsub.s fcvt.w.s fcvt.wu.s fcvt.s.w fcvt.s.wu
+	            // fmv.x.w fclass.s feq.s flt.s fle.s fsgnj.s fsgnjn.s
+	            // fsgnjx.s fmin.s fmax.s
+	            // D fld fsd fadd.d fsub.d fdiv.d fsqrt.d fmadd.s fcvt.d.s fcvt.s.d
+	            // C
+	            default: $display("unknow instruction %h, %b", ir, ir);
+               endcase
 	    end
         end
 	re[0]<= 64'h0; 
