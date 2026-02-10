@@ -298,6 +298,7 @@ bf7f0efadf90e3c080384979bf0ea6fb68493d15 print XXXABCDXABCDEFGHXABCDEFGHX*-^-|:^
 85dd1336e249483fa1092a236f1a59b5bcfdfa08 compile M-mul/mulh ok, need to add multipile cycle div/divu/rem/remu
 71f9d3e93ffdc425ed59cce849938159f0f773a6 separate div/divu/rem/remu compile ok
 16964070123501d2897e4895261f65b56d931ee4 separate div.../mul... ok
+273b3204049e9950a6cc0fd981f333c9d9decb62 ls/TLB4page/muls/divs/atoms compile OK!
 
 
 
