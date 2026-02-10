@@ -557,36 +557,42 @@ module riscv64(
     reg [63:0] reserve_addr;
     reg        reserve_valid;
 
-    // -- TLB -- 8 pages
-    (* ram_style = "logic" *) reg [26:0] tlb_vpn [0:7]; // vpn number VA[38:12]  Sv39
-    (* ram_style = "logic" *) reg [43:0] tlb_ppn [0:7]; // ppn number PA[55:12]
-    (* ram_style = "logic" *) reg tlb_vld [0:7];
+    //// -- TLB -- 8 pages
+    //(* ram_style = "logic" *) reg [26:0] tlb_vpn [0:7]; // vpn number VA[38:12]  Sv39
+    //(* ram_style = "logic" *) reg [43:0] tlb_ppn [0:7]; // ppn number PA[55:12]
+    //(* ram_style = "logic" *) reg tlb_vld [0:7];
+    // -- TLB -- 4 pages
+    (* ram_style = "logic" *) reg [26:0] tlb_vpn [0:3]; // vpn number VA[38:12]  Sv39
+    (* ram_style = "logic" *) reg [43:0] tlb_ppn [0:3]; // ppn number PA[55:12]
+    (* ram_style = "logic" *) reg tlb_vld [0:3];
 
     // tlb i hit
     wire [26:0] pc_vpn = pc[38:12];
     reg [43:0] pc_ppn;
     reg tlb_i_hit;
 
-    wire [7:0] tlb_i_match;
+    //wire [7:0] tlb_i_match;
+    wire [3:0] tlb_i_match;
     assign tlb_i_match[0] = tlb_vld[0] && (tlb_vpn[0] == pc_vpn);
     assign tlb_i_match[1] = tlb_vld[1] && (tlb_vpn[1] == pc_vpn);
     assign tlb_i_match[2] = tlb_vld[2] && (tlb_vpn[2] == pc_vpn);
     assign tlb_i_match[3] = tlb_vld[3] && (tlb_vpn[3] == pc_vpn);
-    assign tlb_i_match[4] = tlb_vld[4] && (tlb_vpn[4] == pc_vpn);
-    assign tlb_i_match[5] = tlb_vld[5] && (tlb_vpn[5] == pc_vpn);
-    assign tlb_i_match[6] = tlb_vld[6] && (tlb_vpn[6] == pc_vpn);
-    assign tlb_i_match[7] = tlb_vld[7] && (tlb_vpn[7] == pc_vpn);
+    //assign tlb_i_match[4] = tlb_vld[4] && (tlb_vpn[4] == pc_vpn);
+    //assign tlb_i_match[5] = tlb_vld[5] && (tlb_vpn[5] == pc_vpn);
+    //assign tlb_i_match[6] = tlb_vld[6] && (tlb_vpn[6] == pc_vpn);
+    //assign tlb_i_match[7] = tlb_vld[7] && (tlb_vpn[7] == pc_vpn);
     // pc_ppn hit
     always @(*) begin
         tlb_i_hit = |tlb_i_match;
         pc_ppn =   ({44{tlb_i_match[0]}} & tlb_ppn[0]) |
                    ({44{tlb_i_match[1]}} & tlb_ppn[1]) |
                    ({44{tlb_i_match[2]}} & tlb_ppn[2]) |
-                   ({44{tlb_i_match[3]}} & tlb_ppn[3]) |
-                   ({44{tlb_i_match[4]}} & tlb_ppn[4]) |
-                   ({44{tlb_i_match[5]}} & tlb_ppn[5]) |
-                   ({44{tlb_i_match[6]}} & tlb_ppn[6]) |
-                   ({44{tlb_i_match[7]}} & tlb_ppn[7]) ; end
+		   ({44{tlb_i_match[3]}} & tlb_ppn[3]) ; end
+                   //({44{tlb_i_match[3]}} & tlb_ppn[3]) |
+                   //({44{tlb_i_match[4]}} & tlb_ppn[4]) |
+                   //({44{tlb_i_match[5]}} & tlb_ppn[5]) |
+                   //({44{tlb_i_match[6]}} & tlb_ppn[6]) |
+                   //({44{tlb_i_match[7]}} & tlb_ppn[7]) ; end
     // --------
     // tlb d hit
     wire [63:0] ls_va_offset = (op == 7'b0000011) ? w_imm_i : (op == 7'b0100011) ?  w_imm_s : 64'h0; // load/store/atom
@@ -595,34 +601,36 @@ module riscv64(
     reg [43:0] data_ppn;
     reg tlb_d_hit;
 
-    wire [7:0] tlb_d_match;
+    //wire [7:0] tlb_d_match;
+    wire [3:0] tlb_d_match;
     assign tlb_d_match[0] = tlb_vld[0] && (tlb_vpn[0] == ls_va[38:12]);
     assign tlb_d_match[1] = tlb_vld[1] && (tlb_vpn[1] == ls_va[38:12]);
     assign tlb_d_match[2] = tlb_vld[2] && (tlb_vpn[2] == ls_va[38:12]);
     assign tlb_d_match[3] = tlb_vld[3] && (tlb_vpn[3] == ls_va[38:12]);
-    assign tlb_d_match[4] = tlb_vld[4] && (tlb_vpn[4] == ls_va[38:12]);
-    assign tlb_d_match[5] = tlb_vld[5] && (tlb_vpn[5] == ls_va[38:12]);
-    assign tlb_d_match[6] = tlb_vld[6] && (tlb_vpn[6] == ls_va[38:12]);
-    assign tlb_d_match[7] = tlb_vld[7] && (tlb_vpn[7] == ls_va[38:12]);
+    //assign tlb_d_match[4] = tlb_vld[4] && (tlb_vpn[4] == ls_va[38:12]);
+    //assign tlb_d_match[5] = tlb_vld[5] && (tlb_vpn[5] == ls_va[38:12]);
+    //assign tlb_d_match[6] = tlb_vld[6] && (tlb_vpn[6] == ls_va[38:12]);
+    //assign tlb_d_match[7] = tlb_vld[7] && (tlb_vpn[7] == ls_va[38:12]);
     // data_ppn hit
     always @(*) begin
         tlb_d_hit = |tlb_d_match;
         data_ppn = ({44{tlb_d_match[0]}} & tlb_ppn[0]) |
                    ({44{tlb_d_match[1]}} & tlb_ppn[1]) |
                    ({44{tlb_d_match[2]}} & tlb_ppn[2]) |
-                   ({44{tlb_d_match[3]}} & tlb_ppn[3]) |
-                   ({44{tlb_d_match[4]}} & tlb_ppn[4]) |
-                   ({44{tlb_d_match[5]}} & tlb_ppn[5]) |
-                   ({44{tlb_d_match[6]}} & tlb_ppn[6]) |
-                   ({44{tlb_d_match[7]}} & tlb_ppn[7]) ;
-    end
+		   ({44{tlb_d_match[3]}} & tlb_ppn[3]) ; end
+                   //({44{tlb_d_match[3]}} & tlb_ppn[3]) |
+                   //({44{tlb_d_match[4]}} & tlb_ppn[4]) |
+                   //({44{tlb_d_match[5]}} & tlb_ppn[5]) |
+                   //({44{tlb_d_match[6]}} & tlb_ppn[6]) |
+                   //({44{tlb_d_match[7]}} & tlb_ppn[7]) ; end
     // concat physical address
     wire need_trans = satp_mmu   && !mmu_pc && !mmu_da && !mmu_cache_refill;
     assign ppc = need_trans ? {8'h0, pc_ppn, pc[11:0]} : pc;
     assign pda = need_trans ? {8'h0, data_ppn, ls_va[11:0]} : ls_va;
         
     // TLB Refill
-    reg [2:0] tlb_ptr = 0; // 8 entries TLB
+    //reg [2:0] tlb_ptr = 0; // 8 entries TLB
+    reg [1:0] tlb_ptr = 0; // 4 entries TLB
     always @(posedge clk or negedge reset) begin
         if (!reset) tlb_ptr <= 0; // hit->trap(save va to x9)->refill assembly(fetch pa to x9)-> sd x9, `Tlb -> here to refill tlb
         else if ((mmu_pc || mmu_da) && bus_write_enable && bus_address == `Tlb) begin // for the last fill: sd ppa, Tlb
