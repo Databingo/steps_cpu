@@ -1227,28 +1227,41 @@ module riscv64(
 		        if (store_step == 1 && bus_write_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working 1 bubble2 this3
 		        if (store_step == 1 && bus_write_done == 1) begin store_step <= 0; re[w_rd] <= 0; end end // sc.w successed return 0 in rd
 
-               // AMOs (Swap, Add, Xor, And, Or, Min, Max) - Matches .w and .d
-               // Opcode 0101111, Func5 is NOT LR(00010) or SC(00011)
-               32'b?????_??_?????_?????_01?_?????_0101111: begin
-                   if (load_step == 0) begin 
-                       bus_address <= pda; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; 
-                       load_step <= 1; bus_ls_type <= w_func3; 
-                   end
-                   if (load_step == 1 && bus_read_done == 0) begin pc <= pc - 4; bubble <= 1; end
-                   if (load_step == 1 && bus_read_done == 1) begin 
-                       // 1. Finish Load: Write original value to RD
-                       re[w_rd] <= amo_op_mem; 
-                       load_step <= 0;  
-                       
-                       // 2. Start Store: Write calculated value to Memory
-                       bus_address <= pda; 
-                       bus_write_data <= w_atomic_write_data; // Pre-calculated in wires
-                       bus_write_enable <= 1; pc <= pc - 4; bubble <= 1; 
-                       store_step <= 1; bus_ls_type <= w_func3; 
-                   end
-                   if (store_step == 1 && bus_write_done == 0) begin pc <= pc - 4; bubble <= 1; end
-                   if (store_step == 1 && bus_write_done == 1) begin store_step <= 0; end 
-               end
+               //// AMOs (Swap, Add, Xor, And, Or, Min, Max) - Matches .w and .d
+               //// Opcode 0101111, Func5 is NOT LR(00010) or SC(00011)
+               //32'b?????_??_?????_?????_01?_?????_0101111: begin
+               //    if (load_step == 0) begin 
+               //        bus_address <= pda; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; 
+               //        load_step <= 1; bus_ls_type <= w_func3; 
+               //    end
+               //    if (load_step == 1 && bus_read_done == 0) begin pc <= pc - 4; bubble <= 1; end
+               //    if (load_step == 1 && bus_read_done == 1) begin 
+               //        // 1. Finish Load: Write original value to RD
+               //        re[w_rd] <= amo_op_mem; 
+               //        load_step <= 0;  
+               //        
+               //        // 2. Start Store: Write calculated value to Memory
+               //        bus_address <= pda; 
+               //        bus_write_data <= w_atomic_write_data; // Pre-calculated in wires
+               //        bus_write_enable <= 1; pc <= pc - 4; bubble <= 1; 
+               //        store_step <= 1; bus_ls_type <= w_func3; 
+               //    end
+               //    if (store_step == 1 && bus_write_done == 0) begin pc <= pc - 4; bubble <= 1; end
+               //    if (store_step == 1 && bus_write_done == 1) begin store_step <= 0; end 
+               //end
+
+	            32'b?????_??_?????_?????_01?_?????_0101111: begin // not 00010lr/00011sc
+		        if (load_step == 0) begin bus_address <= pda; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; bus_ls_type <= w_func3; end
+		        if (load_step == 1 && bus_read_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working
+		        if (load_step == 1 && bus_read_done == 1) begin 
+			    // finish load
+			    re[w_rd] <= amo_op_mem; load_step <= 0;  // finish load
+			    // start store
+		            bus_address <= pda;bus_write_enable<=1;pc<=pc-4;bubble<=1;store_step<=1;bus_ls_type<=w_func3; 
+			    bus_write_data <= w_atomic_write_data;
+		        end
+		        if (store_step == 1 && bus_write_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working 1 bubble2 this3
+		        if (store_step == 1 && bus_write_done == 1) begin store_step <= 0; end end //
 
 	       // -- ATOMIC end --
                // M extension // M mul mulh mulhsu mulhu div divu rem remu mulw divw divuw remuw
