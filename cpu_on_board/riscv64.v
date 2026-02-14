@@ -192,9 +192,9 @@ module riscv64(
        (w_func5 == 5'b00001) ? amo_op_rs2 : // swap
        (w_func5 == 5'b00000) ? val_add    : // add
        (w_func5 == 5'b00100) ? val_xor    : // xor
-       (w_func5 == 5'b01100) ? val_adn    : // and
+       (w_func5 == 5'b01100) ? val_and    : // and
        (w_func5 == 5'b01000) ? val_or     : // or
-       (w_func5 == 5'b1?000) ? val_minx   : // min/minu
+       (w_func5 == 5'b1?000) ? val_mins   : // min/minu
                                val_maxs   ; // max/maxu
 
     //// 6. Write Data Formatting (Handle SC vs AMO)
@@ -206,7 +206,7 @@ module riscv64(
 
     wire [63:0] w_atomic_write_data = (op == 7'b0101111 && w_func5[4:0] == 5'b00011) ? // SC
 	                              (is_word_op ? {32'b0, rs2[31:0]} : rs2) : // sc.w/sc.d
-				      w_amo_cale_data; // AMOs
+				      w_amo_calc_data; // AMOs
     // -- mul rela --
     // ============================================================
     // SEPARATE MULTIPLIER ENGINE REGISTERS
