@@ -139,7 +139,7 @@ module riscv64(
     // 1. Input Formatting
     // If .w (func3=010), we operate on sign-extended 32-bit values.
     // If .d (func3=011), we operate on native 64-bit values.
-    wire is_word_op = (w_func3 == 3'b010);
+    wire is_word_op = (w_func3 == 3'b010);  // word as signed 32-bit values
     
     wire [63:0] amo_op_mem = is_word_op ? {{32{bus_read_data[31]}}, bus_read_data[31:0]} : bus_read_data;
     wire [63:0] amo_op_rs2 = is_word_op ? {{32{rs2[31]}}, rs2[31:0]} : rs2;
