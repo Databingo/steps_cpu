@@ -113,13 +113,13 @@ module riscv64(
     //    (w_func3 == 3'b110) ? { 32'd0,                  bus_read_data[31:0]} : // lwu (zero ext)
     //                                                    bus_read_data;         // ld  (011)
     wire [63:0] w_load_data =
-        (w_func3 == 3'b000) ? {56{bus_read_data[ 7]}}, bus_read_data[ 7:0]} : // lb
-        (w_func3 == 3'b001) ? {48{bus_read_data[15]}}, bus_read_data[15:0]} : // lh
-        (w_func3 == 3'b010) ? {32{bus_read_data[31]}}, bus_read_data[31:0]} : // lw
-        (w_func3 == 3'b100) ? {56'b0,                  bus_read_data[ 7:0]} : // lbu
-        (w_func3 == 3'b101) ? {48'b0,                  bus_read_data[15:0]} : // lhu
-        (w_func3 == 3'b110) ? {32'b0,                  bus_read_data[31:0]} : // lhw
-                                                       bus_read_data ; // ld (011)
+        (w_func3 == 3'b000) ? {{56{bus_read_data[ 7]}}, bus_read_data[ 7:0]} : // lb
+        (w_func3 == 3'b001) ? {{48{bus_read_data[15]}}, bus_read_data[15:0]} : // lh
+        (w_func3 == 3'b010) ? {{32{bus_read_data[31]}}, bus_read_data[31:0]} : // lw
+        (w_func3 == 3'b100) ? { 56'b0,                  bus_read_data[ 7:0]} : // lbu
+        (w_func3 == 3'b101) ? { 48'b0,                  bus_read_data[15:0]} : // lhu
+        (w_func3 == 3'b110) ? { 32'b0,                  bus_read_data[31:0]} : // lhw
+                                                        bus_read_data ; // ld (011)
                          
     //wire [63:0] w_store_data =
     //    (w_func3 == 3'b000) ? {56'd0, rs2[7:0]}  : // sb
