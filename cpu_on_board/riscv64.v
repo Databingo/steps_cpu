@@ -103,10 +103,10 @@ module riscv64(
     wire [63:0] alu_sraiw = $signed(rs1[31:0]) >>> w_shamt[4:0]; // Sraiw
     wire [63:0] branch = pc - 4 + w_imm_b; //branch
 
-    wire [63:0] csrrs  = Csrs[w_csr_id] |  rs1;
-    wire [63:0] csrrc  = Csrs[w_csr_id] & ~rs1;
-    wire [63:0] csrrsi = Csrs[w_csr_id] |  w_imm_z;
-    wire [63:0] csrrci = Csrs[w_csr_id] & ~w_imm_z;
+    //wire [63:0] csrrs  = Csrs[w_csr_id] |  rs1;
+    //wire [63:0] csrrc  = Csrs[w_csr_id] & ~rs1;
+    //wire [63:0] csrrsi = Csrs[w_csr_id] |  w_imm_z;
+    //wire [63:0] csrrci = Csrs[w_csr_id] & ~w_imm_z;
 
     //    (w_func3 == 3'b000) ? {{56{bus_read_data[7]}},  bus_read_data[7:0]}  : // lb  (sign ext)
     //    (w_func3 == 3'b001) ? {{48{bus_read_data[15]}}, bus_read_data[15:0]} : // lh  (sign ext)
@@ -168,8 +168,10 @@ module riscv64(
     //wire amo_pick_mem = (w_func5[2] == 0) ? amo_less_than : !amo_less_than;
     //wire [63:0] val_minmax = amo_pick_mem ? amo_op_mem : amo_op_rs2;
 
-    wire [63:0] val_mins = amo_less_than ? amo_op_mem : amo_op_rs2;
-    wire [63:0] val_maxs = amo_less_than ? amo_op_rs2 : amo_op_mem;
+    //wire [63:0] val_mins = amo_less_than ? amo_op_mem : amo_op_rs2;
+    //wire [63:0] val_maxs = amo_less_than ? amo_op_rs2 : amo_op_mem;
+    wire amo_pick_mem = (w_func5[2] == 0) ? amo_less_than : !amo_less_than;
+    wire [63:0] val_minmax = amo_pick_mem ? amo_op_mem : amo_op_rs2;
 
     //// 4. Calculate All Results (Parallel)
     //wire [63:0] val_add  = amo_op_mem + amo_op_rs2;
@@ -197,8 +199,10 @@ module riscv64(
        (w_func5 == 5'b00100) ? val_xor    : // xor
        (w_func5 == 5'b01100) ? val_and    : // and
        (w_func5 == 5'b01000) ? val_or     : // or
-       (w_func5 == 5'b1?000) ? val_mins   : // min/minu
-                               val_maxs   ; // max/maxu
+                               val_minmax ; // min/max/minu/maxu
+
+       //(w_func5 == 5'b1?000) ? val_mins   : // min/minu
+       //                        val_maxs   ; // max/maxu
 
     //// 6. Write Data Formatting (Handle SC vs AMO)
     //// For SC.w, we just write rs2[31:0]. For SC.d, rs2.
@@ -849,18 +853,19 @@ module riscv64(
 		    32'b???????_?????_?????_110_?????_1100011: begin if ($unsigned(re[w_rs1]) < $unsigned(re[w_rs2])) begin pc <= branch; bubble <= 1'b1; end end // Bltu
 		    32'b???????_?????_?????_111_?????_1100011: begin if ($unsigned(re[w_rs1]) >= $unsigned(re[w_rs2])) begin pc <= branch; bubble <= 1'b1; end end // Bgeu
 		    // System-CSR 
-	            //32'b???????_?????_?????_001_?????_1110011: begin if (w_rd != 0) re[w_rd] <= Csrs[w_csr_id]; Csrs[w_csr_id] <= rs1; end // Csrrw  bram read first old data
-	            //32'b???????_?????_?????_010_?????_1110011: begin if (w_rd != 0) re[w_rd] <= Csrs[w_csr_id]; if (w_rs1 != 0) Csrs[w_csr_id] <= (Csrs[w_csr_id] |  rs1); end // Csrrs
-	            //32'b???????_?????_?????_011_?????_1110011: begin if (w_rd != 0) re[w_rd] <= Csrs[w_csr_id]; if (w_rs1 != 0) Csrs[w_csr_id] <= (Csrs[w_csr_id] & ~rs1); end // Csrrc
-	            //32'b???????_?????_?????_101_?????_1110011: begin if (w_rd != 0) re[w_rd] <= Csrs[w_csr_id]; Csrs[w_csr_id] <= w_imm_z; end // Csrrwi
-	            //32'b???????_?????_?????_110_?????_1110011: begin if (w_rd != 0) re[w_rd] <= Csrs[w_csr_id]; if (w_imm_z != 0) Csrs[w_csr_id] <= (Csrs[w_csr_id] |  w_imm_z); end // csrrsi
-	            //32'b???????_?????_?????_111_?????_1110011: begin if (w_rd != 0) re[w_rd] <= Csrs[w_csr_id]; if (w_imm_z != 0) Csrs[w_csr_id] <= (Csrs[w_csr_id] & ~w_imm_z); end // Csrrci
 	            32'b???????_?????_?????_001_?????_1110011: begin if (w_rd != 0) re[w_rd] <= Csrs[w_csr_id]; Csrs[w_csr_id] <= rs1; end // Csrrw  bram read first old data
-	            32'b???????_?????_?????_010_?????_1110011: begin if (w_rd != 0) re[w_rd] <= Csrs[w_csr_id]; if (w_rs1 != 0) Csrs[w_csr_id] <= csrrs; end // Csrrs
-	            32'b???????_?????_?????_011_?????_1110011: begin if (w_rd != 0) re[w_rd] <= Csrs[w_csr_id]; if (w_rs1 != 0) Csrs[w_csr_id] <= csrrc; end // Csrrc
+	            32'b???????_?????_?????_010_?????_1110011: begin if (w_rd != 0) re[w_rd] <= Csrs[w_csr_id]; if (w_rs1 != 0) Csrs[w_csr_id] <= (Csrs[w_csr_id] |  rs1); end // Csrrs
+	            32'b???????_?????_?????_011_?????_1110011: begin if (w_rd != 0) re[w_rd] <= Csrs[w_csr_id]; if (w_rs1 != 0) Csrs[w_csr_id] <= (Csrs[w_csr_id] & ~rs1); end // Csrrc
 	            32'b???????_?????_?????_101_?????_1110011: begin if (w_rd != 0) re[w_rd] <= Csrs[w_csr_id]; Csrs[w_csr_id] <= w_imm_z; end // Csrrwi
-	            32'b???????_?????_?????_110_?????_1110011: begin if (w_rd != 0) re[w_rd] <= Csrs[w_csr_id]; if (w_imm_z != 0) Csrs[w_csr_id] <= csrrsi; end // csrrsi
-	            32'b???????_?????_?????_111_?????_1110011: begin if (w_rd != 0) re[w_rd] <= Csrs[w_csr_id]; if (w_imm_z != 0) Csrs[w_csr_id] <= csrrci; end // Csrrci
+	            32'b???????_?????_?????_110_?????_1110011: begin if (w_rd != 0) re[w_rd] <= Csrs[w_csr_id]; if (w_imm_z != 0) Csrs[w_csr_id] <= (Csrs[w_csr_id] |  w_imm_z); end // csrrsi
+	            32'b???????_?????_?????_111_?????_1110011: begin if (w_rd != 0) re[w_rd] <= Csrs[w_csr_id]; if (w_imm_z != 0) Csrs[w_csr_id] <= (Csrs[w_csr_id] & ~w_imm_z); end // Csrrci
+		    //
+	            //32'b???????_?????_?????_001_?????_1110011: begin if (w_rd != 0) re[w_rd] <= Csrs[w_csr_id]; Csrs[w_csr_id] <= rs1; end // Csrrw  bram read first old data
+	            //32'b???????_?????_?????_010_?????_1110011: begin if (w_rd != 0) re[w_rd] <= Csrs[w_csr_id]; if (w_rs1 != 0) Csrs[w_csr_id] <= csrrs; end // Csrrs
+	            //32'b???????_?????_?????_011_?????_1110011: begin if (w_rd != 0) re[w_rd] <= Csrs[w_csr_id]; if (w_rs1 != 0) Csrs[w_csr_id] <= csrrc; end // Csrrc
+	            //32'b???????_?????_?????_101_?????_1110011: begin if (w_rd != 0) re[w_rd] <= Csrs[w_csr_id]; Csrs[w_csr_id] <= w_imm_z; end // Csrrwi
+	            //32'b???????_?????_?????_110_?????_1110011: begin if (w_rd != 0) re[w_rd] <= Csrs[w_csr_id]; if (w_imm_z != 0) Csrs[w_csr_id] <= csrrsi; end // csrrsi
+	            //32'b???????_?????_?????_111_?????_1110011: begin if (w_rd != 0) re[w_rd] <= Csrs[w_csr_id]; if (w_imm_z != 0) Csrs[w_csr_id] <= csrrci; end // Csrrci
                     // Ecall
 	            32'b0000000_00000_?????_000_?????_1110011: begin 
 	                                                if      (current_privilege_mode == U_mode) CAUSE_CODE = UECALL; // 8 indicate Ecall from U-mode; 9 call from S-mode; 11 call from M-mode
