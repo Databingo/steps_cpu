@@ -104,20 +104,33 @@ module riscv64(
 
 
     // -- Load / Store Data Formatting (Pure Combinational) --
-    wire [63:0] w_load_data = 
-        (w_func3 == 3'b000) ? {{56{bus_read_data[7]}},  bus_read_data[7:0]}  : // lb  (sign ext)
-        (w_func3 == 3'b001) ? {{48{bus_read_data[15]}}, bus_read_data[15:0]} : // lh  (sign ext)
-        (w_func3 == 3'b010) ? {{32{bus_read_data[31]}}, bus_read_data[31:0]} : // lw  (sign ext)
-        (w_func3 == 3'b100) ? { 56'd0,                  bus_read_data[7:0]}  : // lbu (zero ext)
-        (w_func3 == 3'b101) ? { 48'd0,                  bus_read_data[15:0]} : // lhu (zero ext)
-        (w_func3 == 3'b110) ? { 32'd0,                  bus_read_data[31:0]} : // lwu (zero ext)
-                                                        bus_read_data;         // ld  (011)
-
-    wire [63:0] w_store_data =
-        (w_func3 == 3'b000) ? {56'd0, rs2[7:0]}  : // sb
-        (w_func3 == 3'b001) ? {48'd0, rs2[15:0]} : // sh
-        (w_func3 == 3'b010) ? {32'd0, rs2[31:0]} : // sw
+    //wire [63:0] w_load_data = 
+    //    (w_func3 == 3'b000) ? {{56{bus_read_data[7]}},  bus_read_data[7:0]}  : // lb  (sign ext)
+    //    (w_func3 == 3'b001) ? {{48{bus_read_data[15]}}, bus_read_data[15:0]} : // lh  (sign ext)
+    //    (w_func3 == 3'b010) ? {{32{bus_read_data[31]}}, bus_read_data[31:0]} : // lw  (sign ext)
+    //    (w_func3 == 3'b100) ? { 56'd0,                  bus_read_data[7:0]}  : // lbu (zero ext)
+    //    (w_func3 == 3'b101) ? { 48'd0,                  bus_read_data[15:0]} : // lhu (zero ext)
+    //    (w_func3 == 3'b110) ? { 32'd0,                  bus_read_data[31:0]} : // lwu (zero ext)
+    //                                                    bus_read_data;         // ld  (011)
+    wire [63:0] w_load_data =
+        (w_func3 == 3'b000) ? {56{bus_read_data[ 7]}}, bus_read_data[ 7:0]} : // lb
+        (w_func3 == 3'b001) ? {48{bus_read_data[15]}}, bus_read_data[15:0]} : // lh
+        (w_func3 == 3'b010) ? {32{bus_read_data[31]}}, bus_read_data[31:0]} : // lw
+        (w_func3 == 3'b100) ? {56'b0,                  bus_read_data[ 7:0]} : // lbu
+        (w_func3 == 3'b101) ? {48'b0,                  bus_read_data[15:0]} : // lhu
+        (w_func3 == 3'b110) ? {32'b0,                  bus_read_data[31:0]} : // lhw
+                                                       bus_read_data ; // ld (011)
+                         
+    //wire [63:0] w_store_data =
+    //    (w_func3 == 3'b000) ? {56'd0, rs2[7:0]}  : // sb
+    //    (w_func3 == 3'b001) ? {48'd0, rs2[15:0]} : // sh
+    //    (w_func3 == 3'b010) ? {32'd0, rs2[31:0]} : // sw
                                       rs2;         // sd  (011)
+    wire [63:0] w_store_data = 
+	(w_func3 == 3'b000) ? {56'b0, rs2[ 7:0] : // sb
+	(w_func3 == 3'b001) ? {48'b0, rs2[15:0] : // sh
+	(w_func3 == 3'b010) ? {32'b0, rs2[31:0] : // sw
+	                              rs2;        // sd (011)
 
     // ============================================================
     // AMO / LR / SC OPTIMIZATION WIRES
