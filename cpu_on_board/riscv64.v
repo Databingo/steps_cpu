@@ -125,7 +125,7 @@ module riscv64(
     //    (w_func3 == 3'b000) ? {56'd0, rs2[7:0]}  : // sb
     //    (w_func3 == 3'b001) ? {48'd0, rs2[15:0]} : // sh
     //    (w_func3 == 3'b010) ? {32'd0, rs2[31:0]} : // sw
-                                      rs2;         // sd  (011)
+    //                                  rs2;         // sd  (011)
     wire [63:0] w_store_data = 
 	(w_func3 == 3'b000) ? {56'b0, rs2[ 7:0] : // sb
 	(w_func3 == 3'b001) ? {48'b0, rs2[15:0] : // sh
