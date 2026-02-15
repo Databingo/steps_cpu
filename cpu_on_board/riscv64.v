@@ -103,18 +103,6 @@ module riscv64(
     wire [63:0] alu_sraiw = $signed(rs1[31:0]) >>> w_shamt[4:0]; // Sraiw
     wire [63:0] branch = pc - 4 + w_imm_b; //branch
 
-    //wire [63:0] csrrs  = Csrs[w_csr_id] |  rs1;
-    //wire [63:0] csrrc  = Csrs[w_csr_id] & ~rs1;
-    //wire [63:0] csrrsi = Csrs[w_csr_id] |  w_imm_z;
-    //wire [63:0] csrrci = Csrs[w_csr_id] & ~w_imm_z;
-
-    //    (w_func3 == 3'b000) ? {{56{bus_read_data[7]}},  bus_read_data[7:0]}  : // lb  (sign ext)
-    //    (w_func3 == 3'b001) ? {{48{bus_read_data[15]}}, bus_read_data[15:0]} : // lh  (sign ext)
-    //    (w_func3 == 3'b010) ? {{32{bus_read_data[31]}}, bus_read_data[31:0]} : // lw  (sign ext)
-    //    (w_func3 == 3'b100) ? { 56'd0,                  bus_read_data[7:0]}  : // lbu (zero ext)
-    //    (w_func3 == 3'b101) ? { 48'd0,                  bus_read_data[15:0]} : // lhu (zero ext)
-    //    (w_func3 == 3'b110) ? { 32'd0,                  bus_read_data[31:0]} : // lwu (zero ext)
-    //                                                    bus_read_data;         // ld  (011)
     wire [63:0] w_load_data =
         (w_func3 == 3'b000) ? {{56{bus_read_data[ 7]}}, bus_read_data[ 7:0]} : // lb
         (w_func3 == 3'b001) ? {{48{bus_read_data[15]}}, bus_read_data[15:0]} : // lh
@@ -124,93 +112,38 @@ module riscv64(
         (w_func3 == 3'b110) ? { 32'b0,                  bus_read_data[31:0]} : // lhw
                                                         bus_read_data ; // ld (011)
                          
-    //wire [63:0] w_store_data =
-    //    (w_func3 == 3'b000) ? {56'd0, rs2[7:0]}  : // sb
-    //    (w_func3 == 3'b001) ? {48'd0, rs2[15:0]} : // sh
-    //    (w_func3 == 3'b010) ? {32'd0, rs2[31:0]} : // sw
-    //                                  rs2;         // sd  (011)
     wire [63:0] w_store_data = 
 	(w_func3 == 3'b000) ? {56'b0, rs2[ 7:0]} : // sb
 	(w_func3 == 3'b001) ? {48'b0, rs2[15:0]} : // sh
 	(w_func3 == 3'b010) ? {32'b0, rs2[31:0]} : // sw
 	                              rs2;        // sd (011)
-
-    // ============================================================
-    // AMO / LR / SC OPTIMIZATION WIRES
-    // ============================================================
-
-    // 1. Input Formatting
-    // If .w (func3=010), we operate on sign-extended 32-bit values.
-    // If .d (func3=011), we operate on native 64-bit values.
+    // AMO prepare
     wire is_word_op = (w_func3 == 3'b010);  // word as signed 32-bit values
     wire [63:0] amo_op_mem = is_word_op ? {{32{bus_read_data[31]}}, bus_read_data[31:0]} : bus_read_data;
     wire [63:0] amo_op_rs2 = is_word_op ? {{32{rs2[31]}}, rs2[31:0]} : rs2;
     
-    //wire [63:0] amo_op_mem = is_word_op ? {{32{bus_read_data[31]}}, bus_read_data[31:0]} : bus_read_data;
-    //wire [63:0] amo_op_rs2 = is_word_op ? {{32{rs2[31]}}, rs2[31:0]} : rs2;
-
-    // 2. Unified Comparator (Shared by min/max/minu/maxu)
-    // Detect if we are doing an unsigned comparison (minu/maxu have bit 2 set: 11xxx)
-    //wire amo_is_unsigned = w_func5[3]; 
-    //wire amo_less_than;
-    //
-    //// Single comparator for both signed and unsigned
-    //assign amo_less_than = amo_is_unsigned ? 
-    //                       (amo_op_mem < amo_op_rs2) : 
-    //                       ($signed(amo_op_mem) < $signed(amo_op_rs2));
-
-    // Unin amomin amomax/amominu amomaxu 11xxx
+    // Unin amomin amomax/amominu amomaxu 11xxx (unsigned w_func5[3]== 1)
     wire amo_less_than = w_func5[3] ? (amo_op_mem < amo_op_rs2) : ($signed(amo_op_mem) < $signed(amo_op_rs2));
 
-    // 3. Select Min/Max Result
-    // Min (10000/11000): pick MEM if MEM < RS2
-    // Max (10100/11100): pick MEM if MEM > RS2 (i.e., !(MEM < RS2))
-    //wire amo_pick_mem = (w_func5[2] == 0) ? amo_less_than : !amo_less_than;
-    //wire [63:0] val_minmax = amo_pick_mem ? amo_op_mem : amo_op_rs2;
-
-    //wire [63:0] val_mins = amo_less_than ? amo_op_mem : amo_op_rs2;
-    //wire [63:0] val_maxs = amo_less_than ? amo_op_rs2 : amo_op_mem;
+    // selecet min/max resutl
     wire amo_pick_mem = (w_func5[2] == 0) ? amo_less_than : !amo_less_than;
     wire [63:0] val_minmax = amo_pick_mem ? amo_op_mem : amo_op_rs2;
 
-    //// 4. Calculate All Results (Parallel)
-    //wire [63:0] val_add  = amo_op_mem + amo_op_rs2;
-    //wire [63:0] val_xor  = amo_op_mem ^ amo_op_rs2;
-    //wire [63:0] val_and  = amo_op_mem & amo_op_rs2;
-    //wire [63:0] val_or   = amo_op_mem | amo_op_rs2;
-
+    // calculate
     wire [63:0] val_add = amo_op_mem + amo_op_rs2;
     wire [63:0] val_xor = amo_op_mem ^ amo_op_rs2;
     wire [63:0] val_and = amo_op_mem & amo_op_rs2;
     wire [63:0] val_or  = amo_op_mem | amo_op_rs2;
 
-    //// 5. Multiplexer for Memory Write Data
-    //wire [63:0] w_amo_calc_data = 
-    //    (w_func5 == 5'b00001) ? amo_op_rs2 : // swap
-    //    (w_func5 == 5'b00000) ? val_add    : // add
-    //    (w_func5 == 5'b00100) ? val_xor    : // xor
-    //    (w_func5 == 5'b01100) ? val_and    : // and
-    //    (w_func5 == 5'b01000) ? val_or     : // or
-    //                            val_minmax;  // min/max/minu/maxu
-
-   wire [63:0] w_amo_calc_data = 
-       (w_func5 == 5'b00001) ? amo_op_rs2 : // swap
-       (w_func5 == 5'b00000) ? val_add    : // add
-       (w_func5 == 5'b00100) ? val_xor    : // xor
-       (w_func5 == 5'b01100) ? val_and    : // and
-       (w_func5 == 5'b01000) ? val_or     : // or
-                               val_minmax ; // min/max/minu/maxu
-
-       //(w_func5 == 5'b1?000) ? val_mins   : // min/minu
-       //                        val_maxs   ; // max/maxu
-
-    //// 6. Write Data Formatting (Handle SC vs AMO)
-    //// For SC.w, we just write rs2[31:0]. For SC.d, rs2.
-    //// For AMOs, we use the calculated value.
-    //wire [63:0] w_atomic_write_data = (op == 7'b0101111 && w_func5[4:0] == 5'b00011) ? 
-    //                                  (is_word_op ? {32'b0, rs2[31:0]} : rs2) : // SC
-    //                                  w_amo_calc_data; // AMO
-
+    // write back memory data
+    wire [63:0] w_amo_calc_data = 
+        (w_func5 == 5'b00001) ? amo_op_rs2 : // swap
+        (w_func5 == 5'b00000) ? val_add    : // add
+        (w_func5 == 5'b00100) ? val_xor    : // xor
+        (w_func5 == 5'b01100) ? val_and    : // and
+        (w_func5 == 5'b01000) ? val_or     : // or
+                                val_minmax ; // min/max/minu/maxu
+    // formatting sc.w/sc.d/amo
     wire [63:0] w_atomic_write_data = (op == 7'b0101111 && w_func5[4:0] == 5'b00011) ? // SC
 	                              (is_word_op ? {32'b0, rs2[31:0]} : rs2) : // sc.w/sc.d
 				      w_amo_calc_data; // AMOs
