@@ -151,14 +151,23 @@ module riscv64(
     // ============================================================
     // SEPARATE MULTIPLIER ENGINE REGISTERS
     // ============================================================
-    reg [6:0]   mul_cnt;        // Counter (0-64)
-    reg [127:0] mul_acc;        // Accumulator (Product)
-    reg [63:0]  mul_a_reg;      // Multiplicand (Abs value)
-    reg         mul_active;     // State: 1 = Computing
-    reg         mul_done;       // Handshake: 1 = Ready
-    reg         mul_enable;     // Handshake: 1 = Start
-    reg         mul_neg_res;    // Sign of final result
-    reg [1:0]   mul_out_sel;    // 0:Low, 1:High, 2:Word(Low 32 sign-ext)
+    //reg [6:0]   mul_cnt;        // Counter (0-64)
+    //reg [127:0] mul_acc;        // Accumulator (Product)
+    //reg [63:0]  mul_a_reg;      // Multiplicand (Abs value)
+    //reg         mul_active;     // State: 1 = Computing
+    //reg         mul_done;       // Handshake: 1 = Ready
+    //reg         mul_enable;     // Handshake: 1 = Start
+    //reg         mul_neg_res;    // Sign of final result
+    //reg [1:0]   mul_out_sel;    // 0:Low, 1:High, 2:Word(Low 32 sign-ext)
+
+    reg [6:0]   mul_cnt;
+    reg [127:0] mul_acc; 
+    reg [63:0]  mul_a_reg;
+    reg         mul_active;
+    reg         mul_done;
+    reg         mul_enable;
+    reg         mul_neg_res;
+    reg [1:0]   mul_out_sel;
     
     // Helper signals for decoding operands
     // func3: 000(MUL), 001(MULH), 010(MULHSU), 011(MULHU)
@@ -167,7 +176,7 @@ module riscv64(
     wire mul_sign_b = mul_is_w ? 1'b1 : (w_func3[1:0] == 2'b00 || w_func3[1:0] == 2'b01); // Signed for MUL/MULH
 
 
-// ============================================================
+    // ============================================================
     // INDEPENDENT MULTIPLIER LOGIC (Sequential Shift-and-Add)
     // ============================================================
     always @(posedge clk or negedge reset) begin
