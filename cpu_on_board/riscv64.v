@@ -175,6 +175,9 @@ module riscv64(
     wire mul_sign_a = mul_is_w ? 1'b1 : (w_func3[1:0] != 2'b11); // Signed unless MULHU
     wire mul_sign_b = mul_is_w ? 1'b1 : (w_func3[1:0] == 2'b00 || w_func3[1:0] == 2'b01); // Signed for MUL/MULH
 
+    wire mul_is_w = (op == 7'b0111011); // Mulw (opc 0111011)
+    wire mul_sign_a = mul_is_w ? 1'b1 : (w_func3[1:0] != 2'b11); // signed unless Mulhu
+
 
     // ============================================================
     // INDEPENDENT MULTIPLIER LOGIC (Sequential Shift-and-Add)
