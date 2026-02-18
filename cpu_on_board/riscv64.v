@@ -171,12 +171,13 @@ module riscv64(
     
     // Helper signals for decoding operands
     // func3: 000(MUL), 001(MULH), 010(MULHSU), 011(MULHU)
-    wire mul_is_w   = (op == 7'b0111011); // MULW (Opcode 0111011)
-    wire mul_sign_a = mul_is_w ? 1'b1 : (w_func3[1:0] != 2'b11); // Signed unless MULHU
-    wire mul_sign_b = mul_is_w ? 1'b1 : (w_func3[1:0] == 2'b00 || w_func3[1:0] == 2'b01); // Signed for MUL/MULH
+    //wire mul_is_w   = (op == 7'b0111011); // MULW (Opcode 0111011)
+    //wire mul_sign_a = mul_is_w ? 1'b1 : (w_func3[1:0] != 2'b11); // Signed unless MULHU
+    //wire mul_sign_b = mul_is_w ? 1'b1 : (w_func3[1:0] == 2'b00 || w_func3[1:0] == 2'b01); // Signed for MUL/MULH
 
     wire mul_is_w = (op == 7'b0111011); // Mulw (opc 0111011)
-    wire mul_sign_a = mul_is_w ? 1'b1 : (w_func3[1:0] != 2'b11); // signed unless Mulhu
+    wire mul_sign_a = mul_is_w ? 1'b1 : (w_func3 != 3'b011); // signed except Mulhu
+    wire mul_sign_b = mul_is_w ? 1'b1 : (w_func3 == 3'b000 || w_func3 == 3'b001); // signed Mul/Mulh
 
 
     // ============================================================
