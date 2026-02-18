@@ -232,17 +232,27 @@ module riscv64(
 
                 // Load Abs(B) into Lower Accumulator
                 // We initialize High Accumulator to 0
-                if (mul_is_w) mul_acc <= {64'd0, 32'd0, (rs2[31] ? -rs2[31:0] : rs2[31:0])};
-                else mul_acc <= {64'd0, (mul_sign_b && rs2[63]) ? -rs2 : rs2};
-            end 
+            //    if (mul_is_w) mul_acc <= {64'd0, 32'd0, (rs2[31] ? -rs2[31:0] : rs2[31:0])};
+            //    else mul_acc <= {64'd0, (mul_sign_b && rs2[63]) ? -rs2 : rs2};
+            //end 
+	        // load abs(b) into lower accumulator
+	        if (mul_is_w) mul_acc <= {64'd0, 32'd0, (rs2[31] ? -rs2[31:0] : rs2[31:0])};
+		else mul_acc <= {64'd0, (mul_sign_b && rs2[63]) ? -rs2 :rs2};
+	    end
+            //else if (mul_active) begin
+            //    // --- COMPUTE PHASE (64 Cycles) ---
+            //    if (mul_cnt < 64) begin
+            //        // 1. Check LSB of Multiplier (stored in mul_acc[0])
+            //        if (mul_acc[0]) begin
+            //            // Add Multiplicand to Upper Half
+            //            mul_acc[127:64] <= mul_acc[127:64] + mul_a_reg;
+            //        end
             else if (mul_active) begin
-                // --- COMPUTE PHASE (64 Cycles) ---
-                if (mul_cnt < 64) begin
-                    // 1. Check LSB of Multiplier (stored in mul_acc[0])
-                    if (mul_acc[0]) begin
-                        // Add Multiplicand to Upper Half
-                        mul_acc[127:64] <= mul_acc[127:64] + mul_a_reg;
-                    end
+		// compute phase (64 cycles)
+		if (mul_cnt < 64) begin
+		    if (mul_acc[0]) begin  // is 1
+			mul_acc[127:64] <= mul_acc[127:64] + mul_a_reg; // add multiplicand to upper half
+		    end
                     
                     // 2. Shift Right Entire Accumulator
                     // This moves the next bit of Multiplier into pos 0
@@ -251,27 +261,47 @@ module riscv64(
                     // but usually splitting them:
                     // Here we do: (High + A) >> 1, Low >> 1
                     
-                    if (mul_acc[0])
-                        mul_acc <= {1'b0, (mul_acc[127:64] + mul_a_reg), mul_acc[63:1]};
-                    else
-                        mul_acc <= {1'b0, mul_acc[127:1]};
+                //    if (mul_acc[0])
+                //        mul_acc <= {1'b0, (mul_acc[127:64] + mul_a_reg), mul_acc[63:1]};
+                //    else
+                //        mul_acc <= {1'b0, mul_acc[127:1]};
 
-                    mul_cnt <= mul_cnt + 1;
-                end else begin
-                    // --- FINISH PHASE ---
-                    mul_active <= 0;
-                    mul_done   <= 1;
-                    
-                    // Final Negation if result should be negative
-                    if (mul_neg_res) mul_acc <= -mul_acc;
-                end
-            end 
+                //    mul_cnt <= mul_cnt + 1;
+                //end else begin
+		    // shift
+		    if (mul_acc[0])   // >>
+			mul_acc <= {1'b0, (mul_acc[127:64] + mul_a_reg), mul_acc[63:1]};
+		    else
+			mul_acc <= {1'b0, mul_acc[127:1]};
+		    mul_cnt <= mul_cnt + 1;
+		end else begin
+            //        // --- FINISH PHASE ---
+            //        mul_active <= 0;
+            //        mul_done   <= 1;
+            //        
+            //        // Final Negation if result should be negative
+            //        if (mul_neg_res) mul_acc <= -mul_acc;
+            //    end
+            //end 
+	            // finish phase
+	            mul_active <= 0;
+		    mul_done   <= 1;
+		    if  (mul_neg_reg) mul_acc <= -mul_acc;
+		end
+	    end
+    //        else if (!mul_enable) begin
+    //            // --- RESET HANDSHAKE ---
+    //            mul_done <= 0;
+    //        end
+    //    end
+    //end
             else if (!mul_enable) begin
-                // --- RESET HANDSHAKE ---
-                mul_done <= 0;
-            end
-        end
+		// reset handshake
+		mul_done <= 0;
+	    end
+	end
     end
+// --
 
 		    //32'b0000001_?????_?????_010_?????_0110011: begin
 		    //    if (mul_step == 0) begin
@@ -942,27 +972,46 @@ module riscv64(
                     // M-Extension: Multiplication (Sequential)
                     // Matches 0110011 (Op) + 0000001 (Func7) + Func3 0xx
                     // Also matches 0111011 (Op Word) + 0000001 (Func7) + Func3 000 (MULW)
-                    32'b0000001_?????_?????_0??_?????_0110011, // MUL, MULH, MULHSU, MULHU
-                    32'b0000001_?????_?????_000_?????_0111011: // MULW
-                    begin
-                        if (!mul_done) begin
-                            // 1. Request Start
-                            mul_enable <= 1;
-                            // 2. Stall Pipeline
-                            pc <= pc - 4;
-                            bubble <= 1;
-                        end else begin
-                            // 3. Result Ready
-                            mul_enable <= 0;
-                            
-                            // Select Output based on cached type
-                            if (mul_out_sel == 0)      re[w_rd] <= mul_acc[63:0];   // MUL
-                            else if (mul_out_sel == 1) re[w_rd] <= mul_acc[127:64]; // MULH*
-                            else                       re[w_rd] <= {{32{mul_acc[31]}}, mul_acc[31:0]}; // MULW (Sign Ext)
-                            
-                            // Bubble clears next cycle
-                        end
-                    end
+                    //32'b0000001_?????_?????_0??_?????_0110011, // MUL, MULH, MULHSU, MULHU
+                    //32'b0000001_?????_?????_000_?????_0111011: // MULW
+                    //begin
+                    //    if (!mul_done) begin
+                    //        // 1. Request Start
+                    //        mul_enable <= 1;
+                    //        // 2. Stall Pipeline
+                    //        pc <= pc - 4;
+                    //        bubble <= 1;
+                    //    end else begin
+                    //        // 3. Result Ready
+                    //        mul_enable <= 0;
+                    //        
+                    //        // Select Output based on cached type
+                    //        if (mul_out_sel == 0)      re[w_rd] <= mul_acc[63:0];   // MUL
+                    //        else if (mul_out_sel == 1) re[w_rd] <= mul_acc[127:64]; // MULH*
+                    //        else                       re[w_rd] <= {{32{mul_acc[31]}}, mul_acc[31:0]}; // MULW (Sign Ext)
+                    //        
+                    //        // Bubble clears next cycle
+                    //    end
+                    //end
+		    32'b0000001_?????_?????_0??_?????_0110011; // Mul, Mulh, Mulhsu, Mulhu
+		    32'b0000001_?????_?????_000_?????_0111011; // Mulw
+		    begin
+			if (!mul_done) begin
+			    // request start
+			    mul_enable <= 1;
+			    // stall pipeline
+			    pc <= pc - 4;
+			    bubble <= 1;
+			end else begin
+			    // result ready
+			    mul_enable <= 0;
+			    // select output based on cached type
+			    if (mul_out_sel == 0)      re[w_rd] <= mul_acc[63:0]; // Mul
+			    else if (mul_out_sel == 1) re[w_rd] <= mul_acc[127:64]; // Mulh*
+			    else                       re[w_rd] <= {{32{mul_acc[31]}}, mul_acc[31:0]}; // Mulw
+			end
+		    end
+
                     
                     // M-Extension: Division and Remainder
                     // Opcode: 0110011 (Reg-Reg), Func7: 0000001 (M-Ext)
