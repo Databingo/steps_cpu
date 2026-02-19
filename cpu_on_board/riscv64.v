@@ -209,8 +209,8 @@ module riscv64(
                 //else if (w_func3 == 0) mul_out_sel <= 0; // MUL (Low)
                 //else mul_out_sel <= 1;               // MULH* (High)
 		// 1. Determine output mode
-	        if (mul_is_w) mul_out_set <= 2; // mulw
-		else if (w_func3 == 0) mul_out_set <= 0; // mul
+	        if (mul_is_w) mul_out_sel <= 2; // mulw
+		else if (w_func3 == 0) mul_out_sel <= 0; // mul
 		else mul_out_sel <= 1;   // mulh* 
 
                 // 2. Prepare Operands (Convert to Absolute)
