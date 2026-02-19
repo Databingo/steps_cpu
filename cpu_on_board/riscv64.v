@@ -838,30 +838,6 @@ module riscv64(
 
 	            // -- ATOMIC end --
                     // M extension // M mul mulh mulhsu mulhu div divu rem remu mulw divw divuw remuw
-                    // M-Extension: Multiplication (Sequential)
-                    // Matches 0110011 (Op) + 0000001 (Func7) + Func3 0xx
-                    // Also matches 0111011 (Op Word) + 0000001 (Func7) + Func3 000 (MULW)
-                    //32'b0000001_?????_?????_0??_?????_0110011, // MUL, MULH, MULHSU, MULHU
-                    //32'b0000001_?????_?????_000_?????_0111011: // MULW
-                    //begin
-                    //    if (!mul_done) begin
-                    //        // 1. Request Start
-                    //        mul_enable <= 1;
-                    //        // 2. Stall Pipeline
-                    //        pc <= pc - 4;
-                    //        bubble <= 1;
-                    //    end else begin
-                    //        // 3. Result Ready
-                    //        mul_enable <= 0;
-                    //        
-                    //        // Select Output based on cached type
-                    //        if (mul_out_sel == 0)      re[w_rd] <= mul_acc[63:0];   // MUL
-                    //        else if (mul_out_sel == 1) re[w_rd] <= mul_acc[127:64]; // MULH*
-                    //        else                       re[w_rd] <= {{32{mul_acc[31]}}, mul_acc[31:0]}; // MULW (Sign Ext)
-                    //        
-                    //        // Bubble clears next cycle
-                    //    end
-                    //end
 		    32'b0000001_?????_?????_0??_?????_0110011, // Mul, Mulh, Mulhsu, Mulhu
 		    32'b0000001_?????_?????_000_?????_0111011: // Mulw
 		    begin
@@ -880,6 +856,9 @@ module riscv64(
 			    else                       re[w_rd] <= {{32{mul_acc[31]}}, mul_acc[31:0]}; // Mulw
 			end
 		    end
+
+
+
 
                     
                     // M-Extension: Division and Remainder
