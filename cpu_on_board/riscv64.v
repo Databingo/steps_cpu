@@ -161,7 +161,7 @@ module riscv64(
     //reg [1:0]   mul_out_sel;    // 0:Low, 1:High, 2:Word(Low 32 sign-ext)
 
     reg [6:0]   mul_cnt;
-    reg [127:0] mul_acc; 
+    reg [127:0] mul_acc;  // result|multiplier
     reg [63:0]  mul_a_reg;
     reg         mul_active;
     reg         mul_done;
