@@ -286,7 +286,7 @@ module riscv64(
 	            // finish phase
 	            mul_active <= 0;
 		    mul_done   <= 1;
-		    if  (mul_neg_reg) mul_acc <= -mul_acc;
+		    if  (mul_neg_res) mul_acc <= -mul_acc;
 		end
 	    end
     //        else if (!mul_enable) begin
