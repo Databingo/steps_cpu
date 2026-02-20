@@ -255,7 +255,7 @@ module riscv64(
     //wire div_op_is_rem = ir[13];  // func3[1] == 1 is rem
     // signal 100div/w 101divu 110rem/w 111remu
     wire div_op_signed = !ir[12];  // func3[0] == 0 is signed
-    wire div_op_is_ren = ir[13];   // func3[1] == 1 is rem
+    wire div_op_is_rem = ir[13];   // func3[1] == 1 is rem
 
     // ============================================================
     // INDEPENDENT DIVIDER LOGIC (Sequential Shift-and-Subtract)
@@ -299,7 +299,7 @@ module riscv64(
 		// handle corner case
 		if (rs2 == 0) begin
 		    // divide by zero
-		    div_resutl_out <= div_op_is_rem ? rs1 : -64'd1;
+		    div_result_out <= div_op_is_rem ? rs1 : -64'd1;
 		    div_active <= 0;
 		    div_done <= 1; // finish immediately
 		end
@@ -340,7 +340,7 @@ module riscv64(
             //            div_rem <= {div_rem[126:0], 1'b0};
             //        end
             //        div_cnt <= div_cnt + 1;
-            end else if (div_actives) begin
+            end else if (div_active) begin
 		// compute phase (64 cycles)
 		if (div_cnt < 64) begin
 		    if (div_rem[126:63] >= div_b) begin
