@@ -919,20 +919,34 @@ module riscv64(
                     // M-Extension: Division and Remainder
                     // Opcode: 0110011 (Reg-Reg), Func7: 0000001 (M-Ext)
                     // Func3: 100(DIV), 101(DIVU), 110(REM), 111(REMU)
-                    32'b0000001_?????_?????_1??_?????_0110011: begin 
-                        if (!div_done) begin
-                            // 1. Request Start
-                            div_enable <= 1; 
-                            // 2. Stall Pipeline
-                            pc <= pc - 4;    
-                            bubble <= 1;     
-                        end else begin
-                            // 3. Result Ready
-                            re[w_rd] <= div_result_out; 
-                            div_enable <= 0; // Clear Request
-                            // Bubble automatically clears in next cycle, PC proceeds
-                        end
-                    end
+                    //32'b0000001_?????_?????_1??_?????_0110011: begin 
+                    //    if (!div_done) begin
+                    //        // 1. Request Start
+                    //        div_enable <= 1; 
+                    //        // 2. Stall Pipeline
+                    //        pc <= pc - 4;    
+                    //        bubble <= 1;     
+                    //    end else begin
+                    //        // 3. Result Ready
+                    //        re[w_rd] <= div_result_out; 
+                    //        div_enable <= 0; // Clear Request
+                    //        // Bubble automatically clears in next cycle, PC proceeds
+                    //    end
+                    //end
+		    32'b0000001_?????_?????_1??_?????_0110011: begin
+			if (!div_done) begin
+			    div_enable <= 1;
+			    pc <= pc - 4;
+			    bubble <= 1;
+			end else begin
+			    re[w_rd] <= div_result_out;
+			    div_enable <= 0;
+			end
+		    end
+
+
+
+
 	            // F (reg f0-f31)
 	            // flw fsw fadd.s fsub.s fmul.s fdiv.s fsqrt.s fmadd.s
 	            // fmsub.s fnmsub.s fcvt.w.s fcvt.wu.s fcvt.s.w fcvt.s.wu
