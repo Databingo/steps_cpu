@@ -227,18 +227,18 @@ module riscv64(
     // ============================================================
     // SEPARATE DIVIDER ENGINE REGISTERS
     // ============================================================
-    reg [6:0]   div_cnt;        // Counter (0-64)
-    reg [127:0] div_rem;        // Combined {Remainder, Quotient} register
-    reg [63:0]  div_b;          // Divisor register
-    reg         div_active;     // State: 1 = Computing, 0 = Idle
-    reg         div_done;       // Handshake: 1 = Result Ready
-    reg         div_enable;     // Handshake: 1 = Start Request
-    reg         div_sign_q;     // Sign of Quotient
-    reg         div_sign_r;     // Sign of Remainder
-    reg         div_is_rem;     // 1 for REM, 0 for DIV operation
-    reg [63:0]  div_result_out; // Final output buffer
+    //reg [6:0]   div_cnt;        // Counter (0-64)
+    //reg [127:0] div_rem;        // Combined {Remainder, Quotient} register
+    //reg [63:0]  div_b;          // Divisor register
+    //reg         div_active;     // State: 1 = Computing, 0 = Idle
+    //reg         div_done;       // Handshake: 1 = Result Ready
+    //reg         div_enable;     // Handshake: 1 = Start Request
+    //reg         div_sign_q;     // Sign of Quotient
+    //reg         div_sign_r;     // Sign of Remainder
+    //reg         div_is_rem;     // 1 for REM, 0 for DIV operation
+    //reg [63:0]  div_result_out; // Final output buffer
 
-
+    // independent divider
     reg [6:0]   div_cnt;
     reg [127:0] div_rem;   // remainder|quotient
     reg [63:0]  div_b;    // divisor
@@ -253,6 +253,9 @@ module riscv64(
     // Helper signals for decoding inside the divider
     wire div_op_signed = !ir[12]; // func3[0] == 0 is signed
     wire div_op_is_rem = ir[13];  // func3[1] == 1 is rem
+    // signal 100div/w 101divu 110rem/w 111remu
+    wire div_op_signed = !ir[12];  // func3[0] == 0 is signed
+    wire div_op_is_ren = ir[13];   // func3[1] == 1 is rem
     // ============================================================
     // INDEPENDENT DIVIDER LOGIC (Sequential Shift-and-Subtract)
     // ============================================================
