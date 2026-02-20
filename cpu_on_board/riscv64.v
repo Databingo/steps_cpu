@@ -308,6 +308,7 @@ module riscv64(
 		    div_result_out <= div_op_is_rem ? 64'd0 : rs1;
 		    div_active <= 0;
 		    div_done <= 1; // finish immediately
+		end
                 //else begin
                 //    // Normal Division Setup
                 //    // 1. Determine Signs
