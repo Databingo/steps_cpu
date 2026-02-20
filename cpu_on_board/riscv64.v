@@ -217,27 +217,6 @@ module riscv64(
 	end
     end
 
-
-
-
-
-
-
-
-    // ============================================================
-    // SEPARATE DIVIDER ENGINE REGISTERS
-    // ============================================================
-    //reg [6:0]   div_cnt;        // Counter (0-64)
-    //reg [127:0] div_rem;        // Combined {Remainder, Quotient} register
-    //reg [63:0]  div_b;          // Divisor register
-    //reg         div_active;     // State: 1 = Computing, 0 = Idle
-    //reg         div_done;       // Handshake: 1 = Result Ready
-    //reg         div_enable;     // Handshake: 1 = Start Request
-    //reg         div_sign_quotient;     // Sign of Quotient
-    //reg         div_sign_reminder;     // Sign of Remainder
-    //reg         div_is_rem;     // 1 for REM, 0 for DIV operation
-    //reg [63:0]  div_result_out; // Final output buffer
-
     // independent divider
     reg [6:0]   div_cnt;
     reg [127:0] div_rem;   // remainder|quotient
@@ -250,52 +229,22 @@ module riscv64(
     reg         div_is_rem; // 1rem, 0div
     reg [63:0]  div_result_out; // final output buffer
     
-    //// Helper signals for decoding inside the divider
-    //wire div_op_signed = !ir[12]; // func3[0] == 0 is signed
-    //wire div_op_is_rem = ir[13];  // func3[1] == 1 is rem
     // signal 100div/w 101divu 110rem/w 111remu
     wire div_op_signed = !ir[12];  // func3[0] == 0 is signed
     wire div_op_is_rem = ir[13];   // func3[1] == 1 is rem
 
-    // ============================================================
-    // INDEPENDENT DIVIDER LOGIC (Sequential Shift-and-Subtract)
-    // ============================================================
-    //always @(posedge clk or negedge reset) begin
-    //    if (!reset) begin
-    //        div_active <= 0;
-    //        div_done   <= 0;
-    //        div_cnt    <= 0;
-    //    end else begin
     always @(posedge clk or negedge reset) begin
 	if (!reset) begin
 	    div_active <= 0;
 	    div_done   <= 0;
 	    div_cnt    <= 0;
 	end else begin
-            //if (div_enable && !div_active && !div_done) begin
-            //    // --- START PHASE ---
-            //    div_active <= 1;
-            //    div_cnt    <= 0;
-            //    div_is_rem <= div_op_is_rem;
             if (div_enable && !div_active && !div_done) begin
 		// start phase
 		div_active <= 1;
 		div_cnt <= 0;
 		div_is_rem <= div_op_is_rem;
 
-                //// Handle Corner Cases & Setup in one go to save MUX resources
-                //if (rs2 == 0) begin
-                //    // Divide by Zero
-                //    div_result_out <= div_op_is_rem ? rs1 : -64'd1; 
-                //    div_active <= 0; 
-                //    div_done   <= 1; // Finish immediately
-                //end 
-                //else if (div_op_signed && rs1 == 64'h8000000000000000 && rs2 == -64'd1) begin
-                //    // Signed Overflow
-                //    div_result_out <= div_op_is_rem ? 64'd0 : rs1;
-                //    div_active <= 0;
-                //    div_done   <= 1; // Finish immediately
-                //end 
 		// handle corner case
 		if (rs2 == 0) begin
 		    // divide by zero
@@ -309,16 +258,6 @@ module riscv64(
 		    div_active <= 0;
 		    div_done <= 1; // finish immediately
 		end
-                //else begin
-                //    // Normal Division Setup
-                //    // 1. Determine Signs
-                //    div_sign_reminder <= div_op_signed ? rs1[63] : 0;
-                //    div_sign_quotient <= div_op_signed ? (rs1[63] ^ rs2[63]) : 0;
-                //    
-                //    // 2. Load Absolute Values
-                //    div_rem <= {64'd0, (div_op_signed && rs1[63]) ? -rs1 : rs1};
-                //    div_b   <= (div_op_signed && rs2[63]) ? -rs2 : rs2;
-                //end
 		else begin 
 		    // mormal division setup
 		    // 1. determine signs
@@ -328,18 +267,6 @@ module riscv64(
 		    div_rem <= {64'd0, (div_op_signed && rs1[63]) ? -rs1 :rs1};
 		    div_b <= (div_op_signed && rs2[63]) ? -rs2 : rs2;
 		end
-            //end else if (div_active) begin
-            //    // --- COMPUTE PHASE (64 Cycles) ---
-            //    if (div_cnt < 64) begin
-            //        // Shift Left: div_rem << 1
-            //        // Subtract: if High part >= Divisor
-            //        // We do this using a temporary calc to keep logic compact
-            //        if (div_rem[126:63] >= div_b) begin
-            //            div_rem <= {div_rem[126:63] - div_b, div_rem[62:0], 1'b1};
-            //        end else begin
-            //            div_rem <= {div_rem[126:0], 1'b0};
-            //        end
-            //        div_cnt <= div_cnt + 1;
             end else if (div_active) begin
 		// compute phase (64 cycles)
 		if (div_cnt < 64) begin
@@ -350,19 +277,6 @@ module riscv64(
 		    end
 		    div_cnt <= div_cnt + 1;
 
-            //    end else begin
-            //        // --- FINISH PHASE ---
-            //        div_active <= 0;
-            //        div_done   <= 1;
-
-            //        // Apply Signs to Result
-            //        if (div_is_rem) 
-            //            div_result_out <= div_sign_reminder ? -div_rem[127:64] : div_rem[127:64];
-            //        else 
-            //            div_result_out <= div_sign_quotient ? -div_rem[63:0] : div_rem[63:0];
-            //    end
-            //end 
-
 	        end else begin
 		    // finish phase
 		    div_active <= 0;
@@ -370,12 +284,6 @@ module riscv64(
 		    if (div_is_rem) div_result_out <= div_sign_reminder ? -div_rem[127:64] : div_rem[127:64];
 		    else div_result_out <= div_sign_quotient ? -div_rem[63:0] : div_rem[63:0];
 		end
-    //        else if (!div_enable) begin
-    //            // --- RESET HANDSHAKE ---
-    //            div_done <= 0;
-    //        end
-    //    end
-    //end
 	    end else if (!div_enable) begin
 		// reset handshake
 	        div_done <= 0;
@@ -912,27 +820,7 @@ module riscv64(
 			end
 		    end
 
-
-
-
-                    
                     // M-Extension: Division and Remainder
-                    // Opcode: 0110011 (Reg-Reg), Func7: 0000001 (M-Ext)
-                    // Func3: 100(DIV), 101(DIVU), 110(REM), 111(REMU)
-                    //32'b0000001_?????_?????_1??_?????_0110011: begin 
-                    //    if (!div_done) begin
-                    //        // 1. Request Start
-                    //        div_enable <= 1; 
-                    //        // 2. Stall Pipeline
-                    //        pc <= pc - 4;    
-                    //        bubble <= 1;     
-                    //    end else begin
-                    //        // 3. Result Ready
-                    //        re[w_rd] <= div_result_out; 
-                    //        div_enable <= 0; // Clear Request
-                    //        // Bubble automatically clears in next cycle, PC proceeds
-                    //    end
-                    //end
 		    32'b0000001_?????_?????_1??_?????_0110011: begin
 			if (!div_done) begin
 			    div_enable <= 1;
@@ -943,9 +831,6 @@ module riscv64(
 			    div_enable <= 0;
 			end
 		    end
-
-
-
 
 	            // F (reg f0-f31)
 	            // flw fsw fadd.s fsub.s fmul.s fdiv.s fsqrt.s fmadd.s
@@ -963,4 +848,3 @@ module riscv64(
     end
 
 endmodule
-
