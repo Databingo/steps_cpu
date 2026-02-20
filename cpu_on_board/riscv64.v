@@ -326,7 +326,7 @@ module riscv64(
 		    div_sign_quotient <= div_op_signed ? (rs1[63] & rs2[63]) :0;
 		    // 2. load absoulte values
 		    div_rem <= {64'd0, (div_op_signed && rs1[63]) ? -rs1 :rs1};
-		    div_b <= (div_op_signed && rs2[63] ? -rs2 : rs2;
+		    div_b <= (div_op_signed && rs2[63]) ? -rs2 : rs2;
 		end
             //end else if (div_active) begin
             //    // --- COMPUTE PHASE (64 Cycles) ---
