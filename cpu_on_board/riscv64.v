@@ -148,18 +148,6 @@ module riscv64(
 	                              (is_word_op ? {32'b0, rs2[31:0]} : rs2) : // sc.w/sc.d
 				      w_amo_calc_data; // AMOs
     // -- mul rela --
-    // ============================================================
-    // SEPARATE MULTIPLIER ENGINE REGISTERS
-    // ============================================================
-    //reg [6:0]   mul_cnt;        // Counter (0-64)
-    //reg [127:0] mul_acc;        // Accumulator (Product)
-    //reg [63:0]  mul_a_reg;      // Multiplicand (Abs value)
-    //reg         mul_active;     // State: 1 = Computing
-    //reg         mul_done;       // Handshake: 1 = Ready
-    //reg         mul_enable;     // Handshake: 1 = Start
-    //reg         mul_neg_res;    // Sign of final result
-    //reg [1:0]   mul_out_sel;    // 0:Low, 1:High, 2:Word(Low 32 sign-ext)
-
     reg [6:0]   mul_cnt;
     reg [127:0] mul_acc;  // result|multiplier
     reg [63:0]  mul_a_reg;
@@ -169,12 +157,7 @@ module riscv64(
     reg         mul_neg_res;
     reg [1:0]   mul_out_sel;
     
-    // Helper signals for decoding operands
-    // func3: 000(MUL), 001(MULH), 010(MULHSU), 011(MULHU)
-    //wire mul_is_w   = (op == 7'b0111011); // MULW (Opcode 0111011)
-    //wire mul_sign_a = mul_is_w ? 1'b1 : (w_func3[1:0] != 2'b11); // Signed unless MULHU
-    //wire mul_sign_b = mul_is_w ? 1'b1 : (w_func3[1:0] == 2'b00 || w_func3[1:0] == 2'b01); // Signed for MUL/MULH
-
+    // 000mul 001mulh 010mulhsu 011mulhu
     wire mul_is_w = (op == 7'b0111011); // Mulw (opc 0111011)
     wire mul_sign_a = mul_is_w ? 1'b1 : (w_func3 != 3'b011); // signed except Mulhu
     wire mul_sign_b = mul_is_w ? 1'b1 : (w_func3 == 3'b000 || w_func3 == 3'b001); // signed Mul/Mulh
@@ -254,6 +237,18 @@ module riscv64(
     reg         div_sign_r;     // Sign of Remainder
     reg         div_is_rem;     // 1 for REM, 0 for DIV operation
     reg [63:0]  div_result_out; // Final output buffer
+
+
+    reg [6:0]   div_cnt;
+    reg [127:0] div_rem;   // remainder|quotient
+    reg [63:0]  div_b;    // divisor
+    reg         div_active; // 1computing, 0idle
+    reg         div_done;   // handshake 1result ready
+    reg         div_enable; // handshake 1start request
+    reg         div_sign_q; // sige of quotient
+    reg         div_sign_r; // sige of remainder
+    reg         div_is_rem; // 1rem, 0div
+    reg [63:0]  div_result_out; // final output buffer
     
     // Helper signals for decoding inside the divider
     wire div_op_signed = !ir[12]; // func3[0] == 0 is signed
