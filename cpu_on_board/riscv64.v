@@ -798,9 +798,10 @@ module riscv64(
 		        end
 		        if (store_step == 1 && bus_write_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working 1 bubble2 this3
 		        if (store_step == 1 && bus_write_done == 1) begin store_step <= 0; end end //
-
 	            // -- ATOMIC end --
-                    // M extension // M mul mulh mulhsu mulhu div divu rem remu mulw divw divuw remuw
+
+                    // M-Extension 
+		    // M mul mulh mulhsu mulhu 
 		    32'b0000001_?????_?????_0??_?????_0110011, // Mul, Mulh, Mulhsu, Mulhu
 		    32'b0000001_?????_?????_000_?????_0111011: // Mulw
 		    begin
@@ -820,7 +821,8 @@ module riscv64(
 			end
 		    end
 
-                    // M-Extension: Division and Remainder
+		    // M-Extension
+		    // div divu rem remu mulw divw divuw remuw
 		    32'b0000001_?????_?????_1??_?????_0110011: begin
 			if (!div_done) begin
 			    div_enable <= 1;
