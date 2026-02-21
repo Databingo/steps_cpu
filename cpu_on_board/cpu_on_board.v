@@ -106,35 +106,6 @@ assign DRAM_CKE = 1; // always enable
         .reset_n(KEY0)
     );
     
-    
-    
-
-    //wire clock_1hz_dirty;
-    //wire clock_1hz;
-    //clock_slower clock_ins(
-    //    .clk_in(CLOCK_50),
-    //    .clk_out(clock_1hz_dirty),
-    //    .reset_n(KEY0)
-    //);
-    //global global_clk_inst (
-    //    .in(clock_1hz_dirty),
-    //    .out(clock_1hz)
-    //);
-
-//wire sdram_clk;
-//
-//    // -- sdram pll --
-//    sdram_pll sdrampll (
-//        .clk_clk                        (clock_1hz),               //                     clk.clk
-//        .reset_reset_n                  (KEY0),                   //                   reset.reset_n
-//        .altpll_0_c0_clk                (clock_1hz),                //             altpll_0_c0.clk
-//        .altpll_0_c1_clk                (sdram_clk),              //             altpll_0_c1.clk
-//        .altpll_0_areset_conduit_export (), // altpll_0_areset_conduit.export
-//        .altpll_0_locked_conduit_export ()  // altpll_0_locked_conduit.export
-//    );
-
-
-
 
     wire [63:0] ppc;
     reg [31:0] ir_bd;
