@@ -218,6 +218,7 @@ module riscv64(
     //end
     // improve signed-correct
     // -- mul rela --
+    // Indepenedent Multiplier // Booth algorithim + Signed-correct
     reg [6:0]   mul_cnt;
     reg [128:0] mul_acc;  // sign|result|multiplier
     reg [64:0]  mul_a_reg;
@@ -241,7 +242,6 @@ module riscv64(
     wire [64:0] adder_input_a = do_sub ? ~mul_a_reg : mul_a_reg;
     wire [64:0] sum_upper = mul_acc[128:64] + adder_input_a + do_sub;
 
-    // Indepenedent Multiplier // Booth algorithim
     always @(posedge clk or negedge reset) begin  
         if (!reset) begin
             mul_active <= 0;
@@ -252,23 +252,21 @@ module riscv64(
 		// Start phase
 		mul_active <= 1;
 		mul_cnt    <= 0;
-                
 		// 1. Determine output mode
 	        if (mul_is_w) mul_out_sel <= 2; // mulw
 		else if (w_func3 == 0) mul_out_sel <= 0; // mul
 		else mul_out_sel <= 1;   // mulh* 
-
 		mul_a_reg <= ext_a;
 		mul_acc <= {65'd0, raw_b};
 		mul_b_is_signed <= mul_sign_b;
 	    end else if (mul_active) begin
-		// compute phase (64 cycles)
+		// Compute phase (64 cycles)
 		if (mul_cnt < 64) begin
 		    if (mul_acc[0]) mul_acc <= {sum_upper[64], sum_upper, mul_acc[63:1]}; // is 1,  + and << 1
 		    else mul_acc <= {mul_acc[128], mul_acc[128:1]}; // is 0, only << 1, preserve sign bit
 		    mul_cnt <= mul_cnt + 1;
 		end else begin
-	            // finish phase
+	            // Finish phase
 	            mul_active <= 0;
 		    mul_done   <= 1;
 		end
@@ -276,7 +274,7 @@ module riscv64(
 	end
     end
 
-    // independent divider
+    // Independent divider
     reg [6:0]   div_cnt;
     reg [127:0] div_rem;   // remainder|quotient
     reg [63:0]  div_b;    // divisor
@@ -303,7 +301,6 @@ module riscv64(
 		div_active <= 1;
 		div_cnt <= 0;
 		div_is_rem <= div_op_is_rem;
-
 		// handle corner case
 		if (rs2 == 0) begin
 		    // divide by zero
@@ -335,7 +332,6 @@ module riscv64(
 		        div_rem <= {div_rem[126:0], 1'b0};
 		    end
 		    div_cnt <= div_cnt + 1;
-
 	        end else begin
 		    // finish phase
 		    div_active <= 0;
@@ -343,10 +339,7 @@ module riscv64(
 		    if (div_is_rem) div_result_out <= div_sign_reminder ? -div_rem[127:64] : div_rem[127:64];
 		    else div_result_out <= div_sign_quotient ? -div_rem[63:0] : div_rem[63:0];
 		end
-	    end else if (!div_enable) begin
-		// reset handshake
-	        div_done <= 0;
-	    end
+	    end else if (!div_enable) div_done <= 0; // reset handshake
 	end
     end
 
