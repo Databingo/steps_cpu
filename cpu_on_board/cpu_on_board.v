@@ -105,22 +105,8 @@ assign DRAM_CKE = 1; // always enable
         .clk_out(clock_1hz),
         .reset_n(KEY0)
     );
-    
-    
-    
 
-    //wire clock_1hz_dirty;
-    //wire clock_1hz;
-    //clock_slower clock_ins(
-    //    .clk_in(CLOCK_50),
-    //    .clk_out(clock_1hz_dirty),
-    //    .reset_n(KEY0)
-    //);
-    //global global_clk_inst (
-    //    .in(clock_1hz_dirty),
-    //    .out(clock_1hz)
-    //);
-
+//wire clock_1hz;
 //wire sdram_clk;
 //
 //    // -- sdram pll --
@@ -345,8 +331,6 @@ assign DRAM_CKE = 1; // always enable
 
 	    if (Art_selected) begin 
 	        if (uart_read_step ==0) begin uart_read_pulse <= 1; uart_read_step <= 1; end
-	        //if (uart_read_step ==1 &&  uart_waitrequest) begin uart_read_pulse <= 1; end
-	        //if (uart_read_step ==1 && !uart_waitrequest) begin bus_read_data <= uart_readdata; uart_read_step <= 0; bus_read_done <=1; uart_read_pulse <= 0;end
 	        if (uart_read_step ==1 && !uart_waitrequest) begin bus_read_data <= uart_readdata; uart_read_step <= 0; bus_read_done <=1; end
 	    end
 
@@ -479,12 +463,8 @@ assign DRAM_CKE = 1; // always enable
 	    //if (Art_selected) begin uart_write_pulse <= 1; bus_write_done <=1; end
 	    if (Art_selected) begin 
 	        if (uart_write_step ==0) begin uart_write_pulse <= 1; uart_write_step <= 1; end
-	        //if (uart_write_step ==1 &&  uart_waitrequest) begin uart_write_pulse <= 1; end
-	        //if (uart_write_step ==1 && !uart_waitrequest) begin uart_write_step <= 0; bus_write_done <=1; uart_write_pulse <= 0;end
 	        if (uart_write_step ==1 && !uart_waitrequest) begin uart_write_step <= 0; bus_write_done <=1; end
 	    end
-        
-	
 
 	    if (Mtimecmp_selected) begin mtimecmp <= bus_write_data; bus_write_done <= 1; end
 	    //if (Sdram_selected) begin if (sdram_req_wait==0) bus_write_done <= 1; end
