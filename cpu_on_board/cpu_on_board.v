@@ -118,7 +118,7 @@ assign DRAM_CKE = 1; // always enable
     );
     global global_clk_inst (
 	.in(clock_1hz_dirty),
-	.out(clokc_1hz)
+	.out(clock_1hz)
     );
 //wire sdram_clk;
 //
