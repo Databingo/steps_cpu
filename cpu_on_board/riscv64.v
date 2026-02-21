@@ -147,20 +147,99 @@ module riscv64(
     wire [63:0] w_atomic_write_data = (op == 7'b0101111 && w_func5[4:0] == 5'b00011) ? // SC
 	                              (is_word_op ? {32'b0, rs2[31:0]} : rs2) : // sc.w/sc.d
 				      w_amo_calc_data; // AMOs
+    //// -- mul rela --
+    //reg [6:0]   mul_cnt;
+    //reg [127:0] mul_acc;  // result|multiplier
+    //reg [63:0]  mul_a_reg;
+    //reg         mul_active;
+    //reg         mul_done;
+    //reg         mul_enable;
+    //reg         mul_neg_res;
+    //reg [1:0]   mul_out_sel;
+    //
+    //// 000mul 001mulh 010mulhsu 011mulhu
+    //wire mul_is_w = (op == 7'b0111011); // Mulw (opc 0111011)
+    //wire mul_sign_a = mul_is_w ? 1'b1 : (w_func3 != 3'b011); // signed except Mulhu
+    //wire mul_sign_b = mul_is_w ? 1'b1 : (w_func3 == 3'b000 || w_func3 == 3'b001); // signed Mul/Mulh
+
+    //// Indepenedent Multiplier // Booth algorithim
+    //always @(posedge clk or negedge reset) begin  
+    //    if (!reset) begin
+    //        mul_active <= 0;
+    //        mul_done   <= 0;
+    //        mul_cnt    <=0;	    
+    //    end else begin
+    //        if (mul_enable && !mul_active && !mul_done) begin
+    //    	// Start phase
+    //    	mul_active <= 1;
+    //    	mul_cnt    <= 0;
+    //            
+    //    	// 1. Determine output mode
+    //            if (mul_is_w) mul_out_sel <= 2; // mulw
+    //    	else if (w_func3 == 0) mul_out_sel <= 0; // mul
+    //    	else mul_out_sel <= 1;   // mulh* 
+
+    //    	// determine result sign: xor
+    //    	mul_neg_res <= (mul_sign_a && rs1[63]) ^ (mul_sign_b && rs2[63]);
+
+    //    	// load abs(a) into mul_a_reg
+    //            if (mul_is_w) mul_a_reg <= {{32{1'b0}}, (rs1[31] ? -rs1[31:0] : rs1[31:0])};
+    //    	else mul_a_reg <= (mul_sign_a && rs1[63]) ? -rs1 : rs1;
+
+    //            // load abs(b) into lower accumulator
+    //            if (mul_is_w) mul_acc <= {64'd0, 32'd0, (rs2[31] ? -rs2[31:0] : rs2[31:0])};
+    //    	else mul_acc <= {64'd0, (mul_sign_b && rs2[63]) ? -rs2 :rs2};
+    //        end
+    //        else if (mul_active) begin
+    //    	// compute phase (64 cycles)
+    //    	if (mul_cnt < 64) begin
+    //    	    if (mul_acc[0]) begin  // is 1
+    //    		mul_acc[127:64] <= mul_acc[127:64] + mul_a_reg; // add multiplicand to upper half
+    //    	    end
+    //                
+    //    	    // shift
+    //    	    if (mul_acc[0])   //  result|multiplier >> 1
+    //    		mul_acc <= {1'b0, (mul_acc[127:64] + mul_a_reg), mul_acc[63:1]};
+    //    	    else
+    //    		mul_acc <= {1'b0, mul_acc[127:1]};
+    //    	    mul_cnt <= mul_cnt + 1;
+    //    	end else begin
+    //                // finish phase
+    //                mul_active <= 0;
+    //    	    mul_done   <= 1;
+    //    	    if  (mul_neg_res) mul_acc <= -mul_acc;
+    //    	end
+    //        end
+    //        else if (!mul_enable) begin
+    //    	// reset handshake
+    //    	mul_done <= 0;
+    //        end
+    //    end
+    //end
+    // improve signed-correct
     // -- mul rela --
     reg [6:0]   mul_cnt;
-    reg [127:0] mul_acc;  // result|multiplier
-    reg [63:0]  mul_a_reg;
+    reg [128:0] mul_acc;  // sign|result|multiplier
+    reg [64:0]  mul_a_reg;
     reg         mul_active;
     reg         mul_done;
     reg         mul_enable;
-    reg         mul_neg_res;
+    reg         mul_b_is_signed;
     reg [1:0]   mul_out_sel;
     
     // 000mul 001mulh 010mulhsu 011mulhu
     wire mul_is_w = (op == 7'b0111011); // Mulw (opc 0111011)
     wire mul_sign_a = mul_is_w ? 1'b1 : (w_func3 != 3'b011); // signed except Mulhu
     wire mul_sign_b = mul_is_w ? 1'b1 : (w_func3 == 3'b000 || w_func3 == 3'b001); // signed Mul/Mulh
+
+    wire [63:0] raw_a = mul_is_w ? {{32{rs1[31]}}, rs1[31:0]} : rs1;
+    wire [63:0] raw_b = mul_is_w ? {{32{rs2[31]}}, rs2[31:0]} : rs2;
+    wire [64:0] ext_a = {mul_sign_a & raw_a[63], raw_a}; 
+    //wire [64:0] ext_b = {mul_sign_b & raw_b[63], raw_b}; 
+    wire is_last_cycle = (mul_cnt == 7'd63);
+    wire do_sub = is_last_cycle && mul_b_is_signed;
+    wire [64:0] adder_input_a = do_sub ? ~mul_a_reg : mul_a_reg;
+    wire [64:0] sum_upper = mul_acc[128:64] + adder_input_a + do_sub;
 
     // Indepenedent Multiplier // Booth algorithim
     always @(posedge clk or negedge reset) begin  
@@ -179,41 +258,21 @@ module riscv64(
 		else if (w_func3 == 0) mul_out_sel <= 0; // mul
 		else mul_out_sel <= 1;   // mulh* 
 
-		// determine result sign: xor
-		mul_neg_res <= (mul_sign_a && rs1[63]) ^ (mul_sign_b && rs2[63]);
-
-		// load abs(a) into mul_a_reg
-	        if (mul_is_w) mul_a_reg <= {{32{1'b0}}, (rs1[31] ? -rs1[31:0] : rs1[31:0])};
-		else mul_a_reg <= (mul_sign_a && rs1[63]) ? -rs1 : rs1;
-
-	        // load abs(b) into lower accumulator
-	        if (mul_is_w) mul_acc <= {64'd0, 32'd0, (rs2[31] ? -rs2[31:0] : rs2[31:0])};
-		else mul_acc <= {64'd0, (mul_sign_b && rs2[63]) ? -rs2 :rs2};
-	    end
-            else if (mul_active) begin
+		mul_a_reg <= ext_a;
+		mul_acc <= {65'd0, raw_b};
+		mul_b_is_signed <= mul_sign_b;
+	    end else if (mul_active) begin
 		// compute phase (64 cycles)
 		if (mul_cnt < 64) begin
-		    if (mul_acc[0]) begin  // is 1
-			mul_acc[127:64] <= mul_acc[127:64] + mul_a_reg; // add multiplicand to upper half
-		    end
-                    
-		    // shift
-		    if (mul_acc[0])   //  result|multiplier >> 1
-			mul_acc <= {1'b0, (mul_acc[127:64] + mul_a_reg), mul_acc[63:1]};
-		    else
-			mul_acc <= {1'b0, mul_acc[127:1]};
+		    if (mul_acc[0]) mul_acc <= {sum_upper[64], sum_upper, mul_acc[63:1]}; // is 1,  + and << 1
+		    else mul_acc <= {mul_acc[128], mul_acc[128:1]}; // is 0, only << 1, preserve sign bit
 		    mul_cnt <= mul_cnt + 1;
 		end else begin
 	            // finish phase
 	            mul_active <= 0;
 		    mul_done   <= 1;
-		    if  (mul_neg_res) mul_acc <= -mul_acc;
 		end
-	    end
-            else if (!mul_enable) begin
-		// reset handshake
-		mul_done <= 0;
-	    end
+	    end else if (!mul_enable) mul_done <= 0; // reset handshake
 	end
     end
 
