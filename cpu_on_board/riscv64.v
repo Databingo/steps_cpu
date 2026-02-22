@@ -296,6 +296,11 @@ module riscv64(
    localparam sip        = 19;  // Supervisor interrupt pending
    localparam satp       = 20;  // Supervisor address translation and protection satp[63:60].MODE=0:off|8:SV39 satp[59:44].asid vpn2:9 vpn1:9 vpn0:9 satp[43:0]:rootpage physical addr
    localparam mtval      = 21;  // Machine Trap Value Register (bad address or instruction)
+   localparam mhartid    = 22;  // Hardware Thread ID 0 for single-core
+   localparam misa       = 23;  // Machine ISA Register (IMA is 0x8000000000001101)
+   localparam mvendorid  = 24;  // 0
+   localparam marchid    = 25;  // 0
+   localparam mimpid     = 26;  // 0
     //integer scontext = 12'h5a8; 
    reg [62:0] CAUSE_CODE;
    reg  [5:0] w_csr_id;             // CSR id (32)
@@ -323,6 +328,10 @@ module riscv64(
             12'h143 : w_csr_id = stval      ;   
             12'h144 : w_csr_id = sip        ;   
             12'h180 : w_csr_id = satp       ;   
+            12'hF14 : w_csr_id = mhartid    ;   
+            12'hF11 : w_csr_id = mvendorid  ;   
+            12'hF12 : w_csr_id = marchid    ;   
+            12'hF13 : w_csr_id = mimpid     ;   
 	    default : w_csr_id = 64; 
 	endcase
     end
