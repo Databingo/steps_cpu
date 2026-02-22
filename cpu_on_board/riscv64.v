@@ -344,7 +344,7 @@ module riscv64(
             12'hF11 : w_csr_id = mvendorid  ;   
             12'hF12 : w_csr_id = marchid    ;   
             12'hF13 : w_csr_id = mimpid     ;   
-            12'h3A0 : w_csr_id = pmpcfc0    ;   
+            12'h3A0 : w_csr_id = pmpcfg0    ;   
             12'h3B0 : w_csr_id = pmpaddr0   ;   
             12'h3B1 : w_csr_id = pmpaddr1   ;   
             12'h3B2 : w_csr_id = pmpaddr2   ;   
