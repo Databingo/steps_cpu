@@ -296,11 +296,23 @@ module riscv64(
    localparam sip        = 19;  // Supervisor interrupt pending
    localparam satp       = 20;  // Supervisor address translation and protection satp[63:60].MODE=0:off|8:SV39 satp[59:44].asid vpn2:9 vpn1:9 vpn0:9 satp[43:0]:rootpage physical addr
    localparam mtval      = 21;  // Machine Trap Value Register (bad address or instruction)
+
    localparam mhartid    = 22;  // Hardware Thread ID 0 for single-core
    localparam misa       = 23;  // Machine ISA Register (IMA is 0x8000000000001101)
    localparam mvendorid  = 24;  // 0
    localparam marchid    = 25;  // 0
    localparam mimpid     = 26;  // 0
+
+   localparam pmpcfg0    = 27;  // Physical Memory Protection
+   localparam pmpaddr0   = 28;  // 
+   localparam pmpaddr1   = 29;  // 
+   localparam pmpaddr2   = 30;  // 
+   localparam pmpaddr3   = 31;  // 
+   localparam pmpaddr4   = 32;  // 
+   localparam pmpaddr5   = 33;  // 
+   localparam pmpaddr6   = 34;  // 
+   localparam pmpaddr7   = 35;  // 
+
     //integer scontext = 12'h5a8; 
    reg [62:0] CAUSE_CODE;
    reg  [5:0] w_csr_id;             // CSR id (32)
@@ -332,11 +344,20 @@ module riscv64(
             12'hF11 : w_csr_id = mvendorid  ;   
             12'hF12 : w_csr_id = marchid    ;   
             12'hF13 : w_csr_id = mimpid     ;   
-	    default : w_csr_id = 64; 
+            12'h3A0 : w_csr_id = pmpcfc0    ;   
+            12'h3B0 : w_csr_id = pmpaddr0   ;   
+            12'h3B1 : w_csr_id = pmpaddr1   ;   
+            12'h3B2 : w_csr_id = pmpaddr2   ;   
+            12'h3B3 : w_csr_id = pmpaddr3   ;   
+            12'h3B4 : w_csr_id = pmpaddr4   ;   
+            12'h3B5 : w_csr_id = pmpaddr5   ;   
+            12'h3B6 : w_csr_id = pmpaddr6   ;   
+            12'h3B7 : w_csr_id = pmpaddr7   ;   
+	    default : w_csr_id = 63; 
 	endcase
     end
 
-    (* ram_style = "logic" *) reg [63:0] Csrs [0:31]; // 32 CSRs for now
+    (* ram_style = "logic" *) reg [63:0] Csrs [0:63]; // 64 CSRs for now // totally 4096
     wire [3:0]  satp_mmu  = Csrs[satp][63:60]; // 0:bare, 8:sv39, 9:sv48  satp.MODE!=0, privilegae is not M-mode, mstatus.MPRN is not set or in MPP's mode?
     wire [15:0] satp_asid = Csrs[satp][59:44]; // Address Space ID for TLB
     wire [43:0] satp_ppn  = Csrs[satp][43:0];  // Root Page Table PPN physical page number
@@ -488,9 +509,13 @@ module riscv64(
 	    //interrupt_ack <= 0;
 	    mmu_da <= 0;
 	    for (i=0;i<10;i=i+1) begin sre[i]<= 64'b0; end
-	    for (i=0;i<32;i=i+1) begin Csrs[i]<= 64'b0; end
+	    for (i=0;i<64;i=i+1) begin Csrs[i]<= 64'b0; end
 	    Csrs[medeleg] <= 64'hb1af; // delegate to S-mode 1011000110101111 // see VII 3.1.15 mcasue exceptions
 	    Csrs[mideleg] <= 64'h0222; // delegate to S-mode 0000001000100010 see VII 3.1.15 mcasue interrupt 1/5/9 SSIP(supervisor software interrupt) STIP(time) SEIP(external)
+	    // Initialize Machine Info for OpenSBI
+	    Csrs[misa] <= 64'h8000000000001101; // IMA extensions (1<<8 | 1<< 12| 1<<0)
+	    Csrs[mhartid] <= 64'd0; // single Core 0
+	    // mvendorid, marchid, mimpid remain 0
 	    mmu_pc <= 0;
             reserve_addr <= 0;
             reserve_valid <= 0;
