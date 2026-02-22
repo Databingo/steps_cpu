@@ -353,11 +353,11 @@ module riscv64(
             12'h3B5 : w_csr_id = pmpaddr5   ;   
             12'h3B6 : w_csr_id = pmpaddr6   ;   
             12'h3B7 : w_csr_id = pmpaddr7   ;   
-	    default : w_csr_id = 63; 
+	    default : w_csr_id = 36; 
 	endcase
     end
 
-    (* ram_style = "logic" *) reg [63:0] Csrs [0:63]; // 64 CSRs for now // totally 4096
+    (* ram_style = "logic" *) reg [63:0] Csrs [0:36]; // 36 CSRs for now // totally 4096
     wire [3:0]  satp_mmu  = Csrs[satp][63:60]; // 0:bare, 8:sv39, 9:sv48  satp.MODE!=0, privilegae is not M-mode, mstatus.MPRN is not set or in MPP's mode?
     wire [15:0] satp_asid = Csrs[satp][59:44]; // Address Space ID for TLB
     wire [43:0] satp_ppn  = Csrs[satp][43:0];  // Root Page Table PPN physical page number
@@ -509,7 +509,7 @@ module riscv64(
 	    //interrupt_ack <= 0;
 	    mmu_da <= 0;
 	    for (i=0;i<10;i=i+1) begin sre[i]<= 64'b0; end
-	    for (i=0;i<64;i=i+1) begin Csrs[i]<= 64'b0; end
+	    for (i=0;i<36;i=i+1) begin Csrs[i]<= 64'b0; end
 	    Csrs[medeleg] <= 64'hb1af; // delegate to S-mode 1011000110101111 // see VII 3.1.15 mcasue exceptions
 	    Csrs[mideleg] <= 64'h0222; // delegate to S-mode 0000001000100010 see VII 3.1.15 mcasue interrupt 1/5/9 SSIP(supervisor software interrupt) STIP(time) SEIP(external)
 	    // Initialize Machine Info for OpenSBI
@@ -682,7 +682,7 @@ module riscv64(
 		    32'b???????_?????_?????_110_?????_1100011: begin if ($unsigned(re[w_rs1]) < $unsigned(re[w_rs2])) begin pc <= branch; bubble <= 1'b1; end end // Bltu
 		    32'b???????_?????_?????_111_?????_1100011: begin if ($unsigned(re[w_rs1]) >= $unsigned(re[w_rs2])) begin pc <= branch; bubble <= 1'b1; end end // Bgeu
 		    // System-CSR 
-	            32'b???????_?????_?????_001_?????_1110011: begin if (w_rd != 0) re[w_rd] <= Csrs[w_csr_id]; Csrs[w_csr_id] <= rs1; end // Csrrw  bram read first old data
+	            32'b???????_?????_?????_001_?????_1110011: begin if (w_rd != 0) re[w_rd] <= Csrs[w_csr_id]; if (w_csr_id != 36)  Csrs[w_csr_id] <= rs1; end // Csrrw  bram read first old data(xdefault)
 	            32'b???????_?????_?????_010_?????_1110011: begin if (w_rd != 0) re[w_rd] <= Csrs[w_csr_id]; if (w_rs1 != 0) Csrs[w_csr_id] <= (Csrs[w_csr_id] |  rs1); end // Csrrs
 	            32'b???????_?????_?????_011_?????_1110011: begin if (w_rd != 0) re[w_rd] <= Csrs[w_csr_id]; if (w_rs1 != 0) Csrs[w_csr_id] <= (Csrs[w_csr_id] & ~rs1); end // Csrrc
 	            32'b???????_?????_?????_101_?????_1110011: begin if (w_rd != 0) re[w_rd] <= Csrs[w_csr_id]; Csrs[w_csr_id] <= w_imm_z; end // Csrrwi
