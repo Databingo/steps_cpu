@@ -64,3 +64,5 @@ const struct sbi_platform platform = {
     .hart_stack_size = 4096,
     .platform_ops_addr = (unsigned long)&platform_ops
 };
+
+

@@ -1,0 +1,25 @@
+/dts-v1/;
+/ {
+    #address-cells = <2>;
+    #size-cells = <2>;
+    model = "My Custom FPGA";
+
+    memory@80000000 {
+        device_type = "memory";
+        reg = <0x0 0x80000000 0x0 0x10000000>; /* 256MB RAM */
+    };
+
+    soc {
+        #address-cells = <2>;
+        #size-cells = <2>;
+        compatible = "simple-bus";
+        ranges;
+
+        uart@10000000 {
+            compatible = "altr,juart-1.0"; /* Tells OpenSBI to use the Altera JTAG driver */
+            reg = <0x0 0x10000000 0x0 0x8>;
+        };
+        
+        /* You would also define your aclint-mtimer here */
+    };
+};
