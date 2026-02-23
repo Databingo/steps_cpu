@@ -71,7 +71,7 @@
            compatible = "altr,juart-1.0";
            reg = <0x0 0x10000000 0x0 0x8>;
        };
-       timer@2000000 {
+       timer@200bff8 {
            compatible = "riscv,aclint-mtimer";
            reg = <0x0 0x200BFF8 0x0 0x8>,
                  <0x0 0x2004000 0x0 0x8>;
