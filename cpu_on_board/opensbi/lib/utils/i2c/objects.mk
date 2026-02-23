@@ -10,7 +10,7 @@
 libsbiutils-objs-$(CONFIG_I2C) += i2c/i2c.o
 
 libsbiutils-objs-$(CONFIG_FDT_I2C) += i2c/fdt_i2c.o
-libsbiutils-objs-$(CONFIG_FDT_I2C) += i2c/fdt_i2c_adapter_drivers.carray.o
+libsbiutils-objs-$(CONFIG_FDT_I2C) += i2c/fdt_i2c_adapter_drivers.o
 
 carray-fdt_i2c_adapter_drivers-$(CONFIG_FDT_I2C_SIFIVE) += fdt_i2c_adapter_sifive
 libsbiutils-objs-$(CONFIG_FDT_I2C_SIFIVE) += i2c/fdt_i2c_sifive.o

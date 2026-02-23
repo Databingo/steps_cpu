@@ -11,7 +11,6 @@
 #define __SBI_PMU_H__
 
 #include <sbi/sbi_types.h>
-#include <sbi/sbi_trap.h>
 
 struct sbi_scratch;
 
@@ -24,7 +23,6 @@ struct sbi_scratch;
 #define SBI_PMU_HW_CTR_MAX 32
 #define SBI_PMU_CTR_MAX	   (SBI_PMU_HW_CTR_MAX + SBI_PMU_FW_CTR_MAX)
 #define SBI_PMU_FIXED_CTR_MASK 0x07
-#define SBI_PMU_CY_IR_MASK	0x05
 
 struct sbi_pmu_device {
 	/** Name of the PMU platform device */
@@ -91,12 +89,6 @@ struct sbi_pmu_device {
 	 * Custom function returning the machine-specific irq-bit.
 	 */
 	int (*hw_counter_irq_bit)(void);
-
-	/**
-	 * Custom function to inhibit counting of events while in
-	 * specified mode.
-	 */
-	void (*hw_counter_filter_mode)(unsigned long flags, int counter_index);
 };
 
 /** Get the PMU platform device */
@@ -113,9 +105,6 @@ void sbi_pmu_exit(struct sbi_scratch *scratch);
 
 /** Return the pmu irq bit depending on extension existence */
 int sbi_pmu_irq_bit(void);
-
-/** Return the pmu irq mask or 0 if the pmu overflow irq is not supported */
-unsigned long sbi_pmu_irq_mask(void);
 
 /**
  * Add the hardware event to counter mapping information. This should be called
@@ -145,8 +134,6 @@ int sbi_pmu_ctr_start(unsigned long cidx_base, unsigned long cidx_mask,
 		      unsigned long flags, uint64_t ival);
 
 int sbi_pmu_ctr_get_info(uint32_t cidx, unsigned long *ctr_info);
-int sbi_pmu_event_get_info(unsigned long shmem_lo, unsigned long shmem_high,
-						   unsigned long num_events, unsigned long flags);
 
 unsigned long sbi_pmu_num_ctr(void);
 
@@ -155,7 +142,5 @@ int sbi_pmu_ctr_cfg_match(unsigned long cidx_base, unsigned long cidx_mask,
 			  uint64_t event_data);
 
 int sbi_pmu_ctr_incr_fw(enum sbi_pmu_fw_event_code_id fw_id);
-
-void sbi_pmu_ovf_irq();
 
 #endif

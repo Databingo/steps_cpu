@@ -23,11 +23,13 @@ static inline unsigned long sbi_ecall_vendor_id(void)
 }
 
 static int sbi_ecall_vendor_handler(unsigned long extid, unsigned long funcid,
-				    struct sbi_trap_regs *regs,
-				    struct sbi_ecall_return *out)
+				    const struct sbi_trap_regs *regs,
+				    unsigned long *out_val,
+				    struct sbi_trap_info *out_trap)
 {
 	return sbi_platform_vendor_ext_provider(sbi_platform_thishart_ptr(),
-						funcid, regs, out);
+						funcid, regs,
+						out_val, out_trap);
 }
 
 struct sbi_ecall_extension ecall_vendor;
@@ -46,7 +48,6 @@ static int sbi_ecall_vendor_register_extensions(void)
 }
 
 struct sbi_ecall_extension ecall_vendor = {
-	.name			= "vendor",
 	.extid_start		= SBI_EXT_VENDOR_START,
 	.extid_end		= SBI_EXT_VENDOR_END,
 	.register_extensions	= sbi_ecall_vendor_register_extensions,

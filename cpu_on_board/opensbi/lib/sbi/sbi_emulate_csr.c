@@ -10,6 +10,7 @@
 #include <sbi/riscv_asm.h>
 #include <sbi/riscv_encoding.h>
 #include <sbi/sbi_bitops.h>
+#include <sbi/sbi_console.h>
 #include <sbi/sbi_emulate_csr.h>
 #include <sbi/sbi_error.h>
 #include <sbi/sbi_hart.h>
@@ -46,8 +47,12 @@ int sbi_emulate_csr_read(int csr_num, struct sbi_trap_regs *regs,
 {
 	int ret = 0;
 	struct sbi_scratch *scratch = sbi_scratch_thishart_ptr();
-	ulong prev_mode = sbi_mstatus_prev_mode(regs->mstatus);
-	bool virt = sbi_regs_from_virt(regs);
+	ulong prev_mode = (regs->mstatus & MSTATUS_MPP) >> MSTATUS_MPP_SHIFT;
+#if __riscv_xlen == 32
+	bool virt = (regs->mstatusH & MSTATUSH_MPV) ? true : false;
+#else
+	bool virt = (regs->mstatus & MSTATUS_MPV) ? true : false;
+#endif
 
 	switch (csr_num) {
 	case CSR_HTIMEDELTA:
@@ -62,11 +67,12 @@ int sbi_emulate_csr_read(int csr_num, struct sbi_trap_regs *regs,
 		*csr_val = csr_read(CSR_MCYCLE);
 		break;
 	case CSR_TIME:
-		if (!hpm_allowed(csr_num - CSR_CYCLE, prev_mode, virt))
-			return SBI_ENOTSUPP;
 		/*
 		 * We emulate TIME CSR for both Host (HS/U-mode) and
 		 * Guest (VS/VU-mode).
+		 *
+		 * Faster TIME CSR reads are critical for good performance
+		 * in S-mode software so we don't check CSR permissions.
 		 */
 		*csr_val = (virt) ? sbi_timer_virt_value():
 				    sbi_timer_value();
@@ -103,7 +109,7 @@ int sbi_emulate_csr_read(int csr_num, struct sbi_trap_regs *regs,
 
 #define switchcase_hpm(__uref, __mref, __csr)				\
 	case __csr:							\
-		if (sbi_hart_mhpm_mask(scratch) & (1 << (__csr - __uref)))\
+		if ((sbi_hart_mhpm_count(scratch) + 3) <= (__csr - __uref))\
 			return SBI_ENOTSUPP;				\
 		if (!hpm_allowed(__csr - __uref, prev_mode, virt))	\
 			return SBI_ENOTSUPP;				\
@@ -145,6 +151,10 @@ int sbi_emulate_csr_read(int csr_num, struct sbi_trap_regs *regs,
 		break;
 	}
 
+	if (ret)
+		sbi_dprintf("%s: hartid%d: invalid csr_num=0x%x\n",
+			    __func__, current_hartid(), csr_num);
+
 	return ret;
 }
 
@@ -152,8 +162,12 @@ int sbi_emulate_csr_write(int csr_num, struct sbi_trap_regs *regs,
 			  ulong csr_val)
 {
 	int ret = 0;
-	ulong prev_mode = sbi_mstatus_prev_mode(regs->mstatus);
-	bool virt = sbi_regs_from_virt(regs);
+	ulong prev_mode = (regs->mstatus & MSTATUS_MPP) >> MSTATUS_MPP_SHIFT;
+#if __riscv_xlen == 32
+	bool virt = (regs->mstatusH & MSTATUSH_MPV) ? true : false;
+#else
+	bool virt = (regs->mstatus & MSTATUS_MPV) ? true : false;
+#endif
 
 	switch (csr_num) {
 	case CSR_HTIMEDELTA:
@@ -174,6 +188,10 @@ int sbi_emulate_csr_write(int csr_num, struct sbi_trap_regs *regs,
 		ret = SBI_ENOTSUPP;
 		break;
 	}
+
+	if (ret)
+		sbi_dprintf("%s: hartid%d: invalid csr_num=0x%x\n",
+			    __func__, current_hartid(), csr_num);
 
 	return ret;
 }

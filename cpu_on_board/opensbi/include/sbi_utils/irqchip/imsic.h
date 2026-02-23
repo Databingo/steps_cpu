@@ -37,11 +37,13 @@ struct imsic_data {
 
 int imsic_map_hartid_to_data(u32 hartid, struct imsic_data *imsic, int file);
 
-struct imsic_data *imsic_get_data(u32 hartindex);
+struct imsic_data *imsic_get_data(u32 hartid);
 
-int imsic_get_target_file(u32 hartindex);
+int imsic_get_target_file(u32 hartid);
 
 void imsic_local_irqchip_init(void);
+
+int imsic_warm_irqchip_init(void);
 
 int imsic_data_check(struct imsic_data *imsic);
 

@@ -9,6 +9,7 @@
 
 #include <sbi/riscv_asm.h>
 #include <sbi/riscv_encoding.h>
+#include <sbi/sbi_console.h>
 #include <sbi/sbi_const.h>
 #include <sbi/sbi_platform.h>
 #include <sbi/sbi_system.h>
@@ -31,12 +32,7 @@ unsigned long fw_platform_init(unsigned long arg0, unsigned long arg1,
 
 static struct plic_data plic = {
 	.addr = K210_PLIC_BASE_ADDR,
-	.size = K210_PLIC_BASE_SIZE,
 	.num_src = K210_PLIC_NUM_SOURCES,
-	.context_map = {
-		[0] = { 0, 1 },
-		[1] = { 2, 3 },
-	},
 };
 
 static struct aclint_mswi_data mswi = {
@@ -112,19 +108,10 @@ static struct sbi_system_reset_device k210_reset = {
 
 static int k210_early_init(bool cold_boot)
 {
-	int rc;
+	if (cold_boot)
+		sbi_system_reset_add_device(&k210_reset);
 
-	if (!cold_boot)
-		return 0;
-
-	sbi_system_reset_add_device(&k210_reset);
-
-	rc = sifive_uart_init(K210_UART_BASE_ADDR, k210_get_clk_freq(),
-			      K210_UART_BAUDRATE);
-	if (rc)
-		return rc;
-
-	return aclint_mswi_cold_init(&mswi);
+	return 0;
 }
 
 static int k210_final_init(bool cold_boot)
@@ -134,7 +121,7 @@ static int k210_final_init(bool cold_boot)
 	if (!cold_boot)
 		return 0;
 
-	fdt = fdt_get_address_rw();
+	fdt = fdt_get_address();
 
 	fdt_cpu_fixup(fdt);
 	fdt_fixups(fdt);
@@ -142,14 +129,50 @@ static int k210_final_init(bool cold_boot)
 	return 0;
 }
 
-static int k210_irqchip_init(void)
+static int k210_console_init(void)
 {
-	return plic_cold_irqchip_init(&plic);
+	return sifive_uart_init(K210_UART_BASE_ADDR, k210_get_clk_freq(),
+				K210_UART_BAUDRATE);
 }
 
-static int k210_timer_init(void)
+static int k210_irqchip_init(bool cold_boot)
 {
-	return aclint_mtimer_cold_init(&mtimer, NULL);
+	int rc;
+	u32 hartid = current_hartid();
+
+	if (cold_boot) {
+		rc = plic_cold_irqchip_init(&plic);
+		if (rc)
+			return rc;
+	}
+
+	return plic_warm_irqchip_init(&plic, hartid * 2, hartid * 2 + 1);
+}
+
+static int k210_ipi_init(bool cold_boot)
+{
+	int rc;
+
+	if (cold_boot) {
+		rc = aclint_mswi_cold_init(&mswi);
+		if (rc)
+			return rc;
+	}
+
+	return aclint_mswi_warm_init();
+}
+
+static int k210_timer_init(bool cold_boot)
+{
+	int rc;
+
+	if (cold_boot) {
+		rc = aclint_mtimer_cold_init(&mtimer, NULL);
+		if (rc)
+			return rc;
+	}
+
+	return aclint_mtimer_warm_init();
 }
 
 const struct sbi_platform_operations platform_ops = {
@@ -157,7 +180,11 @@ const struct sbi_platform_operations platform_ops = {
 
 	.final_init	= k210_final_init,
 
+	.console_init	= k210_console_init,
+
 	.irqchip_init = k210_irqchip_init,
+
+	.ipi_init  = k210_ipi_init,
 
 	.timer_init	   = k210_timer_init,
 };

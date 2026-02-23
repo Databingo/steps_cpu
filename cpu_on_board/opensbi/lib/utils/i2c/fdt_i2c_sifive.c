@@ -46,6 +46,8 @@ struct sifive_i2c_adapter {
 	struct i2c_adapter adapter;
 };
 
+extern struct fdt_i2c_adapter fdt_i2c_adapter_sifive;
+
 static inline void sifive_i2c_setreg(struct sifive_i2c_adapter *adap,
 				     uint8_t reg, uint8_t value)
 {
@@ -230,8 +232,8 @@ static int sifive_i2c_adapter_read(struct i2c_adapter *ia, uint8_t addr,
 	return 0;
 }
 
-static int sifive_i2c_init(const void *fdt, int nodeoff,
-			   const struct fdt_match *match)
+static int sifive_i2c_init(void *fdt, int nodeoff,
+			    const struct fdt_match *match)
 {
 	int rc;
 	struct sifive_i2c_adapter *adapter;
@@ -248,6 +250,7 @@ static int sifive_i2c_init(const void *fdt, int nodeoff,
 	}
 
 	adapter->addr = addr;
+	adapter->adapter.driver = &fdt_i2c_adapter_sifive;
 	adapter->adapter.id = nodeoff;
 	adapter->adapter.write = sifive_i2c_adapter_write;
 	adapter->adapter.read = sifive_i2c_adapter_read;
@@ -265,7 +268,7 @@ static const struct fdt_match sifive_i2c_match[] = {
 	{ },
 };
 
-const struct fdt_driver fdt_i2c_adapter_sifive = {
+struct fdt_i2c_adapter fdt_i2c_adapter_sifive = {
 	.match_table = sifive_i2c_match,
 	.init = sifive_i2c_init,
 };

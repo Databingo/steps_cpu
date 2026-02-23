@@ -1,12 +1,3 @@
-# ignore anything begin with dot
-.*
-
-# exceptions we need even begin with dot
-!.clang-format
-!.gitignore
-!.github
-!.editorconfig
-
 # Object files
 *.o
 *.a
@@ -19,4 +10,4 @@ install/
 # Development friendly files
 tags
 cscope*
-*~
+*.swp

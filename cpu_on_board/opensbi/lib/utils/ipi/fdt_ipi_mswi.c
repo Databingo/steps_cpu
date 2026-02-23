@@ -9,11 +9,11 @@
 
 #include <sbi/sbi_error.h>
 #include <sbi/sbi_heap.h>
-#include <sbi_utils/fdt/fdt_driver.h>
 #include <sbi_utils/fdt/fdt_helper.h>
+#include <sbi_utils/ipi/fdt_ipi.h>
 #include <sbi_utils/ipi/aclint_mswi.h>
 
-static int ipi_mswi_cold_init(const void *fdt, int nodeoff,
+static int ipi_mswi_cold_init(void *fdt, int nodeoff,
 			      const struct fdt_match *match)
 {
 	int rc;
@@ -24,7 +24,7 @@ static int ipi_mswi_cold_init(const void *fdt, int nodeoff,
 	if (!ms)
 		return SBI_ENOMEM;
 
-	rc = fdt_parse_aclint_node(fdt, nodeoff, false, false,
+	rc = fdt_parse_aclint_node(fdt, nodeoff, false,
 				   &ms->addr, &ms->size, NULL, NULL,
 				   &ms->first_hartid, &ms->hart_count);
 	if (rc) {
@@ -56,13 +56,13 @@ static const struct fdt_match ipi_mswi_match[] = {
 	{ .compatible = "riscv,clint0", .data = &clint_offset },
 	{ .compatible = "sifive,clint0", .data = &clint_offset },
 	{ .compatible = "thead,c900-clint", .data = &clint_offset },
-	{ .compatible = "thead,c900-aclint-mswi" },
-	{ .compatible = "mips,p8700-aclint-mswi" },
 	{ .compatible = "riscv,aclint-mswi" },
 	{ },
 };
 
-const struct fdt_driver fdt_ipi_mswi = {
+struct fdt_ipi fdt_ipi_mswi = {
 	.match_table = ipi_mswi_match,
-	.init = ipi_mswi_cold_init,
+	.cold_init = ipi_mswi_cold_init,
+	.warm_init = aclint_mswi_warm_init,
+	.exit = NULL,
 };

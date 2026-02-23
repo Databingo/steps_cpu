@@ -46,10 +46,6 @@ fw_save_info:
 fw_next_arg1:
 #ifdef FW_JUMP_FDT_ADDR
 	li	a0, FW_JUMP_FDT_ADDR
-#elif defined(FW_JUMP_FDT_OFFSET)
-	lla	a0, _fw_start
-	li	a1, FW_JUMP_FDT_OFFSET
-	add	a0, a0, a1
 #else
 	add	a0, a1, zero
 #endif
@@ -63,16 +59,8 @@ fw_next_arg1:
 	 * The next address should be returned in 'a0'.
 	 */
 fw_next_addr:
-#ifdef FW_JUMP_ADDR
 	lla	a0, _jump_addr
 	REG_L	a0, (a0)
-#elif defined(FW_JUMP_OFFSET)
-	lla	a0, _fw_start
-	li	a1, FW_JUMP_OFFSET
-	add	a0, a0, a1
-#else
-#error "Must define at least FW_JUMP_ADDR or FW_JUMP_OFFSET"
-#endif
 	ret
 
 	.section .entry, "ax", %progbits
@@ -98,9 +86,11 @@ fw_options:
 	add	a0, zero, zero
 	ret
 
-#ifdef FW_JUMP_ADDR
-	.section .rodata
+#ifndef FW_JUMP_ADDR
+#error "Must define FW_JUMP_ADDR"
+#endif
+
+	.section .entry, "ax", %progbits
 	.align 3
 _jump_addr:
 	RISCV_PTR FW_JUMP_ADDR
-#endif
