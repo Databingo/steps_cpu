@@ -1,25 +1,99 @@
+///dts-v1/;
+/// {
+//    #address-cells = <2>;
+//    #size-cells = <2>;
+//    model = "My Custom FPGA";
+//
+//    memory@80000000 {
+//        device_type = "memory";
+//        reg = <0x0 0x80000000 0x0 0x10000000>; /* 256MB RAM */
+//    };
+//
+//    soc {
+//        #address-cells = <2>;
+//        #size-cells = <2>;
+//        compatible = "simple-bus";
+//        ranges;
+//
+//        uart@10000000 {
+//            compatible = "altr,juart-1.0"; /* Tells OpenSBI to use the Altera JTAG driver */
+//            reg = <0x0 0x10000000 0x0 0x8>;
+//        };
+//        
+//        /* You would also define your aclint-mtimer here */
+//    };
+//};
+
+
 /dts-v1/;
 / {
-    #address-cells = <2>;
-    #size-cells = <2>;
-    model = "My Custom FPGA";
+   #address-cells = <2>;
+   #size-cells = <2>;
+   model = "My Custom FPGA SoC";
+   compatible = "my-custom-fpga";
+ 
+   chosen {
+       stdout-path = "/soc/uart@10000000";  // pass to linux
+   };
+   
+   memory@80000000 {
+       device_type = "memory";
+       reg = <0x0 0x80000000 0x0 0x10000000>; /* 256MB RAM */  // two 32-bit value: high+low, address size
+   };
 
-    memory@80000000 {
-        device_type = "memory";
-        reg = <0x0 0x80000000 0x0 0x10000000>; /* 256MB RAM */
-    };
-
-    soc {
-        #address-cells = <2>;
-        #size-cells = <2>;
-        compatible = "simple-bus";
-        ranges;
-
-        uart@10000000 {
-            compatible = "altr,juart-1.0"; /* Tells OpenSBI to use the Altera JTAG driver */
-            reg = <0x0 0x10000000 0x0 0x8>;
+   cpus {
+       #address-cells = <1>;
+       #size-cells = <0>;
+       timebase-frequency = <10000000>; // 10MHz
+      
+       cpu0: cpu@0 {
+           device_type = "cpu";  // _ due to IEEE-1275
+           reg = <0>;
+           compatible = "riscv";
+           riscv,isa = "rv64ima_zicsr_zifencei";
+           mmu-type = "riscv,sv39";
+  
+           cpu0_intc: interrupt-controller {
+               #interrupt-cells = <1>;
+               interrupt-controller;
+               compatible = "riscv,cpu-intc";
+           };
         };
-        
-        /* You would also define your aclint-mtimer here */
-    };
+   };
+  
+   soc {  // a container for all mmp peripherals UART/Timers/SPI .etc
+       #address-cells = <2>;
+       #size-cells = <2>;
+       compatible = "simple-bus";
+       ranges; 
+
+       uart0: uart@10000000 {
+           compatible = "altr,juart-1.0";
+           reg = <0x0 0x10000000 0x0 0x8>;
+       };
+       timer@2000000 {
+           compatible = "riscv,aclint-mtimer";
+           reg = <0x0 0x200BFF8 0x0 0x8>,
+                 <0x0 0x2004000 0x0 0x8>;
+       };
+   };
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
