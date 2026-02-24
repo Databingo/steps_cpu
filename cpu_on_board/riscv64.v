@@ -472,8 +472,13 @@ module riscv64(
     (* ram_style = "block" *) reg [63:0] Cache_L_High [0:511]; // 4KB
     //(* ram_style = "block" *) reg [51:0] Cache_T [0:511];  // ~4KB (addr: 1(valit) + 51(tag) + 9(index) + 4(offset))
     (* ram_style = "block" *) reg [50:0] Cache_T [0:511];  // ~4KB (addr: 51(tag) + 9(index) + 4(offset))
-    reg [511:0] cache_valid_bits [0:0] = 0;
+    reg [511:0] cache_valid_bits = 0;
+    reg flush_pre = 0; 
+    reg flush = 0;
     always @(posedge clk) begin 
+	// Flush
+	flush_pre <= flush;
+	if (flush_pre != flush) cache_valid_bits <= 512'b0;
 	// Read
 	cache_line <= {Cache_L_High[ppc[12:4]], Cache_L_Low[ppc[12:4]]}; 
 	//cache_tag <= Cache_T[ppc[12:4]]; 
@@ -782,7 +787,7 @@ module riscv64(
 		    // Fence
 		    32'b?????????????????_000_?????_0001111: begin end
 		    // Fence.i
-		    32'b?????????????????_001_?????_0001111: begin cache_valid_bits <= 512'b0; end //for (integer j=0; j<512; j=j+1) begin Cache_T[j][51] <= 0; end end // clear Tag for clear I-Cache
+		    32'b?????????????????_001_?????_0001111: begin flush <= ~flush; end //bubble <= 1'b1; pc<=pc; end
 		    // Sfence.vma
 		    32'b0001001??????????_000_?????_1110011: begin end
 		    // RV64IMAFD(G)C  RVA23U64
