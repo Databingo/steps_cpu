@@ -109,22 +109,39 @@ module riscv64(
 
 
 // --- Shared Shifter Optimization (Saves ~2000 LUTs) ---
-    wire is_imm_shift  = (op == 7'b0010011 || op == 7'b0011011); 
-    wire is_word_shift = (op == 7'b0111011 || op == 7'b0011011); 
-    wire is_arith_shift = ir[30]; // func7[5] is 1 for Arithmetic Right Shifts (SRA/SRAW)
+    //wire is_imm_shift  = (op == 7'b0010011 || op == 7'b0011011);  // Slli Srli Srai || Slliw Srliw Sraiw
+    //wire is_word_shift = (op == 7'b0111011 || op == 7'b0011011);  // Sllw Srlw Sraw || Slliw Srliw Sraiw
+    //wire is_arith_shift = ir[30]; // func7[5] is 1 for Arithmetic Right Shifts (SRA/SRAW/Srai/Sraiw)
 
-    // Select the shift amount (Register value vs Immediate value)
-    wire [5:0] shift_amt = is_imm_shift ? w_shamt : (is_word_shift ? {1'b0, rs2[4:0]} : rs2[5:0]);
+    //// Select the shift amount (Register value vs Immediate value)
+    //wire [5:0] shift_amt = is_imm_shift ? w_shamt : (is_word_shift ? {1'b0, rs2[4:0]} : rs2[5:0]);
 
-    // Build exactly ONE physical Left Shifter
-    wire [63:0] left_shift_64 = rs1 << shift_amt;
-    wire [31:0] left_shift_32 = rs1[31:0] << shift_amt[4:0];
-    wire [63:0] shared_sll = is_word_shift ? {{32{left_shift_32[31]}}, left_shift_32} : left_shift_64;
+    //// Build exactly ONE physical Left Shifter
+    //wire [63:0] left_shift_64 = rs1 << shift_amt;
+    //wire [31:0] left_shift_32 = rs1[31:0] << shift_amt[4:0];
+    //wire [63:0] shared_sll = is_word_shift ? {{32{left_shift_32[31]}}, left_shift_32} : left_shift_64;
 
-    // Build exactly ONE physical Right Shifter
-    wire [63:0] right_shift_64 = is_arith_shift ? ($signed(rs1) >>> shift_amt) : (rs1 >> shift_amt);
-    wire [31:0] right_shift_32 = is_arith_shift ? ($signed(rs1[31:0]) >>> shift_amt[4:0]) : (rs1[31:0] >> shift_amt[4:0]);
-    wire [63:0] shared_srl_sra = is_word_shift ? {{32{right_shift_32[31]}}, right_shift_32} : right_shift_64;
+    //// Build exactly ONE physical Right Shifter
+    //wire [63:0] right_shift_64 = is_arith_shift ? ($signed(rs1) >>> shift_amt) : (rs1 >> shift_amt);
+    //wire [31:0] right_shift_32 = is_arith_shift ? ($signed(rs1[31:0]) >>> shift_amt[4:0]) : (rs1[31:0] >> shift_amt[4:0]);
+    //wire [63:0] shared_srl_sra = is_word_shift ? {{32{right_shift_32[31]}}, right_shift_32} : right_shift_64;
+
+    wire is_imm_shift  = (op == 7'b0010011 || op == 7'b0011011); // Slli Srli Srai || Slliw Srliw Sraiw
+    wire is_word_shift = (op == 7'b0111011 || op == 7'b0011011); // Sllw Srlw Sraw || Slliw Srliw Sraiw
+    wire is_arith_shift = ir[30]; // sra/sraw/srai/sraiw
+
+    wire [5:0] shift_amt = is_imm_shift ? w_shamt : rs2[5:0];
+    wire [5:0] final_shift_amt = is_word_shift ? {1'b0, shift_amt[4:0]} : shift_amt;
+    wire [63:0] shift_to_right = is_word_shift ? {{32{is_arith_shift & rs1[31]}}, rs1[31:0]}: rs1;
+
+    wire [63:0] raw_sll = rs1 << final_shift_amt;
+    wire [63:0] raw_srl_sra = is_arith_shift ? ($signed(shift_to_right) >>> final_shift_amt): (shift_to_right >> final_shift_amt);
+
+    wire [63:0] shared_sll = is_word_shift ? {{32{raw_sll[31]}}, raw_sll[31:0]} : raw_sll;
+    wire [63:0] shared_srl_sra = is_word_shift ? {{32{raw_srl_sra[31]}}, raw_srl_sra[31:0]} : raw_srl_sra;
+
+
+
     // ------------------------------------------------------
     //
     //
@@ -719,9 +736,10 @@ module riscv64(
 	            32'b0100000_?????_?????_000_?????_0111011: re[w_rd] <= alu_subw;  // Subw
 	            //32'b???????_?????_?????_001_?????_0111011: re[w_rd] <= alu_sllw;  // Sllw 5 length
                     //32'b0000000_?????_?????_101_?????_0111011: re[w_rd] <= alu_srlw;  // Srlw 5 length
-	                32'b???????_?????_?????_001_?????_0111011: re[w_rd] <= shared_sll;  // Sllw
+		    //32'b0100000_?????_?????_101_?????_0111011: re[w_rd] <= alu_sraw;  // Sraw 5 length
+    32'b???????_?????_?????_001_?????_0111011: re[w_rd] <= shared_sll;  // Sllw
     32'b0000000_?????_?????_101_?????_0111011: re[w_rd] <= shared_srl_sra;  // Srlw
-    32'b0100000_?????_?????_101_?????_0111011: re[w_rd] <= shared_srl_sra;  // Sraw//32'b0100000_?????_?????_101_?????_0111011: re[w_rd] <= alu_sraw;  // Sraw 5 length
+    32'b0100000_?????_?????_101_?????_0111011: re[w_rd] <= shared_srl_sra;  // Sraw
 		    
 		    
                     // Jump
