@@ -470,17 +470,22 @@ module riscv64(
     //(* ram_style = "block" *) reg [127:0] Cache_L [0:1023]; // 16KB
     (* ram_style = "block" *) reg [63:0] Cache_L_Low [0:511]; // 4KB
     (* ram_style = "block" *) reg [63:0] Cache_L_High [0:511]; // 4KB
-    (* ram_style = "block" *) reg [51:0] Cache_T [0:511];  // ~4KB (addr: 1(valit) + 51(tag) + 9(index) + 4(offset))
+    //(* ram_style = "block" *) reg [51:0] Cache_T [0:511];  // ~4KB (addr: 1(valit) + 51(tag) + 9(index) + 4(offset))
+    (* ram_style = "block" *) reg [50:0] Cache_T [0:511];  // ~4KB (addr: 51(tag) + 9(index) + 4(offset))
+    reg [511:0] cache_valid_bits = 0;
     always @(posedge clk) begin 
 	// Read
 	cache_line <= {Cache_L_High[ppc[12:4]], Cache_L_Low[ppc[12:4]]}; 
-	cache_tag <= Cache_T[ppc[12:4]]; 
+	//cache_tag <= Cache_T[ppc[12:4]]; 
+	cache_tag <= {cache_valid_bits[ppc[12:4]], Cache_T[ppc[12:4]]}; 
 	ppc_pre <= ppc;
 	// Write
         if (mmu_cache_refill && bus_write_enable && bus_address == `CacheI_L) begin Cache_L_Low[ask_i_data[12:4]] <= bus_write_data; end
         if (mmu_cache_refill && bus_write_enable && bus_address == `CacheI_H) begin 
 	    Cache_L_High[ask_i_data[12:4]] <= bus_write_data; 
-	    Cache_T[ask_i_data[12:4]] <= {1'b1, ask_i_data[63:13]}; 
+	    //Cache_T[ask_i_data[12:4]] <= {1'b1, ask_i_data[63:13]}; 
+	    Cache_T[ask_i_data[12:4]] <= ask_i_data[63:13]; 
+	    cache_valid_bits[ask_i_data[12:4]] <= 1'b1;
 	end
     end
     wire cache_i_hit = cache_tag[51] && (ppc_pre[63:13] == cache_tag[50:0]);
@@ -777,7 +782,7 @@ module riscv64(
 		    // Fence
 		    32'b?????????????????_000_?????_0001111: begin end
 		    // Fence.i
-		    32'b?????????????????_001_?????_0001111: begin end //for (integer j=0; j<512; j=j+1) begin Cache_T[j][51] <= 0; end end // clear Tag for clear I-Cache
+		    32'b?????????????????_001_?????_0001111: begin cache_valid_bits <= 512'b0; end //for (integer j=0; j<512; j=j+1) begin Cache_T[j][51] <= 0; end end // clear Tag for clear I-Cache
 		    // Sfence.vma
 		    32'b0001001??????????_000_?????_1110011: begin end
 		    // RV64IMAFD(G)C  RVA23U64
