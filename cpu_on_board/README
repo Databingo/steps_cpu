@@ -355,3 +355,5 @@ SDRAM 8MB PSC A2V64S40CTP-G7 IS42S16400.pdf
 #rpm2cpio tbb-4.1-9.20130314.el7.i686.rpm | cpio -idmv
 #sudo cp ./usr/lib/libtbb* /home/ashah/altera/13.0sp1/quartus/linux/
 
+
+取值周期和执行周期(执行包括分析和执行，以及各种中断检查,线性秩序)
