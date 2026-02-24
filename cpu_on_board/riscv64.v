@@ -472,7 +472,7 @@ module riscv64(
     (* ram_style = "block" *) reg [63:0] Cache_L_High [0:511]; // 4KB
     //(* ram_style = "block" *) reg [51:0] Cache_T [0:511];  // ~4KB (addr: 1(valit) + 51(tag) + 9(index) + 4(offset))
     (* ram_style = "block" *) reg [50:0] Cache_T [0:511];  // ~4KB (addr: 51(tag) + 9(index) + 4(offset))
-    reg [511:0] cache_valid_bits = 0;
+    reg [511:0] cache_valid_bits [0:0] = 0;
     always @(posedge clk) begin 
 	// Read
 	cache_line <= {Cache_L_High[ppc[12:4]], Cache_L_Low[ppc[12:4]]}; 
