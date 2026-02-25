@@ -62,4 +62,4 @@ go run ../rvas.go fake_opensbi.s
 #
 cat bin.txt > ram.mif  # write RAM program
 
-
+# xxd -b fake_opensbi.bin
