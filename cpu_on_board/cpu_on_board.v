@@ -64,7 +64,7 @@ wire        sdram_req_wait;
 wire sdram_ready;
 
 sdram_controller sdram_ctrl (
-    .sys_clk(clock_1hz),
+    .sys_clk(clock_slow),
     .rstn(KEY0),
     // to bus (software)
     .avl_addr(sdram_addr),
@@ -85,7 +85,7 @@ sdram_controller sdram_ctrl (
     .RASn(DRAM_RAS_N),       //                            .ras_n
     .WEn(DRAM_WE_N)          //                            .we_n
 );
-assign DRAM_CLK = clock_1hz;
+assign DRAM_CLK = clock_slow;
 assign DRAM_CKE = 1; // always enable
 
     // -- MEM -- minic L1 cache
@@ -99,35 +99,35 @@ assign DRAM_CKE = 1; // always enable
     end
 
     // -- Clock --
-    wire clock_1hz;
+    wire clock_slow;
     clock_slower clock_ins(
         .clk_in(CLOCK_50),
-        .clk_out(clock_1hz),
+        .clk_out(clock_slow),
         .reset_n(KEY0)
     );
     
     
     
 
-    //wire clock_1hz_dirty;
-    //wire clock_1hz;
+    //wire clock_slow_dirty;
+    //wire clock_slow;
     //clock_slower clock_ins(
     //    .clk_in(CLOCK_50),
-    //    .clk_out(clock_1hz_dirty),
+    //    .clk_out(clock_slow_dirty),
     //    .reset_n(KEY0)
     //);
     //global global_clk_inst (
-    //    .in(clock_1hz_dirty),
-    //    .out(clock_1hz)
+    //    .in(clock_slow_dirty),
+    //    .out(clock_slow)
     //);
 
 //wire sdram_clk;
 //
 //    // -- sdram pll --
 //    sdram_pll sdrampll (
-//        .clk_clk                        (clock_1hz),               //                     clk.clk
+//        .clk_clk                        (clock_slow),               //                     clk.clk
 //        .reset_reset_n                  (KEY0),                   //                   reset.reset_n
-//        .altpll_0_c0_clk                (clock_1hz),                //             altpll_0_c0.clk
+//        .altpll_0_c0_clk                (clock_slow),                //             altpll_0_c0.clk
 //        .altpll_0_c1_clk                (sdram_clk),              //             altpll_0_c1.clk
 //        .altpll_0_areset_conduit_export (), // altpll_0_areset_conduit.export
 //        .altpll_0_locked_conduit_export ()  // altpll_0_locked_conduit.export
@@ -140,15 +140,15 @@ assign DRAM_CKE = 1; // always enable
     reg [31:0] ir_bd;
     //wire bubble;
     // IR_LD BRAM Port A read
-    always @(posedge clock_1hz) begin ir_bd <= Cache[ppc>>2]; end
+    always @(posedge clock_slow) begin ir_bd <= Cache[ppc>>2]; end
     wire [31:0] ir_ld; assign ir_ld = ir_bd;//{ir_bd[7:0], ir_bd[15:8], ir_bd[23:16], ir_bd[31:24]}; // Endianness swap
     assign LEDR_PC = ppc/4;
     assign LEDG = ir_ld;
 
     // -- CPU --
     riscv64 cpu (
-        //.clk(clock_1hz), 
-        .clk(clock_1hz), 
+        //.clk(clock_slow), 
+        .clk(clock_slow), 
         .reset(KEY0),     
         .instruction(ir_ld),
         //.pc(pc),
@@ -181,7 +181,7 @@ assign DRAM_CKE = 1; // always enable
     wire key_released;
 
     ps2_decoder ps2_decoder_inst (
-        .clk(clock_1hz),
+        .clk(clock_slow),
         .ps2_clk_async(PS2_CLK),
         .ps2_data_async(PS2_DAT),
         .scan_code(scan),
@@ -189,7 +189,7 @@ assign DRAM_CKE = 1; // always enable
         .key_pressed(key_pressed),
         .key_released(key_released)
      );
-    always @(posedge clock_1hz) begin key_pressed_delay <= key_pressed; end
+    always @(posedge clock_slow) begin key_pressed_delay <= key_pressed; end
     wire key_pressed_edge = key_pressed && !key_pressed_delay;
 
     // -- Monitor -- Connected to Bus
@@ -199,7 +199,7 @@ assign DRAM_CKE = 1; // always enable
     reg uart_read_step;
     wire uart_waitrequest;
     jtag_uart_system my_jtag_system (
-        .clk_clk                                 (clock_1hz),
+        .clk_clk                                 (clock_slow),
         .reset_reset_n                           (KEY0),
         //.jtag_uart_0_avalon_jtag_slave_address   (bus_address[0:0]),
         .jtag_uart_0_avalon_jtag_slave_address   (~bus_address[2]), // 0x00 for Data, 0x04 for Control
@@ -293,7 +293,7 @@ assign DRAM_CKE = 1; // always enable
     reg [63:0] next_addr;
     wire [4:0] plic_id = (bus_address - `Plic_base) >> 2; // id = offset /4
 
-    always @(posedge clock_1hz or negedge KEY0) begin
+    always @(posedge clock_slow or negedge KEY0) begin
         if (!KEY0) begin
             bus_read_done <= 1;
             bus_write_done <= 1;
@@ -567,7 +567,7 @@ end
     reg sd_byte_available_d = 0;
     reg do_read = 0;
     wire [4:0] sd_status;
-    always @(posedge clock_1hz or negedge KEY0) begin
+    always @(posedge clock_slow or negedge KEY0) begin
 	if (!KEY0) begin
 	    //sd_rd_start <= 0;
 	    byte_index <= 0;
@@ -596,9 +596,10 @@ end
     end
 
     // Slow pulse clock for SD init (~100 kHz)
-    reg [8:0] clkdiv = 0;
-    //always @(posedge clock_1hz or negedge KEY0) begin
-    always @(posedge CLOCK_50 or negedge KEY0) begin
+    //reg [8:0] clkdiv = 0;  // for 50M
+    reg [5:0] clkdiv = 0; // for 10M  10MHz/64 = 156.25KHz
+    always @(posedge clock_slow or negedge KEY0) begin
+    //always @(posedge CLOCK_50 or negedge KEY0) begin
         if (!KEY0) clkdiv <= 0;
         else clkdiv <= clkdiv + 1;
     end
@@ -629,7 +630,7 @@ end
         .reset(~KEY0),
         .ready(sd_ready),
         .address(sd_addr),
-        .clk(clock_1hz),
+        .clk(clock_slow),
         .clk_pulse_slow(clk_pulse_slow),
         .status(sd_status),
         .recv_data()
