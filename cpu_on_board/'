@@ -311,7 +311,7 @@ assign DRAM_CKE = 1; // always enable
         bus_address_reg <= bus_address>>2;
         bus_address_reg_full <= bus_address;
         if (!sd_ready) sd_rd_start <= 0;
-        uart_write_pulse <= 0;
+        //uart_write_pulse <= 0;
 	uart_read_pulse <= 0;
 	uart_irq_pre <= uart_irq;
 	if (uart_irq && !uart_irq_pre) Plic_pending[1] <= 1;
@@ -481,10 +481,10 @@ assign DRAM_CKE = 1; // always enable
 	        if (uart_write_step ==0) begin uart_write_pulse <= 1; uart_write_step <= 1; end
 	        //if (uart_write_step ==1 &&  uart_waitrequest) begin uart_write_pulse <= 1; end
 	        //if (uart_write_step ==1 && !uart_waitrequest) begin uart_write_step <= 0; bus_write_done <=1; uart_write_pulse <= 0;end
-	        if (uart_write_step ==1 && !uart_waitrequest) begin uart_write_step <= 0; bus_write_done <=1; end
-	        //if (uart_write_step ==1) begin uart_write_pulse <= 1;
-	        //    if (!uart_waitrequest) begin uart_write_pulse <= 0; uart_write_step <= 0; bus_write_done <=1; end
-		//end
+	        //if (uart_write_step ==1 && !uart_waitrequest) begin uart_write_step <= 0; bus_write_done <=1; end
+	        if (uart_write_step ==1) begin uart_write_pulse <= 1;
+	            if (!uart_waitrequest) begin uart_write_pulse <= 0; uart_write_step <= 0; bus_write_done <=1; end
+		end
 	    end
         
 	
@@ -582,7 +582,6 @@ end
 	end
 	else begin
 	    //sd_cache_available <= 0;
-	    if (sd_rd_start) sd_cache_available <= 0;
             sd_byte_available_d  <= sd_byte_available;
             if (sd_byte_available && !sd_byte_available_d) begin
 	        sd_cache[byte_index] <= sd_dout;

@@ -6,7 +6,7 @@
 #`define Sdc_dirty 32'h0000_3224
 #`define Sdc_avail 32'h0000_3228
 # UART 0x2004
-
+# %X%I %am% o%pe%ns%bi%%A%%%%A%%%%%%%%%%%%%B%%ZZZ
 .globl _start
 _start:
 
