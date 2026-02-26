@@ -567,7 +567,8 @@ end
     reg sd_byte_available_d = 0;
     reg do_read = 0;
     wire [4:0] sd_status;
-    always @(posedge clock_slow or negedge KEY0) begin
+    //always @(posedge clock_slow or negedge KEY0) begin
+    always @(posedge CLOCK_50 or negedge KEY0) begin
 	if (!KEY0) begin
 	    //sd_rd_start <= 0;
 	    byte_index <= 0;
@@ -596,10 +597,10 @@ end
     end
 
     // Slow pulse clock for SD init (~100 kHz)
-    //reg [8:0] clkdiv = 0;  // for 50M
-    reg [5:0] clkdiv = 0; // for 10M  10MHz/64 = 156.25KHz
-    always @(posedge clock_slow or negedge KEY0) begin
-    //always @(posedge CLOCK_50 or negedge KEY0) begin
+    reg [8:0] clkdiv = 0;  // for 50M
+    //reg [5:0] clkdiv = 0; // for 10M  10MHz/64 = 156.25KHz
+    //always @(posedge clock_slow or negedge KEY0) begin
+    always @(posedge CLOCK_50 or negedge KEY0) begin
         if (!KEY0) clkdiv <= 0;
         else clkdiv <= clkdiv + 1;
     end
@@ -630,7 +631,8 @@ end
         .reset(~KEY0),
         .ready(sd_ready),
         .address(sd_addr),
-        .clk(clock_slow),
+        //.clk(clock_slow),
+        .clk(CLOCK_50),
         .clk_pulse_slow(clk_pulse_slow),
         .status(sd_status),
         .recv_data()
