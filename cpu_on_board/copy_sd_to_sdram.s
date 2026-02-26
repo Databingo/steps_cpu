@@ -59,8 +59,8 @@ sb t1, 0(t0)     # print
 # -- Wait SD ready
 sd_ready:
 lw a2, 0x220(a1)    # a2 0x3220 ready
-li t1, 0x60        # `
-sb t1, 0(t0)     # print
+#li t1, 0x60        # `
+#sb t1, 0(t0)     # print
 beq a2, x0, sd_ready
 
 # -- Read Boot Sector 0 -- 
