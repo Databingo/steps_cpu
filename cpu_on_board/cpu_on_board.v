@@ -310,14 +310,14 @@ assign DRAM_CKE = 1; // always enable
 	end else begin
         bus_address_reg <= bus_address>>2;
         bus_address_reg_full <= bus_address;
-        if (!sd_ready) sd_rd_start <= 0;
+        sd_rd_start <= 0;
         uart_write_pulse <= 0;
 	uart_read_pulse <= 0;
 	uart_irq_pre <= uart_irq;
 	if (uart_irq && !uart_irq_pre) Plic_pending[1] <= 1;
 	//if (key_pressed_edge) Plic_pending[1] <= 1;
 
-        if (bus_read_enable) begin bus_read_done <= 0; end //cid <= (bus_address-`Sdc_base); end 
+        if (bus_read_enable) begin bus_read_done <= 0; cid <= (bus_address-`Sdc_base); end 
         if (bus_write_enable) begin bus_write_done <= 0; end
 
         // Read
@@ -482,9 +482,6 @@ assign DRAM_CKE = 1; // always enable
 	        //if (uart_write_step ==1 &&  uart_waitrequest) begin uart_write_pulse <= 1; end
 	        //if (uart_write_step ==1 && !uart_waitrequest) begin uart_write_step <= 0; bus_write_done <=1; uart_write_pulse <= 0;end
 	        if (uart_write_step ==1 && !uart_waitrequest) begin uart_write_step <= 0; bus_write_done <=1; end
-	        //if (uart_write_step ==1) begin uart_write_pulse <= 1;
-	        //    if (!uart_waitrequest) begin uart_write_pulse <= 0; uart_write_step <= 0; bus_write_done <=1; end
-		//end
 	    end
         
 	
@@ -561,18 +558,16 @@ assign DRAM_CKE = 1; // always enable
 end
 
     // -- SD Card --
-    wire [11:0] cid = (bus_address-`Sdc_base);
-    //reg [11:0] cid;
-    reg [7:0] sd_cache [0:511];
-    //(* ram_style = "block" *) reg [7:0] sd_cache [0:511];
-    //(* ram_style = "logic" *) reg [7:0] sd_cache [0:511];
+    //wire [11:0] cid = (bus_address-`Sdc_base);
+    reg [11:0] cid;
+    //reg [7:0] sd_cache [0:511];
+    (* ram_style = "block" *) reg [7:0] sd_cache [0:511];
     reg [9:0] byte_index = 0;
     reg sd_cache_available = 0;
     reg sd_byte_available_d = 0;
     reg do_read = 0;
     wire [4:0] sd_status;
-    //always @(posedge clock_slow or negedge KEY0) begin
-    always @(posedge CLOCK_50 or negedge KEY0) begin
+    always @(posedge clock_slow or negedge KEY0) begin
 	if (!KEY0) begin
 	    //sd_rd_start <= 0;
 	    byte_index <= 0;
@@ -583,7 +578,6 @@ end
 	end
 	else begin
 	    //sd_cache_available <= 0;
-	    if (sd_rd_start) sd_cache_available <= 0;
             sd_byte_available_d  <= sd_byte_available;
             if (sd_byte_available && !sd_byte_available_d) begin
 	        sd_cache[byte_index] <= sd_dout;
@@ -602,10 +596,10 @@ end
     end
 
     // Slow pulse clock for SD init (~100 kHz)
-    reg [8:0] clkdiv = 0;  // for 50M
-    //reg [5:0] clkdiv = 0; // for 10M  10MHz/64 = 156.25KHz
-    //always @(posedge clock_slow or negedge KEY0) begin
-    always @(posedge CLOCK_50 or negedge KEY0) begin
+    //reg [8:0] clkdiv = 0;  // for 50M
+    reg [5:0] clkdiv = 0; // for 10M  10MHz/64 = 156.25KHz
+    always @(posedge clock_slow or negedge KEY0) begin
+    //always @(posedge CLOCK_50 or negedge KEY0) begin
         if (!KEY0) clkdiv <= 0;
         else clkdiv <= clkdiv + 1;
     end
@@ -636,8 +630,7 @@ end
         .reset(~KEY0),
         .ready(sd_ready),
         .address(sd_addr),
-        //.clk(clock_slow),
-        .clk(CLOCK_50),
+        .clk(clock_slow),
         .clk_pulse_slow(clk_pulse_slow),
         .status(sd_status),
         .recv_data()
