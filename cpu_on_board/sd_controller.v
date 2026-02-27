@@ -64,9 +64,8 @@ module sd_controller(
     parameter WRITE_BLOCK_DATA = 19;
     parameter WRITE_BLOCK_BYTE = 20;
     parameter WRITE_BLOCK_WAIT = 21;
+    
     parameter WRITE_DATA_SIZE = 515;
-
-    parameter READ_BLOCK_END = 22;
     
     (*mark_debug = "true"*) reg [4:0] state = RST;
     assign status = state;
@@ -195,7 +194,6 @@ module sd_controller(
                     state <= SEND_CMD;
                 end
                 IDLE: begin
-                    cs <= 1;
                     if(rd == 1) begin
                         state <= READ_BLOCK;
                     end
@@ -208,52 +206,27 @@ module sd_controller(
                     sclk_sig <= ~sclk_sig;
                 end
                 READ_BLOCK: begin
-                    cs <= 0;
                     cmd_out <= {16'hFF_51, address, 8'hFF};
                     bit_counter <= 55;
                     response_type <= 3'b1;
                     return_state <= READ_BLOCK_WAIT;
                     state <= SEND_CMD;
                 end
-                //READ_BLOCK_WAIT: begin
-                //    if(sclk_sig == 1 && miso == 0) begin
-                //        byte_counter <= 511;
-                //        bit_counter <= 7;
-                //        return_state <= READ_BLOCK_DATA;
-                //        state <= RECEIVE_BYTE;
-                //    end
-                //    sclk_sig <= ~sclk_sig;
-                //end
-
-
-
                 READ_BLOCK_WAIT: begin
-                    if(sclk_sig == 1) begin
-                        // Shift the MISO line into our register continuously
-                        recv_data <= {recv_data[6:0], miso};
-                        
-                        // Only trigger when we see the exact 0xFE Data Token!
-                        if ({recv_data[6:0], miso} == 8'hFE) begin
-                            byte_counter <= 511;
-                            bit_counter <= 7;
-                            return_state <= READ_BLOCK_DATA;
-                            state <= RECEIVE_BYTE;
-                        end
+                    if(sclk_sig == 1 && miso == 0) begin
+                        byte_counter <= 511;
+                        bit_counter <= 7;
+                        return_state <= READ_BLOCK_DATA;
+                        state <= RECEIVE_BYTE;
                     end
                     sclk_sig <= ~sclk_sig;
                 end
-
-
-
-
-
                 READ_BLOCK_DATA: begin
                     dout <= recv_data;
                     byte_available <= 1;
                     if (byte_counter == 0) begin
-                        //bit_counter <= 7;
-                        bit_counter <= 15;
-                        return_state <= READ_BLOCK_CRC;  // Cyclic Redundancy Check 2 bytes
+                        bit_counter <= 7;
+                        return_state <= READ_BLOCK_CRC;
                         state <= RECEIVE_BYTE;
                     end
                     else begin
@@ -263,28 +236,11 @@ module sd_controller(
                         state <= RECEIVE_BYTE;
                     end
                 end
-                //READ_BLOCK_CRC: begin
-                //    //bit_counter <= 7;
-                //    bit_counter <= 255;  // delay more time
-                //    return_state <= IDLE;
-                //    state <= RECEIVE_BYTE;
-                //end
                 READ_BLOCK_CRC: begin
-                    bit_counter <= 15; // 16 clocks for CRC
-                    return_state <= READ_BLOCK_END; // Go to CS release
-                    state <= RECEIVE_BYTE;
-                end
-                READ_BLOCK_END: begin
-                    cs <= 1;          // FORCE CS HIGH to close transaction!
-                    bit_counter <= 7; // 8 dummy clocks with CS High
+                    bit_counter <= 7;
                     return_state <= IDLE;
                     state <= RECEIVE_BYTE;
                 end
-
-
-
-
-
                 SEND_CMD: begin
                     if (sclk_sig == 1) begin
                         if (bit_counter == 0) begin
@@ -327,7 +283,6 @@ module sd_controller(
                     sclk_sig <= ~sclk_sig;
                 end
                 WRITE_BLOCK_CMD: begin
-                    cs <= 0;
                     cmd_out <= {16'hFF_58, address, 8'hFF};
                     bit_counter <= 55;
                     return_state <= WRITE_BLOCK_INIT;
