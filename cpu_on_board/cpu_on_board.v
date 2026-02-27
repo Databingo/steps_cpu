@@ -149,7 +149,8 @@ module cpu_on_board (
         bus_address_reg <= bus_address>>2;
         bus_address_reg_full <= bus_address;
 	//bus_read_done <= 0;
-        sd_rd_start <= 0;
+        //sd_rd_start <= 0;
+	if (Sdc_read_selected) sd_rd_start <= 1; else if (sd_ready) sd_rd_start <= 0;
 
 
         if (bus_read_enable) begin bus_read_done <= 0; end
@@ -214,7 +215,7 @@ module cpu_on_board (
 	    end
 
 	    if (Sdc_addr_selected) sd_addr <= bus_write_data[31:0];
-            if (Sdc_read_selected) sd_rd_start <= 1;
+            //if (Sdc_read_selected) sd_rd_start <= 1;
         end
     end
 
