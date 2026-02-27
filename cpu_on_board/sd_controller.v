@@ -212,15 +212,38 @@ module sd_controller(
                     return_state <= READ_BLOCK_WAIT;
                     state <= SEND_CMD;
                 end
+                //READ_BLOCK_WAIT: begin
+                //    if(sclk_sig == 1 && miso == 0) begin
+                //        byte_counter <= 511;
+                //        bit_counter <= 7;
+                //        return_state <= READ_BLOCK_DATA;
+                //        state <= RECEIVE_BYTE;
+                //    end
+                //    sclk_sig <= ~sclk_sig;
+                //end
+
+
+
                 READ_BLOCK_WAIT: begin
-                    if(sclk_sig == 1 && miso == 0) begin
-                        byte_counter <= 511;
-                        bit_counter <= 7;
-                        return_state <= READ_BLOCK_DATA;
-                        state <= RECEIVE_BYTE;
+                    if(sclk_sig == 1) begin
+                        // Shift the MISO line into our register continuously
+                        recv_data <= {recv_data[6:0], miso};
+                        
+                        // Only trigger when we see the exact 0xFE Data Token!
+                        if ({recv_data[6:0], miso} == 8'hFE) begin
+                            byte_counter <= 511;
+                            bit_counter <= 7;
+                            return_state <= READ_BLOCK_DATA;
+                            state <= RECEIVE_BYTE;
+                        end
                     end
                     sclk_sig <= ~sclk_sig;
                 end
+
+
+
+
+
                 READ_BLOCK_DATA: begin
                     dout <= recv_data;
                     byte_available <= 1;
