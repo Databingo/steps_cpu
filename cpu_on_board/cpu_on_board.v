@@ -317,7 +317,7 @@ assign DRAM_CKE = 1; // always enable
 	if (uart_irq && !uart_irq_pre) Plic_pending[1] <= 1;
 	//if (key_pressed_edge) Plic_pending[1] <= 1;
 
-        if (bus_read_enable) begin bus_read_done <= 0; cid <= (bus_address-`Sdc_base); end 
+        if (bus_read_enable) begin bus_read_done <= 0; end //cid <= (bus_address-`Sdc_base); end 
         if (bus_write_enable) begin bus_write_done <= 0; end
 
         // Read
@@ -561,11 +561,11 @@ assign DRAM_CKE = 1; // always enable
 end
 
     // -- SD Card --
-    //wire [11:0] cid = (bus_address-`Sdc_base);
+    wire [11:0] cid = (bus_address-`Sdc_base);
     reg [11:0] cid;
     //reg [7:0] sd_cache [0:511];
-    //(* ram_style = "block" *) reg [7:0] sd_cache [0:511];
-    (* ram_style = "logic" *) reg [7:0] sd_cache [0:511];
+    (* ram_style = "block" *) reg [7:0] sd_cache [0:511];
+    //(* ram_style = "logic" *) reg [7:0] sd_cache [0:511];
     reg [9:0] byte_index = 0;
     reg sd_cache_available = 0;
     reg sd_byte_available_d = 0;
