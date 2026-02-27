@@ -12,8 +12,7 @@ module jtag_uart_system (
 		output wire [31:0] jtag_uart_0_avalon_jtag_slave_readdata,    //                              .readdata
 		input  wire        jtag_uart_0_avalon_jtag_slave_write_n,     //                              .write_n
 		input  wire [31:0] jtag_uart_0_avalon_jtag_slave_writedata,   //                              .writedata
-		output wire        jtag_uart_0_avalon_jtag_slave_waitrequest, //                              .waitrequest
-		output wire        jtag_uart_0_irq_irq                        //                              .
+		output wire        jtag_uart_0_avalon_jtag_slave_waitrequest  //                              .waitrequest
 	);
 
 	wire    rst_controller_reset_out_reset; // rst_controller:reset_out -> jtag_uart_0:rst_n
@@ -28,7 +27,7 @@ module jtag_uart_system (
 		.av_write_n     (jtag_uart_0_avalon_jtag_slave_write_n),     //                  .write_n
 		.av_writedata   (jtag_uart_0_avalon_jtag_slave_writedata),   //                  .writedata
 		.av_waitrequest (jtag_uart_0_avalon_jtag_slave_waitrequest), //                  .waitrequest
-		.av_irq         (jtag_uart_0_irq_irq)                        //               irq.irq
+		.av_irq         ()                                           //               irq.irq
 	);
 
 	altera_reset_controller #(

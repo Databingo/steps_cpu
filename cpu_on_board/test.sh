@@ -35,14 +35,6 @@ cat bin.txt > rom.mif  # write ROM program
 #go run ../rvas.go SD.s # 
 #go run ../rvas.go SD2.s # 
 go run ../rvas.go SD3.s # 
-#go run ../rvas.go sdram.s
-#go run ../rvas.go shadow.s
-#go run ../rvas.go mopensbi.s
-#go run ../rvas.go TLB.s
-#go run ../rvas.go PLIC.s # sdram write/read ok
-#go run ../rvas.go fake_opensbi.s
-#go run ../rvas.go copy_sd_to_sdram.s
-
 
 
 
@@ -64,4 +56,4 @@ go run ../rvas.go SD3.s #
 #
 cat bin.txt > ram.mif  # write RAM program
 
-# xxd -b fake_opensbi.bin
+

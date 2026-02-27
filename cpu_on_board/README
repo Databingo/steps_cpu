@@ -5,11 +5,6 @@ dpkg --add-architecture i386
 apt upgrade
 sudo apt-get install libstdc++6:i386 libc6:i386 libx11-dev:i386 libxext-dev:i386 libxau-dev:i386 libfreetype6:i386 fontconfig:i386 expat:i386
 
-
-
-sudo apt install  libgcc-s1:i386 zlib1g:i386 libncurses5:i386 libx11-6:i386 libxext6:i386 libxft2:i386 libxtst6:i386 libxi6:i386 libxp6 libxm4:i386
-sudo apt install libc6:i386 libstdc++6:i386 libstdc++5:i386 libgcc-s1:i386 libgcc1:i386 zlib1g:i386 libncurses5:i386 libx11-6:i386 libxext6:i386 libxft2:i386 libxtst6:i386 libxi6:i386 libxm4:i386
-
 # for run qsys
 apt-get install libxtst6:i386
 apt-get install libxi6:i386
@@ -272,91 +267,3 @@ NeuralNetWork
 quartus material
 https://dcenet.fel.cvut.cz/edu/fpga/install_en.aspx
 http://web.mit.edu/6.111/volume2/www/f2018/tools/sd_controller.v
-
-c9479d067c156f59db5fe4e486422bcb18495723 tlb_i_hit_refill ok with plic
-cfb5c680ac73052f15f49f69f4cf72d8dc14232c tlb_i_hit_refill and 64 bits bus/pc/ppc ok with plic
-6ee114347731a217e55a324e77f166073e984865 fixed i_trap of j/b bubble
-e36659d8b74f1ff0697e8c7706432546207a4e53 ls_va registed work ok
-d4f4e1abccdb7fc8235370e53f881d5424c2db1a use check to registe ls_va ok
-b74f2763c4afba28153d50f3870e4da67235f90e use hit to check simple hit ok
-29b2ee3ad11684e4f6689fdb172800baec9691d2 use if hi successful ok
-2024e0d7c1dfef6d38601d1fbfd2148bc9f85e34 load/store for ls_va/check/hit ok
-b23ce398200c10d3d6bc1cecf24f8cc5ad5c1e53 back to pc-4 if hit successful ok
-b7703c3ab89361fb2d5ca15254b82e93a6afee4c pc-4/uni_check/mmu_pc/mmu_da/raw_step/PLIC ok
-b6651f409d9a311ee69952f44aa11ff3531999db pc-4/uni_check/mmu_pc/mmu_da/real_step/PLIC ok
-d958b6eb624cac9e0d3c36e01027a1f4521b857f add standlong logic of mmu_cache_refill ok
-b01408e4677bad1b430e5d947f308b33259c18ff fix sdram ld
-4a5bd01a13348cfa582dc6717579e5a4bd2f5e38 fix sdram_controller CAS3 & sdram ld only! s/l no touch
-be3d4f8044994b6be788524a19aca4a0a45445d4 no mmu and CAS3+invertClock sd/ld work
-358c0e8b7d30589947766bd9068967283bb18151 mmu_pc CAS3+invertClock+WDELAY6+FDELAY5+sd+ld for SDRAM work!
-88fae5eda19e912cec4bf1ce1c2d379883ee6118 mmu_pc+plic+CAS2+normalClock+W6+D5+sd+ld+sdram_controller_pending for SDRAM ld work!
-c2afcd6e6f46efef8182da675788201c11cf4791 print XXXABCDXABCDEFGHX*-^-|:^-ABCDXABCDEFGHXABCDEFGHXAB|01^-2^-
-ac1d207fc0e6de9683a8cc6082b8b8ee49c19678 print XXXABCDXABCDEFGHX|:ABCDXABCDEFGHXABCDEFGHXAB|01234567|1.1/E|1.b/E|1.f/E|1.f/E|1.6/E|1.6/E
-bf7f0efadf90e3c080384979bf0ea6fb68493d15 print XXXABCDXABCDEFGHXABCDEFGHX*-^-|:^-ABCDXABCDEFGHXABCDEFGHXAB|01^-2^-3^-4^-
-9b1778f6bb5a98384f552e40c78387d8367d19a6 25Mhz print XXXABCDXABCDEFGHXABCDEFGHX*-^-|:^-ABCDXABCDEFGHXABCDEFGHXAB|01^-2^-3^-4^-567|1.n/E|1.i/E|1.h/E|1.a/E|1.o/E|1.h/E|1.a/E|1.o/E|1.a/E
-5a6d6b6be74b7073d040001d3a66ebb4aa33a159 mmu_cache_refill seems work
-85dd1336e249483fa1092a236f1a59b5bcfdfa08 compile M-mul/mulh ok, need to add multipile cycle div/divu/rem/remu
-71f9d3e93ffdc425ed59cce849938159f0f773a6 separate div/divu/rem/remu compile ok
-16964070123501d2897e4895261f65b56d931ee4 separate div.../mul... ok
-273b3204049e9950a6cc0fd981f333c9d9decb62 ls/TLB4page/muls/divs/atoms compile OK!
-682d2c30d80e39c25f7728bf3565bc8cf008ffe2 ls/TLB4page/muls/divs/atoms burn&run OK!
-eb823cd8ff2ead9e90b6aad11de235dd517af072 run ok but 1357 lost bit(0)as 1
-b3f9c7c4f6246530cdc3c1e70c7eff99a6495903 run fake_opensbi.s/PLIC.s ok(but lost bit 0 sometime)
-94c787d9ba5323c74f2e55ec2d7263620b218e6d copy_sd_to_sdram testing(SD3+PLIC) PLIC ok,now SD3 tes tproblem
-d033be36    37_sd_workd
-
-
-
-Cyclone II FPGA Starter Board with EP2C20F484C7
-BRAM 29.25KB 234Kb
-SRAM 512KB
-SDRAM 8MB
-
--timer
--plic
--mmu full sv39 page table walker
--TLB translation lookaside buffer
-VA->TLB(assembly->MMU->SDRAM->TLB)->PA->Cache(assembly->SDRAM->Cache)->ir/data
-page fault
--atom lr.w/sc.w
-amoswap.w/amoadd.w/lr.d/sc.d
--fence
--fence.i
-sfence.vma ?
--mideleg/medeleg
-sstatus/..
-uart_16550
-device tree
-map to 0x80000000
-mini opensbi
-mini linux kernel
-Cyclone II FPGA Starter Board with EP2C20F484C7
-BRAM 29.25KB 234Kb
-SRAM 512KB
-SDRAM 8MB PSC A2V64S40CTP-G7 IS42S16400.pdf
-
-
-// Linux needs:
-// Privilege RV
-// mret/sret/ecall/ebreak
-// PLIC
-// CLINT timer
-// UART 16550
-// Map DRAM 0x80000000/0x40000000
-// OpenSBI at 0x80000000 ?
-// lr.w|d/sc.w|d Atom amo...
-// sfence.vma TLE flush could be NOP
-// sv39 mmu ! Accessed/Direct bit in PTE(Page Table Entry)
-// exception handler: page faults/illegal ir/misaligned ls/timer interrutp/external interrupt/breakpoint/ecallUSM
-// SBI interface: OpenSBI run first
-// fence fence.i
-// cache !  // SDRAM to cache(BRAM)
-// Device Tree
-  
-#fix compile hanging:
-#wget https://yum.oracle.com/repo/OracleLinux/OL7/7/base/x86_64/getPackage/tbb-4.1-9.20130314.el7.i686.rpm 
-#rpm2cpio tbb-4.1-9.20130314.el7.i686.rpm | cpio -idmv
-#sudo cp ./usr/lib/libtbb* /home/ashah/altera/13.0sp1/quartus/linux/
-
-
-取值周期和执行周期(执行包括分析和执行，以及各种中断检查,线性秩序)
