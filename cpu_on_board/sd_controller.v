@@ -195,6 +195,7 @@ module sd_controller(
                     state <= SEND_CMD;
                 end
                 IDLE: begin
+                    cs <= 1;
                     if(rd == 1) begin
                         state <= READ_BLOCK;
                     end
