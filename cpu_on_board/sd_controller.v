@@ -238,7 +238,8 @@ module sd_controller(
                     end
                 end
                 READ_BLOCK_CRC: begin
-                    bit_counter <= 7;
+                    //bit_counter <= 7;
+                    bit_counter <= 255;  // delay more time
                     return_state <= IDLE;
                     state <= RECEIVE_BYTE;
                 end
