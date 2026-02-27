@@ -564,7 +564,8 @@ end
     //wire [11:0] cid = (bus_address-`Sdc_base);
     reg [11:0] cid;
     //reg [7:0] sd_cache [0:511];
-    (* ram_style = "block" *) reg [7:0] sd_cache [0:511];
+    //(* ram_style = "block" *) reg [7:0] sd_cache [0:511];
+    (* ram_style = "logic" *) reg [7:0] sd_cache [0:511];
     reg [9:0] byte_index = 0;
     reg sd_cache_available = 0;
     reg sd_byte_available_d = 0;

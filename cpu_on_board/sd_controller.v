@@ -64,8 +64,9 @@ module sd_controller(
     parameter WRITE_BLOCK_DATA = 19;
     parameter WRITE_BLOCK_BYTE = 20;
     parameter WRITE_BLOCK_WAIT = 21;
-    
     parameter WRITE_DATA_SIZE = 515;
+
+    parameter READ_BLOCK_END = 21;
     
     (*mark_debug = "true"*) reg [4:0] state = RST;
     assign status = state;
@@ -206,6 +207,7 @@ module sd_controller(
                     sclk_sig <= ~sclk_sig;
                 end
                 READ_BLOCK: begin
+                    cs <= 0;
                     cmd_out <= {16'hFF_51, address, 8'hFF};
                     bit_counter <= 55;
                     response_type <= 3'b1;
@@ -260,12 +262,28 @@ module sd_controller(
                         state <= RECEIVE_BYTE;
                     end
                 end
+                //READ_BLOCK_CRC: begin
+                //    //bit_counter <= 7;
+                //    bit_counter <= 255;  // delay more time
+                //    return_state <= IDLE;
+                //    state <= RECEIVE_BYTE;
+                //end
                 READ_BLOCK_CRC: begin
-                    //bit_counter <= 7;
-                    bit_counter <= 255;  // delay more time
+                    bit_counter <= 15; // 16 clocks for CRC
+                    return_state <= READ_BLOCK_END; // Go to CS release
+                    state <= RECEIVE_BYTE;
+                end
+                READ_BLOCK_END: begin
+                    cs <= 1;          // FORCE CS HIGH to close transaction!
+                    bit_counter <= 7; // 8 dummy clocks with CS High
                     return_state <= IDLE;
                     state <= RECEIVE_BYTE;
                 end
+
+
+
+
+
                 SEND_CMD: begin
                     if (sclk_sig == 1) begin
                         if (bit_counter == 0) begin
@@ -308,6 +326,7 @@ module sd_controller(
                     sclk_sig <= ~sclk_sig;
                 end
                 WRITE_BLOCK_CMD: begin
+                    cs <= 0;
                     cmd_out <= {16'hFF_58, address, 8'hFF};
                     bit_counter <= 55;
                     return_state <= WRITE_BLOCK_INIT;
