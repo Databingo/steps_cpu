@@ -66,7 +66,7 @@ module sd_controller(
     parameter WRITE_BLOCK_WAIT = 21;
     parameter WRITE_DATA_SIZE = 515;
 
-    parameter READ_BLOCK_END = 21;
+    parameter READ_BLOCK_END = 22;
     
     (*mark_debug = "true"*) reg [4:0] state = RST;
     assign status = state;
