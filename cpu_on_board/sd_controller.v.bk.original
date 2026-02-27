@@ -225,9 +225,8 @@ module sd_controller(
                     dout <= recv_data;
                     byte_available <= 1;
                     if (byte_counter == 0) begin
-                        //bit_counter <= 7;
-                        bit_counter <= 15;
-                        return_state <= READ_BLOCK_CRC;  // Cyclic Redundancy Check 2 bytes
+                        bit_counter <= 7;
+                        return_state <= READ_BLOCK_CRC;  // Cyclic Redundancy Check
                         state <= RECEIVE_BYTE;
                     end
                     else begin
