@@ -644,7 +644,8 @@ end
     reg sd_byte_available_d = 0;
     reg do_read = 0;
     wire [4:0] sd_status;
-    always @(posedge CLOCK_50 or negedge KEY0) begin
+    //always @(posedge CLOCK_50 or negedge KEY0) begin
+    always @(posedge clock_slow or negedge KEY0) begin
 	if (!KEY0) begin
 	    //sd_rd_start <= 0;
 	    byte_index <= 0;
@@ -713,7 +714,8 @@ end
         .reset(~KEY0),
         .ready(sd_ready), // 
         .address(sd_addr), //
-        .clk(CLOCK_50),
+        //.clk(CLOCK_50),
+        .clk(clock_slow),
         .clk_pulse_slow(clk_pulse_slow),
         .status(sd_status),
         .recv_data()
