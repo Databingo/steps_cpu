@@ -149,7 +149,11 @@ module cpu_on_board (
         bus_address_reg <= bus_address>>2;
         bus_address_reg_full <= bus_address;
 	//bus_read_done <= 0;
-        sd_rd_start <= 0;
+        //sd_rd_start <= 0;
+        //if (bus_write_enable && Sdc_read_selected) sd_rd_start <= 1; // we have to write 1 to sd's rd so in write
+	//else if (sd_cache_available) sd_rd_start <= 0; // not reset by sd_cache_available 1 
+	//if (sd_cache_available) sd_rd_start <= 0; // clear first, not reset by sd_cache_available 1 
+        //if (bus_write_enable && Sdc_read_selected) sd_rd_start <= 1; // we have to write 1 to sd's rd so in write
 
 
         if (bus_read_enable) begin bus_read_done <= 0; end
@@ -214,7 +218,8 @@ module cpu_on_board (
 	    end
 
 	    if (Sdc_addr_selected) sd_addr <= bus_write_data[31:0];
-            if (Sdc_read_selected) sd_rd_start <= 1;
+            //if (Sdc_read_selected) sd_rd_start <= 1; // we have to write 1 to sd's rd so in write
+	    //if (Sdc_read_selected) begin sd_rd_start <= 1; sd_cache_available <= 0; byte_index <= 0; end// we have to write 1 to sd's rd so in write
         end
     end
 
@@ -242,13 +247,16 @@ module cpu_on_board (
 	        byte_index <= byte_index + 1;
 	        do_read <=1;
 	    end
-	    if (byte_index == 10) sd_cache_available <= 0;
+	    //if (byte_index == 10) sd_cache_available <= 0;
+	    if (bus_write_enable && Sdc_read_selected) begin sd_cache_available <= 0; byte_index <= 0; sd_rd_start <= 1; end
+
 	    //if (do_read && sd_status !=6) begin 
 	    if (byte_index == 512) begin 
 	        //sd_rd_start <= 0;
 	        byte_index <= 0;
 	        do_read <=0;
 	        sd_cache_available <= 1;
+		sd_rd_start <= 0;
 	    end
         end
     end
@@ -281,16 +289,16 @@ module cpu_on_board (
         .miso(SD_DAT0),
         .sclk(SD_CLK),
 
-        .rd(sd_rd_start),
-        .wr(1'b0),
-        .dout(sd_dout),
-        .byte_available(sd_byte_available),
+        .rd(sd_rd_start), //  ready->rd->byte_availalbe->dout(512 bytes)
+        .wr(1'b0),        //  ready->wr->ready_for_next_byte->addr|din ??
+        .dout(sd_dout), //
+        .byte_available(sd_byte_available), //
 
         .din(8'd0),
         .ready_for_next_byte(),
         .reset(~KEY0),
-        .ready(sd_ready),
-        .address(sd_addr),
+        .ready(sd_ready), // 
+        .address(sd_addr), //
         .clk(CLOCK_50),
         .clk_pulse_slow(clk_pulse_slow),
         .status(sd_status),
