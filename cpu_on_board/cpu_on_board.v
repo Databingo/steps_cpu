@@ -475,6 +475,7 @@ assign DRAM_CKE = 1; // always enable
 
 	    if (Sdc_addr_selected) begin sd_addr <= bus_write_data[31:0]; bus_write_done <= 1; end
 	    //if (Sdc_read_selected) begin sd_rd_start <= 1; bus_write_done <= 1; end
+	    if (Sdc_read_selected) begin bus_write_done <= 1; end
 
 	    //if (Art_selected) begin uart_write_pulse <= 1; bus_write_done <=1; end
 	    if (Art_selected) begin 
