@@ -394,12 +394,13 @@ jal print_sector
 
 # ---  sd_read_sector ---
 sd_read_sector:
-sw a2, 0x200(a1) # Write Sector index value to address 0x3200
-li t1, 1
-sw t1, 0x204(a1) # Trigger read at 0x3204
 wait_ready:
 lw t2, 0x220(a1)    # t2 0x3220 ready
 beq t2, x0, wait_ready
+
+sw a2, 0x200(a1) # Write Sector index value to address 0x3200
+li t1, 1
+sw t1, 0x204(a1) # Trigger read at 0x3204
 wait_cache:
 lw t2, 0x228(a1)    # t2 0x3228 cache_avaible
 beq t2, x0, wait_cache
