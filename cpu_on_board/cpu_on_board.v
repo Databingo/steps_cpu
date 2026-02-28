@@ -682,8 +682,10 @@ end
 
 
     // Slow pulse clock for SD init (~100 kHz)
-    reg [8:0] clkdiv = 0;
-    always @(posedge CLOCK_50 or negedge KEY0) begin
+    //reg [8:0] clkdiv = 0;
+    //always @(posedge CLOCK_50 or negedge KEY0) begin
+    reg [5:0] clkdiv = 0; // 10Mhz/64 = 156Khz
+    always @(posedge clock_slow or negedge KEY0) begin
         if (!KEY0) clkdiv <= 0;
         else clkdiv <= clkdiv + 1;
     end
