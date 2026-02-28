@@ -483,6 +483,7 @@ assign DRAM_CKE = 1; // always enable
 	        if (uart_write_step ==0) begin uart_write_pulse <= 1; uart_write_step <= 1; end
 	        //if (uart_write_step ==1 &&  uart_waitrequest) begin uart_write_pulse <= 1; end
 	        //if (uart_write_step ==1 && !uart_waitrequest) begin uart_write_step <= 0; bus_write_done <=1; uart_write_pulse <= 0;end
+	        if (uart_write_step ==1 && uart_waitrequest) begin uart_write_pulse <= 1; end
 	        if (uart_write_step ==1 && !uart_waitrequest) begin uart_write_step <= 0; bus_write_done <=1; end
 	    end
         
@@ -667,13 +668,15 @@ end
 	    //if (byte_index == 10) sd_cache_available <= 0;
 	    if (bus_write_enable && Sdc_read_selected) begin sd_cache_available <= 0; byte_index <= 0; sd_rd_start <= 1; end
 
+	    if (sd_rd_start && !sd_ready) sd_rd_start <= 0;
+
 	    //if (do_read && sd_status !=6) begin 
 	    if (byte_index == 512) begin 
 	        //sd_rd_start <= 0;
 	        byte_index <= 0;
 	        do_read <=0;
 	        sd_cache_available <= 1;
-		sd_rd_start <= 0;
+		//sd_rd_start <= 0;
 	    end
         end
     end
