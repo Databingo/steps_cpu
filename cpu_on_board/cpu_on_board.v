@@ -673,7 +673,7 @@ end
 	        do_read <=1;
 	    end
 	    //if (byte_index == 10) sd_cache_available <= 0;
-	    if (sd_rd_start) sd_cache_available <= 0;
+	    if (byt_index ==0 & sd_rd_start) sd_cache_available <= 0;
 	    //if (bus_write_enable && Sdc_read_selected) begin sd_cache_available <= 0; byte_index <= 0; sd_rd_start <= 1; end
 	    //if (!bus_write_done && Sdc_read_selected) begin sd_cache_available <= 0; byte_index <= 0; sd_rd_start <= 1; end
 
