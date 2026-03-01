@@ -322,7 +322,9 @@ assign DRAM_CKE = 1; // always enable
         if (bus_read_enable) begin bus_read_done <= 0; end //cid <= (bus_address-`Sdc_base); end 
         if (bus_write_enable) begin bus_write_done <= 0; end
 
-        if (sd_rd_start && !sd_ready) sd_rd_start <= 0;
+        //if (sd_rd_start && !sd_ready) sd_rd_start <= 0;
+        if (sd_rd_start && sd_cache_available) sd_rd_start <= 0;
+	
       
 
         // Read
