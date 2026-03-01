@@ -410,14 +410,14 @@ li t3, 0 # t3 is counter
 li t4, 100
 wait_cache:
 lw t2, 0x228(a1)    # t2 0x3228 cache_avaible
-#beq t2, x0, wait_cache
-bne t2, x0, cache_ready
-addi t3, t3, 1
-blt t3, t4, wait_cache
-li t1, 69        # E
-sw t1, 0(t0)     # print
-li t3, 0
-j wait_cache
+beq t2, x0, wait_cache
+#bne t2, x0, cache_ready
+#addi t3, t3, 1
+#blt t3, t4, wait_cache
+#li t1, 69        # E
+#sw t1, 0(t0)     # print
+#li t3, 0
+#j wait_cache
 cache_ready:
 li t1, 70        # F
 sw t1, 0(t0)     # print
