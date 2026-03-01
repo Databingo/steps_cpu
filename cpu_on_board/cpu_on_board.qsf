@@ -104,7 +104,7 @@ set_global_assignment -name PARTITION_FITTER_PRESERVATION_LEVEL PLACEMENT_AND_RO
 set_global_assignment -name PARTITION_COLOR 16764057 -section_id Top
 
 set_global_assignment -name STRATIX_DEVICE_IO_STANDARD "3.3-V LVTTL"
-set_global_assignment -name ENABLE_SIGNALTAP OFF
+set_global_assignment -name ENABLE_SIGNALTAP ON
 set_global_assignment -name USE_SIGNALTAP_FILE stp1.stp
 set_global_assignment -name SLD_FILE /usr/local/projects/steps_cpu/cpu_on_board/stp1_auto_stripped.stp
 set_global_assignment -name QIP_FILE jtag_uart_system/synthesis/jtag_uart_system.qip
@@ -113,12 +113,8 @@ set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_
 
 
 
+set_global_assignment -name QIP_FILE spi/synthesis/spi.qip
 set_global_assignment -name CYCLONEII_RESERVE_NCEO_AFTER_CONFIGURATION "USE AS REGULAR IO"
-
-#set_global_assignment -name QIP_FILE spi/synthesis/spi.qip
-#set_global_assignment -name QIP_FILE sdram/synthesis/sdram.qip
-set_global_assignment -name QIP_FILE sdram_pll/sdram/synthesis/sdram_pll.qip
-#set_global_assignment -name QIP_FILE upclk/synthesis/upclk.qip
 
 #set_global_assignment -name VERILOG_FILE SD_CMD.v
 #set_global_assignment -name VERILOG_FILE SD_CLK.v
@@ -153,132 +149,10 @@ set_global_assignment -name PHYSICAL_SYNTHESIS_REGISTER_RETIMING ON
 set_global_assignment -name ADV_NETLIST_OPT_SYNTH_WYSIWYG_REMAP ON
 
 # Log
-set_global_assignment -name HDL_MESSAGE_LEVEL LEVEL3
+set_global_assignment -name HDL_MESSAGE_LEVEL Level3
 
 
 # ==============================================
 # Cyclone II – Byte-enable BRAM settings
 # ==============================================
 set_global_assignment -name ALLOW_ANY_RAM_SIZE_FOR_RECOGNITION ON
-
-
-# faster
-set_global_assignment -name INCREMENTAL_COMPILATION FULL_INCREMENTAL_COMPILATION
-#set_global_assignment -name RAPID_RECOMPILE ON
-#set_global_assignment -name FITTER_EFFORT "FAST FIT"
-set_global_assignment -name OPTIMIZATION_TECHNIQUE AREA
-
-
-
-
-## --- SDRAM Drive Strength & Slew Rate Settings ---
-#
-## 1. Set Current Strength to 8mA (Stronger signal)
-#set_instance_assignment -name CURRENT_STRENGTH_NEW 8MA -to DRAM_ADDR*
-#set_instance_assignment -name CURRENT_STRENGTH_NEW 8MA -to DRAM_BA*
-#set_instance_assignment -name CURRENT_STRENGTH_NEW 8MA -to DRAM_CAS_N
-#set_instance_assignment -name CURRENT_STRENGTH_NEW 8MA -to DRAM_CKE
-#set_instance_assignment -name CURRENT_STRENGTH_NEW 8MA -to DRAM_CLK
-#set_instance_assignment -name CURRENT_STRENGTH_NEW 8MA -to DRAM_CS_N
-#set_instance_assignment -name CURRENT_STRENGTH_NEW 8MA -to DRAM_DQ*
-#set_instance_assignment -name CURRENT_STRENGTH_NEW 8MA -to DRAM_DQM*
-#set_instance_assignment -name CURRENT_STRENGTH_NEW 8MA -to DRAM_RAS_N
-#set_instance_assignment -name CURRENT_STRENGTH_NEW 8MA -to DRAM_WE_N
-#
-## 2. Set Slew Rate to 2 (Fast edges) - Helps with timing at 50MHz+
-#set_instance_assignment -name SLEW_RATE 2 -to DRAM_ADDR*
-#set_instance_assignment -name SLEW_RATE 2 -to DRAM_BA*
-#set_instance_assignment -name SLEW_RATE 2 -to DRAM_CAS_N
-#set_instance_assignment -name SLEW_RATE 2 -to DRAM_CKE
-#set_instance_assignment -name SLEW_RATE 2 -to DRAM_CLK
-#set_instance_assignment -name SLEW_RATE 2 -to DRAM_CS_N
-#set_instance_assignment -name SLEW_RATE 2 -to DRAM_DQ*
-#set_instance_assignment -name SLEW_RATE 2 -to DRAM_DQM*
-#set_instance_assignment -name SLEW_RATE 2 -to DRAM_RAS_N
-#set_instance_assignment -name SLEW_RATE 2 -to DRAM_WE_N
-#
-#
-#
-## Force registers into IO Pads
-#set_instance_assignment -name FAST_INPUT_REGISTER ON -to DQ[*]
-#set_instance_assignment -name FAST_OUTPUT_REGISTER ON -to DQ[*]
-#set_instance_assignment -name FAST_OUTPUT_ENABLE_REGISTER ON -to DQ[*]
-#
-#set_instance_assignment -name FAST_OUTPUT_REGISTER ON -to addr[*]
-#set_instance_assignment -name FAST_OUTPUT_REGISTER ON -to BA[*]
-#set_instance_assignment -name FAST_OUTPUT_REGISTER ON -to CSn
-#set_instance_assignment -name FAST_OUTPUT_REGISTER ON -to WEn
-#set_instance_assignment -name FAST_OUTPUT_REGISTER ON -to RASn
-#set_instance_assignment -name FAST_OUTPUT_REGISTER ON -to CASn
-#set_instance_assignment -name FAST_OUTPUT_REGISTER ON -to DQM[*]
-## If you have CKE or CLK output pins, add them here too
-##
-##
-### Force DQ[3] (and others) to be fast
-#set_instance_assignment -name FAST_INPUT_REGISTER ON -to DQ[3]
-#set_instance_assignment -name FAST_OUTPUT_REGISTER ON -to DQ[3]
-#set_instance_assignment -name CURRENT_STRENGTH_NEW "MAXIMUM CURRENT" -to DQ[3]
-#
-## Apply to ALL DQ pins
-#set_instance_assignment -name FAST_INPUT_REGISTER ON -to DQ[*]
-#set_instance_assignment -name FAST_OUTPUT_REGISTER ON -to DQ[*]
-#
-#
- 
- # ===================================================================
-# SDRAM PHYSICAL CONSTRAINTS (FIXED)
-# ===================================================================
-
-# 1. CURRENT STRENGTH (8mA is recommended to reduce ringing/overshoot)
-#    If 8mA is too weak (errors return), try 12mA. Do not use Maximum.
-set_instance_assignment -name CURRENT_STRENGTH_NEW 8MA -to DRAM_ADDR[*]
-set_instance_assignment -name CURRENT_STRENGTH_NEW 8MA -to DRAM_BA[*]
-set_instance_assignment -name CURRENT_STRENGTH_NEW 8MA -to DRAM_CAS_N
-set_instance_assignment -name CURRENT_STRENGTH_NEW 8MA -to DRAM_CKE
-set_instance_assignment -name CURRENT_STRENGTH_NEW 8MA -to DRAM_CLK
-set_instance_assignment -name CURRENT_STRENGTH_NEW 8MA -to DRAM_CS_N
-set_instance_assignment -name CURRENT_STRENGTH_NEW 8MA -to DRAM_DQ[*]
-set_instance_assignment -name CURRENT_STRENGTH_NEW 8MA -to DRAM_DQM[*]
-set_instance_assignment -name CURRENT_STRENGTH_NEW 8MA -to DRAM_RAS_N
-set_instance_assignment -name CURRENT_STRENGTH_NEW 8MA -to DRAM_WE_N
-
-# 2. SLEW RATE (2 is usually standard fast/medium)
-set_instance_assignment -name SLEW_RATE 2 -to DRAM_ADDR[*]
-set_instance_assignment -name SLEW_RATE 2 -to DRAM_BA[*]
-set_instance_assignment -name SLEW_RATE 2 -to DRAM_CAS_N
-set_instance_assignment -name SLEW_RATE 2 -to DRAM_CKE
-set_instance_assignment -name SLEW_RATE 2 -to DRAM_CLK
-set_instance_assignment -name SLEW_RATE 2 -to DRAM_CS_N
-set_instance_assignment -name SLEW_RATE 2 -to DRAM_DQ[*]
-set_instance_assignment -name SLEW_RATE 2 -to DRAM_DQM[*]
-set_instance_assignment -name SLEW_RATE 2 -to DRAM_RAS_N
-set_instance_assignment -name SLEW_RATE 2 -to DRAM_WE_N
-
-# 3. I/O REGISTER PACKING (Crucial for Timing Stability)
-#    Note: Naming must match Top-Level Ports (DRAM_*, not just addr/DQ)
-
-# Fast Input (Fixes Read Errors)
-set_instance_assignment -name FAST_INPUT_REGISTER ON -to DRAM_DQ[*]
-
-# Fast Output (Fixes Write/Command Stability)
-set_instance_assignment -name FAST_OUTPUT_REGISTER ON -to DRAM_ADDR[*]
-set_instance_assignment -name FAST_OUTPUT_REGISTER ON -to DRAM_BA[*]
-set_instance_assignment -name FAST_OUTPUT_REGISTER ON -to DRAM_CAS_N
-set_instance_assignment -name FAST_OUTPUT_REGISTER ON -to DRAM_CKE
-set_instance_assignment -name FAST_OUTPUT_REGISTER ON -to DRAM_CS_N
-set_instance_assignment -name FAST_OUTPUT_REGISTER ON -to DRAM_DQ[*]
-set_instance_assignment -name FAST_OUTPUT_REGISTER ON -to DRAM_DQM[*]
-set_instance_assignment -name FAST_OUTPUT_REGISTER ON -to DRAM_RAS_N
-set_instance_assignment -name FAST_OUTPUT_REGISTER ON -to DRAM_WE_N
-
-# Fast Output Enable (For Bi-directional DQ)
-set_instance_assignment -name FAST_OUTPUT_ENABLE_REGISTER ON -to DRAM_DQ[*]
-
-
-# Disable parallel compilation to avoid TBB bugs (single-threaded mode)
-#set_global_assignment -name NUM_PARALLEL_PROCESSORS 1
-#
-# # Optional: Further reduce threading stress (recommended for stability)
-#set_global_assignment -name OPTIMIZATION_MODE "AREA"  # Prioritize area over speed (less aggressive parallel opts)
-#set_global_assignment -name PARALLEL_FITTING ON      # Keep fitting parallel if needed (usually safe)
-#set_global_assignment -name PARALLEL_TIMING_ANALYSIS OFF  # Disable parallel timing if issues persist

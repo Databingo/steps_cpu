@@ -304,7 +304,6 @@ eb823cd8ff2ead9e90b6aad11de235dd517af072 run ok but 1357 lost bit(0)as 1
 b3f9c7c4f6246530cdc3c1e70c7eff99a6495903 run fake_opensbi.s/PLIC.s ok(but lost bit 0 sometime)
 94c787d9ba5323c74f2e55ec2d7263620b218e6d copy_sd_to_sdram testing(SD3+PLIC) PLIC ok,now SD3 tes tproblem
 d033be36    37_sd_workd
-072aac1f292fb05a6cd0cc19d2390d20171100db 37_sd_10Mhz_work
 
 
 
