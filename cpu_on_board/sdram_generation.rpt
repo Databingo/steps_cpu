@@ -1,0 +1,42 @@
+Info: Starting: Create block symbol file (.bsf)
+Info: ip-generate --project-directory=/usr/local/projects/steps_cpu/cpu_on_board/ --output-directory=/usr/local/projects/steps_cpu/cpu_on_board/sdram/ --report-file=bsf:/usr/local/projects/steps_cpu/cpu_on_board/sdram.bsf --system-info=DEVICE_FAMILY="Cyclone II" --system-info=DEVICE=EP2C20F484C7 --system-info=DEVICE_SPEEDGRADE=7 --component-file=/usr/local/projects/steps_cpu/cpu_on_board/sdram.qsys
+Progress: Loading cpu_on_board/sdram.qsys
+Progress: Reading input file
+Progress: Adding clk_0 [clock_source 13.0]
+Progress: Parameterizing module clk_0
+Progress: Adding new_sdram_controller_0 [altera_avalon_new_sdram_controller 13.0.1.99.2]
+Progress: Parameterizing module new_sdram_controller_0
+Progress: Building connections
+Progress: Parameterizing connections
+Progress: Validating
+Progress: Done reading input file
+Info: ip-generate succeeded.
+Info: Finished: Create block symbol file (.bsf)
+Info: 
+Info: Starting: Create HDL design files for synthesis
+Info: ip-generate --project-directory=/usr/local/projects/steps_cpu/cpu_on_board/ --output-directory=/usr/local/projects/steps_cpu/cpu_on_board/sdram/synthesis/ --file-set=QUARTUS_SYNTH --report-file=sopcinfo:/usr/local/projects/steps_cpu/cpu_on_board/sdram.sopcinfo --report-file=html:/usr/local/projects/steps_cpu/cpu_on_board/sdram.html --report-file=qip:/usr/local/projects/steps_cpu/cpu_on_board/sdram/synthesis/sdram.qip --report-file=cmp:/usr/local/projects/steps_cpu/cpu_on_board/sdram.cmp --report-file=svd --system-info=DEVICE_FAMILY="Cyclone II" --system-info=DEVICE=EP2C20F484C7 --system-info=DEVICE_SPEEDGRADE=7 --component-file=/usr/local/projects/steps_cpu/cpu_on_board/sdram.qsys --language=VERILOG
+Progress: Loading cpu_on_board/sdram.qsys
+Progress: Reading input file
+Progress: Adding clk_0 [clock_source 13.0]
+Progress: Parameterizing module clk_0
+Progress: Adding new_sdram_controller_0 [altera_avalon_new_sdram_controller 13.0.1.99.2]
+Progress: Parameterizing module new_sdram_controller_0
+Progress: Building connections
+Progress: Parameterizing connections
+Progress: Validating
+Progress: Done reading input file
+Info: sdram: Generating sdram "sdram" for QUARTUS_SYNTH
+Info: pipeline_bridge_swap_transform: After transform: 2 modules, 2 connections
+Info: No custom instruction connections, skipping transform 
+Info: No Avalon connections, skipping transform 
+Info: merlin_translator_transform: After transform: 2 modules, 2 connections
+Info: reset_adaptation_transform: After transform: 3 modules, 4 connections
+Info: merlin_mm_transform: After transform: 3 modules, 4 connections
+Info: new_sdram_controller_0: Starting RTL generation for module 'sdram_new_sdram_controller_0'
+Info: new_sdram_controller_0:   Generation command is [exec /home/ashah/altera/13.0sp1/quartus/linux/perl/bin/perl -I /home/ashah/altera/13.0sp1/quartus/common/ip/altera/common/perl/5.8.3 -I /home/ashah/altera/13.0sp1/quartus/sopc_builder/bin/europa -I /home/ashah/altera/13.0sp1/quartus/sopc_builder/bin/perl_lib -I /home/ashah/altera/13.0sp1/quartus/sopc_builder/bin -I /home/ashah/altera/13.0sp1/quartus/../ip/altera/sopc_builder_ip/common -I /home/ashah/altera/13.0sp1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_new_sdram_controller -- /home/ashah/altera/13.0sp1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_new_sdram_controller/generate_rtl.pl --name=sdram_new_sdram_controller_0 --dir=/tmp/alt0407_1658011007372058506.dir/0001_new_sdram_controller_0_gen/ --quartus_dir=/home/ashah/altera/13.0sp1/quartus --verilog --config=/tmp/alt0407_1658011007372058506.dir/0001_new_sdram_controller_0_gen//sdram_new_sdram_controller_0_component_configuration.pl  --do_build_sim=0  ]
+Info: new_sdram_controller_0: Done RTL generation for module 'sdram_new_sdram_controller_0'
+Info: new_sdram_controller_0: "sdram" instantiated altera_avalon_new_sdram_controller "new_sdram_controller_0"
+Info: rst_controller: "sdram" instantiated altera_reset_controller "rst_controller"
+Info: sdram: Done sdram" with 3 modules, 5 files, 41074 bytes
+Info: ip-generate succeeded.
+Info: Finished: Create HDL design files for synthesis

@@ -10,6 +10,43 @@
 .globl _start
 _start:
 
+# fake_opensbi  ------------------
+    lui t0, 0x2
+    addi t0, t0, 4       # UART = 0x2004
+    
+    # Print one byte
+    li t1, 0x58          # 'X'
+    sb t1, 0(t0)         # test
+    
+    # Load 4 byte
+    li t1, 0x49    # I
+    sb t1, 0(t0)    
+    li t1, 0x20    # space
+    sb t1, 0(t0)   
+    li t1, 0x61    # a
+    sb t1, 0(t0)   
+    li t1, 0x6d    # m
+    sb t1, 0(t0)   
+    li t1, 0x20    # space
+    sb t1, 0(t0)   
+    li t1, 0x6f    # o
+    sb t1, 0(t0)   
+    li t1, 0x70    # p
+    sb t1, 0(t0)   
+    li t1, 0x65    # e
+    sb t1, 0(t0)   
+    li t1, 0x6e    # n
+    sb t1, 0(t0)   
+    li t1, 0x73    # s
+    sb t1, 0(t0)   
+    li t1, 0x62    # b
+    sb t1, 0(t0)   
+    li t1, 0x69    # i
+    sb t1, 0(t0)   
+
+
+# ---------------------- SD card -------------------
+
 # UART base (for print_char)
 lui t0, 0x2
 addi t0, t0, 4      # t0 = 0x2004
@@ -18,23 +55,19 @@ addi t0, t0, 4      # t0 = 0x2004
 lui a1, 0x3         # a1 = 0x3000 base
 
 li t1, 65        # A
-sw t1, 0(t0)     # print
+sb t1, 0(t0)     # print
 # -- Wait SD ready
 sd_ready:
-li t1, 0x60       # `
-sw t1, 0(t0)     # print
-
 lw a2, 0x220(a1)    # a2 0x3220 ready
+li t1, 0x60        # `
+sb t1, 0(t0)     # print
 beq a2, x0, sd_ready
-
-li t1, 66        # B
-sw t1, 0(t0)     # print
 
 # -- Read Boot Sector 0 -- 
 li a2, 0
 jal sd_read_sector
 
-li t1, 67        # C
+li t1, 65        # A
 sw t1, 0(t0)     # print
 
 #jal print_sector
@@ -361,21 +394,13 @@ jal print_sector
 
 # ---  sd_read_sector ---
 sd_read_sector:
-li t1, 0x2a       # *
-sw t1, 0(t0)     # print
-wait_ready:
-lw t2, 0x220(a1)    # t2 0x3220 ready
-beq t2, x0, wait_ready
-# 
 sw a2, 0x200(a1) # Write Sector index value to address 0x3200
 li t1, 1
 sw t1, 0x204(a1) # Trigger read at 0x3204
-#wait_ready:
-#lw t2, 0x220(a1)    # t2 0x3220 ready
-#beq t2, x0, wait_ready
+wait_ready:
+lw t2, 0x220(a1)    # t2 0x3220 ready
+beq t2, x0, wait_ready
 wait_cache:
-li t1, 0x2d       # -
-sw t1, 0(t0)     # print
 lw t2, 0x228(a1)    # t2 0x3228 cache_avaible
 beq t2, x0, wait_cache
 ret
