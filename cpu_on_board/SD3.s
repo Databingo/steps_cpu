@@ -17,8 +17,13 @@ addi t0, t0, 4      # t0 = 0x2004
 # SD controller base
 lui a1, 0x3         # a1 = 0x3000 base
 
+li t1, 65        # A
+sw t1, 0(t0)     # print
 # -- Wait SD ready
 sd_ready:
+li t1, 0x60       # `
+sw t1, 0(t0)     # print
+
 lw a2, 0x220(a1)    # a2 0x3220 ready
 beq a2, x0, sd_ready
 
