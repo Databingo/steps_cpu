@@ -41,17 +41,18 @@ module cpu_on_board (
     end
 
     // -- Clock --
-    wire clock_1hz;
+    wire clock_slow;
     clock_slower clock_ins(
         .clk_in(CLOCK_50),
-        .clk_out(clock_1hz),
+        .clk_out(clock_slow),
         .reset_n(KEY0)
     );
 
     wire [63:0] pc;
     reg [31:0] ir_bd;
     // Port A BRAM
-    always @(posedge CLOCK_50) begin
+    //always @(posedge CLOCK_50) begin
+    always @(posedge clock_slow) begin
 	ir_bd <= Cache[pc>>2];
     end
     wire [31:0] ir_ld; assign ir_ld = {ir_bd[7:0], ir_bd[15:8], ir_bd[23:16], ir_bd[31:24]}; // Endianness swap
@@ -59,7 +60,7 @@ module cpu_on_board (
 
     // -- CPU --
     riscv64 cpu (
-        .clk(clock_1hz), 
+        .clk(clock_slow), 
         //.clk(CLOCK_50), 
         .reset(KEY0),     
         .instruction(ir_ld),
@@ -103,7 +104,8 @@ module cpu_on_board (
 
     // -- Monitor -- Connected to Bus
     jtag_uart_system my_jtag_system (
-        .clk_clk                                 (CLOCK_50),
+        //.clk_clk                                 (CLOCK_50),
+        .clk_clk                                 (clock_slow),
         .reset_reset_n                           (KEY0),
         .jtag_uart_0_avalon_jtag_slave_address   (bus_address[0:0]),
         .jtag_uart_0_avalon_jtag_slave_writedata (bus_write_data[31:0]),
@@ -145,7 +147,8 @@ module cpu_on_board (
     reg [63:0] next_addr;
 
 
-    always @(posedge CLOCK_50) begin
+    //always @(posedge CLOCK_50) begin
+    always @(posedge clock_slow) begin
         bus_address_reg <= bus_address>>2;
         bus_address_reg_full <= bus_address;
 	//bus_read_done <= 0;
@@ -230,7 +233,8 @@ module cpu_on_board (
     reg sd_byte_available_d = 0;
     reg do_read = 0;
     wire [4:0] sd_status;
-    always @(posedge CLOCK_50 or negedge KEY0) begin
+    //always @(posedge CLOCK_50 or negedge KEY0) begin
+    always @(posedge clock_slow or negedge KEY0) begin
 	if (!KEY0) begin
 	    //sd_rd_start <= 0;
 	    byte_index <= 0;
@@ -267,8 +271,10 @@ module cpu_on_board (
 
 
     // Slow pulse clock for SD init (~100 kHz)
-    reg [8:0] clkdiv = 0;
-    always @(posedge CLOCK_50 or negedge KEY0) begin
+    //reg [8:0] clkdiv = 0;
+    //always @(posedge CLOCK_50 or negedge KEY0) begin
+    reg [5:0] clkdiv = 0;  // 160Khz
+    always @(posedge clock_slow or negedge KEY0) begin
         if (!KEY0) clkdiv <= 0;
         else clkdiv <= clkdiv + 1;
     end
@@ -299,7 +305,8 @@ module cpu_on_board (
         .reset(~KEY0),
         .ready(sd_ready), // 
         .address(sd_addr), //
-        .clk(CLOCK_50),
+        //.clk(CLOCK_50),
+        .clk(clock_slow),
         .clk_pulse_slow(clk_pulse_slow),
         .status(sd_status),
         .recv_data()
