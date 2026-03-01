@@ -348,7 +348,11 @@ module cpu_on_board (
     assign HEX01 = ~Ram_selected;
     assign HEX02 = ~Rom_selected;
     //assign HEX03 = ~Sdc_selected;
-
+    // Temporary SD debug: wire sd_status bits to LEDR and HEX03
+assign LEDR1    = sd_ready;            // lights up when SD init complete
+assign HEX03    = ~sd_cache_available; // lights up when 512 bytes received
+// LEDR_PC already shows pc/4, but you can temporarily swap:
+// assign LEDR_PC = {sd_status, 1'b0};  // show sd_controller state on LEDs
 endmodule
 
 
