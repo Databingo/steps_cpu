@@ -358,6 +358,8 @@ jal print_sector
 
 # ---  sd_read_sector ---
 sd_read_sector:
+li t1, 0x2a       # *
+sw t1, 0(t0)     # print
 wait_ready:
 lw t2, 0x220(a1)    # t2 0x3220 ready
 beq t2, x0, wait_ready
@@ -369,6 +371,8 @@ sw t1, 0x204(a1) # Trigger read at 0x3204
 #lw t2, 0x220(a1)    # t2 0x3220 ready
 #beq t2, x0, wait_ready
 wait_cache:
+li t1, 0x2d       # -
+sw t1, 0(t0)     # print
 lw t2, 0x228(a1)    # t2 0x3228 cache_avaible
 beq t2, x0, wait_cache
 ret
