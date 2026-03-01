@@ -51,8 +51,7 @@ module cpu_on_board (
     wire [63:0] pc;
     reg [31:0] ir_bd;
     // Port A BRAM
-    //always @(posedge CLOCK_50) begin
-    always @(posedge clock_1hz) begin
+    always @(posedge CLOCK_50) begin
 	ir_bd <= Cache[pc>>2];
     end
     wire [31:0] ir_ld; assign ir_ld = {ir_bd[7:0], ir_bd[15:8], ir_bd[23:16], ir_bd[31:24]}; // Endianness swap
@@ -91,8 +90,7 @@ module cpu_on_board (
     wire key_released;
 
     ps2_decoder ps2_decoder_inst (
-        //.clk(CLOCK_50),
-        .clk(clock_1hz),
+        .clk(CLOCK_50),
         .ps2_clk_async(PS2_CLK),
         .ps2_data_async(PS2_DAT),
         .scan_code(scan),
@@ -100,14 +98,12 @@ module cpu_on_board (
         .key_pressed(key_pressed),
         .key_released(key_released)
      );
-    //always @(posedge CLOCK_50) begin key_pressed_delay <= key_pressed; end
-    always @(posedge clock_1hz) begin key_pressed_delay <= key_pressed; end
+    always @(posedge CLOCK_50) begin key_pressed_delay <= key_pressed; end
     wire key_pressed_edge = key_pressed && !key_pressed_delay;
 
     // -- Monitor -- Connected to Bus
     jtag_uart_system my_jtag_system (
-        //.clk_clk                                 (CLOCK_50),
-        .clk_clk                                 (clock_1hz),
+        .clk_clk                                 (CLOCK_50),
         .reset_reset_n                           (KEY0),
         .jtag_uart_0_avalon_jtag_slave_address   (bus_address[0:0]),
         .jtag_uart_0_avalon_jtag_slave_writedata (bus_write_data[31:0]),
@@ -149,8 +145,7 @@ module cpu_on_board (
     reg [63:0] next_addr;
 
 
-    //always @(posedge CLOCK_50) begin
-    always @(posedge clock_1hz) begin
+    always @(posedge CLOCK_50) begin
         bus_address_reg <= bus_address>>2;
         bus_address_reg_full <= bus_address;
 	//bus_read_done <= 0;
@@ -235,8 +230,7 @@ module cpu_on_board (
     reg sd_byte_available_d = 0;
     reg do_read = 0;
     wire [4:0] sd_status;
-    //always @(posedge CLOCK_50 or negedge KEY0) begin
-    always @(posedge clock_1hz or negedge KEY0) begin
+    always @(posedge CLOCK_50 or negedge KEY0) begin
 	if (!KEY0) begin
 	    //sd_rd_start <= 0;
 	    byte_index <= 0;
@@ -275,8 +269,6 @@ module cpu_on_board (
     // Slow pulse clock for SD init (~100 kHz)
     reg [8:0] clkdiv = 0;
     always @(posedge CLOCK_50 or negedge KEY0) begin
-    //reg [5:0] clkdiv = 0; // 160khz
-    //always @(posedge clock_1hz or negedge KEY0) begin
         if (!KEY0) clkdiv <= 0;
         else clkdiv <= clkdiv + 1;
     end
@@ -308,7 +300,6 @@ module cpu_on_board (
         .ready(sd_ready), // 
         .address(sd_addr), //
         .clk(CLOCK_50),
-        //.clk(clock_1hz),
         .clk_pulse_slow(clk_pulse_slow),
         .status(sd_status),
         .recv_data()
@@ -318,8 +309,7 @@ module cpu_on_board (
     // UART Writer Trigger
     wire uart_write_trigger = bus_write_enable && Art_selected;
     reg uart_write_trigger_dly;
-    //always @(posedge CLOCK_50 or negedge KEY0) begin
-    always @(posedge clock_1hz or negedge KEY0) begin
+    always @(posedge CLOCK_50 or negedge KEY0) begin
         if (!KEY0) uart_write_trigger_dly <= 0;
         else uart_write_trigger_dly <= uart_write_trigger;
 	//if (uart_write_trigger_pulse) bus_write_done <= 1;
@@ -329,8 +319,7 @@ module cpu_on_board (
     // Interrupt controller
     wire [3:0] interrupt_vector;
     wire interrupt_ack;
-    //always @(posedge CLOCK_50 or negedge KEY0) begin
-    always @(posedge clock_1hz or negedge KEY0) begin
+    always @(posedge CLOCK_50 or negedge KEY0) begin
         if (!KEY0) begin
             interrupt_vector <= 0;
             LEDR0 <= 0;
