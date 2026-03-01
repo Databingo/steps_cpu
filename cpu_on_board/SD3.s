@@ -27,11 +27,14 @@ sw t1, 0(t0)     # print
 lw a2, 0x220(a1)    # a2 0x3220 ready
 beq a2, x0, sd_ready
 
+li t1, 66        # B
+sw t1, 0(t0)     # print
+
 # -- Read Boot Sector 0 -- 
 li a2, 0
 jal sd_read_sector
 
-li t1, 65        # A
+li t1, 67        # C
 sw t1, 0(t0)     # print
 
 #jal print_sector

@@ -248,14 +248,14 @@ module cpu_on_board (
 	else begin
 	    //sd_cache_available <= 0;
             sd_byte_available_d  <= sd_byte_available;
-            //if (sd_byte_available && !sd_byte_available_d) begin
-            if (sd_byte_available ) begin
+            if (sd_byte_available && !sd_byte_available_d) begin
+            //if (sd_byte_available ) begin
 	        sd_cache[byte_index] <= sd_dout;
 	        byte_index <= byte_index + 1;
 	        do_read <=1;
 	    end
 	    //if (byte_index == 10) sd_cache_available <= 0;
-	    if (bus_write_enable && Sdc_read_selected) begin sd_cache_available <= 0; byte_index <= 0; sd_rd_start <= 1; end
+	    if (byte_index  == 0 && bus_write_enable && Sdc_read_selected) begin sd_cache_available <= 0; byte_index <= 0; sd_rd_start <= 1; end
 
 	    //if (do_read && sd_status !=6) begin 
 	    if (byte_index == 512) begin 
