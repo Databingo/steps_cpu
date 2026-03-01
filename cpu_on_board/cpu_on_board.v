@@ -310,7 +310,7 @@ assign DRAM_CKE = 1; // always enable
 	end else begin
         bus_address_reg <= bus_address>>2;
         bus_address_reg_full <= bus_address;
-        sd_rd_start <= 0;
+        //sd_rd_start <= 0;
         uart_write_pulse <= 0;
 	uart_read_pulse <= 0;
 	uart_irq_pre <= uart_irq;
@@ -576,6 +576,7 @@ end
 	    sd_cache_available <= 0;
 	    //sd_byte_available <= 0;
 	    sd_byte_available_d <= 0;
+            sd_rd_start <= 0;
 	end
 	else begin
 	    //sd_cache_available <= 0;
@@ -611,7 +612,7 @@ end
 
     // SD Controller Bridge
     reg [31:0] sd_addr = 0;           // Sector address
-    reg sd_rd_start;                  // Trigger rd
+    reg sd_rd_start = 0;                  // Trigger rd
 
     wire [7:0] sd_dout;
     wire sd_ready;
