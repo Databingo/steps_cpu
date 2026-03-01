@@ -273,10 +273,10 @@ module cpu_on_board (
 
 
     // Slow pulse clock for SD init (~100 kHz)
-    //reg [8:0] clkdiv = 0;
-    //always @(posedge CLOCK_50 or negedge KEY0) begin
-    reg [5:0] clkdiv = 0; // 160khz
-    always @(posedge clock_1hz or negedge KEY0) begin
+    reg [8:0] clkdiv = 0;
+    always @(posedge CLOCK_50 or negedge KEY0) begin
+    //reg [5:0] clkdiv = 0; // 160khz
+    //always @(posedge clock_1hz or negedge KEY0) begin
         if (!KEY0) clkdiv <= 0;
         else clkdiv <= clkdiv + 1;
     end
@@ -307,8 +307,8 @@ module cpu_on_board (
         .reset(~KEY0),
         .ready(sd_ready), // 
         .address(sd_addr), //
-        //.clk(CLOCK_50),
-        .clk(clock_1hz),
+        .clk(CLOCK_50),
+        //.clk(clock_1hz),
         .clk_pulse_slow(clk_pulse_slow),
         .status(sd_status),
         .recv_data()
