@@ -407,7 +407,7 @@ li t1, 68        # D
 sw t1, 0(t0)     # print
 
 li t3, 0 # t3 is counter
-li t4, 500
+li t4, 100
 wait_cache:
 lw t2, 0x228(a1)    # t2 0x3228 cache_avaible
 #beq t2, x0, wait_cache
