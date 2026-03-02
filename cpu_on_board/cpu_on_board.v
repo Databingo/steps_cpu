@@ -322,8 +322,8 @@ assign DRAM_CKE = 1; // always enable
 	if (bus_read_enable) begin bus_read_done <= 0; end
         if (bus_write_enable) begin bus_write_done <= 0; end
 
-        //if (!sd_ready) sd_rd_start <= 0;
-        if (sd_cache_available) sd_rd_start <= 0;
+        if (!sd_ready) sd_rd_start <= 0;
+        //if (sd_cache_available) sd_rd_start <= 0;
 
 
         // Read
@@ -608,7 +608,8 @@ end
 
     // Slow pulse clock for SD init (~100 kHz)
     //reg [8:0] clkdiv = 0;  // for 50M
-    reg [5:0] clkdiv = 0; // for 10M  10MHz/64 = 156.25KHz
+    //reg [5:0] clkdiv = 0; // for 10M  10MHz/64 = 156.25KHz
+    reg [4:0] clkdiv = 0; // for 10M  10MHz/32 = 300KHz
     always @(posedge clock_slow or negedge KEY0) begin
     //always @(posedge CLOCK_50 or negedge KEY0) begin
         if (!KEY0) clkdiv <= 0;
