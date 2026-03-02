@@ -400,6 +400,16 @@ wait_ready:
 lw t2, 0x220(a1)    # t2 0x3220 ready
 beq t2, x0, wait_ready
 
+# ---> ADD THIS DELAY LOOP <---
+# Give the SD card time to recover (N_cc idle clocks) 
+# before blasting the next CMD17 command at it!
+li t5, 100000
+delay_loop:
+addi t5, t5, -1
+bne t5, x0, delay_loop
+# -----------------------------
+
+
 sw a2, 0x200(a1) # Write Sector index value to address 0x3200
 li t1, 1
 sw t1, 0x204(a1) # Trigger read at 0x3204
