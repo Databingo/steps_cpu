@@ -618,7 +618,8 @@ end
         if (!KEY0) clkdiv <= 0;
         else clkdiv <= clkdiv + 1;
     end
-    wire clk_pulse_slow = (clkdiv == 0);
+    //wire clk_pulse_slow = (clkdiv == 0);
+    wire clk_pulse_slow = (sd_status <= 8) ? (clkdiv == 0) : 1'b1;
 
     // SD Controller Bridge
     reg [31:0] sd_addr = 0;           // Sector address
