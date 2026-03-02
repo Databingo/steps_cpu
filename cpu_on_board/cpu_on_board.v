@@ -610,7 +610,8 @@ end
     // Slow pulse clock for SD init (~100 kHz)
     //reg [8:0] clkdiv = 0;  // for 50M
     //reg [5:0] clkdiv = 0; // for 10M  10MHz/64 = 156.25KHz
-    reg [4:0] clkdiv = 0; // for 10M  10MHz/32 = 300KHz
+    //reg [4:0] clkdiv = 0; // for 10M  10MHz/32 = 300KHz
+    reg [1:0] clkdiv = 0; // for 5M  5MHz/4 = 625Khz (sd SPI 100-400Khz)
     always @(posedge clock_slow or negedge KEY0) begin
     //always @(posedge CLOCK_50 or negedge KEY0) begin
         if (!KEY0) clkdiv <= 0;
