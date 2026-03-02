@@ -594,7 +594,7 @@ end
 	    //if (byte_index  == 0 && bus_write_done==0 && Sdc_read_selected) begin sd_cache_available <= 0; sd_rd_start <= 1; end
 	    if (byte_index  == 0 && bus_write_enable && Sdc_read_selected) begin sd_cache_available <= 0; end
 	    //if (do_read && sd_status !=6) begin 
-	    if (byte_index == 511) begin 
+	    if (byte_index == 512) begin 
 	        //sd_rd_start <= 0;
 	        byte_index <= 0;
 	        do_read <=0;
