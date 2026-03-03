@@ -308,7 +308,7 @@ assign DRAM_CKE = 1; // always enable
 	    uart_read_step <= 0;
 	    mtimecmp <=  64'h80000000;
 	    uart_irq_pre <= 0;
-            sd_rd_start <= 0;
+            //sd_rd_start <= 0;
 	end else begin
         bus_address_reg <= bus_address>>2;
         bus_address_reg_full <= bus_address;
@@ -583,7 +583,7 @@ end
 	    sd_cache_available <= 0;
 	    //sd_byte_available <= 0;
 	    sd_byte_available_d <= 0;
-            //sd_rd_start <= 0;
+            sd_rd_start <= 0;
 	end
 	else begin
 	    //sd_cache_available <= 0;
