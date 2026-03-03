@@ -117,8 +117,8 @@ module sd_controller(
                     else begin
                         // <400KHz startup init
                         boot_counter <= boot_counter - 1;
-                        //if (boot_counter[6:0] == 0) sclk_sig <= ~sclk_sig;
-                        sclk_sig <= ~sclk_sig; // I added this
+                        if (boot_counter[6:0] == 0) sclk_sig <= ~sclk_sig;
+                        //sclk_sig <= ~sclk_sig; // I added this
                     end
                 end
                 INIT: begin
