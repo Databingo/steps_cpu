@@ -79,14 +79,15 @@ module sd_controller(
     reg [9:0] byte_counter;
     reg [9:0] bit_counter;
     
-    reg [26:0] boot_counter = 27'd080_000;
+    //reg [26:0] boot_counter = 27'd080_000;
+    reg [26:0] boot_counter = 27'd005_000;
     reg [7:0] reset_counter = 0;
     always @(posedge clk) begin
         if(reset == 1) begin
             state <= RST;
             sclk_sig <= 0;
-            //boot_counter <= 27'd005_000;
-			boot_counter <= 27'd080_000;
+            boot_counter <= 27'd005_000;
+	    //boot_counter <= 27'd080_000;
             cmd_mode <= 1;
             cs <= 1;
             cmd_out <= {56{1'b1}};
@@ -95,7 +96,8 @@ module sd_controller(
             /*
 			if (clk_pulse_slow) begin // startup init even when reseting
                 reset_counter <= reset_counter + 1;
-                if (reset_counter[7]) sclk_sig <= ~sclk_sig;
+                //if (reset_counter[7]) sclk_sig <= ~sclk_sig;
+                if (reset_counter[2]) sclk_sig <= ~sclk_sig;
             end
             */
         end
@@ -117,7 +119,8 @@ module sd_controller(
                     else begin
                         // <400KHz startup init
                         boot_counter <= boot_counter - 1;
-                        if (boot_counter[6:0] == 0) sclk_sig <= ~sclk_sig;
+                        //if (boot_counter[6:0] == 0) sclk_sig <= ~sclk_sig; // this for 50Mhz
+                        if (boot_counter[2:0] == 0) sclk_sig <= ~sclk_sig; // this for 5Mhz
                         //sclk_sig <= ~sclk_sig; // I added this
                     end
                 end
@@ -238,6 +241,7 @@ module sd_controller(
                 end
                 READ_BLOCK_CRC: begin
                     bit_counter <= 7;
+                    //bit_counter <= 15;
                     return_state <= IDLE;
                     state <= RECEIVE_BYTE;
                 end
