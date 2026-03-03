@@ -603,7 +603,7 @@ end
 	    if (bus_write_enable && Sdc_read_selected) begin sd_cache_available <= 0; sd_rd_start <= 1;byte_index  <= 0; end //sd_rd_start <= 1; end
 	    //if (do_read && sd_status !=6) begin 
 	    if (byte_index == 512) begin 
-	        sd_rd_start <= 0;
+	        //sd_rd_start <= 0;
 	        byte_index <= 0;
 	        do_read <=0;
 	        sd_cache_available <= 1;
@@ -673,6 +673,7 @@ end
     assign HEX03 = ~sd_dout;
     assign HEX04 = ~clk_pulse_slow;
     assign HEX05 = ~|sd_addr;
+    assign HEX06 = ~sd_cache_available;
 
     assign HEX31 = ~Sdram_selected;
     //assign HEX32 = ~sdram_readdatavalid;
@@ -686,6 +687,6 @@ end
     assign HEX36 = ~|sdram_rddata;
     //assign HEX04 = ~uart_irq;
     //assign HEX05 = ~Plic_priority_selected;
-    assign HEX06 = ~meip_interrupt;
+    //assign HEX06 = ~meip_interrupt;
 
 endmodule

@@ -403,7 +403,7 @@ beq t2, x0, wait_ready
 # ---> ADD THIS DELAY LOOP <---
 # Give the SD card time to recover (N_cc idle clocks) 
 # before blasting the next CMD17 command at it!
-li t5, 100000
+li t5, 1000000
 delay_loop:
 addi t5, t5, -1
 bne t5, x0, delay_loop
@@ -419,13 +419,13 @@ sw t1, 0(t0)     # print
 li t3, 0 # t3 is counter
 li t4, 100
 wait_cache:
-lw t2, 0x228(a1)    # t2 0x3228 cache_avaible
+lb t2, 0x228(a1)    # t2 0x3228 cache_avaible
 beq t2, x0, wait_cache
 #bne t2, x0, cache_ready
 #addi t3, t3, 1
 #blt t3, t4, wait_cache
-#li t1, 69        # E
-#sw t1, 0(t0)     # print
+li t1, 69        # E
+sw t1, 0(t0)     # print
 #li t3, 0
 #j wait_cache
 cache_ready:
