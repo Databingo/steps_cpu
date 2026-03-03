@@ -238,8 +238,8 @@ module cpu_on_board (
     reg sd_byte_available_d = 0;
     reg do_read = 0;
     wire [4:0] sd_status;
-    //always @(posedge CLOCK_50 or negedge KEY0) begin
-    always @(posedge clock_sys or negedge KEY0) begin
+    always @(posedge CLOCK_50 or negedge KEY0) begin
+    //always @(posedge clock_sys or negedge KEY0) begin
 	if (!KEY0) begin
 	    //sd_rd_start <= 0;
 	    byte_index <= 0;
@@ -257,7 +257,7 @@ module cpu_on_board (
 	        do_read <=1;
 	    end
 	    //if (byte_index == 10) sd_cache_available <= 0;
-	    if (bus_write_enable && Sdc_read_selected) begin sd_cache_available <= 0; byte_index <= 0; sd_rd_start <= 1; end
+	    if (byte_index == 0 && bus_write_enable && Sdc_read_selected) begin sd_cache_available <= 0; byte_index <= 0; sd_rd_start <= 1; end
 
 	    //if (do_read && sd_status !=6) begin 
 	    if (byte_index == 512) begin 
