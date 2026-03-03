@@ -668,8 +668,8 @@ end
     //assign HEX03 = ~Sdram_selected ;
     //assign HEX03 = (bus_address >= `Sdram_min && bus_address < `Sdram_max);
     assign HEX03 = ~sd_dout;
-    assign HEX04 = ~|sd_addr;
-    assign HEX05 = clk_pulse_slow;
+    assign HEX04 = clk_pulse_slow;
+    assign HEX05 = ~|sd_addr;
 
     assign HEX31 = ~Sdram_selected;
     //assign HEX32 = ~sdram_readdatavalid;
