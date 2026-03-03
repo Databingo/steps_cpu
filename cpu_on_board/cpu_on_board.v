@@ -323,7 +323,7 @@ assign DRAM_CKE = 1; // always enable
         if (bus_write_enable) begin bus_write_done <= 0; end
 
         //if (!sd_ready) sd_rd_start <= 0;
-        if (sd_cache_available) sd_rd_start <= 0;
+        if (byte_index>=12) sd_rd_start <= 0;
 
 
         // Read
@@ -596,7 +596,8 @@ end
 	    //if (byte_index  == 0 && bus_write_enable && Sdc_read_selected) begin sd_cache_available <= 0; sd_rd_start <= 1; end
 	    //if (byte_index  == 0 && bus_write_done==0 && Sdc_read_selected) begin sd_cache_available <= 0; sd_rd_start <= 1; end
 	    //if (byte_index  == 0 && bus_write_enable && Sdc_read_selected) begin sd_cache_available <= 0; end
-	    if (bus_write_enable && Sdc_read_selected) begin sd_cache_available <= 0; byte_index <= 0; end
+	    //if (bus_write_enable && Sdc_read_selected) begin sd_cache_available <= 0; byte_index <= 0; end
+	    if (byte_index  == 0 && bus_write_done==0 && Sdc_read_selected) begin sd_cache_available <= 0; end //sd_rd_start <= 1; end
 	    //if (do_read && sd_status !=6) begin 
 	    if (byte_index == 512) begin 
 	        //sd_rd_start <= 0;
@@ -660,10 +661,15 @@ end
     assign HEX10 = ~|bus_write_data;
     assign HEX11 = ~bus_write_enable;
     assign HEX00 = ~Art_selected;
-    assign HEX01 = ~Ram_selected;
-    assign HEX02 = ~Rom_selected;
+    //assign HEX01 = ~Ram_selected;
+    assign HEX01 = ~sd_rd_start;
+    //assign HEX02 = ~Rom_selected;
+    assign HEX02 = ~sd_byte_available;
     //assign HEX03 = ~Sdram_selected ;
-    assign HEX03 = (bus_address >= `Sdram_min && bus_address < `Sdram_max);
+    //assign HEX03 = (bus_address >= `Sdram_min && bus_address < `Sdram_max);
+    assign HEX03 = ~sd_dout;
+    assign HEX04 = ~|sd_addr;
+    assign HEX05 = clk_pulse_slow;
 
     assign HEX31 = ~Sdram_selected;
     //assign HEX32 = ~sdram_readdatavalid;
@@ -675,9 +681,8 @@ end
     assign HEX35 = ~sdram_req_wait;
     //assign HEX36 = ~|sdram_readdata;
     assign HEX36 = ~|sdram_rddata;
-    assign HEX04 = ~uart_irq;
-    assign HEX05 = ~Plic_priority_selected;
-    //assign HEX06 = ~meip_interrupt;
-    assign HEX06 = ~sd_byte_available;
+    //assign HEX04 = ~uart_irq;
+    //assign HEX05 = ~Plic_priority_selected;
+    assign HEX06 = ~meip_interrupt;
 
 endmodule
