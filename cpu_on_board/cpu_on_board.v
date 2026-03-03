@@ -310,8 +310,8 @@ module cpu_on_board (
         .reset(~KEY0),
         .ready(sd_ready), // 
         .address(sd_addr), //
-        //.clk(CLOCK_50),
-        .clk(clock_sys),
+        .clk(CLOCK_50),
+        //.clk(clock_sys),
         .clk_pulse_slow(clk_pulse_slow),
         .status(sd_status),
         .recv_data()
