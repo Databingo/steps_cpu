@@ -1,0 +1,43 @@
+Info: Starting: Create block symbol file (.bsf)
+Info: ip-generate --project-directory=/usr/local/projects/steps_cpu/cpu_on_board/sdram_pll/ --output-directory=/usr/local/projects/steps_cpu/cpu_on_board/sdram_pll/sdram/ --report-file=bsf:/usr/local/projects/steps_cpu/cpu_on_board/sdram_pll/sdram_pll.bsf --system-info=DEVICE_FAMILY="Cyclone II" --system-info=DEVICE=EP2C20F484C7 --system-info=DEVICE_SPEEDGRADE=7 --component-file=/usr/local/projects/steps_cpu/cpu_on_board/sdram_pll/sdram_pll.qsys
+Progress: Loading sdram_pll/sdram_pll.qsys
+Progress: Reading input file
+Progress: Adding clk_0 [clock_source 13.0]
+Progress: Parameterizing module clk_0
+Progress: Adding altpll_0 [altpll 13.0]
+Progress: Parameterizing module altpll_0
+Progress: Building connections
+Progress: Parameterizing connections
+Progress: Validating
+Progress: Done reading input file
+Warning: sdram_pll.altpll_0: altpll_0.pll_slave must be connected to an Avalon-MM master
+Warning: sdram_pll.altpll_0: altpll_0.phasedone_conduit must be exported, or connected to a matching conduit.
+Info: ip-generate succeeded.
+Info: Finished: Create block symbol file (.bsf)
+Info: 
+Info: Starting: Create HDL design files for synthesis
+Info: ip-generate --project-directory=/usr/local/projects/steps_cpu/cpu_on_board/sdram_pll/ --output-directory=/usr/local/projects/steps_cpu/cpu_on_board/sdram_pll/sdram/synthesis/ --file-set=QUARTUS_SYNTH --report-file=sopcinfo:/usr/local/projects/steps_cpu/cpu_on_board/sdram_pll/sdram_pll.sopcinfo --report-file=html:/usr/local/projects/steps_cpu/cpu_on_board/sdram_pll/sdram_pll.html --report-file=qip:/usr/local/projects/steps_cpu/cpu_on_board/sdram_pll/sdram/synthesis/sdram_pll.qip --report-file=cmp:/usr/local/projects/steps_cpu/cpu_on_board/sdram_pll/sdram_pll.cmp --report-file=svd --system-info=DEVICE_FAMILY="Cyclone II" --system-info=DEVICE=EP2C20F484C7 --system-info=DEVICE_SPEEDGRADE=7 --component-file=/usr/local/projects/steps_cpu/cpu_on_board/sdram_pll/sdram_pll.qsys --language=VERILOG
+Progress: Loading sdram_pll/sdram_pll.qsys
+Progress: Reading input file
+Progress: Adding clk_0 [clock_source 13.0]
+Progress: Parameterizing module clk_0
+Progress: Adding altpll_0 [altpll 13.0]
+Progress: Parameterizing module altpll_0
+Progress: Building connections
+Progress: Parameterizing connections
+Progress: Validating
+Progress: Done reading input file
+Warning: sdram_pll.altpll_0: altpll_0.pll_slave must be connected to an Avalon-MM master
+Warning: sdram_pll.altpll_0: altpll_0.phasedone_conduit must be exported, or connected to a matching conduit.
+Info: sdram_pll: Generating sdram_pll "sdram_pll" for QUARTUS_SYNTH
+Info: pipeline_bridge_swap_transform: After transform: 2 modules, 2 connections
+Info: No custom instruction connections, skipping transform 
+Info: No Avalon connections, skipping transform 
+Info: merlin_translator_transform: After transform: 2 modules, 2 connections
+Info: reset_adaptation_transform: After transform: 3 modules, 4 connections
+Info: merlin_mm_transform: After transform: 3 modules, 4 connections
+Info: altpll_0: "sdram_pll" instantiated altpll "altpll_0"
+Info: rst_controller: "sdram_pll" instantiated altera_reset_controller "rst_controller"
+Info: sdram_pll: Done sdram_pll" with 3 modules, 5 files, 24974 bytes
+Info: ip-generate succeeded.
+Info: Finished: Create HDL design files for synthesis

@@ -1,0 +1,973 @@
+/////////////////       指令与编码 格式说明： ////////////////////
+//
+//类编码高4位，源寄存器3位，目寄存器3位，功能码在低6位，地址12位
+//代码		类码	功能码	汇编格式		解释
+//nop：		0000	000000	nop
+//push:		0000	000001	push	i		寄存器入栈	
+//pop:		0000	000010 	pop		i		寄存器出栈
+//ldar:		0000	000011	ldar	i		送寄存器到da
+//strr:		0000	000100	strr 	i		将da送寄存器   
+//add:		0000	000101	add		i,j		二寄存器加，结果送后面寄存器 
+//sub:		0000	000110 	sub		i,j 	寄存器减，结果送后面寄存器
+//out:		0000	000111  out		i 		寄存器内容输出   
+//mov:		0000	001000	mov 	i,j		寄存器间传送    
+//mult:		0000	001001	mult	i		da*i->da,高16位送x
+//divi:		0000	001010	divi	i		da/i->da,余数16位送x
+//xtda:		0000	001011	xtda			//寄存器x->da
+//datx:		0000	001100	datx			da->x
+//dptr:		0000	001101	dptr			da数据到数据存储器ptr指示单元
+//ting：	0000	001111	ting			缓冲区空暂停
+//lnot:		0000	010000	lnot	i		寄存器逐位取反
+//land:		0000	010001	land	i,j		寄存器逐位与
+//lor:		0000	010010	lor		i,j		寄存器逐位或
+//shl：		0000	010011	shl		i,j		将j寄存器左移i位
+//shr：		0000	010100	shr		i,j		将j寄存器右移i位
+//ret:		0000	111110	ret				子程序返回
+//stp		0000	111111	stp				stop
+//lda:  	0001	     	lda		addr		da从数据单元取数据  
+//str:		0010			str		addr		将da送数据单元 
+//jend:		0011			jend	addr		将da送数据单元 
+//sdal:		10010000		sdal 	n		低字立即数，有符号扩充到高字放入da	
+//sdah:		10010001		sdah	n		高字立即数，与低字组成16位数据放入da
+//jk:		1010			jk		addr	 
+//jmp:		1011			jmp		addr	无条件跳转  	
+//jz:		1100			jz		addr	da为0转 
+//jn:		1101			jn		addr	da为负转
+//pop:		1110			call	addr	调用子程序 
+//iptr:		0000	010111	iptr			da->[ptr] 
+//inl:		0000	011000	inl				idata->da[7:0] 
+//inh:		0000	011001	inh				idata->da[15:8] 
+//datp:		0000	011010	datp			da->ptr
+//inc:		0000	011011	inc				ptr+1 
+//dec:		0000	011100	dec				ptr-1 
+//////////////////////////////////////////////////////////////
+
+module sjls_cpum( //三级流水
+	clock,      //系统时钟
+	clr_n,		//初始复位，低电位有效
+	idata,		//输入数据
+	odata,		//输出数据
+	w,
+	w1,
+	w2,
+	opc,
+	brak,
+	empty,
+	read,
+	endf,
+	orup,
+	oda
+	);
+	
+	input	        clock,clr_n,brak,empty,endf;
+	input	[7:0]  idata;
+	output	[15:0]  odata;
+	output	[15:0]  w,w1,w2,oda;
+	output  	[9:0]  	opc;
+	output	read,orup;
+	
+	wire 			clk;
+	reg 	[15:0]	r_0,r_1,r_2,r_3,r_4,r_5,r_6,r_7,x;
+	reg				lda,add,sub,out,in,str,mov,xtda,mult,divi,sdal,sdah,
+					ldar,strr,jmp,jz,jn,call,ret,nop,push,pop,stp;
+	reg		iptr,inl,inh,dec,inc,jk,jend,datp,ting;
+	wire 	[15:0]  q_w,q_data,qw;
+	wire	[9:0]  pc_next;
+	reg 	[15:0]	aq_w,bq_w,cq_w,dq_w,wdat,ddat,a,b,da,outd,idat;
+	reg     [9:0]  pc,sp,pc_back,mar,ptr;
+	reg     [0:0]   iwren,dwren,swren,rea,rup,rupt,rrup,flag,rcall,rret,rstr;
+	reg     [0:0]   rjend,rjz,rjn,rjk;
+ 	altsyncram0 iram(.address(pc),.clock(clock),.data(idat),.wren(iwren),.q(qw));  //程序存储器
+	altsyncram4 dram(.address(mar),.clock(clock),.data(ddat),.wren(dwren),.q(q_data)); //数据存储器
+	altsyncram4 sram(.address(sp),.clock(clock),.data(pc_back),.wren(swren),.q(pc_next));  //堆栈
+	
+	assign odata = outd;
+	assign oda = da;
+	assign w=q_w;
+	assign w1=aq_w;
+	assign w2=bq_w;
+	assign opc=pc;
+	assign read=rea;
+	assign orup=rup;
+	assign q_w= (rrup|rcall|rret|rjend|rjz|rjn|rjk|rupt|rup|flag) ? 0 : qw;
+	
+	always @(posedge clock  or negedge clr_n)  
+	begin			//取出指令与传递指令
+	if (!clr_n)
+	begin
+    aq_w <= 16'h0000;
+	bq_w <= 16'h0000;
+	pc	<= 0;
+	sp 	<= 10'h000; //栈底下一位
+	dwren	<= 0;
+	swren 	<= 0; 
+	// 指令线:
+	lda 	<= 0;   //da取数据                
+	str 	<= 0;                   
+	ldar 	<= 0;                   
+	strr 	<= 0;                   
+	add 	<= 0;                   
+	sub 	<= 0;                   
+	out 	<= 0;                   
+	mov 	<= 0; 
+	xtda	<= 0;
+	mult	<= 0;
+	divi	<= 0;                  
+	sdal 	<= 0;                   
+	sdah	<= 0;                   
+	jmp 	<= 0;                   
+	jz 		<= 0;                   
+	jn 		<= 0;                   
+	call	<= 0;                   
+	ret 	<= 0; 
+	push	<= 0;
+	pop		<= 0;
+	stp		<= 0;
+	datp	<= 0;
+	inl		<= 0;
+	inh		<= 0;
+	inc		<= 0;
+	dec		<= 0;
+	iptr	<= 0;
+	jk		<= 0;
+	jend	<= 0;
+	ting	<= 0;
+	flag<=0;
+	rup<=0;
+	rrup<=0;
+	rupt<=0;
+	rcall<=0;
+	rret<=0;
+	rjend<=0;
+	rjz<=0;
+	rjn<=0;
+	rjk<=0;
+	rstr<=0;
+	end
+	else
+	begin
+//<1>取指传递和节拍控制设备： 
+		aq_w <= q_w;        //实际aq_w在第一拍改变
+		bq_w <= aq_w;       //实际bq_w在第二拍改变
+
+		if (!brak)
+		begin
+			flag<=0;
+			if (iptr) rrup<=rupt; 
+			else if (call) rrup<= rcall;
+				else if (ret) rrup <= rret;
+					else if (jend) rrup<=rjend;
+						else if (jz) rrup<=rjz;
+							else if (jn) rrup<=rjn;
+								else if (jk) rrup<=rjk;
+									//else if (str) rrup<=rstr;
+										else rrup<=0;
+			if (rupt) pc <= pc-1;
+			else if (!rup) pc<=pc+1;
+		end
+		else 
+		begin
+			flag<=1;
+			rup<=0;
+		end
+//以上是初始过程，此后q_w将依次向后传递。
+ 
+//<2>分析准备设备：
+	case (q_w[15:12])			//
+	4'b0000: case (q_w[5:0])
+			6'b000001:			// push
+					begin
+					push <= 1;
+					swren<=1;
+					case (q_w[11:9])
+					3'b000: pc_back <= r_0;
+					3'b001: pc_back <= r_1;
+					3'b010: pc_back <= r_2;
+					3'b011: pc_back <= r_3;
+					3'b100: pc_back <= r_4;
+					3'b101: pc_back <= r_5;
+					3'b110: pc_back <= r_6;
+					3'b111: pc_back <= r_7;
+					endcase
+					end
+			6'b000010:		//pop
+					begin
+					case (q_w[11:9])
+					3'b000:  r_0 <= pc_next;
+					3'b001:  r_1 <= pc_next ;
+					3'b010:  r_2 <= pc_next;
+					3'b011:  r_3 <= pc_next ;
+					3'b100:  r_4 <= pc_next;
+					3'b101:  r_5 <= pc_next;
+					3'b110:  r_6 <= pc_next ;
+					3'b111:  r_7 <= pc_next;
+					endcase	
+					end
+			6'b000011:		//ldar
+					case (q_w[11:9])
+					3'b000: da <= r_0;
+					3'b001: da <= r_1;
+					3'b010: da <= r_2;
+					3'b011: da <= r_3;
+					3'b100: da <= r_4;
+					3'b101: da <= r_5;
+					3'b110: da <= r_6;
+					3'b111: da <= r_7;
+					endcase
+			6'b000100: 		// (strr )
+					case (q_w[11:9])
+					3'b000:  if (lda==1)r_0 <= q_data;
+								else r_0 <= da;
+					3'b001:  if (lda==1)r_1 <= q_data;
+								else r_1 <= da;
+					3'b010:  if (lda==1)r_2 <= q_data;
+								else r_2 <= da;
+					3'b011:  if (lda==1)r_3 <= q_data;
+								else r_3 <= da;
+					3'b100:  if (lda==1)r_4 <= q_data;
+								else r_4 <= da;
+					3'b101:  if (lda==1)r_5 <= q_data;
+								else r_5 <= da;
+					3'b110:  if (lda==1)r_6 <= q_data;
+								else r_6 <= da;
+					3'b111:  if (lda==1)r_7 <= q_data;
+								else r_7 <= da;
+					endcase
+			6'b000101:		// (add )
+					case (q_w[11:6])
+					6'b000000: r_0 <= r_0+r_0;
+					6'b001001: r_1 <= r_1+r_1;
+					6'b010010: r_2 <= r_2+r_2;
+					6'b011011: r_3 <= r_3+r_3;
+					6'b100100: r_4 <= r_4+r_4;
+					6'b101101: r_5 <= r_5+r_5;
+					6'b110110: r_6 <= r_6+r_6;
+					6'b111111: r_7 <= r_7+r_7;
+					6'b000001: r_1 <= r_0+r_1;
+					6'b000010: r_2 <= r_0+r_2;
+					6'b000011: r_3 <= r_0+r_3;
+					6'b000100: r_4 <= r_0+r_4;
+					6'b000101: r_5 <= r_0+r_5;
+					6'b000110: r_6 <= r_0+r_6;
+					6'b000111: r_7 <= r_0+r_7;
+					6'b001000: r_0 <= r_1+r_0;
+					6'b001010: r_2 <= r_1+r_2;
+					6'b001011: r_3 <= r_1+r_3;
+					6'b001100: r_4 <= r_1+r_4;
+					6'b001101: r_5 <= r_1+r_5;
+					6'b001110: r_6 <= r_1+r_6;
+					6'b001111: r_7 <= r_1+r_7;
+					6'b010000: r_0 <= r_2+r_0;
+					6'b010001: r_1 <= r_2+r_1;
+					6'b010011: r_3 <= r_2+r_3;
+					6'b010100: r_4 <= r_2+r_4;
+					6'b010101: r_5 <= r_2+r_5;
+					6'b010110: r_6 <= r_2+r_6;
+					6'b010111: r_7 <= r_2+r_7;
+					6'b011000: r_0 <= r_3+r_0;
+					6'b011001: r_1 <= r_3+r_1;
+					6'b011010: r_2 <= r_3+r_2;
+					6'b011100: r_4 <= r_3+r_4;
+					6'b011101: r_5 <= r_3+r_5;
+					6'b011110: r_6 <= r_3+r_6;
+					6'b011111: r_7 <= r_3+r_7;
+					6'b100000: r_0 <= r_4+r_0;
+					6'b100001: r_1 <= r_4+r_1;
+					6'b100010: r_2 <= r_4+r_2;
+					6'b100011: r_3 <= r_4+r_3;
+					6'b100101: r_5 <= r_4+r_5;
+					6'b100110: r_6 <= r_4+r_6;
+					6'b100111: r_7 <= r_4+r_7;
+					6'b101000: r_0 <= r_5+r_0;
+					6'b101001: r_1 <= r_5+r_1;
+					6'b101010: r_2 <= r_5+r_2;
+					6'b101011: r_3 <= r_5+r_3;
+					6'b101100: r_4 <= r_5+r_4;
+					6'b101110: r_6 <= r_5+r_6;
+					6'b101111: r_7 <= r_5+r_7;
+					6'b110000: r_0 <= r_6+r_0;
+					6'b110001: r_1 <= r_6+r_1;
+					6'b110010: r_2 <= r_6+r_2;
+					6'b110011: r_3 <= r_6+r_3;
+					6'b110100: r_4 <= r_6+r_4;
+					6'b110101: r_5 <= r_6+r_5;
+					6'b110111: r_7 <= r_6+r_7;
+					6'b111000: r_0 <= r_7+r_0;
+					6'b111001: r_1 <= r_7+r_1;
+					6'b111010: r_2 <= r_7+r_2;
+					6'b111011: r_3 <= r_7+r_3;
+					6'b111100: r_4 <= r_7+r_4;
+					6'b111101: r_5 <= r_7+r_5;
+					6'b111110: r_6 <= r_7+r_6;
+					endcase
+				6'b000110:		 // (sub )
+					case (q_w[11:6])
+					6'b000000: r_0 <= r_0-r_0;
+					6'b001001: r_1 <= r_1-r_1;
+					6'b010010: r_2 <= r_2-r_2;
+					6'b011011: r_3 <= r_3-r_3;
+					6'b100100: r_4 <= r_4-r_4;
+					6'b101101: r_5 <= r_5-r_5;
+					6'b110110: r_6 <= r_6-r_6;
+					6'b111111: r_7 <= r_7-r_7;
+					6'b000001: r_1 <= r_1-r_0;
+					6'b000010: r_2 <= r_2-r_0;
+					6'b000011: r_3 <= r_3-r_0;
+					6'b000100: r_4 <= r_4-r_0;
+					6'b000101: r_5 <= r_5-r_0;
+					6'b000110: r_6 <= r_6-r_0;
+					6'b000111: r_7 <= r_7-r_0;
+					6'b001000: r_0 <= r_0-r_1;
+					6'b001010: r_2 <= r_2-r_1;
+					6'b001011: r_3 <= r_3-r_1;
+					6'b001100: r_4 <= r_4-r_1;
+					6'b001101: r_5 <= r_5-r_1;
+					6'b001110: r_6 <= r_6-r_1;
+					6'b001111: r_7 <= r_7-r_1;
+					6'b010000: r_0 <= r_0-r_2;
+					6'b010001: r_1 <= r_1-r_2;
+					6'b010011: r_3 <= r_3-r_2;
+					6'b010100: r_4 <= r_4-r_2;
+					6'b010101: r_5 <= r_5-r_2;
+					6'b010110: r_6 <= r_6-r_2;
+					6'b010111: r_7 <= r_7-r_2;
+					6'b011000: r_0 <= r_0-r_3;
+					6'b011001: r_1 <= r_1-r_3;
+					6'b011010: r_2 <= r_2-r_3;
+					6'b011100: r_4 <= r_4-r_3;
+					6'b011101: r_5 <= r_5-r_3;
+					6'b011110: r_6 <= r_6-r_3;
+					6'b011111: r_7 <= r_7-r_3;
+					6'b100000: r_0 <= r_0-r_4;
+					6'b100001: r_1 <= r_1-r_4;
+					6'b100010: r_2 <= r_2-r_4;
+					6'b100011: r_3 <= r_3-r_4;
+					6'b100101: r_5 <= r_5-r_4;
+					6'b100110: r_6 <= r_6-r_4;
+					6'b100111: r_7 <= r_7-r_4;
+					6'b101000: r_0 <= r_0-r_5;
+					6'b101001: r_1 <= r_1-r_5;
+					6'b101010: r_2 <= r_2-r_5;
+					6'b101011: r_3 <= r_3-r_5;
+					6'b101100: r_4 <= r_4-r_5;
+					6'b101110: r_6 <= r_6-r_5;
+					6'b101111: r_7 <= r_7-r_5;
+					6'b110000: r_0 <= r_0-r_6;
+					6'b110001: r_1 <= r_1-r_6;
+					6'b110010: r_2 <= r_2-r_6;
+					6'b110011: r_3 <= r_3-r_6;
+					6'b110100: r_4 <= r_4-r_6;
+					6'b110101: r_5 <= r_5-r_6;
+					6'b110111: r_7 <= r_7-r_6;
+					6'b111000: r_0 <= r_0-r_7;
+					6'b111001: r_1 <= r_1-r_7;
+					6'b111010: r_2 <= r_2-r_7;
+					6'b111011: r_3 <= r_3-r_7;
+					6'b111100: r_4 <= r_4-r_7;
+					6'b111101: r_5 <= r_5-r_7;
+					6'b111110: r_6 <= r_6-r_7;
+					endcase
+				6'b000111:	    					// (out )
+					case (q_w[11:9])
+					3'b000: outd <= r_0;
+					3'b001: outd <= r_1;
+					3'b010: outd <= r_2;
+					3'b011: outd <= r_3;
+					3'b100: outd <= r_4;
+					3'b101: outd <= r_5;
+					3'b110: outd <= r_6;
+					3'b111: outd <= r_7;
+					endcase
+				6'b001000:							//(mov)
+					case (q_w[11:6])
+					6'b000001: r_1 <= r_0;
+					6'b000010: r_2 <= r_0;
+					6'b000011: r_3 <= r_0;
+					6'b000100: r_4 <= r_0;
+					6'b000101: r_5 <= r_0;
+					6'b000110: r_6 <= r_0;
+					6'b000111: r_7 <= r_0;
+					6'b001000: r_0 <= r_1;
+					6'b001010: r_2 <= r_1;
+					6'b001011: r_3 <= r_1;
+					6'b001100: r_4 <= r_1;
+					6'b001101: r_5 <= r_1;
+					6'b001110: r_6 <= r_1;
+					6'b001111: r_7 <= r_1;
+					6'b010000: r_0 <= r_2;
+					6'b010001: r_1 <= r_2;
+					6'b010011: r_3 <= r_2;
+					6'b010100: r_4 <= r_2;
+					6'b010101: r_5 <= r_2;
+					6'b010110: r_6 <= r_2;
+					6'b010111: r_7 <= r_2;
+					6'b011000: r_0 <= r_3;
+					6'b011001: r_1 <= r_3;
+					6'b011010: r_2 <= r_3;
+					6'b011100: r_4 <= r_3;
+					6'b011101: r_5 <= r_3;
+					6'b011110: r_6 <= r_3;
+					6'b011111: r_7 <= r_3;
+					6'b100000: r_0 <= r_4;
+					6'b100001: r_1 <= r_4;
+					6'b100010: r_2 <= r_4;
+					6'b100011: r_3 <= r_4;
+					6'b100101: r_5 <= r_4;
+					6'b100110: r_6 <= r_4;
+					6'b100111: r_7 <= r_4;
+					6'b101000: r_0 <= r_5;
+					6'b101001: r_1 <= r_5;
+					6'b101010: r_2 <= r_5;
+					6'b101011: r_3 <= r_5;
+					6'b101100: r_4 <= r_5;
+					6'b101110: r_6 <= r_5;
+					6'b101111: r_7 <= r_5;
+					6'b110000: r_0 <= r_6;
+					6'b110001: r_1 <= r_6;
+					6'b110010: r_2 <= r_6;
+					6'b110011: r_3 <= r_6;
+					6'b110100: r_4 <= r_6;
+					6'b110101: r_5 <= r_6;
+					6'b110111: r_7 <= r_6;
+					6'b111000: r_0 <= r_7;
+					6'b111001: r_1 <= r_7;
+					6'b111010: r_2 <= r_7;
+					6'b111011: r_3 <= r_7;
+					6'b111100: r_4 <= r_7;
+					6'b111101: r_5 <= r_7;
+					6'b111110: r_6 <= r_7;
+					endcase
+				6'b001001:		// mult
+					begin
+					case (q_w[11:9])
+					3'b000: begin
+							if (lda==1){x,da} <= q_data*r_0;
+							else 	{x,da} <= da*r_0;
+							end
+					3'b001: begin
+							if (lda==1){x,da} <= q_data*r_1;
+							else 	{x,da} <= da*r_1;
+							end
+					3'b010: begin
+							if (lda==1){x,da} <= q_data*r_2;
+							else 	{x,da} <= da*r_2;
+							end
+					3'b011: begin
+							if (lda==1){x,da} <= q_data*r_3;
+							else 	{x,da} <= da*r_3;
+							end
+					3'b100: begin
+							if (lda==1){x,da} <= q_data*r_4;
+							else 	{x,da} <= da*r_4;
+							end
+					3'b101: begin
+							if (lda==1){x,da} <= q_data*r_5;
+							else 	{x,da} <= da*r_5;
+							end
+					3'b110: begin
+							if (lda==1){x,da} <= q_data*r_6;
+							else 	{x,da} <= da*r_6;
+							end
+					3'b111: begin
+							if (lda==1){x,da} <= q_data*r_7;
+							else 	{x,da} <= da*r_7;
+							end
+					endcase
+					end
+/*				6'b001010:		// divi
+					begin
+					divi<=1;
+					case (q_w[11:9])
+					3'b000: begin
+							if (lda==1) begin 
+									da <= q_data/r_0; 
+								end
+							else	begin 
+									da <= da/r_0; 
+								end
+							end
+					3'b001: begin
+							if (lda==1) begin 
+									da <= q_data/r_1; 
+								end
+							else	begin 
+									da <= da/r_1; 
+								end
+							end
+					3'b010: begin
+							if (lda==1) begin 
+									da <= q_data/r_2; 
+								end
+							else	begin 
+									da <= da/r_2; 
+								end
+							end
+					3'b011: begin
+							if (lda==1) begin 
+									da <= q_data/r_3; 
+								end
+							else	begin 
+									da <= da/r_3; 
+								end
+							end
+					3'b100: begin
+							if (lda==1) begin 
+									da <= q_data/r_4; 
+								end
+							else	begin 
+									da <= da/r_4; 
+								end
+							end
+					3'b101: begin
+							if (lda==1) begin 
+									da <= q_data/r_5; 
+								end
+							else	begin 
+									da <= da/r_5; 
+								end
+							end
+					3'b110: begin
+							if (lda==1) begin 
+									da <= q_data/r_6; 
+								end
+							else	begin 
+									da <= da/r_6; 
+								end
+							end
+					3'b111: begin
+							if (lda==1) begin 
+									da <= q_data/r_7; 
+								end
+							else	begin 
+									da <= da/r_7; 
+								end
+							end
+					endcase 
+					end 
+*/							
+				6'b001011:da <= x;  	//xtda
+				6'b001100:x <= da;  	//datx
+				6'b000000:
+					begin end     		//nop
+				6'b001111:    			//ting
+					begin 
+						if (empty) begin
+						rup <= 1;
+						rupt <= 1;
+						end
+						else rea<=1;
+					end 
+/*				6'b010000: begin
+						case (q_w[11:9])
+						3'b000: r_0<=~r_0;
+						3'b000: r_1<=~r_1;
+						3'b000: r_2<=~r_2;
+						3'b000: r_3<=~r_3;
+						3'b000: r_4<=~r_4;
+						3'b000: r_5<=~r_5;
+						3'b000: r_6<=~r_6;
+						3'b000: r_7<=~r_7;
+						endcase
+						end
+						
+				6'b010001:							//(land)
+					case (q_w[11:6])
+					6'b000001: r_1 <= r_0 & r_1;
+					6'b000010: r_2 <= r_0 & r_2;
+					6'b000011: r_3 <= r_0 & r_3;
+					6'b000100: r_4 <= r_0 & r_4;
+					6'b000101: r_5 <= r_0 & r_5;
+					6'b000110: r_6 <= r_0 & r_6;
+					6'b000111: r_7 <= r_0 & r_7;
+					6'b001000: r_0 <= r_1 & r_0;
+					6'b001010: r_2 <= r_1 & r_2;
+					6'b001011: r_3 <= r_1 & r_3;
+					6'b001100: r_4 <= r_1 & r_4;
+					6'b001101: r_5 <= r_1 & r_5;
+					6'b001110: r_6 <= r_1 & r_6;
+					6'b001111: r_7 <= r_1 & r_7;
+					6'b010000: r_0 <= r_2 & r_0;
+					6'b010001: r_1 <= r_2 & r_1;
+					6'b010011: r_3 <= r_2 & r_3;
+					6'b010100: r_4 <= r_2 & r_4;
+					6'b010101: r_5 <= r_2 & r_5;
+					6'b010110: r_6 <= r_2 & r_6;
+					6'b010111: r_7 <= r_2 & r_7;
+					6'b011000: r_0 <= r_3 & r_0;
+					6'b011001: r_1 <= r_3 & r_1;
+					6'b011010: r_2 <= r_3 & r_2;
+					6'b011100: r_4 <= r_3 & r_4;
+					6'b011101: r_5 <= r_3 & r_5;
+					6'b011110: r_6 <= r_3 & r_6;
+					6'b011111: r_7 <= r_3 & r_7;
+					6'b100000: r_0 <= r_4 & r_0;
+					6'b100001: r_1 <= r_4 & r_1;
+					6'b100010: r_2 <= r_4 & r_2;
+					6'b100011: r_3 <= r_4 & r_3;
+					6'b100101: r_5 <= r_4 & r_5;
+					6'b100110: r_6 <= r_4 & r_6;
+					6'b100111: r_7 <= r_4 & r_7;
+					6'b101000: r_0 <= r_5 & r_0;
+					6'b101001: r_1 <= r_5 & r_1;
+					6'b101010: r_2 <= r_5 & r_2;
+					6'b101011: r_3 <= r_5 & r_3;
+					6'b101100: r_4 <= r_5 & r_4;
+					6'b101110: r_6 <= r_5 & r_6;
+					6'b101111: r_7 <= r_5 & r_7;
+					6'b110000: r_0 <= r_6 & r_0;
+					6'b110001: r_1 <= r_6 & r_1;
+					6'b110010: r_2 <= r_6 & r_2;
+					6'b110011: r_3 <= r_6 & r_3;
+					6'b110100: r_4 <= r_6 & r_4;
+					6'b110101: r_5 <= r_6 & r_5;
+					6'b110111: r_7 <= r_6 & r_7;
+					6'b111000: r_0 <= r_7 & r_0;
+					6'b111001: r_1 <= r_7 & r_1;
+					6'b111010: r_2 <= r_7 & r_2;
+					6'b111011: r_3 <= r_7 & r_3;
+					6'b111100: r_4 <= r_7 & r_4;
+					6'b111101: r_5 <= r_7 & r_5;
+					6'b111110: r_6 <= r_7 & r_6;
+					endcase
+				6'b010010:							//(lor)
+					case (q_w[11:6])
+					6'b000001: r_1 <= r_0 | r_1;
+					6'b000010: r_2 <= r_0 | r_2;
+					6'b000011: r_3 <= r_0 | r_3;
+					6'b000100: r_4 <= r_0 | r_4;
+					6'b000101: r_5 <= r_0 | r_5;
+					6'b000110: r_6 <= r_0 | r_6;
+					6'b000111: r_7 <= r_0 | r_7;
+					6'b001000: r_0 <= r_1 | r_0;
+					6'b001010: r_2 <= r_1 | r_2;
+					6'b001011: r_3 <= r_1 | r_3;
+					6'b001100: r_4 <= r_1 | r_4;
+					6'b001101: r_5 <= r_1 | r_5;
+					6'b001110: r_6 <= r_1 | r_6;
+					6'b001111: r_7 <= r_1 | r_7;
+					6'b010000: r_0 <= r_2 | r_0;
+					6'b010001: r_1 <= r_2 | r_1;
+					6'b010011: r_3 <= r_2 | r_3;
+					6'b010100: r_4 <= r_2 | r_4;
+					6'b010101: r_5 <= r_2 | r_5;
+					6'b010110: r_6 <= r_2 | r_6;
+					6'b010111: r_7 <= r_2 | r_7;
+					6'b011000: r_0 <= r_3 | r_0;
+					6'b011001: r_1 <= r_3 | r_1;
+					6'b011010: r_2 <= r_3 | r_2;
+					6'b011100: r_4 <= r_3 | r_4;
+					6'b011101: r_5 <= r_3 | r_5;
+					6'b011110: r_6 <= r_3 | r_6;
+					6'b011111: r_7 <= r_3 | r_7;
+					6'b100000: r_0 <= r_4 | r_0;
+					6'b100001: r_1 <= r_4 | r_1;
+					6'b100010: r_2 <= r_4 | r_2;
+					6'b100011: r_3 <= r_4 | r_3;
+					6'b100101: r_5 <= r_4 | r_5;
+					6'b100110: r_6 <= r_4 | r_6;
+					6'b100111: r_7 <= r_4 | r_7;
+					6'b101000: r_0 <= r_5 | r_0;
+					6'b101001: r_1 <= r_5 | r_1;
+					6'b101010: r_2 <= r_5 | r_2;
+					6'b101011: r_3 <= r_5 | r_3;
+					6'b101100: r_4 <= r_5 | r_4;
+					6'b101110: r_6 <= r_5 | r_6;
+					6'b101111: r_7 <= r_5 | r_7;
+					6'b110000: r_0 <= r_6 | r_0;
+					6'b110001: r_1 <= r_6 | r_1;
+					6'b110010: r_2 <= r_6 | r_2;
+					6'b110011: r_3 <= r_6 | r_3;
+					6'b110100: r_4 <= r_6 | r_4;
+					6'b110101: r_5 <= r_6 | r_5;
+					6'b110111: r_7 <= r_6 | r_7;
+					6'b111000: r_0 <= r_7 | r_0;
+					6'b111001: r_1 <= r_7 | r_1;
+					6'b111010: r_2 <= r_7 | r_2;
+					6'b111011: r_3 <= r_7 | r_3;
+					6'b111100: r_4 <= r_7 | r_4;
+					6'b111101: r_5 <= r_7 | r_5;
+					6'b111110: r_6 <= r_7 | r_6;
+					endcase
+*/
+				6'b010111:				//iptr
+					begin 
+						pc_back<=pc;	//save pc
+						pc<=ptr;
+						idat<=da;
+						iwren<=1;
+						rupt<=1;
+						iptr<=1;
+					end     		
+				6'b011000:				//inl
+					begin 
+						//rea<=1;
+					end     		
+				6'b011001:				//inh
+					begin 
+						//rea<=1;
+					end     		
+				6'b011010:				//datp
+					begin 
+						ptr<=da;
+						datp<=1;
+					end     		
+				6'b011011:				//inc
+					begin 
+						ptr<=ptr+1;
+						inc<=1;
+					end     		
+				6'b011100:				//dec
+					begin 
+						ptr<=ptr-1;
+						dec<=1;
+					end     		
+				6'b111110:				// (ret )
+					begin   					
+					pc <= pc_next;  
+					sp <= sp-1;
+					rret<=1;
+					ret<=1;
+					end
+				6'b111111:	
+					begin   			// (stp)
+//					rup <= 1;
+					end
+				default:	begin end
+				endcase
+								
+	4'b0001: 	begin 						// (lda )
+				//if (!str)
+				mar   <= q_w[11:0];			//地址
+				lda	<= 1;
+				end
+	4'b0010:	begin    		// (str )
+				mar   <= q_w[11:0];			//地址
+				ddat <= da;
+				dwren<=1;
+				rstr<=1;
+				str <= 1;
+				end  
+	4'b0011:	begin    		// (jend )
+					if (endf) begin
+						pc   <= q_w[11:0];			//地址
+						rjend<=1;
+						jend <= 1;
+					end
+				end  
+	4'b1001:	
+				case (q_w[11:8]) 
+				0000: 			// (sdal )
+					da <= {{8{q_w[7]}},q_w[7:0]};		//扩充16位有符号数
+				0001: 			// (sdah )
+					da[15:0] <= {q_w[7:0],da[7:0]};         //事先sdal送低8位
+				endcase 
+	4'b1010:	begin   		//jk				
+					if (empty) begin
+							pc   <= q_w[11:0];
+							rjk<=1;
+							jk<=1;
+						end
+				end 
+	4'b1011:	begin   					 // (jmp )
+				pc <= q_w[11:0];
+				end  
+	4'b1100:	begin   					 // (jz )
+				if (da==0)	begin
+						pc <= q_w[11:0];
+						rjz<=1;
+						jz<=1;
+					end
+				end  
+	4'b1101:	begin    					 // (jn)
+				if (da<0)	begin
+						pc <= q_w[11:0];
+						rjn<=1;
+						jn<=1;
+					end
+				end  
+	4'b1110:	begin   					 // (call )
+				pc_back <= pc;      	 //返回地址入栈
+				pc 	 <= q_w[11:0];
+				sp <= sp+1;
+				call <= 1;
+				swren<=1;
+				rcall<=1;
+				end  
+	default:	begin   
+				end  
+	endcase
+//<3>执行设备：					
+	case (aq_w[15:12])
+	4'b0000:										
+			case (aq_w[5:0])
+			6'b000001:  		//push
+					begin 
+					swren <= 0;	//第3拍实现入栈
+					sp <= sp+1;
+					end
+			6'b000010:  		//pop
+					sp <= sp-1;
+			6'b001010:	divi<=0;		// divi
+			6'b001111:    		//ting
+					begin 
+						rupt <=0;
+						rea<=0;
+					
+					end 
+			6'b010111:				//iptr
+					begin 
+						iwren<=0;
+						pc<=pc_back;
+						rupt<=0;
+					end     		
+			6'b011000:				//inl
+					begin 
+						da[7:0] <=	idata;
+						//rea<=0;
+						inl<=0;
+					end     		
+			6'b011001:				//inh
+					begin 
+						da <={idata,da[7:0]};
+						//rea<=0;
+						inh<=0;
+					end     		
+
+			6'b011010:				//datp
+					begin 
+						datp<=0;
+					end     		
+			6'b011011:				//inc
+					begin 
+						inc<=0;
+					end     		
+			6'b011100:				//dec
+					begin 
+						dec<=0;
+					end     		
+			6'b111110:				// (ret )
+					begin   					
+					rret<=0;
+					ret<=0;
+					end
+			default: begin end
+			endcase
+
+	4'b0001: 	begin 			// (lda )
+				//if (!str)  da   <= q_data;	//第3拍实现读
+				lda  <= 0;
+				end
+									 
+	4'b0010:	begin    		// (str )
+				dwren <= 0;		//第3拍实现写
+				rstr<=0;
+				str<=0;
+				end  
+	4'b0011:	begin    		// (jend)
+				rjend<=0;
+				jend <= 0;		
+				end  
+	4'b1010:	begin    		// (jk )
+				rjk <= 0;		
+				jk <= 0;		
+				end  
+	4'b1100:	begin   					 // (jz )
+						rjz<=0;
+						jz<=0;
+				end  
+	4'b1101:	begin   					 // (jn )
+						rjn<=0;
+						jn<=0;
+				end  
+	4'b1110:	begin   		// (call )
+				swren  <= 0;    //pc_back实现入栈
+				call<=0;
+				rcall<=0;
+				end  
+	default:	begin   
+				end  
+	endcase
+/*//<4>存取设备：					
+	case (bq_w[15:12])
+									 
+	4'b0000:										
+			case (bq_w[5:0])
+			6'b000001:  		//push
+				begin 
+				swren <= 0;
+				end
+			endcase
+	4'b0010:	begin    		// (str )
+				dwren <= 0;
+				end  
+	4'b1110:	begin    		// (call )
+				swren  <= 0;             
+				end  
+	default:	begin   
+				end  
+	endcase */
+				
+	end
+	end
+endmodule
+//////////////////////////////////////////////////////////////
+
+//例题1：求1+2+...+300。数据文件imem16_1.mif
+//		汇编						编译
+//a0 Start: 	sdal	1				9001 立即数1
+//a1 			Strr	1				0204 送1jcq
+//a2			Sdal	0				9000 立即数0
+//a3			Strr 	0				0004 送0jcq
+//a4			Sdal	44				902c 立即数h12c
+//a5			sdah	256				9101   
+//a6			Str 	7				2007 送7存储单元
+//a7 loop:		lda     7				1007 取7单元
+//a8			Jz		exit			c0af 退出
+//a9			strr	7				0e04 送7寄存器
+//aa			Add		7,0				0e05 加送0寄存器
+//ab			Sub		1,7				03c6 减送7寄存器
+//ac			ldar	7				0e03
+//ad			Jmp		loop			b0a7 缓冲槽
+//ae			str		7				2007 送7单元
+//af Exit:		out		0				0007 输出0寄存器内容
+//b0			ret						003e
+// 
+//结果：hb05e=45150
+//
+//先写后读，直接取da值；
+//转移指令使用缓冲槽；
+//分支指令加nop
+//call b
+//ret
+//ret
+//
+//例题2:求8!	数据文件imem16_2.mif
+//
+//300 main: 		sdal	1				9001  	；1
+//301				Strr	1				0204	；送1号寄存器
+//302				strr	2				0404  	；2号寄存器（部分积）
+//303				Sdal	0				9000  	；0
+//304				Strr	0				0004  	；送0号寄存器
+//305				sdal	8				9008	；
+//306				sdah	0				9100	；高位置0
+//307				strr	7 				0e04	；8送7号寄存器
+//308				call	make			e30b	；保存pc+2
+//309				out		2				0407	；输出结果
+//30a				ret						003e	；停机
+//30b make: 		ldar    7 				0e03	；
+//30c				jz		exit			c312	；
+//30d				mult	2				0409	；乘法
+//30e				strr	2				0404	；
+//30f				sub		1,7				03c6	；
+//310				call	test			e313	；二层调用
+//311				jmp		make			b30b	；
+//312 exit:			ret						003e	；ret后面要加1个nop断流,其他转移指令后加1个nop.
+//313 test:			out		7				0e07	；不让call连接ret
+//314				ret						003e	；
+//315				out		2				0407	；
+//316				nop						0000	；
+//
+//结果：h9d80=40320
+//注意：转移指令无论如何都会将后面的指令执行，所以
+//call/ret/jmp都可以提前一个位置，而分支转移后面一定
+//要加nop指令。造成这些都是指令连续读取的必然。

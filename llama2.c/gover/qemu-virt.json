@@ -1,0 +1,12 @@
+{
+  "llvm-target": "riscv64",
+  "cpu": "generic-rv64",
+  "features": "+m,+a,+f,+d,+c",
+  "goos": "baremetal",
+  "goarch": "riscv64",
+  "linker": "lld",
+  "scheduler": "none",
+  "serial": "ns16550a",
+  "serial-port": "0x10000000",
+  "default-stack-size": 81920
+}

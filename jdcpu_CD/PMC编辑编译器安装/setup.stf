@@ -1,0 +1,155 @@
+App Name   	PMC
+App Version	2014-01-04 20:06:22
+Frame Caption	PMC
+Dialog Caption Base	PMC
+Usage String	用法:  Setup
+About Box String	PMC\n\n此安装程序由 Visual FoxPro 安装向导创建。
+Check Modules	"Fox_4000001,Microsoft Visual FoxPro, graph, MS Graph, ed, MS Draw, msinfo, MS Info, MSOfficeWClass, Microsoft Office Manager, MOM Class, Office Shortcut Bar"
+MSAPPS Mode	local
+Suppress Serial Number Dialog
+Inf File Name	SETUP.INF
+Maximum Object ID	139
+Floppy Mode Root Object ID	2 : 1
+Maintenance Mode Root Object ID	3 : 1
+Batch Mode Root Object ID	2 : 1
+Setup Version	3.0.0.0
+
+ObjID	Install During Batch Mode	Title	Descr	Type	Data	Bmp Id	Vital	Shared	Dir Chang	Dest Dir	Check Directory
+1			搜寻前一版本	AppSearch	"""C:\PMC编译编辑器\"", """", """", 12, ""yes"", ""yes"","					
+2		软盘安装		AppMainDlg	5				Yes	
+3		维护安装		CustomDlg	7					
+4										
+5	Yes		安装 PMC 的所有文件	Group	7	"wizset32.dll, 111"				
+6										
+7	Yes	PMC	PMC 将被安装。	Group	8 9 19 14 12 10 11 25 13 20 26					
+8			*** PMC 文件	CopyFile	"Application,_3YU173D6B"		vital			
+9			*** PMC 文件	CopySection	Application		vital			
+10			ODBC files	Group	15 16 17 18 22 23					
+11			Microsoft Graph	Group	24 128					
+12			Visual Foxpro Runtime	Group	54 55 56 58 59					
+13			Miscellanous files	Group	39		vital			
+14			OLEAUT32 System	Group	42 43 45 46 48 49		vital			
+15				CustomAction	"""WIZSET32.DLL"", ""GetPathFromReg"", ""HKEY_LOCAL_MACHINE,SOFTWARE\Microsoft\Windows\CurrentVersion,CommonFilesDir"" "		vital			%p\Common<%p\Common Files>
+16			ODBC (Core)	Group	62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78					
+17			ODBC (Desktop)	Group	80 81 82 83 84 85 86 87 88 89 90 91 92 93					
+18			ODBC (Visual FoxPro)	Group	96 97 98 99 100 101					
+19		Setup Message	Installation of this product requires system administrator privileges.	CustomAction	"wizset32.dll, DetectAdminPrivileges"					
+20			*** Post Setup Executable	Group	21					
+21			Post Setup Executable	CustomAction	"""wizset32.dll"", ""ExecutePostSetupCommand"", ""BYQPMC.EXE"""					
+22			OLEDB (Core)	Group	103 104 106 107 108 110 111 113 114 116 117 118					
+23			OLEDB (Kajera)	Group	121 122 123 124					
+24			Microsoft Graph	Group	29 30 31 32 33 34 35 36 37					
+25			VC Runtime	Group	51 52		vital			
+26			Uninstall	Group	131 132 133 134 135 136 137 138					
+27										
+28										
+29	Yes	GR8GALRY.GRA		InstallShared	"MS Graph Files,Gr8galryGra,GR8GALRY.GRA,,8"					%M
+30	Yes	GR8409.DLL		InstallShared	"MS Graph Files,Gr8409Dll,GR8409.DLL,,8"					%M
+31	Yes	MSO97RT.DLL		InstallShared	"MS Graph Files,Mso97rtDll,MSO97RT.DLL,,8"					%M
+32	Yes	GRINTL32.DLL		InstallShared	"MS Graph Files,Grintl32Dll,GRINTL32.DLL,,8"					%M
+33	Yes	GRAPH8.OLB		InstallShared	"MS Graph Files,Graph8Olb,GRAPH8.OLB,,8"					%M
+34	Yes	GRAPH8RT.SRG		InstallShared	"MS Graph Files,Graph8rtSrg,GRAPH8RT.SRG,,8"					%M
+35	Yes			InstallSysFile	"MS Graph Files,Scp32Dll"					
+36	Yes	MRT7ENU.DLL		InstallShared	"MS Graph Files,Mrt7enuDll,MRT7ENU.DLL,,8"					%M
+37	Yes	GRAPH8.EXE		InstallShared	"MS Graph Files,Graph8Exe,GRAPH8.EXE,,8"					%M
+38										
+39	Yes			CopyFile	"Misc,ByqpmcExe"					%D
+40										
+41										
+42	Yes			InstallSysFile	"System,Oleaut32Dll"					
+43	Yes	OLEAUT32.DLL		Depend	42 ? 44					
+44	Yes	OLEAUT32.DLL		SelfReg	"System,Oleaut32Dll"					%M
+45	Yes			InstallSysFile	"System,Olepro32Dll"					
+46	Yes	OLEPRO32.DLL		Depend	45 ? 47					
+47	Yes	OLEPRO32.DLL		SelfReg	"System,Olepro32Dll"					%M
+48	Yes			InstallSysFile	"System,AsycfiltDll"					
+49	Yes			InstallSysFile	"System,Stdole2Tlb"					
+50										
+51	Yes			InstallSysFile	"VC Runtime,MsvcrtDll"					
+52	Yes			InstallSysFile	"VC Runtime,Msvcrt40Dll"					
+53										
+54	Yes			InstallSysFile	"VFP Runtime,Vfp6renuDll"					
+55	Yes			InstallSysFile	"VFP Runtime,Vfp6runExe"					
+56	Yes	VFP6RUN.EXE		Depend	55 ? 57					
+57	Yes	VFP6RUN.EXE		CustomAction	"""wizset32.dll"",""ExecutePostSetupCommand"",""VFP6RUN.EXE /RegServer"""					%M
+58	Yes			InstallSysFile	"VFP Runtime,Vfp6rDll"					
+59	Yes	VFP6R.DLL		Depend	58 ? 60					
+60	Yes	VFP6R.DLL		SelfReg	"VFP Runtime,Vfp6rDll"					%M
+61										
+62	Yes			InstallSysFile	"odbc-all,Odbc32Dll"					
+63	Yes			CustomAction	odbcstf.dll,AcmeInstallDriverManager,odbckey.inf					
+64	Yes			InstallSysFile	"odbc-all,Odbccr32Dll"					
+65	Yes			InstallSysFile	"odbc-all,Ds16gtDll"					
+66	Yes			InstallSysFile	"odbc-all,Ds32gtDll"					
+67	Yes			InstallSysFile	"odbc-all,Odbc16gtDll"					
+68	Yes			InstallSysFile	"odbc-all,Odbc32gtDll"					
+69	Yes			InstallSysFile	"odbc-all,Odbcad32Exe"					
+70	Yes			InstallSysFile	"odbc-all,OdbcconfExe"					
+71	Yes			InstallSysFile	"odbc-all,Odbccp32Cpl"					
+72	Yes			InstallSysFile	"odbc-all,OdbcinstCnt"					
+73	Yes			InstallSysFile	"odbc-all,OdbcinstHlp"					
+74	Yes			InstallSysFile	"odbc-all,OdbctracDll"					
+75	Yes			InstallSysFile	"odbc-all,OdbcintDll"					
+76	Yes			InstallSysFile	"odbc-all,Odbccp32Dll"					
+77	Yes			InstallSysFile	"odbc-all,Odbccu32Dll"					
+78	Yes			InstallSysFile	"odbc-all,MtxdmDll"					
+79										
+80	Yes			InstallSysFile	"odbc-desktop,Msjint35Dll"					
+81	Yes			InstallSysFile	"odbc-desktop,Msjter35Dll"					
+82	Yes			InstallSysFile	"odbc-desktop,Odbcjt32Dll"					
+83	Yes			InstallSysFile	"odbc-desktop,Odbctl32Dll"					
+84	Yes			InstallSysFile	"odbc-desktop,Vbajet32Dll"					
+85	Yes			InstallSysFile	"odbc-desktop,Vbar332Dll"					
+86	Yes			InstallSysFile	"odbc-desktop,OdbcjetHlp"					
+87	Yes			InstallSysFile	"odbc-desktop,OdbcjetCnt"					
+88	Yes			InstallSysFile	"odbc-desktop,Odbcji32Dll"					
+89	Yes			InstallSysFile	"odbc-desktop,ExpsrvDll"					
+90	Yes	VBAME.DLL		InstallShared	"odbc-desktop,VbameDll,VBAME.DLL,,8"					%M
+91	Yes			InstallSysFile	"odbc-desktop,Msrepl35Dll"					
+92	Yes			InstallSysFile	"odbc-desktop,Msjet35Dll"					
+93	Yes	MSJET35.DLL		Depend	92 ? 94					
+94	Yes	MSJET35.DLL		SelfReg	"odbc-desktop,Msjet35Dll"					%M
+95										
+96	Yes			InstallSysFile	"odbc-vfp,VfpodbcDll"					
+97	Yes			CustomAction	"odbcstf.dll,AcmeInstallDriver,odbckey.inf:DA Visual FoxPro:Y"					
+98	Yes			InstallSysFile	"odbc-vfp,DrvvfpHlp"					
+99	Yes			CustomAction	"odbcstf.dll,AcmeConfigDataSource,odbckey.inf:ADD:Microsoft Visual FoxPro Driver:DSN=Visual FoxPro Database|SourceDB=|SourceType=DBC||"					
+100	Yes			InstallSysFile	"odbc-vfp,DrvvfpCnt"					
+101	Yes			InstallSysFile	"odbc-vfp,VfpodbcTxt"					
+102										
+103	Yes			CopyFile	"oledb-core,MsdaerDll"					%15\system\ole db
+104	Yes	MSDAER.DLL		Depend	103 ? 105					
+105	Yes	MSDAER.DLL		SelfReg	"oledb-core,MsdaerDll"					%15\system\ole db
+106	Yes			CopyFile	"oledb-core,MsdaerrDll"					%15\system\ole db
+107	Yes			CopyFile	"oledb-core,MsdapsDll"					%15\system\ole db
+108	Yes	MSDAPS.DLL		Depend	107 ? 109					
+109	Yes	MSDAPS.DLL		SelfReg	"oledb-core,MsdapsDll"					%15\system\ole db
+110	Yes			CopyFile	"oledb-core,MsdaenumDll"					%15\system\ole db
+111	Yes	MSDAENUM.DLL		Depend	110 ? 112					
+112	Yes	MSDAENUM.DLL		SelfReg	"oledb-core,MsdaenumDll"					%15\system\ole db
+113	Yes			CopyFile	"oledb-core,MsdattDll"					%15\system\ole db
+114	Yes	MSDATT.DLL		Depend	113 ? 115					
+115	Yes	MSDATT.DLL		SelfReg	"oledb-core,MsdattDll"					%15\system\ole db
+116	Yes			CopyFile	"oledb-core,Msdatl2Dll"					%15\system\ole db
+117	Yes			CopyFile	"oledb-core,MsdadcDll"					%15\system\ole db
+118	Yes	MSDADC.DLL		Depend	117 ? 119					
+119	Yes	MSDADC.DLL		SelfReg	"oledb-core,MsdadcDll"					%15\system\ole db
+120										
+121	Yes			CopyFile	"oledb-kajera,MsdasqlrDll"					%15\system\ole db
+122	Yes			CopyFile	"oledb-kajera,Msdasqlreadme.txt"					%15\system\ole db
+123	Yes			CopyFile	"oledb-kajera,MsdasqlDll"					%15\system\ole db
+124	Yes	MSDASQL.DLL		Depend	123 ? 125					
+125	Yes	MSDASQL.DLL		SelfReg	"oledb-kajera,MsdasqlDll"					%15\system\ole db
+126										
+127				CustomAction	"""wizset32.dll"",""DetectRegData"",""CLASSES\MSGraph.Application"""					%M
+128				Depend	127 ?  : 129					
+129				CustomAction	"""wizset32.dll"",""ExecutePostSetupCommand"",""GRAPH8.Exe /RegServer"""					%M
+130										
+131				AddRegData	"LOCAL,Software\Microsoft\Windows\CurrentVersion\Uninstall\PMC ,DisplayName,PMC ,REG_SZ"					
+132				AddRegData	"LOCAL,Software\Microsoft\Windows\CurrentVersion\Uninstall\PMC ,UninstallString,%s\setup\setup.exe,REG_SZ"					%d
+133				CopySection	"Setup"					%d\setup
+134				CopyFile	"VC Runtime,Msvcrt40Dll"					%d\setup
+135				CopyFile	"VC Runtime,MsvcrtDll"					%d\setup
+136				CopyFile	"odbc-all,Odbccp32Dll"					%d\setup
+137				CopyFile	"odbc-all,OdbcintDll"					%d\setup
+138				WriteTableFile	"setup.stf"					%d\setup

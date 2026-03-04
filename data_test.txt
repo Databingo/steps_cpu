@@ -1,0 +1,134 @@
+// Comprehensive Data File for RISC-V RV64 Instruction Testing
+// Format: @Address (Hex) followed by Hex Bytes (space separated, 4 per line)
+// Target for Verilog $readmemh
+// Little Endian Memory Layout
+
+//----------------------------------------------------
+// Section 1: Byte Data (@000 - @003)
+//----------------------------------------------------
+@000
+// Addr 000: 7F (Max positive byte)
+// Addr 001: 80 (Min negative byte, -128)
+// Addr 002: FF (Negative byte, -1)
+// Addr 003: 00 (Zero byte)
+7F 80 FF 00
+
+//----------------------------------------------------
+// Section 2: Halfword Data (@004 - @007)
+//----------------------------------------------------
+@004
+// Addr 004: 1234 (Positive half) -> Bytes 34 12
+// Addr 006: 8000 (Min negative half, -32768) -> Bytes 00 80
+34 12 00 80
+
+//----------------------------------------------------
+// Section 3: Word Data (@008 - @00F)
+//----------------------------------------------------
+@008
+// Addr 008: 12345678 (Positive word) -> Bytes 78 56 34 12
+78 56 34 12
+@00C
+// Addr 00C: 80000000 (Min negative word, -2^31) -> Bytes 00 00 00 80
+00 00 00 80
+
+//----------------------------------------------------
+// Section 4: Doubleword Data (@010 - @03F)
+//----------------------------------------------------
+@010
+// Addr 010: 1122334455667788 (Positive double) -> Bytes 88 77 66 55 ...
+88 77 66 55
+@014
+// Addr 014: ... (cont.) -> Bytes ... 44 33 22 11
+44 33 22 11
+
+@018
+// Addr 018: AABBCCDDEEFF0011 (Pattern double) -> Bytes 11 00 FF EE ...
+11 00 FF EE
+@01C
+// Addr 01C: ... (cont.) -> Bytes ... DD CC BB AA
+DD CC BB AA
+
+@020
+// Addr 020: FFFFFFFFFFFFFFFF (Negative double, -1) -> Bytes FF FF FF FF ...
+FF FF FF FF
+@024
+// Addr 024: ... (cont.) -> Bytes ... FF FF FF FF
+FF FF FF FF
+
+@028
+// Addr 028: 7FFFFFFFFFFFFFFF (Max positive double) -> Bytes FF FF FF FF ...
+FF FF FF FF
+@02C
+// Addr 02C: ... (cont.) -> Bytes ... FF FF FF 7F
+FF FF FF 7F
+
+@030
+// Addr 030: 8000000000000000 (Min negative double, -2^63) -> Bytes 00 00 00 00 ...
+00 00 00 00
+@034
+// Addr 034: ... (cont.) -> Bytes ... 00 00 00 80
+00 00 00 80
+
+@038
+// Addr 038: 0000000000000000 (Zero double) -> Bytes 00 00 00 00 ...
+00 00 00 00
+@03C
+// Addr 03C: ... (cont.) -> Bytes ... 00 00 00 00
+00 00 00 00
+
+//----------------------------------------------------
+// Section 5: More Word/Half/Byte Boundaries (@040 - @04F)
+//----------------------------------------------------
+@040
+// Addr 040: FFFFFFFF (Word, -1) -> Bytes FF FF FF FF
+FF FF FF FF
+@044
+// Addr 044: 7FFFFFFF (Word, max pos) -> Bytes FF FF FF 7F
+FF FF FF 7F
+@048
+// Addr 048: FFFF (Half, -1) -> Bytes FF FF
+// Addr 04A: 7FFF (Half, max pos) -> Bytes FF 7F
+FF FF FF 7F
+@04C
+// Addr 04C: 55 (Byte pattern)
+// Addr 04D: AA (Byte pattern)
+// Addr 04E: 00 (Padding)
+// Addr 04F: 00 (Padding)
+55 AA 00 00
+
+//----------------------------------------------------
+// Section 6: Store Target Area (@050 - @06F)
+// Initialized with a recognizable pattern (e.g., DEADBEEF...)
+// Use this area for SB, SH, SW, SD instructions.
+//----------------------------------------------------
+@050
+DE AD BE EF
+@054
+DE AD BE EF
+@058
+DE AD BE EF
+@05C
+DE AD BE EF
+@060
+DE AD BE EF
+@064
+DE AD BE EF
+@068
+DE AD BE EF
+@06C
+DE AD BE EF
+
+//----------------------------------------------------
+// Section 7: General Purpose / Extra Data (@070 onwards)
+//----------------------------------------------------
+@070
+01 23 45 67
+@074
+89 AB CD EF
+// Add more data as needed for specific tests...
+@078
+00 00 00 00
+@07C
+00 00 00 00
+
+// End of defined data (Address 0x07F covered)

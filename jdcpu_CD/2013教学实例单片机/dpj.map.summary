@@ -1,0 +1,12 @@
+Analysis & Synthesis Status : Successful - Thu Dec 12 19:42:52 2013
+Quartus II Version : 7.2 Build 151 09/26/2007 SJ Web Edition
+Revision Name : dpj
+Top-level Entity Name : dpj
+Family : Cyclone
+Total logic elements : 2,457
+Total pins : 62
+Total virtual pins : 0
+Total memory bits : 4,096
+DSP block 9-bit elements : N/A until Partition Merge
+Total PLLs : 1
+Total DLLs : N/A until Partition Merge

@@ -1,0 +1,3 @@
+config PLATFORM_CUSTOM_MY_BOARD
+    bool "My Custom FPGA RISC-V Board"
+    default y

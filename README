@@ -1,0 +1,96 @@
+https://stackoverflow.com/questions/58414772/why-are-risc-v-s-b-and-u-j-instruction-types-encoded-in-this-way
+https://stackoverflow.com/questions/76347221/why-does-risc-v-j-immediate-encode-imm11-in-inst20
+https://stackoverflow.com/questions/39427092/risc-v-immediate-encoding-variants
+
+ISA shower
+https://luplab.gitlab.io/rvcodecjs/#q=01400fef&abi=false&isa=AUTO
+
+extend go assembler to phesuo-instruction
+extend cpu with wfi
+write kernel system (error and interrupt)
+write driver of keyborad
+write driver of LCD screen
+
+
+brew install icarus-verilog # with vvp
+
+
+rk.sh run test
+
+2025 Research road map:
+0.ISA
+1.Assembler
+2.Compiler
+3.Kernel/Opensbi
+4.U-boot?
+5.FreeBSD
+6.Trainsystem
+7.Deepeek-x
+8.Audiotalker
+9.Bot
+
+now: instructions in verilog on FPGA + opensbi in instructions from asm via assambler.go = to run keyboad + mounse + monitor + microphone + camera + speaker + freebsdmini
+
+最强的基本功：verilog 实现的指令集 + 汇编实现的 sbi + assembler.go
+
+1.csr verilog 实现
+2.assembler.go 完善伪指令 
+3.汇编实现 sbi
+
+
+用自己的芯片训练自己的AI
+在 FPGA 上部署 verilog 实现的 riscv 处理器逻辑，然后运行 freebsd, 然后用 freebsd 安装 pyTorch 训练 AI
+FPGA grok 推荐：
+Xilinx Artix-7 XC7A200T（Digilent Nexys Video）
+Xilinx Kintex-7 KC705
+Lattice ECP5
+=> 在 FPGA 上部署 verilog 实现的 riscv 处理器逻辑，然后运行用自己的汇编器、编译器编译 神经网络, 用它加载最新的开源 LLM 参数，通过 uart 串口与之互动。
+需要 FPGA 开发板, RISCV64 verilog 代码实现，riscv 汇编器(C 编译器)，神经网络 C 实现(无需 libc 及操作系统), 开源大模型 C 参数
+手撸了一个 riscv64 芯片(verilog)、一个 rva24 汇编器(go)、一个神经网络(c)，烧制在开发板上运行 llama2-7b 大模型，对话 4tokens/秒，这下软硬件全国产了, 一条龙，手工的哦。。。
+
+FPGA 版的 riscv 要支持 freebsd 系统运行，最少要实现: RV64IMAFD
+I 整数
+M 乘除法
+A 原子指令集
+Zicsr 控制状态寄存器指令（内涵于 I）
+--
+F 单精度浮点数 AI 
+D 双精度浮点数 AI
+
+
+verilog MAFD
+golang pseudo
+golang .setion...
+run opensbi.bin freebsc.bin
+golang compiler compile opensbiC freebsc.C
+install pyTorch
+train X-mode
+run X-mode
+
+
+指令|assembler.go汇编实现|qemu测试正常|verilog编码实现|iverilog测试正常|fpga测试正常
+Jal |Y                   |Y           |Y              |                |
+
+riscv64-unknown-elf-objdump -M no-aliases  -D caled.o
+
+
+ld -o t /usr/lib/crt1.o /usr/lib/crti.o caled.o /usr/lib/crtn.o -L/usr/lib -lc -lcompiler_rt -dynamic-linker /libexec/ld-elf.so.1
+
+
+
+gemini pro 2.5 RAM: 28Gb
+grok4 128Gb?
+deepseekr1 192Gb
+
+compiler:token-lexer-parser-ast-codegen
+MajorNick/C-Compiler
+nireo/mc
+the-super-tiny-compiler
+
+
+Cyclone II FPGA Starter Board with EP2C20F484C7
+BRAM 29.25KB 234Kb
+SRAM 512KB
+SDRAM 8MB
+http://download.terasic.com/
+https://sites.ualberta.ca/~delliott/ece492/appnotes/2013w/SD_card_interfacing/altera_up_sd_card_avalon_interface/

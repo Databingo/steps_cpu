@@ -1,0 +1,79 @@
+         1start     stpk                          1 5E                  0001                
+         2          in        n                  43 89        04  00    0004      k         
+         3          sda       1         1         2 8B        01        0006      pw0       
+         4          str       i                 103 8A        0a  00    0009                
+         5          str       k                  13 8A        01  00    000c      n         
+         6          str       p                 143 8A        0e  00    000f      one       
+         7          str       one                53 8A        05  00    0012      two       
+         8          str       ii                113 8A        0b  00    0015                
+         9          sda       2         2         2 8B        02        0017      temp      
+        10          str       two                63 8A        06  00    001a      m         
+        11          zero                          1 58                  001b      i         
+        12          dahp                          1 66                  001c      ii        
+        13          sda       p                 142 8B        0e        001e                
+        14          dalp                          1 56                  001f                
+        15          ncry                          1 B2                  0020      p         
+        16mult      dpda                          1 6A                  0021                
+        17          str       pw0                23 8A        02  00    0024                
+        18          lda       k                  13 81        01  00    0027                
+        19          madd      pw0                23 B0        02  00    002a                
+        20          dapd                          1 69                  002b                
+        21          xtda                          1 54                  002c                
+        22          str       m                  93 8A        09  00    002f                
+        23          lda       i                 103 81        0a  00    0032                
+        24          sub       ii                113 83        0b  00    0035                
+        25          jz        next             1013 86        65  00    0038                
+        26          lda       i                 103 81        0a  00    003b                
+        27          add       one                53 82        05  00    003e                
+        28          str       i                 103 8A        0a  00    0041                
+        29          inc                           1 4F                  0042                
+        30          jmp       mult              643 85        40  00    0045                
+        31next      zero                          1 58                  0046                
+        32          addc      m                  93 AD        09  00    0049                
+        33          jcry       mx2       mx2      3           00  00    004c                
+        34          jz        goon             1383 86        8a  00    004f                
+        35          dapd                          1 69                  0050                
+        36          lda       ii                113 81        0b  00    0053                
+        37          add       one                53 82        05  00    0056                
+        38          str       ii                113 8A        0b  00    0059                
+        39          jmp       goon             1383 85        8a  00    005c                
+        40mx2       dapd                          1 69                  005d                
+        41          inc                           1 4F                  005e                
+        42          sda       1         1         2 8B        01        0060                
+        43          dapd                          1 69                  0061                
+        44          lda       ii                113 81        0b  00    0064                
+        45          add       two                63 82        06  00    0067                
+        46          str       ii                113 8A        0b  00    006a                
+        47goon      lda       ii                113 81        0b  00    006d                
+        48          mult      two                63 AF        06  00    0070                
+        49          str       ii                113 8A        0b  00    0073                
+        50          str       i                 103 8A        0a  00    0076                
+        51          zero                          1 58                  0077                
+        52          dahp                          1 66                  0078                
+        53          sda       p                 142 8B        0e        007a                
+        54          dalp                          1 56                  007b                
+        55          lda       k                  13 81        01  00    007e                
+        56          add       one                53 82        05  00    0081                
+        57          str       k                  13 8A        01  00    0084                
+        58          sub       n                  43 83        04  00    0087                
+        59          jz        disp             1743 86        ae  00    008a                
+        60          ncry                          1 B2                  008b                
+        61          jmp       mult              643 85        40  00    008e                
+        62disp      lda       ii                113 81        0b  00    0091                
+        63          add       one                53 82        05  00    0094                
+        64          str       ii                113 8A        0b  00    0097                
+        65disply    dpda                          1 6A                  0098                
+        66          str       pw0                23 8A        02  00    009b                
+        67          out       pw0                23 84        02  00    009e                
+        68          call      3872      3872      3 88        20  0f    00a1                
+        69          lda       ii                113 81        0b  00    00a4                
+        70          sub       one                53 83        05  00    00a7                
+        71          jz        exit             2133 86        d5  00    00aa                
+        72          str       ii                113 8A        0b  00    00ad                
+        73          dec                           1 50                  00ae                
+        74          lda       pw0                23 81        02  00    00b1                
+        75          datx                          1 51                  00b2                
+        76          jmp       disply           1833 85        b7  00    00b5                
+        77exit      ret                           1 4E                  00b6                
+        78                                                              00b6                
+        79                                                              00b6                

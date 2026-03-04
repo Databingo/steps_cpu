@@ -1,0 +1,129 @@
+Assembler report for 2013xhls
+Sun Aug 25 19:41:16 2013
+Quartus II Version 7.2 Build 151 09/26/2007 SJ Web Edition
+
+
+---------------------
+; Table of Contents ;
+---------------------
+  1. Legal Notice
+  2. Assembler Summary
+  3. Assembler Settings
+  4. Assembler Generated Files
+  5. Assembler Device Options: C:/2013循环流水/2013xhls.sof
+  6. Assembler Device Options: C:/2013循环流水/2013xhls.pof
+  7. Assembler Messages
+
+
+
+----------------
+; Legal Notice ;
+----------------
+Copyright (C) 1991-2007 Altera Corporation
+Your use of Altera Corporation's design tools, logic functions 
+and other software and tools, and its AMPP partner logic 
+functions, and any output files from any of the foregoing 
+(including device programming or simulation files), and any 
+associated documentation or information are expressly subject 
+to the terms and conditions of the Altera Program License 
+Subscription Agreement, Altera MegaCore Function License 
+Agreement, or other applicable license agreement, including, 
+without limitation, that your use is for the sole purpose of 
+programming logic devices manufactured by Altera and sold by 
+Altera or its authorized distributors.  Please refer to the 
+applicable agreement for further details.
+
+
+
++---------------------------------------------------------------+
+; Assembler Summary                                             ;
++-----------------------+---------------------------------------+
+; Assembler Status      ; Successful - Sun Aug 25 19:41:16 2013 ;
+; Revision Name         ; 2013xhls                              ;
+; Top-level Entity Name ; xhlsTOP                               ;
+; Family                ; Cyclone                               ;
+; Device                ; EP1C12Q240C8                          ;
++-----------------------+---------------------------------------+
+
+
++--------------------------------------------------------------------------------------------------------+
+; Assembler Settings                                                                                     ;
++-----------------------------------------------------------------------------+----------+---------------+
+; Option                                                                      ; Setting  ; Default Value ;
++-----------------------------------------------------------------------------+----------+---------------+
+; Use smart compilation                                                       ; Off      ; Off           ;
+; Maximum processors allowed for parallel compilation                         ; 1        ; 1             ;
+; Generate compressed bitstreams                                              ; On       ; On            ;
+; Compression mode                                                            ; Off      ; Off           ;
+; Clock source for configuration device                                       ; Internal ; Internal      ;
+; Clock frequency of the configuration device                                 ; 10 MHZ   ; 10 MHz        ;
+; Divide clock frequency by                                                   ; 1        ; 1             ;
+; JTAG user code for target device                                            ; Ffffffff ; Ffffffff      ;
+; Auto user code                                                              ; Off      ; Off           ;
+; Use configuration device                                                    ; On       ; On            ;
+; Configuration device                                                        ; Auto     ; Auto          ;
+; JTAG user code for configuration device                                     ; Ffffffff ; Ffffffff      ;
+; Configuration device auto user code                                         ; Off      ; Off           ;
+; Auto-increment JTAG user code for multiple configuration devices            ; On       ; On            ;
+; Generate Tabular Text File (.ttf) For Target Device                         ; Off      ; Off           ;
+; Generate Raw Binary File (.rbf) For Target Device                           ; Off      ; Off           ;
+; Generate Hexadecimal (Intel-Format) Output File (.hexout) for Target Device ; Off      ; Off           ;
+; Hexadecimal Output File start address                                       ; 0        ; 0             ;
+; Hexadecimal Output File count direction                                     ; Up       ; Up            ;
+; Release clears before tri-states                                            ; Off      ; Off           ;
+; Auto-restart configuration after error                                      ; On       ; On            ;
+; Generate Serial Vector Format File (.svf) for Target Device                 ; Off      ; Off           ;
+; Generate a JEDEC STAPL Format File (.jam) for Target Device                 ; Off      ; Off           ;
+; Generate a compressed Jam STAPL Byte Code 2.0 File (.jbc) for Target Device ; Off      ; Off           ;
+; Generate a compressed Jam STAPL Byte Code 2.0 File (.jbc) for Target Device ; On       ; On            ;
++-----------------------------------------------------------------------------+----------+---------------+
+
+
++------------------------------+
+; Assembler Generated Files    ;
++------------------------------+
+; File Name                    ;
++------------------------------+
+; C:/2013循环流水/2013xhls.sof ;
+; C:/2013循环流水/2013xhls.pof ;
++------------------------------+
+
+
++--------------------------------------------------------+
+; Assembler Device Options: C:/2013循环流水/2013xhls.sof ;
++----------------+---------------------------------------+
+; Option         ; Setting                               ;
++----------------+---------------------------------------+
+; Device         ; EP1C12Q240C8                          ;
+; JTAG usercode  ; 0xFFFFFFFF                            ;
+; Checksum       ; 0x00796B85                            ;
++----------------+---------------------------------------+
+
+
++--------------------------------------------------------+
+; Assembler Device Options: C:/2013循环流水/2013xhls.pof ;
++--------------------+-----------------------------------+
+; Option             ; Setting                           ;
++--------------------+-----------------------------------+
+; Device             ; EPCS4                             ;
+; JTAG usercode      ; 0x00000000                        ;
+; Checksum           ; 0x06498EF1                        ;
+; Compression Ratio  ; 1                                 ;
++--------------------+-----------------------------------+
+
+
++--------------------+
+; Assembler Messages ;
++--------------------+
+Info: *******************************************************************
+Info: Running Quartus II Assembler
+    Info: Version 7.2 Build 151 09/26/2007 SJ Web Edition
+    Info: Processing started: Sun Aug 25 19:41:14 2013
+Info: Command: quartus_asm --read_settings_files=off --write_settings_files=off 2013xhls -c 2013xhls
+Info: Assembler is generating device programming files
+Info: Quartus II Assembler was successful. 0 errors, 0 warnings
+    Info: Allocated 163 megabytes of memory during processing
+    Info: Processing ended: Sun Aug 25 19:41:17 2013
+    Info: Elapsed time: 00:00:03
+
+

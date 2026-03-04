@@ -1,0 +1,12 @@
+Fitter Status : Successful - Wed Apr 20 06:06:03 2011
+Quartus II Version : 7.0 Build 33 02/05/2007 SJ Full Version
+Revision Name : soc
+Top-level Entity Name : soc
+Family : Cyclone
+Device : EP1C6T144C8
+Timing Models : Final
+Total logic elements : 4,041 / 5,980 ( 68 % )
+Total pins : 62 / 98 ( 63 % )
+Total virtual pins : 0
+Total memory bits : 75,712 / 92,160 ( 82 % )
+Total PLLs : 1 / 2 ( 50 % )

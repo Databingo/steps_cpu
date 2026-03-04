@@ -1,0 +1,10 @@
+Analysis & Synthesis Status : Successful - Wed Apr 20 06:04:24 2011
+Quartus II Version : 7.0 Build 33 02/05/2007 SJ Full Version
+Revision Name : soc
+Top-level Entity Name : soc
+Family : Cyclone
+Total logic elements : 5,227
+Total pins : 62
+Total virtual pins : 0
+Total memory bits : 75,712
+Total PLLs : 1

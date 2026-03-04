@@ -1,0 +1,44 @@
+Info: Starting: Create block symbol file (.bsf)
+Info: ip-generate --project-directory=/usr/local/projects/steps_cpu/cpu_on_board/ --output-directory=/usr/local/projects/steps_cpu/cpu_on_board/jtag_uart_system/ --report-file=bsf:/usr/local/projects/steps_cpu/cpu_on_board/jtag_uart_system.bsf --system-info=DEVICE_FAMILY="Cyclone II" --system-info=DEVICE=EP2C20F484C7 --system-info=DEVICE_SPEEDGRADE=7 --component-file=/usr/local/projects/steps_cpu/cpu_on_board/jtag_uart_system.qsys
+Progress: Loading cpu_on_board/jtag_uart_system.qsys
+Progress: Reading input file
+Progress: Adding clk_0 [clock_source 13.0]
+Progress: Parameterizing module clk_0
+Progress: Adding jtag_uart_0 [altera_avalon_jtag_uart 13.0.1.99.2]
+Progress: Parameterizing module jtag_uart_0
+Progress: Building connections
+Progress: Parameterizing connections
+Progress: Validating
+Progress: Done reading input file
+Warning: jtag_uart_system.jtag_uart_0: Interrupt sender jtag_uart_0.irq is not connected to an interrupt receiver
+Info: ip-generate succeeded.
+Info: Finished: Create block symbol file (.bsf)
+Info: 
+Info: Starting: Create HDL design files for synthesis
+Info: ip-generate --project-directory=/usr/local/projects/steps_cpu/cpu_on_board/ --output-directory=/usr/local/projects/steps_cpu/cpu_on_board/jtag_uart_system/synthesis/ --file-set=QUARTUS_SYNTH --report-file=sopcinfo:/usr/local/projects/steps_cpu/cpu_on_board/jtag_uart_system.sopcinfo --report-file=html:/usr/local/projects/steps_cpu/cpu_on_board/jtag_uart_system.html --report-file=qip:/usr/local/projects/steps_cpu/cpu_on_board/jtag_uart_system/synthesis/jtag_uart_system.qip --report-file=cmp:/usr/local/projects/steps_cpu/cpu_on_board/jtag_uart_system.cmp --report-file=svd --system-info=DEVICE_FAMILY="Cyclone II" --system-info=DEVICE=EP2C20F484C7 --system-info=DEVICE_SPEEDGRADE=7 --component-file=/usr/local/projects/steps_cpu/cpu_on_board/jtag_uart_system.qsys --language=VERILOG
+Progress: Loading cpu_on_board/jtag_uart_system.qsys
+Progress: Reading input file
+Progress: Adding clk_0 [clock_source 13.0]
+Progress: Parameterizing module clk_0
+Progress: Adding jtag_uart_0 [altera_avalon_jtag_uart 13.0.1.99.2]
+Progress: Parameterizing module jtag_uart_0
+Progress: Building connections
+Progress: Parameterizing connections
+Progress: Validating
+Progress: Done reading input file
+Warning: jtag_uart_system.jtag_uart_0: Interrupt sender jtag_uart_0.irq is not connected to an interrupt receiver
+Info: jtag_uart_system: Generating jtag_uart_system "jtag_uart_system" for QUARTUS_SYNTH
+Info: pipeline_bridge_swap_transform: After transform: 2 modules, 2 connections
+Info: No custom instruction connections, skipping transform 
+Info: No Avalon connections, skipping transform 
+Info: merlin_translator_transform: After transform: 2 modules, 2 connections
+Info: reset_adaptation_transform: After transform: 3 modules, 4 connections
+Info: merlin_mm_transform: After transform: 3 modules, 4 connections
+Info: jtag_uart_0: Starting RTL generation for module 'jtag_uart_system_jtag_uart_0'
+Info: jtag_uart_0:   Generation command is [exec /home/ashah/altera/13.0sp1/quartus/linux/perl/bin/perl -I /home/ashah/altera/13.0sp1/quartus/common/ip/altera/common/perl/5.8.3 -I /home/ashah/altera/13.0sp1/quartus/sopc_builder/bin/europa -I /home/ashah/altera/13.0sp1/quartus/sopc_builder/bin/perl_lib -I /home/ashah/altera/13.0sp1/quartus/sopc_builder/bin -I /home/ashah/altera/13.0sp1/quartus/../ip/altera/sopc_builder_ip/common -I /home/ashah/altera/13.0sp1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_jtag_uart -- /home/ashah/altera/13.0sp1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_jtag_uart/generate_rtl.pl --name=jtag_uart_system_jtag_uart_0 --dir=/tmp/alt0320_7624535430560303684.dir/0001_jtag_uart_0_gen/ --quartus_dir=/home/ashah/altera/13.0sp1/quartus --verilog --config=/tmp/alt0320_7624535430560303684.dir/0001_jtag_uart_0_gen//jtag_uart_system_jtag_uart_0_component_configuration.pl  --do_build_sim=0  ]
+Info: jtag_uart_0: Done RTL generation for module 'jtag_uart_system_jtag_uart_0'
+Info: jtag_uart_0: "jtag_uart_system" instantiated altera_avalon_jtag_uart "jtag_uart_0"
+Info: rst_controller: "jtag_uart_system" instantiated altera_reset_controller "rst_controller"
+Info: jtag_uart_system: Done jtag_uart_system" with 3 modules, 5 files, 32682 bytes
+Info: ip-generate succeeded.
+Info: Finished: Create HDL design files for synthesis

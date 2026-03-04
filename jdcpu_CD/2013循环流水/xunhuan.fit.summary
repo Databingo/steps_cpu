@@ -1,0 +1,12 @@
+Fitter Status : Successful - Tue Sep 06 21:55:30 2011
+Quartus II Version : 7.2 Build 151 09/26/2007 SJ Web Edition
+Revision Name : xunhuan
+Top-level Entity Name : L_cpum
+Family : Cyclone
+Device : EP1C20F324C8
+Timing Models : Final
+Total logic elements : 14,795 / 20,060 ( 74 % )
+Total pins : 93 / 233 ( 40 % )
+Total virtual pins : 0
+Total memory bits : 43,008 / 294,912 ( 15 % )
+Total PLLs : 0 / 2 ( 0 % )

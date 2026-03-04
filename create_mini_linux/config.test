@@ -1,0 +1,61 @@
+
+General setup --->
+  [*] Initial RAM filesystem and RAM disk support
+  [*]   Support initial ramdisk/ramfs compressed using gzip
+General setup --->
+[*] Configure standard kernel features (expert users)
+[*] Enable support for printk
+[*] Enable futex support (Good practice, required by many libraries)
+
+
+Device Drivers --->
+  Character devices --->
+    Serial drivers --->
+      [*] 8250/16550 and compatible serial support
+      [*]   Console on 8250/16550
+
+Device Drivers --->
+  [*] Device Tree and Open Firmware support
+  [*]   Flattened Device Tree support
+
+
+File systems --->
+  Pseudo filesystems --->
+    [*] /proc file system support
+    [*] sysfs file system support
+    [*] Tmpfs filesystem support
+    [*] Maintain a devtmpfs filesystem to mount at /dev
+    [*]   Automount devtmpfs at /dev, after the kernel mounted the rootfs
+
+
+Executable file formats --->
+[*] Kernel support for ELF binaries
+[*] Kernel support for scripts starting with #!
+
+Device Drivers --->
+  [*] PCI support
+  [*] Virtio drivers --->
+      [*] Platform bus driver for memory mapped virtio devices
+      [*] Virtio network driver
+Device Drivers --->
+[*] Virtio drivers --->
+[*] Virtio MMIO drivers
+
+Device Drivers --->
+Generic Driver Options --->
+[*] Maintain a devtmpfs filesystem to mount at /dev
+[*] Automount devtmpfs at /dev, after the kernel mounted the rootfs
+
+Platform type --->
+SoC selection --->
+[*] QEMU Virtual Machine (This will select ARCH_VIRT)
+
+
+Networking support --->
+  Networking options --->
+    [*] Unix domain sockets
+    [*] TCP/IP networking
+
+├── Network device support
+    └── Ethernet driver support
+        └── VirtIO network driver (instead of Intel e1000)

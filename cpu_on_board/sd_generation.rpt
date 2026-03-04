@@ -1,0 +1,39 @@
+Info: Starting: Create block symbol file (.bsf)
+Info: ip-generate --project-directory=/usr/local/projects/steps_cpu/cpu_on_board/ --output-directory=/usr/local/projects/steps_cpu/cpu_on_board/sd/ --report-file=bsf:/usr/local/projects/steps_cpu/cpu_on_board/sd.bsf --system-info=DEVICE_FAMILY="Cyclone II" --system-info=DEVICE=EP2C20F484C7 --system-info=DEVICE_SPEEDGRADE=7 --component-file=/usr/local/projects/steps_cpu/cpu_on_board/sd.qsys
+Progress: Loading cpu_on_board/sd.qsys
+Progress: Reading input file
+Progress: Adding clk_0 [clock_source 13.0]
+Progress: Parameterizing module clk_0
+Progress: Adding Altera_UP_SD_Card_Avalon_Interface_0 [Altera_UP_SD_Card_Avalon_Interface 13.0]
+Progress: Parameterizing module Altera_UP_SD_Card_Avalon_Interface_0
+Progress: Building connections
+Progress: Parameterizing connections
+Progress: Validating
+Progress: Done reading input file
+Info: ip-generate succeeded.
+Info: Finished: Create block symbol file (.bsf)
+Info: 
+Info: Starting: Create HDL design files for synthesis
+Info: ip-generate --project-directory=/usr/local/projects/steps_cpu/cpu_on_board/ --output-directory=/usr/local/projects/steps_cpu/cpu_on_board/sd/synthesis/ --file-set=QUARTUS_SYNTH --report-file=sopcinfo:/usr/local/projects/steps_cpu/cpu_on_board/sd.sopcinfo --report-file=html:/usr/local/projects/steps_cpu/cpu_on_board/sd.html --report-file=qip:/usr/local/projects/steps_cpu/cpu_on_board/sd/synthesis/sd.qip --report-file=cmp:/usr/local/projects/steps_cpu/cpu_on_board/sd.cmp --report-file=svd --system-info=DEVICE_FAMILY="Cyclone II" --system-info=DEVICE=EP2C20F484C7 --system-info=DEVICE_SPEEDGRADE=7 --component-file=/usr/local/projects/steps_cpu/cpu_on_board/sd.qsys --language=VERILOG
+Progress: Loading cpu_on_board/sd.qsys
+Progress: Reading input file
+Progress: Adding clk_0 [clock_source 13.0]
+Progress: Parameterizing module clk_0
+Progress: Adding Altera_UP_SD_Card_Avalon_Interface_0 [Altera_UP_SD_Card_Avalon_Interface 13.0]
+Progress: Parameterizing module Altera_UP_SD_Card_Avalon_Interface_0
+Progress: Building connections
+Progress: Parameterizing connections
+Progress: Validating
+Progress: Done reading input file
+Info: sd: Generating sd "sd" for QUARTUS_SYNTH
+Info: pipeline_bridge_swap_transform: After transform: 2 modules, 2 connections
+Info: No custom instruction connections, skipping transform 
+Info: No Avalon connections, skipping transform 
+Info: merlin_translator_transform: After transform: 2 modules, 2 connections
+Info: reset_adaptation_transform: After transform: 3 modules, 4 connections
+Info: merlin_mm_transform: After transform: 3 modules, 4 connections
+Info: Altera_UP_SD_Card_Avalon_Interface_0: "sd" instantiated Altera_UP_SD_Card_Avalon_Interface "Altera_UP_SD_Card_Avalon_Interface_0"
+Info: rst_controller: "sd" instantiated altera_reset_controller "rst_controller"
+Info: sd: Done sd" with 3 modules, 18 files, 146491 bytes
+Info: ip-generate succeeded.
+Info: Finished: Create HDL design files for synthesis

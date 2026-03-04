@@ -1,0 +1,1626 @@
+Analysis & Synthesis report for sanji
+Mon Sep 05 21:50:28 2011
+Quartus II Version 7.2 Build 151 09/26/2007 SJ Web Edition
+
+
+---------------------
+; Table of Contents ;
+---------------------
+  1. Legal Notice
+  2. Analysis & Synthesis Summary
+  3. Analysis & Synthesis Settings
+  4. Analysis & Synthesis Source Files Read
+  5. Analysis & Synthesis Resource Usage Summary
+  6. Analysis & Synthesis Resource Utilization by Entity
+  7. Analysis & Synthesis RAM Summary
+  8. Registers Removed During Synthesis
+  9. General Register Statistics
+ 10. Inverted Register Statistics
+ 11. Multiplexer Restructuring Statistics (Restructuring Performed)
+ 12. Source assignments for buffcpu:cpu0|sjls_cpum:cpum|altsyncram0:iram|altsyncram:altsyncram_component|altsyncram_e5d1:auto_generated
+ 13. Source assignments for buffcpu:cpu0|sjls_cpum:cpum|altsyncram4:dram|altsyncram:altsyncram_component|altsyncram_toh1:auto_generated
+ 14. Source assignments for buffcpu:cpu0|sjls_cpum:cpum|altsyncram4:sram|altsyncram:altsyncram_component|altsyncram_toh1:auto_generated
+ 15. Parameter Settings for User Entity Instance: buffcpu:cpu0|sjls_cpum:cpum|altsyncram0:iram|altsyncram:altsyncram_component
+ 16. Parameter Settings for User Entity Instance: buffcpu:cpu0|sjls_cpum:cpum|altsyncram4:dram|altsyncram:altsyncram_component
+ 17. Parameter Settings for User Entity Instance: buffcpu:cpu0|sjls_cpum:cpum|altsyncram4:sram|altsyncram:altsyncram_component
+ 18. Parameter Settings for User Entity Instance: altpll0:altp0|altpll:altpll_component
+ 19. Parameter Settings for Inferred Entity Instance: buffcpu:cpu0|sjls_cpum:cpum|lpm_mult:Mult11
+ 20. Parameter Settings for Inferred Entity Instance: buffcpu:cpu0|sjls_cpum:cpum|lpm_mult:Mult7
+ 21. Parameter Settings for Inferred Entity Instance: buffcpu:cpu0|sjls_cpum:cpum|lpm_mult:Mult3
+ 22. Parameter Settings for Inferred Entity Instance: buffcpu:cpu0|sjls_cpum:cpum|lpm_mult:Mult15
+ 23. Parameter Settings for Inferred Entity Instance: buffcpu:cpu0|sjls_cpum:cpum|lpm_mult:Mult9
+ 24. Parameter Settings for Inferred Entity Instance: buffcpu:cpu0|sjls_cpum:cpum|lpm_mult:Mult5
+ 25. Parameter Settings for Inferred Entity Instance: buffcpu:cpu0|sjls_cpum:cpum|lpm_mult:Mult1
+ 26. Parameter Settings for Inferred Entity Instance: buffcpu:cpu0|sjls_cpum:cpum|lpm_mult:Mult13
+ 27. lpm_mult Parameter Settings by Entity Instance
+ 28. Analysis & Synthesis Messages
+ 29. Analysis & Synthesis Suppressed Messages
+
+
+
+----------------
+; Legal Notice ;
+----------------
+Copyright (C) 1991-2007 Altera Corporation
+Your use of Altera Corporation's design tools, logic functions 
+and other software and tools, and its AMPP partner logic 
+functions, and any output files from any of the foregoing 
+(including device programming or simulation files), and any 
+associated documentation or information are expressly subject 
+to the terms and conditions of the Altera Program License 
+Subscription Agreement, Altera MegaCore Function License 
+Agreement, or other applicable license agreement, including, 
+without limitation, that your use is for the sole purpose of 
+programming logic devices manufactured by Altera and sold by 
+Altera or its authorized distributors.  Please refer to the 
+applicable agreement for further details.
+
+
+
++-----------------------------------------------------------------------+
+; Analysis & Synthesis Summary                                          ;
++-----------------------------+-----------------------------------------+
+; Analysis & Synthesis Status ; Successful - Mon Sep 05 21:50:28 2011   ;
+; Quartus II Version          ; 7.2 Build 151 09/26/2007 SJ Web Edition ;
+; Revision Name               ; sanji                                   ;
+; Top-level Entity Name       ; sjlsTOP                                 ;
+; Family                      ; Cyclone                                 ;
+; Total logic elements        ; 8,946                                   ;
+; Total pins                  ; 68                                      ;
+; Total virtual pins          ; 0                                       ;
+; Total memory bits           ; 43,008                                  ;
+; DSP block 9-bit elements    ; N/A until Partition Merge               ;
+; Total PLLs                  ; 1                                       ;
+; Total DLLs                  ; N/A until Partition Merge               ;
++-----------------------------+-----------------------------------------+
+
+
++--------------------------------------------------------------------------------------------------------------------------+
+; Analysis & Synthesis Settings                                                                                            ;
++--------------------------------------------------------------------------------+--------------------+--------------------+
+; Option                                                                         ; Setting            ; Default Value      ;
++--------------------------------------------------------------------------------+--------------------+--------------------+
+; Device                                                                         ; EP1C12Q240C8       ;                    ;
+; Top-level entity name                                                          ; sjlsTOP            ; sanji              ;
+; Family name                                                                    ; Cyclone            ; Stratix II         ;
+; Use Generated Physical Constraints File                                        ; Off                ;                    ;
+; Use smart compilation                                                          ; Off                ; Off                ;
+; Maximum processors allowed for parallel compilation                            ; 1                  ; 1                  ;
+; Restructure Multiplexers                                                       ; Auto               ; Auto               ;
+; Create Debugging Nodes for IP Cores                                            ; Off                ; Off                ;
+; Preserve fewer node names                                                      ; On                 ; On                 ;
+; Disable OpenCore Plus hardware evaluation                                      ; Off                ; Off                ;
+; Verilog Version                                                                ; Verilog_2001       ; Verilog_2001       ;
+; VHDL Version                                                                   ; VHDL93             ; VHDL93             ;
+; State Machine Processing                                                       ; Auto               ; Auto               ;
+; Safe State Machine                                                             ; Off                ; Off                ;
+; Extract Verilog State Machines                                                 ; On                 ; On                 ;
+; Extract VHDL State Machines                                                    ; On                 ; On                 ;
+; Ignore Verilog initial constructs                                              ; Off                ; Off                ;
+; Add Pass-Through Logic to Inferred RAMs                                        ; On                 ; On                 ;
+; Parallel Synthesis                                                             ; Off                ; Off                ;
+; NOT Gate Push-Back                                                             ; On                 ; On                 ;
+; Power-Up Don't Care                                                            ; On                 ; On                 ;
+; Remove Redundant Logic Cells                                                   ; Off                ; Off                ;
+; Remove Duplicate Registers                                                     ; On                 ; On                 ;
+; Ignore CARRY Buffers                                                           ; Off                ; Off                ;
+; Ignore CASCADE Buffers                                                         ; Off                ; Off                ;
+; Ignore GLOBAL Buffers                                                          ; Off                ; Off                ;
+; Ignore ROW GLOBAL Buffers                                                      ; Off                ; Off                ;
+; Ignore LCELL Buffers                                                           ; Off                ; Off                ;
+; Ignore SOFT Buffers                                                            ; On                 ; On                 ;
+; Limit AHDL Integers to 32 Bits                                                 ; Off                ; Off                ;
+; Optimization Technique -- Cyclone                                              ; Balanced           ; Balanced           ;
+; Carry Chain Length -- Stratix/Stratix GX/Cyclone/MAX II/Cyclone II/Cyclone III ; 70                 ; 70                 ;
+; Auto Carry Chains                                                              ; On                 ; On                 ;
+; Auto Open-Drain Pins                                                           ; On                 ; On                 ;
+; Perform WYSIWYG Primitive Resynthesis                                          ; Off                ; Off                ;
+; Perform gate-level register retiming                                           ; Off                ; Off                ;
+; Allow register retiming to trade off Tsu/Tco with Fmax                         ; On                 ; On                 ;
+; Auto ROM Replacement                                                           ; On                 ; On                 ;
+; Auto RAM Replacement                                                           ; On                 ; On                 ;
+; Auto Shift Register Replacement                                                ; Auto               ; Auto               ;
+; Auto Clock Enable Replacement                                                  ; On                 ; On                 ;
+; Allow Synchronous Control Signals                                              ; On                 ; On                 ;
+; Force Use of Synchronous Clear Signals                                         ; Off                ; Off                ;
+; Auto RAM Block Balancing                                                       ; On                 ; On                 ;
+; Auto RAM to Logic Cell Conversion                                              ; Off                ; Off                ;
+; Auto Resource Sharing                                                          ; Off                ; Off                ;
+; Allow Any RAM Size For Recognition                                             ; Off                ; Off                ;
+; Allow Any ROM Size For Recognition                                             ; Off                ; Off                ;
+; Allow Any Shift Register Size For Recognition                                  ; Off                ; Off                ;
+; Ignore translate_off and synthesis_off directives                              ; Off                ; Off                ;
+; Show Parameter Settings Tables in Synthesis Report                             ; On                 ; On                 ;
+; Ignore Maximum Fan-Out Assignments                                             ; Off                ; Off                ;
+; Retiming Meta-Stability Register Sequence Length                               ; 2                  ; 2                  ;
+; PowerPlay Power Optimization                                                   ; Normal compilation ; Normal compilation ;
+; HDL message level                                                              ; Level2             ; Level2             ;
+; Suppress Register Optimization Related Messages                                ; Off                ; Off                ;
+; Number of Removed Registers Reported in Synthesis Report                       ; 100                ; 100                ;
+; Clock MUX Protection                                                           ; On                 ; On                 ;
+; Block Design Naming                                                            ; Auto               ; Auto               ;
++--------------------------------------------------------------------------------+--------------------+--------------------+
+
+
++--------------------------------------------------------------------------------------------------------------------------------------------------------+
+; Analysis & Synthesis Source Files Read                                                                                                                 ;
++----------------------------------+-----------------+------------------------------+--------------------------------------------------------------------+
+; File Name with User-Entered Path ; Used in Netlist ; File Type                    ; File Name with Absolute Path                                       ;
++----------------------------------+-----------------+------------------------------+--------------------------------------------------------------------+
+; altsyncram0.v                    ; yes             ; User Verilog HDL File        ; C:/2013透明三级流水线/altsyncram0.v                                ;
+; altpll0.v                        ; yes             ; User Verilog HDL File        ; C:/2013透明三级流水线/altpll0.v                                    ;
+; altsyncram4.v                    ; yes             ; User Verilog HDL File        ; C:/2013透明三级流水线/altsyncram4.v                                ;
+; buffcpu.v                        ; yes             ; User Verilog HDL File        ; C:/2013透明三级流水线/buffcpu.v                                    ;
+; buffin.v                         ; yes             ; User Verilog HDL File        ; C:/2013透明三级流水线/buffin.v                                     ;
+; SEG7_LUT.v                       ; yes             ; User Verilog HDL File        ; C:/2013透明三级流水线/SEG7_LUT.v                                   ;
+; SEG7_LUT_4.v                     ; yes             ; User Verilog HDL File        ; C:/2013透明三级流水线/SEG7_LUT_4.v                                 ;
+; sjls_cpum.v                      ; yes             ; User Verilog HDL File        ; C:/2013透明三级流水线/sjls_cpum.v                                  ;
+; sjlsTOP.v                        ; yes             ; User Verilog HDL File        ; C:/2013透明三级流水线/sjlsTOP.v                                    ;
+; altsyncram.tdf                   ; yes             ; Megafunction                 ; c:/altera/72/quartus/libraries/megafunctions/altsyncram.tdf        ;
+; stratix_ram_block.inc            ; yes             ; Megafunction                 ; c:/altera/72/quartus/libraries/megafunctions/stratix_ram_block.inc ;
+; lpm_mux.inc                      ; yes             ; Megafunction                 ; c:/altera/72/quartus/libraries/megafunctions/lpm_mux.inc           ;
+; lpm_decode.inc                   ; yes             ; Megafunction                 ; c:/altera/72/quartus/libraries/megafunctions/lpm_decode.inc        ;
+; aglobal72.inc                    ; yes             ; Megafunction                 ; c:/altera/72/quartus/libraries/megafunctions/aglobal72.inc         ;
+; a_rdenreg.inc                    ; yes             ; Megafunction                 ; c:/altera/72/quartus/libraries/megafunctions/a_rdenreg.inc         ;
+; altrom.inc                       ; yes             ; Megafunction                 ; c:/altera/72/quartus/libraries/megafunctions/altrom.inc            ;
+; altram.inc                       ; yes             ; Megafunction                 ; c:/altera/72/quartus/libraries/megafunctions/altram.inc            ;
+; altdpram.inc                     ; yes             ; Megafunction                 ; c:/altera/72/quartus/libraries/megafunctions/altdpram.inc          ;
+; altqpram.inc                     ; yes             ; Megafunction                 ; c:/altera/72/quartus/libraries/megafunctions/altqpram.inc          ;
+; db/altsyncram_e5d1.tdf           ; yes             ; Auto-Generated Megafunction  ; C:/2013透明三级流水线/db/altsyncram_e5d1.tdf                       ;
+; db/altsyncram_toh1.tdf           ; yes             ; Auto-Generated Megafunction  ; C:/2013透明三级流水线/db/altsyncram_toh1.tdf                       ;
+; altpll.tdf                       ; yes             ; Megafunction                 ; c:/altera/72/quartus/libraries/megafunctions/altpll.tdf            ;
+; stratix_pll.inc                  ; yes             ; Megafunction                 ; c:/altera/72/quartus/libraries/megafunctions/stratix_pll.inc       ;
+; stratixii_pll.inc                ; yes             ; Megafunction                 ; c:/altera/72/quartus/libraries/megafunctions/stratixii_pll.inc     ;
+; cycloneii_pll.inc                ; yes             ; Megafunction                 ; c:/altera/72/quartus/libraries/megafunctions/cycloneii_pll.inc     ;
+; lpm_mult.tdf                     ; yes             ; Megafunction                 ; c:/altera/72/quartus/libraries/megafunctions/lpm_mult.tdf          ;
+; lpm_add_sub.inc                  ; yes             ; Megafunction                 ; c:/altera/72/quartus/libraries/megafunctions/lpm_add_sub.inc       ;
+; multcore.inc                     ; yes             ; Megafunction                 ; c:/altera/72/quartus/libraries/megafunctions/multcore.inc          ;
+; bypassff.inc                     ; yes             ; Megafunction                 ; c:/altera/72/quartus/libraries/megafunctions/bypassff.inc          ;
+; altshift.inc                     ; yes             ; Megafunction                 ; c:/altera/72/quartus/libraries/megafunctions/altshift.inc          ;
+; db/mult_nn01.tdf                 ; yes             ; Auto-Generated Megafunction  ; C:/2013透明三级流水线/db/mult_nn01.tdf                             ;
++----------------------------------+-----------------+------------------------------+--------------------------------------------------------------------+
+
+
++-------------------------------------------------------------------------------------------+
+; Analysis & Synthesis Resource Usage Summary                                               ;
++---------------------------------------------+---------------------------------------------+
+; Resource                                    ; Usage                                       ;
++---------------------------------------------+---------------------------------------------+
+; Total logic elements                        ; 8946                                        ;
+;     -- Combinational with no register       ; 7382                                        ;
+;     -- Register only                        ; 1136                                        ;
+;     -- Combinational with a register        ; 428                                         ;
+;                                             ;                                             ;
+; Logic element usage by number of LUT inputs ;                                             ;
+;     -- 4 input functions                    ; 4808                                        ;
+;     -- 3 input functions                    ; 2349                                        ;
+;     -- 2 input functions                    ; 524                                         ;
+;     -- 1 input functions                    ; 129                                         ;
+;     -- 0 input functions                    ; 0                                           ;
+;                                             ;                                             ;
+; Logic elements by mode                      ;                                             ;
+;     -- normal mode                          ; 6773                                        ;
+;     -- arithmetic mode                      ; 2173                                        ;
+;     -- qfbk mode                            ; 0                                           ;
+;     -- register cascade mode                ; 0                                           ;
+;     -- synchronous clear/load mode          ; 290                                         ;
+;     -- asynchronous clear/load mode         ; 108                                         ;
+;                                             ;                                             ;
+; Total registers                             ; 1564                                        ;
+; Total logic cells in carry chains           ; 2304                                        ;
+; I/O pins                                    ; 68                                          ;
+; Total memory bits                           ; 43008                                       ;
+; Total PLLs                                  ; 1                                           ;
+; Maximum fan-out node                        ; altpll0:altp0|altpll:altpll_component|_clk0 ;
+; Maximum fan-out                             ; 1606                                        ;
+; Total fan-out                               ; 32755                                       ;
+; Average fan-out                             ; 3.62                                        ;
++---------------------------------------------+---------------------------------------------+
+
+
++---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+; Analysis & Synthesis Resource Utilization by Entity                                                                                                                                                                                                                                                                                         ;
++-------------------------------------------------+-------------+--------------+-------------+------+--------------+--------------+-------------------+------------------+-----------------+------------+----------------------------------------------------------------------------------------------------------------------+--------------+
+; Compilation Hierarchy Node                      ; Logic Cells ; LC Registers ; Memory Bits ; Pins ; Virtual Pins ; LUT-Only LCs ; Register-Only LCs ; LUT/Register LCs ; Carry Chain LCs ; Packed LCs ; Full Hierarchy Name                                                                                                  ; Library Name ;
++-------------------------------------------------+-------------+--------------+-------------+------+--------------+--------------+-------------------+------------------+-----------------+------------+----------------------------------------------------------------------------------------------------------------------+--------------+
+; |sjlsTOP                                        ; 8946 (293)  ; 1564         ; 43008       ; 68   ; 0            ; 7382 (100)   ; 1136 (22)         ; 428 (171)        ; 2304 (184)      ; 0 (0)      ; |sjlsTOP                                                                                                             ; work         ;
+;    |SEG7_LUT_4:u0|                              ; 56 (0)      ; 0            ; 0           ; 0    ; 0            ; 56 (0)       ; 0 (0)             ; 0 (0)            ; 0 (0)           ; 0 (0)      ; |sjlsTOP|SEG7_LUT_4:u0                                                                                               ; work         ;
+;       |SEG7_LUT:u0|                             ; 14 (14)     ; 0            ; 0           ; 0    ; 0            ; 14 (14)      ; 0 (0)             ; 0 (0)            ; 0 (0)           ; 0 (0)      ; |sjlsTOP|SEG7_LUT_4:u0|SEG7_LUT:u0                                                                                   ; work         ;
+;       |SEG7_LUT:u1|                             ; 14 (14)     ; 0            ; 0           ; 0    ; 0            ; 14 (14)      ; 0 (0)             ; 0 (0)            ; 0 (0)           ; 0 (0)      ; |sjlsTOP|SEG7_LUT_4:u0|SEG7_LUT:u1                                                                                   ; work         ;
+;       |SEG7_LUT:u2|                             ; 14 (14)     ; 0            ; 0           ; 0    ; 0            ; 14 (14)      ; 0 (0)             ; 0 (0)            ; 0 (0)           ; 0 (0)      ; |sjlsTOP|SEG7_LUT_4:u0|SEG7_LUT:u2                                                                                   ; work         ;
+;       |SEG7_LUT:u3|                             ; 14 (14)     ; 0            ; 0           ; 0    ; 0            ; 14 (14)      ; 0 (0)             ; 0 (0)            ; 0 (0)           ; 0 (0)      ; |sjlsTOP|SEG7_LUT_4:u0|SEG7_LUT:u3                                                                                   ; work         ;
+;    |altpll0:altp0|                              ; 0 (0)       ; 0            ; 0           ; 0    ; 0            ; 0 (0)        ; 0 (0)             ; 0 (0)            ; 0 (0)           ; 0 (0)      ; |sjlsTOP|altpll0:altp0                                                                                               ; work         ;
+;       |altpll:altpll_component|                 ; 0 (0)       ; 0            ; 0           ; 0    ; 0            ; 0 (0)        ; 0 (0)             ; 0 (0)            ; 0 (0)           ; 0 (0)      ; |sjlsTOP|altpll0:altp0|altpll:altpll_component                                                                       ; work         ;
+;    |buffcpu:cpu0|                               ; 8597 (0)    ; 1371         ; 43008       ; 0    ; 0            ; 7226 (0)     ; 1114 (0)          ; 257 (0)          ; 2120 (0)        ; 0 (0)      ; |sjlsTOP|buffcpu:cpu0                                                                                                ; work         ;
+;       |buffin:buff0|                            ; 3246 (3246) ; 1088         ; 0           ; 0    ; 0            ; 2158 (2158)  ; 1048 (1048)       ; 40 (40)          ; 26 (26)         ; 0 (0)      ; |sjlsTOP|buffcpu:cpu0|buffin:buff0                                                                                   ; work         ;
+;       |sjls_cpum:cpum|                          ; 5351 (2655) ; 283          ; 43008       ; 0    ; 0            ; 5068 (2372)  ; 66 (66)           ; 217 (217)        ; 2094 (614)      ; 0 (0)      ; |sjlsTOP|buffcpu:cpu0|sjls_cpum:cpum                                                                                 ; work         ;
+;          |altsyncram0:iram|                     ; 0 (0)       ; 0            ; 16384       ; 0    ; 0            ; 0 (0)        ; 0 (0)             ; 0 (0)            ; 0 (0)           ; 0 (0)      ; |sjlsTOP|buffcpu:cpu0|sjls_cpum:cpum|altsyncram0:iram                                                                ; work         ;
+;             |altsyncram:altsyncram_component|   ; 0 (0)       ; 0            ; 16384       ; 0    ; 0            ; 0 (0)        ; 0 (0)             ; 0 (0)            ; 0 (0)           ; 0 (0)      ; |sjlsTOP|buffcpu:cpu0|sjls_cpum:cpum|altsyncram0:iram|altsyncram:altsyncram_component                                ; work         ;
+;                |altsyncram_e5d1:auto_generated| ; 0 (0)       ; 0            ; 16384       ; 0    ; 0            ; 0 (0)        ; 0 (0)             ; 0 (0)            ; 0 (0)           ; 0 (0)      ; |sjlsTOP|buffcpu:cpu0|sjls_cpum:cpum|altsyncram0:iram|altsyncram:altsyncram_component|altsyncram_e5d1:auto_generated ; work         ;
+;          |altsyncram4:dram|                     ; 0 (0)       ; 0            ; 16384       ; 0    ; 0            ; 0 (0)        ; 0 (0)             ; 0 (0)            ; 0 (0)           ; 0 (0)      ; |sjlsTOP|buffcpu:cpu0|sjls_cpum:cpum|altsyncram4:dram                                                                ; work         ;
+;             |altsyncram:altsyncram_component|   ; 0 (0)       ; 0            ; 16384       ; 0    ; 0            ; 0 (0)        ; 0 (0)             ; 0 (0)            ; 0 (0)           ; 0 (0)      ; |sjlsTOP|buffcpu:cpu0|sjls_cpum:cpum|altsyncram4:dram|altsyncram:altsyncram_component                                ; work         ;
+;                |altsyncram_toh1:auto_generated| ; 0 (0)       ; 0            ; 16384       ; 0    ; 0            ; 0 (0)        ; 0 (0)             ; 0 (0)            ; 0 (0)           ; 0 (0)      ; |sjlsTOP|buffcpu:cpu0|sjls_cpum:cpum|altsyncram4:dram|altsyncram:altsyncram_component|altsyncram_toh1:auto_generated ; work         ;
+;          |altsyncram4:sram|                     ; 0 (0)       ; 0            ; 10240       ; 0    ; 0            ; 0 (0)        ; 0 (0)             ; 0 (0)            ; 0 (0)           ; 0 (0)      ; |sjlsTOP|buffcpu:cpu0|sjls_cpum:cpum|altsyncram4:sram                                                                ; work         ;
+;             |altsyncram:altsyncram_component|   ; 0 (0)       ; 0            ; 10240       ; 0    ; 0            ; 0 (0)        ; 0 (0)             ; 0 (0)            ; 0 (0)           ; 0 (0)      ; |sjlsTOP|buffcpu:cpu0|sjls_cpum:cpum|altsyncram4:sram|altsyncram:altsyncram_component                                ; work         ;
+;                |altsyncram_toh1:auto_generated| ; 0 (0)       ; 0            ; 10240       ; 0    ; 0            ; 0 (0)        ; 0 (0)             ; 0 (0)            ; 0 (0)           ; 0 (0)      ; |sjlsTOP|buffcpu:cpu0|sjls_cpum:cpum|altsyncram4:sram|altsyncram:altsyncram_component|altsyncram_toh1:auto_generated ; work         ;
+;          |lpm_mult:Mult11|                      ; 337 (0)     ; 0            ; 0           ; 0    ; 0            ; 337 (0)      ; 0 (0)             ; 0 (0)            ; 185 (0)         ; 0 (0)      ; |sjlsTOP|buffcpu:cpu0|sjls_cpum:cpum|lpm_mult:Mult11                                                                 ; work         ;
+;             |mult_nn01:auto_generated|          ; 337 (337)   ; 0            ; 0           ; 0    ; 0            ; 337 (337)    ; 0 (0)             ; 0 (0)            ; 185 (185)       ; 0 (0)      ; |sjlsTOP|buffcpu:cpu0|sjls_cpum:cpum|lpm_mult:Mult11|mult_nn01:auto_generated                                        ; work         ;
+;          |lpm_mult:Mult13|                      ; 337 (0)     ; 0            ; 0           ; 0    ; 0            ; 337 (0)      ; 0 (0)             ; 0 (0)            ; 185 (0)         ; 0 (0)      ; |sjlsTOP|buffcpu:cpu0|sjls_cpum:cpum|lpm_mult:Mult13                                                                 ; work         ;
+;             |mult_nn01:auto_generated|          ; 337 (337)   ; 0            ; 0           ; 0    ; 0            ; 337 (337)    ; 0 (0)             ; 0 (0)            ; 185 (185)       ; 0 (0)      ; |sjlsTOP|buffcpu:cpu0|sjls_cpum:cpum|lpm_mult:Mult13|mult_nn01:auto_generated                                        ; work         ;
+;          |lpm_mult:Mult15|                      ; 337 (0)     ; 0            ; 0           ; 0    ; 0            ; 337 (0)      ; 0 (0)             ; 0 (0)            ; 185 (0)         ; 0 (0)      ; |sjlsTOP|buffcpu:cpu0|sjls_cpum:cpum|lpm_mult:Mult15                                                                 ; work         ;
+;             |mult_nn01:auto_generated|          ; 337 (337)   ; 0            ; 0           ; 0    ; 0            ; 337 (337)    ; 0 (0)             ; 0 (0)            ; 185 (185)       ; 0 (0)      ; |sjlsTOP|buffcpu:cpu0|sjls_cpum:cpum|lpm_mult:Mult15|mult_nn01:auto_generated                                        ; work         ;
+;          |lpm_mult:Mult1|                       ; 337 (0)     ; 0            ; 0           ; 0    ; 0            ; 337 (0)      ; 0 (0)             ; 0 (0)            ; 185 (0)         ; 0 (0)      ; |sjlsTOP|buffcpu:cpu0|sjls_cpum:cpum|lpm_mult:Mult1                                                                  ; work         ;
+;             |mult_nn01:auto_generated|          ; 337 (337)   ; 0            ; 0           ; 0    ; 0            ; 337 (337)    ; 0 (0)             ; 0 (0)            ; 185 (185)       ; 0 (0)      ; |sjlsTOP|buffcpu:cpu0|sjls_cpum:cpum|lpm_mult:Mult1|mult_nn01:auto_generated                                         ; work         ;
+;          |lpm_mult:Mult3|                       ; 337 (0)     ; 0            ; 0           ; 0    ; 0            ; 337 (0)      ; 0 (0)             ; 0 (0)            ; 185 (0)         ; 0 (0)      ; |sjlsTOP|buffcpu:cpu0|sjls_cpum:cpum|lpm_mult:Mult3                                                                  ; work         ;
+;             |mult_nn01:auto_generated|          ; 337 (337)   ; 0            ; 0           ; 0    ; 0            ; 337 (337)    ; 0 (0)             ; 0 (0)            ; 185 (185)       ; 0 (0)      ; |sjlsTOP|buffcpu:cpu0|sjls_cpum:cpum|lpm_mult:Mult3|mult_nn01:auto_generated                                         ; work         ;
+;          |lpm_mult:Mult5|                       ; 337 (0)     ; 0            ; 0           ; 0    ; 0            ; 337 (0)      ; 0 (0)             ; 0 (0)            ; 185 (0)         ; 0 (0)      ; |sjlsTOP|buffcpu:cpu0|sjls_cpum:cpum|lpm_mult:Mult5                                                                  ; work         ;
+;             |mult_nn01:auto_generated|          ; 337 (337)   ; 0            ; 0           ; 0    ; 0            ; 337 (337)    ; 0 (0)             ; 0 (0)            ; 185 (185)       ; 0 (0)      ; |sjlsTOP|buffcpu:cpu0|sjls_cpum:cpum|lpm_mult:Mult5|mult_nn01:auto_generated                                         ; work         ;
+;          |lpm_mult:Mult7|                       ; 337 (0)     ; 0            ; 0           ; 0    ; 0            ; 337 (0)      ; 0 (0)             ; 0 (0)            ; 185 (0)         ; 0 (0)      ; |sjlsTOP|buffcpu:cpu0|sjls_cpum:cpum|lpm_mult:Mult7                                                                  ; work         ;
+;             |mult_nn01:auto_generated|          ; 337 (337)   ; 0            ; 0           ; 0    ; 0            ; 337 (337)    ; 0 (0)             ; 0 (0)            ; 185 (185)       ; 0 (0)      ; |sjlsTOP|buffcpu:cpu0|sjls_cpum:cpum|lpm_mult:Mult7|mult_nn01:auto_generated                                         ; work         ;
+;          |lpm_mult:Mult9|                       ; 337 (0)     ; 0            ; 0           ; 0    ; 0            ; 337 (0)      ; 0 (0)             ; 0 (0)            ; 185 (0)         ; 0 (0)      ; |sjlsTOP|buffcpu:cpu0|sjls_cpum:cpum|lpm_mult:Mult9                                                                  ; work         ;
+;             |mult_nn01:auto_generated|          ; 337 (337)   ; 0            ; 0           ; 0    ; 0            ; 337 (337)    ; 0 (0)             ; 0 (0)            ; 185 (185)       ; 0 (0)      ; |sjlsTOP|buffcpu:cpu0|sjls_cpum:cpum|lpm_mult:Mult9|mult_nn01:auto_generated                                         ; work         ;
++-------------------------------------------------+-------------+--------------+-------------+------+--------------+--------------+-------------------+------------------+-----------------+------------+----------------------------------------------------------------------------------------------------------------------+--------------+
+Note: For table entries with two numbers listed, the numbers in parentheses indicate the number of resources of the given type used by the specific entity alone. The numbers listed outside of parentheses indicate the total resources of the given type used by the specific entity and all of its sub-entities in the hierarchy.
+
+
++--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+; Analysis & Synthesis RAM Summary                                                                                                                                                                                               ;
++------------------------------------------------------------------------------------------------------------------------+------+-------------+--------------+--------------+--------------+--------------+-------+--------------+
+; Name                                                                                                                   ; Type ; Mode        ; Port A Depth ; Port A Width ; Port B Depth ; Port B Width ; Size  ; MIF          ;
++------------------------------------------------------------------------------------------------------------------------+------+-------------+--------------+--------------+--------------+--------------+-------+--------------+
+; buffcpu:cpu0|sjls_cpum:cpum|altsyncram0:iram|altsyncram:altsyncram_component|altsyncram_e5d1:auto_generated|ALTSYNCRAM ; AUTO ; Single Port ; 1024         ; 16           ; --           ; --           ; 16384 ; imem16_4.mif ;
+; buffcpu:cpu0|sjls_cpum:cpum|altsyncram4:dram|altsyncram:altsyncram_component|altsyncram_toh1:auto_generated|ALTSYNCRAM ; AUTO ; Single Port ; 1024         ; 16           ; --           ; --           ; 16384 ; imem16_4.mif ;
+; buffcpu:cpu0|sjls_cpum:cpum|altsyncram4:sram|altsyncram:altsyncram_component|altsyncram_toh1:auto_generated|ALTSYNCRAM ; AUTO ; Single Port ; 1024         ; 16           ; --           ; --           ; 16384 ; imem16_4.mif ;
++------------------------------------------------------------------------------------------------------------------------+------+-------------+--------------+--------------+--------------+--------------+-------+--------------+
+
+
++---------------------------------------------------------------------------------------+
+; Registers Removed During Synthesis                                                    ;
++---------------------------------------+-----------------------------------------------+
+; Register name                         ; Reason for Removal                            ;
++---------------------------------------+-----------------------------------------------+
+; buffcpu:cpu0|sjls_cpum:cpum|rjz[0]    ; Merged with buffcpu:cpu0|sjls_cpum:cpum|jz    ;
+; buffcpu:cpu0|sjls_cpum:cpum|rjn[0]    ; Merged with buffcpu:cpu0|sjls_cpum:cpum|jn    ;
+; buffcpu:cpu0|sjls_cpum:cpum|rcall[0]  ; Merged with buffcpu:cpu0|sjls_cpum:cpum|call  ;
+; buffcpu:cpu0|sjls_cpum:cpum|rret[0]   ; Merged with buffcpu:cpu0|sjls_cpum:cpum|ret   ;
+; buffcpu:cpu0|sjls_cpum:cpum|rjk[0]    ; Merged with buffcpu:cpu0|sjls_cpum:cpum|jk    ;
+; buffcpu:cpu0|sjls_cpum:cpum|rjend[0]  ; Merged with buffcpu:cpu0|sjls_cpum:cpum|jend  ;
+; buffcpu:cpu0|sjls_cpum:cpum|jn        ; Stuck at GND due to stuck port data_in        ;
+; buffcpu:cpu0|buffin:buff0|flge        ; Merged with buffcpu:cpu0|buffin:buff0|ptro[0] ;
+; fkz                                   ; Stuck at GND due to stuck port data_in        ;
+; Total Number of Removed Registers = 9 ;                                               ;
++---------------------------------------+-----------------------------------------------+
+
+
++------------------------------------------------------+
+; General Register Statistics                          ;
++----------------------------------------------+-------+
+; Statistic                                    ; Value ;
++----------------------------------------------+-------+
+; Total registers                              ; 1564  ;
+; Number of registers using Synchronous Clear  ; 233   ;
+; Number of registers using Synchronous Load   ; 129   ;
+; Number of registers using Asynchronous Clear ; 108   ;
+; Number of registers using Asynchronous Load  ; 0     ;
+; Number of registers using Clock Enable       ; 1405  ;
+; Number of registers using Preset             ; 0     ;
++----------------------------------------------+-------+
+
+
++--------------------------------------------------+
+; Inverted Register Statistics                     ;
++----------------------------------------+---------+
+; Inverted Register                      ; Fan out ;
++----------------------------------------+---------+
+; buffcpu:cpu0|buffin:buff0|emp          ; 8       ;
+; Total number of inverted registers = 1 ;         ;
++----------------------------------------+---------+
+
+
++---------------------------------------------------------------------------------------------------------------------------------------------------------------+
+; Multiplexer Restructuring Statistics (Restructuring Performed)                                                                                                ;
++--------------------+-----------+---------------+----------------------+------------------------+------------+-------------------------------------------------+
+; Multiplexer Inputs ; Bus Width ; Baseline Area ; Area if Restructured ; Saving if Restructured ; Registered ; Example Multiplexer Output                      ;
++--------------------+-----------+---------------+----------------------+------------------------+------------+-------------------------------------------------+
+; 4:1                ; 24 bits   ; 48 LEs        ; 24 LEs               ; 24 LEs                 ; Yes        ; |sjlsTOP|boo[2]                                 ;
+; 4:1                ; 24 bits   ; 48 LEs        ; 24 LEs               ; 24 LEs                 ; Yes        ; |sjlsTOP|goo[1]                                 ;
+; 4:1                ; 23 bits   ; 46 LEs        ; 23 LEs               ; 23 LEs                 ; Yes        ; |sjlsTOP|coo[21]                                ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ram[127][3]  ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ram[126][7]  ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ram[125][5]  ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ram[124][0]  ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ram[123][6]  ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ram[122][6]  ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ram[121][7]  ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ram[120][0]  ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ram[119][0]  ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ram[118][7]  ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ram[117][3]  ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ram[116][0]  ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ram[115][7]  ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ram[114][4]  ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ram[113][5]  ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ram[112][5]  ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ram[111][7]  ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ram[110][4]  ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ram[109][2]  ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ram[108][1]  ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ram[107][2]  ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ram[106][5]  ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ram[105][6]  ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ram[104][5]  ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ram[103][0]  ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ram[102][4]  ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ram[101][2]  ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ram[100][2]  ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ram[99][6]   ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ram[98][0]   ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ram[97][7]   ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ram[96][3]   ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ram[95][0]   ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ram[94][4]   ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ram[93][3]   ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ram[92][3]   ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ram[91][3]   ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ram[90][1]   ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ram[89][2]   ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ram[88][4]   ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ram[87][5]   ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ram[86][5]   ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ram[85][6]   ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ram[84][0]   ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ram[83][4]   ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ram[82][4]   ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ram[81][0]   ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ram[80][2]   ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ram[79][6]   ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ram[78][1]   ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ram[77][0]   ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ram[76][3]   ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ram[75][0]   ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ram[74][7]   ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ram[73][7]   ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ram[72][3]   ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ram[71][4]   ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ram[70][1]   ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ram[69][0]   ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ram[68][6]   ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ram[67][6]   ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ram[66][0]   ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ram[65][2]   ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ram[64][1]   ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ram[63][1]   ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ram[62][1]   ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ram[61][1]   ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ram[60][1]   ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ram[59][1]   ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ram[58][1]   ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ram[57][1]   ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ram[56][7]   ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ram[55][1]   ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ram[54][1]   ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ram[53][1]   ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ram[52][1]   ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ram[51][1]   ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ram[50][1]   ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ram[49][0]   ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ram[48][5]   ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ram[47][2]   ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ram[46][0]   ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ram[45][7]   ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ram[44][7]   ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ram[43][0]   ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ram[42][1]   ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ram[41][7]   ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ram[40][5]   ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ram[39][5]   ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ram[38][3]   ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ram[37][2]   ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ram[36][6]   ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ram[35][7]   ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ram[34][6]   ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ram[33][1]   ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ram[32][5]   ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ram[31][6]   ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ram[30][6]   ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ram[29][0]   ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ram[28][4]   ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ram[27][7]   ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ram[26][6]   ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ram[25][5]   ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ram[24][6]   ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ram[23][5]   ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ram[22][0]   ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ram[21][1]   ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ram[20][1]   ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ram[19][6]   ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ram[18][3]   ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ram[17][1]   ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ram[16][7]   ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ram[15][7]   ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ram[14][6]   ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ram[13][7]   ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ram[12][3]   ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ram[11][5]   ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ram[10][7]   ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ram[9][0]    ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ram[8][4]    ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ram[7][0]    ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ram[6][3]    ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ram[5][3]    ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ram[4][3]    ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ram[3][2]    ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ram[2][5]    ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ram[1][6]    ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ram[0][0]    ;
+; 4:1                ; 7 bits    ; 14 LEs        ; 7 LEs                ; 7 LEs                  ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|ptr[0]       ;
+; 5:1                ; 7 bits    ; 21 LEs        ; 0 LEs                ; 21 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|count[3]     ;
+; 34:1               ; 10 bits   ; 220 LEs       ; 10 LEs               ; 210 LEs                ; Yes        ; |sjlsTOP|buffcpu:cpu0|sjls_cpum:cpum|ptr[3]     ;
+; 18:1               ; 10 bits   ; 120 LEs       ; 0 LEs                ; 120 LEs                ; Yes        ; |sjlsTOP|buffcpu:cpu0|sjls_cpum:cpum|sp[9]      ;
+; 26:1               ; 16 bits   ; 272 LEs       ; 96 LEs               ; 176 LEs                ; Yes        ; |sjlsTOP|buffcpu:cpu0|sjls_cpum:cpum|x[4]       ;
+; 49:1               ; 10 bits   ; 320 LEs       ; 10 LEs               ; 310 LEs                ; Yes        ; |sjlsTOP|buffcpu:cpu0|sjls_cpum:cpum|pc_back[3] ;
+; 10:1               ; 10 bits   ; 60 LEs        ; 30 LEs               ; 30 LEs                 ; Yes        ; |sjlsTOP|buffcpu:cpu0|sjls_cpum:cpum|pc[0]      ;
+; 45:1               ; 7 bits    ; 210 LEs       ; 56 LEs               ; 154 LEs                ; Yes        ; |sjlsTOP|buffcpu:cpu0|sjls_cpum:cpum|da[13]     ;
+; 45:1               ; 8 bits    ; 240 LEs       ; 64 LEs               ; 176 LEs                ; Yes        ; |sjlsTOP|buffcpu:cpu0|sjls_cpum:cpum|da[4]      ;
+; 85:1               ; 6 bits    ; 336 LEs       ; 48 LEs               ; 288 LEs                ; Yes        ; |sjlsTOP|buffcpu:cpu0|sjls_cpum:cpum|r_7[13]    ;
+; 85:1               ; 9 bits    ; 504 LEs       ; 72 LEs               ; 432 LEs                ; Yes        ; |sjlsTOP|buffcpu:cpu0|sjls_cpum:cpum|r_7[5]     ;
+; 85:1               ; 6 bits    ; 336 LEs       ; 48 LEs               ; 288 LEs                ; Yes        ; |sjlsTOP|buffcpu:cpu0|sjls_cpum:cpum|r_6[10]    ;
+; 85:1               ; 9 bits    ; 504 LEs       ; 72 LEs               ; 432 LEs                ; Yes        ; |sjlsTOP|buffcpu:cpu0|sjls_cpum:cpum|r_6[3]     ;
+; 85:1               ; 6 bits    ; 336 LEs       ; 48 LEs               ; 288 LEs                ; Yes        ; |sjlsTOP|buffcpu:cpu0|sjls_cpum:cpum|r_5[11]    ;
+; 85:1               ; 9 bits    ; 504 LEs       ; 72 LEs               ; 432 LEs                ; Yes        ; |sjlsTOP|buffcpu:cpu0|sjls_cpum:cpum|r_5[8]     ;
+; 85:1               ; 6 bits    ; 336 LEs       ; 48 LEs               ; 288 LEs                ; Yes        ; |sjlsTOP|buffcpu:cpu0|sjls_cpum:cpum|r_4[15]    ;
+; 85:1               ; 9 bits    ; 504 LEs       ; 72 LEs               ; 432 LEs                ; Yes        ; |sjlsTOP|buffcpu:cpu0|sjls_cpum:cpum|r_4[8]     ;
+; 85:1               ; 6 bits    ; 336 LEs       ; 48 LEs               ; 288 LEs                ; Yes        ; |sjlsTOP|buffcpu:cpu0|sjls_cpum:cpum|r_3[15]    ;
+; 85:1               ; 9 bits    ; 504 LEs       ; 72 LEs               ; 432 LEs                ; Yes        ; |sjlsTOP|buffcpu:cpu0|sjls_cpum:cpum|r_3[1]     ;
+; 85:1               ; 6 bits    ; 336 LEs       ; 48 LEs               ; 288 LEs                ; Yes        ; |sjlsTOP|buffcpu:cpu0|sjls_cpum:cpum|r_2[12]    ;
+; 85:1               ; 9 bits    ; 504 LEs       ; 72 LEs               ; 432 LEs                ; Yes        ; |sjlsTOP|buffcpu:cpu0|sjls_cpum:cpum|r_2[7]     ;
+; 85:1               ; 6 bits    ; 336 LEs       ; 48 LEs               ; 288 LEs                ; Yes        ; |sjlsTOP|buffcpu:cpu0|sjls_cpum:cpum|r_1[13]    ;
+; 85:1               ; 9 bits    ; 504 LEs       ; 72 LEs               ; 432 LEs                ; Yes        ; |sjlsTOP|buffcpu:cpu0|sjls_cpum:cpum|r_1[8]     ;
+; 85:1               ; 6 bits    ; 336 LEs       ; 48 LEs               ; 288 LEs                ; Yes        ; |sjlsTOP|buffcpu:cpu0|sjls_cpum:cpum|r_0[12]    ;
+; 85:1               ; 9 bits    ; 504 LEs       ; 72 LEs               ; 432 LEs                ; Yes        ; |sjlsTOP|buffcpu:cpu0|sjls_cpum:cpum|r_0[5]     ;
+; 258:1              ; 8 bits    ; 1376 LEs      ; 680 LEs              ; 696 LEs                ; Yes        ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|q[3]         ;
+; 3:1                ; 7 bits    ; 14 LEs        ; 14 LEs               ; 0 LEs                  ; No         ; |sjlsTOP|mSEG7_DIG[9]                           ;
+; 11:1               ; 16 bits   ; 112 LEs       ; 16 LEs               ; 96 LEs                 ; No         ; |sjlsTOP|buffcpu:cpu0|sjls_cpum:cpum|Add37      ;
+; 11:1               ; 16 bits   ; 112 LEs       ; 16 LEs               ; 96 LEs                 ; No         ; |sjlsTOP|buffcpu:cpu0|sjls_cpum:cpum|Add31      ;
+; 11:1               ; 16 bits   ; 112 LEs       ; 16 LEs               ; 96 LEs                 ; No         ; |sjlsTOP|buffcpu:cpu0|sjls_cpum:cpum|Add33      ;
+; 11:1               ; 16 bits   ; 112 LEs       ; 16 LEs               ; 96 LEs                 ; No         ; |sjlsTOP|buffcpu:cpu0|sjls_cpum:cpum|Add35      ;
+; 11:1               ; 16 bits   ; 112 LEs       ; 48 LEs               ; 64 LEs                 ; No         ; |sjlsTOP|buffcpu:cpu0|sjls_cpum:cpum|Add37      ;
+; 11:1               ; 16 bits   ; 112 LEs       ; 48 LEs               ; 64 LEs                 ; No         ; |sjlsTOP|buffcpu:cpu0|sjls_cpum:cpum|Add31      ;
+; 11:1               ; 16 bits   ; 112 LEs       ; 48 LEs               ; 64 LEs                 ; No         ; |sjlsTOP|buffcpu:cpu0|sjls_cpum:cpum|Add33      ;
+; 11:1               ; 16 bits   ; 112 LEs       ; 48 LEs               ; 64 LEs                 ; No         ; |sjlsTOP|buffcpu:cpu0|sjls_cpum:cpum|Add35      ;
+; 11:1               ; 16 bits   ; 112 LEs       ; 16 LEs               ; 96 LEs                 ; No         ; |sjlsTOP|buffcpu:cpu0|sjls_cpum:cpum|Add30      ;
+; 11:1               ; 16 bits   ; 112 LEs       ; 16 LEs               ; 96 LEs                 ; No         ; |sjlsTOP|buffcpu:cpu0|sjls_cpum:cpum|Add32      ;
+; 11:1               ; 16 bits   ; 112 LEs       ; 16 LEs               ; 96 LEs                 ; No         ; |sjlsTOP|buffcpu:cpu0|sjls_cpum:cpum|Add34      ;
+; 11:1               ; 16 bits   ; 112 LEs       ; 16 LEs               ; 96 LEs                 ; No         ; |sjlsTOP|buffcpu:cpu0|sjls_cpum:cpum|Add36      ;
+; 11:1               ; 16 bits   ; 112 LEs       ; 48 LEs               ; 64 LEs                 ; No         ; |sjlsTOP|buffcpu:cpu0|sjls_cpum:cpum|Add30      ;
+; 11:1               ; 16 bits   ; 112 LEs       ; 48 LEs               ; 64 LEs                 ; No         ; |sjlsTOP|buffcpu:cpu0|sjls_cpum:cpum|Add32      ;
+; 11:1               ; 16 bits   ; 112 LEs       ; 48 LEs               ; 64 LEs                 ; No         ; |sjlsTOP|buffcpu:cpu0|sjls_cpum:cpum|Add34      ;
+; 11:1               ; 16 bits   ; 112 LEs       ; 48 LEs               ; 64 LEs                 ; No         ; |sjlsTOP|buffcpu:cpu0|sjls_cpum:cpum|Add36      ;
+; 8:1                ; 16 bits   ; 80 LEs        ; 80 LEs               ; 0 LEs                  ; No         ; |sjlsTOP|buffcpu:cpu0|sjls_cpum:cpum|Selector1  ;
+; 128:1              ; 8 bits    ; 680 LEs       ; 680 LEs              ; 0 LEs                  ; No         ; |sjlsTOP|buffcpu:cpu0|buffin:buff0|Mux23        ;
++--------------------+-----------+---------------+----------------------+------------------------+------------+-------------------------------------------------+
+
+
++------------------------------------------------------------------------------------------------------------------------------------+
+; Source assignments for buffcpu:cpu0|sjls_cpum:cpum|altsyncram0:iram|altsyncram:altsyncram_component|altsyncram_e5d1:auto_generated ;
++---------------------------------+--------------------+------+----------------------------------------------------------------------+
+; Assignment                      ; Value              ; From ; To                                                                   ;
++---------------------------------+--------------------+------+----------------------------------------------------------------------+
+; OPTIMIZE_POWER_DURING_SYNTHESIS ; NORMAL_COMPILATION ; -    ; -                                                                    ;
++---------------------------------+--------------------+------+----------------------------------------------------------------------+
+
+
++------------------------------------------------------------------------------------------------------------------------------------+
+; Source assignments for buffcpu:cpu0|sjls_cpum:cpum|altsyncram4:dram|altsyncram:altsyncram_component|altsyncram_toh1:auto_generated ;
++---------------------------------+--------------------+------+----------------------------------------------------------------------+
+; Assignment                      ; Value              ; From ; To                                                                   ;
++---------------------------------+--------------------+------+----------------------------------------------------------------------+
+; OPTIMIZE_POWER_DURING_SYNTHESIS ; NORMAL_COMPILATION ; -    ; -                                                                    ;
++---------------------------------+--------------------+------+----------------------------------------------------------------------+
+
+
++------------------------------------------------------------------------------------------------------------------------------------+
+; Source assignments for buffcpu:cpu0|sjls_cpum:cpum|altsyncram4:sram|altsyncram:altsyncram_component|altsyncram_toh1:auto_generated ;
++---------------------------------+--------------------+------+----------------------------------------------------------------------+
+; Assignment                      ; Value              ; From ; To                                                                   ;
++---------------------------------+--------------------+------+----------------------------------------------------------------------+
+; OPTIMIZE_POWER_DURING_SYNTHESIS ; NORMAL_COMPILATION ; -    ; -                                                                    ;
++---------------------------------+--------------------+------+----------------------------------------------------------------------+
+
+
++---------------------------------------------------------------------------------------------------------------------------+
+; Parameter Settings for User Entity Instance: buffcpu:cpu0|sjls_cpum:cpum|altsyncram0:iram|altsyncram:altsyncram_component ;
++------------------------------------+----------------------+---------------------------------------------------------------+
+; Parameter Name                     ; Value                ; Type                                                          ;
++------------------------------------+----------------------+---------------------------------------------------------------+
+; BYTE_SIZE_BLOCK                    ; 8                    ; Untyped                                                       ;
+; AUTO_CARRY_CHAINS                  ; ON                   ; AUTO_CARRY                                                    ;
+; IGNORE_CARRY_BUFFERS               ; OFF                  ; IGNORE_CARRY                                                  ;
+; AUTO_CASCADE_CHAINS                ; ON                   ; AUTO_CASCADE                                                  ;
+; IGNORE_CASCADE_BUFFERS             ; OFF                  ; IGNORE_CASCADE                                                ;
+; WIDTH_BYTEENA                      ; 1                    ; Untyped                                                       ;
+; OPERATION_MODE                     ; SINGLE_PORT          ; Untyped                                                       ;
+; WIDTH_A                            ; 16                   ; Signed Integer                                                ;
+; WIDTHAD_A                          ; 10                   ; Signed Integer                                                ;
+; NUMWORDS_A                         ; 1024                 ; Signed Integer                                                ;
+; OUTDATA_REG_A                      ; UNREGISTERED         ; Untyped                                                       ;
+; ADDRESS_ACLR_A                     ; NONE                 ; Untyped                                                       ;
+; OUTDATA_ACLR_A                     ; NONE                 ; Untyped                                                       ;
+; WRCONTROL_ACLR_A                   ; NONE                 ; Untyped                                                       ;
+; INDATA_ACLR_A                      ; NONE                 ; Untyped                                                       ;
+; BYTEENA_ACLR_A                     ; NONE                 ; Untyped                                                       ;
+; WIDTH_B                            ; 1                    ; Untyped                                                       ;
+; WIDTHAD_B                          ; 1                    ; Untyped                                                       ;
+; NUMWORDS_B                         ; 1                    ; Untyped                                                       ;
+; INDATA_REG_B                       ; CLOCK1               ; Untyped                                                       ;
+; WRCONTROL_WRADDRESS_REG_B          ; CLOCK1               ; Untyped                                                       ;
+; RDCONTROL_REG_B                    ; CLOCK1               ; Untyped                                                       ;
+; ADDRESS_REG_B                      ; CLOCK1               ; Untyped                                                       ;
+; OUTDATA_REG_B                      ; UNREGISTERED         ; Untyped                                                       ;
+; BYTEENA_REG_B                      ; CLOCK1               ; Untyped                                                       ;
+; INDATA_ACLR_B                      ; NONE                 ; Untyped                                                       ;
+; WRCONTROL_ACLR_B                   ; NONE                 ; Untyped                                                       ;
+; ADDRESS_ACLR_B                     ; NONE                 ; Untyped                                                       ;
+; OUTDATA_ACLR_B                     ; NONE                 ; Untyped                                                       ;
+; RDCONTROL_ACLR_B                   ; NONE                 ; Untyped                                                       ;
+; BYTEENA_ACLR_B                     ; NONE                 ; Untyped                                                       ;
+; WIDTH_BYTEENA_A                    ; 1                    ; Signed Integer                                                ;
+; WIDTH_BYTEENA_B                    ; 1                    ; Untyped                                                       ;
+; RAM_BLOCK_TYPE                     ; AUTO                 ; Untyped                                                       ;
+; BYTE_SIZE                          ; 8                    ; Untyped                                                       ;
+; READ_DURING_WRITE_MODE_MIXED_PORTS ; DONT_CARE            ; Untyped                                                       ;
+; READ_DURING_WRITE_MODE_PORT_A      ; NEW_DATA_NO_NBE_READ ; Untyped                                                       ;
+; READ_DURING_WRITE_MODE_PORT_B      ; NEW_DATA_NO_NBE_READ ; Untyped                                                       ;
+; INIT_FILE                          ; imem16_4.mif         ; Untyped                                                       ;
+; INIT_FILE_LAYOUT                   ; PORT_A               ; Untyped                                                       ;
+; MAXIMUM_DEPTH                      ; 0                    ; Untyped                                                       ;
+; CLOCK_ENABLE_INPUT_A               ; NORMAL               ; Untyped                                                       ;
+; CLOCK_ENABLE_INPUT_B               ; NORMAL               ; Untyped                                                       ;
+; CLOCK_ENABLE_OUTPUT_A              ; NORMAL               ; Untyped                                                       ;
+; CLOCK_ENABLE_OUTPUT_B              ; NORMAL               ; Untyped                                                       ;
+; CLOCK_ENABLE_CORE_A                ; USE_INPUT_CLKEN      ; Untyped                                                       ;
+; CLOCK_ENABLE_CORE_B                ; USE_INPUT_CLKEN      ; Untyped                                                       ;
+; ENABLE_ECC                         ; FALSE                ; Untyped                                                       ;
+; DEVICE_FAMILY                      ; Cyclone              ; Untyped                                                       ;
+; CBXI_PARAMETER                     ; altsyncram_e5d1      ; Untyped                                                       ;
++------------------------------------+----------------------+---------------------------------------------------------------+
+Note: In order to hide this table in the UI and the text report file, please set the "Show Parameter Settings Tables in Synthesis Report" option in "Analysis and Synthesis Settings -> More Settings" to "Off".
+
+
++---------------------------------------------------------------------------------------------------------------------------+
+; Parameter Settings for User Entity Instance: buffcpu:cpu0|sjls_cpum:cpum|altsyncram4:dram|altsyncram:altsyncram_component ;
++------------------------------------+----------------------+---------------------------------------------------------------+
+; Parameter Name                     ; Value                ; Type                                                          ;
++------------------------------------+----------------------+---------------------------------------------------------------+
+; BYTE_SIZE_BLOCK                    ; 8                    ; Untyped                                                       ;
+; AUTO_CARRY_CHAINS                  ; ON                   ; AUTO_CARRY                                                    ;
+; IGNORE_CARRY_BUFFERS               ; OFF                  ; IGNORE_CARRY                                                  ;
+; AUTO_CASCADE_CHAINS                ; ON                   ; AUTO_CASCADE                                                  ;
+; IGNORE_CASCADE_BUFFERS             ; OFF                  ; IGNORE_CASCADE                                                ;
+; WIDTH_BYTEENA                      ; 1                    ; Untyped                                                       ;
+; OPERATION_MODE                     ; SINGLE_PORT          ; Untyped                                                       ;
+; WIDTH_A                            ; 16                   ; Signed Integer                                                ;
+; WIDTHAD_A                          ; 10                   ; Signed Integer                                                ;
+; NUMWORDS_A                         ; 1024                 ; Signed Integer                                                ;
+; OUTDATA_REG_A                      ; UNREGISTERED         ; Untyped                                                       ;
+; ADDRESS_ACLR_A                     ; NONE                 ; Untyped                                                       ;
+; OUTDATA_ACLR_A                     ; NONE                 ; Untyped                                                       ;
+; WRCONTROL_ACLR_A                   ; NONE                 ; Untyped                                                       ;
+; INDATA_ACLR_A                      ; NONE                 ; Untyped                                                       ;
+; BYTEENA_ACLR_A                     ; NONE                 ; Untyped                                                       ;
+; WIDTH_B                            ; 1                    ; Untyped                                                       ;
+; WIDTHAD_B                          ; 1                    ; Untyped                                                       ;
+; NUMWORDS_B                         ; 1                    ; Untyped                                                       ;
+; INDATA_REG_B                       ; CLOCK1               ; Untyped                                                       ;
+; WRCONTROL_WRADDRESS_REG_B          ; CLOCK1               ; Untyped                                                       ;
+; RDCONTROL_REG_B                    ; CLOCK1               ; Untyped                                                       ;
+; ADDRESS_REG_B                      ; CLOCK1               ; Untyped                                                       ;
+; OUTDATA_REG_B                      ; UNREGISTERED         ; Untyped                                                       ;
+; BYTEENA_REG_B                      ; CLOCK1               ; Untyped                                                       ;
+; INDATA_ACLR_B                      ; NONE                 ; Untyped                                                       ;
+; WRCONTROL_ACLR_B                   ; NONE                 ; Untyped                                                       ;
+; ADDRESS_ACLR_B                     ; NONE                 ; Untyped                                                       ;
+; OUTDATA_ACLR_B                     ; NONE                 ; Untyped                                                       ;
+; RDCONTROL_ACLR_B                   ; NONE                 ; Untyped                                                       ;
+; BYTEENA_ACLR_B                     ; NONE                 ; Untyped                                                       ;
+; WIDTH_BYTEENA_A                    ; 1                    ; Signed Integer                                                ;
+; WIDTH_BYTEENA_B                    ; 1                    ; Untyped                                                       ;
+; RAM_BLOCK_TYPE                     ; AUTO                 ; Untyped                                                       ;
+; BYTE_SIZE                          ; 8                    ; Untyped                                                       ;
+; READ_DURING_WRITE_MODE_MIXED_PORTS ; DONT_CARE            ; Untyped                                                       ;
+; READ_DURING_WRITE_MODE_PORT_A      ; NEW_DATA_NO_NBE_READ ; Untyped                                                       ;
+; READ_DURING_WRITE_MODE_PORT_B      ; NEW_DATA_NO_NBE_READ ; Untyped                                                       ;
+; INIT_FILE                          ; imem16_4.mif         ; Untyped                                                       ;
+; INIT_FILE_LAYOUT                   ; PORT_A               ; Untyped                                                       ;
+; MAXIMUM_DEPTH                      ; 0                    ; Untyped                                                       ;
+; CLOCK_ENABLE_INPUT_A               ; NORMAL               ; Untyped                                                       ;
+; CLOCK_ENABLE_INPUT_B               ; NORMAL               ; Untyped                                                       ;
+; CLOCK_ENABLE_OUTPUT_A              ; NORMAL               ; Untyped                                                       ;
+; CLOCK_ENABLE_OUTPUT_B              ; NORMAL               ; Untyped                                                       ;
+; CLOCK_ENABLE_CORE_A                ; USE_INPUT_CLKEN      ; Untyped                                                       ;
+; CLOCK_ENABLE_CORE_B                ; USE_INPUT_CLKEN      ; Untyped                                                       ;
+; ENABLE_ECC                         ; FALSE                ; Untyped                                                       ;
+; DEVICE_FAMILY                      ; Cyclone              ; Untyped                                                       ;
+; CBXI_PARAMETER                     ; altsyncram_toh1      ; Untyped                                                       ;
++------------------------------------+----------------------+---------------------------------------------------------------+
+Note: In order to hide this table in the UI and the text report file, please set the "Show Parameter Settings Tables in Synthesis Report" option in "Analysis and Synthesis Settings -> More Settings" to "Off".
+
+
++---------------------------------------------------------------------------------------------------------------------------+
+; Parameter Settings for User Entity Instance: buffcpu:cpu0|sjls_cpum:cpum|altsyncram4:sram|altsyncram:altsyncram_component ;
++------------------------------------+----------------------+---------------------------------------------------------------+
+; Parameter Name                     ; Value                ; Type                                                          ;
++------------------------------------+----------------------+---------------------------------------------------------------+
+; BYTE_SIZE_BLOCK                    ; 8                    ; Untyped                                                       ;
+; AUTO_CARRY_CHAINS                  ; ON                   ; AUTO_CARRY                                                    ;
+; IGNORE_CARRY_BUFFERS               ; OFF                  ; IGNORE_CARRY                                                  ;
+; AUTO_CASCADE_CHAINS                ; ON                   ; AUTO_CASCADE                                                  ;
+; IGNORE_CASCADE_BUFFERS             ; OFF                  ; IGNORE_CASCADE                                                ;
+; WIDTH_BYTEENA                      ; 1                    ; Untyped                                                       ;
+; OPERATION_MODE                     ; SINGLE_PORT          ; Untyped                                                       ;
+; WIDTH_A                            ; 16                   ; Signed Integer                                                ;
+; WIDTHAD_A                          ; 10                   ; Signed Integer                                                ;
+; NUMWORDS_A                         ; 1024                 ; Signed Integer                                                ;
+; OUTDATA_REG_A                      ; UNREGISTERED         ; Untyped                                                       ;
+; ADDRESS_ACLR_A                     ; NONE                 ; Untyped                                                       ;
+; OUTDATA_ACLR_A                     ; NONE                 ; Untyped                                                       ;
+; WRCONTROL_ACLR_A                   ; NONE                 ; Untyped                                                       ;
+; INDATA_ACLR_A                      ; NONE                 ; Untyped                                                       ;
+; BYTEENA_ACLR_A                     ; NONE                 ; Untyped                                                       ;
+; WIDTH_B                            ; 1                    ; Untyped                                                       ;
+; WIDTHAD_B                          ; 1                    ; Untyped                                                       ;
+; NUMWORDS_B                         ; 1                    ; Untyped                                                       ;
+; INDATA_REG_B                       ; CLOCK1               ; Untyped                                                       ;
+; WRCONTROL_WRADDRESS_REG_B          ; CLOCK1               ; Untyped                                                       ;
+; RDCONTROL_REG_B                    ; CLOCK1               ; Untyped                                                       ;
+; ADDRESS_REG_B                      ; CLOCK1               ; Untyped                                                       ;
+; OUTDATA_REG_B                      ; UNREGISTERED         ; Untyped                                                       ;
+; BYTEENA_REG_B                      ; CLOCK1               ; Untyped                                                       ;
+; INDATA_ACLR_B                      ; NONE                 ; Untyped                                                       ;
+; WRCONTROL_ACLR_B                   ; NONE                 ; Untyped                                                       ;
+; ADDRESS_ACLR_B                     ; NONE                 ; Untyped                                                       ;
+; OUTDATA_ACLR_B                     ; NONE                 ; Untyped                                                       ;
+; RDCONTROL_ACLR_B                   ; NONE                 ; Untyped                                                       ;
+; BYTEENA_ACLR_B                     ; NONE                 ; Untyped                                                       ;
+; WIDTH_BYTEENA_A                    ; 1                    ; Signed Integer                                                ;
+; WIDTH_BYTEENA_B                    ; 1                    ; Untyped                                                       ;
+; RAM_BLOCK_TYPE                     ; AUTO                 ; Untyped                                                       ;
+; BYTE_SIZE                          ; 8                    ; Untyped                                                       ;
+; READ_DURING_WRITE_MODE_MIXED_PORTS ; DONT_CARE            ; Untyped                                                       ;
+; READ_DURING_WRITE_MODE_PORT_A      ; NEW_DATA_NO_NBE_READ ; Untyped                                                       ;
+; READ_DURING_WRITE_MODE_PORT_B      ; NEW_DATA_NO_NBE_READ ; Untyped                                                       ;
+; INIT_FILE                          ; imem16_4.mif         ; Untyped                                                       ;
+; INIT_FILE_LAYOUT                   ; PORT_A               ; Untyped                                                       ;
+; MAXIMUM_DEPTH                      ; 0                    ; Untyped                                                       ;
+; CLOCK_ENABLE_INPUT_A               ; NORMAL               ; Untyped                                                       ;
+; CLOCK_ENABLE_INPUT_B               ; NORMAL               ; Untyped                                                       ;
+; CLOCK_ENABLE_OUTPUT_A              ; NORMAL               ; Untyped                                                       ;
+; CLOCK_ENABLE_OUTPUT_B              ; NORMAL               ; Untyped                                                       ;
+; CLOCK_ENABLE_CORE_A                ; USE_INPUT_CLKEN      ; Untyped                                                       ;
+; CLOCK_ENABLE_CORE_B                ; USE_INPUT_CLKEN      ; Untyped                                                       ;
+; ENABLE_ECC                         ; FALSE                ; Untyped                                                       ;
+; DEVICE_FAMILY                      ; Cyclone              ; Untyped                                                       ;
+; CBXI_PARAMETER                     ; altsyncram_toh1      ; Untyped                                                       ;
++------------------------------------+----------------------+---------------------------------------------------------------+
+Note: In order to hide this table in the UI and the text report file, please set the "Show Parameter Settings Tables in Synthesis Report" option in "Analysis and Synthesis Settings -> More Settings" to "Off".
+
+
++------------------------------------------------------------------------------------+
+; Parameter Settings for User Entity Instance: altpll0:altp0|altpll:altpll_component ;
++-------------------------------+-------------------+--------------------------------+
+; Parameter Name                ; Value             ; Type                           ;
++-------------------------------+-------------------+--------------------------------+
+; OPERATION_MODE                ; NORMAL            ; Untyped                        ;
+; PLL_TYPE                      ; AUTO              ; Untyped                        ;
+; QUALIFY_CONF_DONE             ; OFF               ; Untyped                        ;
+; COMPENSATE_CLOCK              ; CLK0              ; Untyped                        ;
+; SCAN_CHAIN                    ; LONG              ; Untyped                        ;
+; PRIMARY_CLOCK                 ; INCLK0            ; Untyped                        ;
+; INCLK0_INPUT_FREQUENCY        ; 37037             ; Signed Integer                 ;
+; INCLK1_INPUT_FREQUENCY        ; 0                 ; Untyped                        ;
+; GATE_LOCK_SIGNAL              ; NO                ; Untyped                        ;
+; GATE_LOCK_COUNTER             ; 0                 ; Untyped                        ;
+; LOCK_HIGH                     ; 1                 ; Untyped                        ;
+; LOCK_LOW                      ; 1                 ; Untyped                        ;
+; VALID_LOCK_MULTIPLIER         ; 1                 ; Untyped                        ;
+; INVALID_LOCK_MULTIPLIER       ; 5                 ; Untyped                        ;
+; SWITCH_OVER_ON_LOSSCLK        ; OFF               ; Untyped                        ;
+; SWITCH_OVER_ON_GATED_LOCK     ; OFF               ; Untyped                        ;
+; ENABLE_SWITCH_OVER_COUNTER    ; OFF               ; Untyped                        ;
+; SKIP_VCO                      ; OFF               ; Untyped                        ;
+; SWITCH_OVER_COUNTER           ; 0                 ; Untyped                        ;
+; SWITCH_OVER_TYPE              ; AUTO              ; Untyped                        ;
+; FEEDBACK_SOURCE               ; EXTCLK0           ; Untyped                        ;
+; BANDWIDTH                     ; 0                 ; Untyped                        ;
+; BANDWIDTH_TYPE                ; AUTO              ; Untyped                        ;
+; SPREAD_FREQUENCY              ; 0                 ; Untyped                        ;
+; DOWN_SPREAD                   ; 0                 ; Untyped                        ;
+; SELF_RESET_ON_GATED_LOSS_LOCK ; OFF               ; Untyped                        ;
+; SELF_RESET_ON_LOSS_LOCK       ; OFF               ; Untyped                        ;
+; CLK9_MULTIPLY_BY              ; 0                 ; Untyped                        ;
+; CLK8_MULTIPLY_BY              ; 0                 ; Untyped                        ;
+; CLK7_MULTIPLY_BY              ; 0                 ; Untyped                        ;
+; CLK6_MULTIPLY_BY              ; 0                 ; Untyped                        ;
+; CLK5_MULTIPLY_BY              ; 1                 ; Untyped                        ;
+; CLK4_MULTIPLY_BY              ; 1                 ; Untyped                        ;
+; CLK3_MULTIPLY_BY              ; 1                 ; Untyped                        ;
+; CLK2_MULTIPLY_BY              ; 1                 ; Untyped                        ;
+; CLK1_MULTIPLY_BY              ; 1                 ; Untyped                        ;
+; CLK0_MULTIPLY_BY              ; 2                 ; Signed Integer                 ;
+; CLK9_DIVIDE_BY                ; 0                 ; Untyped                        ;
+; CLK8_DIVIDE_BY                ; 0                 ; Untyped                        ;
+; CLK7_DIVIDE_BY                ; 0                 ; Untyped                        ;
+; CLK6_DIVIDE_BY                ; 0                 ; Untyped                        ;
+; CLK5_DIVIDE_BY                ; 1                 ; Untyped                        ;
+; CLK4_DIVIDE_BY                ; 1                 ; Untyped                        ;
+; CLK3_DIVIDE_BY                ; 1                 ; Untyped                        ;
+; CLK2_DIVIDE_BY                ; 1                 ; Untyped                        ;
+; CLK1_DIVIDE_BY                ; 1                 ; Untyped                        ;
+; CLK0_DIVIDE_BY                ; 3                 ; Signed Integer                 ;
+; CLK9_PHASE_SHIFT              ; 0                 ; Untyped                        ;
+; CLK8_PHASE_SHIFT              ; 0                 ; Untyped                        ;
+; CLK7_PHASE_SHIFT              ; 0                 ; Untyped                        ;
+; CLK6_PHASE_SHIFT              ; 0                 ; Untyped                        ;
+; CLK5_PHASE_SHIFT              ; 0                 ; Untyped                        ;
+; CLK4_PHASE_SHIFT              ; 0                 ; Untyped                        ;
+; CLK3_PHASE_SHIFT              ; 0                 ; Untyped                        ;
+; CLK2_PHASE_SHIFT              ; 0                 ; Untyped                        ;
+; CLK1_PHASE_SHIFT              ; 0                 ; Untyped                        ;
+; CLK0_PHASE_SHIFT              ; 0                 ; Untyped                        ;
+; CLK5_TIME_DELAY               ; 0                 ; Untyped                        ;
+; CLK4_TIME_DELAY               ; 0                 ; Untyped                        ;
+; CLK3_TIME_DELAY               ; 0                 ; Untyped                        ;
+; CLK2_TIME_DELAY               ; 0                 ; Untyped                        ;
+; CLK1_TIME_DELAY               ; 0                 ; Untyped                        ;
+; CLK0_TIME_DELAY               ; 0                 ; Untyped                        ;
+; CLK9_DUTY_CYCLE               ; 50                ; Untyped                        ;
+; CLK8_DUTY_CYCLE               ; 50                ; Untyped                        ;
+; CLK7_DUTY_CYCLE               ; 50                ; Untyped                        ;
+; CLK6_DUTY_CYCLE               ; 50                ; Untyped                        ;
+; CLK5_DUTY_CYCLE               ; 50                ; Untyped                        ;
+; CLK4_DUTY_CYCLE               ; 50                ; Untyped                        ;
+; CLK3_DUTY_CYCLE               ; 50                ; Untyped                        ;
+; CLK2_DUTY_CYCLE               ; 50                ; Untyped                        ;
+; CLK1_DUTY_CYCLE               ; 50                ; Untyped                        ;
+; CLK0_DUTY_CYCLE               ; 50                ; Signed Integer                 ;
+; CLK9_USE_EVEN_COUNTER_MODE    ; OFF               ; Untyped                        ;
+; CLK8_USE_EVEN_COUNTER_MODE    ; OFF               ; Untyped                        ;
+; CLK7_USE_EVEN_COUNTER_MODE    ; OFF               ; Untyped                        ;
+; CLK6_USE_EVEN_COUNTER_MODE    ; OFF               ; Untyped                        ;
+; CLK5_USE_EVEN_COUNTER_MODE    ; OFF               ; Untyped                        ;
+; CLK4_USE_EVEN_COUNTER_MODE    ; OFF               ; Untyped                        ;
+; CLK3_USE_EVEN_COUNTER_MODE    ; OFF               ; Untyped                        ;
+; CLK2_USE_EVEN_COUNTER_MODE    ; OFF               ; Untyped                        ;
+; CLK1_USE_EVEN_COUNTER_MODE    ; OFF               ; Untyped                        ;
+; CLK0_USE_EVEN_COUNTER_MODE    ; OFF               ; Untyped                        ;
+; CLK9_USE_EVEN_COUNTER_VALUE   ; OFF               ; Untyped                        ;
+; CLK8_USE_EVEN_COUNTER_VALUE   ; OFF               ; Untyped                        ;
+; CLK7_USE_EVEN_COUNTER_VALUE   ; OFF               ; Untyped                        ;
+; CLK6_USE_EVEN_COUNTER_VALUE   ; OFF               ; Untyped                        ;
+; CLK5_USE_EVEN_COUNTER_VALUE   ; OFF               ; Untyped                        ;
+; CLK4_USE_EVEN_COUNTER_VALUE   ; OFF               ; Untyped                        ;
+; CLK3_USE_EVEN_COUNTER_VALUE   ; OFF               ; Untyped                        ;
+; CLK2_USE_EVEN_COUNTER_VALUE   ; OFF               ; Untyped                        ;
+; CLK1_USE_EVEN_COUNTER_VALUE   ; OFF               ; Untyped                        ;
+; CLK0_USE_EVEN_COUNTER_VALUE   ; OFF               ; Untyped                        ;
+; LOCK_WINDOW_UI                ;  0.05             ; Untyped                        ;
+; LOCK_WINDOW_UI_BITS           ; UNUSED            ; Untyped                        ;
+; VCO_RANGE_DETECTOR_LOW_BITS   ; UNUSED            ; Untyped                        ;
+; VCO_RANGE_DETECTOR_HIGH_BITS  ; UNUSED            ; Untyped                        ;
+; EXTCLK3_MULTIPLY_BY           ; 1                 ; Untyped                        ;
+; EXTCLK2_MULTIPLY_BY           ; 1                 ; Untyped                        ;
+; EXTCLK1_MULTIPLY_BY           ; 1                 ; Untyped                        ;
+; EXTCLK0_MULTIPLY_BY           ; 1                 ; Untyped                        ;
+; EXTCLK3_DIVIDE_BY             ; 1                 ; Untyped                        ;
+; EXTCLK2_DIVIDE_BY             ; 1                 ; Untyped                        ;
+; EXTCLK1_DIVIDE_BY             ; 1                 ; Untyped                        ;
+; EXTCLK0_DIVIDE_BY             ; 1                 ; Untyped                        ;
+; EXTCLK3_PHASE_SHIFT           ; 0                 ; Untyped                        ;
+; EXTCLK2_PHASE_SHIFT           ; 0                 ; Untyped                        ;
+; EXTCLK1_PHASE_SHIFT           ; 0                 ; Untyped                        ;
+; EXTCLK0_PHASE_SHIFT           ; 0                 ; Untyped                        ;
+; EXTCLK3_TIME_DELAY            ; 0                 ; Untyped                        ;
+; EXTCLK2_TIME_DELAY            ; 0                 ; Untyped                        ;
+; EXTCLK1_TIME_DELAY            ; 0                 ; Untyped                        ;
+; EXTCLK0_TIME_DELAY            ; 0                 ; Untyped                        ;
+; EXTCLK3_DUTY_CYCLE            ; 50                ; Untyped                        ;
+; EXTCLK2_DUTY_CYCLE            ; 50                ; Untyped                        ;
+; EXTCLK1_DUTY_CYCLE            ; 50                ; Untyped                        ;
+; EXTCLK0_DUTY_CYCLE            ; 50                ; Untyped                        ;
+; VCO_MULTIPLY_BY               ; 0                 ; Untyped                        ;
+; VCO_DIVIDE_BY                 ; 0                 ; Untyped                        ;
+; SCLKOUT0_PHASE_SHIFT          ; 0                 ; Untyped                        ;
+; SCLKOUT1_PHASE_SHIFT          ; 0                 ; Untyped                        ;
+; VCO_MIN                       ; 0                 ; Untyped                        ;
+; VCO_MAX                       ; 0                 ; Untyped                        ;
+; VCO_CENTER                    ; 0                 ; Untyped                        ;
+; PFD_MIN                       ; 0                 ; Untyped                        ;
+; PFD_MAX                       ; 0                 ; Untyped                        ;
+; M_INITIAL                     ; 0                 ; Untyped                        ;
+; M                             ; 0                 ; Untyped                        ;
+; N                             ; 1                 ; Untyped                        ;
+; M2                            ; 1                 ; Untyped                        ;
+; N2                            ; 1                 ; Untyped                        ;
+; SS                            ; 1                 ; Untyped                        ;
+; C0_HIGH                       ; 0                 ; Untyped                        ;
+; C1_HIGH                       ; 0                 ; Untyped                        ;
+; C2_HIGH                       ; 0                 ; Untyped                        ;
+; C3_HIGH                       ; 0                 ; Untyped                        ;
+; C4_HIGH                       ; 0                 ; Untyped                        ;
+; C5_HIGH                       ; 0                 ; Untyped                        ;
+; C6_HIGH                       ; 0                 ; Untyped                        ;
+; C7_HIGH                       ; 0                 ; Untyped                        ;
+; C8_HIGH                       ; 0                 ; Untyped                        ;
+; C9_HIGH                       ; 0                 ; Untyped                        ;
+; C0_LOW                        ; 0                 ; Untyped                        ;
+; C1_LOW                        ; 0                 ; Untyped                        ;
+; C2_LOW                        ; 0                 ; Untyped                        ;
+; C3_LOW                        ; 0                 ; Untyped                        ;
+; C4_LOW                        ; 0                 ; Untyped                        ;
+; C5_LOW                        ; 0                 ; Untyped                        ;
+; C6_LOW                        ; 0                 ; Untyped                        ;
+; C7_LOW                        ; 0                 ; Untyped                        ;
+; C8_LOW                        ; 0                 ; Untyped                        ;
+; C9_LOW                        ; 0                 ; Untyped                        ;
+; C0_INITIAL                    ; 0                 ; Untyped                        ;
+; C1_INITIAL                    ; 0                 ; Untyped                        ;
+; C2_INITIAL                    ; 0                 ; Untyped                        ;
+; C3_INITIAL                    ; 0                 ; Untyped                        ;
+; C4_INITIAL                    ; 0                 ; Untyped                        ;
+; C5_INITIAL                    ; 0                 ; Untyped                        ;
+; C6_INITIAL                    ; 0                 ; Untyped                        ;
+; C7_INITIAL                    ; 0                 ; Untyped                        ;
+; C8_INITIAL                    ; 0                 ; Untyped                        ;
+; C9_INITIAL                    ; 0                 ; Untyped                        ;
+; C0_MODE                       ; BYPASS            ; Untyped                        ;
+; C1_MODE                       ; BYPASS            ; Untyped                        ;
+; C2_MODE                       ; BYPASS            ; Untyped                        ;
+; C3_MODE                       ; BYPASS            ; Untyped                        ;
+; C4_MODE                       ; BYPASS            ; Untyped                        ;
+; C5_MODE                       ; BYPASS            ; Untyped                        ;
+; C6_MODE                       ; BYPASS            ; Untyped                        ;
+; C7_MODE                       ; BYPASS            ; Untyped                        ;
+; C8_MODE                       ; BYPASS            ; Untyped                        ;
+; C9_MODE                       ; BYPASS            ; Untyped                        ;
+; C0_PH                         ; 0                 ; Untyped                        ;
+; C1_PH                         ; 0                 ; Untyped                        ;
+; C2_PH                         ; 0                 ; Untyped                        ;
+; C3_PH                         ; 0                 ; Untyped                        ;
+; C4_PH                         ; 0                 ; Untyped                        ;
+; C5_PH                         ; 0                 ; Untyped                        ;
+; C6_PH                         ; 0                 ; Untyped                        ;
+; C7_PH                         ; 0                 ; Untyped                        ;
+; C8_PH                         ; 0                 ; Untyped                        ;
+; C9_PH                         ; 0                 ; Untyped                        ;
+; L0_HIGH                       ; 1                 ; Untyped                        ;
+; L1_HIGH                       ; 1                 ; Untyped                        ;
+; G0_HIGH                       ; 1                 ; Untyped                        ;
+; G1_HIGH                       ; 1                 ; Untyped                        ;
+; G2_HIGH                       ; 1                 ; Untyped                        ;
+; G3_HIGH                       ; 1                 ; Untyped                        ;
+; E0_HIGH                       ; 1                 ; Untyped                        ;
+; E1_HIGH                       ; 1                 ; Untyped                        ;
+; E2_HIGH                       ; 1                 ; Untyped                        ;
+; E3_HIGH                       ; 1                 ; Untyped                        ;
+; L0_LOW                        ; 1                 ; Untyped                        ;
+; L1_LOW                        ; 1                 ; Untyped                        ;
+; G0_LOW                        ; 1                 ; Untyped                        ;
+; G1_LOW                        ; 1                 ; Untyped                        ;
+; G2_LOW                        ; 1                 ; Untyped                        ;
+; G3_LOW                        ; 1                 ; Untyped                        ;
+; E0_LOW                        ; 1                 ; Untyped                        ;
+; E1_LOW                        ; 1                 ; Untyped                        ;
+; E2_LOW                        ; 1                 ; Untyped                        ;
+; E3_LOW                        ; 1                 ; Untyped                        ;
+; L0_INITIAL                    ; 1                 ; Untyped                        ;
+; L1_INITIAL                    ; 1                 ; Untyped                        ;
+; G0_INITIAL                    ; 1                 ; Untyped                        ;
+; G1_INITIAL                    ; 1                 ; Untyped                        ;
+; G2_INITIAL                    ; 1                 ; Untyped                        ;
+; G3_INITIAL                    ; 1                 ; Untyped                        ;
+; E0_INITIAL                    ; 1                 ; Untyped                        ;
+; E1_INITIAL                    ; 1                 ; Untyped                        ;
+; E2_INITIAL                    ; 1                 ; Untyped                        ;
+; E3_INITIAL                    ; 1                 ; Untyped                        ;
+; L0_MODE                       ; BYPASS            ; Untyped                        ;
+; L1_MODE                       ; BYPASS            ; Untyped                        ;
+; G0_MODE                       ; BYPASS            ; Untyped                        ;
+; G1_MODE                       ; BYPASS            ; Untyped                        ;
+; G2_MODE                       ; BYPASS            ; Untyped                        ;
+; G3_MODE                       ; BYPASS            ; Untyped                        ;
+; E0_MODE                       ; BYPASS            ; Untyped                        ;
+; E1_MODE                       ; BYPASS            ; Untyped                        ;
+; E2_MODE                       ; BYPASS            ; Untyped                        ;
+; E3_MODE                       ; BYPASS            ; Untyped                        ;
+; L0_PH                         ; 0                 ; Untyped                        ;
+; L1_PH                         ; 0                 ; Untyped                        ;
+; G0_PH                         ; 0                 ; Untyped                        ;
+; G1_PH                         ; 0                 ; Untyped                        ;
+; G2_PH                         ; 0                 ; Untyped                        ;
+; G3_PH                         ; 0                 ; Untyped                        ;
+; E0_PH                         ; 0                 ; Untyped                        ;
+; E1_PH                         ; 0                 ; Untyped                        ;
+; E2_PH                         ; 0                 ; Untyped                        ;
+; E3_PH                         ; 0                 ; Untyped                        ;
+; M_PH                          ; 0                 ; Untyped                        ;
+; C1_USE_CASC_IN                ; OFF               ; Untyped                        ;
+; C2_USE_CASC_IN                ; OFF               ; Untyped                        ;
+; C3_USE_CASC_IN                ; OFF               ; Untyped                        ;
+; C4_USE_CASC_IN                ; OFF               ; Untyped                        ;
+; C5_USE_CASC_IN                ; OFF               ; Untyped                        ;
+; C6_USE_CASC_IN                ; OFF               ; Untyped                        ;
+; C7_USE_CASC_IN                ; OFF               ; Untyped                        ;
+; C8_USE_CASC_IN                ; OFF               ; Untyped                        ;
+; C9_USE_CASC_IN                ; OFF               ; Untyped                        ;
+; CLK0_COUNTER                  ; G0                ; Untyped                        ;
+; CLK1_COUNTER                  ; G0                ; Untyped                        ;
+; CLK2_COUNTER                  ; G0                ; Untyped                        ;
+; CLK3_COUNTER                  ; G0                ; Untyped                        ;
+; CLK4_COUNTER                  ; G0                ; Untyped                        ;
+; CLK5_COUNTER                  ; G0                ; Untyped                        ;
+; CLK6_COUNTER                  ; E0                ; Untyped                        ;
+; CLK7_COUNTER                  ; E1                ; Untyped                        ;
+; CLK8_COUNTER                  ; E2                ; Untyped                        ;
+; CLK9_COUNTER                  ; E3                ; Untyped                        ;
+; L0_TIME_DELAY                 ; 0                 ; Untyped                        ;
+; L1_TIME_DELAY                 ; 0                 ; Untyped                        ;
+; G0_TIME_DELAY                 ; 0                 ; Untyped                        ;
+; G1_TIME_DELAY                 ; 0                 ; Untyped                        ;
+; G2_TIME_DELAY                 ; 0                 ; Untyped                        ;
+; G3_TIME_DELAY                 ; 0                 ; Untyped                        ;
+; E0_TIME_DELAY                 ; 0                 ; Untyped                        ;
+; E1_TIME_DELAY                 ; 0                 ; Untyped                        ;
+; E2_TIME_DELAY                 ; 0                 ; Untyped                        ;
+; E3_TIME_DELAY                 ; 0                 ; Untyped                        ;
+; M_TIME_DELAY                  ; 0                 ; Untyped                        ;
+; N_TIME_DELAY                  ; 0                 ; Untyped                        ;
+; EXTCLK3_COUNTER               ; E3                ; Untyped                        ;
+; EXTCLK2_COUNTER               ; E2                ; Untyped                        ;
+; EXTCLK1_COUNTER               ; E1                ; Untyped                        ;
+; EXTCLK0_COUNTER               ; E0                ; Untyped                        ;
+; ENABLE0_COUNTER               ; L0                ; Untyped                        ;
+; ENABLE1_COUNTER               ; L0                ; Untyped                        ;
+; CHARGE_PUMP_CURRENT           ; 2                 ; Untyped                        ;
+; LOOP_FILTER_R                 ;  1.000000         ; Untyped                        ;
+; LOOP_FILTER_C                 ; 5                 ; Untyped                        ;
+; CHARGE_PUMP_CURRENT_BITS      ; 9999              ; Untyped                        ;
+; LOOP_FILTER_R_BITS            ; 9999              ; Untyped                        ;
+; LOOP_FILTER_C_BITS            ; 9999              ; Untyped                        ;
+; VCO_POST_SCALE                ; 0                 ; Untyped                        ;
+; CLK2_OUTPUT_FREQUENCY         ; 0                 ; Untyped                        ;
+; CLK1_OUTPUT_FREQUENCY         ; 0                 ; Untyped                        ;
+; CLK0_OUTPUT_FREQUENCY         ; 0                 ; Untyped                        ;
+; INTENDED_DEVICE_FAMILY        ; Cyclone           ; Untyped                        ;
+; PORT_CLKENA0                  ; PORT_UNUSED       ; Untyped                        ;
+; PORT_CLKENA1                  ; PORT_UNUSED       ; Untyped                        ;
+; PORT_CLKENA2                  ; PORT_CONNECTIVITY ; Untyped                        ;
+; PORT_CLKENA3                  ; PORT_UNUSED       ; Untyped                        ;
+; PORT_CLKENA4                  ; PORT_UNUSED       ; Untyped                        ;
+; PORT_CLKENA5                  ; PORT_UNUSED       ; Untyped                        ;
+; PORT_EXTCLKENA0               ; PORT_UNUSED       ; Untyped                        ;
+; PORT_EXTCLKENA1               ; PORT_UNUSED       ; Untyped                        ;
+; PORT_EXTCLKENA2               ; PORT_UNUSED       ; Untyped                        ;
+; PORT_EXTCLKENA3               ; PORT_UNUSED       ; Untyped                        ;
+; PORT_EXTCLK0                  ; PORT_UNUSED       ; Untyped                        ;
+; PORT_EXTCLK1                  ; PORT_UNUSED       ; Untyped                        ;
+; PORT_EXTCLK2                  ; PORT_UNUSED       ; Untyped                        ;
+; PORT_EXTCLK3                  ; PORT_UNUSED       ; Untyped                        ;
+; PORT_CLKBAD0                  ; PORT_UNUSED       ; Untyped                        ;
+; PORT_CLKBAD1                  ; PORT_UNUSED       ; Untyped                        ;
+; PORT_CLK0                     ; PORT_USED         ; Untyped                        ;
+; PORT_CLK1                     ; PORT_UNUSED       ; Untyped                        ;
+; PORT_CLK2                     ; PORT_CONNECTIVITY ; Untyped                        ;
+; PORT_CLK3                     ; PORT_UNUSED       ; Untyped                        ;
+; PORT_CLK4                     ; PORT_UNUSED       ; Untyped                        ;
+; PORT_CLK5                     ; PORT_UNUSED       ; Untyped                        ;
+; PORT_CLK6                     ; PORT_CONNECTIVITY ; Untyped                        ;
+; PORT_CLK7                     ; PORT_CONNECTIVITY ; Untyped                        ;
+; PORT_CLK8                     ; PORT_CONNECTIVITY ; Untyped                        ;
+; PORT_CLK9                     ; PORT_CONNECTIVITY ; Untyped                        ;
+; PORT_SCANDATA                 ; PORT_UNUSED       ; Untyped                        ;
+; PORT_SCANDATAOUT              ; PORT_UNUSED       ; Untyped                        ;
+; PORT_SCANDONE                 ; PORT_UNUSED       ; Untyped                        ;
+; PORT_SCLKOUT1                 ; PORT_UNUSED       ; Untyped                        ;
+; PORT_SCLKOUT0                 ; PORT_UNUSED       ; Untyped                        ;
+; PORT_ACTIVECLOCK              ; PORT_UNUSED       ; Untyped                        ;
+; PORT_CLKLOSS                  ; PORT_UNUSED       ; Untyped                        ;
+; PORT_INCLK1                   ; PORT_UNUSED       ; Untyped                        ;
+; PORT_INCLK0                   ; PORT_USED         ; Untyped                        ;
+; PORT_FBIN                     ; PORT_UNUSED       ; Untyped                        ;
+; PORT_PLLENA                   ; PORT_UNUSED       ; Untyped                        ;
+; PORT_CLKSWITCH                ; PORT_UNUSED       ; Untyped                        ;
+; PORT_ARESET                   ; PORT_UNUSED       ; Untyped                        ;
+; PORT_PFDENA                   ; PORT_UNUSED       ; Untyped                        ;
+; PORT_SCANCLK                  ; PORT_UNUSED       ; Untyped                        ;
+; PORT_SCANACLR                 ; PORT_UNUSED       ; Untyped                        ;
+; PORT_SCANREAD                 ; PORT_UNUSED       ; Untyped                        ;
+; PORT_SCANWRITE                ; PORT_UNUSED       ; Untyped                        ;
+; PORT_ENABLE0                  ; PORT_UNUSED       ; Untyped                        ;
+; PORT_ENABLE1                  ; PORT_UNUSED       ; Untyped                        ;
+; PORT_LOCKED                   ; PORT_UNUSED       ; Untyped                        ;
+; PORT_CONFIGUPDATE             ; PORT_CONNECTIVITY ; Untyped                        ;
+; PORT_FBOUT                    ; PORT_CONNECTIVITY ; Untyped                        ;
+; PORT_PHASEDONE                ; PORT_CONNECTIVITY ; Untyped                        ;
+; PORT_PHASESTEP                ; PORT_CONNECTIVITY ; Untyped                        ;
+; PORT_PHASEUPDOWN              ; PORT_CONNECTIVITY ; Untyped                        ;
+; PORT_SCANCLKENA               ; PORT_CONNECTIVITY ; Untyped                        ;
+; PORT_PHASECOUNTERSELECT       ; PORT_CONNECTIVITY ; Untyped                        ;
+; PORT_VCOOVERRANGE             ; PORT_CONNECTIVITY ; Untyped                        ;
+; PORT_VCOUNDERRANGE            ; PORT_CONNECTIVITY ; Untyped                        ;
+; M_TEST_SOURCE                 ; 5                 ; Untyped                        ;
+; C0_TEST_SOURCE                ; 5                 ; Untyped                        ;
+; C1_TEST_SOURCE                ; 5                 ; Untyped                        ;
+; C2_TEST_SOURCE                ; 5                 ; Untyped                        ;
+; C3_TEST_SOURCE                ; 5                 ; Untyped                        ;
+; C4_TEST_SOURCE                ; 5                 ; Untyped                        ;
+; C5_TEST_SOURCE                ; 5                 ; Untyped                        ;
+; C6_TEST_SOURCE                ; 5                 ; Untyped                        ;
+; C7_TEST_SOURCE                ; 5                 ; Untyped                        ;
+; C8_TEST_SOURCE                ; 5                 ; Untyped                        ;
+; C9_TEST_SOURCE                ; 5                 ; Untyped                        ;
+; CBXI_PARAMETER                ; NOTHING           ; Untyped                        ;
+; VCO_FREQUENCY_CONTROL         ; AUTO              ; Untyped                        ;
+; VCO_PHASE_SHIFT_STEP          ; 0                 ; Untyped                        ;
+; WIDTH_CLOCK                   ; 6                 ; Untyped                        ;
+; WIDTH_PHASECOUNTERSELECT      ; 4                 ; Untyped                        ;
+; USING_FBMIMICBIDIR_PORT       ; OFF               ; Untyped                        ;
+; DEVICE_FAMILY                 ; Cyclone           ; Untyped                        ;
+; SCAN_CHAIN_MIF_FILE           ; UNUSED            ; Untyped                        ;
+; AUTO_CARRY_CHAINS             ; ON                ; AUTO_CARRY                     ;
+; IGNORE_CARRY_BUFFERS          ; OFF               ; IGNORE_CARRY                   ;
+; AUTO_CASCADE_CHAINS           ; ON                ; AUTO_CASCADE                   ;
+; IGNORE_CASCADE_BUFFERS        ; OFF               ; IGNORE_CASCADE                 ;
++-------------------------------+-------------------+--------------------------------+
+Note: In order to hide this table in the UI and the text report file, please set the "Show Parameter Settings Tables in Synthesis Report" option in "Analysis and Synthesis Settings -> More Settings" to "Off".
+
+
++----------------------------------------------------------------------------------------------+
+; Parameter Settings for Inferred Entity Instance: buffcpu:cpu0|sjls_cpum:cpum|lpm_mult:Mult11 ;
++------------------------------------------------+-----------+---------------------------------+
+; Parameter Name                                 ; Value     ; Type                            ;
++------------------------------------------------+-----------+---------------------------------+
+; AUTO_CARRY_CHAINS                              ; ON        ; AUTO_CARRY                      ;
+; IGNORE_CARRY_BUFFERS                           ; OFF       ; IGNORE_CARRY                    ;
+; AUTO_CASCADE_CHAINS                            ; ON        ; AUTO_CASCADE                    ;
+; IGNORE_CASCADE_BUFFERS                         ; OFF       ; IGNORE_CASCADE                  ;
+; LPM_WIDTHA                                     ; 16        ; Untyped                         ;
+; LPM_WIDTHB                                     ; 16        ; Untyped                         ;
+; LPM_WIDTHP                                     ; 32        ; Untyped                         ;
+; LPM_WIDTHR                                     ; 32        ; Untyped                         ;
+; LPM_WIDTHS                                     ; 1         ; Untyped                         ;
+; LPM_REPRESENTATION                             ; UNSIGNED  ; Untyped                         ;
+; LPM_PIPELINE                                   ; 0         ; Untyped                         ;
+; LATENCY                                        ; 0         ; Untyped                         ;
+; INPUT_A_IS_CONSTANT                            ; NO        ; Untyped                         ;
+; INPUT_B_IS_CONSTANT                            ; NO        ; Untyped                         ;
+; USE_EAB                                        ; OFF       ; Untyped                         ;
+; MAXIMIZE_SPEED                                 ; 6         ; Untyped                         ;
+; DEVICE_FAMILY                                  ; Cyclone   ; Untyped                         ;
+; CARRY_CHAIN                                    ; MANUAL    ; Untyped                         ;
+; APEX20K_TECHNOLOGY_MAPPER                      ; LUT       ; TECH_MAPPER_APEX20K             ;
+; DEDICATED_MULTIPLIER_CIRCUITRY                 ; AUTO      ; Untyped                         ;
+; DEDICATED_MULTIPLIER_MIN_INPUT_WIDTH_FOR_AUTO  ; 0         ; Untyped                         ;
+; DEDICATED_MULTIPLIER_MIN_OUTPUT_WIDTH_FOR_AUTO ; 0         ; Untyped                         ;
+; CBXI_PARAMETER                                 ; mult_nn01 ; Untyped                         ;
+; INPUT_A_FIXED_VALUE                            ; Bx        ; Untyped                         ;
+; INPUT_B_FIXED_VALUE                            ; Bx        ; Untyped                         ;
+; USE_AHDL_IMPLEMENTATION                        ; OFF       ; Untyped                         ;
++------------------------------------------------+-----------+---------------------------------+
+Note: In order to hide this table in the UI and the text report file, please set the "Show Parameter Settings Tables in Synthesis Report" option in "Analysis and Synthesis Settings -> More Settings" to "Off".
+
+
++---------------------------------------------------------------------------------------------+
+; Parameter Settings for Inferred Entity Instance: buffcpu:cpu0|sjls_cpum:cpum|lpm_mult:Mult7 ;
++------------------------------------------------+-----------+--------------------------------+
+; Parameter Name                                 ; Value     ; Type                           ;
++------------------------------------------------+-----------+--------------------------------+
+; AUTO_CARRY_CHAINS                              ; ON        ; AUTO_CARRY                     ;
+; IGNORE_CARRY_BUFFERS                           ; OFF       ; IGNORE_CARRY                   ;
+; AUTO_CASCADE_CHAINS                            ; ON        ; AUTO_CASCADE                   ;
+; IGNORE_CASCADE_BUFFERS                         ; OFF       ; IGNORE_CASCADE                 ;
+; LPM_WIDTHA                                     ; 16        ; Untyped                        ;
+; LPM_WIDTHB                                     ; 16        ; Untyped                        ;
+; LPM_WIDTHP                                     ; 32        ; Untyped                        ;
+; LPM_WIDTHR                                     ; 32        ; Untyped                        ;
+; LPM_WIDTHS                                     ; 1         ; Untyped                        ;
+; LPM_REPRESENTATION                             ; UNSIGNED  ; Untyped                        ;
+; LPM_PIPELINE                                   ; 0         ; Untyped                        ;
+; LATENCY                                        ; 0         ; Untyped                        ;
+; INPUT_A_IS_CONSTANT                            ; NO        ; Untyped                        ;
+; INPUT_B_IS_CONSTANT                            ; NO        ; Untyped                        ;
+; USE_EAB                                        ; OFF       ; Untyped                        ;
+; MAXIMIZE_SPEED                                 ; 6         ; Untyped                        ;
+; DEVICE_FAMILY                                  ; Cyclone   ; Untyped                        ;
+; CARRY_CHAIN                                    ; MANUAL    ; Untyped                        ;
+; APEX20K_TECHNOLOGY_MAPPER                      ; LUT       ; TECH_MAPPER_APEX20K            ;
+; DEDICATED_MULTIPLIER_CIRCUITRY                 ; AUTO      ; Untyped                        ;
+; DEDICATED_MULTIPLIER_MIN_INPUT_WIDTH_FOR_AUTO  ; 0         ; Untyped                        ;
+; DEDICATED_MULTIPLIER_MIN_OUTPUT_WIDTH_FOR_AUTO ; 0         ; Untyped                        ;
+; CBXI_PARAMETER                                 ; mult_nn01 ; Untyped                        ;
+; INPUT_A_FIXED_VALUE                            ; Bx        ; Untyped                        ;
+; INPUT_B_FIXED_VALUE                            ; Bx        ; Untyped                        ;
+; USE_AHDL_IMPLEMENTATION                        ; OFF       ; Untyped                        ;
++------------------------------------------------+-----------+--------------------------------+
+Note: In order to hide this table in the UI and the text report file, please set the "Show Parameter Settings Tables in Synthesis Report" option in "Analysis and Synthesis Settings -> More Settings" to "Off".
+
+
++---------------------------------------------------------------------------------------------+
+; Parameter Settings for Inferred Entity Instance: buffcpu:cpu0|sjls_cpum:cpum|lpm_mult:Mult3 ;
++------------------------------------------------+-----------+--------------------------------+
+; Parameter Name                                 ; Value     ; Type                           ;
++------------------------------------------------+-----------+--------------------------------+
+; AUTO_CARRY_CHAINS                              ; ON        ; AUTO_CARRY                     ;
+; IGNORE_CARRY_BUFFERS                           ; OFF       ; IGNORE_CARRY                   ;
+; AUTO_CASCADE_CHAINS                            ; ON        ; AUTO_CASCADE                   ;
+; IGNORE_CASCADE_BUFFERS                         ; OFF       ; IGNORE_CASCADE                 ;
+; LPM_WIDTHA                                     ; 16        ; Untyped                        ;
+; LPM_WIDTHB                                     ; 16        ; Untyped                        ;
+; LPM_WIDTHP                                     ; 32        ; Untyped                        ;
+; LPM_WIDTHR                                     ; 32        ; Untyped                        ;
+; LPM_WIDTHS                                     ; 1         ; Untyped                        ;
+; LPM_REPRESENTATION                             ; UNSIGNED  ; Untyped                        ;
+; LPM_PIPELINE                                   ; 0         ; Untyped                        ;
+; LATENCY                                        ; 0         ; Untyped                        ;
+; INPUT_A_IS_CONSTANT                            ; NO        ; Untyped                        ;
+; INPUT_B_IS_CONSTANT                            ; NO        ; Untyped                        ;
+; USE_EAB                                        ; OFF       ; Untyped                        ;
+; MAXIMIZE_SPEED                                 ; 6         ; Untyped                        ;
+; DEVICE_FAMILY                                  ; Cyclone   ; Untyped                        ;
+; CARRY_CHAIN                                    ; MANUAL    ; Untyped                        ;
+; APEX20K_TECHNOLOGY_MAPPER                      ; LUT       ; TECH_MAPPER_APEX20K            ;
+; DEDICATED_MULTIPLIER_CIRCUITRY                 ; AUTO      ; Untyped                        ;
+; DEDICATED_MULTIPLIER_MIN_INPUT_WIDTH_FOR_AUTO  ; 0         ; Untyped                        ;
+; DEDICATED_MULTIPLIER_MIN_OUTPUT_WIDTH_FOR_AUTO ; 0         ; Untyped                        ;
+; CBXI_PARAMETER                                 ; mult_nn01 ; Untyped                        ;
+; INPUT_A_FIXED_VALUE                            ; Bx        ; Untyped                        ;
+; INPUT_B_FIXED_VALUE                            ; Bx        ; Untyped                        ;
+; USE_AHDL_IMPLEMENTATION                        ; OFF       ; Untyped                        ;
++------------------------------------------------+-----------+--------------------------------+
+Note: In order to hide this table in the UI and the text report file, please set the "Show Parameter Settings Tables in Synthesis Report" option in "Analysis and Synthesis Settings -> More Settings" to "Off".
+
+
++----------------------------------------------------------------------------------------------+
+; Parameter Settings for Inferred Entity Instance: buffcpu:cpu0|sjls_cpum:cpum|lpm_mult:Mult15 ;
++------------------------------------------------+-----------+---------------------------------+
+; Parameter Name                                 ; Value     ; Type                            ;
++------------------------------------------------+-----------+---------------------------------+
+; AUTO_CARRY_CHAINS                              ; ON        ; AUTO_CARRY                      ;
+; IGNORE_CARRY_BUFFERS                           ; OFF       ; IGNORE_CARRY                    ;
+; AUTO_CASCADE_CHAINS                            ; ON        ; AUTO_CASCADE                    ;
+; IGNORE_CASCADE_BUFFERS                         ; OFF       ; IGNORE_CASCADE                  ;
+; LPM_WIDTHA                                     ; 16        ; Untyped                         ;
+; LPM_WIDTHB                                     ; 16        ; Untyped                         ;
+; LPM_WIDTHP                                     ; 32        ; Untyped                         ;
+; LPM_WIDTHR                                     ; 32        ; Untyped                         ;
+; LPM_WIDTHS                                     ; 1         ; Untyped                         ;
+; LPM_REPRESENTATION                             ; UNSIGNED  ; Untyped                         ;
+; LPM_PIPELINE                                   ; 0         ; Untyped                         ;
+; LATENCY                                        ; 0         ; Untyped                         ;
+; INPUT_A_IS_CONSTANT                            ; NO        ; Untyped                         ;
+; INPUT_B_IS_CONSTANT                            ; NO        ; Untyped                         ;
+; USE_EAB                                        ; OFF       ; Untyped                         ;
+; MAXIMIZE_SPEED                                 ; 6         ; Untyped                         ;
+; DEVICE_FAMILY                                  ; Cyclone   ; Untyped                         ;
+; CARRY_CHAIN                                    ; MANUAL    ; Untyped                         ;
+; APEX20K_TECHNOLOGY_MAPPER                      ; LUT       ; TECH_MAPPER_APEX20K             ;
+; DEDICATED_MULTIPLIER_CIRCUITRY                 ; AUTO      ; Untyped                         ;
+; DEDICATED_MULTIPLIER_MIN_INPUT_WIDTH_FOR_AUTO  ; 0         ; Untyped                         ;
+; DEDICATED_MULTIPLIER_MIN_OUTPUT_WIDTH_FOR_AUTO ; 0         ; Untyped                         ;
+; CBXI_PARAMETER                                 ; mult_nn01 ; Untyped                         ;
+; INPUT_A_FIXED_VALUE                            ; Bx        ; Untyped                         ;
+; INPUT_B_FIXED_VALUE                            ; Bx        ; Untyped                         ;
+; USE_AHDL_IMPLEMENTATION                        ; OFF       ; Untyped                         ;
++------------------------------------------------+-----------+---------------------------------+
+Note: In order to hide this table in the UI and the text report file, please set the "Show Parameter Settings Tables in Synthesis Report" option in "Analysis and Synthesis Settings -> More Settings" to "Off".
+
+
++---------------------------------------------------------------------------------------------+
+; Parameter Settings for Inferred Entity Instance: buffcpu:cpu0|sjls_cpum:cpum|lpm_mult:Mult9 ;
++------------------------------------------------+-----------+--------------------------------+
+; Parameter Name                                 ; Value     ; Type                           ;
++------------------------------------------------+-----------+--------------------------------+
+; AUTO_CARRY_CHAINS                              ; ON        ; AUTO_CARRY                     ;
+; IGNORE_CARRY_BUFFERS                           ; OFF       ; IGNORE_CARRY                   ;
+; AUTO_CASCADE_CHAINS                            ; ON        ; AUTO_CASCADE                   ;
+; IGNORE_CASCADE_BUFFERS                         ; OFF       ; IGNORE_CASCADE                 ;
+; LPM_WIDTHA                                     ; 16        ; Untyped                        ;
+; LPM_WIDTHB                                     ; 16        ; Untyped                        ;
+; LPM_WIDTHP                                     ; 32        ; Untyped                        ;
+; LPM_WIDTHR                                     ; 32        ; Untyped                        ;
+; LPM_WIDTHS                                     ; 1         ; Untyped                        ;
+; LPM_REPRESENTATION                             ; UNSIGNED  ; Untyped                        ;
+; LPM_PIPELINE                                   ; 0         ; Untyped                        ;
+; LATENCY                                        ; 0         ; Untyped                        ;
+; INPUT_A_IS_CONSTANT                            ; NO        ; Untyped                        ;
+; INPUT_B_IS_CONSTANT                            ; NO        ; Untyped                        ;
+; USE_EAB                                        ; OFF       ; Untyped                        ;
+; MAXIMIZE_SPEED                                 ; 6         ; Untyped                        ;
+; DEVICE_FAMILY                                  ; Cyclone   ; Untyped                        ;
+; CARRY_CHAIN                                    ; MANUAL    ; Untyped                        ;
+; APEX20K_TECHNOLOGY_MAPPER                      ; LUT       ; TECH_MAPPER_APEX20K            ;
+; DEDICATED_MULTIPLIER_CIRCUITRY                 ; AUTO      ; Untyped                        ;
+; DEDICATED_MULTIPLIER_MIN_INPUT_WIDTH_FOR_AUTO  ; 0         ; Untyped                        ;
+; DEDICATED_MULTIPLIER_MIN_OUTPUT_WIDTH_FOR_AUTO ; 0         ; Untyped                        ;
+; CBXI_PARAMETER                                 ; mult_nn01 ; Untyped                        ;
+; INPUT_A_FIXED_VALUE                            ; Bx        ; Untyped                        ;
+; INPUT_B_FIXED_VALUE                            ; Bx        ; Untyped                        ;
+; USE_AHDL_IMPLEMENTATION                        ; OFF       ; Untyped                        ;
++------------------------------------------------+-----------+--------------------------------+
+Note: In order to hide this table in the UI and the text report file, please set the "Show Parameter Settings Tables in Synthesis Report" option in "Analysis and Synthesis Settings -> More Settings" to "Off".
+
+
++---------------------------------------------------------------------------------------------+
+; Parameter Settings for Inferred Entity Instance: buffcpu:cpu0|sjls_cpum:cpum|lpm_mult:Mult5 ;
++------------------------------------------------+-----------+--------------------------------+
+; Parameter Name                                 ; Value     ; Type                           ;
++------------------------------------------------+-----------+--------------------------------+
+; AUTO_CARRY_CHAINS                              ; ON        ; AUTO_CARRY                     ;
+; IGNORE_CARRY_BUFFERS                           ; OFF       ; IGNORE_CARRY                   ;
+; AUTO_CASCADE_CHAINS                            ; ON        ; AUTO_CASCADE                   ;
+; IGNORE_CASCADE_BUFFERS                         ; OFF       ; IGNORE_CASCADE                 ;
+; LPM_WIDTHA                                     ; 16        ; Untyped                        ;
+; LPM_WIDTHB                                     ; 16        ; Untyped                        ;
+; LPM_WIDTHP                                     ; 32        ; Untyped                        ;
+; LPM_WIDTHR                                     ; 32        ; Untyped                        ;
+; LPM_WIDTHS                                     ; 1         ; Untyped                        ;
+; LPM_REPRESENTATION                             ; UNSIGNED  ; Untyped                        ;
+; LPM_PIPELINE                                   ; 0         ; Untyped                        ;
+; LATENCY                                        ; 0         ; Untyped                        ;
+; INPUT_A_IS_CONSTANT                            ; NO        ; Untyped                        ;
+; INPUT_B_IS_CONSTANT                            ; NO        ; Untyped                        ;
+; USE_EAB                                        ; OFF       ; Untyped                        ;
+; MAXIMIZE_SPEED                                 ; 6         ; Untyped                        ;
+; DEVICE_FAMILY                                  ; Cyclone   ; Untyped                        ;
+; CARRY_CHAIN                                    ; MANUAL    ; Untyped                        ;
+; APEX20K_TECHNOLOGY_MAPPER                      ; LUT       ; TECH_MAPPER_APEX20K            ;
+; DEDICATED_MULTIPLIER_CIRCUITRY                 ; AUTO      ; Untyped                        ;
+; DEDICATED_MULTIPLIER_MIN_INPUT_WIDTH_FOR_AUTO  ; 0         ; Untyped                        ;
+; DEDICATED_MULTIPLIER_MIN_OUTPUT_WIDTH_FOR_AUTO ; 0         ; Untyped                        ;
+; CBXI_PARAMETER                                 ; mult_nn01 ; Untyped                        ;
+; INPUT_A_FIXED_VALUE                            ; Bx        ; Untyped                        ;
+; INPUT_B_FIXED_VALUE                            ; Bx        ; Untyped                        ;
+; USE_AHDL_IMPLEMENTATION                        ; OFF       ; Untyped                        ;
++------------------------------------------------+-----------+--------------------------------+
+Note: In order to hide this table in the UI and the text report file, please set the "Show Parameter Settings Tables in Synthesis Report" option in "Analysis and Synthesis Settings -> More Settings" to "Off".
+
+
++---------------------------------------------------------------------------------------------+
+; Parameter Settings for Inferred Entity Instance: buffcpu:cpu0|sjls_cpum:cpum|lpm_mult:Mult1 ;
++------------------------------------------------+-----------+--------------------------------+
+; Parameter Name                                 ; Value     ; Type                           ;
++------------------------------------------------+-----------+--------------------------------+
+; AUTO_CARRY_CHAINS                              ; ON        ; AUTO_CARRY                     ;
+; IGNORE_CARRY_BUFFERS                           ; OFF       ; IGNORE_CARRY                   ;
+; AUTO_CASCADE_CHAINS                            ; ON        ; AUTO_CASCADE                   ;
+; IGNORE_CASCADE_BUFFERS                         ; OFF       ; IGNORE_CASCADE                 ;
+; LPM_WIDTHA                                     ; 16        ; Untyped                        ;
+; LPM_WIDTHB                                     ; 16        ; Untyped                        ;
+; LPM_WIDTHP                                     ; 32        ; Untyped                        ;
+; LPM_WIDTHR                                     ; 32        ; Untyped                        ;
+; LPM_WIDTHS                                     ; 1         ; Untyped                        ;
+; LPM_REPRESENTATION                             ; UNSIGNED  ; Untyped                        ;
+; LPM_PIPELINE                                   ; 0         ; Untyped                        ;
+; LATENCY                                        ; 0         ; Untyped                        ;
+; INPUT_A_IS_CONSTANT                            ; NO        ; Untyped                        ;
+; INPUT_B_IS_CONSTANT                            ; NO        ; Untyped                        ;
+; USE_EAB                                        ; OFF       ; Untyped                        ;
+; MAXIMIZE_SPEED                                 ; 6         ; Untyped                        ;
+; DEVICE_FAMILY                                  ; Cyclone   ; Untyped                        ;
+; CARRY_CHAIN                                    ; MANUAL    ; Untyped                        ;
+; APEX20K_TECHNOLOGY_MAPPER                      ; LUT       ; TECH_MAPPER_APEX20K            ;
+; DEDICATED_MULTIPLIER_CIRCUITRY                 ; AUTO      ; Untyped                        ;
+; DEDICATED_MULTIPLIER_MIN_INPUT_WIDTH_FOR_AUTO  ; 0         ; Untyped                        ;
+; DEDICATED_MULTIPLIER_MIN_OUTPUT_WIDTH_FOR_AUTO ; 0         ; Untyped                        ;
+; CBXI_PARAMETER                                 ; mult_nn01 ; Untyped                        ;
+; INPUT_A_FIXED_VALUE                            ; Bx        ; Untyped                        ;
+; INPUT_B_FIXED_VALUE                            ; Bx        ; Untyped                        ;
+; USE_AHDL_IMPLEMENTATION                        ; OFF       ; Untyped                        ;
++------------------------------------------------+-----------+--------------------------------+
+Note: In order to hide this table in the UI and the text report file, please set the "Show Parameter Settings Tables in Synthesis Report" option in "Analysis and Synthesis Settings -> More Settings" to "Off".
+
+
++----------------------------------------------------------------------------------------------+
+; Parameter Settings for Inferred Entity Instance: buffcpu:cpu0|sjls_cpum:cpum|lpm_mult:Mult13 ;
++------------------------------------------------+-----------+---------------------------------+
+; Parameter Name                                 ; Value     ; Type                            ;
++------------------------------------------------+-----------+---------------------------------+
+; AUTO_CARRY_CHAINS                              ; ON        ; AUTO_CARRY                      ;
+; IGNORE_CARRY_BUFFERS                           ; OFF       ; IGNORE_CARRY                    ;
+; AUTO_CASCADE_CHAINS                            ; ON        ; AUTO_CASCADE                    ;
+; IGNORE_CASCADE_BUFFERS                         ; OFF       ; IGNORE_CASCADE                  ;
+; LPM_WIDTHA                                     ; 16        ; Untyped                         ;
+; LPM_WIDTHB                                     ; 16        ; Untyped                         ;
+; LPM_WIDTHP                                     ; 32        ; Untyped                         ;
+; LPM_WIDTHR                                     ; 32        ; Untyped                         ;
+; LPM_WIDTHS                                     ; 1         ; Untyped                         ;
+; LPM_REPRESENTATION                             ; UNSIGNED  ; Untyped                         ;
+; LPM_PIPELINE                                   ; 0         ; Untyped                         ;
+; LATENCY                                        ; 0         ; Untyped                         ;
+; INPUT_A_IS_CONSTANT                            ; NO        ; Untyped                         ;
+; INPUT_B_IS_CONSTANT                            ; NO        ; Untyped                         ;
+; USE_EAB                                        ; OFF       ; Untyped                         ;
+; MAXIMIZE_SPEED                                 ; 6         ; Untyped                         ;
+; DEVICE_FAMILY                                  ; Cyclone   ; Untyped                         ;
+; CARRY_CHAIN                                    ; MANUAL    ; Untyped                         ;
+; APEX20K_TECHNOLOGY_MAPPER                      ; LUT       ; TECH_MAPPER_APEX20K             ;
+; DEDICATED_MULTIPLIER_CIRCUITRY                 ; AUTO      ; Untyped                         ;
+; DEDICATED_MULTIPLIER_MIN_INPUT_WIDTH_FOR_AUTO  ; 0         ; Untyped                         ;
+; DEDICATED_MULTIPLIER_MIN_OUTPUT_WIDTH_FOR_AUTO ; 0         ; Untyped                         ;
+; CBXI_PARAMETER                                 ; mult_nn01 ; Untyped                         ;
+; INPUT_A_FIXED_VALUE                            ; Bx        ; Untyped                         ;
+; INPUT_B_FIXED_VALUE                            ; Bx        ; Untyped                         ;
+; USE_AHDL_IMPLEMENTATION                        ; OFF       ; Untyped                         ;
++------------------------------------------------+-----------+---------------------------------+
+Note: In order to hide this table in the UI and the text report file, please set the "Show Parameter Settings Tables in Synthesis Report" option in "Analysis and Synthesis Settings -> More Settings" to "Off".
+
+
++-------------------------------------------------------------------------------------+
+; lpm_mult Parameter Settings by Entity Instance                                      ;
++---------------------------------------+---------------------------------------------+
+; Name                                  ; Value                                       ;
++---------------------------------------+---------------------------------------------+
+; Number of entity instances            ; 8                                           ;
+; Entity Instance                       ; buffcpu:cpu0|sjls_cpum:cpum|lpm_mult:Mult11 ;
+;     -- LPM_WIDTHA                     ; 16                                          ;
+;     -- LPM_WIDTHB                     ; 16                                          ;
+;     -- LPM_WIDTHP                     ; 32                                          ;
+;     -- LPM_REPRESENTATION             ; UNSIGNED                                    ;
+;     -- INPUT_A_IS_CONSTANT            ; NO                                          ;
+;     -- INPUT_B_IS_CONSTANT            ; NO                                          ;
+;     -- USE_EAB                        ; OFF                                         ;
+;     -- DEDICATED_MULTIPLIER_CIRCUITRY ; AUTO                                        ;
+;     -- INPUT_A_FIXED_VALUE            ; Bx                                          ;
+;     -- INPUT_B_FIXED_VALUE            ; Bx                                          ;
+; Entity Instance                       ; buffcpu:cpu0|sjls_cpum:cpum|lpm_mult:Mult7  ;
+;     -- LPM_WIDTHA                     ; 16                                          ;
+;     -- LPM_WIDTHB                     ; 16                                          ;
+;     -- LPM_WIDTHP                     ; 32                                          ;
+;     -- LPM_REPRESENTATION             ; UNSIGNED                                    ;
+;     -- INPUT_A_IS_CONSTANT            ; NO                                          ;
+;     -- INPUT_B_IS_CONSTANT            ; NO                                          ;
+;     -- USE_EAB                        ; OFF                                         ;
+;     -- DEDICATED_MULTIPLIER_CIRCUITRY ; AUTO                                        ;
+;     -- INPUT_A_FIXED_VALUE            ; Bx                                          ;
+;     -- INPUT_B_FIXED_VALUE            ; Bx                                          ;
+; Entity Instance                       ; buffcpu:cpu0|sjls_cpum:cpum|lpm_mult:Mult3  ;
+;     -- LPM_WIDTHA                     ; 16                                          ;
+;     -- LPM_WIDTHB                     ; 16                                          ;
+;     -- LPM_WIDTHP                     ; 32                                          ;
+;     -- LPM_REPRESENTATION             ; UNSIGNED                                    ;
+;     -- INPUT_A_IS_CONSTANT            ; NO                                          ;
+;     -- INPUT_B_IS_CONSTANT            ; NO                                          ;
+;     -- USE_EAB                        ; OFF                                         ;
+;     -- DEDICATED_MULTIPLIER_CIRCUITRY ; AUTO                                        ;
+;     -- INPUT_A_FIXED_VALUE            ; Bx                                          ;
+;     -- INPUT_B_FIXED_VALUE            ; Bx                                          ;
+; Entity Instance                       ; buffcpu:cpu0|sjls_cpum:cpum|lpm_mult:Mult15 ;
+;     -- LPM_WIDTHA                     ; 16                                          ;
+;     -- LPM_WIDTHB                     ; 16                                          ;
+;     -- LPM_WIDTHP                     ; 32                                          ;
+;     -- LPM_REPRESENTATION             ; UNSIGNED                                    ;
+;     -- INPUT_A_IS_CONSTANT            ; NO                                          ;
+;     -- INPUT_B_IS_CONSTANT            ; NO                                          ;
+;     -- USE_EAB                        ; OFF                                         ;
+;     -- DEDICATED_MULTIPLIER_CIRCUITRY ; AUTO                                        ;
+;     -- INPUT_A_FIXED_VALUE            ; Bx                                          ;
+;     -- INPUT_B_FIXED_VALUE            ; Bx                                          ;
+; Entity Instance                       ; buffcpu:cpu0|sjls_cpum:cpum|lpm_mult:Mult9  ;
+;     -- LPM_WIDTHA                     ; 16                                          ;
+;     -- LPM_WIDTHB                     ; 16                                          ;
+;     -- LPM_WIDTHP                     ; 32                                          ;
+;     -- LPM_REPRESENTATION             ; UNSIGNED                                    ;
+;     -- INPUT_A_IS_CONSTANT            ; NO                                          ;
+;     -- INPUT_B_IS_CONSTANT            ; NO                                          ;
+;     -- USE_EAB                        ; OFF                                         ;
+;     -- DEDICATED_MULTIPLIER_CIRCUITRY ; AUTO                                        ;
+;     -- INPUT_A_FIXED_VALUE            ; Bx                                          ;
+;     -- INPUT_B_FIXED_VALUE            ; Bx                                          ;
+; Entity Instance                       ; buffcpu:cpu0|sjls_cpum:cpum|lpm_mult:Mult5  ;
+;     -- LPM_WIDTHA                     ; 16                                          ;
+;     -- LPM_WIDTHB                     ; 16                                          ;
+;     -- LPM_WIDTHP                     ; 32                                          ;
+;     -- LPM_REPRESENTATION             ; UNSIGNED                                    ;
+;     -- INPUT_A_IS_CONSTANT            ; NO                                          ;
+;     -- INPUT_B_IS_CONSTANT            ; NO                                          ;
+;     -- USE_EAB                        ; OFF                                         ;
+;     -- DEDICATED_MULTIPLIER_CIRCUITRY ; AUTO                                        ;
+;     -- INPUT_A_FIXED_VALUE            ; Bx                                          ;
+;     -- INPUT_B_FIXED_VALUE            ; Bx                                          ;
+; Entity Instance                       ; buffcpu:cpu0|sjls_cpum:cpum|lpm_mult:Mult1  ;
+;     -- LPM_WIDTHA                     ; 16                                          ;
+;     -- LPM_WIDTHB                     ; 16                                          ;
+;     -- LPM_WIDTHP                     ; 32                                          ;
+;     -- LPM_REPRESENTATION             ; UNSIGNED                                    ;
+;     -- INPUT_A_IS_CONSTANT            ; NO                                          ;
+;     -- INPUT_B_IS_CONSTANT            ; NO                                          ;
+;     -- USE_EAB                        ; OFF                                         ;
+;     -- DEDICATED_MULTIPLIER_CIRCUITRY ; AUTO                                        ;
+;     -- INPUT_A_FIXED_VALUE            ; Bx                                          ;
+;     -- INPUT_B_FIXED_VALUE            ; Bx                                          ;
+; Entity Instance                       ; buffcpu:cpu0|sjls_cpum:cpum|lpm_mult:Mult13 ;
+;     -- LPM_WIDTHA                     ; 16                                          ;
+;     -- LPM_WIDTHB                     ; 16                                          ;
+;     -- LPM_WIDTHP                     ; 32                                          ;
+;     -- LPM_REPRESENTATION             ; UNSIGNED                                    ;
+;     -- INPUT_A_IS_CONSTANT            ; NO                                          ;
+;     -- INPUT_B_IS_CONSTANT            ; NO                                          ;
+;     -- USE_EAB                        ; OFF                                         ;
+;     -- DEDICATED_MULTIPLIER_CIRCUITRY ; AUTO                                        ;
+;     -- INPUT_A_FIXED_VALUE            ; Bx                                          ;
+;     -- INPUT_B_FIXED_VALUE            ; Bx                                          ;
++---------------------------------------+---------------------------------------------+
+
+
++-------------------------------+
+; Analysis & Synthesis Messages ;
++-------------------------------+
+Info: *******************************************************************
+Info: Running Quartus II Analysis & Synthesis
+    Info: Version 7.2 Build 151 09/26/2007 SJ Web Edition
+    Info: Processing started: Mon Sep 05 21:48:28 2011
+Info: Command: quartus_map --read_settings_files=on --write_settings_files=off sanji -c sanji
+Warning: Ignored assignments for entity "sanji" -- entity does not exist in design
+    Warning: Assignment of entity set_global_assignment -name LL_ROOT_REGION ON -entity sanji -section_id "Root Region" is ignored
+    Warning: Assignment of entity set_global_assignment -name LL_MEMBER_STATE LOCKED -entity sanji -section_id "Root Region" is ignored
+Info: Found 1 design units, including 1 entities, in source file altsyncram0.v
+    Info: Found entity 1: altsyncram0
+Info: Found 1 design units, including 1 entities, in source file altpll0.v
+    Info: Found entity 1: altpll0
+Info: Found 1 design units, including 1 entities, in source file altsyncram4.v
+    Info: Found entity 1: altsyncram4
+Info: Found 1 design units, including 1 entities, in source file buffcpu.v
+    Info: Found entity 1: buffcpu
+Info: Found 1 design units, including 1 entities, in source file buffin.v
+    Info: Found entity 1: buffin
+Info: Found 1 design units, including 1 entities, in source file SEG7_LUT.v
+    Info: Found entity 1: SEG7_LUT
+Info: Found 1 design units, including 1 entities, in source file SEG7_LUT_4.v
+    Info: Found entity 1: SEG7_LUT_4
+Info: Found 1 design units, including 1 entities, in source file sjls_cpum.v
+    Info: Found entity 1: sjls_cpum
+Info: Found 1 design units, including 1 entities, in source file sjlsTOP.v
+    Info: Found entity 1: sjlsTOP
+Info: Elaborating entity "sjlsTOP" for the top level hierarchy
+Warning (10036): Verilog HDL or VHDL warning at sjlsTOP.v(77): object "rest" assigned a value but never read
+Warning (10036): Verilog HDL or VHDL warning at sjlsTOP.v(79): object "bclar" assigned a value but never read
+Warning (10036): Verilog HDL or VHDL warning at sjlsTOP.v(84): object "mUP" assigned a value but never read
+Warning (10036): Verilog HDL or VHDL warning at sjlsTOP.v(85): object "mDOWN" assigned a value but never read
+Info: Elaborating entity "buffcpu" for hierarchy "buffcpu:cpu0"
+Info: Elaborating entity "sjls_cpum" for hierarchy "buffcpu:cpu0|sjls_cpum:cpum"
+Warning (10036): Verilog HDL or VHDL warning at sjls_cpum.v(71): object "add" assigned a value but never read
+Warning (10036): Verilog HDL or VHDL warning at sjls_cpum.v(71): object "sub" assigned a value but never read
+Warning (10036): Verilog HDL or VHDL warning at sjls_cpum.v(71): object "out" assigned a value but never read
+Warning (10036): Verilog HDL or VHDL warning at sjls_cpum.v(71): object "str" assigned a value but never read
+Warning (10036): Verilog HDL or VHDL warning at sjls_cpum.v(71): object "mov" assigned a value but never read
+Warning (10036): Verilog HDL or VHDL warning at sjls_cpum.v(71): object "xtda" assigned a value but never read
+Warning (10036): Verilog HDL or VHDL warning at sjls_cpum.v(71): object "mult" assigned a value but never read
+Warning (10036): Verilog HDL or VHDL warning at sjls_cpum.v(71): object "divi" assigned a value but never read
+Warning (10036): Verilog HDL or VHDL warning at sjls_cpum.v(71): object "sdal" assigned a value but never read
+Warning (10036): Verilog HDL or VHDL warning at sjls_cpum.v(71): object "sdah" assigned a value but never read
+Warning (10036): Verilog HDL or VHDL warning at sjls_cpum.v(72): object "ldar" assigned a value but never read
+Warning (10036): Verilog HDL or VHDL warning at sjls_cpum.v(72): object "strr" assigned a value but never read
+Warning (10036): Verilog HDL or VHDL warning at sjls_cpum.v(72): object "jmp" assigned a value but never read
+Warning (10036): Verilog HDL or VHDL warning at sjls_cpum.v(72): object "push" assigned a value but never read
+Warning (10036): Verilog HDL or VHDL warning at sjls_cpum.v(72): object "pop" assigned a value but never read
+Warning (10036): Verilog HDL or VHDL warning at sjls_cpum.v(72): object "stp" assigned a value but never read
+Warning (10036): Verilog HDL or VHDL warning at sjls_cpum.v(73): object "inl" assigned a value but never read
+Warning (10036): Verilog HDL or VHDL warning at sjls_cpum.v(73): object "inh" assigned a value but never read
+Warning (10036): Verilog HDL or VHDL warning at sjls_cpum.v(73): object "dec" assigned a value but never read
+Warning (10036): Verilog HDL or VHDL warning at sjls_cpum.v(73): object "inc" assigned a value but never read
+Warning (10036): Verilog HDL or VHDL warning at sjls_cpum.v(73): object "datp" assigned a value but never read
+Warning (10036): Verilog HDL or VHDL warning at sjls_cpum.v(73): object "ting" assigned a value but never read
+Warning (10230): Verilog HDL assignment warning at sjls_cpum.v(92): truncated value with size 32 to match size of target (16)
+Warning (10230): Verilog HDL assignment warning at sjls_cpum.v(163): truncated value with size 32 to match size of target (10)
+Warning (10230): Verilog HDL assignment warning at sjls_cpum.v(164): truncated value with size 32 to match size of target (10)
+Warning (10230): Verilog HDL assignment warning at sjls_cpum.v(181): truncated value with size 16 to match size of target (10)
+Warning (10230): Verilog HDL assignment warning at sjls_cpum.v(182): truncated value with size 16 to match size of target (10)
+Warning (10230): Verilog HDL assignment warning at sjls_cpum.v(183): truncated value with size 16 to match size of target (10)
+Warning (10230): Verilog HDL assignment warning at sjls_cpum.v(184): truncated value with size 16 to match size of target (10)
+Warning (10230): Verilog HDL assignment warning at sjls_cpum.v(185): truncated value with size 16 to match size of target (10)
+Warning (10230): Verilog HDL assignment warning at sjls_cpum.v(186): truncated value with size 16 to match size of target (10)
+Warning (10230): Verilog HDL assignment warning at sjls_cpum.v(187): truncated value with size 16 to match size of target (10)
+Warning (10230): Verilog HDL assignment warning at sjls_cpum.v(188): truncated value with size 16 to match size of target (10)
+Warning (10230): Verilog HDL assignment warning at sjls_cpum.v(709): truncated value with size 16 to match size of target (10)
+Warning (10230): Verilog HDL assignment warning at sjls_cpum.v(714): truncated value with size 32 to match size of target (10)
+Warning (10230): Verilog HDL assignment warning at sjls_cpum.v(719): truncated value with size 32 to match size of target (10)
+Warning (10230): Verilog HDL assignment warning at sjls_cpum.v(725): truncated value with size 32 to match size of target (10)
+Warning (10230): Verilog HDL assignment warning at sjls_cpum.v(738): truncated value with size 12 to match size of target (10)
+Warning (10230): Verilog HDL assignment warning at sjls_cpum.v(742): truncated value with size 12 to match size of target (10)
+Warning (10230): Verilog HDL assignment warning at sjls_cpum.v(749): truncated value with size 12 to match size of target (10)
+Warning (10230): Verilog HDL assignment warning at sjls_cpum.v(763): truncated value with size 12 to match size of target (10)
+Warning (10230): Verilog HDL assignment warning at sjls_cpum.v(769): truncated value with size 12 to match size of target (10)
+Warning (10230): Verilog HDL assignment warning at sjls_cpum.v(773): truncated value with size 12 to match size of target (10)
+Warning (10230): Verilog HDL assignment warning at sjls_cpum.v(780): truncated value with size 12 to match size of target (10)
+Warning (10230): Verilog HDL assignment warning at sjls_cpum.v(787): truncated value with size 12 to match size of target (10)
+Warning (10230): Verilog HDL assignment warning at sjls_cpum.v(788): truncated value with size 32 to match size of target (10)
+Warning (10230): Verilog HDL assignment warning at sjls_cpum.v(803): truncated value with size 32 to match size of target (10)
+Warning (10230): Verilog HDL assignment warning at sjls_cpum.v(806): truncated value with size 32 to match size of target (10)
+Info: Elaborating entity "altsyncram0" for hierarchy "buffcpu:cpu0|sjls_cpum:cpum|altsyncram0:iram"
+Info: Found 1 design units, including 1 entities, in source file ../altera/72/quartus/libraries/megafunctions/altsyncram.tdf
+    Info: Found entity 1: altsyncram
+Info: Elaborating entity "altsyncram" for hierarchy "buffcpu:cpu0|sjls_cpum:cpum|altsyncram0:iram|altsyncram:altsyncram_component"
+Info: Elaborated megafunction instantiation "buffcpu:cpu0|sjls_cpum:cpum|altsyncram0:iram|altsyncram:altsyncram_component"
+Info: Found 1 design units, including 1 entities, in source file db/altsyncram_e5d1.tdf
+    Info: Found entity 1: altsyncram_e5d1
+Info: Elaborating entity "altsyncram_e5d1" for hierarchy "buffcpu:cpu0|sjls_cpum:cpum|altsyncram0:iram|altsyncram:altsyncram_component|altsyncram_e5d1:auto_generated"
+Info: Elaborating entity "altsyncram4" for hierarchy "buffcpu:cpu0|sjls_cpum:cpum|altsyncram4:dram"
+Info: Elaborating entity "altsyncram" for hierarchy "buffcpu:cpu0|sjls_cpum:cpum|altsyncram4:dram|altsyncram:altsyncram_component"
+Info: Elaborated megafunction instantiation "buffcpu:cpu0|sjls_cpum:cpum|altsyncram4:dram|altsyncram:altsyncram_component"
+Info: Found 1 design units, including 1 entities, in source file db/altsyncram_toh1.tdf
+    Info: Found entity 1: altsyncram_toh1
+Info: Elaborating entity "altsyncram_toh1" for hierarchy "buffcpu:cpu0|sjls_cpum:cpum|altsyncram4:dram|altsyncram:altsyncram_component|altsyncram_toh1:auto_generated"
+Info: Elaborating entity "buffin" for hierarchy "buffcpu:cpu0|buffin:buff0"
+Warning (10230): Verilog HDL assignment warning at buffin.v(58): truncated value with size 32 to match size of target (7)
+Warning (10230): Verilog HDL assignment warning at buffin.v(65): truncated value with size 32 to match size of target (7)
+Warning (10230): Verilog HDL assignment warning at buffin.v(87): truncated value with size 32 to match size of target (7)
+Warning (10230): Verilog HDL assignment warning at buffin.v(88): truncated value with size 32 to match size of target (7)
+Warning (10230): Verilog HDL assignment warning at buffin.v(98): truncated value with size 32 to match size of target (7)
+Warning (10230): Verilog HDL assignment warning at buffin.v(99): truncated value with size 32 to match size of target (7)
+Warning (10230): Verilog HDL assignment warning at buffin.v(101): truncated value with size 32 to match size of target (1)
+Info: Elaborating entity "SEG7_LUT_4" for hierarchy "SEG7_LUT_4:u0"
+Info: Elaborating entity "SEG7_LUT" for hierarchy "SEG7_LUT_4:u0|SEG7_LUT:u0"
+Info: Elaborating entity "altpll0" for hierarchy "altpll0:altp0"
+Info: Found 1 design units, including 1 entities, in source file ../altera/72/quartus/libraries/megafunctions/altpll.tdf
+    Info: Found entity 1: altpll
+Info: Elaborating entity "altpll" for hierarchy "altpll0:altp0|altpll:altpll_component"
+Info: Elaborated megafunction instantiation "altpll0:altp0|altpll:altpll_component"
+Warning (12010): Port "data" on the entity instantiation of "sram" is connected to a signal of width 10. The formal width of the signal in the module is 16.  Extra bits will be driven by GND.
+Warning (12030): Port "q" on the entity instantiation of "sram" is connected to a signal of width 10. The formal width of the signal in the module is 16.  Extra bits will be left dangling without any fanout logic.
+Warning: Synthesized away the following node(s):
+    Warning: Synthesized away the following RAM node(s):
+        Warning (14320): Synthesized away node "buffcpu:cpu0|sjls_cpum:cpum|altsyncram4:sram|altsyncram:altsyncram_component|altsyncram_toh1:auto_generated|q_a[10]"
+        Warning (14320): Synthesized away node "buffcpu:cpu0|sjls_cpum:cpum|altsyncram4:sram|altsyncram:altsyncram_component|altsyncram_toh1:auto_generated|q_a[11]"
+        Warning (14320): Synthesized away node "buffcpu:cpu0|sjls_cpum:cpum|altsyncram4:sram|altsyncram:altsyncram_component|altsyncram_toh1:auto_generated|q_a[12]"
+        Warning (14320): Synthesized away node "buffcpu:cpu0|sjls_cpum:cpum|altsyncram4:sram|altsyncram:altsyncram_component|altsyncram_toh1:auto_generated|q_a[13]"
+        Warning (14320): Synthesized away node "buffcpu:cpu0|sjls_cpum:cpum|altsyncram4:sram|altsyncram:altsyncram_component|altsyncram_toh1:auto_generated|q_a[14]"
+        Warning (14320): Synthesized away node "buffcpu:cpu0|sjls_cpum:cpum|altsyncram4:sram|altsyncram:altsyncram_component|altsyncram_toh1:auto_generated|q_a[15]"
+Info: Duplicate registers merged to single register
+    Info: Duplicate register "buffcpu:cpu0|sjls_cpum:cpum|rjz[0]" merged to single register "buffcpu:cpu0|sjls_cpum:cpum|jz"
+    Info: Duplicate register "buffcpu:cpu0|sjls_cpum:cpum|rjn[0]" merged to single register "buffcpu:cpu0|sjls_cpum:cpum|jn"
+    Info: Duplicate register "buffcpu:cpu0|sjls_cpum:cpum|rcall[0]" merged to single register "buffcpu:cpu0|sjls_cpum:cpum|call"
+    Info: Duplicate register "buffcpu:cpu0|sjls_cpum:cpum|rret[0]" merged to single register "buffcpu:cpu0|sjls_cpum:cpum|ret"
+    Info: Duplicate register "buffcpu:cpu0|sjls_cpum:cpum|rjk[0]" merged to single register "buffcpu:cpu0|sjls_cpum:cpum|jk"
+    Info: Duplicate register "buffcpu:cpu0|sjls_cpum:cpum|rjend[0]" merged to single register "buffcpu:cpu0|sjls_cpum:cpum|jend"
+Warning (14130): Reduced register "buffcpu:cpu0|sjls_cpum:cpum|jn" with stuck data_in port to stuck value GND
+Info: Duplicate registers merged to single register
+    Info: Duplicate register "buffcpu:cpu0|buffin:buff0|flge" merged to single register "buffcpu:cpu0|buffin:buff0|ptro[0]"
+Warning (14130): Reduced register "fkz" with stuck data_in port to stuck value GND
+Info: Inferred 8 megafunctions from design logic
+    Info: Inferred multiplier megafunction ("lpm_mult") from the following logic: "buffcpu:cpu0|sjls_cpum:cpum|Mult11"
+    Info: Inferred multiplier megafunction ("lpm_mult") from the following logic: "buffcpu:cpu0|sjls_cpum:cpum|Mult7"
+    Info: Inferred multiplier megafunction ("lpm_mult") from the following logic: "buffcpu:cpu0|sjls_cpum:cpum|Mult3"
+    Info: Inferred multiplier megafunction ("lpm_mult") from the following logic: "buffcpu:cpu0|sjls_cpum:cpum|Mult15"
+    Info: Inferred multiplier megafunction ("lpm_mult") from the following logic: "buffcpu:cpu0|sjls_cpum:cpum|Mult9"
+    Info: Inferred multiplier megafunction ("lpm_mult") from the following logic: "buffcpu:cpu0|sjls_cpum:cpum|Mult5"
+    Info: Inferred multiplier megafunction ("lpm_mult") from the following logic: "buffcpu:cpu0|sjls_cpum:cpum|Mult1"
+    Info: Inferred multiplier megafunction ("lpm_mult") from the following logic: "buffcpu:cpu0|sjls_cpum:cpum|Mult13"
+Info: Found 1 design units, including 1 entities, in source file ../altera/72/quartus/libraries/megafunctions/lpm_mult.tdf
+    Info: Found entity 1: lpm_mult
+Info: Elaborated megafunction instantiation "buffcpu:cpu0|sjls_cpum:cpum|lpm_mult:Mult11"
+Info: Found 1 design units, including 1 entities, in source file db/mult_nn01.tdf
+    Info: Found entity 1: mult_nn01
+Info: Ignored 3840 buffer(s)
+    Info: Ignored 3840 SOFT buffer(s)
+Info: Registers with preset signals will power-up high
+Warning: Ignored assignments for entity "sanji" -- entity does not exist in design
+    Warning: Assignment of entity set_global_assignment -name LL_ROOT_REGION ON -entity sanji -section_id "Root Region" is ignored
+    Warning: Assignment of entity set_global_assignment -name LL_MEMBER_STATE LOCKED -entity sanji -section_id "Root Region" is ignored
+Info: Generated suppressed messages file C:/2013透明三级流水线/sanji.map.smsg
+Info: Implemented 9057 device resources after synthesis - the final resource count might be different
+    Info: Implemented 20 input pins
+    Info: Implemented 48 output pins
+    Info: Implemented 8946 logic cells
+    Info: Implemented 42 RAM segments
+    Info: Implemented 1 ClockLock PLLs
+Info: Quartus II Analysis & Synthesis was successful. 0 errors, 77 warnings
+    Info: Allocated 174 megabytes of memory during processing
+    Info: Processing ended: Mon Sep 05 21:50:28 2011
+    Info: Elapsed time: 00:02:00
+
+
++------------------------------------------+
+; Analysis & Synthesis Suppressed Messages ;
++------------------------------------------+
+The suppressed messages can be found in C:/2013透明三级流水线/sanji.map.smsg.
+
+

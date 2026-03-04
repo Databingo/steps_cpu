@@ -1,0 +1,1429 @@
+Analysis & Synthesis report for jdcpu
+Sun Aug 18 19:42:15 2013
+Quartus II Version 7.2 Build 151 09/26/2007 SJ Web Edition
+
+
+---------------------
+; Table of Contents ;
+---------------------
+  1. Legal Notice
+  2. Analysis & Synthesis Summary
+  3. Analysis & Synthesis Settings
+  4. Analysis & Synthesis Source Files Read
+  5. Analysis & Synthesis Resource Usage Summary
+  6. Analysis & Synthesis Resource Utilization by Entity
+  7. Analysis & Synthesis RAM Summary
+  8. State Machine - |mycputop|bufuucpu:cpu0|jb_cpu:cpu0|jp
+  9. Registers Removed During Synthesis
+ 10. General Register Statistics
+ 11. Inverted Register Statistics
+ 12. Multiplexer Restructuring Statistics (Restructuring Performed)
+ 13. Source assignments for bufuucpu:cpu0|jb_cpu:cpu0|lpm_ram_dq:iram|altram:sram|altsyncram:ram_block|altsyncram_ek91:auto_generated
+ 14. Source assignments for bufuucpu:cpu0|jb_cpu:cpu0|lpm_ram_dq:dram|altram:sram|altsyncram:ram_block|altsyncram_gh71:auto_generated
+ 15. Source assignments for bufuucpu:cpu0|jb_cpu:cpu0|lpm_ram_dq:sram|altram:sram|altsyncram:ram_block|altsyncram_3h71:auto_generated
+ 16. Parameter Settings for User Entity Instance: bufuucpu:cpu0|jb_cpu:cpu0|lpm_ram_dq:iram
+ 17. Parameter Settings for User Entity Instance: bufuucpu:cpu0|jb_cpu:cpu0|lpm_ram_dq:dram
+ 18. Parameter Settings for User Entity Instance: bufuucpu:cpu0|jb_cpu:cpu0|lpm_ram_dq:sram
+ 19. Parameter Settings for User Entity Instance: altpll0:altp0|altpll:altpll_component
+ 20. Parameter Settings for Inferred Entity Instance: bufuucpu:cpu0|jb_cpu:cpu0|lpm_mult:Mult0
+ 21. Parameter Settings for Inferred Entity Instance: bufuucpu:cpu0|jb_cpu:cpu0|lpm_divide:Div0
+ 22. lpm_mult Parameter Settings by Entity Instance
+ 23. Analysis & Synthesis Messages
+ 24. Analysis & Synthesis Suppressed Messages
+
+
+
+----------------
+; Legal Notice ;
+----------------
+Copyright (C) 1991-2007 Altera Corporation
+Your use of Altera Corporation's design tools, logic functions 
+and other software and tools, and its AMPP partner logic 
+functions, and any output files from any of the foregoing 
+(including device programming or simulation files), and any 
+associated documentation or information are expressly subject 
+to the terms and conditions of the Altera Program License 
+Subscription Agreement, Altera MegaCore Function License 
+Agreement, or other applicable license agreement, including, 
+without limitation, that your use is for the sole purpose of 
+programming logic devices manufactured by Altera and sold by 
+Altera or its authorized distributors.  Please refer to the 
+applicable agreement for further details.
+
+
+
++-----------------------------------------------------------------------+
+; Analysis & Synthesis Summary                                          ;
++-----------------------------+-----------------------------------------+
+; Analysis & Synthesis Status ; Successful - Sun Aug 18 19:42:15 2013   ;
+; Quartus II Version          ; 7.2 Build 151 09/26/2007 SJ Web Edition ;
+; Revision Name               ; jdcpu                                   ;
+; Top-level Entity Name       ; mycputop                                ;
+; Family                      ; Cyclone                                 ;
+; Total logic elements        ; 4,546                                   ;
+; Total pins                  ; 62                                      ;
+; Total virtual pins          ; 0                                       ;
+; Total memory bits           ; 76,800                                  ;
+; DSP block 9-bit elements    ; N/A until Partition Merge               ;
+; Total PLLs                  ; 1                                       ;
+; Total DLLs                  ; N/A until Partition Merge               ;
++-----------------------------+-----------------------------------------+
+
+
++--------------------------------------------------------------------------------------------------------------------------+
+; Analysis & Synthesis Settings                                                                                            ;
++--------------------------------------------------------------------------------+--------------------+--------------------+
+; Option                                                                         ; Setting            ; Default Value      ;
++--------------------------------------------------------------------------------+--------------------+--------------------+
+; Device                                                                         ; EP1C6T144C8        ;                    ;
+; Top-level entity name                                                          ; mycputop           ; jdcpu              ;
+; Family name                                                                    ; Cyclone            ; Stratix II         ;
+; Use Generated Physical Constraints File                                        ; Off                ;                    ;
+; Use smart compilation                                                          ; Off                ; Off                ;
+; Maximum processors allowed for parallel compilation                            ; 1                  ; 1                  ;
+; Restructure Multiplexers                                                       ; Auto               ; Auto               ;
+; Create Debugging Nodes for IP Cores                                            ; Off                ; Off                ;
+; Preserve fewer node names                                                      ; On                 ; On                 ;
+; Disable OpenCore Plus hardware evaluation                                      ; Off                ; Off                ;
+; Verilog Version                                                                ; Verilog_2001       ; Verilog_2001       ;
+; VHDL Version                                                                   ; VHDL93             ; VHDL93             ;
+; State Machine Processing                                                       ; Auto               ; Auto               ;
+; Safe State Machine                                                             ; Off                ; Off                ;
+; Extract Verilog State Machines                                                 ; On                 ; On                 ;
+; Extract VHDL State Machines                                                    ; On                 ; On                 ;
+; Ignore Verilog initial constructs                                              ; Off                ; Off                ;
+; Add Pass-Through Logic to Inferred RAMs                                        ; On                 ; On                 ;
+; Parallel Synthesis                                                             ; Off                ; Off                ;
+; NOT Gate Push-Back                                                             ; On                 ; On                 ;
+; Power-Up Don't Care                                                            ; On                 ; On                 ;
+; Remove Redundant Logic Cells                                                   ; Off                ; Off                ;
+; Remove Duplicate Registers                                                     ; On                 ; On                 ;
+; Ignore CARRY Buffers                                                           ; Off                ; Off                ;
+; Ignore CASCADE Buffers                                                         ; Off                ; Off                ;
+; Ignore GLOBAL Buffers                                                          ; Off                ; Off                ;
+; Ignore ROW GLOBAL Buffers                                                      ; Off                ; Off                ;
+; Ignore LCELL Buffers                                                           ; Off                ; Off                ;
+; Ignore SOFT Buffers                                                            ; On                 ; On                 ;
+; Limit AHDL Integers to 32 Bits                                                 ; Off                ; Off                ;
+; Optimization Technique -- Cyclone                                              ; Balanced           ; Balanced           ;
+; Carry Chain Length -- Stratix/Stratix GX/Cyclone/MAX II/Cyclone II/Cyclone III ; 70                 ; 70                 ;
+; Auto Carry Chains                                                              ; On                 ; On                 ;
+; Auto Open-Drain Pins                                                           ; On                 ; On                 ;
+; Perform WYSIWYG Primitive Resynthesis                                          ; Off                ; Off                ;
+; Perform gate-level register retiming                                           ; Off                ; Off                ;
+; Allow register retiming to trade off Tsu/Tco with Fmax                         ; On                 ; On                 ;
+; Auto ROM Replacement                                                           ; On                 ; On                 ;
+; Auto RAM Replacement                                                           ; On                 ; On                 ;
+; Auto Shift Register Replacement                                                ; Auto               ; Auto               ;
+; Auto Clock Enable Replacement                                                  ; On                 ; On                 ;
+; Allow Synchronous Control Signals                                              ; On                 ; On                 ;
+; Force Use of Synchronous Clear Signals                                         ; Off                ; Off                ;
+; Auto RAM Block Balancing                                                       ; On                 ; On                 ;
+; Auto RAM to Logic Cell Conversion                                              ; Off                ; Off                ;
+; Auto Resource Sharing                                                          ; Off                ; Off                ;
+; Allow Any RAM Size For Recognition                                             ; Off                ; Off                ;
+; Allow Any ROM Size For Recognition                                             ; Off                ; Off                ;
+; Allow Any Shift Register Size For Recognition                                  ; Off                ; Off                ;
+; Ignore translate_off and synthesis_off directives                              ; Off                ; Off                ;
+; Show Parameter Settings Tables in Synthesis Report                             ; On                 ; On                 ;
+; Ignore Maximum Fan-Out Assignments                                             ; Off                ; Off                ;
+; Retiming Meta-Stability Register Sequence Length                               ; 2                  ; 2                  ;
+; PowerPlay Power Optimization                                                   ; Normal compilation ; Normal compilation ;
+; HDL message level                                                              ; Level2             ; Level2             ;
+; Suppress Register Optimization Related Messages                                ; Off                ; Off                ;
+; Number of Removed Registers Reported in Synthesis Report                       ; 100                ; 100                ;
+; Clock MUX Protection                                                           ; On                 ; On                 ;
+; Block Design Naming                                                            ; Auto               ; Auto               ;
++--------------------------------------------------------------------------------+--------------------+--------------------+
+
+
++------------------------------------------------------------------------------------------------------------------------------------------------------------+
+; Analysis & Synthesis Source Files Read                                                                                                                     ;
++----------------------------------+-----------------+----------------------------------+--------------------------------------------------------------------+
+; File Name with User-Entered Path ; Used in Netlist ; File Type                        ; File Name with Absolute Path                                       ;
++----------------------------------+-----------------+----------------------------------+--------------------------------------------------------------------+
+; buffin.v                         ; yes             ; User Verilog HDL File            ; D:/cpu_2013/buffin.v                                               ;
+; mycputop.v                       ; yes             ; User Verilog HDL File            ; D:/cpu_2013/mycputop.v                                             ;
+; altpll0.v                        ; yes             ; User Verilog HDL File            ; D:/cpu_2013/altpll0.v                                              ;
+; jb_cpu.v                         ; yes             ; User Verilog HDL File            ; D:/cpu_2013/jb_cpu.v                                               ;
+; imem16_2.mif                     ; yes             ; User Memory Initialization File  ; D:/cpu_2013/imem16_2.mif                                           ;
+; bufuucpu.v                       ; yes             ; User Verilog HDL File            ; D:/cpu_2013/bufuucpu.v                                             ;
+; lpm_ram_dq.tdf                   ; yes             ; Megafunction                     ; c:/altera/72/quartus/libraries/megafunctions/lpm_ram_dq.tdf        ;
+; altram.inc                       ; yes             ; Megafunction                     ; c:/altera/72/quartus/libraries/megafunctions/altram.inc            ;
+; lpm_mux.inc                      ; yes             ; Megafunction                     ; c:/altera/72/quartus/libraries/megafunctions/lpm_mux.inc           ;
+; lpm_decode.inc                   ; yes             ; Megafunction                     ; c:/altera/72/quartus/libraries/megafunctions/lpm_decode.inc        ;
+; aglobal72.inc                    ; yes             ; Megafunction                     ; c:/altera/72/quartus/libraries/megafunctions/aglobal72.inc         ;
+; altram.tdf                       ; yes             ; Megafunction                     ; c:/altera/72/quartus/libraries/megafunctions/altram.tdf            ;
+; memmodes.inc                     ; yes             ; Megafunction                     ; c:/altera/72/quartus/libraries/others/maxplus2/memmodes.inc        ;
+; altsyncram.inc                   ; yes             ; Megafunction                     ; c:/altera/72/quartus/libraries/megafunctions/altsyncram.inc        ;
+; altqpram.inc                     ; yes             ; Megafunction                     ; c:/altera/72/quartus/libraries/megafunctions/altqpram.inc          ;
+; altsyncram.tdf                   ; yes             ; Megafunction                     ; c:/altera/72/quartus/libraries/megafunctions/altsyncram.tdf        ;
+; stratix_ram_block.inc            ; yes             ; Megafunction                     ; c:/altera/72/quartus/libraries/megafunctions/stratix_ram_block.inc ;
+; a_rdenreg.inc                    ; yes             ; Megafunction                     ; c:/altera/72/quartus/libraries/megafunctions/a_rdenreg.inc         ;
+; altrom.inc                       ; yes             ; Megafunction                     ; c:/altera/72/quartus/libraries/megafunctions/altrom.inc            ;
+; altdpram.inc                     ; yes             ; Megafunction                     ; c:/altera/72/quartus/libraries/megafunctions/altdpram.inc          ;
+; db/altsyncram_ek91.tdf           ; yes             ; Auto-Generated Megafunction      ; D:/cpu_2013/db/altsyncram_ek91.tdf                                 ;
+; db/altsyncram_gh71.tdf           ; yes             ; Auto-Generated Megafunction      ; D:/cpu_2013/db/altsyncram_gh71.tdf                                 ;
+; db/altsyncram_3h71.tdf           ; yes             ; Auto-Generated Megafunction      ; D:/cpu_2013/db/altsyncram_3h71.tdf                                 ;
+; SEG7_LUT_4.v                     ; yes             ; Other                            ; D:/cpu_2013/SEG7_LUT_4.v                                           ;
+; SEG7_LUT.v                       ; yes             ; Other                            ; D:/cpu_2013/SEG7_LUT.v                                             ;
+; altpll.tdf                       ; yes             ; Megafunction                     ; c:/altera/72/quartus/libraries/megafunctions/altpll.tdf            ;
+; stratix_pll.inc                  ; yes             ; Megafunction                     ; c:/altera/72/quartus/libraries/megafunctions/stratix_pll.inc       ;
+; stratixii_pll.inc                ; yes             ; Megafunction                     ; c:/altera/72/quartus/libraries/megafunctions/stratixii_pll.inc     ;
+; cycloneii_pll.inc                ; yes             ; Megafunction                     ; c:/altera/72/quartus/libraries/megafunctions/cycloneii_pll.inc     ;
+; lpm_mult.tdf                     ; yes             ; Megafunction                     ; c:/altera/72/quartus/libraries/megafunctions/lpm_mult.tdf          ;
+; lpm_add_sub.inc                  ; yes             ; Megafunction                     ; c:/altera/72/quartus/libraries/megafunctions/lpm_add_sub.inc       ;
+; multcore.inc                     ; yes             ; Megafunction                     ; c:/altera/72/quartus/libraries/megafunctions/multcore.inc          ;
+; bypassff.inc                     ; yes             ; Megafunction                     ; c:/altera/72/quartus/libraries/megafunctions/bypassff.inc          ;
+; altshift.inc                     ; yes             ; Megafunction                     ; c:/altera/72/quartus/libraries/megafunctions/altshift.inc          ;
+; db/mult_nn01.tdf                 ; yes             ; Auto-Generated Megafunction      ; D:/cpu_2013/db/mult_nn01.tdf                                       ;
+; lpm_divide.tdf                   ; yes             ; Megafunction                     ; c:/altera/72/quartus/libraries/megafunctions/lpm_divide.tdf        ;
+; abs_divider.inc                  ; yes             ; Megafunction                     ; c:/altera/72/quartus/libraries/megafunctions/abs_divider.inc       ;
+; sign_div_unsign.inc              ; yes             ; Megafunction                     ; c:/altera/72/quartus/libraries/megafunctions/sign_div_unsign.inc   ;
+; db/lpm_divide_h8m.tdf            ; yes             ; Auto-Generated Megafunction      ; D:/cpu_2013/db/lpm_divide_h8m.tdf                                  ;
+; db/sign_div_unsign_dnh.tdf       ; yes             ; Auto-Generated Megafunction      ; D:/cpu_2013/db/sign_div_unsign_dnh.tdf                             ;
+; db/alt_u_div_aue.tdf             ; yes             ; Auto-Generated Megafunction      ; D:/cpu_2013/db/alt_u_div_aue.tdf                                   ;
+; db/add_sub_3dc.tdf               ; yes             ; Auto-Generated Megafunction      ; D:/cpu_2013/db/add_sub_3dc.tdf                                     ;
+; db/add_sub_4dc.tdf               ; yes             ; Auto-Generated Megafunction      ; D:/cpu_2013/db/add_sub_4dc.tdf                                     ;
+; db/add_sub_kec.tdf               ; yes             ; Auto-Generated Megafunction      ; D:/cpu_2013/db/add_sub_kec.tdf                                     ;
+; db/add_sub_lec.tdf               ; yes             ; Auto-Generated Megafunction      ; D:/cpu_2013/db/add_sub_lec.tdf                                     ;
+; db/add_sub_mec.tdf               ; yes             ; Auto-Generated Megafunction      ; D:/cpu_2013/db/add_sub_mec.tdf                                     ;
+; db/add_sub_nec.tdf               ; yes             ; Auto-Generated Megafunction      ; D:/cpu_2013/db/add_sub_nec.tdf                                     ;
+; db/add_sub_oec.tdf               ; yes             ; Auto-Generated Megafunction      ; D:/cpu_2013/db/add_sub_oec.tdf                                     ;
+; db/add_sub_pec.tdf               ; yes             ; Auto-Generated Megafunction      ; D:/cpu_2013/db/add_sub_pec.tdf                                     ;
+; db/add_sub_5dc.tdf               ; yes             ; Auto-Generated Megafunction      ; D:/cpu_2013/db/add_sub_5dc.tdf                                     ;
+; db/add_sub_6dc.tdf               ; yes             ; Auto-Generated Megafunction      ; D:/cpu_2013/db/add_sub_6dc.tdf                                     ;
+; db/add_sub_7dc.tdf               ; yes             ; Auto-Generated Megafunction      ; D:/cpu_2013/db/add_sub_7dc.tdf                                     ;
+; db/add_sub_8dc.tdf               ; yes             ; Auto-Generated Megafunction      ; D:/cpu_2013/db/add_sub_8dc.tdf                                     ;
+; db/add_sub_9dc.tdf               ; yes             ; Auto-Generated Megafunction      ; D:/cpu_2013/db/add_sub_9dc.tdf                                     ;
+; db/add_sub_adc.tdf               ; yes             ; Auto-Generated Megafunction      ; D:/cpu_2013/db/add_sub_adc.tdf                                     ;
+; db/add_sub_bdc.tdf               ; yes             ; Auto-Generated Megafunction      ; D:/cpu_2013/db/add_sub_bdc.tdf                                     ;
+; db/add_sub_jec.tdf               ; yes             ; Auto-Generated Megafunction      ; D:/cpu_2013/db/add_sub_jec.tdf                                     ;
+; db/add_sub_oac.tdf               ; yes             ; Auto-Generated Megafunction      ; D:/cpu_2013/db/add_sub_oac.tdf                                     ;
++----------------------------------+-----------------+----------------------------------+--------------------------------------------------------------------+
+
+
++-------------------------------------------------------------------------------------------+
+; Analysis & Synthesis Resource Usage Summary                                               ;
++---------------------------------------------+---------------------------------------------+
+; Resource                                    ; Usage                                       ;
++---------------------------------------------+---------------------------------------------+
+; Total logic elements                        ; 4546                                        ;
+;     -- Combinational with no register       ; 3061                                        ;
+;     -- Register only                        ; 1196                                        ;
+;     -- Combinational with a register        ; 289                                         ;
+;                                             ;                                             ;
+; Logic element usage by number of LUT inputs ;                                             ;
+;     -- 4 input functions                    ; 2355                                        ;
+;     -- 3 input functions                    ; 570                                         ;
+;     -- 2 input functions                    ; 396                                         ;
+;     -- 1 input functions                    ; 29                                          ;
+;     -- 0 input functions                    ; 0                                           ;
+;                                             ;                                             ;
+; Logic elements by mode                      ;                                             ;
+;     -- normal mode                          ; 4071                                        ;
+;     -- arithmetic mode                      ; 475                                         ;
+;     -- qfbk mode                            ; 0                                           ;
+;     -- register cascade mode                ; 0                                           ;
+;     -- synchronous clear/load mode          ; 202                                         ;
+;     -- asynchronous clear/load mode         ; 83                                          ;
+;                                             ;                                             ;
+; Total registers                             ; 1485                                        ;
+; Total logic cells in carry chains           ; 515                                         ;
+; I/O pins                                    ; 62                                          ;
+; Total memory bits                           ; 76800                                       ;
+; Total PLLs                                  ; 1                                           ;
+; Maximum fan-out node                        ; altpll0:altp0|altpll:altpll_component|_clk0 ;
+; Maximum fan-out                             ; 1528                                        ;
+; Total fan-out                               ; 16891                                       ;
+; Average fan-out                             ; 3.63                                        ;
++---------------------------------------------+---------------------------------------------+
+
+
++--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+; Analysis & Synthesis Resource Utilization by Entity                                                                                                                                                                                                                                                                                                                                  ;
++----------------------------------------------------+-------------+--------------+-------------+------+--------------+--------------+-------------------+------------------+-----------------+------------+------------------------------------------------------------------------------------------------------------------------------------------------------------+--------------+
+; Compilation Hierarchy Node                         ; Logic Cells ; LC Registers ; Memory Bits ; Pins ; Virtual Pins ; LUT-Only LCs ; Register-Only LCs ; LUT/Register LCs ; Carry Chain LCs ; Packed LCs ; Full Hierarchy Name                                                                                                                                        ; Library Name ;
++----------------------------------------------------+-------------+--------------+-------------+------+--------------+--------------+-------------------+------------------+-----------------+------------+------------------------------------------------------------------------------------------------------------------------------------------------------------+--------------+
+; |mycputop                                          ; 4546 (323)  ; 1485         ; 76800       ; 62   ; 0            ; 3061 (106)   ; 1196 (23)         ; 289 (194)        ; 515 (207)       ; 0 (0)      ; |mycputop                                                                                                                                                  ; work         ;
+;    |SEG7_LUT_4:u0|                                 ; 56 (0)      ; 0            ; 0           ; 0    ; 0            ; 56 (0)       ; 0 (0)             ; 0 (0)            ; 0 (0)           ; 0 (0)      ; |mycputop|SEG7_LUT_4:u0                                                                                                                                    ; work         ;
+;       |SEG7_LUT:u0|                                ; 14 (14)     ; 0            ; 0           ; 0    ; 0            ; 14 (14)      ; 0 (0)             ; 0 (0)            ; 0 (0)           ; 0 (0)      ; |mycputop|SEG7_LUT_4:u0|SEG7_LUT:u0                                                                                                                        ; work         ;
+;       |SEG7_LUT:u1|                                ; 14 (14)     ; 0            ; 0           ; 0    ; 0            ; 14 (14)      ; 0 (0)             ; 0 (0)            ; 0 (0)           ; 0 (0)      ; |mycputop|SEG7_LUT_4:u0|SEG7_LUT:u1                                                                                                                        ; work         ;
+;       |SEG7_LUT:u2|                                ; 14 (14)     ; 0            ; 0           ; 0    ; 0            ; 14 (14)      ; 0 (0)             ; 0 (0)            ; 0 (0)           ; 0 (0)      ; |mycputop|SEG7_LUT_4:u0|SEG7_LUT:u2                                                                                                                        ; work         ;
+;       |SEG7_LUT:u3|                                ; 14 (14)     ; 0            ; 0           ; 0    ; 0            ; 14 (14)      ; 0 (0)             ; 0 (0)            ; 0 (0)           ; 0 (0)      ; |mycputop|SEG7_LUT_4:u0|SEG7_LUT:u3                                                                                                                        ; work         ;
+;    |altpll0:altp0|                                 ; 0 (0)       ; 0            ; 0           ; 0    ; 0            ; 0 (0)        ; 0 (0)             ; 0 (0)            ; 0 (0)           ; 0 (0)      ; |mycputop|altpll0:altp0                                                                                                                                    ; work         ;
+;       |altpll:altpll_component|                    ; 0 (0)       ; 0            ; 0           ; 0    ; 0            ; 0 (0)        ; 0 (0)             ; 0 (0)            ; 0 (0)           ; 0 (0)      ; |mycputop|altpll0:altp0|altpll:altpll_component                                                                                                            ; work         ;
+;    |bufuucpu:cpu0|                                 ; 4167 (2)    ; 1268         ; 76800       ; 0    ; 0            ; 2899 (1)     ; 1173 (1)          ; 95 (0)           ; 308 (0)         ; 0 (0)      ; |mycputop|bufuucpu:cpu0                                                                                                                                    ; work         ;
+;       |buffin:buff0|                               ; 3276 (3276) ; 1087         ; 0           ; 0    ; 0            ; 2189 (2189)  ; 1055 (1055)       ; 32 (32)          ; 26 (26)         ; 0 (0)      ; |mycputop|bufuucpu:cpu0|buffin:buff0                                                                                                                       ; work         ;
+;       |jb_cpu:cpu0|                                ; 889 (443)   ; 180          ; 76800       ; 0    ; 0            ; 709 (263)    ; 117 (117)         ; 63 (63)          ; 282 (51)        ; 0 (0)      ; |mycputop|bufuucpu:cpu0|jb_cpu:cpu0                                                                                                                        ; work         ;
+;          |lpm_divide:Div0|                         ; 288 (0)     ; 0            ; 0           ; 0    ; 0            ; 288 (0)      ; 0 (0)             ; 0 (0)            ; 147 (0)         ; 0 (0)      ; |mycputop|bufuucpu:cpu0|jb_cpu:cpu0|lpm_divide:Div0                                                                                                        ; work         ;
+;             |lpm_divide_h8m:auto_generated|        ; 288 (0)     ; 0            ; 0           ; 0    ; 0            ; 288 (0)      ; 0 (0)             ; 0 (0)            ; 147 (0)         ; 0 (0)      ; |mycputop|bufuucpu:cpu0|jb_cpu:cpu0|lpm_divide:Div0|lpm_divide_h8m:auto_generated                                                                          ; work         ;
+;                |sign_div_unsign_dnh:divider|       ; 288 (0)     ; 0            ; 0           ; 0    ; 0            ; 288 (0)      ; 0 (0)             ; 0 (0)            ; 147 (0)         ; 0 (0)      ; |mycputop|bufuucpu:cpu0|jb_cpu:cpu0|lpm_divide:Div0|lpm_divide_h8m:auto_generated|sign_div_unsign_dnh:divider                                              ; work         ;
+;                   |alt_u_div_aue:divider|          ; 288 (140)   ; 0            ; 0           ; 0    ; 0            ; 288 (140)    ; 0 (0)             ; 0 (0)            ; 147 (0)         ; 0 (0)      ; |mycputop|bufuucpu:cpu0|jb_cpu:cpu0|lpm_divide:Div0|lpm_divide_h8m:auto_generated|sign_div_unsign_dnh:divider|alt_u_div_aue:divider                        ; work         ;
+;                      |add_sub_4dc:add_sub_1|       ; 1 (1)       ; 0            ; 0           ; 0    ; 0            ; 1 (1)        ; 0 (0)             ; 0 (0)            ; 0 (0)           ; 0 (0)      ; |mycputop|bufuucpu:cpu0|jb_cpu:cpu0|lpm_divide:Div0|lpm_divide_h8m:auto_generated|sign_div_unsign_dnh:divider|alt_u_div_aue:divider|add_sub_4dc:add_sub_1  ; work         ;
+;                      |add_sub_5dc:add_sub_2|       ; 4 (4)       ; 0            ; 0           ; 0    ; 0            ; 4 (4)        ; 0 (0)             ; 0 (0)            ; 4 (4)           ; 0 (0)      ; |mycputop|bufuucpu:cpu0|jb_cpu:cpu0|lpm_divide:Div0|lpm_divide_h8m:auto_generated|sign_div_unsign_dnh:divider|alt_u_div_aue:divider|add_sub_5dc:add_sub_2  ; work         ;
+;                      |add_sub_6dc:add_sub_3|       ; 5 (5)       ; 0            ; 0           ; 0    ; 0            ; 5 (5)        ; 0 (0)             ; 0 (0)            ; 5 (5)           ; 0 (0)      ; |mycputop|bufuucpu:cpu0|jb_cpu:cpu0|lpm_divide:Div0|lpm_divide_h8m:auto_generated|sign_div_unsign_dnh:divider|alt_u_div_aue:divider|add_sub_6dc:add_sub_3  ; work         ;
+;                      |add_sub_7dc:add_sub_4|       ; 6 (6)       ; 0            ; 0           ; 0    ; 0            ; 6 (6)        ; 0 (0)             ; 0 (0)            ; 6 (6)           ; 0 (0)      ; |mycputop|bufuucpu:cpu0|jb_cpu:cpu0|lpm_divide:Div0|lpm_divide_h8m:auto_generated|sign_div_unsign_dnh:divider|alt_u_div_aue:divider|add_sub_7dc:add_sub_4  ; work         ;
+;                      |add_sub_8dc:add_sub_5|       ; 7 (7)       ; 0            ; 0           ; 0    ; 0            ; 7 (7)        ; 0 (0)             ; 0 (0)            ; 7 (7)           ; 0 (0)      ; |mycputop|bufuucpu:cpu0|jb_cpu:cpu0|lpm_divide:Div0|lpm_divide_h8m:auto_generated|sign_div_unsign_dnh:divider|alt_u_div_aue:divider|add_sub_8dc:add_sub_5  ; work         ;
+;                      |add_sub_9dc:add_sub_6|       ; 8 (8)       ; 0            ; 0           ; 0    ; 0            ; 8 (8)        ; 0 (0)             ; 0 (0)            ; 8 (8)           ; 0 (0)      ; |mycputop|bufuucpu:cpu0|jb_cpu:cpu0|lpm_divide:Div0|lpm_divide_h8m:auto_generated|sign_div_unsign_dnh:divider|alt_u_div_aue:divider|add_sub_9dc:add_sub_6  ; work         ;
+;                      |add_sub_adc:add_sub_7|       ; 9 (9)       ; 0            ; 0           ; 0    ; 0            ; 9 (9)        ; 0 (0)             ; 0 (0)            ; 9 (9)           ; 0 (0)      ; |mycputop|bufuucpu:cpu0|jb_cpu:cpu0|lpm_divide:Div0|lpm_divide_h8m:auto_generated|sign_div_unsign_dnh:divider|alt_u_div_aue:divider|add_sub_adc:add_sub_7  ; work         ;
+;                      |add_sub_bdc:add_sub_8|       ; 10 (10)     ; 0            ; 0           ; 0    ; 0            ; 10 (10)      ; 0 (0)             ; 0 (0)            ; 10 (10)         ; 0 (0)      ; |mycputop|bufuucpu:cpu0|jb_cpu:cpu0|lpm_divide:Div0|lpm_divide_h8m:auto_generated|sign_div_unsign_dnh:divider|alt_u_div_aue:divider|add_sub_bdc:add_sub_8  ; work         ;
+;                      |add_sub_jec:add_sub_9|       ; 11 (11)     ; 0            ; 0           ; 0    ; 0            ; 11 (11)      ; 0 (0)             ; 0 (0)            ; 11 (11)         ; 0 (0)      ; |mycputop|bufuucpu:cpu0|jb_cpu:cpu0|lpm_divide:Div0|lpm_divide_h8m:auto_generated|sign_div_unsign_dnh:divider|alt_u_div_aue:divider|add_sub_jec:add_sub_9  ; work         ;
+;                      |add_sub_kec:add_sub_10|      ; 12 (12)     ; 0            ; 0           ; 0    ; 0            ; 12 (12)      ; 0 (0)             ; 0 (0)            ; 12 (12)         ; 0 (0)      ; |mycputop|bufuucpu:cpu0|jb_cpu:cpu0|lpm_divide:Div0|lpm_divide_h8m:auto_generated|sign_div_unsign_dnh:divider|alt_u_div_aue:divider|add_sub_kec:add_sub_10 ; work         ;
+;                      |add_sub_lec:add_sub_11|      ; 13 (13)     ; 0            ; 0           ; 0    ; 0            ; 13 (13)      ; 0 (0)             ; 0 (0)            ; 13 (13)         ; 0 (0)      ; |mycputop|bufuucpu:cpu0|jb_cpu:cpu0|lpm_divide:Div0|lpm_divide_h8m:auto_generated|sign_div_unsign_dnh:divider|alt_u_div_aue:divider|add_sub_lec:add_sub_11 ; work         ;
+;                      |add_sub_mec:add_sub_12|      ; 14 (14)     ; 0            ; 0           ; 0    ; 0            ; 14 (14)      ; 0 (0)             ; 0 (0)            ; 14 (14)         ; 0 (0)      ; |mycputop|bufuucpu:cpu0|jb_cpu:cpu0|lpm_divide:Div0|lpm_divide_h8m:auto_generated|sign_div_unsign_dnh:divider|alt_u_div_aue:divider|add_sub_mec:add_sub_12 ; work         ;
+;                      |add_sub_nec:add_sub_13|      ; 15 (15)     ; 0            ; 0           ; 0    ; 0            ; 15 (15)      ; 0 (0)             ; 0 (0)            ; 15 (15)         ; 0 (0)      ; |mycputop|bufuucpu:cpu0|jb_cpu:cpu0|lpm_divide:Div0|lpm_divide_h8m:auto_generated|sign_div_unsign_dnh:divider|alt_u_div_aue:divider|add_sub_nec:add_sub_13 ; work         ;
+;                      |add_sub_oec:add_sub_14|      ; 16 (16)     ; 0            ; 0           ; 0    ; 0            ; 16 (16)      ; 0 (0)             ; 0 (0)            ; 16 (16)         ; 0 (0)      ; |mycputop|bufuucpu:cpu0|jb_cpu:cpu0|lpm_divide:Div0|lpm_divide_h8m:auto_generated|sign_div_unsign_dnh:divider|alt_u_div_aue:divider|add_sub_oec:add_sub_14 ; work         ;
+;                      |add_sub_pec:add_sub_15|      ; 17 (17)     ; 0            ; 0           ; 0    ; 0            ; 17 (17)      ; 0 (0)             ; 0 (0)            ; 17 (17)         ; 0 (0)      ; |mycputop|bufuucpu:cpu0|jb_cpu:cpu0|lpm_divide:Div0|lpm_divide_h8m:auto_generated|sign_div_unsign_dnh:divider|alt_u_div_aue:divider|add_sub_pec:add_sub_15 ; work         ;
+;          |lpm_mult:Mult0|                          ; 158 (0)     ; 0            ; 0           ; 0    ; 0            ; 158 (0)      ; 0 (0)             ; 0 (0)            ; 84 (0)          ; 0 (0)      ; |mycputop|bufuucpu:cpu0|jb_cpu:cpu0|lpm_mult:Mult0                                                                                                         ; work         ;
+;             |mult_nn01:auto_generated|             ; 158 (158)   ; 0            ; 0           ; 0    ; 0            ; 158 (158)    ; 0 (0)             ; 0 (0)            ; 84 (84)         ; 0 (0)      ; |mycputop|bufuucpu:cpu0|jb_cpu:cpu0|lpm_mult:Mult0|mult_nn01:auto_generated                                                                                ; work         ;
+;          |lpm_ram_dq:dram|                         ; 0 (0)       ; 0            ; 32768       ; 0    ; 0            ; 0 (0)        ; 0 (0)             ; 0 (0)            ; 0 (0)           ; 0 (0)      ; |mycputop|bufuucpu:cpu0|jb_cpu:cpu0|lpm_ram_dq:dram                                                                                                        ; work         ;
+;             |altram:sram|                          ; 0 (0)       ; 0            ; 32768       ; 0    ; 0            ; 0 (0)        ; 0 (0)             ; 0 (0)            ; 0 (0)           ; 0 (0)      ; |mycputop|bufuucpu:cpu0|jb_cpu:cpu0|lpm_ram_dq:dram|altram:sram                                                                                            ; work         ;
+;                |altsyncram:ram_block|              ; 0 (0)       ; 0            ; 32768       ; 0    ; 0            ; 0 (0)        ; 0 (0)             ; 0 (0)            ; 0 (0)           ; 0 (0)      ; |mycputop|bufuucpu:cpu0|jb_cpu:cpu0|lpm_ram_dq:dram|altram:sram|altsyncram:ram_block                                                                       ; work         ;
+;                   |altsyncram_gh71:auto_generated| ; 0 (0)       ; 0            ; 32768       ; 0    ; 0            ; 0 (0)        ; 0 (0)             ; 0 (0)            ; 0 (0)           ; 0 (0)      ; |mycputop|bufuucpu:cpu0|jb_cpu:cpu0|lpm_ram_dq:dram|altram:sram|altsyncram:ram_block|altsyncram_gh71:auto_generated                                        ; work         ;
+;          |lpm_ram_dq:iram|                         ; 0 (0)       ; 0            ; 32768       ; 0    ; 0            ; 0 (0)        ; 0 (0)             ; 0 (0)            ; 0 (0)           ; 0 (0)      ; |mycputop|bufuucpu:cpu0|jb_cpu:cpu0|lpm_ram_dq:iram                                                                                                        ; work         ;
+;             |altram:sram|                          ; 0 (0)       ; 0            ; 32768       ; 0    ; 0            ; 0 (0)        ; 0 (0)             ; 0 (0)            ; 0 (0)           ; 0 (0)      ; |mycputop|bufuucpu:cpu0|jb_cpu:cpu0|lpm_ram_dq:iram|altram:sram                                                                                            ; work         ;
+;                |altsyncram:ram_block|              ; 0 (0)       ; 0            ; 32768       ; 0    ; 0            ; 0 (0)        ; 0 (0)             ; 0 (0)            ; 0 (0)           ; 0 (0)      ; |mycputop|bufuucpu:cpu0|jb_cpu:cpu0|lpm_ram_dq:iram|altram:sram|altsyncram:ram_block                                                                       ; work         ;
+;                   |altsyncram_ek91:auto_generated| ; 0 (0)       ; 0            ; 32768       ; 0    ; 0            ; 0 (0)        ; 0 (0)             ; 0 (0)            ; 0 (0)           ; 0 (0)      ; |mycputop|bufuucpu:cpu0|jb_cpu:cpu0|lpm_ram_dq:iram|altram:sram|altsyncram:ram_block|altsyncram_ek91:auto_generated                                        ; work         ;
+;          |lpm_ram_dq:sram|                         ; 0 (0)       ; 0            ; 11264       ; 0    ; 0            ; 0 (0)        ; 0 (0)             ; 0 (0)            ; 0 (0)           ; 0 (0)      ; |mycputop|bufuucpu:cpu0|jb_cpu:cpu0|lpm_ram_dq:sram                                                                                                        ; work         ;
+;             |altram:sram|                          ; 0 (0)       ; 0            ; 11264       ; 0    ; 0            ; 0 (0)        ; 0 (0)             ; 0 (0)            ; 0 (0)           ; 0 (0)      ; |mycputop|bufuucpu:cpu0|jb_cpu:cpu0|lpm_ram_dq:sram|altram:sram                                                                                            ; work         ;
+;                |altsyncram:ram_block|              ; 0 (0)       ; 0            ; 11264       ; 0    ; 0            ; 0 (0)        ; 0 (0)             ; 0 (0)            ; 0 (0)           ; 0 (0)      ; |mycputop|bufuucpu:cpu0|jb_cpu:cpu0|lpm_ram_dq:sram|altram:sram|altsyncram:ram_block                                                                       ; work         ;
+;                   |altsyncram_3h71:auto_generated| ; 0 (0)       ; 0            ; 11264       ; 0    ; 0            ; 0 (0)        ; 0 (0)             ; 0 (0)            ; 0 (0)           ; 0 (0)      ; |mycputop|bufuucpu:cpu0|jb_cpu:cpu0|lpm_ram_dq:sram|altram:sram|altsyncram:ram_block|altsyncram_3h71:auto_generated                                        ; work         ;
++----------------------------------------------------+-------------+--------------+-------------+------+--------------+--------------+-------------------+------------------+-----------------+------------+------------------------------------------------------------------------------------------------------------------------------------------------------------+--------------+
+Note: For table entries with two numbers listed, the numbers in parentheses indicate the number of resources of the given type used by the specific entity alone. The numbers listed outside of parentheses indicate the total resources of the given type used by the specific entity and all of its sub-entities in the hierarchy.
+
+
++------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+; Analysis & Synthesis RAM Summary                                                                                                                                                                                             ;
++----------------------------------------------------------------------------------------------------------------------+------+-------------+--------------+--------------+--------------+--------------+-------+--------------+
+; Name                                                                                                                 ; Type ; Mode        ; Port A Depth ; Port A Width ; Port B Depth ; Port B Width ; Size  ; MIF          ;
++----------------------------------------------------------------------------------------------------------------------+------+-------------+--------------+--------------+--------------+--------------+-------+--------------+
+; bufuucpu:cpu0|jb_cpu:cpu0|lpm_ram_dq:dram|altram:sram|altsyncram:ram_block|altsyncram_gh71:auto_generated|ALTSYNCRAM ; AUTO ; Single Port ; 2048         ; 16           ; --           ; --           ; 32768 ; None         ;
+; bufuucpu:cpu0|jb_cpu:cpu0|lpm_ram_dq:iram|altram:sram|altsyncram:ram_block|altsyncram_ek91:auto_generated|ALTSYNCRAM ; AUTO ; Single Port ; 2048         ; 16           ; --           ; --           ; 32768 ; imem16_2.mif ;
+; bufuucpu:cpu0|jb_cpu:cpu0|lpm_ram_dq:sram|altram:sram|altsyncram:ram_block|altsyncram_3h71:auto_generated|ALTSYNCRAM ; AUTO ; Single Port ; 1024         ; 11           ; --           ; --           ; 11264 ; None         ;
++----------------------------------------------------------------------------------------------------------------------+------+-------------+--------------+--------------+--------------+--------------+-------+--------------+
+
+
+Encoding Type:  One-Hot
++--------------------------------------------------------------+
+; State Machine - |mycputop|bufuucpu:cpu0|jb_cpu:cpu0|jp       ;
++--------+--------+--------+--------+--------+--------+--------+
+; Name   ; jp.101 ; jp.100 ; jp.011 ; jp.010 ; jp.001 ; jp.000 ;
++--------+--------+--------+--------+--------+--------+--------+
+; jp.000 ; 0      ; 0      ; 0      ; 0      ; 0      ; 0      ;
+; jp.001 ; 0      ; 0      ; 0      ; 0      ; 1      ; 1      ;
+; jp.010 ; 0      ; 0      ; 0      ; 1      ; 0      ; 1      ;
+; jp.011 ; 0      ; 0      ; 1      ; 0      ; 0      ; 1      ;
+; jp.100 ; 0      ; 1      ; 0      ; 0      ; 0      ; 1      ;
+; jp.101 ; 1      ; 0      ; 0      ; 0      ; 0      ; 1      ;
++--------+--------+--------+--------+--------+--------+--------+
+
+
++----------------------------------------------------------------------------------------+
+; Registers Removed During Synthesis                                                     ;
++---------------------------------------+------------------------------------------------+
+; Register name                         ; Reason for Removal                             ;
++---------------------------------------+------------------------------------------------+
+; bufuucpu:cpu0|jb_cpu:cpu0|jn          ; Stuck at GND due to stuck port data_in         ;
+; bufuucpu:cpu0|buffin:buff0|flge       ; Merged with bufuucpu:cpu0|buffin:buff0|ptro[0] ;
+; fkz                                   ; Stuck at GND due to stuck port data_in         ;
+; ekz                                   ; Stuck at GND due to stuck port data_in         ;
+; bufuucpu:cpu0|jb_cpu:cpu0|jp~40       ; Lost fanout                                    ;
+; bufuucpu:cpu0|jb_cpu:cpu0|jp~41       ; Lost fanout                                    ;
+; bufuucpu:cpu0|jb_cpu:cpu0|jp~42       ; Lost fanout                                    ;
+; bufuucpu:cpu0|jb_cpu:cpu0|sp[10]      ; Lost fanout                                    ;
+; Total Number of Removed Registers = 8 ;                                                ;
++---------------------------------------+------------------------------------------------+
+
+
++------------------------------------------------------+
+; General Register Statistics                          ;
++----------------------------------------------+-------+
+; Statistic                                    ; Value ;
++----------------------------------------------+-------+
+; Total registers                              ; 1485  ;
+; Number of registers using Synchronous Clear  ; 185   ;
+; Number of registers using Synchronous Load   ; 17    ;
+; Number of registers using Asynchronous Clear ; 83    ;
+; Number of registers using Asynchronous Load  ; 1     ;
+; Number of registers using Clock Enable       ; 1318  ;
+; Number of registers using Preset             ; 0     ;
++----------------------------------------------+-------+
+
+
++--------------------------------------------------+
+; Inverted Register Statistics                     ;
++----------------------------------------+---------+
+; Inverted Register                      ; Fan out ;
++----------------------------------------+---------+
+; bufuucpu:cpu0|buffin:buff0|emp         ; 1       ;
+; Total number of inverted registers = 1 ;         ;
++----------------------------------------+---------+
+
+
++----------------------------------------------------------------------------------------------------------------------------------------------------------------+
+; Multiplexer Restructuring Statistics (Restructuring Performed)                                                                                                 ;
++--------------------+-----------+---------------+----------------------+------------------------+------------+--------------------------------------------------+
+; Multiplexer Inputs ; Bus Width ; Baseline Area ; Area if Restructured ; Saving if Restructured ; Registered ; Example Multiplexer Output                       ;
++--------------------+-----------+---------------+----------------------+------------------------+------------+--------------------------------------------------+
+; 3:1                ; 16 bits   ; 32 LEs        ; 0 LEs                ; 32 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|jb_cpu:cpu0|oo[0]        ;
+; 4:1                ; 24 bits   ; 48 LEs        ; 24 LEs               ; 24 LEs                 ; Yes        ; |mycputop|boo[11]                                ;
+; 4:1                ; 24 bits   ; 48 LEs        ; 24 LEs               ; 24 LEs                 ; Yes        ; |mycputop|goo[3]                                 ;
+; 4:1                ; 23 bits   ; 46 LEs        ; 23 LEs               ; 23 LEs                 ; Yes        ; |mycputop|coo[3]                                 ;
+; 4:1                ; 11 bits   ; 22 LEs        ; 0 LEs                ; 22 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|jb_cpu:cpu0|sp[4]        ;
+; 4:1                ; 7 bits    ; 14 LEs        ; 7 LEs                ; 7 LEs                  ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ptr[0]      ;
+; 5:1                ; 7 bits    ; 21 LEs        ; 0 LEs                ; 21 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|count[5]    ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ram[127][7] ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ram[126][2] ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ram[125][2] ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ram[124][3] ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ram[123][7] ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ram[122][3] ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ram[121][6] ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ram[120][6] ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ram[119][4] ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ram[118][0] ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ram[117][2] ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ram[116][6] ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ram[115][1] ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ram[114][0] ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ram[113][3] ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ram[112][0] ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ram[111][3] ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ram[110][1] ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ram[109][1] ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ram[108][1] ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ram[107][1] ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ram[106][7] ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ram[105][0] ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ram[104][7] ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ram[103][7] ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ram[102][3] ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ram[101][3] ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ram[100][3] ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ram[99][3]  ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ram[98][5]  ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ram[97][5]  ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ram[96][2]  ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ram[95][7]  ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ram[94][4]  ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ram[93][4]  ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ram[92][4]  ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ram[91][4]  ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ram[90][4]  ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ram[89][4]  ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ram[88][1]  ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ram[87][5]  ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ram[86][0]  ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ram[85][1]  ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ram[84][7]  ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ram[83][2]  ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ram[82][3]  ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ram[81][1]  ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ram[80][1]  ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ram[79][3]  ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ram[78][3]  ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ram[77][2]  ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ram[76][1]  ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ram[75][1]  ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ram[74][1]  ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ram[73][5]  ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ram[72][1]  ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ram[71][1]  ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ram[70][1]  ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ram[69][7]  ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ram[68][1]  ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ram[67][1]  ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ram[66][1]  ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ram[65][6]  ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ram[64][6]  ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ram[63][3]  ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ram[62][3]  ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ram[61][6]  ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ram[60][5]  ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ram[59][7]  ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ram[58][5]  ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ram[57][6]  ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ram[56][0]  ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ram[55][7]  ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ram[54][7]  ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ram[53][7]  ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ram[52][6]  ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ram[51][2]  ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ram[50][2]  ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ram[49][2]  ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ram[48][0]  ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ram[47][1]  ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ram[46][1]  ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ram[45][4]  ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ram[44][0]  ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ram[43][7]  ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ram[42][0]  ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ram[41][3]  ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ram[40][7]  ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ram[39][7]  ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ram[38][5]  ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ram[37][5]  ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ram[36][5]  ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ram[35][0]  ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ram[34][2]  ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ram[33][2]  ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ram[32][0]  ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ram[31][6]  ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ram[30][2]  ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ram[29][6]  ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ram[28][0]  ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ram[27][4]  ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ram[26][6]  ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ram[25][6]  ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ram[24][6]  ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ram[23][3]  ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ram[22][0]  ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ram[21][1]  ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ram[20][7]  ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ram[19][3]  ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ram[18][6]  ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ram[17][6]  ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ram[16][4]  ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ram[15][0]  ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ram[14][5]  ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ram[13][6]  ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ram[12][4]  ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ram[11][4]  ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ram[10][4]  ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ram[9][4]   ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ram[8][7]   ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ram[7][3]   ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ram[6][6]   ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ram[5][7]   ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ram[4][7]   ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ram[3][7]   ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ram[2][7]   ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ram[1][7]   ;
+; 5:1                ; 8 bits    ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|ram[0][0]   ;
+; 17:1               ; 8 bits    ; 88 LEs        ; 8 LEs                ; 80 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|jb_cpu:cpu0|ptr[4]       ;
+; 19:1               ; 3 bits    ; 36 LEs        ; 3 LEs                ; 33 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|jb_cpu:cpu0|ptr[8]       ;
+; 25:1               ; 8 bits    ; 128 LEs       ; 32 LEs               ; 96 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|jb_cpu:cpu0|da[0]        ;
+; 25:1               ; 7 bits    ; 112 LEs       ; 28 LEs               ; 84 LEs                 ; Yes        ; |mycputop|bufuucpu:cpu0|jb_cpu:cpu0|da[8]        ;
+; 43:1               ; 11 bits   ; 308 LEs       ; 44 LEs               ; 264 LEs                ; Yes        ; |mycputop|bufuucpu:cpu0|jb_cpu:cpu0|pc[9]        ;
+; 259:1              ; 8 bits    ; 1376 LEs      ; 688 LEs              ; 688 LEs                ; Yes        ; |mycputop|bufuucpu:cpu0|buffin:buff0|q[1]        ;
+; 3:1                ; 4 bits    ; 8 LEs         ; 4 LEs                ; 4 LEs                  ; No         ; |mycputop|LEDG~5                                 ;
+; 3:1                ; 7 bits    ; 14 LEs        ; 14 LEs               ; 0 LEs                  ; No         ; |mycputop|mSEG7_DIG[8]                           ;
+; 3:1                ; 4 bits    ; 8 LEs         ; 4 LEs                ; 4 LEs                  ; No         ; |mycputop|bufuucpu:cpu0|jb_cpu:cpu0|jp~10        ;
+; 128:1              ; 8 bits    ; 680 LEs       ; 680 LEs              ; 0 LEs                  ; No         ; |mycputop|bufuucpu:cpu0|buffin:buff0|Mux21       ;
++--------------------+-----------+---------------+----------------------+------------------------+------------+--------------------------------------------------+
+
+
++----------------------------------------------------------------------------------------------------------------------------------+
+; Source assignments for bufuucpu:cpu0|jb_cpu:cpu0|lpm_ram_dq:iram|altram:sram|altsyncram:ram_block|altsyncram_ek91:auto_generated ;
++---------------------------------+--------------------+------+--------------------------------------------------------------------+
+; Assignment                      ; Value              ; From ; To                                                                 ;
++---------------------------------+--------------------+------+--------------------------------------------------------------------+
+; OPTIMIZE_POWER_DURING_SYNTHESIS ; NORMAL_COMPILATION ; -    ; -                                                                  ;
++---------------------------------+--------------------+------+--------------------------------------------------------------------+
+
+
++----------------------------------------------------------------------------------------------------------------------------------+
+; Source assignments for bufuucpu:cpu0|jb_cpu:cpu0|lpm_ram_dq:dram|altram:sram|altsyncram:ram_block|altsyncram_gh71:auto_generated ;
++---------------------------------+--------------------+------+--------------------------------------------------------------------+
+; Assignment                      ; Value              ; From ; To                                                                 ;
++---------------------------------+--------------------+------+--------------------------------------------------------------------+
+; OPTIMIZE_POWER_DURING_SYNTHESIS ; NORMAL_COMPILATION ; -    ; -                                                                  ;
++---------------------------------+--------------------+------+--------------------------------------------------------------------+
+
+
++----------------------------------------------------------------------------------------------------------------------------------+
+; Source assignments for bufuucpu:cpu0|jb_cpu:cpu0|lpm_ram_dq:sram|altram:sram|altsyncram:ram_block|altsyncram_3h71:auto_generated ;
++---------------------------------+--------------------+------+--------------------------------------------------------------------+
+; Assignment                      ; Value              ; From ; To                                                                 ;
++---------------------------------+--------------------+------+--------------------------------------------------------------------+
+; OPTIMIZE_POWER_DURING_SYNTHESIS ; NORMAL_COMPILATION ; -    ; -                                                                  ;
++---------------------------------+--------------------+------+--------------------------------------------------------------------+
+
+
++----------------------------------------------------------------------------------------+
+; Parameter Settings for User Entity Instance: bufuucpu:cpu0|jb_cpu:cpu0|lpm_ram_dq:iram ;
++------------------------+--------------+------------------------------------------------+
+; Parameter Name         ; Value        ; Type                                           ;
++------------------------+--------------+------------------------------------------------+
+; LPM_WIDTH              ; 16           ; Signed Integer                                 ;
+; LPM_WIDTHAD            ; 11           ; Signed Integer                                 ;
+; LPM_NUMWORDS           ; 2048         ; Untyped                                        ;
+; LPM_INDATA             ; REGISTERED   ; Untyped                                        ;
+; LPM_ADDRESS_CONTROL    ; REGISTERED   ; Untyped                                        ;
+; LPM_OUTDATA            ; UNREGISTERED ; Untyped                                        ;
+; LPM_FILE               ; imem16_2.mif ; Untyped                                        ;
+; USE_EAB                ; ON           ; Untyped                                        ;
+; DEVICE_FAMILY          ; Cyclone      ; Untyped                                        ;
+; CBXI_PARAMETER         ; NOTHING      ; Untyped                                        ;
+; AUTO_CARRY_CHAINS      ; ON           ; AUTO_CARRY                                     ;
+; IGNORE_CARRY_BUFFERS   ; OFF          ; IGNORE_CARRY                                   ;
+; AUTO_CASCADE_CHAINS    ; ON           ; AUTO_CASCADE                                   ;
+; IGNORE_CASCADE_BUFFERS ; OFF          ; IGNORE_CASCADE                                 ;
++------------------------+--------------+------------------------------------------------+
+Note: In order to hide this table in the UI and the text report file, please set the "Show Parameter Settings Tables in Synthesis Report" option in "Analysis and Synthesis Settings -> More Settings" to "Off".
+
+
++----------------------------------------------------------------------------------------+
+; Parameter Settings for User Entity Instance: bufuucpu:cpu0|jb_cpu:cpu0|lpm_ram_dq:dram ;
++------------------------+--------------+------------------------------------------------+
+; Parameter Name         ; Value        ; Type                                           ;
++------------------------+--------------+------------------------------------------------+
+; LPM_WIDTH              ; 16           ; Signed Integer                                 ;
+; LPM_WIDTHAD            ; 11           ; Signed Integer                                 ;
+; LPM_NUMWORDS           ; 2048         ; Untyped                                        ;
+; LPM_INDATA             ; REGISTERED   ; Untyped                                        ;
+; LPM_ADDRESS_CONTROL    ; REGISTERED   ; Untyped                                        ;
+; LPM_OUTDATA            ; UNREGISTERED ; Untyped                                        ;
+; LPM_FILE               ; UNUSED       ; Untyped                                        ;
+; USE_EAB                ; ON           ; Untyped                                        ;
+; DEVICE_FAMILY          ; Cyclone      ; Untyped                                        ;
+; CBXI_PARAMETER         ; NOTHING      ; Untyped                                        ;
+; AUTO_CARRY_CHAINS      ; ON           ; AUTO_CARRY                                     ;
+; IGNORE_CARRY_BUFFERS   ; OFF          ; IGNORE_CARRY                                   ;
+; AUTO_CASCADE_CHAINS    ; ON           ; AUTO_CASCADE                                   ;
+; IGNORE_CASCADE_BUFFERS ; OFF          ; IGNORE_CASCADE                                 ;
++------------------------+--------------+------------------------------------------------+
+Note: In order to hide this table in the UI and the text report file, please set the "Show Parameter Settings Tables in Synthesis Report" option in "Analysis and Synthesis Settings -> More Settings" to "Off".
+
+
++----------------------------------------------------------------------------------------+
+; Parameter Settings for User Entity Instance: bufuucpu:cpu0|jb_cpu:cpu0|lpm_ram_dq:sram ;
++------------------------+--------------+------------------------------------------------+
+; Parameter Name         ; Value        ; Type                                           ;
++------------------------+--------------+------------------------------------------------+
+; LPM_WIDTH              ; 11           ; Signed Integer                                 ;
+; LPM_WIDTHAD            ; 10           ; Signed Integer                                 ;
+; LPM_NUMWORDS           ; 1024         ; Untyped                                        ;
+; LPM_INDATA             ; REGISTERED   ; Untyped                                        ;
+; LPM_ADDRESS_CONTROL    ; REGISTERED   ; Untyped                                        ;
+; LPM_OUTDATA            ; UNREGISTERED ; Untyped                                        ;
+; LPM_FILE               ; UNUSED       ; Untyped                                        ;
+; USE_EAB                ; ON           ; Untyped                                        ;
+; DEVICE_FAMILY          ; Cyclone      ; Untyped                                        ;
+; CBXI_PARAMETER         ; NOTHING      ; Untyped                                        ;
+; AUTO_CARRY_CHAINS      ; ON           ; AUTO_CARRY                                     ;
+; IGNORE_CARRY_BUFFERS   ; OFF          ; IGNORE_CARRY                                   ;
+; AUTO_CASCADE_CHAINS    ; ON           ; AUTO_CASCADE                                   ;
+; IGNORE_CASCADE_BUFFERS ; OFF          ; IGNORE_CASCADE                                 ;
++------------------------+--------------+------------------------------------------------+
+Note: In order to hide this table in the UI and the text report file, please set the "Show Parameter Settings Tables in Synthesis Report" option in "Analysis and Synthesis Settings -> More Settings" to "Off".
+
+
++------------------------------------------------------------------------------------+
+; Parameter Settings for User Entity Instance: altpll0:altp0|altpll:altpll_component ;
++-------------------------------+-------------------+--------------------------------+
+; Parameter Name                ; Value             ; Type                           ;
++-------------------------------+-------------------+--------------------------------+
+; OPERATION_MODE                ; NORMAL            ; Untyped                        ;
+; PLL_TYPE                      ; AUTO              ; Untyped                        ;
+; QUALIFY_CONF_DONE             ; OFF               ; Untyped                        ;
+; COMPENSATE_CLOCK              ; CLK0              ; Untyped                        ;
+; SCAN_CHAIN                    ; LONG              ; Untyped                        ;
+; PRIMARY_CLOCK                 ; INCLK0            ; Untyped                        ;
+; INCLK0_INPUT_FREQUENCY        ; 37037             ; Signed Integer                 ;
+; INCLK1_INPUT_FREQUENCY        ; 0                 ; Untyped                        ;
+; GATE_LOCK_SIGNAL              ; NO                ; Untyped                        ;
+; GATE_LOCK_COUNTER             ; 0                 ; Untyped                        ;
+; LOCK_HIGH                     ; 1                 ; Untyped                        ;
+; LOCK_LOW                      ; 1                 ; Untyped                        ;
+; VALID_LOCK_MULTIPLIER         ; 1                 ; Untyped                        ;
+; INVALID_LOCK_MULTIPLIER       ; 5                 ; Untyped                        ;
+; SWITCH_OVER_ON_LOSSCLK        ; OFF               ; Untyped                        ;
+; SWITCH_OVER_ON_GATED_LOCK     ; OFF               ; Untyped                        ;
+; ENABLE_SWITCH_OVER_COUNTER    ; OFF               ; Untyped                        ;
+; SKIP_VCO                      ; OFF               ; Untyped                        ;
+; SWITCH_OVER_COUNTER           ; 0                 ; Untyped                        ;
+; SWITCH_OVER_TYPE              ; AUTO              ; Untyped                        ;
+; FEEDBACK_SOURCE               ; EXTCLK0           ; Untyped                        ;
+; BANDWIDTH                     ; 0                 ; Untyped                        ;
+; BANDWIDTH_TYPE                ; AUTO              ; Untyped                        ;
+; SPREAD_FREQUENCY              ; 0                 ; Untyped                        ;
+; DOWN_SPREAD                   ; 0                 ; Untyped                        ;
+; SELF_RESET_ON_GATED_LOSS_LOCK ; OFF               ; Untyped                        ;
+; SELF_RESET_ON_LOSS_LOCK       ; OFF               ; Untyped                        ;
+; CLK9_MULTIPLY_BY              ; 0                 ; Untyped                        ;
+; CLK8_MULTIPLY_BY              ; 0                 ; Untyped                        ;
+; CLK7_MULTIPLY_BY              ; 0                 ; Untyped                        ;
+; CLK6_MULTIPLY_BY              ; 0                 ; Untyped                        ;
+; CLK5_MULTIPLY_BY              ; 1                 ; Untyped                        ;
+; CLK4_MULTIPLY_BY              ; 1                 ; Untyped                        ;
+; CLK3_MULTIPLY_BY              ; 1                 ; Untyped                        ;
+; CLK2_MULTIPLY_BY              ; 1                 ; Untyped                        ;
+; CLK1_MULTIPLY_BY              ; 1                 ; Untyped                        ;
+; CLK0_MULTIPLY_BY              ; 2                 ; Signed Integer                 ;
+; CLK9_DIVIDE_BY                ; 0                 ; Untyped                        ;
+; CLK8_DIVIDE_BY                ; 0                 ; Untyped                        ;
+; CLK7_DIVIDE_BY                ; 0                 ; Untyped                        ;
+; CLK6_DIVIDE_BY                ; 0                 ; Untyped                        ;
+; CLK5_DIVIDE_BY                ; 1                 ; Untyped                        ;
+; CLK4_DIVIDE_BY                ; 1                 ; Untyped                        ;
+; CLK3_DIVIDE_BY                ; 1                 ; Untyped                        ;
+; CLK2_DIVIDE_BY                ; 1                 ; Untyped                        ;
+; CLK1_DIVIDE_BY                ; 1                 ; Untyped                        ;
+; CLK0_DIVIDE_BY                ; 3                 ; Signed Integer                 ;
+; CLK9_PHASE_SHIFT              ; 0                 ; Untyped                        ;
+; CLK8_PHASE_SHIFT              ; 0                 ; Untyped                        ;
+; CLK7_PHASE_SHIFT              ; 0                 ; Untyped                        ;
+; CLK6_PHASE_SHIFT              ; 0                 ; Untyped                        ;
+; CLK5_PHASE_SHIFT              ; 0                 ; Untyped                        ;
+; CLK4_PHASE_SHIFT              ; 0                 ; Untyped                        ;
+; CLK3_PHASE_SHIFT              ; 0                 ; Untyped                        ;
+; CLK2_PHASE_SHIFT              ; 0                 ; Untyped                        ;
+; CLK1_PHASE_SHIFT              ; 0                 ; Untyped                        ;
+; CLK0_PHASE_SHIFT              ; 0                 ; Untyped                        ;
+; CLK5_TIME_DELAY               ; 0                 ; Untyped                        ;
+; CLK4_TIME_DELAY               ; 0                 ; Untyped                        ;
+; CLK3_TIME_DELAY               ; 0                 ; Untyped                        ;
+; CLK2_TIME_DELAY               ; 0                 ; Untyped                        ;
+; CLK1_TIME_DELAY               ; 0                 ; Untyped                        ;
+; CLK0_TIME_DELAY               ; 0                 ; Untyped                        ;
+; CLK9_DUTY_CYCLE               ; 50                ; Untyped                        ;
+; CLK8_DUTY_CYCLE               ; 50                ; Untyped                        ;
+; CLK7_DUTY_CYCLE               ; 50                ; Untyped                        ;
+; CLK6_DUTY_CYCLE               ; 50                ; Untyped                        ;
+; CLK5_DUTY_CYCLE               ; 50                ; Untyped                        ;
+; CLK4_DUTY_CYCLE               ; 50                ; Untyped                        ;
+; CLK3_DUTY_CYCLE               ; 50                ; Untyped                        ;
+; CLK2_DUTY_CYCLE               ; 50                ; Untyped                        ;
+; CLK1_DUTY_CYCLE               ; 50                ; Untyped                        ;
+; CLK0_DUTY_CYCLE               ; 50                ; Signed Integer                 ;
+; CLK9_USE_EVEN_COUNTER_MODE    ; OFF               ; Untyped                        ;
+; CLK8_USE_EVEN_COUNTER_MODE    ; OFF               ; Untyped                        ;
+; CLK7_USE_EVEN_COUNTER_MODE    ; OFF               ; Untyped                        ;
+; CLK6_USE_EVEN_COUNTER_MODE    ; OFF               ; Untyped                        ;
+; CLK5_USE_EVEN_COUNTER_MODE    ; OFF               ; Untyped                        ;
+; CLK4_USE_EVEN_COUNTER_MODE    ; OFF               ; Untyped                        ;
+; CLK3_USE_EVEN_COUNTER_MODE    ; OFF               ; Untyped                        ;
+; CLK2_USE_EVEN_COUNTER_MODE    ; OFF               ; Untyped                        ;
+; CLK1_USE_EVEN_COUNTER_MODE    ; OFF               ; Untyped                        ;
+; CLK0_USE_EVEN_COUNTER_MODE    ; OFF               ; Untyped                        ;
+; CLK9_USE_EVEN_COUNTER_VALUE   ; OFF               ; Untyped                        ;
+; CLK8_USE_EVEN_COUNTER_VALUE   ; OFF               ; Untyped                        ;
+; CLK7_USE_EVEN_COUNTER_VALUE   ; OFF               ; Untyped                        ;
+; CLK6_USE_EVEN_COUNTER_VALUE   ; OFF               ; Untyped                        ;
+; CLK5_USE_EVEN_COUNTER_VALUE   ; OFF               ; Untyped                        ;
+; CLK4_USE_EVEN_COUNTER_VALUE   ; OFF               ; Untyped                        ;
+; CLK3_USE_EVEN_COUNTER_VALUE   ; OFF               ; Untyped                        ;
+; CLK2_USE_EVEN_COUNTER_VALUE   ; OFF               ; Untyped                        ;
+; CLK1_USE_EVEN_COUNTER_VALUE   ; OFF               ; Untyped                        ;
+; CLK0_USE_EVEN_COUNTER_VALUE   ; OFF               ; Untyped                        ;
+; LOCK_WINDOW_UI                ;  0.05             ; Untyped                        ;
+; LOCK_WINDOW_UI_BITS           ; UNUSED            ; Untyped                        ;
+; VCO_RANGE_DETECTOR_LOW_BITS   ; UNUSED            ; Untyped                        ;
+; VCO_RANGE_DETECTOR_HIGH_BITS  ; UNUSED            ; Untyped                        ;
+; EXTCLK3_MULTIPLY_BY           ; 1                 ; Untyped                        ;
+; EXTCLK2_MULTIPLY_BY           ; 1                 ; Untyped                        ;
+; EXTCLK1_MULTIPLY_BY           ; 1                 ; Untyped                        ;
+; EXTCLK0_MULTIPLY_BY           ; 1                 ; Untyped                        ;
+; EXTCLK3_DIVIDE_BY             ; 1                 ; Untyped                        ;
+; EXTCLK2_DIVIDE_BY             ; 1                 ; Untyped                        ;
+; EXTCLK1_DIVIDE_BY             ; 1                 ; Untyped                        ;
+; EXTCLK0_DIVIDE_BY             ; 1                 ; Untyped                        ;
+; EXTCLK3_PHASE_SHIFT           ; 0                 ; Untyped                        ;
+; EXTCLK2_PHASE_SHIFT           ; 0                 ; Untyped                        ;
+; EXTCLK1_PHASE_SHIFT           ; 0                 ; Untyped                        ;
+; EXTCLK0_PHASE_SHIFT           ; 0                 ; Untyped                        ;
+; EXTCLK3_TIME_DELAY            ; 0                 ; Untyped                        ;
+; EXTCLK2_TIME_DELAY            ; 0                 ; Untyped                        ;
+; EXTCLK1_TIME_DELAY            ; 0                 ; Untyped                        ;
+; EXTCLK0_TIME_DELAY            ; 0                 ; Untyped                        ;
+; EXTCLK3_DUTY_CYCLE            ; 50                ; Untyped                        ;
+; EXTCLK2_DUTY_CYCLE            ; 50                ; Untyped                        ;
+; EXTCLK1_DUTY_CYCLE            ; 50                ; Untyped                        ;
+; EXTCLK0_DUTY_CYCLE            ; 50                ; Untyped                        ;
+; VCO_MULTIPLY_BY               ; 0                 ; Untyped                        ;
+; VCO_DIVIDE_BY                 ; 0                 ; Untyped                        ;
+; SCLKOUT0_PHASE_SHIFT          ; 0                 ; Untyped                        ;
+; SCLKOUT1_PHASE_SHIFT          ; 0                 ; Untyped                        ;
+; VCO_MIN                       ; 0                 ; Untyped                        ;
+; VCO_MAX                       ; 0                 ; Untyped                        ;
+; VCO_CENTER                    ; 0                 ; Untyped                        ;
+; PFD_MIN                       ; 0                 ; Untyped                        ;
+; PFD_MAX                       ; 0                 ; Untyped                        ;
+; M_INITIAL                     ; 0                 ; Untyped                        ;
+; M                             ; 0                 ; Untyped                        ;
+; N                             ; 1                 ; Untyped                        ;
+; M2                            ; 1                 ; Untyped                        ;
+; N2                            ; 1                 ; Untyped                        ;
+; SS                            ; 1                 ; Untyped                        ;
+; C0_HIGH                       ; 0                 ; Untyped                        ;
+; C1_HIGH                       ; 0                 ; Untyped                        ;
+; C2_HIGH                       ; 0                 ; Untyped                        ;
+; C3_HIGH                       ; 0                 ; Untyped                        ;
+; C4_HIGH                       ; 0                 ; Untyped                        ;
+; C5_HIGH                       ; 0                 ; Untyped                        ;
+; C6_HIGH                       ; 0                 ; Untyped                        ;
+; C7_HIGH                       ; 0                 ; Untyped                        ;
+; C8_HIGH                       ; 0                 ; Untyped                        ;
+; C9_HIGH                       ; 0                 ; Untyped                        ;
+; C0_LOW                        ; 0                 ; Untyped                        ;
+; C1_LOW                        ; 0                 ; Untyped                        ;
+; C2_LOW                        ; 0                 ; Untyped                        ;
+; C3_LOW                        ; 0                 ; Untyped                        ;
+; C4_LOW                        ; 0                 ; Untyped                        ;
+; C5_LOW                        ; 0                 ; Untyped                        ;
+; C6_LOW                        ; 0                 ; Untyped                        ;
+; C7_LOW                        ; 0                 ; Untyped                        ;
+; C8_LOW                        ; 0                 ; Untyped                        ;
+; C9_LOW                        ; 0                 ; Untyped                        ;
+; C0_INITIAL                    ; 0                 ; Untyped                        ;
+; C1_INITIAL                    ; 0                 ; Untyped                        ;
+; C2_INITIAL                    ; 0                 ; Untyped                        ;
+; C3_INITIAL                    ; 0                 ; Untyped                        ;
+; C4_INITIAL                    ; 0                 ; Untyped                        ;
+; C5_INITIAL                    ; 0                 ; Untyped                        ;
+; C6_INITIAL                    ; 0                 ; Untyped                        ;
+; C7_INITIAL                    ; 0                 ; Untyped                        ;
+; C8_INITIAL                    ; 0                 ; Untyped                        ;
+; C9_INITIAL                    ; 0                 ; Untyped                        ;
+; C0_MODE                       ; BYPASS            ; Untyped                        ;
+; C1_MODE                       ; BYPASS            ; Untyped                        ;
+; C2_MODE                       ; BYPASS            ; Untyped                        ;
+; C3_MODE                       ; BYPASS            ; Untyped                        ;
+; C4_MODE                       ; BYPASS            ; Untyped                        ;
+; C5_MODE                       ; BYPASS            ; Untyped                        ;
+; C6_MODE                       ; BYPASS            ; Untyped                        ;
+; C7_MODE                       ; BYPASS            ; Untyped                        ;
+; C8_MODE                       ; BYPASS            ; Untyped                        ;
+; C9_MODE                       ; BYPASS            ; Untyped                        ;
+; C0_PH                         ; 0                 ; Untyped                        ;
+; C1_PH                         ; 0                 ; Untyped                        ;
+; C2_PH                         ; 0                 ; Untyped                        ;
+; C3_PH                         ; 0                 ; Untyped                        ;
+; C4_PH                         ; 0                 ; Untyped                        ;
+; C5_PH                         ; 0                 ; Untyped                        ;
+; C6_PH                         ; 0                 ; Untyped                        ;
+; C7_PH                         ; 0                 ; Untyped                        ;
+; C8_PH                         ; 0                 ; Untyped                        ;
+; C9_PH                         ; 0                 ; Untyped                        ;
+; L0_HIGH                       ; 1                 ; Untyped                        ;
+; L1_HIGH                       ; 1                 ; Untyped                        ;
+; G0_HIGH                       ; 1                 ; Untyped                        ;
+; G1_HIGH                       ; 1                 ; Untyped                        ;
+; G2_HIGH                       ; 1                 ; Untyped                        ;
+; G3_HIGH                       ; 1                 ; Untyped                        ;
+; E0_HIGH                       ; 1                 ; Untyped                        ;
+; E1_HIGH                       ; 1                 ; Untyped                        ;
+; E2_HIGH                       ; 1                 ; Untyped                        ;
+; E3_HIGH                       ; 1                 ; Untyped                        ;
+; L0_LOW                        ; 1                 ; Untyped                        ;
+; L1_LOW                        ; 1                 ; Untyped                        ;
+; G0_LOW                        ; 1                 ; Untyped                        ;
+; G1_LOW                        ; 1                 ; Untyped                        ;
+; G2_LOW                        ; 1                 ; Untyped                        ;
+; G3_LOW                        ; 1                 ; Untyped                        ;
+; E0_LOW                        ; 1                 ; Untyped                        ;
+; E1_LOW                        ; 1                 ; Untyped                        ;
+; E2_LOW                        ; 1                 ; Untyped                        ;
+; E3_LOW                        ; 1                 ; Untyped                        ;
+; L0_INITIAL                    ; 1                 ; Untyped                        ;
+; L1_INITIAL                    ; 1                 ; Untyped                        ;
+; G0_INITIAL                    ; 1                 ; Untyped                        ;
+; G1_INITIAL                    ; 1                 ; Untyped                        ;
+; G2_INITIAL                    ; 1                 ; Untyped                        ;
+; G3_INITIAL                    ; 1                 ; Untyped                        ;
+; E0_INITIAL                    ; 1                 ; Untyped                        ;
+; E1_INITIAL                    ; 1                 ; Untyped                        ;
+; E2_INITIAL                    ; 1                 ; Untyped                        ;
+; E3_INITIAL                    ; 1                 ; Untyped                        ;
+; L0_MODE                       ; BYPASS            ; Untyped                        ;
+; L1_MODE                       ; BYPASS            ; Untyped                        ;
+; G0_MODE                       ; BYPASS            ; Untyped                        ;
+; G1_MODE                       ; BYPASS            ; Untyped                        ;
+; G2_MODE                       ; BYPASS            ; Untyped                        ;
+; G3_MODE                       ; BYPASS            ; Untyped                        ;
+; E0_MODE                       ; BYPASS            ; Untyped                        ;
+; E1_MODE                       ; BYPASS            ; Untyped                        ;
+; E2_MODE                       ; BYPASS            ; Untyped                        ;
+; E3_MODE                       ; BYPASS            ; Untyped                        ;
+; L0_PH                         ; 0                 ; Untyped                        ;
+; L1_PH                         ; 0                 ; Untyped                        ;
+; G0_PH                         ; 0                 ; Untyped                        ;
+; G1_PH                         ; 0                 ; Untyped                        ;
+; G2_PH                         ; 0                 ; Untyped                        ;
+; G3_PH                         ; 0                 ; Untyped                        ;
+; E0_PH                         ; 0                 ; Untyped                        ;
+; E1_PH                         ; 0                 ; Untyped                        ;
+; E2_PH                         ; 0                 ; Untyped                        ;
+; E3_PH                         ; 0                 ; Untyped                        ;
+; M_PH                          ; 0                 ; Untyped                        ;
+; C1_USE_CASC_IN                ; OFF               ; Untyped                        ;
+; C2_USE_CASC_IN                ; OFF               ; Untyped                        ;
+; C3_USE_CASC_IN                ; OFF               ; Untyped                        ;
+; C4_USE_CASC_IN                ; OFF               ; Untyped                        ;
+; C5_USE_CASC_IN                ; OFF               ; Untyped                        ;
+; C6_USE_CASC_IN                ; OFF               ; Untyped                        ;
+; C7_USE_CASC_IN                ; OFF               ; Untyped                        ;
+; C8_USE_CASC_IN                ; OFF               ; Untyped                        ;
+; C9_USE_CASC_IN                ; OFF               ; Untyped                        ;
+; CLK0_COUNTER                  ; G0                ; Untyped                        ;
+; CLK1_COUNTER                  ; G0                ; Untyped                        ;
+; CLK2_COUNTER                  ; G0                ; Untyped                        ;
+; CLK3_COUNTER                  ; G0                ; Untyped                        ;
+; CLK4_COUNTER                  ; G0                ; Untyped                        ;
+; CLK5_COUNTER                  ; G0                ; Untyped                        ;
+; CLK6_COUNTER                  ; E0                ; Untyped                        ;
+; CLK7_COUNTER                  ; E1                ; Untyped                        ;
+; CLK8_COUNTER                  ; E2                ; Untyped                        ;
+; CLK9_COUNTER                  ; E3                ; Untyped                        ;
+; L0_TIME_DELAY                 ; 0                 ; Untyped                        ;
+; L1_TIME_DELAY                 ; 0                 ; Untyped                        ;
+; G0_TIME_DELAY                 ; 0                 ; Untyped                        ;
+; G1_TIME_DELAY                 ; 0                 ; Untyped                        ;
+; G2_TIME_DELAY                 ; 0                 ; Untyped                        ;
+; G3_TIME_DELAY                 ; 0                 ; Untyped                        ;
+; E0_TIME_DELAY                 ; 0                 ; Untyped                        ;
+; E1_TIME_DELAY                 ; 0                 ; Untyped                        ;
+; E2_TIME_DELAY                 ; 0                 ; Untyped                        ;
+; E3_TIME_DELAY                 ; 0                 ; Untyped                        ;
+; M_TIME_DELAY                  ; 0                 ; Untyped                        ;
+; N_TIME_DELAY                  ; 0                 ; Untyped                        ;
+; EXTCLK3_COUNTER               ; E3                ; Untyped                        ;
+; EXTCLK2_COUNTER               ; E2                ; Untyped                        ;
+; EXTCLK1_COUNTER               ; E1                ; Untyped                        ;
+; EXTCLK0_COUNTER               ; E0                ; Untyped                        ;
+; ENABLE0_COUNTER               ; L0                ; Untyped                        ;
+; ENABLE1_COUNTER               ; L0                ; Untyped                        ;
+; CHARGE_PUMP_CURRENT           ; 2                 ; Untyped                        ;
+; LOOP_FILTER_R                 ;  1.000000         ; Untyped                        ;
+; LOOP_FILTER_C                 ; 5                 ; Untyped                        ;
+; CHARGE_PUMP_CURRENT_BITS      ; 9999              ; Untyped                        ;
+; LOOP_FILTER_R_BITS            ; 9999              ; Untyped                        ;
+; LOOP_FILTER_C_BITS            ; 9999              ; Untyped                        ;
+; VCO_POST_SCALE                ; 0                 ; Untyped                        ;
+; CLK2_OUTPUT_FREQUENCY         ; 0                 ; Untyped                        ;
+; CLK1_OUTPUT_FREQUENCY         ; 0                 ; Untyped                        ;
+; CLK0_OUTPUT_FREQUENCY         ; 0                 ; Untyped                        ;
+; INTENDED_DEVICE_FAMILY        ; Cyclone           ; Untyped                        ;
+; PORT_CLKENA0                  ; PORT_UNUSED       ; Untyped                        ;
+; PORT_CLKENA1                  ; PORT_UNUSED       ; Untyped                        ;
+; PORT_CLKENA2                  ; PORT_CONNECTIVITY ; Untyped                        ;
+; PORT_CLKENA3                  ; PORT_UNUSED       ; Untyped                        ;
+; PORT_CLKENA4                  ; PORT_UNUSED       ; Untyped                        ;
+; PORT_CLKENA5                  ; PORT_UNUSED       ; Untyped                        ;
+; PORT_EXTCLKENA0               ; PORT_UNUSED       ; Untyped                        ;
+; PORT_EXTCLKENA1               ; PORT_UNUSED       ; Untyped                        ;
+; PORT_EXTCLKENA2               ; PORT_UNUSED       ; Untyped                        ;
+; PORT_EXTCLKENA3               ; PORT_UNUSED       ; Untyped                        ;
+; PORT_EXTCLK0                  ; PORT_UNUSED       ; Untyped                        ;
+; PORT_EXTCLK1                  ; PORT_UNUSED       ; Untyped                        ;
+; PORT_EXTCLK2                  ; PORT_UNUSED       ; Untyped                        ;
+; PORT_EXTCLK3                  ; PORT_UNUSED       ; Untyped                        ;
+; PORT_CLKBAD0                  ; PORT_UNUSED       ; Untyped                        ;
+; PORT_CLKBAD1                  ; PORT_UNUSED       ; Untyped                        ;
+; PORT_CLK0                     ; PORT_USED         ; Untyped                        ;
+; PORT_CLK1                     ; PORT_UNUSED       ; Untyped                        ;
+; PORT_CLK2                     ; PORT_CONNECTIVITY ; Untyped                        ;
+; PORT_CLK3                     ; PORT_UNUSED       ; Untyped                        ;
+; PORT_CLK4                     ; PORT_UNUSED       ; Untyped                        ;
+; PORT_CLK5                     ; PORT_UNUSED       ; Untyped                        ;
+; PORT_CLK6                     ; PORT_CONNECTIVITY ; Untyped                        ;
+; PORT_CLK7                     ; PORT_CONNECTIVITY ; Untyped                        ;
+; PORT_CLK8                     ; PORT_CONNECTIVITY ; Untyped                        ;
+; PORT_CLK9                     ; PORT_CONNECTIVITY ; Untyped                        ;
+; PORT_SCANDATA                 ; PORT_UNUSED       ; Untyped                        ;
+; PORT_SCANDATAOUT              ; PORT_UNUSED       ; Untyped                        ;
+; PORT_SCANDONE                 ; PORT_UNUSED       ; Untyped                        ;
+; PORT_SCLKOUT1                 ; PORT_UNUSED       ; Untyped                        ;
+; PORT_SCLKOUT0                 ; PORT_UNUSED       ; Untyped                        ;
+; PORT_ACTIVECLOCK              ; PORT_UNUSED       ; Untyped                        ;
+; PORT_CLKLOSS                  ; PORT_UNUSED       ; Untyped                        ;
+; PORT_INCLK1                   ; PORT_UNUSED       ; Untyped                        ;
+; PORT_INCLK0                   ; PORT_USED         ; Untyped                        ;
+; PORT_FBIN                     ; PORT_UNUSED       ; Untyped                        ;
+; PORT_PLLENA                   ; PORT_UNUSED       ; Untyped                        ;
+; PORT_CLKSWITCH                ; PORT_UNUSED       ; Untyped                        ;
+; PORT_ARESET                   ; PORT_UNUSED       ; Untyped                        ;
+; PORT_PFDENA                   ; PORT_UNUSED       ; Untyped                        ;
+; PORT_SCANCLK                  ; PORT_UNUSED       ; Untyped                        ;
+; PORT_SCANACLR                 ; PORT_UNUSED       ; Untyped                        ;
+; PORT_SCANREAD                 ; PORT_UNUSED       ; Untyped                        ;
+; PORT_SCANWRITE                ; PORT_UNUSED       ; Untyped                        ;
+; PORT_ENABLE0                  ; PORT_UNUSED       ; Untyped                        ;
+; PORT_ENABLE1                  ; PORT_UNUSED       ; Untyped                        ;
+; PORT_LOCKED                   ; PORT_UNUSED       ; Untyped                        ;
+; PORT_CONFIGUPDATE             ; PORT_CONNECTIVITY ; Untyped                        ;
+; PORT_FBOUT                    ; PORT_CONNECTIVITY ; Untyped                        ;
+; PORT_PHASEDONE                ; PORT_CONNECTIVITY ; Untyped                        ;
+; PORT_PHASESTEP                ; PORT_CONNECTIVITY ; Untyped                        ;
+; PORT_PHASEUPDOWN              ; PORT_CONNECTIVITY ; Untyped                        ;
+; PORT_SCANCLKENA               ; PORT_CONNECTIVITY ; Untyped                        ;
+; PORT_PHASECOUNTERSELECT       ; PORT_CONNECTIVITY ; Untyped                        ;
+; PORT_VCOOVERRANGE             ; PORT_CONNECTIVITY ; Untyped                        ;
+; PORT_VCOUNDERRANGE            ; PORT_CONNECTIVITY ; Untyped                        ;
+; M_TEST_SOURCE                 ; 5                 ; Untyped                        ;
+; C0_TEST_SOURCE                ; 5                 ; Untyped                        ;
+; C1_TEST_SOURCE                ; 5                 ; Untyped                        ;
+; C2_TEST_SOURCE                ; 5                 ; Untyped                        ;
+; C3_TEST_SOURCE                ; 5                 ; Untyped                        ;
+; C4_TEST_SOURCE                ; 5                 ; Untyped                        ;
+; C5_TEST_SOURCE                ; 5                 ; Untyped                        ;
+; C6_TEST_SOURCE                ; 5                 ; Untyped                        ;
+; C7_TEST_SOURCE                ; 5                 ; Untyped                        ;
+; C8_TEST_SOURCE                ; 5                 ; Untyped                        ;
+; C9_TEST_SOURCE                ; 5                 ; Untyped                        ;
+; CBXI_PARAMETER                ; NOTHING           ; Untyped                        ;
+; VCO_FREQUENCY_CONTROL         ; AUTO              ; Untyped                        ;
+; VCO_PHASE_SHIFT_STEP          ; 0                 ; Untyped                        ;
+; WIDTH_CLOCK                   ; 6                 ; Untyped                        ;
+; WIDTH_PHASECOUNTERSELECT      ; 4                 ; Untyped                        ;
+; USING_FBMIMICBIDIR_PORT       ; OFF               ; Untyped                        ;
+; DEVICE_FAMILY                 ; Cyclone           ; Untyped                        ;
+; SCAN_CHAIN_MIF_FILE           ; UNUSED            ; Untyped                        ;
+; AUTO_CARRY_CHAINS             ; ON                ; AUTO_CARRY                     ;
+; IGNORE_CARRY_BUFFERS          ; OFF               ; IGNORE_CARRY                   ;
+; AUTO_CASCADE_CHAINS           ; ON                ; AUTO_CASCADE                   ;
+; IGNORE_CASCADE_BUFFERS        ; OFF               ; IGNORE_CASCADE                 ;
++-------------------------------+-------------------+--------------------------------+
+Note: In order to hide this table in the UI and the text report file, please set the "Show Parameter Settings Tables in Synthesis Report" option in "Analysis and Synthesis Settings -> More Settings" to "Off".
+
+
++-------------------------------------------------------------------------------------------+
+; Parameter Settings for Inferred Entity Instance: bufuucpu:cpu0|jb_cpu:cpu0|lpm_mult:Mult0 ;
++------------------------------------------------+-----------+------------------------------+
+; Parameter Name                                 ; Value     ; Type                         ;
++------------------------------------------------+-----------+------------------------------+
+; AUTO_CARRY_CHAINS                              ; ON        ; AUTO_CARRY                   ;
+; IGNORE_CARRY_BUFFERS                           ; OFF       ; IGNORE_CARRY                 ;
+; AUTO_CASCADE_CHAINS                            ; ON        ; AUTO_CASCADE                 ;
+; IGNORE_CASCADE_BUFFERS                         ; OFF       ; IGNORE_CASCADE               ;
+; LPM_WIDTHA                                     ; 16        ; Untyped                      ;
+; LPM_WIDTHB                                     ; 16        ; Untyped                      ;
+; LPM_WIDTHP                                     ; 32        ; Untyped                      ;
+; LPM_WIDTHR                                     ; 32        ; Untyped                      ;
+; LPM_WIDTHS                                     ; 1         ; Untyped                      ;
+; LPM_REPRESENTATION                             ; UNSIGNED  ; Untyped                      ;
+; LPM_PIPELINE                                   ; 0         ; Untyped                      ;
+; LATENCY                                        ; 0         ; Untyped                      ;
+; INPUT_A_IS_CONSTANT                            ; NO        ; Untyped                      ;
+; INPUT_B_IS_CONSTANT                            ; NO        ; Untyped                      ;
+; USE_EAB                                        ; OFF       ; Untyped                      ;
+; MAXIMIZE_SPEED                                 ; 6         ; Untyped                      ;
+; DEVICE_FAMILY                                  ; Cyclone   ; Untyped                      ;
+; CARRY_CHAIN                                    ; MANUAL    ; Untyped                      ;
+; APEX20K_TECHNOLOGY_MAPPER                      ; LUT       ; TECH_MAPPER_APEX20K          ;
+; DEDICATED_MULTIPLIER_CIRCUITRY                 ; AUTO      ; Untyped                      ;
+; DEDICATED_MULTIPLIER_MIN_INPUT_WIDTH_FOR_AUTO  ; 0         ; Untyped                      ;
+; DEDICATED_MULTIPLIER_MIN_OUTPUT_WIDTH_FOR_AUTO ; 0         ; Untyped                      ;
+; CBXI_PARAMETER                                 ; mult_nn01 ; Untyped                      ;
+; INPUT_A_FIXED_VALUE                            ; Bx        ; Untyped                      ;
+; INPUT_B_FIXED_VALUE                            ; Bx        ; Untyped                      ;
+; USE_AHDL_IMPLEMENTATION                        ; OFF       ; Untyped                      ;
++------------------------------------------------+-----------+------------------------------+
+Note: In order to hide this table in the UI and the text report file, please set the "Show Parameter Settings Tables in Synthesis Report" option in "Analysis and Synthesis Settings -> More Settings" to "Off".
+
+
++--------------------------------------------------------------------------------------------+
+; Parameter Settings for Inferred Entity Instance: bufuucpu:cpu0|jb_cpu:cpu0|lpm_divide:Div0 ;
++------------------------+----------------+--------------------------------------------------+
+; Parameter Name         ; Value          ; Type                                             ;
++------------------------+----------------+--------------------------------------------------+
+; LPM_WIDTHN             ; 16             ; Untyped                                          ;
+; LPM_WIDTHD             ; 16             ; Untyped                                          ;
+; LPM_NREPRESENTATION    ; UNSIGNED       ; Untyped                                          ;
+; LPM_DREPRESENTATION    ; UNSIGNED       ; Untyped                                          ;
+; LPM_PIPELINE           ; 0              ; Untyped                                          ;
+; LPM_REMAINDERPOSITIVE  ; TRUE           ; Untyped                                          ;
+; MAXIMIZE_SPEED         ; 5              ; Untyped                                          ;
+; CBXI_PARAMETER         ; lpm_divide_h8m ; Untyped                                          ;
+; CARRY_CHAIN            ; MANUAL         ; Untyped                                          ;
+; OPTIMIZE_FOR_SPEED     ; 5              ; Untyped                                          ;
+; AUTO_CARRY_CHAINS      ; ON             ; AUTO_CARRY                                       ;
+; IGNORE_CARRY_BUFFERS   ; OFF            ; IGNORE_CARRY                                     ;
+; AUTO_CASCADE_CHAINS    ; ON             ; AUTO_CASCADE                                     ;
+; IGNORE_CASCADE_BUFFERS ; OFF            ; IGNORE_CASCADE                                   ;
++------------------------+----------------+--------------------------------------------------+
+Note: In order to hide this table in the UI and the text report file, please set the "Show Parameter Settings Tables in Synthesis Report" option in "Analysis and Synthesis Settings -> More Settings" to "Off".
+
+
++----------------------------------------------------------------------------------+
+; lpm_mult Parameter Settings by Entity Instance                                   ;
++---------------------------------------+------------------------------------------+
+; Name                                  ; Value                                    ;
++---------------------------------------+------------------------------------------+
+; Number of entity instances            ; 1                                        ;
+; Entity Instance                       ; bufuucpu:cpu0|jb_cpu:cpu0|lpm_mult:Mult0 ;
+;     -- LPM_WIDTHA                     ; 16                                       ;
+;     -- LPM_WIDTHB                     ; 16                                       ;
+;     -- LPM_WIDTHP                     ; 32                                       ;
+;     -- LPM_REPRESENTATION             ; UNSIGNED                                 ;
+;     -- INPUT_A_IS_CONSTANT            ; NO                                       ;
+;     -- INPUT_B_IS_CONSTANT            ; NO                                       ;
+;     -- USE_EAB                        ; OFF                                      ;
+;     -- DEDICATED_MULTIPLIER_CIRCUITRY ; AUTO                                     ;
+;     -- INPUT_A_FIXED_VALUE            ; Bx                                       ;
+;     -- INPUT_B_FIXED_VALUE            ; Bx                                       ;
++---------------------------------------+------------------------------------------+
+
+
++-------------------------------+
+; Analysis & Synthesis Messages ;
++-------------------------------+
+Info: *******************************************************************
+Info: Running Quartus II Analysis & Synthesis
+    Info: Version 7.2 Build 151 09/26/2007 SJ Web Edition
+    Info: Processing started: Sun Aug 18 19:41:22 2013
+Info: Command: quartus_map --read_settings_files=on --write_settings_files=off jdcpu -c jdcpu
+Info: Found 1 design units, including 1 entities, in source file top.bdf
+    Info: Found entity 1: top
+Info: Found 1 design units, including 1 entities, in source file buffin.v
+    Info: Found entity 1: buffin
+Info: Found 1 design units, including 1 entities, in source file mycputop.v
+    Info: Found entity 1: mycputop
+Warning: Can't analyze file -- file D:/cpu_2013/jbcpu.bdf is missing
+Info: Found 1 design units, including 1 entities, in source file altpll0.v
+    Info: Found entity 1: altpll0
+Info: Found 1 design units, including 1 entities, in source file jdcpu.bdf
+    Info: Found entity 1: jdcpu
+Info: Found 1 design units, including 1 entities, in source file jb_cpu.v
+    Info: Found entity 1: jb_cpu
+Info: Found 1 design units, including 1 entities, in source file clk18.v
+    Info: Found entity 1: clk18
+Info: Found 1 design units, including 1 entities, in source file bufuucpu.v
+    Info: Found entity 1: bufuucpu
+Info: Elaborating entity "mycputop" for the top level hierarchy
+Warning (10036): Verilog HDL or VHDL warning at mycputop.v(70): object "bclar" assigned a value but never read
+Warning (10036): Verilog HDL or VHDL warning at mycputop.v(72): object "mUP" assigned a value but never read
+Warning (10036): Verilog HDL or VHDL warning at mycputop.v(73): object "mDOWN" assigned a value but never read
+Info: Elaborating entity "bufuucpu" for hierarchy "bufuucpu:cpu0"
+Info: Elaborating entity "jb_cpu" for hierarchy "bufuucpu:cpu0|jb_cpu:cpu0"
+Warning (10036): Verilog HDL or VHDL warning at jb_cpu.v(64): object "over" assigned a value but never read
+Warning (10036): Verilog HDL or VHDL warning at jb_cpu.v(71): object "lda" assigned a value but never read
+Warning (10036): Verilog HDL or VHDL warning at jb_cpu.v(72): object "add" assigned a value but never read
+Warning (10036): Verilog HDL or VHDL warning at jb_cpu.v(73): object "out" assigned a value but never read
+Warning (10036): Verilog HDL or VHDL warning at jb_cpu.v(74): object "sdal" assigned a value but never read
+Warning (10036): Verilog HDL or VHDL warning at jb_cpu.v(75): object "sdah" assigned a value but never read
+Warning (10036): Verilog HDL or VHDL warning at jb_cpu.v(76): object "str" assigned a value but never read
+Warning (10036): Verilog HDL or VHDL warning at jb_cpu.v(77): object "sub" assigned a value but never read
+Warning (10036): Verilog HDL or VHDL warning at jb_cpu.v(78): object "jmp" assigned a value but never read
+Warning (10036): Verilog HDL or VHDL warning at jb_cpu.v(81): object "call" assigned a value but never read
+Warning (10036): Verilog HDL or VHDL warning at jb_cpu.v(82): object "ret" assigned a value but never read
+Warning (10036): Verilog HDL or VHDL warning at jb_cpu.v(83): object "dptr" assigned a value but never read
+Warning (10036): Verilog HDL or VHDL warning at jb_cpu.v(84): object "inl" assigned a value but never read
+Warning (10036): Verilog HDL or VHDL warning at jb_cpu.v(85): object "inc" assigned a value but never read
+Warning (10036): Verilog HDL or VHDL warning at jb_cpu.v(86): object "dec" assigned a value but never read
+Warning (10036): Verilog HDL or VHDL warning at jb_cpu.v(87): object "datp" assigned a value but never read
+Warning (10036): Verilog HDL or VHDL warning at jb_cpu.v(89): object "jend" assigned a value but never read
+Warning (10036): Verilog HDL or VHDL warning at jb_cpu.v(90): object "inh" assigned a value but never read
+Warning (10036): Verilog HDL or VHDL warning at jb_cpu.v(92): object "mult" assigned a value but never read
+Warning (10036): Verilog HDL or VHDL warning at jb_cpu.v(93): object "divi" assigned a value but never read
+Warning (10036): Verilog HDL or VHDL warning at jb_cpu.v(94): object "stp" assigned a value but never read
+Warning (10230): Verilog HDL assignment warning at jb_cpu.v(199): truncated value with size 32 to match size of target (11)
+Warning (10230): Verilog HDL assignment warning at jb_cpu.v(202): truncated value with size 32 to match size of target (11)
+Warning (10230): Verilog HDL assignment warning at jb_cpu.v(240): truncated value with size 32 to match size of target (11)
+Warning (10230): Verilog HDL assignment warning at jb_cpu.v(247): truncated value with size 32 to match size of target (11)
+Warning (10230): Verilog HDL assignment warning at jb_cpu.v(268): truncated value with size 32 to match size of target (11)
+Warning (10230): Verilog HDL assignment warning at jb_cpu.v(275): truncated value with size 32 to match size of target (11)
+Warning (10230): Verilog HDL assignment warning at jb_cpu.v(294): truncated value with size 32 to match size of target (11)
+Warning (10230): Verilog HDL assignment warning at jb_cpu.v(295): truncated value with size 32 to match size of target (11)
+Warning (10230): Verilog HDL assignment warning at jb_cpu.v(300): truncated value with size 16 to match size of target (11)
+Warning (10230): Verilog HDL assignment warning at jb_cpu.v(301): truncated value with size 32 to match size of target (11)
+Warning (10230): Verilog HDL assignment warning at jb_cpu.v(307): truncated value with size 32 to match size of target (11)
+Warning (10230): Verilog HDL assignment warning at jb_cpu.v(313): truncated value with size 32 to match size of target (11)
+Warning (10230): Verilog HDL assignment warning at jb_cpu.v(329): truncated value with size 32 to match size of target (11)
+Warning (10230): Verilog HDL assignment warning at jb_cpu.v(335): truncated value with size 32 to match size of target (11)
+Warning (10230): Verilog HDL assignment warning at jb_cpu.v(336): truncated value with size 32 to match size of target (11)
+Warning (10230): Verilog HDL assignment warning at jb_cpu.v(378): truncated value with size 32 to match size of target (11)
+Warning (10230): Verilog HDL assignment warning at jb_cpu.v(388): truncated value with size 32 to match size of target (11)
+Warning (10230): Verilog HDL assignment warning at jb_cpu.v(394): truncated value with size 32 to match size of target (11)
+Warning (10230): Verilog HDL assignment warning at jb_cpu.v(417): truncated value with size 32 to match size of target (11)
+Warning (10230): Verilog HDL assignment warning at jb_cpu.v(428): truncated value with size 32 to match size of target (11)
+Warning (10230): Verilog HDL assignment warning at jb_cpu.v(444): truncated value with size 32 to match size of target (11)
+Warning (10230): Verilog HDL assignment warning at jb_cpu.v(474): truncated value with size 32 to match size of target (11)
+Warning (10230): Verilog HDL assignment warning at jb_cpu.v(480): truncated value with size 32 to match size of target (11)
+Warning (10230): Verilog HDL assignment warning at jb_cpu.v(487): truncated value with size 32 to match size of target (11)
+Warning (10230): Verilog HDL assignment warning at jb_cpu.v(493): truncated value with size 32 to match size of target (11)
+Warning (10230): Verilog HDL assignment warning at jb_cpu.v(504): truncated value with size 16 to match size of target (11)
+Warning (10230): Verilog HDL assignment warning at jb_cpu.v(510): truncated value with size 32 to match size of target (11)
+Warning (10230): Verilog HDL assignment warning at jb_cpu.v(516): truncated value with size 32 to match size of target (11)
+Info: Found 1 design units, including 1 entities, in source file c:/altera/72/quartus/libraries/megafunctions/lpm_ram_dq.tdf
+    Info: Found entity 1: lpm_ram_dq
+Info: Elaborating entity "lpm_ram_dq" for hierarchy "bufuucpu:cpu0|jb_cpu:cpu0|lpm_ram_dq:iram"
+Info: Elaborated megafunction instantiation "bufuucpu:cpu0|jb_cpu:cpu0|lpm_ram_dq:iram"
+Info: Found 1 design units, including 1 entities, in source file c:/altera/72/quartus/libraries/megafunctions/altram.tdf
+    Info: Found entity 1: altram
+Info: Elaborating entity "altram" for hierarchy "bufuucpu:cpu0|jb_cpu:cpu0|lpm_ram_dq:iram|altram:sram"
+Warning: Assertion warning: altram does not support Cyclone device family -- attempting best-case memory conversions, but power-up states and read during write behavior will be different for Cyclone devices
+Info: Elaborated megafunction instantiation "bufuucpu:cpu0|jb_cpu:cpu0|lpm_ram_dq:iram|altram:sram", which is child of megafunction instantiation "bufuucpu:cpu0|jb_cpu:cpu0|lpm_ram_dq:iram"
+Info: Instantiated megafunction "bufuucpu:cpu0|jb_cpu:cpu0|lpm_ram_dq:iram" with the following parameter:
+    Info: Parameter "lpm_width" = "16"
+    Info: Parameter "lpm_widthad" = "11"
+    Info: Parameter "lpm_outdata" = "UNREGISTERED"
+    Info: Parameter "lpm_indata" = "REGISTERED"
+    Info: Parameter "lpm_address_control" = "REGISTERED"
+    Info: Parameter "lpm_file" = "imem16_2.mif"
+Info: Found 1 design units, including 1 entities, in source file c:/altera/72/quartus/libraries/megafunctions/altsyncram.tdf
+    Info: Found entity 1: altsyncram
+Info: Elaborating entity "altsyncram" for hierarchy "bufuucpu:cpu0|jb_cpu:cpu0|lpm_ram_dq:iram|altram:sram|altsyncram:ram_block"
+Info: Elaborated megafunction instantiation "bufuucpu:cpu0|jb_cpu:cpu0|lpm_ram_dq:iram|altram:sram|altsyncram:ram_block", which is child of megafunction instantiation "bufuucpu:cpu0|jb_cpu:cpu0|lpm_ram_dq:iram"
+Info: Instantiated megafunction "bufuucpu:cpu0|jb_cpu:cpu0|lpm_ram_dq:iram" with the following parameter:
+    Info: Parameter "lpm_width" = "16"
+    Info: Parameter "lpm_widthad" = "11"
+    Info: Parameter "lpm_outdata" = "UNREGISTERED"
+    Info: Parameter "lpm_indata" = "REGISTERED"
+    Info: Parameter "lpm_address_control" = "REGISTERED"
+    Info: Parameter "lpm_file" = "imem16_2.mif"
+Info: Found 1 design units, including 1 entities, in source file db/altsyncram_ek91.tdf
+    Info: Found entity 1: altsyncram_ek91
+Info: Elaborating entity "altsyncram_ek91" for hierarchy "bufuucpu:cpu0|jb_cpu:cpu0|lpm_ram_dq:iram|altram:sram|altsyncram:ram_block|altsyncram_ek91:auto_generated"
+Warning: Memory depth value (2048) in design file differs from memory depth value (4096) in Memory Initialization File -- truncated remaining initial content value to fit RAM
+Info: Elaborating entity "lpm_ram_dq" for hierarchy "bufuucpu:cpu0|jb_cpu:cpu0|lpm_ram_dq:dram"
+Info: Elaborated megafunction instantiation "bufuucpu:cpu0|jb_cpu:cpu0|lpm_ram_dq:dram"
+Info: Elaborating entity "altram" for hierarchy "bufuucpu:cpu0|jb_cpu:cpu0|lpm_ram_dq:dram|altram:sram"
+Warning: Assertion warning: altram does not support Cyclone device family -- attempting best-case memory conversions, but power-up states and read during write behavior will be different for Cyclone devices
+Info: Elaborated megafunction instantiation "bufuucpu:cpu0|jb_cpu:cpu0|lpm_ram_dq:dram|altram:sram", which is child of megafunction instantiation "bufuucpu:cpu0|jb_cpu:cpu0|lpm_ram_dq:dram"
+Info: Instantiated megafunction "bufuucpu:cpu0|jb_cpu:cpu0|lpm_ram_dq:dram" with the following parameter:
+    Info: Parameter "lpm_width" = "16"
+    Info: Parameter "lpm_widthad" = "11"
+    Info: Parameter "lpm_outdata" = "UNREGISTERED"
+    Info: Parameter "lpm_indata" = "REGISTERED"
+    Info: Parameter "lpm_address_control" = "REGISTERED"
+Info: Elaborating entity "altsyncram" for hierarchy "bufuucpu:cpu0|jb_cpu:cpu0|lpm_ram_dq:dram|altram:sram|altsyncram:ram_block"
+Info: Elaborated megafunction instantiation "bufuucpu:cpu0|jb_cpu:cpu0|lpm_ram_dq:dram|altram:sram|altsyncram:ram_block", which is child of megafunction instantiation "bufuucpu:cpu0|jb_cpu:cpu0|lpm_ram_dq:dram"
+Info: Instantiated megafunction "bufuucpu:cpu0|jb_cpu:cpu0|lpm_ram_dq:dram" with the following parameter:
+    Info: Parameter "lpm_width" = "16"
+    Info: Parameter "lpm_widthad" = "11"
+    Info: Parameter "lpm_outdata" = "UNREGISTERED"
+    Info: Parameter "lpm_indata" = "REGISTERED"
+    Info: Parameter "lpm_address_control" = "REGISTERED"
+Info: Found 1 design units, including 1 entities, in source file db/altsyncram_gh71.tdf
+    Info: Found entity 1: altsyncram_gh71
+Info: Elaborating entity "altsyncram_gh71" for hierarchy "bufuucpu:cpu0|jb_cpu:cpu0|lpm_ram_dq:dram|altram:sram|altsyncram:ram_block|altsyncram_gh71:auto_generated"
+Info: Elaborating entity "lpm_ram_dq" for hierarchy "bufuucpu:cpu0|jb_cpu:cpu0|lpm_ram_dq:sram"
+Info: Elaborated megafunction instantiation "bufuucpu:cpu0|jb_cpu:cpu0|lpm_ram_dq:sram"
+Info: Elaborating entity "altram" for hierarchy "bufuucpu:cpu0|jb_cpu:cpu0|lpm_ram_dq:sram|altram:sram"
+Warning: Assertion warning: altram does not support Cyclone device family -- attempting best-case memory conversions, but power-up states and read during write behavior will be different for Cyclone devices
+Info: Elaborated megafunction instantiation "bufuucpu:cpu0|jb_cpu:cpu0|lpm_ram_dq:sram|altram:sram", which is child of megafunction instantiation "bufuucpu:cpu0|jb_cpu:cpu0|lpm_ram_dq:sram"
+Info: Instantiated megafunction "bufuucpu:cpu0|jb_cpu:cpu0|lpm_ram_dq:sram" with the following parameter:
+    Info: Parameter "lpm_width" = "11"
+    Info: Parameter "lpm_widthad" = "10"
+    Info: Parameter "lpm_outdata" = "UNREGISTERED"
+    Info: Parameter "lpm_indata" = "REGISTERED"
+    Info: Parameter "lpm_address_control" = "REGISTERED"
+Info: Elaborating entity "altsyncram" for hierarchy "bufuucpu:cpu0|jb_cpu:cpu0|lpm_ram_dq:sram|altram:sram|altsyncram:ram_block"
+Info: Elaborated megafunction instantiation "bufuucpu:cpu0|jb_cpu:cpu0|lpm_ram_dq:sram|altram:sram|altsyncram:ram_block", which is child of megafunction instantiation "bufuucpu:cpu0|jb_cpu:cpu0|lpm_ram_dq:sram"
+Info: Instantiated megafunction "bufuucpu:cpu0|jb_cpu:cpu0|lpm_ram_dq:sram" with the following parameter:
+    Info: Parameter "lpm_width" = "11"
+    Info: Parameter "lpm_widthad" = "10"
+    Info: Parameter "lpm_outdata" = "UNREGISTERED"
+    Info: Parameter "lpm_indata" = "REGISTERED"
+    Info: Parameter "lpm_address_control" = "REGISTERED"
+Info: Found 1 design units, including 1 entities, in source file db/altsyncram_3h71.tdf
+    Info: Found entity 1: altsyncram_3h71
+Info: Elaborating entity "altsyncram_3h71" for hierarchy "bufuucpu:cpu0|jb_cpu:cpu0|lpm_ram_dq:sram|altram:sram|altsyncram:ram_block|altsyncram_3h71:auto_generated"
+Info: Elaborating entity "buffin" for hierarchy "bufuucpu:cpu0|buffin:buff0"
+Warning (10230): Verilog HDL assignment warning at buffin.v(58): truncated value with size 32 to match size of target (7)
+Warning (10230): Verilog HDL assignment warning at buffin.v(65): truncated value with size 32 to match size of target (7)
+Warning (10230): Verilog HDL assignment warning at buffin.v(86): truncated value with size 32 to match size of target (7)
+Warning (10230): Verilog HDL assignment warning at buffin.v(87): truncated value with size 32 to match size of target (7)
+Warning (10230): Verilog HDL assignment warning at buffin.v(101): truncated value with size 32 to match size of target (7)
+Warning (10230): Verilog HDL assignment warning at buffin.v(102): truncated value with size 32 to match size of target (7)
+Warning (10230): Verilog HDL assignment warning at buffin.v(104): truncated value with size 32 to match size of target (1)
+Warning: Using design file SEG7_LUT_4.v, which is not specified as a design file for the current project, but contains definitions for 1 design units and 1 entities in project
+    Info: Found entity 1: SEG7_LUT_4
+Info: Elaborating entity "SEG7_LUT_4" for hierarchy "SEG7_LUT_4:u0"
+Warning: Using design file SEG7_LUT.v, which is not specified as a design file for the current project, but contains definitions for 1 design units and 1 entities in project
+    Info: Found entity 1: SEG7_LUT
+Info: Elaborating entity "SEG7_LUT" for hierarchy "SEG7_LUT_4:u0|SEG7_LUT:u0"
+Info: Elaborating entity "altpll0" for hierarchy "altpll0:altp0"
+Info: Found 1 design units, including 1 entities, in source file c:/altera/72/quartus/libraries/megafunctions/altpll.tdf
+    Info: Found entity 1: altpll
+Info: Elaborating entity "altpll" for hierarchy "altpll0:altp0|altpll:altpll_component"
+Info: Elaborated megafunction instantiation "altpll0:altp0|altpll:altpll_component"
+Warning (12020): Port "ordered port 6" on the entity instantiation of "u0" is connected to a signal of width 32. The formal width of the signal in the module is 1.  Extra bits will be ignored.
+Warning (12020): Port "address" on the entity instantiation of "sram" is connected to a signal of width 11. The formal width of the signal in the module is 10.  Extra bits will be ignored.
+Warning (12030): Port "q" on the entity instantiation of "sram" is connected to a signal of width 16. The formal width of the signal in the module is 11.  Extra bits will be left dangling without any fanout logic.
+Warning (14130): Reduced register "bufuucpu:cpu0|jb_cpu:cpu0|jn" with stuck data_in port to stuck value GND
+Info: Duplicate registers merged to single register
+    Info: Duplicate register "bufuucpu:cpu0|buffin:buff0|flge" merged to single register "bufuucpu:cpu0|buffin:buff0|ptro[0]"
+Warning (14130): Reduced register "fkz" with stuck data_in port to stuck value GND
+Warning (14130): Reduced register "ekz" with stuck data_in port to stuck value GND
+Info: State machine "|mycputop|bufuucpu:cpu0|jb_cpu:cpu0|jp" contains 6 states
+Info: Selected Auto state machine encoding method for state machine "|mycputop|bufuucpu:cpu0|jb_cpu:cpu0|jp"
+Info: Encoding result for state machine "|mycputop|bufuucpu:cpu0|jb_cpu:cpu0|jp"
+    Info: Completed encoding using 6 state bits
+        Info: Encoded state bit "bufuucpu:cpu0|jb_cpu:cpu0|jp.101"
+        Info: Encoded state bit "bufuucpu:cpu0|jb_cpu:cpu0|jp.100"
+        Info: Encoded state bit "bufuucpu:cpu0|jb_cpu:cpu0|jp.011"
+        Info: Encoded state bit "bufuucpu:cpu0|jb_cpu:cpu0|jp.010"
+        Info: Encoded state bit "bufuucpu:cpu0|jb_cpu:cpu0|jp.001"
+        Info: Encoded state bit "bufuucpu:cpu0|jb_cpu:cpu0|jp.000"
+    Info: State "|mycputop|bufuucpu:cpu0|jb_cpu:cpu0|jp.000" uses code string "000000"
+    Info: State "|mycputop|bufuucpu:cpu0|jb_cpu:cpu0|jp.001" uses code string "000011"
+    Info: State "|mycputop|bufuucpu:cpu0|jb_cpu:cpu0|jp.010" uses code string "000101"
+    Info: State "|mycputop|bufuucpu:cpu0|jb_cpu:cpu0|jp.011" uses code string "001001"
+    Info: State "|mycputop|bufuucpu:cpu0|jb_cpu:cpu0|jp.100" uses code string "010001"
+    Info: State "|mycputop|bufuucpu:cpu0|jb_cpu:cpu0|jp.101" uses code string "100001"
+Info: Inferred 2 megafunctions from design logic
+    Info: Inferred multiplier megafunction ("lpm_mult") from the following logic: "bufuucpu:cpu0|jb_cpu:cpu0|Mult0"
+    Info: Inferred divider/modulo megafunction ("lpm_divide") from the following logic: "bufuucpu:cpu0|jb_cpu:cpu0|Div0"
+Info: Found 1 design units, including 1 entities, in source file c:/altera/72/quartus/libraries/megafunctions/lpm_mult.tdf
+    Info: Found entity 1: lpm_mult
+Info: Elaborated megafunction instantiation "bufuucpu:cpu0|jb_cpu:cpu0|lpm_mult:Mult0"
+Info: Found 1 design units, including 1 entities, in source file db/mult_nn01.tdf
+    Info: Found entity 1: mult_nn01
+Info: Found 1 design units, including 1 entities, in source file c:/altera/72/quartus/libraries/megafunctions/lpm_divide.tdf
+    Info: Found entity 1: lpm_divide
+Info: Elaborated megafunction instantiation "bufuucpu:cpu0|jb_cpu:cpu0|lpm_divide:Div0"
+Info: Found 1 design units, including 1 entities, in source file db/lpm_divide_h8m.tdf
+    Info: Found entity 1: lpm_divide_h8m
+Info: Found 1 design units, including 1 entities, in source file db/sign_div_unsign_dnh.tdf
+    Info: Found entity 1: sign_div_unsign_dnh
+Info: Found 1 design units, including 1 entities, in source file db/alt_u_div_aue.tdf
+    Info: Found entity 1: alt_u_div_aue
+Info: Found 1 design units, including 1 entities, in source file db/add_sub_3dc.tdf
+    Info: Found entity 1: add_sub_3dc
+Info: Found 1 design units, including 1 entities, in source file db/add_sub_4dc.tdf
+    Info: Found entity 1: add_sub_4dc
+Info: Found 1 design units, including 1 entities, in source file db/add_sub_kec.tdf
+    Info: Found entity 1: add_sub_kec
+Info: Found 1 design units, including 1 entities, in source file db/add_sub_lec.tdf
+    Info: Found entity 1: add_sub_lec
+Info: Found 1 design units, including 1 entities, in source file db/add_sub_mec.tdf
+    Info: Found entity 1: add_sub_mec
+Info: Found 1 design units, including 1 entities, in source file db/add_sub_nec.tdf
+    Info: Found entity 1: add_sub_nec
+Info: Found 1 design units, including 1 entities, in source file db/add_sub_oec.tdf
+    Info: Found entity 1: add_sub_oec
+Info: Found 1 design units, including 1 entities, in source file db/add_sub_pec.tdf
+    Info: Found entity 1: add_sub_pec
+Info: Found 1 design units, including 1 entities, in source file db/add_sub_5dc.tdf
+    Info: Found entity 1: add_sub_5dc
+Info: Found 1 design units, including 1 entities, in source file db/add_sub_6dc.tdf
+    Info: Found entity 1: add_sub_6dc
+Info: Found 1 design units, including 1 entities, in source file db/add_sub_7dc.tdf
+    Info: Found entity 1: add_sub_7dc
+Info: Found 1 design units, including 1 entities, in source file db/add_sub_8dc.tdf
+    Info: Found entity 1: add_sub_8dc
+Info: Found 1 design units, including 1 entities, in source file db/add_sub_9dc.tdf
+    Info: Found entity 1: add_sub_9dc
+Info: Found 1 design units, including 1 entities, in source file db/add_sub_adc.tdf
+    Info: Found entity 1: add_sub_adc
+Info: Found 1 design units, including 1 entities, in source file db/add_sub_bdc.tdf
+    Info: Found entity 1: add_sub_bdc
+Info: Found 1 design units, including 1 entities, in source file db/add_sub_jec.tdf
+    Info: Found entity 1: add_sub_jec
+Info: Found 1 design units, including 1 entities, in source file db/add_sub_oac.tdf
+    Info: Found entity 1: add_sub_oac
+Warning: Synthesized away the following node(s):
+    Warning: Synthesized away the following LCELL buffer node(s):
+        Warning (14320): Synthesized away node "bufuucpu:cpu0|jb_cpu:cpu0|lpm_mult:Mult0|mult_nn01:auto_generated|le10a[17]"
+        Warning (14320): Synthesized away node "bufuucpu:cpu0|jb_cpu:cpu0|lpm_mult:Mult0|mult_nn01:auto_generated|le10a[16]"
+        Warning (14320): Synthesized away node "bufuucpu:cpu0|jb_cpu:cpu0|lpm_mult:Mult0|mult_nn01:auto_generated|le10a[15]"
+        Warning (14320): Synthesized away node "bufuucpu:cpu0|jb_cpu:cpu0|lpm_mult:Mult0|mult_nn01:auto_generated|le10a[14]"
+        Warning (14320): Synthesized away node "bufuucpu:cpu0|jb_cpu:cpu0|lpm_mult:Mult0|mult_nn01:auto_generated|le10a[13]"
+        Warning (14320): Synthesized away node "bufuucpu:cpu0|jb_cpu:cpu0|lpm_mult:Mult0|mult_nn01:auto_generated|le10a[12]"
+        Warning (14320): Synthesized away node "bufuucpu:cpu0|jb_cpu:cpu0|lpm_mult:Mult0|mult_nn01:auto_generated|le11a[16]"
+        Warning (14320): Synthesized away node "bufuucpu:cpu0|jb_cpu:cpu0|lpm_mult:Mult0|mult_nn01:auto_generated|le11a[15]"
+        Warning (14320): Synthesized away node "bufuucpu:cpu0|jb_cpu:cpu0|lpm_mult:Mult0|mult_nn01:auto_generated|le11a[14]"
+        Warning (14320): Synthesized away node "bufuucpu:cpu0|jb_cpu:cpu0|lpm_mult:Mult0|mult_nn01:auto_generated|le11a[13]"
+        Warning (14320): Synthesized away node "bufuucpu:cpu0|jb_cpu:cpu0|lpm_mult:Mult0|mult_nn01:auto_generated|le11a[12]"
+        Warning (14320): Synthesized away node "bufuucpu:cpu0|jb_cpu:cpu0|lpm_mult:Mult0|mult_nn01:auto_generated|le11a[11]"
+        Warning (14320): Synthesized away node "bufuucpu:cpu0|jb_cpu:cpu0|lpm_mult:Mult0|mult_nn01:auto_generated|le11a[10]"
+        Warning (14320): Synthesized away node "bufuucpu:cpu0|jb_cpu:cpu0|lpm_mult:Mult0|mult_nn01:auto_generated|le11a[9]"
+        Warning (14320): Synthesized away node "bufuucpu:cpu0|jb_cpu:cpu0|lpm_mult:Mult0|mult_nn01:auto_generated|le9a[17]"
+        Warning (14320): Synthesized away node "bufuucpu:cpu0|jb_cpu:cpu0|lpm_mult:Mult0|mult_nn01:auto_generated|le9a[16]"
+Warning: Synthesized away the following node(s):
+    Warning: Synthesized away the following LCELL buffer node(s):
+        Warning (14320): Synthesized away node "bufuucpu:cpu0|jb_cpu:cpu0|lpm_mult:Mult0|mult_nn01:auto_generated|le10a[11]"
+        Warning (14320): Synthesized away node "bufuucpu:cpu0|jb_cpu:cpu0|lpm_mult:Mult0|mult_nn01:auto_generated|le10a[10]"
+        Warning (14320): Synthesized away node "bufuucpu:cpu0|jb_cpu:cpu0|lpm_mult:Mult0|mult_nn01:auto_generated|le10a[9]"
+        Warning (14320): Synthesized away node "bufuucpu:cpu0|jb_cpu:cpu0|lpm_mult:Mult0|mult_nn01:auto_generated|le10a[8]"
+        Warning (14320): Synthesized away node "bufuucpu:cpu0|jb_cpu:cpu0|lpm_mult:Mult0|mult_nn01:auto_generated|le10a[7]"
+        Warning (14320): Synthesized away node "bufuucpu:cpu0|jb_cpu:cpu0|lpm_mult:Mult0|mult_nn01:auto_generated|le10a[6]"
+        Warning (14320): Synthesized away node "bufuucpu:cpu0|jb_cpu:cpu0|lpm_mult:Mult0|mult_nn01:auto_generated|le10a[5]"
+        Warning (14320): Synthesized away node "bufuucpu:cpu0|jb_cpu:cpu0|lpm_mult:Mult0|mult_nn01:auto_generated|le10a[4]"
+        Warning (14320): Synthesized away node "bufuucpu:cpu0|jb_cpu:cpu0|lpm_mult:Mult0|mult_nn01:auto_generated|le10a[3]"
+        Warning (14320): Synthesized away node "bufuucpu:cpu0|jb_cpu:cpu0|lpm_mult:Mult0|mult_nn01:auto_generated|le10a[2]"
+        Warning (14320): Synthesized away node "bufuucpu:cpu0|jb_cpu:cpu0|lpm_mult:Mult0|mult_nn01:auto_generated|le11a[8]"
+        Warning (14320): Synthesized away node "bufuucpu:cpu0|jb_cpu:cpu0|lpm_mult:Mult0|mult_nn01:auto_generated|le11a[7]"
+        Warning (14320): Synthesized away node "bufuucpu:cpu0|jb_cpu:cpu0|lpm_mult:Mult0|mult_nn01:auto_generated|le11a[6]"
+        Warning (14320): Synthesized away node "bufuucpu:cpu0|jb_cpu:cpu0|lpm_mult:Mult0|mult_nn01:auto_generated|le11a[5]"
+        Warning (14320): Synthesized away node "bufuucpu:cpu0|jb_cpu:cpu0|lpm_mult:Mult0|mult_nn01:auto_generated|le11a[4]"
+        Warning (14320): Synthesized away node "bufuucpu:cpu0|jb_cpu:cpu0|lpm_mult:Mult0|mult_nn01:auto_generated|le11a[3]"
+        Warning (14320): Synthesized away node "bufuucpu:cpu0|jb_cpu:cpu0|lpm_mult:Mult0|mult_nn01:auto_generated|le11a[2]"
+        Warning (14320): Synthesized away node "bufuucpu:cpu0|jb_cpu:cpu0|lpm_mult:Mult0|mult_nn01:auto_generated|le11a[1]"
+        Warning (14320): Synthesized away node "bufuucpu:cpu0|jb_cpu:cpu0|lpm_mult:Mult0|mult_nn01:auto_generated|le3a[17]"
+        Warning (14320): Synthesized away node "bufuucpu:cpu0|jb_cpu:cpu0|lpm_mult:Mult0|mult_nn01:auto_generated|le5a[17]"
+        Warning (14320): Synthesized away node "bufuucpu:cpu0|jb_cpu:cpu0|lpm_mult:Mult0|mult_nn01:auto_generated|le5a[16]"
+        Warning (14320): Synthesized away node "bufuucpu:cpu0|jb_cpu:cpu0|lpm_mult:Mult0|mult_nn01:auto_generated|le5a[12]"
+        Warning (14320): Synthesized away node "bufuucpu:cpu0|jb_cpu:cpu0|lpm_mult:Mult0|mult_nn01:auto_generated|le6a[17]"
+        Warning (14320): Synthesized away node "bufuucpu:cpu0|jb_cpu:cpu0|lpm_mult:Mult0|mult_nn01:auto_generated|le6a[16]"
+        Warning (14320): Synthesized away node "bufuucpu:cpu0|jb_cpu:cpu0|lpm_mult:Mult0|mult_nn01:auto_generated|le6a[15]"
+        Warning (14320): Synthesized away node "bufuucpu:cpu0|jb_cpu:cpu0|lpm_mult:Mult0|mult_nn01:auto_generated|le6a[14]"
+        Warning (14320): Synthesized away node "bufuucpu:cpu0|jb_cpu:cpu0|lpm_mult:Mult0|mult_nn01:auto_generated|le6a[13]"
+        Warning (14320): Synthesized away node "bufuucpu:cpu0|jb_cpu:cpu0|lpm_mult:Mult0|mult_nn01:auto_generated|le6a[12]"
+        Warning (14320): Synthesized away node "bufuucpu:cpu0|jb_cpu:cpu0|lpm_mult:Mult0|mult_nn01:auto_generated|le6a[11]"
+        Warning (14320): Synthesized away node "bufuucpu:cpu0|jb_cpu:cpu0|lpm_mult:Mult0|mult_nn01:auto_generated|le6a[10]"
+        Warning (14320): Synthesized away node "bufuucpu:cpu0|jb_cpu:cpu0|lpm_mult:Mult0|mult_nn01:auto_generated|le7a[17]"
+        Warning (14320): Synthesized away node "bufuucpu:cpu0|jb_cpu:cpu0|lpm_mult:Mult0|mult_nn01:auto_generated|le7a[16]"
+        Warning (14320): Synthesized away node "bufuucpu:cpu0|jb_cpu:cpu0|lpm_mult:Mult0|mult_nn01:auto_generated|le7a[15]"
+        Warning (14320): Synthesized away node "bufuucpu:cpu0|jb_cpu:cpu0|lpm_mult:Mult0|mult_nn01:auto_generated|le7a[14]"
+        Warning (14320): Synthesized away node "bufuucpu:cpu0|jb_cpu:cpu0|lpm_mult:Mult0|mult_nn01:auto_generated|le7a[13]"
+        Warning (14320): Synthesized away node "bufuucpu:cpu0|jb_cpu:cpu0|lpm_mult:Mult0|mult_nn01:auto_generated|le7a[12]"
+        Warning (14320): Synthesized away node "bufuucpu:cpu0|jb_cpu:cpu0|lpm_mult:Mult0|mult_nn01:auto_generated|le7a[11]"
+        Warning (14320): Synthesized away node "bufuucpu:cpu0|jb_cpu:cpu0|lpm_mult:Mult0|mult_nn01:auto_generated|le7a[10]"
+        Warning (14320): Synthesized away node "bufuucpu:cpu0|jb_cpu:cpu0|lpm_mult:Mult0|mult_nn01:auto_generated|le7a[9]"
+        Warning (14320): Synthesized away node "bufuucpu:cpu0|jb_cpu:cpu0|lpm_mult:Mult0|mult_nn01:auto_generated|le7a[8]"
+        Warning (14320): Synthesized away node "bufuucpu:cpu0|jb_cpu:cpu0|lpm_mult:Mult0|mult_nn01:auto_generated|le8a[17]"
+        Warning (14320): Synthesized away node "bufuucpu:cpu0|jb_cpu:cpu0|lpm_mult:Mult0|mult_nn01:auto_generated|le8a[16]"
+        Warning (14320): Synthesized away node "bufuucpu:cpu0|jb_cpu:cpu0|lpm_mult:Mult0|mult_nn01:auto_generated|le8a[15]"
+        Warning (14320): Synthesized away node "bufuucpu:cpu0|jb_cpu:cpu0|lpm_mult:Mult0|mult_nn01:auto_generated|le8a[14]"
+        Warning (14320): Synthesized away node "bufuucpu:cpu0|jb_cpu:cpu0|lpm_mult:Mult0|mult_nn01:auto_generated|le8a[13]"
+        Warning (14320): Synthesized away node "bufuucpu:cpu0|jb_cpu:cpu0|lpm_mult:Mult0|mult_nn01:auto_generated|le8a[12]"
+        Warning (14320): Synthesized away node "bufuucpu:cpu0|jb_cpu:cpu0|lpm_mult:Mult0|mult_nn01:auto_generated|le8a[11]"
+        Warning (14320): Synthesized away node "bufuucpu:cpu0|jb_cpu:cpu0|lpm_mult:Mult0|mult_nn01:auto_generated|le8a[10]"
+        Warning (14320): Synthesized away node "bufuucpu:cpu0|jb_cpu:cpu0|lpm_mult:Mult0|mult_nn01:auto_generated|le8a[9]"
+        Warning (14320): Synthesized away node "bufuucpu:cpu0|jb_cpu:cpu0|lpm_mult:Mult0|mult_nn01:auto_generated|le8a[8]"
+        Warning (14320): Synthesized away node "bufuucpu:cpu0|jb_cpu:cpu0|lpm_mult:Mult0|mult_nn01:auto_generated|le8a[7]"
+        Warning (14320): Synthesized away node "bufuucpu:cpu0|jb_cpu:cpu0|lpm_mult:Mult0|mult_nn01:auto_generated|le8a[6]"
+        Warning (14320): Synthesized away node "bufuucpu:cpu0|jb_cpu:cpu0|lpm_mult:Mult0|mult_nn01:auto_generated|le9a[15]"
+        Warning (14320): Synthesized away node "bufuucpu:cpu0|jb_cpu:cpu0|lpm_mult:Mult0|mult_nn01:auto_generated|le9a[14]"
+        Warning (14320): Synthesized away node "bufuucpu:cpu0|jb_cpu:cpu0|lpm_mult:Mult0|mult_nn01:auto_generated|le9a[13]"
+        Warning (14320): Synthesized away node "bufuucpu:cpu0|jb_cpu:cpu0|lpm_mult:Mult0|mult_nn01:auto_generated|le9a[12]"
+        Warning (14320): Synthesized away node "bufuucpu:cpu0|jb_cpu:cpu0|lpm_mult:Mult0|mult_nn01:auto_generated|le9a[11]"
+        Warning (14320): Synthesized away node "bufuucpu:cpu0|jb_cpu:cpu0|lpm_mult:Mult0|mult_nn01:auto_generated|le9a[10]"
+        Warning (14320): Synthesized away node "bufuucpu:cpu0|jb_cpu:cpu0|lpm_mult:Mult0|mult_nn01:auto_generated|le9a[9]"
+        Warning (14320): Synthesized away node "bufuucpu:cpu0|jb_cpu:cpu0|lpm_mult:Mult0|mult_nn01:auto_generated|le9a[8]"
+        Warning (14320): Synthesized away node "bufuucpu:cpu0|jb_cpu:cpu0|lpm_mult:Mult0|mult_nn01:auto_generated|le9a[7]"
+        Warning (14320): Synthesized away node "bufuucpu:cpu0|jb_cpu:cpu0|lpm_mult:Mult0|mult_nn01:auto_generated|le9a[6]"
+        Warning (14320): Synthesized away node "bufuucpu:cpu0|jb_cpu:cpu0|lpm_mult:Mult0|mult_nn01:auto_generated|le9a[5]"
+        Warning (14320): Synthesized away node "bufuucpu:cpu0|jb_cpu:cpu0|lpm_mult:Mult0|mult_nn01:auto_generated|le9a[4]"
+Warning: Synthesized away the following node(s):
+    Warning: Synthesized away the following LCELL buffer node(s):
+        Warning (14320): Synthesized away node "bufuucpu:cpu0|jb_cpu:cpu0|lpm_mult:Mult0|mult_nn01:auto_generated|le3a[16]"
+        Warning (14320): Synthesized away node "bufuucpu:cpu0|jb_cpu:cpu0|lpm_mult:Mult0|mult_nn01:auto_generated|le4a[17]"
+        Warning (14320): Synthesized away node "bufuucpu:cpu0|jb_cpu:cpu0|lpm_mult:Mult0|mult_nn01:auto_generated|le4a[16]"
+        Warning (14320): Synthesized away node "bufuucpu:cpu0|jb_cpu:cpu0|lpm_mult:Mult0|mult_nn01:auto_generated|le4a[15]"
+        Warning (14320): Synthesized away node "bufuucpu:cpu0|jb_cpu:cpu0|lpm_mult:Mult0|mult_nn01:auto_generated|le4a[14]"
+        Warning (14320): Synthesized away node "bufuucpu:cpu0|jb_cpu:cpu0|lpm_mult:Mult0|mult_nn01:auto_generated|le5a[15]"
+        Warning (14320): Synthesized away node "bufuucpu:cpu0|jb_cpu:cpu0|lpm_mult:Mult0|mult_nn01:auto_generated|le5a[14]"
+        Warning (14320): Synthesized away node "bufuucpu:cpu0|jb_cpu:cpu0|lpm_mult:Mult0|mult_nn01:auto_generated|le5a[13]"
+Info: Ignored 206 buffer(s)
+    Info: Ignored 206 SOFT buffer(s)
+Info: Registers with preset signals will power-up high
+Info: 4 registers lost all their fanouts during netlist optimizations. The first 4 are displayed below.
+    Info: Register "bufuucpu:cpu0|jb_cpu:cpu0|jp~40" lost all its fanouts during netlist optimizations.
+    Info: Register "bufuucpu:cpu0|jb_cpu:cpu0|jp~41" lost all its fanouts during netlist optimizations.
+    Info: Register "bufuucpu:cpu0|jb_cpu:cpu0|jp~42" lost all its fanouts during netlist optimizations.
+    Info: Register "bufuucpu:cpu0|jb_cpu:cpu0|sp[10]" lost all its fanouts during netlist optimizations.
+Info: Generated suppressed messages file D:/cpu_2013/jdcpu.map.smsg
+Info: Implemented 4652 device resources after synthesis - the final resource count might be different
+    Info: Implemented 16 input pins
+    Info: Implemented 46 output pins
+    Info: Implemented 4546 logic cells
+    Info: Implemented 43 RAM segments
+    Info: Implemented 1 ClockLock PLLs
+Info: Quartus II Analysis & Synthesis was successful. 0 errors, 166 warnings
+    Info: Allocated 169 megabytes of memory during processing
+    Info: Processing ended: Sun Aug 18 19:42:15 2013
+    Info: Elapsed time: 00:00:53
+
+
++------------------------------------------+
+; Analysis & Synthesis Suppressed Messages ;
++------------------------------------------+
+The suppressed messages can be found in D:/cpu_2013/jdcpu.map.smsg.
+
+

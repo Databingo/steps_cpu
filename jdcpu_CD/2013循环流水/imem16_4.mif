@@ -1,0 +1,120 @@
+-- Copyright (C) 1991-2007 Altera Corporation
+-- Your use of Altera Corporation's design tools, logic functions 
+-- and other software and tools, and its AMPP partner logic 
+-- functions, and any output files from any of the foregoing 
+-- (including device programming or simulation files), and any 
+-- associated documentation or information are expressly subject 
+-- to the terms and conditions of the Altera Program License 
+-- Subscription Agreement, Altera MegaCore Function License 
+-- Agreement, or other applicable license agreement, including, 
+-- without limitation, that your use is for the sole purpose of 
+-- programming logic devices manufactured by Altera and sold by 
+-- Altera or its authorized distributors.  Please refer to the 
+-- applicable agreement for further details.
+
+-- Quartus II generated Memory Initialization File (.mif)
+
+WIDTH=16;
+DEPTH=4096;
+
+ADDRESS_RADIX=HEX;
+DATA_RADIX=HEX;
+
+CONTENT BEGIN
+	0000  :   A000;
+	0001  :   0000;
+	0002  :   9020;
+	0003  :   9100;
+	0004  :   001A;
+	0005  :   000F;
+	0006  :   0018;
+	0007  :   000F;
+	0008  :   0019;
+	0009  :   300F;
+	000A  :   0000;
+	000B  :   0017;
+	000C  :   0000;
+	000D  :   B005;
+	000E  :   001B;
+	000F  :   E020;
+	0010  :   0000;
+	0011  :   B000;
+	[0012..001F]  :   0000;
+	0020  :   9015;
+	0021  :   0204;
+	0022  :   0207;
+	0023  :   003E;
+	[0024..009F]  :   0000;
+	00A0  :   9001;
+	00A1  :   0204;
+	00A2  :   9000;
+	00A3  :   0004;
+	00A4  :   902C;
+	00A5  :   9101;
+	00A6  :   2007;
+	00A7  :   0000;
+	00A8  :   1007;
+	00A9  :   C0B1;
+	00AA  :   0000;
+	00AB  :   0E04;
+	00AC  :   0E05;
+	00AD  :   03C6;
+	00AE  :   0E03;
+	00AF  :   B0A7;
+	00B0  :   2007;
+	00B1  :   0007;
+	00B2  :   003E;
+	[00B3..02FF]  :   0000;
+	0300  :   9001;
+	0301  :   0204;
+	0302  :   0404;
+	0303  :   9000;
+	0304  :   0004;
+	0305  :   9008;
+	0306  :   9100;
+	0307  :   E30B;
+	0308  :   0E04;
+	0309  :   0407;
+	030A  :   003F;
+	030B  :   0E03;
+	030C  :   C314;
+	030D  :   0409;
+	030E  :   0404;
+	030F  :   03C6;
+	0310  :   E318;
+	0311  :   0000;
+	0312  :   B30B;
+	0313  :   0000;
+	0314  :   003E;
+	[0315..0317]  :   0000;
+	0318  :   0E07;
+	0319  :   003E;
+	031A  :   0407;
+	[031B..06FF]  :   0000;
+	0700  :   9001;
+	0701  :   0204;
+	0702  :   0404;
+	0703  :   9000;
+	0704  :   0004;
+	0705  :   9008;
+	0706  :   A000;
+	0707  :   E70B;
+	0708  :   0E04;
+	0709  :   0407;
+	070A  :   003F;
+	070B  :   0E03;
+	070C  :   C714;
+	070D  :   0409;
+	070E  :   0404;
+	070F  :   03C6;
+	0710  :   E718;
+	0711  :   0000;
+	0712  :   B70B;
+	0713  :   0000;
+	0714  :   003E;
+	[0715..0717]  :   0000;
+	0718  :   0E07;
+	0719  :   003E;
+	071A  :   0407;
+	[071B..0FFF]  :   0000;
+END;
