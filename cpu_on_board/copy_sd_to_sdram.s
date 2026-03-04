@@ -153,6 +153,14 @@ li t1, 66 # B
 sw t1, 0(t0)     # print
 #jal print_sector
 
+# -- debug
+lw t2, 0(a1) # load first byte from sd_cache[0]
+jal print_hex_b
+# -- debug end
+
+
+
+
 # -- Scan Entries --
 # entries_per_sector = bytes_per_sector / 32 -> srli 5
 srli s7, s0, 5 # s7 = entries_per_sector (512/32=16)
@@ -207,7 +215,9 @@ j entry_loop
 done_entries:
 li t1, 90  # Z
 sw t1, 0(t0)
-j done_entries
+#j done_entries
+halt_loop:
+j halt_loop
 
 find_file_entry:
 li t1, 89  # Y
@@ -440,7 +450,7 @@ wait_ready:
 lw t2, 0x220(a1)    # t2 0x3220 ready
 beq t2, x0, wait_ready
 
-li t5, 2000 # 8 SPC dummy clocks (8*2*64= 1024）
+li t5, 5000 # 8 SPC dummy clocks (8*2*64= 1024）
 delay_loop:
 addi t5, t5, -1
 bne t5, x0, delay_loop
