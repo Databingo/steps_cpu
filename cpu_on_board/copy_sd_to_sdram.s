@@ -391,6 +391,7 @@ sw t1, 0(t0) # print
 mv a2, t6
 jal sd_read_sector
 jal print_sector
+j sdram_test
 
 
 
@@ -749,10 +750,11 @@ ret
 #000001e0  c5 fc 01 fc db fc b8 fc  e8 fc 67 fd f5 fc 09 fe  |..........g.....|
 #000001f0  07 fd 9c fe 27 fd 21 ff  58 fd 9b ff 9d fd 0c 00  |....'.!.X.......|
 # Minimal SDRAM test
-.section .text
-.globl _start
-
-_start:
+#.section .text
+#.globl _start
+#
+#_start:
+sdram_test:
     lui t0, 0x2
     addi t0, t0, 4       # UART = 0x2004
     
