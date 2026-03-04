@@ -194,6 +194,7 @@ module sd_controller(
                     state <= SEND_CMD;
                 end
                 IDLE: begin
+                    cs <= 1'b1;
                     if(rd == 1) begin
                         state <= READ_BLOCK;
                     end
@@ -206,6 +207,7 @@ module sd_controller(
                     sclk_sig <= ~sclk_sig;
                 end
                 READ_BLOCK: begin
+                    cs <= 1'b0;
                     cmd_out <= {16'hFF_51, address, 8'hFF};
                     bit_counter <= 55;
                     response_type <= 3'b1;
@@ -283,6 +285,7 @@ module sd_controller(
                     sclk_sig <= ~sclk_sig;
                 end
                 WRITE_BLOCK_CMD: begin
+                    cs <= 1'b0;
                     cmd_out <= {16'hFF_58, address, 8'hFF};
                     bit_counter <= 55;
                     return_state <= WRITE_BLOCK_INIT;
