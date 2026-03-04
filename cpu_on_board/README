@@ -306,6 +306,8 @@ b3f9c7c4f6246530cdc3c1e70c7eff99a6495903 run fake_opensbi.s/PLIC.s ok(but lost b
 d033be36    37_sd_workd
 072aac1f292fb05a6cd0cc19d2390d20171100db 37_sd_work
 59f44c1c9d40be1d4149d355aae8f7855add4f6d 37_sd_work_10Mhz
+85198a7b5567ec4834a1647952adc7e8423b0e3a still testing sd
+ba2b37e2594dc44bd455b648dc43209db35ec9db print DEF ok
 
 
 
