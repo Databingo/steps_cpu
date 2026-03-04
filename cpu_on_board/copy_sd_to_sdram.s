@@ -72,6 +72,14 @@ jal sd_read_sector
 li t1, 67        # C
 sw t1, 0(t0)     # print
 
+# -- debug
+lw t2, 0(a1) # load first byte from sd_cache[0]
+jal print_hex_b
+# -- debug end
+
+li t1, 0x60        # `
+sw t1, 0(t0)     # print
+
 #jal print_sector
 
 # -- Parse BPB -- little-endian
