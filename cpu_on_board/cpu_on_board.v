@@ -247,7 +247,7 @@ assign DRAM_CKE = 1; // always enable
     wire Sdc_read_selected = (bus_address == `Sdc_read);
     wire Sdc_write_selected = (bus_address == `Sdc_write);
     wire Sdc_ready_selected = (bus_address == `Sdc_ready);
-    wire Sdc_cache_selected = (bus_address >= `Sdc_base && bus_address < (`Sdc_base + 512));
+    wire Sdc_cache_selected = (bus_address >= `Sdc_base && bus_address < (`Sdc_base + 512)); // h200
     wire Sdc_avail_selected = (bus_address == `Sdc_avail);
     wire Sdram_selected = (bus_address >= `Sdram_min && bus_address < `Sdram_max);
     wire Mtime_selected = (bus_address == `Mtime);
@@ -352,7 +352,7 @@ assign DRAM_CKE = 1; // always enable
 
 	    if (Art_selected) begin 
 	        if (uart_read_step ==0) begin uart_read_pulse <= 1; uart_read_step <= 1; end
-	        //if (uart_read_step ==1 &&  uart_waitrequest) begin uart_read_pulse <= 1; end
+	        if (uart_read_step ==1 &&  uart_waitrequest) begin uart_read_pulse <= 1; end
 	        //if (uart_read_step ==1 && !uart_waitrequest) begin bus_read_data <= uart_readdata; uart_read_step <= 0; bus_read_done <=1; uart_read_pulse <= 0;end
 	        if (uart_read_step ==1 && !uart_waitrequest) begin bus_read_data <= uart_readdata; uart_read_step <= 0; bus_read_done <=1; end
 	    end
