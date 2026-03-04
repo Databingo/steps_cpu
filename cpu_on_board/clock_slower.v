@@ -15,7 +15,7 @@ module clock_slower(
         end else begin
             //if (counter == 25000000 - 1) begin // 1hz
             //if (counter == 2500000 - 1) begin // 10hz
-            if (counter == 2 - 1) begin // 25Mhz
+            if (counter == 2 - 1) begin // 12.4Mhz? 4 cycles one wave
             //if (counter == 5 - 1) begin // 10Mhz
             //if (counter == 0) begin // 50Mhz
                 counter <= 0;

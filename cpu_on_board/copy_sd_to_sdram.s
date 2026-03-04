@@ -176,12 +176,14 @@ add t3, a1, t2 # t3 = address of entry
 
 # first byte of entry
 lw t4, 0(t3)
+#lbu t4, 0(t3)
 beq t4, x0, done_entries # 0x00 no more entries in dir
 li t1, 0xE5
 beq t4, t1, next_entry # 0xE5 deleted entry, skip
 
 # attribute at 0x0B(11)
 lw t5, 11(t3)
+#lbu t5, 11(t3)
 li t1, 0x0F
 beq t5, t1, next_entry # 0x0F LFN entry, skip
 
@@ -200,6 +202,7 @@ li a2, 0x4D55534943202020  # MUSIC___
 print_name_loop:
 add a4, t3, a3 # a4 = name char address
 lw a5, 0(a4)   # a5 = name char
+#lbu a5, 0(a4)   # a5 = name char
 sw a5, 0(t0)
 
 slli a7, a7, 8
