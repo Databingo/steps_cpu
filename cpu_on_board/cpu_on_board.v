@@ -670,7 +670,7 @@ end
     assign HEX02 = ~sd_byte_available;
     //assign HEX03 = ~Sdram_selected ;
     //assign HEX03 = (bus_address >= `Sdram_min && bus_address < `Sdram_max);
-    assign HEX03 = ~sd_dout;
+    assign HEX03 = ~|sd_dout;
     assign HEX04 = ~clk_pulse_slow;
     assign HEX05 = ~|sd_addr;
     assign HEX06 = ~sd_cache_available;
