@@ -70,7 +70,7 @@ jal sd_read_sector
 li t1, 65        # A
 sw t1, 0(t0)     # print
 
-#jal print_sector
+jal print_sector
 
 # -- Parse BPB -- little-endian
 
