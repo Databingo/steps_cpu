@@ -71,7 +71,7 @@
      addi x2, x0, 0x2d
      sd x2, 0(x1)    #  print -
      mret           
-# I-Cache mmu-refill
+# I-Cache refill (withoud stap/tlb_hit sensitive)
      lui x1, 0x2     
      addi x1, x1, 0x4  # set print           
 
@@ -93,6 +93,6 @@
     #sd x2, 0(x1)    # print #
      sd x3, 8(x8)    # refill line high 64  
 
-    #addi x2, x0, 0x2f
-    #sd x2, 0(x1)    # print /
+    addi x2, x0, 0x2f
+    sd x2, 0(x1)    # print /
      mret           

@@ -142,8 +142,7 @@ assign DRAM_CKE = 1; // always enable
     // IR_LD BRAM Port A read
     always @(posedge clock_slow) begin ir_bd <= Cache[ppc>>2]; end
     wire [31:0] ir_ld; assign ir_ld = ir_bd;//{ir_bd[7:0], ir_bd[15:8], ir_bd[23:16], ir_bd[31:24]}; // Endianness swap
-    //assign LEDR_PC = ppc/4;
-    assign LEDR_PC = sd_status;
+    assign LEDR_PC = ppc/4;
     assign LEDG = ir_ld;
 
     // -- CPU --
@@ -247,7 +246,7 @@ assign DRAM_CKE = 1; // always enable
     wire Sdc_read_selected = (bus_address == `Sdc_read);
     wire Sdc_write_selected = (bus_address == `Sdc_write);
     wire Sdc_ready_selected = (bus_address == `Sdc_ready);
-    wire Sdc_cache_selected = (bus_address >= `Sdc_base && bus_address < (`Sdc_base + 512)); // h200
+    wire Sdc_cache_selected = (bus_address >= `Sdc_base && bus_address < (`Sdc_base + 512));
     wire Sdc_avail_selected = (bus_address == `Sdc_avail);
     wire Sdram_selected = (bus_address >= `Sdram_min && bus_address < `Sdram_max);
     wire Mtime_selected = (bus_address == `Mtime);
@@ -308,7 +307,6 @@ assign DRAM_CKE = 1; // always enable
 	    uart_read_step <= 0;
 	    mtimecmp <=  64'h80000000;
 	    uart_irq_pre <= 0;
-            //sd_rd_start <= 0;
 	end else begin
         bus_address_reg <= bus_address>>2;
         bus_address_reg_full <= bus_address;
@@ -323,9 +321,7 @@ assign DRAM_CKE = 1; // always enable
 	if (bus_read_enable) begin bus_read_done <= 0; end
         if (bus_write_enable) begin bus_write_done <= 0; end
 
-        //if (!sd_ready) sd_rd_start <= 0;
-        //if (byte_index>=12) sd_rd_start <= 0;
-
+        if (!sd_ready) sd_rd_start <= 0;
 
         // Read
         //if (!bus_read_enable && bus_read_done==0) begin 
@@ -352,7 +348,7 @@ assign DRAM_CKE = 1; // always enable
 
 	    if (Art_selected) begin 
 	        if (uart_read_step ==0) begin uart_read_pulse <= 1; uart_read_step <= 1; end
-	        if (uart_read_step ==1 &&  uart_waitrequest) begin uart_read_pulse <= 1; end
+	        //if (uart_read_step ==1 &&  uart_waitrequest) begin uart_read_pulse <= 1; end
 	        //if (uart_read_step ==1 && !uart_waitrequest) begin bus_read_data <= uart_readdata; uart_read_step <= 0; bus_read_done <=1; uart_read_pulse <= 0;end
 	        if (uart_read_step ==1 && !uart_waitrequest) begin bus_read_data <= uart_readdata; uart_read_step <= 0; bus_read_done <=1; end
 	    end
@@ -481,8 +477,8 @@ assign DRAM_CKE = 1; // always enable
 	    end
 
 	    if (Sdc_addr_selected) begin sd_addr <= bus_write_data[31:0]; bus_write_done <= 1; end
-	    //if (Sdc_read_selected) begin sd_rd_start <= 1; bus_write_done <= 1; end
-	    if (Sdc_read_selected) begin bus_write_done <= 1; end
+	    if (Sdc_read_selected) begin sd_rd_start <= 1; bus_write_done <= 1; end
+	    //if (Sdc_read_selected) begin bus_write_done <= 1; end
 
 	    //if (Art_selected) begin uart_write_pulse <= 1; bus_write_done <=1; end
 	    if (Art_selected) begin 
@@ -583,7 +579,7 @@ end
 	    sd_cache_available <= 0;
 	    //sd_byte_available <= 0;
 	    sd_byte_available_d <= 0;
-            sd_rd_start <= 0;
+            //sd_rd_start <= 0;
 	end
 	else begin
 	    //sd_cache_available <= 0;
@@ -596,14 +592,10 @@ end
 	    //if (byte_index == 10) sd_cache_available <= 0;
 	    //if (byte_index  == 0 && bus_write_enable && Sdc_read_selected) begin sd_cache_available <= 0; sd_rd_start <= 1; end
 	    //if (byte_index  == 0 && bus_write_done==0 && Sdc_read_selected) begin sd_cache_available <= 0; sd_rd_start <= 1; end
-	    //if (byte_index  == 0 && bus_write_enable && Sdc_read_selected) begin sd_cache_available <= 0; end
-	    //if (bus_write_enable && Sdc_read_selected) begin sd_cache_available <= 0; byte_index <= 0; end
-	    //
-	    //if (Sdc_read_selected) begin sd_rd_start <= 1; bus_write_done <= 1; end
-	    if (bus_write_enable && Sdc_read_selected) begin sd_cache_available <= 0; sd_rd_start <= 1;byte_index  <= 0; end //sd_rd_start <= 1; end
+	    if (byte_index  == 0 && bus_write_enable && Sdc_read_selected) begin sd_cache_available <= 0; end
 	    //if (do_read && sd_status !=6) begin 
 	    if (byte_index == 512) begin 
-	        sd_rd_start <= 0;
+	        //sd_rd_start <= 0;
 	        byte_index <= 0;
 	        do_read <=0;
 	        sd_cache_available <= 1;
@@ -612,19 +604,14 @@ end
     end
 
     // Slow pulse clock for SD init (~100 kHz)
-    reg [8:0] clkdiv = 0;  // for 50M
-    //reg [7:0] clkdiv = 0;  // for 25M
-    //reg [5:0] clkdiv = 0; // for 10M  10MHz/64 = 156.25KHz
-    //reg [4:0] clkdiv = 0; // for 10M  10MHz/32 = 300KHz
-    //reg [1:0] clkdiv = 0; // for 5M  5MHz/4 = 625Khz (sd SPI 100-400Khz)
-    //reg [3:0] clkdiv = 0; // for 5M  5MHz/8 = 625Khz (sd SPI=300khz 100-400Khz)
+    //reg [8:0] clkdiv = 0;  // for 50M
+    reg [5:0] clkdiv = 0; // for 10M  10MHz/64 = 156.25KHz
     always @(posedge clock_slow or negedge KEY0) begin
     //always @(posedge CLOCK_50 or negedge KEY0) begin
         if (!KEY0) clkdiv <= 0;
         else clkdiv <= clkdiv + 1;
     end
     wire clk_pulse_slow = (clkdiv == 0);
-    //wire clk_pulse_slow = (sd_status <= 8) ? (clkdiv == 0) : 1'b1;
 
     // SD Controller Bridge
     reg [31:0] sd_addr = 0;           // Sector address
@@ -664,16 +651,10 @@ end
     assign HEX10 = ~|bus_write_data;
     assign HEX11 = ~bus_write_enable;
     assign HEX00 = ~Art_selected;
-    //assign HEX01 = ~Ram_selected;
-    assign HEX01 = ~sd_rd_start;
-    //assign HEX02 = ~Rom_selected;
-    assign HEX02 = ~sd_byte_available;
+    assign HEX01 = ~Ram_selected;
+    assign HEX02 = ~Rom_selected;
     //assign HEX03 = ~Sdram_selected ;
-    //assign HEX03 = (bus_address >= `Sdram_min && bus_address < `Sdram_max);
-    assign HEX03 = ~|sd_dout;
-    assign HEX04 = ~clk_pulse_slow;
-    assign HEX05 = ~|sd_addr;
-    assign HEX06 = ~sd_cache_available;
+    assign HEX03 = (bus_address >= `Sdram_min && bus_address < `Sdram_max);
 
     assign HEX31 = ~Sdram_selected;
     //assign HEX32 = ~sdram_readdatavalid;
@@ -685,8 +666,8 @@ end
     assign HEX35 = ~sdram_req_wait;
     //assign HEX36 = ~|sdram_readdata;
     assign HEX36 = ~|sdram_rddata;
-    //assign HEX04 = ~uart_irq;
-    //assign HEX05 = ~Plic_priority_selected;
-    //assign HEX06 = ~meip_interrupt;
+    assign HEX04 = ~uart_irq;
+    assign HEX05 = ~Plic_priority_selected;
+    assign HEX06 = ~meip_interrupt;
 
 endmodule
