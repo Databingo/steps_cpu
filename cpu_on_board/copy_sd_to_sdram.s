@@ -419,6 +419,12 @@ sw t1, 0(t0)     # print
 sw t1, 0x204(a1) # Trigger read at 0x3204
 li t3, 0 # t3 is counter
 li t4, 100
+
+#wait_not_avail:
+#lw t5, 0x228(a1)
+#bne t5, x0, wait_not_avail
+
+
 wait_cache:
 lw t5, 0x228(a1)    # t5 0x3228 cache_avaible
 beq t5, x0, wait_cache
