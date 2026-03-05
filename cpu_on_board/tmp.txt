@@ -338,6 +338,9 @@ addi a2, t6, 0
 jal x1, sd_read_sector
 # jal print_sector
 jal x1, print_sector
+end:
+# j end
+jal x0, end
 sd_read_sector:
 sw a2, 0x200(a1) # Write Sector index value to address 0x3200
 # li t1, 1
