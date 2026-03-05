@@ -72,6 +72,9 @@ sw t1, 0(t0)     # print
 
 jal print_sector
 
+li t1, 136       # ^
+sb t1, 0(t0)     # print
+
 # -- Parse BPB -- little-endian
 
 # bytes_per_sector offset 0x0b-0x0c 2 bytes

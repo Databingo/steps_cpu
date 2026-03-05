@@ -61,6 +61,9 @@ addi t1, x0, 0x41
 sw t1, 0(t0)     # print
 # jal print_sector
 jal x1, print_sector
+# li t1, 136       
+addi t1, x0, 0x88
+sb t1, 0(t0)     # print
 addi t1, a1, 0x0B 
 lw t2, 0(t1)
 andi t2, t2, 0xff
