@@ -344,7 +344,20 @@ assign DRAM_CKE = 1; // always enable
 	    end
 
             if (Sdc_ready_selected) begin bus_read_data <= {63'd0, sd_ready}; bus_read_done <= 1; end
-	    if (Sdc_cache_selected) begin bus_read_data <= {56'd0, sd_cache[cid]}; bus_read_done <= 1; end // one byte for all load
+	    if (Sdc_cache_selected) begin 
+                bus_read_data <= {56'd0, sd_cache[cid]}; 
+
+                // #region agent log
+                if (agent_log_fd_sd == 0) agent_log_fd_sd = $fopen("/usr/local/projects/steps_cpu/cpu_on_board/.cursor/debug.log", "a");
+                if (agent_log_fd_sd) begin
+                    $fwrite(agent_log_fd_sd,
+                        "{\"id\":\"log_sd_read_%0t\",\"timestamp\":%0t,\"location\":\"z/z2.txt:347\",\"message\":\"sd_cache_read\",\"data\":{\"cid\":%0d,\"bus_address\":%0d,\"byte\":%0d}}\n",
+                        $time, $time, cid, bus_address, sd_cache[cid]);
+                end
+                // #endregion
+
+                bus_read_done <= 1; 
+            end // one byte for all load
             if (Sdc_avail_selected) begin bus_read_data <= {63'd0, sd_cache_available}; bus_read_done <= 1; end 
 
             if (Mtime_selected) begin bus_read_data <= mtime; bus_read_done <= 1; end 
@@ -575,6 +588,11 @@ end
     reg sd_byte_available_d = 0;
     reg do_read = 0;
     wire [4:0] sd_status;
+
+    // #region agent log
+    integer agent_log_fd_sd;
+    initial agent_log_fd_sd = 0;
+    // #endregion
     always @(posedge clock_slow or negedge KEY0) begin
 	if (!KEY0) begin
 	    //sd_rd_start <= 0;
@@ -602,11 +620,20 @@ end
 	    //if (Sdc_read_selected) begin sd_rd_start <= 1; bus_write_done <= 1; end
 	    if (bus_write_enable && Sdc_read_selected) begin sd_cache_available <= 0; sd_rd_start <= 1;byte_index  <= 0; end //sd_rd_start <= 1; end
 	    //if (do_read && sd_status !=6) begin 
-	    else if (byte_index == 512) begin 
+	    if (byte_index == 512) begin 
 	        sd_rd_start <= 0;
 	        byte_index <= 0;
 	        do_read <=0;
 	        sd_cache_available <= 1;
+
+                // #region agent log
+                if (agent_log_fd_sd == 0) agent_log_fd_sd = $fopen("/usr/local/projects/steps_cpu/cpu_on_board/.cursor/debug.log", "a");
+                if (agent_log_fd_sd) begin
+                    $fwrite(agent_log_fd_sd,
+                        "{\"id\":\"log_sd_cache_full_%0t\",\"timestamp\":%0t,\"location\":\"z/z2.txt:605\",\"message\":\"sd_cache_full\",\"data\":{\"b0\":%0d,\"b1\":%0d,\"b2\":%0d,\"b3\":%0d}}\n",
+                        $time, $time, sd_cache[0], sd_cache[1], sd_cache[2], sd_cache[3]);
+                end
+                // #endregion
 	    end
         end
     end
