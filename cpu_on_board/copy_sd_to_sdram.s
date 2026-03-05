@@ -67,12 +67,12 @@ li t1, 66        # B
 sb t1, 0(t0)     # print
 # -- Read Boot Sector 0 -- 
 li a2, 0
-jal sd_read_sector
+jal sd_read_sector  # inner print DEF
 
 li t1, 67        # C
 sw t1, 0(t0)     # print
 
-#jal print_sector
+jal print_sector
 
 # -- Parse BPB -- little-endian
 
@@ -412,15 +412,17 @@ bne t5, x0, delay_loop
 
 sw a2, 0x200(a1) # Write Sector index value to address 0x3200
 li t1, 1
-sw t1, 0x204(a1) # Trigger read at 0x3204
+
 li t1, 68        # D
 sw t1, 0(t0)     # print
 
+sw t1, 0x204(a1) # Trigger read at 0x3204
 li t3, 0 # t3 is counter
 li t4, 100
 wait_cache:
 lw t5, 0x228(a1)    # t5 0x3228 cache_avaible
 beq t5, x0, wait_cache
+
 #bne t2, x0, cache_ready
 #addi t3, t3, 1
 #blt t3, t4, wait_cache
@@ -428,6 +430,8 @@ li t1, 69        # E
 sw t1, 0(t0)     # print
 #li t3, 0
 #j wait_cache
+
+
 cache_ready:
 li t1, 70        # F
 sw t1, 0(t0)     # print
