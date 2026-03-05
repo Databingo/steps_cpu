@@ -54,22 +54,22 @@
 # I-TLB mmu-refill 1:1 identity map
      lui x1, 0x2     
      addi x1, x1, 0x4              
-     addi x2, x0, 0x2a
-     sd x2, 0(x1)    #  print *
+     addi x2, x0, 91
+     sd x2, 0(x1)    #  print [
      lui x8, 0x20000
      sd x9, 0(x8) 
-     addi x2, x0, 0x2d
-     sd x2, 0(x1)    #  print -
+     addi x2, x0, 93
+     sd x2, 0(x1)    #  print ]
      mret           
 # D-TLB mmu-refill
      lui x1, 0x2     
      addi x1, x1, 0x4              
-     addi x2, x0, 0x5e
-     sd x2, 0(x1)    #  print ^
+     addi x2, x0, 123
+     sd x2, 0(x1)    #  print {
      lui x8, 0x20000
      sd x9, 0(x8) 
-     addi x2, x0, 0x2d
-     sd x2, 0(x1)    #  print -
+     addi x2, x0, 125
+     sd x2, 0(x1)    #  print }
      mret           
 # I-Cache refill (withoud stap/tlb_hit sensitive)
      lui x1, 0x2     
