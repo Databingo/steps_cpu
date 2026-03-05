@@ -1,12 +1,6 @@
 _start:
 lui t0, 0x2
 addi t0, t0, 4       # UART = 0x2004
-#     li t1, 0x73    
-addi t1, x0, 0x73
-sb t1, 0(t0)   
-#     li t1, 0x62    
-addi t1, x0, 0x62
-sb t1, 0(t0)   
 #     li t1, 0x69    
 addi t1, x0, 0x69
 sb t1, 0(t0)   
@@ -421,7 +415,6 @@ addi t4, x0, 0
 addi t5, x0, 0
 # ret
 jalr x0, 0(x1)
-_start:
 lui t0, 0x2
 addi t0, t0, 4       # UART = 0x2004
 lui s0, 0x10000      # SDRAM = 0x10000000
