@@ -74,6 +74,9 @@ sw t1, 0(t0)     # print
 
 jal print_sector
 
+li t1, 95        # -
+sb t1, 0(t0)     # print
+
 # -- Parse BPB -- little-endian
 
 # bytes_per_sector offset 0x0b-0x0c 2 bytes
@@ -144,6 +147,9 @@ mv s5, t2    # s5 = sectors_per_fat16 high offset 0x16-0x17 2 bytes
 mul t4, s3, s5
 add t4, t4, s2
 mv s6, t4     # s6 = root_dir_sector_start
+
+li t1, 33 # !
+sw t1, 0(t0)     # print
 
 # -- Read Root Dir first sector --
 mv a2, s6
