@@ -1,6 +1,5 @@
 `include "header.vh"
 
-
 module cpu_on_board (
     // -- Pin --
     (* chip_pin = "PIN_L1" *)  input wire CLOCK_50, // 50 MHz clock
@@ -3273,7 +3272,7 @@ assign DRAM_CKE = 1; // always enable
 	    //if (Art_selected) begin uart_write_pulse <= 1; bus_write_done <=1; end
 	    if (Art_selected) begin 
 	        if (uart_write_step ==0) begin uart_write_pulse <= 1; uart_write_step <= 1; end
-	        if (uart_write_step ==1 &&  uart_waitrequest) begin uart_write_pulse <= 1; end
+	        //if (uart_write_step ==1 &&  uart_waitrequest) begin uart_write_pulse <= 1; end
 	        //if (uart_write_step ==1 && !uart_waitrequest) begin uart_write_step <= 0; bus_write_done <=1; uart_write_pulse <= 0;end
 	        if (uart_write_step ==1 && !uart_waitrequest) begin uart_write_step <= 0; bus_write_done <=1; end
 	    end
@@ -5265,7 +5264,7 @@ beq t2, x0, wait_ready
 # ---> ADD THIS DELAY LOOP <---
 # Give the SD card time to recover (N_cc idle clocks) 
 # before blasting the next CMD17 command at it!
-li t5, 10000
+li t5, 1000000
 delay_loop:
 addi t5, t5, -1
 bne t5, x0, delay_loop
