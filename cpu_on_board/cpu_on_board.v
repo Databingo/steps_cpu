@@ -487,7 +487,7 @@ assign DRAM_CKE = 1; // always enable
 	    //if (Art_selected) begin uart_write_pulse <= 1; bus_write_done <=1; end
 	    if (Art_selected) begin 
 	        if (uart_write_step ==0) begin uart_write_pulse <= 1; uart_write_step <= 1; end
-	        if (uart_write_step ==1 &&  uart_waitrequest) begin uart_write_pulse <= 1; end
+	        //if (uart_write_step ==1 &&  uart_waitrequest) begin uart_write_pulse <= 1; end
 	        //if (uart_write_step ==1 && !uart_waitrequest) begin uart_write_step <= 0; bus_write_done <=1; uart_write_pulse <= 0;end
 	        if (uart_write_step ==1 && !uart_waitrequest) begin uart_write_step <= 0; bus_write_done <=1; end
 	    end
@@ -612,10 +612,9 @@ end
     end
 
     // Slow pulse clock for SD init (~100 kHz)
-    //reg [8:0] clkdiv = 0;  // for 50M
+    reg [8:0] clkdiv = 0;  // for 50M
     //reg [7:0] clkdiv = 0;  // for 25M
-    //reg [5:0] clkdiv = 0; // 25M/64 =390k/2=200Khz
-    reg [4:0] clkdiv = 0; // 12.5M/32 =390k/2=200Khz
+    //reg [5:0] clkdiv = 0; // for 10M  10MHz/64 = 156.25KHz
     //reg [4:0] clkdiv = 0; // for 10M  10MHz/32 = 300KHz
     //reg [1:0] clkdiv = 0; // for 5M  5MHz/4 = 625Khz (sd SPI 100-400Khz)
     //reg [3:0] clkdiv = 0; // for 5M  5MHz/8 = 625Khz (sd SPI=300khz 100-400Khz)

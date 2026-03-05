@@ -72,14 +72,6 @@ jal sd_read_sector
 li t1, 67        # C
 sw t1, 0(t0)     # print
 
-# -- debug
-lw t2, 0(a1) # load first byte from sd_cache[0]
-jal print_hex_b
-# -- debug end
-
-li t1, 0x60        # `
-sw t1, 0(t0)     # print
-
 #jal print_sector
 
 # -- Parse BPB -- little-endian
@@ -161,14 +153,6 @@ li t1, 66 # B
 sw t1, 0(t0)     # print
 #jal print_sector
 
-# -- debug
-lw t2, 0(a1) # load first byte from sd_cache[0]
-jal print_hex_b
-# -- debug end
-
-
-
-
 # -- Scan Entries --
 # entries_per_sector = bytes_per_sector / 32 -> srli 5
 srli s7, s0, 5 # s7 = entries_per_sector (512/32=16)
@@ -184,14 +168,12 @@ add t3, a1, t2 # t3 = address of entry
 
 # first byte of entry
 lw t4, 0(t3)
-#lbu t4, 0(t3)
 beq t4, x0, done_entries # 0x00 no more entries in dir
 li t1, 0xE5
 beq t4, t1, next_entry # 0xE5 deleted entry, skip
 
 # attribute at 0x0B(11)
 lw t5, 11(t3)
-#lbu t5, 11(t3)
 li t1, 0x0F
 beq t5, t1, next_entry # 0x0F LFN entry, skip
 
@@ -210,7 +192,6 @@ li a2, 0x4D55534943202020  # MUSIC___
 print_name_loop:
 add a4, t3, a3 # a4 = name char address
 lw a5, 0(a4)   # a5 = name char
-#lbu a5, 0(a4)   # a5 = name char
 sw a5, 0(t0)
 
 slli a7, a7, 8
@@ -226,9 +207,7 @@ j entry_loop
 done_entries:
 li t1, 90  # Z
 sw t1, 0(t0)
-#j done_entries
-halt_loop:
-j halt_loop
+j done_entries
 
 find_file_entry:
 li t1, 89  # Y
@@ -412,71 +391,48 @@ sw t1, 0(t0) # print
 mv a2, t6
 jal sd_read_sector
 jal print_sector
-j sdram_test
 
 
-
-# ---  sd_read_sector ---
-#sd_read_sector:
-#wait_ready:
-#lw t2, 0x220(a1)    # t2 0x3220 ready
-#beq t2, x0, wait_ready
-#
-## ---> ADD THIS DELAY LOOP <---
-## Give the SD card time to recover (N_cc idle clocks) 
-## before blasting the next CMD17 command at it!
-#li t5, 1000000
-#delay_loop:
-#addi t5, t5, -1
-#bne t5, x0, delay_loop
-## -----------------------------
-#
-#sw a2, 0x200(a1) # Write Sector index value to address 0x3200
-#li t1, 1
-#sw t1, 0x204(a1) # Trigger read at 0x3204
-#li t1, 68        # D
-#sw t1, 0(t0)     # print
-#
-#li t3, 0 # t3 is counter
-#li t4, 100
-#wait_cache:
-#lw t5, 0x228(a1)    # t5 0x3228 cache_avaible
-#beq t5, x0, wait_cache
-##bne t2, x0, cache_ready
-##addi t3, t3, 1
-##blt t3, t4, wait_cache
-#li t1, 69        # E
-#sw t1, 0(t0)     # print
-##li t3, 0
-##j wait_cache
-#cache_ready:
-#li t1, 70        # F
-#sw t1, 0(t0)     # print
-#ret
 
 # ---  sd_read_sector ---
 sd_read_sector:
-
 wait_ready:
 lw t2, 0x220(a1)    # t2 0x3220 ready
 beq t2, x0, wait_ready
 
-li t5, 5000 # 8 SPC dummy clocks (8*2*64= 1024）
+# ---> ADD THIS DELAY LOOP <---
+# Give the SD card time to recover (N_cc idle clocks) 
+# before blasting the next CMD17 command at it!
+li t5, 1000000
 delay_loop:
 addi t5, t5, -1
 bne t5, x0, delay_loop
+# -----------------------------
+
 
 sw a2, 0x200(a1) # Write Sector index value to address 0x3200
 li t1, 1
 sw t1, 0x204(a1) # Trigger read at 0x3204
-wait_cache:
-lw t2, 0x228(a1)    # t2 0x3228 cache_avaible
-beq t2, x0, wait_cache
-
-li t1, 70        # F
+li t1, 68        # D
 sw t1, 0(t0)     # print
 
+li t3, 0 # t3 is counter
+li t4, 100
+wait_cache:
+lw t5, 0x228(a1)    # t5 0x3228 cache_avaible
+beq t5, x0, wait_cache
+#bne t2, x0, cache_ready
+#addi t3, t3, 1
+#blt t3, t4, wait_cache
+li t1, 69        # E
+sw t1, 0(t0)     # print
+#li t3, 0
+#j wait_cache
+cache_ready:
+li t1, 70        # F
+sw t1, 0(t0)     # print
 ret
+
 
 # BPB
 #Field,Value
@@ -781,11 +737,10 @@ ret
 #000001e0  c5 fc 01 fc db fc b8 fc  e8 fc 67 fd f5 fc 09 fe  |..........g.....|
 #000001f0  07 fd 9c fe 27 fd 21 ff  58 fd 9b ff 9d fd 0c 00  |....'.!.X.......|
 # Minimal SDRAM test
-#.section .text
-#.globl _start
-#
-#_start:
-sdram_test:
+.section .text
+.globl _start
+
+_start:
     lui t0, 0x2
     addi t0, t0, 4       # UART = 0x2004
     
