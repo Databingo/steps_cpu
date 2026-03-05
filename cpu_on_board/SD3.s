@@ -404,7 +404,7 @@ wait_cache:
 lw t2, 0x228(a1)    # t2 0x3228 cache_avaible
 beq t2, x0, wait_cache
 
-li t1, 70        # A
+li t1, 70        # F
 sw t1, 0(t0)     # print
 ret
 
