@@ -618,8 +618,8 @@ end
     //reg [4:0] clkdiv = 0; // for 10M  10MHz/32 = 300KHz
     //reg [1:0] clkdiv = 0; // for 5M  5MHz/4 = 625Khz (sd SPI 100-400Khz)
     //reg [3:0] clkdiv = 0; // for 5M  5MHz/8 = 625Khz (sd SPI=300khz 100-400Khz)
-    always @(posedge clock_slow or negedge KEY0) begin
-    //always @(posedge CLOCK_50 or negedge KEY0) begin
+    //always @(posedge clock_slow or negedge KEY0) begin
+    always @(posedge CLOCK_50 or negedge KEY0) begin
         if (!KEY0) clkdiv <= 0;
         else clkdiv <= clkdiv + 1;
     end
@@ -651,7 +651,8 @@ end
         .reset(~KEY0),
         .ready(sd_ready),
         .address(sd_addr),
-        .clk(clock_slow),
+        //.clk(clock_slow),
+        .clk(CLOCK_50),
         .clk_pulse_slow(clk_pulse_slow),
         .status(sd_status),
         .recv_data()
