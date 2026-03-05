@@ -403,7 +403,7 @@ beq t2, x0, wait_ready
 # ---> ADD THIS DELAY LOOP <---
 # Give the SD card time to recover (N_cc idle clocks) 
 # before blasting the next CMD17 command at it!
-li t5, 1000000
+li t5, 10000
 delay_loop:
 addi t5, t5, -1
 bne t5, x0, delay_loop
