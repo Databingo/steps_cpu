@@ -1,5 +1,6 @@
 `include "header.vh"
 
+
 module cpu_on_board (
     // -- Pin --
     (* chip_pin = "PIN_L1" *)  input wire CLOCK_50, // 50 MHz clock
