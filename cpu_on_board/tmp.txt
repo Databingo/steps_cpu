@@ -359,8 +359,8 @@ jalr x0, 0(x1)
 print_sector:
 # li t1, 0   
 addi t1, x0, 0x0
-# li t6, 511 
-addi t6, x0, 0x1ff
+# li t6, 512 
+addi t6, x0, 0x200
 print_loop:
 add a4, a1, t1 
 addi t1, t1, 1
