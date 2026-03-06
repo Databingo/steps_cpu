@@ -613,8 +613,8 @@ end
     end
 
     // Slow pulse clock for SD init (~100 kHz)
-    //reg [8:0] clkdiv = 0;  // for 50M
-    reg [7:0] clkdiv = 0;  // for 25M
+    reg [8:0] clkdiv = 0;  // for 50M
+    //reg [7:0] clkdiv = 0;  // for 25M
     //reg [5:0] clkdiv = 0; // for 10M  10MHz/64 = 156.25KHz
     //reg [4:0] clkdiv = 0; // 12.8MHz/32 = 400KHz / 2 = 200 Khz SPI
     //reg [1:0] clkdiv = 0; // for 5M  5MHz/4 = 625Khz (sd SPI 100-400Khz)
