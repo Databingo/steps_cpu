@@ -61,12 +61,12 @@ addi t1, x0, 0x2d
 sw t1, 0(t0)     # print
 # jal print_sector
 jal x1, print_sector
-pause:
-# j pause
-jal x0, pause
 # li t1, 124       
 addi t1, x0, 0x7c
 sb t1, 0(t0)     # print
+pause:
+# j pause
+jal x0, pause
 addi t1, a1, 0x0B 
 lw t2, 0(t1)
 andi t2, t2, 0xff

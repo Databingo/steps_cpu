@@ -72,11 +72,11 @@ sw t1, 0(t0)     # print
 
 jal print_sector
 
-pause:
-j pause
-
 li t1, 124       # |
 sb t1, 0(t0)     # print
+
+pause:
+j pause
 
 # -- Parse BPB -- little-endian
 
