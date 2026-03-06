@@ -445,7 +445,11 @@ letter_l:
 addi t4, t4, 55        # 10 is "A" ascii 65 ..
 print_l_hex:
 sw t4, 0(t0)
-bgt t6, t1, print_loop
+bge t6, t1, print_loop
+
+li t1, 126           # '~'
+sb t1, 0(t0)         # print_sector finish print 512 byte
+
 ret
 # -- end print_sector --
 
