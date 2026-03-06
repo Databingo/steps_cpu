@@ -449,7 +449,7 @@ addi t4, t4, 55        # 10 is "A" ascii 65 ..
 print_l_hex:
 sw t4, 0(t0)
 #bge t6, t1, print_loop
-blt x0, t1 print_loop
+bge t1, x0, print_loop
 
 li x31, 126           # '~'
 sb x31, 0(t0)         # print_sector finish print 512 byte
