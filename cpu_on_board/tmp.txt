@@ -366,7 +366,6 @@ addi t1, x0, 0x0
 addi t6, x0, 0x1ff
 print_loop:
 add a4, a1, t1 
-addi t1, t1, -1
 lb t2, 0(a4)           # load byte at 0x3000 a1+t1
 andi t2, t2, 0xFF   # Isolate byte value
 srli t3, t2, 4      # get high nibble
@@ -389,6 +388,7 @@ letter_l:
 addi t4, t4, 55        # 10 is "A" ascii 65 ..
 print_l_hex:
 sw t4, 0(t0)
+addi t1, t1, -1
 bge t1, x0, print_loop
 # li x31, 126           
 addi x31, x0, 0x7e
