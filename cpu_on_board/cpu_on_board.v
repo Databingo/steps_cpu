@@ -488,7 +488,7 @@ assign DRAM_CKE = 1; // always enable
 	    //if (Art_selected) begin uart_write_pulse <= 1; bus_write_done <=1; end
 	    if (Art_selected) begin 
 	        if (uart_write_step ==0) begin uart_write_pulse <= 1; uart_write_step <= 1; end
-	        //if (uart_write_step ==1 &&  uart_waitrequest) begin uart_write_pulse <= 1; end
+	        if (uart_write_step ==1 &&  uart_waitrequest) begin uart_write_pulse <= 1; end
 	        //if (uart_write_step ==1 && !uart_waitrequest) begin uart_write_step <= 0; bus_write_done <=1; uart_write_pulse <= 0;end
 	        if (uart_write_step ==1 && !uart_waitrequest) begin uart_write_step <= 0; bus_write_done <=1; end
 	    end
