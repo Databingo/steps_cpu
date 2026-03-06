@@ -67,7 +67,7 @@ beq a2, x0, sd_ready
 li a2, 0
 jal sd_read_sector
 
-li t1, 65        # A
+li t1, 45        # -
 sw t1, 0(t0)     # print
 
 jal print_sector
