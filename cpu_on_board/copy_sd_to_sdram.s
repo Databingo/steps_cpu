@@ -426,7 +426,7 @@ print_loop:
 #li a3, 32     # space 
 #sw a3, 0(t0)  # print start space per byte
 add a4, a1, t1 
-addi t1, t1, 1
+addi t1, t1, -1
 #lw t2, 0(a4)           # load byte at 0x3000 a1+t1
 lb t2, 0(a4)           # load byte at 0x3000 a1+t1
 andi t2, t2, 0xFF   # Isolate byte value
@@ -448,7 +448,8 @@ letter_l:
 addi t4, t4, 55        # 10 is "A" ascii 65 ..
 print_l_hex:
 sw t4, 0(t0)
-bge t6, t1, print_loop
+#bge t6, t1, print_loop
+blt x0, t1 print_loop
 
 li x31, 126           # '~'
 sb x31, 0(t0)         # print_sector finish print 512 byte
