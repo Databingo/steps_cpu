@@ -39,9 +39,9 @@ cat bin.txt > rom.mif  # write ROM program
 #go run ../rvas.go shadow.s
 #go run ../rvas.go mopensbi.s
 #go run ../rvas.go TLB.s
-#go run ../rvas.go PLIC.s # sdram write/read ok
+go run ../rvas.go PLIC.s # sdram write/read ok
 #go run ../rvas.go fake_opensbi.s
-go run ../rvas.go copy_sd_to_sdram.s
+#go run ../rvas.go copy_sd_to_sdram.s
 
 
 
