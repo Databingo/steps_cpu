@@ -61,6 +61,9 @@ addi t1, x0, 0x2d
 sw t1, 0(t0)     # print
 # jal print_sector
 jal x1, print_sector
+pause:
+# j pause
+jal x0, pause
 # li t1, 124       
 addi t1, x0, 0x7c
 sb t1, 0(t0)     # print
