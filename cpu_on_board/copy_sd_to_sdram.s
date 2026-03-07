@@ -67,8 +67,8 @@ beq a2, x0, sd_ready
 li a2, 0
 jal sd_read_sector
 
-li t1, 65        # A
-sw t1, 0(t0)     # print
+#li t1, 65        # A
+#sw t1, 0(t0)     # print
 
 jal print_sector
 
@@ -410,8 +410,8 @@ wait_cache:
 lw t2, 0x228(a1)    # t2 0x3228 cache_avaible
 beq t2, x0, wait_cache
 
-li t1, 70        # F
-sw t1, 0(t0)     # print
+#li t1, 70        # F
+#sw t1, 0(t0)     # print
 ret
 
 
