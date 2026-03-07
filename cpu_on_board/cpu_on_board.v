@@ -214,7 +214,7 @@ assign DRAM_CKE = 1; // always enable
 	
         .jtag_uart_0_avalon_jtag_slave_readdata    (uart_readdata),
         .jtag_uart_0_avalon_jtag_slave_waitrequest (uart_waitrequest),
-	//.jtag_uart_0_irq_irq(uart_irq)                        
+	.jtag_uart_0_irq_irq(uart_irq)                        
     );
 
     // -- Bus --
