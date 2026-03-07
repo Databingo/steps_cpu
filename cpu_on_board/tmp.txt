@@ -56,23 +56,14 @@ beq a2, x0, sd_ready
 addi a2, x0, 0x0
 # jal sd_read_sector
 jal x1, sd_read_sector
-# li t1, 45        
-addi t1, x0, 0x2d
+# li t1, 65        
+addi t1, x0, 0x41
 sw t1, 0(t0)     # print
 # jal print_sector
 jal x1, print_sector
 # li t1, 124       
 addi t1, x0, 0x7c
 sb t1, 0(t0)     # print
-# li t1, 124       
-addi t1, x0, 0x7c
-sb t1, 0(t0)     # print
-# li t1, 124       
-addi t1, x0, 0x7c
-sb t1, 0(t0)     # print
-pause:
-# j pause
-jal x0, pause
 addi t1, a1, 0x0B 
 lw t2, 0(t1)
 andi t2, t2, 0xff
@@ -347,8 +338,9 @@ addi a2, t6, 0
 jal x1, sd_read_sector
 # jal print_sector
 jal x1, print_sector
-# j sdram_test
-jal x0, sdram_test
+end:
+# j end
+jal x0, end
 sd_read_sector:
 sw a2, 0x200(a1) # Write Sector index value to address 0x3200
 # li t1, 1
@@ -372,6 +364,7 @@ addi t1, x0, 0x0
 addi t6, x0, 0x1ff
 print_loop:
 add a4, a1, t1 
+addi t1, t1, 1
 lb t2, 0(a4)           # load byte at 0x3000 a1+t1
 andi t2, t2, 0xFF   # Isolate byte value
 srli t3, t2, 4      # get high nibble
@@ -394,11 +387,7 @@ letter_l:
 addi t4, t4, 55        # 10 is "A" ascii 65 ..
 print_l_hex:
 sw t4, 0(t0)
-addi t1, t1, 1
 bge t6, t1, print_loop
-# li x31, 126           
-addi x31, x0, 0x7e
-sb x31, 0(t0)         # print_sector finish print 512 byte
 # ret
 jalr x0, 0(x1)
 print_bin_f:
@@ -442,249 +431,3 @@ addi t4, x0, 0
 addi t5, x0, 0
 # ret
 jalr x0, 0(x1)
-sdram_test:
-lui t0, 0x2
-addi t0, t0, 4       # UART = 0x2004
-lui s0, 0x10000      # SDRAM = 0x10000000
-#     li t1, 0x58          
-addi t1, x0, 0x58
-sb t1, 0(s0)         # test sdram sb/sh
-lbu t2, 0(s0)         # test sdram lbu
-sb t2, 0(t0)         # Should print 'X'
-sb t2, 0(t0)         # Should print 'X'
-sh t2, 0(t0)         # Should print 'X'
-#     li t1, 0x44434241    
-lui t1, 0x44434
-addi t1, t1, 0x241
-sw t1, 0(s0)         # test sdram sw
-lhu t3, 0(s0) # A    # test sdram lhu lwu
-lbu t4, 1(s0) # B
-lwu t5, 2(s0) # C
-lbu t6, 3(s0) # D
-sb t3, 0(t0)         # Should print 'A'
-sb t4, 0(t0)         # Should print 'B'
-sb t5, 0(t0)         # Should print 'C'
-sb t6, 0(t0)         # Should print 'D'
-sb t2, 0(t0)         # Should print 'X'
-#     li t1, 0x4847464544434241         
-lui t1, 0x44434
-addi t1, t1, 0x241
-lui x2, 0x48474
-addi x2, x2, 0x645
-slli x2, x2, 0x20
-add t1, x2, t1
-sd t1, 0(s0)         # test sdram sd
-lbu a0, 0(s0) # A
-lbu a1, 1(s0) # B
-lbu a2, 2(s0) # C
-lbu a3, 3(s0) # D
-lbu a4, 4(s0) # E
-lbu a5, 5(s0) # F
-lbu a6, 6(s0) # G
-lbu a7, 7(s0) # H
-sb a0, 0(t0)         # Should print 'A'
-sb a1, 0(t0)         # Should print 'B'
-sb a2, 0(t0)         # Should print 'C'
-sb a3, 0(t0)         # Should print 'D'
-sb a4, 0(t0)         # Should print 'E'
-sb a5, 0(t0)         # Should print 'F'
-sb a6, 0(t0)         # Should print 'G'
-sb a7, 0(t0)         # Should print 'H'
-sb t2, 0(t0)         # Should print 'X'
-ld a0, 0(s0)
-sb a0, 0(t0)         # Should print 'A'
-srli a0, a0, 8
-sb a0, 0(t0)         # Should print 'B'
-srli a0, a0, 8
-sb a0, 0(t0)         # Should print 'C'
-srli a0, a0, 8
-sb a0, 0(t0)         # Should print 'D'
-srli a0, a0, 8
-sb a0, 0(t0)         # Should print 'E'
-srli a0, a0, 8
-sb a0, 0(t0)         # Should print 'F'
-srli a0, a0, 8
-sb a0, 0(t0)         # Should print 'G'
-srli a0, a0, 8
-sb a0, 0(t0)         # Should print 'H'
-sb t2, 0(t0)         # Should print 'X'
-#     li a1, 8              
-addi a1, x0, 0x8
-slli a1, a1, 60          # mmu mode sv39 #li a1, 0x8000000000000000 # mmu mode sv39
-csrrw a3, satp, a1      # set satp csr index 0x180
-#     li t3, 124 
-addi t3, x0, 0x7c
-sb t3, 0(t0) # mmu settled
-#     li t1, 0x44434241    
-lui t1, 0x44434
-addi t1, t1, 0x241
-#     li t3, 58 
-addi t3, x0, 0x3a
-sb t3, 0(t0) # start read sw to sdram
-sw t1, 0(s0)         # test sdram sw
-lhu t3, 0(s0) # A    # test sdram lhu lwu
-lbu t4, 1(s0) # B
-lwu t5, 2(s0) # C
-lbu t6, 3(s0) # D
-sb t3, 0(t0)         # Should print 'A'
-sb t4, 0(t0)         # Should print 'B'
-sb t5, 0(t0)         # Should print 'C'
-sb t6, 0(t0)         # Should print 'D'
-sb t2, 0(t0)         # Should print 'X'
-#     li t1, 0x4847464544434241         
-lui t1, 0x44434
-addi t1, t1, 0x241
-lui x2, 0x48474
-addi x2, x2, 0x645
-slli x2, x2, 0x20
-add t1, x2, t1
-sd t1, 0(s0)         
-lbu a0, 0(s0) # A
-lbu a1, 1(s0) # B
-lbu a2, 2(s0) # C
-lbu a3, 3(s0) # D
-lbu a4, 4(s0) # E
-lbu a5, 5(s0) # F
-lbu a6, 6(s0) # G
-lbu a7, 7(s0) # H
-sb a0, 0(t0)         # Should print 'A'
-sb a1, 0(t0)         # Should print 'B'
-sb a2, 0(t0)         # Should print 'C'
-sb a3, 0(t0)         # Should print 'D'
-sb a4, 0(t0)         # Should print 'E'
-sb a5, 0(t0)         # Should print 'F'
-sb a6, 0(t0)         # Should print 'G'
-sb a7, 0(t0)         # Should print 'H'
-sb t2, 0(t0)         # Should print 'X'
-ld a0, 0(s0)
-sb a0, 0(t0)         # Should print 'A'
-srli a0, a0, 8
-sb a0, 0(t0)         # Should print 'B'
-srli a0, a0, 8
-sb a0, 0(t0)         # Should print 'C'
-srli a0, a0, 8
-sb a0, 0(t0)         # Should print 'D'
-srli a0, a0, 8
-sb a0, 0(t0)         # Should print 'E'
-srli a0, a0, 8
-sb a0, 0(t0)         # Should print 'F'
-srli a0, a0, 8
-sb a0, 0(t0)         # Should print 'G'
-srli a0, a0, 8
-sb a0, 0(t0)         # Should print 'H'
-sb t2, 0(t0)         # Should print 'X'
-#     li t1, 0x41          
-addi t1, x0, 0x41
-sb t1, 0(s0)         # test sdarm sb
-#     li t1, 0x42          
-addi t1, x0, 0x42
-sb t1, 1(s0)         # test sdarm sb+1
-lb a0, 0(s0)         # test sdram ld
-sb a0, 0(t0)         # Should print 'A'
-lb a0, 1(s0)         # test sdram ld+1
-sb a0, 0(t0)         # Should print 'B'
-#     li t3, 124 
-addi t3, x0, 0x7c
-sb t3, 0(t0) # to plic
-#     li t0, 0x2004 
-lui t0, 0x2
-addi t0, t0, 0x4
-#     li t1, 1
-addi t1, x0, 0x1
-sw t1, 4(t0) # write 1 to 0x2008 UART control means readable
-#     li t3, 48 
-addi t3, x0, 0x30
-sb t3, 0(t0)
-#     la t2, irq_handler
-auipc t2, 0 # R_RISCV_PCREL_HI20 irq_handler 
-addi t2, t2, 0 # R_RISCV_PCREL_LO12_I irq_handler 
-#     csrw mtvec, t2
-csrrw x0, mtvec, t2
-#     li t3, 49 
-addi t3, x0, 0x31
-sb t3, 0(t0)
-#     li t2, 0x0C000004 
-lui t2, 0xc000
-addi t2, t2, 0x4
-#     li t3, 1
-addi t3, x0, 0x1
-sw t3, 0(t2)
-#     li t3, 50 
-addi t3, x0, 0x32
-sb t3, 0(t0)
-#     li t2, 0x0C002000
-lui t2, 0xc002
-addi t2, t2, 0x0
-#     li t1, 2 
-addi t1, x0, 0x2
-sw t1, 0(t2)
-#     li t3, 51 
-addi t3, x0, 0x33
-sb t3, 0(t0)
-#     li t2, 0x0C200000  
-lui t2, 0xc200
-addi t2, t2, 0x0
-#     li t1, 0 
-addi t1, x0, 0x0
-sw t1, 0(t2)
-#     li t3, 52 
-addi t3, x0, 0x34
-sb t3, 0(t0)
-#     li t2, 0x0C201000  
-lui t2, 0xc201
-addi t2, t2, 0x0
-#     li t1, 0 
-addi t1, x0, 0x0
-sw t1, 0(t2)
-#     li t3, 53 
-addi t3, x0, 0x35
-sb t3, 0(t0)
-#     li t2, 0x800 
-lui t2, 0x1
-addi t2, t2, 0x800
-#     csrs mie, t2
-csrrs x0, mie, t2
-#     li t3, 54 
-addi t3, x0, 0x36
-sb t3, 0(t0)
-#     li t2, 8  
-addi t2, x0, 0x8
-#     csrs mstatus, t2
-csrrs x0, mstatus, t2
-#     li t3, 55 
-addi t3, x0, 0x37
-sb t3, 0(t0) # to plic
-wait_loop:
-#     j wait_loop
-jal x0, wait_loop
-irq_handler:
-#    li t0, 0x2004 
-lui t0, 0x2
-addi t0, t0, 0x4
-#    li t2, 0x0C200004  
-lui t2, 0xc200
-addi t2, t2, 0x4
-#    li t3, 124 
-addi t3, x0, 0x7c
-sb t3, 0(t0) # print |
-lw t1, 0(t2)
-#    mv t5, t1
-addi t5, t1, 0
-#    beqz t1, exit_irq
-beq t1, x0, exit_irq
-addi t4, t1, 48 
-sb t4, 0(t0) # show interrupt id
-#    li t3, 46 
-addi t3, x0, 0x2e
-sb t3, 0(t0) 
-lw t3, 0(t0) # read from UART FIFO
-sw t3, 0(t0) # print key value
-sw t5, 0(t2) # write id back to ctx0claim to clear pending id
-#    li t3, 47 
-addi t3, x0, 0x2f
-sb t3, 0(t0) #  finished
-exit_irq:
-#    li t3, 69 
-addi t3, x0, 0x45
-sb t3, 0(t0) #  Exit irq
-mret 

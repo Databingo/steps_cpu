@@ -196,22 +196,18 @@ assign DRAM_CKE = 1; // always enable
 
     // -- Monitor -- Connected to Bus
     reg uart_write_pulse;
-    //reg uart_write_pulse_d;
     reg uart_write_step;
     reg uart_read_pulse;
     reg uart_read_step;
     wire uart_waitrequest;
     jtag_uart_system my_jtag_system (
         .clk_clk                                 (clock_slow),
-        //.clk_clk                                 (CLOCK_50),
         .reset_reset_n                           (KEY0),
         //.jtag_uart_0_avalon_jtag_slave_address   (bus_address[0:0]),
         .jtag_uart_0_avalon_jtag_slave_address   (~bus_address[2]), // 0x00 for Data, 0x04 for Control
         .jtag_uart_0_avalon_jtag_slave_writedata (bus_write_data[31:0]),
         //.jtag_uart_0_avalon_jtag_slave_write_n   (~uart_write_trigger_pulse),
         .jtag_uart_0_avalon_jtag_slave_write_n   (~uart_write_pulse),
-        //.jtag_uart_0_avalon_jtag_slave_write_n   (~(uart_write_pulse && !uart_write_pulse_d)),
-        //.jtag_uart_0_avalon_jtag_slave_write_n   (~uart_write_edge),
         .jtag_uart_0_avalon_jtag_slave_chipselect(1'b1),
         //.jtag_uart_0_avalon_jtag_slave_read_n    (~(bus_read_done==0 && Art_selected)),
         .jtag_uart_0_avalon_jtag_slave_read_n    (~uart_read_pulse),
@@ -220,8 +216,6 @@ assign DRAM_CKE = 1; // always enable
         .jtag_uart_0_avalon_jtag_slave_waitrequest (uart_waitrequest),
 	.jtag_uart_0_irq_irq(uart_irq)                        
     );
-    //always @(posedge CLOCK_50) begin uart_write_pulse_d <= uart_write_pulse; end
-    //wire uart_write_edge = uart_write_pulse && !uart_write_pulse_d;
 
     // -- Bus --
     reg  [63:0] bus_read_data;
@@ -311,7 +305,6 @@ assign DRAM_CKE = 1; // always enable
 	    step <= 0;
 	    bus_read_data <= 0;
 	    uart_write_pulse <= 0;
-	    uart_write_step <= 0;
 	    uart_read_pulse <= 0;
 	    uart_read_step <= 0;
 	    mtimecmp <=  64'h80000000;
@@ -326,7 +319,6 @@ assign DRAM_CKE = 1; // always enable
 	uart_irq_pre <= uart_irq;
 	if (uart_irq && !uart_irq_pre) Plic_pending[1] <= 1;
 	//if (key_pressed_edge) Plic_pending[1] <= 1;
-        //uart_write_pulse_d <=  uart_write_pulse;
 
         //if (bus_read_enable) begin bus_read_done <= 0; cid <= (bus_address-`Sdc_base); end 
 	if (bus_read_enable) begin bus_read_done <= 0; end
@@ -495,18 +487,11 @@ assign DRAM_CKE = 1; // always enable
 
 	    //if (Art_selected) begin uart_write_pulse <= 1; bus_write_done <=1; end
 	    if (Art_selected) begin 
-	        if (uart_write_step ==0 &&  uart_waitrequest) begin uart_write_step <= 0; end
-	        if (uart_write_step ==0 && !uart_waitrequest) begin uart_write_pulse <= 1; uart_write_step <= 1; end
-	        //if (uart_write_step ==1 &&  uart_waitrequest) begin uart_write_pulse <= 0; end
+	        if (uart_write_step ==0) begin uart_write_pulse <= 1; uart_write_step <= 1; end
+	        if (uart_write_step ==1 &&  uart_waitrequest) begin uart_write_pulse <= 1; end
 	        //if (uart_write_step ==1 && !uart_waitrequest) begin uart_write_step <= 0; bus_write_done <=1; uart_write_pulse <= 0;end
 	        if (uart_write_step ==1 && !uart_waitrequest) begin uart_write_step <= 0; bus_write_done <=1; end
 	    end
-	    //if (Art_selected) begin 
-	    //    if (uart_write_step ==0 && !uart_waitrequest) begin uart_write_pulse <= 1; uart_write_step <= 1; end
-	    //    if (uart_write_step ==1 &&  uart_waitrequest) begin uart_write_pulse <= 1; end
-	    //    //if (uart_write_step ==1 && !uart_waitrequest) begin uart_write_step <= 0; bus_write_done <=1; uart_write_pulse <= 0;end
-	    //    //if (!uart_waitrequest) begin uart_write_pulse <= 1; bus_write_done <=1; end
-	    //end
         
 	
 
@@ -584,9 +569,9 @@ end
     // -- SD Card --
     wire [11:0] cid = (bus_address-`Sdc_base);
     //reg [11:0] cid;
-    //reg [7:0] sd_cache [0:511];
-    (* ram_style = "logic" *) reg [7:0] sd_cache [0:511];
-    (* ram_style = "logic" *)reg [9:0] byte_index = 0;
+    reg [7:0] sd_cache [0:511];
+    //(* ram_style = "block" *) reg [7:0] sd_cache [0:511];
+    reg [9:0] byte_index = 0;
     reg sd_cache_available = 0;
     reg sd_byte_available_d = 0;
     reg do_read = 0;
@@ -631,7 +616,7 @@ end
     reg [8:0] clkdiv = 0;  // for 50M
     //reg [7:0] clkdiv = 0;  // for 25M
     //reg [5:0] clkdiv = 0; // for 10M  10MHz/64 = 156.25KHz
-    //reg [4:0] clkdiv = 0; // 12.8MHz/32 = 400KHz / 2 = 200 Khz SPI
+    //reg [4:0] clkdiv = 0; // for 10M  10MHz/32 = 300KHz
     //reg [1:0] clkdiv = 0; // for 5M  5MHz/4 = 625Khz (sd SPI 100-400Khz)
     //reg [3:0] clkdiv = 0; // for 5M  5MHz/8 = 625Khz (sd SPI=300khz 100-400Khz)
     always @(posedge clock_slow or negedge KEY0) begin
