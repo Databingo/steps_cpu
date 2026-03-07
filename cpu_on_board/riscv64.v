@@ -657,12 +657,31 @@ module riscv64(
                         if (load_step == 1 && bus_read_done == 1) begin re[w_rd] <= w_load_data; load_step <= 0; end 
                     end
 
-                    // Store after TLB
+//                    // Store after TLB
+//                    32'b???????_?????_?????_???_?????_0100011: begin 
+//                        if (store_step == 0) begin bus_address <= pda; bus_write_data <= w_store_data; bus_write_enable <= 1; pc <= pc - 4; bubble <= 1; store_step <= 1; bus_ls_type <= w_func3; end
+//                        if (store_step == 1 && bus_write_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working
+//                        if (store_step == 1 && bus_write_done == 1) begin store_step <= 0; end 
+//                    end   
+// Store logic
                     32'b???????_?????_?????_???_?????_0100011: begin 
                         if (store_step == 0) begin bus_address <= pda; bus_write_data <= w_store_data; bus_write_enable <= 1; pc <= pc - 4; bubble <= 1; store_step <= 1; bus_ls_type <= w_func3; end
-                        if (store_step == 1 && bus_write_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working
-                        if (store_step == 1 && bus_write_done == 1) begin store_step <= 0; end 
-                    end   
+                        else if (store_step == 1) begin
+                            pc <= pc - 4; bubble <= 1;
+                            // Wait for bus_write_done to register as 0
+                            if (bus_write_done == 0) store_step <= 2; 
+                        end
+                        else if (store_step == 2) begin
+                            // Wait for bus to report 1 (Finished)
+                            if (bus_write_done == 0) begin pc <= pc - 4; bubble <= 1; end 
+                            else begin store_step <= 0; end 
+                        end
+                    end
+
+
+
+
+
                     // Math-I
 	            32'b???????_?????_?????_000_?????_0010011: re[w_rd] <= alu_addi;  // Addi
 	            32'b???????_?????_?????_100_?????_0010011: re[w_rd] <= alu_xori; // Xori
