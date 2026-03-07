@@ -210,7 +210,8 @@ assign DRAM_CKE = 1; // always enable
         .jtag_uart_0_avalon_jtag_slave_writedata (bus_write_data[31:0]),
         //.jtag_uart_0_avalon_jtag_slave_write_n   (~uart_write_trigger_pulse),
         //.jtag_uart_0_avalon_jtag_slave_write_n   (~uart_write_pulse),
-        .jtag_uart_0_avalon_jtag_slave_write_n   (~(uart_write_pulse && !uart_write_pulse_d)),
+        //.jtag_uart_0_avalon_jtag_slave_write_n   (~(uart_write_pulse && !uart_write_pulse_d)),
+        .jtag_uart_0_avalon_jtag_slave_write_n   (~uart_write_edge),
         .jtag_uart_0_avalon_jtag_slave_chipselect(1'b1),
         //.jtag_uart_0_avalon_jtag_slave_read_n    (~(bus_read_done==0 && Art_selected)),
         .jtag_uart_0_avalon_jtag_slave_read_n    (~uart_read_pulse),
@@ -219,6 +220,8 @@ assign DRAM_CKE = 1; // always enable
         .jtag_uart_0_avalon_jtag_slave_waitrequest (uart_waitrequest),
 	.jtag_uart_0_irq_irq(uart_irq)                        
     );
+    always @(posedge CLOCK_50) begin uart_write_pulse_d <= uart_write_pulse; end
+    wire uart_write_edge = uart_write_pulse && !uart_write_pulse_d;
 
     // -- Bus --
     reg  [63:0] bus_read_data;
@@ -322,7 +325,7 @@ assign DRAM_CKE = 1; // always enable
 	uart_irq_pre <= uart_irq;
 	if (uart_irq && !uart_irq_pre) Plic_pending[1] <= 1;
 	//if (key_pressed_edge) Plic_pending[1] <= 1;
-        uart_write_pulse_d <=  uart_write_pulse;
+        //uart_write_pulse_d <=  uart_write_pulse;
 
         //if (bus_read_enable) begin bus_read_done <= 0; cid <= (bus_address-`Sdc_base); end 
 	if (bus_read_enable) begin bus_read_done <= 0; end
