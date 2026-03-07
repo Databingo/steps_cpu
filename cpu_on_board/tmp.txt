@@ -366,6 +366,8 @@ sw t1, 0(t0)     # print
 # ret
 jalr x0, 0(x1)
 print_sector:
+# li t1, 0   
+addi t1, x0, 0x0
 # li t6, 511 
 addi t6, x0, 0x1ff
 print_loop:

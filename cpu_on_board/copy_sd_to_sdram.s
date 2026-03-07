@@ -426,7 +426,7 @@ ret
 
 # print sector 0 512 bytes
 print_sector:
-#li t1, 0   # byte index
+li t1, 0   # byte index
 #li t1, 511   # byte index
 li t6, 511 # max byte index
 print_loop:
