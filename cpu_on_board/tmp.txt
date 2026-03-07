@@ -393,12 +393,12 @@ jal x0, print_l_hex
 letter_l:
 addi t4, t4, 55        # 10 is "A" ascii 65 ..
 print_l_hex:
-sw t4, 0(t0)
-addi t1, t1, -1
-bge t1, x0, print_loop
 # li x31, 126           
 addi x31, x0, 0x7e
 sb x31, 0(t0)         # print_sector finish print 512 byte
+sw t4, 0(t0)
+addi t1, t1, -1
+bge t1, x0, print_loop
 # ret
 jalr x0, 0(x1)
 print_bin_f:
