@@ -64,6 +64,12 @@ jal x1, print_sector
 # li t1, 124       
 addi t1, x0, 0x7c
 sb t1, 0(t0)     # print
+# li t1, 124       
+addi t1, x0, 0x7c
+sb t1, 0(t0)     # print
+# li t1, 124       
+addi t1, x0, 0x7c
+sb t1, 0(t0)     # print
 pause:
 # j pause
 jal x0, pause
