@@ -202,8 +202,8 @@ assign DRAM_CKE = 1; // always enable
     reg uart_read_step;
     wire uart_waitrequest;
     jtag_uart_system my_jtag_system (
-        //.clk_clk                                 (clock_slow),
-        .clk_clk                                 (CLOCK_50),
+        .clk_clk                                 (clock_slow),
+        //.clk_clk                                 (CLOCK_50),
         .reset_reset_n                           (KEY0),
         //.jtag_uart_0_avalon_jtag_slave_address   (bus_address[0:0]),
         .jtag_uart_0_avalon_jtag_slave_address   (~bus_address[2]), // 0x00 for Data, 0x04 for Control
