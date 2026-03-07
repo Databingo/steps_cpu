@@ -321,11 +321,14 @@ assign DRAM_CKE = 1; // always enable
 	//if (key_pressed_edge) Plic_pending[1] <= 1;
 
         //if (bus_read_enable) begin bus_read_done <= 0; cid <= (bus_address-`Sdc_base); end 
-	if (bus_read_enable) begin bus_read_done <= 0; end
-        if (bus_write_enable) begin bus_write_done <= 0; end
+	if (bus_read_enable && bus_read_done) begin bus_read_done <= 0; end
+        if (bus_write_enable && bus_write_done) begin bus_write_done <= 0; end
 
-        //if (!sd_ready) sd_rd_start <= 0;
-        //if (byte_index>=12) sd_rd_start <= 0;
+
+
+
+
+
 
 
         // Read
