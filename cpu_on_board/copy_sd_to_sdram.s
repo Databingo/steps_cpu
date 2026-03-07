@@ -427,7 +427,7 @@ ret
 # print sector 0 512 bytes
 print_sector:
 #li t1, 0   # byte index
-li t1, 511   # byte index
+#li t1, 511   # byte index
 li t6, 511 # max byte index
 print_loop:
 #li a3, 32     # space 
@@ -454,13 +454,13 @@ letter_l:
 addi t4, t4, 55        # 10 is "A" ascii 65 ..
 print_l_hex:
 
+sw t4, 0(t0)
+addi t1, t1, 1
+bge t6, t1, print_loop
+#bge t1, x0, print_loop
+
 li x31, 126           # '~'
 sb x31, 0(t0)         # print_sector finish print 512 byte
-
-sw t4, 0(t0)
-addi t1, t1, -1
-#bge t6, t1, print_loop
-bge t1, x0, print_loop
 
 
 ret
