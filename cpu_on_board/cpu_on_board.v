@@ -592,7 +592,7 @@ end
 	else begin
 	    //sd_cache_available <= 0;
             sd_byte_available_d  <= sd_byte_available;
-            if (sd_byte_available && !sd_byte_available_d) begin
+            if (sd_byte_available && !sd_byte_available_d && byte_index < 512) begin
 	        sd_cache[byte_index] <= sd_dout;
 	        byte_index <= byte_index + 1;
 	        do_read <=1;
