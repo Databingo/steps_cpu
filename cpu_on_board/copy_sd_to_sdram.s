@@ -9,6 +9,7 @@
 
 .globl _start
 _start:
+.string ABC
 
 # fake_opensbi  ------------------
     lui t0, 0x2
@@ -418,12 +419,7 @@ ret
 
 # print sector 0 512 bytes
 print_sector:
-wait_uart_tx:
-li t1, 0x2008
-lw t2, 0(t1)
-#andi t2, t2, 0x01
-beq t2, x0, wait_uart_tx
-
+li a5, 0x2008 # uart control
 li t1, 0   # byte index
 li t6, 511 # max byte index
 print_loop:
@@ -442,6 +438,11 @@ j print_h_hex
 letter_h:
 addi t3, t3, 55     # 10 is "A" ascii 65 ..
 print_h_hex:
+
+wait_uart_tx_h:
+lw t5, 0(a5)
+beq t5, x0, wait_uart_tx_h
+
 sw t3, 0(t0)
 andi t4, t2, 0x0F      # get low nibble
 slti t5, t4, 10     # if < 10 number
@@ -451,6 +452,11 @@ j print_l_hex
 letter_l:
 addi t4, t4, 55        # 10 is "A" ascii 65 ..
 print_l_hex:
+
+wait_uart_tx_l:
+lw t5, 0(a5)
+beq t5, x0, wait_uart_tx_l
+
 sw t4, 0(t0)
 bge t6, t1, print_loop
 ret

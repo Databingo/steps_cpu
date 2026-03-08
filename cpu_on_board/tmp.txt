@@ -358,12 +358,9 @@ sw t1, 0(t0)     # print
 # ret
 jalr x0, 0(x1)
 print_sector:
-wait_uart_tx:
-# li t1, 0x2008
-lui t1, 0x2
-addi t1, t1, 0x8
-lw t2, 0(t1)
-beq t2, x0, wait_uart_tx
+# li a5, 0x2008 
+lui a5, 0x2
+addi a5, a5, 0x8
 # li t1, 0   
 addi t1, x0, 0x0
 # li t6, 511 
@@ -382,6 +379,9 @@ jal x0, print_h_hex
 letter_h:
 addi t3, t3, 55     # 10 is "A" ascii 65 ..
 print_h_hex:
+wait_uart_tx_h:
+lw t5, 0(a5)
+beq t5, x0, wait_uart_tx_h
 sw t3, 0(t0)
 andi t4, t2, 0x0F      # get low nibble
 slti t5, t4, 10     # if < 10 number
@@ -392,6 +392,9 @@ jal x0, print_l_hex
 letter_l:
 addi t4, t4, 55        # 10 is "A" ascii 65 ..
 print_l_hex:
+wait_uart_tx_l:
+lw t5, 0(a5)
+beq t5, x0, wait_uart_tx_l
 sw t4, 0(t0)
 bge t6, t1, print_loop
 # ret
