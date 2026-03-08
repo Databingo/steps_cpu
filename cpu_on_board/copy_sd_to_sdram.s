@@ -441,6 +441,7 @@ print_h_hex:
 
 wait_uart_tx_h:
 lw t5, 0(a5)
+srli t5, t5, 16   # 31:16 WSPACE = 0 full
 beq t5, x0, wait_uart_tx_h
 
 sw t3, 0(t0)
@@ -455,6 +456,7 @@ print_l_hex:
 
 wait_uart_tx_l:
 lw t5, 0(a5)
+srli t5, t5, 16
 beq t5, x0, wait_uart_tx_l
 
 sw t4, 0(t0)
