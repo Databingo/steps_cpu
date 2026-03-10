@@ -768,6 +768,7 @@ func main() { //t6a7s11
 	                    Size : 0 }
 			    strtab = append(strtab, suf_directive+"\x00")
 			    symtab_ = append(symtab_, new_sym) // global no need insert
+	                    sym_idx_map[suf_directive+"\x00"] = len(symtab_) - 1
 			} // Global end--
 
 			if directive == ".section" {
@@ -845,7 +846,7 @@ func main() { //t6a7s11
 	                    sym_idx_map[label_in+"\x00"] = new_local_sym_idx
 			    new_local_sym_idx += 1 
 			} else {
-			    fmt.Println("=|=shndx:", uint16(slices.Index(shstrtab, section_in)), strtab, "section_in:", section_in, "sym_index:", sym_index, "symbal:", strtab[sym_index])
+			    //fmt.Println("=|=shndx:", uint16(slices.Index(shstrtab, section_in)), strtab, "section_in:", section_in, "sym_index:", sym_index, "symbal:", strtab[sym_index])
 			    symtab_[sym_index].Shndx = uint16(slices.Index(shstrtab, section_in))//0 //#uint16 // section index the symbol in
 					    }
 			copy_instr.WriteString(raw_instr)
