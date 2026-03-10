@@ -788,8 +788,8 @@ func main() { //t6a7s11
 			    //local symbols should be in front of global symbols in symtab
 			    //symtab_ = append(symtab_[:1+1], symtab_[1:]...)
 			    //symtab_[1] = sym
-			    strtab = slices.Insert(strtab, 1, label_in+"\x00")
-			    symtab_ = slices.Insert(symtab_, 1, sym)
+			    strtab = slices.Insert(strtab, 1, label_in+"\x00")  // infront for keep global atend
+			    symtab_ = slices.Insert(symtab_, 1, sym) // infront for keep global atend
 			} else {
 			    fmt.Println("=|=shndx:", uint16(slices.Index(shstrtab, section_in)), strtab, "section_in:", section_in, "sym_index:", sym_index, "symbal:", strtab[sym_index])
 			    symtab_[sym_index].Shndx = uint16(slices.Index(shstrtab, section_in))//0 //#uint16 // section index the symbol in
@@ -1500,6 +1500,12 @@ func main() { //t6a7s11
 			    //fmt.Println("create .rela.text entry for LO12_I.: of", sy, idx, "at line:", lineCounter, "address:", address)
 			    idx := slices.Index(strtab, "_start\x00") // find the index of _start for .text section for auipc
 			    if idx == -1 {fmt.Println("Error: _start symbole not found!"); os.Exit(1)}
+			    //idx := slices.Index(strtab, "L_ref\x00")
+			    //if idx == -1 {
+			    //    strtab = append(strtab, "L_ref\x00")
+			    //    symtab_ = append(symtab_, Elf64_sym{Info:0, Shndx:4})// STB_LOCAL, .text
+			    //    idx = len(strtab) - 1
+			    //    }
                             var rela Elf64_rela 
                             rela.Offset = uint64(address)//uint64 modified instruction's offset in .text
                             rela.Info = (uint64(idx) << 32) | R_RISCV_PCREL_LO12_I //uint64   // sym index and relocation type

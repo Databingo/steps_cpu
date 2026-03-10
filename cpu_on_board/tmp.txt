@@ -1,4 +1,7 @@
 _start:
+#     li x1, 0x2004
+lui x1, 0x2
+addi x1, x1, 0x4
 #     la x5, msg
 auipc x5, 0 # R_RISCV_PCREL_HI20 msg 
 addi x5, x5, 0 # R_RISCV_PCREL_LO12_I msg 
