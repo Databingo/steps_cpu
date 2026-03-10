@@ -6,3 +6,6 @@ riscv64-unknown-elf-objcopy -O binary final.elf final.bin  # to binary
 #riscv64-unknown-elf-readelf -S final.elf
 riscv64-unknown-elf-objdump -b binary -m riscv -D final.bin
 
+
+hexdump -v -e '1/4 "%08x" "\n"' final.bin | perl -ne 'print unpack("B32", pack("N", hex($_))) . "\n"' > bin.txt
+
