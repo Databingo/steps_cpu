@@ -434,16 +434,17 @@ func main() { //t6a7s11
 	elf_header.Entry = 0x0          // e_entry program entry address -- 0 for relocatable file set final entry point by linker
 	elf_header.Phoff = 0x0          // e_phoff points to start of program header table --  0 for relocatable file (no program headers)
 	//-------
-	elf_header.Shoff = 0x40         // e_shoff points to start of section header table --  no 0 have to be the start of SHT  (e_shnum * e_shentsize = whole table of SHT) = elf_heaser.Ehsize ? 
+	elf_header.Shoff = 0x40         // !e_shoff points to start of section header table --  if no, 0 have to be the start of SHT  (e_shnum * e_shentsize = whole table of SHT) = elf_heaser.Ehsize ? 
 	elf_header.Flags = 0x00000004   // e_flags  // 0x4 for LP64D ABI  (EF_RISCV_FLOAT_ABI_DOUBLE) fit for RV64G
 	elf_header.Ehsize = 0x0040      // e_ehsize specify size of This header, 52 bytes(0x34) for 32-bit format, 64 bytes(0x40) for 64-bit ?
 	elf_header.Phentsize = 0x0      // e_phentsize size of program header table entry -- 0 for relocatable
-	elf_header.Phnum = 0x0          // e_phnum contains number of entries in program header table --
+	elf_header.Phnum = 0x0          // !e_phnum contains number of entries in program header table --
 	elf_header.Shentsize = 0x0040   // e_shentsize size of section header entry -- 64 for Elf64_shdr
 	//-------
-	elf_header.Shnum = 0x0 //#
+	elf_header.Shnum = 0x0          // !
 	//-------
-	elf_header.Shstrndx = 0x1 //# 0 indicate SHN_UNDEF no section header string table ** -- if no, 0 must be SHT index for .shstrtab section
+	elf_header.Shstrndx = 0x1       // 0 indicate SHN_UNDEF no section header string table ** -- if no, 0 must be SHT index for .shstrtab section
+	                                // I put shstr table at 1
 
 	//buf := new(bytes.Buffer)
 	//_ = binary.Write(buf, binary.LittleEndian, &elf_header)
@@ -624,7 +625,7 @@ func main() { //t6a7s11
 	sym.Value = 0 //# uint64  for relocatable .o file it's symbol's offset in its section
 	sym.Size = 0  //#uint64  for function it's its size
 
-	fmt.Println(".symtab 0 inital:")
+	fmt.Println(".sym 0 inital:")
 	var sym0 Elf64_sym
 	sym0.Name = 0  //uint32 // offset in string table
 	sym0.Info = 0  //# uint8 // H4:binding and L4:type
@@ -2030,7 +2031,12 @@ func main() { //t6a7s11
 	fmt.Println("--------#")
 	fmt.Println(len(symtab_data))
 
-	relatext_data := []byte("relatext_data")
+	//relatext_data := []byte("relatext_data")
+	buf_relatext := new(bytes.Buffer)
+	for _, rela := range relatext{
+	    _ = binary.Write(buf_relatext, binary.LittleEndian, &rela)
+	}
+	relatext_data := buf_relatext.Bytes()
 
 	//-----------shstrtab h
 	sht1.Name = sht0.Name + uint32(len("\x00")) // offset in shstrtab
@@ -2090,12 +2096,19 @@ func main() { //t6a7s11
 	fmt.Println(len(sht5_bytes))
 
 	//-----------rela.text h
-	sht6.Name = sht5.Name + uint32(len(".data\x00")) // offset in shstrtab
+	sht6.Name = sht5.Name + uint32(len(".data\x00")) // offset in shstrtab, it follow .data
 	sht6.Offset = sht5.Offset + sht5.Size
 	sht6.Size = uint64(len(relatext_data))
+        // for linker
+	sht6.Type = 4 // 4 means SHT_RELA(relocation table)
+	sht6.Link = 3 // tell Linker symbl at SHT[3] .symtabl
+	sht6.Info = 4 // tell Linker patches to SHT[4] .text
+	sht6.Entsize = 24 // Elf64_rela entry size is 24 bytes
+
 	buf_sht6 := new(bytes.Buffer)
 	_ = binary.Write(buf_sht6, binary.LittleEndian, &sht6)
 	sht6_bytes := buf_sht6.Bytes()
+
 	fmt.Println(sht6_bytes)
 	fmt.Println("--------#")
 	fmt.Println(len(sht6_bytes))
