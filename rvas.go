@@ -140,7 +140,7 @@ const STT_SECTION = 3
 const STT_FILE = 4
 
 type Elf64_sym struct { // 24 bytes
-	Name  uint32 // offset in string table
+	Name  uint32 // offset in string table strtab (byte offset!)
 	Info  uint8  // H4:binding and L4:type
 	Other uint8  // reserved, currently holds 0
 	Shndx uint16 // section index the symbol in
@@ -673,26 +673,72 @@ func main() { //t6a7s11
 	var shstrtab []string
 	var text []byte
 	var data []byte
-	var sym Elf64_sym
+	//var sym Elf64_sym
 	var sht SHT
         var elf_header Elf64_header
 
 	//symtab_ := []Elf64_sym{sym}// symtab_ array and strtab are same order
-	symtab_ := []Elf64_sym{sym}// symtab_ array and strtab are same order
+	symtab_ := []Elf64_sym{{}}
 	strtab := []string{"\x00"}
 	var relatext []Elf64_rela
-	//var no_local_sym_1st uint32
-       
-	//elf
-	//sht0
-	shstrtab = append(shstrtab,"\x00")
+
+	sym_idx_map := make(map[string]int)
+	new_local_sym_idx := 1
+
+	//sht0 NULL
+	shstrtab = append(shstrtab,"\x00")  // Create NULL sht
 	shts = append(shts, sht) // strings array shts and shstrtab are same order
 	elf_header.Shnum += 1 
-	//sht1
-	shstrtab = append(shstrtab,".shstrtab\x00")
+
+	//sht1 shstrtab
+	shstrtab = append(shstrtab,".shstrtab\x00") // Create shstrtab sht
 	shts = append(shts, sht)
 	elf_header.Shnum += 1 
-	
+	// sht1.shstrtab to symtab
+	new_sym := Elf64_sym{
+        Name : 0, // section name not in strtab so no byte offset
+        Info : (STB_LOCAL << 4 | STT_SECTION),    // local section_symbol
+        Shndx : uint16(len(shts)-1),
+        Value : 0,
+	Size : 0 }
+	//symtab_ = slices.Insert(symtab_, 1, new_sym)
+	symtab_ = append(symtab_, new_sym)
+	sym_idx_map[".shstrtab\x00"] = new_local_sym_idx
+	new_local_sym_idx += 1
+
+        //sht2 strtab
+        shstrtab = append(shstrtab, ".strtab\x00")
+        shts = append(shts, sht)
+        elf_header.Shnum += 1 
+	// sht2.strtab to symtab
+	new_sym = Elf64_sym{
+        Name : 0, // section name not in strtab so no byte offset
+        Info : (STB_LOCAL << 4 | STT_SECTION),    // local section_symbol
+        Shndx : uint16(len(shts)-1),
+        Value : 0,
+	Size : 0 }
+	//symtab_ = slices.Insert(symtab_, 1, new_sym)
+	symtab_ = append(symtab_, new_sym)
+	sym_idx_map[".strtab\x00"] = new_local_sym_idx
+	new_local_sym_idx += 1
+
+        //sht3 + symtab
+        shstrtab = append(shstrtab, ".symtab\x00")
+        shts = append(shts, sht)
+        elf_header.Shnum += 1 
+	// sht3.symtab to symtab
+	new_sym = Elf64_sym{
+        Name : 0, // section name not in strtab so no byte offset
+        Info : (STB_LOCAL << 4 | STT_SECTION),    // local section_symbol
+        Shndx : uint16(len(shts)-1),
+        Value : 0,
+	Size : 0 }
+	//symtab_ = slices.Insert(symtab_, 1, new_sym)
+	symtab_ = append(symtab_, new_sym)
+	sym_idx_map[".symtab\x00"] = new_local_sym_idx
+	new_local_sym_idx += 1
+
+
 	for scanner0.Scan() {
 		raw_instr := scanner0.Text() + "\n"
 		line := strings.Split(scanner0.Text(), "#")[0]
@@ -710,94 +756,100 @@ func main() { //t6a7s11
                         //if !strings.HasPrefix(code[1], "."){
 			//fmt.Println("Directive:", directive, "|Suf_directive:", suf_directive)
 			//}
+			// GLOBAL --
 			if directive == ".global" || directive == ".globl" {
 			    fmt.Println("Directive:", directive, "//Suf_directive:", suf_directive)
-			    fmt.Println("create .symtab entry + .strtab entry, add .symtab to .shstrtab")
-			    if !slices.Contains(shstrtab, ".strtab\x00") {
-			        //sht + shstrtab
-	                        shstrtab = append(shstrtab, ".strtab\x00")
-	                        shts = append(shts, sht)
-	                        elf_header.Shnum += 1 
-			    }
-			    if !slices.Contains(shstrtab, ".symtab\x00") {
-			        //sht + shstrtab
-	                        shstrtab = append(shstrtab, ".symtab\x00")
-	                        shts = append(shts, sht)
-	                        elf_header.Shnum += 1 
-			    }
 
-	                    sym.Name = uint32(len(strings.Join(strtab,"")))  //#uint32 // offset in string table
-			    fmt.Println("sym.Name:--|", sym.Name)
-
-	                    sym.Info = (STB_GLOBAL << 4 | STT_FUNC)    //# H4:binding and L4:type
-	                    sym.Other = 0 //uint8 // reserved, currently holds 0
-	                    //sym.Shndx = uint16(slices.Index(shstrtab, section_in))//0 //#uint16 // section index the symbol in
-			    //fmt.Println("-::", section_in, uint16(slices.Index(shstrtab, section_in)))//0 //#uint16 // section index the symbol in
-	                    sym.Value = 0 //# uint64  for relocatable .o file it's symbol's offset in its section
-	                    sym.Size = 0  //#uint64  for function it's its size   -- uint64(len(align8("H\n")))                   
-			    //sym + str 
+	                    new_sym = Elf64_sym{
+                            Name :  uint32(len(strings.Join(strtab,""))),  // offset in strtab
+	                    Info : (STB_GLOBAL << 4 | STT_FUNC),    // more compare?
+                            Shndx : uint16(len(shts)-1),
+                            Value : 0,
+	                    Size : 0 }
 			    strtab = append(strtab, suf_directive+"\x00")
-			    symtab_ = append(symtab_, sym)
-			}
+			    symtab_ = append(symtab_, new_sym) // global no need insert
+			} // Global end--
 
 			if directive == ".section" {
 			    fmt.Println("Directive:", directive, "||Suf_directive:", suf_directive)
 			    fmt.Println("create SHT(s) + .shstrtab entry + section[]byte")
-			    section_in = suf_directive + "\x00"
-			    //sht
+			    section_in = suf_directive + "\x00"  // .section I am in now
+    		            _, exist := sym_idx_map[section_in]
+			    if !exist {
+			    //shtstr
 	                    shstrtab = append(shstrtab,suf_directive+"\x00")
+			    //sht
 	                    shts = append(shts, sht)
+			    //header
 	                    elf_header.Shnum += 1 
+			    // sym
+	                    new_sym = Elf64_sym{
+                            Name : 0, // offset in strtab, .section string no in strtab
+	                    Info : (STB_LOCAL << 4 | STT_SECTION),    // local section_symbol
+                            Shndx : uint16(len(shts)-1),
+                            Value : 0,
+	                    Size : 0 }
+			    symtab_ = slices.Insert(symtab_,  new_local_sym_idx, new_sym)  // infront for keep global append
+	                    sym_idx_map[section_in] = new_local_sym_idx
+	                    new_local_sym_idx += 1 }
 			}
+
 			if directive == ".string" {
 			    fmt.Println("Directive:", directive, "||Suf_directive:", suf_directive)
 			    fmt.Println("check label_in + check strtab + edit symtab")
-			    fmt.Println("strtab:", strtab)
-			    sym_index := slices.Index(strtab, label_in+"\x00")
+			    //fmt.Println("strtab:", strtab)
+    		            sym_index, exist := sym_idx_map[label_in+"\x00"]
+			    if exist {
 			    fmt.Println("label_in-:", label_in, sym_index)
 			    fmt.Println("sym_e:", symtab_[sym_index])
-			    //pad8 :=  align8(suf_directive)
 			    pad8 :=  align_x(suf_directive, 8)
 	                    //symtab_[sym_index].Name = 1  // points to "_start" in .strtab
-	                    symtab_[sym_index].Info = ( symtab_[sym_index].Info >> 4 | STT_OBJECT  ) //# uint8 // H4:binding and L4:type
+	                    //symtab_[sym_index].Info = ( symtab_[sym_index].Info >> 4 | STT_OBJECT  ) //# uint8 // H4:binding and L4:type
+	                    symtab_[sym_index].Info = ( symtab_[sym_index].Info & 0xF0 | STT_OBJECT  ) //# uint8 // H4:binding and L4:type
 	                    //symtab_[sym_index].Other = 0 //uint8 // reserved, currently holds 0
 	                    symtab_[sym_index].Shndx = uint16(slices.Index(shstrtab, section_in))//4 //uint16 // section index the symbol in (.text)
 	                    symtab_[sym_index].Value = uint64(len(data)) //# uint64  for relocatable .o file it's symbol's offset in its section
 	                    symtab_[sym_index].Size = uint64(len(pad8))  //#uint64  for function it's its size
+
+	                    //new_sym = Elf64_sym{
+                            //Name =  uint32(len(strings.Join(strtab,"")))  // offset in strtab
+	                    //Info = (STB_LOCAL << 4 | STT_OBJECT)    // local 
+                            //Shndx = uint16(slices.Index(shstrtab, section_in))// section index the symbol in (.text/.data ...)
+	                    //Value = uint64(len(data)) //# uint64  for relocatable .o file it's symbol's offset in its section
+	                    //Size = uint64(len(pad8))  //#uint64  for function it's its size
+			    //}
+			    //symtab = slices.Insert(symtab_,  new_local_sym_idx, new_sym)  // infront for keep global append
+	                    //sym_idx_map[label_in+"\x00"] = new_local_sym_idx
+			    //new_local_sym_idx += 1 
+
 			    //sym + str + data
                             data = append(data, pad8...)
-
+	                    } else {
+				fmt.Println("Error: Label not found for .string", suf_directive)
+				os.Exit(1) }
 			}
-		
 
 		} else if strings.HasSuffix(switchOnOp, ":") {
 			label_in = strings.TrimSuffix(code[0], ":")
-		        sym_index := slices.Index(strtab, label_in+"\x00")
-			    fmt.Println("|-:sym.Name",len(strings.Join(strtab,"")),  "strtab:", strtab, "section_in:", section_in)
-			if sym_index == -1 {
-	                    //sym.Name = uint32(len(strings.Join(strtab,"")))  //#uint32 // offset in string table
-	                    sym.Info = (STB_LOCAL << 4 | STT_FUNC)    //# H4:binding and L4:type
-	                    sym.Other = 0 //uint8 // reserved, currently holds 0
-	                    sym.Shndx = uint16(slices.Index(shstrtab, section_in))//0 //#uint16 // section index the symbol in
-			    //fmt.Println("-::", section_in, uint16(slices.Index(shstrtab, section_in)))//0 //#uint16 // section index the symbol in
-	                    sym.Value = 0 //# uint64  for relocatable .o file it's symbol's offset in its section
-	                    sym.Size = 0  //#uint64  for function it's its size   -- uint64(len(align8("H\n")))                   
-			    //sym + str
-			    //symtab_ = append(symtab_, sym)
-			    //strtab = append(strtab, label_in+"\x00")
-			    //local symbols should be in front of global symbols in symtab
-			    //symtab_ = append(symtab_[:1+1], symtab_[1:]...)
-			    //symtab_[1] = sym
-			    strtab = slices.Insert(strtab, 1, label_in+"\x00")  // infront for keep global atend
-			    symtab_ = slices.Insert(symtab_, 1, sym) // infront for keep global atend
+    		            sym_index, exist := sym_idx_map[label_in+"\x00"]
+			    if !exist {
+	                    new_sym = Elf64_sym{
+                            Name :  uint32(len(strings.Join(strtab,""))),  // offset in strtab
+	                    Info : (STB_LOCAL << 4 | STT_FUNC),    // local 
+                            Shndx : uint16(slices.Index(shstrtab, section_in)),// section index the symbol in (.text/.data ...)
+	                    Value : 0,
+	                    Size : 0 }
+			    strtab = append(strtab, label_in+"\x00")
+	                    //symtab_ = append(symtab_, new_sym) 
+			    symtab_ = slices.Insert(symtab_,  new_local_sym_idx, new_sym)  // infront for keep global append
+	                    sym_idx_map[label_in+"\x00"] = new_local_sym_idx
+			    new_local_sym_idx += 1 
 			} else {
 			    fmt.Println("=|=shndx:", uint16(slices.Index(shstrtab, section_in)), strtab, "section_in:", section_in, "sym_index:", sym_index, "symbal:", strtab[sym_index])
 			    symtab_[sym_index].Shndx = uint16(slices.Index(shstrtab, section_in))//0 //#uint16 // section index the symbol in
 					    }
 			copy_instr.WriteString(raw_instr)
-		} else {
-			copy_instr.WriteString(raw_instr)
-		}
+		} else { copy_instr.WriteString(raw_instr) }
          	    fmt.Println(shstrtab, strtab, text, data, shts, section_in, label_in, "x|")
 	}
 	////////
@@ -2350,8 +2402,8 @@ func main() { //t6a7s11
 	        cal_bytes = append(cal_bytes, []byte(strings.Join(strtab, ""))...)
 	    case ".symtab\x00":
 		for idx, _ := range symtab_{
-	        symtab_[idx].Name = uint32(len(strings.Join(strtab[:idx],"")))  //#uint32 // offset in string table
-		if strtab[idx] == "_start\x00" { symtab_[idx].Size = uint64(len(txt))} // _start size is the size of .text, so .text is seemed as a funciont name _start! 
+	        //symtab_[idx].Name = uint32(len(strings.Join(strtab[:idx],"")))  //#uint32 // offset in string table
+		//if strtab[idx] == "_start\x00" { symtab_[idx].Size = uint64(len(txt))} // _start size is the size of .text, so .text is seemed as a funciont name _start! 
 	        cal_bytes = append(cal_bytes, byted(symtab_[idx])...)
 	    }
 	    case ".text\x00":
