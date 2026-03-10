@@ -2322,6 +2322,7 @@ func main() { //t6a7s11
 
 
 	for idx, shstr := range  shstrtab {
+	//for _, shstr := range  shstrtab {
 	    shtp := &shts[idx]
 	    if shtp.Size == 0 {continue}
 	    pad_len := int(shtp.Offset) - len(cal_bytes)
