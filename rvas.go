@@ -1979,9 +1979,10 @@ func main() { //t6a7s11
 		little_endian_ins := ins[24:32] + " " + ins[16:24] + " " + ins[8:16] + " " + ins[0:8]
 		append2f(little_endian_ins+" // Addr: "+addrd+" "+addr+" "+ins+" "+ins_h+" "+line, "binary_instructions.txt")
 		//append2f(little_endian_ins+" // Addr: "+addrd+" "+addr+" "+ins+" "+scanner.Text(), "binary_instructions.txt")
-
-		append2f(strings.Replace(little_endian_ins, " ", "", -1), "bin.txt")
-		//append2f(ins, "bin.txt")
+                
+		// SWAP IN REAL
+		//append2f(strings.Replace(little_endian_ins, " ", "", -1), "bin.txt")
+		append2f(ins, "bin.txt")
 		lineCounter++
 		address += 4
 
