@@ -144,8 +144,8 @@ type Elf64_sym struct { // 24 bytes
 	Info  uint8  // H4:binding and L4:type
 	Other uint8  // reserved, currently holds 0
 	Shndx uint16 // section index the symbol in
-	Value uint64
-	Size  uint64
+	Value uint64 //(for relocatable .o file)it's symbol's offset in its section
+	Size  uint64 // varibale or function's lenth
 }
 
 const R_RISCV_PCREL_HI20 = 23
@@ -418,32 +418,32 @@ func main() { //t6a7s11
 	// .byte .string .half .word .dword .zero .align .equ 8
 	fmt.Println("start 0pass.")
 	fmt.Println("ELF header inital:")
-	var elf_header Elf64_header
-	elf_header.Ident = [16]byte{
-		0x7F, 0x45, 0x4C, 0x46, // Magic number indicates ELF file (.ELF)
-		0x02,                                     // ei_class|0 Invalid|1 32-bit|2 64-bit
-		0x01,                                     // ei_data specify|0 Invalid|1 2's complete little endian|2 2's complete bit endian
-		0x01,                                     // ei_version current elf version
-		0x09,                                     // ei_osabi target platform|0 NONE/UNIX System V|1 HP-UX|2 NetBSD|3 Linux|9 FreeBSD
-		0x00,                                     // ei_abiverison ABI version
-		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // ei_padding zero padding
-	}
-	elf_header.Type = 0x0001        // 0 No type|1 Relocatable file|2 Executable file|3 Shared object file|4 Core file
-	elf_header.Machine = 0x00F3     // 0 No machine|62 AMDx86-64|183 ARMaarh64|0xF3 RISC-V
-	elf_header.Version = 0x00000001 // e_version specify original elf version
-	elf_header.Entry = 0x0          // e_entry program entry address -- 0 for relocatable file set final entry point by linker
-	elf_header.Phoff = 0x0          // e_phoff points to start of program header table --  0 for relocatable file (no program headers)
-	//-------
-	elf_header.Shoff = 0x40         // !e_shoff points to start of section header table --  if no, 0 have to be the start of SHT  (e_shnum * e_shentsize = whole table of SHT) = elf_heaser.Ehsize ? 
-	elf_header.Flags = 0x00000004   // e_flags  // 0x4 for LP64D ABI  (EF_RISCV_FLOAT_ABI_DOUBLE) fit for RV64G
-	elf_header.Ehsize = 0x0040      // e_ehsize specify size of This header, 52 bytes(0x34) for 32-bit format, 64 bytes(0x40) for 64-bit ?
-	elf_header.Phentsize = 0x0      // e_phentsize size of program header table entry -- 0 for relocatable
-	elf_header.Phnum = 0x0          // !e_phnum contains number of entries in program header table --
-	elf_header.Shentsize = 0x0040   // e_shentsize size of section header entry -- 64 for Elf64_shdr
-	//-------
-	elf_header.Shnum = 0x0          // !
-	//-------
-	elf_header.Shstrndx = 0x1       // 0 indicate SHN_UNDEF no section header string table ** -- if no, 0 must be SHT index for .shstrtab section
+	//var elf_header Elf64_header
+	//elf_header.Ident = [16]byte{
+	//	0x7F, 0x45, 0x4C, 0x46, // Magic number indicates ELF file (.ELF)
+	//	0x02,                                     // ei_class|0 Invalid|1 32-bit|2 64-bit
+	//	0x01,                                     // ei_data specify|0 Invalid|1 2's complete little endian|2 2's complete bit endian
+	//	0x01,                                     // ei_version current elf version
+	//	0x09,                                     // ei_osabi target platform|0 NONE/UNIX System V|1 HP-UX|2 NetBSD|3 Linux|9 FreeBSD
+	//	0x00,                                     // ei_abiverison ABI version
+	//	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // ei_padding zero padding
+	//}
+	//elf_header.Type = 0x0001        // 0 No type|1 Relocatable file|2 Executable file|3 Shared object file|4 Core file
+	//elf_header.Machine = 0x00F3     // 0 No machine|62 AMDx86-64|183 ARMaarh64|0xF3 RISC-V
+	//elf_header.Version = 0x00000001 // e_version specify original elf version
+	//elf_header.Entry = 0x0          // e_entry program entry address -- 0 for relocatable file set final entry point by linker
+	//elf_header.Phoff = 0x0          // e_phoff points to start of program header table --  0 for relocatable file (no program headers)
+	////-------
+	//elf_header.Shoff = 0x40         // !e_shoff points to start of section header table --  if no, 0 have to be the start of SHT  (e_shnum * e_shentsize = whole table of SHT) = elf_heaser.Ehsize ? 
+	//elf_header.Flags = 0x00000004   // e_flags  // 0x4 for LP64D ABI  (EF_RISCV_FLOAT_ABI_DOUBLE) fit for RV64G
+	//elf_header.Ehsize = 0x0040      // e_ehsize specify size of This header, 52 bytes(0x34) for 32-bit format, 64 bytes(0x40) for 64-bit ?
+	//elf_header.Phentsize = 0x0      // e_phentsize size of program header table entry -- 0 for relocatable
+	//elf_header.Phnum = 0x0          // !e_phnum contains number of entries in program header table --
+	//elf_header.Shentsize = 0x0040   // e_shentsize size of section header entry -- 64 for Elf64_shdr
+	////-------
+	//elf_header.Shnum = 0x0          // !
+	////-------
+	//elf_header.Shstrndx = 0x1       // 0 indicate SHN_UNDEF no section header string table ** -- if no, 0 must be SHT index for .shstrtab section
 	                                // I put shstr table at 1
 
 	//buf := new(bytes.Buffer)
@@ -468,195 +468,195 @@ func main() { //t6a7s11
 	// ----------------
 	// each entrie of SHT is 64 bytes, sh_offset is the exactly offset from beginning of file to the start point of this section's context, e.g., .text's sh_offset is 64, after ELF header
 	// Must need a Non Section for the first section header
-	var sht SHT
-	sht.Name = 0     // 0 for null
-	sht.Type = 0x00000000 // 0 for sh_null
-	sht.Flags = 0x0000000000000000
-	sht.Addr = 0x0000000000000000
-	sht.Offset = 0 // need calculate
-	sht.Size = 0   // need calculate
-	sht.Link = 0x00000000
-	sht.Info = 0x00000000
-	sht.Addralign = 0x0000000000000000 //?
-	sht.Entsize = 0x0000000000000000
-	fmt.Println("SHT Section header NON inital:")
-	var sht0 SHT
-	sht0.Name = 0          //0x00000001   // offset in shstrtab
-	sht0.Type = 0x00000000 // 0 for sh_null
-	sht0.Flags = 0x0000000000000000
-	sht0.Addr = 0x0000000000000000
-	sht0.Offset = 0 // need calculate
-	sht0.Size = 0   // need calculate
-	sht0.Link = 0x00000000
-	sht0.Info = 0x00000000
-	sht0.Addralign = 0x0000000000000000 //?
-	sht0.Entsize = 0x0000000000000000
-	buf_sht0 := new(bytes.Buffer)
-	_ = binary.Write(buf_sht0, binary.LittleEndian, &sht0)
-	sht0_bytes := buf_sht0.Bytes()
-	fmt.Println(sht0_bytes)
-	fmt.Println("--------#")
-	fmt.Println(len(sht0_bytes))
-
-	fmt.Println("SHT .shstrtab Section header inital:")
-	var sht1 SHT
-	sht1.Name = 1          // sh_name //0x00000001   // offset in shstrtab
-	sht1.Type = 0x00000003 // sh_type 3_SHT_STRTAB // 3 for sh_strtab
-	sht1.Flags = 0x0000000000000000
-	sht1.Addr = 0x0000000000000000 // sh_addr virtual address at exection?
-	sht1.Offset = 64 * 5           // need calculate // sh_offset (with sh_size to locate whole section content)
-	sht1.Size = 28                 // need calculate
-	sht1.Link = 0x00000000
-	sht1.Info = 0x00000000
-	sht1.Addralign = 0x0000000000000001 //?
-	sht1.Entsize = 0x0000000000000000
-	//	buf_sht1 := new(bytes.Buffer)
-	//	_ = binary.Write(buf_sht1, binary.LittleEndian, &sht1)
-	//	sht1_bytes := buf_sht1.Bytes()
-	//	fmt.Println(sht1_bytes)
-	//	fmt.Println("--------#")
-	//	fmt.Println(len(sht1_bytes))
-	//Find Section name string
-	//Elf64_hdr -> Elf64_Shdr(SHT) -> Section header of .x -> sh_name(index in .shstrtab) -> section name string in .shstrtab
-	//Elf64_hdr -> e_shstrndx(.shstrtab index in SHT) -> Section header of .shstrtab -> sh_offset + sh_size -> .shstrtab
-
-	fmt.Println("SHT .strtab Section header inital:")
-	var sht2 SHT
-	sht2.Name = 11         // sh_name offset in shstrtab
-	sht2.Type = 0x00000003 // sh_type
-	sht2.Flags = 0x0000000000000000
-	sht2.Addr = 0x0000000000000000 // sh_addr virtual address at exection?
-	sht2.Offset = 64*4 + 28        // need calculate // sh_offset (with sh_size to locate whole section content)
-	sht2.Size = 160                // need calculate
-	sht2.Link = 0x00000000
-	sht2.Info = 0x00000000
-	sht2.Addralign = 0x0000000000000001 //?
-	sht2.Entsize = 0x0000000000000000
-	//buf_sht2 := new(bytes.Buffer)
-	//_ = binary.Write(buf_sht2, binary.LittleEndian, &sht2)
-	//sht2_bytes := buf_sht2.Bytes()
-	//fmt.Println(sht2_bytes)
+	//var sht SHT
+	//sht.Name = 0     // 0 for null
+	//sht.Type = 0x00000000 // 0 for sh_null
+	//sht.Flags = 0x0000000000000000
+	//sht.Addr = 0x0000000000000000
+	//sht.Offset = 0 // need calculate
+	//sht.Size = 0   // need calculate
+	//sht.Link = 0x00000000
+	//sht.Info = 0x00000000
+	//sht.Addralign = 0x0000000000000000 //?
+	//sht.Entsize = 0x0000000000000000
+	//fmt.Println("SHT Section header NON inital:")
+	//var sht0 SHT
+	//sht0.Name = 0          //0x00000001   // offset in shstrtab
+	//sht0.Type = 0x00000000 // 0 for sh_null
+	//sht0.Flags = 0x0000000000000000
+	//sht0.Addr = 0x0000000000000000
+	//sht0.Offset = 0 // need calculate
+	//sht0.Size = 0   // need calculate
+	//sht0.Link = 0x00000000
+	//sht0.Info = 0x00000000
+	//sht0.Addralign = 0x0000000000000000 //?
+	//sht0.Entsize = 0x0000000000000000
+	//buf_sht0 := new(bytes.Buffer)
+	//_ = binary.Write(buf_sht0, binary.LittleEndian, &sht0)
+	//sht0_bytes := buf_sht0.Bytes()
+	//fmt.Println(sht0_bytes)
 	//fmt.Println("--------#")
-	//fmt.Println(len(sht2_bytes))
+	//fmt.Println(len(sht0_bytes))
 
-	fmt.Println("SHT .symtab Section header inital:")
-	var sht3 SHT
-	sht3.Name = 11         // sh_name offset in shstrtab
-	sht3.Type = 0x00000002 // sh_type
-	sht3.Flags = 0x0000000000000000
-	sht3.Addr = 0x0000000000000000      // sh_addr virtual address at exection?
-	sht3.Offset = 64*4 + 28             // need calculate // sh_offset (with sh_size to locate whole section content)
-	sht3.Size = 160                     // need calculate
-	sht3.Link = 0x00000002              // .strtab index 2 in .shstrtab
-	sht3.Info = 0x00000001              // first no local symbol in syms
-	sht3.Addralign = 0x0000000000000008 //? Good practice for alignment
-	sht3.Entsize = 0x18                 //24 each sym record size is 24 bytes
-	//buf_sht3 := new(bytes.Buffer)
-	//_ = binary.Write(buf_sht3, binary.LittleEndian, &sht3)
-	//sht3_bytes := buf_sht3.Bytes()
-	//fmt.Println(sht3_bytes)
-	//fmt.Println("--------#")
-	//fmt.Println(len(sht3_bytes))
+	//fmt.Println("SHT .shstrtab Section header inital:")
+	//var sht1 SHT
+	//sht1.Name = 1          // sh_name //0x00000001   // offset in shstrtab
+	//sht1.Type = 0x00000003 // sh_type 3_SHT_STRTAB // 3 for sh_strtab
+	//sht1.Flags = 0x0000000000000000
+	//sht1.Addr = 0x0000000000000000 // sh_addr virtual address at exection?
+	//sht1.Offset = 64 * 5           // need calculate // sh_offset (with sh_size to locate whole section content)
+	//sht1.Size = 28                 // need calculate
+	//sht1.Link = 0x00000000
+	//sht1.Info = 0x00000000
+	//sht1.Addralign = 0x0000000000000001 //?
+	//sht1.Entsize = 0x0000000000000000
+	////	buf_sht1 := new(bytes.Buffer)
+	////	_ = binary.Write(buf_sht1, binary.LittleEndian, &sht1)
+	////	sht1_bytes := buf_sht1.Bytes()
+	////	fmt.Println(sht1_bytes)
+	////	fmt.Println("--------#")
+	////	fmt.Println(len(sht1_bytes))
+	////Find Section name string
+	////Elf64_hdr -> Elf64_Shdr(SHT) -> Section header of .x -> sh_name(index in .shstrtab) -> section name string in .shstrtab
+	////Elf64_hdr -> e_shstrndx(.shstrtab index in SHT) -> Section header of .shstrtab -> sh_offset + sh_size -> .shstrtab
 
-	fmt.Println("SHT .text Section header inital:")
-	var sht4 SHT
-	sht4.Name = 11         // sh_name offset in shstrtab
-	sht4.Type = 0x00000001 // sh_type
-	//sht4.Flags = 0x0000000000000000
-	sht4.Flags = SHF_ALLOC | SHF_EXECINSTR
-	sht4.Addr = 0x0000000000000000 // sh_addr virtual address at exection?
-	sht4.Offset = 64*4 + 28        // need calculate // sh_offset (with sh_size to locate whole section content)
-	sht4.Size = 160                // need calculate
-	sht4.Link = 0x00000000
-	sht4.Info = 0x00000000
-	sht4.Addralign = 0x0000000000000008 //?
-	sht4.Entsize = 0x0000000000000000
-	//buf_sht4 := new(bytes.Buffer)
-	//_ = binary.Write(buf_sht4, binary.LittleEndian, &sht4)
-	//sht4_bytes := buf_sht4.Bytes()
-	//fmt.Println(sht4_bytes)
-	//fmt.Println("--------#")
-	//fmt.Println(len(sht4_bytes))
+	//fmt.Println("SHT .strtab Section header inital:")
+	//var sht2 SHT
+	//sht2.Name = 11         // sh_name offset in shstrtab
+	//sht2.Type = 0x00000003 // sh_type
+	//sht2.Flags = 0x0000000000000000
+	//sht2.Addr = 0x0000000000000000 // sh_addr virtual address at exection?
+	//sht2.Offset = 64*4 + 28        // need calculate // sh_offset (with sh_size to locate whole section content)
+	//sht2.Size = 160                // need calculate
+	//sht2.Link = 0x00000000
+	//sht2.Info = 0x00000000
+	//sht2.Addralign = 0x0000000000000001 //?
+	//sht2.Entsize = 0x0000000000000000
+	////buf_sht2 := new(bytes.Buffer)
+	////_ = binary.Write(buf_sht2, binary.LittleEndian, &sht2)
+	////sht2_bytes := buf_sht2.Bytes()
+	////fmt.Println(sht2_bytes)
+	////fmt.Println("--------#")
+	////fmt.Println(len(sht2_bytes))
 
-	fmt.Println("SHT .data Section header inital:")
-	var sht5 SHT
-	sht5.Name = 11         // sh_name offset in shstrtab
-	sht5.Type = 0x00000001 // sh_type
-	//sht5.Flags = 0x0000000000000000
-	sht5.Flags = SHF_ALLOC | SHF_WRITE
-	sht5.Addr = 0x0000000000000000 // sh_addr virtual address at exection?
-	sht5.Offset = 64*4 + 28        // need calculate // sh_offset (with sh_size to locate whole section content)
-	sht5.Size = 160                // need calculate
-	sht5.Link = 0x00000000
-	sht5.Info = 0x00000000
-	sht5.Addralign = 0x0000000000000008 //?
-	sht5.Entsize = 0x0000000000000000
-	//buf_sht5 := new(bytes.Buffer)
-	//_ = binary.Write(buf_sht5, binary.LittleEndian, &sht5)
-	//sht5_bytes := buf_sht5.Bytes()
-	//fmt.Println(sht5_bytes)
-	//fmt.Println("--------#")
-	//fmt.Println(len(sht5_bytes))
+	//fmt.Println("SHT .symtab Section header inital:")
+	//var sht3 SHT
+	//sht3.Name = 11         // sh_name offset in shstrtab
+	//sht3.Type = 0x00000002 // sh_type
+	//sht3.Flags = 0x0000000000000000
+	//sht3.Addr = 0x0000000000000000      // sh_addr virtual address at exection?
+	//sht3.Offset = 64*4 + 28             // need calculate // sh_offset (with sh_size to locate whole section content)
+	//sht3.Size = 160                     // need calculate
+	//sht3.Link = 0x00000002              // .strtab index 2 in .shstrtab
+	//sht3.Info = 0x00000001              // first no local symbol in syms
+	//sht3.Addralign = 0x0000000000000008 //? Good practice for alignment
+	//sht3.Entsize = 0x18                 //24 each sym record size is 24 bytes
+	////buf_sht3 := new(bytes.Buffer)
+	////_ = binary.Write(buf_sht3, binary.LittleEndian, &sht3)
+	////sht3_bytes := buf_sht3.Bytes()
+	////fmt.Println(sht3_bytes)
+	////fmt.Println("--------#")
+	////fmt.Println(len(sht3_bytes))
 
-	fmt.Println("SHT .rela.text Section header inital:")
-	var sht6 SHT
-	sht6.Name = 11         // sh_name offset in shstrtab
-	sht6.Type = 0x00000001 // sh_type
-	sht6.Flags = 0x0000000000000000
-	sht6.Addr = 0x0000000000000000 // sh_addr virtual address at exection?
-	sht6.Offset = 64*4 + 28        // need calculate // sh_offset (with sh_size to locate whole section content)
-	sht6.Size = 160                // need calculate
-	sht6.Link = 0x00000000
-	sht6.Info = 0x00000000
-	sht6.Addralign = 0x0000000000000008 //?
-	sht6.Entsize = 0x0000000000000000
-	//buf_sht6 := new(bytes.Buffer)
-	//_ = binary.Write(buf_sht6, binary.LittleEndian, &sht6)
-	//sht6_bytes := buf_sht6.Bytes()
-	//fmt.Println(sht6_bytes)
-	//fmt.Println("--------#")
-	//fmt.Println(len(sht6_bytes))
+	//fmt.Println("SHT .text Section header inital:")
+	//var sht4 SHT
+	//sht4.Name = 11         // sh_name offset in shstrtab
+	//sht4.Type = 0x00000001 // sh_type
+	////sht4.Flags = 0x0000000000000000
+	//sht4.Flags = SHF_ALLOC | SHF_EXECINSTR
+	//sht4.Addr = 0x0000000000000000 // sh_addr virtual address at exection?
+	//sht4.Offset = 64*4 + 28        // need calculate // sh_offset (with sh_size to locate whole section content)
+	//sht4.Size = 160                // need calculate
+	//sht4.Link = 0x00000000
+	//sht4.Info = 0x00000000
+	//sht4.Addralign = 0x0000000000000008 //?
+	//sht4.Entsize = 0x0000000000000000
+	////buf_sht4 := new(bytes.Buffer)
+	////_ = binary.Write(buf_sht4, binary.LittleEndian, &sht4)
+	////sht4_bytes := buf_sht4.Bytes()
+	////fmt.Println(sht4_bytes)
+	////fmt.Println("--------#")
+	////fmt.Println(len(sht4_bytes))
 
-	var sym Elf64_sym
-	sym.Name = 0  //uint32 // offset in string table
-	sym.Info = 0  //# uint8 // H4:binding and L4:type
-	sym.Other = 0 //uint8 // reserved, currently holds 0
-	sym.Shndx = 0 //uint16 // section index the symbol in
-	sym.Value = 0 //# uint64  for relocatable .o file it's symbol's offset in its section
-	sym.Size = 0  //#uint64  for function it's its size
+	//fmt.Println("SHT .data Section header inital:")
+	//var sht5 SHT
+	//sht5.Name = 11         // sh_name offset in shstrtab
+	//sht5.Type = 0x00000001 // sh_type
+	////sht5.Flags = 0x0000000000000000
+	//sht5.Flags = SHF_ALLOC | SHF_WRITE
+	//sht5.Addr = 0x0000000000000000 // sh_addr virtual address at exection?
+	//sht5.Offset = 64*4 + 28        // need calculate // sh_offset (with sh_size to locate whole section content)
+	//sht5.Size = 160                // need calculate
+	//sht5.Link = 0x00000000
+	//sht5.Info = 0x00000000
+	//sht5.Addralign = 0x0000000000000008 //?
+	//sht5.Entsize = 0x0000000000000000
+	////buf_sht5 := new(bytes.Buffer)
+	////_ = binary.Write(buf_sht5, binary.LittleEndian, &sht5)
+	////sht5_bytes := buf_sht5.Bytes()
+	////fmt.Println(sht5_bytes)
+	////fmt.Println("--------#")
+	////fmt.Println(len(sht5_bytes))
 
-	fmt.Println(".sym 0 inital:")
-	var sym0 Elf64_sym
-	sym0.Name = 0  //uint32 // offset in string table
-	sym0.Info = 0  //# uint8 // H4:binding and L4:type
-	sym0.Other = 0 //uint8 // reserved, currently holds 0
-	sym0.Shndx = 0 //uint16 // section index the symbol in
-	sym0.Value = 0 //# uint64  for relocatable .o file it's symbol's offset in its section
-	sym0.Size = 0  //#uint64  for function it's its size
-	//buf_sym1 := new(bytes.Buffer)
-	//_ = binary.Write(buf_sym0, binary.LittleEndian, &sym0)
-	//sym0_bytes := buf_sym0.Bytes()
-	//fmt.Println(smy0_bytes)
-	//fmt.Println("--------#")
-	//fmt.Println(len(sym0_bytes))
+	//fmt.Println("SHT .rela.text Section header inital:")
+	//var sht6 SHT
+	//sht6.Name = 11         // sh_name offset in shstrtab
+	//sht6.Type = 0x00000001 // sh_type
+	//sht6.Flags = 0x0000000000000000
+	//sht6.Addr = 0x0000000000000000 // sh_addr virtual address at exection?
+	//sht6.Offset = 64*4 + 28        // need calculate // sh_offset (with sh_size to locate whole section content)
+	//sht6.Size = 160                // need calculate
+	//sht6.Link = 0x00000000
+	//sht6.Info = 0x00000000
+	//sht6.Addralign = 0x0000000000000008 //?
+	//sht6.Entsize = 0x0000000000000000
+	////buf_sht6 := new(bytes.Buffer)
+	////_ = binary.Write(buf_sht6, binary.LittleEndian, &sht6)
+	////sht6_bytes := buf_sht6.Bytes()
+	////fmt.Println(sht6_bytes)
+	////fmt.Println("--------#")
+	////fmt.Println(len(sht6_bytes))
 
-	fmt.Println(".sym1 _start inital:")
-	var sym1 Elf64_sym
-	sym1.Name = 1  // points to "_start" in .strtab
-	sym1.Info = 0  //# uint8 // H4:binding and L4:type
-	sym1.Other = 0 //uint8 // reserved, currently holds 0
-	sym1.Shndx = 4 //uint16 // section index the symbol in (.text)
-	sym1.Value = 0 //# uint64  for relocatable .o file it's symbol's offset in its section
-	sym1.Size = 0  //#uint64  for function it's its size
+	//var sym Elf64_sym
+	//sym.Name = 0  //uint32 // offset in string table
+	//sym.Info = 0  //# uint8 // H4:binding and L4:type
+	//sym.Other = 0 //uint8 // reserved, currently holds 0
+	//sym.Shndx = 0 //uint16 // section index the symbol in
+	//sym.Value = 0 //# uint64  for relocatable .o file it's symbol's offset in its section
+	//sym.Size = 0  //#uint64  for function it's its size
 
-	fmt.Println(".sym2 msg inital:")
-	var sym2 Elf64_sym
-	sym2.Name = 0  // points to "_start" in .strtab
-	sym2.Info = 0  //# uint8 // H4:binding and L4:type
-	sym2.Other = 0 //uint8 // reserved, currently holds 0
-	sym2.Shndx = 5 //uint16 // section index the symbol in (.data)
-	sym2.Value = 0 //# uint64  for relocatable .o file it's symbol's offset in its section
-	sym2.Size = 0  //#uint64  for function it's its size
+	//fmt.Println(".sym 0 inital:")
+	//var sym0 Elf64_sym
+	//sym0.Name = 0  //uint32 // offset in string table
+	//sym0.Info = 0  //# uint8 // H4:binding and L4:type
+	//sym0.Other = 0 //uint8 // reserved, currently holds 0
+	//sym0.Shndx = 0 //uint16 // section index the symbol in
+	//sym0.Value = 0 //# uint64  for relocatable .o file it's symbol's offset in its section
+	//sym0.Size = 0  //#uint64  for function it's its size
+	////buf_sym1 := new(bytes.Buffer)
+	////_ = binary.Write(buf_sym0, binary.LittleEndian, &sym0)
+	////sym0_bytes := buf_sym0.Bytes()
+	////fmt.Println(smy0_bytes)
+	////fmt.Println("--------#")
+	////fmt.Println(len(sym0_bytes))
+
+	//fmt.Println(".sym1 _start inital:")
+	//var sym1 Elf64_sym
+	//sym1.Name = 1  // points to "_start" in .strtab
+	//sym1.Info = 0  //# uint8 // H4:binding and L4:type
+	//sym1.Other = 0 //uint8 // reserved, currently holds 0
+	//sym1.Shndx = 4 //uint16 // section index the symbol in (.text)
+	//sym1.Value = 0 //# uint64  for relocatable .o file it's symbol's offset in its section
+	//sym1.Size = 0  //#uint64  for function it's its size
+
+	//fmt.Println(".sym2 msg inital:")
+	//var sym2 Elf64_sym
+	//sym2.Name = 0  // points to "_start" in .strtab
+	//sym2.Info = 0  //# uint8 // H4:binding and L4:type
+	//sym2.Other = 0 //uint8 // reserved, currently holds 0
+	//sym2.Shndx = 5 //uint16 // section index the symbol in (.data)
+	//sym2.Value = 0 //# uint64  for relocatable .o file it's symbol's offset in its section
+	//sym2.Size = 0  //#uint64  for function it's its size
 
 	//Find symbol string
 	//Elf64_hdr -> e_shoff + e_shnum * e_shentsize -> Elf64_Shdr(SHT) -> Section header of .symtab -> sh_offset + sh_size -> .symtab -> st_name -> byte start point in .strtab to null
@@ -673,6 +673,11 @@ func main() { //t6a7s11
 	var shstrtab []string
 	var text []byte
 	var data []byte
+	var sym Elf64_sym
+	var sht SHT
+        var elf_header Elf64_header
+
+	//symtab_ := []Elf64_sym{sym}// symtab_ array and strtab are same order
 	symtab_ := []Elf64_sym{sym}// symtab_ array and strtab are same order
 	strtab := []string{"\x00"}
 	var relatext []Elf64_rela
@@ -705,7 +710,7 @@ func main() { //t6a7s11
                         //if !strings.HasPrefix(code[1], "."){
 			//fmt.Println("Directive:", directive, "|Suf_directive:", suf_directive)
 			//}
-			if directive == ".global" {
+			if directive == ".global" || directive == ".globl" {
 			    fmt.Println("Directive:", directive, "//Suf_directive:", suf_directive)
 			    fmt.Println("create .symtab entry + .strtab entry, add .symtab to .shstrtab")
 			    if !slices.Contains(shstrtab, ".strtab\x00") {
@@ -1469,7 +1474,7 @@ func main() { //t6a7s11
 			if len(code) != 3 {
 				fmt.Println("Incorrect argument count on line: ", lineCounter)
 			}
-			//auipc reg, 0 # R_RISCV_PCREL_HI20 arg
+			//auipc reg, 0 # R_RISCV_PCREL_HI20 arg // auipc point to symbol
 			if code[2] == "0"  && strings.Contains(scanner.Text(), "R_RISCV_PCREL_HI20") {
 			    cs := strings.Split(scanner.Text(), " ")
 			    sy := cs[len(cs)-2] // ending with \n
@@ -1487,17 +1492,20 @@ func main() { //t6a7s11
 			if len(code) != 4 {
 				fmt.Println("ori 2 Incorrect argument count on line: ", lineCounter)
 			}
-			//addi reg, reg 0 # R_RISCV_PCREL_LO12_I arg
+			//addi reg, reg 0 # R_RISCV_PCREL_LO12_I arg // addi point to its auipc, not target symbol
 			if code[3] == "0"  && strings.Contains(scanner.Text(), "R_RISCV_PCREL_LO12_I") {
-			    cs := strings.Split(scanner.Text(), " ")
-			    sy := cs[len(cs)-2] // ending with \n
-			    idx := slices.Index(strtab, sy+"\x00")
-			    fmt.Println("create .rela.text entry for LO12_I.: of", sy, idx, "at line:", lineCounter, "address:", address)
+			    //cs := strings.Split(scanner.Text(), " ")
+			    //sy := cs[len(cs)-2] // ending with \n
+			    //idx := slices.Index(strtab, sy+"\x00")
+			    //fmt.Println("create .rela.text entry for LO12_I.: of", sy, idx, "at line:", lineCounter, "address:", address)
+			    idx := slices.Index(strtab, "_start\x00") // find the index of _start for .text section for auipc
+			    if idx == -1 {fmt.Println("Error: _start symbole not found!"); os.Exit(1)}
                             var rela Elf64_rela 
                             rela.Offset = uint64(address)//uint64 modified instruction's offset in .text
                             rela.Info = (uint64(idx) << 32) | R_RISCV_PCREL_LO12_I //uint64   // sym index and relocation type
                             //rela.Addend = int16(0)// int16   // A constant addend used in the reloction calculation 加数
-                            rela.Addend = int64(0)// int64   // A constant addend used in the reloction calculation 加数
+                            //rela.Addend = int64(0)// int64   // A constant addend used in the reloction calculation 加数
+                            rela.Addend = int64(address - 4) // addr of aupic(former of addi so addi's addr - 4)
 			    fmt.Printf("%+v\n", rela)
 			    relatext = append(relatext, rela)
 			}
@@ -1523,8 +1531,8 @@ func main() { //t6a7s11
 
 	// set up write file for machine code comparison
 	f, err := os.Create("add.o")       //("asm-tests/asm-u-bin/beq-mc-u.txt")
-	ff, err := os.Create("combined.o") //("asm-tests/asm-u-bin/beq-mc-u.txt")
-	//fff, err := os.Create("caled.o") //("asm-tests/asm-u-bin/beq-mc-u.txt")
+	//ff, err := os.Create("combined.o") //("asm-tests/asm-u-bin/beq-mc-u.txt")
+	fff, err := os.Create("caled.o") //("asm-tests/asm-u-bin/beq-mc-u.txt")
 	write2f("", "binary_instructions.txt") // clean
 	write2f("", "bin.txt") // clean
 	if err != nil {
@@ -1996,157 +2004,201 @@ func main() { //t6a7s11
 		f.Write(instructionBuffer)
 
 	}
+
+
+        // Manul
 	txt, _ := ioutil.ReadFile("add.o")
 
-	elf_header.Shnum = 0x7 //sht0 1shstrtab 2strtab 3symtab 4text 5data 6relatext
+	//elf_header.Shnum = 0x7 //sht0 1shstrtab 2strtab 3symtab 4text 5data 6relatext
+	////-------
+	//buf := new(bytes.Buffer)
+	//_ = binary.Write(buf, binary.LittleEndian, &elf_header)
+	//elf_header_bytes := buf.Bytes()
+	//fmt.Println(elf_header_bytes)
+
+	//shstrtab_data := []byte("\x00" + ".shstrtab\x00" + ".strtab\x00" + ".symtab\x00" + ".text\x00" + ".data\x00" + ".rela.text\x00")
+	//strtab_data := []byte("\x00" + "_start\x00" + "msg\x00")
+	////dat := align8([]byte("H\n"))
+	//dat := align8("H\n")
+	//fmt.Println("---------###--------:", dat)
+	//symtab := make([]Elf64_sym, 3)
+	//symtab[0] = sym0
+
+	//sym1.Name = sym0.Name + uint32(len("\x00")) // points to "_start" in .strtab
+	//sym1.Info = (STB_GLOBAL<<4 | STT_FUNC)      //# uint8 // H4:binding and L4:type
+	//sym1.Shndx = 4                              //uint16 // section index the symbol in (.text)
+	//sym1.Size = uint64(len(txt))                //#uint64  for function it's its size
+	//symtab[1] = sym1
+
+	//sym2.Name = sym1.Name + uint32(len("_start\x00")) // points to "msg" in .strtab
+	//sym2.Info = (STB_GLOBAL<<4 | STT_OBJECT)          //# uint8 // H4:binding and L4:type
+	//sym2.Shndx = 5                                    //uint16 // section index the symbol in (.data)
+	//sym2.Size = uint64(len(align8("H\n")))                    //#uint64  for function it's its size
+	//symtab[2] = sym2
+	//buf_symtab := new(bytes.Buffer)
+	//for _, sym := range symtab {
+	//	_ = binary.Write(buf_symtab, binary.LittleEndian, &sym)
+	//}
+	//symtab_data := buf_symtab.Bytes()
+	//fmt.Println(symtab_data)
+	//fmt.Println("--------#")
+	//fmt.Println(len(symtab_data))
+
+	////relatext_data := []byte("relatext_data")
+	//buf_relatext := new(bytes.Buffer)
+	//for _, rela := range relatext{
+	//    _ = binary.Write(buf_relatext, binary.LittleEndian, &rela)
+	//}
+	//relatext_data := buf_relatext.Bytes()
+
+	////-----------shstrtab h
+	//sht1.Name = sht0.Name + uint32(len("\x00")) // offset in shstrtab
+	//fmt.Println("--------###", sht1.Name)
+	//sht1.Offset = uint64(elf_header.Ehsize + elf_header.Shentsize*elf_header.Shnum) //data offset
+	//sht1.Size = uint64(len(shstrtab_data))
+	//buf_sht1 := new(bytes.Buffer)
+	//_ = binary.Write(buf_sht1, binary.LittleEndian, &sht1)
+	//sht1_bytes := buf_sht1.Bytes()
+	//fmt.Println(sht1_bytes)
+	//fmt.Println("--------#")
+	//fmt.Println(len(sht1_bytes))
+
+	////-----------strtab h
+	//sht2.Name = sht1.Name + uint32(len(".shstrtab\x00")) // offset in shstrtab
+	//sht2.Offset = sht1.Offset + sht1.Size
+	//sht2.Size = uint64(len(strtab_data))
+	//buf_sht2 := new(bytes.Buffer)
+	//_ = binary.Write(buf_sht2, binary.LittleEndian, &sht2)
+	//sht2_bytes := buf_sht2.Bytes()
+	//fmt.Println(sht2_bytes)
+	//fmt.Println("--------#")
+	//fmt.Println(len(sht2_bytes))
+
+	////-----------symtab h
+	//sht3.Name = sht2.Name + uint32(len(".strtab\x00")) // offset in shstrtab
+	//sht3.Offset = sht2.Offset + sht2.Size
+	//sht3.Size = uint64(len(symtab_data))
+	//sht3.Link = 0x00000002 // .strtab index 2 in .shstrtab
+	//buf_sht3 := new(bytes.Buffer)
+	//_ = binary.Write(buf_sht3, binary.LittleEndian, &sht3)
+	//sht3_bytes := buf_sht3.Bytes()
+	//fmt.Println(sht3_bytes)
+	//fmt.Println("--------#")
+	//fmt.Println(len(sht3_bytes))
+
+	////-----------text h
+	//sht4.Name = sht3.Name + uint32(len(".symtab\x00")) // offset in shstrtab
+	//sht4.Offset = sht3.Offset + sht3.Size
+	//sht4.Size = uint64(len(txt))
+	//buf_sht4 := new(bytes.Buffer)
+	//_ = binary.Write(buf_sht4, binary.LittleEndian, &sht4)
+	//sht4_bytes := buf_sht4.Bytes()
+	//fmt.Println(sht4_bytes)
+	//fmt.Println("--------#")
+	//fmt.Println(len(sht4_bytes))
+
+	////-----------data h
+	//sht5.Name = sht4.Name + uint32(len(".text\x00")) // offset in shstrtab
+	//sht5.Offset = sht4.Offset + sht4.Size
+	//sht5.Size = uint64(len(dat))
+	//buf_sht5 := new(bytes.Buffer)
+	//_ = binary.Write(buf_sht5, binary.LittleEndian, &sht5)
+	//sht5_bytes := buf_sht5.Bytes()
+	//fmt.Println(sht5_bytes)
+	//fmt.Println("--------#")
+	//fmt.Println(len(sht5_bytes))
+
+	////-----------rela.text h
+	//sht6.Name = sht5.Name + uint32(len(".data\x00")) // offset in shstrtab, it follow .data
+	//sht6.Offset = sht5.Offset + sht5.Size
+	//sht6.Size = uint64(len(relatext_data))
+        //// for linker
+	//sht6.Type = 4 // 4 means SHT_RELA(relocation table)
+	//sht6.Link = 3 // tell Linker symbl at SHT[3] .symtabl
+	//sht6.Info = 4 // tell Linker patches to SHT[4] .text
+	//sht6.Entsize = 24 // Elf64_rela entry size is 24 bytes
+
+	//buf_sht6 := new(bytes.Buffer)
+	//_ = binary.Write(buf_sht6, binary.LittleEndian, &sht6)
+	//sht6_bytes := buf_sht6.Bytes()
+
+	//fmt.Println(sht6_bytes)
+	//fmt.Println("--------#")
+	//fmt.Println(len(sht6_bytes))
+
+	//combined := append(elf_header_bytes, sht0_bytes...)
+	//combined = append(combined, sht1_bytes...)
+	//combined = append(combined, sht2_bytes...)
+	//combined = append(combined, sht3_bytes...)
+	//combined = append(combined, sht4_bytes...)
+	//combined = append(combined, sht5_bytes...)
+	//combined = append(combined, sht6_bytes...)
+	//combined = append(combined, shstrtab_data...)
+	//combined = append(combined, strtab_data...)
+	//combined = append(combined, symtab_data...)
+	//combined = append(combined, txt...)
+	//combined = append(combined, dat...)
+	//combined = append(combined, relatext_data...)
+	//fmt.Println("combined:")
+	//fmt.Println("----------#")
+	//fmt.Println(len(txt))
+	//fmt.Println(combined)
+	//ff.Write(combined)
+
+	//var elf_header Elf64_header
+	elf_header.Ident = [16]byte{
+		0x7F, 0x45, 0x4C, 0x46, // Magic number indicates ELF file (.ELF)
+		0x02,                                     // ei_class|0 Invalid|1 32-bit|2 64-bit
+		0x01,                                     // ei_data specify|0 Invalid|1 2's complete little endian|2 2's complete bit endian
+		0x01,                                     // ei_version current elf version
+		0x09,                                     // ei_osabi target platform|0 NONE/UNIX System V|1 HP-UX|2 NetBSD|3 Linux|9 FreeBSD
+		0x00,                                     // ei_abiverison ABI version
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // ei_padding zero padding
+	}
+	elf_header.Type = 0x0001        // 0 No type|1 Relocatable file|2 Executable file|3 Shared object file|4 Core file
+	elf_header.Machine = 0x00F3     // 0 No machine|62 AMDx86-64|183 ARMaarh64|0xF3 RISC-V
+	elf_header.Version = 0x00000001 // e_version specify original elf version
+	elf_header.Entry = 0x0          // e_entry program entry address -- 0 for relocatable file set final entry point by linker
+	elf_header.Phoff = 0x0          // e_phoff points to start of program header table --  0 for relocatable file (no program headers)
 	//-------
-	buf := new(bytes.Buffer)
-	_ = binary.Write(buf, binary.LittleEndian, &elf_header)
-	elf_header_bytes := buf.Bytes()
-	fmt.Println(elf_header_bytes)
-
-	shstrtab_data := []byte("\x00" + ".shstrtab\x00" + ".strtab\x00" + ".symtab\x00" + ".text\x00" + ".data\x00" + ".rela.text\x00")
-	strtab_data := []byte("\x00" + "_start\x00" + "msg\x00")
-	//dat := align8([]byte("H\n"))
-	dat := align8("H\n")
-	fmt.Println("---------###--------:", dat)
-	symtab := make([]Elf64_sym, 3)
-	symtab[0] = sym0
-
-	sym1.Name = sym0.Name + uint32(len("\x00")) // points to "_start" in .strtab
-	sym1.Info = (STB_GLOBAL<<4 | STT_FUNC)      //# uint8 // H4:binding and L4:type
-	sym1.Shndx = 4                              //uint16 // section index the symbol in (.text)
-	sym1.Size = uint64(len(txt))                //#uint64  for function it's its size
-	symtab[1] = sym1
-
-	sym2.Name = sym1.Name + uint32(len("_start\x00")) // points to "msg" in .strtab
-	sym2.Info = (STB_GLOBAL<<4 | STT_OBJECT)          //# uint8 // H4:binding and L4:type
-	sym2.Shndx = 5                                    //uint16 // section index the symbol in (.data)
-	sym2.Size = uint64(len(align8("H\n")))                    //#uint64  for function it's its size
-	symtab[2] = sym2
-	buf_symtab := new(bytes.Buffer)
-	for _, sym := range symtab {
-		_ = binary.Write(buf_symtab, binary.LittleEndian, &sym)
-	}
-	symtab_data := buf_symtab.Bytes()
-	fmt.Println(symtab_data)
-	fmt.Println("--------#")
-	fmt.Println(len(symtab_data))
-
-	//relatext_data := []byte("relatext_data")
-	buf_relatext := new(bytes.Buffer)
-	for _, rela := range relatext{
-	    _ = binary.Write(buf_relatext, binary.LittleEndian, &rela)
-	}
-	relatext_data := buf_relatext.Bytes()
-
-	//-----------shstrtab h
-	sht1.Name = sht0.Name + uint32(len("\x00")) // offset in shstrtab
-	fmt.Println("--------###", sht1.Name)
-	sht1.Offset = uint64(elf_header.Ehsize + elf_header.Shentsize*elf_header.Shnum) //data offset
-	sht1.Size = uint64(len(shstrtab_data))
-	buf_sht1 := new(bytes.Buffer)
-	_ = binary.Write(buf_sht1, binary.LittleEndian, &sht1)
-	sht1_bytes := buf_sht1.Bytes()
-	fmt.Println(sht1_bytes)
-	fmt.Println("--------#")
-	fmt.Println(len(sht1_bytes))
-
-	//-----------strtab h
-	sht2.Name = sht1.Name + uint32(len(".shstrtab\x00")) // offset in shstrtab
-	sht2.Offset = sht1.Offset + sht1.Size
-	sht2.Size = uint64(len(strtab_data))
-	buf_sht2 := new(bytes.Buffer)
-	_ = binary.Write(buf_sht2, binary.LittleEndian, &sht2)
-	sht2_bytes := buf_sht2.Bytes()
-	fmt.Println(sht2_bytes)
-	fmt.Println("--------#")
-	fmt.Println(len(sht2_bytes))
-
-	//-----------symtab h
-	sht3.Name = sht2.Name + uint32(len(".strtab\x00")) // offset in shstrtab
-	sht3.Offset = sht2.Offset + sht2.Size
-	sht3.Size = uint64(len(symtab_data))
-	sht3.Link = 0x00000002 // .strtab index 2 in .shstrtab
-	buf_sht3 := new(bytes.Buffer)
-	_ = binary.Write(buf_sht3, binary.LittleEndian, &sht3)
-	sht3_bytes := buf_sht3.Bytes()
-	fmt.Println(sht3_bytes)
-	fmt.Println("--------#")
-	fmt.Println(len(sht3_bytes))
-
-	//-----------text h
-	sht4.Name = sht3.Name + uint32(len(".symtab\x00")) // offset in shstrtab
-	sht4.Offset = sht3.Offset + sht3.Size
-	sht4.Size = uint64(len(txt))
-	buf_sht4 := new(bytes.Buffer)
-	_ = binary.Write(buf_sht4, binary.LittleEndian, &sht4)
-	sht4_bytes := buf_sht4.Bytes()
-	fmt.Println(sht4_bytes)
-	fmt.Println("--------#")
-	fmt.Println(len(sht4_bytes))
-
-	//-----------data h
-	sht5.Name = sht4.Name + uint32(len(".text\x00")) // offset in shstrtab
-	sht5.Offset = sht4.Offset + sht4.Size
-	sht5.Size = uint64(len(dat))
-	buf_sht5 := new(bytes.Buffer)
-	_ = binary.Write(buf_sht5, binary.LittleEndian, &sht5)
-	sht5_bytes := buf_sht5.Bytes()
-	fmt.Println(sht5_bytes)
-	fmt.Println("--------#")
-	fmt.Println(len(sht5_bytes))
-
-	//-----------rela.text h
-	sht6.Name = sht5.Name + uint32(len(".data\x00")) // offset in shstrtab, it follow .data
-	sht6.Offset = sht5.Offset + sht5.Size
-	sht6.Size = uint64(len(relatext_data))
-        // for linker
-	sht6.Type = 4 // 4 means SHT_RELA(relocation table)
-	sht6.Link = 3 // tell Linker symbl at SHT[3] .symtabl
-	sht6.Info = 4 // tell Linker patches to SHT[4] .text
-	sht6.Entsize = 24 // Elf64_rela entry size is 24 bytes
-
-	buf_sht6 := new(bytes.Buffer)
-	_ = binary.Write(buf_sht6, binary.LittleEndian, &sht6)
-	sht6_bytes := buf_sht6.Bytes()
-
-	fmt.Println(sht6_bytes)
-	fmt.Println("--------#")
-	fmt.Println(len(sht6_bytes))
-
-	combined := append(elf_header_bytes, sht0_bytes...)
-	combined = append(combined, sht1_bytes...)
-	combined = append(combined, sht2_bytes...)
-	combined = append(combined, sht3_bytes...)
-	combined = append(combined, sht4_bytes...)
-	combined = append(combined, sht5_bytes...)
-	combined = append(combined, sht6_bytes...)
-	combined = append(combined, shstrtab_data...)
-	combined = append(combined, strtab_data...)
-	combined = append(combined, symtab_data...)
-	combined = append(combined, txt...)
-	combined = append(combined, dat...)
-	combined = append(combined, relatext_data...)
-	fmt.Println("combined:")
-	fmt.Println("----------#")
-	fmt.Println(len(txt))
-	fmt.Println(combined)
-	ff.Write(combined)
-
+	elf_header.Shoff = 0x40         // !e_shoff points to start of section header table --  if no, 0 have to be the start of SHT  (e_shnum * e_shentsize = whole table of SHT) = elf_heaser.Ehsize ? 
+	elf_header.Flags = 0x00000004   // e_flags  // 0x4 for LP64D ABI  (EF_RISCV_FLOAT_ABI_DOUBLE) fit for RV64G
+	elf_header.Ehsize = 0x0040      // e_ehsize specify size of This header, 52 bytes(0x34) for 32-bit format, 64 bytes(0x40) for 64-bit ?
+	elf_header.Phentsize = 0x0      // e_phentsize size of program header table entry -- 0 for relocatable
+	elf_header.Phnum = 0x0          // !e_phnum contains number of entries in program header table --
+	elf_header.Shentsize = 0x0040   // e_shentsize size of section header entry -- 64 for Elf64_shdr
+	//-------
+	elf_header.Shnum = 0x0          // !
+	//-------
+	elf_header.Shstrndx = 0x1       // 0 indicate SHN_UNDEF no section header string table ** -- if no, 0 must be SHT index for .shstrtab section
+	                                // I put shstr table at 1
 
 	// Dynamic calc
 	elf_header.Shnum = uint16(len(shstrtab))
 	elf_header.Shoff = uint64(elf_header.Ehsize) // after elf_header, e_shoff points to start of section header table -- no 0 have to be the start of SHT  (e_shnum * e_shentsize = whole table of SHT)
-	//elf_header_bytes = byted(elf_header)
+	//elf_header_bytes := byted(elf_header)
+	elf_header.Shstrndx = uint16(slices.Index(shstrtab, ".shstrtab\x00")) 
+
+	//buf := new(bytes.Buffer)
+	//_ = binary.Write(buf, binary.LittleEndian, &elf_header)
+	//elf_header_bytes := buf.Bytes()
+	//fmt.Println(elf_header_bytes)
+
 	fmt.Println("shts SHT list:", shts, len(shts))
-	sec_offset := uint64(0)
+	//sec_offset := uint64(0)
 	cal_bytes := []byte{}
 	cal_bytes = append(cal_bytes, byted(elf_header)...)
+	//cal_bytes = append(cal_bytes, elf_header_bytes...)
+
+	sec_offset := elf_header.Shoff + uint64(elf_header.Shentsize * elf_header.Shnum)
+
+
         // Calc SHTs offset & size 
+	//for idx, shstr := range shstrtab {
+	//shtp := &shts[idx]
 	for idx, sht := range shts {
-	shtp := &shts[idx]
 	shstr := shstrtab[idx]
+	shtp := &shts[idx]
 	switch shstr {
 	    case "\x00":
 		fmt.Println("SHT Section header of NON XYY name startfrom:", idx, uint32(len(strings.Join(shstrtab[0:idx], ""))), "length:", len(byted(shtp)))
@@ -2163,7 +2215,7 @@ func main() { //t6a7s11
 	        shtp.Link = uint32(0)
 	        shtp.Info = uint32(0)
 	        shtp.Entsize = uint64(0)
-	        cal_bytes = append(cal_bytes, byted(shtp)...)
+	        cal_bytes = append(cal_bytes, byted(*shtp)...)
 	    case ".shstrtab\x00":
 	        fmt.Println("SHT Section header of .shstrtab }}}:")
 		fmt.Println("SHT Section header of NON YXY name startf:", uint32(len(strings.Join(shstrtab[0:idx], ""))), "length:", len(byted(shtp)))
@@ -2181,7 +2233,7 @@ func main() { //t6a7s11
 	        shtp.Link = uint32(0) //0
 	        shtp.Info = uint32(0) //
 	        shtp.Entsize = uint64(0)
-	        cal_bytes = append(cal_bytes, byted(shtp)...)
+	        cal_bytes = append(cal_bytes, byted(*shtp)...)
 	    case ".strtab\x00":
 	        fmt.Println("SHT Section header of .strtab }}}:")
 		shtp.Name = uint32(len(strings.Join(shstrtab[0:idx], "")))    // 0 for null
@@ -2218,7 +2270,7 @@ func main() { //t6a7s11
 		    }
 		}
 	        shtp.Entsize = uint64(24)
-	        cal_bytes = append(cal_bytes, byted(shtp)...)
+	        cal_bytes = append(cal_bytes, byted(*shtp)...)
 	    case ".text\x00":
 	        fmt.Println("SHT Section header of .text }}}:")
 		shtp.Name = uint32(len(strings.Join(shstrtab[0:idx], "")))    // 0 for null
@@ -2248,7 +2300,7 @@ func main() { //t6a7s11
 	        shtp.Link = uint32(0)//0
 	        shtp.Info = uint32(0)
 	        shtp.Entsize = uint64(0)
-	        cal_bytes = append(cal_bytes, byted(shtp)...)
+	        cal_bytes = append(cal_bytes, byted(*shtp)...)
 	    case ".rela.text\x00":
 	        fmt.Println("SHT Section header of .rela.text }}}:")
 		shtp.Name = uint32(len(strings.Join(shstrtab[0:idx], "")))    // 0 for null
@@ -2263,29 +2315,36 @@ func main() { //t6a7s11
 	        shtp.Link = uint32(slices.Index(shstrtab, ".symtab\x00")) // link to dependency SHT's index, calculated by (.symtab index in array .shstrtab) 
 	        shtp.Info = uint32(slices.Index(shstrtab, ".text\x00")) // must info to be relocation section
 	        shtp.Entsize = uint64(24)
-	        cal_bytes = append(cal_bytes, byted(shtp)...)
+	        cal_bytes = append(cal_bytes, byted(*shtp)...)
 	}
 	        fmt.Printf("{{%d, %+v\n", idx, sht)
 	}
 
-	for _, shstr := range  shstrtab {
+
+	for idx, shstr := range  shstrtab {
+	    shtp := &shts[idx]
+	    if shtp.Size == 0 {continue}
+	    pad_len := int(shtp.Offset) - len(cal_bytes)
+	    if pad_len > 0 { cal_bytes = append(cal_bytes, make([]byte, pad_len)...)}
 	    switch shstr {
             case "\x00":
 	    case ".shstrtab\x00":
-		former_len := shts[slices.Index(shstrtab, ".shstrtab\x00")].Offset
-	        padd := make([]byte, former_len)
-	        copy(padd, cal_bytes)
-	        cal_bytes = append(padd, []byte(strings.Join(shstrtab, ""))...)
-	        fmt.Println("caled .shstrtab")
+		//former_len := shts[slices.Index(shstrtab, ".shstrtab\x00")].Offset
+	        //padd := make([]byte, former_len)
+	        //copy(padd, cal_bytes)
+	        //cal_bytes = append(padd, []byte(strings.Join(shstrtab, ""))...)
+	        //fmt.Println("caled .shstrtab")
+	        cal_bytes = append(cal_bytes, []byte(strings.Join(shstrtab, ""))...)
 	    case ".strtab\x00":
-		former_len := shts[slices.Index(shstrtab, ".strtab\x00")].Offset
-	        padd := make([]byte, former_len)
-	        copy(padd, cal_bytes)
-	        cal_bytes = append(padd, []byte(strings.Join(strtab, ""))...)
+		//former_len := shts[slices.Index(shstrtab, ".strtab\x00")].Offset
+	        //padd := make([]byte, former_len)
+	        //copy(padd, cal_bytes)
+	        //cal_bytes = append(padd, []byte(strings.Join(strtab, ""))...)
+	        cal_bytes = append(cal_bytes, []byte(strings.Join(strtab, ""))...)
 	    case ".symtab\x00":
 		for idx, _ := range symtab_{
 	        symtab_[idx].Name = uint32(len(strings.Join(strtab[:idx],"")))  //#uint32 // offset in string table
-		if strtab[idx] == "_start\x00" { symtab[idx].Size = uint64(len(txt)) // _start size is the size of .text, so .text is seemed as a funciont name _start! 
+		if strtab[idx] == "_start\x00" { symtab_[idx].Size = uint64(len(txt))} // _start size is the size of .text, so .text is seemed as a funciont name _start! 
 	        cal_bytes = append(cal_bytes, byted(symtab_[idx])...)
 	    }
 	    case ".text\x00":
@@ -2301,31 +2360,31 @@ func main() { //t6a7s11
 
 	fff.Write(cal_bytes)
 
-	//fmt.Println("shstrtab string list:", shstrtab, len(shstrtab))
-	//for idx, shstr := range shstrtab {
-	//		    fmt.Printf("==%d, %+v\n", idx, shstr)
-	//}
-	//fmt.Println("strtab string list:", strtab, len(strtab))
-	//for idx, str := range strtab {
-	//		    fmt.Printf("==%d, %+v\n", idx, str)
-	//}
-	//fmt.Println("symtab_ Elf64_sym list:", symtab_, len(symtab_))
-	//for idx, sym := range symtab {
-	//		    fmt.Printf("==%d, %+v\n", idx, sym)
-	//}
-	////text, data byte list
-	//fmt.Println("relatext Elf64_rela list:", relatext, len(relatext))
-	//for idx, rela := range relatext {
-	//		    fmt.Printf("==%d, %+v\n", idx, rela)
-	//}
-	//fmt.Println("cal_bytes:")
-	//fmt.Println(cal_bytes)
+	fmt.Println("shstrtab string list:", shstrtab, len(shstrtab))
+	for idx, shstr := range shstrtab {
+			    fmt.Printf("==%d, %+v\n", idx, shstr)
+	}
+	fmt.Println("strtab string list:", strtab, len(strtab))
+	for idx, str := range strtab {
+			    fmt.Printf("==%d, %+v\n", idx, str)
+	}
+	fmt.Println("symtab_ Elf64_sym list:", symtab_, len(symtab_))
+	for idx, sym := range symtab_ {
+			    fmt.Printf("==%d, %+v\n", idx, sym)
+	}
+	//text, data byte list
+	fmt.Println("relatext Elf64_rela list:", relatext, len(relatext))
+	for idx, rela := range relatext {
+			    fmt.Printf("==%d, %+v\n", idx, rela)
+	}
+	fmt.Println("cal_bytes:")
+	fmt.Println(cal_bytes)
 
 
-	// fmt.Println("shts SHT list:", shts, len(shts))
-	// fmt.Println("shstrtab string list:", shstrtab, len(shstrtab))
-	// fmt.Println("strtab string list:", strtab, len(strtab))
-	// fmt.Println("symtab_ Elf64_sym list:", symtab_, len(symtab_))
-	// //text, data byte list
-	// fmt.Println("relatext Elf64_rela list:", relatext, len(relatext))
+	 fmt.Println("shts SHT list:", shts, len(shts))
+	 fmt.Println("shstrtab string list:", shstrtab, len(shstrtab))
+	 fmt.Println("strtab string list:", strtab, len(strtab))
+	 fmt.Println("symtab_ Elf64_sym list:", symtab_, len(symtab_))
+	 //text, data byte list
+	 fmt.Println("relatext Elf64_rela list:", relatext, len(relatext))
 }
