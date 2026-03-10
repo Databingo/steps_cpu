@@ -154,7 +154,7 @@ const R_RISCV_PCREL_LO12_I = 24
 type Elf64_rela struct {
 	Offset uint64  // modified instruction's offset in .text
 	Info uint64   // sym index and relocation type
-	Addend int16   // A constant addend used in the reloction calculation 加数
+	Addend int64   // A constant addend used in the reloction calculation 加数
 }
 
 func write2f(text string, name string) {
@@ -1478,7 +1478,8 @@ func main() { //t6a7s11
                             var rela Elf64_rela 
                             rela.Offset = uint64(address)//uint64 modified instruction's offset in .text
                             rela.Info = (uint64(idx) << 32) | R_RISCV_PCREL_HI20 //uint64   // sym index and relocation type
-                            rela.Addend = int16(0)// int16   // A constant addend used in the reloction calculation 加数
+                            //rela.Addend = int16(0)// int16   // A constant addend used in the reloction calculation 加数
+                            rela.Addend = int64(0)// int64   // A constant addend used in the reloction calculation 加数
 			    fmt.Printf("%+v\n", rela)
 			    relatext = append(relatext, rela)
 			}
@@ -1495,7 +1496,8 @@ func main() { //t6a7s11
                             var rela Elf64_rela 
                             rela.Offset = uint64(address)//uint64 modified instruction's offset in .text
                             rela.Info = (uint64(idx) << 32) | R_RISCV_PCREL_LO12_I //uint64   // sym index and relocation type
-                            rela.Addend = int16(0)// int16   // A constant addend used in the reloction calculation 加数
+                            //rela.Addend = int16(0)// int16   // A constant addend used in the reloction calculation 加数
+                            rela.Addend = int64(0)// int64   // A constant addend used in the reloction calculation 加数
 			    fmt.Printf("%+v\n", rela)
 			    relatext = append(relatext, rela)
 			}
