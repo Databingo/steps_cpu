@@ -6,6 +6,7 @@ addi x1, x1, 0x4
 auipc x5, 0 # R_RISCV_PCREL_HI20 msg 
 addi x5, x5, 0 # R_RISCV_PCREL_LO12_I msg 
 lb x6, 0(x5)
+sb x6, 0(x1)
 #     j _start
 jal x0, _start
 msg:
