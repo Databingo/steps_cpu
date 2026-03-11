@@ -1,6 +1,13 @@
 bash test.sh
 file caled.o
 #file combined.o
+ 
+#hexdump -v -e '1/4 "%08x" "\n"' caled.o
+#riscv64-unknown-elf-objdump -b binary -m riscv -D caled.o
+ 
+#exit
+ 
+ 
 riscv64-unknown-elf-ld -o final.elf caled.o  -Ttext 0x0 -Tdata 0x1000  # linker
 #riscv64-unknown-elf-ld -o final.elf combined.o  -Ttext 0x0 -Tdata 0x1000  # linker
 riscv64-unknown-elf-readelf -h final.elf

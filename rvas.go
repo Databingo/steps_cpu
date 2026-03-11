@@ -1531,7 +1531,8 @@ func main() { //t6a7s11
 			if code[2] == "0"  && strings.Contains(scanner.Text(), "R_RISCV_PCREL_HI20") {
 			    cs := strings.Split(scanner.Text(), " ")
 			    sy := cs[len(cs)-2] // ending with \n
-			    idx := slices.Index(strtab, sy+"\x00")
+			    //idx := slices.Index(strtab, sy+"\x00")
+			    idx := sym_idx_map[sy+"\x00"]
 			    fmt.Println("create .rela.text entry for HI20: of", sy, idx, "at line:", lineCounter, "address:", address)
                             var rela Elf64_rela 
                             rela.Offset = uint64(address)//uint64 modified instruction's offset in .text
@@ -1540,6 +1541,23 @@ func main() { //t6a7s11
                             rela.Addend = int64(0)// int64   // A constant addend used in the reloction calculation 加数
 			    fmt.Printf("%+v\n", rela)
 			    relatext = append(relatext, rela)
+
+			    // prepare sym for addi
+			    sym_index, _ := sym_idx_map[".text\x00"]
+	new_sym = Elf64_sym{
+        Name :  uint32(len(strings.Join(strtab,""))),  // offset in strtab
+        Info : (STB_LOCAL << 4 | STT_FUNC),    // local 
+        Shndx : uint16(sym_index),
+        Value : uint64(address) ,
+	Size : 0 }
+        symtab_ = slices.Insert(symtab_,  new_local_sym_idx, new_sym)  // infront for keep global append
+	//symtab_ = append(symtab_, new_sym)
+	sym_idx_map[".symtab\x00"] = new_local_sym_idx
+	new_local_sym_idx += 1
+			    strtab = append(strtab,"auipc"+string(address)+ "\x00")
+
+
+
 			}
 		case "addi": // op rd, rs1, immediate
 			if len(code) != 4 {
@@ -1551,8 +1569,9 @@ func main() { //t6a7s11
 			    //sy := cs[len(cs)-2] // ending with \n
 			    //idx := slices.Index(strtab, sy+"\x00")
 			    //fmt.Println("create .rela.text entry for LO12_I.: of", sy, idx, "at line:", lineCounter, "address:", address)
-			    idx := slices.Index(strtab, "_start\x00") // find the index of _start for .text section for auipc
-			    if idx == -1 {fmt.Println("Error: _start symbole not found!"); os.Exit(1)}
+			    //idx := slices.Index(strtab, "_start\x00") // find the index of _start for .text section for auipc
+			    idx := sym_idx_map["auipc"+string(address-4)+ "\x00"]
+			    if idx == 0 {fmt.Println("Error: _start symbole not found!"); os.Exit(1)}
 			    //idx := slices.Index(strtab, "L_ref\x00")
 			    //if idx == -1 {
 			    //    strtab = append(strtab, "L_ref\x00")
@@ -1564,7 +1583,9 @@ func main() { //t6a7s11
                             rela.Info = (uint64(idx) << 32) | R_RISCV_PCREL_LO12_I //uint64   // sym index and relocation type
                             //rela.Addend = int16(0)// int16   // A constant addend used in the reloction calculation 加数
                             //rela.Addend = int64(0)// int64   // A constant addend used in the reloction calculation 加数
-                            rela.Addend = int64(address - 4) // addr of aupic(former of addi so addi's addr - 4)
+                            //rela.Addend = int64(address - 4) // addr of aupic(former of addi so addi's addr - 4)
+                            rela.Addend = int64(0) // addr of aupic(former of addi so addi's addr - 4)
+                            //rela.Addend = int64(0) // addr of aupic(former of addi so addi's addr - 4)
 			    fmt.Printf("%+v\n", rela)
 			    relatext = append(relatext, rela)
 			}
