@@ -665,24 +665,22 @@ func main() { //t6a7s11
 	scanner0.Split(bufio.ScanLines)
 	var copy_instr strings.Builder
 
-	// Parse directive
+	// parse directive
 	//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	var section_in string
 	var label_in string
-        var elf_header Elf64_header
-	var sht SHT
 	var shts []SHT
 	var shstrtab []string
 	var text []byte
 	var data []byte
-	//var symtab_ []Elf64_sym
-	//var relatext []Elf64_rela
-	//var strtab []string
+	//var sym Elf64_sym
+	var sht SHT
+        var elf_header Elf64_header
 
+	//symtab_ := []Elf64_sym{sym}// symtab_ array and strtab are same order
 	symtab_ := []Elf64_sym{{}}
 	strtab := []string{"\x00"}
-	////var relatext []Elf64_rela
-	relatext := []Elf64_rela{{}}
+	var relatext []Elf64_rela
 
 	sym_idx_map := make(map[string]int)
 	new_local_sym_idx := 1
@@ -787,11 +785,11 @@ func main() { //t6a7s11
 	                    elf_header.Shnum += 1 
 			    // sym
 	                    new_sym = Elf64_sym{
-                                Name  : 0, // offset in strtab, .section string no in strtab
-	                        Info  : (STB_LOCAL << 4 | STT_SECTION),    // local section_symbol
-                                Shndx : uint16(len(shts)-1),
-                                Value : 0,
-	                        Size  : 0 }
+                            Name : 0, // offset in strtab, .section string no in strtab
+	                    Info : (STB_LOCAL << 4 | STT_SECTION),    // local section_symbol
+                            Shndx : uint16(len(shts)-1),
+                            Value : 0,
+	                    Size : 0 }
 			    symtab_ = slices.Insert(symtab_,  new_local_sym_idx, new_sym)  // infront for keep global append
 	                    sym_idx_map[section_in] = new_local_sym_idx
 	                    new_local_sym_idx += 1 }
@@ -1533,8 +1531,7 @@ func main() { //t6a7s11
 			if code[2] == "0"  && strings.Contains(scanner.Text(), "R_RISCV_PCREL_HI20") {
 			    cs := strings.Split(scanner.Text(), " ")
 			    sy := cs[len(cs)-2] // ending with \n
-			    //idx := slices.Index(strtab, sy+"\x00")
-			    idx := sym_idx_map[sy+"\x00"]
+			    idx := slices.Index(strtab, sy+"\x00")
 			    fmt.Println("create .rela.text entry for HI20: of", sy, idx, "at line:", lineCounter, "address:", address)
                             var rela Elf64_rela 
                             rela.Offset = uint64(address)//uint64 modified instruction's offset in .text
@@ -1543,24 +1540,6 @@ func main() { //t6a7s11
                             rela.Addend = int64(0)// int64   // A constant addend used in the reloction calculation 加数
 			    fmt.Printf("%+v\n", rela)
 			    relatext = append(relatext, rela)
-
-			    // prepare sym for addi
-			    //sym_index, _ := sym_idx_map[".text\x00"]
-			    //sym_name_str := "auipc"+fmt.Sprintf("%d", address)+"\x00"
-	new_sym = Elf64_sym{
-        Name : 0,// uint32(len(strings.Join(strtab,""))),  // offset in strtab
-        Info : (STB_LOCAL << 4 | STT_NOTYPE),    // local 
-        Shndx : uint16(slices.Index(shstrtab, ".text\x00")),
-        Value : uint64(address) ,
-	Size : 0 }
-        symtab_ = slices.Insert(symtab_,  new_local_sym_idx, new_sym)  // infront for keep global append
-	//symtab_ = append(symtab_, new_sym)
-	sym_idx_map["auipc"+fmt.Sprintf("%d", address)+"\x00"] = new_local_sym_idx
-	new_local_sym_idx += 1
-			    //strtab = append(strtab,"auipc"+string(address)+ "\x00")
-
-
-
 			}
 		case "addi": // op rd, rs1, immediate
 			if len(code) != 4 {
@@ -1572,9 +1551,8 @@ func main() { //t6a7s11
 			    //sy := cs[len(cs)-2] // ending with \n
 			    //idx := slices.Index(strtab, sy+"\x00")
 			    //fmt.Println("create .rela.text entry for LO12_I.: of", sy, idx, "at line:", lineCounter, "address:", address)
-			    //idx := slices.Index(strtab, "_start\x00") // find the index of _start for .text section for auipc
-			    idx, exist := sym_idx_map["auipc"+fmt.Sprintf("%d", address-4)+ "\x00"]
-			    if !exist {fmt.Println("Error: _start symbole not found!"); os.Exit(1)}
+			    idx := slices.Index(strtab, "_start\x00") // find the index of _start for .text section for auipc
+			    if idx == -1 {fmt.Println("Error: _start symbole not found!"); os.Exit(1)}
 			    //idx := slices.Index(strtab, "L_ref\x00")
 			    //if idx == -1 {
 			    //    strtab = append(strtab, "L_ref\x00")
@@ -1586,9 +1564,7 @@ func main() { //t6a7s11
                             rela.Info = (uint64(idx) << 32) | R_RISCV_PCREL_LO12_I //uint64   // sym index and relocation type
                             //rela.Addend = int16(0)// int16   // A constant addend used in the reloction calculation 加数
                             //rela.Addend = int64(0)// int64   // A constant addend used in the reloction calculation 加数
-                            //rela.Addend = int64(address - 4) // addr of aupic(former of addi so addi's addr - 4)
-                            rela.Addend = int64(0) // addr of aupic(former of addi so addi's addr - 4)
-                            //rela.Addend = int64(0) // addr of aupic(former of addi so addi's addr - 4)
+                            rela.Addend = int64(address - 4) // addr of aupic(former of addi so addi's addr - 4)
 			    fmt.Printf("%+v\n", rela)
 			    relatext = append(relatext, rela)
 			}
@@ -2331,7 +2307,7 @@ func main() { //t6a7s11
 	        shtp.Link = uint32(0)//0
 	        shtp.Info = uint32(0)
 	        shtp.Entsize = uint64(0)
-	        cal_bytes = append(cal_bytes, byted(*shtp)...)
+	        cal_bytes = append(cal_bytes, byted(shtp)...)
 	    case ".symtab\x00":
 	        fmt.Println("SHT Section header of .symtab }}}:")
 		shtp.Name = uint32(len(strings.Join(shstrtab[0:idx], "")))    // 0 for null
@@ -2368,7 +2344,7 @@ func main() { //t6a7s11
 	        shtp.Link = uint32(0)//0
 	        shtp.Info = uint32(0)
 	        shtp.Entsize = uint64(0)
-	        cal_bytes = append(cal_bytes, byted(*shtp)...)
+	        cal_bytes = append(cal_bytes, byted(shtp)...)
 	    case ".data\x00":
 	        fmt.Println("SHT Section header of .data }}}:")
 		shtp.Name = uint32(len(strings.Join(shstrtab[0:idx], "")))    // 0 for null
