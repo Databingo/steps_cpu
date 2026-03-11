@@ -1302,6 +1302,12 @@ func main() { //t6a7s11
 		if strings.HasSuffix(switchOnOp, ":") {
 			label := strings.TrimSuffix(code[0], ":")
 			symbolTable[label] = int64(address) // if label exists in symbolTable, update value to valid address
+
+			if sym_index, exists := sym_idx_map[label+"\x00"]; exists {
+			    text_shndx := uint16(slices.Index(shstrtab, ".text\x00"))
+			    if symtab_[sym_index].Shndx == text_shndx { symtab_[sym_index].Value = uint64(address) }
+			} // add symbol offset
+
 			if len(code) >= 2 {                 // opcode is in code[1] if code[0] is a label
 				switchOnOp = code[1]
 				code = code[1:]

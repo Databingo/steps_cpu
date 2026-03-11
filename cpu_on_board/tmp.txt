@@ -5,8 +5,13 @@ addi x1, x1, 0x4
 #     la x5, msg
 auipc x5, 0 # R_RISCV_PCREL_HI20 msg 
 addi x5, x5, 0 # R_RISCV_PCREL_LO12_I msg 
+addi x2, x5, 5
+print_string:
 lb x6, 0(x5)
 sb x6, 0(x1)
-#     j _start
-jal x0, _start
+addi x5, x5, 1
+bne x5, x2, print_string
+end:
+#     j end
+jal x0, end
 msg:
