@@ -141,7 +141,7 @@ const STT_FILE = 4
 
 type Elf64_sym struct { // 24 bytes
 	Name  uint32 // offset in string table strtab (byte offset!)
-	Info  uint8  // H4:binding and L4:type
+	Info  uint8  // H4:binding and L4:type   // h4 is global/local
 	Other uint8  // reserved, currently holds 0
 	Shndx uint16 // section index the symbol in
 	Value uint64 //(for relocatable .o file)it's symbol's offset in its section
@@ -689,7 +689,7 @@ func main() { //t6a7s11
 
 	//sht0 NULL
 	shstrtab = append(shstrtab,"\x00")  // Create NULL sht
-	shts = append(shts, sht) 
+	shts = append(shts, sht)  // shts and shstrtab in parallal
 	elf_header.Shnum += 1 
 
 	//sht1 shstrtab
@@ -1070,8 +1070,8 @@ func main() { //t6a7s11
 			        fmt.Println("create .rela.text")
 			        //sht + shstrtab
 	                        elf_header.Shnum += 1 
-	                        shts = append(shts, sht)
 	                        shstrtab = append(shstrtab, ".rela.text\x00")
+	                        shts = append(shts, sht)
 			    }
 			fmt.Println(`
 		                 for .rela.text: 
@@ -1523,20 +1523,21 @@ func main() { //t6a7s11
 			    fmt.Printf("%+v\n", rela)
 			    relatext = append(relatext, rela)
 
-			    // prepare sym for addi
+			    // prepare auipc's fake sym for addi
 			    //sym_index, _ := sym_idx_map[".text\x00"]
 			    //sym_name_str := "auipc"+fmt.Sprintf("%d", address)+"\x00"
 	new_sym = Elf64_sym{
-        Name : 0,// uint32(len(strings.Join(strtab,""))),  // offset in strtab
+        //Name : 0,// uint32(len(strings.Join(strtab,""))),  // offset in strtab
+        Name : uint32(len(strings.Join(strtab,""))),  // offset in strtab
         Info : (STB_LOCAL << 4 | STT_NOTYPE),    // local 
-        Shndx : uint16(slices.Index(shstrtab, ".text\x00")),
-        Value : uint64(address) ,
+        Shndx : uint16(slices.Index(shstrtab, ".text\x00")),  // it's section
+        Value : uint64(address) , // symbol's offset in its seciton, if it's instruciton, is instruction's offset in .text
 	Size : 0 }
         symtab_ = slices.Insert(symtab_,  new_local_sym_idx, new_sym)  // infront for keep global append
 	//symtab_ = append(symtab_, new_sym)
 	sym_idx_map["auipc"+fmt.Sprintf("%d", address)+"\x00"] = new_local_sym_idx
 	new_local_sym_idx += 1
-			    //strtab = append(strtab,"auipc"+string(address)+ "\x00")
+			    strtab = append(strtab,"auipc"+fmt.Sprintf("%d", address)+"\x00")
 
 
 
@@ -2206,7 +2207,9 @@ func main() { //t6a7s11
 	//fmt.Println(len(txt))
 	//fmt.Println(combined)
 	//ff.Write(combined)
+        
 
+	// Make ELF
 	//var elf_header Elf64_header
 	elf_header.Ident = [16]byte{
 		0x7F, 0x45, 0x4C, 0x46, // Magic number indicates ELF file (.ELF)
@@ -2230,9 +2233,9 @@ func main() { //t6a7s11
 	elf_header.Phnum = 0x0          // !e_phnum contains number of entries in program header table --
 	elf_header.Shentsize = 0x0040   // e_shentsize size of section header entry -- 64 for Elf64_shdr
 	//-------
-	elf_header.Shnum = 0x0          // !
-	//-------
-	elf_header.Shstrndx = 0x1       // 0 indicate SHN_UNDEF no section header string table ** -- if no, 0 must be SHT index for .shstrtab section
+	//elf_header.Shnum = 0x0          // !
+	////-------
+	//elf_header.Shstrndx = 0x1       // 0 indicate SHN_UNDEF no section header string table ** -- if no, 0 must be SHT index for .shstrtab section
 	                                // I put shstr table at 1
 
 	// Dynamic calc
@@ -2246,7 +2249,7 @@ func main() { //t6a7s11
 	//elf_header_bytes := buf.Bytes()
 	//fmt.Println(elf_header_bytes)
 
-	fmt.Println("shts SHT list:", shts, len(shts))
+	//fmt.Println("shts SHT list:", shts, len(shts))
 	//sec_offset := uint64(0)
 	cal_bytes := []byte{}
 	cal_bytes = append(cal_bytes, byted(elf_header)...)
@@ -2256,11 +2259,11 @@ func main() { //t6a7s11
 
 
         // Calc SHTs offset & size 
-	//for idx, shstr := range shstrtab {
-	//shtp := &shts[idx]
-	for idx, sht := range shts {
-	shstr := shstrtab[idx]
+	for idx, shstr := range shstrtab {
 	shtp := &shts[idx]
+	//for idx, sht := range shts {
+	//shstr := shstrtab[idx]
+	//shtp := &shts[idx]
 	switch shstr {
 	    case "\x00":
 		fmt.Println("SHT Section header of NON XYY name startfrom:", idx, uint32(len(strings.Join(shstrtab[0:idx], ""))), "length:", len(byted(shtp)))
@@ -2413,6 +2416,7 @@ func main() { //t6a7s11
 	    case ".text\x00":
 	        cal_bytes = append(cal_bytes, txt...)
 	    case ".data\x00":
+		fmt.Println("Writing data setion, size:", len(data))
 	        cal_bytes = append(cal_bytes, data...)
 	    case ".rela.text\x00":
 		for _, rela := range relatext {

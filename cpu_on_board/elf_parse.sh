@@ -1,16 +1,27 @@
 bash test.sh
 file caled.o
+riscv64-unknown-elf-objdump  -d caled.o 
+riscv64-unknown-elf-objdump  -r caled.o 
+
+
+
 #file combined.o
  
 #hexdump -v -e '1/4 "%08x" "\n"' caled.o
 #riscv64-unknown-elf-objdump -b binary -m riscv -D caled.o
+echo "---read caled.o relacatbal elf --- "
+riscv64-unknown-elf-readelf --all  caled.o
+exit
  
-#exit
- 
- 
-riscv64-unknown-elf-ld -o final.elf caled.o  -Ttext 0x0 -Tdata 0x1000  # linker
+riscv64-unknown-elf-ld -o linked_caled.elf caled.o  -Ttext 0x0 -Tdata 0x1000  # linker
 #riscv64-unknown-elf-ld -o final.elf combined.o  -Ttext 0x0 -Tdata 0x1000  # linker
-riscv64-unknown-elf-readelf -h final.elf
+#riscv64-unknown-elf-readelf -h  linked_caled.elf
+#riscv64-unknown-elf-readelf -S  linked_caled.elf
+riscv64-unknown-elf-readelf --all  linked_caled.elf
+
+exit
+
+
 riscv64-unknown-elf-objcopy -O binary final.elf final.bin  # to binary
 #riscv64-unknown-elf-readelf -S final.elf
 riscv64-unknown-elf-objdump -b binary -m riscv -D final.bin
