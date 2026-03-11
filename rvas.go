@@ -689,21 +689,14 @@ func main() { //t6a7s11
 
 	//sht0 NULL
 	shstrtab = append(shstrtab,"\x00")  // Create NULL sht
-	shts = append(shts, sht) // strings array shts and shstrtab are same order
+	shts = append(shts, sht) 
 	elf_header.Shnum += 1 
 
 	//sht1 shstrtab
 	shstrtab = append(shstrtab,".shstrtab\x00") // Create shstrtab sht
 	shts = append(shts, sht)
 	elf_header.Shnum += 1 
-	// sht1.shstrtab to symtab
-	new_sym := Elf64_sym{
-        Name : 0, // section name not in strtab so no byte offset
-        Info : (STB_LOCAL << 4 | STT_SECTION),    // local section_symbol
-        Shndx : uint16(len(shts)-1),
-        Value : 0,
-	Size : 0 }
-	//symtab_ = slices.Insert(symtab_, 1, new_sym)
+	new_sym := Elf64_sym{ Name:0, Info:(STB_LOCAL << 4 | STT_SECTION), Shndx:uint16(len(shts)-1), Value:0, Size:0 }
 	symtab_ = append(symtab_, new_sym)
 	sym_idx_map[".shstrtab\x00"] = new_local_sym_idx
 	new_local_sym_idx += 1
@@ -712,14 +705,7 @@ func main() { //t6a7s11
         shstrtab = append(shstrtab, ".strtab\x00")
         shts = append(shts, sht)
         elf_header.Shnum += 1 
-	// sht2.strtab to symtab
-	new_sym = Elf64_sym{
-        Name : 0, // section name not in strtab so no byte offset
-        Info : (STB_LOCAL << 4 | STT_SECTION),    // local section_symbol
-        Shndx : uint16(len(shts)-1),
-        Value : 0,
-	Size : 0 }
-	//symtab_ = slices.Insert(symtab_, 1, new_sym)
+	new_sym = Elf64_sym{ Name:0, Info:(STB_LOCAL << 4 | STT_SECTION), Shndx:uint16(len(shts)-1), Value:0, Size:0 }
 	symtab_ = append(symtab_, new_sym)
 	sym_idx_map[".strtab\x00"] = new_local_sym_idx
 	new_local_sym_idx += 1
@@ -728,14 +714,7 @@ func main() { //t6a7s11
         shstrtab = append(shstrtab, ".symtab\x00")
         shts = append(shts, sht)
         elf_header.Shnum += 1 
-	// sht3.symtab to symtab
-	new_sym = Elf64_sym{
-        Name : 0, // section name not in strtab so no byte offset
-        Info : (STB_LOCAL << 4 | STT_SECTION),    // local section_symbol
-        Shndx : uint16(len(shts)-1),
-        Value : 0,
-	Size : 0 }
-	//symtab_ = slices.Insert(symtab_, 1, new_sym)
+	new_sym = Elf64_sym{ Name:0, Info:(STB_LOCAL << 4 | STT_SECTION), Shndx:uint16(len(shts)-1), Value:0, Size:0 }
 	symtab_ = append(symtab_, new_sym)
 	sym_idx_map[".symtab\x00"] = new_local_sym_idx
 	new_local_sym_idx += 1
