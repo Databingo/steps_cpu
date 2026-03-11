@@ -780,11 +780,14 @@ func main() { //t6a7s11
 			    fmt.Println("Directive:", directive, "||Suf_directive:", suf_directive)
 			    fmt.Println("check label_in + check strtab + edit symtab")
 			    //fmt.Println("strtab:", strtab)
+			    str := strings.TrimSpace(suf_directive)
+			    str  = strings.Trim(str, "\"")
+			    str_data := []byte(str + "\x00")
     		            sym_index, exist := sym_idx_map[label_in+"\x00"]
 			    if exist {
 			    fmt.Println("label_in-:", label_in, sym_index)
 			    fmt.Println("sym_e:", symtab_[sym_index])
-			    pad8 :=  align_x(suf_directive, 8)
+			    pad8 :=  align_x(str_data, 8)
 	                    //symtab_[sym_index].Name = 1  // points to "_start" in .strtab
 	                    //symtab_[sym_index].Info = ( symtab_[sym_index].Info >> 4 | STT_OBJECT  ) //# uint8 // H4:binding and L4:type
 	                    symtab_[sym_index].Info = ( symtab_[sym_index].Info & 0xF0 | STT_OBJECT  ) //# uint8 // H4:binding and L4:type
@@ -807,7 +810,7 @@ func main() { //t6a7s11
 			    //sym + str + data
                             data = append(data, pad8...)
 	                    } else {
-				fmt.Println("Error: Label not found for .string", suf_directive)
+				fmt.Println("Error: Label not found for .string", str_data)
 				os.Exit(1) }
 			}
 
