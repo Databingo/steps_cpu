@@ -1593,9 +1593,9 @@ func main() { //t6a7s11
 	//scanner.Split(bufio.ScanLines)
 
 	// set up write file for machine code comparison
-	f, err := os.Create("add.o")       //("asm-tests/asm-u-bin/beq-mc-u.txt")
+	f, err := os.Create("instruction.bin")       //("asm-tests/asm-u-bin/beq-mc-u.txt")
 	//ff, err := os.Create("combined.o") //("asm-tests/asm-u-bin/beq-mc-u.txt")
-	fff, err := os.Create("caled.o") //("asm-tests/asm-u-bin/beq-mc-u.txt")
+	fff, err := os.Create("relocatable.elf") //("asm-tests/asm-u-bin/beq-mc-u.txt")
 	write2f("", "binary_instructions.txt") // clean
 	write2f("", "bin.txt") // clean
 	if err != nil {
@@ -2070,7 +2070,8 @@ func main() { //t6a7s11
 
 
         // Manul
-	txt, _ := ioutil.ReadFile("add.o")
+	//txt, _ := ioutil.ReadFile("add.o")
+	txt, _ := ioutil.ReadFile("instruction.bin")
 
 	//elf_header.Shnum = 0x7 //sht0 1shstrtab 2strtab 3symtab 4text 5data 6relatext
 	////-------
