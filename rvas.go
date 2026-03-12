@@ -902,14 +902,14 @@ func main() { //t6a7s11
 				ins = fmt.Sprintf("%s:\n", label)
 				//real_instr.WriteString(ins)
 			}
-			/////////////////////////-- deploy 3
+			/////////////////////////-- deploy 3 --------------------------------
 			// lui +0x800>>12; addi -(a<<12)#for h32; srli 11; ori 11; srli 11; ori 11; srli 10, ori 10; r sub 2 instruction for main
-			/////////////////////////-- deploy 2
+			/////////////////////////-- deploy 2 --------------------------------
 			//ins = fmt.Sprintf("addi %s, %s, %#x\n", code[1], "x0", 0) // for 0 or clean reg
 			//real_instr.WriteString(ins)
 			//if imm == 0xffffffffffffffff {
-			//	ins = fmt.Sprintf("addi %s, %s, %#x\n", code[1], "x0", 1) // for 0 or clean reg
-			//	real_instr.WriteString(ins)
+			//	//ins = fmt.Sprintf("addi %s, %s, %#x\n", code[1], "x0", 1) // for 0 or clean reg
+			//	//real_instr.WriteString(ins)
 			//	ins = fmt.Sprintf("xori %s, %s, -1\naddi %s, %s, 1\n", code[1], code[1], code[1], code[1])
 			//	real_instr.WriteString(ins)
 			//	continue
@@ -974,46 +974,126 @@ func main() { //t6a7s11
 			//	real_instr.WriteString(ins)
 
 			//}
-			/////////////////////////-- deploy 5 (max 6 instructions)
-			if imm == 0 {
-                                 ins = fmt.Sprintf("addi %s, x0, %#x\n", code[1], 0)
-			         real_instr.WriteString(ins)
-				 continue
+			/////////////////////////-- deploy 5 (max 6 instructions) ---------------------------
+			//if imm == 0 {
+                        //         ins = fmt.Sprintf("addi %s, x0, %#x\n", code[1], 0)
+			//         real_instr.WriteString(ins)
+			//	 continue
+			//}
+
+                        ////prepare lo32 in t1:
+                        //A_lo32 := imm & 0xffffffff
+                        //A_lo32_h20 := A_lo32 >> 12
+                        //A_lo32_lo12 := A_lo32 & 0xfff
+                        //if A_lo32_lo12 & 0x800 !=0 { A_lo32_h20 += 1}
+                        //if A_lo32_h20 != 0 { ins = fmt.Sprintf("lui %s, %#x\n", code[1], A_lo32_h20) 
+			//                     real_instr.WriteString(ins)
+			//                     ins = fmt.Sprintf("addi %s, %s, %#x\n", code[1], code[1], A_lo32_lo12)
+			//                     real_instr.WriteString(ins)
+                        //} else { ins = fmt.Sprintf("addi %s, x0, %#x\n", code[1], A_lo32_lo12)
+			//         real_instr.WriteString(ins) }
+                        //A_hi32 := imm >> 32
+                        //if A_lo32 & 0x80000000 !=0 { A_hi32 +=1 }
+                        //if A_hi32 == 0 { continue } //if A_hi32 == 0 rd is A64 already
+
+                        ////prepare hi32 in x2:
+                        //A_hi32_h20 := A_hi32 >> 12
+                        //A_hi32_lo12 := A_hi32 & 0xfff
+                        //if A_hi32_lo12 & 0x800 !=0 { A_hi32_h20 += 1}
+                        //if A_hi32_h20 != 0 { ins = fmt.Sprintf("lui %s, %#x\n", "x2", A_hi32_h20) 
+			//                     real_instr.WriteString(ins)
+			//                     ins = fmt.Sprintf("addi %s, %s, %#x\n", "x2", "x2", A_hi32_lo12)
+			//                     real_instr.WriteString(ins)
+                        //} else { ins = fmt.Sprintf("addi %s, x0, %#x\n", "x2",  A_hi32_lo12)
+			//         real_instr.WriteString(ins) }
+			////shift to hi32
+			//ins = fmt.Sprintf("slli %s, %s, %#x\n", "x2", "x2", 32)
+			//real_instr.WriteString(ins)
+
+                        ////combination hi32:x2 and lo32:rd to rd as 64 bit A:
+			//ins = fmt.Sprintf("add %s, %s, %s\n", code[1], "x2", code[1])
+			//real_instr.WriteString(ins)
+			//// lui addi slli add
+
+			///////////////////////-- deploy 6 --------------------------------
+			//ins = fmt.Sprintf("addi %s, %s, %#x\n", code[1], "x0", 0) // for 0 or clean reg
+			//real_instr.WriteString(ins)
+			if imm >= 0 && imm < 0x800 { // imm positive (bit 12 is 0)
+				real_instr.WriteString(ins)
+				ins = fmt.Sprintf("addi %s, %s, %#x\n", code[1], "x0", imm)
+				real_instr.WriteString(ins)
+			}
+			if imm >= 0x800 && imm < 0x80000000{ // lui positive (bit 32 is 0)
+                            h20 := imm >> 12 
+			    l12 := imm & 0xfff
+			    if l12 >= 0x800 {h20 = h20 + 1} // addi negative (bit 12 is 1) fix
+                            ins = fmt.Sprintf("lui %s, %#x\n", code[1], h20) 
+			    real_instr.WriteString(ins)
+			    ins = fmt.Sprintf("addi %s, %s, %#x\n", code[1], code[1], l12)
+			    real_instr.WriteString(ins)
+			}
+			if imm >= 0x80000000 && imm <= 0xffffffffffffffff {  // bit 32 is 1 cannot use lui+addi
+			    // 高 20 位 (high 32 sign extend will be left moved out in 64 bit register)
+			    h20 := imm >> 44 & 0xfffff
+			    if h20 != 0 {
+			    	ins = fmt.Sprintf("lui %s, %#x\n", code[1], h20)
+			    	real_instr.WriteString(ins)
+			    	ins = fmt.Sprintf("srli %s, %s, %#x\n", code[1], code[1], 1) // righ shift to prepare next 11 bits
+			    	real_instr.WriteString(ins)
+			    }
+			    // 次 11 位  
+			    c11 := imm >> 33 & 0x7ff
+			    if c11 != 0 {
+			    	ins = fmt.Sprintf("ori %s, %s, %#x\n", code[1], code[1], c11) // pad to low 11
+			    	real_instr.WriteString(ins)
+			    }
+			    // 中 11 位
+			    sf := 11
+			    z11 := imm >> 22 & 0x7ff
+			    if z11 != 0 {
+			    	ins = fmt.Sprintf("slli %s, %s, %#x\n", code[1], code[1], sf)
+			    	real_instr.WriteString(ins)
+			    	ins = fmt.Sprintf("ori %s, %s, %#x\n", code[1], code[1], z11)
+			    	real_instr.WriteString(ins)
+			    	sf = 0
+			    }
+			    // 低 11 位
+			    sf += 11
+			    d11 := imm >> 11 & 0x7ff
+			    if d11 != 0 {
+			    	ins = fmt.Sprintf("slli %s, %s, %#x\n", code[1], code[1], sf)
+			    	real_instr.WriteString(ins)
+			    	ins = fmt.Sprintf("ori %s, %s, %#x\n", code[1], code[1], d11)
+			    	real_instr.WriteString(ins)
+			    	sf = 0
+			    }
+			    // 末 11 位
+			    sf += 11
+			    m11 := imm & 0x7ff
+			    if m11 != 0 && (d11 != 0 || z11 != 0 || c11 != 0 || h20 != 0) {
+			    	ins = fmt.Sprintf("slli %s, %s, %#x\n", code[1], code[1], sf)
+			    	real_instr.WriteString(ins)
+			    }
+			    if m11 != 0 {
+			    	ins = fmt.Sprintf("ori %s, %s, %#x\n", code[1], code[1], m11)
+			    	real_instr.WriteString(ins)
+			    	sf = 0
+			    }
+			    // 左移
+			    if sf != 0 && imm != 0 {
+			    	ins = fmt.Sprintf("slli %s, %s, %#x\n", code[1], code[1], sf)
+			    	real_instr.WriteString(ins)
+
+			    }
+		        }
+
+			// 取补码还原负数
+			if sign == 1 {
+				ins = fmt.Sprintf("xori %s, %s, -1\naddi %s, %s, 1\n", code[1], code[1], code[1], code[1])
+				real_instr.WriteString(ins)
+
 			}
 
-                        //prepare lo32 in t1:
-                        A_lo32 := imm & 0xffffffff
-                        A_lo32_h20 := A_lo32 >> 12
-                        A_lo32_lo12 := A_lo32 & 0xfff
-                        if A_lo32_lo12 & 0x800 !=0 { A_lo32_h20 += 1}
-                        if A_lo32_h20 != 0 { ins = fmt.Sprintf("lui %s, %#x\n", code[1], A_lo32_h20) 
-			                     real_instr.WriteString(ins)
-			                     ins = fmt.Sprintf("addi %s, %s, %#x\n", code[1], code[1], A_lo32_lo12)
-			                     real_instr.WriteString(ins)
-                        } else { ins = fmt.Sprintf("addi %s, x0, %#x\n", code[1], A_lo32_lo12)
-			         real_instr.WriteString(ins) }
-                        A_hi32 := imm >> 32
-                        if A_lo32 & 0x80000000 !=0 { A_hi32 +=1 }
-                        if A_hi32 == 0 { continue } //if A_hi32 == 0 rd is A64 already
-
-                        //prepare hi32 in x2:
-                        A_hi32_h20 := A_hi32 >> 12
-                        A_hi32_lo12 := A_hi32 & 0xfff
-                        if A_hi32_lo12 & 0x800 !=0 { A_hi32_h20 += 1}
-                        if A_hi32_h20 != 0 { ins = fmt.Sprintf("lui %s, %#x\n", "x2", A_hi32_h20) 
-			                     real_instr.WriteString(ins)
-			                     ins = fmt.Sprintf("addi %s, %s, %#x\n", "x2", "x2", A_hi32_lo12)
-			                     real_instr.WriteString(ins)
-                        } else { ins = fmt.Sprintf("addi %s, x0, %#x\n", "x2",  A_hi32_lo12)
-			         real_instr.WriteString(ins) }
-			//shift to hi32
-			ins = fmt.Sprintf("slli %s, %s, %#x\n", "x2", "x2", 32)
-			real_instr.WriteString(ins)
-
-                        //combination hi32:x2 and lo32:rd to rd as 64 bit A:
-			ins = fmt.Sprintf("add %s, %s, %s\n", code[1], "x2", code[1])
-			real_instr.WriteString(ins)
-			// lui addi slli add
 
 		case "j": // PC尾跳转 j offset|jump to pc+offset
 			//if len(code) != 2 && len(code) != 3 {
