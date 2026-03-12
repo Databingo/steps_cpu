@@ -1,6 +1,7 @@
 bash test.sh
 file relocatable.elf
 riscv64-unknown-elf-objdump  -d  relocatable.elf 
+riscv64-unknown-elf-objdump  -d --show-raw-insi relocatable.elf 
 riscv64-unknown-elf-objdump  -r  relocatable.elf 
 
 #exit
