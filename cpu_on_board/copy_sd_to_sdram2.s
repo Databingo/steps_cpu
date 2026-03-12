@@ -10,18 +10,18 @@
 .section .text
 .globl _start
 _start:
-    la x5, sbi 
+    la t6, sbi 
     jal print_string
 end:
     j end
 
 print_string:
-    li x1, 0x2004
+    li t1, 0x2004
 print:
-    lb x6, 0(x5)
-    beq x6, x0, stop_print
-    sb x6, 0(x1)
-    addi x5, x5, 1
+    lb t5, 0(t6)
+    beq t5, x0, stop_print
+    sb t5, 0(t1)
+    addi t6, t6, 1
     j print
 stop_print:
     ret
