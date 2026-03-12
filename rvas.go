@@ -908,8 +908,8 @@ func main() { //t6a7s11
 			//ins = fmt.Sprintf("addi %s, %s, %#x\n", code[1], "x0", 0) // for 0 or clean reg
 			//real_instr.WriteString(ins)
 			//if imm == 0xffffffffffffffff {
-			//	ins = fmt.Sprintf("addi %s, %s, %#x\n", code[1], "x0", 1) // for 0 or clean reg
-			//	real_instr.WriteString(ins)
+			//	//ins = fmt.Sprintf("addi %s, %s, %#x\n", code[1], "x0", 1) // for 0 or clean reg
+			//	//real_instr.WriteString(ins)
 			//	ins = fmt.Sprintf("xori %s, %s, -1\naddi %s, %s, 1\n", code[1], code[1], code[1], code[1])
 			//	real_instr.WriteString(ins)
 			//	continue
@@ -1015,7 +1015,7 @@ func main() { //t6a7s11
 			//real_instr.WriteString(ins)
 			//// lui addi slli add
 
-			/////////////////////////-- deploy 6 --------------------------------
+			///////////////////////-- deploy 6 --------------------------------
 			ins = fmt.Sprintf("addi %s, %s, %#x\n", code[1], "x0", 0) // for 0 or clean reg
 			real_instr.WriteString(ins)
 			if imm > 0 && imm < 0b100000000000 { // imm positive 11
