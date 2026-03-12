@@ -1,4 +1,4 @@
-go run ../rvasbk.go isr.s
+go run ../rvas.go isr.s
 cat bin.txt > rom.mif  # write ROM program
 
 
@@ -42,8 +42,8 @@ cat bin.txt > rom.mif  # write ROM program
 #go run ../rvas.go PLIC.s # sdram write/read ok
 #go run ../rvas.go fake_opensbi.s
 #go run ../rvas.go copy_sd_to_sdram.s
-go run ../rvasbk.go test_string.s
-#go run ../rvas.go copy_sd_to_sdram2.s
+#go run ../rvas.go test_string.s
+go run ../rvas.go copy_sd_to_sdram2.s
 
 
 

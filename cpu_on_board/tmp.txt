@@ -1,17 +1,25 @@
 _start:
-#     li x1, 0x2004
-lui x1, 0x2
-addi x1, x1, 0x4
-#     la x5, msg
-auipc x5, 0 # R_RISCV_PCREL_HI20 msg 
-addi x5, x5, 0 # R_RISCV_PCREL_LO12_I msg 
-addi x2, x5, 5
-print_string:
-lb x6, 0(x5)
-sb x6, 0(x1)
-addi x5, x5, 1
-bne x5, x2, print_string
+#     la x5, sbi
+auipc x5, 0 # R_RISCV_PCREL_HI20 sbi 
+addi x5, x5, 0 # R_RISCV_PCREL_LO12_I sbi 
+#     j print_string
+jal x0, print_string
 end:
 #     j end
 jal x0, end
+print_string:
+#     li x1, 0x2004
+lui x1, 0x2
+addi x1, x1, 0x4
+print:
+lb x6, 0(x5)
+beq x6, x0, stop_print
+sb x6, 0(x1)
+addi x5, x5, 1
+#     j print
+jal x0, print
+stop_print:
+#     ret
+jalr x0, 0(x1)
 msg:
+sbi:

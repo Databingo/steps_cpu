@@ -10,9 +10,11 @@
 .section .text
 .globl _start
 _start:
-
-
     la x5, sbi
+    j print_string
+end:
+    j end
+
 print_string:
     li x1, 0x2004
 print:
@@ -20,7 +22,7 @@ print:
     beq x6, x0, stop_print
     sb x6, 0(x1)
     addi x5, x5, 1
-    j print_string
+    j print
 stop_print:
     ret
 
