@@ -1018,13 +1018,13 @@ func main() { //t6a7s11
 			/////////////////////////-- deploy 6 --------------------------------
 			ins = fmt.Sprintf("addi %s, %s, %#x\n", code[1], "x0", 0) // for 0 or clean reg
 			real_instr.WriteString(ins)
-			if imm > 0 && imm < 0b100000000000 {
+			if imm > 0 && imm < 0b100000000000 { // imm positive 11
 				real_instr.WriteString(ins)
 				ins = fmt.Sprintf("addi %s, %s, %#x\n", code[1], "x0", imm)
 				real_instr.WriteString(ins)
 			}
-			if imm >= 0b100000000000 && imm < 0b10000000000000000000000000000000 {
-                            h20 := imm >> 12 + 1
+			if imm >= 0b100000000000 && imm < 0b10000000000000000000000000000000 { // lui positive 31 & addi negative
+                            h20 := imm >> 12 + 1 // lui+addi_negative fix
 			    l12 := imm & 0xfff
                             ins = fmt.Sprintf("lui %s, %#x\n", code[1], h20) 
 			    real_instr.WriteString(ins)
@@ -1032,18 +1032,18 @@ func main() { //t6a7s11
 			    real_instr.WriteString(ins)
 			}
 			if imm >= 0b10000000000000000000000000000000 && imm < 0xffffffffffffffff {
-			    // 高 20 位
+			    // 高 20 位 (high 32 sign extend will be left moved out)
 			    h20 := imm >> 44 & 0xfffff
 			    if h20 != 0 {
 			    	ins = fmt.Sprintf("lui %s, %#x\n", code[1], h20)
 			    	real_instr.WriteString(ins)
-			    	ins = fmt.Sprintf("srli %s, %s, %#x\n", code[1], code[1], 1) // righ shift to concat with 11 to 12
+			    	ins = fmt.Sprintf("srli %s, %s, %#x\n", code[1], code[1], 1) // righ shift to prepare next 11 bits
 			    	real_instr.WriteString(ins)
 			    }
-			    // 次 11 位
+			    // 次 11 位  //TODO could be 20+12 patten for save srli 1 
 			    c11 := imm >> 33 & 0x7ff
 			    if c11 != 0 {
-			    	ins = fmt.Sprintf("ori %s, %s, %#x\n", code[1], code[1], c11)
+			    	ins = fmt.Sprintf("ori %s, %s, %#x\n", code[1], code[1], c11) // pad to low 11
 			    	real_instr.WriteString(ins)
 			    }
 			    // 中 11 位
