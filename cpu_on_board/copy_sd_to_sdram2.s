@@ -12,7 +12,7 @@
 _start:
 
 
-    la x5, msg
+    la x5, sbi
 print_string:
     li x1, 0x2004
 print:

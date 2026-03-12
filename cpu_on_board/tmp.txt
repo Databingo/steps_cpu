@@ -1,7 +1,7 @@
 _start:
-#     la x5, msg
-auipc x5, 0 # R_RISCV_PCREL_HI20 msg 
-addi x5, x5, 0 # R_RISCV_PCREL_LO12_I msg 
+#     la x5, sbi
+auipc x5, 0 # R_RISCV_PCREL_HI20 sbi 
+addi x5, x5, 0 # R_RISCV_PCREL_LO12_I sbi 
 print_string:
 #     li x1, 0x2004
 addi x1, x0, 0x0
