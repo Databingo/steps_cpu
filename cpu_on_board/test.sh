@@ -42,7 +42,13 @@ cat bin.txt > rom.mif  # write ROM program
 #go run ../rvas.go PLIC.s # sdram write/read ok
 #go run ../rvas.go fake_opensbi.s
 #go run ../rvas.go copy_sd_to_sdram.s
-go run ../rvas.go test_string.s
+#go run ../rvas.go test_string.s
+#go run ../rvas.go copy_sd_to_sdram2.s
+
+
+
+
+
 riscv64-unknown-elf-ld -o linked.elf   relocatable.elf  -Ttext 0x0 -Tdata 0x600  # linker
 riscv64-unknown-elf-objcopy -O binary linked.elf final.bin  # to binary
 hexdump -v -e '1/4 "%08x" "\n"' final.bin | perl -ne 'print unpack("B32", pack("N", hex($_))) . "\n"' > bin.txt 
