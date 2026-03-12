@@ -1,9 +1,9 @@
 _start:
-#     la x5, msg 
-auipc x5, 0 # R_RISCV_PCREL_HI20 msg 
-addi x5, x5, 0 # R_RISCV_PCREL_LO12_I msg 
-#     j print_string
-jal x0, print_string
+#     la x5, sbi 
+auipc x5, 0 # R_RISCV_PCREL_HI20 sbi 
+addi x5, x5, 0 # R_RISCV_PCREL_LO12_I sbi 
+#     jal print_string
+jal x1, print_string
 end:
 #     j end
 jal x0, end
