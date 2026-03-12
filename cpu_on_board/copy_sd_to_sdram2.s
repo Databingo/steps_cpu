@@ -10,7 +10,7 @@
 .section .text
 .globl _start
 _start:
-    la x5, sbi
+    la x5, msg 
     j print_string
 end:
     j end
