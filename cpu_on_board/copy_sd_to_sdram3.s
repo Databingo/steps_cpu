@@ -207,7 +207,6 @@ print:
 stop_fun_print:
     ret
 
-
 .section .data
 msg:
     .string "Hello"
