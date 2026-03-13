@@ -283,3 +283,5 @@ set_instance_assignment -name FAST_OUTPUT_ENABLE_REGISTER ON -to DRAM_DQ[*]
 #set_global_assignment -name PARALLEL_FITTING ON      # Keep fitting parallel if needed (usually safe)
 #set_global_assignment -name PARALLEL_TIMING_ANALYSIS OFF  # Disable parallel timing if issues persist
 #
+set_global_assignment -name UPDATE_MODE ON  
+#
