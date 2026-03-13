@@ -15,6 +15,8 @@ echo "Project: $PROJECT_NAME"
 echo "========================================="
 echo ""
 
+bash roam.sh
+
 ## update mif
 quartus_cdb --read_settings_files=on --update_mif ${PROJECT_NAME} -c ${PROJECT_NAME}
 ## Step 3: Assembler (quartus_asm) to SoF
