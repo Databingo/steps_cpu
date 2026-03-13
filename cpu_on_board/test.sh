@@ -56,7 +56,6 @@ hexdump -v -e '1/4 "%08x" "\n"' final.bin | perl -ne 'print unpack("B32", pack("
 
 
 
-
  
 #go run ../rvas.go SD_spi.s # 
 #go run ../rvas.go load.s #
