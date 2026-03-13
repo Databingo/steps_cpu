@@ -211,7 +211,7 @@ stop_fun_print:
 msg:
     .string "Hello"
 sbi:
-    .string "I'm test Opensbi"
+    .string "I'm test Opensbi add soft update"
 wait_sd_ready:
     .string "wait_sd_ready:"
 read_sd_sector:
