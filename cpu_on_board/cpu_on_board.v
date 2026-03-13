@@ -94,11 +94,8 @@ assign DRAM_CKE = 1; // always enable
     //(* ram_style = "block" *) reg [31:0] Cache [0:1024]; // 4KB fix overflow of print sd content  
     //(* ram_style = "block", preserve = 1 *) reg [31:0] Cache [0:1024]; // 4KB fix overflow of print sd content  
     //(* ram_style = "block" *) reg [31:0] Cache [0:383]; // 1.5KB
- (* ramstyle = "M4K", ram_init_file = "rom.mif" *)
-reg [31:0] ROM [0:511];
-
-(* ramstyle = "M4K", ram_init_file = "ram.mif" *)
-reg [31:0] RAM [0:511];     
+ (* ramstyle = "M4K", ram_init_file = "roam.mif" *)
+reg [31:0] Cache [0:1023];
       
       
     integer i;
@@ -149,14 +146,7 @@ reg [31:0] RAM [0:511];
     reg [31:0] ir_bd;
     //wire bubble;
     // IR_LD BRAM Port A read
-    //always @(posedge clock_slow) begin ir_bd <= Cache[ppc>>2]; end
-always @(posedge clock_slow) begin
-    if (ppc < `Ram_base)
-        ir_bd <= ROM[ppc>>2];
-    else
-        ir_bd <= RAM[(ppc-`Ram_base)>>2];
-end
-
+    always @(posedge clock_slow) begin ir_bd <= Cache[ppc>>2]; end
 
 
     wire [31:0] ir_ld; assign ir_ld = ir_bd;//{ir_bd[7:0], ir_bd[15:8], ir_bd[23:16], ir_bd[31:24]}; // Endianness swap // SWAP IN REAL
