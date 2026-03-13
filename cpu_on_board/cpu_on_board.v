@@ -94,8 +94,8 @@ assign DRAM_CKE = 1; // always enable
     //(* ram_style = "block" *) reg [31:0] Cache [0:1024]; // 4KB fix overflow of print sd content  
     //(* ram_style = "block", preserve = 1 *) reg [31:0] Cache [0:1024]; // 4KB fix overflow of print sd content  
     //(* ram_style = "block" *) reg [31:0] Cache [0:383]; // 1.5KB
- (* ramstyle = "M4K", ram_init_file = "roam.mif" *)
-reg [31:0] Cache [0:1023];
+    (* ramstyle = "M4K", ram_init_file = "roam.mif" *) 
+    reg [31:0] Cache [0:1023];  // 4KB
       
       
     integer i;
