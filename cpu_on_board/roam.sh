@@ -7,18 +7,18 @@
 LINES_ROM=$(wc -l < rom.mif)
 PAD_ROM=$((512 - LINES_ROM))
 
-cat rom.mif > roam.mif
+cat rom.mif > roam.txt
 if [ $PAD_ROM -gt 0 ]; then
-    yes '00000000000000000000000000000000' | head -n $PAD_ROM >> roam.mif
+    yes '00000000000000000000000000000000' | head -n $PAD_ROM >> roam.txt
 fi
 
 # 2. Ensure ram.mif has exactly 512 lines (pad with zeros if needed)
 LINES_RAM=$(wc -l < ram.mif)
 PAD_RAM=$((512 - LINES_RAM))
 
-cat ram.mif >> roam.mif
+cat ram.mif >> roam.txt
 if [ $PAD_RAM -gt 0 ]; then
-    yes '00000000000000000000000000000000' | head -n $PAD_RAM >> roam.mif
+    yes '00000000000000000000000000000000' | head -n $PAD_RAM >> roam.txt
 fi
 
-echo "Created roam.mif (1024 lines)."
+echo "Created roam.txt (1024 lines)."
