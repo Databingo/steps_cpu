@@ -33,3 +33,5 @@ echo ""
 echo "========================================="
 echo "Programming Update Successful!"
 echo "========================================="
+
+bash monitor.sh
