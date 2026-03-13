@@ -1,4 +1,9 @@
 _start:
+#     la a0, sbi  
+auipc a0, 0 # R_RISCV_PCREL_HI20 sbi 
+addi a0, a0, 0 # R_RISCV_PCREL_LO12_I sbi 
+#     jal fun_print_string
+jal x1, fun_print_string
 lui t0, 0x2
 addi t0, t0, 4       # UART = 0x2004
 #     li t1, 0x58          
@@ -188,3 +193,21 @@ addi t4, x0, 0
 addi t5, x0, 0
 # ret
 jalr x0, 0(x1)
+fun_print_string:
+#     li t1, 0x2004
+lui t1, 0x2
+addi t1, t1, 0x4
+print:
+lb a1, 0(a0)
+beq a1, x0, stop_fun_print
+sb a1, 0(t1)
+addi a0, a0, 1
+#     j print
+jal x0, print
+stop_fun_print:
+#     ret
+jalr x0, 0(x1)
+msg:
+sbi:
+wait_sd_ready:
+read_sd_sector:

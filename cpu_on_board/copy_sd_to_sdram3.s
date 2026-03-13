@@ -10,6 +10,8 @@
 .section .text
 .globl _start
 _start:
+    la a0, sbi  # a0 for print addr
+    jal fun_print_string
 
 # fake_opensbi  ------------------
     lui t0, 0x2
@@ -192,3 +194,26 @@ addi t4, x0, 0
 addi t5, x0, 0
 ret
 
+
+# functions ------
+fun_print_string:
+    li t1, 0x2004
+print:
+    lb a1, 0(a0)
+    beq a1, x0, stop_fun_print
+    sb a1, 0(t1)
+    addi a0, a0, 1
+    j print
+stop_fun_print:
+    ret
+
+
+.section .data
+msg:
+    .string "Hello"
+sbi:
+    .string "I'm test Opensbi"
+wait_sd_ready:
+    .string "wait_sd_ready:"
+read_sd_sector:
+    .string "read_sd_sector:"
