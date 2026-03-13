@@ -125,6 +125,6 @@ sbi:
     .string "I'm test Opensbi"
 
 wait_sd_ready:
-    .string "wait_sd_ready\n"
+    .string "wait_sd_ready\r\n"
 read_sd_sector:
-    .string "read_sd_sector\n"
+    .string "read_sd_sector\r\n"
