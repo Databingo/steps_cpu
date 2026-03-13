@@ -16,7 +16,7 @@ echo "========================================="
 echo ""
 
 # update mif
-quartus_cdb --update_mif $(PROJECT_NAME) -c ${PROJECT_NAME}
+quartus_cdb --update_mif ${PROJECT_NAME} -c ${PROJECT_NAME}
 # Step 3: Assembler (quartus_asm) to SoF
 echo "[3/3] Running Assembler..."
 quartus_asm --read_settings_files=off --write_settings_files=off ${PROJECT_NAME} -c ${PROJECT_NAME}
