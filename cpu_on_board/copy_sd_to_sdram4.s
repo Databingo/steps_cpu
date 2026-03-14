@@ -73,7 +73,7 @@ slli t3, t3, 8
 or t2, t2, t3
 mv a2, t2    # a2 = reserved_sectors offset 0x0e-0x0f 2 bytes (including root sector 0)
 
-#call print_hex_b
+call print_hex_b
 
 li a2, 126       # ~
 call putchar
@@ -97,7 +97,9 @@ j print_hhex
 letterh:
 addi t3, t3, 55     # 10 is "A" ascii 65 ..
 print_hhex:
+mv t0, ra
 call wait_uart
+mv ra, t0
 sw t3, 0(a0)
 
 andi t4, t2, 0x0F      # get low nibble
@@ -108,7 +110,9 @@ j print_lhex
 letterl:
 addi t4, t4, 55        # 10 is "A" ascii 65 ..
 print_lhex:
+mv t0, ra
 call wait_uart
+mv ra, t0
 sw t4, 0(a0)
 ret
 

@@ -81,6 +81,9 @@ slli t3, t3, 8
 or t2, t2, t3
 # mv a2, t2    
 addi a2, t2, 0
+# call print_hex_b
+auipc x1, 0 # R_RISCV_PCREL_HI20 print_hex_b
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_hex_b
 # li a2, 126       
 # li a2, 126       
 addi a2, x0, 0x7e
@@ -101,9 +104,13 @@ jal x0, print_hhex
 letterh:
 addi t3, t3, 55     # 10 is "A" ascii 65 ..
 print_hhex:
+# mv t0, ra
+addi t0, ra, 0
 # call wait_uart
 auipc x1, 0 # R_RISCV_PCREL_HI20 wait_uart
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I wait_uart
+# mv ra, t0
+addi ra, t0, 0
 sw t3, 0(a0)
 andi t4, t2, 0x0F      # get low nibble
 slti t5, t4, 10     # if < 10 number
@@ -114,9 +121,13 @@ jal x0, print_lhex
 letterl:
 addi t4, t4, 55        # 10 is "A" ascii 65 ..
 print_lhex:
+# mv t0, ra
+addi t0, ra, 0
 # call wait_uart
 auipc x1, 0 # R_RISCV_PCREL_HI20 wait_uart
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I wait_uart
+# mv ra, t0
+addi ra, t0, 0
 sw t4, 0(a0)
 # ret
 jalr x0, 0(x1)
