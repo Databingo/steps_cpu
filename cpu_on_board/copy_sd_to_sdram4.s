@@ -85,7 +85,9 @@ li a2, 126       # ~
 call putchar
 
 la t0, reserved_sec
-lbu t2, 0x0f(s1)
+lw t2, 0(t0)
+call print_hex_b
+lbu t2, 0x0e(s1)
 sw t2, 0(t0)
 lw t2, 0(t0)
 call print_hex_b

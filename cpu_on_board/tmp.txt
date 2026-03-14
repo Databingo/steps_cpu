@@ -89,7 +89,11 @@ jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I putchar
 # la t0, reserved_sec
 auipc t0, 0 # R_RISCV_PCREL_HI20 reserved_sec 
 addi t0, t0, 0 # R_RISCV_PCREL_LO12_I reserved_sec 
-lbu t2, 0x0f(s1)
+lw t2, 0(t0)
+# call print_hex_b
+auipc x1, 0 # R_RISCV_PCREL_HI20 print_hex_b
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_hex_b
+lbu t2, 0x0e(s1)
 sw t2, 0(t0)
 lw t2, 0(t0)
 # call print_hex_b

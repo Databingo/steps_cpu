@@ -560,6 +560,32 @@ func main() { //t6a7s11
 				fmt.Println("Error: Label not found for .string", str_data)
 				os.Exit(1) }
 			}
+			if directive == ".word" {
+			    fmt.Println("Directive:", directive, "||Suf_directive:", suf_directive)
+			    fmt.Println("check label_in + check strtab + edit symtab")
+			    //fmt.Println("strtab:", strtab)
+
+			    integer, _ := strconv.ParseUint(suf_directive, 0, 32)
+			    buf := make([]byte, 4)
+			    binary.LittleEndian.PutUint32(buf, uint32(integer))
+
+    		            sym_index, exist := sym_idx_map[label_in+"\x00"]
+			    if exist {
+			    fmt.Println("label_in-:", label_in, sym_index)
+			    fmt.Println("sym_e:", symtab_[sym_index])
+			    //pad8 :=  align_x(buf, 8)
+	                    symtab_[sym_index].Info = ( symtab_[sym_index].Info & 0xF0 | STT_OBJECT  ) //# uint8 // H4:binding and L4:type
+	                    symtab_[sym_index].Shndx = uint16(slices.Index(shstrtab, section_in))//4 //uint16 // section index the symbol in (.text)
+	                    symtab_[sym_index].Value = uint64(len(data)) //# uint64  for relocatable .o file it's symbol's offset in its section
+	                    symtab_[sym_index].Size = 4  //
+
+			    //sym + str + data
+                            //data = append(data, pad8...)
+                            data = append(data, buf...)
+	                    } else {
+				fmt.Println("Error: Label not found for .word", integer)
+				os.Exit(1) }
+			}
 
 		} else if strings.HasSuffix(switchOnOp, ":") {
 			label_in = strings.TrimSuffix(code[0], ":")
