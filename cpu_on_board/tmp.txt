@@ -2,7 +2,7 @@ msg:
 sbi:
 wait_sd_ready:
 read_sd_sector:
-pt_sector:
+prt_sector:
 _start:
 #     li a0 0x2004 
 lui a0, 0x2
@@ -49,14 +49,15 @@ jal x1, sd_read_sector
 # li t1, 124       
 addi t1, x0, 0x7c
 sb t1, 0(a0)     # print
-# la a1, pt_sector
-auipc a1, 0 # R_RISCV_PCREL_HI20 pt_sector 
-addi a1, a1, 0 # R_RISCV_PCREL_LO12_I pt_sector 
+# la a1, prt_sector
+auipc a1, 0 # R_RISCV_PCREL_HI20 prt_sector 
+addi a1, a1, 0 # R_RISCV_PCREL_LO12_I prt_sector 
 # call fun_print
 auipc x1, 0 # R_RISCV_PCREL_HI20 fun_print
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I fun_print
-# jal print_sector
-jal x1, print_sector
+# call print_sector
+auipc x1, 0 # R_RISCV_PCREL_HI20 print_sector
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_sector
 end:
 #     j end
 jal x0, end

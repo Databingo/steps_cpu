@@ -19,8 +19,8 @@ wait_sd_ready:
     .string "wait_sd_ready:"
 read_sd_sector:
     .string "read_sd_sector:"
-pt_sector:
-    .string "pt_sector:"
+prt_sector:
+    .string "prt_sector:"
 
 # -- Start program main function _start --
 .section .text
@@ -51,9 +51,9 @@ jal sd_read_sector  # use a2 as sector no.
 li t1, 124       # |
 sb t1, 0(a0)     # print
 
-la a1, pt_sector
+la a1, prt_sector
 call fun_print
-jal print_sector
+call print_sector
 
 
 end:
