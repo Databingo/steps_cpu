@@ -251,6 +251,6 @@ stop_fun_print:
 
 wait_uart:
     lw a6, 0(a7)
-    srli a5, a5, 16   # 31:16 WSPACE = 0 fully
-    beq a5, x0, wait_uart
+    srli a6, a6, 16   # 31:16 WSPACE = 0 fully
+    beq a6, x0, wait_uart
     ret
