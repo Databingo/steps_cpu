@@ -9,9 +9,16 @@
 
 .section .text
 .globl _start
+
+# -- Global setup --
 _start:
     la a0, sbi  # a0 for print addr
-    jal fun_print_string
+    #jal fun_print_string
+    call fun_print_string
+
+    
+
+
 
 # fake_opensbi  ------------------
     lui t0, 0x2

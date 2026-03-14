@@ -2,8 +2,9 @@ _start:
 #     la a0, sbi  
 auipc a0, 0 # R_RISCV_PCREL_HI20 sbi 
 addi a0, a0, 0 # R_RISCV_PCREL_LO12_I sbi 
-#     jal fun_print_string
-jal x1, fun_print_string
+#     call fun_print_string
+auipc x1, 0 # R_RISCV_PCREL_HI20 fun_print_string
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I fun_print_string
 lui t0, 0x2
 addi t0, t0, 4       # UART = 0x2004
 #     li t1, 0x58          
