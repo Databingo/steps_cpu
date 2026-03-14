@@ -61,18 +61,22 @@ call putchar
 
 # -- Parse BPB -- little-endian  Bios Parameter Block : sector 0
 # reserved_sectors offset 0x0e-0x0f 2 bytes (including root sector 0)
-addi t1, s1, 0x0E
-lw t2, 0(t1)
-andi t2, t2, 0xff
+#addi t1, s1, 0x0E
+#lw t2, 0(t1)
+#andi t2, t2, 0xff
+#
+#addi t1, s1, 0x0F 
+#lw t3, 0(t1)
+#andi t3, t3, 0xff
+#
+#slli t3, t3, 8
+#or t2, t2, t3
+#mv a2, t2    # a2 = reserved_sectors offset 0x0e-0x0f 2 bytes (including root sector 0)
 
-addi t1, s1, 0x0F 
-lw t3, 0(t1)
-andi t3, t3, 0xff
-
+lbu t2, 0x0e(s1)
+lbu t3, 0x0f(s1)
 slli t3, t3, 8
-or t2, t2, t3
-mv a2, t2    # a2 = reserved_sectors offset 0x0e-0x0f 2 bytes (including root sector 0)
-
+or t2,t2, t3
 call print_hex_b
 
 li a2, 126       # ~
