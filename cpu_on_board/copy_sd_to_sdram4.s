@@ -58,7 +58,7 @@ call print_sector
 li t1, 43       # +
 sb t1, 0(a0)     # print
 
-li t1, 43       # +
+li t1, 45       # -
 sb t1, 0(a0)     # print
 
 #end:
