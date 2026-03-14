@@ -38,21 +38,21 @@ _start:
 
     # print
     la a1, sbi 
-    call fun_print_string
+    call fun_print
 
 # ---------------------- SD card -------------------
 
 # -- Read Boot Sector 0 -- 
-la a1, read_sd_sector
-call fun_print_string
-li a2, 0
-jal sd_read_sector
+la a1, read_sd_sector 
+call fun_print
+li a2, 0   
+jal sd_read_sector  # use a2 as sector no.
 
 li t1, 124       # |
 sb t1, 0(a0)     # print
 
 la a1, pt_sector
-call fun_print_string
+call fun_print
 jal print_sector
 
 
@@ -237,11 +237,11 @@ ret
 
 
 # functions ------
-fun_print_string:
+fun_print:
 print:
     lb t0, 0(a1)
     beq t0, x0, stop_fun_print # \x00 for end of string
-    sb t0, 0(s0)
+    sb t0, 0(a0)
     addi a1, a1, 1 # next byte
     j print
 stop_fun_print:
