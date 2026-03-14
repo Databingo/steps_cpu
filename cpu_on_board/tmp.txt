@@ -71,7 +71,7 @@ addi a2, x0, 0x2d
 # call putchar
 auipc x1, 0 # R_RISCV_PCREL_HI20 putchar
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I putchar
-lbu t3, 0x0f(s1)
+lbu t2, 0x0f(s1)
 # call print_hex_b
 auipc x1, 0 # R_RISCV_PCREL_HI20 print_hex_b
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_hex_b
