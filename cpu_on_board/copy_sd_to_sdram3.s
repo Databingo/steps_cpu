@@ -107,7 +107,71 @@ jal print_sector
 li t1, 124       # |
 sb t1, 0(t0)     # print
 
-# -- Parse BPB -- little-endian
+
+
+#end:
+#    j end
+
+# -- Parse BPB -- little-endian  Bios Parameter Block : sector 0
+# reserved_sectors offset 0x0e-0x0f 2 bytes (including root sector 0)
+addi t1, s1, 0x0E
+lw t2, 0(t1)
+andi t2, t2, 0xff
+
+addi t1, s1, 0x0F 
+lw t3, 0(t1)
+andi t3, t3, 0xff
+
+slli t3, t3, 8
+or t2, t2, t3
+mv a2, t2    # a2 = reserved_sectors offset 0x0e-0x0f 2 bytes (including root sector 0)
+
+mv t2, a2
+call print_hex_b
+
+end:
+    j end
+
+
+
+
+
+# print_hex_b(t2)
+print_hex_b:
+andi t2, t2, 0xFF   # Isolate byte value
+
+srli t3, t2, 4      # get high nibble
+slti t5, t3, 10     # if < 10 number
+beq t5, x0, letterh
+addi t3, t3, 48     # 0 is "0" ascii 48
+j print_hhex
+letterh:
+addi t3, t3, 55     # 10 is "A" ascii 65 ..
+print_hhex:
+sw t3, 0(t0)
+
+andi t4, t2, 0x0F      # get low nibble
+slti t5, t4, 10     # if < 10 number
+beq t5, x0, letterl
+addi t4, t4, 48     # 0 is "0" ascii 48
+j print_lhex
+letterl:
+addi t4, t4, 55        # 10 is "A" ascii 65 ..
+print_lhex:
+sw t4, 0(t0)
+
+# clean middle re
+addi t3, x0, 0
+addi t4, x0, 0
+addi t5, x0, 0
+ret
+
+
+
+
+
+
+# --------------------  --------------------  --------------------
 
 
 # ---  sd_read_sector ---

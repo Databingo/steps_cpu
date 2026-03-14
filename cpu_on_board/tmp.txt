@@ -106,6 +106,51 @@ jal x1, print_sector
 # li t1, 124       
 addi t1, x0, 0x7c
 sb t1, 0(t0)     # print
+addi t1, s1, 0x0E
+lw t2, 0(t1)
+andi t2, t2, 0xff
+addi t1, s1, 0x0F 
+lw t3, 0(t1)
+andi t3, t3, 0xff
+slli t3, t3, 8
+or t2, t2, t3
+# mv a2, t2    
+addi a2, t2, 0
+# mv t2, a2
+addi t2, a2, 0
+# call print_hex_b
+auipc x1, 0 # R_RISCV_PCREL_HI20 print_hex_b
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_hex_b
+end:
+#     j end
+jal x0, end
+print_hex_b:
+andi t2, t2, 0xFF   # Isolate byte value
+srli t3, t2, 4      # get high nibble
+slti t5, t3, 10     # if < 10 number
+beq t5, x0, letterh
+addi t3, t3, 48     # 0 is "0" ascii 48
+# j print_hhex
+jal x0, print_hhex
+letterh:
+addi t3, t3, 55     # 10 is "A" ascii 65 ..
+print_hhex:
+sw t3, 0(t0)
+andi t4, t2, 0x0F      # get low nibble
+slti t5, t4, 10     # if < 10 number
+beq t5, x0, letterl
+addi t4, t4, 48     # 0 is "0" ascii 48
+# j print_lhex
+jal x0, print_lhex
+letterl:
+addi t4, t4, 55        # 10 is "A" ascii 65 ..
+print_lhex:
+sw t4, 0(t0)
+addi t3, x0, 0
+addi t4, x0, 0
+addi t5, x0, 0
+# ret
+jalr x0, 0(x1)
 sd_read_sector:
 sw a2, 0x200(a1) # Write Sector index value to address 0x3200
 # li t1, 1
