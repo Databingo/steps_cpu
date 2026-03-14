@@ -58,17 +58,18 @@ jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I puts
 # call print_sector
 auipc x1, 0 # R_RISCV_PCREL_HI20 print_sector
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_sector
-# li t1, 43       
-# li t1, 43       
-addi t1, x0, 0x2b
-sb t1, 0(a0)     # print
-# call wait_uart
-auipc x1, 0 # R_RISCV_PCREL_HI20 wait_uart
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I wait_uart
-# li t1, 45       
-# li t1, 45       
-addi t1, x0, 0x2d
-sb t1, 0(a0)     # print
+# li a2, 43       
+# li a2, 43       
+addi a2, x0, 0x2b
+# call putchar
+auipc x1, 0 # R_RISCV_PCREL_HI20 putchar
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I putchar
+# li a2, 45       
+# li a2, 45       
+addi a2, x0, 0x2d
+# call putchar
+auipc x1, 0 # R_RISCV_PCREL_HI20 putchar
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I putchar
 addi t1, s1, 0x0E
 lw t2, 0(t1)
 andi t2, t2, 0xff
@@ -124,9 +125,9 @@ lw t2, 0(s5)   # 0x3220 ready
 #     li a2, 96      
 #     li a2, 96      
 addi a2, x0, 0x60
-#     call purtchar
-auipc x1, 0 # R_RISCV_PCREL_HI20 purtchar
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I purtchar
+#     call putchar
+auipc x1, 0 # R_RISCV_PCREL_HI20 putchar
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I putchar
 beq t2, x0, wait_ready
 #     li t1, 1
 #     li t1, 1
@@ -195,6 +196,13 @@ addi t1, x0, 0
 addi t2, x0, 0
 # ret
 jalr x0, 0(x1)
+putchar:
+lw t2, 0(a7)
+srli t2, t2, 16   # 31:16 WSPACE = 0 fully
+beq t2, x0, putchar
+sb a2, 0(a0)
+#    ret
+jalr x0, 0(x1)
 puts:
 lb a2, 0(a1)
 beq a2, x0, stop_puts # \x00 for end of string
@@ -212,11 +220,4 @@ lw a6, 0(a7)
 srli a6, a6, 16   # 31:16 WSPACE = 0 fully
 beq a6, x0, wait_uart
 #     ret
-jalr x0, 0(x1)
-putchar:
-lw t2, 0(a7)
-srli t2, t2, 16   # 31:16 WSPACE = 0 fully
-beq t2, x0, putchar
-sb a2, 0(a0)
-#    ret
 jalr x0, 0(x1)

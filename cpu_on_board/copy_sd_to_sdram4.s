@@ -53,11 +53,10 @@ la a1, prt_sector
 call puts
 call print_sector
 
-li t1, 43       # +
-sb t1, 0(a0)     # print
-call wait_uart
-li t1, 45       # -
-sb t1, 0(a0)     # print
+li a2, 43       # +
+call putchar
+li a2, 45       # -
+call putchar
 
 #end:
 #    j end
@@ -129,7 +128,7 @@ sd_read_sector:  #  a2 sector index
 wait_ready:
     lw t2, 0(s5)   # 0x3220 ready
     li a2, 96      # `
-    call purtchar
+    call putchar
     beq t2, x0, wait_ready
 
     li t1, 1
@@ -205,6 +204,15 @@ ret
 
 
 # functions ------
+
+putchar:  # a2
+   lw t2, 0(a7)
+   srli t2, t2, 16   # 31:16 WSPACE = 0 fully
+   beq t2, x0, putchar
+   sb a2, 0(a0)
+   ret
+
+
 puts: # a1
     lb a2, 0(a1)
     beq a2, x0, stop_puts # \x00 for end of string
@@ -220,9 +228,3 @@ wait_uart:
     beq a6, x0, wait_uart
     ret
 
-putchar:  # a2
-   lw t2, 0(a7)
-   srli t2, t2, 16   # 31:16 WSPACE = 0 fully
-   beq t2, x0, putchar
-   sb a2, 0(a0)
-   ret
