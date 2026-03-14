@@ -49,14 +49,6 @@ jal x1, sd_read_sector
 # li t1, 124       
 addi t1, x0, 0x7c
 sb t1, 0(a0)     # print
-# li t1, 43       
-# li t1, 43       
-addi t1, x0, 0x2b
-sb t1, 0(a0)     # print
-# li t1, 43       
-# li t1, 43       
-addi t1, x0, 0x2b
-sb t1, 0(a0)     # print
 # la a1, prt_sector
 auipc a1, 0 # R_RISCV_PCREL_HI20 prt_sector 
 addi a1, a1, 0 # R_RISCV_PCREL_LO12_I prt_sector 
@@ -134,10 +126,6 @@ sw t1, 0(s3) # Trigger read at 0x3204
 wait_cache:
 lw t2, 0(s6)    # t2 0x3228 cache_avaible
 beq t2, x0, wait_cache
-# li t1, 124       
-# li t1, 124       
-addi t1, x0, 0x7c
-sb t1, 0(a0)     # print
 # ret
 jalr x0, 0(x1)
 print_sector:
@@ -181,9 +169,6 @@ srli t5, t5, 16
 beq t5, x0, wait_uart_tx_l
 sw t4, 0(a0)
 bge t6, t1, print_loop
-# call wait_uart
-auipc x1, 0 # R_RISCV_PCREL_HI20 wait_uart
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I wait_uart
 # ret
 jalr x0, 0(x1)
 print_bin_f:

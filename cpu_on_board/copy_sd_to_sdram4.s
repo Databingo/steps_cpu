@@ -51,13 +51,6 @@ jal sd_read_sector  # use a2 as sector no.
 li t1, 124       # |
 sb t1, 0(a0)     # print
 
-li t1, 43       # +
-sb t1, 0(a0)     # print
-
-li t1, 43       # +
-sb t1, 0(a0)     # print
-
-
 la a1, prt_sector
 call fun_print
 call print_sector
@@ -147,9 +140,6 @@ sw t1, 0(s3) # Trigger read at 0x3204
 wait_cache:
 lw t2, 0(s6)    # t2 0x3228 cache_avaible
 beq t2, x0, wait_cache
-
-li t1, 124       # |
-sb t1, 0(a0)     # print
 ret
 
 
@@ -194,8 +184,6 @@ beq t5, x0, wait_uart_tx_l
 
 sw t4, 0(a0)
 bge t6, t1, print_loop
-
-call wait_uart
 ret
 # -- end print_sector --
 
