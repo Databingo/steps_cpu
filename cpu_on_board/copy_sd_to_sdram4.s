@@ -129,8 +129,8 @@ sd_read_sector: #  a2 sector index
 sw a2, 0(s2) # Write Sector index value to address 0x3200
 wait_ready:
 lw t2, 0(s5)    # 0x3220 ready
-li t1, 96      # `
-sb t1, 0(a0)   # print
+#li t1, 96      # `
+#sb t1, 0(a0)   # print
 beq t2, x0, wait_ready
 
 li t1, 1
