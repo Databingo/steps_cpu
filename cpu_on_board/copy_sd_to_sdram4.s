@@ -51,6 +51,13 @@ jal sd_read_sector  # use a2 as sector no.
 li t1, 124       # |
 sb t1, 0(a0)     # print
 
+li t1, 43       # +
+sb t1, 0(a0)     # print
+
+li t1, 43       # +
+sb t1, 0(a0)     # print
+
+
 la a1, prt_sector
 call fun_print
 call print_sector
