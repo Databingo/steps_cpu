@@ -185,6 +185,8 @@ beq t5, x0, wait_uart_tx_l
 
 sw t4, 0(a0)
 bge t6, t1, print_loop
+
+call wait_uart
 ret
 # -- end print_sector --
 
@@ -250,3 +252,8 @@ print:
 stop_fun_print:
     ret
 
+wait_uart:
+    lw a6, 0(a7)
+    srli a5, a5, 16   # 31:16 WSPACE = 0 fully
+    beq a5, x0, wait_uart
+    ret
