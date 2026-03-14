@@ -84,13 +84,12 @@ addi t2, a2, 0
 # call print_hex_b
 auipc x1, 0 # R_RISCV_PCREL_HI20 print_hex_b
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_hex_b
-# call wait_uart
-auipc x1, 0 # R_RISCV_PCREL_HI20 wait_uart
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I wait_uart
-# li t1, 126       
-# li t1, 126       
-addi t1, x0, 0x7e
-sb t1, 0(a0)     # print
+# li a1, 126       
+# li a1, 126       
+addi a1, x0, 0x7e
+# call uart_print
+auipc x1, 0 # R_RISCV_PCREL_HI20 uart_print
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I uart_print
 end:
 #     j end
 jal x0, end
@@ -206,4 +205,18 @@ lw a6, 0(a7)
 srli a6, a6, 16   # 31:16 WSPACE = 0 fully
 beq a6, x0, wait_uart
 #     ret
+jalr x0, 0(x1)
+uart_print:
+#    li t0, 0x2004
+lui t0, 0x2
+addi t0, t0, 0x4
+#    li t1, 0x2008
+lui t1, 0x2
+addi t1, t1, 0x8
+wait_uart_:
+lw t2, 0(t1)
+srli t2, t2, 16   # 31:16 WSPACE = 0 fully
+beq t2, x0, wait_uart_
+sb a1, 0(t0)
+#    ret
 jalr x0, 0(x1)

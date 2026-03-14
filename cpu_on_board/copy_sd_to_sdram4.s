@@ -81,9 +81,8 @@ mv a2, t2    # a2 = reserved_sectors offset 0x0e-0x0f 2 bytes (including root se
 mv t2, a2
 call print_hex_b
 
-call wait_uart
-li t1, 126       # ~
-sb t1, 0(a0)     # print
+li a1, 126       # ~
+call uart_print
 
 end:
     j end
@@ -254,3 +253,14 @@ wait_uart:
     srli a6, a6, 16   # 31:16 WSPACE = 0 fully
     beq a6, x0, wait_uart
     ret
+
+
+uart_print:
+   li t0, 0x2004
+   li t1, 0x2008
+wait_uart_:
+   lw t2, 0(t1)
+   srli t2, t2, 16   # 31:16 WSPACE = 0 fully
+   beq t2, x0, wait_uart_
+   sb a1, 0(t0)
+   ret
