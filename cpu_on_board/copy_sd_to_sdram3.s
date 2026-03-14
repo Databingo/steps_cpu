@@ -7,18 +7,20 @@
 #`define Sdc_avail 32'h0000_3228
 # UART 0x2004
 
+.globl _start
+# -- Define data --
 .section .data
 msg:
     .string "Hello"
 sbi:
-    .string "I'm test Opensbi add update ram read=on0"
+    .string "I'm test Opensbi add update ram read=on1"
 wait_sd_ready:
     .string "wait_sd_ready:"
 read_sd_sector:
     .string "read_sd_sector:"
 
+# -- Start program main function _start --
 .section .text
-.globl _start
 
 # -- Global setup --
 _start:
