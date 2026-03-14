@@ -44,7 +44,7 @@ _start:
 la a1, read_sd_sector 
 call puts
 li a2, 0   
-jal sd_read_sector  # use a2 as sector no.
+call sd_read_sector  # use a2 as sector no.
 
 li t1, 124       # |
 sb t1, 0(a0)     # print
@@ -128,7 +128,9 @@ sd_read_sector:  #  a2 sector index
 wait_ready:
     lw t2, 0(s5)   # 0x3220 ready
     li a2, 96      # `
+    mv t0, ra
     call putchar
+    mv ra, t0
     beq t2, x0, wait_ready
 
     li t1, 1
