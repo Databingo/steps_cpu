@@ -8,6 +8,7 @@
 # UART 0x2004
 
 .globl _start
+
 # -- Define data --
 .section .data
 msg:
@@ -21,13 +22,19 @@ read_sd_sector:
 
 # -- Start program main function _start --
 .section .text
-
 # -- Global setup --
 _start:
-    #  a0 for print addr
-    li s0 0x2004 # UART print 
+    #  a1 for print symbol addr
+    li a0 0x2004 # UART print 
 
-    la a0, sbi  # a0 for print addr
+    li s0 0x3000 # SD base
+    li s1 0x3200 # SD address
+    li s2 0x3204 # SD trigger read
+    li s3 0x3208 # SD trigger write
+    li s4 0x3220 # SD ready for rd/wr
+    li s5 0x3228 # SD cache available
+
+    la a1, sbi  # a0 for print addr
     #jal fun_print_string
     call fun_print_string
 
@@ -219,12 +226,11 @@ ret
 
 # functions ------
 fun_print_string:
-    li t1, 0x2004
 print:
-    lb a1, 0(a0)
+    lb a1, 0(a1)
     beq a1, x0, stop_fun_print
-    sb a1, 0(t1)
-    addi a0, a0, 1
+    sb a1, 0(a0)
+    addi a1, a1, 1
     j print
 stop_fun_print:
     ret
