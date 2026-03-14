@@ -1,114 +1,133 @@
+msg:
+sbi:
+wait_sd_ready:
+read_sd_sector:
+pt_sector:
 _start:
-#     la a0, sbi  
-auipc a0, 0 # R_RISCV_PCREL_HI20 sbi 
-addi a0, a0, 0 # R_RISCV_PCREL_LO12_I sbi 
-#     jal fun_print_string
-jal x1, fun_print_string
-lui t0, 0x2
-addi t0, t0, 4       # UART = 0x2004
-#     li t1, 0x58          
-#     li t1, 0x58          
-addi t1, x0, 0x58
-sb t1, 0(t0)         # test
-#     li t1, 0x49    
-#     li t1, 0x49    
-addi t1, x0, 0x49
-sb t1, 0(t0)    
-#     li t1, 0x20    
-#     li t1, 0x20    
-addi t1, x0, 0x20
-sb t1, 0(t0)   
-#     li t1, 0x61    
-#     li t1, 0x61    
-addi t1, x0, 0x61
-sb t1, 0(t0)   
-#     li t1, 0x6d    
-#     li t1, 0x6d    
-addi t1, x0, 0x6d
-sb t1, 0(t0)   
-#     li t1, 0x20    
-#     li t1, 0x20    
-addi t1, x0, 0x20
-sb t1, 0(t0)   
-#     li t1, 0x6f    
-#     li t1, 0x6f    
-addi t1, x0, 0x6f
-sb t1, 0(t0)   
-#     li t1, 0x70    
-#     li t1, 0x70    
-addi t1, x0, 0x70
-sb t1, 0(t0)   
-#     li t1, 0x65    
-#     li t1, 0x65    
-addi t1, x0, 0x65
-sb t1, 0(t0)   
-#     li t1, 0x6e    
-#     li t1, 0x6e    
-addi t1, x0, 0x6e
-sb t1, 0(t0)   
-#     li t1, 0x73    
-#     li t1, 0x73    
-addi t1, x0, 0x73
-sb t1, 0(t0)   
-#     li t1, 0x62    
-#     li t1, 0x62    
-addi t1, x0, 0x62
-sb t1, 0(t0)   
-#     li t1, 0x69    
-#     li t1, 0x69    
-addi t1, x0, 0x69
-sb t1, 0(t0)   
-lui t0, 0x2
-addi t0, t0, 4      # t0 = 0x2004
-lui a1, 0x3         # a1 = 0x3000 base
-# li t1, 65        
-# li t1, 65        
-addi t1, x0, 0x41
-sb t1, 0(t0)     # print
-sd_ready:
-lw a2, 0x220(a1)    # a2 0x3220 ready
-# li t1, 0x60        
-# li t1, 0x60        
-addi t1, x0, 0x60
-sb t1, 0(t0)     # print
-beq a2, x0, sd_ready
+#     li a0 0x2004 
+lui a0, 0x2
+addi a0, a0, 0x4
+#     li a7 0x2008 
+lui a7, 0x2
+addi a7, a7, 0x8
+#     li s1 0x3000 
+lui s1, 0x3
+addi s1, s1, 0x0
+#     li s2 0x3200 
+lui s2, 0x3
+addi s2, s2, 0x200
+#     li s3 0x3204 
+lui s3, 0x3
+addi s3, s3, 0x204
+#     li s4 0x3208 
+lui s4, 0x3
+addi s4, s4, 0x208
+#     li s5 0x3220 
+lui s5, 0x3
+addi s5, s5, 0x220
+#     li s6 0x3228 
+lui s6, 0x3
+addi s6, s6, 0x228
+#     la a1, sbi 
+auipc a1, 0 # R_RISCV_PCREL_HI20 sbi 
+addi a1, a1, 0 # R_RISCV_PCREL_LO12_I sbi 
+#     call fun_print_string
+auipc x1, 0 # R_RISCV_PCREL_HI20 fun_print_string
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I fun_print_string
+# la a1, read_sd_sector
+auipc a1, 0 # R_RISCV_PCREL_HI20 read_sd_sector 
+addi a1, a1, 0 # R_RISCV_PCREL_LO12_I read_sd_sector 
+# call fun_print_string
+auipc x1, 0 # R_RISCV_PCREL_HI20 fun_print_string
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I fun_print_string
 # li a2, 0
 # li a2, 0
 addi a2, x0, 0x0
 # jal sd_read_sector
 jal x1, sd_read_sector
-# li t1, 65        
-# li t1, 65        
-addi t1, x0, 0x41
-sw t1, 0(t0)     # print
-# jal print_sector
-jal x1, print_sector
 # li t1, 124       
 # li t1, 124       
 addi t1, x0, 0x7c
-sb t1, 0(t0)     # print
+sb t1, 0(a0)     # print
+# la a1, pt_sector
+auipc a1, 0 # R_RISCV_PCREL_HI20 pt_sector 
+addi a1, a1, 0 # R_RISCV_PCREL_LO12_I pt_sector 
+# call fun_print_string
+auipc x1, 0 # R_RISCV_PCREL_HI20 fun_print_string
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I fun_print_string
+# jal print_sector
+jal x1, print_sector
+end:
+#     j end
+jal x0, end
+addi t1, s1, 0x0E
+lw t2, 0(t1)
+andi t2, t2, 0xff
+addi t1, s1, 0x0F 
+lw t3, 0(t1)
+andi t3, t3, 0xff
+slli t3, t3, 8
+or t2, t2, t3
+# mv a2, t2    
+addi a2, t2, 0
+# mv t2, a2
+addi t2, a2, 0
+# call print_hex_b
+auipc x1, 0 # R_RISCV_PCREL_HI20 print_hex_b
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_hex_b
+# li t1, 126       
+# li t1, 126       
+addi t1, x0, 0x7e
+sb t1, 0(s0)     # print
+end:
+#     j end
+jal x0, end
+print_hex_b:
+andi t2, t2, 0xFF   # Isolate byte value
+srli t3, t2, 4      # get high nibble
+slti t5, t3, 10     # if < 10 number
+beq t5, x0, letterh
+addi t3, t3, 48     # 0 is "0" ascii 48
+# j print_hhex
+jal x0, print_hhex
+letterh:
+addi t3, t3, 55     # 10 is "A" ascii 65 ..
+print_hhex:
+sw t3, 0(a0)
+andi t4, t2, 0x0F      # get low nibble
+slti t5, t4, 10     # if < 10 number
+beq t5, x0, letterl
+addi t4, t4, 48     # 0 is "0" ascii 48
+# j print_lhex
+jal x0, print_lhex
+letterl:
+addi t4, t4, 55        # 10 is "A" ascii 65 ..
+print_lhex:
+sw t4, 0(a0)
+addi t3, x0, 0
+addi t4, x0, 0
+addi t5, x0, 0
+# ret
+jalr x0, 0(x1)
 sd_read_sector:
-sw a2, 0x200(a1) # Write Sector index value to address 0x3200
+sw a2, 0(s2) # Write Sector index value to address 0x3200
 # li t1, 1
 # li t1, 1
 addi t1, x0, 0x1
-sw t1, 0x204(a1) # Trigger read at 0x3204
+sw t1, 0(s3) # Trigger read at 0x3204
 wait_ready:
-lw t2, 0x220(a1)    # t2 0x3220 ready
+lw t2, 0(s5)    # 0x3220 ready
 beq t2, x0, wait_ready
 wait_cache:
-lw t2, 0x228(a1)    # t2 0x3228 cache_avaible
+lw t2, 0(s6)    # t2 0x3228 cache_avaible
 beq t2, x0, wait_cache
-# li t1, 70        
-# li t1, 70        
-addi t1, x0, 0x46
-sw t1, 0(t0)     # print
+# li t1, 124       
+# li t1, 124       
+addi t1, x0, 0x7c
+sb t1, 0(s0)     # print
 # ret
 jalr x0, 0(x1)
 print_sector:
-# li a5, 0x2008 
-lui a5, 0x2
-addi a5, a5, 0x8
 # li t1, 0   
 # li t1, 0   
 addi t1, x0, 0x0
@@ -116,7 +135,7 @@ addi t1, x0, 0x0
 # li t6, 511 
 addi t6, x0, 0x1ff
 print_loop:
-add a4, a1, t1 
+add a4, s1, t1 
 addi t1, t1, 1
 lb t2, 0(a4)           # load byte at 0x3000 a1+t1
 andi t2, t2, 0xFF   # Isolate byte value
@@ -130,10 +149,10 @@ letter_h:
 addi t3, t3, 55     # 10 is "A" ascii 65 ..
 print_h_hex:
 wait_uart_tx_h:
-lw t5, 0(a5)
+lw t5, 0(a7)
 srli t5, t5, 16   # 31:16 WSPACE = 0 full
 beq t5, x0, wait_uart_tx_h
-sw t3, 0(t0)
+sw t3, 0(a0)
 andi t4, t2, 0x0F      # get low nibble
 slti t5, t4, 10     # if < 10 number
 beq t5, x0, letter_l
@@ -144,10 +163,10 @@ letter_l:
 addi t4, t4, 55        # 10 is "A" ascii 65 ..
 print_l_hex:
 wait_uart_tx_l:
-lw t5, 0(a5)
+lw t5, 0(a7)
 srli t5, t5, 16
 beq t5, x0, wait_uart_tx_l
-sw t4, 0(t0)
+sw t4, 0(a0)
 bge t6, t1, print_loop
 # ret
 jalr x0, 0(x1)
@@ -160,7 +179,7 @@ addi t1, t1, -1
 srl t2, a0, t1
 andi t2, t2, 1
 addi t2, t2, 48  # 0 to "0"
-sw t2, 0(t0)     # print
+sw t2, 0(a0)     # print
 bne t1, x0, print_binf_loop
 addi t1, x0, 0
 addi t2, x0, 0
@@ -177,7 +196,7 @@ jal x0, print_hhex
 letterh:
 addi t3, t3, 55     # 10 is "A" ascii 65 ..
 print_hhex:
-sw t3, 0(t0)
+sw t3, 0(a0)
 andi t4, t2, 0x0F      # get low nibble
 slti t5, t4, 10     # if < 10 number
 beq t5, x0, letterl
@@ -187,27 +206,20 @@ jal x0, print_lhex
 letterl:
 addi t4, t4, 55        # 10 is "A" ascii 65 ..
 print_lhex:
-sw t4, 0(t0)
+sw t4, 0(a0)
 addi t3, x0, 0
 addi t4, x0, 0
 addi t5, x0, 0
 # ret
 jalr x0, 0(x1)
 fun_print_string:
-#     li t1, 0x2004
-lui t1, 0x2
-addi t1, t1, 0x4
 print:
-lb a1, 0(a0)
-beq a1, x0, stop_fun_print
-sb a1, 0(t1)
-addi a0, a0, 1
+lb a0, 0(a1)
+beq a0, x0, stop_fun_print # \x00 for end of string
+sb a0, 0(s0)
+addi a1, a1, 1 # next byte
 #     j print
 jal x0, print
 stop_fun_print:
 #     ret
 jalr x0, 0(x1)
-msg:
-sbi:
-wait_sd_ready:
-read_sd_sector:

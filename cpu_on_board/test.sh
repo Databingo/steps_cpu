@@ -44,7 +44,8 @@ cat bin.txt > rom.mif  # write ROM program
 #go run ../rvas.go copy_sd_to_sdram.s
 #go run ../rvas.go test_string.s
 #go run ../rvas.go copy_sd_to_sdram2.s
-go run ../rvas.go copy_sd_to_sdram3.s
+#go run ../rvas.go copy_sd_to_sdram3.s
+go run ../rvas.go copy_sd_to_sdram4.s
 
 
 

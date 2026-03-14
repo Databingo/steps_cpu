@@ -26,7 +26,8 @@ pt_sector:
 .section .text
 # -- Global setup --
 _start:
-    li s0 0x2004 # UART print # a1 for print symbol addr
+    li a0 0x2004 # UART print # a1 for print symbol addr
+    li a7 0x2008 # UART controller
 
     li s1 0x3000 # SD base
     li s2 0x3200 # SD address
@@ -48,7 +49,7 @@ li a2, 0
 jal sd_read_sector
 
 li t1, 124       # |
-sb t1, 0(s0)     # print
+sb t1, 0(a0)     # print
 
 la a1, pt_sector
 call fun_print_string
@@ -97,7 +98,7 @@ j print_hhex
 letterh:
 addi t3, t3, 55     # 10 is "A" ascii 65 ..
 print_hhex:
-sw t3, 0(t0)
+sw t3, 0(a0)
 
 andi t4, t2, 0x0F      # get low nibble
 slti t5, t4, 10     # if < 10 number
@@ -107,7 +108,7 @@ j print_lhex
 letterl:
 addi t4, t4, 55        # 10 is "A" ascii 65 ..
 print_lhex:
-sw t4, 0(t0)
+sw t4, 0(a0)
 
 # clean middle re
 addi t3, x0, 0
@@ -143,14 +144,11 @@ ret
 
 # print sector 0 512 bytes
 print_sector:
-li t0, 0x2004
-li a5, 0x2008 # uart control
 li t1, 0   # byte index
 li t6, 511 # max byte index
 print_loop:
-add a4, a1, t1 
+add a4, s1, t1 
 addi t1, t1, 1
-#lw t2, 0(a4)           # load byte at 0x3000 a1+t1
 lb t2, 0(a4)           # load byte at 0x3000 a1+t1
 andi t2, t2, 0xFF   # Isolate byte value
 srli t3, t2, 4      # get high nibble
@@ -163,11 +161,11 @@ addi t3, t3, 55     # 10 is "A" ascii 65 ..
 print_h_hex:
 
 wait_uart_tx_h:
-lw t5, 0(a5)
+lw t5, 0(a7)
 srli t5, t5, 16   # 31:16 WSPACE = 0 full
 beq t5, x0, wait_uart_tx_h
 
-sw t3, 0(t0)
+sw t3, 0(a0)
 andi t4, t2, 0x0F      # get low nibble
 slti t5, t4, 10     # if < 10 number
 beq t5, x0, letter_l
@@ -178,17 +176,19 @@ addi t4, t4, 55        # 10 is "A" ascii 65 ..
 print_l_hex:
 
 wait_uart_tx_l:
-lw t5, 0(a5)
+lw t5, 0(a7)
 srli t5, t5, 16
 beq t5, x0, wait_uart_tx_l
 
-sw t4, 0(t0)
+sw t4, 0(a0)
 bge t6, t1, print_loop
 ret
 # -- end print_sector --
 
 
-# funciton print_bin(a0) print 8 bits of a0 at t0 UART
+
+
+# funciton print_bin(a0) print 8 bits of a0 at a0 UART
 print_bin_f:
 li t1, 8 # number of bits
 print_binf_loop:
@@ -196,7 +196,7 @@ addi t1, t1, -1
 srl t2, a0, t1
 andi t2, t2, 1
 addi t2, t2, 48  # 0 to "0"
-sw t2, 0(t0)     # print
+sw t2, 0(a0)     # print
 bne t1, x0, print_binf_loop
 # clean middle re
 addi t1, x0, 0
@@ -217,7 +217,7 @@ j print_hhex
 letterh:
 addi t3, t3, 55     # 10 is "A" ascii 65 ..
 print_hhex:
-sw t3, 0(t0)
+sw t3, 0(a0)
 
 andi t4, t2, 0x0F      # get low nibble
 slti t5, t4, 10     # if < 10 number
@@ -227,7 +227,7 @@ j print_lhex
 letterl:
 addi t4, t4, 55        # 10 is "A" ascii 65 ..
 print_lhex:
-sw t4, 0(t0)
+sw t4, 0(a0)
 
 # clean middle re
 addi t3, x0, 0
@@ -239,9 +239,9 @@ ret
 # functions ------
 fun_print_string:
 print:
-    lb t0, 0(a1)
-    beq t0, x0, stop_fun_print # \x00 for end of string
-    sb t0, 0(s0)
+    lb a0, 0(a1)
+    beq a0, x0, stop_fun_print # \x00 for end of string
+    sb a0, 0(s0)
     addi a1, a1, 1 # next byte
     j print
 stop_fun_print:
