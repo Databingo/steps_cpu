@@ -365,3 +365,19 @@ SDRAM 8MB PSC A2V64S40CTP-G7 IS42S16400.pdf
 
 
 取值周期和执行周期(执行包括分析和执行，以及各种中断检查,线性秩序)
+
+
+Assembly grammar:
+[label:	]
+instrucion operand, operand
+.directive argument, argument
+
+
+.equ
+.ascii
+.word
+.dword
+.include
+.byte
+.align
+.macro .endm
