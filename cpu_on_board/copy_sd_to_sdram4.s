@@ -216,7 +216,9 @@ putchar:  # a2
 puts: # a1
     lb a2, 0(a1)
     beq a2, x0, stop_puts # \x00 for end of string
+    mv t0, ra
     call putchar
+    mv ra, t0
     addi a1, a1, 1 # next byte
     j puts
 stop_puts:
