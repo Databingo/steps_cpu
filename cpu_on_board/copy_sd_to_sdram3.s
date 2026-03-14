@@ -33,8 +33,8 @@ _start:
     li s5 0x3220 # SD ready for rd/wr
     li s6 0x3228 # SD cache available
 
-    la a0, sbi  # a0 for print symbol addr
-    #jal fun_print_string
+    # print
+    la a0, sbi 
     call fun_print_string
 
     
