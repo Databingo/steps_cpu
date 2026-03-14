@@ -207,35 +207,35 @@ ret
 
 
 
-# print_hex_b(t2)
-print_hex_b:
-andi t2, t2, 0xFF   # Isolate byte value
-
-srli t3, t2, 4      # get high nibble
-slti t5, t3, 10     # if < 10 number
-beq t5, x0, letterh
-addi t3, t3, 48     # 0 is "0" ascii 48
-j print_hhex
-letterh:
-addi t3, t3, 55     # 10 is "A" ascii 65 ..
-print_hhex:
-sw t3, 0(a0)
-
-andi t4, t2, 0x0F      # get low nibble
-slti t5, t4, 10     # if < 10 number
-beq t5, x0, letterl
-addi t4, t4, 48     # 0 is "0" ascii 48
-j print_lhex
-letterl:
-addi t4, t4, 55        # 10 is "A" ascii 65 ..
-print_lhex:
-sw t4, 0(a0)
-
-# clean middle re
-addi t3, x0, 0
-addi t4, x0, 0
-addi t5, x0, 0
-ret
+## print_hex_b(t2)
+#print_hex_b:
+#andi t2, t2, 0xFF   # Isolate byte value
+#
+#srli t3, t2, 4      # get high nibble
+#slti t5, t3, 10     # if < 10 number
+#beq t5, x0, letterh
+#addi t3, t3, 48     # 0 is "0" ascii 48
+#j print_hhex
+#letterh:
+#addi t3, t3, 55     # 10 is "A" ascii 65 ..
+#print_hhex:
+#sw t3, 0(a0)
+#
+#andi t4, t2, 0x0F      # get low nibble
+#slti t5, t4, 10     # if < 10 number
+#beq t5, x0, letterl
+#addi t4, t4, 48     # 0 is "0" ascii 48
+#j print_lhex
+#letterl:
+#addi t4, t4, 55        # 10 is "A" ascii 65 ..
+#print_lhex:
+#sw t4, 0(a0)
+#
+## clean middle re
+#addi t3, x0, 0
+#addi t4, x0, 0
+#addi t5, x0, 0
+#ret
 
 
 # functions ------
