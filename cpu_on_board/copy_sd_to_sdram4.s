@@ -20,7 +20,7 @@ wait_sd_ready:
 read_sd_sector:
     .string "read_sd_sector:"
 prt_sector:
-    .string "prt_sector:"
+    .string "print_sector:"
 
 # -- Start program main function _start --
 .section .text
@@ -38,13 +38,13 @@ _start:
 
     # print
     la a1, sbi 
-    call fun_print
+    call puts
 
 # ---------------------- SD card -------------------
 
 # -- Read Boot Sector 0 -- 
 la a1, read_sd_sector 
-call fun_print
+call puts
 li a2, 0   
 jal sd_read_sector  # use a2 as sector no.
 
@@ -52,7 +52,7 @@ li t1, 124       # |
 sb t1, 0(a0)     # print
 
 la a1, prt_sector
-call fun_print
+call puts
 call print_sector
 
 li t1, 43       # +
@@ -82,7 +82,7 @@ mv t2, a2
 call print_hex_b
 
 li a1, 126       # ~
-call uart_print
+call putchar
 
 end:
     j end
@@ -206,46 +206,14 @@ ret
 
 
 
-## print_hex_b(t2)
-#print_hex_b:
-#andi t2, t2, 0xFF   # Isolate byte value
-#
-#srli t3, t2, 4      # get high nibble
-#slti t5, t3, 10     # if < 10 number
-#beq t5, x0, letterh
-#addi t3, t3, 48     # 0 is "0" ascii 48
-#j print_hhex
-#letterh:
-#addi t3, t3, 55     # 10 is "A" ascii 65 ..
-#print_hhex:
-#sw t3, 0(a0)
-#
-#andi t4, t2, 0x0F      # get low nibble
-#slti t5, t4, 10     # if < 10 number
-#beq t5, x0, letterl
-#addi t4, t4, 48     # 0 is "0" ascii 48
-#j print_lhex
-#letterl:
-#addi t4, t4, 55        # 10 is "A" ascii 65 ..
-#print_lhex:
-#sw t4, 0(a0)
-#
-## clean middle re
-#addi t3, x0, 0
-#addi t4, x0, 0
-#addi t5, x0, 0
-#ret
-
-
 # functions ------
-fun_print:
-print:
-    lb t0, 0(a1)
-    beq t0, x0, stop_fun_print # \x00 for end of string
-    sb t0, 0(a0)
+puts: # a1
+    lb a2, 0(a1)
+    beq a2, x0, stop_puts # \x00 for end of string
+    call putchar
     addi a1, a1, 1 # next byte
-    j print
-stop_fun_print:
+    j puts
+stop_puts:
     ret
 
 wait_uart:
@@ -254,9 +222,9 @@ wait_uart:
     beq a6, x0, wait_uart
     ret
 
-uart_print:
+putchar:  # a2
    lw t2, 0(a7)
    srli t2, t2, 16   # 31:16 WSPACE = 0 fully
-   beq t2, x0, uart_print
-   sb a1, 0(a0)
+   beq t2, x0, putchar
+   sb a2, 0(a0)
    ret

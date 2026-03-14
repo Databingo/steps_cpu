@@ -31,15 +31,15 @@ addi s6, s6, 0x228
 #     la a1, sbi 
 auipc a1, 0 # R_RISCV_PCREL_HI20 sbi 
 addi a1, a1, 0 # R_RISCV_PCREL_LO12_I sbi 
-#     call fun_print
-auipc x1, 0 # R_RISCV_PCREL_HI20 fun_print
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I fun_print
+#     call puts
+auipc x1, 0 # R_RISCV_PCREL_HI20 puts
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I puts
 # la a1, read_sd_sector 
 auipc a1, 0 # R_RISCV_PCREL_HI20 read_sd_sector 
 addi a1, a1, 0 # R_RISCV_PCREL_LO12_I read_sd_sector 
-# call fun_print
-auipc x1, 0 # R_RISCV_PCREL_HI20 fun_print
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I fun_print
+# call puts
+auipc x1, 0 # R_RISCV_PCREL_HI20 puts
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I puts
 # li a2, 0   
 # li a2, 0   
 addi a2, x0, 0x0
@@ -52,9 +52,9 @@ sb t1, 0(a0)     # print
 # la a1, prt_sector
 auipc a1, 0 # R_RISCV_PCREL_HI20 prt_sector 
 addi a1, a1, 0 # R_RISCV_PCREL_LO12_I prt_sector 
-# call fun_print
-auipc x1, 0 # R_RISCV_PCREL_HI20 fun_print
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I fun_print
+# call puts
+auipc x1, 0 # R_RISCV_PCREL_HI20 puts
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I puts
 # call print_sector
 auipc x1, 0 # R_RISCV_PCREL_HI20 print_sector
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_sector
@@ -87,9 +87,9 @@ jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_hex_b
 # li a1, 126       
 # li a1, 126       
 addi a1, x0, 0x7e
-# call uart_print
-auipc x1, 0 # R_RISCV_PCREL_HI20 uart_print
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I uart_print
+# call putchar
+auipc x1, 0 # R_RISCV_PCREL_HI20 putchar
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I putchar
 end:
 #     j end
 jal x0, end
@@ -189,15 +189,16 @@ addi t1, x0, 0
 addi t2, x0, 0
 # ret
 jalr x0, 0(x1)
-fun_print:
-print:
-lb t0, 0(a1)
-beq t0, x0, stop_fun_print # \x00 for end of string
-sb t0, 0(a0)
+puts:
+lb a2, 0(a1)
+beq a2, x0, stop_puts # \x00 for end of string
+#     call putchar
+auipc x1, 0 # R_RISCV_PCREL_HI20 putchar
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I putchar
 addi a1, a1, 1 # next byte
-#     j print
-jal x0, print
-stop_fun_print:
+#     j puts
+jal x0, puts
+stop_puts:
 #     ret
 jalr x0, 0(x1)
 wait_uart:
@@ -206,10 +207,10 @@ srli a6, a6, 16   # 31:16 WSPACE = 0 fully
 beq a6, x0, wait_uart
 #     ret
 jalr x0, 0(x1)
-uart_print:
+putchar:
 lw t2, 0(a7)
 srli t2, t2, 16   # 31:16 WSPACE = 0 fully
-beq t2, x0, uart_print
-sb a1, 0(a0)
+beq t2, x0, putchar
+sb a2, 0(a0)
 #    ret
 jalr x0, 0(x1)
