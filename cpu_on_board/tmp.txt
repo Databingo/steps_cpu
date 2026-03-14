@@ -3,6 +3,7 @@ sbi:
 wait_sd_ready:
 read_sd_sector:
 prt_sector:
+reserved_sec:
 _start:
 #     li a0 0x2004 
 lui a0, 0x2

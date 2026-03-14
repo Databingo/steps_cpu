@@ -21,6 +21,8 @@ read_sd_sector:
     .string "read_sd_sector:"
 prt_sector:
     .string "print_sector:"
+reserved_sec:
+    .word 4
 
 # -- Start program main function _start --
 .section .text
