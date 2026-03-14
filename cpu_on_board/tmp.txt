@@ -84,6 +84,9 @@ addi t2, a2, 0
 # call print_hex_b
 auipc x1, 0 # R_RISCV_PCREL_HI20 print_hex_b
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_hex_b
+# call wait_uart
+auipc x1, 0 # R_RISCV_PCREL_HI20 wait_uart
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I wait_uart
 # li t1, 126       
 # li t1, 126       
 addi t1, x0, 0x7e
@@ -113,9 +116,6 @@ letterl:
 addi t4, t4, 55        # 10 is "A" ascii 65 ..
 print_lhex:
 sw t4, 0(a0)
-addi t3, x0, 0
-addi t4, x0, 0
-addi t5, x0, 0
 # ret
 jalr x0, 0(x1)
 sd_read_sector:

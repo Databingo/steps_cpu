@@ -81,6 +81,7 @@ mv a2, t2    # a2 = reserved_sectors offset 0x0e-0x0f 2 bytes (including root se
 mv t2, a2
 call print_hex_b
 
+call wait_uart
 li t1, 126       # ~
 sb t1, 0(a0)     # print
 
@@ -115,10 +116,6 @@ addi t4, t4, 55        # 10 is "A" ascii 65 ..
 print_lhex:
 sw t4, 0(a0)
 
-# clean middle re
-addi t3, x0, 0
-addi t4, x0, 0
-addi t5, x0, 0
 ret
 
 
