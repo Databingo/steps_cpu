@@ -82,7 +82,7 @@ mv t2, a2
 call print_hex_b
 
 li t1, 126       # ~
-sb t1, 0(s0)     # print
+sb t1, 0(a0)     # print
 
 end:
     j end

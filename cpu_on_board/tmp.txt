@@ -87,7 +87,7 @@ jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_hex_b
 # li t1, 126       
 # li t1, 126       
 addi t1, x0, 0x7e
-sb t1, 0(s0)     # print
+sb t1, 0(a0)     # print
 end:
 #     j end
 jal x0, end
