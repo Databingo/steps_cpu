@@ -24,7 +24,7 @@ addi s5, s5, 0x220
 #     li s6 0x3228 
 lui s6, 0x3
 addi s6, s6, 0x228
-#     la a0, sbi  
+#     la a0, sbi 
 auipc a0, 0 # R_RISCV_PCREL_HI20 sbi 
 addi a0, a0, 0 # R_RISCV_PCREL_LO12_I sbi 
 #     call fun_print_string
@@ -91,13 +91,6 @@ lui a1, 0x3         # a1 = 0x3000 base
 # li t1, 65        
 addi t1, x0, 0x41
 sb t1, 0(t0)     # print
-sd_ready:
-lw a2, 0x220(a1)    # a2 0x3220 ready
-# li t1, 0x60        
-# li t1, 0x60        
-addi t1, x0, 0x60
-sb t1, 0(t0)     # print
-beq a2, x0, sd_ready
 # li a2, 0
 # li a2, 0
 addi a2, x0, 0x0
