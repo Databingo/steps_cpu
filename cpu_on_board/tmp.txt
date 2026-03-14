@@ -3,30 +3,30 @@ sbi:
 wait_sd_ready:
 read_sd_sector:
 _start:
-#     li a0 0x2004 
-lui a0, 0x2
-addi a0, a0, 0x4
-#     li s0 0x3000 
-lui s0, 0x3
-addi s0, s0, 0x0
-#     li s1 0x3200 
+#     li s0 0x2004 
+lui s0, 0x2
+addi s0, s0, 0x4
+#     li s1 0x3000 
 lui s1, 0x3
-addi s1, s1, 0x200
-#     li s2 0x3204 
+addi s1, s1, 0x0
+#     li s2 0x3200 
 lui s2, 0x3
-addi s2, s2, 0x204
-#     li s3 0x3208 
+addi s2, s2, 0x200
+#     li s3 0x3204 
 lui s3, 0x3
-addi s3, s3, 0x208
-#     li s4 0x3220 
+addi s3, s3, 0x204
+#     li s4 0x3208 
 lui s4, 0x3
-addi s4, s4, 0x220
-#     li s5 0x3228 
+addi s4, s4, 0x208
+#     li s5 0x3220 
 lui s5, 0x3
-addi s5, s5, 0x228
-#     la a1, sbi  
-auipc a1, 0 # R_RISCV_PCREL_HI20 sbi 
-addi a1, a1, 0 # R_RISCV_PCREL_LO12_I sbi 
+addi s5, s5, 0x220
+#     li s6 0x3228 
+lui s6, 0x3
+addi s6, s6, 0x228
+#     la a0, sbi  
+auipc a0, 0 # R_RISCV_PCREL_HI20 sbi 
+addi a0, a0, 0 # R_RISCV_PCREL_LO12_I sbi 
 #     call fun_print_string
 auipc x1, 0 # R_RISCV_PCREL_HI20 fun_print_string
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I fun_print_string
@@ -220,14 +220,11 @@ addi t5, x0, 0
 # ret
 jalr x0, 0(x1)
 fun_print_string:
-#     li a0 0x2004 
-lui a0, 0x2
-addi a0, a0, 0x4
 print:
-lb a1, 0(a1)
-beq a1, x0, stop_fun_print
-sb a1, 0(a0)
-addi a1, a1, 1
+lb t0, 0(a0)
+beq t0, x0, stop_fun_print # \x00 for end of string
+sb t0, 0(s0)
+addi a0, a0, 1 # next byte
 #     j print
 jal x0, print
 stop_fun_print:

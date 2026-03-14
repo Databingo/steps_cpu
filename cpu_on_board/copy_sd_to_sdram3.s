@@ -24,17 +24,16 @@ read_sd_sector:
 .section .text
 # -- Global setup --
 _start:
-    #  a1 for print symbol addr
-    li a0 0x2004 # UART print 
+    li s0 0x2004 # UART print # a0 for print symbol addr
 
-    li s0 0x3000 # SD base
-    li s1 0x3200 # SD address
-    li s2 0x3204 # SD trigger read
-    li s3 0x3208 # SD trigger write
-    li s4 0x3220 # SD ready for rd/wr
-    li s5 0x3228 # SD cache available
+    li s1 0x3000 # SD base
+    li s2 0x3200 # SD address
+    li s3 0x3204 # SD trigger read
+    li s4 0x3208 # SD trigger write
+    li s5 0x3220 # SD ready for rd/wr
+    li s6 0x3228 # SD cache available
 
-    la a1, sbi  # a0 for print addr
+    la a0, sbi  # a0 for print symbol addr
     #jal fun_print_string
     call fun_print_string
 
@@ -226,12 +225,11 @@ ret
 
 # functions ------
 fun_print_string:
-    li a0 0x2004 # UART print 
 print:
-    lb a1, 0(a1)
-    beq a1, x0, stop_fun_print
-    sb a1, 0(a0)
-    addi a1, a1, 1
+    lb t0, 0(a0)
+    beq t0, x0, stop_fun_print # \x00 for end of string
+    sb t0, 0(s0)
+    addi a0, a0, 1 # next byte
     j print
 stop_fun_print:
     ret
