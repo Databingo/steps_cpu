@@ -62,9 +62,6 @@ jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_sector
 # li t1, 43       
 addi t1, x0, 0x2b
 sb t1, 0(a0)     # print
-end:
-#     j end
-jal x0, end
 addi t1, s1, 0x0E
 lw t2, 0(t1)
 andi t2, t2, 0xff
@@ -226,7 +223,7 @@ stop_fun_print:
 jalr x0, 0(x1)
 wait_uart:
 lw a6, 0(a7)
-srli a5, a5, 16   # 31:16 WSPACE = 0 fully
-beq a5, x0, wait_uart
+srli a6, a6, 16   # 31:16 WSPACE = 0 fully
+beq a6, x0, wait_uart
 #     ret
 jalr x0, 0(x1)

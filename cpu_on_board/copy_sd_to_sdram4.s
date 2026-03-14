@@ -58,8 +58,8 @@ call print_sector
 li t1, 43       # +
 sb t1, 0(a0)     # print
 
-end:
-    j end
+#end:
+#    j end
 
 # -- Parse BPB -- little-endian  Bios Parameter Block : sector 0
 # reserved_sectors offset 0x0e-0x0f 2 bytes (including root sector 0)
