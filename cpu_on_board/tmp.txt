@@ -62,6 +62,10 @@ jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_sector
 # li t1, 43       
 addi t1, x0, 0x2b
 sb t1, 0(a0)     # print
+# li t1, 43       
+# li t1, 43       
+addi t1, x0, 0x2b
+sb t1, 0(a0)     # print
 addi t1, s1, 0x0E
 lw t2, 0(t1)
 andi t2, t2, 0xff
