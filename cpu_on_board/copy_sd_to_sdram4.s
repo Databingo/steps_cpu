@@ -75,7 +75,7 @@ mv a2, t2    # a2 = reserved_sectors offset 0x0e-0x0f 2 bytes (including root se
 
 #call print_hex_b
 
-li a1, 126       # ~
+li a2, 126       # ~
 call putchar
 
 end:

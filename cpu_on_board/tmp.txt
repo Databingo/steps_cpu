@@ -81,9 +81,9 @@ slli t3, t3, 8
 or t2, t2, t3
 # mv a2, t2    
 addi a2, t2, 0
-# li a1, 126       
-# li a1, 126       
-addi a1, x0, 0x7e
+# li a2, 126       
+# li a2, 126       
+addi a2, x0, 0x7e
 # call putchar
 auipc x1, 0 # R_RISCV_PCREL_HI20 putchar
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I putchar
