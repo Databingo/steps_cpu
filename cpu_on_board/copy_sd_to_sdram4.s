@@ -7,106 +7,147 @@
 #`define Sdc_avail 32'h0000_3228
 # UART 0x2004
 
-.section .text
 .globl _start
+
+# -- Define data --
+.section .data
+msg:
+    .string "Hello"
+sbi:
+    .string "I'm test Opensbi add update ram read=on1"
+wait_sd_ready:
+    .string "wait_sd_ready:"
+read_sd_sector:
+    .string "read_sd_sector:"
+pt_sector:
+    .string "pt_sector:"
+
+# -- Start program main function _start --
+.section .text
+# -- Global setup --
 _start:
-    la a0, sbi  # a0 for print addr
-    jal fun_print_string
+    li s0 0x2004 # UART print # a1 for print symbol addr
 
-# fake_opensbi  ------------------
-    lui t0, 0x2
-    addi t0, t0, 4       # UART = 0x2004
-    
-    # Print one byte
-    li t1, 0x58          # 'X'
-    sb t1, 0(t0)         # test
-    
-    # Load 4 byte
-    li t1, 0x49    # I
-    sb t1, 0(t0)    
-    li t1, 0x20    # space
-    sb t1, 0(t0)   
-    li t1, 0x61    # a
-    sb t1, 0(t0)   
-    li t1, 0x6d    # m
-    sb t1, 0(t0)   
-    li t1, 0x20    # space
-    sb t1, 0(t0)   
-    li t1, 0x6f    # o
-    sb t1, 0(t0)   
-    li t1, 0x70    # p
-    sb t1, 0(t0)   
-    li t1, 0x65    # e
-    sb t1, 0(t0)   
-    li t1, 0x6e    # n
-    sb t1, 0(t0)   
-    li t1, 0x73    # s
-    sb t1, 0(t0)   
-    li t1, 0x62    # b
-    sb t1, 0(t0)   
-    li t1, 0x69    # i
-    sb t1, 0(t0)   
+    li s1 0x3000 # SD base
+    li s2 0x3200 # SD address
+    li s3 0x3204 # SD trigger read
+    li s4 0x3208 # SD trigger write
+    li s5 0x3220 # SD ready for rd/wr
+    li s6 0x3228 # SD cache available
 
+    # print
+    la a1, sbi 
+    call fun_print_string
 
 # ---------------------- SD card -------------------
 
-# UART base (for print_char)
-lui t0, 0x2
-addi t0, t0, 4      # t0 = 0x2004
-
-# SD controller base
-lui a1, 0x3         # a1 = 0x3000 base
-
-li t1, 65        # A
-sb t1, 0(t0)     # print
-# -- Wait SD ready
-sd_ready:
-lw a2, 0x220(a1)    # a2 0x3220 ready
-li t1, 0x60        # `
-sb t1, 0(t0)     # print
-beq a2, x0, sd_ready
-
 # -- Read Boot Sector 0 -- 
+la a1, read_sd_sector
+call fun_print_string
 li a2, 0
 jal sd_read_sector
 
-li t1, 65        # A
-sw t1, 0(t0)     # print
+li t1, 124       # |
+sb t1, 0(s0)     # print
 
+la a1, pt_sector
+call fun_print_string
 jal print_sector
 
-li t1, 124       # |
-sb t1, 0(t0)     # print
 
-# -- Parse BPB -- little-endian
+end:
+    j end
+
+# -- Parse BPB -- little-endian  Bios Parameter Block : sector 0
+# reserved_sectors offset 0x0e-0x0f 2 bytes (including root sector 0)
+addi t1, s1, 0x0E
+lw t2, 0(t1)
+andi t2, t2, 0xff
+
+addi t1, s1, 0x0F 
+lw t3, 0(t1)
+andi t3, t3, 0xff
+
+slli t3, t3, 8
+or t2, t2, t3
+mv a2, t2    # a2 = reserved_sectors offset 0x0e-0x0f 2 bytes (including root sector 0)
+
+mv t2, a2
+call print_hex_b
+
+li t1, 126       # ~
+sb t1, 0(s0)     # print
+
+end:
+    j end
+
+
+
+
+
+# print_hex_b(t2)
+print_hex_b:
+andi t2, t2, 0xFF   # Isolate byte value
+
+srli t3, t2, 4      # get high nibble
+slti t5, t3, 10     # if < 10 number
+beq t5, x0, letterh
+addi t3, t3, 48     # 0 is "0" ascii 48
+j print_hhex
+letterh:
+addi t3, t3, 55     # 10 is "A" ascii 65 ..
+print_hhex:
+sw t3, 0(t0)
+
+andi t4, t2, 0x0F      # get low nibble
+slti t5, t4, 10     # if < 10 number
+beq t5, x0, letterl
+addi t4, t4, 48     # 0 is "0" ascii 48
+j print_lhex
+letterl:
+addi t4, t4, 55        # 10 is "A" ascii 65 ..
+print_lhex:
+sw t4, 0(t0)
+
+# clean middle re
+addi t3, x0, 0
+addi t4, x0, 0
+addi t5, x0, 0
+ret
+
+
+
+
+
+
+# --------------------  --------------------  --------------------
 
 
 # ---  sd_read_sector ---
-sd_read_sector:
-sw a2, 0x200(a1) # Write Sector index value to address 0x3200
+sd_read_sector: #  a2 sector index
+sw a2, 0(s2) # Write Sector index value to address 0x3200
 li t1, 1
-sw t1, 0x204(a1) # Trigger read at 0x3204
+sw t1, 0(s3) # Trigger read at 0x3204
 wait_ready:
-lw t2, 0x220(a1)    # t2 0x3220 ready
+lw t2, 0(s5)    # 0x3220 ready
 beq t2, x0, wait_ready
 wait_cache:
-lw t2, 0x228(a1)    # t2 0x3228 cache_avaible
+lw t2, 0(s6)    # t2 0x3228 cache_avaible
 beq t2, x0, wait_cache
 
-li t1, 70        # F
-sw t1, 0(t0)     # print
+li t1, 124       # |
+sb t1, 0(s0)     # print
 ret
 
 
 
 # print sector 0 512 bytes
 print_sector:
+li t0, 0x2004
 li a5, 0x2008 # uart control
 li t1, 0   # byte index
 li t6, 511 # max byte index
 print_loop:
-#li a3, 32     # space 
-#sw a3, 0(t0)  # print start space per byte
 add a4, a1, t1 
 addi t1, t1, 1
 #lw t2, 0(a4)           # load byte at 0x3000 a1+t1
@@ -197,22 +238,12 @@ ret
 
 # functions ------
 fun_print_string:
-    li t1, 0x2004
 print:
-    lb a1, 0(a0)
-    beq a1, x0, stop_fun_print
-    sb a1, 0(t1)
-    addi a0, a0, 1
+    lb t0, 0(a1)
+    beq t0, x0, stop_fun_print # \x00 for end of string
+    sb t0, 0(s0)
+    addi a1, a1, 1 # next byte
     j print
 stop_fun_print:
     ret
 
-.section .data
-msg:
-    .string "Hello"
-sbi:
-    .string "I'm test Opensbi add update ram read=on3"
-wait_sd_ready:
-    .string "wait_sd_ready:"
-read_sd_sector:
-    .string "read_sd_sector:"
