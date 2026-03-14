@@ -73,6 +73,7 @@ call putchar
 #or t2, t2, t3
 #mv a2, t2    # a2 = reserved_sectors offset 0x0e-0x0f 2 bytes (including root sector 0)
 
+
 lbu t2, 0x0f(s1)
 call print_hex_b
 lbu t2, 0x0e(s1)
