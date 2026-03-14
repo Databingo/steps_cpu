@@ -19,8 +19,8 @@ wait_sd_ready:
     .string "wait_sd_ready:"
 read_sd_sector:
     .string "read_sd_sector:"
-print_sector:
-    .string "print_sector:"
+pt_sector:
+    .string "pt_sector:"
 
 # -- Start program main function _start --
 .section .text
@@ -50,7 +50,7 @@ jal sd_read_sector
 li t1, 124       # |
 sb t1, 0(s0)     # print
 
-la a1, print_sector
+la a1, pt_sector
 call fun_print_string
 jal print_sector
 
@@ -135,8 +135,8 @@ wait_cache:
 lw t2, 0(s6)    # t2 0x3228 cache_avaible
 beq t2, x0, wait_cache
 
-li t1, 70        # F
-sw t1, 0(s0)     # print
+li t1, 124       # |
+sb t1, 0(s0)     # print
 ret
 
 

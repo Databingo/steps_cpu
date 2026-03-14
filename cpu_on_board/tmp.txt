@@ -2,7 +2,7 @@ msg:
 sbi:
 wait_sd_ready:
 read_sd_sector:
-print_sector:
+pt_sector:
 _start:
 #     li s0 0x2004 
 lui s0, 0x2
@@ -46,9 +46,9 @@ jal x1, sd_read_sector
 # li t1, 124       
 addi t1, x0, 0x7c
 sb t1, 0(s0)     # print
-# la a1, print_sector
-auipc a1, 0 # R_RISCV_PCREL_HI20 print_sector 
-addi a1, a1, 0 # R_RISCV_PCREL_LO12_I print_sector 
+# la a1, pt_sector
+auipc a1, 0 # R_RISCV_PCREL_HI20 pt_sector 
+addi a1, a1, 0 # R_RISCV_PCREL_LO12_I pt_sector 
 # call fun_print_string
 auipc x1, 0 # R_RISCV_PCREL_HI20 fun_print_string
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I fun_print_string
@@ -118,10 +118,10 @@ beq t2, x0, wait_ready
 wait_cache:
 lw t2, 0(s6)    # t2 0x3228 cache_avaible
 beq t2, x0, wait_cache
-# li t1, 70        
-# li t1, 70        
-addi t1, x0, 0x46
-sw t1, 0(s0)     # print
+# li t1, 124       
+# li t1, 124       
+addi t1, x0, 0x7c
+sb t1, 0(s0)     # print
 # ret
 jalr x0, 0(x1)
 print_sector:
