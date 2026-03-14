@@ -120,16 +120,22 @@ jalr x0, 0(x1)
 sd_read_sector:
 sw a2, 0(s2) # Write Sector index value to address 0x3200
 wait_ready:
-lw t2, 0(s5)    # 0x3220 ready
+lw t2, 0(s5)   # 0x3220 ready
+#     li a2, 96      
+#     li a2, 96      
+addi a2, x0, 0x60
+#     call purtchar
+auipc x1, 0 # R_RISCV_PCREL_HI20 purtchar
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I purtchar
 beq t2, x0, wait_ready
-# li t1, 1
-# li t1, 1
+#     li t1, 1
+#     li t1, 1
 addi t1, x0, 0x1
-sw t1, 0(s3) # Trigger read at 0x3204
+sw t1, 0(s3)   # Trigger read at 0x3204
 wait_cache:
-lw t2, 0(s6)    # t2 0x3228 cache_avaible
+lw t2, 0(s6)   # t2 0x3228 cache_avaible
 beq t2, x0, wait_cache
-# ret
+#     ret
 jalr x0, 0(x1)
 print_sector:
 # li t1, 0   
