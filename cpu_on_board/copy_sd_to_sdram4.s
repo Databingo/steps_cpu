@@ -41,8 +41,6 @@ _start:
     call puts
 
 # ---------------------- SD card -------------------
-
-# -- Read Boot Sector 0 -- 
 la a1, read_sd_sector 
 call puts
 li a2, 0   
