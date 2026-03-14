@@ -239,9 +239,9 @@ ret
 # functions ------
 fun_print_string:
 print:
-    lb a0, 0(a1)
-    beq a0, x0, stop_fun_print # \x00 for end of string
-    sb a0, 0(s0)
+    lb t0, 0(a1)
+    beq t0, x0, stop_fun_print # \x00 for end of string
+    sb t0, 0(s0)
     addi a1, a1, 1 # next byte
     j print
 stop_fun_print:
