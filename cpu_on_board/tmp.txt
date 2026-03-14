@@ -81,9 +81,6 @@ slli t3, t3, 8
 or t2, t2, t3
 # mv a2, t2    
 addi a2, t2, 0
-# call print_hex_b
-auipc x1, 0 # R_RISCV_PCREL_HI20 print_hex_b
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_hex_b
 # li a1, 126       
 # li a1, 126       
 addi a1, x0, 0x7e
