@@ -1,4 +1,11 @@
+msg:
+sbi:
+wait_sd_ready:
+read_sd_sector:
 _start:
+#     li s0 0x2004 
+lui s0, 0x2
+addi s0, s0, 0x4
 #     la a0, sbi  
 auipc a0, 0 # R_RISCV_PCREL_HI20 sbi 
 addi a0, a0, 0 # R_RISCV_PCREL_LO12_I sbi 
@@ -208,7 +215,3 @@ jal x0, print
 stop_fun_print:
 #     ret
 jalr x0, 0(x1)
-msg:
-sbi:
-wait_sd_ready:
-read_sd_sector:

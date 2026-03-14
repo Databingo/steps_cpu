@@ -7,11 +7,24 @@
 #`define Sdc_avail 32'h0000_3228
 # UART 0x2004
 
+.section .data
+msg:
+    .string "Hello"
+sbi:
+    .string "I'm test Opensbi add update ram read=on0"
+wait_sd_ready:
+    .string "wait_sd_ready:"
+read_sd_sector:
+    .string "read_sd_sector:"
+
 .section .text
 .globl _start
 
 # -- Global setup --
 _start:
+    #  a0 for print addr
+    li s0 0x2004 # UART print 
+
     la a0, sbi  # a0 for print addr
     #jal fun_print_string
     call fun_print_string
@@ -214,12 +227,3 @@ print:
 stop_fun_print:
     ret
 
-.section .data
-msg:
-    .string "Hello"
-sbi:
-    .string "I'm test Opensbi add update ram read=on0"
-wait_sd_ready:
-    .string "wait_sd_ready:"
-read_sd_sector:
-    .string "read_sd_sector:"
