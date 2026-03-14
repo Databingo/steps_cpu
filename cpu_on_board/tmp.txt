@@ -125,6 +125,9 @@ sb t1, 0(s0)     # print
 # ret
 jalr x0, 0(x1)
 print_sector:
+# li t0, 0x2004
+lui t0, 0x2
+addi t0, t0, 0x4
 # li a5, 0x2008 
 lui a5, 0x2
 addi a5, a5, 0x8
