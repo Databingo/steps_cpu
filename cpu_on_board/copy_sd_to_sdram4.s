@@ -92,8 +92,6 @@ sw t2, 0(t0)
 lw t2, 0(t0)
 call print_hex_b
 
-
-
 end:
     j end
 
