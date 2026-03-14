@@ -254,13 +254,9 @@ wait_uart:
     beq a6, x0, wait_uart
     ret
 
-
 uart_print:
-   li t0, 0x2004
-   li t1, 0x2008
-wait_uart_:
-   lw t2, 0(t1)
+   lw t2, 0(a7)
    srli t2, t2, 16   # 31:16 WSPACE = 0 fully
-   beq t2, x0, wait_uart_
-   sb a1, 0(t0)
+   beq t2, x0, uart_print
+   sb a1, 0(a0)
    ret

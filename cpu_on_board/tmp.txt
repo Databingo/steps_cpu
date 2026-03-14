@@ -207,16 +207,9 @@ beq a6, x0, wait_uart
 #     ret
 jalr x0, 0(x1)
 uart_print:
-#    li t0, 0x2004
-lui t0, 0x2
-addi t0, t0, 0x4
-#    li t1, 0x2008
-lui t1, 0x2
-addi t1, t1, 0x8
-wait_uart_:
-lw t2, 0(t1)
+lw t2, 0(a7)
 srli t2, t2, 16   # 31:16 WSPACE = 0 fully
-beq t2, x0, wait_uart_
-sb a1, 0(t0)
+beq t2, x0, uart_print
+sb a1, 0(a0)
 #    ret
 jalr x0, 0(x1)
