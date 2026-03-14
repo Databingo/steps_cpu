@@ -58,8 +58,6 @@ call putchar
 li a2, 45       # -
 call putchar
 
-#end:
-#    j end
 
 # -- Parse BPB -- little-endian  Bios Parameter Block : sector 0
 # reserved_sectors offset 0x0e-0x0f 2 bytes (including root sector 0)
@@ -100,6 +98,7 @@ j print_hhex
 letterh:
 addi t3, t3, 55     # 10 is "A" ascii 65 ..
 print_hhex:
+call wait_uart
 sw t3, 0(a0)
 
 andi t4, t2, 0x0F      # get low nibble
@@ -110,16 +109,13 @@ j print_lhex
 letterl:
 addi t4, t4, 55        # 10 is "A" ascii 65 ..
 print_lhex:
+call wait_uart
 sw t4, 0(a0)
-
 ret
 
 
 
 
-
-
-# --------------------  --------------------  --------------------
 
 
 # ---  sd_read_sector ---
