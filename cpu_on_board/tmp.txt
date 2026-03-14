@@ -220,6 +220,9 @@ addi t5, x0, 0
 # ret
 jalr x0, 0(x1)
 fun_print_string:
+#     li a0 0x2004 
+lui a0, 0x2
+addi a0, a0, 0x4
 print:
 lb a1, 0(a1)
 beq a1, x0, stop_fun_print

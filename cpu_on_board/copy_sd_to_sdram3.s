@@ -226,6 +226,7 @@ ret
 
 # functions ------
 fun_print_string:
+    li a0 0x2004 # UART print 
 print:
     lb a1, 0(a1)
     beq a1, x0, stop_fun_print
