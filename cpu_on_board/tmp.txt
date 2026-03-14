@@ -2,6 +2,7 @@ msg:
 sbi:
 wait_sd_ready:
 read_sd_sector:
+print_sector:
 _start:
 #     li s0 0x2004 
 lui s0, 0x2
@@ -24,9 +25,9 @@ addi s5, s5, 0x220
 #     li s6 0x3228 
 lui s6, 0x3
 addi s6, s6, 0x228
-#     la a0, sbi 
-auipc a0, 0 # R_RISCV_PCREL_HI20 sbi 
-addi a0, a0, 0 # R_RISCV_PCREL_LO12_I sbi 
+#     la a1, sbi 
+auipc a1, 0 # R_RISCV_PCREL_HI20 sbi 
+addi a1, a1, 0 # R_RISCV_PCREL_LO12_I sbi 
 #     call fun_print_string
 auipc x1, 0 # R_RISCV_PCREL_HI20 fun_print_string
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I fun_print_string
@@ -86,26 +87,37 @@ addi t1, x0, 0x69
 sb t1, 0(t0)   
 lui t0, 0x2
 addi t0, t0, 4      # t0 = 0x2004
-lui a1, 0x3         # a1 = 0x3000 base
+lui s1, 0x3         # a1 = 0x3000 base
 # li t1, 65        
 # li t1, 65        
 addi t1, x0, 0x41
-sb t1, 0(t0)     # print
+sb t1, 0(s0)     # print
+# la a1, read_sd_sector
+auipc a1, 0 # R_RISCV_PCREL_HI20 read_sd_sector 
+addi a1, a1, 0 # R_RISCV_PCREL_LO12_I read_sd_sector 
+# call fun_print_string
+auipc x1, 0 # R_RISCV_PCREL_HI20 fun_print_string
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I fun_print_string
 # li a2, 0
 # li a2, 0
 addi a2, x0, 0x0
 # jal sd_read_sector
 jal x1, sd_read_sector
-# li t1, 65        
-# li t1, 65        
-addi t1, x0, 0x41
-sw t1, 0(t0)     # print
-# jal print_sector
-jal x1, print_sector
 # li t1, 124       
 # li t1, 124       
 addi t1, x0, 0x7c
-sb t1, 0(t0)     # print
+sb t1, 0(s0)     # print
+# la a1, print_sector
+auipc a1, 0 # R_RISCV_PCREL_HI20 print_sector 
+addi a1, a1, 0 # R_RISCV_PCREL_LO12_I print_sector 
+# call fun_print_string
+auipc x1, 0 # R_RISCV_PCREL_HI20 fun_print_string
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I fun_print_string
+# jal print_sector
+jal x1, print_sector
+end:
+#     j end
+jal x0, end
 addi t1, s1, 0x0E
 lw t2, 0(t1)
 andi t2, t2, 0xff
@@ -121,6 +133,10 @@ addi t2, a2, 0
 # call print_hex_b
 auipc x1, 0 # R_RISCV_PCREL_HI20 print_hex_b
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_hex_b
+# li t1, 126       
+# li t1, 126       
+addi t1, x0, 0x7e
+sb t1, 0(s0)     # print
 end:
 #     j end
 jal x0, end
@@ -259,10 +275,10 @@ addi t5, x0, 0
 jalr x0, 0(x1)
 fun_print_string:
 print:
-lb t0, 0(a0)
+lb t0, 0(a1)
 beq t0, x0, stop_fun_print # \x00 for end of string
 sb t0, 0(s0)
-addi a0, a0, 1 # next byte
+addi a1, a1, 1 # next byte
 #     j print
 jal x0, print
 stop_fun_print:

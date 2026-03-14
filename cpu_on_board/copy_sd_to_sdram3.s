@@ -19,12 +19,14 @@ wait_sd_ready:
     .string "wait_sd_ready:"
 read_sd_sector:
     .string "read_sd_sector:"
+print_sector:
+    .string "print_sector:"
 
 # -- Start program main function _start --
 .section .text
 # -- Global setup --
 _start:
-    li s0 0x2004 # UART print # a0 for print symbol addr
+    li s0 0x2004 # UART print # a1 for print symbol addr
 
     li s1 0x3000 # SD base
     li s2 0x3200 # SD address
@@ -34,7 +36,7 @@ _start:
     li s6 0x3228 # SD cache available
 
     # print
-    la a0, sbi 
+    la a1, sbi 
     call fun_print_string
 
     
@@ -83,34 +85,27 @@ lui t0, 0x2
 addi t0, t0, 4      # t0 = 0x2004
 
 # SD controller base
-lui a1, 0x3         # a1 = 0x3000 base
+lui s1, 0x3         # a1 = 0x3000 base
 
 li t1, 65        # A
-sb t1, 0(t0)     # print
-
-## -- Wait SD ready
-#sd_ready:
-#lw a2, 0x220(a1)    # a2 0x3220 ready
-#li t1, 0x60        # `
-#sb t1, 0(t0)     # print
-#beq a2, x0, sd_ready
+sb t1, 0(s0)     # print
 
 # -- Read Boot Sector 0 -- 
+la a1, read_sd_sector
+call fun_print_string
 li a2, 0
 jal sd_read_sector
 
-li t1, 65        # A
-sw t1, 0(t0)     # print
+li t1, 124       # |
+sb t1, 0(s0)     # print
 
+la a1, print_sector
+call fun_print_string
 jal print_sector
 
-li t1, 124       # |
-sb t1, 0(t0)     # print
 
-
-
-#end:
-#    j end
+end:
+    j end
 
 # -- Parse BPB -- little-endian  Bios Parameter Block : sector 0
 # reserved_sectors offset 0x0e-0x0f 2 bytes (including root sector 0)
@@ -128,6 +123,9 @@ mv a2, t2    # a2 = reserved_sectors offset 0x0e-0x0f 2 bytes (including root se
 
 mv t2, a2
 call print_hex_b
+
+li t1, 126       # ~
+sb t1, 0(s0)     # print
 
 end:
     j end
@@ -175,7 +173,7 @@ ret
 
 
 # ---  sd_read_sector ---
-sd_read_sector:
+sd_read_sector: #  a2 sector index
 sw a2, 0x200(a1) # Write Sector index value to address 0x3200
 li t1, 1
 sw t1, 0x204(a1) # Trigger read at 0x3204
@@ -291,10 +289,10 @@ ret
 # functions ------
 fun_print_string:
 print:
-    lb t0, 0(a0)
+    lb t0, 0(a1)
     beq t0, x0, stop_fun_print # \x00 for end of string
     sb t0, 0(s0)
-    addi a0, a0, 1 # next byte
+    addi a1, a1, 1 # next byte
     j print
 stop_fun_print:
     ret
