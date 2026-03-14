@@ -62,6 +62,9 @@ jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_sector
 # li t1, 43       
 addi t1, x0, 0x2b
 sb t1, 0(a0)     # print
+# call wait_uart
+auipc x1, 0 # R_RISCV_PCREL_HI20 wait_uart
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I wait_uart
 # li t1, 45       
 # li t1, 45       
 addi t1, x0, 0x2d

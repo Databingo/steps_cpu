@@ -57,7 +57,7 @@ call print_sector
 
 li t1, 43       # +
 sb t1, 0(a0)     # print
-
+call wait_uart
 li t1, 45       # -
 sb t1, 0(a0)     # print
 
