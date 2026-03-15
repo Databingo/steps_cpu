@@ -104,12 +104,12 @@ mv a0, sp
 call puts
 addi sp, sp, 8
 
-la t0, reserved_sec
+la a1, reserved_sec
 lhu a0, 0x0e(s1)
-sh a0, 0(t0)
-lb a0, 1(t0)
+sh a0, 0(a1)
+lb a0, 1(a1)
 call print_hex_b
-lb a0, 0(t0)
+lb a0, 0(a1)
 call print_hex_b
 
 # num_fats offset 0x10 1 bytes
