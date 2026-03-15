@@ -99,6 +99,7 @@ call print_hex_b
 #addi sp, sp, 8
 
 
+la t0, reserved_sec
 lbu t2, 0x0e(s1)
 sw t2, 0(t0)
 lw t2, 0(t0)
