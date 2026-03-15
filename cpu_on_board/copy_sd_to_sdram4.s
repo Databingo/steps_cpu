@@ -103,9 +103,11 @@ call puts
 addi sp, sp, 8
 
 la t0, reserved_sec
-lbu a0, 0x0e(s1)
-sd a0, 0(t0)
-ld a0, 0(t0)
+lhu a0, 0x0e(s1)
+sh a0, 0(t0)
+lb a0, 1(t0)
+call print_hex_b
+lb a0, 0(t0)
 call print_hex_b
 
 
