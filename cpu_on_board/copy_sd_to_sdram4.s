@@ -98,6 +98,8 @@ mv a0, sp
 call puts
 addi sp, sp, 8
 
+li a0, 94       # ^
+call putchar
 
 la t0, reserved_sec
 lbu t2, 0x0e(s1)
@@ -261,7 +263,7 @@ puts_loop:
 stop_puts:
     lw ra, 0(sp)
     lw a0, 8(sp)
-    addi sp, sp 16
+    addi sp, sp, 16
     ret
 
 wait_uart:
