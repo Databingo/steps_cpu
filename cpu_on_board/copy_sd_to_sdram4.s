@@ -122,36 +122,34 @@ end:
 
 # -- function --
 print_hex_b:  # a0
-andi a0, a0, 0xFF   # Isolate byte value
-
-srli t3, a0, 4      # get high nibble
-slti t5, t3, 10     # if < 10 number
-beq t5, x0, letterh
-addi t3, t3, 48     # 0 is "0" ascii 48
-j print_hhex
+    andi a0, a0, 0xFF   # Isolate byte value
+    
+    srli t3, a0, 4      # get high nibble
+    slti t5, t3, 10     # if < 10 number
+    beq t5, x0, letterh
+    addi t3, t3, 48     # 0 is "0" ascii 48
+    j print_hhex
 letterh:
-addi t3, t3, 55     # 10 is "A" ascii 65 ..
+    addi t3, t3, 55     # 10 is "A" ascii 65 ..
 print_hhex:
-mv t0, ra
-call wait_uart
-mv ra, t0
-sw t3, 0(s11)
-
-andi t4, a0, 0x0F      # get low nibble
-slti t5, t4, 10     # if < 10 number
-beq t5, x0, letterl
-addi t4, t4, 48     # 0 is "0" ascii 48
-j print_lhex
+    mv t0, ra
+    call wait_uart
+    mv ra, t0
+    sw t3, 0(s11)
+    
+    andi t4, a0, 0x0F      # get low nibble
+    slti t5, t4, 10     # if < 10 number
+    beq t5, x0, letterl
+    addi t4, t4, 48     # 0 is "0" ascii 48
+    j print_lhex
 letterl:
-addi t4, t4, 55        # 10 is "A" ascii 65 ..
+    addi t4, t4, 55        # 10 is "A" ascii 65 ..
 print_lhex:
-mv t0, ra
-call wait_uart
-mv ra, t0
-sw t4, 0(s11)
-ret
-
-
+    mv t0, ra
+    call wait_uart
+    mv ra, t0
+    sw t4, 0(s11)
+    ret
 
 
 # ---  sd_read_sector ---
@@ -164,7 +162,6 @@ wait_ready:
     call putchar
     mv ra, t0
     beq t2, x0, wait_ready
-
     li t1, 1
     sw t1, 0(s3)   # Trigger read at 0x3204
 wait_cache:
@@ -176,45 +173,43 @@ wait_cache:
 
 # print sector 0 512 bytes
 print_sector:
-li t1, 0   # byte index
-li t6, 511 # max byte index
+    li t1, 0   # byte index
+    li t6, 511 # max byte index
 print_loop:
-add a4, s1, t1 
-addi t1, t1, 1
-lb t2, 0(a4)           # load byte at 0x3000 a1+t1
-andi t2, t2, 0xFF   # Isolate byte value
-srli t3, t2, 4      # get high nibble
-slti t5, t3, 10     # if < 10 number
-beq t5, x0, letter_h
-addi t3, t3, 48     # 0 is "0" ascii 48
-j print_h_hex
+    add a4, s1, t1 
+    addi t1, t1, 1
+    lb t2, 0(a4)           # load byte at 0x3000 a1+t1
+    andi t2, t2, 0xFF   # Isolate byte value
+    srli t3, t2, 4      # get high nibble
+    slti t5, t3, 10     # if < 10 number
+    beq t5, x0, letter_h
+    addi t3, t3, 48     # 0 is "0" ascii 48
+    j print_h_hex
 letter_h:
-addi t3, t3, 55     # 10 is "A" ascii 65 ..
+    addi t3, t3, 55     # 10 is "A" ascii 65 ..
 print_h_hex:
-
 wait_uart_tx_h:
-lw t5, 0(s10)
-srli t5, t5, 16   # 31:16 WSPACE = 0 full
-beq t5, x0, wait_uart_tx_h
-
-sw t3, 0(s11)
-andi t4, t2, 0x0F      # get low nibble
-slti t5, t4, 10     # if < 10 number
-beq t5, x0, letter_l
-addi t4, t4, 48     # 0 is "0" ascii 48
-j print_l_hex
+    lw t5, 0(s10)
+    srli t5, t5, 16   # 31:16 WSPACE = 0 full
+    beq t5, x0, wait_uart_tx_h
+    
+    sw t3, 0(s11)
+    andi t4, t2, 0x0F      # get low nibble
+    slti t5, t4, 10     # if < 10 number
+    beq t5, x0, letter_l
+    addi t4, t4, 48     # 0 is "0" ascii 48
+    j print_l_hex
 letter_l:
-addi t4, t4, 55        # 10 is "A" ascii 65 ..
+    addi t4, t4, 55        # 10 is "A" ascii 65 ..
 print_l_hex:
-
 wait_uart_tx_l:
-lw t5, 0(s10)
-srli t5, t5, 16
-beq t5, x0, wait_uart_tx_l
-
-sw t4, 0(s11)
-bge t6, t1, print_loop
-ret
+    lw t5, 0(s10)
+    srli t5, t5, 16
+    beq t5, x0, wait_uart_tx_l
+    
+    sw t4, 0(s11)
+    bge t6, t1, print_loop
+    ret
 # -- end print_sector --
 
 
