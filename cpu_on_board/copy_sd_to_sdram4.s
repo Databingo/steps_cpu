@@ -22,7 +22,9 @@ read_sd_sector:
 prt_sector:
     .string "print_sector:"
 reserved_sec:
-    .word 4
+    .word 0
+num_fats:
+    .word 0
 
 # -- Start program main function _start --
 .section .text
@@ -98,9 +100,6 @@ mv a0, sp
 call puts
 addi sp, sp, 8
 
-li a0, 94       # ^
-call putchar
-
 la t0, reserved_sec
 lbu a0, 0x0e(s1)
 sd a0, 0(t0)
@@ -108,12 +107,23 @@ ld a0, 0(t0)
 call print_hex_b
 
 
-#li t0, "resSec:"
-#addi sp, sp, -8
-#sd t0, 0(sp)
-#mv a0, sp
-#call puts
-#addi sp, sp, 8
+# root_dir_sector_start = reserved_sectors + (num_fats * sectors_per_fat16)
+# num_fats offset 0x10 1 bytes
+
+li t0, "numFat:" # 7 char left on for null
+addi sp, sp, -8
+sd t0, 0(sp)
+mv a0, sp
+call puts
+addi sp, sp, 8
+
+la t0, num_fats
+lbu a0, 0x10(s1)
+sd a0, 0(t0)
+ld a0, 0(t0)
+call print_hex_b
+
+
 
 end:
     j end

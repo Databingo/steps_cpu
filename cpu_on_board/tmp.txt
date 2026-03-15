@@ -4,6 +4,7 @@ wait_sd_ready:
 read_sd_sector:
 prt_sector:
 reserved_sec:
+num_fats:
 _start:
 #     li sp, 0x1000 
 lui sp, 0x1
@@ -114,16 +115,37 @@ addi a0, sp, 0
 auipc x1, 0 # R_RISCV_PCREL_HI20 puts
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I puts
 addi sp, sp, 8
-# li a0, 94       
-# li a0, 94       
-addi a0, x0, 0x5e
-# call putchar
-auipc x1, 0 # R_RISCV_PCREL_HI20 putchar
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I putchar
 # la t0, reserved_sec
 auipc t0, 0 # R_RISCV_PCREL_HI20 reserved_sec 
 addi t0, t0, 0 # R_RISCV_PCREL_LO12_I reserved_sec 
 lbu a0, 0x0e(s1)
+sd a0, 0(t0)
+ld a0, 0(t0)
+# call print_hex_b
+auipc x1, 0 # R_RISCV_PCREL_HI20 print_hex_b
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_hex_b
+# li t0, "numFat:" 
+lui t0, 0x3a7
+srli t0, t0, 0x1
+ori t0, t0, 0x230
+slli t0, t0, 0xb
+ori t0, t0, 0x519
+slli t0, t0, 0xb
+ori t0, t0, 0x5ae
+slli t0, t0, 0xb
+ori t0, t0, 0x56e
+addi sp, sp, -8
+sd t0, 0(sp)
+# mv a0, sp
+addi a0, sp, 0
+# call puts
+auipc x1, 0 # R_RISCV_PCREL_HI20 puts
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I puts
+addi sp, sp, 8
+# la t0, num_fats
+auipc t0, 0 # R_RISCV_PCREL_HI20 num_fats 
+addi t0, t0, 0 # R_RISCV_PCREL_LO12_I num_fats 
+lbu a0, 0x10(s1)
 sd a0, 0(t0)
 ld a0, 0(t0)
 # call print_hex_b
@@ -138,37 +160,37 @@ srli t3, a0, 4      # get high nibble
 slti t5, t3, 10     # if < 10 number
 beq t5, x0, letterh
 addi t3, t3, 48     # 0 is "0" ascii 48
-# j print_hhex
+#     j print_hhex
 jal x0, print_hhex
 letterh:
 addi t3, t3, 55     # 10 is "A" ascii 65 ..
 print_hhex:
-# mv t0, ra
+#     mv t0, ra
 addi t0, ra, 0
-# call wait_uart
+#     call wait_uart
 auipc x1, 0 # R_RISCV_PCREL_HI20 wait_uart
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I wait_uart
-# mv ra, t0
+#     mv ra, t0
 addi ra, t0, 0
 sw t3, 0(s11)
 andi t4, a0, 0x0F      # get low nibble
 slti t5, t4, 10     # if < 10 number
 beq t5, x0, letterl
 addi t4, t4, 48     # 0 is "0" ascii 48
-# j print_lhex
+#     j print_lhex
 jal x0, print_lhex
 letterl:
 addi t4, t4, 55        # 10 is "A" ascii 65 ..
 print_lhex:
-# mv t0, ra
+#     mv t0, ra
 addi t0, ra, 0
-# call wait_uart
+#     call wait_uart
 auipc x1, 0 # R_RISCV_PCREL_HI20 wait_uart
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I wait_uart
-# mv ra, t0
+#     mv ra, t0
 addi ra, t0, 0
 sw t4, 0(s11)
-# ret
+#     ret
 jalr x0, 0(x1)
 sd_read_sector:
 sw a0, 0(s2) # Write Sector index value to address 0x3200
@@ -195,11 +217,11 @@ beq t2, x0, wait_cache
 #     ret
 jalr x0, 0(x1)
 print_sector:
-# li t1, 0   
-# li t1, 0   
+#     li t1, 0   
+#     li t1, 0   
 addi t1, x0, 0x0
-# li t6, 511 
-# li t6, 511 
+#     li t6, 511 
+#     li t6, 511 
 addi t6, x0, 0x1ff
 print_loop:
 add a4, s1, t1 
@@ -210,7 +232,7 @@ srli t3, t2, 4      # get high nibble
 slti t5, t3, 10     # if < 10 number
 beq t5, x0, letter_h
 addi t3, t3, 48     # 0 is "0" ascii 48
-# j print_h_hex
+#     j print_h_hex
 jal x0, print_h_hex
 letter_h:
 addi t3, t3, 55     # 10 is "A" ascii 65 ..
@@ -224,7 +246,7 @@ andi t4, t2, 0x0F      # get low nibble
 slti t5, t4, 10     # if < 10 number
 beq t5, x0, letter_l
 addi t4, t4, 48     # 0 is "0" ascii 48
-# j print_l_hex
+#     j print_l_hex
 jal x0, print_l_hex
 letter_l:
 addi t4, t4, 55        # 10 is "A" ascii 65 ..
@@ -235,7 +257,7 @@ srli t5, t5, 16
 beq t5, x0, wait_uart_tx_l
 sw t4, 0(s11)
 bge t6, t1, print_loop
-# ret
+#     ret
 jalr x0, 0(x1)
 print_bin_f:
 # li t1, 8 
