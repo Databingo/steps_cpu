@@ -63,15 +63,15 @@ jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I puts
 # call print_sector
 auipc x1, 0 # R_RISCV_PCREL_HI20 print_sector
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_sector
-# li a2, 43       
-# li a2, 43       
-addi a2, x0, 0x2b
+# li a0, 43       
+# li a0, 43       
+addi a0, x0, 0x2b
 # call putchar
 auipc x1, 0 # R_RISCV_PCREL_HI20 putchar
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I putchar
-# li a2, 45       
-# li a2, 45       
-addi a2, x0, 0x2d
+# li a0, 45       
+# li a0, 45       
+addi a0, x0, 0x2d
 # call putchar
 auipc x1, 0 # R_RISCV_PCREL_HI20 putchar
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I putchar
@@ -83,9 +83,9 @@ lbu t2, 0x0e(s1)
 # call print_hex_b
 auipc x1, 0 # R_RISCV_PCREL_HI20 print_hex_b
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_hex_b
-# li a2, 126       
-# li a2, 126       
-addi a2, x0, 0x7e
+# li a0, 126       
+# li a0, 126       
+addi a0, x0, 0x7e
 # call putchar
 auipc x1, 0 # R_RISCV_PCREL_HI20 putchar
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I putchar
@@ -165,9 +165,9 @@ sd_read_sector:
 sw a2, 0(s2) # Write Sector index value to address 0x3200
 wait_ready:
 lw t2, 0(s5)   # 0x3220 ready
-#     li a2, 96      
-#     li a2, 96      
-addi a2, x0, 0x60
+#     li a0, 96      
+#     li a0, 96      
+addi a0, x0, 0x60
 #     mv t0, ra
 addi t0, ra, 0
 #     call putchar
@@ -247,12 +247,12 @@ putchar:
 lw t2, 0(s10)
 srli t2, t2, 16   # 31:16 WSPACE = 0 fully
 beq t2, x0, putchar
-sb a2, 0(s11)
+sb a0, 0(s11)
 #    ret
 jalr x0, 0(x1)
 puts:
-lb a2, 0(a1)
-beq a2, x0, stop_puts # \x00 for end of string
+lb a0, 0(a1)
+beq a0, x0, stop_puts # \x00 for end of string
 #     mv t0, ra
 addi t0, ra, 0
 #     call putchar

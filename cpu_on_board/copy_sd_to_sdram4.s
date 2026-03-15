@@ -57,9 +57,9 @@ la a1, prt_sector
 call puts
 call print_sector
 
-li a2, 43       # +
+li a0, 43       # +
 call putchar
-li a2, 45       # -
+li a0, 45       # -
 call putchar
 
 
@@ -83,7 +83,7 @@ call print_hex_b
 lbu t2, 0x0e(s1)
 call print_hex_b
 
-li a2, 126       # ~
+li a0, 126       # ~
 call putchar
 
 la t0, reserved_sec
@@ -153,7 +153,7 @@ sd_read_sector:  #  a2 sector index
     sw a2, 0(s2) # Write Sector index value to address 0x3200
 wait_ready:
     lw t2, 0(s5)   # 0x3220 ready
-    li a2, 96      # `
+    li a0, 96      # `
     mv t0, ra
     call putchar
     mv ra, t0
@@ -233,17 +233,17 @@ ret
 
 # functions ------
 
-putchar:  # a2
+putchar:  # a0
    lw t2, 0(s10)
    srli t2, t2, 16   # 31:16 WSPACE = 0 fully
    beq t2, x0, putchar
-   sb a2, 0(s11)
+   sb a0, 0(s11)
    ret
 
 
 puts: # a1
-    lb a2, 0(a1)
-    beq a2, x0, stop_puts # \x00 for end of string
+    lb a0, 0(a1)
+    beq a0, x0, stop_puts # \x00 for end of string
     mv t0, ra
     call putchar
     mv ra, t0
@@ -251,18 +251,6 @@ puts: # a1
     j puts
 stop_puts:
     ret
-
-#putstr: # a3
-#    li t1, 7
-#    srl a2, a3, t1
-#    mv t0, ra
-#    call putchar # a2
-#    mv ra, t0
-#    addi t1, t1, -1 # next byte
-#    beq a2, x0, stop_puts 
-#    j putstr
-#stop_putstr:
-#    ret
 
 wait_uart:
     lw a6, 0(s10)
