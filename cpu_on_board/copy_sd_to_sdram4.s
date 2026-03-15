@@ -146,9 +146,9 @@ slli t1, t1, 8
 or a0, t1, t0
 
 sh a0, 0(a1)
-lb a0, 1(a1)
-call print_hex_b
 lb a0, 0(a1)
+call print_hex_b
+lb a0, 1(a1)
 call print_hex_b
 
 end:
