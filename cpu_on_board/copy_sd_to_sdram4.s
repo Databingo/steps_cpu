@@ -28,15 +28,16 @@ reserved_sec:
 .section .text
 # -- Global setup --
 _start:
-    li a0 0x2004 # UART print # a1 for print symbol addr
-    li a7 0x2008 # UART controller
+    li sp, 0x1000 # Set stack
+    li a0, 0x2004 # UART print # a1 for print symbol addr
+    li a7, 0x2008 # UART controller
 
-    li s1 0x3000 # SD base
-    li s2 0x3200 # SD address
-    li s3 0x3204 # SD trigger read
-    li s4 0x3208 # SD trigger write
-    li s5 0x3220 # SD ready for rd/wr
-    li s6 0x3228 # SD cache available
+    li s1, 0x3000 # SD base
+    li s2, 0x3200 # SD address
+    li s3, 0x3204 # SD trigger read
+    li s4, 0x3208 # SD trigger write
+    li s5, 0x3220 # SD ready for rd/wr
+    li s6, 0x3228 # SD cache available
 
     # print
     la a1, sbi 
@@ -91,6 +92,17 @@ lbu t2, 0x0e(s1)
 sw t2, 0(t0)
 lw t2, 0(t0)
 call print_hex_b
+
+
+li t0, "listring"
+addi sp, sp, -8
+sd t0, 0(sp)
+mv a1, sp
+call puts
+addi sp, sp, 8
+
+
+
 
 end:
     j end
@@ -238,6 +250,18 @@ puts: # a1
     j puts
 stop_puts:
     ret
+
+#putstr: # a3
+#    li t1, 7
+#    srl a2, a3, t1
+#    mv t0, ra
+#    call putchar # a2
+#    mv ra, t0
+#    addi t1, t1, -1 # next byte
+#    beq a2, x0, stop_puts 
+#    j putstr
+#stop_putstr:
+#    ret
 
 wait_uart:
     lw a6, 0(a7)
