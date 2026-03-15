@@ -29,7 +29,8 @@ reserved_sec:
 # -- Global setup --
 _start:
     li sp, 0x1000 # Set stack
-    li a0, 0x2004 # UART print # a1 for print symbol addr
+
+    li s11, 0x2004 # UART print # a1 for print symbol addr
     li a7, 0x2008 # UART controller
 
     li s1, 0x3000 # SD base
@@ -50,7 +51,7 @@ li a2, 0
 call sd_read_sector  # use a2 as sector no.
 
 li t1, 124       # |
-sb t1, 0(a0)     # print
+sb t1, 0(s11)     # print
 
 la a1, prt_sector
 call puts
@@ -126,7 +127,7 @@ print_hhex:
 mv t0, ra
 call wait_uart
 mv ra, t0
-sw t3, 0(a0)
+sw t3, 0(s11)
 
 andi t4, t2, 0x0F      # get low nibble
 slti t5, t4, 10     # if < 10 number
@@ -139,7 +140,7 @@ print_lhex:
 mv t0, ra
 call wait_uart
 mv ra, t0
-sw t4, 0(a0)
+sw t4, 0(s11)
 ret
 
 
@@ -190,7 +191,7 @@ lw t5, 0(a7)
 srli t5, t5, 16   # 31:16 WSPACE = 0 full
 beq t5, x0, wait_uart_tx_h
 
-sw t3, 0(a0)
+sw t3, 0(s11)
 andi t4, t2, 0x0F      # get low nibble
 slti t5, t4, 10     # if < 10 number
 beq t5, x0, letter_l
@@ -205,7 +206,7 @@ lw t5, 0(a7)
 srli t5, t5, 16
 beq t5, x0, wait_uart_tx_l
 
-sw t4, 0(a0)
+sw t4, 0(s11)
 bge t6, t1, print_loop
 ret
 # -- end print_sector --
@@ -213,15 +214,15 @@ ret
 
 
 
-# funciton print_bin(a0) print 8 bits of a0 at a0 UART
+# funciton print_bin(s11) print 8 bits of s11 at s11 UART
 print_bin_f:
 li t1, 8 # number of bits
 print_binf_loop:
 addi t1, t1, -1
-srl t2, a0, t1
+srl t2, s11, t1
 andi t2, t2, 1
 addi t2, t2, 48  # 0 to "0"
-sw t2, 0(a0)     # print
+sw t2, 0(s11)     # print
 bne t1, x0, print_binf_loop
 # clean middle re
 addi t1, x0, 0
@@ -236,7 +237,7 @@ putchar:  # a2
    lw t2, 0(a7)
    srli t2, t2, 16   # 31:16 WSPACE = 0 fully
    beq t2, x0, putchar
-   sb a2, 0(a0)
+   sb a2, 0(s11)
    ret
 
 

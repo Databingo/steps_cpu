@@ -217,14 +217,22 @@ func isValidImmediate(s string) (int64, error) {
 }
 func isValidImmediate_u(s string) (int64, uint64, error) {
 	var sign int64
-	var imm1, imm2, imm3 uint64
+	var imm0, imm1, imm2, imm3 uint64
+	var err0 = errors.New("error_init")
 	var err1 = errors.New("error_init")
 	var err2 = errors.New("error_init")
 	var err3 = errors.New("error_init")
 
 	//imm1, err1 = strconv.ParseUint(s, 10, 32) // check if s is a decimal number
 
-	if strings.HasPrefix(s, "0x") {
+	if (strings.HasPrefix(s, "'") || strings.HasPrefix(s, "\"") ) && (strings.HasSuffix(s, "'") || strings.HasSuffix(s, "\"") ){
+	        content := s[1:len(s)-1]
+		//if len(content) == 1 { imm0 = uint64(content) }
+		if len(content) <= 8 { 
+		    for i:=0;i<len(content);i++ { imm0 |= uint64(content[i])<< (i*8) }
+		    err0 = nil
+		}
+        } else if strings.HasPrefix(s, "0x") {
 		imm2, err2 = strconv.ParseUint(s[2:], 16, 64) // check if s is hex
 		fmt.Println("+imm2:", imm2, err2)
 	} else if strings.HasPrefix(s, "-0x") {
@@ -247,19 +255,28 @@ func isValidImmediate_u(s string) (int64, uint64, error) {
 		imm3 = ^imm3 + 1
 	}
 
-	if err1 != nil && err2 != nil && err3 != nil {
-		fmt.Println(".", err1)
-		fmt.Println("..", err2)
-		fmt.Println("...", err3)
-		fmt.Println(s)
-		return 0, 0, errors.New("Invalid immediate value")
-	} else if err1 == nil {
-		return sign, imm1, nil
-	} else if err2 == nil {
-		return sign, imm2, nil
-	} else {
-		return sign, imm3, nil
-	}
+	//if err0 != nil && err1 != nil && err2 != nil && err3 != nil {
+	//	fmt.Println(".", err1)
+	//	fmt.Println("..", err2)
+	//	fmt.Println("...", err3)
+	//	fmt.Println(s)
+	//	return 0, 0, errors.New("Invalid immediate value")
+	//} else if err0 == nil {
+	//	return sign, imm0, nil
+	//} else if err1 == nil {
+	//	return sign, imm1, nil
+	//} else if err2 == nil {
+	//	return sign, imm2, nil
+	//} else {
+	//	return sign, imm3, nil
+	//}
+
+	if err0 == nil { return sign, imm0, nil }
+	if err1 == nil { return sign, imm1, nil }
+	if err2 == nil { return sign, imm2, nil }
+	if err3 == nil { return sign, imm3, nil }
+
+	return 0, 0, errors.New("Invalid immediate value")
 }
 
 func main() { //t6a7s11
