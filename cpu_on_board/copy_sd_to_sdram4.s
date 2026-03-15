@@ -104,32 +104,45 @@ mv a0, sp
 call puts
 addi sp, sp, 8
 
+#la a1, reserved_sec
+#lbu a0, 0x0e(s1)
+#mv a2, a0
+#call print_hex_b
+#lbu a0, 0x0f(s1)
+#mv a3, a0
+#call print_hex_b
+#
+#slli a3, a3, 8
+#and a4, a3, a2 # riscv.v miss and/or
+#srli  a0, a4, 0
+#call print_hex_b
+#srli a0, a4, 8
+#call print_hex_b
+#
+##xend:
+##    j xend
+
 la a1, reserved_sec
-lbu a0, 0x0e(s1)
-mv a2, a0
-call print_hex_b
-lbu a0, 0x0f(s1)
-mv a3, a0
-call print_hex_b
 
-slli a3, a3, 8
-and a4, a3, a2
-srli  a0, a4, 0
-call print_hex_b
-srli a0, a4, 8
-call print_hex_b
-
-xend:
-    j xend
-
+lbu t0, 0x0e(s1)
+lbu t1, 0x0f(s1)
 slli t1, t1, 8
-or a0, t1, t0
+and a0, t1, t0
 
 sh a0, 0(a1)
 lb a0, 1(a1)
 call print_hex_b
 lb a0, 0(a1)
 call print_hex_b
+
+#slli t1, t1, 8
+#or a0, t1, t0
+#
+#sh a0, 0(a1)
+#lb a0, 1(a1)
+#call print_hex_b
+#lb a0, 0(a1)
+#call print_hex_b
 
 # num_fats offset 0x10 1 bytes
 li t0, "numFat:" # 7 char left on for null
@@ -158,12 +171,13 @@ la a1, sec_per_fat
 lbu t0, 0x16(s1)
 lbu t1, 0x17(s1)
 slli t1, t1, 8
-or a0, t1, t0
+#or a0, t1, t0
+and a0, t1, t0 # !! hardware error and/or
 
 sh a0, 0(a1)
-lb a0, 0(a1)
-call print_hex_b
 lb a0, 1(a1)
+call print_hex_b
+lb a0, 0(a1)
 call print_hex_b
 
 end:
