@@ -134,16 +134,12 @@ mv a0, sp
 call puts
 addi sp, sp, 8
 
-la t0, sec_per_fat
 lhu a0, 0x16(s1)
-sh a0, 0(t0)
-lb a0, 1(t0)
-addi sp, sp, -8
-sd t0, 8(sp)
+la a1, sec_per_fat
+sh a0, 0(a1)
+lb a0, 1(a1)
 call print_hex_b
-ld t0, 8(sp)
-addi sp, sp, 8
-lb a0, 0(t0)
+lb a0, 0(a1)
 call print_hex_b
 
 end:
