@@ -262,13 +262,9 @@ addi t1, a0, 0
 puts_loop:
 lb a0, 0(t1)
 beq a0, x0, stop_puts # \x00 for end of string
-#     mv t0, ra
-addi t0, ra, 0
 #     call putchar 
 auipc x1, 0 # R_RISCV_PCREL_HI20 putchar
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I putchar
-#     mv ra, t0
-addi ra, t0, 0
 addi t1, t1, 1 # next byte
 #     j puts_loop
 jal x0, puts_loop

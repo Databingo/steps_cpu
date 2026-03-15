@@ -251,9 +251,7 @@ puts: # a0 addr
 puts_loop:
     lb a0, 0(t1)
     beq a0, x0, stop_puts # \x00 for end of string
-    mv t0, ra
     call putchar # a0 char
-    mv ra, t0
     addi t1, t1, 1 # next byte
     j puts_loop
 stop_puts:
