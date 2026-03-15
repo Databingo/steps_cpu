@@ -86,21 +86,19 @@ call print_hex_b
 li a0, 126       # ~
 call putchar
 
-la t0, reserved_sec
-lw t2, 0(t0)
-call print_hex_b
-lbu t2, 0x0e(s1)
-sw t2, 0(t0)
-lw t2, 0(t0)
-call print_hex_b
-
-
-li t0, "listring"
+li t0, "resSecs:"
 addi sp, sp, -8
 sd t0, 0(sp)
 mv a0, sp
 call puts
 addi sp, sp, 8
+
+la t0, reserved_sec
+lbu t2, 0x0e(s1)
+sw t2, 0(t0)
+lw t2, 0(t0)
+call print_hex_b
+
 
 end:
     j end
