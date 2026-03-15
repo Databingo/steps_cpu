@@ -44,9 +44,9 @@ addi a0, a0, 0 # R_RISCV_PCREL_LO12_I read_sd_sector
 # call puts
 auipc x1, 0 # R_RISCV_PCREL_HI20 puts
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I puts
-# li a2, 0   
-# li a2, 0   
-addi a2, x0, 0x0
+# li a0, 0   
+# li a0, 0   
+addi a0, x0, 0x0
 # call sd_read_sector  
 auipc x1, 0 # R_RISCV_PCREL_HI20 sd_read_sector
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I sd_read_sector
@@ -165,7 +165,7 @@ sw t4, 0(s11)
 # ret
 jalr x0, 0(x1)
 sd_read_sector:
-sw a2, 0(s2) # Write Sector index value to address 0x3200
+sw a0, 0(s2) # Write Sector index value to address 0x3200
 wait_ready:
 lw t2, 0(s5)   # 0x3220 ready
 #     li a0, 96      

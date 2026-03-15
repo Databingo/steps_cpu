@@ -47,7 +47,7 @@ _start:
 # ---------------------- SD card -------------------
 la a0, read_sd_sector 
 call puts
-li a2, 0   
+li a0, 0   
 call sd_read_sector  # use a2 as sector no.
 
 li t1, 124       # |
@@ -151,8 +151,8 @@ ret
 
 
 # ---  sd_read_sector ---
-sd_read_sector:  #  a2 sector index
-    sw a2, 0(s2) # Write Sector index value to address 0x3200
+sd_read_sector:  #  a0 sector index
+    sw a0, 0(s2) # Write Sector index value to address 0x3200
 wait_ready:
     lw t2, 0(s5)   # 0x3220 ready
     li a0, 96      # `
