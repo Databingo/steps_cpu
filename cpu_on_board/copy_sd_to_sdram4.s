@@ -31,7 +31,7 @@ _start:
     li sp, 0x1000 # Set stack
 
     li s11, 0x2004 # UART print # a1 for print symbol addr
-    li a7, 0x2008 # UART controller
+    li s10, 0x2008 # UART controller
 
     li s1, 0x3000 # SD base
     li s2, 0x3200 # SD address
@@ -187,7 +187,7 @@ addi t3, t3, 55     # 10 is "A" ascii 65 ..
 print_h_hex:
 
 wait_uart_tx_h:
-lw t5, 0(a7)
+lw t5, 0(s10)
 srli t5, t5, 16   # 31:16 WSPACE = 0 full
 beq t5, x0, wait_uart_tx_h
 
@@ -202,7 +202,7 @@ addi t4, t4, 55        # 10 is "A" ascii 65 ..
 print_l_hex:
 
 wait_uart_tx_l:
-lw t5, 0(a7)
+lw t5, 0(s10)
 srli t5, t5, 16
 beq t5, x0, wait_uart_tx_l
 
@@ -234,7 +234,7 @@ ret
 # functions ------
 
 putchar:  # a2
-   lw t2, 0(a7)
+   lw t2, 0(s10)
    srli t2, t2, 16   # 31:16 WSPACE = 0 fully
    beq t2, x0, putchar
    sb a2, 0(s11)
@@ -265,7 +265,7 @@ stop_puts:
 #    ret
 
 wait_uart:
-    lw a6, 0(a7)
+    lw a6, 0(s10)
     srli a6, a6, 16   # 31:16 WSPACE = 0 fully
     beq a6, x0, wait_uart
     ret

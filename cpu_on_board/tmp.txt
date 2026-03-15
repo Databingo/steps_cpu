@@ -11,9 +11,9 @@ addi sp, sp, 0x0
 #     li s11, 0x2004 
 lui s11, 0x2
 addi s11, s11, 0x4
-#     li a7, 0x2008 
-lui a7, 0x2
-addi a7, a7, 0x8
+#     li s10, 0x2008 
+lui s10, 0x2
+addi s10, s10, 0x8
 #     li s1, 0x3000 
 lui s1, 0x3
 addi s1, s1, 0x0
@@ -207,7 +207,7 @@ letter_h:
 addi t3, t3, 55     # 10 is "A" ascii 65 ..
 print_h_hex:
 wait_uart_tx_h:
-lw t5, 0(a7)
+lw t5, 0(s10)
 srli t5, t5, 16   # 31:16 WSPACE = 0 full
 beq t5, x0, wait_uart_tx_h
 sw t3, 0(s11)
@@ -221,7 +221,7 @@ letter_l:
 addi t4, t4, 55        # 10 is "A" ascii 65 ..
 print_l_hex:
 wait_uart_tx_l:
-lw t5, 0(a7)
+lw t5, 0(s10)
 srli t5, t5, 16
 beq t5, x0, wait_uart_tx_l
 sw t4, 0(s11)
@@ -244,7 +244,7 @@ addi t2, x0, 0
 # ret
 jalr x0, 0(x1)
 putchar:
-lw t2, 0(a7)
+lw t2, 0(s10)
 srli t2, t2, 16   # 31:16 WSPACE = 0 fully
 beq t2, x0, putchar
 sb a2, 0(s11)
@@ -267,7 +267,7 @@ stop_puts:
 #     ret
 jalr x0, 0(x1)
 wait_uart:
-lw a6, 0(a7)
+lw a6, 0(s10)
 srli a6, a6, 16   # 31:16 WSPACE = 0 fully
 beq a6, x0, wait_uart
 #     ret
