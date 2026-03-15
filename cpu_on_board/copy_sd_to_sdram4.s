@@ -98,7 +98,7 @@ call print_hex_b
 li t0, "listring"
 addi sp, sp, -8
 sd t0, 0(sp)
-mv a1, sp
+mv a0, sp
 call puts
 addi sp, sp, 8
 

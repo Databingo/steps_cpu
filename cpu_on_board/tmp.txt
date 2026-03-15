@@ -114,8 +114,8 @@ slli t0, t0, 0xb
 ori t0, t0, 0x16c
 addi sp, sp, -8
 sd t0, 0(sp)
-# mv a1, sp
-addi a1, sp, 0
+# mv a0, sp
+addi a0, sp, 0
 # call puts
 auipc x1, 0 # R_RISCV_PCREL_HI20 puts
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I puts
