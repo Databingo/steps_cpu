@@ -25,6 +25,8 @@ reserved_sec:
     .word 0
 num_fats:
     .word 0
+sec_per_fat:
+    .word 0
 
 # -- Start program main function _start --
 .section .text
@@ -123,6 +125,32 @@ sd a0, 0(t0)
 ld a0, 0(t0)
 call print_hex_b
 
+# sectors_per_fat16 high offset 0x16-0x17 2 bytes
+
+addi t1, a1, 0x16
+lw t2, 0(t1)
+andi t2, t2, 0xff
+
+addi t1, a1, 0x17
+lw t3, 0(t1)
+andi t3, t3, 0xff
+
+
+
+li t0, "secPfat" # 7 char left on for null
+addi sp, sp, -8
+sd t0, 0(sp)
+mv a0, sp
+call puts
+addi sp, sp, 8
+
+la t0, sec_per_fat
+lhu a0, 0x16(s1)
+sb a0, 0(t0)
+lb a0, 1(t0)
+call print_hex_b
+ld a0, 0(t0)
+call print_hex_b
 
 
 end:
