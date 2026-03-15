@@ -49,13 +49,11 @@ la a0, read_sd_sector
 call puts
 li a2, 0   
 call sd_read_sector  # use a2 as sector no.
-aend:
-    j aend
 
 li t1, 124       # |
 sb t1, 0(s11)     # print
 
-la a1, prt_sector
+la a0, prt_sector
 call puts
 call print_sector
 
@@ -64,6 +62,8 @@ call putchar
 li a0, 45       # -
 call putchar
 
+aend:
+    j aend
 
 # -- Parse BPB -- little-endian  Bios Parameter Block : sector 0
 # reserved_sectors offset 0x0e-0x0f 2 bytes (including root sector 0)

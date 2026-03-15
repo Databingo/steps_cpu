@@ -50,16 +50,13 @@ addi a2, x0, 0x0
 # call sd_read_sector  
 auipc x1, 0 # R_RISCV_PCREL_HI20 sd_read_sector
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I sd_read_sector
-aend:
-#     j aend
-jal x0, aend
 # li t1, 124       
 # li t1, 124       
 addi t1, x0, 0x7c
 sb t1, 0(s11)     # print
-# la a1, prt_sector
-auipc a1, 0 # R_RISCV_PCREL_HI20 prt_sector 
-addi a1, a1, 0 # R_RISCV_PCREL_LO12_I prt_sector 
+# la a0, prt_sector
+auipc a0, 0 # R_RISCV_PCREL_HI20 prt_sector 
+addi a0, a0, 0 # R_RISCV_PCREL_LO12_I prt_sector 
 # call puts
 auipc x1, 0 # R_RISCV_PCREL_HI20 puts
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I puts
@@ -78,6 +75,9 @@ addi a0, x0, 0x2d
 # call putchar
 auipc x1, 0 # R_RISCV_PCREL_HI20 putchar
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I putchar
+aend:
+#     j aend
+jal x0, aend
 lbu t2, 0x0f(s1)
 # call print_hex_b
 auipc x1, 0 # R_RISCV_PCREL_HI20 print_hex_b
