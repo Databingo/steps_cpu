@@ -91,7 +91,7 @@ lw t2, 0(t0)
 call print_hex_b
 
 
-li t0, "resSec:"
+li t0, "resSec:" # 7 char left on for null
 addi sp, sp, -8
 sd t0, 0(sp)
 mv a0, sp
@@ -103,12 +103,12 @@ call putchar
 
 la t0, reserved_sec
 lbu t2, 0x0e(s1)
-sw t2, 0(t0)
-lw t2, 0(t0)
+sd t2, 0(t0)
+ld t2, 0(t0)
 call print_hex_b
 
 
-li t0, "resSecs:"
+li t0, "resSec:"
 addi sp, sp, -8
 sd t0, 0(sp)
 mv a0, sp
@@ -251,8 +251,8 @@ putchar:  # a0
 
 puts: # a0 addr
     addi sp, sp, -16
-    sw ra, 0(sp)
-    sw a0, 8(sp)
+    sd ra, 0(sp)
+    sd a0, 8(sp)
     mv t1, a0
 puts_loop:
     lb a0, 0(t1)
@@ -261,8 +261,8 @@ puts_loop:
     addi t1, t1, 1 # next byte
     j puts_loop
 stop_puts:
-    lw ra, 0(sp)
-    lw a0, 8(sp)
+    ld ra, 0(sp)
+    ld a0, 8(sp)
     addi sp, sp, 16
     ret
 
