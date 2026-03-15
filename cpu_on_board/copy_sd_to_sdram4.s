@@ -30,8 +30,9 @@ reserved_sec:
 _start:
     li sp, 0x1000 # Set stack
 
-    li s11, 0x2004 # UART print # a1 for print symbol addr
-    li a7, 0x2008 # UART controller
+    li s11,0x2004 # UART print # a1 for print symbol addr
+    li s10,0x2008 # UART controller
+    # a0 for default first call parameter 
 
     li s1, 0x3000 # SD base
     li s2, 0x3200 # SD address
@@ -57,9 +58,9 @@ la a1, prt_sector
 call puts
 call print_sector
 
-li a2, 43       # +
+li a0, 43       # +
 call putchar
-li a2, 45       # -
+li a0, 45       # -
 call putchar
 
 
@@ -83,7 +84,7 @@ call print_hex_b
 lbu t2, 0x0e(s1)
 call print_hex_b
 
-li a2, 126       # ~
+li a0, 126       # ~
 call putchar
 
 la t0, reserved_sec
@@ -153,7 +154,7 @@ sd_read_sector:  #  a2 sector index
     sw a2, 0(s2) # Write Sector index value to address 0x3200
 wait_ready:
     lw t2, 0(s5)   # 0x3220 ready
-    li a2, 96      # `
+    li a0, 96      # `
     mv t0, ra
     call putchar
     mv ra, t0
@@ -187,7 +188,7 @@ addi t3, t3, 55     # 10 is "A" ascii 65 ..
 print_h_hex:
 
 wait_uart_tx_h:
-lw t5, 0(a7)
+lw t5, 0(s10)
 srli t5, t5, 16   # 31:16 WSPACE = 0 full
 beq t5, x0, wait_uart_tx_h
 
@@ -202,7 +203,7 @@ addi t4, t4, 55        # 10 is "A" ascii 65 ..
 print_l_hex:
 
 wait_uart_tx_l:
-lw t5, 0(a7)
+lw t5, 0(s10)
 srli t5, t5, 16
 beq t5, x0, wait_uart_tx_l
 
@@ -233,21 +234,22 @@ ret
 
 # functions ------
 
-putchar:  # a2
-   lw t2, 0(a7)
-   srli t2, t2, 16   # 31:16 WSPACE = 0 fully
-   beq t2, x0, putchar
-   sb a2, 0(s11)
+putchar:  # a0
+   lw t1, 0(s10)
+   srli t1, t1, 16   # 31:16 WSPACE = 0 full uart buffer
+   beq t1, x0, putchar
+   sb a0, 0(s11)
    ret
 
 
-puts: # a1
-    lb a2, 0(a1)
-    beq a2, x0, stop_puts # \x00 for end of string
+puts: # a0
+    mv t1, a0
+    lb a0, 0(t1)
+    beq a0, x0, stop_puts # \x00 for end of string
     mv t0, ra
     call putchar
     mv ra, t0
-    addi a1, a1, 1 # next byte
+    addi t1, t1, 1 # next byte
     j puts
 stop_puts:
     ret
@@ -265,8 +267,8 @@ stop_puts:
 #    ret
 
 wait_uart:
-    lw a6, 0(a7)
-    srli a6, a6, 16   # 31:16 WSPACE = 0 fully
-    beq a6, x0, wait_uart
+    lw t0, 0(s10)
+    srli t0, t0, 16   # 31:16 WSPACE = 0 fully
+    beq t0, x0, wait_uart
     ret
 
