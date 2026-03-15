@@ -29,8 +29,9 @@ reserved_sec:
 # -- Global setup --
 _start:
     li sp, 0x1000 # Set stack
+    # a0 for function call default parameter
 
-    li s11, 0x2004 # UART print # a1 for print symbol addr
+    li s11, 0x2004 # UART print 
     li s10, 0x2008 # UART controller
 
     li s1, 0x3000 # SD base
@@ -61,9 +62,6 @@ li a0, 43       # +
 call putchar
 li a0, 45       # -
 call putchar
-
-aend:
-    j aend
 
 # -- Parse BPB -- little-endian  Bios Parameter Block : sector 0
 # reserved_sectors offset 0x0e-0x0f 2 bytes (including root sector 0)
@@ -104,9 +102,6 @@ mv a1, sp
 call puts
 addi sp, sp, 8
 
-
-
-
 end:
     j end
 
@@ -144,8 +139,6 @@ call wait_uart
 mv ra, t0
 sw t4, 0(s11)
 ret
-
-
 
 
 
