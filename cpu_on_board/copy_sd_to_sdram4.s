@@ -91,12 +91,12 @@ lw t2, 0(t0)
 call print_hex_b
 
 
-li t0, "resSecs:"
-addi sp, sp, -8
-sd t0, 0(sp)
-mv a0, sp
-call puts
-addi sp, sp, 8
+#li t0, "resSecs:"
+#addi sp, sp, -8
+#sd t0, 0(sp)
+#mv a0, sp
+#call puts
+#addi sp, sp, 8
 
 
 lbu t2, 0x0e(s1)
@@ -105,12 +105,12 @@ lw t2, 0(t0)
 call print_hex_b
 
 
-#li t0, "resSecs:"
-#addi sp, sp, -8
-#sd t0, 0(sp)
-#mv a0, sp
-#call puts
-#addi sp, sp, 8
+li t0, "resSecs:"
+addi sp, sp, -8
+sd t0, 0(sp)
+mv a0, sp
+call puts
+addi sp, sp, 8
 
 end:
     j end
