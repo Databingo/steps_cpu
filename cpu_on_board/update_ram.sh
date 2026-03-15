@@ -1,4 +1,6 @@
 #!/bin/bash
+source ~/.zshrc
+cm
 
 PROJECT_NAME="cpu_on_board"
 SOF_FILE="output_files/${PROJECT_NAME}.sof"
