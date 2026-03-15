@@ -38,12 +38,9 @@ addi a0, a0, 0 # R_RISCV_PCREL_LO12_I sbi
 #     call puts
 auipc x1, 0 # R_RISCV_PCREL_HI20 puts
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I puts
-aend:
-#     j aend
-jal x0, aend
-# la a1, read_sd_sector 
-auipc a1, 0 # R_RISCV_PCREL_HI20 read_sd_sector 
-addi a1, a1, 0 # R_RISCV_PCREL_LO12_I read_sd_sector 
+# la a0, read_sd_sector 
+auipc a0, 0 # R_RISCV_PCREL_HI20 read_sd_sector 
+addi a0, a0, 0 # R_RISCV_PCREL_LO12_I read_sd_sector 
 # call puts
 auipc x1, 0 # R_RISCV_PCREL_HI20 puts
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I puts
@@ -53,6 +50,9 @@ addi a2, x0, 0x0
 # call sd_read_sector  
 auipc x1, 0 # R_RISCV_PCREL_HI20 sd_read_sector
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I sd_read_sector
+aend:
+#     j aend
+jal x0, aend
 # li t1, 124       
 # li t1, 124       
 addi t1, x0, 0x7c

@@ -43,14 +43,14 @@ _start:
     # print
     la a0, sbi 
     call puts
-aend:
-    j aend
 
 # ---------------------- SD card -------------------
-la a1, read_sd_sector 
+la a0, read_sd_sector 
 call puts
 li a2, 0   
 call sd_read_sector  # use a2 as sector no.
+aend:
+    j aend
 
 li t1, 124       # |
 sb t1, 0(s11)     # print
