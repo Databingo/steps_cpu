@@ -119,7 +119,10 @@ addi sp, sp, 8
 # la a1, reserved_sec
 auipc a1, 0 # R_RISCV_PCREL_HI20 reserved_sec 
 addi a1, a1, 0 # R_RISCV_PCREL_LO12_I reserved_sec 
-lhu a0, 0x0e(s1)
+lbu t0, 0x0e(s1)
+lbu t1, 0x0f(s1)
+slli t1, t1, 8
+or a0, t1, t0
 sh a0, 0(a1)
 lb a0, 1(a1)
 # call print_hex_b
@@ -147,12 +150,12 @@ addi a0, sp, 0
 auipc x1, 0 # R_RISCV_PCREL_HI20 puts
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I puts
 addi sp, sp, 8
-# la t0, num_fats
-auipc t0, 0 # R_RISCV_PCREL_HI20 num_fats 
-addi t0, t0, 0 # R_RISCV_PCREL_LO12_I num_fats 
+# la a1, num_fats
+auipc a1, 0 # R_RISCV_PCREL_HI20 num_fats 
+addi a1, a1, 0 # R_RISCV_PCREL_LO12_I num_fats 
 lbu a0, 0x10(s1)
-sd a0, 0(t0)
-ld a0, 0(t0)
+sd a0, 0(a1)
+ld a0, 0(a1)
 # call print_hex_b
 auipc x1, 0 # R_RISCV_PCREL_HI20 print_hex_b
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_hex_b
@@ -174,10 +177,13 @@ addi a0, sp, 0
 auipc x1, 0 # R_RISCV_PCREL_HI20 puts
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I puts
 addi sp, sp, 8
-lhu a0, 0x16(s1)
 # la a1, sec_per_fat
 auipc a1, 0 # R_RISCV_PCREL_HI20 sec_per_fat 
 addi a1, a1, 0 # R_RISCV_PCREL_LO12_I sec_per_fat 
+lbu t0, 0x16(s1)
+lbu t1, 0x17(s1)
+slli t1, t1, 8
+or a0, t1, t0
 sh a0, 0(a1)
 lb a0, 1(a1)
 # call print_hex_b
@@ -208,7 +214,7 @@ auipc x1, 0 # R_RISCV_PCREL_HI20 wait_uart
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I wait_uart
 #     mv ra, t0
 addi ra, t0, 0
-sw t3, 0(s11)
+sb t3, 0(s11)
 andi t4, a0, 0x0F      # get low nibble
 slti t5, t4, 10     # if < 10 number
 beq t5, x0, letterl
@@ -225,7 +231,7 @@ auipc x1, 0 # R_RISCV_PCREL_HI20 wait_uart
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I wait_uart
 #     mv ra, t0
 addi ra, t0, 0
-sw t4, 0(s11)
+sb t4, 0(s11)
 #     ret
 jalr x0, 0(x1)
 sd_read_sector:
@@ -277,7 +283,7 @@ wait_uart_tx_h:
 lw t5, 0(s10)
 srli t5, t5, 16   # 31:16 WSPACE = 0 full
 beq t5, x0, wait_uart_tx_h
-sw t3, 0(s11)
+sb t3, 0(s11)
 andi t4, t2, 0x0F      # get low nibble
 slti t5, t4, 10     # if < 10 number
 beq t5, x0, letter_l
@@ -291,7 +297,7 @@ wait_uart_tx_l:
 lw t5, 0(s10)
 srli t5, t5, 16
 beq t5, x0, wait_uart_tx_l
-sw t4, 0(s11)
+sb t4, 0(s11)
 bge t6, t1, print_loop
 #     ret
 jalr x0, 0(x1)
@@ -304,7 +310,7 @@ addi t1, t1, -1
 srl t2, s11, t1
 andi t2, t2, 1
 addi t2, t2, 48  # 0 to "0"
-sw t2, 0(s11)     # print
+sb t2, 0(s11)     # print
 bne t1, x0, print_binf_loop
 addi t1, x0, 0
 addi t2, x0, 0

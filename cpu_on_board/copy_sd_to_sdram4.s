@@ -105,7 +105,11 @@ call puts
 addi sp, sp, 8
 
 la a1, reserved_sec
-lhu a0, 0x0e(s1)
+lbu t0, 0x0e(s1)
+lbu t1, 0x0f(s1)
+slli t1, t1, 8
+or a0, t1, t0
+
 sh a0, 0(a1)
 lb a0, 1(a1)
 call print_hex_b
@@ -120,10 +124,10 @@ mv a0, sp
 call puts
 addi sp, sp, 8
 
-la t0, num_fats
+la a1, num_fats
 lbu a0, 0x10(s1)
-sd a0, 0(t0)
-ld a0, 0(t0)
+sd a0, 0(a1)
+ld a0, 0(a1)
 call print_hex_b
 
 # sectors_per_fat16 high offset 0x16-0x17 2 bytes
@@ -134,8 +138,13 @@ mv a0, sp
 call puts
 addi sp, sp, 8
 
-lhu a0, 0x16(s1)
 la a1, sec_per_fat
+
+lbu t0, 0x16(s1)
+lbu t1, 0x17(s1)
+slli t1, t1, 8
+or a0, t1, t0
+
 sh a0, 0(a1)
 lb a0, 1(a1)
 call print_hex_b
@@ -162,7 +171,7 @@ print_hhex:
     mv t0, ra
     call wait_uart
     mv ra, t0
-    sw t3, 0(s11)
+    sb t3, 0(s11)
     
     andi t4, a0, 0x0F      # get low nibble
     slti t5, t4, 10     # if < 10 number
@@ -175,7 +184,7 @@ print_lhex:
     mv t0, ra
     call wait_uart
     mv ra, t0
-    sw t4, 0(s11)
+    sb t4, 0(s11)
     ret
 
 
@@ -220,7 +229,7 @@ wait_uart_tx_h:
     srli t5, t5, 16   # 31:16 WSPACE = 0 full
     beq t5, x0, wait_uart_tx_h
     
-    sw t3, 0(s11)
+    sb t3, 0(s11)
     andi t4, t2, 0x0F      # get low nibble
     slti t5, t4, 10     # if < 10 number
     beq t5, x0, letter_l
@@ -234,7 +243,7 @@ wait_uart_tx_l:
     srli t5, t5, 16
     beq t5, x0, wait_uart_tx_l
     
-    sw t4, 0(s11)
+    sb t4, 0(s11)
     bge t6, t1, print_loop
     ret
 # -- end print_sector --
@@ -250,7 +259,7 @@ addi t1, t1, -1
 srl t2, s11, t1
 andi t2, t2, 1
 addi t2, t2, 48  # 0 to "0"
-sw t2, 0(s11)     # print
+sb t2, 0(s11)     # print
 bne t1, x0, print_binf_loop
 # clean middle re
 addi t1, x0, 0
