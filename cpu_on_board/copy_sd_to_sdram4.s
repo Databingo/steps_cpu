@@ -127,7 +127,7 @@ la a1, reserved_sec
 lbu t0, 0x0e(s1)
 lbu t1, 0x0f(s1)
 slli t1, t1, 8
-and a0, t1, t0
+and a0, t1, t0   # hardware miss take and/or
 
 sh a0, 0(a1)
 lb a0, 1(a1)
