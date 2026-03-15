@@ -96,8 +96,8 @@ lw t2, 0(t0)
 # call print_hex_b
 auipc x1, 0 # R_RISCV_PCREL_HI20 print_hex_b
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_hex_b
-# li t0, "resSecs:"
-lui t0, 0x3a736
+# li t0, "resSec:"
+lui t0, 0x3a6
 srli t0, t0, 0x1
 ori t0, t0, 0x1b2
 slli t0, t0, 0xb
