@@ -254,8 +254,12 @@ sb a0, 0(s11)
 #    ret
 jalr x0, 0(x1)
 puts:
+addi sp, sp, -16
+sw ra, 0(sp)
+sw a0, 8(sp)
 #     mv t1, a0
 addi t1, a0, 0
+puts_loop:
 lb a0, 0(t1)
 beq a0, x0, stop_puts # \x00 for end of string
 #     mv t0, ra
@@ -266,9 +270,12 @@ jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I putchar
 #     mv ra, t0
 addi ra, t0, 0
 addi t1, t1, 1 # next byte
-#     j puts
-jal x0, puts
+#     j puts_loop
+jal x0, puts_loop
 stop_puts:
+lw ra, 0(sp)
+lw a0, 8(sp)
+addi sp, sp 16
 #     ret
 jalr x0, 0(x1)
 wait_uart:
