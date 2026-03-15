@@ -41,11 +41,11 @@ _start:
     li s6, 0x3228 # SD cache available
 
     # print
-    la a1, sbi 
+    la a0, sbi 
     call puts
 
 # ---------------------- SD card -------------------
-la a1, read_sd_sector 
+la a0, read_sd_sector 
 call puts
 li a2, 0   
 call sd_read_sector  # use a2 as sector no.
@@ -53,7 +53,7 @@ call sd_read_sector  # use a2 as sector no.
 li t1, 124       # |
 sb t1, 0(s11)     # print
 
-la a1, prt_sector
+la a0, prt_sector
 call puts
 call print_sector
 
@@ -98,7 +98,7 @@ call print_hex_b
 li t0, "listring"
 addi sp, sp, -8
 sd t0, 0(sp)
-mv a1, sp
+mv a0, sp
 call puts
 addi sp, sp, 8
 
@@ -241,13 +241,14 @@ putchar:  # a0
    ret
 
 
-puts: # a1
-    lb a0, 0(a1)
+puts: # a0 addr
+    mv t1, a0
+    lb a0, 0(t1)
     beq a0, x0, stop_puts # \x00 for end of string
     mv t0, ra
     call putchar
     mv ra, t0
-    addi a1, a1, 1 # next byte
+    addi t1, t1, 1 # next byte
     j puts
 stop_puts:
     ret
