@@ -381,5 +381,3 @@ instrucion operand, operand
 .byte
 .align
 .macro .endm
-
-
