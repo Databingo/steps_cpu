@@ -114,7 +114,7 @@ call print_hex_b
 
 slli a3, a3, 8
 or a4, a3, a2
-mv a0, a4
+srli  a0, a4, 0
 call print_hex_b
 srli a0, a4, 8
 call print_hex_b
