@@ -1,5 +1,5 @@
 #!/bin/bash
-source ~/.zshrc
+source ~/.zshrc || source ~/.bashrc
 cm
 
 PROJECT_NAME="cpu_on_board"
