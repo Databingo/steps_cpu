@@ -41,8 +41,10 @@ _start:
     li s6, 0x3228 # SD cache available
 
     # print
-    la a1, sbi 
+    la a0, sbi 
     call puts
+aend:
+    j aend
 
 # ---------------------- SD card -------------------
 la a1, read_sd_sector 
@@ -241,13 +243,14 @@ putchar:  # a0
    ret
 
 
-puts: # a1
-    lb a0, 0(a1)
+puts: # a0 addr
+    mv t1, a0
+    lb a0, 0(t1)
     beq a0, x0, stop_puts # \x00 for end of string
     mv t0, ra
-    call putchar
+    call putchar # a0 char
     mv ra, t0
-    addi a1, a1, 1 # next byte
+    addi t1, t1, 1 # next byte
     j puts
 stop_puts:
     ret
