@@ -119,8 +119,17 @@ addi sp, sp, 8
 # la a1, reserved_sec
 auipc a1, 0 # R_RISCV_PCREL_HI20 reserved_sec 
 addi a1, a1, 0 # R_RISCV_PCREL_LO12_I reserved_sec 
-lbu t0, 0x0e(s1)
-lbu t1, 0x0f(s1)
+lbu a0, 0x0e(s1)
+# call print_hex_b
+auipc x1, 0 # R_RISCV_PCREL_HI20 print_hex_b
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_hex_b
+lbu a0, 0x0f(s1)
+# call print_hex_b
+auipc x1, 0 # R_RISCV_PCREL_HI20 print_hex_b
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_hex_b
+xend:
+#     j xend
+jal x0, xend
 slli t1, t1, 8
 or a0, t1, t0
 sh a0, 0(a1)
@@ -154,8 +163,8 @@ addi sp, sp, 8
 auipc a1, 0 # R_RISCV_PCREL_HI20 num_fats 
 addi a1, a1, 0 # R_RISCV_PCREL_LO12_I num_fats 
 lbu a0, 0x10(s1)
-sd a0, 0(a1)
-ld a0, 0(a1)
+sw a0, 0(a1)
+lw a0, 0(a1)
 # call print_hex_b
 auipc x1, 0 # R_RISCV_PCREL_HI20 print_hex_b
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_hex_b

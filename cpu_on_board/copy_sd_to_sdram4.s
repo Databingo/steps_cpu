@@ -105,8 +105,14 @@ call puts
 addi sp, sp, 8
 
 la a1, reserved_sec
-lbu t0, 0x0e(s1)
-lbu t1, 0x0f(s1)
+lbu a0, 0x0e(s1)
+call print_hex_b
+lbu a0, 0x0f(s1)
+call print_hex_b
+
+xend:
+    j xend
+
 slli t1, t1, 8
 or a0, t1, t0
 
@@ -126,8 +132,8 @@ addi sp, sp, 8
 
 la a1, num_fats
 lbu a0, 0x10(s1)
-sd a0, 0(a1)
-ld a0, 0(a1)
+sw a0, 0(a1)
+lw a0, 0(a1)
 call print_hex_b
 
 # sectors_per_fat16 high offset 0x16-0x17 2 bytes
