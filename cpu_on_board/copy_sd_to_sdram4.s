@@ -244,15 +244,22 @@ putchar:  # a0
 
 
 puts: # a0 addr
+    addi sp, sp, -16
+    sw ra, 0(sp)
+    sw a0, 8(sp)
     mv t1, a0
+puts_loop:
     lb a0, 0(t1)
     beq a0, x0, stop_puts # \x00 for end of string
     mv t0, ra
     call putchar # a0 char
     mv ra, t0
     addi t1, t1, 1 # next byte
-    j puts
+    j puts_loop
 stop_puts:
+    lw ra, 0(sp)
+    lw a0, 8(sp)
+    addi sp, sp 16
     ret
 
 wait_uart:
