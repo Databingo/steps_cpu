@@ -77,27 +77,6 @@ addi a0, x0, 0x2d
 # call putchar
 auipc x1, 0 # R_RISCV_PCREL_HI20 putchar
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I putchar
-lbu a0, 0x0f(s1)
-# call print_hex_b
-auipc x1, 0 # R_RISCV_PCREL_HI20 print_hex_b
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_hex_b
-lbu a0, 0x0e(s1)
-# call print_hex_b
-auipc x1, 0 # R_RISCV_PCREL_HI20 print_hex_b
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_hex_b
-# li a0, 126       
-# li a0, 126       
-addi a0, x0, 0x7e
-# call putchar
-auipc x1, 0 # R_RISCV_PCREL_HI20 putchar
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I putchar
-# la t0, reserved_sec
-auipc t0, 0 # R_RISCV_PCREL_HI20 reserved_sec 
-addi t0, t0, 0 # R_RISCV_PCREL_LO12_I reserved_sec 
-lw a0, 0(t0)
-# call print_hex_b
-auipc x1, 0 # R_RISCV_PCREL_HI20 print_hex_b
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_hex_b
 # li t0, "resSec:" 
 lui t0, 0x3a6
 srli t0, t0, 0x1

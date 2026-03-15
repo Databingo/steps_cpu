@@ -82,18 +82,19 @@ call putchar
 #mv a2, t2    # a2 = reserved_sectors offset 0x0e-0x0f 2 bytes (including root sector 0)
 
 
-lbu a0, 0x0f(s1)
-call print_hex_b
-lbu a0, 0x0e(s1)
-call print_hex_b
+#lbu a0, 0x0f(s1)
+#call print_hex_b
+#lbu a0, 0x0e(s1)
+#call print_hex_b
+#
+#li a0, 126       # ~
+#call putchar
+#
+#la t0, reserved_sec
+#lw a0, 0(t0)
+#call print_hex_b
 
-li a0, 126       # ~
-call putchar
-
-la t0, reserved_sec
-lw a0, 0(t0)
-call print_hex_b
-
+# root_dir_sector_start = reserved_sectors + (num_fats * sectors_per_fat16)
 
 li t0, "resSec:" # 7 char left on for null
 addi sp, sp, -8
@@ -110,10 +111,7 @@ call print_hex_b
 lb a0, 0(t0)
 call print_hex_b
 
-
-# root_dir_sector_start = reserved_sectors + (num_fats * sectors_per_fat16)
 # num_fats offset 0x10 1 bytes
-
 li t0, "numFat:" # 7 char left on for null
 addi sp, sp, -8
 sd t0, 0(sp)
@@ -128,7 +126,6 @@ ld a0, 0(t0)
 call print_hex_b
 
 # sectors_per_fat16 high offset 0x16-0x17 2 bytes
-
 li t0, "secPfat" # 7 char left on for null
 addi sp, sp, -8
 sd t0, 0(sp)
@@ -143,7 +140,6 @@ lb a0, 1(t0)
 call print_hex_b
 lb a0, 0(t0)
 call print_hex_b
-
 
 end:
     j end
