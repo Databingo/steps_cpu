@@ -91,12 +91,12 @@ lw t2, 0(t0)
 call print_hex_b
 
 
-#li t0, "resSecs:"
-#addi sp, sp, -8
-#sd t0, 0(sp)
-#mv a0, sp
-#call puts
-#addi sp, sp, 8
+li t0, "resSecs:"
+addi sp, sp, -8
+sd t0, 0(sp)
+mv a0, sp
+call puts
+addi sp, sp, 8
 
 
 la t0, reserved_sec

@@ -96,6 +96,24 @@ lw t2, 0(t0)
 # call print_hex_b
 auipc x1, 0 # R_RISCV_PCREL_HI20 print_hex_b
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_hex_b
+# li t0, "resSecs:"
+lui t0, 0x3a736
+srli t0, t0, 0x1
+ori t0, t0, 0x1b2
+slli t0, t0, 0xb
+ori t0, t0, 0x54d
+slli t0, t0, 0xb
+ori t0, t0, 0x66c
+slli t0, t0, 0xb
+ori t0, t0, 0x572
+addi sp, sp, -8
+sd t0, 0(sp)
+# mv a0, sp
+addi a0, sp, 0
+# call puts
+auipc x1, 0 # R_RISCV_PCREL_HI20 puts
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I puts
+addi sp, sp, 8
 # la t0, reserved_sec
 auipc t0, 0 # R_RISCV_PCREL_HI20 reserved_sec 
 addi t0, t0, 0 # R_RISCV_PCREL_LO12_I reserved_sec 
