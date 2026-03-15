@@ -113,7 +113,7 @@ mv a3, a0
 call print_hex_b
 
 slli a3, a3, 8
-or a4, a3, a2
+and a4, a3, a2
 srli  a0, a4, 0
 call print_hex_b
 srli a0, a4, 8
