@@ -78,16 +78,16 @@ call putchar
 #mv a2, t2    # a2 = reserved_sectors offset 0x0e-0x0f 2 bytes (including root sector 0)
 
 
-lbu t2, 0x0f(s1)
+lbu a0, 0x0f(s1)
 call print_hex_b
-lbu t2, 0x0e(s1)
+lbu a0, 0x0e(s1)
 call print_hex_b
 
 li a0, 126       # ~
 call putchar
 
 la t0, reserved_sec
-lw t2, 0(t0)
+lw a0, 0(t0)
 call print_hex_b
 
 
@@ -102,31 +102,29 @@ li a0, 94       # ^
 call putchar
 
 la t0, reserved_sec
-lbu t2, 0x0e(s1)
-sd t2, 0(t0)
-ld t2, 0(t0)
+lbu a0, 0x0e(s1)
+sd a0, 0(t0)
+ld a0, 0(t0)
 call print_hex_b
 
 
-li t0, "resSec:"
-addi sp, sp, -8
-sd t0, 0(sp)
-mv a0, sp
-call puts
-addi sp, sp, 8
+#li t0, "resSec:"
+#addi sp, sp, -8
+#sd t0, 0(sp)
+#mv a0, sp
+#call puts
+#addi sp, sp, 8
 
 end:
     j end
 
 
 
+# -- function --
+print_hex_b:  # a0
+andi a0, a0, 0xFF   # Isolate byte value
 
-
-# print_hex_b(t2)
-print_hex_b:
-andi t2, t2, 0xFF   # Isolate byte value
-
-srli t3, t2, 4      # get high nibble
+srli t3, a0, 4      # get high nibble
 slti t5, t3, 10     # if < 10 number
 beq t5, x0, letterh
 addi t3, t3, 48     # 0 is "0" ascii 48
@@ -139,7 +137,7 @@ call wait_uart
 mv ra, t0
 sw t3, 0(s11)
 
-andi t4, t2, 0x0F      # get low nibble
+andi t4, a0, 0x0F      # get low nibble
 slti t5, t4, 10     # if < 10 number
 beq t5, x0, letterl
 addi t4, t4, 48     # 0 is "0" ascii 48

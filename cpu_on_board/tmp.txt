@@ -75,11 +75,11 @@ addi a0, x0, 0x2d
 # call putchar
 auipc x1, 0 # R_RISCV_PCREL_HI20 putchar
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I putchar
-lbu t2, 0x0f(s1)
+lbu a0, 0x0f(s1)
 # call print_hex_b
 auipc x1, 0 # R_RISCV_PCREL_HI20 print_hex_b
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_hex_b
-lbu t2, 0x0e(s1)
+lbu a0, 0x0e(s1)
 # call print_hex_b
 auipc x1, 0 # R_RISCV_PCREL_HI20 print_hex_b
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_hex_b
@@ -92,7 +92,7 @@ jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I putchar
 # la t0, reserved_sec
 auipc t0, 0 # R_RISCV_PCREL_HI20 reserved_sec 
 addi t0, t0, 0 # R_RISCV_PCREL_LO12_I reserved_sec 
-lw t2, 0(t0)
+lw a0, 0(t0)
 # call print_hex_b
 auipc x1, 0 # R_RISCV_PCREL_HI20 print_hex_b
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_hex_b
@@ -123,36 +123,18 @@ jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I putchar
 # la t0, reserved_sec
 auipc t0, 0 # R_RISCV_PCREL_HI20 reserved_sec 
 addi t0, t0, 0 # R_RISCV_PCREL_LO12_I reserved_sec 
-lbu t2, 0x0e(s1)
-sd t2, 0(t0)
-ld t2, 0(t0)
+lbu a0, 0x0e(s1)
+sd a0, 0(t0)
+ld a0, 0(t0)
 # call print_hex_b
 auipc x1, 0 # R_RISCV_PCREL_HI20 print_hex_b
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_hex_b
-# li t0, "resSec:"
-lui t0, 0x3a6
-srli t0, t0, 0x1
-ori t0, t0, 0x1b2
-slli t0, t0, 0xb
-ori t0, t0, 0x54d
-slli t0, t0, 0xb
-ori t0, t0, 0x66c
-slli t0, t0, 0xb
-ori t0, t0, 0x572
-addi sp, sp, -8
-sd t0, 0(sp)
-# mv a0, sp
-addi a0, sp, 0
-# call puts
-auipc x1, 0 # R_RISCV_PCREL_HI20 puts
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I puts
-addi sp, sp, 8
 end:
 #     j end
 jal x0, end
 print_hex_b:
-andi t2, t2, 0xFF   # Isolate byte value
-srli t3, t2, 4      # get high nibble
+andi a0, a0, 0xFF   # Isolate byte value
+srli t3, a0, 4      # get high nibble
 slti t5, t3, 10     # if < 10 number
 beq t5, x0, letterh
 addi t3, t3, 48     # 0 is "0" ascii 48
@@ -169,7 +151,7 @@ jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I wait_uart
 # mv ra, t0
 addi ra, t0, 0
 sw t3, 0(s11)
-andi t4, t2, 0x0F      # get low nibble
+andi t4, a0, 0x0F      # get low nibble
 slti t5, t4, 10     # if < 10 number
 beq t5, x0, letterl
 addi t4, t4, 48     # 0 is "0" ascii 48
