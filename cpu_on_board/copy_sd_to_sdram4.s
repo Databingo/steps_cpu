@@ -150,17 +150,15 @@ mv a0, sp
 call puts
 addi sp, sp, 8
 
-la a1, sec_per_fat
+la a1, byte_per_sec
 lbu t0, 0x06(s1)
 lbu t1, 0x0c(s1)
 slli t1, t1, 8
 or a0, t1, t0 
 
 sh a0, 0(a1)
-lb a0, 1(a1)
-call print_hex_b
 lb a0, 0(a1)
-call print_hex_b
+call print_reg
 
 
 
