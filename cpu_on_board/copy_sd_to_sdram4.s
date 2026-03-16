@@ -214,6 +214,7 @@ call print_reg
 li a0, 63       # ?
 call putchar
 
+mul a0, t1, t2
 la a1, reserved_sec
 lw t0, 0(a1)
 add a0, a0, t0

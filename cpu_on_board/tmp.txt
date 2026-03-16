@@ -298,6 +298,7 @@ addi a0, x0, 0x3f
 # call putchar
 auipc x1, 0 # R_RISCV_PCREL_HI20 putchar
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I putchar
+mul a0, t1, t2
 # la a1, reserved_sec
 auipc a1, 0 # R_RISCV_PCREL_HI20 reserved_sec 
 addi a1, a1, 0 # R_RISCV_PCREL_LO12_I reserved_sec 
