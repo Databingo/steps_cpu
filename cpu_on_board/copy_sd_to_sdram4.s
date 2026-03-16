@@ -221,7 +221,7 @@ call print_reg
 
 
 li t1, -2
-li t2, 3
+li t2, -3
 mul a0, t1, t2
 call print_reg
 

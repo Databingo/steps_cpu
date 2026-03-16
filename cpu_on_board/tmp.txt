@@ -301,31 +301,23 @@ addi a0, x0, 0x2b
 auipc x1, 0 # R_RISCV_PCREL_HI20 putchar
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I putchar
 # li a0, -2
-lui a0, 0xfffff
-srli a0, a0, 0x1
-ori a0, a0, 0x7ff
-slli a0, a0, 0xb
-ori a0, a0, 0x7ff
-slli a0, a0, 0xb
-ori a0, a0, 0x7ff
-slli a0, a0, 0xb
-ori a0, a0, 0x7fe
+# li a0, -2
+addi a0, x0, 0x2
+xori a0, a0, -1
+addi a0, a0, 1
 # call print_reg
 auipc x1, 0 # R_RISCV_PCREL_HI20 print_reg
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_reg
 # li t1, -2
-lui t1, 0xfffff
-srli t1, t1, 0x1
-ori t1, t1, 0x7ff
-slli t1, t1, 0xb
-ori t1, t1, 0x7ff
-slli t1, t1, 0xb
-ori t1, t1, 0x7ff
-slli t1, t1, 0xb
-ori t1, t1, 0x7fe
-# li t2, 3
-# li t2, 3
+# li t1, -2
+addi t1, x0, 0x2
+xori t1, t1, -1
+addi t1, t1, 1
+# li t2, -3
+# li t2, -3
 addi t2, x0, 0x3
+xori t2, t2, -1
+addi t2, t2, 1
 mul a0, t1, t2
 # call print_reg
 auipc x1, 0 # R_RISCV_PCREL_HI20 print_reg

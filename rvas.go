@@ -215,7 +215,7 @@ func isValidImmediate(s string) (int64, error) {
 		return imm3, nil
 	}
 }
-func isValidImmediate_u(s string) (int64, uint64, error) {
+func isValidImmediate_u(s string) (int64, uint64, error) { // get sign + abs
 	var sign int64
 	var imm0, imm1, imm2, imm3 uint64
 	var err0 = errors.New("error_init")
@@ -250,9 +250,9 @@ func isValidImmediate_u(s string) (int64, uint64, error) {
 
 	if strings.HasPrefix(s, "-") {
 		sign = 1
-		imm1 = ^imm1 + 1
-		imm2 = ^imm2 + 1
-		imm3 = ^imm3 + 1
+		//imm1 = ^imm1 + 1
+		//imm2 = ^imm2 + 1
+		//imm3 = ^imm3 + 1
 	}
 
 	//if err0 != nil && err1 != nil && err2 != nil && err3 != nil {
@@ -877,12 +877,12 @@ func main() { //t6a7s11
 			    }
 		        }
 
-			//// 取补码还原负数
-			//if sign == 1 {
-			//	ins = fmt.Sprintf("xori %s, %s, -1\naddi %s, %s, 1\n", code[1], code[1], code[1], code[1])
-			//	real_instr.WriteString(ins)
+			// 取补码还原负数
+			if sign == 1 {
+				ins = fmt.Sprintf("xori %s, %s, -1\naddi %s, %s, 1\n", code[1], code[1], code[1], code[1])
+				real_instr.WriteString(ins)
 
-			//}
+			}
 
 
 		case "j": // PC尾跳转 j offset|jump to pc+offset
