@@ -310,8 +310,6 @@ slli a0, a0, 0xb
 ori a0, a0, 0x7ff
 slli a0, a0, 0xb
 ori a0, a0, 0x7fe
-xori a0, a0, -1
-addi a0, a0, 1
 # call print_reg
 auipc x1, 0 # R_RISCV_PCREL_HI20 print_reg
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_reg
@@ -325,8 +323,6 @@ slli t1, t1, 0xb
 ori t1, t1, 0x7ff
 slli t1, t1, 0xb
 ori t1, t1, 0x7fe
-xori t1, t1, -1
-addi t1, t1, 1
 # li t2, 3
 # li t2, 3
 addi t2, x0, 0x3

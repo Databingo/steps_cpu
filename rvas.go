@@ -877,12 +877,12 @@ func main() { //t6a7s11
 			    }
 		        }
 
-			// 取补码还原负数
-			if sign == 1 {
-				ins = fmt.Sprintf("xori %s, %s, -1\naddi %s, %s, 1\n", code[1], code[1], code[1], code[1])
-				real_instr.WriteString(ins)
+			//// 取补码还原负数
+			//if sign == 1 {
+			//	ins = fmt.Sprintf("xori %s, %s, -1\naddi %s, %s, 1\n", code[1], code[1], code[1], code[1])
+			//	real_instr.WriteString(ins)
 
-			}
+			//}
 
 
 		case "j": // PC尾跳转 j offset|jump to pc+offset
