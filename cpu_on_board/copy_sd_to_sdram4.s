@@ -27,6 +27,8 @@ num_fats:
     .word 0
 sec_per_fat:
     .word 0
+byte_per_sec:
+    .word 0
 root_dir_sector_start:
     .word 0
 
@@ -138,6 +140,30 @@ lb a0, 1(a1)
 call print_hex_b
 lb a0, 0(a1)
 call print_hex_b
+
+
+# byte_per_sec offset 0x0b-0x0c 2 bytes
+li t0, "bysPsec" # 7 char left on for null
+addi sp, sp, -8
+sd t0, 0(sp)
+mv a0, sp
+call puts
+addi sp, sp, 8
+
+la a1, sec_per_fat
+lbu t0, 0x06(s1)
+lbu t1, 0x0c(s1)
+slli t1, t1, 8
+or a0, t1, t0 
+
+sh a0, 0(a1)
+lb a0, 1(a1)
+call print_hex_b
+lb a0, 0(a1)
+call print_hex_b
+
+
+
 
 li t1, 124       # |
 sb t1, 0(s11)     # print

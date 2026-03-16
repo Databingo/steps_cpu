@@ -6,6 +6,7 @@ prt_sector:
 reserved_sec:
 num_fats:
 sec_per_fat:
+byte_per_sec:
 root_dir_sector_start:
 _start:
 #     li sp, 0x1000 
@@ -162,6 +163,40 @@ auipc a1, 0 # R_RISCV_PCREL_HI20 sec_per_fat
 addi a1, a1, 0 # R_RISCV_PCREL_LO12_I sec_per_fat 
 lbu t0, 0x16(s1)
 lbu t1, 0x17(s1)
+slli t1, t1, 8
+or a0, t1, t0 
+sh a0, 0(a1)
+lb a0, 1(a1)
+# call print_hex_b
+auipc x1, 0 # R_RISCV_PCREL_HI20 print_hex_b
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_hex_b
+lb a0, 0(a1)
+# call print_hex_b
+auipc x1, 0 # R_RISCV_PCREL_HI20 print_hex_b
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_hex_b
+# li t0, "bysPsec" 
+lui t0, 0x636
+srli t0, t0, 0x1
+ori t0, t0, 0x2b9
+slli t0, t0, 0xb
+ori t0, t0, 0x541
+slli t0, t0, 0xb
+ori t0, t0, 0x66f
+slli t0, t0, 0xb
+ori t0, t0, 0x162
+addi sp, sp, -8
+sd t0, 0(sp)
+# mv a0, sp
+addi a0, sp, 0
+# call puts
+auipc x1, 0 # R_RISCV_PCREL_HI20 puts
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I puts
+addi sp, sp, 8
+# la a1, sec_per_fat
+auipc a1, 0 # R_RISCV_PCREL_HI20 sec_per_fat 
+addi a1, a1, 0 # R_RISCV_PCREL_LO12_I sec_per_fat 
+lbu t0, 0x06(s1)
+lbu t1, 0x0c(s1)
 slli t1, t1, 8
 or a0, t1, t0 
 sh a0, 0(a1)
