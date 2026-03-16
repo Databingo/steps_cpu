@@ -951,10 +951,34 @@ func main() { //t6a7s11
 		case "call": //auipc x1, offset[31:12]; jalr x1, offset[11:0](x1) 调用远距离过程(save pc+4)  // far_call:auipc near_call:jal
 			ins := fmt.Sprintf("# %s\n", line)
 			real_instr.WriteString(ins) //callee:ra,t0,a0|caller:sp,s0
+
+			//ins := fmt.Sprintf(`addi sp, sp -72
+			//                    sd ra, 0(sp)
+			//                    sd t0, 8(sp)
+                        //                    sd t1, 16(sp)
+                        //                    sd t2, 24(sp)
+                        //                    sd t3, 32(sp)
+                        //                    sd t4, 40(sp)
+                        //                    sd t5, 48(sp)
+                        //                    sd t6, 56(sp) \n
+			//`)
+			//real_instr.WriteString(ins) // ra t0-6
 			ins = fmt.Sprintf("auipc x1, 0 # R_RISCV_PCREL_HI20 %s\n", code[1])  //x1=ra return address; x10=a0 return value; x2=sp stack pointer; x8=s0 saved resigter 
 			real_instr.WriteString(ins)
 			ins = fmt.Sprintf("jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I %s\n", code[1])
 			real_instr.WriteString(ins)
+			//ins := fmt.Sprintf(`
+			//                    ld ra, 0(sp)
+			//                    ld t0, 8(sp)
+                        //                    ld t1, 16(sp)
+                        //                    ld t2, 24(sp)
+                        //                    ld t3, 32(sp)
+                        //                    ld t4, 40(sp)
+                        //                    ld t5, 48(sp)
+                        //                    ld t6, 56(sp)
+                        //                    addi sp, sp 72 \n
+			//`)
+			//real_instr.WriteString(ins) // ra t0-6 
 		case "tail": //auipc x6, offset[32:12]; jalr x0, x6, offset[11:0] 尾调用远距离子过程(discard pc+4)
 			ins := fmt.Sprintf("# %s\n", line)
 			real_instr.WriteString(ins)
