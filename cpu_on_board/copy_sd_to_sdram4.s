@@ -214,9 +214,14 @@ call print_reg
 li a0, 63       # ?
 call putchar
 
-mul a0, t1, t2
+la a1, num_fats
+lw t1, 0(a1)
+la a1, sec_per_fat
+lw t2, 0(a1)
 la a1, reserved_sec
 lw t0, 0(a1)
+
+mul a0, t1, t2
 add a0, a0, t0
 call print_reg
 
