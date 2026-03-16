@@ -151,15 +151,14 @@ call puts
 addi sp, sp, 8
 
 la a1, byte_per_sec
-lbu t0, 0x06(s1)
+lbu t0, 0x0b(s1)
 lbu t1, 0x0c(s1)
 slli t1, t1, 8
 or a0, t1, t0 
 
-sh a0, 0(a1)
-lb a0, 0(a1)
+sd a0, 0(a1)
+ld a0, 0(a1)
 call print_reg
-
 
 
 
