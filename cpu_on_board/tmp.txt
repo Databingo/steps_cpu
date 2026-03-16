@@ -231,6 +231,16 @@ jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_hex_b
 # li t1, 124       
 addi t1, x0, 0x7c
 sb t1, 0(s11)     # print
+addi a0, x0, 8
+# call print_reg
+auipc x1, 0 # R_RISCV_PCREL_HI20 print_reg
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_reg
+# li a0, 43       
+# li a0, 43       
+addi a0, x0, 0x2b
+# call putchar
+auipc x1, 0 # R_RISCV_PCREL_HI20 putchar
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I putchar
 # mv a0, t1
 addi a0, t1, 0
 mul a0, t1, t2
@@ -315,7 +325,7 @@ auipc x1, 0 # R_RISCV_PCREL_HI20 wait_uart
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I wait_uart
 sb t3, 0(s11)       # print
 addi t1, t1, -4
-bge t3, x0, p_loop 
+bge t1, x0, p_loop 
 ld ra, 0(sp)
 addi sp, sp, 8
 #     ret
