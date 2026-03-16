@@ -81,19 +81,6 @@ call putchar
 #or t2, t2, t3
 #mv a2, t2    # a2 = reserved_sectors offset 0x0e-0x0f 2 bytes (including root sector 0)
 
-
-lbu a0, 0x0f(s1)
-call print_hex_b
-lbu a0, 0x0e(s1)
-call print_hex_b
-
-li a0, 126       # ~
-call putchar
-
-la t0, reserved_sec
-lw a0, 0(t0)
-call print_hex_b
-
 # root_dir_sector_start = reserved_sectors + (num_fats * sectors_per_fat16)
 
 # reserved_sectors offset 0x0e-0x0f 2 bytes (including root sector 0)
@@ -227,6 +214,11 @@ call print_reg
 
 li a0, 43       # +
 call putchar
+
+
+li a0, -2
+call print_reg
+
 
 li t1, -2
 li t2, 3
