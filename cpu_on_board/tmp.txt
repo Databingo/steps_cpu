@@ -204,16 +204,6 @@ ld a0, 0(a1)
 # call print_reg
 auipc x1, 0 # R_RISCV_PCREL_HI20 print_reg
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_reg
-# li t0, "EntrPse" 
-lui t0, 0x657
-srli t0, t0, 0x1
-ori t0, t0, 0x1a8
-slli t0, t0, 0xb
-ori t0, t0, 0x1c9
-slli t0, t0, 0xb
-ori t0, t0, 0x68d
-slli t0, t0, 0xb
-ori t0, t0, 0x645
 # li t1, 124       
 # li t1, 124       
 addi t1, x0, 0x7c

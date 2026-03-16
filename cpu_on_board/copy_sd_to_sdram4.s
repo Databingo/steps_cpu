@@ -161,7 +161,7 @@ ld a0, 0(a1)
 call print_reg
 
 
-li t0, "EntrPse" # byte_per_sec/32  srli 5
+#li t0, "EntrPse" # byte_per_sec/32  srli 5
 #addi sp, sp, -8
 #sd t0, 0(sp)
 #mv a0, sp
