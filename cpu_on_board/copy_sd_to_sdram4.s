@@ -178,14 +178,27 @@ call print_hex_b
 li t1, 124       # |
 sb t1, 0(s11)     # print
 
-addi a0, x0, 8
+addi a0, x0, 7
 call print_reg
 li a0, 43       # +
 call putchar
 
 
 mv a0, t1
+call print_reg
+li a0, 43       # +
+call putchar
+
+mv a0, t2
+call print_reg
+li a0, 43       # +
+call putchar
+
 mul a0, t1, t2
+call print_reg
+li a0, 43       # +
+call putchar
+
 add a0, a0, t0
 call print_reg
 

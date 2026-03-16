@@ -231,7 +231,7 @@ jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_hex_b
 # li t1, 124       
 addi t1, x0, 0x7c
 sb t1, 0(s11)     # print
-addi a0, x0, 8
+addi a0, x0, 7
 # call print_reg
 auipc x1, 0 # R_RISCV_PCREL_HI20 print_reg
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_reg
@@ -243,7 +243,36 @@ auipc x1, 0 # R_RISCV_PCREL_HI20 putchar
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I putchar
 # mv a0, t1
 addi a0, t1, 0
+# call print_reg
+auipc x1, 0 # R_RISCV_PCREL_HI20 print_reg
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_reg
+# li a0, 43       
+# li a0, 43       
+addi a0, x0, 0x2b
+# call putchar
+auipc x1, 0 # R_RISCV_PCREL_HI20 putchar
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I putchar
+# mv a0, t2
+addi a0, t2, 0
+# call print_reg
+auipc x1, 0 # R_RISCV_PCREL_HI20 print_reg
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_reg
+# li a0, 43       
+# li a0, 43       
+addi a0, x0, 0x2b
+# call putchar
+auipc x1, 0 # R_RISCV_PCREL_HI20 putchar
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I putchar
 mul a0, t1, t2
+# call print_reg
+auipc x1, 0 # R_RISCV_PCREL_HI20 print_reg
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_reg
+# li a0, 43       
+# li a0, 43       
+addi a0, x0, 0x2b
+# call putchar
+auipc x1, 0 # R_RISCV_PCREL_HI20 putchar
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I putchar
 add a0, a0, t0
 # call print_reg
 auipc x1, 0 # R_RISCV_PCREL_HI20 print_reg
