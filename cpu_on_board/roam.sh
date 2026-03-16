@@ -27,7 +27,8 @@
 #!/bin/bash
 # make_unified_mif.sh
 
-echo "DEPTH = 1024;" > roam.mif
+#echo "DEPTH = 1024;" > roam.mif
+echo "DEPTH = 4096;" > roam.mif
 echo "WIDTH = 32;" >> roam.mif
 echo "ADDRESS_RADIX = DEC;" >> roam.mif
 echo "DATA_RADIX = BIN;" >> roam.mif
