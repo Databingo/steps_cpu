@@ -44,7 +44,8 @@ fi
 
 cat ram.mif >> temp.txt
 LINES_RAM=$(wc -l < ram.mif)
-PAD_RAM=$((512 - LINES_RAM))
+#PAD_RAM=$((512 - LINES_RAM))
+PAD_RAM=$((1024 - LINES_RAM))
 if [ $PAD_RAM -gt 0 ]; then
     yes '00000000000000000000000000000000' | head -n $PAD_RAM >> temp.txt
 fi
