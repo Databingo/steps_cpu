@@ -122,7 +122,7 @@ addi a1, a1, 0 # R_RISCV_PCREL_LO12_I reserved_sec
 lbu t0, 0x0e(s1)
 lbu t1, 0x0f(s1)
 slli t1, t1, 8
-or a0, t1, t0   # hardware miss take and/or
+or a0, t1, t0 
 sh a0, 0(a1)
 lb a0, 1(a1)
 # call print_hex_b
@@ -183,13 +183,30 @@ addi a1, a1, 0 # R_RISCV_PCREL_LO12_I sec_per_fat
 lbu t0, 0x16(s1)
 lbu t1, 0x17(s1)
 slli t1, t1, 8
-or a0, t1, t0 # !! hardware error and/or
+or a0, t1, t0 
 sh a0, 0(a1)
 lb a0, 1(a1)
 # call print_hex_b
 auipc x1, 0 # R_RISCV_PCREL_HI20 print_hex_b
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_hex_b
 lb a0, 0(a1)
+# call print_hex_b
+auipc x1, 0 # R_RISCV_PCREL_HI20 print_hex_b
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_hex_b
+# la a1, reserved_sec
+auipc a1, 0 # R_RISCV_PCREL_HI20 reserved_sec 
+addi a1, a1, 0 # R_RISCV_PCREL_LO12_I reserved_sec 
+lw t0, 0(a1)
+# la a1, num_fats
+auipc a1, 0 # R_RISCV_PCREL_HI20 num_fats 
+addi a1, a1, 0 # R_RISCV_PCREL_LO12_I num_fats 
+lw t1, 0(a1)
+# la a1, sec_per_fat
+auipc a1, 0 # R_RISCV_PCREL_HI20 sec_per_fat 
+addi a1, a1, 0 # R_RISCV_PCREL_LO12_I sec_per_fat 
+lw t2, 0(a1)
+mul a0, t1, t2
+add a0, a0, t0
 # call print_hex_b
 auipc x1, 0 # R_RISCV_PCREL_HI20 print_hex_b
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_hex_b
