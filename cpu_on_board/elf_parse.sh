@@ -9,7 +9,7 @@ riscv64-unknown-elf-objdump  -r  relocatable.elf
 echo "---read relocatable.elf relacatbal elf --- "
 riscv64-unknown-elf-readelf --all  relocatable.elf
  
-riscv64-unknown-elf-ld -o linked.elf   relocatable.elf  -Ttext 0x0 -Tdata 0x600  # linker
+riscv64-unknown-elf-ld -o linked.elf   relocatable.elf  -Ttext 0x0 -Tdata 0xc00  # linker
 #riscv64-unknown-elf-ld -o final.elf combined.o  -Ttext 0x0 -Tdata 0x1000  # linker
 #riscv64-unknown-elf-readelf -h  linked_caled.elf
 #riscv64-unknown-elf-readelf -S  linked_caled.elf
