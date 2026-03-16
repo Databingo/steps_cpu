@@ -220,6 +220,13 @@ lw t0, 0(a1)
 add a0, a0, t0
 call print_reg
 
+li a0, 43       # +
+call putchar
+
+li t1, -2
+li t2, 3
+mul a0, t1, t2
+call print_reg
 
 end:
     j end

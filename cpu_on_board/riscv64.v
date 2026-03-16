@@ -889,7 +889,7 @@ module riscv64(
 			    // stall pipeline
 			    pc <= pc - 4;
 			    bubble <= 1;
-			end else begin
+			end else if (mul_done) begin
 			    // result ready
 			    mul_enable <= 0;
 			    // select output based on cached type

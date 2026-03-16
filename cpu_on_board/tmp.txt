@@ -307,6 +307,31 @@ add a0, a0, t0
 # call print_reg
 auipc x1, 0 # R_RISCV_PCREL_HI20 print_reg
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_reg
+# li a0, 43       
+# li a0, 43       
+addi a0, x0, 0x2b
+# call putchar
+auipc x1, 0 # R_RISCV_PCREL_HI20 putchar
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I putchar
+# li t1, -2
+lui t1, 0xfffff
+srli t1, t1, 0x1
+ori t1, t1, 0x7ff
+slli t1, t1, 0xb
+ori t1, t1, 0x7ff
+slli t1, t1, 0xb
+ori t1, t1, 0x7ff
+slli t1, t1, 0xb
+ori t1, t1, 0x7fe
+xori t1, t1, -1
+addi t1, t1, 1
+# li t2, 3
+# li t2, 3
+addi t2, x0, 0x3
+mul a0, t1, t2
+# call print_reg
+auipc x1, 0 # R_RISCV_PCREL_HI20 print_reg
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_reg
 end:
 #     j end
 jal x0, end
