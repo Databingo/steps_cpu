@@ -235,9 +235,9 @@ addi a0, x0, 5
 # call print_reg
 auipc x1, 0 # R_RISCV_PCREL_HI20 print_reg
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_reg
-# li a0, 43       
-# li a0, 43       
-addi a0, x0, 0x2b
+# li a0, 45       
+# li a0, 45       
+addi a0, x0, 0x2d
 # call putchar
 auipc x1, 0 # R_RISCV_PCREL_HI20 putchar
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I putchar
@@ -292,9 +292,9 @@ mul a0, t1, t2
 # call print_reg
 auipc x1, 0 # R_RISCV_PCREL_HI20 print_reg
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_reg
-# li a0, 43       
-# li a0, 43       
-addi a0, x0, 0x2b
+# li a0, 63       
+# li a0, 63       
+addi a0, x0, 0x3f
 # call putchar
 auipc x1, 0 # R_RISCV_PCREL_HI20 putchar
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I putchar
@@ -350,8 +350,16 @@ jalr x0, 0(x1)
 print_reg:
 addi sp, sp, -8
 sd ra, 0(sp)
-#     mv t0, a0
-addi t0, a0, 0
+addi sp, sp, -8
+sd s0, 0(sp)
+addi sp, sp, -8
+sd s1, 0(sp)
+addi sp, sp, -8
+sd s2, 0(sp)
+addi sp, sp, -8
+sd s3, 0(sp)
+#     mv s0, a0
+addi s0, a0, 0
 #     li a0, "0"
 #     li a0, "0"
 addi a0, x0, 0x30
@@ -364,28 +372,36 @@ addi a0, x0, 0x78
 #     call putchar
 auipc x1, 0 # R_RISCV_PCREL_HI20 putchar
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I putchar
-#     li t1, 60 
-#     li t1, 60 
-addi t1, x0, 0x3c
+#     li s1, 60 
+#     li s1, 60 
+addi s1, x0, 0x3c
 p_loop:
-srl t3, t0, t1      # get high nibble
-andi t3, t3, 0xF
-slti t5, t3, 10     # if < 10 number
-beq t5, x0, letter
-addi t3, t3, 48     # 0 is "0" ascii 48
+srl s2, s0, s1      # get high nibble
+andi s2, s2, 0xF
+slti s3, s2, 10     # if < 10 number
+beq s3, x0, letter
+addi s2, s2, 48     # 0 is "0" ascii 48
 #     j print_h
 jal x0, print_h
 letter:
-addi t3, t3, 55     # 10 is "A" ascii 65 ..
+addi s2, s2, 55     # 10 is "A" ascii 65 ..
 print_h:
 #     call wait_uart
 auipc x1, 0 # R_RISCV_PCREL_HI20 wait_uart
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I wait_uart
-sb t3, 0(s11)       # print
-addi t1, t1, -4
-bge t1, x0, p_loop 
+sb s2, 0(s11)       # print
+addi s1, s1, -4
+bge s1, x0, p_loop 
+addi sp, sp, 8
 ld ra, 0(sp)
 addi sp, sp, 8
+ld s0, 0(sp)
+addi sp, sp, 8
+ld s1, 0(sp)
+addi sp, sp, 8
+ld s2, 0(sp)
+addi sp, sp, 8
+ld s3, 0(sp)
 #     ret
 jalr x0, 0(x1)
 sd_read_sector:

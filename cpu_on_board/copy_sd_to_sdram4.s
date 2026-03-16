@@ -180,11 +180,8 @@ sb t1, 0(s11)     # print
 
 addi a0, x0, 5
 call print_reg
-li a0, 43       # +
+li a0, 45       # -
 call putchar
-
-
-
 
 
 
@@ -214,7 +211,7 @@ lw t2, 0(a1)
 
 mul a0, t1, t2
 call print_reg
-li a0, 43       # +
+li a0, 63       # ?
 call putchar
 
 la a1, reserved_sec
@@ -264,32 +261,48 @@ print_lhex:
 print_reg: # a0
     addi sp, sp, -8
     sd ra, 0(sp)
+    addi sp, sp, -8
+    sd s0, 0(sp)
+    addi sp, sp, -8
+    sd s1, 0(sp)
+    addi sp, sp, -8
+    sd s2, 0(sp)
+    addi sp, sp, -8
+    sd s3, 0(sp)
 
-    mv t0, a0
+    mv s0, a0
 
     li a0, "0"
     call putchar
     li a0, "x"
     call putchar
 
-    li t1, 60 
+    li s1, 60 
 p_loop:
-    srl t3, t0, t1      # get high nibble
-    andi t3, t3, 0xF
-    slti t5, t3, 10     # if < 10 number
-    beq t5, x0, letter
-    addi t3, t3, 48     # 0 is "0" ascii 48
+    srl s2, s0, s1      # get high nibble
+    andi s2, s2, 0xF
+    slti s3, s2, 10     # if < 10 number
+    beq s3, x0, letter
+    addi s2, s2, 48     # 0 is "0" ascii 48
     j print_h
 letter:
-    addi t3, t3, 55     # 10 is "A" ascii 65 ..
+    addi s2, s2, 55     # 10 is "A" ascii 65 ..
 print_h:
     call wait_uart
-    sb t3, 0(s11)       # print
-    addi t1, t1, -4
-    bge t1, x0, p_loop 
+    sb s2, 0(s11)       # print
+    addi s1, s1, -4
+    bge s1, x0, p_loop 
 
+    addi sp, sp, 8
     ld ra, 0(sp)
     addi sp, sp, 8
+    ld s0, 0(sp)
+    addi sp, sp, 8
+    ld s1, 0(sp)
+    addi sp, sp, 8
+    ld s2, 0(sp)
+    addi sp, sp, 8
+    ld s3, 0(sp)
     ret
 
 
