@@ -6,6 +6,7 @@ prt_sector:
 reserved_sec:
 num_fats:
 sec_per_fat:
+root_dir_sector_start:
 _start:
 #     li sp, 0x1000 
 lui sp, 0x1
@@ -291,6 +292,11 @@ addi a1, a1, 0 # R_RISCV_PCREL_LO12_I reserved_sec
 lw t0, 0(a1)
 mul a0, t1, t2
 add a0, a0, t0
+# la t3, root_dir_sector_start
+auipc t3, 0 # R_RISCV_PCREL_HI20 root_dir_sector_start 
+addi t3, t3, 0 # R_RISCV_PCREL_LO12_I root_dir_sector_start 
+sw a0, 0(t3)
+lw a0, 0(t3)
 # call print_reg
 auipc x1, 0 # R_RISCV_PCREL_HI20 print_reg
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_reg
@@ -300,28 +306,16 @@ addi a0, x0, 0x2b
 # call putchar
 auipc x1, 0 # R_RISCV_PCREL_HI20 putchar
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I putchar
-# li a0, -2
-# li a0, -2
-addi a0, x0, 0x2
-xori a0, a0, -1
-addi a0, a0, 1
-# call print_reg
-auipc x1, 0 # R_RISCV_PCREL_HI20 print_reg
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_reg
-# li t1, -2
-# li t1, -2
-addi t1, x0, 0x2
-xori t1, t1, -1
-addi t1, t1, 1
-# li t2, -3
-# li t2, -3
-addi t2, x0, 0x3
-xori t2, t2, -1
-addi t2, t2, 1
-mul a0, t1, t2
-# call print_reg
-auipc x1, 0 # R_RISCV_PCREL_HI20 print_reg
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_reg
+# la t3, root_dir_sector_start
+auipc t3, 0 # R_RISCV_PCREL_HI20 root_dir_sector_start 
+addi t3, t3, 0 # R_RISCV_PCREL_LO12_I root_dir_sector_start 
+lw a0, 0(t3)
+# call sd_read_sector  
+auipc x1, 0 # R_RISCV_PCREL_HI20 sd_read_sector
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I sd_read_sector
+# call print_sector
+auipc x1, 0 # R_RISCV_PCREL_HI20 print_sector
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_sector
 end:
 #     j end
 jal x0, end

@@ -27,6 +27,8 @@ num_fats:
     .word 0
 sec_per_fat:
     .word 0
+root_dir_sector_start:
+    .word 0
 
 # -- Start program main function _start --
 .section .text
@@ -210,20 +212,29 @@ lw t0, 0(a1)
 
 mul a0, t1, t2
 add a0, a0, t0
+la t3, root_dir_sector_start
+sw a0, 0(t3)
+lw a0, 0(t3)
 call print_reg
 
 li a0, 43       # +
 call putchar
 
 
-li a0, -2
-call print_reg
+la t3, root_dir_sector_start
+lw a0, 0(t3)
+call sd_read_sector  # use a0 as sector no.
+call print_sector
 
 
-li t1, -2
-li t2, -3
-mul a0, t1, t2
-call print_reg
+#li a0, -2
+#call print_reg
+#
+#
+#li t1, -2
+#li t2, -3
+#mul a0, t1, t2
+#call print_reg
 
 end:
     j end
