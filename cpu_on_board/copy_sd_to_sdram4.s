@@ -167,6 +167,10 @@ lw t2, 0(a1)
 mv a0, t1
 call print_hex_b
 srli a0, t2, 8
+
+li t1, 124       # |
+sb t1, 0(s11)     # print
+
 call print_hex_b
 mv a0, t2
 call print_hex_b
