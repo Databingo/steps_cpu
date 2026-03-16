@@ -150,6 +150,9 @@ call print_hex_b
 lb a0, 0(a1)
 call print_hex_b
 
+li t1, 124       # |
+sb t1, 0(s11)     # print
+
 # root_dir_sector_start = reserved_sectors + (num_fats * sectors_per_fat16)
 
 la a1, reserved_sec
@@ -161,8 +164,17 @@ lw t1, 0(a1)
 la a1, sec_per_fat
 lw t2, 0(a1)
 
+mv a0, t1
+call print_hex_b
+mv a0, t2
+call print_hex_b
+
+li t1, 124       # |
+sb t1, 0(s11)     # print
+
+mv a0, t1
 mul a0, t1, t2
-add a0, a0, t0
+#add a0, a0, t0
 call print_hex_b
 
 
