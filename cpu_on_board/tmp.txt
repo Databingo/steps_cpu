@@ -392,15 +392,15 @@ jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I wait_uart
 sb s2, 0(s11)       # print
 addi s1, s1, -4
 bge s1, x0, p_loop 
-ld ra, 0(sp)
-addi sp, sp, 8
-ld s0, 0(sp)
-addi sp, sp, 8
-ld s1, 0(sp)
+ld s3, 0(sp)
 addi sp, sp, 8
 ld s2, 0(sp)
 addi sp, sp, 8
-ld s3, 0(sp)
+ld s1, 0(sp)
+addi sp, sp, 8
+ld s0, 0(sp)
+addi sp, sp, 8
+ld ra, 0(sp)
 addi sp, sp, 8
 #     ret
 jalr x0, 0(x1)

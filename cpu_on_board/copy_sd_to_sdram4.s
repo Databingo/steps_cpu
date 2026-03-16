@@ -293,15 +293,15 @@ print_h:
     addi s1, s1, -4
     bge s1, x0, p_loop 
 
-    ld ra, 0(sp)
-    addi sp, sp, 8
-    ld s0, 0(sp)
-    addi sp, sp, 8
-    ld s1, 0(sp)
+    ld s3, 0(sp)
     addi sp, sp, 8
     ld s2, 0(sp)
     addi sp, sp, 8
-    ld s3, 0(sp)
+    ld s1, 0(sp)
+    addi sp, sp, 8
+    ld s0, 0(sp)
+    addi sp, sp, 8
+    ld ra, 0(sp)
     addi sp, sp, 8
     ret
 
