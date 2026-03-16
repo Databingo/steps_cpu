@@ -122,7 +122,7 @@ addi a1, a1, 0 # R_RISCV_PCREL_LO12_I reserved_sec
 lbu t0, 0x0e(s1)
 lbu t1, 0x0f(s1)
 slli t1, t1, 8
-and a0, t1, t0
+or a0, t1, t0   # hardware miss take and/or
 sh a0, 0(a1)
 lb a0, 1(a1)
 # call print_hex_b
@@ -183,7 +183,7 @@ addi a1, a1, 0 # R_RISCV_PCREL_LO12_I sec_per_fat
 lbu t0, 0x16(s1)
 lbu t1, 0x17(s1)
 slli t1, t1, 8
-and a0, t1, t0 # !! hardware error and/or
+or a0, t1, t0 # !! hardware error and/or
 sh a0, 0(a1)
 lb a0, 1(a1)
 # call print_hex_b
