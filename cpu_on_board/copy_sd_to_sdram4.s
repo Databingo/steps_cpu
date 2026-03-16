@@ -264,14 +264,14 @@ call sd_read_sector  # use a0 as sector no.
 call print_sector
 
 
-li a0, -2
-call print_reg
-
-
-li t1, -2
-li t2, -3
-mul a0, t1, t2
-call print_reg
+#li a0, -2
+#call print_reg
+#
+#
+#li t1, -2
+#li t2, -3
+#mul a0, t1, t2
+#call print_reg
 
 end:
     j end
