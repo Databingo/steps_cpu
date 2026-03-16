@@ -162,11 +162,11 @@ call print_reg
 
 
 li t0, "EntrPse" # byte_per_sec/32  srli 5
-addi sp, sp, -8
-sd t0, 0(sp)
-mv a0, sp
-call puts
-addi sp, sp, 8
+#addi sp, sp, -8
+#sd t0, 0(sp)
+#mv a0, sp
+#call puts
+#addi sp, sp, 8
 
 #la a1, byte_per_sec
 #ld t0, 0(a1)
