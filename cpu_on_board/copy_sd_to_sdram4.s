@@ -180,8 +180,8 @@ sb t1, 0(s11)     # print
 
 mv a0, t1
 mul a0, t1, t2
-#add a0, a0, t0
-call print_hex_b
+add a0, a0, t0
+call print_reg
 
 
 end:
@@ -218,6 +218,39 @@ print_lhex:
     call wait_uart
     mv ra, t0
     sb t4, 0(s11)
+    ret
+
+
+
+print_reg: # a0
+    addi sp, sp, -8
+    sd ra, 0(sp)
+
+    mv t0, a0
+
+    li a0, "0"
+    call putchar
+    li a0, "x"
+    call putchar
+
+    li t1, 60 
+p_loop:
+    srl t3, t0, t1      # get high nibble
+    andi t3, t3, 0xF
+    slti t5, t3, 10     # if < 10 number
+    beq t5, x0, letterh
+    addi t3, t3, 48     # 0 is "0" ascii 48
+    j print_hhex
+letterh:
+    addi t3, t3, 55     # 10 is "A" ascii 65 ..
+print_hhex:
+    call wait_uart
+    sb t3, 0(s11)       # print
+    addi t1, t1, -4
+    bge t3, x0, p_loop 
+
+    ld ra, 0(sp)
+    addi sp, sp, 8
     ret
 
 
