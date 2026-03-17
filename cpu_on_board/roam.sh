@@ -27,7 +27,7 @@
 #!/bin/bash
 # make_unified_mif.sh
 
-echo "DEPTH = 8192;" > roam.mif
+echo "DEPTH = 2048;" > roam.mif
 echo "WIDTH = 32;" >> roam.mif
 echo "ADDRESS_RADIX = DEC;" >> roam.mif
 echo "DATA_RADIX = BIN;" >> roam.mif
@@ -45,7 +45,7 @@ fi
 cat ram.mif >> temp.txt
 LINES_RAM=$(wc -l < ram.mif)
 #PAD_RAM=$((512 - LINES_RAM))
-PAD_RAM=$((7680 - LINES_RAM))
+PAD_RAM=$((1536 - LINES_RAM))
 if [ $PAD_RAM -gt 0 ]; then
     yes '00000000000000000000000000000000' | head -n $PAD_RAM >> temp.txt
 fi
