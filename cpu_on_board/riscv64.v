@@ -163,53 +163,114 @@ module riscv64(
     wire [63:0] w_atomic_write_data = (op == 7'b0101111 && w_func5[4:0] == 5'b00011) ? // SC
 	                              (is_word_op ? {32'b0, rs2[31:0]} : rs2) : // sc.w/sc.d
 				      w_amo_calc_data; // AMOs
-    //// -- mul rela --
+    // -- mul rela --
+    // Indepenedent Multiplier // Booth algorithim + Signed-correct
+    reg [6:0]   mul_cnt;
+    reg [128:0] mul_acc;  // sign|result|multiplier
+    reg [64:0]  mul_a_reg;
+    reg         mul_active;
+    reg         mul_done;
+    reg         mul_enable;
+    reg         mul_b_is_signed;
+    reg [1:0]   mul_out_sel;
+    
+    // 000mul 001mulh 010mulhsu 011mulhu
+    wire mul_is_w = (op == 7'b0111011); // Mulw (opc 0111011)
+    wire mul_sign_a = mul_is_w ? 1'b1 : (w_func3 != 3'b011); // signed except Mulhu
+    wire mul_sign_b = mul_is_w ? 1'b1 : (w_func3 == 3'b000 || w_func3 == 3'b001); // signed Mul/Mulh
+
+    wire [63:0] raw_a = mul_is_w ? {{32{rs1[31]}}, rs1[31:0]} : rs1;
+    wire [63:0] raw_b = mul_is_w ? {{32{rs2[31]}}, rs2[31:0]} : rs2;
+    wire [64:0] ext_a = {mul_sign_a & raw_a[63], raw_a}; 
+    //wire [64:0] ext_b = {mul_sign_b & raw_b[63], raw_b}; 
+    wire is_last_cycle = (mul_cnt == 7'd63);
+    wire do_sub = is_last_cycle && mul_b_is_signed;
+    wire [64:0] adder_input_a = do_sub ? ~mul_a_reg : mul_a_reg;
+    wire [64:0] sum_upper = mul_acc[128:64] + adder_input_a + do_sub;
+
+    always @(posedge clk or negedge reset) begin  
+        if (!reset) begin
+            mul_active <= 0;
+            mul_done   <= 0;
+            mul_cnt    <=0;	    
+        end else begin
+            if (mul_enable && !mul_active && !mul_done) begin
+        	// Start phase
+        	mul_active <= 1;
+        	mul_cnt    <= 0;
+        	// 1. Determine output mode
+                if (mul_is_w) mul_out_sel <= 2; // mulw
+        	else if (w_func3 == 0) mul_out_sel <= 0; // mul
+        	else mul_out_sel <= 1;   // mulh* 
+        	mul_a_reg <= ext_a;
+        	mul_acc <= {65'd0, raw_b};
+        	mul_b_is_signed <= mul_sign_b;
+            end else if (mul_active) begin
+        	// Compute phase (64 cycles)
+        	if (mul_cnt < 64) begin
+        	    if (mul_acc[0]) mul_acc <= {sum_upper[64], sum_upper, mul_acc[63:1]}; // is 1,  + and << 1
+        	    else mul_acc <= {mul_acc[128], mul_acc[128:1]}; // is 0, only << 1, preserve sign bit
+        	    mul_cnt <= mul_cnt + 1;
+        	end else begin
+                    // Finish phase
+                    mul_active <= 0;
+        	    mul_done   <= 1;
+        	end
+            end else if (!mul_enable) mul_done <= 0; // reset handshake
+        end
+    end
     //// Indepenedent Multiplier // Booth algorithim + Signed-correct
     //reg [6:0]   mul_cnt;
-    //reg [128:0] mul_acc;  // sign|result|multiplier
-    //reg [64:0]  mul_a_reg;
+    //reg [127:0] mul_acc;  // result|multiplier
+    //reg [63:0]  mul_a_reg; // 被乘数(绝对值)
     //reg         mul_active;
     //reg         mul_done;
     //reg         mul_enable;
-    //reg         mul_b_is_signed;
-    //reg [1:0]   mul_out_sel;
+    //                          
+    //reg mul_neg_result;
+    //reg [2:0] mul_op_type;
     //
+    //reg  mul_is_w_latched;
+    //reg  [63:0] raw_a_latched;
+    //reg  [63:0] raw_b_latched;
+    //reg  a_is_signed_latched;
+    //reg  b_is_signed_latched;
+    //reg  [63:0] abs_a_latched;
+    //reg  [63:0] abs_b_latched;
+    //reg  [4:0] mul_rd_latched;
+
     //// 000mul 001mulh 010mulhsu 011mulhu
     //wire mul_is_w = (op == 7'b0111011); // Mulw (opc 0111011)
-    //wire mul_sign_a = mul_is_w ? 1'b1 : (w_func3 != 3'b011); // signed except Mulhu
-    //wire mul_sign_b = mul_is_w ? 1'b1 : (w_func3 == 3'b000 || w_func3 == 3'b001); // signed Mul/Mulh
-
     //wire [63:0] raw_a = mul_is_w ? {{32{rs1[31]}}, rs1[31:0]} : rs1;
     //wire [63:0] raw_b = mul_is_w ? {{32{rs2[31]}}, rs2[31:0]} : rs2;
-    //wire [64:0] ext_a = {mul_sign_a & raw_a[63], raw_a}; 
-    ////wire [64:0] ext_b = {mul_sign_b & raw_b[63], raw_b}; 
-    //wire is_last_cycle = (mul_cnt == 7'd63);
-    //wire do_sub = is_last_cycle && mul_b_is_signed;
-    //wire [64:0] adder_input_a = do_sub ? ~mul_a_reg : mul_a_reg;
-    //wire [64:0] sum_upper = mul_acc[128:64] + adder_input_a + do_sub;
+
+    //wire a_is_signed = mul_is_w ? 1'b1 : (w_func3 != 3'b011); // signed except Mulhu
+    //wire b_is_signed = mul_is_w ? 1'b1 : (w_func3 == 3'b000 || w_func3 == 3'b001); // signed Mul/Mulh
+
+    //wire [63:0] abs_a = (a_is_signed & raw_a[63])? (~raw_a+64'd1):raw_a; 
+    //wire [63:0] abs_b = (b_is_signed & raw_b[63])? (~raw_b+64'd1):raw_b; 
+    //wire [64:0] add_res = {1'b0, mul_acc[127:64]} + {1'b0, mul_a_reg};
 
     //always @(posedge clk or negedge reset) begin  
     //    if (!reset) begin
     //        mul_active <= 0;
     //        mul_done   <= 0;
-    //        mul_cnt    <=0;	    
+    //        mul_cnt    <= 0;	    
+    //        mul_acc    <= 0;
     //    end else begin
     //        if (mul_enable && !mul_active && !mul_done) begin
     //    	// Start phase
     //    	mul_active <= 1;
     //    	mul_cnt    <= 0;
-    //    	// 1. Determine output mode
-    //            if (mul_is_w) mul_out_sel <= 2; // mulw
-    //    	else if (w_func3 == 0) mul_out_sel <= 0; // mul
-    //    	else mul_out_sel <= 1;   // mulh* 
-    //    	mul_a_reg <= ext_a;
-    //    	mul_acc <= {65'd0, raw_b};
-    //    	mul_b_is_signed <= mul_sign_b;
+    //    	mul_a_reg  <= abs_a_latched;
+    //    	mul_acc <= {64'b0, abs_b_latched};
+    //    	mul_neg_result <= (a_is_signed_latched && raw_a_latched[63]) ^ (b_is_signed_latched && raw_b_latched[63]);
+    //    	   
     //        end else if (mul_active) begin
     //    	// Compute phase (64 cycles)
     //    	if (mul_cnt < 64) begin
-    //    	    if (mul_acc[0]) mul_acc <= {sum_upper[64], sum_upper, mul_acc[63:1]}; // is 1,  + and << 1
-    //    	    else mul_acc <= {mul_acc[128], mul_acc[128:1]}; // is 0, only << 1, preserve sign bit
+    //    	    if (mul_acc[0]) mul_acc <= {add_res, mul_acc[63:1]}; // is 1,  + and >> 1
+    //    	    else mul_acc <= {1'b0, mul_acc[127:1]}; // is 0, only >> 1, preserve sign bit
     //    	    mul_cnt <= mul_cnt + 1;
     //    	end else begin
     //                // Finish phase
@@ -219,74 +280,13 @@ module riscv64(
     //        end else if (!mul_enable) mul_done <= 0; // reset handshake
     //    end
     //end
-    // Indepenedent Multiplier // Booth algorithim + Signed-correct
-    reg [6:0]   mul_cnt;
-    reg [127:0] mul_acc;  // result|multiplier
-    reg [63:0]  mul_a_reg; // 被乘数(绝对值)
-    reg         mul_active;
-    reg         mul_done;
-    reg         mul_enable;
-                              
-    reg mul_neg_result;
-    reg [2:0] mul_op_type;
-    
-    reg  mul_is_w_latched;
-    reg  [63:0] raw_a_latched;
-    reg  [63:0] raw_b_latched;
-    reg  a_is_signed_latched;
-    reg  b_is_signed_latched;
-    reg  [63:0] abs_a_latched;
-    reg  [63:0] abs_b_latched;
-    reg  [4:0] mul_rd_latched;
 
-    // 000mul 001mulh 010mulhsu 011mulhu
-    wire mul_is_w = (op == 7'b0111011); // Mulw (opc 0111011)
-    wire [63:0] raw_a = mul_is_w ? {{32{rs1[31]}}, rs1[31:0]} : rs1;
-    wire [63:0] raw_b = mul_is_w ? {{32{rs2[31]}}, rs2[31:0]} : rs2;
-
-    wire a_is_signed = mul_is_w ? 1'b1 : (w_func3 != 3'b011); // signed except Mulhu
-    wire b_is_signed = mul_is_w ? 1'b1 : (w_func3 == 3'b000 || w_func3 == 3'b001); // signed Mul/Mulh
-
-    wire [63:0] abs_a = (a_is_signed & raw_a[63])? (~raw_a+64'd1):raw_a; 
-    wire [63:0] abs_b = (b_is_signed & raw_b[63])? (~raw_b+64'd1):raw_b; 
-    wire [64:0] add_res = {1'b0, mul_acc[127:64]} + {1'b0, mul_a_reg};
-
-    always @(posedge clk or negedge reset) begin  
-        if (!reset) begin
-            mul_active <= 0;
-            mul_done   <= 0;
-            mul_cnt    <= 0;	    
-	    mul_acc    <= 0;
-	end else begin
-            if (mul_enable && !mul_active && !mul_done) begin
-		// Start phase
-		mul_active <= 1;
-		mul_cnt    <= 0;
-		mul_a_reg  <= abs_a_latched;
-		mul_acc <= {64'b0, abs_b_latched};
-		mul_neg_result <= (a_is_signed_latched && raw_a_latched[63]) ^ (b_is_signed_latched && raw_b_latched[63]);
-		   
-	    end else if (mul_active) begin
-		// Compute phase (64 cycles)
-		if (mul_cnt < 64) begin
-		    if (mul_acc[0]) mul_acc <= {add_res, mul_acc[63:1]}; // is 1,  + and >> 1
-		    else mul_acc <= {1'b0, mul_acc[127:1]}; // is 0, only >> 1, preserve sign bit
-		    mul_cnt <= mul_cnt + 1;
-		end else begin
-	            // Finish phase
-	            mul_active <= 0;
-		    mul_done   <= 1;
-		end
-	    end else if (!mul_enable) mul_done <= 0; // reset handshake
-	end
-    end
-
-    wire [127:0] final_mul_res = mul_neg_result ? ~mul_acc+128'd1 : mul_acc;
-    wire is_high_mul = (mul_op_type == 3'b001) || (mul_op_type == 3'b010) || (mul_op_type == 3'b011);
-    wire [63:0] w_mul_out = 
-	    (mul_is_w_latched) ? {{32{final_mul_res[31]}}, final_mul_res[31:0]}: // mulw
-	    (is_high_mul) ? final_mul_res[127:64]:// mulh, mulhsu, mulhu
-	                    final_mul_res[63:0];// mul
+    //wire [127:0] final_mul_res = mul_neg_result ? ~mul_acc+128'd1 : mul_acc;
+    //wire is_high_mul = (mul_op_type == 3'b001) || (mul_op_type == 3'b010) || (mul_op_type == 3'b011);
+    //wire [63:0] w_mul_out = 
+    //        (mul_is_w_latched) ? {{32{final_mul_res[31]}}, final_mul_res[31:0]}: // mulw
+    //        (is_high_mul) ? final_mul_res[127:64]:// mulh, mulhsu, mulhu
+    //                        final_mul_res[63:0];// mul
 
     // Independent divider
     reg [6:0]   div_cnt;
@@ -1046,16 +1046,16 @@ module riscv64(
 			if (!mul_done) begin
 			    // request start
 			    mul_enable <= 1;
-                            // latch
-                            mul_is_w_latched <=  mul_is_w;
-                            raw_a_latched <= raw_a;
-                            raw_b_latched <= raw_b;
-                            a_is_signed_latched <= a_is_signed;
-                            b_is_signed_latched <= b_is_signed;
-                            abs_a_latched <= abs_a;
-                            abs_b_latched <= abs_b;
-		            mul_op_type <= w_func3;
-			    mul_rd_latched <= w_rd;
+                            //// latch
+                            //mul_is_w_latched <=  mul_is_w;
+                            //raw_a_latched <= raw_a;
+                            //raw_b_latched <= raw_b;
+                            //a_is_signed_latched <= a_is_signed;
+                            //b_is_signed_latched <= b_is_signed;
+                            //abs_a_latched <= abs_a;
+                            //abs_b_latched <= abs_b;
+		            //mul_op_type <= w_func3;
+			    //mul_rd_latched <= w_rd;
 
 			    // stall pipeline
 			    pc <= pc - 4;
@@ -1064,10 +1064,10 @@ module riscv64(
 			    // result ready
 			    mul_enable <= 0;
 			    // select output based on cached type
-			    re[mul_rd_latched] <= w_mul_out;
-			    //if (mul_out_sel == 0)      re[w_rd] <= mul_acc[63:0]; // Mul
-			    //else if (mul_out_sel == 1) re[w_rd] <= mul_acc[127:64]; // Mulh*
-			    //else                       re[w_rd] <= {{32{mul_acc[31]}}, mul_acc[31:0]}; // Mulw
+			    //re[mul_rd_latched] <= w_mul_out;
+			    if (mul_out_sel == 0)      re[w_rd] <= mul_acc[63:0]; // Mul
+			    else if (mul_out_sel == 1) re[w_rd] <= mul_acc[127:64]; // Mulh*
+			    else                       re[w_rd] <= {{32{mul_acc[31]}}, mul_acc[31:0]}; // Mulw
 			end
 		    end
 
