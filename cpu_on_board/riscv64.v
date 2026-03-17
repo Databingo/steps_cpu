@@ -163,114 +163,53 @@ module riscv64(
     wire [63:0] w_atomic_write_data = (op == 7'b0101111 && w_func5[4:0] == 5'b00011) ? // SC
 	                              (is_word_op ? {32'b0, rs2[31:0]} : rs2) : // sc.w/sc.d
 				      w_amo_calc_data; // AMOs
-    // -- mul rela --
-    // Indepenedent Multiplier // Booth algorithim + Signed-correct
-    reg [6:0]   mul_cnt;
-    reg [128:0] mul_acc;  // sign|result|multiplier
-    reg [64:0]  mul_a_reg;
-    reg         mul_active;
-    reg         mul_done;
-    reg         mul_enable;
-    reg         mul_b_is_signed;
-    reg [1:0]   mul_out_sel;
-    
-    // 000mul 001mulh 010mulhsu 011mulhu
-    wire mul_is_w = (op == 7'b0111011); // Mulw (opc 0111011)
-    wire mul_sign_a = mul_is_w ? 1'b1 : (w_func3 != 3'b011); // signed except Mulhu
-    wire mul_sign_b = mul_is_w ? 1'b1 : (w_func3 == 3'b000 || w_func3 == 3'b001); // signed Mul/Mulh
-
-    wire [63:0] raw_a = mul_is_w ? {{32{rs1[31]}}, rs1[31:0]} : rs1;
-    wire [63:0] raw_b = mul_is_w ? {{32{rs2[31]}}, rs2[31:0]} : rs2;
-    wire [64:0] ext_a = {mul_sign_a & raw_a[63], raw_a}; 
-    //wire [64:0] ext_b = {mul_sign_b & raw_b[63], raw_b}; 
-    wire is_last_cycle = (mul_cnt == 7'd63);
-    wire do_sub = is_last_cycle && mul_b_is_signed;
-    wire [64:0] adder_input_a = do_sub ? ~mul_a_reg : mul_a_reg;
-    wire [64:0] sum_upper = mul_acc[128:64] + adder_input_a + do_sub;
-
-    always @(posedge clk or negedge reset) begin  
-        if (!reset) begin
-            mul_active <= 0;
-            mul_done   <= 0;
-            mul_cnt    <=0;	    
-        end else begin
-            if (mul_enable && !mul_active && !mul_done) begin
-        	// Start phase
-        	mul_active <= 1;
-        	mul_cnt    <= 0;
-        	// 1. Determine output mode
-                if (mul_is_w) mul_out_sel <= 2; // mulw
-        	else if (w_func3 == 0) mul_out_sel <= 0; // mul
-        	else mul_out_sel <= 1;   // mulh* 
-        	mul_a_reg <= ext_a;
-        	mul_acc <= {65'd0, raw_b};
-        	mul_b_is_signed <= mul_sign_b;
-            end else if (mul_active) begin
-        	// Compute phase (64 cycles)
-        	if (mul_cnt < 64) begin
-        	    if (mul_acc[0]) mul_acc <= {sum_upper[64], sum_upper, mul_acc[63:1]}; // is 1,  + and << 1
-        	    else mul_acc <= {mul_acc[128], mul_acc[128:1]}; // is 0, only << 1, preserve sign bit
-        	    mul_cnt <= mul_cnt + 1;
-        	end else begin
-                    // Finish phase
-                    mul_active <= 0;
-        	    mul_done   <= 1;
-        	end
-            end else if (!mul_enable) mul_done <= 0; // reset handshake
-        end
-    end
+    //// -- mul rela --
     //// Indepenedent Multiplier // Booth algorithim + Signed-correct
     //reg [6:0]   mul_cnt;
-    //reg [127:0] mul_acc;  // result|multiplier
-    //reg [63:0]  mul_a_reg; // 被乘数(绝对值)
+    //reg [128:0] mul_acc;  // sign|result|multiplier
+    //reg [64:0]  mul_a_reg;
     //reg         mul_active;
     //reg         mul_done;
     //reg         mul_enable;
-    //                          
-    //reg mul_neg_result;
-    //reg [2:0] mul_op_type;
+    //reg         mul_b_is_signed;
+    //reg [1:0]   mul_out_sel;
     //
-    //reg  mul_is_w_latched;
-    //reg  [63:0] raw_a_latched;
-    //reg  [63:0] raw_b_latched;
-    //reg  a_is_signed_latched;
-    //reg  b_is_signed_latched;
-    //reg  [63:0] abs_a_latched;
-    //reg  [63:0] abs_b_latched;
-    //reg  [4:0] mul_rd_latched;
-
     //// 000mul 001mulh 010mulhsu 011mulhu
     //wire mul_is_w = (op == 7'b0111011); // Mulw (opc 0111011)
+    //wire mul_sign_a = mul_is_w ? 1'b1 : (w_func3 != 3'b011); // signed except Mulhu
+    //wire mul_sign_b = mul_is_w ? 1'b1 : (w_func3 == 3'b000 || w_func3 == 3'b001); // signed Mul/Mulh
+
     //wire [63:0] raw_a = mul_is_w ? {{32{rs1[31]}}, rs1[31:0]} : rs1;
     //wire [63:0] raw_b = mul_is_w ? {{32{rs2[31]}}, rs2[31:0]} : rs2;
-
-    //wire a_is_signed = mul_is_w ? 1'b1 : (w_func3 != 3'b011); // signed except Mulhu
-    //wire b_is_signed = mul_is_w ? 1'b1 : (w_func3 == 3'b000 || w_func3 == 3'b001); // signed Mul/Mulh
-
-    //wire [63:0] abs_a = (a_is_signed & raw_a[63])? (~raw_a+64'd1):raw_a; 
-    //wire [63:0] abs_b = (b_is_signed & raw_b[63])? (~raw_b+64'd1):raw_b; 
-    //wire [64:0] add_res = {1'b0, mul_acc[127:64]} + {1'b0, mul_a_reg};
+    //wire [64:0] ext_a = {mul_sign_a & raw_a[63], raw_a}; 
+    ////wire [64:0] ext_b = {mul_sign_b & raw_b[63], raw_b}; 
+    //wire is_last_cycle = (mul_cnt == 7'd63);
+    //wire do_sub = is_last_cycle && mul_b_is_signed;
+    //wire [64:0] adder_input_a = do_sub ? ~mul_a_reg : mul_a_reg;
+    //wire [64:0] sum_upper = mul_acc[128:64] + adder_input_a + do_sub;
 
     //always @(posedge clk or negedge reset) begin  
     //    if (!reset) begin
     //        mul_active <= 0;
     //        mul_done   <= 0;
-    //        mul_cnt    <= 0;	    
-    //        mul_acc    <= 0;
+    //        mul_cnt    <=0;	    
     //    end else begin
     //        if (mul_enable && !mul_active && !mul_done) begin
     //    	// Start phase
     //    	mul_active <= 1;
     //    	mul_cnt    <= 0;
-    //    	mul_a_reg  <= abs_a_latched;
-    //    	mul_acc <= {64'b0, abs_b_latched};
-    //    	mul_neg_result <= (a_is_signed_latched && raw_a_latched[63]) ^ (b_is_signed_latched && raw_b_latched[63]);
-    //    	   
+    //    	// 1. Determine output mode
+    //            if (mul_is_w) mul_out_sel <= 2; // mulw
+    //    	else if (w_func3 == 0) mul_out_sel <= 0; // mul
+    //    	else mul_out_sel <= 1;   // mulh* 
+    //    	mul_a_reg <= ext_a;
+    //    	mul_acc <= {65'd0, raw_b};
+    //    	mul_b_is_signed <= mul_sign_b;
     //        end else if (mul_active) begin
     //    	// Compute phase (64 cycles)
     //    	if (mul_cnt < 64) begin
-    //    	    if (mul_acc[0]) mul_acc <= {add_res, mul_acc[63:1]}; // is 1,  + and >> 1
-    //    	    else mul_acc <= {1'b0, mul_acc[127:1]}; // is 0, only >> 1, preserve sign bit
+    //    	    if (mul_acc[0]) mul_acc <= {sum_upper[64], sum_upper, mul_acc[63:1]}; // is 1,  + and << 1
+    //    	    else mul_acc <= {mul_acc[128], mul_acc[128:1]}; // is 0, only << 1, preserve sign bit
     //    	    mul_cnt <= mul_cnt + 1;
     //    	end else begin
     //                // Finish phase
@@ -280,13 +219,74 @@ module riscv64(
     //        end else if (!mul_enable) mul_done <= 0; // reset handshake
     //    end
     //end
+    // Indepenedent Multiplier // Booth algorithim + Signed-correct
+    reg [6:0]   mul_cnt;
+    reg [127:0] mul_acc;  // result|multiplier
+    reg [63:0]  mul_a_reg; // 被乘数(绝对值)
+    reg         mul_active;
+    reg         mul_done;
+    reg         mul_enable;
+                              
+    reg mul_neg_result;
+    reg [2:0] mul_op_type;
+    
+    reg  mul_is_w_latched;
+    reg  [63:0] raw_a_latched;
+    reg  [63:0] raw_b_latched;
+    reg  a_is_signed_latched;
+    reg  b_is_signed_latched;
+    reg  [63:0] abs_a_latched;
+    reg  [63:0] abs_b_latched;
+    reg  [4:0] mul_rd_latched;
 
-    //wire [127:0] final_mul_res = mul_neg_result ? ~mul_acc+128'd1 : mul_acc;
-    //wire is_high_mul = (mul_op_type == 3'b001) || (mul_op_type == 3'b010) || (mul_op_type == 3'b011);
-    //wire [63:0] w_mul_out = 
-    //        (mul_is_w_latched) ? {{32{final_mul_res[31]}}, final_mul_res[31:0]}: // mulw
-    //        (is_high_mul) ? final_mul_res[127:64]:// mulh, mulhsu, mulhu
-    //                        final_mul_res[63:0];// mul
+    // 000mul 001mulh 010mulhsu 011mulhu
+    wire mul_is_w = (op == 7'b0111011); // Mulw (opc 0111011)
+    wire [63:0] raw_a = mul_is_w ? {{32{rs1[31]}}, rs1[31:0]} : rs1;
+    wire [63:0] raw_b = mul_is_w ? {{32{rs2[31]}}, rs2[31:0]} : rs2;
+
+    wire a_is_signed = mul_is_w ? 1'b1 : (w_func3 != 3'b011); // signed except Mulhu
+    wire b_is_signed = mul_is_w ? 1'b1 : (w_func3 == 3'b000 || w_func3 == 3'b001); // signed Mul/Mulh
+
+    wire [63:0] abs_a = (a_is_signed & raw_a[63])? (~raw_a+64'd1):raw_a; 
+    wire [63:0] abs_b = (b_is_signed & raw_b[63])? (~raw_b+64'd1):raw_b; 
+    wire [64:0] add_res = {1'b0, mul_acc[127:64]} + {1'b0, mul_a_reg};
+
+    always @(posedge clk or negedge reset) begin  
+        if (!reset) begin
+            mul_active <= 0;
+            mul_done   <= 0;
+            mul_cnt    <= 0;	    
+            mul_acc    <= 0;
+        end else begin
+            if (mul_enable && !mul_active && !mul_done) begin
+        	// Start phase
+        	mul_active <= 1;
+        	mul_cnt    <= 0;
+        	mul_a_reg  <= abs_a_latched;
+        	mul_acc <= {64'b0, abs_b_latched};
+        	mul_neg_result <= (a_is_signed_latched && raw_a_latched[63]) ^ (b_is_signed_latched && raw_b_latched[63]);
+        	   
+            end else if (mul_active) begin
+        	// Compute phase (64 cycles)
+        	if (mul_cnt < 64) begin
+        	    if (mul_acc[0]) mul_acc <= {add_res, mul_acc[63:1]}; // is 1,  + and >> 1
+        	    else mul_acc <= {1'b0, mul_acc[127:1]}; // is 0, only >> 1, preserve sign bit
+        	    mul_cnt <= mul_cnt + 1;
+        	end else begin
+                    // Finish phase
+                    mul_active <= 0;
+        	    mul_done   <= 1;
+        	end
+            end else if (!mul_enable) mul_done <= 0; // reset handshake
+        end
+    end
+
+    wire [127:0] final_mul_res = mul_neg_result ? ~mul_acc+128'd1 : mul_acc;
+    wire is_high_mul = (mul_op_type == 3'b001) || (mul_op_type == 3'b010) || (mul_op_type == 3'b011);
+    wire [63:0] w_mul_out = 
+            (mul_is_w_latched) ? {{32{final_mul_res[31]}}, final_mul_res[31:0]}: // mulw
+            (is_high_mul) ? final_mul_res[127:64]:// mulh, mulhsu, mulhu
+                            final_mul_res[63:0];// mul
 
     // Independent divider
     reg [6:0]   div_cnt;
@@ -520,20 +520,22 @@ module riscv64(
             12'hF11 : w_csr_id = mvendorid  ;   
             12'hF12 : w_csr_id = marchid    ;   
             12'hF13 : w_csr_id = mimpid     ;   
-            12'h3A0 : w_csr_id = pmpcfg0    ;   
-            12'h3B0 : w_csr_id = pmpaddr0   ;   
-            12'h3B1 : w_csr_id = pmpaddr1   ;   
-            12'h3B2 : w_csr_id = pmpaddr2   ;   
-            12'h3B3 : w_csr_id = pmpaddr3   ;   
-            12'h3B4 : w_csr_id = pmpaddr4   ;   
-            12'h3B5 : w_csr_id = pmpaddr5   ;   
-            12'h3B6 : w_csr_id = pmpaddr6   ;   
-            12'h3B7 : w_csr_id = pmpaddr7   ;   
-	    default : w_csr_id = 36; 
+            //12'h3A0 : w_csr_id = pmpcfg0    ;   
+            //12'h3B0 : w_csr_id = pmpaddr0   ;   
+            //12'h3B1 : w_csr_id = pmpaddr1   ;   
+            //12'h3B2 : w_csr_id = pmpaddr2   ;   
+            //12'h3B3 : w_csr_id = pmpaddr3   ;   
+            //12'h3B4 : w_csr_id = pmpaddr4   ;   
+            //12'h3B5 : w_csr_id = pmpaddr5   ;   
+            //12'h3B6 : w_csr_id = pmpaddr6   ;   
+            //12'h3B7 : w_csr_id = pmpaddr7   ;   
+	    //default : w_csr_id = 36; 
+	    default : w_csr_id = 27; 
 	endcase
     end
 
-    (* ram_style = "logic" *) reg [63:0] Csrs [0:36]; // 36 CSRs for now // totally 4096
+    //(* ram_style = "logic" *) reg [63:0] Csrs [0:36]; // 36 CSRs for now // totally 4096
+    (* ram_style = "logic" *) reg [63:0] Csrs [0:27]; // 36 CSRs for now // totally 4096
     wire [3:0]  satp_mmu  = Csrs[satp][63:60]; // 0:bare, 8:sv39, 9:sv48  satp.MODE!=0, privilegae is not M-mode, mstatus.MPRN is not set or in MPP's mode?
     wire [15:0] satp_asid = Csrs[satp][59:44]; // Address Space ID for TLB
     wire [43:0] satp_ppn  = Csrs[satp][43:0];  // Root Page Table PPN physical page number
@@ -560,19 +562,21 @@ module riscv64(
     // -- TLB -- 4 pages
     (* ram_style = "logic" *) reg [26:0] tlb_vpn [0:3]; // vpn number VA[38:12]  Sv39
     (* ram_style = "logic" *) reg [43:0] tlb_ppn [0:3]; // ppn number PA[55:12]
-    (* ram_style = "logic" *) reg tlb_vld [0:3];
+    //(* ram_style = "logic" *) reg tlb_vld [0:3];
+    (* ram_style = "logic" *) reg tlb_vld [0:1];
 
     // tlb i hit
     wire [26:0] pc_vpn = pc[38:12];
     reg [43:0] pc_ppn;
     reg tlb_i_hit;
 
-    //wire [7:0] tlb_i_match;
-    wire [3:0] tlb_i_match;
+    //wire [7:0] tlb_i_match; // 8page
+    //wire [3:0] tlb_i_match; // 4page
+    wire [1:0] tlb_i_match; // 2page
     assign tlb_i_match[0] = tlb_vld[0] && (tlb_vpn[0] == pc_vpn);
     assign tlb_i_match[1] = tlb_vld[1] && (tlb_vpn[1] == pc_vpn);
-    assign tlb_i_match[2] = tlb_vld[2] && (tlb_vpn[2] == pc_vpn);
-    assign tlb_i_match[3] = tlb_vld[3] && (tlb_vpn[3] == pc_vpn);
+    //assign tlb_i_match[2] = tlb_vld[2] && (tlb_vpn[2] == pc_vpn);
+    //assign tlb_i_match[3] = tlb_vld[3] && (tlb_vpn[3] == pc_vpn);
     //assign tlb_i_match[4] = tlb_vld[4] && (tlb_vpn[4] == pc_vpn);
     //assign tlb_i_match[5] = tlb_vld[5] && (tlb_vpn[5] == pc_vpn);
     //assign tlb_i_match[6] = tlb_vld[6] && (tlb_vpn[6] == pc_vpn);
@@ -581,9 +585,9 @@ module riscv64(
     always @(*) begin
         tlb_i_hit = |tlb_i_match;
         pc_ppn =   ({44{tlb_i_match[0]}} & tlb_ppn[0]) |
-                   ({44{tlb_i_match[1]}} & tlb_ppn[1]) |
-                   ({44{tlb_i_match[2]}} & tlb_ppn[2]) |
-		   ({44{tlb_i_match[3]}} & tlb_ppn[3]) ; end
+	           ({44{tlb_i_match[1]}} & tlb_ppn[1]) ; end
+                   //({44{tlb_i_match[2]}} & tlb_ppn[2]) |
+		   //({44{tlb_i_match[3]}} & tlb_ppn[3]) ; end
                    //({44{tlb_i_match[3]}} & tlb_ppn[3]) |
                    //({44{tlb_i_match[4]}} & tlb_ppn[4]) |
                    //({44{tlb_i_match[5]}} & tlb_ppn[5]) |
@@ -598,11 +602,12 @@ module riscv64(
     reg tlb_d_hit;
 
     //wire [7:0] tlb_d_match;
-    wire [3:0] tlb_d_match;
+    //wire [3:0] tlb_d_match;
+    wire [1:0] tlb_d_match;
     assign tlb_d_match[0] = tlb_vld[0] && (tlb_vpn[0] == ls_va[38:12]);
     assign tlb_d_match[1] = tlb_vld[1] && (tlb_vpn[1] == ls_va[38:12]);
-    assign tlb_d_match[2] = tlb_vld[2] && (tlb_vpn[2] == ls_va[38:12]);
-    assign tlb_d_match[3] = tlb_vld[3] && (tlb_vpn[3] == ls_va[38:12]);
+    //assign tlb_d_match[2] = tlb_vld[2] && (tlb_vpn[2] == ls_va[38:12]);
+    //assign tlb_d_match[3] = tlb_vld[3] && (tlb_vpn[3] == ls_va[38:12]);
     //assign tlb_d_match[4] = tlb_vld[4] && (tlb_vpn[4] == ls_va[38:12]);
     //assign tlb_d_match[5] = tlb_vld[5] && (tlb_vpn[5] == ls_va[38:12]);
     //assign tlb_d_match[6] = tlb_vld[6] && (tlb_vpn[6] == ls_va[38:12]);
@@ -611,9 +616,9 @@ module riscv64(
     always @(*) begin
         tlb_d_hit = |tlb_d_match;
         data_ppn = ({44{tlb_d_match[0]}} & tlb_ppn[0]) |
-                   ({44{tlb_d_match[1]}} & tlb_ppn[1]) |
-                   ({44{tlb_d_match[2]}} & tlb_ppn[2]) |
-		   ({44{tlb_d_match[3]}} & tlb_ppn[3]) ; end
+	           ({44{tlb_d_match[1]}} & tlb_ppn[1]) ; end
+                   //({44{tlb_d_match[2]}} & tlb_ppn[2]) |
+		   //({44{tlb_d_match[3]}} & tlb_ppn[3]) ; end
                    //({44{tlb_d_match[3]}} & tlb_ppn[3]) |
                    //({44{tlb_d_match[4]}} & tlb_ppn[4]) |
                    //({44{tlb_d_match[5]}} & tlb_ppn[5]) |
@@ -626,7 +631,8 @@ module riscv64(
         
     // TLB Refill
     //reg [2:0] tlb_ptr = 0; // 8 entries TLB
-    reg [1:0] tlb_ptr = 0; // 4 entries TLB
+    //reg [1:0] tlb_ptr = 0; // 4 entries TLB
+    reg  tlb_ptr = 0; // 2 entries TLB
     always @(posedge clk or negedge reset) begin
         if (!reset) tlb_ptr <= 0; // hit->trap(save va to x9)->refill assembly(fetch pa to x9)-> sd x9, `Tlb -> here to refill tlb
         else if ((mmu_pc || mmu_da) && bus_write_enable && bus_address == `Tlb) begin // for the last fill: sd ppa, Tlb
@@ -698,8 +704,9 @@ module riscv64(
 	    Csrs[mstatus][MIE] <= 0;
 	    //interrupt_ack <= 0;
 	    mmu_da <= 0;
-	    for (i=0;i<10;i=i+1) begin sre[i]<= 64'b0; end
-	    for (i=0;i<36;i=i+1) begin Csrs[i]<= 64'b0; end
+	    for (i=0;i<10;i=i+1) begin sre[i]<= 64'b0; end 
+	    //for (i=0;i<36;i=i+1) begin Csrs[i]<= 64'b0; end
+	    for (i=0;i<27;i=i+1) begin Csrs[i]<= 64'b0; end
 	    Csrs[medeleg] <= 64'hb1af; // delegate to S-mode 1011000110101111 // see VII 3.1.15 mcasue exceptions
 	    Csrs[mideleg] <= 64'h0222; // delegate to S-mode 0000001000100010 see VII 3.1.15 mcasue interrupt 1/5/9 SSIP(supervisor software interrupt) STIP(time) SEIP(external)
 	    // Initialize Machine Info for OpenSBI
@@ -724,7 +731,7 @@ module riscv64(
        	 	bubble <= 1'b1; // bubble 
 	        saved_user_pc <= pc - 4; // !!! save pc (EXE was flushed so record-redo it, previous pc)
 	        if (bubble) saved_user_pc <= pc ; // !!! save pc (j/b EXE was flushed currectly)
-		for (i=0;i<10;i=i+1) begin sre[i]<= re[i]; end // save re
+		for (i=1;i<10;i=i+1) begin sre[i]<= re[i]; end // save re
 		re[9] <= pc;// - 4; // save this vpc to x1 //!!!! We also need to refill pc - 4' ppc for re-executeing pc-4, with hit(if satp in for very next sfence.vma) 
 		//Csrs[mstatus][MPIE] <= Csrs[mstatus][MIE]; // disable interrupt during shadow mmu walking
 		//Csrs[mstatus][MIE] <= 0;
@@ -736,7 +743,7 @@ module riscv64(
 	    end else if (mmu_pc && ir == 32'b00110000001000000000000001110011) begin // end hiject mret & recover from shadow when see Mret
 		pc <= saved_user_pc; // recover from shadow when see Mret
 	 	bubble <= 1'b1; // bubble
-		for (i=0;i<10;i=i+1) begin re[i]<= sre[i]; end // recover usr re
+		for (i=1;i<10;i=i+1) begin re[i]<= sre[i]; end // recover usr re
 		mmu_pc <= 0; // MMU_PC OFF
 		//Csrs[mstatus][MIE] <= Csrs[mstatus][MPIE]; // set back interrupt status
     
@@ -747,7 +754,7 @@ module riscv64(
        		mmu_cache_refill <= 1; // 
        	        pc <= 72; //
        	 	bubble <= 1'b1; // bubble 
-		for (i=0;i<10;i=i+1) begin sre[i]<= re[i]; end // save re
+		for (i=1;i<10;i=i+1) begin sre[i]<= re[i]; end // save re
 	        saved_user_pc <= pc -4  ; // ??!!! save pc (j/b EXE was flushed currectly)
 		re[9] <= {ppc_pre[63:4], 4'b0};// save missed ppc_pre cache_line address for handler
 		ask_i_data <= {ppc_pre[63:4], 4'b0};// save missed ppc_pre cache_line address for hardware
@@ -759,7 +766,7 @@ module riscv64(
 	    end else if (mmu_cache_refill && ir == 32'b00110000001000000000000001110011) begin // end hiject mret & recover from shadow when see Mret
 		pc <= saved_user_pc; // recover from shadow when see Mret
 	 	bubble <= 1'b1; // bubble
-		for (i=0;i<10;i=i+1) begin re[i]<= sre[i]; end // recover usr re
+		for (i=1;i<10;i=i+1) begin re[i]<= sre[i]; end // recover usr re
 		mmu_cache_refill <= 0; // OFF
 	    // -----
 
@@ -769,14 +776,14 @@ module riscv64(
 		pc <= 36; // D-TLB refill Handler
 	 	bubble <= 1'b1; // bubble
 	        saved_user_pc <= pc - 4; // save pc EXE l/s/a
-		for (i=0;i<10;i=i+1) begin sre[i]<= re[i]; end // save re
+		for (i=1;i<10;i=i+1) begin sre[i]<= re[i]; end // save re
 		re[9] <= ls_va; //save va to x1
 		//Csrs[mstatus][MPIE] <= Csrs[mstatus][MIE]; // disable interrupt during shadow mmu walking
 		//Csrs[mstatus][MIE] <= 0;
 	    end else if (mmu_da && ir == 32'b00110000001000000000000001110011) begin // hiject mret 
 		pc <= saved_user_pc; // recover from shadow when see Mret
 		bubble <= 1; // bubble
-		for (i=0;i<10;i=i+1) begin re[i]<= sre[i]; end // recover usr re
+		for (i=1;i<10;i=i+1) begin re[i]<= sre[i]; end // recover usr re
 		mmu_da <= 0; // MMU_DA OFF
 		//Csrs[mstatus][MIE] <= Csrs[mstatus][MPIE]; // set back interrupt status
 		
@@ -1046,16 +1053,16 @@ module riscv64(
 			if (!mul_done) begin
 			    // request start
 			    mul_enable <= 1;
-                            //// latch
-                            //mul_is_w_latched <=  mul_is_w;
-                            //raw_a_latched <= raw_a;
-                            //raw_b_latched <= raw_b;
-                            //a_is_signed_latched <= a_is_signed;
-                            //b_is_signed_latched <= b_is_signed;
-                            //abs_a_latched <= abs_a;
-                            //abs_b_latched <= abs_b;
-		            //mul_op_type <= w_func3;
-			    //mul_rd_latched <= w_rd;
+                            // latch
+                            mul_is_w_latched <=  mul_is_w;
+                            raw_a_latched <= raw_a;
+                            raw_b_latched <= raw_b;
+                            a_is_signed_latched <= a_is_signed;
+                            b_is_signed_latched <= b_is_signed;
+                            abs_a_latched <= abs_a;
+                            abs_b_latched <= abs_b;
+		            mul_op_type <= w_func3;
+			    mul_rd_latched <= w_rd;
 
 			    // stall pipeline
 			    pc <= pc - 4;
@@ -1064,10 +1071,10 @@ module riscv64(
 			    // result ready
 			    mul_enable <= 0;
 			    // select output based on cached type
-			    //re[mul_rd_latched] <= w_mul_out;
-			    if (mul_out_sel == 0)      re[w_rd] <= mul_acc[63:0]; // Mul
-			    else if (mul_out_sel == 1) re[w_rd] <= mul_acc[127:64]; // Mulh*
-			    else                       re[w_rd] <= {{32{mul_acc[31]}}, mul_acc[31:0]}; // Mulw
+			    re[mul_rd_latched] <= w_mul_out;
+			    //if (mul_out_sel == 0)      re[w_rd] <= mul_acc[63:0]; // Mul
+			    //else if (mul_out_sel == 1) re[w_rd] <= mul_acc[127:64]; // Mulh*
+			    //else                       re[w_rd] <= {{32{mul_acc[31]}}, mul_acc[31:0]}; // Mulw
 			end
 		    end
 
