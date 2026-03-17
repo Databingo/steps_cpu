@@ -419,7 +419,7 @@ module riscv64(
 		    div_active <= 0;
 		    div_done <= 1; // finish immediately
 		end
-		/else begin 
+		else begin 
 		//    // mormal division setup
 		//    // 1. determine signs
 		//    div_sign_reminder <= div_op_signed_latched ?  div_a[63] :0;
