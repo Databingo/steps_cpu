@@ -265,10 +265,15 @@ call puts
 addi sp, sp, 8
 
 la a1, byte_per_sec
-ld t0, 0(a1)
+ld a0, 0(a1)
+call print_reg
+
+
 #li t1, 32
 #div t2, t0, t1
-srli a0, t0, 5
+la a1, byte_per_sec
+ld a0, 0(a1)
+srli a0, a0, 5
 call print_reg
 
 end:
