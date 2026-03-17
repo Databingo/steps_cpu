@@ -182,11 +182,11 @@ la a1, byte_per_sec
 lw a0, 0(a1)  # two byts, use lw, ld will get other word together!
 call print_reg
 
+#li t1, 32
+#div t2, t0, t1
 la a1, byte_per_sec
 lw a0, 0(a1)
-#srli a0, a0, 5
-li t1, 32
-div a0, a0, t1
+srli a0, a0, 5
 call print_reg
 
 end:
