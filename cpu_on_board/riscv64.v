@@ -394,6 +394,7 @@ module riscv64(
     // signal 100div/w 101divu 110rem/w 111remu
     wire div_op_signed = !ir[12];  // func3[0] == 0 is signed
     wire div_op_is_rem = ir[13];   // func3[1] == 1 is rem
+    wire [63:0] ori_rs1 = div_sign_reminder ? -div_a:div_a;
 
     always @(posedge clk or negedge reset) begin
 	if (!reset) begin
@@ -409,13 +410,13 @@ module riscv64(
 		// handle corner case
 		if (div_b == 0) begin
 		    // divide by zero
-		    div_result_out <= div_op_is_rem ? div_a : -64'd1;
+		    div_result_out <= div_is_rem ? ori_rs1: -64'd1;
 		    div_active <= 0;
 		    div_done <= 1; // finish immediately
 		end
-		else if (div_op_signed_latched && div_a == 64'h8000000000000000 && div_b == 1) begin // ??
+		else if (div_op_signed_latched && div_a == 64'h8000000000000000 && div_b == 64'd1) begin // ??
 		    // signed overflow
-		    div_result_out <= div_op_is_rem ? 64'd0 : div_a;
+		    div_result_out <= div_is_rem ? 64'd0 : ori_rs1;
 		    div_active <= 0;
 		    div_done <= 1; // finish immediately
 		end
@@ -425,7 +426,8 @@ module riscv64(
 		//    div_sign_reminder <= div_op_signed_latched ?  div_a[63] :0;
 		//    div_sign_quotient <= div_op_signed_latched ? (div_a[63] & div_b[63]) :0;
 		//    // 2. load absoulte values
-		    div_rem <= {64'd0, (div_op_signed_latched && div_a[63]) ? -div_a : div_a};
+		    //div_rem <= {64'd0, (div_op_signed_latched && div_a[63]) ? -div_a : div_a};
+		    div_rem <= {64'd0, div_a};
 		//    div_b <= (div_op_signed_latched &&  div_b[63]) ? -div_b : div_b;
 		end
             end else if (div_active) begin
@@ -1080,18 +1082,20 @@ module riscv64(
 			    div_enable <= 1;
 			    
                             // latch
-                            div_a <= rs1;    // be divided
+                            //div_a <= rs1;    // be divided
                             //div_b <= rs2;    // divisor
+                            div_a <= (div_op_signed &&  rs1[63]) ? -rs1:rs1;
+                            div_b <= (div_op_signed &&  rs2[63]) ? -rs2:rs2;
                             div_op_signed_latched <= div_op_signed;
                             div_is_rem <= div_op_is_rem; // 1rem, 0div
                             div_rd <= w_rd; 
 
-		    // 1. determine signs
-		    div_sign_reminder <= div_op_signed ?  rs1[63] :0;
-		    div_sign_quotient <= div_op_signed ? (rs1[63] ^ rs2[63]) :0;
-		    // 2. load absoulte values
-		    //div_rem <= {64'd0, (div_op_signed && rs1[63]) ? -rs1: rs1};
-		    div_b <= (div_op_signed && rs2[63]) ? -rs2: rs2;
+		            // 1. determine signs
+		            div_sign_reminder <= div_op_signed ?  rs1[63] : 0;
+		            div_sign_quotient <= div_op_signed ? (rs1[63] ^ rs2[63]) : 0;
+		            // 2. load absoulte values
+		            //div_rem <= {64'd0, (div_op_signed && rs1[63]) ? -rs1: rs1};
+		            //div_b <= (div_op_signed && rs2[63]) ? -rs2: rs2;
 
 			    pc <= pc - 4;
 			    bubble <= 1;
