@@ -36,12 +36,6 @@ addi s5, s5, 0x220
 #     li s6, 0x3228 
 lui s6, 0x3
 addi s6, s6, 0x228
-#     la a0, sbi 
-auipc a0, 0 # R_RISCV_PCREL_HI20 sbi 
-addi a0, a0, 0 # R_RISCV_PCREL_LO12_I sbi 
-#     call puts
-auipc x1, 0 # R_RISCV_PCREL_HI20 puts
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I puts
 # la a0, read_sd_sector 
 auipc a0, 0 # R_RISCV_PCREL_HI20 read_sd_sector 
 addi a0, a0, 0 # R_RISCV_PCREL_LO12_I read_sd_sector 
@@ -54,10 +48,6 @@ addi a0, x0, 0x0
 # call sd_read_sector  
 auipc x1, 0 # R_RISCV_PCREL_HI20 sd_read_sector
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I sd_read_sector
-# li t1, 124       
-# li t1, 124       
-addi t1, x0, 0x7c
-sb t1, 0(s11)     # print
 # la a0, prt_sector
 auipc a0, 0 # R_RISCV_PCREL_HI20 prt_sector 
 addi a0, a0, 0 # R_RISCV_PCREL_LO12_I prt_sector 
@@ -70,12 +60,6 @@ jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_sector
 # li a0, 43       
 # li a0, 43       
 addi a0, x0, 0x2b
-# call putchar
-auipc x1, 0 # R_RISCV_PCREL_HI20 putchar
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I putchar
-# li a0, 45       
-# li a0, 45       
-addi a0, x0, 0x2d
 # call putchar
 auipc x1, 0 # R_RISCV_PCREL_HI20 putchar
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I putchar
@@ -104,15 +88,11 @@ lbu t0, 0x0e(s1)
 lbu t1, 0x0f(s1)
 slli t1, t1, 8
 or a0, t1, t0 
-sh a0, 0(a1)
-lb a0, 1(a1)
-# call print_hex_b
-auipc x1, 0 # R_RISCV_PCREL_HI20 print_hex_b
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_hex_b
-lb a0, 0(a1)
-# call print_hex_b
-auipc x1, 0 # R_RISCV_PCREL_HI20 print_hex_b
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_hex_b
+sd a0, 0(a1)
+ld a0, 0(a1)
+# call print_reg
+auipc x1, 0 # R_RISCV_PCREL_HI20 print_reg
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_reg
 # li t0, "numFat:" 
 lui t0, 0x3a7
 srli t0, t0, 0x1

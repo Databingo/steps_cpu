@@ -49,9 +49,9 @@ _start:
     li s5, 0x3220 # SD ready for rd/wr
     li s6, 0x3228 # SD cache available
 
-    # print
-    la a0, sbi 
-    call puts
+   ## print
+   #la a0, sbi 
+   #call puts
 
 # ---------------------- SD card -------------------
 la a0, read_sd_sector 
@@ -59,8 +59,8 @@ call puts
 li a0, 0   
 call sd_read_sector  # use a2 as sector no.
 
-li t1, 124       # |
-sb t1, 0(s11)     # print
+#li t1, 124       # |
+#sb t1, 0(s11)     # print
 
 la a0, prt_sector
 call puts
@@ -68,8 +68,8 @@ call print_sector
 
 li a0, 43       # +
 call putchar
-li a0, 45       # -
-call putchar
+#li a0, 45       # -
+#call putchar
 
 # -- Parse BPB -- little-endian  Bios Parameter Block : sector 0
 # reserved_sectors offset 0x0e-0x0f 2 bytes (including root sector 0)
@@ -101,11 +101,13 @@ lbu t1, 0x0f(s1)
 slli t1, t1, 8
 or a0, t1, t0 
 
-sh a0, 0(a1)
-lb a0, 1(a1)
-call print_hex_b
-lb a0, 0(a1)
-call print_hex_b
+sd a0, 0(a1)
+ld a0, 0(a1)
+call print_reg
+#lb a0, 1(a1)
+#call print_hex_b
+#lb a0, 0(a1)
+#call print_hex_b
 
 # num_fats offset 0x10 1 bytes
 li t0, "numFat:" # 7 char left on for null
