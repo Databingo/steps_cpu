@@ -45,7 +45,9 @@ if [ -f "$MAP_SUMMARY" ]; then
     grep -E "Family|Device|logic elements|combinational functions|registers|pins|memory bits|Multiplier|PLLs" "$MAP_SUMMARY"
     
     # Extract just the number for combinational functions (removes text, spaces, and commas)
-    COMB_COUNT=$(grep -i "Total combinational functions" "$MAP_SUMMARY" | awk -F ':' '{print $2}' | tr -d ' ,')
+   #COMB_COUNT=$(grep -i "Total combinational functions" "$MAP_SUMMARY" | awk -F ':' '{print $2}' | tr -d ' ,')
+    # Extract just the number for combinational functions (removes text, spaces, and commas)
+    COMB_COUNT=$(grep -i "Total combinational functions" "$MAP_SUMMARY" | awk -F ':' '{print $2}' | awk -F '/' '{print $1}' | tr -d ' ,')
     
     # Failsafe in case extraction fails
     if [ -z "$COMB_COUNT" ]; then COMB_COUNT=0; fi
