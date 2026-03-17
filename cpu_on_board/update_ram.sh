@@ -9,7 +9,7 @@ SOF_FILE="output_files/${PROJECT_NAME}.sof"
 set -e
 
 # Create roam.mif base on rom.mif and ram.mif
-bash roam.sh
+#bash roam.sh
 
 # Update mif
 quartus_cdb --read_settings_files=on --update_mif ${PROJECT_NAME} -c ${PROJECT_NAME}
