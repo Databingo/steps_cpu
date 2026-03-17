@@ -27,4 +27,4 @@ hexdump -v -e '1/4 "%08x" "\n"' final.bin | perl -ne 'print unpack("B32", pack("
 
 
 
-
+bash roam.sh
