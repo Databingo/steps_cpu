@@ -67,8 +67,6 @@ li a0, 43       # +
 call putchar
 
 # -- Parse BPB -- little-endian  Bios Parameter Block : sector 0
-# root_dir_sector_start = reserved_sectors + (num_fats * sectors_per_fat16)
-
 # reserved_sectors offset 0x0e-0x0f 2 bytes (including root sector 0)
 li t0, "resSec:" # 7 char left on for null
 addi sp, sp, -8
@@ -86,7 +84,7 @@ or a0, t1, t0
 sd a0, 0(a1)
 ld a0, 0(a1)
 call print_reg
-
+# -------------------------------------
 # num_fats offset 0x10 1 bytes
 li t0, "numFat:" # 7 char left on for null
 addi sp, sp, -8
@@ -101,6 +99,7 @@ sw a0, 0(a1)
 lw a0, 0(a1)
 call print_reg
 
+# -------------------------------------
 # sectors_per_fat16 high offset 0x16-0x17 2 bytes
 li t0, "secPfat" # 7 char left on for null
 addi sp, sp, -8
@@ -119,6 +118,7 @@ sh a0, 0(a1)
 lh a0, 0(a1)
 call print_reg
 
+# -------------------------------------
 # byte_per_sec offset 0x0b-0x0c 2 bytes
 li t0, "bysPsec" # 7 char left on for null
 addi sp, sp, -8
@@ -138,6 +138,7 @@ lh a0, 0(a1)
 call print_reg
 
 
+# -------------------------------------
 # root_dir_sector_start = reserved_sectors + (num_fats * sectors_per_fat16)
 li t0, "rootdS0" # 7 char left on for null
 addi sp, sp, -8
@@ -163,12 +164,12 @@ call print_reg
 li a0, 43       # +
 call putchar
 
-
 la t3, root_dir_sector_start
 lw a0, 0(t3)
 call sd_read_sector  # use a0 as sector no.
 call print_sector
 
+# -------------------------------------
 # entries per secter = byte_per_sec/32  srli 5
 li t0, "EntrPse"
 addi sp, sp, -8
@@ -178,7 +179,7 @@ call puts
 addi sp, sp, 8
 
 la a1, byte_per_sec
-ld a0, 0(a1)
+lw a0, 0(a1)
 call print_reg
 
 
