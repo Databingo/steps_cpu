@@ -53,13 +53,13 @@ _start:
     la a0, sbi 
     call puts
 
-li a0, -2
-call print_reg
-
-li t1, -2
-li t2, -3
-mul a0, t1, t2
-call print_reg
+    li a0, -2
+    call print_reg
+    
+    li t1, -2
+    li t2, -3
+    mul a0, t1, t2
+    call print_reg
 
 
 # ---------------------- SD card -------------------
