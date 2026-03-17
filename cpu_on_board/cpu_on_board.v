@@ -96,7 +96,8 @@ assign DRAM_CKE = 1; // always enable
     //(* ram_style = "block" *) reg [31:0] Cache [0:383]; // 1.5KB
     (* ramstyle = "M4K", ram_init_file = "roam.mif" *) 
     //reg [31:0] Cache [0:1023];  // 4KB
-    reg [31:0] Cache [0:2047];  // 8KB
+    //reg [31:0] Cache [0:2047];  // 8KB more than 52 RAM location
+    reg [31:0] Cache [0:1535];  // 6KB
       
       
     integer i;
