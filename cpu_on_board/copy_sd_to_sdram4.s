@@ -138,10 +138,11 @@ slli t1, t1, 8
 or a0, t1, t0 
 
 sh a0, 0(a1)
-lb a0, 1(a1)
-call print_hex_b
-lb a0, 0(a1)
-call print_hex_b
+lh a0, 0(a1)
+call print_reg
+#call print_hex_b
+#lb a0, 0(a1)
+#call print_hex_b
 
 
 # byte_per_sec offset 0x0b-0x0c 2 bytes
@@ -158,75 +159,85 @@ lbu t1, 0x0c(s1)
 slli t1, t1, 8
 or a0, t1, t0 
 
-sd a0, 0(a1)
-ld a0, 0(a1)
+sh a0, 0(a1)
+lh a0, 0(a1)
 call print_reg
 
 
-
-li t1, 124       # |
-sb t1, 0(s11)     # print
+#
+#li t1, 124       # |
+#sb t1, 0(s11)     # print
 
 # root_dir_sector_start = reserved_sectors + (num_fats * sectors_per_fat16)
 
-la a1, reserved_sec
-lw t0, 0(a1)
+#la a1, reserved_sec
+#lw t0, 0(a1)
+#
+#la a1, num_fats
+#lw t1, 0(a1)
+#
+#la a1, sec_per_fat
+#lw t2, 0(a1)
+#
+#mv a0, t1
+#call print_hex_b
+#srli a0, t2, 8
+#
+#li t1, 124       # |
+#sb t1, 0(s11)     # print
+#
+#call print_hex_b
+#mv a0, t2
+#call print_hex_b
+#
+#li t1, 124       # |
+#sb t1, 0(s11)     # print
+#
+#addi a0, x0, 5
+#call print_reg
+#li a0, 45       # -
+#call putchar
 
-la a1, num_fats
-lw t1, 0(a1)
-
-la a1, sec_per_fat
-lw t2, 0(a1)
-
-mv a0, t1
-call print_hex_b
-srli a0, t2, 8
-
-li t1, 124       # |
-sb t1, 0(s11)     # print
-
-call print_hex_b
-mv a0, t2
-call print_hex_b
-
-li t1, 124       # |
-sb t1, 0(s11)     # print
-
-addi a0, x0, 5
-call print_reg
-li a0, 45       # -
-call putchar
 
 
+#la a1, reserved_sec
+#lw a0, 0(a1)
+#call print_reg
+#li a0, 43       # +
+#call putchar
+#
+#la a1, num_fats
+#lw a0, 0(a1)
+#call print_reg
+#li a0, 43       # +
+#call putchar
+#
+#la a1, sec_per_fat
+#lw a0, 0(a1)
+#call print_reg
+#li a0, 43       # +
+#call putchar
+#
+#la a1, num_fats
+#lw t1, 0(a1)
+#
+#la a1, sec_per_fat
+#lw t2, 0(a1)
+#
+#mul a0, t1, t2
+#call print_reg
+#li a0, 63       # ?
+#call putchar
 
-la a1, reserved_sec
-lw a0, 0(a1)
-call print_reg
-li a0, 43       # +
-call putchar
 
-la a1, num_fats
-lw a0, 0(a1)
-call print_reg
-li a0, 43       # +
-call putchar
+# byte_per_sec offset 0x0b-0x0c 2 bytes
+li t0, "rootdS0" # 7 char left on for null
+addi sp, sp, -8
+sd t0, 0(sp)
+mv a0, sp
+call puts
+addi sp, sp, 8
 
-la a1, sec_per_fat
-lw a0, 0(a1)
-call print_reg
-li a0, 43       # +
-call putchar
-
-la a1, num_fats
-lw t1, 0(a1)
-
-la a1, sec_per_fat
-lw t2, 0(a1)
-
-mul a0, t1, t2
-call print_reg
-li a0, 63       # ?
-call putchar
 
 la a1, num_fats
 lw t1, 0(a1)
