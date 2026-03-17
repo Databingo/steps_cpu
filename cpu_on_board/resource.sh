@@ -25,30 +25,6 @@ echo ""
 ## Step 1.5: Extract and Print Resource Usage
 ## ==========================================================
 echo "========================================="
-echo "        RESOURCE USAGE SUMMARY           "
-echo "========================================="
-
-# Quartus puts the report in output_files/ by default, but sometimes in the root directory.
-SUMMARY_FILE="output_files/${PROJECT_NAME}.map.summary"
-if [ ! -f "$SUMMARY_FILE" ]; then
-    SUMMARY_FILE="${PROJECT_NAME}.map.summary"
-fi
-
-if [ -f "$SUMMARY_FILE" ]; then
-    # We use grep to filter out the date/version lines and only show the hardware stats
-    grep -E "Family|Device|Total logic elements|Total combinational functions|Dedicated logic registers|Total registers|Total pins|Total memory bits|Embedded Multiplier|Total RAM|Total PLLs" "$SUMMARY_FILE"
-else
-    echo "Warning: Could not find $SUMMARY_FILE to display resource usage."
-fi
-
-echo ""
-echo "========================================="
-echo "Compilation Successful!"
-echo "Output file: output_files/${PROJECT_NAME}.sof"
-echo "========================================="
-
-
-echo "========================================="
 echo "    SYNTHESIS RESOURCE USAGE ESTIMATE    "
 echo "========================================="
 
