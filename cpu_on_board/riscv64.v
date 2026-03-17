@@ -303,9 +303,82 @@ module riscv64(
 	    64'b0;
 	    
 
+    //// Independent divider
+    //reg [6:0]   div_cnt;
+    //reg [127:0] div_rem;   // remainder|quotient
+    //reg [63:0]  div_b;    // divisor
+    //reg         div_active; // 1computing, 0idle
+    //reg         div_done;   // handshake 1result ready
+    //reg         div_enable; // handshake 1start request
+    //reg         div_sign_quotient; // sige of quotient
+    //reg         div_sign_reminder; // sige of remainder
+    //reg         div_is_rem; // 1rem, 0div
+    //reg [63:0]  div_result_out; // final output buffer
+
+
+
+    //
+    //// signal 100div/w 101divu 110rem/w 111remu
+    //wire div_op_signed = !ir[12];  // func3[0] == 0 is signed
+    //wire div_op_is_rem = ir[13];   // func3[1] == 1 is rem
+
+    //always @(posedge clk or negedge reset) begin
+    //    if (!reset) begin
+    //        div_active <= 0;
+    //        div_done   <= 0;
+    //        div_cnt    <= 0;
+    //    end else begin
+    //        if (div_enable && !div_active && !div_done) begin
+    //    	// start phase
+    //    	div_active <= 1;
+    //    	div_cnt <= 0;
+    //    	div_is_rem <= div_op_is_rem;
+    //    	// handle corner case
+    //    	if (rs2 == 0) begin
+    //    	    // divide by zero
+    //    	    div_result_out <= div_op_is_rem ? rs1 : -64'd1;
+    //    	    div_active <= 0;
+    //    	    div_done <= 1; // finish immediately
+    //    	end
+    //    	else if (div_op_signed && rs1 == 64'h8000000000000000 && rs2 == -64'd1) begin // ??
+    //    	    // signed overflow
+    //    	    div_result_out <= div_op_is_rem ? 64'd0 : rs1;
+    //    	    div_active <= 0;
+    //    	    div_done <= 1; // finish immediately
+    //    	end
+    //    	else begin 
+    //    	    // mormal division setup
+    //    	    // 1. determine signs
+    //    	    div_sign_reminder <= div_op_signed ?  rs1[63] :0;
+    //    	    div_sign_quotient <= div_op_signed ? (rs1[63] & rs2[63]) :0;
+    //    	    // 2. load absoulte values
+    //    	    div_rem <= {64'd0, (div_op_signed && rs1[63]) ? -rs1 :rs1};
+    //    	    div_b <= (div_op_signed && rs2[63]) ? -rs2 : rs2;
+    //    	end
+    //        end else if (div_active) begin
+    //    	// compute phase (64 cycles)
+    //    	if (div_cnt < 64) begin
+    //    	    if (div_rem[126:63] >= div_b) begin
+    //    	        div_rem <= {div_rem[126:63] - div_b, div_rem[62:0], 1'b1};
+    //    	    end else begin
+    //    	        div_rem <= {div_rem[126:0], 1'b0};
+    //    	    end
+    //    	    div_cnt <= div_cnt + 1;
+    //            end else begin
+    //    	    // finish phase
+    //    	    div_active <= 0;
+    //    	    div_done   <= 1;
+    //    	    if (div_is_rem) div_result_out <= div_sign_reminder ? -div_rem[127:64] : div_rem[127:64];
+    //    	    else div_result_out <= div_sign_quotient ? -div_rem[63:0] : div_rem[63:0];
+    //    	end
+    //        end else if (!div_enable) div_done <= 0; // reset handshake
+    //    end
+    //end
+
     // Independent divider
     reg [6:0]   div_cnt;
     reg [127:0] div_rem;   // remainder|quotient
+    reg [63:0]  div_a;    // be divided
     reg [63:0]  div_b;    // divisor
     reg         div_active; // 1computing, 0idle
     reg         div_done;   // handshake 1result ready
@@ -314,6 +387,9 @@ module riscv64(
     reg         div_sign_reminder; // sige of remainder
     reg         div_is_rem; // 1rem, 0div
     reg [63:0]  div_result_out; // final output buffer
+    reg [4:0]   div_rd; 
+    reg         div_op_signed_latched;
+
     
     // signal 100div/w 101divu 110rem/w 111remu
     wire div_op_signed = !ir[12];  // func3[0] == 0 is signed
@@ -329,28 +405,28 @@ module riscv64(
 		// start phase
 		div_active <= 1;
 		div_cnt <= 0;
-		div_is_rem <= div_op_is_rem;
+		//div_is_rem <= div_op_is_rem;
 		// handle corner case
-		if (rs2 == 0) begin
+		if (div_b == 0) begin
 		    // divide by zero
-		    div_result_out <= div_op_is_rem ? rs1 : -64'd1;
+		    div_result_out <= div_op_is_rem ? div_a : -64'd1;
 		    div_active <= 0;
 		    div_done <= 1; // finish immediately
 		end
-		else if (div_op_signed && rs1 == 64'h8000000000000000 && rs2 == -64'd1) begin // ??
+		else if (div_op_signed_latched && div_a == 64'h8000000000000000 && div_b == 1) begin // ??
 		    // signed overflow
-		    div_result_out <= div_op_is_rem ? 64'd0 : rs1;
+		    div_result_out <= div_op_is_rem ? 64'd0 : div_a;
 		    div_active <= 0;
 		    div_done <= 1; // finish immediately
 		end
-		else begin 
-		    // mormal division setup
-		    // 1. determine signs
-		    div_sign_reminder <= div_op_signed ?  rs1[63] :0;
-		    div_sign_quotient <= div_op_signed ? (rs1[63] & rs2[63]) :0;
-		    // 2. load absoulte values
-		    div_rem <= {64'd0, (div_op_signed && rs1[63]) ? -rs1 :rs1};
-		    div_b <= (div_op_signed && rs2[63]) ? -rs2 : rs2;
+		/else begin 
+		//    // mormal division setup
+		//    // 1. determine signs
+		//    div_sign_reminder <= div_op_signed_latched ?  div_a[63] :0;
+		//    div_sign_quotient <= div_op_signed_latched ? (div_a[63] & div_b[63]) :0;
+		//    // 2. load absoulte values
+		    div_rem <= {64'd0, (div_op_signed_latched && div_a[63]) ? -div_a : div_a};
+		//    div_b <= (div_op_signed_latched &&  div_b[63]) ? -div_b : div_b;
 		end
             end else if (div_active) begin
 		// compute phase (64 cycles)
@@ -371,6 +447,9 @@ module riscv64(
 	    end else if (!div_enable) div_done <= 0; // reset handshake
 	end
     end
+
+
+
 
     // --Machine CSR --
    localparam mstatus    = 0 ; localparam MPRV=17,MPP=11,SPP=8,MPIE=7,SPIE=5,MIE=3,SIE=1,UIE=0;//63_SD|37_MBE|36_SBE|35:34_SXL10|22_TSR|21_TW|20_TVW|17_MPRV|12:11_MPP|8_SPP|7_MPIE|5_SPIE|3_MIE|1_SIE|0_UIE
@@ -969,7 +1048,7 @@ module riscv64(
 			if (!mul_done) begin
 			    // request start
 			    mul_enable <= 1;
-
+                            // latch
                             mul_is_w_latched <=  mul_is_w;
                             raw_a_latched <= raw_a;
                             raw_b_latched <= raw_b;
@@ -999,10 +1078,25 @@ module riscv64(
 		    32'b0000001_?????_?????_1??_?????_0110011: begin
 			if (!div_done) begin
 			    div_enable <= 1;
+			    
+                            // latch
+                            div_a <= rs1;    // be divided
+                            //div_b <= rs2;    // divisor
+                            div_op_signed_latched <= div_op_signed;
+                            div_is_rem <= div_op_is_rem; // 1rem, 0div
+                            div_rd <= w_rd; 
+
+		    // 1. determine signs
+		    div_sign_reminder <= div_op_signed ?  rs1[63] :0;
+		    div_sign_quotient <= div_op_signed ? (rs1[63] ^ rs2[63]) :0;
+		    // 2. load absoulte values
+		    //div_rem <= {64'd0, (div_op_signed && rs1[63]) ? -rs1: rs1};
+		    div_b <= (div_op_signed && rs2[63]) ? -rs2: rs2;
+
 			    pc <= pc - 4;
 			    bubble <= 1;
 			end else begin
-			    re[w_rd] <= div_result_out;
+			    re[div_rd] <= div_result_out;
 			    div_enable <= 0;
 			end
 		    end
