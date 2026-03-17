@@ -248,8 +248,8 @@ module riscv64(
     wire a_is_signed = mul_is_w ? 1'b1 : (w_func3 != 3'b011); // signed except Mulhu
     wire b_is_signed = mul_is_w ? 1'b1 : (w_func3 == 3'b000 || w_func3 == 3'b001); // signed Mul/Mulh
 
-    wire [63:0] abs_a = (a_is_signed & raw_a[63])? -raw_a:raw_a; 
-    wire [63:0] abs_b = (b_is_signed & raw_b[63])? -raw_b:raw_b; 
+    wire [63:0] abs_a = (a_is_signed & raw_a[63])? (~raw_a+1):raw_a; 
+    wire [63:0] abs_b = (b_is_signed & raw_b[63])? (~raw_b+1):raw_b; 
     //wire [64:0] ext_b = {mul_sign_b & raw_b[63], raw_b}; 
     //wire is_last_cycle = (mul_cnt == 7'd63);
     //wire do_sub = is_last_cycle && mul_b_is_signed;
@@ -293,7 +293,7 @@ module riscv64(
 	    end else if (!mul_enable) mul_done <= 0; // reset handshake
 	end
     end
-    wire [127:0] final_mul_res = mul_neg_result ? -mul_acc : mul_acc;
+    wire [127:0] final_mul_res = mul_neg_result ? (~mul_acc+1) : mul_acc;
     wire [63:0] w_mul_out = 
 	    (mul_is_w_latched) ? {{32{final_mul_res[31]}}, final_mul_res[31:0]}: // mulw
 	    (mul_op_type == 0) ? final_mul_res[63:0]  :// mul
