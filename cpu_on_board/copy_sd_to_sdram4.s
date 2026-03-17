@@ -53,6 +53,15 @@ _start:
     la a0, sbi 
     call puts
 
+li a0, -2
+call print_reg
+
+li t1, -2
+li t2, -3
+mul a0, t1, t2
+call print_reg
+
+
 # ---------------------- SD card -------------------
 la a0, read_sd_sector 
 call puts
@@ -263,14 +272,13 @@ lw a0, 0(t3)
 call sd_read_sector  # use a0 as sector no.
 call print_sector
 
-li a0, -2
-call print_reg
-
-
-li t1, -2
-li t2, -3
-mul a0, t1, t2
-call print_reg
+#li a0, -2
+#call print_reg
+#
+#li t1, -2
+#li t2, -3
+#mul a0, t1, t2
+#call print_reg
 
 end:
     j end
