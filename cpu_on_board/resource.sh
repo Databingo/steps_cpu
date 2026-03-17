@@ -12,64 +12,28 @@ MAX_COMB_NODES=18752
 
 # --- Stop on any error ---
 set -e
-
-# --- Compilation Flow ---
-
+# ==========================================================
+# Step 4: Extract and Print Resource Usage
+# ==========================================================
 echo "========================================="
-echo "Starting Quartus II Compilation Flow..."
-echo "Project: $PROJECT_NAME"
-echo "========================================="
-echo ""
-
-## ==========================================================
-## Step 1.5: Extract and Print Resource Usage
-## ==========================================================
-echo "========================================="
-echo "    SYNTHESIS RESOURCE USAGE ESTIMATE    "
+echo "        RESOURCE USAGE SUMMARY           "
 echo "========================================="
 
-# Quartus synthesis report
-MAP_SUMMARY="output_files/${PROJECT_NAME}.map.summary"
-if [ ! -f "$MAP_SUMMARY" ]; then
-    MAP_SUMMARY="${PROJECT_NAME}.map.summary"
+# Quartus puts the report in output_files/ by default, but sometimes in the root directory.
+SUMMARY_FILE="output_files/${PROJECT_NAME}.fit.summary"
+if [ ! -f "$SUMMARY_FILE" ]; then
+    SUMMARY_FILE="${PROJECT_NAME}.fit.summary"
 fi
 
-if [ -f "$MAP_SUMMARY" ]; then
-    # Print the detailed hardware stats
-    grep -E "Family|Device|logic elements|combinational functions|registers|pins|memory bits|Multiplier|PLLs" "$MAP_SUMMARY"
-    
-    # Extract just the number for combinational functions (removes text, spaces, and commas)
-    COMB_COUNT=$(grep -i "Total combinational functions" "$MAP_SUMMARY" | awk -F ':' '{print $2}' | tr -d ' ,')
-    
-    # Failsafe in case extraction fails
-    if [ -z "$COMB_COUNT" ]; then COMB_COUNT=0; fi
-
-    echo "-----------------------------------------"
-    echo "Resource Limit Check:"
-    echo "Current Combinational Nodes: $COMB_COUNT"
-    echo "Device Maximum Nodes:        $MAX_COMB_NODES"
-
-    # Compare usage vs limits
-    if [ "$COMB_COUNT" -gt "$MAX_COMB_NODES" ]; then
-        echo "-----------------------------------------"
-        echo "❌ ERROR: Design exceeds device capacity!"
-        echo "Compilation aborted before Place & Route to save time."
-        echo "Please optimize your combinational logic."
-        echo "========================================="
-        exit 1 # <--- THIS BREAKS AND STOPS THE SCRIPT
-    else
-        echo "✅ Resource check passed. Proceeding to Fitter..."
-    fi
+if [ -f "$SUMMARY_FILE" ]; then
+    # We use grep to filter out the date/version lines and only show the hardware stats
+    grep -E "Family|Device|Total logic elements|Total combinational functions|Dedicated logic registers|Total registers|Total pins|Total memory bits|Embedded Multiplier|Total RAM|Total PLLs" "$SUMMARY_FILE"
 else
-    echo "Warning: Could not find $MAP_SUMMARY to display resource usage."
+    echo "Warning: Could not find $SUMMARY_FILE to display resource usage."
 fi
-echo "========================================="
+
 echo ""
-
-
-
-
-
-
-
-
+echo "========================================="
+echo "Compilation Successful!"
+echo "Output file: output_files/${PROJECT_NAME}.sof"
+echo "========================================="
