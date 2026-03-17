@@ -265,10 +265,7 @@ jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_reg
 auipc a1, 0 # R_RISCV_PCREL_HI20 byte_per_sec 
 addi a1, a1, 0 # R_RISCV_PCREL_LO12_I byte_per_sec 
 lw a0, 0(a1)
-# li t1, 32
-# li t1, 32
-addi t1, x0, 0x20
-div a0, a0, t1
+srli a0, a0, 5
 # call print_reg
 auipc x1, 0 # R_RISCV_PCREL_HI20 print_reg
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_reg
