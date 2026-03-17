@@ -263,7 +263,6 @@ lw a0, 0(t3)
 call sd_read_sector  # use a0 as sector no.
 call print_sector
 
-
 li a0, -2
 call print_reg
 
