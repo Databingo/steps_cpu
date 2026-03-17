@@ -352,7 +352,15 @@ assign DRAM_CKE = 1; // always enable
 		            1: begin bus_read_data[63:32] <= Cache[bus_address_reg]; step <= 0; bus_read_done <= 1; end
 			endcase
 		    end 
-		    default: begin bus_read_data <= Cache[bus_address_reg] >> (8*bus_address_reg_full[1:0]); bus_read_done <= 1; end // 000Lb 001Lh 010Lw 101Lhu 100Lbu 110Lwu
+		    //default: begin bus_read_data <= Cache[bus_address_reg] >> (8*bus_address_reg_full[1:0]); bus_read_done <= 1; end // 000Lb 001Lh 010Lw 101Lhu 100Lbu 110Lwu
+		    default: begin 
+		        case(bus_address_reg_full[1:0])
+		            2'b00: bus_read_data <= {32'b0, Cache[bus_address_reg]}; 
+		            2'b01: bus_read_data <= {40'b0, Cache[bus_address_reg][31:8]}; 
+		            2'b10: bus_read_data <= {48'b0, Cache[bus_address_reg][31:16]}; 
+		            2'b11: bus_read_data <= {56'b0, Cache[bus_address_reg][31:24]}; 
+			endcase
+			    bus_read_done <= 1; end // 000Lb 001Lh 010Lw 101Lhu 100Lbu 110Lwu
 		endcase
 	    end
 
@@ -412,7 +420,8 @@ assign DRAM_CKE = 1; // always enable
 		        case(step)
 			    0: if (sdram_ready) begin sdram_addr <= bus_address[22:1]; sdram_byte_en <= 2'b11; sdram_read_en <= 1; step <= 1; end
 			    1: if (sdram_req_wait==0) begin sdram_read_en <= 0; bus_read_data<= {48'b0, sdram_rddata[15:0]};bus_read_done <= 0; step <=2; end
-			    2: if (sdram_ready) begin sdram_addr <= bus_address[22:1]+1; sdram_byte_en <= 2'b11; sdram_read_en <= 1; step <= 3; end
+			    //2: if (sdram_ready) begin sdram_addr <= bus_address[22:1]+1; sdram_byte_en <= 2'b11; sdram_read_en <= 1; step <= 3; end
+			    2: if (sdram_ready) begin sdram_addr <= sdram_addr+1; sdram_byte_en <= 2'b11; sdram_read_en <= 1; step <= 3; end
 			    3: if (sdram_req_wait==0) begin sdram_read_en <= 0; bus_read_data[63:16] <= {{32{sdram_rddata[15]}}, sdram_rddata[15:0]}; bus_read_done <= 1; step <=0; end
 			endcase
 		        end
@@ -420,7 +429,8 @@ assign DRAM_CKE = 1; // always enable
 		        case(step)
 			    0: if (sdram_ready) begin sdram_addr <= bus_address[22:1]; sdram_byte_en <= 2'b11; sdram_read_en <= 1; step <= 1; end
 			    1: if (sdram_req_wait==0) begin sdram_read_en <= 0; bus_read_data<= {48'b0, sdram_rddata[15:0]};bus_read_done <= 0; step <=2; end
-			    2: if (sdram_ready) begin sdram_addr <= bus_address[22:1]+1; sdram_byte_en <= 2'b11; sdram_read_en <= 1;  step <= 3; end
+			    //2: if (sdram_ready) begin sdram_addr <= bus_address[22:1]+1; sdram_byte_en <= 2'b11; sdram_read_en <= 1;  step <= 3; end
+			    2: if (sdram_ready) begin sdram_addr <= sdram_addr+1; sdram_byte_en <= 2'b11; sdram_read_en <= 1;  step <= 3; end
 			    3: if (sdram_req_wait==0) begin sdram_read_en <= 0; bus_read_data[31:16] <= sdram_rddata[15:0]; bus_read_done <= 1; step <=0; end
 			endcase
 		        end
@@ -439,11 +449,14 @@ assign DRAM_CKE = 1; // always enable
 		        case(step)
 			    0: if (sdram_ready) begin sdram_addr <= bus_address[22:1];   sdram_byte_en <= 2'b11; sdram_read_en <= 1; step <= 1; end 
 			    1: if (sdram_req_wait==0) begin sdram_read_en <= 0; bus_read_data<= {48'b0, sdram_rddata[15:0]};bus_read_done <= 0; step <=2; end
-		            2: if (sdram_ready) begin sdram_addr <= bus_address[22:1]+1; sdram_byte_en <= 2'b11; sdram_read_en <= 1; step <= 3; end  
+		            //2: if (sdram_ready) begin sdram_addr <= bus_address[22:1]+1; sdram_byte_en <= 2'b11; sdram_read_en <= 1; step <= 3; end  
+		            2: if (sdram_ready) begin sdram_addr <= sdram_addr+1; sdram_byte_en <= 2'b11; sdram_read_en <= 1; step <= 3; end  
 			    3: if (sdram_req_wait==0) begin sdram_read_en <= 0; bus_read_data[31:16] <= sdram_rddata[15:0]; bus_read_done <= 0; step <=4; end
-		            4: if (sdram_ready) begin sdram_addr <= bus_address[22:1]+2; sdram_byte_en <= 2'b11; sdram_read_en <= 1; step <= 5; end  
+		            //4: if (sdram_ready) begin sdram_addr <= bus_address[22:1]+2; sdram_byte_en <= 2'b11; sdram_read_en <= 1; step <= 5; end  
+		            4: if (sdram_ready) begin sdram_addr <= sdram_addr+1; sdram_byte_en <= 2'b11; sdram_read_en <= 1; step <= 5; end  
 			    5: if (sdram_req_wait==0) begin sdram_read_en <= 0; bus_read_data[47:32] <= sdram_rddata[15:0]; bus_read_done <= 0; step <=6; end
-		            6: if (sdram_ready) begin sdram_addr <= bus_address[22:1]+3; sdram_byte_en <= 2'b11; sdram_read_en <= 1; step <= 7; end  
+		            //6: if (sdram_ready) begin sdram_addr <= bus_address[22:1]+3; sdram_byte_en <= 2'b11; sdram_read_en <= 1; step <= 7; end  
+		            6: if (sdram_ready) begin sdram_addr <= sdram_addr+1; sdram_byte_en <= 2'b11; sdram_read_en <= 1; step <= 7; end  
 			    7: if (sdram_req_wait==0) begin sdram_read_en <= 0; bus_read_data[63:48] <= sdram_rddata[15:0]; bus_read_done <= 1; step <=0; end
 			endcase
 		    end
@@ -556,7 +569,8 @@ assign DRAM_CKE = 1; // always enable
 		        case(step)
 			    0: if (sdram_ready) begin sdram_addr <= bus_address[22:1]; sdram_wrdata <= bus_write_data[15:0]; sdram_write_en <= 1; sdram_byte_en <= 2'b11; step <= 1; end
 			    1: if (sdram_req_wait==0) begin sdram_write_en <= 0; bus_write_done <= 0; step <= 2; end 
-			    2: if (sdram_ready) begin sdram_addr <= bus_address[22:1]+1; sdram_wrdata <= bus_write_data[31:16]; sdram_write_en <= 1; sdram_byte_en <= 2'b11; step <= 3; end
+			    //2: if (sdram_ready) begin sdram_addr <= bus_address[22:1]+1; sdram_wrdata <= bus_write_data[31:16]; sdram_write_en <= 1; sdram_byte_en <= 2'b11; step <= 3; end
+			    2: if (sdram_ready) begin sdram_addr <= sdram_addr+1; sdram_wrdata <= bus_write_data[31:16]; sdram_write_en <= 1; sdram_byte_en <= 2'b11; step <= 3; end
 			    3: if (sdram_req_wait==0) begin sdram_write_en <= 0; bus_write_done <= 1; step <= 0; end
 			endcase
 		    end
@@ -564,11 +578,14 @@ assign DRAM_CKE = 1; // always enable
 		        case(step)
 			    0: if (sdram_ready) begin sdram_addr <= bus_address[22:1];   sdram_wrdata <= bus_write_data[15:0];  sdram_write_en <= 1; sdram_byte_en <= 2'b11; step <= 1; end
 			    1: if (sdram_req_wait==0) begin sdram_write_en <= 0; bus_write_done <= 0; step <= 2; end
-			    2: if (sdram_ready) begin sdram_addr <= bus_address[22:1]+1; sdram_wrdata <= bus_write_data[31:16]; sdram_write_en <= 1; sdram_byte_en <= 2'b11; step <= 3; end
+			    //2: if (sdram_ready) begin sdram_addr <= bus_address[22:1]+1; sdram_wrdata <= bus_write_data[31:16]; sdram_write_en <= 1; sdram_byte_en <= 2'b11; step <= 3; end
+			    2: if (sdram_ready) begin sdram_addr <= sdram_addr+1; sdram_wrdata <= bus_write_data[31:16]; sdram_write_en <= 1; sdram_byte_en <= 2'b11; step <= 3; end
 			    3: if (sdram_req_wait==0) begin sdram_write_en <= 0; bus_write_done <= 0; step <= 4; end
-			    4: if (sdram_ready) begin sdram_addr <= bus_address[22:1]+2; sdram_wrdata <= bus_write_data[47:32]; sdram_write_en <= 1; sdram_byte_en <= 2'b11; step <= 5; end
+			    //4: if (sdram_ready) begin sdram_addr <= bus_address[22:1]+2; sdram_wrdata <= bus_write_data[47:32]; sdram_write_en <= 1; sdram_byte_en <= 2'b11; step <= 5; end
+			    4: if (sdram_ready) begin sdram_addr <= sdram_addr+1; sdram_wrdata <= bus_write_data[47:32]; sdram_write_en <= 1; sdram_byte_en <= 2'b11; step <= 5; end
 			    5: if (sdram_req_wait==0) begin sdram_write_en <= 0; bus_write_done <= 0; step <= 6; end 
-			    6: if (sdram_ready) begin sdram_addr <= bus_address[22:1]+3; sdram_wrdata <= bus_write_data[63:48]; sdram_write_en <= 1; sdram_byte_en <= 2'b11; step <= 7; end
+			    //6: if (sdram_ready) begin sdram_addr <= bus_address[22:1]+3; sdram_wrdata <= bus_write_data[63:48]; sdram_write_en <= 1; sdram_byte_en <= 2'b11; step <= 7; end
+			    6: if (sdram_ready) begin sdram_addr <= sdram_addr+1; sdram_wrdata <= bus_write_data[63:48]; sdram_write_en <= 1; sdram_byte_en <= 2'b11; step <= 7; end
 			    7: if (sdram_req_wait==0) begin sdram_write_en <= 0; bus_write_done <= 1; step <= 0; end 
 			endcase
 		    end
@@ -584,8 +601,8 @@ end
     // -- SD Card --
     wire [11:0] cid = (bus_address-`Sdc_base);
     //reg [11:0] cid;
-    reg [7:0] sd_cache [0:511];
-    //(* ram_style = "block" *) reg [7:0] sd_cache [0:511];
+    //reg [7:0] sd_cache [0:511];
+    (* ram_style = "block" *) reg [7:0] sd_cache [0:511];
     reg [9:0] byte_index = 0;
     reg sd_cache_available = 0;
     reg sd_byte_available_d = 0;
