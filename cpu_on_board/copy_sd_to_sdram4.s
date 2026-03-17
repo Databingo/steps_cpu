@@ -184,9 +184,9 @@ call print_reg
 
 la a1, byte_per_sec
 lw a0, 0(a1)
-srli a0, a0, 5
-#li t1, 32
-#div a0, a0, t1
+#srli a0, a0, 5
+li t1, 32
+div a0, a0, t1
 call print_reg
 
 end:
