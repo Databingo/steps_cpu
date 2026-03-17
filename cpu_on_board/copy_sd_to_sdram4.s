@@ -59,32 +59,14 @@ call puts
 li a0, 0   
 call sd_read_sector  # use a2 as sector no.
 
-#li t1, 124       # |
-#sb t1, 0(s11)     # print
-
 la a0, prt_sector
 call puts
 call print_sector
 
 li a0, 43       # +
 call putchar
-#li a0, 45       # -
-#call putchar
 
 # -- Parse BPB -- little-endian  Bios Parameter Block : sector 0
-# reserved_sectors offset 0x0e-0x0f 2 bytes (including root sector 0)
-#addi t1, s1, 0x0E
-#lw t2, 0(t1)
-#andi t2, t2, 0xff
-#
-#addi t1, s1, 0x0F 
-#lw t3, 0(t1)
-#andi t3, t3, 0xff
-#
-#slli t3, t3, 8
-#or t2, t2, t3
-#mv a2, t2    # a2 = reserved_sectors offset 0x0e-0x0f 2 bytes (including root sector 0)
-
 # root_dir_sector_start = reserved_sectors + (num_fats * sectors_per_fat16)
 
 # reserved_sectors offset 0x0e-0x0f 2 bytes (including root sector 0)
@@ -104,10 +86,6 @@ or a0, t1, t0
 sd a0, 0(a1)
 ld a0, 0(a1)
 call print_reg
-#lb a0, 1(a1)
-#call print_hex_b
-#lb a0, 0(a1)
-#call print_hex_b
 
 # num_fats offset 0x10 1 bytes
 li t0, "numFat:" # 7 char left on for null
@@ -121,7 +99,7 @@ la a1, num_fats
 lbu a0, 0x10(s1)
 sw a0, 0(a1)
 lw a0, 0(a1)
-call print_hex_b
+call print_reg
 
 # sectors_per_fat16 high offset 0x16-0x17 2 bytes
 li t0, "secPfat" # 7 char left on for null
@@ -140,10 +118,6 @@ or a0, t1, t0
 sh a0, 0(a1)
 lh a0, 0(a1)
 call print_reg
-#call print_hex_b
-#lb a0, 0(a1)
-#call print_hex_b
-
 
 # byte_per_sec offset 0x0b-0x0c 2 bytes
 li t0, "bysPsec" # 7 char left on for null
@@ -164,80 +138,13 @@ lh a0, 0(a1)
 call print_reg
 
 
-#
-#li t1, 124       # |
-#sb t1, 0(s11)     # print
-
 # root_dir_sector_start = reserved_sectors + (num_fats * sectors_per_fat16)
-
-#la a1, reserved_sec
-#lw t0, 0(a1)
-#
-#la a1, num_fats
-#lw t1, 0(a1)
-#
-#la a1, sec_per_fat
-#lw t2, 0(a1)
-#
-#mv a0, t1
-#call print_hex_b
-#srli a0, t2, 8
-#
-#li t1, 124       # |
-#sb t1, 0(s11)     # print
-#
-#call print_hex_b
-#mv a0, t2
-#call print_hex_b
-#
-#li t1, 124       # |
-#sb t1, 0(s11)     # print
-#
-#addi a0, x0, 5
-#call print_reg
-#li a0, 45       # -
-#call putchar
-
-
-
-#la a1, reserved_sec
-#lw a0, 0(a1)
-#call print_reg
-#li a0, 43       # +
-#call putchar
-#
-#la a1, num_fats
-#lw a0, 0(a1)
-#call print_reg
-#li a0, 43       # +
-#call putchar
-#
-#la a1, sec_per_fat
-#lw a0, 0(a1)
-#call print_reg
-#li a0, 43       # +
-#call putchar
-#
-#la a1, num_fats
-#lw t1, 0(a1)
-#
-#la a1, sec_per_fat
-#lw t2, 0(a1)
-#
-#mul a0, t1, t2
-#call print_reg
-#li a0, 63       # ?
-#call putchar
-
-
-# byte_per_sec offset 0x0b-0x0c 2 bytes
 li t0, "rootdS0" # 7 char left on for null
 addi sp, sp, -8
 sd t0, 0(sp)
 mv a0, sp
 call puts
 addi sp, sp, 8
-
 
 la a1, num_fats
 lw t1, 0(a1)
@@ -262,15 +169,8 @@ lw a0, 0(t3)
 call sd_read_sector  # use a0 as sector no.
 call print_sector
 
-#li a0, -2
-#call print_reg
-#
-#li t1, -2
-#li t2, -3
-#mul a0, t1, t2
-#call print_reg
-
-li t0, "EntrPse" # byte_per_sec/32  srli 5
+# entries per secter = byte_per_sec/32  srli 5
+li t0, "EntrPse"
 addi sp, sp, -8
 sd t0, 0(sp)
 mv a0, sp

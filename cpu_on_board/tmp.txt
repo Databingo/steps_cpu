@@ -117,9 +117,9 @@ addi a1, a1, 0 # R_RISCV_PCREL_LO12_I num_fats
 lbu a0, 0x10(s1)
 sw a0, 0(a1)
 lw a0, 0(a1)
-# call print_hex_b
-auipc x1, 0 # R_RISCV_PCREL_HI20 print_hex_b
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_hex_b
+# call print_reg
+auipc x1, 0 # R_RISCV_PCREL_HI20 print_reg
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_reg
 # li t0, "secPfat" 
 lui t0, 0x746
 srli t0, t0, 0x1
@@ -236,7 +236,7 @@ jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I sd_read_sector
 # call print_sector
 auipc x1, 0 # R_RISCV_PCREL_HI20 print_sector
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_sector
-# li t0, "EntrPse" 
+# li t0, "EntrPse"
 lui t0, 0x657
 srli t0, t0, 0x1
 ori t0, t0, 0x1a8
