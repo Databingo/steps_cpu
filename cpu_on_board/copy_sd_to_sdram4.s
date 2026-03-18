@@ -189,6 +189,11 @@ li t1, 32
 div a0, a0, t1
 call print_reg
 
+li t1, 2324
+li t2, 982
+mul a0, t1, t2
+call print_reg
+
 end:
     j end
 

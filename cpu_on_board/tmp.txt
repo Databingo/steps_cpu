@@ -272,6 +272,16 @@ div a0, a0, t1
 # call print_reg
 auipc x1, 0 # R_RISCV_PCREL_HI20 print_reg
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_reg
+# li t1, 2324
+lui t1, 0x1
+addi t1, t1, 0x914
+# li t2, 982
+# li t2, 982
+addi t2, x0, 0x3d6
+mul a0, t1, t2
+# call print_reg
+auipc x1, 0 # R_RISCV_PCREL_HI20 print_reg
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_reg
 end:
 #     j end
 jal x0, end
