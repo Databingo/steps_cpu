@@ -326,44 +326,6 @@ jal x0, entry_loop
 end:
 #     j end
 jal x0, end
-print_hex_b:
-andi a0, a0, 0xFF   # Isolate byte value
-srli t3, a0, 4      # get high nibble
-slti t5, t3, 10     # if < 10 number
-beq t5, x0, letterh
-addi t3, t3, 48     # 0 is "0" ascii 48
-#     j print_hhex
-jal x0, print_hhex
-letterh:
-addi t3, t3, 55     # 10 is "A" ascii 65 ..
-print_hhex:
-#     mv t0, ra
-addi t0, ra, 0
-#     call wait_uart
-auipc x1, 0 # R_RISCV_PCREL_HI20 wait_uart
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I wait_uart
-#     mv ra, t0
-addi ra, t0, 0
-sb t3, 0(s11)
-andi t4, a0, 0x0F      # get low nibble
-slti t5, t4, 10     # if < 10 number
-beq t5, x0, letterl
-addi t4, t4, 48     # 0 is "0" ascii 48
-#     j print_lhex
-jal x0, print_lhex
-letterl:
-addi t4, t4, 55        # 10 is "A" ascii 65 ..
-print_lhex:
-#     mv t0, ra
-addi t0, ra, 0
-#     call wait_uart
-auipc x1, 0 # R_RISCV_PCREL_HI20 wait_uart
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I wait_uart
-#     mv ra, t0
-addi ra, t0, 0
-sb t4, 0(s11)
-#     ret
-jalr x0, 0(x1)
 print_reg:
 addi sp, sp, -8
 sd ra, 0(sp)
@@ -488,21 +450,6 @@ sb t4, 0(s11)
 bge t6, t1, print_loop
 #     ret
 jalr x0, 0(x1)
-print_bin_f:
-# li t1, 8 
-# li t1, 8 
-addi t1, x0, 0x8
-print_binf_loop:
-addi t1, t1, -1
-srl t2, s11, t1
-andi t2, t2, 1
-addi t2, t2, 48  # 0 to "0"
-sb t2, 0(s11)     # print
-bne t1, x0, print_binf_loop
-addi t1, x0, 0
-addi t2, x0, 0
-# ret
-jalr x0, 0(x1)
 putchar:
 addi sp, sp, -8
 sd s0, 0(sp)
@@ -540,7 +487,6 @@ wait_uart:
 addi sp, sp, -8
 sd s0, 0(sp)
 wait_uart_loop:
-addi sp, sp, -8
 lw s0, 0(s10)
 srli s0, s0, 16   # 31:16 WSPACE = 0 fully
 beq s0, x0, wait_uart_loop

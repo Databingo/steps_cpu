@@ -266,36 +266,36 @@ end:
 
 
 
-# -- function --
-print_hex_b:  # a0
-    andi a0, a0, 0xFF   # Isolate byte value
-    
-    srli t3, a0, 4      # get high nibble
-    slti t5, t3, 10     # if < 10 number
-    beq t5, x0, letterh
-    addi t3, t3, 48     # 0 is "0" ascii 48
-    j print_hhex
-letterh:
-    addi t3, t3, 55     # 10 is "A" ascii 65 ..
-print_hhex:
-    mv t0, ra
-    call wait_uart
-    mv ra, t0
-    sb t3, 0(s11)
-    
-    andi t4, a0, 0x0F      # get low nibble
-    slti t5, t4, 10     # if < 10 number
-    beq t5, x0, letterl
-    addi t4, t4, 48     # 0 is "0" ascii 48
-    j print_lhex
-letterl:
-    addi t4, t4, 55        # 10 is "A" ascii 65 ..
-print_lhex:
-    mv t0, ra
-    call wait_uart
-    mv ra, t0
-    sb t4, 0(s11)
-    ret
+## -- function --
+#print_hex_b:  # a0
+#    andi a0, a0, 0xFF   # Isolate byte value
+#    
+#    srli t3, a0, 4      # get high nibble
+#    slti t5, t3, 10     # if < 10 number
+#    beq t5, x0, letterh
+#    addi t3, t3, 48     # 0 is "0" ascii 48
+#    j print_hhex
+#letterh:
+#    addi t3, t3, 55     # 10 is "A" ascii 65 ..
+#print_hhex:
+#    mv t0, ra
+#    call wait_uart
+#    mv ra, t0
+#    sb t3, 0(s11)
+#    
+#    andi t4, a0, 0x0F      # get low nibble
+#    slti t5, t4, 10     # if < 10 number
+#    beq t5, x0, letterl
+#    addi t4, t4, 48     # 0 is "0" ascii 48
+#    j print_lhex
+#letterl:
+#    addi t4, t4, 55        # 10 is "A" ascii 65 ..
+#print_lhex:
+#    mv t0, ra
+#    call wait_uart
+#    mv ra, t0
+#    sb t4, 0(s11)
+#    ret
 
 
 
@@ -410,20 +410,20 @@ wait_uart_tx_l:
 
 
 
-# funciton print_bin(s11) print 8 bits of s11 at s11 UART
-print_bin_f:
-li t1, 8 # number of bits
-print_binf_loop:
-addi t1, t1, -1
-srl t2, s11, t1
-andi t2, t2, 1
-addi t2, t2, 48  # 0 to "0"
-sb t2, 0(s11)     # print
-bne t1, x0, print_binf_loop
-# clean middle re
-addi t1, x0, 0
-addi t2, x0, 0
-ret
+## funciton print_bin(s11) print 8 bits of s11 at s11 UART
+#print_bin_f:
+#li t1, 8 # number of bits
+#print_binf_loop:
+#addi t1, t1, -1
+#srl t2, s11, t1
+#andi t2, t2, 1
+#addi t2, t2, 48  # 0 to "0"
+#sb t2, 0(s11)     # print
+#bne t1, x0, print_binf_loop
+## clean middle re
+#addi t1, x0, 0
+#addi t2, x0, 0
+#ret
 
 
 
@@ -464,7 +464,6 @@ wait_uart:
     addi sp, sp, -8
     sd s0, 0(sp)
 wait_uart_loop:
-    addi sp, sp, -8
     lw s0, 0(s10)
     srli s0, s0, 16   # 31:16 WSPACE = 0 fully
     beq s0, x0, wait_uart_loop
