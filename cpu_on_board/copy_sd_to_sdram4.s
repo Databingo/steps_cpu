@@ -438,7 +438,7 @@ print_sector:
     sd s7, 32(sp)
     sd s8, 40(sp)
     sd s9, 48(sp)
-    sd s10, 56(sp)
+    sd s3, 56(sp)
 
     li s7, 0   # byte index
     li s8, 511 # max byte index
@@ -447,16 +447,16 @@ print_loop:
     addi s7, s7, 1
     lbu s9, 0(s6)        # load byte at 0x3000 a1+t1
     andi s9, s9, 0xFF   # Isolate byte value
-    srli s10, s9, 4      # get high nibble
-    slti s5, s10, 10     # if < 10 number
+    srli s3, s9, 4      # get high nibble
+    slti s5, s3, 10     # if < 10 number
     beq s5, x0, letter_h
-    addi s10, s10, 48     # 0 is "0" ascii 48
+    addi s3, s3, 48     # 0 is "0" ascii 48
     j print_h_hex
 letter_h:
-    addi s10, s10, 55     # 10 is "A" ascii 65 ..
+    addi s3, s3, 55     # 10 is "A" ascii 65 ..
 print_h_hex:
     call wait_uart 
-    sb s10, 0(s11)
+    sb s3, 0(s11)
     andi s4, s9, 0x0F   # get low nibble
     slti s5, s4, 10     # if < 10 number
     beq s5, x0, letter_l
@@ -476,7 +476,7 @@ print_l_hex:
     ld s7, 32(sp)
     ld s8, 40(sp)
     ld s9, 48(sp)
-    ld s10, 56(sp)
+    ld s3, 56(sp)
     addi sp, sp, 64
     ret
 # -- end print_sector --
