@@ -359,16 +359,12 @@ read_file:
 # functions ------
 
 print_reg: # a0
-    addi sp, sp, -8
+    addi sp, sp, -40
     sd ra, 0(sp)
-    addi sp, sp, -8
-    sd s0, 0(sp)
-    addi sp, sp, -8
-    sd s1, 0(sp)
-    addi sp, sp, -8
-    sd s2, 0(sp)
-    addi sp, sp, -8
-    sd s3, 0(sp)
+    sd s0, 8(sp)
+    sd s1, 16(sp)
+    sd s2, 24(sp)
+    sd s3, 32(sp)
     mv s0, a0
     li a0, "0"
     call putchar
@@ -389,16 +385,12 @@ print_h:
     sb s2, 0(s11)       # print
     addi s1, s1, -4
     bge s1, x0, p_loop 
-    ld s3, 0(sp)
-    addi sp, sp, 8
-    ld s2, 0(sp)
-    addi sp, sp, 8
-    ld s1, 0(sp)
-    addi sp, sp, 8
-    ld s0, 0(sp)
-    addi sp, sp, 8
     ld ra, 0(sp)
-    addi sp, sp, 8
+    ld s0, 8(sp)
+    ld s1, 16(sp)
+    ld s2, 24(sp)
+    ld s3, 32(sp)
+    addi sp, sp, 40
     ret
 
 
@@ -408,7 +400,6 @@ sd_read_sector:  #  a0 sector index
     sd s7, 0(sp)
     sd s8, 8(sp)
     sd ra, 16(sp)
-
     sw a0, 0(s2) # Write Sector index value to address 0x3200
 wait_ready:
     lw s7, 0(s5)   # 0x3220 ready
@@ -420,7 +411,6 @@ wait_ready:
 wait_cache:
     lw s7, 0(s6)   # s7 0x3228 cache_avaible
     beq s7, x0, wait_cache
-
     ld s7, 0(sp)
     ld s8, 8(sp)
     ld ra, 16(sp)
@@ -439,13 +429,12 @@ print_sector:
     sd s8, 40(sp)
     sd s9, 48(sp)
     sd s3, 56(sp)
-
     li s7, 0   # byte index
     li s8, 511 # max byte index
 print_loop:
     add s6, s1, s7 
     addi s7, s7, 1
-    lbu s9, 0(s6)        # load byte at 0x3000 a1+t1
+    lbu s9, 0(s6)       # load byte at 0x3000 a1+t1
     andi s9, s9, 0xFF   # Isolate byte value
     srli s3, s9, 4      # get high nibble
     slti s5, s3, 10     # if < 10 number
@@ -468,7 +457,6 @@ print_l_hex:
     call wait_uart 
     sb s4, 0(s11)
     bge s8, s7, print_loop
-
     ld ra, 0(sp)
     ld s4, 8(sp)
     ld s5, 16(sp)
@@ -482,7 +470,6 @@ print_l_hex:
 # -- end print_sector --
 
 
-
 putchar:  # a0
     addi sp, sp, -8
     sd s0, 0(sp)
@@ -491,7 +478,6 @@ putchar_wait:
     srli s0, s0, 16   # 31:16 WSPACE = 0 fully
     beq s0, x0, putchar_wait
     sb a0, 0(s11)
-
     ld s0, 0(sp)
     addi sp, sp, 8
     ret
@@ -514,6 +500,7 @@ stop_puts:
     addi sp, sp, 16
     ret
 
+
 wait_uart:
     addi sp, sp, -8
     sd s0, 0(sp)
@@ -521,7 +508,6 @@ wait_uart_loop:
     lw s0, 0(s10)
     srli s0, s0, 16   # 31:16 WSPACE = 0 fully
     beq s0, x0, wait_uart_loop
-
     ld s0, 0(sp)
     addi sp, sp, 8
     ret
