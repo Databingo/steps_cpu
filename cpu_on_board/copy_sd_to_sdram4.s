@@ -246,9 +246,9 @@ xor t2, t2, t0
 addi t4, t4, -1
 bge t4, t3, load_name_loop
 
-## keep 5 char
-#slli t2, t2, 24
-#srli t2, t2, 24
+# keep 5 char
+slli t2, t2, 24
+srli t2, t2, 24
 
 # -- Print Name --- 
 addi sp, sp, -16
@@ -261,20 +261,21 @@ addi sp, sp, 16
 
 bne t2, s9, next_entry
 
-nend:
-  j nend
-
 ## 4. FOUND! Extract File Info
-#mv a0, t2
-#call puts
+li t0, "FOUND!"
+addi sp, sp, -8
+sd t0, 0(sp)
+mv a0, sp
+call puts
+addi sp, sp, 8
 
+done_entries:
+   j done_entries
 
 next_entry:
 addi s8, s8, 1
 j entry_loop
 
-done_entries:
-   j done_entries
 
 
 
