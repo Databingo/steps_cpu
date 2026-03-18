@@ -319,7 +319,7 @@ slli t2, t2, 24
 srli t2, t2, 24
 addi sp, sp, -16
 sd t2, 0(sp)
-sb zero, 8(sp)
+sb x0, 8(sp)
 # mv a0, sp
 addi a0, sp, 0
 # call puts
@@ -327,13 +327,16 @@ auipc x1, 0 # R_RISCV_PCREL_HI20 puts
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I puts
 addi sp, sp, 16
 bne t2, s9, next_entry
+nend:
+#   j nend
+jal x0, nend
 next_entry:
 addi s8, s8, 1
 # j entry_loop
 jal x0, entry_loop
-end:
-#     j end
-jal x0, end
+done_entries:
+#    j done_entries
+jal x0, done_entries
 print_reg:
 addi sp, sp, -8
 sd ra, 0(sp)

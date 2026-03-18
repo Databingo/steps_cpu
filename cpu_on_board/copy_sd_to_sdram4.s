@@ -214,7 +214,6 @@ addi sp, sp, 8
 
 
 
-
 entry_loop:
 bge s8, s7, done_entries
 # entry_addr = s1 + (entry_index * 32)
@@ -245,7 +244,7 @@ srli t2, t2, 24
 # -- Print Name --- 
 addi sp, sp, -16
 sd t2, 0(sp)
-sb zero, 8(sp)
+sb x0, 8(sp)
 mv a0, sp
 call puts
 addi sp, sp, 16
@@ -253,6 +252,8 @@ addi sp, sp, 16
 
 bne t2, s9, next_entry
 
+nend:
+  j nend
 
 ## 4. FOUND! Extract File Info
 #mv a0, t2
@@ -263,16 +264,9 @@ next_entry:
 addi s8, s8, 1
 j entry_loop
 
+done_entries:
+   j done_entries
 
-
-
-
-
-
-
-
-end:
-    j end
 
 
 
@@ -425,4 +419,5 @@ wait_uart_loop:
     ld s0, 0(sp)
     addi sp, sp, 8
     ret
+
 
