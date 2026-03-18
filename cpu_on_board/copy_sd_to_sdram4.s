@@ -237,7 +237,16 @@ bne t6, x0, next_entry # skip
 
 # 3. Compare Filename(First 8 bytes)
 # load name 8 bytes
-ld t2, 0(t3)
+li t2, 0
+addi t4, t3, 7
+load_name_loop:
+lbu t0, 0(t4)
+slli t2, t2, 8
+xor t2, t2, t0
+addi t4, t4, -1
+bge t4, t3, load_name_loop
+
+# keep 5 char
 slli t2, t2, 24
 srli t2, t2, 24
 
