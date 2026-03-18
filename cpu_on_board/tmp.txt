@@ -8,6 +8,9 @@ num_fats:
 sec_per_fat:
 byte_per_sec:
 root_dir_sector_start:
+root_ent_cnt:
+set_per_clus:
+data_start_sec:
 _start:
 #     li sp, 0x1000 
 lui sp, 0x1
@@ -443,27 +446,29 @@ addi sp, sp, 8
 #     ret
 jalr x0, 0(x1)
 sd_read_sector:
+addi sp, sp, -16
+sd s7, 0(sp)
+sd s8, 8(sp)
 sw a0, 0(s2) # Write Sector index value to address 0x3200
 wait_ready:
-lw t2, 0(s5)   # 0x3220 ready
+lw s7, 0(s5)   # 0x3220 ready
 #     li a0, 96      
 #     li a0, 96      
 addi a0, x0, 0x60
-#     mv t0, ra
-addi t0, ra, 0
 #     call putchar
 auipc x1, 0 # R_RISCV_PCREL_HI20 putchar
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I putchar
-#     mv ra, t0
-addi ra, t0, 0
-beq t2, x0, wait_ready
-#     li t1, 1
-#     li t1, 1
-addi t1, x0, 0x1
-sw t1, 0(s3)   # Trigger read at 0x3204
+beq s7, x0, wait_ready
+#     li s8, 1
+#     li s8, 1
+addi s8, x0, 0x1
+sw s8, 0(s3)   # Trigger read at 0x3204
 wait_cache:
-lw t2, 0(s6)   # t2 0x3228 cache_avaible
-beq t2, x0, wait_cache
+lw s7, 0(s6)   # s7 0x3228 cache_avaible
+beq s7, x0, wait_cache
+ld s7, 0(sp)
+ld s8, 8(sp)
+addi sp, sp, 16
 #     ret
 jalr x0, 0(x1)
 print_sector:

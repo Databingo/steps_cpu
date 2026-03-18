@@ -31,6 +31,12 @@ byte_per_sec:
     .word 0
 root_dir_sector_start:
     .word 0
+root_ent_cnt:
+    .word 0
+set_per_clus:
+    .word 0
+data_start_sec:
+    .word 0
 
 # -- Start program main function _start --
 .section .text
@@ -286,6 +292,11 @@ addi s8, s8, 1
 j entry_loop
 
 
+# root_dir_sector_start = reserved_sectors + (num_FATs * sectors_per_FAT)
+# root_dir_sectors = (RootEntryCount * 32 + BytesPerSector -1 )/ BytesPerSector
+# FirstDataSector = root_dir_sector_start + root_dir_sectors 
+# FirstSectorOfCluster(N)=FirstDataSector + (N - 2) * SectorsPerCluster
+
 read_file:
 #li t1, 89  # Y
 #sw t1, 0(t0)
@@ -393,19 +404,25 @@ print_h:
 
 # ---  sd_read_sector ---
 sd_read_sector:  #  a0 sector index
+    addi sp, sp, -16
+    sd s7, 0(sp)
+    sd s8, 8(sp)
+
     sw a0, 0(s2) # Write Sector index value to address 0x3200
 wait_ready:
-    lw t2, 0(s5)   # 0x3220 ready
+    lw s7, 0(s5)   # 0x3220 ready
     li a0, 96      # `
-    mv t0, ra
     call putchar
-    mv ra, t0
-    beq t2, x0, wait_ready
-    li t1, 1
-    sw t1, 0(s3)   # Trigger read at 0x3204
+    beq s7, x0, wait_ready
+    li s8, 1
+    sw s8, 0(s3)   # Trigger read at 0x3204
 wait_cache:
-    lw t2, 0(s6)   # t2 0x3228 cache_avaible
-    beq t2, x0, wait_cache
+    lw s7, 0(s6)   # s7 0x3228 cache_avaible
+    beq s7, x0, wait_cache
+
+    ld s7, 0(sp)
+    ld s8, 8(sp)
+    addi sp, sp, 16
     ret
 
 
