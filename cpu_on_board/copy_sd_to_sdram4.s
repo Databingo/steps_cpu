@@ -404,9 +404,10 @@ print_h:
 
 # ---  sd_read_sector ---
 sd_read_sector:  #  a0 sector index
-    addi sp, sp, -16
+    addi sp, sp, -24
     sd s7, 0(sp)
     sd s8, 8(sp)
+    sd ra, 16(sp)
 
     sw a0, 0(s2) # Write Sector index value to address 0x3200
 wait_ready:
@@ -422,7 +423,8 @@ wait_cache:
 
     ld s7, 0(sp)
     ld s8, 8(sp)
-    addi sp, sp, 16
+    ld ra, 16(sp)
+    addi sp, sp, 24
     ret
 
 
