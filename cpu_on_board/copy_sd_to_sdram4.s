@@ -279,11 +279,14 @@ call puts
 addi sp, sp, 8
 
 done_entries:
-   j done_entries
+   j read_file
 
 next_entry:
 addi s8, s8, 1
 j entry_loop
+
+
+read_file:
 
 
 
