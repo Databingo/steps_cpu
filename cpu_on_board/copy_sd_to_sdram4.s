@@ -430,33 +430,46 @@ ret
 # functions ------
 
 putchar:  # a0
-   lw t2, 0(s10)
-   srli t2, t2, 16   # 31:16 WSPACE = 0 fully
-   beq t2, x0, putchar
-   sb a0, 0(s11)
-   ret
+    addi sp, sp, -8
+    sd s0, 0(sp)
+putchar_wait:
+    lw s0, 0(s10)
+    srli s0, s0, 16   # 31:16 WSPACE = 0 fully
+    beq s0, x0, putchar_wait
+    sb a0, 0(s11)
+
+    ld s0, 0(sp)
+    addi sp, sp, 8
+    ret
 
 
 puts: # a0 addr
     addi sp, sp, -16
     sd ra, 0(sp)
-    sd a0, 8(sp)
-    mv t1, a0
+    sd s0, 8(sp)
+    mv s0, a0
 puts_loop:
-    lb a0, 0(t1)
+    lbu a0, 0(s0)
     beq a0, x0, stop_puts # \x00 for end of string
     call putchar # a0 char
-    addi t1, t1, 1 # next byte
+    addi s0, s0, 1 # next byte
     j puts_loop
 stop_puts:
     ld ra, 0(sp)
-    ld a0, 8(sp)
+    ld s0, 8(sp)
     addi sp, sp, 16
     ret
 
 wait_uart:
-    lw a6, 0(s10)
-    srli a6, a6, 16   # 31:16 WSPACE = 0 fully
-    beq a6, x0, wait_uart
+    addi sp, sp, -8
+    sd s0, 0(sp)
+wait_uart_loop:
+    addi sp, sp, -8
+    lw s0, 0(s10)
+    srli s0, s0, 16   # 31:16 WSPACE = 0 fully
+    beq s0, x0, wait_uart_loop
+
+    ld s0, 0(sp)
+    addi sp, sp, 8
     ret
 
