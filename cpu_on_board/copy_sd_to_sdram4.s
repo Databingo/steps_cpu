@@ -184,15 +184,82 @@ call print_reg
 
 la a1, byte_per_sec
 lw a0, 0(a1)
-#srli a0, a0, 5
-li t1, 32
-div a0, a0, t1
+srli a0, a0, 5  # calc entries_per_sector
+mv s7, a0
+#li t1, 32
+#div a0, a0, t1
 call print_reg
 
-li t1, 2324
-li t2, 982
-mul a0, t1, t2
-call print_reg
+## Test mul #22D2B8
+#li t1, 2324
+#li t2, 982
+#mul a0, t1, t2
+#call print_reg
+
+
+la t3, root_dir_sector_start
+lw a0, 0(t3)
+call sd_read_sector  # use a0 as sector no.
+
+# Scan Entries of Root Dir first sector
+# s7 entry_per_sector
+li s8, 0 # entry_index
+li s9, "MUSIC"
+entry_loop:
+bge s8, s7, done_entries
+# entry_addr = s1 + (entry_index * 32)
+slli t1, s8, 5
+add t3, s1, t1 # t3 = address of entry
+
+# 1. Quick Validity Check
+# load first byte of entry
+lbu t4, 0(t3)
+beq t4, x0, done_entries # 0x00 no more entries in dir
+li t1, 0xE5
+beq t4, t1, next_entry # 0xE5 deleted entry, skip
+    
+# 2. Attribute Check # attribute at 0x0B( offset 11)
+lbu t5, 11(t3)
+li t1, 0x0F
+beq t5, t1, next_entry # 0x0F LFN(Long File Name) entry, skip
+
+andi t6, t5, 0x18  # Mask for Volume Label(0x08) and Directory (0x10)
+bne t6, x0, next_entry # skip 
+
+# 3. Compare Filename(First 8 bytes)
+# load name 8 bytes
+ld t2, 0(t3)
+slli t2, t2, 24
+srli t2, t2, 24
+
+# -- Print Name --- 
+addi sp, sp, -16
+sd t2, 0(sp)
+sb zero, 8(sp)
+mv a0, sp
+call puts
+addi sp, sp, 16
+# -----------------
+
+bne t2, s9, next_entry
+
+
+## 4. FOUND! Extract File Info
+#mv a0, t2
+#call puts
+
+
+next_entry:
+addi s8, s8, 1
+j entry_loop
+
+
+
+
+
+
+
+
 
 end:
     j end

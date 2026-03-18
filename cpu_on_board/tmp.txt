@@ -265,23 +265,64 @@ jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_reg
 auipc a1, 0 # R_RISCV_PCREL_HI20 byte_per_sec 
 addi a1, a1, 0 # R_RISCV_PCREL_LO12_I byte_per_sec 
 lw a0, 0(a1)
-# li t1, 32
-# li t1, 32
-addi t1, x0, 0x20
-div a0, a0, t1
+srli a0, a0, 5  # calc entries_per_sector
+# mv s7, a0
+addi s7, a0, 0
 # call print_reg
 auipc x1, 0 # R_RISCV_PCREL_HI20 print_reg
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_reg
-# li t1, 2324
-lui t1, 0x1
-addi t1, t1, 0x914
-# li t2, 982
-# li t2, 982
-addi t2, x0, 0x3d6
-mul a0, t1, t2
-# call print_reg
-auipc x1, 0 # R_RISCV_PCREL_HI20 print_reg
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_reg
+# la t3, root_dir_sector_start
+auipc t3, 0 # R_RISCV_PCREL_HI20 root_dir_sector_start 
+addi t3, t3, 0 # R_RISCV_PCREL_LO12_I root_dir_sector_start 
+lw a0, 0(t3)
+# call sd_read_sector  
+auipc x1, 0 # R_RISCV_PCREL_HI20 sd_read_sector
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I sd_read_sector
+# li s8, 0 
+# li s8, 0 
+addi s8, x0, 0x0
+# li s9, "MUSIC"
+ori s9, s9, 0x21
+slli s9, s9, 0xb
+ori s9, s9, 0x525
+slli s9, s9, 0xb
+ori s9, s9, 0x26a
+slli s9, s9, 0xb
+ori s9, s9, 0x54d
+entry_loop:
+bge s8, s7, done_entries
+slli t1, s8, 5
+add t3, s1, t1 # t3 = address of entry
+lbu t4, 0(t3)
+beq t4, x0, done_entries # 0x00 no more entries in dir
+# li t1, 0xE5
+# li t1, 0xE5
+addi t1, x0, 0xe5
+beq t4, t1, next_entry # 0xE5 deleted entry, skip
+lbu t5, 11(t3)
+# li t1, 0x0F
+# li t1, 0x0F
+addi t1, x0, 0xf
+beq t5, t1, next_entry # 0x0F LFN(Long File Name) entry, skip
+andi t6, t5, 0x18  # Mask for Volume Label(0x08) and Directory (0x10)
+bne t6, x0, next_entry # skip 
+ld t2, 0(t3)
+slli t2, t2, 24
+srli t2, t2, 24
+addi sp, sp, -16
+sd t2, 0(sp)
+sb zero, 8(sp)
+# mv a0, sp
+addi a0, sp, 0
+# call puts
+auipc x1, 0 # R_RISCV_PCREL_HI20 puts
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I puts
+addi sp, sp, 16
+bne t2, s9, next_entry
+next_entry:
+addi s8, s8, 1
+# j entry_loop
+jal x0, entry_loop
 end:
 #     j end
 jal x0, end

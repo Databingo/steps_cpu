@@ -271,12 +271,12 @@ func isValidImmediate_u(s string) (int64, uint64, error) { // get sign + abs
 	//	return sign, imm3, nil
 	//}
 
-	if err0 == nil { return sign, imm0, nil }
-	if err1 == nil { return sign, imm1, nil }
-	if err2 == nil { return sign, imm2, nil }
-	if err3 == nil { return sign, imm3, nil }
+	if err0 == nil { fmt.Println(0, s); return sign, imm0, nil }
+	if err1 == nil { fmt.Println(1, s); return sign, imm1, nil }
+	if err2 == nil { fmt.Println(2, s); return sign, imm2, nil }
+	if err3 == nil { fmt.Println(3, s); return sign, imm3, nil }
 
-	return 0, 0, errors.New("Invalid immediate value")
+	return 0, 0, errors.New("Invalid immediate_u value")
 }
 
 func main() { //t6a7s11
@@ -683,7 +683,7 @@ func main() { //t6a7s11
 			sign, imm, err := isValidImmediate_u(code[2])
 			//imm, err := isValidImmediate(code[2])
 			if err != nil {
-				fmt.Printf("~Error on line %d: %s, %s \n", lineCounter, err, line, sign)
+				fmt.Printf("~Error on line %d: %s, %s, %s \n", lineCounter, err, line, sign, code[2])
 				os.Exit(0)
 			}
 			ins := fmt.Sprintf("# %s\n", line)
