@@ -494,10 +494,9 @@ jal x0, print_h_hex
 letter_h:
 addi t3, t3, 55     # 10 is "A" ascii 65 ..
 print_h_hex:
-wait_uart_tx_h:
-lw t5, 0(s10)
-srli t5, t5, 16   # 31:16 WSPACE = 0 full
-beq t5, x0, wait_uart_tx_h
+#     call wait_uart 
+auipc x1, 0 # R_RISCV_PCREL_HI20 wait_uart
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I wait_uart
 sb t3, 0(s11)
 andi t4, t2, 0x0F      # get low nibble
 slti t5, t4, 10     # if < 10 number
@@ -508,10 +507,9 @@ jal x0, print_l_hex
 letter_l:
 addi t4, t4, 55        # 10 is "A" ascii 65 ..
 print_l_hex:
-wait_uart_tx_l:
-lw t5, 0(s10)
-srli t5, t5, 16
-beq t5, x0, wait_uart_tx_l
+#     call wait_uart 
+auipc x1, 0 # R_RISCV_PCREL_HI20 wait_uart
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I wait_uart
 sb t4, 0(s11)
 bge t6, t1, print_loop
 #     ret
