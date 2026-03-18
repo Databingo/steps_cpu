@@ -182,12 +182,21 @@ la a1, byte_per_sec
 lw a0, 0(a1)  # two byts, use lw, ld will get other word together!
 call print_reg
 
+
+
+li t0, "EtrPse:"
+addi sp, sp, -8
+sd t0, 0(sp)
+mv a0, sp
+call puts
+addi sp, sp, 8
+
 la a1, byte_per_sec
 lw a0, 0(a1)
-srli a0, a0, 5  # calc entries_per_sector
 mv s7, a0
-#li t1, 32
-#div a0, a0, t1
+#srli a0, a0, 5  # calc entries_per_sector
+li t1, 32
+div a0, a0, t1
 call print_reg
 
 ## Test mul #22D2B8
