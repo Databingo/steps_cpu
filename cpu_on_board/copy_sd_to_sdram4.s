@@ -287,11 +287,65 @@ j entry_loop
 
 
 read_file:
+li t1, 89  # Y
+sw t1, 0(t0)
+#j find_file
+
+# file size at 0x1C-0x1D-0x1E-0x1F 4 bytes
+addi t1, t3, 0x1C
+lw t2, 0(t1)
+andi t2, t2, 0xff
+
+addi t1, t3, 0x1D
+lw t4, 0(t1)
+andi t4, t4, 0xff
+slli t4, t4, 8
+or t2, t2, t4
+
+addi t1, t3, 0x1E
+lw t4, 0(t1)
+andi t4, t4, 0xff
+slli t4, t4, 16
+or t2, t2, t4
+
+addi t1, t3, 0x1F
+lw t4, 0(t1)
+andi t4, t4, 0xff
+slli t4, t4, 24
+or t2, t2, t4
+mv s9, t2   # s9 = file_size_bytes  
+
+
+# first cluster at 0x1A-0x1B 2 bytes
+addi t1, t3, 0x1A
+lw t2, 0(t1)
+andi t2, t2, 0xff
+
+addi t1, t3, 0x1B
+lw t4, 0(t1)
+andi t4, t4, 0xff
+slli t4, t4, 8
+or t2, t2, t4
+mv s10, t2   # s10 = file_cluster_start_number
+
+# print file_cluster_start_number
+li t1, 123  # {
+sw t1, 0(t0) # print
+srli t2, s10, 8
+jal print_hex_b
+mv t2, s10
+jal print_hex_b
+li t1, 125  # }
+sw t1, 0(t0) # print
    j read_file
 
 
 
 
+
+
+
+# functions ------
 
 print_reg: # a0
     addi sp, sp, -8
@@ -398,7 +452,6 @@ wait_uart_tx_l:
 # -- end print_sector --
 
 
-# functions ------
 
 putchar:  # a0
     addi sp, sp, -8
