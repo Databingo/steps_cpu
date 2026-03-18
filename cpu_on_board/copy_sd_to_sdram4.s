@@ -445,7 +445,7 @@ print_sector:
 print_loop:
     add s6, s1, s7 
     addi s7, s7, 1
-    lb s9, 0(s6)        # load byte at 0x3000 a1+t1
+    lbu s9, 0(s6)        # load byte at 0x3000 a1+t1
     andi s9, s9, 0xFF   # Isolate byte value
     srli s10, s9, 4      # get high nibble
     slti s5, s10, 10     # if < 10 number
