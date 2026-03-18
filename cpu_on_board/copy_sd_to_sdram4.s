@@ -430,52 +430,54 @@ wait_cache:
 
 # print sector 0 512 bytes
 print_sector:
-    addi sp, sp, -8
+    addi sp, sp, -64
     sd ra, 0(sp)
+    sd s4, 8(sp)
+    sd s5, 16(sp)
+    sd s6, 24(sp)
+    sd s7, 32(sp)
+    sd s8, 40(sp)
+    sd s9, 48(sp)
+    sd s10, 56(sp)
 
-    li t1, 0   # byte index
-    li t6, 511 # max byte index
+    li s7, 0   # byte index
+    li s8, 511 # max byte index
 print_loop:
-    add a4, s1, t1 
-    addi t1, t1, 1
-    lb t2, 0(a4)           # load byte at 0x3000 a1+t1
-    andi t2, t2, 0xFF   # Isolate byte value
-    srli t3, t2, 4      # get high nibble
-    slti t5, t3, 10     # if < 10 number
-    beq t5, x0, letter_h
-    addi t3, t3, 48     # 0 is "0" ascii 48
+    add s6, s1, s7 
+    addi s7, s7, 1
+    lb s9, 0(s6)        # load byte at 0x3000 a1+t1
+    andi s9, s9, 0xFF   # Isolate byte value
+    srli s10, s9, 4      # get high nibble
+    slti s5, s10, 10     # if < 10 number
+    beq s5, x0, letter_h
+    addi s10, s10, 48     # 0 is "0" ascii 48
     j print_h_hex
 letter_h:
-    addi t3, t3, 55     # 10 is "A" ascii 65 ..
+    addi s10, s10, 55     # 10 is "A" ascii 65 ..
 print_h_hex:
-#wait_uart_tx_h:
-   #lw t5, 0(s10)
-   #srli t5, t5, 16   # 31:16 WSPACE = 0 full
-   #beq t5, x0, wait_uart_tx_h
-
     call wait_uart 
-    sb t3, 0(s11)
-    andi t4, t2, 0x0F      # get low nibble
-    slti t5, t4, 10     # if < 10 number
-    beq t5, x0, letter_l
-    addi t4, t4, 48     # 0 is "0" ascii 48
+    sb s10, 0(s11)
+    andi s4, s9, 0x0F   # get low nibble
+    slti s5, s4, 10     # if < 10 number
+    beq s5, x0, letter_l
+    addi s4, s4, 48     # 0 is "0" ascii 48
     j print_l_hex
 letter_l:
-    addi t4, t4, 55        # 10 is "A" ascii 65 ..
+    addi s4, s4, 55     # 10 is "A" ascii 65 ..
 print_l_hex:
-#wait_uart_tx_l:
-#    lw t5, 0(s10)
-#    srli t5, t5, 16
-#    beq t5, x0, wait_uart_tx_l
-    
     call wait_uart 
-    sb t4, 0(s11)
-    bge t6, t1, print_loop
+    sb s4, 0(s11)
+    bge s8, s7, print_loop
 
     ld ra, 0(sp)
-    addi sp, sp, 8
-
-
+    ld s4, 8(sp)
+    ld s5, 16(sp)
+    ld s6, 24(sp)
+    ld s7, 32(sp)
+    ld s8, 40(sp)
+    ld s9, 48(sp)
+    ld s10, 56(sp)
+    addi sp, sp, 64
     ret
 # -- end print_sector --
 
