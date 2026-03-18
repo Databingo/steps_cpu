@@ -246,9 +246,9 @@ xor t2, t2, t0
 addi t4, t4, -1
 bge t4, t3, load_name_loop
 
-# keep 5 char
-slli t2, t2, 24
-srli t2, t2, 24
+## keep 5 char
+#slli t2, t2, 24
+#srli t2, t2, 24
 
 # -- Print Name --- 
 addi sp, sp, -16

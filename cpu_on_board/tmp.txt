@@ -324,8 +324,6 @@ slli t2, t2, 8
 xor t2, t2, t0
 addi t4, t4, -1
 bge t4, t3, load_name_loop
-slli t2, t2, 24
-srli t2, t2, 24
 addi sp, sp, -16
 sd t2, 0(sp)
 sb x0, 8(sp)
