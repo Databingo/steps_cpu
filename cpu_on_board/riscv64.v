@@ -1054,15 +1054,17 @@ module riscv64(
 			    // request start
 			    mul_enable <= 1;
                             // latch
-                            mul_is_w_latched <=  mul_is_w;
-                            raw_a_latched <= raw_a;
-                            raw_b_latched <= raw_b;
-                            a_is_signed_latched <= a_is_signed;
-                            b_is_signed_latched <= b_is_signed;
-                            abs_a_latched <= abs_a;
-                            abs_b_latched <= abs_b;
-		            mul_op_type <= w_func3;
-			    mul_rd_latched <= w_rd;
+			    if (!mul_enable) begin
+                                mul_is_w_latched <=  mul_is_w;
+                                raw_a_latched <= raw_a;
+                                raw_b_latched <= raw_b;
+                                a_is_signed_latched <= a_is_signed;
+                                b_is_signed_latched <= b_is_signed;
+                                abs_a_latched <= abs_a;
+                                abs_b_latched <= abs_b;
+		                mul_op_type <= w_func3;
+			        mul_rd_latched <= w_rd;
+			    end
 
 			    // stall pipeline
 			    pc <= pc - 4;
@@ -1085,13 +1087,15 @@ module riscv64(
 			    div_enable <= 1;
 			    
                             // latch
-                            div_a <= rs1;    // be divided
-                            div_b <= rs2;    // divisor
-                            //div_a <= (div_op_signed &&  rs1[63]) ? -rs1:rs1;
-                            //div_b <= (div_op_signed &&  rs2[63]) ? -rs2:rs2;
-                            div_op_signed_latched <= div_op_signed;
-                            div_is_rem <= div_op_is_rem; // 1rem, 0div
-                            div_rd <= w_rd; 
+			    if (!div_enable) begin
+                                div_a <= rs1;    // be divided
+                                div_b <= rs2;    // divisor
+                                //div_a <= (div_op_signed &&  rs1[63]) ? -rs1:rs1;
+                                //div_b <= (div_op_signed &&  rs2[63]) ? -rs2:rs2;
+                                div_op_signed_latched <= div_op_signed;
+                                div_is_rem <= div_op_is_rem; // 1rem, 0div
+                                div_rd <= w_rd; 
+			    end
 
 			    pc <= pc - 4;
 			    bubble <= 1;
