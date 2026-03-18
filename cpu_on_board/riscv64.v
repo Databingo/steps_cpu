@@ -75,34 +75,21 @@ module riscv64(
     wire [63:0] alu_xor  = rs1 ^ rs2;
     wire [63:0] alu_and  = rs1 & rs2;
     wire [63:0] alu_or   = rs1 | rs2;
-    //wire [63:0] alu_sll  = rs1 << rs2[5:0];
-    //wire [63:0] alu_srl  = rs1 >> rs2[5:0];
-    //wire [63:0] alu_sra  = $signed(rs1) >>> rs2[5:0];
     wire [63:0] alu_slt  = ($signed(rs1) < $signed(rs2)) ? 1:0;
     wire [63:0] alu_sltu = ($unsigned(rs1) < $unsigned(rs2)) ? 1:0;
 
     wire [63:0] alu_addw = $signed(rs1[31:0] + rs2[31:0]);  // Addw
     wire [63:0] alu_subw = $signed(rs1[31:0] - rs2[31:0]);  // Subw
-    //wire [63:0] alu_sllw = $signed(rs1[31:0] << rs2[4:0]);  // Sllw 5 length
-    //wire [63:0] alu_srlw = $signed(rs1[31:0] >> rs2[4:0]);  // Srlw 5 length
-    //wire [63:0] alu_sraw = $signed(rs1[31:0]) >>> rs2[4:0]; // Sraw 5 length
 
     wire [63:0] alu_addi = rs1 + w_imm_i;  // Addi
     wire [63:0] alu_xori = rs1 ^ w_imm_i ; // Xori
     wire [63:0] alu_andi = rs1 & w_imm_i ; // Andi
     wire [63:0] alu_ori  = rs1 | w_imm_i ; // Ori
-    //wire [63:0] alu_slli = rs1 << w_shamt; // Slli
-    //wire [63:0] alu_srli = rs1 >> w_shamt; // Srli // func7->6 // rv64 shame take w_f7[0]
-    //wire [63:0] alu_srai = $signed(rs1) >>> w_shamt; // Srai
     wire [63:0] alu_slti = $signed(rs1) < w_imm_i ? 1:0; // Slti
     wire [63:0] alu_sltiu= ($unsigned(rs1) < w_imm_i) ?  1:0; // Sltiu
 
     wire [63:0] alu_addiw = $signed(rs1[31:0] + w_imm_i[31:0]); // Addiw
-    //wire [63:0] alu_slliw = $signed(rs1[31:0] << w_shamt[4:0]); // Slliw
-    //wire [63:0] alu_srliw = $signed(rs1[31:0] >> w_shamt[4:0]); // Srliw
-    //wire [63:0] alu_sraiw = $signed(rs1[31:0]) >>> w_shamt[4:0]; // Sraiw
     wire [63:0] branch = pc - 4 + w_imm_b; //branch
-
 
     wire is_imm_shift  = (op == 7'b0010011 || op == 7'b0011011); // Slli Srli Srai || Slliw Srliw Sraiw
     wire is_word_shift = (op == 7'b0111011 || op == 7'b0011011); // Sllw Srlw Sraw || Slliw Srliw Sraiw
@@ -164,61 +151,6 @@ module riscv64(
 	                              (is_word_op ? {32'b0, rs2[31:0]} : rs2) : // sc.w/sc.d
 				      w_amo_calc_data; // AMOs
     //// -- mul rela --
-    //// Indepenedent Multiplier // Booth algorithim + Signed-correct
-    //reg [6:0]   mul_cnt;
-    //reg [128:0] mul_acc;  // sign|result|multiplier
-    //reg [64:0]  mul_a_reg;
-    //reg         mul_active;
-    //reg         mul_done;
-    //reg         mul_enable;
-    //reg         mul_b_is_signed;
-    //reg [1:0]   mul_out_sel;
-    //
-    //// 000mul 001mulh 010mulhsu 011mulhu
-    //wire mul_is_w = (op == 7'b0111011); // Mulw (opc 0111011)
-    //wire mul_sign_a = mul_is_w ? 1'b1 : (w_func3 != 3'b011); // signed except Mulhu
-    //wire mul_sign_b = mul_is_w ? 1'b1 : (w_func3 == 3'b000 || w_func3 == 3'b001); // signed Mul/Mulh
-
-    //wire [63:0] raw_a = mul_is_w ? {{32{rs1[31]}}, rs1[31:0]} : rs1;
-    //wire [63:0] raw_b = mul_is_w ? {{32{rs2[31]}}, rs2[31:0]} : rs2;
-    //wire [64:0] ext_a = {mul_sign_a & raw_a[63], raw_a}; 
-    ////wire [64:0] ext_b = {mul_sign_b & raw_b[63], raw_b}; 
-    //wire is_last_cycle = (mul_cnt == 7'd63);
-    //wire do_sub = is_last_cycle && mul_b_is_signed;
-    //wire [64:0] adder_input_a = do_sub ? ~mul_a_reg : mul_a_reg;
-    //wire [64:0] sum_upper = mul_acc[128:64] + adder_input_a + do_sub;
-
-    //always @(posedge clk or negedge reset) begin  
-    //    if (!reset) begin
-    //        mul_active <= 0;
-    //        mul_done   <= 0;
-    //        mul_cnt    <=0;	    
-    //    end else begin
-    //        if (mul_enable && !mul_active && !mul_done) begin
-    //    	// Start phase
-    //    	mul_active <= 1;
-    //    	mul_cnt    <= 0;
-    //    	// 1. Determine output mode
-    //            if (mul_is_w) mul_out_sel <= 2; // mulw
-    //    	else if (w_func3 == 0) mul_out_sel <= 0; // mul
-    //    	else mul_out_sel <= 1;   // mulh* 
-    //    	mul_a_reg <= ext_a;
-    //    	mul_acc <= {65'd0, raw_b};
-    //    	mul_b_is_signed <= mul_sign_b;
-    //        end else if (mul_active) begin
-    //    	// Compute phase (64 cycles)
-    //    	if (mul_cnt < 64) begin
-    //    	    if (mul_acc[0]) mul_acc <= {sum_upper[64], sum_upper, mul_acc[63:1]}; // is 1,  + and << 1
-    //    	    else mul_acc <= {mul_acc[128], mul_acc[128:1]}; // is 0, only << 1, preserve sign bit
-    //    	    mul_cnt <= mul_cnt + 1;
-    //    	end else begin
-    //                // Finish phase
-    //                mul_active <= 0;
-    //    	    mul_done   <= 1;
-    //    	end
-    //        end else if (!mul_enable) mul_done <= 0; // reset handshake
-    //    end
-    //end
     // Indepenedent Multiplier // Booth algorithim + Signed-correct
     reg [6:0]   mul_cnt;
     reg [127:0] mul_acc;  // result|multiplier
@@ -288,78 +220,6 @@ module riscv64(
             (is_high_mul) ? final_mul_res[127:64]:// mulh, mulhsu, mulhu
                             final_mul_res[63:0];// mul
 
-    //// Independent divider
-    //reg [6:0]   div_cnt;
-    //reg [127:0] div_rem;   // remainder|quotient
-    //reg [63:0]  div_b;    // divisor
-    //reg         div_active; // 1computing, 0idle
-    //reg         div_done;   // handshake 1result ready
-    //reg         div_enable; // handshake 1start request
-    //reg         div_sign_quotient; // sige of quotient
-    //reg         div_sign_reminder; // sige of remainder
-    //reg         div_is_rem; // 1rem, 0div
-    //reg [63:0]  div_result_out; // final output buffer
-
-
-
-    //
-    //// signal 100div/w 101divu 110rem/w 111remu
-    //wire div_op_signed = !ir[12];  // func3[0] == 0 is signed
-    //wire div_op_is_rem = ir[13];   // func3[1] == 1 is rem
-
-    //always @(posedge clk or negedge reset) begin
-    //    if (!reset) begin
-    //        div_active <= 0;
-    //        div_done   <= 0;
-    //        div_cnt    <= 0;
-    //    end else begin
-    //        if (div_enable && !div_active && !div_done) begin
-    //    	// start phase
-    //    	div_active <= 1;
-    //    	div_cnt <= 0;
-    //    	div_is_rem <= div_op_is_rem;
-    //    	// handle corner case
-    //    	if (rs2 == 0) begin
-    //    	    // divide by zero
-    //    	    div_result_out <= div_op_is_rem ? rs1 : -64'd1;
-    //    	    div_active <= 0;
-    //    	    div_done <= 1; // finish immediately
-    //    	end
-    //    	else if (div_op_signed && rs1 == 64'h8000000000000000 && rs2 == -64'd1) begin // ??
-    //    	    // signed overflow
-    //    	    div_result_out <= div_op_is_rem ? 64'd0 : rs1;
-    //    	    div_active <= 0;
-    //    	    div_done <= 1; // finish immediately
-    //    	end
-    //    	else begin 
-    //    	    // mormal division setup
-    //    	    // 1. determine signs
-    //    	    div_sign_reminder <= div_op_signed ?  rs1[63] :0;
-    //    	    div_sign_quotient <= div_op_signed ? (rs1[63] & rs2[63]) :0;
-    //    	    // 2. load absoulte values
-    //    	    div_rem <= {64'd0, (div_op_signed && rs1[63]) ? -rs1 :rs1};
-    //    	    div_b <= (div_op_signed && rs2[63]) ? -rs2 : rs2;
-    //    	end
-    //        end else if (div_active) begin
-    //    	// compute phase (64 cycles)
-    //    	if (div_cnt < 64) begin
-    //    	    if (div_rem[126:63] >= div_b) begin
-    //    	        div_rem <= {div_rem[126:63] - div_b, div_rem[62:0], 1'b1};
-    //    	    end else begin
-    //    	        div_rem <= {div_rem[126:0], 1'b0};
-    //    	    end
-    //    	    div_cnt <= div_cnt + 1;
-    //            end else begin
-    //    	    // finish phase
-    //    	    div_active <= 0;
-    //    	    div_done   <= 1;
-    //    	    if (div_is_rem) div_result_out <= div_sign_reminder ? -div_rem[127:64] : div_rem[127:64];
-    //    	    else div_result_out <= div_sign_quotient ? -div_rem[63:0] : div_rem[63:0];
-    //    	end
-    //        end else if (!div_enable) div_done <= 0; // reset handshake
-    //    end
-    //end
-
     // Independent divider
     reg [6:0]   div_cnt;
     reg [127:0] div_rem;   // remainder|quotient
@@ -394,33 +254,27 @@ module riscv64(
         	div_cnt <= 0;
         	// handle corner case
         	if (div_b == 0) begin
-        	    // divide by zero
-        	    div_result_out <= div_is_rem ? div_a : ~64'd0;
+        	    div_result_out <= div_is_rem ? div_a : ~64'd0; // divide by zero
         	    div_active <= 0;
         	    div_done <= 1; // finish immediately
         	end
         	else if (div_op_signed && div_a == 64'h8000000000000000 && div_b == ~64'd0) begin // ??
-        	    // signed overflow
-        	    div_result_out <= div_is_rem ? 64'd0 : div_a;
+        	    div_result_out <= div_is_rem ? 64'd0 : div_a; // signed overflow
         	    div_active <= 0;
         	    div_done <= 1; // finish immediately
         	end
         	else begin 
         	    div_rem <= {64'd0, div_abs_a};
         	end
-            end else if (div_active) begin
-        	// compute phase (64 cycles)
+            end else if (div_active) begin // compute phase (64 cycles)
         	if (div_cnt < 64) begin
         	    if (div_rem[126:63] >= div_abs_b) begin
-        	    //if (div_rem[127:64] >= div_abs_b) begin
         	        div_rem <= {div_rem[126:63] - div_abs_b, div_rem[62:0], 1'b1};
-        	        //div_rem <= {div_rem[127:64] - div_abs_b, div_rem[62:0], 1'b1};
         	    end else begin
         	        div_rem <= {div_rem[126:0], 1'b0};
         	    end
         	    div_cnt <= div_cnt + 1;
-                end else begin
-        	    // finish phase
+                end else begin // finish phase
         	    div_active <= 0;
         	    div_done   <= 1;
         	    div_result_out <= final_out;
@@ -428,8 +282,6 @@ module riscv64(
             end else if (!div_enable) div_done <= 0; // reset handshake
         end
     end
-
-
 
 
     // --Machine CSR --
@@ -851,7 +703,6 @@ module riscv64(
                     32'b0000000_?????_?????_101_?????_0111011: re[w_rd] <= shared_srl_sra;  // Srlw
                     32'b0100000_?????_?????_101_?????_0111011: re[w_rd] <= shared_srl_sra;  // Sraw
 		    
-		    
                     // Jump
 	            32'b???????_?????_?????_???_?????_1101111: begin pc <= pc - 4 + w_imm_j; if (w_rd != 5'b0) re[w_rd] <= pc; bubble <= 1'b1; end // Jal
 	            //32'b???????_?????_?????_???_?????_1100111: begin pc <= (re[w_rs1] + w_imm_i) & 64'hFFFFFFFFFFFFFFFE; if (w_rd != 5'b0) re[w_rd] <= pc; bubble <= 1; end // Jalr
@@ -1004,7 +855,6 @@ module riscv64(
 		    32'b0000001_?????_?????_000_?????_0111011: // Mulw
 		    begin
 			if (!mul_done) begin
-			    // request start
 			    mul_enable <= 1;
                             // latch
 			    if (!mul_enable) begin
@@ -1018,18 +868,12 @@ module riscv64(
 		                mul_op_type <= w_func3;
 			        mul_rd_latched <= w_rd;
 			    end
-
 			    // stall pipeline
 			    pc <= pc - 4;
 			    bubble <= 1;
 			end else  begin //if (mul_done)
-			    // result ready
 			    mul_enable <= 0;
-			    // select output based on cached type
 			    re[mul_rd_latched] <= w_mul_out;
-			    //if (mul_out_sel == 0)      re[w_rd] <= mul_acc[63:0]; // Mul
-			    //else if (mul_out_sel == 1) re[w_rd] <= mul_acc[127:64]; // Mulh*
-			    //else                       re[w_rd] <= {{32{mul_acc[31]}}, mul_acc[31:0]}; // Mulw
 			end
 		    end
 
@@ -1038,22 +882,18 @@ module riscv64(
 		    32'b0000001_?????_?????_1??_?????_0110011: begin
 			if (!div_done) begin
 			    div_enable <= 1;
-			    
                             // latch
 			    if (!div_enable) begin
                                 div_a <= rs1;    // be divided
                                 div_b <= rs2;    // divisor
-                                // 100div/w 101divu 110rem/w 111remu
-                                div_op_signed <= !ir[12];  // func3[0] == 0 is signed
+                                div_op_signed <= !ir[12];  // func3[0] == 0 is signed // 100div/w 101divu 110rem/w 111remu
                                 div_is_rem <= ir[13];   // func3[1] == 1 is rem
                                 div_rd <= w_rd; 
 			    end
-
 			    pc <= pc - 4;
 			    bubble <= 1;
 			end else begin
 			    re[div_rd] <= div_result_out;
-			    //re[w_rd] <= div_result_out;
 			    div_enable <= 0;
 			end
 		    end
