@@ -289,6 +289,14 @@ slli s9, s9, 0xb
 ori s9, s9, 0x26a
 slli s9, s9, 0xb
 ori s9, s9, 0x54d
+addi sp, sp, -8
+sd s9, 0(sp)
+# mv a0, sp
+addi a0, sp, 0
+# call puts
+auipc x1, 0 # R_RISCV_PCREL_HI20 puts
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I puts
+addi sp, sp, 8
 entry_loop:
 bge s8, s7, done_entries
 slli t1, s8, 5

@@ -201,10 +201,20 @@ la t3, root_dir_sector_start
 lw a0, 0(t3)
 call sd_read_sector  # use a0 as sector no.
 
+# -------------------------------------
 # Scan Entries of Root Dir first sector
 # s7 entry_per_sector
 li s8, 0 # entry_index
 li s9, "MUSIC"
+addi sp, sp, -8
+sd s9, 0(sp)
+mv a0, sp
+call puts
+addi sp, sp, 8
+
+
+
+
 entry_loop:
 bge s8, s7, done_entries
 # entry_addr = s1 + (entry_index * 32)
@@ -266,39 +276,6 @@ end:
 
 
 
-## -- function --
-#print_hex_b:  # a0
-#    andi a0, a0, 0xFF   # Isolate byte value
-#    
-#    srli t3, a0, 4      # get high nibble
-#    slti t5, t3, 10     # if < 10 number
-#    beq t5, x0, letterh
-#    addi t3, t3, 48     # 0 is "0" ascii 48
-#    j print_hhex
-#letterh:
-#    addi t3, t3, 55     # 10 is "A" ascii 65 ..
-#print_hhex:
-#    mv t0, ra
-#    call wait_uart
-#    mv ra, t0
-#    sb t3, 0(s11)
-#    
-#    andi t4, a0, 0x0F      # get low nibble
-#    slti t5, t4, 10     # if < 10 number
-#    beq t5, x0, letterl
-#    addi t4, t4, 48     # 0 is "0" ascii 48
-#    j print_lhex
-#letterl:
-#    addi t4, t4, 55        # 10 is "A" ascii 65 ..
-#print_lhex:
-#    mv t0, ra
-#    call wait_uart
-#    mv ra, t0
-#    sb t4, 0(s11)
-#    ret
-
-
-
 print_reg: # a0
     addi sp, sp, -8
     sd ra, 0(sp)
@@ -310,14 +287,11 @@ print_reg: # a0
     sd s2, 0(sp)
     addi sp, sp, -8
     sd s3, 0(sp)
-
     mv s0, a0
-
     li a0, "0"
     call putchar
     li a0, "x"
     call putchar
-
     li s1, 60 
 p_loop:
     srl s2, s0, s1      # get high nibble
@@ -333,7 +307,6 @@ print_h:
     sb s2, 0(s11)       # print
     addi s1, s1, -4
     bge s1, x0, p_loop 
-
     ld s3, 0(sp)
     addi sp, sp, 8
     ld s2, 0(sp)
@@ -406,25 +379,6 @@ wait_uart_tx_l:
     bge t6, t1, print_loop
     ret
 # -- end print_sector --
-
-
-
-
-## funciton print_bin(s11) print 8 bits of s11 at s11 UART
-#print_bin_f:
-#li t1, 8 # number of bits
-#print_binf_loop:
-#addi t1, t1, -1
-#srl t2, s11, t1
-#andi t2, t2, 1
-#addi t2, t2, 48  # 0 to "0"
-#sb t2, 0(s11)     # print
-#bne t1, x0, print_binf_loop
-## clean middle re
-#addi t1, x0, 0
-#addi t2, x0, 0
-#ret
-
 
 
 # functions ------
