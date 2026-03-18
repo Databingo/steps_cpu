@@ -430,6 +430,9 @@ wait_cache:
 
 # print sector 0 512 bytes
 print_sector:
+    addi sp, sp, -8
+    sd ra, 0(sp)
+
     li t1, 0   # byte index
     li t6, 511 # max byte index
 print_loop:
@@ -468,6 +471,11 @@ print_l_hex:
     call wait_uart 
     sb t4, 0(s11)
     bge t6, t1, print_loop
+
+    ld ra, 0(sp)
+    addi sp, sp, 8
+
+
     ret
 # -- end print_sector --
 
