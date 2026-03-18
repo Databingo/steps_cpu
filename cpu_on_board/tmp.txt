@@ -376,12 +376,15 @@ auipc x1, 0 # R_RISCV_PCREL_HI20 puts
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I puts
 addi sp, sp, 8
 done_entries:
-#    j done_entries
-jal x0, done_entries
+#    j read_file
+jal x0, read_file
 next_entry:
 addi s8, s8, 1
 # j entry_loop
 jal x0, entry_loop
+read_file:
+#    j read_file
+jal x0, read_file
 print_reg:
 addi sp, sp, -8
 sd ra, 0(sp)
