@@ -41,6 +41,10 @@ entries_per_sector:
     .word 0
 total_sectors:
     .word 0
+file_size:
+    .word 0
+file_first_cluster:
+    .word 0
 
 # -- Start program main function _start --
 .section .text
@@ -348,6 +352,21 @@ j entry_loop
 
 read_file:
 ## file size at 0x1C-0x1D-0x1E-0x1F 4 bytes
+li a0, "\nFSize:"
+call print7
+lwu a0, 0x1c(t3)
+call print_reg
+
+
+#file_first_cluster
+
+
+
+
+
+
+
+
 ## first cluster at 0x1A-0x1B 2 bytes
 j read_file
 

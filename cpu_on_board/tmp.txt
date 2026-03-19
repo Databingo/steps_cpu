@@ -13,6 +13,8 @@ sec_per_clus:
 data_start_sec:
 entries_per_sector:
 total_sectors:
+file_size:
+file_first_cluster:
 _start:
 #     li sp, 0x1000 
 addi sp, x0, 0x0
@@ -415,6 +417,24 @@ addi s8, s8, 1
 # j entry_loop
 jal x0, entry_loop
 read_file:
+# li a0, "\nFSize:"
+addi a0, x0, 0x0
+lui a0, 0x3a6
+srli a0, a0, 0x1
+ori a0, a0, 0x2bd
+slli a0, a0, 0xb
+ori a0, a0, 0x1a5
+slli a0, a0, 0xb
+ori a0, a0, 0x268
+slli a0, a0, 0xb
+ori a0, a0, 0x60a
+# call print7
+auipc x1, 0 # R_RISCV_PCREL_HI20 print7
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print7
+lwu a0, 0x1c(t3)
+# call print_reg
+auipc x1, 0 # R_RISCV_PCREL_HI20 print_reg
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_reg
 # j read_file
 jal x0, read_file
 print_reg:
