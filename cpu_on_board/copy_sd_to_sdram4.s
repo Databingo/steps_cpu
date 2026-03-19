@@ -49,6 +49,8 @@ file_first_cluster:
     .word 0
 file_sectors:
     .word 0
+file_start_sector:
+    .word 0
 
 
 
@@ -111,7 +113,7 @@ call print7
 
 la a1, byte_per_sec
 lwu a0, 0x0a(s1)
-srli, a0, a0, 8
+srli a0, a0, 8
 sh a0, 0(a1)
 lhu a0, 0(a1)
 call print_reg
@@ -399,6 +401,8 @@ mul t2, t0, t1
 la a1, data_start_sec
 lw t3, 0(a1)
 add a0, t3, t2
+la a1, file_start_sector
+sw a0, 0(a1)
 call print_reg
 
 
@@ -422,15 +426,16 @@ call print7
 
 la a1, file_sectors
 lw t0, 0(a1)
-la a1, data_start_sec
+la a1,  file_start_sector
 lw t1, 0(a1)
+add t2, t1, t0
 
 print_sector_loop:
 mv a0, t1
 call sd_read_sector  # use a0 as sector no.
 call print_sector
 addi t1, t1, 1
-bge t0, t1 print_sector_loop
+blt t1, t2, print_sector_loop
 
 
 
