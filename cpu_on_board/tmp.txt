@@ -63,22 +63,6 @@ addi a0, x0, 0x0
 # call sd_read_sector  
 auipc x1, 0 # R_RISCV_PCREL_HI20 sd_read_sector
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I sd_read_sector
-# la a0, prt_sector
-auipc a0, 0 # R_RISCV_PCREL_HI20 prt_sector 
-addi a0, a0, 0 # R_RISCV_PCREL_LO12_I prt_sector 
-# call puts
-auipc x1, 0 # R_RISCV_PCREL_HI20 puts
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I puts
-# call print_sector
-auipc x1, 0 # R_RISCV_PCREL_HI20 print_sector
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_sector
-# li a0, 43       
-addi a0, x0, 0x0
-addi a0, x0, 0x0
-addi a0, x0, 0x2b
-# call putchar
-auipc x1, 0 # R_RISCV_PCREL_HI20 putchar
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I putchar
 # li a0, "\nBPsec:" 
 addi a0, x0, 0x0
 lui a0, 0x3a6
@@ -437,6 +421,29 @@ auipc a1, 0 # R_RISCV_PCREL_HI20 file_size
 addi a1, a1, 0 # R_RISCV_PCREL_LO12_I file_size 
 sw a0, 0(a1)
 lwu a0, 0(a1)
+# call print_reg
+auipc x1, 0 # R_RISCV_PCREL_HI20 print_reg
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_reg
+# li a0, "\nF0cls:"
+addi a0, x0, 0x0
+lui a0, 0x3a7
+srli a0, a0, 0x1
+ori a0, a0, 0x1b6
+slli a0, a0, 0xb
+ori a0, a0, 0x18c
+slli a0, a0, 0xb
+ori a0, a0, 0x608
+slli a0, a0, 0xb
+ori a0, a0, 0x60a
+# call print7
+auipc x1, 0 # R_RISCV_PCREL_HI20 print7
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print7
+lhu a0, 0x1a(t3)
+# la a1, file_first_cluster
+auipc a1, 0 # R_RISCV_PCREL_HI20 file_first_cluster 
+addi a1, a1, 0 # R_RISCV_PCREL_LO12_I file_first_cluster 
+sh a0, 0(a1)
+lhu a0, 0(a1)
 # call print_reg
 auipc x1, 0 # R_RISCV_PCREL_HI20 print_reg
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_reg

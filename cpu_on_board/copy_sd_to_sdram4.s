@@ -91,13 +91,13 @@ la a0, read_sd_sector
 call puts
 li a0, 0   
 call sd_read_sector  # use a2 as sector no.
-
-la a0, prt_sector
-call puts
-call print_sector
-
-li a0, 43       # +
-call putchar
+#
+#la a0, prt_sector
+#call puts
+#call print_sector
+#
+#li a0, 43       # +
+#call putchar
 
 # -- Parse BPB -- little-endian  Bios Parameter Block : sector 0
 # -------------------------------------
@@ -363,14 +363,14 @@ sw a0, 0(a1)
 lwu a0, 0(a1)
 call print_reg
 
-## file_first_cluster at 0x1A-0x1B 2 bytes
-#li a0, "\nF0cls:"
-#call print7
-#lhu a0, 0x1a(t3)
-#la a1, file_first_cluster
-#sh a0, 0(a1)
-#lhu a0, 0(a1)
-#call print_reg
+# file_first_cluster at 0x1A-0x1B 2 bytes
+li a0, "\nF0cls:"
+call print7
+lhu a0, 0x1a(t3)
+la a1, file_first_cluster
+sh a0, 0(a1)
+lhu a0, 0(a1)
+call print_reg
 
 
 
