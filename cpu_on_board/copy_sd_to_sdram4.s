@@ -360,14 +360,14 @@ sw a0, 0(a1)
 lwu a0, 0(a1)
 call print_reg
 
-##file_first_cluster
-#li a0, "\nF0cls:"
-#call print7
-#lhu a0, 0x1a(t3)
-#la a1, file_first_cluster
-#sh a0, 0(a1)
-#lhu a0, 0(a1)
-#call print_reg
+# file_first_cluster at 0x1A-0x1B 2 bytes
+li a0, "\nF0cls:"
+call print7
+lhu a0, 0x1a(t3)
+la a1, file_first_cluster
+sh a0, 0(a1)
+lhu a0, 0(a1)
+call print_reg
 
 
 
@@ -376,7 +376,6 @@ call print_reg
 
 
 
-## first cluster at 0x1A-0x1B 2 bytes
 end: 
 j end
 
