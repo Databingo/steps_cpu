@@ -53,7 +53,7 @@ file_first_cluster:
 .section .text
 # -- Global setup --
 _start:
-    li sp, 0x1000 # Set stack
+    li sp, 0x1800 # Set stack
     li s11, 0x2004 # UART print 
     li s10, 0x2008 # UART controller
     li s1,  0x3000 # SD base
@@ -91,13 +91,13 @@ la a0, read_sd_sector
 call puts
 li a0, 0   
 call sd_read_sector  # use a2 as sector no.
-#
-#la a0, prt_sector
-#call puts
-#call print_sector
-#
-#li a0, 43       # +
-#call putchar
+
+la a0, prt_sector
+call puts
+call print_sector
+
+li a0, 43       # +
+call putchar
 
 # -- Parse BPB -- little-endian  Bios Parameter Block : sector 0
 # -------------------------------------
