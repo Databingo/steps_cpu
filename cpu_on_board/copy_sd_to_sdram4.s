@@ -159,7 +159,7 @@ call print7
 
 # -------------------------------------
 # sectors_per_fat16 high offset 0x16-0x17 2 bytes
-li a0, "\nsePfat" # 7 char left on for null
+li a0, "\nsePft:" # 7 char left on for null
 call print7
 
 la a1, sec_per_fat
