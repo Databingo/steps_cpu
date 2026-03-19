@@ -357,11 +357,17 @@ call print7
 lwu a0, 0x1c(t3)
 la a1, file_size
 sw a0, 0(a1)
-lw a0, 0(a1)
+lwu a0, 0(a1)
 call print_reg
 
-
 #file_first_cluster
+li a0, "\nF0cls:"
+call print7
+lhu a0, 0x1a(t3)
+la a1, file_first_cluster
+sh a0, 0(a1)
+lhu a0, 0(a1)
+call print_reg
 
 
 
