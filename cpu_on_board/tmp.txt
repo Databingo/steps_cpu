@@ -91,24 +91,19 @@ lh a0, 0(a1)
 # call print_reg
 auipc x1, 0 # R_RISCV_PCREL_HI20 print_reg
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_reg
-# li t0, "resSec:" 
-lui t0, 0x3a6
-srli t0, t0, 0x1
-ori t0, t0, 0x1b2
-slli t0, t0, 0xb
-ori t0, t0, 0x54d
-slli t0, t0, 0xb
-ori t0, t0, 0x66c
-slli t0, t0, 0xb
-ori t0, t0, 0x572
-addi sp, sp, -8
-sd t0, 0(sp)
-# mv a0, sp
-addi a0, sp, 0
-# call puts
-auipc x1, 0 # R_RISCV_PCREL_HI20 puts
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I puts
-addi sp, sp, 8
+# li a0, "resSec:" 
+lui a0, 0x3a6
+srli a0, a0, 0x1
+ori a0, a0, 0x1b2
+slli a0, a0, 0xb
+ori a0, a0, 0x54d
+slli a0, a0, 0xb
+ori a0, a0, 0x66c
+slli a0, a0, 0xb
+ori a0, a0, 0x572
+# call print7
+auipc x1, 0 # R_RISCV_PCREL_HI20 print7
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print7
 # la a1, reserved_sec
 auipc a1, 0 # R_RISCV_PCREL_HI20 reserved_sec 
 addi a1, a1, 0 # R_RISCV_PCREL_LO12_I reserved_sec 
@@ -121,24 +116,19 @@ ld a0, 0(a1)
 # call print_reg
 auipc x1, 0 # R_RISCV_PCREL_HI20 print_reg
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_reg
-# li t0, "numFat:" 
-lui t0, 0x3a7
-srli t0, t0, 0x1
-ori t0, t0, 0x230
-slli t0, t0, 0xb
-ori t0, t0, 0x519
-slli t0, t0, 0xb
-ori t0, t0, 0x5ae
-slli t0, t0, 0xb
-ori t0, t0, 0x56e
-addi sp, sp, -8
-sd t0, 0(sp)
-# mv a0, sp
-addi a0, sp, 0
-# call puts
-auipc x1, 0 # R_RISCV_PCREL_HI20 puts
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I puts
-addi sp, sp, 8
+# li a0, "numFat:" 
+lui a0, 0x3a7
+srli a0, a0, 0x1
+ori a0, a0, 0x230
+slli a0, a0, 0xb
+ori a0, a0, 0x519
+slli a0, a0, 0xb
+ori a0, a0, 0x5ae
+slli a0, a0, 0xb
+ori a0, a0, 0x56e
+# call print7
+auipc x1, 0 # R_RISCV_PCREL_HI20 print7
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print7
 # la a1, num_fats
 auipc a1, 0 # R_RISCV_PCREL_HI20 num_fats 
 addi a1, a1, 0 # R_RISCV_PCREL_LO12_I num_fats 
@@ -148,24 +138,19 @@ lw a0, 0(a1)
 # call print_reg
 auipc x1, 0 # R_RISCV_PCREL_HI20 print_reg
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_reg
-# li t0, "secPfat" 
-lui t0, 0x746
-srli t0, t0, 0x1
-ori t0, t0, 0xb3
-slli t0, t0, 0xb
-ori t0, t0, 0x141
-slli t0, t0, 0xb
-ori t0, t0, 0x46c
-slli t0, t0, 0xb
-ori t0, t0, 0x573
-addi sp, sp, -8
-sd t0, 0(sp)
-# mv a0, sp
-addi a0, sp, 0
-# call puts
-auipc x1, 0 # R_RISCV_PCREL_HI20 puts
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I puts
-addi sp, sp, 8
+# li a0, "secPfat" 
+lui a0, 0x746
+srli a0, a0, 0x1
+ori a0, a0, 0xb3
+slli a0, a0, 0xb
+ori a0, a0, 0x141
+slli a0, a0, 0xb
+ori a0, a0, 0x46c
+slli a0, a0, 0xb
+ori a0, a0, 0x573
+# call print7
+auipc x1, 0 # R_RISCV_PCREL_HI20 print7
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print7
 # la a1, sec_per_fat
 auipc a1, 0 # R_RISCV_PCREL_HI20 sec_per_fat 
 addi a1, a1, 0 # R_RISCV_PCREL_LO12_I sec_per_fat 
@@ -178,24 +163,19 @@ lh a0, 0(a1)
 # call print_reg
 auipc x1, 0 # R_RISCV_PCREL_HI20 print_reg
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_reg
-# li t0, "rootdS0" 
-lui t0, 0x305
-srli t0, t0, 0x1
-ori t0, t0, 0x1b2
-slli t0, t0, 0xb
-ori t0, t0, 0x1d1
-slli t0, t0, 0xb
-ori t0, t0, 0x5ed
-slli t0, t0, 0xb
-ori t0, t0, 0x772
-addi sp, sp, -8
-sd t0, 0(sp)
-# mv a0, sp
-addi a0, sp, 0
-# call puts
-auipc x1, 0 # R_RISCV_PCREL_HI20 puts
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I puts
-addi sp, sp, 8
+# li a0, "rootdS0" 
+lui a0, 0x305
+srli a0, a0, 0x1
+ori a0, a0, 0x1b2
+slli a0, a0, 0xb
+ori a0, a0, 0x1d1
+slli a0, a0, 0xb
+ori a0, a0, 0x5ed
+slli a0, a0, 0xb
+ori a0, a0, 0x772
+# call print7
+auipc x1, 0 # R_RISCV_PCREL_HI20 print7
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print7
 # la a1, num_fats
 auipc a1, 0 # R_RISCV_PCREL_HI20 num_fats 
 addi a1, a1, 0 # R_RISCV_PCREL_LO12_I num_fats 
@@ -218,24 +198,19 @@ lw a0, 0(t3)
 # call print_reg
 auipc x1, 0 # R_RISCV_PCREL_HI20 print_reg
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_reg
-# li t0, "EtrPse:"
-lui t0, 0x3a6
-srli t0, t0, 0x1
-ori t0, t0, 0x2b9
-slli t0, t0, 0xb
-ori t0, t0, 0x541
-slli t0, t0, 0xb
-ori t0, t0, 0x64e
-slli t0, t0, 0xb
-ori t0, t0, 0x445
-addi sp, sp, -8
-sd t0, 0(sp)
-# mv a0, sp
-addi a0, sp, 0
-# call puts
-auipc x1, 0 # R_RISCV_PCREL_HI20 puts
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I puts
-addi sp, sp, 8
+# li a0, "EtrPse:"
+lui a0, 0x3a6
+srli a0, a0, 0x1
+ori a0, a0, 0x2b9
+slli a0, a0, 0xb
+ori a0, a0, 0x541
+slli a0, a0, 0xb
+ori a0, a0, 0x64e
+slli a0, a0, 0xb
+ori a0, a0, 0x445
+# call print7
+auipc x1, 0 # R_RISCV_PCREL_HI20 print7
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print7
 # la a1, byte_per_sec
 auipc a1, 0 # R_RISCV_PCREL_HI20 byte_per_sec 
 addi a1, a1, 0 # R_RISCV_PCREL_LO12_I byte_per_sec 
@@ -249,24 +224,19 @@ div a0, a0, t1
 # call print_reg
 auipc x1, 0 # R_RISCV_PCREL_HI20 print_reg
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_reg
-# li t0, "RenCnt:"
-lui t0, 0x3a7
-srli t0, t0, 0x1
-ori t0, t0, 0x237
-slli t0, t0, 0xb
-ori t0, t0, 0x10d
-slli t0, t0, 0xb
-ori t0, t0, 0x5cc
-slli t0, t0, 0xb
-ori t0, t0, 0x552
-addi sp, sp, -8
-sd t0, 0(sp)
-# mv a0, sp
-addi a0, sp, 0
-# call puts
-auipc x1, 0 # R_RISCV_PCREL_HI20 puts
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I puts
-addi sp, sp, 8
+# li a0, "RenCnt:"
+lui a0, 0x3a7
+srli a0, a0, 0x1
+ori a0, a0, 0x237
+slli a0, a0, 0xb
+ori a0, a0, 0x10d
+slli a0, a0, 0xb
+ori a0, a0, 0x5cc
+slli a0, a0, 0xb
+ori a0, a0, 0x552
+# call print7
+auipc x1, 0 # R_RISCV_PCREL_HI20 print7
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print7
 # la a1, root_ent_cnt 
 auipc a1, 0 # R_RISCV_PCREL_HI20 root_ent_cnt 
 addi a1, a1, 0 # R_RISCV_PCREL_LO12_I root_ent_cnt 
@@ -313,14 +283,11 @@ slli s9, s9, 0xb
 ori s9, s9, 0x26a
 slli s9, s9, 0xb
 ori s9, s9, 0x54d
-addi sp, sp, -8
-sd s9, 0(sp)
-# mv a0, sp
-addi a0, sp, 0
-# call puts
-auipc x1, 0 # R_RISCV_PCREL_HI20 puts
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I puts
-addi sp, sp, 8
+# mv a0, s9
+addi a0, s9, 0
+# call print7
+auipc x1, 0 # R_RISCV_PCREL_HI20 print7
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print7
 entry_loop:
 bge s8, s7, done_entries
 slli t1, s8, 5
@@ -360,24 +327,19 @@ auipc x1, 0 # R_RISCV_PCREL_HI20 puts
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I puts
 addi sp, sp, 16
 bne t2, s9, next_entry
-# li t0, "FOUND!"
-lui t0, 0x2
-srli t0, t0, 0x1
-ori t0, t0, 0xa2
-slli t0, t0, 0xb
-ori t0, t0, 0x139
-slli t0, t0, 0xb
-ori t0, t0, 0x2a9
-slli t0, t0, 0xb
-ori t0, t0, 0x746
-addi sp, sp, -8
-sd t0, 0(sp)
-# mv a0, sp
-addi a0, sp, 0
-# call puts
-auipc x1, 0 # R_RISCV_PCREL_HI20 puts
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I puts
-addi sp, sp, 8
+# li a0, "FOUND!"
+lui a0, 0x2
+srli a0, a0, 0x1
+ori a0, a0, 0xa2
+slli a0, a0, 0xb
+ori a0, a0, 0x139
+slli a0, a0, 0xb
+ori a0, a0, 0x2a9
+slli a0, a0, 0xb
+ori a0, a0, 0x746
+# call print7
+auipc x1, 0 # R_RISCV_PCREL_HI20 print7
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print7
 done_entries:
 #    j read_file
 jal x0, read_file

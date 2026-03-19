@@ -110,12 +110,8 @@ lh a0, 0(a1)
 call print_reg
 
 # reserved_sectors offset 0x0e-0x0f 2 bytes (including root sector 0)
-li t0, "resSec:" # 7 char left on for null
-addi sp, sp, -8
-sd t0, 0(sp)
-mv a0, sp
-call puts
-addi sp, sp, 8
+li a0, "resSec:" # 7 char left on for null
+call print7
 
 la a1, reserved_sec
 lbu t0, 0x0e(s1)
@@ -128,12 +124,8 @@ ld a0, 0(a1)
 call print_reg
 # -------------------------------------
 # num_fats offset 0x10 1 bytes
-li t0, "numFat:" # 7 char left on for null
-addi sp, sp, -8
-sd t0, 0(sp)
-mv a0, sp
-call puts
-addi sp, sp, 8
+li a0, "numFat:" # 7 char left on for null
+call print7
 
 la a1, num_fats
 lbu a0, 0x10(s1)
@@ -143,12 +135,8 @@ call print_reg
 
 # -------------------------------------
 # sectors_per_fat16 high offset 0x16-0x17 2 bytes
-li t0, "secPfat" # 7 char left on for null
-addi sp, sp, -8
-sd t0, 0(sp)
-mv a0, sp
-call puts
-addi sp, sp, 8
+li a0, "secPfat" # 7 char left on for null
+call print7
 
 la a1, sec_per_fat
 lbu t0, 0x16(s1)
@@ -163,12 +151,8 @@ call print_reg
 
 # -------------------------------------
 # root_dir_sector_start = reserved_sectors + (num_fats * sectors_per_fat16)
-li t0, "rootdS0" # 7 char left on for null
-addi sp, sp, -8
-sd t0, 0(sp)
-mv a0, sp
-call puts
-addi sp, sp, 8
+li a0, "rootdS0" # 7 char left on for null
+call print7
 
 la a1, num_fats
 lw t1, 0(a1)
@@ -185,12 +169,8 @@ lw a0, 0(t3)
 call print_reg
 
 
-li t0, "EtrPse:"
-addi sp, sp, -8
-sd t0, 0(sp)
-mv a0, sp
-call puts
-addi sp, sp, 8
+li a0, "EtrPse:"
+call print7
 
 la a1, byte_per_sec
 lw a0, 0(a1)
@@ -201,12 +181,8 @@ div a0, a0, t1
 call print_reg
 
 
-li t0, "RenCnt:"
-addi sp, sp, -8
-sd t0, 0(sp)
-mv a0, sp
-call puts
-addi sp, sp, 8
+li a0, "RenCnt:"
+call print7
 
 la a1, root_ent_cnt # root_entries offset 0x11-0x12 2 bytes
 lbu t0, 0x11(s1)
@@ -288,11 +264,8 @@ call sd_read_sector  # use a0 as sector no.
 # s7 entry_per_sector
 li s8, 0 # entry_index
 li s9, "MUSIC"
-addi sp, sp, -8
-sd s9, 0(sp)
-mv a0, sp
-call puts
-addi sp, sp, 8
+mv a0, s9
+call print7
 
 
 
@@ -344,12 +317,8 @@ addi sp, sp, 16
 bne t2, s9, next_entry
 
 ## 4. FOUND! Extract File Info
-li t0, "FOUND!"
-addi sp, sp, -8
-sd t0, 0(sp)
-mv a0, sp
-call puts
-addi sp, sp, 8
+li a0, "FOUND!"
+call print7
 
 done_entries:
    j read_file
