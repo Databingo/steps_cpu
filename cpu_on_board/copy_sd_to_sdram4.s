@@ -114,7 +114,7 @@ li a0, "\nsePcl:" # 7 char left on for null
 call print7
 
 la a1, sec_per_clus
-lbu a0, 0x0b(s1)
+lbu a0, 0x0d(s1)
 sh a0, 0(a1)
 lh a0, 0(a1)
 call print_reg
@@ -231,8 +231,8 @@ lw a0, 0(t3)
 call print_reg
 
 
-
-
+# ------------------------
+#data_start_sec = 
 
 
 
