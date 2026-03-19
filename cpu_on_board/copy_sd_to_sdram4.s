@@ -153,11 +153,6 @@ li a0, "\nReCnt:"
 call print7
 
 la a1, root_ent_cnt
-#lbu t0, 0x11(s1)
-#lbu t1, 0x12(s1)
-#slli t1, t1, 8
-#or a0, t1, t0 
-
 lwu a0, 0x10(s1)
 srli a0, a0, 8
 sh a0, 0(a1)
@@ -169,12 +164,7 @@ call print_reg
 li a0, "\nToSec:"
 call print7
 la a1, total_sectors
-#lbu t0, 0x13(s1)
-#lbu t1, 0x14(s1)
-#slli t1, t1, 8
-#or a0, t1, t0 
 lwu a0, 0x20(s1)
-
 sw a0, 0(a1)
 lwu a0, 0(a1)
 call print_reg
@@ -189,12 +179,7 @@ li a0, "\nsePft:" # 7 char left on for null
 call print7
 
 la a1, sec_per_fat
-#lbu t0, 0x16(s1)
-#lbu t1, 0x17(s1)
-#slli t1, t1, 8
-#or a0, t1, t0 
 lh a0, 0x16(s1)
-
 sh a0, 0(a1)
 lh a0, 0(a1)
 call print_reg
@@ -239,12 +224,6 @@ call print_reg
 
 # ------------------------
 # data_start_sec = 
-
-
-
-
-
-
 
 
 li a0, 43       # +
