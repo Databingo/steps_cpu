@@ -9,7 +9,7 @@ sec_per_fat:
 byte_per_sec:
 root_dir_sector_start:
 root_ent_cnt:
-set_per_clus:
+sec_per_clus:
 data_start_sec:
 entries_per_sector:
 total_sectors:
@@ -98,6 +98,29 @@ lbu t0, 0x0b(s1)
 lbu t1, 0x0c(s1)
 slli t1, t1, 8
 or a0, t1, t0 
+sh a0, 0(a1)
+lh a0, 0(a1)
+# call print_reg
+auipc x1, 0 # R_RISCV_PCREL_HI20 print_reg
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_reg
+# li a0, "\nsePcl:" 
+addi a0, x0, 0x0
+lui a0, 0x3a6
+srli a0, a0, 0x1
+ori a0, a0, 0x631
+slli a0, a0, 0xb
+ori a0, a0, 0x541
+slli a0, a0, 0xb
+ori a0, a0, 0x4ae
+slli a0, a0, 0xb
+ori a0, a0, 0x30a
+# call print7
+auipc x1, 0 # R_RISCV_PCREL_HI20 print7
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print7
+# la a1, sec_per_clus
+auipc a1, 0 # R_RISCV_PCREL_HI20 sec_per_clus 
+addi a1, a1, 0 # R_RISCV_PCREL_LO12_I sec_per_clus 
+lbu a0, 0x0b(s1)
 sh a0, 0(a1)
 lh a0, 0(a1)
 # call print_reg

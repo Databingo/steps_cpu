@@ -33,7 +33,7 @@ root_dir_sector_start:
     .word 0
 root_ent_cnt:
     .word 0
-set_per_clus:
+sec_per_clus:
     .word 0
 data_start_sec:
     .word 0
@@ -109,7 +109,15 @@ lh a0, 0(a1)
 call print_reg
 
 # -------------------------------------
-# Sectors per cluster 0x0d
+# Sectors per cluster 0x0d 1 byte
+li a0, "\nsePcl:" # 7 char left on for null
+call print7
+
+la a1, sec_per_clus
+lbu a0, 0x0b(s1)
+sh a0, 0(a1)
+lh a0, 0(a1)
+call print_reg
 
 
 # -------------------------------------
