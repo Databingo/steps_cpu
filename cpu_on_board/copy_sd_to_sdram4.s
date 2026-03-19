@@ -382,21 +382,21 @@ lw a0, 0(a1)
 call print_reg
 
 
-li a0, "\nFileB:"
-call print7
-
-la a1, file_sectors
-lw t0, 0(a1)
-la a1,  file_start_sector
-lw t1, 0(a1)
-add t2, t1, t0
-
-print_sector_loop:
-mv a0, t1
-call sd_read_sector  # use a0 as sector no.
-call print_sector
-addi t1, t1, 1
-blt t1, t2, print_sector_loop
+#li a0, "\nFileB:"
+#call print7
+#
+#la a1, file_sectors
+#lw t0, 0(a1)
+#la a1,  file_start_sector
+#lw t1, 0(a1)
+#add t2, t1, t0
+#
+#print_sector_loop:
+#mv a0, t1
+#call sd_read_sector  # use a0 as sector no.
+#call print_sector
+#addi t1, t1, 1
+#blt t1, t2, print_sector_loop
 
 
 
