@@ -878,8 +878,8 @@ module riscv64(
 		    end
 
 		    // M-Extension
-		    // Div divu rem remu mulw divw divuw remuw
-		    32'b0000001_?????_?????_1??_?????_0110011: begin
+		    32'b0000001_?????_?????_1??_?????_0110011, //Div100 divu101 rem110 remu111
+		    32'b0000001_?????_?????_1??_?????_0111011: begin // divw100 divuw101  remw110 remuw111
 			if (!div_done) begin
 			    div_enable <= 1;
                             // latch
@@ -897,6 +897,7 @@ module riscv64(
 			    div_enable <= 0;
 			end
 		    end
+		    // 32'b0000001_?????_?????_???_?????_1111011 muld divd divud remd remud
 
 	            // F (reg f0-f31)
 	            // flw fsw fadd.s fsub.s fmul.s fdiv.s fsqrt.s fmadd.s
