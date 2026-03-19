@@ -230,9 +230,11 @@ func isValidImmediate_u(s string) (int64, uint64, error) { // get sign + abs
 	        content, _ := strconv.Unquote(s)
 		if len(content) <= 8 { 
 		    imm0 = 0;
-		    for i:=0;i<len(content);i++ { imm0 |= uint64(content[i])<< (i*8) }
+		    for i:=0;i<len(content);i++ { imm0 |= uint64(content[i])<< uint64(i*8) }
 		    err0 = nil
 		}
+		fmt.Printf("0x%016x\n", imm0)
+		//os.Exit(1)
         } else if strings.HasPrefix(s, "0x") {
 		imm2, err2 = strconv.ParseUint(s[2:], 16, 64) // check if s is hex
 		fmt.Println("+imm2:", imm2, err2)
