@@ -355,57 +355,57 @@ sh a0, 0(a1)
 lhu a0, 0(a1)
 call print_reg
 
-# root_dir_sectors = (RootEntryCount * 32 + BytesPerSector -1 )/ BytesPerSector  ceiling division
-li a0, "\nrDseS:"
-call print7
-
-la a1, root_ent_cnt
-lwu t0, 0(a1)
-li t1, 32
-mul t2, t0, t1
-
-la a1, byte_per_sec
-lwu t0, 0(a1)
-add t3, t2, t0
-addi t3, t3, -1
-div a0, t3, t0
-
-la a1, root_dir_sectors 
-sw a0, 0(a1)
-lw a0, 0(a1)
-call print_reg
-
-#data_start_sec # FirstDataSector = root_dir_sector_start + root_dir_sectors 
-li a0, "\nD0sec:"
-call print7
-la a1, root_dir_sector_start
-lw t0, 0(a1)
-la a1, root_dir_sectors 
-lw t1, 0(a1)
-add t2, t0, t1
-la a1, data_start_sec  
-sw t2, 0(a1)
-lw a0, 0(a1)
-call print_reg
-
-# FirstSectorOfCluster(N)=FirstDataSector + (N - 2) * SectorsPerCluster
-li a0, "\nF0sec:"
-call print7
-
-la a1, file_first_cluster # N
-lw t0, 0(a1)
-addi t0, t0, -2
-la a1, sec_per_clus
-lw t1, 0(a1)
-mul t2, t0, t1
-la a1, data_start_sec
-lw t3, 0(a1)
-add a0, t3, t2
-la a1, file_start_sector
-sw a0, 0(a1)
-call print_reg
-
-
+## root_dir_sectors = (RootEntryCount * 32 + BytesPerSector -1 )/ BytesPerSector  ceiling division
+#li a0, "\nrDseS:"
+#call print7
+#
+#la a1, root_ent_cnt
+#lwu t0, 0(a1)
+#li t1, 32
+#mul t2, t0, t1
+#
+#la a1, byte_per_sec
+#lwu t0, 0(a1)
+#add t3, t2, t0
+#addi t3, t3, -1
+#div a0, t3, t0
+#
+#la a1, root_dir_sectors 
+#sw a0, 0(a1)
+#lw a0, 0(a1)
+#call print_reg
+#
+##data_start_sec # FirstDataSector = root_dir_sector_start + root_dir_sectors 
+#li a0, "\nD0sec:"
+#call print7
+#la a1, root_dir_sector_start
+#lw t0, 0(a1)
+#la a1, root_dir_sectors 
+#lw t1, 0(a1)
+#add t2, t0, t1
+#la a1, data_start_sec  
+#sw t2, 0(a1)
+#lw a0, 0(a1)
+#call print_reg
+#
+## FirstSectorOfCluster(N)=FirstDataSector + (N - 2) * SectorsPerCluster
+#li a0, "\nF0sec:"
+#call print7
+#
+#la a1, file_first_cluster # N
+#lw t0, 0(a1)
+#addi t0, t0, -2
+#la a1, sec_per_clus
+#lw t1, 0(a1)
+#mul t2, t0, t1
+#la a1, data_start_sec
+#lw t3, 0(a1)
+#add a0, t3, t2
+#la a1, file_start_sector
+#sw a0, 0(a1)
+#call print_reg
+#
+#
 ## file_sectors = file_size + 511 / 512
 #li a0, "\nFseS:"
 #call print7
