@@ -153,16 +153,16 @@ lh a0, 0(a1)
 # call print_reg
 auipc x1, 0 # R_RISCV_PCREL_HI20 print_reg
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_reg
-# li t0, "bysPsec" 
+# li t0, "BytPsec" 
 lui t0, 0x636
 srli t0, t0, 0x1
 ori t0, t0, 0x2b9
 slli t0, t0, 0xb
 ori t0, t0, 0x541
 slli t0, t0, 0xb
-ori t0, t0, 0x66f
+ori t0, t0, 0x68f
 slli t0, t0, 0xb
-ori t0, t0, 0x162
+ori t0, t0, 0x142
 addi sp, sp, -8
 sd t0, 0(sp)
 # mv a0, sp
@@ -220,47 +220,6 @@ auipc t3, 0 # R_RISCV_PCREL_HI20 root_dir_sector_start
 addi t3, t3, 0 # R_RISCV_PCREL_LO12_I root_dir_sector_start 
 sw a0, 0(t3)
 lw a0, 0(t3)
-# call print_reg
-auipc x1, 0 # R_RISCV_PCREL_HI20 print_reg
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_reg
-# li a0, 43       
-# li a0, 43       
-addi a0, x0, 0x2b
-# call putchar
-auipc x1, 0 # R_RISCV_PCREL_HI20 putchar
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I putchar
-# la t3, root_dir_sector_start
-auipc t3, 0 # R_RISCV_PCREL_HI20 root_dir_sector_start 
-addi t3, t3, 0 # R_RISCV_PCREL_LO12_I root_dir_sector_start 
-lw a0, 0(t3)
-# call sd_read_sector  
-auipc x1, 0 # R_RISCV_PCREL_HI20 sd_read_sector
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I sd_read_sector
-# call print_sector
-auipc x1, 0 # R_RISCV_PCREL_HI20 print_sector
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_sector
-# li t0, "BytPse"
-lui t0, 0x6
-srli t0, t0, 0x1
-ori t0, t0, 0x2b9
-slli t0, t0, 0xb
-ori t0, t0, 0x541
-slli t0, t0, 0xb
-ori t0, t0, 0x68f
-slli t0, t0, 0xb
-ori t0, t0, 0x142
-addi sp, sp, -8
-sd t0, 0(sp)
-# mv a0, sp
-addi a0, sp, 0
-# call puts
-auipc x1, 0 # R_RISCV_PCREL_HI20 puts
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I puts
-addi sp, sp, 8
-# la a1, byte_per_sec
-auipc a1, 0 # R_RISCV_PCREL_HI20 byte_per_sec 
-addi a1, a1, 0 # R_RISCV_PCREL_LO12_I byte_per_sec 
-lw a0, 0(a1)  # two byts, use lw, ld will get other word together!
 # call print_reg
 auipc x1, 0 # R_RISCV_PCREL_HI20 print_reg
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_reg
@@ -325,6 +284,22 @@ lh a0, 0(a1)
 # call print_reg
 auipc x1, 0 # R_RISCV_PCREL_HI20 print_reg
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_reg
+# li a0, 43       
+# li a0, 43       
+addi a0, x0, 0x2b
+# call putchar
+auipc x1, 0 # R_RISCV_PCREL_HI20 putchar
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I putchar
+# la t3, root_dir_sector_start
+auipc t3, 0 # R_RISCV_PCREL_HI20 root_dir_sector_start 
+addi t3, t3, 0 # R_RISCV_PCREL_LO12_I root_dir_sector_start 
+lw a0, 0(t3)
+# call sd_read_sector  
+auipc x1, 0 # R_RISCV_PCREL_HI20 sd_read_sector
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I sd_read_sector
+# call print_sector
+auipc x1, 0 # R_RISCV_PCREL_HI20 print_sector
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_sector
 # la t3, root_dir_sector_start
 auipc t3, 0 # R_RISCV_PCREL_HI20 root_dir_sector_start 
 addi t3, t3, 0 # R_RISCV_PCREL_LO12_I root_dir_sector_start 

@@ -60,6 +60,27 @@ _start:
    #call puts
 
 # ---------------------- SD card -------------------
+# Sector 0 Layout # BPB (BIOS Parameter Block) in sector 0
+#| Offset | Size | Field                           | Meaning                        | Example (FAT16) |
+#| :----- | :--- | :------------------------------ | :----------------------------- | :-------------- |
+#| `0x00` | 3    | Jump Instruction                | JMP to boot code               | EB 3C 90        |
+#| `0x03` | 8    | OEM Name                        | Text label                     | "MSDOS5.0"      |
+#| `0x0B` | 2    | **Bytes per sector**            | Usually 512                    | 0x0200          |
+#| `0x0D` | 1    | **Sectors per cluster**         | Cluster size (e.g. 1,2,4,8,16) | 1               |
+#| `0x0E` | 2    | **Reserved sectors**            | Includes boot sector           | 1               |
+#| `0x10` | 1    | **Number of FATs**              | Typically 2                    | 2               |
+#| `0x11` | 2    | **Root entries**                | Count of directory entries     | 512             |
+#| `0x13` | 2    | **Total sectors (16-bit)**      | If zero, use 0x20–0x23         | 2880            |
+#| `0x15` | 1    | **Media descriptor**            | 0xF8 (fixed disk)              | F8              |
+#| `0x16` | 2    | **Sectors per FAT**             | FAT size                       | 9               |
+#| `0x18` | 2    | **Sectors per track**           | BIOS info                      | 18              |
+#| `0x1A` | 2    | **Number of heads**             | BIOS info                      | 2               |
+#| `0x1C` | 4    | **Hidden sectors**              | Partition offset               | 0               |
+#| `0x20` | 4    | **Total sectors (32-bit)**      | Large volumes                  | 0               |
+#| `0x24` | —    | (More fields in FAT32 only)     | —                              | —               |
+#| `0x36` | 11   | Volume Label / File System Type | "NO NAME    " / "FAT16   "     | —               |
+# ----------Read BPB sector 0 -----
+
 la a0, read_sd_sector 
 call puts
 li a0, 0   
@@ -126,7 +147,7 @@ call print_reg
 
 # -------------------------------------
 # byte_per_sec offset 0x0b-0x0c 2 bytes
-li t0, "bysPsec" # 7 char left on for null
+li t0, "BytPsec" # 7 char left on for null
 addi sp, sp, -8
 sd t0, 0(sp)
 mv a0, sp
@@ -167,28 +188,6 @@ sw a0, 0(t3)
 lw a0, 0(t3)
 call print_reg
 
-li a0, 43       # +
-call putchar
-
-la t3, root_dir_sector_start
-lw a0, 0(t3)
-call sd_read_sector  # use a0 as sector no.
-call print_sector
-
-# -------------------------------------
-# entries per secter = byte_per_sec/32  srli 5
-li t0, "BytPse"
-addi sp, sp, -8
-sd t0, 0(sp)
-mv a0, sp
-call puts
-addi sp, sp, 8
-
-la a1, byte_per_sec
-lw a0, 0(a1)  # two byts, use lw, ld will get other word together!
-call print_reg
-
-
 
 li t0, "EtrPse:"
 addi sp, sp, -8
@@ -222,6 +221,47 @@ or a0, t1, t0
 sh a0, 0(a1)
 lh a0, 0(a1)
 call print_reg
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+li a0, 43       # +
+call putchar
+
+# ---------- Read Root dir Secotr 0 -----
+la t3, root_dir_sector_start
+lw a0, 0(t3)
+call sd_read_sector  # use a0 as sector no.
+call print_sector
+
+# -------------------------------------
+## entries per secter = byte_per_sec/32  srli 5
+#li t0, "BytPse"
+#addi sp, sp, -8
+#sd t0, 0(sp)
+#mv a0, sp
+#call puts
+#addi sp, sp, 8
+#
+#la a1, byte_per_sec
+#lw a0, 0(a1)  # two byts, use lw, ld will get other word together!
+#call print_reg
+
+
 
 #root_ent_cnt:
 #    .word 0
