@@ -46,6 +46,9 @@ file_size:
 file_first_cluster:
     .word 0
 
+
+
+
 # -- Start program main function _start --
 .section .text
 # -- Global setup --
@@ -93,8 +96,8 @@ la a0, prt_sector
 call puts
 call print_sector
 
-li a0, 43       # +
-call putchar
+#li a0, 43       # +
+#call putchar
 
 # -- Parse BPB -- little-endian  Bios Parameter Block : sector 0
 # -------------------------------------
