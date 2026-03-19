@@ -96,10 +96,10 @@ jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print7
 # la a1, byte_per_sec
 auipc a1, 0 # R_RISCV_PCREL_HI20 byte_per_sec 
 addi a1, a1, 0 # R_RISCV_PCREL_LO12_I byte_per_sec 
-lh a0, 0x0a(s1)
+lwu a0, 0x0a(s1)
 srli, a0, a0, 8
 sh a0, 0(a1)
-lh a0, 0(a1)
+lhu a0, 0(a1)
 # call print_reg
 auipc x1, 0 # R_RISCV_PCREL_HI20 print_reg
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_reg

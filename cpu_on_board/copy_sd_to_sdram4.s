@@ -110,10 +110,10 @@ la a1, byte_per_sec
 #lbu t1, 0x0c(s1)
 #slli t1, t1, 8
 #or a0, t1, t0 
-lh a0, 0x0a(s1)
+lwu a0, 0x0a(s1)
 srli, a0, a0, 8
 sh a0, 0(a1)
-lh a0, 0(a1)
+lhu a0, 0(a1)
 call print_reg
 
 # -------------------------------------
