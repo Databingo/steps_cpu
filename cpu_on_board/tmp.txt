@@ -569,12 +569,13 @@ addi sp, sp, 8
 #     ret
 jalr x0, 0(x1)
 print7:
-addi sp, sp, -8
-sd ra, 0(sp)
+addi sp, sp, -16
+sd a0, 0(sp)
+sd ra, 8(sp)
 #     mv a0, sp
 addi a0, sp, 0
 #     call puts
 auipc x1, 0 # R_RISCV_PCREL_HI20 puts
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I puts
-ld ra, 0(sp)
-addi sp, sp, 8
+ld ra, 8(sp)
+addi sp, sp, 16
