@@ -440,8 +440,9 @@ lw a0, 0(a1)
 # call print_reg
 auipc x1, 0 # R_RISCV_PCREL_HI20 print_reg
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_reg
-# j read_file
-jal x0, read_file
+end:
+# j end
+jal x0, end
 print_reg:
 addi sp, sp, -40
 sd ra, 0(sp)
