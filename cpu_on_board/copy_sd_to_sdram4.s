@@ -588,3 +588,4 @@ print7: # a0, 7 char left one for null
    #ld a0, 0(sp)
     ld ra, 8(sp)
     addi sp, sp, 16
+    ret

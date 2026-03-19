@@ -579,3 +579,5 @@ auipc x1, 0 # R_RISCV_PCREL_HI20 puts
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I puts
 ld ra, 8(sp)
 addi sp, sp, 16
+#     ret
+jalr x0, 0(x1)
