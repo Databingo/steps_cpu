@@ -1,8 +1,4 @@
 msg:
-sbi:
-wait_sd_ready:
-read_sd_sector:
-prt_sector:
 reserved_sec:
 num_fats:
 sec_per_fat:
@@ -55,33 +51,14 @@ addi s5, s5, 0x220
 addi s6, x0, 0x0
 lui s6, 0x3
 addi s6, s6, 0x228
-# la a0, read_sd_sector 
-auipc a0, 0 # R_RISCV_PCREL_HI20 read_sd_sector 
-addi a0, a0, 0 # R_RISCV_PCREL_LO12_I read_sd_sector 
-# call puts
-auipc x1, 0 # R_RISCV_PCREL_HI20 puts
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I puts
 # li a0, 0   
 addi a0, x0, 0x0
 # call sd_read_sector  
 auipc x1, 0 # R_RISCV_PCREL_HI20 sd_read_sector
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I sd_read_sector
-# la a0, prt_sector
-auipc a0, 0 # R_RISCV_PCREL_HI20 prt_sector 
-addi a0, a0, 0 # R_RISCV_PCREL_LO12_I prt_sector 
-# call puts
-auipc x1, 0 # R_RISCV_PCREL_HI20 puts
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I puts
 # call print_sector
 auipc x1, 0 # R_RISCV_PCREL_HI20 print_sector
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_sector
-# li a0, 43       
-addi a0, x0, 0x0
-addi a0, x0, 0x0
-addi a0, x0, 0x2b
-# call putchar
-auipc x1, 0 # R_RISCV_PCREL_HI20 putchar
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I putchar
 # li a0, "\nBPsec:" 
 addi a0, x0, 0x0
 lui a0, 0x3a6
@@ -314,13 +291,6 @@ lw a0, 0(t3)
 # call print_reg
 auipc x1, 0 # R_RISCV_PCREL_HI20 print_reg
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_reg
-# li a0, 43       
-addi a0, x0, 0x0
-addi a0, x0, 0x0
-addi a0, x0, 0x2b
-# call putchar
-auipc x1, 0 # R_RISCV_PCREL_HI20 putchar
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I putchar
 # la t3, root_dir_sector_start
 auipc t3, 0 # R_RISCV_PCREL_HI20 root_dir_sector_start 
 addi t3, t3, 0 # R_RISCV_PCREL_LO12_I root_dir_sector_start 

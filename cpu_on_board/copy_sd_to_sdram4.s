@@ -13,14 +13,14 @@
 .section .data
 msg:
     .string "Hello"
-sbi:
-    .string "I'm test Opensbi add update ram read=on1"
-wait_sd_ready:
-    .string "wait_sd_ready:"
-read_sd_sector:
-    .string "read_sd_sector:"
-prt_sector:
-    .string "print_sector:"
+#sbi:
+#    .string "I'm test Opensbi add update ram read=on1"
+#wait_sd_ready:
+#    .string "wait_sd_ready:"
+#read_sd_sector:
+#    .string "read_sd_sector:"
+#prt_sector:
+#    .string "print_sector:"
 reserved_sec:
     .word 0
 num_fats:
@@ -93,17 +93,17 @@ _start:
 #| :----- | :--- | :------------------------------ | :----------------------------- | :-------------- |
 
 # ----------Read BPB sector 0 -----
-la a0, read_sd_sector 
-call puts
+#la a0, read_sd_sector 
+#call puts
 li a0, 0   
 call sd_read_sector  # use a0 as sector no.
 
-la a0, prt_sector
-call puts
+#la a0, prt_sector
+#call puts
 call print_sector
 
-li a0, 43       # +
-call putchar
+#li a0, 43       # +
+#call putchar
 
 # -- Parse BPB -- little-endian  Bios Parameter Block : sector 0
 # -------------------------------------
@@ -231,9 +231,9 @@ call print_reg
 # ------------------------
 # data_start_sec = 
 
-
-li a0, 43       # +
-call putchar
+#
+#li a0, 43       # +
+#call putchar
 
 # ---------- Read Root dir Secotr 0 -----
 la t3, root_dir_sector_start
