@@ -37,6 +37,8 @@ set_per_clus:
     .word 0
 data_start_sec:
     .word 0
+entries_per_sector:
+    .word 0
 
 # -- Start program main function _start --
 .section .text
@@ -109,6 +111,11 @@ sh a0, 0(a1)
 lh a0, 0(a1)
 call print_reg
 
+# -------------------------------------
+# Sectors per cluster 0x0d
+
+
+# -------------------------------------
 # reserved_sectors offset 0x0e-0x0f 2 bytes (including root sector 0)
 li a0, "resSec:" # 7 char left on for null
 call print7
@@ -122,6 +129,7 @@ or a0, t1, t0
 sd a0, 0(a1)
 ld a0, 0(a1)
 call print_reg
+
 # -------------------------------------
 # num_fats offset 0x10 1 bytes
 li a0, "numFat:" # 7 char left on for null
@@ -132,6 +140,31 @@ lbu a0, 0x10(s1)
 sw a0, 0(a1)
 lw a0, 0(a1)
 call print_reg
+
+
+# -------------------------------------
+# root_entries offset 0x11-0x12 2 bytes
+li a0, "RenCnt:"
+call print7
+
+la a1, root_ent_cnt
+lbu t0, 0x11(s1)
+lbu t1, 0x12(s1)
+slli t1, t1, 8
+or a0, t1, t0 
+
+sh a0, 0(a1)
+lh a0, 0(a1)
+call print_reg
+
+# -------------------------------------
+# total sectors offset 0x13 2 bytes
+li a0, "TolSec:"
+call print7
+
+# -------------------------------------
+# Media descriptor offset 0x15 1 byte
+
 
 # -------------------------------------
 # sectors_per_fat16 high offset 0x16-0x17 2 bytes
@@ -149,7 +182,7 @@ lh a0, 0(a1)
 call print_reg
 
 
-# -------------------------------------
+# ---------Calcauted ----------------------------
 # root_dir_sector_start = reserved_sectors + (num_fats * sectors_per_fat16)
 li a0, "rootdS0" # 7 char left on for null
 call print7
@@ -168,31 +201,24 @@ sw a0, 0(t3)
 lw a0, 0(t3)
 call print_reg
 
-
+# -------------------------------------
+# entries_per_sector =  byte_per_sec/32
 li a0, "EtrPse:"
 call print7
-
+  
 la a1, byte_per_sec
 lw a0, 0(a1)
 mv s7, a0
 #srli a0, a0, 5  # calc entries_per_sector
 li t1, 32
 div a0, a0, t1
+
+la t3,  entries_per_sector
+sw a0, 0(t3)
+lw a0, 0(t3)
 call print_reg
 
 
-li a0, "RenCnt:"
-call print7
-
-la a1, root_ent_cnt # root_entries offset 0x11-0x12 2 bytes
-lbu t0, 0x11(s1)
-lbu t1, 0x12(s1)
-slli t1, t1, 8
-or a0, t1, t0 
-
-sh a0, 0(a1)
-lh a0, 0(a1)
-call print_reg
 
 
 

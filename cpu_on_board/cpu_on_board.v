@@ -322,6 +322,7 @@ assign DRAM_CKE = 1; // always enable
 	end else begin
         bus_address_reg <= bus_address>>2;
         bus_address_reg_full <= bus_address;
+	cid8 <= cid;
         //sd_rd_start <= 0;
         uart_write_pulse <= 0;
 	uart_read_pulse <= 0;
@@ -365,7 +366,20 @@ assign DRAM_CKE = 1; // always enable
 	    end
 
             if (Sdc_ready_selected) begin bus_read_data <= {63'd0, sd_ready}; bus_read_done <= 1; end
-	    if (Sdc_cache_selected) begin bus_read_data <= {56'd0, sd_cache[cid]}; bus_read_done <= 1; end // one byte for all load
+	    //if (Sdc_cache_selected) begin bus_read_data <= {56'd0, sd_cache[cid]}; bus_read_done <= 1; end // one byte for all load
+	    // New develop
+	    if (Sdc_cache_selected) begin 
+		case(step)
+		    0:bus_read_data[7:0]   <= sd_cache[cid8]; cid8 <= cid8 + 1; step <= 1;  
+		    1:bus_read_data[15:8]  <= sd_cache[cid8]; cid8 <= cid8 + 1; step <= 2; 
+		    2:bus_read_data[23:16] <= sd_cache[cid8]; cid8 <= cid8 + 1; step <= 3; 
+		    3:bus_read_data[31:24] <= sd_cache[cid8]; cid8 <= cid8 + 1; step <= 4; 
+		    4:bus_read_data[39:32] <= sd_cache[cid8]; cid8 <= cid8 + 1; step <= 5; 
+		    5:bus_read_data[47:40] <= sd_cache[cid8]; cid8 <= cid8 + 1; step <= 6; 
+		    6:bus_read_data[55:48] <= sd_cache[cid8]; cid8 <= cid8 + 1; step <= 7; 
+		    7:bus_read_data[63:56] <= sd_cache[cid8];                   step <= 0; bus_read_done <= 1; 
+		endcase
+	    end // 8 byte for all load
             if (Sdc_avail_selected) begin bus_read_data <= {63'd0, sd_cache_available}; bus_read_done <= 1; end 
 
             if (Mtime_selected) begin bus_read_data <= mtime; bus_read_done <= 1; end 
@@ -600,7 +614,7 @@ end
 
     // -- SD Card --
     wire [11:0] cid = (bus_address-`Sdc_base);
-    //reg [11:0] cid;
+    reg [11:0] cid8;
     //reg [7:0] sd_cache [0:511];
     (* ram_style = "block" *) reg [7:0] sd_cache [0:511];
     reg [9:0] byte_index = 0;
