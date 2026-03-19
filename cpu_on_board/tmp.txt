@@ -76,15 +76,17 @@ addi a0, x0, 0x2b
 # call putchar
 auipc x1, 0 # R_RISCV_PCREL_HI20 putchar
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I putchar
-# li a0, "BPsec\n" 
+# li a0, "\nBPsec:" 
 addi a0, x0, 0x0
-ori a0, a0, 0x531
+lui a0, 0x3a6
+srli a0, a0, 0x1
+ori a0, a0, 0x1b2
 slli a0, a0, 0xb
-ori a0, a0, 0x595
+ori a0, a0, 0x5cd
 slli a0, a0, 0xb
-ori a0, a0, 0x66a
+ori a0, a0, 0x208
 slli a0, a0, 0xb
-ori a0, a0, 0x42
+ori a0, a0, 0x20a
 # call print7
 auipc x1, 0 # R_RISCV_PCREL_HI20 print7
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print7
@@ -100,17 +102,17 @@ lh a0, 0(a1)
 # call print_reg
 auipc x1, 0 # R_RISCV_PCREL_HI20 print_reg
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_reg
-# li a0, "resSec:" 
+# li a0, "\nrevSe:" 
 addi a0, x0, 0x0
 lui a0, 0x3a6
 srli a0, a0, 0x1
-ori a0, a0, 0x1b2
+ori a0, a0, 0x2a9
 slli a0, a0, 0xb
-ori a0, a0, 0x54d
+ori a0, a0, 0x5d9
 slli a0, a0, 0xb
-ori a0, a0, 0x66c
+ori a0, a0, 0x4ae
 slli a0, a0, 0xb
-ori a0, a0, 0x572
+ori a0, a0, 0x20a
 # call print7
 auipc x1, 0 # R_RISCV_PCREL_HI20 print7
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print7
@@ -123,7 +125,7 @@ ld a0, 0(a1)
 # call print_reg
 auipc x1, 0 # R_RISCV_PCREL_HI20 print_reg
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_reg
-# li a0, "numFat:" 
+# li a0, "\nnuFat:" 
 addi a0, x0, 0x0
 lui a0, 0x3a7
 srli a0, a0, 0x1
@@ -131,9 +133,9 @@ ori a0, a0, 0x230
 slli a0, a0, 0xb
 ori a0, a0, 0x519
 slli a0, a0, 0xb
-ori a0, a0, 0x5ae
+ori a0, a0, 0x6ad
 slli a0, a0, 0xb
-ori a0, a0, 0x56e
+ori a0, a0, 0x60a
 # call print7
 auipc x1, 0 # R_RISCV_PCREL_HI20 print7
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print7
@@ -146,7 +148,7 @@ lw a0, 0(a1)
 # call print_reg
 auipc x1, 0 # R_RISCV_PCREL_HI20 print_reg
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_reg
-# li a0, "RenCnt:"
+# li a0, "\nReCnt:"
 addi a0, x0, 0x0
 lui a0, 0x3a7
 srli a0, a0, 0x1
@@ -154,9 +156,9 @@ ori a0, a0, 0x237
 slli a0, a0, 0xb
 ori a0, a0, 0x10d
 slli a0, a0, 0xb
-ori a0, a0, 0x5cc
+ori a0, a0, 0x4aa
 slli a0, a0, 0xb
-ori a0, a0, 0x552
+ori a0, a0, 0x20a
 # call print7
 auipc x1, 0 # R_RISCV_PCREL_HI20 print7
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print7
@@ -172,7 +174,7 @@ lh a0, 0(a1)
 # call print_reg
 auipc x1, 0 # R_RISCV_PCREL_HI20 print_reg
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_reg
-# li a0, "TolSec:"
+# li a0, "\nToSec:"
 addi a0, x0, 0x0
 lui a0, 0x3a6
 srli a0, a0, 0x1
@@ -180,13 +182,13 @@ ori a0, a0, 0x1b2
 slli a0, a0, 0xb
 ori a0, a0, 0x54d
 slli a0, a0, 0xb
-ori a0, a0, 0x58d
+ori a0, a0, 0x5ea
 slli a0, a0, 0xb
-ori a0, a0, 0x754
+ori a0, a0, 0x40a
 # call print7
 auipc x1, 0 # R_RISCV_PCREL_HI20 print7
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print7
-# li a0, "secPfat" 
+# li a0, "\nsePfat" 
 addi a0, x0, 0x0
 lui a0, 0x746
 srli a0, a0, 0x1
@@ -194,9 +196,9 @@ ori a0, a0, 0xb3
 slli a0, a0, 0xb
 ori a0, a0, 0x141
 slli a0, a0, 0xb
-ori a0, a0, 0x46c
+ori a0, a0, 0x4ae
 slli a0, a0, 0xb
-ori a0, a0, 0x573
+ori a0, a0, 0x30a
 # call print7
 auipc x1, 0 # R_RISCV_PCREL_HI20 print7
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print7
@@ -212,17 +214,17 @@ lh a0, 0(a1)
 # call print_reg
 auipc x1, 0 # R_RISCV_PCREL_HI20 print_reg
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_reg
-# li a0, "rootdS0" 
+# li a0, "\nrtdS0:" 
 addi a0, x0, 0x0
-lui a0, 0x305
+lui a0, 0x3a3
 srli a0, a0, 0x1
-ori a0, a0, 0x1b2
+ori a0, a0, 0x29
 slli a0, a0, 0xb
-ori a0, a0, 0x1d1
+ori a0, a0, 0x591
 slli a0, a0, 0xb
-ori a0, a0, 0x5ed
+ori a0, a0, 0x68e
 slli a0, a0, 0xb
-ori a0, a0, 0x772
+ori a0, a0, 0x20a
 # call print7
 auipc x1, 0 # R_RISCV_PCREL_HI20 print7
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print7
@@ -248,7 +250,7 @@ lw a0, 0(t3)
 # call print_reg
 auipc x1, 0 # R_RISCV_PCREL_HI20 print_reg
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_reg
-# li a0, "EtrPse:"
+# li a0, "\nEtPse:"
 addi a0, x0, 0x0
 lui a0, 0x3a6
 srli a0, a0, 0x1
@@ -256,9 +258,9 @@ ori a0, a0, 0x2b9
 slli a0, a0, 0xb
 ori a0, a0, 0x541
 slli a0, a0, 0xb
-ori a0, a0, 0x64e
+ori a0, a0, 0x688
 slli a0, a0, 0xb
-ori a0, a0, 0x445
+ori a0, a0, 0x50a
 # call print7
 auipc x1, 0 # R_RISCV_PCREL_HI20 print7
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print7

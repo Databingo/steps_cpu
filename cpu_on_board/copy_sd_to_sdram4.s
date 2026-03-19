@@ -92,7 +92,7 @@ call putchar
 # -- Parse BPB -- little-endian  Bios Parameter Block : sector 0
 # -------------------------------------
 # byte_per_sec offset 0x0b-0x0c 2 bytes
-li a0, "BPsec\n" # 7 char left on for null
+li a0, "\nBPsec:" # 7 char left on for null
 call print7
 
 la a1, byte_per_sec
@@ -112,7 +112,7 @@ call print_reg
 
 # -------------------------------------
 # reserved_sectors offset 0x0e-0x0f 2 bytes (including root sector 0)
-li a0, "resSec:" # 7 char left on for null
+li a0, "\nrevSe:" # 7 char left on for null
 call print7
 
 la a1, reserved_sec
@@ -123,7 +123,7 @@ call print_reg
 
 # -------------------------------------
 # num_fats offset 0x10 1 bytes
-li a0, "numFat:" # 7 char left on for null
+li a0, "\nnuFat:" # 7 char left on for null
 call print7
 
 la a1, num_fats
@@ -135,7 +135,7 @@ call print_reg
 
 # -------------------------------------
 # root_entries offset 0x11-0x12 2 bytes
-li a0, "RenCnt:"
+li a0, "\nReCnt:"
 call print7
 
 la a1, root_ent_cnt
@@ -150,7 +150,7 @@ call print_reg
 
 # -------------------------------------
 # total sectors offset 0x13 2 bytes
-li a0, "TolSec:"
+li a0, "\nToSec:"
 call print7
 
 # -------------------------------------
@@ -159,7 +159,7 @@ call print7
 
 # -------------------------------------
 # sectors_per_fat16 high offset 0x16-0x17 2 bytes
-li a0, "secPfat" # 7 char left on for null
+li a0, "\nsePfat" # 7 char left on for null
 call print7
 
 la a1, sec_per_fat
@@ -175,7 +175,7 @@ call print_reg
 
 # ---------Calcauted ----------------------------
 # root_dir_sector_start = reserved_sectors + (num_fats * sectors_per_fat16)
-li a0, "rootdS0" # 7 char left on for null
+li a0, "\nrtdS0:" # 7 char left on for null
 call print7
 
 la a1, num_fats
@@ -194,7 +194,7 @@ call print_reg
 
 # -------------------------------------
 # entries_per_sector =  byte_per_sec/32
-li a0, "EtrPse:"
+li a0, "\nEtPse:"
 call print7
   
 la a1, byte_per_sec
