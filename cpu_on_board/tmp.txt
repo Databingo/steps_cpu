@@ -415,6 +415,8 @@ addi s8, s8, 1
 # j entry_loop
 jal x0, entry_loop
 read_file:
+# j read_file
+jal x0, read_file
 print_reg:
 addi sp, sp, -40
 sd ra, 0(sp)

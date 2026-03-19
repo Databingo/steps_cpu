@@ -349,6 +349,7 @@ j entry_loop
 read_file:
 ## file size at 0x1C-0x1D-0x1E-0x1F 4 bytes
 ## first cluster at 0x1A-0x1B 2 bytes
+j read_file
 
 
 
