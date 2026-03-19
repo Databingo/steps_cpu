@@ -12,6 +12,7 @@ root_ent_cnt:
 set_per_clus:
 data_start_sec:
 entries_per_sector:
+total_sectors:
 _start:
 #     li sp, 0x1000 
 addi sp, x0, 0x0
@@ -188,11 +189,23 @@ ori a0, a0, 0x40a
 # call print7
 auipc x1, 0 # R_RISCV_PCREL_HI20 print7
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print7
-# li a0, "\nsePfat" 
+# la a1, total_sectors
+auipc a1, 0 # R_RISCV_PCREL_HI20 total_sectors 
+addi a1, a1, 0 # R_RISCV_PCREL_LO12_I total_sectors 
+lbu t0, 0x13(s1)
+lbu t1, 0x14(s1)
+slli t1, t1, 8
+or a0, t1, t0 
+sh a0, 0(a1)
+lh a0, 0(a1)
+# call print_reg
+auipc x1, 0 # R_RISCV_PCREL_HI20 print_reg
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_reg
+# li a0, "\nsePft:" 
 addi a0, x0, 0x0
-lui a0, 0x746
+lui a0, 0x3a7
 srli a0, a0, 0x1
-ori a0, a0, 0xb3
+ori a0, a0, 0x233
 slli a0, a0, 0xb
 ori a0, a0, 0x141
 slli a0, a0, 0xb

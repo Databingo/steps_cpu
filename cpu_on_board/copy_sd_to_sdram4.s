@@ -39,6 +39,8 @@ data_start_sec:
     .word 0
 entries_per_sector:
     .word 0
+total_sectors:
+    .word 0
 
 # -- Start program main function _start --
 .section .text
@@ -152,6 +154,15 @@ call print_reg
 # total sectors offset 0x13 2 bytes
 li a0, "\nToSec:"
 call print7
+la a1, total_sectors
+lbu t0, 0x13(s1)
+lbu t1, 0x14(s1)
+slli t1, t1, 8
+or a0, t1, t0 
+
+sh a0, 0(a1)
+lh a0, 0(a1)
+call print_reg
 
 # -------------------------------------
 # Media descriptor offset 0x15 1 byte
