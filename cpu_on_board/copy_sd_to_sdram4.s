@@ -92,7 +92,7 @@ call putchar
 # -- Parse BPB -- little-endian  Bios Parameter Block : sector 0
 # -------------------------------------
 # byte_per_sec offset 0x0b-0x0c 2 bytes
-li a0, "BPse\\n" # 7 char left on for null
+li a0, "BPse\n" # 7 char left on for null
 call print7
 
 la a1, byte_per_sec
@@ -116,12 +116,7 @@ li a0, "resSec:" # 7 char left on for null
 call print7
 
 la a1, reserved_sec
-#lbu t0, 0x0e(s1)
-#lbu t1, 0x0f(s1)
-#slli t1, t1, 8
-#or a0, t1, t0 
 lh a0, 0x0e(s1)
-
 sd a0, 0(a1)
 ld a0, 0(a1)
 call print_reg

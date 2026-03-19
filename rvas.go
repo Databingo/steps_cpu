@@ -226,8 +226,8 @@ func isValidImmediate_u(s string) (int64, uint64, error) { // get sign + abs
 	//imm1, err1 = strconv.ParseUint(s, 10, 32) // check if s is a decimal number
 
 	if (strings.HasPrefix(s, "'") || strings.HasPrefix(s, "\"") ) && (strings.HasSuffix(s, "'") || strings.HasSuffix(s, "\"") ){
-	        content := s[1:len(s)-1]
-	        //content, _ := strconv.Unquote(s)
+	        //content := s[1:len(s)-1]
+	        content, _ := strconv.Unquote(s)
 		if len(content) <= 8 { 
 		    imm0 = 0;
 		    for i:=0;i<len(content);i++ { imm0 |= uint64(content[i])<< (i*8) }
