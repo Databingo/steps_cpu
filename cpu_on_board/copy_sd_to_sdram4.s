@@ -175,10 +175,11 @@ li a0, "\nsePft:" # 7 char left on for null
 call print7
 
 la a1, sec_per_fat
-lbu t0, 0x16(s1)
-lbu t1, 0x17(s1)
-slli t1, t1, 8
-or a0, t1, t0 
+#lbu t0, 0x16(s1)
+#lbu t1, 0x17(s1)
+#slli t1, t1, 8
+#or a0, t1, t0 
+lh a0, 0x16(s1)
 
 sh a0, 0(a1)
 lh a0, 0(a1)
