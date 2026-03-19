@@ -368,39 +368,38 @@ sw a0, 0(a1)
 call print_reg
 
 
-## file_sectors = file_size + 511 / 512
-#li a0, "\nFseS:"
-#call print7
-#la a1, file_size
-#lw t0, 0(a1)
-#addi t0, t0, 511
-#li t1, 512
-#div a0, t0, t1
-#la a1, file_sectors 
-#sw a0, 0(a1)
-#lw a0, 0(a1)
-#call print_reg
-#
-#
-#li a0, "\nFileB:"
-#call print7
-#
-#
-#la a1, file_sectors
-#lw t0, 0(a1)
-#la a1,  file_start_sector
-#lw t1, 0(a1)
-#add t2, t1, t0
-#
-#print_sector_loop:
-#mv a0, t1
-#call sd_read_sector  # use a0 as sector no.
-#call print_sector
-#addi t1, t1, 1
-#blt t1, t2, print_sector_loop
-#
-#
-#
+# file_sectors = file_size + 511 / 512
+li a0, "\nFseS:"
+call print7
+la a1, file_size
+lw t0, 0(a1)
+addi t0, t0, 511
+li t1, 512
+div a0, t0, t1
+la a1, file_sectors 
+sw a0, 0(a1)
+lw a0, 0(a1)
+call print_reg
+
+
+li a0, "\nFileB:"
+call print7
+
+la a1, file_sectors
+lw t0, 0(a1)
+la a1,  file_start_sector
+lw t1, 0(a1)
+add t2, t1, t0
+
+print_sector_loop:
+mv a0, t1
+call sd_read_sector  # use a0 as sector no.
+call print_sector
+addi t1, t1, 1
+blt t1, t2, print_sector_loop
+
+
+
 end: 
 j end
 

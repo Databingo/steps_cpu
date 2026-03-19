@@ -356,6 +356,72 @@ sw a0, 0(a1)
 # call print_reg
 auipc x1, 0 # R_RISCV_PCREL_HI20 print_reg
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_reg
+# li a0, "\nFseS:"
+addi a0, x0, 0x0
+lui a0, 0x3
+srli a0, a0, 0x1
+ori a0, a0, 0x529
+slli a0, a0, 0xb
+ori a0, a0, 0x595
+slli a0, a0, 0xb
+ori a0, a0, 0x668
+slli a0, a0, 0xb
+ori a0, a0, 0x60a
+# call print7
+auipc x1, 0 # R_RISCV_PCREL_HI20 print7
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print7
+# la a1, file_size
+auipc a1, 0 # R_RISCV_PCREL_HI20 file_size 
+addi a1, a1, 0 # R_RISCV_PCREL_LO12_I file_size 
+lw t0, 0(a1)
+addi t0, t0, 511
+# li t1, 512
+addi t1, x0, 0x0
+addi t1, x0, 0x0
+addi t1, x0, 0x200
+div a0, t0, t1
+# la a1, file_sectors 
+auipc a1, 0 # R_RISCV_PCREL_HI20 file_sectors 
+addi a1, a1, 0 # R_RISCV_PCREL_LO12_I file_sectors 
+sw a0, 0(a1)
+lw a0, 0(a1)
+# call print_reg
+auipc x1, 0 # R_RISCV_PCREL_HI20 print_reg
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_reg
+# li a0, "\nFileB:"
+addi a0, x0, 0x0
+lui a0, 0x3a4
+srli a0, a0, 0x1
+ori a0, a0, 0x132
+slli a0, a0, 0xb
+ori a0, a0, 0x5b1
+slli a0, a0, 0xb
+ori a0, a0, 0x528
+slli a0, a0, 0xb
+ori a0, a0, 0x60a
+# call print7
+auipc x1, 0 # R_RISCV_PCREL_HI20 print7
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print7
+# la a1, file_sectors
+auipc a1, 0 # R_RISCV_PCREL_HI20 file_sectors 
+addi a1, a1, 0 # R_RISCV_PCREL_LO12_I file_sectors 
+lw t0, 0(a1)
+# la a1,  file_start_sector
+auipc a1, 0 # R_RISCV_PCREL_HI20 file_start_sector 
+addi a1, a1, 0 # R_RISCV_PCREL_LO12_I file_start_sector 
+lw t1, 0(a1)
+add t2, t1, t0
+print_sector_loop:
+# mv a0, t1
+addi a0, t1, 0
+# call sd_read_sector  
+auipc x1, 0 # R_RISCV_PCREL_HI20 sd_read_sector
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I sd_read_sector
+# call print_sector
+auipc x1, 0 # R_RISCV_PCREL_HI20 print_sector
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_sector
+addi t1, t1, 1
+blt t1, t2, print_sector_loop
 end:
 # j end
 jal x0, end
