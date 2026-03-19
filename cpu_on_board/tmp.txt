@@ -216,8 +216,8 @@ jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print7
 auipc a1, 0 # R_RISCV_PCREL_HI20 total_sectors 
 addi a1, a1, 0 # R_RISCV_PCREL_LO12_I total_sectors 
 lwu a0, 0x20(s1)
-sh a0, 0(a1)
-lh a0, 0(a1)
+sw a0, 0(a1)
+lwu a0, 0(a1)
 # call print_reg
 auipc x1, 0 # R_RISCV_PCREL_HI20 print_reg
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_reg

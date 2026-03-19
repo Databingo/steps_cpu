@@ -170,8 +170,8 @@ la a1, total_sectors
 #or a0, t1, t0 
 lwu a0, 0x20(s1)
 
-sh a0, 0(a1)
-lh a0, 0(a1)
+sw a0, 0(a1)
+lwu a0, 0(a1)
 call print_reg
 
 # -------------------------------------
