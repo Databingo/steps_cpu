@@ -355,26 +355,26 @@ sh a0, 0(a1)
 lhu a0, 0(a1)
 call print_reg
 
-## root_dir_sectors = (RootEntryCount * 32 + BytesPerSector -1 )/ BytesPerSector  ceiling division
-#li a0, "\nrDseS:"
-#call print7
-#
-#la a1, root_ent_cnt
-#lwu t0, 0(a1)
-#li t1, 32
-#mul t2, t0, t1
-#
-#la a1, byte_per_sec
-#lwu t0, 0(a1)
-#add t3, t2, t0
-#addi t3, t3, -1
-#div a0, t3, t0
-#
-#la a1, root_dir_sectors 
-#sw a0, 0(a1)
-#lw a0, 0(a1)
-#call print_reg
-#
+# root_dir_sectors = (RootEntryCount * 32 + BytesPerSector -1 )/ BytesPerSector  ceiling division
+li a0, "\nrDseS:"
+call print7
+
+la a1, root_ent_cnt
+lwu t0, 0(a1)
+li t1, 32
+mul t2, t0, t1
+
+la a1, byte_per_sec
+lwu t0, 0(a1)
+add t3, t2, t0
+addi t3, t3, -1
+div a0, t3, t0
+
+la a1, root_dir_sectors 
+sw a0, 0(a1)
+lw a0, 0(a1)
+call print_reg
+
 ##data_start_sec # FirstDataSector = root_dir_sector_start + root_dir_sectors 
 #li a0, "\nD0sec:"
 #call print7
