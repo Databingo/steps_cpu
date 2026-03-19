@@ -50,8 +50,8 @@ go run ../rvas.go copy_sd_to_sdram4.s
 
 
 
-#0-0x800rom | 0x800-0x1000text, 0x1000-0x1800data, 0x1800<-sp
-riscv64-unknown-elf-ld -o linked.elf   relocatable.elf  -Ttext 0x0 -Tdata 0x800  # linker 
+#0-0x800rom | 0x800-0x1500text, 0x1500-0x1800data, 0x1800<-sp
+riscv64-unknown-elf-ld -o linked.elf   relocatable.elf  -Ttext 0x0 -Tdata 0xd00  # linker 
 riscv64-unknown-elf-objcopy -O binary linked.elf final.bin  # to binary
 hexdump -v -e '1/4 "%08x" "\n"' final.bin | perl -ne 'print unpack("B32", pack("N", hex($_))) . "\n"' > bin.txt 
 
