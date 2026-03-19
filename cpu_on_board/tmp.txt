@@ -14,30 +14,39 @@ data_start_sec:
 entries_per_sector:
 _start:
 #     li sp, 0x1000 
+addi sp, x0, 0x0
 lui sp, 0x1
 addi sp, sp, 0x0
 #     li s11, 0x2004 
+addi s11, x0, 0x0
 lui s11, 0x2
 addi s11, s11, 0x4
 #     li s10, 0x2008 
+addi s10, x0, 0x0
 lui s10, 0x2
 addi s10, s10, 0x8
 #     li s1,  0x3000 
+addi s1, x0, 0x0
 lui s1, 0x3
 addi s1, s1, 0x0
 #     li s2,  0x3200 
+addi s2, x0, 0x0
 lui s2, 0x3
 addi s2, s2, 0x200
 #     li s3,  0x3204 
+addi s3, x0, 0x0
 lui s3, 0x3
 addi s3, s3, 0x204
 #     li s4,  0x3208 
+addi s4, x0, 0x0
 lui s4, 0x3
 addi s4, s4, 0x208
 #     li s5,  0x3220 
+addi s5, x0, 0x0
 lui s5, 0x3
 addi s5, s5, 0x220
 #     li s6,  0x3228 
+addi s6, x0, 0x0
 lui s6, 0x3
 addi s6, s6, 0x228
 # la a0, read_sd_sector 
@@ -46,7 +55,6 @@ addi a0, a0, 0 # R_RISCV_PCREL_LO12_I read_sd_sector
 # call puts
 auipc x1, 0 # R_RISCV_PCREL_HI20 puts
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I puts
-# li a0, 0   
 # li a0, 0   
 addi a0, x0, 0x0
 # call sd_read_sector  
@@ -62,12 +70,14 @@ jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I puts
 auipc x1, 0 # R_RISCV_PCREL_HI20 print_sector
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_sector
 # li a0, 43       
-# li a0, 43       
+addi a0, x0, 0x0
+addi a0, x0, 0x0
 addi a0, x0, 0x2b
 # call putchar
 auipc x1, 0 # R_RISCV_PCREL_HI20 putchar
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I putchar
 # li a0, "BPsec\n" 
+addi a0, x0, 0x0
 ori a0, a0, 0x531
 slli a0, a0, 0xb
 ori a0, a0, 0x595
@@ -91,6 +101,7 @@ lh a0, 0(a1)
 auipc x1, 0 # R_RISCV_PCREL_HI20 print_reg
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_reg
 # li a0, "resSec:" 
+addi a0, x0, 0x0
 lui a0, 0x3a6
 srli a0, a0, 0x1
 ori a0, a0, 0x1b2
@@ -113,6 +124,7 @@ ld a0, 0(a1)
 auipc x1, 0 # R_RISCV_PCREL_HI20 print_reg
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_reg
 # li a0, "numFat:" 
+addi a0, x0, 0x0
 lui a0, 0x3a7
 srli a0, a0, 0x1
 ori a0, a0, 0x230
@@ -135,6 +147,7 @@ lw a0, 0(a1)
 auipc x1, 0 # R_RISCV_PCREL_HI20 print_reg
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_reg
 # li a0, "RenCnt:"
+addi a0, x0, 0x0
 lui a0, 0x3a7
 srli a0, a0, 0x1
 ori a0, a0, 0x237
@@ -160,6 +173,7 @@ lh a0, 0(a1)
 auipc x1, 0 # R_RISCV_PCREL_HI20 print_reg
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_reg
 # li a0, "TolSec:"
+addi a0, x0, 0x0
 lui a0, 0x3a6
 srli a0, a0, 0x1
 ori a0, a0, 0x1b2
@@ -173,6 +187,7 @@ ori a0, a0, 0x754
 auipc x1, 0 # R_RISCV_PCREL_HI20 print7
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print7
 # li a0, "secPfat" 
+addi a0, x0, 0x0
 lui a0, 0x746
 srli a0, a0, 0x1
 ori a0, a0, 0xb3
@@ -198,6 +213,7 @@ lh a0, 0(a1)
 auipc x1, 0 # R_RISCV_PCREL_HI20 print_reg
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_reg
 # li a0, "rootdS0" 
+addi a0, x0, 0x0
 lui a0, 0x305
 srli a0, a0, 0x1
 ori a0, a0, 0x1b2
@@ -233,6 +249,7 @@ lw a0, 0(t3)
 auipc x1, 0 # R_RISCV_PCREL_HI20 print_reg
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_reg
 # li a0, "EtrPse:"
+addi a0, x0, 0x0
 lui a0, 0x3a6
 srli a0, a0, 0x1
 ori a0, a0, 0x2b9
@@ -252,7 +269,8 @@ lw a0, 0(a1)
 # mv s7, a0
 addi s7, a0, 0
 # li t1, 32
-# li t1, 32
+addi t1, x0, 0x0
+addi t1, x0, 0x0
 addi t1, x0, 0x20
 div a0, a0, t1
 # la t3,  entries_per_sector
@@ -264,7 +282,8 @@ lw a0, 0(t3)
 auipc x1, 0 # R_RISCV_PCREL_HI20 print_reg
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_reg
 # li a0, 43       
-# li a0, 43       
+addi a0, x0, 0x0
+addi a0, x0, 0x0
 addi a0, x0, 0x2b
 # call putchar
 auipc x1, 0 # R_RISCV_PCREL_HI20 putchar
@@ -287,9 +306,9 @@ lw a0, 0(t3)
 auipc x1, 0 # R_RISCV_PCREL_HI20 sd_read_sector
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I sd_read_sector
 # li s8, 0 
-# li s8, 0 
 addi s8, x0, 0x0
 # li s9, "MUSIC"
+addi s9, x0, 0x0
 ori s9, s9, 0x21
 slli s9, s9, 0xb
 ori s9, s9, 0x525
@@ -309,17 +328,18 @@ add t3, s1, t1 # t3 = address of entry
 lbu t4, 0(t3)
 beq t4, x0, done_entries # 0x00 no more entries in dir
 # li t1, 0xE5
-# li t1, 0xE5
+addi t1, x0, 0x0
+addi t1, x0, 0x0
 addi t1, x0, 0xe5
 beq t4, t1, next_entry # 0xE5 deleted entry, skip
 lbu t5, 11(t3)
 # li t1, 0x0F
-# li t1, 0x0F
+addi t1, x0, 0x0
+addi t1, x0, 0x0
 addi t1, x0, 0xf
 beq t5, t1, next_entry # 0x0F LFN(Long File Name) entry, skip
 andi t6, t5, 0x18  # Mask for Volume Label(0x08) and Directory (0x10)
 bne t6, x0, next_entry # skip 
-# li t2, 0
 # li t2, 0
 addi t2, x0, 0x0
 addi t4, t3, 7
@@ -342,6 +362,7 @@ jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I puts
 addi sp, sp, 16
 bne t2, s9, next_entry
 # li a0, "FOUND!"
+addi a0, x0, 0x0
 lui a0, 0x2
 srli a0, a0, 0x1
 ori a0, a0, 0xa2
@@ -374,19 +395,22 @@ sd s3, 32(sp)
 #     mv s0, a0
 addi s0, a0, 0
 #     li a0, "0"
-#     li a0, "0"
+addi a0, x0, 0x0
+addi a0, x0, 0x0
 addi a0, x0, 0x30
 #     call putchar
 auipc x1, 0 # R_RISCV_PCREL_HI20 putchar
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I putchar
 #     li a0, "x"
-#     li a0, "x"
+addi a0, x0, 0x0
+addi a0, x0, 0x0
 addi a0, x0, 0x78
 #     call putchar
 auipc x1, 0 # R_RISCV_PCREL_HI20 putchar
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I putchar
 #     li s1, 60 
-#     li s1, 60 
+addi s1, x0, 0x0
+addi s1, x0, 0x0
 addi s1, x0, 0x3c
 p_loop:
 srl s2, s0, s1      # get high nibble
@@ -422,14 +446,16 @@ sw a0, 0(s2) # Write Sector index value to address 0x3200
 wait_ready:
 lw s7, 0(s5)   # 0x3220 ready
 #     li a0, 96      
-#     li a0, 96      
+addi a0, x0, 0x0
+addi a0, x0, 0x0
 addi a0, x0, 0x60
 #     call putchar
 auipc x1, 0 # R_RISCV_PCREL_HI20 putchar
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I putchar
 beq s7, x0, wait_ready
 #     li s8, 1
-#     li s8, 1
+addi s8, x0, 0x0
+addi s8, x0, 0x0
 addi s8, x0, 0x1
 sw s8, 0(s3)   # Trigger read at 0x3204
 wait_cache:
@@ -452,10 +478,10 @@ sd s8, 40(sp)
 sd s9, 48(sp)
 sd s3, 56(sp)
 #     li s7, 0   
-#     li s7, 0   
 addi s7, x0, 0x0
 #     li s8, 511 
-#     li s8, 511 
+addi s8, x0, 0x0
+addi s8, x0, 0x0
 addi s8, x0, 0x1ff
 print_loop:
 add s6, s1, s7 

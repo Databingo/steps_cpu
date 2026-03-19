@@ -809,9 +809,9 @@ func main() { //t6a7s11
 			//// lui addi slli add
 
 			///////////////////////-- deploy 6 --------------------------------
-			//ins = fmt.Sprintf("addi %s, %s, %#x\n", code[1], "x0", 0) // for 0 or clean reg
-			//real_instr.WriteString(ins)
-			if imm >= 0 && imm < 0x800 { // imm positive (bit 12 is 0)
+			ins = fmt.Sprintf("addi %s, %s, %#x\n", code[1], "x0", 0) // for 0 or clean reg
+			real_instr.WriteString(ins)
+			if imm > 0 && imm < 0x800 { // imm positive (bit 12 is 0)
 				real_instr.WriteString(ins)
 				ins = fmt.Sprintf("addi %s, %s, %#x\n", code[1], "x0", imm)
 				real_instr.WriteString(ins)
