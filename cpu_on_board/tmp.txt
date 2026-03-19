@@ -239,16 +239,16 @@ jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I sd_read_sector
 # call print_sector
 auipc x1, 0 # R_RISCV_PCREL_HI20 print_sector
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_sector
-# li t0, "EntrPse"
-lui t0, 0x657
+# li t0, "BytPse"
+lui t0, 0x6
 srli t0, t0, 0x1
-ori t0, t0, 0x1a8
+ori t0, t0, 0x2b9
 slli t0, t0, 0xb
-ori t0, t0, 0x1c9
+ori t0, t0, 0x541
 slli t0, t0, 0xb
-ori t0, t0, 0x68d
+ori t0, t0, 0x68f
 slli t0, t0, 0xb
-ori t0, t0, 0x645
+ori t0, t0, 0x142
 addi sp, sp, -8
 sd t0, 0(sp)
 # mv a0, sp
@@ -292,6 +292,36 @@ addi s7, a0, 0
 # li t1, 32
 addi t1, x0, 0x20
 div a0, a0, t1
+# call print_reg
+auipc x1, 0 # R_RISCV_PCREL_HI20 print_reg
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_reg
+# li t0, "RenCnt:"
+lui t0, 0x3a7
+srli t0, t0, 0x1
+ori t0, t0, 0x237
+slli t0, t0, 0xb
+ori t0, t0, 0x10d
+slli t0, t0, 0xb
+ori t0, t0, 0x5cc
+slli t0, t0, 0xb
+ori t0, t0, 0x552
+addi sp, sp, -8
+sd t0, 0(sp)
+# mv a0, sp
+addi a0, sp, 0
+# call puts
+auipc x1, 0 # R_RISCV_PCREL_HI20 puts
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I puts
+addi sp, sp, 8
+# la a1, root_ent_cnt 
+auipc a1, 0 # R_RISCV_PCREL_HI20 root_ent_cnt 
+addi a1, a1, 0 # R_RISCV_PCREL_LO12_I root_ent_cnt 
+lbu t0, 0x11(s1)
+lbu t1, 0x12(s1)
+slli t1, t1, 8
+or a0, t1, t0 
+sh a0, 0(a1)
+lh a0, 0(a1)
 # call print_reg
 auipc x1, 0 # R_RISCV_PCREL_HI20 print_reg
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_reg
@@ -389,16 +419,12 @@ read_file:
 #    j read_file
 jal x0, read_file
 print_reg:
-addi sp, sp, -8
+addi sp, sp, -40
 sd ra, 0(sp)
-addi sp, sp, -8
-sd s0, 0(sp)
-addi sp, sp, -8
-sd s1, 0(sp)
-addi sp, sp, -8
-sd s2, 0(sp)
-addi sp, sp, -8
-sd s3, 0(sp)
+sd s0, 8(sp)
+sd s1, 16(sp)
+sd s2, 24(sp)
+sd s3, 32(sp)
 #     mv s0, a0
 addi s0, a0, 0
 #     li a0, "0"
@@ -433,16 +459,12 @@ jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I wait_uart
 sb s2, 0(s11)       # print
 addi s1, s1, -4
 bge s1, x0, p_loop 
-ld s3, 0(sp)
-addi sp, sp, 8
-ld s2, 0(sp)
-addi sp, sp, 8
-ld s1, 0(sp)
-addi sp, sp, 8
-ld s0, 0(sp)
-addi sp, sp, 8
 ld ra, 0(sp)
-addi sp, sp, 8
+ld s0, 8(sp)
+ld s1, 16(sp)
+ld s2, 24(sp)
+ld s3, 32(sp)
+addi sp, sp, 40
 #     ret
 jalr x0, 0(x1)
 sd_read_sector:
@@ -492,7 +514,7 @@ addi s8, x0, 0x1ff
 print_loop:
 add s6, s1, s7 
 addi s7, s7, 1
-lbu s9, 0(s6)        # load byte at 0x3000 a1+t1
+lbu s9, 0(s6)       # load byte at 0x3000 a1+t1
 andi s9, s9, 0xFF   # Isolate byte value
 srli s3, s9, 4      # get high nibble
 slti s5, s3, 10     # if < 10 number

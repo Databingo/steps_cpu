@@ -177,7 +177,7 @@ call print_sector
 
 # -------------------------------------
 # entries per secter = byte_per_sec/32  srli 5
-li t0, "EntrPse"
+li t0, "BytPse"
 addi sp, sp, -8
 sd t0, 0(sp)
 mv a0, sp
@@ -204,6 +204,37 @@ mv s7, a0
 li t1, 32
 div a0, a0, t1
 call print_reg
+
+
+li t0, "RenCnt:"
+addi sp, sp, -8
+sd t0, 0(sp)
+mv a0, sp
+call puts
+addi sp, sp, 8
+
+la a1, root_ent_cnt # root_entries offset 0x11-0x12 2 bytes
+lbu t0, 0x11(s1)
+lbu t1, 0x12(s1)
+slli t1, t1, 8
+or a0, t1, t0 
+
+sh a0, 0(a1)
+lh a0, 0(a1)
+call print_reg
+
+#root_ent_cnt:
+#    .word 0
+#set_per_clus:
+#    .word 0
+#data_start_sec:
+#    .word 0
+
+
+
+
+
+
 
 ## Test mul #22D2B8
 #li t1, 2324
