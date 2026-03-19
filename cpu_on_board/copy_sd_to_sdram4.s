@@ -106,10 +106,6 @@ li a0, "\nBPsec:" # 7 char left on for null
 call print7
 
 la a1, byte_per_sec
-#lbu t0, 0x0b(s1)
-#lbu t1, 0x0c(s1)
-#slli t1, t1, 8
-#or a0, t1, t0 
 lwu a0, 0x0a(s1)
 srli, a0, a0, 8
 sh a0, 0(a1)
@@ -157,13 +153,15 @@ li a0, "\nReCnt:"
 call print7
 
 la a1, root_ent_cnt
-lbu t0, 0x11(s1)
-lbu t1, 0x12(s1)
-slli t1, t1, 8
-or a0, t1, t0 
+#lbu t0, 0x11(s1)
+#lbu t1, 0x12(s1)
+#slli t1, t1, 8
+#or a0, t1, t0 
 
+lwu a0, 0x10(s1)
+srli a0, a0, 8
 sh a0, 0(a1)
-lh a0, 0(a1)
+lhu a0, 0(a1)
 call print_reg
 
 # -------------------------------------
