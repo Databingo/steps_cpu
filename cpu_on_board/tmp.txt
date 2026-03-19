@@ -22,22 +22,22 @@ addi s11, s11, 0x4
 #     li s10, 0x2008 
 lui s10, 0x2
 addi s10, s10, 0x8
-#     li s1, 0x3000 
+#     li s1,  0x3000 
 lui s1, 0x3
 addi s1, s1, 0x0
-#     li s2, 0x3200 
+#     li s2,  0x3200 
 lui s2, 0x3
 addi s2, s2, 0x200
-#     li s3, 0x3204 
+#     li s3,  0x3204 
 lui s3, 0x3
 addi s3, s3, 0x204
-#     li s4, 0x3208 
+#     li s4,  0x3208 
 lui s4, 0x3
 addi s4, s4, 0x208
-#     li s5, 0x3220 
+#     li s5,  0x3220 
 lui s5, 0x3
 addi s5, s5, 0x220
-#     li s6, 0x3228 
+#     li s6,  0x3228 
 lui s6, 0x3
 addi s6, s6, 0x228
 # la a0, read_sd_sector 
@@ -67,16 +67,14 @@ addi a0, x0, 0x2b
 # call putchar
 auipc x1, 0 # R_RISCV_PCREL_HI20 putchar
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I putchar
-# li a0, "BytPsec" 
-lui a0, 0x636
-srli a0, a0, 0x1
-ori a0, a0, 0x2b9
+# li a0, "BPsec\n" 
+ori a0, a0, 0x531
 slli a0, a0, 0xb
-ori a0, a0, 0x541
+ori a0, a0, 0x595
 slli a0, a0, 0xb
-ori a0, a0, 0x68f
+ori a0, a0, 0x66a
 slli a0, a0, 0xb
-ori a0, a0, 0x142
+ori a0, a0, 0x42
 # call print7
 auipc x1, 0 # R_RISCV_PCREL_HI20 print7
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print7

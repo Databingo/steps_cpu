@@ -45,21 +45,15 @@ entries_per_sector:
 # -- Global setup --
 _start:
     li sp, 0x1000 # Set stack
-    # a0 for function call default parameter
-
     li s11, 0x2004 # UART print 
     li s10, 0x2008 # UART controller
-
-    li s1, 0x3000 # SD base
-    li s2, 0x3200 # SD address
-    li s3, 0x3204 # SD trigger read
-    li s4, 0x3208 # SD trigger write
-    li s5, 0x3220 # SD ready for rd/wr
-    li s6, 0x3228 # SD cache available
-
-   ## print
-   #la a0, sbi 
-   #call puts
+    li s1,  0x3000 # SD base
+    li s2,  0x3200 # SD address
+    li s3,  0x3204 # SD trigger read
+    li s4,  0x3208 # SD trigger write
+    li s5,  0x3220 # SD ready for rd/wr
+    li s6,  0x3228 # SD cache available
+    # a0 for function call default parameter
 
 # ---------------------- SD card -------------------
 # Sector 0 Layout # BPB (BIOS Parameter Block) in sector 0
@@ -81,8 +75,8 @@ _start:
 #| `0x20` | 4    | **Total sectors (32-bit)**      | Large volumes                  | 0               |
 #| `0x24` | —    | (More fields in FAT32 only)     | —                              | —               |
 #| `0x36` | 11   | Volume Label / File System Type | "NO NAME    " / "FAT16   "     | —               |
-# ----------Read BPB sector 0 -----
 
+# ----------Read BPB sector 0 -----
 la a0, read_sd_sector 
 call puts
 li a0, 0   
@@ -98,7 +92,7 @@ call putchar
 # -- Parse BPB -- little-endian  Bios Parameter Block : sector 0
 # -------------------------------------
 # byte_per_sec offset 0x0b-0x0c 2 bytes
-li a0, "BytPsec" # 7 char left on for null
+li a0, "BPsec\n" # 7 char left on for null
 call print7
 
 la a1, byte_per_sec
