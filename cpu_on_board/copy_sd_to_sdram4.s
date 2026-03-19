@@ -228,13 +228,6 @@ lw a0, 0(t3)
 call print_reg
 
 
-# ------------------------
-# data_start_sec = 
-
-#
-#li a0, 43       # +
-#call putchar
-
 # ---------- Read Root dir Secotr 0 -----
 la t3, root_dir_sector_start
 lw a0, 0(t3)
