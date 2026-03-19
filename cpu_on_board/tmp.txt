@@ -215,7 +215,7 @@ jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print7
 # la a1, total_sectors
 auipc a1, 0 # R_RISCV_PCREL_HI20 total_sectors 
 addi a1, a1, 0 # R_RISCV_PCREL_LO12_I total_sectors 
-lw a0, 0x20(s1)
+lwu a0, 0x20(s1)
 sh a0, 0(a1)
 lh a0, 0(a1)
 # call print_reg
@@ -415,8 +415,6 @@ addi s8, s8, 1
 # j entry_loop
 jal x0, entry_loop
 read_file:
-#    j read_file
-jal x0, read_file
 print_reg:
 addi sp, sp, -40
 sd ra, 0(sp)

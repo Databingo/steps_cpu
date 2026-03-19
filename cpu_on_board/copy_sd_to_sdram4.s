@@ -77,6 +77,7 @@ _start:
 #| `0x20` | 4    | **Total sectors (32-bit)**      | Large volumes                  | 0               |
 #| `0x24` | —    | (More fields in FAT32 only)     | —                              | —               |
 #| `0x36` | 11   | Volume Label / File System Type | "NO NAME    " / "FAT16   "     | —               |
+#| :----- | :--- | :------------------------------ | :----------------------------- | :-------------- |
 
 # ----------Read BPB sector 0 -----
 la a0, read_sd_sector 
@@ -167,7 +168,7 @@ la a1, total_sectors
 #lbu t1, 0x14(s1)
 #slli t1, t1, 8
 #or a0, t1, t0 
-lw a0, 0x20(s1)
+lwu a0, 0x20(s1)
 
 sh a0, 0(a1)
 lh a0, 0(a1)
@@ -194,7 +195,7 @@ lh a0, 0(a1)
 call print_reg
 
 
-# ---------Calcauted ----------------------------
+## ---------Calcauted ----------------------------
 # root_dir_sector_start = reserved_sectors + (num_fats * sectors_per_fat16)
 li a0, "\nrtdS0:" # 7 char left on for null
 call print7
@@ -232,15 +233,7 @@ call print_reg
 
 
 # ------------------------
-#data_start_sec = 
-
-
-
-
-
-
-
-
+# data_start_sec = 
 
 
 
@@ -257,41 +250,6 @@ la t3, root_dir_sector_start
 lw a0, 0(t3)
 call sd_read_sector  # use a0 as sector no.
 call print_sector
-
-# -------------------------------------
-## entries per secter = byte_per_sec/32  srli 5
-#li t0, "BytPse"
-#addi sp, sp, -8
-#sd t0, 0(sp)
-#mv a0, sp
-#call puts
-#addi sp, sp, 8
-#
-#la a1, byte_per_sec
-#lw a0, 0(a1)  # two byts, use lw, ld will get other word together!
-#call print_reg
-
-
-
-#root_ent_cnt:
-#    .word 0
-#set_per_clus:
-#    .word 0
-#data_start_sec:
-#    .word 0
-
-
-
-
-
-
-
-## Test mul #22D2B8
-#li t1, 2324
-#li t2, 982
-#mul a0, t1, t2
-#call print_reg
-
 
 la t3, root_dir_sector_start
 lw a0, 0(t3)
@@ -367,63 +325,30 @@ j entry_loop
 
 
 # root_dir_sector_start = reserved_sectors + (num_FATs * sectors_per_FAT)
-# root_dir_sectors = (RootEntryCount * 32 + BytesPerSector -1 )/ BytesPerSector
+# root_dir_sectors = (RootEntryCount * 32 + BytesPerSector -1 )/ BytesPerSector  ceiling division
 # FirstDataSector = root_dir_sector_start + root_dir_sectors 
 # FirstSectorOfCluster(N)=FirstDataSector + (N - 2) * SectorsPerCluster
 
-read_file:
-#li t1, 89  # Y
-#sw t1, 0(t0)
-##j find_file
-#
-## file size at 0x1C-0x1D-0x1E-0x1F 4 bytes
-#addi t1, t3, 0x1C
-#lw t2, 0(t1)
-#andi t2, t2, 0xff
-#
-#addi t1, t3, 0x1D
-#lw t4, 0(t1)
-#andi t4, t4, 0xff
-#slli t4, t4, 8
-#or t2, t2, t4
-#
-#addi t1, t3, 0x1E
-#lw t4, 0(t1)
-#andi t4, t4, 0xff
-#slli t4, t4, 16
-#or t2, t2, t4
-#
-#addi t1, t3, 0x1F
-#lw t4, 0(t1)
-#andi t4, t4, 0xff
-#slli t4, t4, 24
-#or t2, t2, t4
-#mv s9, t2   # s9 = file_size_bytes  
-#
-#
-## first cluster at 0x1A-0x1B 2 bytes
-#addi t1, t3, 0x1A
-#lw t2, 0(t1)
-#andi t2, t2, 0xff
-#
-#addi t1, t3, 0x1B
-#lw t4, 0(t1)
-#andi t4, t4, 0xff
-#slli t4, t4, 8
-#or t2, t2, t4
-#mv s10, t2   # s10 = file_cluster_start_number
-#
-## print file_cluster_start_number
-#li t1, 123  # {
-#sw t1, 0(t0) # print
-#srli t2, s10, 8
-#jal print_hex_b
-#mv t2, s10
-#jal print_hex_b
-#li t1, 125  # }
-#sw t1, 0(t0) # print
-   j read_file
+# Entry Layout(in Root Directory)
+#| Offset | Size | Field                             | Description                  | Example      |
+#| :----- | :--- | :-------------------------------- | :--------------------------- | :----------- |
+#| `0x00` | 8    | **Filename**                      | 8 chars (space padded)       | `"MUSIC   "` | FAT16 8.3 format for name.extension
+#| `0x08` | 3    | **Extension**                     | 3 chars (space padded)       | `"WAV"`      |
+#| `0x0B` | 1    | **Attributes**                    | Bit flags (see below)        | 0x20         |
+#| `0x0C` | 1    | Reserved                          | For Windows NT               | 0            |
+#| `0x0D` | 1    | Creation time (tenths)            | Optional                     | —            |
+#| `0x0E` | 2    | Creation time                     | —                            | —            |
+#| `0x10` | 2    | Creation date                     | —                            | —            |
+#| `0x12` | 2    | Last access date                  | —                            | —            |
+#| `0x14` | 2    | High word of cluster (FAT32 only) | —                            | —            |
+#| `0x16` | 2    | Last modified time                | —                            | —            |
+#| `0x18` | 2    | Last modified date                | —                            | —            |
+#| `0x1A` | 2    | **First cluster (low word)**      | Cluster number (starts at 2) | 0x0002       |
+#| `0x1C` | 4    | **File size (bytes)**             | File length                  | 4096         |
 
+read_file:
+## file size at 0x1C-0x1D-0x1E-0x1F 4 bytes
+## first cluster at 0x1A-0x1B 2 bytes
 
 
 
