@@ -66,6 +66,31 @@ addi a0, x0, 0x2b
 # call putchar
 auipc x1, 0 # R_RISCV_PCREL_HI20 putchar
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I putchar
+# li a0, "BytPsec" 
+lui a0, 0x636
+srli a0, a0, 0x1
+ori a0, a0, 0x2b9
+slli a0, a0, 0xb
+ori a0, a0, 0x541
+slli a0, a0, 0xb
+ori a0, a0, 0x68f
+slli a0, a0, 0xb
+ori a0, a0, 0x142
+# call print7
+auipc x1, 0 # R_RISCV_PCREL_HI20 print7
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print7
+# la a1, byte_per_sec
+auipc a1, 0 # R_RISCV_PCREL_HI20 byte_per_sec 
+addi a1, a1, 0 # R_RISCV_PCREL_LO12_I byte_per_sec 
+lbu t0, 0x0b(s1)
+lbu t1, 0x0c(s1)
+slli t1, t1, 8
+or a0, t1, t0 
+sh a0, 0(a1)
+lh a0, 0(a1)
+# call print_reg
+auipc x1, 0 # R_RISCV_PCREL_HI20 print_reg
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_reg
 # li t0, "resSec:" 
 lui t0, 0x3a6
 srli t0, t0, 0x1
@@ -146,36 +171,6 @@ auipc a1, 0 # R_RISCV_PCREL_HI20 sec_per_fat
 addi a1, a1, 0 # R_RISCV_PCREL_LO12_I sec_per_fat 
 lbu t0, 0x16(s1)
 lbu t1, 0x17(s1)
-slli t1, t1, 8
-or a0, t1, t0 
-sh a0, 0(a1)
-lh a0, 0(a1)
-# call print_reg
-auipc x1, 0 # R_RISCV_PCREL_HI20 print_reg
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_reg
-# li t0, "BytPsec" 
-lui t0, 0x636
-srli t0, t0, 0x1
-ori t0, t0, 0x2b9
-slli t0, t0, 0xb
-ori t0, t0, 0x541
-slli t0, t0, 0xb
-ori t0, t0, 0x68f
-slli t0, t0, 0xb
-ori t0, t0, 0x142
-addi sp, sp, -8
-sd t0, 0(sp)
-# mv a0, sp
-addi a0, sp, 0
-# call puts
-auipc x1, 0 # R_RISCV_PCREL_HI20 puts
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I puts
-addi sp, sp, 8
-# la a1, byte_per_sec
-auipc a1, 0 # R_RISCV_PCREL_HI20 byte_per_sec 
-addi a1, a1, 0 # R_RISCV_PCREL_LO12_I byte_per_sec 
-lbu t0, 0x0b(s1)
-lbu t1, 0x0c(s1)
 slli t1, t1, 8
 or a0, t1, t0 
 sh a0, 0(a1)
@@ -573,3 +568,12 @@ ld s0, 0(sp)
 addi sp, sp, 8
 #     ret
 jalr x0, 0(x1)
+print7:
+addi sp, sp, -8
+sd a0, 0(sp)
+#     mv a0, sp
+addi a0, sp, 0
+#     call puts
+auipc x1, 0 # R_RISCV_PCREL_HI20 puts
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I puts
+addi sp, sp, 8

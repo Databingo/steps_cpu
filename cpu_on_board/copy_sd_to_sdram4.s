@@ -94,6 +94,21 @@ li a0, 43       # +
 call putchar
 
 # -- Parse BPB -- little-endian  Bios Parameter Block : sector 0
+# -------------------------------------
+# byte_per_sec offset 0x0b-0x0c 2 bytes
+li a0, "BytPsec" # 7 char left on for null
+call print7
+
+la a1, byte_per_sec
+lbu t0, 0x0b(s1)
+lbu t1, 0x0c(s1)
+slli t1, t1, 8
+or a0, t1, t0 
+
+sh a0, 0(a1)
+lh a0, 0(a1)
+call print_reg
+
 # reserved_sectors offset 0x0e-0x0f 2 bytes (including root sector 0)
 li t0, "resSec:" # 7 char left on for null
 addi sp, sp, -8
@@ -138,25 +153,6 @@ addi sp, sp, 8
 la a1, sec_per_fat
 lbu t0, 0x16(s1)
 lbu t1, 0x17(s1)
-slli t1, t1, 8
-or a0, t1, t0 
-
-sh a0, 0(a1)
-lh a0, 0(a1)
-call print_reg
-
-# -------------------------------------
-# byte_per_sec offset 0x0b-0x0c 2 bytes
-li t0, "BytPsec" # 7 char left on for null
-addi sp, sp, -8
-sd t0, 0(sp)
-mv a0, sp
-call puts
-addi sp, sp, 8
-
-la a1, byte_per_sec
-lbu t0, 0x0b(s1)
-lbu t1, 0x0c(s1)
 slli t1, t1, 8
 or a0, t1, t0 
 
@@ -583,4 +579,9 @@ wait_uart_loop:
     addi sp, sp, 8
     ret
 
-
+print7: # a0, 7 char left one for null
+    addi sp, sp, -8
+    sd a0, 0(sp)
+    mv a0, sp
+    call puts
+    addi sp, sp, 8
