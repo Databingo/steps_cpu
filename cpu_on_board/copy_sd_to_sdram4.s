@@ -355,6 +355,9 @@ read_file:
 li a0, "\nFSize:"
 call print7
 lwu a0, 0x1c(t3)
+la a1, file_size
+sw a0, 0(a1)
+lw a0, 0(a1)
 call print_reg
 
 
