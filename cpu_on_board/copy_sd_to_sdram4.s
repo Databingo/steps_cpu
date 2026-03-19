@@ -581,7 +581,8 @@ wait_uart_loop:
 
 print7: # a0, 7 char left one for null
     addi sp, sp, -8
-    sd a0, 0(sp)
+    sd ra, 0(sp)
     mv a0, sp
     call puts
+    ld ra, 0(sp)
     addi sp, sp, 8
