@@ -357,17 +357,17 @@ module riscv64(
             12'hF11 : w_csr_id = mvendorid  ;   
             12'hF12 : w_csr_id = marchid    ;   
             12'hF13 : w_csr_id = mimpid     ;   
-            //12'h3A0 : w_csr_id = pmpcfg0    ;   
-            //12'h3B0 : w_csr_id = pmpaddr0   ;   
-            //12'h3B1 : w_csr_id = pmpaddr1   ;   
-            //12'h3B2 : w_csr_id = pmpaddr2   ;   
-            //12'h3B3 : w_csr_id = pmpaddr3   ;   
-            //12'h3B4 : w_csr_id = pmpaddr4   ;   
-            //12'h3B5 : w_csr_id = pmpaddr5   ;   
-            //12'h3B6 : w_csr_id = pmpaddr6   ;   
-            //12'h3B7 : w_csr_id = pmpaddr7   ;   
-	    //default : w_csr_id = 36; 
-	    default : w_csr_id = 27; 
+            12'h3A0 : w_csr_id = pmpcfg0    ;   
+            12'h3B0 : w_csr_id = pmpaddr0   ;   
+            12'h3B1 : w_csr_id = pmpaddr1   ;   
+            12'h3B2 : w_csr_id = pmpaddr2   ;   
+            12'h3B3 : w_csr_id = pmpaddr3   ;   
+            12'h3B4 : w_csr_id = pmpaddr4   ;   
+            12'h3B5 : w_csr_id = pmpaddr5   ;   
+            12'h3B6 : w_csr_id = pmpaddr6   ;   
+            12'h3B7 : w_csr_id = pmpaddr7   ;   
+	    default : w_csr_id = 36; 
+	    //default : w_csr_id = 27; 
 	endcase
     end
 
@@ -813,8 +813,8 @@ module riscv64(
 		    32'b?????????????????_000_?????_0001111: begin end
 		    // Fence.i
 		    32'b?????????????????_001_?????_0001111: begin flush <= ~flush; end //bubble <= 1'b1; pc<=pc; end
-		    // Sfence.vma
-		    32'b0001001??????????_000_?????_1110011: begin end
+		    // Sfence.vma supervisor fence for virtual memory address
+		    32'b0001001??????????_000_?????_1110011: begin tlb_vld[0] <= 0; tlb_vld[1] <= 0; end
 		    // RV64IMAFD(G)C  RVA23U64
 		    // Atomic after TLB // -- ATOMIC instructions (A-extension) opcode: 0101111
 		    // lr
