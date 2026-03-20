@@ -593,32 +593,25 @@ print_l_hex:
 
 # copy sector 0 512 bytes
 copy_sector:
-    addi sp, sp, -64
+    addi sp, sp, -32
     sd ra, 0(sp)
-    sd s4, 8(sp)
-    sd s5, 16(sp)
-    sd s6, 24(sp)
-    sd s7, 32(sp)
-    sd s8, 40(sp)
-    sd s9, 48(sp)
-    sd s3, 56(sp)
+    sd s6, 8(sp)
+    sd s7, 16(sp)
+    sd s8, 24(sp)
+
     li s7, 0   # byte index
     li s8, 511 # max byte index
 copy_loop:
     add s6, s1, s7 
-    addi s7, s7, 4
-    ld a0, 0(s6)       # load byte at 0x3000 a1+s7
+    addi s7, s7, 8
+    ld a0, 0(s6)       # load 8 byte at 0x3000 a1+s7
     call print_reg
     bge s8, s7, copy_loop
     ld ra, 0(sp)
-    ld s4, 8(sp)
-    ld s5, 16(sp)
-    ld s6, 24(sp)
-    ld s7, 32(sp)
-    ld s8, 40(sp)
-    ld s9, 48(sp)
-    ld s3, 56(sp)
-    addi sp, sp, 64
+    ld s6, 8(sp)
+    ld s7, 16(sp)
+    ld s8, 24(sp)
+    addi sp, sp, 32 
     ret
 # -- end print_sector --
 
