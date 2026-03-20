@@ -371,8 +371,8 @@ module riscv64(
 	endcase
     end
 
-    //(* ram_style = "logic" *) reg [63:0] Csrs [0:36]; // 36 CSRs for now // totally 4096
-    (* ram_style = "logic" *) reg [63:0] Csrs [0:27]; // 36 CSRs for now // totally 4096
+    (* ram_style = "logic" *) reg [63:0] Csrs [0:36]; // 36 CSRs for now // totally 4096
+    //(* ram_style = "logic" *) reg [63:0] Csrs [0:27]; // 36 CSRs for now // totally 4096
     wire [3:0]  satp_mmu  = Csrs[satp][63:60]; // 0:bare, 8:sv39, 9:sv48  satp.MODE!=0, privilegae is not M-mode, mstatus.MPRN is not set or in MPP's mode?
     wire [15:0] satp_asid = Csrs[satp][59:44]; // Address Space ID for TLB
     wire [43:0] satp_ppn  = Csrs[satp][43:0];  // Root Page Table PPN physical page number
