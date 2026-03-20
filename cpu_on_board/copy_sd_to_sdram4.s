@@ -401,16 +401,64 @@ blt t1, t2, print_sector_loop
 
 # -----------------------------
 # Read/Write SDRAM
-lui s0, 0x10000 # SDRAM base 0x10000000
-# Write one byte
-li t1, 0x58          # 'X'
-sb t1, 0(s0)         # test sdram sb/sh
+#lui s0, 0x10000 # SDRAM base 0x10000000
+## Write one byte
+#li t1, 0x58          # 'X'
+#sb t1, 0(s0)         # test sdram sb/sh
+#    
+## Read it back
+#lbu t2, 0(s0)         # test sdram lbu
+#    
+## Print it
+#sb t2, 0(s11)         # Should print 'X'
+
+
+    lui t0, 0x2
+    addi t0, t0, 4       # UART = 0x2004
     
-# Read it back
-lbu t2, 0(s0)         # test sdram lbu
+    lui s0, 0x10000      # SDRAM = 0x10000000
     
-# Print it
-sb t2, 0(s11)         # Should print 'X'
+    # Write one byte
+    li t1, 0x58          # 'X'
+    call wait_uart
+    sb t1, 0(s0)         # test sdram sb/sh
+    
+    # Read it back
+    lbu t2, 0(s0)         # test sdram lbu
+    
+    # Print it
+    sb t2, 0(t0)         # Should print 'X'
+    sb t2, 0(t0)         # Should print 'X'
+    sh t2, 0(t0)         # Should print 'X'
+    
+    # Write 4 byte
+    li t1, 0x44434241    # 'DCBA'
+    sw t1, 0(s0)         # test sdram sw
+    
+    # Read it back
+    lhu t3, 0(s0) # A    # test sdram lhu lwu
+    lbu t4, 1(s0) # B
+    lwu t5, 2(s0) # C
+    lbu t6, 3(s0) # D
+    
+    # Print it
+    sb t3, 0(t0)         # Should print 'A'
+    sb t4, 0(t0)         # Should print 'B'
+    sb t5, 0(t0)         # Should print 'C'
+    sb t6, 0(t0)         # Should print 'D'
+    sb t2, 0(t0)         # Should print 'X'
+
+
+
+
+
+
+
+
+
+
+
+
 end: 
 j end
 
