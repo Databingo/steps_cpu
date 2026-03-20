@@ -398,13 +398,16 @@ add t2, t1, t0
 #call print_sector
 #addi t1, t1, 1
 #blt t1, t2, print_sector_loop
+ 
 
-
+lui s0, 0x10000 # SDRAM base 0x10000000
 copy_sector_loop:
 mv a0, t1
 call sd_read_sector  # use a0 as sector no.
+mv a0, s0
 call copy_sector
 addi t1, t1, 1
+addi s0, s0, 512
 blt t1, t2, copy_sector_loop
 
 
@@ -459,6 +462,8 @@ blt t1, t2, copy_sector_loop
 #    sb t2, 0(t0)         # Should print 'X'
 
 
+    ld a0, 0(s0)         # test sdram read data
+    call print_reg
 
 
 
@@ -592,26 +597,33 @@ print_l_hex:
 
 
 # copy sector 0 512 bytes
-copy_sector:
-    addi sp, sp, -32
+copy_sector: # a0 as target addr
+    addi sp, sp, -48
     sd ra, 0(sp)
     sd s6, 8(sp)
     sd s7, 16(sp)
     sd s8, 24(sp)
+    sd s9, 32(sp)
+    sd s5, 40(sp)
 
     li s7, 0   # byte index
     li s8, 511 # max byte index
+    mv s5, a0
 copy_loop:
     add s6, s1, s7 
-    addi s7, s7, 8
-    ld a0, 0(s6)       # load 8 byte at 0x3000 a1+s7
+    ld a0, 0(s6)       # load 8 bytes at 0x3000 a1+s7
+    sd a0, 0(s5)       # save 8 bytes to s5
     call print_reg
+    addi s7, s7, 8
+    addi s5, s5, 8
     bge s8, s7, copy_loop
     ld ra, 0(sp)
     ld s6, 8(sp)
     ld s7, 16(sp)
     ld s8, 24(sp)
-    addi sp, sp, 32 
+    ld s9, 32(sp)
+    ld s5, 40(sp)
+    addi sp, sp,  48
     ret
 # -- end print_sector --
 
