@@ -69,6 +69,7 @@ _start:
     li s5,  0x3220 # SD ready for rd/wr
     li s6,  0x3228 # SD cache available
     # a0 for function call default parameter
+    lui s0, 0x10000 # SDRAM base 0x10000000
 
 # ---------------------- SD card -------------------
 # Sector 0 Layout # BPB (BIOS Parameter Block) in sector 0
@@ -398,8 +399,17 @@ call print_sector
 addi t1, t1, 1
 blt t1, t2, print_sector_loop
 
-
-
+# -----------------------------
+# Read/Write SDRAM
+# Write one byte
+li t1, 0x58          # 'X'
+sb t1, 0(s0)         # test sdram sb/sh
+    
+# Read it back
+lbu t1, 0(s0)         # test sdram lbu
+    
+# Print it
+sb t1, 0(s11)         # Should print 'X'
 end: 
 j end
 

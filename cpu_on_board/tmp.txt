@@ -51,6 +51,7 @@ addi s5, s5, 0x220
 addi s6, x0, 0x0
 lui s6, 0x3
 addi s6, s6, 0x228
+lui s0, 0x10000 # SDRAM base 0x10000000
 # li a0, 0   
 addi a0, x0, 0x0
 # call sd_read_sector  
@@ -422,6 +423,13 @@ auipc x1, 0 # R_RISCV_PCREL_HI20 print_sector
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_sector
 addi t1, t1, 1
 blt t1, t2, print_sector_loop
+# li t1, 0x58          
+addi t1, x0, 0x0
+addi t1, x0, 0x0
+addi t1, x0, 0x58
+sb t1, 0(s0)         # test sdram sb/sh
+lbu t1, 0(s0)         # test sdram lbu
+sb t1, 0(s11)         # Should print 'X'
 end:
 # j end
 jal x0, end
