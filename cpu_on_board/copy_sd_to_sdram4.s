@@ -462,6 +462,7 @@ blt t1, t2, copy_sector_loop
 #    sb t2, 0(t0)         # Should print 'X'
 
 
+    lui s0, 0x10000      # SDRAM = 0x10000000
     ld a0, 0(s0)         # test sdram read data
     call print_reg
 

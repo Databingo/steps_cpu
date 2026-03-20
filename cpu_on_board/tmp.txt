@@ -404,6 +404,7 @@ jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I wait_uart
 sb t1, 0(s0)         # test sdram sb/sh
 lbu t2, 0(s0)         # test sdram lbu
 sb t2, 0(t0)         # Should print 'X'
+lui s0, 0x10000      # SDRAM = 0x10000000
 ld a0, 0(s0)         # test sdram read data
 #     call print_reg
 auipc x1, 0 # R_RISCV_PCREL_HI20 print_reg
