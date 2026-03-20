@@ -232,7 +232,9 @@ module riscv64(
     reg [63:0]  div_result_out; // final output buffer
     reg [4:0]   div_rd; 
     reg         div_op_signed;
+    reg         div_is_w_latched;
 
+    wire div_is_w = (op == 7'b0111011); //  divw100 divuw101  remw110 remuw111 (opc 0111011)
     wire a_is_neg = div_op_signed && div_a[63];
     wire b_is_neg = div_op_signed && div_b[63];
     wire [63:0] div_abs_a = a_is_neg ? (~div_a + 64'd1):div_a;
@@ -884,16 +886,20 @@ module riscv64(
 			    div_enable <= 1;
                             // latch
 			    if (!div_enable) begin
-                                div_a <= rs1;    // be divided
-                                div_b <= rs2;    // divisor
-                                div_op_signed <= !ir[12];  // func3[0] == 0 is signed // 100div/w 101divu 110rem/w 111remu
-                                div_is_rem <= ir[13];   // func3[1] == 1 is rem
+                                div_a <= div_is_w ? (w_func3[0] ? {32'b0, rs1[31:0]} : {{32{rs1[31]}}, rs1[31:0]}) : rs1;    // be divided
+                                div_b <= div_is_w ? (w_func3[0] ? {32'b0, rs2[31:0]} : {{32{rs2[31]}}, rs2[31:0]}) : rs2;    // divisro
+                                div_op_signed <= !w_func3[0];  // func3[0] == 0 is signed // 100div/w 101divu 110rem/w 111remu
+                                div_is_rem <= w_func3[1];   // func3[1] == 1 is rem
+                                //div_op_signed <= !ir[12];  // func3[0] == 0 is signed // 100div/w 101divu 110rem/w 111remu
+                                //div_is_rem <= ir[13];   // func3[1] == 1 is rem
                                 div_rd <= w_rd; 
+				div_is_w_latched <= div_is_w;
 			    end
 			    pc <= pc - 4;
 			    bubble <= 1;
 			end else begin
-			    re[div_rd] <= div_result_out;
+			    //re[div_rd] <= div_result_out;
+			    re[div_rd] <= div_is_w_latched ? {{32{div_result_out[31]}}, div_result_out[31:0]} : div_result_out;
 			    div_enable <= 0;
 			end
 		    end
