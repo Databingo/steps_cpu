@@ -478,7 +478,13 @@ module riscv64(
             tlb_vld[tlb_ptr] <= 1;
             tlb_ptr <= tlb_ptr + 1; 
         end
-	casez (ir) 32'b0001001??????????_000_?????_1110011: begin tlb_vld[0] <= 0; tlb_vld[1] <= 0; end endcase
+	if (!bubble) begin 
+	    casez (ir) 32'b0001001??????????_000_?????_1110011: begin 
+	        tlb_vld[0] <= 0; 
+		tlb_vld[1] <= 0; 
+                end 
+	    endcase 
+	end
     end
 
     // -----
