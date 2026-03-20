@@ -310,13 +310,13 @@ lwu a0, 0(a1)
 call print_reg
 
 # file_first_cluster at 0x1A-0x1B 2 bytes
-li a0, "\nF0cls:"
-call print7
+#li a0, "\nF0cls:"
+#call print7
 lhu a0, 0x1a(t3)
 la a1, file_first_cluster
 sh a0, 0(a1)
-lhu a0, 0(a1)
-call print_reg
+#lhu a0, 0(a1)
+#call print_reg
 
 # root_dir_sectors = (RootEntryCount * 32 + BytesPerSector -1 )/ BytesPerSector  ceiling division
 li a0, "\nrDseS:"
@@ -339,8 +339,8 @@ lw a0, 0(a1)
 call print_reg
 
 #data_start_sec # FirstDataSector = root_dir_sector_start + root_dir_sectors 
-li a0, "\nD0sec:"
-call print7
+#li a0, "\nD0sec:"
+#call print7
 la a1, root_dir_sector_start
 lw t0, 0(a1)
 la a1, root_dir_sectors 
@@ -348,8 +348,8 @@ lw t1, 0(a1)
 add t2, t0, t1
 la a1, data_start_sec  
 sw t2, 0(a1)
-lw a0, 0(a1)
-call print_reg
+#lw a0, 0(a1)
+#call print_reg
 
 # FirstSectorOfCluster(N)=FirstDataSector + (N - 2) * SectorsPerCluster
 li a0, "\nF0sec:"
@@ -401,15 +401,16 @@ blt t1, t2, print_sector_loop
 
 # -----------------------------
 # Read/Write SDRAM
+lui s0, 0x10000 # SDRAM base 0x10000000
 # Write one byte
 li t1, 0x58          # 'X'
 sb t1, 0(s0)         # test sdram sb/sh
     
 # Read it back
-lbu t1, 0(s0)         # test sdram lbu
+lbu t2, 0(s0)         # test sdram lbu
     
 # Print it
-sb t1, 0(s11)         # Should print 'X'
+sb t2, 0(s11)         # Should print 'X'
 end: 
 j end
 
