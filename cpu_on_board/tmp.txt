@@ -1,598 +1,310 @@
-msg:
-reserved_sec:
-num_fats:
-sec_per_fat:
-byte_per_sec:
-root_dir_sector_start:
-root_ent_cnt:
-root_dir_sectors:
-sec_per_clus:
-data_start_sec:
-entries_per_sector:
-total_sectors:
-file_size:
-file_first_cluster:
-file_sectors:
-file_start_sector:
 _start:
-#     li sp, 0x1800 
-addi sp, x0, 0x0
-lui sp, 0x2
-addi sp, sp, 0x800
-#     li s11, 0x2004 
-addi s11, x0, 0x0
-lui s11, 0x2
-addi s11, s11, 0x4
-#     li s10, 0x2008 
-addi s10, x0, 0x0
-lui s10, 0x2
-addi s10, s10, 0x8
-#     li s1,  0x3000 
-addi s1, x0, 0x0
-lui s1, 0x3
-addi s1, s1, 0x0
-#     li s2,  0x3200 
-addi s2, x0, 0x0
-lui s2, 0x3
-addi s2, s2, 0x200
-#     li s3,  0x3204 
-addi s3, x0, 0x0
-lui s3, 0x3
-addi s3, s3, 0x204
-#     li s4,  0x3208 
-addi s4, x0, 0x0
-lui s4, 0x3
-addi s4, s4, 0x208
-#     li s5,  0x3220 
-addi s5, x0, 0x0
-lui s5, 0x3
-addi s5, s5, 0x220
-#     li s6,  0x3228 
-addi s6, x0, 0x0
-lui s6, 0x3
-addi s6, s6, 0x228
-lui s0, 0x10000 # SDRAM base 0x10000000
-# li a0, 0   
-addi a0, x0, 0x0
-# call sd_read_sector  
-auipc x1, 0 # R_RISCV_PCREL_HI20 sd_read_sector
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I sd_read_sector
-# la a1, byte_per_sec
-auipc a1, 0 # R_RISCV_PCREL_HI20 byte_per_sec 
-addi a1, a1, 0 # R_RISCV_PCREL_LO12_I byte_per_sec 
-lwu a0, 0x0a(s1)
-srli a0, a0, 8
-sh a0, 0(a1)
-# la a1, sec_per_clus
-auipc a1, 0 # R_RISCV_PCREL_HI20 sec_per_clus 
-addi a1, a1, 0 # R_RISCV_PCREL_LO12_I sec_per_clus 
-lbu a0, 0x0d(s1)
-sh a0, 0(a1)
-# la a1, reserved_sec
-auipc a1, 0 # R_RISCV_PCREL_HI20 reserved_sec 
-addi a1, a1, 0 # R_RISCV_PCREL_LO12_I reserved_sec 
-lh a0, 0x0e(s1)
-sd a0, 0(a1)
-# la a1, num_fats
-auipc a1, 0 # R_RISCV_PCREL_HI20 num_fats 
-addi a1, a1, 0 # R_RISCV_PCREL_LO12_I num_fats 
-lbu a0, 0x10(s1)
-sw a0, 0(a1)
-# la a1, root_ent_cnt
-auipc a1, 0 # R_RISCV_PCREL_HI20 root_ent_cnt 
-addi a1, a1, 0 # R_RISCV_PCREL_LO12_I root_ent_cnt 
-lwu a0, 0x10(s1)
-srli a0, a0, 8
-sh a0, 0(a1)
-# la a1, total_sectors
-auipc a1, 0 # R_RISCV_PCREL_HI20 total_sectors 
-addi a1, a1, 0 # R_RISCV_PCREL_LO12_I total_sectors 
-lwu a0, 0x20(s1)
-sw a0, 0(a1)
-# la a1, sec_per_fat
-auipc a1, 0 # R_RISCV_PCREL_HI20 sec_per_fat 
-addi a1, a1, 0 # R_RISCV_PCREL_LO12_I sec_per_fat 
-lh a0, 0x16(s1)
-sh a0, 0(a1)
-# la a1, num_fats
-auipc a1, 0 # R_RISCV_PCREL_HI20 num_fats 
-addi a1, a1, 0 # R_RISCV_PCREL_LO12_I num_fats 
-lw t1, 0(a1)
-# la a1, sec_per_fat
-auipc a1, 0 # R_RISCV_PCREL_HI20 sec_per_fat 
-addi a1, a1, 0 # R_RISCV_PCREL_LO12_I sec_per_fat 
-lw t2, 0(a1)
-# la a1, reserved_sec
-auipc a1, 0 # R_RISCV_PCREL_HI20 reserved_sec 
-addi a1, a1, 0 # R_RISCV_PCREL_LO12_I reserved_sec 
-lw t0, 0(a1)
-mul a0, t1, t2
-add a0, a0, t0
-# la t3, root_dir_sector_start
-auipc t3, 0 # R_RISCV_PCREL_HI20 root_dir_sector_start 
-addi t3, t3, 0 # R_RISCV_PCREL_LO12_I root_dir_sector_start 
-sw a0, 0(t3)
-# la a1, byte_per_sec
-auipc a1, 0 # R_RISCV_PCREL_HI20 byte_per_sec 
-addi a1, a1, 0 # R_RISCV_PCREL_LO12_I byte_per_sec 
-lw a0, 0(a1)
-# mv s7, a0
-addi s7, a0, 0
-# li t1, 32
-addi t1, x0, 0x0
-addi t1, x0, 0x0
-addi t1, x0, 0x20
-div a0, a0, t1
-# la t3,  entries_per_sector
-auipc t3, 0 # R_RISCV_PCREL_HI20 entries_per_sector 
-addi t3, t3, 0 # R_RISCV_PCREL_LO12_I entries_per_sector 
-sw a0, 0(t3)
-# la t3, root_dir_sector_start
-auipc t3, 0 # R_RISCV_PCREL_HI20 root_dir_sector_start 
-addi t3, t3, 0 # R_RISCV_PCREL_LO12_I root_dir_sector_start 
-lw a0, 0(t3)
-# call sd_read_sector  
-auipc x1, 0 # R_RISCV_PCREL_HI20 sd_read_sector
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I sd_read_sector
-# call print_sector
-auipc x1, 0 # R_RISCV_PCREL_HI20 print_sector
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_sector
-# li s8, 0 
-addi s8, x0, 0x0
-# li s9, "MUSIC"
-addi s9, x0, 0x0
-ori s9, s9, 0x21
-slli s9, s9, 0xb
-ori s9, s9, 0x525
-slli s9, s9, 0xb
-ori s9, s9, 0x26a
-slli s9, s9, 0xb
-ori s9, s9, 0x54d
-# mv a0, s9
-addi a0, s9, 0
-# call print7
-auipc x1, 0 # R_RISCV_PCREL_HI20 print7
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print7
-entry_loop:
-bge s8, s7, done_entries
-slli t1, s8, 5
-add t3, s1, t1 # t3 = address of entry
-lbu t4, 0(t3)
-beq t4, x0, done_entries # 0x00 no more entries in dir
-# li t1, 0xE5
-addi t1, x0, 0x0
-addi t1, x0, 0x0
-addi t1, x0, 0xe5
-beq t4, t1, next_entry # 0xE5 deleted entry, skip
-lbu t5, 11(t3)
-# li t1, 0x0F
-addi t1, x0, 0x0
-addi t1, x0, 0x0
-addi t1, x0, 0xf
-beq t5, t1, next_entry # 0x0F LFN(Long File Name) entry, skip
-andi t6, t5, 0x18  # Mask for Volume Label(0x08) and Directory (0x10)
-bne t6, x0, next_entry # skip 
-# li t2, 0
-addi t2, x0, 0x0
-addi t4, t3, 7
-load_name_loop:
-lbu t0, 0(t4)
-slli t2, t2, 8
-xor t2, t2, t0
-addi t4, t4, -1
-bge t4, t3, load_name_loop
-slli t2, t2, 24
-srli t2, t2, 24
-bne t2, s9, next_entry
-# li a0, "FOUND!"
-addi a0, x0, 0x0
-lui a0, 0x2
-srli a0, a0, 0x1
-ori a0, a0, 0xa2
-slli a0, a0, 0xb
-ori a0, a0, 0x139
-slli a0, a0, 0xb
-ori a0, a0, 0x2a9
-slli a0, a0, 0xb
-ori a0, a0, 0x746
-# call print7
-auipc x1, 0 # R_RISCV_PCREL_HI20 print7
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print7
-done_entries:
-#    j read_file
-jal x0, read_file
-next_entry:
-addi s8, s8, 1
-# j entry_loop
-jal x0, entry_loop
-read_file:
-# li a0, "\nFSize:"
-addi a0, x0, 0x0
-lui a0, 0x3a6
-srli a0, a0, 0x1
-ori a0, a0, 0x2bd
-slli a0, a0, 0xb
-ori a0, a0, 0x1a5
-slli a0, a0, 0xb
-ori a0, a0, 0x268
-slli a0, a0, 0xb
-ori a0, a0, 0x60a
-# call print7
-auipc x1, 0 # R_RISCV_PCREL_HI20 print7
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print7
-lwu a0, 0x1c(t3)
-# la a1, file_size
-auipc a1, 0 # R_RISCV_PCREL_HI20 file_size 
-addi a1, a1, 0 # R_RISCV_PCREL_LO12_I file_size 
-sw a0, 0(a1)
-lwu a0, 0(a1)
-# call print_reg
-auipc x1, 0 # R_RISCV_PCREL_HI20 print_reg
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_reg
-lhu a0, 0x1a(t3)
-# la a1, file_first_cluster
-auipc a1, 0 # R_RISCV_PCREL_HI20 file_first_cluster 
-addi a1, a1, 0 # R_RISCV_PCREL_LO12_I file_first_cluster 
-sh a0, 0(a1)
-# li a0, "\nrDseS:"
-addi a0, x0, 0x0
-lui a0, 0x3a5
-srli a0, a0, 0x1
-ori a0, a0, 0x1b2
-slli a0, a0, 0xb
-ori a0, a0, 0x5cd
-slli a0, a0, 0xb
-ori a0, a0, 0x8e
-slli a0, a0, 0xb
-ori a0, a0, 0x20a
-# call print7
-auipc x1, 0 # R_RISCV_PCREL_HI20 print7
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print7
-# la a1, root_ent_cnt
-auipc a1, 0 # R_RISCV_PCREL_HI20 root_ent_cnt 
-addi a1, a1, 0 # R_RISCV_PCREL_LO12_I root_ent_cnt 
-lwu t0, 0(a1)
-# li t1, 32
-addi t1, x0, 0x0
-addi t1, x0, 0x0
-addi t1, x0, 0x20
-mul t2, t0, t1
-# la a1, byte_per_sec
-auipc a1, 0 # R_RISCV_PCREL_HI20 byte_per_sec 
-addi a1, a1, 0 # R_RISCV_PCREL_LO12_I byte_per_sec 
-lwu t0, 0(a1)
-add t3, t2, t0
-addi t3, t3, -1
-div a0, t3, t0
-# la a1, root_dir_sectors 
-auipc a1, 0 # R_RISCV_PCREL_HI20 root_dir_sectors 
-addi a1, a1, 0 # R_RISCV_PCREL_LO12_I root_dir_sectors 
-sw a0, 0(a1)
-lw a0, 0(a1)
-# call print_reg
-auipc x1, 0 # R_RISCV_PCREL_HI20 print_reg
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_reg
-# la a1, root_dir_sector_start
-auipc a1, 0 # R_RISCV_PCREL_HI20 root_dir_sector_start 
-addi a1, a1, 0 # R_RISCV_PCREL_LO12_I root_dir_sector_start 
-lw t0, 0(a1)
-# la a1, root_dir_sectors 
-auipc a1, 0 # R_RISCV_PCREL_HI20 root_dir_sectors 
-addi a1, a1, 0 # R_RISCV_PCREL_LO12_I root_dir_sectors 
-lw t1, 0(a1)
-add t2, t0, t1
-# la a1, data_start_sec  
-auipc a1, 0 # R_RISCV_PCREL_HI20 data_start_sec 
-addi a1, a1, 0 # R_RISCV_PCREL_LO12_I data_start_sec 
-sw t2, 0(a1)
-# li a0, "\nF0sec:"
-addi a0, x0, 0x0
-lui a0, 0x3a6
-srli a0, a0, 0x1
-ori a0, a0, 0x1b2
-slli a0, a0, 0xb
-ori a0, a0, 0x5cc
-slli a0, a0, 0xb
-ori a0, a0, 0x608
-slli a0, a0, 0xb
-ori a0, a0, 0x60a
-# call print7
-auipc x1, 0 # R_RISCV_PCREL_HI20 print7
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print7
-# la a1, file_first_cluster 
-auipc a1, 0 # R_RISCV_PCREL_HI20 file_first_cluster 
-addi a1, a1, 0 # R_RISCV_PCREL_LO12_I file_first_cluster 
-lw t0, 0(a1)
-addi t0, t0, -2
-# la a1, sec_per_clus
-auipc a1, 0 # R_RISCV_PCREL_HI20 sec_per_clus 
-addi a1, a1, 0 # R_RISCV_PCREL_LO12_I sec_per_clus 
-lw t1, 0(a1)
-mul t2, t0, t1
-# la a1, data_start_sec
-auipc a1, 0 # R_RISCV_PCREL_HI20 data_start_sec 
-addi a1, a1, 0 # R_RISCV_PCREL_LO12_I data_start_sec 
-lw t3, 0(a1)
-add a0, t3, t2
-# la a1, file_start_sector
-auipc a1, 0 # R_RISCV_PCREL_HI20 file_start_sector 
-addi a1, a1, 0 # R_RISCV_PCREL_LO12_I file_start_sector 
-sw a0, 0(a1)
-# call print_reg
-auipc x1, 0 # R_RISCV_PCREL_HI20 print_reg
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_reg
-# li a0, "\nFseS:"
-addi a0, x0, 0x0
-lui a0, 0x3
-srli a0, a0, 0x1
-ori a0, a0, 0x529
-slli a0, a0, 0xb
-ori a0, a0, 0x595
-slli a0, a0, 0xb
-ori a0, a0, 0x668
-slli a0, a0, 0xb
-ori a0, a0, 0x60a
-# call print7
-auipc x1, 0 # R_RISCV_PCREL_HI20 print7
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print7
-# la a1, file_size
-auipc a1, 0 # R_RISCV_PCREL_HI20 file_size 
-addi a1, a1, 0 # R_RISCV_PCREL_LO12_I file_size 
-lw t0, 0(a1)
-addi t0, t0, 511
-# li t1, 512
-addi t1, x0, 0x0
-addi t1, x0, 0x0
-addi t1, x0, 0x200
-div a0, t0, t1
-# la a1, file_sectors 
-auipc a1, 0 # R_RISCV_PCREL_HI20 file_sectors 
-addi a1, a1, 0 # R_RISCV_PCREL_LO12_I file_sectors 
-sw a0, 0(a1)
-lw a0, 0(a1)
-# call print_reg
-auipc x1, 0 # R_RISCV_PCREL_HI20 print_reg
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_reg
-# li a0, "\nFileB:"
-addi a0, x0, 0x0
-lui a0, 0x3a4
-srli a0, a0, 0x1
-ori a0, a0, 0x132
-slli a0, a0, 0xb
-ori a0, a0, 0x5b1
-slli a0, a0, 0xb
-ori a0, a0, 0x528
-slli a0, a0, 0xb
-ori a0, a0, 0x60a
-# call print7
-auipc x1, 0 # R_RISCV_PCREL_HI20 print7
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print7
-# la a1, file_sectors
-auipc a1, 0 # R_RISCV_PCREL_HI20 file_sectors 
-addi a1, a1, 0 # R_RISCV_PCREL_LO12_I file_sectors 
-lw t0, 0(a1)
-# la a1,  file_start_sector
-auipc a1, 0 # R_RISCV_PCREL_HI20 file_start_sector 
-addi a1, a1, 0 # R_RISCV_PCREL_LO12_I file_start_sector 
-lw t1, 0(a1)
-add t2, t1, t0
-print_sector_loop:
-# mv a0, t1
-addi a0, t1, 0
-# call sd_read_sector  
-auipc x1, 0 # R_RISCV_PCREL_HI20 sd_read_sector
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I sd_read_sector
-# call print_sector
-auipc x1, 0 # R_RISCV_PCREL_HI20 print_sector
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_sector
-addi t1, t1, 1
-blt t1, t2, print_sector_loop
-lui s0, 0x10000 # SDRAM base 0x10000000
-# li t1, 0x58          
+lui t0, 0x2
+addi t0, t0, 4       # UART = 0x2004
+lui s0, 0x10000      # SDRAM = 0x10000000
+#     li t1, 0x58          
 addi t1, x0, 0x0
 addi t1, x0, 0x0
 addi t1, x0, 0x58
 sb t1, 0(s0)         # test sdram sb/sh
 lbu t2, 0(s0)         # test sdram lbu
-sb t2, 0(s11)         # Should print 'X'
-end:
-# j end
-jal x0, end
-print_reg:
-addi sp, sp, -40
-sd ra, 0(sp)
-sd s0, 8(sp)
-sd s1, 16(sp)
-sd s2, 24(sp)
-sd s3, 32(sp)
-#     mv s0, a0
-addi s0, a0, 0
-#     li a0, "0"
-addi a0, x0, 0x0
-addi a0, x0, 0x0
-addi a0, x0, 0x30
-#     call putchar
-auipc x1, 0 # R_RISCV_PCREL_HI20 putchar
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I putchar
-#     li a0, "x"
-addi a0, x0, 0x0
-addi a0, x0, 0x0
-addi a0, x0, 0x78
-#     call putchar
-auipc x1, 0 # R_RISCV_PCREL_HI20 putchar
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I putchar
-#     li s1, 60 
-addi s1, x0, 0x0
-addi s1, x0, 0x0
-addi s1, x0, 0x3c
-p_loop:
-srl s2, s0, s1      # get high nibble
-andi s2, s2, 0xF
-slti s3, s2, 10     # if < 10 number
-beq s3, x0, letter
-addi s2, s2, 48     # 0 is "0" ascii 48
-#     j print_h
-jal x0, print_h
-letter:
-addi s2, s2, 55     # 10 is "A" ascii 65 ..
-print_h:
-#     call wait_uart
-auipc x1, 0 # R_RISCV_PCREL_HI20 wait_uart
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I wait_uart
-sb s2, 0(s11)       # print
-addi s1, s1, -4
-bge s1, x0, p_loop 
-ld ra, 0(sp)
-ld s0, 8(sp)
-ld s1, 16(sp)
-ld s2, 24(sp)
-ld s3, 32(sp)
-addi sp, sp, 40
-#     ret
-jalr x0, 0(x1)
-sd_read_sector:
-addi sp, sp, -24
-sd s7, 0(sp)
-sd s8, 8(sp)
-sd ra, 16(sp)
-sw a0, 0(s2) # Write Sector index value to address 0x3200
-wait_ready:
-lw s7, 0(s5)   # 0x3220 ready
-#     li a0, 96      
-addi a0, x0, 0x0
-addi a0, x0, 0x0
-addi a0, x0, 0x60
-#     call putchar
-auipc x1, 0 # R_RISCV_PCREL_HI20 putchar
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I putchar
-beq s7, x0, wait_ready
-#     li s8, 1
-addi s8, x0, 0x0
-addi s8, x0, 0x0
-addi s8, x0, 0x1
-sw s8, 0(s3)   # Trigger read at 0x3204
-wait_cache:
-lw s7, 0(s6)   # s7 0x3228 cache_avaible
-beq s7, x0, wait_cache
-ld s7, 0(sp)
-ld s8, 8(sp)
-ld ra, 16(sp)
-addi sp, sp, 24
-#     ret
-jalr x0, 0(x1)
-print_sector:
-addi sp, sp, -64
-sd ra, 0(sp)
-sd s4, 8(sp)
-sd s5, 16(sp)
-sd s6, 24(sp)
-sd s7, 32(sp)
-sd s8, 40(sp)
-sd s9, 48(sp)
-sd s3, 56(sp)
-#     li s7, 0   
-addi s7, x0, 0x0
-#     li s8, 511 
-addi s8, x0, 0x0
-addi s8, x0, 0x0
-addi s8, x0, 0x1ff
-print_loop:
-add s6, s1, s7 
-addi s7, s7, 1
-lbu s9, 0(s6)       # load byte at 0x3000 a1+t1
-andi s9, s9, 0xFF   # Isolate byte value
-srli s3, s9, 4      # get high nibble
-slti s5, s3, 10     # if < 10 number
-beq s5, x0, letter_h
-addi s3, s3, 48     # 0 is "0" ascii 48
-#     j print_h_hex
-jal x0, print_h_hex
-letter_h:
-addi s3, s3, 55     # 10 is "A" ascii 65 ..
-print_h_hex:
-#     call wait_uart 
-auipc x1, 0 # R_RISCV_PCREL_HI20 wait_uart
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I wait_uart
-sb s3, 0(s11)
-andi s4, s9, 0x0F   # get low nibble
-slti s5, s4, 10     # if < 10 number
-beq s5, x0, letter_l
-addi s4, s4, 48     # 0 is "0" ascii 48
-#     j print_l_hex
-jal x0, print_l_hex
-letter_l:
-addi s4, s4, 55     # 10 is "A" ascii 65 ..
-print_l_hex:
-#     call wait_uart 
-auipc x1, 0 # R_RISCV_PCREL_HI20 wait_uart
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I wait_uart
-sb s4, 0(s11)
-bge s8, s7, print_loop
-ld ra, 0(sp)
-ld s4, 8(sp)
-ld s5, 16(sp)
-ld s6, 24(sp)
-ld s7, 32(sp)
-ld s8, 40(sp)
-ld s9, 48(sp)
-ld s3, 56(sp)
-addi sp, sp, 64
-#     ret
-jalr x0, 0(x1)
-putchar:
-addi sp, sp, -8
-sd s0, 0(sp)
-putchar_wait:
-lw s0, 0(s10)
-srli s0, s0, 16   # 31:16 WSPACE = 0 fully
-beq s0, x0, putchar_wait
-sb a0, 0(s11)
-ld s0, 0(sp)
-addi sp, sp, 8
-#     ret
-jalr x0, 0(x1)
-puts:
-addi sp, sp, -16
-sd ra, 0(sp)
-sd s0, 8(sp)
-#     mv s0, a0
-addi s0, a0, 0
-puts_loop:
-lbu a0, 0(s0)
-beq a0, x0, stop_puts # \x00 for end of string
-#     call putchar 
-auipc x1, 0 # R_RISCV_PCREL_HI20 putchar
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I putchar
-addi s0, s0, 1 # next byte
-#     j puts_loop
-jal x0, puts_loop
-stop_puts:
-ld ra, 0(sp)
-ld s0, 8(sp)
-addi sp, sp, 16
-#     ret
-jalr x0, 0(x1)
-wait_uart:
-addi sp, sp, -8
-sd s0, 0(sp)
-wait_uart_loop:
-lw s0, 0(s10)
-srli s0, s0, 16   # 31:16 WSPACE = 0 fully
-beq s0, x0, wait_uart_loop
-ld s0, 0(sp)
-addi sp, sp, 8
-#     ret
-jalr x0, 0(x1)
-print7:
-addi sp, sp, -16
-sd a0, 0(sp)
-sd ra, 8(sp)
-#     mv a0, sp
-addi a0, sp, 0
-#     call puts
-auipc x1, 0 # R_RISCV_PCREL_HI20 puts
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I puts
-ld ra, 8(sp)
-addi sp, sp, 16
-#     ret
-jalr x0, 0(x1)
+sb t2, 0(t0)         # Should print 'X'
+sb t2, 0(t0)         # Should print 'X'
+sh t2, 0(t0)         # Should print 'X'
+#     li t1, 0x44434241    
+addi t1, x0, 0x0
+lui t1, 0x44434
+addi t1, t1, 0x241
+sw t1, 0(s0)         # test sdram sw
+lhu t3, 0(s0) # A    # test sdram lhu lwu
+lbu t4, 1(s0) # B
+lwu t5, 2(s0) # C
+lbu t6, 3(s0) # D
+sb t3, 0(t0)         # Should print 'A'
+sb t4, 0(t0)         # Should print 'B'
+sb t5, 0(t0)         # Should print 'C'
+sb t6, 0(t0)         # Should print 'D'
+sb t2, 0(t0)         # Should print 'X'
+#     li t1, 0x4847464544434241         
+addi t1, x0, 0x0
+lui t1, 0x48474
+srli t1, t1, 0x1
+ori t1, t1, 0x322
+slli t1, t1, 0xb
+ori t1, t1, 0x511
+slli t1, t1, 0xb
+ori t1, t1, 0x68
+slli t1, t1, 0xb
+ori t1, t1, 0x241
+sd t1, 0(s0)         # test sdram sd
+lbu a0, 0(s0) # A
+lbu a1, 1(s0) # B
+lbu a2, 2(s0) # C
+lbu a3, 3(s0) # D
+lbu a4, 4(s0) # E
+lbu a5, 5(s0) # F
+lbu a6, 6(s0) # G
+lbu a7, 7(s0) # H
+sb a0, 0(t0)         # Should print 'A'
+sb a1, 0(t0)         # Should print 'B'
+sb a2, 0(t0)         # Should print 'C'
+sb a3, 0(t0)         # Should print 'D'
+sb a4, 0(t0)         # Should print 'E'
+sb a5, 0(t0)         # Should print 'F'
+sb a6, 0(t0)         # Should print 'G'
+sb a7, 0(t0)         # Should print 'H'
+sb t2, 0(t0)         # Should print 'X'
+ld a0, 0(s0)
+sb a0, 0(t0)         # Should print 'A'
+srli a0, a0, 8
+sb a0, 0(t0)         # Should print 'B'
+srli a0, a0, 8
+sb a0, 0(t0)         # Should print 'C'
+srli a0, a0, 8
+sb a0, 0(t0)         # Should print 'D'
+srli a0, a0, 8
+sb a0, 0(t0)         # Should print 'E'
+srli a0, a0, 8
+sb a0, 0(t0)         # Should print 'F'
+srli a0, a0, 8
+sb a0, 0(t0)         # Should print 'G'
+srli a0, a0, 8
+sb a0, 0(t0)         # Should print 'H'
+sb t2, 0(t0)         # Should print 'X'
+#     li a1, 8              
+addi a1, x0, 0x0
+addi a1, x0, 0x0
+addi a1, x0, 0x8
+slli a1, a1, 60          # mmu mode sv39 #li a1, 0x8000000000000000 # mmu mode sv39
+csrrw a3, satp, a1      # set satp csr index 0x180
+#     li t3, 124 
+addi t3, x0, 0x0
+addi t3, x0, 0x0
+addi t3, x0, 0x7c
+sb t3, 0(t0) # mmu settled
+#     li t1, 0x44434241    
+addi t1, x0, 0x0
+lui t1, 0x44434
+addi t1, t1, 0x241
+#     li t3, 58 
+addi t3, x0, 0x0
+addi t3, x0, 0x0
+addi t3, x0, 0x3a
+sb t3, 0(t0) # start read sw to sdram
+sw t1, 0(s0)         # test sdram sw
+lhu t3, 0(s0) # A    # test sdram lhu lwu
+lbu t4, 1(s0) # B
+lwu t5, 2(s0) # C
+lbu t6, 3(s0) # D
+sb t3, 0(t0)         # Should print 'A'
+sb t4, 0(t0)         # Should print 'B'
+sb t5, 0(t0)         # Should print 'C'
+sb t6, 0(t0)         # Should print 'D'
+sb t2, 0(t0)         # Should print 'X'
+#     li t1, 0x4847464544434241         
+addi t1, x0, 0x0
+lui t1, 0x48474
+srli t1, t1, 0x1
+ori t1, t1, 0x322
+slli t1, t1, 0xb
+ori t1, t1, 0x511
+slli t1, t1, 0xb
+ori t1, t1, 0x68
+slli t1, t1, 0xb
+ori t1, t1, 0x241
+sd t1, 0(s0)         
+lbu a0, 0(s0) # A
+lbu a1, 1(s0) # B
+lbu a2, 2(s0) # C
+lbu a3, 3(s0) # D
+lbu a4, 4(s0) # E
+lbu a5, 5(s0) # F
+lbu a6, 6(s0) # G
+lbu a7, 7(s0) # H
+sb a0, 0(t0)         # Should print 'A'
+sb a1, 0(t0)         # Should print 'B'
+sb a2, 0(t0)         # Should print 'C'
+sb a3, 0(t0)         # Should print 'D'
+sb a4, 0(t0)         # Should print 'E'
+sb a5, 0(t0)         # Should print 'F'
+sb a6, 0(t0)         # Should print 'G'
+sb a7, 0(t0)         # Should print 'H'
+sb t2, 0(t0)         # Should print 'X'
+ld a0, 0(s0)
+sb a0, 0(t0)         # Should print 'A'
+srli a0, a0, 8
+sb a0, 0(t0)         # Should print 'B'
+srli a0, a0, 8
+sb a0, 0(t0)         # Should print 'C'
+srli a0, a0, 8
+sb a0, 0(t0)         # Should print 'D'
+srli a0, a0, 8
+sb a0, 0(t0)         # Should print 'E'
+srli a0, a0, 8
+sb a0, 0(t0)         # Should print 'F'
+srli a0, a0, 8
+sb a0, 0(t0)         # Should print 'G'
+srli a0, a0, 8
+sb a0, 0(t0)         # Should print 'H'
+sb t2, 0(t0)         # Should print 'X'
+#     li t1, 0x41          
+addi t1, x0, 0x0
+addi t1, x0, 0x0
+addi t1, x0, 0x41
+sb t1, 0(s0)         # test sdarm sb
+#     li t1, 0x42          
+addi t1, x0, 0x0
+addi t1, x0, 0x0
+addi t1, x0, 0x42
+sb t1, 1(s0)         # test sdarm sb+1
+lb a0, 0(s0)         # test sdram ld
+sb a0, 0(t0)         # Should print 'A'
+lb a0, 1(s0)         # test sdram ld+1
+sb a0, 0(t0)         # Should print 'B'
+#     li t3, 124 
+addi t3, x0, 0x0
+addi t3, x0, 0x0
+addi t3, x0, 0x7c
+sb t3, 0(t0) # to plic
+#     li t0, 0x2004 
+addi t0, x0, 0x0
+lui t0, 0x2
+addi t0, t0, 0x4
+#     li t1, 1
+addi t1, x0, 0x0
+addi t1, x0, 0x0
+addi t1, x0, 0x1
+sw t1, 4(t0) # write 1 to 0x2008 UART control means readable
+#     li t3, 48 
+addi t3, x0, 0x0
+addi t3, x0, 0x0
+addi t3, x0, 0x30
+sb t3, 0(t0)
+#     la t2, irq_handler
+auipc t2, 0 # R_RISCV_PCREL_HI20 irq_handler 
+addi t2, t2, 0 # R_RISCV_PCREL_LO12_I irq_handler 
+#     csrw mtvec, t2
+csrrw x0, mtvec, t2
+#     li t3, 49 
+addi t3, x0, 0x0
+addi t3, x0, 0x0
+addi t3, x0, 0x31
+sb t3, 0(t0)
+#     li t2, 0x0C000004 
+addi t2, x0, 0x0
+lui t2, 0xc000
+addi t2, t2, 0x4
+#     li t3, 1
+addi t3, x0, 0x0
+addi t3, x0, 0x0
+addi t3, x0, 0x1
+sw t3, 0(t2)
+#     li t3, 50 
+addi t3, x0, 0x0
+addi t3, x0, 0x0
+addi t3, x0, 0x32
+sb t3, 0(t0)
+#     li t2, 0x0C002000
+addi t2, x0, 0x0
+lui t2, 0xc002
+addi t2, t2, 0x0
+#     li t1, 2 
+addi t1, x0, 0x0
+addi t1, x0, 0x0
+addi t1, x0, 0x2
+sw t1, 0(t2)
+#     li t3, 51 
+addi t3, x0, 0x0
+addi t3, x0, 0x0
+addi t3, x0, 0x33
+sb t3, 0(t0)
+#     li t2, 0x0C200000  
+addi t2, x0, 0x0
+lui t2, 0xc200
+addi t2, t2, 0x0
+#     li t1, 0 
+addi t1, x0, 0x0
+sw t1, 0(t2)
+#     li t3, 52 
+addi t3, x0, 0x0
+addi t3, x0, 0x0
+addi t3, x0, 0x34
+sb t3, 0(t0)
+#     li t2, 0x0C201000  
+addi t2, x0, 0x0
+lui t2, 0xc201
+addi t2, t2, 0x0
+#     li t1, 0 
+addi t1, x0, 0x0
+sw t1, 0(t2)
+#     li t3, 53 
+addi t3, x0, 0x0
+addi t3, x0, 0x0
+addi t3, x0, 0x35
+sb t3, 0(t0)
+#     li t2, 0x800 
+addi t2, x0, 0x0
+lui t2, 0x1
+addi t2, t2, 0x800
+#     csrs mie, t2
+csrrs x0, mie, t2
+#     li t3, 54 
+addi t3, x0, 0x0
+addi t3, x0, 0x0
+addi t3, x0, 0x36
+sb t3, 0(t0)
+#     li t2, 8  
+addi t2, x0, 0x0
+addi t2, x0, 0x0
+addi t2, x0, 0x8
+#     csrs mstatus, t2
+csrrs x0, mstatus, t2
+#     li t3, 55 
+addi t3, x0, 0x0
+addi t3, x0, 0x0
+addi t3, x0, 0x37
+sb t3, 0(t0) # to plic
+wait_loop:
+#     j wait_loop
+jal x0, wait_loop
+irq_handler:
+#    li t0, 0x2004 
+addi t0, x0, 0x0
+lui t0, 0x2
+addi t0, t0, 0x4
+#    li t2, 0x0C200004  
+addi t2, x0, 0x0
+lui t2, 0xc200
+addi t2, t2, 0x4
+#    li t3, 124 
+addi t3, x0, 0x0
+addi t3, x0, 0x0
+addi t3, x0, 0x7c
+sb t3, 0(t0) # print |
+lw t1, 0(t2)
+#    mv t5, t1
+addi t5, t1, 0
+#    beqz t1, exit_irq
+beq t1, x0, exit_irq
+addi t4, t1, 48 
+sb t4, 0(t0) # show interrupt id
+#    li t3, 46 
+addi t3, x0, 0x0
+addi t3, x0, 0x0
+addi t3, x0, 0x2e
+sb t3, 0(t0) 
+lw t3, 0(t0) # read from UART FIFO
+sw t3, 0(t0) # print key value
+sw t5, 0(t2) # write id back to ctx0claim to clear pending id
+#    li t3, 47 
+addi t3, x0, 0x0
+addi t3, x0, 0x0
+addi t3, x0, 0x2f
+sb t3, 0(t0) #  finished
+exit_irq:
+#    li t3, 69 
+addi t3, x0, 0x0
+addi t3, x0, 0x0
+addi t3, x0, 0x45
+sb t3, 0(t0) #  Exit irq
+mret 
