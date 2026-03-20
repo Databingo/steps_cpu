@@ -471,15 +471,19 @@ module riscv64(
     //reg [1:0] tlb_ptr = 0; // 4 entries TLB
     reg  tlb_ptr = 0; // 2 entries TLB
     always @(posedge clk or negedge reset) begin
-        if (!reset) tlb_ptr <= 0; // hit->trap(save va to x9)->refill assembly(fetch pa to x9)-> sd x9, `Tlb -> here to refill tlb
+	if (!reset) begin
+	    tlb_ptr <= 0; // hit->trap(save va to x9)->refill assembly(fetch pa to x9)-> sd x9, `Tlb -> here to refill tlb
+	    tlb_vld[0] <= 0; 
+	    tlb_vld[1] <= 0; 
+	end
         else if ((mmu_pc || mmu_da) && bus_write_enable && bus_address == `Tlb) begin // for the last fill: sd ppa, Tlb
             tlb_vpn[tlb_ptr] <= re[9][38:12]; // VA from x9 saved by trapp mmu_pc/mmu_da
             tlb_ppn[tlb_ptr] <= {17'h0, re[9][38:12]}; // mimic copy now | real need walking assembly !!
             tlb_vld[tlb_ptr] <= 1;
             tlb_ptr <= tlb_ptr + 1; 
         end
-	if (!bubble) begin 
-	    casez (ir) 32'b0001001??????????_000_?????_1110011: begin 
+	else if (!bubble) begin 
+	    casez (ir) 32'b0001001??????????_000_?????_1110011: begin  // sfence.vma flush
 	        tlb_vld[0] <= 0; 
 		tlb_vld[1] <= 0; 
                 end 
