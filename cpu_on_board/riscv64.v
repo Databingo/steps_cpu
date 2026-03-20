@@ -474,10 +474,11 @@ module riscv64(
         if (!reset) tlb_ptr <= 0; // hit->trap(save va to x9)->refill assembly(fetch pa to x9)-> sd x9, `Tlb -> here to refill tlb
         else if ((mmu_pc || mmu_da) && bus_write_enable && bus_address == `Tlb) begin // for the last fill: sd ppa, Tlb
             tlb_vpn[tlb_ptr] <= re[9][38:12]; // VA from x9 saved by trapp mmu_pc/mmu_da
-            tlb_ppn[tlb_ptr] <= {17'h0, re[9][38:12]}; // mimic copy now | real need walking assembly
+            tlb_ppn[tlb_ptr] <= {17'h0, re[9][38:12]}; // mimic copy now | real need walking assembly !!
             tlb_vld[tlb_ptr] <= 1;
             tlb_ptr <= tlb_ptr + 1; 
         end
+	casez (ir) 32'b0001001??????????_000_?????_1110011: begin tlb_vld[0] <= 0; tlb_vld[1] <= 0; end endcase
     end
 
     // -----
@@ -814,7 +815,7 @@ module riscv64(
 		    // Fence.i
 		    32'b?????????????????_001_?????_0001111: begin flush <= ~flush; end //bubble <= 1'b1; pc<=pc; end
 		    // Sfence.vma supervisor fence for virtual memory address
-		    32'b0001001??????????_000_?????_1110011: begin tlb_vld[0] <= 0; tlb_vld[1] <= 0; end
+		    32'b0001001??????????_000_?????_1110011: begin end
 		    // RV64IMAFD(G)C  RVA23U64
 		    // Atomic after TLB // -- ATOMIC instructions (A-extension) opcode: 0101111
 		    // lr
