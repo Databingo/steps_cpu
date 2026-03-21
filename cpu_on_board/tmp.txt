@@ -134,9 +134,6 @@ lw a0, 0(t3)
 # call sd_read_sector  
 auipc x1, 0 # R_RISCV_PCREL_HI20 sd_read_sector
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I sd_read_sector
-# call print_sector
-auipc x1, 0 # R_RISCV_PCREL_HI20 print_sector
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_sector
 # li s8, 0 
 addi s8, x0, 0x0
 # li s9, "MUSIC"

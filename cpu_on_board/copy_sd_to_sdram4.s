@@ -208,7 +208,7 @@ sw a0, 0(t3)
 la t3, root_dir_sector_start
 lw a0, 0(t3)
 call sd_read_sector  # use a0 as sector no.
-call print_sector
+#call print_sector
 
 # -------------------------------------
 # Scan Entries of Root Dir first sector
