@@ -184,24 +184,24 @@ assign DRAM_CKE = 1; // always enable
         .bus_write_done(bus_write_done)
     );
 
-    // -- Keyboard -- 
-    reg [7:0] ascii;
-    reg [7:0] scan;
-    reg key_pressed_delay;
-    wire key_pressed;
-    wire key_released;
-
-    ps2_decoder ps2_decoder_inst (
-        .clk(clock_slow),
-        .ps2_clk_async(PS2_CLK),
-        .ps2_data_async(PS2_DAT),
-        .scan_code(scan),
-        .ascii_code(ascii),
-        .key_pressed(key_pressed),
-        .key_released(key_released)
-     );
-    always @(posedge clock_slow) begin key_pressed_delay <= key_pressed; end
-    wire key_pressed_edge = key_pressed && !key_pressed_delay;
+//    // -- Keyboard -- 
+//    reg [7:0] ascii;
+//    reg [7:0] scan;
+//    reg key_pressed_delay;
+//    wire key_pressed;
+//    wire key_released;
+//
+//    ps2_decoder ps2_decoder_inst (
+//        .clk(clock_slow),
+//        .ps2_clk_async(PS2_CLK),
+//        .ps2_data_async(PS2_DAT),
+//        .scan_code(scan),
+//        .ascii_code(ascii),
+//        .key_pressed(key_pressed),
+//        .key_released(key_released)
+//     );
+//    always @(posedge clock_slow) begin key_pressed_delay <= key_pressed; end
+//    wire key_pressed_edge = key_pressed && !key_pressed_delay;
 
     // -- Monitor -- Connected to Bus
     reg uart_write_pulse;
@@ -255,7 +255,7 @@ assign DRAM_CKE = 1; // always enable
     // Address Decoding --
     wire Rom_selected = (bus_address >= `Rom_base && bus_address < `Rom_base + `Rom_size);
     wire Ram_selected = (bus_address >= `Ram_base && bus_address < `Ram_base + `Ram_size);
-    wire Key_selected = (bus_address == `Key_base);
+    //wire Key_selected = (bus_address == `Key_base);
     wire Art_selected = (bus_address == `Art_base || bus_address == `ArtK_base);
     wire Sdc_addr_selected = (bus_address == `Sdc_addr);
     wire Sdc_read_selected = (bus_address == `Sdc_read);
@@ -348,7 +348,7 @@ assign DRAM_CKE = 1; // always enable
         // Read
         //if (!bus_read_enable && bus_read_done==0) begin 
         if (bus_read_done==0) begin 
-            if (Key_selected) begin bus_read_data <= {32'd0, 24'd0, ascii}; bus_read_done <= 1; end
+            //if (Key_selected) begin bus_read_data <= {32'd0, 24'd0, ascii}; bus_read_done <= 1; end
 	    if (Ram_selected) begin 
 	        casez(bus_ls_type)
 	            3'b011: begin // 011Ld
@@ -713,7 +713,7 @@ end
     );
 
     // Debug LEDs
-    assign HEX30 = ~Key_selected;
+    //assign HEX30 = ~Key_selected;
     assign HEX20 = ~|bus_read_data;
     assign HEX21 = ~bus_read_enable;
     assign HEX10 = ~|bus_write_data;
