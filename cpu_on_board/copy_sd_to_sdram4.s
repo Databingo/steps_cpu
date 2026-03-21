@@ -674,7 +674,7 @@ stop_puts:
 
 wait_uart:
     addi sp, sp, -8
-    sd ra, 0(sp)
+    sd s0, 0(sp)
     #sd s0, 8(sp)
 wait_uart_loop:
     #lw s0, 0(s10)
@@ -682,7 +682,7 @@ wait_uart_loop:
     #beq s0, x0, wait_uart_loop
     lw s0, 0(s11)
     bltz s0, wait_uart_loop
-    ld ra, 0(sp)
+    ld s0, 0(sp)
     #ld s0, 8(sp)
     addi sp, sp, 8
     ret
