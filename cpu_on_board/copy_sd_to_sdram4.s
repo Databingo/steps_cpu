@@ -613,7 +613,7 @@ copy_loop:
     add s6, s1, s7 
     ld a0, 0(s6)       # load 8 bytes at 0x3000 a1+s7
     sd a0, 0(s5)       # save 8 bytes to s5
-    call print_reg
+    #call print_reg
     addi s7, s7, 8
     addi s5, s5, 8
     bge s8, s7, copy_loop
