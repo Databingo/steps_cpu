@@ -8,8 +8,10 @@ make CROSS_COMPILE=/usr/local/projects/bin/xpack-riscv-none-elf-gcc-14.2.0-3/bin
      FW_PIC=n \
      PLATFORM_RISCV_ISA=rv64ima_zicsr_zifencei \
      PLATFORM_RISCV_ABI=lp64 \
+     #CFLAGS="-march=rv64ima_zicsr_zifencei -mabi=lp64"\
+     #ASFLAGS="-march=rv64ima_zicsr_zifencei -mabi=lp64"\
+     EXTRA_CFLAGS="-mno-relax"\
      FW_PAYLOAD=y \
-
 
 
     #FW_PAYLOAD_PATH= add.o \
@@ -28,3 +30,7 @@ make CROSS_COMPILE=/usr/local/projects/bin/xpack-riscv-none-elf-gcc-14.2.0-3/bin
 
 # use opensbi v13.0 for disable FW_PIC
 # align 4KB
+#
+#
+../../../bin/riscv64-unknown-elf-objdump -D -b binary -m riscv:rv64ima build/platform/generic/firmware/fw_payload.bin|less
+

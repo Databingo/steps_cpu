@@ -643,15 +643,18 @@ copy_loop:
 
 
 putchar:  # a0
-    addi sp, sp, -8
-    sd s0, 0(sp)
-putchar_wait:
-    lw s0, 0(s10)
-    srli s0, s0, 16   # 31:16 WSPACE = 0 fully
-    beq s0, x0, putchar_wait
+    addi sp, sp, -16
+    sd ra, 0(sp)
+    sd s0, 8(sp)
+    call wait_uart
+#putchar_wait:
+#    lw s0, 0(s10)
+#    srli s0, s0, 16   # 31:16 WSPACE = 0 fully
+#    beq s0, x0, putchar_wait
     sb a0, 0(s11)
-    ld s0, 0(sp)
-    addi sp, sp, 8
+    ld ra, 0(sp)
+    ld s0, 8(sp)
+    addi sp, sp, 16
     ret
 
 
