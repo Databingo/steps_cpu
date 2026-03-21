@@ -101,8 +101,8 @@ call sd_read_sector  # use a0 as sector no.
 # -- Parse BPB -- little-endian  Bios Parameter Block : sector 0
 # -------------------------------------
 # byte_per_sec offset 0x0b-0x0c 2 bytes
-#li a0, "\nBPsec:" # 7 char left on for null
-#call print7
+li a0, "\nBPsec:" # 7 char left on for null
+call print7
 la a1, byte_per_sec
 lwu a0, 0x0a(s1)
 srli a0, a0, 8
@@ -678,7 +678,8 @@ wait_uart_loop:
     #srli s0, s0, 16   # 31:16 WSPACE = 0 fully
     #beq s0, x0, wait_uart_loop
     lw s0, 0(s11)
-    bltz s0, wait_uart_loop
+    #bltz s0, wait_uart_loop
+    bgt zero, s0, wait_uart_loop
     ld s0, 0(sp)
     addi sp, sp,8 
     ret
