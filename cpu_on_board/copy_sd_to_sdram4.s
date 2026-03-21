@@ -215,8 +215,8 @@ call sd_read_sector  # use a0 as sector no.
 # s7 entry_per_sector
 li s8, 0 # entry_index
 li s9, "MUSIC"
-mv a0, s9
-call print7
+#mv a0, s9
+#call print7
 
 entry_loop:
 bge s8, s7, done_entries
@@ -301,13 +301,13 @@ j entry_loop
 
 read_file:
 ## file size at 0x1C-0x1D-0x1E-0x1F 4 bytes
-li a0, "\nFSize:"
-call print7
+#li a0, "\nFSize:"
+#call print7
 lwu a0, 0x1c(t3)
 la a1, file_size
 sw a0, 0(a1)
-lwu a0, 0(a1)
-call print_reg
+#lwu a0, 0(a1)
+#call print_reg
 
 # file_first_cluster at 0x1A-0x1B 2 bytes
 #li a0, "\nF0cls:"
@@ -319,8 +319,8 @@ sh a0, 0(a1)
 #call print_reg
 
 # root_dir_sectors = (RootEntryCount * 32 + BytesPerSector -1 )/ BytesPerSector  ceiling division
-li a0, "\nrDseS:"
-call print7
+#li a0, "\nrDseS:"
+#call print7
 
 la a1, root_ent_cnt
 lwu t0, 0(a1)
@@ -335,8 +335,8 @@ div a0, t3, t0
 
 la a1, root_dir_sectors 
 sw a0, 0(a1)
-lw a0, 0(a1)
-call print_reg
+#lw a0, 0(a1)
+#call print_reg
 
 #data_start_sec # FirstDataSector = root_dir_sector_start + root_dir_sectors 
 #li a0, "\nD0sec:"
@@ -352,8 +352,8 @@ sw t2, 0(a1)
 #call print_reg
 
 # FirstSectorOfCluster(N)=FirstDataSector + (N - 2) * SectorsPerCluster
-li a0, "\nF0sec:"
-call print7
+#li a0, "\nF0sec:"
+#call print7
 
 la a1, file_first_cluster # N
 lw t0, 0(a1)
@@ -366,12 +366,12 @@ lw t3, 0(a1)
 add a0, t3, t2
 la a1, file_start_sector
 sw a0, 0(a1)
-call print_reg
-
+#call print_reg
+#
 
 # file_sectors = file_size + 511 / 512
-li a0, "\nFseS:"
-call print7
+#li a0, "\nFseS:"
+#call print7
 la a1, file_size
 lw t0, 0(a1)
 addi t0, t0, 511
@@ -379,12 +379,12 @@ li t1, 512
 div a0, t0, t1
 la a1, file_sectors 
 sw a0, 0(a1)
-lw a0, 0(a1)
-call print_reg
+#lw a0, 0(a1)
+#call print_reg
 
 
-li a0, "\nFileB:"
-call print7
+#li a0, "\nFileB:"
+#call print7
 
 la a1, file_sectors
 lw t0, 0(a1)
