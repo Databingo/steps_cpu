@@ -4,7 +4,7 @@
 `define Ram_size   64'h0000_1000
 `define Key_base   64'h0000_2000
 `define Art_base   64'h0000_2004
-`define ArtC_base  64'h0000_2008
+`define ArtK_base  64'h0000_2008
 
 `define Sdc_base   64'h0000_3000
 `define Sdc_addr   64'h0000_3200

@@ -674,14 +674,18 @@ stop_puts:
 
 
 wait_uart:
-    addi sp, sp, -8
-    sd s0, 0(sp)
+    addi sp, sp, -16
+    sd ra, 0(sp)
+    sd s0, 8(sp)
 wait_uart_loop:
-    lw s0, 0(s10)
-    srli s0, s0, 16   # 31:16 WSPACE = 0 fully
-    beq s0, x0, wait_uart_loop
-    ld s0, 0(sp)
-    addi sp, sp, 8
+    #lw s0, 0(s10)
+    #srli s0, s0, 16   # 31:16 WSPACE = 0 fully
+    #beq s0, x0, wait_uart_loop
+    lw s0, 0(s11)
+    bltz s0, wait_uart_loop
+    ld ra, 0(sp)
+    ld s0, 8(sp)
+    addi sp, sp, 16
     ret
 
 print7: # a0, 7 char left one for null
