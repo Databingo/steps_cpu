@@ -11,8 +11,8 @@
 
 # -- Define data --
 .section .data
-msg:
-    .string "Hello"
+#msg:
+#    .string "Hello"
 #sbi:
 #    .string "I'm test Opensbi add update ram read=on1"
 #wait_sd_ready:

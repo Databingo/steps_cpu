@@ -1,4 +1,3 @@
-msg:
 reserved_sec:
 num_fats:
 sec_per_fat:
