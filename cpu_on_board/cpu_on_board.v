@@ -209,11 +209,13 @@ assign DRAM_CKE = 1; // always enable
     reg uart_read_pulse;
     reg uart_read_step;
     wire uart_waitrequest;
+    //wire jtag_addr = {bus_read_enable && Art_selected) ? 1:0;
     jtag_uart_system my_jtag_system (
         .clk_clk                                 (clock_slow),
         .reset_reset_n                           (KEY0),
         //.jtag_uart_0_avalon_jtag_slave_address   (bus_address[0:0]),
-        .jtag_uart_0_avalon_jtag_slave_address   (~bus_address[2]), // 0 for Data, 1 for Control
+        //.jtag_uart_0_avalon_jtag_slave_address   (~bus_address[2]), // 0 for Data, 1 for Control
+        .jtag_uart_0_avalon_jtag_slave_address   (0), // for jtag, read (0)0x2004 return 31 bits, 31-16 is WSPACE, 15-0 is data; write (0)0x2004 give low 8 bits to uart.  
         .jtag_uart_0_avalon_jtag_slave_writedata (bus_write_data[31:0]),
         //.jtag_uart_0_avalon_jtag_slave_write_n   (~uart_write_trigger_pulse),
         .jtag_uart_0_avalon_jtag_slave_write_n   (~uart_write_pulse),
@@ -389,7 +391,11 @@ assign DRAM_CKE = 1; // always enable
 	        if (uart_read_step ==0) begin uart_read_pulse <= 1; uart_read_step <= 1; end
 	        if (uart_read_step ==1 &&  uart_waitrequest) begin uart_read_pulse <= 1; end
 	        //if (uart_read_step ==1 && !uart_waitrequest) begin bus_read_data <= uart_readdata; uart_read_step <= 0; bus_read_done <=1; uart_read_pulse <= 0;end
-	        if (uart_read_step ==1 && !uart_waitrequest) begin bus_read_data <= uart_readdata; uart_read_step <= 0; bus_read_done <=1; end
+	        //if (uart_read_step ==1 && !uart_waitrequest) begin bus_read_data <= uart_readdata; uart_read_step <= 0; bus_read_done <=1; end
+	        if (uart_read_step ==1 && !uart_waitrequest) begin  // jtage 31:16 mean how many free space, 15 0 means RVALID 0
+		    if (bus_address == 64'h2004) begin bus_read_data <= {{33{uart_readdata[31:16]==16'h0)}}, 31'b0}; uart_read_step <= 0; bus_read_done <=1; end //opensbi reading tx 32 1 means full
+		    if (bus_address == 64'h2008) begin bus_read_data <= {32'b0, ~uart_readdata[15], 23'b0, uart_readdata[7:0]}; uart_read_step <= 0; bus_read_done <=1;end//opensbi reading rx 31 1 empty
+		end
 	    end
 
 	    if (Sdram_selected) begin

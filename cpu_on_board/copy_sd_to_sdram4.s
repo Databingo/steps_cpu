@@ -676,9 +676,11 @@ wait_uart:
     addi sp, sp, -8
     sd s0, 0(sp)
 wait_uart_loop:
-    lw s0, 0(s10)
-    srli s0, s0, 16   # 31:16 WSPACE = 0 fully
-    beq s0, x0, wait_uart_loop
+    #lw s0, 0(s10)
+    #srli s0, s0, 16   # 31:16 WSPACE = 0 fully
+    #beq s0, x0, wait_uart_loop
+    lw s0, 0(s11)
+    bltz s0, wait_uart_loop
     ld s0, 0(sp)
     addi sp, sp, 8
     ret
