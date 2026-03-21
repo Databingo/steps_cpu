@@ -11,8 +11,8 @@
 
 # -- Define data --
 .section .data
-#msg:
-#    .string "Hello"
+msg:
+    .string "Hello"
 #sbi:
 #    .string "I'm test Opensbi add update ram read=on1"
 #wait_sd_ready:
@@ -208,15 +208,15 @@ sw a0, 0(t3)
 la t3, root_dir_sector_start
 lw a0, 0(t3)
 call sd_read_sector  # use a0 as sector no.
-#call print_sector
+call print_sector
 
 # -------------------------------------
 # Scan Entries of Root Dir first sector
 # s7 entry_per_sector
 li s8, 0 # entry_index
 li s9, "MUSIC"
-#mv a0, s9
-#call print7
+mv a0, s9
+call print7
 
 entry_loop:
 bge s8, s7, done_entries
@@ -301,13 +301,13 @@ j entry_loop
 
 read_file:
 ## file size at 0x1C-0x1D-0x1E-0x1F 4 bytes
-#li a0, "\nFSize:"
-#call print7
+li a0, "\nFSize:"
+call print7
 lwu a0, 0x1c(t3)
 la a1, file_size
 sw a0, 0(a1)
-#lwu a0, 0(a1)
-#call print_reg
+lwu a0, 0(a1)
+call print_reg
 
 # file_first_cluster at 0x1A-0x1B 2 bytes
 #li a0, "\nF0cls:"
@@ -319,8 +319,8 @@ sh a0, 0(a1)
 #call print_reg
 
 # root_dir_sectors = (RootEntryCount * 32 + BytesPerSector -1 )/ BytesPerSector  ceiling division
-#li a0, "\nrDseS:"
-#call print7
+li a0, "\nrDseS:"
+call print7
 
 la a1, root_ent_cnt
 lwu t0, 0(a1)
@@ -335,8 +335,8 @@ div a0, t3, t0
 
 la a1, root_dir_sectors 
 sw a0, 0(a1)
-#lw a0, 0(a1)
-#call print_reg
+lw a0, 0(a1)
+call print_reg
 
 #data_start_sec # FirstDataSector = root_dir_sector_start + root_dir_sectors 
 #li a0, "\nD0sec:"
@@ -352,8 +352,8 @@ sw t2, 0(a1)
 #call print_reg
 
 # FirstSectorOfCluster(N)=FirstDataSector + (N - 2) * SectorsPerCluster
-#li a0, "\nF0sec:"
-#call print7
+li a0, "\nF0sec:"
+call print7
 
 la a1, file_first_cluster # N
 lw t0, 0(a1)
@@ -366,12 +366,12 @@ lw t3, 0(a1)
 add a0, t3, t2
 la a1, file_start_sector
 sw a0, 0(a1)
-#call print_reg
-#
+call print_reg
+
 
 # file_sectors = file_size + 511 / 512
-#li a0, "\nFseS:"
-#call print7
+li a0, "\nFseS:"
+call print7
 la a1, file_size
 lw t0, 0(a1)
 addi t0, t0, 511
@@ -379,12 +379,12 @@ li t1, 512
 div a0, t0, t1
 la a1, file_sectors 
 sw a0, 0(a1)
-#lw a0, 0(a1)
-#call print_reg
+lw a0, 0(a1)
+call print_reg
 
 
-#li a0, "\nFileB:"
-#call print7
+li a0, "\nFileB:"
+call print7
 
 la a1, file_sectors
 lw t0, 0(a1)
@@ -613,7 +613,7 @@ copy_loop:
     add s6, s1, s7 
     ld a0, 0(s6)       # load 8 bytes at 0x3000 a1+s7
     sd a0, 0(s5)       # save 8 bytes to s5
-    #call print_reg
+    call print_reg
     addi s7, s7, 8
     addi s5, s5, 8
     bge s8, s7, copy_loop
@@ -643,14 +643,15 @@ copy_loop:
 
 
 putchar:  # a0
-    addi sp, sp, -16
-    sd ra, 0(sp)
-    sd s0, 8(sp)
-    call wait_uart
+    addi sp, sp, -8
+    sd s0, 0(sp)
+putchar_wait:
+    lw s0, 0(s10)
+    srli s0, s0, 16   # 31:16 WSPACE = 0 fully
+    beq s0, x0, putchar_wait
     sb a0, 0(s11)
-    ld ra, 0(sp)
-    ld s0, 8(sp)
-    addi sp, sp, 16
+    ld s0, 0(sp)
+    addi sp, sp, 8
     ret
 
 
@@ -675,15 +676,11 @@ stop_puts:
 wait_uart:
     addi sp, sp, -8
     sd s0, 0(sp)
-    #sd s0, 8(sp)
 wait_uart_loop:
-    #lw s0, 0(s10)
-    #srli s0, s0, 16   # 31:16 WSPACE = 0 fully
-    #beq s0, x0, wait_uart_loop
-    lw s0, 0(s11)
-    bltz s0, wait_uart_loop
+    lw s0, 0(s10)
+    srli s0, s0, 16   # 31:16 WSPACE = 0 fully
+    beq s0, x0, wait_uart_loop
     ld s0, 0(sp)
-    #ld s0, 8(sp)
     addi sp, sp, 8
     ret
 

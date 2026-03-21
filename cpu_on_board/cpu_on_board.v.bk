@@ -90,13 +90,21 @@ assign DRAM_CKE = 1; // always enable
 
     // -- MEM -- minic L1 cache
     //(* ram_style = "block" *) reg [31:0] Cache [0:2000];
-    (* ram_style = "block" *) reg [31:0] Cache [0:511]; // 2KB
+    //(* ram_style = "block" *) reg [31:0] Cache [0:511]; // 2KB
+    //(* ram_style = "block" *) reg [31:0] Cache [0:1024]; // 4KB fix overflow of print sd content  
+    //(* ram_style = "block", preserve = 1 *) reg [31:0] Cache [0:1024]; // 4KB fix overflow of print sd content  
     //(* ram_style = "block" *) reg [31:0] Cache [0:383]; // 1.5KB
+    //(* ramstyle = "M4K", ram_init_file = "roam.mif" *) reg [31:0] Cache [0:1535];  // 6KB
+    (* ramstyle = "block", ram_init_file = "roam.mif" *) reg [31:0] Cache [0:1535];  // 6KB
+    //reg [31:0] Cache [0:1023];  // 4KB
+    //reg [31:0] Cache [0:2047];  // 8KB more than 52 RAM location
+      
+      
     integer i;
-    initial begin
-        $readmemb("rom.mif", Cache, `Rom_base>>2);
-        $readmemb("ram.mif", Cache, `Ram_base>>2);
-    end
+    //initial begin
+    //    $readmemb("rom.mif", Cache, `Rom_base>>2);
+    //    $readmemb("ram.mif", Cache, `Ram_base>>2);
+    //end
 
     // -- Clock --
     wire clock_slow;
@@ -141,8 +149,11 @@ assign DRAM_CKE = 1; // always enable
     //wire bubble;
     // IR_LD BRAM Port A read
     always @(posedge clock_slow) begin ir_bd <= Cache[ppc>>2]; end
-    wire [31:0] ir_ld; assign ir_ld = ir_bd;//{ir_bd[7:0], ir_bd[15:8], ir_bd[23:16], ir_bd[31:24]}; // Endianness swap
-    assign LEDR_PC = ppc/4;
+
+
+    wire [31:0] ir_ld; assign ir_ld = ir_bd;//{ir_bd[7:0], ir_bd[15:8], ir_bd[23:16], ir_bd[31:24]}; // Endianness swap // SWAP IN REAL
+    //assign LEDR_PC = ppc/4;
+    assign LEDR_PC = sd_status;
     assign LEDG = ir_ld;
 
     // -- CPU --
@@ -198,11 +209,13 @@ assign DRAM_CKE = 1; // always enable
     reg uart_read_pulse;
     reg uart_read_step;
     wire uart_waitrequest;
+    //wire jtag_addr = {bus_read_enable && Art_selected) ? 1:0;
     jtag_uart_system my_jtag_system (
         .clk_clk                                 (clock_slow),
         .reset_reset_n                           (KEY0),
         //.jtag_uart_0_avalon_jtag_slave_address   (bus_address[0:0]),
-        .jtag_uart_0_avalon_jtag_slave_address   (~bus_address[2]), // 0x00 for Data, 0x04 for Control
+        //.jtag_uart_0_avalon_jtag_slave_address   (~bus_address[2]), // 0 for Data, 1 for Control
+        .jtag_uart_0_avalon_jtag_slave_address   (0), // for jtag, read (0)0x2004 return 31 bits, 31-16 is WSPACE, 15-0 is data; write (0)0x2004 give low 8 bits to uart.  
         .jtag_uart_0_avalon_jtag_slave_writedata (bus_write_data[31:0]),
         //.jtag_uart_0_avalon_jtag_slave_write_n   (~uart_write_trigger_pulse),
         .jtag_uart_0_avalon_jtag_slave_write_n   (~uart_write_pulse),
@@ -246,7 +259,7 @@ assign DRAM_CKE = 1; // always enable
     wire Sdc_read_selected = (bus_address == `Sdc_read);
     wire Sdc_write_selected = (bus_address == `Sdc_write);
     wire Sdc_ready_selected = (bus_address == `Sdc_ready);
-    wire Sdc_cache_selected = (bus_address >= `Sdc_base && bus_address < (`Sdc_base + 512));
+    wire Sdc_cache_selected = (bus_address >= `Sdc_base && bus_address < (`Sdc_base + 512)); // h200
     wire Sdc_avail_selected = (bus_address == `Sdc_avail);
     wire Sdram_selected = (bus_address >= `Sdram_min && bus_address < `Sdram_max);
     wire Mtime_selected = (bus_address == `Mtime);
@@ -307,9 +320,11 @@ assign DRAM_CKE = 1; // always enable
 	    uart_read_step <= 0;
 	    mtimecmp <=  64'h80000000;
 	    uart_irq_pre <= 0;
+            //sd_rd_start <= 0;
 	end else begin
         bus_address_reg <= bus_address>>2;
         bus_address_reg_full <= bus_address;
+	cid8 <= cid;
         //sd_rd_start <= 0;
         uart_write_pulse <= 0;
 	uart_read_pulse <= 0;
@@ -318,10 +333,15 @@ assign DRAM_CKE = 1; // always enable
 	//if (key_pressed_edge) Plic_pending[1] <= 1;
 
         //if (bus_read_enable) begin bus_read_done <= 0; cid <= (bus_address-`Sdc_base); end 
-	if (bus_read_enable) begin bus_read_done <= 0; end
-        if (bus_write_enable) begin bus_write_done <= 0; end
+	if (bus_read_enable && bus_read_done) begin bus_read_done <= 0; end
+        if (bus_write_enable && bus_write_done) begin bus_write_done <= 0; end
 
-        if (!sd_ready) sd_rd_start <= 0;
+
+
+
+
+
+
 
         // Read
         //if (!bus_read_enable && bus_read_done==0) begin 
@@ -335,12 +355,33 @@ assign DRAM_CKE = 1; // always enable
 		            1: begin bus_read_data[63:32] <= Cache[bus_address_reg]; step <= 0; bus_read_done <= 1; end
 			endcase
 		    end 
-		    default: begin bus_read_data <= Cache[bus_address_reg] >> (8*bus_address_reg_full[1:0]); bus_read_done <= 1; end // 000Lb 001Lh 010Lw 101Lhu 100Lbu 110Lwu
+		    //default: begin bus_read_data <= Cache[bus_address_reg] >> (8*bus_address_reg_full[1:0]); bus_read_done <= 1; end // 000Lb 001Lh 010Lw 101Lhu 100Lbu 110Lwu
+		    default: begin 
+		        case(bus_address_reg_full[1:0])
+		            2'b00: bus_read_data <= {32'b0, Cache[bus_address_reg]}; 
+		            2'b01: bus_read_data <= {40'b0, Cache[bus_address_reg][31:8]}; 
+		            2'b10: bus_read_data <= {48'b0, Cache[bus_address_reg][31:16]}; 
+		            2'b11: bus_read_data <= {56'b0, Cache[bus_address_reg][31:24]}; 
+			endcase
+			    bus_read_done <= 1; end // 000Lb 001Lh 010Lw 101Lhu 100Lbu 110Lwu
 		endcase
 	    end
 
             if (Sdc_ready_selected) begin bus_read_data <= {63'd0, sd_ready}; bus_read_done <= 1; end
-	    if (Sdc_cache_selected) begin bus_read_data <= {56'd0, sd_cache[cid]}; bus_read_done <= 1; end // one byte for all load
+	    //if (Sdc_cache_selected) begin bus_read_data <= {56'd0, sd_cache[cid]}; bus_read_done <= 1; end // one byte for all load
+	    // New develop
+	    if (Sdc_cache_selected) begin 
+		case(step)
+		    0:begin bus_read_data[7:0]   <= sd_cache[cid8]; cid8 <= cid8 + 1; step <= 1;end  
+		    1:begin bus_read_data[15:8]  <= sd_cache[cid8]; cid8 <= cid8 + 1; step <= 2;end 
+		    2:begin bus_read_data[23:16] <= sd_cache[cid8]; cid8 <= cid8 + 1; step <= 3;end 
+		    3:begin bus_read_data[31:24] <= sd_cache[cid8]; cid8 <= cid8 + 1; step <= 4;end 
+		    4:begin bus_read_data[39:32] <= sd_cache[cid8]; cid8 <= cid8 + 1; step <= 5;end 
+		    5:begin bus_read_data[47:40] <= sd_cache[cid8]; cid8 <= cid8 + 1; step <= 6;end 
+		    6:begin bus_read_data[55:48] <= sd_cache[cid8]; cid8 <= cid8 + 1; step <= 7;end 
+		    7:begin bus_read_data[63:56] <= sd_cache[cid8];                   step <= 0; bus_read_done <= 1; end
+		endcase
+	    end // 8 byte for all load
             if (Sdc_avail_selected) begin bus_read_data <= {63'd0, sd_cache_available}; bus_read_done <= 1; end 
 
             if (Mtime_selected) begin bus_read_data <= mtime; bus_read_done <= 1; end 
@@ -348,9 +389,13 @@ assign DRAM_CKE = 1; // always enable
 
 	    if (Art_selected) begin 
 	        if (uart_read_step ==0) begin uart_read_pulse <= 1; uart_read_step <= 1; end
-	        //if (uart_read_step ==1 &&  uart_waitrequest) begin uart_read_pulse <= 1; end
+	        if (uart_read_step ==1 &&  uart_waitrequest) begin uart_read_pulse <= 1; end
 	        //if (uart_read_step ==1 && !uart_waitrequest) begin bus_read_data <= uart_readdata; uart_read_step <= 0; bus_read_done <=1; uart_read_pulse <= 0;end
-	        if (uart_read_step ==1 && !uart_waitrequest) begin bus_read_data <= uart_readdata; uart_read_step <= 0; bus_read_done <=1; end
+	        //if (uart_read_step ==1 && !uart_waitrequest) begin bus_read_data <= uart_readdata; uart_read_step <= 0; bus_read_done <=1; end
+	        if (uart_read_step ==1 && !uart_waitrequest) begin  // jtage 31:16 mean how many free space, 15 0 means RVALID 0
+		    if (bus_address == 64'h2004) begin bus_read_data <= {{33{(uart_readdata[31:16]==16'h0)}}, 31'b0}; uart_read_step <= 0; bus_read_done <=1; end //opensbi reading tx 32 1 means full
+		    if (bus_address == 64'h2008) begin bus_read_data <= {32'b0, ~uart_readdata[15], 23'b0, uart_readdata[7:0]}; uart_read_step <= 0; bus_read_done <=1;end//opensbi reading rx 31 1 empty
+		end
 	    end
 
 	    if (Sdram_selected) begin
@@ -395,7 +440,8 @@ assign DRAM_CKE = 1; // always enable
 		        case(step)
 			    0: if (sdram_ready) begin sdram_addr <= bus_address[22:1]; sdram_byte_en <= 2'b11; sdram_read_en <= 1; step <= 1; end
 			    1: if (sdram_req_wait==0) begin sdram_read_en <= 0; bus_read_data<= {48'b0, sdram_rddata[15:0]};bus_read_done <= 0; step <=2; end
-			    2: if (sdram_ready) begin sdram_addr <= bus_address[22:1]+1; sdram_byte_en <= 2'b11; sdram_read_en <= 1; step <= 3; end
+			    //2: if (sdram_ready) begin sdram_addr <= bus_address[22:1]+1; sdram_byte_en <= 2'b11; sdram_read_en <= 1; step <= 3; end
+			    2: if (sdram_ready) begin sdram_addr <= sdram_addr+1; sdram_byte_en <= 2'b11; sdram_read_en <= 1; step <= 3; end
 			    3: if (sdram_req_wait==0) begin sdram_read_en <= 0; bus_read_data[63:16] <= {{32{sdram_rddata[15]}}, sdram_rddata[15:0]}; bus_read_done <= 1; step <=0; end
 			endcase
 		        end
@@ -403,7 +449,8 @@ assign DRAM_CKE = 1; // always enable
 		        case(step)
 			    0: if (sdram_ready) begin sdram_addr <= bus_address[22:1]; sdram_byte_en <= 2'b11; sdram_read_en <= 1; step <= 1; end
 			    1: if (sdram_req_wait==0) begin sdram_read_en <= 0; bus_read_data<= {48'b0, sdram_rddata[15:0]};bus_read_done <= 0; step <=2; end
-			    2: if (sdram_ready) begin sdram_addr <= bus_address[22:1]+1; sdram_byte_en <= 2'b11; sdram_read_en <= 1;  step <= 3; end
+			    //2: if (sdram_ready) begin sdram_addr <= bus_address[22:1]+1; sdram_byte_en <= 2'b11; sdram_read_en <= 1;  step <= 3; end
+			    2: if (sdram_ready) begin sdram_addr <= sdram_addr+1; sdram_byte_en <= 2'b11; sdram_read_en <= 1;  step <= 3; end
 			    3: if (sdram_req_wait==0) begin sdram_read_en <= 0; bus_read_data[31:16] <= sdram_rddata[15:0]; bus_read_done <= 1; step <=0; end
 			endcase
 		        end
@@ -422,11 +469,14 @@ assign DRAM_CKE = 1; // always enable
 		        case(step)
 			    0: if (sdram_ready) begin sdram_addr <= bus_address[22:1];   sdram_byte_en <= 2'b11; sdram_read_en <= 1; step <= 1; end 
 			    1: if (sdram_req_wait==0) begin sdram_read_en <= 0; bus_read_data<= {48'b0, sdram_rddata[15:0]};bus_read_done <= 0; step <=2; end
-		            2: if (sdram_ready) begin sdram_addr <= bus_address[22:1]+1; sdram_byte_en <= 2'b11; sdram_read_en <= 1; step <= 3; end  
+		            //2: if (sdram_ready) begin sdram_addr <= bus_address[22:1]+1; sdram_byte_en <= 2'b11; sdram_read_en <= 1; step <= 3; end  
+		            2: if (sdram_ready) begin sdram_addr <= sdram_addr+1; sdram_byte_en <= 2'b11; sdram_read_en <= 1; step <= 3; end  
 			    3: if (sdram_req_wait==0) begin sdram_read_en <= 0; bus_read_data[31:16] <= sdram_rddata[15:0]; bus_read_done <= 0; step <=4; end
-		            4: if (sdram_ready) begin sdram_addr <= bus_address[22:1]+2; sdram_byte_en <= 2'b11; sdram_read_en <= 1; step <= 5; end  
+		            //4: if (sdram_ready) begin sdram_addr <= bus_address[22:1]+2; sdram_byte_en <= 2'b11; sdram_read_en <= 1; step <= 5; end  
+		            4: if (sdram_ready) begin sdram_addr <= sdram_addr+1; sdram_byte_en <= 2'b11; sdram_read_en <= 1; step <= 5; end  
 			    5: if (sdram_req_wait==0) begin sdram_read_en <= 0; bus_read_data[47:32] <= sdram_rddata[15:0]; bus_read_done <= 0; step <=6; end
-		            6: if (sdram_ready) begin sdram_addr <= bus_address[22:1]+3; sdram_byte_en <= 2'b11; sdram_read_en <= 1; step <= 7; end  
+		            //6: if (sdram_ready) begin sdram_addr <= bus_address[22:1]+3; sdram_byte_en <= 2'b11; sdram_read_en <= 1; step <= 7; end  
+		            6: if (sdram_ready) begin sdram_addr <= sdram_addr+1; sdram_byte_en <= 2'b11; sdram_read_en <= 1; step <= 7; end  
 			    7: if (sdram_req_wait==0) begin sdram_read_en <= 0; bus_read_data[63:48] <= sdram_rddata[15:0]; bus_read_done <= 1; step <=0; end
 			endcase
 		    end
@@ -477,16 +527,19 @@ assign DRAM_CKE = 1; // always enable
 	    end
 
 	    if (Sdc_addr_selected) begin sd_addr <= bus_write_data[31:0]; bus_write_done <= 1; end
-	    if (Sdc_read_selected) begin sd_rd_start <= 1; bus_write_done <= 1; end
-	    //if (Sdc_read_selected) begin bus_write_done <= 1; end
+	    //if (Sdc_read_selected) begin sd_rd_start <= 1; bus_write_done <= 1; end
+	    if (Sdc_read_selected) begin bus_write_done <= 1; end
 
 	    //if (Art_selected) begin uart_write_pulse <= 1; bus_write_done <=1; end
 	    if (Art_selected) begin 
 	        if (uart_write_step ==0) begin uart_write_pulse <= 1; uart_write_step <= 1; end
-	        //if (uart_write_step ==1 &&  uart_waitrequest) begin uart_write_pulse <= 1; end
+	        if (uart_write_step ==1 &&  uart_waitrequest) begin uart_write_pulse <= 1; end
 	        //if (uart_write_step ==1 && !uart_waitrequest) begin uart_write_step <= 0; bus_write_done <=1; uart_write_pulse <= 0;end
 	        if (uart_write_step ==1 && !uart_waitrequest) begin uart_write_step <= 0; bus_write_done <=1; end
 	    end
+	    //if (Art_selected) begin 
+	    //    if (!uart_waitrequest) begin uart_write_pulse <= 1; bus_write_done <=1; end
+	    //end
         
 	
 
@@ -536,7 +589,8 @@ assign DRAM_CKE = 1; // always enable
 		        case(step)
 			    0: if (sdram_ready) begin sdram_addr <= bus_address[22:1]; sdram_wrdata <= bus_write_data[15:0]; sdram_write_en <= 1; sdram_byte_en <= 2'b11; step <= 1; end
 			    1: if (sdram_req_wait==0) begin sdram_write_en <= 0; bus_write_done <= 0; step <= 2; end 
-			    2: if (sdram_ready) begin sdram_addr <= bus_address[22:1]+1; sdram_wrdata <= bus_write_data[31:16]; sdram_write_en <= 1; sdram_byte_en <= 2'b11; step <= 3; end
+			    //2: if (sdram_ready) begin sdram_addr <= bus_address[22:1]+1; sdram_wrdata <= bus_write_data[31:16]; sdram_write_en <= 1; sdram_byte_en <= 2'b11; step <= 3; end
+			    2: if (sdram_ready) begin sdram_addr <= sdram_addr+1; sdram_wrdata <= bus_write_data[31:16]; sdram_write_en <= 1; sdram_byte_en <= 2'b11; step <= 3; end
 			    3: if (sdram_req_wait==0) begin sdram_write_en <= 0; bus_write_done <= 1; step <= 0; end
 			endcase
 		    end
@@ -544,11 +598,14 @@ assign DRAM_CKE = 1; // always enable
 		        case(step)
 			    0: if (sdram_ready) begin sdram_addr <= bus_address[22:1];   sdram_wrdata <= bus_write_data[15:0];  sdram_write_en <= 1; sdram_byte_en <= 2'b11; step <= 1; end
 			    1: if (sdram_req_wait==0) begin sdram_write_en <= 0; bus_write_done <= 0; step <= 2; end
-			    2: if (sdram_ready) begin sdram_addr <= bus_address[22:1]+1; sdram_wrdata <= bus_write_data[31:16]; sdram_write_en <= 1; sdram_byte_en <= 2'b11; step <= 3; end
+			    //2: if (sdram_ready) begin sdram_addr <= bus_address[22:1]+1; sdram_wrdata <= bus_write_data[31:16]; sdram_write_en <= 1; sdram_byte_en <= 2'b11; step <= 3; end
+			    2: if (sdram_ready) begin sdram_addr <= sdram_addr+1; sdram_wrdata <= bus_write_data[31:16]; sdram_write_en <= 1; sdram_byte_en <= 2'b11; step <= 3; end
 			    3: if (sdram_req_wait==0) begin sdram_write_en <= 0; bus_write_done <= 0; step <= 4; end
-			    4: if (sdram_ready) begin sdram_addr <= bus_address[22:1]+2; sdram_wrdata <= bus_write_data[47:32]; sdram_write_en <= 1; sdram_byte_en <= 2'b11; step <= 5; end
+			    //4: if (sdram_ready) begin sdram_addr <= bus_address[22:1]+2; sdram_wrdata <= bus_write_data[47:32]; sdram_write_en <= 1; sdram_byte_en <= 2'b11; step <= 5; end
+			    4: if (sdram_ready) begin sdram_addr <= sdram_addr+1; sdram_wrdata <= bus_write_data[47:32]; sdram_write_en <= 1; sdram_byte_en <= 2'b11; step <= 5; end
 			    5: if (sdram_req_wait==0) begin sdram_write_en <= 0; bus_write_done <= 0; step <= 6; end 
-			    6: if (sdram_ready) begin sdram_addr <= bus_address[22:1]+3; sdram_wrdata <= bus_write_data[63:48]; sdram_write_en <= 1; sdram_byte_en <= 2'b11; step <= 7; end
+			    //6: if (sdram_ready) begin sdram_addr <= bus_address[22:1]+3; sdram_wrdata <= bus_write_data[63:48]; sdram_write_en <= 1; sdram_byte_en <= 2'b11; step <= 7; end
+			    6: if (sdram_ready) begin sdram_addr <= sdram_addr+1; sdram_wrdata <= bus_write_data[63:48]; sdram_write_en <= 1; sdram_byte_en <= 2'b11; step <= 7; end
 			    7: if (sdram_req_wait==0) begin sdram_write_en <= 0; bus_write_done <= 1; step <= 0; end 
 			endcase
 		    end
@@ -563,9 +620,9 @@ end
 
     // -- SD Card --
     wire [11:0] cid = (bus_address-`Sdc_base);
-    //reg [11:0] cid;
-    reg [7:0] sd_cache [0:511];
-    //(* ram_style = "block" *) reg [7:0] sd_cache [0:511];
+    reg [11:0] cid8;
+    //reg [7:0] sd_cache [0:511];
+    (* ram_style = "block" *) reg [7:0] sd_cache [0:511];
     reg [9:0] byte_index = 0;
     reg sd_cache_available = 0;
     reg sd_byte_available_d = 0;
@@ -579,12 +636,12 @@ end
 	    sd_cache_available <= 0;
 	    //sd_byte_available <= 0;
 	    sd_byte_available_d <= 0;
-            //sd_rd_start <= 0;
+            sd_rd_start <= 0;
 	end
 	else begin
 	    //sd_cache_available <= 0;
             sd_byte_available_d  <= sd_byte_available;
-            if (sd_byte_available && !sd_byte_available_d) begin
+            if (sd_byte_available && !sd_byte_available_d && byte_index < 512) begin
 	        sd_cache[byte_index] <= sd_dout;
 	        byte_index <= byte_index + 1;
 	        do_read <=1;
@@ -592,10 +649,14 @@ end
 	    //if (byte_index == 10) sd_cache_available <= 0;
 	    //if (byte_index  == 0 && bus_write_enable && Sdc_read_selected) begin sd_cache_available <= 0; sd_rd_start <= 1; end
 	    //if (byte_index  == 0 && bus_write_done==0 && Sdc_read_selected) begin sd_cache_available <= 0; sd_rd_start <= 1; end
-	    if (byte_index  == 0 && bus_write_enable && Sdc_read_selected) begin sd_cache_available <= 0; end
+	    //if (byte_index  == 0 && bus_write_enable && Sdc_read_selected) begin sd_cache_available <= 0; end
+	    //if (bus_write_enable && Sdc_read_selected) begin sd_cache_available <= 0; byte_index <= 0; end
+	    //
+	    //if (Sdc_read_selected) begin sd_rd_start <= 1; bus_write_done <= 1; end
+	    if (bus_write_enable && Sdc_read_selected) begin sd_cache_available <= 0; sd_rd_start <= 1;byte_index  <= 0; end //sd_rd_start <= 1; end
 	    //if (do_read && sd_status !=6) begin 
 	    if (byte_index == 512) begin 
-	        //sd_rd_start <= 0;
+	        sd_rd_start <= 0;
 	        byte_index <= 0;
 	        do_read <=0;
 	        sd_cache_available <= 1;
@@ -604,14 +665,19 @@ end
     end
 
     // Slow pulse clock for SD init (~100 kHz)
-    //reg [8:0] clkdiv = 0;  // for 50M
-    reg [5:0] clkdiv = 0; // for 10M  10MHz/64 = 156.25KHz
+    reg [8:0] clkdiv = 0;  // for 50M
+    //reg [7:0] clkdiv = 0;  // for 25M
+    //reg [5:0] clkdiv = 0; // for 10M  10MHz/64 = 156.25KHz
+    //reg [4:0] clkdiv = 0; // for 10M  10MHz/32 = 300KHz
+    //reg [1:0] clkdiv = 0; // for 5M  5MHz/4 = 625Khz (sd SPI 100-400Khz)
+    //reg [3:0] clkdiv = 0; // for 5M  5MHz/8 = 625Khz (sd SPI=300khz 100-400Khz)
     always @(posedge clock_slow or negedge KEY0) begin
     //always @(posedge CLOCK_50 or negedge KEY0) begin
         if (!KEY0) clkdiv <= 0;
         else clkdiv <= clkdiv + 1;
     end
     wire clk_pulse_slow = (clkdiv == 0);
+    //wire clk_pulse_slow = (sd_status <= 8) ? (clkdiv == 0) : 1'b1;
 
     // SD Controller Bridge
     reg [31:0] sd_addr = 0;           // Sector address
@@ -651,10 +717,16 @@ end
     assign HEX10 = ~|bus_write_data;
     assign HEX11 = ~bus_write_enable;
     assign HEX00 = ~Art_selected;
-    assign HEX01 = ~Ram_selected;
-    assign HEX02 = ~Rom_selected;
+    //assign HEX01 = ~Ram_selected;
+    assign HEX01 = ~sd_rd_start;
+    //assign HEX02 = ~Rom_selected;
+    assign HEX02 = ~sd_byte_available;
     //assign HEX03 = ~Sdram_selected ;
-    assign HEX03 = (bus_address >= `Sdram_min && bus_address < `Sdram_max);
+    //assign HEX03 = (bus_address >= `Sdram_min && bus_address < `Sdram_max);
+    assign HEX03 = ~|sd_dout;
+    assign HEX04 = ~clk_pulse_slow;
+    assign HEX05 = ~|sd_addr;
+    assign HEX06 = ~sd_cache_available;
 
     assign HEX31 = ~Sdram_selected;
     //assign HEX32 = ~sdram_readdatavalid;
@@ -666,8 +738,8 @@ end
     assign HEX35 = ~sdram_req_wait;
     //assign HEX36 = ~|sdram_readdata;
     assign HEX36 = ~|sdram_rddata;
-    assign HEX04 = ~uart_irq;
-    assign HEX05 = ~Plic_priority_selected;
-    assign HEX06 = ~meip_interrupt;
+    //assign HEX04 = ~uart_irq;
+    //assign HEX05 = ~Plic_priority_selected;
+    //assign HEX06 = ~meip_interrupt;
 
 endmodule
