@@ -1,3 +1,4 @@
+msg:
 reserved_sec:
 num_fats:
 sec_per_fat:
@@ -133,6 +134,9 @@ lw a0, 0(t3)
 # call sd_read_sector  
 auipc x1, 0 # R_RISCV_PCREL_HI20 sd_read_sector
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I sd_read_sector
+# call print_sector
+auipc x1, 0 # R_RISCV_PCREL_HI20 print_sector
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_sector
 # li s8, 0 
 addi s8, x0, 0x0
 # li s9, "MUSIC"
@@ -144,6 +148,11 @@ slli s9, s9, 0xb
 ori s9, s9, 0x26a
 slli s9, s9, 0xb
 ori s9, s9, 0x54d
+# mv a0, s9
+addi a0, s9, 0
+# call print7
+auipc x1, 0 # R_RISCV_PCREL_HI20 print7
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print7
 entry_loop:
 bge s8, s7, done_entries
 slli t1, s8, 5
@@ -197,16 +206,48 @@ addi s8, s8, 1
 # j entry_loop
 jal x0, entry_loop
 read_file:
+# li a0, "\nFSize:"
+addi a0, x0, 0x0
+lui a0, 0x3a6
+srli a0, a0, 0x1
+ori a0, a0, 0x2bd
+slli a0, a0, 0xb
+ori a0, a0, 0x1a5
+slli a0, a0, 0xb
+ori a0, a0, 0x268
+slli a0, a0, 0xb
+ori a0, a0, 0x60a
+# call print7
+auipc x1, 0 # R_RISCV_PCREL_HI20 print7
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print7
 lwu a0, 0x1c(t3)
 # la a1, file_size
 auipc a1, 0 # R_RISCV_PCREL_HI20 file_size 
 addi a1, a1, 0 # R_RISCV_PCREL_LO12_I file_size 
 sw a0, 0(a1)
+lwu a0, 0(a1)
+# call print_reg
+auipc x1, 0 # R_RISCV_PCREL_HI20 print_reg
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_reg
 lhu a0, 0x1a(t3)
 # la a1, file_first_cluster
 auipc a1, 0 # R_RISCV_PCREL_HI20 file_first_cluster 
 addi a1, a1, 0 # R_RISCV_PCREL_LO12_I file_first_cluster 
 sh a0, 0(a1)
+# li a0, "\nrDseS:"
+addi a0, x0, 0x0
+lui a0, 0x3a5
+srli a0, a0, 0x1
+ori a0, a0, 0x1b2
+slli a0, a0, 0xb
+ori a0, a0, 0x5cd
+slli a0, a0, 0xb
+ori a0, a0, 0x8e
+slli a0, a0, 0xb
+ori a0, a0, 0x20a
+# call print7
+auipc x1, 0 # R_RISCV_PCREL_HI20 print7
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print7
 # la a1, root_ent_cnt
 auipc a1, 0 # R_RISCV_PCREL_HI20 root_ent_cnt 
 addi a1, a1, 0 # R_RISCV_PCREL_LO12_I root_ent_cnt 
@@ -227,6 +268,10 @@ div a0, t3, t0
 auipc a1, 0 # R_RISCV_PCREL_HI20 root_dir_sectors 
 addi a1, a1, 0 # R_RISCV_PCREL_LO12_I root_dir_sectors 
 sw a0, 0(a1)
+lw a0, 0(a1)
+# call print_reg
+auipc x1, 0 # R_RISCV_PCREL_HI20 print_reg
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_reg
 # la a1, root_dir_sector_start
 auipc a1, 0 # R_RISCV_PCREL_HI20 root_dir_sector_start 
 addi a1, a1, 0 # R_RISCV_PCREL_LO12_I root_dir_sector_start 
@@ -240,6 +285,20 @@ add t2, t0, t1
 auipc a1, 0 # R_RISCV_PCREL_HI20 data_start_sec 
 addi a1, a1, 0 # R_RISCV_PCREL_LO12_I data_start_sec 
 sw t2, 0(a1)
+# li a0, "\nF0sec:"
+addi a0, x0, 0x0
+lui a0, 0x3a6
+srli a0, a0, 0x1
+ori a0, a0, 0x1b2
+slli a0, a0, 0xb
+ori a0, a0, 0x5cc
+slli a0, a0, 0xb
+ori a0, a0, 0x608
+slli a0, a0, 0xb
+ori a0, a0, 0x60a
+# call print7
+auipc x1, 0 # R_RISCV_PCREL_HI20 print7
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print7
 # la a1, file_first_cluster 
 auipc a1, 0 # R_RISCV_PCREL_HI20 file_first_cluster 
 addi a1, a1, 0 # R_RISCV_PCREL_LO12_I file_first_cluster 
@@ -259,6 +318,23 @@ add a0, t3, t2
 auipc a1, 0 # R_RISCV_PCREL_HI20 file_start_sector 
 addi a1, a1, 0 # R_RISCV_PCREL_LO12_I file_start_sector 
 sw a0, 0(a1)
+# call print_reg
+auipc x1, 0 # R_RISCV_PCREL_HI20 print_reg
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_reg
+# li a0, "\nFseS:"
+addi a0, x0, 0x0
+lui a0, 0x3
+srli a0, a0, 0x1
+ori a0, a0, 0x529
+slli a0, a0, 0xb
+ori a0, a0, 0x595
+slli a0, a0, 0xb
+ori a0, a0, 0x668
+slli a0, a0, 0xb
+ori a0, a0, 0x60a
+# call print7
+auipc x1, 0 # R_RISCV_PCREL_HI20 print7
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print7
 # la a1, file_size
 auipc a1, 0 # R_RISCV_PCREL_HI20 file_size 
 addi a1, a1, 0 # R_RISCV_PCREL_LO12_I file_size 
@@ -273,6 +349,24 @@ div a0, t0, t1
 auipc a1, 0 # R_RISCV_PCREL_HI20 file_sectors 
 addi a1, a1, 0 # R_RISCV_PCREL_LO12_I file_sectors 
 sw a0, 0(a1)
+lw a0, 0(a1)
+# call print_reg
+auipc x1, 0 # R_RISCV_PCREL_HI20 print_reg
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_reg
+# li a0, "\nFileB:"
+addi a0, x0, 0x0
+lui a0, 0x3a4
+srli a0, a0, 0x1
+ori a0, a0, 0x132
+slli a0, a0, 0xb
+ori a0, a0, 0x5b1
+slli a0, a0, 0xb
+ori a0, a0, 0x528
+slli a0, a0, 0xb
+ori a0, a0, 0x60a
+# call print7
+auipc x1, 0 # R_RISCV_PCREL_HI20 print7
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print7
 # la a1, file_sectors
 auipc a1, 0 # R_RISCV_PCREL_HI20 file_sectors 
 addi a1, a1, 0 # R_RISCV_PCREL_LO12_I file_sectors 
@@ -468,6 +562,9 @@ copy_loop:
 add s6, s1, s7 
 ld a0, 0(s6)       # load 8 bytes at 0x3000 a1+s7
 sd a0, 0(s5)       # save 8 bytes to s5
+#     call print_reg
+auipc x1, 0 # R_RISCV_PCREL_HI20 print_reg
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_reg
 addi s7, s7, 8
 addi s5, s5, 8
 bge s8, s7, copy_loop
@@ -481,16 +578,15 @@ addi sp, sp,  48
 #     ret
 jalr x0, 0(x1)
 putchar:
-addi sp, sp, -16
-sd ra, 0(sp)
-sd s0, 8(sp)
-#     call wait_uart
-auipc x1, 0 # R_RISCV_PCREL_HI20 wait_uart
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I wait_uart
+addi sp, sp, -8
+sd s0, 0(sp)
+putchar_wait:
+lw s0, 0(s10)
+srli s0, s0, 16   # 31:16 WSPACE = 0 fully
+beq s0, x0, putchar_wait
 sb a0, 0(s11)
-ld ra, 0(sp)
-ld s0, 8(sp)
-addi sp, sp, 16
+ld s0, 0(sp)
+addi sp, sp, 8
 #     ret
 jalr x0, 0(x1)
 puts:
@@ -518,9 +614,9 @@ wait_uart:
 addi sp, sp, -8
 sd s0, 0(sp)
 wait_uart_loop:
-lw s0, 0(s11)
-#     bltz s0, wait_uart_loop
-blt s0, x0, wait_uart_loop
+lw s0, 0(s10)
+srli s0, s0, 16   # 31:16 WSPACE = 0 fully
+beq s0, x0, wait_uart_loop
 ld s0, 0(sp)
 addi sp, sp, 8
 #     ret
