@@ -106,380 +106,380 @@ call print7
 
 endd:
     j endd
-
-la a1, byte_per_sec
-lwu a0, 0x0a(s1)
-srli a0, a0, 8
-sh a0, 0(a1)
-#lhu a0, 0(a1)
-#call print_reg
-
-# -------------------------------------
-# Sectors per cluster 0x0d 1 byte
-#li a0, "\nsePcl:" # 7 char left on for null
-#call print7
-la a1, sec_per_clus
-lbu a0, 0x0d(s1)
-sh a0, 0(a1)
-#lh a0, 0(a1)
-#call print_reg
-
-
-# -------------------------------------
-# reserved_sectors offset 0x0e-0x0f 2 bytes (including root sector 0)
-#li a0, "\nrevSe:" # 7 char left on for null
-#call print7
-la a1, reserved_sec
-lh a0, 0x0e(s1)
-sd a0, 0(a1)
-#ld a0, 0(a1)
-#call print_reg
-
-# -------------------------------------
-# num_fats offset 0x10 1 bytes
-#li a0, "\nnuFat:" # 7 char left on for null
-#call print7
-la a1, num_fats
-lbu a0, 0x10(s1)
-sw a0, 0(a1)
+#
+#la a1, byte_per_sec
+#lwu a0, 0x0a(s1)
+#srli a0, a0, 8
+#sh a0, 0(a1)
+##lhu a0, 0(a1)
+##call print_reg
+#
+## -------------------------------------
+## Sectors per cluster 0x0d 1 byte
+##li a0, "\nsePcl:" # 7 char left on for null
+##call print7
+#la a1, sec_per_clus
+#lbu a0, 0x0d(s1)
+#sh a0, 0(a1)
+##lh a0, 0(a1)
+##call print_reg
+#
+#
+## -------------------------------------
+## reserved_sectors offset 0x0e-0x0f 2 bytes (including root sector 0)
+##li a0, "\nrevSe:" # 7 char left on for null
+##call print7
+#la a1, reserved_sec
+#lh a0, 0x0e(s1)
+#sd a0, 0(a1)
+##ld a0, 0(a1)
+##call print_reg
+#
+## -------------------------------------
+## num_fats offset 0x10 1 bytes
+##li a0, "\nnuFat:" # 7 char left on for null
+##call print7
+#la a1, num_fats
+#lbu a0, 0x10(s1)
+#sw a0, 0(a1)
+##lw a0, 0(a1)
+##call print_reg
+#
+## -------------------------------------
+## root_entries offset 0x11-0x12 2 bytes
+##li a0, "\nReCnt:"
+##call print7
+#la a1, root_ent_cnt
+#lwu a0, 0x10(s1)
+#srli a0, a0, 8
+#sh a0, 0(a1)
+##lhu a0, 0(a1)
+##call print_reg
+#
+## -------------------------------------
+## total sectors offset 0x13 2 bytes if 0 find 0x20 4 bytes for large volumes
+##li a0, "\nToSec:"
+##call print7
+#la a1, total_sectors
+#lwu a0, 0x20(s1)
+#sw a0, 0(a1)
+##lwu a0, 0(a1)
+##call print_reg
+#
+## -------------------------------------
+## sectors_per_fat16 high offset 0x16-0x17 2 bytes
+##li a0, "\nsePft:" # 7 char left on for null
+##call print7
+#la a1, sec_per_fat
+#lh a0, 0x16(s1)
+#sh a0, 0(a1)
+##lh a0, 0(a1)
+##call print_reg
+#
+### ---------Calcauted ----------------------------
+## root_dir_sector_start = reserved_sectors + (num_fats * sectors_per_fat16)
+##li a0, "\nrtdS0:" # 7 char left on for null
+##call print7
+#la a1, num_fats
+#lw t1, 0(a1)
+#la a1, sec_per_fat
+#lw t2, 0(a1)
+#la a1, reserved_sec
+#lw t0, 0(a1)
+#mul a0, t1, t2
+#add a0, a0, t0
+#la t3, root_dir_sector_start
+#sw a0, 0(t3)
+##lw a0, 0(t3)
+##call print_reg
+#
+## -------------------------------------
+## entries_per_sector =  byte_per_sec/32
+##li a0, "\nEtPse:"
+##call print7
+#la a1, byte_per_sec
 #lw a0, 0(a1)
-#call print_reg
-
-# -------------------------------------
-# root_entries offset 0x11-0x12 2 bytes
-#li a0, "\nReCnt:"
-#call print7
-la a1, root_ent_cnt
-lwu a0, 0x10(s1)
-srli a0, a0, 8
-sh a0, 0(a1)
-#lhu a0, 0(a1)
-#call print_reg
-
-# -------------------------------------
-# total sectors offset 0x13 2 bytes if 0 find 0x20 4 bytes for large volumes
-#li a0, "\nToSec:"
-#call print7
-la a1, total_sectors
-lwu a0, 0x20(s1)
-sw a0, 0(a1)
-#lwu a0, 0(a1)
-#call print_reg
-
-# -------------------------------------
-# sectors_per_fat16 high offset 0x16-0x17 2 bytes
-#li a0, "\nsePft:" # 7 char left on for null
-#call print7
-la a1, sec_per_fat
-lh a0, 0x16(s1)
-sh a0, 0(a1)
-#lh a0, 0(a1)
-#call print_reg
-
-## ---------Calcauted ----------------------------
-# root_dir_sector_start = reserved_sectors + (num_fats * sectors_per_fat16)
-#li a0, "\nrtdS0:" # 7 char left on for null
-#call print7
-la a1, num_fats
-lw t1, 0(a1)
-la a1, sec_per_fat
-lw t2, 0(a1)
-la a1, reserved_sec
-lw t0, 0(a1)
-mul a0, t1, t2
-add a0, a0, t0
-la t3, root_dir_sector_start
-sw a0, 0(t3)
+#mv s7, a0
+##srli a0, a0, 5  # calc entries_per_sector
+#li t1, 32
+#div a0, a0, t1
+#la t3,  entries_per_sector
+#sw a0, 0(t3)
+##lw a0, 0(t3)
+##call print_reg
+#
+## ---------- Read Root dir Secotr 0 -----
+#la t3, root_dir_sector_start
 #lw a0, 0(t3)
-#call print_reg
-
-# -------------------------------------
-# entries_per_sector =  byte_per_sec/32
-#li a0, "\nEtPse:"
-#call print7
-la a1, byte_per_sec
-lw a0, 0(a1)
-mv s7, a0
-#srli a0, a0, 5  # calc entries_per_sector
-li t1, 32
-div a0, a0, t1
-la t3,  entries_per_sector
-sw a0, 0(t3)
-#lw a0, 0(t3)
-#call print_reg
-
-# ---------- Read Root dir Secotr 0 -----
-la t3, root_dir_sector_start
-lw a0, 0(t3)
-call sd_read_sector  # use a0 as sector no.
-call print_sector
-
-# -------------------------------------
-# Scan Entries of Root Dir first sector
-# s7 entry_per_sector
-li s8, 0 # entry_index
-li s9, "MUSIC"
-mv a0, s9
-call print7
-
-entry_loop:
-bge s8, s7, done_entries
-# entry_addr = s1 + (entry_index * 32)
-slli t1, s8, 5
-add t3, s1, t1 # t3 = address of entry
-
-# 1. Quick Validity Check
-# load first byte of entry
-lbu t4, 0(t3)
-beq t4, x0, done_entries # 0x00 no more entries in dir
-li t1, 0xE5
-beq t4, t1, next_entry # 0xE5 deleted entry, skip
-    
-# 2. Attribute Check # attribute at 0x0B( offset 11)
-lbu t5, 11(t3)
-li t1, 0x0F
-beq t5, t1, next_entry # 0x0F LFN(Long File Name) entry, skip
-
-andi t6, t5, 0x18  # Mask for Volume Label(0x08) and Directory (0x10)
-bne t6, x0, next_entry # skip 
-
-# 3. Compare Filename(First 8 bytes)
-# load name 8 bytes
-li t2, 0
-addi t4, t3, 7
-load_name_loop:
-lbu t0, 0(t4)
-slli t2, t2, 8
-xor t2, t2, t0
-addi t4, t4, -1
-bge t4, t3, load_name_loop
-
-# keep 5 char
-slli t2, t2, 24
-srli t2, t2, 24
-
-## -- Print Name --- 
-#addi sp, sp, -16
-#sd t2, 0(sp)
-#sb x0, 8(sp)
-#mv a0, sp
-#call puts
-#addi sp, sp, 16
-## -----------------
-
-bne t2, s9, next_entry
-
-## 4. FOUND! Extract File Info
-li a0, "FOUND!"
-call print7
-
-done_entries:
-   j read_file
-
-next_entry:
-addi s8, s8, 1
-j entry_loop
-
-
-# root_dir_sector_start = reserved_sectors + (num_FATs * sectors_per_FAT)
-# root_dir_sectors = (RootEntryCount * 32 + BytesPerSector -1 )/ BytesPerSector  ceiling division
-# FirstDataSector = root_dir_sector_start + root_dir_sectors 
-# FirstSectorOfCluster(N)=FirstDataSector + (N - 2) * SectorsPerCluster
-
-# Entry Layout(in Root Directory)
-#| Offset | Size | Field                             | Description                  | Example      |
-#| :----- | :--- | :-------------------------------- | :--------------------------- | :----------- |
-#| `0x00` | 8    | **Filename**                      | 8 chars (space padded)       | `"MUSIC   "` | FAT16 8.3 format for name.extension
-#| `0x08` | 3    | **Extension**                     | 3 chars (space padded)       | `"WAV"`      |
-#| `0x0B` | 1    | **Attributes**                    | Bit flags (see below)        | 0x20         |
-#| `0x0C` | 1    | Reserved                          | For Windows NT               | 0            |
-#| `0x0D` | 1    | Creation time (tenths)            | Optional                     | —            |
-#| `0x0E` | 2    | Creation time                     | —                            | —            |
-#| `0x10` | 2    | Creation date                     | —                            | —            |
-#| `0x12` | 2    | Last access date                  | —                            | —            |
-#| `0x14` | 2    | High word of cluster (FAT32 only) | —                            | —            |
-#| `0x16` | 2    | Last modified time                | —                            | —            |
-#| `0x18` | 2    | Last modified date                | —                            | —            |
-#| `0x1A` | 2    | **First cluster (low word)**      | Cluster number (starts at 2) | 0x0002       |
-#| `0x1C` | 4    | **File size (bytes)**             | File length                  | 4096         |
-
-read_file:
-## file size at 0x1C-0x1D-0x1E-0x1F 4 bytes
-li a0, "\nFSize:"
-call print7
-lwu a0, 0x1c(t3)
-la a1, file_size
-sw a0, 0(a1)
-lwu a0, 0(a1)
-call print_reg
-
-# file_first_cluster at 0x1A-0x1B 2 bytes
-#li a0, "\nF0cls:"
-#call print7
-lhu a0, 0x1a(t3)
-la a1, file_first_cluster
-sh a0, 0(a1)
-#lhu a0, 0(a1)
-#call print_reg
-
-# root_dir_sectors = (RootEntryCount * 32 + BytesPerSector -1 )/ BytesPerSector  ceiling division
-li a0, "\nrDseS:"
-call print7
-
-la a1, root_ent_cnt
-lwu t0, 0(a1)
-li t1, 32
-mul t2, t0, t1
-
-la a1, byte_per_sec
-lwu t0, 0(a1)
-add t3, t2, t0
-addi t3, t3, -1
-div a0, t3, t0
-
-la a1, root_dir_sectors 
-sw a0, 0(a1)
-lw a0, 0(a1)
-call print_reg
-
-#data_start_sec # FirstDataSector = root_dir_sector_start + root_dir_sectors 
-#li a0, "\nD0sec:"
-#call print7
-la a1, root_dir_sector_start
-lw t0, 0(a1)
-la a1, root_dir_sectors 
-lw t1, 0(a1)
-add t2, t0, t1
-la a1, data_start_sec  
-sw t2, 0(a1)
-#lw a0, 0(a1)
-#call print_reg
-
-# FirstSectorOfCluster(N)=FirstDataSector + (N - 2) * SectorsPerCluster
-li a0, "\nF0sec:"
-call print7
-
-la a1, file_first_cluster # N
-lw t0, 0(a1)
-addi t0, t0, -2
-la a1, sec_per_clus
-lw t1, 0(a1)
-mul t2, t0, t1
-la a1, data_start_sec
-lw t3, 0(a1)
-add a0, t3, t2
-la a1, file_start_sector
-sw a0, 0(a1)
-call print_reg
-
-
-# file_sectors = file_size + 511 / 512
-li a0, "\nFseS:"
-call print7
-la a1, file_size
-lw t0, 0(a1)
-addi t0, t0, 511
-li t1, 512
-div a0, t0, t1
-la a1, file_sectors 
-sw a0, 0(a1)
-lw a0, 0(a1)
-call print_reg
-
-
-li a0, "\nFileB:"
-call print7
-
-la a1, file_sectors
-lw t0, 0(a1)
-la a1,  file_start_sector
-lw t1, 0(a1)
-add t2, t1, t0
-
-#print_sector_loop:
-#mv a0, t1
 #call sd_read_sector  # use a0 as sector no.
 #call print_sector
-#addi t1, t1, 1
-#blt t1, t2, print_sector_loop
- 
-
-lui s0, 0x10000 # SDRAM base 0x10000000
-copy_sector_loop:
-mv a0, t1
-call sd_read_sector  # use a0 as sector no.
-mv a0, s0
-call copy_sector
-addi t1, t1, 1
-addi s0, s0, 512
-blt t1, t2, copy_sector_loop
-
-
-
-# -----------------------------
-# Read/Write SDRAM
+#
+## -------------------------------------
+## Scan Entries of Root Dir first sector
+## s7 entry_per_sector
+#li s8, 0 # entry_index
+#li s9, "MUSIC"
+#mv a0, s9
+#call print7
+#
+#entry_loop:
+#bge s8, s7, done_entries
+## entry_addr = s1 + (entry_index * 32)
+#slli t1, s8, 5
+#add t3, s1, t1 # t3 = address of entry
+#
+## 1. Quick Validity Check
+## load first byte of entry
+#lbu t4, 0(t3)
+#beq t4, x0, done_entries # 0x00 no more entries in dir
+#li t1, 0xE5
+#beq t4, t1, next_entry # 0xE5 deleted entry, skip
+#    
+## 2. Attribute Check # attribute at 0x0B( offset 11)
+#lbu t5, 11(t3)
+#li t1, 0x0F
+#beq t5, t1, next_entry # 0x0F LFN(Long File Name) entry, skip
+#
+#andi t6, t5, 0x18  # Mask for Volume Label(0x08) and Directory (0x10)
+#bne t6, x0, next_entry # skip 
+#
+## 3. Compare Filename(First 8 bytes)
+## load name 8 bytes
+#li t2, 0
+#addi t4, t3, 7
+#load_name_loop:
+#lbu t0, 0(t4)
+#slli t2, t2, 8
+#xor t2, t2, t0
+#addi t4, t4, -1
+#bge t4, t3, load_name_loop
+#
+## keep 5 char
+#slli t2, t2, 24
+#srli t2, t2, 24
+#
+### -- Print Name --- 
+##addi sp, sp, -16
+##sd t2, 0(sp)
+##sb x0, 8(sp)
+##mv a0, sp
+##call puts
+##addi sp, sp, 16
+### -----------------
+#
+#bne t2, s9, next_entry
+#
+### 4. FOUND! Extract File Info
+#li a0, "FOUND!"
+#call print7
+#
+#done_entries:
+#   j read_file
+#
+#next_entry:
+#addi s8, s8, 1
+#j entry_loop
+#
+#
+## root_dir_sector_start = reserved_sectors + (num_FATs * sectors_per_FAT)
+## root_dir_sectors = (RootEntryCount * 32 + BytesPerSector -1 )/ BytesPerSector  ceiling division
+## FirstDataSector = root_dir_sector_start + root_dir_sectors 
+## FirstSectorOfCluster(N)=FirstDataSector + (N - 2) * SectorsPerCluster
+#
+## Entry Layout(in Root Directory)
+##| Offset | Size | Field                             | Description                  | Example      |
+##| :----- | :--- | :-------------------------------- | :--------------------------- | :----------- |
+##| `0x00` | 8    | **Filename**                      | 8 chars (space padded)       | `"MUSIC   "` | FAT16 8.3 format for name.extension
+##| `0x08` | 3    | **Extension**                     | 3 chars (space padded)       | `"WAV"`      |
+##| `0x0B` | 1    | **Attributes**                    | Bit flags (see below)        | 0x20         |
+##| `0x0C` | 1    | Reserved                          | For Windows NT               | 0            |
+##| `0x0D` | 1    | Creation time (tenths)            | Optional                     | —            |
+##| `0x0E` | 2    | Creation time                     | —                            | —            |
+##| `0x10` | 2    | Creation date                     | —                            | —            |
+##| `0x12` | 2    | Last access date                  | —                            | —            |
+##| `0x14` | 2    | High word of cluster (FAT32 only) | —                            | —            |
+##| `0x16` | 2    | Last modified time                | —                            | —            |
+##| `0x18` | 2    | Last modified date                | —                            | —            |
+##| `0x1A` | 2    | **First cluster (low word)**      | Cluster number (starts at 2) | 0x0002       |
+##| `0x1C` | 4    | **File size (bytes)**             | File length                  | 4096         |
+#
+#read_file:
+### file size at 0x1C-0x1D-0x1E-0x1F 4 bytes
+#li a0, "\nFSize:"
+#call print7
+#lwu a0, 0x1c(t3)
+#la a1, file_size
+#sw a0, 0(a1)
+#lwu a0, 0(a1)
+#call print_reg
+#
+## file_first_cluster at 0x1A-0x1B 2 bytes
+##li a0, "\nF0cls:"
+##call print7
+#lhu a0, 0x1a(t3)
+#la a1, file_first_cluster
+#sh a0, 0(a1)
+##lhu a0, 0(a1)
+##call print_reg
+#
+## root_dir_sectors = (RootEntryCount * 32 + BytesPerSector -1 )/ BytesPerSector  ceiling division
+#li a0, "\nrDseS:"
+#call print7
+#
+#la a1, root_ent_cnt
+#lwu t0, 0(a1)
+#li t1, 32
+#mul t2, t0, t1
+#
+#la a1, byte_per_sec
+#lwu t0, 0(a1)
+#add t3, t2, t0
+#addi t3, t3, -1
+#div a0, t3, t0
+#
+#la a1, root_dir_sectors 
+#sw a0, 0(a1)
+#lw a0, 0(a1)
+#call print_reg
+#
+##data_start_sec # FirstDataSector = root_dir_sector_start + root_dir_sectors 
+##li a0, "\nD0sec:"
+##call print7
+#la a1, root_dir_sector_start
+#lw t0, 0(a1)
+#la a1, root_dir_sectors 
+#lw t1, 0(a1)
+#add t2, t0, t1
+#la a1, data_start_sec  
+#sw t2, 0(a1)
+##lw a0, 0(a1)
+##call print_reg
+#
+## FirstSectorOfCluster(N)=FirstDataSector + (N - 2) * SectorsPerCluster
+#li a0, "\nF0sec:"
+#call print7
+#
+#la a1, file_first_cluster # N
+#lw t0, 0(a1)
+#addi t0, t0, -2
+#la a1, sec_per_clus
+#lw t1, 0(a1)
+#mul t2, t0, t1
+#la a1, data_start_sec
+#lw t3, 0(a1)
+#add a0, t3, t2
+#la a1, file_start_sector
+#sw a0, 0(a1)
+#call print_reg
+#
+#
+## file_sectors = file_size + 511 / 512
+#li a0, "\nFseS:"
+#call print7
+#la a1, file_size
+#lw t0, 0(a1)
+#addi t0, t0, 511
+#li t1, 512
+#div a0, t0, t1
+#la a1, file_sectors 
+#sw a0, 0(a1)
+#lw a0, 0(a1)
+#call print_reg
+#
+#
+#li a0, "\nFileB:"
+#call print7
+#
+#la a1, file_sectors
+#lw t0, 0(a1)
+#la a1,  file_start_sector
+#lw t1, 0(a1)
+#add t2, t1, t0
+#
+##print_sector_loop:
+##mv a0, t1
+##call sd_read_sector  # use a0 as sector no.
+##call print_sector
+##addi t1, t1, 1
+##blt t1, t2, print_sector_loop
+# 
+#
 #lui s0, 0x10000 # SDRAM base 0x10000000
-## Write one byte
-#li t1, 0x58          # 'X'
-#sb t1, 0(s0)         # test sdram sb/sh
-#    
-## Read it back
-#lbu t2, 0(s0)         # test sdram lbu
-#    
-## Print it
-#sb t2, 0(s11)         # Should print 'X'
-
-
-#    lui t0, 0x2
-#    addi t0, t0, 4       # UART = 0x2004
-#    
+#copy_sector_loop:
+#mv a0, t1
+#call sd_read_sector  # use a0 as sector no.
+#mv a0, s0
+#call copy_sector
+#addi t1, t1, 1
+#addi s0, s0, 512
+#blt t1, t2, copy_sector_loop
+#
+#
+#
+## -----------------------------
+## Read/Write SDRAM
+##lui s0, 0x10000 # SDRAM base 0x10000000
+### Write one byte
+##li t1, 0x58          # 'X'
+##sb t1, 0(s0)         # test sdram sb/sh
+##    
+### Read it back
+##lbu t2, 0(s0)         # test sdram lbu
+##    
+### Print it
+##sb t2, 0(s11)         # Should print 'X'
+#
+#
+##    lui t0, 0x2
+##    addi t0, t0, 4       # UART = 0x2004
+##    
+##    lui s0, 0x10000      # SDRAM = 0x10000000
+##    
+##    # Write one byte
+##    li t1, 0x58          # 'X'
+##    call wait_uart
+##    sb t1, 0(s0)         # test sdram sb/sh
+##    
+##    # Read it back
+##    lbu t2, 0(s0)         # test sdram lbu
+##    
+##    # Print it
+##    sb t2, 0(t0)         # Should print 'X'
+##    sb t2, 0(t0)         # Should print 'X'
+##    sh t2, 0(t0)         # Should print 'X'
+##    
+##    # Write 4 byte
+##    li t1, 0x44434241    # 'DCBA'
+##    sw t1, 0(s0)         # test sdram sw
+##    
+##    # Read it back
+##    lhu t3, 0(s0) # A    # test sdram lhu lwu
+##    lbu t4, 1(s0) # B
+##    lwu t5, 2(s0) # C
+##    lbu t6, 3(s0) # D
+##    
+##    # Print it
+##    sb t3, 0(t0)         # Should print 'A'
+##    sb t4, 0(t0)         # Should print 'B'
+##    sb t5, 0(t0)         # Should print 'C'
+##    sb t6, 0(t0)         # Should print 'D'
+##    sb t2, 0(t0)         # Should print 'X'
+#
+#
 #    lui s0, 0x10000      # SDRAM = 0x10000000
-#    
-#    # Write one byte
-#    li t1, 0x58          # 'X'
-#    call wait_uart
-#    sb t1, 0(s0)         # test sdram sb/sh
-#    
-#    # Read it back
-#    lbu t2, 0(s0)         # test sdram lbu
-#    
-#    # Print it
-#    sb t2, 0(t0)         # Should print 'X'
-#    sb t2, 0(t0)         # Should print 'X'
-#    sh t2, 0(t0)         # Should print 'X'
-#    
-#    # Write 4 byte
-#    li t1, 0x44434241    # 'DCBA'
-#    sw t1, 0(s0)         # test sdram sw
-#    
-#    # Read it back
-#    lhu t3, 0(s0) # A    # test sdram lhu lwu
-#    lbu t4, 1(s0) # B
-#    lwu t5, 2(s0) # C
-#    lbu t6, 3(s0) # D
-#    
-#    # Print it
-#    sb t3, 0(t0)         # Should print 'A'
-#    sb t4, 0(t0)         # Should print 'B'
-#    sb t5, 0(t0)         # Should print 'C'
-#    sb t6, 0(t0)         # Should print 'D'
-#    sb t2, 0(t0)         # Should print 'X'
-
-
-    lui s0, 0x10000      # SDRAM = 0x10000000
-    ld a0, 0(s0)         # test sdram read data
-    call print_reg
-
-    jr s0  # jump to SDRAM!
-
-
-
-
-
-
-
-end: 
-j end
+#    ld a0, 0(s0)         # test sdram read data
+#    call print_reg
+#
+#    jr s0  # jump to SDRAM!
+#
+#
+#
+#
+#
+#
+#
+#end: 
+#j end
 
 
 
@@ -681,6 +681,8 @@ wait_uart_loop:
     li a0, 65  # A
     sb a0, 0(s11)
     lw s0, 0(s11)
+mv a0, s0
+call print_reg
     bgt zero, s0, wait_uart_loop
     ld s0, 0(sp)
     addi sp, sp,8 
