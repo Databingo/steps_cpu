@@ -214,15 +214,15 @@ sw a0, 0(t3)
 lw a0, 0(t3)
 call print_reg
 
+# ---------- Read Root dir Secotr 0 -----
+la t3, root_dir_sector_start
+lw a0, 0(t3)
+call sd_read_sector  # use a0 as sector no.
+call print_sector
 
 endd:
    j endd
 
-## ---------- Read Root dir Secotr 0 -----
-#la t3, root_dir_sector_start
-#lw a0, 0(t3)
-#call sd_read_sector  # use a0 as sector no.
-#call print_sector
 #
 ## -------------------------------------
 ## Scan Entries of Root Dir first sector

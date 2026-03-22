@@ -168,6 +168,16 @@ lw a0, 0(t3)
 # call print_reg
 auipc x1, 0 # R_RISCV_PCREL_HI20 print_reg
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_reg
+# la t3, root_dir_sector_start
+auipc t3, 0 # R_RISCV_PCREL_HI20 root_dir_sector_start 
+addi t3, t3, 0 # R_RISCV_PCREL_LO12_I root_dir_sector_start 
+lw a0, 0(t3)
+# call sd_read_sector  
+auipc x1, 0 # R_RISCV_PCREL_HI20 sd_read_sector
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I sd_read_sector
+# call print_sector
+auipc x1, 0 # R_RISCV_PCREL_HI20 print_sector
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_sector
 endd:
 #    j endd
 jal x0, endd
