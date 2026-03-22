@@ -685,8 +685,8 @@ wait_uart:
     sd s0, 0(sp)
     sd ra, 8(sp)
 wait_uart_loop:
-    li a0, 65  # A
-    sb a0, 0(s11)
+   #li a0, 65  # A
+   #sb a0, 0(s11)
     lw s0, 0(s11)
     bgt zero, s0, wait_uart_loop
     ld s0, 0(sp)
