@@ -535,8 +535,8 @@ sd_read_sector:  #  a0 sector index
     sw a0, 0(s2) # Write Sector index value to address 0x3200
 wait_ready:
     lw s7, 0(s5)   # 0x3220 ready
-    li a0, 96      # `
-    call putchar
+    #li a0, 96      # `
+    #call putchar
     beq s7, x0, wait_ready
     li s8, 1
     sw s8, 0(s3)   # Trigger read at 0x3204
@@ -684,8 +684,7 @@ wait_uart_loop:
     li a0, 65  # A
     sb a0, 0(s11)
     lw s0, 0(s11)
-    #bgt zero, s0, wait_uart_loop
-    bgt s0, zero, wait_uart_loop
+    bgt zero, s0, wait_uart_loop
     ld s0, 0(sp)
     ld ra, 8(sp)
     addi sp, sp, 16

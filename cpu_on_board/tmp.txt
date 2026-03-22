@@ -139,13 +139,6 @@ sd ra, 16(sp)
 sw a0, 0(s2) # Write Sector index value to address 0x3200
 wait_ready:
 lw s7, 0(s5)   # 0x3220 ready
-#     li a0, 96      
-addi a0, x0, 0x0
-addi a0, x0, 0x0
-addi a0, x0, 0x60
-#     call putchar
-auipc x1, 0 # R_RISCV_PCREL_HI20 putchar
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I putchar
 beq s7, x0, wait_ready
 #     li s8, 1
 addi s8, x0, 0x0
@@ -298,8 +291,8 @@ addi a0, x0, 0x0
 addi a0, x0, 0x41
 sb a0, 0(s11)
 lw s0, 0(s11)
-#     bgt s0, zero, wait_uart_loop
-blt zero, s0, wait_uart_loop
+#     bgt zero, s0, wait_uart_loop
+blt s0, zero, wait_uart_loop
 ld s0, 0(sp)
 ld ra, 8(sp)
 addi sp, sp, 16
