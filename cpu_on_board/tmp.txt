@@ -71,6 +71,9 @@ ori a0, a0, 0x20a
 # call print7
 auipc x1, 0 # R_RISCV_PCREL_HI20 print7
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print7
+endd:
+#     j endd
+jal x0, endd
 # la a1, byte_per_sec
 auipc a1, 0 # R_RISCV_PCREL_HI20 byte_per_sec 
 addi a1, a1, 0 # R_RISCV_PCREL_LO12_I byte_per_sec 
@@ -627,12 +630,12 @@ wait_uart:
 addi sp, sp, -8
 sd s0, 0(sp)
 wait_uart_loop:
+#     li a0, 65  
+addi a0, x0, 0x0
+addi a0, x0, 0x0
+addi a0, x0, 0x41
+sb a0, 0(s11)
 lw s0, 0(s11)
-#     mv a0, s0
-addi a0, s0, 0
-#     call print_reg
-auipc x1, 0 # R_RISCV_PCREL_HI20 print_reg
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_reg
 #     bgt zero, s0, wait_uart_loop
 blt s0, zero, wait_uart_loop
 ld s0, 0(sp)

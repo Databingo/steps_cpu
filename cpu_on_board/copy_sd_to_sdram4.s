@@ -103,6 +103,10 @@ call sd_read_sector  # use a0 as sector no.
 # byte_per_sec offset 0x0b-0x0c 2 bytes
 li a0, "\nBPsec:" # 7 char left on for null
 call print7
+
+endd:
+    j endd
+
 la a1, byte_per_sec
 lwu a0, 0x0a(s1)
 srli a0, a0, 8
@@ -674,11 +678,9 @@ wait_uart:
     addi sp, sp, -8
     sd s0, 0(sp)
 wait_uart_loop:
-    #li a0, 65  # A
-    #sb a0, 0(s11)
+    li a0, 65  # A
+    sb a0, 0(s11)
     lw s0, 0(s11)
-    mv a0, s0
-    call print_reg
     bgt zero, s0, wait_uart_loop
     ld s0, 0(sp)
     addi sp, sp,8 
