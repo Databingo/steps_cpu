@@ -209,7 +209,7 @@ assign DRAM_CKE = 1; // always enable
     reg uart_read_pulse;
     reg uart_read_step;
     wire uart_waitrequest;
-    wire jtag_addr = (bus_read_enable && bus_address == `Art_base) ? 1'b1:1'b0;  
+    wire jtag_addr = (bus_read_done == 0 && bus_address == `Art_base) ? 1'b1:1'b0;  
     // jtag:   TX/RX in 0, Control(WSPACE) in 1, read[31:16RAVAL-15RVALID-7:0Key]rvalid0empty write 0 givelow 8 bits to uart, read 1 return 31 bits, 31-16 is WSPACE;
     // sifive: Tx/Control in 0, RX in 1
     jtag_uart_system my_jtag_system (

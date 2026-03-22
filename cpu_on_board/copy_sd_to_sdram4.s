@@ -496,10 +496,10 @@ print_reg: # a0
     sd s2, 24(sp)
     sd s3, 32(sp)
     mv s0, a0
-    #li a0, "0"
-    #call putchar
-    #li a0, "x"
-    #call putchar
+    li a0, "0"
+    call putchar
+    li a0, "x"
+    call putchar
     li s1, 60 
 p_loop:
     srl s2, s0, s1      # get high nibble
@@ -682,8 +682,8 @@ wait_uart_loop:
     li a0, 65  # A
     sb a0, 0(s11)
     lw s0, 0(s11)
-    mv a0, s0
-    call print_reg
+    #mv a0, s0
+    #call print_reg
     bgt zero, s0, wait_uart_loop
     ld s0, 0(sp)
     ld ra, 8(sp)

@@ -83,6 +83,20 @@ sd s2, 24(sp)
 sd s3, 32(sp)
 #     mv s0, a0
 addi s0, a0, 0
+#     li a0, "0"
+addi a0, x0, 0x0
+addi a0, x0, 0x0
+addi a0, x0, 0x30
+#     call putchar
+auipc x1, 0 # R_RISCV_PCREL_HI20 putchar
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I putchar
+#     li a0, "x"
+addi a0, x0, 0x0
+addi a0, x0, 0x0
+addi a0, x0, 0x78
+#     call putchar
+auipc x1, 0 # R_RISCV_PCREL_HI20 putchar
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I putchar
 #     li s1, 60 
 addi s1, x0, 0x0
 addi s1, x0, 0x0
@@ -279,11 +293,6 @@ addi a0, x0, 0x0
 addi a0, x0, 0x41
 sb a0, 0(s11)
 lw s0, 0(s11)
-#     mv a0, s0
-addi a0, s0, 0
-#     call print_reg
-auipc x1, 0 # R_RISCV_PCREL_HI20 print_reg
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_reg
 #     bgt zero, s0, wait_uart_loop
 blt s0, zero, wait_uart_loop
 ld s0, 0(sp)
