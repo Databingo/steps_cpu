@@ -220,70 +220,71 @@ lw a0, 0(t3)
 call sd_read_sector  # use a0 as sector no.
 call print_sector
 
+
+# -------------------------------------
+# Scan Entries of Root Dir first sector
+# s7 entry_per_sector
+li s8, 0 # entry_index
+li s9, "MUSIC"
+mv a0, s9
+call print7
+
+entry_loop:
+bge s8, s7, done_entries
+# entry_addr = s1 + (entry_index * 32)
+slli t1, s8, 5
+add t3, s1, t1 # t3 = address of entry
+
+# 1. Quick Validity Check
+# load first byte of entry
+lbu t4, 0(t3)
+beq t4, x0, done_entries # 0x00 no more entries in dir
+li t1, 0xE5
+beq t4, t1, next_entry # 0xE5 deleted entry, skip
+    
+# 2. Attribute Check # attribute at 0x0B( offset 11)
+lbu t5, 11(t3)
+li t1, 0x0F
+beq t5, t1, next_entry # 0x0F LFN(Long File Name) entry, skip
+
+andi t6, t5, 0x18  # Mask for Volume Label(0x08) and Directory (0x10)
+bne t6, x0, next_entry # skip 
+
+# 3. Compare Filename(First 8 bytes)
+# load name 8 bytes
+li t2, 0
+addi t4, t3, 7
+load_name_loop:
+lbu t0, 0(t4)
+slli t2, t2, 8
+xor t2, t2, t0
+addi t4, t4, -1
+bge t4, t3, load_name_loop
+
+# keep 5 char
+slli t2, t2, 24
+srli t2, t2, 24
+
+## -- Print Name --- 
+#addi sp, sp, -16
+#sd t2, 0(sp)
+#sb x0, 8(sp)
+#mv a0, sp
+#call puts
+#addi sp, sp, 16
+## -----------------
+
+bne t2, s9, next_entry
+
+## 4. FOUND! Extract File Info
+li a0, "FOUND!"
+call print7
+
+done_entries:
 endd:
    j endd
 
-#
-## -------------------------------------
-## Scan Entries of Root Dir first sector
-## s7 entry_per_sector
-#li s8, 0 # entry_index
-#li s9, "MUSIC"
-#mv a0, s9
-#call print7
-#
-#entry_loop:
-#bge s8, s7, done_entries
-## entry_addr = s1 + (entry_index * 32)
-#slli t1, s8, 5
-#add t3, s1, t1 # t3 = address of entry
-#
-## 1. Quick Validity Check
-## load first byte of entry
-#lbu t4, 0(t3)
-#beq t4, x0, done_entries # 0x00 no more entries in dir
-#li t1, 0xE5
-#beq t4, t1, next_entry # 0xE5 deleted entry, skip
-#    
-## 2. Attribute Check # attribute at 0x0B( offset 11)
-#lbu t5, 11(t3)
-#li t1, 0x0F
-#beq t5, t1, next_entry # 0x0F LFN(Long File Name) entry, skip
-#
-#andi t6, t5, 0x18  # Mask for Volume Label(0x08) and Directory (0x10)
-#bne t6, x0, next_entry # skip 
-#
-## 3. Compare Filename(First 8 bytes)
-## load name 8 bytes
-#li t2, 0
-#addi t4, t3, 7
-#load_name_loop:
-#lbu t0, 0(t4)
-#slli t2, t2, 8
-#xor t2, t2, t0
-#addi t4, t4, -1
-#bge t4, t3, load_name_loop
-#
-## keep 5 char
-#slli t2, t2, 24
-#srli t2, t2, 24
-#
-### -- Print Name --- 
-##addi sp, sp, -16
-##sd t2, 0(sp)
-##sb x0, 8(sp)
-##mv a0, sp
-##call puts
-##addi sp, sp, 16
-### -----------------
-#
-#bne t2, s9, next_entry
-#
-### 4. FOUND! Extract File Info
-#li a0, "FOUND!"
-#call print7
-#
-#done_entries:
+
 #   j read_file
 #
 #next_entry:
