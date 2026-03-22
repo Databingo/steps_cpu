@@ -117,20 +117,20 @@ la a1, byte_per_sec
 lwu a0, 0x0a(s1)
 srli a0, a0, 8
 sh a0, 0(a1)
-lhu a0, 0(a1)
+#lhu a0, 0(a1)
+#call print_reg
+
+# -------------------------------------
+# Sectors per cluster 0x0d 1 byte
+li a0, "\nsePcl:" # 7 char left on for null
+call print7
+la a1, sec_per_clus
+lbu a0, 0x0d(s1)
+sh a0, 0(a1)
+lh a0, 0(a1)
 call print_reg
 endd:
     j endd
-
-## -------------------------------------
-## Sectors per cluster 0x0d 1 byte
-##li a0, "\nsePcl:" # 7 char left on for null
-##call print7
-#la a1, sec_per_clus
-#lbu a0, 0x0d(s1)
-#sh a0, 0(a1)
-##lh a0, 0(a1)
-##call print_reg
 #
 #
 ## -------------------------------------
