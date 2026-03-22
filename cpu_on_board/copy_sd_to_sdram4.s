@@ -93,6 +93,10 @@ _start:
 #| `0x36` | 11   | Volume Label / File System Type | "NO NAME    " / "FAT16   "     | —               |
 #| :----- | :--- | :------------------------------ | :----------------------------- | :-------------- |
 
+lw a0, 0(s11)
+call print_reg
+
+
 # ----------Read BPB sector 0 -----
 li a0, 0   
 call sd_read_sector  # use a0 as sector no.
