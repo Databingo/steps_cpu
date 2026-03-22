@@ -674,9 +674,11 @@ wait_uart:
     addi sp, sp, -8
     sd s0, 0(sp)
 wait_uart_loop:
-    li a0, 65  # A
-    sb a0, 0(s11)
+    #li a0, 65  # A
+    #sb a0, 0(s11)
     lw s0, 0(s11)
+    mv a0, s0
+    call print_reg
     bgt zero, s0, wait_uart_loop
     ld s0, 0(sp)
     addi sp, sp,8 
