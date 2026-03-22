@@ -283,8 +283,9 @@ addi sp, sp, 16
 #     ret
 jalr x0, 0(x1)
 wait_uart:
-addi sp, sp, -8
+addi sp, sp, -16
 sd s0, 0(sp)
+sd ra, 8(sp)
 wait_uart_loop:
 #     li a0, 65  
 addi a0, x0, 0x0
@@ -292,15 +293,16 @@ addi a0, x0, 0x0
 addi a0, x0, 0x41
 sb a0, 0(s11)
 lw s0, 0(s11)
-# mv a0, s0
+#     mv a0, s0
 addi a0, s0, 0
-# call print_reg
+#     call print_reg
 auipc x1, 0 # R_RISCV_PCREL_HI20 print_reg
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_reg
 #     bgt zero, s0, wait_uart_loop
 blt s0, zero, wait_uart_loop
 ld s0, 0(sp)
-addi sp, sp,8 
+ld ra, 8(sp)
+addi sp, sp, 16
 #     ret
 jalr x0, 0(x1)
 print7:
