@@ -101,6 +101,8 @@ call sd_read_sector  # use a0 as sector no.
 # -- Parse BPB -- little-endian  Bios Parameter Block : sector 0
 # -------------------------------------
 # byte_per_sec offset 0x0b-0x0c 2 bytes
+li s7, 66
+sb s7, 0(s11)
 li a0, "\nBPsec:" # 7 char left on for null
 call print7
 
