@@ -265,14 +265,14 @@ bge t4, t3, load_name_loop
 slli t2, t2, 24
 srli t2, t2, 24
 
-## -- Print Name --- 
-#addi sp, sp, -16
-#sd t2, 0(sp)
-#sb x0, 8(sp)
-#mv a0, sp
-#call puts
-#addi sp, sp, 16
-## -----------------
+# -- Print Name --- 
+addi sp, sp, -16
+sd t2, 0(sp)
+sb x0, 8(sp)
+mv a0, sp
+call puts
+addi sp, sp, 16
+# -----------------
 
 bne t2, s9, next_entry
 
@@ -281,17 +281,13 @@ li a0, "FOUND!"
 call print7
 
 done_entries:
-endd:
-   j endd
+   j read_file
+
+next_entry:
+addi s8, s8, 1
+j entry_loop
 
 
-#   j read_file
-#
-#next_entry:
-#addi s8, s8, 1
-#j entry_loop
-#
-#
 ## root_dir_sector_start = reserved_sectors + (num_FATs * sectors_per_FAT)
 ## root_dir_sectors = (RootEntryCount * 32 + BytesPerSector -1 )/ BytesPerSector  ceiling division
 ## FirstDataSector = root_dir_sector_start + root_dir_sectors 
@@ -314,7 +310,8 @@ endd:
 ##| `0x1A` | 2    | **First cluster (low word)**      | Cluster number (starts at 2) | 0x0002       |
 ##| `0x1C` | 4    | **File size (bytes)**             | File length                  | 4096         |
 #
-#read_file:
+read_file:
+j read_file
 ### file size at 0x1C-0x1D-0x1E-0x1F 4 bytes
 #li a0, "\nFSize:"
 #call print7

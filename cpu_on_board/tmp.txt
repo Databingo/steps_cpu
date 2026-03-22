@@ -224,6 +224,15 @@ addi t4, t4, -1
 bge t4, t3, load_name_loop
 slli t2, t2, 24
 srli t2, t2, 24
+addi sp, sp, -16
+sd t2, 0(sp)
+sb x0, 8(sp)
+# mv a0, sp
+addi a0, sp, 0
+# call puts
+auipc x1, 0 # R_RISCV_PCREL_HI20 puts
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I puts
+addi sp, sp, 16
 bne t2, s9, next_entry
 # li a0, "FOUND!"
 addi a0, x0, 0x0
@@ -240,9 +249,15 @@ ori a0, a0, 0x746
 auipc x1, 0 # R_RISCV_PCREL_HI20 print7
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print7
 done_entries:
-endd:
-#    j endd
-jal x0, endd
+#    j read_file
+jal x0, read_file
+next_entry:
+addi s8, s8, 1
+# j entry_loop
+jal x0, entry_loop
+read_file:
+# j read_file
+jal x0, read_file
 print_reg:
 addi sp, sp, -40
 sd ra, 0(sp)
