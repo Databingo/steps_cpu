@@ -122,100 +122,102 @@ sh a0, 0(a1)
 
 # -------------------------------------
 # Sectors per cluster 0x0d 1 byte
-li a0, "\nsePcl:" # 7 char left on for null
-call print7
+#li a0, "\nsePcl:" # 7 char left on for null
+#call print7
 la a1, sec_per_clus
 lbu a0, 0x0d(s1)
 sh a0, 0(a1)
-lh a0, 0(a1)
-call print_reg
-endd:
-    j endd
+#lh a0, 0(a1)
+#call print_reg
 #
 #
-## -------------------------------------
-## reserved_sectors offset 0x0e-0x0f 2 bytes (including root sector 0)
-##li a0, "\nrevSe:" # 7 char left on for null
-##call print7
-#la a1, reserved_sec
-#lh a0, 0x0e(s1)
-#sd a0, 0(a1)
-##ld a0, 0(a1)
-##call print_reg
-#
-## -------------------------------------
-## num_fats offset 0x10 1 bytes
-##li a0, "\nnuFat:" # 7 char left on for null
-##call print7
-#la a1, num_fats
-#lbu a0, 0x10(s1)
-#sw a0, 0(a1)
-##lw a0, 0(a1)
-##call print_reg
-#
-## -------------------------------------
-## root_entries offset 0x11-0x12 2 bytes
-##li a0, "\nReCnt:"
-##call print7
-#la a1, root_ent_cnt
-#lwu a0, 0x10(s1)
-#srli a0, a0, 8
-#sh a0, 0(a1)
-##lhu a0, 0(a1)
-##call print_reg
-#
-## -------------------------------------
-## total sectors offset 0x13 2 bytes if 0 find 0x20 4 bytes for large volumes
-##li a0, "\nToSec:"
-##call print7
-#la a1, total_sectors
-#lwu a0, 0x20(s1)
-#sw a0, 0(a1)
-##lwu a0, 0(a1)
-##call print_reg
-#
-## -------------------------------------
-## sectors_per_fat16 high offset 0x16-0x17 2 bytes
-##li a0, "\nsePft:" # 7 char left on for null
-##call print7
-#la a1, sec_per_fat
-#lh a0, 0x16(s1)
-#sh a0, 0(a1)
-##lh a0, 0(a1)
-##call print_reg
-#
-### ---------Calcauted ----------------------------
-## root_dir_sector_start = reserved_sectors + (num_fats * sectors_per_fat16)
-##li a0, "\nrtdS0:" # 7 char left on for null
-##call print7
-#la a1, num_fats
-#lw t1, 0(a1)
-#la a1, sec_per_fat
-#lw t2, 0(a1)
-#la a1, reserved_sec
-#lw t0, 0(a1)
-#mul a0, t1, t2
-#add a0, a0, t0
-#la t3, root_dir_sector_start
-#sw a0, 0(t3)
-##lw a0, 0(t3)
-##call print_reg
-#
-## -------------------------------------
-## entries_per_sector =  byte_per_sec/32
-##li a0, "\nEtPse:"
-##call print7
-#la a1, byte_per_sec
+# -------------------------------------
+# reserved_sectors offset 0x0e-0x0f 2 bytes (including root sector 0)
+#li a0, "\nrevSe:" # 7 char left on for null
+#call print7
+la a1, reserved_sec
+lh a0, 0x0e(s1)
+sd a0, 0(a1)
+#ld a0, 0(a1)
+#call print_reg
+
+# -------------------------------------
+# num_fats offset 0x10 1 bytes
+#li a0, "\nnuFat:" # 7 char left on for null
+#call print7
+la a1, num_fats
+lbu a0, 0x10(s1)
+sw a0, 0(a1)
 #lw a0, 0(a1)
-#mv s7, a0
-##srli a0, a0, 5  # calc entries_per_sector
-#li t1, 32
-#div a0, a0, t1
-#la t3,  entries_per_sector
-#sw a0, 0(t3)
-##lw a0, 0(t3)
-##call print_reg
-#
+#call print_reg
+
+# -------------------------------------
+# root_entries offset 0x11-0x12 2 bytes
+#li a0, "\nReCnt:"
+#call print7
+la a1, root_ent_cnt
+lwu a0, 0x10(s1)
+srli a0, a0, 8
+sh a0, 0(a1)
+#lhu a0, 0(a1)
+#call print_reg
+
+# -------------------------------------
+# total sectors offset 0x13 2 bytes if 0 find 0x20 4 bytes for large volumes
+#li a0, "\nToSec:"
+#call print7
+la a1, total_sectors
+lwu a0, 0x20(s1)
+sw a0, 0(a1)
+#lwu a0, 0(a1)
+#call print_reg
+
+# -------------------------------------
+# sectors_per_fat16 high offset 0x16-0x17 2 bytes
+#li a0, "\nsePft:" # 7 char left on for null
+#call print7
+la a1, sec_per_fat
+lh a0, 0x16(s1)
+sh a0, 0(a1)
+#lh a0, 0(a1)
+#call print_reg
+
+## ---------Calcauted ----------------------------
+# root_dir_sector_start = reserved_sectors + (num_fats * sectors_per_fat16)
+#li a0, "\nrtdS0:" # 7 char left on for null
+#call print7
+la a1, num_fats
+lw t1, 0(a1)
+la a1, sec_per_fat
+lw t2, 0(a1)
+la a1, reserved_sec
+lw t0, 0(a1)
+mul a0, t1, t2
+add a0, a0, t0
+la t3, root_dir_sector_start
+sw a0, 0(t3)
+#lw a0, 0(t3)
+#call print_reg
+
+# -------------------------------------
+# entries_per_sector =  byte_per_sec/32
+li a0, "\nEtPse:"
+call print7
+la a1, byte_per_sec
+lw a0, 0(a1)
+mv s7, a0
+#srli a0, a0, 5  # calc entries_per_sector
+li t1, 32
+div a0, a0, t1
+la t3,  entries_per_sector
+sw a0, 0(t3)
+lw a0, 0(t3)
+call print_reg
+
+
+endd:
+   j endd
+
 ## ---------- Read Root dir Secotr 0 -----
 #la t3, root_dir_sector_start
 #lw a0, 0(t3)
