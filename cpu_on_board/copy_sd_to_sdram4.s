@@ -110,16 +110,18 @@ sb s7, 0(s11)
 li a0, "\nBPsec:" # 7 char left on for null
 call print7
 
+#endd:
+#    j endd
+
+la a1, byte_per_sec
+lwu a0, 0x0a(s1)
+srli a0, a0, 8
+sh a0, 0(a1)
+lhu a0, 0(a1)
+call print_reg
 endd:
     j endd
-#
-#la a1, byte_per_sec
-#lwu a0, 0x0a(s1)
-#srli a0, a0, 8
-#sh a0, 0(a1)
-##lhu a0, 0(a1)
-##call print_reg
-#
+
 ## -------------------------------------
 ## Sectors per cluster 0x0d 1 byte
 ##li a0, "\nsePcl:" # 7 char left on for null
