@@ -3,7 +3,7 @@
    #address-cells = <2>;
    #size-cells = <2>;
    model = "My Custom FPGA SoC";
-   compatible = "my-custom-fpga";
+   compatible = "riscv-virtio";
  
    chosen {
        stdout-path = "/soc/uart@10000000";  // pass to opensbi
@@ -23,7 +23,7 @@
       
        cpu0: cpu@0 {
            device_type = "cpu";  // _ due to IEEE-1275
-           reg = <0>;
+           reg = <0x0>;
            compatible = "riscv";
            riscv,isa = "rv64ima_zicsr_zifencei";
            mmu-type = "riscv,sv39";
@@ -52,7 +52,7 @@
        //};
        uart0: uart@10000000 {
            compatible = "ns16550a";
-           reg = <0x0 0x10000000 0x0 0x8>;
+           reg = <0x0 0x10000000 0x0 0x100>;
            clock-frequency = <12500000>;
            reg-shift = <0>;
        };
@@ -62,8 +62,13 @@
        //          <0x0 0x200BFF8 0x0 0x8>;  // MTIME addr
        //    interrupts-extend = <&cpu0_intc 7>; // TIP at 7
        //};
-       timer@2000000 {
-           compatible = "riscv,clint0";
+       //timer@2000000 {
+       //    compatible = "riscv,clint0";
+       //    reg = <0x0 0x2000000 0x0 0x10000>;
+       //    interrupts-extend = <&cpu0_intc 3 &cpu0_intc 7>; // TIP at 7
+       //};
+       clint0: clint@2000000 {
+           compatible = "sifive,clint0";
            reg = <0x0 0x2000000 0x0 0x10000>;
            interrupts-extend = <&cpu0_intc 3 &cpu0_intc 7>; // TIP at 7
        };
