@@ -56,7 +56,8 @@
 #    -cpu rv64,c=off,f=off,d=off \
 #    -bios build/platform/generic/firmware/fw_payload.elf
 qemu-system-riscv64 -nographic \
+    -m 36M \
     -dtb my_board.dtb \
     -machine virt \
-    -cpu rv64,c=off,f=off,d=off,zfa=off,zfh=off \
+    -cpu rv64,h=off,c=off,f=off,d=off,zfa=off,zfh=off \
     -bios build/platform/generic/firmware/fw_payload.elf

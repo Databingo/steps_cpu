@@ -48,7 +48,7 @@
 			riscv,cbom-block-size = <0x40>;
 			//riscv,isa = "rv64imafdch_zicbom_zicboz_zicntr_zicsr_zifencei_zihintntl_zihintpause_zihpm_zawrs_zfa_zca_zcd_zba_zbb_zbc_zbs_sstc_svadu";
 			riscv,isa = "rv64ima_zicsr_zifencei";
-			mmu-type = "riscv,sv57";
+			mmu-type = "riscv,sv39";
 
 			interrupt-controller {
 				#interrupt-cells = <0x01>;
