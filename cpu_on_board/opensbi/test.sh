@@ -37,15 +37,25 @@
 #
 #
 #
+
+
+#qemu-system-riscv64 -nographic \
+#    -machine virt \
+#    #-bios build/platform/generic/firmware/fw_payload.bin \
+#    #-bios default \
+#    #-kernel Image_test \
+#    #-initrd rootfs.cpio.gz \
+#    -append "console=ttyS0"
+
+
+
+
+
+#qemu-system-riscv64 -nographic \
+#    -machine virt \
+#    -cpu rv64,c=off,f=off,d=off \
+#    -bios build/platform/generic/firmware/fw_payload.elf
 qemu-system-riscv64 -nographic \
     -machine virt \
-    -bios default \
-    #-kernel Image_test \
-    #-initrd rootfs.cpio.gz \
-    -append "console=ttyS0"
-
-
-
-
-
-
+    -cpu rv64,c=off,f=off,d=off,zfa=off,zfh=off \
+    -bios build/platform/generic/firmware/fw_payload.elf

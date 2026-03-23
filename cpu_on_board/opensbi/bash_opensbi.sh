@@ -2,16 +2,18 @@ dtc -I dts -O dtb -o my_board.dtb my_board.dts # boot time use via its address a
 
 make CROSS_COMPILE=/usr/local/projects/bin/xpack-riscv-none-elf-gcc-14.2.0-3/bin/riscv-none-elf- \
      PLATFORM=generic \
-     FW_FDT_PATH=my_board.dtb \
      FW_TEXT_START=0x80000000 \
      FW_PAYLOAD_OFFSET=0x200000 \
      FW_PIC=n \
      PLATFORM_RISCV_ISA=rv64ima_zicsr_zifencei \
      PLATFORM_RISCV_ABI=lp64 \
+     EXTRA_CCASFLAGS="-march=rv64ima_zicsr_zifencei -mabi=lp64"\
+     EXTRA_CFLAGS="-mno-relax -march=rv64ima_zicsr_zifencei -mabi=lp64"\
+     FW_PAYLOAD=y \
+    #FW_FDT_PATH=my_board.dtb \
+    #EXTRA_CFLAGS="-mno-relax"\
      #CFLAGS="-march=rv64ima_zicsr_zifencei -mabi=lp64"\
      #ASFLAGS="-march=rv64ima_zicsr_zifencei -mabi=lp64"\
-     EXTRA_CFLAGS="-mno-relax"\
-     FW_PAYLOAD=y \
 
 
     #FW_PAYLOAD_PATH= add.o \
@@ -32,5 +34,5 @@ make CROSS_COMPILE=/usr/local/projects/bin/xpack-riscv-none-elf-gcc-14.2.0-3/bin
 # align 4KB
 #
 #
-../../../bin/riscv64-unknown-elf-objdump -D -b binary -m riscv:rv64ima build/platform/generic/firmware/fw_payload.bin|less
+#../../../bin/riscv64-unknown-elf-objdump -D -b binary -m riscv:rv64ima build/platform/generic/firmware/fw_payload.bin|less
 
