@@ -339,12 +339,6 @@ assign DRAM_CKE = 1; // always enable
         if (bus_write_enable && bus_write_done) begin bus_write_done <= 0; end
 
 
-
-
-
-
-
-
         // Read
         //if (!bus_read_enable && bus_read_done==0) begin 
         if (bus_read_done==0) begin 
