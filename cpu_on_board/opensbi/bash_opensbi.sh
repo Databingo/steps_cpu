@@ -1,5 +1,5 @@
 dtc -I dts -O dtb -o my_board.dtb my_board.dts # boot time use via its address at register a1, hardid(core number) in a0
-
+make PLATFORM=generic clean
 make CROSS_COMPILE=/usr/local/projects/bin/xpack-riscv-none-elf-gcc-14.2.0-3/bin/riscv-none-elf- \
      PLATFORM=generic \
      FW_TEXT_START=0x80000000 \
@@ -10,7 +10,7 @@ make CROSS_COMPILE=/usr/local/projects/bin/xpack-riscv-none-elf-gcc-14.2.0-3/bin
      EXTRA_CCASFLAGS="-march=rv64ima_zicsr_zifencei -mabi=lp64"\
      EXTRA_CFLAGS="-mno-relax -march=rv64ima_zicsr_zifencei -mabi=lp64"\
      FW_PAYLOAD=y \
-    #FW_FDT_PATH=my_board.dtb \
+     FW_FDT_PATH=my_board.dtb \
     #EXTRA_CFLAGS="-mno-relax"\
      #CFLAGS="-march=rv64ima_zicsr_zifencei -mabi=lp64"\
      #ASFLAGS="-march=rv64ima_zicsr_zifencei -mabi=lp64"\
