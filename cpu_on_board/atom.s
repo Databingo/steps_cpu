@@ -69,7 +69,7 @@ _start:
     li s5,  0x3220 # SD ready for rd/wr
     li s6,  0x3228 # SD cache available
     # a0 for function call default parameter
-    li s0, 0x10000000 # SDRAM base 0x80000000
+    li s0, 0x80000000 # SDRAM base 0x80000000
 
 la a0, msg
 call puts
@@ -77,16 +77,16 @@ call puts
 
 li a0, 10 
 call print_reg
-#li a0, 0x80000000
-#call print_reg
+li a0, 0x80000000
+call print_reg
 
+
+la a0, msg
+call puts
 
 # atom test ------
 li t0, 10 
 sw t0, 0(s0)
-
-#lw a0, 0(s0)
-
 
 li t0, 5
 amoadd.w t1, t0, (s0)
