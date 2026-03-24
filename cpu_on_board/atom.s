@@ -199,10 +199,10 @@ call print_reg # new value
 li a0, "\nAmin.w"
 call print7
 
-li t0, 5
+li t0, 10 
 sw t0, 0(s0)
 
-li t0, 10
+li t0, 5
 amomin.w t1, t0, (s0)
 
 mv a0, t1
