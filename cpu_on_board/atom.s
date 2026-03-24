@@ -84,15 +84,197 @@ call print_reg
 la a0, msg
 call puts
 
+##-----------w---------
+## atom test ------
+#li a0, "\nAadd.w"
+#call print7
+#
+#li t0, 10 
+#sw t0, 0(s0)
+#
+#li t0, 5
+#amoadd.w t1, t0, (s0)
+#
+#mv a0, t1
+#call print_reg # old value
+#
+#lw a0, 0(s0)
+#call print_reg # new value
+#
+## atom test ------
+#li a0, "\nlr/scw"
+#call print7
+#
+#lr.w t2, (s0)
+#addi t2, t2, 20
+#sc.w t3, t2, (s0)
+#
+#mv a0, t3
+#call print_reg
+#mv a0, t2
+#call print_reg
+#
+## atom test ------
+#li a0, "\nlrscwF"
+#call print7
+#
+#lr.w t2, (s0)
+#li t4, 99
+#sw t4, 0(s0)
+#
+#sc.w t3, t2, (s0)
+#mv a0, t3
+#call print_reg
+#mv a0, t2
+#call print_reg
+#
+#
+## atom test ------
+#li a0, "\nAswap.w"
+#call print7
+#
+#li t0, 10 
+#sw t0, 0(s0)
+#
+#li t0, 5
+#amoswap.w t1, t0, (s0)
+#
+#mv a0, t1
+#call print_reg # old value
+#
+#lw a0, 0(s0)
+#call print_reg # new value
+#
+#
+## atom test ------
+#li a0, "\nAxor.w"
+#call print7
+#
+#li t0, 10 
+#sw t0, 0(s0)
+#
+#li t0, 5
+#amoxor.w t1, t0, (s0)
+#
+#mv a0, t1
+#call print_reg # old value
+#
+#lw a0, 0(s0)
+#call print_reg # new value
+#
+## atom test ------
+#li a0, "\nAand.w"
+#call print7
+#
+#li t0, 11 
+#sw t0, 0(s0)
+#
+#li t0, 5
+#amoand.w t1, t0, (s0)
+#
+#mv a0, t1
+#call print_reg # old value
+#
+#lw a0, 0(s0)
+#call print_reg # new value
+#
+#
+## atom test ------
+#li a0, "\nAor.w"
+#call print7
+#
+#li t0, 10 
+#sw t0, 0(s0)
+#
+#li t0, 4
+#amoor.w t1, t0, (s0)
+#
+#mv a0, t1
+#call print_reg # old value
+#
+#lw a0, 0(s0)
+#call print_reg # new value
+#
+#
+## atom test ------
+#li a0, "\nAmin.w"
+#call print7
+#
+#li t0, 10 
+#sw t0, 0(s0)
+#
+#li t0, 5
+#amomin.w t1, t0, (s0)
+#
+#mv a0, t1
+#call print_reg # old value
+#
+#lw a0, 0(s0)
+#call print_reg # new value
+#
+#
+## atom test ------
+#li a0, "\nAmax.w"
+#call print7
+#
+#li t0, 5 
+#sw t0, 0(s0)
+#
+#li t0, 11
+#amomax.w t1, t0, (s0)
+#
+#mv a0, t1
+#call print_reg # old value
+#
+#lw a0, 0(s0)
+#call print_reg # new value
+#
+#
+## atom test ------
+#li a0, "\nAminuw"
+#call print7
+#
+#li t0, 10 
+#sw t0, 0(s0)
+#
+#li t0, -1 
+#amominu.w t1, t0, (s0)
+#
+#mv a0, t1
+#call print_reg # old value
+#
+#lw a0, 0(s0)
+#call print_reg # new value
+#
+#
+## atom test ------
+#li a0, "\nAmaxuw"
+#call print7
+#
+#li t0, 5 
+#sw t0, 0(s0)
+#
+#li t0, -1 
+#amomaxu.w t1, t0, (s0)
+#
+#mv a0, t1
+#call print_reg # old value
+#
+#lw a0, 0(s0)
+#call print_reg # new value
+
+
+#  -------d------------
+
 # atom test ------
-li a0, "\nAadd.w"
+li a0, "\nAadd.d"
 call print7
 
 li t0, 10 
 sw t0, 0(s0)
 
 li t0, 5
-amoadd.w t1, t0, (s0)
+amoadd.d t1, t0, (s0)
 
 mv a0, t1
 call print_reg # old value
@@ -101,12 +283,12 @@ lw a0, 0(s0)
 call print_reg # new value
 
 # atom test ------
-li a0, "\nlr/scw"
+li a0, "\nlr/scd"
 call print7
 
-lr.w t2, (s0)
+lr.d t2, (s0)
 addi t2, t2, 20
-sc.w t3, t2, (s0)
+sc.d t3, t2, (s0)
 
 mv a0, t3
 call print_reg
@@ -114,14 +296,14 @@ mv a0, t2
 call print_reg
 
 # atom test ------
-li a0, "\nlrscwF"
+li a0, "\nlrscdF"
 call print7
 
-lr.w t2, (s0)
+lr.d t2, (s0)
 li t4, 99
-sw t4, 0(s0)
+sd t4, 0(s0)
 
-sc.w t3, t2, (s0)
+sc.d t3, t2, (s0)
 mv a0, t3
 call print_reg
 mv a0, t2
@@ -129,139 +311,138 @@ call print_reg
 
 
 # atom test ------
-li a0, "\nAswap.w"
+li a0, "\nAswap.d"
 call print7
 
 li t0, 10 
-sw t0, 0(s0)
+sd t0, 0(s0)
 
 li t0, 5
-amoswap.w t1, t0, (s0)
+amoswap.d t1, t0, (s0)
 
 mv a0, t1
 call print_reg # old value
 
-lw a0, 0(s0)
+ld a0, 0(s0)
 call print_reg # new value
 
 
 # atom test ------
-li a0, "\nAxor.w"
+li a0, "\nAxor.d"
 call print7
 
 li t0, 10 
-sw t0, 0(s0)
+sd t0, 0(s0)
 
 li t0, 5
-amoxor.w t1, t0, (s0)
+amoxor.d t1, t0, (s0)
 
 mv a0, t1
 call print_reg # old value
 
-lw a0, 0(s0)
+ld a0, 0(s0)
 call print_reg # new value
 
 # atom test ------
-li a0, "\nAand.w"
+li a0, "\nAand.d"
 call print7
 
 li t0, 11 
-sw t0, 0(s0)
+sd t0, 0(s0)
 
 li t0, 5
-amoand.w t1, t0, (s0)
+amoand.d t1, t0, (s0)
 
 mv a0, t1
 call print_reg # old value
 
-lw a0, 0(s0)
+ld a0, 0(s0)
 call print_reg # new value
 
 
 # atom test ------
-li a0, "\nAor.w"
+li a0, "\nAor.d"
 call print7
 
 li t0, 10 
-sw t0, 0(s0)
+sd t0, 0(s0)
 
 li t0, 4
-amoor.w t1, t0, (s0)
+amoor.d t1, t0, (s0)
 
 mv a0, t1
 call print_reg # old value
 
-lw a0, 0(s0)
+ld a0, 0(s0)
 call print_reg # new value
 
 
 # atom test ------
-li a0, "\nAmin.w"
+li a0, "\nAmin.d"
 call print7
 
 li t0, 10 
-sw t0, 0(s0)
+sd t0, 0(s0)
 
 li t0, 5
-amomin.w t1, t0, (s0)
+amomin.d t1, t0, (s0)
 
 mv a0, t1
 call print_reg # old value
 
-lw a0, 0(s0)
+ld a0, 0(s0)
 call print_reg # new value
 
 
 # atom test ------
-li a0, "\nAmax.w"
+li a0, "\nAmax.d"
 call print7
 
 li t0, 5 
-sw t0, 0(s0)
+sd t0, 0(s0)
 
 li t0, 11
-amomax.w t1, t0, (s0)
+amomax.d t1, t0, (s0)
 
 mv a0, t1
 call print_reg # old value
 
-lw a0, 0(s0)
+ld a0, 0(s0)
 call print_reg # new value
 
 
 # atom test ------
-li a0, "\nAminuw"
+li a0, "\nAminud"
 call print7
 
 li t0, 10 
-sw t0, 0(s0)
+sd t0, 0(s0)
 
 li t0, -1 
-amominu.w t1, t0, (s0)
+amominu.d t1, t0, (s0)
 
 mv a0, t1
 call print_reg # old value
 
-lw a0, 0(s0)
+ld a0, 0(s0)
 call print_reg # new value
 
 
 # atom test ------
-li a0, "\nAmaxuw"
+li a0, "\nAmaxud"
 call print7
 
 li t0, 5 
-sw t0, 0(s0)
+sd t0, 0(s0)
 
 li t0, -1 
-amomaxu.w t1, t0, (s0)
+amomaxu.d t1, t0, (s0)
 
 mv a0, t1
 call print_reg # old value
 
-lw a0, 0(s0)
+ld a0, 0(s0)
 call print_reg # new value
-
 
 enda:
    j enda
