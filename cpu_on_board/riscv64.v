@@ -120,7 +120,7 @@ module riscv64(
 	(w_func3 == 3'b001) ? {48'b0, rs2[15:0]} : // sh
 	(w_func3 == 3'b010) ? {32'b0, rs2[31:0]} : // sw
 	                              rs2;        // sd (011)
-    // AMO prepare
+    // AMO prepare -----------
     wire is_word_op = (w_func3 == 3'b010);  // word as signed 32-bit values
     wire [63:0] amo_op_mem = is_word_op ? {{32{bus_read_data[31]}}, bus_read_data[31:0]} : bus_read_data;
     wire [63:0] amo_op_rs2 = is_word_op ? {{32{rs2[31]}}, rs2[31:0]} : rs2;
@@ -149,7 +149,7 @@ module riscv64(
     // formatting sc.w/sc.d/amo
     wire [63:0] w_atomic_write_data = (op == 7'b0101111 && w_func5[4:0] == 5'b00011) ? // SC
 	                              (is_word_op ? {32'b0, rs2[31:0]} : rs2) : // sc.w/sc.d
-				      w_amo_calc_data; // AMOs
+				      w_amo_calc_data; // AMOs -----------
     //// -- mul rela --
     // Indepenedent Multiplier // Booth algorithim + Signed-correct
     reg [6:0]   mul_cnt;

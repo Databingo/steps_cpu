@@ -421,6 +421,33 @@ func main() { //t6a7s11
 		"sret": 0b00010000001000000000000001110011,
 		"mret": 0b00110000001000000000000001110011,
 		"wfi":  0b00010000010100000000000001110011,
+
+		// --new
+		"lr.w":      0b00010000000000000010000000101111, // func5=00010, func3=010
+		"sc.w":      0b00011000000000000010000000101111, // func5=00011, func3=010
+		"amoadd.w":  0b00000000000000000010000000101111, // func5=00000, func3=010
+		"amoswap.w": 0b00001000000000000010000000101111, // func5=00001, func3=010
+		"amoxor.w":  0b00100000000000000010000000101111, // func5=00100, func3=010
+		"amoand.w":  0b01100000000000000010000000101111, // func5=01100, func3=010
+		"amoor.w":   0b01000000000000000010000000101111, // func5=01000, func3=010
+		"amomin.w":  0b10100000000000000010000000101111, // func5=10100, func3=010
+		"amomax.w":  0b10000000000000000010000000101111, // func5=10000, func3=010
+		"amominu.w": 0b11100000000000000010000000101111, // func5=11100, func3=010
+		"amomaxu.w": 0b11000000000000000010000000101111, // func5=11000, func3=010
+
+		"lr.d":      0b00010000000000000011000000101111, // func5=00010, func3=011
+		"sc.d":      0b00011000000000000011000000101111, // func5=00011, func3=011
+		"amoadd.d":  0b00000000000000000011000000101111, // func5=00000, func3=011
+		"amoswap.d": 0b00001000000000000011000000101111, // func5=00001, func3=011
+		"amoxor.d":  0b00100000000000000011000000101111, // func5=00100, func3=011
+		"amoand.d":  0b01100000000000000011000000101111, // func5=01100, func3=011
+		"amoor.d":   0b01000000000000000011000000101111, // func5=01000, func3=011
+		"amomin.d":  0b10100000000000000011000000101111, // func5=10100, func3=011
+		"amomax.d":  0b10000000000000000011000000101111, // func5=10000, func3=011
+		"amominu.d": 0b11100000000000000011000000101111, // func5=11100, func3=011
+		"amomaxu.d": 0b11000000000000000011000000101111, // func5=11000, func3=011
+		// --new
+
 	}
 
 	if len(os.Args) != 2 {
@@ -1353,6 +1380,17 @@ func main() { //t6a7s11
 				fmt.Printf("%s not a valid label\n", code[0])
 				os.Exit(0)
 			}
+	        case "lr.w", "lr.d":
+			if len(code) != 3 { // lr.w rd, (rs1)
+				fmt.Println("Incorrect argument count on line: ", lineCounter)
+				os.Exit(0)
+			}
+	        case "sc.w", "amoswap.w", "amoadd.w", "amoxor.w", "amoand.w", "amoor.w", "amomin.w", "amomax.w", "amominu.w", "amomaxu.w",
+	             "sc.d", "amoswap.d", "amoadd.d", "amoxor.d", "amoand.d", "amoor.d", "amomin.d", "amomax.d", "amominu.d", "amomaxu.d":
+			if len(code) != 4 { // amoadd.w rd, rs2, (rs1)
+				fmt.Println("Incorrect argument count on line: ", lineCounter)
+				os.Exit(0)
+			}
 
 		default:
 			fmt.Println("1 Syntax Error on line: ", lineCounter, switchOnOp, line)
@@ -1839,6 +1877,29 @@ func main() { //t6a7s11
 				instruction = csr<<20 | uint32(imm)<<15 | rd<<7 | op // code[0]=op, code[1]=rd, code[2]=rs1 code[3]=rs2
 			    }
 		//-------------new
+	        case "lr.w", "lr.d":
+			op, opFound := opBin[code[0]]
+			rd, rdFound := regBin[code[1]]
+			rs1, rs1Found := regBin[code[2]]
+			if opFound && rdFound && rs1Found {
+				instruction = rs1 <<15 | rd<<7 | op 
+			    } else {
+				fmt.Println("Invalid on line", lineCounter)
+				os.Exit(0)
+			}
+	        case "sc.w", "amoswap.w", "amoadd.w", "amoxor.w", "amoand.w", "amoor.w", "amomin.w", "amomax.w", "amominu.w", "amomaxu.w",
+	             "sc.d", "amoswap.d", "amoadd.d", "amoxor.d", "amoand.d", "amoor.d", "amomin.d", "amomax.d", "amominu.d", "amomaxu.d" :// amoadd.w rd, rs2, (rs1)
+			op, opFound := opBin[code[0]]
+			rd, rdFound := regBin[code[1]]
+			rs1, rs1Found := regBin[code[3]]
+			rs2, rs2Found := regBin[code[2]]
+			if opFound && rdFound && rs1Found && rs2Found {
+				instruction = rs2 << 20 | rs1 <<15 | rd<<7 | op 
+			    } else {
+				fmt.Println("Invalid on line", lineCounter)
+				os.Exit(0)
+			}
+
 
 		default:
 			fmt.Println("2 Syntax Error on line: ", lineCounter, switchOnOp)
