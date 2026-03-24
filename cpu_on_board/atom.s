@@ -54,7 +54,6 @@ file_start_sector:
 
 
 
-
 # -- Start program main function _start --
 .section .text
 # -- Global setup --
