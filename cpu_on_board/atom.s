@@ -77,8 +77,8 @@ call puts
 
 li a0, 10 
 call print_reg
-li a0, 0x80000000
-call print_reg
+#li a0, 0x80000000
+#call print_reg
 
 
 # atom test ------
