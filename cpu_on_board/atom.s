@@ -165,7 +165,7 @@ call print_reg # new value
 li a0, "\nAand.w"
 call print7
 
-li t0, 10 
+li t0, 11 
 sw t0, 0(s0)
 
 li t0, 5

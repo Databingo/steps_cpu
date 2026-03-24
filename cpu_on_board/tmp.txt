@@ -254,10 +254,10 @@ ori a0, a0, 0x10a
 # call print7
 auipc x1, 0 # R_RISCV_PCREL_HI20 print7
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print7
-# li t0, 10 
+# li t0, 11 
 addi t0, x0, 0x0
 addi t0, x0, 0x0
-addi t0, x0, 0xa
+addi t0, x0, 0xb
 sw t0, 0(s0)
 # li t0, 5
 addi t0, x0, 0x0
