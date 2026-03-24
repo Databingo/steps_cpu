@@ -98,7 +98,6 @@ lw a0, 0(s0)
 call print_reg # new value
 
 
-
 enda:
    j enda
 
