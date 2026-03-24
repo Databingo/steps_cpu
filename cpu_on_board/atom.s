@@ -69,7 +69,7 @@ _start:
     li s5,  0x3220 # SD ready for rd/wr
     li s6,  0x3228 # SD cache available
     # a0 for function call default parameter
-    lui s0, 0x10000 # SDRAM base 0x10000000
+    lui s0, 0x80000 # SDRAM base 0x80000000
 
 la a0, msg
 call puts
@@ -465,7 +465,7 @@ add t2, t1, t0
 #blt t1, t2, print_sector_loop
  
 
-lui s0, 0x10000 # SDRAM base 0x10000000
+lui s0, 0x80000 # SDRAM base 0x10000000
 copy_sector_loop:
 mv a0, t1
 call sd_read_sector  # use a0 as sector no.
@@ -527,7 +527,7 @@ blt t1, t2, copy_sector_loop
 #    sb t2, 0(t0)         # Should print 'X'
 
 
-    lui s0, 0x10000      # SDRAM = 0x10000000
+    lui s0, 0x80000      # SDRAM = 0x80000000
     ld a0, 0(s0)         # test sdram read data
     call print_reg
 
