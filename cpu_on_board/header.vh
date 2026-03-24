@@ -16,8 +16,8 @@
 `define Sdc_dirty  64'h0000_3224
 `define Sdc_avail  64'h0000_3228
 
-`define Sdram_min  64'h1000_0000
-`define Sdram_max  64'h1080_0000
+`define Sdram_min  64'h8000_0000
+`define Sdram_max  64'h8080_0000
 
 `define Mtime      64'h0200_bff8
 `define Mtimecmp   64'h0200_4000

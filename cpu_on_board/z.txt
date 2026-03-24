@@ -2091,7 +2091,8 @@ assign DRAM_CKE = 1; // always enable
 	    uart_write_pulse <= 0;
 	    uart_read_pulse <= 0;
 	    uart_read_step <= 0;
-	    mtimecmp <=  64'h80000000;
+	    //mtimecmp <=  64'h80000000;
+	    mtimecmp <=  64'hffffffffffffffff;
 	    uart_irq_pre <= 0;
             //sd_rd_start <= 0;
 	end else begin
@@ -2108,12 +2109,6 @@ assign DRAM_CKE = 1; // always enable
         //if (bus_read_enable) begin bus_read_done <= 0; cid <= (bus_address-`Sdc_base); end 
 	if (bus_read_enable && bus_read_done) begin bus_read_done <= 0; end
         if (bus_write_enable && bus_write_done) begin bus_write_done <= 0; end
-
-
-
-
-
-
 
 
         // Read
@@ -2438,7 +2433,7 @@ end
     end
 
     // Slow pulse clock for SD init (~100 kHz)
-    reg [8:0] clkdiv = 0;  // for 50M
+    reg [8:0] clkdiv = 0;  // for 50M  12.5M/512=97.6Khz
     //reg [7:0] clkdiv = 0;  // for 25M
     //reg [5:0] clkdiv = 0; // for 10M  10MHz/64 = 156.25KHz
     //reg [4:0] clkdiv = 0; // for 10M  10MHz/32 = 300KHz
@@ -3817,7 +3812,7 @@ module clock_slower(
         end else begin
             //if (counter == 25000000 - 1) begin // 1hz
             //if (counter == 2500000 - 1) begin // 10hz
-            if (counter == 2 - 1) begin // 12.8Mhz
+            if (counter == 2 - 1) begin // 12.5Mhz 50/4
             //if (counter == 5 - 1) begin // 10Mhz
             //if (counter == 0) begin // 50Mhz
                 counter <= 0;

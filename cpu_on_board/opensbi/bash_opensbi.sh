@@ -18,7 +18,7 @@ make CROSS_COMPILE=/usr/local/projects/bin/xpack-riscv-none-elf-gcc-14.2.0-3/bin
      FW_PAYLOAD=y \
      FW_FDT_PATH=my_board.dtb
 
-
+# Opensbi start from 0x80000000, DeviceTree at 0x80100000, Program at 0x80200000, Ram end at 0x80800000
 
     #EXTRA_CFLAGS="-mno-relax"\
     #CFLAGS="-march=rv64ima_zicsr_zifencei -mabi=lp64"\
