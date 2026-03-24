@@ -78,7 +78,8 @@ call puts
 li t0, 10 
 sw t0, 0(s0)
 
-lw a0, 0(s0)
+#lw a0, 0(s0)
+li a0, 10 
 call print_reg
 
 
