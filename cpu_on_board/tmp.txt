@@ -329,7 +329,7 @@ sw t0, 0(s0)
 addi t0, x0, 0x0
 addi t0, x0, 0x0
 addi t0, x0, 0xa
-amoor.w t1, t0, (s0)
+amomin.w t1, t0, (s0)
 # mv a0, t1
 addi a0, t1, 0
 # call print_reg 

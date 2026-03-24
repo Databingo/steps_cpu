@@ -203,7 +203,7 @@ li t0, 5
 sw t0, 0(s0)
 
 li t0, 10
-amoor.w t1, t0, (s0)
+amomin.w t1, t0, (s0)
 
 mv a0, t1
 call print_reg # old value
