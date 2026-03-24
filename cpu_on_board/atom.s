@@ -85,6 +85,9 @@ la a0, msg
 call puts
 
 # atom test ------
+li a0, "\nAadd.w"
+call print7
+
 li t0, 10 
 sw t0, 0(s0)
 
@@ -96,6 +99,21 @@ call print_reg # old value
 
 lw a0, 0(s0)
 call print_reg # new value
+
+# atom test ------
+li a0, "\nlr/scw"
+call print7
+
+lr.w t2, (s0)
+addi t2, t2, 20
+sc.w t3, t2, (s0)
+
+mv a0, t3
+call print_reg
+mv a0, t2
+call print_reg
+
+
 
 
 enda:

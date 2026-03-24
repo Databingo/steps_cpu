@@ -83,6 +83,20 @@ addi a0, a0, 0 # R_RISCV_PCREL_LO12_I msg
 # call puts
 auipc x1, 0 # R_RISCV_PCREL_HI20 puts
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I puts
+# li a0, "\nAadd.w"
+addi a0, x0, 0x0
+lui a0, 0x772
+srli a0, a0, 0x1
+ori a0, a0, 0x732
+slli a0, a0, 0xb
+ori a0, a0, 0x191
+slli a0, a0, 0xb
+ori a0, a0, 0x428
+slli a0, a0, 0xb
+ori a0, a0, 0x10a
+# call print7
+auipc x1, 0 # R_RISCV_PCREL_HI20 print7
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print7
 # li t0, 10 
 addi t0, x0, 0x0
 addi t0, x0, 0x0
@@ -100,6 +114,33 @@ auipc x1, 0 # R_RISCV_PCREL_HI20 print_reg
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_reg
 lw a0, 0(s0)
 # call print_reg 
+auipc x1, 0 # R_RISCV_PCREL_HI20 print_reg
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_reg
+# li a0, "\nlr/scw"
+addi a0, x0, 0x0
+lui a0, 0x776
+srli a0, a0, 0x1
+ori a0, a0, 0x1b9
+slli a0, a0, 0xb
+ori a0, a0, 0x4bd
+slli a0, a0, 0xb
+ori a0, a0, 0x64d
+slli a0, a0, 0xb
+ori a0, a0, 0x40a
+# call print7
+auipc x1, 0 # R_RISCV_PCREL_HI20 print7
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print7
+lr.w t2, (s0)
+addi t2, t2, 20
+sc.w t3, t2, (s0)
+# mv a0, t3
+addi a0, t3, 0
+# call print_reg
+auipc x1, 0 # R_RISCV_PCREL_HI20 print_reg
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_reg
+# mv a0, t2
+addi a0, t2, 0
+# call print_reg
 auipc x1, 0 # R_RISCV_PCREL_HI20 print_reg
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_reg
 enda:
