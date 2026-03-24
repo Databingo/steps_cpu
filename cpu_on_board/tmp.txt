@@ -51,7 +51,11 @@ addi s5, s5, 0x220
 addi s6, x0, 0x0
 lui s6, 0x3
 addi s6, s6, 0x228
-lui s0, 0x80000 # SDRAM base 0x80000000
+#     li s0, 0x80000000 
+addi s0, x0, 0x0
+slli s0, s0, 0xb
+ori s0, s0, 0x200
+slli s0, s0, 0x16
 # la a0, msg
 auipc a0, 0 # R_RISCV_PCREL_HI20 msg 
 addi a0, a0, 0 # R_RISCV_PCREL_LO12_I msg 
@@ -458,7 +462,11 @@ auipc a1, 0 # R_RISCV_PCREL_HI20 file_start_sector
 addi a1, a1, 0 # R_RISCV_PCREL_LO12_I file_start_sector 
 lw t1, 0(a1)
 add t2, t1, t0
-lui s0, 0x80000 # SDRAM base 0x10000000
+# li s0, 0x80000000 
+addi s0, x0, 0x0
+slli s0, s0, 0xb
+ori s0, s0, 0x200
+slli s0, s0, 0x16
 copy_sector_loop:
 # mv a0, t1
 addi a0, t1, 0
@@ -473,7 +481,11 @@ jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I copy_sector
 addi t1, t1, 1
 addi s0, s0, 512
 blt t1, t2, copy_sector_loop
-lui s0, 0x80000      # SDRAM = 0x80000000
+#     li s0, 0x80000000      
+addi s0, x0, 0x0
+slli s0, s0, 0xb
+ori s0, s0, 0x200
+slli s0, s0, 0x16
 ld a0, 0(s0)         # test sdram read data
 #     call print_reg
 auipc x1, 0 # R_RISCV_PCREL_HI20 print_reg
