@@ -113,6 +113,21 @@ call print_reg
 mv a0, t2
 call print_reg
 
+# atom test ------
+li a0, "\nlrscwF"
+call print7
+
+lr.w t2, (s0)
+li t4, 99
+sw t4, 0(s0)
+
+sc.w t3, t2, (s0)
+mv a0, t3
+call print_reg
+mv a0, t2
+call print_reg
+
+
 
 
 
