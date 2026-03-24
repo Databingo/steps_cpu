@@ -74,6 +74,14 @@ addi a0, x0, 0xa
 # call print_reg
 auipc x1, 0 # R_RISCV_PCREL_HI20 print_reg
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_reg
+# li a0,  0x80000000
+addi a0, x0, 0x0
+slli a0, a0, 0xb
+ori a0, a0, 0x200
+slli a0, a0, 0x16
+# call print_reg
+auipc x1, 0 # R_RISCV_PCREL_HI20 print_reg
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_reg
 # li t0, 5
 addi t0, x0, 0x0
 addi t0, x0, 0x0
