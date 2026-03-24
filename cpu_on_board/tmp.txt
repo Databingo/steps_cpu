@@ -52,6 +52,28 @@ addi s6, x0, 0x0
 lui s6, 0x3
 addi s6, s6, 0x228
 lui s0, 0x10000 # SDRAM base 0x10000000
+# li t0, 10 
+addi t0, x0, 0x0
+addi t0, x0, 0x0
+addi t0, x0, 0xa
+sw t0, 0(s0)
+# li t0, 5
+addi t0, x0, 0x0
+addi t0, x0, 0x0
+addi t0, x0, 0x5
+amoadd.w t1, t0, (s0)
+# mv a0, t1
+addi a0, t1, 0
+# call print_reg 
+auipc x1, 0 # R_RISCV_PCREL_HI20 print_reg
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_reg
+lw a0, 0(s0)
+# call print_reg 
+auipc x1, 0 # R_RISCV_PCREL_HI20 print_reg
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_reg
+enda:
+#    j enda
+jal x0, enda
 lw a0, 0(s11)
 # call print_reg
 auipc x1, 0 # R_RISCV_PCREL_HI20 print_reg
