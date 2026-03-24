@@ -677,7 +677,7 @@ module riscv64(
                     32'b???????_?????_?????_???_?????_0100011: begin 
                         if (store_step == 0) begin bus_address <= pda; bus_write_data <= w_store_data; bus_write_enable <= 1; pc <= pc - 4; bubble <= 1; store_step <= 1; bus_ls_type <= w_func3; end
                         if (store_step == 1 && bus_write_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working
-                        if (store_step == 1 && bus_write_done == 1) begin store_step <= 0; if (bus_address == reserve_addr && reserv_valid) reserve_valid <= 0; end 
+                        if (store_step == 1 && bus_write_done == 1) begin store_step <= 0; if (bus_address == reserve_addr && reserve_valid) reserve_valid <= 0; end 
                     end   
 
                     // Math-I
@@ -849,7 +849,7 @@ module riscv64(
 
 	           // amos(swap, add, xor, and, or, min, max) w/d
 	            32'b?????_??_?????_?????_01?_?????_0101111: begin // not 00010lr/00011sc
-		        if (load_step == 0) begin bus_address <= pda; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; bus_ls_type <= w_func3; end
+		        if (load_step == 0 && store_step == 0) begin bus_address <= pda; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; bus_ls_type <= w_func3; end
 		        if (load_step == 1 && bus_read_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working
 		        if (load_step == 1 && bus_read_done == 1) begin 
 			    // finish load
