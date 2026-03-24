@@ -71,6 +71,8 @@ _start:
     # a0 for function call default parameter
     lui s0, 0x10000 # SDRAM base 0x10000000
 
+la a0, msg
+call puts
 
 # atom test ------
 li t0, 10 
