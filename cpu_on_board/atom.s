@@ -78,6 +78,10 @@ call puts
 li t0, 10 
 sw t0, 0(s0)
 
+lw a0, 0(s0)
+call print_reg
+
+
 li t0, 5
 amoadd.w t1, t0, (s0)
 
