@@ -229,6 +229,24 @@ lw a0, 0(s0)
 call print_reg # new value
 
 
+# atom test ------
+li a0, "\nAminu.w"
+call print7
+
+li t0, 10 
+sw t0, 0(s0)
+
+li t0, -1 
+amominu.w t1, t0, (s0)
+
+mv a0, t1
+call print_reg # old value
+
+lw a0, 0(s0)
+call print_reg # new value
+
+
+
 
 enda:
    j enda
