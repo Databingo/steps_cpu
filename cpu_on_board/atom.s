@@ -212,6 +212,21 @@ lw a0, 0(s0)
 call print_reg # new value
 
 
+# atom test ------
+li a0, "\nAmax.w"
+call print7
+
+li t0, 5 
+sw t0, 0(s0)
+
+li t0, 11
+amomax.w t1, t0, (s0)
+
+mv a0, t1
+call print_reg # old value
+
+lw a0, 0(s0)
+call print_reg # new value
 
 
 
