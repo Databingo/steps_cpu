@@ -4,6 +4,11 @@ auipc t0, 0 # R_RISCV_PCREL_HI20 sbi_trap_handler
 addi t0, t0, 0 # R_RISCV_PCREL_LO12_I sbi_trap_handler 
 #    csrw mtvec, t0
 csrrw x0, mtvec, t0
+#    la t0, s_trap_handler 
+auipc t0, 0 # R_RISCV_PCREL_HI20 s_trap_handler 
+addi t0, t0, 0 # R_RISCV_PCREL_LO12_I s_trap_handler 
+#    csrw stvec, t0
+csrrw x0, stvec, t0
 #    li t0, 0xffffffffffffffff
 addi t0, x0, 0x0
 lui t0, 0xfffff
@@ -101,6 +106,28 @@ addi a7, x0, 0x0
 addi a7, x0, 0x0
 addi a7, x0, 0x1
 ecall
+#    li t0, 0b1000  
+addi t0, x0, 0x0
+addi t0, x0, 0x0
+addi t0, x0, 0x8
+#    csrw medeleg, t0
+csrrw x0, medeleg, t0
+ebreak
+halt:
+#    j halt
+jal x0, halt
 s_mode_done:
 #    j s_mode_done
 jal x0, s_mode_done
+s_trap_handler:
+#    li a0, "S"
+addi a0, x0, 0x0
+addi a0, x0, 0x0
+addi a0, x0, 0x53
+#    li a7, 1
+addi a7, x0, 0x0
+addi a7, x0, 0x0
+addi a7, x0, 0x1
+ecall
+#    j halt
+jal x0, halt

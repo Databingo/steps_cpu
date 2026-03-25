@@ -6,6 +6,11 @@ _start:
    la t0, sbi_trap_handler
    csrw mtvec, t0
 
+   la t0, s_trap_handler # setup s-mode trap handler
+   csrw stvec, t0
+
+
+
    # 2. unlock PMP (Physical Memory Protection) which prevent S-mode to touch hardware
    li t0, 0xffffffffffffffff
    csrw pmpaddr0, t0
@@ -22,6 +27,15 @@ _start:
 
    # Look at mstatus.MPP but see S-mode, jump to mepc then transition to S-mode
    mret
+
+
+
+
+
+
+
+
+
 
 
 
@@ -68,6 +82,21 @@ s_mode_kernel:
    li a0, "i"
    li a7, 1
    ecall
+
+   li t0, 0b1000  # delegate breakpoint to s-mode
+   csrw medeleg, t0
+   ebreak
+
+halt:
+   j halt
+
 s_mode_done:
    j s_mode_done
+
+
+s_trap_handler:
+   li a0, "S"
+   li a7, 1
+   ecall
+   j halt
 
