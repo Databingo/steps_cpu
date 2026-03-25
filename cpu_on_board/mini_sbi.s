@@ -79,7 +79,8 @@ m_handler_timer:
    j m_done
 
 m_handler_deleg:
-   li t0, 0x800 # 0b1000
+   #li t0, 0x800 # 0b1000
+   li t0, 0b1000            # Delegate breakpoint to s-mode
    csrw medeleg, t0 
    li a0, 0
    j m_done
@@ -97,7 +98,8 @@ s_trap_handler:
    li a0, "S"
    li a7, 1
    ecall
-   j s_done
+   #j s_done
+   jr t2
 
 s_done: 
    csrr t2, sepc
@@ -120,7 +122,8 @@ s_mode_kernel:
  
    li a7, 0x10
    ecall  # turn delegate
-   li t3, 0x10
+
+   la t2, s_mode_done
    ebreak # S
 
 s_mode_done:
