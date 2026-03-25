@@ -127,6 +127,10 @@ s_mode_kernel:
    ebreak # S
 
 s_mode_done:
+   li s11, 0x2004
+   li t0, 65
+   lb t0, 0(s11)
+   
    j s_mode_done
 
 
