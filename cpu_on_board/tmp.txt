@@ -92,6 +92,15 @@ addi a7, x0, 0x0
 addi a7, x0, 0x0
 addi a7, x0, 0x1
 ecall
+#    li a0, "i"
+addi a0, x0, 0x0
+addi a0, x0, 0x0
+addi a0, x0, 0x69
+#    li a7, 1
+addi a7, x0, 0x0
+addi a7, x0, 0x0
+addi a7, x0, 0x1
+ecall
 s_mode_done:
 #    j s_mode_done
 jal x0, s_mode_done

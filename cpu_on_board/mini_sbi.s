@@ -64,6 +64,10 @@ s_mode_kernel:
    li a0, "H"
    li a7, 1
    ecall
+
+   li a0, "i"
+   li a7, 1
+   ecall
 s_mode_done:
    j s_mode_done
 
