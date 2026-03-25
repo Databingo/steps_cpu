@@ -1,10 +1,10 @@
 _start:
-#    la t0, sbi_trap_handler
-auipc t0, 0 # R_RISCV_PCREL_HI20 sbi_trap_handler 
-addi t0, t0, 0 # R_RISCV_PCREL_LO12_I sbi_trap_handler 
+#    la t0, m_trap_router      
+auipc t0, 0 # R_RISCV_PCREL_HI20 m_trap_router 
+addi t0, t0, 0 # R_RISCV_PCREL_LO12_I m_trap_router 
 #    csrw mtvec, t0
 csrrw x0, mtvec, t0
-#    la t0, s_trap_handler 
+#    la t0, s_trap_handler     
 auipc t0, 0 # R_RISCV_PCREL_HI20 s_trap_handler 
 addi t0, t0, 0 # R_RISCV_PCREL_LO12_I s_trap_handler 
 #    csrw stvec, t0
@@ -28,6 +28,8 @@ addi t0, x0, 0x0
 addi t0, x0, 0xf
 #    csrw pmpcfg0, t0
 csrrw x0, pmpcfg0, t0
+#    csrw medeleg, zero
+csrrw x0, medeleg, zero
 #    li t0, 0b100000000000 
 addi t0, x0, 0x0
 lui t0, 0x1
@@ -40,24 +42,61 @@ addi t0, t0, 0 # R_RISCV_PCREL_LO12_I s_mode_kernel
 #    csrw mepc, t0
 csrrw x0, mepc, t0
 mret
-sbi_trap_handler:
+m_trap_router:
+#    csrr t0, mcause  
+csrrs t0, mcause, x0
+#    li t1, 9  
+addi t1, x0, 0x0
+addi t1, x0, 0x0
+addi t1, x0, 0x9
+beq t0, t1, m_ecall_router
+#    li t1, 3 
+addi t1, x0, 0x0
+addi t1, x0, 0x0
+addi t1, x0, 0x3
+beq t0, t1, m_ebreak_handler
+#    j m_done
+jal x0, m_done
+m_ecall_router:
 #    li t0, 1 
 addi t0, x0, 0x0
 addi t0, x0, 0x0
 addi t0, x0, 0x1
-beq a7, t0, sbi_handler_putchar  # (SBI_CONSOLE_PUTCHAR ( a7 = 0x01)
+beq a7, t0, m_handler_putchar  # (SBI_CONSOLE_PUTCHAR ( a7 = 0x01)
 #    li t0, 0
 addi t0, x0, 0x0
-beq a7, t0, sbi_handler_timer
+beq a7, t0, m_handler_timer
+#    li t0, 0x10
+addi t0, x0, 0x0
+addi t0, x0, 0x0
+addi t0, x0, 0x10
+beq a7, t0, m_handler_deleg
 #    li a0, -1  
 addi a0, x0, 0x0
 addi a0, x0, 0x0
 addi a0, x0, 0x1
 xori a0, a0, -1
 addi a0, a0, 1
-#    j ecall_done
-jal x0, ecall_done
-sbi_handler_putchar:
+#    j m_done
+jal x0, m_done
+m_ebreak_handler:
+#    li a0, "M"
+addi a0, x0, 0x0
+addi a0, x0, 0x0
+addi a0, x0, 0x4d
+#    li s11, 0x2004
+addi s11, x0, 0x0
+lui s11, 0x2
+addi s11, s11, 0x4
+wait_uart_m:
+lw t1, 0(s11)
+blt t1, zero, wait_uart_m  # sifive uart negetive is full
+sb a0, 0(s11)
+#    li a0, 0     
+addi a0, x0, 0x0
+#    j m_done
+jal x0, m_done
+m_handler_putchar:
 #    li s11, 0x2004
 addi s11, x0, 0x0
 lui s11, 0x2
@@ -68,9 +107,9 @@ blt t1, zero, wait_uart_sbi  # sifive uart negetive is full
 sb a0, 0(s11)
 #    li a0, 0     
 addi a0, x0, 0x0
-#    j ecall_done
-jal x0, ecall_done
-sbi_handler_timer:
+#    j m_done
+jal x0, m_done
+m_handler_timer:
 #    li t1, 0x2004000  
 addi t1, x0, 0x0
 lui t1, 0x2004
@@ -78,16 +117,47 @@ addi t1, t1, 0x0
 sd a0, 0(t1)      # S-mode passes new time in a0
 #    li a0, 0          
 addi a0, x0, 0x0
-#    j ecall_done
-jal x0, ecall_done
-ecall_done:
+#    j m_done
+jal x0, m_done
+m_handler_deleg:
+#    li t0, 0b1000
+addi t0, x0, 0x0
+addi t0, x0, 0x0
+addi t0, x0, 0x8
+#    csrw medeleg, t0 
+csrrw x0, medeleg, t0
+#    li a0, 0
+addi a0, x0, 0x0
+#    j m_done
+jal x0, m_done
+m_done:
 #    csrr t0, mepc
 csrrs t0, mepc, x0
-addi t0, t0, 4 # skip ecall instruction
+addi t0, t0, 4 # skip ecall/ebreak instruction
 #    csrw mepc, t0
 csrrw x0, mepc, t0
 mret
+s_trap_handler:
+#    li a0, "S"
+addi a0, x0, 0x0
+addi a0, x0, 0x0
+addi a0, x0, 0x53
+#    li a7, 1
+addi a7, x0, 0x0
+addi a7, x0, 0x0
+addi a7, x0, 0x1
+ecall
+#    j s_done
+jal x0, s_done
+s_done:
+#    csrr t0, sepc
+csrrs t0, sepc, x0
+addi t0, t0, 4 # skip ecall/ebreak instruction
+#    csrw sepc, t0
+csrrw x0, sepc, t0
+sret
 s_mode_kernel:
+ebreak   # M
 #    li a0, "H"
 addi a0, x0, 0x0
 addi a0, x0, 0x0
@@ -106,28 +176,12 @@ addi a7, x0, 0x0
 addi a7, x0, 0x0
 addi a7, x0, 0x1
 ecall
-#    li t0, 0b1000  
-addi t0, x0, 0x0
-addi t0, x0, 0x0
-addi t0, x0, 0x8
-#    csrw medeleg, t0
-csrrw x0, medeleg, t0
-ebreak
-halt:
-#    j halt
-jal x0, halt
+#    li a7, 0x10
+addi a7, x0, 0x0
+addi a7, x0, 0x0
+addi a7, x0, 0x10
+ecall  # turn delegate
+ebreak # S
 s_mode_done:
 #    j s_mode_done
 jal x0, s_mode_done
-s_trap_handler:
-#    li a0, "S"
-addi a0, x0, 0x0
-addi a0, x0, 0x0
-addi a0, x0, 0x53
-#    li a7, 1
-addi a7, x0, 0x0
-addi a7, x0, 0x0
-addi a7, x0, 0x1
-ecall
-#    j halt
-jal x0, halt
