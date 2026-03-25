@@ -82,6 +82,13 @@ addi t0, x0, 0x1
 slli t0, t0, 63 # sv39 satp[63:60] MODE to 8
 #    csrw satp, t0
 csrrw x0, satp, t0
+#    la a1, msg   
+auipc a1, 0 # R_RISCV_PCREL_HI20 msg 
+addi a1, a1, 0 # R_RISCV_PCREL_LO12_I msg 
+ld a0, 0(a1) # trigger D-TLB miss
+#    call puts
+auipc x1, 0 # R_RISCV_PCREL_HI20 puts
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I puts
 s_mode_done:
 #   j s_mode_done
 jal x0, s_mode_done
