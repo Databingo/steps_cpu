@@ -33,6 +33,11 @@ _start:
 
 
 m_trap_router:
+   sd t0, 0x300(zero)
+   sd t1, 0x308(zero)
+
+
+
    csrr t0, mcause  # check type
    li t1, 9  # ecall from S-mode
    beq t0, t1, m_ecall_router
@@ -90,6 +95,8 @@ m_done:
    csrr t0, mepc
    addi t0, t0, 4 # skip ecall/ebreak instruction
    csrw mepc, t0
+   ld t0, 0x300(zero)
+   ld t1, 0x308(zero)
    mret
 
 

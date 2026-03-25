@@ -43,6 +43,8 @@ addi t0, t0, 0 # R_RISCV_PCREL_LO12_I s_mode_kernel
 csrrw x0, mepc, t0
 mret
 m_trap_router:
+sd t0, 0x300(zero)
+sd t1, 0x308(zero)
 #    csrr t0, mcause  
 csrrs t0, mcause, x0
 #    li t1, 9  
@@ -136,6 +138,8 @@ csrrs t0, mepc, x0
 addi t0, t0, 4 # skip ecall/ebreak instruction
 #    csrw mepc, t0
 csrrw x0, mepc, t0
+ld t0, 0x300(zero)
+ld t1, 0x308(zero)
 mret
 s_trap_handler:
 #    li a0, "S"
