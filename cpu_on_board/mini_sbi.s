@@ -44,11 +44,12 @@ s_mode_kernel:
    li a7, 0x10
    ecall  # turn delegate
 
+   li a0, 0x8888
+   call print_reg
 
    csrr a0, medeleg
-   
-   li s11, 0x2004
    call print_reg
+
    #la t2, s_mode_done
    ebreak # S
 
