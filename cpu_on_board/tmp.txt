@@ -1,4 +1,3 @@
-msg:
 _start:
 #    li sp, 0x1800 
 addi sp, x0, 0x0

@@ -1,9 +1,9 @@
 .section .text
 .globl _start
 
-.section .data
-msg:
-    .string "Hello"
+#.section .data
+#msg:
+#    .string "Hello"
 
 _start:
    li sp, 0x1800 # Set stack
