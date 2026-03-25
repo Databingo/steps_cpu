@@ -54,8 +54,8 @@ s_mode_kernel:
 
 
    # test MMU
-  #li a0, "\nMMU:" 
-  #call print7
+   li a0, "\nMMU:" 
+   call print7
 
    li t0, 1
    slli t0, t0, 63 # sv39 satp[63:60] MODE to 8

@@ -63,6 +63,18 @@ addi a7, x0, 0x0
 addi a7, x0, 0x0
 addi a7, x0, 0x10
 ecall  # turn delegate
+#    li a0, "\nMMU:" 
+addi a0, x0, 0x0
+ori a0, a0, 0x1d
+slli a0, a0, 0xb
+ori a0, a0, 0x155
+slli a0, a0, 0xb
+ori a0, a0, 0x1a9
+slli a0, a0, 0xb
+ori a0, a0, 0x50a
+#    call print7
+auipc x1, 0 # R_RISCV_PCREL_HI20 print7
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print7
 #    li t0, 1
 addi t0, x0, 0x0
 addi t0, x0, 0x0
