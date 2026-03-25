@@ -1,4 +1,3 @@
-.section .text
 .globl _start
 
 .section .data
@@ -62,8 +61,7 @@ s_mode_kernel:
    csrw satp, t0
    # <--- start TLB I/D hitting
 
-   la a1, msg   # trigger I-TLB miss
-   ld a0, 0(a1) # trigger D-TLB miss
+   la a0, msg   # trigger I-TLB miss
    call puts
    ##li a0, "\nOK"
    ##call print7
