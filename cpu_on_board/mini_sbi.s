@@ -36,15 +36,15 @@ _start:
 
 
 s_mode_kernel:
-   ebreak   # M  test m-mode ebreak
+   #ebreak   # M  test m-mode ebreak
 
-   li a0, "H"
-   li a7, 1
-   ecall
+   #li a0, "H"
+   #li a7, 1
+   #ecall
 
-   li a0, "i"
-   li a7, 1
-   ecall
+   #li a0, "i"
+   #li a7, 1
+   #ecall
  
    li a7, 0x10
    ecall  # turn delegate
@@ -55,6 +55,7 @@ s_mode_kernel:
    # test MMU
    li a0, "\nMMU:" 
    call print7
+
    li t0, 1
    slli t0, t0, 63 # sv39 satp[63:60] MODE to 8
    csrw satp, t0
@@ -63,10 +64,10 @@ s_mode_kernel:
    la a1, msg   # trigger I-TLB miss
    ld a0, 0(a1) # trigger D-TLB miss
    call puts
-   li a0, "\nOK"
-   call print7
-   
-   ebreak
+   #li a0, "\nOK"
+   #call print7
+   #
+   #ebreak
    
 
   

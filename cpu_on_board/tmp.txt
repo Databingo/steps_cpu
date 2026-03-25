@@ -58,25 +58,6 @@ addi t0, t0, 0 # R_RISCV_PCREL_LO12_I s_mode_kernel
 csrrw x0, mepc, t0
 mret                      # 6. Drop to S-mode go to s_kernel
 s_mode_kernel:
-ebreak   # M  test m-mode ebreak
-#    li a0, "H"
-addi a0, x0, 0x0
-addi a0, x0, 0x0
-addi a0, x0, 0x48
-#    li a7, 1
-addi a7, x0, 0x0
-addi a7, x0, 0x0
-addi a7, x0, 0x1
-ecall
-#    li a0, "i"
-addi a0, x0, 0x0
-addi a0, x0, 0x0
-addi a0, x0, 0x69
-#    li a7, 1
-addi a7, x0, 0x0
-addi a7, x0, 0x0
-addi a7, x0, 0x1
-ecall
 #    li a7, 0x10
 addi a7, x0, 0x0
 addi a7, x0, 0x0
@@ -109,14 +90,6 @@ ld a0, 0(a1) # trigger D-TLB miss
 #    call puts
 auipc x1, 0 # R_RISCV_PCREL_HI20 puts
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I puts
-#    li a0, "\nOK"
-addi a0, x0, 0x0
-lui a0, 0x4b5
-addi a0, a0, 0xf0a
-#    call print7
-auipc x1, 0 # R_RISCV_PCREL_HI20 print7
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print7
-ebreak
 s_mode_done:
 #   j s_mode_done
 jal x0, s_mode_done
