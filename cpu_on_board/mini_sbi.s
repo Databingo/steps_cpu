@@ -14,7 +14,7 @@ _start:
  
    # 3. prepare the jump to S-mode
    #li t0, (1<<11) # set mstatus.MPP to 1, Bit 11 is MPP
-   li t0, 0b10000000000 # set mstatus.MPP to 1, Bit 11 is MPP
+   li t0, 0b100000000000 # set mstatus.MPP to 1, Bit 11 is MPP
    csrs mstatus, t0
    # set mepc to the address of our S-mode kernel
    la t0, s_mode_kernel
