@@ -95,8 +95,8 @@ m_done:
    csrr t0, mepc
    addi t0, t0, 4 # skip ecall/ebreak instruction
    csrw mepc, t0
-   ld t0, 0x300(zero)
-   ld t1, 0x308(zero)
+   ld t0, 0x900(zero)
+   ld t1, 0x908(zero)
    mret
 
 
