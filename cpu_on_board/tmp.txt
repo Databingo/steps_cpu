@@ -9,7 +9,7 @@ auipc t0, 0 # R_RISCV_PCREL_HI20 s_trap_handler
 addi t0, t0, 0 # R_RISCV_PCREL_LO12_I s_trap_handler 
 #    csrw stvec, t0
 csrrw x0, stvec, t0
-#    li t0, 0xffffffffffffffff
+#    li t0, 0xffffffffffffffff 
 addi t0, x0, 0x0
 lui t0, 0xfffff
 srli t0, t0, 0x1
@@ -22,26 +22,26 @@ slli t0, t0, 0xb
 ori t0, t0, 0x7ff
 #    csrw pmpaddr0, t0
 csrrw x0, pmpaddr0, t0
-#    li t0, 0x0f    
+#    li t0, 0x0f               
 addi t0, x0, 0x0
 addi t0, x0, 0x0
 addi t0, x0, 0xf
 #    csrw pmpcfg0, t0
 csrrw x0, pmpcfg0, t0
-#    csrw medeleg, zero
+#    csrw medeleg, zero        
 csrrw x0, medeleg, zero
-#    li t0, 0b100000000000 
+#    li t0, 0b100000000000     
 addi t0, x0, 0x0
 lui t0, 0x1
 addi t0, t0, 0x800
 #    csrs mstatus, t0
 csrrs x0, mstatus, t0
-#    la t0, s_mode_kernel
+#    la t0, s_mode_kernel      
 auipc t0, 0 # R_RISCV_PCREL_HI20 s_mode_kernel 
 addi t0, t0, 0 # R_RISCV_PCREL_LO12_I s_mode_kernel 
 #    csrw mepc, t0
 csrrw x0, mepc, t0
-mret
+mret                      # 5. Drop to S-mode go to s_kernel
 m_trap_router:
 #    csrr t0, mcause  
 csrrs t0, mcause, x0
@@ -150,11 +150,11 @@ ecall
 #    j s_done
 jal x0, s_done
 s_done:
-#    csrr t0, sepc
-csrrs t0, sepc, x0
-addi t0, t0, 4 # skip ecall/ebreak instruction
-#    csrw sepc, t0
-csrrw x0, sepc, t0
+#    csrr t2, sepc
+csrrs t2, sepc, x0
+addi t2, t2, 4 # skip ecall/ebreak instruction
+#    csrw sepc, t2
+csrrw x0, sepc, t2
 sret
 s_mode_kernel:
 ebreak   # M

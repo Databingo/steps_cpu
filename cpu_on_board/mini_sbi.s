@@ -9,27 +9,21 @@ _start:
    csrw stvec, t0
 
 
-   # 2. Unlock PMP (Physical Memory Protection) which prevent S-mode to touch hardware
-   li t0, 0xffffffffffffffff
+   li t0, 0xffffffffffffffff # 3. Unlock PMP (Physical Memory Protection) which prevent S-mode to touch hardware
    csrw pmpaddr0, t0
-   li t0, 0x0f    # NAPOT mode, Read/Write/Execute permissions
+   li t0, 0x0f               # NAPOT mode, Read/Write/Execute permissions
    csrw pmpcfg0, t0
 
-   # No delegation (let M-mode handler take care)
-   csrw medeleg, zero
-   # Delegate breakpoint to s-mode
-   #li t0, 0b1000
+   csrw medeleg, zero        # No delegation (let M-mode handler take care)
+   #li t0, 0b1000            # Delegate breakpoint to s-mode
    #csrw medeleg, t0
 
-   # 3. prepare the jump to S-mode
-   li t0, 0b100000000000 # set mstatus.MPP to 1, Bit 11 is MPP
+   li t0, 0b100000000000     # 4. prepare the jump to S-mode # set mstatus.MPP to 1, Bit 11 is MPP
    csrs mstatus, t0
-   # set mepc to the address of our S-mode kernel
-   la t0, s_mode_kernel
+   la t0, s_mode_kernel      # set mepc to the address of our S-mode kernel
    csrw mepc, t0
    
-   # 4. Drop to S-mode go to s_kernel
-   mret
+   mret                      # 5. Drop to S-mode go to s_kernel
 
 
 m_trap_router:
@@ -107,9 +101,9 @@ s_trap_handler:
    j s_done
 
 s_done: 
-   csrr t0, sepc
-   addi t0, t0, 4 # skip ecall/ebreak instruction
-   csrw sepc, t0
+   csrr t2, sepc
+   addi t2, t2, 4 # skip ecall/ebreak instruction
+   csrw sepc, t2
    sret
 
 
