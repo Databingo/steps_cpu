@@ -54,6 +54,13 @@ s_mode_kernel:
    #la t2, s_mode_done
    ebreak # S
 
+s_mode_done:
+  j s_mode_done
+
+
+
+
+
 m_trap_router:
    #sd t0, 0x300(zero)
    #sd t1, 0x308(zero)
@@ -138,12 +145,15 @@ s_done:
 
 
 
-s_mode_done:
-   #li s11, 0x2004
-   #li t0, 65
-   #lb t0, 0(s11)
-   
-   j s_mode_done
+
+
+
+
+
+
+
+
+
 
 
 

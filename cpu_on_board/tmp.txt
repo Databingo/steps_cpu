@@ -94,6 +94,9 @@ csrrs a0, medeleg, x0
 auipc x1, 0 # R_RISCV_PCREL_HI20 print_reg
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_reg
 ebreak # S
+s_mode_done:
+#   j s_mode_done
+jal x0, s_mode_done
 m_trap_router:
 #    csrr t0, mcause  
 csrrs t0, mcause, x0
@@ -208,9 +211,6 @@ addi t2, t2, 4 # skip ecall/ebreak instruction
 #    csrw sepc, t2
 csrrw x0, sepc, t2
 sret
-s_mode_done:
-#    j s_mode_done
-jal x0, s_mode_done
 print_reg:
 addi sp, sp, -40
 sd ra, 0(sp)
