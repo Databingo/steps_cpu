@@ -75,6 +75,13 @@ ori a0, a0, 0x50a
 #    call print7
 auipc x1, 0 # R_RISCV_PCREL_HI20 print7
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print7
+#    li t0, 1
+addi t0, x0, 0x0
+addi t0, x0, 0x0
+addi t0, x0, 0x1
+slli t0, t0, 63 # sv39 satp[63:60] MODE to 8
+#    csrw satp, t0
+csrrw x0, satp, t0
 s_mode_done:
 #   j s_mode_done
 jal x0, s_mode_done

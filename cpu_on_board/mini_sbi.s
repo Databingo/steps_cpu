@@ -56,10 +56,10 @@ s_mode_kernel:
    li a0, "\nMMU:" 
    call print7
 
-   #li t0, 1
-   #slli t0, t0, 63 # sv39 satp[63:60] MODE to 8
-   #csrw satp, t0
-   ## <--- start TLB I/D hitting
+   li t0, 1
+   slli t0, t0, 63 # sv39 satp[63:60] MODE to 8
+   csrw satp, t0
+   # <--- start TLB I/D hitting
 
    #la a1, msg   # trigger I-TLB miss
    #ld a0, 0(a1) # trigger D-TLB miss
