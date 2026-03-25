@@ -54,7 +54,7 @@ sbi_handler_timer:
 
 
 ecall_done: 
-   csrr r0, mepc
+   csrr t0, mepc
    addi t0, t0, 4 # skip ecall instruction
    csrw mepc, t0
    mret

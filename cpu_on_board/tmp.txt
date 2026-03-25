@@ -76,8 +76,8 @@ addi a0, x0, 0x0
 #    j ecall_done
 jal x0, ecall_done
 ecall_done:
-#    csrr r0, mepc
-csrrs r0, mepc, x0
+#    csrr t0, mepc
+csrrs t0, mepc, x0
 addi t0, t0, 4 # skip ecall instruction
 #    csrw mepc, t0
 csrrw x0, mepc, t0

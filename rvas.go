@@ -339,6 +339,8 @@ func main() { //t6a7s11
             "stval"      : 0x143,   
             "sip"        : 0x144,   
             "satp"       : 0x180,   
+	    "pmpcfg0"    : 0x3a0,
+	    "pmpaddr0"   : 0x3b0,
 	    //"0x180"      : 0x180, 
 	    }
 
@@ -1863,7 +1865,10 @@ func main() { //t6a7s11
 				instruction = csr<<20 | rs1<<15 | rd<<7 | op // code[0]=op, code[1]=rd, code[2]=rs1 code[3]=rs2
 				//fmt.Println(instruction )
 		                //os.Exit(1)
-			    }
+			    } else {
+				fmt.Println("Invalid on line", lineCounter, line, opFound, rdFound, csrFound, rs1Found)
+				os.Exit(0)
+			}
 		case "csrrwi", "csrrsi", "csrrci": // Instruction format: op rd, csr, imm or label: op rd, csr, imm
 			op, opFound := opBin[code[0]]
 			rd, rdFound := regBin[code[1]]
@@ -1875,7 +1880,10 @@ func main() { //t6a7s11
 			}
 			if opFound && rdFound && csrFound {
 				instruction = csr<<20 | uint32(imm)<<15 | rd<<7 | op // code[0]=op, code[1]=rd, code[2]=rs1 code[3]=rs2
-			    }
+			    } else {
+				fmt.Println("Invalid on line", lineCounter, line)
+				os.Exit(0)
+			}
 		//-------------new
 	        case "lr.w", "lr.d":
 			op, opFound := opBin[code[0]]
