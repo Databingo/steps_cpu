@@ -81,19 +81,7 @@ addi a7, x0, 0x0
 addi a7, x0, 0x0
 addi a7, x0, 0x10
 ecall  # turn delegate
-#    li a0, 0x8888
-addi a0, x0, 0x0
-lui a0, 0x9
-addi a0, a0, 0x888
-#    call print_reg
-auipc x1, 0 # R_RISCV_PCREL_HI20 print_reg
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_reg
-#    csrr a0, medeleg
-csrrs a0, medeleg, x0
-#    call print_reg
-auipc x1, 0 # R_RISCV_PCREL_HI20 print_reg
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_reg
-ebreak # S
+ebreak # S ebreak was delegeted to s-mode, so use stvec to find s-handler for break
 s_mode_done:
 #   j s_mode_done
 jal x0, s_mode_done
@@ -201,7 +189,7 @@ addi a0, x0, 0x53
 addi a7, x0, 0x0
 addi a7, x0, 0x0
 addi a7, x0, 0x1
-ecall
+ecall   # here ecall was not delegated to s_mode, so go to mtvec to find m-mode ecall handler
 #    j s_done
 jal x0, s_done
 s_done:

@@ -45,14 +45,13 @@ s_mode_kernel:
    li a7, 0x10
    ecall  # turn delegate
 
-   li a0, 0x8888
-   call print_reg
+   #li a0, 0x8888
+   #call print_reg
 
-   csrr a0, medeleg
-   call print_reg
+   #csrr a0, medeleg
+   #call print_reg
 
-   #la t2, s_mode_done
-   ebreak # S
+   ebreak # S ebreak was delegeted to s-mode, so use stvec to find s-handler for break
 
 s_mode_done:
   j s_mode_done
@@ -132,9 +131,8 @@ m_done:
 s_trap_handler:
    li a0, "S"
    li a7, 1
-   ecall
+   ecall   # here ecall was not delegated to s_mode, so go to mtvec to find m-mode ecall handler
    j s_done
-   #jr t2
 
 s_done: 
    csrr t2, sepc

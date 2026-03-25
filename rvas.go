@@ -1848,6 +1848,7 @@ func main() { //t6a7s11
 				fmt.Println("Too many arguments on line: ", lineCounter)
 				os.Exit(0)
 			}
+			instruction = opBin[code[0]]
 		case "wfi":
 			if len(code) != 1 {
 				fmt.Println("Too many arguments on line: ", lineCounter)
