@@ -46,6 +46,8 @@ s_mode_kernel:
 
 
    csrr a0, medeleg
+   
+   li s11, 0x2004
    call print_reg
    #la t2, s_mode_done
    ebreak # S

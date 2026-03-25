@@ -79,6 +79,10 @@ addi a7, x0, 0x10
 ecall  # turn delegate
 #    csrr a0, medeleg
 csrrs a0, medeleg, x0
+#    li s11, 0x2004
+addi s11, x0, 0x0
+lui s11, 0x2
+addi s11, s11, 0x4
 #    call print_reg
 auipc x1, 0 # R_RISCV_PCREL_HI20 print_reg
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_reg
