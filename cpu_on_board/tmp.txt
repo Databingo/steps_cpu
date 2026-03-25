@@ -2,11 +2,13 @@ _start:
 #    la t0, m_trap_router      
 auipc t0, 0 # R_RISCV_PCREL_HI20 m_trap_router 
 addi t0, t0, 0 # R_RISCV_PCREL_LO12_I m_trap_router 
+andi t0, t0, -4 # align 4 byte for directory mode of tvec
 #    csrw mtvec, t0
 csrrw x0, mtvec, t0
 #    la t0, s_trap_handler     
 auipc t0, 0 # R_RISCV_PCREL_HI20 s_trap_handler 
 addi t0, t0, 0 # R_RISCV_PCREL_LO12_I s_trap_handler 
+andi t0, t0, -4
 #    csrw stvec, t0
 csrrw x0, stvec, t0
 #    li t0, 0xffffffffffffffff 
@@ -41,7 +43,7 @@ auipc t0, 0 # R_RISCV_PCREL_HI20 s_mode_kernel
 addi t0, t0, 0 # R_RISCV_PCREL_LO12_I s_mode_kernel 
 #    csrw mepc, t0
 csrrw x0, mepc, t0
-mret                      # 5. Drop to S-mode go to s_kernel
+mret                      # 6. Drop to S-mode go to s_kernel
 m_trap_router:
 #    csrr t0, mcause  
 csrrs t0, mcause, x0

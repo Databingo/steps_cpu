@@ -2,36 +2,37 @@
 .globl _start
 
 _start:
-   la t0, m_trap_router      # 1. setup m-mode trap handler (sbi interface)
+   la t0, m_trap_router      # 1. setup m-mode trap handler
+   andi t0, t0, -4 # align 4 byte for directory mode of tvec
    csrw mtvec, t0
 
    la t0, s_trap_handler     # 2. setup s-mode trap handler
+   andi t0, t0, -4
    csrw stvec, t0
 
 
    li t0, 0xffffffffffffffff # 3. Unlock PMP (Physical Memory Protection) which prevent S-mode to touch hardware
    csrw pmpaddr0, t0
-   li t0, 0x0f               # NAPOT mode, Read/Write/Execute permissions
+   li t0, 0x0f               # 4. config NAPOT mode, Read/Write/Execute permissions
    csrw pmpcfg0, t0
 
    csrw medeleg, zero        # No delegation (let M-mode handler take care)
    #li t0, 0b1000            # Delegate breakpoint to s-mode
    #csrw medeleg, t0
 
-   li t0, 0b100000000000     # 4. prepare the jump to S-mode # set mstatus.MPP to 1, Bit 11 is MPP
+   li t0, 0b100000000000     # 5. prepare the jump to S-mode # set mstatus.MPP to 1, Bit 11 is MPP
    csrs mstatus, t0
    la t0, s_mode_kernel      # set mepc to the address of our S-mode kernel
    csrw mepc, t0
-   mret                      # 5. Drop to S-mode go to s_kernel
+   mret                      # 6. Drop to S-mode go to s_kernel
 
 
 m_trap_router:
    #sd t0, 0x300(zero)
    #sd t1, 0x308(zero)
 
-
-
    csrr t0, mcause  # check type
+
    li t1, 9  # ecall from S-mode
    beq t0, t1, m_ecall_router
 
