@@ -49,12 +49,12 @@ s_mode_kernel:
    li a7, 0x10
    ecall  # turn delegate
 
-   ebreak # S ebreak was delegeted to s-mode, so use stvec to find s-handler for break
+  #ebreak # S ebreak was delegeted to s-mode, so use stvec to find s-handler for break
 
 
    # test MMU
-   li a0, "\nMMU:" 
-   call print7
+  #li a0, "\nMMU:" 
+  #call print7
 
    li t0, 1
    slli t0, t0, 63 # sv39 satp[63:60] MODE to 8
