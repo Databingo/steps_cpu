@@ -812,8 +812,7 @@ module riscv64(
 	            32'b0001000_00010_?????_000_?????_1110011: begin      
 	               			       Csrs[sstatus][SIE] <= Csrs[sstatus][SPIE]; // restore interrupt enable(SIE) by SPIE 
 	               			       Csrs[sstatus][SPIE] <= 1; // next trap will have SPIE=1
-	               			       if (Csrs[sstatus][SPP] == 0) current_privilege_mode <= U_mode;
-					       else current_privilege_mode  <= S_mode;
+	               			       if (Csrs[sstatus][SPP] == 0) current_privilege_mode <= U_mode; else current_privilege_mode  <= S_mode;
 	               			       Csrs[sstatus][SPP] <= 0; // set previous privilege mode(SPP) to be 0 (U-mode)
 	               			       pc <=  Csrs[sepc]; // sepc was +4 by the software handler and written back to sepc
 		          		       bubble <= 1'b1;
