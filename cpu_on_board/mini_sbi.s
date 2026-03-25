@@ -123,7 +123,7 @@ s_mode_kernel:
    li a7, 0x10
    ecall  # turn delegate
 
-   la t2, s_mode_done
+   #la t2, s_mode_done
    ebreak # S
 
 s_mode_done:

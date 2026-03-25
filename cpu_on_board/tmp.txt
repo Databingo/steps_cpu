@@ -181,9 +181,6 @@ addi a7, x0, 0x0
 addi a7, x0, 0x0
 addi a7, x0, 0x10
 ecall  # turn delegate
-#    la t2, s_mode_done
-auipc t2, 0 # R_RISCV_PCREL_HI20 s_mode_done 
-addi t2, t2, 0 # R_RISCV_PCREL_LO12_I s_mode_done 
 ebreak # S
 s_mode_done:
 #    j s_mode_done
