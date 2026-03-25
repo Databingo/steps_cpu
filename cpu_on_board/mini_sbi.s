@@ -2,6 +2,9 @@
 .globl _start
 
 _start:
+   li s11, 0x2004 # UART print 
+   li s10, 0x2008 # UART controller
+
    la t0, m_trap_router      # 1. setup m-mode trap handler
    andi t0, t0, -4 # align 4 byte for directory mode of tvec
    csrw mtvec, t0
