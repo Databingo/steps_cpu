@@ -6,13 +6,32 @@ _start:
    la t0, sbi_trap_handler
    csrw mtvec, t0
 
+   # 2. unlock PMP (Physical Memory Protection) which prevent S-mode to touch hardware
+   li t0, 0xffffffffffffffff
+   csrw pmpaddr0, t0
+   li t0, 0x0f    # NAPOT mode, Read/Write/Execute permissions
+   csrw pmpcfg0, t0
+ 
+   # 3. prepare the jump to S-mode
+   #li t0, (1<<11) # set mstatus.MPP to 1, Bit 11 is MPP
+   li t0, 0b10000000000 # set mstatus.MPP to 1, Bit 11 is MPP
+   csrs mstatus, t0
+   # set mepc to the address of our S-mode kernel
+   la t0, s_mode_kernel
+   csrw mepc, t0
+
+   # Look at mstatus.MPP but see S-mode, jump to mepc then transition to S-mode
+   mret
+
+
+
 
 sbi_trap_handler:  # a7 Extension 1 putchar, 2 getchar, 0 settimer; a0 is the first argument a1..a5
    li t0, 1 # look a7 to see function is requested(sbi standard)
    beq a7, t0, sbi_handler_putchar  # (SBI_CONSOLE_PUTCHAR ( a7 = 0x01)
 
    li t0, 0
-   beq a7, t0, sbi_hander_timer
+   beq a7, t0, sbi_handler_timer
 
    li a0, -1  # unknow SBI_ERR_NOT_SUPPORTED = -1
    j ecall_done
@@ -23,10 +42,12 @@ wait_uart_sbi:
    lw t1, 0(s11)
    blt t1, zero, wait_uart_sbi  # sifive uart negetive is full
    sb a0, 0(s11)
+   li a0, 0     # return success
    j ecall_done
 
-sbi_hander_timer:
-   csrw mtimecmp, a0 # S-mode passes new time in a0
+sbi_handler_timer:
+   li t1, 0x2004000  # riscv use MMIP for mtimecmp
+   sd a0, 0(t1)      # S-mode passes new time in a0
    li a0, 0          # Success return a0=0
    j ecall_done
    
@@ -39,6 +60,10 @@ ecall_done:
    mret
    
 
-
-
+s_mode_kernel:
+   li a0, "H"
+   li a7, 1
+   ecall
+s_mode_done:
+   j s_mode_done
 
