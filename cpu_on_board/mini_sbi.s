@@ -22,7 +22,6 @@ _start:
    csrs mstatus, t0
    la t0, s_mode_kernel      # set mepc to the address of our S-mode kernel
    csrw mepc, t0
-   
    mret                      # 5. Drop to S-mode go to s_kernel
 
 
@@ -121,6 +120,7 @@ s_mode_kernel:
  
    li a7, 0x10
    ecall  # turn delegate
+   li t0, 0x10
    ebreak # S
 
 s_mode_done:

@@ -58,7 +58,7 @@ beq t0, t1, m_ebreak_handler
 #    j m_done
 jal x0, m_done
 m_ecall_router:
-#    li t0, 1 
+#    li t0, 1
 addi t0, x0, 0x0
 addi t0, x0, 0x0
 addi t0, x0, 0x1
@@ -120,10 +120,10 @@ addi a0, x0, 0x0
 #    j m_done
 jal x0, m_done
 m_handler_deleg:
-#    li t0, 0b1000
+#    li t0, 0x800 
 addi t0, x0, 0x0
-addi t0, x0, 0x0
-addi t0, x0, 0x8
+lui t0, 0x1
+addi t0, t0, 0x800
 #    csrw medeleg, t0 
 csrrw x0, medeleg, t0
 #    li a0, 0
@@ -181,6 +181,10 @@ addi a7, x0, 0x0
 addi a7, x0, 0x0
 addi a7, x0, 0x10
 ecall  # turn delegate
+#    li t0, 0x10
+addi t0, x0, 0x0
+addi t0, x0, 0x0
+addi t0, x0, 0x10
 ebreak # S
 s_mode_done:
 #    j s_mode_done
