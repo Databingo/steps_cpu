@@ -1,4 +1,8 @@
 _start:
+#    li sp, 0x1800 
+addi sp, x0, 0x0
+lui sp, 0x2
+addi sp, sp, 0x800
 #    li s11, 0x2004 
 addi s11, x0, 0x0
 lui s11, 0x2

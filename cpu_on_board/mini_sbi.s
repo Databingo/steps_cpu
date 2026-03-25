@@ -2,6 +2,7 @@
 .globl _start
 
 _start:
+   li sp, 0x1800 # Set stack
    li s11, 0x2004 # UART print 
    li s10, 0x2008 # UART controller
 
