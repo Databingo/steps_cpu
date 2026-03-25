@@ -4,6 +4,7 @@
 msg:
     .string "Hello"
 
+
 .section .text
 _start:
    li sp, 0x1800 # Set stack
