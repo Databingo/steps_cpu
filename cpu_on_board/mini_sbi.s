@@ -1,10 +1,11 @@
 .section .text
 .globl _start
 
-#.section .data
-#msg:
-#    .string "Hello"
+.section .data
+msg:
+    .string "Hello"
 
+.section .text
 _start:
    li sp, 0x1800 # Set stack
    li s11, 0x2004 # UART print 
