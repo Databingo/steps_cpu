@@ -27,6 +27,26 @@ _start:
    mret                      # 6. Drop to S-mode go to s_kernel
 
 
+s_mode_kernel:
+   ebreak   # M
+
+   li a0, "H"
+   li a7, 1
+   ecall
+
+   li a0, "i"
+   li a7, 1
+   ecall
+ 
+   li a7, 0x10
+   ecall  # turn delegate
+
+
+   csrr a0, medeleg
+   call print_reg
+   #la t2, s_mode_done
+   ebreak # S
+
 m_trap_router:
    #sd t0, 0x300(zero)
    #sd t1, 0x308(zero)
@@ -81,7 +101,7 @@ m_handler_timer:
 
 m_handler_deleg:
    #li t0, 0x800 # 0b1000
-   li t0, 0b1000            # Delegate breakpoint to s-mode
+   li t0, 0b1000            # Delegate breakpoint bit3 to s-mode, ecall is bit9 not delegate yet
    csrw medeleg, t0 
    li a0, 0
    j m_done
@@ -110,22 +130,6 @@ s_done:
 
 
 
-s_mode_kernel:
-   ebreak   # M
-
-   li a0, "H"
-   li a7, 1
-   ecall
-
-   li a0, "i"
-   li a7, 1
-   ecall
- 
-   li a7, 0x10
-   ecall  # turn delegate
-
-   #la t2, s_mode_done
-   ebreak # S
 
 s_mode_done:
    #li s11, 0x2004
@@ -135,3 +139,96 @@ s_mode_done:
    j s_mode_done
 
 
+
+
+
+# functions ------
+
+print_reg: # a0
+    addi sp, sp, -40
+    sd ra, 0(sp)
+    sd s0, 8(sp)
+    sd s1, 16(sp)
+    sd s2, 24(sp)
+    sd s3, 32(sp)
+    mv s0, a0
+    li a0, "0"
+    call putchar
+    li a0, "x"
+    call putchar
+    li s1, 60 
+p_loop:
+    srl s2, s0, s1      # get high nibble
+    andi s2, s2, 0xF
+    slti s3, s2, 10     # if < 10 number
+    beq s3, x0, letter
+    addi s2, s2, 48     # 0 is "0" ascii 48
+    j print_h
+letter:
+    addi s2, s2, 55     # 10 is "A" ascii 65 ..
+print_h:
+    call wait_uart
+    sb s2, 0(s11)       # print
+    addi s1, s1, -4
+    bge s1, x0, p_loop 
+    ld ra, 0(sp)
+    ld s0, 8(sp)
+    ld s1, 16(sp)
+    ld s2, 24(sp)
+    ld s3, 32(sp)
+    addi sp, sp, 40
+    ret
+
+
+putchar:  # a0
+    addi sp, sp, -8
+    sd ra, 0(sp)
+    call wait_uart
+    sb a0, 0(s11)
+    ld ra, 0(sp)
+    addi sp, sp, 8
+    ret
+
+
+puts: # a0 addr
+    addi sp, sp, -16
+    sd ra, 0(sp)
+    sd s0, 8(sp)
+    mv s0, a0
+puts_loop:
+    lbu a0, 0(s0)
+    beq a0, x0, stop_puts # \x00 for end of string
+    call putchar # a0 char
+    addi s0, s0, 1 # next byte
+    j puts_loop
+stop_puts:
+    ld ra, 0(sp)
+    ld s0, 8(sp)
+    addi sp, sp, 16
+    ret
+
+
+wait_uart:
+    addi sp, sp, -16
+    sd s0, 0(sp)
+    sd ra, 8(sp)
+wait_uart_loop:
+   #li a0, 65  # A
+   #sb a0, 0(s11)
+    lw s0, 0(s11)
+    bgt zero, s0, wait_uart_loop
+    ld s0, 0(sp)
+    ld ra, 8(sp)
+    addi sp, sp, 16
+    ret
+
+print7: # a0, 7 char left one for null
+    addi sp, sp, -16
+    sd a0, 0(sp)
+    sd ra, 8(sp)
+    mv a0, sp
+    call puts
+   #ld a0, 0(sp)
+    ld ra, 8(sp)
+    addi sp, sp, 16
+    ret
