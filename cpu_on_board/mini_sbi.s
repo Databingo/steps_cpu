@@ -98,8 +98,8 @@ s_trap_handler:
    li a0, "S"
    li a7, 1
    ecall
-   #j s_done
-   jr t2
+   j s_done
+   #jr t2
 
 s_done: 
    csrr t2, sepc
@@ -127,9 +127,9 @@ s_mode_kernel:
    ebreak # S
 
 s_mode_done:
-   li s11, 0x2004
-   li t0, 65
-   lb t0, 0(s11)
+   #li s11, 0x2004
+   #li t0, 65
+   #lb t0, 0(s11)
    
    j s_mode_done
 

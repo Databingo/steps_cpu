@@ -147,8 +147,8 @@ addi a7, x0, 0x0
 addi a7, x0, 0x0
 addi a7, x0, 0x1
 ecall
-#    jr t2
-jalr x0, 0(t2)
+#    j s_done
+jal x0, s_done
 s_done:
 #    csrr t2, sepc
 csrrs t2, sepc, x0
@@ -186,14 +186,5 @@ auipc t2, 0 # R_RISCV_PCREL_HI20 s_mode_done
 addi t2, t2, 0 # R_RISCV_PCREL_LO12_I s_mode_done 
 ebreak # S
 s_mode_done:
-#    li s11, 0x2004
-addi s11, x0, 0x0
-lui s11, 0x2
-addi s11, s11, 0x4
-#    li t0, 65
-addi t0, x0, 0x0
-addi t0, x0, 0x0
-addi t0, x0, 0x41
-lb t0, 0(s11)
 #    j s_mode_done
 jal x0, s_mode_done
