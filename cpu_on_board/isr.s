@@ -1,6 +1,6 @@
 # I-TLB mmu-refill 1:1 identity map
      j mmu
-     #lui x1, 0x2     
+    #lui x1, 0x2     
      addi x1, x1, 0x4              
      addi x2, x0, 91
      sd x2, 0(x1)    #  print [
@@ -10,7 +10,8 @@
      sd x2, 0(x1)    #  print ]
      mret           
 # D-TLB mmu-refill
-     lui x1, 0x2     
+     j mmu
+    #lui x1, 0x2     
      addi x1, x1, 0x4              
      addi x2, x0, 123
      sd x2, 0(x1)    #  print {
@@ -19,7 +20,7 @@
      addi x2, x0, 125
      sd x2, 0(x1)    #  print }
      mret           
- I-Cache refill (withoud stap/tlb_hit sensitive)
+#  I-Cache refill (withoud stap/tlb_hit sensitive)
      lui x1, 0x2     
      addi x1, x1, 0x4  # set print           
 
@@ -60,7 +61,9 @@ mmu:  # VA 63:39Sign|38:30Vpn[2]|29:21Vpn[1]|20:12Vpn[0]|11:0PageOffset
 
    # 3. Check Leaf
      andi x6, x7, 0xE # bit 3:1 for X/W/R
-     bnez x6, FINISH   # If not zero, it's leaf. We get the address.
+     bnez x6, FINISH  # If not zero, it's leaf. We get the address.
+     andi x6, x7, 1   # check PTE valid bit
+     beqz x6, FAULT
 
    # 4. Prepare for Level 1
      srli x5, x7, 10 # Extract PPN from L2 PTE
@@ -76,6 +79,8 @@ mmu:  # VA 63:39Sign|38:30Vpn[2]|29:21Vpn[1]|20:12Vpn[0]|11:0PageOffset
    # 6. Check Leaf
      andi x6, x7, 0xE # bit 3:1 for X/W/R
      bnez x6, FINISH   # If not zero, it's leaf. We get the address.
+     andi x6, x7, 1   # check PTE valid bit
+     beqz x6, FAULT
 
    # 7. Prepare for Level 0
      srli x5, x7, 10 # Extract PPN from L1 PTE
@@ -88,6 +93,10 @@ mmu:  # VA 63:39Sign|38:30Vpn[2]|29:21Vpn[1]|20:12Vpn[0]|11:0PageOffset
      add  x5, x5, x6 # x5 = Address of L0 PTE
      ld x7, 0(x5)    # Load L0 PTE from memory
 
+   # 9. Check valid
+     andi x6, x7, 1   # check PTE valid bit
+     beqz x6, FAULT
+
 FINISH:
      srli x7, x7, 10  # get PPN from PTE(PTE's data struction?)  64:54Reserved 53:10PPN 
                       # 9:8RSW 7Dirty 6Accessed 5Global 4User 3Executable 2Write 1Readable 0Valid
@@ -96,6 +105,14 @@ FINISH:
      # 9. Writ ppn back to hardware mmu trap
      lui x8, 0xF0002 # Magic TLB address
      sd x7, 0(x8)
+
+     lui x1, 0x2     
+     addi x1, x1, 0x4              
+     addi x2, x0, 91
+     sd x2, 0(x1)    #  print [
+
+     mret
+FAULT: # error trap?
      mret
      
 #Seems VA has 3 table number, satp has Root Table(vpn[2]) address via PPN(ppn+12 space), the we can find PTE in table 2, and PTE has PPN, we can use table2PPN to find table 1 address plus vpn1 number to find PTE in table1, then we get table1 PPN for table0 address, and together with vpn0 to find PTE in talbe0, this is  the last ppa, by ppn + 12 bit of VA low.

@@ -43,7 +43,22 @@ _start:
     # ---------------------------------------------------------
     # PART 2: TURN ON THE MMU
     # ---------------------------------------------------------
+    # Step C: Create a 1GB Identity Map for the code itself
+    # L2 Index for 0x0000_0000 is 0.
+    # Entry address = 0x10000 + (0 * 8 bytes) = 0x10000.
+    li t0, 0x10000
     
+    # We point this Virtual Address to Physical Address 0x0000_0000.
+    # PPN = 0x0 >> 12 = 0.
+    # Flags = Valid(1), Read(2), Write(4), Exec(8), Accessed(64), Dirty(128).
+    # Because R/W/X are not zero, this is a 1GB Superpage (Leaf)!
+    # PTE = (0x0 << 10) | 0xCF = 0xCF.
+    li t1, 0xCF
+    sd t1, 0(t0) 
+
+
+
+ 
     # satp needs the Physical Page Number of the Root Table (0x10000).
     # PPN = 0x10000 >> 12 = 0x10.
     # Mode = 8 (Sv39). We shift 8 to the very top (bit 60).
