@@ -106,7 +106,7 @@ FINISH_4KB:
 FINISH_2MB:
      srli x7, x7, 10 
      slli x7, x7, 12 
-     li x6, 0x1ff00000 # mask for VA[20:12]
+     li x6, 0x001ff000 # mask for VA[20:12]
      and x6, x6, x9    
      add x7, x7, x6   
      j WRITE_TLB

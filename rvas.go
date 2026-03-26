@@ -449,6 +449,7 @@ func main() { //t6a7s11
 		"amominu.d": 0b11000000000000000011000000101111, // func5=11100, func3=011
 		"amomaxu.d": 0b11100000000000000011000000101111, // func5=11000, func3=011
 		// --new
+		"sfence.vma": 0b00010010000000000000000001110011,
 
 	}
 
@@ -1358,21 +1359,26 @@ func main() { //t6a7s11
 				os.Exit(0)
 			}
 			// check if imm has a constant definition
-		case "mret":
+		case "mret", "sret", "wfi", "sfence.vma":
 			if len(code) != 1 {
-				fmt.Println("Too many arguments on line: ", lineCounter)
+				fmt.Println("Too many arguments on line: ", lineCounter, line)
 				os.Exit(0)
 			}
-		case "sret":
-			if len(code) != 1 {
-				fmt.Println("Too many arguments on line: ", lineCounter)
-				os.Exit(0)
-			}
-		case "wfi":
-			if len(code) != 1 {
-				fmt.Println("Too many arguments on line: ", lineCounter)
-				os.Exit(0)
-			}
+		//case "sret":
+		//	if len(code) != 1 {
+		//		fmt.Println("Too many arguments on line: ", lineCounter)
+		//		os.Exit(0)
+		//	}
+		//case "wfi":
+		//	if len(code) != 1 {
+		//		fmt.Println("Too many arguments on line: ", lineCounter)
+		//		os.Exit(0)
+		//	}
+		//case "sfence.vma":
+		//	if len(code) != 1 {
+		//		fmt.Println("Too many arguments on line: ", lineCounter)
+		//		os.Exit(0)
+		//	}
 		case "csrrw", "csrrs", "csrrc", "csrrwi", "csrrsi", "csrrci": // Instruction format: op rd, csr, rs1/imm or label: op rd, csr, rs1/imm
 			if len(code) != 4 && len(code) != 5 {
 				fmt.Println("Incorrect argument count on line: ", lineCounter)
@@ -1831,30 +1837,30 @@ func main() { //t6a7s11
 				os.Exit(0)
 			}
 
-		case "ecall", "ebreak":
-			if len(code) != 1 {
-				fmt.Println("Too many arguments on line: ", lineCounter)
-				os.Exit(0)
-			}
+		case "ecall", "ebreak", "mret", "sret", "wfi", "sfence.vma":
+			//if len(code) != 1 {
+			//	fmt.Println("Too many arguments on line: ", lineCounter)
+			//	os.Exit(0)
+			//}
 			instruction = opBin[code[0]]
-		case "mret":
-			if len(code) != 1 {
-				fmt.Println("Too many arguments on line: ", lineCounter)
-				os.Exit(0)
-			}
-			instruction = opBin[code[0]]
-		case "sret":
-			if len(code) != 1 {
-				fmt.Println("Too many arguments on line: ", lineCounter)
-				os.Exit(0)
-			}
-			instruction = opBin[code[0]]
-		case "wfi":
-			if len(code) != 1 {
-				fmt.Println("Too many arguments on line: ", lineCounter)
-				os.Exit(0)
-			}
-			instruction = opBin[code[0]]
+		//case "mret":
+		//	if len(code) != 1 {
+		//		fmt.Println("Too many arguments on line: ", lineCounter)
+		//		os.Exit(0)
+		//	}
+		//	instruction = opBin[code[0]]
+		//case "sret":
+		//	if len(code) != 1 {
+		//		fmt.Println("Too many arguments on line: ", lineCounter)
+		//		os.Exit(0)
+		//	}
+		//	instruction = opBin[code[0]]
+		//case "wfi":
+		//	if len(code) != 1 {
+		//		fmt.Println("Too many arguments on line: ", lineCounter)
+		//		os.Exit(0)
+		//	}
+		//	instruction = opBin[code[0]]
 		//-------------new
 		case "csrrw", "csrrs", "csrrc": // Instruction format: op rd, csr, rs1 or label: op rd, csr, rs1
 		        //os.Exit(1)
