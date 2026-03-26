@@ -709,32 +709,32 @@ end
 
     // Debug LEDs
     //assign HEX30 = ~Key_selected;
-    assign HEX20 = ~|bus_read_data;
-    assign HEX21 = ~bus_read_enable;
-    assign HEX10 = ~|bus_write_data;
-    assign HEX11 = ~bus_write_enable;
-    assign HEX00 = ~Art_selected;
-    //assign HEX01 = ~Ram_selected;
-    assign HEX01 = ~sd_rd_start;
-    //assign HEX02 = ~Rom_selected;
-    assign HEX02 = ~sd_byte_available;
-    //assign HEX03 = ~Sdram_selected ;
-    //assign HEX03 = (bus_address >= `Sdram_min && bus_address < `Sdram_max);
-    assign HEX03 = ~|sd_dout;
-    assign HEX04 = ~clk_pulse_slow;
-    assign HEX05 = ~|sd_addr;
-    assign HEX06 = ~sd_cache_available;
-
-    assign HEX31 = ~Sdram_selected;
-    //assign HEX32 = ~sdram_readdatavalid;
-    //assign HEX33 = sdram_read_n;
-    assign HEX33 = ~sdram_read_en;
-    //assign HEX34 = sdram_write_n;
-    assign HEX34 = ~sdram_write_en;
-    //assign HEX35 = ~sdram_waitrequest;
-    assign HEX35 = ~sdram_req_wait;
-    //assign HEX36 = ~|sdram_readdata;
-    assign HEX36 = ~|sdram_rddata;
+//    assign HEX20 = ~|bus_read_data;
+//    assign HEX21 = ~bus_read_enable;
+//    assign HEX10 = ~|bus_write_data;
+//    assign HEX11 = ~bus_write_enable;
+//    assign HEX00 = ~Art_selected;
+//    //assign HEX01 = ~Ram_selected;
+//    assign HEX01 = ~sd_rd_start;
+//    //assign HEX02 = ~Rom_selected;
+//    assign HEX02 = ~sd_byte_available;
+//    //assign HEX03 = ~Sdram_selected ;
+//    //assign HEX03 = (bus_address >= `Sdram_min && bus_address < `Sdram_max);
+//    assign HEX03 = ~|sd_dout;
+//    assign HEX04 = ~clk_pulse_slow;
+//    assign HEX05 = ~|sd_addr;
+//    assign HEX06 = ~sd_cache_available;
+//
+//    assign HEX31 = ~Sdram_selected;
+//    //assign HEX32 = ~sdram_readdatavalid;
+//    //assign HEX33 = sdram_read_n;
+//    assign HEX33 = ~sdram_read_en;
+//    //assign HEX34 = sdram_write_n;
+//    assign HEX34 = ~sdram_write_en;
+//    //assign HEX35 = ~sdram_waitrequest;
+//    assign HEX35 = ~sdram_req_wait;
+//    //assign HEX36 = ~|sdram_readdata;
+//    assign HEX36 = ~|sdram_rddata;
     //assign HEX04 = ~uart_irq;
     //assign HEX05 = ~Plic_priority_selected;
     //assign HEX06 = ~meip_interrupt;
