@@ -45,18 +45,18 @@
     sd x2, 0(x1)    # print /
      mret           
 
-mmu:
+mmu:  # VA 63:39Sign|38:30Vpn[2]|29:21Vpn[1]|20:12Vpn[0]|11:0PageOffset  
    # 1. Get root table address from csr satp Supervisor Address Translation and Protection
-     csrr x5, satp
+     csrr x5, satp   # satp 63:60Mode|59:44Asid(0forSimpleOS)|43:0PPNofRootTable
      slli x5, x5, 20 # clear high mode+Asid Address Space Identifier
-     srli x5, x5, 8  # get level_2 ppn(27 bits) + 12 zero positon, point to start of L2 table
+     srli x5, x5, 8  # get level_2 ppn(27 bits) + 12 zero positon, point to start of Root Table
 
    # 2. Level 2 walk
      srli x6, x9, 30 # extract vpn[2] bit 38:30 the first 9 bits
      andi x6, x6, 0x1ff # Mask 9 bits
      slli x6, x6, 3  # Multiple by 8 (PTE size 8 bytes) Page Table Entry 64 bits
      add  x5, x5, x6 # x5 = Address of L2 PTE
-     ld x7, 0(x5)    # Load L2 PTE from memory
+     ld x7, 0(x5)    # Load L2 PTE from memory  PTE 63:54Reserved|53:10PPN|9:8RSW|XWRmark|0validBit1
 
    # 3. Check Leaf
      andi x6, x7, 0xE # bit 3:1 for X/W/R
@@ -98,4 +98,4 @@ FINISH:
      sd x7, 0(x8)
      mret
      
-
+#Seems VA has 3 table number, satp has Root Table(vpn[2]) address via PPN(ppn+12 space), the we can find PTE in table 2, and PTE has PPN, we can use table2PPN to find table 1 address plus vpn1 number to find PTE in table1, then we get table1 PPN for table0 address, and together with vpn0 to find PTE in talbe0, this is  the last ppa, by ppn + 12 bit of VA low.
