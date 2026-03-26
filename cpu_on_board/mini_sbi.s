@@ -56,18 +56,37 @@ s_mode_kernel:
    # test MMU
    li a0, "\nMMU:" 
    call print7
+   
+   # simple test
+   #li t0, 1
+   #slli t0, t0, 63 # sv39 satp[63:60] MODE to 8
+   #csrw satp, t0
+   ## <--- start TLB I/D hitting
 
-   li t0, 1
-   slli t0, t0, 63 # sv39 satp[63:60] MODE to 8
+   # real test
+   # Build SV39 table in sdram (4KB per table)
+   li t0, 0x80000000 # map to ppa 0x0000_0000, ppn =  ppa >> 12 = 0
+   li t1, 0xcf # pte = ppn << 10 | flags valid0 read1 write2 exec3 accessed6 dirty7 0b11001111=0xcf
+   sd t1, 0(t0)
+
+   # satp need ppn of root table rt 0x80000000
+   # ppn = rt >> 12 = 0x80000
+   # mode = 3 sv39
+   li t0, 0x8000000000080000
    csrw satp, t0
-   # <--- start TLB I/D hitting
+   sfence.vma
+   ## <--- start use TLB I/D hitting
+
+
+
+
+
+
+
+
 
    la a0, msg   # trigger I-TLB miss
    call puts
-   ##li a0, "\nOK"
-   ##call print7
-   ##
-   ##ebreak
    
 
   

@@ -1,317 +1,87 @@
-msg:
-_start:
-#    li sp, 0x1800 
-addi sp, x0, 0x0
-lui sp, 0x2
-addi sp, sp, 0x800
-#    li s11, 0x2004 
-addi s11, x0, 0x0
-lui s11, 0x2
-addi s11, s11, 0x4
-#    li s10, 0x2008 
-addi s10, x0, 0x0
-lui s10, 0x2
-addi s10, s10, 0x8
-#    la t0, m_trap_router      
-auipc t0, 0 # R_RISCV_PCREL_HI20 m_trap_router 
-addi t0, t0, 0 # R_RISCV_PCREL_LO12_I m_trap_router 
-andi t0, t0, -4 # align 4 byte for directory mode of tvec
-#    csrw mtvec, t0
-csrrw x0, mtvec, t0
-#    la t0, s_trap_handler     
-auipc t0, 0 # R_RISCV_PCREL_HI20 s_trap_handler 
-addi t0, t0, 0 # R_RISCV_PCREL_LO12_I s_trap_handler 
-andi t0, t0, -4
-#    csrw stvec, t0
-csrrw x0, stvec, t0
-#    li t0, 0xffffffffffffffff 
-addi t0, x0, 0x0
-lui t0, 0xfffff
-srli t0, t0, 0x1
-ori t0, t0, 0x7ff
-slli t0, t0, 0xb
-ori t0, t0, 0x7ff
-slli t0, t0, 0xb
-ori t0, t0, 0x7ff
-slli t0, t0, 0xb
-ori t0, t0, 0x7ff
-#    csrw pmpaddr0, t0
-csrrw x0, pmpaddr0, t0
-#    li t0, 0x0f               
-addi t0, x0, 0x0
-addi t0, x0, 0x0
-addi t0, x0, 0xf
-#    csrw pmpcfg0, t0
-csrrw x0, pmpcfg0, t0
-#    csrw medeleg, zero        
-csrrw x0, medeleg, zero
-#    li t0, 0b100000000000     
-addi t0, x0, 0x0
-lui t0, 0x1
-addi t0, t0, 0x800
-#    csrs mstatus, t0
-csrrs x0, mstatus, t0
-#    la t0, s_mode_kernel      
-auipc t0, 0 # R_RISCV_PCREL_HI20 s_mode_kernel 
-addi t0, t0, 0 # R_RISCV_PCREL_LO12_I s_mode_kernel 
-#    csrw mepc, t0
-csrrw x0, mepc, t0
-mret                      # 6. Drop to S-mode go to s_kernel
-s_mode_kernel:
-#    li a7, 0x10
-addi a7, x0, 0x0
-addi a7, x0, 0x0
-addi a7, x0, 0x10
-ecall  # turn delegate
-#    li a0, "\nMMU:" 
-addi a0, x0, 0x0
-ori a0, a0, 0x1d
-slli a0, a0, 0xb
-ori a0, a0, 0x155
-slli a0, a0, 0xb
-ori a0, a0, 0x1a9
-slli a0, a0, 0xb
-ori a0, a0, 0x50a
-#    call print7
-auipc x1, 0 # R_RISCV_PCREL_HI20 print7
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print7
-#    li t0, 1
-addi t0, x0, 0x0
-addi t0, x0, 0x0
-addi t0, x0, 0x1
-slli t0, t0, 63 # sv39 satp[63:60] MODE to 8
-#    csrw satp, t0
-csrrw x0, satp, t0
-#    la a0, msg   
-auipc a0, 0 # R_RISCV_PCREL_HI20 msg 
-addi a0, a0, 0 # R_RISCV_PCREL_LO12_I msg 
-#    call puts
-auipc x1, 0 # R_RISCV_PCREL_HI20 puts
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I puts
-s_mode_done:
-#   j s_mode_done
-jal x0, s_mode_done
-m_trap_router:
-#    csrr t0, mcause  
-csrrs t0, mcause, x0
-#    li t1, 9  
-addi t1, x0, 0x0
-addi t1, x0, 0x0
-addi t1, x0, 0x9
-beq t0, t1, m_ecall_router
-#    li t1, 3 
-addi t1, x0, 0x0
-addi t1, x0, 0x0
-addi t1, x0, 0x3
-beq t0, t1, m_ebreak_handler
-#    j m_done
-jal x0, m_done
-m_ecall_router:
-#    li t0, 1
-addi t0, x0, 0x0
-addi t0, x0, 0x0
-addi t0, x0, 0x1
-beq a7, t0, m_handler_putchar  # (SBI_CONSOLE_PUTCHAR ( a7 = 0x01)
-#    li t0, 0
-addi t0, x0, 0x0
-beq a7, t0, m_handler_timer
-#    li t0, 0x10
-addi t0, x0, 0x0
-addi t0, x0, 0x0
-addi t0, x0, 0x10
-beq a7, t0, m_handler_deleg
-#    li a0, -1  
-addi a0, x0, 0x0
-addi a0, x0, 0x0
-addi a0, x0, 0x1
-xori a0, a0, -1
-addi a0, a0, 1
-#    j m_done
-jal x0, m_done
-m_ebreak_handler:
-#    li a0, "M"
-addi a0, x0, 0x0
-addi a0, x0, 0x0
-addi a0, x0, 0x4d
-#    li s11, 0x2004
-addi s11, x0, 0x0
-lui s11, 0x2
-addi s11, s11, 0x4
-wait_uart_m:
-lw t1, 0(s11)
-blt t1, zero, wait_uart_m  # sifive uart negetive is full
-sb a0, 0(s11)
-#    li a0, 0     
-addi a0, x0, 0x0
-#    j m_done
-jal x0, m_done
-m_handler_putchar:
-#    li s11, 0x2004
-addi s11, x0, 0x0
-lui s11, 0x2
-addi s11, s11, 0x4
-wait_uart_sbi:
-lw t1, 0(s11)
-blt t1, zero, wait_uart_sbi  # sifive uart negetive is full
-sb a0, 0(s11)
-#    li a0, 0     
-addi a0, x0, 0x0
-#    j m_done
-jal x0, m_done
-m_handler_timer:
-#    li t1, 0x2004000  
-addi t1, x0, 0x0
-lui t1, 0x2004
-addi t1, t1, 0x0
-sd a0, 0(t1)      # S-mode passes new time in a0
-#    li a0, 0          
-addi a0, x0, 0x0
-#    j m_done
-jal x0, m_done
-m_handler_deleg:
-#    li t0, 0b1000            
-addi t0, x0, 0x0
-addi t0, x0, 0x0
-addi t0, x0, 0x8
-#    csrw medeleg, t0 
-csrrw x0, medeleg, t0
-#    li a0, 0
-addi a0, x0, 0x0
-#    j m_done
-jal x0, m_done
-m_done:
-#    csrr t0, mepc
-csrrs t0, mepc, x0
-addi t0, t0, 4 # skip ecall/ebreak instruction
-#    csrw mepc, t0
-csrrw x0, mepc, t0
+#      j mmu
+jal x0, mmu
+addi x1, x1, 0x4              
+addi x2, x0, 91
+sd x2, 0(x1)    #  print [
+lui x8, 0x20000
+sd x9, 0(x8) 
+addi x2, x0, 93
+sd x2, 0(x1)    #  print ]
+mret           
+#      j mmu
+jal x0, mmu
+addi x1, x1, 0x4              
+addi x2, x0, 123
+sd x2, 0(x1)    #  print {
+lui x8, 0x20000
+sd x9, 0(x8) 
+addi x2, x0, 125
+sd x2, 0(x1)    #  print }
+mret           
+lui x1, 0x2     
+addi x1, x1, 0x4  # set print           
+addi x2, x0, 0x25
+sd x2, 0(x1)    #  print %
+lui x8, 0x20001 # base Cache address
+ld x3, 0(x9)    # get data
+sd x3, 0(x8)    # refill line low 64
+ld x3, 8(x9)    # get data
+sd x3, 8(x8)    # refill line high 64  
+addi x2, x0, 0x2f
+sd x2, 0(x1)    # print /
+mret           
+mmu:
+#      csrr x5, satp   
+csrrs x5, satp, x0
+slli x5, x5, 20 # clear high mode+Asid Address Space Identifier
+srli x5, x5, 8  # get level_2 ppn(27 bits) + 12 zero positon, point to start of Root Table
+srli x6, x9, 30 # extract vpn[2] bit 38:30 the first 9 bits
+andi x6, x6, 0x1ff # Mask 9 bits
+slli x6, x6, 3  # Multiple by 8 (PTE size 8 bytes) Page Table Entry 64 bits
+add  x5, x5, x6 # x5 = Address of L2 PTE
+ld x7, 0(x5)    # Load L2 PTE from memory  PTE 63:54Reserved|53:10PPN|9:8RSW|XWRmark|0validBit1
+andi x6, x7, 0xE # bit 3:1 for X/W/R
+#      bnez x6, FINISH  
+bne x6, x0, FINISH
+andi x6, x7, 1   # check PTE valid bit
+#      beqz x6, FAULT
+beq x6, x0, FAULT
+srli x5, x7, 10 # Extract PPN from L2 PTE
+slli x5, x5, 12 # x5 = Address of L1 Table
+srli x6, x9, 21 # Extract VPN[1] bit 29:21
+andi x6, x6, 0x1ff # Mask 9 bits
+slli x6, x6, 3  # Multiple by 8 (PTE size 8 bytes)
+add  x5, x5, x6 # x5 = Address of L1 PTE
+ld x7, 0(x5)    # Load L1 PTE from memory
+andi x6, x7, 0xE # bit 3:1 for X/W/R
+#      bnez x6, FINISH   
+bne x6, x0, FINISH
+andi x6, x7, 1   # check PTE valid bit
+#      beqz x6, FAULT
+beq x6, x0, FAULT
+srli x5, x7, 10 # Extract PPN from L1 PTE
+slli x5, x5, 12 # x5 = Address of L0 Table
+srli x6, x9, 12 # Extract VPN[0] bit 20:12
+andi x6, x6, 0x1ff # Mask 9 bits
+slli x6, x6, 3  # Multiple by 8 (PTE size 8 bytes)
+add  x5, x5, x6 # x5 = Address of L0 PTE
+ld x7, 0(x5)    # Load L0 PTE from memory
+andi x6, x7, 1   # check PTE valid bit
+#      beqz x6, FAULT
+beq x6, x0, FAULT
+FINISH:
+srli x7, x7, 10  # get PPN from PTE(PTE's data struction?)  64:54Reserved 53:10PPN 
+slli x7, x7, 12  # PPN posint [38:12] in satp
+lui x8, 0xF0002 # Magic TLB address
+sd x7, 0(x8)
+lui x1, 0x2     
+addi x1, x1, 0x4              
+addi x2, x0, 91
+sd x2, 0(x1)    #  print [
 mret
-s_trap_handler:
-#    li a0, "S"
-addi a0, x0, 0x0
-addi a0, x0, 0x0
-addi a0, x0, 0x53
-#    li a7, 1
-addi a7, x0, 0x0
-addi a7, x0, 0x0
-addi a7, x0, 0x1
-ecall   # here ecall was not delegated to s_mode, so go to mtvec to find m-mode ecall handler
-#    j s_done
-jal x0, s_done
-s_done:
-#    csrr t2, sepc
-csrrs t2, sepc, x0
-addi t2, t2, 4 # skip ecall/ebreak instruction
-#    csrw sepc, t2
-csrrw x0, sepc, t2
-sret
-print_reg:
-addi sp, sp, -40
-sd ra, 0(sp)
-sd s0, 8(sp)
-sd s1, 16(sp)
-sd s2, 24(sp)
-sd s3, 32(sp)
-#     mv s0, a0
-addi s0, a0, 0
-#     li a0, "0"
-addi a0, x0, 0x0
-addi a0, x0, 0x0
-addi a0, x0, 0x30
-#     call putchar
-auipc x1, 0 # R_RISCV_PCREL_HI20 putchar
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I putchar
-#     li a0, "x"
-addi a0, x0, 0x0
-addi a0, x0, 0x0
-addi a0, x0, 0x78
-#     call putchar
-auipc x1, 0 # R_RISCV_PCREL_HI20 putchar
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I putchar
-#     li s1, 60 
-addi s1, x0, 0x0
-addi s1, x0, 0x0
-addi s1, x0, 0x3c
-p_loop:
-srl s2, s0, s1      # get high nibble
-andi s2, s2, 0xF
-slti s3, s2, 10     # if < 10 number
-beq s3, x0, letter
-addi s2, s2, 48     # 0 is "0" ascii 48
-#     j print_h
-jal x0, print_h
-letter:
-addi s2, s2, 55     # 10 is "A" ascii 65 ..
-print_h:
-#     call wait_uart
-auipc x1, 0 # R_RISCV_PCREL_HI20 wait_uart
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I wait_uart
-sb s2, 0(s11)       # print
-addi s1, s1, -4
-bge s1, x0, p_loop 
-ld ra, 0(sp)
-ld s0, 8(sp)
-ld s1, 16(sp)
-ld s2, 24(sp)
-ld s3, 32(sp)
-addi sp, sp, 40
-#     ret
-jalr x0, 0(x1)
-putchar:
-addi sp, sp, -8
-sd ra, 0(sp)
-#     call wait_uart
-auipc x1, 0 # R_RISCV_PCREL_HI20 wait_uart
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I wait_uart
-sb a0, 0(s11)
-ld ra, 0(sp)
-addi sp, sp, 8
-#     ret
-jalr x0, 0(x1)
-puts:
-addi sp, sp, -16
-sd ra, 0(sp)
-sd s0, 8(sp)
-#     mv s0, a0
-addi s0, a0, 0
-puts_loop:
-lbu a0, 0(s0)
-beq a0, x0, stop_puts # \x00 for end of string
-#     call putchar 
-auipc x1, 0 # R_RISCV_PCREL_HI20 putchar
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I putchar
-addi s0, s0, 1 # next byte
-#     j puts_loop
-jal x0, puts_loop
-stop_puts:
-ld ra, 0(sp)
-ld s0, 8(sp)
-addi sp, sp, 16
-#     ret
-jalr x0, 0(x1)
-wait_uart:
-addi sp, sp, -16
-sd s0, 0(sp)
-sd ra, 8(sp)
-wait_uart_loop:
-lw s0, 0(s11)
-#     bgt zero, s0, wait_uart_loop
-blt s0, zero, wait_uart_loop
-ld s0, 0(sp)
-ld ra, 8(sp)
-addi sp, sp, 16
-#     ret
-jalr x0, 0(x1)
-print7:
-addi sp, sp, -16
-sd a0, 0(sp)
-sd ra, 8(sp)
-#     mv a0, sp
-addi a0, sp, 0
-#     call puts
-auipc x1, 0 # R_RISCV_PCREL_HI20 puts
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I puts
-ld ra, 8(sp)
-addi sp, sp, 16
-#     ret
-jalr x0, 0(x1)
+FAULT:
+lui x1, 0x2     
+addi x1, x1, 0x4              
+addi x2, x0, 93
+sd x2, 0(x1)    #  print ]
+mret

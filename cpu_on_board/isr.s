@@ -61,7 +61,7 @@ mmu:  # VA 63:39Sign|38:30Vpn[2]|29:21Vpn[1]|20:12Vpn[0]|11:0PageOffset
 
    # 3. Check Leaf
      andi x6, x7, 0xE # bit 3:1 for X/W/R
-     bnez x6, FINISH  # If not zero, it's leaf. We get the address.
+     bnez x6, FINISH_1GB  # If not zero, it's leaf. We get the address.
      andi x6, x7, 1   # check PTE valid bit
      beqz x6, FAULT
 
@@ -78,7 +78,7 @@ mmu:  # VA 63:39Sign|38:30Vpn[2]|29:21Vpn[1]|20:12Vpn[0]|11:0PageOffset
 
    # 6. Check Leaf
      andi x6, x7, 0xE # bit 3:1 for X/W/R
-     bnez x6, FINISH   # If not zero, it's leaf. We get the address.
+     bnez x6, FINISH_2MB   # If not zero, it's leaf. We get the address.
      andi x6, x7, 1   # check PTE valid bit
      beqz x6, FAULT
 
@@ -96,12 +96,31 @@ mmu:  # VA 63:39Sign|38:30Vpn[2]|29:21Vpn[1]|20:12Vpn[0]|11:0PageOffset
    # 9. Check valid
      andi x6, x7, 1   # check PTE valid bit
      beqz x6, FAULT
+   # fall to 4KB finish
 
-FINISH:
-     srli x7, x7, 10  # get PPN from PTE(PTE's data struction?)  64:54Reserved 53:10PPN 
-                      # 9:8RSW 7Dirty 6Accessed 5Global 4User 3Executable 2Write 1Readable 0Valid
+FINISH_4KB:
+     srli x7, x7, 10 
+     slli x7, x7, 12 
+     j WRITE_TLB
+                                            
+FINISH_2MB:
+     srli x7, x7, 10 
+     slli x7, x7, 12 
+     li x6, 0x1ff00000 # mask for VA[20:12]
+     and x6, x6, x9    
+     add x7, x7, x6   
+     j WRITE_TLB
+
+FINISH_1GB:
+     srli x7, x7, 10  # get PPN from PTE(PTE's data struction?)  64:54Reserved 53:10PPN # 9:8RSW 7Dirty 6Accessed 5Global 4User 3Executable 2Write 1Readable 0Valid
      slli x7, x7, 12  # PPN posint [38:12] in satp
-     
+     li x6, 0x3ffff000 # mask for VA[29:12]
+     and x6, x6, x9    # extrac from VA
+     add x7, x7, x6    # add offset to PPN
+     j WRITE_TLB
+                 
+
+WRITE_TLB:
      # 9. Writ ppn back to hardware mmu trap
      lui x8, 0xF0002 # Magic TLB address
      sd x7, 0(x8)
@@ -110,13 +129,14 @@ FINISH:
      addi x1, x1, 0x4              
      addi x2, x0, 91
      sd x2, 0(x1)    #  print [
-
      mret
+
+
 FAULT: # error trap?
      lui x1, 0x2     
      addi x1, x1, 0x4              
-     addi x2, x0, 93
-     sd x2, 0(x1)    #  print ]
+     addi x2, x0, 33
+     sd x2, 0(x1)    #  print !
      mret
      
 #Seems VA has 3 table number, satp has Root Table(vpn[2]) address via PPN(ppn+12 space), the we can find PTE in table 2, and PTE has PPN, we can use table2PPN to find table 1 address plus vpn1 number to find PTE in table1, then we get table1 PPN for table0 address, and together with vpn0 to find PTE in talbe0, this is  the last ppa, by ppn + 12 bit of VA low.
