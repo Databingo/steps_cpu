@@ -84,7 +84,6 @@ s_mode_kernel:
 
 
 
-
    la a0, msg   # trigger I-TLB miss
    call puts
    
