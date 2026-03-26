@@ -48,7 +48,7 @@
 mmu:
    # 1. Get root table address from csr satp Supervisor Address Translation and Protection
      csrr x5, satp
-     slli x5, x5, 20 # clear high mode+Asid
+     slli x5, x5, 20 # clear high mode+Asid Address Space Identifier
      srli x5, x5, 8  # get level_2 ppn(27 bits) + 12 zero positon
 
    # 2. Level 2 walk
