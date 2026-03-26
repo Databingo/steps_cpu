@@ -49,7 +49,7 @@ mmu:
    # 1. Get root table address from csr satp Supervisor Address Translation and Protection
      csrr x5, satp
      slli x5, x5, 20 # clear high mode+Asid Address Space Identifier
-     srli x5, x5, 8  # get level_2 ppn(27 bits) + 12 zero positon
+     srli x5, x5, 8  # get level_2 ppn(27 bits) + 12 zero positon, point to start of L2 table
 
    # 2. Level 2 walk
      srli x6, x9, 30 # extract vpn[2] bit 38:30 the first 9 bits
