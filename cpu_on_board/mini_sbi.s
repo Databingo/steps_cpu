@@ -101,6 +101,24 @@ m_trap_router:
    li t1, 3 # breakpoint
    beq t0, t1, m_ebreak_handler
 
+   # 0 pc is not aligned to 4 bytes
+   # 1 instruction is not accessable
+   # 2 illegal instruction
+   # 3 breakpoint
+   # 4 load address not aligned lw!=4  ld!=8 lh!=2?
+   # 5 load access fault
+   # 6 store/amo address not aligned
+   # 7 store/amo access fault
+   # 8 ecall from u-mode
+   # 9 ecall from s-mode
+   # 10 (reserved)
+   # 11 ecall from m-mode
+   # 12 instruciton page fault
+   # 13 load page fault
+   # 14 store/amo page fault
+
+
+
    j m_done
 
 m_ecall_router:  # a7 Extension 1 putchar, 2 getchar, 0 settimer; a0 is the first argument a1..a5  # look a7 to see function is requested(sbi standard)
