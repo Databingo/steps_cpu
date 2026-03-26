@@ -54,7 +54,7 @@ mmu:
    # 2. Level 2 walk
      srli x6, x9, 30 # extract vpn[2] bit 38:30 the first 9 bits
      andi x6, x6, 0x1ff # Mask 9 bits
-     slli x6, x6, 3  # Multiple by 8 (PTE size 8 bytes) Page Table Entry
+     slli x6, x6, 3  # Multiple by 8 (PTE size 8 bytes) Page Table Entry 64 bits
      add  x5, x5, x6 # x5 = Address of L2 PTE
      ld x7, 0(x5)    # Load L2 PTE from memory
 
