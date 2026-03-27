@@ -449,17 +449,6 @@ jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I copy_sector
 addi t1, t1, 1
 addi s0, s0, 512
 blt t1, t2, copy_sector_loop
-#     li s0, 0x80000000 
-addi s0, x0, 0x0
-slli s0, s0, 0xb
-ori s0, s0, 0x200
-slli s0, s0, 0x16
-ld a0, 0(s0)         # test sdram read data
-#     call print_reg
-auipc x1, 0 # R_RISCV_PCREL_HI20 print_reg
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_reg
-#     jr s0  
-jalr x0, 0(s0)
 end:
 # j end
 jal x0, end
