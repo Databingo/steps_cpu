@@ -114,6 +114,7 @@ WRITE_TLB:
      # 9. Writ ppn back to hardware mmu trap
      lui x2, 0x20000 # Magic TLB address
      sd x4, 0(x2)
+     call print_reg
 
      lui x3, 0x2     
      addi x3, x3, 0x4              
@@ -130,3 +131,54 @@ FAULT: # error trap?
      mret
      
 #Seems VA has 3 table number, satp has Root Table(vpn[2]) address via PPN(ppn+12 space), the we can find PTE in table 2, and PTE has PPN, we can use table2PPN to find table 1 address plus vpn1 number to find PTE in table1, then we get table1 PPN for table0 address, and together with vpn0 to find PTE in talbe0, this is  the last ppa, by ppn + 12 bit of VA low.
+
+
+
+
+# functions ------
+
+print_reg: # a0
+    addi sp, sp, -40
+    sd ra, 0(sp)
+    sd s0, 8(sp)
+    sd s1, 16(sp)
+    sd s2, 24(sp)
+    sd s3, 32(sp)
+    mv s0, a0
+    li a0, "0"
+    call putchar
+    li a0, "x"
+    call putchar
+    li s1, 60 
+p_loop:
+    srl s2, s0, s1      # get high nibble
+    andi s2, s2, 0xF
+    slti s3, s2, 10     # if < 10 number
+    beq s3, x0, letter
+    addi s2, s2, 48     # 0 is "0" ascii 48
+    j print_h
+letter:
+    addi s2, s2, 55     # 10 is "A" ascii 65 ..
+print_h:
+    call wait_uart
+    sb s2, 0(s11)       # print
+    addi s1, s1, -4
+    bge s1, x0, p_loop 
+    ld ra, 0(sp)
+    ld s0, 8(sp)
+    ld s1, 16(sp)
+    ld s2, 24(sp)
+    ld s3, 32(sp)
+    addi sp, sp, 40
+    ret
+
+
+putchar:  # a0
+    addi sp, sp, -8
+    sd ra, 0(sp)
+    call wait_uart
+    sb a0, 0(s11)
+    ld ra, 0(sp)
+    addi sp, sp, 8
+    ret
+
