@@ -83,6 +83,8 @@ s_mode_kernel:
 
 
 
+   la a0, msg   # trigger I-TLB miss
+   call print_reg
 
    la a0, msg   # trigger I-TLB miss
    call puts
