@@ -482,12 +482,13 @@ module riscv64(
 	end
         else if ((mmu_pc || mmu_da) && bus_write_enable && bus_address == `Tlb) begin // for the last fill: sd ppa, Tlb
             tlb_vpn[tlb_ptr] <= re[1][38:12]; // VA from x1 saved by trapp mmu_pc/mmu_da
-            tlb_ppn[tlb_ptr] <= {17'h0, re[1][38:12]}; // mimic copy now | real need walking assembly !!
-            //tlb_ppn[tlb_ptr] <= w_store_data[55:12] ; // real 
+            //tlb_ppn[tlb_ptr] <= {17'h0, re[1][38:12]}; // mimic copy now | real need walking assembly !!
+            tlb_ppn[tlb_ptr] <= bus_write_data[55:12] ; // real 
             tlb_vld[tlb_ptr] <= 1;
             tlb_ptr <= tlb_ptr + 1; 
         end
 	else if (!bubble) begin 
+	//else if (!bubble && !(satp_mmu && !mmu_pc && !mmu_da && !mmu_cache_refill && !tlb_i_hit)) begin 
 	    casez (ir) 32'b0001001??????????_000_?????_1110011: begin  // sfence.vma flush
 	        tlb_vld[0] <= 0; 
 		tlb_vld[1] <= 0; 
