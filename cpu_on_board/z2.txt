@@ -709,32 +709,32 @@ end
 
     // Debug LEDs
     //assign HEX30 = ~Key_selected;
-//    assign HEX20 = ~|bus_read_data;
-//    assign HEX21 = ~bus_read_enable;
-//    assign HEX10 = ~|bus_write_data;
-//    assign HEX11 = ~bus_write_enable;
-//    assign HEX00 = ~Art_selected;
-//    //assign HEX01 = ~Ram_selected;
-//    assign HEX01 = ~sd_rd_start;
-//    //assign HEX02 = ~Rom_selected;
-//    assign HEX02 = ~sd_byte_available;
-//    //assign HEX03 = ~Sdram_selected ;
-//    //assign HEX03 = (bus_address >= `Sdram_min && bus_address < `Sdram_max);
-//    assign HEX03 = ~|sd_dout;
-//    assign HEX04 = ~clk_pulse_slow;
-//    assign HEX05 = ~|sd_addr;
-//    assign HEX06 = ~sd_cache_available;
-//
-//    assign HEX31 = ~Sdram_selected;
-//    //assign HEX32 = ~sdram_readdatavalid;
-//    //assign HEX33 = sdram_read_n;
-//    assign HEX33 = ~sdram_read_en;
-//    //assign HEX34 = sdram_write_n;
-//    assign HEX34 = ~sdram_write_en;
-//    //assign HEX35 = ~sdram_waitrequest;
-//    assign HEX35 = ~sdram_req_wait;
-//    //assign HEX36 = ~|sdram_readdata;
-//    assign HEX36 = ~|sdram_rddata;
+    assign HEX20 = ~|bus_read_data;
+    assign HEX21 = ~bus_read_enable;
+    assign HEX10 = ~|bus_write_data;
+    assign HEX11 = ~bus_write_enable;
+    assign HEX00 = ~Art_selected;
+    //assign HEX01 = ~Ram_selected;
+    assign HEX01 = ~sd_rd_start;
+    //assign HEX02 = ~Rom_selected;
+    assign HEX02 = ~sd_byte_available;
+    //assign HEX03 = ~Sdram_selected ;
+    //assign HEX03 = (bus_address >= `Sdram_min && bus_address < `Sdram_max);
+    assign HEX03 = ~|sd_dout;
+    assign HEX04 = ~clk_pulse_slow;
+    assign HEX05 = ~|sd_addr;
+    assign HEX06 = ~sd_cache_available;
+
+    assign HEX31 = ~Sdram_selected;
+    //assign HEX32 = ~sdram_readdatavalid;
+    //assign HEX33 = sdram_read_n;
+    assign HEX33 = ~sdram_read_en;
+    //assign HEX34 = sdram_write_n;
+    assign HEX34 = ~sdram_write_en;
+    //assign HEX35 = ~sdram_waitrequest;
+    assign HEX35 = ~sdram_req_wait;
+    //assign HEX36 = ~|sdram_readdata;
+    assign HEX36 = ~|sdram_rddata;
     //assign HEX04 = ~uart_irq;
     //assign HEX05 = ~Plic_priority_selected;
     //assign HEX06 = ~meip_interrupt;
@@ -766,12 +766,12 @@ module riscv64(
 );
 
     (* keep = 1 *) reg [63:0] pc;
-    //reg check=0;
-    //reg tlb=0;
+    reg check=0;
+    reg tlb=0;
     wire [31:0] ir;
             
     (* ram_style = "logic" *) reg [63:0] re [0:31]; // General Registers 32s
-    (* ram_style = "logic" *) reg [63:0] sre [0:4]; // Shadow Registers 5s (use x0-x4)
+    (* ram_style = "logic" *) reg [63:0] sre [0:9]; // Shadow Registers 10s
     reg mmu_da=0;
     reg mmu_pc = 0;
     reg mmu_cache_refill=0;
@@ -1134,29 +1134,28 @@ module riscv64(
     reg [63:0] reserve_addr;
     reg        reserve_valid;
 
-    // -- TLB -- 8 pages
+    //// -- TLB -- 8 pages
     //(* ram_style = "logic" *) reg [26:0] tlb_vpn [0:7]; // vpn number VA[38:12]  Sv39
     //(* ram_style = "logic" *) reg [43:0] tlb_ppn [0:7]; // ppn number PA[55:12]
     //(* ram_style = "logic" *) reg tlb_vld [0:7];
     // -- TLB -- 4 pages
     (* ram_style = "logic" *) reg [26:0] tlb_vpn [0:3]; // vpn number VA[38:12]  Sv39
     (* ram_style = "logic" *) reg [43:0] tlb_ppn [0:3]; // ppn number PA[55:12]
-    (* ram_style = "logic" *) reg tlb_vld [0:3];
-    // -- TLB -- 2 pages
-    //(* ram_style = "logic" *) reg tlb_vld [0:1];
+    //(* ram_style = "logic" *) reg tlb_vld [0:3];
+    (* ram_style = "logic" *) reg tlb_vld [0:1];
 
     // tlb i hit
     wire [26:0] pc_vpn = pc[38:12];
     reg [43:0] pc_ppn;
     reg tlb_i_hit;
 
-    wire [7:0] tlb_i_match; // 8page
+    //wire [7:0] tlb_i_match; // 8page
     //wire [3:0] tlb_i_match; // 4page
-    //wire [1:0] tlb_i_match; // 2page
+    wire [1:0] tlb_i_match; // 2page
     assign tlb_i_match[0] = tlb_vld[0] && (tlb_vpn[0] == pc_vpn);
     assign tlb_i_match[1] = tlb_vld[1] && (tlb_vpn[1] == pc_vpn);
-    assign tlb_i_match[2] = tlb_vld[2] && (tlb_vpn[2] == pc_vpn);
-    assign tlb_i_match[3] = tlb_vld[3] && (tlb_vpn[3] == pc_vpn);
+    //assign tlb_i_match[2] = tlb_vld[2] && (tlb_vpn[2] == pc_vpn);
+    //assign tlb_i_match[3] = tlb_vld[3] && (tlb_vpn[3] == pc_vpn);
     //assign tlb_i_match[4] = tlb_vld[4] && (tlb_vpn[4] == pc_vpn);
     //assign tlb_i_match[5] = tlb_vld[5] && (tlb_vpn[5] == pc_vpn);
     //assign tlb_i_match[6] = tlb_vld[6] && (tlb_vpn[6] == pc_vpn);
@@ -1165,9 +1164,10 @@ module riscv64(
     always @(*) begin
         tlb_i_hit = |tlb_i_match;
         pc_ppn =   ({44{tlb_i_match[0]}} & tlb_ppn[0]) |
-	           ({44{tlb_i_match[1]}} & tlb_ppn[1]) | //; end
-                   ({44{tlb_i_match[2]}} & tlb_ppn[2]) |
-		   ({44{tlb_i_match[3]}} & tlb_ppn[3]) ; end
+	           ({44{tlb_i_match[1]}} & tlb_ppn[1]) ; end
+                   //({44{tlb_i_match[2]}} & tlb_ppn[2]) |
+		   //({44{tlb_i_match[3]}} & tlb_ppn[3]) ; end
+                   //({44{tlb_i_match[3]}} & tlb_ppn[3]) |
                    //({44{tlb_i_match[4]}} & tlb_ppn[4]) |
                    //({44{tlb_i_match[5]}} & tlb_ppn[5]) |
                    //({44{tlb_i_match[6]}} & tlb_ppn[6]) |
@@ -1180,13 +1180,13 @@ module riscv64(
     reg [43:0] data_ppn;
     reg tlb_d_hit;
 
-    //wire [7:0] tlb_d_match; // 8
-    wire [3:0] tlb_d_match; // 4
-    //wire [1:0] tlb_d_match; // 2
+    //wire [7:0] tlb_d_match;
+    //wire [3:0] tlb_d_match;
+    wire [1:0] tlb_d_match;
     assign tlb_d_match[0] = tlb_vld[0] && (tlb_vpn[0] == ls_va[38:12]);
     assign tlb_d_match[1] = tlb_vld[1] && (tlb_vpn[1] == ls_va[38:12]);
-    assign tlb_d_match[2] = tlb_vld[2] && (tlb_vpn[2] == ls_va[38:12]);
-    assign tlb_d_match[3] = tlb_vld[3] && (tlb_vpn[3] == ls_va[38:12]);
+    //assign tlb_d_match[2] = tlb_vld[2] && (tlb_vpn[2] == ls_va[38:12]);
+    //assign tlb_d_match[3] = tlb_vld[3] && (tlb_vpn[3] == ls_va[38:12]);
     //assign tlb_d_match[4] = tlb_vld[4] && (tlb_vpn[4] == ls_va[38:12]);
     //assign tlb_d_match[5] = tlb_vld[5] && (tlb_vpn[5] == ls_va[38:12]);
     //assign tlb_d_match[6] = tlb_vld[6] && (tlb_vpn[6] == ls_va[38:12]);
@@ -1195,9 +1195,10 @@ module riscv64(
     always @(*) begin
         tlb_d_hit = |tlb_d_match;
         data_ppn = ({44{tlb_d_match[0]}} & tlb_ppn[0]) |
-	           ({44{tlb_d_match[1]}} & tlb_ppn[1]) | //; end
-                   ({44{tlb_d_match[2]}} & tlb_ppn[2]) |
-		   ({44{tlb_d_match[3]}} & tlb_ppn[3]) ; end
+	           ({44{tlb_d_match[1]}} & tlb_ppn[1]) ; end
+                   //({44{tlb_d_match[2]}} & tlb_ppn[2]) |
+		   //({44{tlb_d_match[3]}} & tlb_ppn[3]) ; end
+                   //({44{tlb_d_match[3]}} & tlb_ppn[3]) |
                    //({44{tlb_d_match[4]}} & tlb_ppn[4]) |
                    //({44{tlb_d_match[5]}} & tlb_ppn[5]) |
                    //({44{tlb_d_match[6]}} & tlb_ppn[6]) |
@@ -1209,23 +1210,24 @@ module riscv64(
         
     // TLB Refill
     //reg [2:0] tlb_ptr = 0; // 8 entries TLB
-    reg [1:0] tlb_ptr = 0; // 4 entries TLB
-    //reg  tlb_ptr = 0; // 2 entries TLB
+    //reg [1:0] tlb_ptr = 0; // 4 entries TLB
+    reg  tlb_ptr = 0; // 2 entries TLB
     always @(posedge clk or negedge reset) begin
 	if (!reset) begin
 	    tlb_ptr <= 0; // hit->trap(save va to x9)->refill assembly(fetch pa to x9)-> sd x9, `Tlb -> here to refill tlb
-	    tlb_vld[0] <= 0; tlb_vld[1] <= 0; tlb_vld[2] <= 0; tlb_vld[3] <= 0; //tlb_vld[4] <= 0; tlb_vld[5] <= 0; tlb_vld[6] <= 0; tlb_vld[7] <= 0; 
+	    tlb_vld[0] <= 0; 
+	    tlb_vld[1] <= 0; 
 	end
         else if ((mmu_pc || mmu_da) && bus_write_enable && bus_address == `Tlb) begin // for the last fill: sd ppa, Tlb
-            tlb_vpn[tlb_ptr] <= re[1][38:12]; // VA from x9 saved by trapp mmu_pc/mmu_da
-            //tlb_ppn[tlb_ptr] <= {17'h0, re[1][38:12]}; // mimic copy now | real need walking assembly !!
-            tlb_ppn[tlb_ptr] <= w_store_data[55:12] ; // real 
+            tlb_vpn[tlb_ptr] <= re[9][38:12]; // VA from x9 saved by trapp mmu_pc/mmu_da
+            tlb_ppn[tlb_ptr] <= {17'h0, re[9][38:12]}; // mimic copy now | real need walking assembly !!
             tlb_vld[tlb_ptr] <= 1;
             tlb_ptr <= tlb_ptr + 1; 
         end
 	else if (!bubble) begin 
 	    casez (ir) 32'b0001001??????????_000_?????_1110011: begin  // sfence.vma flush
-	        tlb_vld[0] <= 0; tlb_vld[1] <= 0; tlb_vld[2] <= 0; tlb_vld[3] <= 0; //tlb_vld[4] <= 0; tlb_vld[5] <= 0; tlb_vld[6] <= 0; tlb_vld[7] <= 0; 
+	        tlb_vld[0] <= 0; 
+		tlb_vld[1] <= 0; 
                 end 
 	    endcase 
 	end
@@ -1292,9 +1294,9 @@ module riscv64(
 	    Csrs[mstatus][MIE] <= 0;
 	    //interrupt_ack <= 0;
 	    mmu_da <= 0;
-	    for (i=0;i<5;i=i+1) begin sre[i]<= 64'b0; end 
-	    for (i=0;i<36;i=i+1) begin Csrs[i]<= 64'b0; end
-	    //for (i=0;i<27;i=i+1) begin Csrs[i]<= 64'b0; end
+	    for (i=0;i<10;i=i+1) begin sre[i]<= 64'b0; end 
+	    //for (i=0;i<36;i=i+1) begin Csrs[i]<= 64'b0; end
+	    for (i=0;i<27;i=i+1) begin Csrs[i]<= 64'b0; end
 	    Csrs[medeleg] <= 64'hb1af; // delegate to S-mode 1011000110101111 // see VII 3.1.15 mcasue exceptions
 	    Csrs[mideleg] <= 64'h0222; // delegate to S-mode 0000001000100010 see VII 3.1.15 mcasue interrupt 1/5/9 SSIP(supervisor software interrupt) STIP(time) SEIP(external)
 	    // Initialize Machine Info for OpenSBI
@@ -1319,8 +1321,8 @@ module riscv64(
        	 	bubble <= 1'b1; // bubble 
 	        saved_user_pc <= pc - 4; // !!! save pc (EXE was flushed so record-redo it, previous pc)
 	        if (bubble) saved_user_pc <= pc ; // !!! save pc (j/b EXE was flushed currectly)
-		for (i=1;i<5;i=i+1) begin sre[i]<= re[i]; end // save re
-		re[1] <= pc;// - 4; // save this vpc to x1 //!!!! We also need to refill pc - 4' ppc for re-executeing pc-4, with hit(if satp in for very next sfence.vma) 
+		for (i=1;i<10;i=i+1) begin sre[i]<= re[i]; end // save re
+		re[9] <= pc;// - 4; // save this vpc to x1 //!!!! We also need to refill pc - 4' ppc for re-executeing pc-4, with hit(if satp in for very next sfence.vma) 
 		//Csrs[mstatus][MPIE] <= Csrs[mstatus][MIE]; // disable interrupt during shadow mmu walking
 		//Csrs[mstatus][MIE] <= 0;
 		// Infront of bubble just for trapping jump/branch instrucion
@@ -1331,48 +1333,47 @@ module riscv64(
 	    end else if (mmu_pc && ir == 32'b00110000001000000000000001110011) begin // end hiject mret & recover from shadow when see Mret
 		pc <= saved_user_pc; // recover from shadow when see Mret
 	 	bubble <= 1'b1; // bubble
-		for (i=1;i<5;i=i+1) begin re[i]<= sre[i]; end // recover usr re
+		for (i=1;i<10;i=i+1) begin re[i]<= sre[i]; end // recover usr re
 		mmu_pc <= 0; // MMU_PC OFF
 		//Csrs[mstatus][MIE] <= Csrs[mstatus][MPIE]; // set back interrupt status
     
 	    // ----- 
-	    //  cache_i at EXE stage without stap/tlb_hit sensitive
+	    //  mmu_cache_i at EXE stage without stap/tlb_hit sensitive
 	    end else if (!mmu_pc && !mmu_da && !mmu_cache_refill && !cache_i_hit) begin //OPEN 
 	    //end else if (!cache_i_hit) begin //OPEN 
        		mmu_cache_refill <= 1; // 
-       	        //pc <= 72; //
-       	        pc <= 4; //
+       	        pc <= 72; //
        	 	bubble <= 1'b1; // bubble 
-		for (i=1;i<5;i=i+1) begin sre[i]<= re[i]; end // save re
-	        saved_user_pc <= pc-4  ; // ??!!! save pc (j/b EXE was flushed currectly)
-		re[1] <= {ppc_pre[63:4], 4'b0};// save missed ppc_pre cache_line address for handler
+		for (i=1;i<10;i=i+1) begin sre[i]<= re[i]; end // save re
+	        saved_user_pc <= pc -4  ; // ??!!! save pc (j/b EXE was flushed currectly)
+		re[9] <= {ppc_pre[63:4], 4'b0};// save missed ppc_pre cache_line address for handler
 		ask_i_data <= {ppc_pre[63:4], 4'b0};// save missed ppc_pre cache_line address for hardware
 		if (pc == `Ram_base) begin // initial situation
 		    saved_user_pc <= pc; // first pc
-		    re[1] <= {ppc[63:4], 4'b0};// save missed ppc_pre cache_line address for handler
+		    re[9] <= {ppc[63:4], 4'b0};// save missed ppc_pre cache_line address for handler
 		    ask_i_data <= {ppc[63:4], 4'b0};// save missed ppc_pre cache_line address for hardware
 		end
 	    end else if (mmu_cache_refill && ir == 32'b00110000001000000000000001110011) begin // end hiject mret & recover from shadow when see Mret
 		pc <= saved_user_pc; // recover from shadow when see Mret
 	 	bubble <= 1'b1; // bubble
-		for (i=1;i<5;i=i+1) begin re[i]<= sre[i]; end // recover usr re
+		for (i=1;i<10;i=i+1) begin re[i]<= sre[i]; end // recover usr re
 		mmu_cache_refill <= 0; // OFF
 	    // -----
 
             //  mmu_da  D-TLB miss Trap // load/store/atom
 	    end else if (satp_mmu && !mmu_pc && !mmu_da && !mmu_cache_refill && tlb_i_hit && !tlb_d_hit && (op == 7'b0000011 || op == 7'b0100011 || op == 7'b0101111) ) begin  
 		mmu_da <= 1; // MMU_DA ON
-		pc <= 0; // D-TLB refill Handler
+		pc <= 36; // D-TLB refill Handler
 	 	bubble <= 1'b1; // bubble
 	        saved_user_pc <= pc - 4; // save pc EXE l/s/a
-		for (i=1;i<5;i=i+1) begin sre[i]<= re[i]; end // save re
-		re[1] <= ls_va; //save va to x1
+		for (i=1;i<10;i=i+1) begin sre[i]<= re[i]; end // save re
+		re[9] <= ls_va; //save va to x1
 		//Csrs[mstatus][MPIE] <= Csrs[mstatus][MIE]; // disable interrupt during shadow mmu walking
 		//Csrs[mstatus][MIE] <= 0;
 	    end else if (mmu_da && ir == 32'b00110000001000000000000001110011) begin // hiject mret 
 		pc <= saved_user_pc; // recover from shadow when see Mret
 		bubble <= 1; // bubble
-		for (i=1;i<5;i=i+1) begin re[i]<= sre[i]; end // recover usr re
+		for (i=1;i<10;i=i+1) begin re[i]<= sre[i]; end // recover usr re
 		mmu_da <= 0; // MMU_DA OFF
 		//Csrs[mstatus][MIE] <= Csrs[mstatus][MPIE]; // set back interrupt status
 		
@@ -2051,122 +2052,107 @@ module clock_slower(
     end
 endmodule
 
-# TLB mmu-refill 1:1 identity map
-     j mmu
-# I-Cache refill (withoud stap/tlb_hit sensitive)
-     lui x2, 0x20001 # base Cache address
-     ld x3, 0(x1)    # get data
-     sd x3, 0(x2)    # refill line low 64
-     ld x3, 8(x1)    # get data
-     sd x3, 8(x2)    # refill line high 64  
-     lui x2, 0x2     
-     addi x2, x2, 0x4  # set print           
-     addi x3, x0, 0x2f
-     sd x3, 0(x2)    # print /
-     mret           
-
-mmu:  # VA 63:39Sign|38:30Vpn[2]|29:21Vpn[1]|20:12Vpn[0]|11:0PageOffset  
-   # 1. Get root table address from csr satp (Supervisor Address Translation and Protection)
-     csrr x2, satp   # satp 63:60Mode|59:44Asid(0forSimpleOS)|43:0PPNofRootTable
-     slli x2, x2, 20 # clear high mode+Asid (Address Space Identifier)
-     srli x2, x2, 8  # get level_2 ppn(27 bits) + 12 zero positon, point to start of Root Table
-
-   # 2. Level 2 walk
-     srli x3, x1, 30 # extract vpn[2] bit 38:30 the first 9 bits
-     andi x3, x3, 0x1ff # Mask 9 bits
-     slli x3, x3, 3  # Multiple by 8 (PTE size 8 bytes) Page Table Entry 64 bits
-     add  x2, x2, x3 # x2 = Address of L2 PTE
-     ld x4, 0(x2)    # Load L2 PTE from memory  PTE 63:54Reserved|53:10PPN|9:8RSW|XWRmark|0validBit1
-
-   # 3. Check Leaf
-     andi x3, x4, 0xE # bit 3:1 for X/W/R
-     bnez x3, FINISH_1GB  # If not zero, it's leaf. We get the address.
-     andi x3, x4, 1   # check PTE valid bit
-     beqz x3, FAULT
-
-   # 4. Prepare for Level 1
-     srli x2, x4, 10 # Extract PPN from L2 PTE
-     slli x2, x2, 12 # x5 = Address of L1 Table
-
-   # 5. Level 1 Walk
-     srli x3, x1, 21 # Extract VPN[1] bit 29:21
-     andi x3, x3, 0x1ff # Mask 9 bits
-     slli x3, x3, 3  # Multiple by 8 (PTE size 8 bytes)
-     add  x2, x2, x3 # x2 = Address of L1 PTE
-     ld x4, 0(x2)    # Load L1 PTE from memory
-
-   # 6. Check Leaf
-     andi x3, x4, 0xE # bit 3:1 for X/W/R
-     bnez x3, FINISH_2MB   # If not zero, it's leaf. We get the address.
-     andi x3, x4, 1   # check PTE valid bit
-     beqz x3, FAULT
-
-   # 7. Prepare for Level 0
-     srli x2, x4, 10 # Extract PPN from L1 PTE
-     slli x2, x2, 12 # x5 = Address of L0 Table
-
-   # 8. Level 0 Walk
-     srli x3, x1, 12 # Extract VPN[0] bit 20:12
-     andi x3, x3, 0x1ff # Mask 9 bits
-     slli x3, x3, 3  # Multiple by 8 (PTE size 8 bytes)
-     add  x2, x2, x3 # x2 = Address of L0 PTE
-     ld x4, 0(x2)    # Load L0 PTE from memory
-
-   # 9. Check valid
-     andi x2, x4, 1   # check PTE valid bit
-     beqz x2, FAULT
-   # fall to 4KB finish
-
-FINISH_4KB:
-     srli x4, x4, 10 
-     slli x4, x4, 12 
-     j WRITE_TLB
-                                            
-FINISH_2MB:
-     srli x4, x4, 10 
-     slli x4, x4, 12 
-     li x2, 0x001ff000 # mask for VA[20:12]
-     and x2, x2, x1    
-     add x4, x4, x2   
-     j WRITE_TLB
-
-FINISH_1GB:
-     srli x4, x4, 10  # get PPN from PTE(PTE's data struction?)  64:54Reserved 53:10PPN # 9:8RSW 7Dirty 6Accessed 5Global 4User 3Executable 2Write 1Readable 0Valid
-     slli x4, x4, 12  # PPN posint [38:12] in satp
-     li x2, 0x3ffff000 # mask for VA[29:12]
-     and x2, x2, x1    # extrac from VA
-     add x4, x4, x2    # add offset to PPN
-     j WRITE_TLB
-                 
-
-WRITE_TLB:
-     # 9. Writ ppn back to hardware mmu trap
-     lui x2, 0x20000 # Magic TLB address
-     sd x4, 0(x2)
-
-     lui x2, 0x2     
-     addi x2, x2, 0x4              
-     addi x3, x0, 91
-     sd x3, 0(x2)    #  print [
-     mret
-
-
-FAULT: # error trap?
-     lui x2, 0x2     
-     addi x2, x2, 0x4              
-     addi x3, x0, 33
-     sd x3, 0(x2)    #  print !
-     mret
+#   # 1. Get root table address from csr satp
+#     csrr x5, satp
+#     slli x5, x5, 20 # clear high mode+Asid
+#     srli x5, x5, 8  # get level_2 ppn(27 bits) + 12 zero positon
+#
+#   # 2. Level 2 walk
+#     srli x6, x9, 30 # extract vpn[2] bit 38:30 the first 9 bits
+#     andi x6, x6, 0x1ff # Mask 9 bits
+#     slli x6, x6, 3  # Multiple by 8 (PTE size 8 bytes)
+#     add  x5, x5, x6 # x5 = Address of L2 PTE
+#     ld x7, 0(x5)    # Load L2 PTE from memory
+#
+#   # 3. Check Leaf
+#     andi x6, x7, 0xE # bit 3:1 for X/W/R
+#     bnez x6, FINISH   # If not zero, it's leaf. We get the address.
+#
+#   # 4. Prepare for Level 1
+#     srli x5, x7, 10 # Extract PPN from L2 PTE
+#     slli x5, x5, 12 # x5 = Address of L1 Table
+#
+#   # 5. Level 1 Walk
+#     srli x6, x9, 21 # Extract VPN[1] bit 29:21
+#     andi x6, x6, 0x1ff # Mask 9 bits
+#     slli x6, x6, 3  # Multiple by 8 (PTE size 8 bytes)
+#     add  x5, x5, x6 # x5 = Address of L1 PTE
+#     ld x7, 0(x5)    # Load L1 PTE from memory
+#
+#   # 6. Check Leaf
+#     andi x6, x7, 0xE # bit 3:1 for X/W/R
+#     bnez x6, FINISH   # If not zero, it's leaf. We get the address.
+#
+#   # 7. Prepare for Level 0
+#     srli x5, x7, 10 # Extract PPN from L1 PTE
+#     slli x5, x5, 12 # x5 = Address of L0 Table
+#
+#   # 8. Level 0 Walk
+#     srli x6, x9, 12 # Extract VPN[0] bit 20:12
+#     andi x6, x6, 0x1ff # Mask 9 bits
+#     slli x6, x6, 3  # Multiple by 8 (PTE size 8 bytes)
+#     add  x5, x5, x6 # x5 = Address of L0 PTE
+#     ld x7, 0(x5)    # Load L0 PTE from memory
+#
+#FINISH:
+#     srli x7, x7, 10  # get PPN from PTE(PTE's data struction?)  64:54Reserved 53:10PPN 
+#                      # 9:8RSW 7Dirty 6Accessed 5Global 4User 3Executable 2Write 1Readable 0Valid
+#     slli x7, x7, 12  # PPN posint [38:12] in satp
+#     
+#     # 9. Writ ppn back to hardware mmu trap
+#     lui x8, 0xF0002 # Magic TLB address
+#     sd x7, 0(x8)
+#     mret
      
-#Seems VA has 3 table number, satp has Root Table(vpn[2]) address via PPN(ppn+12 space), the we can find PTE in table 2, and PTE has PPN, we can use table2PPN to find table 1 address plus vpn1 number to find PTE in table1, then we get table1 PPN for table0 address, and together with vpn0 to find PTE in talbe0, this is  the last ppa, by ppn + 12 bit of VA low.
+
+# I-TLB mmu-refill 1:1 identity map
+     lui x1, 0x2     
+     addi x1, x1, 0x4              
+     addi x2, x0, 91
+     sd x2, 0(x1)    #  print [
+     lui x8, 0x20000
+     sd x9, 0(x8) 
+     addi x2, x0, 93
+     sd x2, 0(x1)    #  print ]
+     mret           
+# D-TLB mmu-refill
+     lui x1, 0x2     
+     addi x1, x1, 0x4              
+     addi x2, x0, 123
+     sd x2, 0(x1)    #  print {
+     lui x8, 0x20000
+     sd x9, 0(x8) 
+     addi x2, x0, 125
+     sd x2, 0(x1)    #  print }
+     mret           
+# I-Cache refill (withoud stap/tlb_hit sensitive)
+     lui x1, 0x2     
+     addi x1, x1, 0x4  # set print           
+
+     addi x2, x0, 0x25
+     sd x2, 0(x1)    #  print %
+
+     lui x8, 0x20001 # base Cache address
+     
+     ld x3, 0(x9)    # get data
+    #addi x2, x0, 0x27
+    #sd x2, 0(x1)    # print '
+
+     sd x3, 0(x8)    # refill line low 64
+    #addi x2, x0, 0x22
+    #sd x2, 0(x1)    # print "
+
+     ld x3, 8(x9)    # get data
+    #addi x2, x0, 0x23
+    #sd x2, 0(x1)    # print #
+     sd x3, 8(x8)    # refill line high 64  
+
+    addi x2, x0, 0x2f
+    sd x2, 0(x1)    # print /
+     mret           
+.section .text
 .globl _start
 
-.section .data
-msg:
-    .string "Hello"
-
-
-.section .text
 _start:
    li sp, 0x1800 # Set stack
    li s11, 0x2004 # UART print 
@@ -2198,68 +2184,26 @@ _start:
 
 
 s_mode_kernel:
-   #ebreak   # M  test m-mode ebreak
+   ebreak   # M
 
-   #li a0, "H"
-   #li a7, 1
-   #ecall
+   li a0, "H"
+   li a7, 1
+   ecall
 
-   #li a0, "i"
-   #li a7, 1
-   #ecall
+   li a0, "i"
+   li a7, 1
+   ecall
  
    li a7, 0x10
    ecall  # turn delegate
 
-  #ebreak # S ebreak was delegeted to s-mode, so use stvec to find s-handler for break
+   li a0, 0x8888
+   call print_reg
 
+   csrr a0, medeleg
+   call print_reg
 
-   # test MMU
-   li a0, "\nMMU:" 
-   call print7
-   
-   # simple test
-   #li t0, 1
-   #slli t0, t0, 63 # sv39 satp[63:60] MODE to 8
-   #csrw satp, t0
-   ## <--- start TLB I/D hitting
-
-  # real test
-  # Build SV39 table in sdram (4KB per table)
-  li t0, 0x80000000 # map to ppa 0x0000_0000, ppn =  ppa >> 12 = 0
-  li t1, 0xcf # pte = ppn << 10 | flags valid0 read1 write2 exec3 accessed6 dirty7 0b11001111=0xcf
-  sd t1, 0(t0)
-
-  # satp need ppn of root table rt 0x80000000
-  # ppn = rt >> 12 = 0x80000
-  # mode = 3 sv39
-  li t0, 0x8000000000080000
-  csrw satp, t0
-  sfence.vma
-  ## <--- start use TLB I/D hitting
-
-
-
-
-
-
-
-
-   la a0, msg   # trigger I-TLB miss
-   call puts
-   
-
-  
-
-
-
-
-
-
-
-
-
-
+   ebreak # S
 
 s_mode_done:
   j s_mode_done
@@ -2279,24 +2223,6 @@ m_trap_router:
 
    li t1, 3 # breakpoint
    beq t0, t1, m_ebreak_handler
-
-   # 0 pc is not aligned to 4 bytes
-   # 1 instruction is not accessable
-   # 2 illegal instruction
-   # 3 breakpoint
-   # 4 load address not aligned lw!=4  ld!=8 lh!=2?
-   # 5 load access fault
-   # 6 store/amo address not aligned
-   # 7 store/amo access fault
-   # 8 ecall from u-mode
-   # 9 ecall from s-mode
-   # 10 (reserved)
-   # 11 ecall from m-mode
-   # 12 instruciton page fault
-   # 13 load page fault
-   # 14 store/amo page fault
-
-
 
    j m_done
 
@@ -2357,8 +2283,9 @@ m_done:
 s_trap_handler:
    li a0, "S"
    li a7, 1
-   ecall   # here ecall was not delegated to s_mode, so go to mtvec to find m-mode ecall handler
+   ecall
    j s_done
+   #jr t2
 
 s_done: 
    csrr t2, sepc
