@@ -115,6 +115,12 @@ WRITE_TLB:
      lui x2, 0x20000 # Magic TLB address
      sd x4, 0(x2)
      mv a0, x4
+
+   li sp, 0x1800 # Set stack
+   li s11, 0x2004 # UART print 
+
+
+
      call print_reg
 
      lui x3, 0x2     
@@ -173,6 +179,35 @@ print_h:
     addi sp, sp, 40
     ret
 
+
+putchar:  # a0
+    addi sp, sp, -8
+    sd ra, 0(sp)
+    call wait_uart
+    sb a0, 0(s11)
+    ld ra, 0(sp)
+    addi sp, sp, 8
+    ret
+
+
+puts: # a0 addr
+    addi sp, sp, -16
+    sd ra, 0(sp)
+    sd s0, 8(sp)
+    mv s0, a0
+puts_loop:
+    lbu a0, 0(s0)
+    beq a0, x0, stop_puts # \x00 for end of string
+    call putchar # a0 char
+    addi s0, s0, 1 # next byte
+    j puts_loop
+stop_puts:
+    ld ra, 0(sp)
+    ld s0, 8(sp)
+    addi sp, sp, 16
+    ret
+
+
 wait_uart:
     addi sp, sp, -16
     sd s0, 0(sp)
@@ -187,12 +222,13 @@ wait_uart_loop:
     addi sp, sp, 16
     ret
 
-putchar:  # a0
-    addi sp, sp, -8
-    sd ra, 0(sp)
-    call wait_uart
-    sb a0, 0(s11)
-    ld ra, 0(sp)
-    addi sp, sp, 8
+print7: # a0, 7 char left one for null
+    addi sp, sp, -16
+    sd a0, 0(sp)
+    sd ra, 8(sp)
+    mv a0, sp
+    call puts
+   #ld a0, 0(sp)
+    ld ra, 8(sp)
+    addi sp, sp, 16
     ret
-
