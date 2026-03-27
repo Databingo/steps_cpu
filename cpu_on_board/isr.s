@@ -1,3 +1,4 @@
+# Use re0-re4 shadowed register only
 # I-TLB mmu-refill 1:1 identity map
      j mmu
     #lui x1, 0x2     
