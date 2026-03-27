@@ -89,8 +89,8 @@ FINISH_1GB:
 WRITE_TLB:
      # 9. Writ ppn back to hardware mmu trap
      lui x2, 0x20000 # Magic TLB address
-     #sd x4, 0(x2)
-     sd x1, 0(x2)
+     sd x4, 0(x2)
+     #sd x1, 0(x2)
 
      lui x2, 0x2     
      addi x2, x2, 0x4              
