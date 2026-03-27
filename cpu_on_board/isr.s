@@ -20,12 +20,14 @@
      addi x2, x0, 125
      sd x2, 0(x1)    #  print }
      mret           
-#  I-Cache refill (withoud stap/tlb_hit sensitive)
-     lui x1, 0x2     
-     addi x1, x1, 0x4  # set print           
 
-     addi x2, x0, 0x25
-     sd x2, 0(x1)    #  print %
+
+
+
+#  I-Cache refill (withoud stap/tlb_hit sensitive)
+
+     #addi x2, x0, 0x2f
+     #sd x2, 0(x3)    # print /
 
      lui x4, 0x20001 # base Cache address
      
@@ -35,8 +37,12 @@
      ld x3, 8(x9)    # get data
      sd x3, 8(x4)    # refill line high 64  
 
-     addi x2, x0, 0x2f
-     sd x2, 0(x1)    # print /
+     lui x3, 0x2     
+     addi x3, x3, 0x4  # set print           
+
+     addi x2, x0, 0x25
+     sd x2, 0(x3)    #  print %
+
      mret           
 
 mmu:  # VA 63:39Sign|38:30Vpn[2]|29:21Vpn[1]|20:12Vpn[0]|11:0PageOffset  
