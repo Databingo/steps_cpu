@@ -75,13 +75,26 @@ ori a0, a0, 0x50a
 #    call print7
 auipc x1, 0 # R_RISCV_PCREL_HI20 print7
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print7
-#    li t0, 1
+#   li t0, 0x80000000 
 addi t0, x0, 0x0
+slli t0, t0, 0xb
+ori t0, t0, 0x200
+slli t0, t0, 0x16
+#   li t1, 0xcf 
+addi t1, x0, 0x0
+addi t1, x0, 0x0
+addi t1, x0, 0xcf
+sd t1, 0(t0)
+#   li t0, 0x8000000000080000
 addi t0, x0, 0x0
-addi t0, x0, 0x1
-slli t0, t0, 63 # sv39 satp[63:60] MODE to 8
-#    csrw satp, t0
+lui t0, 0x80000
+srli t0, t0, 0x1
+slli t0, t0, 0x16
+ori t0, t0, 0x100
+slli t0, t0, 0xb
+#   csrw satp, t0
 csrrw x0, satp, t0
+sfence.vma
 #    la a0, msg   
 auipc a0, 0 # R_RISCV_PCREL_HI20 msg 
 addi a0, a0, 0 # R_RISCV_PCREL_LO12_I msg 
