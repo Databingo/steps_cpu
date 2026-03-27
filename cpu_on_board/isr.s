@@ -1,15 +1,11 @@
 # TLB mmu-refill 1:1 identity map
      j mmu
 # I-Cache refill (withoud stap/tlb_hit sensitive)
-
      lui x2, 0x20001 # base Cache address
-     
      ld x3, 0(x1)    # get data
      sd x3, 0(x2)    # refill line low 64
-
      ld x3, 8(x1)    # get data
      sd x3, 8(x2)    # refill line high 64  
-
      lui x2, 0x2     
      addi x2, x2, 0x4  # set print           
      addi x3, x0, 0x2f
@@ -17,16 +13,16 @@
      mret           
 
 mmu:  # VA 63:39Sign|38:30Vpn[2]|29:21Vpn[1]|20:12Vpn[0]|11:0PageOffset  
-   # 1. Get root table address from csr satp Supervisor Address Translation and Protection
+   # 1. Get root table address from csr satp (Supervisor Address Translation and Protection)
      csrr x2, satp   # satp 63:60Mode|59:44Asid(0forSimpleOS)|43:0PPNofRootTable
-     slli x2, x2, 20 # clear high mode+Asid Address Space Identifier
+     slli x2, x2, 20 # clear high mode+Asid (Address Space Identifier)
      srli x2, x2, 8  # get level_2 ppn(27 bits) + 12 zero positon, point to start of Root Table
 
    # 2. Level 2 walk
      srli x3, x1, 30 # extract vpn[2] bit 38:30 the first 9 bits
      andi x3, x3, 0x1ff # Mask 9 bits
      slli x3, x3, 3  # Multiple by 8 (PTE size 8 bytes) Page Table Entry 64 bits
-     add  x2, x2, x6 # x2 = Address of L2 PTE
+     add  x2, x2, x3 # x2 = Address of L2 PTE
      ld x4, 0(x2)    # Load L2 PTE from memory  PTE 63:54Reserved|53:10PPN|9:8RSW|XWRmark|0validBit1
 
    # 3. Check Leaf
@@ -70,7 +66,7 @@ mmu:  # VA 63:39Sign|38:30Vpn[2]|29:21Vpn[1]|20:12Vpn[0]|11:0PageOffset
 
 FINISH_4KB:
      srli x4, x4, 10 
-     slli x7, x4, 12 
+     slli x4, x4, 12 
      j WRITE_TLB
                                             
 FINISH_2MB:

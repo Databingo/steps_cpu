@@ -24,12 +24,12 @@ module riscv64(
 );
 
     (* keep = 1 *) reg [63:0] pc;
-    reg check=0;
-    reg tlb=0;
+    //reg check=0;
+    //reg tlb=0;
     wire [31:0] ir;
             
     (* ram_style = "logic" *) reg [63:0] re [0:31]; // General Registers 32s
-    (* ram_style = "logic" *) reg [63:0] sre [0:9]; // Shadow Registers 10s
+    (* ram_style = "logic" *) reg [63:0] sre [0:4]; // Shadow Registers 5s (use x0-x4)
     reg mmu_da=0;
     reg mmu_pc = 0;
     reg mmu_cache_refill=0;
@@ -550,9 +550,9 @@ module riscv64(
 	    Csrs[mstatus][MIE] <= 0;
 	    //interrupt_ack <= 0;
 	    mmu_da <= 0;
-	    for (i=0;i<10;i=i+1) begin sre[i]<= 64'b0; end 
-	    //for (i=0;i<36;i=i+1) begin Csrs[i]<= 64'b0; end
-	    for (i=0;i<27;i=i+1) begin Csrs[i]<= 64'b0; end
+	    for (i=0;i<5;i=i+1) begin sre[i]<= 64'b0; end 
+	    for (i=0;i<36;i=i+1) begin Csrs[i]<= 64'b0; end
+	    //for (i=0;i<27;i=i+1) begin Csrs[i]<= 64'b0; end
 	    Csrs[medeleg] <= 64'hb1af; // delegate to S-mode 1011000110101111 // see VII 3.1.15 mcasue exceptions
 	    Csrs[mideleg] <= 64'h0222; // delegate to S-mode 0000001000100010 see VII 3.1.15 mcasue interrupt 1/5/9 SSIP(supervisor software interrupt) STIP(time) SEIP(external)
 	    // Initialize Machine Info for OpenSBI
@@ -577,7 +577,7 @@ module riscv64(
        	 	bubble <= 1'b1; // bubble 
 	        saved_user_pc <= pc - 4; // !!! save pc (EXE was flushed so record-redo it, previous pc)
 	        if (bubble) saved_user_pc <= pc ; // !!! save pc (j/b EXE was flushed currectly)
-		for (i=1;i<10;i=i+1) begin sre[i]<= re[i]; end // save re
+		for (i=1;i<5;i=i+1) begin sre[i]<= re[i]; end // save re
 		re[1] <= pc;// - 4; // save this vpc to x1 //!!!! We also need to refill pc - 4' ppc for re-executeing pc-4, with hit(if satp in for very next sfence.vma) 
 		//Csrs[mstatus][MPIE] <= Csrs[mstatus][MIE]; // disable interrupt during shadow mmu walking
 		//Csrs[mstatus][MIE] <= 0;
@@ -589,19 +589,20 @@ module riscv64(
 	    end else if (mmu_pc && ir == 32'b00110000001000000000000001110011) begin // end hiject mret & recover from shadow when see Mret
 		pc <= saved_user_pc; // recover from shadow when see Mret
 	 	bubble <= 1'b1; // bubble
-		for (i=1;i<10;i=i+1) begin re[i]<= sre[i]; end // recover usr re
+		for (i=1;i<5;i=i+1) begin re[i]<= sre[i]; end // recover usr re
 		mmu_pc <= 0; // MMU_PC OFF
 		//Csrs[mstatus][MIE] <= Csrs[mstatus][MPIE]; // set back interrupt status
     
 	    // ----- 
-	    //  mmu_cache_i at EXE stage without stap/tlb_hit sensitive
+	    //  cache_i at EXE stage without stap/tlb_hit sensitive
 	    end else if (!mmu_pc && !mmu_da && !mmu_cache_refill && !cache_i_hit) begin //OPEN 
 	    //end else if (!cache_i_hit) begin //OPEN 
        		mmu_cache_refill <= 1; // 
-       	        pc <= 72; //
+       	        //pc <= 72; //
+       	        pc <= 4; //
        	 	bubble <= 1'b1; // bubble 
-		for (i=1;i<10;i=i+1) begin sre[i]<= re[i]; end // save re
-	        saved_user_pc <= pc -4  ; // ??!!! save pc (j/b EXE was flushed currectly)
+		for (i=1;i<5;i=i+1) begin sre[i]<= re[i]; end // save re
+	        saved_user_pc <= pc-4  ; // ??!!! save pc (j/b EXE was flushed currectly)
 		re[1] <= {ppc_pre[63:4], 4'b0};// save missed ppc_pre cache_line address for handler
 		ask_i_data <= {ppc_pre[63:4], 4'b0};// save missed ppc_pre cache_line address for hardware
 		if (pc == `Ram_base) begin // initial situation
@@ -612,24 +613,24 @@ module riscv64(
 	    end else if (mmu_cache_refill && ir == 32'b00110000001000000000000001110011) begin // end hiject mret & recover from shadow when see Mret
 		pc <= saved_user_pc; // recover from shadow when see Mret
 	 	bubble <= 1'b1; // bubble
-		for (i=1;i<10;i=i+1) begin re[i]<= sre[i]; end // recover usr re
+		for (i=1;i<5;i=i+1) begin re[i]<= sre[i]; end // recover usr re
 		mmu_cache_refill <= 0; // OFF
 	    // -----
 
             //  mmu_da  D-TLB miss Trap // load/store/atom
 	    end else if (satp_mmu && !mmu_pc && !mmu_da && !mmu_cache_refill && tlb_i_hit && !tlb_d_hit && (op == 7'b0000011 || op == 7'b0100011 || op == 7'b0101111) ) begin  
 		mmu_da <= 1; // MMU_DA ON
-		pc <= 36; // D-TLB refill Handler
+		pc <= 0; // D-TLB refill Handler
 	 	bubble <= 1'b1; // bubble
 	        saved_user_pc <= pc - 4; // save pc EXE l/s/a
-		for (i=1;i<10;i=i+1) begin sre[i]<= re[i]; end // save re
+		for (i=1;i<5;i=i+1) begin sre[i]<= re[i]; end // save re
 		re[1] <= ls_va; //save va to x1
 		//Csrs[mstatus][MPIE] <= Csrs[mstatus][MIE]; // disable interrupt during shadow mmu walking
 		//Csrs[mstatus][MIE] <= 0;
 	    end else if (mmu_da && ir == 32'b00110000001000000000000001110011) begin // hiject mret 
 		pc <= saved_user_pc; // recover from shadow when see Mret
 		bubble <= 1; // bubble
-		for (i=1;i<10;i=i+1) begin re[i]<= sre[i]; end // recover usr re
+		for (i=1;i<5;i=i+1) begin re[i]<= sre[i]; end // recover usr re
 		mmu_da <= 0; // MMU_DA OFF
 		//Csrs[mstatus][MIE] <= Csrs[mstatus][MPIE]; // set back interrupt status
 		
