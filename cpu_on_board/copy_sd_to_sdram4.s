@@ -482,11 +482,6 @@ blt t1, t2, copy_sector_loop
     jr s0  # jump to SDRAM!
 
 
-
-
-
-
-
 end: 
 j end
 
