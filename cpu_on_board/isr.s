@@ -114,6 +114,7 @@ WRITE_TLB:
      # 9. Writ ppn back to hardware mmu trap
      lui x2, 0x20000 # Magic TLB address
      sd x4, 0(x2)
+     mv a0, x4
      call print_reg
 
      lui x3, 0x2     
