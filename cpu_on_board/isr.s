@@ -124,18 +124,18 @@ WRITE_TLB:
      lui x2, 0x20000 # Magic TLB address
      sd x4, 0(x2)
 
-     lui x1, 0x2     
-     addi x1, x1, 0x4              
+     lui x3, 0x2     
+     addi x3, x3, 0x4              
      addi x2, x0, 91
-     sd x2, 0(x1)    #  print [
+     sd x2, 0(x3)    #  print [
      mret
 
 
 FAULT: # error trap?
-     lui x1, 0x2     
-     addi x1, x1, 0x4              
+     lui x3, 0x2     
+     addi x3, x3, 0x4              
      addi x2, x0, 33
-     sd x2, 0(x1)    #  print !
+     sd x2, 0(x3)    #  print !
      mret
      
 #Seems VA has 3 table number, satp has Root Table(vpn[2]) address via PPN(ppn+12 space), the we can find PTE in table 2, and PTE has PPN, we can use table2PPN to find table 1 address plus vpn1 number to find PTE in table1, then we get table1 PPN for table0 address, and together with vpn0 to find PTE in talbe0, this is  the last ppa, by ppn + 12 bit of VA low.
