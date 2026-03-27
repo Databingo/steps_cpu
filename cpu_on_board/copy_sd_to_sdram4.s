@@ -108,8 +108,8 @@ call sd_read_sector  # use a0 as sector no.
 # byte_per_sec offset 0x0b-0x0c 2 bytes
 li s7, 66
 sb s7, 0(s11)
-li a0, "\nBPsec:" # 7 char left on for null
-call print7
+#li a0, "\nBPsec:" # 7 char left on for null
+#call print7
 
 #endd:
 #    j endd
@@ -332,8 +332,8 @@ sh a0, 0(a1)
 #call print_reg
 
 # root_dir_sectors = (RootEntryCount * 32 + BytesPerSector -1 )/ BytesPerSector  ceiling division
-li a0, "\nrDseS:"
-call print7
+#li a0, "\nrDseS:"
+#call print7
 
 la a1, root_ent_cnt
 lwu t0, 0(a1)
@@ -365,8 +365,8 @@ sw t2, 0(a1)
 #call print_reg
 
 # FirstSectorOfCluster(N)=FirstDataSector + (N - 2) * SectorsPerCluster
-li a0, "\nF0sec:"
-call print7
+#li a0, "\nF0sec:"
+#call print7
 
 la a1, file_first_cluster # N
 lw t0, 0(a1)
@@ -383,8 +383,8 @@ call print_reg
 
 
 # file_sectors = file_size + 511 / 512
-li a0, "\nFseS:"
-call print7
+#li a0, "\nFseS:"
+#call print7
 la a1, file_size
 lw t0, 0(a1)
 addi t0, t0, 511
@@ -479,13 +479,13 @@ blt t1, t2, copy_sector_loop
 #    sb t2, 0(t0)         # Should print 'X'
 
 
-#    #lui s0, 0x80000      # SDRAM = 0x80000000
-#    li s0, 0x80000000 # SDRAM base 0x80000000
-#    ld a0, 0(s0)         # test sdram read data
-#    call print_reg
-#
-#    jr s0  # jump to SDRAM!
-#
+    #lui s0, 0x80000      # SDRAM = 0x80000000
+    li s0, 0x80000000 # SDRAM base 0x80000000
+    ld a0, 0(s0)         # test sdram read data
+    call print_reg
+
+    jr s0  # jump to SDRAM!
+
 
 end: 
 j end
