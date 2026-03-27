@@ -69,7 +69,8 @@ _start:
     li s5,  0x3220 # SD ready for rd/wr
     li s6,  0x3228 # SD cache available
     # a0 for function call default parameter
-    lui s0, 0x80000 # SDRAM base 0x80000000
+    #lui s0, 0x80000 # SDRAM base 0x80000000 wrong! neg
+    li s0, 0x80000000 # SDRAM base 0x80000000
 
 # ---------------------- SD card -------------------
 # Sector 0 Layout # BPB (BIOS Parameter Block) in sector 0
@@ -413,7 +414,8 @@ add t2, t1, t0
 #blt t1, t2, print_sector_loop
  
 
-lui s0, 0x80000 # SDRAM base 0x80000000
+#lui s0, 0x80000 # SDRAM base 0x80000000
+li s0, 0x80000000 # SDRAM base 0x80000000
 copy_sector_loop:
 mv a0, t1
 call sd_read_sector  # use a0 as sector no.
@@ -428,6 +430,7 @@ blt t1, t2, copy_sector_loop
 # -----------------------------
 # Read/Write SDRAM
 #lui s0, 0x80000 # SDRAM base 0x80000000
+#li s0, 0x80000000 # SDRAM base 0x80000000
 ## Write one byte
 #li t1, 0x58          # 'X'
 #sb t1, 0(s0)         # test sdram sb/sh
@@ -443,6 +446,7 @@ blt t1, t2, copy_sector_loop
 #    addi t0, t0, 4       # UART = 0x2004
 #    
 #    lui s0, 0x80000      # SDRAM = 0x80000000
+#li s0, 0x80000000 # SDRAM base 0x80000000
 #    
 #    # Write one byte
 #    li t1, 0x58          # 'X'
@@ -475,7 +479,8 @@ blt t1, t2, copy_sector_loop
 #    sb t2, 0(t0)         # Should print 'X'
 
 
-    lui s0, 0x80000      # SDRAM = 0x80000000
+    #lui s0, 0x80000      # SDRAM = 0x80000000
+    li s0, 0x80000000 # SDRAM base 0x80000000
     ld a0, 0(s0)         # test sdram read data
     call print_reg
 
