@@ -172,6 +172,19 @@ print_h:
     addi sp, sp, 40
     ret
 
+wait_uart:
+    addi sp, sp, -16
+    sd s0, 0(sp)
+    sd ra, 8(sp)
+wait_uart_loop:
+   #li a0, 65  # A
+   #sb a0, 0(s11)
+    lw s0, 0(s11)
+    bgt zero, s0, wait_uart_loop
+    ld s0, 0(sp)
+    ld ra, 8(sp)
+    addi sp, sp, 16
+    ret
 
 putchar:  # a0
     addi sp, sp, -8
