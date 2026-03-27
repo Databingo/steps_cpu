@@ -4,8 +4,8 @@
      addi x1, x1, 0x4              
      addi x2, x0, 91
      sd x2, 0(x1)    #  print [
-     lui x8, 0x20000
-     sd x9, 0(x8) 
+     lui x3, 0x20000
+     sd x9, 0(x3) 
      addi x2, x0, 93
      sd x2, 0(x1)    #  print ]
      mret           
