@@ -405,12 +405,12 @@ lw t1, 0(a1)
 add t2, t1, t0
 
 
-print_sector_loop:
-mv a0, t1
-call sd_read_sector  # use a0 as sector no.
-call print_sector
-addi t1, t1, 1
-blt t1, t2, print_sector_loop
+#print_sector_loop:
+#mv a0, t1
+#call sd_read_sector  # use a0 as sector no.
+#call print_sector
+#addi t1, t1, 1
+#blt t1, t2, print_sector_loop
  
 
 lui s0, 0x10000 # SDRAM base 0x10000000
