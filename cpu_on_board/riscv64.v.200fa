@@ -754,7 +754,7 @@ module riscv64(
 	                                                if      (current_privilege_mode == U_mode) CAUSE_CODE = UECALL; // 8 indicate Ecall from U-mode; 9 call from S-mode; 11 call from M-mode
 	                                                else if (current_privilege_mode == S_mode) CAUSE_CODE = SECALL; // block assign attaintion!
 	                                                else if (current_privilege_mode == M_mode) CAUSE_CODE = MECALL;
-						        if (Csrs[medeleg][CAUSE_CODE] == 1 && current_privilege_mode <= S_mode) // UECALL8 SECALL9 MECALL11 delegate to S-mode
+						        if (Csrs[medeleg][CAUSE_CODE] == 1) // UECALL8 SECALL9 MECALL11 delegate to S-mode
 	                 			        begin // Trap into S-mode
 	                 			           Csrs[scause][INTERRUPT] <= 0; //63_type 0exception 1interrupt|value
 	                 			           Csrs[scause][CAUSE+62:CAUSE] <= CAUSE_CODE; // 8 indicate Ecall from U-mode; 9 call from S-mode; 11 call from M-mode
@@ -785,7 +785,7 @@ module riscv64(
                     // Ebreak
 	            32'b0000000_00001_?????_000_?????_1110011: begin 
 	                                                //CAUSE_CODE <= 3; // Breakpoint is 3
-						        if (Csrs[medeleg][BREAK] == 1 && current_privilege_mode <= S_mode) // BREAK3 UECALL8 SECALL9 MECALL11 delegate to S-mode
+						        if (Csrs[medeleg][BREAK] == 1) // BREAK3 UECALL8 SECALL9 MECALL11 delegate to S-mode
 	                 			        begin // Trap into S-mode
 	                 			           Csrs[scause][INTERRUPT] <= 0; //63_type 0exception 1interrupt|value
 	                 			           Csrs[scause][CAUSE+62:CAUSE] <= BREAK; // 8 indicate Ecall from U-mode; 9 call from S-mode; 11 call from M-mode
@@ -937,40 +937,7 @@ module riscv64(
 	            // fsgnjx.s fmin.s fmax.s
 	            // D fld fsd fadd.d fsub.d fdiv.d fsqrt.d fmadd.s fcvt.d.s fcvt.s.d
 	            // C
-		    default: begin // $display("unknow instruction %h, %b", ir, ir);
-	                                                if      (current_privilege_mode == U_mode) CAUSE_CODE = ILLEGALINSTRUCTION; // 2
-	                                                else if (current_privilege_mode == S_mode) CAUSE_CODE = ILLEGALINSTRUCTION; // block assign attaintion!
-	                                                else if (current_privilege_mode == M_mode) CAUSE_CODE = ILLEGALINSTRUCTION;
-						        if (Csrs[medeleg][CAUSE_CODE] == 1 && current_privilege_mode <= S_mode) // UECALL8 SECALL9 MECALL11 delegate to S-mode (M-mode still in M-mode)
-	                 			        begin // Trap into S-mode
-	                 			           Csrs[scause][INTERRUPT] <= 0; //63_type 0exception 1interrupt|value
-	                 			           Csrs[scause][CAUSE+62:CAUSE] <=  ILLEGALINSTRUCTION; // 2
-	                 			           Csrs[sepc] <= pc - 4;  // Ecall is sycronized, back and repeat pc
-							   Csrs[stval] <= ir; // 
-	                 			           Csrs[sstatus][SPP] <= (current_privilege_mode == U_mode ? 0 : 1); // save previous privilege mode(user0 super1) to SPP 
-	                 			           Csrs[sstatus][SPIE] <= Csrs[sstatus][SIE]; // save interrupt enable(SIE) to SPIE 
-	                 			           Csrs[sstatus][SIE] <= 0; // clear SIE
-							   //if (Csrs[stvec][MODE+1:MODE] == 0) pc <= (Csrs[stvec][BASE+61:BASE] << 2); // directly  
-							   //else  pc <= (Csrs[stvec][BASE+61:BASE] << 2) + (CAUSE_CODE << 2); // vectorily BASE & CAUSE_CODE are 4 bytes aligned already number need << 2
-                                                           pc <= (Csrs[stvec][BASE+61:BASE] << 2); // 0 Exceptions Never vector 1 will be ignore
-	                 				   current_privilege_mode <= S_mode;
-		    				           bubble <= 1'b1;
-	                 			       end
-	                 			       else begin // Trap into M-mode
-	                 			           Csrs[mcause][INTERRUPT] <= 0; //63_type 0exception 1interrupt|value
-	                 			           Csrs[mcause][CAUSE+62:CAUSE] <= ILLEGALINSTRUCTION; // 2 
-	                 			           Csrs[mepc] <= pc - 4; 
-							   Csrs[mtval] <= ir; // mtval hold the error instruction
-	                 			           Csrs[mstatus][MPIE] <= Csrs[mstatus][MIE]; // save interrupt enable(MIE) to MPIE 
-	                 			           Csrs[mstatus][MIE] <= 0; // clear MIE (not enabled, blocked when trap)
-							   //if (Csrs[mtvec][MODE+1:MODE] == 0) pc <= (Csrs[mtvec][BASE+61:BASE] << 2); // directly
-							   //else  pc <= (Csrs[mtvec][BASE+61:BASE] << 2) + (BREAK << 2); // vectorily
-                                                           pc <= (Csrs[mtvec][BASE+61:BASE] << 2); // 0 Exceptions Never vector 1 will be ignore
-	                 				   Csrs[mstatus][MPP+1:MPP] <= current_privilege_mode; // save privilege mode to MPP 
-	                 				   current_privilege_mode <= M_mode;  // set current privilege mode
-		    				           bubble <= 1'b1;
-	                 			       end
-	                 			   end
+	            default: $display("unknow instruction %h, %b", ir, ir);
                endcase
 	    end
         end
