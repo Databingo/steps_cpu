@@ -584,7 +584,8 @@ module riscv64(
 	    //  mmu_pc  I-TLB miss Trap
 	    if (satp_mmu && !mmu_pc && !mmu_da && !mmu_cache_refill && !tlb_i_hit) begin //OPEN 
        		mmu_pc <= 1; // MMU_PC ON 
-       	        pc <= 0; // I-TLB refill Handler
+       	        //pc <= 0; // I-TLB refill Handler
+       	        pc <= 0; // trap to isr_router
        	 	bubble <= 1'b1; // bubble 
 	        saved_user_pc <= pc - 4; // !!! save pc (EXE was flushed so record-redo it, previous pc)
 	        if (bubble || ir==32'b0001001??????????_000_?????_1110011) saved_user_pc <= pc ; // !!! save pc (j/b EXE was flushed currectly)
@@ -610,7 +611,8 @@ module riscv64(
 	    end else if (!mmu_pc && !mmu_da && !mmu_cache_refill && !cache_i_hit) begin //OPEN 
 	    //end else if (!cache_i_hit) begin //OPEN 
        		mmu_cache_refill <= 1; // 
-       	        pc <= 72; //
+       	        //pc <= 72; //
+       	        pc <= 0; // trap to isr_router
        	 	bubble <= 1'b1; // bubble 
 		for (i=1;i<5;i=i+1) begin sre[i]<= re[i]; end // save re
 	        saved_user_pc <= pc -4  ; // ??!!! save pc (j/b EXE was flushed currectly)
@@ -632,7 +634,8 @@ module riscv64(
             //  mmu_da  D-TLB miss Trap // load/store/atom
 	    end else if (satp_mmu && !mmu_pc && !mmu_da && !mmu_cache_refill && tlb_i_hit && !tlb_d_hit && (op == 7'b0000011 || op == 7'b0100011 || op == 7'b0101111) ) begin  
 		mmu_da <= 1; // MMU_DA ON
-		pc <= 36; // D-TLB refill Handler
+		//pc <= 36; // D-TLB refill Handler
+       	        pc <= 0; // trap to isr_router
 	 	bubble <= 1'b1; // bubble
 	        saved_user_pc <= pc - 4; // save pc EXE l/s/a
 		for (i=1;i<5;i=i+1) begin sre[i]<= re[i]; end // save re
