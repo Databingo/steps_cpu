@@ -1,6 +1,7 @@
 # Use re0-re4 shadowed register only
 # I-TLB mmu-refill 1:1 identity map
-     j mmu
+     j isr_router
+    #j mmu
     #lui x1, 0x2     
      addi x1, x1, 0x4              
      addi x2, x0, 91
@@ -11,7 +12,8 @@
      sd x2, 0(x1)    #  print ]
      mret           
 # D-TLB mmu-refill
-     j mmu
+     j isr_router
+    #j mmu
     #lui x1, 0x2     
      addi x1, x1, 0x4              
      addi x2, x0, 123
@@ -24,6 +26,8 @@
 
 
 #  I-Cache refill (withoud stap/tlb_hit sensitive)
+     j isr_router
+icache_refill:
      lui x4, 0x20001 # base Cache address
      ld x3, 0(x1)    # get data
      sd x3, 0(x4)    # refill line low 64
@@ -35,6 +39,14 @@
      addi x2, x0, 0x25
      sd x2, 0(x3)    #  print %
      mret           
+
+isr_router:
+     li x3, 0 
+     beq x2, x3, mmu    # i-tlb-refill
+     li x3, 1 
+     beq x2, x3, icache_refill
+     li x3, 2 
+     beq x2, x3, mmu    # d-tlb-refill
 
 mmu:  # VA 63:39Sign|38:30Vpn[2]|29:21Vpn[1]|20:12Vpn[0]|11:0PageOffset  
    # 1. Get root table address from csr satp Supervisor Address Translation and Protection
