@@ -52,7 +52,7 @@ mmu:  # VA 63:39Sign|38:30Vpn[2]|29:21Vpn[1]|20:12Vpn[0]|11:0PageOffset
      ld x4, 0(x2)    # Load L1 PTE from memory
 
    # 6. Check Leaf
-     andi x3, x4, 0xE # bit 3:1 for X/W/R
+     andi x3, x4, 0xE # bit 3:1 for X/W/R 1110
      bnez x3, FINISH_2MB   # If not zero, it's leaf. We get the address.
      andi x3, x4, 1   # check PTE valid bit
      beqz x3, FAULT

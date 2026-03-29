@@ -73,8 +73,8 @@ s_mode_kernel:
   # ppn = rt >> 12 = 0x80000
   # mode = 3 sv39
   li t0, 0x8000000000080000
-  testf 
   csrw satp, t0
+  testf 
   sfence.vma
   ## <--- start use TLB I/D hitting
 
