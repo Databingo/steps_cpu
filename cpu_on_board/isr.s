@@ -101,7 +101,7 @@ WRITE_TLB:
      sd x4, 0(x2)
      mv a0, x4
 
-   li a7, 0x1600 # Set stack
+   li a6, 0x1600 # Set stack
    li s11, 0x2004 # UART print 
 
 
@@ -122,7 +122,7 @@ FAULT: # error trap?
      sd x2, 0(x3)    #  print !
      mret
      
-#Seems VA has 3 table number, satp has Root Table(vpn[2]) address via PPN(ppn+12 a7ace), the we can find PTE in table 2, and PTE has PPN, we can use table2PPN to find table 1 address plus vpn1 number to find PTE in table1, then we get table1 PPN for table0 address, and together with vpn0 to find PTE in talbe0, this is  the last ppa, by ppn + 12 bit of VA low.
+#Seems VA has 3 table number, satp has Root Table(vpn[2]) address via PPN(ppn+12 a6ace), the we can find PTE in table 2, and PTE has PPN, we can use table2PPN to find table 1 address plus vpn1 number to find PTE in table1, then we get table1 PPN for table0 address, and together with vpn0 to find PTE in talbe0, this is  the last ppa, by ppn + 12 bit of VA low.
 
 
 
@@ -130,12 +130,12 @@ FAULT: # error trap?
 # functions ------
 
 print_reg: # a0
-    addi a7, a7, -40
-    sd ra, 0(a7)
-    sd s0, 8(a7)
-    sd s1, 16(a7)
-    sd s2, 24(a7)
-    sd s3, 32(a7)
+    addi a6, a6, -40
+    sd ra, 0(a6)
+    sd s0, 8(a6)
+    sd s1, 16(a6)
+    sd s2, 24(a6)
+    sd s3, 32(a6)
     mv s0, a0
     li a0, "0"
     call putchar
@@ -156,29 +156,29 @@ print_h:
     sb s2, 0(s11)       # print
     addi s1, s1, -4
     bge s1, x0, p_loop 
-    ld ra, 0(a7)
-    ld s0, 8(a7)
-    ld s1, 16(a7)
-    ld s2, 24(a7)
-    ld s3, 32(a7)
-    addi a7, a7, 40
+    ld ra, 0(a6)
+    ld s0, 8(a6)
+    ld s1, 16(a6)
+    ld s2, 24(a6)
+    ld s3, 32(a6)
+    addi a6, a6, 40
     ret
 
 
 putchar:  # a0
-    addi a7, a7, -8
-    sd ra, 0(a7)
+    addi a6, a6, -8
+    sd ra, 0(a6)
     call wait_uart
     sb a0, 0(s11)
-    ld ra, 0(a7)
-    addi a7, a7, 8
+    ld ra, 0(a6)
+    addi a6, a6, 8
     ret
 
 
 puts: # a0 addr
-    addi a7, a7, -16
-    sd ra, 0(a7)
-    sd s0, 8(a7)
+    addi a6, a6, -16
+    sd ra, 0(a6)
+    sd s0, 8(a6)
     mv s0, a0
 puts_loop:
     lbu a0, 0(s0)
@@ -187,33 +187,33 @@ puts_loop:
     addi s0, s0, 1 # next byte
     j puts_loop
 stop_puts:
-    ld ra, 0(a7)
-    ld s0, 8(a7)
-    addi a7, a7, 16
+    ld ra, 0(a6)
+    ld s0, 8(a6)
+    addi a6, a6, 16
     ret
 
 
 wait_uart:
-    addi a7, a7, -16
-    sd s0, 0(a7)
-    sd ra, 8(a7)
+    addi a6, a6, -16
+    sd s0, 0(a6)
+    sd ra, 8(a6)
 wait_uart_loop:
    #li a0, 65  # A
    #sb a0, 0(s11)
     lw s0, 0(s11)
     bgt zero, s0, wait_uart_loop
-    ld s0, 0(a7)
-    ld ra, 8(a7)
-    addi a7, a7, 16
+    ld s0, 0(a6)
+    ld ra, 8(a6)
+    addi a6, a6, 16
     ret
 
 print7: # a0, 7 char left one for null
-    addi a7, a7, -16
-    sd a0, 0(a7)
-    sd ra, 8(a7)
-    mv a0, a7
+    addi a6, a6, -16
+    sd a0, 0(a6)
+    sd ra, 8(a6)
+    mv a0, a6
     call puts
-   #ld a0, 0(a7)
-    ld ra, 8(a7)
-    addi a7, a7, 16
+   #ld a0, 0(a6)
+    ld ra, 8(a6)
+    addi a6, a6, 16
     ret
