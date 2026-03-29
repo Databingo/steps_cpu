@@ -99,9 +99,9 @@ WRITE_TLB:
      # 9. Writ ppn back to hardware mmu trap
      lui x2, 0x20000 # Magic TLB address
      sd x4, 0(x2)
-     mv a0, x4
+    #mv a0, x4
 
-   li a6, 0x1600 # Set stack
+   li a6, 0x1600 # Set stack   # use shadowed x5??
    li s11, 0x2004 # UART print 
 
 
