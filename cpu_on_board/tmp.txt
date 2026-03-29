@@ -96,6 +96,8 @@ ori t0, t0, 0x100
 slli t0, t0, 0xb
 #   csrw satp, t0
 csrrw x0, satp, t0
+#   nop
+addi x0, x0, 0
 sfence.vma
 #    la a0, msg   
 auipc a0, 0 # R_RISCV_PCREL_HI20 msg 
