@@ -137,6 +137,9 @@ m_trap_router:
    # 13 load page fault
    # 14 store/amo page fault
 
+   li t1, 2 # illegal instruction
+   beq t0, t1, m_ex_illegal_ir
+   
 
 
    j m_done
@@ -193,6 +196,13 @@ m_done:
    #ld t0, 0x900(zero)
    #ld t1, 0x908(zero)
    mret
+
+m_ex_illegal_ir:
+   li a0, "\nIllIR"
+   call print7
+
+
+
 
 
 s_trap_handler:

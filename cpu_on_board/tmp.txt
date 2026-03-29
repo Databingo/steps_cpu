@@ -123,6 +123,11 @@ addi t1, x0, 0x0
 addi t1, x0, 0x0
 addi t1, x0, 0x3
 beq t0, t1, m_ebreak_handler
+#    li t1, 2 
+addi t1, x0, 0x0
+addi t1, x0, 0x0
+addi t1, x0, 0x2
+beq t0, t1, m_ex_illegal_ir
 #    j m_done
 jal x0, m_done
 m_ecall_router:
@@ -205,6 +210,21 @@ addi t0, t0, 4 # skip ecall/ebreak instruction
 #    csrw mepc, t0
 csrrw x0, mepc, t0
 mret
+m_ex_illegal_ir:
+#    li a0, "\nIllIR"
+addi a0, x0, 0x0
+lui a0, 0x5
+srli a0, a0, 0x1
+ori a0, a0, 0x124
+slli a0, a0, 0xb
+ori a0, a0, 0x5b1
+slli a0, a0, 0xb
+ori a0, a0, 0x589
+slli a0, a0, 0xb
+ori a0, a0, 0x10a
+#    call print7
+auipc x1, 0 # R_RISCV_PCREL_HI20 print7
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print7
 s_trap_handler:
 #    li a0, "S"
 addi a0, x0, 0x0
