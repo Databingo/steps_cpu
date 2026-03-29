@@ -4,11 +4,11 @@ isr_router:
      li x3, 0 
      beq x2, x3, mmu    # i-tlb-refill
      li x3, 1 
-     beq x2, x3, icache_refill
+     beq x2, x3, i_cache_refill
      li x3, 2 
      beq x2, x3, mmu    # d-tlb-refill
 
-icache_refill:
+i_cache_refill:
      lui x4, 0x20001 # base Cache address
      ld x3, 0(x1)    # get data
      sd x3, 0(x4)    # refill line low 64
