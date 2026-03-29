@@ -74,11 +74,11 @@ s_mode_kernel:
   # mode = 3 sv39
   li t0, 0x8000000000080000
   csrw satp, t0
-  nop
   sfence.vma
   ## <--- start use TLB I/D hitting
 
 
+  nop
 
 
 
