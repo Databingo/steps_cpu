@@ -1,8 +1,6 @@
 # Use re0-re4 shadowed register only
      j isr_router
 isr_router:
-   li a6, 0x1600 # Set stack
-   li s11, 0x2004 # UART print 
      li x3, 0 
      beq x2, x3, mmu    # i-tlb-refill
      li x3, 1 
