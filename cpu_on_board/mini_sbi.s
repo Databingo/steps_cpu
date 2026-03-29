@@ -191,6 +191,8 @@ m_handler_deleg:
    j m_done
 
 m_ex_illegal_ir:
+   li a0, "I"
+   call putchar
    li a0, "\n0ILLIR"
    call print7
    csrr a0, mtval

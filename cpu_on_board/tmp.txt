@@ -201,6 +201,13 @@ addi a0, x0, 0x0
 #    j m_done
 jal x0, m_done
 m_ex_illegal_ir:
+#    li a0, "I"
+addi a0, x0, 0x0
+addi a0, x0, 0x0
+addi a0, x0, 0x49
+#    call putchar
+auipc x1, 0 # R_RISCV_PCREL_HI20 putchar
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I putchar
 #    li a0, "\n0ILLIR"
 addi a0, x0, 0x0
 lui a0, 0x524
