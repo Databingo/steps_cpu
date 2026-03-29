@@ -1,0 +1,29 @@
+2. Page Fault Exceptions (Required by Linux)
+Why you need it: Linux does not load programs into physical RAM immediately. It creates "Empty" page tables (Valid = 0). When a program tries to run, it hits an empty page, the CPU triggers a Page Fault, and Linux pauses the program to load the data from the SD Card into RAM.
+Right now, your software walker's FAULT: label just prints ! and mrets. Linux will be stuck in an infinite loop.
+The Fix: Your software walker must be able to tell the Hardware to trigger a Page Fault.
+Create a new Magic Address in Verilog (e.g., 0xF0004).
+Have the Software Walker write the bad Virtual Address to 0xF0004.
+The Verilog catches this write and triggers Exception 12 (Instruction Page Fault), 13 (Load Page Fault), or 15 (Store Page Fault) based on what mmu_pc or mmu_da was doing.
+3. Page Permissions R/W/X/U (Required by Linux)
+Why you need it: Linux protects kernel memory from user programs. A user program (U-mode) is not allowed to read a page unless the U bit (bit 4) is 1 in the PTE. A program is not allowed to write to a page unless the W bit is 1.
+Right now, your Hardware TLB only stores the PPN (tlb_ppn). It does not store permissions, so it allows anything to read/write to any mapped page!
+The Fix:
+In your mmu assembly, when you write to the TLB magic address, write the ENTIRE 64-bit PTE (x4), not just the PPN (x7).
+In your Verilog Hardware TLB, add a new array: reg [7:0] tlb_flags [0:3];
+When the Hardware TLB matches a virtual address, check the flags!
+If it is an Instruction Fetch, but X is 0 -> Trigger Instruction Page Fault.
+If it is a Store, but W is 0 -> Trigger Store Page Fault.
+If current_privilege_mode == U_mode but U is 0 -> Trigger Page Fault.
+4. Standardize the CLINT (Timer) and PLIC
+Why you need it: OpenSBI has platform code built-in. If you use the standard "QEMU Virt" or "SiFive" memory addresses, OpenSBI will work out-of-the-box without you having to write custom C code for OpenSBI.
+CLINT Base: 0x0200_0000
+MSIP: 0x0200_0000 (Write 1 to trigger Software Interrupt)
+MTIMECMP: 0x0200_4000
+MTIME: 0x0200_BFF8
+UART Base: Usually 0x1000_0000 (16550A UART standard).
+You already have mtime and mtimecmp connected perfectly to the bus! You just need to make sure your address decoding (Mtime_selected, Mtimecmp_selected, etc.) matches the official RISC-V physical addresses so OpenSBI knows where to find them.
+Your Next Step
+Before touching the complex Page Faults, implement the Illegal Instruction Exception (Step 1).
+Once you have that, you can download the generic fw_jump.bin from OpenSBI, load it into your SDRAM, point your CPU's boot PC to it, and watch OpenSBI initialize your CPU via the UART!
+You have built a truly magnificent architecture. You are ready to enter the Operating System tier!
