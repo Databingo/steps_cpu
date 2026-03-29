@@ -160,7 +160,7 @@ m_ecall_router:  # a7 Extension 1 putchar, 2 getchar, 0 settimer; a0 is the firs
 m_ebreak_handler:
    li a0, "M"
    li s11, 0x2004
-wait_uart_m:
+   wait_uart_m:
    lw t1, 0(s11)
    blt t1, zero, wait_uart_m  # sifive uart negetive is full
    sb a0, 0(s11)
@@ -169,7 +169,7 @@ wait_uart_m:
    
 m_handler_putchar:
    li s11, 0x2004
-wait_uart_sbi:
+   wait_uart_sbi:
    lw t1, 0(s11)
    blt t1, zero, wait_uart_sbi  # sifive uart negetive is full
    sb a0, 0(s11)
@@ -189,6 +189,13 @@ m_handler_deleg:
    li a0, 0
    j m_done
 
+m_ex_illegal_ir:
+   li a0, "\n0ILLIR"
+   call print7
+   csrr a0, mtval
+   call print_reg
+   j m_done
+
 m_done: 
    csrr t0, mepc
    addi t0, t0, 4 # skip ecall/ebreak instruction
@@ -196,13 +203,6 @@ m_done:
    #ld t0, 0x900(zero)
    #ld t1, 0x908(zero)
    mret
-
-m_ex_illegal_ir:
-   li a0, "\n0ILLIR"
-   call print7
-   csrr a0, mtval
-   call print_reg
-
 
 
 

@@ -205,13 +205,6 @@ csrrw x0, medeleg, t0
 addi a0, x0, 0x0
 #    j m_done
 jal x0, m_done
-m_done:
-#    csrr t0, mepc
-csrrs t0, mepc, x0
-addi t0, t0, 4 # skip ecall/ebreak instruction
-#    csrw mepc, t0
-csrrw x0, mepc, t0
-mret
 m_ex_illegal_ir:
 #    li a0, "\n0ILLIR"
 addi a0, x0, 0x0
@@ -232,6 +225,15 @@ csrrs a0, mtval, x0
 #    call print_reg
 auipc x1, 0 # R_RISCV_PCREL_HI20 print_reg
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_reg
+#    j m_done
+jal x0, m_done
+m_done:
+#    csrr t0, mepc
+csrrs t0, mepc, x0
+addi t0, t0, 4 # skip ecall/ebreak instruction
+#    csrw mepc, t0
+csrrw x0, mepc, t0
+mret
 s_trap_handler:
 #    li a0, "S"
 addi a0, x0, 0x0
