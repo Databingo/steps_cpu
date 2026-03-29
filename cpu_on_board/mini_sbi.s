@@ -48,7 +48,7 @@ s_mode_kernel:
    #ecall
  
    li a7, 0x10
-   ecall  # turn delegate
+   ecall  # turn delegate (test 3 breakpoint)
 
    ebreak # S ebreak was delegeted to s-mode, so use stvec to find s-handler for break
 
@@ -112,14 +112,7 @@ s_mode_done:
 m_trap_router:
    #sd t0, 0x300(zero)
    #sd t1, 0x308(zero)
-
    csrr t0, mcause  # check type
-
-   li t1, 9  # ecall from S-mode
-   beq t0, t1, m_ecall_router
-
-   li t1, 3 # breakpoint
-   beq t0, t1, m_ebreak_handler
 
    # 0 pc is not aligned to 4 bytes
    # 1 instruction is not accessable
@@ -137,8 +130,15 @@ m_trap_router:
    # 13 load page fault
    # 14 store/amo page fault
 
+   li t1, 9  # ecall from S-mode
+   beq t0, t1, m_ecall_router
+
    li t1, 2 # illegal instruction
    beq t0, t1, m_ex_illegal_ir
+
+   li t1, 3 #  ebreak
+   beq t0, t1, m_ebreak_handler
+
    
 
 

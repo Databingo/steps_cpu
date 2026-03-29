@@ -63,7 +63,7 @@ ebreak   # M  test m-mode ebreak
 addi a7, x0, 0x0
 addi a7, x0, 0x0
 addi a7, x0, 0x10
-ecall  # turn delegate
+ecall  # turn delegate (test 3 breakpoint)
 ebreak # S ebreak was delegeted to s-mode, so use stvec to find s-handler for break
 #    li a0, "\nMMU:" 
 addi a0, x0, 0x0
@@ -120,16 +120,16 @@ addi t1, x0, 0x0
 addi t1, x0, 0x0
 addi t1, x0, 0x9
 beq t0, t1, m_ecall_router
-#    li t1, 3 
-addi t1, x0, 0x0
-addi t1, x0, 0x0
-addi t1, x0, 0x3
-beq t0, t1, m_ebreak_handler
 #    li t1, 2 
 addi t1, x0, 0x0
 addi t1, x0, 0x0
 addi t1, x0, 0x2
 beq t0, t1, m_ex_illegal_ir
+#    li t1, 3 
+addi t1, x0, 0x0
+addi t1, x0, 0x0
+addi t1, x0, 0x3
+beq t0, t1, m_ebreak_handler
 #    j m_done
 jal x0, m_done
 m_ecall_router:
