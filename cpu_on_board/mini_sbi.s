@@ -78,7 +78,7 @@ s_mode_kernel:
   ## <--- start use TLB I/D hitting
 
 
-  nop
+  testf 
 
 
 
