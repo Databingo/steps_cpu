@@ -213,20 +213,25 @@ addi t0, t0, 4 # skip ecall/ebreak instruction
 csrrw x0, mepc, t0
 mret
 m_ex_illegal_ir:
-#    li a0, "\nE_ILIR"
+#    li a0, "\nILL_IR"
 addi a0, x0, 0x0
 lui a0, 0x524
 srli a0, a0, 0x1
-ori a0, a0, 0x4a6
+ori a0, a0, 0x4af
 slli a0, a0, 0xb
-ori a0, a0, 0x125
+ori a0, a0, 0x531
 slli a0, a0, 0xb
-ori a0, a0, 0x3e8
+ori a0, a0, 0x189
 slli a0, a0, 0xb
-ori a0, a0, 0x50a
+ori a0, a0, 0x10a
 #    call print7
 auipc x1, 0 # R_RISCV_PCREL_HI20 print7
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print7
+#    csrr a0, mtval
+csrrs a0, mtval, x0
+#    call print_reg
+auipc x1, 0 # R_RISCV_PCREL_HI20 print_reg
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_reg
 s_trap_handler:
 #    li a0, "S"
 addi a0, x0, 0x0

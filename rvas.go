@@ -324,6 +324,7 @@ func main() { //t6a7s11
             "mepc"       : 0x341,    
             "mcause"     : 0x342,    
             "mie"        : 0x304,    
+            "mtval"      : 0x343,    
             "mip"        : 0x344,    
             "medeleg"    : 0x302,    
             "mideleg"    : 0x303,    
