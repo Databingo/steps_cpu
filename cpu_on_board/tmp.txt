@@ -58,11 +58,13 @@ addi t0, t0, 0 # R_RISCV_PCREL_LO12_I s_mode_kernel
 csrrw x0, mepc, t0
 mret                      # 6. Drop to S-mode go to s_kernel
 s_mode_kernel:
+ebreak   # M  test m-mode ebreak
 #    li a7, 0x10
 addi a7, x0, 0x0
 addi a7, x0, 0x0
 addi a7, x0, 0x10
 ecall  # turn delegate
+ebreak # S ebreak was delegeted to s-mode, so use stvec to find s-handler for break
 #    li a0, "\nMMU:" 
 addi a0, x0, 0x0
 ori a0, a0, 0x1d

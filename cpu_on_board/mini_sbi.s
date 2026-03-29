@@ -37,7 +37,7 @@ _start:
 
 
 s_mode_kernel:
-   #ebreak   # M  test m-mode ebreak
+   ebreak   # M  test m-mode ebreak
 
    #li a0, "H"
    #li a7, 1
@@ -50,7 +50,7 @@ s_mode_kernel:
    li a7, 0x10
    ecall  # turn delegate
 
-  #ebreak # S ebreak was delegeted to s-mode, so use stvec to find s-handler for break
+   ebreak # S ebreak was delegeted to s-mode, so use stvec to find s-handler for break
 
 
    # test MMU
