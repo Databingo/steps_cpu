@@ -213,17 +213,17 @@ addi t0, t0, 4 # skip ecall/ebreak instruction
 csrrw x0, mepc, t0
 mret
 m_ex_illegal_ir:
-#    li a0, "\nILL_IR"
+#    li a0, "\n0ILLIR"
 addi a0, x0, 0x0
 lui a0, 0x524
 srli a0, a0, 0x1
-ori a0, a0, 0x4af
+ori a0, a0, 0x4a6
 slli a0, a0, 0xb
-ori a0, a0, 0x531
+ori a0, a0, 0x131
 slli a0, a0, 0xb
-ori a0, a0, 0x189
+ori a0, a0, 0x126
 slli a0, a0, 0xb
-ori a0, a0, 0x10a
+ori a0, a0, 0xa
 #    call print7
 auipc x1, 0 # R_RISCV_PCREL_HI20 print7
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print7

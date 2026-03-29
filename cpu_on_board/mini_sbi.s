@@ -198,7 +198,7 @@ m_done:
    mret
 
 m_ex_illegal_ir:
-   li a0, "\nILL_IR"
+   li a0, "\n0ILLIR"
    call print7
    csrr a0, mtval
    call print_reg
