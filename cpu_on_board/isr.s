@@ -106,7 +106,7 @@ WRITE_TLB:
 
 
 
-     call print_reg
+    #call print_reg
 
      lui x3, 0x2     
      addi x3, x3, 0x4              
