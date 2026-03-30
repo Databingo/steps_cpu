@@ -30,7 +30,7 @@ module riscv64(
     //(* ram_style = "logic" *) reg [63:0] sre [0:9]; // Shadow Registers 10s
     //(* ram_style = "logic" *) reg [63:0] sre [0:4]; // Shadow Registers 5s
     //(* ram_style = "logic" *) reg [63:0] sre [0:7]; // Shadow Registers 8s
-    (* ram_style = "logic" *) reg [63:0] sre [0:10]; // Shadow Registers 10s
+    (* ram_style = "logic" *) reg [63:0] sre [0:10]; // Shadow Registers 11s
     reg mmu_da=0;
     reg mmu_pc = 0;
     reg mmu_cache_refill=0;
