@@ -20,7 +20,22 @@ i_cache_refill:
      addi x3, x3, 0x4  # set print           
      addi x2, x0, 0x25
      sd x2, 0(x3)    #  print %
- #mv x1, x9 
+
+  mv x5, a0 
+  li x7, 0x1600 # Set stack   # use shadowed x7
+  li x6, 0x2004 # UART print 
+
+   li a0, "\nICA_FL"
+   call print7
+   mv a0, x9
+   call print_reg
+
+
+  mv a0, x5
+  mv x1, x9 
+
+
+
      mret           
 
 mmu:  # VA 63:39Sign|38:30Vpn[2]|29:21Vpn[1]|20:12Vpn[0]|11:0PageOffset  
