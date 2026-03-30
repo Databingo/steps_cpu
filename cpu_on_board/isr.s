@@ -25,7 +25,7 @@ i_cache_refill:
   li x7, 0x1600 # Set stack   # use shadowed x7
   li x6, 0x2004 # UART print 
 
-   li a0, "\nICA_RF"
+   li a0, "ICA_RF"
    call print7
    mv a0, x9
    call print_reg
