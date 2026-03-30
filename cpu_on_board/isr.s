@@ -221,7 +221,7 @@ print7: # a0, 7 char left one for null
     sd ra, 8(x7)
     mv a0, x7
     call puts
-   #ld a0, 0(x7)
+    ld a0, 0(x7)
     ld ra, 8(x7)
     addi x7, x7, 16
     ret
