@@ -107,7 +107,7 @@ WRITE_TLB:
   li x6, 0x2004 # UART print 
 
 
-   li a0, "\nTLB"
+   li a0, "\nTLB_RF"
    call print7
    mv a0, x9
    call print_reg
@@ -129,6 +129,14 @@ FAULT: # error trap?
      addi x3, x3, 0x4              
      addi x2, x0, 33
      sd x2, 0(x3)    #  print !
+
+   li a0, "\nTLB_FL"
+   call print7
+   mv a0, x9
+   call print_reg
+
+
+  mv a0, x5
   mv x1, x9 
      mret
      
