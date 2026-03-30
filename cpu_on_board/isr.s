@@ -7,11 +7,11 @@ isr_router:        # Use x0-x9 shadowed register only
   
      # x1234 operating
      li x3, 0 
-     beq x2, x3, mmu    # i-tlb-refill
+     beq x2, x3, mmu_i    # i-tlb-refill
      li x3, 1 
      beq x2, x3, i_cache_refill
      li x3, 2 
-     beq x2, x3, mmu    # d-tlb-refill
+     beq x2, x3, mmu_d    # d-tlb-refill
 
 i_cache_refill:
      lui x4, 0x20001 # base Cache address
@@ -32,11 +32,21 @@ i_cache_refill:
 
      j return
 
+
+mmu_i:
+   li a0, "\nTLBiMP"
+   call print7
+   mv a0, x9
+   call print_reg
+     j mmu
+mmu_d:
+   li a0, "\nTLBdMP"
+   call print7
+   mv a0, x9
+   call print_reg
+     j mmu
+
 mmu:  # VA 63:39Sign|38:30Vpn[2]|29:21Vpn[1]|20:12Vpn[0]|11:0PageOffset  
-
-   # mv a0, x2
-   # call print_reg
-
    # 1. Get root table address from csr satp Supervisor Address Translation and Protection
      csrr x2, satp   # satp 63:60Mode|59:44Asid(0forSimpleOS)|43:0PPNofRootTable
      slli x2, x2, 20 # clear high mode+Asid Address Space Identifier
@@ -115,10 +125,6 @@ WRITE_TLB:
      lui x2, 0x20000 # Magic TLB address
      sd x4, 0(x2)
 
-   li a0, "\nTLB_MP"
-   call print7
-   mv a0, x9
-   call print_reg
    mv a0, x4
    call print_reg
 
