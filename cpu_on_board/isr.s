@@ -1,17 +1,10 @@
-# Use re0-re4 shadowed register only
+# Use re0-re9 shadowed register only
      j isr_router
 isr_router:
-    mv x9, x1     # keep deal address
-    li x7, 0x1600 # Set stack   # use shadowed x7
     li x6, 0x2004 # UART print 
+    li x7, 0x1600 # Set stack   # use shadowed x7
+    mv x9, x1     # keep deal address
   
-
-
-
-
-
-
-
 
      li x3, 0 
      beq x2, x3, mmu    # i-tlb-refill
@@ -153,8 +146,6 @@ FAULT: # error trap?
 
 return:    
     mv x1, x9     # back deal address
-    ld x10, 9(x7) # restore a0
-    addi x7, x7, 8
     mret
 
 #Seems VA has 3 table number, satp has Root Table(vpn[2]) address via PPN(ppn+12 x7ace), the we can find PTE in table 2, and PTE has PPN, we can use table2PPN to find table 1 address plus vpn1 number to find PTE in table1, then we get table1 PPN for table0 address, and together with vpn0 to find PTE in talbe0, this is  the last ppa, by ppn + 12 bit of VA low.
