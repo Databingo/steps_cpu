@@ -20,7 +20,7 @@ i_cache_refill:
      addi x3, x3, 0x4  # set print           
      addi x2, x0, 0x25
      sd x2, 0(x3)    #  print %
-  mv x1, x9 
+ #mv x1, x9 
      mret           
 
 mmu:  # VA 63:39Sign|38:30Vpn[2]|29:21Vpn[1]|20:12Vpn[0]|11:0PageOffset  
