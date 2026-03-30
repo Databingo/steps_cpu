@@ -107,8 +107,8 @@ WRITE_TLB:
 
    li a0, "\nISR"
    call print7
-   #mv a0, x4
-   #call print_reg
+   mv a0, x4
+   call print_reg
 
      lui x3, 0x2     
      addi x3, x3, 0x4              
