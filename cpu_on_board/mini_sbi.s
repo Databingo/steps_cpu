@@ -322,10 +322,10 @@ wait_uart:
 print7: # a0, 7 char left one for null
     addi sp, sp, -8
    #sd a0, 0(sp)
-    sd ra, 8(sp)
+    sd ra, 0(sp)
     mv a0, sp
     call puts
    #ld a0, 0(sp)
-    ld ra, 8(sp)
+    ld ra, 0(sp)
     addi sp, sp, 8
     ret
