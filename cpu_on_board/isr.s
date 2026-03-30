@@ -130,8 +130,12 @@ FAULT: # error trap?
      addi x2, x0, 33
      sd x2, 0(x3)    #  print !
 
-   li a0, "\nTLB_FL"
-   call print7
+  mv x5, a0 
+  li x7, 0x1600 # Set stack   # use shadowed x7
+  li x6, 0x2004 # UART print 
+
+   #li a0, "\nTLB_FL"
+   #call print7
    mv a0, x9
    call print_reg
 
