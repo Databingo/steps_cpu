@@ -1,12 +1,11 @@
-# Use re0-re9 shadowed register only
-     j isr_router
-isr_router:
-    li x6, 0x2004 # UART print 
-    li x7, 0x1600 # Set stack   # use shadowed x7
-    mv x9, x1     # keep deal address
-    mv x8, x10    # keep a0
+isr_router:        # Use x0-x9 shadowed register only
+     li x6, 0x2004 # UART print 
+     li x7, 0x1600 # Set stack   # use shadowed x7
+     mv x9, x1     # keep deal address aka ra
+     mv x8, x10    # keep a0
+     # x56789 setting
   
-
+     # x1234 operating
      li x3, 0 
      beq x2, x3, mmu    # i-tlb-refill
      li x3, 1 
@@ -26,10 +25,10 @@ i_cache_refill:
      addi x2, x0, 0x25
      sd x2, 0(x3)    #  print %
 
-   #li a0, "\nICA_RF"
-   #call print7
-   #mv a0, x9
-   #call print_reg
+     li a0, "ICA_RF"
+     call print7
+     mv a0, x9
+     call print_reg
 
      j return
 
@@ -156,9 +155,7 @@ return:
 
 
 
-# -------------- use ra, s.. have to save in stack and restore -------
-# functions ------
-
+# -------------- use ra, s0... have to save in stack and restore -------
 print_reg: # a0
     addi x7, x7, -40
     sd ra, 0(x7)
