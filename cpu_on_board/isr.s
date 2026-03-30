@@ -1,7 +1,18 @@
 # Use re0-re4 shadowed register only
      j isr_router
 isr_router:
-     mv x9, x1
+    mv x9, x1     # keep deal address
+    li x7, 0x1600 # Set stack   # use shadowed x7
+    li x6, 0x2004 # UART print 
+  
+
+
+
+
+
+
+
+
      li x3, 0 
      beq x2, x3, mmu    # i-tlb-refill
      li x3, 1 
@@ -21,29 +32,14 @@ i_cache_refill:
      addi x2, x0, 0x25
      sd x2, 0(x3)    #  print %
 
-  mv x8, a0 
-  li x7, 0x1600 # Set stack   # use shadowed x7
-  li x6, 0x2004 # UART print 
-
    li a0, "\nICA_RF"
    call print7
    mv a0, x9
    call print_reg
 
-
-  mv a0, x8
-  mv x1, x9 
-
-
-
-     mret           
+     j return
 
 mmu:  # VA 63:39Sign|38:30Vpn[2]|29:21Vpn[1]|20:12Vpn[0]|11:0PageOffset  
-
-  mv x8, a0 
-  li x7, 0x1600 # Set stack   # use shadowed x7
-  li x6, 0x2004 # UART print 
-
 
      mv a0, x2
      call print_reg
@@ -125,11 +121,6 @@ WRITE_TLB:
      lui x2, 0x20000 # Magic TLB address
      sd x4, 0(x2)
 
- #mv x8, a0 
- #li x7, 0x1600 # Set stack   # use shadowed x7
- #li x6, 0x2004 # UART print 
-
-
    li a0, "\nTLB_RF"
    call print7
    mv a0, x9
@@ -142,9 +133,7 @@ WRITE_TLB:
      addi x2, x0, 91
      sd x2, 0(x3)    #  print [
 
-  mv a0, x8
-  mv x1, x9 
-     mret
+   j return
 
 
 FAULT: # error trap?
@@ -153,20 +142,21 @@ FAULT: # error trap?
      addi x2, x0, 33
      sd x2, 0(x3)    #  print !
 
- #mv x8, a0 
- #li x7, 0x1600 # Set stack   # use shadowed x7
- #li x6, 0x2004 # UART print 
 
    li a0, "TLB_FL:"
    call print7
    mv a0, x9
    call print_reg
 
+   j return
 
-  mv a0, x8
-  mv x1, x9 
-     mret
-     
+
+return:    
+    mv x1, x9     # back deal address
+    ld x10, 9(x7) # restore a0
+    addi x7, x7, 8
+    mret
+
 #Seems VA has 3 table number, satp has Root Table(vpn[2]) address via PPN(ppn+12 x7ace), the we can find PTE in table 2, and PTE has PPN, we can use table2PPN to find table 1 address plus vpn1 number to find PTE in table1, then we get table1 PPN for table0 address, and together with vpn0 to find PTE in talbe0, this is  the last ppa, by ppn + 12 bit of VA low.
 
 
