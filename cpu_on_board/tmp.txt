@@ -361,6 +361,7 @@ addi a0, sp, 0
 #     call puts
 auipc x1, 0 # R_RISCV_PCREL_HI20 puts
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I puts
+ld a0, 0(sp)
 ld ra, 8(sp)
 addi sp, sp, 16
 #     ret

@@ -327,7 +327,7 @@ print7: # a0, 7 char left one for null
     sd ra, 8(sp)
     mv a0, sp
     call puts
-   #ld a0, 0(sp)
+    ld a0, 0(sp)
     ld ra, 8(sp)
     addi sp, sp, 16
     ret
