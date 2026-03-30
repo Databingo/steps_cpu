@@ -21,7 +21,7 @@ i_cache_refill:
      addi x2, x0, 0x25
      sd x2, 0(x3)    #  print %
 
-  mv x5, a0 
+  mv x8, a0 
   li x7, 0x1600 # Set stack   # use shadowed x7
   li x6, 0x2004 # UART print 
 
@@ -31,7 +31,7 @@ i_cache_refill:
    call print_reg
 
 
-  mv a0, x5
+  mv a0, x8
   mv x1, x9 
 
 
@@ -117,7 +117,7 @@ WRITE_TLB:
      lui x2, 0x20000 # Magic TLB address
      sd x4, 0(x2)
 
-  mv x5, a0 
+  mv x8, a0 
   li x7, 0x1600 # Set stack   # use shadowed x7
   li x6, 0x2004 # UART print 
 
@@ -134,7 +134,7 @@ WRITE_TLB:
      addi x2, x0, 91
      sd x2, 0(x3)    #  print [
 
-  mv a0, x5
+  mv a0, x8
   mv x1, x9 
      mret
 
@@ -145,7 +145,7 @@ FAULT: # error trap?
      addi x2, x0, 33
      sd x2, 0(x3)    #  print !
 
-  mv x5, a0 
+  mv x8, a0 
   li x7, 0x1600 # Set stack   # use shadowed x7
   li x6, 0x2004 # UART print 
 
@@ -155,7 +155,7 @@ FAULT: # error trap?
    call print_reg
 
 
-  mv a0, x5
+  mv a0, x8
   mv x1, x9 
      mret
      
