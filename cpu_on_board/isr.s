@@ -39,6 +39,8 @@ i_cache_refill:
      mret           
 
 mmu:  # VA 63:39Sign|38:30Vpn[2]|29:21Vpn[1]|20:12Vpn[0]|11:0PageOffset  
+     mv a0, x2
+     call print_reg
    # 1. Get root table address from csr satp Supervisor Address Translation and Protection
      csrr x2, satp   # satp 63:60Mode|59:44Asid(0forSimpleOS)|43:0PPNofRootTable
      slli x2, x2, 20 # clear high mode+Asid Address Space Identifier
