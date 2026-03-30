@@ -25,7 +25,7 @@ i_cache_refill:
      addi x2, x0, 0x25
      sd x2, 0(x3)    #  print %
 
-     li a0, "ICA_RF"
+     li a0, "ICA_RF:"
      call print7
      mv a0, x9
      call print_reg
@@ -115,7 +115,7 @@ WRITE_TLB:
      lui x2, 0x20000 # Magic TLB address
      sd x4, 0(x2)
 
-   li a0, "\nTLB_RF"
+   li a0, "\nTLB_MP"
    call print7
    mv a0, x9
    call print_reg
