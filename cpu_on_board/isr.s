@@ -39,6 +39,12 @@ i_cache_refill:
      mret           
 
 mmu:  # VA 63:39Sign|38:30Vpn[2]|29:21Vpn[1]|20:12Vpn[0]|11:0PageOffset  
+
+  mv x8, a0 
+  li x7, 0x1600 # Set stack   # use shadowed x7
+  li x6, 0x2004 # UART print 
+
+
      mv a0, x2
      call print_reg
    # 1. Get root table address from csr satp Supervisor Address Translation and Protection
@@ -119,9 +125,9 @@ WRITE_TLB:
      lui x2, 0x20000 # Magic TLB address
      sd x4, 0(x2)
 
-  mv x8, a0 
-  li x7, 0x1600 # Set stack   # use shadowed x7
-  li x6, 0x2004 # UART print 
+ #mv x8, a0 
+ #li x7, 0x1600 # Set stack   # use shadowed x7
+ #li x6, 0x2004 # UART print 
 
 
    li a0, "\nTLB_RF"
@@ -147,9 +153,9 @@ FAULT: # error trap?
      addi x2, x0, 33
      sd x2, 0(x3)    #  print !
 
-  mv x8, a0 
-  li x7, 0x1600 # Set stack   # use shadowed x7
-  li x6, 0x2004 # UART print 
+ #mv x8, a0 
+ #li x7, 0x1600 # Set stack   # use shadowed x7
+ #li x6, 0x2004 # UART print 
 
    li a0, "TLB_FL:"
    call print7
