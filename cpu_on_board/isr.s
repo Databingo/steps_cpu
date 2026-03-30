@@ -1,6 +1,6 @@
 isr_router:        # Use x0-x9 shadowed register only
      li x6, 0x2004 # UART print 
-     li x7, 0x1600 # Set stack   # use shadowed x7
+     li x7, 0x1500 # Set stack   # use shadowed x7
      mv x9, x1     # keep deal address aka ra
      mv x8, x10    # keep a0
      # x56789 setting
@@ -25,7 +25,7 @@ i_cache_refill:
      addi x2, x0, 0x25
      sd x2, 0(x3)    #  print %
 
-     li a0, "ICA_RF:"
+     li a0, "ICA_Re:"
      call print7
      mv a0, x9
      call print_reg
