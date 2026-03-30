@@ -1,6 +1,7 @@
 # Use re0-re4 shadowed register only
      j isr_router
 isr_router:
+     mv x9, x1
      li x3, 0 
      beq x2, x3, mmu    # i-tlb-refill
      li x3, 1 
@@ -10,9 +11,9 @@ isr_router:
 
 i_cache_refill:
      lui x4, 0x20001 # base Cache address
-     ld x3, 0(x1)    # get data
+     ld x3, 0(x9)    # get data
      sd x3, 0(x4)    # refill line low 64
-     ld x3, 8(x1)    # get data
+     ld x3, 8(x9)    # get data
      sd x3, 8(x4)    # refill line high 64  
 
      lui x3, 0x2     
@@ -28,8 +29,8 @@ mmu:  # VA 63:39Sign|38:30Vpn[2]|29:21Vpn[1]|20:12Vpn[0]|11:0PageOffset
      srli x2, x2, 8  # get level_2 ppn(27 bits) + 12 zero positon, point to start of Root Table
 
    # 2. Level 2 walk
-     srli x3, x1, 30 # extract vpn[2] bit 38:30 the first 9 bits
-     andi x3, x3, 0x1ff # Mask 9 bits
+     srli x3, x9, 30 # extract vpn[2] bit 38:30 the first 9 bits
+     andi x3, x3, 0x9ff # Mask 9 bits
      slli x3, x3, 3  # Multiple by 8 (PTE size 8 bytes) Page Table Entry 64 bits
      add  x2, x2, x3 # x2 = Address of L2 PTE
      ld x4, 0(x2)    # Load L2 PTE from memory  PTE 63:54Reserved|53:10PPN|9:8RSW|XWRmark|0validBit1
@@ -45,8 +46,8 @@ mmu:  # VA 63:39Sign|38:30Vpn[2]|29:21Vpn[1]|20:12Vpn[0]|11:0PageOffset
      slli x2, x2, 12 # x2 = Address of L1 Table
 
    # 5. Level 1 Walk
-     srli x3, x1, 21 # Extract VPN[1] bit 29:21
-     andi x3, x3, 0x1ff # Mask 9 bits
+     srli x3, x9, 21 # Extract VPN[1] bit 29:21
+     andi x3, x3, 0x9ff # Mask 9 bits
      slli x3, x3, 3  # Multiple by 8 (PTE size 8 bytes)
      add  x2, x2, x3 # x2 = Address of L1 PTE
      ld x4, 0(x2)    # Load L1 PTE from memory
@@ -62,8 +63,8 @@ mmu:  # VA 63:39Sign|38:30Vpn[2]|29:21Vpn[1]|20:12Vpn[0]|11:0PageOffset
      slli x2, x2, 12 # x2 = Address of L0 Table
 
    # 8. Level 0 Walk
-     srli x3, x1, 12 # Extract VPN[0] bit 20:12
-     andi x3, x3, 0x1ff # Mask 9 bits
+     srli x3, x9, 12 # Extract VPN[0] bit 20:12
+     andi x3, x3, 0x9ff # Mask 9 bits
      slli x3, x3, 3  # Multiple by 8 (PTE size 8 bytes)
      add  x2, x2, x3 # x2 = Address of L0 PTE
      ld x4, 0(x2)    # Load L0 PTE from memory
@@ -82,7 +83,7 @@ FINISH_2MB:
      srli x4, x4, 10 
      slli x4, x4, 12 
      li x3, 0x001ff000 # mask for VA[20:12]
-     and x3, x3, x1    
+     and x3, x3, x9    
      add x4, x4, x3   
      j WRITE_TLB
 
@@ -90,7 +91,7 @@ FINISH_1GB:
      srli x4, x4, 10  # get PPN from PTE(PTE's data struction?)  64:54Reserved 53:10PPN # 9:8RSW 7Dirty 6Accessed 5Global 4User 3Executable 2Write 1Readable 0Valid
      slli x4, x4, 12  # PPN posint [38:12] in satp
      li x3, 0x3ffff000 # mask for VA[29:12]
-     and x3, x3, x1    # extrac from VA
+     and x3, x3, x9    # extrac from VA
      add x4, x4, x3    # add offset to PPN
      j WRITE_TLB
                  
@@ -101,13 +102,13 @@ WRITE_TLB:
      sd x4, 0(x2)
 
   mv x5, a0 
-  li x7, 0x1600 # Set stack   # use shadowed x7
+  li x7, 0x9600 # Set stack   # use shadowed x7
   li x6, 0x2004 # UART print 
 
 
    li a0, "\nISR"
    call print7
-   mv a0, x1
+   mv a0, x9
    call print_reg
    mv a0, x4
    call print_reg
