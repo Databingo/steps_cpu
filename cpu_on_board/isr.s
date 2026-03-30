@@ -100,18 +100,21 @@ WRITE_TLB:
      lui x2, 0x20000 # Magic TLB address
      sd x4, 0(x2)
 
-  #mv a0, x4
+  mv x5, a0 
+  mv a0, x4
   li x7, 0x1600 # Set stack   # use shadowed x7
   li x6, 0x2004 # UART print 
 
 
 
-    #call print_reg
+    call print_reg
 
      lui x3, 0x2     
      addi x3, x3, 0x4              
      addi x2, x0, 91
      sd x2, 0(x3)    #  print [
+
+  mv a0, x5
      mret
 
 
