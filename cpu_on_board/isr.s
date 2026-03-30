@@ -105,8 +105,8 @@ WRITE_TLB:
   li x6, 0x2004 # UART print 
 
 
-   #li a0, "\nISR"
-   #call print7
+   li a0, "\nISR"
+   call print7
    #mv a0, x4
    #call print_reg
 
@@ -115,7 +115,7 @@ WRITE_TLB:
      addi x2, x0, 91
      sd x2, 0(x3)    #  print [
 
- #mv a0, x5
+  mv a0, x5
      mret
 
 
