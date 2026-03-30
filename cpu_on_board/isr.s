@@ -25,7 +25,7 @@ i_cache_refill:
   li x7, 0x1600 # Set stack   # use shadowed x7
   li x6, 0x2004 # UART print 
 
-   li a0, "\nICA_FL"
+   li a0, "\nICA_RF"
    call print7
    mv a0, x9
    call print_reg
@@ -149,8 +149,8 @@ FAULT: # error trap?
   li x7, 0x1600 # Set stack   # use shadowed x7
   li x6, 0x2004 # UART print 
 
-   #li a0, "\nTLB_FL"
-   #call print7
+   li a0, "\nTLB_F"
+   call print7
    mv a0, x9
    call print_reg
 
