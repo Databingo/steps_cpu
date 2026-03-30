@@ -33,11 +33,11 @@ i_cache_refill:
      j return
 
 mmu_i:
-     li a0, "i:"
+     li a0, "\ni:"
      call print7
      j mmu
 mmu_d:
-     li a0, "d:"
+     li a0, "\nd:"
      call print7
      j mmu
 
@@ -120,7 +120,7 @@ WRITE_TLB:
      lui x2, 0x20000 # Magic TLB address
      sd x4, 0(x2)
 
-     li a0, "\nTLB_MP"
+     li a0, "TLB_MP"
      call print7
      mv a0, x9
      call print_reg
