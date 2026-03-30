@@ -34,15 +34,6 @@ i_cache_refill:
 
 
 mmu:  # VA 63:39Sign|38:30Vpn[2]|29:21Vpn[1]|20:12Vpn[0]|11:0PageOffset  
-     beq x3, x2, dtlb 
-     li a0, "\nTLBiMP:"
-     call print7
-dtlb:
-     li a0, "\nTLBdMP:"
-     call print7
-     mv a0, x9
-     call print_reg
- 
    # 1. Get root table address from csr satp Supervisor Address Translation and Protection
      csrr x2, satp   # satp 63:60Mode|59:44Asid(0forSimpleOS)|43:0PPNofRootTable
      slli x2, x2, 20 # clear high mode+Asid Address Space Identifier
@@ -121,6 +112,11 @@ WRITE_TLB:
      lui x2, 0x20000 # Magic TLB address
      sd x4, 0(x2)
 
+     li a0, "\nTLB_MP:"
+     call print7
+     mv a0, x9
+     call print_reg
+ 
    mv a0, x4
    call print_reg
 
