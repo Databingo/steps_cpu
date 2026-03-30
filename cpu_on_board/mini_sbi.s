@@ -256,16 +256,16 @@ print_reg: # a0
     li a0, "x"
     call putchar
     li s1, 60 
-p_loop:
+    p_loop:
     srl s2, s0, s1      # get high nibble
     andi s2, s2, 0xF
     slti s3, s2, 10     # if < 10 number
     beq s3, x0, letter
     addi s2, s2, 48     # 0 is "0" ascii 48
     j print_h
-letter:
+    letter:
     addi s2, s2, 55     # 10 is "A" ascii 65 ..
-print_h:
+    print_h:
     call wait_uart
     sb s2, 0(s11)       # print
     addi s1, s1, -4
@@ -294,13 +294,13 @@ puts: # a0 addr
     sd ra, 0(sp)
     sd s0, 8(sp)
     mv s0, a0
-puts_loop:
+    puts_loop:
     lbu a0, 0(s0)
     beq a0, x0, stop_puts # \x00 for end of string
     call putchar # a0 char
     addi s0, s0, 1 # next byte
     j puts_loop
-stop_puts:
+    stop_puts:
     ld ra, 0(sp)
     ld s0, 8(sp)
     addi sp, sp, 16
@@ -311,9 +311,7 @@ wait_uart:
     addi sp, sp, -16
     sd s0, 0(sp)
     sd ra, 8(sp)
-wait_uart_loop:
-   #li a0, 65  # A
-   #sb a0, 0(s11)
+    wait_uart_loop:
     lw s0, 0(s11)
     bgt zero, s0, wait_uart_loop
     ld s0, 0(sp)
@@ -322,12 +320,12 @@ wait_uart_loop:
     ret
 
 print7: # a0, 7 char left one for null
-    addi sp, sp, -16
-    sd a0, 0(sp)
+    addi sp, sp, -8
+   #sd a0, 0(sp)
     sd ra, 8(sp)
     mv a0, sp
     call puts
-    ld a0, 0(sp)
+   #ld a0, 0(sp)
     ld ra, 8(sp)
-    addi sp, sp, 16
+    addi sp, sp, 8
     ret
