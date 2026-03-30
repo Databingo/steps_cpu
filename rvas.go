@@ -1030,7 +1030,7 @@ func main() { //t6a7s11
 		case "mv": // 复制寄存器
 			ins := fmt.Sprintf("# %s\n", line)
 			real_instr.WriteString(ins)
-			ins = fmt.Sprintf("addi %s, %s, 0\n", code[1], code[2]) // 2->1
+			ins = fmt.Sprintf("addi %s, %s, 0\n", code[1], code[2]) // 1<-2
 			real_instr.WriteString(ins)
 		case "not": // 取反
 			ins := fmt.Sprintf("# %s\n", line)
