@@ -4,6 +4,7 @@ isr_router:
     li x6, 0x2004 # UART print 
     li x7, 0x1600 # Set stack   # use shadowed x7
     mv x9, x1     # keep deal address
+    mv x8, x10    # keep a0
   
 
      li x3, 0 
@@ -25,17 +26,18 @@ i_cache_refill:
      addi x2, x0, 0x25
      sd x2, 0(x3)    #  print %
 
-   li a0, "\nICA_RF"
-   call print7
-   mv a0, x9
-   call print_reg
+   #li a0, "\nICA_RF"
+   #call print7
+   #mv a0, x9
+   #call print_reg
 
      j return
 
 mmu:  # VA 63:39Sign|38:30Vpn[2]|29:21Vpn[1]|20:12Vpn[0]|11:0PageOffset  
 
-     mv a0, x2
-     call print_reg
+   # mv a0, x2
+   # call print_reg
+
    # 1. Get root table address from csr satp Supervisor Address Translation and Protection
      csrr x2, satp   # satp 63:60Mode|59:44Asid(0forSimpleOS)|43:0PPNofRootTable
      slli x2, x2, 20 # clear high mode+Asid Address Space Identifier
@@ -143,9 +145,9 @@ FAULT: # error trap?
 
    j return
 
-
 return:    
-    mv x1, x9     # back deal address
+    mv x1, x9     # back deal address ra
+    mv x10, x8     # back a0
     mret
 
 #Seems VA has 3 table number, satp has Root Table(vpn[2]) address via PPN(ppn+12 x7ace), the we can find PTE in table 2, and PTE has PPN, we can use table2PPN to find table 1 address plus vpn1 number to find PTE in table1, then we get table1 PPN for table0 address, and together with vpn0 to find PTE in talbe0, this is  the last ppa, by ppn + 12 bit of VA low.
@@ -154,7 +156,7 @@ return:
 
 
 
-
+# -------------- use ra, s.. have to save in stack and restore -------
 # functions ------
 
 print_reg: # a0
