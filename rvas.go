@@ -1576,7 +1576,7 @@ func main() { //t6a7s11
 			    lo12 := uint32(abs) & 0xfff 
                             if lo12 & 0x800 !=0 { hi20 += 1}
 			    instruction = uint32(hi20)<<12 | rd<<7 | op
-			    line = fmt.Sprintf("auipc %s, %#x\n", code[1], hi20)
+			    line = fmt.Sprintf("auipc %s, %#x", code[1], hi20)
 			} else {
 			     imm, err := isValidImmediate(code[2])
 			     if err != nil {
@@ -1743,7 +1743,7 @@ func main() { //t6a7s11
 			    lo12 := uint32(absolute_addr) & 0xfff 
                             if lo12 & 0x800 !=0 { hi20 += 1}
 			    instruction = uint32(lo12)<<20 | rs1<<15 | rd<<7 | op
-			    line = fmt.Sprintf("addi %s, %s, %#x\n", code[1], code[2], lo12)
+			    line = fmt.Sprintf("addi %s, %s, %#x", code[1], code[2], lo12)
 			} else {
 			//op, opFound := opBin[code[0]]
 			//rd, rdFound := regBin[code[1]]
@@ -1785,7 +1785,7 @@ func main() { //t6a7s11
 			    offset := label - int64(address - 4) // offset based on auipc address
 			    lo12 := uint32(offset) & 0xfff 
 			    instruction = uint32(lo12)<<20 | rs1<<15 |  rd<<7 | op
-			    line = fmt.Sprintf("jalr %s, %#x(%s)\n", code[1], lo12, code[3])
+			    line = fmt.Sprintf("jalr %s, %#x(%s)", code[1], lo12, code[3])
 			} else {
 			    imm, err := isValidImmediate(code[2])
 			    if err != nil {
