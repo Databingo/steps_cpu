@@ -101,12 +101,13 @@ WRITE_TLB:
      sd x4, 0(x2)
 
   mv x5, a0 
-  mv a0, x4
   li x7, 0x1600 # Set stack   # use shadowed x7
   li x6, 0x2004 # UART print 
 
 
-
+    li a0, "\nISR"
+    call print7
+    mv a0, x4
     call print_reg
 
      lui x3, 0x2     
