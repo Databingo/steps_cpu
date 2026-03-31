@@ -1,5 +1,5 @@
 MIF/HEX Update report for cpu_on_board
-Tue Mar 31 11:00:04 2026
+Tue Mar 31 17:25:48 2026
 Quartus II 32-bit Version 13.0.1 Build 232 06/12/2013 Service Pack 1 SJ Web Edition
 
 
@@ -35,7 +35,7 @@ applicable agreement for further details.
 +---------------------------------------------------------------+
 ; MIF/HEX Update Summary                                        ;
 +-----------------------+---------------------------------------+
-; MIF/HEX Update Status ; Successful - Tue Mar 31 11:00:04 2026 ;
+; MIF/HEX Update Status ; Successful - Tue Mar 31 17:25:48 2026 ;
 ; Revision Name         ; cpu_on_board                          ;
 ; Top-level Entity Name ; cpu_on_board                          ;
 ; Family                ; Cyclone II                            ;
@@ -71,15 +71,15 @@ Info: Running Quartus II 32-bit MIF/HEX Update
     Info: programming logic devices manufactured by Altera and sold by 
     Info: Altera or its authorized distributors.  Please refer to the 
     Info: applicable agreement for further details.
-    Info: Processing started: Tue Mar 31 11:00:00 2026
+    Info: Processing started: Tue Mar 31 17:25:45 2026
 Info: Command: quartus_cdb --read_settings_files=on --update_mif cpu_on_board -c cpu_on_board
 Critical Warning (127004): Memory depth (1536) in the design file differs from memory depth (2048) in the Memory Initialization File "/usr/local/projects/steps_cpu/cpu_on_board/roam.mif" -- truncated remaining initial content value to fit RAM
 Info (39024): Processed the following Memory Initialization File(s)
     Info (39025): Processed Memory Initialization File /usr/local/projects/steps_cpu/cpu_on_board/roam.mif
 Info: Quartus II 32-bit MIF/HEX Update was successful. 0 errors, 1 warning
     Info: Peak virtual memory: 391 megabytes
-    Info: Processing ended: Tue Mar 31 11:00:04 2026
-    Info: Elapsed time: 00:00:04
-    Info: Total CPU time (on all processors): 00:00:04
+    Info: Processing ended: Tue Mar 31 17:25:48 2026
+    Info: Elapsed time: 00:00:03
+    Info: Total CPU time (on all processors): 00:00:03
 
 
