@@ -1,11 +1,12 @@
 isr_router:        # Use x0-x9 shadowed register only
      li x6, 0x2004 # UART print 
      li x7, 0x1500 # Set stack   # use shadowed x7
-    #mv x9, x1     # x9 keep the address need manage, no change x9
-     mv x8, x10    # keep a0(x10)
+                   # x9 keep the address need manage, no change x9
+                   # sre keep ra(x1), a0(x10) will recove when mret
+     # x9 addr 
+     # x2 trap_type
      # x6789 setting
-  
-     # x12345 operating
+     # x12345,x10 operating
      li x3, 0 
      beq x2, x3, mmu_i    # i-tlb-refill
      li x3, 1 
