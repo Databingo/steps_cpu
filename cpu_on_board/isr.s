@@ -161,7 +161,7 @@ return:
 
 
 
-# -------------- use ra, s0... have to save in stack and restore -------
+# -------------- use ra(x1), x2-x4... have to save in stack and restore -------
 print_reg: # a0
     addi x7, x7, -40
     sd ra, 0(x7)
@@ -211,31 +211,31 @@ putchar:  # a0
 puts: # a0 addr
     addi x7, x7, -16
     sd ra, 0(x7)
-    sd s0, 8(x7)
-    mv s0, a0
+    sd x2, 8(x7)
+    mv x2, a0
 puts_loop:
-    lbu a0, 0(s0)
+    lbu a0, 0(x2)
     beq a0, x0, stop_puts # \x00 for end of string
     call putchar # a0 char
-    addi s0, s0, 1 # next byte
+    addi x2, x2, 1 # next byte
     j puts_loop
 stop_puts:
     ld ra, 0(x7)
-    ld s0, 8(x7)
+    ld x2, 8(x7)
     addi x7, x7, 16
     ret
 
 
 wait_uart:
     addi x7, x7, -16
-    sd x1, 0(x7)
+    sd x2, 0(x7)
     sd ra, 8(x7)
 wait_uart_loop:
    #li a0, 65  # A
    #sb a0, 0(x6)
-    lw x1, 0(x6)
+    lw x2, 0(x6)
     bgt zero, s0, wait_uart_loop
-    ld x1, 0(x7)
+    ld x2, 0(x7)
     ld ra, 8(x7)
     addi x7, x7, 16
     ret
