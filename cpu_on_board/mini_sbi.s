@@ -73,7 +73,7 @@ s_mode_kernel:
   # ppn = rt >> 12 = 0x80000
   # mode = 3 sv39
   li t0, 0x8000000000080000
- #testf 
+  testf 
   csrw satp, t0
  #testf 
   sfence.vma
@@ -193,9 +193,9 @@ m_handler_deleg:
    j m_done
 
 m_ex_illegal_ir:
-   li a0, "I"
-   call putchar
-   li a0, "\n0ILLIR"
+  #li a0, "I"
+  #call putchar
+   li a0, "\nEILLIR"
    call print7
    csrr a0, mtval
    call print_reg

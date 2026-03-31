@@ -94,6 +94,7 @@ srli t0, t0, 0x1
 slli t0, t0, 0x16
 ori t0, t0, 0x100
 slli t0, t0, 0xb
+testf 
 #   csrw satp, t0
 csrrw x0, satp, t0
 sfence.vma
@@ -201,14 +202,7 @@ addi a0, x0, 0x0
 #    j m_done
 jal x0, m_done
 m_ex_illegal_ir:
-#    li a0, "I"
-addi a0, x0, 0x0
-addi a0, x0, 0x0
-addi a0, x0, 0x49
-#    call putchar
-auipc x1, 0 # R_RISCV_PCREL_HI20 putchar
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I putchar
-#    li a0, "\n0ILLIR"
+#    li a0, "\nEILLIR"
 addi a0, x0, 0x0
 lui a0, 0x524
 srli a0, a0, 0x1
@@ -216,9 +210,9 @@ ori a0, a0, 0x4a6
 slli a0, a0, 0xb
 ori a0, a0, 0x131
 slli a0, a0, 0xb
-ori a0, a0, 0x126
+ori a0, a0, 0x128
 slli a0, a0, 0xb
-ori a0, a0, 0xa
+ori a0, a0, 0x50a
 #    call print7
 auipc x1, 0 # R_RISCV_PCREL_HI20 print7
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print7
