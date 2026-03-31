@@ -73,6 +73,7 @@ s_mode_kernel:
   # ppn = rt >> 12 = 0x80000
   # mode = 3 sv39
   li t0, 0x8000000000080000
+  call print_reg
   testf 
   csrw satp, t0
  #testf 
