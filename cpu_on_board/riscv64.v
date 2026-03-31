@@ -482,7 +482,6 @@ module riscv64(
 	end
         else if ((mmu_pc || mmu_da) && bus_write_enable && bus_address == `Tlb) begin // for the last fill: sd ppa, Tlb
             tlb_vpn[tlb_ptr] <= re[1][38:12]; // VA from x1 saved by trapp mmu_pc/mmu_da
-            //tlb_ppn[tlb_ptr] <= {17'h0, re[1][38:12]}; // mimic copy now | real need walking assembly !!
             tlb_ppn[tlb_ptr] <= bus_write_data[55:12] ; // real 
             tlb_vld[tlb_ptr] <= 1;
             tlb_ptr <= tlb_ptr + 1; 
@@ -490,7 +489,7 @@ module riscv64(
 	else if (!bubble) begin 
 	//else if (!bubble && !(satp_mmu && !mmu_pc && !mmu_da && !i_cache_refill && !tlb_i_hit)) begin 
 	//else if (!bubble && (!tlb_i_hit || !tlb_d_hit)) begin 
-	    casez (ir) 32'b0001001??????????_000_?????_1110011: begin  // sfence.vma flush
+	    casez (ir) 32'b0001001??????????_000_?????_1110011: begin  // sfence.vma flush any way if ir is (not be bubbled)
 	        tlb_vld[0] <= 0; 
 		tlb_vld[1] <= 0; 
 	        tlb_vld[2] <= 0; 
@@ -503,9 +502,9 @@ module riscv64(
     // -----
     // i_cache_hit 63:13 tag, 12:4 index 3:0 offset Cache line 16B (4 instructions) 512 lines
     reg [127:0] cache_line = 128'h0;
-    reg [51:0] cache_tag = 52'h0;
-    reg [63:0] ppc_pre = 64'h0; // for read
-    reg [63:0] ask_i_data; // for write
+    reg [51:0]  cache_tag = 52'h0;
+    reg [63:0]  ppc_pre = 64'h0; // for read
+    reg [63:0]  ask_i_data; // for write
     //(* ram_style = "block" *) reg [127:0] Cache_L [0:1023]; // 16KB
     (* ram_style = "block" *) reg [63:0] Cache_L_Low [0:511]; // 4KB
     (* ram_style = "block" *) reg [63:0] Cache_L_High [0:511]; // 4KB
@@ -538,13 +537,10 @@ module riscv64(
     assign ir = (mmu_pc || mmu_da || i_cache_refill) ? instruction : i_cache_hit ? cache_i : 32'h00000013; // NOP:addi x0, x0, 0;
 
     // NO cache test
-    //wire i_cache_hit = 1;    // no cache trap
-    //assign ir = instruction; // no cache
+    // wire i_cache_hit = 1;    // no cache trap
+    // assign ir = instruction; // no cache
     // -----
-
-    //assign ir = instruction;
-    //initial begin end !!
-
+      
     // EXE Instruction 
     always @(posedge clk or negedge reset) begin
         if (!reset) begin 
@@ -559,7 +555,6 @@ module riscv64(
 	    bus_address <= `Ram_base;
             // Interrupt re-enable
 	    Csrs[mstatus][MIE] <= 0;
-	    //interrupt_ack <= 0;
 	    mmu_da <= 0;
 	    for (i=0;i<10;i=i+1) begin sre[i]<= 64'b0; end 
 	    for (i=0;i<27;i=i+1) begin Csrs[i]<= 64'b0; end
@@ -575,16 +570,15 @@ module riscv64(
 
 
         end else begin
-            pc <= pc + 4; // Default PC+4    (1.Could be overide 2.Take effect next cycle) 
-	    //interrupt_ack <= 0;
+            pc <= pc + 4; // Default PC+4    (1.Could be overwrite 2.Take effect next cycle) 
 	    bus_read_enable <= 0;
 	    bus_write_enable <= 0; 
 
 	    //  mmu_pc  I-TLB miss Trap
 	    if (satp_mmu && !mmu_pc && !mmu_da && !i_cache_refill && !tlb_i_hit) begin //OPEN 
        		mmu_pc <= 1; // MMU_PC ON 
-       	        pc <= 0; // trap to isr_router
-       	 	bubble <= 1'b1; // bubble 
+       	        pc <= 0;     // trap to isr_router
+       	 	bubble <= 1'b1; // bubble IF for new pc value 
 	        saved_user_pc <= pc - 4; // !!! save pc (EXE was flushed so record-redo it, previous pc)
 	        if (bubble || ir==32'b0001001??????????_000_?????_1110011) saved_user_pc <= pc ; // !!! save pc (j/b EXE was flushed currectly, vma executed anyway no need back-redo)
 		for (i=1;i<10;i=i+1) begin sre[i]<= re[i]; end // save re
