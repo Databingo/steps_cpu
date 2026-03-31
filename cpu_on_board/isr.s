@@ -3,9 +3,9 @@ isr_router:        # Use x0-x9 shadowed register only
      li x7, 0x1500 # Set stack   # use shadowed x7
      mv x9, x1     # keep deal address aka ra
      mv x8, x10    # keep a0
-     # x56789 setting
+     # x6789 setting
   
-     # x1234 operating
+     # x12345 operating
      li x3, 0 
      beq x2, x3, mmu_i    # i-tlb-refill
      li x3, 1 
@@ -161,39 +161,39 @@ return:
 
 
 
-# -------------- use ra(x1), x2-x4... have to save in stack and restore -------
+# -------------- use ra(x1), x2-x5... have to save in stack and restore -------
 print_reg: # a0
     addi x7, x7, -40
     sd ra, 0(x7)
-    sd s0, 8(x7)
-    sd s1, 16(x7)
-    sd s2, 24(x7)
-    sd s3, 32(x7)
-    mv s0, a0
+    sd x2, 8(x7)
+    sd x3, 16(x7)
+    sd x4, 24(x7)
+    sd x5, 32(x7)
+    mv x2, a0
     li a0, "0"
     call putchar
     li a0, "x"
     call putchar
-    li s1, 60 
+    li x3, 60 
 p_loop:
-    srl s2, s0, s1      # get high nibble
-    andi s2, s2, 0xF
-    slti s3, s2, 10     # if < 10 number
-    beq s3, x0, letter
-    addi s2, s2, 48     # 0 is "0" ascii 48
+    srl x4, x2, x3      # get high nibble
+    andi x4, x4 0xF
+    slti x5, x4, 10     # if < 10 number
+    beq x5, x0, letter
+    addi x4, x4, 48     # 0 is "0" ascii 48
     j print_h
 letter:
-    addi s2, s2, 55     # 10 is "A" ascii 65 ..
+    addi x4, x4, 55     # 10 is "A" ascii 65 ..
 print_h:
     call wait_uart
-    sb s2, 0(x6)       # print
-    addi s1, s1, -4
-    bge s1, x0, p_loop 
+    sb x4, 0(x6)       # print
+    addi x3, x3, -4
+    bge x3, x0, p_loop 
     ld ra, 0(x7)
-    ld s0, 8(x7)
-    ld s1, 16(x7)
-    ld s2, 24(x7)
-    ld s3, 32(x7)
+    ld x2, 8(x7)
+    ld x3, 16(x7)
+    ld x4, 24(x7)
+    ld x5, 32(x7)
     addi x7, x7, 40
     ret
 
