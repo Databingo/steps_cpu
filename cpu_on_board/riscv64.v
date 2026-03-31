@@ -826,7 +826,7 @@ module riscv64(
 	               			       if (Csrs[mstatus][MPP+1:MPP] < M_mode) Csrs[mstatus][MPRV] <= 0; // set mprv to 0, modified privilege, 1 using in MPP not current
 	               			       current_privilege_mode  <= Csrs[mstatus][MPP+1:MPP]; // set back previous mode
 	               			       Csrs[mstatus][MPP+1:MPP] <= 2'b00; // set previous privilege mode(MPP) to be 00 (U-mode)
-	               			       pc <=  Csrs[mepc]; // mepc was +4 by the software handler and written back to sepc
+	               			       pc <= Csrs[mepc]; // mepc was +4 by the software handler and written back to sepc
 		          		       bubble <= 1'b1;
 	               			       end
                     // Sret
