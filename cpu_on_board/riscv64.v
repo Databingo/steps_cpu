@@ -574,7 +574,7 @@ module riscv64(
 	    bus_read_enable <= 0;
 	    bus_write_enable <= 0; 
 
-	    //  mmu_pc  I-TLB miss Trap
+	    //  mmu_pc I-TLB miss Trap
 	    if (satp_mmu && !mmu_pc && !mmu_da && !i_cache_refill && !tlb_i_hit) begin //OPEN 
        		mmu_pc <= 1; // MMU_PC ON 
        	        pc <= 0;     // trap to isr_router
@@ -599,7 +599,7 @@ module riscv64(
 	//	//Csrs[mstatus][MIE] <= Csrs[mstatus][MPIE]; // set back interrupt status
     
 	    // ----- 
-	    //  mmu_cache_i at EXE stage without stap/tlb_hit sensitive
+	    //  i_cache_hit at EXE stage without stap/tlb_hit sensitive
 	    end else if (!mmu_pc && !mmu_da && !i_cache_refill && !i_cache_hit) begin //OPEN 
 	    //end else if (!i_cache_hit) begin //OPEN 
        		i_cache_refill <= 1; // 
