@@ -591,12 +591,12 @@ module riscv64(
             // Bubble
 	    end else if (bubble) begin bubble <= 1'b0; // Flush this cycle & Clear bubble signal for the next cycle
 
-	    end else if (mmu_pc && ir == 32'b00110000001000000000000001110011) begin // end hiject mret & recover from shadow when see Mret
-		pc <= saved_user_pc; // recover from shadow when see Mret
-	 	bubble <= 1'b1; // bubble
-		for (i=1;i<10;i=i+1) begin re[i]<= sre[i]; end // recover usr re
-		mmu_pc <= 0; // MMU_PC OFF
-		//Csrs[mstatus][MIE] <= Csrs[mstatus][MPIE]; // set back interrupt status
+	//    end else if (mmu_pc && ir == 32'b00110000001000000000000001110011) begin // end hiject mret & recover from shadow when see Mret
+	//	pc <= saved_user_pc; // recover from shadow when see Mret
+	// 	bubble <= 1'b1; // bubble
+	//	for (i=1;i<10;i=i+1) begin re[i]<= sre[i]; end // recover usr re
+	//	mmu_pc <= 0; // MMU_PC OFF
+	//	//Csrs[mstatus][MIE] <= Csrs[mstatus][MPIE]; // set back interrupt status
     
 	    // ----- 
 	    //  mmu_cache_i at EXE stage without stap/tlb_hit sensitive
@@ -616,11 +616,11 @@ module riscv64(
 		end
 		re[2] <= 1;// save x2 trap type 1 i-cache trap
 		re[3] <= ir;// save in x3 executing ir
-	    end else if (i_cache_refill && ir == 32'b00110000001000000000000001110011) begin // end hiject mret & recover from shadow when see Mret
-		pc <= saved_user_pc; // recover from shadow when see Mret
-	 	bubble <= 1'b1; // bubble
-		for (i=1;i<10;i=i+1) begin re[i]<= sre[i]; end // recover usr re
-		i_cache_refill <= 0; // OFF
+	//    end else if (i_cache_refill && ir == 32'b00110000001000000000000001110011) begin // end hiject mret & recover from shadow when see Mret
+	//	pc <= saved_user_pc; // recover from shadow when see Mret
+	// 	bubble <= 1'b1; // bubble
+	//	for (i=1;i<10;i=i+1) begin re[i]<= sre[i]; end // recover usr re
+	//	i_cache_refill <= 0; // OFF
 	    // -----
 
             //  mmu_da  D-TLB miss Trap // load/store/atom
@@ -635,13 +635,27 @@ module riscv64(
 		re[3] <= ir;// save in x3 executing ir
 		//Csrs[mstatus][MPIE] <= Csrs[mstatus][MIE]; // disable interrupt during shadow mmu walking
 		//Csrs[mstatus][MIE] <= 0;
-	    end else if (mmu_da && ir == 32'b00110000001000000000000001110011) begin // hiject mret 
+	//    end else if (mmu_da && ir == 32'b00110000001000000000000001110011) begin // hiject mret 
+	//	pc <= saved_user_pc; // recover from shadow when see Mret
+	//	bubble <= 1; // bubble
+	//	for (i=1;i<10;i=i+1) begin re[i]<= sre[i]; end // recover usr re
+	//	mmu_da <= 0; // MMU_DA OFF
+	//	//Csrs[mstatus][MIE] <= Csrs[mstatus][MPIE]; // set back interrupt status
+    
+    
+    
+            // Back from Trap
+	    end else if ((mmu_pc || mmu_da || i_cache_refill) && ir == 32'b00110000001000000000000001110011) begin // hiject mret 
 		pc <= saved_user_pc; // recover from shadow when see Mret
 		bubble <= 1; // bubble
 		for (i=1;i<10;i=i+1) begin re[i]<= sre[i]; end // recover usr re
-		mmu_da <= 0; // MMU_DA OFF
-		//Csrs[mstatus][MIE] <= Csrs[mstatus][MPIE]; // set back interrupt status
+		if (mmu_pc) mmu_cp <= 0 ;// MMU_PC OFF
+		if (mmu_da) mmu_da <= 0; // MMU_DA OFF
+		if (i_cache_refill) i_cache_refill<= 0; // MMU_DA OFF
 		
+
+
+
             // Interrupt PLIC full (Platform-Level-Interrupt-Control)  MMIO
 	    end else if ((meip_interrupt || msip_interrupt) && Csrs[mstatus][MIE]==1) begin //mstatus[3] MIE
 	    //end else if ((meip_interrupt || msip_interrupt) && Csrs[mstatus][MIE]==1 && !mmu_pc && !mmu_da && !i_cache_refill && !load_step && !store_step) begin //mstatus[3] MIE
