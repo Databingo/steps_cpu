@@ -1,8 +1,8 @@
 isr_router:        # Use x0-x9 shadowed register only
      li x6, 0x2004 # UART print 
      li x7, 0x1500 # Set stack   # use shadowed x7
-    #mv x9, x1     # keep deal address aka ra
-     mv x8, x10    # keep a0
+    #mv x9, x1     # x9 keep the address need manage, no change x9
+     mv x8, x10    # keep a0(x10)
      # x6789 setting
   
      # x12345 operating
