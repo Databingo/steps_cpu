@@ -584,7 +584,7 @@ module riscv64(
 		for (i=1;i<10;i=i+1) begin sre[i]<= re[i]; end // save re
 		re[1] <= pc;// - 4; // save this vpc to x1 //!!!! We also need to refill pc - 4' ppc for re-executeing pc-4, with hit(if satp in for very next sfence.vma) 
 		re[2] <= 0;// save in x2 trap type 0 i-tlb trap
-		re[3] <= ir;// save in x3 executing ir
+		//re[3] <= ir;// save in x3 executing ir
 		//Csrs[mstatus][MPIE] <= Csrs[mstatus][MIE]; // disable interrupt during shadow mmu walking
 		//Csrs[mstatus][MIE] <= 0;
 
@@ -615,7 +615,7 @@ module riscv64(
 		    ask_i_data <= {ppc[63:4], 4'b0};// save missed ppc_pre cache_line address for hardware
 		end
 		re[2] <= 1;// save x2 trap type 1 i-cache trap
-		re[3] <= ir;// save in x3 executing ir
+		//re[3] <= ir;// save in x3 executing ir
 	//    end else if (i_cache_refill && ir == 32'b00110000001000000000000001110011) begin // end hiject mret & recover from shadow when see Mret
 	//	pc <= saved_user_pc; // recover from shadow when see Mret
 	// 	bubble <= 1'b1; // bubble
@@ -632,7 +632,7 @@ module riscv64(
 		for (i=1;i<10;i=i+1) begin sre[i]<= re[i]; end // save re
 		re[1] <= ls_va; //save va to x1
 		re[2] <= 2;// save x2 trap type 2 d-tlb trap
-		re[3] <= ir;// save in x3 executing ir
+		//re[3] <= ir;// save in x3 executing ir
 		//Csrs[mstatus][MPIE] <= Csrs[mstatus][MIE]; // disable interrupt during shadow mmu walking
 		//Csrs[mstatus][MIE] <= 0;
 	//    end else if (mmu_da && ir == 32'b00110000001000000000000001110011) begin // hiject mret 
