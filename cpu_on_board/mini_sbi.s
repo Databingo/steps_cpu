@@ -80,7 +80,7 @@ s_mode_kernel:
   ## <--- start use TLB I/D hitting
 
 
- testf 
+ #testf 
 
 
 
@@ -203,7 +203,7 @@ m_ex_illegal_ir:
 
 m_done: 
    csrr t0, mepc
-  #addi t0, t0, 4 # skip ecall/ebreak instruction
+   addi t0, t0, 4 # skip ecall/ebreak instruction
    csrw mepc, t0
    #ld t0, 0x900(zero)
    #ld t1, 0x908(zero)
