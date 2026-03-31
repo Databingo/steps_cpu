@@ -33,7 +33,7 @@ module riscv64(
     //(* ram_style = "logic" *) reg [63:0] sre [0:10]; // Shadow Registers 11s
     reg mmu_da=0;
     reg mmu_pc = 0;
-    reg mmu_cache_refill=0;
+    reg i_cache_refill=0;
     reg [63:0] saved_user_pc;
     integer i; 
 
@@ -464,7 +464,7 @@ module riscv64(
                    //({44{tlb_d_match[6]}} & tlb_ppn[6]) |
                    //({44{tlb_d_match[7]}} & tlb_ppn[7]) ; end
     // concat physical address
-    wire need_trans = satp_mmu   && !mmu_pc && !mmu_da && !mmu_cache_refill;
+    wire need_trans = satp_mmu   && !mmu_pc && !mmu_da && !i_cache_refill;
     assign ppc = need_trans ? {8'h0, pc_ppn, pc[11:0]} : pc;
     assign pda = need_trans ? {8'h0, data_ppn, ls_va[11:0]} : ls_va;
         
@@ -488,7 +488,7 @@ module riscv64(
             tlb_ptr <= tlb_ptr + 1; 
         end
 	else if (!bubble) begin 
-	//else if (!bubble && !(satp_mmu && !mmu_pc && !mmu_da && !mmu_cache_refill && !tlb_i_hit)) begin 
+	//else if (!bubble && !(satp_mmu && !mmu_pc && !mmu_da && !i_cache_refill && !tlb_i_hit)) begin 
 	//else if (!bubble && (!tlb_i_hit || !tlb_d_hit)) begin 
 	    casez (ir) 32'b0001001??????????_000_?????_1110011: begin  // sfence.vma flush
 	        tlb_vld[0] <= 0; 
@@ -501,7 +501,7 @@ module riscv64(
     end
 
     // -----
-    // cache_i_hit 63:13 tag, 12:4 index 3:0 offset Cache line 16B (4 instructions) 512 lines
+    // i_cache_hit 63:13 tag, 12:4 index 3:0 offset Cache line 16B (4 instructions) 512 lines
     reg [127:0] cache_line = 128'h0;
     reg [51:0] cache_tag = 52'h0;
     reg [63:0] ppc_pre = 64'h0; // for read
@@ -524,8 +524,8 @@ module riscv64(
 	cache_tag <= {cache_valid_bits[ppc[12:4]], Cache_T[ppc[12:4]]}; 
 	ppc_pre <= ppc;
 	// Write
-        if (mmu_cache_refill && bus_write_enable && bus_address == `CacheI_L) begin Cache_L_Low[ask_i_data[12:4]] <= bus_write_data; end
-        if (mmu_cache_refill && bus_write_enable && bus_address == `CacheI_H) begin 
+        if (i_cache_refill && bus_write_enable && bus_address == `CacheI_L) begin Cache_L_Low[ask_i_data[12:4]] <= bus_write_data; end
+        if (i_cache_refill && bus_write_enable && bus_address == `CacheI_H) begin 
 	    Cache_L_High[ask_i_data[12:4]] <= bus_write_data; 
 	    //Cache_T[ask_i_data[12:4]] <= {1'b1, ask_i_data[63:13]}; 
 	    Cache_T[ask_i_data[12:4]] <= ask_i_data[63:13]; 
@@ -533,12 +533,12 @@ module riscv64(
 	end
     end
 
-    wire cache_i_hit = cache_tag[51] && (ppc_pre[63:13] == cache_tag[50:0]);
+    wire i_cache_hit = cache_tag[51] && (ppc_pre[63:13] == cache_tag[50:0]);
     wire [31:0] cache_i = cache_line[ppc_pre[3:2]*32 +: 32];
-    assign ir = (mmu_pc || mmu_da || mmu_cache_refill) ? instruction : cache_i_hit ? cache_i : 32'h00000013; // NOP:addi x0, x0, 0;
+    assign ir = (mmu_pc || mmu_da || i_cache_refill) ? instruction : i_cache_hit ? cache_i : 32'h00000013; // NOP:addi x0, x0, 0;
 
     // NO cache test
-    //wire cache_i_hit = 1;    // no cache trap
+    //wire i_cache_hit = 1;    // no cache trap
     //assign ir = instruction; // no cache
     // -----
 
@@ -562,7 +562,6 @@ module riscv64(
 	    //interrupt_ack <= 0;
 	    mmu_da <= 0;
 	    for (i=0;i<10;i=i+1) begin sre[i]<= 64'b0; end 
-	    //for (i=0;i<36;i=i+1) begin Csrs[i]<= 64'b0; end
 	    for (i=0;i<27;i=i+1) begin Csrs[i]<= 64'b0; end
 	    Csrs[medeleg] <= 64'hb1af; // delegate to S-mode 1011000110101111 // see VII 3.1.15 mcasue exceptions
 	    Csrs[mideleg] <= 64'h0222; // delegate to S-mode 0000001000100010 see VII 3.1.15 mcasue interrupt 1/5/9 SSIP(supervisor software interrupt) STIP(time) SEIP(external)
@@ -582,19 +581,17 @@ module riscv64(
 	    bus_write_enable <= 0; 
 
 	    //  mmu_pc  I-TLB miss Trap
-	    if (satp_mmu && !mmu_pc && !mmu_da && !mmu_cache_refill && !tlb_i_hit) begin //OPEN 
+	    if (satp_mmu && !mmu_pc && !mmu_da && !i_cache_refill && !tlb_i_hit) begin //OPEN 
        		mmu_pc <= 1; // MMU_PC ON 
-       	        //pc <= 0; // I-TLB refill Handler
        	        pc <= 0; // trap to isr_router
        	 	bubble <= 1'b1; // bubble 
 	        saved_user_pc <= pc - 4; // !!! save pc (EXE was flushed so record-redo it, previous pc)
-	        if (bubble || ir==32'b0001001??????????_000_?????_1110011) saved_user_pc <= pc ; // !!! save pc (j/b EXE was flushed currectly)
+	        if (bubble || ir==32'b0001001??????????_000_?????_1110011) saved_user_pc <= pc ; // !!! save pc (j/b EXE was flushed currectly, vma executed anyway no need back-redo)
 		for (i=1;i<10;i=i+1) begin sre[i]<= re[i]; end // save re
 		re[1] <= pc;// - 4; // save this vpc to x1 //!!!! We also need to refill pc - 4' ppc for re-executeing pc-4, with hit(if satp in for very next sfence.vma) 
+		re[2] <= 0;// save x2 trap type 0 i-tlb trap
 		//Csrs[mstatus][MPIE] <= Csrs[mstatus][MIE]; // disable interrupt during shadow mmu walking
 		//Csrs[mstatus][MIE] <= 0;
-		// Infront of bubble just for trapping jump/branch instrucion
-		re[2] <= 0;// save x2 trap type 0 i-tlb trap
 
             // Bubble
 	    end else if (bubble) begin bubble <= 1'b0; // Flush this cycle & Clear bubble signal for the next cycle
@@ -608,14 +605,13 @@ module riscv64(
     
 	    // ----- 
 	    //  mmu_cache_i at EXE stage without stap/tlb_hit sensitive
-	    end else if (!mmu_pc && !mmu_da && !mmu_cache_refill && !cache_i_hit) begin //OPEN 
-	    //end else if (!cache_i_hit) begin //OPEN 
-       		mmu_cache_refill <= 1; // 
-       	        //pc <= 72; //
+	    end else if (!mmu_pc && !mmu_da && !i_cache_refill && !i_cache_hit) begin //OPEN 
+	    //end else if (!i_cache_hit) begin //OPEN 
+       		i_cache_refill <= 1; // 
        	        pc <= 0; // trap to isr_router
        	 	bubble <= 1'b1; // bubble 
 		for (i=1;i<10;i=i+1) begin sre[i]<= re[i]; end // save re
-	        saved_user_pc <= pc -4  ; // ??!!! save pc (j/b EXE was flushed currectly)
+	        saved_user_pc <= pc - 4  ; // ??!!! save pc (j/b EXE was flushed currectly)
 		re[1] <= {ppc_pre[63:4], 4'b0};// save missed ppc_pre cache_line address for handler
 		ask_i_data <= {ppc_pre[63:4], 4'b0};// save missed ppc_pre cache_line address for hardware
 		if (pc == `Ram_base) begin // initial situation
@@ -624,25 +620,24 @@ module riscv64(
 		    ask_i_data <= {ppc[63:4], 4'b0};// save missed ppc_pre cache_line address for hardware
 		end
 		re[2] <= 1;// save x2 trap type 1 i-cache trap
-	    end else if (mmu_cache_refill && ir == 32'b00110000001000000000000001110011) begin // end hiject mret & recover from shadow when see Mret
+	    end else if (i_cache_refill && ir == 32'b00110000001000000000000001110011) begin // end hiject mret & recover from shadow when see Mret
 		pc <= saved_user_pc; // recover from shadow when see Mret
 	 	bubble <= 1'b1; // bubble
 		for (i=1;i<10;i=i+1) begin re[i]<= sre[i]; end // recover usr re
-		mmu_cache_refill <= 0; // OFF
+		i_cache_refill <= 0; // OFF
 	    // -----
 
             //  mmu_da  D-TLB miss Trap // load/store/atom
-	    end else if (satp_mmu && !mmu_pc && !mmu_da && !mmu_cache_refill && tlb_i_hit && !tlb_d_hit && (op == 7'b0000011 || op == 7'b0100011 || op == 7'b0101111) ) begin  
+	    end else if (satp_mmu && !mmu_pc && !mmu_da && !i_cache_refill && tlb_i_hit && !tlb_d_hit && (op == 7'b0000011 || op == 7'b0100011 || op == 7'b0101111) ) begin  
 		mmu_da <= 1; // MMU_DA ON
-		//pc <= 36; // D-TLB refill Handler
        	        pc <= 0; // trap to isr_router
 	 	bubble <= 1'b1; // bubble
 	        saved_user_pc <= pc - 4; // save pc EXE l/s/a
 		for (i=1;i<10;i=i+1) begin sre[i]<= re[i]; end // save re
 		re[1] <= ls_va; //save va to x1
+		re[2] <= 2;// save x2 trap type 2 d-tlb trap
 		//Csrs[mstatus][MPIE] <= Csrs[mstatus][MIE]; // disable interrupt during shadow mmu walking
 		//Csrs[mstatus][MIE] <= 0;
-		re[2] <= 2;// save x2 trap type 2 d-tlb trap
 	    end else if (mmu_da && ir == 32'b00110000001000000000000001110011) begin // hiject mret 
 		pc <= saved_user_pc; // recover from shadow when see Mret
 		bubble <= 1; // bubble
@@ -652,7 +647,7 @@ module riscv64(
 		
             // Interrupt PLIC full (Platform-Level-Interrupt-Control)  MMIO
 	    end else if ((meip_interrupt || msip_interrupt) && Csrs[mstatus][MIE]==1) begin //mstatus[3] MIE
-	    //end else if ((meip_interrupt || msip_interrupt) && Csrs[mstatus][MIE]==1 && !mmu_pc && !mmu_da && !mmu_cache_refill && !load_step && !store_step) begin //mstatus[3] MIE
+	    //end else if ((meip_interrupt || msip_interrupt) && Csrs[mstatus][MIE]==1 && !mmu_pc && !mmu_da && !i_cache_refill && !load_step && !store_step) begin //mstatus[3] MIE
                 Csrs[mip][MTIP] <= time_interrupt; // MTIP linux will see then jump to its handler
                 Csrs[mip][MEIP] <= meip_interrupt; // MEIP
                 Csrs[mip][MSIP] <= msip_interrupt; // MSIP
