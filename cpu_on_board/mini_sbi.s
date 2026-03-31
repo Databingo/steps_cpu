@@ -82,7 +82,7 @@ s_mode_kernel:
   ## <--- start use TLB I/D hitting
 
 
- #testf 
+ testf 
 
 
 

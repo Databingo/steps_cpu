@@ -97,6 +97,7 @@ slli t0, t0, 0xb
 #   csrw satp, t0
 csrrw x0, satp, t0
 sfence.vma
+testf 
 #    la a0, msg   
 auipc a0, 0 # R_RISCV_PCREL_HI20 msg 
 addi a0, a0, 0 # R_RISCV_PCREL_LO12_I msg 
