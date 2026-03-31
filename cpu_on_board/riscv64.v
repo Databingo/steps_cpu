@@ -27,10 +27,10 @@ module riscv64(
     wire [31:0] ir;
             
     (* ram_style = "logic" *) reg [63:0] re [0:31]; // General Registers 32s
-    (* ram_style = "logic" *) reg [63:0] sre [0:9]; // Shadow Registers 10s
+    //(* ram_style = "logic" *) reg [63:0] sre [0:9]; // Shadow Registers 10s
     //(* ram_style = "logic" *) reg [63:0] sre [0:4]; // Shadow Registers 5s
     //(* ram_style = "logic" *) reg [63:0] sre [0:7]; // Shadow Registers 8s
-    //(* ram_style = "logic" *) reg [63:0] sre [0:10]; // Shadow Registers 11s
+    (* ram_style = "logic" *) reg [63:0] sre [0:10]; // Shadow Registers 11s
     reg mmu_da=0;
     reg mmu_pc = 0;
     reg i_cache_refill=0;
@@ -319,13 +319,13 @@ module riscv64(
 
    localparam pmpcfg0    = 27;  // Physical Memory Protection
    localparam pmpaddr0   = 28;  // 
-   localparam pmpaddr1   = 29;  // 
-   localparam pmpaddr2   = 30;  // 
-   localparam pmpaddr3   = 31;  // 
-   localparam pmpaddr4   = 32;  // 
-   localparam pmpaddr5   = 33;  // 
-   localparam pmpaddr6   = 34;  // 
-   localparam pmpaddr7   = 35;  // 
+   //localparam pmpaddr1   = 29;  // 
+   //localparam pmpaddr2   = 30;  // 
+   //localparam pmpaddr3   = 31;  // 
+   //localparam pmpaddr4   = 32;  // 
+   //localparam pmpaddr5   = 33;  // 
+   //localparam pmpaddr6   = 34;  // 
+   //localparam pmpaddr7   = 35;  // 
 
     //integer scontext = 12'h5a8; 
    reg [62:0] CAUSE_CODE;
@@ -360,20 +360,20 @@ module riscv64(
             12'hF13 : w_csr_id = mimpid     ;   
             12'h3A0 : w_csr_id = pmpcfg0    ;   
             12'h3B0 : w_csr_id = pmpaddr0   ;   
-            12'h3B1 : w_csr_id = pmpaddr1   ;   
-            12'h3B2 : w_csr_id = pmpaddr2   ;   
-            12'h3B3 : w_csr_id = pmpaddr3   ;   
-            12'h3B4 : w_csr_id = pmpaddr4   ;   
-            12'h3B5 : w_csr_id = pmpaddr5   ;   
-            12'h3B6 : w_csr_id = pmpaddr6   ;   
-            12'h3B7 : w_csr_id = pmpaddr7   ;   
-	    default : w_csr_id = 36; 
-	    //default : w_csr_id = 27; 
+            //12'h3B1 : w_csr_id = pmpaddr1   ;   
+            //12'h3B2 : w_csr_id = pmpaddr2   ;   
+            //12'h3B3 : w_csr_id = pmpaddr3   ;   
+            //12'h3B4 : w_csr_id = pmpaddr4   ;   
+            //12'h3B5 : w_csr_id = pmpaddr5   ;   
+            //12'h3B6 : w_csr_id = pmpaddr6   ;   
+            //12'h3B7 : w_csr_id = pmpaddr7   ;   
+	    //default : w_csr_id = 36; 
+	    default : w_csr_id = 29; 
 	endcase
     end
 
-    (* ram_style = "logic" *) reg [63:0] Csrs [0:36]; // 36 CSRs for now // totally 4096
-    //(* ram_style = "logic" *) reg [63:0] Csrs [0:27]; // 36 CSRs for now // totally 4096
+    //(* ram_style = "logic" *) reg [63:0] Csrs [0:36]; // 36 CSRs for now // totally 4096
+    (* ram_style = "logic" *) reg [63:0] Csrs [0:28]; // 36 CSRs for now // totally 4096
     wire [3:0]  satp_mmu  = Csrs[satp][63:60]; // 0:bare, 8:sv39, 9:sv48  satp.MODE!=0, privilegae is not M-mode, mstatus.MPRN is not set or in MPP's mode?
     wire [15:0] satp_asid = Csrs[satp][59:44]; // Address Space ID for TLB
     wire [43:0] satp_ppn  = Csrs[satp][43:0];  // Root Page Table PPN physical page number
@@ -556,8 +556,8 @@ module riscv64(
             // Interrupt re-enable
 	    Csrs[mstatus][MIE] <= 0;
 	    mmu_da <= 0;
-	    for (i=0;i<10;i=i+1) begin sre[i]<= 64'b0; end 
-	    for (i=0;i<36;i=i+1) begin Csrs[i]<= 64'b0; end
+	    for (i=0;i<11;i=i+1) begin sre[i]<= 64'b0; end 
+	    for (i=0;i<29;i=i+1) begin Csrs[i]<= 64'b0; end
 	    Csrs[medeleg] <= 64'hb1af; // delegate to S-mode 1011000110101111 // see VII 3.1.15 mcasue exceptions
 	    Csrs[mideleg] <= 64'h0222; // delegate to S-mode 0000001000100010 see VII 3.1.15 mcasue interrupt 1/5/9 SSIP(supervisor software interrupt) STIP(time) SEIP(external)
 	    // Initialize Machine Info for OpenSBI
@@ -581,7 +581,7 @@ module riscv64(
        	 	bubble <= 1'b1; // bubble IF for new pc value 
 	        saved_user_pc <= pc - 4; // !!! save pc (EXE was flushed so record-redo it, previous pc)
 	        if (bubble || ir==32'b0001001??????????_000_?????_1110011) saved_user_pc <= pc ; // !!! save pc (j/b EXE was flushed currectly, vma executed anyway no need back-redo)
-		for (i=1;i<10;i=i+1) begin sre[i]<= re[i]; end // save re
+		for (i=1;i<11;i=i+1) begin sre[i]<= re[i]; end // save re
 		re[9] <= pc;// - 4; // save this vpc to x1 //!!!! We also need to refill pc - 4' ppc for re-executeing pc-4, with hit(if satp in for very next sfence.vma) 
 		re[2] <= 0;// save in x2 trap type 0 i-tlb trap
 		//re[3] <= ir;// save in x3 executing ir
@@ -594,7 +594,7 @@ module riscv64(
 	    end else if (mmu_pc && ir == 32'b00110000001000000000000001110011) begin // end hiject mret & recover from shadow when see Mret
 		pc <= saved_user_pc; // recover from shadow when see Mret
 	 	bubble <= 1'b1; // bubble
-		for (i=1;i<10;i=i+1) begin re[i]<= sre[i]; end // recover usr re
+		for (i=1;i<11;i=i+1) begin re[i]<= sre[i]; end // recover usr re
 		mmu_pc <= 0; // MMU_PC OFF
 		//Csrs[mstatus][MIE] <= Csrs[mstatus][MPIE]; // set back interrupt status
     
@@ -605,7 +605,7 @@ module riscv64(
        		i_cache_refill <= 1; // 
        	        pc <= 0; // trap to isr_router
        	 	bubble <= 1'b1; // bubble 
-		for (i=1;i<10;i=i+1) begin sre[i]<= re[i]; end // save re
+		for (i=1;i<11;i=i+1) begin sre[i]<= re[i]; end // save re
 	        saved_user_pc <= pc - 4  ; // ??!!! save pc (j/b EXE was flushed currectly)
 		re[9] <= {ppc_pre[63:4], 4'b0};// save missed ppc_pre cache_line address for handler
 		ask_i_data <= {ppc_pre[63:4], 4'b0};// save missed ppc_pre cache_line address for hardware
@@ -619,7 +619,7 @@ module riscv64(
 	    end else if (i_cache_refill && ir == 32'b00110000001000000000000001110011) begin // end hiject mret & recover from shadow when see Mret
 		pc <= saved_user_pc; // recover from shadow when see Mret
 	 	bubble <= 1'b1; // bubble
-		for (i=1;i<10;i=i+1) begin re[i]<= sre[i]; end // recover usr re
+		for (i=1;i<11;i=i+1) begin re[i]<= sre[i]; end // recover usr re
 		i_cache_refill <= 0; // OFF
 	    // -----
 
@@ -629,7 +629,7 @@ module riscv64(
        	        pc <= 0; // trap to isr_router
 	 	bubble <= 1'b1; // bubble
 	        saved_user_pc <= pc - 4; // save pc EXE l/s/a
-		for (i=1;i<10;i=i+1) begin sre[i]<= re[i]; end // save re
+		for (i=1;i<11;i=i+1) begin sre[i]<= re[i]; end // save re
 		re[9] <= ls_va; //save va to x1
 		re[2] <= 2;// save x2 trap type 2 d-tlb trap
 		//re[3] <= ir;// save in x3 executing ir
@@ -638,7 +638,7 @@ module riscv64(
 	    end else if (mmu_da && ir == 32'b00110000001000000000000001110011) begin // hiject mret 
 		pc <= saved_user_pc; // recover from shadow when see Mret
 		bubble <= 1; // bubble
-		for (i=1;i<10;i=i+1) begin re[i]<= sre[i]; end // recover usr re
+		for (i=1;i<11;i=i+1) begin re[i]<= sre[i]; end // recover usr re
 		mmu_da <= 0; // MMU_DA OFF
 		//Csrs[mstatus][MIE] <= Csrs[mstatus][MPIE]; // set back interrupt status
     
@@ -749,7 +749,7 @@ module riscv64(
 		    32'b???????_?????_?????_110_?????_1100011: begin if ($unsigned(re[w_rs1]) < $unsigned(re[w_rs2])) begin pc <= branch; bubble <= 1'b1; end end // Bltu
 		    32'b???????_?????_?????_111_?????_1100011: begin if ($unsigned(re[w_rs1]) >= $unsigned(re[w_rs2])) begin pc <= branch; bubble <= 1'b1; end end // Bgeu
 		    // System-CSR 
-	            32'b???????_?????_?????_001_?????_1110011: begin if (w_rd != 0) re[w_rd] <= Csrs[w_csr_id]; if (w_csr_id != 36)  Csrs[w_csr_id] <= rs1; end // Csrrw  bram read first old data(xdefault)
+	            32'b???????_?????_?????_001_?????_1110011: begin if (w_rd != 0) re[w_rd] <= Csrs[w_csr_id]; if (w_csr_id != 29)  Csrs[w_csr_id] <= rs1; end // Csrrw  bram read first old data(xdefault)
 	            32'b???????_?????_?????_010_?????_1110011: begin if (w_rd != 0) re[w_rd] <= Csrs[w_csr_id]; if (w_rs1 != 0) Csrs[w_csr_id] <= (Csrs[w_csr_id] |  rs1); end // Csrrs
 	            32'b???????_?????_?????_011_?????_1110011: begin if (w_rd != 0) re[w_rd] <= Csrs[w_csr_id]; if (w_rs1 != 0) Csrs[w_csr_id] <= (Csrs[w_csr_id] & ~rs1); end // Csrrc
 	            32'b???????_?????_?????_101_?????_1110011: begin if (w_rd != 0) re[w_rd] <= Csrs[w_csr_id]; Csrs[w_csr_id] <= w_imm_z; end // Csrrwi
@@ -826,7 +826,7 @@ module riscv64(
 	               			       if (Csrs[mstatus][MPP+1:MPP] < M_mode) Csrs[mstatus][MPRV] <= 0; // set mprv to 0, modified privilege, 1 using in MPP not current
 	               			       current_privilege_mode  <= Csrs[mstatus][MPP+1:MPP]; // set back previous mode
 	               			       Csrs[mstatus][MPP+1:MPP] <= 2'b00; // set previous privilege mode(MPP) to be 00 (U-mode)
-	               			       pc <= Csrs[mepc]; // mepc was +4 by the software handler and written back to sepc
+	               			       pc <=  Csrs[mepc]; // mepc was +4 by the software handler and written back to sepc
 		          		       bubble <= 1'b1;
 	               			       end
                     // Sret
