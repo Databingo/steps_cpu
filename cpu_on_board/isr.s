@@ -25,10 +25,10 @@ i_cache_refill:
      addi x2, x0, 0x25
      sd x2, 0(x3)    #  print %
 
-     li a0, "ICA_Re:"
-     call print7
-     mv a0, x9
-     call print_reg
+    #li a0, "ICA_Re:"
+    #call print7
+    #mv a0, x9
+    #call print_reg
 
      j return
 
