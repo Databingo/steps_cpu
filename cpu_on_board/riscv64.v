@@ -649,7 +649,7 @@ module riscv64(
 		pc <= saved_user_pc; // recover from shadow when see Mret
 		bubble <= 1; // bubble
 		for (i=1;i<10;i=i+1) begin re[i]<= sre[i]; end // recover usr re
-		if (mmu_pc) mmu_cp <= 0 ;// MMU_PC OFF
+		if (mmu_pc) mmu_pc <= 0 ;// MMU_PC OFF
 		if (mmu_da) mmu_da <= 0; // MMU_DA OFF
 		if (i_cache_refill) i_cache_refill<= 0; // MMU_DA OFF
 		
