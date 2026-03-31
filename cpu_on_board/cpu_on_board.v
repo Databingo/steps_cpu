@@ -4,33 +4,33 @@ module cpu_on_board (
     // -- Pin --
     (* chip_pin = "PIN_L1" *)  input wire CLOCK_50, // 50 MHz clock
     (* chip_pin = "PIN_R22" *) input wire KEY0,     // Active-low reset button
-    (* chip_pin = "PIN_Y21, PIN_Y22, PIN_W21, PIN_W22, PIN_V21, PIN_V22, PIN_U21, PIN_U22" *) output wire [7:0] LEDG, // 8 green LEDs
-    (* chip_pin = "R17" *) output reg LEDR9, // 1 red LEDs breath left most 
-    (* chip_pin = "R20" *) output wire LEDR0, // 
-    (* chip_pin = "R19" *) output wire LEDR1, // 
-    (* chip_pin = "U18, Y18, V19, T18, Y19, U19" *) output wire [5:0] LEDR_PC, // 8 red LEDs right
-    (* chip_pin = "J2" *)  output wire HEX00,
-    (* chip_pin = "J1" *)  output wire HEX01,
-    (* chip_pin = "H2" *)  output wire HEX02,
-    (* chip_pin = "H1" *)  output wire HEX03,
-    (* chip_pin = "F2" *)  output wire HEX04,
-    (* chip_pin = "F1" *)  output wire HEX05,
-    (* chip_pin = "E2" *)  output wire HEX06,
-    (* chip_pin = "E1" *)  output wire HEX10,
-    (* chip_pin = "H6" *)  output wire HEX11,
-    (* chip_pin = "H5" *)  output wire HEX12,
-    (* chip_pin = "H4" *)  output wire HEX13,
-    (* chip_pin = "G5" *)  output wire HEX20,
-    (* chip_pin = "G6" *)  output wire HEX21,
-    (* chip_pin = "C2" *)  output wire HEX22,
-    (* chip_pin = "C1" *)  output wire HEX23,
-    (* chip_pin = "F4" *)  output wire HEX30,
-    (* chip_pin = "D5" *)  output wire HEX31,
-    (* chip_pin = "D6" *)  output wire HEX32,
-    (* chip_pin = "J4" *)  output wire HEX33,
-    (* chip_pin = "L8" *)  output wire HEX34,
-    (* chip_pin = "F3" *)  output wire HEX35,
-    (* chip_pin = "D4" *)  output wire HEX36,
+    //(* chip_pin = "PIN_Y21, PIN_Y22, PIN_W21, PIN_W22, PIN_V21, PIN_V22, PIN_U21, PIN_U22" *) output wire [7:0] LEDG, // 8 green LEDs
+    //(* chip_pin = "R17" *) output reg LEDR9, // 1 red LEDs breath left most 
+    //(* chip_pin = "R20" *) output wire LEDR0, // 
+    //(* chip_pin = "R19" *) output wire LEDR1, // 
+    //(* chip_pin = "U18, Y18, V19, T18, Y19, U19" *) output wire [5:0] LEDR_PC, // 8 red LEDs right
+    //(* chip_pin = "J2" *)  output wire HEX00,
+    //(* chip_pin = "J1" *)  output wire HEX01,
+    //(* chip_pin = "H2" *)  output wire HEX02,
+    //(* chip_pin = "H1" *)  output wire HEX03,
+    //(* chip_pin = "F2" *)  output wire HEX04,
+    //(* chip_pin = "F1" *)  output wire HEX05,
+    //(* chip_pin = "E2" *)  output wire HEX06,
+    //(* chip_pin = "E1" *)  output wire HEX10,
+    //(* chip_pin = "H6" *)  output wire HEX11,
+    //(* chip_pin = "H5" *)  output wire HEX12,
+    //(* chip_pin = "H4" *)  output wire HEX13,
+    //(* chip_pin = "G5" *)  output wire HEX20,
+    //(* chip_pin = "G6" *)  output wire HEX21,
+    //(* chip_pin = "C2" *)  output wire HEX22,
+    //(* chip_pin = "C1" *)  output wire HEX23,
+    //(* chip_pin = "F4" *)  output wire HEX30,
+    //(* chip_pin = "D5" *)  output wire HEX31,
+    //(* chip_pin = "D6" *)  output wire HEX32,
+    //(* chip_pin = "J4" *)  output wire HEX33,
+    //(* chip_pin = "L8" *)  output wire HEX34,
+    //(* chip_pin = "F3" *)  output wire HEX35,
+    //(* chip_pin = "D4" *)  output wire HEX36,
     (* chip_pin = "H15" *)  input wire PS2_CLK, 
     (* chip_pin = "J14" *)  input wire PS2_DAT,
     (* chip_pin = "V20" *)  output wire SD_CLK, //SD_CLK
@@ -153,8 +153,8 @@ assign DRAM_CKE = 1; // always enable
 
     wire [31:0] ir_ld; assign ir_ld = ir_bd;//{ir_bd[7:0], ir_bd[15:8], ir_bd[23:16], ir_bd[31:24]}; // Endianness swap // SWAP IN REAL
     //assign LEDR_PC = ppc/4;
-    assign LEDR_PC = sd_status;
-    assign LEDG = ir_ld;
+    //assign LEDR_PC = sd_status;
+    //assign LEDG = ir_ld;
 
     // -- CPU --
     riscv64 cpu (
@@ -166,7 +166,7 @@ assign DRAM_CKE = 1; // always enable
         .ppc(ppc),
         //.bubble(bubble),
         //.ir(LEDG),
-        .heartbeat(LEDR9),
+        //.heartbeat(LEDR9),
 
         .bus_address(bus_address),
         .bus_write_data(bus_write_data),

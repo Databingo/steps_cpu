@@ -5,7 +5,7 @@ module riscv64(
     input wire reset,     // Active-low reset button
     input wire [31:0] instruction,
     output wire [63:0] ppc,
-    output wire  heartbeat,
+    //output wire  heartbeat,
     output reg [63:0] bus_address,     // 39 bit for real Sv39 standard?
     output reg [63:0] bus_write_data,
     output reg        bus_write_enable,
