@@ -1,0 +1,159 @@
+Flow report for cpu_on_board
+Tue Mar 31 16:29:40 2026
+Quartus II 32-bit Version 13.0.1 Build 232 06/12/2013 Service Pack 1 SJ Web Edition
+
+
+---------------------
+; Table of Contents ;
+---------------------
+  1. Legal Notice
+  2. Flow Summary
+  3. Flow Settings
+  4. Flow Non-Default Global Settings
+  5. Flow Elapsed Time
+  6. Flow OS Summary
+  7. Flow Log
+  8. Flow Messages
+  9. Flow Suppressed Messages
+
+
+
+----------------
+; Legal Notice ;
+----------------
+Copyright (C) 1991-2013 Altera Corporation
+Your use of Altera Corporation's design tools, logic functions 
+and other software and tools, and its AMPP partner logic 
+functions, and any output files from any of the foregoing 
+(including device programming or simulation files), and any 
+associated documentation or information are expressly subject 
+to the terms and conditions of the Altera Program License 
+Subscription Agreement, Altera MegaCore Function License 
+Agreement, or other applicable license agreement, including, 
+without limitation, that your use is for the sole purpose of 
+programming logic devices manufactured by Altera and sold by 
+Altera or its authorized distributors.  Please refer to the 
+applicable agreement for further details.
+
+
+
++--------------------------------------------------------------------------------------+
+; Flow Summary                                                                         ;
++------------------------------------+-------------------------------------------------+
+; Flow Status                        ; Successful - Tue Mar 31 16:29:40 2026           ;
+; Quartus II 32-bit Version          ; 13.0.1 Build 232 06/12/2013 SP 1 SJ Web Edition ;
+; Revision Name                      ; cpu_on_board                                    ;
+; Top-level Entity Name              ; cpu_on_board                                    ;
+; Family                             ; Cyclone II                                      ;
+; Device                             ; EP2C20F484C7                                    ;
+; Timing Models                      ; Final                                           ;
+; Total logic elements               ; 22,172                                          ;
+;     Total combinational functions  ; 17,543                                          ;
+;     Dedicated logic registers      ; 7,815                                           ;
+; Total registers                    ; 7815                                            ;
+; Total pins                         ; 46                                              ;
+; Total virtual pins                 ; 0                                               ;
+; Total memory bits                  ; 210,432                                         ;
+; Embedded Multiplier 9-bit elements ; 0                                               ;
+; Total PLLs                         ; 0                                               ;
++------------------------------------+-------------------------------------------------+
+
+
++-----------------------------------------+
+; Flow Settings                           ;
++-------------------+---------------------+
+; Option            ; Setting             ;
++-------------------+---------------------+
+; Start date & time ; 03/31/2026 16:16:38 ;
+; Main task         ; Compilation         ;
+; Revision Name     ; cpu_on_board        ;
++-------------------+---------------------+
+
+
++--------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+; Flow Non-Default Global Settings                                                                                                                                         ;
++-----------------------------------------+--------------------------------------------------------------------+---------------+------------------------------+------------+
+; Assignment Name                         ; Value                                                              ; Default Value ; Entity Name                  ; Section Id ;
++-----------------------------------------+--------------------------------------------------------------------+---------------+------------------------------+------------+
+; ADV_NETLIST_OPT_SYNTH_WYSIWYG_REMAP     ; On                                                                 ; Off           ; --                           ; --         ;
+; ALLOW_ANY_RAM_SIZE_FOR_RECOGNITION      ; On                                                                 ; Off           ; --                           ; --         ;
+; COMPILER_SIGNATURE_ID                   ; 0.177494499719284                                                  ; --            ; --                           ; --         ;
+; ENABLE_SIGNALTAP                        ; Off                                                                ; --            ; --                           ; --         ;
+; FITTER_EFFORT                           ; Standard Fit                                                       ; Auto Fit      ; --                           ; --         ;
+; HDL_MESSAGE_LEVEL                       ; Level3                                                             ; Level2        ; --                           ; --         ;
+; IP_TOOL_ENV                             ; Qsys                                                               ; --            ; altera_reset_controller      ; --         ;
+; IP_TOOL_ENV                             ; Qsys                                                               ; --            ; altera_reset_controller      ; --         ;
+; IP_TOOL_ENV                             ; Qsys                                                               ; --            ; jtag_uart_system             ; --         ;
+; IP_TOOL_ENV                             ; Qsys                                                               ; --            ; jtag_uart_system_jtag_uart_0 ; --         ;
+; IP_TOOL_ENV                             ; Qsys                                                               ; --            ; sdram_pll                    ; --         ;
+; IP_TOOL_ENV                             ; Qsys                                                               ; --            ; sdram_pll_altpll_0           ; --         ;
+; IP_TOOL_NAME                            ; altera_reset_controller                                            ; --            ; altera_reset_controller      ; --         ;
+; IP_TOOL_NAME                            ; altera_reset_controller                                            ; --            ; altera_reset_controller      ; --         ;
+; IP_TOOL_NAME                            ; Qsys                                                               ; --            ; jtag_uart_system             ; --         ;
+; IP_TOOL_NAME                            ; altera_avalon_jtag_uart                                            ; --            ; jtag_uart_system_jtag_uart_0 ; --         ;
+; IP_TOOL_NAME                            ; Qsys                                                               ; --            ; sdram_pll                    ; --         ;
+; IP_TOOL_NAME                            ; altpll                                                             ; --            ; sdram_pll_altpll_0           ; --         ;
+; IP_TOOL_VERSION                         ; 13.0                                                               ; --            ; altera_reset_controller      ; --         ;
+; IP_TOOL_VERSION                         ; 13.0                                                               ; --            ; altera_reset_controller      ; --         ;
+; IP_TOOL_VERSION                         ; 13.0sp1                                                            ; --            ; jtag_uart_system             ; --         ;
+; IP_TOOL_VERSION                         ; 13.0.1.99.2                                                        ; --            ; jtag_uart_system_jtag_uart_0 ; --         ;
+; IP_TOOL_VERSION                         ; 13.0sp1                                                            ; --            ; sdram_pll                    ; --         ;
+; IP_TOOL_VERSION                         ; 13.0                                                               ; --            ; sdram_pll_altpll_0           ; --         ;
+; MAX_CORE_JUNCTION_TEMP                  ; 85                                                                 ; --            ; --                           ; --         ;
+; MIN_CORE_JUNCTION_TEMP                  ; 0                                                                  ; --            ; --                           ; --         ;
+; MISC_FILE                               ; jtag_uart_system/synthesis/../../jtag_uart_system.cmp              ; --            ; --                           ; --         ;
+; MISC_FILE                               ; jtag_uart_system/synthesis/../../jtag_uart_system.qsys             ; --            ; --                           ; --         ;
+; MISC_FILE                               ; sdram_pll/sdram/synthesis/../../sdram_pll.cmp                      ; --            ; --                           ; --         ;
+; MISC_FILE                               ; sdram_pll/sdram/synthesis/../../sdram_pll.qsys                     ; --            ; --                           ; --         ;
+; OPTIMIZATION_TECHNIQUE                  ; Area                                                               ; Balanced      ; --                           ; --         ;
+; PARTITION_COLOR                         ; 16764057                                                           ; --            ; --                           ; Top        ;
+; PARTITION_FITTER_PRESERVATION_LEVEL     ; PLACEMENT_AND_ROUTING                                              ; --            ; --                           ; Top        ;
+; PARTITION_NETLIST_TYPE                  ; SOURCE                                                             ; --            ; --                           ; Top        ;
+; PHYSICAL_SYNTHESIS_COMBO_LOGIC_FOR_AREA ; On                                                                 ; Off           ; --                           ; --         ;
+; PHYSICAL_SYNTHESIS_EFFORT               ; Extra                                                              ; Normal        ; --                           ; --         ;
+; PHYSICAL_SYNTHESIS_REGISTER_RETIMING    ; On                                                                 ; Off           ; --                           ; --         ;
+; PLACEMENT_EFFORT_MULTIPLIER             ; 4.0                                                                ; 1.0           ; --                           ; --         ;
+; POWER_BOARD_THERMAL_MODEL               ; None (CONSERVATIVE)                                                ; --            ; --                           ; --         ;
+; POWER_PRESET_COOLING_SOLUTION           ; 23 MM HEAT SINK WITH 200 LFPM AIRFLOW                              ; --            ; --                           ; --         ;
+; PROJECT_OUTPUT_DIRECTORY                ; output_files                                                       ; --            ; --                           ; --         ;
+; ROUTER_EFFORT_MULTIPLIER                ; 4                                                                  ; 1.0           ; --                           ; --         ;
+; ROUTER_TIMING_OPTIMIZATION_LEVEL        ; MAXIMUM                                                            ; Normal        ; --                           ; --         ;
+; SLD_FILE                                ; /usr/local/projects/steps_cpu/cpu_on_board/stp1_auto_stripped.stp  ; --            ; --                           ; --         ;
+; SLD_INFO                                ; QSYS_NAME jtag_uart_system HAS_SOPCINFO 1 GENERATION_ID 1760608262 ; --            ; jtag_uart_system             ; --         ;
+; SLD_INFO                                ; QSYS_NAME sdram_pll HAS_SOPCINFO 1 GENERATION_ID 1763195282        ; --            ; sdram_pll                    ; --         ;
+; SOPCINFO_FILE                           ; jtag_uart_system/synthesis/../../jtag_uart_system.sopcinfo         ; --            ; --                           ; --         ;
+; SOPCINFO_FILE                           ; sdram_pll/sdram/synthesis/../../sdram_pll.sopcinfo                 ; --            ; --                           ; --         ;
+; SYNTHESIS_ONLY_QIP                      ; On                                                                 ; --            ; --                           ; --         ;
+; SYNTHESIS_ONLY_QIP                      ; On                                                                 ; --            ; --                           ; --         ;
+; USE_SIGNALTAP_FILE                      ; stp1.stp                                                           ; --            ; --                           ; --         ;
+; VERILOG_INPUT_VERSION                   ; SystemVerilog_2005                                                 ; Verilog_2001  ; --                           ; --         ;
+; VERILOG_SHOW_LMF_MAPPING_MESSAGES       ; Off                                                                ; --            ; --                           ; --         ;
++-----------------------------------------+--------------------------------------------------------------------+---------------+------------------------------+------------+
+
+
++--------------------------------------------------------------------------------------------------------------------------+
+; Flow Elapsed Time                                                                                                        ;
++----------------------+--------------+-------------------------+---------------------+------------------------------------+
+; Module Name          ; Elapsed Time ; Average Processors Used ; Peak Virtual Memory ; Total CPU Time (on all processors) ;
++----------------------+--------------+-------------------------+---------------------+------------------------------------+
+; Analysis & Synthesis ; 00:12:59     ; 1.0                     ; 569 MB              ; 00:12:54                           ;
+; Total                ; 00:12:59     ; --                      ; --                  ; 00:12:54                           ;
++----------------------+--------------+-------------------------+---------------------+------------------------------------+
+
+
++-----------------------------------------------------------------------------------------------------+
+; Flow OS Summary                                                                                     ;
++----------------------+-----------------------------+------------------+------------+----------------+
+; Module Name          ; Machine Hostname            ; OS Name          ; OS Version ; Processor type ;
++----------------------+-----------------------------+------------------+------------+----------------+
+; Analysis & Synthesis ; ashah-standardpcq35ich92009 ; Debian GNU/Linux ; 12         ; x86_64         ;
++----------------------+-----------------------------+------------------+------------+----------------+
+
+
+------------
+; Flow Log ;
+------------
+quartus_map --read_settings_files=on --write_settings_files=off cpu_on_board -c cpu_on_board
+
+
+
