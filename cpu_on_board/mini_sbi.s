@@ -75,7 +75,7 @@ s_mode_kernel:
   li t0, 0x8000000000080000
  #csrw satp, t0
  #call print_reg
-  testf 
+ #testf 
   csrw satp, t0
  #testf 
   sfence.vma

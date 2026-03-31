@@ -94,7 +94,6 @@ srli t0, t0, 0x1
 slli t0, t0, 0x16
 ori t0, t0, 0x100
 slli t0, t0, 0xb
-testf 
 #   csrw satp, t0
 csrrw x0, satp, t0
 sfence.vma
