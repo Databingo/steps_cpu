@@ -161,39 +161,39 @@ return:
 
 
 
-# -------------- use ra, s0... have to save in stack and restore -------
+# -------------- use ra, x1-9... have to save in stack and restore -------
 print_reg: # a0
     addi x7, x7, -40
     sd ra, 0(x7)
-    sd s0, 8(x7)
-    sd s1, 16(x7)
-    sd s2, 24(x7)
-    sd s3, 32(x7)
-    mv s0, a0
+    sd x1, 8(x7)
+    sd x2, 16(x7)
+    sd x3, 24(x7)
+    sd x4, 32(x7)
+    mv x1, a0
     li a0, "0"
     call putchar
     li a0, "x"
     call putchar
-    li s1, 60 
-p_loop:
-    srl s2, s0, s1      # get high nibble
-    andi s2, s2, 0xF
-    slti s3, s2, 10     # if < 10 number
-    beq s3, x0, letter
-    addi s2, s2, 48     # 0 is "0" ascii 48
+    li x2, 60 
+    p_loop:
+    srl x3, x1, x2      # get high nibble
+    andi x3, x3, 0xF
+    slti x4, x3, 10     # if < 10 number
+    beq x4, x0, letter
+    addi x3, x3, 48     # 0 is "0" ascii 48
     j print_h
-letter:
-    addi s2, s2, 55     # 10 is "A" ascii 65 ..
-print_h:
+    letter:
+    addi x3, x3, 55     # 10 is "A" ascii 65 ..
+    print_h:
     call wait_uart
-    sb s2, 0(x6)       # print
-    addi s1, s1, -4
-    bge s1, x0, p_loop 
+    sb x3, 0(x6)       # print
+    addi x2, x2, -4
+    bge x2, x0, p_loop 
     ld ra, 0(x7)
-    ld s0, 8(x7)
-    ld s1, 16(x7)
-    ld s2, 24(x7)
-    ld s3, 32(x7)
+    ld x1, 8(x7)
+    ld x2, 16(x7)
+    ld x3, 24(x7)
+    ld x4, 32(x7)
     addi x7, x7, 40
     ret
 
@@ -211,31 +211,31 @@ putchar:  # a0
 puts: # a0 addr
     addi x7, x7, -16
     sd ra, 0(x7)
-    sd s0, 8(x7)
-    mv s0, a0
-puts_loop:
-    lbu a0, 0(s0)
-    beq a0, x0, stop_puts # \x00 for end of string
-    call putchar # a0 char
-    addi s0, s0, 1 # next byte
+    sd x1, 8(x7)
+    mv x1, a0
+    puts_loop:
+    lbu a0, 0(x1)
+    beq a0, x0, stop_puts   # \x00 for end of string
+    call putchar            # a0 char
+    addi x1, x1, 1          # next byte
     j puts_loop
-stop_puts:
+    stop_puts:
     ld ra, 0(x7)
-    ld s0, 8(x7)
+    ld x1, 8(x7)
     addi x7, x7, 16
     ret
 
 
 wait_uart:
     addi x7, x7, -16
-    sd s0, 0(x7)
+    sd x1, 0(x7)
     sd ra, 8(x7)
 wait_uart_loop:
    #li a0, 65  # A
    #sb a0, 0(x6)
-    lw s0, 0(x6)
-    bgt zero, s0, wait_uart_loop
-    ld s0, 0(x7)
+    lw x1, 0(x6)
+    bgt zero, x1, wait_uart_loop
+    ld x1, 0(x7)
     ld ra, 8(x7)
     addi x7, x7, 16
     ret
