@@ -481,7 +481,7 @@ module riscv64(
 	    tlb_vld[3] <= 0; 
 	end
         else if ((mmu_pc || mmu_da) && bus_write_enable && bus_address == `Tlb) begin // for the last fill: sd ppa, Tlb
-            tlb_vpn[tlb_ptr] <= re[1][38:12]; // VA from x1 saved by trapp mmu_pc/mmu_da
+            tlb_vpn[tlb_ptr] <= re[9][38:12]; // VA from x1 saved by trapp mmu_pc/mmu_da
             tlb_ppn[tlb_ptr] <= bus_write_data[55:12] ; // real 
             tlb_vld[tlb_ptr] <= 1;
             tlb_ptr <= tlb_ptr + 1; 
@@ -582,7 +582,7 @@ module riscv64(
 	        saved_user_pc <= pc - 4; // !!! save pc (EXE was flushed so record-redo it, previous pc)
 	        if (bubble || ir==32'b0001001??????????_000_?????_1110011) saved_user_pc <= pc ; // !!! save pc (j/b EXE was flushed currectly, vma executed anyway no need back-redo)
 		for (i=1;i<10;i=i+1) begin sre[i]<= re[i]; end // save re
-		re[1] <= pc;// - 4; // save this vpc to x1 //!!!! We also need to refill pc - 4' ppc for re-executeing pc-4, with hit(if satp in for very next sfence.vma) 
+		re[9] <= pc;// - 4; // save this vpc to x1 //!!!! We also need to refill pc - 4' ppc for re-executeing pc-4, with hit(if satp in for very next sfence.vma) 
 		re[2] <= 0;// save in x2 trap type 0 i-tlb trap
 		//re[3] <= ir;// save in x3 executing ir
 		//Csrs[mstatus][MPIE] <= Csrs[mstatus][MIE]; // disable interrupt during shadow mmu walking
@@ -607,11 +607,11 @@ module riscv64(
        	 	bubble <= 1'b1; // bubble 
 		for (i=1;i<10;i=i+1) begin sre[i]<= re[i]; end // save re
 	        saved_user_pc <= pc - 4  ; // ??!!! save pc (j/b EXE was flushed currectly)
-		re[1] <= {ppc_pre[63:4], 4'b0};// save missed ppc_pre cache_line address for handler
+		re[9] <= {ppc_pre[63:4], 4'b0};// save missed ppc_pre cache_line address for handler
 		ask_i_data <= {ppc_pre[63:4], 4'b0};// save missed ppc_pre cache_line address for hardware
 		if (pc == `Ram_base) begin // initial situation
 		    saved_user_pc <= pc; // first pc
-		    re[1] <= {ppc[63:4], 4'b0};// save missed ppc_pre cache_line address for handler
+		    re[9] <= {ppc[63:4], 4'b0};// save missed ppc_pre cache_line address for handler
 		    ask_i_data <= {ppc[63:4], 4'b0};// save missed ppc_pre cache_line address for hardware
 		end
 		re[2] <= 1;// save x2 trap type 1 i-cache trap
@@ -630,7 +630,7 @@ module riscv64(
 	 	bubble <= 1'b1; // bubble
 	        saved_user_pc <= pc - 4; // save pc EXE l/s/a
 		for (i=1;i<10;i=i+1) begin sre[i]<= re[i]; end // save re
-		re[1] <= ls_va; //save va to x1
+		re[9] <= ls_va; //save va to x1
 		re[2] <= 2;// save x2 trap type 2 d-tlb trap
 		//re[3] <= ir;// save in x3 executing ir
 		//Csrs[mstatus][MPIE] <= Csrs[mstatus][MIE]; // disable interrupt during shadow mmu walking
