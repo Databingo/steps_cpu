@@ -7,6 +7,7 @@ isr_router:        # Use x0-x9 shadowed register only
      # x2 trap_type
      # x6789 setting
      # x12345,x10 operating
+
      li x3, 0 
      beq x2, x3, mmu_i    # i-tlb-refill
      li x3, 1 
@@ -30,7 +31,6 @@ i_cache_refill:
     #call print7
     #mv a0, x9
     #call print_reg
-
      j return
 
 mmu_i:
@@ -126,35 +126,31 @@ WRITE_TLB:
      mv a0, x9
      call print_reg
  
-    mv a0, x4
-    call print_reg
+     mv a0, x4
+     call print_reg
 
-     lui x3, 0x2     
-     addi x3, x3, 0x4              
-     addi x2, x0, 91
-     sd x2, 0(x3)    #  print [
+     addi x2, x0, 93
+     sd x2, 0(x6)    #  print ]
 
-   j return
+     j return
 
 
 FAULT: # error trap?
-     lui x3, 0x2     
-     addi x3, x3, 0x4              
+
+     li a0, "TLB_FL:"
+     call print7
+     mv a0, x9
+     call print_reg
+
      addi x2, x0, 33
-     sd x2, 0(x3)    #  print !
+     sd x2, 0(x6)    #  print !
 
-
-   li a0, "TLB_FL:"
-   call print7
-   mv a0, x9
-   call print_reg
-
-   j return
+     j return
 
 return:    
-    mv x1, x9     # back deal address ra
-    mv x10, x8     # back a0
-    mret
+    #mv x1, x9     # back deal address ra
+    #mv x10, x8     # back a0
+     mret
 
 #Seems VA has 3 table number, satp has Root Table(vpn[2]) address via PPN(ppn+12 x7ace), the we can find PTE in table 2, and PTE has PPN, we can use table2PPN to find table 1 address plus vpn1 number to find PTE in table1, then we get table1 PPN for table0 address, and together with vpn0 to find PTE in talbe0, this is  the last ppa, by ppn + 12 bit of VA low.
 
@@ -162,7 +158,7 @@ return:
 
 
 
-# -------------- use ra(x1), x2-x5... have to save in stack and restore -------
+# -------------- use ra(x1), x2-x5, a0(x10) have to save in stack and restore -------
 print_reg: # a0
     addi x7, x7, -40
     sd ra, 0(x7)
