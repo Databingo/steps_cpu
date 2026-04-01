@@ -627,7 +627,7 @@ module riscv64(
 		end
 
             // Async Interrupt PLIC full (Platform-Level-Interrupt-Control)  MMIO (hardwire timers uart plic)
-	    end else if ((meip_interrupt || msip_interrupt) && Csrs[mstatus][MIE]==1 && !STrap && !load_step && !store_step) begin //mstatus[3] MIE
+	    end else if ((meip_interrupt || msip_interrupt || time_interrupt) && Csrs[mstatus][MIE]==1 && !STrap && !load_step && !store_step) begin //mstatus[3] MIE
                 Csrs[mip][MTIP] <= time_interrupt; // MTIP linux will see then jump to its handler
                 Csrs[mip][MEIP] <= meip_interrupt; // MEIP
                 Csrs[mip][MSIP] <= msip_interrupt; // MSIP
