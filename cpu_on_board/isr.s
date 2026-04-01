@@ -36,11 +36,11 @@ i_cache_refill:
      j return
 
 mmu_i:
-     li a0, "\ni"
+     li a0, "\n[i"
      call print7
      j mmu
 mmu_d:
-     li a0, "\nd"
+     li a0, "\n[d"
      call print7
      j mmu
 
