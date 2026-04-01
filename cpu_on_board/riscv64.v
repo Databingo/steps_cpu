@@ -612,7 +612,7 @@ module riscv64(
 	                 			        begin // Trap into S-mode
 	                 			           Csrs[scause][INTERRUPT] <= 0; //63_type 0exception 1interrupt|value
 	                 			           Csrs[scause][CAUSE+62:CAUSE] <=  CAUSE_CODE; // 2
-	                 			           Csrs[sepc] <= saved_user_pc
+	                 			           Csrs[sepc] <= saved_user_pc;
 							   Csrs[stval] <= re[9];  
 	                 			           Csrs[sstatus][SPP] <= (current_privilege_mode == U_mode ? 0 : 1); // save previous privilege mode(user0 super1) to SPP 
 	                 			           Csrs[sstatus][SPIE] <= Csrs[sstatus][SIE]; // save interrupt enable(SIE) to SPIE 
