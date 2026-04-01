@@ -381,7 +381,7 @@ module riscv64(
     end
 
     //(* ram_style = "logic" *) reg [63:0] Csrs [0:36]; // 36 CSRs for now // totally 4096
-    (* ram_style = "logic" *) reg [63:0] Csrs [0:28]; // 36 CSRs for now // totally 4096
+    (* ram_style = "logic" *) reg [63:0] Csrs [0:29]; // 36 CSRs for now // totally 4096
     wire [3:0]  satp_mmu  = Csrs[satp][63:60]; // 0:bare, 8:sv39, 9:sv48  satp.MODE!=0, privilegae is not M-mode, mstatus.MPRN is not set or in MPP's mode?
     wire [15:0] satp_asid = Csrs[satp][59:44]; // Address Space ID for TLB
     wire [43:0] satp_ppn  = Csrs[satp][43:0];  // Root Page Table PPN physical page number
@@ -472,7 +472,8 @@ module riscv64(
                    //({44{tlb_d_match[6]}} & tlb_ppn[6]) |
                    //({44{tlb_d_match[7]}} & tlb_ppn[7]) ; end
     // concat physical address
-    wire need_trans = satp_mmu   && !mmu_pc && !mmu_da && !i_cache_refill;
+    //wire need_trans = satp_mmu   && !mmu_pc && !mmu_da && !i_cache_refill;
+    wire need_trans = satp_mmu && !Trap;
     assign ppc = need_trans ? {8'h0, pc_ppn, pc[11:0]} : pc;
     assign pda = need_trans ? {8'h0, data_ppn, ls_va[11:0]} : ls_va;
         
@@ -488,7 +489,8 @@ module riscv64(
 	    tlb_vld[2] <= 0; 
 	    tlb_vld[3] <= 0; 
 	end
-        else if ((mmu_pc || mmu_da) && bus_write_enable && bus_address == `Tlb) begin // for the last fill: sd ppa, Tlb
+        //else if ((mmu_pc || mmu_da) && bus_write_enable && bus_address == `Tlb) begin // for the last fill: sd ppa, Tlb
+        else if (Trap && bus_write_enable && bus_address == `Tlb) begin // for the last fill: sd ppa, Tlb
             tlb_vpn[tlb_ptr] <= re[9][38:12]; // VA from x1 saved by trapp mmu_pc/mmu_da
             tlb_ppn[tlb_ptr] <= bus_write_data[55:12] ; // real 
             tlb_vld[tlb_ptr] <= 1;
@@ -569,7 +571,7 @@ module riscv64(
 	    Csrs[mstatus][MIE] <= 0;
 	    mmu_da <= 0;
 	    for (i=0;i<11;i=i+1) begin sre[i]<= 64'b0; end 
-	    for (i=0;i<29;i=i+1) begin Csrs[i]<= 64'b0; end
+	    for (i=0;i<30;i=i+1) begin Csrs[i]<= 64'b0; end
 	    Csrs[medeleg] <= 64'hb1af; // delegate to S-mode 1011000110101111 // see VII 3.1.15 mcasue exceptions
 	    Csrs[mideleg] <= 64'h0222; // delegate to S-mode 0000001000100010 see VII 3.1.15 mcasue interrupt 1/5/9 SSIP(supervisor software interrupt) STIP(time) SEIP(external)
 	    // Initialize Machine Info for OpenSBI
