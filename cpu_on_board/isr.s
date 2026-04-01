@@ -27,7 +27,7 @@ i_cache_refill:
      addi x2, x0, 0x25
      sd x2, 0(x3)    #  print %
 
-    #li a0, "ICA_Re:"
+    #li a0, "ICAre:"
     #call print7
     #mv a0, x9
     #call print_reg
@@ -125,7 +125,7 @@ WRITE_TLB:
      lui x2, 0x20000 # Magic TLB address
      sd x4, 0(x2)
 
-     li a0, "TLB_MP"
+     li a0, "TLBre:"
      call print7
      mv a0, x9
      call print_reg
@@ -142,7 +142,7 @@ WRITE_TLB:
 
 FAULT: # error trap?
 
-     li a0, "TLB_FL:"
+     li a0, "TLBfl:"
      call print7
      mv a0, x9
      call print_reg
