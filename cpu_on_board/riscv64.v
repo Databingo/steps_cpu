@@ -638,7 +638,6 @@ module riscv64(
 		    				           bubble <= 1'b1;
 	                 			       end
 	                 			   end
-        end
 
 	//    end else if (mmu_pc && ir == 32'b00110000001000000000000001110011) begin // end hiject mret & recover from shadow when see Mret
 	//	pc <= saved_user_pc; // recover from shadow when see Mret
