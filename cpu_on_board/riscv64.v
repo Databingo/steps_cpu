@@ -666,16 +666,15 @@ module riscv64(
                 Csrs[mip][MEIP] <= meip_interrupt; // MEIP
                 Csrs[mip][MSIP] <= msip_interrupt; // MSIP
 
-                if (msip_interrupt) trap_casue <= 3; // Cause 3 for Sofeware Interrupt
-                if (time_interrupt) trap_casue <= 7; // Cause 7 for Timer Interrupt
-                if (meip_interrupt) trap_casue <= 11; // Cause 11 for External Interrupt
-
 		reserve_valid <= 0;// Interrupt clear lr.w/lr.d
 
-		do_trapo_trap = 1;
+		do_trap = 1;
 		trap_is_interrupt =1;
 		trap_val = 0;
 		trap_epc = pc - 4;
+                if (msip_interrupt) trap_cause = 3; // Cause 3 for Sofeware Interrupt
+                if (time_interrupt) trap_cause = 7; // Cause 7 for Timer Interrupt
+                if (meip_interrupt) trap_cause = 11; // Cause 11 for External Interrupt
 
 
 	    // IR
@@ -912,9 +911,8 @@ module riscv64(
 	                 			           Csrs[sstatus][SPP] <= (current_privilege_mode == U_mode ? 0 : 1); // save previous privilege mode(user0 super1) to SPP 
 	                 			           Csrs[sstatus][SPIE] <= Csrs[sstatus][SIE]; // save interrupt enable(SIE) to SPIE 
 	                 			           Csrs[sstatus][SIE] <= 0; // clear SIE
-							   if (trap_is_interrupt && Csrs[stvec][MODE+1:MODE] == 0) pc <= (Csrs[stvec][BASE+61:BASE] << 2); // directly  
-							   else  pc <= (Csrs[stvec][BASE+61:BASE] << 2) + (trap_cause << 2); // vectorily BASE & CAUSE_CODE are 4 bytes aligned already number need << 2
-                                                           //pc <= (Csrs[stvec][BASE+61:BASE] << 2); // 0 Exceptions Never vector 1 will be ignore
+							   if (trap_is_interrupt && Csrs[stvec][MODE+1:MODE] == 1) pc <= (Csrs[stvec][BASE+61:BASE] << 2) + (trap_cause << 2); //vectorily  
+							   else  pc <= (Csrs[stvec][BASE+61:BASE] << 2) ; // directly Exceptions Never vector 1 will be ignore
 	                 				   current_privilege_mode <= S_mode;
 		    				           bubble <= 1'b1;
 	                 			       end
@@ -925,9 +923,8 @@ module riscv64(
 							   Csrs[mtval] <= trap_val;
 	                 			           Csrs[mstatus][MPIE] <= Csrs[mstatus][MIE]; // save interrupt enable(MIE) to MPIE 
 	                 			           Csrs[mstatus][MIE] <= 0; // clear MIE (not enabled, blocked when trap)
-							   if (trap_is_interrupt && Csrs[mtvec][MODE+1:MODE] == 0) pc <= (Csrs[mtvec][BASE+61:BASE] << 2); // directly
-							   else  pc <= (Csrs[mtvec][BASE+61:BASE] << 2) + (trap_cause << 2); // vectorily
-                                                           //pc <= (Csrs[mtvec][BASE+61:BASE] << 2); // 0 Exceptions Never vector 1 will be ignore
+							   if (trap_is_interrupt && Csrs[mtvec][MODE+1:MODE] == 1) pc <= (Csrs[mtvec][BASE+61:BASE] << 2) + (trap_cause << 2);
+							   else  pc <= (Csrs[mtvec][BASE+61:BASE] << 2);
 	                 				   Csrs[mstatus][MPP+1:MPP] <= current_privilege_mode; // save privilege mode to MPP 
 	                 				   current_privilege_mode <= M_mode;  // set current privilege mode
 		    				           bubble <= 1'b1;
