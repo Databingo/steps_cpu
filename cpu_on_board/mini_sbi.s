@@ -195,7 +195,7 @@ m_handler_set_timer:
    j m_done
 
 m_handler_get_timer:
-   li t1, 0x2004000  # riscv use MMIP for mtimecmp
+   li t1, 0x200bff8  # riscv mtime
    ld a0, 0(t1)      # S-mode passes new time in a0
    j m_done
 
