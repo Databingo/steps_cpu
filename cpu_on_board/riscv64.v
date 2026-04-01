@@ -34,6 +34,7 @@ module riscv64(
     reg mmu_da=0;
     reg mmu_pc = 0;
     reg i_cache_refill=0;
+    wire Trap = (mmu_pc || mmu_da || i_cache_refill);
     reg [63:0] saved_user_pc;
     integer i; 
 
@@ -594,7 +595,7 @@ module riscv64(
             // Bubble
 	    end else if (bubble) begin bubble <= 1'b0; // Flush this cycle & Clear bubble signal for the next cycle
 	     
-            end else if ((mmu_pc || mmu_da || i_cache_refill) && ir == 32'b00110000001000000000000001110011) begin // for the fauld fill: sd ppa, Tlb_fault
+            end else if (Trap && ir == 32'b00110000001000000000000001110011) begin // for the fauld fill: sd ppa, Tlb_fault
 		pc <= saved_user_pc; // recover from shadow when see Mret
 	 	bubble <= 1'b1; // bubble
 		for (i=1;i<11;i=i+1) begin re[i]<= sre[i]; end // recover usr re
