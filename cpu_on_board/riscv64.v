@@ -77,12 +77,6 @@ module riscv64(
     wire [63:0] shared_add = rs1 + alu_op2_inv + is_sub;
     wire [63:0] shared_addw= $signed(rs1[31:0] + alu_op2_inv[31:0] + is_sub);
 
-    //wire [63:0] alu_add  = rs1 + rs2;
-    //wire [63:0] alu_sub  = rs1 - rs2;
-    //wire [63:0] alu_addw = $signed(rs1[31:0] + rs2[31:0]);  // Addw
-    //wire [63:0] alu_subw = $signed(rs1[31:0] - rs2[31:0]);  // Subw
-    //wire [63:0] alu_addiw = $signed(rs1[31:0] + w_imm_i[31:0]); // Addiw
-    //wire [63:0] alu_addi = rs1 + w_imm_i;  // Addi
     wire [63:0] alu_add  = shared_add; 
     wire [63:0] alu_sub  = shared_add;  
     wire [63:0] alu_addi = shared_add; 
@@ -90,21 +84,11 @@ module riscv64(
     wire [63:0] alu_subw = shared_addw;  
     wire [63:0] alu_addiw= shared_addw; 
 
-    //wire [63:0] alu_slt  = ($signed(rs1) < $signed(rs2)) ? 1:0;
-    //wire [63:0] alu_sltu = ($unsigned(rs1) < $unsigned(rs2)) ? 1:0;
-    //wire [63:0] alu_slti = $signed(rs1) < w_imm_i ? 1:0; // Slti
-    //wire [63:0] alu_sltiu= ($unsigned(rs1) < w_imm_i) ?  1:0; // Sltiu
     wire [63:0] alu_slt  = ($signed(rs1) < $signed(alu_op2)) ? 1:0;
     wire [63:0] alu_slti = alu_slt;
     wire [63:0] alu_sltu = ($unsigned(rs1) < $unsigned(alu_op2)) ? 1:0;
     wire [63:0] alu_sltiu= alu_sltu;
 
-    //wire [63:0] alu_xor  = rs1 ^ rs2;
-    //wire [63:0] alu_xori = rs1 ^ w_imm_i ; // Xori
-    //wire [63:0] alu_and  = rs1 & rs2;
-    //wire [63:0] alu_andi = rs1 & w_imm_i ; // Andi
-    //wire [63:0] alu_or   = rs1 | rs2;
-    //wire [63:0] alu_ori  = rs1 | w_imm_i ; // Ori
     wire [63:0] alu_xor  = rs1 ^ alu_op2;
     wire [63:0] alu_xori = alu_xor;
     wire [63:0] alu_and  = rs1 & alu_op2;
@@ -127,7 +111,6 @@ module riscv64(
 
     wire [63:0] shared_sll = is_word_shift ? {{32{raw_sll[31]}}, raw_sll[31:0]} : raw_sll;
     wire [63:0] shared_srl_sra = is_word_shift ? {{32{raw_srl_sra[31]}}, raw_srl_sra[31:0]} : raw_srl_sra;
-
 
     wire [63:0] w_load_data =
         (w_func3 == 3'b000) ? {{56{bus_read_data[ 7]}}, bus_read_data[ 7:0]} : // lb
@@ -314,7 +297,7 @@ module riscv64(
    localparam mtvec      = 1 ; localparam BASE=2,MODE=0; // 63:2BASE|1:0MDOE  // 0x305 MRW Machine trap-handler base address * 0 direct 1vec
    localparam mscratch   = 2 ;  // 
    localparam mepc       = 3 ;  
-   localparam mcause     = 4 ; localparam INTERRUPT=63,CAUSE=0,ILLEGALINSTRUCTION=2,PAGE_FAULT_I=12,PAGE_FAULT_L=13,PAGE_FAULT_S=14;//0x342 MRW Machine trap casue*63InterruptAsync/ErrorSync|62:0CauseCode
+   localparam mcause     = 4 ; localparam INTERRUPT=63,CAUSE=0,ILLEGAL_INSTRUCTION=2,PAGE_F_I=12,PAGE_F_L=13,PAGE_F_S=14;//0x342 MRW Machine trap casue*63InterruptAsync/ErrorSync|62:0CauseCode
    localparam mie        = 5 ; localparam SGEIE=12,MEIE=11,VSEIE=10,SEIE=9,MTIE=7,VSTIE=6,STIE=5,MSIE=3,VSSIE=2,SSIE=1; // Machine Interrupt Enable from OS software set enable
    localparam mip        = 6 ; localparam SGEIP=12,MEIP=11,VSEIP=10,SEIP=9,MTIP=7,VSTIP=6,STIP=5,MSIP=3,VSSIP=2,SSIP=1; // Machine Interrupt Pending from HardWare timer,uart,PLIC..11Exter 7Time 3Software
    localparam medeleg    = 7 ; localparam MECALL=11,SECALL=9,UECALL=8,BREAK=3; // bit_index=mcause_value 8UECALL|9SECALL
@@ -921,7 +904,7 @@ module riscv64(
                              trap_is_interrupt = 0;
                              trap_val = ir;
                              trap_epc = pc - 4;
-                             trap_cause = ILLEGALINSTRUCTION ; // 2
+                             trap_cause = ILLEGAL_INSTRUCTION ; // 2
 		    end
                endcase
 	    end 
