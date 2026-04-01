@@ -121,6 +121,7 @@ m_trap_router:
    # 63 bit 1 interrupt
    # 63 bit 0 exception
 
+   # Exception 0
    # 0 pc is not aligned to 4 bytes
    # 1 instruction is not accessable
    # 2 illegal instruction
@@ -131,11 +132,31 @@ m_trap_router:
    # 7 store/amo access fault
    # 8 ecall from u-mode
    # 9 ecall from s-mode
-   # 10 (reserved)
+   # 10 --(reserved)
    # 11 ecall from m-mode
    # 12 instruciton page fault
    # 13 load page fault
-   # 14 store/amo page fault
+   # 14 --
+   # 15 store/amo page fault
+   # 16+ --
+
+   # Interrupt 1
+   # 0 user software interrupt
+   # 1 supervisor software interrupt
+   # 2 -- 
+   # 3 machine software interrupt
+   # 4 user timer software interrupt
+   # 5 supervisor timer software interrupt
+   # 6 --
+   # 7 machine timer interrupt
+   # 8 user external interrupt
+   # 9 supervisor external interrupt
+   # 10 --
+   # 11 machine external interrupt
+   # 12-15 --
+   # 16+ local define interrupt
+
+
 
    li t1, 9  # ecall from S-mode
    beq t0, t1, m_ecall_router
