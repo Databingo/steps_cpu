@@ -406,3 +406,4 @@ vma
 trap
 plic
 clint
+rom/ram space adjust
