@@ -468,35 +468,21 @@ module riscv64(
     always @(posedge clk or negedge reset) begin
 	if (!reset) begin
 	    tlb_ptr <= 0; // hit->trap(save va to x9)->refill assembly(fetch pa to x9)-> sd x9, `Tlb -> here to refill tlb
-	    tlb_vld[0] <= 0; 
-	    tlb_vld[1] <= 0; 
-	    tlb_vld[2] <= 0; 
-	    tlb_vld[3] <= 0; 
-	end
+	    tlb_vld[0] <= 0; tlb_vld[1] <= 0; tlb_vld[2] <= 0; tlb_vld[3] <= 0; 
+	end else if (STrap && bus_write_enable && bus_address == `Tlb) begin // for the last fill: sd ppa, Tlb
         //else if ((mmu_pc || mmu_da) && bus_write_enable && bus_address == `Tlb) begin // for the last fill: sd ppa, Tlb
-        else if (STrap && bus_write_enable && bus_address == `Tlb) begin // for the last fill: sd ppa, Tlb
             tlb_vpn[tlb_ptr] <= re[9][38:12]; // VA from x1 saved by trapp mmu_pc/mmu_da
             tlb_ppn[tlb_ptr] <= bus_write_data[55:12] ; // real 
             tlb_vld[tlb_ptr] <= 1;
             tlb_ptr <= tlb_ptr + 1; 
-        end
-
-	else if (!bubble) begin 
-	//else if (!bubble && !(satp_mmu && !mmu_pc && !mmu_da && !i_cache_refill && !tlb_i_hit)) begin 
-	//else if (!bubble && (!tlb_i_hit || !tlb_d_hit)) begin 
-	    casez (ir) 32'b0001001??????????_000_?????_1110011: begin  // sfence.vma flush any way if ir is (not be bubbled)
-	        tlb_vld[0] <= 0; 
-		tlb_vld[1] <= 0; 
-	        tlb_vld[2] <= 0; 
-	        tlb_vld[3] <= 0; 
-                end 
+        end else if (!bubble) begin // sfence.vma flush any way if ir is (not be bubbled)
+	    casez (ir) 32'b0001001??????????_000_?????_1110011: begin tlb_vld[0] <= 0; tlb_vld[1] <= 0; tlb_vld[2] <= 0; tlb_vld[3] <= 0; end
 	    endcase 
 	end
     end
 
     // I_cache_hit 63:13 tag, 12:4 index 3:0 offset Cache line 16B (4 instructions) 512 lines
-    reg [127:0] cache_line = 128'h0;
-    //reg [51:0]  cache_tag = 52'h0;
+    reg [127:0] cache_line = 128'h0; //reg [51:0]  cache_tag = 52'h0;
     reg [58:0]  cache_tag = 58'h0;
     reg [63:0]  ppc_pre = 64'h0; // for read
     reg [63:0]  ask_i_data; // for write
