@@ -118,6 +118,8 @@ m_trap_router:
    #sd t0, 0x300(zero)
    #sd t1, 0x308(zero)
    csrr t0, mcause  # check type
+   # 63 bit 1 interrupt
+   # 63 bit 0 exception
 
    # 0 pc is not aligned to 4 bytes
    # 1 instruction is not accessable
