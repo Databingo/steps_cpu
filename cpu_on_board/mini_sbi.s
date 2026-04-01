@@ -150,11 +150,18 @@ m_trap_router:
    j m_done
 
 m_ecall_router:  # a7 Extension 1 putchar, 2 getchar, 0 settimer; a0 is the first argument a1..a5  # look a7 to see function is requested(sbi standard)
+
+   li t0, 0
+   beq a7, t0, m_handler_set_timer
+
    li t0, 1
    beq a7, t0, m_handler_putchar  # (SBI_CONSOLE_PUTCHAR ( a7 = 0x01)
 
-   li t0, 0
-   beq a7, t0, m_handler_timer
+   li t0, 2
+   beq a7, t0, m_handler_getchar  
+
+   li t0, 3
+   beq a7, t0, m_handler_get_timer
 
    li t0, 0x10
    beq a7, t0, m_handler_deleg
@@ -181,10 +188,15 @@ m_handler_putchar:
    li a0, 0     # return success
    j m_done
 
-m_handler_timer:
+m_handler_set_timer:
    li t1, 0x2004000  # riscv use MMIP for mtimecmp
    sd a0, 0(t1)      # S-mode passes new time in a0
    li a0, 0          # Success return a0=0
+   j m_done
+
+m_handler_get_timer:
+   li t1, 0x2004000  # riscv use MMIP for mtimecmp
+   ld a0, 0(t1)      # S-mode passes new time in a0
    j m_done
 
 m_handler_deleg:
