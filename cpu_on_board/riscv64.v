@@ -292,7 +292,7 @@ module riscv64(
    localparam mtvec      = 1 ; localparam BASE=2,MODE=0; // 63:2BASE|1:0MDOE  // 0x305 MRW Machine trap-handler base address * 0 direct 1vec
    localparam mscratch   = 2 ;  // 
    localparam mepc       = 3 ;  
-   localparam mcause     = 4 ; localparam INTERRUPT=63,CAUSE=0,ILLEGALINSTRUCTION=2; // 0x342 MRW Machine trap casue *  63InterruptAsync/ErrorSync|62:0CauseCode
+   localparam mcause     = 4 ; localparam INTERRUPT=63,CAUSE=0,ILLEGALINSTRUCTION=2,PAGE_FAULT_I=12,PAGE_FAULT_L=13,PAGE_FAULT_S=14;//0x342 MRW Machine trap casue*63InterruptAsync/ErrorSync|62:0CauseCode
    localparam mie        = 5 ; localparam SGEIE=12,MEIE=11,VSEIE=10,SEIE=9,MTIE=7,VSTIE=6,STIE=5,MSIE=3,VSSIE=2,SSIE=1; // Machine Interrupt Enable from OS software set enable
    localparam mip        = 6 ; localparam SGEIP=12,MEIP=11,VSEIP=10,SEIP=9,MTIP=7,VSTIP=6,STIP=5,MSIP=3,VSSIP=2,SSIP=1; // Machine Interrupt Pending from HardWare timer,uart,PLIC..11Exter 7Time 3Software
    localparam medeleg    = 7 ; localparam MECALL=11,SECALL=9,UECALL=8,BREAK=3; // bit_index=mcause_value 8UECALL|9SECALL
@@ -486,6 +486,9 @@ module riscv64(
             tlb_vld[tlb_ptr] <= 1;
             tlb_ptr <= tlb_ptr + 1; 
         end
+
+
+
 	else if (!bubble) begin 
 	//else if (!bubble && !(satp_mmu && !mmu_pc && !mmu_da && !i_cache_refill && !tlb_i_hit)) begin 
 	//else if (!bubble && (!tlb_i_hit || !tlb_d_hit)) begin 
@@ -583,20 +586,66 @@ module riscv64(
 	        if (bubble || ir==32'b0001001??????????_000_?????_1110011) saved_user_pc <= pc ; // !!! save pc (j/b EXE was flushed currectly, vma executed anyway no need back-redo)
 		for (i=1;i<11;i=i+1) begin sre[i]<= re[i]; end // save re
 		re[9] <= pc;// - 4; // save this vpc to x1 //!!!! We also need to refill pc - 4' ppc for re-executeing pc-4, with hit(if satp in for very next sfence.vma) 
-		re[2] <= 0;// save in x2 trap type 0 i-tlb trap
+		re[8] <= 12 ;// save in x8 trap type 0 i-tlb trap
 		//re[3] <= ir;// save in x3 executing ir
 		//Csrs[mstatus][MPIE] <= Csrs[mstatus][MIE]; // disable interrupt during shadow mmu walking
 		//Csrs[mstatus][MIE] <= 0;
 
             // Bubble
 	    end else if (bubble) begin bubble <= 1'b0; // Flush this cycle & Clear bubble signal for the next cycle
-
-	    end else if (mmu_pc && ir == 32'b00110000001000000000000001110011) begin // end hiject mret & recover from shadow when see Mret
+	     
+            end else if ((mmu_pc || mmu_da || i_cache_refill) && ir == 32'b00110000001000000000000001110011) begin // for the fauld fill: sd ppa, Tlb_fault
 		pc <= saved_user_pc; // recover from shadow when see Mret
 	 	bubble <= 1'b1; // bubble
 		for (i=1;i<11;i=i+1) begin re[i]<= sre[i]; end // recover usr re
-		mmu_pc <= 0; // MMU_PC OFF
-		//Csrs[mstatus][MIE] <= Csrs[mstatus][MPIE]; // set back interrupt status
+		if (mmu_pc) mmu_pc <= 0;
+		if (mmu_da) mmu_da <= 0;
+		if (i_cache_refill) i_cache_refill<= 0;
+
+		if  (re[8]!=0) begin
+	                                                //if      (re[8]==12) CAUSE_CODE = PAGE_FAULT_I; // 12
+	                                                //else if (re[8]==13) CAUSE_CODE = PAGE_FAULT_L; // 13
+	                                                //else if (re[8]==14) CAUSE_CODE = PAGE_FAULT_S; // 14
+	                                                CAUSE_CODE = re[8]; 
+							
+						        if (Csrs[medeleg][CAUSE_CODE] == 1 && current_privilege_mode <= S_mode) // UECALL8 SECALL9 MECALL11 delegate to S-mode (M-mode still in M-mode)
+	                 			        begin // Trap into S-mode
+	                 			           Csrs[scause][INTERRUPT] <= 0; //63_type 0exception 1interrupt|value
+	                 			           Csrs[scause][CAUSE+62:CAUSE] <=  CAUSE_CODE; // 2
+	                 			           Csrs[sepc] <= saved_user_pc
+							   Csrs[stval] <= re[9];  
+	                 			           Csrs[sstatus][SPP] <= (current_privilege_mode == U_mode ? 0 : 1); // save previous privilege mode(user0 super1) to SPP 
+	                 			           Csrs[sstatus][SPIE] <= Csrs[sstatus][SIE]; // save interrupt enable(SIE) to SPIE 
+	                 			           Csrs[sstatus][SIE] <= 0; // clear SIE
+							   //if (Csrs[stvec][MODE+1:MODE] == 0) pc <= (Csrs[stvec][BASE+61:BASE] << 2); // directly  
+							   //else  pc <= (Csrs[stvec][BASE+61:BASE] << 2) + (CAUSE_CODE << 2); // vectorily BASE & CAUSE_CODE are 4 bytes aligned already number need << 2
+                                                           pc <= (Csrs[stvec][BASE+61:BASE] << 2); // 0 Exceptions Never vector 1 will be ignore
+	                 				   current_privilege_mode <= S_mode;
+		    				           bubble <= 1'b1;
+	                 			       end
+	                 			       else begin // Trap into M-mode
+	                 			           Csrs[mcause][INTERRUPT] <= 0; //63_type 0exception 1interrupt|value
+	                 			           Csrs[mcause][CAUSE+62:CAUSE] <=   CAUSE_CODE; // 2 
+	                 			           Csrs[mepc] <=  saved_user_pc;
+							   Csrs[mtval] <= re[9];
+	                 			           Csrs[mstatus][MPIE] <= Csrs[mstatus][MIE]; // save interrupt enable(MIE) to MPIE 
+	                 			           Csrs[mstatus][MIE] <= 0; // clear MIE (not enabled, blocked when trap)
+							   //if (Csrs[mtvec][MODE+1:MODE] == 0) pc <= (Csrs[mtvec][BASE+61:BASE] << 2); // directly
+							   //else  pc <= (Csrs[mtvec][BASE+61:BASE] << 2) + (BREAK << 2); // vectorily
+                                                           pc <= (Csrs[mtvec][BASE+61:BASE] << 2); // 0 Exceptions Never vector 1 will be ignore
+	                 				   Csrs[mstatus][MPP+1:MPP] <= current_privilege_mode; // save privilege mode to MPP 
+	                 				   current_privilege_mode <= M_mode;  // set current privilege mode
+		    				           bubble <= 1'b1;
+	                 			       end
+	                 			   end
+        end
+
+	//    end else if (mmu_pc && ir == 32'b00110000001000000000000001110011) begin // end hiject mret & recover from shadow when see Mret
+	//	pc <= saved_user_pc; // recover from shadow when see Mret
+	// 	bubble <= 1'b1; // bubble
+	//	for (i=1;i<11;i=i+1) begin re[i]<= sre[i]; end // recover usr re
+	//	mmu_pc <= 0; // MMU_PC OFF
+	//	//Csrs[mstatus][MIE] <= Csrs[mstatus][MPIE]; // set back interrupt status
     
 	    // ----- 
 	    //  i_cache_hit at EXE stage without stap/tlb_hit sensitive
@@ -614,13 +663,13 @@ module riscv64(
 		    re[9] <= {ppc[63:4], 4'b0};// save missed ppc_pre cache_line address for handler
 		    ask_i_data <= {ppc[63:4], 4'b0};// save missed ppc_pre cache_line address for hardware
 		end
-		re[2] <= 1;// save x2 trap type 1 i-cache trap
+		re[8] <= 1;// save x2 trap type 1 i-cache trap
 		//re[3] <= ir;// save in x3 executing ir
-	    end else if (i_cache_refill && ir == 32'b00110000001000000000000001110011) begin // end hiject mret & recover from shadow when see Mret
-		pc <= saved_user_pc; // recover from shadow when see Mret
-	 	bubble <= 1'b1; // bubble
-		for (i=1;i<11;i=i+1) begin re[i]<= sre[i]; end // recover usr re
-		i_cache_refill <= 0; // OFF
+	//    end else if (i_cache_refill && ir == 32'b00110000001000000000000001110011) begin // end hiject mret & recover from shadow when see Mret
+	//	pc <= saved_user_pc; // recover from shadow when see Mret
+	// 	bubble <= 1'b1; // bubble
+	//	for (i=1;i<11;i=i+1) begin re[i]<= sre[i]; end // recover usr re
+	//	i_cache_refill <= 0; // OFF
 	    // -----
 
             //  mmu_da  D-TLB miss Trap // load/store/atom
@@ -631,16 +680,16 @@ module riscv64(
 	        saved_user_pc <= pc - 4; // save pc EXE l/s/a
 		for (i=1;i<11;i=i+1) begin sre[i]<= re[i]; end // save re
 		re[9] <= ls_va; //save va to x1
-		re[2] <= 2;// save x2 trap type 2 d-tlb trap
+		re[8] <= (op == 7'b0000011) ? 13 : 14;// save x2 trap type load/store_atom
 		//re[3] <= ir;// save in x3 executing ir
 		//Csrs[mstatus][MPIE] <= Csrs[mstatus][MIE]; // disable interrupt during shadow mmu walking
 		//Csrs[mstatus][MIE] <= 0;
-	    end else if (mmu_da && ir == 32'b00110000001000000000000001110011) begin // hiject mret 
-		pc <= saved_user_pc; // recover from shadow when see Mret
-		bubble <= 1; // bubble
-		for (i=1;i<11;i=i+1) begin re[i]<= sre[i]; end // recover usr re
-		mmu_da <= 0; // MMU_DA OFF
-		//Csrs[mstatus][MIE] <= Csrs[mstatus][MPIE]; // set back interrupt status
+	//    end else if (mmu_da && ir == 32'b00110000001000000000000001110011) begin // hiject mret 
+	//	pc <= saved_user_pc; // recover from shadow when see Mret
+	//	bubble <= 1; // bubble
+	//	for (i=1;i<11;i=i+1) begin re[i]<= sre[i]; end // recover usr re
+	//	mmu_da <= 0; // MMU_DA OFF
+	//	//Csrs[mstatus][MIE] <= Csrs[mstatus][MPIE]; // set back interrupt status
     
     
     
@@ -944,9 +993,10 @@ module riscv64(
 	            // D fld fsd fadd.d fsub.d fdiv.d fsqrt.d fmadd.s fcvt.d.s fcvt.s.d
 	            // C
 		    default: begin // $display("unknow instruction %h, %b", ir, ir);
-	                                                if      (current_privilege_mode == U_mode) CAUSE_CODE = ILLEGALINSTRUCTION; // 2
-	                                                else if (current_privilege_mode == S_mode) CAUSE_CODE = ILLEGALINSTRUCTION; // block assign attaintion!
-	                                                else if (current_privilege_mode == M_mode) CAUSE_CODE = ILLEGALINSTRUCTION;
+	                                                //if      (current_privilege_mode == U_mode) CAUSE_CODE = ILLEGALINSTRUCTION; // 2
+	                                                //else if (current_privilege_mode == S_mode) CAUSE_CODE = ILLEGALINSTRUCTION; // block assign attaintion!
+	                                                //else if (current_privilege_mode == M_mode) CAUSE_CODE = ILLEGALINSTRUCTION;
+	                                                CAUSE_CODE = ILLEGALINSTRUCTION;
 						        if (Csrs[medeleg][CAUSE_CODE] == 1 && current_privilege_mode <= S_mode) // UECALL8 SECALL9 MECALL11 delegate to S-mode (M-mode still in M-mode)
 	                 			        begin // Trap into S-mode
 	                 			           Csrs[scause][INTERRUPT] <= 0; //63_type 0exception 1interrupt|value

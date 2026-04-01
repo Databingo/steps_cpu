@@ -1,17 +1,19 @@
 isr_router:        # Use x0-x10 shadowed register only (ra(x1), a0(x10),..x19)
      li x6, 0x2004 # UART print 
      li x7, 0x1500 # Set stack   # use shadowed x7
+     # x8 trap_type no change
      # x9 addr  # x9 keep the address need manage, no change x9
      # x6789 setting
-     # x2 trap_type
 
-     # x12345,x10 operating
-     li x3, 0 
-     beq x2, x3, mmu_i    # i-tlb-refill
+     # x1(ra)2345,x10(a0) operating
+     li x3, 12 
+     beq x8, x3, mmu_i    # i-tlb-refill
      li x3, 1 
-     beq x2, x3, i_cache_refill
-     li x3, 2 
-     beq x2, x3, mmu_d    # d-tlb-refill
+     beq x8, x3, i_cache_refill
+     li x3, 13 
+     beq x8, x3, mmu_d    # d-tlb-refill load
+     li x3, 14 
+     beq x8, x3, mmu_d    # d-tlb-refill store
 
 i_cache_refill:
      lui x4, 0x20001 # base Cache address
@@ -29,6 +31,8 @@ i_cache_refill:
     #call print7
     #mv a0, x9
     #call print_reg
+
+     addi x8, x0, 0  # success x8=0
      j return
 
 mmu_i:
@@ -130,6 +134,7 @@ WRITE_TLB:
      addi x2, x0, 93
      sd x2, 0(x6)    #  print ]
 
+     addi x8, x0, 0  # success x8=0
      j return
 
 
