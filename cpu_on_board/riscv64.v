@@ -763,19 +763,9 @@ module riscv64(
 	                                                if      (current_privilege_mode == U_mode) trap_cause = UECALL; // 8 indicate Ecall from U-mode; 9 call from S-mode; 11 call from M-mode
 	                                                else if (current_privilege_mode == S_mode) trap_cause = SECALL; // block assign attaintion!
 	                                                else if (current_privilege_mode == M_mode) trap_cause = MECALL;
-                                                        do_trap = 1;
-                                                        trap_is_interrupt = 0;
-                                                        trap_val = 0;
-                                                        trap_epc = pc - 4;
-	                 			   end
+                                                        do_trap = 1; trap_is_interrupt = 0; trap_val = 0; trap_epc = pc - 4; end
                     // Ebreak
-	            32'b0000000_00001_?????_000_?????_1110011: begin 
-                                                        do_trap = 1;
-                                                        trap_is_interrupt = 0;
-                                                        trap_val = 0;
-                                                        trap_epc = pc - 4;
-                                                        trap_cause = BREAK; // 3
-	                 			   end
+	            32'b0000000_00001_?????_000_?????_1110011: begin do_trap = 1; trap_is_interrupt = 0; trap_val = 0; trap_epc = pc - 4; trap_cause = BREAK; end
                     // Mret
 	            32'b0011000_00010_?????_000_?????_1110011: begin  
 	               			       Csrs[mstatus][MIE] <= Csrs[mstatus][MPIE]; // set back interrupt enable(MIE) by MPIE 
@@ -784,8 +774,7 @@ module riscv64(
 	               			       current_privilege_mode  <= Csrs[mstatus][MPP+1:MPP]; // set back previous mode
 	               			       Csrs[mstatus][MPP+1:MPP] <= 2'b00; // set previous privilege mode(MPP) to be 00 (U-mode)
 	               			       pc <=  Csrs[mepc]; // mepc was +4 by the software handler and written back to sepc
-		          		       bubble <= 1'b1;
-	               			       end
+		          		       bubble <= 1'b1; end
                     // Sret
 	            32'b0001000_00010_?????_000_?????_1110011: begin      
 	               			       Csrs[sstatus][SIE] <= Csrs[sstatus][SPIE]; // restore interrupt enable(SIE) by SPIE 
@@ -793,17 +782,15 @@ module riscv64(
 	               			       if (Csrs[sstatus][SPP] == 0) current_privilege_mode <= U_mode; else current_privilege_mode  <= S_mode;
 	               			       Csrs[sstatus][SPP] <= 0; // set previous privilege mode(SPP) to be 0 (U-mode)
 	               			       pc <=  Csrs[sepc]; // sepc was +4 by the software handler and written back to sepc
-		          		       bubble <= 1'b1;
-	               			       end 
+		          		       bubble <= 1'b1; end 
 		    // Wfi
 		    32'b00010000010100000000000001110011: begin end
 		    // Fence
 		    32'b?????????????????_000_?????_0001111: begin end
 		    // Fence.i
-		    32'b?????????????????_001_?????_0001111: begin flush <= ~flush; end //bubble <= 1'b1; pc<=pc; end
-		    // Sfence.vma supervisor fence for virtual memory address
-		    32'b0001001??????????_000_?????_1110011: begin end
-		    // RV64IMAFD(G)C  RVA23U64
+		    32'b?????????????????_001_?????_0001111: begin flush <= ~flush; end 
+		    // Sfence.vma 
+		    32'b0001001??????????_000_?????_1110011: begin end //supervisor fence for virtual memory address
 		    // Atomic after TLB // -- ATOMIC instructions (A-extension) opcode: 0101111
 		    // lr
 		    32'b00010_??_?????_?????_01?_?????_0101111: begin  // Lr._mmu 3 cycles lr.w010 lr.d011
