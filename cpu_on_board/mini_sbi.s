@@ -209,10 +209,12 @@ m_handler_deleg:
 m_ex_illegal_ir:
   #li a0, "I"
   #call putchar
-   li a0, "\nEILLIR"
+   li a0, "\n{ILLir"
    call print7
    csrr a0, mtval
    call print_reg
+   li a0 "}"
+   call putchar
    j m_done
 
 m_done: 

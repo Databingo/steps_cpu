@@ -222,17 +222,17 @@ addi a0, x0, 0x0
 #    j m_done
 jal x0, m_done
 m_ex_illegal_ir:
-#    li a0, "\nEILLIR"
+#    li a0, "\n{ILLir"
 addi a0, x0, 0x0
-lui a0, 0x524
+lui a0, 0x726
 srli a0, a0, 0x1
 ori a0, a0, 0x4a6
 slli a0, a0, 0xb
 ori a0, a0, 0x131
 slli a0, a0, 0xb
-ori a0, a0, 0x128
+ori a0, a0, 0x12f
 slli a0, a0, 0xb
-ori a0, a0, 0x50a
+ori a0, a0, 0x30a
 #    call print7
 auipc x1, 0 # R_RISCV_PCREL_HI20 print7
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print7
@@ -241,6 +241,13 @@ csrrs a0, mtval, x0
 #    call print_reg
 auipc x1, 0 # R_RISCV_PCREL_HI20 print_reg
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_reg
+#    li a0 "}"
+addi a0, x0, 0x0
+addi a0, x0, 0x0
+addi a0, x0, 0x7d
+#    call putchar
+auipc x1, 0 # R_RISCV_PCREL_HI20 putchar
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I putchar
 #    j m_done
 jal x0, m_done
 m_done:
