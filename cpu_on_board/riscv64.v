@@ -68,26 +68,50 @@ module riscv64(
     //-- csr --
     wire [11:0] w_csr = ir[31:20];   // CSR official address
 
+
     // Shared Arithmetic Units
-    wire [63:0] alu_add  = rs1 + rs2;
-    wire [63:0] alu_sub  = rs1 - rs2;
-    wire [63:0] alu_xor  = rs1 ^ rs2;
-    wire [63:0] alu_and  = rs1 & rs2;
-    wire [63:0] alu_or   = rs1 | rs2;
-    wire [63:0] alu_slt  = ($signed(rs1) < $signed(rs2)) ? 1:0;
-    wire [63:0] alu_sltu = ($unsigned(rs1) < $unsigned(rs2)) ? 1:0;
+    wire use_imm = (op == 7'b0010011 || op == 7'b0011011 || op == 7'b1100111); //math-i math-i-w jalr 
+    wire is_sub = (op == 7'b0110011 || op == 7'b0111011) && ir[30]; // sub/subw
+    wire [63:0] alu_op2 = use_imm ? w_imm_i : rs2;
+    wire [63:0] alu_op2_inv = is_sub ? ~alu_op2 : alu_op2;
+    wire [63:0] shared_add = rs1 + alu_op2_inv + is_sub;
+    wire [63:0] shared_addw= $signed(rs1[31:0] + alu_op2_inv[31:0] + is_sub);
 
-    wire [63:0] alu_addw = $signed(rs1[31:0] + rs2[31:0]);  // Addw
-    wire [63:0] alu_subw = $signed(rs1[31:0] - rs2[31:0]);  // Subw
+    //wire [63:0] alu_add  = rs1 + rs2;
+    //wire [63:0] alu_sub  = rs1 - rs2;
+    //wire [63:0] alu_addw = $signed(rs1[31:0] + rs2[31:0]);  // Addw
+    //wire [63:0] alu_subw = $signed(rs1[31:0] - rs2[31:0]);  // Subw
+    //wire [63:0] alu_addiw = $signed(rs1[31:0] + w_imm_i[31:0]); // Addiw
+    //wire [63:0] alu_addi = rs1 + w_imm_i;  // Addi
+    wire [63:0] alu_add  = shared_add; 
+    wire [63:0] alu_sub  = shared_add;  
+    wire [63:0] alu_addi = shared_add; 
+    wire [63:0] alu_addw = shared_addw;  
+    wire [63:0] alu_subw = shared_addw;  
+    wire [63:0] alu_addiw= shared_addw; 
 
-    wire [63:0] alu_addi = rs1 + w_imm_i;  // Addi
-    wire [63:0] alu_xori = rs1 ^ w_imm_i ; // Xori
-    wire [63:0] alu_andi = rs1 & w_imm_i ; // Andi
-    wire [63:0] alu_ori  = rs1 | w_imm_i ; // Ori
-    wire [63:0] alu_slti = $signed(rs1) < w_imm_i ? 1:0; // Slti
-    wire [63:0] alu_sltiu= ($unsigned(rs1) < w_imm_i) ?  1:0; // Sltiu
+    //wire [63:0] alu_slt  = ($signed(rs1) < $signed(rs2)) ? 1:0;
+    //wire [63:0] alu_sltu = ($unsigned(rs1) < $unsigned(rs2)) ? 1:0;
+    //wire [63:0] alu_slti = $signed(rs1) < w_imm_i ? 1:0; // Slti
+    //wire [63:0] alu_sltiu= ($unsigned(rs1) < w_imm_i) ?  1:0; // Sltiu
+    wire [63:0] alu_slt  = ($signed(rs1) < $signed(alu_op2)) ? 1:0;
+    wire [63:0] alu_slti = alu_slt;
+    wire [63:0] alu_sltu = ($unsigned(rs1) < $unsigned(alu_op2)) ? 1:0;
+    wire [63:0] alu_sltiu= alu_sltu;
 
-    wire [63:0] alu_addiw = $signed(rs1[31:0] + w_imm_i[31:0]); // Addiw
+    //wire [63:0] alu_xor  = rs1 ^ rs2;
+    //wire [63:0] alu_xori = rs1 ^ w_imm_i ; // Xori
+    //wire [63:0] alu_and  = rs1 & rs2;
+    //wire [63:0] alu_andi = rs1 & w_imm_i ; // Andi
+    //wire [63:0] alu_or   = rs1 | rs2;
+    //wire [63:0] alu_ori  = rs1 | w_imm_i ; // Ori
+    wire [63:0] alu_xor  = rs1 ^ alu_op2;
+    wire [63:0] alu_xori = alu_xor;
+    wire [63:0] alu_and  = rs1 & alu_op2;
+    wire [63:0] alu_andi = alu_and;
+    wire [63:0] alu_or   = rs1 | alu_op2;
+    wire [63:0] alu_ori  = alu_or;
+
     wire [63:0] branch = pc - 4 + w_imm_b; //branch
 
     wire is_imm_shift  = (op == 7'b0010011 || op == 7'b0011011); // Slli Srli Srai || Slliw Srliw Sraiw
@@ -859,7 +883,6 @@ module riscv64(
 			    re[mul_rd_latched] <= w_mul_out;
 			end
 		    end
-
 		    // M-Extension
 		    32'b0000001_?????_?????_1??_?????_0110011, //Div100 divu101 rem110 remu111
 		    32'b0000001_?????_?????_1??_?????_0111011: begin // divw100 divuw101  remw110 remuw111
@@ -901,8 +924,9 @@ module riscv64(
                              trap_cause = ILLEGALINSTRUCTION ; // 2
 		    end
                endcase
+	    end 
 	    // Trap
-	    end if (do_trap) begin
+	    if (do_trap) begin
 		if ((trap_is_interrupt ? Csrs[mideleg][trap_cause] : Csrs[medeleg][trap_cause]) == 1'b1 && current_privilege_mode <= S_mode) begin // Trap in S-mode
 	                 			           Csrs[scause][INTERRUPT] <= trap_is_interrupt; //63_type 0exception 1interrupt|value
 	                 			           Csrs[scause][CAUSE+62:CAUSE] <= trap_cause;
