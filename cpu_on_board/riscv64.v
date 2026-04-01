@@ -383,8 +383,8 @@ module riscv64(
     //(* ram_style = "logic" *) reg [63:0] Csrs [0:36]; // 36 CSRs for now // totally 4096
     (* ram_style = "logic" *) reg [63:0] Csrs [0:29]; // 36 CSRs for now // totally 4096
     wire [3:0]  satp_mmu  = Csrs[satp][63:60]; // 0:bare, 8:sv39, 9:sv48  satp.MODE!=0, privilegae is not M-mode, mstatus.MPRN is not set or in MPP's mode?
-    wire [15:0] satp_asid = Csrs[satp][59:44]; // Address Space ID for TLB
-    wire [43:0] satp_ppn  = Csrs[satp][43:0];  // Root Page Table PPN physical page number
+   // wire [15:0] satp_asid = Csrs[satp][59:44]; // Address Space ID for TLB
+   // wire [43:0] satp_ppn  = Csrs[satp][43:0];  // Root Page Table PPN physical page number
 
     // -- Timer --
     always @(posedge clk or negedge reset) begin 
@@ -521,31 +521,35 @@ module riscv64(
     //(* ram_style = "block" *) reg [127:0] Cache_L [0:1023]; // 16KB
     (* ram_style = "block" *) reg [63:0] Cache_L_Low [0:511]; // 4KB
     (* ram_style = "block" *) reg [63:0] Cache_L_High [0:511]; // 4KB
-    //(* ram_style = "block" *) reg [51:0] Cache_T [0:511];  // ~4KB (addr: 1(valit) + 51(tag) + 9(index) + 4(offset))
-    (* ram_style = "block" *) reg [50:0] Cache_T [0:511];  // ~4KB (addr: 51(tag) + 9(index) + 4(offset))
-    reg [511:0] cache_valid_bits = 0;
+    //(* ram_style = "block" *) reg [50:0] Cache_T [0:511];  // ~4KB (addr: 51(tag) + 9(index) + 4(offset))
+    //reg [511:0] cache_valid_bits = 0;
+    (* ram_style = "block" *) reg [58:0] Cache_T [0:511];  // 8-bit epoth + 51-bit tag
+    reg [7:0] cache_epoch = 1;
+
     reg flush_pre = 0; 
     reg flush = 0;
     always @(posedge clk) begin 
 	// Flush
 	flush_pre <= flush;
-	if (flush_pre != flush) cache_valid_bits <= 512'b0;
+	//if (flush_pre != flush) cache_valid_bits <= 512'b0;
+	if (flush_pre != flush) cache_epoch <= cache_epoch + 1;
 	// Read
 	cache_line <= {Cache_L_High[ppc[12:4]], Cache_L_Low[ppc[12:4]]}; 
-	//cache_tag <= Cache_T[ppc[12:4]]; 
-	cache_tag <= {cache_valid_bits[ppc[12:4]], Cache_T[ppc[12:4]]}; 
+	//cache_tag <= {cache_valid_bits[ppc[12:4]], Cache_T[ppc[12:4]]}; 
+	cache_tag <= Cache_T[ppc[12:4]]; 
 	ppc_pre <= ppc;
 	// Write
         if (i_cache_refill && bus_write_enable && bus_address == `CacheI_L) begin Cache_L_Low[ask_i_data[12:4]] <= bus_write_data; end
         if (i_cache_refill && bus_write_enable && bus_address == `CacheI_H) begin 
 	    Cache_L_High[ask_i_data[12:4]] <= bus_write_data; 
-	    //Cache_T[ask_i_data[12:4]] <= {1'b1, ask_i_data[63:13]}; 
-	    Cache_T[ask_i_data[12:4]] <= ask_i_data[63:13]; 
-	    cache_valid_bits[ask_i_data[12:4]] <= 1'b1;
+	    //Cache_T[ask_i_data[12:4]] <= ask_i_data[63:13]; 
+	    //cache_valid_bits[ask_i_data[12:4]] <= 1'b1;
+	    Cache_T[ask_i_data[12:4]] <= {cache_epoch, ask_i_data[63:13]}; 
 	end
     end
 
-    wire i_cache_hit = cache_tag[51] && (ppc_pre[63:13] == cache_tag[50:0]);
+    //wire i_cache_hit = cache_tag[51] && (ppc_pre[63:13] == cache_tag[50:0]);
+    wire i_cache_hit = (cache_tag[58:51] == cache_epoch) && (ppc_pre[63:13] == cache_tag[50:0]);
     wire [31:0] cache_i = cache_line[ppc_pre[3:2]*32 +: 32];
     //assign ir = (mmu_pc || mmu_da || i_cache_refill) ? instruction : i_cache_hit ? cache_i : 32'h00000013; // NOP:addi x0, x0, 0;
     assign ir = Trap ? instruction : i_cache_hit ? cache_i : 32'h00000013; // NOP:addi x0, x0, 0;
@@ -590,7 +594,8 @@ module riscv64(
 
 	    //  mmu_pc I-TLB miss Trap
 	    //if (satp_mmu && !mmu_pc && !mmu_da && !i_cache_refill && !tlb_i_hit) begin //OPEN 
-	    if (satp_mmu && !Trap && !tlb_i_hit) begin //OPEN 
+	    //if (satp_mmu && !Trap && !tlb_i_hit) begin //OPEN 
+	    if (need_trans && !tlb_i_hit) begin //OPEN 
        		mmu_pc <= 1; // MMU_PC ON 
        	        pc <= 0;     // trap to isr_router
        	 	bubble <= 1'b1; // bubble IF for new pc value 
@@ -681,7 +686,8 @@ module riscv64(
 
             //  mmu_da  D-TLB miss Trap // load/store/atom
 	    //end else if (satp_mmu && !mmu_pc && !mmu_da && !i_cache_refill && tlb_i_hit && !tlb_d_hit && (op == 7'b0000011 || op == 7'b0100011 || op == 7'b0101111) ) begin  
-	    end else if (satp_mmu && !Trap && !tlb_d_hit && (op == 7'b0000011 || op == 7'b0100011 || op == 7'b0101111) ) begin  
+	    //end else if (satp_mmu && !Trap && !tlb_d_hit && (op == 7'b0000011 || op == 7'b0100011 || op == 7'b0101111) ) begin  
+	    end else if (need_trans && !tlb_d_hit && (op == 7'b0000011 || op == 7'b0100011 || op == 7'b0101111) ) begin  
 		mmu_da <= 1; // MMU_DA ON
        	        pc <= 0; // trap to isr_router
 	 	bubble <= 1'b1; // bubble
@@ -714,7 +720,7 @@ module riscv64(
 
 
             // Interrupt PLIC full (Platform-Level-Interrupt-Control)  MMIO
-	    end else if ((meip_interrupt || msip_interrupt) && Csrs[mstatus][MIE]==1) begin //mstatus[3] MIE
+	    end else if ((meip_interrupt || msip_interrupt) && Csrs[mstatus][MIE]==1 && !Trap) begin //mstatus[3] MIE
 	    //end else if ((meip_interrupt || msip_interrupt) && Csrs[mstatus][MIE]==1 && !mmu_pc && !mmu_da && !i_cache_refill && !load_step && !store_step) begin //mstatus[3] MIE
                 Csrs[mip][MTIP] <= time_interrupt; // MTIP linux will see then jump to its handler
                 Csrs[mip][MEIP] <= meip_interrupt; // MEIP

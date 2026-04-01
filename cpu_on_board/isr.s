@@ -58,10 +58,10 @@ mmu:  # VA 63:39Sign|38:30Vpn[2]|29:21Vpn[1]|20:12Vpn[0]|11:0PageOffset
      ld x4, 0(x2)    # Load L2 PTE from memory  PTE 63:54Reserved|53:10PPN|9:8RSW|XWRmark|0validBit1
 
    # 3. Check Leaf
-     andi x3, x4, 0xE # bit 3:1 for X/W/R
-     bnez x3, FINISH_1GB  # If not zero, it's leaf. We get the address.
      andi x3, x4, 1   # check PTE valid bit
      beqz x3, FAULT
+     andi x3, x4, 0xE # bit 3:1 for X/W/R
+     bnez x3, FINISH_1GB  # If not zero, it's leaf. We get the address.
 
    # 4. Prepare for Level 1
      srli x2, x4, 10 # Extract PPN from L2 PTE
@@ -75,10 +75,10 @@ mmu:  # VA 63:39Sign|38:30Vpn[2]|29:21Vpn[1]|20:12Vpn[0]|11:0PageOffset
      ld x4, 0(x2)    # Load L1 PTE from memory
 
    # 6. Check Leaf
-     andi x3, x4, 0xE # bit 3:1 for X/W/R 1110
-     bnez x3, FINISH_2MB   # If not zero, it's leaf. We get the address.
      andi x3, x4, 1   # check PTE valid bit
      beqz x3, FAULT
+     andi x3, x4, 0xE # bit 3:1 for X/W/R 1110
+     bnez x3, FINISH_2MB   # If not zero, it's leaf. We get the address.
 
    # 7. Prepare for Level 0
      srli x2, x4, 10 # Extract PPN from L1 PTE
@@ -102,7 +102,8 @@ FINISH_4KB:
      j WRITE_TLB
                                             
 FINISH_2MB:
-     srli x4, x4, 10 
+     slli x4, x4, 10  # mask out reserved bits
+     srli x4, x4, 20 
      slli x4, x4, 12 
      li x3, 0x001ff000 # mask for VA[20:12]
      and x3, x3, x9    
@@ -110,7 +111,8 @@ FINISH_2MB:
      j WRITE_TLB
 
 FINISH_1GB:
-     srli x4, x4, 10  # get PPN from PTE(PTE's data struction?)  64:54Reserved 53:10PPN # 9:8RSW 7Dirty 6Accessed 5Global 4User 3Executable 2Write 1Readable 0Valid
+     slli x4, x4, 10  # mask out reserved bits
+     srli x4, x4, 20  # get PPN from PTE(PTE's data struction?)  64:54Reserved 53:10PPN # 9:8RSW 7Dirty 6Accessed 5Global 4User 3Executable 2Write 1Readable 0Valid
      slli x4, x4, 12  # PPN posint [38:12] in satp
      li x3, 0x3ffff000 # mask for VA[29:12]
      and x3, x3, x9    # extrac from VA
