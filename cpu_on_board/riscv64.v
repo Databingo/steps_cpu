@@ -328,13 +328,13 @@ module riscv64(
    //localparam pmpaddr6   = 34;  // 
    //localparam pmpaddr7   = 35;  // 
 
-   localparam pmpaddr1   = 29;  // 
-   localparam pmpaddr2   = 29;  // 
-   localparam pmpaddr3   = 29;  // 
-   localparam pmpaddr4   = 29;  // 
-   localparam pmpaddr5   = 29;  // 
-   localparam pmpaddr6   = 29;  // 
-   localparam pmpaddr7   = 29;  // 
+   //localparam pmpaddr1   = 29;  // 
+   //localparam pmpaddr2   = 29;  // 
+   //localparam pmpaddr3   = 29;  // 
+   //localparam pmpaddr4   = 29;  // 
+   //localparam pmpaddr5   = 29;  // 
+   //localparam pmpaddr6   = 29;  // 
+   //localparam pmpaddr7   = 29;  // 
     //integer scontext = 12'h5a8; 
    reg [62:0] CAUSE_CODE;
    reg  [5:0] w_csr_id;             // CSR id (32)
@@ -368,13 +368,13 @@ module riscv64(
             12'hF13 : w_csr_id = mimpid     ;   
             12'h3A0 : w_csr_id = pmpcfg0    ;   
             12'h3B0 : w_csr_id = pmpaddr0   ;   
-            12'h3B1 : w_csr_id = pmpaddr1   ;   
-            12'h3B2 : w_csr_id = pmpaddr2   ;   
-            12'h3B3 : w_csr_id = pmpaddr3   ;   
-            12'h3B4 : w_csr_id = pmpaddr4   ;   
-            12'h3B5 : w_csr_id = pmpaddr5   ;   
-            12'h3B6 : w_csr_id = pmpaddr6   ;   
-            12'h3B7 : w_csr_id = pmpaddr7   ;   
+            //12'h3B1 : w_csr_id = pmpaddr1   ;   
+            //12'h3B2 : w_csr_id = pmpaddr2   ;   
+            //12'h3B3 : w_csr_id = pmpaddr3   ;   
+            //12'h3B4 : w_csr_id = pmpaddr4   ;   
+            //12'h3B5 : w_csr_id = pmpaddr5   ;   
+            //12'h3B6 : w_csr_id = pmpaddr6   ;   
+            //12'h3B7 : w_csr_id = pmpaddr7   ;   
 	    //default : w_csr_id = 36; 
 	    default : w_csr_id = 29; 
 	endcase
@@ -610,16 +610,11 @@ module riscv64(
 		pc <= saved_user_pc; // recover from shadow when see Mret
 	 	bubble <= 1'b1; // bubble
 		for (i=1;i<11;i=i+1) begin re[i]<= sre[i]; end // recover usr re
-		if (mmu_pc) mmu_pc <= 0;
-		if (mmu_da) mmu_da <= 0;
-		if (i_cache_refill) i_cache_refill<= 0;
-
+		mmu_pc <= 0;
+		mmu_da <= 0;
+		i_cache_refill<= 0;
 		if  (re[8]!=0) begin
-	                                                //if      (re[8]==12) CAUSE_CODE = PAGE_FAULT_I; // 12
-	                                                //else if (re[8]==13) CAUSE_CODE = PAGE_FAULT_L; // 13
-	                                                //else if (re[8]==14) CAUSE_CODE = PAGE_FAULT_S; // 14
 	                                                CAUSE_CODE = re[8]; 
-							
 						        if (Csrs[medeleg][CAUSE_CODE] == 1 && current_privilege_mode <= S_mode) // UECALL8 SECALL9 MECALL11 delegate to S-mode (M-mode still in M-mode)
 	                 			        begin // Trap into S-mode
 	                 			           Csrs[scause][INTERRUPT] <= 0; //63_type 0exception 1interrupt|value
