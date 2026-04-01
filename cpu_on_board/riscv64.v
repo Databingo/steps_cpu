@@ -515,7 +515,8 @@ module riscv64(
     // -----
     // i_cache_hit 63:13 tag, 12:4 index 3:0 offset Cache line 16B (4 instructions) 512 lines
     reg [127:0] cache_line = 128'h0;
-    reg [51:0]  cache_tag = 52'h0;
+    //reg [51:0]  cache_tag = 52'h0;
+    reg [58:0]  cache_tag = 58'h0;
     reg [63:0]  ppc_pre = 64'h0; // for read
     reg [63:0]  ask_i_data; // for write
     //(* ram_style = "block" *) reg [127:0] Cache_L [0:1023]; // 16KB
