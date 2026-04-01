@@ -538,7 +538,8 @@ module riscv64(
 
     wire i_cache_hit = cache_tag[51] && (ppc_pre[63:13] == cache_tag[50:0]);
     wire [31:0] cache_i = cache_line[ppc_pre[3:2]*32 +: 32];
-    assign ir = (mmu_pc || mmu_da || i_cache_refill) ? instruction : i_cache_hit ? cache_i : 32'h00000013; // NOP:addi x0, x0, 0;
+    //assign ir = (mmu_pc || mmu_da || i_cache_refill) ? instruction : i_cache_hit ? cache_i : 32'h00000013; // NOP:addi x0, x0, 0;
+    assign ir = Trap ? instruction : i_cache_hit ? cache_i : 32'h00000013; // NOP:addi x0, x0, 0;
 
     // NO cache test
     // wire i_cache_hit = 1;    // no cache trap
