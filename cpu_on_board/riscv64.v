@@ -579,7 +579,8 @@ module riscv64(
 	    bus_write_enable <= 0; 
 
 	    //  mmu_pc I-TLB miss Trap
-	    if (satp_mmu && !mmu_pc && !mmu_da && !i_cache_refill && !tlb_i_hit) begin //OPEN 
+	    //if (satp_mmu && !mmu_pc && !mmu_da && !i_cache_refill && !tlb_i_hit) begin //OPEN 
+	    if (satp_mmu && !Trap && !tlb_i_hit) begin //OPEN 
        		mmu_pc <= 1; // MMU_PC ON 
        	        pc <= 0;     // trap to isr_router
        	 	bubble <= 1'b1; // bubble IF for new pc value 
@@ -649,7 +650,8 @@ module riscv64(
     
 	    // ----- 
 	    //  i_cache_hit at EXE stage without stap/tlb_hit sensitive
-	    end else if (!mmu_pc && !mmu_da && !i_cache_refill && !i_cache_hit) begin //OPEN 
+	    //end else if (!mmu_pc && !mmu_da && !i_cache_refill && !i_cache_hit) begin //OPEN 
+	    end else if (!Trap && !i_cache_hit) begin //OPEN 
 	    //end else if (!i_cache_hit) begin //OPEN 
        		i_cache_refill <= 1; // 
        	        pc <= 0; // trap to isr_router
@@ -673,7 +675,8 @@ module riscv64(
 	    // -----
 
             //  mmu_da  D-TLB miss Trap // load/store/atom
-	    end else if (satp_mmu && !mmu_pc && !mmu_da && !i_cache_refill && tlb_i_hit && !tlb_d_hit && (op == 7'b0000011 || op == 7'b0100011 || op == 7'b0101111) ) begin  
+	    //end else if (satp_mmu && !mmu_pc && !mmu_da && !i_cache_refill && tlb_i_hit && !tlb_d_hit && (op == 7'b0000011 || op == 7'b0100011 || op == 7'b0101111) ) begin  
+	    end else if (satp_mmu && !Trap && !tlb_d_hit && (op == 7'b0000011 || op == 7'b0100011 || op == 7'b0101111) ) begin  
 		mmu_da <= 1; // MMU_DA ON
        	        pc <= 0; // trap to isr_router
 	 	bubble <= 1'b1; // bubble
