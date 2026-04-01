@@ -1,5 +1,5 @@
 Analysis & Synthesis report for cpu_on_board
-Wed Apr  1 12:00:13 2026
+Wed Apr  1 12:02:01 2026
 Quartus II 32-bit Version 13.0.1 Build 232 06/12/2013 Service Pack 1 SJ Web Edition
 
 
@@ -36,7 +36,7 @@ applicable agreement for further details.
 +--------------------------------------------------------------------------------------+
 ; Analysis & Synthesis Summary                                                         ;
 +------------------------------------+-------------------------------------------------+
-; Analysis & Synthesis Status        ; Failed - Wed Apr  1 12:00:12 2026               ;
+; Analysis & Synthesis Status        ; Failed - Wed Apr  1 12:02:01 2026               ;
 ; Quartus II 32-bit Version          ; 13.0.1 Build 232 06/12/2013 SP 1 SJ Web Edition ;
 ; Revision Name                      ; cpu_on_board                                    ;
 ; Top-level Entity Name              ; cpu_on_board                                    ;
@@ -175,7 +175,7 @@ Info: Running Quartus II 32-bit Analysis & Synthesis
     Info: programming logic devices manufactured by Altera and sold by 
     Info: Altera or its authorized distributors.  Please refer to the 
     Info: applicable agreement for further details.
-    Info: Processing started: Wed Apr  1 12:00:07 2026
+    Info: Processing started: Wed Apr  1 12:01:58 2026
 Info: Command: quartus_map --read_settings_files=on --write_settings_files=off cpu_on_board -c cpu_on_board
 Info (20030): Parallel compilation is enabled and will use 2 of the 2 processors detected
 Info (12021): Found 1 design units, including 1 entities, in source file jtag_uart_system/synthesis/jtag_uart_system.v
@@ -391,7 +391,6 @@ Warning (10335): Unrecognized synthesis attribute "ram_style" at riscv64.v(403)
 Warning (10335): Unrecognized synthesis attribute "ram_style" at riscv64.v(512)
 Warning (10335): Unrecognized synthesis attribute "ram_style" at riscv64.v(513)
 Warning (10335): Unrecognized synthesis attribute "ram_style" at riscv64.v(515)
-Error (10170): Verilog HDL syntax error at riscv64.v(616) near text "Csrs";  expecting ";" File: /usr/local/projects/steps_cpu/cpu_on_board/riscv64.v Line: 616
 Error (10170): Verilog HDL syntax error at riscv64.v(652) near text "else";  expecting "end" File: /usr/local/projects/steps_cpu/cpu_on_board/riscv64.v Line: 652
 Warning (10268): Verilog HDL information at riscv64.v(548): always construct contains both blocking and non-blocking assignments
 Error (10170): Verilog HDL syntax error at riscv64.v(1033) near text "<=";  expecting ".", or an identifier File: /usr/local/projects/steps_cpu/cpu_on_board/riscv64.v Line: 1033
@@ -402,10 +401,10 @@ Info (10499): HDL info at riscv64.v(296): see declaration for object "mie"
 Info (10281): Verilog HDL Declaration information at riscv64.v(291): object "SIE" differs only in case from object "sie" in the same scope
 Info (10499): HDL info at riscv64.v(303): see declaration for object "sie"
 Error (10112): Ignored design unit "riscv64" at riscv64.v(3) due to previous errors File: /usr/local/projects/steps_cpu/cpu_on_board/riscv64.v Line: 3
-Error: Quartus II 32-bit Analysis & Synthesis was unsuccessful. 6 errors, 55 warnings
-    Error: Peak virtual memory: 386 megabytes
-    Error: Processing ended: Wed Apr  1 12:00:14 2026
-    Error: Elapsed time: 00:00:07
-    Error: Total CPU time (on all processors): 00:00:07
+Error: Quartus II 32-bit Analysis & Synthesis was unsuccessful. 5 errors, 55 warnings
+    Error: Peak virtual memory: 351 megabytes
+    Error: Processing ended: Wed Apr  1 12:02:02 2026
+    Error: Elapsed time: 00:00:04
+    Error: Total CPU time (on all processors): 00:00:04
 
 
