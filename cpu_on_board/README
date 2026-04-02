@@ -409,7 +409,7 @@ clint
 rom/ram space adjust
 
 三级流水线
-1-Line with Conditional_Jump_Mine by 3 stages on 6 Parts
+1-Line with Conditional_Jump_Mine by 3 stages on 6 Parts 保证触发条件、返回条件、处理逻辑正确
 Main  pcA->|instr_i->|i_executing
 PC    pcA->|pcA_+_4->|pcA_+_8    ->|pcA_+12
 IF    A-4->|pcA_+_0->|pcA_+_4    ->|pcA_+_8
