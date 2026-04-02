@@ -419,7 +419,7 @@ TLBi  icA-4->|tlb_i_h->X
 CACi  pcA-8->|i_cache_hX
                        |i_cache_r|mepc=pcA_-_4=pc-4 mval=pcA-4=pc-4
 TLBd  dcA-8->|tlb_d_h->X
-                       |d_tlb_ref|mepc=pcA_-_4=pc-4 mval=dcA-4=pc-4 (mepc for ls_va of ir, target adress)
+                       |d_tlb_ref|mepc=pcA_-_4=pc-4 mval=ls_va      (ls_va is target_adress_of_mepc's instruction:rs1+offset)
 Trap  trA-8->|i_execu->X
                        |trap_0or1|mepc=pcA_-_4=pc-4 mval=trA-4=pc-4
                    
