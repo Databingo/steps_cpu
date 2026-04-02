@@ -408,15 +408,18 @@ plic
 clint
 rom/ram space adjust
 
-
-1-Stream with Condition+JumpMine
+三级流水线
+1-Line with Conditional_Jump_Mine by 3 stages on 6 Parts
 Main  pcA->|instr_i->|i_executing
 PC    pcA->|pcA_+_4->|pcA_+_8    ->|pcA_+12
 IF    A-4->|pcA_+_0->|pcA_+_4    ->|pcA_+_8
-EX    A-8->|pcA_-_4->|pcA_+_0    ->|pcA_+_4
-TLBi  pcA->|tlb_i_h
-                   ->|i_tlb_refil->|               pcA_-_4=pc-4(j/b/vma use pcA=pc)
-Cach  pcA->|cache_i->|i_cache_hit
+EX    A-8->|pcA_-_4->|pcA_+_0    ->|pcA_+_4       |back to aviod EX stage's pc value
+TLBi  pcA->|tlb_i_h X
+                   ->|i_tlb_refil->|pcA_-_4=pc-4  |(only j/b/vma use pcA=pc)
+Cach  pcA->|cache_i->|i_cache_hit X
                                  ->|i_cache_refi->|pcA_+_0=pc-4
-TLBd  pcA->|instr_i->|tlb_d_h
+TLBd  pcA->|instr_i->|tlb_d_h     X
                                  ->|d_tlb_refill->|pcA_+_0=pc-4
+Trap  pcA->|instr_i->|i_executing X
+                                 ->|trap_0_or_1_->|pcA_+_0=pc-4
+                   
