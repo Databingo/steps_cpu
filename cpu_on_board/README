@@ -407,3 +407,8 @@ trap
 plic
 clint
 rom/ram space adjust
+
+
+pcA->fetch_ir->irA_getL
+pcA->fetch_ca->irA_miss+nop+PC_trap_ca_i+bubble->cache_refill+bublle+pcA->pcA
+ppc->pcA
