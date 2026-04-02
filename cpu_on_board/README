@@ -415,7 +415,7 @@ PC    pcA->|pcA_+_4->|pcA_+_8    ->|pcA_+12
 IF    A-4->|pcA_+_0->|pcA_+_4    ->|pcA_+_8
 EX    A-8->|pcA_-_4->|pcA_+_0    ->|pcA_+_4
 TLBi  pcA->|tlb_i_h
-                   ->|i_tlb_refil->|pcA_-_4=pc-4(j/b/vma use pcA=pc)
+                   ->|i_tlb_refil->|               pcA_-_4=pc-4(j/b/vma use pcA=pc)
 Cach  pcA->|cache_i->|i_cache_hit
                                  ->|i_cache_refi->|pcA_+_0=pc-4
 TLBd  pcA->|instr_i->|tlb_d_h
