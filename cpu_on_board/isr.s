@@ -60,6 +60,7 @@ mmu:  # VA 63:39Sign|38:30Vpn[2]|29:21Vpn[1]|20:12Vpn[0]|11:0PageOffset
    # 3. Check Leaf
      andi x3, x4, 1   # check PTE valid bit
      beqz x3, FAULT
+    #andi x3, x4, 0b10000000 # bit 7 Dirty
      andi x3, x4, 0xE # bit 3:1 for X/W/R
      bnez x3, FINISH_1GB  # If not zero, it's leaf. We get the address.
 
