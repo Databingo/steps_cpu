@@ -409,6 +409,14 @@ clint
 rom/ram space adjust
 
 
-pcA->fetch_ir->irA_getL
-pcA->fetch_ca->irA_miss+nop+PC_trap_ca_i+bubble->cache_refill+bublle+pcA->pcA
-ppc->pcA
+1-Stream with Condition+JumpMine
+Main  pcA->|instr_i->|i_executing
+PC    pcA->|pcA_+_4->|pcA_+_8    ->|pcA_+12
+IF    A-4->|pcA_+_0->|pcA_+_4    ->|pcA_+_8
+EX    A-8->|pcA_-_4->|pcA_+_0    ->|pcA_+_4
+TLBi  pcA->|tlb_i_h
+                   ->|i_tlb_refil->|pcA_-_4=pc-4(j/b/vma use pcA=pc)
+Cach  pcA->|cache_i->|i_cache_hit
+                                 ->|i_cache_refi->|pcA_+_0=pc-4
+TLBd  pcA->|instr_i->|tlb_d_h
+                                 ->|d_tlb_refill->|pcA_+_0=pc-4

@@ -402,6 +402,7 @@ module riscv64(
     (* ram_style = "logic" *) reg [43:0] tlb_ppn [0:3]; // ppn number PA[55:12]
     (* ram_style = "logic" *) reg tlb_vld [0:3];
 
+    // TLB-I
     wire [26:0] pc_vpn = pc[38:12];
     reg [43:0] pc_ppn;
     reg tlb_i_hit;
@@ -428,7 +429,7 @@ module riscv64(
                    //({44{tlb_i_match[5]}} & tlb_ppn[5]) |
                    //({44{tlb_i_match[6]}} & tlb_ppn[6]) |
                    //({44{tlb_i_match[7]}} & tlb_ppn[7]) ; end
-    // tlb d hit
+    // TLB-D tlb d hit
     wire [63:0] ls_va_offset = (op == 7'b0000011) ? w_imm_i : (op == 7'b0100011) ?  w_imm_s : 64'h0; // load/store/atom
     wire [63:0] ls_va = rs1 + ls_va_offset;
     wire [63:0] pda;
@@ -481,7 +482,7 @@ module riscv64(
 	end
     end
 
-    // I_cache_hit 63:13 tag, 12:4 index 3:0 offset Cache line 16B (4 instructions) 512 lines
+    // Cache I_cache_hit 63:13 tag, 12:4 index 3:0 offset Cache line 16B (4 instructions) 512 lines
     reg [127:0] cache_line = 128'h0; //reg [51:0]  cache_tag = 52'h0;
     reg [58:0]  cache_tag = 58'h0;
     reg [63:0]  ppc_pre = 64'h0; // for read
