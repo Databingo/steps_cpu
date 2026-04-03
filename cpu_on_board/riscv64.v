@@ -554,7 +554,7 @@ module riscv64(
 	    Csrs[medeleg] <= 64'hb1af; // delegate to S-mode 1011000110101111 // see VII 3.1.15 mcasue exceptions
 	    Csrs[mideleg] <= 64'h0222; // delegate to S-mode 0000001000100010 see VII 3.1.15 mcasue interrupt 1/5/9 SSIP(supervisor software interrupt) STIP(time) SEIP(external)
 	    // Initialize Machine Info for OpenSBI
-	    Csrs[misa] <= 64'h8000000000141101; // RV64IMASU extensions (63:1 64bits | 1<<0 Atomic| 1<<8 Integer| 1<<12 Multiple| 1<<18 Supervisor| 1 <<20 User) so: 64'h8000000000141101; RV64IMASU
+	    Csrs[misa] <= 64'h8000000000141101; // RV64IMASU extensions (63:62=2 64bits | 1<<0 Atomic| 1<<8 Integer| 1<<12 Multiply| 1<<18 Supervisor| 1 <<20 User) so: 64'h8000000000141101; RV64IMASU
 	    Csrs[mhartid] <= 64'd0; // single Core 0
 	    // mvendorid, marchid, mimpid remain 0
 	    mmu_pc <= 0;
