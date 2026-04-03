@@ -485,6 +485,8 @@ blt t1, t2, copy_sector_loop
     call print_reg
 
     fence.i
+    li a0, 0 # use core 0
+    li a1, 0 # let opensbi use its embedded DTB
     jr s0  # jump to SDRAM!
 
 
