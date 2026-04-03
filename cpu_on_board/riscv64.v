@@ -158,8 +158,7 @@ module riscv64(
 
     // Indepenedent Multiplier // Booth algorithim + Signed-correct
     reg [6:0]   mul_cnt;
-    //reg [127:0] mul_acc;  // result|multiplier
-    reg [127:0] mul_div_buff;  // result|multiplier
+    reg [127:0] mul_acc;  // result|multiplier
     reg [63:0]  mul_a_reg; // 被乘数(绝对值)
     reg         mul_active;
     reg         mul_done;
@@ -187,26 +186,26 @@ module riscv64(
 
     wire [63:0] abs_a = (a_is_signed & raw_a[63])? (~raw_a+64'd1):raw_a; 
     wire [63:0] abs_b = (b_is_signed & raw_b[63])? (~raw_b+64'd1):raw_b; 
-    wire [64:0] add_res = {1'b0, mul_div_buff[127:64]} + {1'b0, mul_a_reg};
+    wire [64:0] add_res = {1'b0, mul_acc[127:64]} + {1'b0, mul_a_reg};
 
     always @(posedge clk or negedge reset) begin  
         if (!reset) begin
             mul_active <= 0;
             mul_done   <= 0;
             mul_cnt    <= 0;	    
-            mul_div_buff    <= 0;
+            mul_acc    <= 0;
         end else begin
             if (mul_enable && !mul_active && !mul_done) begin // Start phase
         	mul_active <= 1;
         	mul_cnt    <= 0;
         	mul_a_reg  <= abs_a_latched;
-        	mul_div_buff <= {64'b0, abs_b_latched};
+        	mul_acc <= {64'b0, abs_b_latched};
         	mul_neg_result <= (a_is_signed_latched && raw_a_latched[63]) ^ (b_is_signed_latched && raw_b_latched[63]);
         	   
             end else if (mul_active) begin // Compute phase (64 cycles)
         	if (mul_cnt < 64) begin
-        	    if (mul_div_buff[0]) mul_div_buff <= {add_res, mul_div_buff[63:1]}; // is 1,  + and >> 1
-        	    else mul_div_buff <= {1'b0, mul_div_buff[127:1]}; // is 0, only >> 1, preserve sign bit
+        	    if (mul_acc[0]) mul_acc <= {add_res, mul_acc[63:1]}; // is 1,  + and >> 1
+        	    else mul_acc <= {1'b0, mul_acc[127:1]}; // is 0, only >> 1, preserve sign bit
         	    mul_cnt <= mul_cnt + 1;
         	end else begin // Finish phase
                     mul_active <= 0;
@@ -216,7 +215,7 @@ module riscv64(
         end
     end
 
-    wire [127:0] final_mul_res = mul_neg_result ? ~mul_div_buff+128'd1 : mul_div_buff;
+    wire [127:0] final_mul_res = mul_neg_result ? ~mul_acc+128'd1 : mul_acc;
     wire is_high_mul = (mul_op_type == 3'b001) || (mul_op_type == 3'b010) || (mul_op_type == 3'b011);
     wire [63:0] w_mul_out = 
             (mul_is_w_latched) ? {{32{final_mul_res[31]}}, final_mul_res[31:0]}: // mulw
@@ -225,8 +224,7 @@ module riscv64(
 
     // Independent divider
     reg [6:0]   div_cnt;
-    //reg [127:0] div_rem;   // remainder|quotient
-    //reg [127:0] mul_div_buff;   // remainder|quotient
+    reg [127:0] div_rem;   // remainder|quotient
     reg [63:0]  div_a;    // be divided
     reg [63:0]  div_b;    // divisor
     reg         div_active; // 1computing, 0idle
@@ -245,7 +243,7 @@ module riscv64(
     wire [63:0] div_abs_b = b_is_neg ? (~div_b + 64'd1):div_b;
     wire out_sign_quo = div_op_signed && (div_a[63] ^ div_b[63]);
     wire out_sign = div_is_rem ? a_is_neg : out_sign_quo;
-    wire [63:0] raw_out = div_is_rem ? mul_div_buff[127:64] : mul_div_buff[63:0];
+    wire [63:0] raw_out = div_is_rem ? div_rem[127:64] : div_rem[63:0];
     wire [63:0] final_out = out_sign ? (~raw_out+64'd1): raw_out;
 
     always @(posedge clk or negedge reset) begin
@@ -268,14 +266,14 @@ module riscv64(
         	    div_done <= 1; // finish immediately
         	end
         	else begin 
-        	    mul_div_buff <= {64'd0, div_abs_a};
+        	    div_rem <= {64'd0, div_abs_a};
         	end
             end else if (div_active) begin // compute phase (64 cycles)
         	if (div_cnt < 64) begin
-        	    if (mul_div_buff[126:63] >= div_abs_b) begin
-        	        mul_div_buff <= {mul_div_buff[126:63] - div_abs_b, mul_div_buff[62:0], 1'b1};
+        	    if (div_rem[126:63] >= div_abs_b) begin
+        	        div_rem <= {div_rem[126:63] - div_abs_b, div_rem[62:0], 1'b1};
         	    end else begin
-        	        mul_div_buff <= {mul_div_buff[126:0], 1'b0};
+        	        div_rem <= {div_rem[126:0], 1'b0};
         	    end
         	    div_cnt <= div_cnt + 1;
                 end else begin // finish phase
