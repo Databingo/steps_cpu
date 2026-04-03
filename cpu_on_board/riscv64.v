@@ -519,7 +519,8 @@ module riscv64(
     end
 
     //wire i_cache_hit = cache_tag[51] && (ppc_pre[63:13] == cache_tag[50:0]);
-    wire i_cache_hit = (cache_tag[58:51] == cache_epoch) && (ppc_pre[63:13] == cache_tag[50:0]);
+    //wire i_cache_hit = (cache_tag[58:51] == cache_epoch) && (ppc_pre[63:13] == cache_tag[50:0]);
+    wire i_cache_hit = (cache_tag[58:51] == cache_epoch) && (ppc_pre[63:13] == cache_tag[50:0]) && (flush_pre == flush);
     wire [31:0] cache_i = cache_line[ppc_pre[3:2]*32 +: 32];
     //assign ir = (mmu_pc || mmu_da || i_cache_refill) ? instruction : i_cache_hit ? cache_i : 32'h00000013; // NOP:addi x0, x0, 0;
     assign ir = STrap ? instruction : i_cache_hit ? cache_i : 32'h00000013; // NOP:addi x0, x0, 0;
@@ -734,7 +735,7 @@ module riscv64(
 		          		       bubble <= 1'b1; end 
 		    32'b00010000010100000000000001110011: begin end // Wfi
 		    32'b?????????????????_000_?????_0001111: begin end // Fence
-		    32'b?????????????????_001_?????_0001111: begin flush <= ~flush; end // Fence.i =??
+		    32'b?????????????????_001_?????_0001111: begin flush <= ~flush; end // Fence.i =?? no need
 		    32'b0001001??????????_000_?????_1110011: begin end // Sfence.vma (supervisor fence for virtual memory address)
 		    // Atomic after TLB // -- ATOMIC instructions (A-extension) opcode: 0101111
 		    32'b00010_??_?????_?????_01?_?????_0101111: begin  // lr Lr._mmu 3 cycles lr.w010 lr.d011
