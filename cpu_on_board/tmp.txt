@@ -203,10 +203,10 @@ addi a0, x0, 0x0
 #    j m_done
 jal x0, m_done
 m_handler_get_timer:
-#    li t1, 0x2004000  
+#    li t1, 0x200bff8  
 addi t1, x0, 0x0
-lui t1, 0x2004
-addi t1, t1, 0x0
+lui t1, 0x200c
+addi t1, t1, 0xff8
 ld a0, 0(t1)      # S-mode passes new time in a0
 #    j m_done
 jal x0, m_done

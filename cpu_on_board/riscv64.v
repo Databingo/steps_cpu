@@ -66,6 +66,7 @@ module riscv64(
     //wire [11:0] w_f12 = ir[31:20];   // ecall 0, ebreak 1
     //-- csr --
     wire [11:0] w_csr = ir[31:20];   // CSR official address
+    wire [63:0] pc_4 = pc - 4;
 
     // Shared Arithmetic Units
     wire use_imm = (op == 7'b0010011 || op == 7'b0011011 || op == 7'b1100111); //math-i math-i-w jalr 
@@ -94,7 +95,7 @@ module riscv64(
     wire [63:0] alu_or   = rs1 | alu_op2;
     wire [63:0] alu_ori  = alu_or;
 
-    wire [63:0] branch = pc - 4 + w_imm_b; //branch
+    wire [63:0] branch = pc_4 + w_imm_b; //branch
 
     wire is_imm_shift  = (op == 7'b0010011 || op == 7'b0011011); // Slli Srli Srai || Slliw Srliw Sraiw
     wire is_word_shift = (op == 7'b0111011 || op == 7'b0011011); // Sllw Srlw Sraw || Slliw Srliw Sraiw
@@ -157,7 +158,8 @@ module riscv64(
 
     // Indepenedent Multiplier // Booth algorithim + Signed-correct
     reg [6:0]   mul_cnt;
-    reg [127:0] mul_acc;  // result|multiplier
+    //reg [127:0] mul_acc;  // result|multiplier
+    reg [127:0] mul_div_buff;  // result|multiplier
     reg [63:0]  mul_a_reg; // 被乘数(绝对值)
     reg         mul_active;
     reg         mul_done;
@@ -185,26 +187,26 @@ module riscv64(
 
     wire [63:0] abs_a = (a_is_signed & raw_a[63])? (~raw_a+64'd1):raw_a; 
     wire [63:0] abs_b = (b_is_signed & raw_b[63])? (~raw_b+64'd1):raw_b; 
-    wire [64:0] add_res = {1'b0, mul_acc[127:64]} + {1'b0, mul_a_reg};
+    wire [64:0] add_res = {1'b0, mul_div_buff[127:64]} + {1'b0, mul_a_reg};
 
     always @(posedge clk or negedge reset) begin  
         if (!reset) begin
             mul_active <= 0;
             mul_done   <= 0;
             mul_cnt    <= 0;	    
-            mul_acc    <= 0;
+            mul_div_buff    <= 0;
         end else begin
             if (mul_enable && !mul_active && !mul_done) begin // Start phase
         	mul_active <= 1;
         	mul_cnt    <= 0;
         	mul_a_reg  <= abs_a_latched;
-        	mul_acc <= {64'b0, abs_b_latched};
+        	mul_div_buff <= {64'b0, abs_b_latched};
         	mul_neg_result <= (a_is_signed_latched && raw_a_latched[63]) ^ (b_is_signed_latched && raw_b_latched[63]);
         	   
             end else if (mul_active) begin // Compute phase (64 cycles)
         	if (mul_cnt < 64) begin
-        	    if (mul_acc[0]) mul_acc <= {add_res, mul_acc[63:1]}; // is 1,  + and >> 1
-        	    else mul_acc <= {1'b0, mul_acc[127:1]}; // is 0, only >> 1, preserve sign bit
+        	    if (mul_div_buff[0]) mul_div_buff <= {add_res, mul_div_buff[63:1]}; // is 1,  + and >> 1
+        	    else mul_div_buff <= {1'b0, mul_div_buff[127:1]}; // is 0, only >> 1, preserve sign bit
         	    mul_cnt <= mul_cnt + 1;
         	end else begin // Finish phase
                     mul_active <= 0;
@@ -214,7 +216,7 @@ module riscv64(
         end
     end
 
-    wire [127:0] final_mul_res = mul_neg_result ? ~mul_acc+128'd1 : mul_acc;
+    wire [127:0] final_mul_res = mul_neg_result ? ~mul_div_buff+128'd1 : mul_div_buff;
     wire is_high_mul = (mul_op_type == 3'b001) || (mul_op_type == 3'b010) || (mul_op_type == 3'b011);
     wire [63:0] w_mul_out = 
             (mul_is_w_latched) ? {{32{final_mul_res[31]}}, final_mul_res[31:0]}: // mulw
@@ -223,7 +225,8 @@ module riscv64(
 
     // Independent divider
     reg [6:0]   div_cnt;
-    reg [127:0] div_rem;   // remainder|quotient
+    //reg [127:0] div_rem;   // remainder|quotient
+    reg [127:0] mul_div_buff;   // remainder|quotient
     reg [63:0]  div_a;    // be divided
     reg [63:0]  div_b;    // divisor
     reg         div_active; // 1computing, 0idle
@@ -242,7 +245,7 @@ module riscv64(
     wire [63:0] div_abs_b = b_is_neg ? (~div_b + 64'd1):div_b;
     wire out_sign_quo = div_op_signed && (div_a[63] ^ div_b[63]);
     wire out_sign = div_is_rem ? a_is_neg : out_sign_quo;
-    wire [63:0] raw_out = div_is_rem ? div_rem[127:64] : div_rem[63:0];
+    wire [63:0] raw_out = div_is_rem ? mul_div_buff[127:64] : mul_div_buff[63:0];
     wire [63:0] final_out = out_sign ? (~raw_out+64'd1): raw_out;
 
     always @(posedge clk or negedge reset) begin
@@ -265,14 +268,14 @@ module riscv64(
         	    div_done <= 1; // finish immediately
         	end
         	else begin 
-        	    div_rem <= {64'd0, div_abs_a};
+        	    mul_div_buff <= {64'd0, div_abs_a};
         	end
             end else if (div_active) begin // compute phase (64 cycles)
         	if (div_cnt < 64) begin
-        	    if (div_rem[126:63] >= div_abs_b) begin
-        	        div_rem <= {div_rem[126:63] - div_abs_b, div_rem[62:0], 1'b1};
+        	    if (mul_div_buff[126:63] >= div_abs_b) begin
+        	        mul_div_buff <= {mul_div_buff[126:63] - div_abs_b, mul_div_buff[62:0], 1'b1};
         	    end else begin
-        	        div_rem <= {div_rem[126:0], 1'b0};
+        	        mul_div_buff <= {mul_div_buff[126:0], 1'b0};
         	    end
         	    div_cnt <= div_cnt + 1;
                 end else begin // finish phase
@@ -576,7 +579,7 @@ module riscv64(
        		mmu_pc <= 1; // MMU_PC ON 
        	        pc <= 0;     // trap to isr_router
        	 	bubble <= 1'b1; // bubble IF for new pc value 
-	        saved_user_pc <= pc - 4; // !!! save pc (EXE was flushed so record-redo it, previous pc)
+	        saved_user_pc <= pc_4; // !!! save pc (EXE was flushed so record-redo it, previous pc)
 	        if (bubble || ir==32'b0001001??????????_000_?????_1110011) saved_user_pc <= pc ; // !!! save pc (j/b EXE was flushed currectly, vma executed anyway no need back-redo)
 		for (i=1;i<11;i=i+1) begin sre[i]<= re[i]; end // save re
 		re[9] <= pc;// - 4; // save this vpc to x1 //!!!! We also need to refill pc - 4' ppc for re-executeing pc-4, with hit(if satp in for very next sfence.vma) 
@@ -593,7 +596,7 @@ module riscv64(
        	        pc <= 0; // trap to isr_router
        	 	bubble <= 1'b1; // bubble 
 		for (i=1;i<11;i=i+1) begin sre[i]<= re[i]; end // save re
-	        saved_user_pc <= pc - 4  ; // ??!!! save pc (j/b EXE was flushed currectly)
+	        saved_user_pc <= pc_4  ; // ??!!! save pc (j/b EXE was flushed currectly)
 		re[9] <= {ppc_pre[63:4], 4'b0};// save missed ppc_pre cache_line address for handler
 		ask_i_data <= {ppc_pre[63:4], 4'b0};// save missed ppc_pre cache_line address for hardware
 		if (pc == `Ram_base) begin // initial situation
@@ -608,7 +611,7 @@ module riscv64(
 		mmu_da <= 1; // MMU_DA ON
        	        pc <= 0; // trap to isr_router
 	 	bubble <= 1'b1; // bubble
-	        saved_user_pc <= pc - 4; // save pc EXE l/s/a
+	        saved_user_pc <= pc_4; // save pc EXE l/s/a
 		for (i=1;i<11;i=i+1) begin sre[i]<= re[i]; end // save re
 		re[9] <= ls_va; //save va to x1
 		re[8] <= (op == 7'b0000011) ? 13 : 14;// save x2 trap type load/store_atom
@@ -634,7 +637,7 @@ module riscv64(
                 Csrs[mip][MSIP] <= msip_interrupt; // MSIP
 		reserve_valid <= 0; // Interrupt clear lr.w/lr.d
 
-		do_trap = 1; trap_is_interrupt =1; trap_val = 0; trap_epc = pc - 4;
+		do_trap = 1; trap_is_interrupt =1; trap_val = 0; trap_epc = pc_4;
                 if (msip_interrupt) trap_cause = 3;  // Cause 3 for Sofeware Interrupt
                 if (time_interrupt) trap_cause = 7;  // Cause 7 for Timer Interrupt
                 if (meip_interrupt) trap_cause = 11; // Cause 11 for External Interrupt
@@ -644,17 +647,17 @@ module riscv64(
                 casez(ir)
 	            // U-type
 	            32'b???????_?????_?????_???_?????_0110111: re[w_rd] <= w_imm_u; // Lui
-	            32'b???????_?????_?????_???_?????_0010111: re[w_rd] <= w_imm_u + (pc - 4); // Auipc
+	            32'b???????_?????_?????_???_?????_0010111: re[w_rd] <= w_imm_u + pc_4; // Auipc
                     // Load after TLB
                     32'b???????_?????_?????_???_?????_0000011: begin 
-                        if (load_step == 0) begin bus_address <= pda; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; bus_ls_type <= w_func3; end
-                        if (load_step == 1 && bus_read_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working
+                        if (load_step == 0) begin bus_address <= pda; bus_read_enable <= 1; pc <= pc_4; bubble <= 1; load_step <= 1; bus_ls_type <= w_func3; end
+                        if (load_step == 1 && bus_read_done == 0) begin pc <= pc_4; bubble <= 1; end // bus working
                         if (load_step == 1 && bus_read_done == 1) begin re[w_rd] <= w_load_data; load_step <= 0; end 
                     end
                     // Store after TLB
                     32'b???????_?????_?????_???_?????_0100011: begin 
-                        if (store_step == 0) begin bus_address <= pda; bus_write_data <= w_store_data; bus_write_enable <= 1; pc <= pc - 4; bubble <= 1; store_step <= 1; bus_ls_type <= w_func3; end
-                        if (store_step == 1 && bus_write_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working
+                        if (store_step == 0) begin bus_address <= pda; bus_write_data <= w_store_data; bus_write_enable <= 1; pc <= pc_4; bubble <= 1; store_step <= 1; bus_ls_type <= w_func3; end
+                        if (store_step == 1 && bus_write_done == 0) begin pc <= pc_4; bubble <= 1; end // bus working
                         if (store_step == 1 && bus_write_done == 1) begin store_step <= 0; if (bus_address == reserve_addr && reserve_valid) reserve_valid <= 0; end 
                     end   
                     // Math-I
@@ -690,7 +693,7 @@ module riscv64(
                     32'b0000000_?????_?????_101_?????_0111011: re[w_rd] <= shared_srl_sra;  // Srlw
                     32'b0100000_?????_?????_101_?????_0111011: re[w_rd] <= shared_srl_sra;  // Sraw
                     // Jump
-	            32'b???????_?????_?????_???_?????_1101111: begin pc <= pc - 4 + w_imm_j; if (w_rd != 5'b0) re[w_rd] <= pc; bubble <= 1'b1; end // Jal
+	            32'b???????_?????_?????_???_?????_1101111: begin pc <= pc_4 + w_imm_j; if (w_rd != 5'b0) re[w_rd] <= pc; bubble <= 1'b1; end // Jal
 	            32'b???????_?????_?????_???_?????_1100111: begin pc <= alu_addi & 64'hFFFFFFFFFFFFFFFE; if (w_rd != 5'b0) re[w_rd] <= pc; bubble <= 1; end // Jalr (re[w_rs1] + w_imm_i)
                     // Branch 
 		    32'b???????_?????_?????_000_?????_1100011: begin if (re[w_rs1] == re[w_rs2]) begin pc <= branch; bubble <= 1'b1; end end // Beq
@@ -711,9 +714,9 @@ module riscv64(
 	                                                if      (current_privilege_mode == U_mode) trap_cause = UECALL; // 8 indicate Ecall from U-mode; 9 call from S-mode; 11 call from M-mode
 	                                                else if (current_privilege_mode == S_mode) trap_cause = SECALL; // block assign attaintion!
 	                                                else if (current_privilege_mode == M_mode) trap_cause = MECALL;
-                                                        do_trap = 1; trap_is_interrupt = 0; trap_val = 0; trap_epc = pc - 4; end
+                                                        do_trap = 1; trap_is_interrupt = 0; trap_val = 0; trap_epc = pc_4; end
                     // Ebreak
-	            32'b0000000_00001_?????_000_?????_1110011: begin do_trap = 1; trap_is_interrupt = 0; trap_val = 0; trap_epc = pc - 4; trap_cause = BREAK; end
+	            32'b0000000_00001_?????_000_?????_1110011: begin do_trap = 1; trap_is_interrupt = 0; trap_val = 0; trap_epc = pc_4; trap_cause = BREAK; end
                     // Mret
 	            32'b0011000_00010_?????_000_?????_1110011: begin  
 	               			       Csrs[mstatus][MIE] <= Csrs[mstatus][MPIE]; // set back interrupt enable(MIE) by MPIE 
@@ -737,27 +740,27 @@ module riscv64(
 		    32'b0001001??????????_000_?????_1110011: begin end // Sfence.vma (supervisor fence for virtual memory address)
 		    // Atomic after TLB // -- ATOMIC instructions (A-extension) opcode: 0101111
 		    32'b00010_??_?????_?????_01?_?????_0101111: begin  // lr Lr._mmu 3 cycles lr.w010 lr.d011
-		        if (load_step == 0) begin bus_address <= pda; bus_read_enable <=1; pc <= pc-4; bubble <=1; load_step <=1; bus_ls_type <= w_func3; reserve_addr <= pda; reserve_valid <=1; end
-		        if (load_step == 1 && bus_read_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working
+		        if (load_step == 0) begin bus_address <= pda; bus_read_enable <=1; pc <= pc_4; bubble <=1; load_step <=1; bus_ls_type <= w_func3; reserve_addr <= pda; reserve_valid <=1; end
+		        if (load_step == 1 && bus_read_done == 0) begin pc <= pc_4; bubble <= 1; end // bus working
 		        if (load_step == 1 && bus_read_done == 1) begin re[w_rd] <= amo_op_mem; load_step <= 0; end end
 	            32'b00011_??_?????_?????_01?_?????_0101111: begin  // sc sc.w010 sc.d011
 		        if (store_step == 0) begin 
 		            if (!reserve_valid || reserve_addr != pda) begin re[w_rd] <= 1; reserve_valid <= 0; end // finish failed 1 in rd cycle without bubble & clear reserve
 		            else begin bus_address <= pda; 
 			    bus_write_data<= w_atomic_write_data;
-			    bus_write_enable<=1;pc<=pc-4;bubble<=1;store_step<=1;bus_ls_type<=w_func3;reserve_valid<=0;end end //consumed
-		        if (store_step == 1 && bus_write_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working 1 bubble2 this3
+			    bus_write_enable<=1;pc<=pc_4;bubble<=1;store_step<=1;bus_ls_type<=w_func3;reserve_valid<=0;end end //consumed
+		        if (store_step == 1 && bus_write_done == 0) begin pc <= pc_4; bubble <= 1; end // bus working 1 bubble2 this3
 		        if (store_step == 1 && bus_write_done == 1) begin store_step <= 0; re[w_rd] <= 0; end end // sc.w successed return 0 in rd
 	           // Amos(swap, add, xor, and, or, min, max) w/d
 	            32'b?????_??_?????_?????_01?_?????_0101111: begin // not 00010lr/00011sc
-		        if (load_step == 0 && store_step == 0) begin bus_address <= pda; bus_read_enable <= 1; pc <= pc - 4; bubble <= 1; load_step <= 1; bus_ls_type <= w_func3; end
-		        if (load_step == 1 && bus_read_done == 0) begin pc <= pc - 4; bubble <= 1; end // bus working
+		        if (load_step == 0 && store_step == 0) begin bus_address <= pda; bus_read_enable <= 1; pc <= pc_4; bubble <= 1; load_step <= 1; bus_ls_type <= w_func3; end
+		        if (load_step == 1 && bus_read_done == 0) begin pc <= pc_4; bubble <= 1; end // bus working
 		        if (load_step == 1 && bus_read_done == 1) begin 
 			    re[w_rd] <= amo_op_mem; load_step <= 0;  // finish load
-		            bus_address <= pda;bus_write_enable<=1;pc<=pc-4;bubble<=1;store_step<=1;bus_ls_type<=w_func3; // start store
+		            bus_address <= pda;bus_write_enable<=1;pc<=pc_4;bubble<=1;store_step<=1;bus_ls_type<=w_func3; // start store
 			    bus_write_data <= w_atomic_write_data;
 		        end
-		        if (store_step == 1 && bus_write_done == 0) begin pc <= pc - 4; bubble <= 1; end
+		        if (store_step == 1 && bus_write_done == 0) begin pc <= pc_4; bubble <= 1; end
 		        if (store_step == 1 && bus_write_done == 1) begin store_step <= 0; end end
                     // M-Mul
 		    32'b0000001_?????_?????_0??_?????_0110011, // Mul, Mulh, Mulhsu, Mulhu
@@ -776,7 +779,7 @@ module riscv64(
 		                    mul_op_type <= w_func3;
 		                    mul_rd_latched <= w_rd;
 		                end // stall pipeline
-		                pc <= pc - 4;
+		                pc <= pc_4;
 		                bubble <= 1;
 		            end else  begin // if (mul_done)
 		                re[mul_rd_latched] <= w_mul_out;
@@ -796,7 +799,7 @@ module riscv64(
                                 div_rd <= w_rd; 
 				div_is_w_latched <= div_is_w;
 			    end // stall pipeline
-			    pc <= pc - 4;
+			    pc <= pc_4;
 			    bubble <= 1;
 			end else begin
 			    re[div_rd] <= div_is_w_latched ? {{32{div_result_out[31]}}, div_result_out[31:0]} : div_result_out;
@@ -805,7 +808,7 @@ module riscv64(
 		    end
                     // FD...
 		    // Unknow instructions
-		    default: begin do_trap = 1; trap_is_interrupt = 0; trap_val = ir; trap_epc = pc - 4; trap_cause = ILLEGAL_INSTRUCTION ; end
+		    default: begin do_trap = 1; trap_is_interrupt = 0; trap_val = ir; trap_epc = pc_4; trap_cause = ILLEGAL_INSTRUCTION ; end
                endcase
 	    end 
 	    // Trap
