@@ -1,5 +1,5 @@
 Analysis & Synthesis report for cpu_on_board
-Fri Apr  3 10:26:00 2026
+Fri Apr  3 10:28:47 2026
 Quartus II 32-bit Version 13.0.1 Build 232 06/12/2013 Service Pack 1 SJ Web Edition
 
 
@@ -37,7 +37,7 @@ applicable agreement for further details.
 +--------------------------------------------------------------------------------------+
 ; Analysis & Synthesis Summary                                                         ;
 +------------------------------------+-------------------------------------------------+
-; Analysis & Synthesis Status        ; Failed - Fri Apr  3 10:26:00 2026               ;
+; Analysis & Synthesis Status        ; Failed - Fri Apr  3 10:28:47 2026               ;
 ; Quartus II 32-bit Version          ; 13.0.1 Build 232 06/12/2013 SP 1 SJ Web Edition ;
 ; Revision Name                      ; cpu_on_board                                    ;
 ; Top-level Entity Name              ; cpu_on_board                                    ;
@@ -188,7 +188,7 @@ Info: Running Quartus II 32-bit Analysis & Synthesis
     Info: programming logic devices manufactured by Altera and sold by 
     Info: Altera or its authorized distributors.  Please refer to the 
     Info: applicable agreement for further details.
-    Info: Processing started: Fri Apr  3 10:25:55 2026
+    Info: Processing started: Fri Apr  3 10:28:41 2026
 Info: Command: quartus_map --read_settings_files=on --write_settings_files=off cpu_on_board -c cpu_on_board
 Info (20030): Parallel compilation is enabled and will use 2 of the 2 processors detected
 Info (12021): Found 1 design units, including 1 entities, in source file jtag_uart_system/synthesis/jtag_uart_system.v
@@ -507,9 +507,9 @@ Warning (10230): Verilog HDL assignment warning at sd_controller.v(328): truncat
 Info (10662): Verilog HDL Assignment information at sd_controller.v(337): truncated unsized constant literal with size 32 to size 1 with no loss of information
 Error (12006): Node instance "cpu" instantiates undefined entity "riscv64" File: /usr/local/projects/steps_cpu/cpu_on_board/cpu_on_board.v Line: 185
 Error: Quartus II 32-bit Analysis & Synthesis was unsuccessful. 1 error, 56 warnings
-    Error: Peak virtual memory: 369 megabytes
-    Error: Processing ended: Fri Apr  3 10:26:01 2026
-    Error: Elapsed time: 00:00:06
-    Error: Total CPU time (on all processors): 00:00:06
+    Error: Peak virtual memory: 381 megabytes
+    Error: Processing ended: Fri Apr  3 10:28:49 2026
+    Error: Elapsed time: 00:00:08
+    Error: Total CPU time (on all processors): 00:00:07
 
 
