@@ -1,0 +1,83 @@
+/dts-v1/;
+
+/ {
+    #address-cells = <0x02>;
+    #size-cells = <0x02>;
+    compatible = "riscv-virtio";
+    model = "riscv-virtio,qemu";
+
+    /* 1. RAM: 8MB at 0x80000000 */
+    memory@80000000 {
+        device_type = "memory";
+        reg = <0x00 0x80000000 0x00 0x800000>;
+    };
+
+    cpus {
+        #address-cells = <0x01>;
+        #size-cells = <0x00>;
+        timebase-frequency = <12500000>;
+
+        cpu@0 {
+            phandle = <0x01>;
+            device_type = "cpu";
+            reg = <0x00>;
+            status = "okay";
+            compatible = "riscv";
+            riscv,isa = "rv64ima_zicsr_zifencei";
+            mmu-type = "riscv,sv39";
+
+            /* INTC: This handles internal interrupts */
+            cpu0_intc: interrupt-controller {
+                #interrupt-cells = <0x01>;
+                interrupt-controller;
+                compatible = "riscv,cpu-intc";
+                phandle = <0x02>; /* This ID is used by CLINT below */
+            };
+        };
+    };
+
+    chosen {
+        /* Points to the UART below */
+        stdout-path = "/soc/serial@10000000";
+       // ############
+       //stdout-path = "/soc/uart@2004";
+    };
+
+    soc {
+        #address-cells = <0x02>;
+        #size-cells = <0x02>;
+        compatible = "simple-bus";
+        ranges;
+
+        /* 2. UART: For QEMU test (at 10000000) */
+        serial@10000000 {
+            compatible = "ns16550a";
+            reg = <0x00 0x10000000 0x00 0x100>;
+            clock-frequency = <12500000>;
+            reg-shift = <0>;
+        };
+       // ##########3
+       //uart0: uart@2004{
+       //    compatible = "sifive,uart0";
+       //    reg = <0x0 0x2004 0x0 0x10>;
+       //    clock-frequency = <12500000>;
+       //};
+
+        /* 3. CLINT: Handles Timer AND IPI (Software Interrupt) */
+        clint@2000000 {
+            /* This links to phandle 0x02 (the CPU INTC) */
+            /* 0x03 = Software Interrupt, 0x07 = Timer Interrupt */
+            interrupts-extended = <0x02 0x03 0x02 0x07>;
+            reg = <0x00 0x2000000 0x00 0x10000>;
+            compatible = "sifive,clint0", "riscv,clint0";
+        };
+        // ########
+        //clint@2000000 { // mtimecmp=base+0x4000, mtime=base+0xbff8
+        //    /* This links to phandle 0x02 (the CPU INTC) */
+        //    /* 0x03 = Software Interrupt, 0x07 = Timer Interrupt */
+        //    interrupts-extended = <0x02 0x03 0x02 0x07>;
+        //    reg = <0x00 0x2000000 0x00 0x10000>;
+        //    compatible = "sifive,clint0", "riscv,clint0";
+        //};
+    };
+};
