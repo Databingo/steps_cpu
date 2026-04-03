@@ -226,7 +226,7 @@ module riscv64(
     // Independent divider
     reg [6:0]   div_cnt;
     //reg [127:0] div_rem;   // remainder|quotient
-    reg [127:0] mul_div_buff;   // remainder|quotient
+    //reg [127:0] mul_div_buff;   // remainder|quotient
     reg [63:0]  div_a;    // be divided
     reg [63:0]  div_b;    // divisor
     reg         div_active; // 1computing, 0idle
