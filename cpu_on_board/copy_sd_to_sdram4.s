@@ -484,6 +484,7 @@ blt t1, t2, copy_sector_loop
     ld a0, 0(s0)         # test sdram read data
     call print_reg
 
+    fence.i
     jr s0  # jump to SDRAM!
 
 
