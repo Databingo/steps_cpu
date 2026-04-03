@@ -1,5 +1,4 @@
-![diagram](./diagram.png)
-
+<img src="diagram.png" alt="screenshot" style="width:80%;">
 
 https://stackoverflow.com/questions/58414772/why-are-risc-v-s-b-and-u-j-instruction-types-encoded-in-this-way
 https://stackoverflow.com/questions/76347221/why-does-risc-v-j-immediate-encode-imm11-in-inst20
