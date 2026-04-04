@@ -7,7 +7,7 @@ msg:
 
 .section .text
 _start:
-   li sp, 0x80700000 # Set stack # 80000000-8080000 sdram as 8M ram, we start sp from 0x80700000
+   li sp, 0x80700000 # Set stack # 80000000-8080000 sdram as 8M ram, we start sp from 0x80700000<-, MMU from 0x80700000->
    li s11, 0x2004 # UART print 
    li s10, 0x2008 # UART controller
 
@@ -88,7 +88,7 @@ s_mode_kernel:
   ## <--- start use TLB I/D hitting
 
 
- testf 
+  testf 
 
 
 
