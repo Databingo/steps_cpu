@@ -409,7 +409,7 @@ clint
 rom/ram space adjust
 
 单核二级流水线 IF-EXE
-1-Line with Conditional_Jump_Mine by 2 stages on 7 Parts 保证触发条件、返回条件、处理逻辑正确
+1-Line with Conditional_Jump_Mine by 2 stages on 6 Parts 保证触发条件、返回条件、处理逻辑正确
 -----------------------------------------------------------------------------------------------------------------------------
 Main  Cycle N|Cycle N+1|Cycle N+2|
 PC    pcA-4->|pcA_+_0->|pcA_+_4->|pcA_+_8
