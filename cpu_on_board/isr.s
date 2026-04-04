@@ -95,10 +95,16 @@ mmu:  # VA 63:39Sign|38:30Vpn[2]|29:21Vpn[1]|20:12Vpn[0]|11:0PageOffset
    # 9. Check valid
      andi x3, x4, 1   # check PTE valid bit
      beqz x3, FAULT
+     andi x3, x4, 0xE # bit 3:1 for X/W/R 1110
+     bnez x3, FAULT   # It should be leaf
+
+
+
    # fall to 4KB finish
 
 FINISH_4KB:
-     srli x4, x4, 10 
+     slli x4, x4, 10  # mask out reserved bits
+     srli x4, x4, 20 
      slli x4, x4, 12 
      j WRITE_TLB
                                             
