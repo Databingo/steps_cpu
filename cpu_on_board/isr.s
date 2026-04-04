@@ -65,7 +65,8 @@ mmu:  # VA 63:39Sign|38:30Vpn[2]|29:21Vpn[1]|20:12Vpn[0]|11:0PageOffset
      bnez x3, FINISH_1GB  # If not zero, it's leaf. We get the address.
 
    # 4. Prepare for Level 1
-     srli x2, x4, 10 # Extract PPN from L2 PTE
+     slli x2, x4, 10 # clear top 10 reserved bits
+     srli x2, x2, 20 # Extract PPN from L2 PTE
      slli x2, x2, 12 # x2 = Address of L1 Table
 
    # 5. Level 1 Walk
@@ -82,7 +83,8 @@ mmu:  # VA 63:39Sign|38:30Vpn[2]|29:21Vpn[1]|20:12Vpn[0]|11:0PageOffset
      bnez x3, FINISH_2MB   # If not zero, it's leaf. We get the address.
 
    # 7. Prepare for Level 0
-     srli x2, x4, 10 # Extract PPN from L1 PTE
+     slli x2, x4, 10 # clear top 10 reserved bits
+     srli x2, x2, 20 # Extract PPN from L1 PTE
      slli x2, x2, 12 # x2 = Address of L0 Table
 
    # 8. Level 0 Walk
