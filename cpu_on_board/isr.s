@@ -178,7 +178,7 @@ print_reg: # a0
     li x3, 60 
 p_loop:
     srl x4, x2, x3      # get high nibble
-    andi x4, x4 0xF
+    andi x4, x4, 0xF
     slti x5, x4, 10     # if < 10 number
     beq x5, x0, letter
     addi x4, x4, 48     # 0 is "0" ascii 48
@@ -235,7 +235,7 @@ wait_uart_loop:
    #li a0, 65  # A
    #sb a0, 0(x6)
     lw x2, 0(x6)
-    bgt zero, s0, wait_uart_loop
+    bgt zero, x2, wait_uart_loop
     ld x2, 0(x7)
     ld ra, 8(x7)
     addi x7, x7, 16
