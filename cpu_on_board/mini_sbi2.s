@@ -247,12 +247,19 @@ m_ex_illegal_ir:
    j m_done
 
 m_done: 
+   csrr t0, mcause
+   li t1, 12
+   bge t0, t1, return_same_pc # Page_Fault 12/13/14/15 give mepc to Trap
+
+
    csrr t0, mepc
    addi t0, t0, 4 # skip ecall/ebreak instruction
    csrw mepc, t0
    #ld t0, 0x900(zero)
    #ld t1, 0x908(zero)
+   return_same_pc:
    mret
+
 
 
 
