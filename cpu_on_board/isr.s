@@ -1,11 +1,11 @@
 isr_router:        # Use x0-x10 shadowed register only (ra(x1), a0(x10),..x19)
-     li x6, 0x2004 # UART print 
-     li sp, 0x1500 # Set stack   # use shadowed sp
+     li x7, 0x2004 # UART print 
      # x8 trap_type no change
      # x9 addr  # x9 keep the address need manage, no change x9
-     # x6789 setting
+     # x689 setting
 
-     # x1(ra)2345,x10(a0) operating
+     # x1(ra)2(sp)3456,x10(a0) operating
+     li sp, 0x1500 # Set stack   # use shadowed sp
      li x3, 12 
      beq x8, x3, mmu_i    # i-tlb-refill
      li x3, 1 
@@ -24,8 +24,8 @@ i_cache_refill:
 
      lui x3, 0x2     
      addi x3, x3, 0x4  # set print           
-     addi x7, x0, 0x25
-     sd x7, 0(x3)    #  print %
+     addi x6, x0, 0x25
+     sd x6, 0(x3)    #  print %
 
     #li a0, "ICAre:"
     #call print7
@@ -46,16 +46,16 @@ mmu_d:
 
 mmu:  # VA 63:39Sign|38:30Vpn[2]|29:21Vpn[1]|20:12Vpn[0]|11:0PageOffset  
    # 1. Get root table address from csr satp Supervisor Address Translation and Protection
-     csrr x7, satp   # satp 63:60Mode|59:44Asid(0forSimpleOS)|43:0PPNofRootTable
-     slli x7, x7, 20 # clear high mode+Asid Address Space Identifier
-     srli x7, x7, 8  # get level_2 ppn(27 bits) + 12 zero positon, point to start of Root Table
+     csrr x6, satp   # satp 63:60Mode|59:44Asid(0forSimpleOS)|43:0PPNofRootTable
+     slli x6, x6, 20 # clear high mode+Asid Address Space Identifier
+     srli x6, x6, 8  # get level_2 ppn(27 bits) + 12 zero positon, point to start of Root Table
 
    # 2. Level 2 walk
      srli x3, x9, 30 # extract vpn[2] bit 38:30 the first 9 bits
      andi x3, x3, 0x1ff # Mask 9 bits
      slli x3, x3, 3  # Multiple by 8 (PTE size 8 bytes) Page Table Entry 64 bits
-     add  x7, x7, x3 # x2 = Address of L2 PTE
-     ld x4, 0(x7)    # Load L2 PTE from memory  PTE 63:54Reserved|53:10PPN|9:8RSW|XWRmark|0validBit1
+     add  x6, x6, x3 # x2 = Address of L2 PTE
+     ld x4, 0(x6)    # Load L2 PTE from memory  PTE 63:54Reserved|53:10PPN|9:8RSW|XWRmark|0validBit1
 
    # 3. Check Leaf
      andi x3, x4, 1   # check PTE valid bit
@@ -65,16 +65,16 @@ mmu:  # VA 63:39Sign|38:30Vpn[2]|29:21Vpn[1]|20:12Vpn[0]|11:0PageOffset
      bnez x3, FINISH_1GB  # If not zero, it's leaf. We get the address.
 
    # 4. Prepare for Level 1
-     slli x7, x4, 10 # clear top 10 reserved bits
-     srli x7, x7, 20 # Extract PPN from L2 PTE
-     slli x7, x7, 12 # x2 = Address of L1 Table
+     slli x6, x4, 10 # clear top 10 reserved bits
+     srli x6, x6, 20 # Extract PPN from L2 PTE
+     slli x6, x6, 12 # x2 = Address of L1 Table
 
    # 5. Level 1 Walk
      srli x3, x9, 21 # Extract VPN[1] bit 29:21
      andi x3, x3, 0x1ff # Mask 9 bits
      slli x3, x3, 3  # Multiple by 8 (PTE size 8 bytes)
-     add  x7, x7, x3 # x2 = Address of L1 PTE
-     ld x4, 0(x7)    # Load L1 PTE from memory
+     add  x6, x6, x3 # x2 = Address of L1 PTE
+     ld x4, 0(x6)    # Load L1 PTE from memory
 
    # 6. Check Leaf
      andi x3, x4, 1   # check PTE valid bit
@@ -83,16 +83,16 @@ mmu:  # VA 63:39Sign|38:30Vpn[2]|29:21Vpn[1]|20:12Vpn[0]|11:0PageOffset
      bnez x3, FINISH_2MB   # If not zero, it's leaf. We get the address.
 
    # 7. Prepare for Level 0
-     slli x7, x4, 10 # clear top 10 reserved bits
-     srli x7, x7, 20 # Extract PPN from L1 PTE
-     slli x7, x7, 12 # x2 = Address of L0 Table
+     slli x6, x4, 10 # clear top 10 reserved bits
+     srli x6, x6, 20 # Extract PPN from L1 PTE
+     slli x6, x6, 12 # x2 = Address of L0 Table
 
    # 8. Level 0 Walk
      srli x3, x9, 12 # Extract VPN[0] bit 20:12
      andi x3, x3, 0x1ff # Mask 9 bits
      slli x3, x3, 3  # Multiple by 8 (PTE size 8 bytes)
-     add  x7, x7, x3 # x2 = Address of L0 PTE
-     ld x4, 0(x7)    # Load L0 PTE from memory
+     add  x6, x6, x3 # x2 = Address of L0 PTE
+     ld x4, 0(x6)    # Load L0 PTE from memory
 
    # 9. Check valid
      andi x3, x4, 1   # check PTE valid bit
@@ -131,8 +131,8 @@ FINISH_1GB:
 
 WRITE_TLB:
      # 9. Writ ppn back to hardware mmu trap
-     lui x7, 0x20000 # Magic TLB address
-     sd x4, 0(x7)
+     lui x6, 0x20000 # Magic TLB address
+     sd x4, 0(x6)
 
      li a0, "TLBre:"
      call print7
@@ -142,8 +142,8 @@ WRITE_TLB:
      mv a0, x4
      call print_reg
 
-     addi x7, x0, 93
-     sd x7, 0(x6)    #  print ]
+     addi x6, x0, 93
+     sd x6, 0(x7)    #  print ]
 
      addi x8, x0, 0  # success x8=0
      j return
@@ -156,8 +156,8 @@ FAULT: # error trap?
      mv a0, x9
      call print_reg
 
-     addi x7, x0, 33
-     sd x7, 0(x6)    #  print !
+     addi x6, x0, 33
+     sd x6, 0(x7)    #  print !
 
      j return
 
@@ -174,18 +174,18 @@ return:
 print_reg: # a0
     addi sp, sp, -40
     sd ra, 0(sp)
-    sd x7, 8(sp)
+    sd x6, 8(sp)
     sd x3, 16(sp)
     sd x4, 24(sp)
     sd x5, 32(sp)
-    mv x7, a0
+    mv x6, a0
     li a0, "0"
     call putchar
     li a0, "x"
     call putchar
     li x3, 60 
 p_loop:
-    srl x4, x7, x3      # get high nibble
+    srl x4, x6, x3      # get high nibble
     andi x4, x4, 0xF
     slti x5, x4, 10     # if < 10 number
     beq x5, x0, letter
@@ -195,11 +195,11 @@ letter:
     addi x4, x4, 55     # 10 is "A" ascii 65 ..
 print_h:
     call wait_uart
-    sb x4, 0(x6)       # print
+    sb x4, 0(x7)       # print
     addi x3, x3, -4
     bge x3, x0, p_loop 
     ld ra, 0(sp)
-    ld x7, 8(sp)
+    ld x6, 8(sp)
     ld x3, 16(sp)
     ld x4, 24(sp)
     ld x5, 32(sp)
@@ -211,7 +211,7 @@ putchar:  # a0
     addi sp, sp, -8
     sd ra, 0(sp)
     call wait_uart
-    sb a0, 0(x6)
+    sb a0, 0(x7)
     ld ra, 0(sp)
     addi sp, sp, 8
     ret
@@ -220,31 +220,31 @@ putchar:  # a0
 puts: # a0 addr
     addi sp, sp, -16
     sd ra, 0(sp)
-    sd x7, 8(sp)
-    mv x7, a0
+    sd x6, 8(sp)
+    mv x6, a0
 puts_loop:
-    lbu a0, 0(x7)
+    lbu a0, 0(x6)
     beq a0, x0, stop_puts # \x00 for end of string
     call putchar # a0 char
-    addi x7, x7, 1 # next byte
+    addi x6, x6, 1 # next byte
     j puts_loop
 stop_puts:
     ld ra, 0(sp)
-    ld x7, 8(sp)
+    ld x6, 8(sp)
     addi sp, sp, 16
     ret
 
 
 wait_uart:
     addi sp, sp, -16
-    sd x7, 0(sp)
+    sd x6, 0(sp)
     sd ra, 8(sp)
 wait_uart_loop:
    #li a0, 65  # A
-   #sb a0, 0(x6)
-    lw x7, 0(x6)
-    bgt zero, x7, wait_uart_loop
-    ld x7, 0(sp)
+   #sb a0, 0(x7)
+    lw x6, 0(x7)
+    bgt zero, x6, wait_uart_loop
+    ld x6, 0(sp)
     ld ra, 8(sp)
     addi sp, sp, 16
     ret
