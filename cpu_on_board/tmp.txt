@@ -40,15 +40,15 @@ slli t0, t0, 0xb
 ori t0, t0, 0x7ff
 #    csrw pmpaddr0, t0
 csrrw x0, pmpaddr0, t0
-#    li t0, 0x0f               
+#    li t0, 0x1f               
 addi t0, x0, 0x0
 addi t0, x0, 0x0
-addi t0, x0, 0xf
+addi t0, x0, 0x1f
 #    csrw pmpcfg0, t0
 csrrw x0, pmpcfg0, t0
 #    csrw medeleg, zero        
 csrrw x0, medeleg, zero
-#    li t0, 0b100000000000     
+#    li t0, 0b100000000000    
 addi t0, x0, 0x0
 lui t0, 0x1
 addi t0, t0, 0x800
@@ -59,6 +59,11 @@ auipc t0, 0 # R_RISCV_PCREL_HI20 s_mode_kernel
 addi t0, t0, 0 # R_RISCV_PCREL_LO12_I s_mode_kernel 
 #    csrw mepc, t0
 csrrw x0, mepc, t0
+#    li t1, 62 
+addi t1, x0, 0x0
+addi t1, x0, 0x0
+addi t1, x0, 0x3e
+sw t1, 0(s11)
 mret                      # 6. Drop to S-mode go to s_kernel
 s_mode_kernel:
 ebreak   # M  test m-mode ebreak
