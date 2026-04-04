@@ -55,7 +55,7 @@ mmu:  # VA 63:39Sign|38:30Vpn[2]|29:21Vpn[1]|20:12Vpn[0]|11:0PageOffset
      andi x3, x3, 0x1ff # Mask 9 bits
      slli x3, x3, 3  # Multiple by 8 (PTE size 8 bytes) Page Table Entry 64 bits
      add  x7, x7, x3 # x2 = Address of L2 PTE
-     ld x4, 0(x2)    # Load L2 PTE from memory  PTE 63:54Reserved|53:10PPN|9:8RSW|XWRmark|0validBit1
+     ld x4, 0(x7)    # Load L2 PTE from memory  PTE 63:54Reserved|53:10PPN|9:8RSW|XWRmark|0validBit1
 
    # 3. Check Leaf
      andi x3, x4, 1   # check PTE valid bit
@@ -74,7 +74,7 @@ mmu:  # VA 63:39Sign|38:30Vpn[2]|29:21Vpn[1]|20:12Vpn[0]|11:0PageOffset
      andi x3, x3, 0x1ff # Mask 9 bits
      slli x3, x3, 3  # Multiple by 8 (PTE size 8 bytes)
      add  x7, x7, x3 # x2 = Address of L1 PTE
-     ld x4, 0(x2)    # Load L1 PTE from memory
+     ld x4, 0(x7)    # Load L1 PTE from memory
 
    # 6. Check Leaf
      andi x3, x4, 1   # check PTE valid bit
@@ -92,7 +92,7 @@ mmu:  # VA 63:39Sign|38:30Vpn[2]|29:21Vpn[1]|20:12Vpn[0]|11:0PageOffset
      andi x3, x3, 0x1ff # Mask 9 bits
      slli x3, x3, 3  # Multiple by 8 (PTE size 8 bytes)
      add  x7, x7, x3 # x2 = Address of L0 PTE
-     ld x4, 0(x2)    # Load L0 PTE from memory
+     ld x4, 0(x7)    # Load L0 PTE from memory
 
    # 9. Check valid
      andi x3, x4, 1   # check PTE valid bit
@@ -132,7 +132,7 @@ FINISH_1GB:
 WRITE_TLB:
      # 9. Writ ppn back to hardware mmu trap
      lui x7, 0x20000 # Magic TLB address
-     sd x4, 0(x2)
+     sd x4, 0(x7)
 
      li a0, "TLBre:"
      call print7
@@ -223,7 +223,7 @@ puts: # a0 addr
     sd x7, 8(sp)
     mv x7, a0
 puts_loop:
-    lbu a0, 0(x2)
+    lbu a0, 0(x7)
     beq a0, x0, stop_puts # \x00 for end of string
     call putchar # a0 char
     addi x7, x7, 1 # next byte
