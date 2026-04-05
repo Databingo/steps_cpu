@@ -74,35 +74,32 @@ s_mode_kernel:
    #csrw satp, t0
    ## <--- start TLB I/D hitting
 
-  # real test
-  # 1. Build SV39 root table in sdram (4KB per table 2**9=512*8=4096) vpn2 4KB map 512*4k=2MBram; all vpn1=4*512=2Mb map 512*2M=1Gram, all vpn0=512*512=262144*4kb=1GB map 512Gram,total VPNs 4KB+2MB+1024MB
-  li t0, 0x80700000 # set base address of MMU root table
+   # real test
+   # 1.Build SV39 root table in sdram (4KB per table 2**9=512*8=4096) vpn2 4KB map 512*4k=2MBram; all vpn1=4*512=2Mb map 512*2M=1Gram, all vpn0=512*512=262144*4kb=1GB map 512Gram,total VPNs 4KB+2MB+1024MB
+   li t0, 0x80700000 # set base address of MMU root table
 
-  # 2. map vma 0x0000_0000 to ppa 0x0000_0000, ppn =  ppa >> 12 = 0, for UART/CLINT
-  li t1, 0xcf       # pte = ppn << 10 | flags valid0 read1 write2 exec3 accessed6 dirty7 0b11001111=0xcf
-  sd t1, 0(t0) 
+   # 2. map vma 0x0000_0000 to ppa 0x0000_0000, ppn =  ppa >> 12 = 0, for UART/CLINT
+   li t1, 0xcf       # pte = ppn << 10 | flags valid0 read1 write2 exec3 accessed6 dirty7 0b11001111=0xcf
+   sd t1, 0(t0) 
 
-  # 3. map vma 0x8000_0000 to ppa 0x8000_0000, ppn =  ppa >> 12 = 0x80000 pte = ppn << 10 | flags
-  li t1, 0x200000cf # pte = ppn << 10 | flags valid0 read1 write2 exec3 accessed6 dirty7 0b11001111=0xcf
-  sd t1, 16(t0)     # Index=va[38:30]=0b00000010=2, 8 bytes per PTE = 16, 
+   # 3. map vma 0x8000_0000 to ppa 0x8000_0000, ppn =  ppa >> 12 = 0x80000 pte = ppn << 10 | flags
+   li t1, 0x200000cf # pte = ppn << 10 | flags valid0 read1 write2 exec3 accessed6 dirty7 0b11001111=0xcf
+   sd t1, 16(t0)     # Index=va[38:30]=0b00000010=2, 8 bytes per PTE = 16, 
 
-  # satp need ppn of root table rt 0x80700000 
-  # satp = satp[63:60].MODE(0:bare, 8:sv39, 9:sv48)|satp[59:44].asid|satp[43:0].rootpage_physical_addr(vpn2:9|vpn1:9|vpn0:9|offseet12)
-  # ppn = rt >> 12 = 0x80700
-  # mode = 3 sv39
-  li t0, 0x8000000000080700
- #call print_reg
- #testf 
-  csrw satp, t0 # write mode and root table address to satp CSR register
- #testf 
-  sfence.vma
-  ## <--- start use TLB I/D hitting
-
-
-  testf 
+   # satp need ppn of root table rt 0x80700000 
+   # satp = satp[63:60].MODE(0:bare, 8:sv39, 9:sv48)|satp[59:44].asid|satp[43:0].rootpage_physical_addr(vpn2:9|vpn1:9|vpn0:9|offseet12)
+   # ppn = rt >> 12 = 0x80700
+   # mode = 3 sv39
+   li t0, 0x8000000000080700
+  #call print_reg
+  #testf 
+   csrw satp, t0 # write mode and root table address to satp CSR register
+  #testf 
+   sfence.vma
+   ## <--- start use TLB I/D hitting
 
 
-
+   testf 
 
 
    #la a0, msg   # trigger I-TLB miss
@@ -112,22 +109,10 @@ s_mode_kernel:
    call puts
    
 
-  
-
-
-
-
-
-
-
-
-
 
 
 s_mode_done:
   j s_mode_done
-
-
 
 
 
@@ -174,7 +159,6 @@ m_trap_router:
    # 16+ local define interrupt
 
 
-
    li t1, 9  # ecall from S-mode
    beq t0, t1, m_ecall_router
 
@@ -185,7 +169,6 @@ m_trap_router:
    beq t0, t1, m_ebreak_handler
 
    
-
 
    j m_done
 
