@@ -101,8 +101,8 @@ s_mode_kernel: # like OS/linux
   #testf  #A
    nop
    csrw satp, t0 # write mode and root table address to satp CSR register
-  #testf  #B
-   nop
+   testf  #B
+  #nop
    sfence.vma
    ## <--- start use TLB I/D hitting
    testf  #C

@@ -102,8 +102,7 @@ ori t0, t0, 0x700
 addi x0, x0, 0
 #    csrw satp, t0 
 csrrw x0, satp, t0
-#    nop
-addi x0, x0, 0
+testf  #B
 sfence.vma
 testf  #C
 #    la a0, msg   
