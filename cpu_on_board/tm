@@ -1,11 +1,20 @@
-%%%%%%%%%%%%>%%%%%%%%M%%%%%%%%%%%%%%%S%%%%%%%%%%%%%
-MMU:%%%%%%%
-[iTLBre:0x000000000000095C0x0000000000000000]
-[iTLBre:0x00000000000009600x0000000000000000]%%%%
-{ILLir%%%%0%x%%%0%0000000FFFF07FF%%}
+   testf  #A
+   csrw satp, t0 # write mode and root table address to satp CSR register
+   testf  #B
+   sfence.vma
+   testf  #C
+   la a0, msg   # trigger I-TLB miss
+   call puts
+%%%%%%%%%%%>%%%%%%%%M%%%%%%%%%%%%%%
+MMU:%%%%%%%%%%%%
+{ILLir%%%%0%x%%%%00000000FFFF07FF%%}
+[iTLBre:0x000000000000093C0x0000000000000000]
+[iTLBre:0x00000000000009400x0000000000000000]%
+{ILLir0x00000000FFFF07FF}%
 [dTLBre:0x00000000806FFFF00x00000000806FF000]
 [dTLBre:0x00000000000012000x0000000000001000]
-[dTLBre:0x00000000000020040x0000000000002000]Hello
+[dTLBre:0x00000000000020040x0000000000002000]Hello%%%%%%%%%%%%S
 
-0x95c=2396=599=sfence.vma
-0x960=2400=600=tesft_2
+
+
+

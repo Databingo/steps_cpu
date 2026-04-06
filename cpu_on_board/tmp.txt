@@ -98,12 +98,14 @@ slli t0, t0, 0x16
 ori t0, t0, 0x100
 slli t0, t0, 0xb
 ori t0, t0, 0x700
-testf  #B
+#    nop
+addi x0, x0, 0
 #    csrw satp, t0 
 csrrw x0, satp, t0
-testf 
+#    nop
+addi x0, x0, 0
 sfence.vma
-testf 
+testf  #C
 #    la a0, msg   
 auipc a0, 0 # R_RISCV_PCREL_HI20 msg 
 addi a0, a0, 0 # R_RISCV_PCREL_LO12_I msg 
