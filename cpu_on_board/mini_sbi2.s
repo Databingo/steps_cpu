@@ -53,9 +53,9 @@ _start:  # like open_sbi
 
 s_mode_kernel: # like OS/linux
 
-   la t0, s_trap_handler     # 2. setup s-mode trap handler  # Should do by kernel/OS/linux
-   andi t0, t0, -4
-   csrw stvec, t0
+  #la t0, s_trap_handler     # 2. setup s-mode trap handler  # Should do by kernel/OS/linux
+  #andi t0, t0, -4
+  #csrw stvec, t0
 
 
    ebreak   # M  test m-mode ebreak
@@ -84,6 +84,7 @@ s_mode_kernel: # like OS/linux
    #csrw satp, t0
    ## <--- start TLB I/D hitting
 
+   # Build MMU table
    # real test
    # 1.Build SV39 root table in sdram (4KB per table 2**9=512*8=4096) vpn2 4KB map 512*4k=2MBram; all vpn1=4*512=2Mb map 512*2M=1Gram, all vpn0=512*512=262144*4kb=1GB map 512Gram,total VPNs 4KB+2MB+1024MB
    li t0, 0x80700000 # set base address of MMU root table
@@ -114,8 +115,11 @@ s_mode_kernel: # like OS/linux
 
    la a0, msg   # trigger I-TLB miss
    call puts
-   
 
+
+  la t0, s_trap_handler     # 2. setup s-mode trap handler  # Should do by kernel/OS/linux # Should write with Virtual address after MMU table was write and MMU was turn on
+  andi t0, t0, -4
+  csrw stvec, t0
 
 
 s_mode_done:
