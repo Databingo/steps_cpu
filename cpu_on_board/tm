@@ -1,7 +1,8 @@
-Sorr, if assembly like this it print this:
    csrw satp, t0 # write mode and root table address to satp CSR register
    sfence.vma
    testf 
+   la a0, msg   # trigger I-TLB miss
+   call puts
 %%%%%%%%%%%%>%%%%%%%%M%%%%%%%%%%%%%%S%%%%%%%%%%%%%%
 %MMU:%%%%%%%
 [iTLBre:0x000000000000095C0x0000000000000000]%%%
@@ -9,28 +10,9 @@ Sorr, if assembly like this it print this:
 [dTLBre:0x00000000000020040x0000000000002000]
 {ILLir%%%%0%x%%%0%0000000FFFF07FF%%}%
 [dTLBre:0x00000000000012000x0000000000001000]Hello
-
-This print this:
    testf  #B
    csrw satp, t0 # write mode and root table address to satp CSR register
    sfence.vma
    testf 
-%%%%%%%%%%%%>%%%%%%%%M%%%%%%%%%%%%%%%S%%%%%%%%%%%%%
-MMU:%%%%%%%%%%
-{ILLir%%%%0%x%%%0%0000000FFFF07FF%%}%
-{ILLir0x00000000FFFF07FF}Hello
-
-And this print this:
-   csrw satp, t0 # write mode and root table address to satp CSR register
-   testf 
-   sfence.vma
-   testf 
-%%%%%%%%%%%%>%%%%%%%%M%%%%%%%%%%%%%%%S%%%%%%%%%%%%%
-MMU:%%%%%%%
-[iTLBre:0x000000000000095C0x0000000000000000]
-[iTLBre:0x00000000000009640x0000000000000000]%
-[dTLBre:0x00000000806FFFF00x00000000806FF000]
-[dTLBre:0x00000000000012000x0000000000001000]
-[dTLBre:0x00000000000020040x0000000000002000]Hello
-
-
+   la a0, msg   # trigger I-TLB miss
+   call puts
