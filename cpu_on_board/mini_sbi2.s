@@ -97,7 +97,7 @@ s_mode_kernel:
   #call print_reg
   #testf  #B
    csrw satp, t0 # write mode and root table address to satp CSR register
-   testf 
+  #testf 
    sfence.vma
    ## <--- start use TLB I/D hitting
 
