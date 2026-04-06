@@ -101,6 +101,7 @@ ori t0, t0, 0x700
 testf  #B
 #    csrw satp, t0 
 csrrw x0, satp, t0
+testf 
 sfence.vma
 testf 
 #    la a0, msg   
