@@ -1,3 +1,4 @@
+Scenario 1:
    csrw satp, t0 # write mode and root table address to satp CSR register
    sfence.vma
    testf 
@@ -10,9 +11,18 @@
 [dTLBre:0x00000000000020040x0000000000002000]
 {ILLir%%%%0%x%%%0%0000000FFFF07FF%%}%
 [dTLBre:0x00000000000012000x0000000000001000]Hello
+Scenario 2:
    testf  #B
    csrw satp, t0 # write mode and root table address to satp CSR register
    sfence.vma
    testf 
    la a0, msg   # trigger I-TLB miss
    call puts
+%%%%%%%%%%%%>%%%%%%%%M%%%%%%%%%%%%%%%S%%%%%%%%%%%%%
+MMU:%%%%%%%%%%
+{ILLir%%%%0%x%%%0%0000000FFFF07FF%%}
+[iTLBre:0x00000000000009600x0000000000000000]%
+[dTLBre:0x00000000806FFFF00x00000000806FF000]
+[dTLBre:0x00000000000020040x0000000000002000]
+{ILLir0x00000000FFFF07FF}
+[dTLBre:0x00000000000012000x0000000000001000]Hello
