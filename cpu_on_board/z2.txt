@@ -460,7 +460,7 @@ always @(*) begin
 		//({44{tlb_d_match[6]}} & tlb_ppn[6]) |
 		//({44{tlb_d_match[7]}} & tlb_ppn[7]) ; end
 		// concat physical address
-		wire need_trans = satp_mmu && !STrap;
+		wire need_trans = satp_mmu && !STrap && (current_privilege_mode != M_mode);
 		assign ppc = need_trans ? {8'h0, pc_ppn, pc[11:0]} : pc;
 		assign pda = need_trans ? {8'h0, data_ppn, ls_va[11:0]} : ls_va;
 
@@ -2505,8 +2505,9 @@ msg:
     .string "Hello"
 
 
+# Bootloader/copy4 --> firmware/BIOS/opensib/mini_sbi2 --> OS/linux/kernal
 .section .text
-_start:
+_start:  # like open_sbi
    li sp, 0x80700000 # Set stack # 80000000-8080000 sdram as 8M ram, we start sp from 0x80700000<-, MMU from 0x80700000->
    li s11, 0x2004 # UART print 
    li s10, 0x2008 # UART controller
@@ -2518,9 +2519,9 @@ _start:
    andi t0, t0, -4 # align 4 byte for directory mode of tvec
    csrw mtvec, t0
 
-   la t0, s_trap_handler     # 2. setup s-mode trap handler
-   andi t0, t0, -4
-   csrw stvec, t0
+  #la t0, s_trap_handler     # 2. setup s-mode trap handler  # Should do by kernel/OS/linux
+  #andi t0, t0, -4
+  #csrw stvec, t0
 
 
    li t0, 0xffffffffffffffff # 3. Unlock PMP (Physical Memory Protection) which prevent S-mode to touch hardware -1
@@ -2550,7 +2551,13 @@ _start:
    mret                      # 6. Drop to S-mode go to s_kernel
 
 
-s_mode_kernel:
+s_mode_kernel: # like OS/linux
+
+  #la t0, s_trap_handler     # 2. setup s-mode trap handler  # Should do by kernel/OS/linux
+  #andi t0, t0, -4
+  #csrw stvec, t0
+
+
    ebreak   # M  test m-mode ebreak
 
    #li a0, "H"
@@ -2561,11 +2568,6 @@ s_mode_kernel:
    #li a7, 1
    #ecall
  
-   li a7, 0x10
-   ecall  # turn delegate (test 3 breakpoint)
-
-   ebreak # S ebreak was delegeted to s-mode, so use stvec to find s-handler for break
-
 
    # test MMU
    li a0, "\nMMU:" 
@@ -2577,6 +2579,7 @@ s_mode_kernel:
    #csrw satp, t0
    ## <--- start TLB I/D hitting
 
+   # Build MMU table
    # real test
    # 1.Build SV39 root table in sdram (4KB per table 2**9=512*8=4096) vpn2 4KB map 512*4k=2MBram; all vpn1=4*512=2Mb map 512*2M=1Gram, all vpn0=512*512=262144*4kb=1GB map 512Gram,total VPNs 4KB+2MB+1024MB
    li t0, 0x80700000 # set base address of MMU root table
@@ -2600,19 +2603,24 @@ s_mode_kernel:
    testf 
    sfence.vma
    ## <--- start use TLB I/D hitting
-
-
    testf 
-
 
    #la a0, msg   # trigger I-TLB miss
    #call print_reg
 
    la a0, msg   # trigger I-TLB miss
    call puts
-   
 
 
+  la t0, s_trap_handler     # 2. setup s-mode trap handler  # Should do by kernel/OS/linux # Should write with Virtual address after MMU table was write and MMU was turn on
+  andi t0, t0, -4
+  csrw stvec, t0
+
+
+   li a7, 0x10
+   ecall  # turn delegate (test 3 breakpoint)
+
+   ebreak # S ebreak was delegeted to s-mode, so use stvec to find s-handler for break
 
 s_mode_done:
   j s_mode_done

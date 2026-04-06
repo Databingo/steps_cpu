@@ -26,6 +26,9 @@ i_cache_refill:
      addi x3, x3, 0x4  # set print           
      addi x6, x0, 0x25
      sd x6, 0(x3)    #  print %
+     mv a0, x9
+     call print_reg
+
 
     #li a0, "ICAre:"
     #call print7
