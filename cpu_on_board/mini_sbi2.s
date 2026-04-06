@@ -98,7 +98,7 @@ s_mode_kernel: # like OS/linux
    # mode = 3 sv39
    li t0, 0x8000000000080700
   #call print_reg
-  #testf  #B
+   testf  #B
    csrw satp, t0 # write mode and root table address to satp CSR register
   #testf 
    sfence.vma
