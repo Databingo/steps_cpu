@@ -5,8 +5,9 @@ msg:
     .string "Hello"
 
 
+# Bootloader/copy4 --> firmware/BIOS/opensib/mini_sbi2 --> OS/linux/kernal
 .section .text
-_start:
+_start:  # like open_sbi
    li sp, 0x80700000 # Set stack # 80000000-8080000 sdram as 8M ram, we start sp from 0x80700000<-, MMU from 0x80700000->
    li s11, 0x2004 # UART print 
    li s10, 0x2008 # UART controller
@@ -18,9 +19,9 @@ _start:
    andi t0, t0, -4 # align 4 byte for directory mode of tvec
    csrw mtvec, t0
 
-   la t0, s_trap_handler     # 2. setup s-mode trap handler
-   andi t0, t0, -4
-   csrw stvec, t0
+  #la t0, s_trap_handler     # 2. setup s-mode trap handler  # Should do by kernel/OS/linux
+  #andi t0, t0, -4
+  #csrw stvec, t0
 
 
    li t0, 0xffffffffffffffff # 3. Unlock PMP (Physical Memory Protection) which prevent S-mode to touch hardware -1
@@ -50,7 +51,13 @@ _start:
    mret                      # 6. Drop to S-mode go to s_kernel
 
 
-s_mode_kernel:
+s_mode_kernel: # like OS/linux
+
+   la t0, s_trap_handler     # 2. setup s-mode trap handler  # Should do by kernel/OS/linux
+   andi t0, t0, -4
+   csrw stvec, t0
+
+
    ebreak   # M  test m-mode ebreak
 
    #li a0, "H"
