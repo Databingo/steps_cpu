@@ -6,7 +6,7 @@ cat sdram_controller.v >> z2.txt
 echo "---------- rom inner isr.s---------" >> z2.txt
 cat isr.s >> z2.txt 
 echo "---------- ram test assembly code ---------" >> z2.txt
-cat mini_sbi.s >> z2.txt
+cat mini_sbi2.s >> z2.txt
 echo "---------- rom and ram ---------" >> z2.txt
 #cat roam.mif >> z2.txt
 
