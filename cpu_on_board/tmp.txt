@@ -125,49 +125,49 @@ s_mode_done:
 #   j s_mode_done
 jal x0, s_mode_done
 m_trap_router:
-#    csrr t0, mcause  
-csrrs t0, mcause, x0
-#    li t1, 9  
-addi t1, x0, 0x0
-addi t1, x0, 0x0
-addi t1, x0, 0x9
-beq t0, t1, m_ecall_router
-#    li t1, 2 
-addi t1, x0, 0x0
-addi t1, x0, 0x0
-addi t1, x0, 0x2
-beq t0, t1, m_ex_illegal_ir
-#    li t1, 3 
-addi t1, x0, 0x0
-addi t1, x0, 0x0
-addi t1, x0, 0x3
-beq t0, t1, m_ebreak_handler
+#    csrr s0, mcause  
+csrrs s0, mcause, x0
+#    li s1, 9  
+addi s1, x0, 0x0
+addi s1, x0, 0x0
+addi s1, x0, 0x9
+beq s0, s1, m_ecall_router
+#    li s1, 2 
+addi s1, x0, 0x0
+addi s1, x0, 0x0
+addi s1, x0, 0x2
+beq s0, s1, m_ex_illegal_ir
+#    li s1, 3 
+addi s1, x0, 0x0
+addi s1, x0, 0x0
+addi s1, x0, 0x3
+beq s0, s1, m_ebreak_handler
 #    j m_done
 jal x0, m_done
 m_ecall_router:
-#    li t0, 0
-addi t0, x0, 0x0
-beq a7, t0, m_handler_set_timer
-#    li t0, 1
-addi t0, x0, 0x0
-addi t0, x0, 0x0
-addi t0, x0, 0x1
-beq a7, t0, m_handler_putchar  # (SBI_CONSOLE_PUTCHAR ( a7 = 0x01)
-#    li t0, 2
-addi t0, x0, 0x0
-addi t0, x0, 0x0
-addi t0, x0, 0x2
-beq a7, t0, m_handler_getchar  
-#    li t0, 3
-addi t0, x0, 0x0
-addi t0, x0, 0x0
-addi t0, x0, 0x3
-beq a7, t0, m_handler_get_timer
-#    li t0, 0x10
-addi t0, x0, 0x0
-addi t0, x0, 0x0
-addi t0, x0, 0x10
-beq a7, t0, m_handler_deleg
+#    li s0, 0
+addi s0, x0, 0x0
+beq a7, s0, m_handler_set_timer
+#    li s0, 1
+addi s0, x0, 0x0
+addi s0, x0, 0x0
+addi s0, x0, 0x1
+beq a7, s0, m_handler_putchar  # (SBI_CONSOLE_PUTCHAR ( a7 = 0x01)
+#    li s0, 2
+addi s0, x0, 0x0
+addi s0, x0, 0x0
+addi s0, x0, 0x2
+beq a7, s0, m_handler_getchar  
+#    li s0, 3
+addi s0, x0, 0x0
+addi s0, x0, 0x0
+addi s0, x0, 0x3
+beq a7, s0, m_handler_get_timer
+#    li s0, 0x10
+addi s0, x0, 0x0
+addi s0, x0, 0x0
+addi s0, x0, 0x10
+beq a7, s0, m_handler_deleg
 #    li a0, -1  
 addi a0, x0, 0x0
 addi a0, x0, 0x0
@@ -186,8 +186,8 @@ addi s11, x0, 0x0
 lui s11, 0x2
 addi s11, s11, 0x4
 wait_uart_m:
-lw t1, 0(s11)
-blt t1, zero, wait_uart_m  # sifive uart negetive is full
+lw s9, 0(s11)
+blt s9, zero, wait_uart_m  # sifive uart negetive is full
 sb a0, 0(s11)
 #    li a0, 0     
 addi a0, x0, 0x0
@@ -199,38 +199,38 @@ addi s11, x0, 0x0
 lui s11, 0x2
 addi s11, s11, 0x4
 wait_uart_sbi:
-lw t1, 0(s11)
-blt t1, zero, wait_uart_sbi  # sifive uart negetive is full
+lw s9, 0(s11)
+blt s9, zero, wait_uart_sbi  # sifive uart negetive is full
 sb a0, 0(s11)
 #    li a0, 0     
 addi a0, x0, 0x0
 #    j m_done
 jal x0, m_done
 m_handler_set_timer:
-#    li t1, 0x2004000  
-addi t1, x0, 0x0
-lui t1, 0x2004
-addi t1, t1, 0x0
-sd a0, 0(t1)      # S-mode passes new time in a0
+#    li s1, 0x2004000  
+addi s1, x0, 0x0
+lui s1, 0x2004
+addi s1, s1, 0x0
+sd a0, 0(s1)      # S-mode passes new time in a0
 #    li a0, 0          
 addi a0, x0, 0x0
 #    j m_done
 jal x0, m_done
 m_handler_get_timer:
-#    li t1, 0x200bff8  
-addi t1, x0, 0x0
-lui t1, 0x200c
-addi t1, t1, 0xff8
-ld a0, 0(t1)      # S-mode passes new time in a0
+#    li s1, 0x200bff8  
+addi s1, x0, 0x0
+lui s1, 0x200c
+addi s1, s1, 0xff8
+ld a0, 0(s1)      # S-mode passes new time in a0
 #    j m_done
 jal x0, m_done
 m_handler_deleg:
-#    li t0, 0b1000            
-addi t0, x0, 0x0
-addi t0, x0, 0x0
-addi t0, x0, 0x8
-#    csrw medeleg, t0 
-csrrw x0, medeleg, t0
+#    li s0, 0b1000            
+addi s0, x0, 0x0
+addi s0, x0, 0x0
+addi s0, x0, 0x8
+#    csrw medeleg, s0 
+csrrw x0, medeleg, s0
 #    li a0, 0
 addi a0, x0, 0x0
 #    j m_done
@@ -265,18 +265,18 @@ jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I putchar
 #    j m_done
 jal x0, m_done
 m_done:
-#    csrr t0, mcause
-csrrs t0, mcause, x0
-#    li t1, 12
-addi t1, x0, 0x0
-addi t1, x0, 0x0
-addi t1, x0, 0xc
-bge t0, t1, return_same_pc # Page_Fault 12/13/14/15 give mepc to Trap
-#    csrr t0, mepc
-csrrs t0, mepc, x0
-addi t0, t0, 4 # skip ecall/ebreak instruction
-#    csrw mepc, t0
-csrrw x0, mepc, t0
+#    csrr s0, mcause
+csrrs s0, mcause, x0
+#    li s1, 12
+addi s1, x0, 0x0
+addi s1, x0, 0x0
+addi s1, x0, 0xc
+bge s0, s1, return_same_pc # Page_Fault 12/13/14/15 give mepc to Trap
+#    csrr s0, mepc
+csrrs s0, mepc, x0
+addi s0, s0, 4 # skip ecall/ebreak instruction
+#    csrw mepc, s0
+csrrw x0, mepc, s0
 return_same_pc:
 mret
 s_trap_handler:
@@ -292,11 +292,11 @@ ecall   # here ecall was not delegated to s_mode, so go to mtvec to find m-mode 
 #    j s_done
 jal x0, s_done
 s_done:
-#    csrr t2, sepc
-csrrs t2, sepc, x0
-addi t2, t2, 4 # skip ecall/ebreak instruction
-#    csrw sepc, t2
-csrrw x0, sepc, t2
+#    csrr s2, sepc
+csrrs s2, sepc, x0
+addi s2, s2, 4 # skip ecall/ebreak instruction
+#    csrw sepc, s2
+csrrw x0, sepc, s2
 sret
 print_reg:
 addi sp, sp, -40

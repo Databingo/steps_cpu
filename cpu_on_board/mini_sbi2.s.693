@@ -7,12 +7,9 @@ msg:
 
 .section .text
 _start:
-   li sp, 0x80700000 # Set stack # 80000000-8080000 sdram as 8M ram, we start sp from 0x80700000<-, MMU from 0x80700000->
+   li sp, 0x80700000 # Set stack # 80000000-8080000 sdram as 8M ram, we start sp from 0x80700000
    li s11, 0x2004 # UART print 
    li s10, 0x2008 # UART controller
-   # function use stacked s 
-   # handlers use s
-   # kernel use t
 
    la t0, m_trap_router      # 1. setup m-mode trap handler
    andi t0, t0, -4 # align 4 byte for directory mode of tvec
@@ -23,30 +20,19 @@ _start:
    csrw stvec, t0
 
 
-   li t0, 0xffffffffffffffff # 3. Unlock PMP (Physical Memory Protection) which prevent S-mode to touch hardware -1
+   li t0, 0xffffffffffffffff # 3. Unlock PMP (Physical Memory Protection) which prevent S-mode to touch hardware
    csrw pmpaddr0, t0
-   li t0, 0x1f               # 4. config TOR mode, Read/Write/Execute permissions L(0), A(01=TOR), X(1), W(1), R(1)=00011111=31=0x1f
+   li t0, 0x0f               # 4. config NAPOT mode, Read/Write/Execute permissions
    csrw pmpcfg0, t0
 
    csrw medeleg, zero        # No delegation (let M-mode handler take care)
-   #li t0, 0b1000            # Do delegate breakpoint to s-mode
+   #li t0, 0b1000            # Delegate breakpoint to s-mode
    #csrw medeleg, t0
 
-  #li t1, 0xB109             # Excepitons medeleg mask (Ecall,PageFaults...)
-  #csrw medeleg, t1
-  #li t1, 0x222              # Interrupts medeleg mask (SSI,STI,SEI)
-  #csrw mideleg, t1
-
-
-
-                            # 5. prepare the jump to S-mode 
-   li t0, 0b100000000000    # set mstatus.MPP to 01 (S-mode), Bit 11:12 is MPP
+   li t0, 0b100000000000     # 5. prepare the jump to S-mode # set mstatus.MPP to 1, Bit 11 is MPP
    csrs mstatus, t0
    la t0, s_mode_kernel      # set mepc to the address of our S-mode kernel
    csrw mepc, t0
-
-   li t1, 62 # >
-   sw t1, 0(s11)
    mret                      # 6. Drop to S-mode go to s_kernel
 
 
@@ -77,32 +63,35 @@ s_mode_kernel:
    #csrw satp, t0
    ## <--- start TLB I/D hitting
 
-   # real test
-   # 1.Build SV39 root table in sdram (4KB per table 2**9=512*8=4096) vpn2 4KB map 512*4k=2MBram; all vpn1=4*512=2Mb map 512*2M=1Gram, all vpn0=512*512=262144*4kb=1GB map 512Gram,total VPNs 4KB+2MB+1024MB
-   li t0, 0x80700000 # set base address of MMU root table
+  # real test
+  # 1. Build SV39 root table in sdram (4KB per table 2**9=512*8=4096) vpn2 4KB map 512*4k=2MBram; all vpn1=4*512=2Mb map 512*2M=1Gram, all vpn0=512*512=262144*4kb=1GB map 512Gram,total VPNs 4KB+2MB+1024MB
+  li t0, 0x80700000 # set base address of MMU root table
 
-   # 2. map vma 0x0000_0000 to ppa 0x0000_0000, ppn =  ppa >> 12 = 0, for UART/CLINT
-   li t1, 0xcf       # pte = ppn << 10 | flags valid0 read1 write2 exec3 accessed6 dirty7 0b11001111=0xcf
-   sd t1, 0(t0) 
+  # 2. map vma 0x0000_0000 to ppa 0x0000_0000, ppn =  ppa >> 12 = 0, for UART/CLINT
+  li t1, 0xcf       # pte = ppn << 10 | flags valid0 read1 write2 exec3 accessed6 dirty7 0b11001111=0xcf
+  sd t1, 0(t0) 
 
-   # 3. map vma 0x8000_0000 to ppa 0x8000_0000, ppn =  ppa >> 12 = 0x80000 pte = ppn << 10 | flags
-   li t1, 0x200000cf # pte = ppn << 10 | flags valid0 read1 write2 exec3 accessed6 dirty7 0b11001111=0xcf
-   sd t1, 16(t0)     # Index=va[38:30]=0b00000010=2, 8 bytes per PTE = 16, 
+  # 3. map vma 0x8000_0000 to ppa 0x8000_0000, ppn =  ppa >> 12 = 0x80000 pte = ppn << 10 | flags
+  li t1, 0x200000cf # pte = ppn << 10 | flags valid0 read1 write2 exec3 accessed6 dirty7 0b11001111=0xcf
+  sd t1, 16(t0)     # Index=va[38:30]=0b00000010=2, 8 bytes per PTE = 16, 
 
-   # satp need ppn of root table rt 0x80700000 
-   # satp = satp[63:60].MODE(0:bare, 8:sv39, 9:sv48)|satp[59:44].asid|satp[43:0].rootpage_physical_addr(vpn2:9|vpn1:9|vpn0:9|offseet12)
-   # ppn = rt >> 12 = 0x80700
-   # mode = 3 sv39
-   li t0, 0x8000000000080700
-  #call print_reg
-  #testf  #B
-   csrw satp, t0 # write mode and root table address to satp CSR register
-   testf 
-   sfence.vma
-   ## <--- start use TLB I/D hitting
+  # satp need ppn of root table rt 0x80700000 
+  # satp = satp[63:60].MODE(0:bare, 8:sv39, 9:sv48)|satp[59:44].asid|satp[43:0].rootpage_physical_addr(vpn2:9|vpn1:9|vpn0:9|offseet12)
+  # ppn = rt >> 12 = 0x80700
+  # mode = 3 sv39
+  li t0, 0x8000000000080700
+ #call print_reg
+ #testf 
+  csrw satp, t0 # write mode and root table address to satp CSR register
+ #testf 
+  sfence.vma
+  ## <--- start use TLB I/D hitting
 
 
-   testf 
+ testf 
+
+
+
 
 
    #la a0, msg   # trigger I-TLB miss
@@ -112,6 +101,16 @@ s_mode_kernel:
    call puts
    
 
+  
+
+
+
+
+
+
+
+
+
 
 
 s_mode_done:
@@ -119,12 +118,12 @@ s_mode_done:
 
 
 
+
+
 m_trap_router:
    #sd t0, 0x300(zero)
    #sd t1, 0x308(zero)
-
-   csrr s0, mcause  # check type
-
+   csrr t0, mcause  # check type
    # 63 bit 1 interrupt
    # 63 bit 0 exception
 
@@ -164,35 +163,37 @@ m_trap_router:
    # 16+ local define interrupt
 
 
-   li s1, 9  # ecall from S-mode
-   beq s0, s1, m_ecall_router
 
-   li s1, 2 # illegal instruction
-   beq s0, s1, m_ex_illegal_ir
+   li t1, 9  # ecall from S-mode
+   beq t0, t1, m_ecall_router
 
-   li s1, 3 #  ebreak
-   beq s0, s1, m_ebreak_handler
+   li t1, 2 # illegal instruction
+   beq t0, t1, m_ex_illegal_ir
+
+   li t1, 3 #  ebreak
+   beq t0, t1, m_ebreak_handler
 
    
+
 
    j m_done
 
 m_ecall_router:  # a7 Extension 1 putchar, 2 getchar, 0 settimer; a0 is the first argument a1..a5  # look a7 to see function is requested(sbi standard)
 
-   li s0, 0
-   beq a7, s0, m_handler_set_timer
+   li t0, 0
+   beq a7, t0, m_handler_set_timer
 
-   li s0, 1
-   beq a7, s0, m_handler_putchar  # (SBI_CONSOLE_PUTCHAR ( a7 = 0x01)
+   li t0, 1
+   beq a7, t0, m_handler_putchar  # (SBI_CONSOLE_PUTCHAR ( a7 = 0x01)
 
-   li s0, 2
-   beq a7, s0, m_handler_getchar  
+   li t0, 2
+   beq a7, t0, m_handler_getchar  
 
-   li s0, 3
-   beq a7, s0, m_handler_get_timer
+   li t0, 3
+   beq a7, t0, m_handler_get_timer
 
-   li s0, 0x10
-   beq a7, s0, m_handler_deleg
+   li t0, 0x10
+   beq a7, t0, m_handler_deleg
 
    li a0, -1  # unknow SBI_ERR_NOT_SUPPORTED = -1
    j m_done
@@ -201,8 +202,8 @@ m_ebreak_handler:
    li a0, "M"
    li s11, 0x2004
    wait_uart_m:
-   lw s9, 0(s11)
-   blt s9, zero, wait_uart_m  # sifive uart negetive is full
+   lw t1, 0(s11)
+   blt t1, zero, wait_uart_m  # sifive uart negetive is full
    sb a0, 0(s11)
    li a0, 0     # return success
    j m_done
@@ -210,27 +211,27 @@ m_ebreak_handler:
 m_handler_putchar:
    li s11, 0x2004
    wait_uart_sbi:
-   lw s9, 0(s11)
-   blt s9, zero, wait_uart_sbi  # sifive uart negetive is full
+   lw t1, 0(s11)
+   blt t1, zero, wait_uart_sbi  # sifive uart negetive is full
    sb a0, 0(s11)
    li a0, 0     # return success
    j m_done
 
 m_handler_set_timer:
-   li s1, 0x2004000  # riscv use MMIP for mtimecmp
-   sd a0, 0(s1)      # S-mode passes new time in a0
+   li t1, 0x2004000  # riscv use MMIP for mtimecmp
+   sd a0, 0(t1)      # S-mode passes new time in a0
    li a0, 0          # Success return a0=0
    j m_done
 
 m_handler_get_timer:
-   li s1, 0x200bff8  # riscv mtime
-   ld a0, 0(s1)      # S-mode passes new time in a0
+   li t1, 0x200bff8  # riscv mtime
+   ld a0, 0(t1)      # S-mode passes new time in a0
    j m_done
 
 m_handler_deleg:
    #li t0, 0x800 # 0b1000
-   li s0, 0b1000            # Delegate breakpoint bit3 to s-mode, ecall is bit9 not delegate yet
-   csrw medeleg, s0 
+   li t0, 0b1000            # Delegate breakpoint bit3 to s-mode, ecall is bit9 not delegate yet
+   csrw medeleg, t0 
    li a0, 0
    j m_done
 
@@ -246,16 +247,16 @@ m_ex_illegal_ir:
    j m_done
 
 m_done: 
-   csrr s0, mcause
-   li s1, 12
-   bge s0, s1, return_same_pc # Page_Fault 12/13/14/15 give mepc to Trap
+   csrr t0, mcause
+   li t1, 12
+   bge t0, t1, return_same_pc # Page_Fault 12/13/14/15 give mepc to Trap
 
 
-   csrr s0, mepc
-   addi s0, s0, 4 # skip ecall/ebreak instruction
-   csrw mepc, s0
-   #ld s0, 0x900(zero)
-   #ld s1, 0x908(zero)
+   csrr t0, mepc
+   addi t0, t0, 4 # skip ecall/ebreak instruction
+   csrw mepc, t0
+   #ld t0, 0x900(zero)
+   #ld t1, 0x908(zero)
    return_same_pc:
    mret
 
@@ -270,9 +271,9 @@ s_trap_handler:
    j s_done
 
 s_done: 
-   csrr s2, sepc
-   addi s2, s2, 4 # skip ecall/ebreak instruction
-   csrw sepc, s2
+   csrr t2, sepc
+   addi t2, t2, 4 # skip ecall/ebreak instruction
+   csrw sepc, t2
    sret
 
 
