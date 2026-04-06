@@ -68,11 +68,6 @@ s_mode_kernel: # like OS/linux
    #li a7, 1
    #ecall
  
-   li a7, 0x10
-   ecall  # turn delegate (test 3 breakpoint)
-
-   ebreak # S ebreak was delegeted to s-mode, so use stvec to find s-handler for break
-
 
    # test MMU
    li a0, "\nMMU:" 
@@ -121,6 +116,11 @@ s_mode_kernel: # like OS/linux
   andi t0, t0, -4
   csrw stvec, t0
 
+
+   li a7, 0x10
+   ecall  # turn delegate (test 3 breakpoint)
+
+   ebreak # S ebreak was delegeted to s-mode, so use stvec to find s-handler for break
 
 s_mode_done:
   j s_mode_done
