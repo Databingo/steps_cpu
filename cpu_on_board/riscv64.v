@@ -460,7 +460,7 @@ always @(*) begin
 		//({44{tlb_d_match[6]}} & tlb_ppn[6]) |
 		//({44{tlb_d_match[7]}} & tlb_ppn[7]) ; end
 		// concat physical address
-		wire need_trans = satp_mmu && !STrap;
+		wire need_trans = satp_mmu && !STrap && (current_privilege_mode != M_mode);
 		assign ppc = need_trans ? {8'h0, pc_ppn, pc[11:0]} : pc;
 		assign pda = need_trans ? {8'h0, data_ppn, ls_va[11:0]} : ls_va;
 
