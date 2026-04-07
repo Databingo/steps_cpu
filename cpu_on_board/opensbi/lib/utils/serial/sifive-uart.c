@@ -95,19 +95,19 @@ int sifive_uart_init(unsigned long base, u32 in_freq, u32 baudrate)
 	uart_base     = (volatile char *)base;
 	uart_in_freq  = in_freq;
 	uart_baudrate = baudrate;
-
-	/* Configure baudrate */
-	if (in_freq && baudrate)
-		set_reg(UART_REG_DIV, uart_min_clk_divisor(in_freq, baudrate));
-
-	/* Disable interrupts */
-	set_reg(UART_REG_IE, 0);
-
-	/* Enable TX */
-	set_reg(UART_REG_TXCTRL, UART_TXCTRL_TXEN);
-
-	/* Enable Rx */
-	set_reg(UART_REG_RXCTRL, UART_RXCTRL_RXEN);
+// comment out for SoC UART
+//	/* Configure baudrate */
+//	if (in_freq && baudrate)
+//		set_reg(UART_REG_DIV, uart_min_clk_divisor(in_freq, baudrate));
+//
+//	/* Disable interrupts */
+//	set_reg(UART_REG_IE, 0);
+//
+//	/* Enable TX */
+//	set_reg(UART_REG_TXCTRL, UART_TXCTRL_TXEN);
+//
+//	/* Enable Rx */
+//	set_reg(UART_REG_RXCTRL, UART_RXCTRL_RXEN);
 
 	sbi_console_set_device(&sifive_console);
 

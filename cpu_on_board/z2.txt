@@ -477,7 +477,7 @@ always @(*) begin
 			tlb_ppn[tlb_ptr] <= bus_write_data[55:12] ; // real 
 			tlb_vld[tlb_ptr] <= 1;
 			tlb_ptr <= tlb_ptr + 1; 
-		    end else if (!bubble) begin // sfence.vma flush any way if ir is (not be bubbled)
+		    end else if (!bubble && tlb_i_hit && i_cache_hit) begin // sfence.vma flush any way if ir is (not be bubbled)
 			casez (ir) 32'b0001001??????????_000_?????_1110011: begin tlb_vld[0] <= 0; tlb_vld[1] <= 0; tlb_vld[2] <= 0; tlb_vld[3] <= 0; end
 		    endcase 
 		end
@@ -579,10 +579,11 @@ always @(*) begin
 		    pc <= 0;     // trap to isr_router
 		    bubble <= 1'b1; // bubble IF for new pc value 
 		    saved_user_pc <= pc_4; // !!! save pc (EXE was flushed so record-redo it, previous pc)
-		    if (bubble || ir==32'b0001001??????????_000_?????_1110011) saved_user_pc <= pc ; // !!! save pc (j/b EXE was flushed currectly, vma executed anyway no need back-redo)
+		    //if (bubble || ir==32'b0001001??????????_000_?????_1110011) saved_user_pc <= pc ; // !!! save pc (j/b EXE was flushed currectly, vma executed anyway no need back-redo)
+		    if (bubble) saved_user_pc <= pc ; // !!! save pc (j/b EXE was flushed currectly, vma executed only in EXEcuting)
 		    for (i=1;i<11;i=i+1) begin sre[i]<= re[i]; end // save re
 		    re[9] <= pc;// - 4; // save this vpc to x1 //!!!! We also need to refill pc - 4' ppc for re-executeing pc-4, with hit(if satp in for very next sfence.vma) 
-		    re[8] <= 12 ;// save in x8 trap type 0 i-tlb trap
+		    re[8] <= 12 ;// save in x8 trap type 0 i-tlb trap so record as instruciont page fault for prepare
 		    //Csrs[mstatus][MPIE] <= Csrs[mstatus][MIE]; // disable interrupt during shadow mmu walking
 		    //Csrs[mstatus][MIE] <= 0;
 
@@ -702,7 +703,8 @@ always @(*) begin
 		    32'b???????_?????_?????_110_?????_1100011: begin if ($unsigned(re[w_rs1]) < $unsigned(re[w_rs2])) begin pc <= branch; bubble <= 1'b1; end end // Bltu
 		    32'b???????_?????_?????_111_?????_1100011: begin if ($unsigned(re[w_rs1]) >= $unsigned(re[w_rs2])) begin pc <= branch; bubble <= 1'b1; end end // Bgeu
 		    // System-CSR 
-	            32'b???????_?????_?????_001_?????_1110011: begin if (w_rd != 0) re[w_rd] <= Csrs[w_csr_id]; if (w_csr_id != 29) Csrs[w_csr_id] <= rs1; end // Csrrw logic
+		    32'b???????_?????_?????_001_?????_1110011: begin if (w_rd != 0) re[w_rd] <= Csrs[w_csr_id]; if (w_csr_id != 29) Csrs[w_csr_id] <= rs1; end // Csrrw logic
+		                                                     //if (w_csr_id==satp) begin pc<=pc; bubble<=1; end end // flush pipelien on satp write
 	            32'b???????_?????_?????_010_?????_1110011: begin if (w_rd != 0) re[w_rd] <= Csrs[w_csr_id]; if (w_rs1 != 0) Csrs[w_csr_id] <= (Csrs[w_csr_id] |  rs1); end // Csrrs
 	            32'b???????_?????_?????_011_?????_1110011: begin if (w_rd != 0) re[w_rd] <= Csrs[w_csr_id]; if (w_rs1 != 0) Csrs[w_csr_id] <= (Csrs[w_csr_id] & ~rs1); end // Csrrc
 	            32'b???????_?????_?????_101_?????_1110011: begin if (w_rd != 0) re[w_rd] <= Csrs[w_csr_id]; Csrs[w_csr_id] <= w_imm_z; end // Csrrwi
@@ -2235,6 +2237,43 @@ assign avl_req_wait = (cur[4:0] == RDELAY7[4:0] || cur[4:0] == WDELAY7[4:0]) ? 1
 assign avl_ready = (cur[4:0] == HALT ) && (ref_cnt < RefMax);
 
 endmodule
+`define Rom_base   64'h0000_0000
+`define Rom_size   64'h0000_0800
+`define Ram_base   64'h0000_0800
+`define Ram_size   64'h0000_1000
+`define Key_base   64'h0000_2000
+`define Art_base   64'h0000_2004
+`define ArtK_base  64'h0000_2008
+
+`define Sdc_base   64'h0000_3000
+`define Sdc_addr   64'h0000_3200
+`define Sdc_read   64'h0000_3204
+`define Sdc_write  64'h0000_3208
+`define Sdc_ncd    64'h0000_3212
+`define Sdc_wp     64'h0000_3216
+`define Sdc_ready  64'h0000_3220
+`define Sdc_dirty  64'h0000_3224
+`define Sdc_avail  64'h0000_3228
+
+`define Sdram_min  64'h8000_0000
+`define Sdram_max  64'h8080_0000
+
+`define Mtime      64'h0200_bff8
+`define Mtimecmp   64'h0200_4000
+
+`define Plic_base         64'h0C00_0000  
+`define Plic_pending      64'h0C00_1000  
+`define Plic_enable       64'h0C00_2000  
+`define Plic_threshold    64'h0C20_0000  
+`define Plic_claim        64'h0C20_0004  
+`define HARTS 1
+
+`define Tlb    64'h00000000_2000_0000
+`define CacheI 64'h2000_1000
+`define CacheI_L 64'h2000_1000
+`define CacheI_H 64'h2000_1008
+
+`define Msip_base 64'h0200_0000
 ---------- rom inner isr.s---------
 isr_router:        # Use x0-x10 shadowed register only (ra(x1), a0(x10),..x19)
      li x7, 0x2004 # UART print 
@@ -2244,12 +2283,16 @@ isr_router:        # Use x0-x10 shadowed register only (ra(x1), a0(x10),..x19)
 
      # x1(ra)2(sp)3456,x10(a0) operating
      li sp, 0x1500 # Set stack   # use shadowed sp
+
      li x3, 12 
      beq x8, x3, mmu_i    # i-tlb-refill
+
      li x3, 1 
      beq x8, x3, i_cache_refill
+
      li x3, 13 
      beq x8, x3, mmu_d    # d-tlb-refill load
+
      li x3, 14 
      beq x8, x3, mmu_d    # d-tlb-refill store
 
@@ -2501,305 +2544,505 @@ print7: # a0, 7 char left one for null
     addi sp, sp, 16
     ret
 ---------- ram test assembly code ---------
+#`define Sdc_base  32'h0000_3000 (3000-31ff 512 bytes index) sd_cache 
+#`define Sdc_addr  32'h0000_3200
+#`define Sdc_read  32'h0000_3204
+#`define Sdc_write 32'h0000_3208
+#`define Sdc_ready 32'h0000_3220
+#`define Sdc_dirty 32'h0000_3224
+#`define Sdc_avail 32'h0000_3228
+# UART 0x2004
+
 .globl _start
 
+# -- Define data --
 .section .data
 msg:
     .string "Hello"
+#sbi:
+#    .string "I'm test Opensbi add update ram read=on1"
+#wait_sd_ready:
+#    .string "wait_sd_ready:"
+#read_sd_sector:
+#    .string "read_sd_sector:"
+#prt_sector:
+#    .string "print_sector:"
+reserved_sec:
+    .word 0
+num_fats:
+    .word 0
+sec_per_fat:
+    .word 0
+byte_per_sec:
+    .word 0
+root_dir_sector_start:
+    .word 0
+root_ent_cnt:
+    .word 0
+root_dir_sectors:
+    .word 0
+sec_per_clus:
+    .word 0
+data_start_sec:
+    .word 0
+entries_per_sector:
+    .word 0
+total_sectors:
+    .word 0
+file_size:
+    .word 0
+file_first_cluster:
+    .word 0
+file_sectors:
+    .word 0
+file_start_sector:
+    .word 0
 
 
-# Bootloader/copy4 --> firmware/BIOS/opensib/mini_sbi2 --> OS/linux/kernal
+
+
+# -- Start program main function _start --
 .section .text
-_start:  # like open_sbi
-   li sp, 0x80700000 # Set stack # 80000000-8080000 sdram as 8M ram, we start sp from 0x80700000<-, MMU from 0x80700000->
-   li s11, 0x2004 # UART print 
-   li s10, 0x2008 # UART controller
-   # function use stacked s 
-   # handlers use s
-   # kernel use t
+# -- Global setup --
+_start:
+    li sp, 0x1800 # Set stack
+    li s11, 0x2004 # UART print 
+    li s10, 0x2008 # UART controller
+    li s1,  0x3000 # SD base
+    li s2,  0x3200 # SD address
+    li s3,  0x3204 # SD trigger read
+    li s4,  0x3208 # SD trigger write
+    li s5,  0x3220 # SD ready for rd/wr
+    li s6,  0x3228 # SD cache available
+    # a0 for function call default parameter
+    #lui s0, 0x80000 # SDRAM base 0x80000000 wrong! neg
+    li s0, 0x80000000 # SDRAM base 0x80000000
 
-   la t0, m_trap_router      # 1. setup m-mode trap handler
-   andi t0, t0, -4 # align 4 byte for directory mode of tvec
-   csrw mtvec, t0
+# ---------------------- SD card -------------------
+# Sector 0 Layout # BPB (BIOS Parameter Block) in sector 0
+#| Offset | Size | Field                           | Meaning                        | Example (FAT16) |
+#| :----- | :--- | :------------------------------ | :----------------------------- | :-------------- |
+#| `0x00` | 3    | Jump Instruction                | JMP to boot code               | EB 3C 90        |
+#| `0x03` | 8    | OEM Name                        | Text label                     | "MSDOS5.0"      |
+#| `0x0B` | 2    | **Bytes per sector**            | Usually 512                    | 0x0200          |
+#| `0x0D` | 1    | **Sectors per cluster**         | Cluster size (e.g. 1,2,4,8,16) | 1               |
+#| `0x0E` | 2    | **Reserved sectors**            | Includes boot sector           | 1               |
+#| `0x10` | 1    | **Number of FATs**              | Typically 2                    | 2               |
+#| `0x11` | 2    | **Root entries**                | Count of directory entries     | 512             |
+#| `0x13` | 2    | **Total sectors (16-bit)**      | If zero, use 0x20–0x23         | 2880            |
+#| `0x15` | 1    | **Media descriptor**            | 0xF8 (fixed disk)              | F8              |
+#| `0x16` | 2    | **Sectors per FAT**             | FAT size                       | 9               |
+#| `0x18` | 2    | **Sectors per track**           | BIOS info                      | 18              |
+#| `0x1A` | 2    | **Number of heads**             | BIOS info                      | 2               |
+#| `0x1C` | 4    | **Hidden sectors**              | Partition offset               | 0               |
+#| `0x20` | 4    | **Total sectors (32-bit)**      | Large volumes                  | 0               |
+#| `0x24` | —    | (More fields in FAT32 only)     | —                              | —               |
+#| `0x36` | 11   | Volume Label / File System Type | "NO NAME    " / "FAT16   "     | —               |
+#| :----- | :--- | :------------------------------ | :----------------------------- | :-------------- |
 
-  #la t0, s_trap_handler     # 2. setup s-mode trap handler  # Should do by kernel/OS/linux
-  #andi t0, t0, -4
-  #csrw stvec, t0
-
-
-   li t0, 0xffffffffffffffff # 3. Unlock PMP (Physical Memory Protection) which prevent S-mode to touch hardware -1
-   csrw pmpaddr0, t0
-   li t0, 0x1f               # 4. config TOR mode, Read/Write/Execute permissions L(0), A(01=TOR), X(1), W(1), R(1)=00011111=31=0x1f
-   csrw pmpcfg0, t0
-
-   csrw medeleg, zero        # No delegation (let M-mode handler take care)
-   #li t0, 0b1000            # Do delegate breakpoint to s-mode
-   #csrw medeleg, t0
-
-  #li t1, 0xB109             # Excepitons medeleg mask (Ecall,PageFaults...)
-  #csrw medeleg, t1
-  #li t1, 0x222              # Interrupts medeleg mask (SSI,STI,SEI)
-  #csrw mideleg, t1
-
-
-
-                            # 5. prepare the jump to S-mode 
-   li t0, 0b100000000000    # set mstatus.MPP to 01 (S-mode), Bit 11:12 is MPP
-   csrs mstatus, t0
-   la t0, s_mode_kernel      # set mepc to the address of our S-mode kernel
-   csrw mepc, t0
-
-   li t1, 62 # >
-   sw t1, 0(s11)
-   mret                      # 6. Drop to S-mode go to s_kernel
+lw a0, 0(s11)
+call print_reg
 
 
-s_mode_kernel: # like OS/linux
+# ----------Read BPB sector 0 -----
+li a0, 0   
+call sd_read_sector  # use a0 as sector no.
+#call print_sector
 
-  #la t0, s_trap_handler     # 2. setup s-mode trap handler  # Should do by kernel/OS/linux
-  #andi t0, t0, -4
-  #csrw stvec, t0
+# -- Parse BPB -- little-endian  Bios Parameter Block : sector 0
+# -------------------------------------
+# byte_per_sec offset 0x0b-0x0c 2 bytes
+li s7, 66
+sb s7, 0(s11)
+#li a0, "\nBPsec:" # 7 char left on for null
+#call print7
+
+#endd:
+#    j endd
+
+la a1, byte_per_sec
+lwu a0, 0x0a(s1)
+srli a0, a0, 8
+sh a0, 0(a1)
+#lhu a0, 0(a1)
+#call print_reg
+
+# -------------------------------------
+# Sectors per cluster 0x0d 1 byte
+#li a0, "\nsePcl:" # 7 char left on for null
+#call print7
+la a1, sec_per_clus
+lbu a0, 0x0d(s1)
+sh a0, 0(a1)
+#lh a0, 0(a1)
+#call print_reg
+#
+#
+# -------------------------------------
+# reserved_sectors offset 0x0e-0x0f 2 bytes (including root sector 0)
+#li a0, "\nrevSe:" # 7 char left on for null
+#call print7
+la a1, reserved_sec
+lh a0, 0x0e(s1)
+sd a0, 0(a1)
+#ld a0, 0(a1)
+#call print_reg
+
+# -------------------------------------
+# num_fats offset 0x10 1 bytes
+#li a0, "\nnuFat:" # 7 char left on for null
+#call print7
+la a1, num_fats
+lbu a0, 0x10(s1)
+sw a0, 0(a1)
+#lw a0, 0(a1)
+#call print_reg
+
+# -------------------------------------
+# root_entries offset 0x11-0x12 2 bytes
+#li a0, "\nReCnt:"
+#call print7
+la a1, root_ent_cnt
+lwu a0, 0x10(s1)
+srli a0, a0, 8
+sh a0, 0(a1)
+#lhu a0, 0(a1)
+#call print_reg
+
+# -------------------------------------
+# total sectors offset 0x13 2 bytes if 0 find 0x20 4 bytes for large volumes
+#li a0, "\nToSec:"
+#call print7
+la a1, total_sectors
+lwu a0, 0x20(s1)
+sw a0, 0(a1)
+#lwu a0, 0(a1)
+#call print_reg
+
+# -------------------------------------
+# sectors_per_fat16 high offset 0x16-0x17 2 bytes
+#li a0, "\nsePft:" # 7 char left on for null
+#call print7
+la a1, sec_per_fat
+lh a0, 0x16(s1)
+sh a0, 0(a1)
+#lh a0, 0(a1)
+#call print_reg
+
+## ---------Calcauted ----------------------------
+# root_dir_sector_start = reserved_sectors + (num_fats * sectors_per_fat16)
+#li a0, "\nrtdS0:" # 7 char left on for null
+#call print7
+la a1, num_fats
+lw t1, 0(a1)
+la a1, sec_per_fat
+lw t2, 0(a1)
+la a1, reserved_sec
+lw t0, 0(a1)
+mul a0, t1, t2
+add a0, a0, t0
+la t3, root_dir_sector_start
+sw a0, 0(t3)
+#lw a0, 0(t3)
+#call print_reg
+
+# -------------------------------------
+# entries_per_sector =  byte_per_sec/32
+li a0, "\nEtPse:"
+call print7
+la a1, byte_per_sec
+lw a0, 0(a1)
+mv s7, a0
+#srli a0, a0, 5  # calc entries_per_sector
+li t1, 32
+div a0, a0, t1
+la t3,  entries_per_sector
+sw a0, 0(t3)
+lw a0, 0(t3)
+call print_reg
+
+# ---------- Read Root dir Secotr 0 -----
+la t3, root_dir_sector_start
+lw a0, 0(t3)
+call sd_read_sector  # use a0 as sector no.
+call print_sector
 
 
-   ebreak   # M  test m-mode ebreak
+# -------------------------------------
+# Scan Entries of Root Dir first sector
+# s7 entry_per_sector
+li s8, 0 # entry_index
+li s9, "MUSIC"
+mv a0, s9
+call print7
 
-   #li a0, "H"
-   #li a7, 1
-   #ecall
+entry_loop:
+bge s8, s7, done_entries
+# entry_addr = s1 + (entry_index * 32)
+slli t1, s8, 5
+add t3, s1, t1 # t3 = address of entry
 
-   #li a0, "i"
-   #li a7, 1
-   #ecall
+# 1. Quick Validity Check
+# load first byte of entry
+lbu t4, 0(t3)
+beq t4, x0, done_entries # 0x00 no more entries in dir
+li t1, 0xE5
+beq t4, t1, next_entry # 0xE5 deleted entry, skip
+    
+# 2. Attribute Check # attribute at 0x0B( offset 11)
+lbu t5, 11(t3)
+li t1, 0x0F
+beq t5, t1, next_entry # 0x0F LFN(Long File Name) entry, skip
+
+andi t6, t5, 0x18  # Mask for Volume Label(0x08) and Directory (0x10)
+bne t6, x0, next_entry # skip 
+
+# 3. Compare Filename(First 8 bytes)
+# load name 8 bytes
+li t2, 0
+addi t4, t3, 7
+load_name_loop:
+lbu t0, 0(t4)
+slli t2, t2, 8
+xor t2, t2, t0
+addi t4, t4, -1
+bge t4, t3, load_name_loop
+
+# keep 5 char
+slli t2, t2, 24
+srli t2, t2, 24
+
+# -- Print Name --- 
+addi sp, sp, -16
+sd t2, 0(sp)
+sb x0, 8(sp)
+mv a0, sp
+call puts
+addi sp, sp, 16
+# -----------------
+
+bne t2, s9, next_entry
+
+## 4. FOUND! Extract File Info
+li a0, "FOUND!"
+call print7
+
+done_entries:
+   j read_file
+
+next_entry:
+addi s8, s8, 1
+j entry_loop
+
+
+## root_dir_sector_start = reserved_sectors + (num_FATs * sectors_per_FAT)
+## root_dir_sectors = (RootEntryCount * 32 + BytesPerSector -1 )/ BytesPerSector  ceiling division
+## FirstDataSector = root_dir_sector_start + root_dir_sectors 
+## FirstSectorOfCluster(N)=FirstDataSector + (N - 2) * SectorsPerCluster
+#
+## Entry Layout(in Root Directory)
+##| Offset | Size | Field                             | Description                  | Example      |
+##| :----- | :--- | :-------------------------------- | :--------------------------- | :----------- |
+##| `0x00` | 8    | **Filename**                      | 8 chars (space padded)       | `"MUSIC   "` | FAT16 8.3 format for name.extension
+##| `0x08` | 3    | **Extension**                     | 3 chars (space padded)       | `"WAV"`      |
+##| `0x0B` | 1    | **Attributes**                    | Bit flags (see below)        | 0x20         |
+##| `0x0C` | 1    | Reserved                          | For Windows NT               | 0            |
+##| `0x0D` | 1    | Creation time (tenths)            | Optional                     | —            |
+##| `0x0E` | 2    | Creation time                     | —                            | —            |
+##| `0x10` | 2    | Creation date                     | —                            | —            |
+##| `0x12` | 2    | Last access date                  | —                            | —            |
+##| `0x14` | 2    | High word of cluster (FAT32 only) | —                            | —            |
+##| `0x16` | 2    | Last modified time                | —                            | —            |
+##| `0x18` | 2    | Last modified date                | —                            | —            |
+##| `0x1A` | 2    | **First cluster (low word)**      | Cluster number (starts at 2) | 0x0002       |
+##| `0x1C` | 4    | **File size (bytes)**             | File length                  | 4096         |
+#
+read_file:
+#j read_file
+## file size at 0x1C-0x1D-0x1E-0x1F 4 bytes
+li a0, "\nFSize:"
+call print7
+lwu a0, 0x1c(t3)
+la a1, file_size
+sw a0, 0(a1)
+lwu a0, 0(a1)
+call print_reg
+
+# file_first_cluster at 0x1A-0x1B 2 bytes
+#li a0, "\nF0cls:"
+#call print7
+lhu a0, 0x1a(t3)
+la a1, file_first_cluster
+sh a0, 0(a1)
+#lhu a0, 0(a1)
+#call print_reg
+
+# root_dir_sectors = (RootEntryCount * 32 + BytesPerSector -1 )/ BytesPerSector  ceiling division
+#li a0, "\nrDseS:"
+#call print7
+
+la a1, root_ent_cnt
+lwu t0, 0(a1)
+li t1, 32
+mul t2, t0, t1
+
+la a1, byte_per_sec
+lwu t0, 0(a1)
+add t3, t2, t0
+addi t3, t3, -1
+div a0, t3, t0
+
+la a1, root_dir_sectors 
+sw a0, 0(a1)
+lw a0, 0(a1)
+call print_reg
+
+#data_start_sec # FirstDataSector = root_dir_sector_start + root_dir_sectors 
+#li a0, "\nD0sec:"
+#call print7
+la a1, root_dir_sector_start
+lw t0, 0(a1)
+la a1, root_dir_sectors 
+lw t1, 0(a1)
+add t2, t0, t1
+la a1, data_start_sec  
+sw t2, 0(a1)
+#lw a0, 0(a1)
+#call print_reg
+
+# FirstSectorOfCluster(N)=FirstDataSector + (N - 2) * SectorsPerCluster
+#li a0, "\nF0sec:"
+#call print7
+
+la a1, file_first_cluster # N
+lw t0, 0(a1)
+addi t0, t0, -2
+la a1, sec_per_clus
+lw t1, 0(a1)
+mul t2, t0, t1
+la a1, data_start_sec
+lw t3, 0(a1)
+add a0, t3, t2
+la a1, file_start_sector
+sw a0, 0(a1)
+call print_reg
+
+
+# file_sectors = file_size + 511 / 512
+#li a0, "\nFseS:"
+#call print7
+la a1, file_size
+lw t0, 0(a1)
+addi t0, t0, 511
+li t1, 512
+div a0, t0, t1
+la a1, file_sectors 
+sw a0, 0(a1)
+lw a0, 0(a1)
+call print_reg
+
+
+li a0, "\nFileB:"
+call print7
+
+la a1, file_sectors
+lw t0, 0(a1)
+la a1,  file_start_sector
+lw t1, 0(a1)
+add t2, t1, t0
+
+
+#print_sector_loop:
+#mv a0, t1
+#call sd_read_sector  # use a0 as sector no.
+#call print_sector
+#addi t1, t1, 1
+#blt t1, t2, print_sector_loop
  
 
-   # test MMU
-   li a0, "\nMMU:" 
-   call print7
-   
-   # simple test
-   #li t0, 1
-   #slli t0, t0, 63 # sv39 satp[63:60] MODE to 8
-   #csrw satp, t0
-   ## <--- start TLB I/D hitting
-
-   # Build MMU table
-   # real test
-   # 1.Build SV39 root table in sdram (4KB per table 2**9=512*8=4096) vpn2 4KB map 512*4k=2MBram; all vpn1=4*512=2Mb map 512*2M=1Gram, all vpn0=512*512=262144*4kb=1GB map 512Gram,total VPNs 4KB+2MB+1024MB
-   li t0, 0x80700000 # set base address of MMU root table
-
-   # 2. map vma 0x0000_0000 to ppa 0x0000_0000, ppn =  ppa >> 12 = 0, for UART/CLINT
-   li t1, 0xcf       # pte = ppn << 10 | flags valid0 read1 write2 exec3 accessed6 dirty7 0b11001111=0xcf
-   sd t1, 0(t0) 
-
-   # 3. map vma 0x8000_0000 to ppa 0x8000_0000, ppn =  ppa >> 12 = 0x80000 pte = ppn << 10 | flags
-   li t1, 0x200000cf # pte = ppn << 10 | flags valid0 read1 write2 exec3 accessed6 dirty7 0b11001111=0xcf
-   sd t1, 16(t0)     # Index=va[38:30]=0b00000010=2, 8 bytes per PTE = 16, 
-
-   # satp need ppn of root table rt 0x80700000 
-   # satp = satp[63:60].MODE(0:bare, 8:sv39, 9:sv48)|satp[59:44].asid|satp[43:0].rootpage_physical_addr(vpn2:9|vpn1:9|vpn0:9|offseet12)
-   # ppn = rt >> 12 = 0x80700
-   # mode = 3 sv39
-   li t0, 0x8000000000080700
-  #call print_reg
-   testf  #A
-  #nop
-  #csrw satp, t0 # write mode and root table address to satp CSR register
-   testf  #B
-  #nop
-   sfence.vma
-   ## <--- start use TLB I/D hitting
-   testf  #C
-  #nop
-
-   #la a0, msg   # trigger I-TLB miss
-   #call print_reg
-
-   la a0, msg   # trigger I-TLB miss
-   call puts
-
-
-  la t0, s_trap_handler     # 2. setup s-mode trap handler  # Should do by kernel/OS/linux # Should write with Virtual address after MMU table was write and MMU was turn on
-  andi t0, t0, -4
-  csrw stvec, t0
-
-
-   li a7, 0x10
-   ecall  # turn delegate (test 3 breakpoint)
-
-   ebreak # S ebreak was delegeted to s-mode, so use stvec to find s-handler for break
-
-s_mode_done:
-  j s_mode_done
+#lui s0, 0x80000 # SDRAM base 0x80000000
+li s0, 0x80000000 # SDRAM base 0x80000000
+copy_sector_loop:
+li a0, 94 # ^
+call putchar
+mv a0, t1
+call sd_read_sector  # use a0 as sector no.
+mv a0, s0
+call copy_sector
+addi t1, t1, 1
+addi s0, s0, 512
+blt t1, t2, copy_sector_loop
 
 
 
-m_trap_router:
-   #sd t0, 0x300(zero)
-   #sd t1, 0x308(zero)
-
-   csrr s0, mcause  # check type
-
-   # 63 bit 1 interrupt
-   # 63 bit 0 exception
-
-   # Exception 0
-   # 0 pc is not aligned to 4 bytes
-   # 1 instruction is not accessable
-   # 2 illegal instruction
-   # 3 breakpoint
-   # 4 load address not aligned lw!=4  ld!=8 lh!=2?
-   # 5 load access fault
-   # 6 store/amo address not aligned
-   # 7 store/amo access fault
-   # 8 ecall from u-mode
-   # 9 ecall from s-mode
-   # 10 --(reserved)
-   # 11 ecall from m-mode
-   # 12 instruciton page fault
-   # 13 load page fault
-   # 14 --
-   # 15 store/amo page fault
-   # 16+ --
-
-   # Interrupt 1
-   # 0 user software interrupt
-   # 1 supervisor software interrupt
-   # 2 -- 
-   # 3 machine software interrupt
-   # 4 user timer software interrupt
-   # 5 supervisor timer software interrupt
-   # 6 --
-   # 7 machine timer interrupt
-   # 8 user external interrupt
-   # 9 supervisor external interrupt
-   # 10 --
-   # 11 machine external interrupt
-   # 12-15 --
-   # 16+ local define interrupt
+# -----------------------------
+# Read/Write SDRAM
+#lui s0, 0x80000 # SDRAM base 0x80000000
+#li s0, 0x80000000 # SDRAM base 0x80000000
+## Write one byte
+#li t1, 0x58          # 'X'
+#sb t1, 0(s0)         # test sdram sb/sh
+#    
+## Read it back
+#lbu t2, 0(s0)         # test sdram lbu
+#    
+## Print it
+#sb t2, 0(s11)         # Should print 'X'
 
 
-   li s1, 9  # ecall from S-mode
-   beq s0, s1, m_ecall_router
-
-   li s1, 2 # illegal instruction
-   beq s0, s1, m_ex_illegal_ir
-
-   li s1, 3 #  ebreak
-   beq s0, s1, m_ebreak_handler
-
-   
-
-   j m_done
-
-m_ecall_router:  # a7 Extension 1 putchar, 2 getchar, 0 settimer; a0 is the first argument a1..a5  # look a7 to see function is requested(sbi standard)
-
-   li s0, 0
-   beq a7, s0, m_handler_set_timer
-
-   li s0, 1
-   beq a7, s0, m_handler_putchar  # (SBI_CONSOLE_PUTCHAR ( a7 = 0x01)
-
-   li s0, 2
-   beq a7, s0, m_handler_getchar  
-
-   li s0, 3
-   beq a7, s0, m_handler_get_timer
-
-   li s0, 0x10
-   beq a7, s0, m_handler_deleg
-
-   li a0, -1  # unknow SBI_ERR_NOT_SUPPORTED = -1
-   j m_done
-
-m_ebreak_handler:
-   li a0, "M"
-   li s11, 0x2004
-   wait_uart_m:
-   lw s9, 0(s11)
-   blt s9, zero, wait_uart_m  # sifive uart negetive is full
-   sb a0, 0(s11)
-   li a0, 0     # return success
-   j m_done
-   
-m_handler_putchar:
-   li s11, 0x2004
-   wait_uart_sbi:
-   lw s9, 0(s11)
-   blt s9, zero, wait_uart_sbi  # sifive uart negetive is full
-   sb a0, 0(s11)
-   li a0, 0     # return success
-   j m_done
-
-m_handler_set_timer:
-   li s1, 0x2004000  # riscv use MMIP for mtimecmp
-   sd a0, 0(s1)      # S-mode passes new time in a0
-   li a0, 0          # Success return a0=0
-   j m_done
-
-m_handler_get_timer:
-   li s1, 0x200bff8  # riscv mtime
-   ld a0, 0(s1)      # S-mode passes new time in a0
-   j m_done
-
-m_handler_deleg:
-   #li t0, 0x800 # 0b1000
-   li s0, 0b1000            # Delegate breakpoint bit3 to s-mode, ecall is bit9 not delegate yet
-   csrw medeleg, s0 
-   li a0, 0
-   j m_done
-
-m_ex_illegal_ir:
-  #li a0, "I"
-  #call putchar
-   li a0, "\n{ILLir"
-   call print7
-   csrr a0, mtval
-   call print_reg
-   li a0 "}"
-   call putchar
-   j m_done
-
-m_done: 
-   csrr s0, mcause
-   li s1, 12
-   bge s0, s1, return_same_pc # Page_Fault 12/13/14/15 give mepc to Trap
+#    lui t0, 0x2
+#    addi t0, t0, 4       # UART = 0x2004
+#    
+#    lui s0, 0x80000      # SDRAM = 0x80000000
+#li s0, 0x80000000 # SDRAM base 0x80000000
+#    
+#    # Write one byte
+#    li t1, 0x58          # 'X'
+#    call wait_uart
+#    sb t1, 0(s0)         # test sdram sb/sh
+#    
+#    # Read it back
+#    lbu t2, 0(s0)         # test sdram lbu
+#    
+#    # Print it
+#    sb t2, 0(t0)         # Should print 'X'
+#    sb t2, 0(t0)         # Should print 'X'
+#    sh t2, 0(t0)         # Should print 'X'
+#    
+#    # Write 4 byte
+#    li t1, 0x44434241    # 'DCBA'
+#    sw t1, 0(s0)         # test sdram sw
+#    
+#    # Read it back
+#    lhu t3, 0(s0) # A    # test sdram lhu lwu
+#    lbu t4, 1(s0) # B
+#    lwu t5, 2(s0) # C
+#    lbu t6, 3(s0) # D
+#    
+#    # Print it
+#    sb t3, 0(t0)         # Should print 'A'
+#    sb t4, 0(t0)         # Should print 'B'
+#    sb t5, 0(t0)         # Should print 'C'
+#    sb t6, 0(t0)         # Should print 'D'
+#    sb t2, 0(t0)         # Should print 'X'
 
 
-   csrr s0, mepc
-   addi s0, s0, 4 # skip ecall/ebreak instruction
-   csrw mepc, s0
-   #ld s0, 0x900(zero)
-   #ld s1, 0x908(zero)
-   return_same_pc:
-   mret
+    #lui s0, 0x80000      # SDRAM = 0x80000000
+    li s0, 0x80000000 # SDRAM base 0x80000000
+    ld a0, 0(s0)         # test sdram read data
+    call print_reg
+
+ li a0, "\nJump:"
+ call print7
+
+    fence.i
+    li a0, 0 # use core 0
+    li a1, 0 # let opensbi use its embedded DTB
+    jr s0  # jump to SDRAM!
 
 
-
-
-
-s_trap_handler:
-   li a0, "S"
-   li a7, 1
-   ecall   # here ecall was not delegated to s_mode, so go to mtvec to find m-mode ecall handler
-   j s_done
-
-s_done: 
-   csrr s2, sepc
-   addi s2, s2, 4 # skip ecall/ebreak instruction
-   csrw sepc, s2
-   sret
-
-
-
-
-
-
-
-
-
-
-
-
+end: 
+j end
 
 
 
@@ -2821,16 +3064,16 @@ print_reg: # a0
     li a0, "x"
     call putchar
     li s1, 60 
-    p_loop:
+p_loop:
     srl s2, s0, s1      # get high nibble
     andi s2, s2, 0xF
     slti s3, s2, 10     # if < 10 number
     beq s3, x0, letter
     addi s2, s2, 48     # 0 is "0" ascii 48
     j print_h
-    letter:
+letter:
     addi s2, s2, 55     # 10 is "A" ascii 65 ..
-    print_h:
+print_h:
     call wait_uart
     sb s2, 0(s11)       # print
     addi s1, s1, -4
@@ -2842,6 +3085,128 @@ print_reg: # a0
     ld s3, 32(sp)
     addi sp, sp, 40
     ret
+
+
+# ---  sd_read_sector ---
+sd_read_sector:  #  a0 sector index
+    addi sp, sp, -24
+    sd s7, 0(sp)
+    sd s8, 8(sp)
+    sd ra, 16(sp)
+    sw a0, 0(s2) # Write Sector index value to address 0x3200
+wait_ready:
+    lw s7, 0(s5)   # 0x3220 ready
+    #li a0, 96      # `
+    #call putchar
+    beq s7, x0, wait_ready
+    li s8, 1
+    sw s8, 0(s3)   # Trigger read at 0x3204
+wait_cache:
+    lw s7, 0(s6)   # s7 0x3228 cache_avaible
+    beq s7, x0, wait_cache
+    ld s7, 0(sp)
+    ld s8, 8(sp)
+    ld ra, 16(sp)
+    addi sp, sp, 24
+    ret
+
+
+# print sector 0 512 bytes
+print_sector:
+    addi sp, sp, -64
+    sd ra, 0(sp)
+    sd s4, 8(sp)
+    sd s5, 16(sp)
+    sd s6, 24(sp)
+    sd s7, 32(sp)
+    sd s8, 40(sp)
+    sd s9, 48(sp)
+    sd s3, 56(sp)
+    li s7, 0   # byte index
+    li s8, 511 # max byte index
+print_loop:
+    add s6, s1, s7 
+    addi s7, s7, 1
+    lbu s9, 0(s6)       # load byte at 0x3000 a1+t1
+    andi s9, s9, 0xFF   # Isolate byte value
+    srli s3, s9, 4      # get high nibble
+    slti s5, s3, 10     # if < 10 number
+    beq s5, x0, letter_h
+    addi s3, s3, 48     # 0 is "0" ascii 48
+    j print_h_hex
+letter_h:
+    addi s3, s3, 55     # 10 is "A" ascii 65 ..
+print_h_hex:
+    call wait_uart 
+    sb s3, 0(s11)
+    andi s4, s9, 0x0F   # get low nibble
+    slti s5, s4, 10     # if < 10 number
+    beq s5, x0, letter_l
+    addi s4, s4, 48     # 0 is "0" ascii 48
+    j print_l_hex
+letter_l:
+    addi s4, s4, 55     # 10 is "A" ascii 65 ..
+print_l_hex:
+    call wait_uart 
+    sb s4, 0(s11)
+    bge s8, s7, print_loop
+    ld ra, 0(sp)
+    ld s4, 8(sp)
+    ld s5, 16(sp)
+    ld s6, 24(sp)
+    ld s7, 32(sp)
+    ld s8, 40(sp)
+    ld s9, 48(sp)
+    ld s3, 56(sp)
+    addi sp, sp, 64
+    ret
+# -- end print_sector --
+
+
+# copy sector 0 512 bytes
+copy_sector: # a0 as target addr
+    addi sp, sp, -48
+    sd ra, 0(sp)
+    sd s6, 8(sp)
+    sd s7, 16(sp)
+    sd s8, 24(sp)
+    sd s9, 32(sp)
+    sd s5, 40(sp)
+
+    li s7, 0   # byte index
+    li s8, 511 # max byte index
+    mv s5, a0
+copy_loop:
+    add s6, s1, s7 
+    ld a0, 0(s6)       # load 8 bytes at 0x3000 a1+s7
+    sd a0, 0(s5)       # save 8 bytes to s5
+   #call print_reg
+    addi s7, s7, 8
+    addi s5, s5, 8
+    bge s8, s7, copy_loop
+    ld ra, 0(sp)
+    ld s6, 8(sp)
+    ld s7, 16(sp)
+    ld s8, 24(sp)
+    ld s9, 32(sp)
+    ld s5, 40(sp)
+    addi sp, sp,  48
+    ret
+# -- end print_sector --
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 putchar:  # a0
@@ -2859,13 +3224,13 @@ puts: # a0 addr
     sd ra, 0(sp)
     sd s0, 8(sp)
     mv s0, a0
-    puts_loop:
+puts_loop:
     lbu a0, 0(s0)
     beq a0, x0, stop_puts # \x00 for end of string
     call putchar # a0 char
     addi s0, s0, 1 # next byte
     j puts_loop
-    stop_puts:
+stop_puts:
     ld ra, 0(sp)
     ld s0, 8(sp)
     addi sp, sp, 16
@@ -2876,7 +3241,9 @@ wait_uart:
     addi sp, sp, -16
     sd s0, 0(sp)
     sd ra, 8(sp)
-    wait_uart_loop:
+wait_uart_loop:
+   #li a0, 65  # A
+   #sb a0, 0(s11)
     lw s0, 0(s11)
     bgt zero, s0, wait_uart_loop
     ld s0, 0(sp)
@@ -2890,133 +3257,7 @@ print7: # a0, 7 char left one for null
     sd ra, 8(sp)
     mv a0, sp
     call puts
-    ld a0, 0(sp)
+   #ld a0, 0(sp)
     ld ra, 8(sp)
     addi sp, sp, 16
     ret
----------- test code and print result ---------
-
-
-1
-   testf  #A
-   csrw satp, t0 # write mode and root table address to satp CSR register
-   testf  #B
-   sfence.vma
-   testf  #C
-   la a0, msg   # trigger I-TLB miss
-   call puts
-%%%%%%%%%%%>%%%%%%%%M%%%%%%%%%%%%%%
-MMU:%%%%%%%%%%%%
-{ILLir%%%%0%x%%%%00000000FFFF07FF%%}
-[iTLBre:0x000000000000093C0x0000000000000000]
-[iTLBre:0x00000000000009400x0000000000000000]%
-{ILLir0x00000000FFFF07FF}%
-[dTLBre:0x00000000806FFFF00x00000000806FF000]
-[dTLBre:0x00000000000012000x0000000000001000]
-[dTLBre:0x00000000000020040x0000000000002000]Hello%%%%%%%%%%%%S
-
-2
-   nop
-   csrw satp, t0 # write mode and root table address to satp CSR register
-   nop
-   sfence.vma
-   testf  #C
-   la a0, msg   # trigger I-TLB miss
-   call puts
-%%%%%%%%%%%>%%%%%%%%M%%%%%%%%%%%%%%
-MMU:%%%%%%%%
-[iTLBre:0x000000000000093C0x0000000000000000]
-[iTLBre:0x00000000000009400x0000000000000000]%%%%%
-{ILLir%%%%0%x%%%%00000000FFFF07FF%%}%
-[dTLBre:0x00000000806FFFF00x00000000806FF000]
-[dTLBre:0x00000000000012000x0000000000001000]
-[dTLBre:0x00000000000020040x0000000000002000]Hello%%%%%%%%%%%%S
-
-591 : 00010010000000000000000001110011; 0x93c
-592 : 11111111111111110000011111111111; 0x940
-593 : 00000000000000000001010100010111;
-
-3
-   nop
-   csrw satp, t0 # write mode and root table address to satp CSR register
-   testf  #B
-   sfence.vma
-   testf  #C
-   la a0, msg   # trigger I-TLB miss
-   call puts
-%%%%%%%%%%%>%%%%%%%%M%%%%%%%%%%%%%%
-MMU:%%%%%%%%
-[iTLBre:0x000000000000093C0x0000000000000000]
-[iTLBre:0x00000000000009400x0000000000000000]%%%%%
-{ILLir%%%%0%x%%%%00000000FFFF07FF%%}%
-[dTLBre:0x00000000806FFFF00x00000000806FF000]
-[dTLBre:0x00000000000012000x0000000000001000]
-[dTLBre:0x00000000000020040x0000000000002000]Hello%%%%%%%%%%%%S
-
-
-4
-   testf  #A
-   csrw satp, t0 # write mode and root table address to satp CSR register
-   nop
-   sfence.vma
-   testf  #C
-   la a0, msg   # trigger I-TLB miss
-   call puts
-%%%%%%%%%%%>%%%%%%%%M%%%%%%%%%%%%%%
-MMU:%%%%%%%%%%%%
-{ILLir%%%%0%x%%%%00000000FFFF07FF%%}
-[iTLBre:0x000000000000093C0x0000000000000000]
-[iTLBre:0x00000000000009400x0000000000000000]%
-{ILLir0x00000000FFFF07FF}%
-[dTLBre:0x00000000806FFFF00x00000000806FF000]
-[dTLBre:0x00000000000012000x0000000000001000]
-[dTLBre:0x00000000000020040x0000000000002000]Hello%%%%%%%%%%%%S
-
-588 : 11111111111111110000011111111111;
-589 : 00011000000000101001000001110011;
-590 : 00000000000000000000000000010011;
-591 : 00010010000000000000000001110011;
-592 : 11111111111111110000011111111111;
-593 : 00000000000000000001010100010111;
-
-
-5
-   nop
-   csrw satp, t0 # write mode and root table address to satp CSR register
-   testf  #B
-   sfence.vma
-   nop
-   la a0, msg   # trigger I-TLB miss
-   call puts
-%%%%%%%%%%%>%%%%%%%%M%%%%%%%%%%%%%%
-MMU:%%%%%%%%
-[iTLBre:0x000000000000093C0x0000000000000000]
-[iTLBre:0x00000000000009400x0000000000000000]%%
-[dTLBre:0x00000000806FFFF00x00000000806FF000]
-[dTLBre:0x00000000000012000x0000000000001000]
-[dTLBre:0x00000000000020040x0000000000002000]Hello%%%%%%%%%%%%%S%
-
-588 : 00000000000000000000000000010011;
-589 : 00011000000000101001000001110011;
-590 : 11111111111111110000011111111111;
-591 : 00010010000000000000000001110011;
-592 : 00000000000000000000000000010011;
-593 : 00000000000000000001010100010111;
-594 : 10001011110001010000010100010011;
-595 : 00000000000000000000000010010111;
-
-
-6
-   testf  #A
-  #csrw satp, t0 # write mode and root table address to satp CSR register
-   testf  #B
-   sfence.vma
-   testf  #C
-   la a0, msg   # trigger I-TLB miss
-   call puts
-%%%%%%%%%%%>%%%%%%%%M%%%%%%%%%%%%%%%
-MMU:%%%%%%%%%%
-{ILLir%%%%%0%x%%%0%0000000FFFF07FF%%}
-{ILLir0x00000000FFFF07FF}
-{ILLir0x00000000FFFF07FF}%Hello%%%%%%%%%%%%%S
-

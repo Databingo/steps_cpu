@@ -63,14 +63,15 @@
            clock-frequency = <12500000>;
        };
 
-        /* 3. CLINT: Handles Timer AND IPI (Software Interrupt) */
-        clint@2000000 {
-            /* This links to phandle 0x02 (the CPU INTC) */
-            /* 0x03 = Software Interrupt, 0x07 = Timer Interrupt */
-            interrupts-extended = <0x02 0x03 0x02 0x07>;
-            reg = <0x00 0x2000000 0x00 0x10000>;
-            compatible = "sifive,clint0", "riscv,clint0";
-        };
+    // comment out for SoC
+    //    /* 3. CLINT: Handles Timer AND IPI (Software Interrupt) */
+    //    clint@2000000 {
+    //        /* This links to phandle 0x02 (the CPU INTC) */
+    //        /* 0x03 = Software Interrupt, 0x07 = Timer Interrupt */
+    //        interrupts-extended = <0x02 0x03 0x02 0x07>;
+    //        reg = <0x00 0x2000000 0x00 0x10000>;
+    //        compatible = "sifive,clint0", "riscv,clint0";
+    //    };
         // ########
         //clint@2000000 { // mtimecmp=base+0x4000, mtime=base+0xbff8
         //    /* This links to phandle 0x02 (the CPU INTC) */

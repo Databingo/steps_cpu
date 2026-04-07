@@ -98,14 +98,14 @@ s_mode_kernel: # like OS/linux
    # mode = 3 sv39
    li t0, 0x8000000000080700
   #call print_reg
-  #testf  #A
+   testf  #A
   #nop
-   csrw satp, t0 # write mode and root table address to satp CSR register
+  #csrw satp, t0 # write mode and root table address to satp CSR register
    testf  #B
   #nop
    sfence.vma
    ## <--- start use TLB I/D hitting
-  #testf  #C
+   testf  #C
   #nop
 
    #la a0, msg   # trigger I-TLB miss
