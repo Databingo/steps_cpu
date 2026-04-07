@@ -100,7 +100,7 @@ s_mode_kernel: # like OS/linux
   #call print_reg
    testf  #A
   #nop
-  #csrw satp, t0 # write mode and root table address to satp CSR register
+   csrw satp, t0 # write mode and root table address to satp CSR register
    testf  #B
   #nop
    sfence.vma
