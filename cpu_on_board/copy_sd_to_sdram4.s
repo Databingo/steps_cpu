@@ -417,6 +417,8 @@ add t2, t1, t0
 #lui s0, 0x80000 # SDRAM base 0x80000000
 li s0, 0x80000000 # SDRAM base 0x80000000
 copy_sector_loop:
+li a0, 94 # ^
+call putchar
 mv a0, t1
 call sd_read_sector  # use a0 as sector no.
 mv a0, s0
@@ -484,7 +486,7 @@ blt t1, t2, copy_sector_loop
     ld a0, 0(s0)         # test sdram read data
     call print_reg
 
- li a0, "\nJump!:"
+ li a0, "\nJump:"
  call print7
 
     fence.i

@@ -380,6 +380,13 @@ slli s0, s0, 0xb
 ori s0, s0, 0x200
 slli s0, s0, 0x16
 copy_sector_loop:
+# li a0, 94 
+addi a0, x0, 0x0
+addi a0, x0, 0x0
+addi a0, x0, 0x5e
+# call putchar
+auipc x1, 0 # R_RISCV_PCREL_HI20 putchar
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I putchar
 # mv a0, t1
 addi a0, t1, 0
 # call sd_read_sector  
@@ -402,11 +409,11 @@ ld a0, 0(s0)         # test sdram read data
 #     call print_reg
 auipc x1, 0 # R_RISCV_PCREL_HI20 print_reg
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_reg
-#  li a0, "\nJump!:"
+#  li a0, "\nJump:"
 addi a0, x0, 0x0
-lui a0, 0x3a2
+lui a0, 0x3
 srli a0, a0, 0x1
-ori a0, a0, 0xb8
+ori a0, a0, 0x538
 slli a0, a0, 0xb
 ori a0, a0, 0x1b5
 slli a0, a0, 0xb
