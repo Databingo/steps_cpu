@@ -6,12 +6,16 @@ isr_router:        # Use x0-x10 shadowed register only (ra(x1), a0(x10),..x19)
 
      # x1(ra)2(sp)3456,x10(a0) operating
      li sp, 0x1500 # Set stack   # use shadowed sp
+
      li x3, 12 
      beq x8, x3, mmu_i    # i-tlb-refill
+
      li x3, 1 
      beq x8, x3, i_cache_refill
+
      li x3, 13 
      beq x8, x3, mmu_d    # d-tlb-refill load
+
      li x3, 14 
      beq x8, x3, mmu_d    # d-tlb-refill store
 

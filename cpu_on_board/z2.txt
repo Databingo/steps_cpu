@@ -2601,15 +2601,15 @@ s_mode_kernel: # like OS/linux
    # mode = 3 sv39
    li t0, 0x8000000000080700
   #call print_reg
-  #testf  #A
-   nop
-   csrw satp, t0 # write mode and root table address to satp CSR register
+   testf  #A
+  #nop
+  #csrw satp, t0 # write mode and root table address to satp CSR register
    testf  #B
   #nop
    sfence.vma
    ## <--- start use TLB I/D hitting
-  #testf  #C
-   nop
+   testf  #C
+  #nop
 
    #la a0, msg   # trigger I-TLB miss
    #call print_reg
@@ -2894,4 +2894,129 @@ print7: # a0, 7 char left one for null
     ld ra, 8(sp)
     addi sp, sp, 16
     ret
----------- rom and ram ---------
+---------- test code and print result ---------
+
+
+1
+   testf  #A
+   csrw satp, t0 # write mode and root table address to satp CSR register
+   testf  #B
+   sfence.vma
+   testf  #C
+   la a0, msg   # trigger I-TLB miss
+   call puts
+%%%%%%%%%%%>%%%%%%%%M%%%%%%%%%%%%%%
+MMU:%%%%%%%%%%%%
+{ILLir%%%%0%x%%%%00000000FFFF07FF%%}
+[iTLBre:0x000000000000093C0x0000000000000000]
+[iTLBre:0x00000000000009400x0000000000000000]%
+{ILLir0x00000000FFFF07FF}%
+[dTLBre:0x00000000806FFFF00x00000000806FF000]
+[dTLBre:0x00000000000012000x0000000000001000]
+[dTLBre:0x00000000000020040x0000000000002000]Hello%%%%%%%%%%%%S
+
+2
+   nop
+   csrw satp, t0 # write mode and root table address to satp CSR register
+   nop
+   sfence.vma
+   testf  #C
+   la a0, msg   # trigger I-TLB miss
+   call puts
+%%%%%%%%%%%>%%%%%%%%M%%%%%%%%%%%%%%
+MMU:%%%%%%%%
+[iTLBre:0x000000000000093C0x0000000000000000]
+[iTLBre:0x00000000000009400x0000000000000000]%%%%%
+{ILLir%%%%0%x%%%%00000000FFFF07FF%%}%
+[dTLBre:0x00000000806FFFF00x00000000806FF000]
+[dTLBre:0x00000000000012000x0000000000001000]
+[dTLBre:0x00000000000020040x0000000000002000]Hello%%%%%%%%%%%%S
+
+591 : 00010010000000000000000001110011; 0x93c
+592 : 11111111111111110000011111111111; 0x940
+593 : 00000000000000000001010100010111;
+
+3
+   nop
+   csrw satp, t0 # write mode and root table address to satp CSR register
+   testf  #B
+   sfence.vma
+   testf  #C
+   la a0, msg   # trigger I-TLB miss
+   call puts
+%%%%%%%%%%%>%%%%%%%%M%%%%%%%%%%%%%%
+MMU:%%%%%%%%
+[iTLBre:0x000000000000093C0x0000000000000000]
+[iTLBre:0x00000000000009400x0000000000000000]%%%%%
+{ILLir%%%%0%x%%%%00000000FFFF07FF%%}%
+[dTLBre:0x00000000806FFFF00x00000000806FF000]
+[dTLBre:0x00000000000012000x0000000000001000]
+[dTLBre:0x00000000000020040x0000000000002000]Hello%%%%%%%%%%%%S
+
+
+4
+   testf  #A
+   csrw satp, t0 # write mode and root table address to satp CSR register
+   nop
+   sfence.vma
+   testf  #C
+   la a0, msg   # trigger I-TLB miss
+   call puts
+%%%%%%%%%%%>%%%%%%%%M%%%%%%%%%%%%%%
+MMU:%%%%%%%%%%%%
+{ILLir%%%%0%x%%%%00000000FFFF07FF%%}
+[iTLBre:0x000000000000093C0x0000000000000000]
+[iTLBre:0x00000000000009400x0000000000000000]%
+{ILLir0x00000000FFFF07FF}%
+[dTLBre:0x00000000806FFFF00x00000000806FF000]
+[dTLBre:0x00000000000012000x0000000000001000]
+[dTLBre:0x00000000000020040x0000000000002000]Hello%%%%%%%%%%%%S
+
+588 : 11111111111111110000011111111111;
+589 : 00011000000000101001000001110011;
+590 : 00000000000000000000000000010011;
+591 : 00010010000000000000000001110011;
+592 : 11111111111111110000011111111111;
+593 : 00000000000000000001010100010111;
+
+
+5
+   nop
+   csrw satp, t0 # write mode and root table address to satp CSR register
+   testf  #B
+   sfence.vma
+   nop
+   la a0, msg   # trigger I-TLB miss
+   call puts
+%%%%%%%%%%%>%%%%%%%%M%%%%%%%%%%%%%%
+MMU:%%%%%%%%
+[iTLBre:0x000000000000093C0x0000000000000000]
+[iTLBre:0x00000000000009400x0000000000000000]%%
+[dTLBre:0x00000000806FFFF00x00000000806FF000]
+[dTLBre:0x00000000000012000x0000000000001000]
+[dTLBre:0x00000000000020040x0000000000002000]Hello%%%%%%%%%%%%%S%
+
+588 : 00000000000000000000000000010011;
+589 : 00011000000000101001000001110011;
+590 : 11111111111111110000011111111111;
+591 : 00010010000000000000000001110011;
+592 : 00000000000000000000000000010011;
+593 : 00000000000000000001010100010111;
+594 : 10001011110001010000010100010011;
+595 : 00000000000000000000000010010111;
+
+
+6
+   testf  #A
+  #csrw satp, t0 # write mode and root table address to satp CSR register
+   testf  #B
+   sfence.vma
+   testf  #C
+   la a0, msg   # trigger I-TLB miss
+   call puts
+%%%%%%%%%%%>%%%%%%%%M%%%%%%%%%%%%%%%
+MMU:%%%%%%%%%%
+{ILLir%%%%%0%x%%%0%0000000FFFF07FF%%}
+{ILLir0x00000000FFFF07FF}
+{ILLir0x00000000FFFF07FF}%Hello%%%%%%%%%%%%%S
+

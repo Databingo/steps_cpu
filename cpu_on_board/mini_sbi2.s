@@ -134,8 +134,6 @@ m_trap_router:
    #sd t0, 0x300(zero)
    #sd t1, 0x308(zero)
 
-   csrr s0, mcause  # check type
-
    # 63 bit 1 interrupt
    # 63 bit 0 exception
 
@@ -174,6 +172,7 @@ m_trap_router:
    # 12-15 --
    # 16+ local define interrupt
 
+   csrr s0, mcause  # check type
 
    li s1, 9  # ecall from S-mode
    beq s0, s1, m_ecall_router

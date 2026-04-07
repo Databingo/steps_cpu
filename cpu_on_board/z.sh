@@ -7,8 +7,8 @@ echo "---------- rom inner isr.s---------" >> z2.txt
 cat isr.s >> z2.txt 
 echo "---------- ram test assembly code ---------" >> z2.txt
 cat mini_sbi2.s >> z2.txt
-echo "---------- rom and ram ---------" >> z2.txt
-#cat roam.mif >> z2.txt
+echo "---------- test code and print result ---------" >> z2.txt
+cat tm >> z2.txt
 
 #cat z1.txt >  z.txt
 #cat z2.txt >> z.txt
