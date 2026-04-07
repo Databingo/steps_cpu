@@ -2264,6 +2264,9 @@ i_cache_refill:
      addi x3, x3, 0x4  # set print           
      addi x6, x0, 0x25
      sd x6, 0(x3)    #  print %
+    #mv a0, x9
+    #call print_reg
+
 
     #li a0, "ICAre:"
     #call print7
@@ -2598,12 +2601,15 @@ s_mode_kernel: # like OS/linux
    # mode = 3 sv39
    li t0, 0x8000000000080700
   #call print_reg
-  #testf  #B
+  #testf  #A
+   nop
    csrw satp, t0 # write mode and root table address to satp CSR register
-   testf 
+   testf  #B
+  #nop
    sfence.vma
    ## <--- start use TLB I/D hitting
-   testf 
+  #testf  #C
+   nop
 
    #la a0, msg   # trigger I-TLB miss
    #call print_reg
