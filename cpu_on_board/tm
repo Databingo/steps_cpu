@@ -107,3 +107,19 @@ MMU:%%%%%%%%
 593 : 00000000000000000001010100010111;
 594 : 10001011110001010000010100010011;
 595 : 00000000000000000000000010010111;
+
+
+6
+   testf  #A
+  #csrw satp, t0 # write mode and root table address to satp CSR register
+   testf  #B
+   sfence.vma
+   testf  #C
+   la a0, msg   # trigger I-TLB miss
+   call puts
+%%%%%%%%%%%>%%%%%%%%M%%%%%%%%%%%%%%%
+MMU:%%%%%%%%%%
+{ILLir%%%%%0%x%%%0%0000000FFFF07FF%%}
+{ILLir0x00000000FFFF07FF}
+{ILLir0x00000000FFFF07FF}%Hello%%%%%%%%%%%%%S
+
