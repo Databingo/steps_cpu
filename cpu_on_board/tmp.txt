@@ -402,6 +402,20 @@ ld a0, 0(s0)         # test sdram read data
 #     call print_reg
 auipc x1, 0 # R_RISCV_PCREL_HI20 print_reg
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_reg
+#  li a0, "\nJump!:"
+addi a0, x0, 0x0
+lui a0, 0x3a2
+srli a0, a0, 0x1
+ori a0, a0, 0xb8
+slli a0, a0, 0xb
+ori a0, a0, 0x1b5
+slli a0, a0, 0xb
+ori a0, a0, 0x6a9
+slli a0, a0, 0xb
+ori a0, a0, 0x20a
+#  call print7
+auipc x1, 0 # R_RISCV_PCREL_HI20 print7
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print7
 fence.i
 #     li a0, 0 
 addi a0, x0, 0x0

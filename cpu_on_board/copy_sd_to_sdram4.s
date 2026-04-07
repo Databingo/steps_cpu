@@ -484,6 +484,9 @@ blt t1, t2, copy_sector_loop
     ld a0, 0(s0)         # test sdram read data
     call print_reg
 
+ li a0, "\nJump!:"
+ call print7
+
     fence.i
     li a0, 0 # use core 0
     li a1, 0 # let opensbi use its embedded DTB
