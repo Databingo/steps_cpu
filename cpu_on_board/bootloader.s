@@ -202,6 +202,9 @@ sw a0, 0(t3)
 
 # -------------------------------------
 # entries_per_sector =  byte_per_sec/32
+
+    csrwi mdebug, 8
+
 li a0, "\nEtPse:"
 call print7
 la a1, byte_per_sec
@@ -214,6 +217,8 @@ la t3,  entries_per_sector
 sw a0, 0(t3)
 lw a0, 0(t3)
 call print_reg
+
+    csrwi mdebug, 0
 
 # ---------- Read Root dir Secotr 0 -----
 la t3, root_dir_sector_start

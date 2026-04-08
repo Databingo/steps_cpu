@@ -125,6 +125,8 @@ add a0, a0, t0
 auipc t3, 0 # R_RISCV_PCREL_HI20 root_dir_sector_start 
 addi t3, t3, 0 # R_RISCV_PCREL_LO12_I root_dir_sector_start 
 sw a0, 0(t3)
+#     csrwi mdebug, 8
+csrrwi x0, mdebug, 8
 # li a0, "\nEtPse:"
 addi a0, x0, 0x0
 lui a0, 0x3a6
@@ -158,6 +160,8 @@ lw a0, 0(t3)
 # call print_reg
 auipc x1, 0 # R_RISCV_PCREL_HI20 print_reg
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_reg
+#     csrwi mdebug, 0
+csrrwi x0, mdebug, 0
 # la t3, root_dir_sector_start
 auipc t3, 0 # R_RISCV_PCREL_HI20 root_dir_sector_start 
 addi t3, t3, 0 # R_RISCV_PCREL_LO12_I root_dir_sector_start 

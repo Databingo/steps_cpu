@@ -1180,17 +1180,17 @@ func main() { //t6a7s11
 		case "csrwi": // 
 			ins := fmt.Sprintf("# %s\n", line)
 			real_instr.WriteString(ins) 
-			ins = fmt.Sprintf("csrrw x0, %s, %s\n", code[1], code[2])
+			ins = fmt.Sprintf("csrrwi x0, %s, %s\n", code[1], code[2])
 			real_instr.WriteString(ins)
 		case "csrsi": // 
 			ins := fmt.Sprintf("# %s\n", line)
 			real_instr.WriteString(ins) 
-			ins = fmt.Sprintf("csrrs x0, %s, %s\n", code[1], code[2])
+			ins = fmt.Sprintf("csrrsi x0, %s, %s\n", code[1], code[2])
 			real_instr.WriteString(ins)
 		case "csrci": // 
 			ins := fmt.Sprintf("# %s\n", line)
 			real_instr.WriteString(ins) 
-			ins = fmt.Sprintf("csrrc x0, %s, %s\n", code[1], code[2])
+			ins = fmt.Sprintf("csrrci x0, %s, %s\n", code[1], code[2])
 			real_instr.WriteString(ins)
 		default:
 			origin_instr = strings.TrimLeft(origin_instr, " ")
