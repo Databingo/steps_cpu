@@ -17,7 +17,9 @@ module riscv64(
     inout wire [63:0] mtimecmp, // map to 0x0200_4000 + 8byte*hartid
 
     input wire meip_interrupt, // from PLIC
-    input wire msip_interrupt, // from Software
+    input wire seip_interrupt, // from Supervisor External
+    input wire msip_interrupt, // from CLINT
+    input wire mtip_interrupt, // from Machine Time
 
     input  reg        bus_read_done,
     input  reg        bus_write_done,
@@ -588,8 +590,9 @@ always @(*) begin
 		// -- UPPER is default change for EXE stage --- but (1.Could be overwrite 2.Take effect next cycle) 
 
 		Csrs[mip][MTIP] <= time_interrupt; // MTIP linux will see then jump to its handler
-		Csrs[mip][MEIP] <= meip_interrupt; // MEIP
-		Csrs[mip][MSIP] <= msip_interrupt; // MSIP
+		Csrs[mip][MEIP] <= meip_interrupt; 
+		Csrs[mip][SEIP] <= seip_interrupt;
+		Csrs[mip][MSIP] <= msip_interrupt; 
 
 		//  i-tlb miss STrap
             if (need_trans && !tlb_i_hit) begin //OPEN 
@@ -678,16 +681,17 @@ always @(*) begin
 		end
 
 		// Async Interrupt PLIC full (Platform-Level-Interrupt-Control)  MMIO (hardwire timers uart plic)
-	    end else if ((meip_interrupt || msip_interrupt || time_interrupt) && Csrs[mstatus][MIE]==1 && !STrap && !load_step && !store_step) begin //mstatus[3] MIE
+	    end else if ((meip_interrupt || seip_interrupt || time_interrupt) && Csrs[mstatus][MIE]==1 && !STrap && !load_step && !store_step) begin //mstatus[3] MIE
 		//Csrs[mip][MTIP] <= time_interrupt; // MTIP linux will see then jump to its handler
 		//Csrs[mip][MEIP] <= meip_interrupt; // MEIP
-		//Csrs[mip][MSIP] <= msip_interrupt; // MSIP
+		//Csrs[mip][MSIP] <= seip_interrupt; // MSIP
 		reserve_valid <= 0; // Interrupt clear lr.w/lr.d
 
 		do_trap = 1; trap_is_interrupt =1; trap_val = 0; trap_epc = pc_4;
-		if (meip_interrupt) trap_cause = 11; // Cause 11 for External Interrupt
-		else if (msip_interrupt) trap_cause = 3;  // Cause 3 for Sofeware Interrupt
-		else if (time_interrupt) trap_cause = 7;  // Cause 7 for Timer Interrupt
+		if (meip_interrupt) trap_cause = 11; // Cause 11 for Machine External Interrupt
+		else if (msip_interrupt) trap_cause = 3;  // Cause 3 for Machine Sofeware Interrupt
+		else if (time_interrupt) trap_cause = 7;  // Cause 7 for Machine Timer Interrupt
+		else if (seip_interrupt) trap_cause = 9;  // Cause 9 for Supervisor External
 
 		// IR
 	    end else begin 

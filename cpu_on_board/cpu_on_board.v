@@ -178,7 +178,9 @@ assign DRAM_CKE = 1; // always enable
 	.mtime(mtime),
 	.mtimecmp(mtimecmp),
 	.meip_interrupt(meip_interrupt),
-	.msip_interrupt(msip_interrupt),
+	.seip_interrupt(seip_interrupt),
+	.msip_interrupt(1'b0),
+	.mtip_interrupt(1'b0),
 
         .bus_read_data(bus_read_data),
         .bus_read_done(bus_read_done),
@@ -296,7 +298,7 @@ assign DRAM_CKE = 1; // always enable
     end
 
     wire meip_interrupt = (claim_interrupt_id_ctx[0] != 0);
-    wire msip_interrupt = (claim_interrupt_id_ctx[1] != 0);
+    wire seip_interrupt = (claim_interrupt_id_ctx[1] != 0);
     wire uart_irq;
     reg uart_irq_pre;
     wire [31:0] uart_readdata;
