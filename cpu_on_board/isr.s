@@ -184,17 +184,20 @@ bus_error_strap:
 
      li a0, "|pda:" 
      call print7
-     csrr a0, 0xF13 # mimpid/pda
+    #csrr a0, 0xF13 # mimpid/pda
+     csrr a0, mimpid # mimpid/pda
      call print_reg
 
      li a0, "|ir:" 
      call print7
-     csrr a0, 0xF11 # mvendorid/ir
+    #csrr a0, 0xF11 # mvendorid/ir
+     csrr a0, mvendorid # mvendorid/ir
      call print_reg
 
      li a0, "|ppc:" 
      call print7
-     csrr a0, 0xF12 # marchid/ppc
+    #csrr a0, 0xF12 # marchid/ppc
+     csrr a0, marchid # marchid/ppc
      call print_reg
      
      addi x8, x0, 0  # success x8=0

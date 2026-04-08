@@ -342,6 +342,10 @@ func main() { //t6a7s11
             "satp"       : 0x180,   
 	    "pmpcfg0"    : 0x3a0,
 	    "pmpaddr0"   : 0x3b0,
+	    "mvendorid"  : 0xF11,
+	    "marchid"    : 0xF12,
+	    "mimpid"     : 0xF13,
+	    "mhartid"    : 0xF14,
 	    //"0x180"      : 0x180, 
 	    }
 
