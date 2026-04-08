@@ -56,6 +56,17 @@ addi s0, x0, 0x0
 slli s0, s0, 0xb
 ori s0, s0, 0x200
 slli s0, s0, 0x16
+# li t0, 0x80200000
+addi t0, x0, 0x0
+slli t0, t0, 0xb
+ori t0, t0, 0x200
+slli t0, t0, 0xb
+ori t0, t0, 0x400
+slli t0, t0, 0xb
+clear_sdram_loop:
+sd zero, 0(s0)
+addi s0, s0, 8
+blt s0, t0, clear_sdram_loop
 lw a0, 0(s11)
 # call print_reg
 auipc x1, 0 # R_RISCV_PCREL_HI20 print_reg
@@ -432,8 +443,13 @@ fence.i
 csrrwi x0, mdebug, 8
 #     li a0, 0 
 addi a0, x0, 0x0
-#     li a1, 0 
+#     li a1, 0x80100000 
 addi a1, x0, 0x0
+slli a1, a1, 0xb
+ori a1, a1, 0x200
+slli a1, a1, 0xb
+ori a1, a1, 0x200
+slli a1, a1, 0xb
 #     li a2, 0x80200000 
 addi a2, x0, 0x0
 slli a2, a2, 0xb

@@ -94,8 +94,19 @@ _start:
 #| `0x36` | 11   | Volume Label / File System Type | "NO NAME    " / "FAT16   "     | —               |
 #| :----- | :--- | :------------------------------ | :----------------------------- | :-------------- |
 
+li t0, 0x80200000
+clear_sdram_loop:
+  sd zero, 0(s0)
+  addi s0, s0, 8
+  blt s0, t0, clear_sdram_loop
+
+
+
 lw a0, 0(s11)
 call print_reg
+
+
+
 
 
 # ----------Read BPB sector 0 -----
@@ -498,7 +509,8 @@ blt t1, t2, copy_sector_loop
    #csrw 0x7cc, t0  # open debug print
     csrwi mdebug, 8 
     li a0, 0 # use core 0
-    li a1, 0 # let opensbi use its embedded DTB
+   #li a1, 0 # let opensbi use its embedded DTB
+    li a1, 0x80100000 # set DTB addr
    #li a2, 0 # set boot HART
     li a2, 0x80200000 # next jump address
 
