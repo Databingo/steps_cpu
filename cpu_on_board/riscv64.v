@@ -31,7 +31,8 @@ wire [31:0] ir;
 (* ram_style = "logic" *) reg [63:0] sre [0:10]; // Shadow Registers 11s
 reg mmu_da=0;
 reg mmu_pc = 0;
-reg debug = 0;
+//reg debug = 0;
+reg did = 1;
 reg in_debug = 0;
 reg i_cache_refill=0;
 wire STrap = (mmu_pc || mmu_da || i_cache_refill || in_debug);
@@ -579,7 +580,9 @@ always @(*) begin
 		trap_epc = 0;
 
 		//if (bus_read_done && bus_write_done && !load_step && !store_step) debug <= 1;
-		if (!STrap && !bubble && !load_step && !store_step) debug <= 1;
+		//if (!STrap && !bubble && !load_step && !store_step && did) begin did <= 0;
+		//if (!STrap && !bubble && bus_read_done && bus_write_done && did)  begin did <= 0;
+		if (!STrap && !bubble && did)  begin did <= 0; end
 		// -- UPPER is default change for EXE stage --- but (1.Could be overwrite 2.Take effect next cycle) 
 
 		//  i-tlb miss STrap
@@ -639,7 +642,7 @@ always @(*) begin
             //    Csrs[mimpid] <=  pda;
             //    Csrs[marchid] <= ppc;
             //    Csrs[mvendorid] <= ir;
-	    end else if (!STrap && debug) begin
+	    end else if (!STrap && !did && !load_step && !store_step && !mul_enable && !div_enable) begin
 		in_debug <= 1;
 		pc <= 0; // trap to isr_router
 		bubble <= 1'b1; // bubble
@@ -658,8 +661,9 @@ always @(*) begin
 		bubble <= 1'b1; // bubble
 		for (i=1;i<11;i=i+1) begin re[i]<= sre[i]; end // recover usr re
 		mmu_pc <= 0; mmu_da <= 0; i_cache_refill<= 0;
-		debug <= 0;
+		//debug <= 0;
 		in_debug <= 0;
+		did <= 1;
 		if (re[8]!=0) begin // Trap to Page Fault
 		    do_trap = 1;
 		    trap_cause = re[8];
