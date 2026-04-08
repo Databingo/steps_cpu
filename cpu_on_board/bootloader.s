@@ -495,9 +495,8 @@ blt t1, t2, copy_sector_loop
  call print7
 
     fence.i
-    li t0, 1
-    csrw 0x7cc, t0  # open debug print
-    csrw mdebug, t0
+   #csrw 0x7cc, t0  # open debug print
+    csrwi mdebug, 8 
     li a0, 0 # use core 0
     li a1, 0 # let opensbi use its embedded DTB
     jr s0  # jump to SDRAM!
