@@ -8,15 +8,17 @@ dtc -I dts -O dtb -o my_board.dtb b.dts # boot time use via its address at regis
 make CROSS_COMPILE=/usr/local/projects/bin/xpack-riscv-none-elf-gcc-14.2.0-3/bin/riscv-none-elf- \
      PLATFORM=generic \
      FW_TEXT_START=0x80000000 \
-     FW_PAYLOAD_OFFSET=0x200000 \
-     FW_PAYLOAD_FDT_ADDR=0x80100000 \
+     FW_JUMP_ADDR=0x80200000 \
+     FW_JUMP_FDT_ADDR=0x80100000 \
      FW_PIC=n \
      PLATFORM_RISCV_ISA=rv64ima_zicsr_zifencei \
      PLATFORM_RISCV_ABI=lp64 \
      EXTRA_CCASFLAGS="-march=rv64ima_zicsr_zifencei -mabi=lp64"\
      EXTRA_CFLAGS="-mno-relax -march=rv64ima_zicsr_zifencei -mabi=lp64"\
-     FW_PAYLOAD=n \
-     FW_FDT_PATH=my_board.dtb
+     FW_FDT_PATH=my_board.dtb \
+     FW_PAYLOAD=n 
+    #FW_PAYLOAD_OFFSET=0x200000 \
+    #FW_PAYLOAD_FDT_ADDR=0x80100000 \
 
 # Opensbi start from 0x80000000, DeviceTree at 0x80100000, Program at 0x80200000, Ram end at 0x80800000
 

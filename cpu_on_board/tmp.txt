@@ -428,7 +428,7 @@ fence.i
 addi t0, x0, 0x0
 addi t0, x0, 0x0
 addi t0, x0, 0x1
-#     csrw 0x7cc, t0
+#     csrw 0x7cc, t0  
 csrrw x0, 0x7cc, t0
 #     csrw mdebug, t0
 csrrw x0, mdebug, t0
