@@ -346,6 +346,8 @@ func main() { //t6a7s11
 	    "marchid"    : 0xF12,
 	    "mimpid"     : 0xF13,
 	    "mhartid"    : 0xF14,
+	    "0x7cc"      : 0x7CC,
+	    "mdebug"     : 0x7CC,
 	    //"0x180"      : 0x180, 
 	    }
 
