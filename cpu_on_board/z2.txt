@@ -31,7 +31,8 @@ wire [31:0] ir;
 (* ram_style = "logic" *) reg [63:0] sre [0:10]; // Shadow Registers 11s
 reg mmu_da=0;
 reg mmu_pc = 0;
-reg debug = 0;
+//reg debug = 0;
+reg did = 1;
 reg in_debug = 0;
 reg i_cache_refill=0;
 wire STrap = (mmu_pc || mmu_da || i_cache_refill || in_debug);
@@ -321,6 +322,7 @@ localparam mimpid     = 26;  // 0
 
 localparam pmpcfg0    = 27;  // Physical Memory Protection
 localparam pmpaddr0   = 28;  // 
+localparam mdebug     = 29;  // 
 //localparam pmpaddr1   = 29;  // 
 //localparam pmpaddr2   = 30;  // 
 //localparam pmpaddr3   = 31;  // 
@@ -377,12 +379,13 @@ always @(*) begin
 	//12'h3B6 : w_csr_id = pmpaddr6   ;   
 	//12'h3B7 : w_csr_id = pmpaddr7   ;   
 	//default : w_csr_id = 36; 
-	default : w_csr_id = 29; 
+	12'h7CC : w_csr_id = mdebug     ;   
+	default : w_csr_id = 30; 
     endcase
 end
 
 //(* ram_style = "logic" *) reg [63:0] Csrs [0:36]; // 36 CSRs for now // totally 4096
-(* ram_style = "logic" *) reg [63:0] Csrs [0:29]; // 36 CSRs for now // totally 4096
+(* ram_style = "logic" *) reg [63:0] Csrs [0:30]; // 36 CSRs for now // totally 4096
 wire [3:0]  satp_mmu  = Csrs[satp][63:60]; // 0:bare, 8:sv39, 9:sv48  satp.MODE!=0, privilegae is not M-mode, mstatus.MPRN is not set or in MPP's mode?
 
 // -- Timer --
@@ -555,7 +558,7 @@ always @(*) begin
 		Csrs[mstatus][MIE] <= 0;
 		mmu_da <= 0;
 		for (i=0;i<11;i=i+1) begin sre[i]<= 64'b0; end 
-		for (i=0;i<30;i=i+1) begin Csrs[i]<= 64'b0; end
+		for (i=0;i<31;i=i+1) begin Csrs[i]<= 64'b0; end
 		Csrs[medeleg] <= 64'hb1af; // delegate to S-mode 1011000110101111 // see VII 3.1.15 mcasue exceptions
 		Csrs[mideleg] <= 64'h0222; // delegate to S-mode 0000001000100010 see VII 3.1.15 mcasue interrupt 1/5/9 SSIP(supervisor software interrupt) STIP(time) SEIP(external)
 		// Initialize Machine Info for OpenSBI
@@ -579,7 +582,9 @@ always @(*) begin
 		trap_epc = 0;
 
 		//if (bus_read_done && bus_write_done && !load_step && !store_step) debug <= 1;
-		if (!STrap && !bubble && !load_step && !store_step) debug <= 1;
+		//if (!STrap && !bubble && !load_step && !store_step && did) begin did <= 0;
+		//if (!STrap && !bubble && bus_read_done && bus_write_done && did)  begin did <= 0;
+		if (!STrap && !bubble && did)  begin did <= 0; end
 		// -- UPPER is default change for EXE stage --- but (1.Could be overwrite 2.Take effect next cycle) 
 
 		//  i-tlb miss STrap
@@ -639,7 +644,7 @@ always @(*) begin
             //    Csrs[mimpid] <=  pda;
             //    Csrs[marchid] <= ppc;
             //    Csrs[mvendorid] <= ir;
-	    end else if (!STrap && debug) begin
+	    end else if (Csrs[mdebug] && !STrap && !did && !load_step && !store_step && !mul_enable && !div_enable) begin
 		in_debug <= 1;
 		pc <= 0; // trap to isr_router
 		bubble <= 1'b1; // bubble
@@ -658,8 +663,9 @@ always @(*) begin
 		bubble <= 1'b1; // bubble
 		for (i=1;i<11;i=i+1) begin re[i]<= sre[i]; end // recover usr re
 		mmu_pc <= 0; mmu_da <= 0; i_cache_refill<= 0;
-		debug <= 0;
+		//debug <= 0;
 		in_debug <= 0;
+		did <= 1;
 		if (re[8]!=0) begin // Trap to Page Fault
 		    do_trap = 1;
 		    trap_cause = re[8];
@@ -2557,7 +2563,8 @@ debug:
     #csrr a0, 0xF13 # mimpid/pda
      csrr a0, mimpid # mimpid/pda
      call print_reg
-
+     li a0, "|" 
+     call putchar
 
 
      
@@ -2864,6 +2871,9 @@ sw a0, 0(t3)
 
 # -------------------------------------
 # entries_per_sector =  byte_per_sec/32
+
+    csrwi mdebug, 8
+
 li a0, "\nEtPse:"
 call print7
 la a1, byte_per_sec
@@ -2876,6 +2886,8 @@ la t3,  entries_per_sector
 sw a0, 0(t3)
 lw a0, 0(t3)
 call print_reg
+
+    csrwi mdebug, 0
 
 # ---------- Read Root dir Secotr 0 -----
 la t3, root_dir_sector_start
@@ -3152,8 +3164,12 @@ blt t1, t2, copy_sector_loop
  call print7
 
     fence.i
+   #csrw 0x7cc, t0  # open debug print
+    csrwi mdebug, 8 
     li a0, 0 # use core 0
     li a1, 0 # let opensbi use its embedded DTB
+    li a2, 0 # set boot HART
+
     jr s0  # jump to SDRAM!
 
 
@@ -3444,14 +3460,14 @@ print7: # a0, 7 char left one for null
        };
 
     // comment out for SoC
-    //    /* 3. CLINT: Handles Timer AND IPI (Software Interrupt) */
-    //    clint@2000000 {
-    //        /* This links to phandle 0x02 (the CPU INTC) */
-    //        /* 0x03 = Software Interrupt, 0x07 = Timer Interrupt */
-    //        interrupts-extended = <0x02 0x03 0x02 0x07>;
-    //        reg = <0x00 0x2000000 0x00 0x10000>;
-    //        compatible = "sifive,clint0", "riscv,clint0";
-    //    };
+        /* 3. CLINT: Handles Timer AND IPI (Software Interrupt) */
+        clint@2000000 {
+            /* This links to phandle 0x02 (the CPU INTC) */
+            /* 0x03 = Software Interrupt, 0x07 = Timer Interrupt */
+            interrupts-extended = <0x02 0x03 0x02 0x07>;
+            reg = <0x00 0x2000000 0x00 0x10000>;
+            compatible = "sifive,clint0", "riscv,clint0";
+        };
         // ########
         //clint@2000000 { // mtimecmp=base+0x4000, mtime=base+0xbff8
         //    /* This links to phandle 0x02 (the CPU INTC) */

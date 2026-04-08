@@ -499,6 +499,8 @@ blt t1, t2, copy_sector_loop
     csrwi mdebug, 8 
     li a0, 0 # use core 0
     li a1, 0 # let opensbi use its embedded DTB
+    li a2, 0 # set boot HART
+
     jr s0  # jump to SDRAM!
 
 
