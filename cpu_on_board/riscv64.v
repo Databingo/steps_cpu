@@ -4,6 +4,7 @@ module riscv64(
     input wire clk, 
     input wire reset,     // Active-low reset button
     input wire [31:0] instruction,
+    input wire valid_address,
     output wire [63:0] ppc,
     //output wire  heartbeat,
     output reg [63:0] bus_address,     // 39 bit for real Sv39 standard?
@@ -32,6 +33,7 @@ reg mmu_da=0;
 reg mmu_pc = 0;
 reg i_cache_refill=0;
 wire STrap = (mmu_pc || mmu_da || i_cache_refill);
+wire is_mem_access = (op == 7'b0000011 || op == 7'b0100011 || op == 7'b0101111); //load/store/atm
 reg [63:0] saved_user_pc;
 integer i; 
 
@@ -607,7 +609,8 @@ always @(*) begin
 		re[8] <= 1;// save x2 trap type 1 i-cache trap
 
 		// d-tlb miss STrap load/store/atom
-	    end else if (need_trans && !tlb_d_hit && (op == 7'b0000011 || op == 7'b0100011 || op == 7'b0101111) ) begin  
+	    //end else if (need_trans && !tlb_d_hit && (op == 7'b0000011 || op == 7'b0100011 || op == 7'b0101111) ) begin  
+	    end else if (need_trans && !tlb_d_hit && is_mem_access) begin  
 		mmu_da <= 1; // MMU_DA ON
 		pc <= 0; // trap to isr_router
 		bubble <= 1'b1; // bubble
@@ -616,8 +619,21 @@ always @(*) begin
 		re[9] <= ls_va; //save va to x1
 		re[8] <= (op == 7'b0000011) ? 13 : 14;// save x2 trap type load/store_atom
 		//Csrs[mstatus][MIE] <= Csrs[mstatus][MPIE]; // set back interrupt status
+    
+	    end else if (!STrap && !valid_address && is_mem_access) begin
+		mmu_da <= 1; // MMU_DA ON
+		pc <= 0; // trap to isr_router
+		bubble <= 1'b1; // bubble
+		saved_user_pc <= pc_4; // save pc EXE l/s/a
+		for (i=1;i<11;i=i+1) begin sre[i]<= re[i]; end // save re
+		re[9] <= ls_va; //save va to x1
+		//re[8] <= (op == 7'b0000011) ? 13 : 14;// save x2 trap type load/store_atom
+		re[8] <= 17; // save 17 for invalid address
+                Csrs[mimpid] <=  pda;
+                Csrs[marchid] <= ppc;
+                Csrs[mvendorid] <= ir;
 
-		// Back from STrap
+            // Back from STrap
 	    end else if (STrap && ir == 32'b00110000001000000000000001110011) begin // for the fauld fill: sd ppa, Tlb_fault
 		pc <= saved_user_pc; // recover from shadow when see Mret
 		bubble <= 1'b1; // bubble

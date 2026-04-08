@@ -167,6 +167,7 @@ assign DRAM_CKE = 1; // always enable
         //.bubble(bubble),
         //.ir(LEDG),
         //.heartbeat(LEDR9),
+	.valid_address(valid_address),
 
         .bus_address(bus_address),
         .bus_write_data(bus_write_data),
@@ -256,7 +257,8 @@ assign DRAM_CKE = 1; // always enable
     wire Rom_selected = (bus_address >= `Rom_base && bus_address < `Rom_base + `Rom_size);
     wire Ram_selected = (bus_address >= `Ram_base && bus_address < `Ram_base + `Ram_size);
     //wire Key_selected = (bus_address == `Key_base);
-    wire Art_selected = (bus_address == `Art_base || bus_address == `ArtK_base);
+    //wire Art_selected = (bus_address == `Art_base || bus_address == `ArtK_base);
+    wire Art_selected = (bus_address >= `Art_base && bus_address <= `Art_last);
     wire Sdc_addr_selected = (bus_address == `Sdc_addr);
     wire Sdc_read_selected = (bus_address == `Sdc_read);
     wire Sdc_write_selected = (bus_address == `Sdc_write);
@@ -266,6 +268,7 @@ assign DRAM_CKE = 1; // always enable
     wire Sdram_selected = (bus_address >= `Sdram_min && bus_address < `Sdram_max);
     wire Mtime_selected = (bus_address == `Mtime);
     wire Mtimecmp_selected = (bus_address == `Mtimecmp);
+    wire Clint_selected = (bus_address >= `Clint_base && bus_address <= `Mtime);
     //wire CacheI_selected = (bus_address == `CacheI);
     //---
     wire CacheI_L_selected = (bus_address == `CacheI_L);
@@ -297,6 +300,33 @@ assign DRAM_CKE = 1; // always enable
     wire uart_irq;
     reg uart_irq_pre;
     wire [31:0] uart_readdata;
+
+
+    //wire Key_selected = (bus_address == `Key_base);
+    wire valid_address = Rom_selected
+    | Ram_selected
+    | Art_selected
+    | Sdc_addr_selected
+    | Sdc_read_selected
+    | Sdc_write_selected
+    | Sdc_ready_selected
+    | Sdc_cache_selected
+    | Sdc_avail_selected
+    | Sdram_selected
+    | Clint_selected
+    | Mtime_selected
+    | Mtimecmp_selected
+    | CacheI_L_selected
+    | CacheI_H_selected
+    | Tlb_selected
+    | Plic_priority_selected
+    | Plic_pending_selected
+    | Plic_enable_ctx0_selected
+    | Plic_enable_ctx1_selected
+    | Plic_threshold_ctx0_selected
+    | Plic_threshold_ctx1_selected
+    | Plic_claim_ctx0_selected
+    | Plic_claim_ctx1_selected;
 
 
     // Read & Write BRAM Port B 
@@ -381,10 +411,13 @@ assign DRAM_CKE = 1; // always enable
 	    end // 8 byte for all load
             if (Sdc_avail_selected) begin bus_read_data <= {63'd0, sd_cache_available}; bus_read_done <= 1; end 
 
+            if (Clint_selected) begin bus_read_data <= 64'b0 ; bus_read_done <= 1; end 
             if (Mtime_selected) begin bus_read_data <= mtime; bus_read_done <= 1; end 
             if (Mtimecmp_selected) begin bus_read_data <= mtimecmp; bus_read_done <= 1; end 
 
 	    if (Art_selected) begin 
+	      if (bus_address == `Art_base || bus_address == `ArtK_base) begin
+
 	        if (uart_read_step ==0) begin uart_read_pulse <= 1; uart_read_step <= 1; end  // sifive 0x2004 read status, write data
 	        if (uart_read_step ==1 &&  uart_waitrequest) begin uart_read_pulse <= 1; end  // sifive 0x2008 read keypress
 	        //if (uart_read_step ==1 && !uart_waitrequest) begin bus_read_data <= uart_readdata; uart_read_step <= 0; bus_read_done <=1; uart_read_pulse <= 0;end
@@ -393,6 +426,8 @@ assign DRAM_CKE = 1; // always enable
 		    if (bus_address == `Art_base) begin bus_read_data <= {{33{(uart_readdata[31:16]==16'h0)}}, 31'b0}; uart_read_step <= 0; bus_read_done <=1; end //opensbi reading tx 32 1 neg means full
 		    if (bus_address == `ArtK_base) begin bus_read_data <= {32'b0, ~uart_readdata[15], 23'b0, uart_readdata[7:0]}; uart_read_step <= 0; bus_read_done <=1;end//opensbi reading rx 32 1 empty
 		end
+
+	      end else begin bus_read_data <= 64'b0; bus_read_done <= 1; end // Dummy ACK for TXCTRL/RXCTRL/DIV registers
 	    end
 
 	    if (Sdram_selected) begin
@@ -529,10 +564,15 @@ assign DRAM_CKE = 1; // always enable
 
 	    //if (Art_selected) begin uart_write_pulse <= 1; bus_write_done <=1; end
 	    if (Art_selected) begin 
+	      if (bus_address == `Art_base) begin
+
 	        if (uart_write_step ==0) begin uart_write_pulse <= 1; uart_write_step <= 1; end
 	        if (uart_write_step ==1 &&  uart_waitrequest) begin uart_write_pulse <= 1; end
 	        //if (uart_write_step ==1 && !uart_waitrequest) begin uart_write_step <= 0; bus_write_done <=1; uart_write_pulse <= 0;end
 	        if (uart_write_step ==1 && !uart_waitrequest) begin uart_write_step <= 0; bus_write_done <=1; end
+
+
+	      end else bus_write_done <= 1;
 	    end
 	    //if (Art_selected) begin 
 	    //    if (!uart_waitrequest) begin uart_write_pulse <= 1; bus_write_done <=1; end
@@ -540,6 +580,7 @@ assign DRAM_CKE = 1; // always enable
         
 	
 
+            if (Clint_selected) begin bus_write_done <= 1; end 
 	    if (Mtimecmp_selected) begin mtimecmp <= bus_write_data; bus_write_done <= 1; end
 	    //if (Sdram_selected) begin if (sdram_req_wait==0) bus_write_done <= 1; end
 

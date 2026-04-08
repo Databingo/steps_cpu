@@ -4,6 +4,7 @@ module riscv64(
     input wire clk, 
     input wire reset,     // Active-low reset button
     input wire [31:0] instruction,
+    input wire valid_address,
     output wire [63:0] ppc,
     //output wire  heartbeat,
     output reg [63:0] bus_address,     // 39 bit for real Sv39 standard?
@@ -32,6 +33,7 @@ reg mmu_da=0;
 reg mmu_pc = 0;
 reg i_cache_refill=0;
 wire STrap = (mmu_pc || mmu_da || i_cache_refill);
+wire is_mem_access = (op == 7'b0000011 || op == 7'b0100011 || op == 7'b0101111); //load/store/atm
 reg [63:0] saved_user_pc;
 integer i; 
 
@@ -607,7 +609,8 @@ always @(*) begin
 		re[8] <= 1;// save x2 trap type 1 i-cache trap
 
 		// d-tlb miss STrap load/store/atom
-	    end else if (need_trans && !tlb_d_hit && (op == 7'b0000011 || op == 7'b0100011 || op == 7'b0101111) ) begin  
+	    //end else if (need_trans && !tlb_d_hit && (op == 7'b0000011 || op == 7'b0100011 || op == 7'b0101111) ) begin  
+	    end else if (need_trans && !tlb_d_hit && is_mem_access) begin  
 		mmu_da <= 1; // MMU_DA ON
 		pc <= 0; // trap to isr_router
 		bubble <= 1'b1; // bubble
@@ -616,8 +619,21 @@ always @(*) begin
 		re[9] <= ls_va; //save va to x1
 		re[8] <= (op == 7'b0000011) ? 13 : 14;// save x2 trap type load/store_atom
 		//Csrs[mstatus][MIE] <= Csrs[mstatus][MPIE]; // set back interrupt status
+    
+	    end else if (!STrap && !valid_address && is_mem_access) begin
+		mmu_da <= 1; // MMU_DA ON
+		pc <= 0; // trap to isr_router
+		bubble <= 1'b1; // bubble
+		saved_user_pc <= pc_4; // save pc EXE l/s/a
+		for (i=1;i<11;i=i+1) begin sre[i]<= re[i]; end // save re
+		re[9] <= ls_va; //save va to x1
+		//re[8] <= (op == 7'b0000011) ? 13 : 14;// save x2 trap type load/store_atom
+		re[8] <= 17; // save 17 for invalid address
+                Csrs[mimpid] <=  pda;
+                Csrs[marchid] <= ppc;
+                Csrs[mvendorid] <= ir;
 
-		// Back from STrap
+            // Back from STrap
 	    end else if (STrap && ir == 32'b00110000001000000000000001110011) begin // for the fauld fill: sd ppa, Tlb_fault
 		pc <= saved_user_pc; // recover from shadow when see Mret
 		bubble <= 1'b1; // bubble
@@ -1014,6 +1030,7 @@ assign DRAM_CKE = 1; // always enable
         //.bubble(bubble),
         //.ir(LEDG),
         //.heartbeat(LEDR9),
+	.valid_address(valid_address),
 
         .bus_address(bus_address),
         .bus_write_data(bus_write_data),
@@ -1103,7 +1120,8 @@ assign DRAM_CKE = 1; // always enable
     wire Rom_selected = (bus_address >= `Rom_base && bus_address < `Rom_base + `Rom_size);
     wire Ram_selected = (bus_address >= `Ram_base && bus_address < `Ram_base + `Ram_size);
     //wire Key_selected = (bus_address == `Key_base);
-    wire Art_selected = (bus_address == `Art_base || bus_address == `ArtK_base);
+    //wire Art_selected = (bus_address == `Art_base || bus_address == `ArtK_base);
+    wire Art_selected = (bus_address >= `Art_base && bus_address <= `Art_last);
     wire Sdc_addr_selected = (bus_address == `Sdc_addr);
     wire Sdc_read_selected = (bus_address == `Sdc_read);
     wire Sdc_write_selected = (bus_address == `Sdc_write);
@@ -1113,6 +1131,7 @@ assign DRAM_CKE = 1; // always enable
     wire Sdram_selected = (bus_address >= `Sdram_min && bus_address < `Sdram_max);
     wire Mtime_selected = (bus_address == `Mtime);
     wire Mtimecmp_selected = (bus_address == `Mtimecmp);
+    wire Clint_selected = (bus_address >= `Clint_base && bus_address <= `Mtime);
     //wire CacheI_selected = (bus_address == `CacheI);
     //---
     wire CacheI_L_selected = (bus_address == `CacheI_L);
@@ -1144,6 +1163,33 @@ assign DRAM_CKE = 1; // always enable
     wire uart_irq;
     reg uart_irq_pre;
     wire [31:0] uart_readdata;
+
+
+    //wire Key_selected = (bus_address == `Key_base);
+    wire valid_address = Rom_selected
+    | Ram_selected
+    | Art_selected
+    | Sdc_addr_selected
+    | Sdc_read_selected
+    | Sdc_write_selected
+    | Sdc_ready_selected
+    | Sdc_cache_selected
+    | Sdc_avail_selected
+    | Sdram_selected
+    | Clint_selected
+    | Mtime_selected
+    | Mtimecmp_selected
+    | CacheI_L_selected
+    | CacheI_H_selected
+    | Tlb_selected
+    | Plic_priority_selected
+    | Plic_pending_selected
+    | Plic_enable_ctx0_selected
+    | Plic_enable_ctx1_selected
+    | Plic_threshold_ctx0_selected
+    | Plic_threshold_ctx1_selected
+    | Plic_claim_ctx0_selected
+    | Plic_claim_ctx1_selected;
 
 
     // Read & Write BRAM Port B 
@@ -1228,10 +1274,13 @@ assign DRAM_CKE = 1; // always enable
 	    end // 8 byte for all load
             if (Sdc_avail_selected) begin bus_read_data <= {63'd0, sd_cache_available}; bus_read_done <= 1; end 
 
+            if (Clint_selected) begin bus_read_data <= 64'b0 ; bus_read_done <= 1; end 
             if (Mtime_selected) begin bus_read_data <= mtime; bus_read_done <= 1; end 
             if (Mtimecmp_selected) begin bus_read_data <= mtimecmp; bus_read_done <= 1; end 
 
 	    if (Art_selected) begin 
+	      if (bus_address == `Art_base || bus_address == `ArtK_base) begin
+
 	        if (uart_read_step ==0) begin uart_read_pulse <= 1; uart_read_step <= 1; end  // sifive 0x2004 read status, write data
 	        if (uart_read_step ==1 &&  uart_waitrequest) begin uart_read_pulse <= 1; end  // sifive 0x2008 read keypress
 	        //if (uart_read_step ==1 && !uart_waitrequest) begin bus_read_data <= uart_readdata; uart_read_step <= 0; bus_read_done <=1; uart_read_pulse <= 0;end
@@ -1240,6 +1289,8 @@ assign DRAM_CKE = 1; // always enable
 		    if (bus_address == `Art_base) begin bus_read_data <= {{33{(uart_readdata[31:16]==16'h0)}}, 31'b0}; uart_read_step <= 0; bus_read_done <=1; end //opensbi reading tx 32 1 neg means full
 		    if (bus_address == `ArtK_base) begin bus_read_data <= {32'b0, ~uart_readdata[15], 23'b0, uart_readdata[7:0]}; uart_read_step <= 0; bus_read_done <=1;end//opensbi reading rx 32 1 empty
 		end
+
+	      end else begin bus_read_data <= 64'b0; bus_read_done <= 1; end // Dummy ACK for TXCTRL/RXCTRL/DIV registers
 	    end
 
 	    if (Sdram_selected) begin
@@ -1376,10 +1427,15 @@ assign DRAM_CKE = 1; // always enable
 
 	    //if (Art_selected) begin uart_write_pulse <= 1; bus_write_done <=1; end
 	    if (Art_selected) begin 
+	      if (bus_address == `Art_base) begin
+
 	        if (uart_write_step ==0) begin uart_write_pulse <= 1; uart_write_step <= 1; end
 	        if (uart_write_step ==1 &&  uart_waitrequest) begin uart_write_pulse <= 1; end
 	        //if (uart_write_step ==1 && !uart_waitrequest) begin uart_write_step <= 0; bus_write_done <=1; uart_write_pulse <= 0;end
 	        if (uart_write_step ==1 && !uart_waitrequest) begin uart_write_step <= 0; bus_write_done <=1; end
+
+
+	      end else bus_write_done <= 1;
 	    end
 	    //if (Art_selected) begin 
 	    //    if (!uart_waitrequest) begin uart_write_pulse <= 1; bus_write_done <=1; end
@@ -1387,6 +1443,7 @@ assign DRAM_CKE = 1; // always enable
         
 	
 
+            if (Clint_selected) begin bus_write_done <= 1; end 
 	    if (Mtimecmp_selected) begin mtimecmp <= bus_write_data; bus_write_done <= 1; end
 	    //if (Sdram_selected) begin if (sdram_req_wait==0) bus_write_done <= 1; end
 
@@ -2244,6 +2301,7 @@ endmodule
 `define Key_base   64'h0000_2000
 `define Art_base   64'h0000_2004
 `define ArtK_base  64'h0000_2008
+`define Art_last   64'h0000_201C
 
 `define Sdc_base   64'h0000_3000
 `define Sdc_addr   64'h0000_3200
@@ -2258,8 +2316,9 @@ endmodule
 `define Sdram_min  64'h8000_0000
 `define Sdram_max  64'h8080_0000
 
-`define Mtime      64'h0200_bff8
+`define Clint_base 64'h0200_0000
 `define Mtimecmp   64'h0200_4000
+`define Mtime      64'h0200_bff8
 
 `define Plic_base         64'h0C00_0000  
 `define Plic_pending      64'h0C00_1000  
@@ -2273,7 +2332,6 @@ endmodule
 `define CacheI_L 64'h2000_1000
 `define CacheI_H 64'h2000_1008
 
-`define Msip_base 64'h0200_0000
 ---------- rom inner isr.s---------
 isr_router:        # Use x0-x10 shadowed register only (ra(x1), a0(x10),..x19)
      li x7, 0x2004 # UART print 
@@ -2295,6 +2353,9 @@ isr_router:        # Use x0-x10 shadowed register only (ra(x1), a0(x10),..x19)
 
      li x3, 14 
      beq x8, x3, mmu_d    # d-tlb-refill store
+
+     li x3, 17 
+     beq x8, x3, bus_error_strap
 
 i_cache_refill:
      lui x4, 0x20001 # base Cache address
@@ -2449,6 +2510,32 @@ return:
      mret
 
 #Seems VA has 3 table number, satp has Root Table(vpn[2]) address via PPN(ppn+12 space), the we can find PTE in table 2, and PTE has PPN, we can use table2PPN to find table 1 address plus vpn1 number to find PTE in table1, then we get table1 PPN for table0 address, and together with vpn0 to find PTE in talbe0, this is  the last ppa, by ppn + 12 bit of VA low.
+
+
+
+bus_error_strap:
+     li a0, "\nBUSerr" 
+     call print7
+
+     li a0, "|pda:" 
+     call print7
+     csrr a0, 0xF13 # mimpid/pda
+     call print_reg
+
+     li a0, "|ir:" 
+     call print7
+     csrr a0, 0xF11 # mvendorid/ir
+     call print_reg
+
+     li a0, "|ppc:" 
+     call print7
+     csrr a0, 0xF12 # marchid/ppc
+     call print_reg
+     
+     addi x8, x0, 0  # success x8=0
+     j return
+
+
 
 
 
@@ -3261,3 +3348,88 @@ print7: # a0, 7 char left one for null
     ld ra, 8(sp)
     addi sp, sp, 16
     ret
+---------- device tree ---------
+/dts-v1/;
+
+/ {
+    #address-cells = <0x02>;
+    #size-cells = <0x02>;
+    compatible = "riscv-virtio";
+    model = "riscv-virtio,qemu";
+
+    /* 1. RAM: 8MB at 0x80000000 */
+    memory@80000000 {
+        device_type = "memory";
+        reg = <0x00 0x80000000 0x00 0x800000>;
+    };
+
+    cpus {
+        #address-cells = <0x01>;
+        #size-cells = <0x00>;
+        timebase-frequency = <12500000>;
+
+        cpu@0 {
+            phandle = <0x01>;
+            device_type = "cpu";
+            reg = <0x00>;
+            status = "okay";
+            compatible = "riscv";
+            riscv,isa = "rv64ima_zicsr_zifencei";
+            mmu-type = "riscv,sv39";
+
+            /* INTC: This handles internal interrupts */
+            cpu0_intc: interrupt-controller {
+                #interrupt-cells = <0x01>;
+                interrupt-controller;
+                compatible = "riscv,cpu-intc";
+                phandle = <0x02>; /* This ID is used by CLINT below */
+            };
+        };
+    };
+
+    chosen {
+        /* Points to the UART below */
+       //stdout-path = "/soc/serial@10000000";
+       // ############
+       stdout-path = "/soc/uart@2004";
+    };
+
+    soc {
+        #address-cells = <0x02>;
+        #size-cells = <0x02>;
+        compatible = "simple-bus";
+        ranges;
+
+        ///* 2. UART: For QEMU test (at 10000000) */
+        //serial@10000000 {
+        //    compatible = "ns16550a";
+        //    reg = <0x00 0x10000000 0x00 0x100>;
+        //    clock-frequency = <12500000>;
+        //    reg-shift = <0>;
+        //};
+       // ##########3
+       uart0: uart@2004{
+           compatible = "sifive,uart0";
+           reg = <0x0 0x2004 0x0 0x10>;
+           clock-frequency = <12500000>;
+       };
+
+    // comment out for SoC
+    //    /* 3. CLINT: Handles Timer AND IPI (Software Interrupt) */
+    //    clint@2000000 {
+    //        /* This links to phandle 0x02 (the CPU INTC) */
+    //        /* 0x03 = Software Interrupt, 0x07 = Timer Interrupt */
+    //        interrupts-extended = <0x02 0x03 0x02 0x07>;
+    //        reg = <0x00 0x2000000 0x00 0x10000>;
+    //        compatible = "sifive,clint0", "riscv,clint0";
+    //    };
+        // ########
+        //clint@2000000 { // mtimecmp=base+0x4000, mtime=base+0xbff8
+        //    /* This links to phandle 0x02 (the CPU INTC) */
+        //    /* 0x03 = Software Interrupt, 0x07 = Timer Interrupt */
+        //    interrupts-extended = <0x02 0x03 0x02 0x07>;
+        //    reg = <0x00 0x2000000 0x00 0x10000>;
+        //    compatible = "sifive,clint0", "riscv,clint0";
+        //};
+    };
+};

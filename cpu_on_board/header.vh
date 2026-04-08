@@ -5,6 +5,7 @@
 `define Key_base   64'h0000_2000
 `define Art_base   64'h0000_2004
 `define ArtK_base  64'h0000_2008
+`define Art_last   64'h0000_201C
 
 `define Sdc_base   64'h0000_3000
 `define Sdc_addr   64'h0000_3200
@@ -19,8 +20,9 @@
 `define Sdram_min  64'h8000_0000
 `define Sdram_max  64'h8080_0000
 
-`define Mtime      64'h0200_bff8
+`define Clint_base 64'h0200_0000
 `define Mtimecmp   64'h0200_4000
+`define Mtime      64'h0200_bff8
 
 `define Plic_base         64'h0C00_0000  
 `define Plic_pending      64'h0C00_1000  
@@ -34,4 +36,3 @@
 `define CacheI_L 64'h2000_1000
 `define CacheI_H 64'h2000_1008
 
-`define Msip_base 64'h0200_0000
