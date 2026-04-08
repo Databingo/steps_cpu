@@ -587,6 +587,10 @@ always @(*) begin
 		if (!STrap && !bubble && did)  begin did <= 0; end
 		// -- UPPER is default change for EXE stage --- but (1.Could be overwrite 2.Take effect next cycle) 
 
+		Csrs[mip][MTIP] <= time_interrupt; // MTIP linux will see then jump to its handler
+		Csrs[mip][MEIP] <= meip_interrupt; // MEIP
+		Csrs[mip][MSIP] <= msip_interrupt; // MSIP
+
 		//  i-tlb miss STrap
             if (need_trans && !tlb_i_hit) begin //OPEN 
                 mmu_pc <= 1; // MMU_PC ON 
@@ -675,15 +679,15 @@ always @(*) begin
 
 		// Async Interrupt PLIC full (Platform-Level-Interrupt-Control)  MMIO (hardwire timers uart plic)
 	    end else if ((meip_interrupt || msip_interrupt || time_interrupt) && Csrs[mstatus][MIE]==1 && !STrap && !load_step && !store_step) begin //mstatus[3] MIE
-		Csrs[mip][MTIP] <= time_interrupt; // MTIP linux will see then jump to its handler
-		Csrs[mip][MEIP] <= meip_interrupt; // MEIP
-		Csrs[mip][MSIP] <= msip_interrupt; // MSIP
+		//Csrs[mip][MTIP] <= time_interrupt; // MTIP linux will see then jump to its handler
+		//Csrs[mip][MEIP] <= meip_interrupt; // MEIP
+		//Csrs[mip][MSIP] <= msip_interrupt; // MSIP
 		reserve_valid <= 0; // Interrupt clear lr.w/lr.d
 
 		do_trap = 1; trap_is_interrupt =1; trap_val = 0; trap_epc = pc_4;
-		if (msip_interrupt) trap_cause = 3;  // Cause 3 for Sofeware Interrupt
-		if (time_interrupt) trap_cause = 7;  // Cause 7 for Timer Interrupt
 		if (meip_interrupt) trap_cause = 11; // Cause 11 for External Interrupt
+		else if (msip_interrupt) trap_cause = 3;  // Cause 3 for Sofeware Interrupt
+		else if (time_interrupt) trap_cause = 7;  // Cause 7 for Timer Interrupt
 
 		// IR
 	    end else begin 
