@@ -19,9 +19,11 @@ isr_router:        # Use x0-x10 shadowed register only (ra(x1), a0(x10),..x19)
      li x3, 14 
      beq x8, x3, mmu_d    # d-tlb-refill store
 
-     li x3, 17 
-     beq x8, x3, bus_error_strap
+    #li x3, 17 
+    #beq x8, x3, bus_error_strap
 
+     li x3, 18 
+     beq x8, x3, debug
 i_cache_refill:
      lui x4, 0x20001 # base Cache address
      ld x3, 0(x9)    # get data
@@ -178,15 +180,9 @@ return:
 
 
 
-bus_error_strap:
-     li a0, "\nBUSerr" 
+debug:
+     li a0, "\nDEBUG" 
      call print7
-
-     li a0, "|pda:" 
-     call print7
-    #csrr a0, 0xF13 # mimpid/pda
-     csrr a0, mimpid # mimpid/pda
-     call print_reg
 
      li a0, "|ir:" 
      call print7
@@ -199,6 +195,15 @@ bus_error_strap:
     #csrr a0, 0xF12 # marchid/ppc
      csrr a0, marchid # marchid/ppc
      call print_reg
+
+     li a0, "|pda:" 
+     call print7
+    #csrr a0, 0xF13 # mimpid/pda
+     csrr a0, mimpid # mimpid/pda
+     call print_reg
+
+
+
      
      addi x8, x0, 0  # success x8=0
      j return

@@ -31,8 +31,10 @@ wire [31:0] ir;
 (* ram_style = "logic" *) reg [63:0] sre [0:10]; // Shadow Registers 11s
 reg mmu_da=0;
 reg mmu_pc = 0;
+reg debug = 0;
+reg in_debug = 0;
 reg i_cache_refill=0;
-wire STrap = (mmu_pc || mmu_da || i_cache_refill);
+wire STrap = (mmu_pc || mmu_da || i_cache_refill || in_debug);
 wire is_mem_access = (op == 7'b0000011 || op == 7'b0100011 || op == 7'b0101111); //load/store/atm
 reg [63:0] saved_user_pc;
 integer i; 
@@ -561,6 +563,7 @@ always @(*) begin
 		Csrs[mhartid] <= 64'd0; // single Core 0
 		// mvendorid, marchid, mimpid remain 0
 		mmu_pc <= 0;
+		in_debug <= 0;
 		reserve_addr <= 0;
 		reserve_valid <= 0;
 
@@ -575,24 +578,28 @@ always @(*) begin
 		trap_val = 0;
 		trap_epc = 0;
 
+		//if (bus_read_done && bus_write_done && !load_step && !store_step) debug <= 1;
+		if (!STrap && !bubble && !load_step && !store_step) debug <= 1;
+		// -- UPPER is default change for EXE stage --- but (1.Could be overwrite 2.Take effect next cycle) 
+
 		//  i-tlb miss STrap
-		if (need_trans && !tlb_i_hit) begin //OPEN 
-		    mmu_pc <= 1; // MMU_PC ON 
-		    pc <= 0;     // trap to isr_router
-		    bubble <= 1'b1; // bubble IF for new pc value 
-		    saved_user_pc <= pc_4; // !!! save pc (EXE was flushed so record-redo it, previous pc)
-		    //if (bubble || ir==32'b0001001??????????_000_?????_1110011) saved_user_pc <= pc ; // !!! save pc (j/b EXE was flushed currectly, vma executed anyway no need back-redo)
-		    if (bubble) saved_user_pc <= pc ; // !!! save pc (j/b EXE was flushed currectly, vma executed only in EXEcuting)
-		    for (i=1;i<11;i=i+1) begin sre[i]<= re[i]; end // save re
-		    re[9] <= pc;// - 4; // save this vpc to x1 //!!!! We also need to refill pc - 4' ppc for re-executeing pc-4, with hit(if satp in for very next sfence.vma) 
-		    re[8] <= 12 ;// save in x8 trap type 0 i-tlb trap so record as instruciont page fault for prepare
-		    //Csrs[mstatus][MPIE] <= Csrs[mstatus][MIE]; // disable interrupt during shadow mmu walking
-		    //Csrs[mstatus][MIE] <= 0;
+            if (need_trans && !tlb_i_hit) begin //OPEN 
+                mmu_pc <= 1; // MMU_PC ON 
+                pc <= 0;     // trap to isr_router
+                bubble <= 1'b1; // bubble IF for new pc value 
+                saved_user_pc <= pc_4; // !!! save pc (EXE was flushed so record-redo it, previous pc)
+                //if (bubble || ir==32'b0001001??????????_000_?????_1110011) saved_user_pc <= pc ; // !!! save pc (j/b EXE was flushed currectly, vma executed anyway no need back-redo)
+                if (bubble) saved_user_pc <= pc ; // !!! save pc (j/b EXE was flushed currectly, vma executed only in EXEcuting)
+                for (i=1;i<11;i=i+1) begin sre[i]<= re[i]; end // save re
+                re[9] <= pc;// - 4; // save this vpc to x1 //!!!! We also need to refill pc - 4' ppc for re-executeing pc-4, with hit(if satp in for very next sfence.vma) 
+                re[8] <= 12 ;// save in x8 trap type 0 i-tlb trap so record as instruciont page fault for prepare
+                //Csrs[mstatus][MPIE] <= Csrs[mstatus][MIE]; // disable interrupt during shadow mmu walking
+                //Csrs[mstatus][MIE] <= 0;
 
-		    // Bubble
-		end else if (bubble) begin bubble <= 1'b0; // Flush this cycle & Clear bubble signal for the next cycle
+                // Bubble
+            end else if (bubble) begin bubble <= 1'b0; // Flush this cycle & Clear bubble signal for the next cycle
 
-		// i-cache miss STrap (at EXE stage without stap/tlb_hit sensitive)
+            // i-cache miss STrap (at EXE stage without stap/tlb_hit sensitive)
 	    end else if (!STrap && !i_cache_hit) begin //OPEN 
 		i_cache_refill <= 1; // 
 		pc <= 0; // trap to isr_router
@@ -620,15 +627,27 @@ always @(*) begin
 		re[8] <= (op == 7'b0000011) ? 13 : 14;// save x2 trap type load/store_atom
 		//Csrs[mstatus][MIE] <= Csrs[mstatus][MPIE]; // set back interrupt status
     
-	    end else if (!STrap && !valid_address && is_mem_access) begin
-		mmu_da <= 1; // MMU_DA ON
+	    //end else if (!STrap && !valid_address && is_mem_access) begin
+	    //    mmu_da <= 1; // MMU_DA ON
+	    //    pc <= 0; // trap to isr_router
+	    //    bubble <= 1'b1; // bubble
+	    //    saved_user_pc <= pc_4; // save pc EXE l/s/a
+	    //    for (i=1;i<11;i=i+1) begin sre[i]<= re[i]; end // save re
+	    //    re[9] <= ls_va; //save va to x1
+	    //    //re[8] <= (op == 7'b0000011) ? 13 : 14;// save x2 trap type load/store_atom
+	    //    re[8] <= 17; // save 17 for invalid address
+            //    Csrs[mimpid] <=  pda;
+            //    Csrs[marchid] <= ppc;
+            //    Csrs[mvendorid] <= ir;
+	    end else if (!STrap && debug) begin
+		in_debug <= 1;
 		pc <= 0; // trap to isr_router
 		bubble <= 1'b1; // bubble
 		saved_user_pc <= pc_4; // save pc EXE l/s/a
 		for (i=1;i<11;i=i+1) begin sre[i]<= re[i]; end // save re
 		re[9] <= ls_va; //save va to x1
 		//re[8] <= (op == 7'b0000011) ? 13 : 14;// save x2 trap type load/store_atom
-		re[8] <= 17; // save 17 for invalid address
+		re[8] <= 18; // save 18 for debug
                 Csrs[mimpid] <=  pda;
                 Csrs[marchid] <= ppc;
                 Csrs[mvendorid] <= ir;
@@ -639,6 +658,8 @@ always @(*) begin
 		bubble <= 1'b1; // bubble
 		for (i=1;i<11;i=i+1) begin re[i]<= sre[i]; end // recover usr re
 		mmu_pc <= 0; mmu_da <= 0; i_cache_refill<= 0;
+		debug <= 0;
+		in_debug <= 0;
 		if (re[8]!=0) begin // Trap to Page Fault
 		    do_trap = 1;
 		    trap_cause = re[8];
