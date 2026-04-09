@@ -446,8 +446,6 @@ csrrsi x0, mie, 0b10000000
 #  csrsi mstatus, 0b1000 
 csrrsi x0, mstatus, 0b1000
 fence.i
-#     csrwi mdebug, 8 
-csrrwi x0, mdebug, 8
 #     li a0, 0 
 addi a0, x0, 0x0
 #     li a1, 0x80100000 
