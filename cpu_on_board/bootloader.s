@@ -446,6 +446,22 @@ blt t1, t2, copy_sector_loop
 
 
 
+
+#li s0, 0x80000000
+#la a1, file_size
+#lw t0, 0(a1)
+#add s0, s0, t0     # s0 = end of file
+#li s1, 0x80800000  # s1 = end of SDRAM
+#clear_garbage_loop:
+#bge s0, s1, boot_opensbi
+#sb zero, 0(s0)
+#addi s0, s0, 1
+#j clear_garbage_loop
+
+
+
+
+
 # -----------------------------
 # Read/Write SDRAM
 #lui s0, 0x80000 # SDRAM base 0x80000000
@@ -497,7 +513,7 @@ blt t1, t2, copy_sector_loop
 #    sb t6, 0(t0)         # Should print 'D'
 #    sb t2, 0(t0)         # Should print 'X'
 
-
+boot_opensbi:
     #lui s0, 0x80000      # SDRAM = 0x80000000
     li s0, 0x80000000 # SDRAM base 0x80000000
     ld a0, 0(s0)         # test sdram read data
@@ -512,7 +528,7 @@ blt t1, t2, copy_sector_loop
     fence.i
    #csrw 0x7cc, t0  # open debug print
 
-    csrwi mdebug, 8 
+   #csrwi mdebug, 8 
     li a0, 0 # use core 0
     li a1, 0 # let opensbi use its embedded DTB
    #li a1, 0x80100000 # set DTB addr
