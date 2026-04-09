@@ -31,10 +31,11 @@ i_cache_refill:
      ld x3, 8(x9)    # get data
      sd x3, 8(x4)    # refill line high 64  
 
-     lui x3, 0x2     
-     addi x3, x3, 0x4  # set print           
-     addi x6, x0, 0x25
-     sd x6, 0(x3)    #  print %
+    #lui x3, 0x2     
+    #addi x3, x3, 0x4  # set print           
+    #addi x6, x0, 0x25
+    #sd x6, 0(x3)    #  print %
+
     #mv a0, x9
     #call print_reg
 
