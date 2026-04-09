@@ -349,7 +349,7 @@ localparam mdebug     = 29;  //
 //localparam pmpaddr7   = 29;  // 
 //integer scontext = 12'h5a8; 
 reg [62:0] CAUSE_CODE;
-reg  [5:0] w_csr_id;             // CSR id (32)
+reg  [5:0] w_csr_id;             // CSR id (64)
 always @(*) begin
     case(w_csr)
 	12'h300 : w_csr_id = mstatus    ;    
@@ -390,7 +390,7 @@ always @(*) begin
 	//12'h3B7 : w_csr_id = pmpaddr7   ;   
 	//default : w_csr_id = 36; 
 	12'h7CC : w_csr_id = mdebug     ;   
-	default : w_csr_id = 30; 
+	default : w_csr_id = 63; 
     endcase
 end
 
@@ -770,13 +770,19 @@ always @(*) begin
 		    32'b???????_?????_?????_110_?????_1100011: begin if ($unsigned(re[w_rs1]) < $unsigned(re[w_rs2])) begin pc <= branch; bubble <= 1'b1; end end // Bltu
 		    32'b???????_?????_?????_111_?????_1100011: begin if ($unsigned(re[w_rs1]) >= $unsigned(re[w_rs2])) begin pc <= branch; bubble <= 1'b1; end end // Bgeu
 		    // System-CSR 
-		    32'b???????_?????_?????_001_?????_1110011: begin if (w_rd != 0) re[w_rd] <= Csrs[w_csr_id]; if (w_csr_id != 29) Csrs[w_csr_id] <= rs1; end // Csrrw logic
+		    32'b???????_?????_?????_001_?????_1110011: begin if (w_rd != 0) re[w_rd] <=(w_csr_id==63) ? 64'b0:Csrs[w_csr_id];
+		                                                     if (w_csr_id != 63) Csrs[w_csr_id] <= rs1; end // Csrrw logic
 		                                                     //if (w_csr_id==satp) begin pc<=pc; bubble<=1; end end // flush pipelien on satp write
-	            32'b???????_?????_?????_010_?????_1110011: begin if (w_rd != 0) re[w_rd] <= Csrs[w_csr_id]; if (w_rs1 != 0) Csrs[w_csr_id] <= (Csrs[w_csr_id] |  rs1); end // Csrrs
-	            32'b???????_?????_?????_011_?????_1110011: begin if (w_rd != 0) re[w_rd] <= Csrs[w_csr_id]; if (w_rs1 != 0) Csrs[w_csr_id] <= (Csrs[w_csr_id] & ~rs1); end // Csrrc
-	            32'b???????_?????_?????_101_?????_1110011: begin if (w_rd != 0) re[w_rd] <= Csrs[w_csr_id]; Csrs[w_csr_id] <= w_imm_z; end // Csrrwi
-	            32'b???????_?????_?????_110_?????_1110011: begin if (w_rd != 0) re[w_rd] <= Csrs[w_csr_id]; if (w_imm_z != 0) Csrs[w_csr_id] <= (Csrs[w_csr_id] |  w_imm_z); end // csrrsi
-	            32'b???????_?????_?????_111_?????_1110011: begin if (w_rd != 0) re[w_rd] <= Csrs[w_csr_id]; if (w_imm_z != 0) Csrs[w_csr_id] <= (Csrs[w_csr_id] & ~w_imm_z); end // Csrrci
+	            32'b???????_?????_?????_010_?????_1110011: begin if (w_rd != 0) re[w_rd] <=(w_csr_id==63) ? 64'b0:Csrs[w_csr_id];
+		                                                     if (w_rs1 != 0 && w_csr_id != 63) Csrs[w_csr_id] <= (Csrs[w_csr_id] |  rs1); end // Csrrs
+	            32'b???????_?????_?????_011_?????_1110011: begin if (w_rd != 0) re[w_rd] <=(w_csr_id==63) ? 64'b0:Csrs[w_csr_id];
+		                                                     if (w_rs1 != 0 && w_csr_id != 63) Csrs[w_csr_id] <= (Csrs[w_csr_id] & ~rs1); end // Csrrc
+	            32'b???????_?????_?????_101_?????_1110011: begin if (w_rd != 0) re[w_rd] <=(w_csr_id==63) ? 64'b0:Csrs[w_csr_id];
+		                                                     if (w_csr_id != 63)   Csrs[w_csr_id] <= w_imm_z; end // Csrrwi
+	            32'b???????_?????_?????_110_?????_1110011: begin if (w_rd != 0) re[w_rd] <=(w_csr_id==63) ? 64'b0:Csrs[w_csr_id];
+		                                                     if (w_imm_z != 0 && w_csr_id != 63) Csrs[w_csr_id] <= (Csrs[w_csr_id] | w_imm_z); end // csrrsi
+	            32'b???????_?????_?????_111_?????_1110011: begin if (w_rd != 0) re[w_rd] <=(w_csr_id==63) ? 64'b0:Csrs[w_csr_id];
+		                                                     if (w_imm_z != 0 && w_csr_id != 63) Csrs[w_csr_id] <= (Csrs[w_csr_id] & ~w_imm_z); end // Csrrci
                     // Ecall
 	            32'b0000000_00000_?????_000_?????_1110011: begin 
 	                                                if      (current_privilege_mode == U_mode) trap_cause = UECALL; // 8 indicate Ecall from U-mode; 9 call from S-mode; 11 call from M-mode
