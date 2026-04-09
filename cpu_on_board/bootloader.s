@@ -506,8 +506,8 @@ blt t1, t2, copy_sector_loop
  li a0, "\nJump:"
  call print7
 
-#csrsi mie, 0b10000000 # MTIP
-#csrsi mstatus, 0b1000 # MIE
+ csrsi mie, 0b10000000 # MTIP
+ csrsi mstatus, 0b1000 # MIE
 
     fence.i
    #csrw 0x7cc, t0  # open debug print

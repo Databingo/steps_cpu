@@ -1,3 +1,11 @@
+Why my SoC start opensbi fw_jump.bin always fall into Secondary Hart Loop?
+
+0x10500073 : wfi (Wait For Interrupt)
+0x344027F3 : csrr a5, mip (Read Machine Interrupt Pending)
+0x0037D713 : andi a4, a5, 8 (Mask bit 3: MSIP - Software Interrupt)
+0x10177713 : andi x14, x14, 257 (A logic check used by OpenSBI)
+0xFE0708E3 : beq a4, a5, ... (Branch back to wfi)
+Log:
 DEBUG|ir:0x0000000000FF0637|ppc:0x00000000800148E8|pda:0x0000000000000000|
 DEBUG|ir:0x0000000000010737|ppc:0x00000000800148EC|pda:0x0000000080046E90|
 DEBUG|ir:0x000000000187959B|ppc:0x00000000800148F0|pda:0x0000000003000000|
