@@ -51,3 +51,4 @@ make CROSS_COMPILE=/usr/local/projects/bin/xpack-riscv-none-elf-gcc-14.2.0-3/bin
 
 hexdump -C build/platform/generic/firmware/fw_jump.bin > ../fw_jump.bin.txt
 cp build/platform/generic/firmware/fw_jump.bin ../fw_jump.bin
+cp my_board.dtb ../my_board.dtb
