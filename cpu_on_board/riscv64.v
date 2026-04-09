@@ -589,7 +589,7 @@ always @(*) begin
 		if (!STrap && !bubble && did)  begin did <= 0; end
 		// -- UPPER is default change for EXE stage --- but (1.Could be overwrite 2.Take effect next cycle) 
 
-		Csrs[mip][MTIP] <= time_interrupt; // MTIP linux will see then jump to its handler
+		Csrs[mip][MTIP] <= time_interrupt; // MTIP linux will see then jump to its handler  mtime>=mtimecmp
 		Csrs[mip][MEIP] <= meip_interrupt; 
 		Csrs[mip][SEIP] <= seip_interrupt;
 		Csrs[mip][MSIP] <= msip_interrupt; 
@@ -681,7 +681,7 @@ always @(*) begin
 		end
 
 		// Async Interrupt PLIC full (Platform-Level-Interrupt-Control)  MMIO (hardwire timers uart plic)
-	    end else if ((meip_interrupt || seip_interrupt || time_interrupt) && Csrs[mstatus][MIE]==1 && !STrap && !load_step && !store_step) begin //mstatus[3] MIE
+	    end else if ((meip_interrupt || msip_interrupt || time_interrupt || seip_interrupt) && Csrs[mstatus][MIE]==1 && !STrap && !load_step && !store_step) begin //mstatus[3] MIE
 		//Csrs[mip][MTIP] <= time_interrupt; // MTIP linux will see then jump to its handler
 		//Csrs[mip][MEIP] <= meip_interrupt; // MEIP
 		//Csrs[mip][MSIP] <= seip_interrupt; // MSIP
