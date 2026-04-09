@@ -448,8 +448,6 @@ csrrsi x0, mstatus, 0b1000
 fence.i
 #     li a0, 0 
 addi a0, x0, 0x0
-#     li a1, 0 
-addi a1, x0, 0x0
 #     li a1, 0x80100000 
 addi a1, x0, 0x0
 slli a1, a1, 0xb
