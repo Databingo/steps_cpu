@@ -14,17 +14,24 @@ module riscv64(
     output reg [2:0]  bus_ls_type, // lb lh lw ld lbu lhu lwu // sb sh sw sd sbu shu swu 
 
     output reg [63:0] mtime,    // map to 0x0200_bff8 
-    inout wire [63:0] mtimecmp, // map to 0x0200_4000 + 8byte*hartid
+    //inout wire [63:0] mtimecmp, // map to 0x0200_4000 + 8byte*hartid
+    input wire [63:0] mtimecmp, // map to 0x0200_4000 + 8byte*hartid
 
     input wire meip_interrupt, // from PLIC
     input wire seip_interrupt, // from Supervisor External
     input wire msip_interrupt, // from CLINT
-    input wire mtip_interrupt, // from Machine Time
+    //input wire mtip_interrupt, // from Machine Time
 
     input  reg        bus_read_done,
     input  reg        bus_write_done,
     input  wire [63:0] bus_read_data   // from outside
 );
+
+wire mtip = Csrs[mip][MTIP] && Csrs[mie][MTIE];
+wire meip = Csrs[mip][MEIP] && Csrs[mie][MEIE];
+wire msip = Csrs[mip][MSIP] && Csrs[mie][MSIE];
+wire seip = Csrs[mip][SEIP] && Csrs[mie][SEIE];
+
 
 (* keep = 1 *) reg [63:0] pc;
 wire [31:0] ir;
@@ -392,7 +399,7 @@ wire [3:0]  satp_mmu  = Csrs[satp][63:60]; // 0:bare, 8:sv39, 9:sv48  satp.MODE!
 
 // -- Timer --
 always @(posedge clk or negedge reset) begin if (!reset) mtime <= 0; else mtime <= mtime + 1; end
-wire time_interrupt = (mtime >= mtimecmp);
+wire mtip_interrupt = (mtime >= mtimecmp);
 
 // -- Innerl signal --
 reg bubble;
@@ -589,7 +596,7 @@ always @(*) begin
 		if (!STrap && !bubble && did)  begin did <= 0; end
 		// -- UPPER is default change for EXE stage --- but (1.Could be overwrite 2.Take effect next cycle) 
 
-		Csrs[mip][MTIP] <= time_interrupt; // MTIP linux will see then jump to its handler  mtime>=mtimecmp
+		Csrs[mip][MTIP] <= mtip_interrupt; // MTIP linux will see then jump to its handler  mtime>=mtimecmp
 		Csrs[mip][MEIP] <= meip_interrupt; 
 		Csrs[mip][SEIP] <= seip_interrupt;
 		Csrs[mip][MSIP] <= msip_interrupt; 
@@ -681,17 +688,25 @@ always @(*) begin
 		end
 
 		// Async Interrupt PLIC full (Platform-Level-Interrupt-Control)  MMIO (hardwire timers uart plic)
-	    end else if ((meip_interrupt || msip_interrupt || time_interrupt || seip_interrupt) && Csrs[mstatus][MIE]==1 && !STrap && !load_step && !store_step) begin //mstatus[3] MIE
-		//Csrs[mip][MTIP] <= time_interrupt; // MTIP linux will see then jump to its handler
+	    //end else if ((meip_interrupt || msip_interrupt || mtip_interrupt || seip_interrupt) && Csrs[mstatus][MIE]==1 && !STrap && !load_step && !store_step) begin //mstatus[3] MIE
+	    end else if ((meip|| msip|| mtip|| seip) && Csrs[mstatus][MIE]==1 && !STrap && !load_step && !store_step) begin //mstatus[3] MIE
+		//Csrs[mip][MTIP] <= mtip_interrupt; // MTIP linux will see then jump to its handler
 		//Csrs[mip][MEIP] <= meip_interrupt; // MEIP
 		//Csrs[mip][MSIP] <= seip_interrupt; // MSIP
-		reserve_valid <= 0; // Interrupt clear lr.w/lr.d
+    
+		//reserve_valid <= 0; // Interrupt clear lr.w/lr.d
+		//do_trap = 1; trap_is_interrupt =1; trap_val = 0; trap_epc = pc_4;
+		//if (meip_interrupt) trap_cause = 11; // Cause 11 for Machine External Interrupt
+		//else if (msip_interrupt) trap_cause = 3;  // Cause 3 for Machine Sofeware Interrupt
+		//else if (mtip_interrupt) trap_cause = 7;  // Cause 7 for Machine Timer Interrupt
+		//else if (seip_interrupt) trap_cause = 9;  // Cause 9 for Supervisor External
 
+		reserve_valid <= 0; // Interrupt clear lr.w/lr.d
 		do_trap = 1; trap_is_interrupt =1; trap_val = 0; trap_epc = pc_4;
-		if (meip_interrupt) trap_cause = 11; // Cause 11 for Machine External Interrupt
-		else if (msip_interrupt) trap_cause = 3;  // Cause 3 for Machine Sofeware Interrupt
-		else if (time_interrupt) trap_cause = 7;  // Cause 7 for Machine Timer Interrupt
-		else if (seip_interrupt) trap_cause = 9;  // Cause 9 for Supervisor External
+		if (meip) trap_cause = 11; // Cause 11 for Machine External Interrupt
+		else if (msip) trap_cause = 3;  // Cause 3 for Machine Sofeware Interrupt
+		else if (mtip) trap_cause = 7;  // Cause 7 for Machine Timer Interrupt
+		else if (seip) trap_cause = 9;  // Cause 9 for Supervisor External
 
 		// IR
 	    end else begin 
