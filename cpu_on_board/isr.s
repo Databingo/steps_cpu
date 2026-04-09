@@ -202,11 +202,15 @@ debug:
      csrr a0, mimpid # mimpid/pda
      call print_reg
 
-     li a0, "|mhartid:" 
-     call print7
-     csrr a0, mhartid
-     call print_reg
+    li a0, "|mhtid:" 
+    call print7
+    csrr a0, mhartid
+    call print_reg
 
+    li a0, "|mstas:" 
+    call print7
+    csrr a0, mstatus
+    call print_reg
 
 
      li a0, "|" 
