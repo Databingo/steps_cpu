@@ -15,6 +15,20 @@ file_first_cluster:
 file_sectors:
 file_start_sector:
 _start:
+#     li s0, 0x80000000
+addi s0, x0, 0x0
+slli s0, s0, 0xb
+ori s0, s0, 0x200
+slli s0, s0, 0x16
+#     li s1, 0x80800000
+addi s1, x0, 0x0
+slli s1, s1, 0xb
+ori s1, s1, 0x202
+slli s1, s1, 0x16
+clear_ram_loop:
+sd zero, 0(s0)
+addi s0, s0, 8
+blt s0, s1, clear_ram_loop
 #     li sp, 0x1800 
 addi sp, x0, 0x0
 lui sp, 0x2
@@ -428,8 +442,6 @@ ori a0, a0, 0x20a
 auipc x1, 0 # R_RISCV_PCREL_HI20 print7
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print7
 fence.i
-#     csrwi mdebug, 8 
-csrrwi x0, mdebug, 8
 #     li a0, 0 
 addi a0, x0, 0x0
 #     li a1, 0 

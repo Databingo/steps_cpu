@@ -353,6 +353,7 @@ reg  [5:0] w_csr_id;             // CSR id (32)
 always @(*) begin
     case(w_csr)
 	12'h300 : w_csr_id = mstatus    ;    
+	12'h301 : w_csr_id = misa       ;    
 	12'h305 : w_csr_id = mtvec      ;    
 	12'h340 : w_csr_id = mscratch   ;    
 	12'h341 : w_csr_id = mepc       ;    

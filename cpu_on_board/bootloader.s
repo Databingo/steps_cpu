@@ -59,6 +59,17 @@ file_start_sector:
 .section .text
 # -- Global setup --
 _start:
+
+    li s0, 0x80000000
+    li s1, 0x80800000
+clear_ram_loop:
+    sd zero, 0(s0)
+    addi s0, s0, 8
+    blt s0, s1, clear_ram_loop
+
+
+
+
     li sp, 0x1800 # Set stack
     li s11, 0x2004 # UART print 
     li s10, 0x2008 # UART controller
@@ -93,6 +104,7 @@ _start:
 #| `0x24` | —    | (More fields in FAT32 only)     | —                              | —               |
 #| `0x36` | 11   | Volume Label / File System Type | "NO NAME    " / "FAT16   "     | —               |
 #| :----- | :--- | :------------------------------ | :----------------------------- | :-------------- |
+
 
 lw a0, 0(s11)
 call print_reg
@@ -494,9 +506,13 @@ blt t1, t2, copy_sector_loop
  li a0, "\nJump:"
  call print7
 
+#csrsi mie, 0b10000000 # MTIP
+#csrsi mstatus, 0b1000 # MIE
+
     fence.i
    #csrw 0x7cc, t0  # open debug print
-    csrwi mdebug, 8 
+
+   #csrwi mdebug, 8 
     li a0, 0 # use core 0
     li a1, 0 # let opensbi use its embedded DTB
    #li a1, 0x80100000 # set DTB addr
