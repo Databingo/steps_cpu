@@ -506,13 +506,13 @@ blt t1, t2, copy_sector_loop
  li a0, "\nJump:"
  call print7
 
- csrsi mie, 0b10000000 # MTIP
- csrsi mstatus, 0b1000 # MIE
+#csrsi mie, 0b10000000 # MTIP
+#csrsi mstatus, 0b1000 # MIE
 
     fence.i
    #csrw 0x7cc, t0  # open debug print
 
-   #csrwi mdebug, 8 
+    csrwi mdebug, 8 
     li a0, 0 # use core 0
    #li a1, 0 # let opensbi use its embedded DTB
     li a1, 0x80100000 # set DTB addr
