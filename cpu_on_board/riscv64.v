@@ -27,10 +27,10 @@ module riscv64(
     input  wire [63:0] bus_read_data   // from outside
 );
 
-wire mtip = Csrs[mip][MTIP] && Csrs[mie][MTIE];
-wire meip = Csrs[mip][MEIP] && Csrs[mie][MEIE];
-wire msip = Csrs[mip][MSIP] && Csrs[mie][MSIE];
-wire seip = Csrs[mip][SEIP] && Csrs[mie][SEIE];
+wire meip = Csrs[mip][MEIP] && Csrs[mie][MEIE];  // mip:P Hardware say pending;|mie:E Software allow this pending;|mstatus[MIE]:cpu globally allow interrup # 3 conditions for a interrup run
+wire mtip = Csrs[mip][MTIP] && Csrs[mie][MTIE];  // irq level: MEI MTI MSI
+wire msip = Csrs[mip][MSIP] && Csrs[mie][MSIE];  // hardware mip-> local mie-> global mstatus.MIE-> cpu take by irq-> trap mpie=mie/mie=0
+wire seip = Csrs[mip][SEIP] && Csrs[mie][SEIE];  // hardware sip-> local sie-> global mstatus.SIE-> cpu take by irq-> trap spie=sie/sie=0 (this need after mideleg)
 
 
 (* keep = 1 *) reg [63:0] pc;
