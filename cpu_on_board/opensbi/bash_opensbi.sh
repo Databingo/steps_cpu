@@ -17,6 +17,7 @@ make CROSS_COMPILE=/usr/local/projects/bin/xpack-riscv-none-elf-gcc-14.2.0-3/bin
      EXTRA_CFLAGS="-mno-relax -march=rv64ima_zicsr_zifencei -mabi=lp64"\
      FW_FDT_PATH=my_board.dtb \
      FW_COLDBOOT_HART=0 \
+     FW_HART_COUNT=1 \
      FW_PAYLOAD=n 
     #FW_PAYLOAD_OFFSET=0x200000 \
     #FW_PAYLOAD_FDT_ADDR=0x80100000 \

@@ -1,4 +1,4 @@
-Why my SoC start opensbi fw_jump.bin always fall into Secondary Hart Loop?
+Why my SoC start opensbi fw_jump.bin always fall into infinite Loop?
 
 0x10500073 : wfi (Wait For Interrupt)
 0x344027F3 : csrr a5, mip (Read Machine Interrupt Pending)

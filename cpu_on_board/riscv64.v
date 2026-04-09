@@ -565,7 +565,7 @@ always @(*) begin
 		bus_write_data <= 0;
 		bus_address <= `Ram_base;
 		// Interrupt re-enable
-		Csrs[mstatus][MIE] <= 0;
+		Csrs[mstatus][MIE] <= 1;
 		mmu_da <= 0;
 		for (i=0;i<11;i=i+1) begin sre[i]<= 64'b0; end 
 		for (i=0;i<31;i=i+1) begin Csrs[i]<= 64'b0; end
