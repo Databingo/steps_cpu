@@ -37,10 +37,10 @@
     };
 
     chosen { /* Points to the UART below */
-       //// qemu
-       //stdout-path = "/soc/serial@10000000";
-       // ############ SoC
-       stdout-path = "/soc/uart@2004";
+       // qemu
+       stdout-path = "/soc/serial@10000000";
+       //// ############ SoC
+       //stdout-path = "/soc/uart@2004";
     };
 
     soc {
@@ -49,20 +49,20 @@
         compatible = "simple-bus";
         ranges;
 
-        ///* 2. UART: For QEMU test (at 10000000) */
-        //serial@10000000 {
-        //    compatible = "ns16550a";
-        //    reg = <0x00 0x10000000 0x00 0x100>;
-        //    clock-frequency = <12500000>;
-        //    reg-shift = <0>;
-        //};
-         // ############ SoC
-         uart0: uart@2004{
-             compatible = "sifive,uart0";
-             reg = <0x0 0x2004 0x0 0x10>;
-              interrupts-extended = <&cpu0_intc 0x09>; // add dummy external interrupt mapping
-             clock-frequency = <12500000>;
-         };
+        /* 2. UART: For QEMU test (at 10000000) */
+        serial@10000000 {
+            compatible = "ns16550a";
+            reg = <0x00 0x10000000 0x00 0x100>;
+            clock-frequency = <12500000>;
+            reg-shift = <0>;
+        };
+        // // ############ SoC
+        // uart0: uart@2004{
+        //     compatible = "sifive,uart0";
+        //     reg = <0x0 0x2004 0x0 0x10>;
+        //      interrupts-extended = <&cpu0_intc 0x09>; // add dummy external interrupt mapping
+        //     clock-frequency = <12500000>;
+        // };
 
     // comment out for SoC
         /* 3. CLINT: Handles Timer AND IPI (Software Interrupt) */
