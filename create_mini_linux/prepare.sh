@@ -31,10 +31,10 @@ BR2_STATIC_LIBS=y
 EOF
 
 
-
-LD_LIBRARY_PATH= make clean
-LD_LIBRARY_PATH= make defconfig BR2_DEFCONFIG=ima_defconfig
-LD_LIBRARY_PATH= FORCE_UNSAFE_CONFIGURE=1 make -j$(nproc)
+#
+#LD_LIBRARY_PATH= make clean
+#LD_LIBRARY_PATH= make defconfig BR2_DEFCONFIG=ima_defconfig
+#LD_LIBRARY_PATH= FORCE_UNSAFE_CONFIGURE=1 make -j$(nproc)
 
 # build process
 # binutils (rv assembler/linker)
