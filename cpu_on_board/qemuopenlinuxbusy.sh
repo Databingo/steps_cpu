@@ -4,7 +4,8 @@
 #    -cpu rv64,f=off,d=off,c=off,h=off,g=off,zfa=off,zfh=off,zba=off,zbb=off \
 #    -nographic \
 #    -dtb my_board_qemu.dtb \
-#    -bios opensbi/build/platform/generic/firmware/fw_payload.bin \
+#    -bios opensbi/build/platform/generic/firmware/fw_jump.bin \
+#   #-bios opensbi/build/platform/generic/firmware/fw_payload.bin \
 #   #-bios fw_jump_qemu.bin \
 #
 #qemu-system-riscv64 -nographic \
@@ -13,9 +14,9 @@
 #    -bios opensbi/build/platform/generic/firmware/fw_payload.bin \
 ##   -append "console=hvc0 earlycon=sbi"
 
+# Work
 qemu-system-riscv64 -nographic \
     -machine virt \
-    -cpu rv64,f=off,d=off,c=off,h=off,g=off,zfa=off,zfh=off,zba=off,zbb=off \
     -bios default \
     -kernel /usr/local/projects/steps_cpu/create_mini_linux/riscv64-linux/Image \
     -initrd /usr/local/projects/steps_cpu/create_mini_linux/riscv64-linux/rootfs.cpio \
