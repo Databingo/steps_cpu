@@ -16,4 +16,5 @@ cpu_on_board/py/
 create_mini_linux/riscv64-linux
 create_mini_linux/busybox
 create_mini_linux/buildroot_bk
+create_mini_linux/buildroot-2026.02
 create_mini_linux/riscv64-gnu-toolchain
