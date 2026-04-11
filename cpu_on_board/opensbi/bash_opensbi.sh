@@ -33,8 +33,8 @@ make CROSS_COMPILE=/usr/local/projects/bin/xpack-riscv-none-elf-gcc-14.2.0-3/bin
      EXTRA_CFLAGS="-mno-relax -march=rv64ima_zicsr_zifencei -mabi=lp64"\
      FW_COLDBOOT_HART=0 \
      FW_HART_COUNT=1 \
-     FW_PAYLOAD=y \
-     FW_PAYLOAD_PATH=/usr/local/projects/steps_cpu/create_mini_linux/riscv64-linux/Image
+    #FW_PAYLOAD=y \
+    #FW_PAYLOAD_PATH=/usr/local/projects/steps_cpu/create_mini_linux/riscv64-linux/Image
 
 
 
