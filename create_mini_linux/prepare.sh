@@ -31,6 +31,14 @@ EOF
 
 
 
-LD_LIBRARY_PATH= make defconfig BR2_DEFCONFIG=ima_defconfig
 LD_LIBRARY_PATH= make clean
+LD_LIBRARY_PATH= make defconfig BR2_DEFCONFIG=ima_defconfig
 LD_LIBRARY_PATH= FORCE_UNSAFE_CONFIGURE=1 make -j$(nproc)
+
+# build process
+# binutils (rv assembler/linker)
+# gcc pass1 (no libc yet)
+# musl headers
+# libgcc (rv64ima/lp640
+# musl libc fully
+# gcc pass2(linked musl)
