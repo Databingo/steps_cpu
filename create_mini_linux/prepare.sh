@@ -21,6 +21,7 @@ cat <<EOF > ima_defconfig
 BR2_riscv=y
 BR2_RISCV_64=y
 BR2_riscv_custom=y
+BR2_RISCV_ISA_RVI=y
 BR2_RISCV_ISA_RVM=y
 BR2_RISCV_ISA_RVA=y
 BR2_RISCV_ISA_EXTRA="zicsr_zifencei"
