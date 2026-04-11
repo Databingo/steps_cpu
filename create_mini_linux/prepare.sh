@@ -21,9 +21,9 @@ cat <<EOF > ima_defconfig
 BR2_riscv=y
 BR2_RISCV_64=y
 BR2_riscv_custom=y
-BR2_RISCV_ISA_CUSTOM_RVM=y
-BR2_RISCV_ISA_CUSTOM_RVA=y
-BR2_RISCV_ISA_CUSTOM_EXTENSIONS="-march=rv64ima_zicsr_zifencei_zalrsc_zaamo"
+BR2_RISCV_ISA_RVM=y
+BR2_RISCV_ISA_RVA=y
+BR2_RISCV_ISA_EXTRA="zicsr_zifencei_zalrsc_zaamo"
 BR2_RISCV_ABI_LP64=y
 BR2_TOOLCHAIN_BUILDROOT_MUSL=y
 BR2_TARGET_ROOTFS_CPIO=y
