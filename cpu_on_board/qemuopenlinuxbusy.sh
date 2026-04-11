@@ -7,9 +7,11 @@
 #    -bios opensbi/build/platform/generic/firmware/fw_payload.bin \
 #   #-bios fw_jump_qemu.bin \
 #
-#qemu-system-riscv64 -nographic \
-#    -machine virt \
-#    -bios opensbi/build/platform/generic/firmware/fw_payload.bin \
+qemu-system-riscv64 -nographic \
+    -machine virt \
+    -cpu rv64,f=off,d=off,c=off,h=off,g=off,zfa=off,zfh=off,zba=off,zbb=off \
+    -bios opensbi/build/platform/generic/firmware/fw_payload.bin \
+#   -append "console=hvc0 earlycon=sbi"
 
 
 # 1. qemu-ima test jump
