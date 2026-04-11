@@ -12,7 +12,7 @@
 # make CROSS_COMPILE=riscv64-linux-gnu- install
 #
 #
-# GCC 14.3 BR2_RISCV_ISA_RVA=y is zaamo + zalrc
+# GCC 14.3 BR2_RISCV_ISA_RVA=y is zaamo + zalrc  riscv64ima_zicsr_zifencei
 #wget https://buildroot.org/downloads/buildroot-2026.02.tar.gz
 #tar -zxvf buildroot-2026.02.tar.gz
 cd buildroot-2026.02
