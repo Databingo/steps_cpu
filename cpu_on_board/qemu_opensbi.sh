@@ -4,8 +4,9 @@ qemu-system-riscv64  \
     -m 64M \
     -cpu rv64,f=off,d=off,c=off,h=off,g=off,zfa=off,zfh=off,zba=off,zbb=off \
     -nographic \
-    -bios fw_jump_qemu.bin \
     -dtb my_board_qemu.dtb \
+    -bios opensbi/build/platform/generic/firmware/fw_payload.bin \
+   #-bios fw_jump_qemu.bin \
 
 
 
