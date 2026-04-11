@@ -39,6 +39,6 @@ LD_LIBRARY_PATH= FORCE_UNSAFE_CONFIGURE=1 make -j$(nproc)
 # binutils (rv assembler/linker)
 # gcc pass1 (no libc yet)
 # musl headers
-# libgcc (rv64ima/lp640
+# libgcc (rv64ima/lp64)
 # musl libc fully
 # gcc pass2(linked musl)
