@@ -16,8 +16,10 @@
 qemu-system-riscv64 -nographic \
     -machine virt \
     -cpu rv64,f=off,d=off,c=off,h=off,g=off,zfa=off,zfh=off,zba=off,zbb=off \
+    -bios default \
     -kernel /usr/local/projects/steps_cpu/create_mini_linux/riscv64-linux/Image \
-    -append "console=hvc0 earlycon=sbi"
+    -initrd /usr/local/projects/steps_cpu/create_mini_linux/riscv64-linux/rootfs.cpio \
+    -append "console=ttyS0"
 
 # 1. qemu-ima test jump
 # 2. test payload
