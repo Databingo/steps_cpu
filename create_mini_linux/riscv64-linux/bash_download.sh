@@ -5,4 +5,4 @@
 #cd linux && make ARCH=riscv  CROSS_COMPILE=/usr/local/projects/bin/riscv64-lp64d--glibc--bleeding-edge-2025.08-1/bin/riscv64-buildroot-linux-gnu- CC=/usr/local/projects/bin/riscv64-lp64d--glibc--bleeding-edge-2025.08-1/bin/riscv64-buildroot-linux-gnu-gcc menuconfig
 #cd linux && make ARCH=riscv  CROSS_COMPILE=/usr/local/projects/bin/riscv64-lp64d--glibc--bleeding-edge-2025.08-1/bin/riscv64-buildroot-linux-gnu-  menuconfig
 cp ../config.up5_fix_lp64 linux/.config
-cd linux && make ARCH=riscv CROSS_COMPILE=./buildroot-2026.02/output/host/bin/riscv64-buildroot-linux-musl- menuconfig
+cd linux && make ARCH=riscv CROSS_COMPILE=../buildroot-2026.02/output/host/bin/riscv64-buildroot-linux-musl- menuconfig
