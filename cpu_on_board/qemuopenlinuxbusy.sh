@@ -66,13 +66,19 @@
 #    -bios fw_jump_ima.bin \
 #    -kernel /usr/local/projects/steps_cpu/create_mini_linux/riscv64-linux/Image_noblock
 
-# Work with no-defaultuart-noblock-novirdriver-xzramfs
+## Work with no-defaultuart-noblock-novirdriver-xzramfs
+#qemu-system-riscv64 -nographic \
+#    -machine virt \
+#    -cpu rv64,f=off,d=off,c=off,h=off,g=off,zfa=off,zfh=off,zba=off,zbb=off \
+#    -bios fw_jump_ima.bin \
+#    -kernel /usr/local/projects/steps_cpu/create_mini_linux/riscv64-linux/Image_novir
+
+# Test smaller image
 qemu-system-riscv64 -nographic \
     -machine virt \
     -cpu rv64,f=off,d=off,c=off,h=off,g=off,zfa=off,zfh=off,zba=off,zbb=off \
     -bios fw_jump_ima.bin \
-    -kernel /usr/local/projects/steps_cpu/create_mini_linux/riscv64-linux/Image_novir
-
+    -kernel /usr/local/projects/steps_cpu/create_mini_linux/riscv64-linux/Image
 
 
 
