@@ -23,7 +23,7 @@ dtc -I dts -O dtb -o my_board.dtb b.dts.qemu # boot time use via its address at 
 #    #FW_PAYLOAD_OFFSET=0x200000 \
 #    #FW_PAYLOAD_FDT_ADDR=0x80100000 \
 
-# for buildroot-linux-busybox
+# for buildroot-linux-busybox  0x8000000-opensib 1Mb | 0x80100000-dtb 1Mb | 0x80200000-linuxImage 2.2Mb | user space
 make CROSS_COMPILE=/usr/local/projects/bin/xpack-riscv-none-elf-gcc-14.2.0-3/bin/riscv-none-elf- \
      PLATFORM=generic \
      FW_PIC=n \
@@ -33,8 +33,13 @@ make CROSS_COMPILE=/usr/local/projects/bin/xpack-riscv-none-elf-gcc-14.2.0-3/bin
      EXTRA_CFLAGS="-mno-relax -march=rv64ima_zicsr_zifencei -mabi=lp64"\
      FW_COLDBOOT_HART=0 \
      FW_HART_COUNT=1 \
-    #FW_PAYLOAD=y \
-    #FW_PAYLOAD_PATH=/usr/local/projects/steps_cpu/create_mini_linux/riscv64-linux/Image
+     FW_TEXT_START=0x80000000 \
+     FW_FDT_PATH=my_board.dtb \
+     FW_JUMP_FDT_ADDR=0x80100000 \
+     FW_JUMP_ADDR=0x80200000 \
+     FW_PAYLOAD=y \
+     FW_PAYLOAD_PATH=/usr/local/projects/steps_cpu/create_mini_linux/riscv64-linux/Image \
+     FW_PAYLOAD_OFFSET=0x200000 \
 
 
 
@@ -76,5 +81,5 @@ make CROSS_COMPILE=/usr/local/projects/bin/xpack-riscv-none-elf-gcc-14.2.0-3/bin
 #../../../bin/riscv64-unknown-elf-objdump -D -b binary -m riscv:rv64ima build/platform/generic/firmware/fw_payload.bin|less
 
 #hexdump -C build/platform/generic/firmware/fw_jump.bin > ../fw_jump.bin.txt
-#cp build/platform/generic/firmware/fw_jump.bin ../fw_jump.bin
+cp build/platform/generic/firmware/fw_jump.bin ../fw_jump.bin
 #cp my_board.dtb ../my_board.dtb
