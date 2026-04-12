@@ -52,13 +52,19 @@
 #    -append "earlycon=sbi console=hvc0"
 #   #-append "console=ttyS0"
  
-# Work with 1fs-bootcmd-sbi01uart
+## Work with 1fs-bootcmd-sbi01uart
+#qemu-system-riscv64 -nographic \
+#    -machine virt \
+#    -cpu rv64,f=off,d=off,c=off,h=off,g=off,zfa=off,zfh=off,zba=off,zbb=off \
+#    -bios fw_jump_ima.bin \
+#    -kernel /usr/local/projects/steps_cpu/create_mini_linux/riscv64-linux/Image_fs_nou8250_only_hvc0
+
+# Work with no-defaultuart-noblock
 qemu-system-riscv64 -nographic \
     -machine virt \
     -cpu rv64,f=off,d=off,c=off,h=off,g=off,zfa=off,zfh=off,zba=off,zbb=off \
     -bios fw_jump_ima.bin \
-    -kernel /usr/local/projects/steps_cpu/create_mini_linux/riscv64-linux/Image_fs_nou8250_only_hvc0
-
+    -kernel /usr/local/projects/steps_cpu/create_mini_linux/riscv64-linux/Image_noblock
 # 1. qemu-ima test jump
 # 2. test payload
 # 3. test qemu linux
