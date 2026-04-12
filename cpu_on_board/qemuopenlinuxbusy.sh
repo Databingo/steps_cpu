@@ -23,11 +23,12 @@
 #    -append "console=ttyS0"
 #
 
+# Work ima_liunx_busybox_default_uart_page5
 qemu-system-riscv64 -nographic \
     -machine virt \
     -cpu rv64,f=off,d=off,c=off,h=off,g=off,zfa=off,zfh=off,zba=off,zbb=off \
     -bios fw_jump_ima.bin \
-    -kernel /usr/local/projects/steps_cpu/create_mini_linux/riscv64-linux/Image \
+    -kernel /usr/local/projects/steps_cpu/create_mini_linux/riscv64-linux/Image_default_uart_page5 \
     -initrd /usr/local/projects/steps_cpu/create_mini_linux/riscv64-linux/rootfs.cpio \
     -append "console=ttyS0"
 
