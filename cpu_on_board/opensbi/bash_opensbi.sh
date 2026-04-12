@@ -23,7 +23,7 @@ dtc -I dts -O dtb -o my_board.dtb b.dts.qemu # boot time use via its address at 
 #    #FW_PAYLOAD_OFFSET=0x200000 \
 #    #FW_PAYLOAD_FDT_ADDR=0x80100000 \
 
-# for buildroot-linux-busybox  0x8000000-opensib 1Mb | 0x80100000-dtb 1Mb | 0x80200000-linuxImage 2.2Mb | user space
+# for buildroot-linux-busybox  0x8000000-opensib 512kb | 0x80080000-dtb 512kb | 0x80100000-linuxKernel 2.2Mb | user space
 make CROSS_COMPILE=/usr/local/projects/bin/xpack-riscv-none-elf-gcc-14.2.0-3/bin/riscv-none-elf- \
      PLATFORM=generic \
      FW_PIC=n \
