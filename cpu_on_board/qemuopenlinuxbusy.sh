@@ -33,7 +33,7 @@
 #    -append "console=ttyS0"
 #
 
-# Work turn to page 3 with same Image of linux
+# Work turn to page 3 with same Image of linux (ctrl-a c infor registers satp 8...)
 qemu-system-riscv64 -nographic \
     -machine virt \
     -cpu rv64,f=off,d=off,c=off,h=off,g=off,zfa=off,zfh=off,zba=off,zbb=off \
