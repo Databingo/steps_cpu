@@ -36,10 +36,10 @@ make CROSS_COMPILE=/usr/local/projects/bin/xpack-riscv-none-elf-gcc-14.2.0-3/bin
      FW_TEXT_START=0x80000000 \
      FW_FDT_PATH=my_board.dtb \
      FW_JUMP_FDT_ADDR=0x80100000 \
-     FW_JUMP_ADDR=0x80200000 \
      FW_PAYLOAD=y \
      FW_PAYLOAD_PATH=/usr/local/projects/steps_cpu/create_mini_linux/riscv64-linux/Image \
      FW_PAYLOAD_OFFSET=0x200000 \
+     FW_JUMP_ADDR=0x80200000 \
 
 
 
