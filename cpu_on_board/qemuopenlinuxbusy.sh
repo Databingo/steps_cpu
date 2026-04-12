@@ -47,8 +47,8 @@ qemu-system-riscv64 -nographic \
     -cpu rv64,f=off,d=off,c=off,h=off,g=off,zfa=off,zfh=off,zba=off,zbb=off \
     -bios fw_jump_ima.bin \
     -kernel /usr/local/projects/steps_cpu/create_mini_linux/riscv64-linux/Image_sbiuart_bootcmd_page3 \
-    -initrd /usr/local/projects/steps_cpu/create_mini_linux/riscv64-linux/rootfs.cpio \
-    -append "earlycon=sbi console=hvc0"
+   #-initrd /usr/local/projects/steps_cpu/create_mini_linux/riscv64-linux/rootfs.cpio \
+   #-append "earlycon=sbi console=hvc0"
    #-append "console=ttyS0"
 
 # 1. qemu-ima test jump
