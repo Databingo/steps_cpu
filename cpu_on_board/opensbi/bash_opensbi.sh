@@ -29,17 +29,18 @@ make CROSS_COMPILE=/usr/local/projects/bin/xpack-riscv-none-elf-gcc-14.2.0-3/bin
      FW_PIC=n \
      PLATFORM_RISCV_ISA=rv64ima_zicsr_zifencei \
      PLATFORM_RISCV_ABI=lp64 \
-     EXTRA_CCASFLAGS="-march=rv64ima_zicsr_zifencei -mabi=lp64"\
-     EXTRA_CFLAGS="-mno-relax -march=rv64ima_zicsr_zifencei -mabi=lp64"\
+     EXTRA_CCASFLAGS="-march=rv64ima_zicsr_zifencei -mabi=lp64" \
+     EXTRA_CFLAGS="-mno-relax -march=rv64ima_zicsr_zifencei -mabi=lp64" \
      FW_COLDBOOT_HART=0 \
      FW_HART_COUNT=1 \
      FW_TEXT_START=0x80000000 \
      FW_FDT_PATH=my_board.dtb \
      FW_JUMP_FDT_ADDR=0x80080000 \
-     FW_PAYLOAD=y \
-     FW_PAYLOAD_PATH=/usr/local/projects/steps_cpu/create_mini_linux/riscv64-linux/Image \
-     FW_PAYLOAD_OFFSET=0x100000 \
      FW_JUMP_ADDR=0x80100000 \
+     FW_PAYLOAD_PATH=/usr/local/projects/steps_cpu/create_mini_linux/riscv64-linux/Image \
+     FW_PAYLOAD=y \
+     FW_PAYLOAD_OFFSET=0x100000 \
+     FW_PAYLOAD_ALIGN=0x1000
 
 
 
