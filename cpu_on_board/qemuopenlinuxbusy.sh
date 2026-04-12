@@ -85,7 +85,8 @@ qemu-system-riscv64 -nographic \
     -machine virt \
      -m 8M \
     -cpu rv64,f=off,d=off,c=off,h=off,g=off,zfa=off,zfh=off,zba=off,zbb=off \
-    -bios opensbi/build/platform/generic/firmware/fw_payload.bin \
+    -bios opensbi/build/platform/generic/firmware/fw_jump.bin \
+   #-bios opensbi/build/platform/generic/firmware/fw_payload.bin \
    #-bios fw_jump.bin \
 
 
