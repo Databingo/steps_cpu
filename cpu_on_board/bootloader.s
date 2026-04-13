@@ -245,9 +245,9 @@ call print_sector
 opensbi:
 li s8, 0 # entry_index
 #li s9, "MUSIC"
-li s9, "KERNEL"
-mv a0, s9
-call print7
+li s9, "KERNL"
+#mv a0, s9
+#call print7
 kernel:
 entry_loop:
 bge s8, s7, done_entries

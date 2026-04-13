@@ -189,22 +189,15 @@ jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_sector
 opensbi:
 # li s8, 0 
 addi s8, x0, 0x0
-# li s9, "KERNEL"
+# li s9, "KERNL"
 addi s9, x0, 0x0
-lui s9, 0x4
-srli s9, s9, 0x1
-ori s9, s9, 0x622
+ori s9, s9, 0x26
 slli s9, s9, 0xb
-ori s9, s9, 0x539
+ori s9, s9, 0x139
 slli s9, s9, 0xb
 ori s9, s9, 0x248
 slli s9, s9, 0xb
 ori s9, s9, 0x54b
-# mv a0, s9
-addi a0, s9, 0
-# call print7
-auipc x1, 0 # R_RISCV_PCREL_HI20 print7
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print7
 kernel:
 entry_loop:
 bge s8, s7, done_entries
