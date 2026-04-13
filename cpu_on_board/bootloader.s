@@ -285,14 +285,14 @@ bge t4, t3, load_name_loop
 slli t2, t2, 24
 srli t2, t2, 24
 
-# -- Print Name --- 
-addi sp, sp, -16
-sd t2, 0(sp)
-sb x0, 8(sp)
-mv a0, sp
-call puts
-addi sp, sp, 16
-# -----------------
+## -- Print Name --- 
+#addi sp, sp, -16
+#sd t2, 0(sp)
+#sb x0, 8(sp)
+#mv a0, sp
+#call puts
+#addi sp, sp, 16
+## -----------------
 
 bne t2, s9, next_entry
 
@@ -415,8 +415,8 @@ lw a0, 0(a1)
 call print_reg
 
 
-li a0, "\nFileB:"
-call print7
+#li a0, "\nFileB:"
+#call print7
 
 la a1, file_sectors
 lw t0, 0(a1)
