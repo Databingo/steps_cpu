@@ -81,3 +81,8 @@ hexdump -v -e '1/4 "%08x" "\n"' final.bin | perl -ne 'print unpack("B32", pack("
 cat bin.txt > ram.mif  # write RAM program
 
 # xxd -b fake_opensbi.bin
+#
+
+cp opensbi/build/platform/generic/firmware/fw_jump.bin fw_jump_pad.bin
+truncate -s 2M fw_jump_pad.bin
+cat final.bin >> fw_jump_pad.bin
