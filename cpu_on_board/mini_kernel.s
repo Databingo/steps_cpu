@@ -10,13 +10,12 @@ msg_boot:
 _start:  # like linux kernel
 
    li sp, 0x80700000 # Set stack # 80000000-8080000 sdram as 8M ram, we start sp from 0x80700000<-, MMU from 0x80700000->
-  #li s11, 0x2004 # UART print 
-  #li s10, 0x2008 # UART controller
-   # function use stacked s 
-   # handlers use s
-   # kernel use t
    la a0, msg_boot
    call sbi_puts
+
+
+
+
 
 end:
 j end
