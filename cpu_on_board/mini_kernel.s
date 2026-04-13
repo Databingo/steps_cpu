@@ -2,7 +2,9 @@
 
 .section .data
 msg_boot:
-    .string "\n\r -- S-Mode mini Kernel boot --\n\r"
+    .string "-- S-Mode mini Kernel boot --"
+test_var:
+    .word 0x00000000
 
 
 # Bootloader/copy4 --> firmware/BIOS/opensib/mini_sbi2 --> OS/linux/kernal
@@ -10,8 +12,18 @@ msg_boot:
 _start:  # like linux kernel
 
    li sp, 0x80700000 # Set stack # 80000000-8080000 sdram as 8M ram, we start sp from 0x80700000<-, MMU from 0x80700000->
+ 
+   # Step 1 test ecall (sbi) print
    la a0, msg_boot
    call sbi_puts
+   # --- 1 ok
+
+   # Step 2 test A-Extension Atomics
+   la t0, test_var
+   li t1, 1
+   amoadd.w t2, t1, (t0)
+   li a0, "\nAtomok"
+   call sbi_print7
 
 
 
@@ -415,6 +427,17 @@ sbi_puts: # a0 addr
     sbi_stop_puts:
     ld ra, 0(sp)
     ld s0, 8(sp)
+    addi sp, sp, 16
+    ret
+
+sbi_print7: # a0, 7 char left one for null
+    addi sp, sp, -16
+    sd a0, 0(sp)
+    sd ra, 8(sp)
+    mv a0, sp
+    call sbi_puts
+    ld a0, 0(sp)
+    ld ra, 8(sp)
     addi sp, sp, 16
     ret
 
