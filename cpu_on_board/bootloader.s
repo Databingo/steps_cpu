@@ -109,6 +109,9 @@ clear_ram_loop:
 #lw a0, 0(s11)
 #call print_reg
 
+find_opensbi:
+li s9, "MUSIC"
+find_kernel:
 
 # ----------Read BPB sector 0 -----
 li a0, 0   
@@ -242,13 +245,16 @@ call print_sector
 # -------------------------------------
 # Scan Entries of Root Dir first sector
 # s7 entry_per_sector
-find_opensbi:
+
+#find_opensbi:
+#li s9, "MUSIC"
+##li s9, "KERNL"
+##mv a0, s9
+##call print7
+#find_kernel:
+
+
 li s8, 0 # entry_index
-li s9, "MUSIC"
-#li s9, "KERNL"
-#mv a0, s9
-#call print7
-find_kernel:
 entry_loop:
 bge s8, s7, done_entries
 # entry_addr = s1 + (entry_index * 32)
@@ -452,10 +458,9 @@ blt t1, t2, copy_sector_loop
 
  
 search_kernel:
-li s8, 0 # entry_index
 li s9, "KERNL"
-mv a0, s9
-call print7
+#mv a0, s9
+#call print7
 j find_kernel
 
 copy_kernel: 

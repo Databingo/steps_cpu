@@ -70,6 +70,17 @@ addi s0, x0, 0x0
 slli s0, s0, 0xb
 ori s0, s0, 0x200
 slli s0, s0, 0x16
+find_opensbi:
+# li s9, "MUSIC"
+addi s9, x0, 0x0
+ori s9, s9, 0x21
+slli s9, s9, 0xb
+ori s9, s9, 0x525
+slli s9, s9, 0xb
+ori s9, s9, 0x26a
+slli s9, s9, 0xb
+ori s9, s9, 0x54d
+find_kernel:
 # li a0, 0   
 addi a0, x0, 0x0
 # call sd_read_sector  
@@ -168,19 +179,8 @@ jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I sd_read_sector
 # call print_sector
 auipc x1, 0 # R_RISCV_PCREL_HI20 print_sector
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_sector
-find_opensbi:
 # li s8, 0 
 addi s8, x0, 0x0
-# li s9, "MUSIC"
-addi s9, x0, 0x0
-ori s9, s9, 0x21
-slli s9, s9, 0xb
-ori s9, s9, 0x525
-slli s9, s9, 0xb
-ori s9, s9, 0x26a
-slli s9, s9, 0xb
-ori s9, s9, 0x54d
-find_kernel:
 entry_loop:
 bge s8, s7, done_entries
 slli t1, s8, 5
@@ -385,8 +385,6 @@ addi t1, t1, 1
 addi s0, s0, 512
 blt t1, t2, copy_sector_loop
 search_kernel:
-# li s8, 0 
-addi s8, x0, 0x0
 # li s9, "KERNL"
 addi s9, x0, 0x0
 ori s9, s9, 0x26
@@ -396,11 +394,6 @@ slli s9, s9, 0xb
 ori s9, s9, 0x248
 slli s9, s9, 0xb
 ori s9, s9, 0x54b
-# mv a0, s9
-addi a0, s9, 0
-# call print7
-auipc x1, 0 # R_RISCV_PCREL_HI20 print7
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print7
 # j find_kernel
 jal x0, find_kernel
 copy_kernel:
