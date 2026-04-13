@@ -106,8 +106,8 @@ clear_ram_loop:
 #| :----- | :--- | :------------------------------ | :----------------------------- | :-------------- |
 
 
-lw a0, 0(s11)
-call print_reg
+#lw a0, 0(s11)
+#call print_reg
 
 
 # ----------Read BPB sector 0 -----
@@ -217,8 +217,8 @@ sw a0, 0(t3)
 
     csrwi mdebug, 8
 
-li a0, "\nEtPse:"
-call print7
+#li a0, "\nEtPse:"
+#call print7
 la a1, byte_per_sec
 lw a0, 0(a1)
 mv s7, a0
