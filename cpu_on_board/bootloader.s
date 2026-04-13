@@ -244,7 +244,8 @@ call print_sector
 # s7 entry_per_sector
 opensbi:
 li s8, 0 # entry_index
-li s9, "MUSIC"
+#li s9, "MUSIC"
+li s9, "KERNEL"
 mv a0, s9
 call print7
 kernel:
@@ -431,8 +432,8 @@ add t2, t1, t0
 #addi t1, t1, 1
 #blt t1, t2, print_sector_loop
  
-li t0, "KERNEL"
-beq t0, s9, copy_kernel 
+#li t0, "KERNEL"
+#beq t0, s9, copy_kernel 
 
 #lui s0, 0x80000 # SDRAM base 0x80000000
 li s0, 0x80000000 # SDRAM base 0x80000000
@@ -447,26 +448,26 @@ addi t1, t1, 1
 addi s0, s0, 512
 blt t1, t2, copy_sector_loop
 
-
-search_kernel:
-li s8, 0 # entry_index
-li s9, "KERNEL"
-mv a0, s9
-call print7
-j kernel
-
-copy_kernel: 
-li s0, 0x80200000 # FW_JUMP to KERNEL base 0x80200000
-copy_sector_loop:
-li a0, 96 # `
-call putchar
-mv a0, t1
-call sd_read_sector  # use a0 as sector no.
-mv a0, s0
-call copy_sector
-addi t1, t1, 1
-addi s0, s0, 512
-blt t1, t2, copy_sector_loop
+#
+#search_kernel:
+#li s8, 0 # entry_index
+#li s9, "KERNEL"
+#mv a0, s9
+#call print7
+#j kernel
+#
+#copy_kernel: 
+#li s0, 0x80200000 # FW_JUMP to KERNEL base 0x80200000
+#copy_sector_loop:
+#li a0, 96 # `
+#call putchar
+#mv a0, t1
+#call sd_read_sector  # use a0 as sector no.
+#mv a0, s0
+#call copy_sector
+#addi t1, t1, 1
+#addi s0, s0, 512
+#blt t1, t2, copy_sector_loop
 
 
 
