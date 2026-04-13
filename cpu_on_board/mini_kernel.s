@@ -7,7 +7,7 @@ msg:
 
 # Bootloader/copy4 --> firmware/BIOS/opensib/mini_sbi2 --> OS/linux/kernal
 .section .text
-_start:  # like open_sbi
+_start:  # like linux kernel
    li sp, 0x80700000 # Set stack # 80000000-8080000 sdram as 8M ram, we start sp from 0x80700000<-, MMU from 0x80700000->
    li s11, 0x2004 # UART print 
    li s10, 0x2008 # UART controller
