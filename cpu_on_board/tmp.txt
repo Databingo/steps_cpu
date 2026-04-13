@@ -226,11 +226,6 @@ ori a0, a0, 0x746
 # call print7
 auipc x1, 0 # R_RISCV_PCREL_HI20 print7
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print7
-# mv a0, s9
-addi a0, s9, 0
-# call print7
-auipc x1, 0 # R_RISCV_PCREL_HI20 print7
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print7
 done_entries:
 #    j read_file
 jal x0, read_file

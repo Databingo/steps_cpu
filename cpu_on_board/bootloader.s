@@ -299,8 +299,8 @@ bne t2, s9, next_entry
 ## 4. FOUND! Extract File Info
 li a0, "FOUND!"
 call print7
-mv a0, s9
-call print7
+#mv a0, s9
+#call print7
 
 done_entries:
    j read_file
