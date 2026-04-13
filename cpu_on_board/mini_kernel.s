@@ -2,7 +2,11 @@
 
 .section .data
 msg_boot:
-    .string "-- S-Mode mini Kernel boot --"
+    .string "--S-Mode_mini_Kernel_boot--"
+msg_mmu:
+    .string "--MMU_test--"
+msg_rx:
+    .string "key_press: "
 test_var:
     .word 0x00000000
 
@@ -26,7 +30,59 @@ _start:  # like linux kernel
    call sbi_print7
 
 
+   # Step 3 test S-Mode trap hander
+   # Opensbi delegate Ebreak to OS, so we set our handler address to stvec
+   la t0, s_trap_handler
+   andi t0, t0, -4 # Align to 4 bytes
+   csrw stvec, t0
+   ebreak
+   li a0, "\nStrpok"
+   call sbi_print7
 
+
+   # Step 4 test MMU
+   # 1.Build SV39 root table in sdram (4KB per table 2**9=512*8=4096) vpn2 4KB map 512*4k=2MBram; all vpn1=4*512=2Mb map 512*2M=1Gram, all vpn0=512*512=262144*4kb=1GB map 512Gram,total VPNs 4KB+2MB+1024MB
+   li t0, 0x80700000 # set base address of MMU root table
+
+   # 2. map vma 0x0000_0000 to ppa 0x0000_0000, ppn =  ppa >> 12 = 0, for UART/CLINT/PLIC .etc
+   li t1, 0xcf       # pte = ppn << 10 | flags valid0 read1 write2 exec3 accessed6 dirty7 0b11001111=0xcf
+   sd t1, 0(t0) 
+
+   # 3. map vma 0x8000_0000 to ppa 0x8000_0000, ppn =  ppa >> 12 = 0x80000 pte = ppn << 10 | flags, for RAM/Code
+   li t1, 0x200000cf # pte = ppn << 10 | flags valid0 read1 write2 exec3 accessed6 dirty7 0b11001111=0xcf
+   sd t1, 16(t0)     # Index=va[38:30]=0b00000010=2, 8 bytes per PTE = 16, 
+
+   # satp need ppn of root table rt 0x80700000 
+   # satp = satp[63:60].MODE(0:bare, 8:sv39, 9:sv48)|satp[59:44].asid|satp[43:0].rootpage_physical_addr(vpn2:9|vpn1:9|vpn0:9|offseet12)
+   # ppn = rt >> 12 = 0x80700
+   # mode = 3 sv39
+   li t0, 0x8000000000080700
+   # Turn MMU SV39
+   csrw satp, t0 # write mode and root table address to satp CSR register
+   sfence.vma ## <--- start use TLB I/D hitting
+
+   la a0, msg_mmu   # trigger I-TLB miss
+   call sbi_puts
+  
+   # Step 5 test Typing 
+   li a0, "\ntyping"
+   call sbi_print7
+
+wait_for_key:
+   li a7, 2  # SBI Getchar ID
+   ecall
+   bltz a0, wait_for_key  # if a0 is negative, no key press
+   mv s3, a0
+
+   la a0, msg_rx
+   call sbi_puts
+  
+   mv a0, s3
+   li a7, 1 # SBI Putchar ID
+   ecall 
+   
+   li a0, "\n\r"
+   call sbi_print7
 
 
 end:
@@ -293,17 +349,19 @@ j end
 #
 #
 #
-#s_trap_handler:
-#   li a0, "S"
-#   li a7, 1
-#   ecall   # here ecall was not delegated to s_mode, so go to mtvec to find m-mode ecall handler
-#   j s_done
-#
-#s_done: 
-#   csrr s2, sepc
-#   addi s2, s2, 4 # skip ecall/ebreak instruction
-#   csrw sepc, s2
-#   sret
+s_trap_handler:
+   li a0, "\n"
+   li a7, 1
+   ecall   # here ecall was not delegated to s_mode, so go to mtvec to find m-mode ecall handler
+   li a0, "strap.."
+   call sbi_print7
+   j s_done
+
+s_done: 
+   csrr s2, sepc
+   addi s2, s2, 4 # skip ecall/ebreak instruction
+   csrw sepc, s2
+   sret
 #
 #
 #

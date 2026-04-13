@@ -1,4 +1,6 @@
 msg_boot:
+msg_mmu:
+msg_rx:
 test_var:
 _start:
 #    li sp, 0x80700000 
@@ -36,9 +38,141 @@ ori a0, a0, 0x10a
 #    call sbi_print7
 auipc x1, 0 # R_RISCV_PCREL_HI20 sbi_print7
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I sbi_print7
+#    la t0, s_trap_handler
+auipc t0, 0 # R_RISCV_PCREL_HI20 s_trap_handler 
+addi t0, t0, 0 # R_RISCV_PCREL_LO12_I s_trap_handler 
+andi t0, t0, -4 # Align to 4 bytes
+#    csrw stvec, t0
+csrrw x0, stvec, t0
+ebreak
+#    li a0, "\nStrpok"
+addi a0, x0, 0x0
+lui a0, 0x6b6
+srli a0, a0, 0x1
+ori a0, a0, 0x7b8
+slli a0, a0, 0xb
+ori a0, a0, 0x1c9
+slli a0, a0, 0xb
+ori a0, a0, 0x68a
+slli a0, a0, 0xb
+ori a0, a0, 0x30a
+#    call sbi_print7
+auipc x1, 0 # R_RISCV_PCREL_HI20 sbi_print7
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I sbi_print7
+#    li t0, 0x80700000 
+addi t0, x0, 0x0
+slli t0, t0, 0xb
+ori t0, t0, 0x201
+slli t0, t0, 0xb
+ori t0, t0, 0x600
+slli t0, t0, 0xb
+#    li t1, 0xcf       
+addi t1, x0, 0x0
+addi t1, x0, 0x0
+addi t1, x0, 0xcf
+sd t1, 0(t0) 
+#    li t1, 0x200000cf 
+addi t1, x0, 0x0
+lui t1, 0x20000
+addi t1, t1, 0xcf
+sd t1, 16(t0)     # Index=va[38:30]=0b00000010=2, 8 bytes per PTE = 16, 
+#    li t0, 0x8000000000080700
+addi t0, x0, 0x0
+lui t0, 0x80000
+srli t0, t0, 0x1
+slli t0, t0, 0x16
+ori t0, t0, 0x100
+slli t0, t0, 0xb
+ori t0, t0, 0x700
+#    csrw satp, t0 
+csrrw x0, satp, t0
+sfence.vma ## <--- start use TLB I/D hitting
+#    la a0, msg_mmu   
+auipc a0, 0 # R_RISCV_PCREL_HI20 msg_mmu 
+addi a0, a0, 0 # R_RISCV_PCREL_LO12_I msg_mmu 
+#    call sbi_puts
+auipc x1, 0 # R_RISCV_PCREL_HI20 sbi_puts
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I sbi_puts
+#    li a0, "\ntyping"
+addi a0, x0, 0x0
+lui a0, 0x676
+srli a0, a0, 0x1
+ori a0, a0, 0x734
+slli a0, a0, 0xb
+ori a0, a0, 0x5c1
+slli a0, a0, 0xb
+ori a0, a0, 0x72e
+slli a0, a0, 0xb
+ori a0, a0, 0x40a
+#    call sbi_print7
+auipc x1, 0 # R_RISCV_PCREL_HI20 sbi_print7
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I sbi_print7
+wait_for_key:
+#    li a7, 2  
+addi a7, x0, 0x0
+addi a7, x0, 0x0
+addi a7, x0, 0x2
+ecall
+#    bltz a0, wait_for_key  
+blt a0, x0, wait_for_key
+#    mv s3, a0
+addi s3, a0, 0
+#    la a0, msg_rx
+auipc a0, 0 # R_RISCV_PCREL_HI20 msg_rx 
+addi a0, a0, 0 # R_RISCV_PCREL_LO12_I msg_rx 
+#    call sbi_puts
+auipc x1, 0 # R_RISCV_PCREL_HI20 sbi_puts
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I sbi_puts
+#    mv a0, s3
+addi a0, s3, 0
+#    li a7, 1 
+addi a7, x0, 0x0
+addi a7, x0, 0x0
+addi a7, x0, 0x1
+ecall 
+#    li a0, "\n\r"
+addi a0, x0, 0x0
+lui a0, 0x1
+addi a0, a0, 0xd0a
+#    call sbi_print7
+auipc x1, 0 # R_RISCV_PCREL_HI20 sbi_print7
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I sbi_print7
 end:
 # j end
 jal x0, end
+s_trap_handler:
+#    li a0, "\n"
+addi a0, x0, 0x0
+addi a0, x0, 0x0
+addi a0, x0, 0xa
+#    li a7, 1
+addi a7, x0, 0x0
+addi a7, x0, 0x0
+addi a7, x0, 0x1
+ecall   # here ecall was not delegated to s_mode, so go to mtvec to find m-mode ecall handler
+#    li a0, "strap.."
+addi a0, x0, 0x0
+lui a0, 0x2e2
+srli a0, a0, 0x1
+ori a0, a0, 0x738
+slli a0, a0, 0xb
+ori a0, a0, 0x185
+slli a0, a0, 0xb
+ori a0, a0, 0x64e
+slli a0, a0, 0xb
+ori a0, a0, 0x473
+#    call sbi_print7
+auipc x1, 0 # R_RISCV_PCREL_HI20 sbi_print7
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I sbi_print7
+#    j s_done
+jal x0, s_done
+s_done:
+#    csrr s2, sepc
+csrrs s2, sepc, x0
+addi s2, s2, 4 # skip ecall/ebreak instruction
+#    csrw sepc, s2
+csrrw x0, sepc, s2
+sret
 sbi_puts:
 addi sp, sp, -16
 sd ra, 0(sp)
