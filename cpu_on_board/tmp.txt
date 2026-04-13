@@ -186,19 +186,19 @@ jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I sd_read_sector
 # call print_sector
 auipc x1, 0 # R_RISCV_PCREL_HI20 print_sector
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_sector
-opensbi:
+find_opensbi:
 # li s8, 0 
 addi s8, x0, 0x0
-# li s9, "KERNL"
+# li s9, "MUSIC"
 addi s9, x0, 0x0
-ori s9, s9, 0x26
+ori s9, s9, 0x21
 slli s9, s9, 0xb
-ori s9, s9, 0x139
+ori s9, s9, 0x525
 slli s9, s9, 0xb
-ori s9, s9, 0x248
+ori s9, s9, 0x26a
 slli s9, s9, 0xb
-ori s9, s9, 0x54b
-kernel:
+ori s9, s9, 0x54d
+find_kernel:
 entry_loop:
 bge s8, s7, done_entries
 slli t1, s8, 5
@@ -389,13 +389,21 @@ auipc a1, 0 # R_RISCV_PCREL_HI20 file_start_sector
 addi a1, a1, 0 # R_RISCV_PCREL_LO12_I file_start_sector 
 lw t1, 0(a1)
 add t2, t1, t0
-# li s0, 0x80200000 
+# li t0, "KERNL"
+addi t0, x0, 0x0
+ori t0, t0, 0x26
+slli t0, t0, 0xb
+ori t0, t0, 0x139
+slli t0, t0, 0xb
+ori t0, t0, 0x248
+slli t0, t0, 0xb
+ori t0, t0, 0x54b
+beq t0, s9, copy_kernel 
+# li s0, 0x80000000 
 addi s0, x0, 0x0
 slli s0, s0, 0xb
 ori s0, s0, 0x200
-slli s0, s0, 0xb
-ori s0, s0, 0x400
-slli s0, s0, 0xb
+slli s0, s0, 0x16
 copy_sector_loop:
 # li a0, 94 
 addi a0, x0, 0x0
@@ -417,14 +425,60 @@ jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I copy_sector
 addi t1, t1, 1
 addi s0, s0, 512
 blt t1, t2, copy_sector_loop
-boot_opensbi:
-#     li s0, 0x80200000 
+search_kernel:
+# li s8, 0 
+addi s8, x0, 0x0
+# li s9, "KERNL"
+addi s9, x0, 0x0
+ori s9, s9, 0x26
+slli s9, s9, 0xb
+ori s9, s9, 0x139
+slli s9, s9, 0xb
+ori s9, s9, 0x248
+slli s9, s9, 0xb
+ori s9, s9, 0x54b
+# mv a0, s9
+addi a0, s9, 0
+# call print7
+auipc x1, 0 # R_RISCV_PCREL_HI20 print7
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print7
+# j find_kernel
+jal x0, find_kernel
+copy_kernel:
+# li s0, 0x80200000 
 addi s0, x0, 0x0
 slli s0, s0, 0xb
 ori s0, s0, 0x200
 slli s0, s0, 0xb
 ori s0, s0, 0x400
 slli s0, s0, 0xb
+copy_sector_loop:
+# li a0, 96 
+addi a0, x0, 0x0
+addi a0, x0, 0x0
+addi a0, x0, 0x60
+# call putchar
+auipc x1, 0 # R_RISCV_PCREL_HI20 putchar
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I putchar
+# mv a0, t1
+addi a0, t1, 0
+# call sd_read_sector  
+auipc x1, 0 # R_RISCV_PCREL_HI20 sd_read_sector
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I sd_read_sector
+# mv a0, s0
+addi a0, s0, 0
+# call copy_sector
+auipc x1, 0 # R_RISCV_PCREL_HI20 copy_sector
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I copy_sector
+addi t1, t1, 1
+addi s0, s0, 512
+blt t1, t2, copy_sector_loop
+boot_opensbi:
+#     li s0, 0x80000000 
+addi s0, x0, 0x0
+slli s0, s0, 0xb
+ori s0, s0, 0x200
+slli s0, s0, 0x16
 ld a0, 0(s0)         # test sdram read data
 #     call print_reg
 auipc x1, 0 # R_RISCV_PCREL_HI20 print_reg
