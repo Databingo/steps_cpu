@@ -389,11 +389,13 @@ auipc a1, 0 # R_RISCV_PCREL_HI20 file_start_sector
 addi a1, a1, 0 # R_RISCV_PCREL_LO12_I file_start_sector 
 lw t1, 0(a1)
 add t2, t1, t0
-# li s0, 0x80000000 
+# li s0, 0x80200000 
 addi s0, x0, 0x0
 slli s0, s0, 0xb
 ori s0, s0, 0x200
-slli s0, s0, 0x16
+slli s0, s0, 0xb
+ori s0, s0, 0x400
+slli s0, s0, 0xb
 copy_sector_loop:
 # li a0, 94 
 addi a0, x0, 0x0
@@ -416,11 +418,13 @@ addi t1, t1, 1
 addi s0, s0, 512
 blt t1, t2, copy_sector_loop
 boot_opensbi:
-#     li s0, 0x80000000 
+#     li s0, 0x80200000 
 addi s0, x0, 0x0
 slli s0, s0, 0xb
 ori s0, s0, 0x200
-slli s0, s0, 0x16
+slli s0, s0, 0xb
+ori s0, s0, 0x400
+slli s0, s0, 0xb
 ld a0, 0(s0)         # test sdram read data
 #     call print_reg
 auipc x1, 0 # R_RISCV_PCREL_HI20 print_reg

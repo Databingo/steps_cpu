@@ -436,7 +436,7 @@ add t2, t1, t0
 #beq t0, s9, copy_kernel 
 
 #lui s0, 0x80000 # SDRAM base 0x80000000
-li s0, 0x80000000 # SDRAM base 0x80000000
+li s0, 0x80200000 # SDRAM base 0x80000000
 copy_sector_loop:
 li a0, 94 # ^
 call putchar
@@ -539,7 +539,7 @@ blt t1, t2, copy_sector_loop
 
 boot_opensbi:
     #lui s0, 0x80000      # SDRAM = 0x80000000
-    li s0, 0x80000000 # SDRAM base 0x80000000
+    li s0, 0x80200000 # SDRAM base 0x80000000
     ld a0, 0(s0)         # test sdram read data
     call print_reg
 
