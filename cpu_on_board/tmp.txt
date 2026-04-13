@@ -226,6 +226,11 @@ ori a0, a0, 0x746
 # call print7
 auipc x1, 0 # R_RISCV_PCREL_HI20 print7
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print7
+# mv a0, s9
+addi a0, s9, 0
+# call print7
+auipc x1, 0 # R_RISCV_PCREL_HI20 print7
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print7
 done_entries:
 #    j read_file
 jal x0, read_file
@@ -411,7 +416,7 @@ ori s0, s0, 0x200
 slli s0, s0, 0xb
 ori s0, s0, 0x400
 slli s0, s0, 0xb
-copy_sector_loop:
+copy_kernel_sector_loop:
 # li a0, 96 
 addi a0, x0, 0x0
 addi a0, x0, 0x0
@@ -431,7 +436,7 @@ auipc x1, 0 # R_RISCV_PCREL_HI20 copy_sector
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I copy_sector
 addi t1, t1, 1
 addi s0, s0, 512
-blt t1, t2, copy_sector_loop
+blt t1, t2, copy_kernel_sector_loop
 boot_opensbi:
 #     li s0, 0x80000000 
 addi s0, x0, 0x0

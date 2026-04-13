@@ -299,6 +299,8 @@ bne t2, s9, next_entry
 ## 4. FOUND! Extract File Info
 li a0, "FOUND!"
 call print7
+mv a0, s9
+call print7
 
 done_entries:
    j read_file
@@ -458,7 +460,7 @@ j find_kernel
 
 copy_kernel: 
 li s0, 0x80200000 # FW_JUMP to KERNL base 0x80200000
-copy_sector_loop:
+copy_kernel_sector_loop:
 li a0, 96 # `
 call putchar
 mv a0, t1
@@ -467,7 +469,7 @@ mv a0, s0
 call copy_sector
 addi t1, t1, 1
 addi s0, s0, 512
-blt t1, t2, copy_sector_loop
+blt t1, t2, copy_kernel_sector_loop
 
 
 
