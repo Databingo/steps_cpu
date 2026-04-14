@@ -412,10 +412,19 @@ func main() { //t6a7s11
 		"ebreak": 0b00000000000100000000000001110011,
 
 		// M
-		"mul":  0b00000010000000000000000000110011,
-		"mulh": 0b00000010000000000001000000110011,
-		"div":  0b00000010000000000100000000110011,
-		"divu": 0b00000010000000000101000000110011,
+		"mul":   0b00000010000000000000000000110011,
+		"mulh":  0b00000010000000000001000000110011,
+		"mulhu": 0b00000010000000000011000000110011,
+		"mulhsu":0b00000010000000000010000000110011,
+		"mulw":  0b00000010000000000000000000111011,
+		"div":   0b00000010000000000100000000110011,
+		"divu":  0b00000010000000000101000000110011,
+		"divw":  0b00000010000000000100000000111011,
+		"divuw": 0b00000010000000000101000000111011,
+		"rem":   0b00000010000000000110000000110011,
+		"remu":  0b00000010000000000111000000110011,
+		"remw":  0b00000010000000000110000000111011,
+		"remuw": 0b00000010000000000111000000111011,
 
 		// --new
 		"csrrw":  0b00000000000000000001000001110011 ,  
@@ -1374,7 +1383,7 @@ func main() { //t6a7s11
 				}
 			}
 
-		case "add", "addw", "sub", "subw", "sll", "sllw", "slt", "sltu", "xor", "srl", "srlw", "sra", "sraw", "or", "and", "mul", "mulh", "div", "divu": // Instruction format: op rd, rs1, rs2       or      label: op rd, rs1, rs2
+		case "add", "addw", "sub", "subw", "sll", "sllw", "slt", "sltu", "xor", "srl", "srlw", "sra", "sraw", "or", "and", "mul", "mulh", "mulhu", "mulhsu", "mulw", "div", "divu", "divw", "divuw", "rem", "remu", "remw", "remuw": // Instruction format: op rd, rs1, rs2       or      label: op rd, rs1, rs2
 			if len(code) != 4 && len(code) != 5 {
 				fmt.Println("Incorrect argument count on line: ", lineCounter)
 				os.Exit(0)
@@ -1856,7 +1865,7 @@ func main() { //t6a7s11
 				os.Exit(0)
 			}
 
-			case "add", "addw", "sub", "subw", "sll", "sllw", "slt", "sltu", "xor", "srl", "srlw", "sra", "sraw", "or", "and", "mul", "mulh", "div", "divu": // op rd, rs1, rs2
+			case "add", "addw", "sub", "subw", "sll", "sllw", "slt", "sltu", "xor", "srl", "srlw", "sra", "sraw", "or", "and", "mul", "mulh", "mulhu", "mulhsu", "mulw", "div", "divu", "divw", "divuw", "rem", "remu", "remw", "remuw": // op rd, rs1, rs2
 			if len(code) != 4 {
 				fmt.Println("Incorrect argument count on line: ", lineCounter)
 				os.Exit(0)

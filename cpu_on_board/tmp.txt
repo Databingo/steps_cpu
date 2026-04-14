@@ -208,6 +208,166 @@ slli a0, a0, 0xb
 ori a0, a0, 0x60a
 bne t4, t5 fail_alu
 auipc s0, 0
+lui a1, 0x12345        # a1 = 0x0000000012345000
+auipc a2, 0            
+#    la a2, mem_test_var
+auipc a2, 0 # R_RISCV_PCREL_HI20 mem_test_var 
+addi a2, a2, 0 # R_RISCV_PCREL_LO12_I mem_test_var 
+sd a1, 0(a2)           # Store 0x12345000
+ld a1, 0(a2)           # Load  0x12345000
+addi a1, a1, 0x678     # a1 = 0x12345678
+xori a1, a1, 0x111     # a1 = 0x12345769
+andi a1, a1, 0xFFF     # a1 = 0x00000769
+ori  a1, a1, 0x800     # a1 = 0x00000F69
+slli a1, a1, 4         # a1 = 0x0000F690
+srli a1, a1, 4         # a1 = 0x00000F69
+srai a1, a1, 0         # a1 = 0x00000F69 (MSB is 0)
+slti a3, a1, 0         # a3 = 0 (0xF69 is not < 0)
+add  a1, a1, a3        # a1 = 0x00000F69
+sltiu a3, a1, 0        # a3 = 0
+add  a1, a1, a3        # a1 = 0x00000F69
+addiw a1, a1, 1        # a1 = 0x00000F6A
+slliw a1, a1, 16       # a1 = 0x0F6A0000
+srliw a1, a1, 16       # a1 = 0x00000F6A
+sraiw a1, a1, 0        # a1 = 0x00000F6A
+#    li a2, 0x111
+addi a2, x0, 0x0
+addi a2, x0, 0x0
+addi a2, x0, 0x111
+add a1, a1, a2         # a1 = 0x107B
+sub a1, a1, a2         # a1 = 0x0F6A
+xor a1, a1, a2         # a1 = 0x0E7B
+and a1, a1, a1         # a1 = 0x0E7B
+or  a1, a1, a2         # a1 = 0x0F7B
+#    li a2, 4
+addi a2, x0, 0x0
+addi a2, x0, 0x0
+addi a2, x0, 0x4
+sll a1, a1, a2         # a1 = 0x0F7B0
+srl a1, a1, a2         # a1 = 0x00F7B
+sra a1, a1, a2         # a1 = 0x000F7
+#    li a2, 0
+addi a2, x0, 0x0
+slt a3, a2, a1         # a3 = 1 (0 < 0xF7)
+add a1, a1, a3         # a1 = 0x000F8
+sltu a3, a2, a1        # a3 = 1 (0 < 0xF8)
+add a1, a1, a3         # a1 = 0x000F9
+#    li a2, 1
+addi a2, x0, 0x0
+addi a2, x0, 0x0
+addi a2, x0, 0x1
+addw a1, a1, a2        # a1 = 0x000FA
+subw a1, a1, a2        # a1 = 0x000F9
+#    li a2, 4
+addi a2, x0, 0x0
+addi a2, x0, 0x0
+addi a2, x0, 0x4
+sllw a1, a1, a2        # a1 = 0x00F90
+srlw a1, a1, a2        # a1 = 0x000F9
+sraw a1, a1, a2        # a1 = 0x0000F
+jal a2, 1f             
+1:
+1: addi a1, a1, 1         # a1 = 0x00010
+#    la a2, 2f
+auipc a2, 0 # R_RISCV_PCREL_HI20 2f 
+addi a2, a2, 0 # R_RISCV_PCREL_LO12_I 2f 
+jalr a2, a2, 0         
+2:
+2: addi a1, a1, 1         # a1 = 0x00011
+beq a1, a1, 3f         
+3:
+3: addi a1, a1, 1         # a1 = 0x00012
+#    li a2, 0
+addi a2, x0, 0x0
+bne a1, a2, 4f         
+4:
+4: addi a1, a1, 1         # a1 = 0x00013
+blt a2, a1, 5f         
+5:
+5: addi a1, a1, 1         # a1 = 0x00014
+bge a1, a2, 6f         
+6:
+6: addi a1, a1, 1         # a1 = 0x00015
+bltu a2, a1, 7f        
+7:
+7: addi a1, a1, 1         # a1 = 0x00016
+bgeu a1, a2, 8f        
+8:
+8: addi a1, a1, 1         # a1 = 0x00017
+#    csrw mscratch, a1      
+csrrw x0, mscratch, a1
+#    csrr a1, mscratch      
+csrrs a1, mscratch, x0
+csrrs a3, mscratch, zero
+csrrc a3, mscratch, zero
+csrrwi a3, mscratch, 0
+csrrsi a3, mscratch, 0
+csrrci a3, mscratch, 0 
+#    la a2, test_var
+auipc a2, 0 # R_RISCV_PCREL_HI20 test_var 
+addi a2, a2, 0 # R_RISCV_PCREL_LO12_I test_var 
+lr.d a3, (a2)          
+sc.d a3, a1, (a2)      
+ld a1, 0(a2)           # a1 = 0x00017
+#    li a2, 2
+addi a2, x0, 0x0
+addi a2, x0, 0x0
+addi a2, x0, 0x2
+mul a1, a1, a2         # a1 = 0x17 * 2 = 0x2E
+mulh a3, a1, a2        # a3 = 0
+add a1, a1, a3         # a1 = 0x2E
+mulw a1, a1, a2        # a1 = 0x2E * 2 = 0x5C
+div a1, a1, a2         # a1 = 0x5C / 2 = 0x2E
+rem a3, a1, a2         # a3 = 0x2E % 2 = 0
+add a1, a1, a3         # a1 = 0x2E
+divw a1, a1, a2        # a1 = 0x2E / 2 = 0x17
+remw a3, a1, a2        # a3 = 0x17 % 2 = 1
+add a1, a1, a3         # a1 = 0x17 + 1 = 0x18
+#    li t2, 0x0000000000000018
+addi t2, x0, 0x0
+addi t2, x0, 0x0
+addi t2, x0, 0x18
+bne a1, t2, fail_chain
+#    li a0, "\nChainOK"
+addi a0, x0, 0x0
+lui a0, 0x4b4f6
+srli a0, a0, 0x1
+ori a0, a0, 0x734
+slli a0, a0, 0xb
+ori a0, a0, 0x585
+slli a0, a0, 0xb
+ori a0, a0, 0x508
+slli a0, a0, 0xb
+ori a0, a0, 0x30a
+#    call sbi_print7
+auipc x1, 0 # R_RISCV_PCREL_HI20 sbi_print7
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I sbi_print7
+#    j end_of_chain_test
+jal x0, end_of_chain_test
+fail_chain:
+#    mv a0, a1
+addi a0, a1, 0
+#    call sbi_print_reg
+auipc x1, 0 # R_RISCV_PCREL_HI20 sbi_print_reg
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I sbi_print_reg
+#    li a0, "\nFAIL!!"
+addi a0, x0, 0x0
+lui a0, 0x212
+srli a0, a0, 0x1
+ori a0, a0, 0xa6
+slli a0, a0, 0xb
+ori a0, a0, 0x125
+slli a0, a0, 0xb
+ori a0, a0, 0x28
+slli a0, a0, 0xb
+ori a0, a0, 0x60a
+#    call sbi_print7
+auipc x1, 0 # R_RISCV_PCREL_HI20 sbi_print7
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I sbi_print7
+halt_loop:
+#    j halt_loop
+jal x0, halt_loop
+end_of_chain_test:
 pause:
 # j pause
 jal x0, pause

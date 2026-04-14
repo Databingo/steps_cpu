@@ -110,7 +110,141 @@ bne t4, t5 fail_alu
 auipc s0, 0
 
   
+# ========================================================
+   # THE "ONELINE" SEQUENTIAL EXECUTION TEST
+   # Accumulator register: a1
+   # ========================================================
 
+   # [1] U-Type: Lui
+   lui a1, 0x12345        # a1 = 0x0000000012345000
+   
+   # [2] U-Type: Auipc (Test it executes, doesn't ruin a1)
+   auipc a2, 0            
+
+   # [3/4] Memory: Store then Load
+   la a2, mem_test_var
+   sd a1, 0(a2)           # Store 0x12345000
+   ld a1, 0(a2)           # Load  0x12345000
+
+   # [5] Math-I (addi, xori, andi, ori, slli, srli, srai, slti, sltiu)
+   addi a1, a1, 0x678     # a1 = 0x12345678
+   xori a1, a1, 0x111     # a1 = 0x12345769
+   andi a1, a1, 0xFFF     # a1 = 0x00000769
+   ori  a1, a1, 0x800     # a1 = 0x00000F69
+   slli a1, a1, 4         # a1 = 0x0000F690
+   srli a1, a1, 4         # a1 = 0x00000F69
+   srai a1, a1, 0         # a1 = 0x00000F69 (MSB is 0)
+   slti a3, a1, 0         # a3 = 0 (0xF69 is not < 0)
+   add  a1, a1, a3        # a1 = 0x00000F69
+   sltiu a3, a1, 0        # a3 = 0
+   add  a1, a1, a3        # a1 = 0x00000F69
+
+   # [6] Math-I Word (addiw, slliw, srliw, sraiw)
+   addiw a1, a1, 1        # a1 = 0x00000F6A
+   slliw a1, a1, 16       # a1 = 0x0F6A0000
+   srliw a1, a1, 16       # a1 = 0x00000F6A
+   sraiw a1, a1, 0        # a1 = 0x00000F6A
+
+   # [7] Math-R (add, sub, xor, and, or, sll, srl, sra, slt, sltu)
+   li a2, 0x111
+   add a1, a1, a2         # a1 = 0x107B
+   sub a1, a1, a2         # a1 = 0x0F6A
+   xor a1, a1, a2         # a1 = 0x0E7B
+   and a1, a1, a1         # a1 = 0x0E7B
+   or  a1, a1, a2         # a1 = 0x0F7B
+   li a2, 4
+   sll a1, a1, a2         # a1 = 0x0F7B0
+   srl a1, a1, a2         # a1 = 0x00F7B
+   sra a1, a1, a2         # a1 = 0x000F7
+   li a2, 0
+   slt a3, a2, a1         # a3 = 1 (0 < 0xF7)
+   add a1, a1, a3         # a1 = 0x000F8
+   sltu a3, a2, a1        # a3 = 1 (0 < 0xF8)
+   add a1, a1, a3         # a1 = 0x000F9
+
+   # [8] Math-R Word (addw, subw, sllw, srlw, sraw)
+   li a2, 1
+   addw a1, a1, a2        # a1 = 0x000FA
+   subw a1, a1, a2        # a1 = 0x000F9
+   li a2, 4
+   sllw a1, a1, a2        # a1 = 0x00F90
+   srlw a1, a1, a2        # a1 = 0x000F9
+   sraw a1, a1, a2        # a1 = 0x0000F
+
+   # [9] Jump (jal, jalr)
+   jal a2, 1f             
+1: addi a1, a1, 1         # a1 = 0x00010
+   la a2, 2f
+   jalr a2, a2, 0         
+2: addi a1, a1, 1         # a1 = 0x00011
+
+   # [10] Branch (beq, bne, blt, bge, bltu, bgeu)
+   beq a1, a1, 3f         
+3: addi a1, a1, 1         # a1 = 0x00012
+   li a2, 0
+   bne a1, a2, 4f         
+4: addi a1, a1, 1         # a1 = 0x00013
+   blt a2, a1, 5f         
+5: addi a1, a1, 1         # a1 = 0x00014
+   bge a1, a2, 6f         
+6: addi a1, a1, 1         # a1 = 0x00015
+   bltu a2, a1, 7f        
+7: addi a1, a1, 1         # a1 = 0x00016
+   bgeu a1, a2, 8f        
+8: addi a1, a1, 1         # a1 = 0x00017
+
+   # [11] System-CSR (Write to mscratch so we don't break privileges)
+   csrw mscratch, a1      # mscratch = 0x17
+   csrr a1, mscratch      # a1 = 0x17
+   csrrs a3, mscratch, zero
+   csrrc a3, mscratch, zero
+   csrrwi a3, mscratch, 0
+   csrrsi a3, mscratch, 0
+   csrrci a3, mscratch, 0 
+   # a1 is still 0x17
+
+   # [12] Atomic
+   la a2, test_var
+   lr.d a3, (a2)          
+   sc.d a3, a1, (a2)      
+   ld a1, 0(a2)           # a1 = 0x00017
+
+   # [13] M-Mul
+   li a2, 2
+   mul a1, a1, a2         # a1 = 0x17 * 2 = 0x2E
+   mulh a3, a1, a2        # a3 = 0
+   add a1, a1, a3         # a1 = 0x2E
+   mulw a1, a1, a2        # a1 = 0x2E * 2 = 0x5C
+
+   # [14] M-Div
+   div a1, a1, a2         # a1 = 0x5C / 2 = 0x2E
+   rem a3, a1, a2         # a3 = 0x2E % 2 = 0
+   add a1, a1, a3         # a1 = 0x2E
+   divw a1, a1, a2        # a1 = 0x2E / 2 = 0x17
+   remw a3, a1, a2        # a3 = 0x17 % 2 = 1
+   add a1, a1, a3         # a1 = 0x17 + 1 = 0x18
+
+   # ========================================================
+   # FINAL CHECK
+   # ========================================================
+   li t2, 0x0000000000000018
+   bne a1, t2, fail_chain
+
+   # Success!
+   li a0, "\nChainOK"
+   call sbi_print7
+   j end_of_chain_test
+
+fail_chain:
+   # Failed! Print register to see exactly where it broke
+   mv a0, a1
+   call sbi_print_reg
+   li a0, "\nFAIL!!"
+   call sbi_print7
+halt_loop: 
+   j halt_loop
+
+end_of_chain_test:
 
 
 
