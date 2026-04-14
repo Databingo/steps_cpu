@@ -109,8 +109,6 @@ sbi_print_reg: # a0
 
 
 
-
-
 main:
 
    li sp, 0x80700000 # Set stack # 80000000-80800000 sdram as 8M ram, we start sp from 0x80700000<-, MMU from 0x80700000->
@@ -131,7 +129,7 @@ main:
    # Step 3 test S-Mode trap hander
    # Opensbi delegate Ebreak to OS, so we set our handler address to stvec
    la t0, s_trap_handler
-  #andi t0, t0, -4 # Align to 4 bytes
+   andi t0, t0, -4 # Align to 4 bytes
    csrw stvec, t0
    ebreak
    li a0, "\nStrpok"
@@ -216,40 +214,53 @@ main:
    # ========================================================
 
    # [1] U-Type: Lui
-   lui a1, 0x12345        # a1 = 0x0000000012345000
+  #lui a1, 0x12345        # a1 = 0x0000000012345000
+# 1 Lui
+lui a1, 0x12345
    
    # [2] U-Type: Auipc (Test it executes, doesn't ruin a1)
-   auipc a2, 0
+  #auipc a2, 0
   #mv a0, a1 
   #call sbi_print_reg
+# 2 auipc
+auipc a2, 0
 
    # [3/4] Memory: Store then Load
-   la a2, mem_test_var
-   sd a1, 0(a2)           # Store 0x12345000
-   ld a1, 0(a2)           # Load  0x12345000
+  #la a2, mem_test_var
+  #sd a1, 0(a2)           # Store 0x12345000
+  #ld a1, 0(a2)           # Load  0x12345000
+#3/4 ls
+la a2, mem_test_var
+sd a1, 0(a2)
+ld a1, 0(a2)
 
    # [5] Math-I (addi, xori, andi, ori, slli, srli, srai, slti, sltiu)
+   # 5 math-i
    li a0, "\naddi:"
    call sbi_print7
-   addi a1, a1, 0x678     # a1 = 0x12345678
+  #addi a1, a1, 0x678     # a1 = 0x12345678
+   addi a1, a1, 0x678
    mv a0, a1 
    call sbi_print_reg
 
    li a0, "\nxori:"
    call sbi_print7
-   xori a1, a1, 0x111     # a1 = 0x12345769
+  #xori a1, a1, 0x111     # a1 = 0x12345769
+   xori a1, a1, 0x111
    mv a0, a1 
    call sbi_print_reg
 
    li a0, "\nandi:"
    call sbi_print7
-   andi a1, a1, 0xFFF     # a1 = 0x12345769
+  #andi a1, a1, 0xFFF     # a1 = 0x12345769
+   andi a1, a1, 0xFFF
    mv a0, a1 
    call sbi_print_reg
 
    li a0, "\nori_:"
    call sbi_print7
-   ori  a1, a1, 0x800     # a1 = 0xFFFFFFFFFFFFFF69
+  #ori a1, a1, 0x800     # a1 = 0xFFFFFFFFFFFFFF69
+   ori a1, a1, 0x800
    li a2, 0xFFF 
    and a1, a1, a2         # a1 = 0x0000000000000F69
    mv a0, a1 
@@ -257,158 +268,248 @@ main:
 
    li a0, "\nshift:"
    call sbi_print7
-   slli a1, a1, 4         # a1 = 0x0000F690
-   srli a1, a1, 4         # a1 = 0x00000F69
-   srai a1, a1, 0         # a1 = 0x00000F69 (MSB is 0)
-   slti a3, a1, 0         # a3 = 0 (0xF69 is not < 0)
-   add  a1, a1, a3        # a1 = 0x00000F69
-   sltiu a3, a1, 0        # a3 = 0
-   add  a1, a1, a3        # a1 = 0x00000F69
-   mv a0, a1 
-   call sbi_print_reg
+  #slli a1, a1, 4         # a1 = 0x0000F690
+  #srli a1, a1, 4         # a1 = 0x00000F69
+  #srai a1, a1, 0         # a1 = 0x00000F69 (MSB is 0)
+  #slti a3, a1, 0         # a3 = 0 (0xF69 is not < 0)
+  #add  a1, a1, a3        # a1 = 0x00000F69
+  #sltiu a3, a1, 0        # a3 = 0
+  #add  a1, a1, a3        # a1 = 0x00000F69
+slli a1, a1, 4
+srli a1, a1, 4
+srai a1, a1, 0
+slti a3, a1, 0
+add  a1, a1, a3
+sltiu a3, a1, 0
+add  a1, a1, a3
+  #mv a0, a1 
+  #call sbi_print_reg
 
    li a0, "\nmah"
    call sbi_print7
    # [6] Math-I Word (addiw, slliw, srliw, sraiw)
-   addiw a1, a1, 1        # a1 = 0x00000F6A
-   slliw a1, a1, 16       # a1 = 0x0F6A0000
-   srliw a1, a1, 16       # a1 = 0x00000F6A
-   sraiw a1, a1, 0        # a1 = 0x00000F6A
+  #addiw a1, a1, 1        # a1 = 0x00000F6A
+  #slliw a1, a1, 16       # a1 = 0x0F6A0000
+  #srliw a1, a1, 16       # a1 = 0x00000F6A
+  #sraiw a1, a1, 0        # a1 = 0x00000F6A
+addiw a1, a1, 1
+slliw a1, a1, 16
+srliw a1, a1, 16
+sraiw a1, a1, 0
 
   #mv a0, a1 
   #call sbi_print_reg
 
    # [7] Math-R (add, sub, xor, and, or, sll, srl, sra, slt, sltu)
-   li a2, 0x111
-   add a1, a1, a2         # a1 = 0x107B
-   sub a1, a1, a2         # a1 = 0x0F6A
-   xor a1, a1, a2         # a1 = 0x0E7B
-   and a1, a1, a1         # a1 = 0x0E7B
-   or  a1, a1, a2         # a1 = 0x0F7B
-   li a2, 4
-   sll a1, a1, a2         # a1 = 0x0F7B0
-   srl a1, a1, a2         # a1 = 0x00F7B
-   sra a1, a1, a2         # a1 = 0x000F7
-   li a2, 0
-   slt a3, a2, a1         # a3 = 1 (0 < 0xF7)
-   add a1, a1, a3         # a1 = 0x000F8
-   sltu a3, a2, a1        # a3 = 1 (0 < 0xF8)
-   add a1, a1, a3         # a1 = 0x000F9
+  #li a2, 0x111
+  #add a1, a1, a2         # a1 = 0x107B
+  #sub a1, a1, a2         # a1 = 0x0F6A
+  #xor a1, a1, a2         # a1 = 0x0E7B
+  #and a1, a1, a1         # a1 = 0x0E7B
+  #or  a1, a1, a2         # a1 = 0x0F7B
+  #li a2, 4
+  #sll a1, a1, a2         # a1 = 0x0F7B0
+  #srl a1, a1, a2         # a1 = 0x00F7B
+  #sra a1, a1, a2         # a1 = 0x000F7
+  #li a2, 0
+  #slt a3, a2, a1         # a3 = 1 (0 < 0xF7)
+  #add a1, a1, a3         # a1 = 0x000F8
+  #sltu a3, a2, a1        # a3 = 1 (0 < 0xF8)
+  #add a1, a1, a3         # a1 = 0x000F9
+# 7 mathr
+li a2, 0x111
+add a1, a1, a2
+sub a1, a1, a2
+xor a1, a1, a2
+and a1, a1, a1
+or  a1, a1, a2
+li a2, 4
+sll a1, a1, a2
+srl a1, a1, a2
+sra a1, a1, a2
+li a2, 0
+slt a3, a2, a1
+add a1, a1, a3
+sltu a3, a2, a1
+add a1, a1, a3
 
 
    # [8] Math-R Word (addw, subw, sllw, srlw, sraw)
-   li a2, 1
-   addw a1, a1, a2        # a1 = 0x000FA
-   subw a1, a1, a2        # a1 = 0x000F9
-   li a2, 4
-   sllw a1, a1, a2        # a1 = 0x00F90
-   srlw a1, a1, a2        # a1 = 0x000F9
-   sraw a1, a1, a2        # a1 = 0x0000F
+  #li a2, 1
+  #addw a1, a1, a2        # a1 = 0x000FA
+  #subw a1, a1, a2        # a1 = 0x000F9
+  #li a2, 4
+  #sllw a1, a1, a2        # a1 = 0x00F90
+  #srlw a1, a1, a2        # a1 = 0x000F9
+  #sraw a1, a1, a2        # a1 = 0x0000F
+# 8
+li a2, 1
+addw a1, a1, a2
+subw a1, a1, a2
+li a2, 4
+sllw a1, a1, a2
+srlw a1, a1, a2
+sraw a1, a1, a2
 
-   # [9] Jump (jal, jalr)
-   jal a2, jump_target_1             
-jump_target_1: 
-   addi a1, a1, 1         # a1 = 0x00010
+#   # [9] Jump (jal, jalr)
+#   jal a2, jump_target_1             
+#jump_target_1: 
+#   addi a1, a1, 1         # a1 = 0x00010
+#   la a2, jump_target_2
+#   jalr a2, 0(a2)         
+#jump_target_2: 
+#   addi a1, a1, 1         # a1 = 0x00011
+
+# 9 jump
+   jal a2, jump_target_1
+jump_target_1:
+   addi a1, a1, 1
    la a2, jump_target_2
-   jalr a2, 0(a2)         
-jump_target_2: 
-   addi a1, a1, 1         # a1 = 0x00011
+   jalr a2, 0(a2)
+jump_target_2:
+   addi a1, a1, 1
 
-   # [10] Branch (beq, bne, blt, bge, bltu, bgeu)
-   beq a1, a1, branch_target_3         
-branch_target_3: 
-   addi a1, a1, 1         # a1 = 0x00012
-   li a2, 0
-   bne a1, a2, branch_target_4         
-branch_target_4: 
-   addi a1, a1, 1         # a1 = 0x00013
-   blt a2, a1, branch_target_5         
-branch_target_5: 
-   addi a1, a1, 1         # a1 = 0x00014
-   bge a1, a2, branch_target_6         
-branch_target_6: 
-   addi a1, a1, 1         # a1 = 0x00015
-   bltu a2, a1, branch_target_7        
-branch_target_7: 
-   addi a1, a1, 1         # a1 = 0x00016
-   bgeu a1, a2, branch_target_8        
-branch_target_8: 
-   addi a1, a1, 1         # a1 = 0x00017
+#   # [10] Branch (beq, bne, blt, bge, bltu, bgeu)
+#   beq a1, a1, branch_target_3         
+#branch_target_3: 
+#   addi a1, a1, 1         # a1 = 0x00012
+#   li a2, 0
+#   bne a1, a2, branch_target_4         
+#branch_target_4: 
+#   addi a1, a1, 1         # a1 = 0x00013
+#   blt a2, a1, branch_target_5         
+#branch_target_5: 
+#   addi a1, a1, 1         # a1 = 0x00014
+#   bge a1, a2, branch_target_6         
+#branch_target_6: 
+#   addi a1, a1, 1         # a1 = 0x00015
+#   bltu a2, a1, branch_target_7        
+#branch_target_7: 
+#   addi a1, a1, 1         # a1 = 0x00016
+#   bgeu a1, a2, branch_target_8        
+#branch_target_8: 
+#   addi a1, a1, 1         # a1 = 0x00017
 
-#  # [11] System-CSR (Write to mscratch so we don't break privileges)
-#  csrw mscratch, a1      # mscratch = 0x17
-#  csrr a1, mscratch      # a1 = 0x17
-#  csrrs a3, mscratch, zero
-#  csrrc a3, mscratch, zero
-#  csrrwi a3, mscratch, 0
-#  csrrsi a3, mscratch, 0
-#  csrrci a3, mscratch, 0 
-#  # a1 is still 0x17
-# [11] System-CSR (Use sscratch because mscratch traps in S-mode!)
-   csrw sscratch, a1      # sscratch = 0x17
-   csrr a1, sscratch      # a1 = 0x17
-   csrrs a3, sscratch, zero
-   csrrc a3, sscratch, zero
-   csrrwi a3, sscratch, 0
-   csrrsi a3, sscratch, 0
-   csrrci a3, sscratch, 0 
-   # a1 is still 0x17
+# 10 branch
+beq a1, a1, branch_target_3
+branch_taret_3:
+addi a1, a1, 1
+li a2, 0
+bne a1, a2, branch_target_4
+branch_taret_4:
+addi a1, a1, 1
+blt a2, a1, branch_target_5
+branch_taret_5:
+addi a1, a1, 1
+bge a1, a2, branch_target_6
+branch_taret_6:
+addi a1, a1, 1
+bltu a2, a1, branch_target_7
+branch_taret_7:
+addi a1, a1, 1
+bgeu a1, a2, branch_target_8
+branch_taret_8:
+addi a1, a1, 1
 
 
 
-   # [12] Atomic
-   la a2, mem_test_var
-   lr.d a3, (a2)          
-   sc.d a4, a1, (a2)      
-   ld a1, 0(a2)           # a1 = 0x00017
+## [11] System-CSR (Use sscratch because mscratch traps in S-mode!)
+#   csrw sscratch, a1      # sscratch = 0x17
+#   csrr a1, sscratch      # a1 = 0x17
+#   csrrs a3, sscratch, zero
+#   csrrc a3, sscratch, zero
+#   csrrwi a3, sscratch, 0
+#   csrrsi a3, sscratch, 0
+#   csrrci a3, sscratch, 0 
+#   # a1 is still 0x17
+# 11 CSR
+csrw sscratch, a1
+csrr a1, sscratch
+csrrs a3, sscratch, zero
+csrrc a3, sscratch, zero
+csrrwi a3, sscratch, 0
+csrrsi a3, sscratch, 0
+csrrci a3, sscratch, 0
 
-   # [13] M-Mul
-   li a2, 2
-   mul a1, a1, a2         # a1 = 0x17 * 2 = 0x2E
-   mulh a3, a1, a2        # a3 = 0
-   add a1, a1, a3         # a1 = 0x2E
-   mulw a1, a1, a2        # a1 = 0x2E * 2 = 0x5C
 
-   # [14] M-Div
-   div a1, a1, a2         # a1 = 0x5C / 2 = 0x2E
-   rem a3, a1, a2         # a3 = 0x2E % 2 = 0
-   add a1, a1, a3         # a1 = 0x2E
-   divw a1, a1, a2        # a1 = 0x2E / 2 = 0x17
-   remw a3, a1, a2        # a3 = 0x17 % 2 = 1
-   add a1, a1, a3         # a1 = 0x17 + 1 = 0x18
+#   # [12] Atomic
+#   la a2, mem_test_var
+#   lr.d a3, (a2)          
+#   sc.d a4, a1, (a2)      
+#   ld a1, 0(a2)           # a1 = 0x00017
+# 12 Atomic
+la a2, mem_test_var
+lr.d a3, (a2)
+sc.d a4, a1, (a2)
+ld a1, 0(a2)
 
-   # ========================================================
-   # FINAL CHECK
-   # ========================================================
-   mv a0, a1
-   call sbi_print_reg
-   li t2, 0x0000000000000018
-   bne a1, t2, fail_chain
+#  # [13] M-Mul
+#  li a2, 2
+#  mul a1, a1, a2         # a1 = 0x17 * 2 = 0x2E
+#  mulh a3, a1, a2        # a3 = 0
+#  add a1, a1, a3         # a1 = 0x2E
+#  mulw a1, a1, a2        # a1 = 0x2E * 2 = 0x5C
+# 13 Mul
+li a2, 2
+mul a1, a1, a2
+mulh a3, a1, a2
+add a1, a1, a3
+mulw a1, a1, a2
+
+#  # [14] M-Div
+#  div a1, a1, a2         # a1 = 0x5C / 2 = 0x2E
+#  rem a3, a1, a2         # a3 = 0x2E % 2 = 0
+#  add a1, a1, a3         # a1 = 0x2E
+#  divw a1, a1, a2        # a1 = 0x2E / 2 = 0x17
+#  remw a3, a1, a2        # a3 = 0x17 % 2 = 1
+#  add a1, a1, a3         # a1 = 0x17 + 1 = 0x18
+# 14 Div
+div a1, a1, a2
+rem a3, a1, a2
+add a1, a1, a3
+divw a1, a1, a2
+remw a3, a1, a2
+add a1, a1, a3
+
+  ## ========================================================
+  ## FINAL CHECK
+  ## ========================================================
+  #mv a0, a1
+  #call sbi_print_reg
+  #li t2, 0x0000000000000018
+  #bne a1, t2, fail_chain
+# FINAL CHECK
+mv a0, a1
+call sbi_print_reg
+li t2, 0x0000000000000018
+bne a1, t2, fail_chain
 
    # Success!
-   li a0, "\nChainOK"
-   call sbi_print7
-   j end_of_chain_test
+  #li a0, "\nChainOK"
+  #call sbi_print7
+  #j end_of_chain_test
+# Success
+li a0, "\nChainOK"
+call sbi_print7
+j end_test
+
+#fail_chain:
+#   # Failed! Print register to see exactly where it broke
+#   mv a0, a1
+#   call sbi_print_reg
+#   li a0, "\nFAIL!!"
+#   call sbi_print7
+#halt_loop_chain: 
+#   j halt_loop_chain
 
 fail_chain:
-   # Failed! Print register to see exactly where it broke
-   mv a0, a1
-   call sbi_print_reg
-   li a0, "\nFAIL!!"
-   call sbi_print7
-halt_loop_chain: 
-   j halt_loop_chain
+mv a0, a1
+call sbi_print_reg
+li a0, "\nFAIL"
+call sbi_print7
 
-end_of_chain_test:
-
-
-
-pause:
-j pause
-
-fail_alu:
-  call sbi_print7
-
+end_test:
+j end_test
 
 
 
