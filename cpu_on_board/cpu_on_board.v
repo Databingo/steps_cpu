@@ -167,7 +167,7 @@ assign DRAM_CKE = 1; // always enable
         //.bubble(bubble),
         //.ir(LEDG),
         //.heartbeat(LEDR9),
-	.valid_address(valid_address),
+	//.valid_address(valid_address),
 
         .bus_address(bus_address),
         .bus_write_data(bus_write_data),
@@ -307,31 +307,31 @@ assign DRAM_CKE = 1; // always enable
 
 
     //wire Key_selected = (bus_address == `Key_base);
-    wire valid_address = Rom_selected
-    | Ram_selected
-    | Art_selected
-    | Sdc_addr_selected
-    | Sdc_read_selected
-    | Sdc_write_selected
-    | Sdc_ready_selected
-    | Sdc_cache_selected
-    | Sdc_avail_selected
-    | Sdram_selected
-    | Clintbase_selected 
-    | Mtime_selected
-    | Mtimecmp_selected
-    | CacheI_L_selected
-    | CacheI_H_selected
-    | Tlb_selected
-    | Plic_priority_selected
-    | Plic_pending_selected
-    | Plic_enable_ctx0_selected
-    | Plic_enable_ctx1_selected
-    | Plic_threshold_ctx0_selected
-    | Plic_threshold_ctx1_selected
-    | Plic_claim_ctx0_selected
-    | Plic_claim_ctx1_selected;
-
+//    wire valid_address = Rom_selected
+//    | Ram_selected
+//    | Art_selected
+//    | Sdc_addr_selected
+//    | Sdc_read_selected
+//    | Sdc_write_selected
+//    | Sdc_ready_selected
+//    | Sdc_cache_selected
+//    | Sdc_avail_selected
+//    | Sdram_selected
+//    | Clintbase_selected 
+//    | Mtime_selected
+//    | Mtimecmp_selected
+//    | CacheI_L_selected
+//    | CacheI_H_selected
+//    | Tlb_selected
+//    | Plic_priority_selected
+//    | Plic_pending_selected
+//    | Plic_enable_ctx0_selected
+//    | Plic_enable_ctx1_selected
+//    | Plic_threshold_ctx0_selected
+//    | Plic_threshold_ctx1_selected
+//    | Plic_claim_ctx0_selected
+//    | Plic_claim_ctx1_selected;
+//
 
     // Read & Write BRAM Port B 
     reg [63:0] bus_address_reg;

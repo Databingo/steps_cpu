@@ -4,7 +4,7 @@ module riscv64(
     input wire clk, 
     input wire reset,     // Active-low reset button
     input wire [31:0] instruction,
-    input wire valid_address,
+    //input wire valid_address,
     output wire [63:0] ppc,
     //output wire  heartbeat,
     output reg [63:0] bus_address,     // 39 bit for real Sv39 standard?
