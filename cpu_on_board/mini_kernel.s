@@ -8,7 +8,7 @@ msg_mmu:
 msg_rx:
     .string "key_press: "
 test_var:
-    .word 0x00000000
+    .dword 0x00000000
 
 
 # Bootloader/copy4 --> firmware/BIOS/opensib/mini_sbi2 --> OS/linux/kernal
@@ -63,7 +63,29 @@ _start:  # like linux kernel
 
    la a0, msg_mmu   # trigger I-TLB miss
    call sbi_puts
-  
+ 
+
+   
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
    # Step 5 test Typing 
    li a0, "\ntyping"
    call sbi_print7
