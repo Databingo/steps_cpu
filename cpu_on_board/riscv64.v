@@ -319,29 +319,32 @@ localparam sip        = 6;  // Supervisor interrupt pending
 localparam sip_write_mask   = 64'h0000_0000_0000_0002; // SSIP
 wire [63:0] csr_mask  = (w_csr == 12'h100) ? sstatus_mask : (w_csr == 12'h104) ? (sie_sip_mask & Csrs[mideleg]) : (w_csr == 12'h144) ? (sie_sip_mask   & Csrs[mideleg]) : 64'hffff_ffff_ffff_ffff;
 wire [63:0] csr_mask_w= (w_csr == 12'h100) ? sstatus_mask : (w_csr == 12'h104) ? (sie_sip_mask & Csrs[mideleg]) : (w_csr == 12'h144) ? (sip_write_mask & Csrs[mideleg]) : 64'hffff_ffff_ffff_ffff;
+wire [63:0] csr_read  = Csrs[w_csr_id] & csr_mask;
+wire [63:0] csr_write_re  = rs1 & csr_mask_w;
+wire [63:0] csr_write_im  = w_imm_z & csr_mask_w;
 
 localparam medeleg    = 7 ; localparam MECALL=11,SECALL=9,UECALL=8,BREAK=3; // bit_index=mcause_value 8UECALL|9SECALL
 localparam mideleg    = 8 ;  //
+localparam mimpid     = 9;  // 0
 localparam sedeleg    = 10;  
 localparam sideleg    = 11;  
+localparam marchid    = 12;  // 0
 localparam stvec      = 13;  //localparam ; //BASE=2,MODE=0 63:2BASE|1:0MDOE Supervisor trap handler base address
 localparam scounteren = 14;  
 localparam sscratch   = 15;  
 localparam sepc       = 16;  
 localparam scause     = 17;  //localparam ; //INTERRUPT=63,CAUSE=0 *  63InterruptAsync/ErrorSync|62:0CauseCode// 
 localparam stval      = 18;  
-localparam satp       = 20;  // Supervisor address translation and protection satp[63:60].MODE=0:off|8:SV39 satp[59:44].asid vpn2:9 vpn1:9 vpn0:9 satp[43:0]:rootpage physical addr
-localparam mtval      = 21;  // Machine Trap Value Register (bad address or instruction)
+localparam satp       = 19;  // Supervisor address translation and protection satp[63:60].MODE=0:off|8:SV39 satp[59:44].asid vpn2:9 vpn1:9 vpn0:9 satp[43:0]:rootpage physical addr
+localparam mtval      = 20;  // Machine Trap Value Register (bad address or instruction)
 
-localparam mhartid    = 22;  // Hardware Thread ID 0 for single-core
-localparam misa       = 23;  // Machine ISA Register (IMA is 0x8000000000001101)
-localparam mvendorid  = 24;  // 0
-localparam marchid    = 25;  // 0
-localparam mimpid     = 26;  // 0
+localparam mhartid    = 21;  // Hardware Thread ID 0 for single-core
+localparam misa       = 22;  // Machine ISA Register (IMA is 0x8000000000001101)
+localparam mvendorid  = 23;  // 0
 
-localparam pmpcfg0    = 27;  // Physical Memory Protection
-localparam pmpaddr0   = 28;  // 
-localparam mdebug     = 29;  // 
+localparam pmpcfg0    = 24;  // Physical Memory Protection
+localparam pmpaddr0   = 25;  // 
+localparam mdebug     = 26;  // 
 //localparam pmpaddr1   = 29;  // 
 //localparam pmpaddr2   = 30;  // 
 //localparam pmpaddr3   = 31;  // 
@@ -406,7 +409,7 @@ end
 
 
 //(* ram_style = "logic" *) reg [63:0] Csrs [0:36]; // 36 CSRs for now // totally 4096
-(* ram_style = "logic" *) reg [63:0] Csrs [0:30]; // 36 CSRs for now // totally 4096
+(* ram_style = "logic" *) reg [63:0] Csrs [0:26]; // 36 CSRs for now // totally 4096
 wire [3:0]  satp_mmu  = Csrs[satp][63:60]; // 0:bare, 8:sv39, 9:sv48  satp.MODE!=0, privilegae is not M-mode, mstatus.MPRN is not set or in MPP's mode?
 
 // -- Timer --
@@ -579,7 +582,7 @@ always @(*) begin
 		Csrs[mstatus][MIE] <= 1;
 		mmu_da <= 0;
 		for (i=0;i<11;i=i+1) begin sre[i]<= 64'b0; end 
-		for (i=0;i<31;i=i+1) begin Csrs[i]<= 64'b0; end
+		for (i=0;i<27;i=i+1) begin Csrs[i]<= 64'b0; end
 		Csrs[medeleg] <= 64'hb1af; // delegate to S-mode 1011000110101111 // see VII 3.1.15 mcasue exceptions
 		Csrs[mideleg] <= 64'h0222; // delegate to S-mode 0000001000100010 see VII 3.1.15 mcasue interrupt 1/5/9 SSIP(supervisor software interrupt) STIP(time) SEIP(external)
 		// Initialize Machine Info for OpenSBI
@@ -781,19 +784,19 @@ always @(*) begin
 		    32'b???????_?????_?????_110_?????_1100011: begin if ($unsigned(re[w_rs1]) < $unsigned(re[w_rs2])) begin pc <= branch; bubble <= 1'b1; end end // Bltu
 		    32'b???????_?????_?????_111_?????_1100011: begin if ($unsigned(re[w_rs1]) >= $unsigned(re[w_rs2])) begin pc <= branch; bubble <= 1'b1; end end // Bgeu
 		    // System-CSR 
-		    32'b???????_?????_?????_001_?????_1110011: begin if (w_rd != 0) re[w_rd] <=(w_csr_id==63) ? 64'b0 : Csrs[w_csr_id] & csr_mask;
-		                                                     if (w_csr_id != 63) Csrs[w_csr_id] <= (Csrs[w_csr_id] & ~csr_mask_w) | (rs1 & csr_mask_w); end // Csrrw logic
+		    32'b???????_?????_?????_001_?????_1110011: begin if (w_rd != 0) re[w_rd] <=(w_csr_id==63) ? 64'b0 : csr_read; // Csrs[w_csr_id] & csr_mask;
+		                                                     if (w_csr_id != 63) Csrs[w_csr_id] <= (Csrs[w_csr_id] & ~csr_mask_w)| csr_write_re; end //  (rs1 & csr_mask_w); end // Csrrw logic
 		                                                     //if (w_csr_id==satp) begin pc<=pc; bubble<=1; end end // flush pipelien on satp write
-	            32'b???????_?????_?????_010_?????_1110011: begin if (w_rd != 0) re[w_rd] <=(w_csr_id==63) ? 64'b0 : Csrs[w_csr_id] & csr_mask;
-		                                                     if (w_rs1 != 0 && w_csr_id != 63) Csrs[w_csr_id] <= (Csrs[w_csr_id] | (rs1 & csr_mask_w)); end // Csrrs
-	            32'b???????_?????_?????_011_?????_1110011: begin if (w_rd != 0) re[w_rd] <=(w_csr_id==63) ? 64'b0 : Csrs[w_csr_id] & csr_mask;
-		                                                     if (w_rs1 != 0 && w_csr_id != 63) Csrs[w_csr_id] <= (Csrs[w_csr_id] & ~(rs1 & csr_mask_w)); end // Csrrc
-	            32'b???????_?????_?????_101_?????_1110011: begin if (w_rd != 0) re[w_rd] <=(w_csr_id==63) ? 64'b0 : Csrs[w_csr_id] & csr_mask;
-		                                                     if (w_csr_id != 63)   Csrs[w_csr_id] <= (Csrs[w_csr_id] & ~csr_mask_w) | ( w_imm_z & csr_mask_w); end // Csrrwi
-	            32'b???????_?????_?????_110_?????_1110011: begin if (w_rd != 0) re[w_rd] <=(w_csr_id==63) ? 64'b0 : Csrs[w_csr_id] & csr_mask;
-		                                                     if (w_imm_z != 0 && w_csr_id != 63) Csrs[w_csr_id] <= (Csrs[w_csr_id] | (w_imm_z & csr_mask_w)); end // csrrsi
-	            32'b???????_?????_?????_111_?????_1110011: begin if (w_rd != 0) re[w_rd] <=(w_csr_id==63) ? 64'b0 : Csrs[w_csr_id] & csr_mask;
-		                                                     if (w_imm_z != 0 && w_csr_id != 63) Csrs[w_csr_id] <= (Csrs[w_csr_id] & ~(w_imm_z & csr_mask_w)); end // Csrrci
+	            32'b???????_?????_?????_010_?????_1110011: begin if (w_rd != 0) re[w_rd] <=(w_csr_id==63) ? 64'b0 : csr_read; // Csrs[w_csr_id] & csr_mask;
+		                                                     if (w_rs1 != 0 && w_csr_id != 63) Csrs[w_csr_id] <= (Csrs[w_csr_id] | csr_write_re); end //  (rs1 & csr_mask_w)); end // Csrrs
+	            32'b???????_?????_?????_011_?????_1110011: begin if (w_rd != 0) re[w_rd] <=(w_csr_id==63) ? 64'b0 : csr_read; // Csrs[w_csr_id] & csr_mask;
+		                                                     if (w_rs1 != 0 && w_csr_id != 63) Csrs[w_csr_id] <= (Csrs[w_csr_id] & ~csr_write_re); end //  (rs1 & csr_mask_w)); end // Csrrc
+	            32'b???????_?????_?????_101_?????_1110011: begin if (w_rd != 0) re[w_rd] <=(w_csr_id==63) ? 64'b0 : csr_read; // Csrs[w_csr_id] & csr_mask;
+		                                                     if (w_csr_id != 63)   Csrs[w_csr_id] <= (Csrs[w_csr_id] & ~csr_mask_w) | csr_write_im; end //  (w_imm_z & csr_mask_w); end // Csrrwi
+	            32'b???????_?????_?????_110_?????_1110011: begin if (w_rd != 0) re[w_rd] <=(w_csr_id==63) ? 64'b0 : csr_read; // Csrs[w_csr_id] & csr_mask;
+		                                                     if (w_imm_z != 0 && w_csr_id != 63) Csrs[w_csr_id] <= (Csrs[w_csr_id] | csr_write_im); end //  (w_imm_z & csr_mask_w)); end // csrrsi
+	            32'b???????_?????_?????_111_?????_1110011: begin if (w_rd != 0) re[w_rd] <=(w_csr_id==63) ? 64'b0 : csr_read; // Csrs[w_csr_id] & csr_mask;
+		                                                     if (w_imm_z != 0 && w_csr_id != 63) Csrs[w_csr_id] <= (Csrs[w_csr_id] & ~csr_write_im); end //  (w_imm_z & csr_mask_w)); end // Csrrci
                     // Ecall
 	            32'b0000000_00000_?????_000_?????_1110011: begin 
 	                                                if      (current_privilege_mode == U_mode) trap_cause = UECALL; // 8 indicate Ecall from U-mode; 9 call from S-mode; 11 call from M-mode
