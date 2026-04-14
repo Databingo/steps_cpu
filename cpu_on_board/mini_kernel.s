@@ -192,24 +192,25 @@ main:
    li a0, "\nF_alus"
    bne t6, t1, fail_alu
 
-li t0, 0x0F
-slli t1, t0, 4 #0xF0
-srl t2, t1, t0
-li t3, 0xF0000000
-mv a0, t3
-#call sbi_print_reg
-sraiw t4, t3, 4 #0xFF000000
-mv a0, t4
-#call sbi_print_reg
-li t5, 0xFFFFFFFFFF000000
-li a0, "\nF_alur"
-bne t4, t5, fail_alu
+   li t0, 0x0F
+   slli t1, t0, 4 #0xF0
+   srl t2, t1, t0
+   li t3, 0xF0000000
+   mv a0, t3
+   #call sbi_print_reg
+   sraiw t4, t3, 4 #0xFF000000
+   mv a0, t4
+   #call sbi_print_reg
+   li t5, 0xFFFFFFFFFF000000
+   li a0, "\nF_alur"
+   bne t4, t5, fail_alu
 
 
   
-li a0, "\nFullt\n"
-call sbi_print7
-# ========================================================
+   li a0, "\nFullt\n"
+   call sbi_print7
+
+   # ========================================================
    # THE "ONELINE" SEQUENTIAL EXECUTION TEST (Fixed for rvas.go)
    # Accumulator register: a1
    # ========================================================
