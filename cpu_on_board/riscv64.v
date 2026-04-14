@@ -301,25 +301,35 @@ end
 
 // --Machine CSR --
 localparam mstatus    = 0 ; localparam MPRV=17,MPP=11,SPP=8,MPIE=7,SPIE=5,MIE=3,SIE=1,UIE=0;//63_SD|37_MBE|36_SBE|35:34_SXL10|22_TSR|21_TW|20_TVW|17_MPRV|12:11MPP|8SPP|7MPIE|5SPIE|3MIE|1SIE|0UIE
+localparam sstatus    = 0 ; localparam SD=63,UXL=32,MXR=19,SUM=18,XS=15,FS=13,VS=9,UBE=6; //SPP=8,SPIE=5,SIE=1,//63SD|33:32UXL|19MXR|18SUM|16:15XS|14:13FS|10:9VS|8SPP|6UBE|5SPIE|1SIE
+localparam sstatus_mask  = 64'h8000_0003_000D_E122; // SD,UXL,MXR,SUM,XS,FS,SPP,SPIE,SIE only from mirror mstatus, RVV E722
+
 localparam mtvec      = 1 ; localparam BASE=2,MODE=0; // 63:2BASE|1:0MDOE  // 0x305 MRW Machine trap-handler base address * 0 direct 1vec
 localparam mscratch   = 2 ;  // 
 localparam mepc       = 3 ;  
 localparam mcause     = 4 ; localparam INTERRUPT=63,CAUSE=0,ILLEGAL_INSTRUCTION=2,PAGE_F_I=12,PAGE_F_L=13,PAGE_F_S=14;//0x342 MRW Machine trap casue*63InterruptAsync/ErrorSync|62:0CauseCode
+
 localparam mie        = 5 ; localparam SGEIE=12,MEIE=11,VSEIE=10,SEIE=9,MTIE=7,VSTIE=6,STIE=5,MSIE=3,VSSIE=2,SSIE=1; // Machine Interrupt Enable from OS software set enable
+localparam sie        = 5;  // Supervisor interrupt-enable register
+localparam sie_sip_mask   = 64'h0000_0000_0000_0222; // SEIE, STIE, SSIE
+
 localparam mip        = 6 ; localparam SGEIP=12,MEIP=11,VSEIP=10,SEIP=9,MTIP=7,VSTIP=6,STIP=5,MSIP=3,VSSIP=2,SSIP=1; // Machine Interrupt Pending from HardWare timer,uart,PLIC.11Exter7Time3Software
+localparam sip        = 6;  // Supervisor interrupt pending
+//localparam sip_mask   = 64'h0000_0000_0000_0222; // SEIP, STIP, SSIP
+localparam sip_write_mask   = 64'h0000_0000_0000_0002; // SSIP
+wire [63:0] csr_mask  = (w_csr == 12'h100) ? sstatus_mask : (w_csr == 12'h104) ? (sie_sip_mask & Csrs[mideleg]) : (w_csr == 12'h144) ? (sie_sip_mask   & Csrs[mideleg]) : 64'hffff_ffff_ffff_ffff;
+wire [63:0] csr_mask_w= (w_csr == 12'h100) ? sstatus_mask : (w_csr == 12'h104) ? (sie_sip_mask & Csrs[mideleg]) : (w_csr == 12'h144) ? (sip_write_mask & Csrs[mideleg]) : 64'hffff_ffff_ffff_ffff;
+
 localparam medeleg    = 7 ; localparam MECALL=11,SECALL=9,UECALL=8,BREAK=3; // bit_index=mcause_value 8UECALL|9SECALL
 localparam mideleg    = 8 ;  //
-localparam sstatus    = 9 ; localparam SD=63,UXL=32,MXR=19,SUM=18,XS=15,FS=13,VS=9,UBE=6; //SPP=8,SPIE=5,SIE=1,//63SD|33:32UXL|19MXR|18SUM|16:15XS|14:13FS|10:9VS|8SPP|6UBE|5SPIE|1SIE
 localparam sedeleg    = 10;  
 localparam sideleg    = 11;  
-localparam sie        = 12;  // Supervisor interrupt-enable register
 localparam stvec      = 13;  //localparam ; //BASE=2,MODE=0 63:2BASE|1:0MDOE Supervisor trap handler base address
 localparam scounteren = 14;  
 localparam sscratch   = 15;  
 localparam sepc       = 16;  
 localparam scause     = 17;  //localparam ; //INTERRUPT=63,CAUSE=0 *  63InterruptAsync/ErrorSync|62:0CauseCode// 
 localparam stval      = 18;  
-localparam sip        = 19;  // Supervisor interrupt pending
 localparam satp       = 20;  // Supervisor address translation and protection satp[63:60].MODE=0:off|8:SV39 satp[59:44].asid vpn2:9 vpn1:9 vpn0:9 satp[43:0]:rootpage physical addr
 localparam mtval      = 21;  // Machine Trap Value Register (bad address or instruction)
 
@@ -393,6 +403,7 @@ always @(*) begin
 	default : w_csr_id = 63; 
     endcase
 end
+
 
 //(* ram_style = "logic" *) reg [63:0] Csrs [0:36]; // 36 CSRs for now // totally 4096
 (* ram_style = "logic" *) reg [63:0] Csrs [0:30]; // 36 CSRs for now // totally 4096
@@ -770,19 +781,19 @@ always @(*) begin
 		    32'b???????_?????_?????_110_?????_1100011: begin if ($unsigned(re[w_rs1]) < $unsigned(re[w_rs2])) begin pc <= branch; bubble <= 1'b1; end end // Bltu
 		    32'b???????_?????_?????_111_?????_1100011: begin if ($unsigned(re[w_rs1]) >= $unsigned(re[w_rs2])) begin pc <= branch; bubble <= 1'b1; end end // Bgeu
 		    // System-CSR 
-		    32'b???????_?????_?????_001_?????_1110011: begin if (w_rd != 0) re[w_rd] <=(w_csr_id==63) ? 64'b0:Csrs[w_csr_id];
-		                                                     if (w_csr_id != 63) Csrs[w_csr_id] <= rs1; end // Csrrw logic
+		    32'b???????_?????_?????_001_?????_1110011: begin if (w_rd != 0) re[w_rd] <=(w_csr_id==63) ? 64'b0 : Csrs[w_csr_id] & csr_mask;
+		                                                     if (w_csr_id != 63) Csrs[w_csr_id] <= (Csrs[w_csr_id] & ~csr_mask_w) | (rs1 & csr_mask_w); end // Csrrw logic
 		                                                     //if (w_csr_id==satp) begin pc<=pc; bubble<=1; end end // flush pipelien on satp write
-	            32'b???????_?????_?????_010_?????_1110011: begin if (w_rd != 0) re[w_rd] <=(w_csr_id==63) ? 64'b0:Csrs[w_csr_id];
-		                                                     if (w_rs1 != 0 && w_csr_id != 63) Csrs[w_csr_id] <= (Csrs[w_csr_id] |  rs1); end // Csrrs
-	            32'b???????_?????_?????_011_?????_1110011: begin if (w_rd != 0) re[w_rd] <=(w_csr_id==63) ? 64'b0:Csrs[w_csr_id];
-		                                                     if (w_rs1 != 0 && w_csr_id != 63) Csrs[w_csr_id] <= (Csrs[w_csr_id] & ~rs1); end // Csrrc
-	            32'b???????_?????_?????_101_?????_1110011: begin if (w_rd != 0) re[w_rd] <=(w_csr_id==63) ? 64'b0:Csrs[w_csr_id];
-		                                                     if (w_csr_id != 63)   Csrs[w_csr_id] <= w_imm_z; end // Csrrwi
-	            32'b???????_?????_?????_110_?????_1110011: begin if (w_rd != 0) re[w_rd] <=(w_csr_id==63) ? 64'b0:Csrs[w_csr_id];
-		                                                     if (w_imm_z != 0 && w_csr_id != 63) Csrs[w_csr_id] <= (Csrs[w_csr_id] | w_imm_z); end // csrrsi
-	            32'b???????_?????_?????_111_?????_1110011: begin if (w_rd != 0) re[w_rd] <=(w_csr_id==63) ? 64'b0:Csrs[w_csr_id];
-		                                                     if (w_imm_z != 0 && w_csr_id != 63) Csrs[w_csr_id] <= (Csrs[w_csr_id] & ~w_imm_z); end // Csrrci
+	            32'b???????_?????_?????_010_?????_1110011: begin if (w_rd != 0) re[w_rd] <=(w_csr_id==63) ? 64'b0 : Csrs[w_csr_id] & csr_mask;
+		                                                     if (w_rs1 != 0 && w_csr_id != 63) Csrs[w_csr_id] <= (Csrs[w_csr_id] | (rs1 & csr_mask_w)); end // Csrrs
+	            32'b???????_?????_?????_011_?????_1110011: begin if (w_rd != 0) re[w_rd] <=(w_csr_id==63) ? 64'b0 : Csrs[w_csr_id] & csr_mask;
+		                                                     if (w_rs1 != 0 && w_csr_id != 63) Csrs[w_csr_id] <= (Csrs[w_csr_id] & ~(rs1 & csr_mask_w)); end // Csrrc
+	            32'b???????_?????_?????_101_?????_1110011: begin if (w_rd != 0) re[w_rd] <=(w_csr_id==63) ? 64'b0 : Csrs[w_csr_id] & csr_mask;
+		                                                     if (w_csr_id != 63)   Csrs[w_csr_id] <= (Csrs[w_csr_id] & ~csr_mask_w) | ( w_imm_z & csr_mask_w); end // Csrrwi
+	            32'b???????_?????_?????_110_?????_1110011: begin if (w_rd != 0) re[w_rd] <=(w_csr_id==63) ? 64'b0 : Csrs[w_csr_id] & csr_mask;
+		                                                     if (w_imm_z != 0 && w_csr_id != 63) Csrs[w_csr_id] <= (Csrs[w_csr_id] | (w_imm_z & csr_mask_w)); end // csrrsi
+	            32'b???????_?????_?????_111_?????_1110011: begin if (w_rd != 0) re[w_rd] <=(w_csr_id==63) ? 64'b0 : Csrs[w_csr_id] & csr_mask;
+		                                                     if (w_imm_z != 0 && w_csr_id != 63) Csrs[w_csr_id] <= (Csrs[w_csr_id] & ~(w_imm_z & csr_mask_w)); end // Csrrci
                     // Ecall
 	            32'b0000000_00000_?????_000_?????_1110011: begin 
 	                                                if      (current_privilege_mode == U_mode) trap_cause = UECALL; // 8 indicate Ecall from U-mode; 9 call from S-mode; 11 call from M-mode
