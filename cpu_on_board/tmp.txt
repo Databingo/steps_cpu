@@ -206,7 +206,7 @@ slli a0, a0, 0xb
 ori a0, a0, 0x3e8
 slli a0, a0, 0xb
 ori a0, a0, 0x60a
-bne t4, t5 fail_alu
+bne t4, t5, fail_alu
 lui a1, 0x12345        # a1 = 0x0000000012345000
 #    la a2, mem_test_var
 auipc a2, 0 # R_RISCV_PCREL_HI20 mem_test_var 
@@ -292,20 +292,20 @@ addi a1, a1, 1         # a1 = 0x00016
 bgeu a1, a2, branch_target_8        
 branch_target_8:
 addi a1, a1, 1         # a1 = 0x00017
-#    csrw mscratch, a1      
-csrrw x0, mscratch, a1
-#    csrr a1, mscratch      
-csrrs a1, mscratch, x0
-csrrs a3, mscratch, zero
-csrrc a3, mscratch, zero
-csrrwi a3, mscratch, 0
-csrrsi a3, mscratch, 0
-csrrci a3, mscratch, 0 
+#    csrw sscratch, a1      
+csrrw x0, sscratch, a1
+#    csrr a1, sscratch      
+csrrs a1, sscratch, x0
+csrrs a3, sscratch, zero
+csrrc a3, sscratch, zero
+csrrwi a3, sscratch, 0
+csrrsi a3, sscratch, 0
+csrrci a3, sscratch, 0 
 #    la a2, mem_test_var
 auipc a2, 0 # R_RISCV_PCREL_HI20 mem_test_var 
 addi a2, a2, 0 # R_RISCV_PCREL_LO12_I mem_test_var 
 lr.d a3, (a2)          
-sc.d a3, a1, (a2)      
+sc.d a4, a1, (a2)      
 ld a1, 0(a2)           # a1 = 0x00017
 #    li a2, 2
 addi a2, x0, 0x0
@@ -321,6 +321,11 @@ add a1, a1, a3         # a1 = 0x2E
 divw a1, a1, a2        # a1 = 0x2E / 2 = 0x17
 remw a3, a1, a2        # a3 = 0x17 % 2 = 1
 add a1, a1, a3         # a1 = 0x17 + 1 = 0x18
+#    mv a0, a1
+addi a0, a1, 0
+#    call sbi_print_reg
+auipc x1, 0 # R_RISCV_PCREL_HI20 sbi_print_reg
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I sbi_print_reg
 #    li t2, 0x0000000000000018
 addi t2, x0, 0x0
 addi t2, x0, 0x0
