@@ -14,8 +14,106 @@ mem_test_var:
 # Bootloader/copy4 --> firmware/BIOS/opensib/mini_sbi2 --> OS/linux/kernal
 .section .text
 _start:  # like linux kernel
+  j main
 
-   li sp, 0x80700000 # Set stack # 80000000-8080000 sdram as 8M ram, we start sp from 0x80700000<-, MMU from 0x80700000->
+s_trap_handler:
+   li a0, "\n"
+   li a7, 1
+   ecall   # here ecall was not delegated to s_mode, so go to mtvec to find m-mode ecall handler
+   li a0, "strap.."
+   call sbi_print7
+   j s_done
+
+s_done: 
+   csrr s2, sepc
+   addi s2, s2, 4 # skip ecall/ebreak instruction
+   csrw sepc, s2
+   sret
+
+
+sbi_puts: # a0 addr
+    addi sp, sp, -16
+    sd ra, 0(sp)
+    sd s0, 8(sp)
+    mv s0, a0
+    sbi_puts_loop:
+    lbu a0, 0(s0)
+    beq a0, x0, sbi_stop_puts # \x00 for end of string
+    li a7, 1 # SBI Putchar ID
+    ecall
+   #call putchar # a0 char
+    addi s0, s0, 1 # next byte
+    j sbi_puts_loop
+    sbi_stop_puts:
+    ld ra, 0(sp)
+    ld s0, 8(sp)
+    addi sp, sp, 16
+    ret
+
+sbi_print7: # a0, 7 char left one for null
+    addi sp, sp, -16
+    sd a0, 0(sp)
+    sd ra, 8(sp)
+    mv a0, sp
+    call sbi_puts
+    ld a0, 0(sp)
+    ld ra, 8(sp)
+    addi sp, sp, 16
+    ret
+
+sbi_putchar:  # a0
+    addi sp, sp, -8
+    sd ra, 0(sp)
+    li a7, 1 # SBI Putchar ID
+    ecall
+    ld ra, 0(sp)
+    addi sp, sp, 8
+    ret
+
+
+
+sbi_print_reg: # a0
+    addi sp, sp, -40
+    sd ra, 0(sp)
+    sd s0, 8(sp)
+    sd s1, 16(sp)
+    sd s2, 24(sp)
+    sd s3, 32(sp)
+    mv s0, a0
+    li a0, "0"
+    call sbi_putchar
+    li a0, "x"
+    call sbi_putchar
+    li s1, 60 
+    p_loop:
+    srl s2, s0, s1      # get high nibble
+    andi s2, s2, 0xF
+    slti s3, s2, 10     # if < 10 number
+    beq s3, x0, letter
+    addi a0, s2, 48     # 0 is "0" ascii 48
+    j print_h
+    letter:
+    addi a0, s2, 55     # 10 is "A" ascii 65 ..
+    print_h:
+    call sbi_putchar    # print
+    addi s1, s1, -4
+    bge s1, x0, p_loop 
+    ld ra, 0(sp)
+    ld s0, 8(sp)
+    ld s1, 16(sp)
+    ld s2, 24(sp)
+    ld s3, 32(sp)
+    addi sp, sp, 40
+    ret
+
+
+
+
+
+
+main:
+
+   li sp, 0x80700000 # Set stack # 80000000-80800000 sdram as 8M ram, we start sp from 0x80700000<-, MMU from 0x80700000->
  
    # Step 1 test ecall (sbi) print
    la a0, msg_boot
@@ -33,7 +131,7 @@ _start:  # like linux kernel
    # Step 3 test S-Mode trap hander
    # Opensbi delegate Ebreak to OS, so we set our handler address to stvec
    la t0, s_trap_handler
-   andi t0, t0, -4 # Align to 4 bytes
+  #andi t0, t0, -4 # Align to 4 bytes
    csrw stvec, t0
    ebreak
    li a0, "\nStrpok"
@@ -99,16 +197,18 @@ slli t1, t0, 4 #0xF0
 srl t2, t1, t0
 li t3, 0xF0000000
 mv a0, t3
-call sbi_print_reg
+#call sbi_print_reg
 sraiw t4, t3, 4 #0xFF000000
 mv a0, t4
-call sbi_print_reg
+#call sbi_print_reg
 li t5, 0xFFFFFFFFFF000000
 li a0, "\nF_alur"
 bne t4, t5, fail_alu
 
 
   
+li a0, "\nFullt\n"
+call sbi_print7
 # ========================================================
    # THE "ONELINE" SEQUENTIAL EXECUTION TEST (Fixed for rvas.go)
    # Accumulator register: a1
@@ -119,6 +219,8 @@ bne t4, t5, fail_alu
    
    # [2] U-Type: Auipc (Test it executes, doesn't ruin a1)
    auipc a2, 0
+  #mv a0, a1 
+  #call sbi_print_reg
 
    # [3/4] Memory: Store then Load
    la a2, mem_test_var
@@ -126,10 +228,34 @@ bne t4, t5, fail_alu
    ld a1, 0(a2)           # Load  0x12345000
 
    # [5] Math-I (addi, xori, andi, ori, slli, srli, srai, slti, sltiu)
+   li a0, "\naddi:"
+   call sbi_print7
    addi a1, a1, 0x678     # a1 = 0x12345678
+   mv a0, a1 
+   call sbi_print_reg
+
+   li a0, "\nxori:"
+   call sbi_print7
    xori a1, a1, 0x111     # a1 = 0x12345769
-   andi a1, a1, 0xFFF     # a1 = 0x00000769
-   ori  a1, a1, 0x800     # a1 = 0x00000F69
+   mv a0, a1 
+   call sbi_print_reg
+
+   li a0, "\nandi:"
+   call sbi_print7
+   andi a1, a1, 0xFFF     # a1 = 0x12345769
+   mv a0, a1 
+   call sbi_print_reg
+
+   li a0, "\nori_:"
+   call sbi_print7
+   ori  a1, a1, 0x800     # a1 = 0xFFFFFFFFFFFFFF69
+   li a2, 0xFFF 
+   and a1, a1, a2         # a1 = 0x0000000000000F69
+   mv a0, a1 
+   call sbi_print_reg
+
+   li a0, "\nshift:"
+   call sbi_print7
    slli a1, a1, 4         # a1 = 0x0000F690
    srli a1, a1, 4         # a1 = 0x00000F69
    srai a1, a1, 0         # a1 = 0x00000F69 (MSB is 0)
@@ -137,12 +263,19 @@ bne t4, t5, fail_alu
    add  a1, a1, a3        # a1 = 0x00000F69
    sltiu a3, a1, 0        # a3 = 0
    add  a1, a1, a3        # a1 = 0x00000F69
+   mv a0, a1 
+   call sbi_print_reg
 
+   li a0, "\nmah"
+   call sbi_print7
    # [6] Math-I Word (addiw, slliw, srliw, sraiw)
    addiw a1, a1, 1        # a1 = 0x00000F6A
    slliw a1, a1, 16       # a1 = 0x0F6A0000
    srliw a1, a1, 16       # a1 = 0x00000F6A
    sraiw a1, a1, 0        # a1 = 0x00000F6A
+
+  #mv a0, a1 
+  #call sbi_print_reg
 
    # [7] Math-R (add, sub, xor, and, or, sll, srl, sra, slt, sltu)
    li a2, 0x111
@@ -160,6 +293,7 @@ bne t4, t5, fail_alu
    add a1, a1, a3         # a1 = 0x000F8
    sltu a3, a2, a1        # a3 = 1 (0 < 0xF8)
    add a1, a1, a3         # a1 = 0x000F9
+
 
    # [8] Math-R Word (addw, subw, sllw, srlw, sraw)
    li a2, 1
@@ -318,95 +452,4 @@ end:
 j end
 
 
-
-
-s_trap_handler:
-   li a0, "\n"
-   li a7, 1
-   ecall   # here ecall was not delegated to s_mode, so go to mtvec to find m-mode ecall handler
-   li a0, "strap.."
-   call sbi_print7
-   j s_done
-
-s_done: 
-   csrr s2, sepc
-   addi s2, s2, 4 # skip ecall/ebreak instruction
-   csrw sepc, s2
-   sret
-
-
-sbi_puts: # a0 addr
-    addi sp, sp, -16
-    sd ra, 0(sp)
-    sd s0, 8(sp)
-    mv s0, a0
-    sbi_puts_loop:
-    lbu a0, 0(s0)
-    beq a0, x0, sbi_stop_puts # \x00 for end of string
-    li a7, 1 # SBI Putchar ID
-    ecall
-   #call putchar # a0 char
-    addi s0, s0, 1 # next byte
-    j sbi_puts_loop
-    sbi_stop_puts:
-    ld ra, 0(sp)
-    ld s0, 8(sp)
-    addi sp, sp, 16
-    ret
-
-sbi_print7: # a0, 7 char left one for null
-    addi sp, sp, -16
-    sd a0, 0(sp)
-    sd ra, 8(sp)
-    mv a0, sp
-    call sbi_puts
-    ld a0, 0(sp)
-    ld ra, 8(sp)
-    addi sp, sp, 16
-    ret
-
-sbi_putchar:  # a0
-    addi sp, sp, -8
-    sd ra, 0(sp)
-    li a7, 1 # SBI Putchar ID
-    ecall
-    ld ra, 0(sp)
-    addi sp, sp, 8
-    ret
-
-
-
-sbi_print_reg: # a0
-    addi sp, sp, -40
-    sd ra, 0(sp)
-    sd s0, 8(sp)
-    sd s1, 16(sp)
-    sd s2, 24(sp)
-    sd s3, 32(sp)
-    mv s0, a0
-    li a0, "0"
-    call sbi_putchar
-    li a0, "x"
-    call sbi_putchar
-    li s1, 60 
-    p_loop:
-    srl s2, s0, s1      # get high nibble
-    andi s2, s2, 0xF
-    slti s3, s2, 10     # if < 10 number
-    beq s3, x0, letter
-    addi a0, s2, 48     # 0 is "0" ascii 48
-    j print_h
-    letter:
-    addi a0, s2, 55     # 10 is "A" ascii 65 ..
-    print_h:
-    call sbi_putchar    # print
-    addi s1, s1, -4
-    bge s1, x0, p_loop 
-    ld ra, 0(sp)
-    ld s0, 8(sp)
-    ld s1, 16(sp)
-    ld s2, 24(sp)
-    ld s3, 32(sp)
-    addi sp, sp, 40
-    ret
 
