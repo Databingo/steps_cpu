@@ -988,7 +988,8 @@ func main() { //t6a7s11
 			if len(code) == 2 { // different from real: jal rd, imm
 				ins := fmt.Sprintf("# %s\n", line)
 				real_instr.WriteString(ins)
-				ins = fmt.Sprintf("jalr x1, %s, 0\n", code[1])
+				//ins = fmt.Sprintf("jalr x1, %s, 0\n", code[1])
+				ins = fmt.Sprintf("jalr x1, 0(%s)\n", code[1])
 				real_instr.WriteString(ins)
 			} else {
 				origin_instr = strings.TrimLeft(origin_instr, " ")

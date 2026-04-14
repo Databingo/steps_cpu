@@ -107,11 +107,11 @@ li t5, 0xFFFFFFFFFF000000
 li a0, "\nF_alur"
 bne t4, t5 fail_alu
 
-auipc s0, 0
 
   
 # ========================================================
-   # THE "ONELINE" SEQUENTIAL EXECUTION TEST
+# ========================================================
+   # THE "ONELINE" SEQUENTIAL EXECUTION TEST (Fixed for rvas.go)
    # Accumulator register: a1
    # ========================================================
 
@@ -119,7 +119,6 @@ auipc s0, 0
    lui a1, 0x12345        # a1 = 0x0000000012345000
    
    # [2] U-Type: Auipc (Test it executes, doesn't ruin a1)
-   auipc a2, 0            
 
    # [3/4] Memory: Store then Load
    la a2, mem_test_var
@@ -172,26 +171,34 @@ auipc s0, 0
    sraw a1, a1, a2        # a1 = 0x0000F
 
    # [9] Jump (jal, jalr)
-   jal a2, 1f             
-1: addi a1, a1, 1         # a1 = 0x00010
-   la a2, 2f
-   jalr a2, a2, 0         
-2: addi a1, a1, 1         # a1 = 0x00011
+   jal a2, jump_target_1             
+jump_target_1: 
+   addi a1, a1, 1         # a1 = 0x00010
+   la a2, jump_target_2
+   jalr a2, 0(a2)         
+jump_target_2: 
+   addi a1, a1, 1         # a1 = 0x00011
 
    # [10] Branch (beq, bne, blt, bge, bltu, bgeu)
-   beq a1, a1, 3f         
-3: addi a1, a1, 1         # a1 = 0x00012
+   beq a1, a1, branch_target_3         
+branch_target_3: 
+   addi a1, a1, 1         # a1 = 0x00012
    li a2, 0
-   bne a1, a2, 4f         
-4: addi a1, a1, 1         # a1 = 0x00013
-   blt a2, a1, 5f         
-5: addi a1, a1, 1         # a1 = 0x00014
-   bge a1, a2, 6f         
-6: addi a1, a1, 1         # a1 = 0x00015
-   bltu a2, a1, 7f        
-7: addi a1, a1, 1         # a1 = 0x00016
-   bgeu a1, a2, 8f        
-8: addi a1, a1, 1         # a1 = 0x00017
+   bne a1, a2, branch_target_4         
+branch_target_4: 
+   addi a1, a1, 1         # a1 = 0x00013
+   blt a2, a1, branch_target_5         
+branch_target_5: 
+   addi a1, a1, 1         # a1 = 0x00014
+   bge a1, a2, branch_target_6         
+branch_target_6: 
+   addi a1, a1, 1         # a1 = 0x00015
+   bltu a2, a1, branch_target_7        
+branch_target_7: 
+   addi a1, a1, 1         # a1 = 0x00016
+   bgeu a1, a2, branch_target_8        
+branch_target_8: 
+   addi a1, a1, 1         # a1 = 0x00017
 
    # [11] System-CSR (Write to mscratch so we don't break privileges)
    csrw mscratch, a1      # mscratch = 0x17
@@ -204,7 +211,7 @@ auipc s0, 0
    # a1 is still 0x17
 
    # [12] Atomic
-   la a2, test_var
+   la a2, mem_test_var
    lr.d a3, (a2)          
    sc.d a3, a1, (a2)      
    ld a1, 0(a2)           # a1 = 0x00017
@@ -241,12 +248,10 @@ fail_chain:
    call sbi_print_reg
    li a0, "\nFAIL!!"
    call sbi_print7
-halt_loop: 
-   j halt_loop
+halt_loop_chain: 
+   j halt_loop_chain
 
 end_of_chain_test:
-
-
 
 
 

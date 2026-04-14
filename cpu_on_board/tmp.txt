@@ -207,9 +207,7 @@ ori a0, a0, 0x3e8
 slli a0, a0, 0xb
 ori a0, a0, 0x60a
 bne t4, t5 fail_alu
-auipc s0, 0
 lui a1, 0x12345        # a1 = 0x0000000012345000
-auipc a2, 0            
 #    la a2, mem_test_var
 auipc a2, 0 # R_RISCV_PCREL_HI20 mem_test_var 
 addi a2, a2, 0 # R_RISCV_PCREL_LO12_I mem_test_var 
@@ -265,35 +263,35 @@ addi a2, x0, 0x4
 sllw a1, a1, a2        # a1 = 0x00F90
 srlw a1, a1, a2        # a1 = 0x000F9
 sraw a1, a1, a2        # a1 = 0x0000F
-jal a2, 1f             
-1:
-1: addi a1, a1, 1         # a1 = 0x00010
-#    la a2, 2f
-auipc a2, 0 # R_RISCV_PCREL_HI20 2f 
-addi a2, a2, 0 # R_RISCV_PCREL_LO12_I 2f 
-jalr a2, a2, 0         
-2:
-2: addi a1, a1, 1         # a1 = 0x00011
-beq a1, a1, 3f         
-3:
-3: addi a1, a1, 1         # a1 = 0x00012
+jal a2, jump_target_1             
+jump_target_1:
+addi a1, a1, 1         # a1 = 0x00010
+#    la a2, jump_target_2
+auipc a2, 0 # R_RISCV_PCREL_HI20 jump_target_2 
+addi a2, a2, 0 # R_RISCV_PCREL_LO12_I jump_target_2 
+jalr a2, 0(a2)         
+jump_target_2:
+addi a1, a1, 1         # a1 = 0x00011
+beq a1, a1, branch_target_3         
+branch_target_3:
+addi a1, a1, 1         # a1 = 0x00012
 #    li a2, 0
 addi a2, x0, 0x0
-bne a1, a2, 4f         
-4:
-4: addi a1, a1, 1         # a1 = 0x00013
-blt a2, a1, 5f         
-5:
-5: addi a1, a1, 1         # a1 = 0x00014
-bge a1, a2, 6f         
-6:
-6: addi a1, a1, 1         # a1 = 0x00015
-bltu a2, a1, 7f        
-7:
-7: addi a1, a1, 1         # a1 = 0x00016
-bgeu a1, a2, 8f        
-8:
-8: addi a1, a1, 1         # a1 = 0x00017
+bne a1, a2, branch_target_4         
+branch_target_4:
+addi a1, a1, 1         # a1 = 0x00013
+blt a2, a1, branch_target_5         
+branch_target_5:
+addi a1, a1, 1         # a1 = 0x00014
+bge a1, a2, branch_target_6         
+branch_target_6:
+addi a1, a1, 1         # a1 = 0x00015
+bltu a2, a1, branch_target_7        
+branch_target_7:
+addi a1, a1, 1         # a1 = 0x00016
+bgeu a1, a2, branch_target_8        
+branch_target_8:
+addi a1, a1, 1         # a1 = 0x00017
 #    csrw mscratch, a1      
 csrrw x0, mscratch, a1
 #    csrr a1, mscratch      
@@ -303,9 +301,9 @@ csrrc a3, mscratch, zero
 csrrwi a3, mscratch, 0
 csrrsi a3, mscratch, 0
 csrrci a3, mscratch, 0 
-#    la a2, test_var
-auipc a2, 0 # R_RISCV_PCREL_HI20 test_var 
-addi a2, a2, 0 # R_RISCV_PCREL_LO12_I test_var 
+#    la a2, mem_test_var
+auipc a2, 0 # R_RISCV_PCREL_HI20 mem_test_var 
+addi a2, a2, 0 # R_RISCV_PCREL_LO12_I mem_test_var 
 lr.d a3, (a2)          
 sc.d a3, a1, (a2)      
 ld a1, 0(a2)           # a1 = 0x00017
@@ -364,9 +362,9 @@ ori a0, a0, 0x60a
 #    call sbi_print7
 auipc x1, 0 # R_RISCV_PCREL_HI20 sbi_print7
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I sbi_print7
-halt_loop:
-#    j halt_loop
-jal x0, halt_loop
+halt_loop_chain:
+#    j halt_loop_chain
+jal x0, halt_loop_chain
 end_of_chain_test:
 pause:
 # j pause
