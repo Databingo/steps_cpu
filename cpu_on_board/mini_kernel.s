@@ -84,7 +84,7 @@ wait_for_key:
    li a0, "\n\r"
    call sbi_print7
 
-
+j wait_for_key
 end:
 j end
 
