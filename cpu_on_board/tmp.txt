@@ -1,7 +1,7 @@
 msg_boot:
 msg_mmu:
 msg_rx:
-test_var:
+mem_test_var:
 _start:
 #    li sp, 0x80700000 
 addi sp, x0, 0x0
@@ -16,9 +16,9 @@ addi a0, a0, 0 # R_RISCV_PCREL_LO12_I msg_boot
 #    call sbi_puts
 auipc x1, 0 # R_RISCV_PCREL_HI20 sbi_puts
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I sbi_puts
-#    la t0, test_var
-auipc t0, 0 # R_RISCV_PCREL_HI20 test_var 
-addi t0, t0, 0 # R_RISCV_PCREL_LO12_I test_var 
+#    la t0, mem_test_var
+auipc t0, 0 # R_RISCV_PCREL_HI20 mem_test_var 
+addi t0, t0, 0 # R_RISCV_PCREL_LO12_I mem_test_var 
 #    li t1, 1
 addi t1, x0, 0x0
 addi t1, x0, 0x0
@@ -93,6 +93,128 @@ addi a0, a0, 0 # R_RISCV_PCREL_LO12_I msg_mmu
 #    call sbi_puts
 auipc x1, 0 # R_RISCV_PCREL_HI20 sbi_puts
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I sbi_puts
+lui t0, 0x12345
+addi t0, t0, 0x678   
+#    li t1, 0x11111111
+addi t1, x0, 0x0
+lui t1, 0x11111
+addi t1, t1, 0x111
+add t2, t0, t1  # 0x23456789
+sub t3, t2, t1
+#    li a0, "\nF_alu"
+addi a0, x0, 0x0
+lui a0, 0x7
+srli a0, a0, 0x1
+ori a0, a0, 0x2b6
+slli a0, a0, 0xb
+ori a0, a0, 0x185
+slli a0, a0, 0xb
+ori a0, a0, 0x3e8
+slli a0, a0, 0xb
+ori a0, a0, 0x60a
+bne t0, t3, fail_alu
+xori t4, t0, 0xFFF
+ori t5, t4, 0xF00
+andi t6, t5, 0x0FF
+#    li t1, 0x87
+addi t1, x0, 0x0
+addi t1, x0, 0x0
+addi t1, x0, 0x87
+#    li a0, "\nF_alux"
+addi a0, x0, 0x0
+lui a0, 0x787
+srli a0, a0, 0x1
+ori a0, a0, 0x2b6
+slli a0, a0, 0xb
+ori a0, a0, 0x185
+slli a0, a0, 0xb
+ori a0, a0, 0x3e8
+slli a0, a0, 0xb
+ori a0, a0, 0x60a
+bne t6, t1, fail_alu
+#    li t0, -10
+addi t0, x0, 0x0
+addi t0, x0, 0x0
+addi t0, x0, 0xa
+xori t0, t0, -1
+addi t0, t0, 1
+#    li t1, 5
+addi t1, x0, 0x0
+addi t1, x0, 0x0
+addi t1, x0, 0x5
+slt t2, t0, t1 #1
+sltu t3, t0, t1 #0
+slti t4, t1, 10 #1
+sltiu t5, t0, 10 #0
+add t6, t2, t4 #2
+add t6, t6, t3 #2
+add t6, t6, t5 #2
+#    li t1, 2
+addi t1, x0, 0x0
+addi t1, x0, 0x0
+addi t1, x0, 0x2
+#    li a0, "\nF_alus"
+addi a0, x0, 0x0
+lui a0, 0x737
+srli a0, a0, 0x1
+ori a0, a0, 0x2b6
+slli a0, a0, 0xb
+ori a0, a0, 0x185
+slli a0, a0, 0xb
+ori a0, a0, 0x3e8
+slli a0, a0, 0xb
+ori a0, a0, 0x60a
+bne t6, t1, fail_alu
+# li t0, 0x0F
+addi t0, x0, 0x0
+addi t0, x0, 0x0
+addi t0, x0, 0xf
+slli t1, t0, 4 #0xF0
+srl t2, t1, t0
+# li t3, 0xF0000000
+addi t3, x0, 0x0
+slli t3, t3, 0xb
+ori t3, t3, 0x3c0
+slli t3, t3, 0x16
+# mv a0, t3
+addi a0, t3, 0
+# call sbi_print_reg
+auipc x1, 0 # R_RISCV_PCREL_HI20 sbi_print_reg
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I sbi_print_reg
+sraiw t4, t3, 4 #0xFF000000
+# mv a0, t4
+addi a0, t4, 0
+# call sbi_print_reg
+auipc x1, 0 # R_RISCV_PCREL_HI20 sbi_print_reg
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I sbi_print_reg
+# li t5, 0xFFFFFFFFFF000000
+addi t5, x0, 0x0
+lui t5, 0xfffff
+srli t5, t5, 0x1
+ori t5, t5, 0x7ff
+slli t5, t5, 0xb
+ori t5, t5, 0x7fc
+slli t5, t5, 0x16
+# li a0, "\nF_alur"
+addi a0, x0, 0x0
+lui a0, 0x727
+srli a0, a0, 0x1
+ori a0, a0, 0x2b6
+slli a0, a0, 0xb
+ori a0, a0, 0x185
+slli a0, a0, 0xb
+ori a0, a0, 0x3e8
+slli a0, a0, 0xb
+ori a0, a0, 0x60a
+bne t4, t5 fail_alu
+auipc s0, 0
+pause:
+# j pause
+jal x0, pause
+fail_alu:
+#   call sbi_print7
+auipc x1, 0 # R_RISCV_PCREL_HI20 sbi_print7
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I sbi_print7
 #    li a0, "\ntyping"
 addi a0, x0, 0x0
 lui a0, 0x676
@@ -210,5 +332,68 @@ jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I sbi_puts
 ld a0, 0(sp)
 ld ra, 8(sp)
 addi sp, sp, 16
+#     ret
+jalr x0, 0(x1)
+sbi_putchar:
+addi sp, sp, -8
+sd ra, 0(sp)
+#     li a7, 1 
+addi a7, x0, 0x0
+addi a7, x0, 0x0
+addi a7, x0, 0x1
+ecall
+ld ra, 0(sp)
+addi sp, sp, 8
+#     ret
+jalr x0, 0(x1)
+sbi_print_reg:
+addi sp, sp, -40
+sd ra, 0(sp)
+sd s0, 8(sp)
+sd s1, 16(sp)
+sd s2, 24(sp)
+sd s3, 32(sp)
+#     mv s0, a0
+addi s0, a0, 0
+#     li a0, "0"
+addi a0, x0, 0x0
+addi a0, x0, 0x0
+addi a0, x0, 0x30
+#     call sbi_putchar
+auipc x1, 0 # R_RISCV_PCREL_HI20 sbi_putchar
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I sbi_putchar
+#     li a0, "x"
+addi a0, x0, 0x0
+addi a0, x0, 0x0
+addi a0, x0, 0x78
+#     call sbi_putchar
+auipc x1, 0 # R_RISCV_PCREL_HI20 sbi_putchar
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I sbi_putchar
+#     li s1, 60 
+addi s1, x0, 0x0
+addi s1, x0, 0x0
+addi s1, x0, 0x3c
+p_loop:
+srl s2, s0, s1      # get high nibble
+andi s2, s2, 0xF
+slti s3, s2, 10     # if < 10 number
+beq s3, x0, letter
+addi a0, s2, 48     # 0 is "0" ascii 48
+#     j print_h
+jal x0, print_h
+letter:
+addi a0, s2, 55     # 10 is "A" ascii 65 ..
+print_h:
+#     call sbi_putchar    
+auipc x1, 0 # R_RISCV_PCREL_HI20 sbi_putchar
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I sbi_putchar
+addi s1, s1, -4
+bge s1, x0, p_loop 
+ld ra, 0(sp)
+ld s0, 8(sp)
+ld s1, 16(sp)
+ld s2, 24(sp)
+ld s3, 32(sp)
+addi sp, sp, 40
 #     ret
 jalr x0, 0(x1)

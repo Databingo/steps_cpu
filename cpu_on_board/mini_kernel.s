@@ -7,8 +7,8 @@ msg_mmu:
     .string "--MMU_test--"
 msg_rx:
     .string "key_press: "
-test_var:
-    .dword 0x00000000
+mem_test_var:
+    .dword 0x0000000000000000
 
 
 # Bootloader/copy4 --> firmware/BIOS/opensib/mini_sbi2 --> OS/linux/kernal
@@ -23,7 +23,7 @@ _start:  # like linux kernel
    # --- 1 ok
 
    # Step 2 test A-Extension Atomics
-   la t0, test_var
+   la t0, mem_test_var
    li t1, 1
    amoadd.w t2, t1, (t0)
    li a0, "\nAtomok"
@@ -65,7 +65,62 @@ _start:  # like linux kernel
    call sbi_puts
  
 
-   
+   # ALU
+   lui t0, 0x12345
+   addi t0, t0, 0x678   
+   li t1, 0x11111111
+   add t2, t0, t1  # 0x23456789
+   sub t3, t2, t1
+   li a0, "\nF_alu"
+   bne t0, t3, fail_alu
+
+   xori t4, t0, 0xFFF
+   ori t5, t4, 0xF00
+   andi t6, t5, 0x0FF
+   li t1, 0x87
+   li a0, "\nF_alux"
+   bne t6, t1, fail_alu
+
+   li t0, -10
+   li t1, 5
+   slt t2, t0, t1 #1
+   sltu t3, t0, t1 #0
+   slti t4, t1, 10 #1
+   sltiu t5, t0, 10 #0
+   add t6, t2, t4 #2
+   add t6, t6, t3 #2
+   add t6, t6, t5 #2
+   li t1, 2
+   li a0, "\nF_alus"
+   bne t6, t1, fail_alu
+
+li t0, 0x0F
+slli t1, t0, 4 #0xF0
+srl t2, t1, t0
+li t3, 0xF0000000
+mv a0, t3
+call sbi_print_reg
+sraiw t4, t3, 4 #0xFF000000
+mv a0, t4
+call sbi_print_reg
+li t5, 0xFFFFFFFFFF000000
+li a0, "\nF_alur"
+bne t4, t5 fail_alu
+
+auipc s0, 0
+
+  
+
+
+
+
+
+
+pause:
+j pause
+
+fail_alu:
+  call sbi_print7
 
 
 
@@ -438,8 +493,8 @@ s_done:
 #    ld s3, 32(sp)
 #    addi sp, sp, 40
 #    ret
-#
-#
+
+
 #putchar:  # a0
 #    addi sp, sp, -8
 #    sd ra, 0(sp)
@@ -519,5 +574,50 @@ sbi_print7: # a0, 7 char left one for null
     ld a0, 0(sp)
     ld ra, 8(sp)
     addi sp, sp, 16
+    ret
+
+sbi_putchar:  # a0
+    addi sp, sp, -8
+    sd ra, 0(sp)
+    li a7, 1 # SBI Putchar ID
+    ecall
+    ld ra, 0(sp)
+    addi sp, sp, 8
+    ret
+
+
+
+sbi_print_reg: # a0
+    addi sp, sp, -40
+    sd ra, 0(sp)
+    sd s0, 8(sp)
+    sd s1, 16(sp)
+    sd s2, 24(sp)
+    sd s3, 32(sp)
+    mv s0, a0
+    li a0, "0"
+    call sbi_putchar
+    li a0, "x"
+    call sbi_putchar
+    li s1, 60 
+    p_loop:
+    srl s2, s0, s1      # get high nibble
+    andi s2, s2, 0xF
+    slti s3, s2, 10     # if < 10 number
+    beq s3, x0, letter
+    addi a0, s2, 48     # 0 is "0" ascii 48
+    j print_h
+    letter:
+    addi a0, s2, 55     # 10 is "A" ascii 65 ..
+    print_h:
+    call sbi_putchar    # print
+    addi s1, s1, -4
+    bge s1, x0, p_loop 
+    ld ra, 0(sp)
+    ld s0, 8(sp)
+    ld s1, 16(sp)
+    ld s2, 24(sp)
+    ld s3, 32(sp)
+    addi sp, sp, 40
     ret
 
