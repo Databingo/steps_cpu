@@ -223,6 +223,50 @@ auipc a2, 0
 #    la a2, mem_test_var
 auipc a2, 0 # R_RISCV_PCREL_HI20 mem_test_var 
 addi a2, a2, 0 # R_RISCV_PCREL_LO12_I mem_test_var 
+#    li t4, 0x8F  
+addi t4, x0, 0x0
+addi t4, x0, 0x0
+addi t4, x0, 0x8f
+sb t4, 0(a2)
+lb t5, 0(a2) # 0xFFFFFFFFFFFFFF8F
+lbu t6, 0(a2)# 0x000000000000008F
+#    li t1, 0x8F
+addi t1, x0, 0x0
+addi t1, x0, 0x0
+addi t1, x0, 0x8f
+bne t6, t1, fail_chain
+#    li t4, 0x8FEE  
+addi t4, x0, 0x0
+lui t4, 0x9
+addi t4, t4, 0xfee
+sh t4, 0(a2)
+lh t5, 0(a2) # 0xFFFFFFFFFFFF8FEE
+lhu t6, 0(a2)# 0x0000000000008FEE
+#    li t1, 0x8FEE
+addi t1, x0, 0x0
+lui t1, 0x9
+addi t1, t1, 0xfee
+bne t6, t1, fail_chain
+#    li t4, 0x8FEEDBCA  
+addi t4, x0, 0x0
+slli t4, t4, 0xb
+ori t4, t4, 0x23f
+slli t4, t4, 0xb
+ori t4, t4, 0x5db
+slli t4, t4, 0xb
+ori t4, t4, 0x3ca
+sw t4, 0(a2)
+lw t5, 0(a2) # 0xFFFFFFFF8FEEDBCA
+lwu t6, 0(a2)# 0x000000008FEEDBCA`
+#    li t1, 0x8FEEDBCA
+addi t1, x0, 0x0
+slli t1, t1, 0xb
+ori t1, t1, 0x23f
+slli t1, t1, 0xb
+ori t1, t1, 0x5db
+slli t1, t1, 0xb
+ori t1, t1, 0x3ca
+bne t6, t1, fail_chain
 sd a1, 0(a2)
 ld a1, 0(a2)
 #    li a0, "\nLSOK"
@@ -434,6 +478,11 @@ addi a2, a2, 0 # R_RISCV_PCREL_LO12_I mem_test_var
 lr.d a3, (a2)
 sc.d a4, a1, (a2)
 ld a1, 0(a2)           # a1 = 0x00017
+#    mv a0, a1
+addi a0, a1, 0
+#    call sbi_print_reg
+auipc x1, 0 # R_RISCV_PCREL_HI20 sbi_print_reg
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I sbi_print_reg
 #    li a0, "\nAtomOK"
 addi a0, x0, 0x0
 lui a0, 0x4b4
@@ -448,6 +497,8 @@ ori a0, a0, 0x10a
 #    call sbi_print7
 auipc x1, 0 # R_RISCV_PCREL_HI20 sbi_print7
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I sbi_print7
+amoadd.w  t3, a1, (a2) # M[a2]=0x17, t3=0x17
+amoswap.w t3, a1, (a2) # M[a2]=0x17, t3=0x17
 amoswap.d t3, a1, (a2) # M[a2]=0x17, t3=0x17
 amoadd.d  t3, a1, (a2) # M[a2]=0x2E, t3=0x17
 amoxor.d  t3, a1, (a2) # M[a2]=0x39, t3=0x2E
@@ -478,6 +529,8 @@ addi a2, x0, 0x0
 addi a2, x0, 0x2
 mul a1, a1, a2
 mulh a3, a1, a2
+mulhu t3, a1, a2
+mulhsu t4, a1, a2
 add a1, a1, a3
 mulw a1, a1, a2
 #    li a0, "\nMulOK"
@@ -495,10 +548,14 @@ ori a0, a0, 0x50a
 auipc x1, 0 # R_RISCV_PCREL_HI20 sbi_print7
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I sbi_print7
 div a1, a1, a2
+divu t1, a1, a2
 rem a3, a1, a2
+remu t4, a1, a2
 add a1, a1, a3
 divw a1, a1, a2
+divuw t5, a1, a2
 remw a3, a1, a2
+remuw t6, a1, a2
 add a1, a1, a3
 #    li a0, "\nDivOK"
 addi a0, x0, 0x0
@@ -514,6 +571,8 @@ ori a0, a0, 0x40a
 #    call sbi_print7
 auipc x1, 0 # R_RISCV_PCREL_HI20 sbi_print7
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I sbi_print7
+fence
+fence.i
 #    li t2, 0x0000000000000018
 addi t2, x0, 0x0
 addi t2, x0, 0x0

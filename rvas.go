@@ -467,6 +467,7 @@ func main() { //t6a7s11
 		// --new
 		"sfence.vma": 0b00010010000000000000000001110011,
 		"fence.i":    0b00000000000000000001000000001111,
+		"fence":      0b00000000000000000000000000001111,
 		"testf": 0b11111111111111110000011111111111,
 
 	}
@@ -1404,7 +1405,7 @@ func main() { //t6a7s11
 				os.Exit(0)
 			}
 			// check if imm has a constant definition
-		case "mret", "sret", "wfi", "sfence.vma", "fence.i", "testf":
+		case "mret", "sret", "wfi", "sfence.vma", "fence.i", "fence", "testf":
 			if len(code) != 1 {
 				fmt.Println("Too many arguments on line: ", lineCounter, line)
 				os.Exit(0)
@@ -1882,7 +1883,7 @@ func main() { //t6a7s11
 				os.Exit(0)
 			}
 
-		case "ecall", "ebreak", "mret", "sret", "wfi", "sfence.vma", "fence.i", "testf":
+		case "ecall", "ebreak", "mret", "sret", "wfi", "sfence.vma", "fence.i", "fence", "testf":
 			//if len(code) != 1 {
 			//	fmt.Println("Too many arguments on line: ", lineCounter)
 			//	os.Exit(0)

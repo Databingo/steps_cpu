@@ -2,7 +2,7 @@
 
 .section .data
 msg_boot:
-    .string "--Full instructions test for run Linux Kernel--"
+    .string "--Full instructions test for run Linux Kernel(rv64IMA) --"
 msg_mmu:
     .string "--MMU_test--"
 msg_rx:
@@ -165,6 +165,32 @@ main:
 
    # 3/4 ls
    la a2, mem_test_var
+
+   # Test Byte (sb/lb/lbu)
+   li t4, 0x8F  # A negative-looking byte
+   sb t4, 0(a2)
+   lb t5, 0(a2) # 0xFFFFFFFFFFFFFF8F
+   lbu t6, 0(a2)# 0x000000000000008F
+   li t1, 0x8F
+   bne t6, t1, fail_chain
+
+   # Test Half (sh/lh/lhu)
+   li t4, 0x8FEE  # A negative-looking half
+   sh t4, 0(a2)
+   lh t5, 0(a2) # 0xFFFFFFFFFFFF8FEE
+   lhu t6, 0(a2)# 0x0000000000008FEE
+   li t1, 0x8FEE
+   bne t6, t1, fail_chain
+
+   # Test Word (sw/lw/lwu)
+   li t4, 0x8FEEDBCA  # A negative-looking word
+   sw t4, 0(a2)
+   lw t5, 0(a2) # 0xFFFFFFFF8FEEDBCA
+   lwu t6, 0(a2)# 0x000000008FEEDBCA`
+   li t1, 0x8FEEDBCA
+   bne t6, t1, fail_chain
+
+   # Test Doube Word (sd/ld)
    sd a1, 0(a2)
    ld a1, 0(a2)
    li a0, "\nLSOK"
@@ -273,11 +299,26 @@ branch_target_8:
 
    # 12 Atomic
    la a2, mem_test_var
+
+  #lr.w t3, (a2)
+  #mv a0, t3
+  #call sbi_print_reg
+  #add a1, a1, t3
+  #mv a0, a1
+  #call sbi_print_reg
+  #addi a1, a1, -0x17
+  #sc.w t4, a1, (a2)
+
    lr.d a3, (a2)
    sc.d a4, a1, (a2)
    ld a1, 0(a2)           # a1 = 0x00017
+   mv a0, a1
+   call sbi_print_reg
    li a0, "\nAtomOK"
    call sbi_print7
+
+   amoadd.w  t3, a1, (a2) # M[a2]=0x17, t3=0x17
+   amoswap.w t3, a1, (a2) # M[a2]=0x17, t3=0x17
 
    amoswap.d t3, a1, (a2) # M[a2]=0x17, t3=0x17
    amoadd.d  t3, a1, (a2) # M[a2]=0x2E, t3=0x17
@@ -296,6 +337,10 @@ branch_target_8:
    li a2, 2
    mul a1, a1, a2
    mulh a3, a1, a2
+
+   mulhu t3, a1, a2
+   mulhsu t4, a1, a2
+
    add a1, a1, a3
    mulw a1, a1, a2
    li a0, "\nMulOK"
@@ -303,13 +348,25 @@ branch_target_8:
 
    # 14 Div
    div a1, a1, a2
+   divu t1, a1, a2
+
    rem a3, a1, a2
+   remu t4, a1, a2
+
    add a1, a1, a3
+
    divw a1, a1, a2
+   divuw t5, a1, a2
+
    remw a3, a1, a2
+   remuw t6, a1, a2
+
    add a1, a1, a3
    li a0, "\nDivOK"
    call sbi_print7
+
+   fence
+   fence.i
 
    # FINAL CHECK
    li t2, 0x0000000000000018
