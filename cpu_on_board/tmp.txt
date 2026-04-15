@@ -464,13 +464,6 @@ slti a3, a1, 0
 add  a1, a1, a3
 sltiu a3, a1, 0
 add  a1, a1, a3
-#    li a0, "\nmah"
-addi a0, x0, 0x0
-lui a0, 0x68617
-addi a0, a0, 0xd0a
-#    call sbi_print7
-auipc x1, 0 # R_RISCV_PCREL_HI20 sbi_print7
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I sbi_print7
 addiw a1, a1, 1
 slliw a1, a1, 16
 srliw a1, a1, 16
