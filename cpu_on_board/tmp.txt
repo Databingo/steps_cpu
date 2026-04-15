@@ -200,7 +200,6 @@ ori a0, a0, 0x50a
 auipc x1, 0 # R_RISCV_PCREL_HI20 sbi_print7
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I sbi_print7
 lui a1, 0x12345         # a1 = 0x0000000012345000
-auipc a2, 0
 #    la a2, mem_test_var
 auipc a2, 0 # R_RISCV_PCREL_HI20 mem_test_var 
 addi a2, a2, 0 # R_RISCV_PCREL_LO12_I mem_test_var 
@@ -449,20 +448,6 @@ addi t0, x0, 0x0
 addi t0, x0, 0x0
 addi t0, x0, 0x17
 bne a1, t0, fail_chain
-#    li a0, "\nAmowOK"
-addi a0, x0, 0x0
-lui a0, 0x4b4
-srli a0, a0, 0x1
-ori a0, a0, 0x7bb
-slli a0, a0, 0xb
-ori a0, a0, 0x5bd
-slli a0, a0, 0xb
-ori a0, a0, 0x5a8
-slli a0, a0, 0xb
-ori a0, a0, 0x10a
-#    call sbi_print7
-auipc x1, 0 # R_RISCV_PCREL_HI20 sbi_print7
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I sbi_print7
 amoswap.d t3, a1, (a2) # M[a2]=0x17, t3=0x17
 amoadd.d  t3, a1, (a2) # M[a2]=0x2E, t3=0x17
 amoxor.d  t3, a1, (a2) # M[a2]=0x39, t3=0x2E
@@ -473,13 +458,13 @@ amomin.d  t3, a1, (a2) # M[a2]=0x17, t3=0x17
 amomaxu.d t3, a1, (a2) # M[a2]=0x17, t3=0x17
 amominu.d t3, a1, (a2) # M[a2]=0x17, t3=0x17
 ld a1, 0(a2)           # a1 = 0x00017
-#    li a0, "\nAmodOK"
+#    li a0, "\nAmoOK"
 addi a0, x0, 0x0
-lui a0, 0x4b4
+lui a0, 0x4
 srli a0, a0, 0x1
-ori a0, a0, 0x7b2
+ori a0, a0, 0x5a7
 slli a0, a0, 0xb
-ori a0, a0, 0x1bd
+ori a0, a0, 0x5bd
 slli a0, a0, 0xb
 ori a0, a0, 0x5a8
 slli a0, a0, 0xb
@@ -493,8 +478,6 @@ addi a2, x0, 0x0
 addi a2, x0, 0x2
 mul a1, a1, a2
 mulh a3, a1, a2
-mulhu t3, a1, a2
-mulhsu t4, a1, a2
 add a1, a1, a3
 mulw a1, a1, a2
 #    li a0, "\nMulOK"
@@ -521,6 +504,22 @@ divu t1, a1, a2
 remu t4, a1, a2
 divuw t5, a1, a2
 remuw t6, a1, a2
+#   li a2, -1
+addi a2, x0, 0x0
+addi a2, x0, 0x0
+addi a2, x0, 0x1
+xori a2, a2, -1
+addi a2, a2, 1
+#   li a3, 2
+addi a3, x0, 0x0
+addi a3, x0, 0x0
+addi a3, x0, 0x2
+mulhu t3, a1, a2
+mulhsu t4, a1, a2
+divu t3, a2, a3
+remu t4, a2, a3
+divuw t5, a2, a3
+remuw t6, a2, a3
 #    li a2, 5
 addi a2, x0, 0x0
 addi a2, x0, 0x0

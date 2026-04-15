@@ -17,6 +17,7 @@ mem_test_val:
 .section .text
 _start:  
   j main # like linux kernel
+  # .balign 4
 
 s_trap_handler:
    li a0, "\n"
@@ -160,8 +161,8 @@ main:
    # 1 Lui
    lui a1, 0x12345         # a1 = 0x0000000012345000
     
-   # 2 auipc
-   auipc a2, 0
+  ## 2 auipc
+  #auipc a2, 0
 
   ## 3/4 ls
   #la a2, mem_test_var
@@ -331,8 +332,8 @@ branch_target_8:
    lw a1, 0(a2)           # a1 = 0x00017
    li t0, 0x17
    bne a1, t0, fail_chain
-   li a0, "\nAmowOK"
-   call sbi_print7
+  #li a0, "\nAmowOK"
+  #call sbi_print7
 
 
    amoswap.d t3, a1, (a2) # M[a2]=0x17, t3=0x17
@@ -345,17 +346,14 @@ branch_target_8:
    amomaxu.d t3, a1, (a2) # M[a2]=0x17, t3=0x17
    amominu.d t3, a1, (a2) # M[a2]=0x17, t3=0x17
    ld a1, 0(a2)           # a1 = 0x00017
-   li a0, "\nAmodOK"
+  #li a0, "\nAmodOK"
+   li a0, "\nAmoOK"
    call sbi_print7
 
    # 13 Mul
    li a2, 2
    mul a1, a1, a2
    mulh a3, a1, a2
-
-   mulhu t3, a1, a2
-   mulhsu t4, a1, a2
-
    add a1, a1, a3
    mulw a1, a1, a2
    li a0, "\nMulOK"
@@ -373,6 +371,18 @@ branch_target_8:
    remu t4, a1, a2
    divuw t5, a1, a2
    remuw t6, a1, a2
+
+  ## 15 unsigned M
+  li a2, -1
+  li a3, 2
+  mulhu t3, a1, a2
+  mulhsu t4, a1, a2
+  divu t3, a2, a3
+  remu t4, a2, a3
+  divuw t5, a2, a3
+  remuw t6, a2, a3
+ #li a0, "\nusMOK"
+ #call sbi_print7
 
    # div by 0 = -1
    li a2, 5
