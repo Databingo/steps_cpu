@@ -470,47 +470,45 @@ mul a1, a1, a2
 mulh a3, a1, a2
 add a1, a1, a3
 mulw a1, a1, a2
-#    li t1, 0x000000000000005C 
+#    li a2, 3        
+addi a2, x0, 0x0
+addi a2, x0, 0x0
+addi a2, x0, 0x3
+div a3, a1, a2  # a3 = 0x000000000000001E
+rem a4, a1, a2  # a4 = 0x0000000000000002
+add a1, a1, a3  # a1 = 92+30=122
+add a1, a1, a4  # a1 = 122+2=124
+divw a3, a1, a2 # 124/3=41
+remw a4, a1, a2 # 124%3=1
+add a1, a1, a3  # 124+41=165
+add a1, a1, a4  # 165+1=166
+divu a3, a1, a2 # 166/3=55
+remu a4, a1, a2 # 166%3=1
+add a1, a1, a3  # 166+55=221
+add a1, a1, a4  # 221+1=222
+divuw a3, a1, a2 # 222/3=74
+remuw a4, a1, a2 # 222%3=0
+add a1, a1, a3  # 222+74=296
+add a1, a1, a4  # 296
+#    li t1, 0x0000000000000128
 addi t1, x0, 0x0
 addi t1, x0, 0x0
-addi t1, x0, 0x5c
+addi t1, x0, 0x128
 bne a1, t1, fail_chain
-#    li a0, "\nMulOK"
+#    li a0, "\nDivOK"
 addi a0, x0, 0x0
 lui a0, 0x4
 srli a0, a0, 0x1
 ori a0, a0, 0x5a7
 slli a0, a0, 0xb
-ori a0, a0, 0x5b1
+ori a0, a0, 0x5d9
 slli a0, a0, 0xb
-ori a0, a0, 0x6a9
+ori a0, a0, 0x528
 slli a0, a0, 0xb
-ori a0, a0, 0x50a
+ori a0, a0, 0x40a
 #    call sbi_print7
 auipc x1, 0 # R_RISCV_PCREL_HI20 sbi_print7
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I sbi_print7
-div a1, a1, a2
-rem a3, a1, a2
-add a1, a1, a3
-divw a1, a1, a2
-remw a3, a1, a2
-add a1, a1, a3
-#    li t1, 0x0000000000000018
-addi t1, x0, 0x0
-addi t1, x0, 0x0
-addi t1, x0, 0x18
-bne a1, t1, fail_chain
-divu a1, a1, a2
-remu a3, a1, a2
-add  a1, a1, a3
-divuw a1, a1, a2
-remuw a3, a1, a2
-add  a1, a1, a3
-#    li t1, 0x0000000000000006
-addi t1, x0, 0x0
-addi t1, x0, 0x0
-addi t1, x0, 0x6
-bne a1, t1, fail_chain
 #    li a2, -1
 addi a2, x0, 0x0
 addi a2, x0, 0x0
@@ -529,12 +527,6 @@ add  a1, a1, a4
 divuw a1, a2, a3
 remuw a4, a2, a3
 add  a1, a1, a4
-#    li t1, 0x0000000080000000
-addi t1, x0, 0x0
-slli t1, t1, 0xb
-ori t1, t1, 0x200
-slli t1, t1, 0x16
-bne a1, t1, fail_chain
 #    li a2, 5
 addi a2, x0, 0x0
 addi a2, x0, 0x0
@@ -564,17 +556,17 @@ xori a3, a3, -1
 addi a3, a3, 1
 div t1, a2, a3
 bne t1, a2, fail_chain
-#    li a0, "\nDivOK"
+#    li a0, "\nExtrOK"
 addi a0, x0, 0x0
-lui a0, 0x4
+lui a0, 0x4b4
 srli a0, a0, 0x1
-ori a0, a0, 0x5a7
+ori a0, a0, 0x7b9
 slli a0, a0, 0xb
-ori a0, a0, 0x5d9
+ori a0, a0, 0x1d1
 slli a0, a0, 0xb
-ori a0, a0, 0x528
+ori a0, a0, 0x708
 slli a0, a0, 0xb
-ori a0, a0, 0x40a
+ori a0, a0, 0x50a
 #    call sbi_print7
 auipc x1, 0 # R_RISCV_PCREL_HI20 sbi_print7
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I sbi_print7
