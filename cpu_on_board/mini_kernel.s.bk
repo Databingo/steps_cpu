@@ -2,7 +2,7 @@
 
 .section .data
 msg_boot:
-    .string "--Full instructions test for run Linux Kernel--"
+    .string "--Full instructions test for run Linux Kernel(rv64IMA) --"
 msg_mmu:
     .string "--MMU_test--"
 msg_rx:
@@ -16,14 +16,333 @@ mem_test_val:
 # Bootloader/copy4 --> firmware/BIOS/opensib/mini_sbi2 --> OS/linux/kernal
 .section .text
 _start:  
-  j main # like linux kernel
+
+main:
+
+   li sp, 0x80700000 # Set stack # 80000000-80800000 sdram as 8M ram, we start sp from 0x80700000<-, MMU from 0x80700000->
+ 
+   # Step 1 test ecall (sbi) print
+   la a0, msg_boot
+   call sbi_puts
+
+   # Step 2 test S-Mode trap hander # Opensbi delegate Ebreak to OS, so we set our handler address to stvec
+   la t0, s_trap_handler
+  #andi t0, t0, -4 # Align to 4 bytes
+   csrw stvec, t0
+   ebreak
+   li a0, "\nStrpOK"
+   call sbi_print7
+
+   # Step 3 test MMU
+   # 1.Build SV39 root table in sdram (4KB per table 2**9=512*8=4096) vpn2 4KB map 512*4k=2MBram; all vpn1=4*512=2Mb map 512*2M=1Gram, all vpn0=512*512=262144*4kb=1GB map 512Gram,total VPNs 4KB+2MB+1024MB
+   li t0, 0x80700000 # set base address of MMU root table
+
+   # 2. map vma 0x0000_0000 to ppa 0x0000_0000, ppn =  ppa >> 12 = 0, for UART/CLINT/PLIC .etc
+   li t1, 0xcf       # pte = ppn << 10 | flags valid0 read1 write2 exec3 accessed6 dirty7 0b11001111=0xcf
+   sd t1, 0(t0) 
+
+   # 3. map vma 0x8000_0000 to ppa 0x8000_0000, ppn =  ppa >> 12 = 0x80000 pte = ppn << 10 | flags, for RAM/Code
+   li t1, 0x200000cf # pte = ppn << 10 | flags valid0 read1 write2 exec3 accessed6 dirty7 0b11001111=0xcf
+   sd t1, 16(t0)     # Index=va[38:30]=0b00000010=2, 8 bytes per PTE = 16, 
+
+   # satp need ppn of root table rt 0x80700000 
+   # satp = satp[63:60].MODE(0:bare, 8:sv39, 9:sv48)|satp[59:44].asid|satp[43:0].rootpage_physical_addr(vpn2:9|vpn1:9|vpn0:9|offseet12)
+   # ppn = rt >> 12 = 0x80700
+   # mode = 3 sv39
+   li t0, 0x8000000000080700
+   # Turn MMU SV39
+   csrw satp, t0 # write mode and root table address to satp CSR register
+   sfence.vma ## <--- start use TLB I/D hitting
+
+   la a0, msg_mmu   # trigger I-TLB miss
+  #call sbi_puts
+   li a0, "\nMMUOK"
+   call sbi_print7
+ 
+   # ======================================
+   # Chain test for riscv64ima instructions
+   # Accumulator register: a1
+   # ======================================
+
+   # 1 Lui
+   lui a1, 0x12345         # a1 = 0x0000000012345000
+    
+   # 2 auipc
+   auipc a2, 0
+
+   # 3/4 ls
+   la a2, mem_test_var
+
+   # Test Byte (sb/lb/lbu)
+   li t4, 0x8F  # A negative-looking byte
+   sb t4, 0(a2)
+   lb t5, 0(a2) # 0xFFFFFFFFFFFFFF8F
+   lbu t6, 0(a2)# 0x000000000000008F
+   li t1, 0x8F
+   bne t6, t1, fail_chain
+
+   # Test Half (sh/lh/lhu)
+   li t4, 0x8FEE  # A negative-looking half
+   sh t4, 0(a2)
+   lh t5, 0(a2) # 0xFFFFFFFFFFFF8FEE
+   lhu t6, 0(a2)# 0x0000000000008FEE
+   li t1, 0x8FEE
+   bne t6, t1, fail_chain
+
+   # Test Word (sw/lw/lwu)
+   li t4, 0x8FEEDCBA  # A negative-looking word
+   sw t4, 0(a2)
+   lw t5, 0(a2) # 0xFFFFFFFF8FEEDBCA
+   lwu t6, 0(a2)# 0x000000008FEEDBCA`
+   li t1, 0x8FEEDCBA
+   bne t6, t1, fail_chain
+
+   # Test Doube Word (sd/ld)
+   sd a1, 0(a2)
+   ld a1, 0(a2)
+   li a0, "\nLSOK"
+   call sbi_print7
+
+   # 5 math-i (addi, xori, andi, ori, slli, srli, srai, slti, sltiu)
+   addi a1, a1, 0x678     # a1 = 0x12345678
+   xori a1, a1, 0x111     # a1 = 0x12345769
+   andi a1, a1, 0xFFF     # a1 = 0x12345769
+   ori a1, a1, 0x800      # a1 = 0xFFFFFFFFFFFFFF69
+   li a2, 0xFFF 
+   and a1, a1, a2         # a1 = 0x0000000000000F69
+   li a0, "\nMthiOK"
+   call sbi_print7
+
+   slli a1, a1, 4         # a1 = 0x0000F690
+   srli a1, a1, 4         # a1 = 0x00000F69
+   srai a1, a1, 0         # a1 = 0x00000F69 (MSB is 0)
+   slti a3, a1, 0         # a3 = 0
+   add  a1, a1, a3        # a1 = 0x00000F69
+   sltiu a3, a1, 0        # a3 = 0
+   add  a1, a1, a3        # a1 = 0x0000F690
+
+   # 6 math-iw (addiw, slliw, srliw, sraiw)
+   addiw a1, a1, 1        # a1 = 0x00000F6A
+   slliw a1, a1, 16       # a1 = 0x0F6A0000
+   srliw a1, a1, 16       # a1 = 0x00000F6A
+   sraiw a1, a1, 0        # a1 = 0x00000F6A
+   li a0, "\nMthiwK"
+   call sbi_print7
+
+   # 7 mathr (add, sub, xor, and, or, sll, srl, sra, slt, sltu)
+   li a2, 0x111
+   add a1, a1, a2          # a1 = 0x107B
+   sub a1, a1, a2          # a1 = 0x0F6A
+   xor a1, a1, a2          # a1 = 0x0E7B
+   and a1, a1, a1          # a1 = 0x0E7B
+   or  a1, a1, a2          # a1 = 0x0F7B
+   li a2, 4
+   sll a1, a1, a2          # a1 = 0x0F7B0
+   srl a1, a1, a2          # a1 = 0x00F7B
+   sra a1, a1, a2          # a1 = 0x000F7
+   li a2, 0
+   slt a3, a2, a1          # a3 = 1
+   add a1, a1, a3          # a1 = 0x000F8
+   sltu a3, a2, a1         # a3 = 1
+   add a1, a1, a3          # a1 = 0x000F9
+   li a0, "\nMthrOK"
+   call sbi_print7
+
+   # 8 math-rw (addw, subw, sllw, srlw, sraw)
+   li a2, 1
+   addw a1, a1, a2         # a1 = 0x000FA
+   subw a1, a1, a2         # a1 = 0x000F9
+   li a2, 4
+   sllw a1, a1, a2         # a1 = 0x00F90
+   srlw a1, a1, a2         # a1 = 0x000F9
+   sraw a1, a1, a2         # a1 = 0x0000F
+   li a0, "\nMthrwK"
+   call sbi_print7
+
+   # 9 jump
+   jal a2, jump_target_1
+jump_target_1:
+   addi a1, a1, 1          # a1 = 0x00010
+   la a2, jump_target_2
+   jalr a2, 0(a2)
+jump_target_2:
+   addi a1, a1, 1          # a1 = 0x00011
+   li a0, "\nJumpOK"
+   call sbi_print7
+
+   # 10 branch (beq, bne, blt, bge, bltu, bgeu)
+   beq a1, a1, branch_target_3
+branch_target_3:
+   addi a1, a1, 1
+   li a2, 0
+   bne a1, a2, branch_target_4
+branch_target_4:
+   addi a1, a1, 1
+   blt a2, a1, branch_target_5
+branch_target_5:
+   addi a1, a1, 1
+   bge a1, a2, branch_target_6
+branch_target_6:
+   addi a1, a1, 1
+   bltu a2, a1, branch_target_7
+branch_target_7:
+   addi a1, a1, 1
+   bgeu a1, a2, branch_target_8
+branch_target_8:
+   addi a1, a1, 1
+   li a0, "\nBrchOK"
+   call sbi_print7
+
+   # 11 CSR
+   csrw sscratch, a1
+   csrr a1, sscratch
+   csrrs a3, sscratch, zero
+   csrrc a3, sscratch, zero
+   csrrwi a3, sscratch, 0
+   csrrsi a3, sscratch, 0
+   csrrci a3, sscratch, 0
+   li a0, "\nCSROK"
+   call sbi_print7
+
+   # 12 Atomic
+   la a2, mem_test_var
+
+  #mv a0, a1
+  #call sbi_print_reg
+   lr.w t3, (a2)
+   sc.w t4, a1, (a2)
+   ld a1, 0(a2)
+  #mv a0, a1
+  #call sbi_print_reg
+
+   lr.d a3, (a2)
+   sc.d a4, a1, (a2)
+   ld a1, 0(a2)           # a1 = 0x00017
+  #mv a0, a1
+  #call sbi_print_reg
+   li a0, "\nAtomOK"
+   call sbi_print7
+
+   amoadd.w  t3, a1, (a2) # M[a2]=0x17, t3=0x17
+   amoswap.w t3, a1, (a2) # M[a2]=0x2E, t3=0x17
+   amoxor.w  t3, a1, (a2) # M[a2]=0x39, t3=0x2E
+   amoand.w  t3, a1, (a2) # M[a2]=0x11, t3=0x39
+   amoor.w   t3, a1, (a2) # M[a2]=0x17, t3=0x11
+   amomax.w  t3, a1, (a2) # M[a2]=0x17, t3=0x17
+   amomin.w  t3, a1, (a2) # M[a2]=0x17, t3=0x17
+   amomaxu.w t3, a1, (a2) # M[a2]=0x17, t3=0x17
+   amominu.w t3, a1, (a2) # M[a2]=0x17, t3=0x17
+   lw a1, 0(a2)           # a1 = 0x00017
+   li t0, 0x17
+   bne a1, t0, fail_chain
+   li a0, "\nAmowOK"
+   call sbi_print7
+
+   amoswap.d t3, a1, (a2) # M[a2]=0x17, t3=0x17
+   amoadd.d  t3, a1, (a2) # M[a2]=0x2E, t3=0x17
+   amoxor.d  t3, a1, (a2) # M[a2]=0x39, t3=0x2E
+   amoand.d  t3, a1, (a2) # M[a2]=0x11, t3=0x39
+   amoor.d   t3, a1, (a2) # M[a2]=0x17, t3=0x11
+   amomax.d  t3, a1, (a2) # M[a2]=0x17, t3=0x17
+   amomin.d  t3, a1, (a2) # M[a2]=0x17, t3=0x17
+   amomaxu.d t3, a1, (a2) # M[a2]=0x17, t3=0x17
+   amominu.d t3, a1, (a2) # M[a2]=0x17, t3=0x17
+   ld a1, 0(a2)           # a1 = 0x00017
+   li a0, "\nAmodOK"
+   call sbi_print7
+
+   # 13 Mul
+   li a2, 2
+   mul a1, a1, a2
+   mulh a3, a1, a2
+
+   mulhu t3, a1, a2
+   mulhsu t4, a1, a2
+
+   add a1, a1, a3
+   mulw a1, a1, a2
+   li a0, "\nMulOK"
+   call sbi_print7
+
+   # 14 Div
+   div a1, a1, a2
+   divu t1, a1, a2
+
+   rem a3, a1, a2
+   remu t4, a1, a2
+
+   add a1, a1, a3
+
+   divw a1, a1, a2
+   divuw t5, a1, a2
+
+   remw a3, a1, a2
+   remuw t6, a1, a2
+
+   add a1, a1, a3
+   li a0, "\nDivOK"
+   call sbi_print7
+
+   fence
+   fence.i
+
+   mv a0, a1
+   call sbi_print_reg
+
+   # FINAL CHECK
+   li t2, 0x0000000000000018
+   bne a1, t2, fail_chain
+
+   # Success
+   li a0, "\nChainK"
+   call sbi_print7
+   j key_test
+
+fail_chain:
+   li a0, "\nFAIL"
+   call sbi_print7
+
+
+key_test:
+   # Step 5 test Typing 
+   li a0, "\nTyping"
+   call sbi_print7
+
+wait_for_key:
+   li a7, 2  # SBI Getchar ID
+   ecall
+   bltz a0, wait_for_key  # if a0 is negative, no key press
+   mv s3, a0
+
+   la a0, msg_rx
+   call sbi_puts
+  
+   mv a0, s3
+   li a7, 1 # SBI Putchar ID
+   ecall 
+   
+   li a0, "\n\r"
+   call sbi_print7
+
+   j wait_for_key
+
+end:
+  j end
+
 
 s_trap_handler:
+   csrr a0, scause
+   call sbi_print_reg
+   csrr a0, stval
+   call sbi_print_reg
+   csrr a0, sepc
+   call sbi_print_reg
    li a0, "\n"
    li a7, 1
    ecall   # here ecall was not delegated to s_mode, so go to mtvec to find m-mode ecall handler
    li a0, "S_TRAP"
    call sbi_print7
+
    j s_done
 
 s_done: 
@@ -107,303 +426,6 @@ sbi_print_reg: # a0
     addi sp, sp, 40
     ret
 
-
-
-
-main:
-
-   li sp, 0x80700000 # Set stack # 80000000-80800000 sdram as 8M ram, we start sp from 0x80700000<-, MMU from 0x80700000->
- 
-   # Step 1 test ecall (sbi) print
-   la a0, msg_boot
-   call sbi_puts
-
-   # Step 2 test S-Mode trap hander # Opensbi delegate Ebreak to OS, so we set our handler address to stvec
-   la t0, s_trap_handler
-  #andi t0, t0, -4 # Align to 4 bytes
-   csrw stvec, t0
-   ebreak
-  #li a0, "\nStrpOK"
-  #call sbi_print7
-
-   # Step 3 test MMU
-   # 1.Build SV39 root table in sdram (4KB per table 2**9=512*8=4096) vpn2 4KB map 512*4k=2MBram; all vpn1=4*512=2Mb map 512*2M=1Gram, all vpn0=512*512=262144*4kb=1GB map 512Gram,total VPNs 4KB+2MB+1024MB
-   li t0, 0x80700000 # set base address of MMU root table
-
-   # 2. map vma 0x0000_0000 to ppa 0x0000_0000, ppn =  ppa >> 12 = 0, for UART/CLINT/PLIC .etc
-   li t1, 0xcf       # pte = ppn << 10 | flags valid0 read1 write2 exec3 accessed6 dirty7 0b11001111=0xcf
-   sd t1, 0(t0) 
-
-   # 3. map vma 0x8000_0000 to ppa 0x8000_0000, ppn =  ppa >> 12 = 0x80000 pte = ppn << 10 | flags, for RAM/Code
-   li t1, 0x200000cf # pte = ppn << 10 | flags valid0 read1 write2 exec3 accessed6 dirty7 0b11001111=0xcf
-   sd t1, 16(t0)     # Index=va[38:30]=0b00000010=2, 8 bytes per PTE = 16, 
-
-   # satp need ppn of root table rt 0x80700000 
-   # satp = satp[63:60].MODE(0:bare, 8:sv39, 9:sv48)|satp[59:44].asid|satp[43:0].rootpage_physical_addr(vpn2:9|vpn1:9|vpn0:9|offseet12)
-   # ppn = rt >> 12 = 0x80700
-   # mode = 3 sv39
-   li t0, 0x8000000000080700
-   # Turn MMU SV39
-   csrw satp, t0 # write mode and root table address to satp CSR register
-   sfence.vma ## <--- start use TLB I/D hitting
-
-   la a0, msg_mmu   # trigger I-TLB miss
-  #call sbi_puts
-   li a0, "\nMMUOK"
-   call sbi_print7
- 
-   # ======================================
-   # Chain test for riscv64ima instructions
-   # Accumulator register: a1
-   # ======================================
-
-   # 1 Lui
-   lui a1, 0x12345         # a1 = 0x0000000012345000
-    
-   # 2 auipc
-   auipc a2, 0
-
-  ## 3/4 ls
-  #la a2, mem_test_var
-  #sd a1, 0(a2)
-  #ld a1, 0(a2)
-  #li a0, "\nLSOK"
-  #call sbi_print7
-
-   # 3/4 ls
-   la a2, mem_test_var
-   # Test Byte (sb/lb/lbu)
-   li t4, 0x8F  # A negative-looking byte
-   sb t4, 0(a2)
-   lb t5, 0(a2) # 0xFFFFFFFFFFFFFF8F
-   lbu t6, 0(a2)# 0x000000000000008F
-   li t1, 0x8F
-   bne t6, t1, fail_chain
-
-   # Test Half (sh/lh/lhu)
-   li t4, 0x8FEE  # A negative-looking half
-   sh t4, 0(a2)
-   lh t5, 0(a2) # 0xFFFFFFFFFFFF8FEE
-   lhu t6, 0(a2)# 0x0000000000008FEE
-   li t1, 0x8FEE
-   bne t6, t1, fail_chain
-
-   # Test Word (sw/lw/lwu)
-   li t4, 0x8FEEDCBA  # A negative-looking word
-   sw t4, 0(a2)
-   lw t5, 0(a2) # 0xFFFFFFFF8FEEDBCA
-   lwu t6, 0(a2)# 0x000000008FEEDBCA`
-   li t1, 0x8FEEDCBA
-   bne t6, t1, fail_chain
-
-   # Test Doube Word (sd/ld)
-   sd a1, 0(a2)
-   ld a1, 0(a2)
-   li a0, "\nLSOK"
-   call sbi_print7
-
-   # 5 math-i (addi, xori, andi, ori, slli, srli, srai, slti, sltiu)
-   addi a1, a1, 0x678     # a1 = 0x12345678
-   xori a1, a1, 0x111     # a1 = 0x12345769
-   andi a1, a1, 0xFFF     # a1 = 0x12345769
-   ori a1, a1, 0x800      # a1 = 0xFFFFFFFFFFFFFF69
-   li a2, 0xFFF 
-   and a1, a1, a2         # a1 = 0x0000000000000F69
-  #li a0, "\nMthiOK"
-  #call sbi_print7
-
-   slli a1, a1, 4         # a1 = 0x0000F690
-   srli a1, a1, 4         # a1 = 0x00000F69
-   srai a1, a1, 0         # a1 = 0x00000F69 (MSB is 0)
-   slti a3, a1, 0         # a3 = 0
-   add  a1, a1, a3        # a1 = 0x00000F69
-   sltiu a3, a1, 0        # a3 = 0
-   add  a1, a1, a3        # a1 = 0x0000F690
-
-   # 6 math-iw (addiw, slliw, srliw, sraiw)
-   addiw a1, a1, 1        # a1 = 0x00000F6A
-   slliw a1, a1, 16       # a1 = 0x0F6A0000
-   srliw a1, a1, 16       # a1 = 0x00000F6A
-   sraiw a1, a1, 0        # a1 = 0x00000F6A
-   li a0, "\nMthiwK"
-   call sbi_print7
-
-   # 7 mathr (add, sub, xor, and, or, sll, srl, sra, slt, sltu)
-   li a2, 0x111
-   add a1, a1, a2          # a1 = 0x107B
-   sub a1, a1, a2          # a1 = 0x0F6A
-   xor a1, a1, a2          # a1 = 0x0E7B
-   and a1, a1, a1          # a1 = 0x0E7B
-   or  a1, a1, a2          # a1 = 0x0F7B
-   li a2, 4
-   sll a1, a1, a2          # a1 = 0x0F7B0
-   srl a1, a1, a2          # a1 = 0x00F7B
-   sra a1, a1, a2          # a1 = 0x000F7
-   li a2, 0
-   slt a3, a2, a1          # a3 = 1
-   add a1, a1, a3          # a1 = 0x000F8
-   sltu a3, a2, a1         # a3 = 1
-   add a1, a1, a3          # a1 = 0x000F9
-  #li a0, "\nMthrOK"
-  #call sbi_print7
-
-   # 8 math-rw (addw, subw, sllw, srlw, sraw)
-   li a2, 1
-   addw a1, a1, a2         # a1 = 0x000FA
-   subw a1, a1, a2         # a1 = 0x000F9
-   li a2, 4
-   sllw a1, a1, a2         # a1 = 0x00F90
-   srlw a1, a1, a2         # a1 = 0x000F9
-   sraw a1, a1, a2         # a1 = 0x0000F
-   li a0, "\nMthrwK"
-   call sbi_print7
-
-   # 9 jump
-   jal a2, jump_target_1
-jump_target_1:
-   addi a1, a1, 1          # a1 = 0x00010
-   la a2, jump_target_2
-   jalr a2, 0(a2)
-jump_target_2:
-   addi a1, a1, 1          # a1 = 0x00011
-   li a0, "\nJumpOK"
-   call sbi_print7
-
-   # 10 branch (beq, bne, blt, bge, bltu, bgeu)
-   beq a1, a1, branch_target_3
-branch_target_3:
-   addi a1, a1, 1
-   li a2, 0
-   bne a1, a2, branch_target_4
-branch_target_4:
-   addi a1, a1, 1
-   blt a2, a1, branch_target_5
-branch_target_5:
-   addi a1, a1, 1
-   bge a1, a2, branch_target_6
-branch_target_6:
-   addi a1, a1, 1
-   bltu a2, a1, branch_target_7
-branch_target_7:
-   addi a1, a1, 1
-   bgeu a1, a2, branch_target_8
-branch_target_8:
-   addi a1, a1, 1
-   li a0, "\nBrchOK"
-   call sbi_print7
-
-   # 11 CSR
-   csrw sscratch, a1
-   csrr a1, sscratch
-   csrrs a3, sscratch, zero
-   csrrc a3, sscratch, zero
-   csrrwi a3, sscratch, 0
-   csrrsi a3, sscratch, 0
-   csrrci a3, sscratch, 0
-   li a0, "\nCSROK"
-   call sbi_print7
-
-   # 12 Atomic
-   la a2, mem_test_var
-
-   lr.w t3, (a2)
-   sc.w t4, a1, (a2)
-   ld a1, 0(a2)
-
-   lr.d a3, (a2)
-   sc.d a4, a1, (a2)
-   ld a1, 0(a2)           # a1 = 0x00017
-   li a0, "\nAtomOK"
-   call sbi_print7
-  
- #mv a0, a1
- #call sbi_print_reg
-   amoswap.w t3, a1, (a2) # M[a2]=0x17, t3=0x17
-   amoadd.w  t3, a1, (a2) # M[a2]=0x2E, t3=0x17
-   amoxor.w  t3, a1, (a2) # M[a2]=0x39, t3=0x2E
-   amoand.w  t3, a1, (a2) # M[a2]=0x11, t3=0x39
-   amoor.w   t3, a1, (a2) # M[a2]=0x17, t3=0x11
-   amomax.w  t3, a1, (a2) # M[a2]=0x17, t3=0x17
-   amomin.w  t3, a1, (a2) # M[a2]=0x17, t3=0x17
-   amomaxu.w t3, a1, (a2) # M[a2]=0x17, t3=0x17
-   amominu.w t3, a1, (a2) # M[a2]=0x17, t3=0x17
-   lw a1, 0(a2)           # a1 = 0x00017
-   li t0, 0x17
-   bne a1, t0, fail_chain
-   li a0, "\nAmowOK"
-   call sbi_print7
-
-
-   amoswap.d t3, a1, (a2) # M[a2]=0x17, t3=0x17
-   amoadd.d  t3, a1, (a2) # M[a2]=0x2E, t3=0x17
-   amoxor.d  t3, a1, (a2) # M[a2]=0x39, t3=0x2E
-   amoand.d  t3, a1, (a2) # M[a2]=0x11, t3=0x39
-   amoor.d   t3, a1, (a2) # M[a2]=0x17, t3=0x11
-   amomax.d  t3, a1, (a2) # M[a2]=0x17, t3=0x17
-   amomin.d  t3, a1, (a2) # M[a2]=0x17, t3=0x17
-   amomaxu.d t3, a1, (a2) # M[a2]=0x17, t3=0x17
-   amominu.d t3, a1, (a2) # M[a2]=0x17, t3=0x17
-   ld a1, 0(a2)           # a1 = 0x00017
-   li a0, "\nAmodOK"
-   call sbi_print7
-
-   # 13 Mul
-   li a2, 2
-   mul a1, a1, a2
-   mulh a3, a1, a2
-   add a1, a1, a3
-   mulw a1, a1, a2
-   li a0, "\nMulOK"
-   call sbi_print7
-
-   # 14 Div
-   div a1, a1, a2
-   rem a3, a1, a2
-   add a1, a1, a3
-   divw a1, a1, a2
-   remw a3, a1, a2
-   add a1, a1, a3
-   li a0, "\nDivOK"
-   call sbi_print7
-
-   # FINAL CHECK
-   li t2, 0x0000000000000018
-   bne a1, t2, fail_chain
-
-   # Success
-   li a0, "\nChinK"
-   call sbi_print7
-   j key_test
-
-fail_chain:
-   li a0, "\nFAIL"
-   call sbi_print7
-
-key_test:
-   # Step 5 test Typing 
-   li a0, "\nType:_"
-   call sbi_print7
-
-wait_for_key:
-   li a7, 2  # SBI Getchar ID
-   ecall
-   bltz a0, wait_for_key  # if a0 is negative, no key press
-   mv s3, a0
-
-  #la a0, msg_rx
-  #call sbi_puts
-  
-   mv a0, s3
-   li a7, 1 # SBI Putchar ID
-   ecall 
-   
-  #li a0, "\n\r"
-  #call sbi_print7
-
-   j wait_for_key
-
-end:
-  j end
 
 
 
