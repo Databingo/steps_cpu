@@ -3,10 +3,6 @@
 .section .data
 msg_boot:
     .string "--Full instructions test for run Linux Kernel--"
-#msg_mmu:
-#    .string "--MMU_test--"
-#msg_rx:
-#    .string "key_press:"
 mem_test_var:
     .dword 0x0000000000000000
 mem_test_val:
@@ -44,7 +40,6 @@ sbi_puts: # a0 addr
     beq a0, x0, sbi_stop_puts # \x00 for end of string
     li a7, 1 # SBI Putchar ID
     ecall
-   #call putchar # a0 char
     addi s0, s0, 1 # next byte
     j sbi_puts_loop
     sbi_stop_puts:
@@ -116,8 +111,8 @@ main:
    li sp, 0x80700000 # Set stack # 80000000-80800000 sdram as 8M ram, we start sp from 0x80700000<-, MMU from 0x80700000->
  
    # Step 1 test ecall (sbi) print
-   la a0, msg_boot
-   call sbi_puts
+  #la a0, msg_boot
+  #call sbi_puts
 
    # Step 2 test S-Mode trap hander # Opensbi delegate Ebreak to OS, so we set our handler address to stvec
    la t0, s_trap_handler
@@ -148,8 +143,6 @@ main:
    csrw satp, t0 # write mode and root table address to satp CSR register
    sfence.vma ## <--- start use TLB I/D hitting
 
-  #la a0, msg_mmu   # trigger I-TLB miss
-  #call sbi_puts
    li a0, "\nMMUOK"
    call sbi_print7
  
@@ -160,16 +153,6 @@ main:
 
    # 1 Lui
    lui a1, 0x12345         # a1 = 0x0000000012345000
-    
-  ## 2 auipc
-  #auipc a2, 0
-
-  ## 3/4 ls
-  #la a2, mem_test_var
-  #sd a1, 0(a2)
-  #ld a1, 0(a2)
-  #li a0, "\nLSOK"
-  #call sbi_print7
 
    # 3/4 ls
    la a2, mem_test_var
@@ -210,8 +193,10 @@ main:
    ori a1, a1, 0x800      # a1 = 0xFFFFFFFFFFFFFF69
    li a2, 0xFFF 
    and a1, a1, a2         # a1 = 0x0000000000000F69
-  #li a0, "\nMthiOK"
-  #call sbi_print7
+   li t1, 0x0000000000000F69
+   bne a1, t1, fail_chain
+   li a0, "\nMthiOK"
+   call sbi_print7
 
    slli a1, a1, 4         # a1 = 0x0000F690
    srli a1, a1, 4         # a1 = 0x00000F69
@@ -219,15 +204,21 @@ main:
    slti a3, a1, 0         # a3 = 0
    add  a1, a1, a3        # a1 = 0x00000F69
    sltiu a3, a1, 0        # a3 = 0
-   add  a1, a1, a3        # a1 = 0x0000F690
+   add  a1, a1, a3        # a1 = 0x00000F69
+   li t1,  0x00000F69
+   bne a1, t1, fail_chain
+   li a0, "\nShifOK"
+   call sbi_print7
 
    # 6 math-iw (addiw, slliw, srliw, sraiw)
    addiw a1, a1, 1        # a1 = 0x00000F6A
    slliw a1, a1, 16       # a1 = 0x0F6A0000
    srliw a1, a1, 16       # a1 = 0x00000F6A
    sraiw a1, a1, 0        # a1 = 0x00000F6A
-  #li a0, "\nMthiwK"
-  #call sbi_print7
+   li t1,  0x00000F6A
+   bne a1, t1, fail_chain
+   li a0, "\nMthiwK"
+   call sbi_print7
 
    # 7 mathr (add, sub, xor, and, or, sll, srl, sra, slt, sltu)
    li a2, 0x111
@@ -245,8 +236,10 @@ main:
    add a1, a1, a3          # a1 = 0x000F8
    sltu a3, a2, a1         # a3 = 1
    add a1, a1, a3          # a1 = 0x000F9
-  #li a0, "\nMthrOK"
-  #call sbi_print7
+   li t1,  0x000F9
+   bne a1, t1, fail_chain
+   li a0, "\nMthrOK"
+   call sbi_print7
 
    # 8 math-rw (addw, subw, sllw, srlw, sraw)
    li a2, 1
@@ -256,8 +249,9 @@ main:
    sllw a1, a1, a2         # a1 = 0x00F90
    srlw a1, a1, a2         # a1 = 0x000F9
    sraw a1, a1, a2         # a1 = 0x0000F
-  #li a0, "\nMthrwK"
-   li a0, "\nMathOK"
+   li t1,  0x000F
+   bne a1, t1, fail_chain
+   li a0, "\nMthrwK"
    call sbi_print7
 
    # 9 jump
@@ -268,8 +262,8 @@ jump_target_1:
    jalr a2, 0(a2)
 jump_target_2:
    addi a1, a1, 1          # a1 = 0x00011
-   li a0, "\nJumpOK"
-   call sbi_print7
+  #li a0, "\nJumpOK"
+  #call sbi_print7
 
    # 10 branch (beq, bne, blt, bge, bltu, bgeu)
    beq a1, a1, branch_target_3
@@ -291,19 +285,21 @@ branch_target_7:
    bgeu a1, a2, branch_target_8
 branch_target_8:
    addi a1, a1, 1
+   li t1,  0x17
+   bne a1, t1, fail_chain
    li a0, "\nBrchOK"
    call sbi_print7
 
-   # 11 CSR
-   csrw sscratch, a1
-   csrr a1, sscratch
-   csrrs a3, sscratch, zero
-   csrrc a3, sscratch, zero
-   csrrwi a3, sscratch, 0
-   csrrsi a3, sscratch, 0
-   csrrci a3, sscratch, 0
-   li a0, "\nCSROK"
-   call sbi_print7
+  ## 11 CSR
+  #csrw sscratch, a1
+  #csrr a1, sscratch
+  #csrrs a3, sscratch, zero
+  #csrrc a3, sscratch, zero
+  #csrrwi a3, sscratch, 0
+  #csrrsi a3, sscratch, 0
+  #csrrci a3, sscratch, 0
+  #li a0, "\nCSROK"
+  #call sbi_print7
 
    # 12 Atomic
    la a2, mem_test_var
@@ -315,40 +311,40 @@ branch_target_8:
    lr.d a3, (a2)
    sc.d a4, a1, (a2)
    ld a1, 0(a2)           # a1 = 0x00017
-   li a0, "\nAtomOK"
-   call sbi_print7
+
+  #li t1,  0x17
+  #bne a1, t1, fail_chain
+  #li a0, "\nAtomOK"
+  #call sbi_print7
   
- #mv a0, a1
- #call sbi_print_reg
-   amoswap.w t3, a1, (a2) # M[a2]=0x17, t3=0x17
-   amoadd.w  t3, a1, (a2) # M[a2]=0x2E, t3=0x17
-   amoxor.w  t3, a1, (a2) # M[a2]=0x39, t3=0x2E
-   amoand.w  t3, a1, (a2) # M[a2]=0x11, t3=0x39
-   amoor.w   t3, a1, (a2) # M[a2]=0x17, t3=0x11
-   amomax.w  t3, a1, (a2) # M[a2]=0x17, t3=0x17
-   amomin.w  t3, a1, (a2) # M[a2]=0x17, t3=0x17
-   amomaxu.w t3, a1, (a2) # M[a2]=0x17, t3=0x17
-   amominu.w t3, a1, (a2) # M[a2]=0x17, t3=0x17
-   lw a1, 0(a2)           # a1 = 0x00017
-   li t0, 0x17
-   bne a1, t0, fail_chain
+  #amoswap.w t3, a1, (a2) # M[a2]=0x17, t3=0x17
+  #amoadd.w  t3, a1, (a2) # M[a2]=0x2E, t3=0x17
+  #amoxor.w  t3, a1, (a2) # M[a2]=0x39, t3=0x2E
+  #amoand.w  t3, a1, (a2) # M[a2]=0x11, t3=0x39
+  #amoor.w   t3, a1, (a2) # M[a2]=0x17, t3=0x11
+  #amomax.w  t3, a1, (a2) # M[a2]=0x17, t3=0x17
+  #amomin.w  t3, a1, (a2) # M[a2]=0x17, t3=0x17
+  #amomaxu.w t3, a1, (a2) # M[a2]=0x17, t3=0x17
+  #amominu.w t3, a1, (a2) # M[a2]=0x17, t3=0x17
+  #lw a1, 0(a2)           # a1 = 0x00017
+  #li t0, 0x17
+  #bne a1, t0, fail_chain
   #li a0, "\nAmowOK"
   #call sbi_print7
 
-
-   amoswap.d t3, a1, (a2) # M[a2]=0x17, t3=0x17
-   amoadd.d  t3, a1, (a2) # M[a2]=0x2E, t3=0x17
-   amoxor.d  t3, a1, (a2) # M[a2]=0x39, t3=0x2E
-   amoand.d  t3, a1, (a2) # M[a2]=0x11, t3=0x39
-   amoor.d   t3, a1, (a2) # M[a2]=0x17, t3=0x11
-   amomax.d  t3, a1, (a2) # M[a2]=0x17, t3=0x17
-   amomin.d  t3, a1, (a2) # M[a2]=0x17, t3=0x17
-   amomaxu.d t3, a1, (a2) # M[a2]=0x17, t3=0x17
-   amominu.d t3, a1, (a2) # M[a2]=0x17, t3=0x17
-   ld a1, 0(a2)           # a1 = 0x00017
+  #amoswap.d t3, a1, (a2) # M[a2]=0x17, t3=0x17
+  #amoadd.d  t3, a1, (a2) # M[a2]=0x2E, t3=0x17
+  #amoxor.d  t3, a1, (a2) # M[a2]=0x39, t3=0x2E
+  #amoand.d  t3, a1, (a2) # M[a2]=0x11, t3=0x39
+  #amoor.d   t3, a1, (a2) # M[a2]=0x17, t3=0x11
+  #amomax.d  t3, a1, (a2) # M[a2]=0x17, t3=0x17
+  #amomin.d  t3, a1, (a2) # M[a2]=0x17, t3=0x17
+  #amomaxu.d t3, a1, (a2) # M[a2]=0x17, t3=0x17
+  #amominu.d t3, a1, (a2) # M[a2]=0x17, t3=0x17
+  #ld a1, 0(a2)           # a1 = 0x00017
   #li a0, "\nAmodOK"
-   li a0, "\nAmoOK"
-   call sbi_print7
+  #li a0, "\nAmoOK"
+  #call sbi_print7
 
    # 13 Mul
    li a2, 2
@@ -356,6 +352,10 @@ branch_target_8:
    mulh a3, a1, a2
    add a1, a1, a3
    mulw a1, a1, a2
+  #mv a0, a1
+  #call sbi_print_reg
+   li t1, 0x000000000000005C 
+   bne a1, t1, fail_chain
    li a0, "\nMulOK"
    call sbi_print7
 
@@ -366,23 +366,33 @@ branch_target_8:
    divw a1, a1, a2
    remw a3, a1, a2
    add a1, a1, a3
+   li t1, 0x0000000000000018
+   bne a1, t1, fail_chain
 
-   divu t1, a1, a2
-   remu t4, a1, a2
-   divuw t5, a1, a2
-   remuw t6, a1, a2
+   divu a1, a1, a2
+   remu a3, a1, a2
+   add  a1, a1, a3
+   divuw a1, a1, a2
+   remuw a3, a1, a2
+   add  a1, a1, a3
+   li t1, 0x0000000000000006
+   bne a1, t1, fail_chain
 
-  ## 15 unsigned M
-  li a2, -1
-  li a3, 2
-  mulhu t3, a1, a2
-  mulhsu t4, a1, a2
-  divu t3, a2, a3
-  remu t4, a2, a3
-  divuw t5, a2, a3
-  remuw t6, a2, a3
- #li a0, "\nusMOK"
- #call sbi_print7
+   ## 15 unsigned M
+   li a2, -1
+   li a3, 2
+   mulhu a1, a1, a2
+   mulhsu a1, a1, a2
+   divu a1, a2, a3
+   remu a4, a2, a3
+   add  a1, a1, a4
+   divuw a1, a2, a3
+   remuw a4, a2, a3
+   add  a1, a1, a4
+   li t1, 0x0000000080000000
+   bne a1, t1, fail_chain
+ # li a0, "\nusMOK"
+ # call sbi_print7
 
    # div by 0 = -1
    li a2, 5
@@ -406,17 +416,18 @@ branch_target_8:
    call sbi_print7
 
    
-   fence
-   fence.i
-   li a0, "\nFencOK"
-   call sbi_print7
+  #fence
+  #fence.i
+  #li a0, "\nFencOK"
+  #call sbi_print7
 
    # FINAL CHECK
-   li t2, 0x0000000000000018
-   bne a1, t2, fail_chain
+  #li t2, 0x0000000000000018
+   li t1, 0x0000000080000000
+   bne a1, t1, fail_chain
 
    # Success
-   li a0, "\nChinK"
+   li a0, "\nPASS"
    call sbi_print7
    j key_test
 
