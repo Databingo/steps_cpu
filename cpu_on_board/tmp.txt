@@ -1,6 +1,5 @@
 msg_boot:
 mem_test_var:
-mem_test_val:
 _start:
 #   j main 
 jal x0, main

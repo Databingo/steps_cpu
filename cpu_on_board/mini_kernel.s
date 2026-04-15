@@ -5,8 +5,8 @@ msg_boot:
     .string "--Full instructions test for run Linux Kernel--"
 mem_test_var:
     .dword 0x0000000000000000
-mem_test_val:
-    .dword 0x0000000000000000
+#mem_test_val:
+#    .dword 0x0000000000000000
 
 
 # Bootloader/copy4 --> firmware/BIOS/opensib/mini_sbi2 --> OS/linux/kernal
