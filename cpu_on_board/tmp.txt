@@ -269,20 +269,6 @@ addi t1, x0, 0x0
 lui t1, 0x1
 addi t1, t1, 0xf69
 bne a1, t1, fail_chain
-#    li a0, "\nMthiOK"
-addi a0, x0, 0x0
-lui a0, 0x4b4
-srli a0, a0, 0x1
-ori a0, a0, 0x7b4
-slli a0, a0, 0xb
-ori a0, a0, 0x5a1
-slli a0, a0, 0xb
-ori a0, a0, 0x689
-slli a0, a0, 0xb
-ori a0, a0, 0x50a
-#    call sbi_print7
-auipc x1, 0 # R_RISCV_PCREL_HI20 sbi_print7
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I sbi_print7
 slli a1, a1, 4         # a1 = 0x0000F690
 srli a1, a1, 4         # a1 = 0x00000F69
 srai a1, a1, 0         # a1 = 0x00000F69 (MSB is 0)
@@ -295,20 +281,6 @@ addi t1, x0, 0x0
 lui t1, 0x1
 addi t1, t1, 0xf69
 bne a1, t1, fail_chain
-#    li a0, "\nShifOK"
-addi a0, x0, 0x0
-lui a0, 0x4b4
-srli a0, a0, 0x1
-ori a0, a0, 0x7b3
-slli a0, a0, 0xb
-ori a0, a0, 0x1a5
-slli a0, a0, 0xb
-ori a0, a0, 0x50a
-slli a0, a0, 0xb
-ori a0, a0, 0x30a
-#    call sbi_print7
-auipc x1, 0 # R_RISCV_PCREL_HI20 sbi_print7
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I sbi_print7
 addiw a1, a1, 1        # a1 = 0x00000F6A
 slliw a1, a1, 16       # a1 = 0x0F6A0000
 srliw a1, a1, 16       # a1 = 0x00000F6A
@@ -318,20 +290,6 @@ addi t1, x0, 0x0
 lui t1, 0x1
 addi t1, t1, 0xf6a
 bne a1, t1, fail_chain
-#    li a0, "\nMthiwK"
-addi a0, x0, 0x0
-lui a0, 0x4b7
-srli a0, a0, 0x1
-ori a0, a0, 0x3b4
-slli a0, a0, 0xb
-ori a0, a0, 0x5a1
-slli a0, a0, 0xb
-ori a0, a0, 0x689
-slli a0, a0, 0xb
-ori a0, a0, 0x50a
-#    call sbi_print7
-auipc x1, 0 # R_RISCV_PCREL_HI20 sbi_print7
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I sbi_print7
 #    li a2, 0x111
 addi a2, x0, 0x0
 addi a2, x0, 0x0
@@ -359,20 +317,6 @@ addi t1, x0, 0x0
 addi t1, x0, 0x0
 addi t1, x0, 0xf9
 bne a1, t1, fail_chain
-#    li a0, "\nMthrOK"
-addi a0, x0, 0x0
-lui a0, 0x4b4
-srli a0, a0, 0x1
-ori a0, a0, 0x7b9
-slli a0, a0, 0xb
-ori a0, a0, 0x1a1
-slli a0, a0, 0xb
-ori a0, a0, 0x689
-slli a0, a0, 0xb
-ori a0, a0, 0x50a
-#    call sbi_print7
-auipc x1, 0 # R_RISCV_PCREL_HI20 sbi_print7
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I sbi_print7
 #    li a2, 1
 addi a2, x0, 0x0
 addi a2, x0, 0x0
@@ -470,30 +414,105 @@ mul a1, a1, a2
 mulh a3, a1, a2
 add a1, a1, a3
 mulw a1, a1, a2
+#    li a0, "\nMulOK"
+addi a0, x0, 0x0
+lui a0, 0x4
+srli a0, a0, 0x1
+ori a0, a0, 0x5a7
+slli a0, a0, 0xb
+ori a0, a0, 0x5b1
+slli a0, a0, 0xb
+ori a0, a0, 0x6a9
+slli a0, a0, 0xb
+ori a0, a0, 0x50a
+#    call sbi_print7
+auipc x1, 0 # R_RISCV_PCREL_HI20 sbi_print7
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I sbi_print7
 #    li a2, 3        
 addi a2, x0, 0x0
 addi a2, x0, 0x0
 addi a2, x0, 0x3
 div a3, a1, a2  # a3 = 0x000000000000001E
+#    mv a0, a3
+addi a0, a3, 0
+#    call sbi_print_reg
+auipc x1, 0 # R_RISCV_PCREL_HI20 sbi_print_reg
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I sbi_print_reg
 rem a4, a1, a2  # a4 = 0x0000000000000002
+#    mv a0, a4
+addi a0, a4, 0
+#    call sbi_print_reg
+auipc x1, 0 # R_RISCV_PCREL_HI20 sbi_print_reg
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I sbi_print_reg
 add a1, a1, a3  # a1 = 92+30=122
 add a1, a1, a4  # a1 = 122+2=124
-divw a3, a1, a2 # 124/3=41
-remw a4, a1, a2 # 124%3=1
-add a1, a1, a3  # 124+41=165
-add a1, a1, a4  # 165+1=166
-divu a3, a1, a2 # 166/3=55
-remu a4, a1, a2 # 166%3=1
-add a1, a1, a3  # 166+55=221
-add a1, a1, a4  # 221+1=222
-divuw a3, a1, a2 # 222/3=74
-remuw a4, a1, a2 # 222%3=0
-add a1, a1, a3  # 222+74=296
-add a1, a1, a4  # 296
-#    li t1, 0x0000000000000128
+#    li t1, 0x80000000
+addi t1, x0, 0x0
+slli t1, t1, 0xb
+ori t1, t1, 0x200
+slli t1, t1, 0x16
+add a1, a1, t1  # a1 = 0x8000007C
+#    li a2, 2
+addi a2, x0, 0x0
+addi a2, x0, 0x0
+addi a2, x0, 0x2
+divw a3, a1, a2  # a3 = 0xFFFFFFFFC000003E
+#    mv a0, a3
+addi a0, a3, 0
+#    call sbi_print_reg
+auipc x1, 0 # R_RISCV_PCREL_HI20 sbi_print_reg
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I sbi_print_reg
+remw a4, a1, a2  # a4 = 0
+#    mv a0, a4
+addi a0, a4, 0
+#    call sbi_print_reg
+auipc x1, 0 # R_RISCV_PCREL_HI20 sbi_print_reg
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I sbi_print_reg
+add a1, a1, a3  # a1 = 0x8000007C +  0xFFFFFFFFC000003E = 0x400000BA
+add a1, a1, a4  # a1
+#    mv a0, a1
+addi a0, a1, 0
+#    call sbi_print_reg
+auipc x1, 0 # R_RISCV_PCREL_HI20 sbi_print_reg
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I sbi_print_reg
+lui t1, 0x40000
+addi t1, t1, 0x100  # t1 = 0x40000100
+sub a1, a1, t1 # a1 =  0x400000BA - 0x40000100 = 0xFFFFFFFFFFFFFFBA = -70
+#    li a2, 3
+addi a2, x0, 0x0
+addi a2, x0, 0x0
+addi a2, x0, 0x3
+divu a3, a1, a2  # a3 = 0x555555555555553E
+remu a4, a1, a2  # a4 = 0
+add a1, a1, a3  # a1 = 0xFFFFFFFFFFFFFFBA + 0x555555555555553E = 0x55555555555554F8
+add a1, a1, a4  # a1
+#    li t1, -1
 addi t1, x0, 0x0
 addi t1, x0, 0x0
-addi t1, x0, 0x128
+addi t1, x0, 0x1
+xori t1, t1, -1
+addi t1, t1, 1
+slli t1, t1, 31 # t1 = 0xFFFFFFFF80000000
+add a1, a1, t1 # a1 =  0x55555555555554F8 +  0xFFFFFFFF80000000 = 0x55555554D55554F8
+#    li a2, 5
+addi a2, x0, 0x0
+addi a2, x0, 0x0
+addi a2, x0, 0x5
+divuw a3, a1, a2  # a3 = 0x000000002AAAAA98
+remuw a4, a1, a2  # a4 = 0
+add a1, a1, a3  # a1 =  0x55555554D55554F8 +  0x000000002AAAAA98 = 0x55555554FFFFFF90
+add a1, a1, a4  # a1
+#    li t1, 0x55555554FFFFFF90
+addi t1, x0, 0x0
+lui t1, 0x55555
+srli t1, t1, 0x1
+ori t1, t1, 0x2aa
+slli t1, t1, 0xb
+ori t1, t1, 0x3ff
+slli t1, t1, 0xb
+ori t1, t1, 0x7ff
+slli t1, t1, 0xb
+ori t1, t1, 0x790
 bne a1, t1, fail_chain
 #    li a0, "\nDivOK"
 addi a0, x0, 0x0
