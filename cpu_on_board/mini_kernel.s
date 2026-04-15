@@ -3,10 +3,10 @@
 .section .data
 msg_boot:
     .string "--Full instructions test for run Linux Kernel--"
-msg_mmu:
-    .string "--MMU_test--"
-msg_rx:
-    .string "key_press:"
+#msg_mmu:
+#    .string "--MMU_test--"
+#msg_rx:
+#    .string "key_press:"
 mem_test_var:
     .dword 0x0000000000000000
 mem_test_val:
@@ -147,7 +147,7 @@ main:
    csrw satp, t0 # write mode and root table address to satp CSR register
    sfence.vma ## <--- start use TLB I/D hitting
 
-   la a0, msg_mmu   # trigger I-TLB miss
+  #la a0, msg_mmu   # trigger I-TLB miss
   #call sbi_puts
    li a0, "\nMMUOK"
    call sbi_print7
@@ -225,8 +225,8 @@ main:
    slliw a1, a1, 16       # a1 = 0x0F6A0000
    srliw a1, a1, 16       # a1 = 0x00000F6A
    sraiw a1, a1, 0        # a1 = 0x00000F6A
-   li a0, "\nMthiwK"
-   call sbi_print7
+  #li a0, "\nMthiwK"
+  #call sbi_print7
 
    # 7 mathr (add, sub, xor, and, or, sll, srl, sra, slt, sltu)
    li a2, 0x111
@@ -255,7 +255,8 @@ main:
    sllw a1, a1, a2         # a1 = 0x00F90
    srlw a1, a1, a2         # a1 = 0x000F9
    sraw a1, a1, a2         # a1 = 0x0000F
-   li a0, "\nMthrwK"
+  #li a0, "\nMthrwK"
+   li a0, "\nMathOK"
    call sbi_print7
 
    # 9 jump
@@ -351,6 +352,10 @@ branch_target_8:
    li a2, 2
    mul a1, a1, a2
    mulh a3, a1, a2
+
+   mulhu t3, a1, a2
+   mulhsu t4, a1, a2
+
    add a1, a1, a3
    mulw a1, a1, a2
    li a0, "\nMulOK"
@@ -363,7 +368,37 @@ branch_target_8:
    divw a1, a1, a2
    remw a3, a1, a2
    add a1, a1, a3
+
+   divu t1, a1, a2
+   remu t4, a1, a2
+   divuw t5, a1, a2
+   remuw t6, a1, a2
+
+   # div by 0 = -1
+   li a2, 5
+   li a3, 0
+   div t1, a2, a3
+   li t2, -1
+   bne t1, t2, fail_chain
+   
+   # rem by 0 = rem
+   rem t1, a2, a3
+   bne t1, a2, fail_chain
+  
+   # Overflow INT_MIN/-1 = INT_MIN
+   li a2, 1
+   slli a2, a2, 63 # a2 = 0x8000000000000000
+   li a3, -1
+   div t1, a2, a3
+   bne t1, a2, fail_chain
+
    li a0, "\nDivOK"
+   call sbi_print7
+
+   
+   fence
+   fence.i
+   li a0, "\nFencOK"
    call sbi_print7
 
    # FINAL CHECK

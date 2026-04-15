@@ -274,7 +274,7 @@ end
 			div_active <= 0;
 			div_done <= 1; // finish immediately
 		    end
-		    else if (div_op_signed && div_a == 64'h8000000000000000 && div_b == ~64'd0) begin // ??
+		    else if (div_op_signed && div_a == 64'h8000000000000000 && div_b == ~64'd0) begin // ?? Overflow INT_MIN/-1 = INT_MIN
 			div_result_out <= div_is_rem ? 64'd0 : div_a; // signed overflow
 		    div_active <= 0;
 		    div_done <= 1; // finish immediately
