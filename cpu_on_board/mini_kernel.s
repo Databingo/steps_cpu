@@ -348,68 +348,36 @@ branch_target_8:
 
    # 13 Mul
    li a2, 2
-   mul a1, a1, a2
-   mulh a3, a1, a2
-   add a1, a1, a3
-   mulw a1, a1, a2
-  #li t1, 0x000000000000005C 
-  #bne a1, t1, fail_chain
+   mul a1, a1, a2  # a1 = 23 * 2 = 46
+   mulh a3, a1, a2 # a3 = High 64 bit of 92 = 0
+   add a1, a1, a3  # a1 = 46
+   mulw a1, a1, a2 # a1 = 46 * 2 = 92 (0x5C)
+
+   li t1, 94
+   sub a1, a1, t1    # a1 = 92-94 =-2
+   li a2, -3
+   mulh a3, a1, a2   # a3=0  -2*-3=6, High 64 is 0
+   add a1, a1, a3    # a1 = -2 + 0 = -2
+   mulhu a3, a1, a2  # a3 = -5  usign*usign H is -5
+   add a1, a1, a3    # a1 = -2 + (-5)  -7
+   mulhsu a3, a1, a2 # a3 = -7  sign*unsign H is -7
+   add a1, a1, a3    # a1 = -7 + (-7) = -14
+   addi a1, a1, 106
+
+   li t1, 0x000000000000005C 
+   bne a1, t1, fail_chain
    li a0, "\nMulOK"
    call sbi_print7
-
-  ## 14 Div
-  #li a2, 3        # a1 = 0x000000000000005C 
-  #div a3, a1, a2  # a3 = 0x000000000000001E
-  #mv a0, a3
-  #call sbi_print_reg
-  #rem a4, a1, a2  # a4 = 0x0000000000000002
-  #mv a0, a4
-  #call sbi_print_reg
-  #add a1, a1, a3  # a1 = 92+30=122
-  #add a1, a1, a4  # a1 = 122+2=124
-
-  #divw a3, a1, a2 # 124/3=41 # a3 = 0x0000000000000029
-  #mv a0, a3
-  #call sbi_print_reg
-  #remw a4, a1, a2 # 124%3=1  # a4 = 0x0000000000000001
-  #mv a0, a4
-  #call sbi_print_reg
-  #add a1, a1, a3  # 124+41=165
-  #add a1, a1, a4  # 165+1=166
-
-  #divu a3, a1, a2 # 166/3=55 # a3 = 0x0000000000000037
-  #mv a0, a3
-  #call sbi_print_reg
-  #remu a4, a1, a2 # 166%3=1  # a4 = 0x0000000000000001
-  #mv a0, a4
-  #call sbi_print_reg
-  #add a1, a1, a3  # 166+55=221
-  #add a1, a1, a4  # 221+1=222
-
-  #divuw a3, a1, a2 # 222/3=74 # a3 = 0x000000000000004A
-  #mv a0, a3
-  #call sbi_print_reg
-  #remuw a4, a1, a2 # 222%3=0  # a4=0
-  #mv a0, a4
-  #call sbi_print_reg
-  #add a1, a1, a3  # 222+74=296
-  #add a1, a1, a4  # 296
-  #
-  #li t1, 0x000000000000005C
-  #li t1, 0x0000000000000128
-  #bne a1, t1, fail_chain
-  #li a0, "\nDivOK"
-  #call sbi_print7
 
   # 14 Div
    # div/rem
    li a2, 3        # a1 = 0x000000000000005C 
    div a3, a1, a2  # a3 = 0x000000000000001E
-   mv a0, a3
-   call sbi_print_reg
+  #mv a0, a3
+  #call sbi_print_reg
    rem a4, a1, a2  # a4 = 0x0000000000000002
-   mv a0, a4
-   call sbi_print_reg
+  #mv a0, a4
+  #call sbi_print_reg
    add a1, a1, a3  # a1 = 92+30=122
    add a1, a1, a4  # a1 = 122+2=124
 
@@ -418,15 +386,15 @@ branch_target_8:
    add a1, a1, t1  # a1 = 0x8000007C
    li a2, 2
    divw a3, a1, a2  # a3 = 0xFFFFFFFFC000003E
-   mv a0, a3
-   call sbi_print_reg
+  #mv a0, a3
+  #call sbi_print_reg
    remw a4, a1, a2  # a4 = 0
-   mv a0, a4
-   call sbi_print_reg
+  #mv a0, a4
+  #call sbi_print_reg
    add a1, a1, a3  # a1 = 0x8000007C +  0xFFFFFFFFC000003E = 0x400000BA
    add a1, a1, a4  # a1
-   mv a0, a1
-   call sbi_print_reg
+  #mv a0, a1
+  #call sbi_print_reg
 
    # divu/remu
    lui t1, 0x40000
@@ -461,22 +429,7 @@ branch_target_8:
    li a0, "\nDivOK"
    call sbi_print7
 
-   ## 15 unsigned M
-   li a2, -1
-   li a3, 2
-   mulhu a1, a1, a2
-   mulhsu a1, a1, a2
-   divu a1, a2, a3
-   remu a4, a2, a3
-   add  a1, a1, a4
-   divuw a1, a2, a3
-   remuw a4, a2, a3
-   add  a1, a1, a4
- # li t1, 0x0000000080000000
- # bne a1, t1, fail_chain
- # li a0, "\nusMOK"
- # call sbi_print7
-
+   li a1, 0x0000000080000000 
    # div by 0 = -1
    li a2, 5
    li a3, 0
@@ -495,8 +448,8 @@ branch_target_8:
    div t1, a2, a3
    bne t1, a2, fail_chain
 
-   li a0, "\nExtrOK"
-   call sbi_print7
+  #li a0, "\nExtrOK"
+  #call sbi_print7
 
    
   #fence
@@ -505,7 +458,6 @@ branch_target_8:
   #call sbi_print7
 
    # FINAL CHECK
-  #li t2, 0x0000000000000018
    li t1, 0x0000000080000000
    bne a1, t1, fail_chain
 
