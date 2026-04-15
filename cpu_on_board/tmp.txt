@@ -599,6 +599,11 @@ jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I sbi_print7
 #    j key_test
 jal x0, key_test
 fail_chain:
+#    mv a0, a1
+addi a0, a1, 0
+#    call sbi_print_reg
+auipc x1, 0 # R_RISCV_PCREL_HI20 sbi_print_reg
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I sbi_print_reg
 #    li a0, "\nFAIL"
 addi a0, x0, 0x0
 ori a0, a0, 0x26

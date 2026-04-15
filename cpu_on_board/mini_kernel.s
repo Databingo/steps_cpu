@@ -432,6 +432,8 @@ branch_target_8:
    j key_test
 
 fail_chain:
+   mv a0, a1
+   call sbi_print_reg
    li a0, "\nFAIL"
    call sbi_print7
 
