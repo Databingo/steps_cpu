@@ -4,11 +4,36 @@ _start:
 #   j main 
 jal x0, main
 s_trap_handler:
+#    csrr t1, scause
+csrrs t1, scause, x0
+#    li t2, 0x8000000000000005 
+addi t2, x0, 0x0
+lui t2, 0x80000
+srli t2, t2, 0x1
+slli t2, t2, 0x21
+ori t2, t2, 0x5
+beq t1, t2, timer_found
 #    csrr t2, sepc
 csrrs t2, sepc, x0
 addi t2, t2, 4 # skip ecall/ebreak instruction
 #    csrw sepc, t2
 csrrw x0, sepc, t2
+sret
+timer_found:
+addi a0, x0, 84  # T
+#     call sbi_putchar
+auipc x1, 0 # R_RISCV_PCREL_HI20 sbi_putchar
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I sbi_putchar
+#    csrr a0, time
+csrrs a0, time, x0
+#    li t0, 10000000 
+addi t0, x0, 0x0
+lui t0, 0x989
+addi t0, t0, 0x680
+add a0, a0, t0
+#    li a7, 0  
+addi a7, x0, 0x0
+ecall
 sret
 sbi_putchar:
 addi sp, sp, -8
@@ -126,6 +151,24 @@ addi t0, t0, 0 # R_RISCV_PCREL_LO12_I s_trap_handler
 #    csrw stvec, t0
 csrrw x0, stvec, t0
 ebreak
+#    li t0, 0x20 
+addi t0, x0, 0x0
+addi t0, x0, 0x0
+addi t0, x0, 0x20
+#    csrs sie, t0
+csrrs x0, sie, t0
+#    csrsi sstatus, 2  
+csrrsi x0, sstatus, 2
+#    csrr a0, time 
+csrrs a0, time, x0
+#    li t0, 10000000 
+addi t0, x0, 0x0
+lui t0, 0x989
+addi t0, t0, 0x680
+add a0, a0, t0
+#    li a7, 0  
+addi a7, x0, 0x0
+ecall
 #    li t0, 0x80700000 
 addi t0, x0, 0x0
 slli t0, t0, 0xb
@@ -154,20 +197,6 @@ ori t0, t0, 0x700
 #    csrw satp, t0 
 csrrw x0, satp, t0
 sfence.vma ## <--- start use TLB I/D hitting
-#    li a0, "\nMMUOK"
-addi a0, x0, 0x0
-lui a0, 0x4
-srli a0, a0, 0x1
-ori a0, a0, 0x5a7
-slli a0, a0, 0xb
-ori a0, a0, 0x555
-slli a0, a0, 0xb
-ori a0, a0, 0x1a9
-slli a0, a0, 0xb
-ori a0, a0, 0x50a
-#    call sbi_print7
-auipc x1, 0 # R_RISCV_PCREL_HI20 sbi_print7
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I sbi_print7
 lui s11, 0x12345         # s11 = 0x0000000012345000
 #    la a2, mem_test_var
 auipc a2, 0 # R_RISCV_PCREL_HI20 mem_test_var 
@@ -218,18 +247,6 @@ ori t1, t1, 0x4ba
 bne t6, t1, fail_chain
 sd s11, 0(a2)
 ld s11, 0(a2)
-#    li a0, "\nLSOK"
-addi a0, x0, 0x0
-ori a0, a0, 0x25
-slli a0, a0, 0xb
-ori a0, a0, 0x53d
-slli a0, a0, 0xb
-ori a0, a0, 0x269
-slli a0, a0, 0xb
-ori a0, a0, 0x40a
-#    call sbi_print7
-auipc x1, 0 # R_RISCV_PCREL_HI20 sbi_print7
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I sbi_print7
 addi s11, s11, 0x678     # s11 = 0x12345678
 xori s11, s11, 0x111     # s11 = 0x12345769
 andi s11, s11, 0xFFF     # s11 = 0x12345769
@@ -464,30 +481,11 @@ addi t1, x0, 0x0
 addi t1, x0, 0x0
 addi t1, x0, 0x5c
 bne s11, t1, fail_chain
-#    li a0, "\nMulOK"
-addi a0, x0, 0x0
-lui a0, 0x4
-srli a0, a0, 0x1
-ori a0, a0, 0x5a7
-slli a0, a0, 0xb
-ori a0, a0, 0x5b1
-slli a0, a0, 0xb
-ori a0, a0, 0x6a9
-slli a0, a0, 0xb
-ori a0, a0, 0x50a
-#    call sbi_print7
-auipc x1, 0 # R_RISCV_PCREL_HI20 sbi_print7
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I sbi_print7
 #    li a2, 3        
 addi a2, x0, 0x0
 addi a2, x0, 0x0
 addi a2, x0, 0x3
 div a3, s11, a2  # a3 = 0x000000000000001E
-#    mv a0, a3
-addi a0, a3, 0
-#    call sbi_print_reg
-auipc x1, 0 # R_RISCV_PCREL_HI20 sbi_print_reg
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I sbi_print_reg
 rem a4, s11, a2  # a4 = 0x0000000000000002
 add s11, s11, a3  # s11 = 92+30=122
 add s11, s11, a4  # s11 = 122+2=124

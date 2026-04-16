@@ -18,7 +18,11 @@ s_trap_handler:
   #ecall   # here ecall was not delegated to s_mode, so go to mtvec to find m-mode ecall handler
   #li a0, "S_TRAP"
   #call sbi_print7
-  #csrr a0, scause
+
+   csrr t1, scause
+   li t2, 0x8000000000000005 # bit 63 set + code 5 (Supervisor Timer)
+   beq t1, t2, timer_found
+
   #bltz a0, handle_interrupt
    # handle exception
   #call sbi_print_reg
@@ -33,20 +37,23 @@ s_trap_handler:
    addi t2, t2, 4 # skip ecall/ebreak instruction
    csrw sepc, t2
    sret
-#handle_interrupt:
-#   csrr t6, sstatus
-#   li t5, 32
-#   not t5, t5 # silence it by clear SIE bit 1 in sstatus  0xFFFFFFFFFFFFFFFD
-#   and t6, t6, t5
-#   csrw sstatus, t6
-#   li a0, "$_INTER"
-#   call sbi_print7
-#   sret # no pc+4
-#s_done: 
-#   csrr s2, sepc
-#   addi s2, s2, 4 # skip ecall/ebreak instruction
-#   csrw sepc, s2
-#   sret
+
+timer_found:
+    addi a0, x0, 84  # T
+    call sbi_putchar
+   #li a0, -1 # Clear timer by max
+   #li a7, 0 # SBI set timer
+   #ecall
+
+   csrr a0, time
+   li t0, 10000000 # 1 second
+   add a0, a0, t0
+   li a7, 0  # SBI Set Timer ID
+   ecall
+
+
+    sret
+
 
 sbi_putchar:  # a0
     addi sp, sp, -8
@@ -123,8 +130,6 @@ sbi_print_reg: # a0
     ret
 
 
-
-
 main:
 
    li sp, 0x80700000 # Set stack # 80000000-80800000 sdram as 8M ram, we start sp from 0x80700000<-, MMU from 0x80700000->
@@ -140,6 +145,30 @@ main:
    ebreak
   #li a0, "\nStrpOK"
   #call sbi_print7
+
+
+  ## Set Timer
+   li t0, 0x20 # enable STIE bit 5
+   csrs sie, t0
+   csrsi sstatus, 2  # enable global SIE bit 1
+  
+   csrr a0, time # read time
+   li t0, 10000000 # 1 second
+   add a0, a0, t0
+   li a7, 0  # SBI Set Timer ID
+   ecall
+
+#wait_for_timer: # wait strap_handler print timecmp trap
+#   wfi
+#   j wait_for_timer
+
+
+
+
+
+
+
+
 
    # Step 3 test MMU
    # 1.Build SV39 root table in sdram (4KB per table 2**9=512*8=4096) vpn2 4KB map 512*4k=2MBram; all vpn1=4*512=2Mb map 512*2M=1Gram, all vpn0=512*512=262144*4kb=1GB map 512Gram,total VPNs 4KB+2MB+1024MB
@@ -162,8 +191,8 @@ main:
    csrw satp, t0 # write mode and root table address to satp CSR register
    sfence.vma ## <--- start use TLB I/D hitting
 
-   li a0, "\nMMUOK"
-   call sbi_print7
+  #li a0, "\nMMUOK"
+  #call sbi_print7
  
    # ======================================
    # Chain test for riscv64ima instructions
@@ -202,8 +231,8 @@ main:
    # Test Doube Word (sd/ld)
    sd s11, 0(a2)
    ld s11, 0(a2)
-   li a0, "\nLSOK"
-   call sbi_print7
+  #li a0, "\nLSOK"
+  #call sbi_print7
 
    # 5 math-i (addi, xori, andi, ori, slli, srli, srai, slti, sltiu)
    addi s11, s11, 0x678     # s11 = 0x12345678
@@ -388,15 +417,15 @@ branch_target_8:
 
    li t1, 0x000000000000005C 
    bne s11, t1, fail_chain
-   li a0, "\nMulOK"
-   call sbi_print7
+  #li a0, "\nMulOK"
+  #call sbi_print7
 
   # 14 Div
    # div/rem
    li a2, 3        # s11 = 0x000000000000005C 
    div a3, s11, a2  # a3 = 0x000000000000001E
-   mv a0, a3
-   call sbi_print_reg
+  #mv a0, a3
+  #call sbi_print_reg
    rem a4, s11, a2  # a4 = 0x0000000000000002
   #mv a0, a4
   #call sbi_print_reg
@@ -484,6 +513,16 @@ branch_target_8:
    # Success
    li a0, "\nPASS"
    call sbi_print7
+
+
+
+
+
+
+
+
+
+
    j wait_for_key
   #j key_test
   #j end

@@ -319,7 +319,8 @@ localparam sip        = 6;  // Supervisor interrupt pending
 localparam sip_write_mask   = 64'h0000_0000_0000_0002; // SSIP
 wire [63:0] csr_mask  = (w_csr == 12'h100) ? sstatus_mask : (w_csr == 12'h104) ? (sie_sip_mask & Csrs[mideleg]) : (w_csr == 12'h144) ? (sie_sip_mask   & Csrs[mideleg]) : 64'hffff_ffff_ffff_ffff;
 wire [63:0] csr_mask_w= (w_csr == 12'h100) ? sstatus_mask : (w_csr == 12'h104) ? (sie_sip_mask & Csrs[mideleg]) : (w_csr == 12'h144) ? (sip_write_mask & Csrs[mideleg]) : 64'hffff_ffff_ffff_ffff;
-wire [63:0] csr_read  = Csrs[w_csr_id] & csr_mask;
+//wire [63:0] csr_read  = Csrs[w_csr_id] & csr_mask;
+wire [63:0] csr_read = (w_csr == 12'hC01) ? mtime : Csrs[w_csr_id] & csr_mask;
 wire [63:0] csr_write_re  = rs1 & csr_mask_w;
 wire [63:0] csr_write_im  = w_imm_z & csr_mask_w;
 
