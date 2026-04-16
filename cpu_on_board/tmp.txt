@@ -625,12 +625,6 @@ slli t1, t1, 0xb
 ori t1, t1, 0x200
 slli t1, t1, 0x16
 bne s11, t1, fail_chain
-#    li t0, 0x20 
-addi t0, x0, 0x0
-addi t0, x0, 0x0
-addi t0, x0, 0x20
-#    csrs mip, t0
-csrrs x0, mip, t0
 #    li a0, "\nPASS"
 addi a0, x0, 0x0
 ori a0, a0, 0x29
@@ -643,6 +637,12 @@ ori a0, a0, 0xa
 #    call sbi_print7
 auipc x1, 0 # R_RISCV_PCREL_HI20 sbi_print7
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I sbi_print7
+#    li t0, 0x20 
+addi t0, x0, 0x0
+addi t0, x0, 0x0
+addi t0, x0, 0x20
+#    csrs mip, t0
+csrrs x0, mip, t0
 #    j wait_for_key
 jal x0, wait_for_key
 fail_chain:

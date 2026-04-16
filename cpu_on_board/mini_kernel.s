@@ -526,14 +526,14 @@ branch_target_8:
    li t1, 0x0000000080000000
    bne s11, t1, fail_chain
 
-   # test stip  
-   li t0, 0x20 #STIP
-   csrs mip, t0
-
    # Success
    li a0, "\nPASS"
    call sbi_print7
   
+   # test stip  
+   li t0, 0x20 #STIP
+   csrs mip, t0
+
 
 
 
