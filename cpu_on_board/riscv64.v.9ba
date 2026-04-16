@@ -872,8 +872,6 @@ always @(*) begin
 		            end else  begin // if (mul_done)
 		                re[mul_rd_latched] <= w_mul_out;
 		                mul_enable <= 0;
-		                pc <= pc; // wait mul_done from Mul driver for very next similar mulx start
-		                bubble <= 1;
 		            end
 		        end
 		    // M-Div
@@ -894,8 +892,6 @@ always @(*) begin
 			end else begin
 			    re[div_rd] <= div_is_w_latched ? {{32{div_result_out[31]}}, div_result_out[31:0]} : div_result_out;
 			    div_enable <= 0;
-			    pc <= pc; // wait div_done from Div driver for very next similar div/rem start
-			    bubble <= 1;
 			end
 		    end
                     // FD...

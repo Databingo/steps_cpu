@@ -373,8 +373,8 @@ branch_target_8:
    # div/rem
    li a2, 3        # a1 = 0x000000000000005C 
    div a3, a1, a2  # a3 = 0x000000000000001E
-  #mv a0, a3
-  #call sbi_print_reg
+   mv a0, a3
+   call sbi_print_reg
    rem a4, a1, a2  # a4 = 0x0000000000000002
   #mv a0, a4
   #call sbi_print_reg
@@ -386,15 +386,15 @@ branch_target_8:
    add a1, a1, t1  # a1 = 0x8000007C
    li a2, 2
    divw a3, a1, a2  # a3 = 0xFFFFFFFFC000003E
-  #mv a0, a3
-  #call sbi_print_reg
+   mv a0, a3
+   call sbi_print_reg
    remw a4, a1, a2  # a4 = 0
   #mv a0, a4
   #call sbi_print_reg
    add a1, a1, a3  # a1 = 0x8000007C +  0xFFFFFFFFC000003E = 0x400000BA
    add a1, a1, a4  # a1
-  #mv a0, a1
-  #call sbi_print_reg
+   mv a0, a1
+   call sbi_print_reg
 
    # divu/remu
    lui t1, 0x40000
@@ -407,8 +407,8 @@ branch_target_8:
    remu a4, a1, a2  # a4 = 0
    add a1, a1, a3  # a1 = 0xFFFFFFFFFFFFFFBA + 0x555555555555553E = 0x55555555555554F8
    add a1, a1, a4  # a1
-  #mv a0, a1
-  #call sbi_print_reg
+   mv a0, a1
+   call sbi_print_reg
 
    # divuw/remuw
    li t1, -1
@@ -416,13 +416,11 @@ branch_target_8:
    add a1, a1, t1 # a1 =  0x55555555555554F8 +  0xFFFFFFFF80000000 = 0x55555554D55554F8
    li a2, 5
    divuw a3, a1, a2  # a3 = 0x000000002AAAAA98
-  #mv a0, a3
-  #call sbi_print_reg
+   mv a0, a3
+   call sbi_print_reg
    remuw a4, a1, a2  # a4 = 0
    add a1, a1, a3  # a1 =  0x55555554D55554F8 +  0x000000002AAAAA98 = 0x55555554FFFFFF90
    add a1, a1, a4  # a1
-  #mv a0, a1
-  #call sbi_print_reg
 
    li t1, 0x55555554FFFFFF90
    bne a1, t1, fail_chain
