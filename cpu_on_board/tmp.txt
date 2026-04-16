@@ -4,38 +4,24 @@ _start:
 #   j main 
 jal x0, main
 s_trap_handler:
-#    li a0, "\n"
-addi a0, x0, 0x0
-addi a0, x0, 0x0
-addi a0, x0, 0xa
-#    li a7, 1
-addi a7, x0, 0x0
-addi a7, x0, 0x0
-addi a7, x0, 0x1
-ecall   # here ecall was not delegated to s_mode, so go to mtvec to find m-mode ecall handler
-#    li a0, "S_TRAP"
-addi a0, x0, 0x0
-lui a0, 0x5
-srli a0, a0, 0x1
-ori a0, a0, 0x20
-slli a0, a0, 0xb
-ori a0, a0, 0x549
-slli a0, a0, 0xb
-ori a0, a0, 0x28b
-slli a0, a0, 0xb
-ori a0, a0, 0x753
-#    call sbi_print7
-auipc x1, 0 # R_RISCV_PCREL_HI20 sbi_print7
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I sbi_print7
-#    j s_done
-jal x0, s_done
-s_done:
 #    csrr s2, sepc
 csrrs s2, sepc, x0
 addi s2, s2, 4 # skip ecall/ebreak instruction
 #    csrw sepc, s2
 csrrw x0, sepc, s2
 sret
+sbi_putchar:
+addi sp, sp, -8
+sd ra, 0(sp)
+#     li a7, 1 
+addi a7, x0, 0x0
+addi a7, x0, 0x0
+addi a7, x0, 0x1
+ecall
+ld ra, 0(sp)
+addi sp, sp, 8
+#     ret
+jalr x0, 0(x1)
 sbi_puts:
 addi sp, sp, -16
 sd ra, 0(sp)
@@ -45,11 +31,9 @@ addi s0, a0, 0
 sbi_puts_loop:
 lbu a0, 0(s0)
 beq a0, x0, sbi_stop_puts # \x00 for end of string
-#     li a7, 1 
-addi a7, x0, 0x0
-addi a7, x0, 0x0
-addi a7, x0, 0x1
-ecall
+#     call sbi_putchar
+auipc x1, 0 # R_RISCV_PCREL_HI20 sbi_putchar
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I sbi_putchar
 addi s0, s0, 1 # next byte
 #     j sbi_puts_loop
 jal x0, sbi_puts_loop
@@ -71,18 +55,6 @@ jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I sbi_puts
 ld a0, 0(sp)
 ld ra, 8(sp)
 addi sp, sp, 16
-#     ret
-jalr x0, 0(x1)
-sbi_putchar:
-addi sp, sp, -8
-sd ra, 0(sp)
-#     li a7, 1 
-addi a7, x0, 0x0
-addi a7, x0, 0x0
-addi a7, x0, 0x1
-ecall
-ld ra, 0(sp)
-addi sp, sp, 8
 #     ret
 jalr x0, 0(x1)
 sbi_print_reg:
@@ -405,11 +377,32 @@ ld a1, 0(a2)
 lr.d a3, (a2)
 sc.d a4, a1, (a2)
 ld a1, 0(a2)           # a1 = 0x00017
+#    li t1,  0x17
+addi t1, x0, 0x0
+addi t1, x0, 0x0
+addi t1, x0, 0x17
+bne a1, t1, fail_chain
+#    li a0, "\nAtomOK"
+addi a0, x0, 0x0
+lui a0, 0x4b4
+srli a0, a0, 0x1
+ori a0, a0, 0x7b6
+slli a0, a0, 0xb
+ori a0, a0, 0x5bd
+slli a0, a0, 0xb
+ori a0, a0, 0x688
+slli a0, a0, 0xb
+ori a0, a0, 0x10a
+#    call sbi_print7
+auipc x1, 0 # R_RISCV_PCREL_HI20 sbi_print7
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I sbi_print7
 #    li a2, 2
 addi a2, x0, 0x0
 addi a2, x0, 0x0
 addi a2, x0, 0x2
 mul a1, a1, a2  # a1 = 23 * 2 = 46
+#    nop
+addi x0, x0, 0
 mulh a3, a1, a2 # a3 = High 64 bit of 92 = 0
 add a1, a1, a3  # a1 = 46
 mulw a1, a1, a2 # a1 = 46 * 2 = 92 (0x5C)
@@ -479,11 +472,7 @@ addi a2, x0, 0x0
 addi a2, x0, 0x0
 addi a2, x0, 0x2
 divw a3, a1, a2  # a3 = 0xFFFFFFFFC000003E
-#    mv a0, a3
-addi a0, a3, 0
 remw a4, a1, a2  # a4 = 0
-#    mv a0, a4
-addi a0, a4, 0
 add a1, a1, a3  # a1 = 0x8000007C +  0xFFFFFFFFC000003E = 0x400000BA
 add a1, a1, a4  # a1
 #    mv a0, a1
@@ -499,11 +488,6 @@ addi a2, x0, 0x0
 addi a2, x0, 0x0
 addi a2, x0, 0x3
 divu a3, a1, a2  # a3 = 0x555555555555553E
-#    mv a0, a3
-addi a0, a3, 0
-#    call sbi_print_reg
-auipc x1, 0 # R_RISCV_PCREL_HI20 sbi_print_reg
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I sbi_print_reg
 remu a4, a1, a2  # a4 = 0
 add a1, a1, a3  # a1 = 0xFFFFFFFFFFFFFFBA + 0x555555555555553E = 0x55555555555554F8
 add a1, a1, a4  # a1
@@ -525,11 +509,6 @@ addi a2, x0, 0x0
 addi a2, x0, 0x0
 addi a2, x0, 0x5
 divuw a3, a1, a2  # a3 = 0x000000002AAAAA98
-#    mv a0, a3
-addi a0, a3, 0
-#    call sbi_print_reg
-auipc x1, 0 # R_RISCV_PCREL_HI20 sbi_print_reg
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I sbi_print_reg
 remuw a4, a1, a2  # a4 = 0
 add a1, a1, a3  # a1 =  0x55555554D55554F8 +  0x000000002AAAAA98 = 0x55555554FFFFFF90
 add a1, a1, a4  # a1
@@ -593,6 +572,20 @@ xori a3, a3, -1
 addi a3, a3, 1
 div t1, a2, a3
 bne t1, a2, fail_chain
+#    li a0, "\nExtrOK"
+addi a0, x0, 0x0
+lui a0, 0x4b4
+srli a0, a0, 0x1
+ori a0, a0, 0x7b9
+slli a0, a0, 0xb
+ori a0, a0, 0x1d1
+slli a0, a0, 0xb
+ori a0, a0, 0x708
+slli a0, a0, 0xb
+ori a0, a0, 0x50a
+#    call sbi_print7
+auipc x1, 0 # R_RISCV_PCREL_HI20 sbi_print7
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I sbi_print7
 #    li t1, 0x0000000080000000
 addi t1, x0, 0x0
 slli t1, t1, 0xb

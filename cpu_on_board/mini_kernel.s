@@ -16,19 +16,52 @@ _start:
   # .balign 4
 
 s_trap_handler:
-   li a0, "\n"
-   li a7, 1
-   ecall   # here ecall was not delegated to s_mode, so go to mtvec to find m-mode ecall handler
-   li a0, "S_TRAP"
-   call sbi_print7
-   j s_done
-
-s_done: 
+  #li a0, "\n"
+  #li a7, 1
+  #ecall   # here ecall was not delegated to s_mode, so go to mtvec to find m-mode ecall handler
+  #li a0, "S_TRAP"
+  #call sbi_print7
+  #csrr a0, scause
+  #bltz a0, handle_interrupt
+   # handle exception
+  #call sbi_print_reg
+  #csrr a0, stval
+  #call sbi_print_reg
+  #csrr a0, sepc
+  #call sbi_print_reg
+  #csrr a0, sstatus
+  #call sbi_print_reg
+  #exception s-done
    csrr s2, sepc
    addi s2, s2, 4 # skip ecall/ebreak instruction
    csrw sepc, s2
    sret
+#handle_interrupt:
+#   csrr t6, sstatus
+#   li t5, 32
+#   not t5, t5 # silence it by clear SIE bit 1 in sstatus  0xFFFFFFFFFFFFFFFD
+#   and t6, t6, t5
+#   csrw sstatus, t6
+#   li a0, "S_INTER"
+#   call sbi_print7
+#   sret # no pc+4
+#
+#
+#
+#s_done: 
+#   csrr s2, sepc
+#   addi s2, s2, 4 # skip ecall/ebreak instruction
+#   csrw sepc, s2
+#   sret
 
+sbi_putchar:  # a0
+    addi sp, sp, -8
+    sd ra, 0(sp)
+    li a7, 1 # SBI Putchar ID
+    ecall
+    ld ra, 0(sp)
+    addi sp, sp, 8
+    ret
 
 sbi_puts: # a0 addr
     addi sp, sp, -16
@@ -38,8 +71,9 @@ sbi_puts: # a0 addr
     sbi_puts_loop:
     lbu a0, 0(s0)
     beq a0, x0, sbi_stop_puts # \x00 for end of string
-    li a7, 1 # SBI Putchar ID
-    ecall
+   #li a7, 1 # SBI Putchar ID
+   #ecall
+    call sbi_putchar
     addi s0, s0, 1 # next byte
     j sbi_puts_loop
     sbi_stop_puts:
@@ -58,16 +92,6 @@ sbi_print7: # a0, 7 char left one for null
     ld ra, 8(sp)
     addi sp, sp, 16
     ret
-
-sbi_putchar:  # a0
-    addi sp, sp, -8
-    sd ra, 0(sp)
-    li a7, 1 # SBI Putchar ID
-    ecall
-    ld ra, 0(sp)
-    addi sp, sp, 8
-    ret
-
 
 sbi_print_reg: # a0
     addi sp, sp, -40
@@ -109,6 +133,15 @@ sbi_print_reg: # a0
 main:
 
    li sp, 0x80700000 # Set stack # 80000000-80800000 sdram as 8M ram, we start sp from 0x80700000<-, MMU from 0x80700000->
+   
+   # disable interrupt
+  #csrr t6, sstatus
+  #li t5, 32
+  #not t5, t5 # silence it by clear SIE bit 1 in sstatus  0xFFFFFFFFFFFFFFFD
+  #and t6, t6, t5
+  #csrw sstatus, t6
+
+
  
    # Step 1 test ecall (sbi) print
   #la a0, msg_boot
@@ -312,10 +345,10 @@ branch_target_8:
    sc.d a4, a1, (a2)
    ld a1, 0(a2)           # a1 = 0x00017
 
-  #li t1,  0x17
-  #bne a1, t1, fail_chain
-  #li a0, "\nAtomOK"
-  #call sbi_print7
+   li t1,  0x17
+   bne a1, t1, fail_chain
+   li a0, "\nAtomOK"
+   call sbi_print7
   
   #amoswap.w t3, a1, (a2) # M[a2]=0x17, t3=0x17
   #amoadd.w  t3, a1, (a2) # M[a2]=0x2E, t3=0x17
@@ -349,6 +382,7 @@ branch_target_8:
    # 13 Mul
    li a2, 2
    mul a1, a1, a2  # a1 = 23 * 2 = 46
+   nop
    mulh a3, a1, a2 # a3 = High 64 bit of 92 = 0
    add a1, a1, a3  # a1 = 46
    mulw a1, a1, a2 # a1 = 46 * 2 = 92 (0x5C)
@@ -386,10 +420,10 @@ branch_target_8:
    add a1, a1, t1  # a1 = 0x8000007C
    li a2, 2
    divw a3, a1, a2  # a3 = 0xFFFFFFFFC000003E
-   mv a0, a3
+  #mv a0, a3
   #call sbi_print_reg
    remw a4, a1, a2  # a4 = 0
-   mv a0, a4
+  #mv a0, a4
   #call sbi_print_reg
    add a1, a1, a3  # a1 = 0x8000007C +  0xFFFFFFFFC000003E = 0x400000BA
    add a1, a1, a4  # a1
@@ -402,8 +436,8 @@ branch_target_8:
    sub a1, a1, t1 # a1 =  0x400000BA - 0x40000100 = 0xFFFFFFFFFFFFFFBA = -70
    li a2, 3
    divu a3, a1, a2  # a3 = 0x555555555555553E
-   mv a0, a3
-   call sbi_print_reg
+  #mv a0, a3
+  #call sbi_print_reg
    remu a4, a1, a2  # a4 = 0
    add a1, a1, a3  # a1 = 0xFFFFFFFFFFFFFFBA + 0x555555555555553E = 0x55555555555554F8
    add a1, a1, a4  # a1
@@ -416,8 +450,8 @@ branch_target_8:
    add a1, a1, t1 # a1 =  0x55555555555554F8 +  0xFFFFFFFF80000000 = 0x55555554D55554F8
    li a2, 5
    divuw a3, a1, a2  # a3 = 0x000000002AAAAA98
-   mv a0, a3
-   call sbi_print_reg
+  #mv a0, a3
+  #call sbi_print_reg
    remuw a4, a1, a2  # a4 = 0
    add a1, a1, a3  # a1 =  0x55555554D55554F8 +  0x000000002AAAAA98 = 0x55555554FFFFFF90
    add a1, a1, a4  # a1
@@ -446,8 +480,8 @@ branch_target_8:
    div t1, a2, a3
    bne t1, a2, fail_chain
 
-  #li a0, "\nExtrOK"
-  #call sbi_print7
+   li a0, "\nExtrOK"
+   call sbi_print7
 
    
   #fence
@@ -463,6 +497,7 @@ branch_target_8:
    li a0, "\nPASS"
    call sbi_print7
    j key_test
+  #j end
 
 fail_chain:
    mv a0, a1
