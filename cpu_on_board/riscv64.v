@@ -170,7 +170,7 @@ wire [63:0] w_atomic_write_data = (op == 7'b0101111 && w_func5[4:0] == 5'b00011)
     (is_word_op ? {32'b0, rs2[31:0]} : rs2) : // sc.w/sc.d
     w_amo_calc_data; // AMOs -----------
 
-// Indepenedent Multiplier // Booth algorithim + Signed-correct
+// Indepenedent Multiplier Mul // Booth algorithim + Signed-correct
 reg [6:0]   mul_cnt;
 reg [127:0] mul_acc;  // result|multiplier
 reg [63:0]  mul_a_reg; // 被乘数(绝对值)
@@ -236,7 +236,7 @@ end
 	(is_high_mul) ? final_mul_res[127:64]:// mulh, mulhsu, mulhu
 	final_mul_res[63:0];// mul
 
-	// Independent divider
+	// Independent divider Div
 	reg [6:0]   div_cnt;
 	reg [127:0] div_rem;   // remainder|quotient
 	reg [63:0]  div_a;    // be divided
