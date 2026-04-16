@@ -144,8 +144,8 @@ main:
 
  
    # Step 1 test ecall (sbi) print
-  #la a0, msg_boot
-  #call sbi_puts
+   la a0, msg_boot
+   call sbi_puts
 
    # Step 2 test S-Mode trap hander # Opensbi delegate Ebreak to OS, so we set our handler address to stvec
    la t0, s_trap_handler

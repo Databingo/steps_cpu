@@ -116,6 +116,12 @@ ori sp, sp, 0x201
 slli sp, sp, 0xb
 ori sp, sp, 0x600
 slli sp, sp, 0xb
+#    la a0, msg_boot
+auipc a0, 0 # R_RISCV_PCREL_HI20 msg_boot 
+addi a0, a0, 0 # R_RISCV_PCREL_LO12_I msg_boot 
+#    call sbi_puts
+auipc x1, 0 # R_RISCV_PCREL_HI20 sbi_puts
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I sbi_puts
 #    la t0, s_trap_handler
 auipc t0, 0 # R_RISCV_PCREL_HI20 s_trap_handler 
 addi t0, t0, 0 # R_RISCV_PCREL_LO12_I s_trap_handler 

@@ -614,17 +614,20 @@ func main() { //t6a7s11
 			    if exist {
 			    fmt.Println("label_in-:", label_in, sym_index)
 			    fmt.Println("sym_e:", symtab_[sym_index])
-			    pad8 :=  align_x(str_data, 8)
+			    //pad8 :=  align_x(str_data, 8)
+			    pad4 :=  align_x(str_data, 4)
 	                    //symtab_[sym_index].Name = 1  // points to "_start" in .strtab
 	                    //symtab_[sym_index].Info = ( symtab_[sym_index].Info >> 4 | STT_OBJECT  ) //# uint8 // H4:binding and L4:type
 	                    symtab_[sym_index].Info = ( symtab_[sym_index].Info & 0xF0 | STT_OBJECT  ) //# uint8 // H4:binding and L4:type
 	                    //symtab_[sym_index].Other = 0 //uint8 // reserved, currently holds 0
 	                    symtab_[sym_index].Shndx = uint16(slices.Index(shstrtab, section_in))//4 //uint16 // section index the symbol in (.text)
 	                    symtab_[sym_index].Value = uint64(len(data)) //# uint64  for relocatable .o file it's symbol's offset in its section
-	                    symtab_[sym_index].Size = uint64(len(pad8))  //#uint64  for function it's its size
+	                    //symtab_[sym_index].Size = uint64(len(pad8))  //#uint64  for function it's its size
+	                    symtab_[sym_index].Size = uint64(len(pad4))  //#uint64  for function it's its size
 
 			    //sym + str + data
-                            data = append(data, pad8...)
+                            //data = append(data, pad8...)
+                            data = append(data, pad4...)
 	                    } else {
 				fmt.Println("Error: Label not found for .string", str_data)
 				os.Exit(1) }
