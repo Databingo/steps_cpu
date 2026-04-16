@@ -39,11 +39,8 @@ s_trap_handler:
    sret
 
 timer_found:
-   addi a0, x0, 84  # T
-   call sbi_putchar
-  #li a7, 1 # SBI Putchar ID
-  #ecall 
-
+    addi a0, x0, 84  # T
+    call sbi_putchar
    #li a0, -1 # Clear timer by max
    #li a7, 0 # SBI set timer
    #ecall
@@ -529,9 +526,14 @@ branch_target_8:
    li t1, 0x0000000080000000
    bne s11, t1, fail_chain
 
+   # test stip  
+   li t0, 0x20 #STIP
+   csrs mip, t0
+
    # Success
    li a0, "\nPASS"
    call sbi_print7
+  
 
 
 
