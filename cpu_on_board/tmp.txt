@@ -116,10 +116,6 @@ ori sp, sp, 0x201
 slli sp, sp, 0xb
 ori sp, sp, 0x600
 slli sp, sp, 0xb
-#   csrw sie, zero
-csrrw x0, sie, zero
-#   csrci sstatus, 2
-csrrci x0, sstatus, 2
 #    la t0, s_trap_handler
 auipc t0, 0 # R_RISCV_PCREL_HI20 s_trap_handler 
 addi t0, t0, 0 # R_RISCV_PCREL_LO12_I s_trap_handler 
@@ -647,20 +643,6 @@ ori a0, a0, 0x60a
 auipc x1, 0 # R_RISCV_PCREL_HI20 sbi_print7
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I sbi_print7
 key_test:
-#    li a0, "\nType:_"
-addi a0, x0, 0x0
-lui a0, 0x5f3
-srli a0, a0, 0x1
-ori a0, a0, 0x532
-slli a0, a0, 0xb
-ori a0, a0, 0x5c1
-slli a0, a0, 0xb
-ori a0, a0, 0x72a
-slli a0, a0, 0xb
-ori a0, a0, 0x40a
-#    call sbi_print7
-auipc x1, 0 # R_RISCV_PCREL_HI20 sbi_print7
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I sbi_print7
 wait_for_key:
 #    li a7, 2  
 addi a7, x0, 0x0

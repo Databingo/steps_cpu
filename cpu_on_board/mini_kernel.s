@@ -15,6 +15,32 @@ _start:
   j main # like linux kernel
   # .balign 4
 
+#key_test:
+#   # Step 5 test Typing 
+#  #li a0, "\nType:_"
+#  #call sbi_print7
+#
+#wait_for_key:
+#   li a7, 2  # SBI Getchar ID
+#   ecall
+#   bltz a0, wait_for_key  # if a0 is negative, no key press
+#   mv s3, a0
+#
+#  #la a0, msg_rx
+#  #call sbi_puts
+#  
+#   mv a0, s3
+#   li a7, 1 # SBI Putchar ID
+#   ecall 
+#   
+#  #li a0, "\n\r"
+#  #call sbi_print7
+#
+#   j wait_for_key
+#
+#end:
+#  j end
+
 s_trap_handler:
   #li a0, "\n"
   #li a7, 1
@@ -509,8 +535,8 @@ fail_chain:
 
 key_test:
    # Step 5 test Typing 
-   li a0, "\nType:_"
-   call sbi_print7
+  #li a0, "\nType:_"
+  #call sbi_print7
 
 wait_for_key:
    li a7, 2  # SBI Getchar ID
