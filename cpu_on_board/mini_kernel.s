@@ -5,8 +5,6 @@ msg_boot:
     .string "--Full instructions test for run Linux Kernel--"
 mem_test_var:
     .dword 0x0000000000000000
-#mem_test_val:
-#    .dword 0x0000000000000000
 
 
 # Bootloader/copy4 --> firmware/BIOS/opensib/mini_sbi2 --> OS/linux/kernal
@@ -70,7 +68,6 @@ sbi_puts: # a0 addr
     beq a0, x0, sbi_stop_puts # \x00 for end of string
     li a7, 1 # SBI Putchar ID
     ecall
-   #call sbi_putchar
     addi s1, s1, 1 # next byte
     j sbi_puts_loop
     sbi_stop_puts:
@@ -132,17 +129,6 @@ main:
 
    li sp, 0x80700000 # Set stack # 80000000-80800000 sdram as 8M ram, we start sp from 0x80700000<-, MMU from 0x80700000->
    
-  ## disable interrupt
-  #csrr t6, sstatus
-  #li t5, 32
-  #not t5, t5 # silence it by clear SIE bit 1 in sstatus  0xFFFFFFFFFFFFFFFD
-  #and t6, t6, t5
-  #csrw sstatus, t6
- #csrw sie, zero
- #csrci sstatus, 2
-
-
- 
    # Step 1 test ecall (sbi) print
   #la a0, msg_boot
   #call sbi_puts
@@ -320,7 +306,7 @@ branch_target_8:
    addi s11, s11, 1
    li t1,  0x17
    bne s11, t1, fail_chain
-   li a0, "\nBrchOK"
+   li a0, "\nBrJOK"
    call sbi_print7
 
   # 11 CSR
@@ -331,8 +317,8 @@ branch_target_8:
   csrrwi a3, sscratch, 0
   csrrsi a3, sscratch, 0
   csrrci a3, sscratch, 0
- #li a0, "\nCSROK"
- #call sbi_print7
+  li a0, "\nCSROK"
+  call sbi_print7
 
    # 12 Atomic
    la a2, mem_test_var
@@ -347,34 +333,36 @@ branch_target_8:
 
    li t1,  0x17
    bne s11, t1, fail_chain
-   li a0, "\nAtomOK"
-   call sbi_print7
+  #li a0, "\nAtomOK"
+  #call sbi_print7
   
-  #amoswap.w t3, s11, (a2) # M[a2]=0x17, t3=0x17
-  #amoadd.w  t3, s11, (a2) # M[a2]=0x2E, t3=0x17
-  #amoxor.w  t3, s11, (a2) # M[a2]=0x39, t3=0x2E
-  #amoand.w  t3, s11, (a2) # M[a2]=0x11, t3=0x39
-  #amoor.w   t3, s11, (a2) # M[a2]=0x17, t3=0x11
-  #amomax.w  t3, s11, (a2) # M[a2]=0x17, t3=0x17
-  #amomin.w  t3, s11, (a2) # M[a2]=0x17, t3=0x17
-  #amomaxu.w t3, s11, (a2) # M[a2]=0x17, t3=0x17
-  #amominu.w t3, s11, (a2) # M[a2]=0x17, t3=0x17
+   amoswap.w t3, s11, (a2) # M[a2]=0x17, t3=0x17
+   amoadd.w  t3, s11, (a2) # M[a2]=0x2E, t3=0x17
+   amoxor.w  t3, s11, (a2) # M[a2]=0x39, t3=0x2E
+   amoand.w  t3, s11, (a2) # M[a2]=0x11, t3=0x39
+   amoor.w   t3, s11, (a2) # M[a2]=0x17, t3=0x11
+   amomax.w  t3, s11, (a2) # M[a2]=0x17, t3=0x17
+   amomin.w  t3, s11, (a2) # M[a2]=0x17, t3=0x17
+   amomaxu.w t3, s11, (a2) # M[a2]=0x17, t3=0x17
+   amominu.w t3, s11, (a2) # M[a2]=0x17, t3=0x17
   #lw s11, 0(a2)           # s11 = 0x00017
   #li t0, 0x17
   #bne s11, t0, fail_chain
   #li a0, "\nAmowOK"
   #call sbi_print7
 
-  #amoswap.d t3, s11, (a2) # M[a2]=0x17, t3=0x17
-  #amoadd.d  t3, s11, (a2) # M[a2]=0x2E, t3=0x17
-  #amoxor.d  t3, s11, (a2) # M[a2]=0x39, t3=0x2E
-  #amoand.d  t3, s11, (a2) # M[a2]=0x11, t3=0x39
-  #amoor.d   t3, s11, (a2) # M[a2]=0x17, t3=0x11
-  #amomax.d  t3, s11, (a2) # M[a2]=0x17, t3=0x17
-  #amomin.d  t3, s11, (a2) # M[a2]=0x17, t3=0x17
-  #amomaxu.d t3, s11, (a2) # M[a2]=0x17, t3=0x17
-  #amominu.d t3, s11, (a2) # M[a2]=0x17, t3=0x17
-  #ld s11, 0(a2)           # s11 = 0x00017
+   amoswap.d t3, s11, (a2) # M[a2]=0x17, t3=0x17
+   amoadd.d  t3, s11, (a2) # M[a2]=0x2E, t3=0x17
+   amoxor.d  t3, s11, (a2) # M[a2]=0x39, t3=0x2E
+   amoand.d  t3, s11, (a2) # M[a2]=0x11, t3=0x39
+   amoor.d   t3, s11, (a2) # M[a2]=0x17, t3=0x11
+   amomax.d  t3, s11, (a2) # M[a2]=0x17, t3=0x17
+   amomin.d  t3, s11, (a2) # M[a2]=0x17, t3=0x17
+   amomaxu.d t3, s11, (a2) # M[a2]=0x17, t3=0x17
+   amominu.d t3, s11, (a2) # M[a2]=0x17, t3=0x17
+   ld s11, 0(a2)           # s11 = 0x00017
+   li t0, 0x17
+   bne s11, t0, fail_chain
   #li a0, "\nAmodOK"
   #li a0, "\nAmoOK"
   #call sbi_print7
@@ -410,8 +398,8 @@ branch_target_8:
    mv a0, a3
    call sbi_print_reg
    rem a4, s11, a2  # a4 = 0x0000000000000002
-   mv a0, a4
-   call sbi_print_reg
+  #mv a0, a4
+  #call sbi_print_reg
    add s11, s11, a3  # s11 = 92+30=122
    add s11, s11, a4  # s11 = 122+2=124
 
@@ -420,15 +408,15 @@ branch_target_8:
    add s11, s11, t1  # s11 = 0x8000007C
    li a2, 2
    divw a3, s11, a2  # a3 = 0xFFFFFFFFC000003E
-   mv a0, a3
-   call sbi_print_reg
+  #mv a0, a3
+  #call sbi_print_reg
    remw a4, s11, a2  # a4 = 0
-   mv a0, a4
-   call sbi_print_reg
+  #mv a0, a4
+  #call sbi_print_reg
    add s11, s11, a3  # s11 = 0x8000007C +  0xFFFFFFFFC000003E = 0x400000BA
    add s11, s11, a4  # s11
-   mv a0, s11
-   call sbi_print_reg
+  #mv a0, s11
+  #call sbi_print_reg
 
    # divu/remu
    lui t1, 0x40000
@@ -436,13 +424,13 @@ branch_target_8:
    sub s11, s11, t1 # s11 =  0x400000BA - 0x40000100 = 0xFFFFFFFFFFFFFFBA = -70
    li a2, 3
    divu a3, s11, a2  # a3 = 0x555555555555553E
-   mv a0, a3
-   call sbi_print_reg
+  #mv a0, a3
+  #call sbi_print_reg
    remu a4, s11, a2  # a4 = 0
    add s11, s11, a3  # s11 = 0xFFFFFFFFFFFFFFBA + 0x555555555555553E = 0x55555555555554F8
    add s11, s11, a4  # s11
-   mv a0, s11
-   call sbi_print_reg
+  #mv a0, s11
+  #call sbi_print_reg
 
    # divuw/remuw
    li t1, -1
@@ -450,8 +438,8 @@ branch_target_8:
    add s11, s11, t1 # s11 =  0x55555555555554F8 +  0xFFFFFFFF80000000 = 0x55555554D55554F8
    li a2, 5
    divuw a3, s11, a2  # a3 = 0x000000002AAAAA98
-   mv a0, a3
-   call sbi_print_reg
+  #mv a0, a3
+  #call sbi_print_reg
    remuw a4, s11, a2  # a4 = 0
    add s11, s11, a3  # s11 =  0x55555554D55554F8 +  0x000000002AAAAA98 = 0x55555554FFFFFF90
    add s11, s11, a4  # s11
@@ -484,8 +472,8 @@ branch_target_8:
    call sbi_print7
 
    
-  #fence
-  #fence.i
+   fence
+   fence.i
   #li a0, "\nFencOK"
   #call sbi_print7
 
@@ -505,11 +493,6 @@ fail_chain:
    call sbi_print_reg
    li a0, "\nFAIL"
    call sbi_print7
-
-#key_test:
-   # Step 5 test Typing 
-  #li a0, "\nType:_"
-  #call sbi_print7
 
 wait_for_key:
    li a7, 2  # SBI Getchar ID
