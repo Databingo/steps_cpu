@@ -382,7 +382,7 @@ branch_target_8:
    # 13 Mul
    li a2, 2
    mul a1, a1, a2  # a1 = 23 * 2 = 46
-   nop
+  #nop
    mulh a3, a1, a2 # a3 = High 64 bit of 92 = 0
    add a1, a1, a3  # a1 = 46
    mulw a1, a1, a2 # a1 = 46 * 2 = 92 (0x5C)
@@ -407,8 +407,8 @@ branch_target_8:
    # div/rem
    li a2, 3        # a1 = 0x000000000000005C 
    div a3, a1, a2  # a3 = 0x000000000000001E
-   mv a0, a3
-   call sbi_print_reg
+  #mv a0, a3
+  #call sbi_print_reg
    rem a4, a1, a2  # a4 = 0x0000000000000002
    mv a0, a4
    call sbi_print_reg
