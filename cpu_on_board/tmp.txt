@@ -21,7 +21,7 @@ csrrw x0, sepc, t2
 sret
 timer_found:
 addi a0, x0, 84  # T
-#     call sbi_putchar
+#    call sbi_putchar
 auipc x1, 0 # R_RISCV_PCREL_HI20 sbi_putchar
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I sbi_putchar
 #    csrr a0, time

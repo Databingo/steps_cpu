@@ -32,6 +32,9 @@ wire mtip = Csrs[mip][MTIP] && Csrs[mie][MTIE];  // irq level: MEI MTI MSI 7
 wire msip = Csrs[mip][MSIP] && Csrs[mie][MSIE];  // hardware mip-> local mie-> global mstatus.MIE-> cpu take by irq-> trap mpie=mie/mie=0
 wire seip = Csrs[mip][SEIP] && Csrs[mie][SEIE];  // hardware sip-> local sie-> global mstatus.SIE-> cpu take by irq-> trap spie=sie/sie=0 (this need after mideleg)
 wire stip = Csrs[mip][STIP] && Csrs[mie][STIE];  // mtip -> stip 5
+wire m_interrupts = (meip || msip || mtip) && (current_privilege_mode < M_mode || (current_privilege_mode == M_mode && Csrs[mstatus][MIE]));
+wire s_interrupts = (seip || stip) && (current_privilege_mode < S_mode || (current_privilege_mode == S_mode && Csrs[sstatus][SIE]));
+wire any_interrupt = (m_interrupts || s_interrupts);
 
 
 (* keep = 1 *) reg [63:0] pc;
@@ -708,7 +711,8 @@ always @(*) begin
 
 		// Async Interrupt PLIC full (Platform-Level-Interrupt-Control)  MMIO (hardwire timers uart plic)
 	    //end else if ((meip_interrupt || msip_interrupt || mtip_interrupt || seip_interrupt) && Csrs[mstatus][MIE]==1 && !STrap && !load_step && !store_step) begin //mstatus[3] MIE
-	    end else if ((meip|| msip|| mtip|| seip || stip) && Csrs[mstatus][MIE]==1 && !STrap && !load_step && !store_step) begin //mstatus[3] MIE
+	    //end else if ((meip|| msip|| mtip|| seip || stip) && Csrs[mstatus][MIE]==1 && !STrap && !load_step && !store_step) begin //mstatus[3] MIE
+	    end else if (any_interrupt && !STrap && !load_step && !store_step) begin //mstatus[3] MIE
 		//Csrs[mip][MTIP] <= mtip_interrupt; // MTIP linux will see then jump to its handler
 		//Csrs[mip][MEIP] <= meip_interrupt; // MEIP
 		//Csrs[mip][MSIP] <= seip_interrupt; // MSIP
@@ -725,8 +729,8 @@ always @(*) begin
 		if (meip) trap_cause = 11; // Cause 11 for Machine External Interrupt
 		else if (msip) trap_cause = 3;  // Cause 3 for Machine Sofeware Interrupt
 		else if (mtip) trap_cause = 7;  // Cause 7 for Machine Timer Interrupt
-		else if (stip) trap_cause = 5;  // Cause 5 for Supervisor Timer Interrupt (set by opensbi via csrw when it see MTIP)
 		else if (seip) trap_cause = 9;  // Cause 9 for Supervisor External
+		else if (stip) trap_cause = 5;  // Cause 5 for Supervisor Timer Interrupt (set by opensbi via csrw when it see MTIP)
 
 		// IR
 	    end else begin 
