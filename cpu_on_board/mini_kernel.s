@@ -376,8 +376,8 @@ branch_target_8:
    mv a0, a3
    call sbi_print_reg
    rem a4, a1, a2  # a4 = 0x0000000000000002
-  #mv a0, a4
-  #call sbi_print_reg
+   mv a0, a4
+   call sbi_print_reg
    add a1, a1, a3  # a1 = 92+30=122
    add a1, a1, a4  # a1 = 122+2=124
 
@@ -387,9 +387,9 @@ branch_target_8:
    li a2, 2
    divw a3, a1, a2  # a3 = 0xFFFFFFFFC000003E
    mv a0, a3
-   call sbi_print_reg
+  #call sbi_print_reg
    remw a4, a1, a2  # a4 = 0
-  #mv a0, a4
+   mv a0, a4
   #call sbi_print_reg
    add a1, a1, a3  # a1 = 0x8000007C +  0xFFFFFFFFC000003E = 0x400000BA
    add a1, a1, a4  # a1
@@ -402,8 +402,8 @@ branch_target_8:
    sub a1, a1, t1 # a1 =  0x400000BA - 0x40000100 = 0xFFFFFFFFFFFFFFBA = -70
    li a2, 3
    divu a3, a1, a2  # a3 = 0x555555555555553E
-  #mv a0, a3
-  #call sbi_print_reg
+   mv a0, a3
+   call sbi_print_reg
    remu a4, a1, a2  # a4 = 0
    add a1, a1, a3  # a1 = 0xFFFFFFFFFFFFFFBA + 0x555555555555553E = 0x55555555555554F8
    add a1, a1, a4  # a1
