@@ -145,6 +145,16 @@ ori sp, sp, 0x201
 slli sp, sp, 0xb
 ori sp, sp, 0x600
 slli sp, sp, 0xb
+#    csrr s0, time
+csrrs s0, time, x0
+check_clock:
+#    csrr a0, time
+csrrs a0, time, x0
+#    call sbi_print_reg
+auipc x1, 0 # R_RISCV_PCREL_HI20 sbi_print_reg
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I sbi_print_reg
+#    j check_clock
+jal x0, check_clock
 #    la t0, s_trap_handler
 auipc t0, 0 # R_RISCV_PCREL_HI20 s_trap_handler 
 addi t0, t0, 0 # R_RISCV_PCREL_LO12_I s_trap_handler 

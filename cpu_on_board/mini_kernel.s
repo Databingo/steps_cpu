@@ -133,6 +133,20 @@ sbi_print_reg: # a0
 main:
 
    li sp, 0x80700000 # Set stack # 80000000-80800000 sdram as 8M ram, we start sp from 0x80700000<-, MMU from 0x80700000->
+
+   # Test time
+   csrr s0, time
+check_clock:
+   csrr a0, time
+   call sbi_print_reg
+   j check_clock
+  #sub t0, s1, s0
+  #li t1, 100000
+  #blt t0, t1, check_clock
+
+
+
+
    
    # Step 1 test ecall (sbi) print
   #la a0, msg_boot
