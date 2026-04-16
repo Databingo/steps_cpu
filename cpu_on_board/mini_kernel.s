@@ -32,9 +32,9 @@ s_trap_handler:
   #csrr a0, sstatus
   #call sbi_print_reg
   #exception s-done
-   csrr s2, sepc
-   addi s2, s2, 4 # skip ecall/ebreak instruction
-   csrw sepc, s2
+   csrr t2, sepc
+   addi t2, t2, 4 # skip ecall/ebreak instruction
+   csrw sepc, t2
    sret
 #handle_interrupt:
 #   csrr t6, sstatus
@@ -42,12 +42,12 @@ s_trap_handler:
 #   not t5, t5 # silence it by clear SIE bit 1 in sstatus  0xFFFFFFFFFFFFFFFD
 #   and t6, t6, t5
 #   csrw sstatus, t6
-#   li a0, "S_INTER"
+#   li a0, "$_INTER"
 #   call sbi_print7
 #   sret # no pc+4
-#
-#
-#
+
+
+
 #s_done: 
 #   csrr s2, sepc
 #   addi s2, s2, 4 # skip ecall/ebreak instruction
@@ -134,18 +134,20 @@ main:
 
    li sp, 0x80700000 # Set stack # 80000000-80800000 sdram as 8M ram, we start sp from 0x80700000<-, MMU from 0x80700000->
    
-   # disable interrupt
+  ## disable interrupt
   #csrr t6, sstatus
   #li t5, 32
   #not t5, t5 # silence it by clear SIE bit 1 in sstatus  0xFFFFFFFFFFFFFFFD
   #and t6, t6, t5
   #csrw sstatus, t6
+ #csrw sie, zero
+ #csrci sstatus, 2
 
 
  
    # Step 1 test ecall (sbi) print
-   la a0, msg_boot
-   call sbi_puts
+  #la a0, msg_boot
+  #call sbi_puts
 
    # Step 2 test S-Mode trap hander # Opensbi delegate Ebreak to OS, so we set our handler address to stvec
    la t0, s_trap_handler
@@ -407,8 +409,8 @@ branch_target_8:
    # div/rem
    li a2, 3        # a1 = 0x000000000000005C 
    div a3, a1, a2  # a3 = 0x000000000000001E
-  #mv a0, a3
-  #call sbi_print_reg
+   mv a0, a3
+   call sbi_print_reg
    rem a4, a1, a2  # a4 = 0x0000000000000002
    mv a0, a4
    call sbi_print_reg
@@ -420,11 +422,11 @@ branch_target_8:
    add a1, a1, t1  # a1 = 0x8000007C
    li a2, 2
    divw a3, a1, a2  # a3 = 0xFFFFFFFFC000003E
-  #mv a0, a3
-  #call sbi_print_reg
+   mv a0, a3
+   call sbi_print_reg
    remw a4, a1, a2  # a4 = 0
-  #mv a0, a4
-  #call sbi_print_reg
+   mv a0, a4
+   call sbi_print_reg
    add a1, a1, a3  # a1 = 0x8000007C +  0xFFFFFFFFC000003E = 0x400000BA
    add a1, a1, a4  # a1
    mv a0, a1
@@ -436,8 +438,8 @@ branch_target_8:
    sub a1, a1, t1 # a1 =  0x400000BA - 0x40000100 = 0xFFFFFFFFFFFFFFBA = -70
    li a2, 3
    divu a3, a1, a2  # a3 = 0x555555555555553E
-  #mv a0, a3
-  #call sbi_print_reg
+   mv a0, a3
+   call sbi_print_reg
    remu a4, a1, a2  # a4 = 0
    add a1, a1, a3  # a1 = 0xFFFFFFFFFFFFFFBA + 0x555555555555553E = 0x55555555555554F8
    add a1, a1, a4  # a1
@@ -450,8 +452,8 @@ branch_target_8:
    add a1, a1, t1 # a1 =  0x55555555555554F8 +  0xFFFFFFFF80000000 = 0x55555554D55554F8
    li a2, 5
    divuw a3, a1, a2  # a3 = 0x000000002AAAAA98
-  #mv a0, a3
-  #call sbi_print_reg
+   mv a0, a3
+   call sbi_print_reg
    remuw a4, a1, a2  # a4 = 0
    add a1, a1, a3  # a1 =  0x55555554D55554F8 +  0x000000002AAAAA98 = 0x55555554FFFFFF90
    add a1, a1, a4  # a1

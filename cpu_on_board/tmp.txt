@@ -4,11 +4,11 @@ _start:
 #   j main 
 jal x0, main
 s_trap_handler:
-#    csrr s2, sepc
-csrrs s2, sepc, x0
-addi s2, s2, 4 # skip ecall/ebreak instruction
-#    csrw sepc, s2
-csrrw x0, sepc, s2
+#    csrr t2, sepc
+csrrs t2, sepc, x0
+addi t2, t2, 4 # skip ecall/ebreak instruction
+#    csrw sepc, t2
+csrrw x0, sepc, t2
 sret
 sbi_putchar:
 addi sp, sp, -8
@@ -116,12 +116,10 @@ ori sp, sp, 0x201
 slli sp, sp, 0xb
 ori sp, sp, 0x600
 slli sp, sp, 0xb
-#    la a0, msg_boot
-auipc a0, 0 # R_RISCV_PCREL_HI20 msg_boot 
-addi a0, a0, 0 # R_RISCV_PCREL_LO12_I msg_boot 
-#    call sbi_puts
-auipc x1, 0 # R_RISCV_PCREL_HI20 sbi_puts
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I sbi_puts
+#   csrw sie, zero
+csrrw x0, sie, zero
+#   csrci sstatus, 2
+csrrci x0, sstatus, 2
 #    la t0, s_trap_handler
 auipc t0, 0 # R_RISCV_PCREL_HI20 s_trap_handler 
 addi t0, t0, 0 # R_RISCV_PCREL_LO12_I s_trap_handler 
@@ -452,6 +450,11 @@ addi a2, x0, 0x0
 addi a2, x0, 0x0
 addi a2, x0, 0x3
 div a3, a1, a2  # a3 = 0x000000000000001E
+#    mv a0, a3
+addi a0, a3, 0
+#    call sbi_print_reg
+auipc x1, 0 # R_RISCV_PCREL_HI20 sbi_print_reg
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I sbi_print_reg
 rem a4, a1, a2  # a4 = 0x0000000000000002
 #    mv a0, a4
 addi a0, a4, 0
@@ -471,7 +474,17 @@ addi a2, x0, 0x0
 addi a2, x0, 0x0
 addi a2, x0, 0x2
 divw a3, a1, a2  # a3 = 0xFFFFFFFFC000003E
+#    mv a0, a3
+addi a0, a3, 0
+#    call sbi_print_reg
+auipc x1, 0 # R_RISCV_PCREL_HI20 sbi_print_reg
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I sbi_print_reg
 remw a4, a1, a2  # a4 = 0
+#    mv a0, a4
+addi a0, a4, 0
+#    call sbi_print_reg
+auipc x1, 0 # R_RISCV_PCREL_HI20 sbi_print_reg
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I sbi_print_reg
 add a1, a1, a3  # a1 = 0x8000007C +  0xFFFFFFFFC000003E = 0x400000BA
 add a1, a1, a4  # a1
 #    mv a0, a1
@@ -487,6 +500,11 @@ addi a2, x0, 0x0
 addi a2, x0, 0x0
 addi a2, x0, 0x3
 divu a3, a1, a2  # a3 = 0x555555555555553E
+#    mv a0, a3
+addi a0, a3, 0
+#    call sbi_print_reg
+auipc x1, 0 # R_RISCV_PCREL_HI20 sbi_print_reg
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I sbi_print_reg
 remu a4, a1, a2  # a4 = 0
 add a1, a1, a3  # a1 = 0xFFFFFFFFFFFFFFBA + 0x555555555555553E = 0x55555555555554F8
 add a1, a1, a4  # a1
@@ -508,6 +526,11 @@ addi a2, x0, 0x0
 addi a2, x0, 0x0
 addi a2, x0, 0x5
 divuw a3, a1, a2  # a3 = 0x000000002AAAAA98
+#    mv a0, a3
+addi a0, a3, 0
+#    call sbi_print_reg
+auipc x1, 0 # R_RISCV_PCREL_HI20 sbi_print_reg
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I sbi_print_reg
 remuw a4, a1, a2  # a4 = 0
 add a1, a1, a3  # a1 =  0x55555554D55554F8 +  0x000000002AAAAA98 = 0x55555554FFFFFF90
 add a1, a1, a4  # a1
