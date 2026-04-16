@@ -26,10 +26,10 @@ auipc x1, 0 # R_RISCV_PCREL_HI20 sbi_putchar
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I sbi_putchar
 #    csrr a0, time
 csrrs a0, time, x0
-#    li t0, 10000000 
+#    li t0, 100000 
 addi t0, x0, 0x0
-lui t0, 0x989
-addi t0, t0, 0x680
+lui t0, 0x18
+addi t0, t0, 0x6a0
 add a0, a0, t0
 #    li a7, 0  
 addi a7, x0, 0x0
@@ -145,16 +145,19 @@ ori sp, sp, 0x201
 slli sp, sp, 0xb
 ori sp, sp, 0x600
 slli sp, sp, 0xb
-#    csrr s0, time
-csrrs s0, time, x0
+#    li t0, 1000
+addi t0, x0, 0x0
+addi t0, x0, 0x0
+addi t0, x0, 0x3e8
 check_clock:
 #    csrr a0, time
 csrrs a0, time, x0
 #    call sbi_print_reg
 auipc x1, 0 # R_RISCV_PCREL_HI20 sbi_print_reg
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I sbi_print_reg
-#    j check_clock
-jal x0, check_clock
+addi t0, t0, -1
+#    bnez t0, check_clock
+bne t0, x0, check_clock
 #    la t0, s_trap_handler
 auipc t0, 0 # R_RISCV_PCREL_HI20 s_trap_handler 
 addi t0, t0, 0 # R_RISCV_PCREL_LO12_I s_trap_handler 
@@ -171,10 +174,10 @@ csrrs x0, sie, t0
 csrrsi x0, sstatus, 2
 #    csrr a0, time 
 csrrs a0, time, x0
-#    li t0, 10000000 
+#    li t0, 100000 
 addi t0, x0, 0x0
-lui t0, 0x989
-addi t0, t0, 0x680
+lui t0, 0x18
+addi t0, t0, 0x6a0
 add a0, a0, t0
 #    li a7, 0  
 addi a7, x0, 0x0

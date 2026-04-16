@@ -46,7 +46,8 @@ timer_found:
    #ecall
 
    csrr a0, time
-   li t0, 10000000 # 1 second
+  #li t0, 10000000 # 1 second
+   li t0, 100000 # 1 second
    add a0, a0, t0
    li a7, 0  # SBI Set Timer ID
    ecall
@@ -135,17 +136,17 @@ main:
    li sp, 0x80700000 # Set stack # 80000000-80800000 sdram as 8M ram, we start sp from 0x80700000<-, MMU from 0x80700000->
 
    # Test time
-   csrr s0, time
+  #csrr s0, time
+   li t0, 1000
 check_clock:
    csrr a0, time
    call sbi_print_reg
-   j check_clock
+   addi t0, t0, -1
+   bnez t0, check_clock
+
   #sub t0, s1, s0
   #li t1, 100000
   #blt t0, t1, check_clock
-
-
-
 
    
    # Step 1 test ecall (sbi) print
@@ -167,7 +168,8 @@ check_clock:
    csrsi sstatus, 2  # enable global SIE bit 1
   
    csrr a0, time # read time
-   li t0, 10000000 # 1 second
+  #li t0, 10000000 # 1 second
+   li t0, 100000 # 1 second
    add a0, a0, t0
    li a7, 0  # SBI Set Timer ID
    ecall
