@@ -289,7 +289,7 @@ assign DRAM_CKE = 1; // always enable
     wire Plic_claim_ctx0_selected = (bus_address == `Plic_claim );
     wire Plic_claim_ctx1_selected = (bus_address == `Plic_claim + 64'h1000);
     //wire Plic_claim_ctx0_selected = (bus_address >= `Plic_claim && bus_address < `Plic_claim+1024*0x1000+4);
-    reg [31:0] claim_interrupt_id_ctx [0:1]; // 0 for hart0M 1 for hart0S
+    reg [31:0] claim_interrupt_id_ctx [0:1]; // 0 for hart0_M; 1 for hart0_S
 
     always @(*) begin
         claim_interrupt_id_ctx[0] = 0; 
@@ -298,8 +298,8 @@ assign DRAM_CKE = 1; // always enable
         if (Plic_pending[1] && Plic_enable[1][1]) claim_interrupt_id_ctx[1] = 1; 
     end
 
-    wire meip_interrupt = (claim_interrupt_id_ctx[0] != 0);
-    wire seip_interrupt = (claim_interrupt_id_ctx[1] != 0);
+    wire meip_interrupt = (claim_interrupt_id_ctx[0] != 0); // To Line 11 MEIP
+    wire seip_interrupt = (claim_interrupt_id_ctx[1] != 0); // To Line 9 SEIP
     reg msip_interrupt = 0;
     wire uart_irq;
     reg uart_irq_pre;
