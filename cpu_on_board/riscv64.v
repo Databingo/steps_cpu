@@ -32,8 +32,11 @@ wire mtip = Csrs[mip][MTIP] && Csrs[mie][MTIE];  // irq level: MEI MTI MSI 7
 wire msip = Csrs[mip][MSIP] && Csrs[mie][MSIE];  // hardware mip-> local mie-> global mstatus.MIE-> cpu take by irq-> trap mpie=mie/mie=0
 wire seip = Csrs[mip][SEIP] && Csrs[mie][SEIE];  // hardware sip-> local sie-> global mstatus.SIE-> cpu take by irq-> trap spie=sie/sie=0 (this need after mideleg)
 wire stip = Csrs[mip][STIP] && Csrs[mie][STIE];  // mtip -> stip 5
+wire ssip = Csrs[mip][SSIP] && Csrs[mie][SSIE];  // 
+
+
 wire m_interrupts = (meip || msip || mtip) && (current_privilege_mode < M_mode || (current_privilege_mode == M_mode && Csrs[mstatus][MIE]));
-wire s_interrupts = (seip || stip) && (current_privilege_mode < S_mode || (current_privilege_mode == S_mode && Csrs[sstatus][SIE]));
+wire s_interrupts = (seip || ssip || stip) && (current_privilege_mode < S_mode || (current_privilege_mode == S_mode && Csrs[sstatus][SIE]));
 wire any_interrupt = (m_interrupts || s_interrupts);
 
 
@@ -731,6 +734,7 @@ always @(*) begin
 		else if (mtip) trap_cause = 7;  // Cause 7 for Machine Timer Interrupt
 		else if (seip) trap_cause = 9;  // Cause 9 for Supervisor External
 		else if (stip) trap_cause = 5;  // Cause 5 for Supervisor Timer Interrupt (set by opensbi via csrw when it see MTIP)
+		else if (ssip) trap_cause = 1;  // Cause 1 for Supervisor Software Interrupt (set by os)
 
 		// IR
 	    end else begin 

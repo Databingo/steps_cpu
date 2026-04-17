@@ -21,7 +21,10 @@ s_trap_handler:
 
    csrr t1, scause
    li t2, 0x8000000000000005 # bit 63 set + code 5 (Supervisor Timer)
-   beq t1, t2, timer_found
+   beq t1, t2, timer_found_stip
+
+   li t2, 0x8000000000000001 # bit 63 set + code 1 (Soft ware Interrupt)
+   beq t1, t2, timer_found_ssip
 
   #bltz a0, handle_interrupt
    # handle exception
@@ -38,7 +41,7 @@ s_trap_handler:
    csrw sepc, t2
    sret
 
-timer_found:
+timer_found_stip:
     addi a0, x0, 84  # T
     call sbi_putchar
    #li a0, -1 # Clear timer by max
@@ -52,6 +55,12 @@ timer_found:
    li a7, 0  # SBI Set Timer ID
    ecall
 
+    sret
+timer_found_ssip:
+    addi a0, x0, 83  # S
+    call sbi_putchar
+    li t2, 0x02  # clear ssip
+    csrc sip, t2
 
     sret
 
@@ -135,14 +144,14 @@ main:
 
    li sp, 0x80700000 # Set stack # 80000000-80800000 sdram as 8M ram, we start sp from 0x80700000<-, MMU from 0x80700000->
 
-   # Test time
-  #csrr s0, time
-   li t0, 1000
-check_clock:
-   csrr a0, time
-   call sbi_print_reg
-   addi t0, t0, -1
-   bnez t0, check_clock
+#   # Test time
+#  #csrr s0, time
+#   li t0, 100
+#check_clock:
+#   csrr a0, time
+#   call sbi_print_reg
+#   addi t0, t0, -1
+#   bnez t0, check_clock
 
   #sub t0, s1, s0
   #li t1, 100000
@@ -162,17 +171,17 @@ check_clock:
   #call sbi_print7
 
 
-  ## Set Timer
-   li t0, 0x20 # enable STIE bit 5
-   csrs sie, t0
-   csrsi sstatus, 2  # enable global SIE bit 1
-  
-   csrr a0, time # read time
-  #li t0, 10000000 # 1 second
-   li t0, 100000 # 1 second
-   add a0, a0, t0
-   li a7, 0  # SBI Set Timer ID
-   ecall
+# ## Set Timer
+#  li t0, 0x20 # enable STIE bit 5
+#  csrs sie, t0
+#  csrsi sstatus, 2  # enable global SIE bit 1
+# 
+#  csrr a0, time # read time
+# #li t0, 10000000 # 1 second
+#  li t0, 100000 # 1 second
+#  add a0, a0, t0
+#  li a7, 0  # SBI Set Timer ID
+#  ecall
 
 #wait_for_timer: # wait strap_handler print timecmp trap
 #   wfi
@@ -529,13 +538,33 @@ branch_target_8:
    # Success
    li a0, "\nPASS"
    call sbi_print7
-  
-   # test stip  
-   li t0, 0x20 #STIP
-   csrs mip, t0
+   
+   # test SSIP 
+   li t0, 0x02 # enable SSIE bit 1
+   csrs sie, t0
+   csrsi sstatus, 2  # enable global SIE bit 1
+
+   # test SSIP  
+   li t0, 0x02 #SSIP
+   csrs sip, t0
 
 
 
+   # test STIP 
+   li t0, 0x20 # enable STIE bit 5
+   csrs sie, t0
+   csrsi sstatus, 2  # enable global SIE bit 1
+
+  ## test STIP 
+  #li t0, 0x20 
+  #csrs sip, t0
+ 
+
+   # Test time
+   csrr a0, time
+   addi a0, a0, 100000
+   li a7, 0  # SBI Set Timer ID
+   ecall
 
 
 

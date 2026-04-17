@@ -2,8 +2,8 @@ make PLATFORM=generic clean
 
 #dtc -I dts -O dtb -o my_board.dtb my_board.dts # boot time use via its address at register a1, hardid(core number) in a0
 #dtc -I dts -O dtb -o my_board.dtb qemu_virt.dts # boot time use via its address at register a1, hardid(core number) in a0
-#dtc -I dts -O dtb -o my_board.dtb b.dts      # boot time use via its address at register a1, hardid(core number) in a0
-dtc -I dts -O dtb -o my_board.dtb b.dts.qemu # boot time use via its address at register a1, hardid(core number) in a0
+dtc -I dts -O dtb -o my_board.dtb b.dts      # boot time use via its address at register a1, hardid(core number) in a0
+#dtc -I dts -O dtb -o my_board.dtb b.dts.qemu # boot time use via its address at register a1, hardid(core number) in a0
 rm -rf build/platform/generic/firmware/*  \
 # for opensbi test in qemy/soc
 #make CROSS_COMPILE=/usr/local/projects/bin/xpack-riscv-none-elf-gcc-14.2.0-3/bin/riscv-none-elf- \

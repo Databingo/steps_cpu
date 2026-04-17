@@ -268,8 +268,8 @@ assign DRAM_CKE = 1; // always enable
     wire Sdc_cache_selected = (bus_address >= `Sdc_base && bus_address < (`Sdc_base + 512)); // h200
     wire Sdc_avail_selected = (bus_address == `Sdc_avail);
     wire Sdram_selected = (bus_address >= `Sdram_min && bus_address < `Sdram_max);
-    wire Mtime_selected = (bus_address == `Mtime);
-    wire Mtimecmp_selected = (bus_address == `Mtimecmp);
+    wire Mtime_selected = (bus_address == `Mtime || bus_address == `Mtime + 4);
+    wire Mtimecmp_selected = (bus_address == `Mtimecmp || bus_address == `Mtimecmp + 4);
     //wire Clint_selected = (bus_address >= `Clint_base && bus_address <= `Mtime);
     wire Clintbase_selected = (bus_address == `Clint_base);
     //wire CacheI_selected = (bus_address == `CacheI);
@@ -416,8 +416,10 @@ assign DRAM_CKE = 1; // always enable
             if (Sdc_avail_selected) begin bus_read_data <= {63'd0, sd_cache_available}; bus_read_done <= 1; end 
 
             //if (Clint_selected) begin bus_read_data <= 64'b0 ; bus_read_done <= 1; end 
-            if (Mtime_selected) begin bus_read_data <= mtime; bus_read_done <= 1; end 
-            if (Mtimecmp_selected) begin bus_read_data <= mtimecmp; bus_read_done <= 1; end 
+            //if (Mtime_selected) begin bus_read_data <= mtime; bus_read_done <= 1; end 
+            if (Mtime_selected) begin bus_read_data <= bus_address[2] ? {32'b0, mtime[63:32]} : mtime; bus_read_done <= 1; end 
+            //if (Mtimecmp_selected) begin bus_read_data <= mtimecmp; bus_read_done <= 1; end 
+            if (Mtimecmp_selected) begin bus_read_data <= bus_address[2] ? {32'b0, mtimecmp[63:32]} : mtimecmp; bus_read_done <= 1; end  
             if (Clintbase_selected) begin bus_read_data <= {63'b0, msip_interrupt} ; bus_read_done <= 1; end 
 
 	    if (Art_selected) begin 
@@ -586,7 +588,11 @@ assign DRAM_CKE = 1; // always enable
 	
 
             //if (Clint_selected) begin bus_write_done <= 1; end 
-	    if (Mtimecmp_selected) begin mtimecmp <= bus_write_data; bus_write_done <= 1; end
+	    //if (Mtimecmp_selected) begin mtimecmp <= bus_write_data; bus_write_done <= 1; end
+	    if (Mtimecmp_selected) begin 
+		if (bus_ls_type == 3'b011) mtimecmp <= bus_write_data;  // for sd
+		else begin if (bus_address[2]) mtimecmp[63:32] <= bus_write_data[31:0]; else  mtimecmp[31:0] <= bus_write_data[31:0]; end  // normally sw
+                bus_write_done <= 1; end
             if (Clintbase_selected) begin msip_interrupt <= bus_write_data[0];bus_write_done <= 1;end 
 	    //if (Sdram_selected) begin if (sdram_req_wait==0) bus_write_done <= 1; end
 

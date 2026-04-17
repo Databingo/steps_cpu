@@ -12,14 +12,21 @@ lui t2, 0x80000
 srli t2, t2, 0x1
 slli t2, t2, 0x21
 ori t2, t2, 0x5
-beq t1, t2, timer_found
+beq t1, t2, timer_found_stip
+#    li t2, 0x8000000000000001 
+addi t2, x0, 0x0
+lui t2, 0x80000
+srli t2, t2, 0x1
+slli t2, t2, 0x21
+ori t2, t2, 0x1
+beq t1, t2, timer_found_ssip
 #    csrr t2, sepc
 csrrs t2, sepc, x0
 addi t2, t2, 4 # skip ecall/ebreak instruction
 #    csrw sepc, t2
 csrrw x0, sepc, t2
 sret
-timer_found:
+timer_found_stip:
 addi a0, x0, 84  # T
 #     call sbi_putchar
 auipc x1, 0 # R_RISCV_PCREL_HI20 sbi_putchar
@@ -34,6 +41,18 @@ add a0, a0, t0
 #    li a7, 0  
 addi a7, x0, 0x0
 ecall
+sret
+timer_found_ssip:
+addi a0, x0, 83  # S
+#     call sbi_putchar
+auipc x1, 0 # R_RISCV_PCREL_HI20 sbi_putchar
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I sbi_putchar
+#     li t2, 0x02  
+addi t2, x0, 0x0
+addi t2, x0, 0x0
+addi t2, x0, 0x2
+#     csrc sip, t2
+csrrc x0, sip, t2
 sret
 sbi_putchar:
 addi sp, sp, -8
@@ -145,43 +164,12 @@ ori sp, sp, 0x201
 slli sp, sp, 0xb
 ori sp, sp, 0x600
 slli sp, sp, 0xb
-#    li t0, 1000
-addi t0, x0, 0x0
-addi t0, x0, 0x0
-addi t0, x0, 0x3e8
-check_clock:
-#    csrr a0, time
-csrrs a0, time, x0
-#    call sbi_print_reg
-auipc x1, 0 # R_RISCV_PCREL_HI20 sbi_print_reg
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I sbi_print_reg
-addi t0, t0, -1
-#    bnez t0, check_clock
-bne t0, x0, check_clock
 #    la t0, s_trap_handler
 auipc t0, 0 # R_RISCV_PCREL_HI20 s_trap_handler 
 addi t0, t0, 0 # R_RISCV_PCREL_LO12_I s_trap_handler 
 #    csrw stvec, t0
 csrrw x0, stvec, t0
 ebreak
-#    li t0, 0x20 
-addi t0, x0, 0x0
-addi t0, x0, 0x0
-addi t0, x0, 0x20
-#    csrs sie, t0
-csrrs x0, sie, t0
-#    csrsi sstatus, 2  
-csrrsi x0, sstatus, 2
-#    csrr a0, time 
-csrrs a0, time, x0
-#    li t0, 100000 
-addi t0, x0, 0x0
-lui t0, 0x18
-addi t0, t0, 0x6a0
-add a0, a0, t0
-#    li a7, 0  
-addi a7, x0, 0x0
-ecall
 #    li t0, 0x80700000 
 addi t0, x0, 0x0
 slli t0, t0, 0xb
@@ -637,12 +625,40 @@ ori a0, a0, 0xa
 #    call sbi_print7
 auipc x1, 0 # R_RISCV_PCREL_HI20 sbi_print7
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I sbi_print7
+#    li t0, 0x02 
+addi t0, x0, 0x0
+addi t0, x0, 0x0
+addi t0, x0, 0x2
+#    csrs sie, t0
+csrrs x0, sie, t0
+#    csrsi sstatus, 2  
+csrrsi x0, sstatus, 2
+#    li t0, 0x02 
+addi t0, x0, 0x0
+addi t0, x0, 0x0
+addi t0, x0, 0x2
+#    csrs sip, t0
+csrrs x0, sip, t0
 #    li t0, 0x20 
 addi t0, x0, 0x0
 addi t0, x0, 0x0
 addi t0, x0, 0x20
-#    csrs mip, t0
-csrrs x0, mip, t0
+#    csrs sie, t0
+csrrs x0, sie, t0
+#    csrsi sstatus, 2  
+csrrsi x0, sstatus, 2
+#    li t0, 0x20 
+addi t0, x0, 0x0
+addi t0, x0, 0x0
+addi t0, x0, 0x20
+#    csrs sip, t0
+csrrs x0, sip, t0
+#    csrr a0, time
+csrrs a0, time, x0
+addi a0, a0, 100000
+#    li a7, 0  
+addi a7, x0, 0x0
+ecall
 #    j wait_for_key
 jal x0, wait_for_key
 fail_chain:
