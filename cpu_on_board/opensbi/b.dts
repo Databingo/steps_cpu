@@ -26,7 +26,13 @@
             riscv,isa = "rv64imasu_zicsr_zifencei";
             mmu-type = "riscv,sv39";
 
+
+            //uart, when meip/seip bell in cpu0_intc, the cause is 11/9, the plic read claim mmio know it's 1 uart. Call uart driver.
+            //timer, when mtip/stip bell in cpu0_intc, the cause is 7/5, cpu0_intc know it's clint. Call Clint dirver.
+            //soft, when msip/ssip bell in cpu0_intc, the cause is 1/3, cpu0_intc know it's software. Call  software dirver.
+
             /* INTC: This handles internal interrupts */
+            //cpu0_intc is just name of my Trap(meip/seip/mtip/stip/msip/ssip) logic
             cpu0_intc: interrupt-controller { // SoftwareLine IPI/TimeLine/ExternalLine
                 #interrupt-cells = <0x01>;
                 interrupt-controller;
@@ -74,6 +80,7 @@
         };
     };
      
+      // device-pending[id]-ctx-meip11-trap(stvec/cpu0_intc) [hardware|software] casue11/9-interruptExtended-plic-driver-claim-knowInterruptType-uartDriver
       // Linux use this to handle harware interrupts
       plic: interrupt-controller@c000000 {  // mmio addr
           compatible = "riscv,plic0"; // pending+0x1000 enable+0x2000 Threshold/Claim+0x200000

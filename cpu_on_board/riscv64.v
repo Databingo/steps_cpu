@@ -19,7 +19,7 @@ module riscv64(
 
     input wire meip_interrupt, // from PLIC
     input wire seip_interrupt, // from Supervisor External
-    input wire msip_interrupt, // from CLINT
+    //input wire msip_interrupt, // from CLINT
     //input wire mtip_interrupt, // from Machine Time
 
     input  reg        bus_read_done,
@@ -29,7 +29,7 @@ module riscv64(
 
 wire meip = Csrs[mip][MEIP] && Csrs[mie][MEIE];  // mip:P Hardware say pending;|mie:E Software allow this pending;|mstatus[MIE]:cpu globally allow interrup # 3 conditions for a interrup run
 wire mtip = Csrs[mip][MTIP] && Csrs[mie][MTIE];  // irq level: MEI MTI MSI 7
-wire msip = Csrs[mip][MSIP] && Csrs[mie][MSIE];  // hardware mip-> local mie-> global mstatus.MIE-> cpu take by irq-> trap mpie=mie/mie=0
+//wire msip = Csrs[mip][MSIP] && Csrs[mie][MSIE];  // hardware mip-> local mie-> global mstatus.MIE-> cpu take by irq-> trap mpie=mie/mie=0
 wire seip = Csrs[mip][SEIP] && Csrs[mie][SEIE];  // hardware sip-> local sie-> global mstatus.SIE-> cpu take by irq-> trap spie=sie/sie=0 (this need after mideleg)
 wire stip = Csrs[mip][STIP] && Csrs[mie][STIE];  // mtip -> stip 5
 wire ssip = Csrs[mip][SSIP] && Csrs[mie][SSIE];  // 
@@ -621,10 +621,10 @@ always @(*) begin
 		if (!STrap && !bubble && did)  begin did <= 0; end
 		// -- UPPER is default change for EXE stage --- but (1.Could be overwrite 2.Take effect next cycle) 
 
-		Csrs[mip][MTIP] <= mtip_interrupt; // MTIP linux will see then jump to its handler  mtime>=mtimecmp
 		Csrs[mip][MEIP] <= meip_interrupt; 
-		Csrs[mip][SEIP] <= seip_interrupt;
+		Csrs[mip][MTIP] <= mtip_interrupt; // MTIP linux will see then jump to its handler  mtime>=mtimecmp
 		Csrs[mip][MSIP] <= msip_interrupt; 
+		Csrs[mip][SEIP] <= seip_interrupt;
 
 		//  i-tlb miss STrap
             if (need_trans && !tlb_i_hit) begin //OPEN 
@@ -715,7 +715,7 @@ always @(*) begin
 		// Async Interrupt PLIC full (Platform-Level-Interrupt-Control)  MMIO (hardwire timers uart plic)
 	    //end else if ((meip_interrupt || msip_interrupt || mtip_interrupt || seip_interrupt) && Csrs[mstatus][MIE]==1 && !STrap && !load_step && !store_step) begin //mstatus[3] MIE
 	    //end else if ((meip|| msip|| mtip|| seip || stip) && Csrs[mstatus][MIE]==1 && !STrap && !load_step && !store_step) begin //mstatus[3] MIE
-	    end else if (any_interrupt && !STrap && !load_step && !store_step) begin //mstatus[3] MIE
+	    end else if (any_interrupt && !STrap && !load_step && !store_step) begin //mstatus[3] MIE // cpu0_intc
 		//Csrs[mip][MTIP] <= mtip_interrupt; // MTIP linux will see then jump to its handler
 		//Csrs[mip][MEIP] <= meip_interrupt; // MEIP
 		//Csrs[mip][MSIP] <= seip_interrupt; // MSIP

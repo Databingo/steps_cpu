@@ -178,9 +178,9 @@ assign DRAM_CKE = 1; // always enable
 	.mtime(mtime),
 	.mtimecmp(mtimecmp),
 	.meip_interrupt(meip_interrupt),
-	//.mtip_interrupt(mtip_interrupt),
-	.msip_interrupt(msip_interrupt),
 	.seip_interrupt(seip_interrupt),
+	//.mtip_interrupt(mtip_interrupt),
+	//.msip_interrupt(msip_interrupt),
 
         .bus_read_data(bus_read_data),
         .bus_read_done(bus_read_done),
@@ -246,8 +246,8 @@ assign DRAM_CKE = 1; // always enable
 
     // -- PLIC --
     (* ram_style = "logic" *) reg [2:0]  Plic_priority [0:5];  // 0x000 + 4 per id
-    reg [31:0] Plic_pending; // 0x1000 Global pending Bitmap   // 0nly 32 type now (by bit position)
-    reg [31:0] Plic_enable [0:1];  // 0x2000 per context +0x80 // 0nly 32 type now (by bit position) same position as Plic_pending
+    reg [31:0] Plic_pending; // 0x1000 Global pending Bitmap   // 0nly 31 type now (by bit position) Bit 0 reserved
+    reg [31:0] Plic_enable [0:1];  // 0x2000 per context +0x80 // 0nly 31 type now (by bit position) same position as Plic_pending
     reg [2:0]  Plic_threshold [0:1]; // 0x200000 4B per hart
     //# PER PRIORITY(id) = base + 4 * id (000-fff) array
     //# base + 0x1000 id 1-32 ... bitmap
@@ -300,7 +300,7 @@ assign DRAM_CKE = 1; // always enable
 
     wire meip_interrupt = (claim_interrupt_id_ctx[0] != 0); // To Line 11 MEIP
     wire seip_interrupt = (claim_interrupt_id_ctx[1] != 0); // To Line 9 SEIP
-    reg msip_interrupt = 0;
+    //reg msip_interrupt = 0;
     wire uart_irq;
     reg uart_irq_pre;
     wire [31:0] uart_readdata;
@@ -420,7 +420,8 @@ assign DRAM_CKE = 1; // always enable
             if (Mtime_selected) begin bus_read_data <= bus_address[2] ? {32'b0, mtime[63:32]} : mtime; bus_read_done <= 1; end 
             //if (Mtimecmp_selected) begin bus_read_data <= mtimecmp; bus_read_done <= 1; end 
             if (Mtimecmp_selected) begin bus_read_data <= bus_address[2] ? {32'b0, mtimecmp[63:32]} : mtimecmp; bus_read_done <= 1; end  
-            if (Clintbase_selected) begin bus_read_data <= {63'b0, msip_interrupt} ; bus_read_done <= 1; end 
+            //if (Clintbase_selected) begin bus_read_data <= {63'b0, msip_interrupt} ; bus_read_done <= 1; end 
+            if (Clintbase_selected) begin bus_read_done <= 1; end 
 
 	    if (Art_selected) begin 
 	      if (bus_address == `Art_base || bus_address == `ArtK_base) begin
@@ -593,7 +594,8 @@ assign DRAM_CKE = 1; // always enable
 		if (bus_ls_type == 3'b011) mtimecmp <= bus_write_data;  // for sd
 		else begin if (bus_address[2]) mtimecmp[63:32] <= bus_write_data[31:0]; else  mtimecmp[31:0] <= bus_write_data[31:0]; end  // normally sw
                 bus_write_done <= 1; end
-            if (Clintbase_selected) begin msip_interrupt <= bus_write_data[0];bus_write_done <= 1;end 
+            //if (Clintbase_selected) begin msip_interrupt <= bus_write_data[0];bus_write_done <= 1;end 
+            if (Clintbase_selected) begin bus_write_done <= 1;end 
 	    //if (Sdram_selected) begin if (sdram_req_wait==0) bus_write_done <= 1; end
 
             if (Tlb_selected) bus_write_done <= 1; 
