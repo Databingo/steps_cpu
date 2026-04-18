@@ -1,30 +1,29 @@
-isr_router:        
-     # x0-x10 are shadowed by hardware, safe to use
-     li sp, 0x1500 # Set stack shadowed sp(x2)
+isr_router:        # Use x0-x10 shadowed register only (ra(x1), a0(x10),..x19)
      li x7, 0x2004 # UART print 
      # x8 trap_type no change
      # x9 addr  # x9 keep the address need manage, no change x9
      # x689 setting
 
      # x1(ra)2(sp)3456,x10(a0) operating
+     li sp, 0x1500 # Set stack   # use shadowed sp
+
      li x3, 12 
-     beq x8, x3, mmu_i    # i-tlb-refill Fetch
-
-     li x3, 13 
-     beq x8, x3, mmu_d    # d-tlb-refill Load
-
-     li x3, 14 
-     beq x8, x3, mmu_d    # d-tlb-refill Store
+     beq x8, x3, mmu_i    # i-tlb-refill
 
      li x3, 1 
      beq x8, x3, i_cache_refill
+
+     li x3, 13 
+     beq x8, x3, mmu_d    # d-tlb-refill load
+
+     li x3, 14 
+     beq x8, x3, mmu_d    # d-tlb-refill store
 
     #li x3, 17 
     #beq x8, x3, bus_error_strap
 
      li x3, 18 
      beq x8, x3, debug
-
 i_cache_refill:
      lui x4, 0x20001 # base Cache address
      ld x3, 0(x9)    # get data
@@ -39,6 +38,7 @@ i_cache_refill:
 
     #mv a0, x9
     #call print_reg
+
 
     #li a0, "ICAre:"
     #call print7
@@ -114,17 +114,16 @@ mmu:  # VA 63:39Sign|38:30Vpn[2]|29:21Vpn[1]|20:12Vpn[0]|11:0PageOffset
      beqz x3, FAULT   # It should be leaf not 0
 
 
+
    # fall to 4KB finish
 
 FINISH_4KB:
-     jal x5, CHECK_PERM_AND_AD
      slli x4, x4, 10  # mask out reserved bits
      srli x4, x4, 20 
      slli x4, x4, 12 
      j WRITE_TLB
                                             
 FINISH_2MB:
-     jal x5, CHECK_PERM_AND_AD
      slli x4, x4, 10  # mask out reserved bits
      srli x4, x4, 20 
      slli x4, x4, 12 
@@ -134,7 +133,6 @@ FINISH_2MB:
      j WRITE_TLB
 
 FINISH_1GB:
-     jal x5, CHECK_PERM_AND_AD
      slli x4, x4, 10  # mask out reserved bits
      srli x4, x4, 20  # get PPN from PTE(PTE's data struction?)  64:54Reserved 53:10PPN # 9:8RSW 7Dirty 6Accessed 5Global 4User 3Executable 2Write 1Readable 0Valid
      slli x4, x4, 12  # PPN posint [38:12] in satp
@@ -142,46 +140,8 @@ FINISH_1GB:
      and x3, x3, x9    # extrac from VA
      add x4, x4, x3    # add offset to PPN
      j WRITE_TLB
+                 
 
-# --- Permissions, U-Bit and A/D Bits --
-CHECK_PERM_AND_AD:                
-     # 1. Check U-Bit based on VA sign (x9)
-     andi x3, x4, 0x10 # Extract U-bit (Bit 4)
-     bltz x9, check_kernel_u
-check_user_u:
-     beqz x3, PERM_FAULT # User VA (>=0) requires U=1
-     j check_permissions
-check_kernel_u:
-     bnez x3, PERM_FAULT # Kernel VA (<0) requires U=0
-check_permissions:
-     # 2. CHECK R/W/X permissions
-     li x3, 14
-     beq x8, x3, check_store
-     li x3, 12
-     beq x8, x3, check_fetch
-check_load:
-     andi x3, x4, 2 # PET.R (bit 1)
-     beqz x3, PERM_FAULT
-     j update_ad
-check_store:
-     andi x3, x4, 4 # PET.W (bit 2)
-     beqz x3, PERM_FAULT
-     j update_ad
-check_fetch:
-     andi x3, x4, 2 # PET.X (bit 3)
-     beqz x3, PERM_FAULT
-update_ad:
-     # 3. Update A/D bits
-     ori x4, x4, 0x40  # set Accessed bit (bit 6)
-     li x3, 14
-     bne x8, x3, write_pte
-     ori x4, x4, 0x80  # set Dirty bit (bit 7) if store
-write_pte:
-     sd x4, 0(x6) # write updated PTE back to memory
-     jalx x0, 0(x5)  # return to leaf formatter
-    
-    
-# -- Hardware writeback --
 WRITE_TLB:
      # 9. Writ ppn back to hardware mmu trap
      lui x6, 0x20000 # Magic TLB address
@@ -213,15 +173,6 @@ FAULT: # error trap?
      sd x6, 0(x7)    #  print !
 
      j return
-#FAULT:
-PERM_FAULT:
-    # force the trap cuase to trigger a real S-mode fualt for linux
-    li x3, 14
-    bne x8, x3, trigger_trap
-    li x8, 15  # Convert to Store Page Fault (15)
-trigger_trap:
-    # leaving x8 != 0
-    j return
 
 return:    
      mret
