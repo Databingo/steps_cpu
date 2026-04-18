@@ -246,8 +246,8 @@ assign DRAM_CKE = 1; // always enable
 
     // -- PLIC --
     (* ram_style = "logic" *) reg [2:0]  Plic_priority [0:5];  // 0x000 + 4 per id
-    reg [31:0] Plic_pending; // 0x1000 Global pending Bitmap 
-    reg [31:0] Plic_enable [0:1];  // 0x2000 per context +0x80
+    reg [31:0] Plic_pending; // 0x1000 Global pending Bitmap   // 0nly 32 type now (by bit position)
+    reg [31:0] Plic_enable [0:1];  // 0x2000 per context +0x80 // 0nly 32 type now (by bit position) same position as Plic_pending
     reg [2:0]  Plic_threshold [0:1]; // 0x200000 4B per hart
     //# PER PRIORITY(id) = base + 4 * id (000-fff) array
     //# base + 0x1000 id 1-32 ... bitmap
@@ -289,12 +289,12 @@ assign DRAM_CKE = 1; // always enable
     wire Plic_claim_ctx0_selected = (bus_address == `Plic_claim );
     wire Plic_claim_ctx1_selected = (bus_address == `Plic_claim + 64'h1000);
     //wire Plic_claim_ctx0_selected = (bus_address >= `Plic_claim && bus_address < `Plic_claim+1024*0x1000+4);
-    reg [31:0] claim_interrupt_id_ctx [0:1]; // 0 for hart0_M; 1 for hart0_S
+    reg [31:0] claim_interrupt_id_ctx [0:1]; // 0 for hart0_M; 1 for hart0_S  // value of interrutp
 
     always @(*) begin
         claim_interrupt_id_ctx[0] = 0; 
         claim_interrupt_id_ctx[1] = 0; 
-        if (Plic_pending[1] && Plic_enable[0][1]) claim_interrupt_id_ctx[0] = 1; 
+        if (Plic_pending[1] && Plic_enable[0][1]) claim_interrupt_id_ctx[0] = 1; // else if ... Arbite order Or last overwrite order
         if (Plic_pending[1] && Plic_enable[1][1]) claim_interrupt_id_ctx[1] = 1; 
     end
 

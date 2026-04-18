@@ -53,12 +53,12 @@
         };
                
         uart0: uart@2004{
-             compatible = "sifive,uart0";
+             compatible = "sifive,uart0";  // driver
              reg = <0x0 0x2004 0x0 0x10>;
              // if using PLIC point to IRQ 1. If bypass use extended
              //interrupts-extended = <&cpu0_intc 0x09>; // add dummy external interrupt mapping
-             interrupt-parent = <&plic>; 
-             interrupts = <1>;
+             interrupt-parent = <&plic>;  
+             interrupts = <1>;             // claim number
              clock-frequency = <12500000>;
              //status = "disable";
              status = "okay";
