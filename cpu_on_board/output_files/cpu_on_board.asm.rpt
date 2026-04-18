@@ -1,5 +1,5 @@
 Assembler report for cpu_on_board
-Sat Apr 18 13:06:40 2026
+Sat Apr 18 14:57:23 2026
 Quartus II 32-bit Version 13.0.1 Build 232 06/12/2013 Service Pack 1 SJ Web Edition
 
 
@@ -39,7 +39,7 @@ applicable agreement for further details.
 +---------------------------------------------------------------+
 ; Assembler Summary                                             ;
 +-----------------------+---------------------------------------+
-; Assembler Status      ; Successful - Sat Apr 18 13:06:40 2026 ;
+; Assembler Status      ; Successful - Sat Apr 18 14:57:23 2026 ;
 ; Revision Name         ; cpu_on_board                          ;
 ; Top-level Entity Name ; cpu_on_board                          ;
 ; Family                ; Cyclone II                            ;
@@ -141,14 +141,23 @@ Info: Running Quartus II 32-bit Assembler
     Info: programming logic devices manufactured by Altera and sold by 
     Info: Altera or its authorized distributors.  Please refer to the 
     Info: applicable agreement for further details.
-    Info: Processing started: Sat Apr 18 13:06:36 2026
-Info: Command: quartus_asm --read_settings_files=off --write_settings_files=off cpu_on_board -c cpu_on_board
+    Info: Processing started: Sat Apr 18 14:57:06 2026
+Info: Command: quartus_asm --read_settings_files=on --write_settings_files=off cpu_on_board -c cpu_on_board
+Warning (20013): Ignored assignments for entity "sdram_pll" -- entity does not exist in design
+    Warning (20014): Assignment for entity set_global_assignment -name IP_TOOL_NAME Qsys -entity sdram_pll -qip sdram_pll/sdram/synthesis/sdram_pll.qip -library sdram_pll was ignored
+    Warning (20014): Assignment for entity set_global_assignment -name IP_TOOL_VERSION 13.0sp1 -entity sdram_pll -qip sdram_pll/sdram/synthesis/sdram_pll.qip -library sdram_pll was ignored
+    Warning (20014): Assignment for entity set_global_assignment -name IP_TOOL_ENV Qsys -entity sdram_pll -qip sdram_pll/sdram/synthesis/sdram_pll.qip -library sdram_pll was ignored
+    Warning (20014): Assignment for entity set_global_assignment -name SLD_INFO "QSYS_NAME sdram_pll HAS_SOPCINFO 1 GENERATION_ID 1763195282" -entity sdram_pll -qip sdram_pll/sdram/synthesis/sdram_pll.qip -library sdram_pll was ignored
+Warning (20013): Ignored assignments for entity "sdram_pll_altpll_0" -- entity does not exist in design
+    Warning (20014): Assignment for entity set_global_assignment -name IP_TOOL_NAME altpll -entity sdram_pll_altpll_0 -qip sdram_pll/sdram/synthesis/sdram_pll.qip -library sdram_pll was ignored
+    Warning (20014): Assignment for entity set_global_assignment -name IP_TOOL_VERSION 13.0 -entity sdram_pll_altpll_0 -qip sdram_pll/sdram/synthesis/sdram_pll.qip -library sdram_pll was ignored
+    Warning (20014): Assignment for entity set_global_assignment -name IP_TOOL_ENV Qsys -entity sdram_pll_altpll_0 -qip sdram_pll/sdram/synthesis/sdram_pll.qip -library sdram_pll was ignored
 Info (115031): Writing out detailed assembly data for power analysis
 Info (115030): Assembler is generating device programming files
-Info: Quartus II 32-bit Assembler was successful. 0 errors, 0 warnings
-    Info: Peak virtual memory: 385 megabytes
-    Info: Processing ended: Sat Apr 18 13:06:40 2026
-    Info: Elapsed time: 00:00:04
-    Info: Total CPU time (on all processors): 00:00:04
+Info: Quartus II 32-bit Assembler was successful. 0 errors, 9 warnings
+    Info: Peak virtual memory: 391 megabytes
+    Info: Processing ended: Sat Apr 18 14:57:25 2026
+    Info: Elapsed time: 00:00:19
+    Info: Total CPU time (on all processors): 00:00:18
 
 
