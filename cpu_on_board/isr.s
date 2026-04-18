@@ -168,7 +168,7 @@ check_store:
      beqz x3, PERM_FAULT
      j update_ad
 check_fetch:
-     andi x3, x4, 2 # PET.X (bit 3)
+     andi x3, x4, 8 # PET.X (bit 8)
      beqz x3, PERM_FAULT
 update_ad:
      # 3. Update A/D bits
@@ -178,7 +178,7 @@ update_ad:
      ori x4, x4, 0x80  # set Dirty bit (bit 7) if store
 write_pte:
      sd x4, 0(x6) # write updated PTE back to memory
-     jalx x0, 0(x5)  # return to leaf formatter
+     jalr x0, 0(x5)  # return to leaf formatter
     
     
 # -- Hardware writeback --
