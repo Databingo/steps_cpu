@@ -164,6 +164,19 @@ ori sp, sp, 0x201
 slli sp, sp, 0xb
 ori sp, sp, 0x600
 slli sp, sp, 0xb
+#    li t0, 100
+addi t0, x0, 0x0
+addi t0, x0, 0x0
+addi t0, x0, 0x64
+check_clock:
+#    csrr a0, time
+csrrs a0, time, x0
+#    call sbi_print_reg
+auipc x1, 0 # R_RISCV_PCREL_HI20 sbi_print_reg
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I sbi_print_reg
+addi t0, t0, -1
+#    bnez t0, check_clock
+bne t0, x0, check_clock
 #    la t0, s_trap_handler
 auipc t0, 0 # R_RISCV_PCREL_HI20 s_trap_handler 
 addi t0, t0, 0 # R_RISCV_PCREL_LO12_I s_trap_handler 
@@ -399,20 +412,6 @@ csrrc a3, sscratch, zero
 csrrwi a3, sscratch, 0
 csrrsi a3, sscratch, 0
 csrrci a3, sscratch, 0
-#   li a0, "\nCSROK"
-addi a0, x0, 0x0
-lui a0, 0x4
-srli a0, a0, 0x1
-ori a0, a0, 0x5a7
-slli a0, a0, 0xb
-ori a0, a0, 0x549
-slli a0, a0, 0xb
-ori a0, a0, 0x268
-slli a0, a0, 0xb
-ori a0, a0, 0x30a
-#   call sbi_print7
-auipc x1, 0 # R_RISCV_PCREL_HI20 sbi_print7
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I sbi_print7
 #    la a2, mem_test_var
 auipc a2, 0 # R_RISCV_PCREL_HI20 mem_test_var 
 addi a2, a2, 0 # R_RISCV_PCREL_LO12_I mem_test_var 
@@ -543,20 +542,6 @@ ori t1, t1, 0x7ff
 slli t1, t1, 0xb
 ori t1, t1, 0x790
 bne s11, t1, fail_chain
-#    li a0, "\nDivOK"
-addi a0, x0, 0x0
-lui a0, 0x4
-srli a0, a0, 0x1
-ori a0, a0, 0x5a7
-slli a0, a0, 0xb
-ori a0, a0, 0x5d9
-slli a0, a0, 0xb
-ori a0, a0, 0x528
-slli a0, a0, 0xb
-ori a0, a0, 0x40a
-#    call sbi_print7
-auipc x1, 0 # R_RISCV_PCREL_HI20 sbi_print7
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I sbi_print7
 #    li s11, 0x0000000080000000 
 addi s11, x0, 0x0
 slli s11, s11, 0xb
@@ -647,12 +632,6 @@ addi t0, x0, 0x20
 csrrs x0, sie, t0
 #    csrsi sstatus, 2  
 csrrsi x0, sstatus, 2
-#    li t0, 0x20 
-addi t0, x0, 0x0
-addi t0, x0, 0x0
-addi t0, x0, 0x20
-#    csrs sip, t0
-csrrs x0, sip, t0
 #    csrr a0, time
 csrrs a0, time, x0
 addi a0, a0, 100000

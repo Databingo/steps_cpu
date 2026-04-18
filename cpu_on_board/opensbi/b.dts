@@ -1,7 +1,7 @@
 /dts-v1/;
 
 / {
-    #address-cells = <0x02>;
+    #address-cells = <0x02>;   // cell is a 32-bit integer, <0x0 0x80000000> is 2 cells
     #size-cells = <0x02>;
     compatible = "riscv-virtio";
     model = "riscv-virtio,qemu";
@@ -78,21 +78,23 @@
             reg = <0x00 0x2000000 0x00 0x10000>;
             compatible = "sifive,clint0", "riscv,clint0";
         };
-    };
      
       // device-pending[id]-ctx-meip11-trap(stvec/cpu0_intc) [hardware|software] casue11/9-interruptExtended-plic-driver-claim-knowInterruptType-uartDriver
       // Linux use this to handle harware interrupts
       plic: interrupt-controller@c000000 {  // mmio addr
           compatible = "riscv,plic0"; // pending+0x1000 enable+0x2000 Threshold/Claim+0x200000
           interrupt-controller;
-          interrupt-cells = <1>; // pin style
-          address-cells = <0>; // no sub-address
+          #interrupt-cells = <1>; // pin style
+          #address-cells = <0>; // no sub-address
           // 11 M-External, 9 S-External
           interrupts-extended = <&cpu0_intc 11 &cpu0_intc 9>;  // to  MEIP & SEIP
           reg = <0x00 0xc000000 0x00 0x400000>;
           riscv,ndev = <31>; // Ports/Devices (Plic_pending bit 0 means no interrupt)
           phandle = <0x03>;
      };
+
+
+    };
 
 
     chosen { /* Points to the UART below */

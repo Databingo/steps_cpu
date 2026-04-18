@@ -144,14 +144,14 @@ main:
 
    li sp, 0x80700000 # Set stack # 80000000-80800000 sdram as 8M ram, we start sp from 0x80700000<-, MMU from 0x80700000->
 
-#   # Test time
-#  #csrr s0, time
-#   li t0, 100
-#check_clock:
-#   csrr a0, time
-#   call sbi_print_reg
-#   addi t0, t0, -1
-#   bnez t0, check_clock
+   # Test time
+  #csrr s0, time
+   li t0, 100
+check_clock:
+   csrr a0, time
+   call sbi_print_reg
+   addi t0, t0, -1
+   bnez t0, check_clock
 
   #sub t0, s1, s0
   #li t1, 100000
@@ -371,8 +371,8 @@ branch_target_8:
   csrrwi a3, sscratch, 0
   csrrsi a3, sscratch, 0
   csrrci a3, sscratch, 0
-  li a0, "\nCSROK"
-  call sbi_print7
+ #li a0, "\nCSROK"
+ #call sbi_print7
 
    # 12 Atomic
    la a2, mem_test_var
@@ -500,8 +500,8 @@ branch_target_8:
 
    li t1, 0x55555554FFFFFF90
    bne s11, t1, fail_chain
-   li a0, "\nDivOK"
-   call sbi_print7
+  #li a0, "\nDivOK"
+  #call sbi_print7
 
    li s11, 0x0000000080000000 
    # div by 0 = -1
