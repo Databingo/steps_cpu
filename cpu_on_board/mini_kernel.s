@@ -562,7 +562,8 @@ branch_target_8:
 
    # Test time
    csrr a0, time
-   addi a0, a0, 100000
+  #addi a0, a0, 100000
+   li a0, 100000
    li a7, 0  # SBI Set Timer ID
    ecall
 

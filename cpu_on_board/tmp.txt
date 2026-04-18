@@ -634,7 +634,10 @@ csrrs x0, sie, t0
 csrrsi x0, sstatus, 2
 #    csrr a0, time
 csrrs a0, time, x0
-addi a0, a0, 100000
+#    li a0, 100000
+addi a0, x0, 0x0
+lui a0, 0x18
+addi a0, a0, 0x6a0
 #    li a7, 0  
 addi a7, x0, 0x0
 ecall
