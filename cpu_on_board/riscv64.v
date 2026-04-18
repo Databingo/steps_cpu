@@ -29,10 +29,10 @@ module riscv64(
 
 wire meip = Csrs[mip][MEIP] && Csrs[mie][MEIE];  // mip:P Hardware say pending;|mie:E Software allow this pending;|mstatus[MIE]:cpu globally allow interrup # 3 conditions for a interrup run
 wire mtip = Csrs[mip][MTIP] && Csrs[mie][MTIE];  // irq level: MEI MTI MSI 7
-//wire msip = Csrs[mip][MSIP] && Csrs[mie][MSIE];  // hardware mip-> local mie-> global mstatus.MIE-> cpu take by irq-> trap mpie=mie/mie=0
+wire msip = Csrs[mip][MSIP] && Csrs[mie][MSIE];  // opensbi csr set
 wire seip = Csrs[mip][SEIP] && Csrs[mie][SEIE];  // hardware sip-> local sie-> global mstatus.SIE-> cpu take by irq-> trap spie=sie/sie=0 (this need after mideleg)
 wire stip = Csrs[mip][STIP] && Csrs[mie][STIE];  // mtip -> stip 5
-wire ssip = Csrs[mip][SSIP] && Csrs[mie][SSIE];  // 
+wire ssip = Csrs[mip][SSIP] && Csrs[mie][SSIE];  // software csr set
 
 
 wire m_interrupts = (meip || msip || mtip) && (current_privilege_mode < M_mode || (current_privilege_mode == M_mode && Csrs[mstatus][MIE]));
@@ -623,8 +623,8 @@ always @(*) begin
 
 		Csrs[mip][MEIP] <= meip_interrupt; 
 		Csrs[mip][MTIP] <= mtip_interrupt; // MTIP linux will see then jump to its handler  mtime>=mtimecmp
-		Csrs[mip][MSIP] <= msip_interrupt; 
 		Csrs[mip][SEIP] <= seip_interrupt;
+		//Csrs[mip][MSIP] <= msip_interrupt; 
 
 		//  i-tlb miss STrap
             if (need_trans && !tlb_i_hit) begin //OPEN 
