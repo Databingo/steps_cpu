@@ -539,22 +539,20 @@ branch_target_8:
    li a0, "\nPASS"
    call sbi_print7
    
-   # test SSIP 
+   # test SSIE 
    li t0, 0x02 # enable SSIE bit 1
    csrs sie, t0
    csrsi sstatus, 2  # enable global SIE bit 1
-
    # test SSIP  
    li t0, 0x02 #SSIP
    csrs sip, t0
 
 
 
-   # test STIP 
+   # test STIE 
    li t0, 0x20 # enable STIE bit 5
    csrs sie, t0
    csrsi sstatus, 2  # enable global SIE bit 1
-
   ## test STIP 
   #li t0, 0x20 
   #csrs sip, t0
@@ -562,9 +560,10 @@ branch_target_8:
 
    # Test time
    csrr a0, time
-  #addi a0, a0, 100000
    li a0, 100000
    li a7, 0  # SBI Set Timer ID
+   ecall
+   li a7, 0x54494D45  # Modern SBI_EXT_TIME_ID
    ecall
 
 

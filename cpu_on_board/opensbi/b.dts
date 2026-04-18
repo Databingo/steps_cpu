@@ -99,9 +99,9 @@
 
     chosen { /* Points to the UART below */
        // qemu
-       stdout-path = "/soc/serial@10000000";
+       //stdout-path = "/soc/serial@10000000";
        // SoC
-       //stdout-path = "/soc/uart@2004";
+       stdout-path = "/soc/uart@2004";
     };
 
 

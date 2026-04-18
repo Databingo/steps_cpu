@@ -85,6 +85,7 @@ cat bin.txt > ram.mif  # write RAM program
 #
 #cd opensbi && bash bash_opensbi.sh
 cp opensbi/build/platform/generic/firmware/fw_jump.bin fw_jump_pad.bin
+#cp fw_jump.bin fw_jump_pad.bin
 truncate -s 2M fw_jump_pad.bin
 cat final.bin >> fw_jump_pad.bin
 
