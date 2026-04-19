@@ -91,5 +91,5 @@ make CROSS_COMPILE=/usr/local/projects/bin/xpack-riscv-none-elf-gcc-14.2.0-3/bin
 #../../../bin/riscv64-unknown-elf-objdump -D -b binary -m riscv:rv64ima build/platform/generic/firmware/fw_payload.bin|less
 
 #hexdump -C build/platform/generic/firmware/fw_jump.bin > ../fw_jump.bin.txt
-cp build/platform/generic/firmware/fw_jump.bin ../fw_jump_ns16550a.bin
+#cp build/platform/generic/firmware/fw_jump.bin ../fw_jump_ns16550a.bin
 #cp my_board.dtb ../my_board.dtb

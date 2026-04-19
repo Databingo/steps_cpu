@@ -372,6 +372,7 @@ localparam clint_time = 27;  //
 //integer scontext = 12'h5a8; 
 reg [62:0] CAUSE_CODE;
 reg  [5:0] w_csr_id;             // CSR id (64)
+localparam XCSR = 63;  //  miss csr that not deployed
 always @(*) begin
     case(w_csr)
 	12'h300 : w_csr_id = mstatus    ;    
@@ -413,7 +414,7 @@ always @(*) begin
 	//12'h3B7 : w_csr_id = pmpaddr7   ;   
 	//default : w_csr_id = 36; 
 	12'h7CC : w_csr_id = mdebug     ;   
-	default : w_csr_id = 63; 
+	default : w_csr_id = XCSR; 
     endcase
 end
 
@@ -798,19 +799,37 @@ always @(*) begin
 		    32'b???????_?????_?????_110_?????_1100011: begin if ($unsigned(re[w_rs1]) < $unsigned(re[w_rs2])) begin pc <= branch; bubble <= 1'b1; end end // Bltu
 		    32'b???????_?????_?????_111_?????_1100011: begin if ($unsigned(re[w_rs1]) >= $unsigned(re[w_rs2])) begin pc <= branch; bubble <= 1'b1; end end // Bgeu
 		    // System-CSR 
-		    32'b???????_?????_?????_001_?????_1110011: begin if (w_rd != 0) re[w_rd] <=(w_csr_id==63) ? 64'b0 : csr_read; // Csrs[w_csr_id] & csr_mask;
-		                                                     if (w_csr_id != 63) Csrs[w_csr_id] <= (Csrs[w_csr_id] & ~csr_mask_w)| csr_write_re; end //  (rs1 & csr_mask_w); end // Csrrw logic
+		    32'b???????_?????_?????_001_?????_1110011: begin if (w_csr_id==XCSR) begin do_trap = 1; trap_is_interrupt =0; trap_val = ir; trap_epc = pc_4; trap_cause = ILLEGAL_INSTRUCTION; end
+		                                                     else begin
+                                                                     if (w_rd != 0) re[w_rd] <= csr_read;
+		                                                     Csrs[w_csr_id] <= (Csrs[w_csr_id] & ~csr_mask_w)| csr_write_re; end //  (rs1 & csr_mask_w); end // Csrrw logic
 		                                                     //if (w_csr_id==satp) begin pc<=pc; bubble<=1; end end // flush pipelien on satp write
-	            32'b???????_?????_?????_010_?????_1110011: begin if (w_rd != 0) re[w_rd] <=(w_csr_id==63) ? 64'b0 : csr_read; // Csrs[w_csr_id] & csr_mask;
-		                                                     if (w_rs1 != 0 && w_csr_id != 63) Csrs[w_csr_id] <= (Csrs[w_csr_id] | csr_write_re); end //  (rs1 & csr_mask_w)); end // Csrrs
-	            32'b???????_?????_?????_011_?????_1110011: begin if (w_rd != 0) re[w_rd] <=(w_csr_id==63) ? 64'b0 : csr_read; // Csrs[w_csr_id] & csr_mask;
-		                                                     if (w_rs1 != 0 && w_csr_id != 63) Csrs[w_csr_id] <= (Csrs[w_csr_id] & ~csr_write_re); end //  (rs1 & csr_mask_w)); end // Csrrc
-	            32'b???????_?????_?????_101_?????_1110011: begin if (w_rd != 0) re[w_rd] <=(w_csr_id==63) ? 64'b0 : csr_read; // Csrs[w_csr_id] & csr_mask;
-		                                                     if (w_csr_id != 63)   Csrs[w_csr_id] <= (Csrs[w_csr_id] & ~csr_mask_w) | csr_write_im; end //  (w_imm_z & csr_mask_w); end // Csrrwi
-	            32'b???????_?????_?????_110_?????_1110011: begin if (w_rd != 0) re[w_rd] <=(w_csr_id==63) ? 64'b0 : csr_read; // Csrs[w_csr_id] & csr_mask;
-		                                                     if (w_imm_z != 0 && w_csr_id != 63) Csrs[w_csr_id] <= (Csrs[w_csr_id] | csr_write_im); end //  (w_imm_z & csr_mask_w)); end // csrrsi
-	            32'b???????_?????_?????_111_?????_1110011: begin if (w_rd != 0) re[w_rd] <=(w_csr_id==63) ? 64'b0 : csr_read; // Csrs[w_csr_id] & csr_mask;
-		                                                     if (w_imm_z != 0 && w_csr_id != 63) Csrs[w_csr_id] <= (Csrs[w_csr_id] & ~csr_write_im); end //  (w_imm_z & csr_mask_w)); end // Csrrci
+								     end
+		    32'b???????_?????_?????_010_?????_1110011: begin if (w_csr_id==XCSR) begin do_trap = 1; trap_is_interrupt =0; trap_val = ir; trap_epc = pc_4; trap_cause = ILLEGAL_INSTRUCTION; end 
+		                                                     else begin
+                                                                     if (w_rd != 0) re[w_rd] <= csr_read;
+		                                                     if (w_rs1 != 0) Csrs[w_csr_id] <= (Csrs[w_csr_id] | csr_write_re); end //  (rs1 & csr_mask_w)); end // Csrrs
+								     end
+		    32'b???????_?????_?????_011_?????_1110011: begin if (w_csr_id==XCSR) begin do_trap = 1; trap_is_interrupt =0; trap_val = ir; trap_epc = pc_4; trap_cause = ILLEGAL_INSTRUCTION; end
+		                                                     else begin
+                                                                     if (w_rd != 0) re[w_rd] <= csr_read;
+		                                                     if (w_rs1 != 0) Csrs[w_csr_id] <= (Csrs[w_csr_id] & ~csr_write_re); end //  (rs1 & csr_mask_w)); end // Csrrc
+								     end
+		    32'b???????_?????_?????_101_?????_1110011: begin if (w_csr_id==XCSR) begin do_trap = 1; trap_is_interrupt =0; trap_val = ir; trap_epc = pc_4; trap_cause = ILLEGAL_INSTRUCTION; end
+		                                                     else begin
+                                                                     if (w_rd != 0) re[w_rd] <= csr_read;
+		                                                     Csrs[w_csr_id] <= (Csrs[w_csr_id] & ~csr_mask_w) | csr_write_im; end //  (w_imm_z & csr_mask_w); end // Csrrwi
+								     end
+		    32'b???????_?????_?????_110_?????_1110011: begin if (w_csr_id==XCSR) begin do_trap = 1; trap_is_interrupt =0; trap_val = ir; trap_epc = pc_4; trap_cause = ILLEGAL_INSTRUCTION; end
+		                                                     else begin
+                                                                     if (w_rd != 0) re[w_rd] <= csr_read;
+		                                                     if (w_imm_z != 0) Csrs[w_csr_id] <= (Csrs[w_csr_id] | csr_write_im); end //  (w_imm_z & csr_mask_w)); end // csrrsi
+								     end
+		    32'b???????_?????_?????_111_?????_1110011: begin if (w_csr_id==XCSR) begin do_trap = 1; trap_is_interrupt =0; trap_val = ir; trap_epc = pc_4; trap_cause = ILLEGAL_INSTRUCTION; end
+		                                                     else begin
+                                                                     if (w_rd != 0) re[w_rd] <= csr_read;
+		                                                     if (w_imm_z != 0) Csrs[w_csr_id] <= (Csrs[w_csr_id] & ~csr_write_im); end //  (w_imm_z & csr_mask_w)); end // Csrrci
+								     end
                     // Ecall
 	            32'b0000000_00000_?????_000_?????_1110011: begin 
 	                                                if      (current_privilege_mode == U_mode) trap_cause = UECALL; // 8 indicate Ecall from U-mode; 9 call from S-mode; 11 call from M-mode
@@ -1306,8 +1325,8 @@ assign DRAM_CKE = 1; // always enable
 	    uart_write_pulse <= 0;
 	    uart_read_pulse <= 0;
 	    uart_read_step <= 0;
-	    //mtimecmp <=  64'h80000000;
-	    mtimecmp <=  64'hffffffffffffffff;
+	    mtimecmp <=  64'h80000000;
+	    //mtimecmp <=  64'hffffffffffffffff;
 	    uart_irq_pre <= 0;
             //sd_rd_start <= 0;
 	end else begin
@@ -2435,33 +2454,34 @@ endmodule
 `define CacheI_L 64'h2000_1000
 `define CacheI_H 64'h2000_1008
 
----------- rom inner isr.s---------
-isr_router:        # Use x0-x10 shadowed register only (ra(x1), a0(x10),..x19)
+---------- mmu-itlb-dtlb, icache isr.s code---------
+isr_router:        
+     # x0-x10 are shadowed by hardware, safe to use
+     li sp, 0x1500 # Set stack shadowed sp(x2)
      li x7, 0x2004 # UART print 
      # x8 trap_type no change
      # x9 addr  # x9 keep the address need manage, no change x9
      # x689 setting
 
      # x1(ra)2(sp)3456,x10(a0) operating
-     li sp, 0x1500 # Set stack   # use shadowed sp
-
      li x3, 12 
-     beq x8, x3, mmu_i    # i-tlb-refill
+     beq x8, x3, mmu_i    # i-tlb-refill Fetch
+
+     li x3, 13 
+     beq x8, x3, mmu_d    # d-tlb-refill Load
+
+     li x3, 14 
+     beq x8, x3, mmu_d    # d-tlb-refill Store
 
      li x3, 1 
      beq x8, x3, i_cache_refill
-
-     li x3, 13 
-     beq x8, x3, mmu_d    # d-tlb-refill load
-
-     li x3, 14 
-     beq x8, x3, mmu_d    # d-tlb-refill store
 
     #li x3, 17 
     #beq x8, x3, bus_error_strap
 
      li x3, 18 
      beq x8, x3, debug
+
 i_cache_refill:
      lui x4, 0x20001 # base Cache address
      ld x3, 0(x9)    # get data
@@ -2476,7 +2496,6 @@ i_cache_refill:
 
     #mv a0, x9
     #call print_reg
-
 
     #li a0, "ICAre:"
     #call print7
@@ -2552,16 +2571,17 @@ mmu:  # VA 63:39Sign|38:30Vpn[2]|29:21Vpn[1]|20:12Vpn[0]|11:0PageOffset
      beqz x3, FAULT   # It should be leaf not 0
 
 
-
    # fall to 4KB finish
 
 FINISH_4KB:
+     jal x5, CHECK_PERM_AND_AD
      slli x4, x4, 10  # mask out reserved bits
      srli x4, x4, 20 
      slli x4, x4, 12 
      j WRITE_TLB
                                             
 FINISH_2MB:
+     jal x5, CHECK_PERM_AND_AD
      slli x4, x4, 10  # mask out reserved bits
      srli x4, x4, 20 
      slli x4, x4, 12 
@@ -2571,6 +2591,7 @@ FINISH_2MB:
      j WRITE_TLB
 
 FINISH_1GB:
+     jal x5, CHECK_PERM_AND_AD
      slli x4, x4, 10  # mask out reserved bits
      srli x4, x4, 20  # get PPN from PTE(PTE's data struction?)  64:54Reserved 53:10PPN # 9:8RSW 7Dirty 6Accessed 5Global 4User 3Executable 2Write 1Readable 0Valid
      slli x4, x4, 12  # PPN posint [38:12] in satp
@@ -2578,8 +2599,46 @@ FINISH_1GB:
      and x3, x3, x9    # extrac from VA
      add x4, x4, x3    # add offset to PPN
      j WRITE_TLB
-                 
 
+# --- Permissions, U-Bit and A/D Bits --
+CHECK_PERM_AND_AD:                
+     # 1. Check U-Bit based on VA sign (x9)
+     andi x3, x4, 0x10 # Extract U-bit (Bit 4)
+     bltz x9, check_kernel_u
+check_user_u:
+     beqz x3, PERM_FAULT # User VA (>=0) requires U=1
+     j check_permissions
+check_kernel_u:
+     bnez x3, PERM_FAULT # Kernel VA (<0) requires U=0
+check_permissions:
+     # 2. CHECK R/W/X permissions
+     li x3, 14
+     beq x8, x3, check_store
+     li x3, 12
+     beq x8, x3, check_fetch
+check_load:
+     andi x3, x4, 2 # PET.R (bit 1)
+     beqz x3, PERM_FAULT
+     j update_ad
+check_store:
+     andi x3, x4, 4 # PET.W (bit 2)
+     beqz x3, PERM_FAULT
+     j update_ad
+check_fetch:
+     andi x3, x4, 8 # PET.X (bit 8)
+     beqz x3, PERM_FAULT
+update_ad:
+     # 3. Update A/D bits
+     ori x4, x4, 0x40  # set Accessed bit (bit 6)
+     li x3, 14
+     bne x8, x3, write_pte
+     ori x4, x4, 0x80  # set Dirty bit (bit 7) if store
+write_pte:
+     sd x4, 0(x6) # write updated PTE back to memory
+     jalr x0, 0(x5)  # return to leaf formatter
+    
+    
+# -- Hardware writeback --
 WRITE_TLB:
      # 9. Writ ppn back to hardware mmu trap
      lui x6, 0x20000 # Magic TLB address
@@ -2611,6 +2670,15 @@ FAULT: # error trap?
      sd x6, 0(x7)    #  print !
 
      j return
+#FAULT:
+PERM_FAULT:
+    # force the trap cuase to trigger a real S-mode fualt for linux
+    li x3, 14
+    bne x8, x3, trigger_trap
+    li x8, 15  # Convert to Store Page Fault (15)
+trigger_trap:
+    # leaving x8 != 0
+    j return
 
 return:    
      mret
@@ -2755,7 +2823,799 @@ print7: # a0, 7 char left one for null
     ld ra, 8(sp)
     addi sp, sp, 16
     ret
----------- ram test assembly code ---------
+---------- bootloader code ---------
+#`define Sdc_base  32'h0000_3000 (3000-31ff 512 bytes index) sd_cache 
+#`define Sdc_addr  32'h0000_3200
+#`define Sdc_read  32'h0000_3204
+#`define Sdc_write 32'h0000_3208
+#`define Sdc_ready 32'h0000_3220
+#`define Sdc_dirty 32'h0000_3224
+#`define Sdc_avail 32'h0000_3228
+# UART 0x2004
+
+.globl _start
+
+# -- Define data --
+.section .data
+msg:
+    .string "Hello"
+#sbi:
+#    .string "I'm test Opensbi add update ram read=on1"
+#wait_sd_ready:
+#    .string "wait_sd_ready:"
+#read_sd_sector:
+#    .string "read_sd_sector:"
+#prt_sector:
+#    .string "print_sector:"
+reserved_sec:
+    .word 0
+num_fats:
+    .word 0
+sec_per_fat:
+    .word 0
+byte_per_sec:
+    .word 0
+root_dir_sector_start:
+    .word 0
+root_ent_cnt:
+    .word 0
+root_dir_sectors:
+    .word 0
+sec_per_clus:
+    .word 0
+data_start_sec:
+    .word 0
+entries_per_sector:
+    .word 0
+total_sectors:
+    .word 0
+file_size:
+    .word 0
+file_first_cluster:
+    .word 0
+file_sectors:
+    .word 0
+file_start_sector:
+    .word 0
+
+
+
+
+# -- Start program main function _start --
+.section .text
+# -- Global setup --
+_start:
+
+    li s0, 0x80000000
+    li s1, 0x80800000
+clear_ram_loop:
+    sd zero, 0(s0)
+    addi s0, s0, 8
+    blt s0, s1, clear_ram_loop
+
+
+
+
+    li sp, 0x1800 # Set stack
+    li s11, 0x2004 # UART print 
+    li s10, 0x2008 # UART controller
+    li s1,  0x3000 # SD base
+    li s2,  0x3200 # SD address
+    li s3,  0x3204 # SD trigger read
+    li s4,  0x3208 # SD trigger write
+    li s5,  0x3220 # SD ready for rd/wr
+    li s6,  0x3228 # SD cache available
+    # a0 for function call default parameter
+    #lui s0, 0x80000 # SDRAM base 0x80000000 wrong! neg
+    li s0, 0x80000000 # SDRAM base 0x80000000
+
+# ---------------------- SD card -------------------
+# Sector 0 Layout # BPB (BIOS Parameter Block) in sector 0
+#| Offset | Size | Field                           | Meaning                        | Example (FAT16) |
+#| :----- | :--- | :------------------------------ | :----------------------------- | :-------------- |
+#| `0x00` | 3    | Jump Instruction                | JMP to boot code               | EB 3C 90        |
+#| `0x03` | 8    | OEM Name                        | Text label                     | "MSDOS5.0"      |
+#| `0x0B` | 2    | **Bytes per sector**            | Usually 512                    | 0x0200          |
+#| `0x0D` | 1    | **Sectors per cluster**         | Cluster size (e.g. 1,2,4,8,16) | 1               |
+#| `0x0E` | 2    | **Reserved sectors**            | Includes boot sector           | 1               |
+#| `0x10` | 1    | **Number of FATs**              | Typically 2                    | 2               |
+#| `0x11` | 2    | **Root entries**                | Count of directory entries     | 512             |
+#| `0x13` | 2    | **Total sectors (16-bit)**      | If zero, use 0x20–0x23         | 2880            |
+#| `0x15` | 1    | **Media descriptor**            | 0xF8 (fixed disk)              | F8              |
+#| `0x16` | 2    | **Sectors per FAT**             | FAT size                       | 9               |
+#| `0x18` | 2    | **Sectors per track**           | BIOS info                      | 18              |
+#| `0x1A` | 2    | **Number of heads**             | BIOS info                      | 2               |
+#| `0x1C` | 4    | **Hidden sectors**              | Partition offset               | 0               |
+#| `0x20` | 4    | **Total sectors (32-bit)**      | Large volumes                  | 0               |
+#| `0x24` | —    | (More fields in FAT32 only)     | —                              | —               |
+#| `0x36` | 11   | Volume Label / File System Type | "NO NAME    " / "FAT16   "     | —               |
+#| :----- | :--- | :------------------------------ | :----------------------------- | :-------------- |
+
+
+#lw a0, 0(s11)
+#call print_reg
+
+find_opensbi:
+li s9, "MUSIC"
+find_kernel:
+
+# ----------Read BPB sector 0 -----
+li a0, 0   
+call sd_read_sector  # use a0 as sector no.
+#call print_sector
+
+# -- Parse BPB -- little-endian  Bios Parameter Block : sector 0
+# -------------------------------------
+# byte_per_sec offset 0x0b-0x0c 2 bytes
+li s7, 66
+sb s7, 0(s11)
+#li a0, "\nBPsec:" # 7 char left on for null
+#call print7
+
+#endd:
+#    j endd
+
+la a1, byte_per_sec
+lwu a0, 0x0a(s1)
+srli a0, a0, 8
+sh a0, 0(a1)
+#lhu a0, 0(a1)
+#call print_reg
+
+# -------------------------------------
+# Sectors per cluster 0x0d 1 byte
+#li a0, "\nsePcl:" # 7 char left on for null
+#call print7
+la a1, sec_per_clus
+lbu a0, 0x0d(s1)
+sh a0, 0(a1)
+#lh a0, 0(a1)
+#call print_reg
+#
+#
+# -------------------------------------
+# reserved_sectors offset 0x0e-0x0f 2 bytes (including root sector 0)
+#li a0, "\nrevSe:" # 7 char left on for null
+#call print7
+la a1, reserved_sec
+lh a0, 0x0e(s1)
+sd a0, 0(a1)
+#ld a0, 0(a1)
+#call print_reg
+
+# -------------------------------------
+# num_fats offset 0x10 1 bytes
+#li a0, "\nnuFat:" # 7 char left on for null
+#call print7
+la a1, num_fats
+lbu a0, 0x10(s1)
+sw a0, 0(a1)
+#lw a0, 0(a1)
+#call print_reg
+
+# -------------------------------------
+# root_entries offset 0x11-0x12 2 bytes
+#li a0, "\nReCnt:"
+#call print7
+la a1, root_ent_cnt
+lwu a0, 0x10(s1)
+srli a0, a0, 8
+sh a0, 0(a1)
+#lhu a0, 0(a1)
+#call print_reg
+
+# -------------------------------------
+# total sectors offset 0x13 2 bytes if 0 find 0x20 4 bytes for large volumes
+#li a0, "\nToSec:"
+#call print7
+la a1, total_sectors
+lwu a0, 0x20(s1)
+sw a0, 0(a1)
+#lwu a0, 0(a1)
+#call print_reg
+
+# -------------------------------------
+# sectors_per_fat16 high offset 0x16-0x17 2 bytes
+#li a0, "\nsePft:" # 7 char left on for null
+#call print7
+la a1, sec_per_fat
+lh a0, 0x16(s1)
+sh a0, 0(a1)
+#lh a0, 0(a1)
+#call print_reg
+
+## ---------Calcauted ----------------------------
+# root_dir_sector_start = reserved_sectors + (num_fats * sectors_per_fat16)
+#li a0, "\nrtdS0:" # 7 char left on for null
+#call print7
+la a1, num_fats
+lw t1, 0(a1)
+la a1, sec_per_fat
+lw t2, 0(a1)
+la a1, reserved_sec
+lw t0, 0(a1)
+mul a0, t1, t2
+add a0, a0, t0
+la t3, root_dir_sector_start
+sw a0, 0(t3)
+#lw a0, 0(t3)
+#call print_reg
+
+# -------------------------------------
+# entries_per_sector =  byte_per_sec/32
+
+    csrwi mdebug, 8
+
+#li a0, "\nEtPse:"
+#call print7
+la a1, byte_per_sec
+lw a0, 0(a1)
+mv s7, a0
+#srli a0, a0, 5  # calc entries_per_sector
+li t1, 32
+div a0, a0, t1
+la t3,  entries_per_sector
+sw a0, 0(t3)
+lw a0, 0(t3)
+call print_reg
+
+    csrwi mdebug, 0
+
+# ---------- Read Root dir Secotr 0 -----
+la t3, root_dir_sector_start
+lw a0, 0(t3)
+call sd_read_sector  # use a0 as sector no.
+call print_sector
+
+
+# -------------------------------------
+# Scan Entries of Root Dir first sector
+# s7 entry_per_sector
+
+#find_opensbi:
+#li s9, "MUSIC"
+##li s9, "KERNL"
+##mv a0, s9
+##call print7
+#find_kernel:
+
+
+li s8, 0 # entry_index
+entry_loop:
+bge s8, s7, done_entries
+# entry_addr = s1 + (entry_index * 32)
+slli t1, s8, 5
+add t3, s1, t1 # t3 = address of entry
+
+# 1. Quick Validity Check
+# load first byte of entry
+lbu t4, 0(t3)
+beq t4, x0, done_entries # 0x00 no more entries in dir
+li t1, 0xE5
+beq t4, t1, next_entry # 0xE5 deleted entry, skip
+    
+# 2. Attribute Check # attribute at 0x0B( offset 11)
+lbu t5, 11(t3)
+li t1, 0x0F
+beq t5, t1, next_entry # 0x0F LFN(Long File Name) entry, skip
+
+andi t6, t5, 0x18  # Mask for Volume Label(0x08) and Directory (0x10)
+bne t6, x0, next_entry # skip 
+
+# 3. Compare Filename(First 8 bytes)
+# load name 8 bytes
+li t2, 0
+addi t4, t3, 7
+load_name_loop:
+lbu t0, 0(t4)
+slli t2, t2, 8
+xor t2, t2, t0
+addi t4, t4, -1
+bge t4, t3, load_name_loop
+
+# keep 5 char
+slli t2, t2, 24
+srli t2, t2, 24
+
+## -- Print Name --- 
+#addi sp, sp, -16
+#sd t2, 0(sp)
+#sb x0, 8(sp)
+#mv a0, sp
+#call puts
+#addi sp, sp, 16
+## -----------------
+
+bne t2, s9, next_entry
+
+## 4. FOUND! Extract File Info
+li a0, "FOUND!"
+call print7
+#mv a0, s9
+#call print7
+
+done_entries:
+   j read_file
+
+next_entry:
+addi s8, s8, 1
+j entry_loop
+
+
+## root_dir_sector_start = reserved_sectors + (num_FATs * sectors_per_FAT)
+## root_dir_sectors = (RootEntryCount * 32 + BytesPerSector -1 )/ BytesPerSector  ceiling division
+## FirstDataSector = root_dir_sector_start + root_dir_sectors 
+## FirstSectorOfCluster(N)=FirstDataSector + (N - 2) * SectorsPerCluster
+#
+## Entry Layout(in Root Directory)
+##| Offset | Size | Field                             | Description                  | Example      |
+##| :----- | :--- | :-------------------------------- | :--------------------------- | :----------- |
+##| `0x00` | 8    | **Filename**                      | 8 chars (space padded)       | `"MUSIC   "` | FAT16 8.3 format for name.extension
+##| `0x08` | 3    | **Extension**                     | 3 chars (space padded)       | `"WAV"`      |
+##| `0x0B` | 1    | **Attributes**                    | Bit flags (see below)        | 0x20         |
+##| `0x0C` | 1    | Reserved                          | For Windows NT               | 0            |
+##| `0x0D` | 1    | Creation time (tenths)            | Optional                     | —            |
+##| `0x0E` | 2    | Creation time                     | —                            | —            |
+##| `0x10` | 2    | Creation date                     | —                            | —            |
+##| `0x12` | 2    | Last access date                  | —                            | —            |
+##| `0x14` | 2    | High word of cluster (FAT32 only) | —                            | —            |
+##| `0x16` | 2    | Last modified time                | —                            | —            |
+##| `0x18` | 2    | Last modified date                | —                            | —            |
+##| `0x1A` | 2    | **First cluster (low word)**      | Cluster number (starts at 2) | 0x0002       |
+##| `0x1C` | 4    | **File size (bytes)**             | File length                  | 4096         |
+#
+read_file:
+#j read_file
+## file size at 0x1C-0x1D-0x1E-0x1F 4 bytes
+li a0, "\nFSize:"
+call print7
+lwu a0, 0x1c(t3)
+la a1, file_size
+sw a0, 0(a1)
+lwu a0, 0(a1)
+call print_reg
+
+# file_first_cluster at 0x1A-0x1B 2 bytes
+#li a0, "\nF0cls:"
+#call print7
+lhu a0, 0x1a(t3)
+la a1, file_first_cluster
+sh a0, 0(a1)
+#lhu a0, 0(a1)
+#call print_reg
+
+# root_dir_sectors = (RootEntryCount * 32 + BytesPerSector -1 )/ BytesPerSector  ceiling division
+#li a0, "\nrDseS:"
+#call print7
+
+la a1, root_ent_cnt
+lwu t0, 0(a1)
+li t1, 32
+mul t2, t0, t1
+
+la a1, byte_per_sec
+lwu t0, 0(a1)
+add t3, t2, t0
+addi t3, t3, -1
+div a0, t3, t0
+
+la a1, root_dir_sectors 
+sw a0, 0(a1)
+lw a0, 0(a1)
+call print_reg
+
+#data_start_sec # FirstDataSector = root_dir_sector_start + root_dir_sectors 
+#li a0, "\nD0sec:"
+#call print7
+la a1, root_dir_sector_start
+lw t0, 0(a1)
+la a1, root_dir_sectors 
+lw t1, 0(a1)
+add t2, t0, t1
+la a1, data_start_sec  
+sw t2, 0(a1)
+#lw a0, 0(a1)
+#call print_reg
+
+# FirstSectorOfCluster(N)=FirstDataSector + (N - 2) * SectorsPerCluster
+#li a0, "\nF0sec:"
+#call print7
+
+la a1, file_first_cluster # N
+lw t0, 0(a1)
+addi t0, t0, -2
+la a1, sec_per_clus
+lw t1, 0(a1)
+mul t2, t0, t1
+la a1, data_start_sec
+lw t3, 0(a1)
+add a0, t3, t2
+la a1, file_start_sector
+sw a0, 0(a1)
+call print_reg
+
+
+# file_sectors = file_size + 511 / 512
+#li a0, "\nFseS:"
+#call print7
+la a1, file_size
+lw t0, 0(a1)
+addi t0, t0, 511
+li t1, 512
+div a0, t0, t1
+la a1, file_sectors 
+sw a0, 0(a1)
+lw a0, 0(a1)
+call print_reg
+
+
+#li a0, "\nFileB:"
+#call print7
+
+la a1, file_sectors
+lw t0, 0(a1)
+la a1,  file_start_sector
+lw t1, 0(a1)
+add t2, t1, t0
+
+
+#print_sector_loop:
+#mv a0, t1
+#call sd_read_sector  # use a0 as sector no.
+#call print_sector
+#addi t1, t1, 1
+#blt t1, t2, print_sector_loop
+ 
+li t0, "KERNL"
+beq t0, s9, copy_kernel 
+
+#lui s0, 0x80000 # SDRAM base 0x80000000
+li s0, 0x80000000 # SDRAM base 0x80000000
+copy_sector_loop:
+li a0, 94 # ^
+call putchar
+mv a0, t1
+call sd_read_sector  # use a0 as sector no.
+mv a0, s0
+call copy_sector
+addi t1, t1, 1
+addi s0, s0, 512
+blt t1, t2, copy_sector_loop
+
+ 
+search_kernel:
+li s9, "KERNL"
+#mv a0, s9
+#call print7
+j find_kernel
+
+copy_kernel: 
+li s0, 0x80200000 # FW_JUMP to KERNL base 0x80200000
+copy_kernel_sector_loop:
+li a0, 96 # `
+call putchar
+mv a0, t1
+call sd_read_sector  # use a0 as sector no.
+mv a0, s0
+call copy_sector
+addi t1, t1, 1
+addi s0, s0, 512
+blt t1, t2, copy_kernel_sector_loop
+
+
+
+#li s0, 0x80000000
+#la a1, file_size
+#lw t0, 0(a1)
+#add s0, s0, t0     # s0 = end of file
+#li s1, 0x80800000  # s1 = end of SDRAM
+#clear_garbage_loop:
+#bge s0, s1, boot_opensbi
+#sb zero, 0(s0)
+#addi s0, s0, 1
+#j clear_garbage_loop
+
+
+
+
+
+# -----------------------------
+# Read/Write SDRAM
+#lui s0, 0x80000 # SDRAM base 0x80000000
+#li s0, 0x80000000 # SDRAM base 0x80000000
+## Write one byte
+#li t1, 0x58          # 'X'
+#sb t1, 0(s0)         # test sdram sb/sh
+#    
+## Read it back
+#lbu t2, 0(s0)         # test sdram lbu
+#    
+## Print it
+#sb t2, 0(s11)         # Should print 'X'
+
+
+#    lui t0, 0x2
+#    addi t0, t0, 4       # UART = 0x2004
+#    
+#    lui s0, 0x80000      # SDRAM = 0x80000000
+#li s0, 0x80000000 # SDRAM base 0x80000000
+#    
+#    # Write one byte
+#    li t1, 0x58          # 'X'
+#    call wait_uart
+#    sb t1, 0(s0)         # test sdram sb/sh
+#    
+#    # Read it back
+#    lbu t2, 0(s0)         # test sdram lbu
+#    
+#    # Print it
+#    sb t2, 0(t0)         # Should print 'X'
+#    sb t2, 0(t0)         # Should print 'X'
+#    sh t2, 0(t0)         # Should print 'X'
+#    
+#    # Write 4 byte
+#    li t1, 0x44434241    # 'DCBA'
+#    sw t1, 0(s0)         # test sdram sw
+#    
+#    # Read it back
+#    lhu t3, 0(s0) # A    # test sdram lhu lwu
+#    lbu t4, 1(s0) # B
+#    lwu t5, 2(s0) # C
+#    lbu t6, 3(s0) # D
+#    
+#    # Print it
+#    sb t3, 0(t0)         # Should print 'A'
+#    sb t4, 0(t0)         # Should print 'B'
+#    sb t5, 0(t0)         # Should print 'C'
+#    sb t6, 0(t0)         # Should print 'D'
+#    sb t2, 0(t0)         # Should print 'X'
+
+boot_opensbi:
+    #lui s0, 0x80000      # SDRAM = 0x80000000
+    li s0, 0x80000000 # SDRAM base 0x80000000
+    ld a0, 0(s0)         # test sdram read data
+    call print_reg
+
+ li a0, "\nJump:"
+ call print7
+
+#csrsi mie, 0b10000000 # MTIP
+#csrsi mstatus, 0b1000 # MIE
+
+    fence.i
+   #csrw 0x7cc, t0  # open debug print
+
+   #csrwi mdebug, 8 
+    li a0, 0 # use core 0
+    li a1, 0 # let opensbi use its embedded DTB
+   #li a1, 0x80100000 # set DTB addr
+   #li a2, 0 # set boot HART
+    li a2, 0x80200000 # next jump address
+
+    jr s0  # jump to SDRAM!
+
+
+end: 
+j end
+
+
+
+
+
+
+# functions ------
+
+print_reg: # a0
+    addi sp, sp, -40
+    sd ra, 0(sp)
+    sd s0, 8(sp)
+    sd s1, 16(sp)
+    sd s2, 24(sp)
+    sd s3, 32(sp)
+    mv s0, a0
+    li a0, "0"
+    call putchar
+    li a0, "x"
+    call putchar
+    li s1, 60 
+p_loop:
+    srl s2, s0, s1      # get high nibble
+    andi s2, s2, 0xF
+    slti s3, s2, 10     # if < 10 number
+    beq s3, x0, letter
+    addi s2, s2, 48     # 0 is "0" ascii 48
+    j print_h
+letter:
+    addi s2, s2, 55     # 10 is "A" ascii 65 ..
+print_h:
+    call wait_uart
+    sb s2, 0(s11)       # print
+    addi s1, s1, -4
+    bge s1, x0, p_loop 
+    ld ra, 0(sp)
+    ld s0, 8(sp)
+    ld s1, 16(sp)
+    ld s2, 24(sp)
+    ld s3, 32(sp)
+    addi sp, sp, 40
+    ret
+
+
+# ---  sd_read_sector ---
+sd_read_sector:  #  a0 sector index
+    addi sp, sp, -24
+    sd s7, 0(sp)
+    sd s8, 8(sp)
+    sd ra, 16(sp)
+    sw a0, 0(s2) # Write Sector index value to address 0x3200
+wait_ready:
+    lw s7, 0(s5)   # 0x3220 ready
+    #li a0, 96      # `
+    #call putchar
+    beq s7, x0, wait_ready
+    li s8, 1
+    sw s8, 0(s3)   # Trigger read at 0x3204
+wait_cache:
+    lw s7, 0(s6)   # s7 0x3228 cache_avaible
+    beq s7, x0, wait_cache
+    ld s7, 0(sp)
+    ld s8, 8(sp)
+    ld ra, 16(sp)
+    addi sp, sp, 24
+    ret
+
+
+# print sector 0 512 bytes
+print_sector:
+    addi sp, sp, -64
+    sd ra, 0(sp)
+    sd s4, 8(sp)
+    sd s5, 16(sp)
+    sd s6, 24(sp)
+    sd s7, 32(sp)
+    sd s8, 40(sp)
+    sd s9, 48(sp)
+    sd s3, 56(sp)
+    li s7, 0   # byte index
+    li s8, 511 # max byte index
+print_loop:
+    add s6, s1, s7 
+    addi s7, s7, 1
+    lbu s9, 0(s6)       # load byte at 0x3000 a1+t1
+    andi s9, s9, 0xFF   # Isolate byte value
+    srli s3, s9, 4      # get high nibble
+    slti s5, s3, 10     # if < 10 number
+    beq s5, x0, letter_h
+    addi s3, s3, 48     # 0 is "0" ascii 48
+    j print_h_hex
+letter_h:
+    addi s3, s3, 55     # 10 is "A" ascii 65 ..
+print_h_hex:
+    call wait_uart 
+    sb s3, 0(s11)
+    andi s4, s9, 0x0F   # get low nibble
+    slti s5, s4, 10     # if < 10 number
+    beq s5, x0, letter_l
+    addi s4, s4, 48     # 0 is "0" ascii 48
+    j print_l_hex
+letter_l:
+    addi s4, s4, 55     # 10 is "A" ascii 65 ..
+print_l_hex:
+    call wait_uart 
+    sb s4, 0(s11)
+    bge s8, s7, print_loop
+    ld ra, 0(sp)
+    ld s4, 8(sp)
+    ld s5, 16(sp)
+    ld s6, 24(sp)
+    ld s7, 32(sp)
+    ld s8, 40(sp)
+    ld s9, 48(sp)
+    ld s3, 56(sp)
+    addi sp, sp, 64
+    ret
+# -- end print_sector --
+
+
+# copy sector 0 512 bytes
+copy_sector: # a0 as target addr
+    addi sp, sp, -48
+    sd ra, 0(sp)
+    sd s6, 8(sp)
+    sd s7, 16(sp)
+    sd s8, 24(sp)
+    sd s9, 32(sp)
+    sd s5, 40(sp)
+
+    li s7, 0   # byte index
+    li s8, 511 # max byte index
+    mv s5, a0
+copy_loop:
+    add s6, s1, s7 
+    ld a0, 0(s6)       # load 8 bytes at 0x3000 a1+s7
+    sd a0, 0(s5)       # save 8 bytes to s5
+   #call print_reg
+    addi s7, s7, 8
+    addi s5, s5, 8
+    bge s8, s7, copy_loop
+    ld ra, 0(sp)
+    ld s6, 8(sp)
+    ld s7, 16(sp)
+    ld s8, 24(sp)
+    ld s9, 32(sp)
+    ld s5, 40(sp)
+    addi sp, sp,  48
+    ret
+# -- end print_sector --
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+putchar:  # a0
+    addi sp, sp, -8
+    sd ra, 0(sp)
+    call wait_uart
+    sb a0, 0(s11)
+    ld ra, 0(sp)
+    addi sp, sp, 8
+    ret
+
+
+puts: # a0 addr
+    addi sp, sp, -16
+    sd ra, 0(sp)
+    sd s0, 8(sp)
+    mv s0, a0
+puts_loop:
+    lbu a0, 0(s0)
+    beq a0, x0, stop_puts # \x00 for end of string
+    call putchar # a0 char
+    addi s0, s0, 1 # next byte
+    j puts_loop
+stop_puts:
+    ld ra, 0(sp)
+    ld s0, 8(sp)
+    addi sp, sp, 16
+    ret
+
+
+wait_uart:
+    addi sp, sp, -16
+    sd s0, 0(sp)
+    sd ra, 8(sp)
+wait_uart_loop:
+   #li a0, 65  # A
+   #sb a0, 0(s11)
+    lw s0, 0(s11)
+    bgt zero, s0, wait_uart_loop
+    ld s0, 0(sp)
+    ld ra, 8(sp)
+    addi sp, sp, 16
+    ret
+
+print7: # a0, 7 char left one for null
+    addi sp, sp, -16
+    sd a0, 0(sp)
+    sd ra, 8(sp)
+    mv a0, sp
+    call puts
+   #ld a0, 0(sp)
+    ld ra, 8(sp)
+    addi sp, sp, 16
+    ret
+---------- mini_kernel test code ---------
 .globl _start
 
 .section .data
@@ -3466,6 +4326,7 @@ end:
 
 
 };
+---------- opensbi config ---------
 make PLATFORM=generic clean
 
 #dtc -I dts -O dtb -o my_board.dtb my_board.dts # boot time use via its address at register a1, hardid(core number) in a0
@@ -3507,6 +4368,7 @@ make CROSS_COMPILE=/usr/local/projects/bin/xpack-riscv-none-elf-gcc-14.2.0-3/bin
      FW_JUMP_FDT_ADDR=0x80100000 \
      FW_PAYLOAD=n \
      FW_JUMP_ADDR=0x80200000 \
+    #SBI_EXT_TIME=n\
     #FW_PAYLOAD_OFFSET=0x200000 \
     #FW_PAYLOAD_PATH=/usr/local/projects/steps_cpu/create_mini_linux/riscv64-linux/Image \
     #FW_PAYLOAD_ALIGN=0x1000 \
@@ -3558,5 +4420,5 @@ make CROSS_COMPILE=/usr/local/projects/bin/xpack-riscv-none-elf-gcc-14.2.0-3/bin
 #../../../bin/riscv64-unknown-elf-objdump -D -b binary -m riscv:rv64ima build/platform/generic/firmware/fw_payload.bin|less
 
 #hexdump -C build/platform/generic/firmware/fw_jump.bin > ../fw_jump.bin.txt
-#cp build/platform/generic/firmware/fw_jump.bin ../fw_jump.bin
+cp build/platform/generic/firmware/fw_jump.bin ../fw_jump_ns16550a.bin
 #cp my_board.dtb ../my_board.dtb
