@@ -76,9 +76,9 @@
 # Test smaller image
 qemu-system-riscv64 -nographic \
     -machine virt \
-    -m 35M \
+    -m 8M \
     -cpu rv64,f=off,d=off,c=off,h=off,g=off,zfa=off,zfh=off,zba=off,zbb=off \
-    -bios fw_jump_ima.bin \
+    -bios fw_jump_ns16550a.bin \
     -append "mem=8M"  \
     -kernel /usr/local/projects/steps_cpu/create_mini_linux/riscv64-linux/Image
 
