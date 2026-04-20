@@ -55,7 +55,8 @@
             reg = <0x00 0x10000000 0x00 0x100>;
             clock-frequency = <12500000>;
             reg-shift = <0>;
-            status = "okay";
+            //status = "okay";
+            status = "disabled";
         };
                
         uart0: uart@2004{
@@ -66,7 +67,7 @@
              interrupt-parent = <&plic>;  
              interrupts = <1>;             // claim number
              clock-frequency = <12500000>;
-             //status = "disable";
+             //status = "disabled";
              status = "okay";
          };
 
@@ -99,9 +100,9 @@
 
     chosen { /* Points to the UART below */
        // qemu
-       stdout-path = "/soc/serial@10000000";
+       //stdout-path = "/soc/serial@10000000";
        // SoC
-       //stdout-path = "/soc/uart@2004";
+       stdout-path = "/soc/uart@2004";
     };
 
 

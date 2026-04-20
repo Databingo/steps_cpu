@@ -307,31 +307,31 @@ assign DRAM_CKE = 1; // always enable
 
 
     //wire Key_selected = (bus_address == `Key_base);
-//    wire valid_address = Rom_selected
-//    | Ram_selected
-//    | Art_selected
-//    | Sdc_addr_selected
-//    | Sdc_read_selected
-//    | Sdc_write_selected
-//    | Sdc_ready_selected
-//    | Sdc_cache_selected
-//    | Sdc_avail_selected
-//    | Sdram_selected
-//    | Clintbase_selected 
-//    | Mtime_selected
-//    | Mtimecmp_selected
-//    | CacheI_L_selected
-//    | CacheI_H_selected
-//    | Tlb_selected
-//    | Plic_priority_selected
-//    | Plic_pending_selected
-//    | Plic_enable_ctx0_selected
-//    | Plic_enable_ctx1_selected
-//    | Plic_threshold_ctx0_selected
-//    | Plic_threshold_ctx1_selected
-//    | Plic_claim_ctx0_selected
-//    | Plic_claim_ctx1_selected;
-//
+    wire valid_address = Rom_selected
+    | Ram_selected
+    | Art_selected
+    | Sdc_addr_selected
+    | Sdc_read_selected
+    | Sdc_write_selected
+    | Sdc_ready_selected
+    | Sdc_cache_selected
+    | Sdc_avail_selected
+    | Sdram_selected
+    | Clintbase_selected 
+    | Mtime_selected
+    | Mtimecmp_selected
+    | CacheI_L_selected
+    | CacheI_H_selected
+    | Tlb_selected
+    | Plic_priority_selected
+    | Plic_pending_selected
+    | Plic_enable_ctx0_selected
+    | Plic_enable_ctx1_selected
+    | Plic_threshold_ctx0_selected
+    | Plic_threshold_ctx1_selected
+    | Plic_claim_ctx0_selected
+    | Plic_claim_ctx1_selected;
+
 
     // Read & Write BRAM Port B 
     reg [63:0] bus_address_reg;
@@ -377,6 +377,7 @@ assign DRAM_CKE = 1; // always enable
         // Read
         //if (!bus_read_enable && bus_read_done==0) begin 
         if (bus_read_done==0) begin 
+	    if (!valid_address) bus_read_done <= 0;
             //if (Key_selected) begin bus_read_data <= {32'd0, 24'd0, ascii}; bus_read_done <= 1; end
 	    if (Ram_selected) begin 
 	        casez(bus_ls_type)
@@ -542,6 +543,7 @@ assign DRAM_CKE = 1; // always enable
         //if (bus_write_enable || sd!=0 ) begin 
         //if (!bus_write_enable && bus_write_done == 0) begin 
         if (bus_write_done == 0) begin 
+	    if (!valid_address) bus_write_done <= 0; // prevent OS hanging by invalid address r/w
 	    if (Ram_selected) begin 
 		casez(bus_ls_type) // 000sb 001sh 010sw 011sd
 		    3'b000: begin //sb
