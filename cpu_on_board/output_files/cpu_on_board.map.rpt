@@ -1,5 +1,5 @@
 Analysis & Synthesis report for cpu_on_board
-Wed Apr 22 00:00:20 2026
+Wed Apr 22 00:03:20 2026
 Quartus II 32-bit Version 13.0.1 Build 232 06/12/2013 Service Pack 1 SJ Web Edition
 
 
@@ -36,7 +36,7 @@ applicable agreement for further details.
 +--------------------------------------------------------------------------------------+
 ; Analysis & Synthesis Summary                                                         ;
 +------------------------------------+-------------------------------------------------+
-; Analysis & Synthesis Status        ; Failed - Wed Apr 22 00:00:19 2026               ;
+; Analysis & Synthesis Status        ; Failed - Wed Apr 22 00:03:20 2026               ;
 ; Quartus II 32-bit Version          ; 13.0.1 Build 232 06/12/2013 SP 1 SJ Web Edition ;
 ; Revision Name                      ; cpu_on_board                                    ;
 ; Top-level Entity Name              ; cpu_on_board                                    ;
@@ -175,7 +175,7 @@ Info: Running Quartus II 32-bit Analysis & Synthesis
     Info: programming logic devices manufactured by Altera and sold by 
     Info: Altera or its authorized distributors.  Please refer to the 
     Info: applicable agreement for further details.
-    Info: Processing started: Tue Apr 21 23:59:38 2026
+    Info: Processing started: Wed Apr 22 00:03:07 2026
 Info: Command: quartus_map --read_settings_files=on --write_settings_files=off cpu_on_board -c cpu_on_board
 Info (20030): Parallel compilation is enabled and will use 2 of the 2 processors detected
 Info (12021): Found 1 design units, including 1 entities, in source file jtag_uart_system/synthesis/jtag_uart_system.v
@@ -395,29 +395,44 @@ Warning (10335): Unrecognized synthesis attribute "ram_style" at riscv64.v(456)
 Warning (10335): Unrecognized synthesis attribute "ram_style" at riscv64.v(548)
 Warning (10335): Unrecognized synthesis attribute "ram_style" at riscv64.v(549)
 Warning (10335): Unrecognized synthesis attribute "ram_style" at riscv64.v(552)
-Error (10170): Verilog HDL syntax error at riscv64.v(597) near text "wire";  expecting ";" File: /usr/local/projects/steps_cpu/cpu_on_board/riscv64.v Line: 597
-Error (10170): Verilog HDL syntax error at riscv64.v(619) near text "<=";  expecting ".", or an identifier File: /usr/local/projects/steps_cpu/cpu_on_board/riscv64.v Line: 619
-Error (10170): Verilog HDL syntax error at riscv64.v(623) near text "<=";  expecting ".", or an identifier File: /usr/local/projects/steps_cpu/cpu_on_board/riscv64.v Line: 623
-Error (10170): Verilog HDL syntax error at riscv64.v(624) near text "<=";  expecting ".", or an identifier File: /usr/local/projects/steps_cpu/cpu_on_board/riscv64.v Line: 624
-Error (10170): Verilog HDL syntax error at riscv64.v(652) near text "<=";  expecting ".", or an identifier File: /usr/local/projects/steps_cpu/cpu_on_board/riscv64.v Line: 652
-Error (10170): Verilog HDL syntax error at riscv64.v(653) near text "<=";  expecting ".", or an identifier File: /usr/local/projects/steps_cpu/cpu_on_board/riscv64.v Line: 653
-Error (10170): Verilog HDL syntax error at riscv64.v(654) near text "<=";  expecting ".", or an identifier File: /usr/local/projects/steps_cpu/cpu_on_board/riscv64.v Line: 654
-Error (10170): Verilog HDL syntax error at riscv64.v(666) near text "<=";  expecting ".", or an identifier File: /usr/local/projects/steps_cpu/cpu_on_board/riscv64.v Line: 666
-Error (10170): Verilog HDL syntax error at riscv64.v(667) near text "<=";  expecting ".", or an identifier File: /usr/local/projects/steps_cpu/cpu_on_board/riscv64.v Line: 667
-Error (10170): Verilog HDL syntax error at riscv64.v(681) near text "<=";  expecting ".", or an identifier File: /usr/local/projects/steps_cpu/cpu_on_board/riscv64.v Line: 681
-Error (10170): Verilog HDL syntax error at riscv64.v(685) near text "<=";  expecting ".", or an identifier File: /usr/local/projects/steps_cpu/cpu_on_board/riscv64.v Line: 685
-Error (10170): Verilog HDL syntax error at riscv64.v(688) near text "<=";  expecting ".", or an identifier File: /usr/local/projects/steps_cpu/cpu_on_board/riscv64.v Line: 688
-Error (10170): Verilog HDL syntax error at riscv64.v(698) near text "<=";  expecting ".", or an identifier File: /usr/local/projects/steps_cpu/cpu_on_board/riscv64.v Line: 698
-Error (10170): Verilog HDL syntax error at riscv64.v(699) near text "<=";  expecting ".", or an identifier File: /usr/local/projects/steps_cpu/cpu_on_board/riscv64.v Line: 699
-Error (10170): Verilog HDL syntax error at riscv64.v(714) near text "&&";  expecting ".", or an identifier File: /usr/local/projects/steps_cpu/cpu_on_board/riscv64.v Line: 714
-Error (10170): Verilog HDL syntax error at riscv64.v(720) near text "<=";  expecting ".", or an identifier File: /usr/local/projects/steps_cpu/cpu_on_board/riscv64.v Line: 720
-Error (10170): Verilog HDL syntax error at riscv64.v(722) near text "<=";  expecting ".", or an identifier File: /usr/local/projects/steps_cpu/cpu_on_board/riscv64.v Line: 722
-Error (10170): Verilog HDL syntax error at riscv64.v(723) near text "<=";  expecting ".", or an identifier File: /usr/local/projects/steps_cpu/cpu_on_board/riscv64.v Line: 723
-Error (10170): Verilog HDL syntax error at riscv64.v(724) near text "<=";  expecting ".", or an identifier File: /usr/local/projects/steps_cpu/cpu_on_board/riscv64.v Line: 724
-Error: Quartus II 32-bit Analysis & Synthesis was unsuccessful. 19 errors, 52 warnings
-    Error: Peak virtual memory: 378 megabytes
-    Error: Processing ended: Wed Apr 22 00:00:25 2026
-    Error: Elapsed time: 00:00:47
-    Error: Total CPU time (on all processors): 00:00:42
+Warning (10268): Verilog HDL information at riscv64.v(598): always construct contains both blocking and non-blocking assignments
+Info (10281): Verilog HDL Declaration information at riscv64.v(313): object "MIE" differs only in case from object "mie" in the same scope
+Info (10499): HDL info at riscv64.v(322): see declaration for object "mie"
+Info (10281): Verilog HDL Declaration information at riscv64.v(313): object "SIE" differs only in case from object "sie" in the same scope
+Info (10499): HDL info at riscv64.v(323): see declaration for object "sie"
+Info (10281): Verilog HDL Declaration information at riscv64.v(30): object "meip" differs only in case from object "MEIP" in the same scope
+Info (10499): HDL info at riscv64.v(326): see declaration for object "MEIP"
+Info (10281): Verilog HDL Declaration information at riscv64.v(33): object "seip" differs only in case from object "SEIP" in the same scope
+Info (10499): HDL info at riscv64.v(326): see declaration for object "SEIP"
+Info (10281): Verilog HDL Declaration information at riscv64.v(31): object "mtip" differs only in case from object "MTIP" in the same scope
+Info (10499): HDL info at riscv64.v(326): see declaration for object "MTIP"
+Info (10281): Verilog HDL Declaration information at riscv64.v(34): object "stip" differs only in case from object "STIP" in the same scope
+Info (10499): HDL info at riscv64.v(326): see declaration for object "STIP"
+Info (10281): Verilog HDL Declaration information at riscv64.v(32): object "msip" differs only in case from object "MSIP" in the same scope
+Info (10499): HDL info at riscv64.v(326): see declaration for object "MSIP"
+Info (10281): Verilog HDL Declaration information at riscv64.v(35): object "ssip" differs only in case from object "SSIP" in the same scope
+Info (10499): HDL info at riscv64.v(326): see declaration for object "SSIP"
+Warning (12125): Using design file riscv64.v, which is not specified as a design file for the current project, but contains definitions for 1 design units and 1 entities in project
+    Info (12023): Found entity 1: riscv64
+Error (10161): Verilog HDL error at riscv64.v(389): object "misa" is not declared File: /usr/local/projects/steps_cpu/cpu_on_board/riscv64.v Line: 389
+Error (10161): Verilog HDL error at riscv64.v(411): object "mhartid" is not declared File: /usr/local/projects/steps_cpu/cpu_on_board/riscv64.v Line: 411
+Error (10161): Verilog HDL error at riscv64.v(412): object "mvendorid" is not declared File: /usr/local/projects/steps_cpu/cpu_on_board/riscv64.v Line: 412
+Error (10161): Verilog HDL error at riscv64.v(413): object "marchid" is not declared File: /usr/local/projects/steps_cpu/cpu_on_board/riscv64.v Line: 413
+Error (10161): Verilog HDL error at riscv64.v(414): object "mimpid" is not declared File: /usr/local/projects/steps_cpu/cpu_on_board/riscv64.v Line: 414
+Error (10161): Verilog HDL error at riscv64.v(417): object "clint_time" is not declared File: /usr/local/projects/steps_cpu/cpu_on_board/riscv64.v Line: 417
+Error (10161): Verilog HDL error at riscv64.v(594): object "misa" is not declared File: /usr/local/projects/steps_cpu/cpu_on_board/riscv64.v Line: 594
+Error (10161): Verilog HDL error at riscv64.v(594): object "mvendorid" is not declared File: /usr/local/projects/steps_cpu/cpu_on_board/riscv64.v Line: 594
+Error (10161): Verilog HDL error at riscv64.v(594): object "marchid" is not declared File: /usr/local/projects/steps_cpu/cpu_on_board/riscv64.v Line: 594
+Error (10161): Verilog HDL error at riscv64.v(594): object "mimpid" is not declared File: /usr/local/projects/steps_cpu/cpu_on_board/riscv64.v Line: 594
+Error (10161): Verilog HDL error at riscv64.v(594): object "mhartid" is not declared File: /usr/local/projects/steps_cpu/cpu_on_board/riscv64.v Line: 594
+Error (10161): Verilog HDL error at riscv64.v(594): object "clint_time" is not declared File: /usr/local/projects/steps_cpu/cpu_on_board/riscv64.v Line: 594
+Error (10161): Verilog HDL error at riscv64.v(714): object "mimpid" is not declared File: /usr/local/projects/steps_cpu/cpu_on_board/riscv64.v Line: 714
+Error (10161): Verilog HDL error at riscv64.v(715): object "marchid" is not declared File: /usr/local/projects/steps_cpu/cpu_on_board/riscv64.v Line: 715
+Error (10161): Verilog HDL error at riscv64.v(716): object "mvendorid" is not declared File: /usr/local/projects/steps_cpu/cpu_on_board/riscv64.v Line: 716
+Error: Quartus II 32-bit Analysis & Synthesis was unsuccessful. 15 errors, 54 warnings
+    Error: Peak virtual memory: 352 megabytes
+    Error: Processing ended: Wed Apr 22 00:03:25 2026
+    Error: Elapsed time: 00:00:18
+    Error: Total CPU time (on all processors): 00:00:17
 
 
