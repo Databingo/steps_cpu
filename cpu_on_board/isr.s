@@ -5,6 +5,7 @@ isr_router:
      # x8 trap_type no change
      # x9 addr  # x9 keep the address need manage, no change x9
      # x689 setting
+
      # software fix for 7ffff... address:
      slli x3, x9, 25
      srai x3, x3, 35
@@ -18,8 +19,6 @@ isr_router:
      srai x4, x4, 25
      csrw sepc, x4
      
-
-
 
 
      # x1(ra)2(sp)3456,x10(a0) operating
