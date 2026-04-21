@@ -1,5 +1,5 @@
 Assembler report for cpu_on_board
-Tue Apr 21 14:39:43 2026
+Tue Apr 21 16:08:40 2026
 Quartus II 32-bit Version 13.0.1 Build 232 06/12/2013 Service Pack 1 SJ Web Edition
 
 
@@ -39,7 +39,7 @@ applicable agreement for further details.
 +---------------------------------------------------------------+
 ; Assembler Summary                                             ;
 +-----------------------+---------------------------------------+
-; Assembler Status      ; Successful - Tue Apr 21 14:39:43 2026 ;
+; Assembler Status      ; Successful - Tue Apr 21 16:08:40 2026 ;
 ; Revision Name         ; cpu_on_board                          ;
 ; Top-level Entity Name ; cpu_on_board                          ;
 ; Family                ; Cyclone II                            ;
@@ -105,8 +105,8 @@ applicable agreement for further details.
 ; Option         ; Setting                   ;
 +----------------+---------------------------+
 ; Device         ; EP2C20F484C7              ;
-; JTAG usercode  ; 0x011355B6                ;
-; Checksum       ; 0x011355B6                ;
+; JTAG usercode  ; 0x011882DA                ;
+; Checksum       ; 0x011882DA                ;
 +----------------+---------------------------+
 
 
@@ -117,7 +117,7 @@ applicable agreement for further details.
 +--------------------+-----------------------+
 ; Device             ; EPCS16                ;
 ; JTAG usercode      ; 0x00000000            ;
-; Checksum           ; 0x1CC97D6B            ;
+; Checksum           ; 0x1CD534F7            ;
 ; Compression Ratio  ; 1                     ;
 +--------------------+-----------------------+
 
@@ -141,23 +141,14 @@ Info: Running Quartus II 32-bit Assembler
     Info: programming logic devices manufactured by Altera and sold by 
     Info: Altera or its authorized distributors.  Please refer to the 
     Info: applicable agreement for further details.
-    Info: Processing started: Tue Apr 21 14:39:39 2026
-Info: Command: quartus_asm --read_settings_files=on --write_settings_files=off cpu_on_board -c cpu_on_board
-Warning (20013): Ignored assignments for entity "sdram_pll" -- entity does not exist in design
-    Warning (20014): Assignment for entity set_global_assignment -name IP_TOOL_NAME Qsys -entity sdram_pll -qip sdram_pll/sdram/synthesis/sdram_pll.qip -library sdram_pll was ignored
-    Warning (20014): Assignment for entity set_global_assignment -name IP_TOOL_VERSION 13.0sp1 -entity sdram_pll -qip sdram_pll/sdram/synthesis/sdram_pll.qip -library sdram_pll was ignored
-    Warning (20014): Assignment for entity set_global_assignment -name IP_TOOL_ENV Qsys -entity sdram_pll -qip sdram_pll/sdram/synthesis/sdram_pll.qip -library sdram_pll was ignored
-    Warning (20014): Assignment for entity set_global_assignment -name SLD_INFO "QSYS_NAME sdram_pll HAS_SOPCINFO 1 GENERATION_ID 1763195282" -entity sdram_pll -qip sdram_pll/sdram/synthesis/sdram_pll.qip -library sdram_pll was ignored
-Warning (20013): Ignored assignments for entity "sdram_pll_altpll_0" -- entity does not exist in design
-    Warning (20014): Assignment for entity set_global_assignment -name IP_TOOL_NAME altpll -entity sdram_pll_altpll_0 -qip sdram_pll/sdram/synthesis/sdram_pll.qip -library sdram_pll was ignored
-    Warning (20014): Assignment for entity set_global_assignment -name IP_TOOL_VERSION 13.0 -entity sdram_pll_altpll_0 -qip sdram_pll/sdram/synthesis/sdram_pll.qip -library sdram_pll was ignored
-    Warning (20014): Assignment for entity set_global_assignment -name IP_TOOL_ENV Qsys -entity sdram_pll_altpll_0 -qip sdram_pll/sdram/synthesis/sdram_pll.qip -library sdram_pll was ignored
+    Info: Processing started: Tue Apr 21 16:08:36 2026
+Info: Command: quartus_asm --read_settings_files=off --write_settings_files=off cpu_on_board -c cpu_on_board
 Info (115031): Writing out detailed assembly data for power analysis
 Info (115030): Assembler is generating device programming files
-Info: Quartus II 32-bit Assembler was successful. 0 errors, 9 warnings
-    Info: Peak virtual memory: 375 megabytes
-    Info: Processing ended: Tue Apr 21 14:39:44 2026
-    Info: Elapsed time: 00:00:05
-    Info: Total CPU time (on all processors): 00:00:05
+Info: Quartus II 32-bit Assembler was successful. 0 errors, 0 warnings
+    Info: Peak virtual memory: 379 megabytes
+    Info: Processing ended: Tue Apr 21 16:08:40 2026
+    Info: Elapsed time: 00:00:04
+    Info: Total CPU time (on all processors): 00:00:04
 
 
