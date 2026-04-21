@@ -330,16 +330,23 @@ localparam sip_write_mask   = 64'h0000_0000_0000_0002; // SSIP
 wire [63:0] csr_mask  = (w_csr == 12'h100) ? sstatus_mask : (w_csr == 12'h104) ? (sie_sip_mask & Csrs[mideleg]) : (w_csr == 12'h144) ? (sie_sip_mask   & Csrs[mideleg]) : 64'hffff_ffff_ffff_ffff;
 wire [63:0] csr_mask_w= (w_csr == 12'h100) ? sstatus_mask : (w_csr == 12'h104) ? (sie_sip_mask & Csrs[mideleg]) : (w_csr == 12'h144) ? (sip_write_mask & Csrs[mideleg]) : 64'hffff_ffff_ffff_ffff;
 //wire [63:0] csr_read  = Csrs[w_csr_id] & csr_mask;
-wire [63:0] csr_read = (w_csr == 12'hC01) ? mtime : Csrs[w_csr_id] & csr_mask;
+//wire [63:0] csr_read = (w_csr == 12'hC01) ? mtime : Csrs[w_csr_id] & csr_mask;
+wire [63:0] csr_read = (w_csr == 12'h301) ? 64'h8000000000141101 : // misa(RV64IMASU)
+                       (w_csr == 12'hf11) ? 64'h0 : // mvendorid
+                       (w_csr == 12'hf12) ? 64'h0 : // marchid
+                       (w_csr == 12'hf13) ? 64'h0 : // mimpid
+                       (w_csr == 12'hf14) ? 64'h0 : // mhartid
+                       (w_csr == 12'hC01) ? mtime : // clint_time
+		        Csrs[w_csr_id] & csr_mask;  // Other
 wire [63:0] csr_write_re  = rs1 & csr_mask_w;
 wire [63:0] csr_write_im  = w_imm_z & csr_mask_w;
 
 localparam medeleg    = 7 ; localparam MECALL=11,SECALL=9,UECALL=8,BREAK=3; // bit_index=mcause_value 8UECALL|9SECALL
 localparam mideleg    = 8 ;  //
-localparam mimpid     = 9;  // 0
+//localparam mimpid     = 9;  // 0
 localparam sedeleg    = 10;  
 localparam sideleg    = 11;  
-localparam marchid    = 12;  // 0
+//localparam marchid    = 12;  // 0
 localparam stvec      = 13;  //localparam ; //BASE=2,MODE=0 63:2BASE|1:0MDOE Supervisor trap handler base address
 localparam scounteren = 14;  
 localparam sscratch   = 15;  
@@ -349,14 +356,14 @@ localparam stval      = 18;
 localparam satp       = 19;  // Supervisor address translation and protection satp[63:60].MODE=0:off|8:SV39 satp[59:44].asid vpn2:9 vpn1:9 vpn0:9 satp[43:0]:rootpage physical addr
 localparam mtval      = 20;  // Machine Trap Value Register (bad address or instruction)
 
-localparam mhartid    = 21;  // Hardware Thread ID 0 for single-core
-localparam misa       = 22;  // Machine ISA Register (IMA is 0x8000000000001101)
-localparam mvendorid  = 23;  // 0
+//localparam mhartid    = 21;  // Hardware Thread ID 0 for single-core
+//localparam misa       = 22;  // Machine ISA Register (IMA is 0x8000000000001101)
+//localparam mvendorid  = 23;  // 0
 
 localparam pmpcfg0    = 24;  // Physical Memory Protection
 localparam pmpaddr0   = 25;  // 
 localparam mdebug     = 26;  // 
-localparam clint_time = 27;  // 
+//localparam clint_time = 27;  // 
 //localparam pmpaddr1   = 29;  // 
 //localparam pmpaddr2   = 30;  // 
 //localparam pmpaddr3   = 31;  // 
@@ -379,7 +386,7 @@ localparam XCSR = 63;  //  miss csr that not deployed
 always @(*) begin
     case(w_csr)
 	12'h300 : w_csr_id = mstatus    ;    
-	12'h301 : w_csr_id = misa       ;    
+	//12'h301 : w_csr_id = misa       ;    
 	12'h305 : w_csr_id = mtvec      ;    
 	12'h340 : w_csr_id = mscratch   ;    
 	12'h341 : w_csr_id = mepc       ;    
@@ -401,13 +408,13 @@ always @(*) begin
 	12'h143 : w_csr_id = stval      ;   
 	12'h144 : w_csr_id = sip        ;   
 	12'h180 : w_csr_id = satp       ;   
-	12'hF14 : w_csr_id = mhartid    ;   
-	12'hF11 : w_csr_id = mvendorid  ;   
-	12'hF12 : w_csr_id = marchid    ;   
-	12'hF13 : w_csr_id = mimpid     ;   
+	//12'hF14 : w_csr_id = mhartid    ;   
+	//12'hF11 : w_csr_id = mvendorid  ;   
+	//12'hF12 : w_csr_id = marchid    ;   
+	//12'hF13 : w_csr_id = mimpid     ;   
 	12'h3A0 : w_csr_id = pmpcfg0    ;   
 	12'h3B0 : w_csr_id = pmpaddr0   ;   
-	12'hC01 : w_csr_id = clint_time ;   
+	//12'hC01 : w_csr_id = clint_time ;   
 	//12'h3B1 : w_csr_id = pmpaddr1   ;   
 	//12'h3B2 : w_csr_id = pmpaddr2   ;   
 	//12'h3B3 : w_csr_id = pmpaddr3   ;   
@@ -604,8 +611,8 @@ always @(*) begin
 		Csrs[medeleg] <= 64'hb1af; // delegate to S-mode 1011000110101111 // see VII 3.1.15 mcasue exceptions
 		Csrs[mideleg] <= 64'h0222; // delegate to S-mode 0000001000100010 see VII 3.1.15 mcasue interrupt 1/5/9 SSIP(supervisor software interrupt) STIP(time) SEIP(external)
 		// Initialize Machine Info for OpenSBI
-		Csrs[misa] <= 64'h8000000000141101; // RV64IMASU extensions (63:62=2 64bits | 1<<0 Atomic| 1<<8 Integer| 1<<12 Multiply| 1<<18 Supervisor| 1 <<20 User) so: 64'h8000000000141101; RV64IMASU
-		Csrs[mhartid] <= 64'd0; // single Core 0
+		//Csrs[misa] <= 64'h8000000000141101; //RV64IMASU extensions(63:62=2 64bits | 1<<0 Atomic| 1<<8 Integer| 1<<12 Multiply| 1<<18 Supervisor| 1 <<20 User) so: 64'h8000000000141101; RV64IMASU
+		//Csrs[mhartid] <= 64'd0; // single Core 0
 		// mvendorid, marchid, mimpid remain 0
 		mmu_pc <= 0;
 		in_debug <= 0;
