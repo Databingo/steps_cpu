@@ -578,7 +578,7 @@ always @(*) begin
 	// -----
 	reg do_trap;
 	reg trap_is_interrupt;
-	reg [63:0] trap_cause;
+	reg [62:0] trap_cause;
 	reg [63:0] trap_val;
 	reg [63:0] trap_epc;
 
