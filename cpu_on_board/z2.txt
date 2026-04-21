@@ -94,8 +94,9 @@ wire use_imm = (op == 7'b0010011 || op == 7'b0011011 || op == 7'b1100111); //mat
 wire is_sub = (op == 7'b0110011 || op == 7'b0111011) && ir[30]; // sub/subw
 wire [63:0] alu_op2 = use_imm ? w_imm_i : rs2;
 wire [63:0] alu_op2_inv = is_sub ? ~alu_op2 : alu_op2;
-wire [63:0] shared_add = rs1 + alu_op2_inv + is_sub;
-wire [63:0] shared_addw= $signed(rs1[31:0] + alu_op2_inv[31:0] + is_sub);
+wire [63:0] shared_add = $signed(rs1) + $signed(alu_op2_inv) + is_sub;
+wire [31:0] shared_addw_32 = rs1[31:0] + alu_op2_inv[31:0] + is_sub;
+wire [63:0] shared_addw = {{32{shared_addw_32[31]}}, shared_addw_32};
 
 wire [63:0] alu_add  = shared_add; 
 wire [63:0] alu_sub  = shared_add;  
@@ -509,7 +510,10 @@ always @(*) begin
 		// TLB Refill
 		//reg [2:0] tlb_ptr = 0; // 8 entries TLB
 		reg [1:0] tlb_ptr = 0; // 4 entries TLB
+		reg tlb_flush_pre = 0;
+		reg tlb_flush;
 		always @(posedge clk or negedge reset) begin
+		    tlb_flush_pre <= tlb_flush;
 		    if (!reset) begin
 			tlb_ptr <= 0; // hit->trap(save va to x9)->refill assembly(fetch pa to x9)-> sd x9, `Tlb -> here to refill tlb
 			tlb_vld[0] <= 0; tlb_vld[1] <= 0; tlb_vld[2] <= 0; tlb_vld[3] <= 0; 
@@ -521,8 +525,9 @@ always @(*) begin
 			tlb_ptr <= tlb_ptr + 1; 
 		    end else if (!bubble && tlb_i_hit && i_cache_hit) begin // sfence.vma flush any way if ir is (not be bubbled)
 			casez (ir) 32'b0001001??????????_000_?????_1110011: begin tlb_vld[0] <= 0; tlb_vld[1] <= 0; tlb_vld[2] <= 0; tlb_vld[3] <= 0; end
-		    endcase 
-		end
+		        endcase 
+		        //if (tlb_flush_pre != tlb_flush) begin tlb_vld[0] <= 0; tlb_vld[1] <= 0; tlb_vld[2] <= 0; tlb_vld[3] <= 0; end
+		    end
 	    end
 
 	    // Cache I_cache_hit 63:13 tag, 12:4 index 3:0 offset Cache line 16B (4 instructions) 512 lines
@@ -789,8 +794,8 @@ always @(*) begin
                     32'b0000000_?????_?????_101_?????_0111011: re[w_rd] <= shared_srl_sra;  // Srlw
                     32'b0100000_?????_?????_101_?????_0111011: re[w_rd] <= shared_srl_sra;  // Sraw
                     // Jump
-	            32'b???????_?????_?????_???_?????_1101111: begin pc <= pc_4 + w_imm_j; if (w_rd != 5'b0) re[w_rd] <= pc; bubble <= 1'b1; end // Jal
-	            32'b???????_?????_?????_???_?????_1100111: begin pc <= alu_addi & 64'hFFFFFFFFFFFFFFFE; if (w_rd != 5'b0) re[w_rd] <= pc; bubble <= 1; end // Jalr (re[w_rs1] + w_imm_i)
+	            32'b???????_?????_?????_???_?????_1101111: begin pc <= $signed(pc_4) + w_imm_j; if (w_rd != 5'b0) re[w_rd] <= pc; bubble <= 1'b1; end // Jal
+	            32'b???????_?????_?????_???_?????_1100111: begin pc <= $signed(alu_addi) & 64'hFFFFFFFFFFFFFFFE; if (w_rd != 5'b0) re[w_rd] <= pc; bubble <= 1; end // Jalr (re[w_rs1] + w_imm_i)
                     // Branch 
 		    32'b???????_?????_?????_000_?????_1100011: begin if (re[w_rs1] == re[w_rs2]) begin pc <= branch; bubble <= 1'b1; end end // Beq
 		    32'b???????_?????_?????_001_?????_1100011: begin if (re[w_rs1] != re[w_rs2]) begin pc <= branch; bubble <= 1'b1; end end // Bne
@@ -803,7 +808,7 @@ always @(*) begin
 		                                                     else begin
                                                                      if (w_rd != 0) re[w_rd] <= csr_read;
 		                                                     Csrs[w_csr_id] <= (Csrs[w_csr_id] & ~csr_mask_w)| csr_write_re; end //  (rs1 & csr_mask_w); end // Csrrw logic
-		                                                     //if (w_csr_id==satp) begin pc<=pc; bubble<=1; end end // flush pipelien on satp write
+		                                                     //if (w_csr_id==satp) begin tlb_flush <= ~tlb_flush; pc<=pc; bubble<=1; end end // flush pipelien on satp write
 								     end
 		    32'b???????_?????_?????_010_?????_1110011: begin if (w_csr_id==XCSR) begin do_trap = 1; trap_is_interrupt =0; trap_val = ir; trap_epc = pc_4; trap_cause = ILLEGAL_INSTRUCTION; end 
 		                                                     else begin
@@ -1699,10 +1704,11 @@ end
     always @(posedge clock_slow or negedge KEY0) begin
     //always @(posedge CLOCK_50 or negedge KEY0) begin
         if (!KEY0) clkdiv <= 0;
-        else clkdiv <= clkdiv + 1;
+	else clkdiv <= clkdiv + 1;
     end
-    wire clk_pulse_slow = (clkdiv == 0);
+    //wire clk_pulse_slow = (clkdiv == 0);
     //wire clk_pulse_slow = (sd_status <= 8) ? (clkdiv == 0) : 1'b1;
+    wire clk_pulse_slow = (sd_status >= 9) ?  1'b1 : (clkdiv == 0);  // speed up to main clk after initial
 
     // SD Controller Bridge
     reg [31:0] sd_addr = 0;           // Sector address
@@ -2458,12 +2464,30 @@ endmodule
 
 ---------- mmu-itlb-dtlb, icache isr.s code---------
 isr_router:        
+
      # x0-x10 are shadowed by hardware, safe to use
      li sp, 0x1500 # Set stack shadowed sp(x2)
      li x7, 0x2004 # UART print 
      # x8 trap_type no change
      # x9 addr  # x9 keep the address need manage, no change x9
      # x689 setting
+
+    ## software fix for 7ffff... address:
+    #slli x3, x9, 25
+    #srai x3, x3, 35
+    #mv x9, x3
+    #csrr x3, mepc
+    #slli x4, x3, 25
+    #srai x4, x4, 25
+    #csrw mepc, x4
+    #csrr x3, sepc
+    #slli x4, x3, 25 
+    #srai x4, x4, 25
+    #csrw sepc, x4
+    #li x3, 0xFFFFFF8000000000
+    #or x9, x9, x3
+     
+
 
      # x1(ra)2(sp)3456,x10(a0) operating
      li x3, 12 
@@ -2508,12 +2532,12 @@ i_cache_refill:
      j return
 
 mmu_i:
-     li a0, "\n[i"
-     call print7
+    #li a0, "\n[i"
+    #call print7
      j mmu
 mmu_d:
-     li a0, "\n[d"
-     call print7
+    #li a0, "\n[d"
+    #call print7
      j mmu
 
 mmu:  # VA 63:39Sign|38:30Vpn[2]|29:21Vpn[1]|20:12Vpn[0]|11:0PageOffset  
@@ -2646,16 +2670,16 @@ WRITE_TLB:
      lui x6, 0x20000 # Magic TLB address
      sd x4, 0(x6)
 
-     li a0, "TLBre:"
-     call print7
-     mv a0, x9
-     call print_reg
+    #li a0, "TLBre:"
+    #call print7
+    #mv a0, x9
+    #call print_reg
  
-     mv a0, x4
-     call print_reg
+    #mv a0, x4
+    #call print_reg
 
-     addi x6, x0, 93
-     sd x6, 0(x7)    #  print ]
+    #addi x6, x0, 93
+    #sd x6, 0(x7)    #  print ]
 
      addi x8, x0, 0  # success x8=0
      j return
@@ -2663,13 +2687,13 @@ WRITE_TLB:
 
 FAULT: # error trap?
 
-     li a0, "TLBfl:"
-     call print7
-     mv a0, x9
-     call print_reg
+    #li a0, "TLBfl:"
+    #call print7
+    #mv a0, x9
+    #call print_reg
 
-     addi x6, x0, 33
-     sd x6, 0(x7)    #  print !
+    #addi x6, x0, 33
+    #sd x6, 0(x7)    #  print !
 
      j return
 #FAULT:
@@ -3594,7 +3618,7 @@ boot_opensbi:
     fence.i
    #csrw 0x7cc, t0  # open debug print
 
-    csrwi mdebug, 8 
+   #csrwi mdebug, 8 
     li a0, 0 # use core 0
     li a1, 0 # let opensbi use its embedded DTB
    #li a1, 0x80100000 # set DTB addr
