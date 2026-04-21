@@ -187,16 +187,16 @@ WRITE_TLB:
      lui x6, 0x20000 # Magic TLB address
      sd x4, 0(x6)
 
-     li a0, "TLBre:"
-     call print7
-     mv a0, x9
-     call print_reg
+    #li a0, "TLBre:"
+    #call print7
+    #mv a0, x9
+    #call print_reg
  
-     mv a0, x4
-     call print_reg
+    #mv a0, x4
+    #call print_reg
 
-     addi x6, x0, 93
-     sd x6, 0(x7)    #  print ]
+    #addi x6, x0, 93
+    #sd x6, 0(x7)    #  print ]
 
      addi x8, x0, 0  # success x8=0
      j return
