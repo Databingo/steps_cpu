@@ -343,27 +343,27 @@ wire [63:0] csr_write_im  = w_imm_z & csr_mask_w;
 
 localparam medeleg    = 7 ; localparam MECALL=11,SECALL=9,UECALL=8,BREAK=3; // bit_index=mcause_value 8UECALL|9SECALL
 localparam mideleg    = 8 ;  //
-//localparam mimpid     = 9;  // 0
-localparam sedeleg    = 10;  
-localparam sideleg    = 11;  
-//localparam marchid    = 12;  // 0
-localparam stvec      = 13;  //localparam ; //BASE=2,MODE=0 63:2BASE|1:0MDOE Supervisor trap handler base address
-localparam scounteren = 14;  
-localparam sscratch   = 15;  
-localparam sepc       = 16;  
-localparam scause     = 17;  //localparam ; //INTERRUPT=63,CAUSE=0 *  63InterruptAsync/ErrorSync|62:0CauseCode// 
-localparam stval      = 18;  
-localparam satp       = 19;  // Supervisor address translation and protection satp[63:60].MODE=0:off|8:SV39 satp[59:44].asid vpn2:9 vpn1:9 vpn0:9 satp[43:0]:rootpage physical addr
-localparam mtval      = 20;  // Machine Trap Value Register (bad address or instruction)
+localparam sedeleg    = 9;  
+localparam sideleg    = 10;  
+localparam stvec      = 11;  //localparam ; //BASE=2,MODE=0 63:2BASE|1:0MDOE Supervisor trap handler base address
+localparam scounteren = 12;  
+localparam sscratch   = 13;  
+localparam sepc       = 14;  
+localparam scause     = 15;  //localparam ; //INTERRUPT=63,CAUSE=0 *  63InterruptAsync/ErrorSync|62:0CauseCode// 
+localparam stval      = 16;  
+localparam satp       = 17;  // Supervisor address translation and protection satp[63:60].MODE=0:off|8:SV39 satp[59:44].asid vpn2:9 vpn1:9 vpn0:9 satp[43:0]:rootpage physical addr
+localparam mtval      = 18;  // Machine Trap Value Register (bad address or instruction)
 
-//localparam mhartid    = 21;  // Hardware Thread ID 0 for single-core
-//localparam misa       = 22;  // Machine ISA Register (IMA is 0x8000000000001101)
-//localparam mvendorid  = 23;  // 0
+localparam marchid    = 19;  // 0
+localparam mimpid     = 19;  // 0
+localparam mhartid    = 19;  // Hardware Thread ID 0 for single-core
+localparam misa       = 19;  // Machine ISA Register (IMA is 0x8000000000001101)
+localparam mvendorid  = 19;  // 0
+localparam clint_time = 19;  // read only
 
-localparam pmpcfg0    = 24;  // Physical Memory Protection
-localparam pmpaddr0   = 25;  // 
-localparam mdebug     = 26;  // 
-//localparam clint_time = 27;  // 
+localparam pmpcfg0    = 20;  // Physical Memory Protection
+localparam pmpaddr0   = 21;  // 
+localparam mdebug     = 22;  // 
 //localparam pmpaddr1   = 29;  // 
 //localparam pmpaddr2   = 30;  // 
 //localparam pmpaddr3   = 31;  // 
@@ -430,7 +430,7 @@ end
 
 
 //(* ram_style = "logic" *) reg [63:0] Csrs [0:36]; // 36 CSRs for now // totally 4096
-(* ram_style = "logic" *) reg [63:0] Csrs [0:27]; // 36 CSRs for now // totally 4096
+(* ram_style = "logic" *) reg [63:0] Csrs [0:22]; // 36 CSRs for now // totally 4096
 wire [3:0]  satp_mmu  = Csrs[satp][63:60]; // 0:bare, 8:sv39, 9:sv48  satp.MODE!=0, privilegae is not M-mode, mstatus.MPRN is not set or in MPP's mode?
 
 // -- Timer --
@@ -610,7 +610,7 @@ always @(*) begin
 		Csrs[mstatus][MIE] <= 1;
 		mmu_da <= 0;
 		for (i=0;i<11;i=i+1) begin sre[i]<= 64'b0; end 
-		for (i=0;i<=27;i=i+1) begin Csrs[i]<= 64'b0; end
+		for (i=0;i<=22;i=i+1) begin Csrs[i]<= 64'b0; end
 		Csrs[medeleg] <= 64'hb1af; // delegate to S-mode 1011000110101111 // see VII 3.1.15 mcasue exceptions
 		Csrs[mideleg] <= 64'h0222; // delegate to S-mode 0000001000100010 see VII 3.1.15 mcasue interrupt 1/5/9 SSIP(supervisor software interrupt) STIP(time) SEIP(external)
 		// Initialize Machine Info for OpenSBI
