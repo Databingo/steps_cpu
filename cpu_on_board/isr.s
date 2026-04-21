@@ -1,4 +1,35 @@
 isr_router:        
+
+     # --- PROTECTIVE SIGN REPAIR ---
+     # Only fix x9 if bit 31 is 1 (RAM/Kernel) and bit 63 is 0 (Corrupted)
+     srli x3, x9, 63     # x3 = bit 63
+     bnez x3, skip_x9    # If bit 63 is already 1, it's a valid kernel addr, skip.
+     
+     srli x3, x9, 31     # Check bit 31
+     andi x3, x3, 1
+     beqz x3, skip_x9    # If bit 31 is 0 (like UART 0x2004), do NOT touch it!
+
+     # If we got here, it's a broken Kernel address (0x7FFFFFFF...)
+     # Force bit 63 to 1
+     li x3, 1
+     slli x3, x3, 63
+     or x9, x9, x3
+skip_x9:
+
+     # Repeat for the Program Counter (mepc)
+     csrr x4, mepc
+     srli x3, x4, 63
+     bnez x3, start_code
+     srli x3, x4, 31
+     andi x3, x3, 1
+     beqz x3, start_code
+     li x3, 1
+     slli x3, x3, 63
+     or x4, x4, x3
+     csrw mepc, x4
+
+
+
      # x0-x10 are shadowed by hardware, safe to use
      li sp, 0x1500 # Set stack shadowed sp(x2)
      li x7, 0x2004 # UART print 
@@ -18,8 +49,8 @@ isr_router:
     #slli x4, x3, 25 
     #srai x4, x4, 25
     #csrw sepc, x4
-     li x3, 0xFFFFFF8000000000
-     or x9, x9, x3
+    #li x3, 0xFFFFFF8000000000
+    #or x9, x9, x3
      
 
 
