@@ -1,0 +1,89 @@
+Linux version 6.12.0 (root@ashah-standardpcq35ich92009) (riscv64-buildroot-linux-musl-gcc.br_real (Buildroot -g0c65e4995-dirty) 14.3.0, GNU ld (GNU Binutils) 2.44) #20 Tue Apr 21 08:36:41 CST 2026
+Machine model: riscv-virtio,qemu
+SBI specification v1.0 detected
+SBI implementation ID=0x1 Version=0x10003
+SBI TIME extension detected
+SBI IPI extension detected
+SBI RFENCE extension detected
+Disabled 4-level and 5-level paging
+earlycon: sbi0 at I/O port 0x0 (options '')
+printk: legacy bootconsole [sbi0] enabled
+OF: reserved mem: 0x0000000080000000..0x000000008003ffff (256 KiB) nomap non-reusable mmode_resv1@80000000
+OF: reserved mem: 0x0000000080040000..0x000000008004ffff (64 KiB) nomap non-reusable mmode_resv0@80040000
+Zone ranges:
+  DMA32    [mem 0x0000000080000000-0x00000000807fffff]
+  Normal   empty
+Movable zone start for each node
+Early memory node ranges
+  node   0: [mem 0x0000000080000000-0x000000008004ffff]
+  node   0: [mem 0x0000000080050000-0x00000000807fffff]
+Initmem setup node 0 [mem 0x0000000080000000-0x00000000807fffff]
+Falling back to deprecated "riscv,isa"
+riscv: base ISA extensions aim
+riscv: ELF capabilities aim
+Kernel command line:  no4lvl earlycon=sbi console=hvc0
+Dentry cache hash table entries: 1024 (order: 1, 8192 bytes, linear)
+Inode-cache hash table entries: 512 (order: 0, 4096 bytes, linear)
+Built 1 zonelists, mobility grouping off.  Total pages: 2048
+mem auto-init: stack:all(zero), heap alloc:off, heap free:off
+SLUB: HWalign=64, Order=0-1, MinObjects=0, CPUs=1, Nodes=1
+NR_IRQS: 64, nr_irqs: 64, preallocated irqs: 0
+riscv-intc: 64 local interrupts mapped
+clocksource: riscv_clocksource: mask: 0xffffffffffffffff max_cycles: 0x2e2049cda, max_idle_ns: 440795202628 ns
+sched_clock: 64 bits at 13MHz, resolution 80ns, wraps every 4398046511080ns
+Unable to handle kernel paging request at virtual address 7fffffff800fc2b0
+Oops [#1]
+CPU: 0 UID: 0 PID: 0 Comm: swapper Not tainted 6.12.0 #20
+Hardware name: riscv-virtio,qemu (DT)
+epc : 0x7fffffff800fc2b0
+ ra : 0x7fffffff800e03d0
+epc : 7fffffff800fc2b0 ra : 7fffffff800e03d0 sp : ffffffff8014fd70
+ gp : ffffffff801d42c0 tp : ffffffff80154280 t0 : ffffffff8014fc80
+ t1 : 0000000000000000 t2 : 3830313135363430 s0 : ffffffd6007fc320
+ s1 : 0000000000000000 a0 : ffffffc4fed004e5 a1 : 7fffffff80125ea8
+ a2 : 0000000000000000 a3 : ffffffff801209d0 a4 : ffffffff80154280
+ a5 : 0000000000000072 a6 : 0000000000000000 a7 : 0000000054494d45
+ s2 : 7fffffff80125ea8 s3 : 0000000000000000 s4 : ffffffff80120a10
+ s5 : ffffffd6007fc238 s6 : ffffffff801d4018 s7 : 0000000000000001
+ s8 : 0000000000002000 s9 : 0000000080041828 s10: 0000000000000000
+ s11: 0000000000000000 t3 : ffffffff801e33c3 t4 : ffffffff801e33c3
+ t5 : ffffffff801e3378 t6 : ffffffff8014fb40
+status: 0000000000000100 badaddr: 7fffffff800fc2b0 cause: 000000000000000c
+[<ffffffff800e0f5c>] 0xffffffff800e0f5c
+[<ffffffff800e1000>] 0xffffffff800e1000
+[<ffffffff801140dc>] 0xffffffff801140dc
+[<ffffffff801029f0>] 0xffffffff801029f0
+[<ffffffff801003d4>] 0xffffffff801003d4
+Unable to handle kernel paging request at virtual address 7fffffff800fc29c
+Oops [#2]
+CPU: 0 UID: 0 PID: 0 Comm: swapper Not tainted 6.12.0 #20
+Hardware name: riscv-virtio,qemu (DT)
+epc : 0x7fffffff80040838
+ ra : 0xffffffff8004077c
+epc : 7fffffff80040838 ra : ffffffff8004077c sp : ffffffff8014fb00
+ gp : ffffffff801d42c0 tp : ffffffff80154280 t0 : ffffffff8014fb8b
+ t1 : 0000000000000023 t2 : 3030303030303030 s0 : 0000000000000002
+ s1 : 7fffffff800fc29c a0 : 0000000000000001 a1 : 0000000000000002
+ a2 : 7fffffff800fc29e a3 : 0000000000000001 a4 : 7fffffff800fc29c
+ a5 : 0000000000000000 a6 : 0000000000000000 a7 : 0000000000000001
+ s2 : ffffffff8014fb3e s3 : 0000000000000000 s4 : ffffffff8014fb40
+ s5 : 0000000000003ee0 s6 : 0000000000000002 s7 : 0000000000000001
+ s8 : 0000000000002000 s9 : 0000000080041828 s10: 0000000000000000
+ s11: 0000000000000000 t3 : ffffffff801e38aa t4 : ffffffff801e38aa
+ t5 : ffffffff801e3860 t6 : ffffffff8014f9a0
+status: 0000000000000100 badaddr: 7fffffff800fc29c cause: 000000000000000d
+[<ffffffff80003274>] 0xffffffff80003274
+[<ffffffff80003388>] 0xffffffff80003388
+[<ffffffff80005540>] 0xffffffff80005540
+[<ffffffff80005584>] 0xffffffff80005584
+[<ffffffff800fcd48>] 0xffffffff800fcd48
+[<ffffffff800ff950>] 0xffffffff800ff950
+[<ffffffff800e0f5c>] 0xffffffff800e0f5c
+[<ffffffff800e1000>] 0xffffffff800e1000
+[<ffffffff801140dc>] 0xffffffff801140dc
+[<ffffffff801029f0>] 0xffffffff801029f0
+[<ffffffff801003d4>] 0xffffffff801003d4
+Code: 3903 0101 3983 0081 0113 0301 8067 0000 0793 0000 (1583) 0007 
+---[ end trace 0000000000000000 ]---
+Kernel panic - not syncing: Attempted to kill the idle task!
+---[ end Kernel panic - not syncing: Attempted to kill the idle task! ]---
