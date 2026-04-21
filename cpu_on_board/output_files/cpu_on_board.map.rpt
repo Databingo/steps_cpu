@@ -1,5 +1,5 @@
 Analysis & Synthesis report for cpu_on_board
-Tue Apr 21 17:53:31 2026
+Tue Apr 21 20:05:09 2026
 Quartus II 32-bit Version 13.0.1 Build 232 06/12/2013 Service Pack 1 SJ Web Edition
 
 
@@ -91,7 +91,7 @@ applicable agreement for further details.
 +--------------------------------------------------------------------------------------+
 ; Analysis & Synthesis Summary                                                         ;
 +------------------------------------+-------------------------------------------------+
-; Analysis & Synthesis Status        ; Successful - Tue Apr 21 17:53:30 2026           ;
+; Analysis & Synthesis Status        ; Successful - Tue Apr 21 20:05:08 2026           ;
 ; Quartus II 32-bit Version          ; 13.0.1 Build 232 06/12/2013 SP 1 SJ Web Edition ;
 ; Revision Name                      ; cpu_on_board                                    ;
 ; Top-level Entity Name              ; cpu_on_board                                    ;
@@ -273,9 +273,9 @@ applicable agreement for further details.
 ;                                             ;                                ;
 ; Total combinational functions               ; 17912                          ;
 ; Logic element usage by number of LUT inputs ;                                ;
-;     -- 4 input functions                    ; 11793                          ;
+;     -- 4 input functions                    ; 11792                          ;
 ;     -- 3 input functions                    ; 5093                           ;
-;     -- <=2 input functions                  ; 1026                           ;
+;     -- <=2 input functions                  ; 1027                           ;
 ;                                             ;                                ;
 ; Logic elements by mode                      ;                                ;
 ;     -- normal mode                          ; 15896                          ;
@@ -290,7 +290,7 @@ applicable agreement for further details.
 ; Embedded Multiplier 9-bit elements          ; 0                              ;
 ; Maximum fan-out node                        ; clock_slower:clock_ins|clk_out ;
 ; Maximum fan-out                             ; 7059                           ;
-; Total fan-out                               ; 97369                          ;
+; Total fan-out                               ; 97367                          ;
 ; Average fan-out                             ; 3.87                           ;
 +---------------------------------------------+--------------------------------+
 
@@ -350,8 +350,8 @@ applicable agreement for further details.
 ;    |sd_controller:sdctrl|                                                                  ; 346 (346)         ; 152 (152)    ; 0           ; 0            ; 0       ; 0         ; 0    ; 0            ; |cpu_on_board|sd_controller:sdctrl                                                                                                                                                                                                                                                                             ; work             ;
 ;    |sdram_controller:sdram_ctrl|                                                           ; 86 (86)           ; 33 (33)      ; 0           ; 0            ; 0       ; 0         ; 0    ; 0            ; |cpu_on_board|sdram_controller:sdram_ctrl                                                                                                                                                                                                                                                                      ; work             ;
 ;    |sld_hub:auto_hub|                                                                      ; 113 (1)           ; 78 (0)       ; 0           ; 0            ; 0       ; 0         ; 0    ; 0            ; |cpu_on_board|sld_hub:auto_hub                                                                                                                                                                                                                                                                                 ; work             ;
-;       |sld_jtag_hub:\jtag_hub_gen:sld_jtag_hub_inst|                                       ; 112 (74)          ; 78 (50)      ; 0           ; 0            ; 0       ; 0         ; 0    ; 0            ; |cpu_on_board|sld_hub:auto_hub|sld_jtag_hub:\jtag_hub_gen:sld_jtag_hub_inst                                                                                                                                                                                                                                    ; work             ;
-;          |sld_rom_sr:hub_info_reg|                                                         ; 21 (21)           ; 9 (9)        ; 0           ; 0            ; 0       ; 0         ; 0    ; 0            ; |cpu_on_board|sld_hub:auto_hub|sld_jtag_hub:\jtag_hub_gen:sld_jtag_hub_inst|sld_rom_sr:hub_info_reg                                                                                                                                                                                                            ; work             ;
+;       |sld_jtag_hub:\jtag_hub_gen:sld_jtag_hub_inst|                                       ; 112 (75)          ; 78 (50)      ; 0           ; 0            ; 0       ; 0         ; 0    ; 0            ; |cpu_on_board|sld_hub:auto_hub|sld_jtag_hub:\jtag_hub_gen:sld_jtag_hub_inst                                                                                                                                                                                                                                    ; work             ;
+;          |sld_rom_sr:hub_info_reg|                                                         ; 20 (20)           ; 9 (9)        ; 0           ; 0            ; 0       ; 0         ; 0    ; 0            ; |cpu_on_board|sld_hub:auto_hub|sld_jtag_hub:\jtag_hub_gen:sld_jtag_hub_inst|sld_rom_sr:hub_info_reg                                                                                                                                                                                                            ; work             ;
 ;          |sld_shadow_jsm:shadow_jsm|                                                       ; 17 (17)           ; 19 (19)      ; 0           ; 0            ; 0       ; 0         ; 0    ; 0            ; |cpu_on_board|sld_hub:auto_hub|sld_jtag_hub:\jtag_hub_gen:sld_jtag_hub_inst|sld_shadow_jsm:shadow_jsm                                                                                                                                                                                                          ; work             ;
 +--------------------------------------------------------------------------------------------+-------------------+--------------+-------------+--------------+---------+-----------+------+--------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+------------------+
 Note: For table entries with two numbers listed, the numbers in parentheses indicate the number of resources of the given type used by the specific entity alone. The numbers listed outside of parentheses indicate the total resources of the given type used by the specific entity and all of its sub-entities in the hierarchy.
@@ -2331,7 +2331,7 @@ Note: In order to hide this table in the UI and the text report file, please set
 +------------------+--------------+
 ; Partition Name   ; Elapsed Time ;
 +------------------+--------------+
-; Top              ; 00:09:18     ;
+; Top              ; 00:09:29     ;
 ; sld_hub:auto_hub ; 00:00:00     ;
 +------------------+--------------+
 
@@ -2355,7 +2355,7 @@ Info: Running Quartus II 32-bit Analysis & Synthesis
     Info: programming logic devices manufactured by Altera and sold by 
     Info: Altera or its authorized distributors.  Please refer to the 
     Info: applicable agreement for further details.
-    Info: Processing started: Tue Apr 21 17:43:31 2026
+    Info: Processing started: Tue Apr 21 19:54:56 2026
 Info: Command: quartus_map --read_settings_files=on --write_settings_files=off cpu_on_board -c cpu_on_board
 Info (20030): Parallel compilation is enabled and will use 2 of the 2 processors detected
 Info (12021): Found 1 design units, including 1 entities, in source file jtag_uart_system/synthesis/jtag_uart_system.v
@@ -2385,6 +2385,7 @@ Info (12021): Found 3 design units, including 3 entities, in source file sdram_p
     Info (12023): Found entity 2: sdram_pll_altpll_0_stdsync_sv6
     Info (12023): Found entity 3: sdram_pll_altpll_0
 Info (12127): Elaborating entity "cpu_on_board" for the top level hierarchy
+Warning (10306): Invalid value "block" for synthesis attribute "ramstyle" at cpu_on_board.v(98)
 Info (10035): Verilog HDL or VHDL information at cpu_on_board.v(103): object "i" declared but not used
 Warning (10036): Verilog HDL or VHDL warning at cpu_on_board.v(683): object "do_read" assigned a value but never read
 Info (10662): Verilog HDL Assignment information at cpu_on_board.v(89): truncated unsized constant literal with size 32 to size 1 with no loss of information
@@ -2568,99 +2569,95 @@ Info (10662): Verilog HDL Assignment information at clock_slower.v(21): truncate
 Warning (10230): Verilog HDL assignment warning at clock_slower.v(24): truncated value with size 32 to match size of target (25)
 Warning (10335): Unrecognized synthesis attribute "ram_style" at riscv64.v(46)
 Warning (10335): Unrecognized synthesis attribute "ram_style" at riscv64.v(47)
-Warning (10335): Unrecognized synthesis attribute "ram_style" at riscv64.v(424)
-Warning (10335): Unrecognized synthesis attribute "ram_style" at riscv64.v(445)
-Warning (10335): Unrecognized synthesis attribute "ram_style" at riscv64.v(446)
+Warning (10335): Unrecognized synthesis attribute "ram_style" at riscv64.v(426)
 Warning (10335): Unrecognized synthesis attribute "ram_style" at riscv64.v(447)
-Warning (10335): Unrecognized synthesis attribute "ram_style" at riscv64.v(539)
-Warning (10335): Unrecognized synthesis attribute "ram_style" at riscv64.v(540)
-Warning (10335): Unrecognized synthesis attribute "ram_style" at riscv64.v(543)
-Warning (10268): Verilog HDL information at riscv64.v(586): always construct contains both blocking and non-blocking assignments
-Info (10281): Verilog HDL Declaration information at riscv64.v(311): object "MIE" differs only in case from object "mie" in the same scope
-Info (10499): HDL info at riscv64.v(320): see declaration for object "mie"
-Info (10281): Verilog HDL Declaration information at riscv64.v(311): object "SIE" differs only in case from object "sie" in the same scope
-Info (10499): HDL info at riscv64.v(321): see declaration for object "sie"
+Warning (10335): Unrecognized synthesis attribute "ram_style" at riscv64.v(448)
+Warning (10335): Unrecognized synthesis attribute "ram_style" at riscv64.v(449)
+Warning (10335): Unrecognized synthesis attribute "ram_style" at riscv64.v(541)
+Warning (10335): Unrecognized synthesis attribute "ram_style" at riscv64.v(542)
+Warning (10335): Unrecognized synthesis attribute "ram_style" at riscv64.v(545)
+Warning (10268): Verilog HDL information at riscv64.v(588): always construct contains both blocking and non-blocking assignments
+Info (10281): Verilog HDL Declaration information at riscv64.v(313): object "MIE" differs only in case from object "mie" in the same scope
+Info (10499): HDL info at riscv64.v(322): see declaration for object "mie"
+Info (10281): Verilog HDL Declaration information at riscv64.v(313): object "SIE" differs only in case from object "sie" in the same scope
+Info (10499): HDL info at riscv64.v(323): see declaration for object "sie"
 Info (10281): Verilog HDL Declaration information at riscv64.v(30): object "meip" differs only in case from object "MEIP" in the same scope
-Info (10499): HDL info at riscv64.v(324): see declaration for object "MEIP"
+Info (10499): HDL info at riscv64.v(326): see declaration for object "MEIP"
 Info (10281): Verilog HDL Declaration information at riscv64.v(33): object "seip" differs only in case from object "SEIP" in the same scope
-Info (10499): HDL info at riscv64.v(324): see declaration for object "SEIP"
+Info (10499): HDL info at riscv64.v(326): see declaration for object "SEIP"
 Info (10281): Verilog HDL Declaration information at riscv64.v(31): object "mtip" differs only in case from object "MTIP" in the same scope
-Info (10499): HDL info at riscv64.v(324): see declaration for object "MTIP"
+Info (10499): HDL info at riscv64.v(326): see declaration for object "MTIP"
 Info (10281): Verilog HDL Declaration information at riscv64.v(34): object "stip" differs only in case from object "STIP" in the same scope
-Info (10499): HDL info at riscv64.v(324): see declaration for object "STIP"
+Info (10499): HDL info at riscv64.v(326): see declaration for object "STIP"
 Info (10281): Verilog HDL Declaration information at riscv64.v(32): object "msip" differs only in case from object "MSIP" in the same scope
-Info (10499): HDL info at riscv64.v(324): see declaration for object "MSIP"
+Info (10499): HDL info at riscv64.v(326): see declaration for object "MSIP"
 Info (10281): Verilog HDL Declaration information at riscv64.v(35): object "ssip" differs only in case from object "SSIP" in the same scope
-Info (10499): HDL info at riscv64.v(324): see declaration for object "SSIP"
+Info (10499): HDL info at riscv64.v(326): see declaration for object "SSIP"
 Warning (12125): Using design file riscv64.v, which is not specified as a design file for the current project, but contains definitions for 1 design units and 1 entities in project
     Info (12023): Found entity 1: riscv64
 Info (12128): Elaborating entity "riscv64" for hierarchy "riscv64:cpu"
-Info (10035): Verilog HDL or VHDL information at riscv64.v(311): object "UIE" declared but not used
-Info (10035): Verilog HDL or VHDL information at riscv64.v(312): object "SD" declared but not used
-Info (10035): Verilog HDL or VHDL information at riscv64.v(312): object "UXL" declared but not used
-Info (10035): Verilog HDL or VHDL information at riscv64.v(312): object "MXR" declared but not used
-Info (10035): Verilog HDL or VHDL information at riscv64.v(312): object "SUM" declared but not used
-Info (10035): Verilog HDL or VHDL information at riscv64.v(312): object "XS" declared but not used
-Info (10035): Verilog HDL or VHDL information at riscv64.v(312): object "FS" declared but not used
-Info (10035): Verilog HDL or VHDL information at riscv64.v(312): object "VS" declared but not used
-Info (10035): Verilog HDL or VHDL information at riscv64.v(312): object "UBE" declared but not used
-Info (10035): Verilog HDL or VHDL information at riscv64.v(318): object "PAGE_F_I" declared but not used
-Info (10035): Verilog HDL or VHDL information at riscv64.v(318): object "PAGE_F_L" declared but not used
-Info (10035): Verilog HDL or VHDL information at riscv64.v(318): object "PAGE_F_S" declared but not used
-Info (10035): Verilog HDL or VHDL information at riscv64.v(320): object "SGEIE" declared but not used
-Info (10035): Verilog HDL or VHDL information at riscv64.v(320): object "VSEIE" declared but not used
-Info (10035): Verilog HDL or VHDL information at riscv64.v(320): object "VSTIE" declared but not used
-Info (10035): Verilog HDL or VHDL information at riscv64.v(320): object "VSSIE" declared but not used
-Info (10035): Verilog HDL or VHDL information at riscv64.v(324): object "SGEIP" declared but not used
-Info (10035): Verilog HDL or VHDL information at riscv64.v(324): object "VSEIP" declared but not used
-Info (10035): Verilog HDL or VHDL information at riscv64.v(324): object "VSTIP" declared but not used
-Info (10035): Verilog HDL or VHDL information at riscv64.v(324): object "VSSIP" declared but not used
+Info (10035): Verilog HDL or VHDL information at riscv64.v(313): object "UIE" declared but not used
+Info (10035): Verilog HDL or VHDL information at riscv64.v(314): object "SD" declared but not used
+Info (10035): Verilog HDL or VHDL information at riscv64.v(314): object "UXL" declared but not used
+Info (10035): Verilog HDL or VHDL information at riscv64.v(314): object "MXR" declared but not used
+Info (10035): Verilog HDL or VHDL information at riscv64.v(314): object "SUM" declared but not used
+Info (10035): Verilog HDL or VHDL information at riscv64.v(314): object "XS" declared but not used
+Info (10035): Verilog HDL or VHDL information at riscv64.v(314): object "FS" declared but not used
+Info (10035): Verilog HDL or VHDL information at riscv64.v(314): object "VS" declared but not used
+Info (10035): Verilog HDL or VHDL information at riscv64.v(314): object "UBE" declared but not used
+Info (10035): Verilog HDL or VHDL information at riscv64.v(320): object "PAGE_F_I" declared but not used
+Info (10035): Verilog HDL or VHDL information at riscv64.v(320): object "PAGE_F_L" declared but not used
+Info (10035): Verilog HDL or VHDL information at riscv64.v(320): object "PAGE_F_S" declared but not used
+Info (10035): Verilog HDL or VHDL information at riscv64.v(322): object "SGEIE" declared but not used
+Info (10035): Verilog HDL or VHDL information at riscv64.v(322): object "VSEIE" declared but not used
+Info (10035): Verilog HDL or VHDL information at riscv64.v(322): object "VSTIE" declared but not used
+Info (10035): Verilog HDL or VHDL information at riscv64.v(322): object "VSSIE" declared but not used
+Info (10035): Verilog HDL or VHDL information at riscv64.v(326): object "SGEIP" declared but not used
+Info (10035): Verilog HDL or VHDL information at riscv64.v(326): object "VSEIP" declared but not used
+Info (10035): Verilog HDL or VHDL information at riscv64.v(326): object "VSTIP" declared but not used
+Info (10035): Verilog HDL or VHDL information at riscv64.v(326): object "VSSIP" declared but not used
 Warning (10036): Verilog HDL or VHDL warning at riscv64.v(80): object "w_func7" assigned a value but never read
 Warning (10036): Verilog HDL or VHDL warning at riscv64.v(81): object "w_func12" assigned a value but never read
-Info (10035): Verilog HDL or VHDL information at riscv64.v(374): object "CAUSE_CODE" declared but not used
-Warning (10036): Verilog HDL or VHDL warning at riscv64.v(513): object "tlb_flush_pre" assigned a value but never read
-Warning (10858): Verilog HDL warning at riscv64.v(514): object tlb_flush used but never assigned
+Info (10035): Verilog HDL or VHDL information at riscv64.v(376): object "CAUSE_CODE" declared but not used
 Info (10662): Verilog HDL Assignment information at riscv64.v(48): truncated unsized constant literal with size 32 to size 1 with no loss of information
 Info (10662): Verilog HDL Assignment information at riscv64.v(49): truncated unsized constant literal with size 32 to size 1 with no loss of information
 Info (10662): Verilog HDL Assignment information at riscv64.v(51): truncated unsized constant literal with size 32 to size 1 with no loss of information
 Info (10662): Verilog HDL Assignment information at riscv64.v(52): truncated unsized constant literal with size 32 to size 1 with no loss of information
 Info (10662): Verilog HDL Assignment information at riscv64.v(53): truncated unsized constant literal with size 32 to size 1 with no loss of information
 Warning (10040): Verilog HDL or VHDL arithmetic warning at riscv64.v(90): loss of carry in addition or borrow in subtraction
-Warning (10040): Verilog HDL or VHDL arithmetic warning at riscv64.v(97): loss of carry in addition or borrow in subtraction
-Warning (10040): Verilog HDL or VHDL arithmetic warning at riscv64.v(98): loss of carry in addition or borrow in subtraction
-Warning (10040): Verilog HDL or VHDL arithmetic warning at riscv64.v(120): loss of carry in addition or borrow in subtraction
-Warning (10040): Verilog HDL or VHDL arithmetic warning at riscv64.v(163): loss of carry in addition or borrow in subtraction
-Warning (10040): Verilog HDL or VHDL arithmetic warning at riscv64.v(209): loss of carry in addition or borrow in subtraction
-Warning (10040): Verilog HDL or VHDL arithmetic warning at riscv64.v(210): loss of carry in addition or borrow in subtraction
-Info (10662): Verilog HDL Assignment information at riscv64.v(215): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(216): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(217): truncated unsized constant literal with size 32 to size 7 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(221): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(222): truncated unsized constant literal with size 32 to size 7 with no loss of information
-Warning (10230): Verilog HDL assignment warning at riscv64.v(231): truncated value with size 32 to match size of target (7)
-Info (10662): Verilog HDL Assignment information at riscv64.v(233): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(234): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Warning (10040): Verilog HDL or VHDL arithmetic warning at riscv64.v(100): loss of carry in addition or borrow in subtraction
+Warning (10040): Verilog HDL or VHDL arithmetic warning at riscv64.v(101): loss of carry in addition or borrow in subtraction
+Warning (10040): Verilog HDL or VHDL arithmetic warning at riscv64.v(122): loss of carry in addition or borrow in subtraction
+Warning (10040): Verilog HDL or VHDL arithmetic warning at riscv64.v(165): loss of carry in addition or borrow in subtraction
+Warning (10040): Verilog HDL or VHDL arithmetic warning at riscv64.v(211): loss of carry in addition or borrow in subtraction
+Warning (10040): Verilog HDL or VHDL arithmetic warning at riscv64.v(212): loss of carry in addition or borrow in subtraction
+Info (10662): Verilog HDL Assignment information at riscv64.v(217): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(218): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(219): truncated unsized constant literal with size 32 to size 7 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(223): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(224): truncated unsized constant literal with size 32 to size 7 with no loss of information
+Warning (10230): Verilog HDL assignment warning at riscv64.v(233): truncated value with size 32 to match size of target (7)
+Info (10662): Verilog HDL Assignment information at riscv64.v(235): truncated unsized constant literal with size 32 to size 1 with no loss of information
 Info (10662): Verilog HDL Assignment information at riscv64.v(236): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Warning (10040): Verilog HDL or VHDL arithmetic warning at riscv64.v(240): loss of carry in addition or borrow in subtraction
-Warning (10040): Verilog HDL or VHDL arithmetic warning at riscv64.v(264): loss of carry in addition or borrow in subtraction
-Warning (10040): Verilog HDL or VHDL arithmetic warning at riscv64.v(265): loss of carry in addition or borrow in subtraction
-Warning (10040): Verilog HDL or VHDL arithmetic warning at riscv64.v(269): loss of carry in addition or borrow in subtraction
-Info (10662): Verilog HDL Assignment information at riscv64.v(273): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(274): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(275): truncated unsized constant literal with size 32 to size 7 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(278): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(279): truncated unsized constant literal with size 32 to size 7 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(282): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(283): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(287): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(288): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Warning (10040): Verilog HDL or VHDL arithmetic warning at riscv64.v(296): loss of carry in addition or borrow in subtraction
-Warning (10230): Verilog HDL assignment warning at riscv64.v(300): truncated value with size 32 to match size of target (7)
-Info (10662): Verilog HDL Assignment information at riscv64.v(302): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(303): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(306): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Warning (10230): Verilog HDL assignment warning at riscv64.v(379): truncated value with size 32 to match size of target (6)
-Warning (10230): Verilog HDL assignment warning at riscv64.v(380): truncated value with size 32 to match size of target (6)
+Info (10662): Verilog HDL Assignment information at riscv64.v(238): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Warning (10040): Verilog HDL or VHDL arithmetic warning at riscv64.v(242): loss of carry in addition or borrow in subtraction
+Warning (10040): Verilog HDL or VHDL arithmetic warning at riscv64.v(266): loss of carry in addition or borrow in subtraction
+Warning (10040): Verilog HDL or VHDL arithmetic warning at riscv64.v(267): loss of carry in addition or borrow in subtraction
+Warning (10040): Verilog HDL or VHDL arithmetic warning at riscv64.v(271): loss of carry in addition or borrow in subtraction
+Info (10662): Verilog HDL Assignment information at riscv64.v(275): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(276): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(277): truncated unsized constant literal with size 32 to size 7 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(280): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(281): truncated unsized constant literal with size 32 to size 7 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(284): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(285): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(289): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(290): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Warning (10040): Verilog HDL or VHDL arithmetic warning at riscv64.v(298): loss of carry in addition or borrow in subtraction
+Warning (10230): Verilog HDL assignment warning at riscv64.v(302): truncated value with size 32 to match size of target (7)
+Info (10662): Verilog HDL Assignment information at riscv64.v(304): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(305): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(308): truncated unsized constant literal with size 32 to size 1 with no loss of information
 Warning (10230): Verilog HDL assignment warning at riscv64.v(381): truncated value with size 32 to match size of target (6)
 Warning (10230): Verilog HDL assignment warning at riscv64.v(382): truncated value with size 32 to match size of target (6)
 Warning (10230): Verilog HDL assignment warning at riscv64.v(383): truncated value with size 32 to match size of target (6)
@@ -2689,109 +2686,109 @@ Warning (10230): Verilog HDL assignment warning at riscv64.v(405): truncated val
 Warning (10230): Verilog HDL assignment warning at riscv64.v(406): truncated value with size 32 to match size of target (6)
 Warning (10230): Verilog HDL assignment warning at riscv64.v(407): truncated value with size 32 to match size of target (6)
 Warning (10230): Verilog HDL assignment warning at riscv64.v(408): truncated value with size 32 to match size of target (6)
-Warning (10230): Verilog HDL assignment warning at riscv64.v(417): truncated value with size 32 to match size of target (6)
-Warning (10230): Verilog HDL assignment warning at riscv64.v(418): truncated value with size 32 to match size of target (6)
-Warning (10040): Verilog HDL or VHDL arithmetic warning at riscv64.v(428): loss of carry in addition or borrow in subtraction
-Warning (10040): Verilog HDL or VHDL arithmetic warning at riscv64.v(478): loss of carry in addition or borrow in subtraction
-Info (10662): Verilog HDL Assignment information at riscv64.v(512): truncated unsized constant literal with size 32 to size 2 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(513): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Critical Warning (10237): Verilog HDL warning at riscv64.v(516): can't infer register for assignment in edge-triggered always construct because the clock isn't obvious. Generated combinational logic instead
-Info (10662): Verilog HDL Assignment information at riscv64.v(518): truncated unsized constant literal with size 32 to size 2 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(519): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(524): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Warning (10230): Verilog HDL assignment warning at riscv64.v(525): truncated value with size 32 to match size of target (2)
-Info (10662): Verilog HDL Assignment information at riscv64.v(527): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Warning (10762): Verilog HDL Case Statement warning at riscv64.v(527): can't check case statement for completeness because the case expression has too many possible states
-Info (10662): Verilog HDL Assignment information at riscv64.v(544): truncated unsized constant literal with size 32 to size 8 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(546): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(547): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Warning (10230): Verilog HDL assignment warning at riscv64.v(552): truncated value with size 32 to match size of target (8)
-Info (10662): Verilog HDL Assignment information at riscv64.v(591): truncated unsized constant literal with size 32 to size 2 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(592): truncated unsized constant literal with size 32 to size 2 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(593): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(594): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(598): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(599): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(608): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(609): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Warning (10230): Verilog HDL assignment warning at riscv64.v(409): truncated value with size 32 to match size of target (6)
+Warning (10230): Verilog HDL assignment warning at riscv64.v(410): truncated value with size 32 to match size of target (6)
+Warning (10230): Verilog HDL assignment warning at riscv64.v(419): truncated value with size 32 to match size of target (6)
+Warning (10230): Verilog HDL assignment warning at riscv64.v(420): truncated value with size 32 to match size of target (6)
+Warning (10040): Verilog HDL or VHDL arithmetic warning at riscv64.v(430): loss of carry in addition or borrow in subtraction
+Warning (10040): Verilog HDL or VHDL arithmetic warning at riscv64.v(480): loss of carry in addition or borrow in subtraction
+Info (10662): Verilog HDL Assignment information at riscv64.v(514): truncated unsized constant literal with size 32 to size 2 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(520): truncated unsized constant literal with size 32 to size 2 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(521): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(526): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Warning (10230): Verilog HDL assignment warning at riscv64.v(527): truncated value with size 32 to match size of target (2)
+Info (10662): Verilog HDL Assignment information at riscv64.v(529): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Warning (10762): Verilog HDL Case Statement warning at riscv64.v(529): can't check case statement for completeness because the case expression has too many possible states
+Info (10662): Verilog HDL Assignment information at riscv64.v(546): truncated unsized constant literal with size 32 to size 8 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(548): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(549): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Warning (10230): Verilog HDL assignment warning at riscv64.v(554): truncated value with size 32 to match size of target (8)
+Info (10662): Verilog HDL Assignment information at riscv64.v(593): truncated unsized constant literal with size 32 to size 2 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(594): truncated unsized constant literal with size 32 to size 2 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(595): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(596): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(600): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(601): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(610): truncated unsized constant literal with size 32 to size 1 with no loss of information
 Info (10662): Verilog HDL Assignment information at riscv64.v(611): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Warning (10040): Verilog HDL or VHDL arithmetic warning at riscv64.v(614): loss of carry in addition or borrow in subtraction
-Info (10662): Verilog HDL Assignment information at riscv64.v(615): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(616): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(613): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Warning (10040): Verilog HDL or VHDL arithmetic warning at riscv64.v(616): loss of carry in addition or borrow in subtraction
+Info (10662): Verilog HDL Assignment information at riscv64.v(617): truncated unsized constant literal with size 32 to size 1 with no loss of information
 Info (10662): Verilog HDL Assignment information at riscv64.v(618): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(619): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(627): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(638): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(655): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(672): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(694): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(711): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(620): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(621): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(629): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(640): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(657): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(674): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(696): truncated unsized constant literal with size 32 to size 1 with no loss of information
 Info (10662): Verilog HDL Assignment information at riscv64.v(713): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(714): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(715): truncated unsized constant literal with size 32 to size 1 with no loss of information
 Info (10662): Verilog HDL Assignment information at riscv64.v(716): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Warning (10230): Verilog HDL assignment warning at riscv64.v(717): truncated value with size 64 to match size of target (63)
-Info (10662): Verilog HDL Assignment information at riscv64.v(737): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(738): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Warning (10040): Verilog HDL or VHDL arithmetic warning at riscv64.v(751): loss of carry in addition or borrow in subtraction
-Info (10662): Verilog HDL Assignment information at riscv64.v(754): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(754): truncated unsized constant literal with size 32 to size 2 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(755): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(718): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Warning (10230): Verilog HDL assignment warning at riscv64.v(719): truncated value with size 64 to match size of target (63)
+Info (10662): Verilog HDL Assignment information at riscv64.v(739): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(740): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Warning (10040): Verilog HDL or VHDL arithmetic warning at riscv64.v(753): loss of carry in addition or borrow in subtraction
+Info (10662): Verilog HDL Assignment information at riscv64.v(756): truncated unsized constant literal with size 32 to size 1 with no loss of information
 Info (10662): Verilog HDL Assignment information at riscv64.v(756): truncated unsized constant literal with size 32 to size 2 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(760): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(760): truncated unsized constant literal with size 32 to size 2 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(761): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(762): truncated unsized constant literal with size 32 to size 2 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(757): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(758): truncated unsized constant literal with size 32 to size 2 with no loss of information
 Info (10662): Verilog HDL Assignment information at riscv64.v(762): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Warning (10040): Verilog HDL or VHDL arithmetic warning at riscv64.v(797): loss of carry in addition or borrow in subtraction
-Info (10662): Verilog HDL Assignment information at riscv64.v(798): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(807): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(813): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(818): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(823): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(828): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(833): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(843): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(762): truncated unsized constant literal with size 32 to size 2 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(763): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(764): truncated unsized constant literal with size 32 to size 2 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(764): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Warning (10040): Verilog HDL or VHDL arithmetic warning at riscv64.v(799): loss of carry in addition or borrow in subtraction
+Info (10662): Verilog HDL Assignment information at riscv64.v(800): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(809): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(815): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(820): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(825): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(830): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(835): truncated unsized constant literal with size 32 to size 1 with no loss of information
 Info (10662): Verilog HDL Assignment information at riscv64.v(845): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(849): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(850): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(858): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(847): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(851): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(852): truncated unsized constant literal with size 32 to size 1 with no loss of information
 Info (10662): Verilog HDL Assignment information at riscv64.v(860): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(866): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(869): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(869): truncated unsized constant literal with size 32 to size 2 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(870): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(862): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(868): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(871): truncated unsized constant literal with size 32 to size 1 with no loss of information
 Info (10662): Verilog HDL Assignment information at riscv64.v(871): truncated unsized constant literal with size 32 to size 2 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(874): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(877): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(877): truncated unsized constant literal with size 32 to size 2 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(878): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(872): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(873): truncated unsized constant literal with size 32 to size 2 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(876): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(879): truncated unsized constant literal with size 32 to size 1 with no loss of information
 Info (10662): Verilog HDL Assignment information at riscv64.v(879): truncated unsized constant literal with size 32 to size 2 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(882): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(882): truncated unsized constant literal with size 32 to size 2 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(883): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(885): truncated unsized constant literal with size 32 to size 2 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(886): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(886): truncated unsized constant literal with size 32 to size 2 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(889): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(890): truncated unsized constant literal with size 32 to size 2 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(896): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(909): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(912): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(880): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(881): truncated unsized constant literal with size 32 to size 2 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(884): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(884): truncated unsized constant literal with size 32 to size 2 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(885): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(887): truncated unsized constant literal with size 32 to size 2 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(888): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(888): truncated unsized constant literal with size 32 to size 2 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(891): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(892): truncated unsized constant literal with size 32 to size 2 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(898): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(911): truncated unsized constant literal with size 32 to size 1 with no loss of information
 Info (10662): Verilog HDL Assignment information at riscv64.v(914): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(921): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(931): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(934): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(916): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(923): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(933): truncated unsized constant literal with size 32 to size 1 with no loss of information
 Info (10662): Verilog HDL Assignment information at riscv64.v(936): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(941): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Warning (10762): Verilog HDL Case Statement warning at riscv64.v(748): can't check case statement for completeness because the case expression has too many possible states
-Warning (10935): Verilog HDL Casex/Casez warning at riscv64.v(881): casex/casez item expression overlaps with a previous casex/casez item expression
-Warning (10230): Verilog HDL assignment warning at riscv64.v(951): truncated value with size 32 to match size of target (1)
-Info (10662): Verilog HDL Assignment information at riscv64.v(953): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Warning (10040): Verilog HDL or VHDL arithmetic warning at riscv64.v(954): loss of carry in addition or borrow in subtraction
-Info (10662): Verilog HDL Assignment information at riscv64.v(964): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Warning (10040): Verilog HDL or VHDL arithmetic warning at riscv64.v(965): loss of carry in addition or borrow in subtraction
-Critical Warning (10237): Verilog HDL warning at riscv64.v(973): can't infer register for assignment in edge-triggered always construct because the clock isn't obvious. Generated combinational logic instead
-Critical Warning (10237): Verilog HDL warning at riscv64.v(974): can't infer register for assignment in edge-triggered always construct because the clock isn't obvious. Generated combinational logic instead
+Info (10662): Verilog HDL Assignment information at riscv64.v(938): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(943): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Warning (10762): Verilog HDL Case Statement warning at riscv64.v(750): can't check case statement for completeness because the case expression has too many possible states
+Warning (10935): Verilog HDL Casex/Casez warning at riscv64.v(883): casex/casez item expression overlaps with a previous casex/casez item expression
+Warning (10230): Verilog HDL assignment warning at riscv64.v(953): truncated value with size 32 to match size of target (1)
+Info (10662): Verilog HDL Assignment information at riscv64.v(955): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Warning (10040): Verilog HDL or VHDL arithmetic warning at riscv64.v(956): loss of carry in addition or borrow in subtraction
+Info (10662): Verilog HDL Assignment information at riscv64.v(966): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Warning (10040): Verilog HDL or VHDL arithmetic warning at riscv64.v(967): loss of carry in addition or borrow in subtraction
+Critical Warning (10237): Verilog HDL warning at riscv64.v(975): can't infer register for assignment in edge-triggered always construct because the clock isn't obvious. Generated combinational logic instead
+Critical Warning (10237): Verilog HDL warning at riscv64.v(976): can't infer register for assignment in edge-triggered always construct because the clock isn't obvious. Generated combinational logic instead
 Info (12128): Elaborating entity "jtag_uart_system" for hierarchy "jtag_uart_system:my_jtag_system"
 Info (12128): Elaborating entity "jtag_uart_system_jtag_uart_0" for hierarchy "jtag_uart_system:my_jtag_system|jtag_uart_system_jtag_uart_0:jtag_uart_0"
 Info (12128): Elaborating entity "jtag_uart_system_jtag_uart_0_scfifo_w" for hierarchy "jtag_uart_system:my_jtag_system|jtag_uart_system_jtag_uart_0:jtag_uart_0|jtag_uart_system_jtag_uart_0_scfifo_w:the_jtag_uart_system_jtag_uart_0_scfifo_w"
@@ -3241,10 +3238,10 @@ Info (21057): Implemented 21779 device resources after synthesis - the final res
     Info (21060): Implemented 18 bidirectional pins
     Info (21061): Implemented 21325 logic cells
     Info (21064): Implemented 403 RAM segments
-Info: Quartus II 32-bit Analysis & Synthesis was successful. 0 errors, 157 warnings
-    Info: Peak virtual memory: 574 megabytes
-    Info: Processing ended: Tue Apr 21 17:53:31 2026
-    Info: Elapsed time: 00:10:00
-    Info: Total CPU time (on all processors): 00:10:00
+Info: Quartus II 32-bit Analysis & Synthesis was successful. 0 errors, 155 warnings
+    Info: Peak virtual memory: 568 megabytes
+    Info: Processing ended: Tue Apr 21 20:05:09 2026
+    Info: Elapsed time: 00:10:13
+    Info: Total CPU time (on all processors): 00:10:08
 
 
