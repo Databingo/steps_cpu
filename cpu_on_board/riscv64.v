@@ -96,7 +96,7 @@ wire [63:0] alu_op2 = use_imm ? w_imm_i : rs2;
 wire [63:0] alu_op2_inv = is_sub ? ~alu_op2 : alu_op2;
 wire [63:0] shared_add = $signed(rs1) + $signed(alu_op2_inv) + is_sub;
 wire [31:0] shared_addw_32 = rs1[31:0] + alu_op2_inv[31:0] + is_sub;
-wire [63:0] shared_addw = {32{shared_addw_32[31]}}, shared_addw_32};
+wire [63:0] shared_addw = {{32{shared_addw_32[31]}}, shared_addw_32};
 
 wire [63:0] alu_add  = shared_add; 
 wire [63:0] alu_sub  = shared_add;  
