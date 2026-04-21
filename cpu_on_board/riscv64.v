@@ -591,16 +591,7 @@ always @(*) begin
 	reg [63:0] trap_val;
 	reg [63:0] trap_epc;
 
-	wire csr_writable = (w_csr_id != misa) && (w_csr_id !=  mvendorid) && (w_csr_id != marchid) && (w_csr_id != mimpid) && (w_csr_id !=  mhartid) && (w_csr_id != clint_time)
-
-
-wire [63:0] csr_read = (w_csr == 12'h301) ? 64'h8000000000141101 : // misa(RV64IMASU)
-                       (w_csr == 12'hF11) ? 64'h0 : // mvendorid
-                       (w_csr == 12'hF12) ? 64'h0 : // marchid
-                       (w_csr == 12'hF13) ? 64'h0 : // mimpid
-                       (w_csr == 12'hF14) ? 64'h0 : // mhartid
-                       (w_csr == 12'hC01) ? mtime : // clint_time
-
+	wire csr_writable = (w_csr_id != misa) && (w_csr_id !=  mvendorid) && (w_csr_id != marchid) && (w_csr_id != mimpid) && (w_csr_id !=  mhartid) && (w_csr_id != clint_time);
 
 
 	// EXE Instruction 
