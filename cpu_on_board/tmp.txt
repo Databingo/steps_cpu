@@ -1,472 +1,111 @@
-msg:
-reserved_sec:
-num_fats:
-sec_per_fat:
-byte_per_sec:
-root_dir_sector_start:
-root_ent_cnt:
-root_dir_sectors:
-sec_per_clus:
-data_start_sec:
-entries_per_sector:
-total_sectors:
-file_size:
-file_first_cluster:
-file_sectors:
-file_start_sector:
+msg_boot:
+mem_test_var:
 _start:
-#     li s0, 0x80000000
-addi s0, x0, 0x0
-slli s0, s0, 0xb
-ori s0, s0, 0x200
-slli s0, s0, 0x16
-#     li s1, 0x80800000
-addi s1, x0, 0x0
-slli s1, s1, 0xb
-ori s1, s1, 0x202
-slli s1, s1, 0x16
-clear_ram_loop:
-sd zero, 0(s0)
-addi s0, s0, 8
-blt s0, s1, clear_ram_loop
-#     li sp, 0x1800 
-addi sp, x0, 0x0
-lui sp, 0x2
-addi sp, sp, 0x800
-#     li s11, 0x2004 
-addi s11, x0, 0x0
-lui s11, 0x2
-addi s11, s11, 0x4
-#     li s10, 0x2008 
-addi s10, x0, 0x0
-lui s10, 0x2
-addi s10, s10, 0x8
-#     li s1,  0x3000 
-addi s1, x0, 0x0
-lui s1, 0x3
-addi s1, s1, 0x0
-#     li s2,  0x3200 
-addi s2, x0, 0x0
-lui s2, 0x3
-addi s2, s2, 0x200
-#     li s3,  0x3204 
-addi s3, x0, 0x0
-lui s3, 0x3
-addi s3, s3, 0x204
-#     li s4,  0x3208 
-addi s4, x0, 0x0
-lui s4, 0x3
-addi s4, s4, 0x208
-#     li s5,  0x3220 
-addi s5, x0, 0x0
-lui s5, 0x3
-addi s5, s5, 0x220
-#     li s6,  0x3228 
-addi s6, x0, 0x0
-lui s6, 0x3
-addi s6, s6, 0x228
-#     li s0, 0x80000000 
-addi s0, x0, 0x0
-slli s0, s0, 0xb
-ori s0, s0, 0x200
-slli s0, s0, 0x16
-find_opensbi:
-# li s9, "MUSIC"
-addi s9, x0, 0x0
-ori s9, s9, 0x21
-slli s9, s9, 0xb
-ori s9, s9, 0x525
-slli s9, s9, 0xb
-ori s9, s9, 0x26a
-slli s9, s9, 0xb
-ori s9, s9, 0x54d
-find_kernel:
-# li a0, 0   
-addi a0, x0, 0x0
-# call sd_read_sector  
-auipc x1, 0 # R_RISCV_PCREL_HI20 sd_read_sector
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I sd_read_sector
-# li s7, 66
-addi s7, x0, 0x0
-addi s7, x0, 0x0
-addi s7, x0, 0x42
-sb s7, 0(s11)
-# la a1, byte_per_sec
-auipc a1, 0 # R_RISCV_PCREL_HI20 byte_per_sec 
-addi a1, a1, 0 # R_RISCV_PCREL_LO12_I byte_per_sec 
-lwu a0, 0x0a(s1)
-srli a0, a0, 8
-sh a0, 0(a1)
-# la a1, sec_per_clus
-auipc a1, 0 # R_RISCV_PCREL_HI20 sec_per_clus 
-addi a1, a1, 0 # R_RISCV_PCREL_LO12_I sec_per_clus 
-lbu a0, 0x0d(s1)
-sh a0, 0(a1)
-# la a1, reserved_sec
-auipc a1, 0 # R_RISCV_PCREL_HI20 reserved_sec 
-addi a1, a1, 0 # R_RISCV_PCREL_LO12_I reserved_sec 
-lh a0, 0x0e(s1)
-sd a0, 0(a1)
-# la a1, num_fats
-auipc a1, 0 # R_RISCV_PCREL_HI20 num_fats 
-addi a1, a1, 0 # R_RISCV_PCREL_LO12_I num_fats 
-lbu a0, 0x10(s1)
-sw a0, 0(a1)
-# la a1, root_ent_cnt
-auipc a1, 0 # R_RISCV_PCREL_HI20 root_ent_cnt 
-addi a1, a1, 0 # R_RISCV_PCREL_LO12_I root_ent_cnt 
-lwu a0, 0x10(s1)
-srli a0, a0, 8
-sh a0, 0(a1)
-# la a1, total_sectors
-auipc a1, 0 # R_RISCV_PCREL_HI20 total_sectors 
-addi a1, a1, 0 # R_RISCV_PCREL_LO12_I total_sectors 
-lwu a0, 0x20(s1)
-sw a0, 0(a1)
-# la a1, sec_per_fat
-auipc a1, 0 # R_RISCV_PCREL_HI20 sec_per_fat 
-addi a1, a1, 0 # R_RISCV_PCREL_LO12_I sec_per_fat 
-lh a0, 0x16(s1)
-sh a0, 0(a1)
-# la a1, num_fats
-auipc a1, 0 # R_RISCV_PCREL_HI20 num_fats 
-addi a1, a1, 0 # R_RISCV_PCREL_LO12_I num_fats 
-lw t1, 0(a1)
-# la a1, sec_per_fat
-auipc a1, 0 # R_RISCV_PCREL_HI20 sec_per_fat 
-addi a1, a1, 0 # R_RISCV_PCREL_LO12_I sec_per_fat 
-lw t2, 0(a1)
-# la a1, reserved_sec
-auipc a1, 0 # R_RISCV_PCREL_HI20 reserved_sec 
-addi a1, a1, 0 # R_RISCV_PCREL_LO12_I reserved_sec 
-lw t0, 0(a1)
-mul a0, t1, t2
-add a0, a0, t0
-# la t3, root_dir_sector_start
-auipc t3, 0 # R_RISCV_PCREL_HI20 root_dir_sector_start 
-addi t3, t3, 0 # R_RISCV_PCREL_LO12_I root_dir_sector_start 
-sw a0, 0(t3)
-#     csrwi mdebug, 8
-csrrwi x0, mdebug, 8
-# la a1, byte_per_sec
-auipc a1, 0 # R_RISCV_PCREL_HI20 byte_per_sec 
-addi a1, a1, 0 # R_RISCV_PCREL_LO12_I byte_per_sec 
-lw a0, 0(a1)
-# mv s7, a0
-addi s7, a0, 0
-# li t1, 32
-addi t1, x0, 0x0
-addi t1, x0, 0x0
-addi t1, x0, 0x20
-div a0, a0, t1
-# la t3,  entries_per_sector
-auipc t3, 0 # R_RISCV_PCREL_HI20 entries_per_sector 
-addi t3, t3, 0 # R_RISCV_PCREL_LO12_I entries_per_sector 
-sw a0, 0(t3)
-lw a0, 0(t3)
-# call print_reg
-auipc x1, 0 # R_RISCV_PCREL_HI20 print_reg
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_reg
-#     csrwi mdebug, 0
-csrrwi x0, mdebug, 0
-# la t3, root_dir_sector_start
-auipc t3, 0 # R_RISCV_PCREL_HI20 root_dir_sector_start 
-addi t3, t3, 0 # R_RISCV_PCREL_LO12_I root_dir_sector_start 
-lw a0, 0(t3)
-# call sd_read_sector  
-auipc x1, 0 # R_RISCV_PCREL_HI20 sd_read_sector
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I sd_read_sector
-# call print_sector
-auipc x1, 0 # R_RISCV_PCREL_HI20 print_sector
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_sector
-# li s8, 0 
-addi s8, x0, 0x0
-entry_loop:
-bge s8, s7, done_entries
-slli t1, s8, 5
-add t3, s1, t1 # t3 = address of entry
-lbu t4, 0(t3)
-beq t4, x0, done_entries # 0x00 no more entries in dir
-# li t1, 0xE5
-addi t1, x0, 0x0
-addi t1, x0, 0x0
-addi t1, x0, 0xe5
-beq t4, t1, next_entry # 0xE5 deleted entry, skip
-lbu t5, 11(t3)
-# li t1, 0x0F
-addi t1, x0, 0x0
-addi t1, x0, 0x0
-addi t1, x0, 0xf
-beq t5, t1, next_entry # 0x0F LFN(Long File Name) entry, skip
-andi t6, t5, 0x18  # Mask for Volume Label(0x08) and Directory (0x10)
-bne t6, x0, next_entry # skip 
-# li t2, 0
+#   j main 
+jal x0, main
+s_trap_handler:
+#    csrr t1, scause
+csrrs t1, scause, x0
+#    li t2, 0x8000000000000005 
 addi t2, x0, 0x0
-addi t4, t3, 7
-load_name_loop:
-lbu t0, 0(t4)
-slli t2, t2, 8
-xor t2, t2, t0
-addi t4, t4, -1
-bge t4, t3, load_name_loop
-slli t2, t2, 24
-srli t2, t2, 24
-bne t2, s9, next_entry
-# li a0, "FOUND!"
-addi a0, x0, 0x0
-lui a0, 0x2
-srli a0, a0, 0x1
-ori a0, a0, 0xa2
-slli a0, a0, 0xb
-ori a0, a0, 0x139
-slli a0, a0, 0xb
-ori a0, a0, 0x2a9
-slli a0, a0, 0xb
-ori a0, a0, 0x746
-# call print7
-auipc x1, 0 # R_RISCV_PCREL_HI20 print7
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print7
-done_entries:
-#    j read_file
-jal x0, read_file
-next_entry:
-addi s8, s8, 1
-# j entry_loop
-jal x0, entry_loop
-read_file:
-# li a0, "\nFSize:"
-addi a0, x0, 0x0
-lui a0, 0x3a6
-srli a0, a0, 0x1
-ori a0, a0, 0x2bd
-slli a0, a0, 0xb
-ori a0, a0, 0x1a5
-slli a0, a0, 0xb
-ori a0, a0, 0x268
-slli a0, a0, 0xb
-ori a0, a0, 0x60a
-# call print7
-auipc x1, 0 # R_RISCV_PCREL_HI20 print7
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print7
-lwu a0, 0x1c(t3)
-# la a1, file_size
-auipc a1, 0 # R_RISCV_PCREL_HI20 file_size 
-addi a1, a1, 0 # R_RISCV_PCREL_LO12_I file_size 
-sw a0, 0(a1)
-lwu a0, 0(a1)
-# call print_reg
-auipc x1, 0 # R_RISCV_PCREL_HI20 print_reg
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_reg
-lhu a0, 0x1a(t3)
-# la a1, file_first_cluster
-auipc a1, 0 # R_RISCV_PCREL_HI20 file_first_cluster 
-addi a1, a1, 0 # R_RISCV_PCREL_LO12_I file_first_cluster 
-sh a0, 0(a1)
-# la a1, root_ent_cnt
-auipc a1, 0 # R_RISCV_PCREL_HI20 root_ent_cnt 
-addi a1, a1, 0 # R_RISCV_PCREL_LO12_I root_ent_cnt 
-lwu t0, 0(a1)
-# li t1, 32
-addi t1, x0, 0x0
-addi t1, x0, 0x0
-addi t1, x0, 0x20
-mul t2, t0, t1
-# la a1, byte_per_sec
-auipc a1, 0 # R_RISCV_PCREL_HI20 byte_per_sec 
-addi a1, a1, 0 # R_RISCV_PCREL_LO12_I byte_per_sec 
-lwu t0, 0(a1)
-add t3, t2, t0
-addi t3, t3, -1
-div a0, t3, t0
-# la a1, root_dir_sectors 
-auipc a1, 0 # R_RISCV_PCREL_HI20 root_dir_sectors 
-addi a1, a1, 0 # R_RISCV_PCREL_LO12_I root_dir_sectors 
-sw a0, 0(a1)
-lw a0, 0(a1)
-# call print_reg
-auipc x1, 0 # R_RISCV_PCREL_HI20 print_reg
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_reg
-# la a1, root_dir_sector_start
-auipc a1, 0 # R_RISCV_PCREL_HI20 root_dir_sector_start 
-addi a1, a1, 0 # R_RISCV_PCREL_LO12_I root_dir_sector_start 
-lw t0, 0(a1)
-# la a1, root_dir_sectors 
-auipc a1, 0 # R_RISCV_PCREL_HI20 root_dir_sectors 
-addi a1, a1, 0 # R_RISCV_PCREL_LO12_I root_dir_sectors 
-lw t1, 0(a1)
-add t2, t0, t1
-# la a1, data_start_sec  
-auipc a1, 0 # R_RISCV_PCREL_HI20 data_start_sec 
-addi a1, a1, 0 # R_RISCV_PCREL_LO12_I data_start_sec 
-sw t2, 0(a1)
-# la a1, file_first_cluster 
-auipc a1, 0 # R_RISCV_PCREL_HI20 file_first_cluster 
-addi a1, a1, 0 # R_RISCV_PCREL_LO12_I file_first_cluster 
-lw t0, 0(a1)
-addi t0, t0, -2
-# la a1, sec_per_clus
-auipc a1, 0 # R_RISCV_PCREL_HI20 sec_per_clus 
-addi a1, a1, 0 # R_RISCV_PCREL_LO12_I sec_per_clus 
-lw t1, 0(a1)
-mul t2, t0, t1
-# la a1, data_start_sec
-auipc a1, 0 # R_RISCV_PCREL_HI20 data_start_sec 
-addi a1, a1, 0 # R_RISCV_PCREL_LO12_I data_start_sec 
-lw t3, 0(a1)
-add a0, t3, t2
-# la a1, file_start_sector
-auipc a1, 0 # R_RISCV_PCREL_HI20 file_start_sector 
-addi a1, a1, 0 # R_RISCV_PCREL_LO12_I file_start_sector 
-sw a0, 0(a1)
-# call print_reg
-auipc x1, 0 # R_RISCV_PCREL_HI20 print_reg
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_reg
-# la a1, file_size
-auipc a1, 0 # R_RISCV_PCREL_HI20 file_size 
-addi a1, a1, 0 # R_RISCV_PCREL_LO12_I file_size 
-lw t0, 0(a1)
-addi t0, t0, 511
-# li t1, 512
-addi t1, x0, 0x0
-addi t1, x0, 0x0
-addi t1, x0, 0x200
-div a0, t0, t1
-# la a1, file_sectors 
-auipc a1, 0 # R_RISCV_PCREL_HI20 file_sectors 
-addi a1, a1, 0 # R_RISCV_PCREL_LO12_I file_sectors 
-sw a0, 0(a1)
-lw a0, 0(a1)
-# call print_reg
-auipc x1, 0 # R_RISCV_PCREL_HI20 print_reg
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_reg
-# la a1, file_sectors
-auipc a1, 0 # R_RISCV_PCREL_HI20 file_sectors 
-addi a1, a1, 0 # R_RISCV_PCREL_LO12_I file_sectors 
-lw t0, 0(a1)
-# la a1,  file_start_sector
-auipc a1, 0 # R_RISCV_PCREL_HI20 file_start_sector 
-addi a1, a1, 0 # R_RISCV_PCREL_LO12_I file_start_sector 
-lw t1, 0(a1)
-add t2, t1, t0
-# li t0, "KERNL"
+lui t2, 0x80000
+srli t2, t2, 0x1
+slli t2, t2, 0x21
+ori t2, t2, 0x5
+beq t1, t2, timer_found_stip
+#    li t2, 0x8000000000000001 
+addi t2, x0, 0x0
+lui t2, 0x80000
+srli t2, t2, 0x1
+slli t2, t2, 0x21
+ori t2, t2, 0x1
+beq t1, t2, timer_found_ssip
+#    csrr t2, sepc
+csrrs t2, sepc, x0
+addi t2, t2, 4 # skip ecall/ebreak instruction
+#    csrw sepc, t2
+csrrw x0, sepc, t2
+sret
+timer_found_stip:
+addi a0, x0, 84  # T
+#     call sbi_putchar
+auipc x1, 0 # R_RISCV_PCREL_HI20 sbi_putchar
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I sbi_putchar
+#    csrr a0, time
+csrrs a0, time, x0
+#    li t0, 100000 
 addi t0, x0, 0x0
-ori t0, t0, 0x26
-slli t0, t0, 0xb
-ori t0, t0, 0x139
-slli t0, t0, 0xb
-ori t0, t0, 0x248
-slli t0, t0, 0xb
-ori t0, t0, 0x54b
-beq t0, s9, copy_kernel 
-# li s0, 0x80000000 
-addi s0, x0, 0x0
-slli s0, s0, 0xb
-ori s0, s0, 0x200
-slli s0, s0, 0x16
-copy_sector_loop:
-# li a0, 94 
-addi a0, x0, 0x0
-addi a0, x0, 0x0
-addi a0, x0, 0x5e
-# call putchar
-auipc x1, 0 # R_RISCV_PCREL_HI20 putchar
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I putchar
-# mv a0, t1
-addi a0, t1, 0
-# call sd_read_sector  
-auipc x1, 0 # R_RISCV_PCREL_HI20 sd_read_sector
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I sd_read_sector
-# mv a0, s0
-addi a0, s0, 0
-# call copy_sector
-auipc x1, 0 # R_RISCV_PCREL_HI20 copy_sector
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I copy_sector
-addi t1, t1, 1
-addi s0, s0, 512
-blt t1, t2, copy_sector_loop
-search_kernel:
-# li s9, "KERNL"
-addi s9, x0, 0x0
-ori s9, s9, 0x26
-slli s9, s9, 0xb
-ori s9, s9, 0x139
-slli s9, s9, 0xb
-ori s9, s9, 0x248
-slli s9, s9, 0xb
-ori s9, s9, 0x54b
-# j find_kernel
-jal x0, find_kernel
-copy_kernel:
-# li s0, 0x80200000 
-addi s0, x0, 0x0
-slli s0, s0, 0xb
-ori s0, s0, 0x200
-slli s0, s0, 0xb
-ori s0, s0, 0x400
-slli s0, s0, 0xb
-copy_kernel_sector_loop:
-# li a0, 96 
-addi a0, x0, 0x0
-addi a0, x0, 0x0
-addi a0, x0, 0x60
-# call putchar
-auipc x1, 0 # R_RISCV_PCREL_HI20 putchar
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I putchar
-# mv a0, t1
-addi a0, t1, 0
-# call sd_read_sector  
-auipc x1, 0 # R_RISCV_PCREL_HI20 sd_read_sector
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I sd_read_sector
-# mv a0, s0
-addi a0, s0, 0
-# call copy_sector
-auipc x1, 0 # R_RISCV_PCREL_HI20 copy_sector
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I copy_sector
-addi t1, t1, 1
-addi s0, s0, 512
-blt t1, t2, copy_kernel_sector_loop
-boot_opensbi:
-#     li s0, 0x80000000 
-addi s0, x0, 0x0
-slli s0, s0, 0xb
-ori s0, s0, 0x200
-slli s0, s0, 0x16
-ld a0, 0(s0)         # test sdram read data
-#     call print_reg
-auipc x1, 0 # R_RISCV_PCREL_HI20 print_reg
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print_reg
-#  li a0, "\nJump:"
-addi a0, x0, 0x0
-lui a0, 0x3
-srli a0, a0, 0x1
-ori a0, a0, 0x538
-slli a0, a0, 0xb
-ori a0, a0, 0x1b5
-slli a0, a0, 0xb
-ori a0, a0, 0x6a9
-slli a0, a0, 0xb
-ori a0, a0, 0x20a
-#  call print7
-auipc x1, 0 # R_RISCV_PCREL_HI20 print7
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print7
-fence.i
-#     li a0, 0 
-addi a0, x0, 0x0
-#     li a1, 0 
-addi a1, x0, 0x0
-#     li a2, 0x80200000 
-addi a2, x0, 0x0
-slli a2, a2, 0xb
-ori a2, a2, 0x200
-slli a2, a2, 0xb
-ori a2, a2, 0x400
-slli a2, a2, 0xb
-#     jr s0  
-jalr x0, 0(s0)
-end:
-# j end
-jal x0, end
-print_reg:
+lui t0, 0x18
+addi t0, t0, 0x6a0
+add a0, a0, t0
+#    li a7, 0  
+addi a7, x0, 0x0
+ecall
+sret
+timer_found_ssip:
+addi a0, x0, 83  # S
+#     call sbi_putchar
+auipc x1, 0 # R_RISCV_PCREL_HI20 sbi_putchar
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I sbi_putchar
+#     li t2, 0x02  
+addi t2, x0, 0x0
+addi t2, x0, 0x0
+addi t2, x0, 0x2
+#     csrc sip, t2
+csrrc x0, sip, t2
+sret
+sbi_putchar:
+addi sp, sp, -8
+sd ra, 0(sp)
+#     li a7, 1 
+addi a7, x0, 0x0
+addi a7, x0, 0x0
+addi a7, x0, 0x1
+ecall
+ld ra, 0(sp)
+addi sp, sp, 8
+#     ret
+jalr x0, 0(x1)
+sbi_puts:
+addi sp, sp, -24
+sd ra, 0(sp)
+sd a0, 8(sp)
+sd s1, 16(sp)
+#     mv s1, a0
+addi s1, a0, 0
+sbi_puts_loop:
+lbu a0, 0(s1)
+beq a0, x0, sbi_stop_puts # \x00 for end of string
+#     li a7, 1 
+addi a7, x0, 0x0
+addi a7, x0, 0x0
+addi a7, x0, 0x1
+ecall
+addi s1, s1, 1 # next byte
+#     j sbi_puts_loop
+jal x0, sbi_puts_loop
+sbi_stop_puts:
+ld ra, 0(sp)
+ld a0, 8(sp)
+ld s1, 16(sp)
+addi sp, sp, 24
+#     ret
+jalr x0, 0(x1)
+sbi_print7:
+addi sp, sp, -16
+sd a0, 0(sp)
+sd ra, 8(sp)
+#     mv a0, sp
+addi a0, sp, 0
+#     call sbi_puts
+auipc x1, 0 # R_RISCV_PCREL_HI20 sbi_puts
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I sbi_puts
+ld a0, 0(sp)
+ld ra, 8(sp)
+addi sp, sp, 16
+#     ret
+jalr x0, 0(x1)
+sbi_print_reg:
 addi sp, sp, -40
 sd ra, 0(sp)
 sd s0, 8(sp)
@@ -479,16 +118,16 @@ addi s0, a0, 0
 addi a0, x0, 0x0
 addi a0, x0, 0x0
 addi a0, x0, 0x30
-#     call putchar
-auipc x1, 0 # R_RISCV_PCREL_HI20 putchar
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I putchar
+#     call sbi_putchar
+auipc x1, 0 # R_RISCV_PCREL_HI20 sbi_putchar
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I sbi_putchar
 #     li a0, "x"
 addi a0, x0, 0x0
 addi a0, x0, 0x0
 addi a0, x0, 0x78
-#     call putchar
-auipc x1, 0 # R_RISCV_PCREL_HI20 putchar
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I putchar
+#     call sbi_putchar
+auipc x1, 0 # R_RISCV_PCREL_HI20 sbi_putchar
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I sbi_putchar
 #     li s1, 60 
 addi s1, x0, 0x0
 addi s1, x0, 0x0
@@ -498,16 +137,15 @@ srl s2, s0, s1      # get high nibble
 andi s2, s2, 0xF
 slti s3, s2, 10     # if < 10 number
 beq s3, x0, letter
-addi s2, s2, 48     # 0 is "0" ascii 48
+addi a0, s2, 48     # 0 is "0" ascii 48
 #     j print_h
 jal x0, print_h
 letter:
-addi s2, s2, 55     # 10 is "A" ascii 65 ..
+addi a0, s2, 55     # 10 is "A" ascii 65 ..
 print_h:
-#     call wait_uart
-auipc x1, 0 # R_RISCV_PCREL_HI20 wait_uart
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I wait_uart
-sb s2, 0(s11)       # print
+#     call sbi_putchar    
+auipc x1, 0 # R_RISCV_PCREL_HI20 sbi_putchar
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I sbi_putchar
 addi s1, s1, -4
 bge s1, x0, p_loop 
 ld ra, 0(sp)
@@ -518,175 +156,535 @@ ld s3, 32(sp)
 addi sp, sp, 40
 #     ret
 jalr x0, 0(x1)
-sd_read_sector:
-addi sp, sp, -24
-sd s7, 0(sp)
-sd s8, 8(sp)
-sd ra, 16(sp)
-sw a0, 0(s2) # Write Sector index value to address 0x3200
-wait_ready:
-lw s7, 0(s5)   # 0x3220 ready
-beq s7, x0, wait_ready
-#     li s8, 1
-addi s8, x0, 0x0
-addi s8, x0, 0x0
-addi s8, x0, 0x1
-sw s8, 0(s3)   # Trigger read at 0x3204
-wait_cache:
-lw s7, 0(s6)   # s7 0x3228 cache_avaible
-beq s7, x0, wait_cache
-ld s7, 0(sp)
-ld s8, 8(sp)
-ld ra, 16(sp)
-addi sp, sp, 24
-#     ret
-jalr x0, 0(x1)
-print_sector:
-addi sp, sp, -64
-sd ra, 0(sp)
-sd s4, 8(sp)
-sd s5, 16(sp)
-sd s6, 24(sp)
-sd s7, 32(sp)
-sd s8, 40(sp)
-sd s9, 48(sp)
-sd s3, 56(sp)
-#     li s7, 0   
-addi s7, x0, 0x0
-#     li s8, 511 
-addi s8, x0, 0x0
-addi s8, x0, 0x0
-addi s8, x0, 0x1ff
-print_loop:
-add s6, s1, s7 
-addi s7, s7, 1
-lbu s9, 0(s6)       # load byte at 0x3000 a1+t1
-andi s9, s9, 0xFF   # Isolate byte value
-srli s3, s9, 4      # get high nibble
-slti s5, s3, 10     # if < 10 number
-beq s5, x0, letter_h
-addi s3, s3, 48     # 0 is "0" ascii 48
-#     j print_h_hex
-jal x0, print_h_hex
-letter_h:
-addi s3, s3, 55     # 10 is "A" ascii 65 ..
-print_h_hex:
-#     call wait_uart 
-auipc x1, 0 # R_RISCV_PCREL_HI20 wait_uart
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I wait_uart
-sb s3, 0(s11)
-andi s4, s9, 0x0F   # get low nibble
-slti s5, s4, 10     # if < 10 number
-beq s5, x0, letter_l
-addi s4, s4, 48     # 0 is "0" ascii 48
-#     j print_l_hex
-jal x0, print_l_hex
-letter_l:
-addi s4, s4, 55     # 10 is "A" ascii 65 ..
-print_l_hex:
-#     call wait_uart 
-auipc x1, 0 # R_RISCV_PCREL_HI20 wait_uart
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I wait_uart
-sb s4, 0(s11)
-bge s8, s7, print_loop
-ld ra, 0(sp)
-ld s4, 8(sp)
-ld s5, 16(sp)
-ld s6, 24(sp)
-ld s7, 32(sp)
-ld s8, 40(sp)
-ld s9, 48(sp)
-ld s3, 56(sp)
-addi sp, sp, 64
-#     ret
-jalr x0, 0(x1)
-copy_sector:
-addi sp, sp, -48
-sd ra, 0(sp)
-sd s6, 8(sp)
-sd s7, 16(sp)
-sd s8, 24(sp)
-sd s9, 32(sp)
-sd s5, 40(sp)
-#     li s7, 0   
-addi s7, x0, 0x0
-#     li s8, 511 
-addi s8, x0, 0x0
-addi s8, x0, 0x0
-addi s8, x0, 0x1ff
-#     mv s5, a0
-addi s5, a0, 0
-copy_loop:
-add s6, s1, s7 
-ld a0, 0(s6)       # load 8 bytes at 0x3000 a1+s7
-sd a0, 0(s5)       # save 8 bytes to s5
-addi s7, s7, 8
-addi s5, s5, 8
-bge s8, s7, copy_loop
-ld ra, 0(sp)
-ld s6, 8(sp)
-ld s7, 16(sp)
-ld s8, 24(sp)
-ld s9, 32(sp)
-ld s5, 40(sp)
-addi sp, sp,  48
-#     ret
-jalr x0, 0(x1)
-putchar:
-addi sp, sp, -8
-sd ra, 0(sp)
-#     call wait_uart
-auipc x1, 0 # R_RISCV_PCREL_HI20 wait_uart
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I wait_uart
-sb a0, 0(s11)
-ld ra, 0(sp)
-addi sp, sp, 8
-#     ret
-jalr x0, 0(x1)
-puts:
-addi sp, sp, -16
-sd ra, 0(sp)
-sd s0, 8(sp)
-#     mv s0, a0
-addi s0, a0, 0
-puts_loop:
-lbu a0, 0(s0)
-beq a0, x0, stop_puts # \x00 for end of string
-#     call putchar 
-auipc x1, 0 # R_RISCV_PCREL_HI20 putchar
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I putchar
-addi s0, s0, 1 # next byte
-#     j puts_loop
-jal x0, puts_loop
-stop_puts:
-ld ra, 0(sp)
-ld s0, 8(sp)
-addi sp, sp, 16
-#     ret
-jalr x0, 0(x1)
-wait_uart:
-addi sp, sp, -16
-sd s0, 0(sp)
-sd ra, 8(sp)
-wait_uart_loop:
-lw s0, 0(s11)
-#     bgt zero, s0, wait_uart_loop
-blt s0, zero, wait_uart_loop
-ld s0, 0(sp)
-ld ra, 8(sp)
-addi sp, sp, 16
-#     ret
-jalr x0, 0(x1)
-print7:
-addi sp, sp, -16
-sd a0, 0(sp)
-sd ra, 8(sp)
-#     mv a0, sp
-addi a0, sp, 0
-#     call puts
-auipc x1, 0 # R_RISCV_PCREL_HI20 puts
-jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I puts
-ld ra, 8(sp)
-addi sp, sp, 16
-#     ret
-jalr x0, 0(x1)
+main:
+#    li sp, 0x80700000 
+addi sp, x0, 0x0
+slli sp, sp, 0xb
+ori sp, sp, 0x201
+slli sp, sp, 0xb
+ori sp, sp, 0x600
+slli sp, sp, 0xb
+#    li t0, 100
+addi t0, x0, 0x0
+addi t0, x0, 0x0
+addi t0, x0, 0x64
+check_clock:
+#    csrr a0, time
+csrrs a0, time, x0
+#    call sbi_print_reg
+auipc x1, 0 # R_RISCV_PCREL_HI20 sbi_print_reg
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I sbi_print_reg
+addi t0, t0, -1
+#    bnez t0, check_clock
+bne t0, x0, check_clock
+#    la t0, s_trap_handler
+auipc t0, 0 # R_RISCV_PCREL_HI20 s_trap_handler 
+addi t0, t0, 0 # R_RISCV_PCREL_LO12_I s_trap_handler 
+#    csrw stvec, t0
+csrrw x0, stvec, t0
+ebreak
+#    li t0, 0x80700000 
+addi t0, x0, 0x0
+slli t0, t0, 0xb
+ori t0, t0, 0x201
+slli t0, t0, 0xb
+ori t0, t0, 0x600
+slli t0, t0, 0xb
+#    li t1, 0xcf       
+addi t1, x0, 0x0
+addi t1, x0, 0x0
+addi t1, x0, 0xcf
+sd t1, 0(t0) 
+#    li t1, 0x200000cf 
+addi t1, x0, 0x0
+lui t1, 0x20000
+addi t1, t1, 0xcf
+sd t1, 16(t0)     # Index=va[38:30]=0b00000010=2, 8 bytes per PTE = 16, 
+#    li t0, 0x8000000000080700
+addi t0, x0, 0x0
+lui t0, 0x80000
+srli t0, t0, 0x1
+slli t0, t0, 0x16
+ori t0, t0, 0x100
+slli t0, t0, 0xb
+ori t0, t0, 0x700
+#    csrw satp, t0 
+csrrw x0, satp, t0
+sfence.vma ## <--- start use TLB I/D hitting
+lui s11, 0x12345         # s11 = 0x0000000012345000
+#    la a2, mem_test_var
+auipc a2, 0 # R_RISCV_PCREL_HI20 mem_test_var 
+addi a2, a2, 0 # R_RISCV_PCREL_LO12_I mem_test_var 
+#    li t4, 0x8F  
+addi t4, x0, 0x0
+addi t4, x0, 0x0
+addi t4, x0, 0x8f
+sb t4, 0(a2)
+lb t5, 0(a2) # 0xFFFFFFFFFFFFFF8F
+lbu t6, 0(a2)# 0x000000000000008F
+#    li t1, 0x8F
+addi t1, x0, 0x0
+addi t1, x0, 0x0
+addi t1, x0, 0x8f
+bne t6, t1, fail_chain
+#    li t4, 0x8FEE  
+addi t4, x0, 0x0
+lui t4, 0x9
+addi t4, t4, 0xfee
+sh t4, 0(a2)
+lh t5, 0(a2) # 0xFFFFFFFFFFFF8FEE
+lhu t6, 0(a2)# 0x0000000000008FEE
+#    li t1, 0x8FEE
+addi t1, x0, 0x0
+lui t1, 0x9
+addi t1, t1, 0xfee
+bne t6, t1, fail_chain
+#    li t4, 0x8FEEDCBA  
+addi t4, x0, 0x0
+slli t4, t4, 0xb
+ori t4, t4, 0x23f
+slli t4, t4, 0xb
+ori t4, t4, 0x5db
+slli t4, t4, 0xb
+ori t4, t4, 0x4ba
+sw t4, 0(a2)
+lw t5, 0(a2) # 0xFFFFFFFF8FEEDBCA
+lwu t6, 0(a2)# 0x000000008FEEDBCA`
+#    li t1, 0x8FEEDCBA
+addi t1, x0, 0x0
+slli t1, t1, 0xb
+ori t1, t1, 0x23f
+slli t1, t1, 0xb
+ori t1, t1, 0x5db
+slli t1, t1, 0xb
+ori t1, t1, 0x4ba
+bne t6, t1, fail_chain
+sd s11, 0(a2)
+ld s11, 0(a2)
+addi s11, s11, 0x678     # s11 = 0x12345678
+xori s11, s11, 0x111     # s11 = 0x12345769
+andi s11, s11, 0xFFF     # s11 = 0x12345769
+ori s11, s11, 0x800      # s11 = 0xFFFFFFFFFFFFFF69
+#    li a2, 0xFFF 
+addi a2, x0, 0x0
+lui a2, 0x1
+addi a2, a2, 0xfff
+and s11, s11, a2         # s11 = 0x0000000000000F69
+#    li t1, 0x0000000000000F69
+addi t1, x0, 0x0
+lui t1, 0x1
+addi t1, t1, 0xf69
+bne s11, t1, fail_chain
+slli s11, s11, 4         # s11 = 0x0000F690
+srli s11, s11, 4         # s11 = 0x00000F69
+srai s11, s11, 0         # s11 = 0x00000F69 (MSB is 0)
+slti a3, s11, 0         # a3 = 0
+add  s11, s11, a3        # s11 = 0x00000F69
+sltiu a3, s11, 0        # a3 = 0
+add  s11, s11, a3        # s11 = 0x00000F69
+#    li t1,  0x00000F69
+addi t1, x0, 0x0
+lui t1, 0x1
+addi t1, t1, 0xf69
+bne s11, t1, fail_chain
+addiw s11, s11, 1        # s11 = 0x00000F6A
+slliw s11, s11, 16       # s11 = 0x0F6A0000
+srliw s11, s11, 16       # s11 = 0x00000F6A
+sraiw s11, s11, 0        # s11 = 0x00000F6A
+#    li t1,  0x00000F6A
+addi t1, x0, 0x0
+lui t1, 0x1
+addi t1, t1, 0xf6a
+bne s11, t1, fail_chain
+#    li a2, 0x111
+addi a2, x0, 0x0
+addi a2, x0, 0x0
+addi a2, x0, 0x111
+add s11, s11, a2          # s11 = 0x107B
+sub s11, s11, a2          # s11 = 0x0F6A
+xor s11, s11, a2          # s11 = 0x0E7B
+and s11, s11, s11          # s11 = 0x0E7B
+or  s11, s11, a2          # s11 = 0x0F7B
+#    li a2, 4
+addi a2, x0, 0x0
+addi a2, x0, 0x0
+addi a2, x0, 0x4
+sll s11, s11, a2          # s11 = 0x0F7B0
+srl s11, s11, a2          # s11 = 0x00F7B
+sra s11, s11, a2          # s11 = 0x000F7
+#    li a2, 0
+addi a2, x0, 0x0
+slt a3, a2, s11          # a3 = 1
+add s11, s11, a3          # s11 = 0x000F8
+sltu a3, a2, s11         # a3 = 1
+add s11, s11, a3          # s11 = 0x000F9
+#    li t1,  0x000F9
+addi t1, x0, 0x0
+addi t1, x0, 0x0
+addi t1, x0, 0xf9
+bne s11, t1, fail_chain
+#    li a2, 1
+addi a2, x0, 0x0
+addi a2, x0, 0x0
+addi a2, x0, 0x1
+addw s11, s11, a2         # s11 = 0x000FA
+subw s11, s11, a2         # s11 = 0x000F9
+#    li a2, 4
+addi a2, x0, 0x0
+addi a2, x0, 0x0
+addi a2, x0, 0x4
+sllw s11, s11, a2         # s11 = 0x00F90
+srlw s11, s11, a2         # s11 = 0x000F9
+sraw s11, s11, a2         # s11 = 0x0000F
+#    li t1,  0x000F
+addi t1, x0, 0x0
+addi t1, x0, 0x0
+addi t1, x0, 0xf
+bne s11, t1, fail_chain
+#    li a0, "\nMthrwK"
+addi a0, x0, 0x0
+lui a0, 0x4b7
+srli a0, a0, 0x1
+ori a0, a0, 0x3b9
+slli a0, a0, 0xb
+ori a0, a0, 0x1a1
+slli a0, a0, 0xb
+ori a0, a0, 0x689
+slli a0, a0, 0xb
+ori a0, a0, 0x50a
+#    call sbi_print7
+auipc x1, 0 # R_RISCV_PCREL_HI20 sbi_print7
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I sbi_print7
+jal a2, jump_target_1
+jump_target_1:
+addi s11, s11, 1          # s11 = 0x00010
+#    la a2, jump_target_2
+auipc a2, 0 # R_RISCV_PCREL_HI20 jump_target_2 
+addi a2, a2, 0 # R_RISCV_PCREL_LO12_I jump_target_2 
+jalr a2, 0(a2)
+jump_target_2:
+addi s11, s11, 1          # s11 = 0x00011
+beq s11, s11, branch_target_3
+branch_target_3:
+addi s11, s11, 1
+#    li a2, 0
+addi a2, x0, 0x0
+bne s11, a2, branch_target_4
+branch_target_4:
+addi s11, s11, 1
+blt a2, s11, branch_target_5
+branch_target_5:
+addi s11, s11, 1
+bge s11, a2, branch_target_6
+branch_target_6:
+addi s11, s11, 1
+bltu a2, s11, branch_target_7
+branch_target_7:
+addi s11, s11, 1
+bgeu s11, a2, branch_target_8
+branch_target_8:
+addi s11, s11, 1
+#    li t1,  0x17
+addi t1, x0, 0x0
+addi t1, x0, 0x0
+addi t1, x0, 0x17
+bne s11, t1, fail_chain
+#    li a0, "\nBrJOK"
+addi a0, x0, 0x0
+lui a0, 0x4
+srli a0, a0, 0x1
+ori a0, a0, 0x5a7
+slli a0, a0, 0xb
+ori a0, a0, 0x529
+slli a0, a0, 0xb
+ori a0, a0, 0x648
+slli a0, a0, 0xb
+ori a0, a0, 0x20a
+#    call sbi_print7
+auipc x1, 0 # R_RISCV_PCREL_HI20 sbi_print7
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I sbi_print7
+#   csrw sscratch, s11
+csrrw x0, sscratch, s11
+#   csrr s11, sscratch
+csrrs s11, sscratch, x0
+csrrs a3, sscratch, zero
+csrrc a3, sscratch, zero
+csrrwi a3, sscratch, 0
+csrrsi a3, sscratch, 0
+csrrci a3, sscratch, 0
+#    la a2, mem_test_var
+auipc a2, 0 # R_RISCV_PCREL_HI20 mem_test_var 
+addi a2, a2, 0 # R_RISCV_PCREL_LO12_I mem_test_var 
+lr.w t3, (a2)
+sc.w t4, s11, (a2)
+ld s11, 0(a2)
+lr.d a3, (a2)
+sc.d a4, s11, (a2)
+ld s11, 0(a2)           # s11 = 0x00017
+#    li t1,  0x17
+addi t1, x0, 0x0
+addi t1, x0, 0x0
+addi t1, x0, 0x17
+bne s11, t1, fail_chain
+amoswap.w t3, s11, (a2) # M[a2]=0x17, t3=0x17
+amoadd.w  t3, s11, (a2) # M[a2]=0x2E, t3=0x17
+amoxor.w  t3, s11, (a2) # M[a2]=0x39, t3=0x2E
+amoand.w  t3, s11, (a2) # M[a2]=0x11, t3=0x39
+amoor.w   t3, s11, (a2) # M[a2]=0x17, t3=0x11
+amomax.w  t3, s11, (a2) # M[a2]=0x17, t3=0x17
+amomin.w  t3, s11, (a2) # M[a2]=0x17, t3=0x17
+amomaxu.w t3, s11, (a2) # M[a2]=0x17, t3=0x17
+amominu.w t3, s11, (a2) # M[a2]=0x17, t3=0x17
+amoswap.d t3, s11, (a2) # M[a2]=0x17, t3=0x17
+amoadd.d  t3, s11, (a2) # M[a2]=0x2E, t3=0x17
+amoxor.d  t3, s11, (a2) # M[a2]=0x39, t3=0x2E
+amoand.d  t3, s11, (a2) # M[a2]=0x11, t3=0x39
+amoor.d   t3, s11, (a2) # M[a2]=0x17, t3=0x11
+amomax.d  t3, s11, (a2) # M[a2]=0x17, t3=0x17
+amomin.d  t3, s11, (a2) # M[a2]=0x17, t3=0x17
+amomaxu.d t3, s11, (a2) # M[a2]=0x17, t3=0x17
+amominu.d t3, s11, (a2) # M[a2]=0x17, t3=0x17
+ld s11, 0(a2)           # s11 = 0x00017
+#    li t0, 0x17
+addi t0, x0, 0x0
+addi t0, x0, 0x0
+addi t0, x0, 0x17
+bne s11, t0, fail_chain
+#    li a2, 2
+addi a2, x0, 0x0
+addi a2, x0, 0x0
+addi a2, x0, 0x2
+mul s11, s11, a2  # s11 = 23 * 2 = 46
+mulh a3, s11, a2 # a3 = High 64 bit of 92 = 0
+add s11, s11, a3  # s11 = 46
+mulw s11, s11, a2 # s11 = 46 * 2 = 92 (0x5C)
+#    li t1, 94
+addi t1, x0, 0x0
+addi t1, x0, 0x0
+addi t1, x0, 0x5e
+sub s11, s11, t1    # s11 = 92-94 =-2
+#    li a2, -3
+addi a2, x0, 0x0
+addi a2, x0, 0x0
+addi a2, x0, 0x3
+xori a2, a2, -1
+addi a2, a2, 1
+mulh a3, s11, a2   # a3=0  -2*-3=6, High 64 is 0
+add s11, s11, a3    # s11 = -2 + 0 = -2
+mulhu a3, s11, a2  # a3 = -5  usign*usign H is -5
+add s11, s11, a3    # s11 = -2 + (-5)  -7
+mulhsu a3, s11, a2 # a3 = -7  sign*unsign H is -7
+add s11, s11, a3    # s11 = -7 + (-7) = -14
+addi s11, s11, 106
+#    li t1, 0x000000000000005C 
+addi t1, x0, 0x0
+addi t1, x0, 0x0
+addi t1, x0, 0x5c
+bne s11, t1, fail_chain
+#    li a2, 3        
+addi a2, x0, 0x0
+addi a2, x0, 0x0
+addi a2, x0, 0x3
+div a3, s11, a2  # a3 = 0x000000000000001E
+rem a4, s11, a2  # a4 = 0x0000000000000002
+add s11, s11, a3  # s11 = 92+30=122
+add s11, s11, a4  # s11 = 122+2=124
+#    li t1, 0x80000000
+addi t1, x0, 0x0
+slli t1, t1, 0xb
+ori t1, t1, 0x200
+slli t1, t1, 0x16
+add s11, s11, t1  # s11 = 0x8000007C
+#    li a2, 2
+addi a2, x0, 0x0
+addi a2, x0, 0x0
+addi a2, x0, 0x2
+divw a3, s11, a2  # a3 = 0xFFFFFFFFC000003E
+remw a4, s11, a2  # a4 = 0
+add s11, s11, a3  # s11 = 0x8000007C +  0xFFFFFFFFC000003E = 0x400000BA
+add s11, s11, a4  # s11
+lui t1, 0x40000
+addi t1, t1, 0x100  # t1 = 0x40000100
+sub s11, s11, t1 # s11 =  0x400000BA - 0x40000100 = 0xFFFFFFFFFFFFFFBA = -70
+#    li a2, 3
+addi a2, x0, 0x0
+addi a2, x0, 0x0
+addi a2, x0, 0x3
+divu a3, s11, a2  # a3 = 0x555555555555553E
+remu a4, s11, a2  # a4 = 0
+add s11, s11, a3  # s11 = 0xFFFFFFFFFFFFFFBA + 0x555555555555553E = 0x55555555555554F8
+add s11, s11, a4  # s11
+#    li t1, -1
+addi t1, x0, 0x0
+addi t1, x0, 0x0
+addi t1, x0, 0x1
+xori t1, t1, -1
+addi t1, t1, 1
+slli t1, t1, 31 # t1 = 0xFFFFFFFF80000000
+add s11, s11, t1 # s11 =  0x55555555555554F8 +  0xFFFFFFFF80000000 = 0x55555554D55554F8
+#    li a2, 5
+addi a2, x0, 0x0
+addi a2, x0, 0x0
+addi a2, x0, 0x5
+divuw a3, s11, a2  # a3 = 0x000000002AAAAA98
+remuw a4, s11, a2  # a4 = 0
+add s11, s11, a3  # s11 =  0x55555554D55554F8 +  0x000000002AAAAA98 = 0x55555554FFFFFF90
+add s11, s11, a4  # s11
+#    li t1, 0x55555554FFFFFF90
+addi t1, x0, 0x0
+lui t1, 0x55555
+srli t1, t1, 0x1
+ori t1, t1, 0x2aa
+slli t1, t1, 0xb
+ori t1, t1, 0x3ff
+slli t1, t1, 0xb
+ori t1, t1, 0x7ff
+slli t1, t1, 0xb
+ori t1, t1, 0x790
+bne s11, t1, fail_chain
+#    li s11, 0x0000000080000000 
+addi s11, x0, 0x0
+slli s11, s11, 0xb
+ori s11, s11, 0x200
+slli s11, s11, 0x16
+#    li a2, 5
+addi a2, x0, 0x0
+addi a2, x0, 0x0
+addi a2, x0, 0x5
+#    li a3, 0
+addi a3, x0, 0x0
+div t1, a2, a3
+#    li t2, -1
+addi t2, x0, 0x0
+addi t2, x0, 0x0
+addi t2, x0, 0x1
+xori t2, t2, -1
+addi t2, t2, 1
+bne t1, t2, fail_chain
+rem t1, a2, a3
+bne t1, a2, fail_chain
+#    li a2, 1
+addi a2, x0, 0x0
+addi a2, x0, 0x0
+addi a2, x0, 0x1
+slli a2, a2, 63 # a2 = 0x8000000000000000
+#    li a3, -1
+addi a3, x0, 0x0
+addi a3, x0, 0x0
+addi a3, x0, 0x1
+xori a3, a3, -1
+addi a3, a3, 1
+div t1, a2, a3
+bne t1, a2, fail_chain
+#    li a0, "\nExtrOK"
+addi a0, x0, 0x0
+lui a0, 0x4b4
+srli a0, a0, 0x1
+ori a0, a0, 0x7b9
+slli a0, a0, 0xb
+ori a0, a0, 0x1d1
+slli a0, a0, 0xb
+ori a0, a0, 0x708
+slli a0, a0, 0xb
+ori a0, a0, 0x50a
+#    call sbi_print7
+auipc x1, 0 # R_RISCV_PCREL_HI20 sbi_print7
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I sbi_print7
+fence
+fence.i
+#    li t1, 0x0000000080000000
+addi t1, x0, 0x0
+slli t1, t1, 0xb
+ori t1, t1, 0x200
+slli t1, t1, 0x16
+bne s11, t1, fail_chain
+#    li a0, "\nPASS"
+addi a0, x0, 0x0
+ori a0, a0, 0x29
+slli a0, a0, 0xb
+ori a0, a0, 0x54d
+slli a0, a0, 0xb
+ori a0, a0, 0x2a
+slli a0, a0, 0xb
+ori a0, a0, 0xa
+#    call sbi_print7
+auipc x1, 0 # R_RISCV_PCREL_HI20 sbi_print7
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I sbi_print7
+#    li t0, 0x02 
+addi t0, x0, 0x0
+addi t0, x0, 0x0
+addi t0, x0, 0x2
+#    csrs sie, t0
+csrrs x0, sie, t0
+#    csrsi sstatus, 2  
+csrrsi x0, sstatus, 2
+#    li t0, 0x02 
+addi t0, x0, 0x0
+addi t0, x0, 0x0
+addi t0, x0, 0x2
+#    csrs sip, t0
+csrrs x0, sip, t0
+#    li t0, 0x20 
+addi t0, x0, 0x0
+addi t0, x0, 0x0
+addi t0, x0, 0x20
+#    csrs sie, t0
+csrrs x0, sie, t0
+#    csrsi sstatus, 2  
+csrrsi x0, sstatus, 2
+#    csrr a0, time
+csrrs a0, time, x0
+#    li a0, 100000
+addi a0, x0, 0x0
+lui a0, 0x18
+addi a0, a0, 0x6a0
+#    li a7, 0  
+addi a7, x0, 0x0
+ecall
+#    li a7, 0x54494D45  
+addi a7, x0, 0x0
+lui a7, 0x54495
+addi a7, a7, 0xd45
+ecall
+#    j wait_for_key
+jal x0, wait_for_key
+fail_chain:
+#    mv a0, s11
+addi a0, s11, 0
+#    call sbi_print_reg
+auipc x1, 0 # R_RISCV_PCREL_HI20 sbi_print_reg
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I sbi_print_reg
+#    li a0, "\nFAIL"
+addi a0, x0, 0x0
+ori a0, a0, 0x26
+slli a0, a0, 0xb
+ori a0, a0, 0x125
+slli a0, a0, 0xb
+ori a0, a0, 0x28
+slli a0, a0, 0xb
+ori a0, a0, 0x60a
+#    call sbi_print7
+auipc x1, 0 # R_RISCV_PCREL_HI20 sbi_print7
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I sbi_print7
+wait_for_key:
+#    li a7, 2  
+addi a7, x0, 0x0
+addi a7, x0, 0x0
+addi a7, x0, 0x2
+ecall
+#    bltz a0, wait_for_key  
+blt a0, x0, wait_for_key
+#    mv s3, a0
+addi s3, a0, 0
+#    mv a0, s3
+addi a0, s3, 0
+#    li a7, 1 
+addi a7, x0, 0x0
+addi a7, x0, 0x0
+addi a7, x0, 0x1
+ecall 
+#    j wait_for_key
+jal x0, wait_for_key
+end:
+#   j end
+jal x0, end
