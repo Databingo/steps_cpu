@@ -732,7 +732,7 @@ end
     end
     //wire clk_pulse_slow = (clkdiv == 0);
     //wire clk_pulse_slow = (sd_status <= 8) ? (clkdiv == 0) : 1'b1;
-    wire clk_pulse_slow = (sd_statud >= 9) ?  1'b1 : (clkdiv == 0);  // speed up to main clk after initial
+    wire clk_pulse_slow = (sd_status >= 9) ?  1'b1 : (clkdiv == 0);  // speed up to main clk after initial
 
     // SD Controller Bridge
     reg [31:0] sd_addr = 0;           // Sector address
