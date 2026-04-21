@@ -17,3 +17,4 @@ cat bootloader.s >> z2.txt
 # gcc-musl ima
 # linux ima small
 # buxybox ima small
+# rvas.go for bootloader/mini_kernel/isr
