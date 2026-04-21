@@ -450,6 +450,8 @@ ori a0, a0, 0x20a
 auipc x1, 0 # R_RISCV_PCREL_HI20 print7
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print7
 fence.i
+#     csrwi mdebug, 8 
+csrrwi x0, mdebug, 8
 #     li a0, 0 
 addi a0, x0, 0x0
 #     li a1, 0 
