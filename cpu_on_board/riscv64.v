@@ -94,8 +94,9 @@ wire use_imm = (op == 7'b0010011 || op == 7'b0011011 || op == 7'b1100111); //mat
 wire is_sub = (op == 7'b0110011 || op == 7'b0111011) && ir[30]; // sub/subw
 wire [63:0] alu_op2 = use_imm ? w_imm_i : rs2;
 wire [63:0] alu_op2_inv = is_sub ? ~alu_op2 : alu_op2;
-wire [63:0] shared_add = rs1 + alu_op2_inv + is_sub;
-wire [63:0] shared_addw= $signed(rs1[31:0] + alu_op2_inv[31:0] + is_sub);
+wire [63:0] shared_add = $signed(rs1) + $signed(alu_op2_inv) + is_sub;
+wire [31:0] shared_addw_32 = rs1[31:0] + alu_op2_inv[31:0] + is_sub;
+wire [63:0] shared_addw = {32{shared_addw_32[31]}}, shared_addw_32};
 
 wire [63:0] alu_add  = shared_add; 
 wire [63:0] alu_sub  = shared_add;  
@@ -794,7 +795,7 @@ always @(*) begin
                     32'b0100000_?????_?????_101_?????_0111011: re[w_rd] <= shared_srl_sra;  // Sraw
                     // Jump
 	            32'b???????_?????_?????_???_?????_1101111: begin pc <= $signed(pc_4) + w_imm_j; if (w_rd != 5'b0) re[w_rd] <= pc; bubble <= 1'b1; end // Jal
-	            32'b???????_?????_?????_???_?????_1100111: begin pc <= alu_addi & 64'hFFFFFFFFFFFFFFFE; if (w_rd != 5'b0) re[w_rd] <= pc; bubble <= 1; end // Jalr (re[w_rs1] + w_imm_i)
+	            32'b???????_?????_?????_???_?????_1100111: begin pc <= $signed(alu_addi) & 64'hFFFFFFFFFFFFFFFE; if (w_rd != 5'b0) re[w_rd] <= pc; bubble <= 1; end // Jalr (re[w_rs1] + w_imm_i)
                     // Branch 
 		    32'b???????_?????_?????_000_?????_1100011: begin if (re[w_rs1] == re[w_rs2]) begin pc <= branch; bubble <= 1'b1; end end // Beq
 		    32'b???????_?????_?????_001_?????_1100011: begin if (re[w_rs1] != re[w_rs2]) begin pc <= branch; bubble <= 1'b1; end end // Bne
