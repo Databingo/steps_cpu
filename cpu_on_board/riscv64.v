@@ -332,10 +332,10 @@ wire [63:0] csr_mask_w= (w_csr == 12'h100) ? sstatus_mask : (w_csr == 12'h104) ?
 //wire [63:0] csr_read  = Csrs[w_csr_id] & csr_mask;
 //wire [63:0] csr_read = (w_csr == 12'hC01) ? mtime : Csrs[w_csr_id] & csr_mask;
 wire [63:0] csr_read = (w_csr == 12'h301) ? 64'h8000000000141101 : // misa(RV64IMASU)
-                       (w_csr == 12'hf11) ? 64'h0 : // mvendorid
-                       (w_csr == 12'hf12) ? 64'h0 : // marchid
-                       (w_csr == 12'hf13) ? 64'h0 : // mimpid
-                       (w_csr == 12'hf14) ? 64'h0 : // mhartid
+                       (w_csr == 12'hF11) ? 64'h0 : // mvendorid
+                       (w_csr == 12'hF12) ? 64'h0 : // marchid
+                       (w_csr == 12'hF13) ? 64'h0 : // mimpid
+                       (w_csr == 12'hF14) ? 64'h0 : // mhartid
                        (w_csr == 12'hC01) ? mtime : // clint_time
 		        Csrs[w_csr_id] & csr_mask;  // Other
 wire [63:0] csr_write_re  = rs1 & csr_mask_w;
@@ -386,7 +386,7 @@ localparam XCSR = 63;  //  miss csr that not deployed
 always @(*) begin
     case(w_csr)
 	12'h300 : w_csr_id = mstatus    ;    
-	//12'h301 : w_csr_id = misa       ;    
+	12'h301 : w_csr_id = misa       ;    
 	12'h305 : w_csr_id = mtvec      ;    
 	12'h340 : w_csr_id = mscratch   ;    
 	12'h341 : w_csr_id = mepc       ;    
@@ -408,13 +408,13 @@ always @(*) begin
 	12'h143 : w_csr_id = stval      ;   
 	12'h144 : w_csr_id = sip        ;   
 	12'h180 : w_csr_id = satp       ;   
-	//12'hF14 : w_csr_id = mhartid    ;   
-	//12'hF11 : w_csr_id = mvendorid  ;   
-	//12'hF12 : w_csr_id = marchid    ;   
-	//12'hF13 : w_csr_id = mimpid     ;   
+	12'hF14 : w_csr_id = mhartid    ;   
+	12'hF11 : w_csr_id = mvendorid  ;   
+	12'hF12 : w_csr_id = marchid    ;   
+	12'hF13 : w_csr_id = mimpid     ;   
 	12'h3A0 : w_csr_id = pmpcfg0    ;   
 	12'h3B0 : w_csr_id = pmpaddr0   ;   
-	//12'hC01 : w_csr_id = clint_time ;   
+	12'hC01 : w_csr_id = clint_time ;   
 	//12'h3B1 : w_csr_id = pmpaddr1   ;   
 	//12'h3B2 : w_csr_id = pmpaddr2   ;   
 	//12'h3B3 : w_csr_id = pmpaddr3   ;   
@@ -590,6 +590,18 @@ always @(*) begin
 	reg [62:0] trap_cause;
 	reg [63:0] trap_val;
 	reg [63:0] trap_epc;
+
+	wire csr_writable = (w_csr_id != misa) && (w_csr_id !=  mvendorid) && (w_csr_id != marchid) && (w_csr_id != mimpid) && (w_csr_id !=  mhartid) && (w_csr_id != clint_time)
+
+
+wire [63:0] csr_read = (w_csr == 12'h301) ? 64'h8000000000141101 : // misa(RV64IMASU)
+                       (w_csr == 12'hF11) ? 64'h0 : // mvendorid
+                       (w_csr == 12'hF12) ? 64'h0 : // marchid
+                       (w_csr == 12'hF13) ? 64'h0 : // mimpid
+                       (w_csr == 12'hF14) ? 64'h0 : // mhartid
+                       (w_csr == 12'hC01) ? mtime : // clint_time
+
+
 
 	// EXE Instruction 
 	always @(posedge clk or negedge reset) begin
@@ -816,33 +828,33 @@ always @(*) begin
 		    32'b???????_?????_?????_001_?????_1110011: begin if (w_csr_id==XCSR) begin do_trap = 1; trap_is_interrupt =0; trap_val = ir; trap_epc = pc_4; trap_cause = ILLEGAL_INSTRUCTION; end
 		                                                     else begin
                                                                      if (w_rd != 0) re[w_rd] <= csr_read;
-		                                                     Csrs[w_csr_id] <= (Csrs[w_csr_id] & ~csr_mask_w)| csr_write_re; end //  (rs1 & csr_mask_w); end // Csrrw logic
+		                                                     if (csr_writable) Csrs[w_csr_id] <= (Csrs[w_csr_id] & ~csr_mask_w)| csr_write_re; end //  (rs1 & csr_mask_w); end // Csrrw logic
 		                                                     //if (w_csr_id==satp) begin tlb_flush <= ~tlb_flush; pc<=pc; bubble<=1; end end // flush pipelien on satp write
 								     end
 		    32'b???????_?????_?????_010_?????_1110011: begin if (w_csr_id==XCSR) begin do_trap = 1; trap_is_interrupt =0; trap_val = ir; trap_epc = pc_4; trap_cause = ILLEGAL_INSTRUCTION; end 
 		                                                     else begin
                                                                      if (w_rd != 0) re[w_rd] <= csr_read;
-		                                                     if (w_rs1 != 0) Csrs[w_csr_id] <= (Csrs[w_csr_id] | csr_write_re); end //  (rs1 & csr_mask_w)); end // Csrrs
+		                                                     if (w_rs1 != 0 && csr_writable) Csrs[w_csr_id] <= (Csrs[w_csr_id] | csr_write_re); end //  (rs1 & csr_mask_w)); end // Csrrs
 								     end
 		    32'b???????_?????_?????_011_?????_1110011: begin if (w_csr_id==XCSR) begin do_trap = 1; trap_is_interrupt =0; trap_val = ir; trap_epc = pc_4; trap_cause = ILLEGAL_INSTRUCTION; end
 		                                                     else begin
                                                                      if (w_rd != 0) re[w_rd] <= csr_read;
-		                                                     if (w_rs1 != 0) Csrs[w_csr_id] <= (Csrs[w_csr_id] & ~csr_write_re); end //  (rs1 & csr_mask_w)); end // Csrrc
+		                                                     if (w_rs1 != 0 && csr_writable) Csrs[w_csr_id] <= (Csrs[w_csr_id] & ~csr_write_re); end //  (rs1 & csr_mask_w)); end // Csrrc
 								     end
 		    32'b???????_?????_?????_101_?????_1110011: begin if (w_csr_id==XCSR) begin do_trap = 1; trap_is_interrupt =0; trap_val = ir; trap_epc = pc_4; trap_cause = ILLEGAL_INSTRUCTION; end
 		                                                     else begin
                                                                      if (w_rd != 0) re[w_rd] <= csr_read;
-		                                                     Csrs[w_csr_id] <= (Csrs[w_csr_id] & ~csr_mask_w) | csr_write_im; end //  (w_imm_z & csr_mask_w); end // Csrrwi
+		                                                     if (csr_writable) Csrs[w_csr_id] <= (Csrs[w_csr_id] & ~csr_mask_w) | csr_write_im; end //  (w_imm_z & csr_mask_w); end // Csrrwi
 								     end
 		    32'b???????_?????_?????_110_?????_1110011: begin if (w_csr_id==XCSR) begin do_trap = 1; trap_is_interrupt =0; trap_val = ir; trap_epc = pc_4; trap_cause = ILLEGAL_INSTRUCTION; end
 		                                                     else begin
                                                                      if (w_rd != 0) re[w_rd] <= csr_read;
-		                                                     if (w_imm_z != 0) Csrs[w_csr_id] <= (Csrs[w_csr_id] | csr_write_im); end //  (w_imm_z & csr_mask_w)); end // csrrsi
+		                                                     if (w_imm_z != 0 && csr_writable) Csrs[w_csr_id] <= (Csrs[w_csr_id] | csr_write_im); end //  (w_imm_z & csr_mask_w)); end // csrrsi
 								     end
 		    32'b???????_?????_?????_111_?????_1110011: begin if (w_csr_id==XCSR) begin do_trap = 1; trap_is_interrupt =0; trap_val = ir; trap_epc = pc_4; trap_cause = ILLEGAL_INSTRUCTION; end
 		                                                     else begin
                                                                      if (w_rd != 0) re[w_rd] <= csr_read;
-		                                                     if (w_imm_z != 0) Csrs[w_csr_id] <= (Csrs[w_csr_id] & ~csr_write_im); end //  (w_imm_z & csr_mask_w)); end // Csrrci
+		                                                     if (w_imm_z != 0 && csr_writable) Csrs[w_csr_id] <= (Csrs[w_csr_id] & ~csr_write_im); end //  (w_imm_z & csr_mask_w)); end // Csrrci
 								     end
                     // Ecall
 	            32'b0000000_00000_?????_000_?????_1110011: begin 
