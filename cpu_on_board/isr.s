@@ -6,18 +6,20 @@ isr_router:
      # x9 addr  # x9 keep the address need manage, no change x9
      # x689 setting
 
-     # software fix for 7ffff... address:
-     slli x3, x9, 25
-     srai x3, x3, 35
-     mv x9, x3
-     csrr x3, mepc
-     slli x4, x3, 25
-     srai x4, x4, 25
-     csrw mepc, x4
-     csrr x3, sepc
-     slli x4, x3, 25 
-     srai x4, x4, 25
-     csrw sepc, x4
+    ## software fix for 7ffff... address:
+    #slli x3, x9, 25
+    #srai x3, x3, 35
+    #mv x9, x3
+    #csrr x3, mepc
+    #slli x4, x3, 25
+    #srai x4, x4, 25
+    #csrw mepc, x4
+    #csrr x3, sepc
+    #slli x4, x3, 25 
+    #srai x4, x4, 25
+    #csrw sepc, x4
+     li x3, 0xFFFFFF8000000000
+     or x9, x9, x3
      
 
 
