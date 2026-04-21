@@ -1,5 +1,5 @@
 Analysis & Synthesis report for cpu_on_board
-Tue Apr 21 15:12:13 2026
+Tue Apr 21 15:14:24 2026
 Quartus II 32-bit Version 13.0.1 Build 232 06/12/2013 Service Pack 1 SJ Web Edition
 
 
@@ -36,7 +36,7 @@ applicable agreement for further details.
 +--------------------------------------------------------------------------------------+
 ; Analysis & Synthesis Summary                                                         ;
 +------------------------------------+-------------------------------------------------+
-; Analysis & Synthesis Status        ; Failed - Tue Apr 21 15:12:13 2026               ;
+; Analysis & Synthesis Status        ; Failed - Tue Apr 21 15:14:24 2026               ;
 ; Quartus II 32-bit Version          ; 13.0.1 Build 232 06/12/2013 SP 1 SJ Web Edition ;
 ; Revision Name                      ; cpu_on_board                                    ;
 ; Top-level Entity Name              ; cpu_on_board                                    ;
@@ -175,7 +175,7 @@ Info: Running Quartus II 32-bit Analysis & Synthesis
     Info: programming logic devices manufactured by Altera and sold by 
     Info: Altera or its authorized distributors.  Please refer to the 
     Info: applicable agreement for further details.
-    Info: Processing started: Tue Apr 21 15:12:03 2026
+    Info: Processing started: Tue Apr 21 15:14:20 2026
 Info: Command: quartus_map --read_settings_files=on --write_settings_files=off cpu_on_board -c cpu_on_board
 Info (20030): Parallel compilation is enabled and will use 2 of the 2 processors detected
 Info (12021): Found 1 design units, including 1 entities, in source file jtag_uart_system/synthesis/jtag_uart_system.v
@@ -388,8 +388,6 @@ Info (10662): Verilog HDL Assignment information at clock_slower.v(21): truncate
 Warning (10230): Verilog HDL assignment warning at clock_slower.v(24): truncated value with size 32 to match size of target (25)
 Warning (10335): Unrecognized synthesis attribute "ram_style" at riscv64.v(46)
 Warning (10335): Unrecognized synthesis attribute "ram_style" at riscv64.v(47)
-Error (10149): Verilog HDL Declaration error at riscv64.v(99): identifier "shared_addw_32" is already declared in the present scope File: /usr/local/projects/steps_cpu/cpu_on_board/riscv64.v Line: 99
-Error (10170): Verilog HDL syntax error at riscv64.v(99) near text "}";  expecting ";" File: /usr/local/projects/steps_cpu/cpu_on_board/riscv64.v Line: 99
 Warning (10335): Unrecognized synthesis attribute "ram_style" at riscv64.v(424)
 Warning (10335): Unrecognized synthesis attribute "ram_style" at riscv64.v(445)
 Warning (10335): Unrecognized synthesis attribute "ram_style" at riscv64.v(446)
@@ -422,10 +420,10 @@ Info (10499): HDL info at riscv64.v(324): see declaration for object "MSIP"
 Info (10281): Verilog HDL Declaration information at riscv64.v(35): object "ssip" differs only in case from object "SSIP" in the same scope
 Info (10499): HDL info at riscv64.v(324): see declaration for object "SSIP"
 Error (10112): Ignored design unit "riscv64" at riscv64.v(3) due to previous errors File: /usr/local/projects/steps_cpu/cpu_on_board/riscv64.v Line: 3
-Error: Quartus II 32-bit Analysis & Synthesis was unsuccessful. 13 errors, 50 warnings
-    Error: Peak virtual memory: 393 megabytes
-    Error: Processing ended: Tue Apr 21 15:12:16 2026
-    Error: Elapsed time: 00:00:13
-    Error: Total CPU time (on all processors): 00:00:12
+Error: Quartus II 32-bit Analysis & Synthesis was unsuccessful. 11 errors, 50 warnings
+    Error: Peak virtual memory: 360 megabytes
+    Error: Processing ended: Tue Apr 21 15:14:26 2026
+    Error: Elapsed time: 00:00:06
+    Error: Total CPU time (on all processors): 00:00:06
 
 
