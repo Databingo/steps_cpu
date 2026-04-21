@@ -50,12 +50,12 @@ i_cache_refill:
 
 mmu_i:
      #li a0, "\n[i"
-     li a0, "*"
+     li a0, "."
      call print7
      j mmu
 mmu_d:
      #li a0, "\n[d"
-     li a0, "."
+     li a0, "`"
      call print7
      j mmu
 
