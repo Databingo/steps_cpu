@@ -720,7 +720,6 @@ end
 
     // Slow pulse clock for SD init (~100 kHz)
     reg [8:0] clkdiv = 0;  // for 50M  12.5M/512=97.6Khz
-    reg sd_init_done = 0;
     //reg [7:0] clkdiv = 0;  // for 25M
     //reg [5:0] clkdiv = 0; // for 10M  10MHz/64 = 156.25KHz
     //reg [4:0] clkdiv = 0; // for 10M  10MHz/32 = 300KHz
@@ -733,7 +732,7 @@ end
     end
     //wire clk_pulse_slow = (clkdiv == 0);
     //wire clk_pulse_slow = (sd_status <= 8) ? (clkdiv == 0) : 1'b1;
-    wire clk_pulse_slow = (sd_statud >= 9) ?  1'b1 : (clkdiv == 0);
+    wire clk_pulse_slow = (sd_statud >= 9) ?  1'b1 : (clkdiv == 0);  // speed up to main clk after initial
 
     // SD Controller Bridge
     reg [31:0] sd_addr = 0;           // Sector address
