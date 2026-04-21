@@ -94,9 +94,11 @@ wire use_imm = (op == 7'b0010011 || op == 7'b0011011 || op == 7'b1100111); //mat
 wire is_sub = (op == 7'b0110011 || op == 7'b0111011) && ir[30]; // sub/subw
 wire [63:0] alu_op2 = use_imm ? w_imm_i : rs2;
 wire [63:0] alu_op2_inv = is_sub ? ~alu_op2 : alu_op2;
-wire [63:0] shared_add = $signed(rs1) + $signed(alu_op2_inv) + $signed({63'b0, is_sub});
-wire [31:0] shared_addw_32 = rs1[31:0] + alu_op2_inv[31:0] + is_sub;
-wire [63:0] shared_addw = {{32{shared_addw_32[31]}}, shared_addw_32};
+//wire [63:0] shared_add = $signed(rs1) + $signed(alu_op2_inv) + $signed({63'b0, is_sub});
+//wire [31:0] shared_addw_32 = rs1[31:0] + alu_op2_inv[31:0] + is_sub;
+//wire [63:0] shared_addw = {{32{shared_addw_32[31]}}, shared_addw_32};
+wire [63:0] shared_add = rs1 + alu_op2_inv + is_sub;
+wire [63:0] shared_addw= $signed(rs1[31:0] + alu_op2_inv[31:0] + is_sub);
 
 wire [63:0] alu_add  = shared_add; 
 wire [63:0] alu_sub  = shared_add;  
@@ -510,10 +512,10 @@ always @(*) begin
 		// TLB Refill
 		//reg [2:0] tlb_ptr = 0; // 8 entries TLB
 		reg [1:0] tlb_ptr = 0; // 4 entries TLB
-		reg tlb_flush_pre = 0;
-		reg tlb_flush;
+		//reg tlb_flush_pre = 0;
+		//reg tlb_flush;
 		always @(posedge clk or negedge reset) begin
-		    tlb_flush_pre <= tlb_flush;
+		    //tlb_flush_pre <= tlb_flush;
 		    if (!reset) begin
 			tlb_ptr <= 0; // hit->trap(save va to x9)->refill assembly(fetch pa to x9)-> sd x9, `Tlb -> here to refill tlb
 			tlb_vld[0] <= 0; tlb_vld[1] <= 0; tlb_vld[2] <= 0; tlb_vld[3] <= 0; 
