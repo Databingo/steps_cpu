@@ -594,8 +594,8 @@ assign DRAM_CKE = 1; // always enable
 	    //if (Mtimecmp_selected) begin mtimecmp <= bus_write_data; bus_write_done <= 1; end
 	    if (Mtimecmp_selected) begin 
 		if (bus_ls_type == 3'b011) mtimecmp <= bus_write_data;  // for sd
-		else begin if (bus_address[2]) mtimecmp[63:32] <= bus_write_data[31:0]; else  mtimecmp[31:0] <= bus_write_data[31:0]; end  // normally sw
-                bus_write_done <= 1; end
+		else begin if (bus_address[2]) mtimecmp[63:32] <= bus_write_data[31:0]; else mtimecmp[63:32] <= 32'hFFFFFFFF; mtimecmp[31:0] <= bus_write_data[31:0]; end  // normally sw
+                bus_write_done <= 1; end // low write first need max high to pretent spurious
             //if (Clintbase_selected) begin msip_interrupt <= bus_write_data[0];bus_write_done <= 1;end 
             if (Clintbase_selected) begin bus_write_done <= 1;end 
 	    //if (Sdram_selected) begin if (sdram_req_wait==0) bus_write_done <= 1; end
