@@ -50,13 +50,11 @@ i_cache_refill:
 
 mmu_i:
      #li a0, "\n[i"
-     li a0, "."
-     call print7
+     #call print7
      j mmu
 mmu_d:
      #li a0, "\n[d"
-     li a0, "`"
-     call print7
+     #call print7
      j mmu
 
 mmu:  # VA 63:39Sign|38:30Vpn[2]|29:21Vpn[1]|20:12Vpn[0]|11:0PageOffset  
