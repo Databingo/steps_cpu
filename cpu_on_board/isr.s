@@ -1,28 +1,10 @@
 isr_router:        
-
      # x0-x10 are shadowed by hardware, safe to use
      li sp, 0x1500 # Set stack shadowed sp(x2)
      li x7, 0x2004 # UART print 
      # x8 trap_type no change
      # x9 addr  # x9 keep the address need manage, no change x9
      # x689 setting
-
-    ## software fix for 7ffff... address:
-    #slli x3, x9, 25
-    #srai x3, x3, 35
-    #mv x9, x3
-    #csrr x3, mepc
-    #slli x4, x3, 25
-    #srai x4, x4, 25
-    #csrw mepc, x4
-    #csrr x3, sepc
-    #slli x4, x3, 25 
-    #srai x4, x4, 25
-    #csrw sepc, x4
-    #li x3, 0xFFFFFF8000000000
-    #or x9, x9, x3
-     
-
 
      # x1(ra)2(sp)3456,x10(a0) operating
      li x3, 12 
