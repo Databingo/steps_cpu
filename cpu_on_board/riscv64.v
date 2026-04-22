@@ -666,7 +666,7 @@ always @(*) begin
 		reserve_addr <= 0;
 		reserve_valid <= 0;
 		tlb_epoch <= 8'd1;
-		cache_epoch <= 8'd1;
+		//cache_epoch <= 8'd1;
 
 	    end else begin
 		pc <= pc + 4; // Default PC+4    (1.Could be overwrite 2.Take effect next cycle) 
