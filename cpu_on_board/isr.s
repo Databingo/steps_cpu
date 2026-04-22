@@ -49,12 +49,12 @@ i_cache_refill:
      j return
 
 mmu_i:
-     li a0, "\n[i"
-     call print7
+    #li a0, "\n[i"
+    #call print7
      j mmu
 mmu_d:
-     li a0, "\n[d"
-     call print7
+    #li a0, "\n[d"
+    #call print7
      j mmu
 
 mmu:  # VA 63:39Sign|38:30Vpn[2]|29:21Vpn[1]|20:12Vpn[0]|11:0PageOffset  
@@ -187,16 +187,16 @@ WRITE_TLB:
      lui x6, 0x20000 # Magic TLB address
      sd x4, 0(x6)
 
-     li a0, "TLBre:"
-     call print7
-     mv a0, x9
-     call print_reg
+    #li a0, "TLBre:"
+    #call print7
+    #mv a0, x9
+    #call print_reg
  
-     mv a0, x4
-     call print_reg
+    #mv a0, x4
+    #call print_reg
 
-     addi x6, x0, 93
-     sd x6, 0(x7)    #  print ]
+    #addi x6, x0, 93
+    #sd x6, 0(x7)    #  print ]
 
      addi x8, x0, 0  # success x8=0
      j return
@@ -252,10 +252,10 @@ debug:
      csrr a0, mimpid # mimpid/pda
      call print_reg
 
-    li a0, "|mhtid:" 
-    call print7
-    csrr a0, mhartid
-    call print_reg
+   #li a0, "|mhtid:" 
+   #call print7
+   #csrr a0, mhartid
+   #call print_reg
 
    #li a0, "|mstas:" 
    #call print7
@@ -263,8 +263,8 @@ debug:
    #call print_reg
 
 
-     li a0, "|" 
-     call putchar
+    #li a0, "|" 
+    #call putchar
 
 
      
