@@ -19,7 +19,7 @@ module riscv64(
 
     input wire meip_interrupt, // from PLIC
     input wire seip_interrupt, // from Supervisor External
-    //input wire msip_interrupt, // from CLINT
+    input wire msip_interrupt, // from CLINT
     //input wire mtip_interrupt, // from Machine Time
 
     input  reg        bus_read_done,
@@ -94,6 +94,9 @@ wire use_imm = (op == 7'b0010011 || op == 7'b0011011 || op == 7'b1100111); //mat
 wire is_sub = (op == 7'b0110011 || op == 7'b0111011) && ir[30]; // sub/subw
 wire [63:0] alu_op2 = use_imm ? w_imm_i : rs2;
 wire [63:0] alu_op2_inv = is_sub ? ~alu_op2 : alu_op2;
+//wire [63:0] shared_add = $signed(rs1) + $signed(alu_op2_inv) + $signed({63'b0, is_sub});
+//wire [31:0] shared_addw_32 = rs1[31:0] + alu_op2_inv[31:0] + is_sub;
+//wire [63:0] shared_addw = {{32{shared_addw_32[31]}}, shared_addw_32};
 wire [63:0] shared_add = rs1 + alu_op2_inv + is_sub;
 wire [63:0] shared_addw= $signed(rs1[31:0] + alu_op2_inv[31:0] + is_sub);
 
@@ -314,7 +317,7 @@ localparam sstatus_mask  = 64'h8000_0003_000D_E122; // SD,UXL,MXR,SUM,XS,FS,SPP,
 localparam mtvec      = 1 ; localparam BASE=2,MODE=0; // 63:2BASE|1:0MDOE  // 0x305 MRW Machine trap-handler base address * 0 direct 1vec
 localparam mscratch   = 2 ;  // 
 localparam mepc       = 3 ;  
-localparam mcause     = 4 ; localparam INTERRUPT=63,CAUSE=0,ILLEGAL_INSTRUCTION=2,PAGE_F_I=12,PAGE_F_L=13,PAGE_F_S=14;//0x342 MRW Machine trap casue*63InterruptAsync/ErrorSync|62:0CauseCode
+localparam mcause     = 4 ; localparam INTERRUPT=63,CAUSE=0,ILLEGAL_INSTRUCTION=2,PAGE_F_I=12,PAGE_F_L=13,PAGE_F_S=15;//0x342 MRW Machine trap casue*63InterruptAsync/ErrorSync|62:0CauseCode
 
 localparam mie        = 5 ; localparam SGEIE=12,MEIE=11,VSEIE=10,SEIE=9,MTIE=7,VSTIE=6,STIE=5,MSIE=3,VSSIE=2,SSIE=1; // Machine Interrupt Enable from OS software set enable
 localparam sie        = 5;  // Supervisor interrupt-enable register
@@ -327,33 +330,40 @@ localparam sip_write_mask   = 64'h0000_0000_0000_0002; // SSIP
 wire [63:0] csr_mask  = (w_csr == 12'h100) ? sstatus_mask : (w_csr == 12'h104) ? (sie_sip_mask & Csrs[mideleg]) : (w_csr == 12'h144) ? (sie_sip_mask   & Csrs[mideleg]) : 64'hffff_ffff_ffff_ffff;
 wire [63:0] csr_mask_w= (w_csr == 12'h100) ? sstatus_mask : (w_csr == 12'h104) ? (sie_sip_mask & Csrs[mideleg]) : (w_csr == 12'h144) ? (sip_write_mask & Csrs[mideleg]) : 64'hffff_ffff_ffff_ffff;
 //wire [63:0] csr_read  = Csrs[w_csr_id] & csr_mask;
-wire [63:0] csr_read = (w_csr == 12'hC01) ? mtime : Csrs[w_csr_id] & csr_mask;
+//wire [63:0] csr_read = (w_csr == 12'hC01) ? mtime : Csrs[w_csr_id] & csr_mask;
+wire [63:0] csr_read = (w_csr == 12'h301) ? 64'h8000000000141101 : // misa(RV64IMASU)
+                       (w_csr == 12'hF11) ? 64'h0 : // mvendorid
+                       (w_csr == 12'hF12) ? 64'h0 : // marchid
+                       (w_csr == 12'hF13) ? 64'h0 : // mimpid
+                       (w_csr == 12'hF14) ? 64'h0 : // mhartid
+                       (w_csr == 12'hC01) ? mtime : // clint_time
+		        Csrs[w_csr_id] & csr_mask;  // Other
 wire [63:0] csr_write_re  = rs1 & csr_mask_w;
 wire [63:0] csr_write_im  = w_imm_z & csr_mask_w;
 
 localparam medeleg    = 7 ; localparam MECALL=11,SECALL=9,UECALL=8,BREAK=3; // bit_index=mcause_value 8UECALL|9SECALL
 localparam mideleg    = 8 ;  //
-localparam mimpid     = 9;  // 0
-localparam sedeleg    = 10;  
-localparam sideleg    = 11;  
-localparam marchid    = 12;  // 0
-localparam stvec      = 13;  //localparam ; //BASE=2,MODE=0 63:2BASE|1:0MDOE Supervisor trap handler base address
-localparam scounteren = 14;  
-localparam sscratch   = 15;  
-localparam sepc       = 16;  
-localparam scause     = 17;  //localparam ; //INTERRUPT=63,CAUSE=0 *  63InterruptAsync/ErrorSync|62:0CauseCode// 
-localparam stval      = 18;  
-localparam satp       = 19;  // Supervisor address translation and protection satp[63:60].MODE=0:off|8:SV39 satp[59:44].asid vpn2:9 vpn1:9 vpn0:9 satp[43:0]:rootpage physical addr
-localparam mtval      = 20;  // Machine Trap Value Register (bad address or instruction)
+localparam sedeleg    = 9;  
+localparam sideleg    = 10;  
+localparam stvec      = 11;  //localparam ; //BASE=2,MODE=0 63:2BASE|1:0MDOE Supervisor trap handler base address
+localparam scounteren = 12;  
+localparam sscratch   = 13;  
+localparam sepc       = 14;  
+localparam scause     = 15;  //localparam ; //INTERRUPT=63,CAUSE=0 *  63InterruptAsync/ErrorSync|62:0CauseCode// 
+localparam stval      = 16;  
+localparam satp       = 17;  // Supervisor address translation and protection satp[63:60].MODE=0:off|8:SV39 satp[59:44].asid vpn2:9 vpn1:9 vpn0:9 satp[43:0]:rootpage physical addr
+localparam mtval      = 18;  // Machine Trap Value Register (bad address or instruction)
 
-localparam mhartid    = 21;  // Hardware Thread ID 0 for single-core
-localparam misa       = 22;  // Machine ISA Register (IMA is 0x8000000000001101)
-localparam mvendorid  = 23;  // 0
+localparam marchid    = 19;  // 0
+localparam mimpid     = 19;  // 0
+localparam mhartid    = 19;  // Hardware Thread ID 0 for single-core
+localparam misa       = 19;  // Machine ISA Register (IMA is 0x8000000000001101)
+localparam mvendorid  = 19;  // 0
+localparam clint_time = 19;  // read only
 
-localparam pmpcfg0    = 24;  // Physical Memory Protection
-localparam pmpaddr0   = 25;  // 
-localparam mdebug     = 26;  // 
-localparam clint_time = 27;  // 
+localparam pmpcfg0    = 20;  // Physical Memory Protection
+localparam pmpaddr0   = 21;  // 
+localparam mdebug     = 22;  // 
 //localparam pmpaddr1   = 29;  // 
 //localparam pmpaddr2   = 30;  // 
 //localparam pmpaddr3   = 31;  // 
@@ -420,7 +430,7 @@ end
 
 
 //(* ram_style = "logic" *) reg [63:0] Csrs [0:36]; // 36 CSRs for now // totally 4096
-(* ram_style = "logic" *) reg [63:0] Csrs [0:27]; // 36 CSRs for now // totally 4096
+(* ram_style = "logic" *) reg [63:0] Csrs [0:22]; // 36 CSRs for now // totally 4096
 wire [3:0]  satp_mmu  = Csrs[satp][63:60]; // 0:bare, 8:sv39, 9:sv48  satp.MODE!=0, privilegae is not M-mode, mstatus.MPRN is not set or in MPP's mode?
 
 // -- Timer --
@@ -440,7 +450,7 @@ reg        reserve_valid;
 //(* ram_style = "logic" *) reg [26:0] tlb_vpn [0:7]; // vpn number VA[38:12]  Sv39
 //(* ram_style = "logic" *) reg [43:0] tlb_ppn [0:7]; // ppn number PA[55:12]
 //(* ram_style = "logic" *) reg tlb_vld [0:7];
-// -- TLB -- 4 pages
+// -- TLB i -- 4 pages
 (* ram_style = "logic" *) reg [26:0] tlb_vpn [0:3]; // vpn number VA[38:12]  Sv39
 (* ram_style = "logic" *) reg [43:0] tlb_ppn [0:3]; // ppn number PA[55:12]
 (* ram_style = "logic" *) reg tlb_vld [0:3];
@@ -472,6 +482,17 @@ always @(*) begin
 	//({44{tlb_i_match[5]}} & tlb_ppn[5]) |
 	//({44{tlb_i_match[6]}} & tlb_ppn[6]) |
 	//({44{tlb_i_match[7]}} & tlb_ppn[7]) ; end
+   
+   
+//// -- TLB d -- 2 pages
+//(* ram_style = "logic" *) reg [26:0] tlb_d_vpn [0:1]; // vpn number VA[38:12]  Sv39
+//(* ram_style = "logic" *) reg [43:0] tlb_d_ppn [0:1]; // ppn number PA[55:12]
+//(* ram_style = "logic" *) reg tlb_d_vld [0:1]; // only 2 entries
+// -- TLB d -- 4 pages
+(* ram_style = "logic" *) reg [26:0] tlb_d_vpn [0:3]; // vpn number VA[38:12]  Sv39
+(* ram_style = "logic" *) reg [43:0] tlb_d_ppn [0:3]; // ppn number PA[55:12]
+(* ram_style = "logic" *) reg tlb_d_vld [0:3]; // only 4 entries
+   
 	// TLB-D tlb d hit
 	wire [63:0] ls_va_offset = (op == 7'b0000011) ? w_imm_i : (op == 7'b0100011) ?  w_imm_s : 64'h0; // load/store/atom
 	wire [63:0] ls_va = rs1 + ls_va_offset;
@@ -481,10 +502,11 @@ always @(*) begin
 
 	//wire [7:0] tlb_d_match;
 	wire [3:0] tlb_d_match;
-	assign tlb_d_match[0] = tlb_vld[0] && (tlb_vpn[0] == ls_va[38:12]);
-	assign tlb_d_match[1] = tlb_vld[1] && (tlb_vpn[1] == ls_va[38:12]);
-	assign tlb_d_match[2] = tlb_vld[2] && (tlb_vpn[2] == ls_va[38:12]);
-	assign tlb_d_match[3] = tlb_vld[3] && (tlb_vpn[3] == ls_va[38:12]);
+	//wire [1:0] tlb_d_match;
+	assign tlb_d_match[0] = tlb_d_vld[0] && (tlb_d_vpn[0] == ls_va[38:12]);
+	assign tlb_d_match[1] = tlb_d_vld[1] && (tlb_d_vpn[1] == ls_va[38:12]);
+	assign tlb_d_match[2] = tlb_d_vld[2] && (tlb_d_vpn[2] == ls_va[38:12]);
+	assign tlb_d_match[3] = tlb_d_vld[3] && (tlb_d_vpn[3] == ls_va[38:12]);
 	//assign tlb_d_match[4] = tlb_vld[4] && (tlb_vpn[4] == ls_va[38:12]);
 	//assign tlb_d_match[5] = tlb_vld[5] && (tlb_vpn[5] == ls_va[38:12]);
 	//assign tlb_d_match[6] = tlb_vld[6] && (tlb_vpn[6] == ls_va[38:12]);
@@ -492,10 +514,10 @@ always @(*) begin
 	// data_ppn hit
 	always @(*) begin
 	    tlb_d_hit = |tlb_d_match;
-	    data_ppn = ({44{tlb_d_match[0]}} & tlb_ppn[0]) |
-		({44{tlb_d_match[1]}} & tlb_ppn[1]) | //; end
-		({44{tlb_d_match[2]}} & tlb_ppn[2]) |
-		({44{tlb_d_match[3]}} & tlb_ppn[3]) ; end
+	    data_ppn = ({44{tlb_d_match[0]}} & tlb_d_ppn[0]) |
+		({44{tlb_d_match[1]}} & tlb_d_ppn[1]) | //; end
+		({44{tlb_d_match[2]}} & tlb_d_ppn[2]) |
+		({44{tlb_d_match[3]}} & tlb_d_ppn[3]) ; end
 		//({44{tlb_d_match[3]}} & tlb_ppn[3]) |
 		//({44{tlb_d_match[4]}} & tlb_ppn[4]) |
 		//({44{tlb_d_match[5]}} & tlb_ppn[5]) |
@@ -508,21 +530,37 @@ always @(*) begin
 
 		// TLB Refill
 		//reg [2:0] tlb_ptr = 0; // 8 entries TLB
-		reg [1:0] tlb_ptr = 0; // 4 entries TLB
+		reg [1:0] tlb_ptr = 0; // 4 entries i TLB
+		//reg       tlb_d_ptr = 0; // 2 entries d TLB
+		reg [1:0] tlb_d_ptr = 0; // 4 entries d TLB
+		//reg tlb_flush_pre = 0;
+		//reg tlb_flush;
 		always @(posedge clk or negedge reset) begin
+		    //tlb_flush_pre <= tlb_flush;
 		    if (!reset) begin
 			tlb_ptr <= 0; // hit->trap(save va to x9)->refill assembly(fetch pa to x9)-> sd x9, `Tlb -> here to refill tlb
 			tlb_vld[0] <= 0; tlb_vld[1] <= 0; tlb_vld[2] <= 0; tlb_vld[3] <= 0; 
+			tlb_d_ptr <= 0;
+			tlb_d_vld[0] <= 0; tlb_d_vld[1] <= 0; tlb_d_vld[2] <= 0; tlb_d_vld[3] <= 0;  
 		    end else if (STrap && bus_write_enable && bus_address == `Tlb) begin // for the last fill: sd ppa, Tlb
-			//else if ((mmu_pc || mmu_da) && bus_write_enable && bus_address == `Tlb) begin // for the last fill: sd ppa, Tlb
+			if (re[8] == 12) begin
 			tlb_vpn[tlb_ptr] <= re[9][38:12]; // VA from x1 saved by trapp mmu_pc/mmu_da
 			tlb_ppn[tlb_ptr] <= bus_write_data[55:12] ; // real 
 			tlb_vld[tlb_ptr] <= 1;
 			tlb_ptr <= tlb_ptr + 1; 
+		        end else begin
+			tlb_d_vpn[tlb_d_ptr] <= re[9][38:12]; // VA from x1 saved by trapp mmu_pc/mmu_da
+			tlb_d_ppn[tlb_d_ptr] <= bus_write_data[55:12] ; // real 
+			tlb_d_vld[tlb_d_ptr] <= 1;
+			tlb_d_ptr <= tlb_d_ptr + 1; 
+		        end 
 		    end else if (!bubble && tlb_i_hit && i_cache_hit) begin // sfence.vma flush any way if ir is (not be bubbled)
-			casez (ir) 32'b0001001??????????_000_?????_1110011: begin tlb_vld[0] <= 0; tlb_vld[1] <= 0; tlb_vld[2] <= 0; tlb_vld[3] <= 0; end
-		    endcase 
-		end
+			casez (ir) 32'b0001001??????????_000_?????_1110011: begin 
+			    tlb_vld[0] <= 0; tlb_vld[1] <= 0; tlb_vld[2] <= 0; tlb_vld[3] <= 0; 
+			    tlb_d_vld[0] <= 0; tlb_d_vld[1] <= 0; tlb_d_vld[2] <= 0; tlb_d_vld[3] <= 0; end
+		        endcase 
+		        //if (tlb_flush_pre != tlb_flush) begin tlb_vld[0] <= 0; tlb_vld[1] <= 0; tlb_vld[2] <= 0; tlb_vld[3] <= 0; end
+		    end
 	    end
 
 	    // Cache I_cache_hit 63:13 tag, 12:4 index 3:0 offset Cache line 16B (4 instructions) 512 lines
@@ -574,8 +612,11 @@ always @(*) begin
 	reg do_trap;
 	reg trap_is_interrupt;
 	reg [62:0] trap_cause;
-	reg [62:0] trap_val;
-	reg [62:0] trap_epc;
+	reg [63:0] trap_val;
+	reg [63:0] trap_epc;
+
+	wire csr_writable = (w_csr_id != misa) && (w_csr_id !=  mvendorid) && (w_csr_id != marchid) && (w_csr_id != mimpid) && (w_csr_id !=  mhartid) && (w_csr_id != clint_time);
+
 
 	// EXE Instruction 
 	always @(posedge clk or negedge reset) begin
@@ -593,12 +634,12 @@ always @(*) begin
 		Csrs[mstatus][MIE] <= 1;
 		mmu_da <= 0;
 		for (i=0;i<11;i=i+1) begin sre[i]<= 64'b0; end 
-		for (i=0;i<=27;i=i+1) begin Csrs[i]<= 64'b0; end
+		for (i=0;i<=22;i=i+1) begin Csrs[i]<= 64'b0; end
 		Csrs[medeleg] <= 64'hb1af; // delegate to S-mode 1011000110101111 // see VII 3.1.15 mcasue exceptions
 		Csrs[mideleg] <= 64'h0222; // delegate to S-mode 0000001000100010 see VII 3.1.15 mcasue interrupt 1/5/9 SSIP(supervisor software interrupt) STIP(time) SEIP(external)
 		// Initialize Machine Info for OpenSBI
-		Csrs[misa] <= 64'h8000000000141101; // RV64IMASU extensions (63:62=2 64bits | 1<<0 Atomic| 1<<8 Integer| 1<<12 Multiply| 1<<18 Supervisor| 1 <<20 User) so: 64'h8000000000141101; RV64IMASU
-		Csrs[mhartid] <= 64'd0; // single Core 0
+		//Csrs[misa] <= 64'h8000000000141101; //RV64IMASU extensions(63:62=2 64bits | 1<<0 Atomic| 1<<8 Integer| 1<<12 Multiply| 1<<18 Supervisor| 1 <<20 User) so: 64'h8000000000141101; RV64IMASU
+		//Csrs[mhartid] <= 64'd0; // single Core 0
 		// mvendorid, marchid, mimpid remain 0
 		mmu_pc <= 0;
 		in_debug <= 0;
@@ -626,7 +667,7 @@ always @(*) begin
 		Csrs[mip][MEIP] <= meip_interrupt; 
 		Csrs[mip][MTIP] <= mtip_interrupt; // MTIP linux will see then jump to its handler  mtime>=mtimecmp
 		Csrs[mip][SEIP] <= seip_interrupt;
-		//Csrs[mip][MSIP] <= msip_interrupt;  
+		Csrs[mip][MSIP] <= msip_interrupt;  
 
 		//  i-tlb miss STrap
             if (need_trans && !tlb_i_hit) begin //OPEN 
@@ -640,7 +681,7 @@ always @(*) begin
                 re[9] <= pc;// - 4; // save this vpc to x1 //!!!! We also need to refill pc - 4' ppc for re-executeing pc-4, with hit(if satp in for very next sfence.vma) 
                 re[8] <= 12 ;// save in x8 trap type 0 i-tlb trap so record as instruciont page fault for prepare
                 //Csrs[mstatus][MPIE] <= Csrs[mstatus][MIE]; // disable interrupt during shadow mmu walking
-                //Csrs[mstatus][MIE] <= 0;
+                //Csrs[mstatus][MIE] <= 0; !!
 
                 // Bubble
             end else if (bubble) begin bubble <= 1'b0; // Flush this cycle & Clear bubble signal for the next cycle
@@ -670,7 +711,7 @@ always @(*) begin
 		saved_user_pc <= pc_4; // save pc EXE l/s/a
 		for (i=1;i<11;i=i+1) begin sre[i]<= re[i]; end // save re
 		re[9] <= ls_va; //save va to x1
-		re[8] <= (op == 7'b0000011) ? 13 : 14;// save x2 trap type load/store_atom
+		re[8] <= (op == 7'b0000011) ? 13 : 15;// save x2 trap type load/store_atom
 		//Csrs[mstatus][MIE] <= Csrs[mstatus][MPIE]; // set back interrupt status
     
 	    //end else if (!STrap && !valid_address && is_mem_access) begin
@@ -802,33 +843,33 @@ always @(*) begin
 		    32'b???????_?????_?????_001_?????_1110011: begin if (w_csr_id==XCSR) begin do_trap = 1; trap_is_interrupt =0; trap_val = ir; trap_epc = pc_4; trap_cause = ILLEGAL_INSTRUCTION; end
 		                                                     else begin
                                                                      if (w_rd != 0) re[w_rd] <= csr_read;
-		                                                     Csrs[w_csr_id] <= (Csrs[w_csr_id] & ~csr_mask_w)| csr_write_re; end //  (rs1 & csr_mask_w); end // Csrrw logic
-		                                                     //if (w_csr_id==satp) begin pc<=pc; bubble<=1; end end // flush pipelien on satp write
+		                                                     if (csr_writable) Csrs[w_csr_id] <= (Csrs[w_csr_id] & ~csr_mask_w)| csr_write_re; end //  (rs1 & csr_mask_w); end // Csrrw logic
+		                                                     //if (w_csr_id==satp) begin tlb_flush <= ~tlb_flush; pc<=pc; bubble<=1; end end // flush pipelien on satp write
 								     end
 		    32'b???????_?????_?????_010_?????_1110011: begin if (w_csr_id==XCSR) begin do_trap = 1; trap_is_interrupt =0; trap_val = ir; trap_epc = pc_4; trap_cause = ILLEGAL_INSTRUCTION; end 
 		                                                     else begin
                                                                      if (w_rd != 0) re[w_rd] <= csr_read;
-		                                                     if (w_rs1 != 0) Csrs[w_csr_id] <= (Csrs[w_csr_id] | csr_write_re); end //  (rs1 & csr_mask_w)); end // Csrrs
+		                                                     if (w_rs1 != 0 && csr_writable) Csrs[w_csr_id] <= (Csrs[w_csr_id] | csr_write_re); end //  (rs1 & csr_mask_w)); end // Csrrs
 								     end
 		    32'b???????_?????_?????_011_?????_1110011: begin if (w_csr_id==XCSR) begin do_trap = 1; trap_is_interrupt =0; trap_val = ir; trap_epc = pc_4; trap_cause = ILLEGAL_INSTRUCTION; end
 		                                                     else begin
                                                                      if (w_rd != 0) re[w_rd] <= csr_read;
-		                                                     if (w_rs1 != 0) Csrs[w_csr_id] <= (Csrs[w_csr_id] & ~csr_write_re); end //  (rs1 & csr_mask_w)); end // Csrrc
+		                                                     if (w_rs1 != 0 && csr_writable) Csrs[w_csr_id] <= (Csrs[w_csr_id] & ~csr_write_re); end //  (rs1 & csr_mask_w)); end // Csrrc
 								     end
 		    32'b???????_?????_?????_101_?????_1110011: begin if (w_csr_id==XCSR) begin do_trap = 1; trap_is_interrupt =0; trap_val = ir; trap_epc = pc_4; trap_cause = ILLEGAL_INSTRUCTION; end
 		                                                     else begin
                                                                      if (w_rd != 0) re[w_rd] <= csr_read;
-		                                                     Csrs[w_csr_id] <= (Csrs[w_csr_id] & ~csr_mask_w) | csr_write_im; end //  (w_imm_z & csr_mask_w); end // Csrrwi
+		                                                     if (csr_writable) Csrs[w_csr_id] <= (Csrs[w_csr_id] & ~csr_mask_w) | csr_write_im; end //  (w_imm_z & csr_mask_w); end // Csrrwi
 								     end
 		    32'b???????_?????_?????_110_?????_1110011: begin if (w_csr_id==XCSR) begin do_trap = 1; trap_is_interrupt =0; trap_val = ir; trap_epc = pc_4; trap_cause = ILLEGAL_INSTRUCTION; end
 		                                                     else begin
                                                                      if (w_rd != 0) re[w_rd] <= csr_read;
-		                                                     if (w_imm_z != 0) Csrs[w_csr_id] <= (Csrs[w_csr_id] | csr_write_im); end //  (w_imm_z & csr_mask_w)); end // csrrsi
+		                                                     if (w_imm_z != 0 && csr_writable) Csrs[w_csr_id] <= (Csrs[w_csr_id] | csr_write_im); end //  (w_imm_z & csr_mask_w)); end // csrrsi
 								     end
 		    32'b???????_?????_?????_111_?????_1110011: begin if (w_csr_id==XCSR) begin do_trap = 1; trap_is_interrupt =0; trap_val = ir; trap_epc = pc_4; trap_cause = ILLEGAL_INSTRUCTION; end
 		                                                     else begin
                                                                      if (w_rd != 0) re[w_rd] <= csr_read;
-		                                                     if (w_imm_z != 0) Csrs[w_csr_id] <= (Csrs[w_csr_id] & ~csr_write_im); end //  (w_imm_z & csr_mask_w)); end // Csrrci
+		                                                     if (w_imm_z != 0 && csr_writable) Csrs[w_csr_id] <= (Csrs[w_csr_id] & ~csr_write_im); end //  (w_imm_z & csr_mask_w)); end // Csrrci
 								     end
                     // Ecall
 	            32'b0000000_00000_?????_000_?????_1110011: begin 
