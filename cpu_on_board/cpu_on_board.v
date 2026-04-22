@@ -179,8 +179,8 @@ assign DRAM_CKE = 1; // always enable
 	.mtimecmp(mtimecmp),
 	.meip_interrupt(meip_interrupt),
 	.seip_interrupt(seip_interrupt),
+	.msip_interrupt(msip_interrupt),
 	//.mtip_interrupt(mtip_interrupt),
-	//.msip_interrupt(msip_interrupt),
 
         .bus_read_data(bus_read_data),
         .bus_read_done(bus_read_done),
@@ -300,7 +300,7 @@ assign DRAM_CKE = 1; // always enable
 
     wire meip_interrupt = (claim_interrupt_id_ctx[0] != 0); // To Line 11 MEIP
     wire seip_interrupt = (claim_interrupt_id_ctx[1] != 0); // To Line 9 SEIP
-    //reg msip_interrupt = 0;
+    reg msip_interrupt = 0;
     wire uart_irq;
     reg uart_irq_pre;
     wire [31:0] uart_readdata;
@@ -421,8 +421,8 @@ assign DRAM_CKE = 1; // always enable
             if (Mtime_selected) begin bus_read_data <= bus_address[2] ? {32'b0, mtime[63:32]} : mtime; bus_read_done <= 1; end 
             //if (Mtimecmp_selected) begin bus_read_data <= mtimecmp; bus_read_done <= 1; end 
             if (Mtimecmp_selected) begin bus_read_data <= bus_address[2] ? {32'b0, mtimecmp[63:32]} : mtimecmp; bus_read_done <= 1; end  
-            //if (Clintbase_selected) begin bus_read_data <= {63'b0, msip_interrupt} ; bus_read_done <= 1; end 
-            if (Clintbase_selected) begin bus_read_done <= 1; end 
+            if (Clintbase_selected) begin bus_read_data <= {63'b0, msip_interrupt} ; bus_read_done <= 1; end 
+            //if (Clintbase_selected) begin bus_read_done <= 1; end 
 
 	    if (Art_selected) begin 
 	      if (bus_address == `Art_base || bus_address == `ArtK_base) begin
@@ -600,8 +600,8 @@ assign DRAM_CKE = 1; // always enable
 		     end
                 bus_write_done <= 1; 
 	    end // low write first need max high to pretent spurious
-            //if (Clintbase_selected) begin msip_interrupt <= bus_write_data[0];bus_write_done <= 1;end 
-            if (Clintbase_selected) begin bus_write_done <= 1;end 
+            if (Clintbase_selected) begin msip_interrupt <= bus_write_data[0];bus_write_done <= 1;end 
+            //if (Clintbase_selected) begin bus_write_done <= 1;end 
 	    //if (Sdram_selected) begin if (sdram_req_wait==0) bus_write_done <= 1; end
 
             if (Tlb_selected) bus_write_done <= 1; 

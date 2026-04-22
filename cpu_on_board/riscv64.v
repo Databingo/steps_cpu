@@ -19,7 +19,7 @@ module riscv64(
 
     input wire meip_interrupt, // from PLIC
     input wire seip_interrupt, // from Supervisor External
-    //input wire msip_interrupt, // from CLINT
+    input wire msip_interrupt, // from CLINT
     //input wire mtip_interrupt, // from Machine Time
 
     input  reg        bus_read_done,
@@ -667,7 +667,7 @@ always @(*) begin
 		Csrs[mip][MEIP] <= meip_interrupt; 
 		Csrs[mip][MTIP] <= mtip_interrupt; // MTIP linux will see then jump to its handler  mtime>=mtimecmp
 		Csrs[mip][SEIP] <= seip_interrupt;
-		//Csrs[mip][MSIP] <= msip_interrupt;  
+		Csrs[mip][MSIP] <= msip_interrupt;  
 
 		//  i-tlb miss STrap
             if (need_trans && !tlb_i_hit) begin //OPEN 
