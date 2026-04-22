@@ -706,6 +706,7 @@ always @(*) begin
                 re[8] <= 12 ;// save in x8 trap type 0 i-tlb trap so record as instruciont page fault for prepare
                 //Csrs[mstatus][MPIE] <= Csrs[mstatus][MIE]; // disable interrupt during shadow mmu walking
                 //Csrs[mstatus][MIE] <= 0; !!
+                //Csrs[mstatus][MPP] !! ?? self design?
 
                 // Bubble
             end else if (bubble) begin bubble <= 1'b0; // Flush this cycle & Clear bubble signal for the next cycle
