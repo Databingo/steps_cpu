@@ -446,6 +446,10 @@ reg [1:0] store_step;
 reg [63:0] reserve_addr;
 reg        reserve_valid;
 
+
+reg [7:0] tlb_epoch = 1;
+(* ram_style = "logic" *) reg [7:0] tlb_i_epoch [0:3]; // 4
+(* ram_style = "logic" *) reg [7:0] tlb_d_epoch [0:3]; // 4
 //// -- TLB -- 8 pages
 //(* ram_style = "logic" *) reg [26:0] tlb_vpn [0:7]; // vpn number VA[38:12]  Sv39
 //(* ram_style = "logic" *) reg [43:0] tlb_ppn [0:7]; // ppn number PA[55:12]
@@ -453,7 +457,7 @@ reg        reserve_valid;
 // -- TLB i -- 4 pages
 (* ram_style = "logic" *) reg [26:0] tlb_vpn [0:3]; // vpn number VA[38:12]  Sv39
 (* ram_style = "logic" *) reg [43:0] tlb_ppn [0:3]; // ppn number PA[55:12]
-(* ram_style = "logic" *) reg tlb_vld [0:3];
+//(* ram_style = "logic" *) reg tlb_vld [0:3];
 
 // TLB-I
 wire [26:0] pc_vpn = pc[38:12];
@@ -462,10 +466,14 @@ reg tlb_i_hit;
 
 //wire [7:0] tlb_i_match; // 8page
 wire [3:0] tlb_i_match; // 4page
-assign tlb_i_match[0] = tlb_vld[0] && (tlb_vpn[0] == pc_vpn);
-assign tlb_i_match[1] = tlb_vld[1] && (tlb_vpn[1] == pc_vpn);
-assign tlb_i_match[2] = tlb_vld[2] && (tlb_vpn[2] == pc_vpn);
-assign tlb_i_match[3] = tlb_vld[3] && (tlb_vpn[3] == pc_vpn);
+assign tlb_i_match[0] = (tlb_vpn[0] == pc_vpn) && (tlb_i_epoch[0] == tlb_epoch);
+assign tlb_i_match[1] = (tlb_vpn[1] == pc_vpn) && (tlb_i_epoch[1] == tlb_epoch);
+assign tlb_i_match[2] = (tlb_vpn[2] == pc_vpn) && (tlb_i_epoch[2] == tlb_epoch);
+assign tlb_i_match[3] = (tlb_vpn[3] == pc_vpn) && (tlb_i_epoch[3] == tlb_epoch);
+//assign tlb_i_match[0] = tlb_vld[0] && (tlb_vpn[0] == pc_vpn) && (tlb_i_epoch[0] == tlb_epoch);
+//assign tlb_i_match[1] = tlb_vld[1] && (tlb_vpn[1] == pc_vpn) && (tlb_i_epoch[1] == tlb_epoch);
+//assign tlb_i_match[2] = tlb_vld[2] && (tlb_vpn[2] == pc_vpn) && (tlb_i_epoch[2] == tlb_epoch);
+//assign tlb_i_match[3] = tlb_vld[3] && (tlb_vpn[3] == pc_vpn) && (tlb_i_epoch[3] == tlb_epoch);
 //assign tlb_i_match[4] = tlb_vld[4] && (tlb_vpn[4] == pc_vpn);
 //assign tlb_i_match[5] = tlb_vld[5] && (tlb_vpn[5] == pc_vpn);
 //assign tlb_i_match[6] = tlb_vld[6] && (tlb_vpn[6] == pc_vpn);
@@ -491,7 +499,7 @@ always @(*) begin
 // -- TLB d -- 4 pages
 (* ram_style = "logic" *) reg [26:0] tlb_d_vpn [0:3]; // vpn number VA[38:12]  Sv39
 (* ram_style = "logic" *) reg [43:0] tlb_d_ppn [0:3]; // ppn number PA[55:12]
-(* ram_style = "logic" *) reg tlb_d_vld [0:3]; // only 4 entries
+//(* ram_style = "logic" *) reg tlb_d_vld [0:3]; // only 4 entries
    
 	// TLB-D tlb d hit
 	wire [63:0] ls_va_offset = (op == 7'b0000011) ? w_imm_i : (op == 7'b0100011) ?  w_imm_s : 64'h0; // load/store/atom
@@ -503,10 +511,14 @@ always @(*) begin
 	//wire [7:0] tlb_d_match;
 	wire [3:0] tlb_d_match;
 	//wire [1:0] tlb_d_match;
-	assign tlb_d_match[0] = tlb_d_vld[0] && (tlb_d_vpn[0] == ls_va[38:12]);
-	assign tlb_d_match[1] = tlb_d_vld[1] && (tlb_d_vpn[1] == ls_va[38:12]);
-	assign tlb_d_match[2] = tlb_d_vld[2] && (tlb_d_vpn[2] == ls_va[38:12]);
-	assign tlb_d_match[3] = tlb_d_vld[3] && (tlb_d_vpn[3] == ls_va[38:12]);
+	assign tlb_d_match[0] = (tlb_d_vpn[0] == ls_va[38:12]) && (tlb_d_epoch[0] == tlb_epoch);
+	assign tlb_d_match[1] = (tlb_d_vpn[1] == ls_va[38:12]) && (tlb_d_epoch[1] == tlb_epoch);
+	assign tlb_d_match[2] = (tlb_d_vpn[2] == ls_va[38:12]) && (tlb_d_epoch[2] == tlb_epoch);
+	assign tlb_d_match[3] = (tlb_d_vpn[3] == ls_va[38:12]) && (tlb_d_epoch[3] == tlb_epoch);
+	//assign tlb_d_match[0] = tlb_d_vld[0] && (tlb_d_vpn[0] == ls_va[38:12]) && (tlb_d_epoch[0] == tlb_epoch);
+	//assign tlb_d_match[1] = tlb_d_vld[1] && (tlb_d_vpn[1] == ls_va[38:12]) && (tlb_d_epoch[1] == tlb_epoch);
+	//assign tlb_d_match[2] = tlb_d_vld[2] && (tlb_d_vpn[2] == ls_va[38:12]) && (tlb_d_epoch[2] == tlb_epoch);
+	//assign tlb_d_match[3] = tlb_d_vld[3] && (tlb_d_vpn[3] == ls_va[38:12]) && (tlb_d_epoch[3] == tlb_epoch);
 	//assign tlb_d_match[4] = tlb_vld[4] && (tlb_vpn[4] == ls_va[38:12]);
 	//assign tlb_d_match[5] = tlb_vld[5] && (tlb_vpn[5] == ls_va[38:12]);
 	//assign tlb_d_match[6] = tlb_vld[6] && (tlb_vpn[6] == ls_va[38:12]);
@@ -537,30 +549,37 @@ always @(*) begin
 		//reg tlb_flush;
 		always @(posedge clk or negedge reset) begin
 		    //tlb_flush_pre <= tlb_flush;
+		    //if (tlb_flush_pre != tlb_flush) begin 
+		    //    tlb_vld[0] <= 0; tlb_vld[1] <= 0; tlb_vld[2] <= 0; tlb_vld[3] <= 0; 
+		    //    tlb_d_vld[0] <= 0; tlb_d_vld[1] <= 0; tlb_d_vld[2] <= 0; tlb_d_vld[3] <= 0; 
+		    //end
 		    if (!reset) begin
 			tlb_ptr <= 0; // hit->trap(save va to x9)->refill assembly(fetch pa to x9)-> sd x9, `Tlb -> here to refill tlb
-			tlb_vld[0] <= 0; tlb_vld[1] <= 0; tlb_vld[2] <= 0; tlb_vld[3] <= 0; 
+			//tlb_vld[0] <= 0; tlb_vld[1] <= 0; tlb_vld[2] <= 0; tlb_vld[3] <= 0; 
 			tlb_d_ptr <= 0;
-			tlb_d_vld[0] <= 0; tlb_d_vld[1] <= 0; tlb_d_vld[2] <= 0; tlb_d_vld[3] <= 0;  
+			tlb_epoch <= 0;
+			//tlb_d_vld[0] <= 0; tlb_d_vld[1] <= 0; tlb_d_vld[2] <= 0; tlb_d_vld[3] <= 0;  
 		    end else if (STrap && bus_write_enable && bus_address == `Tlb) begin // for the last fill: sd ppa, Tlb
 			if (re[8] == 12) begin
 			tlb_vpn[tlb_ptr] <= re[9][38:12]; // VA from x1 saved by trapp mmu_pc/mmu_da
 			tlb_ppn[tlb_ptr] <= bus_write_data[55:12] ; // real 
-			tlb_vld[tlb_ptr] <= 1;
+			//tlb_vld[tlb_ptr] <= 1;
+			tlb_i_epoch[tlb_ptr] <= tlb_epoch;
 			tlb_ptr <= tlb_ptr + 1; 
 		        end else begin
 			tlb_d_vpn[tlb_d_ptr] <= re[9][38:12]; // VA from x1 saved by trapp mmu_pc/mmu_da
 			tlb_d_ppn[tlb_d_ptr] <= bus_write_data[55:12] ; // real 
-			tlb_d_vld[tlb_d_ptr] <= 1;
+			//tlb_d_vld[tlb_d_ptr] <= 1;
+			tlb_d_epoch[tlb_d_ptr] <= tlb_epoch;
 			tlb_d_ptr <= tlb_d_ptr + 1; 
 		        end 
-		    end else if (!bubble && tlb_i_hit && i_cache_hit) begin // sfence.vma flush any way if ir is (not be bubbled)
-			casez (ir) 32'b0001001??????????_000_?????_1110011: begin 
-			    tlb_vld[0] <= 0; tlb_vld[1] <= 0; tlb_vld[2] <= 0; tlb_vld[3] <= 0; 
-			    tlb_d_vld[0] <= 0; tlb_d_vld[1] <= 0; tlb_d_vld[2] <= 0; tlb_d_vld[3] <= 0; end
-		        endcase 
-		        //if (tlb_flush_pre != tlb_flush) begin tlb_vld[0] <= 0; tlb_vld[1] <= 0; tlb_vld[2] <= 0; tlb_vld[3] <= 0; end
 		    end
+		    //end else if (!bubble && tlb_i_hit && i_cache_hit) begin // sfence.vma flush any way if ir is (not be bubbled)
+		    //    casez (ir) 32'b0001001??????????_000_?????_1110011: begin 
+		    //        tlb_vld[0] <= 0; tlb_vld[1] <= 0; tlb_vld[2] <= 0; tlb_vld[3] <= 0; 
+		    //        tlb_d_vld[0] <= 0; tlb_d_vld[1] <= 0; tlb_d_vld[2] <= 0; tlb_d_vld[3] <= 0; end
+		    //    endcase 
+		    //end
 	    end
 
 	    // Cache I_cache_hit 63:13 tag, 12:4 index 3:0 offset Cache line 16B (4 instructions) 512 lines
@@ -573,16 +592,16 @@ always @(*) begin
 	    (* ram_style = "block" *) reg [63:0] Cache_L_High [0:511]; // 4KB
 	    //(* ram_style = "block" *) reg [50:0] Cache_T [0:511];  // ~4KB (addr: 51(tag) + 9(index) + 4(offset))
 	    //reg [511:0] cache_valid_bits = 0;
-	    (* ram_style = "block" *) reg [58:0] Cache_T [0:511];  // 8-bit epoth + 51-bit tag
+	    (* ram_style = "block" *) reg [58:0] Cache_T [0:511];  // 8-bit epoch + 51-bit tag
 	    reg [7:0] cache_epoch = 1;
 
-	    reg flush_pre = 0; 
-	    reg flush = 0;
+	    //reg flush_pre = 0; 
+	    //reg flush = 0;
 	    always @(posedge clk) begin 
-		// Flush
-		flush_pre <= flush;
-		//if (flush_pre != flush) cache_valid_bits <= 512'b0;
-		if (flush_pre != flush) cache_epoch <= cache_epoch + 1;
+		//// Flush
+		//flush_pre <= flush;
+		////if (flush_pre != flush) cache_valid_bits <= 512'b0;
+		//if (flush_pre != flush) cache_epoch <= cache_epoch + 1;
 		// Read
 	    cache_line <= {Cache_L_High[ppc[12:4]], Cache_L_Low[ppc[12:4]]}; 
 	    //cache_tag <= {cache_valid_bits[ppc[12:4]], Cache_T[ppc[12:4]]}; 
@@ -599,8 +618,8 @@ always @(*) begin
 	end
 
 	//wire i_cache_hit = cache_tag[51] && (ppc_pre[63:13] == cache_tag[50:0]);
-	//wire i_cache_hit = (cache_tag[58:51] == cache_epoch) && (ppc_pre[63:13] == cache_tag[50:0]);
-	wire i_cache_hit = (cache_tag[58:51] == cache_epoch) && (ppc_pre[63:13] == cache_tag[50:0]) && (flush_pre == flush);
+	wire i_cache_hit = (cache_tag[58:51] == cache_epoch) && (ppc_pre[63:13] == cache_tag[50:0]);
+	//wire i_cache_hit = (cache_tag[58:51] == cache_epoch) && (ppc_pre[63:13] == cache_tag[50:0]) && (flush_pre == flush);
 	wire [31:0] cache_i = cache_line[ppc_pre[3:2]*32 +: 32];
 	//assign ir = (mmu_pc || mmu_da || i_cache_refill) ? instruction : i_cache_hit ? cache_i : 32'h00000013; // NOP:addi x0, x0, 0;
 	assign ir = STrap ? instruction : i_cache_hit ? cache_i : 32'h00000013; // NOP:addi x0, x0, 0;
@@ -645,6 +664,10 @@ always @(*) begin
 		in_debug <= 0;
 		reserve_addr <= 0;
 		reserve_valid <= 0;
+		tlb_epoch <= 8'd1;
+		tlb_ptr <= 2'b0;
+		tlb_d_ptr <= 2'b0;
+		for (i=0;i<4;i=i+1) begin tlb_i_epoch[i]<= 8'd0; tlb_d_epoch[i]<= 8'd0; end 
 
 	    end else begin
 		pc <= pc + 4; // Default PC+4    (1.Could be overwrite 2.Take effect next cycle) 
@@ -844,32 +867,37 @@ always @(*) begin
 		                                                     else begin
                                                                      if (w_rd != 0) re[w_rd] <= csr_read;
 		                                                     if (csr_writable) Csrs[w_csr_id] <= (Csrs[w_csr_id] & ~csr_mask_w)| csr_write_re; end //  (rs1 & csr_mask_w); end // Csrrw logic
-		                                                     //if (w_csr_id==satp) begin tlb_flush <= ~tlb_flush; pc<=pc; bubble<=1; end end // flush pipelien on satp write
+		                                                     if (w_csr_id==satp) begin tlb_epoch <= tlb_epoch + 1; bubble <= 1; pc <= pc; end //end // flush pipelien on satp write
 								     end
 		    32'b???????_?????_?????_010_?????_1110011: begin if (w_csr_id==XCSR) begin do_trap = 1; trap_is_interrupt =0; trap_val = ir; trap_epc = pc_4; trap_cause = ILLEGAL_INSTRUCTION; end 
 		                                                     else begin
                                                                      if (w_rd != 0) re[w_rd] <= csr_read;
 		                                                     if (w_rs1 != 0 && csr_writable) Csrs[w_csr_id] <= (Csrs[w_csr_id] | csr_write_re); end //  (rs1 & csr_mask_w)); end // Csrrs
+		                                                     if (w_csr_id==satp) begin tlb_epoch <= tlb_epoch + 1; bubble <= 1; pc <= pc; end //end // flush pipelien on satp write
 								     end
 		    32'b???????_?????_?????_011_?????_1110011: begin if (w_csr_id==XCSR) begin do_trap = 1; trap_is_interrupt =0; trap_val = ir; trap_epc = pc_4; trap_cause = ILLEGAL_INSTRUCTION; end
 		                                                     else begin
                                                                      if (w_rd != 0) re[w_rd] <= csr_read;
 		                                                     if (w_rs1 != 0 && csr_writable) Csrs[w_csr_id] <= (Csrs[w_csr_id] & ~csr_write_re); end //  (rs1 & csr_mask_w)); end // Csrrc
+		                                                     if (w_csr_id==satp) begin tlb_epoch <= tlb_epoch + 1; bubble <= 1; pc <= pc; end //end // flush pipelien on satp write
 								     end
 		    32'b???????_?????_?????_101_?????_1110011: begin if (w_csr_id==XCSR) begin do_trap = 1; trap_is_interrupt =0; trap_val = ir; trap_epc = pc_4; trap_cause = ILLEGAL_INSTRUCTION; end
 		                                                     else begin
                                                                      if (w_rd != 0) re[w_rd] <= csr_read;
 		                                                     if (csr_writable) Csrs[w_csr_id] <= (Csrs[w_csr_id] & ~csr_mask_w) | csr_write_im; end //  (w_imm_z & csr_mask_w); end // Csrrwi
+		                                                     if (w_csr_id==satp) begin tlb_epoch <= tlb_epoch + 1; bubble <= 1; pc <= pc; end //end // flush pipelien on satp write
 								     end
 		    32'b???????_?????_?????_110_?????_1110011: begin if (w_csr_id==XCSR) begin do_trap = 1; trap_is_interrupt =0; trap_val = ir; trap_epc = pc_4; trap_cause = ILLEGAL_INSTRUCTION; end
 		                                                     else begin
                                                                      if (w_rd != 0) re[w_rd] <= csr_read;
 		                                                     if (w_imm_z != 0 && csr_writable) Csrs[w_csr_id] <= (Csrs[w_csr_id] | csr_write_im); end //  (w_imm_z & csr_mask_w)); end // csrrsi
+		                                                     if (w_csr_id==satp) begin tlb_epoch <= tlb_epoch + 1; bubble <= 1; pc <= pc; end //end // flush pipelien on satp write
 								     end
 		    32'b???????_?????_?????_111_?????_1110011: begin if (w_csr_id==XCSR) begin do_trap = 1; trap_is_interrupt =0; trap_val = ir; trap_epc = pc_4; trap_cause = ILLEGAL_INSTRUCTION; end
 		                                                     else begin
                                                                      if (w_rd != 0) re[w_rd] <= csr_read;
 		                                                     if (w_imm_z != 0 && csr_writable) Csrs[w_csr_id] <= (Csrs[w_csr_id] & ~csr_write_im); end //  (w_imm_z & csr_mask_w)); end // Csrrci
+		                                                     if (w_csr_id==satp) begin tlb_epoch <= tlb_epoch + 1; bubble <= 1; pc <= pc; end //end // flush pipelien on satp write
 								     end
                     // Ecall
 	            32'b0000000_00000_?????_000_?????_1110011: begin 
@@ -898,8 +926,9 @@ always @(*) begin
 		          		       bubble <= 1'b1; end 
 		    32'b00010000010100000000000001110011: begin end // Wfi
 		    32'b?????????????????_000_?????_0001111: begin end // Fence
-		    32'b?????????????????_001_?????_0001111: begin flush <= ~flush; end // Fence.i 
-		    32'b0001001??????????_000_?????_1110011: begin bubble <=1; pc <= pc; end // Sfence.vma (supervisor fence for virtual memory address) have to bubble the fetch next ir from old tlb, redo
+		    //32'b?????????????????_001_?????_0001111: begin flush <= ~flush; end // Fence.i 
+		    32'b?????????????????_001_?????_0001111: begin cache_epoch <= cache_epoch + 1; bubble <=1; pc <= pc; end // Fence.i 
+		    32'b0001001??????????_000_?????_1110011: begin tlb_epoch <= tlb_epoch + 1; bubble <=1; pc <= pc; end // Sfence.vma (supervisor fence for virtual memory address) bubble next ir old tlb
 		    // Atomic after TLB // -- ATOMIC instructions (A-extension) opcode: 0101111
 		    32'b00010_??_?????_?????_01?_?????_0101111: begin  // lr Lr._mmu 3 cycles lr.w010 lr.d011
 		        if (load_step == 0) begin bus_address <= pda; bus_read_enable <=1; pc <= pc_4; bubble <=1; load_step <=1; bus_ls_type <= w_func3; reserve_addr <= pda; reserve_valid <=1; end
