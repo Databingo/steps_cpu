@@ -149,8 +149,8 @@ CHECK_PERM_AND_AD:
      # 1. Check U-Bit based on VA sign (x9)
      andi x3, x4, 0x10 # Extract U-bit (Bit 4)
      bltz x9, check_kernel_u  # if bit 63 is 1, < 0 (High kernel space)
-     li x5, 0x80000000
-     bgeu x9, x5, check_kernel_u # if address is 0x80000000...0xffffffff, identity map
+     li x10, 0x80000000
+     bgeu x9, x10, check_kernel_u # if address is 0x80000000...0xffffffff, identity map
 check_user_u:
      beqz x3, PERM_FAULT # User VA (>=0) requires U=1
      j check_permissions
