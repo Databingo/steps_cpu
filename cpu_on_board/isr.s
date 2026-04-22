@@ -145,14 +145,14 @@ FINISH_1GB:
 
 # --- Permissions, U-Bit and A/D Bits --
 CHECK_PERM_AND_AD:                
-     # 1. Check U-Bit based on VA sign (x9)
-     andi x3, x4, 0x10 # Extract U-bit (Bit 4)
-     bltz x9, check_kernel_u
-check_user_u:
-     beqz x3, PERM_FAULT # User VA (>=0) requires U=1
-     j check_permissions
-check_kernel_u:
-     bnez x3, PERM_FAULT # Kernel VA (<0) requires U=0
+#     # 1. Check U-Bit based on VA sign (x9)
+#     andi x3, x4, 0x10 # Extract U-bit (Bit 4)
+#     bltz x9, check_kernel_u
+#check_user_u:
+#     beqz x3, PERM_FAULT # User VA (>=0) requires U=1
+#     j check_permissions
+#check_kernel_u:
+#     bnez x3, PERM_FAULT # Kernel VA (<0) requires U=0
 check_permissions:
      # 2. CHECK R/W/X permissions
      li x3, 14
@@ -187,16 +187,16 @@ WRITE_TLB:
      lui x6, 0x20000 # Magic TLB address
      sd x4, 0(x6)
 
-    #li a0, "TLBre:"
-    #call print7
-    #mv a0, x9
-    #call print_reg
+     li a0, "TLBre:"
+     call print7
+     mv a0, x9
+     call print_reg
  
-    #mv a0, x4
-    #call print_reg
+     mv a0, x4
+     call print_reg
 
-    #addi x6, x0, 93
-    #sd x6, 0(x7)    #  print ]
+     addi x6, x0, 93
+     sd x6, 0(x7)    #  print ]
 
      addi x8, x0, 0  # success x8=0
      j return
@@ -246,11 +246,11 @@ debug:
      csrr a0, marchid # marchid/ppc
      call print_reg
 
-     li a0, "|pda:" 
-     call print7
-    #csrr a0, 0xF13 # mimpid/pda
-     csrr a0, mimpid # mimpid/pda
-     call print_reg
+   # li a0, "|pda:" 
+   # call print7
+   ##csrr a0, 0xF13 # mimpid/pda
+   # csrr a0, mimpid # mimpid/pda
+   # call print_reg
 
    #li a0, "|mhtid:" 
    #call print7
