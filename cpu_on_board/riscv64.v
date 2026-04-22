@@ -559,6 +559,9 @@ always @(*) begin
 			//tlb_d_ptr <= 0;
 			//tlb_epoch <= 0;
 			//tlb_d_vld[0] <= 0; tlb_d_vld[1] <= 0; tlb_d_vld[2] <= 0; tlb_d_vld[3] <= 0;  
+		        tlb_ptr <= 2'b0;
+		        tlb_d_ptr <= 2'b0;
+		        for (i=0;i<4;i=i+1) begin tlb_i_epoch[i]<= 8'd0; tlb_d_epoch[i]<= 8'd0; end 
 		    end else if (STrap && bus_write_enable && bus_address == `Tlb) begin // for the last fill: sd ppa, Tlb
 			if (re[8] == 12) begin
 			tlb_vpn[tlb_ptr] <= re[9][38:12]; // VA from x1 saved by trapp mmu_pc/mmu_da
@@ -665,9 +668,7 @@ always @(*) begin
 		reserve_addr <= 0;
 		reserve_valid <= 0;
 		tlb_epoch <= 8'd1;
-		tlb_ptr <= 2'b0;
-		tlb_d_ptr <= 2'b0;
-		for (i=0;i<4;i=i+1) begin tlb_i_epoch[i]<= 8'd0; tlb_d_epoch[i]<= 8'd0; end 
+		cache_epoch <= 8'd1;
 
 	    end else begin
 		pc <= pc + 4; // Default PC+4    (1.Could be overwrite 2.Take effect next cycle) 
