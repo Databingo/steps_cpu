@@ -1,5 +1,5 @@
 Flow report for cpu_on_board
-Wed Apr 22 21:58:17 2026
+Wed Apr 22 22:22:39 2026
 Quartus II 32-bit Version 13.0.1 Build 232 06/12/2013 Service Pack 1 SJ Web Edition
 
 
@@ -40,7 +40,7 @@ applicable agreement for further details.
 +--------------------------------------------------------------------------------------+
 ; Flow Summary                                                                         ;
 +------------------------------------+-------------------------------------------------+
-; Flow Status                        ; Flow Failed - Wed Apr 22 21:58:17 2026          ;
+; Flow Status                        ; Flow Failed - Wed Apr 22 22:22:39 2026          ;
 ; Quartus II 32-bit Version          ; 13.0.1 Build 232 06/12/2013 SP 1 SJ Web Edition ;
 ; Revision Name                      ; cpu_on_board                                    ;
 ; Top-level Entity Name              ; cpu_on_board                                    ;
@@ -64,7 +64,7 @@ applicable agreement for further details.
 +-------------------+---------------------+
 ; Option            ; Setting             ;
 +-------------------+---------------------+
-; Start date & time ; 04/22/2026 21:58:14 ;
+; Start date & time ; 04/22/2026 22:22:35 ;
 ; Main task         ; Compilation         ;
 ; Revision Name     ; cpu_on_board        ;
 +-------------------+---------------------+
@@ -77,7 +77,7 @@ applicable agreement for further details.
 +-----------------------------------------+--------------------------------------------------------------------+---------------+------------------------------+------------+
 ; ADV_NETLIST_OPT_SYNTH_WYSIWYG_REMAP     ; On                                                                 ; Off           ; --                           ; --         ;
 ; ALLOW_ANY_RAM_SIZE_FOR_RECOGNITION      ; On                                                                 ; Off           ; --                           ; --         ;
-; COMPILER_SIGNATURE_ID                   ; 0.177686628046230                                                  ; --            ; --                           ; --         ;
+; COMPILER_SIGNATURE_ID                   ; 0.177686775048203                                                  ; --            ; --                           ; --         ;
 ; ENABLE_SIGNALTAP                        ; Off                                                                ; --            ; --                           ; --         ;
 ; FITTER_EFFORT                           ; Standard Fit                                                       ; Auto Fit      ; --                           ; --         ;
 ; HDL_MESSAGE_LEVEL                       ; Level3                                                             ; Level2        ; --                           ; --         ;
@@ -136,8 +136,8 @@ applicable agreement for further details.
 +----------------------+--------------+-------------------------+---------------------+------------------------------------+
 ; Module Name          ; Elapsed Time ; Average Processors Used ; Peak Virtual Memory ; Total CPU Time (on all processors) ;
 +----------------------+--------------+-------------------------+---------------------+------------------------------------+
-; Analysis & Synthesis ; 00:00:21     ; 1.0                     ; 366 MB              ; 00:00:20                           ;
-; Total                ; 00:00:21     ; --                      ; --                  ; 00:00:20                           ;
+; Analysis & Synthesis ; 00:00:13     ; 1.0                     ; 342 MB              ; 00:00:12                           ;
+; Total                ; 00:00:13     ; --                      ; --                  ; 00:00:12                           ;
 +----------------------+--------------+-------------------------+---------------------+------------------------------------+
 
 

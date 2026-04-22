@@ -1,5 +1,5 @@
 Analysis & Synthesis report for cpu_on_board
-Wed Apr 22 21:58:17 2026
+Wed Apr 22 22:22:39 2026
 Quartus II 32-bit Version 13.0.1 Build 232 06/12/2013 Service Pack 1 SJ Web Edition
 
 
@@ -36,7 +36,7 @@ applicable agreement for further details.
 +--------------------------------------------------------------------------------------+
 ; Analysis & Synthesis Summary                                                         ;
 +------------------------------------+-------------------------------------------------+
-; Analysis & Synthesis Status        ; Failed - Wed Apr 22 21:58:17 2026               ;
+; Analysis & Synthesis Status        ; Failed - Wed Apr 22 22:22:39 2026               ;
 ; Quartus II 32-bit Version          ; 13.0.1 Build 232 06/12/2013 SP 1 SJ Web Edition ;
 ; Revision Name                      ; cpu_on_board                                    ;
 ; Top-level Entity Name              ; cpu_on_board                                    ;
@@ -175,7 +175,7 @@ Info: Running Quartus II 32-bit Analysis & Synthesis
     Info: programming logic devices manufactured by Altera and sold by 
     Info: Altera or its authorized distributors.  Please refer to the 
     Info: applicable agreement for further details.
-    Info: Processing started: Wed Apr 22 21:57:56 2026
+    Info: Processing started: Wed Apr 22 22:22:26 2026
 Info: Command: quartus_map --read_settings_files=on --write_settings_files=off cpu_on_board -c cpu_on_board
 Info (20030): Parallel compilation is enabled and will use 2 of the 2 processors detected
 Info (12021): Found 1 design units, including 1 entities, in source file jtag_uart_system/synthesis/jtag_uart_system.v
@@ -211,9 +211,9 @@ Info (12021): Found 3 design units, including 3 entities, in source file sdram_p
     Info (12023): Found entity 2: sdram_pll_altpll_0_stdsync_sv6
     Info (12023): Found entity 3: sdram_pll_altpll_0
 Error: Quartus II 32-bit Analysis & Synthesis was unsuccessful. 7 errors, 2 warnings
-    Error: Peak virtual memory: 379 megabytes
-    Error: Processing ended: Wed Apr 22 21:58:23 2026
-    Error: Elapsed time: 00:00:27
-    Error: Total CPU time (on all processors): 00:00:26
+    Error: Peak virtual memory: 351 megabytes
+    Error: Processing ended: Wed Apr 22 22:22:45 2026
+    Error: Elapsed time: 00:00:19
+    Error: Total CPU time (on all processors): 00:00:19
 
 
