@@ -13,6 +13,7 @@ isr_router:
      li x3, 13 
      beq x8, x3, mmu_d    # d-tlb-refill Load
 
+    #li x3, 15 
      li x3, 14 
      beq x8, x3, mmu_d    # d-tlb-refill Store
 
@@ -155,6 +156,7 @@ check_kernel_u:
      bnez x3, PERM_FAULT # Kernel VA (<0) requires U=0
 check_permissions:
      # 2. CHECK R/W/X permissions
+    #li x3, 15
      li x3, 14
      beq x8, x3, check_store
      li x3, 12
@@ -173,6 +175,7 @@ check_fetch:
 update_ad:
      # 3. Update A/D bits
      ori x4, x4, 0x40  # set Accessed bit (bit 6)
+    #li x3, 15
      li x3, 14
      bne x8, x3, write_pte
      ori x4, x4, 0x80  # set Dirty bit (bit 7) if store
@@ -215,15 +218,19 @@ FAULT: # error trap?
      j return
 #FAULT:
 PERM_FAULT:
-    # force the trap cuase to trigger a real S-mode fualt for linux
-    li x3, 14
-    bne x8, x3, trigger_trap
-    li x8, 15  # Convert to Store Page Fault (15)
-trigger_trap:
-    # leaving x8 != 0
+#    # force the trap cuase to trigger a real S-mode fualt for linux
+#    li x3, 14
+#    bne x8, x3, trigger_trap
+#    li x8, 15  # Convert to Store Page Fault (15)
+#trigger_trap:
+#    # leaving x8 != 0
     j return
 
 return:    
+     li x3, 14
+     bne x8, x3, final_mret
+     li x8, 15  # Convert to Store Page Fault (15)
+final_mret:
      mret
 
 #Seems VA has 3 table number, satp has Root Table(vpn[2]) address via PPN(ppn+12 space), the we can find PTE in table 2, and PTE has PPN, we can use table2PPN to find table 1 address plus vpn1 number to find PTE in table1, then we get table1 PPN for table0 address, and together with vpn0 to find PTE in talbe0, this is  the last ppa, by ppn + 12 bit of VA low.
@@ -366,3 +373,45 @@ print7: # a0, 7 char left one for null
     ld ra, 8(sp)
     addi sp, sp, 16
     ret
+
+
+
+
+   # csrr t0, mcause  # check type
+   # 63 bit 1 interrupt
+   # 63 bit 0 exception
+
+   # Exception 0
+   # 0 pc is not aligned to 4 bytes
+   # 1 instruction is not accessable
+   # 2 illegal instruction
+   # 3 breakpoint
+   # 4 load address not aligned lw!=4  ld!=8 lh!=2?
+   # 5 load access fault
+   # 6 store/amo address not aligned
+   # 7 store/amo access fault
+   # 8 ecall from u-mode
+   # 9 ecall from s-mode
+   # 10 --(reserved)
+   # 11 ecall from m-mode
+   # 12 instruciton page fault
+   # 13 load page fault
+   # 14 --
+   # 15 store/amo page fault
+   # 16+ --
+
+   # Interrupt 1
+   # 0 user software interrupt
+   # 1 supervisor software interrupt
+   # 2 -- 
+   # 3 machine software interrupt
+   # 4 user timer software interrupt
+   # 5 supervisor timer software interrupt
+   # 6 --
+   # 7 machine timer interrupt
+   # 8 user external interrupt
+   # 9 supervisor external interrupt
+   # 10 --
+   # 11 machine external interrupt
+   # 12-15 --
+   # 16+ local define interrupt
