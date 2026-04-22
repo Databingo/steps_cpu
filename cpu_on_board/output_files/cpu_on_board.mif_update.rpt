@@ -1,5 +1,9 @@
 MIF/HEX Update report for cpu_on_board
+<<<<<<< HEAD
 Wed Apr 22 20:56:22 2026
+=======
+Tue Apr 21 10:33:38 2026
+>>>>>>> 5cc12ce19 (update)
 Quartus II 32-bit Version 13.0.1 Build 232 06/12/2013 Service Pack 1 SJ Web Edition
 
 
@@ -35,7 +39,11 @@ applicable agreement for further details.
 +---------------------------------------------------------------+
 ; MIF/HEX Update Summary                                        ;
 +-----------------------+---------------------------------------+
+<<<<<<< HEAD
 ; MIF/HEX Update Status ; Successful - Wed Apr 22 20:56:22 2026 ;
+=======
+; MIF/HEX Update Status ; Successful - Tue Apr 21 10:33:38 2026 ;
+>>>>>>> 5cc12ce19 (update)
 ; Revision Name         ; cpu_on_board                          ;
 ; Top-level Entity Name ; cpu_on_board                          ;
 ; Family                ; Cyclone II                            ;
@@ -71,15 +79,26 @@ Info: Running Quartus II 32-bit MIF/HEX Update
     Info: programming logic devices manufactured by Altera and sold by 
     Info: Altera or its authorized distributors.  Please refer to the 
     Info: applicable agreement for further details.
+<<<<<<< HEAD
     Info: Processing started: Wed Apr 22 20:56:08 2026
+=======
+    Info: Processing started: Tue Apr 21 10:33:31 2026
+>>>>>>> 5cc12ce19 (update)
 Info: Command: quartus_cdb --read_settings_files=on --update_mif cpu_on_board -c cpu_on_board
 Critical Warning (127004): Memory depth (1536) in the design file differs from memory depth (2048) in the Memory Initialization File "/usr/local/projects/steps_cpu/cpu_on_board/roam.mif" -- truncated remaining initial content value to fit RAM
 Info (39024): Processed the following Memory Initialization File(s)
     Info (39025): Processed Memory Initialization File /usr/local/projects/steps_cpu/cpu_on_board/roam.mif
 Info: Quartus II 32-bit MIF/HEX Update was successful. 0 errors, 1 warning
+<<<<<<< HEAD
     Info: Peak virtual memory: 382 megabytes
     Info: Processing ended: Wed Apr 22 20:56:22 2026
     Info: Elapsed time: 00:00:14
     Info: Total CPU time (on all processors): 00:00:14
+=======
+    Info: Peak virtual memory: 391 megabytes
+    Info: Processing ended: Tue Apr 21 10:33:38 2026
+    Info: Elapsed time: 00:00:07
+    Info: Total CPU time (on all processors): 00:00:07
+>>>>>>> 5cc12ce19 (update)
 
 

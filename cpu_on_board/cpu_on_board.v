@@ -594,8 +594,8 @@ assign DRAM_CKE = 1; // always enable
 	    //if (Mtimecmp_selected) begin mtimecmp <= bus_write_data; bus_write_done <= 1; end
 	    if (Mtimecmp_selected) begin 
 		if (bus_ls_type == 3'b011) mtimecmp <= bus_write_data;  // for sd
-		else begin if (bus_address[2]) mtimecmp[63:32] <= bus_write_data[31:0]; else mtimecmp[63:32] <= 32'hFFFFFFFF; mtimecmp[31:0] <= bus_write_data[31:0]; end  // normally sw
-                bus_write_done <= 1; end // low write first need max high to pretent spurious
+		else begin if (bus_address[2]) mtimecmp[63:32] <= bus_write_data[31:0]; else  mtimecmp[31:0] <= bus_write_data[31:0]; end  // normally sw
+                bus_write_done <= 1; end
             //if (Clintbase_selected) begin msip_interrupt <= bus_write_data[0];bus_write_done <= 1;end 
             if (Clintbase_selected) begin bus_write_done <= 1;end 
 	    //if (Sdram_selected) begin if (sdram_req_wait==0) bus_write_done <= 1; end
@@ -720,6 +720,7 @@ end
 
     // Slow pulse clock for SD init (~100 kHz)
     reg [8:0] clkdiv = 0;  // for 50M  12.5M/512=97.6Khz
+    reg sd_init_done = 0;
     //reg [7:0] clkdiv = 0;  // for 25M
     //reg [5:0] clkdiv = 0; // for 10M  10MHz/64 = 156.25KHz
     //reg [4:0] clkdiv = 0; // for 10M  10MHz/32 = 300KHz
@@ -727,12 +728,12 @@ end
     //reg [3:0] clkdiv = 0; // for 5M  5MHz/8 = 625Khz (sd SPI=300khz 100-400Khz)
     always @(posedge clock_slow or negedge KEY0) begin
     //always @(posedge CLOCK_50 or negedge KEY0) begin
-        if (!KEY0) clkdiv <= 0;
-	else clkdiv <= clkdiv + 1;
+        if (!KEY0) begin clkdiv <= 0; sd_init_done <= 0;
+	else begin clkdiv <= clkdiv + 1; if (sd_status == 9) end
     end
-    //wire clk_pulse_slow = (clkdiv == 0);
+    wire clk_pulse_slow = (clkdiv == 0);
     //wire clk_pulse_slow = (sd_status <= 8) ? (clkdiv == 0) : 1'b1;
-    wire clk_pulse_slow = (sd_status >= 9) ?  1'b1 : (clkdiv == 0);  // speed up to main clk after initial
+    //wire clk_pulse_slow = (sd_statud >= 9) ? (clkdiv = 1'b1) : 0
 
     // SD Controller Bridge
     reg [31:0] sd_addr = 0;           // Sector address

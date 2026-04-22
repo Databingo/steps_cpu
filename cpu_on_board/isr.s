@@ -49,12 +49,12 @@ i_cache_refill:
      j return
 
 mmu_i:
-     #li a0, "\n[i"
-     #call print7
+     li a0, "\n[i"
+     call print7
      j mmu
 mmu_d:
-     #li a0, "\n[d"
-     #call print7
+     li a0, "\n[d"
+     call print7
      j mmu
 
 mmu:  # VA 63:39Sign|38:30Vpn[2]|29:21Vpn[1]|20:12Vpn[0]|11:0PageOffset  
@@ -143,16 +143,16 @@ FINISH_1GB:
      add x4, x4, x3    # add offset to PPN
      j WRITE_TLB
 
- # --- Permissions, U-Bit and A/D Bits --
+# --- Permissions, U-Bit and A/D Bits --
 CHECK_PERM_AND_AD:                
-#     # 1. Check U-Bit based on VA sign (x9)
-#     andi x3, x4, 0x10 # Extract U-bit (Bit 4)
-#     bltz x9, check_kernel_u
-#check_user_u:
-#     beqz x3, PERM_FAULT # User VA (>=0) requires U=1
-#     j check_permissions
-#check_kernel_u:
-#     bnez x3, PERM_FAULT # Kernel VA (<0) requires U=0
+     # 1. Check U-Bit based on VA sign (x9)
+     andi x3, x4, 0x10 # Extract U-bit (Bit 4)
+     bltz x9, check_kernel_u
+check_user_u:
+     beqz x3, PERM_FAULT # User VA (>=0) requires U=1
+     j check_permissions
+check_kernel_u:
+     bnez x3, PERM_FAULT # Kernel VA (<0) requires U=0
 check_permissions:
      # 2. CHECK R/W/X permissions
      li x3, 14
@@ -172,12 +172,10 @@ check_fetch:
      beqz x3, PERM_FAULT
 update_ad:
      # 3. Update A/D bits
-    #ori x4, x4, 0x40  # set Accessed bit (bit 6)
-     ori x4, x4, 0x41  # set Accessed bit (bit 6) and Valid (bit 0)
+     ori x4, x4, 0x40  # set Accessed bit (bit 6)
      li x3, 14
      bne x8, x3, write_pte
-    #ori x4, x4, 0x80  # set Dirty bit (bit 7) if store
-     ori x4, x4, 0x81  # set Dirty bit (bit 7) if store and Accessed and Valid (bit 0)
+     ori x4, x4, 0x80  # set Dirty bit (bit 7) if store
 write_pte:
      sd x4, 0(x6) # write updated PTE back to memory
      jalr x0, 0(x5)  # return to leaf formatter
@@ -189,16 +187,16 @@ WRITE_TLB:
      lui x6, 0x20000 # Magic TLB address
      sd x4, 0(x6)
 
-    #li a0, "TLBre:"
-    #call print7
-    #mv a0, x9
-    #call print_reg
+     li a0, "TLBre:"
+     call print7
+     mv a0, x9
+     call print_reg
  
-    #mv a0, x4
-    #call print_reg
+     mv a0, x4
+     call print_reg
 
-    #addi x6, x0, 93
-    #sd x6, 0(x7)    #  print ]
+     addi x6, x0, 93
+     sd x6, 0(x7)    #  print ]
 
      addi x8, x0, 0  # success x8=0
      j return

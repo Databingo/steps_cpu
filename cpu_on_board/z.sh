@@ -14,7 +14,3 @@ echo "---------- opensbi config ---------" >> z2.txt
 cat opensbi/bash_opensbi.sh >> z2.txt
 echo "---------- bootloader code ---------" >> z2.txt
 cat bootloader.s >> z2.txt
-# gcc-musl ima
-# linux ima small
-# buxybox ima small
-# rvas.go for bootloader/mini_kernel/isr
