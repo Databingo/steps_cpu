@@ -332,7 +332,7 @@ wire [63:0] csr_mask_w= (w_csr == 12'h100) ? sstatus_mask : (w_csr == 12'h104) ?
 //wire [63:0] csr_read  = Csrs[w_csr_id] & csr_mask;
 //wire [63:0] csr_read = (w_csr == 12'hC01) ? mtime : Csrs[w_csr_id] & csr_mask;
 wire [63:0] csr_read = (w_csr == 12'h301) ? 64'h8000000000141101 : // misa(RV64IMASU)
-                       (w_csr == 12'hF11) ? 64'h0 : // mvendorid
+                       //(w_csr == 12'hF11) ? 64'h0 : // mvendorid
                        (w_csr == 12'hF12) ? 64'h0 : // marchid
                        (w_csr == 12'hF13) ? 64'h0 : // mimpid
                        (w_csr == 12'hF14) ? 64'h0 : // mhartid
@@ -358,7 +358,7 @@ localparam marchid    = 19;  // 0
 localparam mimpid     = 19;  // 0
 localparam mhartid    = 19;  // Hardware Thread ID 0 for single-core
 localparam misa       = 19;  // Machine ISA Register (IMA is 0x8000000000001101)
-localparam mvendorid  = 19;  // 0
+localparam mvendorid  = 23;  // 0
 localparam clint_time = 19;  // read only
 
 localparam pmpcfg0    = 20;  // Physical Memory Protection
@@ -430,7 +430,7 @@ end
 
 
 //(* ram_style = "logic" *) reg [63:0] Csrs [0:36]; // 36 CSRs for now // totally 4096
-(* ram_style = "logic" *) reg [63:0] Csrs [0:22]; // 36 CSRs for now // totally 4096
+(* ram_style = "logic" *) reg [63:0] Csrs [0:23]; // 36 CSRs for now // totally 4096
 wire [3:0]  satp_mmu  = Csrs[satp][63:60]; // 0:bare, 8:sv39, 9:sv48  satp.MODE!=0, privilegae is not M-mode, mstatus.MPRN is not set or in MPP's mode?
 
 // -- Timer --
@@ -654,7 +654,7 @@ always @(*) begin
 		Csrs[mstatus][MIE] <= 1;
 		mmu_da <= 0;
 		for (i=0;i<11;i=i+1) begin sre[i]<= 64'b0; end 
-		for (i=0;i<=22;i=i+1) begin Csrs[i]<= 64'b0; end
+		for (i=0;i<=23;i=i+1) begin Csrs[i]<= 64'b0; end
 		Csrs[medeleg] <= 64'hb1af; // delegate to S-mode 1011000110101111 // see VII 3.1.15 mcasue exceptions
 		Csrs[mideleg] <= 64'h0222; // delegate to S-mode 0000001000100010 see VII 3.1.15 mcasue interrupt 1/5/9 SSIP(supervisor software interrupt) STIP(time) SEIP(external)
 		// Initialize Machine Info for OpenSBI
