@@ -238,8 +238,8 @@ return:
 
 
 debug:
-     li a0, "\nDEBUG" 
-     call print7
+    #li a0, "\nDEBUG" 
+    #call print7
 
      li a0, "|ir:" 
      call print7
@@ -270,8 +270,8 @@ debug:
    #call print_reg
 
 
-    #li a0, "|" 
-    #call putchar
+     li a0, "|" 
+     call putchar
 
 
      
