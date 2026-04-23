@@ -764,8 +764,8 @@ always @(*) begin
 		re[9] <= ls_va; //save va to x1
 		//re[8] <= (op == 7'b0000011) ? 13 : 14;// save x2 trap type load/store_atom
 		re[8] <= 18; // save 18 for debug
-                Csrs[mimpid] <=  pda;
-                Csrs[marchid] <= ppc;
+                //Csrs[mimpid] <=  pda;
+                //Csrs[marchid] <= ppc;
                 Csrs[mvendorid] <= ir;
 
             // Back from STrap
