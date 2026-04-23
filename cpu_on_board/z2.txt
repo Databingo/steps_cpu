@@ -18,8 +18,8 @@ module riscv64(
     input wire [63:0] mtimecmp, // map to 0x0200_4000 + 8byte*hartid
 
     input wire meip_interrupt, // from PLIC
-    input wire seip_interrupt, // from Supervisor External
-    input wire msip_interrupt, // from CLINT
+    input wire seip_interrupt, // from Supervisor External (give by meip) opensbi could transfer to SSIP/STIP/SEIP
+    input wire msip_interrupt, // from CLINT (give by mmio write of M-mode software)
     //input wire mtip_interrupt, // from Machine Time
 
     input  reg        bus_read_done,
@@ -53,6 +53,12 @@ reg in_debug = 0;
 reg i_cache_refill=0;
 wire STrap = (mmu_pc || mmu_da || i_cache_refill || in_debug);
 wire is_mem_access = (op == 7'b0000011 || op == 7'b0100011 || op == 7'b0101111); //load/store/atm
+wire is_unaligned_access = is_mem_access && current_privilege_mode != M_mode && (
+    (w_func3[1:0] == 2'b01 && ls_va[0]   != 1'b0) || // lh/lhu/sh
+    (w_func3[1:0] == 2'b10 && ls_va[1:0] != 2'b00) || // lw/lwu/sw
+    (w_func3[1:0] == 2'b11 && ls_va[2:0] != 3'b000)  // ld/sd/AMO
+);
+
 reg [63:0] saved_user_pc;
 integer i; 
 
@@ -141,7 +147,7 @@ wire [63:0] w_load_data =
     (w_func3 == 3'b010) ? {{32{bus_read_data[31]}}, bus_read_data[31:0]} : // lw
     (w_func3 == 3'b100) ? { 56'b0,                  bus_read_data[ 7:0]} : // lbu
     (w_func3 == 3'b101) ? { 48'b0,                  bus_read_data[15:0]} : // lhu
-    (w_func3 == 3'b110) ? { 32'b0,                  bus_read_data[31:0]} : // lhw
+    (w_func3 == 3'b110) ? { 32'b0,                  bus_read_data[31:0]} : // lwu
     bus_read_data ; // ld (011)
 
 wire [63:0] w_store_data = 
@@ -324,11 +330,18 @@ localparam sie        = 5;  // Supervisor interrupt-enable register
 localparam sie_sip_mask   = 64'h0000_0000_0000_0222; // SEIE9, STIE5, SSIE1
 
 localparam mip        = 6 ; localparam SGEIP=12,MEIP=11,VSEIP=10,SEIP=9,MTIP=7,VSTIP=6,STIP=5,MSIP=3,VSSIP=2,SSIP=1; // Machine Interrupt Pending from HardWare timer,uart,PLIC.11Exter7Time3Software
+localparam mip_write_mask   = 64'h0000_0000_0000_0222;  // Allow M-mode software(e.g. opensbi) to write SSIP1/STIP5/SEIP9
 localparam sip        = 6;  // Supervisor interrupt pending
 //localparam sip_mask   = 64'h0000_0000_0000_0222; // SEIP, STIP, SSIP
 localparam sip_write_mask   = 64'h0000_0000_0000_0002; // SSIP
-wire [63:0] csr_mask  = (w_csr == 12'h100) ? sstatus_mask : (w_csr == 12'h104) ? (sie_sip_mask & Csrs[mideleg]) : (w_csr == 12'h144) ? (sie_sip_mask   & Csrs[mideleg]) : 64'hffff_ffff_ffff_ffff;
-wire [63:0] csr_mask_w= (w_csr == 12'h100) ? sstatus_mask : (w_csr == 12'h104) ? (sie_sip_mask & Csrs[mideleg]) : (w_csr == 12'h144) ? (sip_write_mask & Csrs[mideleg]) : 64'hffff_ffff_ffff_ffff;
+localparam satp_mask  = 64'hF000_0FFF_FFFF_FFFF; // ASID(Address Space Identifier) 63:60Mode|59:44ASID to 0|43:0PPN
+wire [63:0] csr_mask  = (w_csr == 12'h180) ? satp_mask : (w_csr == 12'h100) ? sstatus_mask : (w_csr == 12'h104) ? (sie_sip_mask & Csrs[mideleg]) : (w_csr == 12'h144) ? (sie_sip_mask   & Csrs[mideleg]) : 64'hffff_ffff_ffff_ffff;
+wire [63:0] csr_mask_w= (w_csr == 12'h180) ? satp_mask : 
+                        (w_csr == 12'h100) ? sstatus_mask : 
+			(w_csr == 12'h104) ? (sie_sip_mask & Csrs[mideleg]) : 
+			(w_csr == 12'h144) ? (sip_write_mask & Csrs[mideleg]) : 
+                        (w_csr == 12'h344) ? mip_write_mask : 
+			64'hffff_ffff_ffff_ffff;
 //wire [63:0] csr_read  = Csrs[w_csr_id] & csr_mask;
 //wire [63:0] csr_read = (w_csr == 12'hC01) ? mtime : Csrs[w_csr_id] & csr_mask;
 wire [63:0] csr_read = (w_csr == 12'h301) ? 64'h8000000000141101 : // misa(RV64IMASU)
@@ -446,9 +459,9 @@ reg [1:0] store_step;
 reg [63:0] reserve_addr;
 reg        reserve_valid;
 
-reg [7:0] tlb_epoch = 1;
-(* ram_style = "logic" *) reg [7:0] tlb_i_epoch [0:3]; // 4
-(* ram_style = "logic" *) reg [7:0] tlb_d_epoch [0:3]; // 4
+reg [31:0] tlb_epoch = 1;
+(* ram_style = "logic" *) reg [31:0] tlb_i_epoch [0:3]; // 4
+(* ram_style = "logic" *) reg [31:0] tlb_d_epoch [0:3]; // 4
 //// -- TLB -- 8 pages
 //(* ram_style = "logic" *) reg [26:0] tlb_vpn [0:7]; // vpn number VA[38:12]  Sv39
 //(* ram_style = "logic" *) reg [43:0] tlb_ppn [0:7]; // ppn number PA[55:12]
@@ -542,7 +555,11 @@ always @(*) begin
 		// concat physical address
 		wire need_trans = satp_mmu && !STrap && (current_privilege_mode != M_mode);
 		assign ppc = need_trans ? {8'h0, pc_ppn, pc[11:0]} : pc;
-		assign pda = need_trans ? {8'h0, data_ppn, ls_va[11:0]} : ls_va;
+		//assign pda = need_trans ? {8'h0, data_ppn, ls_va[11:0]} : ls_va;
+    
+		wire [1:0] eff_priv = Csrs[mstatus][MPRV] ? Csrs[mstatus][MPP+1:MPP] : current_privilege_mode;
+		wire need_trans_d = satp_mmu && !STrap && (eff_priv != M_mode);
+		assign pda = need_trans_d ? {8'h0, data_ppn, ls_va[11:0]} : ls_va;
 
 		// TLB Refill
 		//reg [2:0] tlb_ptr = 0; // 8 entries TLB
@@ -558,7 +575,7 @@ always @(*) begin
 			//tlb_vld[0] <= 0; tlb_vld[1] <= 0; tlb_vld[2] <= 0; tlb_vld[3] <= 0; 
 			tlb_d_ptr <= 0;
 			//tlb_d_vld[0] <= 0; tlb_d_vld[1] <= 0; tlb_d_vld[2] <= 0; tlb_d_vld[3] <= 0;  
-		        for (i=0;i<4;i=i+1) begin tlb_i_epoch[i]<= 8'd0; tlb_d_epoch[i]<= 8'd0; end 
+		        for (i=0;i<4;i=i+1) begin tlb_i_epoch[i]<= 32'd0; tlb_d_epoch[i]<= 32'd0; end 
 		    end else if (STrap && bus_write_enable && bus_address == `Tlb) begin // for the last fill: sd ppa, Tlb
 			if (re[8] == 12) begin
 			tlb_vpn[tlb_ptr] <= re[9][38:12]; // VA from x1 saved by trapp mmu_pc/mmu_da
@@ -585,7 +602,8 @@ always @(*) begin
 
 	    // Cache I_cache_hit 63:13 tag, 12:4 index 3:0 offset Cache line 16B (4 instructions) 512 lines
 	    reg [127:0] cache_line = 128'h0; //reg [51:0]  cache_tag = 52'h0;
-	    reg [58:0]  cache_tag = 58'h0;
+	    //reg [58:0]  cache_tag = 58'h0;
+	    reg [66:0]  cache_tag = 66'h0; // 16-bit epoch + 51-bit tag
 	    reg [63:0]  ppc_pre = 64'h0; // for read
 	    reg [63:0]  ask_i_data; // for write
 	    //(* ram_style = "block" *) reg [127:0] Cache_L [0:1023]; // 16KB
@@ -593,16 +611,18 @@ always @(*) begin
 	    (* ram_style = "block" *) reg [63:0] Cache_L_High [0:511]; // 4KB
 	    //(* ram_style = "block" *) reg [50:0] Cache_T [0:511];  // ~4KB (addr: 51(tag) + 9(index) + 4(offset))
 	    //reg [511:0] cache_valid_bits = 0;
-	    (* ram_style = "block" *) reg [58:0] Cache_T [0:511];  // 8-bit epoch + 51-bit tag
-	    reg [7:0] cache_epoch = 1;
+	    //(* ram_style = "block" *) reg [58:0] Cache_T [0:511];  // 8-bit epoch + 51-bit tag
+	    (* ram_style = "block" *) reg [66:0] Cache_T [0:511];  // 16-bit epoch + 51-bit tag
+	    //reg [7:0] cache_epoch = 1;
+	    reg [15:0] cache_epoch = 1;
 
-	    reg flush_pre = 0; 
-	    reg flush = 0;
+	    //reg flush_pre = 0; 
+	    //reg flush = 0;
 	    always @(posedge clk) begin 
-		// Flush
-		flush_pre <= flush;
-		//if (flush_pre != flush) cache_valid_bits <= 512'b0;
-		if (flush_pre != flush) cache_epoch <= cache_epoch + 1;
+		//// Flush
+		//flush_pre <= flush;
+		////if (flush_pre != flush) cache_valid_bits <= 512'b0;
+		//if (flush_pre != flush) cache_epoch <= cache_epoch + 1;
 		// Read
 	    cache_line <= {Cache_L_High[ppc[12:4]], Cache_L_Low[ppc[12:4]]}; 
 	    //cache_tag <= {cache_valid_bits[ppc[12:4]], Cache_T[ppc[12:4]]}; 
@@ -620,7 +640,9 @@ always @(*) begin
 
 	//wire i_cache_hit = cache_tag[51] && (ppc_pre[63:13] == cache_tag[50:0]);
 	//wire i_cache_hit = (cache_tag[58:51] == cache_epoch) && (ppc_pre[63:13] == cache_tag[50:0]);
-	wire i_cache_hit = (cache_tag[58:51] == cache_epoch) && (ppc_pre[63:13] == cache_tag[50:0]) && (flush_pre == flush);
+	//wire i_cache_hit = (cache_tag[58:51] == cache_epoch) && (ppc_pre[63:13] == cache_tag[50:0]) && (flush_pre == flush);
+	//wire i_cache_hit = (cache_tag[66:51] == cache_epoch) && (ppc_pre[63:13] == cache_tag[50:0]) && (flush_pre == flush);
+	wire i_cache_hit = (cache_tag[66:51] == cache_epoch) && (ppc_pre[63:13] == cache_tag[50:0]);
 	wire [31:0] cache_i = cache_line[ppc_pre[3:2]*32 +: 32];
 	//assign ir = (mmu_pc || mmu_da || i_cache_refill) ? instruction : i_cache_hit ? cache_i : 32'h00000013; // NOP:addi x0, x0, 0;
 	assign ir = STrap ? instruction : i_cache_hit ? cache_i : 32'h00000013; // NOP:addi x0, x0, 0;
@@ -655,7 +677,8 @@ always @(*) begin
 		mmu_da <= 0;
 		for (i=0;i<11;i=i+1) begin sre[i]<= 64'b0; end 
 		for (i=0;i<=23;i=i+1) begin Csrs[i]<= 64'b0; end
-		Csrs[medeleg] <= 64'hb1af; // delegate to S-mode 1011000110101111 // see VII 3.1.15 mcasue exceptions
+		//Csrs[medeleg] <= 64'hb1af; // delegate to S-mode 1011000110101111 // see VII 3.1.15 mcasue exceptions
+		Csrs[medeleg] <= 64'hb109; // delegate to S-mode no 12/13/15
 		Csrs[mideleg] <= 64'h0222; // delegate to S-mode 0000001000100010 see VII 3.1.15 mcasue interrupt 1/5/9 SSIP(supervisor software interrupt) STIP(time) SEIP(external)
 		// Initialize Machine Info for OpenSBI
 		//Csrs[misa] <= 64'h8000000000141101; //RV64IMASU extensions(63:62=2 64bits | 1<<0 Atomic| 1<<8 Integer| 1<<12 Multiply| 1<<18 Supervisor| 1 <<20 User) so: 64'h8000000000141101; RV64IMASU
@@ -665,8 +688,8 @@ always @(*) begin
 		in_debug <= 0;
 		reserve_addr <= 0;
 		reserve_valid <= 0;
-		tlb_epoch <= 8'd1;
-		//cache_epoch <= 8'd1;
+		tlb_epoch <= 32'd1;
+		cache_epoch <= 16'd1;
 
 	    end else begin
 		pc <= pc + 4; // Default PC+4    (1.Could be overwrite 2.Take effect next cycle) 
@@ -705,7 +728,7 @@ always @(*) begin
                 //Csrs[mstatus][MPIE] <= Csrs[mstatus][MIE]; // disable interrupt during shadow mmu walking
                 //Csrs[mstatus][MIE] <= 0; !!
 
-                // Bubble
+            // Bubble
             end else if (bubble) begin bubble <= 1'b0; // Flush this cycle & Clear bubble signal for the next cycle
 
             // i-cache miss STrap (at EXE stage without stap/tlb_hit sensitive)
@@ -724,9 +747,18 @@ always @(*) begin
 		end
 		re[8] <= 1;// save x2 trap type 1 i-cache trap
 
-		// d-tlb miss STrap load/store/atom
+            // unalign
+	    end else if (!STrap && !load_step && !store_step && is_unaligned_access) begin  
+		do_trap = 1; 
+		trap_is_interrupt = 0; 
+		trap_val = ls_va; 
+		trap_epc = pc_4;
+		trap_cause = (op == 7'b0000011) ? 4 : 6; // cause 4 Load address misaliged; cause 6 Store/amo address misaligned
+
+	    // d-tlb miss STrap load/store/atom
 	    //end else if (need_trans && !tlb_d_hit && (op == 7'b0000011 || op == 7'b0100011 || op == 7'b0101111) ) begin  
-	    end else if (need_trans && !tlb_d_hit && is_mem_access) begin  
+	    //end else if (need_trans && !tlb_d_hit && is_mem_access) begin  
+	    end else if (need_trans_d && !tlb_d_hit && is_mem_access) begin  
 		mmu_da <= 1; // MMU_DA ON
 		pc <= 0; // trap to isr_router
 		bubble <= 1'b1; // bubble
@@ -736,18 +768,6 @@ always @(*) begin
 		re[8] <= (op == 7'b0000011) ? 13 : 15;// save x2 trap type load/store_atom
 		//Csrs[mstatus][MIE] <= Csrs[mstatus][MPIE]; // set back interrupt status
     
-	    //end else if (!STrap && !valid_address && is_mem_access) begin
-	    //    mmu_da <= 1; // MMU_DA ON
-	    //    pc <= 0; // trap to isr_router
-	    //    bubble <= 1'b1; // bubble
-	    //    saved_user_pc <= pc_4; // save pc EXE l/s/a
-	    //    for (i=1;i<11;i=i+1) begin sre[i]<= re[i]; end // save re
-	    //    re[9] <= ls_va; //save va to x1
-	    //    //re[8] <= (op == 7'b0000011) ? 13 : 14;// save x2 trap type load/store_atom
-	    //    re[8] <= 17; // save 17 for invalid address
-            //    Csrs[mimpid] <=  pda;
-            //    Csrs[marchid] <= ppc;
-            //    Csrs[mvendorid] <= ir;
 	    end else if (Csrs[mdebug] && !STrap && !did && !load_step && !store_step && !mul_enable && !div_enable) begin
 		in_debug <= 1;
 		pc <= 0; // trap to isr_router
@@ -757,8 +777,8 @@ always @(*) begin
 		re[9] <= ls_va; //save va to x1
 		//re[8] <= (op == 7'b0000011) ? 13 : 14;// save x2 trap type load/store_atom
 		re[8] <= 18; // save 18 for debug
-                Csrs[mimpid] <=  pda;
-                Csrs[marchid] <= ppc;
+                //Csrs[mimpid] <=  pda;
+                //Csrs[marchid] <= ppc;
                 Csrs[mvendorid] <= ir;
 
             // Back from STrap
@@ -920,7 +940,8 @@ always @(*) begin
 		          		       bubble <= 1'b1; end 
 		    32'b00010000010100000000000001110011: begin end // Wfi
 		    32'b?????????????????_000_?????_0001111: begin end // Fence
-		    32'b?????????????????_001_?????_0001111: begin flush <= ~flush; end // Fence.i 
+		    ///32'b?????????????????_001_?????_0001111: begin flush <= ~flush; end // Fence.i 
+		    32'b?????????????????_001_?????_0001111: begin cache_epoch <= cache_epoch + 1; bubble <= 1; pc <= pc; end // Fence.i 
 		    32'b0001001??????????_000_?????_1110011: begin tlb_epoch <= tlb_epoch + 1; bubble <=1; pc <= pc; end // Sfence.vma (supervisor fence for virtual memory address) have to bubble the fetch next ir from old tlb, redo
 		    // Atomic after TLB // -- ATOMIC instructions (A-extension) opcode: 0101111
 		    32'b00010_??_?????_?????_01?_?????_0101111: begin  // lr Lr._mmu 3 cycles lr.w010 lr.d011
@@ -1275,6 +1296,7 @@ assign DRAM_CKE = 1; // always enable
     wire        bus_write_enable;
     wire [2:0]  bus_ls_type; // lb lbu...sbhwd...
     wire [63:0] mtime;
+    reg  [63:0] mtime_latch;
     reg  [63:0] mtimecmp;
 
 
@@ -1400,7 +1422,8 @@ assign DRAM_CKE = 1; // always enable
         uart_write_pulse <= 0;
 	uart_read_pulse <= 0;
 	uart_irq_pre <= uart_irq;
-	if (uart_irq && !uart_irq_pre) Plic_pending[1] <= 1;
+	//if (uart_irq && !uart_irq_pre) Plic_pending[1] <= 1;
+	if (uart_irq) Plic_pending[1] <= 1;
 	//if (key_pressed_edge) Plic_pending[1] <= 1;
 
         //if (bus_read_enable) begin bus_read_done <= 0; cid <= (bus_address-`Sdc_base); end 
@@ -1452,7 +1475,14 @@ assign DRAM_CKE = 1; // always enable
 
             //if (Clint_selected) begin bus_read_data <= 64'b0 ; bus_read_done <= 1; end 
             //if (Mtime_selected) begin bus_read_data <= mtime; bus_read_done <= 1; end 
-            if (Mtime_selected) begin bus_read_data <= bus_address[2] ? {32'b0, mtime[63:32]} : mtime; bus_read_done <= 1; end 
+            if (Mtime_selected) begin 
+		if (bus_ls_type == 3'b011) bus_read_data <= mtime;  // for ld
+		else begin 
+		     if (!bus_address[2]) begin mtime_latch <= mtime; bus_read_data <= {32'b0, mtime[31:0]}; end 
+		     else begin bus_read_data <= {32'b0, mtime_latch[63:32]}; end
+		end
+		bus_read_done <= 1
+	    end 
             //if (Mtimecmp_selected) begin bus_read_data <= mtimecmp; bus_read_done <= 1; end 
             if (Mtimecmp_selected) begin bus_read_data <= bus_address[2] ? {32'b0, mtimecmp[63:32]} : mtimecmp; bus_read_done <= 1; end  
             if (Clintbase_selected) begin bus_read_data <= {63'b0, msip_interrupt} ; bus_read_done <= 1; end 
@@ -1630,7 +1660,8 @@ assign DRAM_CKE = 1; // always enable
 		if (bus_ls_type == 3'b011) mtimecmp <= bus_write_data;  // for sd
 		else begin 
 		         if (bus_address[2]) mtimecmp[63:32] <= bus_write_data[31:0]; 
-		         else begin mtimecmp[63:32] <= 32'hFFFFFFFF; mtimecmp[31:0] <= bus_write_data[31:0]; end  // normally sw
+		         //else begin mtimecmp[63:32] <= 32'hFFFFFFFF; mtimecmp[31:0] <= bus_write_data[31:0]; end  // normally sw
+		         else mtimecmp[31:0] <= bus_write_data[31:0]; // normally sw
 		     end
                 bus_write_done <= 1; 
 	    end // low write first need max high to pretent spurious
@@ -2673,32 +2704,32 @@ FINISH_1GB:
 
 # --- Permissions, U-Bit and A/D Bits --
 CHECK_PERM_AND_AD:                
-     # 1. Check U-Bit based on VA sign (x9)
-     andi x3, x4, 0x10 # Extract U-bit (Bit 4)
-     bltz x9, check_kernel_u
-check_user_u:
-     beqz x3, PERM_FAULT # User VA (>=0) requires U=1
-     j check_permissions
-check_kernel_u:
-     bnez x3, PERM_FAULT # Kernel VA (<0) requires U=0
-check_permissions:
-     # 2. CHECK R/W/X permissions
-     li x3, 15
-    #li x3, 14
-     beq x8, x3, check_store
-     li x3, 12
-     beq x8, x3, check_fetch
-check_load:
-     andi x3, x4, 2 # PET.R (bit 1)
-     beqz x3, PERM_FAULT
-     j update_ad
-check_store:
-     andi x3, x4, 4 # PET.W (bit 2)
-     beqz x3, PERM_FAULT
-     j update_ad
-check_fetch:
-     andi x3, x4, 8 # PET.X (bit 8)
-     beqz x3, PERM_FAULT
+#     # 1. Check U-Bit based on VA sign (x9)
+#     andi x3, x4, 0x10 # Extract U-bit (Bit 4)
+#     bltz x9, check_kernel_u
+#check_user_u:
+#     beqz x3, PERM_FAULT # User VA (>=0) requires U=1
+#     j check_permissions
+#check_kernel_u:
+#     bnez x3, PERM_FAULT # Kernel VA (<0) requires U=0
+#check_permissions:
+#     # 2. CHECK R/W/X permissions
+#     li x3, 15
+#    #li x3, 14
+#     beq x8, x3, check_store
+#     li x3, 12
+#     beq x8, x3, check_fetch
+#check_load:
+#     andi x3, x4, 2 # PET.R (bit 1)
+#     beqz x3, PERM_FAULT
+#     j update_ad
+#check_store:
+#     andi x3, x4, 4 # PET.W (bit 2)
+#     beqz x3, PERM_FAULT
+#     j update_ad
+#check_fetch:
+#     andi x3, x4, 8 # PET.X (bit 3)
+#     beqz x3, PERM_FAULT
 update_ad:
      # 3. Update A/D bits
      ori x4, x4, 0x40  # set Accessed bit (bit 6)
@@ -2765,10 +2796,10 @@ return:
 
 
 debug:
-     li a0, "\nDEBUG" 
-     call print7
+    #li a0, "\nDEBUG" 
+    #call print7
 
-     li a0, "|ir:" 
+     li a0, "\n|ir:" 
      call print7
     #csrr a0, 0xF11 # mvendorid/ir
      csrr a0, mvendorid # mvendorid/ir
@@ -2797,8 +2828,8 @@ debug:
    #call print_reg
 
 
-    #li a0, "|" 
-    #call putchar
+     li a0, "|" 
+     call putchar
 
 
      
@@ -3711,7 +3742,7 @@ boot_opensbi:
     fence.i
    #csrw 0x7cc, t0  # open debug print
 
-    csrwi mdebug, 8 
+   #csrwi mdebug, 8 
     li a0, 0 # use core 0
     li a1, 0 # let opensbi use its embedded DTB
    #li a1, 0x80100000 # set DTB addr
