@@ -53,7 +53,7 @@ reg in_debug = 0;
 reg i_cache_refill=0;
 wire STrap = (mmu_pc || mmu_da || i_cache_refill || in_debug);
 wire is_mem_access = (op == 7'b0000011 || op == 7'b0100011 || op == 7'b0101111); //load/store/atm
-wire is_unaligned_access = is_mem_access && (
+wire is_unaligned_access = is_mem_access && current_privilege_mode != M_mode && (
     (w_func3[1:0] == 2'b01 && ls_va[0]   != 1'b0) || // lh/lhu/sh
     (w_func3[1:0] == 2'b10 && ls_va[1:0] != 2'b00) || // lw/lwu/sw
     (w_func3[1:0] == 2'b11 && ls_va[2:0] != 3'b000)  // ld/sd/AMO
@@ -555,7 +555,11 @@ always @(*) begin
 		// concat physical address
 		wire need_trans = satp_mmu && !STrap && (current_privilege_mode != M_mode);
 		assign ppc = need_trans ? {8'h0, pc_ppn, pc[11:0]} : pc;
-		assign pda = need_trans ? {8'h0, data_ppn, ls_va[11:0]} : ls_va;
+		//assign pda = need_trans ? {8'h0, data_ppn, ls_va[11:0]} : ls_va;
+    
+		wire [1:0] eff_priv = Csrs[mstatus][MPRV] ? Csrs[mstatus][MPP+1:MPP] : current_privilege_mode;
+		wire need_trans_d = satp_mmu && !STrap && (eff_priv != M_mode);
+		assign pda = need_trans_d ? {8'h0, data_ppn, ls_va[11:0]} : ls_va;
 
 		// TLB Refill
 		//reg [2:0] tlb_ptr = 0; // 8 entries TLB
@@ -718,7 +722,7 @@ always @(*) begin
                 //Csrs[mstatus][MPIE] <= Csrs[mstatus][MIE]; // disable interrupt during shadow mmu walking
                 //Csrs[mstatus][MIE] <= 0; !!
 
-                // Bubble
+            // Bubble
             end else if (bubble) begin bubble <= 1'b0; // Flush this cycle & Clear bubble signal for the next cycle
 
             // i-cache miss STrap (at EXE stage without stap/tlb_hit sensitive)
@@ -737,16 +741,18 @@ always @(*) begin
 		end
 		re[8] <= 1;// save x2 trap type 1 i-cache trap
 
+            // unalign
 	    end else if (!STrap && !load_step && !store_step && is_unaligned_access) begin  
 		do_trap = 1; 
-		trap_is_interrupt =0; 
+		trap_is_interrupt = 0; 
 		trap_val = ls_va; 
 		trap_epc = pc_4;
 		trap_cause = (op == 7'b0000011) ? 4 : 6; // cause 4 Load address misaliged; cause 6 Store/amo address misaligned
 
 	    // d-tlb miss STrap load/store/atom
 	    //end else if (need_trans && !tlb_d_hit && (op == 7'b0000011 || op == 7'b0100011 || op == 7'b0101111) ) begin  
-	    end else if (need_trans && !tlb_d_hit && is_mem_access) begin  
+	    //end else if (need_trans && !tlb_d_hit && is_mem_access) begin  
+	    end else if (need_trans_d && !tlb_d_hit && is_mem_access) begin  
 		mmu_da <= 1; // MMU_DA ON
 		pc <= 0; // trap to isr_router
 		bubble <= 1'b1; // bubble
@@ -756,20 +762,6 @@ always @(*) begin
 		re[8] <= (op == 7'b0000011) ? 13 : 15;// save x2 trap type load/store_atom
 		//Csrs[mstatus][MIE] <= Csrs[mstatus][MPIE]; // set back interrupt status
     
-	    //end else if (!STrap && !valid_address && is_mem_access) begin
-	    //    mmu_da <= 1; // MMU_DA ON
-	    //    pc <= 0; // trap to isr_router
-	    //    bubble <= 1'b1; // bubble
-	    //    saved_user_pc <= pc_4; // save pc EXE l/s/a
-	    //    for (i=1;i<11;i=i+1) begin sre[i]<= re[i]; end // save re
-	    //    re[9] <= ls_va; //save va to x1
-	    //    //re[8] <= (op == 7'b0000011) ? 13 : 14;// save x2 trap type load/store_atom
-	    //    re[8] <= 17; // save 17 for invalid address
-            //    Csrs[mimpid] <=  pda;
-            //    Csrs[marchid] <= ppc;
-            //    Csrs[mvendorid] <= ir;
-       
-       
 	    end else if (Csrs[mdebug] && !STrap && !did && !load_step && !store_step && !mul_enable && !div_enable) begin
 		in_debug <= 1;
 		pc <= 0; // trap to isr_router
