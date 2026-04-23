@@ -459,9 +459,9 @@ reg [1:0] store_step;
 reg [63:0] reserve_addr;
 reg        reserve_valid;
 
-reg [7:0] tlb_epoch = 1;
-(* ram_style = "logic" *) reg [7:0] tlb_i_epoch [0:3]; // 4
-(* ram_style = "logic" *) reg [7:0] tlb_d_epoch [0:3]; // 4
+reg [31:0] tlb_epoch = 1;
+(* ram_style = "logic" *) reg [31:0] tlb_i_epoch [0:3]; // 4
+(* ram_style = "logic" *) reg [31:0] tlb_d_epoch [0:3]; // 4
 //// -- TLB -- 8 pages
 //(* ram_style = "logic" *) reg [26:0] tlb_vpn [0:7]; // vpn number VA[38:12]  Sv39
 //(* ram_style = "logic" *) reg [43:0] tlb_ppn [0:7]; // ppn number PA[55:12]
@@ -575,7 +575,7 @@ always @(*) begin
 			//tlb_vld[0] <= 0; tlb_vld[1] <= 0; tlb_vld[2] <= 0; tlb_vld[3] <= 0; 
 			tlb_d_ptr <= 0;
 			//tlb_d_vld[0] <= 0; tlb_d_vld[1] <= 0; tlb_d_vld[2] <= 0; tlb_d_vld[3] <= 0;  
-		        for (i=0;i<4;i=i+1) begin tlb_i_epoch[i]<= 8'd0; tlb_d_epoch[i]<= 8'd0; end 
+		        for (i=0;i<4;i=i+1) begin tlb_i_epoch[i]<= 32'd0; tlb_d_epoch[i]<= 32'd0; end 
 		    end else if (STrap && bus_write_enable && bus_address == `Tlb) begin // for the last fill: sd ppa, Tlb
 			if (re[8] == 12) begin
 			tlb_vpn[tlb_ptr] <= re[9][38:12]; // VA from x1 saved by trapp mmu_pc/mmu_da
@@ -602,7 +602,8 @@ always @(*) begin
 
 	    // Cache I_cache_hit 63:13 tag, 12:4 index 3:0 offset Cache line 16B (4 instructions) 512 lines
 	    reg [127:0] cache_line = 128'h0; //reg [51:0]  cache_tag = 52'h0;
-	    reg [58:0]  cache_tag = 58'h0;
+	    //reg [58:0]  cache_tag = 58'h0;
+	    reg [66:0]  cache_tag = 66'h0; // 16-bit epoch + 51-bit tag
 	    reg [63:0]  ppc_pre = 64'h0; // for read
 	    reg [63:0]  ask_i_data; // for write
 	    //(* ram_style = "block" *) reg [127:0] Cache_L [0:1023]; // 16KB
@@ -610,16 +611,18 @@ always @(*) begin
 	    (* ram_style = "block" *) reg [63:0] Cache_L_High [0:511]; // 4KB
 	    //(* ram_style = "block" *) reg [50:0] Cache_T [0:511];  // ~4KB (addr: 51(tag) + 9(index) + 4(offset))
 	    //reg [511:0] cache_valid_bits = 0;
-	    (* ram_style = "block" *) reg [58:0] Cache_T [0:511];  // 8-bit epoch + 51-bit tag
-	    reg [7:0] cache_epoch = 1;
+	    //(* ram_style = "block" *) reg [58:0] Cache_T [0:511];  // 8-bit epoch + 51-bit tag
+	    (* ram_style = "block" *) reg [66:0] Cache_T [0:511];  // 16-bit epoch + 51-bit tag
+	    //reg [7:0] cache_epoch = 1;
+	    reg [15:0] cache_epoch = 1;
 
-	    reg flush_pre = 0; 
-	    reg flush = 0;
+	    //reg flush_pre = 0; 
+	    //reg flush = 0;
 	    always @(posedge clk) begin 
-		// Flush
-		flush_pre <= flush;
-		//if (flush_pre != flush) cache_valid_bits <= 512'b0;
-		if (flush_pre != flush) cache_epoch <= cache_epoch + 1;
+		//// Flush
+		//flush_pre <= flush;
+		////if (flush_pre != flush) cache_valid_bits <= 512'b0;
+		//if (flush_pre != flush) cache_epoch <= cache_epoch + 1;
 		// Read
 	    cache_line <= {Cache_L_High[ppc[12:4]], Cache_L_Low[ppc[12:4]]}; 
 	    //cache_tag <= {cache_valid_bits[ppc[12:4]], Cache_T[ppc[12:4]]}; 
@@ -637,7 +640,9 @@ always @(*) begin
 
 	//wire i_cache_hit = cache_tag[51] && (ppc_pre[63:13] == cache_tag[50:0]);
 	//wire i_cache_hit = (cache_tag[58:51] == cache_epoch) && (ppc_pre[63:13] == cache_tag[50:0]);
-	wire i_cache_hit = (cache_tag[58:51] == cache_epoch) && (ppc_pre[63:13] == cache_tag[50:0]) && (flush_pre == flush);
+	//wire i_cache_hit = (cache_tag[58:51] == cache_epoch) && (ppc_pre[63:13] == cache_tag[50:0]) && (flush_pre == flush);
+	//wire i_cache_hit = (cache_tag[66:51] == cache_epoch) && (ppc_pre[63:13] == cache_tag[50:0]) && (flush_pre == flush);
+	wire i_cache_hit = (cache_tag[66:51] == cache_epoch) && (ppc_pre[63:13] == cache_tag[50:0]);
 	wire [31:0] cache_i = cache_line[ppc_pre[3:2]*32 +: 32];
 	//assign ir = (mmu_pc || mmu_da || i_cache_refill) ? instruction : i_cache_hit ? cache_i : 32'h00000013; // NOP:addi x0, x0, 0;
 	assign ir = STrap ? instruction : i_cache_hit ? cache_i : 32'h00000013; // NOP:addi x0, x0, 0;
@@ -672,7 +677,8 @@ always @(*) begin
 		mmu_da <= 0;
 		for (i=0;i<11;i=i+1) begin sre[i]<= 64'b0; end 
 		for (i=0;i<=23;i=i+1) begin Csrs[i]<= 64'b0; end
-		Csrs[medeleg] <= 64'hb1af; // delegate to S-mode 1011000110101111 // see VII 3.1.15 mcasue exceptions
+		//Csrs[medeleg] <= 64'hb1af; // delegate to S-mode 1011000110101111 // see VII 3.1.15 mcasue exceptions
+		Csrs[medeleg] <= 64'hb109; // delegate to S-mode no 12/13/15
 		Csrs[mideleg] <= 64'h0222; // delegate to S-mode 0000001000100010 see VII 3.1.15 mcasue interrupt 1/5/9 SSIP(supervisor software interrupt) STIP(time) SEIP(external)
 		// Initialize Machine Info for OpenSBI
 		//Csrs[misa] <= 64'h8000000000141101; //RV64IMASU extensions(63:62=2 64bits | 1<<0 Atomic| 1<<8 Integer| 1<<12 Multiply| 1<<18 Supervisor| 1 <<20 User) so: 64'h8000000000141101; RV64IMASU
@@ -682,8 +688,8 @@ always @(*) begin
 		in_debug <= 0;
 		reserve_addr <= 0;
 		reserve_valid <= 0;
-		tlb_epoch <= 8'd1;
-		//cache_epoch <= 8'd1;
+		tlb_epoch <= 32'd1;
+		cache_epoch <= 16'd1;
 
 	    end else begin
 		pc <= pc + 4; // Default PC+4    (1.Could be overwrite 2.Take effect next cycle) 
@@ -934,7 +940,8 @@ always @(*) begin
 		          		       bubble <= 1'b1; end 
 		    32'b00010000010100000000000001110011: begin end // Wfi
 		    32'b?????????????????_000_?????_0001111: begin end // Fence
-		    32'b?????????????????_001_?????_0001111: begin flush <= ~flush; end // Fence.i 
+		    ///32'b?????????????????_001_?????_0001111: begin flush <= ~flush; end // Fence.i 
+		    32'b?????????????????_001_?????_0001111: begin cache_epoch <= cache_epoch + 1; bubble <= 1; pc <= pc; end // Fence.i 
 		    32'b0001001??????????_000_?????_1110011: begin tlb_epoch <= tlb_epoch + 1; bubble <=1; pc <= pc; end // Sfence.vma (supervisor fence for virtual memory address) have to bubble the fetch next ir from old tlb, redo
 		    // Atomic after TLB // -- ATOMIC instructions (A-extension) opcode: 0101111
 		    32'b00010_??_?????_?????_01?_?????_0101111: begin  // lr Lr._mmu 3 cycles lr.w010 lr.d011
