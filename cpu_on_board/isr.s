@@ -170,7 +170,7 @@ check_store:
      beqz x3, PERM_FAULT
      j update_ad
 check_fetch:
-     andi x3, x4, 8 # PET.X (bit 8)
+     andi x3, x4, 8 # PET.X (bit 3)
      beqz x3, PERM_FAULT
 update_ad:
      # 3. Update A/D bits
