@@ -53,6 +53,12 @@ reg in_debug = 0;
 reg i_cache_refill=0;
 wire STrap = (mmu_pc || mmu_da || i_cache_refill || in_debug);
 wire is_mem_access = (op == 7'b0000011 || op == 7'b0100011 || op == 7'b0101111); //load/store/atm
+wire is_unaligned_access = is_mem_access && (
+    (w_func3[1:0] == 2'b01 && ls_va[0]   != 1'b0) || // lh/lhu/sh
+    (w_func3[1:0] == 2'b10 && ls_va[1:0] != 2'b00) || // lw/lwu/sw
+    (w_func3[1:0] == 2'b11 && ls_va[2:0] != 3'b000)  // ld/sd/AMO
+);
+
 reg [63:0] saved_user_pc;
 integer i; 
 
@@ -141,7 +147,7 @@ wire [63:0] w_load_data =
     (w_func3 == 3'b010) ? {{32{bus_read_data[31]}}, bus_read_data[31:0]} : // lw
     (w_func3 == 3'b100) ? { 56'b0,                  bus_read_data[ 7:0]} : // lbu
     (w_func3 == 3'b101) ? { 48'b0,                  bus_read_data[15:0]} : // lhu
-    (w_func3 == 3'b110) ? { 32'b0,                  bus_read_data[31:0]} : // lhw
+    (w_func3 == 3'b110) ? { 32'b0,                  bus_read_data[31:0]} : // lwu
     bus_read_data ; // ld (011)
 
 wire [63:0] w_store_data = 
@@ -731,7 +737,14 @@ always @(*) begin
 		end
 		re[8] <= 1;// save x2 trap type 1 i-cache trap
 
-		// d-tlb miss STrap load/store/atom
+	    end else if (!STrap && !load_step && !store_step && is_unaligned_access) begin  
+		do_trap = 1; 
+		trap_is_interrupt =0; 
+		trap_val = ls_va; 
+		trap_epc = pc_4;
+		trap_cause = (op == 7'b0000011) ? 4 : 6; // cause 4 Load address misaliged; cause 6 Store/amo address misaligned
+
+	    // d-tlb miss STrap load/store/atom
 	    //end else if (need_trans && !tlb_d_hit && (op == 7'b0000011 || op == 7'b0100011 || op == 7'b0101111) ) begin  
 	    end else if (need_trans && !tlb_d_hit && is_mem_access) begin  
 		mmu_da <= 1; // MMU_DA ON
@@ -755,6 +768,8 @@ always @(*) begin
             //    Csrs[mimpid] <=  pda;
             //    Csrs[marchid] <= ppc;
             //    Csrs[mvendorid] <= ir;
+       
+       
 	    end else if (Csrs[mdebug] && !STrap && !did && !load_step && !store_step && !mul_enable && !div_enable) begin
 		in_debug <= 1;
 		pc <= 0; // trap to isr_router
