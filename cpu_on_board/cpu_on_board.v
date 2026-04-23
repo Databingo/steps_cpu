@@ -366,7 +366,8 @@ assign DRAM_CKE = 1; // always enable
         uart_write_pulse <= 0;
 	uart_read_pulse <= 0;
 	uart_irq_pre <= uart_irq;
-	if (uart_irq && !uart_irq_pre) Plic_pending[1] <= 1;
+	//if (uart_irq && !uart_irq_pre) Plic_pending[1] <= 1;
+	if (uart_irq) Plic_pending[1] <= 1;
 	//if (key_pressed_edge) Plic_pending[1] <= 1;
 
         //if (bus_read_enable) begin bus_read_done <= 0; cid <= (bus_address-`Sdc_base); end 
