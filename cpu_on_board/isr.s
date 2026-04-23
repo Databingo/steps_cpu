@@ -247,22 +247,22 @@ debug:
      csrr a0, mvendorid # mvendorid/ir
      call print_reg
 
-     li a0, "|ppc:" 
-     call print7
-    #csrr a0, 0xF12 # marchid/ppc
-     csrr a0, marchid # marchid/ppc
-     call print_reg
+   # li a0, "|ppc:" 
+   # call print7
+   ##csrr a0, 0xF12 # marchid/ppc
+   # csrr a0, marchid # marchid/ppc
+   # call print_reg
 
-     li a0, "|pda:" 
-     call print7
-    #csrr a0, 0xF13 # mimpid/pda
-     csrr a0, mimpid # mimpid/pda
-     call print_reg
+   # li a0, "|pda:" 
+   # call print7
+   ##csrr a0, 0xF13 # mimpid/pda
+   # csrr a0, mimpid # mimpid/pda
+   # call print_reg
 
-    li a0, "|mhtid:" 
-    call print7
-    csrr a0, mhartid
-    call print_reg
+   #li a0, "|mhtid:" 
+   #call print7
+   #csrr a0, mhartid
+   #call print_reg
 
    #li a0, "|mstas:" 
    #call print7
@@ -270,8 +270,8 @@ debug:
    #call print_reg
 
 
-     li a0, "|" 
-     call putchar
+    #li a0, "|" 
+    #call putchar
 
 
      
