@@ -18,8 +18,8 @@ module riscv64(
     input wire [63:0] mtimecmp, // map to 0x0200_4000 + 8byte*hartid
 
     input wire meip_interrupt, // from PLIC
-    input wire seip_interrupt, // from Supervisor External
-    input wire msip_interrupt, // from CLINT
+    input wire seip_interrupt, // from Supervisor External (give by meip) opensbi could transfer to SSIP/STIP/SEIP
+    input wire msip_interrupt, // from CLINT (give by mmio write of M-mode software)
     //input wire mtip_interrupt, // from Machine Time
 
     input  reg        bus_read_done,
@@ -324,12 +324,18 @@ localparam sie        = 5;  // Supervisor interrupt-enable register
 localparam sie_sip_mask   = 64'h0000_0000_0000_0222; // SEIE9, STIE5, SSIE1
 
 localparam mip        = 6 ; localparam SGEIP=12,MEIP=11,VSEIP=10,SEIP=9,MTIP=7,VSTIP=6,STIP=5,MSIP=3,VSSIP=2,SSIP=1; // Machine Interrupt Pending from HardWare timer,uart,PLIC.11Exter7Time3Software
+localparam mip_write_mask   = 64'h0000_0000_0000_0222;  // Allow M-mode software(e.g. opensbi) to write SSIP1/STIP5/SEIP9
 localparam sip        = 6;  // Supervisor interrupt pending
 //localparam sip_mask   = 64'h0000_0000_0000_0222; // SEIP, STIP, SSIP
 localparam sip_write_mask   = 64'h0000_0000_0000_0002; // SSIP
 localparam satp_mask  = 64'hF000_0FFF_FFFF_FFFF; // ASID(Address Space Identifier) 63:60Mode|59:44ASID to 0|43:0PPN
 wire [63:0] csr_mask  = (w_csr == 12'h180) ? satp_mask : (w_csr == 12'h100) ? sstatus_mask : (w_csr == 12'h104) ? (sie_sip_mask & Csrs[mideleg]) : (w_csr == 12'h144) ? (sie_sip_mask   & Csrs[mideleg]) : 64'hffff_ffff_ffff_ffff;
-wire [63:0] csr_mask_w= (w_csr == 12'h180) ? satp_mask : (w_csr == 12'h100) ? sstatus_mask : (w_csr == 12'h104) ? (sie_sip_mask & Csrs[mideleg]) : (w_csr == 12'h144) ? (sip_write_mask & Csrs[mideleg]) : 64'hffff_ffff_ffff_ffff;
+wire [63:0] csr_mask_w= (w_csr == 12'h180) ? satp_mask : 
+                        (w_csr == 12'h100) ? sstatus_mask : 
+			(w_csr == 12'h104) ? (sie_sip_mask & Csrs[mideleg]) : 
+			(w_csr == 12'h144) ? (sip_write_mask & Csrs[mideleg]) : 
+                        (w_csr == 12'h344) ? mip_write_mask : 
+			64'hffff_ffff_ffff_ffff;
 //wire [63:0] csr_read  = Csrs[w_csr_id] & csr_mask;
 //wire [63:0] csr_read = (w_csr == 12'hC01) ? mtime : Csrs[w_csr_id] & csr_mask;
 wire [63:0] csr_read = (w_csr == 12'h301) ? 64'h8000000000141101 : // misa(RV64IMASU)
