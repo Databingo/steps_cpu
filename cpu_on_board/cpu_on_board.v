@@ -241,6 +241,7 @@ assign DRAM_CKE = 1; // always enable
     wire        bus_write_enable;
     wire [2:0]  bus_ls_type; // lb lbu...sbhwd...
     wire [63:0] mtime;
+    reg  [63:0] mtime_latch;
     reg  [63:0] mtimecmp;
 
 
@@ -419,7 +420,14 @@ assign DRAM_CKE = 1; // always enable
 
             //if (Clint_selected) begin bus_read_data <= 64'b0 ; bus_read_done <= 1; end 
             //if (Mtime_selected) begin bus_read_data <= mtime; bus_read_done <= 1; end 
-            if (Mtime_selected) begin bus_read_data <= bus_address[2] ? {32'b0, mtime[63:32]} : mtime; bus_read_done <= 1; end 
+            if (Mtime_selected) begin 
+		if (bus_ls_type == 3'b011) bus_read_data <= mtime;  // for ld
+		else begin 
+		     if (!bus_address[2]) begin mtime_latch <= mtime; bus_read_data <= {32'b0, mtime[31:0]}; end 
+		     else begin bus_read_data <= {32'b0, mtime_latch[63:32]}; end
+		end
+		bus_read_done <= 1
+	    end 
             //if (Mtimecmp_selected) begin bus_read_data <= mtimecmp; bus_read_done <= 1; end 
             if (Mtimecmp_selected) begin bus_read_data <= bus_address[2] ? {32'b0, mtimecmp[63:32]} : mtimecmp; bus_read_done <= 1; end  
             if (Clintbase_selected) begin bus_read_data <= {63'b0, msip_interrupt} ; bus_read_done <= 1; end 
