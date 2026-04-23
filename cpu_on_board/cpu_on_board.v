@@ -426,7 +426,7 @@ assign DRAM_CKE = 1; // always enable
 		     if (!bus_address[2]) begin mtime_latch <= mtime; bus_read_data <= {32'b0, mtime[31:0]}; end 
 		     else begin bus_read_data <= {32'b0, mtime_latch[63:32]}; end
 		end
-		bus_read_done <= 1
+		bus_read_done <= 1;
 	    end 
             //if (Mtimecmp_selected) begin bus_read_data <= mtimecmp; bus_read_done <= 1; end 
             if (Mtimecmp_selected) begin bus_read_data <= bus_address[2] ? {32'b0, mtimecmp[63:32]} : mtimecmp; bus_read_done <= 1; end  
