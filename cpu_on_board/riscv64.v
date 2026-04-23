@@ -327,8 +327,9 @@ localparam mip        = 6 ; localparam SGEIP=12,MEIP=11,VSEIP=10,SEIP=9,MTIP=7,V
 localparam sip        = 6;  // Supervisor interrupt pending
 //localparam sip_mask   = 64'h0000_0000_0000_0222; // SEIP, STIP, SSIP
 localparam sip_write_mask   = 64'h0000_0000_0000_0002; // SSIP
-wire [63:0] csr_mask  = (w_csr == 12'h100) ? sstatus_mask : (w_csr == 12'h104) ? (sie_sip_mask & Csrs[mideleg]) : (w_csr == 12'h144) ? (sie_sip_mask   & Csrs[mideleg]) : 64'hffff_ffff_ffff_ffff;
-wire [63:0] csr_mask_w= (w_csr == 12'h100) ? sstatus_mask : (w_csr == 12'h104) ? (sie_sip_mask & Csrs[mideleg]) : (w_csr == 12'h144) ? (sip_write_mask & Csrs[mideleg]) : 64'hffff_ffff_ffff_ffff;
+localparam satp_mask  = 64'hF000_0FFF_FFFF_FFFF; // ASID(Address Space Identifier) 63:60Mode|59:44ASID to 0|43:0PPN
+wire [63:0] csr_mask  = (w_csr == 12'h180) ? satp_mask : (w_csr == 12'h100) ? sstatus_mask : (w_csr == 12'h104) ? (sie_sip_mask & Csrs[mideleg]) : (w_csr == 12'h144) ? (sie_sip_mask   & Csrs[mideleg]) : 64'hffff_ffff_ffff_ffff;
+wire [63:0] csr_mask_w= (w_csr == 12'h180) ? satp_mask : (w_csr == 12'h100) ? sstatus_mask : (w_csr == 12'h104) ? (sie_sip_mask & Csrs[mideleg]) : (w_csr == 12'h144) ? (sip_write_mask & Csrs[mideleg]) : 64'hffff_ffff_ffff_ffff;
 //wire [63:0] csr_read  = Csrs[w_csr_id] & csr_mask;
 //wire [63:0] csr_read = (w_csr == 12'hC01) ? mtime : Csrs[w_csr_id] & csr_mask;
 wire [63:0] csr_read = (w_csr == 12'h301) ? 64'h8000000000141101 : // misa(RV64IMASU)
