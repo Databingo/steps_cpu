@@ -241,7 +241,7 @@ debug:
     #li a0, "\nDEBUG" 
     #call print7
 
-     li a0, "|ir:" 
+     li a0, "\n|ir:" 
      call print7
     #csrr a0, 0xF11 # mvendorid/ir
      csrr a0, mvendorid # mvendorid/ir
