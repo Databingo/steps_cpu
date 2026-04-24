@@ -851,9 +851,10 @@ always @(*) begin
                     end
                     // Store after TLB
                     32'b???????_?????_?????_???_?????_0100011: begin 
-                        if (store_step == 0) begin bus_address <= pda; bus_write_data <= w_store_data; bus_write_enable <= 1; pc <= pc_4; bubble <= 1; store_step <= 1; bus_ls_type <= w_func3; end
+                        if (store_step == 0) begin bus_address <= pda; bus_write_data <= w_store_data; bus_write_enable <= 1; pc <= pc_4; bubble <= 1; store_step <= 1; bus_ls_type <= w_func3; 
+			if (reserve_valid && reserve_addr == pda) reserve_valid <= 0; end // if lr, break the contract
                         if (store_step == 1 && bus_write_done == 0) begin pc <= pc_4; bubble <= 1; end // bus working
-                        if (store_step == 1 && bus_write_done == 1) begin store_step <= 0; if (bus_address == reserve_addr && reserve_valid) reserve_valid <= 0; end 
+                        if (store_step == 1 && bus_write_done == 1) begin store_step <= 0; end 
                     end   
                     // Math-I
 	            32'b???????_?????_?????_000_?????_0010011: re[w_rd] <= alu_addi;  // Addi
