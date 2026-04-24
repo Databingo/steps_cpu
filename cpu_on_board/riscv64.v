@@ -526,9 +526,12 @@ always @(*) begin
 //// -- TLB d -- 4 pages
 //(* ram_style = "logic" *) reg [26:0] tlb_d_vpn [0:3]; // vpn number VA[38:12]  Sv39
 //(* ram_style = "logic" *) reg [43:0] tlb_d_ppn [0:3]; // ppn number PA[55:12]
-// -- TLB d -- 8 pages
-(* ram_style = "logic" *) reg [26:0] tlb_d_vpn [0:7]; // vpn number VA[38:12]  Sv39
-(* ram_style = "logic" *) reg [43:0] tlb_d_ppn [0:7]; // ppn number PA[55:12]
+//// -- TLB d -- 8 pages
+//(* ram_style = "logic" *) reg [26:0] tlb_d_vpn [0:7]; // vpn number VA[38:12]  Sv39
+//(* ram_style = "logic" *) reg [43:0] tlb_d_ppn [0:7]; // ppn number PA[55:12]
+// -- TLB d -- 16 pages
+(* ram_style = "logic" *) reg [26:0] tlb_d_vpn [0:15]; // vpn number VA[38:12]  Sv39
+(* ram_style = "logic" *) reg [43:0] tlb_d_ppn [0:15]; // ppn number PA[55:12]
 //(* ram_style = "logic" *) reg tlb_d_vld [0:3]; // only 4 entries
    
 	// TLB-D tlb d hit
