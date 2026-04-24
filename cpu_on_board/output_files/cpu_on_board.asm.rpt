@@ -1,5 +1,5 @@
 Assembler report for cpu_on_board
-Fri Apr 24 14:59:06 2026
+Fri Apr 24 15:07:44 2026
 Quartus II 32-bit Version 13.0.1 Build 232 06/12/2013 Service Pack 1 SJ Web Edition
 
 
@@ -39,7 +39,7 @@ applicable agreement for further details.
 +---------------------------------------------------------------+
 ; Assembler Summary                                             ;
 +-----------------------+---------------------------------------+
-; Assembler Status      ; Successful - Fri Apr 24 14:59:06 2026 ;
+; Assembler Status      ; Successful - Fri Apr 24 15:07:43 2026 ;
 ; Revision Name         ; cpu_on_board                          ;
 ; Top-level Entity Name ; cpu_on_board                          ;
 ; Family                ; Cyclone II                            ;
@@ -141,7 +141,7 @@ Info: Running Quartus II 32-bit Assembler
     Info: programming logic devices manufactured by Altera and sold by 
     Info: Altera or its authorized distributors.  Please refer to the 
     Info: applicable agreement for further details.
-    Info: Processing started: Fri Apr 24 14:58:40 2026
+    Info: Processing started: Fri Apr 24 15:07:26 2026
 Info: Command: quartus_asm --read_settings_files=on --write_settings_files=off cpu_on_board -c cpu_on_board
 Warning (20013): Ignored assignments for entity "sdram_pll" -- entity does not exist in design
     Warning (20014): Assignment for entity set_global_assignment -name IP_TOOL_NAME Qsys -entity sdram_pll -qip sdram_pll/sdram/synthesis/sdram_pll.qip -library sdram_pll was ignored
@@ -156,8 +156,8 @@ Info (115031): Writing out detailed assembly data for power analysis
 Info (115030): Assembler is generating device programming files
 Info: Quartus II 32-bit Assembler was successful. 0 errors, 9 warnings
     Info: Peak virtual memory: 379 megabytes
-    Info: Processing ended: Fri Apr 24 14:59:07 2026
-    Info: Elapsed time: 00:00:27
-    Info: Total CPU time (on all processors): 00:00:26
+    Info: Processing ended: Fri Apr 24 15:07:44 2026
+    Info: Elapsed time: 00:00:18
+    Info: Total CPU time (on all processors): 00:00:18
 
 
