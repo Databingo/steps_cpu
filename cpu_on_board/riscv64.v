@@ -620,7 +620,7 @@ always @(*) begin
 		//reg tlb_flush;
 		always @(posedge clk or negedge reset) begin
 		    //tlb_flush_pre <= tlb_flush;
-		    if (!reset) begin
+		    if (!reset) begin // RESET
 			tlb_ptr <= 0; // hit->trap(save va to x9)->refill assembly(fetch pa to x9)-> sd x9, `Tlb -> here to refill tlb
 			//tlb_vld[0] <= 0; tlb_vld[1] <= 0; tlb_vld[2] <= 0; tlb_vld[3] <= 0; 
 			tlb_d_ptr <= 0;
@@ -630,8 +630,8 @@ always @(*) begin
 			tlb_vld <= 4'b0;
 		        //for (i=0;i<8;i=i+1) begin tlb_d_epoch[i]<= 16'd0; end 
 			tlb_d_vld <= 16'b0;
-		    end begin if (tlb_flush) begin tlb_vld <= 4'b0; tlb_d_vld <= 16'b0; tlb_flush <= 0; end 
-		    end else if (STrap && bus_write_enable && bus_address == `Tlb) begin // for the last fill: sd ppa, Tlb
+		    end else if (tlb_flush) begin tlb_vld <= 4'b0; tlb_d_vld <= 16'b0; tlb_flush <= 0;  // FLUSH
+		    end else if (STrap && bus_write_enable && bus_address == `Tlb) begin // for the last fill: sd ppa, Tlb  // REFILL
 			if (re[8] == 12) begin
 			tlb_vpn[tlb_ptr] <= re[9][38:12]; // VA from x1 saved by trapp mmu_pc/mmu_da
 			tlb_ppn[tlb_ptr] <= bus_write_data[55:12] ; // real 
