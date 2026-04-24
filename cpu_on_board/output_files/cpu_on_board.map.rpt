@@ -1,5 +1,5 @@
 Analysis & Synthesis report for cpu_on_board
-Fri Apr 24 19:12:46 2026
+Fri Apr 24 19:26:21 2026
 Quartus II 32-bit Version 13.0.1 Build 232 06/12/2013 Service Pack 1 SJ Web Edition
 
 
@@ -36,7 +36,7 @@ applicable agreement for further details.
 +--------------------------------------------------------------------------------------+
 ; Analysis & Synthesis Summary                                                         ;
 +------------------------------------+-------------------------------------------------+
-; Analysis & Synthesis Status        ; Failed - Fri Apr 24 19:12:46 2026               ;
+; Analysis & Synthesis Status        ; Failed - Fri Apr 24 19:26:21 2026               ;
 ; Quartus II 32-bit Version          ; 13.0.1 Build 232 06/12/2013 SP 1 SJ Web Edition ;
 ; Revision Name                      ; cpu_on_board                                    ;
 ; Top-level Entity Name              ; cpu_on_board                                    ;
@@ -175,7 +175,7 @@ Info: Running Quartus II 32-bit Analysis & Synthesis
     Info: programming logic devices manufactured by Altera and sold by 
     Info: Altera or its authorized distributors.  Please refer to the 
     Info: applicable agreement for further details.
-    Info: Processing started: Fri Apr 24 19:12:29 2026
+    Info: Processing started: Fri Apr 24 19:25:38 2026
 Info: Command: quartus_map --read_settings_files=on --write_settings_files=off cpu_on_board -c cpu_on_board
 Info (20030): Parallel compilation is enabled and will use 2 of the 2 processors detected
 Info (12021): Found 1 design units, including 1 entities, in source file jtag_uart_system/synthesis/jtag_uart_system.v
@@ -516,15 +516,13 @@ Info (10662): Verilog HDL Assignment information at riscv64.v(469): truncated un
 Warning (10040): Verilog HDL or VHDL arithmetic warning at riscv64.v(539): loss of carry in addition or borrow in subtraction
 Info (10662): Verilog HDL Assignment information at riscv64.v(614): truncated unsized constant literal with size 32 to size 2 with no loss of information
 Info (10662): Verilog HDL Assignment information at riscv64.v(618): truncated unsized constant literal with size 32 to size 4 with no loss of information
-Error (10200): Verilog HDL Conditional Statement error at riscv64.v(623): cannot match operand(s) in the condition to the corresponding edges in the enclosing event control of the always construct File: /usr/local/projects/steps_cpu/cpu_on_board/riscv64.v Line: 623
-Info (10662): Verilog HDL Assignment information at riscv64.v(623): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(625): truncated unsized constant literal with size 32 to size 2 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(627): truncated unsized constant literal with size 32 to size 4 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(624): truncated unsized constant literal with size 32 to size 2 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(626): truncated unsized constant literal with size 32 to size 4 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(633): truncated unsized constant literal with size 32 to size 1 with no loss of information
 Info (10662): Verilog HDL Assignment information at riscv64.v(638): truncated unsized constant literal with size 32 to size 1 with no loss of information
 Warning (10230): Verilog HDL assignment warning at riscv64.v(640): truncated value with size 32 to match size of target (2)
 Info (10662): Verilog HDL Assignment information at riscv64.v(644): truncated unsized constant literal with size 32 to size 1 with no loss of information
 Warning (10230): Verilog HDL assignment warning at riscv64.v(646): truncated value with size 32 to match size of target (4)
-Warning (10240): Verilog HDL Always Construct warning at riscv64.v(621): inferring latch(es) for variable "tlb_flush", which holds its previous value in one or more paths through the always construct
 Info (10662): Verilog HDL Assignment information at riscv64.v(672): truncated unsized constant literal with size 32 to size 16 with no loss of information
 Info (10662): Verilog HDL Assignment information at riscv64.v(724): truncated unsized constant literal with size 32 to size 2 with no loss of information
 Info (10662): Verilog HDL Assignment information at riscv64.v(725): truncated unsized constant literal with size 32 to size 2 with no loss of information
@@ -618,50 +616,13 @@ Info (10662): Verilog HDL Assignment information at riscv64.v(1105): truncated u
 Warning (10040): Verilog HDL or VHDL arithmetic warning at riscv64.v(1106): loss of carry in addition or borrow in subtraction
 Critical Warning (10237): Verilog HDL warning at riscv64.v(1114): can't infer register for assignment in edge-triggered always construct because the clock isn't obvious. Generated combinational logic instead
 Critical Warning (10237): Verilog HDL warning at riscv64.v(1115): can't infer register for assignment in edge-triggered always construct because the clock isn't obvious. Generated combinational logic instead
-Info (10041): Inferred latch for "tlb_flush" at riscv64.v(621)
-Error (10818): Can't infer register for "tlb_d_vld[0]" at riscv64.v(634) because it does not hold its value outside the clock edge File: /usr/local/projects/steps_cpu/cpu_on_board/riscv64.v Line: 634
-Info (10041): Inferred latch for "tlb_d_vld[0]" at riscv64.v(621)
-Error (10818): Can't infer register for "tlb_d_vld[1]" at riscv64.v(634) because it does not hold its value outside the clock edge File: /usr/local/projects/steps_cpu/cpu_on_board/riscv64.v Line: 634
-Info (10041): Inferred latch for "tlb_d_vld[1]" at riscv64.v(621)
-Error (10818): Can't infer register for "tlb_d_vld[2]" at riscv64.v(634) because it does not hold its value outside the clock edge File: /usr/local/projects/steps_cpu/cpu_on_board/riscv64.v Line: 634
-Info (10041): Inferred latch for "tlb_d_vld[2]" at riscv64.v(621)
-Error (10818): Can't infer register for "tlb_d_vld[3]" at riscv64.v(634) because it does not hold its value outside the clock edge File: /usr/local/projects/steps_cpu/cpu_on_board/riscv64.v Line: 634
-Info (10041): Inferred latch for "tlb_d_vld[3]" at riscv64.v(621)
-Error (10818): Can't infer register for "tlb_d_vld[4]" at riscv64.v(634) because it does not hold its value outside the clock edge File: /usr/local/projects/steps_cpu/cpu_on_board/riscv64.v Line: 634
-Info (10041): Inferred latch for "tlb_d_vld[4]" at riscv64.v(621)
-Error (10818): Can't infer register for "tlb_d_vld[5]" at riscv64.v(634) because it does not hold its value outside the clock edge File: /usr/local/projects/steps_cpu/cpu_on_board/riscv64.v Line: 634
-Info (10041): Inferred latch for "tlb_d_vld[5]" at riscv64.v(621)
-Error (10818): Can't infer register for "tlb_d_vld[6]" at riscv64.v(634) because it does not hold its value outside the clock edge File: /usr/local/projects/steps_cpu/cpu_on_board/riscv64.v Line: 634
-Info (10041): Inferred latch for "tlb_d_vld[6]" at riscv64.v(621)
-Error (10818): Can't infer register for "tlb_d_vld[7]" at riscv64.v(634) because it does not hold its value outside the clock edge File: /usr/local/projects/steps_cpu/cpu_on_board/riscv64.v Line: 634
-Info (10041): Inferred latch for "tlb_d_vld[7]" at riscv64.v(621)
-Error (10818): Can't infer register for "tlb_d_vld[8]" at riscv64.v(634) because it does not hold its value outside the clock edge File: /usr/local/projects/steps_cpu/cpu_on_board/riscv64.v Line: 634
-Info (10041): Inferred latch for "tlb_d_vld[8]" at riscv64.v(621)
-Error (10818): Can't infer register for "tlb_d_vld[9]" at riscv64.v(634) because it does not hold its value outside the clock edge File: /usr/local/projects/steps_cpu/cpu_on_board/riscv64.v Line: 634
-Info (10041): Inferred latch for "tlb_d_vld[9]" at riscv64.v(621)
-Error (10818): Can't infer register for "tlb_d_vld[10]" at riscv64.v(634) because it does not hold its value outside the clock edge File: /usr/local/projects/steps_cpu/cpu_on_board/riscv64.v Line: 634
-Info (10041): Inferred latch for "tlb_d_vld[10]" at riscv64.v(621)
-Error (10818): Can't infer register for "tlb_d_vld[11]" at riscv64.v(634) because it does not hold its value outside the clock edge File: /usr/local/projects/steps_cpu/cpu_on_board/riscv64.v Line: 634
-Info (10041): Inferred latch for "tlb_d_vld[11]" at riscv64.v(621)
-Error (10818): Can't infer register for "tlb_d_vld[12]" at riscv64.v(634) because it does not hold its value outside the clock edge File: /usr/local/projects/steps_cpu/cpu_on_board/riscv64.v Line: 634
-Info (10041): Inferred latch for "tlb_d_vld[12]" at riscv64.v(621)
-Error (10818): Can't infer register for "tlb_d_vld[13]" at riscv64.v(634) because it does not hold its value outside the clock edge File: /usr/local/projects/steps_cpu/cpu_on_board/riscv64.v Line: 634
-Info (10041): Inferred latch for "tlb_d_vld[13]" at riscv64.v(621)
-Error (10818): Can't infer register for "tlb_d_vld[14]" at riscv64.v(634) because it does not hold its value outside the clock edge File: /usr/local/projects/steps_cpu/cpu_on_board/riscv64.v Line: 634
-Info (10041): Inferred latch for "tlb_d_vld[14]" at riscv64.v(621)
-Error (10818): Can't infer register for "tlb_d_vld[15]" at riscv64.v(634) because it does not hold its value outside the clock edge File: /usr/local/projects/steps_cpu/cpu_on_board/riscv64.v Line: 634
-Info (10041): Inferred latch for "tlb_d_vld[15]" at riscv64.v(621)
-Error (10818): Can't infer register for "tlb_vld[0]" at riscv64.v(634) because it does not hold its value outside the clock edge File: /usr/local/projects/steps_cpu/cpu_on_board/riscv64.v Line: 634
-Info (10041): Inferred latch for "tlb_vld[0]" at riscv64.v(621)
-Error (10818): Can't infer register for "tlb_vld[1]" at riscv64.v(634) because it does not hold its value outside the clock edge File: /usr/local/projects/steps_cpu/cpu_on_board/riscv64.v Line: 634
-Info (10041): Inferred latch for "tlb_vld[1]" at riscv64.v(621)
-Error (10818): Can't infer register for "tlb_vld[2]" at riscv64.v(634) because it does not hold its value outside the clock edge File: /usr/local/projects/steps_cpu/cpu_on_board/riscv64.v Line: 634
-Info (10041): Inferred latch for "tlb_vld[2]" at riscv64.v(621)
+Error (10028): Can't resolve multiple constant drivers for net "tlb_flush" at riscv64.v(750) File: /usr/local/projects/steps_cpu/cpu_on_board/riscv64.v Line: 750
+Error (10029): Constant driver at riscv64.v(633) File: /usr/local/projects/steps_cpu/cpu_on_board/riscv64.v Line: 633
 Error (12152): Can't elaborate user hierarchy "riscv64:cpu" File: /usr/local/projects/steps_cpu/cpu_on_board/cpu_on_board.v Line: 190
-Error: Quartus II 32-bit Analysis & Synthesis was unsuccessful. 21 errors, 120 warnings
+Error: Quartus II 32-bit Analysis & Synthesis was unsuccessful. 3 errors, 119 warnings
     Error: Peak virtual memory: 559 megabytes
-    Error: Processing ended: Fri Apr 24 19:12:48 2026
-    Error: Elapsed time: 00:00:19
-    Error: Total CPU time (on all processors): 00:00:19
+    Error: Processing ended: Fri Apr 24 19:26:26 2026
+    Error: Elapsed time: 00:00:48
+    Error: Total CPU time (on all processors): 00:00:48
 
 
