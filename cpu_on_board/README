@@ -470,3 +470,22 @@ Platform: ZhiCheng 2026 (rv64ima)
 Status: Absolute Sincertiy, Absolute Logic
 
 
+
+riscv64 soc for run linux need list:
+I
+M mul/div
+A
+mmu i
+mmu d
+i_tlb refile
+d_tlb refile
+cache-i
+cache-i refile
+csrs
+sstatus-msstatus mask
+mip/sip/mie/sie mask
+plic
+clint timer/msip
+isr.v
+trap
+tlb-w?

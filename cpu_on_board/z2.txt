@@ -12,6 +12,7 @@ module riscv64(
     output reg        bus_write_enable,
     output reg        bus_read_enable,
     output reg [2:0]  bus_ls_type, // lb lh lw ld lbu lhu lwu // sb sh sw sd sbu shu swu 
+    input wire        debug,
 
     output reg [63:0] mtime,    // map to 0x0200_bff8 
     //inout wire [63:0] mtimecmp, // map to 0x0200_4000 + 8byte*hartid
@@ -101,10 +102,10 @@ wire is_sub = (op == 7'b0110011 || op == 7'b0111011) && ir[30]; // sub/subw
 wire [63:0] alu_op2 = use_imm ? w_imm_i : rs2;
 wire [63:0] alu_op2_inv = is_sub ? ~alu_op2 : alu_op2;
 //wire [63:0] shared_add = $signed(rs1) + $signed(alu_op2_inv) + $signed({63'b0, is_sub});
-//wire [31:0] shared_addw_32 = rs1[31:0] + alu_op2_inv[31:0] + is_sub;
-//wire [63:0] shared_addw = {{32{shared_addw_32[31]}}, shared_addw_32};
 wire [63:0] shared_add = rs1 + alu_op2_inv + is_sub;
-wire [63:0] shared_addw= $signed(rs1[31:0] + alu_op2_inv[31:0] + is_sub);
+wire [31:0] shared_addw_32 = rs1[31:0] + alu_op2_inv[31:0] + is_sub;
+wire [63:0] shared_addw = {{32{shared_addw_32[31]}}, shared_addw_32};
+//wire [63:0] shared_addw= $signed(rs1[31:0] + alu_op2_inv[31:0] + is_sub);
 
 wire [63:0] alu_add  = shared_add; 
 wire [63:0] alu_sub  = shared_add;  
@@ -768,7 +769,7 @@ always @(*) begin
 		re[8] <= (op == 7'b0000011) ? 13 : 15;// save x2 trap type load/store_atom
 		//Csrs[mstatus][MIE] <= Csrs[mstatus][MPIE]; // set back interrupt status
     
-	    end else if (Csrs[mdebug] && !STrap && !did && !load_step && !store_step && !mul_enable && !div_enable) begin
+	    end else if ((Csrs[mdebug] || debug) && !STrap && !did && !load_step && !store_step && !mul_enable && !div_enable) begin
 		in_debug <= 1;
 		pc <= 0; // trap to isr_router
 		bubble <= 1'b1; // bubble
@@ -800,7 +801,7 @@ always @(*) begin
 		// Async Interrupt PLIC full (Platform-Level-Interrupt-Control)  MMIO (hardwire timers uart plic)
 	    //end else if ((meip_interrupt || msip_interrupt || mtip_interrupt || seip_interrupt) && Csrs[mstatus][MIE]==1 && !STrap && !load_step && !store_step) begin //mstatus[3] MIE
 	    //end else if ((meip|| msip|| mtip|| seip || stip) && Csrs[mstatus][MIE]==1 && !STrap && !load_step && !store_step) begin //mstatus[3] MIE
-	    end else if (any_interrupt && !STrap && !load_step && !store_step) begin //mstatus[3] MIE // cpu0_intc
+	    end else if (any_interrupt && !STrap && !load_step && !store_step && !mul_enable && !div_enable) begin //mstatus[3] MIE // cpu0_intc
 		//Csrs[mip][MTIP] <= mtip_interrupt; // MTIP linux will see then jump to its handler
 		//Csrs[mip][MEIP] <= meip_interrupt; // MEIP
 		//Csrs[mip][MSIP] <= seip_interrupt; // MSIP
@@ -1059,6 +1060,7 @@ module cpu_on_board (
     // -- Pin --
     (* chip_pin = "PIN_L1" *)  input wire CLOCK_50, // 50 MHz clock
     (* chip_pin = "PIN_R22" *) input wire KEY0,     // Active-low reset button
+    (* chip_pin = "L2" *) input wire SW9,     // debug
     //(* chip_pin = "PIN_Y21, PIN_Y22, PIN_W21, PIN_W22, PIN_V21, PIN_V22, PIN_U21, PIN_U22" *) output wire [7:0] LEDG, // 8 green LEDs
     //(* chip_pin = "R17" *) output reg LEDR9, // 1 red LEDs breath left most 
     //(* chip_pin = "R20" *) output wire LEDR0, // 
@@ -1223,6 +1225,7 @@ assign DRAM_CKE = 1; // always enable
         //.ir(LEDG),
         //.heartbeat(LEDR9),
 	//.valid_address(valid_address),
+	.debug(SW9),
 
         .bus_address(bus_address),
         .bus_write_data(bus_write_data),
@@ -1481,7 +1484,7 @@ assign DRAM_CKE = 1; // always enable
 		     if (!bus_address[2]) begin mtime_latch <= mtime; bus_read_data <= {32'b0, mtime[31:0]}; end 
 		     else begin bus_read_data <= {32'b0, mtime_latch[63:32]}; end
 		end
-		bus_read_done <= 1
+		bus_read_done <= 1;
 	    end 
             //if (Mtimecmp_selected) begin bus_read_data <= mtimecmp; bus_read_done <= 1; end 
             if (Mtimecmp_selected) begin bus_read_data <= bus_address[2] ? {32'b0, mtimecmp[63:32]} : mtimecmp; bus_read_done <= 1; end  
@@ -1865,6 +1868,34 @@ end
     //assign HEX04 = ~uart_irq;
     //assign HEX05 = ~Plic_priority_selected;
     //assign HEX06 = ~meip_interrupt;
+
+//reg [19:0] debounce_cnt;
+//reg key1 = 1'b1;
+//always @(posedge clock_slow) begin
+//    if (KEY1 == key1) begin
+//	debounce_cnt <= 0;
+//    end else begin
+//	debounce_cnt <= debounce_cnt + 1;
+//	if (debounce_cnt == 20'hFFFFF) begin  // 12.5Mhz 83ms make sure
+//	    key1 <= KEY1;
+//	end
+//    end
+//end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 endmodule
 module clock_slower(
