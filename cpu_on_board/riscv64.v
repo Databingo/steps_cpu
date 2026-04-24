@@ -801,7 +801,7 @@ always @(*) begin
 		// Async Interrupt PLIC full (Platform-Level-Interrupt-Control)  MMIO (hardwire timers uart plic)
 	    //end else if ((meip_interrupt || msip_interrupt || mtip_interrupt || seip_interrupt) && Csrs[mstatus][MIE]==1 && !STrap && !load_step && !store_step) begin //mstatus[3] MIE
 	    //end else if ((meip|| msip|| mtip|| seip || stip) && Csrs[mstatus][MIE]==1 && !STrap && !load_step && !store_step) begin //mstatus[3] MIE
-	    end else if (any_interrupt && !STrap && !load_step && !store_step) begin //mstatus[3] MIE // cpu0_intc
+	    end else if (any_interrupt && !STrap && !load_step && !store_step && !mul_enable && !div_enable) begin //mstatus[3] MIE // cpu0_intc
 		//Csrs[mip][MTIP] <= mtip_interrupt; // MTIP linux will see then jump to its handler
 		//Csrs[mip][MEIP] <= meip_interrupt; // MEIP
 		//Csrs[mip][MSIP] <= seip_interrupt; // MSIP
