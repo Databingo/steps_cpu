@@ -738,7 +738,7 @@ always @(*) begin
                 re[8] <= 12 ;// save in x8 trap type 0 i-tlb trap so record as instruciont page fault for prepare
                 //Csrs[mstatus][MPIE] <= Csrs[mstatus][MIE]; // disable interrupt during shadow mmu walking
                 //Csrs[mstatus][MIE] <= 0; !!
-		reserve_valid <= 0; // clear lr.w/lr.d
+		//reserve_valid <= 0; // clear lr.w/lr.d
 
             // Bubble
             end else if (bubble) begin bubble <= 1'b0; // Flush this cycle & Clear bubble signal for the next cycle
@@ -758,7 +758,7 @@ always @(*) begin
 		    ask_i_data <= {ppc[63:4], 4'b0};// save missed ppc_pre cache_line address for hardware
 		end
 		re[8] <= 1;// save x2 trap type 1 i-cache trap
-		reserve_valid <= 0; // clear lr.w/lr.d
+		//reserve_valid <= 0; // clear lr.w/lr.d
 
             // unalign
 	    end else if (!STrap && !load_step && !store_step && is_unaligned_access) begin  
@@ -781,7 +781,7 @@ always @(*) begin
 		re[9] <= ls_va; //save va to x1
 		re[8] <= (op == 7'b0000011) ? 13 : 15;// save x2 trap type load/store_atom
 		//Csrs[mstatus][MIE] <= Csrs[mstatus][MPIE]; // set back interrupt status
-		reserve_valid <= 0; // clear lr.w/lr.d
+		//reserve_valid <= 0; // clear lr.w/lr.d
     
 	    end else if ((Csrs[mdebug] || debug) && !STrap && !did && !load_step && !store_step && !mul_enable && !div_enable) begin
 		in_debug <= 1;
@@ -795,7 +795,7 @@ always @(*) begin
                 //Csrs[mimpid] <=  pda;
                 //Csrs[marchid] <= ppc;
                 Csrs[mvendorid] <= ir;
-		reserve_valid <= 0; // clear lr.w/lr.d
+		//reserve_valid <= 0; // clear lr.w/lr.d
 
             // Back from STrap
 	    end else if (STrap && ir == 32'b00110000001000000000000001110011) begin // for the fauld fill: sd ppa, Tlb_fault
