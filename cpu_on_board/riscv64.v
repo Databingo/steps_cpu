@@ -429,9 +429,6 @@ reg [63:0] reserve_addr;
 reg        reserve_valid;
 
 reg [3:0] tlb_vld;
-//(* ram_style = "logic" *) reg [15:0] tlb_i_epoch [0:3]; // 4
-//(* ram_style = "logic" *) reg [31:0] tlb_d_epoch [0:3]; // 4
-//(* ram_style = "logic" *) reg [15:0] tlb_d_epoch [0:7]; // 8
 reg [15:0] tlb_d_vld;
 reg tlb_flush = 0;
 //// -- TLB -- 8 pages
@@ -450,29 +447,12 @@ reg tlb_i_hit;
 
 //wire [7:0] tlb_i_match; // 8page
 wire [3:0] tlb_i_match; // 4page
-//assign tlb_i_match[0] = (tlb_vpn[0] == pc_vpn) && (tlb_i_epoch[0] == tlb_epoch);
-//assign tlb_i_match[1] = (tlb_vpn[1] == pc_vpn) && (tlb_i_epoch[1] == tlb_epoch);
-//assign tlb_i_match[2] = (tlb_vpn[2] == pc_vpn) && (tlb_i_epoch[2] == tlb_epoch);
-//assign tlb_i_match[3] = (tlb_vpn[3] == pc_vpn) && (tlb_i_epoch[3] == tlb_epoch);
 
 assign tlb_i_match[0] = tlb_vld[0] && (tlb_vpn[0] == pc_vpn);
 assign tlb_i_match[1] = tlb_vld[1] && (tlb_vpn[1] == pc_vpn);
 assign tlb_i_match[2] = tlb_vld[2] && (tlb_vpn[2] == pc_vpn);
 assign tlb_i_match[3] = tlb_vld[3] && (tlb_vpn[3] == pc_vpn);
 
-
-//assign tlb_i_match[0] = tlb_vld[0] && (tlb_vpn[0] == pc_vpn);
-//assign tlb_i_match[1] = tlb_vld[1] && (tlb_vpn[1] == pc_vpn);
-//assign tlb_i_match[2] = tlb_vld[2] && (tlb_vpn[2] == pc_vpn);
-//assign tlb_i_match[3] = tlb_vld[3] && (tlb_vpn[3] == pc_vpn);
-  
-  
-  
-//assign tlb_i_match[4] = tlb_vld[4] && (tlb_vpn[4] == pc_vpn);
-//assign tlb_i_match[5] = tlb_vld[5] && (tlb_vpn[5] == pc_vpn);
-//assign tlb_i_match[6] = tlb_vld[6] && (tlb_vpn[6] == pc_vpn);
-//assign tlb_i_match[7] = tlb_vld[7] && (tlb_vpn[7] == pc_vpn);
-// pc_ppn hit
 always @(*) begin
     tlb_i_hit = |tlb_i_match;
     pc_ppn =   ({44{tlb_i_match[0]}} & tlb_ppn[0]) |
@@ -485,9 +465,6 @@ always @(*) begin
 	       //({44{tlb_i_match[6]}} & tlb_ppn[6]) |
 	       //({44{tlb_i_match[7]}} & tlb_ppn[7]) ; end
    
-//// -- TLB d -- 4 pages
-//(* ram_style = "logic" *) reg [26:0] tlb_d_vpn [0:3]; // vpn number VA[38:12]  Sv39
-//(* ram_style = "logic" *) reg [43:0] tlb_d_ppn [0:3]; // ppn number PA[55:12]
 //// -- TLB d -- 8 pages
 //(* ram_style = "logic" *) reg [26:0] tlb_d_vpn [0:7]; // vpn number VA[38:12]  Sv39
 //(* ram_style = "logic" *) reg [43:0] tlb_d_ppn [0:7]; // ppn number PA[55:12]
@@ -505,17 +482,6 @@ always @(*) begin
 
 	//wire [7:0] tlb_d_match;
 	wire [15:0] tlb_d_match;
-	//wire [3:0] tlb_d_match;
-	//wire [1:0] tlb_d_match;
-	//assign tlb_d_match[0] = (tlb_d_vpn[0] == ls_va[38:12]) && (tlb_d_epoch[0] == tlb_epoch);
-	//assign tlb_d_match[1] = (tlb_d_vpn[1] == ls_va[38:12]) && (tlb_d_epoch[1] == tlb_epoch);
-	//assign tlb_d_match[2] = (tlb_d_vpn[2] == ls_va[38:12]) && (tlb_d_epoch[2] == tlb_epoch);
-	//assign tlb_d_match[3] = (tlb_d_vpn[3] == ls_va[38:12]) && (tlb_d_epoch[3] == tlb_epoch);
-	//assign tlb_d_match[4] = (tlb_d_vpn[4] == ls_va[38:12]) && (tlb_d_epoch[4] == tlb_epoch);
-	//assign tlb_d_match[5] = (tlb_d_vpn[5] == ls_va[38:12]) && (tlb_d_epoch[5] == tlb_epoch);
-	//assign tlb_d_match[6] = (tlb_d_vpn[6] == ls_va[38:12]) && (tlb_d_epoch[6] == tlb_epoch);
-	//assign tlb_d_match[7] = (tlb_d_vpn[7] == ls_va[38:12]) && (tlb_d_epoch[7] == tlb_epoch);
-
 	assign tlb_d_match[0] = tlb_d_vld[0] && (tlb_d_vpn[0] == ls_va[38:12]);
 	assign tlb_d_match[1] = tlb_d_vld[1] && (tlb_d_vpn[1] == ls_va[38:12]);
 	assign tlb_d_match[2] = tlb_d_vld[2] && (tlb_d_vpn[2] == ls_va[38:12]);
@@ -563,14 +529,9 @@ always @(*) begin
 		// TLB Refill
 		//reg [2:0] tlb_ptr = 0; // 8 entries TLB
 		reg [1:0] tlb_ptr = 0; // 4 entries i TLB
-		//reg       tlb_d_ptr = 0; // 2 entries d TLB
-		//reg [1:0] tlb_d_ptr = 0; // 4 entries d TLB
 		//reg [2:0] tlb_d_ptr = 0; // 8 entries d TLB
 		reg [3:0] tlb_d_ptr = 0; // 16 entries d TLB
-		//reg tlb_flush_pre = 0;
-		//reg tlb_flush;
 		always @(posedge clk or negedge reset) begin
-		    //tlb_flush_pre <= tlb_flush;
 		    if (!reset) begin // RESET
 			tlb_ptr <= 0; // hit->trap(save va to x9)->refill assembly(fetch pa to x9)-> sd x9, `Tlb -> here to refill tlb
 			tlb_d_ptr <= 0;
@@ -602,7 +563,6 @@ always @(*) begin
 	    (* ram_style = "block" *) reg [63:0] Cache_L_Low [0:511]; // 4KB
 	    (* ram_style = "block" *) reg [63:0] Cache_L_High [0:511]; // 4KB
 	    //(* ram_style = "block" *) reg [50:0] Cache_T [0:511];  // ~4KB (addr: 51(tag) + 9(index) + 4(offset))
-	    //reg [511:0] cache_valid_bits = 0;
 	    //(* ram_style = "block" *) reg [58:0] Cache_T [0:511];  // 8-bit epoch + 51-bit tag
 	    (* ram_style = "block" *) reg [66:0] Cache_T [0:511];  // 16-bit epoch + 51-bit tag
 	    //reg [7:0] cache_epoch = 1;
@@ -643,7 +603,6 @@ always @(*) begin
 
 	wire csr_writable = (w_csr_id != misa) && (w_csr_id !=  mvendorid) && (w_csr_id != marchid) && (w_csr_id != mimpid) && (w_csr_id !=  mhartid) && (w_csr_id != clint_time);
 
-
 	// EXE Instruction 
 	always @(posedge clk or negedge reset) begin
 	    if (!reset) begin 
@@ -666,8 +625,6 @@ always @(*) begin
 		Csrs[mideleg] <= 64'h0222; // delegate to S-mode 0000001000100010 see VII 3.1.15 mcasue interrupt 1/5/9 SSIP(supervisor software interrupt) STIP(time) SEIP(external)
 		// Initialize Machine Info for OpenSBI
 		//Csrs[misa] <= 64'h8000000000141101; //RV64IMASU extensions(63:62=2 64bits | 1<<0 Atomic| 1<<8 Integer| 1<<12 Multiply| 1<<18 Supervisor| 1 <<20 User) so: 64'h8000000000141101; RV64IMASU
-		//Csrs[mhartid] <= 64'd0; // single Core 0
-		// mvendorid, marchid, mimpid remain 0
 		mmu_pc <= 0;
 		in_debug <= 0;
 		reserve_addr <= 0;
@@ -686,12 +643,8 @@ always @(*) begin
 		trap_cause = 0;
 		trap_val = 0;
 		trap_epc = 0;
-
                 tlb_flush <= 0;
 
-		//if (bus_read_done && bus_write_done && !load_step && !store_step) debug <= 1;
-		//if (!STrap && !bubble && !load_step && !store_step && did) begin did <= 0;
-		//if (!STrap && !bubble && bus_read_done && bus_write_done && did)  begin did <= 0;
 		if (!STrap && !bubble && did)  begin did <= 0; end
 		// -- UPPER is default change for EXE stage --- but (1.Could be overwrite 2.Take effect next cycle) 
                 // meip/seip is triggered by Plic_pending, mtip is triggered by inner Timer, stip is set by mtip trap handler, msip set by opensbi csr, ssip set by software csr
@@ -711,9 +664,6 @@ always @(*) begin
                 for (i=1;i<11;i=i+1) begin sre[i]<= re[i]; end // save re
                 re[9] <= pc;// - 4; // save this vpc to x1 //!!!! We also need to refill pc - 4' ppc for re-executeing pc-4, with hit(if satp in for very next sfence.vma) 
                 re[8] <= 12 ;// save in x8 trap type 0 i-tlb trap so record as instruciont page fault for prepare
-                //Csrs[mstatus][MPIE] <= Csrs[mstatus][MIE]; // disable interrupt during shadow mmu walking
-                //Csrs[mstatus][MIE] <= 0; !!
-		//reserve_valid <= 0; // clear lr.w/lr.d
 
             // Bubble
             end else if (bubble) begin bubble <= 1'b0; // Flush this cycle & Clear bubble signal for the next cycle
@@ -733,7 +683,6 @@ always @(*) begin
 		    ask_i_data <= {ppc[63:4], 4'b0};// save missed ppc_pre cache_line address for hardware
 		end
 		re[8] <= 1;// save x2 trap type 1 i-cache trap
-		//reserve_valid <= 0; // clear lr.w/lr.d
 
             // unalign
 	    end else if (!STrap && !load_step && !store_step && is_unaligned_access) begin  
@@ -754,8 +703,6 @@ always @(*) begin
 		for (i=1;i<11;i=i+1) begin sre[i]<= re[i]; end // save re
 		re[9] <= ls_va; //save va to x1
 		re[8] <= (op == 7'b0000011) ? 13 : 15;// save x2 trap type load/store_atom
-		//Csrs[mstatus][MIE] <= Csrs[mstatus][MPIE]; // set back interrupt status
-		//reserve_valid <= 0; // clear lr.w/lr.d
     
 	    end else if ((Csrs[mdebug] || debug) && !STrap && !did && !load_step && !store_step && !mul_enable && !div_enable) begin
 		in_debug <= 1;
@@ -769,7 +716,6 @@ always @(*) begin
                 //Csrs[mimpid] <=  pda;
                 //Csrs[marchid] <= ppc;
                 Csrs[mvendorid] <= ir;
-		//reserve_valid <= 0; // clear lr.w/lr.d
 
             // Back from STrap
 	    end else if (STrap && ir == 32'b00110000001000000000000001110011) begin // for the fauld fill: sd ppa, Tlb_fault
@@ -789,8 +735,6 @@ always @(*) begin
 		end
 
 	    // Async Interrupt PLIC full (Platform-Level-Interrupt-Control)  MMIO (hardwire timers uart plic)
-	    //end else if ((meip_interrupt || msip_interrupt || mtip_interrupt || seip_interrupt) && Csrs[mstatus][MIE]==1 && !STrap && !load_step && !store_step) begin //mstatus[3] MIE
-	    //end else if ((meip|| msip|| mtip|| seip || stip) && Csrs[mstatus][MIE]==1 && !STrap && !load_step && !store_step) begin //mstatus[3] MIE
 	    end else if (any_interrupt && !STrap && !load_step && !store_step && !mul_enable && !div_enable) begin //mstatus[3] MIE // cpu0_intc
 		reserve_valid <= 0; // Interrupt clear lr.w/lr.d
 		do_trap = 1; trap_is_interrupt =1; trap_val = 0; trap_epc = pc_4;
@@ -922,7 +866,6 @@ always @(*) begin
 		    32'b00010000010100000000000001110011: begin end // Wfi
 		    32'b?????????????????_000_?????_0001111: begin end // Fence
 		    32'b?????????????????_001_?????_0001111: begin cache_epoch <= cache_epoch + 1; bubble <= 1; pc <= pc; end // Fence.i 
-		    //32'b0001001??????????_000_?????_1110011: begin tlb_epoch <= tlb_epoch + 1; bubble <=1; pc <= pc; end // Sfence.vma (supervisor fence for virtual memory address) have to bubble the fetch next ir from old tlb, redo
 		    32'b0001001??????????_000_?????_1110011: begin tlb_flush <= 1; bubble <=1; pc <= pc; end // Sfence.vma (supervisor fence for virtual memory address) have to bubble the fetch next ir from old tlb, redo
 		    // Atomic after TLB // -- ATOMIC instructions (A-extension) opcode: 0101111
 		    32'b00010_??_?????_?????_01?_?????_0101111: begin  // lr Lr._mmu 3 cycles lr.w010 lr.d011
