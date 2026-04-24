@@ -630,7 +630,7 @@ always @(*) begin
 			tlb_vld <= 4'b0;
 		        //for (i=0;i<8;i=i+1) begin tlb_d_epoch[i]<= 16'd0; end 
 			tlb_d_vld <= 16'b0;
-		    end else if (tlb_flush) begin tlb_vld <= 4'b0; tlb_d_vld <= 16'b0; tlb_flush <= 0;  // FLUSH
+		    end else if (tlb_flush) begin tlb_vld <= 4'b0; tlb_d_vld <= 16'b0; // FLUSH
 		    end else if (STrap && bus_write_enable && bus_address == `Tlb) begin // for the last fill: sd ppa, Tlb  // REFILL
 			if (re[8] == 12) begin
 			tlb_vpn[tlb_ptr] <= re[9][38:12]; // VA from x1 saved by trapp mmu_pc/mmu_da
@@ -745,6 +745,7 @@ always @(*) begin
 		reserve_valid <= 0;
 		//tlb_epoch <= 16'd1;
 		cache_epoch <= 16'd1;
+		tlb_flush <= 0;
 
 	    end else begin
 		pc <= pc + 4; // Default PC+4    (1.Could be overwrite 2.Take effect next cycle) 
@@ -756,6 +757,8 @@ always @(*) begin
 		trap_cause = 0;
 		trap_val = 0;
 		trap_epc = 0;
+
+                tlb_flush <= 0;
 
 		//if (bus_read_done && bus_write_done && !load_step && !store_step) debug <= 1;
 		//if (!STrap && !bubble && !load_step && !store_step && did) begin did <= 0;
