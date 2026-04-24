@@ -811,6 +811,7 @@ always @(*) begin
 		    trap_cause = re[8];
 		    trap_val = re[9];
 		    trap_epc = saved_user_pc;
+		    reserve_valid <= 0; // clear lr.w/lr.d  Real Trap has to clear lock
 		end
 
 		// Async Interrupt PLIC full (Platform-Level-Interrupt-Control)  MMIO (hardwire timers uart plic)

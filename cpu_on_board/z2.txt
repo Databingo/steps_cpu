@@ -460,9 +460,10 @@ reg [1:0] store_step;
 reg [63:0] reserve_addr;
 reg        reserve_valid;
 
-reg [31:0] tlb_epoch = 1;
-(* ram_style = "logic" *) reg [31:0] tlb_i_epoch [0:3]; // 4
-(* ram_style = "logic" *) reg [31:0] tlb_d_epoch [0:3]; // 4
+reg [15:0] tlb_epoch = 1;
+(* ram_style = "logic" *) reg [15:0] tlb_i_epoch [0:3]; // 4
+//(* ram_style = "logic" *) reg [31:0] tlb_d_epoch [0:3]; // 4
+(* ram_style = "logic" *) reg [15:0] tlb_d_epoch [0:7]; // 8
 //// -- TLB -- 8 pages
 //(* ram_style = "logic" *) reg [26:0] tlb_vpn [0:7]; // vpn number VA[38:12]  Sv39
 //(* ram_style = "logic" *) reg [43:0] tlb_ppn [0:7]; // ppn number PA[55:12]
@@ -512,9 +513,12 @@ always @(*) begin
 //(* ram_style = "logic" *) reg [26:0] tlb_d_vpn [0:1]; // vpn number VA[38:12]  Sv39
 //(* ram_style = "logic" *) reg [43:0] tlb_d_ppn [0:1]; // ppn number PA[55:12]
 //(* ram_style = "logic" *) reg tlb_d_vld [0:1]; // only 2 entries
-// -- TLB d -- 4 pages
-(* ram_style = "logic" *) reg [26:0] tlb_d_vpn [0:3]; // vpn number VA[38:12]  Sv39
-(* ram_style = "logic" *) reg [43:0] tlb_d_ppn [0:3]; // ppn number PA[55:12]
+//// -- TLB d -- 4 pages
+//(* ram_style = "logic" *) reg [26:0] tlb_d_vpn [0:3]; // vpn number VA[38:12]  Sv39
+//(* ram_style = "logic" *) reg [43:0] tlb_d_ppn [0:3]; // ppn number PA[55:12]
+// -- TLB d -- 8 pages
+(* ram_style = "logic" *) reg [26:0] tlb_d_vpn [0:7]; // vpn number VA[38:12]  Sv39
+(* ram_style = "logic" *) reg [43:0] tlb_d_ppn [0:7]; // ppn number PA[55:12]
 //(* ram_style = "logic" *) reg tlb_d_vld [0:3]; // only 4 entries
    
 	// TLB-D tlb d hit
@@ -524,13 +528,17 @@ always @(*) begin
 	reg [43:0] data_ppn;
 	reg tlb_d_hit;
 
-	//wire [7:0] tlb_d_match;
-	wire [3:0] tlb_d_match;
+	wire [7:0] tlb_d_match;
+	//wire [3:0] tlb_d_match;
 	//wire [1:0] tlb_d_match;
 	assign tlb_d_match[0] = (tlb_d_vpn[0] == ls_va[38:12]) && (tlb_d_epoch[0] == tlb_epoch);
 	assign tlb_d_match[1] = (tlb_d_vpn[1] == ls_va[38:12]) && (tlb_d_epoch[1] == tlb_epoch);
 	assign tlb_d_match[2] = (tlb_d_vpn[2] == ls_va[38:12]) && (tlb_d_epoch[2] == tlb_epoch);
 	assign tlb_d_match[3] = (tlb_d_vpn[3] == ls_va[38:12]) && (tlb_d_epoch[3] == tlb_epoch);
+	assign tlb_d_match[4] = (tlb_d_vpn[4] == ls_va[38:12]) && (tlb_d_epoch[4] == tlb_epoch);
+	assign tlb_d_match[5] = (tlb_d_vpn[5] == ls_va[38:12]) && (tlb_d_epoch[5] == tlb_epoch);
+	assign tlb_d_match[6] = (tlb_d_vpn[6] == ls_va[38:12]) && (tlb_d_epoch[6] == tlb_epoch);
+	assign tlb_d_match[7] = (tlb_d_vpn[7] == ls_va[38:12]) && (tlb_d_epoch[7] == tlb_epoch);
    
 	//assign tlb_d_match[0] = tlb_d_vld[0] && (tlb_d_vpn[0] == ls_va[38:12]);
 	//assign tlb_d_match[1] = tlb_d_vld[1] && (tlb_d_vpn[1] == ls_va[38:12]);
@@ -547,12 +555,11 @@ always @(*) begin
 	    data_ppn = ({44{tlb_d_match[0]}} & tlb_d_ppn[0]) |
 		({44{tlb_d_match[1]}} & tlb_d_ppn[1]) | //; end
 		({44{tlb_d_match[2]}} & tlb_d_ppn[2]) |
-		({44{tlb_d_match[3]}} & tlb_d_ppn[3]) ; end
-		//({44{tlb_d_match[3]}} & tlb_ppn[3]) |
-		//({44{tlb_d_match[4]}} & tlb_ppn[4]) |
-		//({44{tlb_d_match[5]}} & tlb_ppn[5]) |
-		//({44{tlb_d_match[6]}} & tlb_ppn[6]) |
-		//({44{tlb_d_match[7]}} & tlb_ppn[7]) ; end
+		({44{tlb_d_match[3]}} & tlb_d_ppn[3]) | // ; end
+		({44{tlb_d_match[4]}} & tlb_d_ppn[4]) |
+		({44{tlb_d_match[5]}} & tlb_d_ppn[5]) |
+		({44{tlb_d_match[6]}} & tlb_d_ppn[6]) |
+		({44{tlb_d_match[7]}} & tlb_d_ppn[7]) ; end
 		// concat physical address
 		wire need_trans = satp_mmu && !STrap && (current_privilege_mode != M_mode);
 		assign ppc = need_trans ? {8'h0, pc_ppn, pc[11:0]} : pc;
@@ -566,7 +573,8 @@ always @(*) begin
 		//reg [2:0] tlb_ptr = 0; // 8 entries TLB
 		reg [1:0] tlb_ptr = 0; // 4 entries i TLB
 		//reg       tlb_d_ptr = 0; // 2 entries d TLB
-		reg [1:0] tlb_d_ptr = 0; // 4 entries d TLB
+		//reg [1:0] tlb_d_ptr = 0; // 4 entries d TLB
+		reg [2:0] tlb_d_ptr = 0; // 8 entries d TLB
 		//reg tlb_flush_pre = 0;
 		//reg tlb_flush;
 		always @(posedge clk or negedge reset) begin
@@ -576,7 +584,9 @@ always @(*) begin
 			//tlb_vld[0] <= 0; tlb_vld[1] <= 0; tlb_vld[2] <= 0; tlb_vld[3] <= 0; 
 			tlb_d_ptr <= 0;
 			//tlb_d_vld[0] <= 0; tlb_d_vld[1] <= 0; tlb_d_vld[2] <= 0; tlb_d_vld[3] <= 0;  
-		        for (i=0;i<4;i=i+1) begin tlb_i_epoch[i]<= 32'd0; tlb_d_epoch[i]<= 32'd0; end 
+		        //for (i=0;i<4;i=i+1) begin tlb_i_epoch[i]<= 32'd0; tlb_d_epoch[i]<= 32'd0; end 
+		        for (i=0;i<4;i=i+1) begin tlb_i_epoch[i]<= 16'd0; end 
+		        for (i=0;i<8;i=i+1) begin tlb_d_epoch[i]<= 16'd0; end 
 		    end else if (STrap && bus_write_enable && bus_address == `Tlb) begin // for the last fill: sd ppa, Tlb
 			if (re[8] == 12) begin
 			tlb_vpn[tlb_ptr] <= re[9][38:12]; // VA from x1 saved by trapp mmu_pc/mmu_da
@@ -689,7 +699,7 @@ always @(*) begin
 		in_debug <= 0;
 		reserve_addr <= 0;
 		reserve_valid <= 0;
-		tlb_epoch <= 32'd1;
+		tlb_epoch <= 16'd1;
 		cache_epoch <= 16'd1;
 
 	    end else begin
@@ -728,6 +738,7 @@ always @(*) begin
                 re[8] <= 12 ;// save in x8 trap type 0 i-tlb trap so record as instruciont page fault for prepare
                 //Csrs[mstatus][MPIE] <= Csrs[mstatus][MIE]; // disable interrupt during shadow mmu walking
                 //Csrs[mstatus][MIE] <= 0; !!
+		//reserve_valid <= 0; // clear lr.w/lr.d
 
             // Bubble
             end else if (bubble) begin bubble <= 1'b0; // Flush this cycle & Clear bubble signal for the next cycle
@@ -747,6 +758,7 @@ always @(*) begin
 		    ask_i_data <= {ppc[63:4], 4'b0};// save missed ppc_pre cache_line address for hardware
 		end
 		re[8] <= 1;// save x2 trap type 1 i-cache trap
+		//reserve_valid <= 0; // clear lr.w/lr.d
 
             // unalign
 	    end else if (!STrap && !load_step && !store_step && is_unaligned_access) begin  
@@ -755,6 +767,7 @@ always @(*) begin
 		trap_val = ls_va; 
 		trap_epc = pc_4;
 		trap_cause = (op == 7'b0000011) ? 4 : 6; // cause 4 Load address misaliged; cause 6 Store/amo address misaligned
+		reserve_valid <= 0; // clear lr.w/lr.d
 
 	    // d-tlb miss STrap load/store/atom
 	    //end else if (need_trans && !tlb_d_hit && (op == 7'b0000011 || op == 7'b0100011 || op == 7'b0101111) ) begin  
@@ -768,6 +781,7 @@ always @(*) begin
 		re[9] <= ls_va; //save va to x1
 		re[8] <= (op == 7'b0000011) ? 13 : 15;// save x2 trap type load/store_atom
 		//Csrs[mstatus][MIE] <= Csrs[mstatus][MPIE]; // set back interrupt status
+		//reserve_valid <= 0; // clear lr.w/lr.d
     
 	    end else if ((Csrs[mdebug] || debug) && !STrap && !did && !load_step && !store_step && !mul_enable && !div_enable) begin
 		in_debug <= 1;
@@ -781,6 +795,7 @@ always @(*) begin
                 //Csrs[mimpid] <=  pda;
                 //Csrs[marchid] <= ppc;
                 Csrs[mvendorid] <= ir;
+		//reserve_valid <= 0; // clear lr.w/lr.d
 
             // Back from STrap
 	    end else if (STrap && ir == 32'b00110000001000000000000001110011) begin // for the fauld fill: sd ppa, Tlb_fault
@@ -836,9 +851,10 @@ always @(*) begin
                     end
                     // Store after TLB
                     32'b???????_?????_?????_???_?????_0100011: begin 
-                        if (store_step == 0) begin bus_address <= pda; bus_write_data <= w_store_data; bus_write_enable <= 1; pc <= pc_4; bubble <= 1; store_step <= 1; bus_ls_type <= w_func3; end
+                        if (store_step == 0) begin bus_address <= pda; bus_write_data <= w_store_data; bus_write_enable <= 1; pc <= pc_4; bubble <= 1; store_step <= 1; bus_ls_type <= w_func3; 
+			if (reserve_valid && reserve_addr == pda) reserve_valid <= 0; end // if lr, break the contract
                         if (store_step == 1 && bus_write_done == 0) begin pc <= pc_4; bubble <= 1; end // bus working
-                        if (store_step == 1 && bus_write_done == 1) begin store_step <= 0; if (bus_address == reserve_addr && reserve_valid) reserve_valid <= 0; end 
+                        if (store_step == 1 && bus_write_done == 1) begin store_step <= 0; end 
                     end   
                     // Math-I
 	            32'b???????_?????_?????_000_?????_0010011: re[w_rd] <= alu_addi;  // Addi
@@ -2351,7 +2367,8 @@ end
 // Because the sys_clk = 50 MHz, so 20ns for each clock cycle
 // Therefore, every 390 clock cycles the SDRAM have to be refreshed, i.e., tREFI=7.8125us
 reg [8:0] ref_cnt;
-parameter RefMax=9'd390;
+//parameter RefMax=9'd390;
+parameter RefMax=9'd97; // fit for 12.5Mhz
 
 always @(posedge sys_clk, negedge rstn) begin
 	if(!rstn)
@@ -2596,15 +2613,17 @@ isr_router:
      # x689 setting
 
      # x1(ra)2(sp)3456,x10(a0) operating
-     li x3, 12 
-     beq x8, x3, mmu_i    # i-tlb-refill Fetch
-
      li x3, 13 
-     beq x8, x3, mmu_d    # d-tlb-refill Load
+    #beq x8, x3, mmu_d    # d-tlb-refill Load
+     beq x8, x3, mmu      # d-tlb-refill Load
 
      li x3, 15 
-    #li x3, 14 
-     beq x8, x3, mmu_d    # d-tlb-refill Store
+    #beq x8, x3, mmu_d    # d-tlb-refill Store
+     beq x8, x3, mmu      # d-tlb-refill Store
+
+     li x3, 12 
+    #beq x8, x3, mmu_i    # i-tlb-refill Fetch
+     beq x8, x3, mmu      # i-tlb-refill Fetch
 
      li x3, 1 
      beq x8, x3, i_cache_refill
@@ -2616,6 +2635,7 @@ isr_router:
      beq x8, x3, debug
 
 i_cache_refill:
+     andi x9, x9, -16 # 16 bytes align
      lui x4, 0x20001 # base Cache address
      ld x3, 0(x9)    # get data
      sd x3, 0(x4)    # refill line low 64
@@ -3023,6 +3043,8 @@ print7: # a0, 7 char left one for null
         #address-cells = <0x01>;
         #size-cells = <0x00>;
         timebase-frequency = <12500000>;
+        //timebase-frequency = <125000>; // mimic 0.124MHz
+        //timebase-frequency = <1250000>; // mimic 1.24MHz
 
         cpu@0 {
             phandle = <0x01>;
