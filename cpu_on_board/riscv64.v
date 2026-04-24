@@ -460,10 +460,13 @@ reg [1:0] store_step;
 reg [63:0] reserve_addr;
 reg        reserve_valid;
 
-reg [15:0] tlb_epoch = 1;
-(* ram_style = "logic" *) reg [15:0] tlb_i_epoch [0:3]; // 4
+//reg [15:0] tlb_epoch = 1;
+reg [3:0] tlb_vld;
+//(* ram_style = "logic" *) reg [15:0] tlb_i_epoch [0:3]; // 4
 //(* ram_style = "logic" *) reg [31:0] tlb_d_epoch [0:3]; // 4
-(* ram_style = "logic" *) reg [15:0] tlb_d_epoch [0:7]; // 8
+//(* ram_style = "logic" *) reg [15:0] tlb_d_epoch [0:7]; // 8
+reg [15:0] tlb_d_vld;
+reg tlb_flush = 0;
 //// -- TLB -- 8 pages
 //(* ram_style = "logic" *) reg [26:0] tlb_vpn [0:7]; // vpn number VA[38:12]  Sv39
 //(* ram_style = "logic" *) reg [43:0] tlb_ppn [0:7]; // ppn number PA[55:12]
@@ -480,10 +483,17 @@ reg tlb_i_hit;
 
 //wire [7:0] tlb_i_match; // 8page
 wire [3:0] tlb_i_match; // 4page
-assign tlb_i_match[0] = (tlb_vpn[0] == pc_vpn) && (tlb_i_epoch[0] == tlb_epoch);
-assign tlb_i_match[1] = (tlb_vpn[1] == pc_vpn) && (tlb_i_epoch[1] == tlb_epoch);
-assign tlb_i_match[2] = (tlb_vpn[2] == pc_vpn) && (tlb_i_epoch[2] == tlb_epoch);
-assign tlb_i_match[3] = (tlb_vpn[3] == pc_vpn) && (tlb_i_epoch[3] == tlb_epoch);
+//assign tlb_i_match[0] = (tlb_vpn[0] == pc_vpn) && (tlb_i_epoch[0] == tlb_epoch);
+//assign tlb_i_match[1] = (tlb_vpn[1] == pc_vpn) && (tlb_i_epoch[1] == tlb_epoch);
+//assign tlb_i_match[2] = (tlb_vpn[2] == pc_vpn) && (tlb_i_epoch[2] == tlb_epoch);
+//assign tlb_i_match[3] = (tlb_vpn[3] == pc_vpn) && (tlb_i_epoch[3] == tlb_epoch);
+
+assign tlb_i_match[0] = tlb_vld[0] && (tlb_vpn[0] == pc_vpn);
+assign tlb_i_match[1] = tlb_vld[1] && (tlb_vpn[1] == pc_vpn);
+assign tlb_i_match[2] = tlb_vld[2] && (tlb_vpn[2] == pc_vpn);
+assign tlb_i_match[3] = tlb_vld[3] && (tlb_vpn[3] == pc_vpn);
+
+
 //assign tlb_i_match[0] = tlb_vld[0] && (tlb_vpn[0] == pc_vpn);
 //assign tlb_i_match[1] = tlb_vld[1] && (tlb_vpn[1] == pc_vpn);
 //assign tlb_i_match[2] = tlb_vld[2] && (tlb_vpn[2] == pc_vpn);
@@ -528,17 +538,36 @@ always @(*) begin
 	reg [43:0] data_ppn;
 	reg tlb_d_hit;
 
-	wire [7:0] tlb_d_match;
+	//wire [7:0] tlb_d_match;
+	wire [15:0] tlb_d_match;
 	//wire [3:0] tlb_d_match;
 	//wire [1:0] tlb_d_match;
-	assign tlb_d_match[0] = (tlb_d_vpn[0] == ls_va[38:12]) && (tlb_d_epoch[0] == tlb_epoch);
-	assign tlb_d_match[1] = (tlb_d_vpn[1] == ls_va[38:12]) && (tlb_d_epoch[1] == tlb_epoch);
-	assign tlb_d_match[2] = (tlb_d_vpn[2] == ls_va[38:12]) && (tlb_d_epoch[2] == tlb_epoch);
-	assign tlb_d_match[3] = (tlb_d_vpn[3] == ls_va[38:12]) && (tlb_d_epoch[3] == tlb_epoch);
-	assign tlb_d_match[4] = (tlb_d_vpn[4] == ls_va[38:12]) && (tlb_d_epoch[4] == tlb_epoch);
-	assign tlb_d_match[5] = (tlb_d_vpn[5] == ls_va[38:12]) && (tlb_d_epoch[5] == tlb_epoch);
-	assign tlb_d_match[6] = (tlb_d_vpn[6] == ls_va[38:12]) && (tlb_d_epoch[6] == tlb_epoch);
-	assign tlb_d_match[7] = (tlb_d_vpn[7] == ls_va[38:12]) && (tlb_d_epoch[7] == tlb_epoch);
+	//assign tlb_d_match[0] = (tlb_d_vpn[0] == ls_va[38:12]) && (tlb_d_epoch[0] == tlb_epoch);
+	//assign tlb_d_match[1] = (tlb_d_vpn[1] == ls_va[38:12]) && (tlb_d_epoch[1] == tlb_epoch);
+	//assign tlb_d_match[2] = (tlb_d_vpn[2] == ls_va[38:12]) && (tlb_d_epoch[2] == tlb_epoch);
+	//assign tlb_d_match[3] = (tlb_d_vpn[3] == ls_va[38:12]) && (tlb_d_epoch[3] == tlb_epoch);
+	//assign tlb_d_match[4] = (tlb_d_vpn[4] == ls_va[38:12]) && (tlb_d_epoch[4] == tlb_epoch);
+	//assign tlb_d_match[5] = (tlb_d_vpn[5] == ls_va[38:12]) && (tlb_d_epoch[5] == tlb_epoch);
+	//assign tlb_d_match[6] = (tlb_d_vpn[6] == ls_va[38:12]) && (tlb_d_epoch[6] == tlb_epoch);
+	//assign tlb_d_match[7] = (tlb_d_vpn[7] == ls_va[38:12]) && (tlb_d_epoch[7] == tlb_epoch);
+
+	assign tlb_d_match[0] = tlb_d_vld[0] && (tlb_d_vpn[0] == ls_va[38:12]);
+	assign tlb_d_match[1] = tlb_d_vld[1] && (tlb_d_vpn[1] == ls_va[38:12]);
+	assign tlb_d_match[2] = tlb_d_vld[2] && (tlb_d_vpn[2] == ls_va[38:12]);
+	assign tlb_d_match[3] = tlb_d_vld[3] && (tlb_d_vpn[3] == ls_va[38:12]);
+	assign tlb_d_match[4] = tlb_d_vld[4] && (tlb_d_vpn[4] == ls_va[38:12]);
+	assign tlb_d_match[5] = tlb_d_vld[5] && (tlb_d_vpn[5] == ls_va[38:12]);
+	assign tlb_d_match[6] = tlb_d_vld[6] && (tlb_d_vpn[6] == ls_va[38:12]);
+	assign tlb_d_match[7] = tlb_d_vld[7] && (tlb_d_vpn[7] == ls_va[38:12]);
+	assign tlb_d_match[8] = tlb_d_vld[8] && (tlb_d_vpn[8] == ls_va[38:12]);
+	assign tlb_d_match[9] = tlb_d_vld[9] && (tlb_d_vpn[9] == ls_va[38:12]);
+	assign tlb_d_match[10] = tlb_d_vld[10] && (tlb_d_vpn[10] == ls_va[38:12]);
+	assign tlb_d_match[11] = tlb_d_vld[11] && (tlb_d_vpn[11] == ls_va[38:12]);
+	assign tlb_d_match[12] = tlb_d_vld[12] && (tlb_d_vpn[12] == ls_va[38:12]);
+	assign tlb_d_match[13] = tlb_d_vld[13] && (tlb_d_vpn[13] == ls_va[38:12]);
+	assign tlb_d_match[14] = tlb_d_vld[14] && (tlb_d_vpn[14] == ls_va[38:12]);
+	assign tlb_d_match[15] = tlb_d_vld[15] && (tlb_d_vpn[15] == ls_va[38:12]);
+
    
 	//assign tlb_d_match[0] = tlb_d_vld[0] && (tlb_d_vpn[0] == ls_va[38:12]);
 	//assign tlb_d_match[1] = tlb_d_vld[1] && (tlb_d_vpn[1] == ls_va[38:12]);
@@ -559,7 +588,15 @@ always @(*) begin
 		({44{tlb_d_match[4]}} & tlb_d_ppn[4]) |
 		({44{tlb_d_match[5]}} & tlb_d_ppn[5]) |
 		({44{tlb_d_match[6]}} & tlb_d_ppn[6]) |
-		({44{tlb_d_match[7]}} & tlb_d_ppn[7]) ; end
+		({44{tlb_d_match[7]}} & tlb_d_ppn[7]) | //; end
+		({44{tlb_d_match[8]}} & tlb_d_ppn[8]) |
+		({44{tlb_d_match[9]}} & tlb_d_ppn[9]) | //; end
+		({44{tlb_d_match[10]}} & tlb_d_ppn[10]) |
+		({44{tlb_d_match[11]}} & tlb_d_ppn[11]) | // ; end
+		({44{tlb_d_match[12]}} & tlb_d_ppn[12]) |
+		({44{tlb_d_match[13]}} & tlb_d_ppn[13]) |
+		({44{tlb_d_match[14]}} & tlb_d_ppn[14]) |
+		({44{tlb_d_match[15]}} & tlb_d_ppn[15]) ; end
 		// concat physical address
 		wire need_trans = satp_mmu && !STrap && (current_privilege_mode != M_mode);
 		assign ppc = need_trans ? {8'h0, pc_ppn, pc[11:0]} : pc;
@@ -574,31 +611,35 @@ always @(*) begin
 		reg [1:0] tlb_ptr = 0; // 4 entries i TLB
 		//reg       tlb_d_ptr = 0; // 2 entries d TLB
 		//reg [1:0] tlb_d_ptr = 0; // 4 entries d TLB
-		reg [2:0] tlb_d_ptr = 0; // 8 entries d TLB
+		//reg [2:0] tlb_d_ptr = 0; // 8 entries d TLB
+		reg [3:0] tlb_d_ptr = 0; // 16 entries d TLB
 		//reg tlb_flush_pre = 0;
 		//reg tlb_flush;
 		always @(posedge clk or negedge reset) begin
 		    //tlb_flush_pre <= tlb_flush;
+		    if (tlb_flush) begin tlb_vld <= 4'b0; tlb_d_vld <= 16'b0; tlb_flush <= 0; end 
 		    if (!reset) begin
 			tlb_ptr <= 0; // hit->trap(save va to x9)->refill assembly(fetch pa to x9)-> sd x9, `Tlb -> here to refill tlb
 			//tlb_vld[0] <= 0; tlb_vld[1] <= 0; tlb_vld[2] <= 0; tlb_vld[3] <= 0; 
 			tlb_d_ptr <= 0;
 			//tlb_d_vld[0] <= 0; tlb_d_vld[1] <= 0; tlb_d_vld[2] <= 0; tlb_d_vld[3] <= 0;  
 		        //for (i=0;i<4;i=i+1) begin tlb_i_epoch[i]<= 32'd0; tlb_d_epoch[i]<= 32'd0; end 
-		        for (i=0;i<4;i=i+1) begin tlb_i_epoch[i]<= 16'd0; end 
-		        for (i=0;i<8;i=i+1) begin tlb_d_epoch[i]<= 16'd0; end 
+		        //for (i=0;i<4;i=i+1) begin tlb_i_epoch[i]<= 16'd0; end 
+			tlb_vld <= 4'b0;
+		        //for (i=0;i<8;i=i+1) begin tlb_d_epoch[i]<= 16'd0; end 
+			tlb_d_vld <= 16'b0;
 		    end else if (STrap && bus_write_enable && bus_address == `Tlb) begin // for the last fill: sd ppa, Tlb
 			if (re[8] == 12) begin
 			tlb_vpn[tlb_ptr] <= re[9][38:12]; // VA from x1 saved by trapp mmu_pc/mmu_da
 			tlb_ppn[tlb_ptr] <= bus_write_data[55:12] ; // real 
-			//tlb_vld[tlb_ptr] <= 1;
-			tlb_i_epoch[tlb_ptr] <= tlb_epoch;
+			tlb_vld[tlb_ptr] <= 1;
+			//tlb_i_epoch[tlb_ptr] <= tlb_epoch;
 			tlb_ptr <= tlb_ptr + 1; 
 		        end else begin
 			tlb_d_vpn[tlb_d_ptr] <= re[9][38:12]; // VA from x1 saved by trapp mmu_pc/mmu_da
 			tlb_d_ppn[tlb_d_ptr] <= bus_write_data[55:12] ; // real 
-			//tlb_d_vld[tlb_d_ptr] <= 1;
-			tlb_d_epoch[tlb_d_ptr] <= tlb_epoch;
+			tlb_d_vld[tlb_d_ptr] <= 1;
+			//tlb_d_epoch[tlb_d_ptr] <= tlb_epoch;
 			tlb_d_ptr <= tlb_d_ptr + 1; 
 		        end 
 		    end
@@ -958,9 +999,9 @@ always @(*) begin
 		          		       bubble <= 1'b1; end 
 		    32'b00010000010100000000000001110011: begin end // Wfi
 		    32'b?????????????????_000_?????_0001111: begin end // Fence
-		    ///32'b?????????????????_001_?????_0001111: begin flush <= ~flush; end // Fence.i 
 		    32'b?????????????????_001_?????_0001111: begin cache_epoch <= cache_epoch + 1; bubble <= 1; pc <= pc; end // Fence.i 
-		    32'b0001001??????????_000_?????_1110011: begin tlb_epoch <= tlb_epoch + 1; bubble <=1; pc <= pc; end // Sfence.vma (supervisor fence for virtual memory address) have to bubble the fetch next ir from old tlb, redo
+		    //32'b0001001??????????_000_?????_1110011: begin tlb_epoch <= tlb_epoch + 1; bubble <=1; pc <= pc; end // Sfence.vma (supervisor fence for virtual memory address) have to bubble the fetch next ir from old tlb, redo
+		    32'b0001001??????????_000_?????_1110011: begin tlb_flush = 1; bubble <=1; pc <= pc; end // Sfence.vma (supervisor fence for virtual memory address) have to bubble the fetch next ir from old tlb, redo
 		    // Atomic after TLB // -- ATOMIC instructions (A-extension) opcode: 0101111
 		    32'b00010_??_?????_?????_01?_?????_0101111: begin  // lr Lr._mmu 3 cycles lr.w010 lr.d011
 		        if (load_step == 0) begin bus_address <= pda; bus_read_enable <=1; pc <= pc_4; bubble <=1; load_step <=1; bus_ls_type <= w_func3; reserve_addr <= pda; reserve_valid <=1; end
