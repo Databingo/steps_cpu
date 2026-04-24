@@ -33,11 +33,9 @@ wire seip = Csrs[mip][SEIP] && Csrs[mie][SEIE];  // hardware sip-> local sie-> g
 wire stip = Csrs[mip][STIP] && Csrs[mie][STIE];  // opensbi trap in mtip -> set stip 5
 wire ssip = Csrs[mip][SSIP] && Csrs[mie][SSIE];  // software csr set
 
-
 wire m_interrupts = (meip || msip || mtip) && (current_privilege_mode < M_mode || (current_privilege_mode == M_mode && Csrs[mstatus][MIE]));
 wire s_interrupts = (seip || ssip || stip) && (current_privilege_mode < S_mode || (current_privilege_mode == S_mode && Csrs[sstatus][SIE]));
 wire any_interrupt = (m_interrupts || s_interrupts);
-
 
 (* keep = 1 *) reg [63:0] pc;
 wire [31:0] ir;
@@ -410,7 +408,6 @@ always @(*) begin
     endcase
 end
 
-
 //(* ram_style = "logic" *) reg [63:0] Csrs [0:36]; // 36 CSRs for now // totally 4096
 (* ram_style = "logic" *) reg [63:0] Csrs [0:23]; // 36 CSRs for now // totally 4096
 wire [3:0]  satp_mmu  = Csrs[satp][63:60]; // 0:bare, 8:sv39, 9:sv48  satp.MODE!=0, privilegae is not M-mode, mstatus.MPRN is not set or in MPP's mode?
@@ -653,7 +650,7 @@ always @(*) begin
 		Csrs[mip][SEIP] <= seip_interrupt;
 		Csrs[mip][MSIP] <= msip_interrupt;  
 
-		//  i-tlb miss STrap
+	    //  i-tlb miss STrap
             if (need_trans && !tlb_i_hit) begin //OPEN 
                 mmu_pc <= 1; // MMU_PC ON 
                 pc <= 0;     // trap to isr_router
@@ -694,7 +691,6 @@ always @(*) begin
 		reserve_valid <= 0; // clear lr.w/lr.d
 
 	    // d-tlb miss STrap load/store/atom
-	    //end else if (need_trans && !tlb_d_hit && is_mem_access) begin  
 	    end else if (need_trans_d && !tlb_d_hit && is_mem_access) begin  
 		mmu_da <= 1; // MMU_DA ON
 		pc <= 0; // trap to isr_router
