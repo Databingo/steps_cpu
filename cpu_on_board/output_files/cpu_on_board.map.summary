@@ -1,14 +1,14 @@
-Analysis & Synthesis Status : Failed - Thu Apr 23 22:12:18 2026
+Analysis & Synthesis Status : Successful - Thu Apr 23 22:45:20 2026
 Quartus II 32-bit Version : 13.0.1 Build 232 06/12/2013 SP 1 SJ Web Edition
 Revision Name : cpu_on_board
 Top-level Entity Name : cpu_on_board
 Family : Cyclone II
-Total logic elements : N/A until Partition Merge
-    Total combinational functions : N/A until Partition Merge
-    Dedicated logic registers : N/A until Partition Merge
-Total registers : N/A until Partition Merge
-Total pins : N/A until Partition Merge
-Total virtual pins : N/A until Partition Merge
-Total memory bits : N/A until Partition Merge
-Embedded Multiplier 9-bit elements : N/A until Partition Merge
-Total PLLs : N/A until Partition Merge
+Total logic elements : 21,203
+    Total combinational functions : 16,581
+    Dedicated logic registers : 7,085
+Total registers : 7085
+Total pins : 46
+Total virtual pins : 0
+Total memory bits : 218,624
+Embedded Multiplier 9-bit elements : 0
+Total PLLs : 0
