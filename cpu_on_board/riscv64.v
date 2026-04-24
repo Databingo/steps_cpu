@@ -451,7 +451,7 @@ assign tlb_i_match[2] = tlb_vld[2] && (tlb_vpn[2] == pc_vpn);
 assign tlb_i_match[3] = tlb_vld[3] && (tlb_vpn[3] == pc_vpn);
 
 always @(*) begin
-    tlb_i_hit = |tlb_i_match;
+    tlb_i_hit = |tlb_i_match && !tlb_flush;
     pc_ppn =   ({44{tlb_i_match[0]}} & tlb_ppn[0]) |
 	       ({44{tlb_i_match[1]}} & tlb_ppn[1]) | //; end
 	       ({44{tlb_i_match[2]}} & tlb_ppn[2]) |
@@ -861,8 +861,10 @@ always @(*) begin
 		          		       bubble <= 1'b1; end 
 		    32'b00010000010100000000000001110011: begin end // Wfi
 		    32'b?????????????????_000_?????_0001111: begin end // Fence
-		    32'b?????????????????_001_?????_0001111: begin cache_epoch <= cache_epoch + 1; bubble <= 1; pc <= pc; end // Fence.i 
-		    32'b0001001??????????_000_?????_1110011: begin tlb_flush <= 1; bubble <=1; pc <= pc; end // Sfence.vma (supervisor fence for virtual memory address) have to bubble the fetch next ir from old tlb, redo
+		    //32'b?????????????????_001_?????_0001111: begin cache_epoch <= cache_epoch + 1; bubble <= 1; pc <= pc; end // Fence.i 
+		    32'b?????????????????_001_?????_0001111: begin cache_epoch <= cache_epoch + 1; end // Fence.i 
+		    //32'b0001001??????????_000_?????_1110011: begin tlb_flush <= 1; bubble <=1; pc <= pc; end // Sfence.vma (supervisor fence for virtual memory address) have to bubble the fetch next ir from old tlb, redo
+		    32'b0001001??????????_000_?????_1110011: begin tlb_flush <= 1; bubble <=1; pc <= pc; end // Sfence.vma  have to bubble the fetch next ir from old tlb, recheck fail in bubble, strap
 		    // Atomic after TLB // -- ATOMIC instructions (A-extension) opcode: 0101111
 		    32'b00010_??_?????_?????_01?_?????_0101111: begin  // lr Lr._mmu 3 cycles lr.w010 lr.d011
 		        if (load_step == 0) begin bus_address <= pda; bus_read_enable <=1; pc <= pc_4; bubble <=1; load_step <=1; bus_ls_type <= w_func3; reserve_addr <= pda; reserve_valid <=1; end
