@@ -12,6 +12,7 @@ module riscv64(
     output reg        bus_write_enable,
     output reg        bus_read_enable,
     output reg [2:0]  bus_ls_type, // lb lh lw ld lbu lhu lwu // sb sh sw sd sbu shu swu 
+    input wire        debug,
 
     output reg [63:0] mtime,    // map to 0x0200_bff8 
     //inout wire [63:0] mtimecmp, // map to 0x0200_4000 + 8byte*hartid
@@ -768,7 +769,7 @@ always @(*) begin
 		re[8] <= (op == 7'b0000011) ? 13 : 15;// save x2 trap type load/store_atom
 		//Csrs[mstatus][MIE] <= Csrs[mstatus][MPIE]; // set back interrupt status
     
-	    end else if (Csrs[mdebug] && !STrap && !did && !load_step && !store_step && !mul_enable && !div_enable) begin
+	    end else if ((Csrs[mdebug] || debug) && !STrap && !did && !load_step && !store_step && !mul_enable && !div_enable) begin
 		in_debug <= 1;
 		pc <= 0; // trap to isr_router
 		bubble <= 1'b1; // bubble

@@ -4,6 +4,7 @@ module cpu_on_board (
     // -- Pin --
     (* chip_pin = "PIN_L1" *)  input wire CLOCK_50, // 50 MHz clock
     (* chip_pin = "PIN_R22" *) input wire KEY0,     // Active-low reset button
+    (* chip_pin = "PIN_L2" *) input wire SW9,     // debug
     //(* chip_pin = "PIN_Y21, PIN_Y22, PIN_W21, PIN_W22, PIN_V21, PIN_V22, PIN_U21, PIN_U22" *) output wire [7:0] LEDG, // 8 green LEDs
     //(* chip_pin = "R17" *) output reg LEDR9, // 1 red LEDs breath left most 
     //(* chip_pin = "R20" *) output wire LEDR0, // 
@@ -168,6 +169,7 @@ assign DRAM_CKE = 1; // always enable
         //.ir(LEDG),
         //.heartbeat(LEDR9),
 	//.valid_address(valid_address),
+	.debug(SW9),
 
         .bus_address(bus_address),
         .bus_write_data(bus_write_data),
@@ -810,5 +812,33 @@ end
     //assign HEX04 = ~uart_irq;
     //assign HEX05 = ~Plic_priority_selected;
     //assign HEX06 = ~meip_interrupt;
+
+//reg [19:0] debounce_cnt;
+//reg key1 = 1'b1;
+//always @(posedge clock_slow) begin
+//    if (KEY1 == key1) begin
+//	debounce_cnt <= 0;
+//    end else begin
+//	debounce_cnt <= debounce_cnt + 1;
+//	if (debounce_cnt == 20'hFFFFF) begin  // 12.5Mhz 83ms make sure
+//	    key1 <= KEY1;
+//	end
+//    end
+//end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 endmodule
