@@ -740,7 +740,7 @@ always @(*) begin
 		in_debug <= 0;
 		reserve_addr <= 0;
 		reserve_valid <= 0;
-		tlb_epoch <= 16'd1;
+		//tlb_epoch <= 16'd1;
 		cache_epoch <= 16'd1;
 
 	    end else begin
