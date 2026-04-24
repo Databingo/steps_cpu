@@ -7,15 +7,17 @@ isr_router:
      # x689 setting
 
      # x1(ra)2(sp)3456,x10(a0) operating
-     li x3, 12 
-     beq x8, x3, mmu_i    # i-tlb-refill Fetch
-
      li x3, 13 
-     beq x8, x3, mmu_d    # d-tlb-refill Load
+    #beq x8, x3, mmu_d    # d-tlb-refill Load
+     beq x8, x3, mmu      # d-tlb-refill Load
 
      li x3, 15 
-    #li x3, 14 
-     beq x8, x3, mmu_d    # d-tlb-refill Store
+    #beq x8, x3, mmu_d    # d-tlb-refill Store
+     beq x8, x3, mmu      # d-tlb-refill Store
+
+     li x3, 12 
+    #beq x8, x3, mmu_i    # i-tlb-refill Fetch
+     beq x8, x3, mmu      # i-tlb-refill Fetch
 
      li x3, 1 
      beq x8, x3, i_cache_refill
@@ -27,6 +29,7 @@ isr_router:
      beq x8, x3, debug
 
 i_cache_refill:
+     andi x9, x9, -16 # 16 bytes align
      lui x4, 0x20001 # base Cache address
      ld x3, 0(x9)    # get data
      sd x3, 0(x4)    # refill line low 64
