@@ -72,7 +72,8 @@ end
 // Because the sys_clk = 50 MHz, so 20ns for each clock cycle
 // Therefore, every 390 clock cycles the SDRAM have to be refreshed, i.e., tREFI=7.8125us
 reg [8:0] ref_cnt;
-parameter RefMax=9'd390;
+//parameter RefMax=9'd390;
+parameter RefMax=9'd97; // fit for 12.5Mhz
 
 always @(posedge sys_clk, negedge rstn) begin
 	if(!rstn)
