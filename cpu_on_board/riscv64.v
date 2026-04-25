@@ -337,8 +337,8 @@ wire [63:0] csr_mask_w= (w_csr == 12'h180) ? satp_mask :
 			64'hffff_ffff_ffff_ffff;
 wire [63:0] csr_read = (w_csr == 12'h301) ? 64'h8000000000141101 : // misa(RV64IMASU)
                        //(w_csr == 12'hF11) ? 64'h0 : // mvendorid
-                       (w_csr == 12'hF12) ? 64'h0 : // marchid
-                       (w_csr == 12'hF13) ? 64'h0 : // mimpid
+                       //(w_csr == 12'hF12) ? 64'h0 : // marchid
+                       //(w_csr == 12'hF13) ? 64'h0 : // mimpid
                        (w_csr == 12'hF14) ? 64'h0 : // mhartid
                        (w_csr == 12'hC01) ? mtime : // clint_time
 		        Csrs[w_csr_id] & csr_mask;  // Other
@@ -358,11 +358,11 @@ localparam stval      = 16;
 localparam satp       = 17;  // Supervisor address translation and protection satp[63:60].MODE=0:off|8:SV39 satp[59:44].asid vpn2:9 vpn1:9 vpn0:9 satp[43:0]:rootpage physical addr
 localparam mtval      = 18;  // Machine Trap Value Register (bad address or instruction)
 
-localparam marchid    = 19;  // 0
-localparam mimpid     = 19;  // 0
+localparam mvendorid  = 23;  // 0
+localparam marchid    = 24;  // 0
+localparam mimpid     = 25;  // 0
 localparam mhartid    = 19;  // Hardware Thread ID 0 for single-core
 localparam misa       = 19;  // Machine ISA Register (IMA is 0x8000000000001101)
-localparam mvendorid  = 23;  // 0
 localparam clint_time = 19;  // read only
 
 localparam pmpcfg0    = 20;  // Physical Memory Protection
@@ -409,7 +409,7 @@ always @(*) begin
 end
 
 //(* ram_style = "logic" *) reg [63:0] Csrs [0:36]; // 36 CSRs for now // totally 4096
-(* ram_style = "logic" *) reg [63:0] Csrs [0:23]; // 36 CSRs for now // totally 4096
+(* ram_style = "logic" *) reg [63:0] Csrs [0:25]; // 36 CSRs for now // totally 4096
 wire [3:0]  satp_mmu  = Csrs[satp][63:60]; // 0:bare, 8:sv39, 9:sv48  satp.MODE!=0, privilegae is not M-mode, mstatus.MPRN is not set or in MPP's mode?
 
 // -- Timer --
@@ -619,7 +619,7 @@ reg [7:0] tlb_d_vld;
 		Csrs[mstatus][MIE] <= 1;
 		mmu_da <= 0;
 		for (i=0;i<11;i=i+1) begin sre[i]<= 64'b0; end 
-		for (i=0;i<=23;i=i+1) begin Csrs[i]<= 64'b0; end
+		for (i=0;i<=25;i=i+1) begin Csrs[i]<= 64'b0; end
 		//Csrs[medeleg] <= 64'hb1af; // delegate to S-mode 1011000110101111 // see VII 3.1.15 mcasue exceptions
 		Csrs[medeleg] <= 64'hb109; // delegate to S-mode no 12/13/15
 		Csrs[mideleg] <= 64'h0222; // delegate to S-mode 0000001000100010 see VII 3.1.15 mcasue interrupt 1/5/9 SSIP(supervisor software interrupt) STIP(time) SEIP(external)
@@ -712,8 +712,8 @@ reg [7:0] tlb_d_vld;
 		re[9] <= ls_va; //save va to x1
 		//re[8] <= (op == 7'b0000011) ? 13 : 14;// save x2 trap type load/store_atom
 		re[8] <= 18; // save 18 for debug
-                //Csrs[mimpid] <=  pda;
-                //Csrs[marchid] <= ppc;
+                Csrs[mimpid] <= re[9]; // tval
+                Csrs[marchid] <= re[8];  // mcause
                 Csrs[mvendorid] <= ir;
 
             // Back from STrap
