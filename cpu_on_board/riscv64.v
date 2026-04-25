@@ -712,8 +712,8 @@ reg [7:0] tlb_d_vld;
 		re[9] <= ls_va; //save va to x1
 		//re[8] <= (op == 7'b0000011) ? 13 : 14;// save x2 trap type load/store_atom
 		re[8] <= 18; // save 18 for debug
-                Csrs[mimpid] <= re[8]; // icaus 
-                Csrs[marchid] <= trap_cause;  // tcaus
+                Csrs[mimpid] <= pc_4; // pc
+                Csrs[marchid] <= Csrs[mip];  // mip
                 Csrs[mvendorid] <= ir;
 
             // Back from STrap
