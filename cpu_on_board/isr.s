@@ -250,7 +250,7 @@ debug:
      csrr a0, mvendorid # mvendorid/ir
      call print_reg
 
-     li a0, "|tval:" 
+     li a0, "|icas:" 
      call print7
     #csrr a0, 0xF12 # marchid/ppc
      csrr a0, mimpid
@@ -262,9 +262,9 @@ debug:
    # csrr a0, mimpid # mimpid/pda
    # call print_reg
 
-    li a0, "|caus:" 
+    li a0, "|tcas:" 
     call print7
-    csrr a0, mhartid
+    csrr a0, marchid
     call print_reg
 
    #li a0, "|mstas:" 

@@ -712,8 +712,8 @@ reg [7:0] tlb_d_vld;
 		re[9] <= ls_va; //save va to x1
 		//re[8] <= (op == 7'b0000011) ? 13 : 14;// save x2 trap type load/store_atom
 		re[8] <= 18; // save 18 for debug
-                Csrs[mimpid] <= re[9]; // tval
-                Csrs[marchid] <= re[8];  // mcause
+                Csrs[mimpid] <= re[8]; // icaus 
+                Csrs[marchid] <= trap_cause;  // tcaus
                 Csrs[mvendorid] <= ir;
 
             // Back from STrap
@@ -740,7 +740,7 @@ reg [7:0] tlb_d_vld;
 		if (meip) trap_cause = 11; // Cause 11 for Machine External Interrupt
 		else if (msip) trap_cause = 3;  // Cause 3 for Machine Sofeware Interrupt
 		else if (mtip) trap_cause = 7;  // Cause 7 for Machine Timer Interrupt
-		else if (seip) trap_cause = 9;  // Cause 9 for Supervisor External
+		else if (seip) trap_cause = 9;  // Cause 9 for Supervisor External Interrupt
 		else if (stip) trap_cause = 5;  // Cause 5 for Supervisor Timer Interrupt (set by opensbi via csrw when it see MTIP)
 		else if (ssip) trap_cause = 1;  // Cause 1 for Supervisor Software Interrupt (set by os)
 
