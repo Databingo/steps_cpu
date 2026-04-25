@@ -279,16 +279,16 @@ check_clock:
    li t4, 1
    bne t3, t4, fail_chain    # Memory not set to 1
 
-#  # ----- 4. A-EXTENSION: NEIGHBOR BUG [ID: 0xA03] -----
-#  # IF SOC FAILS HERE: Your Hardware Reservation logic is too narrow!
-#  li s11, 0xA03
-#  sd zero, 0(s10)
-#  lr.d t1, (s10)       
-#  li t2, 0xFF
-#  sb t2, 1(s10)        # Store to neighbor byte
-#  li t3, 0xCC
-#  sc.d t4, t3, (s10)   # SC MUST FAIL (t4 != 0)
-#  beq t4, zero, fail_chain
+   # ----- 4. A-EXTENSION: NEIGHBOR BUG [ID: 0xA03] -----
+   # IF SOC FAILS HERE: Your Hardware Reservation logic is too narrow!
+   li s11, 0xA03
+   sd zero, 0(s10)
+   lr.d t1, (s10)       
+   li t2, 0xFF
+   sb t2, 1(s10)        # Store to neighbor byte
+   li t3, 0xCC
+   sc.d t4, t3, (s10)   # SC MUST FAIL (t4 != 0)
+   beq t4, zero, fail_chain
 
    # ----- 5. A-EXTENSION: SIGN EXTENSION [ID: 0xA04] -----
    # IF SOC FAILS HERE: Your pipeline is dropping sign-bits between MUL and AMO
