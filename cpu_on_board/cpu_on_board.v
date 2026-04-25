@@ -381,8 +381,8 @@ assign DRAM_CKE = 1; // always enable
         // Read
         //if (!bus_read_enable && bus_read_done==0) begin 
         if (bus_read_done==0) begin 
-	    //if (!valid_address) begin bus_read_done <= 1; bus_read_data <= 64'd0; end;
-	    if (!valid_address) begin bus_read_done <= 1; end;
+	    if (!valid_address) begin bus_read_done <= 1; bus_read_data <= 64'hFFFFFFFFFFFFFFFF; end;
+	    //if (!valid_address) begin bus_read_done <= 1; end;
             //if (Key_selected) begin bus_read_data <= {32'd0, 24'd0, ascii}; bus_read_done <= 1; end
 	    if (Ram_selected) begin 
 	        casez(bus_ls_type)
