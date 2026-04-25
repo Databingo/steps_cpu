@@ -1,5 +1,5 @@
 Analysis & Synthesis report for cpu_on_board
-Fri Apr 24 20:10:56 2026
+Sat Apr 25 12:48:36 2026
 Quartus II 32-bit Version 13.0.1 Build 232 06/12/2013 Service Pack 1 SJ Web Edition
 
 
@@ -91,13 +91,13 @@ applicable agreement for further details.
 +--------------------------------------------------------------------------------------+
 ; Analysis & Synthesis Summary                                                         ;
 +------------------------------------+-------------------------------------------------+
-; Analysis & Synthesis Status        ; Successful - Fri Apr 24 20:10:55 2026           ;
+; Analysis & Synthesis Status        ; Successful - Sat Apr 25 12:48:35 2026           ;
 ; Quartus II 32-bit Version          ; 13.0.1 Build 232 06/12/2013 SP 1 SJ Web Edition ;
 ; Revision Name                      ; cpu_on_board                                    ;
 ; Top-level Entity Name              ; cpu_on_board                                    ;
 ; Family                             ; Cyclone II                                      ;
-; Total logic elements               ; 22,077                                          ;
-;     Total combinational functions  ; 16,851                                          ;
+; Total logic elements               ; 21,999                                          ;
+;     Total combinational functions  ; 16,773                                          ;
 ;     Dedicated logic registers      ; 7,673                                           ;
 ; Total registers                    ; 7673                                            ;
 ; Total pins                         ; 47                                              ;
@@ -269,16 +269,16 @@ applicable agreement for further details.
 +---------------------------------------------+--------------------------------+
 ; Resource                                    ; Usage                          ;
 +---------------------------------------------+--------------------------------+
-; Estimated Total logic elements              ; 22,077                         ;
+; Estimated Total logic elements              ; 21,999                         ;
 ;                                             ;                                ;
-; Total combinational functions               ; 16851                          ;
+; Total combinational functions               ; 16773                          ;
 ; Logic element usage by number of LUT inputs ;                                ;
-;     -- 4 input functions                    ; 11593                          ;
-;     -- 3 input functions                    ; 4208                           ;
-;     -- <=2 input functions                  ; 1050                           ;
+;     -- 4 input functions                    ; 11497                          ;
+;     -- 3 input functions                    ; 4274                           ;
+;     -- <=2 input functions                  ; 1002                           ;
 ;                                             ;                                ;
 ; Logic elements by mode                      ;                                ;
-;     -- normal mode                          ; 14827                          ;
+;     -- normal mode                          ; 14749                          ;
 ;     -- arithmetic mode                      ; 2024                           ;
 ;                                             ;                                ;
 ; Total registers                             ; 7673                           ;
@@ -290,7 +290,7 @@ applicable agreement for further details.
 ; Embedded Multiplier 9-bit elements          ; 0                              ;
 ; Maximum fan-out node                        ; clock_slower:clock_ins|clk_out ;
 ; Maximum fan-out                             ; 7943                           ;
-; Total fan-out                               ; 97928                          ;
+; Total fan-out                               ; 97644                          ;
 ; Average fan-out                             ; 3.92                           ;
 +---------------------------------------------+--------------------------------+
 
@@ -300,7 +300,7 @@ applicable agreement for further details.
 +--------------------------------------------------------------------------------------------+-------------------+--------------+-------------+--------------+---------+-----------+------+--------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+------------------+
 ; Compilation Hierarchy Node                                                                 ; LC Combinationals ; LC Registers ; Memory Bits ; DSP Elements ; DSP 9x9 ; DSP 18x18 ; Pins ; Virtual Pins ; Full Hierarchy Name                                                                                                                                                                                                                                                                                            ; Library Name     ;
 +--------------------------------------------------------------------------------------------+-------------------+--------------+-------------+--------------+---------+-----------+------+--------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+------------------+
-; |cpu_on_board                                                                              ; 16851 (1521)      ; 7673 (490)   ; 218624      ; 0            ; 0       ; 0         ; 47   ; 0            ; |cpu_on_board                                                                                                                                                                                                                                                                                                  ; work             ;
+; |cpu_on_board                                                                              ; 16773 (1523)      ; 7673 (490)   ; 218624      ; 0            ; 0       ; 0         ; 47   ; 0            ; |cpu_on_board                                                                                                                                                                                                                                                                                                  ; work             ;
 ;    |altsyncram:Cache_rtl_0|                                                                ; 2 (0)             ; 0 (0)        ; 49152       ; 0            ; 0       ; 0         ; 0    ; 0            ; |cpu_on_board|altsyncram:Cache_rtl_0                                                                                                                                                                                                                                                                           ; work             ;
 ;       |altsyncram_nsi1:auto_generated|                                                     ; 2 (0)             ; 0 (0)        ; 49152       ; 0            ; 0       ; 0         ; 0    ; 0            ; |cpu_on_board|altsyncram:Cache_rtl_0|altsyncram_nsi1:auto_generated                                                                                                                                                                                                                                            ; work             ;
 ;          |altsyncram:ram_block1a0|                                                         ; 2 (0)             ; 0 (0)        ; 49152       ; 0            ; 0       ; 0         ; 0    ; 0            ; |cpu_on_board|altsyncram:Cache_rtl_0|altsyncram_nsi1:auto_generated|altsyncram:ram_block1a0                                                                                                                                                                                                                    ; work             ;
@@ -340,7 +340,7 @@ applicable agreement for further details.
 ;                      |dpram_gi21:FIFOram|                                                  ; 0 (0)             ; 0 (0)        ; 8192        ; 0            ; 0       ; 0         ; 0    ; 0            ; |cpu_on_board|jtag_uart_system:my_jtag_system|jtag_uart_system_jtag_uart_0:jtag_uart_0|jtag_uart_system_jtag_uart_0_scfifo_w:the_jtag_uart_system_jtag_uart_0_scfifo_w|scfifo:wfifo|scfifo_9r21:auto_generated|a_dpfifo_g131:dpfifo|dpram_gi21:FIFOram                                                         ; work             ;
 ;                         |altsyncram_vvl1:altsyncram2|                                      ; 0 (0)             ; 0 (0)        ; 8192        ; 0            ; 0       ; 0         ; 0    ; 0            ; |cpu_on_board|jtag_uart_system:my_jtag_system|jtag_uart_system_jtag_uart_0:jtag_uart_0|jtag_uart_system_jtag_uart_0_scfifo_w:the_jtag_uart_system_jtag_uart_0_scfifo_w|scfifo:wfifo|scfifo_9r21:auto_generated|a_dpfifo_g131:dpfifo|dpram_gi21:FIFOram|altsyncram_vvl1:altsyncram2                             ; work             ;
 ;                            |altsyncram_1qe1:altsyncram3|                                   ; 0 (0)             ; 0 (0)        ; 8192        ; 0            ; 0       ; 0         ; 0    ; 0            ; |cpu_on_board|jtag_uart_system:my_jtag_system|jtag_uart_system_jtag_uart_0:jtag_uart_0|jtag_uart_system_jtag_uart_0_scfifo_w:the_jtag_uart_system_jtag_uart_0_scfifo_w|scfifo:wfifo|scfifo_9r21:auto_generated|a_dpfifo_g131:dpfifo|dpram_gi21:FIFOram|altsyncram_vvl1:altsyncram2|altsyncram_1qe1:altsyncram3 ; work             ;
-;    |riscv64:cpu|                                                                           ; 14573 (14573)     ; 6754 (6754)  ; 99840       ; 0            ; 0       ; 0         ; 0    ; 0            ; |cpu_on_board|riscv64:cpu                                                                                                                                                                                                                                                                                      ; work             ;
+;    |riscv64:cpu|                                                                           ; 14494 (14494)     ; 6754 (6754)  ; 99840       ; 0            ; 0       ; 0         ; 0    ; 0            ; |cpu_on_board|riscv64:cpu                                                                                                                                                                                                                                                                                      ; work             ;
 ;       |altsyncram:Cache_L_High_rtl_0|                                                      ; 0 (0)             ; 0 (0)        ; 32768       ; 0            ; 0       ; 0         ; 0    ; 0            ; |cpu_on_board|riscv64:cpu|altsyncram:Cache_L_High_rtl_0                                                                                                                                                                                                                                                        ; work             ;
 ;          |altsyncram_krg1:auto_generated|                                                  ; 0 (0)             ; 0 (0)        ; 32768       ; 0            ; 0       ; 0         ; 0    ; 0            ; |cpu_on_board|riscv64:cpu|altsyncram:Cache_L_High_rtl_0|altsyncram_krg1:auto_generated                                                                                                                                                                                                                         ; work             ;
 ;       |altsyncram:Cache_L_Low_rtl_0|                                                       ; 0 (0)             ; 0 (0)        ; 32768       ; 0            ; 0       ; 0         ; 0    ; 0            ; |cpu_on_board|riscv64:cpu|altsyncram:Cache_L_Low_rtl_0                                                                                                                                                                                                                                                         ; work             ;
@@ -349,8 +349,8 @@ applicable agreement for further details.
 ;          |altsyncram_qrg1:auto_generated|                                                  ; 0 (0)             ; 0 (0)        ; 34304       ; 0            ; 0       ; 0         ; 0    ; 0            ; |cpu_on_board|riscv64:cpu|altsyncram:Cache_T_rtl_0|altsyncram_qrg1:auto_generated                                                                                                                                                                                                                              ; work             ;
 ;    |sd_controller:sdctrl|                                                                  ; 346 (346)         ; 152 (152)    ; 0           ; 0            ; 0       ; 0         ; 0    ; 0            ; |cpu_on_board|sd_controller:sdctrl                                                                                                                                                                                                                                                                             ; work             ;
 ;    |sdram_controller:sdram_ctrl|                                                           ; 87 (87)           ; 33 (33)      ; 0           ; 0            ; 0       ; 0         ; 0    ; 0            ; |cpu_on_board|sdram_controller:sdram_ctrl                                                                                                                                                                                                                                                                      ; work             ;
-;    |sld_hub:auto_hub|                                                                      ; 113 (1)           ; 78 (0)       ; 0           ; 0            ; 0       ; 0         ; 0    ; 0            ; |cpu_on_board|sld_hub:auto_hub                                                                                                                                                                                                                                                                                 ; work             ;
-;       |sld_jtag_hub:\jtag_hub_gen:sld_jtag_hub_inst|                                       ; 112 (75)          ; 78 (50)      ; 0           ; 0            ; 0       ; 0         ; 0    ; 0            ; |cpu_on_board|sld_hub:auto_hub|sld_jtag_hub:\jtag_hub_gen:sld_jtag_hub_inst                                                                                                                                                                                                                                    ; work             ;
+;    |sld_hub:auto_hub|                                                                      ; 112 (1)           ; 78 (0)       ; 0           ; 0            ; 0       ; 0         ; 0    ; 0            ; |cpu_on_board|sld_hub:auto_hub                                                                                                                                                                                                                                                                                 ; work             ;
+;       |sld_jtag_hub:\jtag_hub_gen:sld_jtag_hub_inst|                                       ; 111 (74)          ; 78 (50)      ; 0           ; 0            ; 0       ; 0         ; 0    ; 0            ; |cpu_on_board|sld_hub:auto_hub|sld_jtag_hub:\jtag_hub_gen:sld_jtag_hub_inst                                                                                                                                                                                                                                    ; work             ;
 ;          |sld_rom_sr:hub_info_reg|                                                         ; 20 (20)           ; 9 (9)        ; 0           ; 0            ; 0       ; 0         ; 0    ; 0            ; |cpu_on_board|sld_hub:auto_hub|sld_jtag_hub:\jtag_hub_gen:sld_jtag_hub_inst|sld_rom_sr:hub_info_reg                                                                                                                                                                                                            ; work             ;
 ;          |sld_shadow_jsm:shadow_jsm|                                                       ; 17 (17)           ; 19 (19)      ; 0           ; 0            ; 0       ; 0         ; 0    ; 0            ; |cpu_on_board|sld_hub:auto_hub|sld_jtag_hub:\jtag_hub_gen:sld_jtag_hub_inst|sld_shadow_jsm:shadow_jsm                                                                                                                                                                                                          ; work             ;
 +--------------------------------------------------------------------------------------------+-------------------+--------------+-------------+--------------+---------+-----------+------+--------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+------------------+
@@ -783,7 +783,7 @@ Encoding Type:  One-Hot
 ; Number of registers using Synchronous Load   ; 1157  ;
 ; Number of registers using Asynchronous Clear ; 3035  ;
 ; Number of registers using Asynchronous Load  ; 0     ;
-; Number of registers using Clock Enable       ; 7208  ;
+; Number of registers using Clock Enable       ; 7206  ;
 ; Number of registers using Preset             ; 0     ;
 +----------------------------------------------+-------+
 
@@ -798,13 +798,13 @@ Encoding Type:  One-Hot
 ; sd_controller:sdctrl|boot_counter[12]                                                                                                                     ; 2       ;
 ; sd_controller:sdctrl|boot_counter[13]                                                                                                                     ; 2       ;
 ; sd_controller:sdctrl|boot_counter[16]                                                                                                                     ; 2       ;
-; bus_write_done                                                                                                                                            ; 61      ;
-; bus_read_done                                                                                                                                             ; 81      ;
+; bus_write_done                                                                                                                                            ; 62      ;
+; bus_read_done                                                                                                                                             ; 80      ;
 ; riscv64:cpu|bus_address[11]                                                                                                                               ; 10      ;
 ; riscv64:cpu|cache_epoch[0]                                                                                                                                ; 4       ;
-; riscv64:cpu|current_privilege_mode[1]                                                                                                                     ; 11      ;
-; riscv64:cpu|current_privilege_mode[0]                                                                                                                     ; 11      ;
 ; riscv64:cpu|did                                                                                                                                           ; 2       ;
+; riscv64:cpu|current_privilege_mode[1]                                                                                                                     ; 10      ;
+; riscv64:cpu|current_privilege_mode[0]                                                                                                                     ; 11      ;
 ; jtag_uart_system:my_jtag_system|jtag_uart_system_jtag_uart_0:jtag_uart_0|av_waitrequest                                                                   ; 12      ;
 ; jtag_uart_system:my_jtag_system|jtag_uart_system_jtag_uart_0:jtag_uart_0|alt_jtag_atlantic:jtag_uart_system_jtag_uart_0_alt_jtag_atlantic|count[9]        ; 11      ;
 ; sd_controller:sdctrl|cmd_out[55]                                                                                                                          ; 1       ;
@@ -815,9 +815,9 @@ Encoding Type:  One-Hot
 ; riscv64:cpu|Csrs[7][3]                                                                                                                                    ; 2       ;
 ; riscv64:cpu|Csrs[8][1]                                                                                                                                    ; 5       ;
 ; riscv64:cpu|Csrs[7][0]                                                                                                                                    ; 2       ;
+; riscv64:cpu|Csrs[7][15]                                                                                                                                   ; 2       ;
 ; riscv64:cpu|Csrs[7][13]                                                                                                                                   ; 2       ;
 ; riscv64:cpu|Csrs[7][12]                                                                                                                                   ; 2       ;
-; riscv64:cpu|Csrs[7][15]                                                                                                                                   ; 2       ;
 ; mtimecmp[31]                                                                                                                                              ; 3       ;
 ; jtag_uart_system:my_jtag_system|altera_reset_controller:rst_controller|altera_reset_synchronizer:alt_rst_sync_uq1|altera_reset_synchronizer_int_chain_out ; 96      ;
 ; jtag_uart_system:my_jtag_system|jtag_uart_system_jtag_uart_0:jtag_uart_0|t_dav                                                                            ; 2       ;
@@ -1034,208 +1034,208 @@ Encoding Type:  One-Hot
 +--------------------+-----------+---------------+----------------------+------------------------+------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 ; Multiplexer Inputs ; Bus Width ; Baseline Area ; Area if Restructured ; Saving if Restructured ; Registered ; Example Multiplexer Output                                                                                                                                          ;
 +--------------------+-----------+---------------+----------------------+------------------------+------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-; 3:1                ; 32 bits   ; 64 LEs        ; 32 LEs               ; 32 LEs                 ; Yes        ; |cpu_on_board|mtimecmp[38]                                                                                                                                          ;
-; 3:1                ; 31 bits   ; 62 LEs        ; 0 LEs                ; 62 LEs                 ; Yes        ; |cpu_on_board|mtimecmp[23]                                                                                                                                          ;
-; 3:1                ; 2 bits    ; 4 LEs         ; 2 LEs                ; 2 LEs                  ; Yes        ; |cpu_on_board|sd_cache_available                                                                                                                                    ;
+; 3:1                ; 32 bits   ; 64 LEs        ; 32 LEs               ; 32 LEs                 ; Yes        ; |cpu_on_board|mtimecmp[57]                                                                                                                                          ;
+; 3:1                ; 31 bits   ; 62 LEs        ; 0 LEs                ; 62 LEs                 ; Yes        ; |cpu_on_board|mtimecmp[1]                                                                                                                                           ;
+; 3:1                ; 2 bits    ; 4 LEs         ; 2 LEs                ; 2 LEs                  ; Yes        ; |cpu_on_board|sd_rd_start                                                                                                                                           ;
 ; 3:1                ; 3 bits    ; 6 LEs         ; 3 LEs                ; 3 LEs                  ; Yes        ; |cpu_on_board|sdram_controller:sdram_ctrl|init_ref_cnt[0]                                                                                                           ;
-; 3:1                ; 10 bits   ; 20 LEs        ; 10 LEs               ; 10 LEs                 ; Yes        ; |cpu_on_board|jtag_uart_system:my_jtag_system|jtag_uart_system_jtag_uart_0:jtag_uart_0|alt_jtag_atlantic:jtag_uart_system_jtag_uart_0_alt_jtag_atlantic|count[3]    ;
-; 4:1                ; 8 bits    ; 16 LEs        ; 8 LEs                ; 8 LEs                  ; Yes        ; |cpu_on_board|sd_controller:sdctrl|dout[7]                                                                                                                          ;
+; 3:1                ; 10 bits   ; 20 LEs        ; 10 LEs               ; 10 LEs                 ; Yes        ; |cpu_on_board|jtag_uart_system:my_jtag_system|jtag_uart_system_jtag_uart_0:jtag_uart_0|alt_jtag_atlantic:jtag_uart_system_jtag_uart_0_alt_jtag_atlantic|count[7]    ;
+; 4:1                ; 8 bits    ; 16 LEs        ; 8 LEs                ; 8 LEs                  ; Yes        ; |cpu_on_board|sd_controller:sdctrl|dout[0]                                                                                                                          ;
 ; 4:1                ; 2 bits    ; 4 LEs         ; 4 LEs                ; 0 LEs                  ; Yes        ; |cpu_on_board|jtag_uart_system:my_jtag_system|jtag_uart_system_jtag_uart_0:jtag_uart_0|alt_jtag_atlantic:jtag_uart_system_jtag_uart_0_alt_jtag_atlantic|td_shift[9] ;
 ; 4:1                ; 10 bits   ; 20 LEs        ; 10 LEs               ; 10 LEs                 ; Yes        ; |cpu_on_board|byte_index[4]                                                                                                                                         ;
-; 4:1                ; 3 bits    ; 6 LEs         ; 3 LEs                ; 3 LEs                  ; Yes        ; |cpu_on_board|cid8[11]                                                                                                                                              ;
-; 4:1                ; 6 bits    ; 12 LEs        ; 6 LEs                ; 6 LEs                  ; Yes        ; |cpu_on_board|riscv64:cpu|mul_cnt[5]                                                                                                                                ;
+; 4:1                ; 3 bits    ; 6 LEs         ; 3 LEs                ; 3 LEs                  ; Yes        ; |cpu_on_board|cid8[9]                                                                                                                                               ;
+; 4:1                ; 6 bits    ; 12 LEs        ; 6 LEs                ; 6 LEs                  ; Yes        ; |cpu_on_board|riscv64:cpu|mul_cnt[4]                                                                                                                                ;
 ; 4:1                ; 63 bits   ; 126 LEs       ; 63 LEs               ; 63 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|mul_acc[0]                                                                                                                                ;
-; 4:1                ; 6 bits    ; 12 LEs        ; 6 LEs                ; 6 LEs                  ; Yes        ; |cpu_on_board|riscv64:cpu|div_cnt[4]                                                                                                                                ;
-; 5:1                ; 2 bits    ; 6 LEs         ; 2 LEs                ; 4 LEs                  ; Yes        ; |cpu_on_board|bus_address_reg[62]                                                                                                                                   ;
-; 5:1                ; 51 bits   ; 153 LEs       ; 51 LEs               ; 102 LEs                ; Yes        ; |cpu_on_board|bus_address_reg[24]                                                                                                                                   ;
-; 5:1                ; 22 bits   ; 66 LEs        ; 22 LEs               ; 44 LEs                 ; Yes        ; |cpu_on_board|sd_controller:sdctrl|boot_counter[3]                                                                                                                  ;
+; 4:1                ; 6 bits    ; 12 LEs        ; 6 LEs                ; 6 LEs                  ; Yes        ; |cpu_on_board|riscv64:cpu|div_cnt[0]                                                                                                                                ;
+; 5:1                ; 2 bits    ; 6 LEs         ; 2 LEs                ; 4 LEs                  ; Yes        ; |cpu_on_board|bus_address_reg[63]                                                                                                                                   ;
+; 5:1                ; 51 bits   ; 153 LEs       ; 51 LEs               ; 102 LEs                ; Yes        ; |cpu_on_board|bus_address_reg[22]                                                                                                                                   ;
+; 5:1                ; 22 bits   ; 66 LEs        ; 22 LEs               ; 44 LEs                 ; Yes        ; |cpu_on_board|sd_controller:sdctrl|boot_counter[1]                                                                                                                  ;
 ; 5:1                ; 63 bits   ; 189 LEs       ; 126 LEs              ; 63 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|mul_acc[100]                                                                                                                              ;
 ; 6:1                ; 8 bits    ; 32 LEs        ; 8 LEs                ; 24 LEs                 ; Yes        ; |cpu_on_board|sd_controller:sdctrl|recv_data[1]                                                                                                                     ;
-; 7:1                ; 642 bits  ; 2568 LEs      ; 0 LEs                ; 2568 LEs               ; Yes        ; |cpu_on_board|riscv64:cpu|sre[8][18]                                                                                                                                ;
-; 7:1                ; 64 bits   ; 256 LEs       ; 128 LEs              ; 128 LEs                ; Yes        ; |cpu_on_board|riscv64:cpu|div_rem[3]                                                                                                                                ;
-; 7:1                ; 64 bits   ; 256 LEs       ; 128 LEs              ; 128 LEs                ; Yes        ; |cpu_on_board|riscv64:cpu|div_rem[119]                                                                                                                              ;
+; 7:1                ; 642 bits  ; 2568 LEs      ; 0 LEs                ; 2568 LEs               ; Yes        ; |cpu_on_board|riscv64:cpu|sre[7][18]                                                                                                                                ;
+; 7:1                ; 64 bits   ; 256 LEs       ; 128 LEs              ; 128 LEs                ; Yes        ; |cpu_on_board|riscv64:cpu|div_rem[37]                                                                                                                               ;
+; 7:1                ; 64 bits   ; 256 LEs       ; 128 LEs              ; 128 LEs                ; Yes        ; |cpu_on_board|riscv64:cpu|div_rem[127]                                                                                                                              ;
 ; 34:1               ; 2 bits    ; 44 LEs        ; 32 LEs               ; 12 LEs                 ; Yes        ; |cpu_on_board|sdram_controller:sdram_ctrl|cur[3]                                                                                                                    ;
-; 9:1                ; 62 bits   ; 372 LEs       ; 62 LEs               ; 310 LEs                ; Yes        ; |cpu_on_board|riscv64:cpu|saved_user_pc[5]                                                                                                                          ;
-; 5:1                ; 3 bits    ; 9 LEs         ; 6 LEs                ; 3 LEs                  ; Yes        ; |cpu_on_board|jtag_uart_system:my_jtag_system|jtag_uart_system_jtag_uart_0:jtag_uart_0|alt_jtag_atlantic:jtag_uart_system_jtag_uart_0_alt_jtag_atlantic|td_shift[2] ;
-; 5:1                ; 4 bits    ; 12 LEs        ; 8 LEs                ; 4 LEs                  ; Yes        ; |cpu_on_board|jtag_uart_system:my_jtag_system|jtag_uart_system_jtag_uart_0:jtag_uart_0|alt_jtag_atlantic:jtag_uart_system_jtag_uart_0_alt_jtag_atlantic|td_shift[7] ;
-; 9:1                ; 64 bits   ; 384 LEs       ; 192 LEs              ; 192 LEs                ; Yes        ; |cpu_on_board|riscv64:cpu|div_result_out[48]                                                                                                                        ;
-; 7:1                ; 2 bits    ; 8 LEs         ; 2 LEs                ; 6 LEs                  ; Yes        ; |cpu_on_board|riscv64:cpu|load_step[1]                                                                                                                              ;
+; 9:1                ; 62 bits   ; 372 LEs       ; 62 LEs               ; 310 LEs                ; Yes        ; |cpu_on_board|riscv64:cpu|saved_user_pc[57]                                                                                                                         ;
+; 5:1                ; 3 bits    ; 9 LEs         ; 6 LEs                ; 3 LEs                  ; Yes        ; |cpu_on_board|jtag_uart_system:my_jtag_system|jtag_uart_system_jtag_uart_0:jtag_uart_0|alt_jtag_atlantic:jtag_uart_system_jtag_uart_0_alt_jtag_atlantic|td_shift[4] ;
+; 5:1                ; 4 bits    ; 12 LEs        ; 8 LEs                ; 4 LEs                  ; Yes        ; |cpu_on_board|jtag_uart_system:my_jtag_system|jtag_uart_system_jtag_uart_0:jtag_uart_0|alt_jtag_atlantic:jtag_uart_system_jtag_uart_0_alt_jtag_atlantic|td_shift[5] ;
+; 9:1                ; 64 bits   ; 384 LEs       ; 192 LEs              ; 192 LEs                ; Yes        ; |cpu_on_board|riscv64:cpu|div_result_out[42]                                                                                                                        ;
+; 7:1                ; 2 bits    ; 8 LEs         ; 2 LEs                ; 6 LEs                  ; Yes        ; |cpu_on_board|riscv64:cpu|load_step[0]                                                                                                                              ;
 ; 8:1                ; 10 bits   ; 50 LEs        ; 20 LEs               ; 30 LEs                 ; Yes        ; |cpu_on_board|sd_controller:sdctrl|byte_counter[8]                                                                                                                  ;
 ; 9:1                ; 2 bits    ; 12 LEs        ; 4 LEs                ; 8 LEs                  ; Yes        ; |cpu_on_board|riscv64:cpu|store_step[0]                                                                                                                             ;
-; 11:1               ; 66 bits   ; 462 LEs       ; 0 LEs                ; 462 LEs                ; Yes        ; |cpu_on_board|riscv64:cpu|bus_address[42]                                                                                                                           ;
-; 14:1               ; 7 bits    ; 63 LEs        ; 35 LEs               ; 28 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|bus_write_data[5]                                                                                                                         ;
+; 11:1               ; 66 bits   ; 462 LEs       ; 0 LEs                ; 462 LEs                ; Yes        ; |cpu_on_board|riscv64:cpu|bus_address[29]                                                                                                                           ;
+; 14:1               ; 7 bits    ; 63 LEs        ; 35 LEs               ; 28 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|bus_write_data[2]                                                                                                                         ;
 ; 14:1               ; 7 bits    ; 63 LEs        ; 21 LEs               ; 42 LEs                 ; Yes        ; |cpu_on_board|sd_controller:sdctrl|bit_counter[8]                                                                                                                   ;
-; 15:1               ; 8 bits    ; 80 LEs        ; 48 LEs               ; 32 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|bus_write_data[11]                                                                                                                        ;
-; 16:1               ; 16 bits   ; 160 LEs       ; 96 LEs               ; 64 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|bus_write_data[31]                                                                                                                        ;
-; 16:1               ; 31 bits   ; 310 LEs       ; 186 LEs              ; 124 LEs                ; Yes        ; |cpu_on_board|riscv64:cpu|bus_write_data[32]                                                                                                                        ;
+; 15:1               ; 8 bits    ; 80 LEs        ; 48 LEs               ; 32 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|bus_write_data[12]                                                                                                                        ;
+; 16:1               ; 16 bits   ; 160 LEs       ; 96 LEs               ; 64 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|bus_write_data[16]                                                                                                                        ;
+; 16:1               ; 31 bits   ; 310 LEs       ; 186 LEs              ; 124 LEs                ; Yes        ; |cpu_on_board|riscv64:cpu|bus_write_data[42]                                                                                                                        ;
 ; 13:1               ; 2 bits    ; 16 LEs        ; 2 LEs                ; 14 LEs                 ; Yes        ; |cpu_on_board|sdram_byte_en[0]                                                                                                                                      ;
-; 21:1               ; 59 bits   ; 826 LEs       ; 236 LEs              ; 590 LEs                ; Yes        ; |cpu_on_board|riscv64:cpu|Csrs[2][25]                                                                                                                               ;
-; 21:1               ; 59 bits   ; 826 LEs       ; 236 LEs              ; 590 LEs                ; Yes        ; |cpu_on_board|riscv64:cpu|Csrs[1][57]                                                                                                                               ;
-; 21:1               ; 53 bits   ; 742 LEs       ; 212 LEs              ; 530 LEs                ; Yes        ; |cpu_on_board|riscv64:cpu|Csrs[0][48]                                                                                                                               ;
-; 21:1               ; 55 bits   ; 770 LEs       ; 220 LEs              ; 550 LEs                ; Yes        ; |cpu_on_board|riscv64:cpu|Csrs[7][45]                                                                                                                               ;
-; 21:1               ; 56 bits   ; 784 LEs       ; 224 LEs              ; 560 LEs                ; Yes        ; |cpu_on_board|riscv64:cpu|Csrs[6][16]                                                                                                                               ;
-; 21:1               ; 59 bits   ; 826 LEs       ; 236 LEs              ; 590 LEs                ; Yes        ; |cpu_on_board|riscv64:cpu|Csrs[5][47]                                                                                                                               ;
-; 21:1               ; 59 bits   ; 826 LEs       ; 236 LEs              ; 590 LEs                ; Yes        ; |cpu_on_board|riscv64:cpu|Csrs[11][28]                                                                                                                              ;
-; 21:1               ; 59 bits   ; 826 LEs       ; 236 LEs              ; 590 LEs                ; Yes        ; |cpu_on_board|riscv64:cpu|Csrs[10][62]                                                                                                                              ;
-; 21:1               ; 59 bits   ; 826 LEs       ; 236 LEs              ; 590 LEs                ; Yes        ; |cpu_on_board|riscv64:cpu|Csrs[9][46]                                                                                                                               ;
-; 21:1               ; 57 bits   ; 798 LEs       ; 228 LEs              ; 570 LEs                ; Yes        ; |cpu_on_board|riscv64:cpu|Csrs[8][36]                                                                                                                               ;
-; 21:1               ; 59 bits   ; 826 LEs       ; 236 LEs              ; 590 LEs                ; Yes        ; |cpu_on_board|riscv64:cpu|Csrs[13][44]                                                                                                                              ;
-; 21:1               ; 59 bits   ; 826 LEs       ; 236 LEs              ; 590 LEs                ; Yes        ; |cpu_on_board|riscv64:cpu|Csrs[12][35]                                                                                                                              ;
-; 21:1               ; 59 bits   ; 826 LEs       ; 236 LEs              ; 590 LEs                ; Yes        ; |cpu_on_board|riscv64:cpu|Csrs[19][47]                                                                                                                              ;
-; 21:1               ; 59 bits   ; 826 LEs       ; 236 LEs              ; 590 LEs                ; Yes        ; |cpu_on_board|riscv64:cpu|Csrs[17][46]                                                                                                                              ;
-; 21:1               ; 59 bits   ; 826 LEs       ; 236 LEs              ; 590 LEs                ; Yes        ; |cpu_on_board|riscv64:cpu|Csrs[22][63]                                                                                                                              ;
-; 21:1               ; 59 bits   ; 826 LEs       ; 236 LEs              ; 590 LEs                ; Yes        ; |cpu_on_board|riscv64:cpu|Csrs[21][31]                                                                                                                              ;
-; 21:1               ; 59 bits   ; 826 LEs       ; 236 LEs              ; 590 LEs                ; Yes        ; |cpu_on_board|riscv64:cpu|Csrs[20][49]                                                                                                                              ;
+; 21:1               ; 59 bits   ; 826 LEs       ; 236 LEs              ; 590 LEs                ; Yes        ; |cpu_on_board|riscv64:cpu|Csrs[2][58]                                                                                                                               ;
+; 21:1               ; 59 bits   ; 826 LEs       ; 236 LEs              ; 590 LEs                ; Yes        ; |cpu_on_board|riscv64:cpu|Csrs[1][26]                                                                                                                               ;
+; 21:1               ; 53 bits   ; 742 LEs       ; 212 LEs              ; 530 LEs                ; Yes        ; |cpu_on_board|riscv64:cpu|Csrs[0][61]                                                                                                                               ;
+; 21:1               ; 55 bits   ; 770 LEs       ; 220 LEs              ; 550 LEs                ; Yes        ; |cpu_on_board|riscv64:cpu|Csrs[7][39]                                                                                                                               ;
+; 21:1               ; 56 bits   ; 784 LEs       ; 224 LEs              ; 560 LEs                ; Yes        ; |cpu_on_board|riscv64:cpu|Csrs[6][42]                                                                                                                               ;
+; 21:1               ; 59 bits   ; 826 LEs       ; 236 LEs              ; 590 LEs                ; Yes        ; |cpu_on_board|riscv64:cpu|Csrs[5][29]                                                                                                                               ;
+; 21:1               ; 59 bits   ; 826 LEs       ; 236 LEs              ; 590 LEs                ; Yes        ; |cpu_on_board|riscv64:cpu|Csrs[11][36]                                                                                                                              ;
+; 21:1               ; 59 bits   ; 826 LEs       ; 236 LEs              ; 590 LEs                ; Yes        ; |cpu_on_board|riscv64:cpu|Csrs[10][59]                                                                                                                              ;
+; 21:1               ; 59 bits   ; 826 LEs       ; 236 LEs              ; 590 LEs                ; Yes        ; |cpu_on_board|riscv64:cpu|Csrs[9][17]                                                                                                                               ;
+; 21:1               ; 57 bits   ; 798 LEs       ; 228 LEs              ; 570 LEs                ; Yes        ; |cpu_on_board|riscv64:cpu|Csrs[8][8]                                                                                                                                ;
+; 21:1               ; 59 bits   ; 826 LEs       ; 236 LEs              ; 590 LEs                ; Yes        ; |cpu_on_board|riscv64:cpu|Csrs[13][32]                                                                                                                              ;
+; 21:1               ; 59 bits   ; 826 LEs       ; 236 LEs              ; 590 LEs                ; Yes        ; |cpu_on_board|riscv64:cpu|Csrs[12][26]                                                                                                                              ;
+; 21:1               ; 59 bits   ; 826 LEs       ; 236 LEs              ; 590 LEs                ; Yes        ; |cpu_on_board|riscv64:cpu|Csrs[19][32]                                                                                                                              ;
+; 21:1               ; 59 bits   ; 826 LEs       ; 236 LEs              ; 590 LEs                ; Yes        ; |cpu_on_board|riscv64:cpu|Csrs[17][32]                                                                                                                              ;
+; 21:1               ; 59 bits   ; 826 LEs       ; 236 LEs              ; 590 LEs                ; Yes        ; |cpu_on_board|riscv64:cpu|Csrs[22][21]                                                                                                                              ;
+; 21:1               ; 59 bits   ; 826 LEs       ; 236 LEs              ; 590 LEs                ; Yes        ; |cpu_on_board|riscv64:cpu|Csrs[21][47]                                                                                                                              ;
+; 21:1               ; 59 bits   ; 826 LEs       ; 236 LEs              ; 590 LEs                ; Yes        ; |cpu_on_board|riscv64:cpu|Csrs[20][36]                                                                                                                              ;
 ; 25:1               ; 5 bits    ; 80 LEs        ; 20 LEs               ; 60 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|Csrs[2][4]                                                                                                                                ;
-; 25:1               ; 5 bits    ; 80 LEs        ; 20 LEs               ; 60 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|Csrs[1][0]                                                                                                                                ;
+; 25:1               ; 5 bits    ; 80 LEs        ; 20 LEs               ; 60 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|Csrs[1][2]                                                                                                                                ;
 ; 25:1               ; 3 bits    ; 48 LEs        ; 12 LEs               ; 36 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|Csrs[0][4]                                                                                                                                ;
-; 25:1               ; 3 bits    ; 48 LEs        ; 12 LEs               ; 36 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|Csrs[7][1]                                                                                                                                ;
-; 25:1               ; 4 bits    ; 64 LEs        ; 16 LEs               ; 48 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|Csrs[6][0]                                                                                                                                ;
-; 25:1               ; 5 bits    ; 80 LEs        ; 20 LEs               ; 60 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|Csrs[5][0]                                                                                                                                ;
-; 25:1               ; 5 bits    ; 80 LEs        ; 20 LEs               ; 60 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|Csrs[11][0]                                                                                                                               ;
-; 25:1               ; 5 bits    ; 80 LEs        ; 20 LEs               ; 60 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|Csrs[10][0]                                                                                                                               ;
-; 25:1               ; 5 bits    ; 80 LEs        ; 20 LEs               ; 60 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|Csrs[9][0]                                                                                                                                ;
-; 25:1               ; 4 bits    ; 64 LEs        ; 16 LEs               ; 48 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|Csrs[8][3]                                                                                                                                ;
+; 25:1               ; 3 bits    ; 48 LEs        ; 12 LEs               ; 36 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|Csrs[7][2]                                                                                                                                ;
+; 25:1               ; 4 bits    ; 64 LEs        ; 16 LEs               ; 48 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|Csrs[6][1]                                                                                                                                ;
+; 25:1               ; 5 bits    ; 80 LEs        ; 20 LEs               ; 60 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|Csrs[5][3]                                                                                                                                ;
+; 25:1               ; 5 bits    ; 80 LEs        ; 20 LEs               ; 60 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|Csrs[11][1]                                                                                                                               ;
+; 25:1               ; 5 bits    ; 80 LEs        ; 20 LEs               ; 60 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|Csrs[10][4]                                                                                                                               ;
+; 25:1               ; 5 bits    ; 80 LEs        ; 20 LEs               ; 60 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|Csrs[9][3]                                                                                                                                ;
+; 25:1               ; 4 bits    ; 64 LEs        ; 16 LEs               ; 48 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|Csrs[8][0]                                                                                                                                ;
 ; 25:1               ; 5 bits    ; 80 LEs        ; 20 LEs               ; 60 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|Csrs[13][3]                                                                                                                               ;
-; 25:1               ; 5 bits    ; 80 LEs        ; 20 LEs               ; 60 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|Csrs[12][2]                                                                                                                               ;
-; 25:1               ; 5 bits    ; 80 LEs        ; 20 LEs               ; 60 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|Csrs[19][3]                                                                                                                               ;
-; 25:1               ; 5 bits    ; 80 LEs        ; 20 LEs               ; 60 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|Csrs[17][3]                                                                                                                               ;
-; 24:1               ; 32 bits   ; 512 LEs       ; 128 LEs              ; 384 LEs                ; Yes        ; |cpu_on_board|riscv64:cpu|Csrs[23][57]                                                                                                                              ;
-; 24:1               ; 27 bits   ; 432 LEs       ; 108 LEs              ; 324 LEs                ; Yes        ; |cpu_on_board|riscv64:cpu|Csrs[23][23]                                                                                                                              ;
-; 25:1               ; 5 bits    ; 80 LEs        ; 20 LEs               ; 60 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|Csrs[22][4]                                                                                                                               ;
-; 25:1               ; 5 bits    ; 80 LEs        ; 20 LEs               ; 60 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|Csrs[21][2]                                                                                                                               ;
+; 25:1               ; 5 bits    ; 80 LEs        ; 20 LEs               ; 60 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|Csrs[12][3]                                                                                                                               ;
+; 25:1               ; 5 bits    ; 80 LEs        ; 20 LEs               ; 60 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|Csrs[19][2]                                                                                                                               ;
+; 25:1               ; 5 bits    ; 80 LEs        ; 20 LEs               ; 60 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|Csrs[17][2]                                                                                                                               ;
+; 24:1               ; 32 bits   ; 512 LEs       ; 128 LEs              ; 384 LEs                ; Yes        ; |cpu_on_board|riscv64:cpu|Csrs[23][48]                                                                                                                              ;
+; 24:1               ; 27 bits   ; 432 LEs       ; 108 LEs              ; 324 LEs                ; Yes        ; |cpu_on_board|riscv64:cpu|Csrs[23][24]                                                                                                                              ;
+; 25:1               ; 5 bits    ; 80 LEs        ; 20 LEs               ; 60 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|Csrs[22][0]                                                                                                                               ;
+; 25:1               ; 5 bits    ; 80 LEs        ; 20 LEs               ; 60 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|Csrs[21][3]                                                                                                                               ;
 ; 25:1               ; 5 bits    ; 80 LEs        ; 20 LEs               ; 60 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|Csrs[20][2]                                                                                                                               ;
-; 28:1               ; 5 bits    ; 90 LEs        ; 25 LEs               ; 65 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|Csrs[23][1]                                                                                                                               ;
-; 29:1               ; 3 bits    ; 57 LEs        ; 12 LEs               ; 45 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|Csrs[6][9]                                                                                                                                ;
-; 12:1               ; 22 bits   ; 176 LEs       ; 22 LEs               ; 154 LEs                ; Yes        ; |cpu_on_board|sdram_addr[19]                                                                                                                                        ;
-; 30:1               ; 59 bits   ; 1180 LEs      ; 236 LEs              ; 944 LEs                ; Yes        ; |cpu_on_board|riscv64:cpu|Csrs[3][35]                                                                                                                               ;
-; 30:1               ; 59 bits   ; 1180 LEs      ; 236 LEs              ; 944 LEs                ; Yes        ; |cpu_on_board|riscv64:cpu|Csrs[4][43]                                                                                                                               ;
-; 30:1               ; 59 bits   ; 1180 LEs      ; 236 LEs              ; 944 LEs                ; Yes        ; |cpu_on_board|riscv64:cpu|Csrs[15][48]                                                                                                                              ;
-; 30:1               ; 59 bits   ; 1180 LEs      ; 236 LEs              ; 944 LEs                ; Yes        ; |cpu_on_board|riscv64:cpu|Csrs[14][35]                                                                                                                              ;
-; 30:1               ; 59 bits   ; 1180 LEs      ; 236 LEs              ; 944 LEs                ; Yes        ; |cpu_on_board|riscv64:cpu|Csrs[18][57]                                                                                                                              ;
-; 30:1               ; 59 bits   ; 1180 LEs      ; 236 LEs              ; 944 LEs                ; Yes        ; |cpu_on_board|riscv64:cpu|Csrs[16][59]                                                                                                                              ;
+; 28:1               ; 5 bits    ; 90 LEs        ; 25 LEs               ; 65 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|Csrs[23][3]                                                                                                                               ;
+; 29:1               ; 3 bits    ; 57 LEs        ; 12 LEs               ; 45 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|Csrs[6][7]                                                                                                                                ;
+; 12:1               ; 22 bits   ; 176 LEs       ; 22 LEs               ; 154 LEs                ; Yes        ; |cpu_on_board|sdram_addr[10]                                                                                                                                        ;
+; 30:1               ; 59 bits   ; 1180 LEs      ; 236 LEs              ; 944 LEs                ; Yes        ; |cpu_on_board|riscv64:cpu|Csrs[3][27]                                                                                                                               ;
+; 30:1               ; 59 bits   ; 1180 LEs      ; 236 LEs              ; 944 LEs                ; Yes        ; |cpu_on_board|riscv64:cpu|Csrs[4][20]                                                                                                                               ;
+; 30:1               ; 59 bits   ; 1180 LEs      ; 236 LEs              ; 944 LEs                ; Yes        ; |cpu_on_board|riscv64:cpu|Csrs[15][7]                                                                                                                               ;
+; 30:1               ; 59 bits   ; 1180 LEs      ; 236 LEs              ; 944 LEs                ; Yes        ; |cpu_on_board|riscv64:cpu|Csrs[14][60]                                                                                                                              ;
+; 30:1               ; 59 bits   ; 1180 LEs      ; 236 LEs              ; 944 LEs                ; Yes        ; |cpu_on_board|riscv64:cpu|Csrs[18][9]                                                                                                                               ;
+; 30:1               ; 59 bits   ; 1180 LEs      ; 236 LEs              ; 944 LEs                ; Yes        ; |cpu_on_board|riscv64:cpu|Csrs[16][35]                                                                                                                              ;
 ; 31:1               ; 3 bits    ; 60 LEs        ; 12 LEs               ; 48 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|Csrs[0][7]                                                                                                                                ;
-; 31:1               ; 2 bits    ; 40 LEs        ; 8 LEs                ; 32 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|Csrs[0][5]                                                                                                                                ;
-; 34:1               ; 5 bits    ; 110 LEs       ; 25 LEs               ; 85 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|Csrs[3][3]                                                                                                                                ;
-; 34:1               ; 5 bits    ; 110 LEs       ; 25 LEs               ; 85 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|Csrs[4][4]                                                                                                                                ;
-; 34:1               ; 5 bits    ; 110 LEs       ; 25 LEs               ; 85 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|Csrs[15][1]                                                                                                                               ;
-; 34:1               ; 5 bits    ; 110 LEs       ; 25 LEs               ; 85 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|Csrs[14][1]                                                                                                                               ;
-; 34:1               ; 5 bits    ; 110 LEs       ; 25 LEs               ; 85 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|Csrs[18][1]                                                                                                                               ;
-; 34:1               ; 5 bits    ; 110 LEs       ; 25 LEs               ; 85 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|Csrs[16][4]                                                                                                                               ;
-; 29:1               ; 7 bits    ; 133 LEs       ; 56 LEs               ; 77 LEs                 ; Yes        ; |cpu_on_board|bus_read_data[30]                                                                                                                                     ;
+; 31:1               ; 2 bits    ; 40 LEs        ; 8 LEs                ; 32 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|Csrs[0][8]                                                                                                                                ;
+; 34:1               ; 5 bits    ; 110 LEs       ; 25 LEs               ; 85 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|Csrs[3][1]                                                                                                                                ;
+; 34:1               ; 5 bits    ; 110 LEs       ; 25 LEs               ; 85 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|Csrs[4][2]                                                                                                                                ;
+; 34:1               ; 5 bits    ; 110 LEs       ; 25 LEs               ; 85 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|Csrs[15][3]                                                                                                                               ;
+; 34:1               ; 5 bits    ; 110 LEs       ; 25 LEs               ; 85 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|Csrs[14][3]                                                                                                                               ;
+; 34:1               ; 5 bits    ; 110 LEs       ; 25 LEs               ; 85 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|Csrs[18][2]                                                                                                                               ;
+; 34:1               ; 5 bits    ; 110 LEs       ; 25 LEs               ; 85 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|Csrs[16][1]                                                                                                                               ;
+; 29:1               ; 7 bits    ; 133 LEs       ; 56 LEs               ; 77 LEs                 ; Yes        ; |cpu_on_board|bus_read_data[28]                                                                                                                                     ;
 ; 30:1               ; 8 bits    ; 160 LEs       ; 72 LEs               ; 88 LEs                 ; Yes        ; |cpu_on_board|bus_read_data[22]                                                                                                                                     ;
 ; 36:1               ; 4 bits    ; 96 LEs        ; 36 LEs               ; 60 LEs                 ; Yes        ; |cpu_on_board|bus_read_data[3]                                                                                                                                      ;
-; 48:1               ; 61 bits   ; 1952 LEs      ; 671 LEs              ; 1281 LEs               ; Yes        ; |cpu_on_board|riscv64:cpu|pc[29]                                                                                                                                    ;
-; 37:1               ; 8 bits    ; 192 LEs       ; 64 LEs               ; 128 LEs                ; Yes        ; |cpu_on_board|bus_read_data[11]                                                                                                                                     ;
-; 42:1               ; 8 bits    ; 224 LEs       ; 48 LEs               ; 176 LEs                ; Yes        ; |cpu_on_board|bus_read_data[37]                                                                                                                                     ;
-; 42:1               ; 7 bits    ; 196 LEs       ; 42 LEs               ; 154 LEs                ; Yes        ; |cpu_on_board|bus_read_data[42]                                                                                                                                     ;
-; 42:1               ; 8 bits    ; 224 LEs       ; 48 LEs               ; 176 LEs                ; Yes        ; |cpu_on_board|bus_read_data[54]                                                                                                                                     ;
+; 48:1               ; 61 bits   ; 1952 LEs      ; 671 LEs              ; 1281 LEs               ; Yes        ; |cpu_on_board|riscv64:cpu|pc[9]                                                                                                                                     ;
+; 37:1               ; 8 bits    ; 192 LEs       ; 64 LEs               ; 128 LEs                ; Yes        ; |cpu_on_board|bus_read_data[14]                                                                                                                                     ;
+; 42:1               ; 8 bits    ; 224 LEs       ; 48 LEs               ; 176 LEs                ; Yes        ; |cpu_on_board|bus_read_data[32]                                                                                                                                     ;
+; 42:1               ; 7 bits    ; 196 LEs       ; 42 LEs               ; 154 LEs                ; Yes        ; |cpu_on_board|bus_read_data[46]                                                                                                                                     ;
+; 42:1               ; 8 bits    ; 224 LEs       ; 48 LEs               ; 176 LEs                ; Yes        ; |cpu_on_board|bus_read_data[48]                                                                                                                                     ;
 ; 42:1               ; 7 bits    ; 196 LEs       ; 42 LEs               ; 154 LEs                ; Yes        ; |cpu_on_board|bus_read_data[62]                                                                                                                                     ;
-; 38:1               ; 6 bits    ; 150 LEs       ; 60 LEs               ; 90 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|re[31][6]                                                                                                                                 ;
-; 38:1               ; 6 bits    ; 150 LEs       ; 60 LEs               ; 90 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|re[30][6]                                                                                                                                 ;
-; 38:1               ; 6 bits    ; 150 LEs       ; 60 LEs               ; 90 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|re[29][4]                                                                                                                                 ;
-; 38:1               ; 6 bits    ; 150 LEs       ; 60 LEs               ; 90 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|re[28][6]                                                                                                                                 ;
-; 38:1               ; 6 bits    ; 150 LEs       ; 60 LEs               ; 90 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|re[27][6]                                                                                                                                 ;
-; 38:1               ; 6 bits    ; 150 LEs       ; 60 LEs               ; 90 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|re[26][5]                                                                                                                                 ;
-; 38:1               ; 6 bits    ; 150 LEs       ; 60 LEs               ; 90 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|re[25][4]                                                                                                                                 ;
-; 38:1               ; 6 bits    ; 150 LEs       ; 60 LEs               ; 90 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|re[24][3]                                                                                                                                 ;
+; 38:1               ; 6 bits    ; 150 LEs       ; 60 LEs               ; 90 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|re[31][2]                                                                                                                                 ;
+; 38:1               ; 6 bits    ; 150 LEs       ; 60 LEs               ; 90 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|re[30][2]                                                                                                                                 ;
+; 38:1               ; 6 bits    ; 150 LEs       ; 60 LEs               ; 90 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|re[29][6]                                                                                                                                 ;
+; 38:1               ; 6 bits    ; 150 LEs       ; 60 LEs               ; 90 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|re[28][2]                                                                                                                                 ;
+; 38:1               ; 6 bits    ; 150 LEs       ; 60 LEs               ; 90 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|re[27][7]                                                                                                                                 ;
+; 38:1               ; 6 bits    ; 150 LEs       ; 60 LEs               ; 90 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|re[26][4]                                                                                                                                 ;
+; 38:1               ; 6 bits    ; 150 LEs       ; 60 LEs               ; 90 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|re[25][7]                                                                                                                                 ;
+; 38:1               ; 6 bits    ; 150 LEs       ; 60 LEs               ; 90 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|re[24][4]                                                                                                                                 ;
 ; 38:1               ; 6 bits    ; 150 LEs       ; 60 LEs               ; 90 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|re[23][2]                                                                                                                                 ;
-; 38:1               ; 6 bits    ; 150 LEs       ; 60 LEs               ; 90 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|re[22][4]                                                                                                                                 ;
-; 38:1               ; 6 bits    ; 150 LEs       ; 60 LEs               ; 90 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|re[21][7]                                                                                                                                 ;
-; 38:1               ; 6 bits    ; 150 LEs       ; 60 LEs               ; 90 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|re[20][6]                                                                                                                                 ;
-; 38:1               ; 6 bits    ; 150 LEs       ; 60 LEs               ; 90 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|re[19][3]                                                                                                                                 ;
-; 38:1               ; 6 bits    ; 150 LEs       ; 60 LEs               ; 90 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|re[18][4]                                                                                                                                 ;
-; 38:1               ; 6 bits    ; 150 LEs       ; 60 LEs               ; 90 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|re[17][3]                                                                                                                                 ;
-; 38:1               ; 6 bits    ; 150 LEs       ; 60 LEs               ; 90 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|re[16][4]                                                                                                                                 ;
-; 38:1               ; 6 bits    ; 150 LEs       ; 60 LEs               ; 90 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|re[15][5]                                                                                                                                 ;
+; 38:1               ; 6 bits    ; 150 LEs       ; 60 LEs               ; 90 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|re[22][6]                                                                                                                                 ;
+; 38:1               ; 6 bits    ; 150 LEs       ; 60 LEs               ; 90 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|re[21][3]                                                                                                                                 ;
+; 38:1               ; 6 bits    ; 150 LEs       ; 60 LEs               ; 90 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|re[20][5]                                                                                                                                 ;
+; 38:1               ; 6 bits    ; 150 LEs       ; 60 LEs               ; 90 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|re[19][5]                                                                                                                                 ;
+; 38:1               ; 6 bits    ; 150 LEs       ; 60 LEs               ; 90 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|re[18][2]                                                                                                                                 ;
+; 38:1               ; 6 bits    ; 150 LEs       ; 60 LEs               ; 90 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|re[17][2]                                                                                                                                 ;
+; 38:1               ; 6 bits    ; 150 LEs       ; 60 LEs               ; 90 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|re[16][2]                                                                                                                                 ;
+; 38:1               ; 6 bits    ; 150 LEs       ; 60 LEs               ; 90 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|re[15][7]                                                                                                                                 ;
 ; 38:1               ; 6 bits    ; 150 LEs       ; 60 LEs               ; 90 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|re[14][5]                                                                                                                                 ;
-; 38:1               ; 6 bits    ; 150 LEs       ; 60 LEs               ; 90 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|re[13][4]                                                                                                                                 ;
-; 38:1               ; 6 bits    ; 150 LEs       ; 60 LEs               ; 90 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|re[12][4]                                                                                                                                 ;
-; 38:1               ; 6 bits    ; 150 LEs       ; 60 LEs               ; 90 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|re[11][7]                                                                                                                                 ;
-; 41:1               ; 4 bits    ; 108 LEs       ; 44 LEs               ; 64 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|re[31][8]                                                                                                                                 ;
-; 41:1               ; 4 bits    ; 108 LEs       ; 44 LEs               ; 64 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|re[30][11]                                                                                                                                ;
-; 41:1               ; 4 bits    ; 108 LEs       ; 44 LEs               ; 64 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|re[29][10]                                                                                                                                ;
+; 38:1               ; 6 bits    ; 150 LEs       ; 60 LEs               ; 90 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|re[13][5]                                                                                                                                 ;
+; 38:1               ; 6 bits    ; 150 LEs       ; 60 LEs               ; 90 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|re[12][7]                                                                                                                                 ;
+; 38:1               ; 6 bits    ; 150 LEs       ; 60 LEs               ; 90 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|re[11][2]                                                                                                                                 ;
+; 41:1               ; 4 bits    ; 108 LEs       ; 44 LEs               ; 64 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|re[31][10]                                                                                                                                ;
+; 41:1               ; 4 bits    ; 108 LEs       ; 44 LEs               ; 64 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|re[30][8]                                                                                                                                 ;
+; 41:1               ; 4 bits    ; 108 LEs       ; 44 LEs               ; 64 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|re[29][11]                                                                                                                                ;
 ; 41:1               ; 4 bits    ; 108 LEs       ; 44 LEs               ; 64 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|re[28][11]                                                                                                                                ;
-; 41:1               ; 4 bits    ; 108 LEs       ; 44 LEs               ; 64 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|re[27][11]                                                                                                                                ;
-; 41:1               ; 4 bits    ; 108 LEs       ; 44 LEs               ; 64 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|re[26][8]                                                                                                                                 ;
-; 41:1               ; 4 bits    ; 108 LEs       ; 44 LEs               ; 64 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|re[25][10]                                                                                                                                ;
-; 41:1               ; 4 bits    ; 108 LEs       ; 44 LEs               ; 64 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|re[24][10]                                                                                                                                ;
-; 41:1               ; 4 bits    ; 108 LEs       ; 44 LEs               ; 64 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|re[23][10]                                                                                                                                ;
-; 41:1               ; 4 bits    ; 108 LEs       ; 44 LEs               ; 64 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|re[22][11]                                                                                                                                ;
-; 41:1               ; 4 bits    ; 108 LEs       ; 44 LEs               ; 64 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|re[21][10]                                                                                                                                ;
-; 41:1               ; 4 bits    ; 108 LEs       ; 44 LEs               ; 64 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|re[20][11]                                                                                                                                ;
-; 41:1               ; 4 bits    ; 108 LEs       ; 44 LEs               ; 64 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|re[19][8]                                                                                                                                 ;
-; 41:1               ; 4 bits    ; 108 LEs       ; 44 LEs               ; 64 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|re[18][11]                                                                                                                                ;
-; 41:1               ; 4 bits    ; 108 LEs       ; 44 LEs               ; 64 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|re[17][11]                                                                                                                                ;
-; 41:1               ; 4 bits    ; 108 LEs       ; 44 LEs               ; 64 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|re[16][9]                                                                                                                                 ;
-; 41:1               ; 4 bits    ; 108 LEs       ; 44 LEs               ; 64 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|re[15][10]                                                                                                                                ;
+; 41:1               ; 4 bits    ; 108 LEs       ; 44 LEs               ; 64 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|re[27][8]                                                                                                                                 ;
+; 41:1               ; 4 bits    ; 108 LEs       ; 44 LEs               ; 64 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|re[26][9]                                                                                                                                 ;
+; 41:1               ; 4 bits    ; 108 LEs       ; 44 LEs               ; 64 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|re[25][8]                                                                                                                                 ;
+; 41:1               ; 4 bits    ; 108 LEs       ; 44 LEs               ; 64 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|re[24][8]                                                                                                                                 ;
+; 41:1               ; 4 bits    ; 108 LEs       ; 44 LEs               ; 64 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|re[23][8]                                                                                                                                 ;
+; 41:1               ; 4 bits    ; 108 LEs       ; 44 LEs               ; 64 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|re[22][9]                                                                                                                                 ;
+; 41:1               ; 4 bits    ; 108 LEs       ; 44 LEs               ; 64 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|re[21][8]                                                                                                                                 ;
+; 41:1               ; 4 bits    ; 108 LEs       ; 44 LEs               ; 64 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|re[20][9]                                                                                                                                 ;
+; 41:1               ; 4 bits    ; 108 LEs       ; 44 LEs               ; 64 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|re[19][11]                                                                                                                                ;
+; 41:1               ; 4 bits    ; 108 LEs       ; 44 LEs               ; 64 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|re[18][9]                                                                                                                                 ;
+; 41:1               ; 4 bits    ; 108 LEs       ; 44 LEs               ; 64 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|re[17][10]                                                                                                                                ;
+; 41:1               ; 4 bits    ; 108 LEs       ; 44 LEs               ; 64 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|re[16][10]                                                                                                                                ;
+; 41:1               ; 4 bits    ; 108 LEs       ; 44 LEs               ; 64 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|re[15][8]                                                                                                                                 ;
 ; 41:1               ; 4 bits    ; 108 LEs       ; 44 LEs               ; 64 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|re[14][11]                                                                                                                                ;
-; 41:1               ; 4 bits    ; 108 LEs       ; 44 LEs               ; 64 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|re[13][8]                                                                                                                                 ;
-; 41:1               ; 4 bits    ; 108 LEs       ; 44 LEs               ; 64 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|re[12][8]                                                                                                                                 ;
-; 41:1               ; 4 bits    ; 108 LEs       ; 44 LEs               ; 64 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|re[11][10]                                                                                                                                ;
-; 40:1               ; 6 bits    ; 156 LEs       ; 66 LEs               ; 90 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|re[10][3]                                                                                                                                 ;
-; 40:1               ; 6 bits    ; 156 LEs       ; 66 LEs               ; 90 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|re[7][2]                                                                                                                                  ;
+; 41:1               ; 4 bits    ; 108 LEs       ; 44 LEs               ; 64 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|re[13][10]                                                                                                                                ;
+; 41:1               ; 4 bits    ; 108 LEs       ; 44 LEs               ; 64 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|re[12][10]                                                                                                                                ;
+; 41:1               ; 4 bits    ; 108 LEs       ; 44 LEs               ; 64 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|re[11][8]                                                                                                                                 ;
+; 40:1               ; 6 bits    ; 156 LEs       ; 66 LEs               ; 90 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|re[10][4]                                                                                                                                 ;
+; 40:1               ; 6 bits    ; 156 LEs       ; 66 LEs               ; 90 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|re[7][3]                                                                                                                                  ;
 ; 40:1               ; 6 bits    ; 156 LEs       ; 66 LEs               ; 90 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|re[6][3]                                                                                                                                  ;
-; 40:1               ; 6 bits    ; 156 LEs       ; 66 LEs               ; 90 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|re[5][7]                                                                                                                                  ;
-; 40:1               ; 6 bits    ; 156 LEs       ; 66 LEs               ; 90 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|re[4][4]                                                                                                                                  ;
-; 40:1               ; 6 bits    ; 156 LEs       ; 66 LEs               ; 90 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|re[3][4]                                                                                                                                  ;
-; 40:1               ; 6 bits    ; 156 LEs       ; 66 LEs               ; 90 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|re[2][3]                                                                                                                                  ;
-; 40:1               ; 6 bits    ; 156 LEs       ; 66 LEs               ; 90 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|re[1][2]                                                                                                                                  ;
-; 43:1               ; 52 bits   ; 1456 LEs      ; 624 LEs              ; 832 LEs                ; Yes        ; |cpu_on_board|riscv64:cpu|re[31][22]                                                                                                                                ;
-; 43:1               ; 52 bits   ; 1456 LEs      ; 624 LEs              ; 832 LEs                ; Yes        ; |cpu_on_board|riscv64:cpu|re[30][22]                                                                                                                                ;
-; 43:1               ; 52 bits   ; 1456 LEs      ; 624 LEs              ; 832 LEs                ; Yes        ; |cpu_on_board|riscv64:cpu|re[29][50]                                                                                                                                ;
-; 43:1               ; 52 bits   ; 1456 LEs      ; 624 LEs              ; 832 LEs                ; Yes        ; |cpu_on_board|riscv64:cpu|re[28][26]                                                                                                                                ;
-; 43:1               ; 52 bits   ; 1456 LEs      ; 624 LEs              ; 832 LEs                ; Yes        ; |cpu_on_board|riscv64:cpu|re[27][14]                                                                                                                                ;
-; 43:1               ; 52 bits   ; 1456 LEs      ; 624 LEs              ; 832 LEs                ; Yes        ; |cpu_on_board|riscv64:cpu|re[26][60]                                                                                                                                ;
-; 43:1               ; 52 bits   ; 1456 LEs      ; 624 LEs              ; 832 LEs                ; Yes        ; |cpu_on_board|riscv64:cpu|re[25][49]                                                                                                                                ;
-; 43:1               ; 52 bits   ; 1456 LEs      ; 624 LEs              ; 832 LEs                ; Yes        ; |cpu_on_board|riscv64:cpu|re[24][19]                                                                                                                                ;
-; 43:1               ; 52 bits   ; 1456 LEs      ; 624 LEs              ; 832 LEs                ; Yes        ; |cpu_on_board|riscv64:cpu|re[23][33]                                                                                                                                ;
-; 43:1               ; 52 bits   ; 1456 LEs      ; 624 LEs              ; 832 LEs                ; Yes        ; |cpu_on_board|riscv64:cpu|re[22][56]                                                                                                                                ;
-; 43:1               ; 52 bits   ; 1456 LEs      ; 624 LEs              ; 832 LEs                ; Yes        ; |cpu_on_board|riscv64:cpu|re[21][56]                                                                                                                                ;
-; 43:1               ; 52 bits   ; 1456 LEs      ; 624 LEs              ; 832 LEs                ; Yes        ; |cpu_on_board|riscv64:cpu|re[20][50]                                                                                                                                ;
-; 43:1               ; 52 bits   ; 1456 LEs      ; 624 LEs              ; 832 LEs                ; Yes        ; |cpu_on_board|riscv64:cpu|re[19][27]                                                                                                                                ;
-; 43:1               ; 52 bits   ; 1456 LEs      ; 624 LEs              ; 832 LEs                ; Yes        ; |cpu_on_board|riscv64:cpu|re[18][55]                                                                                                                                ;
-; 43:1               ; 52 bits   ; 1456 LEs      ; 624 LEs              ; 832 LEs                ; Yes        ; |cpu_on_board|riscv64:cpu|re[17][63]                                                                                                                                ;
-; 43:1               ; 52 bits   ; 1456 LEs      ; 624 LEs              ; 832 LEs                ; Yes        ; |cpu_on_board|riscv64:cpu|re[16][57]                                                                                                                                ;
+; 40:1               ; 6 bits    ; 156 LEs       ; 66 LEs               ; 90 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|re[5][5]                                                                                                                                  ;
+; 40:1               ; 6 bits    ; 156 LEs       ; 66 LEs               ; 90 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|re[4][2]                                                                                                                                  ;
+; 40:1               ; 6 bits    ; 156 LEs       ; 66 LEs               ; 90 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|re[3][2]                                                                                                                                  ;
+; 40:1               ; 6 bits    ; 156 LEs       ; 66 LEs               ; 90 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|re[2][2]                                                                                                                                  ;
+; 40:1               ; 6 bits    ; 156 LEs       ; 66 LEs               ; 90 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|re[1][7]                                                                                                                                  ;
+; 43:1               ; 52 bits   ; 1456 LEs      ; 624 LEs              ; 832 LEs                ; Yes        ; |cpu_on_board|riscv64:cpu|re[31][28]                                                                                                                                ;
+; 43:1               ; 52 bits   ; 1456 LEs      ; 624 LEs              ; 832 LEs                ; Yes        ; |cpu_on_board|riscv64:cpu|re[30][20]                                                                                                                                ;
+; 43:1               ; 52 bits   ; 1456 LEs      ; 624 LEs              ; 832 LEs                ; Yes        ; |cpu_on_board|riscv64:cpu|re[29][58]                                                                                                                                ;
+; 43:1               ; 52 bits   ; 1456 LEs      ; 624 LEs              ; 832 LEs                ; Yes        ; |cpu_on_board|riscv64:cpu|re[28][18]                                                                                                                                ;
+; 43:1               ; 52 bits   ; 1456 LEs      ; 624 LEs              ; 832 LEs                ; Yes        ; |cpu_on_board|riscv64:cpu|re[27][61]                                                                                                                                ;
+; 43:1               ; 52 bits   ; 1456 LEs      ; 624 LEs              ; 832 LEs                ; Yes        ; |cpu_on_board|riscv64:cpu|re[26][40]                                                                                                                                ;
+; 43:1               ; 52 bits   ; 1456 LEs      ; 624 LEs              ; 832 LEs                ; Yes        ; |cpu_on_board|riscv64:cpu|re[25][43]                                                                                                                                ;
+; 43:1               ; 52 bits   ; 1456 LEs      ; 624 LEs              ; 832 LEs                ; Yes        ; |cpu_on_board|riscv64:cpu|re[24][17]                                                                                                                                ;
+; 43:1               ; 52 bits   ; 1456 LEs      ; 624 LEs              ; 832 LEs                ; Yes        ; |cpu_on_board|riscv64:cpu|re[23][57]                                                                                                                                ;
+; 43:1               ; 52 bits   ; 1456 LEs      ; 624 LEs              ; 832 LEs                ; Yes        ; |cpu_on_board|riscv64:cpu|re[22][12]                                                                                                                                ;
+; 43:1               ; 52 bits   ; 1456 LEs      ; 624 LEs              ; 832 LEs                ; Yes        ; |cpu_on_board|riscv64:cpu|re[21][49]                                                                                                                                ;
+; 43:1               ; 52 bits   ; 1456 LEs      ; 624 LEs              ; 832 LEs                ; Yes        ; |cpu_on_board|riscv64:cpu|re[20][63]                                                                                                                                ;
+; 43:1               ; 52 bits   ; 1456 LEs      ; 624 LEs              ; 832 LEs                ; Yes        ; |cpu_on_board|riscv64:cpu|re[19][55]                                                                                                                                ;
+; 43:1               ; 52 bits   ; 1456 LEs      ; 624 LEs              ; 832 LEs                ; Yes        ; |cpu_on_board|riscv64:cpu|re[18][39]                                                                                                                                ;
+; 43:1               ; 52 bits   ; 1456 LEs      ; 624 LEs              ; 832 LEs                ; Yes        ; |cpu_on_board|riscv64:cpu|re[17][23]                                                                                                                                ;
+; 43:1               ; 52 bits   ; 1456 LEs      ; 624 LEs              ; 832 LEs                ; Yes        ; |cpu_on_board|riscv64:cpu|re[16][13]                                                                                                                                ;
 ; 43:1               ; 52 bits   ; 1456 LEs      ; 624 LEs              ; 832 LEs                ; Yes        ; |cpu_on_board|riscv64:cpu|re[15][16]                                                                                                                                ;
 ; 43:1               ; 52 bits   ; 1456 LEs      ; 624 LEs              ; 832 LEs                ; Yes        ; |cpu_on_board|riscv64:cpu|re[14][21]                                                                                                                                ;
 ; 43:1               ; 52 bits   ; 1456 LEs      ; 624 LEs              ; 832 LEs                ; Yes        ; |cpu_on_board|riscv64:cpu|re[13][41]                                                                                                                                ;
 ; 43:1               ; 52 bits   ; 1456 LEs      ; 624 LEs              ; 832 LEs                ; Yes        ; |cpu_on_board|riscv64:cpu|re[12][26]                                                                                                                                ;
 ; 43:1               ; 52 bits   ; 1456 LEs      ; 624 LEs              ; 832 LEs                ; Yes        ; |cpu_on_board|riscv64:cpu|re[11][57]                                                                                                                                ;
-; 43:1               ; 4 bits    ; 112 LEs       ; 48 LEs               ; 64 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|re[10][8]                                                                                                                                 ;
-; 43:1               ; 4 bits    ; 112 LEs       ; 48 LEs               ; 64 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|re[7][9]                                                                                                                                  ;
-; 43:1               ; 4 bits    ; 112 LEs       ; 48 LEs               ; 64 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|re[6][9]                                                                                                                                  ;
-; 43:1               ; 4 bits    ; 112 LEs       ; 48 LEs               ; 64 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|re[5][9]                                                                                                                                  ;
-; 43:1               ; 4 bits    ; 112 LEs       ; 48 LEs               ; 64 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|re[4][10]                                                                                                                                 ;
-; 43:1               ; 4 bits    ; 112 LEs       ; 48 LEs               ; 64 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|re[3][11]                                                                                                                                 ;
-; 43:1               ; 4 bits    ; 112 LEs       ; 48 LEs               ; 64 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|re[2][10]                                                                                                                                 ;
+; 43:1               ; 4 bits    ; 112 LEs       ; 48 LEs               ; 64 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|re[10][11]                                                                                                                                ;
+; 43:1               ; 4 bits    ; 112 LEs       ; 48 LEs               ; 64 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|re[7][10]                                                                                                                                 ;
+; 43:1               ; 4 bits    ; 112 LEs       ; 48 LEs               ; 64 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|re[6][10]                                                                                                                                 ;
+; 43:1               ; 4 bits    ; 112 LEs       ; 48 LEs               ; 64 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|re[5][8]                                                                                                                                  ;
+; 43:1               ; 4 bits    ; 112 LEs       ; 48 LEs               ; 64 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|re[4][8]                                                                                                                                  ;
+; 43:1               ; 4 bits    ; 112 LEs       ; 48 LEs               ; 64 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|re[3][10]                                                                                                                                 ;
+; 43:1               ; 4 bits    ; 112 LEs       ; 48 LEs               ; 64 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|re[2][9]                                                                                                                                  ;
 ; 43:1               ; 4 bits    ; 112 LEs       ; 48 LEs               ; 64 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|re[1][10]                                                                                                                                 ;
-; 45:1               ; 52 bits   ; 1560 LEs      ; 624 LEs              ; 936 LEs                ; Yes        ; |cpu_on_board|riscv64:cpu|re[10][17]                                                                                                                                ;
-; 45:1               ; 52 bits   ; 1560 LEs      ; 624 LEs              ; 936 LEs                ; Yes        ; |cpu_on_board|riscv64:cpu|re[7][57]                                                                                                                                 ;
+; 45:1               ; 52 bits   ; 1560 LEs      ; 624 LEs              ; 936 LEs                ; Yes        ; |cpu_on_board|riscv64:cpu|re[10][61]                                                                                                                                ;
+; 45:1               ; 52 bits   ; 1560 LEs      ; 624 LEs              ; 936 LEs                ; Yes        ; |cpu_on_board|riscv64:cpu|re[7][33]                                                                                                                                 ;
 ; 45:1               ; 52 bits   ; 1560 LEs      ; 624 LEs              ; 936 LEs                ; Yes        ; |cpu_on_board|riscv64:cpu|re[6][12]                                                                                                                                 ;
 ; 45:1               ; 52 bits   ; 1560 LEs      ; 624 LEs              ; 936 LEs                ; Yes        ; |cpu_on_board|riscv64:cpu|re[5][14]                                                                                                                                 ;
 ; 45:1               ; 52 bits   ; 1560 LEs      ; 624 LEs              ; 936 LEs                ; Yes        ; |cpu_on_board|riscv64:cpu|re[4][54]                                                                                                                                 ;
 ; 45:1               ; 52 bits   ; 1560 LEs      ; 624 LEs              ; 936 LEs                ; Yes        ; |cpu_on_board|riscv64:cpu|re[3][34]                                                                                                                                 ;
 ; 45:1               ; 52 bits   ; 1560 LEs      ; 624 LEs              ; 936 LEs                ; Yes        ; |cpu_on_board|riscv64:cpu|re[2][14]                                                                                                                                 ;
-; 45:1               ; 52 bits   ; 1560 LEs      ; 624 LEs              ; 936 LEs                ; Yes        ; |cpu_on_board|riscv64:cpu|re[1][53]                                                                                                                                 ;
+; 45:1               ; 52 bits   ; 1560 LEs      ; 624 LEs              ; 936 LEs                ; Yes        ; |cpu_on_board|riscv64:cpu|re[1][23]                                                                                                                                 ;
 ; 46:1               ; 2 bits    ; 60 LEs        ; 24 LEs               ; 36 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|re[9][3]                                                                                                                                  ;
 ; 46:1               ; 4 bits    ; 120 LEs       ; 52 LEs               ; 68 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|re[9][7]                                                                                                                                  ;
 ; 46:1               ; 6 bits    ; 180 LEs       ; 84 LEs               ; 96 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|re[8][7]                                                                                                                                  ;
-; 49:1               ; 4 bits    ; 128 LEs       ; 56 LEs               ; 72 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|re[9][8]                                                                                                                                  ;
+; 49:1               ; 4 bits    ; 128 LEs       ; 56 LEs               ; 72 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|re[9][11]                                                                                                                                 ;
 ; 49:1               ; 4 bits    ; 128 LEs       ; 48 LEs               ; 80 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|re[8][8]                                                                                                                                  ;
-; 51:1               ; 52 bits   ; 1768 LEs      ; 728 LEs              ; 1040 LEs               ; Yes        ; |cpu_on_board|riscv64:cpu|re[9][19]                                                                                                                                 ;
-; 51:1               ; 52 bits   ; 1768 LEs      ; 676 LEs              ; 1092 LEs               ; Yes        ; |cpu_on_board|riscv64:cpu|re[8][24]                                                                                                                                 ;
-; 5:1                ; 5 bits    ; 15 LEs        ; 5 LEs                ; 10 LEs                 ; Yes        ; |cpu_on_board|sd_controller:sdctrl|boot_counter[13]                                                                                                                 ;
-; 8:1                ; 7 bits    ; 35 LEs        ; 14 LEs               ; 21 LEs                 ; Yes        ; |cpu_on_board|sd_controller:sdctrl|data_sig[5]                                                                                                                      ;
-; 9:1                ; 12 bits   ; 72 LEs        ; 24 LEs               ; 48 LEs                 ; Yes        ; |cpu_on_board|sd_controller:sdctrl|cmd_out[7]                                                                                                                       ;
-; 10:1               ; 25 bits   ; 150 LEs       ; 75 LEs               ; 75 LEs                 ; Yes        ; |cpu_on_board|sd_controller:sdctrl|cmd_out[32]                                                                                                                      ;
-; 10:1               ; 3 bits    ; 18 LEs        ; 9 LEs                ; 9 LEs                  ; Yes        ; |cpu_on_board|sd_controller:sdctrl|cmd_out[5]                                                                                                                       ;
-; 11:1               ; 5 bits    ; 35 LEs        ; 20 LEs               ; 15 LEs                 ; Yes        ; |cpu_on_board|sd_controller:sdctrl|cmd_out[13]                                                                                                                      ;
-; 15:1               ; 8 bits    ; 80 LEs        ; 24 LEs               ; 56 LEs                 ; Yes        ; |cpu_on_board|sdram_wrdata[4]                                                                                                                                       ;
-; 18:1               ; 8 bits    ; 96 LEs        ; 32 LEs               ; 64 LEs                 ; Yes        ; |cpu_on_board|sdram_wrdata[11]                                                                                                                                      ;
+; 51:1               ; 52 bits   ; 1768 LEs      ; 728 LEs              ; 1040 LEs               ; Yes        ; |cpu_on_board|riscv64:cpu|re[9][54]                                                                                                                                 ;
+; 51:1               ; 52 bits   ; 1768 LEs      ; 676 LEs              ; 1092 LEs               ; Yes        ; |cpu_on_board|riscv64:cpu|re[8][32]                                                                                                                                 ;
+; 5:1                ; 5 bits    ; 15 LEs        ; 5 LEs                ; 10 LEs                 ; Yes        ; |cpu_on_board|sd_controller:sdctrl|boot_counter[11]                                                                                                                 ;
+; 8:1                ; 7 bits    ; 35 LEs        ; 14 LEs               ; 21 LEs                 ; Yes        ; |cpu_on_board|sd_controller:sdctrl|data_sig[1]                                                                                                                      ;
+; 9:1                ; 12 bits   ; 72 LEs        ; 24 LEs               ; 48 LEs                 ; Yes        ; |cpu_on_board|sd_controller:sdctrl|cmd_out[49]                                                                                                                      ;
+; 10:1               ; 25 bits   ; 150 LEs       ; 75 LEs               ; 75 LEs                 ; Yes        ; |cpu_on_board|sd_controller:sdctrl|cmd_out[33]                                                                                                                      ;
+; 10:1               ; 3 bits    ; 18 LEs        ; 9 LEs                ; 9 LEs                  ; Yes        ; |cpu_on_board|sd_controller:sdctrl|cmd_out[6]                                                                                                                       ;
+; 11:1               ; 5 bits    ; 35 LEs        ; 20 LEs               ; 15 LEs                 ; Yes        ; |cpu_on_board|sd_controller:sdctrl|cmd_out[11]                                                                                                                      ;
+; 15:1               ; 8 bits    ; 80 LEs        ; 24 LEs               ; 56 LEs                 ; Yes        ; |cpu_on_board|sdram_wrdata[2]                                                                                                                                       ;
+; 18:1               ; 8 bits    ; 96 LEs        ; 32 LEs               ; 64 LEs                 ; Yes        ; |cpu_on_board|sdram_wrdata[13]                                                                                                                                      ;
 ; 21:1               ; 4 bits    ; 56 LEs        ; 16 LEs               ; 40 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|Csrs[7][12]                                                                                                                               ;
 ; 21:1               ; 2 bits    ; 28 LEs        ; 8 LEs                ; 20 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|Csrs[8][5]                                                                                                                                ;
-; 25:1               ; 2 bits    ; 32 LEs        ; 8 LEs                ; 24 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|Csrs[7][0]                                                                                                                                ;
+; 25:1               ; 2 bits    ; 32 LEs        ; 8 LEs                ; 24 LEs                 ; Yes        ; |cpu_on_board|riscv64:cpu|Csrs[7][3]                                                                                                                                ;
 ; 3:1                ; 19 bits   ; 38 LEs        ; 19 LEs               ; 19 LEs                 ; No         ; |cpu_on_board|Cache                                                                                                                                                 ;
 ; 3:1                ; 3 bits    ; 6 LEs         ; 3 LEs                ; 3 LEs                  ; No         ; |cpu_on_board|sdram_controller:sdram_ctrl|addr[8]                                                                                                                   ;
 ; 3:1                ; 3 bits    ; 6 LEs         ; 3 LEs                ; 3 LEs                  ; No         ; |cpu_on_board|sd_controller:sdctrl|response_type                                                                                                                    ;
@@ -1284,7 +1284,7 @@ Encoding Type:  One-Hot
 ; 4:1                ; 5 bits    ; 10 LEs        ; 5 LEs                ; 5 LEs                  ; Yes        ; |cpu_on_board|sld_hub:auto_hub|sld_jtag_hub:\jtag_hub_gen:sld_jtag_hub_inst|mixer_addr_reg[4]                                                                       ;
 ; 5:1                ; 5 bits    ; 15 LEs        ; 5 LEs                ; 10 LEs                 ; Yes        ; |cpu_on_board|sld_hub:auto_hub|sld_jtag_hub:\jtag_hub_gen:sld_jtag_hub_inst|sld_rom_sr:hub_info_reg|word_counter[1]                                                 ;
 ; 6:1                ; 3 bits    ; 12 LEs        ; 3 LEs                ; 9 LEs                  ; Yes        ; |cpu_on_board|sld_hub:auto_hub|sld_jtag_hub:\jtag_hub_gen:sld_jtag_hub_inst|irsr_reg[2]                                                                             ;
-; 34:1               ; 4 bits    ; 88 LEs        ; 52 LEs               ; 36 LEs                 ; Yes        ; |cpu_on_board|sld_hub:auto_hub|sld_jtag_hub:\jtag_hub_gen:sld_jtag_hub_inst|design_hash_reg[3]                                                                      ;
+; 34:1               ; 4 bits    ; 88 LEs        ; 64 LEs               ; 24 LEs                 ; Yes        ; |cpu_on_board|sld_hub:auto_hub|sld_jtag_hub:\jtag_hub_gen:sld_jtag_hub_inst|design_hash_reg[3]                                                                      ;
 ; 20:1               ; 4 bits    ; 52 LEs        ; 32 LEs               ; 20 LEs                 ; Yes        ; |cpu_on_board|sld_hub:auto_hub|sld_jtag_hub:\jtag_hub_gen:sld_jtag_hub_inst|sld_rom_sr:hub_info_reg|WORD_SR[1]                                                      ;
 +--------------------+-----------+---------------+----------------------+------------------------+------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 
@@ -2390,7 +2390,7 @@ Note: In order to hide this table in the UI and the text report file, please set
 +------------------+--------------+
 ; Partition Name   ; Elapsed Time ;
 +------------------+--------------+
-; Top              ; 00:26:09     ;
+; Top              ; 00:23:27     ;
 ; sld_hub:auto_hub ; 00:00:00     ;
 +------------------+--------------+
 
@@ -2414,7 +2414,7 @@ Info: Running Quartus II 32-bit Analysis & Synthesis
     Info: programming logic devices manufactured by Altera and sold by 
     Info: Altera or its authorized distributors.  Please refer to the 
     Info: applicable agreement for further details.
-    Info: Processing started: Fri Apr 24 19:43:49 2026
+    Info: Processing started: Sat Apr 25 12:23:09 2026
 Info: Command: quartus_map --read_settings_files=on --write_settings_files=off cpu_on_board -c cpu_on_board
 Info (20030): Parallel compilation is enabled and will use 2 of the 2 processors detected
 Info (12021): Found 1 design units, including 1 entities, in source file jtag_uart_system/synthesis/jtag_uart_system.v
@@ -2626,236 +2626,236 @@ Info (10662): Verilog HDL Assignment information at clock_slower.v(13): truncate
 Info (10662): Verilog HDL Assignment information at clock_slower.v(14): truncated unsized constant literal with size 32 to size 25 with no loss of information
 Info (10662): Verilog HDL Assignment information at clock_slower.v(21): truncated unsized constant literal with size 32 to size 25 with no loss of information
 Warning (10230): Verilog HDL assignment warning at clock_slower.v(24): truncated value with size 32 to match size of target (25)
-Warning (10335): Unrecognized synthesis attribute "ram_style" at riscv64.v(47)
-Warning (10335): Unrecognized synthesis attribute "ram_style" at riscv64.v(48)
-Warning (10335): Unrecognized synthesis attribute "ram_style" at riscv64.v(447)
-Warning (10335): Unrecognized synthesis attribute "ram_style" at riscv64.v(475)
-Warning (10335): Unrecognized synthesis attribute "ram_style" at riscv64.v(476)
-Warning (10335): Unrecognized synthesis attribute "ram_style" at riscv64.v(533)
-Warning (10335): Unrecognized synthesis attribute "ram_style" at riscv64.v(534)
-Warning (10335): Unrecognized synthesis attribute "ram_style" at riscv64.v(665)
-Warning (10335): Unrecognized synthesis attribute "ram_style" at riscv64.v(666)
-Warning (10335): Unrecognized synthesis attribute "ram_style" at riscv64.v(670)
-Warning (10268): Verilog HDL information at riscv64.v(719): always construct contains both blocking and non-blocking assignments
-Info (10281): Verilog HDL Declaration information at riscv64.v(320): object "MIE" differs only in case from object "mie" in the same scope
-Info (10499): HDL info at riscv64.v(329): see declaration for object "mie"
-Info (10281): Verilog HDL Declaration information at riscv64.v(320): object "SIE" differs only in case from object "sie" in the same scope
-Info (10499): HDL info at riscv64.v(330): see declaration for object "sie"
-Info (10281): Verilog HDL Declaration information at riscv64.v(31): object "meip" differs only in case from object "MEIP" in the same scope
-Info (10499): HDL info at riscv64.v(333): see declaration for object "MEIP"
-Info (10281): Verilog HDL Declaration information at riscv64.v(34): object "seip" differs only in case from object "SEIP" in the same scope
-Info (10499): HDL info at riscv64.v(333): see declaration for object "SEIP"
-Info (10281): Verilog HDL Declaration information at riscv64.v(32): object "mtip" differs only in case from object "MTIP" in the same scope
-Info (10499): HDL info at riscv64.v(333): see declaration for object "MTIP"
-Info (10281): Verilog HDL Declaration information at riscv64.v(35): object "stip" differs only in case from object "STIP" in the same scope
-Info (10499): HDL info at riscv64.v(333): see declaration for object "STIP"
-Info (10281): Verilog HDL Declaration information at riscv64.v(33): object "msip" differs only in case from object "MSIP" in the same scope
-Info (10499): HDL info at riscv64.v(333): see declaration for object "MSIP"
-Info (10281): Verilog HDL Declaration information at riscv64.v(36): object "ssip" differs only in case from object "SSIP" in the same scope
-Info (10499): HDL info at riscv64.v(333): see declaration for object "SSIP"
+Warning (10335): Unrecognized synthesis attribute "ram_style" at riscv64.v(43)
+Warning (10335): Unrecognized synthesis attribute "ram_style" at riscv64.v(44)
+Warning (10335): Unrecognized synthesis attribute "ram_style" at riscv64.v(412)
+Warning (10335): Unrecognized synthesis attribute "ram_style" at riscv64.v(436)
+Warning (10335): Unrecognized synthesis attribute "ram_style" at riscv64.v(437)
+Warning (10335): Unrecognized synthesis attribute "ram_style" at riscv64.v(469)
+Warning (10335): Unrecognized synthesis attribute "ram_style" at riscv64.v(470)
+Warning (10335): Unrecognized synthesis attribute "ram_style" at riscv64.v(560)
+Warning (10335): Unrecognized synthesis attribute "ram_style" at riscv64.v(561)
+Warning (10335): Unrecognized synthesis attribute "ram_style" at riscv64.v(564)
+Warning (10268): Verilog HDL information at riscv64.v(604): always construct contains both blocking and non-blocking assignments
+Info (10281): Verilog HDL Declaration information at riscv64.v(312): object "MIE" differs only in case from object "mie" in the same scope
+Info (10499): HDL info at riscv64.v(321): see declaration for object "mie"
+Info (10281): Verilog HDL Declaration information at riscv64.v(312): object "SIE" differs only in case from object "sie" in the same scope
+Info (10499): HDL info at riscv64.v(322): see declaration for object "sie"
+Info (10281): Verilog HDL Declaration information at riscv64.v(29): object "meip" differs only in case from object "MEIP" in the same scope
+Info (10499): HDL info at riscv64.v(325): see declaration for object "MEIP"
+Info (10281): Verilog HDL Declaration information at riscv64.v(32): object "seip" differs only in case from object "SEIP" in the same scope
+Info (10499): HDL info at riscv64.v(325): see declaration for object "SEIP"
+Info (10281): Verilog HDL Declaration information at riscv64.v(30): object "mtip" differs only in case from object "MTIP" in the same scope
+Info (10499): HDL info at riscv64.v(325): see declaration for object "MTIP"
+Info (10281): Verilog HDL Declaration information at riscv64.v(33): object "stip" differs only in case from object "STIP" in the same scope
+Info (10499): HDL info at riscv64.v(325): see declaration for object "STIP"
+Info (10281): Verilog HDL Declaration information at riscv64.v(31): object "msip" differs only in case from object "MSIP" in the same scope
+Info (10499): HDL info at riscv64.v(325): see declaration for object "MSIP"
+Info (10281): Verilog HDL Declaration information at riscv64.v(34): object "ssip" differs only in case from object "SSIP" in the same scope
+Info (10499): HDL info at riscv64.v(325): see declaration for object "SSIP"
 Warning (12125): Using design file riscv64.v, which is not specified as a design file for the current project, but contains definitions for 1 design units and 1 entities in project
     Info (12023): Found entity 1: riscv64
 Info (12128): Elaborating entity "riscv64" for hierarchy "riscv64:cpu"
-Info (10035): Verilog HDL or VHDL information at riscv64.v(320): object "UIE" declared but not used
-Info (10035): Verilog HDL or VHDL information at riscv64.v(321): object "SD" declared but not used
-Info (10035): Verilog HDL or VHDL information at riscv64.v(321): object "UXL" declared but not used
-Info (10035): Verilog HDL or VHDL information at riscv64.v(321): object "MXR" declared but not used
-Info (10035): Verilog HDL or VHDL information at riscv64.v(321): object "SUM" declared but not used
-Info (10035): Verilog HDL or VHDL information at riscv64.v(321): object "XS" declared but not used
-Info (10035): Verilog HDL or VHDL information at riscv64.v(321): object "FS" declared but not used
-Info (10035): Verilog HDL or VHDL information at riscv64.v(321): object "VS" declared but not used
-Info (10035): Verilog HDL or VHDL information at riscv64.v(321): object "UBE" declared but not used
-Info (10035): Verilog HDL or VHDL information at riscv64.v(327): object "PAGE_F_I" declared but not used
-Info (10035): Verilog HDL or VHDL information at riscv64.v(327): object "PAGE_F_L" declared but not used
-Info (10035): Verilog HDL or VHDL information at riscv64.v(327): object "PAGE_F_S" declared but not used
-Info (10035): Verilog HDL or VHDL information at riscv64.v(329): object "SGEIE" declared but not used
-Info (10035): Verilog HDL or VHDL information at riscv64.v(329): object "VSEIE" declared but not used
-Info (10035): Verilog HDL or VHDL information at riscv64.v(329): object "VSTIE" declared but not used
-Info (10035): Verilog HDL or VHDL information at riscv64.v(329): object "VSSIE" declared but not used
-Info (10035): Verilog HDL or VHDL information at riscv64.v(333): object "SGEIP" declared but not used
-Info (10035): Verilog HDL or VHDL information at riscv64.v(333): object "VSEIP" declared but not used
-Info (10035): Verilog HDL or VHDL information at riscv64.v(333): object "VSTIP" declared but not used
-Info (10035): Verilog HDL or VHDL information at riscv64.v(333): object "VSSIP" declared but not used
-Warning (10036): Verilog HDL or VHDL warning at riscv64.v(87): object "w_func7" assigned a value but never read
-Warning (10036): Verilog HDL or VHDL warning at riscv64.v(88): object "w_func12" assigned a value but never read
-Info (10035): Verilog HDL or VHDL information at riscv64.v(397): object "CAUSE_CODE" declared but not used
+Info (10035): Verilog HDL or VHDL information at riscv64.v(312): object "UIE" declared but not used
+Info (10035): Verilog HDL or VHDL information at riscv64.v(313): object "SD" declared but not used
+Info (10035): Verilog HDL or VHDL information at riscv64.v(313): object "UXL" declared but not used
+Info (10035): Verilog HDL or VHDL information at riscv64.v(313): object "MXR" declared but not used
+Info (10035): Verilog HDL or VHDL information at riscv64.v(313): object "SUM" declared but not used
+Info (10035): Verilog HDL or VHDL information at riscv64.v(313): object "XS" declared but not used
+Info (10035): Verilog HDL or VHDL information at riscv64.v(313): object "FS" declared but not used
+Info (10035): Verilog HDL or VHDL information at riscv64.v(313): object "VS" declared but not used
+Info (10035): Verilog HDL or VHDL information at riscv64.v(313): object "UBE" declared but not used
+Info (10035): Verilog HDL or VHDL information at riscv64.v(319): object "PAGE_F_I" declared but not used
+Info (10035): Verilog HDL or VHDL information at riscv64.v(319): object "PAGE_F_L" declared but not used
+Info (10035): Verilog HDL or VHDL information at riscv64.v(319): object "PAGE_F_S" declared but not used
+Info (10035): Verilog HDL or VHDL information at riscv64.v(321): object "SGEIE" declared but not used
+Info (10035): Verilog HDL or VHDL information at riscv64.v(321): object "VSEIE" declared but not used
+Info (10035): Verilog HDL or VHDL information at riscv64.v(321): object "VSTIE" declared but not used
+Info (10035): Verilog HDL or VHDL information at riscv64.v(321): object "VSSIE" declared but not used
+Info (10035): Verilog HDL or VHDL information at riscv64.v(325): object "SGEIP" declared but not used
+Info (10035): Verilog HDL or VHDL information at riscv64.v(325): object "VSEIP" declared but not used
+Info (10035): Verilog HDL or VHDL information at riscv64.v(325): object "VSTIP" declared but not used
+Info (10035): Verilog HDL or VHDL information at riscv64.v(325): object "VSSIP" declared but not used
+Warning (10036): Verilog HDL or VHDL warning at riscv64.v(82): object "w_func7" assigned a value but never read
+Warning (10036): Verilog HDL or VHDL warning at riscv64.v(83): object "w_func12" assigned a value but never read
+Info (10035): Verilog HDL or VHDL information at riscv64.v(371): object "CAUSE_CODE" declared but not used
+Info (10662): Verilog HDL Assignment information at riscv64.v(45): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(46): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(47): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(48): truncated unsized constant literal with size 32 to size 1 with no loss of information
 Info (10662): Verilog HDL Assignment information at riscv64.v(49): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(50): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(52): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(53): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(54): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Warning (10040): Verilog HDL or VHDL arithmetic warning at riscv64.v(97): loss of carry in addition or borrow in subtraction
-Warning (10040): Verilog HDL or VHDL arithmetic warning at riscv64.v(105): loss of carry in addition or borrow in subtraction
-Warning (10040): Verilog HDL or VHDL arithmetic warning at riscv64.v(106): loss of carry in addition or borrow in subtraction
-Warning (10040): Verilog HDL or VHDL arithmetic warning at riscv64.v(129): loss of carry in addition or borrow in subtraction
-Warning (10040): Verilog HDL or VHDL arithmetic warning at riscv64.v(172): loss of carry in addition or borrow in subtraction
-Warning (10040): Verilog HDL or VHDL arithmetic warning at riscv64.v(218): loss of carry in addition or borrow in subtraction
-Warning (10040): Verilog HDL or VHDL arithmetic warning at riscv64.v(219): loss of carry in addition or borrow in subtraction
-Info (10662): Verilog HDL Assignment information at riscv64.v(224): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(225): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(226): truncated unsized constant literal with size 32 to size 7 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(230): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(231): truncated unsized constant literal with size 32 to size 7 with no loss of information
-Warning (10230): Verilog HDL assignment warning at riscv64.v(240): truncated value with size 32 to match size of target (7)
-Info (10662): Verilog HDL Assignment information at riscv64.v(242): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(243): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(245): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Warning (10040): Verilog HDL or VHDL arithmetic warning at riscv64.v(249): loss of carry in addition or borrow in subtraction
-Warning (10040): Verilog HDL or VHDL arithmetic warning at riscv64.v(273): loss of carry in addition or borrow in subtraction
-Warning (10040): Verilog HDL or VHDL arithmetic warning at riscv64.v(274): loss of carry in addition or borrow in subtraction
-Warning (10040): Verilog HDL or VHDL arithmetic warning at riscv64.v(278): loss of carry in addition or borrow in subtraction
-Info (10662): Verilog HDL Assignment information at riscv64.v(282): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Warning (10040): Verilog HDL or VHDL arithmetic warning at riscv64.v(91): loss of carry in addition or borrow in subtraction
+Warning (10040): Verilog HDL or VHDL arithmetic warning at riscv64.v(98): loss of carry in addition or borrow in subtraction
+Warning (10040): Verilog HDL or VHDL arithmetic warning at riscv64.v(99): loss of carry in addition or borrow in subtraction
+Warning (10040): Verilog HDL or VHDL arithmetic warning at riscv64.v(121): loss of carry in addition or borrow in subtraction
+Warning (10040): Verilog HDL or VHDL arithmetic warning at riscv64.v(164): loss of carry in addition or borrow in subtraction
+Warning (10040): Verilog HDL or VHDL arithmetic warning at riscv64.v(210): loss of carry in addition or borrow in subtraction
+Warning (10040): Verilog HDL or VHDL arithmetic warning at riscv64.v(211): loss of carry in addition or borrow in subtraction
+Info (10662): Verilog HDL Assignment information at riscv64.v(216): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(217): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(218): truncated unsized constant literal with size 32 to size 7 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(222): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(223): truncated unsized constant literal with size 32 to size 7 with no loss of information
+Warning (10230): Verilog HDL assignment warning at riscv64.v(232): truncated value with size 32 to match size of target (7)
+Info (10662): Verilog HDL Assignment information at riscv64.v(234): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(235): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(237): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Warning (10040): Verilog HDL or VHDL arithmetic warning at riscv64.v(241): loss of carry in addition or borrow in subtraction
+Warning (10040): Verilog HDL or VHDL arithmetic warning at riscv64.v(265): loss of carry in addition or borrow in subtraction
+Warning (10040): Verilog HDL or VHDL arithmetic warning at riscv64.v(266): loss of carry in addition or borrow in subtraction
+Warning (10040): Verilog HDL or VHDL arithmetic warning at riscv64.v(270): loss of carry in addition or borrow in subtraction
+Info (10662): Verilog HDL Assignment information at riscv64.v(274): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(275): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(276): truncated unsized constant literal with size 32 to size 7 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(279): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(280): truncated unsized constant literal with size 32 to size 7 with no loss of information
 Info (10662): Verilog HDL Assignment information at riscv64.v(283): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(284): truncated unsized constant literal with size 32 to size 7 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(287): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(288): truncated unsized constant literal with size 32 to size 7 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(291): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(292): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(296): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(297): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Warning (10040): Verilog HDL or VHDL arithmetic warning at riscv64.v(305): loss of carry in addition or borrow in subtraction
-Warning (10230): Verilog HDL assignment warning at riscv64.v(309): truncated value with size 32 to match size of target (7)
-Info (10662): Verilog HDL Assignment information at riscv64.v(311): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(312): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(315): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(284): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(288): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(289): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Warning (10040): Verilog HDL or VHDL arithmetic warning at riscv64.v(297): loss of carry in addition or borrow in subtraction
+Warning (10230): Verilog HDL assignment warning at riscv64.v(301): truncated value with size 32 to match size of target (7)
+Info (10662): Verilog HDL Assignment information at riscv64.v(303): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(304): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(307): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Warning (10230): Verilog HDL assignment warning at riscv64.v(376): truncated value with size 32 to match size of target (6)
+Warning (10230): Verilog HDL assignment warning at riscv64.v(377): truncated value with size 32 to match size of target (6)
+Warning (10230): Verilog HDL assignment warning at riscv64.v(378): truncated value with size 32 to match size of target (6)
+Warning (10230): Verilog HDL assignment warning at riscv64.v(379): truncated value with size 32 to match size of target (6)
+Warning (10230): Verilog HDL assignment warning at riscv64.v(380): truncated value with size 32 to match size of target (6)
+Warning (10230): Verilog HDL assignment warning at riscv64.v(381): truncated value with size 32 to match size of target (6)
+Warning (10230): Verilog HDL assignment warning at riscv64.v(382): truncated value with size 32 to match size of target (6)
+Warning (10230): Verilog HDL assignment warning at riscv64.v(383): truncated value with size 32 to match size of target (6)
+Warning (10230): Verilog HDL assignment warning at riscv64.v(384): truncated value with size 32 to match size of target (6)
+Warning (10230): Verilog HDL assignment warning at riscv64.v(385): truncated value with size 32 to match size of target (6)
+Warning (10230): Verilog HDL assignment warning at riscv64.v(386): truncated value with size 32 to match size of target (6)
+Warning (10230): Verilog HDL assignment warning at riscv64.v(387): truncated value with size 32 to match size of target (6)
+Warning (10230): Verilog HDL assignment warning at riscv64.v(388): truncated value with size 32 to match size of target (6)
+Warning (10230): Verilog HDL assignment warning at riscv64.v(389): truncated value with size 32 to match size of target (6)
+Warning (10230): Verilog HDL assignment warning at riscv64.v(390): truncated value with size 32 to match size of target (6)
+Warning (10230): Verilog HDL assignment warning at riscv64.v(391): truncated value with size 32 to match size of target (6)
+Warning (10230): Verilog HDL assignment warning at riscv64.v(392): truncated value with size 32 to match size of target (6)
+Warning (10230): Verilog HDL assignment warning at riscv64.v(393): truncated value with size 32 to match size of target (6)
+Warning (10230): Verilog HDL assignment warning at riscv64.v(394): truncated value with size 32 to match size of target (6)
+Warning (10230): Verilog HDL assignment warning at riscv64.v(395): truncated value with size 32 to match size of target (6)
+Warning (10230): Verilog HDL assignment warning at riscv64.v(396): truncated value with size 32 to match size of target (6)
+Warning (10230): Verilog HDL assignment warning at riscv64.v(397): truncated value with size 32 to match size of target (6)
+Warning (10230): Verilog HDL assignment warning at riscv64.v(398): truncated value with size 32 to match size of target (6)
+Warning (10230): Verilog HDL assignment warning at riscv64.v(399): truncated value with size 32 to match size of target (6)
+Warning (10230): Verilog HDL assignment warning at riscv64.v(400): truncated value with size 32 to match size of target (6)
+Warning (10230): Verilog HDL assignment warning at riscv64.v(401): truncated value with size 32 to match size of target (6)
 Warning (10230): Verilog HDL assignment warning at riscv64.v(402): truncated value with size 32 to match size of target (6)
 Warning (10230): Verilog HDL assignment warning at riscv64.v(403): truncated value with size 32 to match size of target (6)
 Warning (10230): Verilog HDL assignment warning at riscv64.v(404): truncated value with size 32 to match size of target (6)
 Warning (10230): Verilog HDL assignment warning at riscv64.v(405): truncated value with size 32 to match size of target (6)
 Warning (10230): Verilog HDL assignment warning at riscv64.v(406): truncated value with size 32 to match size of target (6)
 Warning (10230): Verilog HDL assignment warning at riscv64.v(407): truncated value with size 32 to match size of target (6)
-Warning (10230): Verilog HDL assignment warning at riscv64.v(408): truncated value with size 32 to match size of target (6)
-Warning (10230): Verilog HDL assignment warning at riscv64.v(409): truncated value with size 32 to match size of target (6)
-Warning (10230): Verilog HDL assignment warning at riscv64.v(410): truncated value with size 32 to match size of target (6)
-Warning (10230): Verilog HDL assignment warning at riscv64.v(411): truncated value with size 32 to match size of target (6)
-Warning (10230): Verilog HDL assignment warning at riscv64.v(412): truncated value with size 32 to match size of target (6)
-Warning (10230): Verilog HDL assignment warning at riscv64.v(413): truncated value with size 32 to match size of target (6)
-Warning (10230): Verilog HDL assignment warning at riscv64.v(414): truncated value with size 32 to match size of target (6)
-Warning (10230): Verilog HDL assignment warning at riscv64.v(415): truncated value with size 32 to match size of target (6)
-Warning (10230): Verilog HDL assignment warning at riscv64.v(416): truncated value with size 32 to match size of target (6)
-Warning (10230): Verilog HDL assignment warning at riscv64.v(417): truncated value with size 32 to match size of target (6)
-Warning (10230): Verilog HDL assignment warning at riscv64.v(418): truncated value with size 32 to match size of target (6)
-Warning (10230): Verilog HDL assignment warning at riscv64.v(419): truncated value with size 32 to match size of target (6)
-Warning (10230): Verilog HDL assignment warning at riscv64.v(420): truncated value with size 32 to match size of target (6)
-Warning (10230): Verilog HDL assignment warning at riscv64.v(421): truncated value with size 32 to match size of target (6)
-Warning (10230): Verilog HDL assignment warning at riscv64.v(422): truncated value with size 32 to match size of target (6)
-Warning (10230): Verilog HDL assignment warning at riscv64.v(423): truncated value with size 32 to match size of target (6)
-Warning (10230): Verilog HDL assignment warning at riscv64.v(424): truncated value with size 32 to match size of target (6)
-Warning (10230): Verilog HDL assignment warning at riscv64.v(425): truncated value with size 32 to match size of target (6)
-Warning (10230): Verilog HDL assignment warning at riscv64.v(426): truncated value with size 32 to match size of target (6)
-Warning (10230): Verilog HDL assignment warning at riscv64.v(427): truncated value with size 32 to match size of target (6)
-Warning (10230): Verilog HDL assignment warning at riscv64.v(428): truncated value with size 32 to match size of target (6)
-Warning (10230): Verilog HDL assignment warning at riscv64.v(429): truncated value with size 32 to match size of target (6)
-Warning (10230): Verilog HDL assignment warning at riscv64.v(430): truncated value with size 32 to match size of target (6)
-Warning (10230): Verilog HDL assignment warning at riscv64.v(431): truncated value with size 32 to match size of target (6)
-Warning (10230): Verilog HDL assignment warning at riscv64.v(440): truncated value with size 32 to match size of target (6)
-Warning (10230): Verilog HDL assignment warning at riscv64.v(441): truncated value with size 32 to match size of target (6)
-Warning (10040): Verilog HDL or VHDL arithmetic warning at riscv64.v(451): loss of carry in addition or borrow in subtraction
-Info (10662): Verilog HDL Assignment information at riscv64.v(469): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Warning (10040): Verilog HDL or VHDL arithmetic warning at riscv64.v(539): loss of carry in addition or borrow in subtraction
-Info (10662): Verilog HDL Assignment information at riscv64.v(614): truncated unsized constant literal with size 32 to size 2 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(618): truncated unsized constant literal with size 32 to size 4 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(624): truncated unsized constant literal with size 32 to size 2 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(626): truncated unsized constant literal with size 32 to size 4 with no loss of information
+Warning (10040): Verilog HDL or VHDL arithmetic warning at riscv64.v(416): loss of carry in addition or borrow in subtraction
+Info (10662): Verilog HDL Assignment information at riscv64.v(430): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Warning (10040): Verilog HDL or VHDL arithmetic warning at riscv64.v(475): loss of carry in addition or borrow in subtraction
+Info (10662): Verilog HDL Assignment information at riscv64.v(528): truncated unsized constant literal with size 32 to size 2 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(530): truncated unsized constant literal with size 32 to size 4 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(533): truncated unsized constant literal with size 32 to size 2 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(534): truncated unsized constant literal with size 32 to size 4 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(542): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Warning (10230): Verilog HDL assignment warning at riscv64.v(543): truncated value with size 32 to match size of target (2)
+Info (10662): Verilog HDL Assignment information at riscv64.v(547): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Warning (10230): Verilog HDL assignment warning at riscv64.v(548): truncated value with size 32 to match size of target (4)
+Info (10662): Verilog HDL Assignment information at riscv64.v(566): truncated unsized constant literal with size 32 to size 16 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(609): truncated unsized constant literal with size 32 to size 2 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(610): truncated unsized constant literal with size 32 to size 2 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(611): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(612): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(616): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(617): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(625): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(626): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(628): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(631): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Warning (10040): Verilog HDL or VHDL arithmetic warning at riscv64.v(634): loss of carry in addition or borrow in subtraction
+Info (10662): Verilog HDL Assignment information at riscv64.v(635): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(636): truncated unsized constant literal with size 32 to size 1 with no loss of information
 Info (10662): Verilog HDL Assignment information at riscv64.v(638): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Warning (10230): Verilog HDL assignment warning at riscv64.v(640): truncated value with size 32 to match size of target (2)
-Info (10662): Verilog HDL Assignment information at riscv64.v(644): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Warning (10230): Verilog HDL assignment warning at riscv64.v(646): truncated value with size 32 to match size of target (4)
-Info (10662): Verilog HDL Assignment information at riscv64.v(672): truncated unsized constant literal with size 32 to size 16 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(724): truncated unsized constant literal with size 32 to size 2 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(725): truncated unsized constant literal with size 32 to size 2 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(639): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(643): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(645): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(655): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(670): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(686): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(687): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(691): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(695): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(704): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(721): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(723): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(724): truncated unsized constant literal with size 32 to size 1 with no loss of information
 Info (10662): Verilog HDL Assignment information at riscv64.v(726): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(727): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(731): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(732): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(742): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(743): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(745): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(748): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Warning (10040): Verilog HDL or VHDL arithmetic warning at riscv64.v(751): loss of carry in addition or borrow in subtraction
+Warning (10230): Verilog HDL assignment warning at riscv64.v(727): truncated value with size 64 to match size of target (63)
+Info (10662): Verilog HDL Assignment information at riscv64.v(730): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(735): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(736): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Warning (10040): Verilog HDL or VHDL arithmetic warning at riscv64.v(749): loss of carry in addition or borrow in subtraction
 Info (10662): Verilog HDL Assignment information at riscv64.v(752): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(752): truncated unsized constant literal with size 32 to size 2 with no loss of information
 Info (10662): Verilog HDL Assignment information at riscv64.v(753): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(755): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(756): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(761): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(766): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(777): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(795): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(754): truncated unsized constant literal with size 32 to size 2 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(758): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(758): truncated unsized constant literal with size 32 to size 2 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(759): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(760): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(761): truncated unsized constant literal with size 32 to size 2 with no loss of information
+Warning (10040): Verilog HDL or VHDL arithmetic warning at riscv64.v(796): loss of carry in addition or borrow in subtraction
+Info (10662): Verilog HDL Assignment information at riscv64.v(797): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(806): truncated unsized constant literal with size 32 to size 1 with no loss of information
 Info (10662): Verilog HDL Assignment information at riscv64.v(812): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(813): truncated unsized constant literal with size 32 to size 1 with no loss of information
 Info (10662): Verilog HDL Assignment information at riscv64.v(817): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(823): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(834): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(852): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(854): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(855): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(822): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(827): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(832): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(842): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(844): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(848): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(849): truncated unsized constant literal with size 32 to size 1 with no loss of information
 Info (10662): Verilog HDL Assignment information at riscv64.v(857): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Warning (10230): Verilog HDL assignment warning at riscv64.v(858): truncated value with size 64 to match size of target (63)
-Info (10662): Verilog HDL Assignment information at riscv64.v(861): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(859): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Warning (10230): Verilog HDL assignment warning at riscv64.v(865): truncated value with size 32 to match size of target (16)
+Info (10662): Verilog HDL Assignment information at riscv64.v(867): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(870): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(870): truncated unsized constant literal with size 32 to size 2 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(871): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(872): truncated unsized constant literal with size 32 to size 2 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(875): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(878): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(878): truncated unsized constant literal with size 32 to size 2 with no loss of information
 Info (10662): Verilog HDL Assignment information at riscv64.v(879): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(880): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Warning (10040): Verilog HDL or VHDL arithmetic warning at riscv64.v(893): loss of carry in addition or borrow in subtraction
-Info (10662): Verilog HDL Assignment information at riscv64.v(896): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(896): truncated unsized constant literal with size 32 to size 2 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(897): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(898): truncated unsized constant literal with size 32 to size 2 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(902): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(902): truncated unsized constant literal with size 32 to size 2 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(903): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(904): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(905): truncated unsized constant literal with size 32 to size 2 with no loss of information
-Warning (10040): Verilog HDL or VHDL arithmetic warning at riscv64.v(940): loss of carry in addition or borrow in subtraction
-Info (10662): Verilog HDL Assignment information at riscv64.v(941): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(950): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(956): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(961): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(880): truncated unsized constant literal with size 32 to size 2 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(883): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(883): truncated unsized constant literal with size 32 to size 2 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(884): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(886): truncated unsized constant literal with size 32 to size 2 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(887): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(887): truncated unsized constant literal with size 32 to size 2 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(890): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(891): truncated unsized constant literal with size 32 to size 2 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(891): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(898): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(911): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(914): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(916): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(923): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(933): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(936): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(938): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at riscv64.v(943): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Warning (10762): Verilog HDL Case Statement warning at riscv64.v(746): can't check case statement for completeness because the case expression has too many possible states
+Warning (10935): Verilog HDL Casex/Casez warning at riscv64.v(882): casex/casez item expression overlaps with a previous casex/casez item expression
+Warning (10230): Verilog HDL assignment warning at riscv64.v(953): truncated value with size 32 to match size of target (1)
+Info (10662): Verilog HDL Assignment information at riscv64.v(955): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Warning (10040): Verilog HDL or VHDL arithmetic warning at riscv64.v(956): loss of carry in addition or borrow in subtraction
 Info (10662): Verilog HDL Assignment information at riscv64.v(966): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(971): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(976): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(986): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(988): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(992): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(993): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(1001): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(1003): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Warning (10230): Verilog HDL assignment warning at riscv64.v(1008): truncated value with size 32 to match size of target (16)
-Info (10662): Verilog HDL Assignment information at riscv64.v(1008): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(1010): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(1013): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(1013): truncated unsized constant literal with size 32 to size 2 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(1014): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(1015): truncated unsized constant literal with size 32 to size 2 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(1018): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(1021): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(1021): truncated unsized constant literal with size 32 to size 2 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(1022): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(1023): truncated unsized constant literal with size 32 to size 2 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(1026): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(1026): truncated unsized constant literal with size 32 to size 2 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(1027): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(1029): truncated unsized constant literal with size 32 to size 2 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(1030): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(1030): truncated unsized constant literal with size 32 to size 2 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(1033): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(1034): truncated unsized constant literal with size 32 to size 2 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(1040): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(1053): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(1056): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(1058): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(1065): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(1075): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(1078): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(1080): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at riscv64.v(1085): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Warning (10762): Verilog HDL Case Statement warning at riscv64.v(890): can't check case statement for completeness because the case expression has too many possible states
-Warning (10935): Verilog HDL Casex/Casez warning at riscv64.v(1025): casex/casez item expression overlaps with a previous casex/casez item expression
-Warning (10230): Verilog HDL assignment warning at riscv64.v(1095): truncated value with size 32 to match size of target (1)
-Info (10662): Verilog HDL Assignment information at riscv64.v(1097): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Warning (10040): Verilog HDL or VHDL arithmetic warning at riscv64.v(1098): loss of carry in addition or borrow in subtraction
-Info (10662): Verilog HDL Assignment information at riscv64.v(1108): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Warning (10040): Verilog HDL or VHDL arithmetic warning at riscv64.v(1109): loss of carry in addition or borrow in subtraction
-Critical Warning (10237): Verilog HDL warning at riscv64.v(1117): can't infer register for assignment in edge-triggered always construct because the clock isn't obvious. Generated combinational logic instead
-Critical Warning (10237): Verilog HDL warning at riscv64.v(1118): can't infer register for assignment in edge-triggered always construct because the clock isn't obvious. Generated combinational logic instead
+Warning (10040): Verilog HDL or VHDL arithmetic warning at riscv64.v(967): loss of carry in addition or borrow in subtraction
+Critical Warning (10237): Verilog HDL warning at riscv64.v(975): can't infer register for assignment in edge-triggered always construct because the clock isn't obvious. Generated combinational logic instead
+Critical Warning (10237): Verilog HDL warning at riscv64.v(976): can't infer register for assignment in edge-triggered always construct because the clock isn't obvious. Generated combinational logic instead
 Info (12128): Elaborating entity "jtag_uart_system" for hierarchy "jtag_uart_system:my_jtag_system"
 Info (12128): Elaborating entity "jtag_uart_system_jtag_uart_0" for hierarchy "jtag_uart_system:my_jtag_system|jtag_uart_system_jtag_uart_0:jtag_uart_0"
 Info (12128): Elaborating entity "jtag_uart_system_jtag_uart_0_scfifo_w" for hierarchy "jtag_uart_system:my_jtag_system|jtag_uart_system_jtag_uart_0:jtag_uart_0|jtag_uart_system_jtag_uart_0_scfifo_w:the_jtag_uart_system_jtag_uart_0_scfifo_w"
@@ -3297,16 +3297,16 @@ Info (16010): Generating hard_block partition "hard_block:auto_generated_inst"
 Warning (21074): Design contains 2 input pin(s) that do not drive logic
     Warning (15610): No output dependent on input pin "PS2_CLK"
     Warning (15610): No output dependent on input pin "PS2_DAT"
-Info (21057): Implemented 22974 device resources after synthesis - the final resource count might be different
+Info (21057): Implemented 22897 device resources after synthesis - the final resource count might be different
     Info (21058): Implemented 8 input pins
     Info (21059): Implemented 25 output pins
     Info (21060): Implemented 18 bidirectional pins
-    Info (21061): Implemented 22511 logic cells
+    Info (21061): Implemented 22434 logic cells
     Info (21064): Implemented 411 RAM segments
 Info: Quartus II 32-bit Analysis & Synthesis was successful. 0 errors, 155 warnings
-    Info: Peak virtual memory: 581 megabytes
-    Info: Processing ended: Fri Apr 24 20:10:56 2026
-    Info: Elapsed time: 00:27:07
-    Info: Total CPU time (on all processors): 00:27:04
+    Info: Peak virtual memory: 574 megabytes
+    Info: Processing ended: Sat Apr 25 12:48:36 2026
+    Info: Elapsed time: 00:25:27
+    Info: Total CPU time (on all processors): 00:25:24
 
 
