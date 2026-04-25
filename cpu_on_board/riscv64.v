@@ -759,7 +759,7 @@ reg [7:0] tlb_d_vld;
                     // Store after TLB
                     32'b???????_?????_?????_???_?????_0100011: begin 
                         if (store_step == 0) begin bus_address <= pda; bus_write_data <= w_store_data; bus_write_enable <= 1; pc <= pc_4; bubble <= 1; store_step <= 1; bus_ls_type <= w_func3; 
-			if (reserve_valid && reserve_addr[63:3] == pda[63:3]) reserve_valid <= 0; end // if lr, break the contract; if in 8-byte
+			    if (reserve_valid && reserve_addr[63:3] == pda[63:3]) reserve_valid <= 0; end // if lr, break the contract; if in 8-byte
                         if (store_step == 1 && bus_write_done == 0) begin pc <= pc_4; bubble <= 1; end // bus working
                         if (store_step == 1 && bus_write_done == 1) begin store_step <= 0; end 
                     end   
@@ -863,7 +863,7 @@ reg [7:0] tlb_d_vld;
 	               			       pc <=  Csrs[sepc]; // sepc was +4 by the software handler and written back to sepc
 		          		       bubble <= 1'b1; end 
 		    32'b00010000010100000000000001110011: begin end // Wfi
-		    32'b?????????????????_000_?????_0001111: begin end // Fence
+		    32'b?????????????????_000_?????_0001111: begin bubble <= 1; pc <= pc; end // Fence
 		    32'b?????????????????_001_?????_0001111: begin cache_epoch <= cache_epoch + 1; bubble <= 1; pc <= pc; end // Fence.i 
 		    //32'b?????????????????_001_?????_0001111: begin cache_epoch <= cache_epoch + 1; end // Fence.i 
 		    //32'b0001001??????????_000_?????_1110011: begin tlb_flush <= 1; bubble <=1; pc <= pc; end // Sfence.vma (supervisor fence for virtual memory address) have to bubble the fetch next ir from old tlb, redo
