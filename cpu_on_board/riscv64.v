@@ -862,7 +862,7 @@ reg [7:0] tlb_d_vld;
 	               			       Csrs[sstatus][SPP] <= 0; // set previous privilege mode(SPP) to be 0 (U-mode)
 	               			       pc <=  Csrs[sepc]; // sepc was +4 by the software handler and written back to sepc
 		          		       bubble <= 1'b1; end 
-		    32'b00010000010100000000000001110011: begin end // Wfi
+		    32'b00010000010100000000000001110011: begin if ((Csrs[mip] & Csrs[mie]) == 64'b0) pc <= pc_4; bubble <= 1; end // Wfi
 		    32'b?????????????????_000_?????_0001111: begin bubble <= 1; pc <= pc; end // Fence
 		    //32'b?????????????????_000_?????_0001111: begin if (bus_read_enable || bus_write_enable || !bus_read_done || !bus_write_done) begin bubble <= 1; pc <= pc_4; end end // Fence wait r/w
 		    32'b?????????????????_001_?????_0001111: begin cache_epoch <= cache_epoch + 1; bubble <= 1; pc <= pc; end // Fence.i 
