@@ -15,13 +15,11 @@ module riscv64(
     input wire        debug,
 
     output reg [63:0] mtime,    // map to 0x0200_bff8 
-    //inout wire [63:0] mtimecmp, // map to 0x0200_4000 + 8byte*hartid
     input wire [63:0] mtimecmp, // map to 0x0200_4000 + 8byte*hartid
 
     input wire meip_interrupt, // from PLIC
     input wire seip_interrupt, // from Supervisor External (give by meip) opensbi could transfer to SSIP/STIP/SEIP
     input wire msip_interrupt, // from CLINT (give by mmio write of M-mode software)
-    //input wire mtip_interrupt, // from Machine Time
 
     input  reg        bus_read_done,
     input  reg        bus_write_done,
@@ -35,11 +33,9 @@ wire seip = Csrs[mip][SEIP] && Csrs[mie][SEIE];  // hardware sip-> local sie-> g
 wire stip = Csrs[mip][STIP] && Csrs[mie][STIE];  // opensbi trap in mtip -> set stip 5
 wire ssip = Csrs[mip][SSIP] && Csrs[mie][SSIE];  // software csr set
 
-
 wire m_interrupts = (meip || msip || mtip) && (current_privilege_mode < M_mode || (current_privilege_mode == M_mode && Csrs[mstatus][MIE]));
 wire s_interrupts = (seip || ssip || stip) && (current_privilege_mode < S_mode || (current_privilege_mode == S_mode && Csrs[sstatus][SIE]));
 wire any_interrupt = (m_interrupts || s_interrupts);
-
 
 (* keep = 1 *) reg [63:0] pc;
 wire [31:0] ir;
@@ -48,7 +44,6 @@ wire [31:0] ir;
 (* ram_style = "logic" *) reg [63:0] sre [0:10]; // Shadow Registers 11s
 reg mmu_da=0;
 reg mmu_pc = 0;
-//reg debug = 0;
 reg did = 1;
 reg in_debug = 0;
 reg i_cache_refill=0;
@@ -91,7 +86,6 @@ wire signed [63:0] rs1 = re[w_rs1];
 wire signed [63:0] rs2 = re[w_rs2];
 // -- op --
 wire [6:0] op = ir[6:0];
-//wire [11:0] w_f12 = ir[31:20];   // ecall 0, ebreak 1
 //-- csr --
 wire [11:0] w_csr = ir[31:20];   // CSR official address
 wire [63:0] pc_4 = pc - 4;
@@ -101,11 +95,9 @@ wire use_imm = (op == 7'b0010011 || op == 7'b0011011 || op == 7'b1100111); //mat
 wire is_sub = (op == 7'b0110011 || op == 7'b0111011) && ir[30]; // sub/subw
 wire [63:0] alu_op2 = use_imm ? w_imm_i : rs2;
 wire [63:0] alu_op2_inv = is_sub ? ~alu_op2 : alu_op2;
-//wire [63:0] shared_add = $signed(rs1) + $signed(alu_op2_inv) + $signed({63'b0, is_sub});
 wire [63:0] shared_add = rs1 + alu_op2_inv + is_sub;
 wire [31:0] shared_addw_32 = rs1[31:0] + alu_op2_inv[31:0] + is_sub;
 wire [63:0] shared_addw = {{32{shared_addw_32[31]}}, shared_addw_32};
-//wire [63:0] shared_addw= $signed(rs1[31:0] + alu_op2_inv[31:0] + is_sub);
 
 wire [63:0] alu_add  = shared_add; 
 wire [63:0] alu_sub  = shared_add;  
@@ -343,8 +335,6 @@ wire [63:0] csr_mask_w= (w_csr == 12'h180) ? satp_mask :
 			(w_csr == 12'h144) ? (sip_write_mask & Csrs[mideleg]) : 
                         (w_csr == 12'h344) ? mip_write_mask : 
 			64'hffff_ffff_ffff_ffff;
-//wire [63:0] csr_read  = Csrs[w_csr_id] & csr_mask;
-//wire [63:0] csr_read = (w_csr == 12'hC01) ? mtime : Csrs[w_csr_id] & csr_mask;
 wire [63:0] csr_read = (w_csr == 12'h301) ? 64'h8000000000141101 : // misa(RV64IMASU)
                        //(w_csr == 12'hF11) ? 64'h0 : // mvendorid
                        (w_csr == 12'hF12) ? 64'h0 : // marchid
@@ -378,22 +368,6 @@ localparam clint_time = 19;  // read only
 localparam pmpcfg0    = 20;  // Physical Memory Protection
 localparam pmpaddr0   = 21;  // 
 localparam mdebug     = 22;  // 
-//localparam pmpaddr1   = 29;  // 
-//localparam pmpaddr2   = 30;  // 
-//localparam pmpaddr3   = 31;  // 
-//localparam pmpaddr4   = 32;  // 
-//localparam pmpaddr5   = 33;  // 
-//localparam pmpaddr6   = 34;  // 
-//localparam pmpaddr7   = 35;  // 
-
-//localparam pmpaddr1   = 29;  // 
-//localparam pmpaddr2   = 29;  // 
-//localparam pmpaddr3   = 29;  // 
-//localparam pmpaddr4   = 29;  // 
-//localparam pmpaddr5   = 29;  // 
-//localparam pmpaddr6   = 29;  // 
-//localparam pmpaddr7   = 29;  // 
-//integer scontext = 12'h5a8; 
 reg [62:0] CAUSE_CODE;
 reg  [5:0] w_csr_id;             // CSR id (64)
 localparam XCSR = 63;  //  miss csr that not deployed
@@ -429,19 +403,10 @@ always @(*) begin
 	12'h3A0 : w_csr_id = pmpcfg0    ;   
 	12'h3B0 : w_csr_id = pmpaddr0   ;   
 	12'hC01 : w_csr_id = clint_time ;   
-	//12'h3B1 : w_csr_id = pmpaddr1   ;   
-	//12'h3B2 : w_csr_id = pmpaddr2   ;   
-	//12'h3B3 : w_csr_id = pmpaddr3   ;   
-	//12'h3B4 : w_csr_id = pmpaddr4   ;   
-	//12'h3B5 : w_csr_id = pmpaddr5   ;   
-	//12'h3B6 : w_csr_id = pmpaddr6   ;   
-	//12'h3B7 : w_csr_id = pmpaddr7   ;   
-	//default : w_csr_id = 36; 
 	12'h7CC : w_csr_id = mdebug     ;   
 	default : w_csr_id = XCSR; 
     endcase
 end
-
 
 //(* ram_style = "logic" *) reg [63:0] Csrs [0:36]; // 36 CSRs for now // totally 4096
 (* ram_style = "logic" *) reg [63:0] Csrs [0:23]; // 36 CSRs for now // totally 4096
@@ -460,10 +425,8 @@ reg [1:0] store_step;
 reg [63:0] reserve_addr;
 reg        reserve_valid;
 
-reg [15:0] tlb_epoch = 1;
-(* ram_style = "logic" *) reg [15:0] tlb_i_epoch [0:3]; // 4
-//(* ram_style = "logic" *) reg [31:0] tlb_d_epoch [0:3]; // 4
-(* ram_style = "logic" *) reg [15:0] tlb_d_epoch [0:7]; // 8
+reg [3:0] tlb_vld;
+reg tlb_flush = 0;
 //// -- TLB -- 8 pages
 //(* ram_style = "logic" *) reg [26:0] tlb_vpn [0:7]; // vpn number VA[38:12]  Sv39
 //(* ram_style = "logic" *) reg [43:0] tlb_ppn [0:7]; // ppn number PA[55:12]
@@ -480,45 +443,32 @@ reg tlb_i_hit;
 
 //wire [7:0] tlb_i_match; // 8page
 wire [3:0] tlb_i_match; // 4page
-assign tlb_i_match[0] = (tlb_vpn[0] == pc_vpn) && (tlb_i_epoch[0] == tlb_epoch);
-assign tlb_i_match[1] = (tlb_vpn[1] == pc_vpn) && (tlb_i_epoch[1] == tlb_epoch);
-assign tlb_i_match[2] = (tlb_vpn[2] == pc_vpn) && (tlb_i_epoch[2] == tlb_epoch);
-assign tlb_i_match[3] = (tlb_vpn[3] == pc_vpn) && (tlb_i_epoch[3] == tlb_epoch);
-//assign tlb_i_match[0] = tlb_vld[0] && (tlb_vpn[0] == pc_vpn);
-//assign tlb_i_match[1] = tlb_vld[1] && (tlb_vpn[1] == pc_vpn);
-//assign tlb_i_match[2] = tlb_vld[2] && (tlb_vpn[2] == pc_vpn);
-//assign tlb_i_match[3] = tlb_vld[3] && (tlb_vpn[3] == pc_vpn);
-  
-  
-  
-//assign tlb_i_match[4] = tlb_vld[4] && (tlb_vpn[4] == pc_vpn);
-//assign tlb_i_match[5] = tlb_vld[5] && (tlb_vpn[5] == pc_vpn);
-//assign tlb_i_match[6] = tlb_vld[6] && (tlb_vpn[6] == pc_vpn);
-//assign tlb_i_match[7] = tlb_vld[7] && (tlb_vpn[7] == pc_vpn);
-// pc_ppn hit
+
+assign tlb_i_match[0] = tlb_vld[0] && (tlb_vpn[0] == pc_vpn);
+assign tlb_i_match[1] = tlb_vld[1] && (tlb_vpn[1] == pc_vpn);
+assign tlb_i_match[2] = tlb_vld[2] && (tlb_vpn[2] == pc_vpn);
+assign tlb_i_match[3] = tlb_vld[3] && (tlb_vpn[3] == pc_vpn);
+
 always @(*) begin
-    tlb_i_hit = |tlb_i_match;
+    tlb_i_hit = |tlb_i_match && !tlb_flush;
     pc_ppn =   ({44{tlb_i_match[0]}} & tlb_ppn[0]) |
-	({44{tlb_i_match[1]}} & tlb_ppn[1]) | //; end
-	({44{tlb_i_match[2]}} & tlb_ppn[2]) |
-	({44{tlb_i_match[3]}} & tlb_ppn[3]) ; end
-	//({44{tlb_i_match[3]}} & tlb_ppn[3]) |
-	//({44{tlb_i_match[4]}} & tlb_ppn[4]) |
-	//({44{tlb_i_match[5]}} & tlb_ppn[5]) |
-	//({44{tlb_i_match[6]}} & tlb_ppn[6]) |
-	//({44{tlb_i_match[7]}} & tlb_ppn[7]) ; end
+	       ({44{tlb_i_match[1]}} & tlb_ppn[1]) | //; end
+	       ({44{tlb_i_match[2]}} & tlb_ppn[2]) |
+	       ({44{tlb_i_match[3]}} & tlb_ppn[3]) ; end
+	       //({44{tlb_i_match[3]}} & tlb_ppn[3]) |
+	       //({44{tlb_i_match[4]}} & tlb_ppn[4]) |
+	       //({44{tlb_i_match[5]}} & tlb_ppn[5]) |
+	       //({44{tlb_i_match[6]}} & tlb_ppn[6]) |
+	       //({44{tlb_i_match[7]}} & tlb_ppn[7]) ; end
    
-   
-//// -- TLB d -- 2 pages
-//(* ram_style = "logic" *) reg [26:0] tlb_d_vpn [0:1]; // vpn number VA[38:12]  Sv39
-//(* ram_style = "logic" *) reg [43:0] tlb_d_ppn [0:1]; // ppn number PA[55:12]
-//(* ram_style = "logic" *) reg tlb_d_vld [0:1]; // only 2 entries
-//// -- TLB d -- 4 pages
-//(* ram_style = "logic" *) reg [26:0] tlb_d_vpn [0:3]; // vpn number VA[38:12]  Sv39
-//(* ram_style = "logic" *) reg [43:0] tlb_d_ppn [0:3]; // ppn number PA[55:12]
 // -- TLB d -- 8 pages
+reg [7:0] tlb_d_vld;
 (* ram_style = "logic" *) reg [26:0] tlb_d_vpn [0:7]; // vpn number VA[38:12]  Sv39
 (* ram_style = "logic" *) reg [43:0] tlb_d_ppn [0:7]; // ppn number PA[55:12]
+//// -- TLB d -- 16 pages
+//reg [15:0] tlb_d_vld;
+//(* ram_style = "logic" *) reg [26:0] tlb_d_vpn [0:15]; // vpn number VA[38:12]  Sv39
+//(* ram_style = "logic" *) reg [43:0] tlb_d_ppn [0:15]; // ppn number PA[55:12]
 //(* ram_style = "logic" *) reg tlb_d_vld [0:3]; // only 4 entries
    
 	// TLB-D tlb d hit
@@ -529,29 +479,26 @@ always @(*) begin
 	reg tlb_d_hit;
 
 	wire [7:0] tlb_d_match;
-	//wire [3:0] tlb_d_match;
-	//wire [1:0] tlb_d_match;
-	assign tlb_d_match[0] = (tlb_d_vpn[0] == ls_va[38:12]) && (tlb_d_epoch[0] == tlb_epoch);
-	assign tlb_d_match[1] = (tlb_d_vpn[1] == ls_va[38:12]) && (tlb_d_epoch[1] == tlb_epoch);
-	assign tlb_d_match[2] = (tlb_d_vpn[2] == ls_va[38:12]) && (tlb_d_epoch[2] == tlb_epoch);
-	assign tlb_d_match[3] = (tlb_d_vpn[3] == ls_va[38:12]) && (tlb_d_epoch[3] == tlb_epoch);
-	assign tlb_d_match[4] = (tlb_d_vpn[4] == ls_va[38:12]) && (tlb_d_epoch[4] == tlb_epoch);
-	assign tlb_d_match[5] = (tlb_d_vpn[5] == ls_va[38:12]) && (tlb_d_epoch[5] == tlb_epoch);
-	assign tlb_d_match[6] = (tlb_d_vpn[6] == ls_va[38:12]) && (tlb_d_epoch[6] == tlb_epoch);
-	assign tlb_d_match[7] = (tlb_d_vpn[7] == ls_va[38:12]) && (tlb_d_epoch[7] == tlb_epoch);
-   
-	//assign tlb_d_match[0] = tlb_d_vld[0] && (tlb_d_vpn[0] == ls_va[38:12]);
-	//assign tlb_d_match[1] = tlb_d_vld[1] && (tlb_d_vpn[1] == ls_va[38:12]);
-	//assign tlb_d_match[2] = tlb_d_vld[2] && (tlb_d_vpn[2] == ls_va[38:12]);
-	//assign tlb_d_match[3] = tlb_d_vld[3] && (tlb_d_vpn[3] == ls_va[38:12]);
-   
-	//assign tlb_d_match[4] = tlb_vld[4] && (tlb_vpn[4] == ls_va[38:12]);
-	//assign tlb_d_match[5] = tlb_vld[5] && (tlb_vpn[5] == ls_va[38:12]);
-	//assign tlb_d_match[6] = tlb_vld[6] && (tlb_vpn[6] == ls_va[38:12]);
-	//assign tlb_d_match[7] = tlb_vld[7] && (tlb_vpn[7] == ls_va[38:12]);
-	// data_ppn hit
+	//wire [15:0] tlb_d_match;
+	assign tlb_d_match[0] = tlb_d_vld[0] && (tlb_d_vpn[0] == ls_va[38:12]);
+	assign tlb_d_match[1] = tlb_d_vld[1] && (tlb_d_vpn[1] == ls_va[38:12]);
+	assign tlb_d_match[2] = tlb_d_vld[2] && (tlb_d_vpn[2] == ls_va[38:12]);
+	assign tlb_d_match[3] = tlb_d_vld[3] && (tlb_d_vpn[3] == ls_va[38:12]);
+	assign tlb_d_match[4] = tlb_d_vld[4] && (tlb_d_vpn[4] == ls_va[38:12]);
+	assign tlb_d_match[5] = tlb_d_vld[5] && (tlb_d_vpn[5] == ls_va[38:12]);
+	assign tlb_d_match[6] = tlb_d_vld[6] && (tlb_d_vpn[6] == ls_va[38:12]);
+	assign tlb_d_match[7] = tlb_d_vld[7] && (tlb_d_vpn[7] == ls_va[38:12]);
+	//assign tlb_d_match[8] = tlb_d_vld[8] && (tlb_d_vpn[8] == ls_va[38:12]);
+	//assign tlb_d_match[9] = tlb_d_vld[9] && (tlb_d_vpn[9] == ls_va[38:12]);
+	//assign tlb_d_match[10] = tlb_d_vld[10] && (tlb_d_vpn[10] == ls_va[38:12]);
+	//assign tlb_d_match[11] = tlb_d_vld[11] && (tlb_d_vpn[11] == ls_va[38:12]);
+	//assign tlb_d_match[12] = tlb_d_vld[12] && (tlb_d_vpn[12] == ls_va[38:12]);
+	//assign tlb_d_match[13] = tlb_d_vld[13] && (tlb_d_vpn[13] == ls_va[38:12]);
+	//assign tlb_d_match[14] = tlb_d_vld[14] && (tlb_d_vpn[14] == ls_va[38:12]);
+	//assign tlb_d_match[15] = tlb_d_vld[15] && (tlb_d_vpn[15] == ls_va[38:12]);
+
 	always @(*) begin
-	    tlb_d_hit = |tlb_d_match;
+	    tlb_d_hit = |tlb_d_match && !tlb_flush;
 	    data_ppn = ({44{tlb_d_match[0]}} & tlb_d_ppn[0]) |
 		({44{tlb_d_match[1]}} & tlb_d_ppn[1]) | //; end
 		({44{tlb_d_match[2]}} & tlb_d_ppn[2]) |
@@ -560,6 +507,14 @@ always @(*) begin
 		({44{tlb_d_match[5]}} & tlb_d_ppn[5]) |
 		({44{tlb_d_match[6]}} & tlb_d_ppn[6]) |
 		({44{tlb_d_match[7]}} & tlb_d_ppn[7]) ; end
+		//({44{tlb_d_match[8]}} & tlb_d_ppn[8]) |
+		//({44{tlb_d_match[9]}} & tlb_d_ppn[9]) | //; end
+		//({44{tlb_d_match[10]}} & tlb_d_ppn[10]) |
+		//({44{tlb_d_match[11]}} & tlb_d_ppn[11]) | // ; end
+		//({44{tlb_d_match[12]}} & tlb_d_ppn[12]) |
+		//({44{tlb_d_match[13]}} & tlb_d_ppn[13]) |
+		//({44{tlb_d_match[14]}} & tlb_d_ppn[14]) |
+		//({44{tlb_d_match[15]}} & tlb_d_ppn[15]) ; end
 		// concat physical address
 		wire need_trans = satp_mmu && !STrap && (current_privilege_mode != M_mode);
 		assign ppc = need_trans ? {8'h0, pc_ppn, pc[11:0]} : pc;
@@ -572,43 +527,30 @@ always @(*) begin
 		// TLB Refill
 		//reg [2:0] tlb_ptr = 0; // 8 entries TLB
 		reg [1:0] tlb_ptr = 0; // 4 entries i TLB
-		//reg       tlb_d_ptr = 0; // 2 entries d TLB
-		//reg [1:0] tlb_d_ptr = 0; // 4 entries d TLB
 		reg [2:0] tlb_d_ptr = 0; // 8 entries d TLB
-		//reg tlb_flush_pre = 0;
-		//reg tlb_flush;
+		//reg [3:0] tlb_d_ptr = 0; // 16 entries d TLB
 		always @(posedge clk or negedge reset) begin
-		    //tlb_flush_pre <= tlb_flush;
-		    if (!reset) begin
+		    if (!reset) begin // RESET
 			tlb_ptr <= 0; // hit->trap(save va to x9)->refill assembly(fetch pa to x9)-> sd x9, `Tlb -> here to refill tlb
-			//tlb_vld[0] <= 0; tlb_vld[1] <= 0; tlb_vld[2] <= 0; tlb_vld[3] <= 0; 
 			tlb_d_ptr <= 0;
-			//tlb_d_vld[0] <= 0; tlb_d_vld[1] <= 0; tlb_d_vld[2] <= 0; tlb_d_vld[3] <= 0;  
-		        //for (i=0;i<4;i=i+1) begin tlb_i_epoch[i]<= 32'd0; tlb_d_epoch[i]<= 32'd0; end 
-		        for (i=0;i<4;i=i+1) begin tlb_i_epoch[i]<= 16'd0; end 
-		        for (i=0;i<8;i=i+1) begin tlb_d_epoch[i]<= 16'd0; end 
-		    end else if (STrap && bus_write_enable && bus_address == `Tlb) begin // for the last fill: sd ppa, Tlb
+			tlb_vld <= 4'b0;
+			//tlb_d_vld <= 16'b0;
+			tlb_d_vld <= 8'b0;
+		    //end else if (tlb_flush) begin tlb_vld <= 4'b0; tlb_d_vld <= 16'b0; // FLUSH
+		    end else if (tlb_flush) begin tlb_vld <= 4'b0; tlb_d_vld <= 8'b0; // FLUSH
+		    end else if (STrap && bus_write_enable && bus_address == `Tlb) begin // for the last fill: sd ppa, Tlb  // REFILL
 			if (re[8] == 12) begin
 			tlb_vpn[tlb_ptr] <= re[9][38:12]; // VA from x1 saved by trapp mmu_pc/mmu_da
 			tlb_ppn[tlb_ptr] <= bus_write_data[55:12] ; // real 
-			//tlb_vld[tlb_ptr] <= 1;
-			tlb_i_epoch[tlb_ptr] <= tlb_epoch;
+			tlb_vld[tlb_ptr] <= 1;
 			tlb_ptr <= tlb_ptr + 1; 
 		        end else begin
 			tlb_d_vpn[tlb_d_ptr] <= re[9][38:12]; // VA from x1 saved by trapp mmu_pc/mmu_da
 			tlb_d_ppn[tlb_d_ptr] <= bus_write_data[55:12] ; // real 
-			//tlb_d_vld[tlb_d_ptr] <= 1;
-			tlb_d_epoch[tlb_d_ptr] <= tlb_epoch;
+			tlb_d_vld[tlb_d_ptr] <= 1;
 			tlb_d_ptr <= tlb_d_ptr + 1; 
 		        end 
 		    end
-		    //end else if (!bubble && tlb_i_hit && i_cache_hit) begin // sfence.vma flush any way if ir is (not be bubbled)
-		    //    casez (ir) 32'b0001001??????????_000_?????_1110011: begin 
-		    //        tlb_vld[0] <= 0; tlb_vld[1] <= 0; tlb_vld[2] <= 0; tlb_vld[3] <= 0; 
-		    //        tlb_d_vld[0] <= 0; tlb_d_vld[1] <= 0; tlb_d_vld[2] <= 0; tlb_d_vld[3] <= 0; end
-		    //    endcase 
-		    //    //if (tlb_flush_pre != tlb_flush) begin tlb_vld[0] <= 0; tlb_vld[1] <= 0; tlb_vld[2] <= 0; tlb_vld[3] <= 0; end
-		    //end
 	    end
 
 	    // Cache I_cache_hit 63:13 tag, 12:4 index 3:0 offset Cache line 16B (4 instructions) 512 lines
@@ -621,7 +563,6 @@ always @(*) begin
 	    (* ram_style = "block" *) reg [63:0] Cache_L_Low [0:511]; // 4KB
 	    (* ram_style = "block" *) reg [63:0] Cache_L_High [0:511]; // 4KB
 	    //(* ram_style = "block" *) reg [50:0] Cache_T [0:511];  // ~4KB (addr: 51(tag) + 9(index) + 4(offset))
-	    //reg [511:0] cache_valid_bits = 0;
 	    //(* ram_style = "block" *) reg [58:0] Cache_T [0:511];  // 8-bit epoch + 51-bit tag
 	    (* ram_style = "block" *) reg [66:0] Cache_T [0:511];  // 16-bit epoch + 51-bit tag
 	    //reg [7:0] cache_epoch = 1;
@@ -630,11 +571,6 @@ always @(*) begin
 	    //reg flush_pre = 0; 
 	    //reg flush = 0;
 	    always @(posedge clk) begin 
-		//// Flush
-		//flush_pre <= flush;
-		////if (flush_pre != flush) cache_valid_bits <= 512'b0;
-		//if (flush_pre != flush) cache_epoch <= cache_epoch + 1;
-		// Read
 	    cache_line <= {Cache_L_High[ppc[12:4]], Cache_L_Low[ppc[12:4]]}; 
 	    //cache_tag <= {cache_valid_bits[ppc[12:4]], Cache_T[ppc[12:4]]}; 
 	    cache_tag <= Cache_T[ppc[12:4]]; 
@@ -649,10 +585,7 @@ always @(*) begin
 	    end
 	end
 
-	//wire i_cache_hit = cache_tag[51] && (ppc_pre[63:13] == cache_tag[50:0]);
-	//wire i_cache_hit = (cache_tag[58:51] == cache_epoch) && (ppc_pre[63:13] == cache_tag[50:0]);
 	//wire i_cache_hit = (cache_tag[58:51] == cache_epoch) && (ppc_pre[63:13] == cache_tag[50:0]) && (flush_pre == flush);
-	//wire i_cache_hit = (cache_tag[66:51] == cache_epoch) && (ppc_pre[63:13] == cache_tag[50:0]) && (flush_pre == flush);
 	wire i_cache_hit = (cache_tag[66:51] == cache_epoch) && (ppc_pre[63:13] == cache_tag[50:0]);
 	wire [31:0] cache_i = cache_line[ppc_pre[3:2]*32 +: 32];
 	//assign ir = (mmu_pc || mmu_da || i_cache_refill) ? instruction : i_cache_hit ? cache_i : 32'h00000013; // NOP:addi x0, x0, 0;
@@ -669,7 +602,6 @@ always @(*) begin
 	reg [63:0] trap_epc;
 
 	wire csr_writable = (w_csr_id != misa) && (w_csr_id !=  mvendorid) && (w_csr_id != marchid) && (w_csr_id != mimpid) && (w_csr_id !=  mhartid) && (w_csr_id != clint_time);
-
 
 	// EXE Instruction 
 	always @(posedge clk or negedge reset) begin
@@ -693,14 +625,13 @@ always @(*) begin
 		Csrs[mideleg] <= 64'h0222; // delegate to S-mode 0000001000100010 see VII 3.1.15 mcasue interrupt 1/5/9 SSIP(supervisor software interrupt) STIP(time) SEIP(external)
 		// Initialize Machine Info for OpenSBI
 		//Csrs[misa] <= 64'h8000000000141101; //RV64IMASU extensions(63:62=2 64bits | 1<<0 Atomic| 1<<8 Integer| 1<<12 Multiply| 1<<18 Supervisor| 1 <<20 User) so: 64'h8000000000141101; RV64IMASU
-		//Csrs[mhartid] <= 64'd0; // single Core 0
-		// mvendorid, marchid, mimpid remain 0
 		mmu_pc <= 0;
 		in_debug <= 0;
 		reserve_addr <= 0;
 		reserve_valid <= 0;
-		tlb_epoch <= 16'd1;
+		//tlb_epoch <= 16'd1;
 		cache_epoch <= 16'd1;
+		tlb_flush <= 0;
 
 	    end else begin
 		pc <= pc + 4; // Default PC+4    (1.Could be overwrite 2.Take effect next cycle) 
@@ -712,20 +643,17 @@ always @(*) begin
 		trap_cause = 0;
 		trap_val = 0;
 		trap_epc = 0;
+                tlb_flush <= 0;
 
-		//if (bus_read_done && bus_write_done && !load_step && !store_step) debug <= 1;
-		//if (!STrap && !bubble && !load_step && !store_step && did) begin did <= 0;
-		//if (!STrap && !bubble && bus_read_done && bus_write_done && did)  begin did <= 0;
 		if (!STrap && !bubble && did)  begin did <= 0; end
 		// -- UPPER is default change for EXE stage --- but (1.Could be overwrite 2.Take effect next cycle) 
-    
                 // meip/seip is triggered by Plic_pending, mtip is triggered by inner Timer, stip is set by mtip trap handler, msip set by opensbi csr, ssip set by software csr
 		Csrs[mip][MEIP] <= meip_interrupt; 
 		Csrs[mip][MTIP] <= mtip_interrupt; // MTIP linux will see then jump to its handler  mtime>=mtimecmp
 		Csrs[mip][SEIP] <= seip_interrupt;
 		Csrs[mip][MSIP] <= msip_interrupt;  
 
-		//  i-tlb miss STrap
+	    //  i-tlb miss STrap
             if (need_trans && !tlb_i_hit) begin //OPEN 
                 mmu_pc <= 1; // MMU_PC ON 
                 pc <= 0;     // trap to isr_router
@@ -736,9 +664,6 @@ always @(*) begin
                 for (i=1;i<11;i=i+1) begin sre[i]<= re[i]; end // save re
                 re[9] <= pc;// - 4; // save this vpc to x1 //!!!! We also need to refill pc - 4' ppc for re-executeing pc-4, with hit(if satp in for very next sfence.vma) 
                 re[8] <= 12 ;// save in x8 trap type 0 i-tlb trap so record as instruciont page fault for prepare
-                //Csrs[mstatus][MPIE] <= Csrs[mstatus][MIE]; // disable interrupt during shadow mmu walking
-                //Csrs[mstatus][MIE] <= 0; !!
-		//reserve_valid <= 0; // clear lr.w/lr.d
 
             // Bubble
             end else if (bubble) begin bubble <= 1'b0; // Flush this cycle & Clear bubble signal for the next cycle
@@ -758,7 +683,6 @@ always @(*) begin
 		    ask_i_data <= {ppc[63:4], 4'b0};// save missed ppc_pre cache_line address for hardware
 		end
 		re[8] <= 1;// save x2 trap type 1 i-cache trap
-		//reserve_valid <= 0; // clear lr.w/lr.d
 
             // unalign
 	    end else if (!STrap && !load_step && !store_step && is_unaligned_access) begin  
@@ -770,8 +694,6 @@ always @(*) begin
 		reserve_valid <= 0; // clear lr.w/lr.d
 
 	    // d-tlb miss STrap load/store/atom
-	    //end else if (need_trans && !tlb_d_hit && (op == 7'b0000011 || op == 7'b0100011 || op == 7'b0101111) ) begin  
-	    //end else if (need_trans && !tlb_d_hit && is_mem_access) begin  
 	    end else if (need_trans_d && !tlb_d_hit && is_mem_access) begin  
 		mmu_da <= 1; // MMU_DA ON
 		pc <= 0; // trap to isr_router
@@ -780,8 +702,6 @@ always @(*) begin
 		for (i=1;i<11;i=i+1) begin sre[i]<= re[i]; end // save re
 		re[9] <= ls_va; //save va to x1
 		re[8] <= (op == 7'b0000011) ? 13 : 15;// save x2 trap type load/store_atom
-		//Csrs[mstatus][MIE] <= Csrs[mstatus][MPIE]; // set back interrupt status
-		//reserve_valid <= 0; // clear lr.w/lr.d
     
 	    end else if ((Csrs[mdebug] || debug) && !STrap && !did && !load_step && !store_step && !mul_enable && !div_enable) begin
 		in_debug <= 1;
@@ -795,7 +715,6 @@ always @(*) begin
                 //Csrs[mimpid] <=  pda;
                 //Csrs[marchid] <= ppc;
                 Csrs[mvendorid] <= ir;
-		//reserve_valid <= 0; // clear lr.w/lr.d
 
             // Back from STrap
 	    end else if (STrap && ir == 32'b00110000001000000000000001110011) begin // for the fauld fill: sd ppa, Tlb_fault
@@ -811,23 +730,11 @@ always @(*) begin
 		    trap_cause = re[8];
 		    trap_val = re[9];
 		    trap_epc = saved_user_pc;
+		    reserve_valid <= 0; // clear lr.w/lr.d  Real Trap has to clear lock
 		end
 
-		// Async Interrupt PLIC full (Platform-Level-Interrupt-Control)  MMIO (hardwire timers uart plic)
-	    //end else if ((meip_interrupt || msip_interrupt || mtip_interrupt || seip_interrupt) && Csrs[mstatus][MIE]==1 && !STrap && !load_step && !store_step) begin //mstatus[3] MIE
-	    //end else if ((meip|| msip|| mtip|| seip || stip) && Csrs[mstatus][MIE]==1 && !STrap && !load_step && !store_step) begin //mstatus[3] MIE
+	    // Async Interrupt PLIC full (Platform-Level-Interrupt-Control)  MMIO (hardwire timers uart plic)
 	    end else if (any_interrupt && !STrap && !load_step && !store_step && !mul_enable && !div_enable) begin //mstatus[3] MIE // cpu0_intc
-		//Csrs[mip][MTIP] <= mtip_interrupt; // MTIP linux will see then jump to its handler
-		//Csrs[mip][MEIP] <= meip_interrupt; // MEIP
-		//Csrs[mip][MSIP] <= seip_interrupt; // MSIP
-    
-		//reserve_valid <= 0; // Interrupt clear lr.w/lr.d
-		//do_trap = 1; trap_is_interrupt =1; trap_val = 0; trap_epc = pc_4;
-		//if (meip_interrupt) trap_cause = 11; // Cause 11 for Machine External Interrupt
-		//else if (msip_interrupt) trap_cause = 3;  // Cause 3 for Machine Sofeware Interrupt
-		//else if (mtip_interrupt) trap_cause = 7;  // Cause 7 for Machine Timer Interrupt
-		//else if (seip_interrupt) trap_cause = 9;  // Cause 9 for Supervisor External
-
 		reserve_valid <= 0; // Interrupt clear lr.w/lr.d
 		do_trap = 1; trap_is_interrupt =1; trap_val = 0; trap_epc = pc_4;
 		if (meip) trap_cause = 11; // Cause 11 for Machine External Interrupt
@@ -837,7 +744,7 @@ always @(*) begin
 		else if (stip) trap_cause = 5;  // Cause 5 for Supervisor Timer Interrupt (set by opensbi via csrw when it see MTIP)
 		else if (ssip) trap_cause = 1;  // Cause 1 for Supervisor Software Interrupt (set by os)
 
-		// IR
+	    // IR
 	    end else begin 
 		casez(ir)
 	            // U-type
@@ -852,7 +759,7 @@ always @(*) begin
                     // Store after TLB
                     32'b???????_?????_?????_???_?????_0100011: begin 
                         if (store_step == 0) begin bus_address <= pda; bus_write_data <= w_store_data; bus_write_enable <= 1; pc <= pc_4; bubble <= 1; store_step <= 1; bus_ls_type <= w_func3; 
-			if (reserve_valid && reserve_addr == pda) reserve_valid <= 0; end // if lr, break the contract
+			    if (reserve_valid && reserve_addr[63:3] == pda[63:3]) reserve_valid <= 0; end // if lr, break the contract; if in 8-byte
                         if (store_step == 1 && bus_write_done == 0) begin pc <= pc_4; bubble <= 1; end // bus working
                         if (store_step == 1 && bus_write_done == 1) begin store_step <= 0; end 
                     end   
@@ -956,10 +863,12 @@ always @(*) begin
 	               			       pc <=  Csrs[sepc]; // sepc was +4 by the software handler and written back to sepc
 		          		       bubble <= 1'b1; end 
 		    32'b00010000010100000000000001110011: begin end // Wfi
-		    32'b?????????????????_000_?????_0001111: begin end // Fence
-		    ///32'b?????????????????_001_?????_0001111: begin flush <= ~flush; end // Fence.i 
+		    32'b?????????????????_000_?????_0001111: begin bubble <= 1; pc <= pc; end // Fence
+		    //32'b?????????????????_000_?????_0001111: begin if (bus_read_enable || bus_write_enable || !bus_read_done || !bus_write_done) begin bubble <= 1; pc <= pc_4; end end // Fence wait r/w
 		    32'b?????????????????_001_?????_0001111: begin cache_epoch <= cache_epoch + 1; bubble <= 1; pc <= pc; end // Fence.i 
-		    32'b0001001??????????_000_?????_1110011: begin tlb_epoch <= tlb_epoch + 1; bubble <=1; pc <= pc; end // Sfence.vma (supervisor fence for virtual memory address) have to bubble the fetch next ir from old tlb, redo
+		    //32'b?????????????????_001_?????_0001111: begin cache_epoch <= cache_epoch + 1; end // Fence.i 
+		    //32'b0001001??????????_000_?????_1110011: begin tlb_flush <= 1; bubble <=1; pc <= pc; end // Sfence.vma (supervisor fence for virtual memory address) have to bubble the fetch next ir from old tlb, redo
+		    32'b0001001??????????_000_?????_1110011: begin tlb_flush <= 1; bubble <=1; pc <= pc; end // Sfence.vma  have to bubble the fetch next ir from old tlb, recheck fail in bubble, strap
 		    // Atomic after TLB // -- ATOMIC instructions (A-extension) opcode: 0101111
 		    32'b00010_??_?????_?????_01?_?????_0101111: begin  // lr Lr._mmu 3 cycles lr.w010 lr.d011
 		        if (load_step == 0) begin bus_address <= pda; bus_read_enable <=1; pc <= pc_4; bubble <=1; load_step <=1; bus_ls_type <= w_func3; reserve_addr <= pda; reserve_valid <=1; end
@@ -981,9 +890,11 @@ always @(*) begin
 			    re[w_rd] <= amo_op_mem; load_step <= 0;  // finish load
 		            bus_address <= pda;bus_write_enable<=1;pc<=pc_4;bubble<=1;store_step<=1;bus_ls_type<=w_func3; // start store
 			    bus_write_data <= w_atomic_write_data;
+			    if (reserve_valid && reserve_addr[63:3] == pda[63:3]) reserve_valid <= 0; // if lr, break the contract; if in 8-byte
 		        end
 		        if (store_step == 1 && bus_write_done == 0) begin pc <= pc_4; bubble <= 1; end
-		        if (store_step == 1 && bus_write_done == 1) begin store_step <= 0; end end
+		        if (store_step == 1 && bus_write_done == 1) begin store_step <= 0; end
+		    end
                     // M-Mul
 		    32'b0000001_?????_?????_0??_?????_0110011, // Mul, Mulh, Mulhsu, Mulhu
 		    32'b0000001_?????_?????_000_?????_0111011: // Mulw
@@ -1441,8 +1352,8 @@ assign DRAM_CKE = 1; // always enable
         uart_write_pulse <= 0;
 	uart_read_pulse <= 0;
 	uart_irq_pre <= uart_irq;
-	//if (uart_irq && !uart_irq_pre) Plic_pending[1] <= 1;
-	if (uart_irq) Plic_pending[1] <= 1;
+	if (uart_irq && !uart_irq_pre) Plic_pending[1] <= 1;
+	//if (uart_irq) Plic_pending[1] <= 1;
 	//if (key_pressed_edge) Plic_pending[1] <= 1;
 
         //if (bus_read_enable) begin bus_read_done <= 0; cid <= (bus_address-`Sdc_base); end 
@@ -3132,6 +3043,7 @@ print7: # a0, 7 char left one for null
        //stdout-path = "/soc/serial@10000000";
        // SoC
        stdout-path = "/soc/uart@2004";
+       bootargs = "no4lvl earlycon=sbi console=hvc0 panic=0 init_on_alloc=0 keep_bootcon ignore_loglevel initcall_debug rcu_update.rcu_cpu_stall_suppress=1";
     };
 
 
@@ -3233,589 +3145,115 @@ make CROSS_COMPILE=/usr/local/projects/bin/xpack-riscv-none-elf-gcc-14.2.0-3/bin
 #hexdump -C build/platform/generic/firmware/fw_jump.bin > ../fw_jump.bin.txt
 #cp build/platform/generic/firmware/fw_jump.bin ../fw_jump_ns16550a.bin
 #cp my_board.dtb ../my_board.dtb
----------- bootloader code ---------
-#`define Sdc_base  32'h0000_3000 (3000-31ff 512 bytes index) sd_cache 
-#`define Sdc_addr  32'h0000_3200
-#`define Sdc_read  32'h0000_3204
-#`define Sdc_write 32'h0000_3208
-#`define Sdc_ready 32'h0000_3220
-#`define Sdc_dirty 32'h0000_3224
-#`define Sdc_avail 32'h0000_3228
-# UART 0x2004
-
+---------- mini_kernel test code ---------
 .globl _start
 
-# -- Define data --
 .section .data
-msg:
-    .string "Hello"
-#sbi:
-#    .string "I'm test Opensbi add update ram read=on1"
-#wait_sd_ready:
-#    .string "wait_sd_ready:"
-#read_sd_sector:
-#    .string "read_sd_sector:"
-#prt_sector:
-#    .string "print_sector:"
-reserved_sec:
-    .word 0
-num_fats:
-    .word 0
-sec_per_fat:
-    .word 0
-byte_per_sec:
-    .word 0
-root_dir_sector_start:
-    .word 0
-root_ent_cnt:
-    .word 0
-root_dir_sectors:
-    .word 0
-sec_per_clus:
-    .word 0
-data_start_sec:
-    .word 0
-entries_per_sector:
-    .word 0
-total_sectors:
-    .word 0
-file_size:
-    .word 0
-file_first_cluster:
-    .word 0
-file_sectors:
-    .word 0
-file_start_sector:
-    .word 0
+msg_boot:
+    .string "--Full instructions test for run Linux Kernel--"
+mem_test_var:
+    .dword 0x0000000000000000
 
 
-
-
-# -- Start program main function _start --
+# Bootloader/copy4 --> firmware/BIOS/opensib/mini_sbi2 --> OS/linux/kernal
 .section .text
-# -- Global setup --
-_start:
-
-    li s0, 0x80000000
-    li s1, 0x80800000
-clear_ram_loop:
-    sd zero, 0(s0)
-    addi s0, s0, 8
-    blt s0, s1, clear_ram_loop
-
-
-
-
-    li sp, 0x1800 # Set stack
-    li s11, 0x2004 # UART print 
-    li s10, 0x2008 # UART controller
-    li s1,  0x3000 # SD base
-    li s2,  0x3200 # SD address
-    li s3,  0x3204 # SD trigger read
-    li s4,  0x3208 # SD trigger write
-    li s5,  0x3220 # SD ready for rd/wr
-    li s6,  0x3228 # SD cache available
-    # a0 for function call default parameter
-    #lui s0, 0x80000 # SDRAM base 0x80000000 wrong! neg
-    li s0, 0x80000000 # SDRAM base 0x80000000
-
-# ---------------------- SD card -------------------
-# Sector 0 Layout # BPB (BIOS Parameter Block) in sector 0
-#| Offset | Size | Field                           | Meaning                        | Example (FAT16) |
-#| :----- | :--- | :------------------------------ | :----------------------------- | :-------------- |
-#| `0x00` | 3    | Jump Instruction                | JMP to boot code               | EB 3C 90        |
-#| `0x03` | 8    | OEM Name                        | Text label                     | "MSDOS5.0"      |
-#| `0x0B` | 2    | **Bytes per sector**            | Usually 512                    | 0x0200          |
-#| `0x0D` | 1    | **Sectors per cluster**         | Cluster size (e.g. 1,2,4,8,16) | 1               |
-#| `0x0E` | 2    | **Reserved sectors**            | Includes boot sector           | 1               |
-#| `0x10` | 1    | **Number of FATs**              | Typically 2                    | 2               |
-#| `0x11` | 2    | **Root entries**                | Count of directory entries     | 512             |
-#| `0x13` | 2    | **Total sectors (16-bit)**      | If zero, use 0x20–0x23         | 2880            |
-#| `0x15` | 1    | **Media descriptor**            | 0xF8 (fixed disk)              | F8              |
-#| `0x16` | 2    | **Sectors per FAT**             | FAT size                       | 9               |
-#| `0x18` | 2    | **Sectors per track**           | BIOS info                      | 18              |
-#| `0x1A` | 2    | **Number of heads**             | BIOS info                      | 2               |
-#| `0x1C` | 4    | **Hidden sectors**              | Partition offset               | 0               |
-#| `0x20` | 4    | **Total sectors (32-bit)**      | Large volumes                  | 0               |
-#| `0x24` | —    | (More fields in FAT32 only)     | —                              | —               |
-#| `0x36` | 11   | Volume Label / File System Type | "NO NAME    " / "FAT16   "     | —               |
-#| :----- | :--- | :------------------------------ | :----------------------------- | :-------------- |
-
-
-#lw a0, 0(s11)
-#call print_reg
-
-find_opensbi:
-li s9, "MUSIC"
-find_kernel:
-
-# ----------Read BPB sector 0 -----
-li a0, 0   
-call sd_read_sector  # use a0 as sector no.
-#call print_sector
-
-# -- Parse BPB -- little-endian  Bios Parameter Block : sector 0
-# -------------------------------------
-# byte_per_sec offset 0x0b-0x0c 2 bytes
-li s7, 66
-sb s7, 0(s11)
-#li a0, "\nBPsec:" # 7 char left on for null
-#call print7
-
-#endd:
-#    j endd
-
-la a1, byte_per_sec
-lwu a0, 0x0a(s1)
-srli a0, a0, 8
-sh a0, 0(a1)
-#lhu a0, 0(a1)
-#call print_reg
-
-# -------------------------------------
-# Sectors per cluster 0x0d 1 byte
-#li a0, "\nsePcl:" # 7 char left on for null
-#call print7
-la a1, sec_per_clus
-lbu a0, 0x0d(s1)
-sh a0, 0(a1)
-#lh a0, 0(a1)
-#call print_reg
-#
-#
-# -------------------------------------
-# reserved_sectors offset 0x0e-0x0f 2 bytes (including root sector 0)
-#li a0, "\nrevSe:" # 7 char left on for null
-#call print7
-la a1, reserved_sec
-lh a0, 0x0e(s1)
-sd a0, 0(a1)
-#ld a0, 0(a1)
-#call print_reg
-
-# -------------------------------------
-# num_fats offset 0x10 1 bytes
-#li a0, "\nnuFat:" # 7 char left on for null
-#call print7
-la a1, num_fats
-lbu a0, 0x10(s1)
-sw a0, 0(a1)
-#lw a0, 0(a1)
-#call print_reg
-
-# -------------------------------------
-# root_entries offset 0x11-0x12 2 bytes
-#li a0, "\nReCnt:"
-#call print7
-la a1, root_ent_cnt
-lwu a0, 0x10(s1)
-srli a0, a0, 8
-sh a0, 0(a1)
-#lhu a0, 0(a1)
-#call print_reg
-
-# -------------------------------------
-# total sectors offset 0x13 2 bytes if 0 find 0x20 4 bytes for large volumes
-#li a0, "\nToSec:"
-#call print7
-la a1, total_sectors
-lwu a0, 0x20(s1)
-sw a0, 0(a1)
-#lwu a0, 0(a1)
-#call print_reg
-
-# -------------------------------------
-# sectors_per_fat16 high offset 0x16-0x17 2 bytes
-#li a0, "\nsePft:" # 7 char left on for null
-#call print7
-la a1, sec_per_fat
-lh a0, 0x16(s1)
-sh a0, 0(a1)
-#lh a0, 0(a1)
-#call print_reg
-
-## ---------Calcauted ----------------------------
-# root_dir_sector_start = reserved_sectors + (num_fats * sectors_per_fat16)
-#li a0, "\nrtdS0:" # 7 char left on for null
-#call print7
-la a1, num_fats
-lw t1, 0(a1)
-la a1, sec_per_fat
-lw t2, 0(a1)
-la a1, reserved_sec
-lw t0, 0(a1)
-mul a0, t1, t2
-add a0, a0, t0
-la t3, root_dir_sector_start
-sw a0, 0(t3)
-#lw a0, 0(t3)
-#call print_reg
-
-# -------------------------------------
-# entries_per_sector =  byte_per_sec/32
-
-    csrwi mdebug, 8
-
-#li a0, "\nEtPse:"
-#call print7
-la a1, byte_per_sec
-lw a0, 0(a1)
-mv s7, a0
-#srli a0, a0, 5  # calc entries_per_sector
-li t1, 32
-div a0, a0, t1
-la t3,  entries_per_sector
-sw a0, 0(t3)
-lw a0, 0(t3)
-call print_reg
-
-    csrwi mdebug, 0
-
-# ---------- Read Root dir Secotr 0 -----
-la t3, root_dir_sector_start
-lw a0, 0(t3)
-call sd_read_sector  # use a0 as sector no.
-call print_sector
-
-
-# -------------------------------------
-# Scan Entries of Root Dir first sector
-# s7 entry_per_sector
-
-#find_opensbi:
-#li s9, "MUSIC"
-##li s9, "KERNL"
-##mv a0, s9
-##call print7
-#find_kernel:
-
-
-li s8, 0 # entry_index
-entry_loop:
-bge s8, s7, done_entries
-# entry_addr = s1 + (entry_index * 32)
-slli t1, s8, 5
-add t3, s1, t1 # t3 = address of entry
-
-# 1. Quick Validity Check
-# load first byte of entry
-lbu t4, 0(t3)
-beq t4, x0, done_entries # 0x00 no more entries in dir
-li t1, 0xE5
-beq t4, t1, next_entry # 0xE5 deleted entry, skip
-    
-# 2. Attribute Check # attribute at 0x0B( offset 11)
-lbu t5, 11(t3)
-li t1, 0x0F
-beq t5, t1, next_entry # 0x0F LFN(Long File Name) entry, skip
-
-andi t6, t5, 0x18  # Mask for Volume Label(0x08) and Directory (0x10)
-bne t6, x0, next_entry # skip 
-
-# 3. Compare Filename(First 8 bytes)
-# load name 8 bytes
-li t2, 0
-addi t4, t3, 7
-load_name_loop:
-lbu t0, 0(t4)
-slli t2, t2, 8
-xor t2, t2, t0
-addi t4, t4, -1
-bge t4, t3, load_name_loop
-
-# keep 5 char
-slli t2, t2, 24
-srli t2, t2, 24
-
-## -- Print Name --- 
-#addi sp, sp, -16
-#sd t2, 0(sp)
-#sb x0, 8(sp)
-#mv a0, sp
-#call puts
-#addi sp, sp, 16
-## -----------------
-
-bne t2, s9, next_entry
-
-## 4. FOUND! Extract File Info
-li a0, "FOUND!"
-call print7
-#mv a0, s9
-#call print7
-
-done_entries:
-   j read_file
-
-next_entry:
-addi s8, s8, 1
-j entry_loop
-
-
-## root_dir_sector_start = reserved_sectors + (num_FATs * sectors_per_FAT)
-## root_dir_sectors = (RootEntryCount * 32 + BytesPerSector -1 )/ BytesPerSector  ceiling division
-## FirstDataSector = root_dir_sector_start + root_dir_sectors 
-## FirstSectorOfCluster(N)=FirstDataSector + (N - 2) * SectorsPerCluster
-#
-## Entry Layout(in Root Directory)
-##| Offset | Size | Field                             | Description                  | Example      |
-##| :----- | :--- | :-------------------------------- | :--------------------------- | :----------- |
-##| `0x00` | 8    | **Filename**                      | 8 chars (space padded)       | `"MUSIC   "` | FAT16 8.3 format for name.extension
-##| `0x08` | 3    | **Extension**                     | 3 chars (space padded)       | `"WAV"`      |
-##| `0x0B` | 1    | **Attributes**                    | Bit flags (see below)        | 0x20         |
-##| `0x0C` | 1    | Reserved                          | For Windows NT               | 0            |
-##| `0x0D` | 1    | Creation time (tenths)            | Optional                     | —            |
-##| `0x0E` | 2    | Creation time                     | —                            | —            |
-##| `0x10` | 2    | Creation date                     | —                            | —            |
-##| `0x12` | 2    | Last access date                  | —                            | —            |
-##| `0x14` | 2    | High word of cluster (FAT32 only) | —                            | —            |
-##| `0x16` | 2    | Last modified time                | —                            | —            |
-##| `0x18` | 2    | Last modified date                | —                            | —            |
-##| `0x1A` | 2    | **First cluster (low word)**      | Cluster number (starts at 2) | 0x0002       |
-##| `0x1C` | 4    | **File size (bytes)**             | File length                  | 4096         |
-#
-read_file:
-#j read_file
-## file size at 0x1C-0x1D-0x1E-0x1F 4 bytes
-li a0, "\nFSize:"
-call print7
-lwu a0, 0x1c(t3)
-la a1, file_size
-sw a0, 0(a1)
-lwu a0, 0(a1)
-call print_reg
-
-# file_first_cluster at 0x1A-0x1B 2 bytes
-#li a0, "\nF0cls:"
-#call print7
-lhu a0, 0x1a(t3)
-la a1, file_first_cluster
-sh a0, 0(a1)
-#lhu a0, 0(a1)
-#call print_reg
-
-# root_dir_sectors = (RootEntryCount * 32 + BytesPerSector -1 )/ BytesPerSector  ceiling division
-#li a0, "\nrDseS:"
-#call print7
-
-la a1, root_ent_cnt
-lwu t0, 0(a1)
-li t1, 32
-mul t2, t0, t1
-
-la a1, byte_per_sec
-lwu t0, 0(a1)
-add t3, t2, t0
-addi t3, t3, -1
-div a0, t3, t0
-
-la a1, root_dir_sectors 
-sw a0, 0(a1)
-lw a0, 0(a1)
-call print_reg
-
-#data_start_sec # FirstDataSector = root_dir_sector_start + root_dir_sectors 
-#li a0, "\nD0sec:"
-#call print7
-la a1, root_dir_sector_start
-lw t0, 0(a1)
-la a1, root_dir_sectors 
-lw t1, 0(a1)
-add t2, t0, t1
-la a1, data_start_sec  
-sw t2, 0(a1)
-#lw a0, 0(a1)
-#call print_reg
-
-# FirstSectorOfCluster(N)=FirstDataSector + (N - 2) * SectorsPerCluster
-#li a0, "\nF0sec:"
-#call print7
-
-la a1, file_first_cluster # N
-lw t0, 0(a1)
-addi t0, t0, -2
-la a1, sec_per_clus
-lw t1, 0(a1)
-mul t2, t0, t1
-la a1, data_start_sec
-lw t3, 0(a1)
-add a0, t3, t2
-la a1, file_start_sector
-sw a0, 0(a1)
-call print_reg
-
-
-# file_sectors = file_size + 511 / 512
-#li a0, "\nFseS:"
-#call print7
-la a1, file_size
-lw t0, 0(a1)
-addi t0, t0, 511
-li t1, 512
-div a0, t0, t1
-la a1, file_sectors 
-sw a0, 0(a1)
-lw a0, 0(a1)
-call print_reg
-
-
-#li a0, "\nFileB:"
-#call print7
-
-la a1, file_sectors
-lw t0, 0(a1)
-la a1,  file_start_sector
-lw t1, 0(a1)
-add t2, t1, t0
-
-
-#print_sector_loop:
-#mv a0, t1
-#call sd_read_sector  # use a0 as sector no.
-#call print_sector
-#addi t1, t1, 1
-#blt t1, t2, print_sector_loop
- 
-li t0, "KERNL"
-beq t0, s9, copy_kernel 
-
-#lui s0, 0x80000 # SDRAM base 0x80000000
-li s0, 0x80000000 # SDRAM base 0x80000000
-copy_sector_loop:
-li a0, 94 # ^
-call putchar
-mv a0, t1
-call sd_read_sector  # use a0 as sector no.
-mv a0, s0
-call copy_sector
-addi t1, t1, 1
-addi s0, s0, 512
-blt t1, t2, copy_sector_loop
-
- 
-search_kernel:
-li s9, "KERNL"
-#mv a0, s9
-#call print7
-j find_kernel
-
-copy_kernel: 
-li s0, 0x80200000 # FW_JUMP to KERNL base 0x80200000
-copy_kernel_sector_loop:
-li a0, 96 # `
-call putchar
-mv a0, t1
-call sd_read_sector  # use a0 as sector no.
-mv a0, s0
-call copy_sector
-addi t1, t1, 1
-addi s0, s0, 512
-blt t1, t2, copy_kernel_sector_loop
-
-
-
-#li s0, 0x80000000
-#la a1, file_size
-#lw t0, 0(a1)
-#add s0, s0, t0     # s0 = end of file
-#li s1, 0x80800000  # s1 = end of SDRAM
-#clear_garbage_loop:
-#bge s0, s1, boot_opensbi
-#sb zero, 0(s0)
-#addi s0, s0, 1
-#j clear_garbage_loop
-
-
-
-
-
-# -----------------------------
-# Read/Write SDRAM
-#lui s0, 0x80000 # SDRAM base 0x80000000
-#li s0, 0x80000000 # SDRAM base 0x80000000
-## Write one byte
-#li t1, 0x58          # 'X'
-#sb t1, 0(s0)         # test sdram sb/sh
-#    
-## Read it back
-#lbu t2, 0(s0)         # test sdram lbu
-#    
-## Print it
-#sb t2, 0(s11)         # Should print 'X'
-
-
-#    lui t0, 0x2
-#    addi t0, t0, 4       # UART = 0x2004
-#    
-#    lui s0, 0x80000      # SDRAM = 0x80000000
-#li s0, 0x80000000 # SDRAM base 0x80000000
-#    
-#    # Write one byte
-#    li t1, 0x58          # 'X'
-#    call wait_uart
-#    sb t1, 0(s0)         # test sdram sb/sh
-#    
-#    # Read it back
-#    lbu t2, 0(s0)         # test sdram lbu
-#    
-#    # Print it
-#    sb t2, 0(t0)         # Should print 'X'
-#    sb t2, 0(t0)         # Should print 'X'
-#    sh t2, 0(t0)         # Should print 'X'
-#    
-#    # Write 4 byte
-#    li t1, 0x44434241    # 'DCBA'
-#    sw t1, 0(s0)         # test sdram sw
-#    
-#    # Read it back
-#    lhu t3, 0(s0) # A    # test sdram lhu lwu
-#    lbu t4, 1(s0) # B
-#    lwu t5, 2(s0) # C
-#    lbu t6, 3(s0) # D
-#    
-#    # Print it
-#    sb t3, 0(t0)         # Should print 'A'
-#    sb t4, 0(t0)         # Should print 'B'
-#    sb t5, 0(t0)         # Should print 'C'
-#    sb t6, 0(t0)         # Should print 'D'
-#    sb t2, 0(t0)         # Should print 'X'
-
-boot_opensbi:
-    #lui s0, 0x80000      # SDRAM = 0x80000000
-    li s0, 0x80000000 # SDRAM base 0x80000000
-    ld a0, 0(s0)         # test sdram read data
-    call print_reg
-
- li a0, "\nJump:"
- call print7
-
-#csrsi mie, 0b10000000 # MTIP
-#csrsi mstatus, 0b1000 # MIE
-
-    fence.i
-   #csrw 0x7cc, t0  # open debug print
-
-   #csrwi mdebug, 8 
-    li a0, 0 # use core 0
-    li a1, 0 # let opensbi use its embedded DTB
-   #li a1, 0x80100000 # set DTB addr
-   #li a2, 0 # set boot HART
-    li a2, 0x80200000 # next jump address
-
-    jr s0  # jump to SDRAM!
-
-
-end: 
-j end
-
-
-
-
-
-
-# functions ------
-
-print_reg: # a0
+_start:  
+  j main # like linux kernel
+
+s_trap_handler:
+  #li a0, "\n"
+  #li a7, 1
+  #ecall   # here ecall was not delegated to s_mode, so go to mtvec to find m-mode ecall handler
+  #li a0, "S_TRAP"
+  #call sbi_print7
+
+   csrr t1, scause
+   li t2, 0x8000000000000005 # bit 63 set + code 5 (Supervisor Timer)
+   beq t1, t2, timer_found_stip
+
+   li t2, 0x8000000000000001 # bit 63 set + code 1 (Soft ware Interrupt)
+   beq t1, t2, timer_found_ssip
+
+  #bltz a0, handle_interrupt
+   # handle exception
+  #call sbi_print_reg
+  #csrr a0, stval
+  #call sbi_print_reg
+  #csrr a0, sepc
+  #call sbi_print_reg
+  #csrr a0, sstatus
+  #call sbi_print_reg
+  #exception s-done
+   csrr t2, sepc
+   addi t2, t2, 4 # skip ecall/ebreak instruction
+   csrw sepc, t2
+   sret
+
+timer_found_stip:
+    addi a0, x0, 84  # T
+    call sbi_putchar
+   #li a0, -1 # Clear timer by max
+   #li a7, 0 # SBI set timer
+   #ecall
+
+   csrr a0, time
+  #li t0, 10000000 # 1 second
+   li t0, 100000 # 1 second
+   add a0, a0, t0
+   li a7, 0  # SBI Set Timer ID
+   ecall
+
+    sret
+timer_found_ssip:
+    addi a0, x0, 83  # S
+    call sbi_putchar
+    li t2, 0x02  # clear ssip
+    csrc sip, t2
+
+    sret
+
+
+sbi_putchar:  # a0
+    addi sp, sp, -8
+    sd ra, 0(sp)
+    li a7, 1 # SBI Putchar ID
+    ecall
+    ld ra, 0(sp)
+    addi sp, sp, 8
+    ret
+
+sbi_puts: # a0 addr
+    addi sp, sp, -24
+    sd ra, 0(sp)
+    sd a0, 8(sp)
+    sd s1, 16(sp)
+    mv s1, a0
+    sbi_puts_loop:
+    lbu a0, 0(s1)
+    beq a0, x0, sbi_stop_puts # \x00 for end of string
+    li a7, 1 # SBI Putchar ID
+    ecall
+    addi s1, s1, 1 # next byte
+    j sbi_puts_loop
+    sbi_stop_puts:
+    ld ra, 0(sp)
+    ld a0, 8(sp)
+    ld s1, 16(sp)
+    addi sp, sp, 24
+    ret
+
+sbi_print7: # a0, 7 char left one for null
+    addi sp, sp, -16
+    sd a0, 0(sp)
+    sd ra, 8(sp)
+    mv a0, sp
+    call sbi_puts
+    ld a0, 0(sp)
+    ld ra, 8(sp)
+    addi sp, sp, 16
+    ret
+
+sbi_print_reg: # a0
     addi sp, sp, -40
     sd ra, 0(sp)
     sd s0, 8(sp)
@@ -3824,22 +3262,21 @@ print_reg: # a0
     sd s3, 32(sp)
     mv s0, a0
     li a0, "0"
-    call putchar
+    call sbi_putchar
     li a0, "x"
-    call putchar
+    call sbi_putchar
     li s1, 60 
-p_loop:
+    p_loop:
     srl s2, s0, s1      # get high nibble
     andi s2, s2, 0xF
     slti s3, s2, 10     # if < 10 number
     beq s3, x0, letter
-    addi s2, s2, 48     # 0 is "0" ascii 48
+    addi a0, s2, 48     # 0 is "0" ascii 48
     j print_h
-letter:
-    addi s2, s2, 55     # 10 is "A" ascii 65 ..
-print_h:
-    call wait_uart
-    sb s2, 0(s11)       # print
+    letter:
+    addi a0, s2, 55     # 10 is "A" ascii 65 ..
+    print_h:
+    call sbi_putchar    # print
     addi s1, s1, -4
     bge s1, x0, p_loop 
     ld ra, 0(sp)
@@ -3851,112 +3288,52 @@ print_h:
     ret
 
 
-# ---  sd_read_sector ---
-sd_read_sector:  #  a0 sector index
-    addi sp, sp, -24
-    sd s7, 0(sp)
-    sd s8, 8(sp)
-    sd ra, 16(sp)
-    sw a0, 0(s2) # Write Sector index value to address 0x3200
-wait_ready:
-    lw s7, 0(s5)   # 0x3220 ready
-    #li a0, 96      # `
-    #call putchar
-    beq s7, x0, wait_ready
-    li s8, 1
-    sw s8, 0(s3)   # Trigger read at 0x3204
-wait_cache:
-    lw s7, 0(s6)   # s7 0x3228 cache_avaible
-    beq s7, x0, wait_cache
-    ld s7, 0(sp)
-    ld s8, 8(sp)
-    ld ra, 16(sp)
-    addi sp, sp, 24
-    ret
+main:
+
+   li sp, 0x80700000 # Set stack # 80000000-80800000 sdram as 8M ram, we start sp from 0x80700000<-, MMU from 0x80700000->
+
+   # Test time
+  #csrr s0, time
+   li t0, 100
+check_clock:
+   csrr a0, time
+   call sbi_print_reg
+   addi t0, t0, -1
+   bnez t0, check_clock
+
+  #sub t0, s1, s0
+  #li t1, 100000
+  #blt t0, t1, check_clock
+
+   
+   # Step 1 test ecall (sbi) print
+  #la a0, msg_boot
+  #call sbi_puts
+
+   # Step 2 test S-Mode trap hander # Opensbi delegate Ebreak to OS, so we set our handler address to stvec
+   la t0, s_trap_handler
+  #andi t0, t0, -4 # Align to 4 bytes
+   csrw stvec, t0
+   ebreak
+  #li a0, "\nStrpOK"
+  #call sbi_print7
 
 
-# print sector 0 512 bytes
-print_sector:
-    addi sp, sp, -64
-    sd ra, 0(sp)
-    sd s4, 8(sp)
-    sd s5, 16(sp)
-    sd s6, 24(sp)
-    sd s7, 32(sp)
-    sd s8, 40(sp)
-    sd s9, 48(sp)
-    sd s3, 56(sp)
-    li s7, 0   # byte index
-    li s8, 511 # max byte index
-print_loop:
-    add s6, s1, s7 
-    addi s7, s7, 1
-    lbu s9, 0(s6)       # load byte at 0x3000 a1+t1
-    andi s9, s9, 0xFF   # Isolate byte value
-    srli s3, s9, 4      # get high nibble
-    slti s5, s3, 10     # if < 10 number
-    beq s5, x0, letter_h
-    addi s3, s3, 48     # 0 is "0" ascii 48
-    j print_h_hex
-letter_h:
-    addi s3, s3, 55     # 10 is "A" ascii 65 ..
-print_h_hex:
-    call wait_uart 
-    sb s3, 0(s11)
-    andi s4, s9, 0x0F   # get low nibble
-    slti s5, s4, 10     # if < 10 number
-    beq s5, x0, letter_l
-    addi s4, s4, 48     # 0 is "0" ascii 48
-    j print_l_hex
-letter_l:
-    addi s4, s4, 55     # 10 is "A" ascii 65 ..
-print_l_hex:
-    call wait_uart 
-    sb s4, 0(s11)
-    bge s8, s7, print_loop
-    ld ra, 0(sp)
-    ld s4, 8(sp)
-    ld s5, 16(sp)
-    ld s6, 24(sp)
-    ld s7, 32(sp)
-    ld s8, 40(sp)
-    ld s9, 48(sp)
-    ld s3, 56(sp)
-    addi sp, sp, 64
-    ret
-# -- end print_sector --
+# ## Set Timer
+#  li t0, 0x20 # enable STIE bit 5
+#  csrs sie, t0
+#  csrsi sstatus, 2  # enable global SIE bit 1
+# 
+#  csrr a0, time # read time
+# #li t0, 10000000 # 1 second
+#  li t0, 100000 # 1 second
+#  add a0, a0, t0
+#  li a7, 0  # SBI Set Timer ID
+#  ecall
 
-
-# copy sector 0 512 bytes
-copy_sector: # a0 as target addr
-    addi sp, sp, -48
-    sd ra, 0(sp)
-    sd s6, 8(sp)
-    sd s7, 16(sp)
-    sd s8, 24(sp)
-    sd s9, 32(sp)
-    sd s5, 40(sp)
-
-    li s7, 0   # byte index
-    li s8, 511 # max byte index
-    mv s5, a0
-copy_loop:
-    add s6, s1, s7 
-    ld a0, 0(s6)       # load 8 bytes at 0x3000 a1+s7
-    sd a0, 0(s5)       # save 8 bytes to s5
-   #call print_reg
-    addi s7, s7, 8
-    addi s5, s5, 8
-    bge s8, s7, copy_loop
-    ld ra, 0(sp)
-    ld s6, 8(sp)
-    ld s7, 16(sp)
-    ld s8, 24(sp)
-    ld s9, 32(sp)
-    ld s5, 40(sp)
-    addi sp, sp,  48
-    ret
-# -- end print_sector --
+#wait_for_timer: # wait strap_handler print timecmp trap
+#   wfi
+#   j wait_for_timer
 
 
 
@@ -3966,6 +3343,376 @@ copy_loop:
 
 
 
+   # Step 3 test MMU
+   # 1.Build SV39 root table in sdram (4KB per table 2**9=512*8=4096) vpn2 4KB map 512*4k=2MBram; all vpn1=4*512=2Mb map 512*2M=1Gram, all vpn0=512*512=262144*4kb=1GB map 512Gram,total VPNs 4KB+2MB+1024MB
+   li t0, 0x80700000 # set base address of MMU root table
+
+   # 2. map vma 0x0000_0000 to ppa 0x0000_0000, ppn =  ppa >> 12 = 0, for UART/CLINT/PLIC .etc
+   li t1, 0xcf       # pte = ppn << 10 | flags valid0 read1 write2 exec3 accessed6 dirty7 0b11001111=0xcf
+   sd t1, 0(t0) 
+
+   # 3. map vma 0x8000_0000 to ppa 0x8000_0000, ppn =  ppa >> 12 = 0x80000 pte = ppn << 10 | flags, for RAM/Code
+   li t1, 0x200000cf # pte = ppn << 10 | flags valid0 read1 write2 exec3 accessed6 dirty7 0b11001111=0xcf
+   sd t1, 16(t0)     # Index=va[38:30]=0b00000010=2, 8 bytes per PTE = 16, 
+
+   # satp need ppn of root table rt 0x80700000 
+   # satp = satp[63:60].MODE(0:bare, 8:sv39, 9:sv48)|satp[59:44].asid|satp[43:0].rootpage_physical_addr(vpn2:9|vpn1:9|vpn0:9|offseet12)
+   # ppn = rt >> 12 = 0x80700
+   # mode = 3 sv39
+   li t0, 0x8000000000080700
+   # Turn MMU SV39
+   csrw satp, t0 # write mode and root table address to satp CSR register
+   sfence.vma ## <--- start use TLB I/D hitting
+
+  #li a0, "\nMMUOK"
+  #call sbi_print7
+ 
+   # ======================================
+   # Chain test for riscv64ima instructions
+   # Accumulator register: s11
+   # ======================================
+
+   # 1 Lui
+   lui s11, 0x12345         # s11 = 0x0000000012345000
+
+   # 3/4 ls
+   la a2, mem_test_var
+   # Test Byte (sb/lb/lbu)
+   li t4, 0x8F  # A negative-looking byte
+   sb t4, 0(a2)
+   lb t5, 0(a2) # 0xFFFFFFFFFFFFFF8F
+   lbu t6, 0(a2)# 0x000000000000008F
+   li t1, 0x8F
+   bne t6, t1, fail_chain
+
+   # Test Half (sh/lh/lhu)
+   li t4, 0x8FEE  # A negative-looking half
+   sh t4, 0(a2)
+   lh t5, 0(a2) # 0xFFFFFFFFFFFF8FEE
+   lhu t6, 0(a2)# 0x0000000000008FEE
+   li t1, 0x8FEE
+   bne t6, t1, fail_chain
+
+   # Test Word (sw/lw/lwu)
+   li t4, 0x8FEEDCBA  # A negative-looking word
+   sw t4, 0(a2)
+   lw t5, 0(a2) # 0xFFFFFFFF8FEEDBCA
+   lwu t6, 0(a2)# 0x000000008FEEDBCA`
+   li t1, 0x8FEEDCBA
+   bne t6, t1, fail_chain
+
+   # Test Doube Word (sd/ld)
+   sd s11, 0(a2)
+   ld s11, 0(a2)
+  #li a0, "\nLSOK"
+  #call sbi_print7
+
+   # 5 math-i (addi, xori, andi, ori, slli, srli, srai, slti, sltiu)
+   addi s11, s11, 0x678     # s11 = 0x12345678
+   xori s11, s11, 0x111     # s11 = 0x12345769
+   andi s11, s11, 0xFFF     # s11 = 0x12345769
+   ori s11, s11, 0x800      # s11 = 0xFFFFFFFFFFFFFF69
+   li a2, 0xFFF 
+   and s11, s11, a2         # s11 = 0x0000000000000F69
+   li t1, 0x0000000000000F69
+   bne s11, t1, fail_chain
+  #li a0, "\nMthiOK"
+  #call sbi_print7
+
+   slli s11, s11, 4         # s11 = 0x0000F690
+   srli s11, s11, 4         # s11 = 0x00000F69
+   srai s11, s11, 0         # s11 = 0x00000F69 (MSB is 0)
+   slti a3, s11, 0         # a3 = 0
+   add  s11, s11, a3        # s11 = 0x00000F69
+   sltiu a3, s11, 0        # a3 = 0
+   add  s11, s11, a3        # s11 = 0x00000F69
+   li t1,  0x00000F69
+   bne s11, t1, fail_chain
+  #li a0, "\nShifOK"
+  #call sbi_print7
+
+   # 6 math-iw (addiw, slliw, srliw, sraiw)
+   addiw s11, s11, 1        # s11 = 0x00000F6A
+   slliw s11, s11, 16       # s11 = 0x0F6A0000
+   srliw s11, s11, 16       # s11 = 0x00000F6A
+   sraiw s11, s11, 0        # s11 = 0x00000F6A
+   li t1,  0x00000F6A
+   bne s11, t1, fail_chain
+  #li a0, "\nMthiwK"
+  #call sbi_print7
+
+   # 7 mathr (add, sub, xor, and, or, sll, srl, sra, slt, sltu)
+   li a2, 0x111
+   add s11, s11, a2          # s11 = 0x107B
+   sub s11, s11, a2          # s11 = 0x0F6A
+   xor s11, s11, a2          # s11 = 0x0E7B
+   and s11, s11, s11          # s11 = 0x0E7B
+   or  s11, s11, a2          # s11 = 0x0F7B
+   li a2, 4
+   sll s11, s11, a2          # s11 = 0x0F7B0
+   srl s11, s11, a2          # s11 = 0x00F7B
+   sra s11, s11, a2          # s11 = 0x000F7
+   li a2, 0
+   slt a3, a2, s11          # a3 = 1
+   add s11, s11, a3          # s11 = 0x000F8
+   sltu a3, a2, s11         # a3 = 1
+   add s11, s11, a3          # s11 = 0x000F9
+   li t1,  0x000F9
+   bne s11, t1, fail_chain
+  #li a0, "\nMthrOK"
+  #call sbi_print7
+
+   # 8 math-rw (addw, subw, sllw, srlw, sraw)
+   li a2, 1
+   addw s11, s11, a2         # s11 = 0x000FA
+   subw s11, s11, a2         # s11 = 0x000F9
+   li a2, 4
+   sllw s11, s11, a2         # s11 = 0x00F90
+   srlw s11, s11, a2         # s11 = 0x000F9
+   sraw s11, s11, a2         # s11 = 0x0000F
+   li t1,  0x000F
+   bne s11, t1, fail_chain
+   li a0, "\nMthrwK"
+   call sbi_print7
+
+   # 9 jump
+   jal a2, jump_target_1
+jump_target_1:
+   addi s11, s11, 1          # s11 = 0x00010
+   la a2, jump_target_2
+   jalr a2, 0(a2)
+jump_target_2:
+   addi s11, s11, 1          # s11 = 0x00011
+  #li a0, "\nJumpOK"
+  #call sbi_print7
+
+   # 10 branch (beq, bne, blt, bge, bltu, bgeu)
+   beq s11, s11, branch_target_3
+branch_target_3:
+   addi s11, s11, 1
+   li a2, 0
+   bne s11, a2, branch_target_4
+branch_target_4:
+   addi s11, s11, 1
+   blt a2, s11, branch_target_5
+branch_target_5:
+   addi s11, s11, 1
+   bge s11, a2, branch_target_6
+branch_target_6:
+   addi s11, s11, 1
+   bltu a2, s11, branch_target_7
+branch_target_7:
+   addi s11, s11, 1
+   bgeu s11, a2, branch_target_8
+branch_target_8:
+   addi s11, s11, 1
+   li t1,  0x17
+   bne s11, t1, fail_chain
+   li a0, "\nBrJOK"
+   call sbi_print7
+
+  # 11 CSR
+  csrw sscratch, s11
+  csrr s11, sscratch
+  csrrs a3, sscratch, zero
+  csrrc a3, sscratch, zero
+  csrrwi a3, sscratch, 0
+  csrrsi a3, sscratch, 0
+  csrrci a3, sscratch, 0
+ #li a0, "\nCSROK"
+ #call sbi_print7
+
+   # 12 Atomic
+   la a2, mem_test_var
+
+   lr.w t3, (a2)
+   sc.w t4, s11, (a2)
+   ld s11, 0(a2)
+
+   lr.d a3, (a2)
+   sc.d a4, s11, (a2)
+   ld s11, 0(a2)           # s11 = 0x00017
+
+   li t1,  0x17
+   bne s11, t1, fail_chain
+  #li a0, "\nAtomOK"
+  #call sbi_print7
+  
+   amoswap.w t3, s11, (a2) # M[a2]=0x17, t3=0x17
+   amoadd.w  t3, s11, (a2) # M[a2]=0x2E, t3=0x17
+   amoxor.w  t3, s11, (a2) # M[a2]=0x39, t3=0x2E
+   amoand.w  t3, s11, (a2) # M[a2]=0x11, t3=0x39
+   amoor.w   t3, s11, (a2) # M[a2]=0x17, t3=0x11
+   amomax.w  t3, s11, (a2) # M[a2]=0x17, t3=0x17
+   amomin.w  t3, s11, (a2) # M[a2]=0x17, t3=0x17
+   amomaxu.w t3, s11, (a2) # M[a2]=0x17, t3=0x17
+   amominu.w t3, s11, (a2) # M[a2]=0x17, t3=0x17
+  #lw s11, 0(a2)           # s11 = 0x00017
+  #li t0, 0x17
+  #bne s11, t0, fail_chain
+  #li a0, "\nAmowOK"
+  #call sbi_print7
+
+   amoswap.d t3, s11, (a2) # M[a2]=0x17, t3=0x17
+   amoadd.d  t3, s11, (a2) # M[a2]=0x2E, t3=0x17
+   amoxor.d  t3, s11, (a2) # M[a2]=0x39, t3=0x2E
+   amoand.d  t3, s11, (a2) # M[a2]=0x11, t3=0x39
+   amoor.d   t3, s11, (a2) # M[a2]=0x17, t3=0x11
+   amomax.d  t3, s11, (a2) # M[a2]=0x17, t3=0x17
+   amomin.d  t3, s11, (a2) # M[a2]=0x17, t3=0x17
+   amomaxu.d t3, s11, (a2) # M[a2]=0x17, t3=0x17
+   amominu.d t3, s11, (a2) # M[a2]=0x17, t3=0x17
+   ld s11, 0(a2)           # s11 = 0x00017
+   li t0, 0x17
+   bne s11, t0, fail_chain
+  #li a0, "\nAmodOK"
+  #li a0, "\nAmoOK"
+  #call sbi_print7
+
+   # 13 Mul
+   li a2, 2
+   mul s11, s11, a2  # s11 = 23 * 2 = 46
+  #nop
+   mulh a3, s11, a2 # a3 = High 64 bit of 92 = 0
+   add s11, s11, a3  # s11 = 46
+   mulw s11, s11, a2 # s11 = 46 * 2 = 92 (0x5C)
+
+   li t1, 94
+   sub s11, s11, t1    # s11 = 92-94 =-2
+   li a2, -3
+   mulh a3, s11, a2   # a3=0  -2*-3=6, High 64 is 0
+   add s11, s11, a3    # s11 = -2 + 0 = -2
+   mulhu a3, s11, a2  # a3 = -5  usign*usign H is -5
+   add s11, s11, a3    # s11 = -2 + (-5)  -7
+   mulhsu a3, s11, a2 # a3 = -7  sign*unsign H is -7
+   add s11, s11, a3    # s11 = -7 + (-7) = -14
+   addi s11, s11, 106
+
+   li t1, 0x000000000000005C 
+   bne s11, t1, fail_chain
+  #li a0, "\nMulOK"
+  #call sbi_print7
+
+  # 14 Div
+   # div/rem
+   li a2, 3        # s11 = 0x000000000000005C 
+   div a3, s11, a2  # a3 = 0x000000000000001E
+  #mv a0, a3
+  #call sbi_print_reg
+   rem a4, s11, a2  # a4 = 0x0000000000000002
+  #mv a0, a4
+  #call sbi_print_reg
+   add s11, s11, a3  # s11 = 92+30=122
+   add s11, s11, a4  # s11 = 122+2=124
+
+   # divw/remw
+   li t1, 0x80000000
+   add s11, s11, t1  # s11 = 0x8000007C
+   li a2, 2
+   divw a3, s11, a2  # a3 = 0xFFFFFFFFC000003E
+  #mv a0, a3
+  #call sbi_print_reg
+   remw a4, s11, a2  # a4 = 0
+  #mv a0, a4
+  #call sbi_print_reg
+   add s11, s11, a3  # s11 = 0x8000007C +  0xFFFFFFFFC000003E = 0x400000BA
+   add s11, s11, a4  # s11
+  #mv a0, s11
+  #call sbi_print_reg
+
+   # divu/remu
+   lui t1, 0x40000
+   addi t1, t1, 0x100  # t1 = 0x40000100
+   sub s11, s11, t1 # s11 =  0x400000BA - 0x40000100 = 0xFFFFFFFFFFFFFFBA = -70
+   li a2, 3
+   divu a3, s11, a2  # a3 = 0x555555555555553E
+  #mv a0, a3
+  #call sbi_print_reg
+   remu a4, s11, a2  # a4 = 0
+   add s11, s11, a3  # s11 = 0xFFFFFFFFFFFFFFBA + 0x555555555555553E = 0x55555555555554F8
+   add s11, s11, a4  # s11
+  #mv a0, s11
+  #call sbi_print_reg
+
+   # divuw/remuw
+   li t1, -1
+   slli t1, t1, 31 # t1 = 0xFFFFFFFF80000000
+   add s11, s11, t1 # s11 =  0x55555555555554F8 +  0xFFFFFFFF80000000 = 0x55555554D55554F8
+   li a2, 5
+   divuw a3, s11, a2  # a3 = 0x000000002AAAAA98
+  #mv a0, a3
+  #call sbi_print_reg
+   remuw a4, s11, a2  # a4 = 0
+   add s11, s11, a3  # s11 =  0x55555554D55554F8 +  0x000000002AAAAA98 = 0x55555554FFFFFF90
+   add s11, s11, a4  # s11
+
+   li t1, 0x55555554FFFFFF90
+   bne s11, t1, fail_chain
+  #li a0, "\nDivOK"
+  #call sbi_print7
+
+   li s11, 0x0000000080000000 
+   # div by 0 = -1
+   li a2, 5
+   li a3, 0
+   div t1, a2, a3
+   li t2, -1
+   bne t1, t2, fail_chain
+   
+   # rem by 0 = rem
+   rem t1, a2, a3
+   bne t1, a2, fail_chain
+  
+   # Overflow INT_MIN/-1 = INT_MIN
+   li a2, 1
+   slli a2, a2, 63 # a2 = 0x8000000000000000
+   li a3, -1
+   div t1, a2, a3
+   bne t1, a2, fail_chain
+
+   li a0, "\nExtrOK"
+   call sbi_print7
+
+   
+   fence
+   fence.i
+  #li a0, "\nFencOK"
+  #call sbi_print7
+
+   # FINAL CHECK
+   li t1, 0x0000000080000000
+   bne s11, t1, fail_chain
+
+   # Success
+   li a0, "\nPASS"
+   call sbi_print7
+   
+   # test SSIE 
+   li t0, 0x02 # enable SSIE bit 1
+   csrs sie, t0
+   csrsi sstatus, 2  # enable global SIE bit 1
+   # test SSIP  
+   li t0, 0x02 #SSIP
+   csrs sip, t0
+
+
+
+   # test STIE 
+   li t0, 0x20 # enable STIE bit 5
+   csrs sie, t0
+   csrsi sstatus, 2  # enable global SIE bit 1
+  ## test STIP 
+  #li t0, 0x20 
+  #csrs sip, t0
+ 
+
+   # Test time
+   csrr a0, time
+   li a0, 100000
+   li a7, 0  # SBI Set Timer ID
+   ecall
+   li a7, 0x54494D45  # Modern SBI_EXT_TIME_ID
+   ecall
 
 
 
@@ -3973,55 +3720,833 @@ copy_loop:
 
 
 
-putchar:  # a0
+
+   j wait_for_key
+  #j key_test
+  #j end
+
+fail_chain:
+   mv a0, s11
+   call sbi_print_reg
+   li a0, "\nFAIL"
+   call sbi_print7
+
+wait_for_key:
+   li a7, 2  # SBI Getchar ID
+   ecall
+   bltz a0, wait_for_key  # if a0 is negative, no key press
+   mv s3, a0
+   mv a0, s3
+   li a7, 1 # SBI Putchar ID
+   ecall 
+   j wait_for_key
+
+end:
+  j end
+
+
+
+---------- mini_kernel test code ---------
+.globl _start
+
+.section .data
+mem_test_var:
+    .dword 0x0000000000000000
+
+
+# Bootloader/copy4 --> firmware/BIOS/opensib/mini_sbi2 --> OS/linux/kernal
+.section .text
+_start:  
+  j main # like linux kernel
+
+s_trap_handler:
+   csrr t1, scause
+   li t2, 0x8000000000000005 # bit 63 set + code 5 (Supervisor Timer)
+   beq t1, t2, timer_found_stip
+
+   li t2, 0x8000000000000001 # bit 63 set + code 1 (Soft ware Interrupt)
+   beq t1, t2, timer_found_ssip
+
+   csrr t2, sepc
+   addi t2, t2, 4 # skip ecall/ebreak instruction
+   csrw sepc, t2
+   sret
+
+timer_found_stip:
+    addi a0, x0, 84  # T
+    call sbi_putchar
+   #li a0, -1 # Clear timer by max
+   #li a7, 0 # SBI set timer
+   #ecall
+
+   csrr a0, time
+  #li t0, 10000000 # 1 second
+   li t0, 100000 # 1 second
+   add a0, a0, t0
+   li a7, 0  # SBI Set Timer ID
+   ecall
+
+    sret
+timer_found_ssip:
+    addi a0, x0, 83  # S
+    call sbi_putchar
+    li t2, 0x02  # clear ssip
+    csrc sip, t2
+
+    sret
+
+
+sbi_putchar:  # a0
     addi sp, sp, -8
     sd ra, 0(sp)
-    call wait_uart
-    sb a0, 0(s11)
+    li a7, 1 # SBI Putchar ID
+    ecall
     ld ra, 0(sp)
     addi sp, sp, 8
     ret
 
-
-puts: # a0 addr
-    addi sp, sp, -16
+sbi_puts: # a0 addr
+    addi sp, sp, -24
     sd ra, 0(sp)
-    sd s0, 8(sp)
-    mv s0, a0
-puts_loop:
-    lbu a0, 0(s0)
-    beq a0, x0, stop_puts # \x00 for end of string
-    call putchar # a0 char
-    addi s0, s0, 1 # next byte
-    j puts_loop
-stop_puts:
+    sd a0, 8(sp)
+    sd s1, 16(sp)
+    mv s1, a0
+    sbi_puts_loop:
+    lbu a0, 0(s1)
+    beq a0, x0, sbi_stop_puts # \x00 for end of string
+    li a7, 1 # SBI Putchar ID
+    ecall
+    addi s1, s1, 1 # next byte
+    j sbi_puts_loop
+    sbi_stop_puts:
     ld ra, 0(sp)
-    ld s0, 8(sp)
-    addi sp, sp, 16
+    ld a0, 8(sp)
+    ld s1, 16(sp)
+    addi sp, sp, 24
     ret
 
-
-wait_uart:
-    addi sp, sp, -16
-    sd s0, 0(sp)
-    sd ra, 8(sp)
-wait_uart_loop:
-   #li a0, 65  # A
-   #sb a0, 0(s11)
-    lw s0, 0(s11)
-    bgt zero, s0, wait_uart_loop
-    ld s0, 0(sp)
-    ld ra, 8(sp)
-    addi sp, sp, 16
-    ret
-
-print7: # a0, 7 char left one for null
+sbi_print7: # a0, 7 char left one for null
     addi sp, sp, -16
     sd a0, 0(sp)
     sd ra, 8(sp)
     mv a0, sp
-    call puts
-   #ld a0, 0(sp)
+    call sbi_puts
+    ld a0, 0(sp)
     ld ra, 8(sp)
     addi sp, sp, 16
     ret
+
+sbi_print_reg: # a0
+    addi sp, sp, -40
+    sd ra, 0(sp)
+    sd s0, 8(sp)
+    sd s1, 16(sp)
+    sd s2, 24(sp)
+    sd s3, 32(sp)
+    mv s0, a0
+    li a0, "0"
+    call sbi_putchar
+    li a0, "x"
+    call sbi_putchar
+    li s1, 60 
+    p_loop:
+    srl s2, s0, s1      # get high nibble
+    andi s2, s2, 0xF
+    slti s3, s2, 10     # if < 10 number
+    beq s3, x0, letter
+    addi a0, s2, 48     # 0 is "0" ascii 48
+    j print_h
+    letter:
+    addi a0, s2, 55     # 10 is "A" ascii 65 ..
+    print_h:
+    call sbi_putchar    # print
+    addi s1, s1, -4
+    bge s1, x0, p_loop 
+    ld ra, 0(sp)
+    ld s0, 8(sp)
+    ld s1, 16(sp)
+    ld s2, 24(sp)
+    ld s3, 32(sp)
+    addi sp, sp, 40
+    ret
+
+
+main:
+
+   li sp, 0x80700000 # Set stack # 80000000-80800000 sdram as 8M ram, we start sp from 0x80700000<-, MMU from 0x80700000->
+
+   # Test time
+  #csrr s0, time
+   li t0, 100
+check_clock:
+   csrr a0, time
+   call sbi_print_reg
+   addi t0, t0, -1
+   bnez t0, check_clock
+
+   # Step 2 test S-Mode trap hander # Opensbi delegate Ebreak to OS, so we set our handler address to stvec
+   la t0, s_trap_handler
+  #andi t0, t0, -4 # Align to 4 bytes
+   csrw stvec, t0
+   ebreak
+  #li a0, "\nStrpOK"
+  #call sbi_print7
+
+
+#   # Step 3 test MMU
+#   # 1.Build SV39 root table in sdram (4KB per table 2**9=512*8=4096) vpn2 4KB map 512*4k=2MBram; all vpn1=4*512=2Mb map 512*2M=1Gram, all vpn0=512*512=262144*4kb=1GB map 512Gram,total VPNs 4KB+2MB+1024MB
+#   li t0, 0x80700000 # set base address of MMU root table
+#
+#   # 2. map vma 0x0000_0000 to ppa 0x0000_0000, ppn =  ppa >> 12 = 0, for UART/CLINT/PLIC .etc
+#   li t1, 0xcf       # pte = ppn << 10 | flags valid0 read1 write2 exec3 accessed6 dirty7 0b11001111=0xcf
+#   sd t1, 0(t0) 
+#
+#   # 3. map vma 0x8000_0000 to ppa 0x8000_0000, ppn =  ppa >> 12 = 0x80000 pte = ppn << 10 | flags, for RAM/Code
+#   li t1, 0x200000cf # pte = ppn << 10 | flags valid0 read1 write2 exec3 accessed6 dirty7 0b11001111=0xcf
+#   sd t1, 16(t0)     # Index=va[38:30]=0b00000010=2, 8 bytes per PTE = 16, 
+#
+#   # satp need ppn of root table rt 0x80700000 
+#   # satp = satp[63:60].MODE(0:bare, 8:sv39, 9:sv48)|satp[59:44].asid|satp[43:0].rootpage_physical_addr(vpn2:9|vpn1:9|vpn0:9|offseet12)
+#   # ppn = rt >> 12 = 0x80700
+#   # mode = 3 sv39
+#   li t0, 0x8000000000080700
+#   # Turn MMU SV39
+#   csrw satp, t0 # write mode and root table address to satp CSR register
+#   sfence.vma ## <--- start use TLB I/D hitting
+#
+#  #li a0, "\nMMUOK"
+#  #call sbi_print7
+
+
+
+   # AAA================= 
+   # ----- 1. MUL / MULH / MULHU / MULHSU -----
+   # Basic positive
+   li s11, 0x1111
+   li a2,  0x2222
+   mul t1, s11, a2
+   li t2, 0x2468642
+   bne t1, t2, fail_chain
+
+   # Negative * Positive (64-bit)
+   li s11, -10
+   li a2,  20
+   mul t1, s11, a2
+   li t2, -200
+   bne t1, t2, fail_chain
+
+   # Negative * Negative High (MULH)
+   li s11, -3
+   li a2,  -3
+   mulh t1, s11, a2
+   li t2, 0
+   bne t1, t2, fail_chain
+
+   # Unsigned High (MULHU)
+   li s11, -1  # 0xFFFFFFFFFFFFFFFF
+   li a2,  2
+   mulhu t1, s11, a2
+   li t2, 1    # (2^64 - 1)*2 = 2^65 - 2, High 64 is 1
+   bne t1, t2, fail_chain
+
+   # Signed * Unsigned High (MULHSU)
+   li s11, -2  # Signed
+   li a2, 3    # Unsigned
+   mulhsu t1, s11, a2
+   li t2, -1   # -6 = 0xFFFFFFFFFFFFFFFA, High is -1
+   bne t1, t2, fail_chain
+
+   # Word Multiplication (MULW)
+   li s11, 0x100000000  # > 32 bit
+   addi s11, s11, 5
+   li a2, 3
+   mulw t1, s11, a2     # Should truncate, 5 * 3 = 15
+   li t2, 15
+   bne t1, t2, fail_chain
+
+   li s11, 0x40000000   # 2^30
+   li a2, 2
+   mulw t1, s11, a2     # 2^31, sign extended -> 0xFFFFFFFF80000000
+   li t2, -1
+   slli t2, t2, 31
+   bne t1, t2, fail_chain
+
+
+   # ----- 2. DIV / REM (64-bit) -----
+   # Basic division and remainder
+   li s11, 100
+   li a2, 33
+   div t1, s11, a2
+   li t2, 3
+   bne t1, t2, fail_chain
+   rem t1, s11, a2
+   li t2, 1
+   bne t1, t2, fail_chain
+
+   # Negative division (round to zero)
+   li s11, -100
+   li a2, 33
+   div t1, s11, a2
+   li t2, -3
+   bne t1, t2, fail_chain
+   rem t1, s11, a2
+   li t2, -1
+   bne t1, t2, fail_chain
+
+   li s11, 100
+   li a2, -33
+   div t1, s11, a2
+   li t2, -3
+   bne t1, t2, fail_chain
+   rem t1, s11, a2
+   li t2, 1      # Sign of remainder = Sign of dividend
+   bne t1, t2, fail_chain
+
+   li s11, -100
+   li a2, -33
+   div t1, s11, a2
+   li t2, 3
+   bne t1, t2, fail_chain
+   rem t1, s11, a2
+   li t2, -1
+   bne t1, t2, fail_chain
+
+   # Unsigned division (DIVU / REMU)
+   li s11, -100  # Huge positive number when unsigned
+   li a2, 10
+   divu t1, s11, a2
+   li t2, 0x199999999999998F # (-100 / 10) unsigned
+   bne t1, t2, fail_chain
+
+
+   # ----- 3. DIVW / REMW (32-bit Word Division) -----
+   # Positive 32-bit overflow check
+   li s11, 0x100000000  # 2^32
+   addi s11, s11, 10    # Bottom 32 is 10
+   li a2, 3
+   divw t1, s11, a2     # 10 / 3 = 3
+   li t2, 3
+   bne t1, t2, fail_chain
+
+   # Sign extension of 32-bit result
+   li s11, 0x80000000   # -2147483648 (INT32_MIN)
+   li a2, 2
+   divw t1, s11, a2     # Result should be -1073741824, sign extended to 64
+   li t2, 0xFFFFFFFFC0000000
+   bne t1, t2, fail_chain
+
+   # DIVUW / REMUW
+   li s11, 0x80000000
+   li a2, 2
+   divuw t1, s11, a2    # Treated as +2147483648, result is +1073741824
+   li t2, 0x0000000040000000
+   bne t1, t2, fail_chain
+
+
+   # ----- 4. CORNER CASES (Div by Zero & Overflow) -----
+   # Divide by zero
+   li s11, 55
+   li a2, 0
+   div t1, s11, a2
+   li t2, -1           # RISC-V spec: div by 0 returns -1
+   bne t1, t2, fail_chain
+
+   rem t1, s11, a2
+   bne t1, s11, fail_chain # RISC-V spec: rem by 0 returns dividend
+
+   divu t1, s11, a2
+   li t2, -1
+   bne t1, t2, fail_chain
+
+   # Overflow (INT_MIN / -1)
+   li s11, 1
+   slli s11, s11, 63   # INT64_MIN
+   li a2, -1
+   div t1, s11, a2
+   bne t1, s11, fail_chain # RISC-V spec: overflow returns INT_MIN
+
+   rem t1, s11, a2
+   li t2, 0
+   bne t1, t2, fail_chain # RISC-V spec: overflow rem returns 0
+
+   # Word Overflow (INT32_MIN / -1)
+   li s11, 0x80000000
+   li a2, -1
+   divw t1, s11, a2
+   li t2, 0xFFFFFFFF80000000 # Sign extended INT32_MIN
+   bne t1, t2, fail_chain
+
+   remw t1, s11, a2
+   li t2, 0
+   bne t1, t2, fail_chain
+
+   # Set s11 back to indicator if pass
+   li s11, 0x0000000080000000 
+
+# ----- 5. LINUX VFS HASHING (64-bit / 32-bit wrapping) -----
+   # Linux hash_64() requires exact behavior for val * 0x9e37fffffffc0001
+   li s11, 0x9e37fffffffc0001
+   li a2, 2
+   mul t1, s11, a2
+   li t2, 0x3c6ffffffff80002
+   bne t1, t2, fail_chain
+
+   # Max 64-bit multiplication wrapping (-1 * -1)
+   li s11, -1 # 0xFFFFFFFFFFFFFFFF
+   li a2, -1
+   mul t1, s11, a2
+   li t2, 1
+   bne t1, t2, fail_chain
+
+   # 64-bit extreme power wrapping (2^63 * 2^63 should wrap strictly to 0)
+   li s11, 1
+   slli s11, s11, 63 # 0x8000000000000000
+   mv a2, s11
+   mul t1, s11, a2
+   li t2, 0
+   bne t1, t2, fail_chain
+
+   # 32-bit Unsigned x 32-bit Unsigned into 64-bit Unsigned via MUL
+   li s11, 0xFFFFFFFF
+   li a2,  0xFFFFFFFF
+   mul t1, s11, a2
+   li t2, 0xFFFFFFFE00000001
+   bne t1, t2, fail_chain
+
+   # ----- 6. CRITICAL REMUW / DIVUW CORNER CASES -----
+   # RISC-V SPEC: REMUW must sign-extend the 32-bit remainder to 64-bit.
+   # If remainder has the 31st bit set, it MUST extend with FFs.
+   li s11, 0x80000000   # 2147483648 Unsigned
+   li a2,  0x80000001   # 2147483649 Unsigned
+   remuw t1, s11, a2    # 2147483648 / 2147483649 = 0, Remainder = 0x80000000
+   li t2, 0xFFFFFFFF80000000 # Critical: Must be Sign Extended!
+   bne t1, t2, fail_chain
+
+   # DIVUW division by zero
+   li s11, 0x12345678
+   li a2, 0
+   divuw t1, s11, a2
+   li t2, -1            # Spec requires returning all 1s (0xFFFFFFFFFFFFFFFF)
+   bne t1, t2, fail_chain
+
+   # REMUW division by zero 
+   li s11, 0x80000005
+   li a2, 0
+   remuw t1, s11, a2
+   li t2, 0xFFFFFFFF80000005 # Spec requires sign-extended dividend!
+   bne t1, t2, fail_chain
+
+   # ----- 7. UNSIGNED OVERFLOW ILLUSIONS -----
+   # INT64_MIN / -1 but Unsigned. 
+   # This is NOT an overflow, it's just 2^63 / (2^64 - 1)
+   li s11, 1
+   slli s11, s11, 63    # 0x8000000000000000
+   li a2, -1            # 0xFFFFFFFFFFFFFFFF
+   divu t1, s11, a2
+   li t2, 0             # 2^63 < (2^64 - 1), so quotient is 0
+   bne t1, t2, fail_chain
+   
+   remu t1, s11, a2
+   bne t1, s11, fail_chain # Remainder is the dividend (0x8000000000000000)
+
+# ----- 8. PIPELINE & DATA FORWARDING HAZARDS -----
+   # 1. Immediate Back-to-Back Dependency
+   # Tests if your CPU correctly stalls/forwards the result of a long division
+   li s11, 100
+   li a2, 10
+   div t1, s11, a2    # t1 takes many cycles to become 10
+   mul t2, t1, a2     # immediately requires t1! t2 = 100
+   bne t2, s11, fail_chain
+
+   # 2. DIV / REM paired execution hazard
+   # Linux GCC compilers frequently put DIV and REM back-to-back.
+   # If your CPU shares the same hardware divider, this can cause a structural hazard.
+   li s11, 23
+   li a2, 5
+   div t1, s11, a2    # t1 = 4
+   rem t2, s11, a2    # t2 = 3 (Should wait for divider to free up)
+   add t3, t1, t2     # immediately use both (4 + 3 = 7)
+   li t4, 7
+   bne t3, t4, fail_chain
+
+   # 3. Write to x0 (Zero Register Trap Check)
+   # Linux sometimes uses instructions with x0 destination to discard data.
+   # If your divider writes back to x0, it must not corrupt the zero register!
+   li s11, 55
+   li a2, 2
+   div x0, s11, a2    # Should do nothing, must not crash
+   mul x0, s11, a2    # Should do nothing, must not crash
+   bne x0, x0, fail_chain # x0 MUST still be 0!
+
+
+
+   # BBB================= 
+   li a0, "\nPASS"
+   call sbi_print7
+   j wait_for_key
+  #j key_test
+  #j end
+
+fail_chain:
+   mv a0, s11
+   call sbi_print_reg
+   li a0, "\nFAIL"
+   call sbi_print7
+
+wait_for_key:
+   li a7, 2  # SBI Getchar ID
+   ecall
+   bltz a0, wait_for_key  # if a0 is negative, no key press
+   mv s3, a0
+   mv a0, s3
+   li a7, 1 # SBI Putchar ID
+   ecall 
+   j wait_for_key
+
+end:
+  j end
+
+
+
+---------- mini_kernel test code ---------
+.globl _start
+
+.section .data
+mem_test_var:
+    .dword 0x0000000000000000
+
+
+# Bootloader/copy4 --> firmware/BIOS/opensib/mini_sbi2 --> OS/linux/kernal
+.section .text
+_start:  
+  j main # like linux kernel
+
+s_trap_handler:
+   csrr t1, scause
+   li t2, 0x8000000000000005 # bit 63 set + code 5 (Supervisor Timer)
+   beq t1, t2, timer_found_stip
+
+   li t2, 0x8000000000000001 # bit 63 set + code 1 (Soft ware Interrupt)
+   beq t1, t2, timer_found_ssip
+
+   csrr t2, sepc
+   addi t2, t2, 4 # skip ecall/ebreak instruction
+   csrw sepc, t2
+   sret
+
+timer_found_stip:
+    addi a0, x0, 84  # T
+    call sbi_putchar
+   #li a0, -1 # Clear timer by max
+   #li a7, 0 # SBI set timer
+   #ecall
+
+   csrr a0, time
+  #li t0, 10000000 # 1 second
+   li t0, 100000 # 1 second
+   add a0, a0, t0
+   li a7, 0  # SBI Set Timer ID
+   ecall
+
+    sret
+timer_found_ssip:
+    addi a0, x0, 83  # S
+    call sbi_putchar
+    li t2, 0x02  # clear ssip
+    csrc sip, t2
+
+    sret
+
+
+sbi_putchar:  # a0
+    addi sp, sp, -8
+    sd ra, 0(sp)
+    li a7, 1 # SBI Putchar ID
+    ecall
+    ld ra, 0(sp)
+    addi sp, sp, 8
+    ret
+
+sbi_puts: # a0 addr
+    addi sp, sp, -24
+    sd ra, 0(sp)
+    sd a0, 8(sp)
+    sd s1, 16(sp)
+    mv s1, a0
+    sbi_puts_loop:
+    lbu a0, 0(s1)
+    beq a0, x0, sbi_stop_puts # \x00 for end of string
+    li a7, 1 # SBI Putchar ID
+    ecall
+    addi s1, s1, 1 # next byte
+    j sbi_puts_loop
+    sbi_stop_puts:
+    ld ra, 0(sp)
+    ld a0, 8(sp)
+    ld s1, 16(sp)
+    addi sp, sp, 24
+    ret
+
+sbi_print7: # a0, 7 char left one for null
+    addi sp, sp, -16
+    sd a0, 0(sp)
+    sd ra, 8(sp)
+    mv a0, sp
+    call sbi_puts
+    ld a0, 0(sp)
+    ld ra, 8(sp)
+    addi sp, sp, 16
+    ret
+
+sbi_print_reg: # a0
+    addi sp, sp, -40
+    sd ra, 0(sp)
+    sd s0, 8(sp)
+    sd s1, 16(sp)
+    sd s2, 24(sp)
+    sd s3, 32(sp)
+    mv s0, a0
+    li a0, "0"
+    call sbi_putchar
+    li a0, "x"
+    call sbi_putchar
+    li s1, 60 
+    p_loop:
+    srl s2, s0, s1      # get high nibble
+    andi s2, s2, 0xF
+    slti s3, s2, 10     # if < 10 number
+    beq s3, x0, letter
+    addi a0, s2, 48     # 0 is "0" ascii 48
+    j print_h
+    letter:
+    addi a0, s2, 55     # 10 is "A" ascii 65 ..
+    print_h:
+    call sbi_putchar    # print
+    addi s1, s1, -4
+    bge s1, x0, p_loop 
+    ld ra, 0(sp)
+    ld s0, 8(sp)
+    ld s1, 16(sp)
+    ld s2, 24(sp)
+    ld s3, 32(sp)
+    addi sp, sp, 40
+    ret
+
+
+main:
+
+   li sp, 0x80700000 # Set stack # 80000000-80800000 sdram as 8M ram, we start sp from 0x80700000<-, MMU from 0x80700000->
+
+   # Test time
+  #csrr s0, time
+   li t0, 100
+check_clock:
+   csrr a0, time
+   call sbi_print_reg
+   addi t0, t0, -1
+   bnez t0, check_clock
+
+   # Step 2 test S-Mode trap hander # Opensbi delegate Ebreak to OS, so we set our handler address to stvec
+   la t0, s_trap_handler
+  #andi t0, t0, -4 # Align to 4 bytes
+   csrw stvec, t0
+   ebreak
+  #li a0, "\nStrpOK"
+  #call sbi_print7
+
+
+#   # Step 3 test MMU
+#   # 1.Build SV39 root table in sdram (4KB per table 2**9=512*8=4096) vpn2 4KB map 512*4k=2MBram; all vpn1=4*512=2Mb map 512*2M=1Gram, all vpn0=512*512=262144*4kb=1GB map 512Gram,total VPNs 4KB+2MB+1024MB
+#   li t0, 0x80700000 # set base address of MMU root table
+#
+#   # 2. map vma 0x0000_0000 to ppa 0x0000_0000, ppn =  ppa >> 12 = 0, for UART/CLINT/PLIC .etc
+#   li t1, 0xcf       # pte = ppn << 10 | flags valid0 read1 write2 exec3 accessed6 dirty7 0b11001111=0xcf
+#   sd t1, 0(t0) 
+#
+#   # 3. map vma 0x8000_0000 to ppa 0x8000_0000, ppn =  ppa >> 12 = 0x80000 pte = ppn << 10 | flags, for RAM/Code
+#   li t1, 0x200000cf # pte = ppn << 10 | flags valid0 read1 write2 exec3 accessed6 dirty7 0b11001111=0xcf
+#   sd t1, 16(t0)     # Index=va[38:30]=0b00000010=2, 8 bytes per PTE = 16, 
+#
+#   # satp need ppn of root table rt 0x80700000 
+#   # satp = satp[63:60].MODE(0:bare, 8:sv39, 9:sv48)|satp[59:44].asid|satp[43:0].rootpage_physical_addr(vpn2:9|vpn1:9|vpn0:9|offseet12)
+#   # ppn = rt >> 12 = 0x80700
+#   # mode = 3 sv39
+#   li t0, 0x8000000000080700
+#   # Turn MMU SV39
+#   csrw satp, t0 # write mode and root table address to satp CSR register
+#   sfence.vma ## <--- start use TLB I/D hitting
+#
+#  #li a0, "\nMMUOK"
+#  #call sbi_print7
+
+
+
+   # AAA================= 
+#   la a2, mem_test_var
+#   sd zero, 0(a2)
+#
+#   # ----- 1. BIT-MASKING (Used for Mount Flags) -----
+#   li s11, 0xA10       # Test AMOOR / AMOAND Bit-masking
+#   li t1, 0x0000FF00
+#   sd t1, 0(a2)
+#   li t2, 0x00FF0000
+#   amoor.d t3, t2, (a2) # Old was 0xFF00, New should be 0xFFFF00
+#   ld t4, 0(a2)
+#   li t5, 0x00FFFF00
+#   bne t4, t5, fail_chain
+#
+#   li t2, 0x000000FF
+#   amoand.d t3, t2, (a2) # New should be 0 because 0xFFFF00 & 0xFF = 0
+#   ld t4, 0(a2)
+#   bne t4, zero, fail_chain
+#
+#   # ----- 2. RESERVATION GRANULARITY (Critical for bit-fields) -----
+#   # Linux often uses 'sb' (store byte) to update a flag next to a locked word.
+#   # A store to ANY byte in the reserved 64-bit word MUST break the reservation.
+#   li s11, 0xA11
+#   li t1, 0x11223344
+#   sd t1, 0(a2)
+#   lr.d t2, (a2)       # Reserve the whole 64-bit dword
+#   
+#   li t3, 0x99
+#   sb t3, 1(a2)        # Store to just ONE BYTE inside that dword
+#   
+#   li t4, 0x55
+#   sc.d t5, t4, (a2)   # This MUST fail (t5 != 0) because of the 'sb'
+#   beq t5, zero, fail_chain 
+#
+#   # ----- 3. SC TO DIFFERENT ADDRESS (Security/Stability) -----
+#   # If you LR address A, then SC to address B, it MUST fail.
+#   li s11, 0xA12
+#   la a3, mem_test_var
+#   addi a4, a3, 8      # A different address
+#   lr.d t1, (a3)       # Reserve A
+#   sc.d t2, t1, (a4)   # Store to B
+#   beq t2, zero, fail_chain # Must fail!
+#
+#   # ----- 4. LR/SC LIVELOCK / INTERRUPT CHECK -----
+#   # Linux spinlocks loop until SC succeeds. 
+#   # If a Timer Interrupt happens between LR and SC, the SC MUST fail,
+#   # but it must NOT stay failed forever.
+#   li s11, 0xA13
+#   li t1, 0
+#   sd t1, 0(a2)
+#lr_sc_loop:
+#   lr.d t2, (a2)
+#   addi t2, t2, 1
+#   # If your timer (T) prints here, it's good! It forces SC to fail once.
+#   sc.d t3, t2, (a2)
+#   bnez t3, lr_sc_loop # Linux loops. If your CPU hangs here, it's a bug.
+#   
+#   ld t4, 0(a2)
+#   li t5, 1
+#   bne t4, t5, fail_chain
+#
+#   # ----- 5. SIGN EXTENSION (The 'W' rule) -----
+#   li s11, 0xA14
+#   li t1, 0x7FFFFFFF
+#   sw t1, 0(a2)
+#   li t2, 1
+#   amoadd.w t3, t2, (a2) # 0x7FFFFFFF + 1 = 0x80000000
+#   # t3 (old value) should be 0x000000007FFFFFFF
+#   # Memory should now contain 0x80000000
+#   lw t4, 0(a2)
+#   li t5, -0x80000000    # Sign extended 32-bit 0x80000000
+#   bne t4, t5, fail_chain
+
+
+#  For linux mountpoint-cache test
+   # Use stack-relative address for alignment and to avoid SD-card buffer overlap
+   addi s10, sp, -16   
+   sd zero, 0(s10)     
+   fence
+
+   # ----- 1. M-EXTENSION: VFS HASH [ID: 0x501] -----
+   li s11, 0x501       
+   li a1, 0x9e37fffffffc0001
+   li a2, 2
+   mul t1, a1, a2
+   li t2, 0x3c6ffffffff80002 
+   bne t1, t2, fail_chain
+
+   # ----- 2. A-EXTENSION: BITWISE OR [ID: 0xA01] -----
+   li s11, 0xA01
+   li t1, 0x00FF0000
+   sd t1, 0(s10)
+   li t2, 0x0000FF00
+   amoor.d t3, t2, (s10) 
+   ld t4, 0(s10)
+   li t5, 0x00FFFF00
+   bne t4, t5, fail_chain # Memory update failed
+   bne t3, t1, fail_chain # Return value (old) failed
+
+   # ----- 3. A-EXTENSION: SPINLOCK SWAP [ID: 0xA02] -----
+   li s11, 0xA02
+   li t1, 1            
+   sw zero, 0(s10)      
+   amoswap.w t2, t1, (s10) 
+   lw t3, 0(s10)        
+   bne t2, zero, fail_chain # Did not return 0
+   li t4, 1
+   bne t3, t4, fail_chain    # Memory not set to 1
+
+   # ----- 4. A-EXTENSION: NEIGHBOR BUG [ID: 0xA03] -----
+   # IF SOC FAILS HERE: Your Hardware Reservation logic is too narrow!
+   li s11, 0xA03
+   sd zero, 0(s10)
+   lr.d t1, (s10)       
+   li t2, 0xFF
+   sb t2, 1(s10)        # Store to neighbor byte
+   li t3, 0xCC
+   sc.d t4, t3, (s10)   # SC MUST FAIL (t4 != 0)
+   beq t4, zero, fail_chain
+
+   # ----- 5. A-EXTENSION: SIGN EXTENSION [ID: 0xA04] -----
+   # IF SOC FAILS HERE: Your pipeline is dropping sign-bits between MUL and AMO
+   li s11, 0xA04
+   li a1, 0x40000000   
+   li a2, 2            
+   mulw t1, a1, a2      # t1 = 0xFFFFFFFF80000000 (sign extended)
+   sw zero, 0(s10)
+   amoadd.w t2, t1, (s10)
+   lw t3, 0(s10)
+   
+   # Build 0xFFFFFFFF80000000 for comparison
+   addi t4, zero, -1
+   slli t4, t4, 31     
+   bne t3, t4, fail_chain
+
+   li s11, 0x0000000080000000 
+
+
+
+
+
+   # BBB================= 
+   li a0, "\nPASS"
+   call sbi_print7
+   j wait_for_key
+  #j key_test
+  #j end
+
+fail_chain:
+   mv a0, s11
+   call sbi_print_reg
+   li a0, "\nFAIL"
+   call sbi_print7
+
+wait_for_key:
+   li a7, 2  # SBI Getchar ID
+   ecall
+   bltz a0, wait_for_key  # if a0 is negative, no key press
+   mv s3, a0
+   mv a0, s3
+   li a7, 1 # SBI Putchar ID
+   ecall 
+   j wait_for_key
+
+end:
+  j end
+
+
+

@@ -357,8 +357,8 @@ assign DRAM_CKE = 1; // always enable
 	    uart_write_pulse <= 0;
 	    uart_read_pulse <= 0;
 	    uart_read_step <= 0;
-	    mtimecmp <=  64'h80000000;
-	    //mtimecmp <=  64'hffffffffffffffff;
+	    //mtimecmp <=  64'h80000000;
+	    mtimecmp <=  64'hffffffffffffffff;
 	    uart_irq_pre <= 0;
             //sd_rd_start <= 0;
 	end else begin
