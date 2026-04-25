@@ -426,7 +426,6 @@ reg [63:0] reserve_addr;
 reg        reserve_valid;
 
 reg [3:0] tlb_vld;
-reg [15:0] tlb_d_vld;
 reg tlb_flush = 0;
 //// -- TLB -- 8 pages
 //(* ram_style = "logic" *) reg [26:0] tlb_vpn [0:7]; // vpn number VA[38:12]  Sv39
@@ -462,12 +461,14 @@ always @(*) begin
 	       //({44{tlb_i_match[6]}} & tlb_ppn[6]) |
 	       //({44{tlb_i_match[7]}} & tlb_ppn[7]) ; end
    
-//// -- TLB d -- 8 pages
-//(* ram_style = "logic" *) reg [26:0] tlb_d_vpn [0:7]; // vpn number VA[38:12]  Sv39
-//(* ram_style = "logic" *) reg [43:0] tlb_d_ppn [0:7]; // ppn number PA[55:12]
-// -- TLB d -- 16 pages
-(* ram_style = "logic" *) reg [26:0] tlb_d_vpn [0:15]; // vpn number VA[38:12]  Sv39
-(* ram_style = "logic" *) reg [43:0] tlb_d_ppn [0:15]; // ppn number PA[55:12]
+// -- TLB d -- 8 pages
+reg [7:0] tlb_d_vld;
+(* ram_style = "logic" *) reg [26:0] tlb_d_vpn [0:7]; // vpn number VA[38:12]  Sv39
+(* ram_style = "logic" *) reg [43:0] tlb_d_ppn [0:7]; // ppn number PA[55:12]
+//// -- TLB d -- 16 pages
+//reg [15:0] tlb_d_vld;
+//(* ram_style = "logic" *) reg [26:0] tlb_d_vpn [0:15]; // vpn number VA[38:12]  Sv39
+//(* ram_style = "logic" *) reg [43:0] tlb_d_ppn [0:15]; // ppn number PA[55:12]
 //(* ram_style = "logic" *) reg tlb_d_vld [0:3]; // only 4 entries
    
 	// TLB-D tlb d hit
@@ -477,8 +478,8 @@ always @(*) begin
 	reg [43:0] data_ppn;
 	reg tlb_d_hit;
 
-	//wire [7:0] tlb_d_match;
-	wire [15:0] tlb_d_match;
+	wire [7:0] tlb_d_match;
+	//wire [15:0] tlb_d_match;
 	assign tlb_d_match[0] = tlb_d_vld[0] && (tlb_d_vpn[0] == ls_va[38:12]);
 	assign tlb_d_match[1] = tlb_d_vld[1] && (tlb_d_vpn[1] == ls_va[38:12]);
 	assign tlb_d_match[2] = tlb_d_vld[2] && (tlb_d_vpn[2] == ls_va[38:12]);
@@ -487,17 +488,17 @@ always @(*) begin
 	assign tlb_d_match[5] = tlb_d_vld[5] && (tlb_d_vpn[5] == ls_va[38:12]);
 	assign tlb_d_match[6] = tlb_d_vld[6] && (tlb_d_vpn[6] == ls_va[38:12]);
 	assign tlb_d_match[7] = tlb_d_vld[7] && (tlb_d_vpn[7] == ls_va[38:12]);
-	assign tlb_d_match[8] = tlb_d_vld[8] && (tlb_d_vpn[8] == ls_va[38:12]);
-	assign tlb_d_match[9] = tlb_d_vld[9] && (tlb_d_vpn[9] == ls_va[38:12]);
-	assign tlb_d_match[10] = tlb_d_vld[10] && (tlb_d_vpn[10] == ls_va[38:12]);
-	assign tlb_d_match[11] = tlb_d_vld[11] && (tlb_d_vpn[11] == ls_va[38:12]);
-	assign tlb_d_match[12] = tlb_d_vld[12] && (tlb_d_vpn[12] == ls_va[38:12]);
-	assign tlb_d_match[13] = tlb_d_vld[13] && (tlb_d_vpn[13] == ls_va[38:12]);
-	assign tlb_d_match[14] = tlb_d_vld[14] && (tlb_d_vpn[14] == ls_va[38:12]);
-	assign tlb_d_match[15] = tlb_d_vld[15] && (tlb_d_vpn[15] == ls_va[38:12]);
+	//assign tlb_d_match[8] = tlb_d_vld[8] && (tlb_d_vpn[8] == ls_va[38:12]);
+	//assign tlb_d_match[9] = tlb_d_vld[9] && (tlb_d_vpn[9] == ls_va[38:12]);
+	//assign tlb_d_match[10] = tlb_d_vld[10] && (tlb_d_vpn[10] == ls_va[38:12]);
+	//assign tlb_d_match[11] = tlb_d_vld[11] && (tlb_d_vpn[11] == ls_va[38:12]);
+	//assign tlb_d_match[12] = tlb_d_vld[12] && (tlb_d_vpn[12] == ls_va[38:12]);
+	//assign tlb_d_match[13] = tlb_d_vld[13] && (tlb_d_vpn[13] == ls_va[38:12]);
+	//assign tlb_d_match[14] = tlb_d_vld[14] && (tlb_d_vpn[14] == ls_va[38:12]);
+	//assign tlb_d_match[15] = tlb_d_vld[15] && (tlb_d_vpn[15] == ls_va[38:12]);
 
 	always @(*) begin
-	    tlb_d_hit = |tlb_d_match;
+	    tlb_d_hit = |tlb_d_match && !tlb_flush;
 	    data_ppn = ({44{tlb_d_match[0]}} & tlb_d_ppn[0]) |
 		({44{tlb_d_match[1]}} & tlb_d_ppn[1]) | //; end
 		({44{tlb_d_match[2]}} & tlb_d_ppn[2]) |
@@ -505,15 +506,15 @@ always @(*) begin
 		({44{tlb_d_match[4]}} & tlb_d_ppn[4]) |
 		({44{tlb_d_match[5]}} & tlb_d_ppn[5]) |
 		({44{tlb_d_match[6]}} & tlb_d_ppn[6]) |
-		({44{tlb_d_match[7]}} & tlb_d_ppn[7]) | //; end
-		({44{tlb_d_match[8]}} & tlb_d_ppn[8]) |
-		({44{tlb_d_match[9]}} & tlb_d_ppn[9]) | //; end
-		({44{tlb_d_match[10]}} & tlb_d_ppn[10]) |
-		({44{tlb_d_match[11]}} & tlb_d_ppn[11]) | // ; end
-		({44{tlb_d_match[12]}} & tlb_d_ppn[12]) |
-		({44{tlb_d_match[13]}} & tlb_d_ppn[13]) |
-		({44{tlb_d_match[14]}} & tlb_d_ppn[14]) |
-		({44{tlb_d_match[15]}} & tlb_d_ppn[15]) ; end
+		({44{tlb_d_match[7]}} & tlb_d_ppn[7]) ; end
+		//({44{tlb_d_match[8]}} & tlb_d_ppn[8]) |
+		//({44{tlb_d_match[9]}} & tlb_d_ppn[9]) | //; end
+		//({44{tlb_d_match[10]}} & tlb_d_ppn[10]) |
+		//({44{tlb_d_match[11]}} & tlb_d_ppn[11]) | // ; end
+		//({44{tlb_d_match[12]}} & tlb_d_ppn[12]) |
+		//({44{tlb_d_match[13]}} & tlb_d_ppn[13]) |
+		//({44{tlb_d_match[14]}} & tlb_d_ppn[14]) |
+		//({44{tlb_d_match[15]}} & tlb_d_ppn[15]) ; end
 		// concat physical address
 		wire need_trans = satp_mmu && !STrap && (current_privilege_mode != M_mode);
 		assign ppc = need_trans ? {8'h0, pc_ppn, pc[11:0]} : pc;
@@ -526,15 +527,17 @@ always @(*) begin
 		// TLB Refill
 		//reg [2:0] tlb_ptr = 0; // 8 entries TLB
 		reg [1:0] tlb_ptr = 0; // 4 entries i TLB
-		//reg [2:0] tlb_d_ptr = 0; // 8 entries d TLB
-		reg [3:0] tlb_d_ptr = 0; // 16 entries d TLB
+		reg [2:0] tlb_d_ptr = 0; // 8 entries d TLB
+		//reg [3:0] tlb_d_ptr = 0; // 16 entries d TLB
 		always @(posedge clk or negedge reset) begin
 		    if (!reset) begin // RESET
 			tlb_ptr <= 0; // hit->trap(save va to x9)->refill assembly(fetch pa to x9)-> sd x9, `Tlb -> here to refill tlb
 			tlb_d_ptr <= 0;
 			tlb_vld <= 4'b0;
-			tlb_d_vld <= 16'b0;
-		    end else if (tlb_flush) begin tlb_vld <= 4'b0; tlb_d_vld <= 16'b0; // FLUSH
+			//tlb_d_vld <= 16'b0;
+			tlb_d_vld <= 8'b0;
+		    //end else if (tlb_flush) begin tlb_vld <= 4'b0; tlb_d_vld <= 16'b0; // FLUSH
+		    end else if (tlb_flush) begin tlb_vld <= 4'b0; tlb_d_vld <= 8'b0; // FLUSH
 		    end else if (STrap && bus_write_enable && bus_address == `Tlb) begin // for the last fill: sd ppa, Tlb  // REFILL
 			if (re[8] == 12) begin
 			tlb_vpn[tlb_ptr] <= re[9][38:12]; // VA from x1 saved by trapp mmu_pc/mmu_da
@@ -861,8 +864,8 @@ always @(*) begin
 		          		       bubble <= 1'b1; end 
 		    32'b00010000010100000000000001110011: begin end // Wfi
 		    32'b?????????????????_000_?????_0001111: begin end // Fence
-		    //32'b?????????????????_001_?????_0001111: begin cache_epoch <= cache_epoch + 1; bubble <= 1; pc <= pc; end // Fence.i 
-		    32'b?????????????????_001_?????_0001111: begin cache_epoch <= cache_epoch + 1; end // Fence.i 
+		    32'b?????????????????_001_?????_0001111: begin cache_epoch <= cache_epoch + 1; bubble <= 1; pc <= pc; end // Fence.i 
+		    //32'b?????????????????_001_?????_0001111: begin cache_epoch <= cache_epoch + 1; end // Fence.i 
 		    //32'b0001001??????????_000_?????_1110011: begin tlb_flush <= 1; bubble <=1; pc <= pc; end // Sfence.vma (supervisor fence for virtual memory address) have to bubble the fetch next ir from old tlb, redo
 		    32'b0001001??????????_000_?????_1110011: begin tlb_flush <= 1; bubble <=1; pc <= pc; end // Sfence.vma  have to bubble the fetch next ir from old tlb, recheck fail in bubble, strap
 		    // Atomic after TLB // -- ATOMIC instructions (A-extension) opcode: 0101111
