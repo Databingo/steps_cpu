@@ -889,9 +889,10 @@ reg [7:0] tlb_d_vld;
 			    re[w_rd] <= amo_op_mem; load_step <= 0;  // finish load
 		            bus_address <= pda;bus_write_enable<=1;pc<=pc_4;bubble<=1;store_step<=1;bus_ls_type<=w_func3; // start store
 			    bus_write_data <= w_atomic_write_data;
+			    if (reserve_valid && reserve_addr[63:3] == pda[63:3]) reserve_valid <= 0; // if lr, break the contract; if in 8-byte
 		        end
 		        if (store_step == 1 && bus_write_done == 0) begin pc <= pc_4; bubble <= 1; end
-		        if (store_step == 1 && bus_write_done == 1) begin store_step <= 0; if (reserve_valid && reserve_addr[63:3] == pda[63:3]) reserve_valid <= 0; end // if lr, break the contract; if in 8-byte
+		        if (store_step == 1 && bus_write_done == 1) begin store_step <= 0; end
 		    end
                     // M-Mul
 		    32'b0000001_?????_?????_0??_?????_0110011, // Mul, Mulh, Mulhsu, Mulhu
