@@ -51,8 +51,10 @@ cat bin.txt > rom.mif  # write ROM program
 #go run ../rvas.go mini_sbi.s ok
 #go run ../rvas.go mini_sbi2.s ok
  
-go run ../rvas.go bootloader.s ok
+#go run ../rvas.go bootloader.s ok
 #go run ../rvas.go mini_kernel.s ok
+#go run ../rvas.go mini_kernel2.s ok
+go run ../rvas.go mini_kernel3.s ok
 
 
 

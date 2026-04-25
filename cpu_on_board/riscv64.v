@@ -756,7 +756,7 @@ always @(*) begin
                     // Store after TLB
                     32'b???????_?????_?????_???_?????_0100011: begin 
                         if (store_step == 0) begin bus_address <= pda; bus_write_data <= w_store_data; bus_write_enable <= 1; pc <= pc_4; bubble <= 1; store_step <= 1; bus_ls_type <= w_func3; 
-			if (reserve_valid && reserve_addr == pda) reserve_valid <= 0; end // if lr, break the contract
+			if (reserve_valid && reserve_addr[63:3] == pda[63:3]) reserve_valid <= 0; end // if lr, break the contract; if in 8-byte
                         if (store_step == 1 && bus_write_done == 0) begin pc <= pc_4; bubble <= 1; end // bus working
                         if (store_step == 1 && bus_write_done == 1) begin store_step <= 0; end 
                     end   
@@ -888,7 +888,8 @@ always @(*) begin
 			    bus_write_data <= w_atomic_write_data;
 		        end
 		        if (store_step == 1 && bus_write_done == 0) begin pc <= pc_4; bubble <= 1; end
-		        if (store_step == 1 && bus_write_done == 1) begin store_step <= 0; end end
+		        if (store_step == 1 && bus_write_done == 1) begin store_step <= 0; if (reserve_valid && reserve_addr[63:3] == pda[63:3]) reserve_valid <= 0; end // if lr, break the contract; if in 8-byte
+		    end
                     // M-Mul
 		    32'b0000001_?????_?????_0??_?????_0110011, // Mul, Mulh, Mulhsu, Mulhu
 		    32'b0000001_?????_?????_000_?????_0111011: // Mulw
