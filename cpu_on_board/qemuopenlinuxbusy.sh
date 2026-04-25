@@ -73,26 +73,27 @@
 #    -bios fw_jump_ima.bin \
 #    -kernel /usr/local/projects/steps_cpu/create_mini_linux/riscv64-linux/Image_novir
 
-## Test smaller image
-#qemu-system-riscv64 -nographic \
-#    -machine virt \
-#    -m 8M \
-#    -cpu rv64,f=off,d=off,c=off,h=off,g=off,zfa=off,zfh=off,zba=off,zbb=off \
-#    -bios fw_jump_ns16550a_call_log.bin \
-#    -append "mem=8M"  \
-#    -icount shift=0,align=off \
-#    -kernel /usr/local/projects/steps_cpu/create_mini_linux/riscv64-linux/Image
-#    #-bios fw_jump_ns16550a.bin \
-
-# In one bin
+# Test smaller image
 qemu-system-riscv64 -nographic \
     -machine virt \
-     -m 8M \
+    -m 8M \
     -cpu rv64,f=off,d=off,c=off,h=off,g=off,zfa=off,zfh=off,zba=off,zbb=off \
-    -bios fw_jump_pad.bin \
-   #-bios opensbi/build/platform/generic/firmware/fw_jump.bin \
-   #-bios opensbi/build/platform/generic/firmware/fw_payload.bin \
-   #-bios fw_jump.bin \
+    -bios fw_jump_ns16550a_call_log_noplic40x2004.bin \
+    -append "mem=8M"  \
+    -icount shift=0,align=off \
+    -kernel /usr/local/projects/steps_cpu/create_mini_linux/riscv64-linux/Image
+    #-bios fw_jump_ns16550a.bin \
+    #-bios fw_jump_ns16550a_call_log.bin \
+
+## In one bin
+#qemu-system-riscv64 -nographic \
+#    -machine virt \
+#     -m 8M \
+#    -cpu rv64,f=off,d=off,c=off,h=off,g=off,zfa=off,zfh=off,zba=off,zbb=off \
+#    -bios fw_jump_pad.bin \
+#   #-bios opensbi/build/platform/generic/firmware/fw_jump.bin \
+#   #-bios opensbi/build/platform/generic/firmware/fw_payload.bin \
+#   #-bios fw_jump.bin \
 
 
 # 1. qemu-ima test jump

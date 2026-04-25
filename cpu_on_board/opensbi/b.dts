@@ -66,8 +66,8 @@
              reg = <0x0 0x2004 0x0 0x10>;
              // if using PLIC point to IRQ 1. If bypass use extended
              //interrupts-extended = <&cpu0_intc 0x09>; // add dummy external interrupt mapping
-             interrupt-parent = <&plic>;  
-             interrupts = <1>;             // claim number
+          //   interrupt-parent = <&plic>;  
+          //   interrupts = <1>;             // claim number
              clock-frequency = <12500000>;
              //status = "disabled";
              status = "okay";
@@ -102,9 +102,9 @@
 
     chosen { /* Points to the UART below */
        // qemu
-       //stdout-path = "/soc/serial@10000000";
+       stdout-path = "/soc/serial@10000000";
        // SoC
-       stdout-path = "/soc/uart@2004";
+       //stdout-path = "/soc/uart@2004";
        bootargs = "no4lvl earlycon=sbi console=hvc0 panic=0 init_on_alloc=0 keep_bootcon ignore_loglevel initcall_debug rcu_update.rcu_cpu_stall_suppress=1";
     };
 
