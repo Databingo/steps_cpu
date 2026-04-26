@@ -100,4 +100,5 @@ initcall 0xffffffff8011ad80 returned 0 after 0 usecs
 calling  0xffffffff80109c7c @ 1
 initcall 0xffffffff80109c7c returned 0 after 68000 usecs
 calling  0xffffffff8010d1f0 @ 1
-
+--------------------------------------------------------
+18:03 nothing...
