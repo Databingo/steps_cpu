@@ -1,14 +1,14 @@
-Fitter Status : Successful - Sat Apr 25 22:08:15 2026
+Fitter Status : Successful - Sun Apr 26 00:43:41 2026
 Quartus II 32-bit Version : 13.0.1 Build 232 06/12/2013 SP 1 SJ Web Edition
 Revision Name : cpu_on_board
 Top-level Entity Name : cpu_on_board
 Family : Cyclone II
 Device : EP2C20F484C7
 Timing Models : Final
-Total logic elements : 18,176 / 18,752 ( 97 % )
-    Total combinational functions : 16,660 / 18,752 ( 89 % )
-    Dedicated logic registers : 7,158 / 18,752 ( 38 % )
-Total registers : 7192
+Total logic elements : 18,181 / 18,752 ( 97 % )
+    Total combinational functions : 16,661 / 18,752 ( 89 % )
+    Dedicated logic registers : 7,190 / 18,752 ( 38 % )
+Total registers : 7224
 Total pins : 47 / 315 ( 15 % )
 Total virtual pins : 0
 Total memory bits : 218,624 / 239,616 ( 91 % )
