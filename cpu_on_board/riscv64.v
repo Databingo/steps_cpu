@@ -425,41 +425,45 @@ reg [1:0] store_step;
 reg [63:0] reserve_addr;
 reg        reserve_valid;
 
-reg [3:0] tlb_vld;
 reg tlb_flush = 0;
 //// -- TLB -- 8 pages
-//(* ram_style = "logic" *) reg [26:0] tlb_vpn [0:7]; // vpn number VA[38:12]  Sv39
-//(* ram_style = "logic" *) reg [43:0] tlb_ppn [0:7]; // ppn number PA[55:12]
+reg [7:0] tlb_vld;
+(* ram_style = "logic" *) reg [26:0] tlb_vpn [0:7]; // vpn number VA[38:12]  Sv39
+(* ram_style = "logic" *) reg [43:0] tlb_ppn [0:7]; // ppn number PA[55:12]
 //(* ram_style = "logic" *) reg tlb_vld [0:7];
-// -- TLB i -- 4 pages
-(* ram_style = "logic" *) reg [26:0] tlb_vpn [0:3]; // vpn number VA[38:12]  Sv39
-(* ram_style = "logic" *) reg [43:0] tlb_ppn [0:3]; // ppn number PA[55:12]
-//(* ram_style = "logic" *) reg tlb_vld [0:3];
+//// -- TLB i -- 4 pages
+//reg [3:0] tlb_vld;
+//(* ram_style = "logic" *) reg [26:0] tlb_vpn [0:3]; // vpn number VA[38:12]  Sv39
+//(* ram_style = "logic" *) reg [43:0] tlb_ppn [0:3]; // ppn number PA[55:12]
+////(* ram_style = "logic" *) reg tlb_vld [0:3];
 
 // TLB-I
 wire [26:0] pc_vpn = pc[38:12];
 reg [43:0] pc_ppn;
 reg tlb_i_hit;
 
-//wire [7:0] tlb_i_match; // 8page
-wire [3:0] tlb_i_match; // 4page
+wire [7:0] tlb_i_match; // 8page
+//wire [3:0] tlb_i_match; // 4page
 
 assign tlb_i_match[0] = tlb_vld[0] && (tlb_vpn[0] == pc_vpn);
 assign tlb_i_match[1] = tlb_vld[1] && (tlb_vpn[1] == pc_vpn);
 assign tlb_i_match[2] = tlb_vld[2] && (tlb_vpn[2] == pc_vpn);
 assign tlb_i_match[3] = tlb_vld[3] && (tlb_vpn[3] == pc_vpn);
+assign tlb_i_match[4] = tlb_vld[4] && (tlb_vpn[4] == pc_vpn);
+assign tlb_i_match[5] = tlb_vld[5] && (tlb_vpn[5] == pc_vpn);
+assign tlb_i_match[6] = tlb_vld[6] && (tlb_vpn[6] == pc_vpn);
+assign tlb_i_match[7] = tlb_vld[7] && (tlb_vpn[7] == pc_vpn);
 
 always @(*) begin
     tlb_i_hit = |tlb_i_match && !tlb_flush;
     pc_ppn =   ({44{tlb_i_match[0]}} & tlb_ppn[0]) |
 	       ({44{tlb_i_match[1]}} & tlb_ppn[1]) | //; end
 	       ({44{tlb_i_match[2]}} & tlb_ppn[2]) |
-	       ({44{tlb_i_match[3]}} & tlb_ppn[3]) ; end
-	       //({44{tlb_i_match[3]}} & tlb_ppn[3]) |
-	       //({44{tlb_i_match[4]}} & tlb_ppn[4]) |
-	       //({44{tlb_i_match[5]}} & tlb_ppn[5]) |
-	       //({44{tlb_i_match[6]}} & tlb_ppn[6]) |
-	       //({44{tlb_i_match[7]}} & tlb_ppn[7]) ; end
+	       ({44{tlb_i_match[3]}} & tlb_ppn[3]) | // ; end
+	       ({44{tlb_i_match[4]}} & tlb_ppn[4]) |
+	       ({44{tlb_i_match[5]}} & tlb_ppn[5]) |
+	       ({44{tlb_i_match[6]}} & tlb_ppn[6]) |
+	       ({44{tlb_i_match[7]}} & tlb_ppn[7]) ; end
    
 // -- TLB d -- 8 pages
 reg [7:0] tlb_d_vld;
@@ -525,19 +529,21 @@ reg [7:0] tlb_d_vld;
 		assign pda = need_trans_d ? {8'h0, data_ppn, ls_va[11:0]} : ls_va;
 
 		// TLB Refill
-		//reg [2:0] tlb_ptr = 0; // 8 entries TLB
-		reg [1:0] tlb_ptr = 0; // 4 entries i TLB
+		reg [2:0] tlb_ptr = 0; // 8 entries TLB
+		//reg [1:0] tlb_ptr = 0; // 4 entries i TLB
 		reg [2:0] tlb_d_ptr = 0; // 8 entries d TLB
 		//reg [3:0] tlb_d_ptr = 0; // 16 entries d TLB
 		always @(posedge clk or negedge reset) begin
 		    if (!reset) begin // RESET
 			tlb_ptr <= 0; // hit->trap(save va to x9)->refill assembly(fetch pa to x9)-> sd x9, `Tlb -> here to refill tlb
 			tlb_d_ptr <= 0;
-			tlb_vld <= 4'b0;
+			//tlb_vld <= 4'b0;
+			tlb_vld <= 8'b0;
 			//tlb_d_vld <= 16'b0;
 			tlb_d_vld <= 8'b0;
 		    //end else if (tlb_flush) begin tlb_vld <= 4'b0; tlb_d_vld <= 16'b0; // FLUSH
-		    end else if (tlb_flush) begin tlb_vld <= 4'b0; tlb_d_vld <= 8'b0; // FLUSH
+		    //end else if (tlb_flush) begin tlb_vld <= 4'b0; tlb_d_vld <= 8'b0; // FLUSH
+		    end else if (tlb_flush) begin tlb_vld <= 8'b0; tlb_d_vld <= 8'b0; // FLUSH
 		    end else if (STrap && bus_write_enable && bus_address == `Tlb) begin // for the last fill: sd ppa, Tlb  // REFILL
 			if (re[8] == 12) begin
 			tlb_vpn[tlb_ptr] <= re[9][38:12]; // VA from x1 saved by trapp mmu_pc/mmu_da
