@@ -8,16 +8,16 @@ isr_router:
 
      # x1(ra)2(sp)3456,x10(a0) operating
      li x3, 13 
-    #beq x8, x3, mmu_d    # d-tlb-refill Load
-     beq x8, x3, mmu      # d-tlb-refill Load
+     beq x8, x3, mmu_d    # d-tlb-refill Load
+    #beq x8, x3, mmu      # d-tlb-refill Load
 
      li x3, 15 
-    #beq x8, x3, mmu_d    # d-tlb-refill Store
-     beq x8, x3, mmu      # d-tlb-refill Store
+     beq x8, x3, mmu_d    # d-tlb-refill Store
+    #beq x8, x3, mmu      # d-tlb-refill Store
 
      li x3, 12 
-    #beq x8, x3, mmu_i    # i-tlb-refill Fetch
-     beq x8, x3, mmu      # i-tlb-refill Fetch
+     beq x8, x3, mmu_i    # i-tlb-refill Fetch
+    #beq x8, x3, mmu      # i-tlb-refill Fetch
 
      li x3, 1 
      beq x8, x3, i_cache_refill
@@ -55,10 +55,14 @@ i_cache_refill:
 mmu_i:
      #li a0, "\n[i"
      #call print7
+     li a0, "i"
+     sb a0, 0(x7)
      j mmu
 mmu_d:
      #li a0, "\n[d"
      #call print7
+     li a0, "d"
+     sb a0, 0(x7)
      j mmu
 
 mmu:  # VA 63:39Sign|38:30Vpn[2]|29:21Vpn[1]|20:12Vpn[0]|11:0PageOffset  
