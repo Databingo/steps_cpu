@@ -192,3 +192,6 @@ calling  0xffffffff80109c7c @ 1
 initcall 0xffffffff80109c7c returned 0 after 68000 usecs
 calling  0xffffffff8010d1f0 @ 1
 nios2-terminal: exiting due to I/O error communicating with target
+
+
+14:25 strart Mountpoing_cache
