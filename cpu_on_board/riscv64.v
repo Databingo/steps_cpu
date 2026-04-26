@@ -652,12 +652,12 @@ reg [7:0] tlb_d_vld;
                 tlb_flush <= 0;
 
 		if (!STrap && !bubble && did)  begin did <= 0; end
-		// -- UPPER is default change for EXE stage --- but (1.Could be overwrite 2.Take effect next cycle) 
-                // meip/seip is triggered by Plic_pending, mtip is triggered by inner Timer, stip is set by mtip trap handler, msip set by opensbi csr, ssip set by software csr
-		Csrs[mip][MEIP] <= meip_interrupt; 
-		Csrs[mip][MTIP] <= mtip_interrupt; // MTIP linux will see then jump to its handler  mtime>=mtimecmp
-		Csrs[mip][SEIP] <= seip_interrupt;
-		Csrs[mip][MSIP] <= msip_interrupt;  
+		//// -- UPPER is default change for EXE stage --- but (1.Could be overwrite 2.Take effect next cycle) 
+                //// meip/seip is triggered by Plic_pending, mtip is triggered by inner Timer, stip is set by mtip trap handler, msip set by opensbi csr, ssip set by software csr
+		//Csrs[mip][MEIP] <= meip_interrupt; 
+		//Csrs[mip][MTIP] <= mtip_interrupt; // MTIP linux will see then jump to its handler  mtime>=mtimecmp
+		//Csrs[mip][SEIP] <= seip_interrupt;
+		//Csrs[mip][MSIP] <= msip_interrupt;  
 
 	    //  i-tlb miss STrap
             if (need_trans && !tlb_i_hit) begin //OPEN 
@@ -986,5 +986,10 @@ reg [7:0] tlb_d_vld;
         end
 	re[0]<= 64'h0; 
 	sre[0]<= 64'h0;
+                //// meip/seip is triggered by Plic_pending, mtip is triggered by inner Timer, stip is set by mtip trap handler, msip set by opensbi csr, ssip set by software csr
+		Csrs[mip][MEIP] <= meip_interrupt; 
+		Csrs[mip][MTIP] <= mtip_interrupt; // MTIP linux will see then jump to its handler  mtime>=mtimecmp
+		Csrs[mip][SEIP] <= seip_interrupt;
+		Csrs[mip][MSIP] <= msip_interrupt;  
     end
 endmodule
