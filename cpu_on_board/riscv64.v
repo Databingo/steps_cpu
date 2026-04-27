@@ -663,7 +663,7 @@ reg [7:0] tlb_d_vld;
 	    // Async Interrupt PLIC full (Platform-Level-Interrupt-Control)  MMIO (hardwire timers uart plic)  first priority in case blocked by itlb cloud
 	    if (any_interrupt && !STrap && !load_step && !store_step && !mul_enable && !div_enable) begin //mstatus[3] MIE // cpu0_intc
 		reserve_valid <= 0; // Interrupt clear lr.w/lr.d
-		do_trap = 1; trap_is_interrupt =1; trap_val = 0; trap_epc = pc_4;
+		do_trap = 1; trap_is_interrupt =1; trap_val = 0; trap_epc = (bubble) ? pc : pc_4; // !!! save pc (j/b EXE was flushed currectly, vma executed only in EXEcuting)
 		if (meip) trap_cause = 11; // Cause 11 for Machine External Interrupt
 		else if (msip) trap_cause = 3;  // Cause 3 for Machine Sofeware Interrupt
 		else if (mtip) trap_cause = 7;  // Cause 7 for Machine Timer Interrupt
