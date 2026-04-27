@@ -1001,7 +1001,7 @@ reg [7:0] tlb_d_vld;
 	sre[0]<= 64'h0;
                 //// meip/seip is triggered by Plic_pending, mtip is triggered by inner Timer, stip is set by mtip trap handler, msip set by opensbi csr, ssip set by software csr
 		Csrs[mip][MEIP] <= meip_interrupt;  
-		Csrs[mip][MTIP] <= mtip_interrupt; // mtime give mtip_interrupt set MEIP, cpu check MTIP&MTIE to fire a m_interrupt|opensbi set STIP1 MTIE0 to surpress repeate|linux reset mtimecmp
+		Csrs[mip][MTIP] <= mtip_interrupt;//mtime-mtip_interrupt-MTIP|MTIP&MTIE-mtip|hardware mstatus.MIE=0|opensbi MTIE0 surpress repeate+STIP1 to linux|opensbi mret MIE=1(MPIE)|linux ecall sbi_set_timer-MIE=1|linux STIP=0
 		Csrs[mip][SEIP] <= seip_interrupt;
 		Csrs[mip][MSIP] <= msip_interrupt;  
     end
