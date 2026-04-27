@@ -8,12 +8,12 @@ isr_router:
 
      # x1(ra)2(sp)3456,x10(a0) operating
      li x3, 13 
-     beq x8, x3, mmu_d    # d-tlb-refill Load
-    #beq x8, x3, mmu      # d-tlb-refill Load
+    #beq x8, x3, mmu_d    # d-tlb-refill Load
+     beq x8, x3, mmu      # d-tlb-refill Load
 
      li x3, 15 
-     beq x8, x3, mmu_d    # d-tlb-refill Store
-    #beq x8, x3, mmu      # d-tlb-refill Store
+    #beq x8, x3, mmu_d    # d-tlb-refill Store
+     beq x8, x3, mmu      # d-tlb-refill Store
 
      li x3, 12 
      beq x8, x3, mmu_i    # i-tlb-refill Fetch
