@@ -16,8 +16,8 @@ isr_router:
      beq x8, x3, mmu      # d-tlb-refill Store
 
      li x3, 12 
-     beq x8, x3, mmu_i    # i-tlb-refill Fetch
-    #beq x8, x3, mmu      # i-tlb-refill Fetch
+    #beq x8, x3, mmu_i    # i-tlb-refill Fetch
+     beq x8, x3, mmu      # i-tlb-refill Fetch
 
      li x3, 1 
      beq x8, x3, i_cache_refill
