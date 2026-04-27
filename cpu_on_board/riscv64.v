@@ -659,8 +659,21 @@ reg [7:0] tlb_d_vld;
 		//Csrs[mip][SEIP] <= seip_interrupt;
 		//Csrs[mip][MSIP] <= msip_interrupt;  
 
+
+	    // Async Interrupt PLIC full (Platform-Level-Interrupt-Control)  MMIO (hardwire timers uart plic)  first priority in case blocked by itlb cloud
+	    if (any_interrupt && !STrap && !load_step && !store_step && !mul_enable && !div_enable) begin //mstatus[3] MIE // cpu0_intc
+		reserve_valid <= 0; // Interrupt clear lr.w/lr.d
+		do_trap = 1; trap_is_interrupt =1; trap_val = 0; trap_epc = pc_4;
+		if (meip) trap_cause = 11; // Cause 11 for Machine External Interrupt
+		else if (msip) trap_cause = 3;  // Cause 3 for Machine Sofeware Interrupt
+		else if (mtip) trap_cause = 7;  // Cause 7 for Machine Timer Interrupt
+		else if (seip) trap_cause = 9;  // Cause 9 for Supervisor External Interrupt
+		else if (stip) trap_cause = 5;  // Cause 5 for Supervisor Timer Interrupt (set by opensbi via csrw when it see MTIP)
+		else if (ssip) trap_cause = 1;  // Cause 1 for Supervisor Software Interrupt (set by os)
+
+
 	    //  i-tlb miss STrap
-            if (need_trans && !tlb_i_hit) begin //OPEN 
+	    end else if (need_trans && !tlb_i_hit) begin //OPEN 
                 mmu_pc <= 1; // MMU_PC ON 
                 pc <= 0;     // trap to isr_router
                 bubble <= 1'b1; // bubble IF for new pc value 
@@ -739,16 +752,16 @@ reg [7:0] tlb_d_vld;
 		    reserve_valid <= 0; // clear lr.w/lr.d  Real Trap has to clear lock
 		end
 
-	    // Async Interrupt PLIC full (Platform-Level-Interrupt-Control)  MMIO (hardwire timers uart plic)
-	    end else if (any_interrupt && !STrap && !load_step && !store_step && !mul_enable && !div_enable) begin //mstatus[3] MIE // cpu0_intc
-		reserve_valid <= 0; // Interrupt clear lr.w/lr.d
-		do_trap = 1; trap_is_interrupt =1; trap_val = 0; trap_epc = pc_4;
-		if (meip) trap_cause = 11; // Cause 11 for Machine External Interrupt
-		else if (msip) trap_cause = 3;  // Cause 3 for Machine Sofeware Interrupt
-		else if (mtip) trap_cause = 7;  // Cause 7 for Machine Timer Interrupt
-		else if (seip) trap_cause = 9;  // Cause 9 for Supervisor External Interrupt
-		else if (stip) trap_cause = 5;  // Cause 5 for Supervisor Timer Interrupt (set by opensbi via csrw when it see MTIP)
-		else if (ssip) trap_cause = 1;  // Cause 1 for Supervisor Software Interrupt (set by os)
+	//    // Async Interrupt PLIC full (Platform-Level-Interrupt-Control)  MMIO (hardwire timers uart plic)
+	//    end else if (any_interrupt && !STrap && !load_step && !store_step && !mul_enable && !div_enable) begin //mstatus[3] MIE // cpu0_intc
+	//	reserve_valid <= 0; // Interrupt clear lr.w/lr.d
+	//	do_trap = 1; trap_is_interrupt =1; trap_val = 0; trap_epc = pc_4;
+	//	if (meip) trap_cause = 11; // Cause 11 for Machine External Interrupt
+	//	else if (msip) trap_cause = 3;  // Cause 3 for Machine Sofeware Interrupt
+	//	else if (mtip) trap_cause = 7;  // Cause 7 for Machine Timer Interrupt
+	//	else if (seip) trap_cause = 9;  // Cause 9 for Supervisor External Interrupt
+	//	else if (stip) trap_cause = 5;  // Cause 5 for Supervisor Timer Interrupt (set by opensbi via csrw when it see MTIP)
+	//	else if (ssip) trap_cause = 1;  // Cause 1 for Supervisor Software Interrupt (set by os)
 
 	    // IR
 	    end else begin 

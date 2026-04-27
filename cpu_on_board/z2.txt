@@ -337,8 +337,8 @@ wire [63:0] csr_mask_w= (w_csr == 12'h180) ? satp_mask :
 			64'hffff_ffff_ffff_ffff;
 wire [63:0] csr_read = (w_csr == 12'h301) ? 64'h8000000000141101 : // misa(RV64IMASU)
                        //(w_csr == 12'hF11) ? 64'h0 : // mvendorid
-                       (w_csr == 12'hF12) ? 64'h0 : // marchid
-                       (w_csr == 12'hF13) ? 64'h0 : // mimpid
+                       //(w_csr == 12'hF12) ? 64'h0 : // marchid
+                       //(w_csr == 12'hF13) ? 64'h0 : // mimpid
                        (w_csr == 12'hF14) ? 64'h0 : // mhartid
                        (w_csr == 12'hC01) ? mtime : // clint_time
 		        Csrs[w_csr_id] & csr_mask;  // Other
@@ -358,11 +358,11 @@ localparam stval      = 16;
 localparam satp       = 17;  // Supervisor address translation and protection satp[63:60].MODE=0:off|8:SV39 satp[59:44].asid vpn2:9 vpn1:9 vpn0:9 satp[43:0]:rootpage physical addr
 localparam mtval      = 18;  // Machine Trap Value Register (bad address or instruction)
 
-localparam marchid    = 19;  // 0
-localparam mimpid     = 19;  // 0
+localparam mvendorid  = 23;  // 0
+localparam marchid    = 24;  // 0
+localparam mimpid     = 25;  // 0
 localparam mhartid    = 19;  // Hardware Thread ID 0 for single-core
 localparam misa       = 19;  // Machine ISA Register (IMA is 0x8000000000001101)
-localparam mvendorid  = 23;  // 0
 localparam clint_time = 19;  // read only
 
 localparam pmpcfg0    = 20;  // Physical Memory Protection
@@ -409,7 +409,7 @@ always @(*) begin
 end
 
 //(* ram_style = "logic" *) reg [63:0] Csrs [0:36]; // 36 CSRs for now // totally 4096
-(* ram_style = "logic" *) reg [63:0] Csrs [0:23]; // 36 CSRs for now // totally 4096
+(* ram_style = "logic" *) reg [63:0] Csrs [0:25]; // 36 CSRs for now // totally 4096
 wire [3:0]  satp_mmu  = Csrs[satp][63:60]; // 0:bare, 8:sv39, 9:sv48  satp.MODE!=0, privilegae is not M-mode, mstatus.MPRN is not set or in MPP's mode?
 
 // -- Timer --
@@ -425,41 +425,45 @@ reg [1:0] store_step;
 reg [63:0] reserve_addr;
 reg        reserve_valid;
 
-reg [3:0] tlb_vld;
 reg tlb_flush = 0;
 //// -- TLB -- 8 pages
-//(* ram_style = "logic" *) reg [26:0] tlb_vpn [0:7]; // vpn number VA[38:12]  Sv39
-//(* ram_style = "logic" *) reg [43:0] tlb_ppn [0:7]; // ppn number PA[55:12]
+reg [7:0] tlb_vld;
+(* ram_style = "logic" *) reg [26:0] tlb_vpn [0:7]; // vpn number VA[38:12]  Sv39
+(* ram_style = "logic" *) reg [43:0] tlb_ppn [0:7]; // ppn number PA[55:12]
 //(* ram_style = "logic" *) reg tlb_vld [0:7];
-// -- TLB i -- 4 pages
-(* ram_style = "logic" *) reg [26:0] tlb_vpn [0:3]; // vpn number VA[38:12]  Sv39
-(* ram_style = "logic" *) reg [43:0] tlb_ppn [0:3]; // ppn number PA[55:12]
-//(* ram_style = "logic" *) reg tlb_vld [0:3];
+//// -- TLB i -- 4 pages
+//reg [3:0] tlb_vld;
+//(* ram_style = "logic" *) reg [26:0] tlb_vpn [0:3]; // vpn number VA[38:12]  Sv39
+//(* ram_style = "logic" *) reg [43:0] tlb_ppn [0:3]; // ppn number PA[55:12]
+////(* ram_style = "logic" *) reg tlb_vld [0:3];
 
 // TLB-I
 wire [26:0] pc_vpn = pc[38:12];
 reg [43:0] pc_ppn;
 reg tlb_i_hit;
 
-//wire [7:0] tlb_i_match; // 8page
-wire [3:0] tlb_i_match; // 4page
+wire [7:0] tlb_i_match; // 8page
+//wire [3:0] tlb_i_match; // 4page
 
 assign tlb_i_match[0] = tlb_vld[0] && (tlb_vpn[0] == pc_vpn);
 assign tlb_i_match[1] = tlb_vld[1] && (tlb_vpn[1] == pc_vpn);
 assign tlb_i_match[2] = tlb_vld[2] && (tlb_vpn[2] == pc_vpn);
 assign tlb_i_match[3] = tlb_vld[3] && (tlb_vpn[3] == pc_vpn);
+assign tlb_i_match[4] = tlb_vld[4] && (tlb_vpn[4] == pc_vpn);
+assign tlb_i_match[5] = tlb_vld[5] && (tlb_vpn[5] == pc_vpn);
+assign tlb_i_match[6] = tlb_vld[6] && (tlb_vpn[6] == pc_vpn);
+assign tlb_i_match[7] = tlb_vld[7] && (tlb_vpn[7] == pc_vpn);
 
 always @(*) begin
     tlb_i_hit = |tlb_i_match && !tlb_flush;
     pc_ppn =   ({44{tlb_i_match[0]}} & tlb_ppn[0]) |
 	       ({44{tlb_i_match[1]}} & tlb_ppn[1]) | //; end
 	       ({44{tlb_i_match[2]}} & tlb_ppn[2]) |
-	       ({44{tlb_i_match[3]}} & tlb_ppn[3]) ; end
-	       //({44{tlb_i_match[3]}} & tlb_ppn[3]) |
-	       //({44{tlb_i_match[4]}} & tlb_ppn[4]) |
-	       //({44{tlb_i_match[5]}} & tlb_ppn[5]) |
-	       //({44{tlb_i_match[6]}} & tlb_ppn[6]) |
-	       //({44{tlb_i_match[7]}} & tlb_ppn[7]) ; end
+	       ({44{tlb_i_match[3]}} & tlb_ppn[3]) | // ; end
+	       ({44{tlb_i_match[4]}} & tlb_ppn[4]) |
+	       ({44{tlb_i_match[5]}} & tlb_ppn[5]) |
+	       ({44{tlb_i_match[6]}} & tlb_ppn[6]) |
+	       ({44{tlb_i_match[7]}} & tlb_ppn[7]) ; end
    
 // -- TLB d -- 8 pages
 reg [7:0] tlb_d_vld;
@@ -525,19 +529,21 @@ reg [7:0] tlb_d_vld;
 		assign pda = need_trans_d ? {8'h0, data_ppn, ls_va[11:0]} : ls_va;
 
 		// TLB Refill
-		//reg [2:0] tlb_ptr = 0; // 8 entries TLB
-		reg [1:0] tlb_ptr = 0; // 4 entries i TLB
+		reg [2:0] tlb_ptr = 0; // 8 entries TLB
+		//reg [1:0] tlb_ptr = 0; // 4 entries i TLB
 		reg [2:0] tlb_d_ptr = 0; // 8 entries d TLB
 		//reg [3:0] tlb_d_ptr = 0; // 16 entries d TLB
 		always @(posedge clk or negedge reset) begin
 		    if (!reset) begin // RESET
 			tlb_ptr <= 0; // hit->trap(save va to x9)->refill assembly(fetch pa to x9)-> sd x9, `Tlb -> here to refill tlb
 			tlb_d_ptr <= 0;
-			tlb_vld <= 4'b0;
+			//tlb_vld <= 4'b0;
+			tlb_vld <= 8'b0;
 			//tlb_d_vld <= 16'b0;
 			tlb_d_vld <= 8'b0;
 		    //end else if (tlb_flush) begin tlb_vld <= 4'b0; tlb_d_vld <= 16'b0; // FLUSH
-		    end else if (tlb_flush) begin tlb_vld <= 4'b0; tlb_d_vld <= 8'b0; // FLUSH
+		    //end else if (tlb_flush) begin tlb_vld <= 4'b0; tlb_d_vld <= 8'b0; // FLUSH
+		    end else if (tlb_flush) begin tlb_vld <= 8'b0; tlb_d_vld <= 8'b0; // FLUSH
 		    end else if (STrap && bus_write_enable && bus_address == `Tlb) begin // for the last fill: sd ppa, Tlb  // REFILL
 			if (re[8] == 12) begin
 			tlb_vpn[tlb_ptr] <= re[9][38:12]; // VA from x1 saved by trapp mmu_pc/mmu_da
@@ -619,7 +625,7 @@ reg [7:0] tlb_d_vld;
 		Csrs[mstatus][MIE] <= 1;
 		mmu_da <= 0;
 		for (i=0;i<11;i=i+1) begin sre[i]<= 64'b0; end 
-		for (i=0;i<=23;i=i+1) begin Csrs[i]<= 64'b0; end
+		for (i=0;i<=25;i=i+1) begin Csrs[i]<= 64'b0; end
 		//Csrs[medeleg] <= 64'hb1af; // delegate to S-mode 1011000110101111 // see VII 3.1.15 mcasue exceptions
 		Csrs[medeleg] <= 64'hb109; // delegate to S-mode no 12/13/15
 		Csrs[mideleg] <= 64'h0222; // delegate to S-mode 0000001000100010 see VII 3.1.15 mcasue interrupt 1/5/9 SSIP(supervisor software interrupt) STIP(time) SEIP(external)
@@ -646,12 +652,12 @@ reg [7:0] tlb_d_vld;
                 tlb_flush <= 0;
 
 		if (!STrap && !bubble && did)  begin did <= 0; end
-		// -- UPPER is default change for EXE stage --- but (1.Could be overwrite 2.Take effect next cycle) 
-                // meip/seip is triggered by Plic_pending, mtip is triggered by inner Timer, stip is set by mtip trap handler, msip set by opensbi csr, ssip set by software csr
-		Csrs[mip][MEIP] <= meip_interrupt; 
-		Csrs[mip][MTIP] <= mtip_interrupt; // MTIP linux will see then jump to its handler  mtime>=mtimecmp
-		Csrs[mip][SEIP] <= seip_interrupt;
-		Csrs[mip][MSIP] <= msip_interrupt;  
+		//// -- UPPER is default change for EXE stage --- but (1.Could be overwrite 2.Take effect next cycle) 
+                //// meip/seip is triggered by Plic_pending, mtip is triggered by inner Timer, stip is set by mtip trap handler, msip set by opensbi csr, ssip set by software csr
+		//Csrs[mip][MEIP] <= meip_interrupt; 
+		//Csrs[mip][MTIP] <= mtip_interrupt; // MTIP linux will see then jump to its handler  mtime>=mtimecmp
+		//Csrs[mip][SEIP] <= seip_interrupt;
+		//Csrs[mip][MSIP] <= msip_interrupt;  
 
 	    //  i-tlb miss STrap
             if (need_trans && !tlb_i_hit) begin //OPEN 
@@ -712,8 +718,8 @@ reg [7:0] tlb_d_vld;
 		re[9] <= ls_va; //save va to x1
 		//re[8] <= (op == 7'b0000011) ? 13 : 14;// save x2 trap type load/store_atom
 		re[8] <= 18; // save 18 for debug
-                //Csrs[mimpid] <=  pda;
-                //Csrs[marchid] <= ppc;
+                Csrs[mimpid] <= pc_4; // pc
+                Csrs[marchid] <= Csrs[mip];  // mip
                 Csrs[mvendorid] <= ir;
 
             // Back from STrap
@@ -740,7 +746,7 @@ reg [7:0] tlb_d_vld;
 		if (meip) trap_cause = 11; // Cause 11 for Machine External Interrupt
 		else if (msip) trap_cause = 3;  // Cause 3 for Machine Sofeware Interrupt
 		else if (mtip) trap_cause = 7;  // Cause 7 for Machine Timer Interrupt
-		else if (seip) trap_cause = 9;  // Cause 9 for Supervisor External
+		else if (seip) trap_cause = 9;  // Cause 9 for Supervisor External Interrupt
 		else if (stip) trap_cause = 5;  // Cause 5 for Supervisor Timer Interrupt (set by opensbi via csrw when it see MTIP)
 		else if (ssip) trap_cause = 1;  // Cause 1 for Supervisor Software Interrupt (set by os)
 
@@ -862,7 +868,8 @@ reg [7:0] tlb_d_vld;
 	               			       Csrs[sstatus][SPP] <= 0; // set previous privilege mode(SPP) to be 0 (U-mode)
 	               			       pc <=  Csrs[sepc]; // sepc was +4 by the software handler and written back to sepc
 		          		       bubble <= 1'b1; end 
-		    32'b00010000010100000000000001110011: begin end // Wfi
+		    //32'b00010000010100000000000001110011: begin if ((Csrs[mip] & Csrs[mie]) == 64'b0) begin pc <= pc_4; bubble <= 1; end end// Wfi
+		    32'b00010000010100000000000001110011: begin end// Wfi
 		    32'b?????????????????_000_?????_0001111: begin bubble <= 1; pc <= pc; end // Fence
 		    //32'b?????????????????_000_?????_0001111: begin if (bus_read_enable || bus_write_enable || !bus_read_done || !bus_write_done) begin bubble <= 1; pc <= pc_4; end end // Fence wait r/w
 		    32'b?????????????????_001_?????_0001111: begin cache_epoch <= cache_epoch + 1; bubble <= 1; pc <= pc; end // Fence.i 
@@ -979,6 +986,11 @@ reg [7:0] tlb_d_vld;
         end
 	re[0]<= 64'h0; 
 	sre[0]<= 64'h0;
+                //// meip/seip is triggered by Plic_pending, mtip is triggered by inner Timer, stip is set by mtip trap handler, msip set by opensbi csr, ssip set by software csr
+		Csrs[mip][MEIP] <= meip_interrupt; 
+		Csrs[mip][MTIP] <= mtip_interrupt; // MTIP linux will see then jump to its handler  mtime>=mtimecmp
+		Csrs[mip][SEIP] <= seip_interrupt;
+		Csrs[mip][MSIP] <= msip_interrupt;  
     end
 endmodule
 `include "header.vh"
@@ -1340,8 +1352,8 @@ assign DRAM_CKE = 1; // always enable
 	    uart_write_pulse <= 0;
 	    uart_read_pulse <= 0;
 	    uart_read_step <= 0;
-	    mtimecmp <=  64'h80000000;
-	    //mtimecmp <=  64'hffffffffffffffff;
+	    //mtimecmp <=  64'h80000000;
+	    mtimecmp <=  64'hffffffffffffffff;
 	    uart_irq_pre <= 0;
             //sd_rd_start <= 0;
 	end else begin
@@ -1364,7 +1376,8 @@ assign DRAM_CKE = 1; // always enable
         // Read
         //if (!bus_read_enable && bus_read_done==0) begin 
         if (bus_read_done==0) begin 
-	    if (!valid_address) bus_read_done <= 1;
+	    if (!valid_address) begin bus_read_done <= 1; bus_read_data <= 64'hFFFFFFFFFFFFFFFF; step <= 0; end;
+	    //if (!valid_address) begin bus_read_done <= 1; end;
             //if (Key_selected) begin bus_read_data <= {32'd0, 24'd0, ascii}; bus_read_done <= 1; end
 	    if (Ram_selected) begin 
 	        casez(bus_ls_type)
@@ -1537,7 +1550,7 @@ assign DRAM_CKE = 1; // always enable
         //if (bus_write_enable || sd!=0 ) begin 
         //if (!bus_write_enable && bus_write_done == 0) begin 
         if (bus_write_done == 0) begin 
-	    if (!valid_address) bus_write_done <= 1; // prevent OS hanging by invalid address r/w
+	    if (!valid_address) begin bus_write_done <= 1; step <= 0; end // prevent OS hanging by invalid address r/w
 	    if (Ram_selected) begin 
 		casez(bus_ls_type) // 000sb 001sh 010sw 011sd
 		    3'b000: begin //sb
@@ -1595,7 +1608,7 @@ assign DRAM_CKE = 1; // always enable
 		     end
                 bus_write_done <= 1; 
 	    end // low write first need max high to pretent spurious
-            if (Clintbase_selected) begin msip_interrupt <= bus_write_data[0];bus_write_done <= 1;end 
+            if (Clintbase_selected) begin msip_interrupt <= bus_write_data[0]; bus_write_done <= 1;end 
             //if (Clintbase_selected) begin bus_write_done <= 1;end 
 	    //if (Sdram_selected) begin if (sdram_req_wait==0) bus_write_done <= 1; end
 
@@ -2572,10 +2585,14 @@ i_cache_refill:
 mmu_i:
      #li a0, "\n[i"
      #call print7
+     li a0, "i"
+     sb a0, 0(x7)
      j mmu
 mmu_d:
      #li a0, "\n[d"
      #call print7
+     li a0, "d"
+     sb a0, 0(x7)
      j mmu
 
 mmu:  # VA 63:39Sign|38:30Vpn[2]|29:21Vpn[1]|20:12Vpn[0]|11:0PageOffset  
@@ -2767,11 +2784,11 @@ debug:
      csrr a0, mvendorid # mvendorid/ir
      call print_reg
 
-   # li a0, "|ppc:" 
-   # call print7
-   ##csrr a0, 0xF12 # marchid/ppc
-   # csrr a0, marchid # marchid/ppc
-   # call print_reg
+     li a0, "|pc:" 
+     call print7
+    #csrr a0, 0xF12 # marchid/ppc
+     csrr a0, mimpid
+     call print_reg
 
    # li a0, "|pda:" 
    # call print7
@@ -2779,10 +2796,10 @@ debug:
    # csrr a0, mimpid # mimpid/pda
    # call print_reg
 
-   #li a0, "|mhtid:" 
-   #call print7
-   #csrr a0, mhartid
-   #call print_reg
+    li a0, "|mip:" 
+    call print7
+    csrr a0, marchid
+    call print_reg
 
    #li a0, "|mstas:" 
    #call print7
@@ -3004,8 +3021,8 @@ print7: # a0, 7 char left one for null
              reg = <0x0 0x2004 0x0 0x10>;
              // if using PLIC point to IRQ 1. If bypass use extended
              //interrupts-extended = <&cpu0_intc 0x09>; // add dummy external interrupt mapping
-             interrupt-parent = <&plic>;  
-             interrupts = <1>;             // claim number
+          //   interrupt-parent = <&plic>;  
+          //   interrupts = <1>;             // claim number
              clock-frequency = <12500000>;
              //status = "disabled";
              status = "okay";
