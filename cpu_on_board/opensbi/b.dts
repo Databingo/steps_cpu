@@ -16,7 +16,7 @@
         #address-cells = <0x01>;
         #size-cells = <0x00>;
         //timebase-frequency = <12500000>;
-        timebase-frequency = <1000000000>;
+        timebase-frequency = <800000000>;
         //timebase-frequency = <125000>; // mimic 0.124MHz
         //timebase-frequency = <1250000>; // mimic 1.24MHz
 
