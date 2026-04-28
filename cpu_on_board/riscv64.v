@@ -174,10 +174,14 @@ wire [63:0] w_amo_calc_data =
     (w_func5 == 5'b01100) ? val_and    : // and
     (w_func5 == 5'b01000) ? val_or     : // or
     val_minmax ; // min/max/minu/maxu
+
+wire [63:0] w_amo_calc_data_dw = (is_word_op) ? {{32{w_amo_calc_data[31]}}, w_amo_calc_data[31:0]} : w_amo_calc_data;
+
 // formatting sc.w/sc.d/amo
 wire [63:0] w_atomic_write_data = (op == 7'b0101111 && w_func5[4:0] == 5'b00011) ? // SC
     (is_word_op ? {32'b0, rs2[31:0]} : rs2) : // sc.w/sc.d
-    w_amo_calc_data; // AMOs -----------
+    //w_amo_calc_data; // AMOs -----------
+    w_amo_calc_data_dw; // AMOs -----------
 
 // Indepenedent Multiplier Mul // Booth algorithim + Signed-correct
 reg [6:0]   mul_cnt;
