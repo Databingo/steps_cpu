@@ -417,7 +417,20 @@ end
 wire [3:0]  satp_mmu  = Csrs[satp][63:60]; // 0:bare, 8:sv39, 9:sv48  satp.MODE!=0, privilegae is not M-mode, mstatus.MPRN is not set or in MPP's mode?
 
 // -- Timer --
-always @(posedge clk or negedge reset) begin if (!reset) mtime <= 0; else mtime <= mtime + 1; end
+reg [6:0] mtime_div;
+always @(posedge clk or negedge reset) begin 
+    if (!reset) begin 
+	mtime <= 0; 
+	mtime_div <= 0; 
+    end else begin 
+	mtime_div <= mtime_div + 1; 
+	if (mtime_div == 7'd99) begin 
+	    mtime_div <= 0;
+	    mtime <= mtime + 1; 
+	end
+    end
+end
+
 wire mtip_interrupt = (mtime >= mtimecmp);
 
 // -- Innerl signal --
