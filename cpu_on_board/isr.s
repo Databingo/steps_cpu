@@ -153,32 +153,32 @@ FINISH_1GB:
 
 # --- Permissions, U-Bit and A/D Bits --
 CHECK_PERM_AND_AD:                
-#     # 1. Check U-Bit based on VA sign (x9)
-#     andi x3, x4, 0x10 # Extract U-bit (Bit 4)
-#     bltz x9, check_kernel_u
-#check_user_u:
-#     beqz x3, PERM_FAULT # User VA (>=0) requires U=1
-#     j check_permissions
-#check_kernel_u:
-#     bnez x3, PERM_FAULT # Kernel VA (<0) requires U=0
-#check_permissions:
-#     # 2. CHECK R/W/X permissions
-#     li x3, 15
-#    #li x3, 14
-#     beq x8, x3, check_store
-#     li x3, 12
-#     beq x8, x3, check_fetch
-#check_load:
-#     andi x3, x4, 2 # PET.R (bit 1)
-#     beqz x3, PERM_FAULT
-#     j update_ad
-#check_store:
-#     andi x3, x4, 4 # PET.W (bit 2)
-#     beqz x3, PERM_FAULT
-#     j update_ad
-#check_fetch:
-#     andi x3, x4, 8 # PET.X (bit 3)
-#     beqz x3, PERM_FAULT
+     # 1. Check U-Bit based on VA sign (x9)
+     andi x3, x4, 0x10 # Extract U-bit (Bit 4)
+     bltz x9, check_kernel_u
+check_user_u:
+     beqz x3, PERM_FAULT # User VA (>=0) requires U=1
+     j check_permissions
+check_kernel_u:
+     bnez x3, PERM_FAULT # Kernel VA (<0) requires U=0
+check_permissions:
+     # 2. CHECK R/W/X permissions
+     li x3, 15
+    #li x3, 14
+     beq x8, x3, check_store
+     li x3, 12
+     beq x8, x3, check_fetch
+check_load:
+     andi x3, x4, 2 # PET.R (bit 1)
+     beqz x3, PERM_FAULT
+     j update_ad
+check_store:
+     andi x3, x4, 4 # PET.W (bit 2)
+     beqz x3, PERM_FAULT
+     j update_ad
+check_fetch:
+     andi x3, x4, 8 # PET.X (bit 3)
+     beqz x3, PERM_FAULT
 update_ad:
      # 3. Update A/D bits
      ori x4, x4, 0x40  # set Accessed bit (bit 6)
