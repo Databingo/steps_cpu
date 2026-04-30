@@ -1,6 +1,7 @@
 isr_router:        
      # x0-x10 are shadowed by hardware, safe to use
-     li sp, 0x1500 # Set stack shadowed sp(x2)
+    #li sp, 0x1500 # Set stack shadowed sp(x2)
+     li sp, 0x801F0000 # Set stack shadowed sp(x2)
      li x7, 0x2004 # UART print 
      # x8 trap_type no change
      # x9 addr  # x9 keep the address need manage, no change x9
