@@ -484,6 +484,9 @@ always @(*) begin
    
 // -- TLB d -- 8 pages
 reg [7:0] tlb_d_vld;
+reg [7:0] tlb_d_w; // Wirte permission bit
+reg [7:0] tlb_d_d; // Dirty bit
+wire is_store = (op == 7'b0100011 || op == 7'b0101111); // Store/Atm
 (* ram_style = "logic" *) reg [26:0] tlb_d_vpn [0:7]; // vpn number VA[38:12]  Sv39
 (* ram_style = "logic" *) reg [43:0] tlb_d_ppn [0:7]; // ppn number PA[55:12]
 //// -- TLB d -- 16 pages
@@ -501,14 +504,14 @@ reg [7:0] tlb_d_vld;
 
 	wire [7:0] tlb_d_match;
 	//wire [15:0] tlb_d_match;
-	assign tlb_d_match[0] = tlb_d_vld[0] && (tlb_d_vpn[0] == ls_va[38:12]);
-	assign tlb_d_match[1] = tlb_d_vld[1] && (tlb_d_vpn[1] == ls_va[38:12]);
-	assign tlb_d_match[2] = tlb_d_vld[2] && (tlb_d_vpn[2] == ls_va[38:12]);
-	assign tlb_d_match[3] = tlb_d_vld[3] && (tlb_d_vpn[3] == ls_va[38:12]);
-	assign tlb_d_match[4] = tlb_d_vld[4] && (tlb_d_vpn[4] == ls_va[38:12]);
-	assign tlb_d_match[5] = tlb_d_vld[5] && (tlb_d_vpn[5] == ls_va[38:12]);
-	assign tlb_d_match[6] = tlb_d_vld[6] && (tlb_d_vpn[6] == ls_va[38:12]);
-	assign tlb_d_match[7] = tlb_d_vld[7] && (tlb_d_vpn[7] == ls_va[38:12]);
+	assign tlb_d_match[0] = tlb_d_vld[0] && (tlb_d_vpn[0] == ls_va[38:12]) && (!is_store || (tlb_d_w[0] && tlb_d_d[0]));
+	assign tlb_d_match[1] = tlb_d_vld[1] && (tlb_d_vpn[1] == ls_va[38:12]) && (!is_store || (tlb_d_w[1] && tlb_d_d[1]));
+	assign tlb_d_match[2] = tlb_d_vld[2] && (tlb_d_vpn[2] == ls_va[38:12]) && (!is_store || (tlb_d_w[2] && tlb_d_d[2]));
+	assign tlb_d_match[3] = tlb_d_vld[3] && (tlb_d_vpn[3] == ls_va[38:12]) && (!is_store || (tlb_d_w[3] && tlb_d_d[3]));
+	assign tlb_d_match[4] = tlb_d_vld[4] && (tlb_d_vpn[4] == ls_va[38:12]) && (!is_store || (tlb_d_w[4] && tlb_d_d[4]));
+	assign tlb_d_match[5] = tlb_d_vld[5] && (tlb_d_vpn[5] == ls_va[38:12]) && (!is_store || (tlb_d_w[5] && tlb_d_d[5]));
+	assign tlb_d_match[6] = tlb_d_vld[6] && (tlb_d_vpn[6] == ls_va[38:12]) && (!is_store || (tlb_d_w[6] && tlb_d_d[6]));
+	assign tlb_d_match[7] = tlb_d_vld[7] && (tlb_d_vpn[7] == ls_va[38:12]) && (!is_store || (tlb_d_w[7] && tlb_d_d[7]));
 	//assign tlb_d_match[8] = tlb_d_vld[8] && (tlb_d_vpn[8] == ls_va[38:12]);
 	//assign tlb_d_match[9] = tlb_d_vld[9] && (tlb_d_vpn[9] == ls_va[38:12]);
 	//assign tlb_d_match[10] = tlb_d_vld[10] && (tlb_d_vpn[10] == ls_va[38:12]);
@@ -571,6 +574,8 @@ reg [7:0] tlb_d_vld;
 			tlb_d_vpn[tlb_d_ptr] <= re[9][38:12]; // VA from x1 saved by trapp mmu_pc/mmu_da
 			tlb_d_ppn[tlb_d_ptr] <= bus_write_data[55:12] ; // real 
 			tlb_d_vld[tlb_d_ptr] <= 1;
+			tlb_d_w[tlb_d_ptr] <= bus_write_data[2]; // bit 2 of PTE is W
+			tlb_d_d[tlb_d_ptr] <= bus_write_data[7]; // bit 7 of PTE is D
 			tlb_d_ptr <= tlb_d_ptr + 1; 
 		        end 
 		    end

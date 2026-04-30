@@ -1,0 +1,887 @@
+I run the same Image of linux on qemu:
+
+qemu-system-riscv64 -nographic \
+    -machine virt \
+    -m 8M \
+    -cpu rv64,f=off,d=off,c=off,h=off,g=off,zfa=off,zfh=off,zba=off,zbb=off \
+    -bios fw_jump_ns16550a_call_log_noplic40x2004.bin \
+    -append "mem=8M"  \
+    -icount shift=0,align=off \
+    -kernel /usr/local/projects/steps_cpu/create_mini_linux/riscv64-linux/Image
+
+It prompt login and I type in root to log in successufully.
+
+
+OpenSBI v1.3
+   ____                    _____ ____ _____
+  / __ \                  / ____|  _ \_   _|
+ | |  | |_ __   ___ _ __ | (___ | |_) || |
+ | |  | | '_ \ / _ \ '_ \ \___ \|  _ < | |
+ | |__| | |_) |  __/ | | |____) | |_) || |_
+  \____/| .__/ \___|_| |_|_____/|___/_____|
+        | |
+        |_|
+
+Platform Name             : riscv-virtio,qemu
+Platform Features         : medeleg
+Platform HART Count       : 1
+Platform IPI Device       : aclint-mswi
+Platform Timer Device     : aclint-mtimer @ 12500000Hz
+Platform Console Device   : uart8250
+Platform HSM Device       : ---
+Platform PMU Device       : ---
+Platform Reboot Device    : ---
+Platform Shutdown Device  : ---
+Platform Suspend Device   : ---
+Platform CPPC Device      : ---
+Firmware Base             : 0x80000000
+Firmware Size             : 318 KB
+Firmware RW Offset        : 0x40000
+Firmware RW Size          : 62 KB
+Firmware Heap Offset      : 0x47000
+Firmware Heap Size        : 34 KB (total), 2 KB (reserved), 9 KB (used), 22 KB (free)
+Firmware Scratch Size     : 4096 B (total), 760 B (used), 3336 B (free)
+Runtime SBI Version       : 1.0
+
+Domain0 Name              : root
+Domain0 Boot HART         : 0
+Domain0 HARTs             : 0*
+Domain0 Region00          : 0x0000000002000000-0x000000000200ffff M: (I,R,W) S/U: ()
+Domain0 Region01          : 0x0000000080040000-0x000000008004ffff M: (R,W) S/U: ()
+Domain0 Region02          : 0x0000000080000000-0x000000008003ffff M: (R,X) S/U: ()
+Domain0 Region03          : 0x0000000000000000-0xffffffffffffffff M: (R,W,X) S/U: (R,W,X)
+Domain0 Next Address      : 0x0000000080200000
+Domain0 Next Arg1         : 0x0000000080100000
+Domain0 Next Mode         : S-mode
+Domain0 SysReset          : yes
+Domain0 SysSuspend        : yes
+
+Boot HART ID              : 0
+Boot HART Domain          : root
+Boot HART Priv Version    : v1.12
+Boot HART Base ISA        : rv64ima
+Boot HART ISA Extensions  : time,sstc
+Boot HART PMP Count       : 16
+Boot HART PMP Granularity : 4
+Boot HART PMP Address Bits: 54
+Boot HART MHPM Count      : 16
+Boot HART MIDELEG         : 0x0000000000000222
+Boot HART MEDELEG         : 0x000000000000b109
+Linux version 6.12.0 (root@ashah-standardpcq35ich92009) (riscv64-buildroot-linux-musl-gcc.br_real (Buildroot -g0c65e4995-dirty) 14.3.0, GNU ld (GNU Binutils) 2.44) #19 Sat Apr 18 22:51:39 CST 2026
+Machine model: riscv-virtio,qemu
+SBI specification v1.0 detected
+SBI implementation ID=0x1 Version=0x10003
+SBI TIME extension detected
+SBI IPI extension detected
+SBI RFENCE extension detected
+Disabled 4-level and 5-level paging
+earlycon: sbi0 at I/O port 0x0 (options '')
+printk: legacy bootconsole [sbi0] enabled
+printk: debug: skip boot console de-registration.
+printk: debug: ignoring loglevel setting.
+Disabled 4-level and 5-level paging
+OF: reserved mem: 0x0000000080000000..0x000000008003ffff (256 KiB) nomap non-reusable mmode_resv1@80000000
+OF: reserved mem: 0x0000000080040000..0x000000008004ffff (64 KiB) nomap non-reusable mmode_resv0@80040000
+Zone ranges:
+  DMA32    [mem 0x0000000080000000-0x00000000807fffff]
+  Normal   empty
+Movable zone start for each node
+Early memory node ranges
+  node   0: [mem 0x0000000080000000-0x000000008004ffff]
+  node   0: [mem 0x0000000080050000-0x00000000807fffff]
+Initmem setup node 0 [mem 0x0000000080000000-0x00000000807fffff]
+Falling back to deprecated "riscv,isa"
+riscv: base ISA extensions aim
+riscv: ELF capabilities aim
+pcpu-alloc: s0 r0 d32768 u32768 alloc=1*32768
+pcpu-alloc: [0] 0
+Kernel command line: no4lvl earlycon=sbi console=hvc0 panic=0 init_on_alloc=0 keep_bootcon ignore_loglevel initcall_debug rcu_update.rcu_cpu_stall_suppress=1 no4lvl earlycon=sbi console=hvc0
+Dentry cache hash table entries: 1024 (order: 1, 8192 bytes, linear)
+Inode-cache hash table entries: 512 (order: 0, 4096 bytes, linear)
+Built 1 zonelists, mobility grouping off.  Total pages: 2048
+mem auto-init: stack:all(zero), heap alloc:off, heap free:off
+SLUB: HWalign=64, Order=0-1, MinObjects=0, CPUs=1, Nodes=1
+NR_IRQS: 64, nr_irqs: 64, preallocated irqs: 0
+riscv-intc: 64 local interrupts mapped
+clocksource: riscv_clocksource: mask: 0xffffffffffffffff max_cycles: 0x2e2049cda, max_idle_ns: 440795202628 ns
+sched_clock: 64 bits at 13MHz, resolution 80ns, wraps every 4398046511080ns
+Calibrating delay loop (skipped), value calculated using timer frequency.. 25.00 BogoMIPS (lpj=50000)
+pid_max: default: 32768 minimum: 301
+Mount-cache hash table entries: 512 (order: 0, 4096 bytes, linear)
+Mountpoint-cache hash table entries: 512 (order: 0, 4096 bytes, linear)
+calling  0xffffffff80109384 @ 1
+ASID allocator using 16 bits (65536 entries)
+initcall 0xffffffff80109384 returned 0 after 0 usecs
+calling  0xffffffff80109b74 @ 1
+initcall 0xffffffff80109b74 returned 0 after 0 usecs
+calling  0xffffffff8010a14c @ 1
+initcall 0xffffffff8010a14c returned 0 after 0 usecs
+calling  0xffffffff8010a1cc @ 1
+initcall 0xffffffff8010a1cc returned 0 after 0 usecs
+calling  0xffffffff8010c094 @ 1
+initcall 0xffffffff8010c094 returned 0 after 0 usecs
+calling  0xffffffff8010d690 @ 1
+initcall 0xffffffff8010d690 returned 0 after 0 usecs
+calling  0xffffffff80110264 @ 1
+initcall 0xffffffff80110264 returned 0 after 0 usecs
+calling  0xffffffff80113be0 @ 1
+initcall 0xffffffff80113be0 returned 0 after 0 usecs
+calling  0xffffffff80114ac8 @ 1
+initcall 0xffffffff80114ac8 returned 0 after 0 usecs
+Memory: 4660K/8192K available (1030K kernel code, 554K rwdata, 160K rodata, 457K init, 213K bss, 2932K reserved, 0K cma-reserved)
+devtmpfs: initialized
+calling  0xffffffff8011532c @ 1
+initcall 0xffffffff8011532c returned 0 after 0 usecs
+calling  0xffffffff8010a250 @ 1
+initcall 0xffffffff8010a250 returned 0 after 0 usecs
+calling  0xffffffff8010b0ac @ 1
+initcall 0xffffffff8010b0ac returned 0 after 0 usecs
+calling  0xffffffff8010d238 @ 1
+clocksource: jiffies: mask: 0xffffffff max_cycles: 0xffffffff, max_idle_ns: 7645041785100000 ns
+initcall 0xffffffff8010d238 returned 0 after 0 usecs
+calling  0xffffffff80114a78 @ 1
+initcall 0xffffffff80114a78 returned 0 after 0 usecs
+calling  0xffffffff80114aa0 @ 1
+initcall 0xffffffff80114aa0 returned 0 after 0 usecs
+calling  0xffffffff800c02fc @ 1
+initcall 0xffffffff800c02fc returned 0 after 0 usecs
+calling  0xffffffff800e2640 @ 1
+initcall 0xffffffff800e2640 returned 0 after 0 usecs
+calling  0xffffffff8010c274 @ 1
+initcall 0xffffffff8010c274 returned 0 after 0 usecs
+calling  0xffffffff8010da38 @ 1
+initcall 0xffffffff8010da38 returned 0 after 0 usecs
+calling  0xffffffff8010da80 @ 1
+initcall 0xffffffff8010da80 returned 0 after 0 usecs
+calling  0xffffffff80110b44 @ 1
+initcall 0xffffffff80110b44 returned 0 after 0 usecs
+calling  0xffffffff80116b5c @ 1
+initcall 0xffffffff80116b5c returned 0 after 0 usecs
+calling  0xffffffff80117934 @ 1
+initcall 0xffffffff80117934 returned 0 after 0 usecs
+calling  0xffffffff80118138 @ 1
+initcall 0xffffffff80118138 returned 0 after 0 usecs
+calling  0xffffffff801183e0 @ 1
+initcall 0xffffffff801183e0 returned 0 after 0 usecs
+calling  0xffffffff801183e8 @ 1
+initcall 0xffffffff801183e8 returned 0 after 0 usecs
+calling  0xffffffff80105840 @ 1
+initcall 0xffffffff80105840 returned 0 after 0 usecs
+calling  0xffffffff80106d94 @ 1
+initcall 0xffffffff80106d94 returned 0 after 0 usecs
+calling  0xffffffff800045c4 @ 1
+cpu0: Ratio of byte access time to unaligned word access is 7.95, unaligned accesses are fast
+initcall 0xffffffff800045c4 returned 0 after 24000 usecs
+calling  0xffffffff800cd7dc @ 1
+initcall 0xffffffff800cd7dc returned 0 after 0 usecs
+calling  0xffffffff80106c54 @ 1
+initcall 0xffffffff80106c54 returned 0 after 0 usecs
+calling  0xffffffff8000454c @ 1
+initcall 0xffffffff8000454c returned 0 after 0 usecs
+calling  0xffffffff80118848 @ 1
+initcall 0xffffffff80118848 returned 0 after 0 usecs
+calling  0xffffffff8010a088 @ 1
+initcall 0xffffffff8010a088 returned 0 after 0 usecs
+calling  0xffffffff8010abe8 @ 1
+initcall 0xffffffff8010abe8 returned 0 after 0 usecs
+calling  0xffffffff8010b3b8 @ 1
+initcall 0xffffffff8010b3b8 returned 0 after 0 usecs
+calling  0xffffffff8010d6ec @ 1
+initcall 0xffffffff8010d6ec returned 0 after 0 usecs
+calling  0xffffffff8010d948 @ 1
+initcall 0xffffffff8010d948 returned 0 after 0 usecs
+calling  0xffffffff8010da44 @ 1
+initcall 0xffffffff8010da44 returned 0 after 0 usecs
+calling  0xffffffff8010f590 @ 1
+initcall 0xffffffff8010f590 returned 0 after 0 usecs
+calling  0xffffffff80110310 @ 1
+initcall 0xffffffff80110310 returned 0 after 0 usecs
+calling  0xffffffff80057974 @ 1
+initcall 0xffffffff80057974 returned 0 after 0 usecs
+calling  0xffffffff8005794c @ 1
+initcall 0xffffffff8005794c returned 0 after 0 usecs
+calling  0xffffffff80117798 @ 1
+initcall 0xffffffff80117798 returned 0 after 0 usecs
+calling  0xffffffff800e2670 @ 1
+initcall 0xffffffff800e2670 returned 0 after 0 usecs
+calling  0xffffffff8011ad80 @ 1
+initcall 0xffffffff8011ad80 returned 0 after 0 usecs
+calling  0xffffffff80109c7c @ 1
+initcall 0xffffffff80109c7c returned 0 after 0 usecs
+calling  0xffffffff8010d1f0 @ 1
+clocksource: Switched to clocksource riscv_clocksource
+initcall 0xffffffff8010d1f0 returned 0 after 21 usecs
+calling  0xffffffff801137fc @ 1
+initcall 0xffffffff801137fc returned 0 after 1 usecs
+calling  0xffffffff8011390c @ 1
+initcall 0xffffffff8011390c returned 0 after 0 usecs
+calling  0xffffffff80113944 @ 1
+initcall 0xffffffff80113944 returned 0 after 10 usecs
+calling  0xffffffff801139c4 @ 1
+initcall 0xffffffff801139c4 returned 0 after 3 usecs
+calling  0xffffffff80113a50 @ 1
+initcall 0xffffffff80113a50 returned 0 after 1 usecs
+calling  0xffffffff80113e60 @ 1
+initcall 0xffffffff80113e60 returned 0 after 0 usecs
+calling  0xffffffff80114a04 @ 1
+initcall 0xffffffff80114a04 returned 0 after 8 usecs
+calling  0xffffffff80114db8 @ 1
+initcall 0xffffffff80114db8 returned 0 after 0 usecs
+calling  0xffffffff80114e14 @ 1
+initcall 0xffffffff80114e14 returned 0 after 0 usecs
+calling  0xffffffff80114e50 @ 1
+initcall 0xffffffff80114e50 returned 0 after 0 usecs
+calling  0xffffffff80114e84 @ 1
+initcall 0xffffffff80114e84 returned 0 after 0 usecs
+calling  0xffffffff80114ecc @ 1
+initcall 0xffffffff80114ecc returned 0 after 0 usecs
+calling  0xffffffff80114f08 @ 1
+initcall 0xffffffff80114f08 returned 0 after 0 usecs
+calling  0xffffffff80114f4c @ 1
+initcall 0xffffffff80114f4c returned 0 after 0 usecs
+calling  0xffffffff80114f90 @ 1
+initcall 0xffffffff80114f90 returned 0 after 0 usecs
+calling  0xffffffff80114fc4 @ 1
+initcall 0xffffffff80114fc4 returned 0 after 0 usecs
+calling  0xffffffff80115008 @ 1
+initcall 0xffffffff80115008 returned 0 after 0 usecs
+calling  0xffffffff8011504c @ 1
+initcall 0xffffffff8011504c returned 0 after 0 usecs
+calling  0xffffffff80115144 @ 1
+initcall 0xffffffff80115144 returned 0 after 0 usecs
+calling  0xffffffff80115178 @ 1
+initcall 0xffffffff80115178 returned 0 after 1 usecs
+calling  0xffffffff80115320 @ 1
+initcall 0xffffffff80115320 returned 0 after 0 usecs
+calling  0xffffffff801174c0 @ 1
+initcall 0xffffffff801174c0 returned 0 after 189 usecs
+calling  0xffffffff8010537c @ 1
+initcall 0xffffffff8010537c returned 0 after 1 usecs
+calling  0xffffffff8010654c @ 1
+initcall 0xffffffff8010654c returned 0 after 0 usecs
+calling  0xffffffff80109878 @ 1
+initcall 0xffffffff80109878 returned 0 after 0 usecs
+calling  0xffffffff80109c14 @ 1
+initcall 0xffffffff80109c14 returned 0 after 1 usecs
+calling  0xffffffff8010ced0 @ 1
+initcall 0xffffffff8010ced0 returned 0 after 0 usecs
+calling  0xffffffff8010d108 @ 1
+initcall 0xffffffff8010d108 returned 0 after 32 usecs
+calling  0xffffffff8010d258 @ 1
+initcall 0xffffffff8010d258 returned 0 after 0 usecs
+calling  0xffffffff8010d2a0 @ 1
+initcall 0xffffffff8010d2a0 returned 0 after 10 usecs
+calling  0xffffffff8010d304 @ 1
+initcall 0xffffffff8010d304 returned 0 after 31 usecs
+calling  0xffffffff8010d38c @ 1
+initcall 0xffffffff8010d38c returned 0 after 0 usecs
+calling  0xffffffff8010d660 @ 1
+initcall 0xffffffff8010d660 returned 0 after 3 usecs
+calling  0xffffffff8010d8b0 @ 1
+initcall 0xffffffff8010d8b0 returned 0 after 1636 usecs
+calling  0xffffffff80110124 @ 1
+workingset: timestamp_bits=62 max_order=11 bucket_order=0
+initcall 0xffffffff80110124 returned 0 after 24 usecs
+calling  0xffffffff80110408 @ 1
+initcall 0xffffffff80110408 returned 0 after 0 usecs
+calling  0xffffffff801139fc @ 1
+initcall 0xffffffff801139fc returned 0 after 0 usecs
+calling  0xffffffff80113d00 @ 1
+initcall 0xffffffff80113d00 returned 0 after 1 usecs
+calling  0xffffffff8011411c @ 1
+initcall 0xffffffff8011411c returned 0 after 0 usecs
+calling  0xffffffff8011533c @ 1
+initcall 0xffffffff8011533c returned 0 after 6028 usecs
+calling  0xffffffff80115a48 @ 1
+initcall 0xffffffff80115a48 returned 0 after 10 usecs
+calling  0xffffffff80116558 @ 1
+initcall 0xffffffff80116558 returned 0 after 11 usecs
+calling  0xffffffff80116568 @ 1
+riscv-plic: interrupt-controller@c000000: mapped 31 interrupts with 1 handlers for 2 contexts.
+probe of c000000.interrupt-controller returned 0 after 96 usecs
+initcall 0xffffffff80116568 returned 0 after 133 usecs
+calling  0xffffffff80116580 @ 1
+probe of soc returned 0 after 19 usecs
+initcall 0xffffffff80116580 returned 0 after 52 usecs
+calling  0xffffffff80116a9c @ 1
+initcall 0xffffffff80116a9c returned 0 after 10 usecs
+calling  0xffffffff80116af4 @ 1
+initcall 0xffffffff80116af4 returned 0 after 10 usecs
+calling  0xffffffff80116b4c @ 1
+initcall 0xffffffff80116b4c returned 0 after 12 usecs
+calling  0xffffffff80116cb4 @ 1
+initcall 0xffffffff80116cb4 returned 0 after 0 usecs
+calling  0xffffffff80116d00 @ 1
+printk: legacy console [hvc0] enabled
+printk: legacy console [hvc0] enabled
+initcall 0xffffffff80116d00 returned 0 after 10020 usecs
+initcall 0xffffffff80116d00 returned 0 after 10020 usecs
+calling  0xffffffff801175ac @ 1
+calling  0xffffffff801175ac @ 1
+initcall 0xffffffff801175ac returned 0 after 3 usecs
+initcall 0xffffffff801175ac returned 0 after 3 usecs
+calling  0xffffffff80117858 @ 1
+calling  0xffffffff80117858 @ 1
+initcall 0xffffffff80117858 returned 0 after 23 usecs
+initcall 0xffffffff80117858 returned 0 after 23 usecs
+calling  0xffffffff80118098 @ 1
+calling  0xffffffff80118098 @ 1
+initcall 0xffffffff80118098 returned 0 after 16 usecs
+initcall 0xffffffff80118098 returned 0 after 16 usecs
+calling  0xffffffff8011810c @ 1
+calling  0xffffffff8011810c @ 1
+initcall 0xffffffff8011810c returned -2 after 1 usecs
+initcall 0xffffffff8011810c returned -2 after 1 usecs
+calling  0xffffffff801183f8 @ 1
+calling  0xffffffff801183f8 @ 1
+initcall 0xffffffff801183f8 returned 0 after 10 usecs
+initcall 0xffffffff801183f8 returned 0 after 10 usecs
+calling  0xffffffff80118408 @ 1
+calling  0xffffffff80118408 @ 1
+initcall 0xffffffff80118408 returned 0 after 10 usecs
+initcall 0xffffffff80118408 returned 0 after 10 usecs
+calling  0xffffffff801042ac @ 1
+calling  0xffffffff801042ac @ 1
+initcall 0xffffffff801042ac returned 0 after 1 usecs
+initcall 0xffffffff801042ac returned 0 after 1 usecs
+calling  0xffffffff801098e8 @ 1
+calling  0xffffffff801098e8 @ 1
+initcall 0xffffffff801098e8 returned 0 after 1 usecs
+initcall 0xffffffff801098e8 returned 0 after 1 usecs
+calling  0xffffffff801098b0 @ 1
+calling  0xffffffff801098b0 @ 1
+initcall 0xffffffff801098b0 returned 0 after 1 usecs
+initcall 0xffffffff801098b0 returned 0 after 1 usecs
+calling  0xffffffff80109b48 @ 1
+calling  0xffffffff80109b48 @ 1
+initcall 0xffffffff80109b48 returned 0 after 1 usecs
+initcall 0xffffffff80109b48 returned 0 after 1 usecs
+calling  0xffffffff80109b10 @ 1
+calling  0xffffffff80109b10 @ 1
+initcall 0xffffffff80109b10 returned 0 after 1 usecs
+initcall 0xffffffff80109b10 returned 0 after 1 usecs
+calling  0xffffffff8010ad14 @ 1
+calling  0xffffffff8010ad14 @ 1
+initcall 0xffffffff8010ad14 returned 0 after 278 usecs
+initcall 0xffffffff8010ad14 returned 0 after 278 usecs
+calling  0xffffffff8010b2fc @ 1
+calling  0xffffffff8010b2fc @ 1
+initcall 0xffffffff8010b2fc returned 0 after 4 usecs
+initcall 0xffffffff8010b2fc returned 0 after 4 usecs
+calling  0xffffffff8010b470 @ 1
+calling  0xffffffff8010b470 @ 1
+initcall 0xffffffff8010b470 returned 0 after 0 usecs
+initcall 0xffffffff8010b470 returned 0 after 0 usecs
+calling  0xffffffff8010b704 @ 1
+calling  0xffffffff8010b704 @ 1
+initcall 0xffffffff8010b704 returned 0 after 0 usecs
+initcall 0xffffffff8010b704 returned 0 after 0 usecs
+calling  0xffffffff8010b7a0 @ 1
+calling  0xffffffff8010b7a0 @ 1
+initcall 0xffffffff8010b7a0 returned 0 after 1 usecs
+initcall 0xffffffff8010b7a0 returned 0 after 1 usecs
+calling  0xffffffff8010b768 @ 1
+calling  0xffffffff8010b768 @ 1
+initcall 0xffffffff8010b768 returned 0 after 2 usecs
+initcall 0xffffffff8010b768 returned 0 after 2 usecs
+calling  0xffffffff8010c0d0 @ 1
+calling  0xffffffff8010c0d0 @ 1
+initcall 0xffffffff8010c0d0 returned 0 after 5 usecs
+initcall 0xffffffff8010c0d0 returned 0 after 5 usecs
+calling  0xffffffff801133a8 @ 1
+calling  0xffffffff801133a8 @ 1
+initcall 0xffffffff801133a8 returned 0 after 0 usecs
+initcall 0xffffffff801133a8 returned 0 after 0 usecs
+calling  0xffffffff800d4428 @ 1
+calling  0xffffffff800d4428 @ 1
+initcall 0xffffffff800d4428 returned 0 after 0 usecs
+initcall 0xffffffff800d4428 returned 0 after 0 usecs
+calling  0xffffffff800d7c9c @ 1
+calling  0xffffffff800d7c9c @ 1
+initcall 0xffffffff800d7c9c returned 0 after 51 usecs
+initcall 0xffffffff800d7c9c returned 0 after 51 usecs
+calling  0xffffffff801189c8 @ 1
+calling  0xffffffff801189c8 @ 1
+initcall 0xffffffff801189c8 returned 0 after 15 usecs
+initcall 0xffffffff801189c8 returned 0 after 15 usecs
+calling  0xffffffff80116724 @ 1
+calling  0xffffffff80116724 @ 1
+clk: Disabling unused clocks
+clk: Disabling unused clocks
+initcall 0xffffffff80116724 returned 0 after 22 usecs
+initcall 0xffffffff80116724 returned 0 after 22 usecs
+calling  0xffffffff8011882c @ 1
+calling  0xffffffff8011882c @ 1
+initcall 0xffffffff8011882c returned 0 after 0 usecs
+initcall 0xffffffff8011882c returned 0 after 0 usecs
+Freeing unused kernel image (initmem) memory: 456K
+Freeing unused kernel image (initmem) memory: 456K
+Kernel memory protection not selected by kernel config.
+Kernel memory protection not selected by kernel config.
+Run /init as init process
+Run /init as init process
+  with arguments:
+  with arguments:
+    /init
+    /init
+  with environment:
+  with environment:
+    HOME=/
+    HOME=/
+    TERM=linux
+    TERM=linux
+mount: mounting devpts on /dev/pts failed: No such device
+hostname: applet not found
+Saving 256 bits of non-creditable seed for next boot
+Starting syslogd: start-stop-daemon: applet not found
+FAIL
+Starting klogd: start-stop-daemon: applet not found
+FAIL
+Running sysctl: xargs: applet not found
+logger: applet not found
+logger: applet not found
+OK
+Starting network: ifup: applet not found
+FAIL
+Starting crond: start-stop-daemon: applet not found
+FAIL
+
+Welcome to Buildroot
+(none) login: root
+login[52]: root login on 'console'
+#
+
+
+
+
+But on my SoC with the same Image and same opensib/dts, it print:
+
+OpenSBI v1.3
+   ____                    _____ ____ _____
+  / __ \                  / ____|  _ \_   _|
+ | |  | |_ __   ___ _ __ | (___ | |_) || |
+ | |  | | '_ \ / _ \ '_ \ \___ \|  _ < | |
+ | |__| | |_) |  __/ | | |____) | |_) || |_
+  \____/| .__/ \___|_| |_|_____/|___/_____|
+        | |
+        |_|
+
+Platform Name             : riscv-virtio,qemu
+Platform Features         : medeleg
+Platform HART Count       : 1
+Platform IPI Device       : aclint-mswi
+Platform Timer Device     : aclint-mtimer @ 12500000Hz
+Platform Console Device   : sifive_uart
+Platform HSM Device       : ---
+Platform PMU Device       : ---
+Platform Reboot Device    : ---
+Platform Shutdown Device  : ---
+Platform Suspend Device   : ---
+Platform CPPC Device      : ---
+Firmware Base             : 0x80000000
+Firmware Size             : 318 KB
+Firmware RW Offset        : 0x40000
+Firmware RW Size          : 62 KB
+Firmware Heap Offset      : 0x47000
+Firmware Heap Size        : 34 KB (total), 2 KB (reserved), 9 KB (used), 22 KB (free)
+Firmware Scratch Size     : 4096 B (total), 760 B (used), 3336 B (free)
+Runtime SBI Version       : 1.0
+
+Domain0 Name              : root
+Domain0 Boot HART         : 0
+Domain0 HARTs             : 0*
+Domain0 Region00          : 0x0000000002000000-0x000000000200ffff M: (I,R,W) S/U: ()
+Domain0 Region01          : 0x0000000080040000-0x000000008004ffff M: (R,W) S/U: ()
+Domain0 Region02          : 0x0000000080000000-0x000000008003ffff M: (R,X) S/U: ()
+Domain0 Region03          : 0x0000000000000000-0xffffffffffffffff M: (R,W,X) S/U: (R,W,X)
+Domain0 Next Address      : 0x0000000080200000
+Domain0 Next Arg1         : 0x0000000080100000
+Domain0 Next Mode         : S-mode
+Domain0 SysReset          : yes
+Domain0 SysSuspend        : yes
+
+Boot HART ID              : 0
+Boot HART Domain          : root
+Boot HART Priv Version    : unknown
+Boot HART Base ISA        : rv64ima
+Boot HART ISA Extensions  : time
+Boot HART PMP Count       : 1
+Boot HART PMP Granularity : 4
+Boot HART PMP Address Bits: 54
+Boot HART MHPM Count      : 0
+Boot HART MIDELEG         : 0x0000000000000222
+Boot HART MEDELEG         : 0x000000000000b109
+TLBfl:0x000000008020009C!Linux version 6.12.0 (root@ashah-standardpcq35ich92009) (riscv64-buildroot-linux-musl-gcc.br_real (Buildroot -g0c65e4995-dirty) 14.3.0, GNU ld (GNU Binutils) 2.44) #19 Sat Apr 18 22:51:39 CST 2026
+Machine model: riscv-virtio,qemu
+SBI specification v1.0 detected
+SBI implementation ID=0x1 Version=0x10003
+SBI TIME extension detected
+SBI IPI extension detected
+SBI RFENCE extension detected
+Disabled 4-level and 5-level paging
+earlycon: sbi0 at I/O port 0x0 (options '')
+printk: legacy bootconsole [sbi0] enabled
+printk: debug: skip boot console de-registration.
+printk: debug: ignoring loglevel setting.
+Disabled 4-level and 5-level paging
+OF: reserved mem: 0x0000000080000000..0x000000008003ffff (256 KiB) nomap non-reusable mmode_resv1@80000000
+OF: reserved mem: 0x0000000080040000..0x000000008004ffff (64 KiB) nomap non-reusable mmode_resv0@80040000
+Zone ranges:
+  DMA32    [mem 0x0000000080000000-0x00000000807fffff]
+  Normal   empty
+Movable zone start for each node
+Early memory node ranges
+  node   0: [mem 0x0000000080000000-0x000000008004ffff]
+  node   0: [mem 0x0000000080050000-0x00000000807fffff]
+Initmem setup node 0 [mem 0x0000000080000000-0x00000000807fffff]
+Falling back to deprecated "riscv,isa"
+riscv: base ISA extensions aim
+riscv: ELF capabilities aim
+pcpu-alloc: s0 r0 d32768 u32768 alloc=1*32768
+pcpu-alloc: [0] 0 
+Kernel command line: no4lvl earlycon=sbi console=hvc0 panic=0 init_on_alloc=0 keep_bootcon ignore_loglevel initcall_debug rcu_update.rcu_cpu_stall_suppress=1 no4lvl earlycon=sbi console=hvc0
+Dentry cache hash table entries: 1024 (order: 1, 8192 bytes, linear)
+Inode-cache hash table entries: 512 (order: 0, 4096 bytes, linear)
+Built 1 zonelists, mobility grouping off.  Total pages: 2048
+mem auto-init: stack:all(zero), heap alloc:off, heap free:off
+SLUB: HWalign=64, Order=0-1, MinObjects=0, CPUs=1, Nodes=1
+NR_IRQS: 64, nr_irqs: 64, preallocated irqs: 0
+riscv-intc: 64 local interrupts mapped
+clocksource: riscv_clocksource: mask: 0xffffffffffffffff max_cycles: 0x2e2049cda, max_idle_ns: 440795202628 ns
+sched_clock: 64 bits at 13MHz, resolution 80ns, wraps every 4398046511080ns
+Calibrating delay loop (skipped), value calculated using timer frequency.. 25.00 BogoMIPS (lpj=50000)
+pid_max: default: 32768 minimum: 301
+Mount-cache hash table entries: 512 (order: 0, 4096 bytes, linear)
+Mountpoint-cache hash table entries: 512 (order: 0, 4096 bytes, linear)
+calling  0xffffffff80109384 @ 1
+ASID allocator disabled (0 bits)
+initcall 0xffffffff80109384 returned 0 after 0 usecs
+calling  0xffffffff80109b74 @ 1
+initcall 0xffffffff80109b74 returned 0 after 0 usecs
+calling  0xffffffff8010a14c @ 1
+initcall 0xffffffff8010a14c returned 0 after 0 usecs
+calling  0xffffffff8010a1cc @ 1
+initcall 0xffffffff8010a1cc returned 0 after 0 usecs
+calling  0xffffffff8010c094 @ 1
+initcall 0xffffffff8010c094 returned 0 after 0 usecs
+calling  0xffffffff8010d690 @ 1
+initcall 0xffffffff8010d690 returned 0 after 0 usecs
+calling  0xffffffff80110264 @ 1
+initcall 0xffffffff80110264 returned 0 after 0 usecs
+calling  0xffffffff80113be0 @ 1
+initcall 0xffffffff80113be0 returned 0 after 0 usecs
+calling  0xffffffff80114ac8 @ 1
+initcall 0xffffffff80114ac8 returned 0 after 0 usecs
+Memory: 4668K/8192K available (1030K kernel code, 554K rwdata, 160K rodata, 457K init, 213K bss, 2932K reserved, 0K cma-reserved)
+devtmpfs: initialized
+calling  0xffffffff8011532c @ 1
+initcall 0xffffffff8011532c returned 0 after 0 usecs
+calling  0xffffffff8010a250 @ 1
+initcall 0xffffffff8010a250 returned 0 after 0 usecs
+calling  0xffffffff8010b0ac @ 1
+initcall 0xffffffff8010b0ac returned 0 after 0 usecs
+calling  0xffffffff8010d238 @ 1
+clocksource: jiffies: mask: 0xffffffff max_cycles: 0xffffffff, max_idle_ns: 7645041785100000 ns
+initcall 0xffffffff8010d238 returned 0 after 0 usecs
+calling  0xffffffff80114a78 @ 1
+initcall 0xffffffff80114a78 returned 0 after 0 usecs
+calling  0xffffffff80114aa0 @ 1
+initcall 0xffffffff80114aa0 returned 0 after 0 usecs
+calling  0xffffffff800c02fc @ 1
+initcall 0xffffffff800c02fc returned 0 after 0 usecs
+calling  0xffffffff800e2640 @ 1
+initcall 0xffffffff800e2640 returned 0 after 0 usecs
+calling  0xffffffff8010c274 @ 1
+initcall 0xffffffff8010c274 returned 0 after 4000 usecs
+calling  0xffffffff8010da38 @ 1
+initcall 0xffffffff8010da38 returned 0 after 0 usecs
+calling  0xffffffff8010da80 @ 1
+initcall 0xffffffff8010da80 returned 0 after 0 usecs
+calling  0xffffffff80110b44 @ 1
+initcall 0xffffffff80110b44 returned 0 after 0 usecs
+calling  0xffffffff80116b5c @ 1
+initcall 0xffffffff80116b5c returned 0 after 0 usecs
+calling  0xffffffff80117934 @ 1
+initcall 0xffffffff80117934 returned 0 after 0 usecs
+calling  0xffffffff80118138 @ 1
+initcall 0xffffffff80118138 returned 0 after 0 usecs
+calling  0xffffffff801183e0 @ 1
+initcall 0xffffffff801183e0 returned 0 after 0 usecs
+calling  0xffffffff801183e8 @ 1
+initcall 0xffffffff801183e8 returned 0 after 0 usecs
+calling  0xffffffff80105840 @ 1
+initcall 0xffffffff80105840 returned 0 after 0 usecs
+calling  0xffffffff80106d94 @ 1
+initcall 0xffffffff80106d94 returned 0 after 0 usecs
+calling  0xffffffff800045c4 @ 1
+cpu0: Ratio of byte access time to unaligned word access is 0.01, unaligned accesses are slow
+initcall 0xffffffff800045c4 returned 0 after 48000 usecs
+calling  0xffffffff800cd7dc @ 1
+initcall 0xffffffff800cd7dc returned 0 after 0 usecs
+calling  0xffffffff80106c54 @ 1
+initcall 0xffffffff80106c54 returned 0 after 0 usecs
+calling  0xffffffff8000454c @ 1
+initcall 0xffffffff8000454c returned 0 after 0 usecs
+calling  0xffffffff80118848 @ 1
+initcall 0xffffffff80118848 returned 0 after 8000 usecs
+calling  0xffffffff8010a088 @ 1
+initcall 0xffffffff8010a088 returned 0 after 0 usecs
+calling  0xffffffff8010abe8 @ 1
+initcall 0xffffffff8010abe8 returned 0 after 0 usecs
+calling  0xffffffff8010b3b8 @ 1
+initcall 0xffffffff8010b3b8 returned 0 after 0 usecs
+calling  0xffffffff8010d6ec @ 1
+initcall 0xffffffff8010d6ec returned 0 after 0 usecs
+calling  0xffffffff8010d948 @ 1
+initcall 0xffffffff8010d948 returned 0 after 0 usecs
+calling  0xffffffff8010da44 @ 1
+initcall 0xffffffff8010da44 returned 0 after 4000 usecs
+calling  0xffffffff8010f590 @ 1
+initcall 0xffffffff8010f590 returned 0 after 0 usecs
+calling  0xffffffff80110310 @ 1
+initcall 0xffffffff80110310 returned 0 after 0 usecs
+calling  0xffffffff80057974 @ 1
+initcall 0xffffffff80057974 returned 0 after 0 usecs
+calling  0xffffffff8005794c @ 1
+initcall 0xffffffff8005794c returned 0 after 0 usecs
+calling  0xffffffff80117798 @ 1
+initcall 0xffffffff80117798 returned 0 after 0 usecs
+calling  0xffffffff800e2670 @ 1
+initcall 0xffffffff800e2670 returned 0 after 0 usecs
+calling  0xffffffff8011ad80 @ 1
+initcall 0xffffffff8011ad80 returned 0 after 0 usecs
+calling  0xffffffff80109c7c @ 1
+initcall 0xffffffff80109c7c returned 0 after 0 usecs
+calling  0xffffffff8010d1f0 @ 1
+clocksource: Switched to clocksource riscv_clocksource
+initcall 0xffffffff8010d1f0 returned 0 after 564 usecs
+calling  0xffffffff801137fc @ 1
+initcall 0xffffffff801137fc returned 0 after 55 usecs
+calling  0xffffffff8011390c @ 1
+initcall 0xffffffff8011390c returned 0 after 42 usecs
+calling  0xffffffff80113944 @ 1
+initcall 0xffffffff80113944 returned 0 after 370 usecs
+calling  0xffffffff801139c4 @ 1
+initcall 0xffffffff801139c4 returned 0 after 68 usecs
+calling  0xffffffff80113a50 @ 1
+initcall 0xffffffff80113a50 returned 0 after 44 usecs
+calling  0xffffffff80113e60 @ 1
+initcall 0xffffffff80113e60 returned 0 after 45 usecs
+calling  0xffffffff80114a04 @ 1
+initcall 0xffffffff80114a04 returned 0 after 370 usecs
+calling  0xffffffff80114db8 @ 1
+initcall 0xffffffff80114db8 returned 0 after 50 usecs
+calling  0xffffffff80114e14 @ 1
+initcall 0xffffffff80114e14 returned 0 after 49 usecs
+calling  0xffffffff80114e50 @ 1
+initcall 0xffffffff80114e50 returned 0 after 49 usecs
+calling  0xffffffff80114e84 @ 1
+initcall 0xffffffff80114e84 returned 0 after 51 usecs
+calling  0xffffffff80114ecc @ 1
+initcall 0xffffffff80114ecc returned 0 after 48 usecs
+calling  0xffffffff80114f08 @ 1
+initcall 0xffffffff80114f08 returned 0 after 48 usecs
+calling  0xffffffff80114f4c @ 1
+initcall 0xffffffff80114f4c returned 0 after 188 usecs
+calling  0xffffffff80114f90 @ 1
+initcall 0xffffffff80114f90 returned 0 after 49 usecs
+calling  0xffffffff80114fc4 @ 1
+initcall 0xffffffff80114fc4 returned 0 after 47 usecs
+calling  0xffffffff80115008 @ 1
+initcall 0xffffffff80115008 returned 0 after 49 usecs
+calling  0xffffffff8011504c @ 1
+initcall 0xffffffff8011504c returned 0 after 49 usecs
+calling  0xffffffff80115144 @ 1
+initcall 0xffffffff80115144 returned 0 after 49 usecs
+calling  0xffffffff80115178 @ 1
+initcall 0xffffffff80115178 returned 0 after 80 usecs
+calling  0xffffffff80115320 @ 1
+initcall 0xffffffff80115320 returned 0 after 9 usecs
+calling  0xffffffff801174c0 @ 1
+initcall 0xffffffff801174c0 returned 0 after 8979 usecs
+calling  0xffffffff8010537c @ 1
+initcall 0xffffffff8010537c returned 0 after 82 usecs
+calling  0xffffffff8010654c @ 1
+initcall 0xffffffff8010654c returned 0 after 2 usecs
+calling  0xffffffff80109878 @ 1
+initcall 0xffffffff80109878 returned 0 after 50 usecs
+calling  0xffffffff80109c14 @ 1
+initcall 0xffffffff80109c14 returned 0 after 76 usecs
+calling  0xffffffff8010ced0 @ 1
+initcall 0xffffffff8010ced0 returned 0 after 5 usecs
+calling  0xffffffff8010d108 @ 1
+initcall 0xffffffff8010d108 returned 0 after 1453 usecs
+calling  0xffffffff8010d258 @ 1
+initcall 0xffffffff8010d258 returned 0 after 54 usecs
+calling  0xffffffff8010d2a0 @ 1
+initcall 0xffffffff8010d2a0 returned 0 after 427 usecs
+calling  0xffffffff8010d304 @ 1
+initcall 0xffffffff8010d304 returned 0 after 1277 usecs
+calling  0xffffffff8010d38c @ 1
+initcall 0xffffffff8010d38c returned 0 after 4 usecs
+calling  0xffffffff8010d660 @ 1
+initcall 0xffffffff8010d660 returned 0 after 83 usecs
+calling  0xffffffff8010d8b0 @ 1
+initcall 0xffffffff8010d8b0 returned 0 after 11433 usecs
+calling  0xffffffff80110124 @ 1
+workingset: timestamp_bits=62 max_order=11 bucket_order=0
+initcall 0xffffffff80110124 returned 0 after 637 usecs
+calling  0xffffffff80110408 @ 1
+initcall 0xffffffff80110408 returned 0 after 52 usecs
+calling  0xffffffff801139fc @ 1
+initcall 0xffffffff801139fc returned 0 after 18 usecs
+calling  0xffffffff80113d00 @ 1
+initcall 0xffffffff80113d00 returned 0 after 52 usecs
+calling  0xffffffff8011411c @ 1
+initcall 0xffffffff8011411c returned 0 after 15 usecs
+calling  0xffffffff8011533c @ 1
+initcall 0xffffffff8011533c returned 0 after 54655 usecs
+calling  0xffffffff80115a48 @ 1
+initcall 0xffffffff80115a48 returned 0 after 462 usecs
+calling  0xffffffff80116558 @ 1
+initcall 0xffffffff80116558 returned 0 after 483 usecs
+calling  0xffffffff80116568 @ 1
+riscv-plic: interrupt-controller@c000000: mapped 31 interrupts with 1 handlers for 2 contexts.
+probe of c000000.interrupt-controller returned 0 after 3002 usecs
+initcall 0xffffffff80116568 returned 0 after 4109 usecs
+calling  0xffffffff80116580 @ 1
+probe of soc returned 0 after 781 usecs
+initcall 0xffffffff80116580 returned 0 after 1815 usecs
+calling  0xffffffff80116a9c @ 1
+initcall 0xffffffff80116a9c returned 0 after 495 usecs
+calling  0xffffffff80116af4 @ 1
+initcall 0xffffffff80116af4 returned 0 after 626 usecs
+calling  0xffffffff80116b4c @ 1
+initcall 0xffffffff80116b4c returned 0 after 509 usecs
+calling  0xffffffff80116cb4 @ 1
+initcall 0xffffffff80116cb4 returned 0 after 3 usecs
+calling  0xffffffff80116d00 @ 1
+printk: legacy console [hvc0] enabled
+printk: legacy console [hvc0] enabled
+initcall 0xffffffff80116d00 returned 0 after 100929 usecs
+initcall 0xffffffff80116d00 returned 0 after 100929 usecs
+calling  0xffffffff801175ac @ 1
+calling  0xffffffff801175ac @ 1
+initcall 0xffffffff801175ac returned 0 after 88 usecs
+initcall 0xffffffff801175ac returned 0 after 88 usecs
+calling  0xffffffff80117858 @ 1
+calling  0xffffffff80117858 @ 1
+initcall 0xffffffff80117858 returned 0 after 868 usecs
+initcall 0xffffffff80117858 returned 0 after 868 usecs
+calling  0xffffffff80118098 @ 1
+calling  0xffffffff80118098 @ 1
+initcall 0xffffffff80118098 returned 0 after 598 usecs
+initcall 0xffffffff80118098 returned 0 after 598 usecs
+calling  0xffffffff8011810c @ 1
+calling  0xffffffff8011810c @ 1
+initcall 0xffffffff8011810c returned -2 after 51 usecs
+initcall 0xffffffff8011810c returned -2 after 51 usecs
+calling  0xffffffff801183f8 @ 1
+calling  0xffffffff801183f8 @ 1
+initcall 0xffffffff801183f8 returned 0 after 409 usecs
+initcall 0xffffffff801183f8 returned 0 after 409 usecs
+calling  0xffffffff80118408 @ 1
+calling  0xffffffff80118408 @ 1
+initcall 0xffffffff80118408 returned 0 after 413 usecs
+initcall 0xffffffff80118408 returned 0 after 413 usecs
+calling  0xffffffff801042ac @ 1
+calling  0xffffffff801042ac @ 1
+initcall 0xffffffff801042ac returned 0 after 46 usecs
+initcall 0xffffffff801042ac returned 0 after 46 usecs
+calling  0xffffffff801098e8 @ 1
+calling  0xffffffff801098e8 @ 1
+initcall 0xffffffff801098e8 returned 0 after 70 usecs
+initcall 0xffffffff801098e8 returned 0 after 70 usecs
+calling  0xffffffff801098b0 @ 1
+calling  0xffffffff801098b0 @ 1
+initcall 0xffffffff801098b0 returned 0 after 47 usecs
+initcall 0xffffffff801098b0 returned 0 after 47 usecs
+calling  0xffffffff80109b48 @ 1
+calling  0xffffffff80109b48 @ 1
+initcall 0xffffffff80109b48 returned 0 after 70 usecs
+initcall 0xffffffff80109b48 returned 0 after 70 usecs
+calling  0xffffffff80109b10 @ 1
+calling  0xffffffff80109b10 @ 1
+initcall 0xffffffff80109b10 returned 0 after 49 usecs
+initcall 0xffffffff80109b10 returned 0 after 49 usecs
+calling  0xffffffff8010ad14 @ 1
+calling  0xffffffff8010ad14 @ 1
+initcall 0xffffffff8010ad14 returned 0 after 10109 usecs
+initcall 0xffffffff8010ad14 returned 0 after 10109 usecs
+calling  0xffffffff8010b2fc @ 1
+calling  0xffffffff8010b2fc @ 1
+initcall 0xffffffff8010b2fc returned 0 after 181 usecs
+initcall 0xffffffff8010b2fc returned 0 after 181 usecs
+calling  0xffffffff8010b470 @ 1
+calling  0xffffffff8010b470 @ 1
+initcall 0xffffffff8010b470 returned 0 after 32 usecs
+initcall 0xffffffff8010b470 returned 0 after 32 usecs
+calling  0xffffffff8010b704 @ 1
+calling  0xffffffff8010b704 @ 1
+initcall 0xffffffff8010b704 returned 0 after 34 usecs
+initcall 0xffffffff8010b704 returned 0 after 34 usecs
+calling  0xffffffff8010b7a0 @ 1
+calling  0xffffffff8010b7a0 @ 1
+initcall 0xffffffff8010b7a0 returned 0 after 59 usecs
+initcall 0xffffffff8010b7a0 returned 0 after 59 usecs
+calling  0xffffffff8010b768 @ 1
+calling  0xffffffff8010b768 @ 1
+initcall 0xffffffff8010b768 returned 0 after 67 usecs
+initcall 0xffffffff8010b768 returned 0 after 67 usecs
+calling  0xffffffff8010c0d0 @ 1
+calling  0xffffffff8010c0d0 @ 1
+initcall 0xffffffff8010c0d0 returned 0 after 125 usecs
+initcall 0xffffffff8010c0d0 returned 0 after 125 usecs
+calling  0xffffffff801133a8 @ 1
+calling  0xffffffff801133a8 @ 1
+initcall 0xffffffff801133a8 returned 0 after 3 usecs
+initcall 0xffffffff801133a8 returned 0 after 3 usecs
+calling  0xffffffff800d4428 @ 1
+calling  0xffffffff800d4428 @ 1
+initcall 0xffffffff800d4428 returned 0 after 7 usecs
+initcall 0xffffffff800d4428 returned 0 after 7 usecs
+calling  0xffffffff800d7c9c @ 1
+calling  0xffffffff800d7c9c @ 1
+initcall 0xffffffff800d7c9c returned 0 after 51880 usecs
+initcall 0xffffffff800d7c9c returned 0 after 51880 usecs
+calling  0xffffffff801189c8 @ 1
+calling  0xffffffff801189c8 @ 1
+initcall 0xffffffff801189c8 returned 0 after 153 usecs
+initcall 0xffffffff801189c8 returned 0 after 153 usecs
+calling  0xffffffff80116724 @ 1
+calling  0xffffffff80116724 @ 1
+clk: Disabling unused clocks
+clk: Disabling unused clocks
+initcall 0xffffffff80116724 returned 0 after 578 usecs
+initcall 0xffffffff80116724 returned 0 after 578 usecs
+calling  0xffffffff8011882c @ 1
+calling  0xffffffff8011882c @ 1
+initcall 0xffffffff8011882c returned 0 after 7 usecs
+initcall 0xffffffff8011882c returned 0 after 7 usecs
+Freeing unused kernel image (initmem) memory: 456K
+Freeing unused kernel image (initmem) memory: 456K
+Kernel memory protection not selected by kernel config.
+Kernel memory protection not selected by kernel config.
+Run /init as init process
+Run /init as init process
+  with arguments:
+  with arguments:
+    /init
+    /init
+  with environment:
+  with environment:
+    HOME=/
+    HOME=/
+    TERM=linux
+    TERM=linux
+TLBfl:0x00000000000B3501!TLBfl:0x000000000001017C!TLBfl:0x0000000000070370!TLBfl:0x000000000008A9DC!TLBfl:0x0000000000090AB4!TLBfl:0x00000000000B4B30!TLBfl:0x00000000000B2FD0!TLBfl:0x00000000000ADD94!TLBfl:0x000000000003B788!TLBfl:0x00000000076F1000!TLBfl:0x0000003FAC5E6000!TLBfl:0x0000003FAC5E5000!TLBfl:0x0000003FAC5E4000!TLBfl:0x000000000002F9D4!TLBfl:0x00000000000B02E7!TLBfl:0x0000000000061548!TLBfl:0x0000003FE1424540!Kernel panic - not syncing: Attempted to kill init! exitcode=0x00000000
+Kernel panic - not syncing: Attempted to kill init! exitcode=0x00000000
+---[ end Kernel panic - not syncing: Attempted to kill init! exitcode=0x00000000 ]---
+---[ end Kernel panic - not syncing: Attempted to kill init! exitcode=0x00000000 ]---
+
+
+
+
+
+
+Please find the reason. Do you need more data such as riscv64.v/cpu_on_borad.v or config of linux or dts please tell me.
