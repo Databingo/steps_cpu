@@ -184,6 +184,8 @@ FINISH_1GB:
 #S/U fetch  X=0 page
 #if pass all check , update A/D accordingly
 CHECK_PERM_AND_AD:                
+     li a0, "ch_ad:"
+     call print7
 #     # 1. Check U-Bit based on VA sign (x9)
 #    #andi x3, x4, 0x10 # Extract U-bit (Bit 4)
 # 
