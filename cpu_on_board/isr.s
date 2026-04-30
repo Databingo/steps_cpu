@@ -1,7 +1,7 @@
 isr_router:        
      # x0-x10 are shadowed by hardware, safe to use
-    #li sp, 0x1500 # Set stack shadowed sp(x2)
-     li sp, 0x801F0000 # Set stack shadowed sp(x2)
+     li sp, 0x1500 # Set stack shadowed sp(x2)
+    #li sp, 0x801F0000 # Set stack shadowed sp(x2)
      li x7, 0x2004 # UART print 
      # x8 trap_type no change
      # x9 addr  # x9 keep the address need manage, no change x9
@@ -127,29 +127,50 @@ mmu:  # VA 63:39Sign|38:30Vpn[2]|29:21Vpn[1]|20:12Vpn[0]|11:0PageOffset
 
 FINISH_4KB:
      jal x5, CHECK_PERM_AND_AD
+
+     mv x10, x4  # Backup PTE
+
      slli x4, x4, 10  # mask out reserved bits
      srli x4, x4, 20 
      slli x4, x4, 12 
+
+     andi x10, x10, 0xFF # Isolate flags(1111_1111)
+     or x4, x4, x10 # Merge PPN and flages
+
      j WRITE_TLB
                                             
 FINISH_2MB:
      jal x5, CHECK_PERM_AND_AD
+
+     mv x10, x4  # Backup PTE
+
      slli x4, x4, 10  # mask out reserved bits
      srli x4, x4, 20 
      slli x4, x4, 12 
      li x3, 0x001ff000 # mask for VA[20:12]
      and x3, x3, x9    
      add x4, x4, x3   
+
+     andi x10, x10, 0xFF # Isolate flags(1111_1111)
+     or x4, x4, x10 # Merge PPN and flages
+
      j WRITE_TLB
 
 FINISH_1GB:
      jal x5, CHECK_PERM_AND_AD
+
+     mv x10, x4  # Backup PTE
+
      slli x4, x4, 10  # mask out reserved bits
      srli x4, x4, 20  # get PPN from PTE(PTE's data struction?)  64:54Reserved 53:10PPN # 9:8RSW 7Dirty 6Accessed 5Global 4User 3Executable 2Write 1Readable 0Valid
      slli x4, x4, 12  # PPN posint [38:12] in satp
      li x3, 0x3ffff000 # mask for VA[29:12]
      and x3, x3, x9    # extrac from VA
      add x4, x4, x3    # add offset to PPN
+
+     andi x10, x10, 0xFF # Isolate flags(1111_1111)
+     or x4, x4, x10 # Merge PPN and flages
+
      j WRITE_TLB
 
 # --- Permissions, U-Bit and A/D Bits --
