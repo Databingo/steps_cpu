@@ -882,6 +882,1534 @@ Kernel panic - not syncing: Attempted to kill init! exitcode=0x00000000
 
 
 
+I fix the riscv64.v with D/A of tlb and isr.s to check but now haning:
+
+OpenSBI v1.3
+   ____                    _____ ____ _____
+  / __ \                  / ____|  _ \_   _|
+ | |  | |_ __   ___ _ __ | (___ | |_) || |
+ | |  | | '_ \ / _ \ '_ \ \___ \|  _ < | |
+ | |__| | |_) |  __/ | | |____) | |_) || |_
+  \____/| .__/ \___|_| |_|_____/|___/_____|
+        | |
+        |_|
+
+Platform Name             : riscv-virtio,qemu
+Platform Features         : medeleg
+Platform HART Count       : 1
+Platform IPI Device       : aclint-mswi
+Platform Timer Device     : aclint-mtimer @ 12500000Hz
+Platform Console Device   : sifive_uart
+Platform HSM Device       : ---
+Platform PMU Device       : ---
+Platform Reboot Device    : ---
+Platform Shutdown Device  : ---
+Platform Suspend Device   : ---
+Platform CPPC Device      : ---
+Firmware Base             : 0x80000000
+Firmware Size             : 318 KB
+Firmware RW Offset        : 0x40000
+Firmware RW Size          : 62 KB
+Firmware Heap Offset      : 0x47000
+Firmware Heap Size        : 34 KB (total), 2 KB (reserved), 9 KB (used), 22 KB (free)
+Firmware Scratch Size     : 4096 B (total), 760 B (used), 3336 B (free)
+Runtime SBI Version       : 1.0
+
+Domain0 Name              : root
+Domain0 Boot HART         : 0
+Domain0 HARTs             : 0*
+Domain0 Region00          : 0x0000000002000000-0x000000000200ffff M: (I,R,W) S/U: ()
+Domain0 Region01          : 0x0000000080040000-0x000000008004ffff M: (R,W) S/U: ()
+Domain0 Region02          : 0x0000000080000000-0x000000008003ffff M: (R,X) S/U: ()
+Domain0 Region03          : 0x0000000000000000-0xffffffffffffffff M: (R,W,X) S/U: (R,W,X)
+Domain0 Next Address      : 0x0000000080200000
+Domain0 Next Arg1         : 0x0000000080100000
+Domain0 Next Mode         : S-mode
+Domain0 SysReset          : yes
+Domain0 SysSuspend        : yes
+
+Boot HART ID              : 0
+Boot HART Domain          : root
+Boot HART Priv Version    : unknown
+Boot HART Base ISA        : rv64ima
+Boot HART ISA Extensions  : time
+Boot HART PMP Count       : 1
+Boot HART PMP Granularity : 4
+Boot HART PMP Address Bits: 54
+Boot HART MHPM Count      : 0
+Boot HART MIDELEG         : 0x0000000000000222
+Boot HART MEDELEG         : 0x000000000000b109
+TLBfl:0x000000008020009C!
 
 
-Please find the reason. Do you need more data such as riscv64.v/cpu_on_borad.v or config of linux or dts please tell me.
+
+Please fix it.
+
+
+riscv64.v:
+`include "header.vh"
+
+module riscv64(
+    input wire clk, 
+    input wire reset,     // Active-low reset button
+    input wire [31:0] instruction,
+    //input wire valid_address,
+    output wire [63:0] ppc,
+    //output wire  heartbeat,
+    output reg [63:0] bus_address,     // 39 bit for real Sv39 standard?
+    output reg [63:0] bus_write_data,
+    output reg        bus_write_enable,
+    output reg        bus_read_enable,
+    output reg [2:0]  bus_ls_type, // lb lh lw ld lbu lhu lwu // sb sh sw sd sbu shu swu 
+    input wire        debug,
+
+    output reg [63:0] mtime,    // map to 0x0200_bff8 
+    input wire [63:0] mtimecmp, // map to 0x0200_4000 + 8byte*hartid
+
+    input wire meip_interrupt, // from PLIC
+    input wire seip_interrupt, // from Supervisor External (give by meip) opensbi could transfer to SSIP/STIP/SEIP
+    input wire msip_interrupt, // from CLINT (give by mmio write of M-mode software)
+
+    input  reg        bus_read_done,
+    input  reg        bus_write_done,
+    input  wire [63:0] bus_read_data   // from outside
+);
+
+wire meip = Csrs[mip][MEIP] && Csrs[mie][MEIE];  // mip:P Hardware say pending;|mie:E Software allow this pending;|mstatus[MIE]:cpu globally allow interrup # 3 conditions for a interrup run
+wire mtip = Csrs[mip][MTIP] && Csrs[mie][MTIE];  // irq level: MEI MTI MSI 7
+wire msip = Csrs[mip][MSIP] && Csrs[mie][MSIE];  // opensbi csr set
+wire seip = Csrs[mip][SEIP] && Csrs[mie][SEIE];  // hardware sip-> local sie-> global mstatus.SIE-> cpu take by irq-> trap spie=sie/sie=0 (this need after mideleg)
+wire stip = Csrs[mip][STIP] && Csrs[mie][STIE];  // opensbi trap in mtip -> set stip 5
+wire ssip = Csrs[mip][SSIP] && Csrs[mie][SSIE];  // software csr set
+
+wire m_interrupts = (meip || msip || mtip) && (current_privilege_mode < M_mode || (current_privilege_mode == M_mode && Csrs[mstatus][MIE]));
+wire s_interrupts = (seip || ssip || stip) && (current_privilege_mode < S_mode || (current_privilege_mode == S_mode && Csrs[sstatus][SIE]));
+wire any_interrupt = (m_interrupts || s_interrupts);
+
+(* keep = 1 *) reg [63:0] pc;
+wire [31:0] ir;
+
+(* ram_style = "logic" *) reg [63:0] re [0:31]; // General Registers 32s
+(* ram_style = "logic" *) reg [63:0] sre [0:10]; // Shadow Registers 11s
+reg mmu_da=0;
+reg mmu_pc = 0;
+reg did = 1;
+reg in_debug = 0;
+reg i_cache_refill=0;
+wire STrap = (mmu_pc || mmu_da || i_cache_refill || in_debug);
+wire is_mem_access = (op == 7'b0000011 || op == 7'b0100011 || op == 7'b0101111); //load/store/atm
+wire is_unaligned_access = is_mem_access && current_privilege_mode != M_mode && (
+    (w_func3[1:0] == 2'b01 && ls_va[0]   != 1'b0) || // lh/lhu/sh
+    (w_func3[1:0] == 2'b10 && ls_va[1:0] != 2'b00) || // lw/lwu/sw
+    (w_func3[1:0] == 2'b11 && ls_va[2:0] != 3'b000)  // ld/sd/AMO
+);
+
+reg [63:0] saved_user_pc;
+integer i; 
+
+// --- Privilege Modes ---
+localparam M_mode = 2'b11;
+localparam S_mode = 2'b01;
+localparam U_mode = 2'b00;
+reg [1:0] current_privilege_mode;
+
+// -- Immediate decoders  -- 
+wire signed [63:0] w_imm_u = {{32{ir[31]}}, ir[31:12], 12'b0};  // U-type immediate Lui Auipc
+wire signed [63:0] w_imm_i = {{52{ir[31]}}, ir[31:20]};   // I-type immediate Lb Lh Lw Lbu Lhu Lwu Ld Jalr Addi Slti Sltiu Xori Ori Andi Addiw 
+wire signed [63:0] w_imm_s = {{52{ir[31]}}, ir[31:25], ir[11:7]};  // S-type immediate Sb Sh Sw Sd
+wire signed [63:0] w_imm_j = {{44{ir[31]}}, ir[19:12], ir[20], ir[30:21], 1'b0}; // UJ-type immediate Jal  // read immediate & padding last 0, total 20 + 1 = 21 bits
+wire signed [63:0] w_imm_b = {{52{ir[31]}}, ir[7],  ir[30:25], ir[11:8], 1'b0}; // B-type immediate Beq Bne Blt Bge Bltu Bgeu // read immediate & padding last 0, total 12 + 1 = 13 bits
+wire        [63:0] w_imm_z = {59'b0, ir[19:15]};  // CSR zimm zero-extending unsigned
+wire [5:0] w_shamt = ir[25:20]; // If 6 bits the highest is always 0??
+// -- Register decoder --
+wire [4:0] w_rd  = ir[11:7];
+wire [4:0] w_rs1 = ir[19:15];
+wire [4:0] w_rs2 = ir[24:20];
+// -- Func decoder --
+wire [2:0] w_func3   = ir[14:12];
+wire [4:0] w_func5   = ir[31:27];
+wire [6:0] w_func7   = ir[31:25]; 
+wire [11:0] w_func12 = ir[31:20]; 
+// -- rs1 rs2 value --
+wire signed [63:0] rs1 = re[w_rs1];
+wire signed [63:0] rs2 = re[w_rs2];
+// -- op --
+wire [6:0] op = ir[6:0];
+//-- csr --
+wire [11:0] w_csr = ir[31:20];   // CSR official address
+wire [63:0] pc_4 = pc - 4;
+
+// Shared Arithmetic Units
+wire use_imm = (op == 7'b0010011 || op == 7'b0011011 || op == 7'b1100111); //math-i math-i-w jalr 
+wire is_sub = (op == 7'b0110011 || op == 7'b0111011) && ir[30]; // sub/subw
+wire [63:0] alu_op2 = use_imm ? w_imm_i : rs2;
+wire [63:0] alu_op2_inv = is_sub ? ~alu_op2 : alu_op2;
+wire [63:0] shared_add = rs1 + alu_op2_inv + is_sub;
+wire [31:0] shared_addw_32 = rs1[31:0] + alu_op2_inv[31:0] + is_sub;
+wire [63:0] shared_addw = {{32{shared_addw_32[31]}}, shared_addw_32};
+
+wire [63:0] alu_add  = shared_add; 
+wire [63:0] alu_sub  = shared_add;  
+wire [63:0] alu_addi = shared_add; 
+wire [63:0] alu_addw = shared_addw;  
+wire [63:0] alu_subw = shared_addw;  
+wire [63:0] alu_addiw= shared_addw; 
+
+wire [63:0] alu_slt  = ($signed(rs1) < $signed(alu_op2)) ? 1:0;
+wire [63:0] alu_slti = alu_slt;
+wire [63:0] alu_sltu = ($unsigned(rs1) < $unsigned(alu_op2)) ? 1:0;
+wire [63:0] alu_sltiu= alu_sltu;
+
+wire [63:0] alu_xor  = rs1 ^ alu_op2;
+wire [63:0] alu_xori = alu_xor;
+wire [63:0] alu_and  = rs1 & alu_op2;
+wire [63:0] alu_andi = alu_and;
+wire [63:0] alu_or   = rs1 | alu_op2;
+wire [63:0] alu_ori  = alu_or;
+
+wire [63:0] branch = pc_4 + w_imm_b; //branch
+
+wire is_imm_shift  = (op == 7'b0010011 || op == 7'b0011011); // Slli Srli Srai || Slliw Srliw Sraiw
+wire is_word_shift = (op == 7'b0111011 || op == 7'b0011011); // Sllw Srlw Sraw || Slliw Srliw Sraiw
+wire is_arith_shift = ir[30]; // sra/sraw/srai/sraiw
+
+wire [5:0] shift_amt = is_imm_shift ? w_shamt : rs2[5:0];
+wire [5:0] final_shift_amt = is_word_shift ? {1'b0, shift_amt[4:0]} : shift_amt;
+wire [63:0] shift_to_right = is_word_shift ? {{32{is_arith_shift & rs1[31]}}, rs1[31:0]}: rs1;
+
+wire [63:0] raw_sll = rs1 << final_shift_amt;
+wire [63:0] raw_srl_sra = is_arith_shift ? ($signed(shift_to_right) >>> final_shift_amt): (shift_to_right >> final_shift_amt);
+
+wire [63:0] shared_sll = is_word_shift ? {{32{raw_sll[31]}}, raw_sll[31:0]} : raw_sll;
+wire [63:0] shared_srl_sra = is_word_shift ? {{32{raw_srl_sra[31]}}, raw_srl_sra[31:0]} : raw_srl_sra;
+
+wire [63:0] w_load_data =
+    (w_func3 == 3'b000) ? {{56{bus_read_data[ 7]}}, bus_read_data[ 7:0]} : // lb
+    (w_func3 == 3'b001) ? {{48{bus_read_data[15]}}, bus_read_data[15:0]} : // lh
+    (w_func3 == 3'b010) ? {{32{bus_read_data[31]}}, bus_read_data[31:0]} : // lw
+    (w_func3 == 3'b100) ? { 56'b0,                  bus_read_data[ 7:0]} : // lbu
+    (w_func3 == 3'b101) ? { 48'b0,                  bus_read_data[15:0]} : // lhu
+    (w_func3 == 3'b110) ? { 32'b0,                  bus_read_data[31:0]} : // lwu
+    bus_read_data ; // ld (011)
+
+wire [63:0] w_store_data = 
+    (w_func3 == 3'b000) ? {56'b0, rs2[ 7:0]} : // sb
+    (w_func3 == 3'b001) ? {48'b0, rs2[15:0]} : // sh
+    (w_func3 == 3'b010) ? {32'b0, rs2[31:0]} : // sw
+    rs2;        // sd (011)
+// AMO prepare -----------
+wire is_word_op = (w_func3 == 3'b010);  // word as signed 32-bit values
+wire [63:0] amo_op_mem = is_word_op ? {{32{bus_read_data[31]}}, bus_read_data[31:0]} : bus_read_data;
+wire [63:0] amo_op_rs2 = is_word_op ? {{32{rs2[31]}}, rs2[31:0]} : rs2;
+
+// Unin amomin amomax/amominu amomaxu 11xxx (unsigned w_func5[3]== 1)
+wire amo_less_than = w_func5[3] ? (amo_op_mem < amo_op_rs2) : ($signed(amo_op_mem) < $signed(amo_op_rs2));
+
+// selecet min/max resutl
+wire amo_pick_mem = (w_func5[2] == 0) ? amo_less_than : !amo_less_than;
+wire [63:0] val_minmax = amo_pick_mem ? amo_op_mem : amo_op_rs2;
+
+// calculate
+wire [63:0] val_add = amo_op_mem + amo_op_rs2;
+wire [63:0] val_xor = amo_op_mem ^ amo_op_rs2;
+wire [63:0] val_and = amo_op_mem & amo_op_rs2;
+wire [63:0] val_or  = amo_op_mem | amo_op_rs2;
+
+// write back memory data
+wire [63:0] w_amo_calc_data = 
+    (w_func5 == 5'b00001) ? amo_op_rs2 : // swap
+    (w_func5 == 5'b00000) ? val_add    : // add
+    (w_func5 == 5'b00100) ? val_xor    : // xor
+    (w_func5 == 5'b01100) ? val_and    : // and
+    (w_func5 == 5'b01000) ? val_or     : // or
+    val_minmax ; // min/max/minu/maxu
+
+wire [63:0] w_amo_calc_data_dw = (is_word_op) ? {{32{w_amo_calc_data[31]}}, w_amo_calc_data[31:0]} : w_amo_calc_data;
+
+// formatting sc.w/sc.d/amo
+wire [63:0] w_atomic_write_data = (op == 7'b0101111 && w_func5[4:0] == 5'b00011) ? // SC
+    (is_word_op ? {32'b0, rs2[31:0]} : rs2) : // sc.w/sc.d
+    //w_amo_calc_data; // AMOs -----------
+    w_amo_calc_data_dw; // AMOs -----------
+
+// Indepenedent Multiplier Mul // Booth algorithim + Signed-correct
+reg [6:0]   mul_cnt;
+reg [127:0] mul_acc;  // result|multiplier
+reg [63:0]  mul_a_reg; // 被乘数(绝对值)
+reg         mul_active;
+reg         mul_done;
+reg         mul_enable;
+
+reg mul_neg_result;
+reg [2:0] mul_op_type;
+
+reg  mul_is_w_latched;
+reg  [63:0] raw_a_latched;
+reg  [63:0] raw_b_latched;
+reg  a_is_signed_latched;
+reg  b_is_signed_latched;
+reg  [63:0] abs_a_latched;
+reg  [63:0] abs_b_latched;
+reg  [4:0] mul_rd_latched;
+
+// 000mul 001mulh 010mulhsu 011mulhu
+wire mul_is_w = (op == 7'b0111011); // Mulw (opc 0111011)
+wire [63:0] raw_a = mul_is_w ? {{32{rs1[31]}}, rs1[31:0]} : rs1;
+wire [63:0] raw_b = mul_is_w ? {{32{rs2[31]}}, rs2[31:0]} : rs2;
+
+wire a_is_signed = mul_is_w ? 1'b1 : (w_func3 != 3'b011); // signed except Mulhu
+wire b_is_signed = mul_is_w ? 1'b1 : (w_func3 == 3'b000 || w_func3 == 3'b001); // signed Mul/Mulh
+
+wire [63:0] abs_a = (a_is_signed & raw_a[63])? (~raw_a+64'd1):raw_a; 
+wire [63:0] abs_b = (b_is_signed & raw_b[63])? (~raw_b+64'd1):raw_b; 
+wire [64:0] add_res = {1'b0, mul_acc[127:64]} + {1'b0, mul_a_reg};
+
+always @(posedge clk or negedge reset) begin  
+    if (!reset) begin
+	mul_active <= 0;
+	mul_done   <= 0;
+	mul_cnt    <= 0;	    
+	mul_acc    <= 0;
+    end else begin
+	if (mul_enable && !mul_active && !mul_done) begin // Start phase
+	    mul_active <= 1;
+	    mul_cnt    <= 0;
+	    mul_a_reg  <= abs_a_latched;
+	    mul_acc <= {64'b0, abs_b_latched};
+	    mul_neg_result <= (a_is_signed_latched && raw_a_latched[63]) ^ (b_is_signed_latched && raw_b_latched[63]);
+
+	end else if (mul_active) begin // Compute phase (64 cycles)
+	    if (mul_cnt < 64) begin
+		if (mul_acc[0]) mul_acc <= {add_res, mul_acc[63:1]}; // is 1,  + and >> 1
+		else mul_acc <= {1'b0, mul_acc[127:1]}; // is 0, only >> 1, preserve sign bit
+		mul_cnt <= mul_cnt + 1;
+	end else begin // Finish phase
+	    mul_active <= 0;
+	    mul_done   <= 1;
+	end
+    end else if (!mul_enable) mul_done <= 0; // reset handshake
+end
+    end
+
+    wire [127:0] final_mul_res = mul_neg_result ? ~mul_acc+128'd1 : mul_acc;
+    wire is_high_mul = (mul_op_type == 3'b001) || (mul_op_type == 3'b010) || (mul_op_type == 3'b011);
+    wire [63:0] w_mul_out = 
+	(mul_is_w_latched) ? {{32{final_mul_res[31]}}, final_mul_res[31:0]}: // mulw
+	(is_high_mul) ? final_mul_res[127:64]:// mulh, mulhsu, mulhu
+	final_mul_res[63:0];// mul
+
+	// Independent divider Div
+	reg [6:0]   div_cnt;
+	reg [127:0] div_rem;   // remainder|quotient
+	reg [63:0]  div_a;    // be divided
+	reg [63:0]  div_b;    // divisor
+	reg         div_active; // 1computing, 0idle
+	reg         div_done;   // handshake 1result ready
+	reg         div_enable; // handshake 1start request
+	reg         div_is_rem; // 1rem, 0div
+	reg [63:0]  div_result_out; // final output buffer
+	reg [4:0]   div_rd; 
+	reg         div_op_signed;
+	reg         div_is_w_latched;
+
+	wire div_is_w = (op == 7'b0111011); //  divw100 divuw101  remw110 remuw111 (opc 0111011)
+	wire a_is_neg = div_op_signed && div_a[63];
+	wire b_is_neg = div_op_signed && div_b[63];
+	wire [63:0] div_abs_a = a_is_neg ? (~div_a + 64'd1):div_a;
+	wire [63:0] div_abs_b = b_is_neg ? (~div_b + 64'd1):div_b;
+	wire out_sign_quo = div_op_signed && (div_a[63] ^ div_b[63]);
+	wire out_sign = div_is_rem ? a_is_neg : out_sign_quo;
+	wire [63:0] raw_out = div_is_rem ? div_rem[127:64] : div_rem[63:0];
+	wire [63:0] final_out = out_sign ? (~raw_out+64'd1): raw_out;
+
+	always @(posedge clk or negedge reset) begin
+	    if (!reset) begin
+		div_active <= 0;
+		div_done   <= 0;
+		div_cnt    <= 0;
+	    end else begin
+		if (div_enable && !div_active && !div_done) begin // start phase
+		    div_active <= 1;
+		    div_cnt <= 0;
+		    if (div_b == 0) begin // handle corner case
+			div_result_out <= div_is_rem ? div_a : ~64'd0; // divide by zero
+			div_active <= 0;
+			div_done <= 1; // finish immediately
+		    end
+		    else if (div_op_signed && div_a == 64'h8000000000000000 && div_b == ~64'd0) begin // ?? Overflow INT_MIN/-1 = INT_MIN
+			div_result_out <= div_is_rem ? 64'd0 : div_a; // signed overflow
+		    div_active <= 0;
+		    div_done <= 1; // finish immediately
+		end
+		else begin 
+		    div_rem <= {64'd0, div_abs_a};
+		end
+	    end else if (div_active) begin // compute phase (64 cycles)
+		if (div_cnt < 64) begin
+		    if (div_rem[126:63] >= div_abs_b) begin
+			div_rem <= {div_rem[126:63] - div_abs_b, div_rem[62:0], 1'b1};
+		    end else begin
+			div_rem <= {div_rem[126:0], 1'b0};
+		    end
+		    div_cnt <= div_cnt + 1;
+		end else begin // finish phase
+		    div_active <= 0;
+		    div_done   <= 1;
+		    div_result_out <= final_out;
+		end
+	    end else if (!div_enable) div_done <= 0; // reset handshake
+	end
+end
+
+// --Machine CSR --
+localparam mstatus    = 0 ; localparam MPRV=17,MPP=11,SPP=8,MPIE=7,SPIE=5,MIE=3,SIE=1,UIE=0;//63_SD|37_MBE|36_SBE|35:34_SXL10|22_TSR|21_TW|20_TVW|17_MPRV|12:11MPP|8SPP|7MPIE|5SPIE|3MIE|1SIE|0UIE
+localparam sstatus    = 0 ; localparam SD=63,UXL=32,MXR=19,SUM=18,XS=15,FS=13,VS=9,UBE=6; //SPP=8,SPIE=5,SIE=1,//63SD|33:32UXL|19MXR|18SUM|16:15XS|14:13FS|10:9VS|8SPP|6UBE|5SPIE|1SIE
+localparam sstatus_mask  = 64'h8000_0003_000D_E122; // SD,UXL,MXR,SUM,XS,FS,SPP,SPIE,SIE only from mirror mstatus, RVV E722
+
+localparam mtvec      = 1 ; localparam BASE=2,MODE=0; // 63:2BASE|1:0MDOE  // 0x305 MRW Machine trap-handler base address * 0 direct 1vec
+localparam mscratch   = 2 ;  // 
+localparam mepc       = 3 ;  
+localparam mcause     = 4 ; localparam INTERRUPT=63,CAUSE=0,ILLEGAL_INSTRUCTION=2,PAGE_F_I=12,PAGE_F_L=13,PAGE_F_S=15;//0x342 MRW Machine trap casue*63InterruptAsync/ErrorSync|62:0CauseCode
+
+localparam mie        = 5 ; localparam SGEIE=12,MEIE=11,VSEIE=10,SEIE=9,MTIE=7,VSTIE=6,STIE=5,MSIE=3,VSSIE=2,SSIE=1; // Machine Interrupt Enable from OS software set enable
+localparam sie        = 5;  // Supervisor interrupt-enable register
+localparam sie_sip_mask   = 64'h0000_0000_0000_0222; // SEIE9, STIE5, SSIE1
+
+localparam mip        = 6 ; localparam SGEIP=12,MEIP=11,VSEIP=10,SEIP=9,MTIP=7,VSTIP=6,STIP=5,MSIP=3,VSSIP=2,SSIP=1; // Machine Interrupt Pending from HardWare timer,uart,PLIC.11Exter7Time3Software
+localparam mip_write_mask   = 64'h0000_0000_0000_0222;  // Allow M-mode software(e.g. opensbi) to write SSIP1/STIP5/SEIP9
+localparam sip        = 6;  // Supervisor interrupt pending
+//localparam sip_mask   = 64'h0000_0000_0000_0222; // SEIP, STIP, SSIP
+localparam sip_write_mask   = 64'h0000_0000_0000_0002; // SSIP
+localparam satp_mask  = 64'hF000_0FFF_FFFF_FFFF; // ASID(Address Space Identifier) 63:60Mode|59:44ASID to 0|43:0PPN
+wire [63:0] csr_mask  = (w_csr == 12'h180) ? satp_mask : (w_csr == 12'h100) ? sstatus_mask : (w_csr == 12'h104) ? (sie_sip_mask & Csrs[mideleg]) : (w_csr == 12'h144) ? (sie_sip_mask   & Csrs[mideleg]) : 64'hffff_ffff_ffff_ffff;
+wire [63:0] csr_mask_w= (w_csr == 12'h180) ? satp_mask : 
+                        (w_csr == 12'h100) ? sstatus_mask : 
+			(w_csr == 12'h104) ? (sie_sip_mask & Csrs[mideleg]) : 
+			(w_csr == 12'h144) ? (sip_write_mask & Csrs[mideleg]) : 
+                        (w_csr == 12'h344) ? mip_write_mask : 
+			64'hffff_ffff_ffff_ffff;
+wire [63:0] csr_read = (w_csr == 12'h301) ? 64'h8000000000141101 : // misa(RV64IMASU)
+                       //(w_csr == 12'hF11) ? 64'h0 : // mvendorid
+                       //(w_csr == 12'hF12) ? 64'h0 : // marchid
+                       //(w_csr == 12'hF13) ? 64'h0 : // mimpid
+                       (w_csr == 12'hF14) ? 64'h0 : // mhartid
+                       (w_csr == 12'hC01) ? mtime : // clint_time
+		        Csrs[w_csr_id] & csr_mask;  // Other
+wire [63:0] csr_write_re  = rs1 & csr_mask_w;
+wire [63:0] csr_write_im  = w_imm_z & csr_mask_w;
+
+localparam medeleg    = 7 ; localparam MECALL=11,SECALL=9,UECALL=8,BREAK=3; // bit_index=mcause_value 8UECALL|9SECALL
+localparam mideleg    = 8 ;  //
+localparam sedeleg    = 9;  
+localparam sideleg    = 10;  
+localparam stvec      = 11;  //localparam ; //BASE=2,MODE=0 63:2BASE|1:0MDOE Supervisor trap handler base address
+localparam scounteren = 12;  
+localparam sscratch   = 13;  
+localparam sepc       = 14;  
+localparam scause     = 15;  //localparam ; //INTERRUPT=63,CAUSE=0 *  63InterruptAsync/ErrorSync|62:0CauseCode// 
+localparam stval      = 16;  
+localparam satp       = 17;  // Supervisor address translation and protection satp[63:60].MODE=0:off|8:SV39 satp[59:44].asid vpn2:9 vpn1:9 vpn0:9 satp[43:0]:rootpage physical addr
+localparam mtval      = 18;  // Machine Trap Value Register (bad address or instruction)
+
+localparam mvendorid  = 23;  // 0
+localparam marchid    = 24;  // 0
+localparam mimpid     = 25;  // 0
+localparam mhartid    = 19;  // Hardware Thread ID 0 for single-core
+localparam misa       = 19;  // Machine ISA Register (IMA is 0x8000000000001101)
+localparam clint_time = 19;  // read only
+
+localparam pmpcfg0    = 20;  // Physical Memory Protection
+localparam pmpaddr0   = 21;  // 
+localparam mdebug     = 22;  // 
+reg [62:0] CAUSE_CODE;
+reg  [5:0] w_csr_id;             // CSR id (64)
+localparam XCSR = 63;  //  miss csr that not deployed
+always @(*) begin
+    case(w_csr)
+	12'h300 : w_csr_id = mstatus    ;    
+	12'h301 : w_csr_id = misa       ;    
+	12'h305 : w_csr_id = mtvec      ;    
+	12'h340 : w_csr_id = mscratch   ;    
+	12'h341 : w_csr_id = mepc       ;    
+	12'h342 : w_csr_id = mcause     ;    
+	12'h343 : w_csr_id = mtval      ;    
+	12'h304 : w_csr_id = mie        ;    
+	12'h344 : w_csr_id = mip        ;    
+	12'h302 : w_csr_id = medeleg    ;    
+	12'h303 : w_csr_id = mideleg    ;    
+	12'h100 : w_csr_id = sstatus    ;    
+	12'h102 : w_csr_id = sedeleg    ;   
+	12'h103 : w_csr_id = sideleg    ;   
+	12'h104 : w_csr_id = sie        ;   
+	12'h105 : w_csr_id = stvec      ;   
+	12'h106 : w_csr_id = scounteren ;   
+	12'h140 : w_csr_id = sscratch   ;   
+	12'h141 : w_csr_id = sepc       ;   
+	12'h142 : w_csr_id = scause     ;   
+	12'h143 : w_csr_id = stval      ;   
+	12'h144 : w_csr_id = sip        ;   
+	12'h180 : w_csr_id = satp       ;   
+	12'hF14 : w_csr_id = mhartid    ;   
+	12'hF11 : w_csr_id = mvendorid  ;   
+	12'hF12 : w_csr_id = marchid    ;   
+	12'hF13 : w_csr_id = mimpid     ;   
+	12'h3A0 : w_csr_id = pmpcfg0    ;   
+	12'h3B0 : w_csr_id = pmpaddr0   ;   
+	12'hC01 : w_csr_id = clint_time ;   
+	12'h7CC : w_csr_id = mdebug     ;   
+	default : w_csr_id = XCSR; 
+    endcase
+end
+
+//(* ram_style = "logic" *) reg [63:0] Csrs [0:36]; // 36 CSRs for now // totally 4096
+(* ram_style = "logic" *) reg [63:0] Csrs [0:25]; // 36 CSRs for now // totally 4096
+wire [3:0]  satp_mmu  = Csrs[satp][63:60]; // 0:bare, 8:sv39, 9:sv48  satp.MODE!=0, privilegae is not M-mode, mstatus.MPRN is not set or in MPP's mode?
+
+// -- Timer --
+reg [6:0] mtime_div;
+always @(posedge clk or negedge reset) begin 
+    if (!reset) begin 
+	mtime <= 0; 
+	mtime_div <= 0; 
+    end else begin 
+	mtime_div <= mtime_div + 1; 
+	if (mtime_div == 7'd99) begin 
+	    mtime_div <= 0;
+	    mtime <= mtime + 1; 
+	end
+    end
+end
+
+wire mtip_interrupt = (mtime >= mtimecmp);
+
+// -- Innerl signal --
+reg bubble;
+reg [1:0] load_step;
+reg [1:0] store_step;
+
+// -- Atomic & Sync state --
+reg [63:0] reserve_addr;
+reg        reserve_valid;
+
+reg tlb_flush = 0;
+//// -- TLB -- 8 pages
+reg [7:0] tlb_vld;
+(* ram_style = "logic" *) reg [26:0] tlb_vpn [0:7]; // vpn number VA[38:12]  Sv39
+(* ram_style = "logic" *) reg [43:0] tlb_ppn [0:7]; // ppn number PA[55:12]
+//(* ram_style = "logic" *) reg tlb_vld [0:7];
+//// -- TLB i -- 4 pages
+//reg [3:0] tlb_vld;
+//(* ram_style = "logic" *) reg [26:0] tlb_vpn [0:3]; // vpn number VA[38:12]  Sv39
+//(* ram_style = "logic" *) reg [43:0] tlb_ppn [0:3]; // ppn number PA[55:12]
+////(* ram_style = "logic" *) reg tlb_vld [0:3];
+
+// TLB-I
+wire [26:0] pc_vpn = pc[38:12];
+reg [43:0] pc_ppn;
+reg tlb_i_hit;
+
+wire [7:0] tlb_i_match; // 8page
+//wire [3:0] tlb_i_match; // 4page
+
+assign tlb_i_match[0] = tlb_vld[0] && (tlb_vpn[0] == pc_vpn);
+assign tlb_i_match[1] = tlb_vld[1] && (tlb_vpn[1] == pc_vpn);
+assign tlb_i_match[2] = tlb_vld[2] && (tlb_vpn[2] == pc_vpn);
+assign tlb_i_match[3] = tlb_vld[3] && (tlb_vpn[3] == pc_vpn);
+assign tlb_i_match[4] = tlb_vld[4] && (tlb_vpn[4] == pc_vpn);
+assign tlb_i_match[5] = tlb_vld[5] && (tlb_vpn[5] == pc_vpn);
+assign tlb_i_match[6] = tlb_vld[6] && (tlb_vpn[6] == pc_vpn);
+assign tlb_i_match[7] = tlb_vld[7] && (tlb_vpn[7] == pc_vpn);
+
+always @(*) begin
+    tlb_i_hit = |tlb_i_match && !tlb_flush;
+    pc_ppn =   ({44{tlb_i_match[0]}} & tlb_ppn[0]) |
+	       ({44{tlb_i_match[1]}} & tlb_ppn[1]) | //; end
+	       ({44{tlb_i_match[2]}} & tlb_ppn[2]) |
+	       ({44{tlb_i_match[3]}} & tlb_ppn[3]) | // ; end
+	       ({44{tlb_i_match[4]}} & tlb_ppn[4]) |
+	       ({44{tlb_i_match[5]}} & tlb_ppn[5]) |
+	       ({44{tlb_i_match[6]}} & tlb_ppn[6]) |
+	       ({44{tlb_i_match[7]}} & tlb_ppn[7]) ; end
+   
+// -- TLB d -- 8 pages
+reg [7:0] tlb_d_vld;
+reg [7:0] tlb_d_w; // Wirte permission bit
+reg [7:0] tlb_d_d; // Dirty bit
+wire is_store = (op == 7'b0100011) || (op == 7'b0101111 && w_func5 != 5'b00010); // Store/Atm(no lr)
+(* ram_style = "logic" *) reg [26:0] tlb_d_vpn [0:7]; // vpn number VA[38:12]  Sv39
+(* ram_style = "logic" *) reg [43:0] tlb_d_ppn [0:7]; // ppn number PA[55:12]
+//// -- TLB d -- 16 pages
+//reg [15:0] tlb_d_vld;
+//(* ram_style = "logic" *) reg [26:0] tlb_d_vpn [0:15]; // vpn number VA[38:12]  Sv39
+//(* ram_style = "logic" *) reg [43:0] tlb_d_ppn [0:15]; // ppn number PA[55:12]
+//(* ram_style = "logic" *) reg tlb_d_vld [0:3]; // only 4 entries
+   
+	// TLB-D tlb d hit
+	wire [63:0] ls_va_offset = (op == 7'b0000011) ? w_imm_i : (op == 7'b0100011) ?  w_imm_s : 64'h0; // load/store/atom
+	wire [63:0] ls_va = rs1 + ls_va_offset;
+	wire [63:0] pda;
+	reg [43:0] data_ppn;
+	reg tlb_d_hit;
+
+	wire [7:0] tlb_d_match;
+	//wire [15:0] tlb_d_match;
+	assign tlb_d_match[0] = tlb_d_vld[0] && (tlb_d_vpn[0] == ls_va[38:12]) && (!is_store || (tlb_d_w[0] && tlb_d_d[0]));
+	assign tlb_d_match[1] = tlb_d_vld[1] && (tlb_d_vpn[1] == ls_va[38:12]) && (!is_store || (tlb_d_w[1] && tlb_d_d[1]));
+	assign tlb_d_match[2] = tlb_d_vld[2] && (tlb_d_vpn[2] == ls_va[38:12]) && (!is_store || (tlb_d_w[2] && tlb_d_d[2]));
+	assign tlb_d_match[3] = tlb_d_vld[3] && (tlb_d_vpn[3] == ls_va[38:12]) && (!is_store || (tlb_d_w[3] && tlb_d_d[3]));
+	assign tlb_d_match[4] = tlb_d_vld[4] && (tlb_d_vpn[4] == ls_va[38:12]) && (!is_store || (tlb_d_w[4] && tlb_d_d[4]));
+	assign tlb_d_match[5] = tlb_d_vld[5] && (tlb_d_vpn[5] == ls_va[38:12]) && (!is_store || (tlb_d_w[5] && tlb_d_d[5]));
+	assign tlb_d_match[6] = tlb_d_vld[6] && (tlb_d_vpn[6] == ls_va[38:12]) && (!is_store || (tlb_d_w[6] && tlb_d_d[6]));
+	assign tlb_d_match[7] = tlb_d_vld[7] && (tlb_d_vpn[7] == ls_va[38:12]) && (!is_store || (tlb_d_w[7] && tlb_d_d[7]));
+	//assign tlb_d_match[8] = tlb_d_vld[8] && (tlb_d_vpn[8] == ls_va[38:12]);
+	//assign tlb_d_match[9] = tlb_d_vld[9] && (tlb_d_vpn[9] == ls_va[38:12]);
+	//assign tlb_d_match[10] = tlb_d_vld[10] && (tlb_d_vpn[10] == ls_va[38:12]);
+	//assign tlb_d_match[11] = tlb_d_vld[11] && (tlb_d_vpn[11] == ls_va[38:12]);
+	//assign tlb_d_match[12] = tlb_d_vld[12] && (tlb_d_vpn[12] == ls_va[38:12]);
+	//assign tlb_d_match[13] = tlb_d_vld[13] && (tlb_d_vpn[13] == ls_va[38:12]);
+	//assign tlb_d_match[14] = tlb_d_vld[14] && (tlb_d_vpn[14] == ls_va[38:12]);
+	//assign tlb_d_match[15] = tlb_d_vld[15] && (tlb_d_vpn[15] == ls_va[38:12]);
+
+	always @(*) begin
+	    tlb_d_hit = |tlb_d_match && !tlb_flush;
+	    data_ppn = ({44{tlb_d_match[0]}} & tlb_d_ppn[0]) |
+		({44{tlb_d_match[1]}} & tlb_d_ppn[1]) | //; end
+		({44{tlb_d_match[2]}} & tlb_d_ppn[2]) |
+		({44{tlb_d_match[3]}} & tlb_d_ppn[3]) | // ; end
+		({44{tlb_d_match[4]}} & tlb_d_ppn[4]) |
+		({44{tlb_d_match[5]}} & tlb_d_ppn[5]) |
+		({44{tlb_d_match[6]}} & tlb_d_ppn[6]) |
+		({44{tlb_d_match[7]}} & tlb_d_ppn[7]) ; end
+		//({44{tlb_d_match[8]}} & tlb_d_ppn[8]) |
+		//({44{tlb_d_match[9]}} & tlb_d_ppn[9]) | //; end
+		//({44{tlb_d_match[10]}} & tlb_d_ppn[10]) |
+		//({44{tlb_d_match[11]}} & tlb_d_ppn[11]) | // ; end
+		//({44{tlb_d_match[12]}} & tlb_d_ppn[12]) |
+		//({44{tlb_d_match[13]}} & tlb_d_ppn[13]) |
+		//({44{tlb_d_match[14]}} & tlb_d_ppn[14]) |
+		//({44{tlb_d_match[15]}} & tlb_d_ppn[15]) ; end
+		// concat physical address
+		wire need_trans = satp_mmu && !STrap && (current_privilege_mode != M_mode);
+		assign ppc = need_trans ? {8'h0, pc_ppn, pc[11:0]} : pc;
+		//assign pda = need_trans ? {8'h0, data_ppn, ls_va[11:0]} : ls_va;
+    
+		wire [1:0] eff_priv = Csrs[mstatus][MPRV] ? Csrs[mstatus][MPP+1:MPP] : current_privilege_mode;
+		wire need_trans_d = satp_mmu && !STrap && (eff_priv != M_mode);
+		assign pda = need_trans_d ? {8'h0, data_ppn, ls_va[11:0]} : ls_va;
+
+		// TLB Refill
+		reg [2:0] tlb_ptr = 0; // 8 entries TLB
+		//reg [1:0] tlb_ptr = 0; // 4 entries i TLB
+		reg [2:0] tlb_d_ptr = 0; // 8 entries d TLB
+		//reg [3:0] tlb_d_ptr = 0; // 16 entries d TLB
+		always @(posedge clk or negedge reset) begin
+		    if (!reset) begin // RESET
+			tlb_ptr <= 0; // hit->trap(save va to x9)->refill assembly(fetch pa to x9)-> sd x9, `Tlb -> here to refill tlb
+			tlb_d_ptr <= 0;
+			//tlb_vld <= 4'b0;
+			tlb_vld <= 8'b0;
+			//tlb_d_vld <= 16'b0;
+			tlb_d_vld <= 8'b0;
+			tlb_d_w <= 8'b0;
+			tlb_d_d <= 8'b0;
+		    //end else if (tlb_flush) begin tlb_vld <= 4'b0; tlb_d_vld <= 16'b0; // FLUSH
+		    //end else if (tlb_flush) begin tlb_vld <= 4'b0; tlb_d_vld <= 8'b0; // FLUSH
+		    end else if (tlb_flush) begin tlb_vld <= 8'b0; tlb_d_vld <= 8'b0; // FLUSH
+		    end else if (STrap && bus_write_enable && bus_address == `Tlb) begin // for the last fill: sd ppa, Tlb  // REFILL
+			if (re[8] == 12) begin
+			tlb_vpn[tlb_ptr] <= re[9][38:12]; // VA from x1 saved by trapp mmu_pc/mmu_da
+			tlb_ppn[tlb_ptr] <= bus_write_data[55:12] ; // real 
+			tlb_vld[tlb_ptr] <= 1;
+			tlb_ptr <= tlb_ptr + 1; 
+		        end else begin
+			tlb_d_vpn[tlb_d_ptr] <= re[9][38:12]; // VA from x1 saved by trapp mmu_pc/mmu_da
+			tlb_d_ppn[tlb_d_ptr] <= bus_write_data[55:12] ; // real 
+			tlb_d_vld[tlb_d_ptr] <= 1;
+			tlb_d_w[tlb_d_ptr] <= bus_write_data[2]; // bit 2 of PTE is W
+			tlb_d_d[tlb_d_ptr] <= bus_write_data[7]; // bit 7 of PTE is D
+			tlb_d_ptr <= tlb_d_ptr + 1; 
+		        end 
+		    end
+	    end
+
+	    // Cache I_cache_hit 63:13 tag, 12:4 index 3:0 offset Cache line 16B (4 instructions) 512 lines
+	    reg [127:0] cache_line = 128'h0; //reg [51:0]  cache_tag = 52'h0;
+	    //reg [58:0]  cache_tag = 58'h0;
+	    reg [66:0]  cache_tag = 66'h0; // 16-bit epoch + 51-bit tag
+	    reg [63:0]  ppc_pre = 64'h0; // for read
+	    reg [63:0]  ask_i_data; // for write
+	    //(* ram_style = "block" *) reg [127:0] Cache_L [0:1023]; // 16KB
+	    (* ram_style = "block" *) reg [63:0] Cache_L_Low [0:511]; // 4KB
+	    (* ram_style = "block" *) reg [63:0] Cache_L_High [0:511]; // 4KB
+	    //(* ram_style = "block" *) reg [50:0] Cache_T [0:511];  // ~4KB (addr: 51(tag) + 9(index) + 4(offset))
+	    //(* ram_style = "block" *) reg [58:0] Cache_T [0:511];  // 8-bit epoch + 51-bit tag
+	    (* ram_style = "block" *) reg [66:0] Cache_T [0:511];  // 16-bit epoch + 51-bit tag
+	    //reg [7:0] cache_epoch = 1;
+	    reg [15:0] cache_epoch = 1;
+
+	    //reg flush_pre = 0; 
+	    //reg flush = 0;
+	    always @(posedge clk) begin 
+	    cache_line <= {Cache_L_High[ppc[12:4]], Cache_L_Low[ppc[12:4]]}; 
+	    //cache_tag <= {cache_valid_bits[ppc[12:4]], Cache_T[ppc[12:4]]}; 
+	    cache_tag <= Cache_T[ppc[12:4]]; 
+	    ppc_pre <= ppc;
+	    // Write
+	    if (i_cache_refill && bus_write_enable && bus_address == `CacheI_L) begin Cache_L_Low[ask_i_data[12:4]] <= bus_write_data; end
+	    if (i_cache_refill && bus_write_enable && bus_address == `CacheI_H) begin 
+		Cache_L_High[ask_i_data[12:4]] <= bus_write_data; 
+		//Cache_T[ask_i_data[12:4]] <= ask_i_data[63:13]; 
+		//cache_valid_bits[ask_i_data[12:4]] <= 1'b1;
+		Cache_T[ask_i_data[12:4]] <= {cache_epoch, ask_i_data[63:13]}; 
+	    end
+	end
+
+	//wire i_cache_hit = (cache_tag[58:51] == cache_epoch) && (ppc_pre[63:13] == cache_tag[50:0]) && (flush_pre == flush);
+	wire i_cache_hit = (cache_tag[66:51] == cache_epoch) && (ppc_pre[63:13] == cache_tag[50:0]);
+	wire [31:0] cache_i = cache_line[ppc_pre[3:2]*32 +: 32];
+	//assign ir = (mmu_pc || mmu_da || i_cache_refill) ? instruction : i_cache_hit ? cache_i : 32'h00000013; // NOP:addi x0, x0, 0;
+	assign ir = STrap ? instruction : i_cache_hit ? cache_i : 32'h00000013; // NOP:addi x0, x0, 0;
+
+	// NO cache test
+	// wire i_cache_hit = 1;    // no cache trap
+	// assign ir = instruction; // no cache
+	// -----
+	reg do_trap;
+	reg trap_is_interrupt;
+	reg [62:0] trap_cause;
+	reg [63:0] trap_val;
+	reg [63:0] trap_epc;
+
+	wire csr_writable = (w_csr_id != misa) && (w_csr_id !=  mvendorid) && (w_csr_id != marchid) && (w_csr_id != mimpid) && (w_csr_id !=  mhartid) && (w_csr_id != clint_time);
+
+	// EXE Instruction 
+	always @(posedge clk or negedge reset) begin
+	    if (!reset) begin 
+		current_privilege_mode <= M_mode;
+		bubble <= 1'b0;
+		pc <= `Ram_base;
+		load_step <= 0;
+		store_step <= 0;
+		bus_read_enable <= 0;
+		bus_write_enable <= 0;
+		bus_write_data <= 0;
+		bus_address <= `Ram_base;
+		// Interrupt re-enable
+		Csrs[mstatus][MIE] <= 1;
+		mmu_da <= 0;
+		for (i=0;i<11;i=i+1) begin sre[i]<= 64'b0; end 
+		for (i=0;i<=25;i=i+1) begin Csrs[i]<= 64'b0; end
+		//Csrs[medeleg] <= 64'hb1af; // delegate to S-mode 1011000110101111 // see VII 3.1.15 mcasue exceptions
+		Csrs[medeleg] <= 64'hb109; // delegate to S-mode no 12/13/15
+		Csrs[mideleg] <= 64'h0222; // delegate to S-mode 0000001000100010 see VII 3.1.15 mcasue interrupt 1/5/9 SSIP(supervisor software interrupt) STIP(time) SEIP(external)
+		// Initialize Machine Info for OpenSBI
+		//Csrs[misa] <= 64'h8000000000141101; //RV64IMASU extensions(63:62=2 64bits | 1<<0 Atomic| 1<<8 Integer| 1<<12 Multiply| 1<<18 Supervisor| 1 <<20 User) so: 64'h8000000000141101; RV64IMASU
+		mmu_pc <= 0;
+		in_debug <= 0;
+		reserve_addr <= 0;
+		reserve_valid <= 0;
+		//tlb_epoch <= 16'd1;
+		cache_epoch <= 16'd1;
+		tlb_flush <= 0;
+
+	    end else begin
+		pc <= pc + 4; // Default PC+4    (1.Could be overwrite 2.Take effect next cycle) 
+		bus_read_enable <= 0;
+		bus_write_enable <= 0; 
+
+		do_trap = 0;
+		trap_is_interrupt = 0;
+		trap_cause = 0;
+		trap_val = 0;
+		trap_epc = 0;
+                tlb_flush <= 0;
+
+		if (!STrap && !bubble && did)  begin did <= 0; end
+		//// -- UPPER is default change for EXE stage --- but (1.Could be overwrite 2.Take effect next cycle) 
+                //// meip/seip is triggered by Plic_pending, mtip is triggered by inner Timer, stip is set by mtip trap handler, msip set by opensbi csr, ssip set by software csr
+		//Csrs[mip][MEIP] <= meip_interrupt; 
+		//Csrs[mip][MTIP] <= mtip_interrupt; // MTIP linux will see then jump to its handler  mtime>=mtimecmp
+		//Csrs[mip][SEIP] <= seip_interrupt;
+		//Csrs[mip][MSIP] <= msip_interrupt;  
+
+
+	    // Async Interrupt PLIC full (Platform-Level-Interrupt-Control)  MMIO (hardwire timers uart plic)  first priority in case blocked by itlb cloud
+	    if (any_interrupt && !STrap && !load_step && !store_step && !mul_enable && !div_enable) begin //mstatus[3] MIE // cpu0_intc
+		reserve_valid <= 0; // Interrupt clear lr.w/lr.d
+		do_trap = 1; trap_is_interrupt =1; trap_val = 0; trap_epc = (bubble) ? pc : pc_4; // !!! save pc (j/b EXE was flushed currectly, vma executed only in EXEcuting)
+		if (meip) trap_cause = 11; // Cause 11 for Machine External Interrupt
+		else if (msip) trap_cause = 3;  // Cause 3 for Machine Sofeware Interrupt
+		else if (mtip) trap_cause = 7;  // Cause 7 for Machine Timer Interrupt
+		else if (seip) trap_cause = 9;  // Cause 9 for Supervisor External Interrupt
+		else if (stip) trap_cause = 5;  // Cause 5 for Supervisor Timer Interrupt (set by opensbi via csrw when it see MTIP)
+		else if (ssip) trap_cause = 1;  // Cause 1 for Supervisor Software Interrupt (set by os)
+
+
+	    //  i-tlb miss STrap
+	    end else if (need_trans && !tlb_i_hit) begin //OPEN 
+                mmu_pc <= 1; // MMU_PC ON 
+                pc <= 0;     // trap to isr_router
+                bubble <= 1'b1; // bubble IF for new pc value 
+                saved_user_pc <= pc_4; // !!! save pc (EXE was flushed so record-redo it, previous pc)
+                //if (bubble || ir==32'b0001001??????????_000_?????_1110011) saved_user_pc <= pc ; // !!! save pc (j/b EXE was flushed currectly, vma executed anyway no need back-redo)
+                if (bubble) saved_user_pc <= pc ; // !!! save pc (j/b EXE was flushed currectly, vma executed only in EXEcuting)
+                for (i=1;i<11;i=i+1) begin sre[i]<= re[i]; end // save re
+                re[9] <= pc;// - 4; // save this vpc to x1 //!!!! We also need to refill pc - 4' ppc for re-executeing pc-4, with hit(if satp in for very next sfence.vma) 
+                re[8] <= 12 ;// save in x8 trap type 0 i-tlb trap so record as instruciont page fault for prepare
+
+            // Bubble
+            end else if (bubble) begin bubble <= 1'b0; // Flush this cycle & Clear bubble signal for the next cycle
+
+            // i-cache miss STrap (at EXE stage without stap/tlb_hit sensitive)
+	    end else if (!STrap && !i_cache_hit) begin //OPEN 
+		i_cache_refill <= 1; // 
+		pc <= 0; // trap to isr_router
+		bubble <= 1'b1; // bubble 
+		for (i=1;i<11;i=i+1) begin sre[i]<= re[i]; end // save re
+		saved_user_pc <= pc_4  ; // ??!!! save pc (j/b EXE was flushed currectly)
+		re[9] <= {ppc_pre[63:4], 4'b0};// save missed ppc_pre cache_line address for handler
+		ask_i_data <= {ppc_pre[63:4], 4'b0};// save missed ppc_pre cache_line address for hardware
+		if (pc == `Ram_base) begin // initial situation
+		    saved_user_pc <= pc; // first pc
+		    re[9] <= {ppc[63:4], 4'b0};// save missed ppc_pre cache_line address for handler
+		    ask_i_data <= {ppc[63:4], 4'b0};// save missed ppc_pre cache_line address for hardware
+		end
+		re[8] <= 1;// save x2 trap type 1 i-cache trap
+
+            // unalign
+	    end else if (!STrap && !load_step && !store_step && is_unaligned_access) begin  
+		do_trap = 1; 
+		trap_is_interrupt = 0; 
+		trap_val = ls_va; 
+		trap_epc = pc_4;
+		trap_cause = (op == 7'b0000011) ? 4 : 6; // cause 4 Load address misaliged; cause 6 Store/amo address misaligned
+		reserve_valid <= 0; // clear lr.w/lr.d
+
+	    // d-tlb miss STrap load/store/atom
+	    end else if (need_trans_d && !tlb_d_hit && is_mem_access) begin  
+		mmu_da <= 1; // MMU_DA ON
+		pc <= 0; // trap to isr_router
+		bubble <= 1'b1; // bubble
+		saved_user_pc <= pc_4; // save pc EXE l/s/a
+		for (i=1;i<11;i=i+1) begin sre[i]<= re[i]; end // save re
+		re[9] <= ls_va; //save va to x1
+		re[8] <= (op == 7'b0000011) ? 13 : 15;// save x2 trap type load/store_atom
+    
+	    end else if ((Csrs[mdebug] || debug) && !STrap && !did && !load_step && !store_step && !mul_enable && !div_enable) begin
+		in_debug <= 1;
+		pc <= 0; // trap to isr_router
+		bubble <= 1'b1; // bubble
+		saved_user_pc <= pc_4; // save pc EXE l/s/a
+		for (i=1;i<11;i=i+1) begin sre[i]<= re[i]; end // save re
+		re[9] <= ls_va; //save va to x1
+		//re[8] <= (op == 7'b0000011) ? 13 : 14;// save x2 trap type load/store_atom
+		re[8] <= 18; // save 18 for debug
+                Csrs[mimpid] <= pc_4; // pc
+                Csrs[marchid] <= Csrs[mip];  // mip
+                Csrs[mvendorid] <= ir;
+
+            // Back from STrap
+	    end else if (STrap && ir == 32'b00110000001000000000000001110011) begin // for the fauld fill: sd ppa, Tlb_fault
+		pc <= saved_user_pc; // recover from shadow when see Mret
+		bubble <= 1'b1; // bubble
+		for (i=1;i<11;i=i+1) begin re[i]<= sre[i]; end // recover usr re
+		mmu_pc <= 0; mmu_da <= 0; i_cache_refill<= 0;
+		//debug <= 0;
+		in_debug <= 0;
+		did <= 1;
+		if (re[8]!=0) begin // Trap to Page Fault
+		    do_trap = 1;
+		    trap_cause = re[8];
+		    trap_val = re[9];
+		    trap_epc = saved_user_pc;
+		    reserve_valid <= 0; // clear lr.w/lr.d  Real Trap has to clear lock
+		end
+
+	//    // Async Interrupt PLIC full (Platform-Level-Interrupt-Control)  MMIO (hardwire timers uart plic)
+	//    end else if (any_interrupt && !STrap && !load_step && !store_step && !mul_enable && !div_enable) begin //mstatus[3] MIE // cpu0_intc
+	//	reserve_valid <= 0; // Interrupt clear lr.w/lr.d
+	//	do_trap = 1; trap_is_interrupt =1; trap_val = 0; trap_epc = pc_4;
+	//	if (meip) trap_cause = 11; // Cause 11 for Machine External Interrupt
+	//	else if (msip) trap_cause = 3;  // Cause 3 for Machine Sofeware Interrupt
+	//	else if (mtip) trap_cause = 7;  // Cause 7 for Machine Timer Interrupt
+	//	else if (seip) trap_cause = 9;  // Cause 9 for Supervisor External Interrupt
+	//	else if (stip) trap_cause = 5;  // Cause 5 for Supervisor Timer Interrupt (set by opensbi via csrw when it see MTIP)
+	//	else if (ssip) trap_cause = 1;  // Cause 1 for Supervisor Software Interrupt (set by os)
+
+	    // IR
+	    end else begin 
+		casez(ir)
+	            // U-type
+	            32'b???????_?????_?????_???_?????_0110111: re[w_rd] <= w_imm_u; // Lui
+	            32'b???????_?????_?????_???_?????_0010111: re[w_rd] <= w_imm_u + pc_4; // Auipc
+                    // Load after TLB
+                    32'b???????_?????_?????_???_?????_0000011: begin 
+                        if (load_step == 0) begin bus_address <= pda; bus_read_enable <= 1; pc <= pc_4; bubble <= 1; load_step <= 1; bus_ls_type <= w_func3; end
+                        if (load_step == 1 && bus_read_done == 0) begin pc <= pc_4; bubble <= 1; end // bus working
+                        if (load_step == 1 && bus_read_done == 1) begin re[w_rd] <= w_load_data; load_step <= 0; end 
+                    end
+                    // Store after TLB
+                    32'b???????_?????_?????_???_?????_0100011: begin 
+                        if (store_step == 0) begin bus_address <= pda; bus_write_data <= w_store_data; bus_write_enable <= 1; pc <= pc_4; bubble <= 1; store_step <= 1; bus_ls_type <= w_func3; 
+			    if (reserve_valid && reserve_addr[63:3] == pda[63:3]) reserve_valid <= 0; end // if lr, break the contract; if in 8-byte
+                        if (store_step == 1 && bus_write_done == 0) begin pc <= pc_4; bubble <= 1; end // bus working
+                        if (store_step == 1 && bus_write_done == 1) begin store_step <= 0; end 
+                    end   
+                    // Math-I
+	            32'b???????_?????_?????_000_?????_0010011: re[w_rd] <= alu_addi;  // Addi
+	            32'b???????_?????_?????_100_?????_0010011: re[w_rd] <= alu_xori; // Xori
+	            32'b???????_?????_?????_111_?????_0010011: re[w_rd] <= alu_andi; // Andi
+	            32'b???????_?????_?????_110_?????_0010011: re[w_rd] <= alu_ori; // Ori
+	            32'b000000?_?????_?????_001_?????_0010011: re[w_rd] <= shared_sll; // Slli
+	            32'b000000?_?????_?????_101_?????_0010011: re[w_rd] <= shared_srl_sra; // Srli // func7->6 // rv64 shame take w_f7[0]
+	            32'b010000?_?????_?????_101_?????_0010011: re[w_rd] <= shared_srl_sra; // Srai
+	            32'b???????_?????_?????_010_?????_0010011: re[w_rd] <= alu_slti; // Slti
+	            32'b???????_?????_?????_011_?????_0010011: re[w_rd] <= alu_sltiu; // Sltiu
+                    // Math-I (Word)
+	            32'b???????_?????_?????_000_?????_0011011: re[w_rd] <= alu_addiw;// Addiw
+	            32'b0000000_?????_?????_001_?????_0011011: re[w_rd] <= shared_sll;// Slliw
+	            32'b0000000_?????_?????_101_?????_0011011: re[w_rd] <= shared_srl_sra;// Srliw
+	            32'b0100000_?????_?????_101_?????_0011011: re[w_rd] <= shared_srl_sra;// Sraiw
+                    // Math-R
+	            32'b0000000_?????_?????_000_?????_0110011: re[w_rd] <= alu_add ;  // Add
+	            32'b0100000_?????_?????_000_?????_0110011: re[w_rd] <= alu_sub ;  // Sub;
+	            32'b0000000_?????_?????_100_?????_0110011: re[w_rd] <= alu_xor ;  // Xor
+	            32'b0000000_?????_?????_111_?????_0110011: re[w_rd] <= alu_and  ;  // And
+	            32'b0000000_?????_?????_110_?????_0110011: re[w_rd] <= alu_or ;  // Or
+	            32'b0000000_?????_?????_001_?????_0110011: re[w_rd] <= shared_sll ; // Sll 6 length
+                    32'b0000000_?????_?????_101_?????_0110011: re[w_rd] <= shared_srl_sra ; // Srl 6 length
+	            32'b0100000_?????_?????_101_?????_0110011: re[w_rd] <= shared_srl_sra ; // Sra 6 length
+	            32'b0000000_?????_?????_010_?????_0110011: re[w_rd] <= alu_slt;  // Slt
+	            32'b0000000_?????_?????_011_?????_0110011: re[w_rd] <= alu_sltu; // Sltu
+                    // Math-R (Word)
+	            32'b0000000_?????_?????_000_?????_0111011: re[w_rd] <= alu_addw;  // Addw
+	            32'b0100000_?????_?????_000_?????_0111011: re[w_rd] <= alu_subw;  // Subw
+                    32'b0000000_?????_?????_001_?????_0111011: re[w_rd] <= shared_sll;  // Sllw
+                    32'b0000000_?????_?????_101_?????_0111011: re[w_rd] <= shared_srl_sra;  // Srlw
+                    32'b0100000_?????_?????_101_?????_0111011: re[w_rd] <= shared_srl_sra;  // Sraw
+                    // Jump
+	            32'b???????_?????_?????_???_?????_1101111: begin pc <= pc_4 + w_imm_j; if (w_rd != 5'b0) re[w_rd] <= pc; bubble <= 1'b1; end // Jal
+	            32'b???????_?????_?????_???_?????_1100111: begin pc <= alu_addi & 64'hFFFFFFFFFFFFFFFE; if (w_rd != 5'b0) re[w_rd] <= pc; bubble <= 1; end // Jalr (re[w_rs1] + w_imm_i)
+                    // Branch 
+		    32'b???????_?????_?????_000_?????_1100011: begin if (re[w_rs1] == re[w_rs2]) begin pc <= branch; bubble <= 1'b1; end end // Beq
+		    32'b???????_?????_?????_001_?????_1100011: begin if (re[w_rs1] != re[w_rs2]) begin pc <= branch; bubble <= 1'b1; end end // Bne
+		    32'b???????_?????_?????_100_?????_1100011: begin if ($signed(re[w_rs1]) < $signed(re[w_rs2])) begin pc <= branch; bubble <= 1'b1; end end // Blt
+		    32'b???????_?????_?????_101_?????_1100011: begin if ($signed(re[w_rs1]) >= $signed(re[w_rs2])) begin pc <= branch; bubble <= 1'b1; end end // Bge
+		    32'b???????_?????_?????_110_?????_1100011: begin if ($unsigned(re[w_rs1]) < $unsigned(re[w_rs2])) begin pc <= branch; bubble <= 1'b1; end end // Bltu
+		    32'b???????_?????_?????_111_?????_1100011: begin if ($unsigned(re[w_rs1]) >= $unsigned(re[w_rs2])) begin pc <= branch; bubble <= 1'b1; end end // Bgeu
+		    // System-CSR 
+		    32'b???????_?????_?????_001_?????_1110011: begin if (w_csr_id==XCSR) begin do_trap = 1; trap_is_interrupt =0; trap_val = ir; trap_epc = pc_4; trap_cause = ILLEGAL_INSTRUCTION; end
+		                                                     else begin
+                                                                     if (w_rd != 0) re[w_rd] <= csr_read;
+		                                                     if (csr_writable) Csrs[w_csr_id] <= (Csrs[w_csr_id] & ~csr_mask_w)| csr_write_re; end //  (rs1 & csr_mask_w); end // Csrrw logic
+		                                                     //if (w_csr_id==satp) begin tlb_flush <= ~tlb_flush; pc<=pc; bubble<=1; end end // flush pipelien on satp write
+								     end
+		    32'b???????_?????_?????_010_?????_1110011: begin if (w_csr_id==XCSR) begin do_trap = 1; trap_is_interrupt =0; trap_val = ir; trap_epc = pc_4; trap_cause = ILLEGAL_INSTRUCTION; end 
+		                                                     else begin
+                                                                     if (w_rd != 0) re[w_rd] <= csr_read;
+		                                                     if (w_rs1 != 0 && csr_writable) Csrs[w_csr_id] <= (Csrs[w_csr_id] | csr_write_re); end //  (rs1 & csr_mask_w)); end // Csrrs
+								     end
+		    32'b???????_?????_?????_011_?????_1110011: begin if (w_csr_id==XCSR) begin do_trap = 1; trap_is_interrupt =0; trap_val = ir; trap_epc = pc_4; trap_cause = ILLEGAL_INSTRUCTION; end
+		                                                     else begin
+                                                                     if (w_rd != 0) re[w_rd] <= csr_read;
+		                                                     if (w_rs1 != 0 && csr_writable) Csrs[w_csr_id] <= (Csrs[w_csr_id] & ~csr_write_re); end //  (rs1 & csr_mask_w)); end // Csrrc
+								     end
+		    32'b???????_?????_?????_101_?????_1110011: begin if (w_csr_id==XCSR) begin do_trap = 1; trap_is_interrupt =0; trap_val = ir; trap_epc = pc_4; trap_cause = ILLEGAL_INSTRUCTION; end
+		                                                     else begin
+                                                                     if (w_rd != 0) re[w_rd] <= csr_read;
+		                                                     if (csr_writable) Csrs[w_csr_id] <= (Csrs[w_csr_id] & ~csr_mask_w) | csr_write_im; end //  (w_imm_z & csr_mask_w); end // Csrrwi
+								     end
+		    32'b???????_?????_?????_110_?????_1110011: begin if (w_csr_id==XCSR) begin do_trap = 1; trap_is_interrupt =0; trap_val = ir; trap_epc = pc_4; trap_cause = ILLEGAL_INSTRUCTION; end
+		                                                     else begin
+                                                                     if (w_rd != 0) re[w_rd] <= csr_read;
+		                                                     if (w_imm_z != 0 && csr_writable) Csrs[w_csr_id] <= (Csrs[w_csr_id] | csr_write_im); end //  (w_imm_z & csr_mask_w)); end // csrrsi
+								     end
+		    32'b???????_?????_?????_111_?????_1110011: begin if (w_csr_id==XCSR) begin do_trap = 1; trap_is_interrupt =0; trap_val = ir; trap_epc = pc_4; trap_cause = ILLEGAL_INSTRUCTION; end
+		                                                     else begin
+                                                                     if (w_rd != 0) re[w_rd] <= csr_read;
+		                                                     if (w_imm_z != 0 && csr_writable) Csrs[w_csr_id] <= (Csrs[w_csr_id] & ~csr_write_im); end //  (w_imm_z & csr_mask_w)); end // Csrrci
+								     end
+                    // Ecall
+	            32'b0000000_00000_?????_000_?????_1110011: begin 
+	                                                if      (current_privilege_mode == U_mode) trap_cause = UECALL; // 8 indicate Ecall from U-mode; 9 call from S-mode; 11 call from M-mode
+	                                                else if (current_privilege_mode == S_mode) trap_cause = SECALL; // block assign attaintion!
+	                                                else if (current_privilege_mode == M_mode) trap_cause = MECALL;
+                                                        do_trap = 1; trap_is_interrupt = 0; trap_val = 0; trap_epc = pc_4; end
+                    // Ebreak
+	            32'b0000000_00001_?????_000_?????_1110011: begin do_trap = 1; trap_is_interrupt = 0; trap_val = 0; trap_epc = pc_4; trap_cause = BREAK; end
+                    // Mret
+	            32'b0011000_00010_?????_000_?????_1110011: begin  
+	               			       Csrs[mstatus][MIE] <= Csrs[mstatus][MPIE]; // set back interrupt enable(MIE) by MPIE 
+	               			       Csrs[mstatus][MPIE] <= 1; // set previous interrupt enable(MIE) to be 1 (enable)
+	               			       if (Csrs[mstatus][MPP+1:MPP] < M_mode) Csrs[mstatus][MPRV] <= 0; // set mprv to 0, modified privilege, 1 using in MPP not current
+	               			       current_privilege_mode  <= Csrs[mstatus][MPP+1:MPP]; // set back previous mode
+	               			       Csrs[mstatus][MPP+1:MPP] <= 2'b00; // set previous privilege mode(MPP) to be 00 (U-mode)
+	               			       pc <=  Csrs[mepc]; // mepc was +4 by the software handler and written back to sepc
+		          		       bubble <= 1'b1; end
+                    // Sret
+	            32'b0001000_00010_?????_000_?????_1110011: begin      
+	               			       Csrs[sstatus][SIE] <= Csrs[sstatus][SPIE]; // restore interrupt enable(SIE) by SPIE 
+	               			       Csrs[sstatus][SPIE] <= 1; // next trap will have SPIE=1
+	               			       if (Csrs[sstatus][SPP] == 0) current_privilege_mode <= U_mode; else current_privilege_mode  <= S_mode;
+	               			       Csrs[sstatus][SPP] <= 0; // set previous privilege mode(SPP) to be 0 (U-mode)
+	               			       pc <=  Csrs[sepc]; // sepc was +4 by the software handler and written back to sepc
+		          		       bubble <= 1'b1; end 
+		    //32'b00010000010100000000000001110011: begin if ((Csrs[mip] & Csrs[mie]) == 64'b0) begin pc <= pc_4; bubble <= 1; end end// Wfi
+		    32'b00010000010100000000000001110011: begin end// Wfi
+		    32'b?????????????????_000_?????_0001111: begin bubble <= 1; pc <= pc; end // Fence
+		    //32'b?????????????????_000_?????_0001111: begin if (bus_read_enable || bus_write_enable || !bus_read_done || !bus_write_done) begin bubble <= 1; pc <= pc_4; end end // Fence wait r/w
+		    32'b?????????????????_001_?????_0001111: begin cache_epoch <= cache_epoch + 1; bubble <= 1; pc <= pc; end // Fence.i 
+		    //32'b?????????????????_001_?????_0001111: begin cache_epoch <= cache_epoch + 1; end // Fence.i 
+		    //32'b0001001??????????_000_?????_1110011: begin tlb_flush <= 1; bubble <=1; pc <= pc; end // Sfence.vma (supervisor fence for virtual memory address) have to bubble the fetch next ir from old tlb, redo
+		    32'b0001001??????????_000_?????_1110011: begin tlb_flush <= 1; bubble <=1; pc <= pc; end // Sfence.vma  have to bubble the fetch next ir from old tlb, recheck fail in bubble, strap
+		    // Atomic after TLB // -- ATOMIC instructions (A-extension) opcode: 0101111
+		    32'b00010_??_?????_?????_01?_?????_0101111: begin  // lr Lr._mmu 3 cycles lr.w010 lr.d011
+		        if (load_step == 0) begin bus_address <= pda; bus_read_enable <=1; pc <= pc_4; bubble <=1; load_step <=1; bus_ls_type <= w_func3; reserve_addr <= pda; reserve_valid <=1; end
+		        if (load_step == 1 && bus_read_done == 0) begin pc <= pc_4; bubble <= 1; end // bus working
+		        if (load_step == 1 && bus_read_done == 1) begin re[w_rd] <= amo_op_mem; load_step <= 0; end end
+	            32'b00011_??_?????_?????_01?_?????_0101111: begin  // sc sc.w010 sc.d011
+		        if (store_step == 0) begin 
+		            if (!reserve_valid || reserve_addr != pda) begin re[w_rd] <= 1; reserve_valid <= 0; end // finish failed 1 in rd cycle without bubble & clear reserve
+		            else begin bus_address <= pda; 
+			    bus_write_data<= w_atomic_write_data;
+			    bus_write_enable<=1;pc<=pc_4;bubble<=1;store_step<=1;bus_ls_type<=w_func3;reserve_valid<=0;end end //consumed
+		        if (store_step == 1 && bus_write_done == 0) begin pc <= pc_4; bubble <= 1; end // bus working 1 bubble2 this3
+		        if (store_step == 1 && bus_write_done == 1) begin store_step <= 0; re[w_rd] <= 0; end end // sc.w successed return 0 in rd
+	           // Amos(swap, add, xor, and, or, min, max) w/d
+	            32'b?????_??_?????_?????_01?_?????_0101111: begin // not 00010lr/00011sc
+		        if (load_step == 0 && store_step == 0) begin bus_address <= pda; bus_read_enable <= 1; pc <= pc_4; bubble <= 1; load_step <= 1; bus_ls_type <= w_func3; end
+		        if (load_step == 1 && bus_read_done == 0) begin pc <= pc_4; bubble <= 1; end // bus working
+		        if (load_step == 1 && bus_read_done == 1) begin 
+			    re[w_rd] <= amo_op_mem; load_step <= 0;  // finish load
+		            bus_address <= pda;bus_write_enable<=1;pc<=pc_4;bubble<=1;store_step<=1;bus_ls_type<=w_func3; // start store
+			    bus_write_data <= w_atomic_write_data;
+			    if (reserve_valid && reserve_addr[63:3] == pda[63:3]) reserve_valid <= 0; // if lr, break the contract; if in 8-byte
+		        end
+		        if (store_step == 1 && bus_write_done == 0) begin pc <= pc_4; bubble <= 1; end
+		        if (store_step == 1 && bus_write_done == 1) begin store_step <= 0; end
+		    end
+                    // M-Mul
+		    32'b0000001_?????_?????_0??_?????_0110011, // Mul, Mulh, Mulhsu, Mulhu
+		    32'b0000001_?????_?????_000_?????_0111011: // Mulw
+		        begin
+		            if (!mul_done) begin
+		                mul_enable <= 1;
+		                if (!mul_enable) begin // latch
+                                    mul_is_w_latched <=  mul_is_w;
+                                    raw_a_latched <= raw_a;
+                                    raw_b_latched <= raw_b;
+                                    a_is_signed_latched <= a_is_signed;
+                                    b_is_signed_latched <= b_is_signed;
+                                    abs_a_latched <= abs_a;
+                                    abs_b_latched <= abs_b;
+		                    mul_op_type <= w_func3;
+		                    mul_rd_latched <= w_rd;
+		                end // stall pipeline
+		                pc <= pc_4;
+		                bubble <= 1;
+		            end else  begin // if (mul_done)
+		                re[mul_rd_latched] <= w_mul_out;
+		                mul_enable <= 0;
+		                pc <= pc; // wait mul_done from Mul driver for very next similar mulx start
+		                bubble <= 1;
+		            end
+		        end
+		    // M-Div
+		    32'b0000001_?????_?????_1??_?????_0110011, //Div100 divu101 rem110 remu111
+		    32'b0000001_?????_?????_1??_?????_0111011: begin // divw100 divuw101  remw110 remuw111
+			if (!div_done) begin
+			    div_enable <= 1;
+			    if (!div_enable) begin // latch
+                                div_a <= div_is_w ? (w_func3[0] ? {32'b0, rs1[31:0]} : {{32{rs1[31]}}, rs1[31:0]}) : rs1;    // be divided
+                                div_b <= div_is_w ? (w_func3[0] ? {32'b0, rs2[31:0]} : {{32{rs2[31]}}, rs2[31:0]}) : rs2;    // divisro
+                                div_op_signed <= !w_func3[0];  // func3[0] == 0 is signed // 100div/w 101divu 110rem/w 111remu
+                                div_is_rem <= w_func3[1];   // func3[1] == 1 is rem
+                                div_rd <= w_rd; 
+				div_is_w_latched <= div_is_w;
+			    end // stall pipeline
+			    pc <= pc_4;
+			    bubble <= 1;
+			end else begin
+			    re[div_rd] <= div_is_w_latched ? {{32{div_result_out[31]}}, div_result_out[31:0]} : div_result_out;
+			    div_enable <= 0;
+			    pc <= pc; // wait div_done from Div driver for very next similar div/rem start
+			    bubble <= 1;
+			end
+		    end
+                    // FD...
+		    // Unknow instructions
+		    default: begin do_trap = 1; trap_is_interrupt = 0; trap_val = ir; trap_epc = pc_4; trap_cause = ILLEGAL_INSTRUCTION ; end
+               endcase
+	    end 
+	    // Trap
+	    if (do_trap) begin
+		if ((trap_is_interrupt ? Csrs[mideleg][trap_cause] : Csrs[medeleg][trap_cause]) == 1'b1 && current_privilege_mode <= S_mode) begin // Trap in S-mode
+	                 			           Csrs[scause][INTERRUPT] <= trap_is_interrupt; //63_type 0exception 1interrupt|value
+	                 			           Csrs[scause][CAUSE+62:CAUSE] <= trap_cause;
+	                 			           Csrs[sepc] <= trap_epc;
+							   Csrs[stval] <= trap_val; 
+	                 			           Csrs[sstatus][SPP] <= (current_privilege_mode == U_mode ? 0 : 1); // save previous privilege mode(user0 super1) to SPP 
+	                 			           Csrs[sstatus][SPIE] <= Csrs[sstatus][SIE]; // save interrupt enable(SIE) to SPIE 
+	                 			           Csrs[sstatus][SIE] <= 0; // clear SIE
+							   if (trap_is_interrupt && Csrs[stvec][MODE+1:MODE] == 1) pc <= (Csrs[stvec][BASE+61:BASE] << 2) + (trap_cause << 2); //vectorily  
+							   else  pc <= (Csrs[stvec][BASE+61:BASE] << 2) ; // directly Exceptions Never vector 1 will be ignore
+	                 				   current_privilege_mode <= S_mode;
+		    				           bubble <= 1'b1;
+	                 			       end else begin // Trap into M-mode
+	                 			           Csrs[mcause][INTERRUPT] <= trap_is_interrupt ; //63_type 0exception 1interrupt|value
+	                 			           Csrs[mcause][CAUSE+62:CAUSE] <= trap_cause; 
+	                 			           Csrs[mepc] <= trap_epc;
+							   Csrs[mtval] <= trap_val;
+	                 			           Csrs[mstatus][MPIE] <= Csrs[mstatus][MIE]; // save interrupt enable(MIE) to MPIE 
+	                 			           Csrs[mstatus][MIE] <= 0; // clear MIE (not enabled, blocked when trap)
+							   if (trap_is_interrupt && Csrs[mtvec][MODE+1:MODE] == 1) pc <= (Csrs[mtvec][BASE+61:BASE] << 2) + (trap_cause << 2);
+							   else  pc <= (Csrs[mtvec][BASE+61:BASE] << 2);
+	                 				   Csrs[mstatus][MPP+1:MPP] <= current_privilege_mode; // save privilege mode to MPP 
+	                 				   current_privilege_mode <= M_mode;  // set current privilege mode
+		    				           bubble <= 1'b1;
+	                 			       end
+	    end
+        end
+	re[0]<= 64'h0; 
+	sre[0]<= 64'h0;
+                //// meip/seip is triggered by Plic_pending, mtip is triggered by inner Timer, stip is set by mtip trap handler, msip set by opensbi csr, ssip set by software csr
+		Csrs[mip][MEIP] <= meip_interrupt;  
+		Csrs[mip][MTIP] <= mtip_interrupt;//mtime-mtip_interrupt-MTIP|MTIP&MTIE-mtip|hardware mstatus.MIE=0|opensbi MTIE0 surpress repeate+STIP1 to linux|opensbi mret MIE=1(MPIE)|linux ecall sbi_set_timer-MIE=1|linux STIP=0
+		Csrs[mip][SEIP] <= seip_interrupt;
+		Csrs[mip][MSIP] <= msip_interrupt;  
+    end
+endmodule
+
+
+
+
+
+
+
+
+isr.s:
+isr_router:        
+     # x0-x10 are shadowed by hardware, safe to use
+     li sp, 0x1500 # Set stack shadowed sp(x2)
+     li x7, 0x2004 # UART print 
+     # x8 trap_type no change
+     # x9 addr  # x9 keep the address need manage, no change x9
+     # x689 setting
+
+     # x1(ra)2(sp)3456,x10(a0) operating
+     li x3, 13 
+    #beq x8, x3, mmu_d    # d-tlb-refill Load
+     beq x8, x3, mmu      # d-tlb-refill Load
+
+     li x3, 15 
+    #beq x8, x3, mmu_d    # d-tlb-refill Store
+     beq x8, x3, mmu      # d-tlb-refill Store
+
+     li x3, 12 
+    #beq x8, x3, mmu_i    # i-tlb-refill Fetch
+     beq x8, x3, mmu      # i-tlb-refill Fetch
+
+     li x3, 1 
+     beq x8, x3, i_cache_refill
+
+    #li x3, 17 
+    #beq x8, x3, bus_error_strap
+
+     li x3, 18 
+     beq x8, x3, debug
+
+i_cache_refill:
+     andi x9, x9, -16 # 16 bytes align
+     lui x4, 0x20001 # base Cache address
+     ld x3, 0(x9)    # get data
+     sd x3, 0(x4)    # refill line low 64
+     ld x3, 8(x9)    # get data
+     sd x3, 8(x4)    # refill line high 64  
+
+    #lui x3, 0x2     
+    #addi x3, x3, 0x4  # set print           
+    #addi x6, x0, 0x25
+    #sd x6, 0(x3)    #  print %
+
+    #mv a0, x9
+    #call print_reg
+
+    #li a0, "ICAre:"
+    #call print7
+    #mv a0, x9
+    #call print_reg
+
+     addi x8, x0, 0  # success x8=0
+     j return
+
+mmu_i:
+     #li a0, "\n[i"
+     #call print7
+     li a0, "i"
+     sb a0, 0(x7)
+     j mmu
+mmu_d:
+     #li a0, "\n[d"
+     #call print7
+     li a0, "d"
+     sb a0, 0(x7)
+     j mmu
+
+mmu:  # VA 63:39Sign|38:30Vpn[2]|29:21Vpn[1]|20:12Vpn[0]|11:0PageOffset  
+   # 1. Get root table address from csr satp Supervisor Address Translation and Protection
+     csrr x6, satp   # satp 63:60Mode|59:44Asid(0forSimpleOS)|43:0PPNofRootTable
+     slli x6, x6, 20 # clear high mode+Asid Address Space Identifier
+     srli x6, x6, 8  # get level_2 ppn(27 bits) + 12 zero positon, point to start of Root Table
+
+   # 2. Level 2 walk
+     srli x3, x9, 30 # extract vpn[2] bit 38:30 the first 9 bits
+     andi x3, x3, 0x1ff # Mask 9 bits
+     slli x3, x3, 3  # Multiple by 8 (PTE size 8 bytes) Page Table Entry 64 bits
+     add  x6, x6, x3 # x2 = Address of L2 PTE
+     ld x4, 0(x6)    # Load L2 PTE from memory  PTE 63:54Reserved|53:10PPN|9:8RSW|XWRmark|0validBit1
+
+   # 3. Check Leaf
+     andi x3, x4, 1   # check PTE valid bit
+     beqz x3, FAULT
+    #andi x3, x4, 0b10000000 # bit 7 Dirty
+     andi x3, x4, 0xE # bit 3:1 for X/W/R
+     bnez x3, FINISH_1GB  # If not zero, it's leaf. We get the address.
+
+   # 4. Prepare for Level 1
+     slli x6, x4, 10 # clear top 10 reserved bits
+     srli x6, x6, 20 # Extract PPN from L2 PTE
+     slli x6, x6, 12 # x2 = Address of L1 Table
+
+   # 5. Level 1 Walk
+     srli x3, x9, 21 # Extract VPN[1] bit 29:21
+     andi x3, x3, 0x1ff # Mask 9 bits
+     slli x3, x3, 3  # Multiple by 8 (PTE size 8 bytes)
+     add  x6, x6, x3 # x2 = Address of L1 PTE
+     ld x4, 0(x6)    # Load L1 PTE from memory
+
+   # 6. Check Leaf
+     andi x3, x4, 1   # check PTE valid bit
+     beqz x3, FAULT
+     andi x3, x4, 0xE # bit 3:1 for X/W/R 1110
+     bnez x3, FINISH_2MB   # If not zero, it's leaf. We get the address.
+
+   # 7. Prepare for Level 0
+     slli x6, x4, 10 # clear top 10 reserved bits
+     srli x6, x6, 20 # Extract PPN from L1 PTE
+     slli x6, x6, 12 # x2 = Address of L0 Table
+
+   # 8. Level 0 Walk
+     srli x3, x9, 12 # Extract VPN[0] bit 20:12
+     andi x3, x3, 0x1ff # Mask 9 bits
+     slli x3, x3, 3  # Multiple by 8 (PTE size 8 bytes)
+     add  x6, x6, x3 # x2 = Address of L0 PTE
+     ld x4, 0(x6)    # Load L0 PTE from memory
+
+   # 9. Check valid
+     andi x3, x4, 1   # check PTE valid bit
+     beqz x3, FAULT
+     andi x3, x4, 0xE # bit 3:1 for X/W/R 1110
+     beqz x3, FAULT   # It should be leaf not 0
+
+
+   # fall to 4KB finish
+
+FINISH_4KB:
+     jal x5, CHECK_PERM_AND_AD
+     slli x4, x4, 10  # mask out reserved bits
+     srli x4, x4, 20 
+     slli x4, x4, 12 
+     j WRITE_TLB
+                                            
+FINISH_2MB:
+     jal x5, CHECK_PERM_AND_AD
+     slli x4, x4, 10  # mask out reserved bits
+     srli x4, x4, 20 
+     slli x4, x4, 12 
+     li x3, 0x001ff000 # mask for VA[20:12]
+     and x3, x3, x9    
+     add x4, x4, x3   
+     j WRITE_TLB
+
+FINISH_1GB:
+     jal x5, CHECK_PERM_AND_AD
+     slli x4, x4, 10  # mask out reserved bits
+     srli x4, x4, 20  # get PPN from PTE(PTE's data struction?)  64:54Reserved 53:10PPN # 9:8RSW 7Dirty 6Accessed 5Global 4User 3Executable 2Write 1Readable 0Valid
+     slli x4, x4, 12  # PPN posint [38:12] in satp
+     li x3, 0x3ffff000 # mask for VA[29:12]
+     and x3, x3, x9    # extrac from VA
+     add x4, x4, x3    # add offset to PPN
+     j WRITE_TLB
+
+# --- Permissions, U-Bit and A/D Bits --
+CHECK_PERM_AND_AD:                
+     # 1. Check U-Bit based on VA sign (x9)
+     andi x3, x4, 0x10 # Extract U-bit (Bit 4)
+     bltz x9, check_kernel_u
+check_user_u:
+     beqz x3, PERM_FAULT # User VA (>=0) requires U=1
+     j check_permissions
+check_kernel_u:
+     bnez x3, PERM_FAULT # Kernel VA (<0) requires U=0
+check_permissions:
+     # 2. CHECK R/W/X permissions
+     li x3, 15
+    #li x3, 14
+     beq x8, x3, check_store
+     li x3, 12
+     beq x8, x3, check_fetch
+check_load:
+     andi x3, x4, 2 # PET.R (bit 1)
+     beqz x3, PERM_FAULT
+     j update_ad
+check_store:
+     andi x3, x4, 4 # PET.W (bit 2)
+     beqz x3, PERM_FAULT
+     j update_ad
+check_fetch:
+     andi x3, x4, 8 # PET.X (bit 3)
+     beqz x3, PERM_FAULT
+update_ad:
+     # 3. Update A/D bits
+     ori x4, x4, 0x40  # set Accessed bit (bit 6)
+     li x3, 15
+    #li x3, 14
+     bne x8, x3, write_pte
+     ori x4, x4, 0x80  # set Dirty bit (bit 7) if store
+write_pte:
+     sd x4, 0(x6) # write updated PTE back to memory
+     jalr x0, 0(x5)  # return to leaf formatter
+    
+    
+# -- Hardware writeback --
+WRITE_TLB:
+     # 9. Writ ppn back to hardware mmu trap
+     lui x6, 0x20000 # Magic TLB address
+     sd x4, 0(x6)
+
+    #li a0, "TLBre:"
+    #call print7
+    #mv a0, x9
+    #call print_reg
+ 
+    #mv a0, x4
+    #call print_reg
+
+    #addi x6, x0, 93
+    #sd x6, 0(x7)    #  print ]
+
+     addi x8, x0, 0  # success x8=0
+     j return
+
+
+FAULT: # error trap?
+
+     li a0, "TLBfl:"
+     call print7
+     mv a0, x9
+     call print_reg
+
+     addi x6, x0, 33
+     sd x6, 0(x7)    #  print !
+
+     j return
+#FAULT:
+PERM_FAULT:
+#    # force the trap cuase to trigger a real S-mode fualt for linux
+#    li x3, 14
+#    bne x8, x3, trigger_trap
+#    li x8, 15  # Convert to Store Page Fault (15)
+#trigger_trap:
+#    # leaving x8 != 0
+    j return
+
+return:    
+#     li x3, 14
+#     bne x8, x3, final_mret
+#     li x8, 15  # Convert to Store Page Fault (15)
+#final_mret:
+     mret
+
+#Seems VA has 3 table number, satp has Root Table(vpn[2]) address via PPN(ppn+12 space), the we can find PTE in table 2, and PTE has PPN, we can use table2PPN to find table 1 address plus vpn1 number to find PTE in table1, then we get table1 PPN for table0 address, and together with vpn0 to find PTE in talbe0, this is  the last ppa, by ppn + 12 bit of VA low.
+
+
+
+debug:
+    #li a0, "\nDEBUG" 
+    #call print7
+
+     li a0, "\n|ir:" 
+     call print7
+    #csrr a0, 0xF11 # mvendorid/ir
+     csrr a0, mvendorid # mvendorid/ir
+     call print_reg
+
+     li a0, "|pc:" 
+     call print7
+    #csrr a0, 0xF12 # marchid/ppc
+     csrr a0, mimpid
+     call print_reg
+
+   # li a0, "|pda:" 
+   # call print7
+   ##csrr a0, 0xF13 # mimpid/pda
+   # csrr a0, mimpid # mimpid/pda
+   # call print_reg
+
+    li a0, "|mip:" 
+    call print7
+    csrr a0, marchid
+    call print_reg
+
+   #li a0, "|mstas:" 
+   #call print7
+   #csrr a0, mstatus
+   #call print_reg
+
+
+     li a0, "|" 
+     call putchar
+
+
+     
+     addi x8, x0, 0  # success x8=0
+     j return
+
+
+
+
+
+
+
+# -------------- use ra(x1), x2-x5, a0(x10) have to save in stack and restore -------
+print_reg: # a0
+    addi sp, sp, -40
+    sd ra, 0(sp)
+    sd x6, 8(sp)
+    sd x3, 16(sp)
+    sd x4, 24(sp)
+    sd x5, 32(sp)
+    mv x6, a0
+    li a0, "0"
+    call putchar
+    li a0, "x"
+    call putchar
+    li x3, 60 
+p_loop:
+    srl x4, x6, x3      # get high nibble
+    andi x4, x4, 0xF
+    slti x5, x4, 10     # if < 10 number
+    beq x5, x0, letter
+    addi x4, x4, 48     # 0 is "0" ascii 48
+    j print_h
+letter:
+    addi x4, x4, 55     # 10 is "A" ascii 65 ..
+print_h:
+    call wait_uart
+    sb x4, 0(x7)       # print
+    addi x3, x3, -4
+    bge x3, x0, p_loop 
+    ld ra, 0(sp)
+    ld x6, 8(sp)
+    ld x3, 16(sp)
+    ld x4, 24(sp)
+    ld x5, 32(sp)
+    addi sp, sp, 40
+    ret
+
+
+putchar:  # a0
+    addi sp, sp, -8
+    sd ra, 0(sp)
+    call wait_uart
+    sb a0, 0(x7)
+    ld ra, 0(sp)
+    addi sp, sp, 8
+    ret
+
+
+puts: # a0 addr
+    addi sp, sp, -16
+    sd ra, 0(sp)
+    sd x6, 8(sp)
+    mv x6, a0
+puts_loop:
+    lbu a0, 0(x6)
+    beq a0, x0, stop_puts # \x00 for end of string
+    call putchar # a0 char
+    addi x6, x6, 1 # next byte
+    j puts_loop
+stop_puts:
+    ld ra, 0(sp)
+    ld x6, 8(sp)
+    addi sp, sp, 16
+    ret
+
+
+wait_uart:
+    addi sp, sp, -16
+    sd x6, 0(sp)
+    sd ra, 8(sp)
+wait_uart_loop:
+   #li a0, 65  # A
+   #sb a0, 0(x7)
+    lw x6, 0(x7)
+    bgt zero, x6, wait_uart_loop
+    ld x6, 0(sp)
+    ld ra, 8(sp)
+    addi sp, sp, 16
+    ret
+
+print7: # a0, 7 char left one for null
+    addi sp, sp, -16
+    sd a0, 0(sp)
+    sd ra, 8(sp)
+    mv a0, sp
+    call puts
+    ld a0, 0(sp)
+    ld ra, 8(sp)
+    addi sp, sp, 16
+    ret
+
+
+
+
+   # csrr t0, mcause  # check type
+   # 63 bit 1 interrupt
+   # 63 bit 0 exception
+
+   # Exception 0
+   # 0 pc is not aligned to 4 bytes
+   # 1 instruction is not accessable
+   # 2 illegal instruction
+   # 3 breakpoint
+   # 4 load address not aligned lw!=4  ld!=8 lh!=2?
+   # 5 load access fault
+   # 6 store/amo address not aligned
+   # 7 store/amo access fault
+   # 8 ecall from u-mode
+   # 9 ecall from s-mode
+   # 10 --(reserved)
+   # 11 ecall from m-mode
+   # 12 instruciton page fault
+   # 13 load page fault
+   # 14 --
+   # 15 store/amo page fault
+   # 16+ --
+
+   # Interrupt 1
+   # 0 user software interrupt
+   # 1 supervisor software interrupt
+   # 2 -- 
+   # 3 machine software interrupt
+   # 4 user timer software interrupt
+   # 5 supervisor timer software interrupt
+   # 6 --
+   # 7 machine timer interrupt
+   # 8 user external interrupt
+   # 9 supervisor external interrupt
+   # 10 --
+   # 11 machine external interrupt
+   # 12-15 --
+   # 16+ local define interrupt
+
