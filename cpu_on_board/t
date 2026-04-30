@@ -1,4 +1,59 @@
-TLBfl:0x000000008020009C!Linux version 6.12.0 (root@ashah-standardpcq35ich92009) (riscv64-buildroot-linux-musl-gcc.br_real (Buildroot -g0c65e4995-dirty) 14.3.0, GNU ld (GNU Binutils) 2.44) #19 Sat Apr 18 22:51:39 CST 2026
+OpenSBI v1.3
+   ____                    _____ ____ _____
+  / __ \                  / ____|  _ \_   _|
+ | |  | |_ __   ___ _ __ | (___ | |_) || |
+ | |  | | '_ \ / _ \ '_ \ \___ \|  _ < | |
+ | |__| | |_) |  __/ | | |____) | |_) || |_
+  \____/| .__/ \___|_| |_|_____/|___/_____|
+        | |
+        |_|
+
+Platform Name             : riscv-virtio,qemu
+Platform Features         : medeleg
+Platform HART Count       : 1
+Platform IPI Device       : aclint-mswi
+Platform Timer Device     : aclint-mtimer @ 12500000Hz
+Platform Console Device   : sifive_uart
+Platform HSM Device       : ---
+Platform PMU Device       : ---
+Platform Reboot Device    : ---
+Platform Shutdown Device  : ---
+Platform Suspend Device   : ---
+Platform CPPC Device      : ---
+Firmware Base             : 0x80000000
+Firmware Size             : 318 KB
+Firmware RW Offset        : 0x40000
+Firmware RW Size          : 62 KB
+Firmware Heap Offset      : 0x47000
+Firmware Heap Size        : 34 KB (total), 2 KB (reserved), 9 KB (used), 22 KB (free)
+Firmware Scratch Size     : 4096 B (total), 760 B (used), 3336 B (free)
+Runtime SBI Version       : 1.0
+
+Domain0 Name              : root
+Domain0 Boot HART         : 0
+Domain0 HARTs             : 0*
+Domain0 Region00          : 0x0000000002000000-0x000000000200ffff M: (I,R,W) S/U: ()
+Domain0 Region01          : 0x0000000080040000-0x000000008004ffff M: (R,W) S/U: ()
+Domain0 Region02          : 0x0000000080000000-0x000000008003ffff M: (R,X) S/U: ()
+Domain0 Region03          : 0x0000000000000000-0xffffffffffffffff M: (R,W,X) S/U: (R,W,X)
+Domain0 Next Address      : 0x0000000080200000
+Domain0 Next Arg1         : 0x0000000080100000
+Domain0 Next Mode         : S-mode
+Domain0 SysReset          : yes
+Domain0 SysSuspend        : yes
+
+Boot HART ID              : 0
+Boot HART Domain          : root
+Boot HART Priv Version    : unknown
+Boot HART Base ISA        : rv64ima
+Boot HART ISA Extensions  : time
+Boot HART PMP Count       : 1
+Boot HART PMP Granularity : 4
+Boot HART PMP Address Bits: 54
+Boot HART MHPM Count      : 0
+Boot HART MIDELEG         : 0x0000000000000222
+Boot HART MEDELEG         : 0x000000000000b109
+Linux version 6.12.0 (root@ashah-standardpcq35ich92009) (riscv64-buildroot-linux-musl-gcc.br_real (Buildroot -g0c65e4995-dirty) 14.3.0, GNU ld (GNU Binutils) 2.44) #19 Sat Apr 18 22:51:39 CST 2026
 Machine model: riscv-virtio,qemu
 SBI specification v1.0 detected
 SBI implementation ID=0x1 Version=0x10003
@@ -179,7 +234,7 @@ initcall 0xffffffff80115008 returned 0 after 49 usecs
 calling  0xffffffff8011504c @ 1
 initcall 0xffffffff8011504c returned 0 after 50 usecs
 calling  0xffffffff80115144 @ 1
-initcall 0xffffffff80115144 returned 0 after 50 usecs
+initcall 0xffffffff80115144 returned 0 after 49 usecs
 calling  0xffffffff80115178 @ 1
 initcall 0xffffffff80115178 returned 0 after 81 usecs
 calling  0xffffffff80115320 @ 1
@@ -201,11 +256,11 @@ initcall 0xffffffff8010d108 returned 0 after 1314 usecs
 calling  0xffffffff8010d258 @ 1
 initcall 0xffffffff8010d258 returned 0 after 54 usecs
 calling  0xffffffff8010d2a0 @ 1
-initcall 0xffffffff8010d2a0 returned 0 after 570 usecs
+initcall 0xffffffff8010d2a0 returned 0 after 571 usecs
 calling  0xffffffff8010d304 @ 1
 initcall 0xffffffff8010d304 returned 0 after 1288 usecs
 calling  0xffffffff8010d38c @ 1
-initcall 0xffffffff8010d38c returned 0 after 5 usecs
+initcall 0xffffffff8010d38c returned 0 after 4 usecs
 calling  0xffffffff8010d660 @ 1
 initcall 0xffffffff8010d660 returned 0 after 83 usecs
 calling  0xffffffff8010d8b0 @ 1
@@ -222,7 +277,7 @@ initcall 0xffffffff80113d00 returned 0 after 53 usecs
 calling  0xffffffff8011411c @ 1
 initcall 0xffffffff8011411c returned 0 after 15 usecs
 calling  0xffffffff8011533c @ 1
-initcall 0xffffffff8011533c returned 0 after 54703 usecs
+initcall 0xffffffff8011533c returned 0 after 54704 usecs
 calling  0xffffffff80115a48 @ 1
 initcall 0xffffffff80115a48 returned 0 after 467 usecs
 calling  0xffffffff80116558 @ 1
@@ -237,7 +292,7 @@ initcall 0xffffffff80116580 returned 0 after 1845 usecs
 calling  0xffffffff80116a9c @ 1
 initcall 0xffffffff80116a9c returned 0 after 476 usecs
 calling  0xffffffff80116af4 @ 1
-initcall 0xffffffff80116af4 returned 0 after 637 usecs
+initcall 0xffffffff80116af4 returned 0 after 638 usecs
 calling  0xffffffff80116b4c @ 1
 initcall 0xffffffff80116b4c returned 0 after 509 usecs
 calling  0xffffffff80116cb4 @ 1
@@ -245,8 +300,8 @@ initcall 0xffffffff80116cb4 returned 0 after 3 usecs
 calling  0xffffffff80116d00 @ 1
 printk: legacy console [hvc0] enabled
 printk: legacy console [hvc0] enabled
-initcall 0xffffffff80116d00 returned 0 after 101793 usecs
-initcall 0xffffffff80116d00 returned 0 after 101793 usecs
+initcall 0xffffffff80116d00 returned 0 after 101795 usecs
+initcall 0xffffffff80116d00 returned 0 after 101795 usecs
 calling  0xffffffff801175ac @ 1
 calling  0xffffffff801175ac @ 1
 initcall 0xffffffff801175ac returned 0 after 88 usecs
@@ -301,8 +356,8 @@ initcall 0xffffffff8010b2fc returned 0 after 183 usecs
 initcall 0xffffffff8010b2fc returned 0 after 183 usecs
 calling  0xffffffff8010b470 @ 1
 calling  0xffffffff8010b470 @ 1
-initcall 0xffffffff8010b470 returned 0 after 33 usecs
-initcall 0xffffffff8010b470 returned 0 after 33 usecs
+initcall 0xffffffff8010b470 returned 0 after 32 usecs
+initcall 0xffffffff8010b470 returned 0 after 32 usecs
 calling  0xffffffff8010b704 @ 1
 calling  0xffffffff8010b704 @ 1
 initcall 0xffffffff8010b704 returned 0 after 35 usecs
@@ -313,8 +368,8 @@ initcall 0xffffffff8010b7a0 returned 0 after 58 usecs
 initcall 0xffffffff8010b7a0 returned 0 after 58 usecs
 calling  0xffffffff8010b768 @ 1
 calling  0xffffffff8010b768 @ 1
-initcall 0xffffffff8010b768 returned 0 after 70 usecs
-initcall 0xffffffff8010b768 returned 0 after 70 usecs
+initcall 0xffffffff8010b768 returned 0 after 69 usecs
+initcall 0xffffffff8010b768 returned 0 after 69 usecs
 calling  0xffffffff8010c0d0 @ 1
 calling  0xffffffff8010c0d0 @ 1
 initcall 0xffffffff8010c0d0 returned 0 after 125 usecs
@@ -361,7 +416,7 @@ Run /init as init process
     HOME=/
     TERM=linux
     TERM=linux
-TLBfl:0x00000000000B3501!TLBfl:0x000000000001017C!TLBfl:0x0000000000070370!TLBfl:0x000000000008A9DC!TLBfl:0x0000000000090AB4!TLBfl:0x00000000000B4B30!TLBfl:0x00000000000B2FD0!TLBfl:0x00000000000ADD94!TLBfl:0x000000000003B788!TLBfl:0x0000000021532000!TLBfl:0x0000003FACB3A000!TLBfl:0x0000003FACB39000!TLBfl:0x0000003FACB38000!TLBfl:0x000000000002F9D4!TLBfl:0x00000000000B02E7!TLBfl:0x0000000000061548!TLBfl:0x0000003FCC7C5440!Kernel panic - not syncing: Attempted to kill init! exitcode=0x00000000
+Kernel panic - not syncing: Attempted to kill init! exitcode=0x00000000
 Kernel panic - not syncing: Attempted to kill init! exitcode=0x00000000
 ---[ end Kernel panic - not syncing: Attempted to kill init! exitcode=0x00000000 ]---
 ---[ end Kernel panic - not syncing: Attempted to kill init! exitcode=0x00000000 ]---

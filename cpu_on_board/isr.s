@@ -174,10 +174,49 @@ FINISH_1GB:
      j WRITE_TLB
 
 # --- Permissions, U-Bit and A/D Bits --
+#we have PERM_FAULTs at:
+#S fetch U instruction page
+#S load/store memory page with SUM=0
+#U access S memory(PTE U=0)
+#S/U load R=0 page with X=0
+#S/U load  R=0 page with X=1, MXR=0
+#S/U store W=0 page
+#S/U fetch  X=0 page
+#if pass all check , update A/D accordingly
 CHECK_PERM_AND_AD:                
-#     # 1. Check U-Bit based on VA sign (x9)
-#     andi x3, x4, 0x10 # Extract U-bit (Bit 4)
-#     bltz x9, check_kernel_u
+     # 1. Check U-Bit based on VA sign (x9)
+    #andi x3, x4, 0x10 # Extract U-bit (Bit 4)
+ 
+     csrr x3, 0x300 # read mstatus
+     srli x3, x3, 11
+     andi x3, x3, 3 # MPP  0=User 1=Supervisor 3=Machine
+     
+     li x1, 3
+     beq x3, x1, check_permissions  # M-mode bypass all u/s check, do RXW check only
+
+     li x1, 0
+     beqz x3, is_user_mode
+
+    #bltz x9, check_kernel_u
+is_supervisor_mode:
+     andi x3, x4, 0x10  # Extra PTE.U (bit 4)
+     beqz x3, check_permissions 
+
+     # S-mode access U=1 page
+     li x3, 12                 # fetch S-mode cannot execute User memory
+     beq x8, x3, PERM_FAULT
+
+     csrr x3, 0x300
+     srli x3, x3, 18 # SUM is bit 18 (Supervisor User Memory access)
+     andi x3, x3, 1
+     beqz x3, PERM_FAULT  # SUM==0 -> Fault  when S read U page with SUM=0
+
+     j check_permissions
+is_user_mode:
+     andi x3, x4, 0x10  # Extra PTE.U (bit 4)
+     beqz x3, PERM_FAULT # User accessing U=0 never allowed
+#    j check_permissions
+
 #check_user_u:
 #     beqz x3, PERM_FAULT # User VA (>=0) requires U=1
 #     j check_permissions
@@ -192,18 +231,31 @@ check_permissions:
      beq x8, x3, check_fetch
 check_load:
      andi x3, x4, 2 # PET.R (bit 1)
+     bnez x3, update_ad
+     
+     # if not R=1 readable, check if X=1 Executable and MXR=1(Make Executable Readable)
+     andi x3, x4, 8 # PTE.X
      beqz x3, PERM_FAULT
+
+     csrr x3, 0x300
+     srli x3, x3, 19 # MXR is bit 19
+     andi x3, x3, 1
+     beqz x3, PERM_FAULT
+
      j update_ad
 check_store:
      andi x3, x4, 4 # PET.W (bit 2)
      beqz x3, PERM_FAULT
+
      j update_ad
 check_fetch:
      andi x3, x4, 8 # PET.X (bit 3)
      beqz x3, PERM_FAULT
+
 update_ad:
      # 3. Update A/D bits
-     ori x4, x4, 0x40  # set Accessed bit (bit 6)
+     #ori x4, x4, 0x40  # set Accessed bit (bit 6)
+     ori x4, x4, 0x41  # set Accessed bit (bit 6) and Valid bit(bit 0)
      li x3, 15
     #li x3, 14
      bne x8, x3, write_pte
@@ -444,3 +496,5 @@ print7: # a0, 7 char left one for null
    # 11 machine external interrupt
    # 12-15 --
    # 16+ local define interrupt
+
+
