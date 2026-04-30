@@ -1,6 +1,6 @@
 isr_router:        
      # x0-x10 are shadowed by hardware, safe to use
-     li sp, 0x1800 # Set stack shadowed sp(x2)
+     li sp, 0x1500 # Set stack shadowed sp(x2)
     #li sp, 0x801F0000 # Set stack shadowed sp(x2)
      li x7, 0x2004 # UART print 
      # x8 trap_type no change
@@ -184,58 +184,58 @@ FINISH_1GB:
 #S/U fetch  X=0 page
 #if pass all check , update A/D accordingly
 CHECK_PERM_AND_AD:                
-     # 1. Check U-Bit based on VA sign (x9)
-    #andi x3, x4, 0x10 # Extract U-bit (Bit 4)
- 
-    #csrr x3, 0x300 # read mstatus
-    #srli x3, x3, 11
-    #andi x3, x3, 3 # MPP  0=User 1=Supervisor 3=Machine
-    #
-    #li x6, 3
-    #beq x3, x6, check_permissions  # M-mode bypass all u/s check, do RXW check only
-
-    #li x6, 0
-    #beqz x3, is_user_mode
-
-    #bltz x9, check_kernel_u
-
-     bltz x9, is_supervisor_mode # VA address like FFFFFFFF........
-
-     andi x3, x4, 0x10  # Extra PTE.U (bit 4)
-    #bnez x3, is_user_mode
-
-    #srli x3, x9, 30 # 1:1 kernel identity map (U=0 and va is 0x8000_0000 to 0xbfff_ffff)
-    #addi x3, x3, -2
-    #beq x3, x0, is_supervisor_mode
-
-     beqz x3, is_supervisor_mode  # is U=0, treat as S-mode(works for any 1:1 map)
-     
-     # still security hole that User can read U=0 page
-
-is_user_mode:
-    #andi x3, x4, 0x10  # Extra PTE.U (bit 4)
-    #beqz x3, PERM_FAULT # User accessing U=0 never allowed
-     j check_permissions
-is_supervisor_mode:
-     andi x3, x4, 0x10  # Extra PTE.U (bit 4)
-     beqz x3, check_permissions 
-
-     # S-mode access U=1 page
-     li x3, 12                 # fetch S-mode cannot execute User memory
-     beq x8, x3, PERM_FAULT
-
-     csrr x3, 0x300
-     srli x3, x3, 18 # SUM is bit 18 (Supervisor User Memory access)
-     andi x3, x3, 1
-     beqz x3, PERM_FAULT  # SUM==0 -> Fault  when S read U page with SUM=0
-
-#    j check_permissions
-
-#check_user_u:
-#     beqz x3, PERM_FAULT # User VA (>=0) requires U=1
+#     # 1. Check U-Bit based on VA sign (x9)
+#    #andi x3, x4, 0x10 # Extract U-bit (Bit 4)
+# 
+#    #csrr x3, 0x300 # read mstatus
+#    #srli x3, x3, 11
+#    #andi x3, x3, 3 # MPP  0=User 1=Supervisor 3=Machine
+#    #
+#    #li x6, 3
+#    #beq x3, x6, check_permissions  # M-mode bypass all u/s check, do RXW check only
+#
+#    #li x6, 0
+#    #beqz x3, is_user_mode
+#
+#    #bltz x9, check_kernel_u
+#
+#     bltz x9, is_supervisor_mode # VA address like FFFFFFFF........
+#
+#     andi x3, x4, 0x10  # Extra PTE.U (bit 4)
+#    #bnez x3, is_user_mode
+#
+#    #srli x3, x9, 30 # 1:1 kernel identity map (U=0 and va is 0x8000_0000 to 0xbfff_ffff)
+#    #addi x3, x3, -2
+#    #beq x3, x0, is_supervisor_mode
+#
+#     beqz x3, is_supervisor_mode  # is U=0, treat as S-mode(works for any 1:1 map)
+#     
+#     # still security hole that User can read U=0 page
+#
+#is_user_mode:
+#    #andi x3, x4, 0x10  # Extra PTE.U (bit 4)
+#    #beqz x3, PERM_FAULT # User accessing U=0 never allowed
 #     j check_permissions
-#check_kernel_u:
-#     bnez x3, PERM_FAULT # Kernel VA (<0) requires U=0
+#is_supervisor_mode:
+#     andi x3, x4, 0x10  # Extra PTE.U (bit 4)
+#     beqz x3, check_permissions 
+#
+#     # S-mode access U=1 page
+#     li x3, 12                 # fetch S-mode cannot execute User memory
+#     beq x8, x3, PERM_FAULT
+#
+#     csrr x3, 0x300
+#     srli x3, x3, 18 # SUM is bit 18 (Supervisor User Memory access)
+#     andi x3, x3, 1
+#     beqz x3, PERM_FAULT  # SUM==0 -> Fault  when S read U page with SUM=0
+#
+##    j check_permissions
+#
+##check_user_u:
+##     beqz x3, PERM_FAULT # User VA (>=0) requires U=1
+##     j check_permissions
+##check_kernel_u:
+##     bnez x3, PERM_FAULT # Kernel VA (<0) requires U=0
 check_permissions:
      # 2. CHECK R/W/X permissions
      li x3, 15
