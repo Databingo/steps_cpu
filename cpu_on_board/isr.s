@@ -173,16 +173,6 @@ FINISH_1GB:
 
      j WRITE_TLB
 
-# --- Permissions, U-Bit and A/D Bits --
-#we have PERM_FAULTs at:
-#S fetch U instruction page
-#S load/store memory page with SUM=0
-#U access S memory(PTE U=0)
-#S/U load R=0 page with X=0
-#S/U load  R=0 page with X=1, MXR=0
-#S/U store W=0 page
-#S/U fetch  X=0 page
-#if pass all check , update A/D accordingly
 CHECK_PERM_AND_AD:                
      li a0, "ch_ad:"
      call print7
@@ -253,7 +243,8 @@ check_load:
      andi x3, x4, 8 # PTE.X
      beqz x3, PERM_FAULT
 
-     csrr x3, 0x300
+    #csrr x3, 0x300
+     csrr x3, mstatus # 0x300
      srli x3, x3, 19 # MXR is bit 19
      andi x3, x3, 1
      beqz x3, PERM_FAULT
@@ -270,8 +261,8 @@ check_fetch:
 
 update_ad:
      # 3. Update A/D bits
-     #ori x4, x4, 0x40  # set Accessed bit (bit 6)
-     ori x4, x4, 0x41  # set Accessed bit (bit 6) and Valid bit(bit 0)
+     ori x4, x4, 0x40  # set Accessed bit (bit 6)
+    #ori x4, x4, 0x41  # set Accessed bit (bit 6) and Valid bit(bit 0)
      li x3, 15
     #li x3, 14
      bne x8, x3, write_pte
