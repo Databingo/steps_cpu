@@ -1,5 +1,5 @@
 Flow report for cpu_on_board
-Thu Apr 30 20:27:12 2026
+Thu Apr 30 20:33:57 2026
 Quartus II 32-bit Version 13.0.1 Build 232 06/12/2013 Service Pack 1 SJ Web Edition
 
 
@@ -40,7 +40,7 @@ applicable agreement for further details.
 +--------------------------------------------------------------------------------------+
 ; Flow Summary                                                                         ;
 +------------------------------------+-------------------------------------------------+
-; Flow Status                        ; Successful - Thu Apr 30 20:27:12 2026           ;
+; Flow Status                        ; Successful - Thu Apr 30 20:33:57 2026           ;
 ; Quartus II 32-bit Version          ; 13.0.1 Build 232 06/12/2013 SP 1 SJ Web Edition ;
 ; Revision Name                      ; cpu_on_board                                    ;
 ; Top-level Entity Name              ; cpu_on_board                                    ;
@@ -167,7 +167,9 @@ applicable agreement for further details.
 ; Assembler            ; 00:00:24     ; 1.0                     ; 383 MB              ; 00:00:24                           ;
 ; MIF/HEX Update       ; 00:00:14     ; 1.0                     ; 381 MB              ; 00:00:13                           ;
 ; Assembler            ; 00:00:21     ; 1.0                     ; 383 MB              ; 00:00:20                           ;
-; Total                ; 01:17:21     ; --                      ; --                  ; 01:19:35                           ;
+; MIF/HEX Update       ; 00:00:16     ; 1.0                     ; 381 MB              ; 00:00:16                           ;
+; Assembler            ; 00:00:23     ; 1.0                     ; 383 MB              ; 00:00:23                           ;
+; Total                ; 01:18:00     ; --                      ; --                  ; 01:20:14                           ;
 +----------------------+--------------+-------------------------+---------------------+------------------------------------+
 
 
@@ -207,6 +209,8 @@ applicable agreement for further details.
 ; Assembler            ; ashah-standardpcq35ich92009 ; Debian GNU/Linux ; 12         ; x86_64         ;
 ; MIF/HEX Update       ; ashah-standardpcq35ich92009 ; Debian GNU/Linux ; 12         ; x86_64         ;
 ; Assembler            ; ashah-standardpcq35ich92009 ; Debian GNU/Linux ; 12         ; x86_64         ;
+; MIF/HEX Update       ; ashah-standardpcq35ich92009 ; Debian GNU/Linux ; 12         ; x86_64         ;
+; Assembler            ; ashah-standardpcq35ich92009 ; Debian GNU/Linux ; 12         ; x86_64         ;
 +----------------------+-----------------------------+------------------+------------+----------------+
 
 
@@ -216,6 +220,8 @@ applicable agreement for further details.
 quartus_map --read_settings_files=on --write_settings_files=off cpu_on_board -c cpu_on_board
 quartus_fit --read_settings_files=off --write_settings_files=off cpu_on_board -c cpu_on_board
 quartus_asm --read_settings_files=off --write_settings_files=off cpu_on_board -c cpu_on_board
+quartus_cdb --read_settings_files=on --update_mif cpu_on_board -c cpu_on_board
+quartus_asm --read_settings_files=on --write_settings_files=off cpu_on_board -c cpu_on_board
 quartus_cdb --read_settings_files=on --update_mif cpu_on_board -c cpu_on_board
 quartus_asm --read_settings_files=on --write_settings_files=off cpu_on_board -c cpu_on_board
 quartus_cdb --read_settings_files=on --update_mif cpu_on_board -c cpu_on_board
