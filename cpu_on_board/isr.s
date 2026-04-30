@@ -236,13 +236,13 @@ WRITE_TLB:
 
 FAULT: # error trap?
 
-     li a0, "TLBfl:"
-     call print7
-     mv a0, x9
-     call print_reg
+#    li a0, "TLBfl:"
+#    call print7
+#    mv a0, x9
+#    call print_reg
 
-     addi x6, x0, 33
-     sd x6, 0(x7)    #  print !
+#    addi x6, x0, 33
+#    sd x6, 0(x7)    #  print !
 
      j return
 #FAULT:
