@@ -15,7 +15,8 @@ cp ../init.sh init
 chmod +x bin/busybox
 chmod +x init
 
-find . | cpio -H newc -o | gzip > ../rootfs.cpio.gz 
+#find . | cpio -H newc -o | gzip > ../rootfs.cpio.gz 
+find . | cpio -H newc -o  > ../rootfs.cpio 
 
 
 
