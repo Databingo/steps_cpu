@@ -1,12 +1,16 @@
-#!/bin/sh
+#!/bin/busybox sh
 
+echo "init start"
 /bin/busybox --install -s /bin
-
 /bin/busybox mount -t devtmpfs none /dev
 /bin/busybox mount -t proc none /proc
 /bin/busybox mount -t sysfs none /sys
 /bin/busybox mount -t tmpfs none /tmp
 
+while [ ! -e /dev/hvc0 ]; do
+    echo "wait /dev/hvc0"
+    /bin/busybox sleep 1
+done
 exec 0</dev/hvc0
 exec 1>/dev/hvc0
 exec 2>/dev/hvc0
@@ -17,5 +21,6 @@ echo "============="
     
 while true; do
     /bin/busybox sh < /dev/hvc0 > /dev/hvc0 2>&1
+    echo "restart shell"
     /bin/busybox sleep 1
 done
