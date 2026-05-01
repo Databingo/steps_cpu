@@ -141,7 +141,7 @@ CONFIG_ARCH_SUPPORTS_INT128=y
 # CONFIG_SCHED_AUTOGROUP is not set
 # CONFIG_RELAY is not set
 CONFIG_BLK_DEV_INITRD=y
-CONFIG_INITRAMFS_SOURCE="/usr/local/projects/steps_cpu/create_mini_linux/riscv64-linux/rootfs.cpio"
+CONFIG_INITRAMFS_SOURCE="/usr/local/projects/steps_cpu/create_mini_linux/riscv64-linux/unpacked_rootfs"
 # CONFIG_INITRAMFS_FORCE is not set
 CONFIG_INITRAMFS_ROOT_UID=0
 CONFIG_INITRAMFS_ROOT_GID=0
