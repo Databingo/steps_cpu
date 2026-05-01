@@ -1,19 +1,22 @@
 #!/bin/sh
 
-/bin/mount -t devtmpfs devtmpfs /dev
-/bin/mount -t proc none /proc
-/bin/mount -t sysfs none /sys
+#/bin/busybox --install -s /bin
 
-exec 0</dev/hvc0
-exec 1>/dev/hvc0
-exec 2>/dev/hvc0
+/bin/busybox mount -t devtmpfs none /dev
+/bin/busybox mount -t proc none /proc
+/bin/busybox mount -t sysfs none /sys
+/bin/busybox mount -t tmpfs none /tmp
+
+echo "script is running"
+#exec 0</dev/hvc0
+#exec 1>/dev/hvc0
+#exec 2>/dev/hvc0
 
 echo "============="
 echo "connected to fpga hvc0"
 echo "============="
     
 while true; do
-    /bin/sh
-    echo "Shell exited. Restarting..."
-    sleep 1
+    /bin/busybox sh < /dev/hvc0 > /dev/hvc0 2>&1
+    /bin/busybox sleep 1
 done
