@@ -28,7 +28,7 @@
 #cd busybox && make distclean && cd -
 #cd busybox && make defconfig && cd -
 #cd busybox && make menuconfig && cd -
-
+#
 #cd busybox && make -j $(nproc) && cd -
 #cd busybox &&  make CROSS_COMPILE=riscv64-linux-gnu- \
 #	            EXTRA_CCASFLAGS="-march=rv64ima_zicsr_zifencei -mabi=lp64"\
@@ -36,8 +36,8 @@
 #		    -j $(nproc)
 #
 # make CROSS_COMPILE=riscv64-linux-gnu- install
-#
-#
-#
-#
-#
+
+
+
+
+
