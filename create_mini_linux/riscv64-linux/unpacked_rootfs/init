@@ -1,0 +1,22 @@
+#!/bin/sh
+
+#/bin/busybox --install -s /bin
+
+/bin/busybox mount -t devtmpfs none /dev
+/bin/busybox mount -t proc none /proc
+/bin/busybox mount -t sysfs none /sys
+/bin/busybox mount -t tmpfs none /tmp
+
+echo "script is running"
+#exec 0</dev/hvc0
+#exec 1>/dev/hvc0
+#exec 2>/dev/hvc0
+
+echo "============="
+echo "connected to fpga hvc0"
+echo "============="
+    
+while true; do
+    /bin/busybox sh < /dev/hvc0 > /dev/hvc0 2>&1
+    /bin/busybox sleep 1
+done
