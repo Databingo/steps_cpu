@@ -82,8 +82,8 @@ qemu-system-riscv64 -nographic \
     -append "mem=8M"  \
     -icount shift=0,align=off \
     -kernel /usr/local/projects/steps_cpu/create_mini_linux/riscv64-linux/Image
-    #-bios fw_jump_ns16550a.bin \
-    #-bios fw_jump_ns16550a_call_log.bin \
+   #-bios fw_jump_ns16550a.bin \
+   #-bios fw_jump_ns16550a_call_log.bin \
 
 ## In one bin
 #qemu-system-riscv64 -nographic \
