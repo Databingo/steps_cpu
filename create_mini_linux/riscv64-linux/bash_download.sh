@@ -12,3 +12,11 @@ cd linux && make ARCH=riscv CROSS_COMPILE=/usr/local/projects/steps_cpu/create_m
 cp linux/arch/riscv/boot/Image .
 cp linux/arch/riscv/boot/Image.xz .
 cp ../buildroot-2026.02/output/images/rootfs.cpio .
+
+
+
+
+
+# cd buitlroot && make menuconfig  # for builtroot config such as hvc0
+# prebusybox build busybox # in output/..
+# bash_download build linux independent
