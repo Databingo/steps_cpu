@@ -1,5 +1,5 @@
 Flow report for cpu_on_board
-Sat May  2 17:08:38 2026
+Sat May  2 20:55:50 2026
 Quartus II 32-bit Version 13.0.1 Build 232 06/12/2013 Service Pack 1 SJ Web Edition
 
 
@@ -40,17 +40,17 @@ applicable agreement for further details.
 +--------------------------------------------------------------------------------------+
 ; Flow Summary                                                                         ;
 +------------------------------------+-------------------------------------------------+
-; Flow Status                        ; Successful - Sat May  2 17:08:38 2026           ;
+; Flow Status                        ; Successful - Sat May  2 20:55:50 2026           ;
 ; Quartus II 32-bit Version          ; 13.0.1 Build 232 06/12/2013 SP 1 SJ Web Edition ;
 ; Revision Name                      ; cpu_on_board                                    ;
 ; Top-level Entity Name              ; cpu_on_board                                    ;
 ; Family                             ; Cyclone II                                      ;
 ; Device                             ; EP2C20F484C7                                    ;
 ; Timing Models                      ; Final                                           ;
-; Total logic elements               ; 18,507 / 18,752 ( 99 % )                        ;
-;     Total combinational functions  ; 16,824 / 18,752 ( 90 % )                        ;
-;     Dedicated logic registers      ; 7,505 / 18,752 ( 40 % )                         ;
-; Total registers                    ; 7539                                            ;
+; Total logic elements               ; 18,204 / 18,752 ( 97 % )                        ;
+;     Total combinational functions  ; 16,909 / 18,752 ( 90 % )                        ;
+;     Dedicated logic registers      ; 7,512 / 18,752 ( 40 % )                         ;
+; Total registers                    ; 7546                                            ;
 ; Total pins                         ; 47 / 315 ( 15 % )                               ;
 ; Total virtual pins                 ; 0                                               ;
 ; Total memory bits                  ; 218,624 / 239,616 ( 91 % )                      ;
@@ -64,7 +64,7 @@ applicable agreement for further details.
 +-------------------+---------------------+
 ; Option            ; Setting             ;
 +-------------------+---------------------+
-; Start date & time ; 05/02/2026 13:43:08 ;
+; Start date & time ; 05/02/2026 17:52:44 ;
 ; Main task         ; Compilation         ;
 ; Revision Name     ; cpu_on_board        ;
 +-------------------+---------------------+
@@ -77,7 +77,7 @@ applicable agreement for further details.
 +-----------------------------------------+--------------------------------------------------------------------+---------------+------------------------------+------------+
 ; ADV_NETLIST_OPT_SYNTH_WYSIWYG_REMAP     ; On                                                                 ; Off           ; --                           ; --         ;
 ; ALLOW_ANY_RAM_SIZE_FOR_RECOGNITION      ; On                                                                 ; Off           ; --                           ; --         ;
-; COMPILER_SIGNATURE_ID                   ; 0.177770057623846                                                  ; --            ; --                           ; --         ;
+; COMPILER_SIGNATURE_ID                   ; 0.177771555228760                                                  ; --            ; --                           ; --         ;
 ; ENABLE_SIGNALTAP                        ; Off                                                                ; --            ; --                           ; --         ;
 ; FITTER_EFFORT                           ; Standard Fit                                                       ; Auto Fit      ; --                           ; --         ;
 ; HDL_MESSAGE_LEVEL                       ; Level3                                                             ; Level2        ; --                           ; --         ;
@@ -136,10 +136,10 @@ applicable agreement for further details.
 +----------------------+--------------+-------------------------+---------------------+------------------------------------+
 ; Module Name          ; Elapsed Time ; Average Processors Used ; Peak Virtual Memory ; Total CPU Time (on all processors) ;
 +----------------------+--------------+-------------------------+---------------------+------------------------------------+
-; Analysis & Synthesis ; 00:21:31     ; 1.0                     ; 585 MB              ; 00:21:26                           ;
-; Fitter               ; 03:03:50     ; 1.1                     ; 717 MB              ; 03:07:33                           ;
-; Assembler            ; 00:00:05     ; 1.0                     ; 379 MB              ; 00:00:04                           ;
-; Total                ; 03:25:26     ; --                      ; --                  ; 03:29:03                           ;
+; Analysis & Synthesis ; 00:27:15     ; 1.0                     ; 577 MB              ; 00:27:13                           ;
+; Fitter               ; 02:35:43     ; 1.1                     ; 704 MB              ; 02:46:23                           ;
+; Assembler            ; 00:00:04     ; 1.0                     ; 375 MB              ; 00:00:04                           ;
+; Total                ; 03:03:02     ; --                      ; --                  ; 03:13:40                           ;
 +----------------------+--------------+-------------------------+---------------------+------------------------------------+
 
 
