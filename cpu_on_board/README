@@ -491,6 +491,13 @@ trap
 tlb-w?
 
 
-
+Linux kernel boot ID 1 search order:
+rdinit=
+/init
+init=
+/sbin/init
+/etc/init
+/bit/init
+/bint/sh (the emergency fallback)
 
 
