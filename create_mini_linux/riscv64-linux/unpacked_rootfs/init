@@ -1,35 +1,15 @@
-#!/bin/busybox sh
+#!/bin/sh
+# devtmpfs does not get automounted for initramfs
+/bin/mount -t devtmpfs devtmpfs /dev
 
-#echo "init start"
-#/bin/busybox --install -s /bin
-#/bin/busybox mount -t devtmpfs none /dev
-#/bin/busybox mount -t proc none /proc
-#/bin/busybox mount -t sysfs none /sys
-#/bin/busybox mount -t tmpfs none /tmp
-#
-#while [ ! -e /dev/hvc0 ]; do
-#    echo "wait /dev/hvc0"
-#    /bin/busybox sleep 1
-#done
-#exec 0</dev/hvc0
-#exec 1>/dev/hvc0
-#exec 2>/dev/hvc0
-#
-#echo "============="
-#echo "connected to fpga hvc0"
-#echo "============="
-#    
-#while true; do
-#    /bin/busybox sh < /dev/hvc0 > /dev/hvc0 2>&1
-#    echo "restart shell"
-#    /bin/busybox sleep 1
-#done
- 
-/bin/busybox mount -t devtmpfs none /dev
+# use the /dev/console device node from devtmpfs if possible to not
+# confuse glibc's ttyname_r().
+# This may fail (E.G. booted with console=), and errors from exec will
+# terminate the shell, so use a subshell for the test
+if (exec 0</dev/console) 2>/dev/null; then
+    exec 0</dev/console
+    exec 1>/dev/console
+    exec 2>/dev/console
+fi
 
-echo "<2>!!! SCRIPT is alive" > /dev/kmsg 
- 
-while true; do
-    echo "<2>!!! IN loop" > /dev/kmsg 
-    /bin/busybox sleep 1
-done
+exec /sbin/init "$@"
