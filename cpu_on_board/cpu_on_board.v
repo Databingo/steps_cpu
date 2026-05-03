@@ -292,7 +292,7 @@ assign DRAM_CKE = 1; // always enable
     wire Plic_claim_ctx0_selected = (bus_address == `Plic_claim );
     wire Plic_claim_ctx1_selected = (bus_address == `Plic_claim + 64'h1000);
     //wire Plic_claim_ctx0_selected = (bus_address >= `Plic_claim && bus_address < `Plic_claim+1024*0x1000+4);
-    reg [31:0] claim_interrupt_id_ctx [0:1]; // 0 for hart0_M; 1 for hart0_S  // value of interrutp
+    reg [31:0] claim_interrupt_id_ctx [0:1]; // bit 0 for hart0_M; bit 1 for hart0_S  // value of interrutp
 
     always @(*) begin
         claim_interrupt_id_ctx[0] = 0; 
