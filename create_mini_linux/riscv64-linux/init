@@ -1,22 +1,33 @@
-#!/bin/sh
+#!/bin/busybox sh
+# 1. Mount /dev so Linux can create /dev/console and /dev/hvc0
+/bin/busybox mount -t devtmpfs devtmpfs /dev
 
-#/bin/busybox --install -s /bin
+exec 0</dev/console
+exec 1>/dev/console
+exec 2>/dev/console
 
-/bin/busybox mount -t devtmpfs none /dev
-/bin/busybox mount -t proc none /proc
-/bin/busybox mount -t sysfs none /sys
-/bin/busybox mount -t tmpfs none /tmp
 
-echo "script is running"
-#exec 0</dev/hvc0
-#exec 1>/dev/hvc0
-#exec 2>/dev/hvc0
+# 2. Print a big banner to prove output works over hvc0
+echo "========================================="
+echo " SUCCESS! CUSTOM INIT SCRIPT IS RUNNING! "
+echo " console=hvc0 output is working perfectly"
+echo "========================================="
 
-echo "============="
-echo "connected to fpga hvc0"
-echo "============="
-    
+# 3. Test input (This will probably hang because of no mtip)
+echo "Please type something and press Enter:"
+read my_input
+echo "You typed: $my_input"
+
+# 4. Infinite loop to keep the kernel alive. 
+# WARNING: Do NOT use 'sleep 1', because sleep requires mtip!
+# We use a math loop to slow down the text instead.
+echo "Entering infinite loop..."
 while true; do
-    /bin/busybox sh < /dev/hvc0 > /dev/hvc0 2>&1
-    /bin/busybox sleep 1
+    echo "Linux is alive!"
+    
+    # Busy-wait loop (replaces 'sleep' since timers are broken)
+    i=0
+    while [ $i -lt 50000 ]; do
+        i=$((i+1))
+    done
 done

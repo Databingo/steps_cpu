@@ -1,5 +1,5 @@
 NAME=Buildroot
-VERSION=-gbb2bc21ba-dirty
+VERSION=-g7fbb194ff-dirty
 ID=buildroot
 VERSION_ID=2026.02
 PRETTY_NAME="Buildroot 2026.02"
