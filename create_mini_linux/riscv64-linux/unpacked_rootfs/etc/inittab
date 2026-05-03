@@ -32,8 +32,8 @@
 #
 ## Put a getty on the serial port
 ##hvc0::respawn:/sbin/getty -L  hvc0 0 vt100 # GENERIC_SERIAL
-#console::respawn:-/bin/busybox sh
-hvc0::respawn:-/bin/busybox sh
+console::respawn:-/bin/busybox sh
+#hvc0::respawn:-/bin/busybox sh
 
 # Stuff to do for the 3-finger salute
 #::ctrlaltdel:/sbin/reboot
