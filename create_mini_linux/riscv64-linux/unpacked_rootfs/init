@@ -1,33 +1,28 @@
 #!/bin/busybox sh
-# 1. Mount /dev so Linux can create /dev/console and /dev/hvc0
+
+# 1. Mount filesystems
 /bin/busybox mount -t devtmpfs devtmpfs /dev
+/bin/busybox mount -t proc proc /proc
 
-exec 0</dev/console
-exec 1>/dev/console
-exec 2>/dev/console
+# 2. Try to redirect to console, but don't die if it fails
+exec 0</dev/console >/dev/console 2>/dev/console
 
+# 3. Write to /dev/kmsg (This bypasses the HVC buffer and shows up in dmesg immediately!)
+echo "INIT: Script started" > /dev/kmsg
+echo "INIT: Busybox version: $(/bin/busybox --help | head -n 1)" > /dev/kmsg
 
-# 2. Print a big banner to prove output works over hvc0
 echo "========================================="
-echo " SUCCESS! CUSTOM INIT SCRIPT IS RUNNING! "
-echo " console=hvc0 output is working perfectly"
+echo "   IMA BUSYBOX IS ALIVE!                 "
 echo "========================================="
 
-# 3. Test input (This will probably hang because of no mtip)
-echo "Please type something and press Enter:"
-read my_input
-echo "You typed: $my_input"
-
-# 4. Infinite loop to keep the kernel alive. 
-# WARNING: Do NOT use 'sleep 1', because sleep requires mtip!
-# We use a math loop to slow down the text instead.
-echo "Entering infinite loop..."
-while true; do
-    echo "Linux is alive!"
+# 4. Infinite loop using ':' (the built-in)
+while :; do
+    echo "LOOP: Heartbeat at $(/bin/busybox date)" > /dev/kmsg
+    echo "Console Heartbeat..."
     
-    # Busy-wait loop (replaces 'sleep' since timers are broken)
+    # Simple delay loop
     i=0
-    while [ $i -lt 50000 ]; do
+    while [ $i -lt 10000 ]; do
         i=$((i+1))
     done
 done
