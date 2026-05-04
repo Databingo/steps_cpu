@@ -214,16 +214,19 @@ assign DRAM_CKE = 1; // always enable
     reg uart_read_pulse;
     reg uart_read_step;
     wire uart_waitrequest;
-    wire jtag_addr = (bus_read_done == 0 && bus_address == `Art_base) ? 1'b1:1'b0;  
-    // jtag:   TX/RX in 0, Control(WSPACE) in 1, read[31:16RAVAL-15RVALID-7:0Key]rvalid0empty write 0 givelow 8 bits to uart, read 1 return 31 bits, 31-16 is WSPACE;
-    // sifive: Tx/Control in 0, RX in 1
+    //wire jtag_addr = (bus_read_done == 0 && bus_address == `Art_base) ? 1'b1:1'b0;  
+    wire jtag_addr = (bus_address == `ArtIE) ? 1'b1 :  // map IE to Jcontrol1, map Read to Jcontrol1. Else(write) to Data0
+                     (bus_read_done == 0 && bus_address == `Art_base) ? 1'b1:1'b0;  
+    wire [31:0] jtag_wdata = (bus_address == `ArtIE) ? {30'b0, bus_write_data[0], bus_write_data[1]} : bus_write_data[31:0]; // swap SiFive bits[1:0] to Jtag [0:1] when write to IE// IE bit 0 Tx, bit 1 Rx
+                                       
     jtag_uart_system my_jtag_system (
         .clk_clk                                 (clock_slow),
         .reset_reset_n                           (KEY0),
         //.jtag_uart_0_avalon_jtag_slave_address   (bus_address[0:0]),
         //.jtag_uart_0_avalon_jtag_slave_address   (~bus_address[2]), // 0 for Data, 1 for Control
         .jtag_uart_0_avalon_jtag_slave_address   (jtag_addr), 
-        .jtag_uart_0_avalon_jtag_slave_writedata (bus_write_data[31:0]),
+        //.jtag_uart_0_avalon_jtag_slave_writedata (bus_write_data[31:0]),
+        .jtag_uart_0_avalon_jtag_slave_writedata (jtag_wdata),
         //.jtag_uart_0_avalon_jtag_slave_write_n   (~uart_write_trigger_pulse),
         .jtag_uart_0_avalon_jtag_slave_write_n   (~uart_write_pulse),
         .jtag_uart_0_avalon_jtag_slave_chipselect(1'b1),
@@ -370,7 +373,7 @@ assign DRAM_CKE = 1; // always enable
 	uart_read_pulse <= 0;
 	uart_irq_pre <= uart_irq;
 	if (uart_irq && !uart_irq_pre) Plic_pending[1] <= 1;
-	//if (uart_irq) Plic_pending[1] <= 1;
+	//if (uart_irq) Plic_pending[1] <= 1; //??
 	//if (key_pressed_edge) Plic_pending[1] <= 1;
 
         //if (bus_read_enable) begin bus_read_done <= 0; cid <= (bus_address-`Sdc_base); end 
@@ -474,7 +477,7 @@ assign DRAM_CKE = 1; // always enable
 	      case (bus_address)
 		`Art_base: begin // TX sifive 0x2004 read status, write data
 	            if (uart_read_step ==0) begin uart_read_pulse <= 1; uart_read_step <= 1; end //jtage 31:16 mean how many free space, sifive reading tx 32 1 neg means full
-	            if (uart_read_step ==1 &&  uart_waitrequest) begin uart_read_pulse <= 1; end
+	            if (uart_read_step ==1 &&  uart_waitrequest) begin uart_read_pulse <= 1; end // make block when full untill have free 
 	            //if (uart_read_step ==1 && !uart_waitrequest) begin bus_read_data <= {{33{(uart_readdata[31:16]==16'h0)}}, 31'b0}; uart_read_step <= 0; bus_read_done <=1; end 
 	            if (uart_read_step ==1 && !uart_waitrequest) begin bus_read_data <= 64'b0; uart_read_step <= 0; bus_read_done <=1; end  // Always tell sifive it's not full for tx
 		end
@@ -483,7 +486,7 @@ assign DRAM_CKE = 1; // always enable
 	            if (uart_read_step ==1 &&  uart_waitrequest) begin uart_read_pulse <= 1; end  
 	            if (uart_read_step ==1 && !uart_waitrequest) begin bus_read_data <= {32'b0, ~uart_readdata[15], 23'b0, uart_readdata[7:0]}; uart_read_step <= 0; bus_read_done <=1;end 
 		end
-		 `ArtIP: begin bus_read_data <= {30'b0, uart_irq, 1'b0}; bus_read_done <= 1; end // IP, RX is bit 1, bit 0 buffer has space, bit 1 data is waiting to be read
+		 `ArtIP: begin bus_read_data <= {62'b0, uart_irq, 1'b1}; bus_read_done <= 1; end // IP, RX is bit 1, bit 0 buffer has space, bit 1 data is waiting to be read. bit 0=1 always has space
 	         default: begin bus_read_data <= 64'b0; bus_read_done <= 1; end // Dummy ACK for TXCTRL/RXCTRL/DIV registers
 	    endcase
 	    end
@@ -625,7 +628,7 @@ assign DRAM_CKE = 1; // always enable
 
 	    //if (Art_selected) begin uart_write_pulse <= 1; bus_write_done <=1; end
 	    if (Art_selected) begin 
-	      if (bus_address == `Art_base) begin
+	      if (bus_address == `Art_base || bus_address == `ArtIE) begin 
 
 	        if (uart_write_step ==0) begin uart_write_pulse <= 1; uart_write_step <= 1; end
 	        if (uart_write_step ==1 &&  uart_waitrequest) begin uart_write_pulse <= 1; end
