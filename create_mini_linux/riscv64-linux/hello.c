@@ -56,33 +56,52 @@
 //}
 //
 //
-#include <unistd.h>
-
-// Function to call OpenSBI directly
-void sbi_putchar(char c) {
-    register unsigned long a0 asm("a0") = (unsigned long)c;
-    register unsigned long a7 asm("a7") = 0x01; // SBI Legacy Putchar
-    asm volatile ("ecall" 
-                  : "+r"(a0) 
-                  : "r"(a7) 
-                  : "memory");
-}
-
-void sbi_puts(const char *s) {
-    while (*s) {
-        sbi_putchar(*s++);
-    }
-}
-
+//#include <unistd.h>
+//
+//// Function to call OpenSBI directly
+//void sbi_putchar(char c) {
+//    register unsigned long a0 asm("a0") = (unsigned long)c;
+//    register unsigned long a7 asm("a7") = 0x01; // SBI Legacy Putchar
+//    asm volatile ("ecall" 
+//                  : "+r"(a0) 
+//                  : "r"(a7) 
+//                  : "memory");
+//}
+//
+//void sbi_puts(const char *s) {
+//    while (*s) {
+//        sbi_putchar(*s++);
+//    }
+//}
+//
+//int main() {
+//    // Print a message as soon as we start
+//    sbi_puts("\n*** SBI DIRECT USER-SPACE STARTING ***\n");
+//
+//    while (1) {
+//        sbi_puts("SBI_HEARTBEAT\n");
+//
+//        // Busy delay loop (adjust number if too fast/slow)
+//        for (volatile long i = 0; i < 5000000; i++);
+//    }
+//    return 0;
+//}
+//
 int main() {
-    // Print a message as soon as we start
-    sbi_puts("\n*** SBI DIRECT USER-SPACE STARTING ***\n");
+    // 0x2004 is the physical address of your UART TX
+    volatile char *uart = (volatile char *)0x2004;
 
     while (1) {
-        sbi_puts("SBI_HEARTBEAT\n");
+        // Raw hardware write
+        *uart = 'H';
+        *uart = 'E';
+        *uart = 'L';
+        *uart = 'l';
+        *uart = 'O';
+        *uart = '\n';
 
-        // Busy delay loop (adjust number if too fast/slow)
-        for (volatile long i = 0; i < 5000000; i++);
+        // Very long delay loop
+        for (volatile long i = 0; i < 10000000; i++);
     }
     return 0;
 }
