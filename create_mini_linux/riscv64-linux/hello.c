@@ -130,10 +130,31 @@
 //}
 
 
+//#include <unistd.h>
+//
+//int main() {
+//    write(1, "Hello Linux!\n", 13);
+//    while(1);
+//    return 0;
+//}
+
+
 #include <unistd.h>
+#include <fcntl.h>
 
 int main() {
-    write(1, "Hello Linux!\n", 13);
-    while(1);
+    // 1. Open the door to the kernel log (Legal)
+    int fd = open("/dev/kmsg", O_WRONLY);
+    
+    // 2. This message will appear in the white kernel logs!
+    char msg[] = "KMSG: USER-SPACE IS ALIVE!\n";
+
+    while (1) {
+        if (fd >= 0) {
+            write(fd, msg, sizeof(msg) - 1);
+        }
+        // 3. Busy delay
+        for (volatile int i = 0; i < 5000000; i++);
+    }
     return 0;
 }
