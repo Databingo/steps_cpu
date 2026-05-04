@@ -87,21 +87,44 @@
 //    return 0;
 //}
 //
+//int main() {
+//    // 0x2004 is the physical address of your UART TX
+//    volatile char *uart = (volatile char *)0x2004;
+//
+//    while (1) {
+//        // Raw hardware write
+//        *uart = 'H';
+//        *uart = 'E';
+//        *uart = 'L';
+//        *uart = 'l';
+//        *uart = 'O';
+//        *uart = '\n';
+//
+//        // Very long delay loop
+//        for (volatile long i = 0; i < 10000000; i++);
+//    }
+//    return 0;
+//}
+//
+//
+#include <unistd.h>
+#include <fcntl.h>
+
 int main() {
-    // 0x2004 is the physical address of your UART TX
-    volatile char *uart = (volatile char *)0x2004;
+    // Open the kernel message buffer
+    // This is always allowed for root processes
+    int fd = open("/dev/kmsg", O_WRONLY);
+    
+    char msg[] = "KMSG: USERSPACE IS ALIVE AND RUNNING!\n";
 
     while (1) {
-        // Raw hardware write
-        *uart = 'H';
-        *uart = 'E';
-        *uart = 'L';
-        *uart = 'l';
-        *uart = 'O';
-        *uart = '\n';
+        if (fd >= 0) {
+            // This will show up in the white kernel logs on your screen
+            write(fd, msg, sizeof(msg) - 1);
+        }
 
-        // Very long delay loop
-        for (volatile long i = 0; i < 10000000; i++);
+        // Delay loop (No pointers to 0x2004!)
+        for (volatile int i = 0; i < 5000000; i++);
     }
     return 0;
 }
