@@ -105,7 +105,7 @@ Disassembly of section .text:
    102a4:	00813823          	sd	s0,16(sp)
    102a8:	02010413          	addi	s0,sp,32
    102ac:	000027b7          	lui	a5,0x2
-   102b0:	00878793          	addi	a5,a5,8 # 2008 <exit-0xe150>
+   102b0:	00478793          	addi	a5,a5,4 # 2004 <exit-0xe154>
    102b4:	fef43423          	sd	a5,-24(s0)
    102b8:	fe843783          	ld	a5,-24(s0)
    102bc:	04800713          	li	a4,72
