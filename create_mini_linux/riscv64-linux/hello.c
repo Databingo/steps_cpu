@@ -29,28 +29,60 @@
 //}
 
 
+//#include <unistd.h>
+//
+//// We use write() because it is a direct system call.
+//// We avoid printf() to keep the binary as simple as possible.
+//
+//int main() {
+//    // The kernel usually opens File Descriptors 0, 1, and 2 
+//    // to the console before starting init.
+//    
+//    char msg[] = "\n*** RAW C INIT STARTING ***\n";
+//    char heart[] = "HEARTBEAT\n";
+//
+//    // Write the starting message
+//    write(1, msg, sizeof(msg) - 1);
+//
+//    while (1) {
+//        // Print a heartbeat
+//        write(1, heart, sizeof(heart) - 1);
+//
+//        // Simple busy-wait delay (since sleep() requires a timer)
+//        for (volatile long i = 0; i < 10000000; i++);
+//    }
+//
+//    return 0;
+//}
+//
+//
 #include <unistd.h>
 
-// We use write() because it is a direct system call.
-// We avoid printf() to keep the binary as simple as possible.
+// Function to call OpenSBI directly
+void sbi_putchar(char c) {
+    register unsigned long a0 asm("a0") = (unsigned long)c;
+    register unsigned long a7 asm("a7") = 0x01; // SBI Legacy Putchar
+    asm volatile ("ecall" 
+                  : "+r"(a0) 
+                  : "r"(a7) 
+                  : "memory");
+}
+
+void sbi_puts(const char *s) {
+    while (*s) {
+        sbi_putchar(*s++);
+    }
+}
 
 int main() {
-    // The kernel usually opens File Descriptors 0, 1, and 2 
-    // to the console before starting init.
-    
-    char msg[] = "\n*** RAW C INIT STARTING ***\n";
-    char heart[] = "HEARTBEAT\n";
-
-    // Write the starting message
-    write(1, msg, sizeof(msg) - 1);
+    // Print a message as soon as we start
+    sbi_puts("\n*** SBI DIRECT USER-SPACE STARTING ***\n");
 
     while (1) {
-        // Print a heartbeat
-        write(1, heart, sizeof(heart) - 1);
+        sbi_puts("SBI_HEARTBEAT\n");
 
-        // Simple busy-wait delay (since sleep() requires a timer)
-        for (volatile long i = 0; i < 10000000; i++);
+        // Busy delay loop (adjust number if too fast/slow)
+        for (volatile long i = 0; i < 5000000; i++);
     }
-
     return 0;
 }

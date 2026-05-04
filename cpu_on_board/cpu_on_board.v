@@ -451,6 +451,22 @@ assign DRAM_CKE = 1; // always enable
 	    //  end else begin bus_read_data <= 64'b0; bus_read_done <= 1; end // Dummy ACK for TXCTRL/RXCTRL/DIV registers
 	    //end
 
+	    // sifive
+	    // 0x00 txdata bit[7:0]=data bit[31]=full
+	    // 0x04 rxdata bit[7:0]=data bit[31]=empty
+	    // 0x08 txctrl
+	    // 0x0c txctrl
+	    // 0x10 ie     bit[0]=txwm bit[1]=rxwm
+	    // 0x14 ip     bit[0]=txwm bit[1]=rxwm
+        
+	    // jtag
+	    // 0x00 data register
+	    //      read: bit[7:0]=data bit[15]=RVALID
+	    //      write:bit[7:0]=data to send
+	    // 0x04 control register
+	    //      read: bit[31:16]=WSPACE (TX free space) bit[15:0]=status flags
+	    //      write:interrupt control
+
             // jtag:   TX/RX in 0, Control(WSPACE) in 1, read[31:16RAVAL-15RVALID-7:0Key]rvalid0empty write 0 givelow 8 bits to uart, read 1 return 31 bits, 31-16 is WSPACE;
             // sifive: Tx/Control in 0, RX in 1
 	    //SiFive Uart:  0x00 txdata; 0x04 rxdata; 0x08 txctrl; 0x0c txctrl; 0x10 ie; 0x14 ip
@@ -459,7 +475,8 @@ assign DRAM_CKE = 1; // always enable
 		`Art_base: begin // TX sifive 0x2004 read status, write data
 	            if (uart_read_step ==0) begin uart_read_pulse <= 1; uart_read_step <= 1; end //jtage 31:16 mean how many free space, sifive reading tx 32 1 neg means full
 	            if (uart_read_step ==1 &&  uart_waitrequest) begin uart_read_pulse <= 1; end
-	            if (uart_read_step ==1 && !uart_waitrequest) begin bus_read_data <= {{33{(uart_readdata[31:16]==16'h0)}}, 31'b0}; uart_read_step <= 0; bus_read_done <=1; end 
+	            //if (uart_read_step ==1 && !uart_waitrequest) begin bus_read_data <= {{33{(uart_readdata[31:16]==16'h0)}}, 31'b0}; uart_read_step <= 0; bus_read_done <=1; end 
+	            if (uart_read_step ==1 && !uart_waitrequest) begin bus_read_data <= 64'b0; uart_read_step <= 0; bus_read_done <=1; end  // Always tell sifive it's not full for tx
 		end
 		 `ArtK_base: begin // RX  // sifive 0x2008 read keypress
 	            if (uart_read_step ==0) begin uart_read_pulse <= 1; uart_read_step <= 1; end  //jtage 15 = 0 means RVALID 0, sifive reading rx 32 1 empty
