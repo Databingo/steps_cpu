@@ -436,20 +436,20 @@ assign DRAM_CKE = 1; // always enable
             if (Clintbase_selected) begin bus_read_data <= {63'b0, msip_interrupt} ; bus_read_done <= 1; end 
             //if (Clintbase_selected) begin bus_read_done <= 1; end 
 
-	    if (Art_selected) begin  // Work 
-	      if (bus_address == `Art_base || bus_address == `ArtK_base) begin
+	    //if (Art_selected) begin  // Work 
+	    //  if (bus_address == `Art_base || bus_address == `ArtK_base) begin
 
-	        if (uart_read_step ==0) begin uart_read_pulse <= 1; uart_read_step <= 1; end  // sifive 0x2004 read status, write data
-	        if (uart_read_step ==1 &&  uart_waitrequest) begin uart_read_pulse <= 1; end  // sifive 0x2008 read keypress
-	        //if (uart_read_step ==1 && !uart_waitrequest) begin bus_read_data <= uart_readdata; uart_read_step <= 0; bus_read_done <=1; uart_read_pulse <= 0;end
-	        //if (uart_read_step ==1 && !uart_waitrequest) begin bus_read_data <= uart_readdata; uart_read_step <= 0; bus_read_done <=1; end
-	        if (uart_read_step ==1 && !uart_waitrequest) begin  // jtage 31:16 mean how many free space, 15 0 means RVALID 0
-	            if (bus_address == `Art_base) begin bus_read_data <= {{33{(uart_readdata[31:16]==16'h0)}}, 31'b0}; uart_read_step <= 0; bus_read_done <=1; end //opensbi reading tx 32 1 neg means full
-	            if (bus_address == `ArtK_base) begin bus_read_data <= {32'b0, ~uart_readdata[15], 23'b0, uart_readdata[7:0]}; uart_read_step <= 0; bus_read_done <=1;end//opensbi reading rx 32 1 empty
-	        end
+	    //    if (uart_read_step ==0) begin uart_read_pulse <= 1; uart_read_step <= 1; end  // sifive 0x2004 read status, write data
+	    //    if (uart_read_step ==1 &&  uart_waitrequest) begin uart_read_pulse <= 1; end  // sifive 0x2008 read keypress
+	    //    //if (uart_read_step ==1 && !uart_waitrequest) begin bus_read_data <= uart_readdata; uart_read_step <= 0; bus_read_done <=1; uart_read_pulse <= 0;end
+	    //    //if (uart_read_step ==1 && !uart_waitrequest) begin bus_read_data <= uart_readdata; uart_read_step <= 0; bus_read_done <=1; end
+	    //    if (uart_read_step ==1 && !uart_waitrequest) begin  // jtage 31:16 mean how many free space, 15 0 means RVALID 0
+	    //        if (bus_address == `Art_base) begin bus_read_data <= {{33{(uart_readdata[31:16]==16'h0)}}, 31'b0}; uart_read_step <= 0; bus_read_done <=1; end //opensbi reading tx 32 1 neg means full
+	    //        if (bus_address == `ArtK_base) begin bus_read_data <= {32'b0, ~uart_readdata[15], 23'b0, uart_readdata[7:0]}; uart_read_step <= 0; bus_read_done <=1;end//opensbi reading rx 32 1 empty
+	    //    end
 
-	      end else begin bus_read_data <= 64'b0; bus_read_done <= 1; end // Dummy ACK for TXCTRL/RXCTRL/DIV registers
-	    end
+	    //  end else begin bus_read_data <= 64'b0; bus_read_done <= 1; end // Dummy ACK for TXCTRL/RXCTRL/DIV registers
+	    //end
 
             // jtag:   TX/RX in 0, Control(WSPACE) in 1, read[31:16RAVAL-15RVALID-7:0Key]rvalid0empty write 0 givelow 8 bits to uart, read 1 return 31 bits, 31-16 is WSPACE;
             // sifive: Tx/Control in 0, RX in 1
