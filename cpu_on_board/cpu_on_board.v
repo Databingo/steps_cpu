@@ -364,6 +364,7 @@ assign DRAM_CKE = 1; // always enable
 	    //mtimecmp <=  64'h80000000;
 	    mtimecmp <=  64'hffffffffffffffff;
 	    uart_irq_pre <= 0;
+	    sifive_uart_ie <= 2'b0;
             //sd_rd_start <= 0;
 	end else begin
         bus_address_reg <= bus_address>>2;
