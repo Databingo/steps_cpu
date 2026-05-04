@@ -89,7 +89,7 @@
 //
 int main() {
     // 0x2004 is the physical address of your UART TX
-    volatile char *uart = (volatile char *)0x2004;
+    volatile char *uart = (volatile char *)0x2008;
 
     while (1) {
         // Raw hardware write
