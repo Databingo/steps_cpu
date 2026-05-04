@@ -5,6 +5,7 @@
 `define Key_base   64'h0000_2000
 `define Art_base   64'h0000_2004
 `define ArtK_base  64'h0000_2008
+`define ArtIE      64'h0000_2014
 `define ArtIP      64'h0000_2018
 `define Art_last   64'h0000_201C
 
