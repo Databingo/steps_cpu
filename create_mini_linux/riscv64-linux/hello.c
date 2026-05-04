@@ -107,24 +107,33 @@
 //}
 //
 //
+//#include <unistd.h>
+//#include <fcntl.h>
+//
+//int main() {
+//    // Open the kernel message buffer
+//    // This is always allowed for root processes
+//    int fd = open("/dev/kmsg", O_WRONLY);
+//    
+//    char msg[] = "KMSG: USERSPACE IS ALIVE AND RUNNING!\n";
+//
+//    while (1) {
+//        if (fd >= 0) {
+//            // This will show up in the white kernel logs on your screen
+//            write(fd, msg, sizeof(msg) - 1);
+//        }
+//
+//        // Delay loop (No pointers to 0x2004!)
+//        for (volatile int i = 0; i < 5000000; i++);
+//    }
+//    return 0;
+//}
+
+
 #include <unistd.h>
-#include <fcntl.h>
 
 int main() {
-    // Open the kernel message buffer
-    // This is always allowed for root processes
-    int fd = open("/dev/kmsg", O_WRONLY);
-    
-    char msg[] = "KMSG: USERSPACE IS ALIVE AND RUNNING!\n";
-
-    while (1) {
-        if (fd >= 0) {
-            // This will show up in the white kernel logs on your screen
-            write(fd, msg, sizeof(msg) - 1);
-        }
-
-        // Delay loop (No pointers to 0x2004!)
-        for (volatile int i = 0; i < 5000000; i++);
-    }
+    write(1, "Hello Linux!\n", 13);
+    while(1);
     return 0;
 }
