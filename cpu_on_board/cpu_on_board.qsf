@@ -139,10 +139,10 @@ set_global_assignment -name SEED 1
 
 
 # Primary Settings for Routing Issues
-set_global_assignment -name FITTER_EFFORT "STANDARD FIT"
 set_global_assignment -name FIT_ONLY_ONE_ATTEMPT ON
 set_global_assignment -name PLACEMENT_EFFORT_MULTIPLIER 4.0
 set_global_assignment -name ROUTER_EFFORT_MULTIPLIER 4
+set_global_assignment -name FITTER_EFFORT "STANDARD FIT"
 
 set_global_assignment -name OPTIMIZE_FOR_METASTABILITY ON
 set_global_assignment -name ROUTER_TIMING_OPTIMIZATION_LEVEL MAXIMUM
