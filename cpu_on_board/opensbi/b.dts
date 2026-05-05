@@ -121,7 +121,8 @@
        stdout-path = "/soc/uart@2004";
        //bootargs = "no4lvl earlycon=sbi console=hvc0 panic=0 init_on_alloc=0 keep_bootcon ignore_loglevel initcall_debug rcu_update.rcu_cpu_stall_suppress=1 rdinit=/bin/sh";
        //bootargs = "no4lvl earlycon=sbi console=hvc0 panic=0 init_on_alloc=0 ignore_loglevel initcall_debug rcu_update.rcu_cpu_stall_suppress=1 rdinit=/hello";
-       bootargs = "no4lvl earlycon=sbi console=hvc0 panic=0 init_on_alloc=0 ignore_loglevel rcu_update.rcu_cpu_stall_suppress=1 hugepages=0 single transparent_hugepage=never lpj=25000 page_alloc.shuffle=0 rdinit=/sbin/init";
+       //bootargs = "no4lvl earlycon=sbi console=hvc0 panic=0 init_on_alloc=0 ignore_loglevel rcu_update.rcu_cpu_stall_suppress=1 hugepages=0 single transparent_hugepage=never lpj=25000 page_alloc.shuffle=0 rdinit=/sbin/init";
+       bootargs = "no4lvl earlycon=sbi console=hvc0 panic=0 init_on_alloc=0 ignore_loglevel rcu_update.rcu_cpu_stall_suppress=1 hugepages=0 transparent_hugepage=never lpj=25000 page_alloc.shuffle=0";
        //bootargs = "no4lvl earlycon=sbi console=ttySIF0 panic=0 init_on_alloc=0 ignore_loglevel initcall_debug rcu_update.rcu_cpu_stall_suppress=1 rdinit=/sbin/init";
        //bootargs = "no4lvl earlycon=sbi console=ttySIF0 ignore_loglevel rdinit=/sbin/init";
        //bootargs = "no4lvl earlycon=sbi console=ttySIF0 ignore_loglevel rdinit=/hello";
