@@ -149,7 +149,7 @@ set_global_assignment -name ROUTER_TIMING_OPTIMIZATION_LEVEL MAXIMUM
 set_global_assignment -name FITTER_AGGRESSIVE_ROUTABILITY_OPTIMIZATION ALWAYS
 set_global_assignment -name MUX_RESTRUCTURE ON
 set_global_assignment -name ROUTER_REGISTER_DUPLICATION ON
-#set_global_assignment -name FINAL_PLACEMENT_OPTIMIZATION ON
+set_global_assignment -name FINAL_PLACEMENT_OPTIMIZATION ALWAYS
 set_global_assignment -name INCREMENTAL_COMPILATION OFF
 
 # Physical Synthesis Help
