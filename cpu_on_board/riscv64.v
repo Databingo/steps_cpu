@@ -447,14 +447,16 @@ always @(posedge clk or negedge reset) begin
 	mtime_div <= 0; 
     end else if (!STrap) begin 
 	mtime_div <= mtime_div + 1; 
-	if (mtime_div == 7'd99) begin 
+	//if (mtime_div == 7'd99) begin 
+	if (mtime_div == 7'd9) begin 
 	    mtime_div <= 0;
 	    mtime <= mtime + 1; 
 	end
     end
 end
 
-wire mtip_interrupt = (!STrap && mtime >= mtimecmp);
+//wire mtip_interrupt = (!STrap && mtime >= mtimecmp);
+wire mtip_interrupt = (mtime >= mtimecmp);
  
 //reg [9:0] mtime_div;
 //always @(posedge clk or negedge reset) begin 
@@ -469,8 +471,8 @@ wire mtip_interrupt = (!STrap && mtime >= mtimecmp);
 //	end
 //    end
 //end
+//wire mtip_interrupt = (mtime >= mtimecmp);
 
-wire mtip_interrupt = (mtime >= mtimecmp);
 // -- Innerl signal --
 reg bubble;
 reg [1:0] load_step;
