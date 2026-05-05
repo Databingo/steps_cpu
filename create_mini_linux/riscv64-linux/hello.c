@@ -1,160 +1,29 @@
-//#include <stdio.h>
-//#include <unistd.h>
-//#include <fcntl.h>
-//#include <sys/mount.h>
-//
-//int main() {
-//    // 1. Mount devtmpfs to get the real hardware nodes
-//    mount("devtmpfs", "/dev", "devtmpfs", 0, NULL);
-//    
-//    // 2. Open the real hardware console
-//    int fd = open("/dev/console", O_RDWR);
-//    if (fd >= 0) {
-//        dup2(fd, 1); // Redirect stdout
-//        dup2(fd, 2); // Redirect stderr
-//    }
-//
-//    // 3. DISABLE C-LIBRARY BUFFERING! (Crucial)
-//    setvbuf(stdout, NULL, _IONBF, 0);
-//
-//    int counter = 0;
-//    while(1) {
-//        printf("Hello from User-Space! MMU is working! [%d]\n", counter++);
-//        
-//        // 4. Use a busy loop instead of sleep() so it prints instantly
-//        for(volatile int i = 0; i < 2000000; i++); 
-//    }
-//    
-//    return 0;
-//}
-
-
-//#include <unistd.h>
-//
-//// We use write() because it is a direct system call.
-//// We avoid printf() to keep the binary as simple as possible.
-//
-//int main() {
-//    // The kernel usually opens File Descriptors 0, 1, and 2 
-//    // to the console before starting init.
-//    
-//    char msg[] = "\n*** RAW C INIT STARTING ***\n";
-//    char heart[] = "HEARTBEAT\n";
-//
-//    // Write the starting message
-//    write(1, msg, sizeof(msg) - 1);
-//
-//    while (1) {
-//        // Print a heartbeat
-//        write(1, heart, sizeof(heart) - 1);
-//
-//        // Simple busy-wait delay (since sleep() requires a timer)
-//        for (volatile long i = 0; i < 10000000; i++);
-//    }
-//
-//    return 0;
-//}
-//
-//
-//#include <unistd.h>
-//
-//// Function to call OpenSBI directly
-//void sbi_putchar(char c) {
-//    register unsigned long a0 asm("a0") = (unsigned long)c;
-//    register unsigned long a7 asm("a7") = 0x01; // SBI Legacy Putchar
-//    asm volatile ("ecall" 
-//                  : "+r"(a0) 
-//                  : "r"(a7) 
-//                  : "memory");
-//}
-//
-//void sbi_puts(const char *s) {
-//    while (*s) {
-//        sbi_putchar(*s++);
-//    }
-//}
-//
-//int main() {
-//    // Print a message as soon as we start
-//    sbi_puts("\n*** SBI DIRECT USER-SPACE STARTING ***\n");
-//
-//    while (1) {
-//        sbi_puts("SBI_HEARTBEAT\n");
-//
-//        // Busy delay loop (adjust number if too fast/slow)
-//        for (volatile long i = 0; i < 5000000; i++);
-//    }
-//    return 0;
-//}
-//
-//int main() {
-//    // 0x2004 is the physical address of your UART TX
-//    volatile char *uart = (volatile char *)0x2004;
-//
-//    while (1) {
-//        // Raw hardware write
-//        *uart = 'H';
-//        *uart = 'E';
-//        *uart = 'L';
-//        *uart = 'l';
-//        *uart = 'O';
-//        *uart = '\n';
-//
-//        // Very long delay loop
-//        for (volatile long i = 0; i < 10000000; i++);
-//    }
-//    return 0;
-//}
-//
-//
-//#include <unistd.h>
-//#include <fcntl.h>
-//
-//int main() {
-//    // Open the kernel message buffer
-//    // This is always allowed for root processes
-//    int fd = open("/dev/kmsg", O_WRONLY);
-//    
-//    char msg[] = "KMSG: USERSPACE IS ALIVE AND RUNNING!\n";
-//
-//    while (1) {
-//        if (fd >= 0) {
-//            // This will show up in the white kernel logs on your screen
-//            write(fd, msg, sizeof(msg) - 1);
-//        }
-//
-//        // Delay loop (No pointers to 0x2004!)
-//        for (volatile int i = 0; i < 5000000; i++);
-//    }
-//    return 0;
-//}
-
-
-//#include <unistd.h>
-//
-//int main() {
-//    write(1, "Hello Linux!\n", 13);
-//    while(1);
-//    return 0;
-//}
-
-
+#include <stdio.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <sys/mount.h>
 
 int main() {
-    // 1. Open the door to the kernel log (Legal)
-    int fd = open("/dev/kmsg", O_WRONLY);
+    // 1. Mount devtmpfs to get the real hardware nodes
+    mount("devtmpfs", "/dev", "devtmpfs", 0, NULL);
     
-    // 2. This message will appear in the white kernel logs!
-    char msg[] = "KMSG: USER-SPACE IS ALIVE!\n";
-
-    while (1) {
-        if (fd >= 0) {
-            write(fd, msg, sizeof(msg) - 1);
-        }
-        // 3. Busy delay
-        for (volatile int i = 0; i < 5000000; i++);
+    // 2. Open the real hardware console
+    int fd = open("/dev/console", O_RDWR);
+    if (fd >= 0) {
+        dup2(fd, 1); // Redirect stdout
+        dup2(fd, 2); // Redirect stderr
     }
+
+    // 3. DISABLE C-LIBRARY BUFFERING! (Crucial)
+    setvbuf(stdout, NULL, _IONBF, 0);
+
+    int counter = 0;
+    while(1) {
+        printf("Hello from User-Space! MMU is working! [%d]\n", counter++);
+        
+        // 4. Use a busy loop instead of sleep() so it prints instantly
+        for(volatile int i = 0; i < 2000000; i++); 
+    }
+    
     return 0;
 }

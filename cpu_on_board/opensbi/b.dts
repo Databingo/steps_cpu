@@ -12,17 +12,6 @@
         reg = <0x00 0x80000000 0x00 0x800000>;
     };
 
-    aliases {
-        serial0 = &uart0;
-    };
-
-    uart_clk: uart-clk {
-         #clock-cells = <0>;
-         compatible = "fixed-clock";
-         clock-frequency = <12500000>;
-    };
-
-
     cpus {
         #address-cells = <0x01>;
         #size-cells = <0x00>;
@@ -75,17 +64,15 @@
                
         uart0: uart@2004{
              compatible = "sifive,uart0";  // driver
-             reg = <0x0 0x2004 0x0 0x100>;
+             reg = <0x0 0x2004 0x0 0x10>;
              // if using PLIC point to IRQ 1. If bypass use extended
              //interrupts-extended = <&cpu0_intc 0x09>; // add dummy external interrupt mapping
              interrupt-parent = <&plic>;  
              interrupts = <1>;             // claim number
-             clocks = <&uart_clk>;
              clock-frequency = <12500000>;
              //status = "disabled";
              status = "okay";
          };
-    
 
         /* 3. CLINT: Handles Timer AND IPI (Software Interrupt) */
         // Opensbi use this find mtimecmp`
@@ -121,19 +108,8 @@
        stdout-path = "/soc/uart@2004";
        //bootargs = "no4lvl earlycon=sbi console=hvc0 panic=0 init_on_alloc=0 keep_bootcon ignore_loglevel initcall_debug rcu_update.rcu_cpu_stall_suppress=1 rdinit=/bin/sh";
        //bootargs = "no4lvl earlycon=sbi console=hvc0 panic=0 init_on_alloc=0 ignore_loglevel initcall_debug rcu_update.rcu_cpu_stall_suppress=1 rdinit=/hello";
-       //bootargs = "no4lvl earlycon=sbi console=hvc0 panic=0 init_on_alloc=0 ignore_loglevel rcu_update.rcu_cpu_stall_suppress=1 hugepages=0 single transparent_hugepage=never lpj=25000 page_alloc.shuffle=0 rdinit=/sbin/init";
-       bootargs = "no4lvl earlycon=sbi console=hvc0 panic=0 init_on_alloc=0 ignore_loglevel rcu_update.rcu_cpu_stall_suppress=1 hugepages=0 transparent_hugepage=never lpj=25000 page_alloc.shuffle=0";
-       //bootargs = "no4lvl earlycon=sbi console=ttySIF0 panic=0 init_on_alloc=0 ignore_loglevel initcall_debug rcu_update.rcu_cpu_stall_suppress=1 rdinit=/sbin/init";
-       //bootargs = "no4lvl earlycon=sbi console=ttySIF0 ignore_loglevel rdinit=/sbin/init";
-       //bootargs = "no4lvl earlycon=sbi console=ttySIF0 ignore_loglevel rdinit=/hello";
-       //bootargs = "no4lvl earlycon=sbi console=hvc0 init_on_alloc=0 ignore_loglevel initcall_debug rcu_update.rcu_cpu_stall_suppress=1 rdinit=/hello";
-       //bootargs = "no4lvl earlycon=sbi console=ttySIF0 init_on_alloc=0 ignore_loglevel initcall_debug rcu_update.rcu_cpu_stall_suppress=1 rdinit=/hello";
-       //bootargs = "no4lvl earlycon=sbi console=ttySIF0 panic=0 init_on_alloc=0 ignore_loglevel initcall_debug rcu_update.rcu_cpu_stall_suppress=1";
-       //bootargs = "no4lvl earlycon=sbi console=ttySIF0 panic=0 init_on_alloc=0 ignore_loglevel initcall_debug rcu_update.rcu_cpu_stall_suppress=1 rdinit=/bin/sh";
+       bootargs = "no4lvl earlycon=sbi console=hvc0 panic=0 init_on_alloc=0 ignore_loglevel initcall_debug rcu_update.rcu_cpu_stall_suppress=1 rdinit=/sbin/init";
        //bootargs = "no4lvl earlycon=sbi console=hvc0 panic=0 init_on_alloc=0 ignore_loglevel initcall_debug rcu_update.rcu_cpu_stall_suppress=1";
-       //bootargs = "no4lvl earlycon=sbi console=hvc0 panic=0 init_on_alloc=0 ignore_loglevel initcall_debug rcu_update.rcu_cpu_stall_suppress=1 single fastboot nosmp norcu page_alloc.shuffle=0";
-       //bootargs = "no4lvl earlycon=sbi console=ttySIF0 panic=0 init_on_alloc=0 ignore_loglevel initcall_debug rcu_update.rcu_cpu_stall_suppress=1 single fastboot nosmp norcu page_alloc.shuffle=0";
-       //bootargs = "no4lvl earlycon=sbi console=ttySIF0 panic=0 init_on_alloc=0 ignore_loglevel initcall_debug rcu_update.rcu_cpu_stall_suppress=1";
        //bootargs = "no4lvl earlycon=sbi console=hvc0 panic=0 init_on_alloc=0 ignore_loglevel initcall_debug rcu_update.rcu_cpu_stall_suppress=1 rdinit=/bin/busybox -- sh -c 'while true; do echo ALIVE; sleep 1; done'";
        //bootargs = "no4lvl earlycon=sbi console=hvc0 panic=0 init_on_alloc=0 ignore_loglevel initcall_debug rcu_update.rcu_cpu_stall_suppress=1 rdinit=/bin/busybox";
     };

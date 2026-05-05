@@ -50,9 +50,6 @@ i_cache_refill:
     #mv a0, x9
     #call print_reg
 
-    #li a0, "c"
-    #sb a0, 0(x7)
-
      addi x8, x0, 0  # success x8=0
      j return
 
@@ -137,8 +134,7 @@ FINISH_4KB:
      srli x4, x4, 20 
      slli x4, x4, 12 
 
-    #andi x10, x10, 0xFF # Isolate flags(1111_1111) # 0x3FF ?
-     andi x10, x10, 0x3FF # Isolate flags(1111_1111) # 0x3FF ?
+     andi x10, x10, 0xFF # Isolate flags(1111_1111) # 0x3FF ?
      or x4, x4, x10 # Merge PPN and flages
 
      j WRITE_TLB

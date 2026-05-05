@@ -40,10 +40,8 @@ wire any_interrupt = (m_interrupts || s_interrupts);
 (* keep = 1 *) reg [63:0] pc;
 wire [31:0] ir;
 
-//(* ram_style = "logic" *) reg [63:0] re [0:31]; // General Registers 32s
-//(* ram_style = "logic" *) reg [63:0] sre [0:10]; // Shadow Registers 11s
-//(* ram_style = "logic" *) reg [63:0] re [0:42]; // General Registers 32s + Shadow 11 =  43
-(* ram_style = "logic" *) reg [63:0] re [0:63]; // General Registers 32s + Shadow 32 = 64 
+(* ram_style = "logic" *) reg [63:0] re [0:31]; // General Registers 32s
+(* ram_style = "logic" *) reg [63:0] sre [0:10]; // Shadow Registers 11s
 reg mmu_da=0;
 reg mmu_pc = 0;
 reg did = 1;
@@ -75,12 +73,9 @@ wire signed [63:0] w_imm_b = {{52{ir[31]}}, ir[7],  ir[30:25], ir[11:8], 1'b0}; 
 wire        [63:0] w_imm_z = {59'b0, ir[19:15]};  // CSR zimm zero-extending unsigned
 wire [5:0] w_shamt = ir[25:20]; // If 6 bits the highest is always 0??
 // -- Register decoder --
-//wire [4:0] w_rd  = ir[11:7];
-//wire [4:0] w_rs1 = ir[19:15];
-//wire [4:0] w_rs2 = ir[24:20];
-wire [5:0] w_rd  = (STrap) ? ir[11:7] + 32 : ir[11:7];
-wire [5:0] w_rs1 = (STrap) ? ir[19:15] + 32 : ir[19:15];
-wire [5:0] w_rs2 = (STrap) ? ir[24:20] + 32 : ir[24:20];
+wire [4:0] w_rd  = ir[11:7];
+wire [4:0] w_rs1 = ir[19:15];
+wire [4:0] w_rs2 = ir[24:20];
 // -- Func decoder --
 wire [2:0] w_func3   = ir[14:12];
 wire [4:0] w_func5   = ir[31:27];
@@ -422,29 +417,6 @@ end
 wire [3:0]  satp_mmu  = Csrs[satp][63:60]; // 0:bare, 8:sv39, 9:sv48  satp.MODE!=0, privilegae is not M-mode, mstatus.MPRN is not set or in MPP's mode?
 
 // -- Timer --
-//reg [6:0] mtime_div;
-//always @(posedge clk or negedge reset) begin 
-//    if (!reset) begin 
-//	mtime <= 0; 
-//	mtime_div <= 0; 
-//    end else begin 
-//	mtime_div <= mtime_div + 1; 
-//	if (mtime_div == 7'd99) begin 
-//	    mtime_div <= 0;
-//	    mtime <= mtime + 1; 
-//	end
-//    end
-//end
-//
-//wire mtip_interrupt = (mtime >= mtimecmp);
-  
-//always @(posedge clk or negedge reset) begin 
-//    if (!reset) mtime <= 0;
-//    else if (!STrap) mtime <= mtime + 1; 
-//end
-//
-//wire mtip_interrupt = (!STrap && mtime >= mtimecmp);
-  
 reg [6:0] mtime_div;
 always @(posedge clk or negedge reset) begin 
     if (!reset) begin 
@@ -459,23 +431,7 @@ always @(posedge clk or negedge reset) begin
     end
 end
 
-//wire mtip_interrupt = (!STrap && mtime >= mtimecmp);
 wire mtip_interrupt = (mtime >= mtimecmp);
- 
-//reg [9:0] mtime_div;
-//always @(posedge clk or negedge reset) begin 
-//    if (!reset) begin 
-//	mtime <= 0; 
-//	mtime_div <= 0; 
-//    end else begin 
-//	mtime_div <= mtime_div + 1; 
-//	if (mtime_div == 10'd999) begin 
-//	    mtime_div <= 0;
-//	    mtime <= mtime + 1; 
-//	end
-//    end
-//end
-//wire mtip_interrupt = (mtime >= mtimecmp);
 
 // -- Innerl signal --
 reg bubble;
@@ -611,16 +567,13 @@ wire is_store = (op == 7'b0100011) || (op == 7'b0101111 && w_func5 != 5'b00010);
 		    //end else if (tlb_flush) begin tlb_vld <= 4'b0; tlb_d_vld <= 8'b0; // FLUSH
 		    end else if (tlb_flush) begin tlb_vld <= 8'b0; tlb_d_vld <= 8'b0; // FLUSH
 		    end else if (STrap && bus_write_enable && bus_address == `Tlb) begin // for the last fill: sd ppa, Tlb  // REFILL
-			//if (re[8] == 12) begin
-			if (re[8+32] == 12) begin
-			//tlb_vpn[tlb_ptr] <= re[9][38:12]; // VA from x1 saved by trapp mmu_pc/mmu_da
-			tlb_vpn[tlb_ptr] <= re[9+32][38:12]; // VA from x1 saved by trapp mmu_pc/mmu_da
+			if (re[8] == 12) begin
+			tlb_vpn[tlb_ptr] <= re[9][38:12]; // VA from x1 saved by trapp mmu_pc/mmu_da
 			tlb_ppn[tlb_ptr] <= bus_write_data[55:12] ; // real 
 			tlb_vld[tlb_ptr] <= 1;
 			tlb_ptr <= tlb_ptr + 1; 
 		        end else begin
-			//tlb_d_vpn[tlb_d_ptr] <= re[9][38:12]; // VA from x1 saved by trapp mmu_pc/mmu_da
-			tlb_d_vpn[tlb_d_ptr] <= re[9+32][38:12]; // VA from x1 saved by trapp mmu_pc/mmu_da
+			tlb_d_vpn[tlb_d_ptr] <= re[9][38:12]; // VA from x1 saved by trapp mmu_pc/mmu_da
 			tlb_d_ppn[tlb_d_ptr] <= bus_write_data[55:12] ; // real 
 			tlb_d_vld[tlb_d_ptr] <= 1;
 			tlb_d_w[tlb_d_ptr] <= bus_write_data[2]; // bit 2 of PTE is W
@@ -695,9 +648,8 @@ wire is_store = (op == 7'b0100011) || (op == 7'b0101111 && w_func5 != 5'b00010);
 		// Interrupt re-enable
 		Csrs[mstatus][MIE] <= 1;
 		mmu_da <= 0;
-		for (i=0;i<64;i=i+1) begin re[i]<= 64'b0; end 
-		//for (i=0;i<=25;i=i+1) begin Csrs[i]<= 64'b0; end
-		for (i=0;i<26;i=i+1) begin Csrs[i]<= 64'b0; end
+		for (i=0;i<11;i=i+1) begin sre[i]<= 64'b0; end 
+		for (i=0;i<=25;i=i+1) begin Csrs[i]<= 64'b0; end
 		//Csrs[medeleg] <= 64'hb1af; // delegate to S-mode 1011000110101111 // see VII 3.1.15 mcasue exceptions
 		Csrs[medeleg] <= 64'hb109; // delegate to S-mode no 12/13/15
 		Csrs[mideleg] <= 64'h0222; // delegate to S-mode 0000001000100010 see VII 3.1.15 mcasue interrupt 1/5/9 SSIP(supervisor software interrupt) STIP(time) SEIP(external)
@@ -752,11 +704,9 @@ wire is_store = (op == 7'b0100011) || (op == 7'b0101111 && w_func5 != 5'b00010);
                 saved_user_pc <= pc_4; // !!! save pc (EXE was flushed so record-redo it, previous pc)
                 //if (bubble || ir==32'b0001001??????????_000_?????_1110011) saved_user_pc <= pc ; // !!! save pc (j/b EXE was flushed currectly, vma executed anyway no need back-redo)
                 if (bubble) saved_user_pc <= pc ; // !!! save pc (j/b EXE was flushed currectly, vma executed only in EXEcuting)
-                //for (i=1;i<11;i=i+1) begin sre[i]<= re[i]; end // save re
-                //re[9] <= pc;// - 4; // save this vpc to x1 //!!!! We also need to refill pc - 4' ppc for re-executeing pc-4, with hit(if satp in for very next sfence.vma) 
-                //re[8] <= 12 ;// save in x8 trap type 0 i-tlb trap so record as instruciont page fault for prepare
-                re[9+32] <= pc;// - 4; // save this vpc to x1 //!!!! We also need to refill pc - 4' ppc for re-executeing pc-4, with hit(if satp in for very next sfence.vma) 
-                re[8+32] <= 12 ;// save in x8 trap type 0 i-tlb trap so record as instruciont page fault for prepare
+                for (i=1;i<11;i=i+1) begin sre[i]<= re[i]; end // save re
+                re[9] <= pc;// - 4; // save this vpc to x1 //!!!! We also need to refill pc - 4' ppc for re-executeing pc-4, with hit(if satp in for very next sfence.vma) 
+                re[8] <= 12 ;// save in x8 trap type 0 i-tlb trap so record as instruciont page fault for prepare
 
             // Bubble
             end else if (bubble) begin bubble <= 1'b0; // Flush this cycle & Clear bubble signal for the next cycle
@@ -766,19 +716,16 @@ wire is_store = (op == 7'b0100011) || (op == 7'b0101111 && w_func5 != 5'b00010);
 		i_cache_refill <= 1; // 
 		pc <= 0; // trap to isr_router
 		bubble <= 1'b1; // bubble 
-		//for (i=1;i<11;i=i+1) begin sre[i]<= re[i]; end // save re
+		for (i=1;i<11;i=i+1) begin sre[i]<= re[i]; end // save re
 		saved_user_pc <= pc_4  ; // ??!!! save pc (j/b EXE was flushed currectly)
-		//re[9] <= {ppc_pre[63:4], 4'b0};// save missed ppc_pre cache_line address for handler
-		re[9+32] <= {ppc_pre[63:4], 4'b0};// save missed ppc_pre cache_line address for handler
+		re[9] <= {ppc_pre[63:4], 4'b0};// save missed ppc_pre cache_line address for handler
 		ask_i_data <= {ppc_pre[63:4], 4'b0};// save missed ppc_pre cache_line address for hardware
 		if (pc == `Ram_base) begin // initial situation
 		    saved_user_pc <= pc; // first pc
-		    //re[9] <= {ppc[63:4], 4'b0};// save missed ppc_pre cache_line address for handler
-		    re[9+32] <= {ppc[63:4], 4'b0};// save missed ppc_pre cache_line address for handler
+		    re[9] <= {ppc[63:4], 4'b0};// save missed ppc_pre cache_line address for handler
 		    ask_i_data <= {ppc[63:4], 4'b0};// save missed ppc_pre cache_line address for hardware
 		end
-		//re[8] <= 1;// save x2 trap type 1 i-cache trap
-		re[8+32] <= 1;// save x2 trap type 1 i-cache trap
+		re[8] <= 1;// save x2 trap type 1 i-cache trap
 
             // unalign
 	    end else if (!STrap && !load_step && !store_step && is_unaligned_access) begin  
@@ -795,23 +742,19 @@ wire is_store = (op == 7'b0100011) || (op == 7'b0101111 && w_func5 != 5'b00010);
 		pc <= 0; // trap to isr_router
 		bubble <= 1'b1; // bubble
 		saved_user_pc <= pc_4; // save pc EXE l/s/a
-		//for (i=1;i<11;i=i+1) begin sre[i]<= re[i]; end // save re
-		//re[9] <= ls_va; //save va to x1
-		//re[8] <= (op == 7'b0000011) ? 13 : 15;// save x2 trap type load/store_atom
-		re[9+32] <= ls_va; //save va to x1
-		re[8+32] <= (op == 7'b0000011) ? 13 : 15;// save x2 trap type load/store_atom
+		for (i=1;i<11;i=i+1) begin sre[i]<= re[i]; end // save re
+		re[9] <= ls_va; //save va to x1
+		re[8] <= (op == 7'b0000011) ? 13 : 15;// save x2 trap type load/store_atom
     
 	    end else if ((Csrs[mdebug] || debug) && !STrap && !did && !load_step && !store_step && !mul_enable && !div_enable) begin
 		in_debug <= 1;
 		pc <= 0; // trap to isr_router
 		bubble <= 1'b1; // bubble
 		saved_user_pc <= pc_4; // save pc EXE l/s/a
-		//for (i=1;i<11;i=i+1) begin sre[i]<= re[i]; end // save re
-		//re[9] <= ls_va; //save va to x1
-		re[9+32] <= ls_va; //save va to x1
+		for (i=1;i<11;i=i+1) begin sre[i]<= re[i]; end // save re
+		re[9] <= ls_va; //save va to x1
 		//re[8] <= (op == 7'b0000011) ? 13 : 14;// save x2 trap type load/store_atom
-		//re[8] <= 18; // save 18 for debug
-		re[8+32] <= 18; // save 18 for debug
+		re[8] <= 18; // save 18 for debug
                 Csrs[mimpid] <= pc_4; // pc
                 Csrs[marchid] <= Csrs[mip];  // mip
                 Csrs[mvendorid] <= ir;
@@ -820,18 +763,15 @@ wire is_store = (op == 7'b0100011) || (op == 7'b0101111 && w_func5 != 5'b00010);
 	    end else if (STrap && ir == 32'b00110000001000000000000001110011) begin // for the fauld fill: sd ppa, Tlb_fault
 		pc <= saved_user_pc; // recover from shadow when see Mret
 		bubble <= 1'b1; // bubble
-		//for (i=1;i<11;i=i+1) begin re[i]<= sre[i]; end // recover usr re
+		for (i=1;i<11;i=i+1) begin re[i]<= sre[i]; end // recover usr re
 		mmu_pc <= 0; mmu_da <= 0; i_cache_refill<= 0;
 		//debug <= 0;
 		in_debug <= 0;
 		did <= 1;
-		//if (re[8]!=0) begin // Trap to Page Fault
-		if (re[8+32]!=0) begin // Trap to Page Fault
+		if (re[8]!=0) begin // Trap to Page Fault
 		    do_trap = 1;
-		    //trap_cause = re[8];
-		    //trap_val = re[9];
-		    trap_cause = re[8+32];
-		    trap_val = re[9+32];
+		    trap_cause = re[8];
+		    trap_val = re[9];
 		    trap_epc = saved_user_pc;
 		    reserve_valid <= 0; // clear lr.w/lr.d  Real Trap has to clear lock
 		end
@@ -1082,7 +1022,7 @@ wire is_store = (op == 7'b0100011) || (op == 7'b0101111 && w_func5 != 5'b00010);
 	    end
         end
 	re[0]<= 64'h0; 
-	re[32]<= 64'h0;
+	sre[0]<= 64'h0;
                 //// meip/seip is triggered by Plic_pending, mtip is triggered by inner Timer, stip is set by mtip trap handler, msip set by opensbi csr, ssip set by software csr
 		Csrs[mip][MEIP] <= meip_interrupt;  
 		Csrs[mip][MTIP] <= mtip_interrupt;//mtime-mtip_interrupt-MTIP|MTIP&MTIE-mtip|hardware mstatus.MIE=0|opensbi MTIE0 surpress repeate+STIP1 to linux|opensbi mret MIE=1(MPIE)|linux ecall sbi_set_timer-MIE=1|linux STIP=0
