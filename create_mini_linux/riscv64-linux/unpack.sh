@@ -1,0 +1,1 @@
+cpio -idmv < ../rootfs.cpio
