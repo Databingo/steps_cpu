@@ -1,5 +1,5 @@
 Assembler report for cpu_on_board
-Wed May  6 14:50:11 2026
+Wed May  6 20:17:01 2026
 Quartus II 32-bit Version 13.0.1 Build 232 06/12/2013 Service Pack 1 SJ Web Edition
 
 
@@ -39,7 +39,7 @@ applicable agreement for further details.
 +---------------------------------------------------------------+
 ; Assembler Summary                                             ;
 +-----------------------+---------------------------------------+
-; Assembler Status      ; Successful - Wed May  6 14:50:11 2026 ;
+; Assembler Status      ; Successful - Wed May  6 20:17:00 2026 ;
 ; Revision Name         ; cpu_on_board                          ;
 ; Top-level Entity Name ; cpu_on_board                          ;
 ; Family                ; Cyclone II                            ;
@@ -105,8 +105,8 @@ applicable agreement for further details.
 ; Option         ; Setting                   ;
 +----------------+---------------------------+
 ; Device         ; EP2C20F484C7              ;
-; JTAG usercode  ; 0x0120215E                ;
-; Checksum       ; 0x0120215E                ;
+; JTAG usercode  ; 0x01201663                ;
+; Checksum       ; 0x01201663                ;
 +----------------+---------------------------+
 
 
@@ -117,7 +117,7 @@ applicable agreement for further details.
 +--------------------+-----------------------+
 ; Device             ; EPCS16                ;
 ; JTAG usercode      ; 0x00000000            ;
-; Checksum           ; 0x1CC159B0            ;
+; Checksum           ; 0x1CC119CB            ;
 ; Compression Ratio  ; 1                     ;
 +--------------------+-----------------------+
 
@@ -141,15 +141,15 @@ Info: Running Quartus II 32-bit Assembler
     Info: programming logic devices manufactured by Altera and sold by 
     Info: Altera or its authorized distributors.  Please refer to the 
     Info: applicable agreement for further details.
-    Info: Processing started: Wed May  6 14:49:54 2026
+    Info: Processing started: Wed May  6 20:16:30 2026
 Info: Command: quartus_asm --read_settings_files=on --write_settings_files=off cpu_on_board -c cpu_on_board
 Critical Warning (138069): Setting INCREMENTAL_COMPILATION to "OFF" is no longer supported. Assignment is ignored. To disable partitions, set the IGNORE_PARTITIONS global assignment to "ON" instead.
 Info (115031): Writing out detailed assembly data for power analysis
 Info (115030): Assembler is generating device programming files
 Info: Quartus II 32-bit Assembler was successful. 0 errors, 1 warning
-    Info: Peak virtual memory: 383 megabytes
-    Info: Processing ended: Wed May  6 14:50:12 2026
-    Info: Elapsed time: 00:00:18
-    Info: Total CPU time (on all processors): 00:00:18
+    Info: Peak virtual memory: 387 megabytes
+    Info: Processing ended: Wed May  6 20:17:03 2026
+    Info: Elapsed time: 00:00:33
+    Info: Total CPU time (on all processors): 00:00:32
 
 
