@@ -27,26 +27,41 @@
 //   
 //   return 0;
 //
+//#include <unistd.h>
+//
+//void print(const char *s, int len) {
+//    // Syscall 64 is 'write' in RISC-V 64-bit
+//    // fd 1 is stdout
+//    write(1, s, len);
+//}
+//
+//int main() {
+//    char buf[1];
+//    //print("\r\n*** USER SPACE STARTED SUCCESSFULLY ***\r\n", 42);
+//    //print("Echo Test: Type something and I will repeat it.\r\n", 48);
+//    write(1, "\r\n--- HELLO START ---\r\n", 23);
+//
+//    while(1) {
+//        // Syscall 63 is 'read'
+//        // fd 0 is stdin
+//        if (read(0, buf, 1) > 0) {
+//            // Echo back to stdout
+//            write(1, buf, 1);
+//        }
+//    }
+//    return 0;
+//}
+
 #include <unistd.h>
 
-void print(const char *s, int len) {
-    // Syscall 64 is 'write' in RISC-V 64-bit
-    // fd 1 is stdout
-    write(1, s, len);
-}
-
 int main() {
-    char buf[1];
-    print("\r\n*** USER SPACE STARTED SUCCESSFULLY ***\r\n", 42);
-    print("Echo Test: Type something and I will repeat it.\r\n", 48);
-
+    char c;
+    write(1, "OK\n", 3);
     while(1) {
-        // Syscall 63 is 'read'
-        // fd 0 is stdin
-        if (read(0, buf, 1) > 0) {
-            // Echo back to stdout
-            write(1, buf, 1);
-        }
-    }
+	if (read(0, &c, 1) > 0) { write(1, "U", 1); }
+	}
     return 0;
 }
+
+  
+  
