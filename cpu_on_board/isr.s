@@ -248,15 +248,15 @@ check_fetch:
      beqz x3, PERM_FAULT
 
 update_ad:
-     # 3. Update A/D bits
-     ori x4, x4, 0x40  # set Accessed bit (bit 6)
-    #ori x4, x4, 0x41  # set Accessed bit (bit 6) and Valid bit(bit 0)
-     li x3, 15
-    #li x3, 14
-     bne x8, x3, write_pte
-     ori x4, x4, 0x80  # set Dirty bit (bit 7) if store
-write_pte:
-     sd x4, 0(x6) # write updated PTE back to memory
+#     # 3. Update A/D bits
+#     ori x4, x4, 0x40  # set Accessed bit (bit 6)
+#    #ori x4, x4, 0x41  # set Accessed bit (bit 6) and Valid bit(bit 0)
+#     li x3, 15
+#    #li x3, 14
+#     bne x8, x3, write_pte
+#     ori x4, x4, 0x80  # set Dirty bit (bit 7) if store
+#write_pte:
+#     sd x4, 0(x6) # write updated PTE back to memory
      jalr x0, 0(x5)  # return to leaf formatter
     
     
