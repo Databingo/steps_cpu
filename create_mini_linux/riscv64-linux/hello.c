@@ -29,26 +29,35 @@
 #include <sys/stat.h>
 
 int main() {
-    // Try to create /dev and mount it
-    if (mkdir("/dev", 0755) == 0) write(1, "d", 1); // 'd' means directory created
-    if (mount("devtmpfs", "/dev", "devtmpfs", 0, NULL) == 0) write(1, "m", 1); // 'm' means mount success
+    // Step 1: Create the folder
+    mkdir("/dev", 0755);
+    
+    // Step 2: Mount the hardware devices
+    mount("devtmpfs", "/dev", "devtmpfs", 0, NULL);
 
-    int fd = open("/dev/hvc0", O_RDWR);
+    // Step 3: Open the console directly
+    int fd = open("/dev/console", O_RDWR);
     if (fd < 0) {
-        write(1, "E", 1); // 'E' means Error: Could not open /dev/hvc0
-        while(1); // Stop here so we don't spam
+        // Fallback if console isn't named right
+        fd = open("/dev/hvc0", O_RDWR); 
     }
 
-    dup2(fd, 0);
-    dup2(fd, 1);
-    
-    write(1, "OK\r\n", 4);
+    if (fd >= 0) {
+        // Step 4: Link the hardware to our program
+        dup2(fd, 0); // stdin
+        dup2(fd, 1); // stdout
+        dup2(fd, 2); // stderr
+        
+        // Step 5: Print success!
+        write(1, "\r\n*** OK ***\r\n", 14);
+    }
 
     char c;
     while(1) {
+        // Step 6: Echo loop
         if (read(0, &c, 1) > 0) {
             write(1, "U", 1);
         }
     }
     return 0;
-}
+} 
