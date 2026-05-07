@@ -136,7 +136,7 @@ set_global_assignment -name SEED 5
 
 
 set_global_assignment -name AUTO_PACKED_REGISTERS "MINIMIZE AREA"
-set_global_assignment -name STATE_MACHINE_PROCESSING "MINIMUM BITS"
+set_global_assignment -name STATE_MACHINE_PROCESSING "MINIMAL BITS"
 set_global_assignment -name ADV_NETLIST_OPT_SYNTH_WYSIWYG_REMAP ON
 #set_global_assignment -name ROUTER_TIMING_OPTIMIZATION_LEVEL MINIMUM
 set_global_assignment -name AUTO_RESOURCE_SHARING ON
