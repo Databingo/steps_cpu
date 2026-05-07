@@ -57,12 +57,11 @@ wire is_unaligned_access = is_mem_access && current_privilege_mode != M_mode && 
 
 reg [63:0] saved_user_pc;
 integer i; 
-//wire is_mmio_io = (current_privilege_mode == M_mode) && (ls_va[63:28]==36'b0); //0x0000_0000 t0 0x0fff_ffff
 
 // --- Privilege Modes ---
-localparam U_mode = 2'b00;
-localparam S_mode = 2'b01;
 localparam M_mode = 2'b11;
+localparam S_mode = 2'b01;
+localparam U_mode = 2'b00;
 reg [1:0] current_privilege_mode;
 
 // -- Immediate decoders  -- 
@@ -317,9 +316,6 @@ end
 localparam mstatus    = 0 ; localparam MPRV=17,MPP=11,SPP=8,MPIE=7,SPIE=5,MIE=3,SIE=1,UIE=0;//63_SD|37_MBE|36_SBE|35:34_SXL10|22_TSR|21_TW|20_TVW|17_MPRV|12:11MPP|8SPP|7MPIE|5SPIE|3MIE|1SIE|0UIE
 localparam sstatus    = 0 ; localparam SD=63,UXL=32,MXR=19,SUM=18,XS=15,FS=13,VS=9,UBE=6; //SPP=8,SPIE=5,SIE=1,//63SD|33:32UXL|19MXR|18SUM|16:15XS|14:13FS|10:9VS|8SPP|6UBE|5SPIE|1SIE
 localparam sstatus_mask  = 64'h8000_0003_000D_E122; // SD,UXL,MXR,SUM,XS,FS,SPP,SPIE,SIE only from mirror mstatus, RVV E722
-//localparam sstatus_mask  = 64'h8000_0003_000F_F122; // SD 19MXR 18SUM 17MPRV 15XS 14FS 1312MPP 8SPP 7MPIE 5SPIE 3MIE 1SIE 0UIE
-// D 19-16 1101 -> 1111 bit17MPRV only M
-// E 15-12 1110 -> 1111 bit13:12MPP only M
 
 localparam mtvec      = 1 ; localparam BASE=2,MODE=0; // 63:2BASE|1:0MDOE  // 0x305 MRW Machine trap-handler base address * 0 direct 1vec
 localparam mscratch   = 2 ;  // 
@@ -426,7 +422,6 @@ always @(posedge clk or negedge reset) begin
     if (!reset) begin 
 	mtime <= 0; 
 	mtime_div <= 0; 
-    //end else if (!STrap) begin 
     end else begin 
 	mtime_div <= mtime_div + 1; 
 	if (mtime_div == 7'd99) begin 
@@ -517,14 +512,6 @@ wire is_store = (op == 7'b0100011) || (op == 7'b0101111 && w_func5 != 5'b00010);
 	assign tlb_d_match[5] = tlb_d_vld[5] && (tlb_d_vpn[5] == ls_va[38:12]) && (!is_store || (tlb_d_w[5] && tlb_d_d[5]));
 	assign tlb_d_match[6] = tlb_d_vld[6] && (tlb_d_vpn[6] == ls_va[38:12]) && (!is_store || (tlb_d_w[6] && tlb_d_d[6]));
 	assign tlb_d_match[7] = tlb_d_vld[7] && (tlb_d_vpn[7] == ls_va[38:12]) && (!is_store || (tlb_d_w[7] && tlb_d_d[7]));
-	//assign tlb_d_match[0] = tlb_d_vld[0] && (tlb_d_vpn[0] == ls_va[38:12]) && (!is_store || tlb_d_w[0]);
-	//assign tlb_d_match[1] = tlb_d_vld[1] && (tlb_d_vpn[1] == ls_va[38:12]) && (!is_store || tlb_d_w[1]);
-	//assign tlb_d_match[2] = tlb_d_vld[2] && (tlb_d_vpn[2] == ls_va[38:12]) && (!is_store || tlb_d_w[2]);
-	//assign tlb_d_match[3] = tlb_d_vld[3] && (tlb_d_vpn[3] == ls_va[38:12]) && (!is_store || tlb_d_w[3]);
-	//assign tlb_d_match[4] = tlb_d_vld[4] && (tlb_d_vpn[4] == ls_va[38:12]) && (!is_store || tlb_d_w[4]);
-	//assign tlb_d_match[5] = tlb_d_vld[5] && (tlb_d_vpn[5] == ls_va[38:12]) && (!is_store || tlb_d_w[5]);
-	//assign tlb_d_match[6] = tlb_d_vld[6] && (tlb_d_vpn[6] == ls_va[38:12]) && (!is_store || tlb_d_w[6]);
-	//assign tlb_d_match[7] = tlb_d_vld[7] && (tlb_d_vpn[7] == ls_va[38:12]) && (!is_store || tlb_d_w[7]);
 	//assign tlb_d_match[8] = tlb_d_vld[8] && (tlb_d_vpn[8] == ls_va[38:12]);
 	//assign tlb_d_match[9] = tlb_d_vld[9] && (tlb_d_vpn[9] == ls_va[38:12]);
 	//assign tlb_d_match[10] = tlb_d_vld[10] && (tlb_d_vpn[10] == ls_va[38:12]);
@@ -556,12 +543,9 @@ wire is_store = (op == 7'b0100011) || (op == 7'b0101111 && w_func5 != 5'b00010);
 		wire need_trans = satp_mmu && !STrap && (current_privilege_mode != M_mode);
 		assign ppc = need_trans ? {8'h0, pc_ppn, pc[11:0]} : pc;
 		//assign pda = need_trans ? {8'h0, data_ppn, ls_va[11:0]} : ls_va;
-                 
-		// MPRV only for M-mode get trans_d (read from a virtual address)
-		wire [1:0] eff_priv = ((current_privilege_mode == M_mode) && Csrs[mstatus][MPRV]) ? Csrs[mstatus][MPP+1:MPP] : current_privilege_mode;
-		//wire [1:0] eff_priv = Csrs[mstatus][MPRV] ? Csrs[mstatus][MPP+1:MPP] : current_privilege_mode;
+    
+		wire [1:0] eff_priv = Csrs[mstatus][MPRV] ? Csrs[mstatus][MPP+1:MPP] : current_privilege_mode;
 		wire need_trans_d = satp_mmu && !STrap && (eff_priv != M_mode);
-		//wire need_trans_d = satp_mmu && !STrap && (eff_priv != M_mode) && !is_mmio_io;
 		assign pda = need_trans_d ? {8'h0, data_ppn, ls_va[11:0]} : ls_va;
 
 		// TLB Refill
@@ -666,8 +650,8 @@ wire is_store = (op == 7'b0100011) || (op == 7'b0101111 && w_func5 != 5'b00010);
 		mmu_da <= 0;
 		for (i=0;i<11;i=i+1) begin sre[i]<= 64'b0; end 
 		for (i=0;i<=25;i=i+1) begin Csrs[i]<= 64'b0; end
-		Csrs[medeleg] <= 64'hb1af; // delegate to S-mode 1011_0001_1010_1111 // VII 3.1.15 15 store page failt 13load 12ir 8uecall 7,5accessFault 4loadaddrunalign 2il 1,0irualign
-		//Csrs[medeleg] <= 64'hb109; // delegate to S-mode have 12/13/15
+		//Csrs[medeleg] <= 64'hb1af; // delegate to S-mode 1011000110101111 // see VII 3.1.15 mcasue exceptions
+		Csrs[medeleg] <= 64'hb109; // delegate to S-mode no 12/13/15
 		Csrs[mideleg] <= 64'h0222; // delegate to S-mode 0000001000100010 see VII 3.1.15 mcasue interrupt 1/5/9 SSIP(supervisor software interrupt) STIP(time) SEIP(external)
 		// Initialize Machine Info for OpenSBI
 		//Csrs[misa] <= 64'h8000000000141101; //RV64IMASU extensions(63:62=2 64bits | 1<<0 Atomic| 1<<8 Integer| 1<<12 Multiply| 1<<18 Supervisor| 1 <<20 User) so: 64'h8000000000141101; RV64IMASU
@@ -772,9 +756,9 @@ wire is_store = (op == 7'b0100011) || (op == 7'b0101111 && w_func5 != 5'b00010);
 		//re[8] <= (op == 7'b0000011) ? 13 : 14;// save x2 trap type load/store_atom
 		re[8] <= 18; // save 18 for debug
                 Csrs[mimpid] <= pc_4; // pc
-                Csrs[marchid] <= re[10]; // a0 ecall returned value     
+                //Csrs[marchid] <= Csrs[mip];  // mip
+                Csrs[marchid] <= re[10];  // mip
                 Csrs[mvendorid] <= ir;
-                Csrs[mscratch] <= ls_va;
 
             // Back from STrap
 	    end else if (STrap && ir == 32'b00110000001000000000000001110011) begin // for the fauld fill: sd ppa, Tlb_fault
