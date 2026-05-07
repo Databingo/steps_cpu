@@ -1,0 +1,55 @@
+msg:
+buf:
+_start:
+#     li a0, 1            
+addi a0, x0, 0x0
+addi a0, x0, 0x0
+addi a0, x0, 0x1
+#     la a1, msg          
+auipc a1, 0 # R_RISCV_PCREL_HI20 msg 
+addi a1, a1, 0 # R_RISCV_PCREL_LO12_I msg 
+#     li a2, 18           
+addi a2, x0, 0x0
+addi a2, x0, 0x0
+addi a2, x0, 0x12
+#     li a7, 64           
+addi a7, x0, 0x0
+addi a7, x0, 0x0
+addi a7, x0, 0x40
+ecall
+loop:
+#     li a0, 0            
+addi a0, x0, 0x0
+#     la a1, buf          
+auipc a1, 0 # R_RISCV_PCREL_HI20 buf 
+addi a1, a1, 0 # R_RISCV_PCREL_LO12_I buf 
+#     li a2, 1            
+addi a2, x0, 0x0
+addi a2, x0, 0x0
+addi a2, x0, 0x1
+#     li a7, 63           
+addi a7, x0, 0x0
+addi a7, x0, 0x0
+addi a7, x0, 0x3f
+ecall
+#     li a0, 1            
+addi a0, x0, 0x0
+addi a0, x0, 0x0
+addi a0, x0, 0x1
+#     la a1, buf          
+auipc a1, 0 # R_RISCV_PCREL_HI20 buf 
+addi a1, a1, 0 # R_RISCV_PCREL_LO12_I buf 
+#     li a2, 1            
+addi a2, x0, 0x0
+addi a2, x0, 0x0
+addi a2, x0, 0x1
+#     li a7, 64           
+addi a7, x0, 0x0
+addi a7, x0, 0x0
+addi a7, x0, 0x40
+ecall
+addi x0, x0, 0x11  # 0x01100013
+addi x0, x0, 0x22  # 0x02200013
+addi x0, x0, 0x33  # 0x03300013
+#     j loop
+jal x0, loop
