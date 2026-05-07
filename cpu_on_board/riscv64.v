@@ -342,7 +342,7 @@ wire [63:0] csr_mask_w= (w_csr == 12'h180) ? satp_mask :
 			(w_csr == 12'h144) ? (sip_write_mask & Csrs[mideleg]) : 
                         (w_csr == 12'h344) ? mip_write_mask : 
 			64'hffff_ffff_ffff_ffff;
-wire [63:0] csr_read = //(w_csr == 12'h301) ? 64'h8000000000141101 : // misa(RV64IMASU)
+wire [63:0] csr_read = (w_csr == 12'h301) ? 64'h8000000000141101 : // misa(RV64IMASU)
                        //(w_csr == 12'hF11) ? 64'h0 : // mvendorid
                        //(w_csr == 12'hF12) ? 64'h0 : // marchid
                        //(w_csr == 12'hF13) ? 64'h0 : // mimpid
@@ -668,7 +668,7 @@ wire is_store = (op == 7'b0100011) || (op == 7'b0101111 && w_func5 != 5'b00010);
 		//Csrs[medeleg] <= 64'hb109; // delegate to S-mode have 12/13/15
 		Csrs[mideleg] <= 64'h0222; // delegate to S-mode 0000001000100010 see VII 3.1.15 mcasue interrupt 1/5/9 SSIP(supervisor software interrupt) STIP(time) SEIP(external)
 		// Initialize Machine Info for OpenSBI
-		Csrs[misa] <= 64'h8000000000141101; //RV64IMASU extensions(63:62=2 64bits | 1<<0 Atomic| 1<<8 Integer| 1<<12 Multiply| 1<<18 Supervisor| 1 <<20 User) so: 64'h8000000000141101; RV64IMASU
+		//Csrs[misa] <= 64'h8000000000141101; //RV64IMASU extensions(63:62=2 64bits | 1<<0 Atomic| 1<<8 Integer| 1<<12 Multiply| 1<<18 Supervisor| 1 <<20 User) so: 64'h8000000000141101; RV64IMASU
 		mmu_pc <= 0;
 		in_debug <= 0;
 		reserve_addr <= 0;
@@ -770,10 +770,9 @@ wire is_store = (op == 7'b0100011) || (op == 7'b0101111 && w_func5 != 5'b00010);
 		//re[8] <= (op == 7'b0000011) ? 13 : 14;// save x2 trap type load/store_atom
 		re[8] <= 18; // save 18 for debug
                 Csrs[mimpid] <= pc_4; // pc
-                Csrs[marchid] <= Csrs[mstatus];
+                Csrs[marchid] <= re[10]; // a0 ecall returned value     
                 Csrs[mvendorid] <= ir;
                 Csrs[mscratch] <= ls_va;
-                Csrs[misa] <= re[10]; // a0 ecall returned value     
 
             // Back from STrap
 	    end else if (STrap && ir == 32'b00110000001000000000000001110011) begin // for the fauld fill: sd ppa, Tlb_fault

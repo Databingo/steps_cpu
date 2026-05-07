@@ -335,12 +335,12 @@ debug:
 
      li a0, "|ms:" 
      call print7
-     csrr a0, marchid
+     csrr a0, mstatus
      call print_reg
 
      li a0, "|a0:" 
      call print7
-     csrr a0, misa
+     csrr a0, marchid
      call print_reg
 
 
