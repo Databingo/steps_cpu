@@ -488,7 +488,7 @@ always @(*) begin
 // -- TLB d -- 8 pages
 reg [7:0] tlb_d_vld;
 reg [7:0] tlb_d_w; // Wirte permission bit
-reg [7:0] tlb_d_d; // Dirty bit
+//reg [7:0] tlb_d_d; // Dirty bit
 wire is_store = (op == 7'b0100011) || (op == 7'b0101111 && w_func5 != 5'b00010); // Store/Atm(no lr)
 (* ram_style = "logic" *) reg [26:0] tlb_d_vpn [0:7]; // vpn number VA[38:12]  Sv39
 (* ram_style = "logic" *) reg [43:0] tlb_d_ppn [0:7]; // ppn number PA[55:12]
@@ -574,7 +574,7 @@ wire is_store = (op == 7'b0100011) || (op == 7'b0101111 && w_func5 != 5'b00010);
 			//tlb_d_vld <= 16'b0;
 			tlb_d_vld <= 8'b0;
 			tlb_d_w <= 8'b0;
-			tlb_d_d <= 8'b0;
+			//tlb_d_d <= 8'b0;
 		    //end else if (tlb_flush) begin tlb_vld <= 4'b0; tlb_d_vld <= 16'b0; // FLUSH
 		    //end else if (tlb_flush) begin tlb_vld <= 4'b0; tlb_d_vld <= 8'b0; // FLUSH
 		    end else if (tlb_flush) begin tlb_vld <= 8'b0; tlb_d_vld <= 8'b0; // FLUSH
@@ -589,7 +589,7 @@ wire is_store = (op == 7'b0100011) || (op == 7'b0101111 && w_func5 != 5'b00010);
 			tlb_d_ppn[tlb_d_ptr] <= bus_write_data[55:12] ; // real 
 			tlb_d_vld[tlb_d_ptr] <= 1;
 			tlb_d_w[tlb_d_ptr] <= bus_write_data[2]; // bit 2 of PTE is W
-			tlb_d_d[tlb_d_ptr] <= bus_write_data[7]; // bit 7 of PTE is D
+			//tlb_d_d[tlb_d_ptr] <= bus_write_data[7]; // bit 7 of PTE is D
 			tlb_d_ptr <= tlb_d_ptr + 1; 
 		        end 
 		    end
