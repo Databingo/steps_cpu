@@ -59,9 +59,9 @@ reg [63:0] saved_user_pc;
 integer i; 
 
 // --- Privilege Modes ---
-localparam M_mode = 2'b11;
-localparam S_mode = 2'b01;
 localparam U_mode = 2'b00;
+localparam S_mode = 2'b01;
+localparam M_mode = 2'b11;
 reg [1:0] current_privilege_mode;
 
 // -- Immediate decoders  -- 
