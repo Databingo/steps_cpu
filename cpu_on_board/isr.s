@@ -338,8 +338,8 @@ debug:
      csrr a0, mstatus
      call print_reg
 
-     li a0, "|a0:" 
-    #li a0, "|mip:" 
+    #li a0, "|a0:" 
+     li a0, "|mip:" 
      call print7
      csrr a0, marchid
      call print_reg
