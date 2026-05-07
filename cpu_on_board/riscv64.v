@@ -315,10 +315,10 @@ end
 // --Machine CSR --
 localparam mstatus    = 0 ; localparam MPRV=17,MPP=11,SPP=8,MPIE=7,SPIE=5,MIE=3,SIE=1,UIE=0;//63_SD|37_MBE|36_SBE|35:34_SXL10|22_TSR|21_TW|20_TVW|17_MPRV|12:11MPP|8SPP|7MPIE|5SPIE|3MIE|1SIE|0UIE
 localparam sstatus    = 0 ; localparam SD=63,UXL=32,MXR=19,SUM=18,XS=15,FS=13,VS=9,UBE=6; //SPP=8,SPIE=5,SIE=1,//63SD|33:32UXL|19MXR|18SUM|16:15XS|14:13FS|10:9VS|8SPP|6UBE|5SPIE|1SIE
-//localparam sstatus_mask  = 64'h8000_0003_000D_E122; // SD,UXL,MXR,SUM,XS,FS,SPP,SPIE,SIE only from mirror mstatus, RVV E722
-localparam sstatus_mask  = 64'h8000_0003_000F_F122; // SD 19MXR 18SUM 17MPRV 15XS 14FS 1312MPP 8SPP 7MPIE 5SPIE 3MIE 1SIE 0UIE
-// D 19-16 1101 -> 1111 bit17MPRV should let S write
-// E 15-12 1110 -> 1111 bit13:12MPP should let S write
+localparam sstatus_mask  = 64'h8000_0003_000D_E122; // SD,UXL,MXR,SUM,XS,FS,SPP,SPIE,SIE only from mirror mstatus, RVV E722
+//localparam sstatus_mask  = 64'h8000_0003_000F_F122; // SD 19MXR 18SUM 17MPRV 15XS 14FS 1312MPP 8SPP 7MPIE 5SPIE 3MIE 1SIE 0UIE
+// D 19-16 1101 -> 1111 bit17MPRV only M
+// E 15-12 1110 -> 1111 bit13:12MPP only M
 
 localparam mtvec      = 1 ; localparam BASE=2,MODE=0; // 63:2BASE|1:0MDOE  // 0x305 MRW Machine trap-handler base address * 0 direct 1vec
 localparam mscratch   = 2 ;  // 
