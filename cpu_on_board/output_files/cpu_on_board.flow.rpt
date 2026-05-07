@@ -1,5 +1,5 @@
 Flow report for cpu_on_board
-Thu May  7 16:47:53 2026
+Thu May  7 21:29:47 2026
 Quartus II 32-bit Version 13.0.1 Build 232 06/12/2013 Service Pack 1 SJ Web Edition
 
 
@@ -40,17 +40,17 @@ applicable agreement for further details.
 +--------------------------------------------------------------------------------------+
 ; Flow Summary                                                                         ;
 +------------------------------------+-------------------------------------------------+
-; Flow Status                        ; Successful - Thu May  7 16:47:52 2026           ;
+; Flow Status                        ; Successful - Thu May  7 21:29:46 2026           ;
 ; Quartus II 32-bit Version          ; 13.0.1 Build 232 06/12/2013 SP 1 SJ Web Edition ;
 ; Revision Name                      ; cpu_on_board                                    ;
 ; Top-level Entity Name              ; cpu_on_board                                    ;
 ; Family                             ; Cyclone II                                      ;
 ; Device                             ; EP2C20F484C7                                    ;
 ; Timing Models                      ; Final                                           ;
-; Total logic elements               ; 21,996                                          ;
-;     Total combinational functions  ; 17,009                                          ;
-;     Dedicated logic registers      ; 7,594                                           ;
-; Total registers                    ; 7594                                            ;
+; Total logic elements               ; 21,974                                          ;
+;     Total combinational functions  ; 16,987                                          ;
+;     Dedicated logic registers      ; 7,592                                           ;
+; Total registers                    ; 7592                                            ;
 ; Total pins                         ; 47                                              ;
 ; Total virtual pins                 ; 0                                               ;
 ; Total memory bits                  ; 218,624                                         ;
@@ -64,67 +64,68 @@ applicable agreement for further details.
 +-------------------+---------------------+
 ; Option            ; Setting             ;
 +-------------------+---------------------+
-; Start date & time ; 05/07/2026 16:22:34 ;
+; Start date & time ; 05/07/2026 21:13:13 ;
 ; Main task         ; Compilation         ;
 ; Revision Name     ; cpu_on_board        ;
 +-------------------+---------------------+
 
 
-+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-; Flow Non-Default Global Settings                                                                                                                                                           ;
-+--------------------------------------------+--------------------------------------------------------------------+------------------------------+------------------------------+------------+
-; Assignment Name                            ; Value                                                              ; Default Value                ; Entity Name                  ; Section Id ;
-+--------------------------------------------+--------------------------------------------------------------------+------------------------------+------------------------------+------------+
-; ADV_NETLIST_OPT_SYNTH_WYSIWYG_REMAP        ; On                                                                 ; Off                          ; --                           ; --         ;
-; ALLOW_ANY_RAM_SIZE_FOR_RECOGNITION         ; On                                                                 ; Off                          ; --                           ; --         ;
-; AUTO_PACKED_REGISTERS                      ; Minimize Area                                                      ; Off                          ; --                           ; --         ;
-; AUTO_RESOURCE_SHARING                      ; On                                                                 ; Off                          ; --                           ; --         ;
-; AUTO_SHIFT_REGISTER_RECOGNITION            ; Always                                                             ; Auto                         ; --                           ; --         ;
-; COMPILER_SIGNATURE_ID                      ; 0.177814215355815                                                  ; --                           ; --                           ; --         ;
-; ENABLE_SIGNALTAP                           ; Off                                                                ; --                           ; --                           ; --         ;
-; FINAL_PLACEMENT_OPTIMIZATION               ; Always                                                             ; Automatically                ; --                           ; --         ;
-; FITTER_AGGRESSIVE_ROUTABILITY_OPTIMIZATION ; Always                                                             ; Automatically                ; --                           ; --         ;
-; FITTER_EFFORT                              ; Standard Fit                                                       ; Auto Fit                     ; --                           ; --         ;
-; HDL_MESSAGE_LEVEL                          ; Level3                                                             ; Level2                       ; --                           ; --         ;
-; INCREMENTAL_COMPILATION                    ; Off                                                                ; FULL_INCREMENTAL_COMPILATION ; --                           ; --         ;
-; IP_TOOL_ENV                                ; Qsys                                                               ; --                           ; altera_reset_controller      ; --         ;
-; IP_TOOL_ENV                                ; Qsys                                                               ; --                           ; jtag_uart_system             ; --         ;
-; IP_TOOL_ENV                                ; Qsys                                                               ; --                           ; jtag_uart_system_jtag_uart_0 ; --         ;
-; IP_TOOL_NAME                               ; altera_reset_controller                                            ; --                           ; altera_reset_controller      ; --         ;
-; IP_TOOL_NAME                               ; Qsys                                                               ; --                           ; jtag_uart_system             ; --         ;
-; IP_TOOL_NAME                               ; altera_avalon_jtag_uart                                            ; --                           ; jtag_uart_system_jtag_uart_0 ; --         ;
-; IP_TOOL_VERSION                            ; 13.0                                                               ; --                           ; altera_reset_controller      ; --         ;
-; IP_TOOL_VERSION                            ; 13.0sp1                                                            ; --                           ; jtag_uart_system             ; --         ;
-; IP_TOOL_VERSION                            ; 13.0.1.99.2                                                        ; --                           ; jtag_uart_system_jtag_uart_0 ; --         ;
-; MAX_CORE_JUNCTION_TEMP                     ; 85                                                                 ; --                           ; --                           ; --         ;
-; MIN_CORE_JUNCTION_TEMP                     ; 0                                                                  ; --                           ; --                           ; --         ;
-; MISC_FILE                                  ; jtag_uart_system/synthesis/../../jtag_uart_system.cmp              ; --                           ; --                           ; --         ;
-; MISC_FILE                                  ; jtag_uart_system/synthesis/../../jtag_uart_system.qsys             ; --                           ; --                           ; --         ;
-; MUX_RESTRUCTURE                            ; On                                                                 ; Auto                         ; --                           ; --         ;
-; OPTIMIZATION_TECHNIQUE                     ; Area                                                               ; Balanced                     ; --                           ; --         ;
-; OPTIMIZE_FOR_METASTABILITY                 ; Off                                                                ; On                           ; --                           ; --         ;
-; PARTITION_COLOR                            ; 16764057                                                           ; --                           ; --                           ; Top        ;
-; PARTITION_FITTER_PRESERVATION_LEVEL        ; PLACEMENT_AND_ROUTING                                              ; --                           ; --                           ; Top        ;
-; PARTITION_NETLIST_TYPE                     ; SOURCE                                                             ; --                           ; --                           ; Top        ;
-; PHYSICAL_SYNTHESIS_COMBO_LOGIC_FOR_AREA    ; On                                                                 ; Off                          ; --                           ; --         ;
-; PLACEMENT_EFFORT_MULTIPLIER                ; 4.0                                                                ; 1.0                          ; --                           ; --         ;
-; POWER_BOARD_THERMAL_MODEL                  ; None (CONSERVATIVE)                                                ; --                           ; --                           ; --         ;
-; POWER_PRESET_COOLING_SOLUTION              ; 23 MM HEAT SINK WITH 200 LFPM AIRFLOW                              ; --                           ; --                           ; --         ;
-; PROJECT_OUTPUT_DIRECTORY                   ; output_files                                                       ; --                           ; --                           ; --         ;
-; REMOVE_REDUNDANT_LOGIC_CELLS               ; On                                                                 ; Off                          ; --                           ; --         ;
-; ROUTER_EFFORT_MULTIPLIER                   ; 4                                                                  ; 1.0                          ; --                           ; --         ;
-; ROUTER_REGISTER_DUPLICATION                ; Off                                                                ; Auto                         ; --                           ; --         ;
-; ROUTER_TIMING_OPTIMIZATION_LEVEL           ; MINIMUM                                                            ; Normal                       ; --                           ; --         ;
-; SEED                                       ; 5                                                                  ; 1                            ; --                           ; --         ;
-; SLD_FILE                                   ; /usr/local/projects/steps_cpu/cpu_on_board/stp1_auto_stripped.stp  ; --                           ; --                           ; --         ;
-; SLD_INFO                                   ; QSYS_NAME jtag_uart_system HAS_SOPCINFO 1 GENERATION_ID 1760608262 ; --                           ; jtag_uart_system             ; --         ;
-; SOPCINFO_FILE                              ; jtag_uart_system/synthesis/../../jtag_uart_system.sopcinfo         ; --                           ; --                           ; --         ;
-; STATE_MACHINE_PROCESSING                   ; Minimal Bits                                                       ; Auto                         ; --                           ; --         ;
-; SYNTHESIS_ONLY_QIP                         ; On                                                                 ; --                           ; --                           ; --         ;
-; USE_SIGNALTAP_FILE                         ; stp1.stp                                                           ; --                           ; --                           ; --         ;
-; VERILOG_INPUT_VERSION                      ; SystemVerilog_2005                                                 ; Verilog_2001                 ; --                           ; --         ;
-; VERILOG_SHOW_LMF_MAPPING_MESSAGES          ; Off                                                                ; --                           ; --                           ; --         ;
-+--------------------------------------------+--------------------------------------------------------------------+------------------------------+------------------------------+------------+
++-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+; Flow Non-Default Global Settings                                                                                                                                                                ;
++-------------------------------------------------+--------------------------------------------------------------------+------------------------------+------------------------------+------------+
+; Assignment Name                                 ; Value                                                              ; Default Value                ; Entity Name                  ; Section Id ;
++-------------------------------------------------+--------------------------------------------------------------------+------------------------------+------------------------------+------------+
+; ADV_NETLIST_OPT_SYNTH_WYSIWYG_REMAP             ; On                                                                 ; Off                          ; --                           ; --         ;
+; ALLOW_ANY_RAM_SIZE_FOR_RECOGNITION              ; On                                                                 ; Off                          ; --                           ; --         ;
+; AUTO_PACKED_REGISTERS                           ; Minimize Area                                                      ; Off                          ; --                           ; --         ;
+; AUTO_RESOURCE_SHARING                           ; On                                                                 ; Off                          ; --                           ; --         ;
+; AUTO_SHIFT_REGISTER_RECOGNITION                 ; Always                                                             ; Auto                         ; --                           ; --         ;
+; COMPILER_SIGNATURE_ID                           ; 0.177815959358417                                                  ; --                           ; --                           ; --         ;
+; ENABLE_SIGNALTAP                                ; Off                                                                ; --                           ; --                           ; --         ;
+; FINAL_PLACEMENT_OPTIMIZATION                    ; Always                                                             ; Automatically                ; --                           ; --         ;
+; FITTER_AGGRESSIVE_ROUTABILITY_OPTIMIZATION      ; Always                                                             ; Automatically                ; --                           ; --         ;
+; FITTER_EFFORT                                   ; Standard Fit                                                       ; Auto Fit                     ; --                           ; --         ;
+; HDL_MESSAGE_LEVEL                               ; Level3                                                             ; Level2                       ; --                           ; --         ;
+; INCREMENTAL_COMPILATION                         ; Off                                                                ; FULL_INCREMENTAL_COMPILATION ; --                           ; --         ;
+; IP_TOOL_ENV                                     ; Qsys                                                               ; --                           ; altera_reset_controller      ; --         ;
+; IP_TOOL_ENV                                     ; Qsys                                                               ; --                           ; jtag_uart_system             ; --         ;
+; IP_TOOL_ENV                                     ; Qsys                                                               ; --                           ; jtag_uart_system_jtag_uart_0 ; --         ;
+; IP_TOOL_NAME                                    ; altera_reset_controller                                            ; --                           ; altera_reset_controller      ; --         ;
+; IP_TOOL_NAME                                    ; Qsys                                                               ; --                           ; jtag_uart_system             ; --         ;
+; IP_TOOL_NAME                                    ; altera_avalon_jtag_uart                                            ; --                           ; jtag_uart_system_jtag_uart_0 ; --         ;
+; IP_TOOL_VERSION                                 ; 13.0                                                               ; --                           ; altera_reset_controller      ; --         ;
+; IP_TOOL_VERSION                                 ; 13.0sp1                                                            ; --                           ; jtag_uart_system             ; --         ;
+; IP_TOOL_VERSION                                 ; 13.0.1.99.2                                                        ; --                           ; jtag_uart_system_jtag_uart_0 ; --         ;
+; MAX_CORE_JUNCTION_TEMP                          ; 85                                                                 ; --                           ; --                           ; --         ;
+; MIN_CORE_JUNCTION_TEMP                          ; 0                                                                  ; --                           ; --                           ; --         ;
+; MISC_FILE                                       ; jtag_uart_system/synthesis/../../jtag_uart_system.cmp              ; --                           ; --                           ; --         ;
+; MISC_FILE                                       ; jtag_uart_system/synthesis/../../jtag_uart_system.qsys             ; --                           ; --                           ; --         ;
+; MUX_RESTRUCTURE                                 ; On                                                                 ; Auto                         ; --                           ; --         ;
+; OPTIMIZATION_TECHNIQUE                          ; Area                                                               ; Balanced                     ; --                           ; --         ;
+; OPTIMIZE_FOR_METASTABILITY                      ; Off                                                                ; On                           ; --                           ; --         ;
+; PARTITION_COLOR                                 ; 16764057                                                           ; --                           ; --                           ; Top        ;
+; PARTITION_FITTER_PRESERVATION_LEVEL             ; PLACEMENT_AND_ROUTING                                              ; --                           ; --                           ; Top        ;
+; PARTITION_NETLIST_TYPE                          ; SOURCE                                                             ; --                           ; --                           ; Top        ;
+; PHYSICAL_SYNTHESIS_COMBO_LOGIC_FOR_AREA         ; On                                                                 ; Off                          ; --                           ; --         ;
+; PHYSICAL_SYNTHESIS_MAP_LOGIC_TO_MEMORY_FOR_AREA ; On                                                                 ; Off                          ; --                           ; --         ;
+; PLACEMENT_EFFORT_MULTIPLIER                     ; 4.0                                                                ; 1.0                          ; --                           ; --         ;
+; POWER_BOARD_THERMAL_MODEL                       ; None (CONSERVATIVE)                                                ; --                           ; --                           ; --         ;
+; POWER_PRESET_COOLING_SOLUTION                   ; 23 MM HEAT SINK WITH 200 LFPM AIRFLOW                              ; --                           ; --                           ; --         ;
+; PROJECT_OUTPUT_DIRECTORY                        ; output_files                                                       ; --                           ; --                           ; --         ;
+; REMOVE_REDUNDANT_LOGIC_CELLS                    ; On                                                                 ; Off                          ; --                           ; --         ;
+; ROUTER_EFFORT_MULTIPLIER                        ; 4                                                                  ; 1.0                          ; --                           ; --         ;
+; ROUTER_REGISTER_DUPLICATION                     ; Off                                                                ; Auto                         ; --                           ; --         ;
+; ROUTER_TIMING_OPTIMIZATION_LEVEL                ; MINIMUM                                                            ; Normal                       ; --                           ; --         ;
+; SEED                                            ; 5                                                                  ; 1                            ; --                           ; --         ;
+; SLD_FILE                                        ; /usr/local/projects/steps_cpu/cpu_on_board/stp1_auto_stripped.stp  ; --                           ; --                           ; --         ;
+; SLD_INFO                                        ; QSYS_NAME jtag_uart_system HAS_SOPCINFO 1 GENERATION_ID 1760608262 ; --                           ; jtag_uart_system             ; --         ;
+; SOPCINFO_FILE                                   ; jtag_uart_system/synthesis/../../jtag_uart_system.sopcinfo         ; --                           ; --                           ; --         ;
+; STATE_MACHINE_PROCESSING                        ; Minimal Bits                                                       ; Auto                         ; --                           ; --         ;
+; SYNTHESIS_ONLY_QIP                              ; On                                                                 ; --                           ; --                           ; --         ;
+; USE_SIGNALTAP_FILE                              ; stp1.stp                                                           ; --                           ; --                           ; --         ;
+; VERILOG_INPUT_VERSION                           ; SystemVerilog_2005                                                 ; Verilog_2001                 ; --                           ; --         ;
+; VERILOG_SHOW_LMF_MAPPING_MESSAGES               ; Off                                                                ; --                           ; --                           ; --         ;
++-------------------------------------------------+--------------------------------------------------------------------+------------------------------+------------------------------+------------+
 
 
 +--------------------------------------------------------------------------------------------------------------------------+
@@ -132,8 +133,8 @@ applicable agreement for further details.
 +----------------------+--------------+-------------------------+---------------------+------------------------------------+
 ; Module Name          ; Elapsed Time ; Average Processors Used ; Peak Virtual Memory ; Total CPU Time (on all processors) ;
 +----------------------+--------------+-------------------------+---------------------+------------------------------------+
-; Analysis & Synthesis ; 00:25:16     ; 1.0                     ; 573 MB              ; 00:25:14                           ;
-; Total                ; 00:25:16     ; --                      ; --                  ; 00:25:14                           ;
+; Analysis & Synthesis ; 00:16:31     ; 1.0                     ; 567 MB              ; 00:16:28                           ;
+; Total                ; 00:16:31     ; --                      ; --                  ; 00:16:28                           ;
 +----------------------+--------------+-------------------------+---------------------+------------------------------------+
 
 
