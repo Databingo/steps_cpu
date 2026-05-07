@@ -18,19 +18,19 @@ _start:
     li a7, 56   # syscall openat
     ecall 
  
-    mv t0, a0 # save ecall returned value
+    mv s1, a0 # save ecall returned value
 
-    # if t0 negative, open failed
-    bltz t0, open_failed_barcode
+    # if s1 negative, open failed
+    bltz s1, open_failed_barcode
     
     # dup2(fd, 0) - stdin
-    mv a0, t0
+    mv a0, s1 
     li a1, 0
     li a7, 24
     ecall
    
     # dup2(fd, 1) - stdout
-    mv a0, t0
+    mv a0, s1 
     li a1, 1
     li a7, 24
     ecall
