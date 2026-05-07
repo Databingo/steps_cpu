@@ -315,7 +315,10 @@ end
 // --Machine CSR --
 localparam mstatus    = 0 ; localparam MPRV=17,MPP=11,SPP=8,MPIE=7,SPIE=5,MIE=3,SIE=1,UIE=0;//63_SD|37_MBE|36_SBE|35:34_SXL10|22_TSR|21_TW|20_TVW|17_MPRV|12:11MPP|8SPP|7MPIE|5SPIE|3MIE|1SIE|0UIE
 localparam sstatus    = 0 ; localparam SD=63,UXL=32,MXR=19,SUM=18,XS=15,FS=13,VS=9,UBE=6; //SPP=8,SPIE=5,SIE=1,//63SD|33:32UXL|19MXR|18SUM|16:15XS|14:13FS|10:9VS|8SPP|6UBE|5SPIE|1SIE
-localparam sstatus_mask  = 64'h8000_0003_000D_E122; // SD,UXL,MXR,SUM,XS,FS,SPP,SPIE,SIE only from mirror mstatus, RVV E722
+//localparam sstatus_mask  = 64'h8000_0003_000D_E122; // SD,UXL,MXR,SUM,XS,FS,SPP,SPIE,SIE only from mirror mstatus, RVV E722
+localparam sstatus_mask  = 64'h8000_0003_000F_F122; // SD 19MXR 18SUM 17MPRV 15XS 14FS 1312MPP 8SPP 7MPIE 5SPIE 3MIE 1SIE 0UIE
+// D 19-16 1101 -> 1111 bit17MPRV should let S write
+// E 15-12 1110 -> 1111 bit13:12MPP should let S write
 
 localparam mtvec      = 1 ; localparam BASE=2,MODE=0; // 63:2BASE|1:0MDOE  // 0x305 MRW Machine trap-handler base address * 0 direct 1vec
 localparam mscratch   = 2 ;  // 
@@ -339,7 +342,7 @@ wire [63:0] csr_mask_w= (w_csr == 12'h180) ? satp_mask :
 			(w_csr == 12'h144) ? (sip_write_mask & Csrs[mideleg]) : 
                         (w_csr == 12'h344) ? mip_write_mask : 
 			64'hffff_ffff_ffff_ffff;
-wire [63:0] csr_read = (w_csr == 12'h301) ? 64'h8000000000141101 : // misa(RV64IMASU)
+wire [63:0] csr_read = //(w_csr == 12'h301) ? 64'h8000000000141101 : // misa(RV64IMASU)
                        //(w_csr == 12'hF11) ? 64'h0 : // mvendorid
                        //(w_csr == 12'hF12) ? 64'h0 : // marchid
                        //(w_csr == 12'hF13) ? 64'h0 : // mimpid
@@ -551,8 +554,9 @@ wire is_store = (op == 7'b0100011) || (op == 7'b0101111 && w_func5 != 5'b00010);
 		wire need_trans = satp_mmu && !STrap && (current_privilege_mode != M_mode);
 		assign ppc = need_trans ? {8'h0, pc_ppn, pc[11:0]} : pc;
 		//assign pda = need_trans ? {8'h0, data_ppn, ls_va[11:0]} : ls_va;
-    
-		wire [1:0] eff_priv = Csrs[mstatus][MPRV] ? Csrs[mstatus][MPP+1:MPP] : current_privilege_mode;
+                 
+		// MPRV only work for M-mode get trans_d (read from a virtual address)
+		wire [1:0] eff_priv = ((current_privilege_mode == M_mode) && Csrs[mstatus][MPRV]) ? Csrs[mstatus][MPP+1:MPP] : current_privilege_mode;
 		wire need_trans_d = satp_mmu && !STrap && (eff_priv != M_mode);
 		assign pda = need_trans_d ? {8'h0, data_ppn, ls_va[11:0]} : ls_va;
 
@@ -658,11 +662,11 @@ wire is_store = (op == 7'b0100011) || (op == 7'b0101111 && w_func5 != 5'b00010);
 		mmu_da <= 0;
 		for (i=0;i<11;i=i+1) begin sre[i]<= 64'b0; end 
 		for (i=0;i<=25;i=i+1) begin Csrs[i]<= 64'b0; end
-		Csrs[medeleg] <= 64'hb1af; // delegate to S-mode 1011000110101111 // see VII 3.1.15 mcasue exceptions  12/13/15 illigal instruction ...
+		Csrs[medeleg] <= 64'hb1af; // delegate to S-mode 1011_0001_1010_1111 // VII 3.1.15 15 store page failt 13load 12ir 8uecall 7,5accessFault 4loadaddrunalign 2il 1,0irualign
 		//Csrs[medeleg] <= 64'hb109; // delegate to S-mode have 12/13/15
 		Csrs[mideleg] <= 64'h0222; // delegate to S-mode 0000001000100010 see VII 3.1.15 mcasue interrupt 1/5/9 SSIP(supervisor software interrupt) STIP(time) SEIP(external)
 		// Initialize Machine Info for OpenSBI
-		//Csrs[misa] <= 64'h8000000000141101; //RV64IMASU extensions(63:62=2 64bits | 1<<0 Atomic| 1<<8 Integer| 1<<12 Multiply| 1<<18 Supervisor| 1 <<20 User) so: 64'h8000000000141101; RV64IMASU
+		Csrs[misa] <= 64'h8000000000141101; //RV64IMASU extensions(63:62=2 64bits | 1<<0 Atomic| 1<<8 Integer| 1<<12 Multiply| 1<<18 Supervisor| 1 <<20 User) so: 64'h8000000000141101; RV64IMASU
 		mmu_pc <= 0;
 		in_debug <= 0;
 		reserve_addr <= 0;
@@ -766,6 +770,8 @@ wire is_store = (op == 7'b0100011) || (op == 7'b0101111 && w_func5 != 5'b00010);
                 Csrs[mimpid] <= pc_4; // pc
                 Csrs[marchid] <= Csrs[mip];  // mip
                 Csrs[mvendorid] <= ir;
+                Csrs[mscratch] <= ls_va; //
+                Csrs[misa] <= re[10]; // a0 ecall returned value     
 
             // Back from STrap
 	    end else if (STrap && ir == 32'b00110000001000000000000001110011) begin // for the fauld fill: sd ppa, Tlb_fault

@@ -319,7 +319,6 @@ debug:
 
      li a0, "\n|ir:" 
      call print7
-    #csrr a0, 0xF11 # mvendorid/ir
      csrr a0, mvendorid # mvendorid/ir
      call print_reg
 
@@ -329,21 +328,20 @@ debug:
      csrr a0, mimpid
      call print_reg
 
-   # li a0, "|pda:" 
-   # call print7
-   ##csrr a0, 0xF13 # mimpid/pda
-   # csrr a0, mimpid # mimpid/pda
-   # call print_reg
+     li a0, "|va:" 
+     call print7
+     csrr a0, mscratch # mscratch/va
+     call print_reg
 
-    li a0, "|mip:" 
-    call print7
-    csrr a0, marchid
-    call print_reg
+     li a0, "|mip:" 
+     call print7
+     csrr a0, marchid
+     call print_reg
 
-   #li a0, "|mstas:" 
-   #call print7
-   #csrr a0, mstatus
-   #call print_reg
+     li a0, "|a0:" 
+     call print7
+     csrr a0, misa
+     call print_reg
 
 
      li a0, "|" 
