@@ -333,7 +333,7 @@ debug:
      csrr a0, mscratch # mscratch/va
      call print_reg
 
-     li a0, "|mip:" 
+     li a0, "|ms:" 
      call print7
      csrr a0, marchid
      call print_reg

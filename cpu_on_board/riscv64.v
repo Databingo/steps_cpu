@@ -769,9 +769,9 @@ wire is_store = (op == 7'b0100011) || (op == 7'b0101111 && w_func5 != 5'b00010);
 		//re[8] <= (op == 7'b0000011) ? 13 : 14;// save x2 trap type load/store_atom
 		re[8] <= 18; // save 18 for debug
                 Csrs[mimpid] <= pc_4; // pc
-                Csrs[marchid] <= Csrs[mip];  // mip
+                Csrs[marchid] <= Csrs[mstatus];
                 Csrs[mvendorid] <= ir;
-                Csrs[mscratch] <= ls_va; //
+                Csrs[mscratch] <= ls_va;
                 Csrs[misa] <= re[10]; // a0 ecall returned value     
 
             // Back from STrap
