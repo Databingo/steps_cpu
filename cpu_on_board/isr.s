@@ -134,8 +134,7 @@ FINISH_4KB:
      srli x4, x4, 20 
      slli x4, x4, 12 
 
-    #andi x10, x10, 0xFF # Isolate flags(1111_1111) # 0x3FF ?
-     andi x10, x10, 0x3FF # Isolate flags(1111_1111) # 0x3FF ?
+     andi x10, x10, 0xFF # Isolate flags(1111_1111) # 0x3FF ?
      or x4, x4, x10 # Merge PPN and flages
 
      j WRITE_TLB
@@ -198,18 +197,18 @@ is_user_mode:
      j check_permissions
 is_supervisor_mode:
      andi x3, x4, 0x10  # Extra PTE.U (bit 4)
-#    beqz x3, check_permissions 
+     beqz x3, check_permissions 
 
-#    # S-mode access U=1 page
-#    li x3, 12                 # fetch S-mode cannot execute User memory
-#    beq x8, x3, PERM_FAULT
+     # S-mode access U=1 page
+     li x3, 12                 # fetch S-mode cannot execute User memory
+     beq x8, x3, PERM_FAULT
 
-#    csrr x3, mstatus # 0x300
-#    srli x3, x3, 18 # SUM is bit 18 (Supervisor User Memory access)
-#    andi x3, x3, 1
-#    beqz x3, PERM_FAULT  # SUM==0 -> Fault  when S read U page with SUM=0
+     csrr x3, mstatus # 0x300
+     srli x3, x3, 18 # SUM is bit 18 (Supervisor User Memory access)
+     andi x3, x3, 1
+     beqz x3, PERM_FAULT  # SUM==0 -> Fault  when S read U page with SUM=0
 
-     j check_permissions
+#    j check_permissions
 
 #check_user_u:
 #     beqz x3, PERM_FAULT # User VA (>=0) requires U=1
@@ -319,6 +318,7 @@ debug:
 
      li a0, "\n|ir:" 
      call print7
+    #csrr a0, 0xF11 # mvendorid/ir
      csrr a0, mvendorid # mvendorid/ir
      call print_reg
 
@@ -328,22 +328,21 @@ debug:
      csrr a0, mimpid
      call print_reg
 
-    #li a0, "|va:" 
-    #call print7
-    #csrr a0, mscratch # mscratch/va
-    #call print_reg
+   # li a0, "|pda:" 
+   # call print7
+   ##csrr a0, 0xF13 # mimpid/pda
+   # csrr a0, mimpid # mimpid/pda
+   # call print_reg
 
-     li a0, "|ms:" 
-     call print7
-     csrr a0, mstatus
-     call print_reg
+    li a0, "|mip:" 
+    call print7
+    csrr a0, marchid
+    call print_reg
 
-    #li a0, "|a0:" 
-     li a0, "|mip:" 
-     call print7
-    #csrr a0, marchid
-     csrr a0, mip
-     call print_reg
+   #li a0, "|mstas:" 
+   #call print7
+   #csrr a0, mstatus
+   #call print_reg
 
 
      li a0, "|" 
