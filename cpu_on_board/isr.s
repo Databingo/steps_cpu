@@ -341,7 +341,8 @@ debug:
     #li a0, "|a0:" 
      li a0, "|mip:" 
      call print7
-     csrr a0, marchid
+    #csrr a0, marchid
+     csrr a0, mip
      call print_reg
 
 
