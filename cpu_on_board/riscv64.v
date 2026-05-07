@@ -555,8 +555,9 @@ wire is_store = (op == 7'b0100011) || (op == 7'b0101111 && w_func5 != 5'b00010);
 		assign ppc = need_trans ? {8'h0, pc_ppn, pc[11:0]} : pc;
 		//assign pda = need_trans ? {8'h0, data_ppn, ls_va[11:0]} : ls_va;
                  
-		// MPRV only work for M-mode get trans_d (read from a virtual address)
-		wire [1:0] eff_priv = ((current_privilege_mode == M_mode) && Csrs[mstatus][MPRV]) ? Csrs[mstatus][MPP+1:MPP] : current_privilege_mode;
+		// MPRV for M-mode get trans_d (read from a virtual address)
+		//wire [1:0] eff_priv = ((current_privilege_mode == M_mode) && Csrs[mstatus][MPRV]) ? Csrs[mstatus][MPP+1:MPP] : current_privilege_mode;
+		wire [1:0] eff_priv = Csrs[mstatus][MPRV] ? Csrs[mstatus][MPP+1:MPP] : current_privilege_mode;
 		wire need_trans_d = satp_mmu && !STrap && (eff_priv != M_mode);
 		assign pda = need_trans_d ? {8'h0, data_ppn, ls_va[11:0]} : ls_va;
 
