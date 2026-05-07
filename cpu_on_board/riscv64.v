@@ -425,7 +425,8 @@ always @(posedge clk or negedge reset) begin
     if (!reset) begin 
 	mtime <= 0; 
 	mtime_div <= 0; 
-    end else if (!STrap) begin 
+    //end else if (!STrap) begin 
+    end else begin 
 	mtime_div <= mtime_div + 1; 
 	if (mtime_div == 7'd99) begin 
 	    mtime_div <= 0;
