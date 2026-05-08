@@ -98,7 +98,8 @@ assign DRAM_CKE = 1; // always enable
     //(* ram_style = "block", preserve = 1 *) reg [31:0] Cache [0:1024]; // 4KB fix overflow of print sd content  
     //(* ram_style = "block" *) reg [31:0] Cache [0:383]; // 1.5KB
     //(* ramstyle = "M4K", ram_init_file = "roam.mif" *) reg [31:0] Cache [0:1535];  // 6KB
-    (* ramstyle = "block", ram_init_file = "roam.mif" *) reg [31:0] Cache [0:1535];  // 6KB
+    //(* ramstyle = "block", ram_init_file = "roam.mif" *) reg [31:0] Cache [0:1535];  // 6KB
+    (* ramstyle = "M4K", ram_init_file = "roam.mif" *) reg [31:0] Cache [0:1535];  // 6KB
     //reg [31:0] Cache [0:1023];  // 4KB
     //reg [31:0] Cache [0:2047];  // 8KB more than 52 RAM location
       
@@ -696,7 +697,8 @@ end
     wire [11:0] cid = (bus_address-`Sdc_base);
     reg [11:0] cid8;
     //reg [7:0] sd_cache [0:511];
-    (* ram_style = "block" *) reg [7:0] sd_cache [0:511];
+    //(* ram_style = "block" *) reg [7:0] sd_cache [0:511];
+    (* ramstyle = "M4K" *) reg [7:0] sd_cache [0:511];
     reg [9:0] byte_index = 0;
     reg sd_cache_available = 0;
     reg sd_byte_available_d = 0;

@@ -46,8 +46,10 @@ wire is_mmio_io = (current_privilege_mode == M_mode) && (is_low_io || is_clint_i
 (* keep = 1 *) reg [63:0] pc;
 wire [31:0] ir;
 
-(* ram_style = "logic" *) reg [63:0] re [0:31]; // General Registers 32s
-(* ram_style = "logic" *) reg [63:0] sre [0:10]; // Shadow Registers 11s
+//(* ram_style = "logic" *) reg [63:0] re [0:31]; // General Registers 32s
+//(* ram_style = "logic" *) reg [63:0] sre [0:10]; // Shadow Registers 11s
+(* ramstyle = "logic" *) reg [63:0] re [0:31]; // General Registers 32s
+(* ramstyle = "logic" *) reg [63:0] sre [0:10]; // Shadow Registers 11s
 reg mmu_da=0;
 reg mmu_pc = 0;
 reg did = 1;
@@ -451,8 +453,8 @@ reg        reserve_valid;
 reg tlb_flush = 0;
 //// -- TLB -- 8 pages
 reg [7:0] tlb_vld;
-(* ram_style = "logic" *) reg [26:0] tlb_vpn [0:7]; // vpn number VA[38:12]  Sv39
-(* ram_style = "logic" *) reg [43:0] tlb_ppn [0:7]; // ppn number PA[55:12]
+(* ramstyle = "logic" *) reg [26:0] tlb_vpn [0:7]; // vpn number VA[38:12]  Sv39
+(* ramstyle = "logic" *) reg [43:0] tlb_ppn [0:7]; // ppn number PA[55:12]
 //(* ram_style = "logic" *) reg tlb_vld [0:7];
 //// -- TLB i -- 4 pages
 //reg [3:0] tlb_vld;
@@ -493,8 +495,8 @@ reg [7:0] tlb_d_vld;
 reg [7:0] tlb_d_w; // Wirte permission bit
 reg [7:0] tlb_d_d; // Dirty bit
 wire is_store = (op == 7'b0100011) || (op == 7'b0101111 && w_func5 != 5'b00010); // Store/Atm(no lr)
-(* ram_style = "logic" *) reg [26:0] tlb_d_vpn [0:7]; // vpn number VA[38:12]  Sv39
-(* ram_style = "logic" *) reg [43:0] tlb_d_ppn [0:7]; // ppn number PA[55:12]
+(* ramstyle = "logic" *) reg [26:0] tlb_d_vpn [0:7]; // vpn number VA[38:12]  Sv39
+(* ramstyle = "logic" *) reg [43:0] tlb_d_ppn [0:7]; // ppn number PA[55:12]
 //// -- TLB d -- 16 pages
 //reg [15:0] tlb_d_vld;
 //(* ram_style = "logic" *) reg [26:0] tlb_d_vpn [0:15]; // vpn number VA[38:12]  Sv39
@@ -597,11 +599,11 @@ wire is_store = (op == 7'b0100011) || (op == 7'b0101111 && w_func5 != 5'b00010);
 	    reg [63:0]  ppc_pre = 64'h0; // for read
 	    reg [63:0]  ask_i_data; // for write
 	    //(* ram_style = "block" *) reg [127:0] Cache_L [0:1023]; // 16KB
-	    (* ram_style = "block" *) reg [63:0] Cache_L_Low [0:511]; // 4KB
-	    (* ram_style = "block" *) reg [63:0] Cache_L_High [0:511]; // 4KB
+	    (* ramstyle = "M4K" *) reg [63:0] Cache_L_Low [0:511]; // 4KB
+	    (* ramstyle = "M4K" *) reg [63:0] Cache_L_High [0:511]; // 4KB
 	    //(* ram_style = "block" *) reg [50:0] Cache_T [0:511];  // ~4KB (addr: 51(tag) + 9(index) + 4(offset))
 	    //(* ram_style = "block" *) reg [58:0] Cache_T [0:511];  // 8-bit epoch + 51-bit tag
-	    (* ram_style = "block" *) reg [66:0] Cache_T [0:511];  // 16-bit epoch + 51-bit tag
+	    (* ramstyle = "M4K" *) reg [66:0] Cache_T [0:511];  // 16-bit epoch + 51-bit tag
 	    //reg [7:0] cache_epoch = 1;
 	    reg [15:0] cache_epoch = 1;
 
