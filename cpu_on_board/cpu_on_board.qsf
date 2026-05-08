@@ -131,7 +131,7 @@ set_global_assignment -name QIP_FILE sdram_pll/sdram/synthesis/sdram_pll.qip
 #set_global_assignment -name FITTER_EFFORT "FAST FIT"
 #set_global_assignment -name ROUTER_EFFORT_MULTIPLIER 3
 #set_global_assignment -name PHYSICAL_SYNTHESIS_EFFORT EXTRA
-#set_global_assignment -name SEED 3
+set_global_assignment -name SEED 11
 #set_global_assignment -name OPTIMIZE_POWER_DURING_FITTING "EXTRA EFFORT"
 #set_global_assignment -name OPTIMIZE_HOLD_TIMING "ALL PATHS"
 
