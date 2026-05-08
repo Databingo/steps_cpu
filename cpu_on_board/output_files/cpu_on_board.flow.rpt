@@ -1,5 +1,5 @@
 Flow report for cpu_on_board
-Fri May  8 11:45:21 2026
+Fri May  8 14:34:28 2026
 Quartus II 32-bit Version 13.0.1 Build 232 06/12/2013 Service Pack 1 SJ Web Edition
 
 
@@ -40,18 +40,18 @@ applicable agreement for further details.
 +--------------------------------------------------------------------------------------+
 ; Flow Summary                                                                         ;
 +------------------------------------+-------------------------------------------------+
-; Flow Status                        ; Successful - Fri May  8 11:45:17 2026           ;
+; Flow Status                        ; Successful - Fri May  8 14:34:27 2026           ;
 ; Quartus II 32-bit Version          ; 13.0.1 Build 232 06/12/2013 SP 1 SJ Web Edition ;
 ; Revision Name                      ; cpu_on_board                                    ;
 ; Top-level Entity Name              ; cpu_on_board                                    ;
 ; Family                             ; Cyclone II                                      ;
 ; Device                             ; EP2C20F484C7                                    ;
 ; Timing Models                      ; Final                                           ;
-; Total logic elements               ; 21,829                                          ;
-;     Total combinational functions  ; 16,834                                          ;
+; Total logic elements               ; 21,880                                          ;
+;     Total combinational functions  ; 16,885                                          ;
 ;     Dedicated logic registers      ; 7,544                                           ;
 ; Total registers                    ; 7544                                            ;
-; Total pins                         ; 47                                              ;
+; Total pins                         ; 48                                              ;
 ; Total virtual pins                 ; 0                                               ;
 ; Total memory bits                  ; 218,624                                         ;
 ; Embedded Multiplier 9-bit elements ; 0                                               ;
@@ -64,7 +64,7 @@ applicable agreement for further details.
 +-------------------+---------------------+
 ; Option            ; Setting             ;
 +-------------------+---------------------+
-; Start date & time ; 05/08/2026 11:14:02 ;
+; Start date & time ; 05/08/2026 14:04:25 ;
 ; Main task         ; Compilation         ;
 ; Revision Name     ; cpu_on_board        ;
 +-------------------+---------------------+
@@ -77,7 +77,7 @@ applicable agreement for further details.
 +-----------------------------------------+--------------------------------------------------------------------+---------------+------------------------------+------------+
 ; ADV_NETLIST_OPT_SYNTH_WYSIWYG_REMAP     ; On                                                                 ; Off           ; --                           ; --         ;
 ; ALLOW_ANY_RAM_SIZE_FOR_RECOGNITION      ; On                                                                 ; Off           ; --                           ; --         ;
-; COMPILER_SIGNATURE_ID                   ; 0.177821004213341                                                  ; --            ; --                           ; --         ;
+; COMPILER_SIGNATURE_ID                   ; 0.177822026402456                                                  ; --            ; --                           ; --         ;
 ; ENABLE_SIGNALTAP                        ; Off                                                                ; --            ; --                           ; --         ;
 ; FITTER_EFFORT                           ; Standard Fit                                                       ; Auto Fit      ; --                           ; --         ;
 ; HDL_MESSAGE_LEVEL                       ; Level3                                                             ; Level2        ; --                           ; --         ;
@@ -111,13 +111,12 @@ applicable agreement for further details.
 ; PARTITION_NETLIST_TYPE                  ; SOURCE                                                             ; --            ; --                           ; Top        ;
 ; PHYSICAL_SYNTHESIS_COMBO_LOGIC_FOR_AREA ; On                                                                 ; Off           ; --                           ; --         ;
 ; PHYSICAL_SYNTHESIS_EFFORT               ; Extra                                                              ; Normal        ; --                           ; --         ;
-; PHYSICAL_SYNTHESIS_REGISTER_RETIMING    ; On                                                                 ; Off           ; --                           ; --         ;
 ; PLACEMENT_EFFORT_MULTIPLIER             ; 4.0                                                                ; 1.0           ; --                           ; --         ;
 ; POWER_BOARD_THERMAL_MODEL               ; None (CONSERVATIVE)                                                ; --            ; --                           ; --         ;
 ; POWER_PRESET_COOLING_SOLUTION           ; 23 MM HEAT SINK WITH 200 LFPM AIRFLOW                              ; --            ; --                           ; --         ;
 ; PROJECT_OUTPUT_DIRECTORY                ; output_files                                                       ; --            ; --                           ; --         ;
 ; ROUTER_EFFORT_MULTIPLIER                ; 4                                                                  ; 1.0           ; --                           ; --         ;
-; ROUTER_TIMING_OPTIMIZATION_LEVEL        ; MAXIMUM                                                            ; Normal        ; --                           ; --         ;
+; ROUTER_TIMING_OPTIMIZATION_LEVEL        ; MINIMUM                                                            ; Normal        ; --                           ; --         ;
 ; SLD_FILE                                ; /usr/local/projects/steps_cpu/cpu_on_board/stp1_auto_stripped.stp  ; --            ; --                           ; --         ;
 ; SLD_INFO                                ; QSYS_NAME jtag_uart_system HAS_SOPCINFO 1 GENERATION_ID 1760608262 ; --            ; jtag_uart_system             ; --         ;
 ; SLD_INFO                                ; QSYS_NAME sdram_pll HAS_SOPCINFO 1 GENERATION_ID 1763195282        ; --            ; sdram_pll                    ; --         ;
@@ -136,8 +135,8 @@ applicable agreement for further details.
 +----------------------+--------------+-------------------------+---------------------+------------------------------------+
 ; Module Name          ; Elapsed Time ; Average Processors Used ; Peak Virtual Memory ; Total CPU Time (on all processors) ;
 +----------------------+--------------+-------------------------+---------------------+------------------------------------+
-; Analysis & Synthesis ; 00:30:57     ; 1.0                     ; 561 MB              ; 00:30:55                           ;
-; Total                ; 00:30:57     ; --                      ; --                  ; 00:30:55                           ;
+; Analysis & Synthesis ; 00:29:49     ; 1.0                     ; 581 MB              ; 00:29:43                           ;
+; Total                ; 00:29:49     ; --                      ; --                  ; 00:29:43                           ;
 +----------------------+--------------+-------------------------+---------------------+------------------------------------+
 
 
