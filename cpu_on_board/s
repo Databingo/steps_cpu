@@ -566,4 +566,11 @@ Warning (10230): Verilog HDL assignment warning at sd_controller.v(328): truncat
 Info (10662): Verilog HDL Assignment information at sd_controller.v(337): truncated unsized constant literal with size 32 to size 1 with no loss of information                                                                                                                                                         
 Info (13014): Ignored 3 buffer(s)                                                                                                                           
     Info (13019): Ignored 3 SOFT buffer(s)                                                                                                                  
-                                     
+
+
+
+Warning (276020): Inferred RAM node "Cache_rtl_1" from synchronous design logic.  Pass-through logic has been added to match the read-during-write behavior of the original design.                                                                                                                                     
+Warning (276020): Inferred RAM node "sd_cache_rtl_0" from synchronous design logic.  Pass-through logic has been added to match the read-during-write behavior of the original design.                                                                                                                                  
+Info (276014): Found 1 instances of uninferred RAM logic                                                                                                    
+    Info (276006): RAM logic "Plic_priority" is uninferred due to "logic" being set as ramstyle synthesis attribute                                         
+                                                                                                                                                            
