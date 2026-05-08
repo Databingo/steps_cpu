@@ -421,7 +421,8 @@ always @(*) begin
 end
 
 //(* ram_style = "logic" *) reg [63:0] Csrs [0:36]; // 36 CSRs for now // totally 4096
-(* ram_style = "logic" *) reg [63:0] Csrs [0:25]; // 36 CSRs for now // totally 4096
+//(* ram_style = "logic" *) reg [63:0] Csrs [0:25]; // 36 CSRs for now // totally 4096
+(* ramstyle = "logic" *) reg [63:0] Csrs [0:25]; // 36 CSRs for now // totally 4096
 wire [3:0]  satp_mmu  = Csrs[satp][63:60]; // 0:bare, 8:sv39, 9:sv48  satp.MODE!=0, privilegae is not M-mode, mstatus.MPRN is not set or in MPP's mode?
 
 // -- Timer --
