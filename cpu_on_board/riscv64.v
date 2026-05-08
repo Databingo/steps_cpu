@@ -87,8 +87,8 @@ wire [4:0] w_rs2 = ir[24:20];
 // -- Func decoder --
 wire [2:0] w_func3   = ir[14:12];
 wire [4:0] w_func5   = ir[31:27];
-wire [6:0] w_func7   = ir[31:25]; 
-wire [11:0] w_func12 = ir[31:20]; 
+//wire [6:0] w_func7   = ir[31:25]; 
+//wire [11:0] w_func12 = ir[31:20]; 
 // -- rs1 rs2 value --
 wire signed [63:0] rs1 = re[w_rs1];
 wire signed [63:0] rs2 = re[w_rs2];
@@ -380,7 +380,7 @@ localparam clint_time = 19;  // read only
 localparam pmpcfg0    = 20;  // Physical Memory Protection
 localparam pmpaddr0   = 21;  // 
 localparam mdebug     = 22;  // 
-reg [62:0] CAUSE_CODE;
+//reg [62:0] CAUSE_CODE;
 reg  [5:0] w_csr_id;             // CSR id (64)
 localparam XCSR = 63;  //  miss csr that not deployed
 always @(*) begin
