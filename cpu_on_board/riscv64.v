@@ -13,7 +13,7 @@ module riscv64(
     output reg        bus_read_enable,
     output reg [2:0]  bus_ls_type, // lb lh lw ld lbu lhu lwu // sb sh sw sd sbu shu swu 
     input wire        debug,
-    //input wire        pma,
+    input wire        pma,
 
     output reg [63:0] mtime,    // map to 0x0200_bff8 
     input wire [63:0] mtimecmp, // map to 0x0200_4000 + 8byte*hartid
@@ -42,8 +42,8 @@ wire is_low_io   = (ls_va[63:16] == 48'h0);    // 0x0000-0xffff (64KB) ROM, RAM,
 wire is_clint_io = (ls_va[63:16] == 48'h0200); // 0x0200_0000-0x0200_ffff (64KB)
 wire is_plic_io  = (ls_va[63:24] == 40'h0C);   // 0x0C00_0000-0x0Cff_ffff (16MB) ??
 //wire is_mmio_io = (current_privilege_mode == M_mode) && (is_low_io || is_clint_io || is_plic_io) && !pma;
-//wire is_mmio_io =  (is_low_io || is_clint_io || is_plic_io) && !pma;
-wire is_mmio_io =  (is_low_io || is_clint_io || is_plic_io);
+wire is_mmio_io =  (is_low_io || is_clint_io || is_plic_io) && !pma;
+//wire is_mmio_io =  (is_low_io || is_clint_io || is_plic_io);
 
 (* keep = 1 *) reg [63:0] pc;
 wire [31:0] ir;
