@@ -1031,7 +1031,6 @@ wire is_store = (op == 7'b0100011) || (op == 7'b0101111 && w_func5 != 5'b00010);
 		    				           bubble <= 1'b1;
 	                 			       end
 	    end
-        end
 	re[0]<= 64'h0; 
 	sre[0]<= 64'h0;
                 //// meip/seip is triggered by Plic_pending, mtip is triggered by inner Timer, stip is set by mtip trap handler, msip set by opensbi csr, ssip set by software csr
@@ -1039,5 +1038,6 @@ wire is_store = (op == 7'b0100011) || (op == 7'b0101111 && w_func5 != 5'b00010);
 		Csrs[mip][MTIP] <= mtip_interrupt;//mtime-mtip_interrupt-MTIP|MTIP&MTIE-mtip|hardware mstatus.MIE=0|opensbi MTIE0 surpress repeate+STIP1 to linux|opensbi mret MIE=1(MPIE)|linux ecall sbi_set_timer-MIE=1|linux STIP=0
 		Csrs[mip][SEIP] <= seip_interrupt;
 		Csrs[mip][MSIP] <= msip_interrupt;  
+        end
     end
 endmodule
