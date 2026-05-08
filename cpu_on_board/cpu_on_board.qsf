@@ -141,8 +141,8 @@ set_global_assignment -name CYCLONEII_RESERVE_NCEO_AFTER_CONFIGURATION "USE AS R
 
 # Primary Settings for Routing Issues
 set_global_assignment -name FITTER_EFFORT "STANDARD FIT"
-set_global_assignment -name ROUTER_EFFORT_MULTIPLIER 4
-set_global_assignment -name PLACEMENT_EFFORT_MULTIPLIER 4.0
+set_global_assignment -name ROUTER_EFFORT_MULTIPLIER 6
+set_global_assignment -name PLACEMENT_EFFORT_MULTIPLIER 6.0
 #set_global_assignment -name ROUTER_TIMING_OPTIMIZATION_LEVEL MAXIMUM
 
 # Physical Synthesis Help
@@ -151,10 +151,15 @@ set_global_assignment -name PHYSICAL_SYNTHESIS_COMBO_LOGIC_FOR_AREA ON
 #set_global_assignment -name PHYSICAL_SYNTHESIS_REGISTER_RETIMING ON
 #set_global_assignment -name PHYSICAL_SYNTHESIS_FANOUT_SPLITTING OFF
 set_global_assignment -name PHYSICAL_SYNTHESIS_REGISTER_RETIMING OFF
+set_global_assignment -name PHYSICAL_SYNTHESIS_SIGNAL_PIPELINING OFF
 set_global_assignment -name PHYSICAL_SYNTHESIS_REGISTER_DUPLICATION OFF
-set_global_assignment -name AUTO_GLOBAL_REGISTER_CONTROLS ON
+#set_global_assignment -name AUTO_GLOBAL_REGISTER_CONTROLS ON
+set_global_assignment -name AUTO_GLOBAL_REGISTER_CONTROLS OFF
 set_global_assignment -name ROUTER_TIMING_OPTIMIZATION_LEVEL MINIMUM
 set_instance_assignment -name CURRENT_STRENGTH_NEW 8MA -to DRAM_ADDR*
+
+set_global_assignment -name STRATIX_OPTIMIZE_AW_SELECT_QUANTITY AREA
+set_global_assignment -name MUX_RESTRUCTURE ON
 
 
 # Area Optimization
