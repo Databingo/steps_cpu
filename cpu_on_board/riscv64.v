@@ -13,6 +13,7 @@ module riscv64(
     output reg        bus_read_enable,
     output reg [2:0]  bus_ls_type, // lb lh lw ld lbu lhu lwu // sb sh sw sd sbu shu swu 
     input wire        debug,
+    input wire        pma,
 
     output reg [63:0] mtime,    // map to 0x0200_bff8 
     input wire [63:0] mtimecmp, // map to 0x0200_4000 + 8byte*hartid
@@ -37,10 +38,10 @@ wire m_interrupts = (meip || msip || mtip) && (current_privilege_mode < M_mode |
 wire s_interrupts = (seip || ssip || stip) && (current_privilege_mode < S_mode || (current_privilege_mode == S_mode && Csrs[sstatus][SIE]));
 wire any_interrupt = (m_interrupts || s_interrupts);
 
-//wire is_low_io   = (ls_va[63:16] == 48'h0);    // 0x0000-0xffff (64KB) ROM, RAM, UART, SD 
-//wire is_clint_io = (ls_va[63:16] == 48'h0200); // 0x0200_0000-0x0200_ffff (64KB)
-//wire is_plic_io  = (ls_va[63:24] == 40'h0C);   // 0x0C00_0000-0x0Cff_ffff (16MB) ??
-//wire is_mmio_io = (current_privilege_mode == M_mode) && (is_low_io || is_clint_io || is_plic_io);
+wire is_low_io   = (ls_va[63:16] == 48'h0);    // 0x0000-0xffff (64KB) ROM, RAM, UART, SD 
+wire is_clint_io = (ls_va[63:16] == 48'h0200); // 0x0200_0000-0x0200_ffff (64KB)
+wire is_plic_io  = (ls_va[63:24] == 40'h0C);   // 0x0C00_0000-0x0Cff_ffff (16MB) ??
+wire is_mmio_io = (current_privilege_mode == M_mode) && (is_low_io || is_clint_io || is_plic_io) && pma;
 
 (* keep = 1 *) reg [63:0] pc;
 wire [31:0] ir;
@@ -550,7 +551,8 @@ wire is_store = (op == 7'b0100011) || (op == 7'b0101111 && w_func5 != 5'b00010);
 		//assign pda = need_trans ? {8'h0, data_ppn, ls_va[11:0]} : ls_va;
     
 		wire [1:0] eff_priv = Csrs[mstatus][MPRV] ? Csrs[mstatus][MPP+1:MPP] : current_privilege_mode;
-		wire need_trans_d = satp_mmu && !STrap && (eff_priv != M_mode);
+		//wire need_trans_d = satp_mmu && !STrap && (eff_priv != M_mode);
+		wire need_trans_d = satp_mmu && !STrap && (eff_priv != M_mode) && !is_mmio_io;
 		assign pda = need_trans_d ? {8'h0, data_ppn, ls_va[11:0]} : ls_va;
 
 		// TLB Refill

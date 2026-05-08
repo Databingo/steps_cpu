@@ -75,7 +75,7 @@
 
 
 set_location_assignment PIN_L1 -to CLOCK_50
-#set_location_assignment PIN_R22 -to KEY0
+set_location_assignment PIN_R22 -to KEY0
 #set_location_assignment PIN_U22 -to LEDG[0]
 #set_location_assignment PIN_U21 -to LEDG[1]
 #set_location_assignment PIN_V22 -to LEDG[2]
