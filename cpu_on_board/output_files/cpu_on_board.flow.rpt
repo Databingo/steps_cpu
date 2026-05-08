@@ -1,5 +1,5 @@
 Flow report for cpu_on_board
-Fri May  8 20:02:26 2026
+Sat May  9 00:44:02 2026
 Quartus II 32-bit Version 13.0.1 Build 232 06/12/2013 Service Pack 1 SJ Web Edition
 
 
@@ -40,18 +40,18 @@ applicable agreement for further details.
 +--------------------------------------------------------------------------------------+
 ; Flow Summary                                                                         ;
 +------------------------------------+-------------------------------------------------+
-; Flow Status                        ; Successful - Fri May  8 20:02:23 2026           ;
+; Flow Status                        ; Successful - Sat May  9 00:44:02 2026           ;
 ; Quartus II 32-bit Version          ; 13.0.1 Build 232 06/12/2013 SP 1 SJ Web Edition ;
 ; Revision Name                      ; cpu_on_board                                    ;
 ; Top-level Entity Name              ; cpu_on_board                                    ;
 ; Family                             ; Cyclone II                                      ;
 ; Device                             ; EP2C20F484C7                                    ;
 ; Timing Models                      ; Final                                           ;
-; Total logic elements               ; 21,655                                          ;
-;     Total combinational functions  ; 16,659                                          ;
-;     Dedicated logic registers      ; 7,548                                           ;
-; Total registers                    ; 7548                                            ;
-; Total pins                         ; 48                                              ;
+; Total logic elements               ; 22,214                                          ;
+;     Total combinational functions  ; 17,218                                          ;
+;     Dedicated logic registers      ; 7,550                                           ;
+; Total registers                    ; 7550                                            ;
+; Total pins                         ; 47                                              ;
 ; Total virtual pins                 ; 0                                               ;
 ; Total memory bits                  ; 218,624                                         ;
 ; Embedded Multiplier 9-bit elements ; 0                                               ;
@@ -64,7 +64,7 @@ applicable agreement for further details.
 +-------------------+---------------------+
 ; Option            ; Setting             ;
 +-------------------+---------------------+
-; Start date & time ; 05/08/2026 19:29:25 ;
+; Start date & time ; 05/09/2026 00:15:43 ;
 ; Main task         ; Compilation         ;
 ; Revision Name     ; cpu_on_board        ;
 +-------------------+---------------------+
@@ -77,7 +77,7 @@ applicable agreement for further details.
 +-----------------------------------------+--------------------------------------------------------------------+---------------+------------------------------+------------+
 ; ADV_NETLIST_OPT_SYNTH_WYSIWYG_REMAP     ; On                                                                 ; Off           ; --                           ; --         ;
 ; ALLOW_ANY_RAM_SIZE_FOR_RECOGNITION      ; On                                                                 ; Off           ; --                           ; --         ;
-; COMPILER_SIGNATURE_ID                   ; 0.177823975506125                                                  ; --            ; --                           ; --         ;
+; COMPILER_SIGNATURE_ID                   ; 0.177825693415614                                                  ; --            ; --                           ; --         ;
 ; ENABLE_SIGNALTAP                        ; Off                                                                ; --            ; --                           ; --         ;
 ; FITTER_EFFORT                           ; Standard Fit                                                       ; Auto Fit      ; --                           ; --         ;
 ; HDL_MESSAGE_LEVEL                       ; Level3                                                             ; Level2        ; --                           ; --         ;
@@ -117,6 +117,7 @@ applicable agreement for further details.
 ; PROJECT_OUTPUT_DIRECTORY                ; output_files                                                       ; --            ; --                           ; --         ;
 ; ROUTER_EFFORT_MULTIPLIER                ; 4                                                                  ; 1.0           ; --                           ; --         ;
 ; ROUTER_TIMING_OPTIMIZATION_LEVEL        ; MINIMUM                                                            ; Normal        ; --                           ; --         ;
+; SEED                                    ; 11                                                                 ; 1             ; --                           ; --         ;
 ; SLD_FILE                                ; /usr/local/projects/steps_cpu/cpu_on_board/stp1_auto_stripped.stp  ; --            ; --                           ; --         ;
 ; SLD_INFO                                ; QSYS_NAME jtag_uart_system HAS_SOPCINFO 1 GENERATION_ID 1760608262 ; --            ; jtag_uart_system             ; --         ;
 ; SLD_INFO                                ; QSYS_NAME sdram_pll HAS_SOPCINFO 1 GENERATION_ID 1763195282        ; --            ; sdram_pll                    ; --         ;
@@ -135,8 +136,8 @@ applicable agreement for further details.
 +----------------------+--------------+-------------------------+---------------------+------------------------------------+
 ; Module Name          ; Elapsed Time ; Average Processors Used ; Peak Virtual Memory ; Total CPU Time (on all processors) ;
 +----------------------+--------------+-------------------------+---------------------+------------------------------------+
-; Analysis & Synthesis ; 00:32:48     ; 1.0                     ; 575 MB              ; 00:32:45                           ;
-; Total                ; 00:32:48     ; --                      ; --                  ; 00:32:45                           ;
+; Analysis & Synthesis ; 00:28:32     ; 1.0                     ; 571 MB              ; 00:28:24                           ;
+; Total                ; 00:28:32     ; --                      ; --                  ; 00:28:24                           ;
 +----------------------+--------------+-------------------------+---------------------+------------------------------------+
 
 
