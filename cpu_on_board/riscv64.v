@@ -41,8 +41,8 @@ wire any_interrupt = (m_interrupts || s_interrupts);
 wire is_low_io   = (ls_va[63:16] == 48'h0);    // 0x0000-0xffff (64KB) ROM, RAM, UART, SD 
 wire is_clint_io = (ls_va[63:16] == 48'h0200); // 0x0200_0000-0x0200_ffff (64KB)
 wire is_plic_io  = (ls_va[63:24] == 40'h0C);   // 0x0C00_0000-0x0Cff_ffff (16MB) ??
-//wire is_mmio_io = (current_privilege_mode == M_mode) && (is_low_io || is_clint_io || is_plic_io) && pma;
-wire is_mmio_io =  (is_low_io || is_clint_io || is_plic_io) && pma;
+//wire is_mmio_io = (current_privilege_mode == M_mode) && (is_low_io || is_clint_io || is_plic_io) && !pma;
+wire is_mmio_io =  (is_low_io || is_clint_io || is_plic_io) && !pma;
 
 (* keep = 1 *) reg [63:0] pc;
 wire [31:0] ir;
