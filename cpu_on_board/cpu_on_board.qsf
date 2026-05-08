@@ -144,6 +144,7 @@ set_global_assignment -name FITTER_EFFORT "STANDARD FIT"
 set_global_assignment -name ROUTER_EFFORT_MULTIPLIER 6
 set_global_assignment -name PLACEMENT_EFFORT_MULTIPLIER 6.0
 set_global_assignment -name ROUTER_TIMING_OPTIMIZATION_LEVEL MINIMUM
+set_global_assignment -name FITTER_AGGRESSIVE_ROUTABILITY_OPTIMIZATION ALWAYS
 
 # Physical Synthesis Help
 set_global_assignment -name PHYSICAL_SYNTHESIS_EFFORT EXTRA
