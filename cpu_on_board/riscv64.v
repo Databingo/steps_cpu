@@ -656,7 +656,7 @@ wire is_store = (op == 7'b0100011) || (op == 7'b0101111 && w_func5 != 5'b00010);
 		bus_write_data <= 0;
 		bus_address <= `Ram_base;
 		// Interrupt re-enable
-		Csrs[mstatus][MIE] <= 1;
+		Csrs[mstatus][MIE] <= 1; // 0 safer?
 		mmu_da <= 0;
 		for (i=0;i<11;i=i+1) begin sre[i]<= 64'b0; end 
 		for (i=0;i<=25;i=i+1) begin Csrs[i]<= 64'b0; end

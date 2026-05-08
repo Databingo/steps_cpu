@@ -13,6 +13,7 @@ module riscv64(
     output reg        bus_read_enable,
     output reg [2:0]  bus_ls_type, // lb lh lw ld lbu lhu lwu // sb sh sw sd sbu shu swu 
     input wire        debug,
+    input wire        pma,
 
     output reg [63:0] mtime,    // map to 0x0200_bff8 
     input wire [63:0] mtimecmp, // map to 0x0200_4000 + 8byte*hartid
@@ -37,11 +38,18 @@ wire m_interrupts = (meip || msip || mtip) && (current_privilege_mode < M_mode |
 wire s_interrupts = (seip || ssip || stip) && (current_privilege_mode < S_mode || (current_privilege_mode == S_mode && Csrs[sstatus][SIE]));
 wire any_interrupt = (m_interrupts || s_interrupts);
 
+wire is_low_io   = (ls_va[63:16] == 48'h0);    // 0x0000-0xffff (64KB) ROM, RAM, UART, SD 
+wire is_clint_io = (ls_va[63:16] == 48'h0200); // 0x0200_0000-0x0200_ffff (64KB)
+wire is_plic_io  = (ls_va[63:24] == 40'h0C);   // 0x0C00_0000-0x0Cff_ffff (16MB) ??
+wire is_mmio_io = (current_privilege_mode == M_mode) && (is_low_io || is_clint_io || is_plic_io) && pma;
+
 (* keep = 1 *) reg [63:0] pc;
 wire [31:0] ir;
 
-(* ram_style = "logic" *) reg [63:0] re [0:31]; // General Registers 32s
-(* ram_style = "logic" *) reg [63:0] sre [0:10]; // Shadow Registers 11s
+//(* ram_style = "logic" *) reg [63:0] re [0:31]; // General Registers 32s
+//(* ram_style = "logic" *) reg [63:0] sre [0:10]; // Shadow Registers 11s
+(* ramstyle = "logic" *) reg [63:0] re [0:31]; // General Registers 32s
+(* ramstyle = "logic" *) reg [63:0] sre [0:10]; // Shadow Registers 11s
 reg mmu_da=0;
 reg mmu_pc = 0;
 reg did = 1;
@@ -79,8 +87,8 @@ wire [4:0] w_rs2 = ir[24:20];
 // -- Func decoder --
 wire [2:0] w_func3   = ir[14:12];
 wire [4:0] w_func5   = ir[31:27];
-wire [6:0] w_func7   = ir[31:25]; 
-wire [11:0] w_func12 = ir[31:20]; 
+//wire [6:0] w_func7   = ir[31:25]; 
+//wire [11:0] w_func12 = ir[31:20]; 
 // -- rs1 rs2 value --
 wire signed [63:0] rs1 = re[w_rs1];
 wire signed [63:0] rs2 = re[w_rs2];
@@ -174,10 +182,14 @@ wire [63:0] w_amo_calc_data =
     (w_func5 == 5'b01100) ? val_and    : // and
     (w_func5 == 5'b01000) ? val_or     : // or
     val_minmax ; // min/max/minu/maxu
+
+wire [63:0] w_amo_calc_data_dw = (is_word_op) ? {{32{w_amo_calc_data[31]}}, w_amo_calc_data[31:0]} : w_amo_calc_data;
+
 // formatting sc.w/sc.d/amo
 wire [63:0] w_atomic_write_data = (op == 7'b0101111 && w_func5[4:0] == 5'b00011) ? // SC
     (is_word_op ? {32'b0, rs2[31:0]} : rs2) : // sc.w/sc.d
-    w_amo_calc_data; // AMOs -----------
+    //w_amo_calc_data; // AMOs -----------
+    w_amo_calc_data_dw; // AMOs -----------
 
 // Indepenedent Multiplier Mul // Booth algorithim + Signed-correct
 reg [6:0]   mul_cnt;
@@ -368,7 +380,7 @@ localparam clint_time = 19;  // read only
 localparam pmpcfg0    = 20;  // Physical Memory Protection
 localparam pmpaddr0   = 21;  // 
 localparam mdebug     = 22;  // 
-reg [62:0] CAUSE_CODE;
+//reg [62:0] CAUSE_CODE;
 reg  [5:0] w_csr_id;             // CSR id (64)
 localparam XCSR = 63;  //  miss csr that not deployed
 always @(*) begin
@@ -409,11 +421,25 @@ always @(*) begin
 end
 
 //(* ram_style = "logic" *) reg [63:0] Csrs [0:36]; // 36 CSRs for now // totally 4096
-(* ram_style = "logic" *) reg [63:0] Csrs [0:25]; // 36 CSRs for now // totally 4096
+//(* ram_style = "logic" *) reg [63:0] Csrs [0:25]; // 36 CSRs for now // totally 4096
+(* ramstyle = "logic" *) reg [63:0] Csrs [0:25]; // 36 CSRs for now // totally 4096
 wire [3:0]  satp_mmu  = Csrs[satp][63:60]; // 0:bare, 8:sv39, 9:sv48  satp.MODE!=0, privilegae is not M-mode, mstatus.MPRN is not set or in MPP's mode?
 
 // -- Timer --
-always @(posedge clk or negedge reset) begin if (!reset) mtime <= 0; else mtime <= mtime + 1; end
+reg [6:0] mtime_div;
+always @(posedge clk or negedge reset) begin 
+    if (!reset) begin 
+	mtime <= 0; 
+	mtime_div <= 0; 
+    end else begin 
+	mtime_div <= mtime_div + 1; 
+	if (mtime_div == 7'd99) begin 
+	    mtime_div <= 0;
+	    mtime <= mtime + 1; 
+	end
+    end
+end
+
 wire mtip_interrupt = (mtime >= mtimecmp);
 
 // -- Innerl signal --
@@ -428,8 +454,8 @@ reg        reserve_valid;
 reg tlb_flush = 0;
 //// -- TLB -- 8 pages
 reg [7:0] tlb_vld;
-(* ram_style = "logic" *) reg [26:0] tlb_vpn [0:7]; // vpn number VA[38:12]  Sv39
-(* ram_style = "logic" *) reg [43:0] tlb_ppn [0:7]; // ppn number PA[55:12]
+(* ramstyle = "logic" *) reg [26:0] tlb_vpn [0:7]; // vpn number VA[38:12]  Sv39
+(* ramstyle = "logic" *) reg [43:0] tlb_ppn [0:7]; // ppn number PA[55:12]
 //(* ram_style = "logic" *) reg tlb_vld [0:7];
 //// -- TLB i -- 4 pages
 //reg [3:0] tlb_vld;
@@ -467,8 +493,11 @@ always @(*) begin
    
 // -- TLB d -- 8 pages
 reg [7:0] tlb_d_vld;
-(* ram_style = "logic" *) reg [26:0] tlb_d_vpn [0:7]; // vpn number VA[38:12]  Sv39
-(* ram_style = "logic" *) reg [43:0] tlb_d_ppn [0:7]; // ppn number PA[55:12]
+reg [7:0] tlb_d_w; // Wirte permission bit
+reg [7:0] tlb_d_d; // Dirty bit
+wire is_store = (op == 7'b0100011) || (op == 7'b0101111 && w_func5 != 5'b00010); // Store/Atm(no lr)
+(* ramstyle = "logic" *) reg [26:0] tlb_d_vpn [0:7]; // vpn number VA[38:12]  Sv39
+(* ramstyle = "logic" *) reg [43:0] tlb_d_ppn [0:7]; // ppn number PA[55:12]
 //// -- TLB d -- 16 pages
 //reg [15:0] tlb_d_vld;
 //(* ram_style = "logic" *) reg [26:0] tlb_d_vpn [0:15]; // vpn number VA[38:12]  Sv39
@@ -484,14 +513,14 @@ reg [7:0] tlb_d_vld;
 
 	wire [7:0] tlb_d_match;
 	//wire [15:0] tlb_d_match;
-	assign tlb_d_match[0] = tlb_d_vld[0] && (tlb_d_vpn[0] == ls_va[38:12]);
-	assign tlb_d_match[1] = tlb_d_vld[1] && (tlb_d_vpn[1] == ls_va[38:12]);
-	assign tlb_d_match[2] = tlb_d_vld[2] && (tlb_d_vpn[2] == ls_va[38:12]);
-	assign tlb_d_match[3] = tlb_d_vld[3] && (tlb_d_vpn[3] == ls_va[38:12]);
-	assign tlb_d_match[4] = tlb_d_vld[4] && (tlb_d_vpn[4] == ls_va[38:12]);
-	assign tlb_d_match[5] = tlb_d_vld[5] && (tlb_d_vpn[5] == ls_va[38:12]);
-	assign tlb_d_match[6] = tlb_d_vld[6] && (tlb_d_vpn[6] == ls_va[38:12]);
-	assign tlb_d_match[7] = tlb_d_vld[7] && (tlb_d_vpn[7] == ls_va[38:12]);
+	assign tlb_d_match[0] = tlb_d_vld[0] && (tlb_d_vpn[0] == ls_va[38:12]) && (!is_store || (tlb_d_w[0] && tlb_d_d[0]));
+	assign tlb_d_match[1] = tlb_d_vld[1] && (tlb_d_vpn[1] == ls_va[38:12]) && (!is_store || (tlb_d_w[1] && tlb_d_d[1]));
+	assign tlb_d_match[2] = tlb_d_vld[2] && (tlb_d_vpn[2] == ls_va[38:12]) && (!is_store || (tlb_d_w[2] && tlb_d_d[2]));
+	assign tlb_d_match[3] = tlb_d_vld[3] && (tlb_d_vpn[3] == ls_va[38:12]) && (!is_store || (tlb_d_w[3] && tlb_d_d[3]));
+	assign tlb_d_match[4] = tlb_d_vld[4] && (tlb_d_vpn[4] == ls_va[38:12]) && (!is_store || (tlb_d_w[4] && tlb_d_d[4]));
+	assign tlb_d_match[5] = tlb_d_vld[5] && (tlb_d_vpn[5] == ls_va[38:12]) && (!is_store || (tlb_d_w[5] && tlb_d_d[5]));
+	assign tlb_d_match[6] = tlb_d_vld[6] && (tlb_d_vpn[6] == ls_va[38:12]) && (!is_store || (tlb_d_w[6] && tlb_d_d[6]));
+	assign tlb_d_match[7] = tlb_d_vld[7] && (tlb_d_vpn[7] == ls_va[38:12]) && (!is_store || (tlb_d_w[7] && tlb_d_d[7]));
 	//assign tlb_d_match[8] = tlb_d_vld[8] && (tlb_d_vpn[8] == ls_va[38:12]);
 	//assign tlb_d_match[9] = tlb_d_vld[9] && (tlb_d_vpn[9] == ls_va[38:12]);
 	//assign tlb_d_match[10] = tlb_d_vld[10] && (tlb_d_vpn[10] == ls_va[38:12]);
@@ -525,7 +554,8 @@ reg [7:0] tlb_d_vld;
 		//assign pda = need_trans ? {8'h0, data_ppn, ls_va[11:0]} : ls_va;
     
 		wire [1:0] eff_priv = Csrs[mstatus][MPRV] ? Csrs[mstatus][MPP+1:MPP] : current_privilege_mode;
-		wire need_trans_d = satp_mmu && !STrap && (eff_priv != M_mode);
+		//wire need_trans_d = satp_mmu && !STrap && (eff_priv != M_mode);
+		wire need_trans_d = satp_mmu && !STrap && (eff_priv != M_mode) && !is_mmio_io;
 		assign pda = need_trans_d ? {8'h0, data_ppn, ls_va[11:0]} : ls_va;
 
 		// TLB Refill
@@ -541,6 +571,8 @@ reg [7:0] tlb_d_vld;
 			tlb_vld <= 8'b0;
 			//tlb_d_vld <= 16'b0;
 			tlb_d_vld <= 8'b0;
+			tlb_d_w <= 8'b0;
+			tlb_d_d <= 8'b0;
 		    //end else if (tlb_flush) begin tlb_vld <= 4'b0; tlb_d_vld <= 16'b0; // FLUSH
 		    //end else if (tlb_flush) begin tlb_vld <= 4'b0; tlb_d_vld <= 8'b0; // FLUSH
 		    end else if (tlb_flush) begin tlb_vld <= 8'b0; tlb_d_vld <= 8'b0; // FLUSH
@@ -554,6 +586,8 @@ reg [7:0] tlb_d_vld;
 			tlb_d_vpn[tlb_d_ptr] <= re[9][38:12]; // VA from x1 saved by trapp mmu_pc/mmu_da
 			tlb_d_ppn[tlb_d_ptr] <= bus_write_data[55:12] ; // real 
 			tlb_d_vld[tlb_d_ptr] <= 1;
+			tlb_d_w[tlb_d_ptr] <= bus_write_data[2]; // bit 2 of PTE is W
+			tlb_d_d[tlb_d_ptr] <= bus_write_data[7]; // bit 7 of PTE is D
 			tlb_d_ptr <= tlb_d_ptr + 1; 
 		        end 
 		    end
@@ -566,11 +600,11 @@ reg [7:0] tlb_d_vld;
 	    reg [63:0]  ppc_pre = 64'h0; // for read
 	    reg [63:0]  ask_i_data; // for write
 	    //(* ram_style = "block" *) reg [127:0] Cache_L [0:1023]; // 16KB
-	    (* ram_style = "block" *) reg [63:0] Cache_L_Low [0:511]; // 4KB
-	    (* ram_style = "block" *) reg [63:0] Cache_L_High [0:511]; // 4KB
+	    (* ramstyle = "M4K" *) reg [63:0] Cache_L_Low [0:511]; // 4KB
+	    (* ramstyle = "M4K" *) reg [63:0] Cache_L_High [0:511]; // 4KB
 	    //(* ram_style = "block" *) reg [50:0] Cache_T [0:511];  // ~4KB (addr: 51(tag) + 9(index) + 4(offset))
 	    //(* ram_style = "block" *) reg [58:0] Cache_T [0:511];  // 8-bit epoch + 51-bit tag
-	    (* ram_style = "block" *) reg [66:0] Cache_T [0:511];  // 16-bit epoch + 51-bit tag
+	    (* ramstyle = "M4K" *) reg [66:0] Cache_T [0:511];  // 16-bit epoch + 51-bit tag
 	    //reg [7:0] cache_epoch = 1;
 	    reg [15:0] cache_epoch = 1;
 
@@ -663,7 +697,7 @@ reg [7:0] tlb_d_vld;
 	    // Async Interrupt PLIC full (Platform-Level-Interrupt-Control)  MMIO (hardwire timers uart plic)  first priority in case blocked by itlb cloud
 	    if (any_interrupt && !STrap && !load_step && !store_step && !mul_enable && !div_enable) begin //mstatus[3] MIE // cpu0_intc
 		reserve_valid <= 0; // Interrupt clear lr.w/lr.d
-		do_trap = 1; trap_is_interrupt =1; trap_val = 0; trap_epc = pc_4;
+		do_trap = 1; trap_is_interrupt =1; trap_val = 0; trap_epc = (bubble) ? pc : pc_4; // !!! save pc (j/b EXE was flushed currectly, vma executed only in EXEcuting)
 		if (meip) trap_cause = 11; // Cause 11 for Machine External Interrupt
 		else if (msip) trap_cause = 3;  // Cause 3 for Machine Sofeware Interrupt
 		else if (mtip) trap_cause = 7;  // Cause 7 for Machine Timer Interrupt
@@ -732,7 +766,8 @@ reg [7:0] tlb_d_vld;
 		//re[8] <= (op == 7'b0000011) ? 13 : 14;// save x2 trap type load/store_atom
 		re[8] <= 18; // save 18 for debug
                 Csrs[mimpid] <= pc_4; // pc
-                Csrs[marchid] <= Csrs[mip];  // mip
+                //Csrs[marchid] <= Csrs[mip];  // mip
+                Csrs[marchid] <= re[10]; // a0
                 Csrs[mvendorid] <= ir;
 
             // Back from STrap
@@ -903,7 +938,11 @@ reg [7:0] tlb_d_vld;
 		        if (store_step == 1 && bus_write_done == 0) begin pc <= pc_4; bubble <= 1; end // bus working 1 bubble2 this3
 		        if (store_step == 1 && bus_write_done == 1) begin store_step <= 0; re[w_rd] <= 0; end end // sc.w successed return 0 in rd
 	           // Amos(swap, add, xor, and, or, min, max) w/d
-	            32'b?????_??_?????_?????_01?_?????_0101111: begin // not 00010lr/00011sc
+	            //32'b?????_??_?????_?????_01?_?????_0101111: begin // not 00010lr/00011sc
+	            32'b0000?_??_?????_?????_01?_?????_0101111, // ADD00000 Swap00001
+	            32'b00100_??_?????_?????_01?_?????_0101111, // Xor00100
+	            32'b01?00_??_?????_?????_01?_?????_0101111, // Or01000 And01100
+	            32'b1????_??_?????_?????_01?_?????_0101111: begin // Min Max Minx Maxu 
 		        if (load_step == 0 && store_step == 0) begin bus_address <= pda; bus_read_enable <= 1; pc <= pc_4; bubble <= 1; load_step <= 1; bus_ls_type <= w_func3; end
 		        if (load_step == 1 && bus_read_done == 0) begin pc <= pc_4; bubble <= 1; end // bus working
 		        if (load_step == 1 && bus_read_done == 1) begin 
@@ -996,7 +1035,6 @@ reg [7:0] tlb_d_vld;
 		    				           bubble <= 1'b1;
 	                 			       end
 	    end
-        end
 	re[0]<= 64'h0; 
 	sre[0]<= 64'h0;
                 //// meip/seip is triggered by Plic_pending, mtip is triggered by inner Timer, stip is set by mtip trap handler, msip set by opensbi csr, ssip set by software csr
@@ -1004,15 +1042,18 @@ reg [7:0] tlb_d_vld;
 		Csrs[mip][MTIP] <= mtip_interrupt;//mtime-mtip_interrupt-MTIP|MTIP&MTIE-mtip|hardware mstatus.MIE=0|opensbi MTIE0 surpress repeate+STIP1 to linux|opensbi mret MIE=1(MPIE)|linux ecall sbi_set_timer-MIE=1|linux STIP=0
 		Csrs[mip][SEIP] <= seip_interrupt;
 		Csrs[mip][MSIP] <= msip_interrupt;  
+        end
     end
 endmodule
 `include "header.vh"
 
 module cpu_on_board (
     // -- Pin --
-    (* chip_pin = "PIN_L1" *)  input wire CLOCK_50, // 50 MHz clock
+    //(* chip_pin = "PIN_L1" *)  input wire CLOCK_50, // 50 MHz clock
+    input wire CLOCK_50, // 50 MHz clock
     (* chip_pin = "PIN_R22" *) input wire KEY0,     // Active-low reset button
     (* chip_pin = "L2" *) input wire SW9,     // debug
+    (* chip_pin = "M1" *) input wire SW8,     // pma 
     //(* chip_pin = "PIN_Y21, PIN_Y22, PIN_W21, PIN_W22, PIN_V21, PIN_V22, PIN_U21, PIN_U22" *) output wire [7:0] LEDG, // 8 green LEDs
     //(* chip_pin = "R17" *) output reg LEDR9, // 1 red LEDs breath left most 
     //(* chip_pin = "R20" *) output wire LEDR0, // 
@@ -1104,7 +1145,8 @@ assign DRAM_CKE = 1; // always enable
     //(* ram_style = "block", preserve = 1 *) reg [31:0] Cache [0:1024]; // 4KB fix overflow of print sd content  
     //(* ram_style = "block" *) reg [31:0] Cache [0:383]; // 1.5KB
     //(* ramstyle = "M4K", ram_init_file = "roam.mif" *) reg [31:0] Cache [0:1535];  // 6KB
-    (* ramstyle = "block", ram_init_file = "roam.mif" *) reg [31:0] Cache [0:1535];  // 6KB
+    //(* ramstyle = "block", ram_init_file = "roam.mif" *) reg [31:0] Cache [0:1535];  // 6KB
+    (* ramstyle = "M4K", ram_init_file = "roam.mif" *) reg [31:0] Cache [0:1535];  // 6KB
     //reg [31:0] Cache [0:1023];  // 4KB
     //reg [31:0] Cache [0:2047];  // 8KB more than 52 RAM location
       
@@ -1178,6 +1220,7 @@ assign DRAM_CKE = 1; // always enable
         //.heartbeat(LEDR9),
 	//.valid_address(valid_address),
 	.debug(SW9),
+	.pma(SW8),
 
         .bus_address(bus_address),
         .bus_write_data(bus_write_data),
@@ -1256,7 +1299,8 @@ assign DRAM_CKE = 1; // always enable
 
 
     // -- PLIC --
-    (* ram_style = "logic" *) reg [2:0]  Plic_priority [0:5];  // 0x000 + 4 per id
+    //(* ram_style = "logic" *) reg [2:0]  Plic_priority [0:5];  // 0x000 + 4 per id
+    (* ramstyle = "logic" *) reg [2:0]  Plic_priority [0:5];  // 0x000 + 4 per id
     reg [31:0] Plic_pending; // 0x1000 Global pending Bitmap   // 0nly 31 type now (by bit position) Bit 0 reserved
     reg [31:0] Plic_enable [0:1];  // 0x2000 per context +0x80 // 0nly 31 type now (by bit position) same position as Plic_pending
     reg [2:0]  Plic_threshold [0:1]; // 0x200000 4B per hart
@@ -1701,7 +1745,8 @@ end
     wire [11:0] cid = (bus_address-`Sdc_base);
     reg [11:0] cid8;
     //reg [7:0] sd_cache [0:511];
-    (* ram_style = "block" *) reg [7:0] sd_cache [0:511];
+    //(* ram_style = "block" *) reg [7:0] sd_cache [0:511];
+    (* ramstyle = "M4K" *) reg [7:0] sd_cache [0:511];
     reg [9:0] byte_index = 0;
     reg sd_cache_available = 0;
     reg sd_byte_available_d = 0;
@@ -2544,6 +2589,7 @@ endmodule
 isr_router:        
      # x0-x10 are shadowed by hardware, safe to use
      li sp, 0x1500 # Set stack shadowed sp(x2)
+    #li sp, 0x801F0000 # Set stack shadowed sp(x2)
      li x7, 0x2004 # UART print 
      # x8 trap_type no change
      # x9 addr  # x9 keep the address need manage, no change x9
@@ -2669,62 +2715,130 @@ mmu:  # VA 63:39Sign|38:30Vpn[2]|29:21Vpn[1]|20:12Vpn[0]|11:0PageOffset
 
 FINISH_4KB:
      jal x5, CHECK_PERM_AND_AD
+
+     mv x10, x4  # Backup PTE
+
      slli x4, x4, 10  # mask out reserved bits
      srli x4, x4, 20 
      slli x4, x4, 12 
+
+    #andi x10, x10, 0xFF # Isolate flags(1111_1111) # 0x3FF ?
+     andi x10, x10, 0x3FF # Isolate flags(1111_1111) # 0x3FF ?
+     or x4, x4, x10 # Merge PPN and flages
+
      j WRITE_TLB
                                             
 FINISH_2MB:
      jal x5, CHECK_PERM_AND_AD
+
+     mv x10, x4  # Backup PTE
+
      slli x4, x4, 10  # mask out reserved bits
      srli x4, x4, 20 
      slli x4, x4, 12 
      li x3, 0x001ff000 # mask for VA[20:12]
      and x3, x3, x9    
      add x4, x4, x3   
+
+     andi x10, x10, 0xFF # Isolate flags(1111_1111)
+     or x4, x4, x10 # Merge PPN and flages
+
      j WRITE_TLB
 
 FINISH_1GB:
      jal x5, CHECK_PERM_AND_AD
+
+     mv x10, x4  # Backup PTE
+
      slli x4, x4, 10  # mask out reserved bits
      srli x4, x4, 20  # get PPN from PTE(PTE's data struction?)  64:54Reserved 53:10PPN # 9:8RSW 7Dirty 6Accessed 5Global 4User 3Executable 2Write 1Readable 0Valid
      slli x4, x4, 12  # PPN posint [38:12] in satp
      li x3, 0x3ffff000 # mask for VA[29:12]
      and x3, x3, x9    # extrac from VA
      add x4, x4, x3    # add offset to PPN
+
+     andi x10, x10, 0xFF # Isolate flags(1111_1111)
+     or x4, x4, x10 # Merge PPN and flages
+
      j WRITE_TLB
 
-# --- Permissions, U-Bit and A/D Bits --
 CHECK_PERM_AND_AD:                
-#     # 1. Check U-Bit based on VA sign (x9)
-#     andi x3, x4, 0x10 # Extract U-bit (Bit 4)
-#     bltz x9, check_kernel_u
+    # 1. Check U-Bit based on VA sign (x9)
+    #andi x3, x4, 0x10 # Extract U-bit (Bit 4)
+ 
+    #csrr x3, mstatus # 0x300 # read mstatus
+    #srli x3, x3, 11
+    #andi x3, x3, 3 # MPP  0=User 1=Supervisor 3=Machine
+    #li x6, 3
+    #beq x3, x6, check_permissions  # M-mode bypass all u/s check, do RXW check only
+    #li x6, 0
+    #beqz x3, is_user_mode
+    #bltz x9, check_kernel_u
+
+     bltz x9, is_supervisor_mode # VA address like FFFFFFFF........
+
+     andi x3, x4, 0x10  # Extra PTE.U (bit 4)
+     beqz x3, is_supervisor_mode  # is U=0, treat as S-mode(works for any 1:1 map)
+
+is_user_mode:
+    #andi x3, x4, 0x10  # Extra PTE.U (bit 4)
+    #beqz x3, PERM_FAULT # User accessing U=0 never allowed
+     j check_permissions
+is_supervisor_mode:
+     andi x3, x4, 0x10  # Extra PTE.U (bit 4)
+     beqz x3, check_permissions 
+
+     # S-mode access U=1 page
+     li x3, 12                 # fetch S-mode cannot execute User memory
+     beq x8, x3, PERM_FAULT
+
+     csrr x3, mstatus # 0x300
+     srli x3, x3, 18 # SUM is bit 18 (Supervisor User Memory access)
+     andi x3, x3, 1
+     beqz x3, PERM_FAULT  # SUM==0 -> Fault  when S read U page with SUM=0
+
+#    j check_permissions
+
 #check_user_u:
 #     beqz x3, PERM_FAULT # User VA (>=0) requires U=1
 #     j check_permissions
 #check_kernel_u:
 #     bnez x3, PERM_FAULT # Kernel VA (<0) requires U=0
-#check_permissions:
-#     # 2. CHECK R/W/X permissions
-#     li x3, 15
-#    #li x3, 14
-#     beq x8, x3, check_store
-#     li x3, 12
-#     beq x8, x3, check_fetch
-#check_load:
-#     andi x3, x4, 2 # PET.R (bit 1)
-#     beqz x3, PERM_FAULT
-#     j update_ad
-#check_store:
-#     andi x3, x4, 4 # PET.W (bit 2)
-#     beqz x3, PERM_FAULT
-#     j update_ad
-#check_fetch:
-#     andi x3, x4, 8 # PET.X (bit 3)
-#     beqz x3, PERM_FAULT
+check_permissions:
+     # 2. CHECK R/W/X permissions
+     li x3, 15
+    #li x3, 14
+     beq x8, x3, check_store
+     li x3, 12
+     beq x8, x3, check_fetch
+check_load:
+     andi x3, x4, 2 # PET.R (bit 1)
+     bnez x3, update_ad
+     
+     # if not R=1 readable, check if X=1 Executable and MXR=1(Make Executable Readable)
+     andi x3, x4, 8 # PTE.X
+     beqz x3, PERM_FAULT
+
+    #csrr x3, 0x300
+     csrr x3, mstatus # 0x300
+     srli x3, x3, 19 # MXR is bit 19
+     andi x3, x3, 1
+     beqz x3, PERM_FAULT
+
+     j update_ad
+check_store:
+     andi x3, x4, 4 # PET.W (bit 2)
+     beqz x3, PERM_FAULT
+
+     j update_ad
+check_fetch:
+     andi x3, x4, 8 # PET.X (bit 3)
+     beqz x3, PERM_FAULT
+
 update_ad:
      # 3. Update A/D bits
      ori x4, x4, 0x40  # set Accessed bit (bit 6)
+    #ori x4, x4, 0x41  # set Accessed bit (bit 6) and Valid bit(bit 0)
      li x3, 15
     #li x3, 14
      bne x8, x3, write_pte
@@ -2757,13 +2871,13 @@ WRITE_TLB:
 
 FAULT: # error trap?
 
-     li a0, "TLBfl:"
-     call print7
-     mv a0, x9
-     call print_reg
+#    li a0, "TLBfl:"
+#    call print7
+#    mv a0, x9
+#    call print_reg
 
-     addi x6, x0, 33
-     sd x6, 0(x7)    #  print !
+#    addi x6, x0, 33
+#    sd x6, 0(x7)    #  print !
 
      j return
 #FAULT:
@@ -2803,23 +2917,27 @@ debug:
      csrr a0, mimpid
      call print_reg
 
-   # li a0, "|pda:" 
-   # call print7
-   ##csrr a0, 0xF13 # mimpid/pda
-   # csrr a0, mimpid # mimpid/pda
-   # call print_reg
+     li a0, "|mip:" 
+     call print7
+     csrr a0, mip
+     call print_reg
 
-    li a0, "|mip:" 
-    call print7
-    csrr a0, marchid
-    call print_reg
+     li a0, "|a0:" 
+     call print7
+     csrr a0, marchid
+     call print_reg
 
-   #li a0, "|mstas:" 
-   #call print7
-   #csrr a0, mstatus
-   #call print_reg
+     li a0, "|ms:" 
+     call print7
+     csrr a0, mstatus
+     call print_reg
 
+     li a0, "|va:" 
+     call print7
+     mv a0, x9
+     call print_reg
 
+     # mcasue mtval scause stval sepc mepc satp sscratch
      li a0, "|" 
      call putchar
 
@@ -2965,6 +3083,8 @@ print7: # a0, 7 char left one for null
    # 11 machine external interrupt
    # 12-15 --
    # 16+ local define interrupt
+
+
 ---------- device tree ---------
 /dts-v1/;
 
@@ -2984,6 +3104,7 @@ print7: # a0, 7 char left one for null
         #address-cells = <0x01>;
         #size-cells = <0x00>;
         timebase-frequency = <12500000>;
+        //timebase-frequency = <960000000>; //960 MHz
         //timebase-frequency = <125000>; // mimic 0.124MHz
         //timebase-frequency = <1250000>; // mimic 1.24MHz
 
@@ -3034,8 +3155,8 @@ print7: # a0, 7 char left one for null
              reg = <0x0 0x2004 0x0 0x10>;
              // if using PLIC point to IRQ 1. If bypass use extended
              //interrupts-extended = <&cpu0_intc 0x09>; // add dummy external interrupt mapping
-          //   interrupt-parent = <&plic>;  
-          //   interrupts = <1>;             // claim number
+             interrupt-parent = <&plic>;  
+             interrupts = <1>;             // claim number
              clock-frequency = <12500000>;
              //status = "disabled";
              status = "okay";
@@ -3073,7 +3194,12 @@ print7: # a0, 7 char left one for null
        //stdout-path = "/soc/serial@10000000";
        // SoC
        stdout-path = "/soc/uart@2004";
-       bootargs = "no4lvl earlycon=sbi console=hvc0 panic=0 init_on_alloc=0 keep_bootcon ignore_loglevel initcall_debug rcu_update.rcu_cpu_stall_suppress=1";
+       //bootargs = "no4lvl earlycon=sbi console=hvc0 panic=0 init_on_alloc=0 keep_bootcon ignore_loglevel initcall_debug rcu_update.rcu_cpu_stall_suppress=1 rdinit=/bin/sh";
+       //bootargs = "no4lvl earlycon=sbi console=hvc0 panic=0 init_on_alloc=0 ignore_loglevel initcall_debug rcu_update.rcu_cpu_stall_suppress=1 rdinit=/hello";
+       bootargs = "no4lvl earlycon=sbi console=hvc0 panic=0 init_on_alloc=0 ignore_loglevel initcall_debug rcu_update.rcu_cpu_stall_suppress=1 rdinit=/sbin/init";
+       //bootargs = "no4lvl earlycon=sbi console=hvc0 panic=0 init_on_alloc=0 ignore_loglevel initcall_debug rcu_update.rcu_cpu_stall_suppress=1";
+       //bootargs = "no4lvl earlycon=sbi console=hvc0 panic=0 init_on_alloc=0 ignore_loglevel initcall_debug rcu_update.rcu_cpu_stall_suppress=1 rdinit=/bin/busybox -- sh -c 'while true; do echo ALIVE; sleep 1; done'";
+       //bootargs = "no4lvl earlycon=sbi console=hvc0 panic=0 init_on_alloc=0 ignore_loglevel initcall_debug rcu_update.rcu_cpu_stall_suppress=1 rdinit=/bin/busybox";
     };
 
 
