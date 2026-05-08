@@ -4,16 +4,29 @@
 msg: 
    .string "ASM INIT STARTING\n"
 dev_path: 
-   .string "/dev/hvc0"
+   .string "/dev"
+devtmpfs_str: 
+   .string "devtmpfs"
+console_path: 
+   .string "/dev/console"
 buf: 
    .word 0
 
 
 .section .text
 _start:
-    # openat(AT_FDCWD, "/dev/hvc0", O_RDWR)
-    li a0, -100 # AT_FDCWD 
+    # mount devtmpfs to /dev
+    la a0, devtmpfs_str
     la a1, dev_path
+    la a2, devtmpfs_str
+    li a3, 0
+    li a4, 0
+    li a7, 40 # syscall mount
+    ecall 
+
+    # openat(AT_FDCWD, "/dev/console", O_RDWR)
+    li a0, -100 # AT_FDCWD 
+    la a1, console_path
     li a2, 2    # O_RDWR
     li a7, 56   # syscall openat
     ecall 
@@ -23,20 +36,21 @@ _start:
     # if s1 negative, open failed
     bltz s1, open_failed_barcode
     
-    # dup2(fd, 0) - stdin
+    # dup3(fd, 0, 0) - stdin
     mv a0, s1 
     li a1, 0
-    li a7, 24
+    li a2, 0
+    li a7, 24 # syscall dup3
     ecall
    
-    # dup2(fd, 1) - stdout
+    # dup2(fd, 1, 0) - stdout
     mv a0, s1 
     li a1, 1
+    li a2, 0
     li a7, 24
     ecall
 
-
-    # write(1, msg, 18)
+    # write(1, msg, 18) # welcome
     li a0, 1            # fd = 1
     la a1, msg          # buf
     li a2, 18           # len
@@ -44,7 +58,7 @@ _start:
     ecall
 
 loop:
-    # read(0, buf, 1)
+    # read(0, buf, 1)   # read keypress
     li a0, 0            # fd = 0
     la a1, buf          # buf
     li a2, 1            # len
