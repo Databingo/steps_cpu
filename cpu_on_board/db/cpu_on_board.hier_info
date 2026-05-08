@@ -1,5 +1,5 @@
 |cpu_on_board
-CLOCK_50 => comb.DATAIN
+CLOCK_50 => CLOCK_50.IN1
 KEY0 => comb.DATAIN
 SW9 => comb.DATAIN
 SW8 => comb.DATAIN
