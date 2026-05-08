@@ -328,26 +328,27 @@ debug:
      csrr a0, mimpid
      call print_reg
 
-    li a0, "|mip:" 
-    call print7
-    csrr a0, mip
-    call print_reg
+     li a0, "|mip:" 
+     call print7
+     csrr a0, mip
+     call print_reg
 
-    li a0, "|a0:" 
-    call print7
-    csrr a0, marchid
-    call print_reg
+     li a0, "|a0:" 
+     call print7
+     csrr a0, marchid
+     call print_reg
 
-    li a0, "|ms:" 
-    call print7
-    csrr a0, mstatus
-    call print_reg
+     li a0, "|ms:" 
+     call print7
+     csrr a0, mstatus
+     call print_reg
 
-    li a0, "|va:" 
-    call print7
-    mv a0, x9
-    call print_reg
+     li a0, "|va:" 
+     call print7
+     mv a0, x9
+     call print_reg
 
+     # mcasue mtval scause stval sepc mepc satp sscratch
      li a0, "|" 
      call putchar
 
