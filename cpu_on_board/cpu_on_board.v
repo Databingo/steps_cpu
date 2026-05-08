@@ -2,7 +2,8 @@
 
 module cpu_on_board (
     // -- Pin --
-    (* chip_pin = "PIN_L1" *)  input wire CLOCK_50, // 50 MHz clock
+    //(* chip_pin = "PIN_L1" *)  input wire CLOCK_50, // 50 MHz clock
+    input wire CLOCK_50, // 50 MHz clock
     (* chip_pin = "PIN_R22" *) input wire KEY0,     // Active-low reset button
     (* chip_pin = "L2" *) input wire SW9,     // debug
     (* chip_pin = "M1" *) input wire SW8,     // pma 

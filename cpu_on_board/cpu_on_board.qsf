@@ -75,6 +75,7 @@
 
 
 set_location_assignment PIN_L1 -to CLOCK_50
+set_instance_assignment -name GLOBAL_SIGNAL "GLOBAL CLOCK" -to CLOCK_50
 set_location_assignment PIN_R22 -to KEY0
 #set_location_assignment PIN_U22 -to LEDG[0]
 #set_location_assignment PIN_U21 -to LEDG[1]
@@ -153,6 +154,8 @@ set_global_assignment -name PHYSICAL_SYNTHESIS_REGISTER_RETIMING OFF
 set_global_assignment -name PHYSICAL_SYNTHESIS_REGISTER_DUPLICATION OFF
 set_global_assignment -name AUTO_GLOBAL_REGISTER_CONTROLS ON
 set_global_assignment -name ROUTER_TIMING_OPTIMIZATION_LEVEL MINIMUM
+set_instance_assignment -name CURRENT_STRENGTH_NEW 8MA -to DRAM_ADDR*
+
 
 # Area Optimization
 set_global_assignment -name ADV_NETLIST_OPT_SYNTH_WYSIWYG_REMAP ON
