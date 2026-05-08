@@ -1,6 +1,20 @@
 isr_router:        
      # x0-x10 are shadowed by hardware, safe to use
      li sp, 0x1500 # Set stack shadowed sp(x2)
+
+     #addi sp, sp, -88
+     #sd x1, 0(sp)
+     #sd x2, 8(sp)
+     #sd x3, 16(sp)
+     #sd x4, 24(sp)
+     #sd x5, 32(sp)
+     #sd x6, 40(sp)
+     #sd x7, 48(sp)
+     #sd x8, 56(sp)
+     #sd x9, 64(sp)
+     #sd x10, 72(sp)
+     #sd x11, 80(sp)
+
     #li sp, 0x801F0000 # Set stack shadowed sp(x2)
      li x7, 0x2004 # UART print 
      # x8 trap_type no change
