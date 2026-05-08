@@ -1,29 +1,63 @@
-#include <stdio.h>
+//#include <unistd.h>
+//#include <fcntl.h>
+//#include <sys/mount.h>
+//#include <sys/stat.h>
+//
+//int main() {
+//    mkdir("/dev", 0755);
+//    mount("devtmpfs", "/dev", "devtmpfs", 0, NULL);
+//    int fd=open("/dev/hvc0", O_RDWR);
+//    dup2(fd, 0);
+//    dup2(fd, 1);
+//    dup2(fd, 2);
+//
+//
+//    write(1, "OK\r\n", 4);
+//
+//    char c;
+//    while(1) {
+//	if (read(0, &c, 1) > 0) { write(1, "U", 1); }
+//	}
+//    return 0;
+//}
+//
+//  
+//  
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/mount.h>
+#include <sys/stat.h>
 
 int main() {
-    // 1. Mount devtmpfs to get the real hardware nodes
+    // Step 1: Create the folder
+    mkdir("/dev", 0755);
+    
+    // Step 2: Mount the hardware devices
     mount("devtmpfs", "/dev", "devtmpfs", 0, NULL);
-    
-    // 2. Open the real hardware console
+
+    // Step 3: Open the console directly
     int fd = open("/dev/console", O_RDWR);
+    if (fd < 0) {
+        // Fallback if console isn't named right
+        fd = open("/dev/hvc0", O_RDWR); 
+    }
+
     if (fd >= 0) {
-        dup2(fd, 1); // Redirect stdout
-        dup2(fd, 2); // Redirect stderr
-    }
-
-    // 3. DISABLE C-LIBRARY BUFFERING! (Crucial)
-    setvbuf(stdout, NULL, _IONBF, 0);
-
-    int counter = 0;
-    while(1) {
-        printf("Hello from User-Space! MMU is working! [%d]\n", counter++);
+        // Step 4: Link the hardware to our program
+        dup2(fd, 0); // stdin
+        dup2(fd, 1); // stdout
+        dup2(fd, 2); // stderr
         
-        // 4. Use a busy loop instead of sleep() so it prints instantly
-        for(volatile int i = 0; i < 2000000; i++); 
+        // Step 5: Print success!
+        write(1, "\r\n*** OK ***\r\n", 14);
     }
-    
+
+    char c;
+    while(1) {
+        // Step 6: Echo loop
+        if (read(0, &c, 1) > 0) {
+            write(1, "U", 1);
+        }
+    }
     return 0;
-}
+} 
