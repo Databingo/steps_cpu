@@ -1,7 +1,8 @@
 |cpu_on_board
 CLOCK_50 => CLOCK_50.IN1
-KEY0 => comb.DATAIN
+KEY0 => KEY0.IN4
 SW9 => comb.DATAIN
+SW8 => comb.DATAIN
 PS2_CLK => ~NO_FANOUT~
 PS2_DAT => ~NO_FANOUT~
 SD_CLK <= sd_controller:sdctrl.sclk
@@ -14405,6 +14406,7 @@ bus_ls_type[0] <= bus_ls_type[0]~reg0.DB_MAX_OUTPUT_PORT_TYPE
 bus_ls_type[1] <= bus_ls_type[1]~reg0.DB_MAX_OUTPUT_PORT_TYPE
 bus_ls_type[2] <= bus_ls_type[2]~reg0.DB_MAX_OUTPUT_PORT_TYPE
 debug => always8.IN1
+pma => is_mmio_io.IN1
 mtime[0] <= mtime[0]~reg0.DB_MAX_OUTPUT_PORT_TYPE
 mtime[1] <= mtime[1]~reg0.DB_MAX_OUTPUT_PORT_TYPE
 mtime[2] <= mtime[2]~reg0.DB_MAX_OUTPUT_PORT_TYPE
