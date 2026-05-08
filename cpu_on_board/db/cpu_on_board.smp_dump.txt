@@ -1,0 +1,56 @@
+
+State Machine - |cpu_on_board|step
+Name step.000111 step.000110 step.000101 step.000100 step.000011 step.000010 step.000001 step.000000 
+step.000000 0 0 0 0 0 0 0 0 
+step.000001 0 0 0 0 0 0 1 1 
+step.000010 0 0 0 0 0 1 0 1 
+step.000011 0 0 0 0 1 0 0 1 
+step.000100 0 0 0 1 0 0 0 1 
+step.000101 0 0 1 0 0 0 0 1 
+step.000110 0 1 0 0 0 0 0 1 
+step.000111 1 0 0 0 0 0 0 1 
+
+State Machine - |cpu_on_board|sd_controller:sdctrl|return_state
+Name return_state.WRITE_BLOCK_WAIT return_state.WRITE_BLOCK_INIT return_state.READ_BLOCK_CRC return_state.READ_BLOCK_DATA return_state.READ_BLOCK_WAIT return_state.IDLE return_state.CMD16 return_state.POLL_CMD return_state.ACMD41 return_state.CMD55 return_state.CMD8 
+return_state.CMD8 0 0 0 0 0 0 0 0 0 0 0 
+return_state.CMD55 0 0 0 0 0 0 0 0 0 1 1 
+return_state.ACMD41 0 0 0 0 0 0 0 0 1 0 1 
+return_state.POLL_CMD 0 0 0 0 0 0 0 1 0 0 1 
+return_state.CMD16 0 0 0 0 0 0 1 0 0 0 1 
+return_state.IDLE 0 0 0 0 0 1 0 0 0 0 1 
+return_state.READ_BLOCK_WAIT 0 0 0 0 1 0 0 0 0 0 1 
+return_state.READ_BLOCK_DATA 0 0 0 1 0 0 0 0 0 0 1 
+return_state.READ_BLOCK_CRC 0 0 1 0 0 0 0 0 0 0 1 
+return_state.WRITE_BLOCK_INIT 0 1 0 0 0 0 0 0 0 0 1 
+return_state.WRITE_BLOCK_WAIT 1 0 0 0 0 0 0 0 0 0 1 
+
+State Machine - |cpu_on_board|sd_controller:sdctrl|response_type
+Name response_type.011 response_type.111 response_type.001 
+response_type.001 0 0 0 
+response_type.011 1 0 1 
+response_type.111 0 1 1 
+
+State Machine - |cpu_on_board|sd_controller:sdctrl|state
+Name state.WRITE_BLOCK_WAIT state.WRITE_BLOCK_BYTE state.WRITE_BLOCK_DATA state.WRITE_BLOCK_INIT state.WRITE_BLOCK_CMD state.RECEIVE_BYTE state.RECEIVE_BYTE_WAIT state.SEND_CMD state.READ_BLOCK_CRC state.READ_BLOCK_DATA state.READ_BLOCK_WAIT state.READ_BLOCK state.IDLE state.CMD16 state.CMD58 state.POLL_CMD state.ACMD41 state.CMD55 state.CMD8 state.CMD0 state.INIT state.RST 
+state.RST 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+state.INIT 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 
+state.CMD0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 1 
+state.CMD8 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 1 
+state.CMD55 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 1 
+state.ACMD41 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 1 
+state.POLL_CMD 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 1 
+state.CMD58 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 1 
+state.CMD16 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 1 
+state.IDLE 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 1 
+state.READ_BLOCK 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 1 
+state.READ_BLOCK_WAIT 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 1 
+state.READ_BLOCK_DATA 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 1 
+state.READ_BLOCK_CRC 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 1 
+state.SEND_CMD 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 1 
+state.RECEIVE_BYTE_WAIT 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 
+state.RECEIVE_BYTE 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 
+state.WRITE_BLOCK_CMD 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 
+state.WRITE_BLOCK_INIT 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 
+state.WRITE_BLOCK_DATA 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 
+state.WRITE_BLOCK_BYTE 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 
+state.WRITE_BLOCK_WAIT 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 

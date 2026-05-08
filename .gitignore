@@ -1,9 +1,7 @@
-db
 *.qpf
 *.vcd
 *.vwf
 simulation
-incremental_db
 steps_cpu
 run_model/*.h
 llama2.c/*.h
