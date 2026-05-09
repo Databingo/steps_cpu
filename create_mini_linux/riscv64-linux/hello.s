@@ -89,15 +89,15 @@ loop:
     j loop
 
 fail_mkdir:
-    addi x0, x0, 0xaaa  
+    addi x0, x0, 0xaa  
     j fail_mkdir
 fail_mount:
-    addi x0, x0, 0xbbb  
+    addi x0, x0, 0xbb  
     j fail_mount
 fail_open:
-    addi x0, x0, 0xccc  
+    addi x0, x0, 0xcc  
     j fail_open
 fail_dup:
-    addi x0, x0, 0xddd  
+    addi x0, x0, 0xdd  
     j fail_dup
 
