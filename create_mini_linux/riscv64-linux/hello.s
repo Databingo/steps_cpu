@@ -41,8 +41,9 @@ _start:
     li a2, 2    # O_RDWR
     li a7, 56   # syscall openat
     ecall 
-    mv s1, a0   # save ecall returned value
-    bltz s1, fail_open  # if s1 negative, open failed
+    bltz a0, fail_open  
+   #mv s1, a0   # save ecall returned value
+   #bltz s1, fail_open  # if s1 negative, open failed
      
     # open for stdout fd 1
     li a0, -100 # AT_FDCWD 
@@ -50,6 +51,8 @@ _start:
     li a2, 2    # O_RDWR
     li a7, 56   # syscall openat
     ecall 
+    bltz a0, fail_open  
+     
 
     # open for stderr fd 2
     li a0, -100 # AT_FDCWD 
@@ -57,6 +60,7 @@ _start:
     li a2, 2    # O_RDWR
     li a7, 56   # syscall openat
     ecall 
+    bltz a0, fail_open  
 
    ## dup3(fd, 0, 0) - stdin
    #mv a0, s1 
@@ -82,12 +86,12 @@ _start:
     ecall
 
 loop:
-    # write(1, buf, 1)
-    li a0, 1            # fd = 1
-    la a1, buf          # buf
-    li a2, 1            # len
-    li a7, 64           # syscall write
-    ecall
+   ## write(1, buf, 1)
+   #li a0, 1            # fd = 1
+   #la a1, buf          # buf
+   #li a2, 1            # len
+   #li a7, 64           # syscall write
+   #ecall
 
     # read(0, buf, 1)   # read keypress
     li a0, 0            # fd = 0
