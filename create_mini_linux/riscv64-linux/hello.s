@@ -118,7 +118,8 @@ dev_path:
 devtmpfs_str: 
    .string "devtmpfs"
 console_path: 
-   .string "/dev/console"
+   .string "/dev/hvc0"
+.align 3
 buf: 
    .word 0
 
