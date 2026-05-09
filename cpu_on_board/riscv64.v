@@ -261,7 +261,7 @@ end
 
 	// Independent divider Div
 	reg [6:0]   div_cnt;
-	reg [127:0] div_rem;   // remainder|quotient
+	//reg [127:0] div_rem;   // remainder|quotient
 	reg [63:0]  div_a;    // be divided
 	reg [63:0]  div_b;    // divisor
 	reg         div_active; // 1computing, 0idle
@@ -280,7 +280,7 @@ end
 	wire [63:0] div_abs_b = b_is_neg ? (~div_b + 64'd1):div_b;
 	wire out_sign_quo = div_op_signed && (div_a[63] ^ div_b[63]);
 	wire out_sign = div_is_rem ? a_is_neg : out_sign_quo;
-	wire [63:0] raw_out = div_is_rem ? div_rem[127:64] : div_rem[63:0];
+	wire [63:0] raw_out = div_is_rem ? mul_acc[127:64] : mul_acc[63:0];
 	wire [63:0] final_out = out_sign ? (~raw_out+64'd1): raw_out;
 
 	always @(posedge clk or negedge reset) begin
@@ -303,14 +303,14 @@ end
 		    div_done <= 1; // finish immediately
 		end
 		else begin 
-		    div_rem <= {64'd0, div_abs_a};
+		    mul_acc <= {64'd0, div_abs_a};
 		end
 	    end else if (div_active) begin // compute phase (64 cycles)
 		if (div_cnt < 64) begin
-		    if (div_rem[126:63] >= div_abs_b) begin
-			div_rem <= {div_rem[126:63] - div_abs_b, div_rem[62:0], 1'b1};
+		    if (mul_acc[126:63] >= div_abs_b) begin
+			mul_acc <= {mul_acc[126:63] - div_abs_b, mul_acc[62:0], 1'b1};
 		    end else begin
-			div_rem <= {div_rem[126:0], 1'b0};
+			mul_acc <= {mul_acc[126:0], 1'b0};
 		    end
 		    div_cnt <= div_cnt + 1;
 		end else begin // finish phase
