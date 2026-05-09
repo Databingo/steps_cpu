@@ -1,5 +1,5 @@
 Analysis & Synthesis report for cpu_on_board
-Sat May  9 00:44:02 2026
+Sat May  9 08:03:30 2026
 Quartus II 32-bit Version 13.0.1 Build 232 06/12/2013 Service Pack 1 SJ Web Edition
 
 
@@ -91,16 +91,16 @@ applicable agreement for further details.
 +--------------------------------------------------------------------------------------+
 ; Analysis & Synthesis Summary                                                         ;
 +------------------------------------+-------------------------------------------------+
-; Analysis & Synthesis Status        ; Successful - Sat May  9 00:44:02 2026           ;
+; Analysis & Synthesis Status        ; Successful - Sat May  9 08:03:28 2026           ;
 ; Quartus II 32-bit Version          ; 13.0.1 Build 232 06/12/2013 SP 1 SJ Web Edition ;
 ; Revision Name                      ; cpu_on_board                                    ;
 ; Top-level Entity Name              ; cpu_on_board                                    ;
 ; Family                             ; Cyclone II                                      ;
-; Total logic elements               ; 22,214                                          ;
-;     Total combinational functions  ; 17,218                                          ;
+; Total logic elements               ; 22,161                                          ;
+;     Total combinational functions  ; 17,165                                          ;
 ;     Dedicated logic registers      ; 7,550                                           ;
 ; Total registers                    ; 7550                                            ;
-; Total pins                         ; 47                                              ;
+; Total pins                         ; 48                                              ;
 ; Total virtual pins                 ; 0                                               ;
 ; Total memory bits                  ; 218,624                                         ;
 ; Embedded Multiplier 9-bit elements ; 0                                               ;
@@ -116,6 +116,7 @@ applicable agreement for further details.
 ; Device                                                                     ; EP2C20F484C7       ;                    ;
 ; Top-level entity name                                                      ; cpu_on_board       ; cpu_on_board       ;
 ; Family name                                                                ; Cyclone II         ; Cyclone IV GX      ;
+; Restructure Multiplexers                                                   ; On                 ; Auto               ;
 ; Verilog Show LMF Mapping Messages                                          ; Off                ;                    ;
 ; Verilog Version                                                            ; SystemVerilog_2005 ; Verilog_2001       ;
 ; Perform WYSIWYG Primitive Resynthesis                                      ; On                 ; Off                ;
@@ -124,7 +125,6 @@ applicable agreement for further details.
 ; Use smart compilation                                                      ; Off                ; Off                ;
 ; Enable parallel Assembler and TimeQuest Timing Analyzer during compilation ; On                 ; On                 ;
 ; Enable compact report table                                                ; Off                ; Off                ;
-; Restructure Multiplexers                                                   ; Auto               ; Auto               ;
 ; Create Debugging Nodes for IP Cores                                        ; Off                ; Off                ;
 ; Preserve fewer node names                                                  ; On                 ; On                 ;
 ; Disable OpenCore Plus hardware evaluation                                  ; Off                ; Off                ;
@@ -269,29 +269,29 @@ applicable agreement for further details.
 +---------------------------------------------+--------------------------------+
 ; Resource                                    ; Usage                          ;
 +---------------------------------------------+--------------------------------+
-; Estimated Total logic elements              ; 22,214                         ;
+; Estimated Total logic elements              ; 22,161                         ;
 ;                                             ;                                ;
-; Total combinational functions               ; 17218                          ;
+; Total combinational functions               ; 17165                          ;
 ; Logic element usage by number of LUT inputs ;                                ;
-;     -- 4 input functions                    ; 11552                          ;
-;     -- 3 input functions                    ; 4408                           ;
-;     -- <=2 input functions                  ; 1258                           ;
+;     -- 4 input functions                    ; 11433                          ;
+;     -- 3 input functions                    ; 4431                           ;
+;     -- <=2 input functions                  ; 1301                           ;
 ;                                             ;                                ;
 ; Logic elements by mode                      ;                                ;
-;     -- normal mode                          ; 15177                          ;
+;     -- normal mode                          ; 15124                          ;
 ;     -- arithmetic mode                      ; 2041                           ;
 ;                                             ;                                ;
 ; Total registers                             ; 7550                           ;
 ;     -- Dedicated logic registers            ; 7550                           ;
 ;     -- I/O registers                        ; 0                              ;
 ;                                             ;                                ;
-; I/O pins                                    ; 47                             ;
+; I/O pins                                    ; 48                             ;
 ; Total memory bits                           ; 218624                         ;
 ; Embedded Multiplier 9-bit elements          ; 0                              ;
 ; Maximum fan-out node                        ; clock_slower:clock_ins|clk_out ;
 ; Maximum fan-out                             ; 7820                           ;
-; Total fan-out                               ; 98797                          ;
-; Average fan-out                             ; 3.92                           ;
+; Total fan-out                               ; 98476                          ;
+; Average fan-out                             ; 3.91                           ;
 +---------------------------------------------+--------------------------------+
 
 
@@ -300,7 +300,7 @@ applicable agreement for further details.
 +--------------------------------------------------------------------------------------------+-------------------+--------------+-------------+--------------+---------+-----------+------+--------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+------------------+
 ; Compilation Hierarchy Node                                                                 ; LC Combinationals ; LC Registers ; Memory Bits ; DSP Elements ; DSP 9x9 ; DSP 18x18 ; Pins ; Virtual Pins ; Full Hierarchy Name                                                                                                                                                                                                                                                                                            ; Library Name     ;
 +--------------------------------------------------------------------------------------------+-------------------+--------------+-------------+--------------+---------+-----------+------+--------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+------------------+
-; |cpu_on_board                                                                              ; 17218 (2023)      ; 7550 (492)   ; 218624      ; 0            ; 0       ; 0         ; 47   ; 0            ; |cpu_on_board                                                                                                                                                                                                                                                                                                  ; work             ;
+; |cpu_on_board                                                                              ; 17165 (2024)      ; 7550 (492)   ; 218624      ; 0            ; 0       ; 0         ; 48   ; 0            ; |cpu_on_board                                                                                                                                                                                                                                                                                                  ; work             ;
 ;    |altsyncram:Cache_rtl_0|                                                                ; 2 (0)             ; 0 (0)        ; 49152       ; 0            ; 0       ; 0         ; 0    ; 0            ; |cpu_on_board|altsyncram:Cache_rtl_0                                                                                                                                                                                                                                                                           ; work             ;
 ;       |altsyncram_fok1:auto_generated|                                                     ; 2 (0)             ; 0 (0)        ; 49152       ; 0            ; 0       ; 0         ; 0    ; 0            ; |cpu_on_board|altsyncram:Cache_rtl_0|altsyncram_fok1:auto_generated                                                                                                                                                                                                                                            ; work             ;
 ;          |altsyncram:ram_block1a0|                                                         ; 2 (0)             ; 0 (0)        ; 49152       ; 0            ; 0       ; 0         ; 0    ; 0            ; |cpu_on_board|altsyncram:Cache_rtl_0|altsyncram_fok1:auto_generated|altsyncram:ram_block1a0                                                                                                                                                                                                                    ; work             ;
@@ -340,7 +340,7 @@ applicable agreement for further details.
 ;                      |dpram_gi21:FIFOram|                                                  ; 0 (0)             ; 0 (0)        ; 8192        ; 0            ; 0       ; 0         ; 0    ; 0            ; |cpu_on_board|jtag_uart_system:my_jtag_system|jtag_uart_system_jtag_uart_0:jtag_uart_0|jtag_uart_system_jtag_uart_0_scfifo_w:the_jtag_uart_system_jtag_uart_0_scfifo_w|scfifo:wfifo|scfifo_9r21:auto_generated|a_dpfifo_g131:dpfifo|dpram_gi21:FIFOram                                                         ; work             ;
 ;                         |altsyncram_vvl1:altsyncram2|                                      ; 0 (0)             ; 0 (0)        ; 8192        ; 0            ; 0       ; 0         ; 0    ; 0            ; |cpu_on_board|jtag_uart_system:my_jtag_system|jtag_uart_system_jtag_uart_0:jtag_uart_0|jtag_uart_system_jtag_uart_0_scfifo_w:the_jtag_uart_system_jtag_uart_0_scfifo_w|scfifo:wfifo|scfifo_9r21:auto_generated|a_dpfifo_g131:dpfifo|dpram_gi21:FIFOram|altsyncram_vvl1:altsyncram2                             ; work             ;
 ;                            |altsyncram_1qe1:altsyncram3|                                   ; 0 (0)             ; 0 (0)        ; 8192        ; 0            ; 0       ; 0         ; 0    ; 0            ; |cpu_on_board|jtag_uart_system:my_jtag_system|jtag_uart_system_jtag_uart_0:jtag_uart_0|jtag_uart_system_jtag_uart_0_scfifo_w:the_jtag_uart_system_jtag_uart_0_scfifo_w|scfifo:wfifo|scfifo_9r21:auto_generated|a_dpfifo_g131:dpfifo|dpram_gi21:FIFOram|altsyncram_vvl1:altsyncram2|altsyncram_1qe1:altsyncram3 ; work             ;
-;    |riscv64:cpu|                                                                           ; 14424 (14424)     ; 6624 (6624)  ; 99840       ; 0            ; 0       ; 0         ; 0    ; 0            ; |cpu_on_board|riscv64:cpu                                                                                                                                                                                                                                                                                      ; work             ;
+;    |riscv64:cpu|                                                                           ; 14374 (14374)     ; 6624 (6624)  ; 99840       ; 0            ; 0       ; 0         ; 0    ; 0            ; |cpu_on_board|riscv64:cpu                                                                                                                                                                                                                                                                                      ; work             ;
 ;       |altsyncram:Cache_L_High_rtl_0|                                                      ; 0 (0)             ; 0 (0)        ; 32768       ; 0            ; 0       ; 0         ; 0    ; 0            ; |cpu_on_board|riscv64:cpu|altsyncram:Cache_L_High_rtl_0                                                                                                                                                                                                                                                        ; work             ;
 ;          |altsyncram_cni1:auto_generated|                                                  ; 0 (0)             ; 0 (0)        ; 32768       ; 0            ; 0       ; 0         ; 0    ; 0            ; |cpu_on_board|riscv64:cpu|altsyncram:Cache_L_High_rtl_0|altsyncram_cni1:auto_generated                                                                                                                                                                                                                         ; work             ;
 ;       |altsyncram:Cache_L_Low_rtl_0|                                                       ; 0 (0)             ; 0 (0)        ; 32768       ; 0            ; 0       ; 0         ; 0    ; 0            ; |cpu_on_board|riscv64:cpu|altsyncram:Cache_L_Low_rtl_0                                                                                                                                                                                                                                                         ; work             ;
@@ -349,9 +349,9 @@ applicable agreement for further details.
 ;          |altsyncram_ini1:auto_generated|                                                  ; 0 (0)             ; 0 (0)        ; 34304       ; 0            ; 0       ; 0         ; 0    ; 0            ; |cpu_on_board|riscv64:cpu|altsyncram:Cache_T_rtl_0|altsyncram_ini1:auto_generated                                                                                                                                                                                                                              ; work             ;
 ;    |sd_controller:sdctrl|                                                                  ; 346 (346)         ; 152 (152)    ; 0           ; 0            ; 0       ; 0         ; 0    ; 0            ; |cpu_on_board|sd_controller:sdctrl                                                                                                                                                                                                                                                                             ; work             ;
 ;    |sdram_controller:sdram_ctrl|                                                           ; 100 (100)         ; 38 (38)      ; 0           ; 0            ; 0       ; 0         ; 0    ; 0            ; |cpu_on_board|sdram_controller:sdram_ctrl                                                                                                                                                                                                                                                                      ; work             ;
-;    |sld_hub:auto_hub|                                                                      ; 115 (1)           ; 78 (0)       ; 0           ; 0            ; 0       ; 0         ; 0    ; 0            ; |cpu_on_board|sld_hub:auto_hub                                                                                                                                                                                                                                                                                 ; work             ;
-;       |sld_jtag_hub:\jtag_hub_gen:sld_jtag_hub_inst|                                       ; 114 (76)          ; 78 (50)      ; 0           ; 0            ; 0       ; 0         ; 0    ; 0            ; |cpu_on_board|sld_hub:auto_hub|sld_jtag_hub:\jtag_hub_gen:sld_jtag_hub_inst                                                                                                                                                                                                                                    ; work             ;
-;          |sld_rom_sr:hub_info_reg|                                                         ; 21 (21)           ; 9 (9)        ; 0           ; 0            ; 0       ; 0         ; 0    ; 0            ; |cpu_on_board|sld_hub:auto_hub|sld_jtag_hub:\jtag_hub_gen:sld_jtag_hub_inst|sld_rom_sr:hub_info_reg                                                                                                                                                                                                            ; work             ;
+;    |sld_hub:auto_hub|                                                                      ; 111 (1)           ; 78 (0)       ; 0           ; 0            ; 0       ; 0         ; 0    ; 0            ; |cpu_on_board|sld_hub:auto_hub                                                                                                                                                                                                                                                                                 ; work             ;
+;       |sld_jtag_hub:\jtag_hub_gen:sld_jtag_hub_inst|                                       ; 110 (73)          ; 78 (50)      ; 0           ; 0            ; 0       ; 0         ; 0    ; 0            ; |cpu_on_board|sld_hub:auto_hub|sld_jtag_hub:\jtag_hub_gen:sld_jtag_hub_inst                                                                                                                                                                                                                                    ; work             ;
+;          |sld_rom_sr:hub_info_reg|                                                         ; 20 (20)           ; 9 (9)        ; 0           ; 0            ; 0       ; 0         ; 0    ; 0            ; |cpu_on_board|sld_hub:auto_hub|sld_jtag_hub:\jtag_hub_gen:sld_jtag_hub_inst|sld_rom_sr:hub_info_reg                                                                                                                                                                                                            ; work             ;
 ;          |sld_shadow_jsm:shadow_jsm|                                                       ; 17 (17)           ; 19 (19)      ; 0           ; 0            ; 0       ; 0         ; 0    ; 0            ; |cpu_on_board|sld_hub:auto_hub|sld_jtag_hub:\jtag_hub_gen:sld_jtag_hub_inst|sld_shadow_jsm:shadow_jsm                                                                                                                                                                                                          ; work             ;
 +--------------------------------------------------------------------------------------------+-------------------+--------------+-------------+--------------+---------+-----------+------+--------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+------------------+
 Note: For table entries with two numbers listed, the numbers in parentheses indicate the number of resources of the given type used by the specific entity alone. The numbers listed outside of parentheses indicate the total resources of the given type used by the specific entity and all of its sub-entities in the hierarchy.
@@ -850,14 +850,14 @@ Encoding Type:  One-Hot
 ; sd_controller:sdctrl|boot_counter[12]                                                                                                                     ; 2       ;
 ; sd_controller:sdctrl|boot_counter[13]                                                                                                                     ; 2       ;
 ; sd_controller:sdctrl|boot_counter[16]                                                                                                                     ; 2       ;
-; bus_write_done                                                                                                                                            ; 28      ;
-; bus_read_done                                                                                                                                             ; 127     ;
+; bus_write_done                                                                                                                                            ; 31      ;
+; bus_read_done                                                                                                                                             ; 129     ;
 ; riscv64:cpu|bus_address[11]                                                                                                                               ; 10      ;
 ; riscv64:cpu|cache_epoch[0]                                                                                                                                ; 4       ;
 ; riscv64:cpu|did                                                                                                                                           ; 2       ;
 ; riscv64:cpu|current_privilege_mode[1]                                                                                                                     ; 10      ;
-; riscv64:cpu|current_privilege_mode[0]                                                                                                                     ; 10      ;
-; jtag_uart_system:my_jtag_system|jtag_uart_system_jtag_uart_0:jtag_uart_0|av_waitrequest                                                                   ; 13      ;
+; riscv64:cpu|current_privilege_mode[0]                                                                                                                     ; 11      ;
+; jtag_uart_system:my_jtag_system|jtag_uart_system_jtag_uart_0:jtag_uart_0|av_waitrequest                                                                   ; 14      ;
 ; jtag_uart_system:my_jtag_system|jtag_uart_system_jtag_uart_0:jtag_uart_0|alt_jtag_atlantic:jtag_uart_system_jtag_uart_0_alt_jtag_atlantic|count[9]        ; 11      ;
 ; sd_controller:sdctrl|cmd_out[55]                                                                                                                          ; 1       ;
 ; riscv64:cpu|Csrs[8][9]                                                                                                                                    ; 4       ;
@@ -871,37 +871,37 @@ Encoding Type:  One-Hot
 ; riscv64:cpu|Csrs[7][13]                                                                                                                                   ; 2       ;
 ; riscv64:cpu|Csrs[7][12]                                                                                                                                   ; 2       ;
 ; mtimecmp[63]                                                                                                                                              ; 5       ;
-; mtimecmp[62]                                                                                                                                              ; 3       ;
-; mtimecmp[61]                                                                                                                                              ; 3       ;
+; mtimecmp[62]                                                                                                                                              ; 4       ;
+; mtimecmp[61]                                                                                                                                              ; 4       ;
 ; mtimecmp[60]                                                                                                                                              ; 3       ;
 ; mtimecmp[59]                                                                                                                                              ; 3       ;
 ; mtimecmp[58]                                                                                                                                              ; 3       ;
 ; mtimecmp[57]                                                                                                                                              ; 3       ;
 ; mtimecmp[56]                                                                                                                                              ; 3       ;
-; mtimecmp[55]                                                                                                                                              ; 3       ;
+; mtimecmp[55]                                                                                                                                              ; 4       ;
 ; mtimecmp[54]                                                                                                                                              ; 3       ;
 ; mtimecmp[53]                                                                                                                                              ; 3       ;
 ; mtimecmp[52]                                                                                                                                              ; 3       ;
 ; mtimecmp[51]                                                                                                                                              ; 3       ;
 ; mtimecmp[50]                                                                                                                                              ; 3       ;
 ; mtimecmp[49]                                                                                                                                              ; 3       ;
-; mtimecmp[48]                                                                                                                                              ; 4       ;
+; mtimecmp[48]                                                                                                                                              ; 3       ;
 ; mtimecmp[47]                                                                                                                                              ; 5       ;
 ; mtimecmp[46]                                                                                                                                              ; 3       ;
-; mtimecmp[45]                                                                                                                                              ; 3       ;
+; mtimecmp[45]                                                                                                                                              ; 4       ;
 ; mtimecmp[44]                                                                                                                                              ; 3       ;
-; mtimecmp[43]                                                                                                                                              ; 3       ;
+; mtimecmp[43]                                                                                                                                              ; 4       ;
 ; mtimecmp[42]                                                                                                                                              ; 3       ;
 ; mtimecmp[41]                                                                                                                                              ; 3       ;
-; mtimecmp[40]                                                                                                                                              ; 3       ;
-; mtimecmp[39]                                                                                                                                              ; 4       ;
+; mtimecmp[40]                                                                                                                                              ; 4       ;
+; mtimecmp[39]                                                                                                                                              ; 3       ;
 ; mtimecmp[38]                                                                                                                                              ; 3       ;
 ; mtimecmp[37]                                                                                                                                              ; 3       ;
 ; mtimecmp[36]                                                                                                                                              ; 4       ;
 ; mtimecmp[35]                                                                                                                                              ; 4       ;
 ; mtimecmp[34]                                                                                                                                              ; 3       ;
 ; mtimecmp[33]                                                                                                                                              ; 3       ;
-; mtimecmp[32]                                                                                                                                              ; 3       ;
+; mtimecmp[32]                                                                                                                                              ; 4       ;
 ; mtimecmp[31]                                                                                                                                              ; 2       ;
 ; mtimecmp[30]                                                                                                                                              ; 2       ;
 ; mtimecmp[29]                                                                                                                                              ; 2       ;
@@ -1358,56 +1358,56 @@ Encoding Type:  One-Hot
 
 +--------------------------------------------------------+
 ; Source assignments for Top-level Entity: |cpu_on_board ;
-+------------+-------------+------+----------------------+
-; Assignment ; Value       ; From ; To                   ;
-+------------+-------------+------+----------------------+
-; LOCATION   ; Pin_N6      ; -    ; DRAM_ADDR[11]        ;
-; LOCATION   ; Pin_W3      ; -    ; DRAM_ADDR[10]        ;
-; LOCATION   ; Pin_N4      ; -    ; DRAM_ADDR[9]         ;
-; LOCATION   ; Pin_P3      ; -    ; DRAM_ADDR[8]         ;
-; LOCATION   ; Pin_P5      ; -    ; DRAM_ADDR[7]         ;
-; LOCATION   ; Pin_P6      ; -    ; DRAM_ADDR[6]         ;
-; LOCATION   ; Pin_R5      ; -    ; DRAM_ADDR[5]         ;
-; LOCATION   ; Pin_R6      ; -    ; DRAM_ADDR[4]         ;
-; LOCATION   ; Pin_Y4      ; -    ; DRAM_ADDR[3]         ;
-; LOCATION   ; Pin_Y3      ; -    ; DRAM_ADDR[2]         ;
-; LOCATION   ; Pin_W5      ; -    ; DRAM_ADDR[1]         ;
-; LOCATION   ; Pin_W4      ; -    ; DRAM_ADDR[0]         ;
-; LOCATION   ; Pin_T2      ; -    ; DRAM_DQ[15]          ;
-; LOCATION   ; Pin_T1      ; -    ; DRAM_DQ[14]          ;
-; LOCATION   ; Pin_R2      ; -    ; DRAM_DQ[13]          ;
-; LOCATION   ; Pin_R1      ; -    ; DRAM_DQ[12]          ;
-; LOCATION   ; Pin_P2      ; -    ; DRAM_DQ[11]          ;
-; LOCATION   ; Pin_P1      ; -    ; DRAM_DQ[10]          ;
-; LOCATION   ; Pin_N2      ; -    ; DRAM_DQ[9]           ;
-; LOCATION   ; Pin_N1      ; -    ; DRAM_DQ[8]           ;
-; LOCATION   ; Pin_Y2      ; -    ; DRAM_DQ[7]           ;
-; LOCATION   ; Pin_Y1      ; -    ; DRAM_DQ[6]           ;
-; LOCATION   ; Pin_W2      ; -    ; DRAM_DQ[5]           ;
-; LOCATION   ; Pin_W1      ; -    ; DRAM_DQ[4]           ;
-; LOCATION   ; Pin_V2      ; -    ; DRAM_DQ[3]           ;
-; LOCATION   ; Pin_V1      ; -    ; DRAM_DQ[2]           ;
-; LOCATION   ; Pin_U2      ; -    ; DRAM_DQ[1]           ;
-; LOCATION   ; Pin_U1      ; -    ; DRAM_DQ[0]           ;
-; LOCATION   ; Pin_V4      ; -    ; DRAM_BA[1]           ;
-; LOCATION   ; Pin_U3      ; -    ; DRAM_BA[0]           ;
-; LOCATION   ; Pin_M5      ; -    ; DRAM_DQM[1]          ;
-; LOCATION   ; Pin_R7      ; -    ; DRAM_DQM[0]          ;
-; LOCATION   ; Pin_PIN_R22 ; -    ; KEY0                 ;
-; LOCATION   ; Pin_L2      ; -    ; SW9                  ;
-; LOCATION   ; Pin_H15     ; -    ; PS2_CLK              ;
-; LOCATION   ; Pin_J14     ; -    ; PS2_DAT              ;
-; LOCATION   ; Pin_V20     ; -    ; SD_CLK               ;
-; LOCATION   ; Pin_Y20     ; -    ; SD_CMD               ;
-; LOCATION   ; Pin_W20     ; -    ; SD_DAT0              ;
-; LOCATION   ; Pin_U20     ; -    ; SD_DAT3              ;
-; LOCATION   ; Pin_T3      ; -    ; DRAM_CAS_N           ;
-; LOCATION   ; Pin_T5      ; -    ; DRAM_RAS_N           ;
-; LOCATION   ; Pin_U4      ; -    ; DRAM_CLK             ;
-; LOCATION   ; Pin_N3      ; -    ; DRAM_CKE             ;
-; LOCATION   ; Pin_R8      ; -    ; DRAM_WE_N            ;
-; LOCATION   ; Pin_T6      ; -    ; DRAM_CS_N            ;
-+------------+-------------+------+----------------------+
++------------+---------+------+--------------------------+
+; Assignment ; Value   ; From ; To                       ;
++------------+---------+------+--------------------------+
+; LOCATION   ; Pin_N6  ; -    ; DRAM_ADDR[11]            ;
+; LOCATION   ; Pin_W3  ; -    ; DRAM_ADDR[10]            ;
+; LOCATION   ; Pin_N4  ; -    ; DRAM_ADDR[9]             ;
+; LOCATION   ; Pin_P3  ; -    ; DRAM_ADDR[8]             ;
+; LOCATION   ; Pin_P5  ; -    ; DRAM_ADDR[7]             ;
+; LOCATION   ; Pin_P6  ; -    ; DRAM_ADDR[6]             ;
+; LOCATION   ; Pin_R5  ; -    ; DRAM_ADDR[5]             ;
+; LOCATION   ; Pin_R6  ; -    ; DRAM_ADDR[4]             ;
+; LOCATION   ; Pin_Y4  ; -    ; DRAM_ADDR[3]             ;
+; LOCATION   ; Pin_Y3  ; -    ; DRAM_ADDR[2]             ;
+; LOCATION   ; Pin_W5  ; -    ; DRAM_ADDR[1]             ;
+; LOCATION   ; Pin_W4  ; -    ; DRAM_ADDR[0]             ;
+; LOCATION   ; Pin_T2  ; -    ; DRAM_DQ[15]              ;
+; LOCATION   ; Pin_T1  ; -    ; DRAM_DQ[14]              ;
+; LOCATION   ; Pin_R2  ; -    ; DRAM_DQ[13]              ;
+; LOCATION   ; Pin_R1  ; -    ; DRAM_DQ[12]              ;
+; LOCATION   ; Pin_P2  ; -    ; DRAM_DQ[11]              ;
+; LOCATION   ; Pin_P1  ; -    ; DRAM_DQ[10]              ;
+; LOCATION   ; Pin_N2  ; -    ; DRAM_DQ[9]               ;
+; LOCATION   ; Pin_N1  ; -    ; DRAM_DQ[8]               ;
+; LOCATION   ; Pin_Y2  ; -    ; DRAM_DQ[7]               ;
+; LOCATION   ; Pin_Y1  ; -    ; DRAM_DQ[6]               ;
+; LOCATION   ; Pin_W2  ; -    ; DRAM_DQ[5]               ;
+; LOCATION   ; Pin_W1  ; -    ; DRAM_DQ[4]               ;
+; LOCATION   ; Pin_V2  ; -    ; DRAM_DQ[3]               ;
+; LOCATION   ; Pin_V1  ; -    ; DRAM_DQ[2]               ;
+; LOCATION   ; Pin_U2  ; -    ; DRAM_DQ[1]               ;
+; LOCATION   ; Pin_U1  ; -    ; DRAM_DQ[0]               ;
+; LOCATION   ; Pin_V4  ; -    ; DRAM_BA[1]               ;
+; LOCATION   ; Pin_U3  ; -    ; DRAM_BA[0]               ;
+; LOCATION   ; Pin_M5  ; -    ; DRAM_DQM[1]              ;
+; LOCATION   ; Pin_R7  ; -    ; DRAM_DQM[0]              ;
+; LOCATION   ; Pin_L2  ; -    ; SW9                      ;
+; LOCATION   ; Pin_M1  ; -    ; SW8                      ;
+; LOCATION   ; Pin_H15 ; -    ; PS2_CLK                  ;
+; LOCATION   ; Pin_J14 ; -    ; PS2_DAT                  ;
+; LOCATION   ; Pin_V20 ; -    ; SD_CLK                   ;
+; LOCATION   ; Pin_Y20 ; -    ; SD_CMD                   ;
+; LOCATION   ; Pin_W20 ; -    ; SD_DAT0                  ;
+; LOCATION   ; Pin_U20 ; -    ; SD_DAT3                  ;
+; LOCATION   ; Pin_T3  ; -    ; DRAM_CAS_N               ;
+; LOCATION   ; Pin_T5  ; -    ; DRAM_RAS_N               ;
+; LOCATION   ; Pin_U4  ; -    ; DRAM_CLK                 ;
+; LOCATION   ; Pin_N3  ; -    ; DRAM_CKE                 ;
+; LOCATION   ; Pin_R8  ; -    ; DRAM_WE_N                ;
+; LOCATION   ; Pin_T6  ; -    ; DRAM_CS_N                ;
++------------+---------+------+--------------------------+
 
 
 +-------------------------------------------+
@@ -2456,8 +2456,8 @@ Note: In order to hide this table in the UI and the text report file, please set
 +------------------+--------------+
 ; Partition Name   ; Elapsed Time ;
 +------------------+--------------+
-; Top              ; 00:25:32     ;
-; sld_hub:auto_hub ; 00:00:00     ;
+; Top              ; 00:38:18     ;
+; sld_hub:auto_hub ; 00:00:03     ;
 +------------------+--------------+
 
 
@@ -2480,7 +2480,7 @@ Info: Running Quartus II 32-bit Analysis & Synthesis
     Info: programming logic devices manufactured by Altera and sold by 
     Info: Altera or its authorized distributors.  Please refer to the 
     Info: applicable agreement for further details.
-    Info: Processing started: Sat May  9 00:15:25 2026
+    Info: Processing started: Sat May  9 07:22:28 2026
 Info: Command: quartus_map --read_settings_files=on --write_settings_files=off cpu_on_board -c cpu_on_board
 Info (20030): Parallel compilation is enabled and will use 2 of the 2 processors detected
 Info (12021): Found 1 design units, including 1 entities, in source file jtag_uart_system/synthesis/jtag_uart_system.v
@@ -2497,189 +2497,179 @@ Info (12021): Found 5 design units, including 5 entities, in source file jtag_ua
     Info (12023): Found entity 5: jtag_uart_system_jtag_uart_0
 Info (12021): Found 1 design units, including 1 entities, in source file cpu_on_board.v
     Info (12023): Found entity 1: cpu_on_board
-Info (12021): Found 1 design units, including 1 entities, in source file sdram_pll/sdram/synthesis/sdram_pll.v
-    Info (12023): Found entity 1: sdram_pll
-Info (12021): Found 1 design units, including 1 entities, in source file sdram_pll/sdram/synthesis/submodules/altera_reset_controller.v
-    Info (12023): Found entity 1: altera_reset_controller
-Info (12021): Found 1 design units, including 1 entities, in source file sdram_pll/sdram/synthesis/submodules/altera_reset_synchronizer.v
-    Info (12023): Found entity 1: altera_reset_synchronizer
-Info (12021): Found 3 design units, including 3 entities, in source file sdram_pll/sdram/synthesis/submodules/sdram_pll_altpll_0.v
-    Info (12023): Found entity 1: sdram_pll_altpll_0_dffpipe_l2c
-    Info (12023): Found entity 2: sdram_pll_altpll_0_stdsync_sv6
-    Info (12023): Found entity 3: sdram_pll_altpll_0
 Info (12127): Elaborating entity "cpu_on_board" for the top level hierarchy
-Info (10035): Verilog HDL or VHDL information at cpu_on_board.v(107): object "i" declared but not used
-Warning (10036): Verilog HDL or VHDL warning at cpu_on_board.v(751): object "do_read" assigned a value but never read
-Info (10662): Verilog HDL Assignment information at cpu_on_board.v(92): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at cpu_on_board.v(315): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at cpu_on_board.v(352): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10035): Verilog HDL or VHDL information at cpu_on_board.v(108): object "i" declared but not used
+Warning (10036): Verilog HDL or VHDL warning at cpu_on_board.v(752): object "do_read" assigned a value but never read
+Info (10662): Verilog HDL Assignment information at cpu_on_board.v(93): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at cpu_on_board.v(316): truncated unsized constant literal with size 32 to size 1 with no loss of information
 Info (10662): Verilog HDL Assignment information at cpu_on_board.v(353): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Warning (10040): Verilog HDL or VHDL arithmetic warning at cpu_on_board.v(355): loss of carry in addition or borrow in subtraction
-Warning (10230): Verilog HDL assignment warning at cpu_on_board.v(355): truncated value with size 64 to match size of target (5)
-Info (10662): Verilog HDL Assignment information at cpu_on_board.v(359): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at cpu_on_board.v(354): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Warning (10040): Verilog HDL or VHDL arithmetic warning at cpu_on_board.v(356): loss of carry in addition or borrow in subtraction
+Warning (10230): Verilog HDL assignment warning at cpu_on_board.v(356): truncated value with size 64 to match size of target (5)
 Info (10662): Verilog HDL Assignment information at cpu_on_board.v(360): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at cpu_on_board.v(366): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at cpu_on_board.v(361): truncated unsized constant literal with size 32 to size 1 with no loss of information
 Info (10662): Verilog HDL Assignment information at cpu_on_board.v(367): truncated unsized constant literal with size 32 to size 1 with no loss of information
 Info (10662): Verilog HDL Assignment information at cpu_on_board.v(368): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at cpu_on_board.v(371): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at cpu_on_board.v(379): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at cpu_on_board.v(369): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at cpu_on_board.v(372): truncated unsized constant literal with size 32 to size 1 with no loss of information
 Info (10662): Verilog HDL Assignment information at cpu_on_board.v(380): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at cpu_on_board.v(382): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at cpu_on_board.v(387): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at cpu_on_board.v(381): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at cpu_on_board.v(383): truncated unsized constant literal with size 32 to size 1 with no loss of information
 Info (10662): Verilog HDL Assignment information at cpu_on_board.v(388): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at cpu_on_board.v(394): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Warning (10040): Verilog HDL or VHDL arithmetic warning at cpu_on_board.v(401): loss of carry in addition or borrow in subtraction
-Info (10662): Verilog HDL Assignment information at cpu_on_board.v(402): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10264): Verilog HDL Case Statement information at cpu_on_board.v(400): all case item expressions in this case statement are onehot
-Info (10662): Verilog HDL Assignment information at cpu_on_board.v(413): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at cpu_on_board.v(417): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Warning (10230): Verilog HDL assignment warning at cpu_on_board.v(422): truncated value with size 32 to match size of target (12)
+Info (10662): Verilog HDL Assignment information at cpu_on_board.v(389): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at cpu_on_board.v(395): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Warning (10040): Verilog HDL or VHDL arithmetic warning at cpu_on_board.v(402): loss of carry in addition or borrow in subtraction
+Info (10662): Verilog HDL Assignment information at cpu_on_board.v(403): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10264): Verilog HDL Case Statement information at cpu_on_board.v(401): all case item expressions in this case statement are onehot
+Info (10662): Verilog HDL Assignment information at cpu_on_board.v(414): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at cpu_on_board.v(418): truncated unsized constant literal with size 32 to size 1 with no loss of information
 Warning (10230): Verilog HDL assignment warning at cpu_on_board.v(423): truncated value with size 32 to match size of target (12)
 Warning (10230): Verilog HDL assignment warning at cpu_on_board.v(424): truncated value with size 32 to match size of target (12)
 Warning (10230): Verilog HDL assignment warning at cpu_on_board.v(425): truncated value with size 32 to match size of target (12)
 Warning (10230): Verilog HDL assignment warning at cpu_on_board.v(426): truncated value with size 32 to match size of target (12)
 Warning (10230): Verilog HDL assignment warning at cpu_on_board.v(427): truncated value with size 32 to match size of target (12)
 Warning (10230): Verilog HDL assignment warning at cpu_on_board.v(428): truncated value with size 32 to match size of target (12)
-Info (10662): Verilog HDL Assignment information at cpu_on_board.v(429): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at cpu_on_board.v(432): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at cpu_on_board.v(442): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at cpu_on_board.v(445): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Warning (10230): Verilog HDL assignment warning at cpu_on_board.v(429): truncated value with size 32 to match size of target (12)
+Info (10662): Verilog HDL Assignment information at cpu_on_board.v(430): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at cpu_on_board.v(433): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at cpu_on_board.v(443): truncated unsized constant literal with size 32 to size 1 with no loss of information
 Info (10662): Verilog HDL Assignment information at cpu_on_board.v(446): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at cpu_on_board.v(486): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at cpu_on_board.v(447): truncated unsized constant literal with size 32 to size 1 with no loss of information
 Info (10662): Verilog HDL Assignment information at cpu_on_board.v(487): truncated unsized constant literal with size 32 to size 1 with no loss of information
 Info (10662): Verilog HDL Assignment information at cpu_on_board.v(488): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at cpu_on_board.v(492): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at cpu_on_board.v(489): truncated unsized constant literal with size 32 to size 1 with no loss of information
 Info (10662): Verilog HDL Assignment information at cpu_on_board.v(493): truncated unsized constant literal with size 32 to size 1 with no loss of information
 Info (10662): Verilog HDL Assignment information at cpu_on_board.v(494): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at cpu_on_board.v(496): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at cpu_on_board.v(495): truncated unsized constant literal with size 32 to size 1 with no loss of information
 Info (10662): Verilog HDL Assignment information at cpu_on_board.v(497): truncated unsized constant literal with size 32 to size 1 with no loss of information
 Info (10662): Verilog HDL Assignment information at cpu_on_board.v(498): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Warning (10762): Verilog HDL Case Statement warning at cpu_on_board.v(484): can't check case statement for completeness because the case expression has too many possible states
-Info (10662): Verilog HDL Assignment information at cpu_on_board.v(508): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Warning (10271): Verilog HDL Case Statement warning at cpu_on_board.v(511): size of case item expression (32) exceeds the size of the case expression (1)
+Info (10662): Verilog HDL Assignment information at cpu_on_board.v(499): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Warning (10762): Verilog HDL Case Statement warning at cpu_on_board.v(485): can't check case statement for completeness because the case expression has too many possible states
+Info (10662): Verilog HDL Assignment information at cpu_on_board.v(509): truncated unsized constant literal with size 32 to size 1 with no loss of information
 Warning (10271): Verilog HDL Case Statement warning at cpu_on_board.v(512): size of case item expression (32) exceeds the size of the case expression (1)
-Info (10662): Verilog HDL Assignment information at cpu_on_board.v(514): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10264): Verilog HDL Case Statement information at cpu_on_board.v(507): all case item expressions in this case statement are onehot
-Info (10662): Verilog HDL Assignment information at cpu_on_board.v(520): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Warning (10271): Verilog HDL Case Statement warning at cpu_on_board.v(523): size of case item expression (32) exceeds the size of the case expression (1)
+Warning (10271): Verilog HDL Case Statement warning at cpu_on_board.v(513): size of case item expression (32) exceeds the size of the case expression (1)
+Info (10662): Verilog HDL Assignment information at cpu_on_board.v(515): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10264): Verilog HDL Case Statement information at cpu_on_board.v(508): all case item expressions in this case statement are onehot
+Info (10662): Verilog HDL Assignment information at cpu_on_board.v(521): truncated unsized constant literal with size 32 to size 1 with no loss of information
 Warning (10271): Verilog HDL Case Statement warning at cpu_on_board.v(524): size of case item expression (32) exceeds the size of the case expression (1)
-Info (10662): Verilog HDL Assignment information at cpu_on_board.v(526): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10264): Verilog HDL Case Statement information at cpu_on_board.v(519): all case item expressions in this case statement are onehot
-Info (10662): Verilog HDL Assignment information at cpu_on_board.v(532): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Warning (10271): Verilog HDL Case Statement warning at cpu_on_board.v(525): size of case item expression (32) exceeds the size of the case expression (1)
+Info (10662): Verilog HDL Assignment information at cpu_on_board.v(527): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10264): Verilog HDL Case Statement information at cpu_on_board.v(520): all case item expressions in this case statement are onehot
 Info (10662): Verilog HDL Assignment information at cpu_on_board.v(533): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10264): Verilog HDL Case Statement information at cpu_on_board.v(531): all case item expressions in this case statement are onehot
-Info (10662): Verilog HDL Assignment information at cpu_on_board.v(538): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at cpu_on_board.v(534): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10264): Verilog HDL Case Statement information at cpu_on_board.v(532): all case item expressions in this case statement are onehot
 Info (10662): Verilog HDL Assignment information at cpu_on_board.v(539): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10264): Verilog HDL Case Statement information at cpu_on_board.v(537): all case item expressions in this case statement are onehot
-Info (10662): Verilog HDL Assignment information at cpu_on_board.v(544): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at cpu_on_board.v(540): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10264): Verilog HDL Case Statement information at cpu_on_board.v(538): all case item expressions in this case statement are onehot
 Info (10662): Verilog HDL Assignment information at cpu_on_board.v(545): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Warning (10230): Verilog HDL assignment warning at cpu_on_board.v(547): truncated value with size 32 to match size of target (22)
-Info (10662): Verilog HDL Assignment information at cpu_on_board.v(547): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at cpu_on_board.v(546): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Warning (10230): Verilog HDL assignment warning at cpu_on_board.v(548): truncated value with size 32 to match size of target (22)
 Info (10662): Verilog HDL Assignment information at cpu_on_board.v(548): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10264): Verilog HDL Case Statement information at cpu_on_board.v(543): all case item expressions in this case statement are onehot
-Info (10662): Verilog HDL Assignment information at cpu_on_board.v(553): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at cpu_on_board.v(549): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10264): Verilog HDL Case Statement information at cpu_on_board.v(544): all case item expressions in this case statement are onehot
 Info (10662): Verilog HDL Assignment information at cpu_on_board.v(554): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Warning (10230): Verilog HDL assignment warning at cpu_on_board.v(556): truncated value with size 32 to match size of target (22)
-Info (10662): Verilog HDL Assignment information at cpu_on_board.v(556): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at cpu_on_board.v(555): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Warning (10230): Verilog HDL assignment warning at cpu_on_board.v(557): truncated value with size 32 to match size of target (22)
 Info (10662): Verilog HDL Assignment information at cpu_on_board.v(557): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10264): Verilog HDL Case Statement information at cpu_on_board.v(552): all case item expressions in this case statement are onehot
-Info (10662): Verilog HDL Assignment information at cpu_on_board.v(573): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at cpu_on_board.v(558): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10264): Verilog HDL Case Statement information at cpu_on_board.v(553): all case item expressions in this case statement are onehot
 Info (10662): Verilog HDL Assignment information at cpu_on_board.v(574): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Warning (10230): Verilog HDL assignment warning at cpu_on_board.v(576): truncated value with size 32 to match size of target (22)
-Info (10662): Verilog HDL Assignment information at cpu_on_board.v(576): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at cpu_on_board.v(575): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Warning (10230): Verilog HDL assignment warning at cpu_on_board.v(577): truncated value with size 32 to match size of target (22)
 Info (10662): Verilog HDL Assignment information at cpu_on_board.v(577): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Warning (10230): Verilog HDL assignment warning at cpu_on_board.v(579): truncated value with size 32 to match size of target (22)
-Info (10662): Verilog HDL Assignment information at cpu_on_board.v(579): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at cpu_on_board.v(578): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Warning (10230): Verilog HDL assignment warning at cpu_on_board.v(580): truncated value with size 32 to match size of target (22)
 Info (10662): Verilog HDL Assignment information at cpu_on_board.v(580): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Warning (10230): Verilog HDL assignment warning at cpu_on_board.v(582): truncated value with size 32 to match size of target (22)
-Info (10662): Verilog HDL Assignment information at cpu_on_board.v(582): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at cpu_on_board.v(581): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Warning (10230): Verilog HDL assignment warning at cpu_on_board.v(583): truncated value with size 32 to match size of target (22)
 Info (10662): Verilog HDL Assignment information at cpu_on_board.v(583): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at cpu_on_board.v(590): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at cpu_on_board.v(584): truncated unsized constant literal with size 32 to size 1 with no loss of information
 Info (10662): Verilog HDL Assignment information at cpu_on_board.v(591): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at cpu_on_board.v(593): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at cpu_on_board.v(592): truncated unsized constant literal with size 32 to size 1 with no loss of information
 Info (10662): Verilog HDL Assignment information at cpu_on_board.v(594): truncated unsized constant literal with size 32 to size 1 with no loss of information
 Info (10662): Verilog HDL Assignment information at cpu_on_board.v(595): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at cpu_on_board.v(597): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at cpu_on_board.v(596): truncated unsized constant literal with size 32 to size 1 with no loss of information
 Info (10662): Verilog HDL Assignment information at cpu_on_board.v(598): truncated unsized constant literal with size 32 to size 1 with no loss of information
 Info (10662): Verilog HDL Assignment information at cpu_on_board.v(599): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at cpu_on_board.v(608): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at cpu_on_board.v(616): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at cpu_on_board.v(621): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at cpu_on_board.v(623): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at cpu_on_board.v(626): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at cpu_on_board.v(600): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at cpu_on_board.v(609): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at cpu_on_board.v(617): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at cpu_on_board.v(622): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at cpu_on_board.v(624): truncated unsized constant literal with size 32 to size 1 with no loss of information
 Info (10662): Verilog HDL Assignment information at cpu_on_board.v(627): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10264): Verilog HDL Case Statement information at cpu_on_board.v(625): all case item expressions in this case statement are onehot
-Info (10662): Verilog HDL Assignment information at cpu_on_board.v(633): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at cpu_on_board.v(635): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at cpu_on_board.v(641): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at cpu_on_board.v(628): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10264): Verilog HDL Case Statement information at cpu_on_board.v(626): all case item expressions in this case statement are onehot
+Info (10662): Verilog HDL Assignment information at cpu_on_board.v(634): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at cpu_on_board.v(636): truncated unsized constant literal with size 32 to size 1 with no loss of information
 Info (10662): Verilog HDL Assignment information at cpu_on_board.v(642): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at cpu_on_board.v(644): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at cpu_on_board.v(647): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at cpu_on_board.v(664): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at cpu_on_board.v(666): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at cpu_on_board.v(670): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at cpu_on_board.v(672): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at cpu_on_board.v(643): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at cpu_on_board.v(645): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at cpu_on_board.v(648): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at cpu_on_board.v(665): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at cpu_on_board.v(667): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at cpu_on_board.v(671): truncated unsized constant literal with size 32 to size 1 with no loss of information
 Info (10662): Verilog HDL Assignment information at cpu_on_board.v(673): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Warning (10230): Verilog HDL assignment warning at cpu_on_board.v(676): truncated value with size 64 to match size of target (3)
-Info (10662): Verilog HDL Assignment information at cpu_on_board.v(676): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Warning (10230): Verilog HDL assignment warning at cpu_on_board.v(678): truncated value with size 64 to match size of target (32)
-Info (10662): Verilog HDL Assignment information at cpu_on_board.v(678): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Warning (10230): Verilog HDL assignment warning at cpu_on_board.v(679): truncated value with size 64 to match size of target (3)
+Info (10662): Verilog HDL Assignment information at cpu_on_board.v(674): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Warning (10230): Verilog HDL assignment warning at cpu_on_board.v(677): truncated value with size 64 to match size of target (3)
+Info (10662): Verilog HDL Assignment information at cpu_on_board.v(677): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Warning (10230): Verilog HDL assignment warning at cpu_on_board.v(679): truncated value with size 64 to match size of target (32)
 Info (10662): Verilog HDL Assignment information at cpu_on_board.v(679): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Warning (10230): Verilog HDL assignment warning at cpu_on_board.v(680): truncated value with size 64 to match size of target (3)
 Info (10662): Verilog HDL Assignment information at cpu_on_board.v(680): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Warning (10230): Verilog HDL assignment warning at cpu_on_board.v(683): truncated value with size 64 to match size of target (32)
-Info (10662): Verilog HDL Assignment information at cpu_on_board.v(683): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Warning (10230): Verilog HDL assignment warning at cpu_on_board.v(684): truncated value with size 64 to match size of target (3)
+Info (10662): Verilog HDL Assignment information at cpu_on_board.v(681): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Warning (10230): Verilog HDL assignment warning at cpu_on_board.v(684): truncated value with size 64 to match size of target (32)
 Info (10662): Verilog HDL Assignment information at cpu_on_board.v(684): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Warning (10230): Verilog HDL assignment warning at cpu_on_board.v(685): truncated value with size 64 to match size of target (3)
 Info (10662): Verilog HDL Assignment information at cpu_on_board.v(685): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at cpu_on_board.v(696): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at cpu_on_board.v(700): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10264): Verilog HDL Case Statement information at cpu_on_board.v(693): all case item expressions in this case statement are onehot
-Info (10662): Verilog HDL Assignment information at cpu_on_board.v(705): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at cpu_on_board.v(686): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at cpu_on_board.v(697): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at cpu_on_board.v(701): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10264): Verilog HDL Case Statement information at cpu_on_board.v(694): all case item expressions in this case statement are onehot
 Info (10662): Verilog HDL Assignment information at cpu_on_board.v(706): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10264): Verilog HDL Case Statement information at cpu_on_board.v(704): all case item expressions in this case statement are onehot
-Info (10662): Verilog HDL Assignment information at cpu_on_board.v(711): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at cpu_on_board.v(707): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10264): Verilog HDL Case Statement information at cpu_on_board.v(705): all case item expressions in this case statement are onehot
 Info (10662): Verilog HDL Assignment information at cpu_on_board.v(712): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Warning (10230): Verilog HDL assignment warning at cpu_on_board.v(714): truncated value with size 32 to match size of target (22)
-Info (10662): Verilog HDL Assignment information at cpu_on_board.v(714): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at cpu_on_board.v(713): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Warning (10230): Verilog HDL assignment warning at cpu_on_board.v(715): truncated value with size 32 to match size of target (22)
 Info (10662): Verilog HDL Assignment information at cpu_on_board.v(715): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10264): Verilog HDL Case Statement information at cpu_on_board.v(710): all case item expressions in this case statement are onehot
-Info (10662): Verilog HDL Assignment information at cpu_on_board.v(720): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at cpu_on_board.v(716): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10264): Verilog HDL Case Statement information at cpu_on_board.v(711): all case item expressions in this case statement are onehot
 Info (10662): Verilog HDL Assignment information at cpu_on_board.v(721): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Warning (10230): Verilog HDL assignment warning at cpu_on_board.v(723): truncated value with size 32 to match size of target (22)
-Info (10662): Verilog HDL Assignment information at cpu_on_board.v(723): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at cpu_on_board.v(722): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Warning (10230): Verilog HDL assignment warning at cpu_on_board.v(724): truncated value with size 32 to match size of target (22)
 Info (10662): Verilog HDL Assignment information at cpu_on_board.v(724): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Warning (10230): Verilog HDL assignment warning at cpu_on_board.v(726): truncated value with size 32 to match size of target (22)
-Info (10662): Verilog HDL Assignment information at cpu_on_board.v(726): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at cpu_on_board.v(725): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Warning (10230): Verilog HDL assignment warning at cpu_on_board.v(727): truncated value with size 32 to match size of target (22)
 Info (10662): Verilog HDL Assignment information at cpu_on_board.v(727): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Warning (10230): Verilog HDL assignment warning at cpu_on_board.v(729): truncated value with size 32 to match size of target (22)
-Info (10662): Verilog HDL Assignment information at cpu_on_board.v(729): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at cpu_on_board.v(728): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Warning (10230): Verilog HDL assignment warning at cpu_on_board.v(730): truncated value with size 32 to match size of target (22)
 Info (10662): Verilog HDL Assignment information at cpu_on_board.v(730): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Warning (10040): Verilog HDL or VHDL arithmetic warning at cpu_on_board.v(743): loss of carry in addition or borrow in subtraction
-Warning (10230): Verilog HDL assignment warning at cpu_on_board.v(743): truncated value with size 64 to match size of target (12)
-Info (10662): Verilog HDL Assignment information at cpu_on_board.v(748): truncated unsized constant literal with size 32 to size 10 with no loss of information
-Info (10662): Verilog HDL Assignment information at cpu_on_board.v(749): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at cpu_on_board.v(731): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Warning (10040): Verilog HDL or VHDL arithmetic warning at cpu_on_board.v(744): loss of carry in addition or borrow in subtraction
+Warning (10230): Verilog HDL assignment warning at cpu_on_board.v(744): truncated value with size 64 to match size of target (12)
+Info (10662): Verilog HDL Assignment information at cpu_on_board.v(749): truncated unsized constant literal with size 32 to size 10 with no loss of information
 Info (10662): Verilog HDL Assignment information at cpu_on_board.v(750): truncated unsized constant literal with size 32 to size 1 with no loss of information
 Info (10662): Verilog HDL Assignment information at cpu_on_board.v(751): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at cpu_on_board.v(756): truncated unsized constant literal with size 32 to size 10 with no loss of information
-Info (10662): Verilog HDL Assignment information at cpu_on_board.v(757): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at cpu_on_board.v(752): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at cpu_on_board.v(757): truncated unsized constant literal with size 32 to size 10 with no loss of information
 Info (10662): Verilog HDL Assignment information at cpu_on_board.v(758): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at cpu_on_board.v(760): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at cpu_on_board.v(759): truncated unsized constant literal with size 32 to size 1 with no loss of information
 Info (10662): Verilog HDL Assignment information at cpu_on_board.v(761): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Warning (10230): Verilog HDL assignment warning at cpu_on_board.v(768): truncated value with size 32 to match size of target (10)
-Info (10662): Verilog HDL Assignment information at cpu_on_board.v(769): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at cpu_on_board.v(778): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at cpu_on_board.v(778): truncated unsized constant literal with size 32 to size 10 with no loss of information
-Info (10662): Verilog HDL Assignment information at cpu_on_board.v(781): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at cpu_on_board.v(782): truncated unsized constant literal with size 32 to size 10 with no loss of information
-Info (10662): Verilog HDL Assignment information at cpu_on_board.v(783): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at cpu_on_board.v(762): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Warning (10230): Verilog HDL assignment warning at cpu_on_board.v(769): truncated value with size 32 to match size of target (10)
+Info (10662): Verilog HDL Assignment information at cpu_on_board.v(770): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at cpu_on_board.v(779): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at cpu_on_board.v(779): truncated unsized constant literal with size 32 to size 10 with no loss of information
+Info (10662): Verilog HDL Assignment information at cpu_on_board.v(782): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at cpu_on_board.v(783): truncated unsized constant literal with size 32 to size 10 with no loss of information
 Info (10662): Verilog HDL Assignment information at cpu_on_board.v(784): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Info (10662): Verilog HDL Assignment information at cpu_on_board.v(790): truncated unsized constant literal with size 32 to size 9 with no loss of information
-Info (10662): Verilog HDL Assignment information at cpu_on_board.v(798): truncated unsized constant literal with size 32 to size 9 with no loss of information
-Warning (10230): Verilog HDL assignment warning at cpu_on_board.v(799): truncated value with size 32 to match size of target (9)
-Info (10662): Verilog HDL Assignment information at cpu_on_board.v(807): truncated unsized constant literal with size 32 to size 1 with no loss of information
-Warning (10862): input port "PS2_CLK" at cpu_on_board.v(37) has no fan-out
-Warning (10862): input port "PS2_DAT" at cpu_on_board.v(38) has no fan-out
+Info (10662): Verilog HDL Assignment information at cpu_on_board.v(785): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Info (10662): Verilog HDL Assignment information at cpu_on_board.v(791): truncated unsized constant literal with size 32 to size 9 with no loss of information
+Info (10662): Verilog HDL Assignment information at cpu_on_board.v(799): truncated unsized constant literal with size 32 to size 9 with no loss of information
+Warning (10230): Verilog HDL assignment warning at cpu_on_board.v(800): truncated value with size 32 to match size of target (9)
+Info (10662): Verilog HDL Assignment information at cpu_on_board.v(808): truncated unsized constant literal with size 32 to size 1 with no loss of information
+Warning (10862): input port "PS2_CLK" at cpu_on_board.v(38) has no fan-out
+Warning (10862): input port "PS2_DAT" at cpu_on_board.v(39) has no fan-out
 Warning (12125): Using design file sdram_controller.v, which is not specified as a design file for the current project, but contains definitions for 1 design units and 1 entities in project
     Info (12023): Found entity 1: sdram_controller
 Info (12128): Elaborating entity "sdram_controller" for hierarchy "sdram_controller:sdram_ctrl"
@@ -3353,30 +3343,21 @@ Info (13000): Registers with preset signals will power-up high
 Info (13003): DEV_CLRn pin will set, and not reset, register with preset signal due to NOT Gate Push-Back
 Warning (13024): Output pins are stuck at VCC or GND
     Warning (13410): Pin "sld_hub:auto_hub|receive[0][0]" is stuck at GND
-Warning (20013): Ignored assignments for entity "sdram_pll" -- entity does not exist in design
-    Warning (20014): Assignment for entity set_global_assignment -name IP_TOOL_NAME Qsys -entity sdram_pll -qip sdram_pll/sdram/synthesis/sdram_pll.qip -library sdram_pll was ignored
-    Warning (20014): Assignment for entity set_global_assignment -name IP_TOOL_VERSION 13.0sp1 -entity sdram_pll -qip sdram_pll/sdram/synthesis/sdram_pll.qip -library sdram_pll was ignored
-    Warning (20014): Assignment for entity set_global_assignment -name IP_TOOL_ENV Qsys -entity sdram_pll -qip sdram_pll/sdram/synthesis/sdram_pll.qip -library sdram_pll was ignored
-    Warning (20014): Assignment for entity set_global_assignment -name SLD_INFO "QSYS_NAME sdram_pll HAS_SOPCINFO 1 GENERATION_ID 1763195282" -entity sdram_pll -qip sdram_pll/sdram/synthesis/sdram_pll.qip -library sdram_pll was ignored
-Warning (20013): Ignored assignments for entity "sdram_pll_altpll_0" -- entity does not exist in design
-    Warning (20014): Assignment for entity set_global_assignment -name IP_TOOL_NAME altpll -entity sdram_pll_altpll_0 -qip sdram_pll/sdram/synthesis/sdram_pll.qip -library sdram_pll was ignored
-    Warning (20014): Assignment for entity set_global_assignment -name IP_TOOL_VERSION 13.0 -entity sdram_pll_altpll_0 -qip sdram_pll/sdram/synthesis/sdram_pll.qip -library sdram_pll was ignored
-    Warning (20014): Assignment for entity set_global_assignment -name IP_TOOL_ENV Qsys -entity sdram_pll_altpll_0 -qip sdram_pll/sdram/synthesis/sdram_pll.qip -library sdram_pll was ignored
 Info (16010): Generating hard_block partition "hard_block:auto_generated_inst"
     Info (16011): Adding 0 node(s), including 0 DDIO, 0 PLL, 0 transceiver and 0 LCELL
 Warning (21074): Design contains 2 input pin(s) that do not drive logic
     Warning (15610): No output dependent on input pin "PS2_CLK"
     Warning (15610): No output dependent on input pin "PS2_DAT"
-Info (21057): Implemented 23226 device resources after synthesis - the final resource count might be different
-    Info (21058): Implemented 8 input pins
+Info (21057): Implemented 23175 device resources after synthesis - the final resource count might be different
+    Info (21058): Implemented 9 input pins
     Info (21059): Implemented 25 output pins
     Info (21060): Implemented 18 bidirectional pins
-    Info (21061): Implemented 22763 logic cells
+    Info (21061): Implemented 22711 logic cells
     Info (21064): Implemented 411 RAM segments
-Info: Quartus II 32-bit Analysis & Synthesis was successful. 0 errors, 140 warnings
-    Info: Peak virtual memory: 571 megabytes
-    Info: Processing ended: Sat May  9 00:44:02 2026
-    Info: Elapsed time: 00:28:37
-    Info: Total CPU time (on all processors): 00:28:28
+Info: Quartus II 32-bit Analysis & Synthesis was successful. 0 errors, 131 warnings
+    Info: Peak virtual memory: 559 megabytes
+    Info: Processing ended: Sat May  9 08:03:31 2026
+    Info: Elapsed time: 00:41:03
+    Info: Total CPU time (on all processors): 00:40:56
 
 

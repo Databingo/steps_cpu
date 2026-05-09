@@ -1,7 +1,15 @@
 <?xml version="1.0" ?>
 <LOG_ROOT>
 	<PROJECT NAME="cpu_on_board">
+		<CBX_INST_ENTRY INSTANCE_NAME="|cpu_on_board|altsyncram:Cache_rtl_1" CBX_FILE_NAME="altsyncram_fok1.tdf"/>
+		<CBX_INST_ENTRY INSTANCE_NAME="|cpu_on_board|riscv64:cpu|altsyncram:Cache_L_High_rtl_0" CBX_FILE_NAME="altsyncram_cni1.tdf"/>
+		<CBX_INST_ENTRY INSTANCE_NAME="|cpu_on_board|altsyncram:Cache_rtl_0" CBX_FILE_NAME="altsyncram_fok1.tdf"/>
+		<CBX_INST_ENTRY INSTANCE_NAME="|cpu_on_board|altsyncram:Cache_rtl_1|altsyncram_fok1:auto_generated|altsyncram:ram_block1a0" CBX_FILE_NAME="altsyncram_fq63.tdf"/>
+		<CBX_INST_ENTRY INSTANCE_NAME="|cpu_on_board|altsyncram:sd_cache_rtl_0" CBX_FILE_NAME="altsyncram_f3k1.tdf"/>
 		<CBX_INST_ENTRY INSTANCE_NAME="|cpu_on_board|jtag_uart_system:my_jtag_system|jtag_uart_system_jtag_uart_0:jtag_uart_0|jtag_uart_system_jtag_uart_0_scfifo_r:the_jtag_uart_system_jtag_uart_0_scfifo_r|scfifo:rfifo" CBX_FILE_NAME="scfifo_9r21.tdf"/>
+		<CBX_INST_ENTRY INSTANCE_NAME="|cpu_on_board|riscv64:cpu|altsyncram:Cache_T_rtl_0" CBX_FILE_NAME="altsyncram_ini1.tdf"/>
+		<CBX_INST_ENTRY INSTANCE_NAME="|cpu_on_board|altsyncram:Cache_rtl_0|altsyncram_fok1:auto_generated|altsyncram:ram_block1a0" CBX_FILE_NAME="altsyncram_fq63.tdf"/>
 		<CBX_INST_ENTRY INSTANCE_NAME="|cpu_on_board|jtag_uart_system:my_jtag_system|jtag_uart_system_jtag_uart_0:jtag_uart_0|jtag_uart_system_jtag_uart_0_scfifo_w:the_jtag_uart_system_jtag_uart_0_scfifo_w|scfifo:wfifo" CBX_FILE_NAME="scfifo_9r21.tdf"/>
+		<CBX_INST_ENTRY INSTANCE_NAME="|cpu_on_board|riscv64:cpu|altsyncram:Cache_L_Low_rtl_0" CBX_FILE_NAME="altsyncram_cni1.tdf"/>
 	</PROJECT>
 </LOG_ROOT>
