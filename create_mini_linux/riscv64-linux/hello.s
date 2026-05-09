@@ -85,7 +85,7 @@ loop:
     # write(1, buf, 1)
     li a0, 1            # fd = 1
     la a1, buf          # buf
-    li a2, 18           # len
+    li a2, 1            # len
     li a7, 64           # syscall write
     ecall
 
