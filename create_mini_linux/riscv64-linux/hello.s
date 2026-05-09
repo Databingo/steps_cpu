@@ -2,7 +2,7 @@
 
 .section .data
 msg: 
-   .string "ASM INIT STARTING\n"
+   .string "ASM iNIT STARTING\n"
 dev_path: 
    .string "/dev"
 devtmpfs_str: 
