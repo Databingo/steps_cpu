@@ -35,6 +35,7 @@ _start:
     bltz a0, fail_mount
 
     # openat(AT_FDCWD, "/dev/console", O_RDWR)
+    # open for stdin fd 0
     li a0, -100 # AT_FDCWD 
     la a1, console_path
     li a2, 2    # O_RDWR
@@ -42,22 +43,36 @@ _start:
     ecall 
     mv s1, a0   # save ecall returned value
     bltz s1, fail_open  # if s1 negative, open failed
-    
-    # dup3(fd, 0, 0) - stdin
-    mv a0, s1 
-    li a1, 0
-    li a2, 0
-    li a7, 24 # syscall dup3
-    ecall
-    bltz a0, fail_dup
-   
-    # dup2(fd, 1, 0) - stdout
-    mv a0, s1 
-    li a1, 1
-    li a2, 0
-    li a7, 24
-    ecall
-    bltz a0, fail_dup
+     
+    # open for stdout fd 1
+    li a0, -100 # AT_FDCWD 
+    la a1, console_path
+    li a2, 2    # O_RDWR
+    li a7, 56   # syscall openat
+    ecall 
+
+    # open for stderr fd 2
+    li a0, -100 # AT_FDCWD 
+    la a1, console_path
+    li a2, 2    # O_RDWR
+    li a7, 56   # syscall openat
+    ecall 
+
+   ## dup3(fd, 0, 0) - stdin
+   #mv a0, s1 
+   #li a1, 0
+   #li a2, 0
+   #li a7, 24 # syscall dup3
+   #ecall
+   #bltz a0, fail_dup
+ 
+   ## dup2(fd, 1, 0) - stdout
+   #mv a0, s1 
+   #li a1, 1
+   #li a2, 0
+   #li a7, 24
+   #ecall
+   #bltz a0, fail_dup
 
     # write(1, msg, 18) # welcome
     li a0, 1            # fd = 1
@@ -67,6 +82,13 @@ _start:
     ecall
 
 loop:
+    # write(1, buf, 1)
+    li a0, 1            # fd = 1
+    la a1, buf          # buf
+    li a2, 18           # len
+    li a7, 64           # syscall write
+    ecall
+
     # read(0, buf, 1)   # read keypress
     li a0, 0            # fd = 0
     la a1, buf          # buf
@@ -74,12 +96,6 @@ loop:
     li a7, 63           # syscall read
     ecall
 
-    # write(1, buf, 1)
-    li a0, 1            # fd = 1
-    la a1, buf          # buf
-    li a2, 1            # len
-    li a7, 64           # syscall write
-    ecall
     
     # Sign
     addi x0, x0, 0x11  # 0x01100013
