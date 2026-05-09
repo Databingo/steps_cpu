@@ -18,7 +18,7 @@ _start:
     # mkdirat(AT_FDCWD, "/dev", 0755)
     li a0, -100
     la a1, dev_path
-    la a2, 493
+    li a2, 493
     li a7, 34 # syscall mkdir
     ecall 
 
