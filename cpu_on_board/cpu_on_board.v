@@ -4,8 +4,7 @@ module cpu_on_board (
     // -- Pin --
     //(* chip_pin = "PIN_L1" *)  input wire CLOCK_50, // 50 MHz clock
     input wire CLOCK_50, // 50 MHz clock
-    //(* chip_pin = "PIN_R22" *) input wire KEY0,     // Active-low reset button
-    input wire KEY0,     // Active-low reset button
+    (* chip_pin = "PIN_R22" *) input wire KEY0,     // Active-low reset button
     (* chip_pin = "L2" *) input wire SW9,     // debug
     (* chip_pin = "M1" *) input wire SW8,     // pma 
     //(* chip_pin = "PIN_Y21, PIN_Y22, PIN_W21, PIN_W22, PIN_V21, PIN_V22, PIN_U21, PIN_U22" *) output wire [7:0] LEDG, // 8 green LEDs
@@ -219,20 +218,16 @@ assign DRAM_CKE = 1; // always enable
     reg uart_read_pulse;
     reg uart_read_step;
     wire uart_waitrequest;
-    reg [1:0] sifive_uart_ie;
-    //wire jtag_addr = (bus_read_done == 0 && bus_address == `Art_base) ? 1'b1:1'b0;  
-    wire jtag_addr = (bus_address == `ArtIE) ? 1'b1 :  // map IE to Jcontrol1, map Read to Jcontrol1. Else(write) to Data0
-                     (bus_read_done == 0 && bus_address == `Art_base) ? 1'b1:1'b0;  
-    wire [31:0] jtag_wdata = (bus_address == `ArtIE) ? {30'b0, bus_write_data[0], bus_write_data[1]} : bus_write_data[31:0]; // swap SiFive bits[1:0] to Jtag [0:1] when write to IE// IE bit 0 Tx, bit 1 Rx
-                                       
+    wire jtag_addr = (bus_read_done == 0 && bus_address == `Art_base) ? 1'b1:1'b0;  
+    // jtag:   TX/RX in 0, Control(WSPACE) in 1, read[31:16RAVAL-15RVALID-7:0Key]rvalid0empty write 0 givelow 8 bits to uart, read 1 return 31 bits, 31-16 is WSPACE;
+    // sifive: Tx/Control in 0, RX in 1
     jtag_uart_system my_jtag_system (
         .clk_clk                                 (clock_slow),
         .reset_reset_n                           (KEY0),
         //.jtag_uart_0_avalon_jtag_slave_address   (bus_address[0:0]),
         //.jtag_uart_0_avalon_jtag_slave_address   (~bus_address[2]), // 0 for Data, 1 for Control
         .jtag_uart_0_avalon_jtag_slave_address   (jtag_addr), 
-        //.jtag_uart_0_avalon_jtag_slave_writedata (bus_write_data[31:0]),
-        .jtag_uart_0_avalon_jtag_slave_writedata (jtag_wdata),
+        .jtag_uart_0_avalon_jtag_slave_writedata (bus_write_data[31:0]),
         //.jtag_uart_0_avalon_jtag_slave_write_n   (~uart_write_trigger_pulse),
         .jtag_uart_0_avalon_jtag_slave_write_n   (~uart_write_pulse),
         .jtag_uart_0_avalon_jtag_slave_chipselect(1'b1),
@@ -302,7 +297,7 @@ assign DRAM_CKE = 1; // always enable
     wire Plic_claim_ctx0_selected = (bus_address == `Plic_claim );
     wire Plic_claim_ctx1_selected = (bus_address == `Plic_claim + 64'h1000);
     //wire Plic_claim_ctx0_selected = (bus_address >= `Plic_claim && bus_address < `Plic_claim+1024*0x1000+4);
-    reg [31:0] claim_interrupt_id_ctx [0:1]; // bit 0 for hart0_M; bit 1 for hart0_S  // value of interrutp
+    reg [31:0] claim_interrupt_id_ctx [0:1]; // 0 for hart0_M; 1 for hart0_S  // value of interrutp
 
     always @(*) begin
         claim_interrupt_id_ctx[0] = 0; 
@@ -370,7 +365,6 @@ assign DRAM_CKE = 1; // always enable
 	    //mtimecmp <=  64'h80000000;
 	    mtimecmp <=  64'hffffffffffffffff;
 	    uart_irq_pre <= 0;
-	    sifive_uart_ie <= 2'b0;
             //sd_rd_start <= 0;
 	end else begin
         bus_address_reg <= bus_address>>2;
@@ -381,7 +375,7 @@ assign DRAM_CKE = 1; // always enable
 	uart_read_pulse <= 0;
 	uart_irq_pre <= uart_irq;
 	if (uart_irq && !uart_irq_pre) Plic_pending[1] <= 1;
-	//if (uart_irq) Plic_pending[1] <= 1; //??
+	//if (uart_irq) Plic_pending[1] <= 1;
 	//if (key_pressed_edge) Plic_pending[1] <= 1;
 
         //if (bus_read_enable) begin bus_read_done <= 0; cid <= (bus_address-`Sdc_base); end 
@@ -447,60 +441,20 @@ assign DRAM_CKE = 1; // always enable
             if (Clintbase_selected) begin bus_read_data <= {63'b0, msip_interrupt} ; bus_read_done <= 1; end 
             //if (Clintbase_selected) begin bus_read_done <= 1; end 
 
-	    //if (Art_selected) begin  // Work 
-	    //  if (bus_address == `Art_base || bus_address == `ArtK_base) begin
-
-	    //    if (uart_read_step ==0) begin uart_read_pulse <= 1; uart_read_step <= 1; end  // sifive 0x2004 read status, write data
-	    //    if (uart_read_step ==1 &&  uart_waitrequest) begin uart_read_pulse <= 1; end  // sifive 0x2008 read keypress
-	    //    //if (uart_read_step ==1 && !uart_waitrequest) begin bus_read_data <= uart_readdata; uart_read_step <= 0; bus_read_done <=1; uart_read_pulse <= 0;end
-	    //    //if (uart_read_step ==1 && !uart_waitrequest) begin bus_read_data <= uart_readdata; uart_read_step <= 0; bus_read_done <=1; end
-	    //    if (uart_read_step ==1 && !uart_waitrequest) begin  // jtage 31:16 mean how many free space, 15 0 means RVALID 0
-	    //        if (bus_address == `Art_base) begin bus_read_data <= {{33{(uart_readdata[31:16]==16'h0)}}, 31'b0}; uart_read_step <= 0; bus_read_done <=1; end //opensbi reading tx 32 1 neg means full
-	    //        if (bus_address == `ArtK_base) begin bus_read_data <= {32'b0, ~uart_readdata[15], 23'b0, uart_readdata[7:0]}; uart_read_step <= 0; bus_read_done <=1;end//opensbi reading rx 32 1 empty
-	    //    end
-
-	    //  end else begin bus_read_data <= 64'b0; bus_read_done <= 1; end // Dummy ACK for TXCTRL/RXCTRL/DIV registers
-	    //end
-
-	    // sifive
-	    // 0x00 txdata bit[7:0]=data bit[31]=full
-	    // 0x04 rxdata bit[7:0]=data bit[31]=empty
-	    // 0x08 txctrl
-	    // 0x0c txctrl
-	    // 0x10 ie     bit[0]=txwm bit[1]=rxwm
-	    // 0x14 ip     bit[0]=txwm bit[1]=rxwm
-        
-	    // jtag
-	    // 0x00 data register
-	    //      read: bit[7:0]=data bit[15]=RVALID
-	    //      write:bit[7:0]=data to send
-	    // 0x04 control register
-	    //      read: bit[31:16]=WSPACE (TX free space) bit[15:0]=status flags
-	    //      write:interrupt control
-
-            // jtag:   TX/RX in 0, Control(WSPACE) in 1, read[31:16RAVAL-15RVALID-7:0Key]rvalid0empty write 0 givelow 8 bits to uart, read 1 return 31 bits, 31-16 is WSPACE;
-            // sifive: Tx/Control in 0, RX in 1
-	    //SiFive Uart:  0x00 txdata; 0x04 rxdata; 0x08 txctrl; 0x0c txctrl; 0x10 ie; 0x14 ip
 	    if (Art_selected) begin 
-	      case (bus_address)
-		`Art_base: begin // TX sifive 0x2004 read status, write data
-	            if (uart_read_step ==0) begin uart_read_pulse <= 1; uart_read_step <= 1; end //jtage 31:16 mean how many free space, sifive reading tx 32 1 neg means full
-	            if (uart_read_step ==1 &&  uart_waitrequest) begin uart_read_pulse <= 1; end // make block when full untill have free 
-	            if (uart_read_step ==1 && !uart_waitrequest) begin bus_read_data <= {{33{(uart_readdata[31:16]==16'h0)}}, 31'b0}; uart_read_step <= 0; bus_read_done <=1; end 
-	            //if (uart_read_step ==1 && !uart_waitrequest) begin bus_read_data <= 64'b0; uart_read_step <= 0; bus_read_done <=1; end  // Always tell sifive it's not full for tx
+	      if (bus_address == `Art_base || bus_address == `ArtK_base) begin
+
+	        if (uart_read_step ==0) begin uart_read_pulse <= 1; uart_read_step <= 1; end  // sifive 0x2004 read status, write data
+	        if (uart_read_step ==1 &&  uart_waitrequest) begin uart_read_pulse <= 1; end  // sifive 0x2008 read keypress
+	        //if (uart_read_step ==1 && !uart_waitrequest) begin bus_read_data <= uart_readdata; uart_read_step <= 0; bus_read_done <=1; uart_read_pulse <= 0;end
+	        //if (uart_read_step ==1 && !uart_waitrequest) begin bus_read_data <= uart_readdata; uart_read_step <= 0; bus_read_done <=1; end
+	        if (uart_read_step ==1 && !uart_waitrequest) begin  // jtage 31:16 mean how many free space, 15 0 means RVALID 0
+		    if (bus_address == `Art_base) begin bus_read_data <= {{33{(uart_readdata[31:16]==16'h0)}}, 31'b0}; uart_read_step <= 0; bus_read_done <=1; end //opensbi reading tx 32 1 neg means full
+		    if (bus_address == `ArtK_base) begin bus_read_data <= {32'b0, ~uart_readdata[15], 23'b0, uart_readdata[7:0]}; uart_read_step <= 0; bus_read_done <=1;end//opensbi reading rx 32 1 empty
 		end
-		 `ArtK_base: begin // RX  // sifive 0x2008 read keypress
-	            if (uart_read_step ==0) begin uart_read_pulse <= 1; uart_read_step <= 1; end  //jtage 15 = 0 means RVALID 0, sifive reading rx 32 1 empty
-	            if (uart_read_step ==1 &&  uart_waitrequest) begin uart_read_pulse <= 1; end  
-	            if (uart_read_step ==1 && !uart_waitrequest) begin bus_read_data <= {32'b0, ~uart_readdata[15], 23'b0, uart_readdata[7:0]}; uart_read_step <= 0; bus_read_done <=1;end 
-		end
-		 `ArtIP: begin bus_read_data <= {62'b0, uart_irq, 1'b1}; bus_read_done <= 1; end // IP, RX is bit 1, bit 0 buffer has space, bit 1 data is waiting to be read. bit 0=1 always has space
-		 `ArtIE: begin bus_read_data <= {62'b0, sifive_uart_ie}; bus_read_done <= 1; end // return saved ie
-	         default: begin bus_read_data <= 64'b0; bus_read_done <= 1; end // Dummy ACK for TXCTRL/RXCTRL/DIV registers
-	    endcase
+
+	      end else begin bus_read_data <= 64'b0; bus_read_done <= 1; end // Dummy ACK for TXCTRL/RXCTRL/DIV registers
 	    end
-
-
 
 	    if (Sdram_selected) begin
 		case(bus_ls_type)
@@ -637,8 +591,8 @@ assign DRAM_CKE = 1; // always enable
 
 	    //if (Art_selected) begin uart_write_pulse <= 1; bus_write_done <=1; end
 	    if (Art_selected) begin 
-	      if (bus_address == `Art_base || bus_address == `ArtIE) begin 
-	        if (bus_address == `ArtIE) sifive_uart_ie <= bus_write_data[1:0];
+	      if (bus_address == `Art_base) begin
+
 	        if (uart_write_step ==0) begin uart_write_pulse <= 1; uart_write_step <= 1; end
 	        if (uart_write_step ==1 &&  uart_waitrequest) begin uart_write_pulse <= 1; end
 	        //if (uart_write_step ==1 && !uart_waitrequest) begin uart_write_step <= 0; bus_write_done <=1; uart_write_pulse <= 0;end
