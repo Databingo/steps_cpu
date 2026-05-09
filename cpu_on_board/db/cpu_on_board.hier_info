@@ -1,6 +1,6 @@
 |cpu_on_board
 CLOCK_50 => CLOCK_50.IN1
-KEY0 => KEY0.IN4
+KEY0 => comb.DATAIN
 SW9 => comb.DATAIN
 SW8 => comb.DATAIN
 PS2_CLK => ~NO_FANOUT~

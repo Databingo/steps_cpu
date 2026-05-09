@@ -1,5 +1,5 @@
 Flow report for cpu_on_board
-Sat May  9 08:03:30 2026
+Sat May  9 09:32:22 2026
 Quartus II 32-bit Version 13.0.1 Build 232 06/12/2013 Service Pack 1 SJ Web Edition
 
 
@@ -40,17 +40,17 @@ applicable agreement for further details.
 +--------------------------------------------------------------------------------------+
 ; Flow Summary                                                                         ;
 +------------------------------------+-------------------------------------------------+
-; Flow Status                        ; Successful - Sat May  9 08:03:28 2026           ;
+; Flow Status                        ; Successful - Sat May  9 09:32:21 2026           ;
 ; Quartus II 32-bit Version          ; 13.0.1 Build 232 06/12/2013 SP 1 SJ Web Edition ;
 ; Revision Name                      ; cpu_on_board                                    ;
 ; Top-level Entity Name              ; cpu_on_board                                    ;
 ; Family                             ; Cyclone II                                      ;
 ; Device                             ; EP2C20F484C7                                    ;
 ; Timing Models                      ; Final                                           ;
-; Total logic elements               ; 22,161                                          ;
-;     Total combinational functions  ; 17,165                                          ;
-;     Dedicated logic registers      ; 7,550                                           ;
-; Total registers                    ; 7550                                            ;
+; Total logic elements               ; 21,652                                          ;
+;     Total combinational functions  ; 16,656                                          ;
+;     Dedicated logic registers      ; 7,548                                           ;
+; Total registers                    ; 7548                                            ;
 ; Total pins                         ; 48                                              ;
 ; Total virtual pins                 ; 0                                               ;
 ; Total memory bits                  ; 218,624                                         ;
@@ -64,7 +64,7 @@ applicable agreement for further details.
 +-------------------+---------------------+
 ; Option            ; Setting             ;
 +-------------------+---------------------+
-; Start date & time ; 05/09/2026 07:22:39 ;
+; Start date & time ; 05/09/2026 08:49:56 ;
 ; Main task         ; Compilation         ;
 ; Revision Name     ; cpu_on_board        ;
 +-------------------+---------------------+
@@ -78,7 +78,7 @@ applicable agreement for further details.
 ; ADV_NETLIST_OPT_SYNTH_WYSIWYG_REMAP        ; On                                                                 ; Off           ; --                           ; --         ;
 ; ALLOW_ANY_RAM_SIZE_FOR_RECOGNITION         ; On                                                                 ; Off           ; --                           ; --         ;
 ; AUTO_GLOBAL_REGISTER_CONTROLS              ; Off                                                                ; On            ; --                           ; --         ;
-; COMPILER_SIGNATURE_ID                      ; 0.177828255218289                                                  ; --            ; --                           ; --         ;
+; COMPILER_SIGNATURE_ID                      ; 0.177828779218986                                                  ; --            ; --                           ; --         ;
 ; ENABLE_SIGNALTAP                           ; Off                                                                ; --            ; --                           ; --         ;
 ; FITTER_AGGRESSIVE_ROUTABILITY_OPTIMIZATION ; Always                                                             ; Automatically ; --                           ; --         ;
 ; FITTER_EFFORT                              ; Standard Fit                                                       ; Auto Fit      ; --                           ; --         ;
@@ -97,6 +97,7 @@ applicable agreement for further details.
 ; MISC_FILE                                  ; jtag_uart_system/synthesis/../../jtag_uart_system.cmp              ; --            ; --                           ; --         ;
 ; MISC_FILE                                  ; jtag_uart_system/synthesis/../../jtag_uart_system.qsys             ; --            ; --                           ; --         ;
 ; MUX_RESTRUCTURE                            ; On                                                                 ; Auto          ; --                           ; --         ;
+; NUM_PARALLEL_PROCESSORS                    ; All                                                                ; --            ; --                           ; --         ;
 ; OPTIMIZATION_TECHNIQUE                     ; Area                                                               ; Balanced      ; --                           ; --         ;
 ; PARTITION_COLOR                            ; 16764057                                                           ; --            ; --                           ; Top        ;
 ; PARTITION_FITTER_PRESERVATION_LEVEL        ; PLACEMENT_AND_ROUTING                                              ; --            ; --                           ; Top        ;
@@ -124,8 +125,8 @@ applicable agreement for further details.
 +----------------------+--------------+-------------------------+---------------------+------------------------------------+
 ; Module Name          ; Elapsed Time ; Average Processors Used ; Peak Virtual Memory ; Total CPU Time (on all processors) ;
 +----------------------+--------------+-------------------------+---------------------+------------------------------------+
-; Analysis & Synthesis ; 00:40:40     ; 1.0                     ; 559 MB              ; 00:40:34                           ;
-; Total                ; 00:40:40     ; --                      ; --                  ; 00:40:34                           ;
+; Analysis & Synthesis ; 00:42:15     ; 1.0                     ; 569 MB              ; 00:28:42                           ;
+; Total                ; 00:42:15     ; --                      ; --                  ; 00:28:42                           ;
 +----------------------+--------------+-------------------------+---------------------+------------------------------------+
 
 
