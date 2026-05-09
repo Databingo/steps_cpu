@@ -21,7 +21,7 @@ _start:
     li a2, 493
     li a7, 34 # syscall mkdir
     ecall 
-    bltz a0, fail_mkdir
+   #bltz a0, fail_mkdir
 
 
     # mount devtmpfs to /dev
