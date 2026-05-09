@@ -1,18 +1,5 @@
 .global _start
 
-.section .data
-msg: 
-   .string "ASM iNIT STARTING\n"
-dev_path: 
-   .string "/dev"
-devtmpfs_str: 
-   .string "devtmpfs"
-console_path: 
-   .string "/dev/console"
-buf: 
-   .word 0
-
-
 .section .text
 _start:
     # mkdirat(AT_FDCWD, "/dev", 0755)
@@ -120,4 +107,19 @@ fail_open:
 fail_dup:
     addi x0, x0, 0xdd  
     j fail_dup
+
+
+
+.section .data
+msg: 
+   .string "ASM iNIT STARTING\n"
+dev_path: 
+   .string "/dev"
+devtmpfs_str: 
+   .string "devtmpfs"
+console_path: 
+   .string "/dev/console"
+buf: 
+   .word 0
+
 
