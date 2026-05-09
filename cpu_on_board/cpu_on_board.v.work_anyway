@@ -253,10 +253,16 @@ assign DRAM_CKE = 1; // always enable
 
     // -- PLIC --
     //(* ram_style = "logic" *) reg [2:0]  Plic_priority [0:5];  // 0x000 + 4 per id
-    (* ramstyle = "logic" *) reg [2:0]  Plic_priority [0:5];  // 0x000 + 4 per id
-    reg [31:0] Plic_pending; // 0x1000 Global pending Bitmap   // 0nly 31 type now (by bit position) Bit 0 reserved
-    reg [31:0] Plic_enable [0:1];  // 0x2000 per context +0x80 // 0nly 31 type now (by bit position) same position as Plic_pending
-    reg [2:0]  Plic_threshold [0:1]; // 0x200000 4B per hart
+    //(* ramstyle = "logic" *) reg [2:0]  Plic_priority [0:5];  // 0x000 + 4 per id
+    //reg [31:0] Plic_pending; // 0x1000 Global pending Bitmap   // 0nly 31 type now (by bit position) Bit 0 reserved
+    //reg [2:0]  Plic_threshold [0:1]; // 0x200000 4B per hart
+    //reg [31:0] Plic_enable [0:1];  // 0x2000 per context +0x80 // 0nly 31 type now (by bit position) same position as Plic_pending
+    //reg [31:0] claim_interrupt_id_ctx [0:1]; // 0 for hart0_M; 1 for hart0_S  // value of interrutp
+    (* ramstyle = "logic" *) reg [2:0]  Plic_priority [0:1];  // 0x000 + 4 per id
+    reg [1:0] Plic_pending; // 0x1000 Global pending Bitmap   // 0nly 31 type now (by bit position) Bit 0 reserved
+    reg [1:0] Plic_enable [0:1];  // 0x2000 per context +0x80 // 0nly 31 type now (by bit position) same position as Plic_pending
+    reg [2:0] Plic_threshold [0:1]; // 0x200000 4B per hart
+    reg [2:0] claim_interrupt_id_ctx [0:1]; // 0 for hart0_M; 1 for hart0_S  // value of interrutp
     //# PER PRIORITY(id) = base + 4 * id (000-fff) array
     //# base + 0x1000 id 1-32 ... bitmap
     //# base + 0x2000 + ContextID*0x80 0hart0M 1hart0S... bitmap
@@ -297,7 +303,6 @@ assign DRAM_CKE = 1; // always enable
     wire Plic_claim_ctx0_selected = (bus_address == `Plic_claim );
     wire Plic_claim_ctx1_selected = (bus_address == `Plic_claim + 64'h1000);
     //wire Plic_claim_ctx0_selected = (bus_address >= `Plic_claim && bus_address < `Plic_claim+1024*0x1000+4);
-    reg [31:0] claim_interrupt_id_ctx [0:1]; // 0 for hart0_M; 1 for hart0_S  // value of interrutp
 
     always @(*) begin
         claim_interrupt_id_ctx[0] = 0; 
@@ -348,7 +353,10 @@ assign DRAM_CKE = 1; // always enable
     reg bus_read_done = 1;
     reg bus_write_done = 1;
     reg [63:0] next_addr;
-    wire [4:0] plic_id = (bus_address - `Plic_base) >> 2; // id = offset /4
+    // new change --
+    //wire [4:0] plic_id = (bus_address - `Plic_base) >> 2; // id = offset /4
+    wire plic_id = bus_address[2]; // id = offset /4
+    // new change end--
 
     always @(posedge clock_slow or negedge KEY0) begin
         if (!KEY0) begin
