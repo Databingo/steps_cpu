@@ -15,6 +15,14 @@ buf:
 
 .section .text
 _start:
+    # mkdirat(AT_FDCWD, "/dev", 0755)
+    li a0, -100
+    la a1, dev_path
+    la a2, 493
+    li a7, 34 # syscall mkdir
+    ecall 
+
+
     # mount devtmpfs to /dev
     la a0, devtmpfs_str
     la a1, dev_path
