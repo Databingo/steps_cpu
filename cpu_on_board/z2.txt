@@ -42,7 +42,7 @@ wire is_low_io   = (ls_va[63:16] == 48'h0);    // 0x0000-0xffff (64KB) ROM, RAM,
 wire is_clint_io = (ls_va[63:16] == 48'h0200); // 0x0200_0000-0x0200_ffff (64KB)
 wire is_plic_io  = (ls_va[63:24] == 40'h0C);   // 0x0C00_0000-0x0Cff_ffff (16MB) ??
 //wire is_mmio_io = (current_privilege_mode == M_mode) && (is_low_io || is_clint_io || is_plic_io) && !pma;
-wire is_mmio_io =  (is_low_io || is_clint_io || is_plic_io) && !pma;
+wire is_mmio_io =  (is_low_io || is_clint_io || is_plic_io) && pma;
 
 (* keep = 1 *) reg [63:0] pc;
 wire [31:0] ir;
@@ -1301,10 +1301,16 @@ assign DRAM_CKE = 1; // always enable
 
     // -- PLIC --
     //(* ram_style = "logic" *) reg [2:0]  Plic_priority [0:5];  // 0x000 + 4 per id
-    (* ramstyle = "logic" *) reg [2:0]  Plic_priority [0:5];  // 0x000 + 4 per id
-    reg [31:0] Plic_pending; // 0x1000 Global pending Bitmap   // 0nly 31 type now (by bit position) Bit 0 reserved
-    reg [31:0] Plic_enable [0:1];  // 0x2000 per context +0x80 // 0nly 31 type now (by bit position) same position as Plic_pending
-    reg [2:0]  Plic_threshold [0:1]; // 0x200000 4B per hart
+    //(* ramstyle = "logic" *) reg [2:0]  Plic_priority [0:5];  // 0x000 + 4 per id
+    //reg [31:0] Plic_pending; // 0x1000 Global pending Bitmap   // 0nly 31 type now (by bit position) Bit 0 reserved
+    //reg [2:0]  Plic_threshold [0:1]; // 0x200000 4B per hart
+    //reg [31:0] Plic_enable [0:1];  // 0x2000 per context +0x80 // 0nly 31 type now (by bit position) same position as Plic_pending
+    //reg [31:0] claim_interrupt_id_ctx [0:1]; // 0 for hart0_M; 1 for hart0_S  // value of interrutp
+    (* ramstyle = "logic" *) reg [2:0]  Plic_priority [0:1];  // 0x000 + 4 per id
+    reg [1:0] Plic_pending; // 0x1000 Global pending Bitmap   // 0nly 31 type now (by bit position) Bit 0 reserved
+    reg [1:0] Plic_enable [0:1];  // 0x2000 per context +0x80 // 0nly 31 type now (by bit position) same position as Plic_pending
+    reg [2:0] Plic_threshold [0:1]; // 0x200000 4B per hart
+    reg [2:0] claim_interrupt_id_ctx [0:1]; // 0 for hart0_M; 1 for hart0_S  // value of interrutp
     //# PER PRIORITY(id) = base + 4 * id (000-fff) array
     //# base + 0x1000 id 1-32 ... bitmap
     //# base + 0x2000 + ContextID*0x80 0hart0M 1hart0S... bitmap
@@ -1345,7 +1351,6 @@ assign DRAM_CKE = 1; // always enable
     wire Plic_claim_ctx0_selected = (bus_address == `Plic_claim );
     wire Plic_claim_ctx1_selected = (bus_address == `Plic_claim + 64'h1000);
     //wire Plic_claim_ctx0_selected = (bus_address >= `Plic_claim && bus_address < `Plic_claim+1024*0x1000+4);
-    reg [31:0] claim_interrupt_id_ctx [0:1]; // 0 for hart0_M; 1 for hart0_S  // value of interrutp
 
     always @(*) begin
         claim_interrupt_id_ctx[0] = 0; 
@@ -1396,7 +1401,10 @@ assign DRAM_CKE = 1; // always enable
     reg bus_read_done = 1;
     reg bus_write_done = 1;
     reg [63:0] next_addr;
-    wire [4:0] plic_id = (bus_address - `Plic_base) >> 2; // id = offset /4
+    // new change --
+    //wire [4:0] plic_id = (bus_address - `Plic_base) >> 2; // id = offset /4
+    wire plic_id = bus_address[2]; // id = offset /4
+    // new change end--
 
     always @(posedge clock_slow or negedge KEY0) begin
         if (!KEY0) begin
@@ -2555,6 +2563,8 @@ endmodule
 `define Key_base   64'h0000_2000
 `define Art_base   64'h0000_2004
 `define ArtK_base  64'h0000_2008
+`define ArtIE      64'h0000_2014
+`define ArtIP      64'h0000_2018
 `define Art_last   64'h0000_201C
 
 `define Sdc_base   64'h0000_3000
@@ -2590,6 +2600,20 @@ endmodule
 isr_router:        
      # x0-x10 are shadowed by hardware, safe to use
      li sp, 0x1500 # Set stack shadowed sp(x2)
+
+     #addi sp, sp, -88
+     #sd x1, 0(sp)
+     #sd x2, 8(sp)
+     #sd x3, 16(sp)
+     #sd x4, 24(sp)
+     #sd x5, 32(sp)
+     #sd x6, 40(sp)
+     #sd x7, 48(sp)
+     #sd x8, 56(sp)
+     #sd x9, 64(sp)
+     #sd x10, 72(sp)
+     #sd x11, 80(sp)
+
     #li sp, 0x801F0000 # Set stack shadowed sp(x2)
      li x7, 0x2004 # UART print 
      # x8 trap_type no change
