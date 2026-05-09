@@ -1,5 +1,19 @@
 .global _start
 
+.section .data
+msg: 
+   .string "ASM iNIT STARTING\n"
+dev_path: 
+   .string "/dev"
+devtmpfs_str: 
+   .string "devtmpfs"
+console_path: 
+   .string "/dev/hvc0"
+.align 3
+buf: 
+   .word 0
+
+
 .section .text
 _start:
     # mkdirat(AT_FDCWD, "/dev", 0755)
@@ -29,8 +43,6 @@ _start:
     li a7, 56   # syscall openat
     ecall 
     bltz a0, fail_open  
-   #mv s1, a0   # save ecall returned value
-   #bltz s1, fail_open  # if s1 negative, open failed
      
     # open for stdout fd 1
     li a0, -100 # AT_FDCWD 
@@ -49,22 +61,6 @@ _start:
     ecall 
     bltz a0, fail_open  
 
-   ## dup3(fd, 0, 0) - stdin
-   #mv a0, s1 
-   #li a1, 0
-   #li a2, 0
-   #li a7, 24 # syscall dup3
-   #ecall
-   #bltz a0, fail_dup
- 
-   ## dup2(fd, 1, 0) - stdout
-   #mv a0, s1 
-   #li a1, 1
-   #li a2, 0
-   #li a7, 24
-   #ecall
-   #bltz a0, fail_dup
-
     # write(1, msg, 18) # welcome
     li a0, 1            # fd = 1
     la a1, msg          # buf
@@ -73,13 +69,6 @@ _start:
     ecall
 
 loop:
-   ## write(1, buf, 1)
-   #li a0, 1            # fd = 1
-   #la a1, buf          # buf
-   #li a2, 1            # len
-   #li a7, 64           # syscall write
-   #ecall
-
     # read(0, buf, 1)   # read keypress
     li a0, 0            # fd = 0
     la a1, buf          # buf
@@ -110,17 +99,5 @@ fail_dup:
 
 
 
-.section .data
-msg: 
-   .string "ASM iNIT STARTING\n"
-dev_path: 
-   .string "/dev"
-devtmpfs_str: 
-   .string "devtmpfs"
-console_path: 
-   .string "/dev/hvc0"
-.align 3
-buf: 
-   .word 0
 
 
