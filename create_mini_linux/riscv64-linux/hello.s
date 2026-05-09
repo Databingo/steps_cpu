@@ -21,6 +21,7 @@ _start:
     li a2, 493
     li a7, 34 # syscall mkdir
     ecall 
+    bltz a0, fail_mkdir
 
 
     # mount devtmpfs to /dev
@@ -31,6 +32,7 @@ _start:
     li a4, 0
     li a7, 40 # syscall mount
     ecall 
+    bltz a0, fail_mount
 
     # openat(AT_FDCWD, "/dev/console", O_RDWR)
     li a0, -100 # AT_FDCWD 
@@ -38,11 +40,8 @@ _start:
     li a2, 2    # O_RDWR
     li a7, 56   # syscall openat
     ecall 
- 
-    mv s1, a0 # save ecall returned value
-
-    # if s1 negative, open failed
-    bltz s1, open_failed_barcode
+    mv s1, a0   # save ecall returned value
+    bltz s1, fail_open  # if s1 negative, open failed
     
     # dup3(fd, 0, 0) - stdin
     mv a0, s1 
@@ -50,6 +49,7 @@ _start:
     li a2, 0
     li a7, 24 # syscall dup3
     ecall
+    bltz a0, fail_dup
    
     # dup2(fd, 1, 0) - stdout
     mv a0, s1 
@@ -57,6 +57,7 @@ _start:
     li a2, 0
     li a7, 24
     ecall
+    bltz a0, fail_dup
 
     # write(1, msg, 18) # welcome
     li a0, 1            # fd = 1
@@ -87,8 +88,16 @@ loop:
 
     j loop
 
-open_failed_barcode:
-    addi x0, x0, 0xee  # 0x0ee00013
-    addi x0, x0, 0xff  # 0x0ff00013
-    j open_failed_barcode
+fail_mkdir:
+    addi x0, x0, 0xaaa  
+    j fail_mkdir
+fail_mount:
+    addi x0, x0, 0xbbb  
+    j fail_mount
+fail_open:
+    addi x0, x0, 0xccc  
+    j fail_open
+fail_dup:
+    addi x0, x0, 0xddd  
+    j fail_dup
 
