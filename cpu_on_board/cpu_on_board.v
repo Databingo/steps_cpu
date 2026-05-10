@@ -494,13 +494,16 @@ assign DRAM_CKE = 1; // always enable
 		`Art_base: begin // TX sifive 0x2004 read status, write data
 	            if (uart_read_step ==0) begin uart_read_pulse <= 1; uart_read_step <= 1; end //jtage 31:16 mean how many free space, sifive reading tx 32 1 neg means full
 	            if (uart_read_step ==1 &&  uart_waitrequest) begin uart_read_pulse <= 1; end // make block when full untill have free 
-	            if (uart_read_step ==1 && !uart_waitrequest) begin bus_read_data <= {{33{(uart_readdata[31:16]==16'h0)}}, 31'b0}; uart_read_step <= 0; bus_read_done <=1; end 
-	            //if (uart_read_step ==1 && !uart_waitrequest) begin bus_read_data <= 64'b0; uart_read_step <= 0; bus_read_done <=1; end  // Always tell sifive it's not full for tx
+	            //if (uart_read_step ==1 && !uart_waitrequest) begin bus_read_data <= {{33{(uart_readdata[31:16]==16'h0)}}, 31'b0}; uart_read_step <= 0; bus_read_done <=1; end 
+	            if (uart_read_step ==1 && !uart_waitrequest) begin uart_read_step <= 2; end  // jtage 1 cycle latency after uart_waritReqeust0
+	            if (uart_read_step ==2) begin bus_read_data <= {{33{(uart_readdata[31:16]==16'h0)}}, 31'b0}; uart_read_step <= 0; bus_read_done <=1; end 
 		end
 		 `ArtK_base: begin // RX  // sifive 0x2008 read keypress
 	            if (uart_read_step ==0) begin uart_read_pulse <= 1; uart_read_step <= 1; end  //jtage 15 = 0 means RVALID 0, sifive reading rx 32 1 empty
 	            if (uart_read_step ==1 &&  uart_waitrequest) begin uart_read_pulse <= 1; end  
-	            if (uart_read_step ==1 && !uart_waitrequest) begin bus_read_data <= {32'b0, ~uart_readdata[15], 23'b0, uart_readdata[7:0]}; uart_read_step <= 0; bus_read_done <=1;end 
+	            //if (uart_read_step ==1 && !uart_waitrequest) begin bus_read_data <= {32'b0, ~uart_readdata[15], 23'b0, uart_readdata[7:0]}; uart_read_step <= 0; bus_read_done <=1;end 
+	            if (uart_read_step ==1 && !uart_waitrequest) begin uart_read_step <= 2; end 
+	            if (uart_read_step ==2) begin bus_read_data <= {32'b0, ~uart_readdata[15], 23'b0, uart_readdata[7:0]}; uart_read_step <= 0; bus_read_done <=1;end 
 		end
 		 `ArtIP: begin bus_read_data <= {62'b0, uart_irq, 1'b1}; bus_read_done <= 1; end // IP, RX is bit 1, bit 0 buffer has space, bit 1 data is waiting to be read. bit 0=1 always has space
 		 `ArtIE: begin bus_read_data <= {62'b0, sifive_uart_ie}; bus_read_done <= 1; end // return saved ie
