@@ -218,10 +218,10 @@ is_supervisor_mode:
      li x3, 12                 # fetch S-mode cannot execute User memory
      beq x8, x3, PERM_FAULT
 
-     csrr x3, mstatus # 0x300
-     srli x3, x3, 18 # SUM is bit 18 (Supervisor User Memory access)
-     andi x3, x3, 1
-     beqz x3, PERM_FAULT  # SUM==0 -> Fault  when S read U page with SUM=0
+   # csrr x3, mstatus # 0x300
+   # srli x3, x3, 18 # SUM is bit 18 (Supervisor User Memory access)
+   # andi x3, x3, 1
+   # beqz x3, PERM_FAULT  # SUM==0 -> Fault  when S read U page with SUM=0
 
 #    j check_permissions
 
