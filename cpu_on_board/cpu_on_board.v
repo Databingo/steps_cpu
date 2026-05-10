@@ -321,6 +321,7 @@ assign DRAM_CKE = 1; // always enable
     reg msip_interrupt = 0;
     wire uart_irq;
     reg uart_irq_pre;
+    reg uart_tx_pre;
     wire [31:0] uart_readdata;
 
 
@@ -363,7 +364,8 @@ assign DRAM_CKE = 1; // always enable
     wire plic_id = bus_address[2]; // id = offset /4
     // new change end--
 
-   wire uart_ip = ((1'b1 & sifive_uart_ie[0]) | (uart_irq & sifive_uart_ie[1])); // ( TX_ready && TX_enabled ) ||( RX_ready && RX_enabled )
+    //wire uart_ip = ((1'b1 & sifive_uart_ie[0]) | (uart_irq & sifive_uart_ie[1])); // ( TX_ready && TX_enabled ) ||( RX_ready && RX_enabled )
+    //wire uart_ip = ((1'b1 & sifive_uart_ie[0]) | (uart_irq & 1'b1)); // ( TX_ready && TX_enabled ) ||( RX_ready && RX_enabled )
     always @(posedge clock_slow or negedge KEY0) begin
         if (!KEY0) begin
             bus_read_done <= 1;
@@ -379,6 +381,7 @@ assign DRAM_CKE = 1; // always enable
 	    //mtimecmp <=  64'h80000000;
 	    mtimecmp <=  64'hffffffffffffffff;
 	    uart_irq_pre <= 0;
+	    uart_tx_pre <= 0;
 	    sifive_uart_ie <= 2'b0;
             //sd_rd_start <= 0;
 	end else begin
@@ -390,8 +393,10 @@ assign DRAM_CKE = 1; // always enable
 	uart_read_pulse <= 0;
 	//uart_irq_pre <= uart_irq;
 	//if (uart_irq && !uart_irq_pre) Plic_pending[1] <= 1;
-	uart_irq_pre <= uart_ip;
-	if (uart_ip && !uart_irq_pre) Plic_pending[1] <= 1;
+	uart_irq_pre <= uart_irq;
+	if (uart_irq && !uart_irq_pre) Plic_pending[1] <= 1;
+	uart_tx_pre <=  sifive_uart_ie[0];
+	if (sifive_uart_ie[0] && !uart_tx_pre) Plic_pending[1] <= 1;
 	//if ((1'b1 & sifive_uart_ie[0]) || (uart_irq & sifive_uart_ie[1])) Plic_pending[1] <= 1; // ( TX_ready && TX_enabled ) ||( RX_ready && RX_enabled )
 	//if (uart_irq) Plic_pending[1] <= 1; //??
 	//if (key_pressed_edge) Plic_pending[1] <= 1;
