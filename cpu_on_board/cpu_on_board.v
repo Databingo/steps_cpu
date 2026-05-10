@@ -216,12 +216,13 @@ assign DRAM_CKE = 1; // always enable
     reg uart_write_pulse;
     reg uart_write_step;
     reg uart_read_pulse;
-    reg uart_read_step;
+    reg [1:0] uart_read_step;
     wire uart_waitrequest;
     reg [1:0] sifive_uart_ie;
     //wire jtag_addr = (bus_read_done == 0 && bus_address == `Art_base) ? 1'b1:1'b0;  
+    wire is_reading = (bus_read_enable || bus_read_done == 0);
     wire jtag_addr = (bus_address == `ArtIE) ? 1'b1 :  // map IE to Jcontrol1, map Read to Jcontrol1. Else(write) to Data0
-                     (bus_read_done == 0 && bus_address == `Art_base) ? 1'b1:1'b0;  
+                     (is_reading && bus_address == `Art_base) ? 1'b1:1'b0;  
     wire [31:0] jtag_wdata = (bus_address == `ArtIE) ? {30'b0, bus_write_data[0], bus_write_data[1]} : bus_write_data[31:0]; // swap SiFive bits[1:0] to Jtag [0:1] when write to IE// IE bit 0 Tx, bit 1 Rx
                                        
     jtag_uart_system my_jtag_system (
