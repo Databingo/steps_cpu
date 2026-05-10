@@ -1,10 +1,4 @@
 
-State Machine - |cpu_on_board|uart_read_step
-Name uart_read_step.00 uart_read_step.10 uart_read_step.01 
-uart_read_step.00 0 0 0 
-uart_read_step.01 1 0 1 
-uart_read_step.10 1 1 0 
-
 State Machine - |cpu_on_board|step
 Name step.000111 step.000110 step.000101 step.000100 step.000011 step.000010 step.000001 step.000000 
 step.000000 0 0 0 0 0 0 0 0 
