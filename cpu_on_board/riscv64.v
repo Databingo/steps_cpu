@@ -662,7 +662,7 @@ wire is_store = (op == 7'b0100011) || (op == 7'b0101111 && w_func5 != 5'b00010);
 		for (i=0;i<11;i=i+1) begin sre[i]<= 64'b0; end 
 		for (i=0;i<=25;i=i+1) begin Csrs[i]<= 64'b0; end
 		//Csrs[medeleg] <= 64'hb1af; // delegate to S-mode 1011000110101111 // see VII 3.1.15 mcasue exceptions
-		Csrs[medeleg] <= 64'hb109; // delegate to S-mode  0misalianfetch 3breakpoint 8uecll 12/13/15 (9 secall no, 11 mecall no)
+		Csrs[medeleg] <= 64'hb109; // delegate to S-mode 1011000100001001  0misalianfetch 3breakpoint 8uecll 12/13/15 (9 secall no, 11 mecall no)
 		Csrs[mideleg] <= 64'h0222; // delegate to S-mode 0000001000100010 see VII 3.1.15 mcasue interrupt 1/5/9 SSIP(supervisor software interrupt) STIP(time) SEIP(external)
 		// Initialize Machine Info for OpenSBI
 		//Csrs[misa] <= 64'h8000000000141101; //RV64IMASU extensions(63:62=2 64bits | 1<<0 Atomic| 1<<8 Integer| 1<<12 Multiply| 1<<18 Supervisor| 1 <<20 User) so: 64'h8000000000141101; RV64IMASU
