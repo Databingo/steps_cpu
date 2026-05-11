@@ -132,34 +132,86 @@
 //}
 
 
+//#include <stdio.h>
+//#include <fcntl.h>
+//#include <unistd.h>
+//#include <sys/stat.h>
+//#include <sys/sysmacros.h>
+//#include <errno.h>
+//
+//int main() {
+//    // 1. Create the dev directory
+//    mkdir("/dev", 0755);
+//    
+//    // 2. Create the console node
+//    mknod("/dev/console", S_IFCHR | 0600, makedev(5, 1));
+//
+//    // 3. MAGIC TRICK: Open with O_NONBLOCK!
+//    // This strictly forbids Linux from going to sleep to wait for your broken PLIC!
+//    int fd = open("/dev/console", O_WRONLY | O_NONBLOCK);
+//    if (fd < 0) {
+//        return 2; // Failed to open
+//    }
+//    
+//        // Because of NONBLOCK, this will bypass the PLIC completely and print to your screen!
+//    int ret =   write(fd, "\n====================\nSUCCESS: A\n====================\n", 53);
+//    if (ret < 0) {
+//        return errno;
+//    }
+//
+//    // Hang forever
+//    while(1) { sleep(1); }
+//    return 0;
+//}
+
+
 #include <stdio.h>
 #include <fcntl.h>
+#include <sys/mman.h>
 #include <unistd.h>
+#include <stdint.h>
 #include <sys/stat.h>
 #include <sys/sysmacros.h>
 #include <errno.h>
 
+// Based on your header.vh: `define Art_base 64'h0000_2004
+#define UART_PHYS_ADDR 0x2004
+
 int main() {
-    // 1. Create the dev directory
+    // 1. Create /dev/mem node (Major 1, Minor 1)
     mkdir("/dev", 0755);
-    
-    // 2. Create the console node
-    mknod("/dev/console", S_IFCHR | 0600, makedev(5, 1));
+    mknod("/dev/mem", S_IFCHR | 0600, makedev(1, 1));
 
-    // 3. MAGIC TRICK: Open with O_NONBLOCK!
-    // This strictly forbids Linux from going to sleep to wait for your broken PLIC!
-    int fd = open("/dev/console", O_WRONLY | O_NONBLOCK);
+    // 2. Open physical memory
+    int fd = open("/dev/mem", O_RDWR | O_SYNC);
     if (fd < 0) {
-        return 2; // Failed to open
-    }
-    
-        // Because of NONBLOCK, this will bypass the PLIC completely and print to your screen!
-    int ret =   write(fd, "\n====================\nSUCCESS: A\n====================\n", 53);
-    if (ret < 0) {
-        return errno;
+        return 100 + errno; // If exitcode is 0x6500 (101), no permission
     }
 
-    // Hang forever
-    while(1) { sleep(1); }
+    // 3. Map the page (mmap must be 4096-byte aligned)
+    // We map 8KB starting at 0x0000 to cover the 0x2004 address
+    void *map_ptr = mmap(NULL, 8192, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+    if (map_ptr == MAP_FAILED) {
+        return 200 + errno; // If exitcode is 0x??00, mmap failed
+    }
+
+    // 4. Calculate exact hardware pointer
+    // map_ptr points to 0x0000. Address is 0x2004.
+    volatile uint32_t *uart_tx = (volatile uint32_t *)((char *)map_ptr + UART_PHYS_ADDR);
+
+    // 5. HARDWARE POKE! 
+    // This writes directly to your FPGA logic, bypassing all drivers.
+    *uart_tx = 'A'; 
+    *uart_tx = '\n';
+    *uart_tx = 'G';
+    *uart_tx = 'O';
+    *uart_tx = 'O';
+    *uart_tx = 'D';
+    *uart_tx = '\n';
+
+    // Success! Hang forever.
+    while(1) {
+        sleep(1);
+    }
     return 0;
 }
