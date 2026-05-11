@@ -132,37 +132,37 @@
 //}
 
 
-//#include <stdio.h>
-//#include <fcntl.h>
-//#include <unistd.h>
-//#include <sys/stat.h>
-//#include <sys/sysmacros.h>
-//#include <errno.h>
-//
-//int main() {
-//    // 1. Create the dev directory
-//    mkdir("/dev", 0755);
-//    
-//    // 2. Create the console node
-//    mknod("/dev/console", S_IFCHR | 0600, makedev(5, 1));
-//
-//    // 3. MAGIC TRICK: Open with O_NONBLOCK!
-//    // This strictly forbids Linux from going to sleep to wait for your broken PLIC!
-//    int fd = open("/dev/console", O_WRONLY | O_NONBLOCK);
-//    if (fd < 0) {
-//        return 2; // Failed to open
-//    }
-//    
-//        // Because of NONBLOCK, this will bypass the PLIC completely and print to your screen!
-//    int ret =   write(fd, "\n====================\nSUCCESS: A\n====================\n", 53);
-//    if (ret < 0) {
-//        return errno;
-//    }
-//
-//    // Hang forever
-//    while(1) { sleep(1); }
-//    return 0;
-//}
+#include <stdio.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <sys/stat.h>
+#include <sys/sysmacros.h>
+#include <errno.h>
+
+int main() {
+    // 1. Create the dev directory
+    mkdir("/dev", 0755);
+    
+    // 2. Create the console node
+    mknod("/dev/console", S_IFCHR | 0600, makedev(5, 1));
+
+    // 3. MAGIC TRICK: Open with O_NONBLOCK!
+    // This strictly forbids Linux from going to sleep to wait for your broken PLIC!
+    int fd = open("/dev/console", O_WRONLY | O_NONBLOCK);
+    if (fd < 0) {
+        return 2; // Failed to open
+    }
+    
+        // Because of NONBLOCK, this will bypass the PLIC completely and print to your screen!
+    int ret =   write(fd, "\n====================\nSUCCESS: A\n====================\n", 53);
+    if (ret < 0) {
+        return errno;
+    }
+
+    // Hang forever
+    while(1) { sleep(1); }
+    return 0;
+}
 
 
 //#include <stdio.h>
@@ -320,20 +320,20 @@
 //}
   
   
-#include <stdio.h>
-#include <fcntl.h>
-#include <unistd.h>
-
-int main() {
-    // Write to the standard output
-    // This will get 'stuck' in the kernel buffer because of the PLIC bug.
-    printf("\n\n*** IF YOU SEE THIS, PRESS A KEY TO CONTINUE ***\n\n");
-    fflush(stdout);
-
-    // After you see the kernel 'hang', tap 'Enter' or 'p' on your keyboard.
-    // The keypress will trigger a new interrupt edge, which will 
-    // flush the printf buffer above to your screen.
-    
-    while(1) { sleep(1); }
-    return 0;
-} 
+//#include <stdio.h>
+//#include <fcntl.h>
+//#include <unistd.h>
+//
+//int main() {
+//    // Write to the standard output
+//    // This will get 'stuck' in the kernel buffer because of the PLIC bug.
+//    printf("\n\n*** IF YOU SEE THIS, PRESS A KEY TO CONTINUE ***\n\n");
+//    fflush(stdout);
+//
+//    // After you see the kernel 'hang', tap 'Enter' or 'p' on your keyboard.
+//    // The keypress will trigger a new interrupt edge, which will 
+//    // flush the printf buffer above to your screen.
+//    
+//    while(1) { sleep(1); }
+//    return 0;
+//} 
