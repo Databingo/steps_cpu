@@ -217,56 +217,104 @@
 //}
   
   
-  
-  
-  
-  
-  
+//#include <unistd.h>
+//#include <fcntl.h>
+//#include <sys/stat.h>
+//#include <sys/sysmacros.h>
+//#include <errno.h>
+//#include <stdint.h>
+//
+//// Based on your header.vh: Art_base 64'h2004
+//#define UART_TX_ADDR 0x2004
+//
+//int main() {
+//    // 1. Setup /dev/mem
+//    mkdir("/dev", 0755);
+//    mknod("/dev/mem", S_IFCHR | 0600, makedev(1, 1));
+//
+//    // 2. Open /dev/mem
+//    int fd = open("/dev/mem", O_RDWR);
+//    if (fd < 0) return 100 + errno;
+//
+//    // 3. Move the file pointer directly to the UART TX register
+//    if (lseek(fd, UART_TX_ADDR, SEEK_SET) == -1) {
+//        return 200 + errno;
+//    }
+//
+//    // 4. THE HARDWARE POKE: Write 4 bytes (32-bit store)
+//    // We write 'A' and then a newline.
+//    uint32_t val;
+//    
+//    val = 'A';
+//    if (write(fd, &val, 4) < 0) return 300 + errno;
+//    
+//    val = '\n';
+//    write(fd, &val, 4);
+//
+//    val = 'O';
+//    write(fd, &val, 4);
+//    val = 'K';
+//    write(fd, &val, 4);
+//    val = '\n';
+//    write(fd, &val, 4);
+//
+//    // 5. Success! Hang forever.
+//    while(1) {
+//        sleep(1);
+//    }
+//    return 0;
+//} 
+    
+
+
 #include <unistd.h>
 #include <fcntl.h>
+#include <stdint.h>
+#include <errno.h>
 #include <sys/stat.h>
 #include <sys/sysmacros.h>
-#include <errno.h>
-#include <stdint.h>
 
-// Based on your header.vh: Art_base 64'h2004
-#define UART_TX_ADDR 0x2004
+// Based on header.vh: Art_base 64'h2004
+#define UART_PHYS_ADDR 0x2004
 
 int main() {
-    // 1. Setup /dev/mem
+    // 1. Ensure the /dev directory exists
     mkdir("/dev", 0755);
-    mknod("/dev/mem", S_IFCHR | 0600, makedev(1, 1));
 
-    // 2. Open /dev/mem
+    // 2. Refresh the /dev/mem node
+    unlink("/dev/mem"); 
+    if (mknod("/dev/mem", S_IFCHR | 0600, makedev(1, 1)) < 0) {
+        // If this fails, we want to know why (e.g., EEXIST is fine, others are bad)
+        if (errno != 17) return 50 + errno; 
+    }
+
+    // 3. Open /dev/mem (Use O_RDWR for hardware access)
     int fd = open("/dev/mem", O_RDWR);
     if (fd < 0) return 100 + errno;
 
-    // 3. Move the file pointer directly to the UART TX register
-    if (lseek(fd, UART_TX_ADDR, SEEK_SET) == -1) {
+    // 4. Move the file pointer to 0x2004
+    // We use lseek instead of pwrite for better compatibility
+    if (lseek(fd, UART_PHYS_ADDR, SEEK_SET) == (off_t)-1) {
         return 200 + errno;
     }
 
-    // 4. THE HARDWARE POKE: Write 4 bytes (32-bit store)
-    // We write 'A' and then a newline.
-    uint32_t val;
-    
-    val = 'A';
-    if (write(fd, &val, 4) < 0) return 300 + errno;
-    
-    val = '\n';
-    write(fd, &val, 4);
+    // 5. HARDWARE POKE: Write 4 bytes (32-bit Store Word)
+    // Writing 4 bytes ensures the FPGA sees a single 32-bit bus transaction.
+    uint32_t val = 'A';
+    if (write(fd, &val, 4) != 4) {
+        return 300 + errno;
+    }
 
-    val = 'O';
-    write(fd, &val, 4);
-    val = 'K';
-    write(fd, &val, 4);
-    val = '\n';
-    write(fd, &val, 4);
+    // Success! Send a few more to be visible
+    val = '\n'; write(fd, &val, 4);
+    val = 'O';  write(fd, &val, 4);
+    val = 'K';  write(fd, &val, 4);
+    val = '\n'; write(fd, &val, 4);
 
-    // 5. Success! Hang forever.
+    // 6. Hang forever so init doesn't exit
     while(1) {
         sleep(1);
     }
+    
     return 0;
-} 
-  
+}
