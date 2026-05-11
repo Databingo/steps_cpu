@@ -267,54 +267,73 @@
     
 
 
-#include <unistd.h>
+//#include <unistd.h>
+//#include <fcntl.h>
+//#include <stdint.h>
+//#include <errno.h>
+//#include <sys/stat.h>
+//#include <sys/sysmacros.h>
+//
+//// Based on header.vh: Art_base 64'h2004
+//#define UART_PHYS_ADDR 0x2004
+//
+//int main() {
+//    // 1. Ensure the /dev directory exists
+//    mkdir("/dev", 0755);
+//
+//    // 2. Refresh the /dev/mem node
+//    unlink("/dev/mem"); 
+//    if (mknod("/dev/mem", S_IFCHR | 0600, makedev(1, 1)) < 0) {
+//        // If this fails, we want to know why (e.g., EEXIST is fine, others are bad)
+//        if (errno != 17) return 50 + errno; 
+//    }
+//
+//    // 3. Open /dev/mem (Use O_RDWR for hardware access)
+//    int fd = open("/dev/mem", O_RDWR);
+//    if (fd < 0) return 100 + errno;
+//
+//    // 4. Move the file pointer to 0x2004
+//    // We use lseek instead of pwrite for better compatibility
+//    if (lseek(fd, UART_PHYS_ADDR, SEEK_SET) == (off_t)-1) {
+//        return 200 + errno;
+//    }
+//
+//    // 5. HARDWARE POKE: Write 4 bytes (32-bit Store Word)
+//    // Writing 4 bytes ensures the FPGA sees a single 32-bit bus transaction.
+//    uint32_t val = 'A';
+//    if (write(fd, &val, 4) != 4) {
+//        return 300 + errno;
+//    }
+//
+//    // Success! Send a few more to be visible
+//    val = '\n'; write(fd, &val, 4);
+//    val = 'O';  write(fd, &val, 4);
+//    val = 'K';  write(fd, &val, 4);
+//    val = '\n'; write(fd, &val, 4);
+//
+//    // 6. Hang forever so init doesn't exit
+//    while(1) {
+//        sleep(1);
+//    }
+//    
+//    return 0;
+//}
+  
+  
+#include <stdio.h>
 #include <fcntl.h>
-#include <stdint.h>
-#include <errno.h>
-#include <sys/stat.h>
-#include <sys/sysmacros.h>
-
-// Based on header.vh: Art_base 64'h2004
-#define UART_PHYS_ADDR 0x2004
+#include <unistd.h>
 
 int main() {
-    // 1. Ensure the /dev directory exists
-    mkdir("/dev", 0755);
+    // Write to the standard output
+    // This will get 'stuck' in the kernel buffer because of the PLIC bug.
+    printf("\n\n*** IF YOU SEE THIS, PRESS A KEY TO CONTINUE ***\n\n");
+    fflush(stdout);
 
-    // 2. Refresh the /dev/mem node
-    unlink("/dev/mem"); 
-    if (mknod("/dev/mem", S_IFCHR | 0600, makedev(1, 1)) < 0) {
-        // If this fails, we want to know why (e.g., EEXIST is fine, others are bad)
-        if (errno != 17) return 50 + errno; 
-    }
-
-    // 3. Open /dev/mem (Use O_RDWR for hardware access)
-    int fd = open("/dev/mem", O_RDWR);
-    if (fd < 0) return 100 + errno;
-
-    // 4. Move the file pointer to 0x2004
-    // We use lseek instead of pwrite for better compatibility
-    if (lseek(fd, UART_PHYS_ADDR, SEEK_SET) == (off_t)-1) {
-        return 200 + errno;
-    }
-
-    // 5. HARDWARE POKE: Write 4 bytes (32-bit Store Word)
-    // Writing 4 bytes ensures the FPGA sees a single 32-bit bus transaction.
-    uint32_t val = 'A';
-    if (write(fd, &val, 4) != 4) {
-        return 300 + errno;
-    }
-
-    // Success! Send a few more to be visible
-    val = '\n'; write(fd, &val, 4);
-    val = 'O';  write(fd, &val, 4);
-    val = 'K';  write(fd, &val, 4);
-    val = '\n'; write(fd, &val, 4);
-
-    // 6. Hang forever so init doesn't exit
-    while(1) {
-        sleep(1);
-    }
+    // After you see the kernel 'hang', tap 'Enter' or 'p' on your keyboard.
+    // The keypress will trigger a new interrupt edge, which will 
+    // flush the printf buffer above to your screen.
     
+    while(1) { sleep(1); }
     return 0;
-}
+} 
