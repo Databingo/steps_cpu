@@ -12,6 +12,16 @@
         reg = <0x00 0x80000000 0x00 0x800000>;
     };
 
+    uart_clk: uart_clk {
+        compatible = "fixed-clock";
+        #clock-cells = <0x00>;
+        clock-frequency = <12500000>;
+    };
+   
+    aliases {
+        serial0 = &uart0;
+    };
+
     cpus {
         #address-cells = <0x01>;
         #size-cells = <0x00>;
@@ -70,8 +80,9 @@
              interrupt-parent = <&plic>;  
              interrupts = <1>;             // claim number
              clock-frequency = <12500000>;
-             status = "disabled";
-             //status = "okay";
+             clocks = <&uart_clk>;
+             //status = "disabled";
+             status = "okay";
          };
 
         /* 3. CLINT: Handles Timer AND IPI (Software Interrupt) */
@@ -106,7 +117,8 @@
        stdout-path = "/soc/uart@2004"; // SoC
        //bootargs = "no4lvl earlycon=sbi console=hvc0 panic=0 init_on_alloc=0 keep_bootcon ignore_loglevel initcall_debug rcu_update.rcu_cpu_stall_suppress=1 rdinit=/bin/sh";
        //bootargs = "no4lvl earlycon=sbi console=hvc0 panic=0 init_on_alloc=0 ignore_loglevel initcall_debug rcu_update.rcu_cpu_stall_suppress=1 rdinit=/hello";
-       bootargs = "no4lvl earlycon=sbi console=hvc0 panic=0 init_on_alloc=0 ignore_loglevel initcall_debug rcu_update.rcu_cpu_stall_suppress=1 rdinit=/sbin/init";
+       //bootargs = "no4lvl earlycon=sbi console=hvc0 panic=0 init_on_alloc=0 ignore_loglevel initcall_debug rcu_update.rcu_cpu_stall_suppress=1 rdinit=/sbin/init";
+       bootargs = "no4lvl earlycon=sbi console=ttySIF0 panic=0 init_on_alloc=0 ignore_loglevel initcall_debug rcu_update.rcu_cpu_stall_suppress=1 rdinit=/sbin/init";
        //bootargs = "no4lvl earlycon=sbi console=hvc0 panic=0 init_on_alloc=0 ignore_loglevel initcall_debug rcu_update.rcu_cpu_stall_suppress=1";
        //bootargs = "no4lvl earlycon=sbi console=hvc0 panic=0 init_on_alloc=0 ignore_loglevel initcall_debug rcu_update.rcu_cpu_stall_suppress=1 rdinit=/bin/busybox -- sh -c 'while true; do echo ALIVE; sleep 1; done'";
        //bootargs = "no4lvl earlycon=sbi console=hvc0 panic=0 init_on_alloc=0 ignore_loglevel initcall_debug rcu_update.rcu_cpu_stall_suppress=1 rdinit=/bin/busybox";
