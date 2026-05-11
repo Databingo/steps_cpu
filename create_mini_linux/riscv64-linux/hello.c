@@ -165,53 +165,108 @@
 //}
 
 
-#include <stdio.h>
-#include <fcntl.h>
-#include <sys/mman.h>
+//#include <stdio.h>
+//#include <fcntl.h>
+//#include <sys/mman.h>
+//#include <unistd.h>
+//#include <stdint.h>
+//#include <sys/stat.h>
+//#include <sys/sysmacros.h>
+//#include <errno.h>
+//
+//// Based on your header.vh: `define Art_base 64'h0000_2004
+//#define UART_PHYS_ADDR 0x2004
+//
+//int main() {
+//    // 1. Create /dev/mem node (Major 1, Minor 1)
+//    mkdir("/dev", 0755);
+//    mknod("/dev/mem", S_IFCHR | 0600, makedev(1, 1));
+//
+//    // 2. Open physical memory
+//    int fd = open("/dev/mem", O_RDWR | O_SYNC);
+//    if (fd < 0) {
+//        return 100 + errno; // If exitcode is 0x6500 (101), no permission
+//    }
+//
+//    // 3. Map the page (mmap must be 4096-byte aligned)
+//    // We map 8KB starting at 0x0000 to cover the 0x2004 address
+//    void *map_ptr = mmap(NULL, 8192, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+//    if (map_ptr == MAP_FAILED) {
+//        return 200 + errno; // If exitcode is 0x??00, mmap failed
+//    }
+//
+//    // 4. Calculate exact hardware pointer
+//    // map_ptr points to 0x0000. Address is 0x2004.
+//    volatile uint32_t *uart_tx = (volatile uint32_t *)((char *)map_ptr + UART_PHYS_ADDR);
+//
+//    // 5. HARDWARE POKE! 
+//    // This writes directly to your FPGA logic, bypassing all drivers.
+//    *uart_tx = 'A'; 
+//    *uart_tx = '\n';
+//    *uart_tx = 'G';
+//    *uart_tx = 'O';
+//    *uart_tx = 'O';
+//    *uart_tx = 'D';
+//    *uart_tx = '\n';
+//
+//    // Success! Hang forever.
+//    while(1) {
+//        sleep(1);
+//    }
+//    return 0;
+//}
+  
+  
+  
+  
+  
+  
+  
 #include <unistd.h>
-#include <stdint.h>
+#include <fcntl.h>
 #include <sys/stat.h>
 #include <sys/sysmacros.h>
 #include <errno.h>
+#include <stdint.h>
 
-// Based on your header.vh: `define Art_base 64'h0000_2004
-#define UART_PHYS_ADDR 0x2004
+// Based on your header.vh: Art_base 64'h2004
+#define UART_TX_ADDR 0x2004
 
 int main() {
-    // 1. Create /dev/mem node (Major 1, Minor 1)
+    // 1. Setup /dev/mem
     mkdir("/dev", 0755);
     mknod("/dev/mem", S_IFCHR | 0600, makedev(1, 1));
 
-    // 2. Open physical memory
-    int fd = open("/dev/mem", O_RDWR | O_SYNC);
-    if (fd < 0) {
-        return 100 + errno; // If exitcode is 0x6500 (101), no permission
+    // 2. Open /dev/mem
+    int fd = open("/dev/mem", O_RDWR);
+    if (fd < 0) return 100 + errno;
+
+    // 3. Move the file pointer directly to the UART TX register
+    if (lseek(fd, UART_TX_ADDR, SEEK_SET) == -1) {
+        return 200 + errno;
     }
 
-    // 3. Map the page (mmap must be 4096-byte aligned)
-    // We map 8KB starting at 0x0000 to cover the 0x2004 address
-    void *map_ptr = mmap(NULL, 8192, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
-    if (map_ptr == MAP_FAILED) {
-        return 200 + errno; // If exitcode is 0x??00, mmap failed
-    }
+    // 4. THE HARDWARE POKE: Write 4 bytes (32-bit store)
+    // We write 'A' and then a newline.
+    uint32_t val;
+    
+    val = 'A';
+    if (write(fd, &val, 4) < 0) return 300 + errno;
+    
+    val = '\n';
+    write(fd, &val, 4);
 
-    // 4. Calculate exact hardware pointer
-    // map_ptr points to 0x0000. Address is 0x2004.
-    volatile uint32_t *uart_tx = (volatile uint32_t *)((char *)map_ptr + UART_PHYS_ADDR);
+    val = 'O';
+    write(fd, &val, 4);
+    val = 'K';
+    write(fd, &val, 4);
+    val = '\n';
+    write(fd, &val, 4);
 
-    // 5. HARDWARE POKE! 
-    // This writes directly to your FPGA logic, bypassing all drivers.
-    *uart_tx = 'A'; 
-    *uart_tx = '\n';
-    *uart_tx = 'G';
-    *uart_tx = 'O';
-    *uart_tx = 'O';
-    *uart_tx = 'D';
-    *uart_tx = '\n';
-
-    // Success! Hang forever.
+    // 5. Success! Hang forever.
     while(1) {
         sleep(1);
     }
     return 0;
-}
+} 
+  
