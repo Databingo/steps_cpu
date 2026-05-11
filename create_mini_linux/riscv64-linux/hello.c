@@ -63,35 +63,70 @@
 //} 
 
 
+//#include <stdio.h>
+//#include <fcntl.h>
+//#include <unistd.h>
+//#include <sys/stat.h>
+//#include <sys/sysmacros.h>
+//
+//int main() {
+//    // 1. Create the /dev directory (if it doesn't exist)
+//    mkdir("/dev", 0755);
+//    
+//    // 2. Create the kmsg node (Major 1, Minor 11)
+//    // Even if devtmpfs is mounted, creating it again won't hurt
+//    mknod("/dev/kmsg", S_IFCHR | 0600, makedev(1, 11));
+//
+//    // 3. Open the kernel log for writing
+//    int fd = open("/dev/kmsg", O_WRONLY);
+//    if (fd < 0) {
+//        return 2; // If panic exitcode is 0x0200, it failed to open /dev/kmsg
+//    }
+//
+//    // 4. Write to kernel log! 
+//    // <1> is the KERN_ALERT prefix to ensure it ignores loglevel filters
+//    // earlycon=sbi will automatically flush this to the screen
+//    int ret = write(fd, "<1>HELLO FROM USERSPACE!\n", 25);
+//    if (ret < 0) {
+//        return 3; // If panic exitcode is 0x0300, it failed to write
+//    }
+//
+//    // Hang forever so it doesn't panic
+//    while(1) { sleep(1); }
+//    return 0;
+//}
+
+
 #include <stdio.h>
 #include <fcntl.h>
 #include <unistd.h>
 #include <sys/stat.h>
 #include <sys/sysmacros.h>
+#include <errno.h>
 
 int main() {
-    // 1. Create the /dev directory (if it doesn't exist)
+    // 1. Create the /dev directory
     mkdir("/dev", 0755);
     
-    // 2. Create the kmsg node (Major 1, Minor 11)
-    // Even if devtmpfs is mounted, creating it again won't hurt
-    mknod("/dev/kmsg", S_IFCHR | 0600, makedev(1, 11));
+    // 2. Create the system console node (Major 5, Minor 1)
+    // Because you boot with console=hvc0, this will automatically link to the working SBI console!
+    mknod("/dev/console", S_IFCHR | 0600, makedev(5, 1));
 
-    // 3. Open the kernel log for writing
-    int fd = open("/dev/kmsg", O_WRONLY);
+    // 3. Open the console
+    int fd = open("/dev/console", O_WRONLY);
     if (fd < 0) {
-        return 2; // If panic exitcode is 0x0200, it failed to open /dev/kmsg
+        return 2; // Failed to open
     }
 
-    // 4. Write to kernel log! 
-    // <1> is the KERN_ALERT prefix to ensure it ignores loglevel filters
-    // earlycon=sbi will automatically flush this to the screen
-    int ret = write(fd, "<1>HELLO FROM USERSPACE!\n", 25);
+    // 4. Write to the console
+    int ret = write(fd, "\n\n================================\nSUCCESS! HELLO FROM USER SPACE!\n================================\n\n", 99);
+    
+    // 5. If it fails, return the exact Linux error code!
     if (ret < 0) {
-        return 3; // If panic exitcode is 0x0300, it failed to write
+        return errno; 
     }
 
-    // Hang forever so it doesn't panic
+    // Success! Hang forever so it doesn't panic
     while(1) { sleep(1); }
     return 0;
 }
