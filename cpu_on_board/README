@@ -500,3 +500,6 @@ init=
 /bit/init
 /bint/sh (the emergency fallback)
 
+
+Linux exit code
+9 EBADF bad file descriptor
