@@ -132,37 +132,37 @@
 //}
 
 
-#include <stdio.h>
-#include <fcntl.h>
-#include <unistd.h>
-#include <sys/stat.h>
-#include <sys/sysmacros.h>
-#include <errno.h>
-
-int main() {
-    // 1. Create the dev directory
-    mkdir("/dev", 0755);
-    
-    // 2. Create the console node
-    mknod("/dev/console", S_IFCHR | 0600, makedev(5, 1));
-
-    // 3. MAGIC TRICK: Open with O_NONBLOCK!
-    // This strictly forbids Linux from going to sleep to wait for your broken PLIC!
-    int fd = open("/dev/console", O_WRONLY | O_NONBLOCK);
-    if (fd < 0) {
-        return 2; // Failed to open
-    }
-    
-        // Because of NONBLOCK, this will bypass the PLIC completely and print to your screen!
-    int ret =   write(fd, "\n====================\nSUCCESS: A\n====================\n", 53);
-    if (ret < 0) {
-        return errno;
-    }
-
-    // Hang forever
-    while(1) { sleep(1); }
-    return 0;
-}
+//#include <stdio.h>
+//#include <fcntl.h>
+//#include <unistd.h>
+//#include <sys/stat.h>
+//#include <sys/sysmacros.h>
+//#include <errno.h>
+//
+//int main() {
+//    // 1. Create the dev directory
+//    mkdir("/dev", 0755);
+//    
+//    // 2. Create the console node
+//    mknod("/dev/console", S_IFCHR | 0600, makedev(5, 1));
+//
+//    // 3. MAGIC TRICK: Open with O_NONBLOCK!
+//    // This strictly forbids Linux from going to sleep to wait for your broken PLIC!
+//    int fd = open("/dev/console", O_WRONLY | O_NONBLOCK);
+//    if (fd < 0) {
+//        return 2; // Failed to open
+//    }
+//    
+//        // Because of NONBLOCK, this will bypass the PLIC completely and print to your screen!
+//    int ret =   write(fd, "\n====================\nSUCCESS: A\n====================\n", 53);
+//    if (ret < 0) {
+//        return errno;
+//    }
+//
+//    // Hang forever
+//    while(1) { sleep(1); }
+//    return 0;
+//}
 
 
 //#include <stdio.h>
@@ -337,3 +337,40 @@ int main() {
 //    while(1) { sleep(1); }
 //    return 0;
 //} 
+//
+  
+#include <fcntl.h>
+#include <unistd.h>
+#include <sys/stat.h>
+#include <sys/sysmacros.h>
+#include <errno.h>
+#include <string.h>
+
+int main() {
+    // 1. Ensure /dev exists and create the kmsg node (Major 1, Minor 11)
+    mkdir("/dev", 0755);
+    // If it already exists, errno 17 (EEXIST) is fine.
+    mknod("/dev/kmsg", S_IFCHR | 0600, makedev(1, 11));
+
+    // 2. Open the kernel log buffer
+    int fd = open("/dev/kmsg", O_WRONLY);
+    if (fd < 0) {
+        // Exit code 0x6500 (101) = Permission/No Node
+        // Exit code 0x6600 (102) = ENOENT
+        return 100 + errno;
+    }
+
+    // 3. Write "A" to the kernel log.
+    // Using "<1>" (KERN_ALERT) ensures it bypasses most loglevel filters.
+    const char *msg = "<1>USERSPACE SUCCESS: A\n";
+    if (write(fd, msg, strlen(msg)) < 0) {
+        return 200 + errno;
+    }
+
+    // 4. Hang forever so the kernel doesn't panic
+    while(1) {
+        sleep(1);
+    }
+
+    return 0;
+} 
