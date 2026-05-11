@@ -502,4 +502,4 @@ init=
 
 
 Linux exit code
-9 EBADF bad file descriptor
+9 EBADF bad file descriptor  i.e S not allow U write to SBI

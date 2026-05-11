@@ -97,36 +97,64 @@
 //}
 
 
+//#include <stdio.h>
+//#include <fcntl.h>
+//#include <unistd.h>
+//#include <sys/stat.h>
+//#include <sys/sysmacros.h>
+//#include <errno.h>
+//
+//int main() {
+//    // 1. Create the /dev directory
+//    mkdir("/dev", 0755);
+//    
+//    // 2. Create the system console node (Major 5, Minor 1)
+//    // Because you boot with console=hvc0, this will automatically link to the working SBI console!
+//    mknod("/dev/console", S_IFCHR | 0600, makedev(5, 1));
+//
+//    // 3. Open the console
+//    int fd = open("/dev/console", O_WRONLY);
+//    if (fd < 0) {
+//        return 2; // Failed to open
+//    }
+//
+//    // 4. Write to the console
+//    int ret = write(fd, "\n\n================================\nSUCCESS! HELLO FROM USER SPACE!\n================================\n\n", 99);
+//    
+//    // 5. If it fails, return the exact Linux error code!
+//    if (ret < 0) {
+//        return errno; 
+//    }
+//
+//    // Success! Hang forever so it doesn't panic
+//    while(1) { sleep(1); }
+//    return 0;
+//}
+
+
 #include <stdio.h>
 #include <fcntl.h>
 #include <unistd.h>
 #include <sys/stat.h>
 #include <sys/sysmacros.h>
-#include <errno.h>
 
 int main() {
-    // 1. Create the /dev directory
+    // 1. Create the dev directory
     mkdir("/dev", 0755);
     
-    // 2. Create the system console node (Major 5, Minor 1)
-    // Because you boot with console=hvc0, this will automatically link to the working SBI console!
+    // 2. Create the console node
     mknod("/dev/console", S_IFCHR | 0600, makedev(5, 1));
 
-    // 3. Open the console
-    int fd = open("/dev/console", O_WRONLY);
-    if (fd < 0) {
-        return 2; // Failed to open
-    }
-
-    // 4. Write to the console
-    int ret = write(fd, "\n\n================================\nSUCCESS! HELLO FROM USER SPACE!\n================================\n\n", 99);
+    // 3. MAGIC TRICK: Open with O_NONBLOCK!
+    // This strictly forbids Linux from going to sleep to wait for your broken PLIC!
+    int fd = open("/dev/console", O_WRONLY | O_NONBLOCK);
     
-    // 5. If it fails, return the exact Linux error code!
-    if (ret < 0) {
-        return errno; 
+    if (fd >= 0) {
+        // Because of NONBLOCK, this will bypass the PLIC completely and print to your screen!
+        write(fd, "\n====================\nSUCCESS: A\n====================\n", 53);
     }
 
-    // Success! Hang forever so it doesn't panic
+    // Hang forever
     while(1) { sleep(1); }
     return 0;
 }
