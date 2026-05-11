@@ -63,44 +63,35 @@
 //} 
 
 
-
-
 #include <stdio.h>
 #include <fcntl.h>
-#include <sys/mman.h>
 #include <unistd.h>
-#include <stdint.h>
 #include <sys/stat.h>
 #include <sys/sysmacros.h>
 
-// --- UPDATE THIS TO YOUR EXACT `Art_base` ADDRESS ---
-#define UART_PHYS_BASE 0x20000000 
-
 int main() {
-    // 1. Create /dev/mem node (Major 1, Minor 1)
+    // 1. Create the /dev directory (if it doesn't exist)
     mkdir("/dev", 0755);
-    mknod("/dev/mem", S_IFCHR | 0600, makedev(1, 1));
+    
+    // 2. Create the kmsg node (Major 1, Minor 11)
+    // Even if devtmpfs is mounted, creating it again won't hurt
+    mknod("/dev/kmsg", S_IFCHR | 0600, makedev(1, 11));
 
-    // 2. Open physical memory
-    int fd = open("/dev/mem", O_RDWR | O_SYNC);
+    // 3. Open the kernel log for writing
+    int fd = open("/dev/kmsg", O_WRONLY);
     if (fd < 0) {
-        return 1; // Failed to open memory
+        return 2; // If panic exitcode is 0x0200, it failed to open /dev/kmsg
     }
 
-    // 3. Map the 4KB page containing your UART into User-Space
-    void *map_base = mmap(0, 4096, PROT_READ | PROT_WRITE, MAP_SHARED, fd, UART_PHYS_BASE & ~0xFFF);
-    if (map_base == (void *) -1) {
-        return 1; // Failed to map
+    // 4. Write to kernel log! 
+    // <1> is the KERN_ALERT prefix to ensure it ignores loglevel filters
+    // earlycon=sbi will automatically flush this to the screen
+    int ret = write(fd, "<1>HELLO FROM USERSPACE!\n", 25);
+    if (ret < 0) {
+        return 3; // If panic exitcode is 0x0300, it failed to write
     }
 
-    // 4. Calculate the exact pointer to the SiFive txdata register (offset 0x00)
-    volatile uint32_t *uart_tx = (volatile uint32_t *)((uint8_t *)map_base + (UART_PHYS_BASE & 0xFFF));
-
-    // 5. WRITE DIRECTLY TO FPGA HARDWARE FROM U-MODE!
-    *uart_tx = 'A';
-    *uart_tx = '\n';
-
-    // Hang forever
+    // Hang forever so it doesn't panic
     while(1) { sleep(1); }
     return 0;
 }
