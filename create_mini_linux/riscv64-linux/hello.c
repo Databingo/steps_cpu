@@ -137,6 +137,7 @@
 #include <unistd.h>
 #include <sys/stat.h>
 #include <sys/sysmacros.h>
+#include <errno.h>
 
 int main() {
     // 1. Create the dev directory
@@ -148,10 +149,14 @@ int main() {
     // 3. MAGIC TRICK: Open with O_NONBLOCK!
     // This strictly forbids Linux from going to sleep to wait for your broken PLIC!
     int fd = open("/dev/console", O_WRONLY | O_NONBLOCK);
+    if (fd < 0) {
+        return 2; // Failed to open
+    }
     
-    if (fd >= 0) {
         // Because of NONBLOCK, this will bypass the PLIC completely and print to your screen!
-        write(fd, "\n====================\nSUCCESS: A\n====================\n", 53);
+    int ret =   write(fd, "\n====================\nSUCCESS: A\n====================\n", 53);
+    if (ret < 0) {
+        return errno;
     }
 
     // Hang forever
