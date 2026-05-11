@@ -339,38 +339,77 @@
 //} 
 //
   
+//#include <fcntl.h>
+//#include <unistd.h>
+//#include <sys/stat.h>
+//#include <sys/sysmacros.h>
+//#include <errno.h>
+//#include <string.h>
+//
+//int main() {
+//    // 1. Ensure /dev exists and create the kmsg node (Major 1, Minor 11)
+//    mkdir("/dev", 0755);
+//    // If it already exists, errno 17 (EEXIST) is fine.
+//    mknod("/dev/kmsg", S_IFCHR | 0600, makedev(1, 11));
+//
+//    // 2. Open the kernel log buffer
+//    int fd = open("/dev/kmsg", O_WRONLY);
+//    if (fd < 0) {
+//        // Exit code 0x6500 (101) = Permission/No Node
+//        // Exit code 0x6600 (102) = ENOENT
+//        return 100 + errno;
+//    }
+//
+//    // 3. Write "A" to the kernel log.
+//    // Using "<1>" (KERN_ALERT) ensures it bypasses most loglevel filters.
+//    const char *msg = "<1>USERSPACE SUCCESS: A\n";
+//    if (write(fd, msg, strlen(msg)) < 0) {
+//        return 200 + errno;
+//    }
+//
+//    // 4. Hang forever so the kernel doesn't panic
+//    while(1) {
+//        sleep(1);
+//    }
+//
+//    return 0;
+//} 
+//
+ 
+
 #include <fcntl.h>
 #include <unistd.h>
 #include <sys/stat.h>
 #include <sys/sysmacros.h>
 #include <errno.h>
-#include <string.h>
 
 int main() {
-    // 1. Ensure /dev exists and create the kmsg node (Major 1, Minor 11)
+    // 1. Ensure /dev exists
     mkdir("/dev", 0755);
-    // If it already exists, errno 17 (EEXIST) is fine.
-    mknod("/dev/kmsg", S_IFCHR | 0600, makedev(1, 11));
 
-    // 2. Open the kernel log buffer
-    int fd = open("/dev/kmsg", O_WRONLY);
+    // 2. Create the ttyprintk node
+    // Major 5, Minor 3 is the standard for ttyprintk
+    mknod("/dev/ttyprintk", S_IFCHR | 0600, makedev(5, 3));
+
+    // 3. Open ttyprintk
+    // We use O_WRONLY because we only want to print
+    int fd = open("/dev/ttyprintk", O_WRONLY);
     if (fd < 0) {
-        // Exit code 0x6500 (101) = Permission/No Node
-        // Exit code 0x6600 (102) = ENOENT
+        // If exitcode is 0x6500+ (100+), the node creation or open failed
         return 100 + errno;
     }
 
-    // 3. Write "A" to the kernel log.
-    // Using "<1>" (KERN_ALERT) ensures it bypasses most loglevel filters.
-    const char *msg = "<1>USERSPACE SUCCESS: A\n";
-    if (write(fd, msg, strlen(msg)) < 0) {
+    // 4. WRITE "A"
+    // Since this goes to printk, it bypasses the SiFive UART's TTY "sleep" logic.
+    // It will be printed using the same SBI path as the kernel boot messages.
+    if (write(fd, "USER-SPACE: A\n", 14) < 0) {
+        // If exitcode is 0xC800+ (200+), the write was rejected
         return 200 + errno;
     }
 
-    // 4. Hang forever so the kernel doesn't panic
+    // Hang forever
     while(1) {
         sleep(1);
     }
-
     return 0;
-} 
+}
