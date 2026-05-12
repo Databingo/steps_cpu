@@ -1,7 +1,3 @@
-WHY user-space silence?
-
-
-
 `include "header.vh"
 
 module riscv64(
@@ -1747,12 +1743,15 @@ assign DRAM_CKE = 1; // always enable
 	    // context 0
 	    else if (Plic_enable_ctx0_selected) begin Plic_enable[0] <= bus_write_data; bus_write_done <= 1; end
 	    else if (Plic_threshold_ctx0_selected) begin Plic_threshold[0] <= bus_write_data; bus_write_done <= 1; end
-	    else if (Plic_claim_ctx0_selected) begin bus_write_done <= 1; end // set to 0 when read already
+	    //else if (Plic_claim_ctx0_selected) begin bus_write_done <= 1; end // set to 0 when read already
+	    else if (Plic_claim_ctx0_selected) begin bus_write_done <= 1; if (uart_irq && bus_write_data[2:0]==3'd1) Plic_pending[1]<=1; end // set to 0 when read already; write back IP to claim as done
+        
 	    //else if (Plic_claim_ctx0_selected) begin Plic_pending[bus_write_data] <= 0; bus_write_done <= 1; end
 	    // context 1
 	    else if (Plic_enable_ctx1_selected) begin Plic_enable[1] <= bus_write_data; bus_write_done <= 1; end
 	    else if (Plic_threshold_ctx1_selected) begin Plic_threshold[1] <= bus_write_data; bus_write_done <= 1; end
-	    else if (Plic_claim_ctx1_selected) begin bus_write_done <= 1; end // set to 0 when read already
+	    //else if (Plic_claim_ctx1_selected) begin bus_write_done <= 1; end // set to 0 when read already
+	    else if (Plic_claim_ctx1_selected) begin bus_write_done <= 1; if (uart_irq && bus_write_data[2:0]==3'd1) Plic_pending[1]<=1; end // set to 0 when read already; write back IP to claim as done
 	    //else if (Plic_claim_ctx1_selected) begin Plic_pending[bus_write_data] <= 0; bus_write_done <= 1; end
 	    
         end
@@ -3184,6 +3183,17 @@ print7: # a0, 7 char left one for null
         reg = <0x00 0x80000000 0x00 0x800000>;
     };
 
+    uart_clk: aurt-clock {
+        compatible = "fixed-clock";
+        #clock-cells = <0x00>;
+        clock-frequency = <12500000>;
+    };
+
+    aliases {
+        serial0 = &uart0;
+    };
+
+
     cpus {
         #address-cells = <0x01>;
         #size-cells = <0x00>;
@@ -3236,14 +3246,16 @@ print7: # a0, 7 char left one for null
                
         uart0: uart@2004{
              compatible = "sifive,uart0";  // driver
+             //reg = <0x0 0x2004 0x0 0x10>;
              reg = <0x0 0x2004 0x0 0x20>;
              // if using PLIC point to IRQ 1. If bypass use extended
              //interrupts-extended = <&cpu0_intc 0x09>; // add dummy external interrupt mapping
              interrupt-parent = <&plic>;  
              interrupts = <1>;             // claim number
              clock-frequency = <12500000>;
-             status = "disabled";
-             //status = "okay";
+             clocks = <&uart_clk>;
+             //status = "disabled";
+             status = "okay";
          };
 
         /* 3. CLINT: Handles Timer AND IPI (Software Interrupt) */
@@ -3274,14 +3286,22 @@ print7: # a0, 7 char left one for null
 
 
     chosen { /* Points to the UART below */
-       //stdout-path = "/soc/serial@10000000"; // qemu
-       stdout-path = "/soc/uart@2004"; // SoC
+       // qemu
        //bootargs = "no4lvl earlycon=sbi console=hvc0 panic=0 init_on_alloc=0 keep_bootcon ignore_loglevel initcall_debug rcu_update.rcu_cpu_stall_suppress=1 rdinit=/bin/sh";
        //bootargs = "no4lvl earlycon=sbi console=hvc0 panic=0 init_on_alloc=0 ignore_loglevel initcall_debug rcu_update.rcu_cpu_stall_suppress=1 rdinit=/hello";
-       bootargs = "no4lvl earlycon=sbi console=hvc0 panic=0 init_on_alloc=0 ignore_loglevel initcall_debug rcu_update.rcu_cpu_stall_suppress=1 rdinit=/sbin/init";
+       //bootargs = "no4lvl earlycon=sbi console=hvc0 panic=0 init_on_alloc=0 ignore_loglevel initcall_debug rcu_update.rcu_cpu_stall_suppress=1 rdinit=/sbin/init";
        //bootargs = "no4lvl earlycon=sbi console=hvc0 panic=0 init_on_alloc=0 ignore_loglevel initcall_debug rcu_update.rcu_cpu_stall_suppress=1";
+       //bootargs = "no4lvl earlycon=sbi console=hvc0 panic=0 init_on_alloc=0 ignore_loglevel initcall_debug rcu_update.rcu_cpu_stall_suppress=1 rdinit=/bin/sh -- -c mount,-t,devtmpfs,dev,/dev;echo,HELLO,>,/dev/kmsg";
+       //bootargs = "no4lvl earlycon=sbi console=ttySIF0,115200 keep_bootcon panic=0 init_on_alloc=0 ignore_loglevel initcall_debug rcu_update.rcu_cpu_stall_suppress=1";
        //bootargs = "no4lvl earlycon=sbi console=hvc0 panic=0 init_on_alloc=0 ignore_loglevel initcall_debug rcu_update.rcu_cpu_stall_suppress=1 rdinit=/bin/busybox -- sh -c 'while true; do echo ALIVE; sleep 1; done'";
        //bootargs = "no4lvl earlycon=sbi console=hvc0 panic=0 init_on_alloc=0 ignore_loglevel initcall_debug rcu_update.rcu_cpu_stall_suppress=1 rdinit=/bin/busybox";
+       //bootargs = "no4lvl earlycon=sbi console=hvc0 keep_bootcon panic=0 init_on_alloc=0 ignore_loglevel initcall_debug rcu_update.rcu_cpu_stall_suppress=1";
+       //bootargs = "no4lvl earlycon=sbi console=hvc0 panic=0 init_on_alloc=0 ignore_loglevel initcall_debug rcu_update.rcu_cpu_stall_suppress=1 rdinit=/bin/sleep 100";
+       //bootargs = "no4lvl earlycon=sbi console=hvc0 panic=0 init_on_alloc=0 ignore_loglevel initcall_debug rcu_update.rcu_cpu_stall_suppress=1 rdinit=/bin/echo HELLO /dev/ttyprintk";
+       //bootargs = "no4lvl earlycon=sbi console=ttySIF0 panic=0 init_on_alloc=0 ignore_loglevel initcall_debug rcu_update.rcu_cpu_stall_suppress=1 rdinit=/hello";
+       bootargs = "no4lvl earlycon=sbi console=hvc0 panic=0 init_on_alloc=0 ignore_loglevel initcall_debug rcu_update.rcu_cpu_stall_suppress=1 rdinit=/hello";
+       //stdout-path = "/soc/serial@10000000";
+       stdout-path = "/soc/uart@2004";
     };
 
 
@@ -3383,594 +3403,3 @@ make CROSS_COMPILE=/usr/local/projects/bin/xpack-riscv-none-elf-gcc-14.2.0-3/bin
 #hexdump -C build/platform/generic/firmware/fw_jump.bin > ../fw_jump.bin.txt
 #cp build/platform/generic/firmware/fw_jump.bin ../fw_jump_ns16550a.bin
 #cp my_board.dtb ../my_board.dtb
-
-
-
-
-
-
-
-
-
-
-
-
-`````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````0x000584B300050433
-Jump:
-OpenSBI v1.3
-   ____                    _____ ____ _____
-  / __ \                  / ____|  _ \_   _|
- | |  | |_ __   ___ _ __ | (___ | |_) || |
- | |  | | '_ \ / _ \ '_ \ \___ \|  _ < | |
- | |__| | |_) |  __/ | | |____) | |_) || |_
-  \____/| .__/ \___|_| |_|_____/|___/_____|
-        | |
-        |_|
-
-Platform Name             : riscv-virtio,qemu
-Platform Features         : medeleg
-Platform HART Count       : 1
-Platform IPI Device       : aclint-mswi
-Platform Timer Device     : aclint-mtimer @ 12500000Hz
-Platform Console Device   : sifive_uart
-Platform HSM Device       : ---
-Platform PMU Device       : ---
-Platform Reboot Device    : ---
-Platform Shutdown Device  : ---
-Platform Suspend Device   : ---
-Platform CPPC Device      : ---
-Firmware Base             : 0x80000000
-Firmware Size             : 318 KB
-Firmware RW Offset        : 0x40000
-Firmware RW Size          : 62 KB
-Firmware Heap Offset      : 0x47000
-Firmware Heap Size        : 34 KB (total), 2 KB (reserved), 9 KB (used), 22 KB (free)
-Firmware Scratch Size     : 4096 B (total), 760 B (used), 3336 B (free)
-Runtime SBI Version       : 1.0
-
-Domain0 Name              : root
-Domain0 Boot HART         : 0
-Domain0 HARTs             : 0*
-Domain0 Region00          : 0x0000000002000000-0x000000000200ffff M: (I,R,W) S/U: ()
-Domain0 Region01          : 0x0000000080040000-0x000000008004ffff M: (R,W) S/U: ()
-Domain0 Region02          : 0x0000000080000000-0x000000008003ffff M: (R,X) S/U: ()
-Domain0 Region03          : 0x0000000000000000-0xffffffffffffffff M: (R,W,X) S/U: (R,W,X)
-Domain0 Next Address      : 0x0000000080200000
-Domain0 Next Arg1         : 0x0000000080100000
-Domain0 Next Mode         : S-mode
-Domain0 SysReset          : yes
-Domain0 SysSuspend        : yes
-
-Boot HART ID              : 0
-Boot HART Domain          : root
-Boot HART Priv Version    : unknown
-Boot HART Base ISA        : rv64ima
-Boot HART ISA Extensions  : time
-Boot HART PMP Count       : 1
-Boot HART PMP Granularity : 4
-Boot HART PMP Address Bits: 54
-Boot HART MHPM Count      : 0
-Boot HART MIDELEG         : 0x0000000000000222
-Boot HART MEDELEG         : 0x000000000000b109
-Linux version 6.12.0 (root@ashah-standardpcq35ich92009) (riscv64-buildroot-linux-musl-gcc.br_real (Buildroot -gbfa00da0f) 14.3.0, GNU ld (GNU Binutils) 2.44) #22 Sun May 10 11:45:38 CST 2026
-Machine model: riscv-virtio,qemu
-SBI specification v1.0 detected
-SBI implementation ID=0x1 Version=0x10003
-SBI TIME extension detected
-SBI IPI extension detected
-SBI RFENCE extension detected
-Disabled 4-level and 5-level paging
-earlycon: sbi0 at I/O port 0x0 (options '')
-printk: legacy bootconsole [sbi0] enabled
-printk: debug: ignoring loglevel setting.
-OF: reserved mem: 0x0000000080000000..0x000000008003ffff (256 KiB) nomap non-reusable mmode_resv1@80000000
-OF: reserved mem: 0x0000000080040000..0x000000008004ffff (64 KiB) nomap non-reusable mmode_resv0@80040000
-Zone ranges:
-  DMA32    [mem 0x0000000080000000-0x00000000807fffff]
-  Normal   empty
-Movable zone start for each node
-Early memory node ranges
-  node   0: [mem 0x0000000080000000-0x000000008004ffff]
-  node   0: [mem 0x0000000080050000-0x00000000807fffff]
-Initmem setup node 0 [mem 0x0000000080000000-0x00000000807fffff]
-Falling back to deprecated "riscv,isa"
-riscv: base ISA extensions aim
-riscv: ELF capabilities aim
-pcpu-alloc: s0 r0 d32768 u32768 alloc=1*32768
-pcpu-alloc: [0] 0 
-Kernel command line: no4lvl earlycon=sbi console=hvc0 panic=0 init_on_alloc=0 ignore_loglevel initcall_debug rcu_update.rcu_cpu_stall_suppress=1 rdinit=/sbin/init
-Dentry cache hash table entries: 1024 (order: 1, 8192 bytes, linear)
-Inode-cache hash table entries: 512 (order: 0, 4096 bytes, linear)
-Built 1 zonelists, mobility grouping off.  Total pages: 2048
-mem auto-init: stack:all(zero), heap alloc:off, heap free:off
-SLUB: HWalign=64, Order=0-1, MinObjects=0, CPUs=1, Nodes=1
-NR_IRQS: 64, nr_irqs: 64, preallocated irqs: 0
-riscv-intc: 64 local interrupts mapped
-clocksource: riscv_clocksource: mask: 0xffffffffffffffff max_cycles: 0x2e2049cda, max_idle_ns: 440795202628 ns
-sched_clock: 64 bits at 13MHz, resolution 80ns, wraps every 4398046511080ns
-Calibrating delay loop (skipped), value calculated using timer frequency.. 25.00 BogoMIPS (lpj=50000)
-pid_max: default: 32768 minimum: 301
-Mount-cache hash table entries: 512 (order: 0, 4096 bytes, linear)
-Mountpoint-cache hash table entries: 512 (order: 0, 4096 bytes, linear)
-calling  0xffffffff8010fc00 @ 1
-ASID allocator disabled (0 bits)
-initcall 0xffffffff8010fc00 returned 0 after 0 usecs
-calling  0xffffffff801103f0 @ 1
-initcall 0xffffffff801103f0 returned 0 after 0 usecs
-calling  0xffffffff801109dc @ 1
-initcall 0xffffffff801109dc returned 0 after 0 usecs
-calling  0xffffffff80110a5c @ 1
-initcall 0xffffffff80110a5c returned 0 after 0 usecs
-calling  0xffffffff8011294c @ 1
-initcall 0xffffffff8011294c returned 0 after 0 usecs
-calling  0xffffffff80113f9c @ 1
-initcall 0xffffffff80113f9c returned 0 after 0 usecs
-calling  0xffffffff80116c34 @ 1
-initcall 0xffffffff80116c34 returned 0 after 0 usecs
-calling  0xffffffff8011a62c @ 1
-initcall 0xffffffff8011a62c returned 0 after 0 usecs
-calling  0xffffffff8011b520 @ 1
-initcall 0xffffffff8011b520 returned 0 after 0 usecs
-Memory: 3768K/8192K available (1056K kernel code, 560K rwdata, 164K rodata, 1319K init, 215K bss, 3832K reserved, 0K cma-reserved)
-devtmpfs: initialized
-calling  0xffffffff8011bd90 @ 1
-initcall 0xffffffff8011bd90 returned 0 after 0 usecs
-calling  0xffffffff80110ae0 @ 1
-initcall 0xffffffff80110ae0 returned 0 after 0 usecs
-calling  0xffffffff8011193c @ 1
-initcall 0xffffffff8011193c returned 0 after 0 usecs
-calling  0xffffffff80113b44 @ 1
-clocksource: jiffies: mask: 0xffffffff max_cycles: 0xffffffff, max_idle_ns: 7645041785100000 ns
-initcall 0xffffffff80113b44 returned 0 after 0 usecs
-calling  0xffffffff8011b4d0 @ 1
-initcall 0xffffffff8011b4d0 returned 0 after 0 usecs
-calling  0xffffffff8011b4f8 @ 1
-initcall 0xffffffff8011b4f8 returned 0 after 0 usecs
-calling  0xffffffff800c1128 @ 1
-initcall 0xffffffff800c1128 returned 0 after 4000 usecs
-calling  0xffffffff800e8c20 @ 1
-initcall 0xffffffff800e8c20 returned 0 after 0 usecs
-calling  0xffffffff80112b30 @ 1
-initcall 0xffffffff80112b30 returned 0 after 0 usecs
-calling  0xffffffff80114350 @ 1
-initcall 0xffffffff80114350 returned 0 after 4000 usecs
-calling  0xffffffff8011439c @ 1
-initcall 0xffffffff8011439c returned 0 after 0 usecs
-calling  0xffffffff80117538 @ 1
-initcall 0xffffffff80117538 returned 0 after 0 usecs
-calling  0xffffffff8011d5e4 @ 1
-initcall 0xffffffff8011d5e4 returned 0 after 0 usecs
-calling  0xffffffff8011e67c @ 1
-initcall 0xffffffff8011e67c returned 0 after 0 usecs
-calling  0xffffffff8011eed0 @ 1
-initcall 0xffffffff8011eed0 returned 0 after 0 usecs
-calling  0xffffffff8011f198 @ 1
-initcall 0xffffffff8011f198 returned 0 after 0 usecs
-calling  0xffffffff8011f1a0 @ 1
-initcall 0xffffffff8011f1a0 returned 0 after 0 usecs
-calling  0xffffffff8010c070 @ 1
-initcall 0xffffffff8010c070 returned 0 after 0 usecs
-calling  0xffffffff8010d5dc @ 1
-initcall 0xffffffff8010d5dc returned 0 after 0 usecs
-calling  0xffffffff800d1d8c @ 1
-initcall 0xffffffff800d1d8c returned 0 after 0 usecs
-calling  0xffffffff8010d498 @ 1
-initcall 0xffffffff8010d498 returned 0 after 0 usecs
-calling  0xffffffff8011f624 @ 1
-initcall 0xffffffff8011f624 returned 0 after 4000 usecs
-calling  0xffffffff80110918 @ 1
-initcall 0xffffffff80110918 returned 0 after 0 usecs
-calling  0xffffffff80111478 @ 1
-initcall 0xffffffff80111478 returned 0 after 0 usecs
-calling  0xffffffff80111c48 @ 1
-initcall 0xffffffff80111c48 returned 0 after 0 usecs
-calling  0xffffffff80113ff8 @ 1
-initcall 0xffffffff80113ff8 returned 0 after 0 usecs
-calling  0xffffffff8011425c @ 1
-initcall 0xffffffff8011425c returned 0 after 0 usecs
-calling  0xffffffff8011435c @ 1
-initcall 0xffffffff8011435c returned 0 after 0 usecs
-calling  0xffffffff80115f34 @ 1
-initcall 0xffffffff80115f34 returned 0 after 0 usecs
-calling  0xffffffff80116ce4 @ 1
-initcall 0xffffffff80116ce4 returned 0 after 0 usecs
-calling  0xffffffff80057cf8 @ 1
-initcall 0xffffffff80057cf8 returned 0 after 0 usecs
-calling  0xffffffff80057cd0 @ 1
-initcall 0xffffffff80057cd0 returned 0 after 0 usecs
-calling  0xffffffff8011e4e0 @ 1
-initcall 0xffffffff8011e4e0 returned 0 after 0 usecs
-calling  0xffffffff800e8c54 @ 1
-initcall 0xffffffff800e8c54 returned 0 after 0 usecs
-calling  0xffffffff80121b8c @ 1
-initcall 0xffffffff80121b8c returned 0 after 0 usecs
-calling  0xffffffff801104f8 @ 1
-initcall 0xffffffff801104f8 returned 0 after 0 usecs
-calling  0xffffffff80113af4 @ 1
-clocksource: Switched to clocksource riscv_clocksource
-initcall 0xffffffff80113af4 returned 0 after 641 usecs
-calling  0xffffffff8011a240 @ 1
-initcall 0xffffffff8011a240 returned 0 after 54 usecs
-calling  0xffffffff8011a358 @ 1
-initcall 0xffffffff8011a358 returned 0 after 43 usecs
-calling  0xffffffff8011a390 @ 1
-initcall 0xffffffff8011a390 returned 0 after 378 usecs
-calling  0xffffffff8011a410 @ 1
-initcall 0xffffffff8011a410 returned 0 after 72 usecs
-calling  0xffffffff8011a49c @ 1
-initcall 0xffffffff8011a49c returned 0 after 43 usecs
-calling  0xffffffff8011a8b0 @ 1
-initcall 0xffffffff8011a8b0 returned 0 after 42 usecs
-calling  0xffffffff8011b45c @ 1
-initcall 0xffffffff8011b45c returned 0 after 527 usecs
-calling  0xffffffff8011b814 @ 1
-initcall 0xffffffff8011b814 returned 0 after 50 usecs
-calling  0xffffffff8011b870 @ 1
-initcall 0xffffffff8011b870 returned 0 after 50 usecs
-calling  0xffffffff8011b8ac @ 1
-initcall 0xffffffff8011b8ac returned 0 after 51 usecs
-calling  0xffffffff8011b8e0 @ 1
-initcall 0xffffffff8011b8e0 returned 0 after 52 usecs
-calling  0xffffffff8011b928 @ 1
-initcall 0xffffffff8011b928 returned 0 after 50 usecs
-calling  0xffffffff8011b964 @ 1
-initcall 0xffffffff8011b964 returned 0 after 49 usecs
-calling  0xffffffff8011b9a8 @ 1
-initcall 0xffffffff8011b9a8 returned 0 after 50 usecs
-calling  0xffffffff8011b9ec @ 1
-initcall 0xffffffff8011b9ec returned 0 after 52 usecs
-calling  0xffffffff8011ba20 @ 1
-initcall 0xffffffff8011ba20 returned 0 after 48 usecs
-calling  0xffffffff8011ba64 @ 1
-initcall 0xffffffff8011ba64 returned 0 after 50 usecs
-calling  0xffffffff8011baa8 @ 1
-initcall 0xffffffff8011baa8 returned 0 after 48 usecs
-calling  0xffffffff8011bba0 @ 1
-initcall 0xffffffff8011bba0 returned 0 after 53 usecs
-calling  0xffffffff8011bbd4 @ 1
-initcall 0xffffffff8011bbd4 returned 0 after 80 usecs
-calling  0xffffffff8011bd84 @ 1
-initcall 0xffffffff8011bd84 returned 0 after 10 usecs
-calling  0xffffffff8011e0c0 @ 1
-initcall 0xffffffff8011e0c0 returned 0 after 10099 usecs
-calling  0xffffffff8010bba4 @ 1
-initcall 0xffffffff8010bba4 returned 0 after 82 usecs
-calling  0xffffffff8010cd84 @ 1
-initcall 0xffffffff8010cd84 returned 0 after 2 usecs
-calling  0xffffffff801100f4 @ 1
-initcall 0xffffffff801100f4 returned 0 after 50 usecs
-calling  0xffffffff80110490 @ 1
-initcall 0xffffffff80110490 returned 0 after 77 usecs
-calling  0xffffffff801137c8 @ 1
-initcall 0xffffffff801137c8 returned 0 after 5 usecs
-calling  0xffffffff80113a0c @ 1
-initcall 0xffffffff80113a0c returned 0 after 1437 usecs
-calling  0xffffffff80113b64 @ 1
-initcall 0xffffffff80113b64 returned 0 after 53 usecs
-calling  0xffffffff80113bac @ 1
-initcall 0xffffffff80113bac returned 0 after 412 usecs
-calling  0xffffffff80113c10 @ 1
-initcall 0xffffffff80113c10 returned 0 after 1426 usecs
-calling  0xffffffff80113c98 @ 1
-initcall 0xffffffff80113c98 returned 0 after 5 usecs
-calling  0xffffffff80113f6c @ 1
-initcall 0xffffffff80113f6c returned 0 after 86 usecs
-calling  0xffffffff801141c4 @ 1
-initcall 0xffffffff801141c4 returned 0 after 11984 usecs
-calling  0xffffffff80116ae4 @ 1
-workingset: timestamp_bits=62 max_order=11 bucket_order=0
-initcall 0xffffffff80116ae4 returned 0 after 600 usecs
-calling  0xffffffff80116de8 @ 1
-initcall 0xffffffff80116de8 returned 0 after 52 usecs
-calling  0xffffffff8011a448 @ 1
-initcall 0xffffffff8011a448 returned 0 after 17 usecs
-calling  0xffffffff8011a74c @ 1
-initcall 0xffffffff8011a74c returned 0 after 53 usecs
-calling  0xffffffff8011ab6c @ 1
-initcall 0xffffffff8011ab6c returned 0 after 16 usecs
-calling  0xffffffff8011bda4 @ 1
-initcall 0xffffffff8011bda4 returned 0 after 53089 usecs
-calling  0xffffffff8011c4b4 @ 1
-initcall 0xffffffff8011c4b4 returned 0 after 438 usecs
-calling  0xffffffff8011cfd8 @ 1
-initcall 0xffffffff8011cfd8 returned 0 after 472 usecs
-calling  0xffffffff8011cfe8 @ 1
-riscv-plic: interrupt-controller@c000000: mapped 31 interrupts with 1 handlers for 2 contexts.
-probe of c000000.interrupt-controller returned 0 after 2912 usecs
-initcall 0xffffffff8011cfe8 returned 0 after 3962 usecs
-calling  0xffffffff8011d000 @ 1
-probe of soc returned 0 after 644 usecs
-initcall 0xffffffff8011d000 returned 0 after 1627 usecs
-calling  0xffffffff8011d524 @ 1
-initcall 0xffffffff8011d524 returned 0 after 456 usecs
-calling  0xffffffff8011d57c @ 1
-initcall 0xffffffff8011d57c returned 0 after 457 usecs
-calling  0xffffffff8011d5d4 @ 1
-initcall 0xffffffff8011d5d4 returned 0 after 497 usecs
-calling  0xffffffff8011d744 @ 1
-initcall 0xffffffff8011d744 returned 0 after 3 usecs
-calling  0xffffffff8011d790 @ 1
-printk: legacy console [hvc0] enabled
-printk: legacy console [hvc0] enabled
-printk: legacy bootconsole [sbi0] disabled
-printk: legacy bootconsole [sbi0] disabled
-initcall 0xffffffff8011d790 returned 0 after 94132 usecs
-calling  0xffffffff8011dfc4 @ 1
-initcall 0xffffffff8011dfc4 returned 0 after 688 usecs
-calling  0xffffffff8011e068 @ 1
-initcall 0xffffffff8011e068 returned 0 after 600 usecs
-calling  0xffffffff8011e1ac @ 1
-initcall 0xffffffff8011e1ac returned 0 after 90 usecs
-calling  0xffffffff8011e3c4 @ 1
-initcall 0xffffffff8011e3c4 returned 0 after 8795 usecs
-calling  0xffffffff8011e5a0 @ 1
-initcall 0xffffffff8011e5a0 returned 0 after 830 usecs
-calling  0xffffffff8011ee30 @ 1
-initcall 0xffffffff8011ee30 returned 0 after 853 usecs
-calling  0xffffffff8011eea4 @ 1
-initcall 0xffffffff8011eea4 returned -2 after 51 usecs
-calling  0xffffffff8011f1b0 @ 1
-initcall 0xffffffff8011f1b0 returned 0 after 392 usecs
-calling  0xffffffff8011f1c0 @ 1
-initcall 0xffffffff8011f1c0 returned 0 after 571 usecs
-calling  0xffffffff8010aacc @ 1
-initcall 0xffffffff8010aacc returned 0 after 45 usecs
-calling  0xffffffff80110164 @ 1
-initcall 0xffffffff80110164 returned 0 after 68 usecs
-calling  0xffffffff8011012c @ 1
-initcall 0xffffffff8011012c returned 0 after 47 usecs
-calling  0xffffffff801103c4 @ 1
-initcall 0xffffffff801103c4 returned 0 after 70 usecs
-calling  0xffffffff8011038c @ 1
-initcall 0xffffffff8011038c returned 0 after 51 usecs
-calling  0xffffffff801115a4 @ 1
-initcall 0xffffffff801115a4 returned 0 after 9872 usecs
-calling  0xffffffff80111b8c @ 1
-initcall 0xffffffff80111b8c returned 0 after 176 usecs
-calling  0xffffffff80111d00 @ 1
-initcall 0xffffffff80111d00 returned 0 after 32 usecs
-calling  0xffffffff80111f98 @ 1
-initcall 0xffffffff80111f98 returned 0 after 31 usecs
-calling  0xffffffff80112034 @ 1
-initcall 0xffffffff80112034 returned 0 after 61 usecs
-calling  0xffffffff80111ffc @ 1
-initcall 0xffffffff80111ffc returned 0 after 72 usecs
-calling  0xffffffff80112988 @ 1
-initcall 0xffffffff80112988 returned 0 after 135 usecs
-calling  0xffffffff80119dec @ 1
-initcall 0xffffffff80119dec returned 0 after 3 usecs
-calling  0xffffffff800da810 @ 1
-initcall 0xffffffff800da810 returned 0 after 7 usecs
-calling  0xffffffff800de0c8 @ 1
-initcall 0xffffffff800de0c8 returned 0 after 35091 usecs
-calling  0xffffffff8011f7a8 @ 1
-initcall 0xffffffff8011f7a8 returned 0 after 156 usecs
-calling  0xffffffff8011d1a4 @ 1
-clk: Disabling unused clocks
-initcall 0xffffffff8011d1a4 returned 0 after 328 usecs
-calling  0xffffffff8011f608 @ 1
-initcall 0xffffffff8011f608 returned 0 after 7 usecs
-Freeing unused kernel image (initmem) memory: 1316K
-Kernel memory protection not selected by kernel config.
-Run /sbin/init as init process
-  with arguments:
-    /sbin/init
-  with environment:
-    HOME=/
-    TERM=linux
-pwd
-
-|ir:0x0000000001010113|pc:0xFFFFFFFF801066A4|mip:0x0000000000000000|a0:0x0000000000000000|ms:0x00000002000000A2|va:0xFFFFFFFF80283E50|
-|ir:0x0000000000008067|pc:0xFFFFFFFF801066A8|mip:0x0000000000000000|a0:0x0000000000000000|ms:0x00000002000000A2|va:0xFFFFFFFF80022788|
-|ir:0x00000000100027F3|pc:0xFFFFFFFF80022788|mip:0x0000000000000000|a0:0x0000000000000000|ms:0x00000002000000A2|va:0x0000000000000000|
-|ir:0x000000000027F793|pc:0xFFFFFFFF8002278C|mip:0x0000000000000000|a0:0x0000000000000000|ms:0x00000002000000A2|va:0x0000000200000022|
-|ir:0x0000000002079463|pc:0xFFFFFFFF80022790|mip:0x0000000000000000|a0:0x0000000000000000|ms:0x00000002000000A2|va:0x0000000000000002|
-|ir:0x00000000FA5FF0EF|pc:0xFFFFFFFF800227B8|mip:0x0000000000000000|a0:0x0000000000000000|ms:0x00000002000000A2|va:0xFFFFFFD600579DB2|
-|ir:0x0000000000008067|pc:0xFFFFFFFF8002275C|mip:0x0000000000000000|a0:0x0000000000000000|ms:0x00000002000000A2|va:0xFFFFFFFF800227BC|
-|ir:0x0000000000023783|pc:0xFFFFFFFF800227BC|mip:0x0000000000000000|a0:0x0000000000000000|ms:0x00000002000000A2|va:0xFFFFFFFF80288340|
-|ir:0x0000000006523023|pc:0x000000008000058C|mip:0x0000000000000080|a0:0x0000000000000000|ms:0x0000000200000822|va:0x0000000080046060|
-|ir:0x0000000000B2D293|pc:0x0000000080000594|mip:0x0000000000000080|a0:0x0000000000000000|ms:0x0000000200000822|va:0x0000000200000822|
-|ir:0x000000000032F293|pc:0x0000000080000598|mip:0x0000000000000080|a0:0x0000000000000000|ms:0x0000000200000822|va:0x0000000000400001|
-|ir:0x000000000032A293|pc:0x000000008000059C|mip:0x0000000000000080|a0:0x0000000000000000|ms:0x0000000200000822|va:0x0000000000000001|
-|ir:0x0000000000414133|pc:0x00000000800005A4|mip:0x0000000000000080|a0:0x0000000000000000|ms:0x0000000200000822|va:0xFFFFFFFF80283E60|
-|ir:0x000000000022F2B3|pc:0x00000000800005A8|mip:0x0000000000000080|a0:0x0000000000000000|ms:0x0000000200000822|va:0x0000000000000000|
-|ir:0x0000000000414133|pc:0x00000000800005AC|mip:0x0000000000000080|a0:0x0000000000000000|ms:0x0000000200000822|va:0xFFFFFFFF002C5E60|
-|ir:0x00000000005242B3|pc:0x00000000800005B0|mip:0x0000000000000080|a0:0x0000000000000000|ms:0x0000000200000822|va:0x0000000080046000|
-|ir:0x00000000EE22BC23|pc:0x00000000800005B4|mip:0x0000000000000080|a0:0x0000000000000000|ms:0x0000000200000822|va:0x0000000080045EF8|
-|ir:0x00000000EE828113|pc:0x00000000800005B8|mip:0x0000000000000080|a0:0x0000000000000000|ms:0x0000000200000822|va:0x0000000080046000|
-|ir:0x0000000006023283|pc:0x00000000800005BC|mip:0x0000000000000080|a0:0x0000000000000000|ms:0x0000000200000822|va:0x0000000080046060|
-|ir:0x0000000002513423|pc:0x00000000800005C0|mip:0x0000000000000080|a0:0x0000000000000000|ms:0x0000000200000822|va:0x0000000080045F10|
-|ir:0x0000000034021273|pc:0x00000000800005C4|mip:0x0000000000000080|a0:0x0000000000000000|ms:0x0000000200000822|va:0x0000000080046000|
-|ir:0x00000000341022F3|pc:0x00000000800005C8|mip:0x0000000000000080|a0:0x0000000000000000|ms:0x0000000200000822|va:0x0000000000000000|
-|ir:0x0000000010513023|pc:0x00000000800005CC|mip:0x0000000000000080|a0:0x0000000000000000|ms:0x0000000200000822|va:0x0000000080045FE8|
-|ir:0x0000000000A75713|pc:0xFFFFFFFF800222DC|mip:0x0000000000000000|a0:0x00000000000EE6B2|ms:0x00000002000001A0|va:0x0000000002FAF080|
-|ir:0x0000000004043683|pc:0xFFFFFFFF800222E4|mip:0x0000000000000000|a0:0x00000000000EE6B2|ms:0x00000002000001A0|va:0xFFFFFFFF8028E518|
-|ir:0x0000000040A6D693|pc:0xFFFFFFFF800222E8|mip:0x0000000000000000|a0:0x00000000000EE6B2|ms:0x00000002000001A0|va:0x00000000002088C0|
-|ir:0x0000000002A686B3|pc:0xFFFFFFFF800222EC|mip:0x0000000000000000|a0:0x00000000000EE6B2|ms:0x00000002000001A0|va:0x0000000000000822|
-|ir:0x000000000C075E63|pc:0xFFFFFFFF800222F4|mip:0x0000000000000000|a0:0x00000000000EE6B2|ms:0x00000002000001A0|va:0x0000000A18ECEDFC|
-|ir:0x0000000001B79713|pc:0xFFFFFFFF800223D4|mip:0x0000000000000000|a0:0x00000000000EE6B2|ms:0x00000002000001A0|va:0x0000003000000000|
-|ir:0x00000000F2075EE3|pc:0xFFFFFFFF800223D8|mip:0x0000000000000000|a0:0x00000000000EE6B2|ms:0x00000002000001A0|va:0x8000000000000000|
-|ir:0x0000000005444783|pc:0xFFFFFFFF800223DC|mip:0x0000000000000000|a0:0x00000000000EE6B2|ms:0x00000002000001A0|va:0xFFFFFFFF8028E52C|
-|ir:0x0000000006523023|pc:0x000000008000058C|mip:0x0000000000000080|a0:0x00000000000EE6B2|ms:0x0000000200000920|va:0x0000000080046060|
-|ir:0x0000000000B2D293|pc:0x0000000080000594|mip:0x0000000000000080|a0:0x00000000000EE6B2|ms:0x0000000200000920|va:0x0000000200000920|
-|ir:0x000000000032F293|pc:0x0000000080000598|mip:0x0000000000000080|a0:0x00000000000EE6B2|ms:0x0000000200000920|va:0x0000000000400001|
-|ir:0x000000000032A293|pc:0x000000008000059C|mip:0x0000000000000080|a0:0x00000000000EE6B2|ms:0x0000000200000920|va:0x0000000000000001|
-|ir:0x0000000000414133|pc:0x00000000800005A4|mip:0x0000000000000080|a0:0x00000000000EE6B2|ms:0x0000000200000920|va:0xFFFFFFFF80283A90|
-|ir:0x000000000022F2B3|pc:0x00000000800005A8|mip:0x0000000000000080|a0:0x00000000000EE6B2|ms:0x0000000200000920|va:0x0000000000000000|
-|ir:0x0000000000414133|pc:0x00000000800005AC|mip:0x0000000000000080|a0:0x00000000000EE6B2|ms:0x0000000200000920|va:0xFFFFFFFF002C5A90|
-|ir:0x00000000EE22BC23|pc:0x00000000800005B4|mip:0x0000000000000080|a0:0x00000000000EE6B2|ms:0x0000000200000920|va:0x0000000080045EF8|
-|ir:0x00000000EE828113|pc:0x00000000800005B8|mip:0x0000000000000080|a0:0x00000000000EE6B2|ms:0x0000000200000920|va:0x0000000080046000|
-|ir:0x0000000006023283|pc:0x00000000800005BC|mip:0x0000000000000080|a0:0x00000000000EE6B2|ms:0x0000000200000920|va:0x0000000080046060|
-|ir:0x0000000034021273|pc:0x00000000800005C4|mip:0x0000000000000080|a0:0x00000000000EE6B2|ms:0x0000000200000920|va:0x0000000080046000|
-|ir:0x00000000341022F3|pc:0x00000000800005C8|mip:0x0000000000000080|a0:0x00000000000EE6B2|ms:0x0000000200000920|va:0x0000000000000000|
-|ir:0x0000000010513023|pc:0x00000000800005CC|mip:0x0000000000000080|a0:0x00000000000EE6B2|ms:0x0000000200000920|va:0x0000000080045FE8|
-|ir:0x0000000010513423|pc:0x00000000800005D4|mip:0x0000000000000080|a0:0x00000000000EE6B2|ms:0x0000000200000920|va:0x0000000080045FF0|
-|ir:0x0000000010013823|pc:0x00000000800005D8|mip:0x0000000000000080|a0:0x00000000000EE6B2|ms:0x0000000200000920|va:0x0000000080045FF8|
-|ir:0x0000000000013023|pc:0x00000000800005DC|mip:0x0000000000000080|a0:0x00000000000EE6B2|ms:0x0000000200000920|va:0x0000000080045EE8|
-|ir:0x0000000000313C23|pc:0x00000000800005E4|mip:0x0000000000000080|a0:0x00000000000EE6B2|ms:0x0000000200000920|va:0x0000000080045F00|
-|ir:0x0000000002413023|pc:0x00000000800005E8|mip:0x0000000000000080|a0:0x00000000000EE6B2|ms:0x0000000200000920|va:0x0000000080045F08|pwd^K
-
-
-
-|ir:0x0000000000023783|pc:0xFFFFFFFF80022770|mip:0x0000000000000000|a0:0x0000000000000000|ms:0x00000002000000A0|va:0xFFFFFFFF80288340|
-|ir:0x000000000087F793|pc:0xFFFFFFFF80022774|mip:0x0000000000000000|a0:0x0000000000000000|ms:0x00000002000000A0|va:0x0000000000000000|
-|ir:0x0000000000078663|pc:0xFFFFFFFF80022778|mip:0x0000000000000000|a0:0x0000000000000000|ms:0x00000002000000A0|va:0x0000000000000000|
-|ir:0x000000006FDE30EF|pc:0xFFFFFFFF80022784|mip:0x0000000000000000|a0:0x0000000000000000|ms:0x00000002000000A0|va:0xFFFFFFD600784508|
-|ir:0x0000000000023783|pc:0xFFFFFFFF80106680|mip:0x0000000000000000|a0:0x0000000000000000|ms:0x00000002000000A0|va:0xFFFFFFFF80288340|
-|ir:0x000000000037D793|pc:0xFFFFFFFF80106684|mip:0x0000000000000000|a0:0x0000000000000000|ms:0x00000002000000A0|va:0x0000000000000000|
-|ir:0x000000000017F793|pc:0xFFFFFFFF80106688|mip:0x0000000000000000|a0:0x0000000000000000|ms:0x00000002000000A0|va:0x0000000000000000|
-|ir:0x0000000002079063|pc:0xFFFFFFFF8010668C|mip:0x0000000000000000|a0:0x0000000000000000|ms:0x00000002000000A0|va:0x0000000000000000|
-|ir:0x00000000FF010113|pc:0xFFFFFFFF80106690|mip:0x0000000000000080|a0:0x0000000000000000|ms:0x00000002000000A0|va:0xFFFFFFFF80283E60|
-|ir:0x0000000006523023|pc:0x000000008000058C|mip:0x0000000000000080|a0:0x0000000000000000|ms:0x0000000200000820|va:0x0000000080046060|
-|ir:0x0000000000B2D293|pc:0x0000000080000594|mip:0x0000000000000080|a0:0x0000000000000000|ms:0x0000000200000820|va:0x0000000200000820|
-|ir:0x000000000032F293|pc:0x0000000080000598|mip:0x0000000000000080|a0:0x0000000000000000|ms:0x0000000200000820|va:0x0000000000400001|
-|ir:0x000000000032A293|pc:0x000000008000059C|mip:0x0000000000000080|a0:0x0000000000000000|ms:0x0000000200000820|va:0x0000000000000001|
-|ir:0x0000000000414133|pc:0x00000000800005A4|mip:0x0000000000000080|a0:0x0000000000000000|ms:0x0000000200000820|va:0xFFFFFFFF80283E60|
-|ir:0x000000000022F2B3|pc:0x00000000800005A8|mip:0x0000000000000080|a0:0x0000000000000000|ms:0x0000000200000820|va:0x0000000000000000|
-|ir:0x0000000000414133|pc:0x00000000800005AC|mip:0x0000000000000080|a0:0x0000000000000000|ms:0x0000000200000820|va:0xFFFFFFFF002C5E60|
-|ir:0x00000000005242B3|pc:0x00000000800005B0|mip:0x0000000000000080|a0:0x0000000000000000|ms:0x0000000200000820|va:0x0000000080046000|
-|ir:0x00000000EE22BC23|pc:0x00000000800005B4|mip:0x0000000000000080|a0:0x0000000000000000|ms:0x0000000200000820|va:0x0000000080045EF8|
-|ir:0x00000000EE828113|pc:0x00000000800005B8|mip:0x0000000000000080|a0:0x0000000000000000|ms:0x0000000200000820|va:0x0000000080046000|
-|ir:0x0000000006023283|pc:0x00000000800005BC|mip:0x0000000000000080|a0:0x0000000000000000|ms:0x0000000200000820|va:0x0000000080046060|
-|ir:0x0000000002513423|pc:0x00000000800005C0|mip:0x0000000000000080|a0:0x0000000000000000|ms:0x0000000200000820|va:0x0000000080045F10|
-|ir:0x0000000034021273|pc:0x00000000800005C4|mip:0x0000000000000080|a0:0x0000000000000000|ms:0x0000000200000820|va:0x0000000080046000|
-|ir:0x00000000341022F3|pc:0x00000000800005C8|mip:0x0000000000000080|a0:0x0000000000000000|ms:0x0000000200000820|va:0x0000000000000000|
-|ir:0x0000000010513023|pc:0x00000000800005CC|mip:0x0000000000000080|a0:0x0000000000000000|ms:0x0000000200000820|va:0x0000000080045FE8|
-|ir:0x00000000300022F3|pc:0x00000000800005D0|mip:0x0000000000000080|a0:0x0000000000000000|ms:0x0000000200000820|va:0x0000000000000000|
-|ir:0x0000000010513423|pc:0x00000000800005D4|mip:0x0000000000000080|a0:0x0000000000000000|ms:0x0000000200000820|va:0x0000000080045FF0|
-|ir:0x0000000010013823|pc:0x00000000800005D8|mip:0x0000000000000080|a0:0x0000000000000000|ms:0x0000000200000820|va:0x0000000080045FF8|
-|ir:0x0000000000013023|pc:0x00000000800005DC|mip:0x0000000000000080|a0:0x0000000000000000|ms:0x0000000200000820|va:0x0000000080045EE8|
-|ir:0x0000000000113423|pc:0x00000000800005E0|mip:0x0000000000000080|a0:0x0000000000000000|ms:0x0000000200000820|va:0x0000000080045EF0|
-|ir:0x0000000000313C23|pc:0x00000000800005E4|mip:0x0000000000000080|a0:0x0000000000000000|ms:0x0000000200000820|va:0x0000000080045F00|
-|ir:0x0000000002413023|pc:0x00000000800005E8|mip:0x0000000000000080|a0:0x0000000000000000|ms:0x0000000200000820|va:0x0000000080045F08|
-|ir:0x0000000002613823|pc:0x00000000800005EC|mip:0x0000000000000080|a0:0x0000000000000000|ms:0x0000000200000820|va:0x0000000080045F18|
-|ir:0x0000000002713C23|pc:0x00000000800005F0|mip:0x0000000000000080|a0:0x0000000000000000|ms:0x0000000200000820|va:0x0000000080045F20|
-|ir:0x0000000004813023|pc:0x00000000800005F4|mip:0x0000000000000080|a0:0x0000000000000000|ms:0x0000000200000820|va:0x0000000080045F28|
-|ir:0x0000000004913423|pc:0x00000000800005F8|mip:0x0000000000000080|a0:0x0000000000000000|ms:0x0000000200000820|va:0x0000000080045F30|
-|ir:0x0000000004A13823|pc:0x00000000800005FC|mip:0x0000000000000080|a0:0x0000000000000000|ms:0x0000000200000820|va:0x0000000080045F38|
-|ir:0x0000000004B13C23|pc:0x0000000080000600|mip:0x0000000000000080|a0:0x0000000000000000|ms:0x0000000200000820|va:0x0000000080045F40|
-|ir:0x0000000006C13023|pc:0x0000000080000604|mip:0x0000000000000080|a0:0x0000000000000000|ms:0x0000000200000820|va:0x0000000080045F48|
-|ir:0x0000000006D13423|pc:0x0000000080000608|mip:0x0000000000000080|a0:0x0000000000000000|ms:0x0000000200000820|va:0x0000000080045F50|
-|ir:0x0000000006E13823|pc:0x000000008000060C|mip:0x0000000000000080|a0:0x0000000000000000|ms:0x0000000200000820|va:0x0000000080045F58|
-|ir:0x0000000006F13C23|pc:0x0000000080000610|mip:0x0000000000000080|a0:0x0000000000000000|ms:0x0000000200000820|va:0x0000000080045F60|
-|ir:0x0000000009013023|pc:0x0000000080000614|mip:0x0000000000000080|a0:0x0000000000000000|ms:0x0000000200000820|va:0x0000000080045F68|
-|ir:0x0000000009113423|pc:0x0000000080000618|mip:0x0000000000000080|a0:0x0000000000000000|ms:0x0000000200000820|va:0x0000000080045F70|
-|ir:0x0000000009213823|pc:0x000000008000061C|mip:0x0000000000000080|a0:0x0000000000000000|ms:0x0000000200000820|va:0x0000000080045F78|
-|ir:0x0000000009313C23|pc:0x0000000080000620|mip:0x0000000000000080|a0:0x0000000000000000|ms:0x0000000200000820|va:0x0000000080045F80|
-|ir:0x000000000B413023|pc:0x0000000080000624|mip:0x0000000000000080|a0:0x0000000000000000|ms:0x0000000200000820|va:0x0000000080045F88|
-|ir:0x000000000B513423|pc:0x0000000080000628|mip:0x0000000000000080|a0:0x0000000000000000|ms:0x0000000200000820|va:0x0000000080045F90|
-|ir:0x000000000B613823|pc:0x000000008000062C|mip:0x0000000000000080|a0:0x0000000000000000|ms:0x0000000200000820|va:0x0000000080045F98|
-|ir:0x000000000B713C23|pc:0x0000000080000630|mip:0x0000000000000080|a0:0x0000000000000000|ms:0x0000000200000820|va:0x0000000080045FA0|
-|ir:0x000000000D813023|pc:0x0000000080000634|mip:0x0000000000000080|a0:0x0000000000000000|ms:0x0000000200000820|va:0x0000000080045FA8|
-|ir:0x000000000D913423|pc:0x0000000080000638|mip:0x0000000000000080|a0:0x0000000000000000|ms:0x0000000200000820|va:0x0000000080045FB0|
-|ir:0x000000000DA13823|pc:0x000000008000063C|mip:0x0000000000000080|a0:0x0000000000000000|ms:0x0000000200000820|va:0x0000000080045FB8|
-|ir:0x000000000DB13C23|pc:0x0000000080000640|mip:0x0000000000000080|a0:0x0000000000000000|ms:0x0000000200000820|va:0x0000000080045FC0|
-|ir:0x000000000FC13023|pc:0x0000000080000644|mip:0x0000000000000080|a0:0x0000000000000000|ms:0x0000000200000820|va:0x0000000080045FC8|
-|ir:0x000000000FD13423|pc:0x0000000080000648|mip:0x0000000000000080|a0:0x0000000000000000|ms:0x0000000200000820|va:0x0000000080045FD0|
-|ir:0x000000000FE13823|pc:0x000000008000064C|mip:0x0000000000000080|a0:0x0000000000000000|ms:0x0000000200000820|va:0x0000000080045FD8|
-|ir:0x000000000FF13C23|pc:0x0000000080000650|mip:0x0000000000000080|a0:0x0000000000000000|ms:0x0000000200000820|va:0x0000000080045FE0|
-|ir:0x0000000000010533|pc:0x0000000080000654|mip:0x0000000000000080|a0:0x0000000000000000|ms:0x0000000200000820|va:0x0000000080045EE8|
-|ir:0x00000000084050EF|pc:0x0000000080000658|mip:0x0000000000000080|a0:0x0000000080045EE8|ms:0x0000000200000820|va:0x0000000000000000|
-|ir:0x00000000F8010113|pc:0x00000000800056DC|mip:0x0000000000000080|a0:0x0000000080045EE8|ms:0x0000000200000820|va:0x0000000080045EE8|
-|ir:0x0000000006813823|pc:0x00000000800056E0|mip:0x0000000000000080|a0:0x0000000080045EE8|ms:0x0000000200000820|va:0x0000000080045ED8|
-|ir:0x0000000006913423|pc:0x00000000800056E4|mip:0x0000000000000080|a0:0x0000000080045EE8|ms:0x0000000200000820|va:0x0000000080045ED0|
-|ir:0x0000000006113C23|pc:0x00000000800056E8|mip:0x0000000000000080|a0:0x0000000080045EE8|ms:0x0000000200000820|va:0x0000000080045EE0|
-|ir:0x0000000007213023|pc:0x00000000800056EC|mip:0x0000000000000080|a0:0x0000000080045EE8|ms:0x0000000200000820|va:0x0000000080045EC8|
-|ir:0x0000000005313C23|pc:0x00000000800056F0|mip:0x0000000000000080|a0:0x0000000080045EE8|ms:0x0000000200000820|va:0x0000000080045EC0|
-|ir:0x0000000005413823|pc:0x00000000800056F4|mip:0x0000000000000080|a0:0x0000000080045EE8|ms:0x0000000200000820|va:0x0000000080045EB8|
-|ir:0x0000000005513423|pc:0x00000000800056F8|mip:0x0000000000000080|a0:0x0000000080045EE8|ms:0x0000000200000820|va:0x0000000080045EB0|
-|ir:0x0000000008010413|pc:0x00000000800056FC|mip:0x0000000000000080|a0:0x0000000080045EE8|ms:0x0000000200000820|va:0x0000000080045E68|
-|ir:0x0000000000050493|pc:0x0000000080005700|mip:0x0000000000000080|a0:0x0000000080045EE8|ms:0x0000000200000820|va:0x0000000080045EE8|
-|ir:0x0000000034202973|pc:0x0000000080005704|mip:0x0000000000000080|a0:0x0000000080045EE8|ms:0x0000000200000820|va:0x0000000000000000|
-|ir:0x0000000034302AF3|pc:0x0000000080005708|mip:0x0000000000000080|a0:0x0000000080045EE8|ms:0x0000000200000820|va:0x0000000000000000|
-|ir:0x0000000004800513|pc:0x000000008000570C|mip:0x0000000000000080|a0:0x0000000080045EE8|ms:0x0000000200000820|va:0x0000000000000000|
-|ir:0x0000000043C010EF|pc:0x0000000080005710|mip:0x0000000000000080|a0:0x0000000000000048|ms:0x0000000200000820|va:0x0000000000000000|
-|ir:0x0000000030102773|pc:0x0000000080006B4C|mip:0x0000000000000080|a0:0x0000000000000048|ms:0x0000000200000820|va:0x0000000000000000|
-|ir:0x0000000004070463|pc:0x0000000080006B50|mip:0x0000000000000080|a0:0x0000000000000048|ms:0x0000000200000820|va:0x8000000000141101|
-|ir:0x00000000FBF5061B|pc:0x0000000080006B54|mip:0x0000000000000080|a0:0x0000000000000048|ms:0x0000000200000820|va:0x0000000000000048|
-|ir:0x000000000FF67593|pc:0x0000000080006B58|mip:0x0000000000000080|a0:0x0000000000000048|ms:0x0000000200000820|va:0x0000000000000007|
-|ir:0x0000000001900693|pc:0x0000000080006B5C|mip:0x0000000000000080|a0:0x0000000000000048|ms:0x0000000200000820|va:0x0000000000000000|
-|ir:0x0000000002B6F263|pc:0x0000000080006B60|mip:0x0000000000000080|a0:0x0000000000000048|ms:0x0000000200000820|va:0x0000000000000019|
-|ir:0x0000000000100513|pc:0x0000000080006B84|mip:0x0000000000000080|a0:0x0000000000000048|ms:0x0000000200000820|va:0x0000000000000000|
-|ir:0x0000000000C5153B|pc:0x0000000080006B88|mip:0x0000000000000080|a0:0x0000000000000001|ms:0x0000000200000820|va:0x0000000000000001|
-|ir:0x0000000000E57533|pc:0x0000000080006B8C|mip:0x0000000000000080|a0:0x0000000000000080|ms:0x0000000200000820|va:0x0000000000000080|
-|ir:0x000000000005051B|pc:0x0000000080006B90|mip:0x0000000000000080|a0:0x0000000000000000|ms:0x0000000200000820|va:0x0000000000000000|
-|ir:0x0000000000008067|pc:0x0000000080006B94|mip:0x0000000000000080|a0:0x0000000000000000|ms:0x0000000200000820|va:0x0000000080005714|
-|ir:0x0000000002050A63|pc:0x0000000080005714|mip:0x0000000000000080|a0:0x0000000000000000|ms:0x0000000200000820|va:0x0000000000000000|
-|ir:0x0000000000000A13|pc:0x0000000080005748|mip:0x0000000000000080|a0:0x0000000000000000|ms:0x0000000200000820|va:0x0000000000000000|
-|ir:0x0000000000000993|pc:0x000000008000574C|mip:0x0000000000000080|a0:0x0000000000000000|ms:0x0000000200000820|va:0x0000000000000000|
-|ir:0x00000000FC095AE3|pc:0x0000000080005750|mip:0x0000000000000080|a0:0x0000000000000000|ms:0x0000000200000820|va:0x8000000000000007|
-|ir:0x0000000034002573|pc:0x0000000080005754|mip:0x0000000000000080|a0:0x0000000000000000|ms:0x0000000200000820|va:0x0000000000000000|
-|ir:0x0000000000200593|pc:0x0000000080005758|mip:0x0000000000000080|a0:0x0000000080046000|ms:0x0000000200000820|va:0x0000000000000000|
-|ir:0x000000004C0070EF|pc:0x000000008000575C|mip:0x0000000000000080|a0:0x0000000080046000|ms:0x0000000200000820|va:0x0000000000000000|
-|ir:0x00000000FF010113|pc:0x000000008000CC1C|mip:0x0000000000000080|a0:0x0000000080046000|ms:0x0000000200000820|va:0x0000000080045E68|
-|ir:0x0000000000813023|pc:0x000000008000CC20|mip:0x0000000000000080|a0:0x0000000080046000|ms:0x0000000200000820|va:0x0000000080045E58|
-|ir:0x0000000000113423|pc:0x000000008000CC24|mip:0x0000000000000080|a0:0x0000000080046000|ms:0x0000000200000820|va:0x0000000080045E60|
-|ir:0x0000000001010413|pc:0x000000008000CC28|mip:0x0000000000000080|a0:0x0000000080046000|ms:0x0000000200000820|va:0x0000000080045E58|
-|ir:0x0000000000034797|pc:0x000000008000CC2C|mip:0x0000000000000080|a0:0x0000000080046000|ms:0x0000000200000820|va:0xFFFFFFFF800C89FC|
-|ir:0x000000004EC7B783|pc:0x000000008000CC30|mip:0x0000000000000080|a0:0x0000000080046000|ms:0x0000000200000820|va:0x0000000080041118|
-|ir:0x0000000000813083|pc:0x000000008000CC34|mip:0x0000000000000080|a0:0x0000000080046000|ms:0x0000000200000820|va:0x0000000080045E60|
-|ir:0x0000000000013403|pc:0x000000008000CC38|mip:0x0000000000000080|a0:0x0000000080046000|ms:0x0000000200000820|va:0x0000000080045E58|
-|ir:0x0000000000F50533|pc:0x000000008000CC3C|mip:0x0000000000000080|a0:0x0000000080046000|ms:0x0000000200000820|va:0x0000000080046000|
-|ir:0x0000000000853503|pc:0x000000008000CC40|mip:0x0000000000000080|a0:0x00000000800460B0|ms:0x0000000200000820|va:0x00000000800460B8|
-|ir:0x0000000001010113|pc:0x000000008000CC44|mip:0x0000000000000080|a0:0x0000000000000002|ms:0x0000000200000820|va:0x0000000080045E58|
-|ir:0x0000000000B55533|pc:0x000000008000CC48|mip:0x0000000000000080|a0:0x0000000000000002|ms:0x0000000200000820|va:0x0000000000000002|
-|ir:0x0000000000157513|pc:0x000000008000CC4C|mip:0x0000000000000080|a0:0x0000000000000000|ms:0x0000000200000820|va:0x0000000000000000|
-|ir:0x0000000000008067|pc:0x000000008000CC50|mip:0x0000000000000080|a0:0x0000000000000000|ms:0x0000000200000820|va:0x0000000080005760|
-|ir:0x0000000042050A63|pc:0x0000000080005760|mip:0x0000000000000080|a0:0x0000000000000000|ms:0x0000000200000820|va:0x0000000000000000|
-|ir:0x0000000000191793|pc:0x0000000080005B94|mip:0x0000000000000080|a0:0x0000000000000000|ms:0x0000000200000820|va:0x8000000000000007|
-|ir:0x000000000017D793|pc:0x0000000080005B98|mip:0x0000000000000080|a0:0x0000000000000000|ms:0x0000000200000820|va:0x000000000000000E|
-|ir:0x0000000000700713|pc:0x0000000080005B9C|mip:0x0000000000000080|a0:0x0000000000000000|ms:0x0000000200000820|va:0x0000000000000000|
-|ir:0x00000000B09FE0EF|pc:0x0000000080005C88|mip:0x0000000000000080|a0:0x0000000000000000|ms:0x0000000200000820|va:0xFFFFFFD600579DB2|
-|ir:0x0000000000813023|pc:0x0000000080004794|mip:0x0000000000000080|a0:0x0000000000000000|ms:0x0000000200000820|va:0x0000000080045E58|
-|ir:0x0000000000113423|pc:0x0000000080004798|mip:0x0000000000000080|a0:0x0000000000000000|ms:0x0000000200000820|va:0x0000000080045E60|
-|ir:0x0000000001010413|pc:0x000000008000479C|mip:0x0000000000000080|a0:0x0000000000000000|ms:0x0000000200000820|va:0x0000000080045E58|
-|ir:0x000000003047B073|pc:0x00000000800047A4|mip:0x0000000000000080|a0:0x0000000000000000|ms:0x0000000200000820|va:0x0000000000000080|
-|ir:0x0000000034002573|pc:0x00000000800047A8|mip:0x0000000000000080|a0:0x0000000000000000|ms:0x0000000200000820|va:0x0000000000000000|
-|ir:0x0000000000400593|pc:0x00000000800047AC|mip:0x0000000000000080|a0:0x0000000080046000|ms:0x0000000200000820|va:0x0000000000000000|
-|ir:0x0000000001010113|pc:0xFFFFFFFF801066A4|mip:0x0000000000000000|a0:0x0000000000000000|ms:0x00000002000000A2|va:0xFFFFFFFF80283E50|
-|ir:0x0000000000008067|pc:0xFFFFFFFF801066A8|mip:0x0000000000000000|a0:0x0000000000000000|ms:0x00000002000000A2|va:0xFFFFFFFF80022788|
-|ir:0x00000000100027F3|pc:0xFFFFFFFF80022788|mip:0x0000000000000000|a0:0x0000000000000000|ms:0x00000002000000A2|va:0x0000000000000000|
-|ir:0x000000000027F793|pc:0xFFFFFFFF8002278C|mip:0x0000000000000000|a0:0x0000000000000000|ms:0x00000002000000A2|va:0x0000000200000022|
-|ir:0x0000000002079463|pc:0xFFFFFFFF80022790|mip:0x0000000000000000|a0:0x0000000000000000|ms:0x00000002000000A2|va:0x0000000000000002|
-|ir:0x00000000FA5FF0EF|pc:0xFFFFFFFF800227B8|mip:0x0000000000000000|a0:0x0000000000000000|ms:0x00000002000000A2|va:0xFFFFFFD600579DB2|
-|ir:0x0000000000008067|pc:0xFFFFFFFF8002275C|mip:0x0000000000000000|a0:0x0000000000000000|ms:0x00000002000000A2|va:0xFFFFFFFF800227BC|
-|ir:0x0000000000023783|pc:0xFFFFFFFF800227BC|mip:0x0000000000000000|a0:0x0000000000000000|ms:0x00000002000000A2|va:0xFFFFFFFF80288340|
-|ir:0x0000000006523023|pc:0x000000008000058C|mip:0x0000000000000080|a0:0x0000000000000000|ms:0x0000000200000822|va:0x0000000080046060|
-|ir:0x0000000000B2D293|pc:0x0000000080000594|mip:0x0000000000000080|a0:0x0000000000000000|ms:0x0000000200000822|va:0x0000000200000822|
-|ir:0x000000000032F293|pc:0x0000000080000598|mip:0x0000000000000080|a0:0x0000000000000000|ms:0x0000000200000822|va:0x0000000000400001|
-|ir:0x000000000032A293|pc:0x000000008000059C|mip:0x0000000000000080|a0:0x0000000000000000|ms:0x0000000200000822|va:0x0000000000000001|
-|ir:0x0000000000414133|pc:0x00000000800005A4|mip:0x0000000000000080|a0:0x0000000000000000|ms:0x0000000200000822|va:0xFFFFFFFF80283E60|
-|ir:0x000000000022F2B3|pc:0x00000000800005A8|mip:0x0000000000000080|a0:0x0000000000000000|ms:0x0000000200000822|va:0x0000000000000000|
-|ir:0x0000000000414133|pc:0x00000000800005AC|mip:0x0000000000000080|a0:0x0000000000000000|ms:0x0000000200000822|va:0xFFFFFFFF002C5E60|
-|ir:0x00000000005242B3|pc:0x00000000800005B0|mip:0x0000000000000080|a0:0x0000000000000000|ms:0x0000000200000822|va:0x0000000080046000|
-|ir:0x00000000EE22BC23|pc:0x00000000800005B4|mip:0x0000000000000080|a0:0x0000000000000000|ms:0x0000000200000822|va:0x0000000080045EF8|
-|ir:0x00000000EE828113|pc:0x00000000800005B8|mip:0x0000000000000080|a0:0x0000000000000000|ms:0x0000000200000822|va:0x0000000080046000|
-|ir:0x0000000006023283|pc:0x00000000800005BC|mip:0x0000000000000080|a0:0x0000000000000000|ms:0x0000000200000822|va:0x0000000080046060|
-|ir:0x0000000002513423|pc:0x00000000800005C0|mip:0x0000000000000080|a0:0x0000000000000000|ms:0x0000000200000822|va:0x0000000080045F10|
-|ir:0x0000000034021273|pc:0x00000000800005C4|mip:0x0000000000000080|a0:0x0000000000000000|ms:0x0000000200000822|va:0x0000000080046000|
-|ir:0x00000000341022F3|pc:0x00000000800005C8|mip:0x0000000000000080|a0:0x0000000000000000|ms:0x0000000200000822|va:0x0000000000000000|
-|ir:0x0000000010513023|pc:0x00000000800005CC|mip:0x0000000000000080|a0:0x0000000000000000|ms:0x0000000200000822|va:0x0000000080045FE8|
-|ir:0x00000000300022F3|pc:0x00000000800005D0|mip:0x0000000000000080|a0:0x0000000000000000|ms:0x0000000200000822|va:0x0000000000000000|
-|ir:0x0000000010513423|pc:0x00000000800005D4|mip:0x0000000000000080|a0:0x0000000000000000|ms:0x0000000200000822|va:0x0000000080045FF0|
-|ir:0x0000000010013823|pc:0x00000000800005D8|mip:0x0000000000000080|a0:0x0000000000000000|ms:0x0000000200000822|va:0x0000000080045FF8|
-|ir:0x0000000000013023|pc:0x00000000800005DC|mip:0x0000000000000080|a0:0x0000000000000000|ms:0x0000000200000822|va:0x0000000080045EE8|
-|ir:0x0000000000113423|pc:0x00000000800005E0|mip:0x0000000000000080|a0:0x0000000000000000|ms:0x0000000200000822|va:0x0000000080045EF0|
-|ir:0x0000000000313C23|pc:0x00000000800005E4|mip:0x0000000000000080|a0:0x0000000000000000|ms:0x0000000200000822|va:0x0000000080045F00|
-|ir:0x0000000002413023|pc:0x00000000800005E8|mip:0x0000000000000080|a0:0x0000000000000000|ms:0x0000000200000822|va:0x0000000080045F08|
-|ir:0x0000000002613823|pc:0x00000000800005EC|mip:0x0000000000000080|a0:0x0000000000000000|ms:0x0000000200000822|va:0x0000000080045F18|
-|ir:0x0000000002713C23|pc:0x00000000800005F0|mip:0x0000000000000080|a0:0x0000000000000000|ms:0x0000000200000822|va:0x0000000080045F20|
-|ir:0x0000000004813023|pc:0x00000000800005F4|mip:0x0000000000000080|a0:0x0000000000000000|ms:0x0000000200000822|va:0x0000000080045F28|
-|ir:0x0000000004913423|pc:0x00000000800005F8|mip:0x0000000000000080|a0:0x0000000000000000|ms:0x0000000200000822|va:0x0000000080045F30|
-|ir:0x0000000004A13823|pc:0x00000000800005FC|mip:0x0000000000000080|a0:0x0000000000000000|ms:0x0000000200000822|va:0x0000000080045F38|
-|ir:0x0000000004B13C23|pc:0x0000000080000600|mip:0x0000000000000080|a0:0x0000000000000000|ms:0x0000000200000822|va:0x0000000080045F40|
-|ir:0x0000000006C13023|pc:0x0000000080000604|mip:0x0000000000000080|a0:0x0000000000000000|ms:0x0000000200000822|va:0x0000000080045F48|
-|ir:0x0000000006D13423|pc:0x0000000080000608|mip:0x0000000000000080|a0:0x0000000000000000|ms:0x0000000200000822|va:0x0000000080045F50|
-|ir:0x0000000006E13823|pc:0x000000008000060C|mip:0x0000000000000080|a0:0x0000000000000000|ms:0x0000000200000822|va:0x0000000080045F58|
-|ir:0x0000000006F13C23|pc:0x0000000080000610|mip:0x0000000000000080|a0:0x0000000000000000|ms:0x0000000200000822|va:0x0000000080045F60|
-|ir:0x0000000009013023|pc:0x0000000080000614|mip:0x0000000000000080|a0:0x0000000000000000|ms:0x0000000200000822|va:0x0000000080045F68|
-|ir:0x0000000009113423|pc:0x0000000080000618|mip:0x0000000000000080|a0:0x0000000000000000|ms:0x0000000200000822|va:0x0000000080045F70|
-
-
-
-
