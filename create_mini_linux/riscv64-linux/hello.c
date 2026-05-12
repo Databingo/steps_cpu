@@ -377,6 +377,46 @@
 //
  
 
+//#include <fcntl.h>
+//#include <unistd.h>
+//#include <sys/stat.h>
+//#include <sys/sysmacros.h>
+//#include <errno.h>
+//
+//int main() {
+//    // 1. Ensure /dev exists
+//    mkdir("/dev", 0755);
+//
+//    // 2. Create the ttyprintk node
+//    // Major 5, Minor 3 is the standard for ttyprintk
+//    mknod("/dev/ttyprintk", S_IFCHR | 0600, makedev(5, 3));
+//
+//    // 3. Open ttyprintk
+//    // We use O_WRONLY because we only want to print
+//    int fd = open("/dev/ttyprintk", O_WRONLY);
+//    if (fd < 0) {
+//        // If exitcode is 0x6500+ (100+), the node creation or open failed
+//        return 100 + errno;
+//    }
+//
+//    // 4. WRITE "A"
+//    // Since this goes to printk, it bypasses the SiFive UART's TTY "sleep" logic.
+//    // It will be printed using the same SBI path as the kernel boot messages.
+//    if (write(fd, "USER-SPACE: A\n", 14) < 0) {
+//        // If exitcode is 0xC800+ (200+), the write was rejected
+//        return 200 + errno;
+//    }
+//
+//    // Hang forever
+//    while(1) {
+//        sleep(1);
+//    }
+//    return 0;
+//}
+
+
+
+#include <stdio.h>
 #include <fcntl.h>
 #include <unistd.h>
 #include <sys/stat.h>
@@ -384,32 +424,26 @@
 #include <errno.h>
 
 int main() {
-    // 1. Ensure /dev exists
+    // 1. Create the dev directory
     mkdir("/dev", 0755);
+    
+    // 2. Create the console node
+    mknod("/dev/hvc0", S_IFCHR | 0600, makedev(5, 1));
 
-    // 2. Create the ttyprintk node
-    // Major 5, Minor 3 is the standard for ttyprintk
-    mknod("/dev/ttyprintk", S_IFCHR | 0600, makedev(5, 3));
-
-    // 3. Open ttyprintk
-    // We use O_WRONLY because we only want to print
-    int fd = open("/dev/ttyprintk", O_WRONLY);
+    // 3. MAGIC TRICK: Open with O_NONBLOCK!
+    // This strictly forbids Linux from going to sleep to wait for your broken PLIC!
+    int fd = open("/dev/hvc0", O_WRONLY | O_NONBLOCK);
     if (fd < 0) {
-        // If exitcode is 0x6500+ (100+), the node creation or open failed
-        return 100 + errno;
+        return 2; // Failed to open
     }
-
-    // 4. WRITE "A"
-    // Since this goes to printk, it bypasses the SiFive UART's TTY "sleep" logic.
-    // It will be printed using the same SBI path as the kernel boot messages.
-    if (write(fd, "USER-SPACE: A\n", 14) < 0) {
-        // If exitcode is 0xC800+ (200+), the write was rejected
-        return 200 + errno;
+    
+        // Because of NONBLOCK, this will bypass the PLIC completely and print to your screen!
+    int ret =   write(fd, "\n====================\nSUCCESS: A\n====================\n", 53);
+    if (ret < 0) {
+        return errno;
     }
 
     // Hang forever
-    while(1) {
-        sleep(1);
-    }
+    while(1) { sleep(1); }
     return 0;
 }
