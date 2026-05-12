@@ -434,7 +434,7 @@ int main() {
       
       
     int t = mount("devtmpfs", "/dev", "devtmpfs", 0, NULL);
-    if (t < 0) { return 1;} 
+    if (t < 0) { return 51;} 
     //int r = mknod("/dev/hvc0", S_IFCHR | 0600, makedev(229, 0));
     //if (r < 0) {}
 
@@ -442,10 +442,8 @@ int main() {
     // This strictly forbids Linux from going to sleep to wait for your broken PLIC!
     //int fd = open("/dev/console", O_WRONLY | O_NONBLOCK);
     int fd = open("/dev/hvc0", O_WRONLY | O_NONBLOCK);
-    return fd;
-
-    if (fd < 0) {
-        return 2; // Failed to open
+    //return fd;  // 3
+    if (fd < 0) { return 52; // Failed to open
     }
 
     char test_char = 'A';
@@ -456,13 +454,13 @@ int main() {
     if (dup3(fd, 0, 0) < 0) return 30;
     if (dup3(fd, 1, 0) < 0) return 31;
     if (dup3(fd, 2, 0) < 0) return 32;
+    if (fd > 2) close(fd);
 
     int ret =   write(1, "\n====================\nSUCCESS: A\n====================\n", 54);
     if (ret < 0) {
         return 200 + errno;
     }
 
-    if (fd > 2) close(fd);
     printf("OK\n");
 
 
