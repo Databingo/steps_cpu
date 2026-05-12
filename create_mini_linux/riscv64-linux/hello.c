@@ -438,27 +438,34 @@ int main() {
     //int r = mknod("/dev/hvc0", S_IFCHR | 0600, makedev(229, 0));
     //if (r < 0) {}
 
+    close(0);
+    close(1);
+    close(2);
+
+
+
     // 3. MAGIC TRICK: Open with O_NONBLOCK!
     // This strictly forbids Linux from going to sleep to wait for your broken PLIC!
     //int fd = open("/dev/console", O_WRONLY | O_NONBLOCK);
-    int fd = open("/dev/hvc0", O_RDWR | O_NONBLOCK);
-    //return fd;  // 3
-    if (fd < 0) { 
-        fd = open("/dev/console", O_RDWR | O_NONBLOCK);
-	if (fd < 0) return 52; // Failed to open
-    }
+    //int fd = open("/dev/hvc0", O_RDWR | O_NONBLOCK);
+    ////return fd;  // 3
+    //if (fd < 0) { 
+    //    fd = open("/dev/console", O_RDWR | O_NONBLOCK);
+    //    if (fd < 0) return 52; // Failed to open
+    //}
 
+    int fd0 = open("/dev/hvc0", O_RDWR | O_NONBLOCK);
+    int fd1 = open("/dev/hvc0", O_RDWR | O_NONBLOCK);
+    int fd2 = open("/dev/hvc0", O_RDWR | O_NONBLOCK);
 
-    if (fd != 0) { if (dup3(fd, 0, 0) < 0) return 30; }
-    if (fd != 1) { if (dup3(fd, 1, 0) < 0) return 31; }
-    if (fd != 2) { if (dup3(fd, 2, 0) < 0) return 32; }
+    if (fd1 != 1) { return 50+fd1; }
 
     char test_char = 'A';
     if (write(1, &test_char, 1) < 0){
 	return 100 + errno;
     }
 
-    if (fd > 2) close(fd);
+    //if (fd > 2) close(fd);
 
 
     int ret =   write(1, "\n====================\nSUCCESS: A\n====================\n", 54);
