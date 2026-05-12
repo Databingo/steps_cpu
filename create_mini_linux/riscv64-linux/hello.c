@@ -421,6 +421,7 @@
 #include <unistd.h>
 #include <sys/stat.h>
 #include <sys/sysmacros.h>
+#include <sys/mount.h>
 #include <errno.h>
 
 int main() {
