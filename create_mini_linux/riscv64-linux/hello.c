@@ -442,7 +442,7 @@ int main() {
 
     char test_char = 'A';
     if (write(fd, &test_char, 1) < 0){
-	return errno;
+	return 100 + errno;
     }
 
     if (dup3(fd, 0, 0) < 0) return 30;
@@ -451,7 +451,7 @@ int main() {
 
     int ret =   write(1, "\n====================\nSUCCESS: A\n====================\n", 54);
     if (ret < 0) {
-        return errno;
+        return 200 + errno;
     }
 
     if (fd > 2) close(fd);
