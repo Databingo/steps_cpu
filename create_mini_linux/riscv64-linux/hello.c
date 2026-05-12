@@ -429,13 +429,20 @@ int main() {
     
     // 2. Create the console node
     //mknod("/dev/console", S_IFCHR | 0600, makedev(5, 1));
-    int r = mknod("/dev/hvc0", S_IFCHR | 0600, makedev(229, 0));
-    if (r < 0) {}
+      
+      
+      
+    int t = mount("devtmpfs", "/dev", "devtmpfs", 0, NULL);
+    if (t < 0) { return 1;} 
+    //int r = mknod("/dev/hvc0", S_IFCHR | 0600, makedev(229, 0));
+    //if (r < 0) {}
 
     // 3. MAGIC TRICK: Open with O_NONBLOCK!
     // This strictly forbids Linux from going to sleep to wait for your broken PLIC!
     //int fd = open("/dev/console", O_WRONLY | O_NONBLOCK);
     int fd = open("/dev/hvc0", O_WRONLY | O_NONBLOCK);
+    return fd;
+
     if (fd < 0) {
         return 2; // Failed to open
     }
