@@ -221,7 +221,7 @@ assign DRAM_CKE = 1; // always enable
     reg [1:0] sifive_uart_ie;
     //wire jtag_addr = (bus_read_done == 0 && bus_address == `Art_base) ? 1'b1:1'b0;  
     wire jtag_addr = (bus_address == `ArtIE) ? 1'b1 :  // map IE to Jcontrol1, map Read to Jcontrol1. Else(write) to Data0
-                     ((bus_read_enable || bus_read_done == 0) && bus_address == `Art_base) ? 1'b1:1'b0;  
+                     (bus_read_done == 0 && bus_address == `Art_base) ? 1'b1:1'b0;  
     wire [31:0] jtag_wdata = (bus_address == `ArtIE) ? {30'b0, bus_write_data[0], bus_write_data[1]} : bus_write_data[31:0]; // swap SiFive bits[1:0] to Jtag [0:1] when write to IE// IE bit 0 Tx, bit 1 Rx
                                        
     jtag_uart_system my_jtag_system (
@@ -696,16 +696,14 @@ assign DRAM_CKE = 1; // always enable
 	    else if (Plic_enable_ctx0_selected) begin Plic_enable[0] <= bus_write_data; bus_write_done <= 1; end
 	    else if (Plic_threshold_ctx0_selected) begin Plic_threshold[0] <= bus_write_data; bus_write_done <= 1; end
 	    //else if (Plic_claim_ctx0_selected) begin bus_write_done <= 1; end // set to 0 when read already
-	    //else if (Plic_claim_ctx0_selected) begin bus_write_done <= 1; if (uart_irq && bus_write_data[2:0]==3'd1) Plic_pending[1]<=1; end // set to 0 when read already; write back IP to claim as done
-	    else if (Plic_claim_ctx0_selected) begin bus_write_done <= 1; if (uart_irq && bus_write_data[0]==1'd1) Plic_pending[1]<=1; end // set to 0 when read already; write back IP to claim as done
+	    else if (Plic_claim_ctx0_selected) begin bus_write_done <= 1; if (uart_irq && bus_write_data[2:0]==3'd1) Plic_pending[1]<=1; end // set to 0 when read already; write back IP to claim as done
         
 	    //else if (Plic_claim_ctx0_selected) begin Plic_pending[bus_write_data] <= 0; bus_write_done <= 1; end
 	    // context 1
 	    else if (Plic_enable_ctx1_selected) begin Plic_enable[1] <= bus_write_data; bus_write_done <= 1; end
 	    else if (Plic_threshold_ctx1_selected) begin Plic_threshold[1] <= bus_write_data; bus_write_done <= 1; end
 	    //else if (Plic_claim_ctx1_selected) begin bus_write_done <= 1; end // set to 0 when read already
-	    //else if (Plic_claim_ctx1_selected) begin bus_write_done <= 1; if (uart_irq && bus_write_data[2:0]==3'd1) Plic_pending[1]<=1; end //
-	    else if (Plic_claim_ctx1_selected) begin bus_write_done <= 1; if (uart_irq && bus_write_data[0]==1'd1) Plic_pending[1]<=1; end // set to 0 when read already; write back IPvalue claim as done
+	    else if (Plic_claim_ctx1_selected) begin bus_write_done <= 1; if (uart_irq && bus_write_data[2:0]==3'd1) Plic_pending[1]<=1; end // set to 0 when read already; write back IP to claim as done
 	    //else if (Plic_claim_ctx1_selected) begin Plic_pending[bus_write_data] <= 0; bus_write_done <= 1; end
 	    
         end
