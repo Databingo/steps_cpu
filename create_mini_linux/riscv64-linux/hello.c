@@ -441,20 +441,25 @@ int main() {
     // 3. MAGIC TRICK: Open with O_NONBLOCK!
     // This strictly forbids Linux from going to sleep to wait for your broken PLIC!
     //int fd = open("/dev/console", O_WRONLY | O_NONBLOCK);
-    int fd = open("/dev/hvc0", O_WRONLY | O_NONBLOCK);
+    int fd = open("/dev/hvc0", O_RDWR | O_NONBLOCK);
     //return fd;  // 3
-    if (fd < 0) { return 52; // Failed to open
+    if (fd < 0) { 
+        fd = open("/dev/console", O_RDWR | O_NONBLOCK);
+	if (fd < 0) return 52; // Failed to open
     }
 
-    char test_char = 'A';
-    if (write(fd, &test_char, 1) < 0){
-	return 100 + errno;
-    }
 
     if (dup3(fd, 0, 0) < 0) return 30;
     if (dup3(fd, 1, 0) < 0) return 31;
     if (dup3(fd, 2, 0) < 0) return 32;
+
+    char test_char = 'A';
+    if (write(1, &test_char, 1) < 0){
+	return 100 + errno;
+    }
+
     if (fd > 2) close(fd);
+
 
     int ret =   write(1, "\n====================\nSUCCESS: A\n====================\n", 54);
     if (ret < 0) {
