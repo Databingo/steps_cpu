@@ -449,9 +449,9 @@ int main() {
     }
 
 
-    if (dup3(fd, 0, 0) < 0) return 30;
-    if (dup3(fd, 1, 0) < 0) return 31;
-    if (dup3(fd, 2, 0) < 0) return 32;
+    if (fd != 0) { if (dup3(fd, 0, 0) < 0) return 30; }
+    if (fd != 1) { if (dup3(fd, 1, 0) < 0) return 31; }
+    if (fd != 2) { if (dup3(fd, 2, 0) < 0) return 32; }
 
     char test_char = 'A';
     if (write(1, &test_char, 1) < 0){
