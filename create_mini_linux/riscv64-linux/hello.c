@@ -415,7 +415,7 @@
 //}
 
 
-
+#define _GNU_SOURCE
 #include <stdio.h>
 #include <fcntl.h>
 #include <unistd.h>
@@ -428,17 +428,24 @@ int main() {
     mkdir("/dev", 0755);
     
     // 2. Create the console node
-    mknod("/dev/hvc0", S_IFCHR | 0600, makedev(5, 1));
+    mknod("/dev/console", S_IFCHR | 0600, makedev(5, 1));
 
     // 3. MAGIC TRICK: Open with O_NONBLOCK!
     // This strictly forbids Linux from going to sleep to wait for your broken PLIC!
-    int fd = open("/dev/hvc0", O_WRONLY | O_NONBLOCK);
+    int fd = open("/dev/console", O_WRONLY | O_NONBLOCK);
     if (fd < 0) {
         return 2; // Failed to open
     }
+
+    dup3(fd, 0, 0);
+    dup3(fd, 1, 0);
+    dup3(fd, 2, 0);
+    if (fd > 2) {
+	close(fd);
+    }
     
         // Because of NONBLOCK, this will bypass the PLIC completely and print to your screen!
-    int ret =   write(fd, "\n====================\nSUCCESS: A\n====================\n", 53);
+    int ret =   write(1, "\n====================\nSUCCESS: A\n====================\n", 54);
     if (ret < 0) {
         return errno;
     }
