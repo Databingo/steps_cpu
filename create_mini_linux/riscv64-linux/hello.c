@@ -415,73 +415,136 @@
 //}
 
 
+//#define _GNU_SOURCE
+//#include <stdio.h>
+//#include <fcntl.h>
+//#include <unistd.h>
+//#include <sys/stat.h>
+//#include <sys/sysmacros.h>
+//#include <sys/mount.h>
+//#include <errno.h>
+//#include <fcntl.h>
+//
+//int main() {
+//    // 1. Create the dev directory
+//    mkdir("/dev", 0755);
+//    
+//    // 2. Create the console node
+//    //mknod("/dev/console", S_IFCHR | 0600, makedev(5, 1));
+//      
+//      
+//      
+//    int t = mount("devtmpfs", "/dev", "devtmpfs", 0, NULL);
+//    if (t < 0) { return 51;} 
+//    //int r = mknod("/dev/hvc0", S_IFCHR | 0600, makedev(229, 0));
+//    //if (r < 0) {}
+//
+//    close(0);
+//    close(1);
+//    close(2);
+//
+//
+//
+//    // 3. MAGIC TRICK: Open with O_NONBLOCK!
+//    // This strictly forbids Linux from going to sleep to wait for your broken PLIC!
+//    //int fd = open("/dev/console", O_WRONLY | O_NONBLOCK);
+//    //int fd = open("/dev/hvc0", O_RDWR | O_NONBLOCK);
+//    ////return fd;  // 3
+//    //if (fd < 0) { 
+//    //    fd = open("/dev/console", O_RDWR | O_NONBLOCK);
+//    //    if (fd < 0) return 52; // Failed to open
+//    //}
+//
+//    int fd0 = open("/dev/hvc0", O_RDWR | O_NONBLOCK);
+//    int fd1 = open("/dev/hvc0", O_RDWR | O_NONBLOCK);
+//    int fd2 = open("/dev/hvc0", O_RDWR | O_NONBLOCK);
+//
+//    if (fd1 != 1) { return 900+fd1; }
+//
+//    int flags = fcntl(1, F_GETFL);
+//    if (flags < 0) return 800 + errno;
+//
+//
+//    char test_char = 'A';
+//    if (write(1, &test_char, 1) < 0){
+//	return 700 + errno;
+//    }
+//
+//    //if (fd > 2) close(fd);
+//
+//
+//    int ret =   write(1, "\n====================\nSUCCESS: A\n====================\n", 54);
+//    if (ret < 0) {
+//        return 600 + errno;
+//    }
+//
+//    printf("OK\n");
+//
+//
+//    // Hang forever
+//    while(1) { sleep(1); }
+//    return 0;
+//}
+  
+  
 #define _GNU_SOURCE
-#include <stdio.h>
-#include <fcntl.h>
 #include <unistd.h>
-#include <sys/stat.h>
-#include <sys/sysmacros.h>
 #include <sys/mount.h>
-#include <errno.h>
-#include <fcntl.h>
 
 int main() {
-    // 1. Create the dev directory
+    // Basic setup so we don't crash the kernel immediately
     mkdir("/dev", 0755);
-    
-    // 2. Create the console node
-    //mknod("/dev/console", S_IFCHR | 0600, makedev(5, 1));
-      
-      
-      
-    int t = mount("devtmpfs", "/dev", "devtmpfs", 0, NULL);
-    if (t < 0) { return 51;} 
-    //int r = mknod("/dev/hvc0", S_IFCHR | 0600, makedev(229, 0));
-    //if (r < 0) {}
+    mount("devtmpfs", "/dev", "devtmpfs", 0, NULL);
 
-    close(0);
-    close(1);
-    close(2);
+    unsigned long val64 = 0;
+    unsigned long pattern = 0x123456789ABCDEF0;
+    unsigned char val8 = 0;
 
+    // --- TEST 1: 64-bit Store/Load (SD/LD) ---
+    // This checks if your SDRAM controller and 64-bit data path are stable.
+    asm volatile (
+        "sd %[pat], %[mem]\n"
+        "ld %[res], %[mem]\n"
+        : [res] "=r" (val64), [mem] "+m" (val64)
+        : [pat] "r" (pattern)
+        : "memory"
+    );
+    if (val64 != pattern) return 101; // Exit 101 (0x65): 64-bit SD/LD failed
 
+    // --- TEST 2: Partial Write Persistence ---
+    // Write 64 bits, then overwrite just the bottom 8 bits.
+    // Checks if 'sb' correctly masks bytes in SDRAM.
+    val64 = 0x1111111111111111;
+    asm volatile (
+        "sd %[pat], %[mem]\n"
+        "li t0, 0xAA\n"
+        "sb t0, %[mem]\n"
+        "ld %[res], %[mem]\n"
+        : [res] "=r" (val64), [mem] "+m" (val64)
+        : [pat] "r" (0xBBBBBBBBBBBBBBBB)
+        : "t0", "memory"
+    );
+    // Expected result: 0xBBBBBBBBBBBBBBAA
+    if (val64 != 0xBBBBBBBBBBBBBBAA) return 102; // Exit 102 (0x66): 'sb' corrupted neighboring bytes
 
-    // 3. MAGIC TRICK: Open with O_NONBLOCK!
-    // This strictly forbids Linux from going to sleep to wait for your broken PLIC!
-    //int fd = open("/dev/console", O_WRONLY | O_NONBLOCK);
-    //int fd = open("/dev/hvc0", O_RDWR | O_NONBLOCK);
-    ////return fd;  // 3
-    //if (fd < 0) { 
-    //    fd = open("/dev/console", O_RDWR | O_NONBLOCK);
-    //    if (fd < 0) return 52; // Failed to open
-    //}
+    // --- TEST 3: TLB Dirty Bit / Trap recovery ---
+    // We allocate a new page and write to it. 
+    // This forces the hardware to go through the Store Page Fault -> ISR -> MRET cycle.
+    // If your TLB Duplicate Bug exists, this will likely return garbage.
+    static unsigned long page_test[512] __attribute__((aligned(4096)));
+    page_test[0] = 0;
+    asm volatile (
+        "sd %[pat], %[mem]\n"
+        "ld %[res], %[mem]\n"
+        : [res] "=r" (val64), [mem] "+m" (page_test[0])
+        : [pat] "r" (0x55AA55AA55AA55AA)
+        : "memory"
+    );
+    if (val64 != 0x55AA55AA55AA55AA) return 103; // Exit 103 (0x67): TLB Store-Fault recovery failed
 
-    int fd0 = open("/dev/hvc0", O_RDWR | O_NONBLOCK);
-    int fd1 = open("/dev/hvc0", O_RDWR | O_NONBLOCK);
-    int fd2 = open("/dev/hvc0", O_RDWR | O_NONBLOCK);
-
-    if (fd1 != 1) { return 900+fd1; }
-
-    int flags = fcntl(1, F_GETFL);
-    if (flags < 0) return 800 + errno;
-
-
-    char test_char = 'A';
-    if (write(1, &test_char, 1) < 0){
-	return 700 + errno;
-    }
-
-    //if (fd > 2) close(fd);
-
-
-    int ret =   write(1, "\n====================\nSUCCESS: A\n====================\n", 54);
-    if (ret < 0) {
-        return 600 + errno;
-    }
-
-    printf("OK\n");
-
-
-    // Hang forever
-    while(1) { sleep(1); }
-    return 0;
-}
+    // If we reach here, the hardware basic instructions are working!
+    // We return a unique "Success" code.
+    return 123; 
+} 
+  
+  
