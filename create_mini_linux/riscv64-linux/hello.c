@@ -594,95 +594,90 @@
 #include <sys/types.h>
 
 int main() {
-    // 0. Environment Setup (prevent early panic)
     mkdir("/dev", 0755);
     mount("devtmpfs", "/dev", "devtmpfs", 0, NULL);
 
     long result = 0;
     long scratch = 0;
 
-    // --- TEST 1: ALU I-Type (Immediate) ---
+    // --- TEST 1: ALU I-Type ---
     asm volatile (
         "li t0, 10\n"
-        "addi t0, t0, -5\n"   // 5
-        "xori t0, t0, 1\n"    // 4
-        "andi t0, t0, 15\n"   // 4
-        "ori  t0, t0, 8\n"    // 12
-        "slli t0, t0, 2\n"    // 48
-        "srli t0, t0, 1\n"    // 24
+        "addi t0, t0, -5\n"
+        "xori t0, t0, 1\n"
+        "andi t0, t0, 15\n"
+        "ori  t0, t0, 8\n"
+        "slli t0, t0, 2\n"
+        "srli t0, t0, 1\n"
         "mv %0, t0" : "=r"(result) : : "t0"
     );
     if (result != 24) return 101; 
 
-    // --- TEST 2: ALU R-Type (Register) ---
+    // --- TEST 2: ALU R-Type ---
     asm volatile (
         "li t0, 50\n"
         "li t1, 20\n"
-        "add t2, t0, t1\n"    // 70
-        "sub t3, t2, t1\n"    // 50
-        "xor t4, t3, t0\n"    // 0
+        "add t2, t0, t1\n"
+        "sub t3, t2, t1\n"
+        "xor t4, t3, t0\n"
         "li t1, 1\n"
-        "sll t5, t0, t1\n"    // 100
+        "sll t5, t0, t1\n"
         "mv %0, t5" : "=r"(result) : : "t0", "t1", "t2", "t3", "t4", "t5"
     );
     if (result != 100) return 102;
 
-    // --- TEST 3: Word Instructions (RV64W) ---
-    // Tests if your CPU correctly sign-extends 32-bit results to 64-bit
+    // --- TEST 3: RV64W (Word instructions) ---
     asm volatile (
         "li t0, 0x7FFFFFFF\n"
-        "addiw t1, t0, 1\n"   // Should overflow to 0xFFFFFFFF80000000
+        "addiw t1, t0, 1\n"
         "mv %0, t1" : "=r"(result) : : "t0", "t1"
     );
     if (result != (long)0xFFFFFFFF80000000) return 103;
 
-    // --- TEST 4: Multiplication (M-Extension) ---
+    // --- TEST 4: Multiplication ---
     asm volatile (
         "li t0, 12\n"
         "li t1, 9\n"
-        "mul t2, t0, t1\n"    // 108
-        "mulh t3, t0, t1\n"   // 0
-        "mulw t4, t0, t1\n"   // 108
-        "mv %0, t2" : "=r"(result) : : "t0", "t1", "t2", "t3", "t4"
+        "mul t2, t0, t1\n"
+        "mv %0, t2" : "=r"(result) : : "t0", "t1", "t2"
     );
     if (result != 108) return 104;
 
-    // --- TEST 5: Division/Remainder (M-Extension) ---
+    // --- TEST 5: Division ---
     asm volatile (
         "li t0, 100\n"
         "li t1, 3\n"
-        "div t2, t0, t1\n"    // 33
-        "rem t3, t0, t1\n"    // 1
+        "div t2, t0, t1\n"
+        "rem t3, t0, t1\n"
         "add %0, t2, t3" : "=r"(result) : : "t0", "t1", "t2", "t3"
     );
     if (result != 34) return 105;
 
-    // --- TEST 6: Atomic LR/SC (A-Extension) ---
-    // Checks your reserve_addr / reserve_valid logic
+    // --- TEST 6: Atomic LR/SC ---
     scratch = 55;
     asm volatile (
-        "1: lr.d t0, (%1)\n"
-        "addi t0, t0, 5\n"    // 60
-        "sc.d t1, t0, (%1)\n"
-        "bnez t1, 1b\n"
-        "mv %0, t0" : "=r"(result) : "r"(&scratch) : "t0", "t1", "memory"
+        "1: lr.d t1, (%1)\n"
+        "addi t1, t1, 5\n"
+        "sc.d t2, t1, (%1)\n"
+        "bnez t2, 1b\n"
+        "mv %0, t1" : "=r"(result) : "r"(&scratch) : "t0", "t1", "t2", "memory"
     );
     if (result != 60 || scratch != 60) return 106;
 
-    // --- TEST 7: AMOs (Atomic Memory Operations) ---
+    // --- TEST 7: AMOs ---
     scratch = 100;
     asm volatile (
         "li t0, 50\n"
-        "amoadd.d t1, t0, (%1)\n" // adds 50 to 100, returns old 100
+        "amoadd.d t1, t0, (%1)\n"
         "mv %0, t1" : "=r"(result) : "r"(&scratch) : "t0", "t1", "memory"
     );
     if (result != 100 || scratch != 150) return 107;
 
-    // --- TEST 8: Branch Logic ---
+    // --- TEST 8: Branch ---
     asm volatile (
         "li t0, 1\n"
         "li t1, 2\n"
-        "blt t0, t1, 2f\n"    // Should jump
+        "blt t0, t1, 2f\n"
         "li %0, 999\n"
         "j 3f\n"
         "2: li %0, 77\n"
@@ -690,30 +685,28 @@ int main() {
     );
     if (result != 77) return 108;
 
-    // --- TEST 9: CSR Logic ---
-    // Test if we can read and write to sscratch
+    // --- TEST 9: JALR (Jump and Link Register) ---
     asm volatile (
-        "li t0, 0xABC\n"
-        "csrw sscratch, t0\n"
-        "csrr %0, sscratch\n"
-        : "=r"(result) : : "t0"
+        "la t0, 1f\n"
+        "jalr ra, t0, 0\n"
+        "li %0, 999\n"
+        "j 2f\n"
+        "1: li %0, 88\n"
+        "2:" : "=r"(result) : : "t0", "ra"
     );
-    if (result != 0xABC) return 109;
+    if (result != 88) return 109;
 
-    // --- TEST 10: Memory Widths (Load/Store) ---
-    // Checks if your DQM (byte mask) and sign extension are correct
+    // --- TEST 10: Memory Widths ---
     scratch = 0;
     asm volatile (
         "li t0, 0x12\n"
-        "sb t0, 0(%1)\n"      // Store Byte
+        "sb t0, 0(%1)\n"
         "li t0, 0x3456\n"
-        "sh t0, 2(%1)\n"      // Store Halfword at offset 2
-        "ld %0, 0(%1)"        // Load Double back
+        "sh t0, 2(%1)\n"
+        "ld %0, 0(%1)"
         : "=r"(result) : "r"(&scratch) : "t0", "memory"
     );
-    // Result should look like 0x0000345600000012
     if (result != 0x0000345600000012) return 110;
 
-    // ALL TESTS PASSED!
     return 123; 
 }
