@@ -490,6 +490,8 @@
 #define _GNU_SOURCE
 #include <unistd.h>
 #include <sys/mount.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 
 int main() {
     // Basic setup so we don't crash the kernel immediately
