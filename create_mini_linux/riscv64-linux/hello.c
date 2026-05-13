@@ -423,6 +423,7 @@
 #include <sys/sysmacros.h>
 #include <sys/mount.h>
 #include <errno.h>
+#include <fcntl.h>
 
 int main() {
     // 1. Create the dev directory
@@ -459,6 +460,10 @@ int main() {
     int fd2 = open("/dev/hvc0", O_RDWR | O_NONBLOCK);
 
     if (fd1 != 1) { return 50+fd1; }
+
+    int flags = fcntl(1, F_GETFL);
+    if (flags < 0) return 60 + errno;
+
 
     char test_char = 'A';
     if (write(1, &test_char, 1) < 0){
