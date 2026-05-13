@@ -624,6 +624,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <sys/mount.h>
+#include <sys/stat.h>
 
 // Manual printer for extra safety
 void manual_puts(const char *s) {
