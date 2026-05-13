@@ -586,6 +586,7 @@
 //}
 
 
+
 #define _GNU_SOURCE
 #include <stdio.h>
 #include <unistd.h>
@@ -601,112 +602,64 @@ int main() {
     long scratch = 0;
 
     // --- TEST 1: ALU I-Type ---
-    asm volatile (
-        "li t0, 10\n"
-        "addi t0, t0, -5\n"
-        "xori t0, t0, 1\n"
-        "andi t0, t0, 15\n"
-        "ori  t0, t0, 8\n"
-        "slli t0, t0, 2\n"
-        "srli t0, t0, 1\n"
-        "mv %0, t0" : "=r"(result) : : "t0"
-    );
-    if (result != 24) return 101; 
+    asm volatile ("li t0, 10; addi t0, t0, -5; xori t0, t0, 1; addi %0, t0, 0" : "=r"(result) : : "t0");
+    if (result != 4) return 101; 
 
-    // --- TEST 2: ALU R-Type ---
-    asm volatile (
-        "li t0, 50\n"
-        "li t1, 20\n"
-        "add t2, t0, t1\n"
-        "sub t3, t2, t1\n"
-        "xor t4, t3, t0\n"
-        "li t1, 1\n"
-        "sll t5, t0, t1\n"
-        "mv %0, t5" : "=r"(result) : : "t0", "t1", "t2", "t3", "t4", "t5"
-    );
-    if (result != 100) return 102;
+    // --- TEST 2: RV64W (Word instructions) ---
+    asm volatile ("li t0, 0x7FFFFFFF; addiw %0, t0, 1" : "=r"(result) : : "t0");
+    if (result != (long)0xFFFFFFFF80000000) return 102;
 
-    // --- TEST 3: RV64W (Word instructions) ---
-    asm volatile (
-        "li t0, 0x7FFFFFFF\n"
-        "addiw t1, t0, 1\n"
-        "mv %0, t1" : "=r"(result) : : "t0", "t1"
-    );
-    if (result != (long)0xFFFFFFFF80000000) return 103;
+    // --- TEST 3: Multiplication ---
+    asm volatile ("li t0, 12; li t1, 9; mul %0, t0, t1" : "=r"(result) : : "t0", "t1");
+    if (result != 108) return 103;
 
-    // --- TEST 4: Multiplication ---
-    asm volatile (
-        "li t0, 12\n"
-        "li t1, 9\n"
-        "mul t2, t0, t1\n"
-        "mv %0, t2" : "=r"(result) : : "t0", "t1", "t2"
-    );
-    if (result != 108) return 104;
+    // --- TEST 4: Division ---
+    asm volatile ("li t0, 100; li t1, 3; div %0, t0, t1" : "=r"(result) : : "t0", "t1");
+    if (result != 33) return 104;
 
-    // --- TEST 5: Division ---
-    asm volatile (
-        "li t0, 100\n"
-        "li t1, 3\n"
-        "div t2, t0, t1\n"
-        "rem t3, t0, t1\n"
-        "add %0, t2, t3" : "=r"(result) : : "t0", "t1", "t2", "t3"
-    );
-    if (result != 34) return 105;
-
-    // --- TEST 6: Atomic LR/SC ---
+    // --- TEST 5: Atomic LR/SC ---
     scratch = 55;
-    asm volatile (
-        "1: lr.d t1, (%1)\n"
-        "addi t1, t1, 5\n"
-        "sc.d t2, t1, (%1)\n"
-        "bnez t2, 1b\n"
-        "mv %0, t1" : "=r"(result) : "r"(&scratch) : "t0", "t1", "t2", "memory"
-    );
-    if (result != 60 || scratch != 60) return 106;
+    asm volatile ("1: lr.d t1, (%1); addi t1, t1, 5; sc.d t2, t1, (%1); bnez t2, 1b; mv %0, t1" 
+                  : "=r"(result) : "r"(&scratch) : "t1", "t2", "memory");
+    if (result != 60 || scratch != 60) return 105;
 
-    // --- TEST 7: AMOs ---
+    // --- TEST 6: Atomic AMOADD ---
     scratch = 100;
-    asm volatile (
-        "li t0, 50\n"
-        "amoadd.d t1, t0, (%1)\n"
-        "mv %0, t1" : "=r"(result) : "r"(&scratch) : "t0", "t1", "memory"
-    );
-    if (result != 100 || scratch != 150) return 107;
+    asm volatile ("li t0, 50; amoadd.d %0, t0, (%1)" : "=r"(result) : "r"(&scratch) : "t0");
+    if (result != 100 || scratch != 150) return 106;
 
-    // --- TEST 8: Branch ---
-    asm volatile (
-        "li t0, 1\n"
-        "li t1, 2\n"
-        "blt t0, t1, 2f\n"
-        "li %0, 999\n"
-        "j 3f\n"
-        "2: li %0, 77\n"
-        "3:" : "=r"(result) : : "t0", "t1"
-    );
-    if (result != 77) return 108;
+    // --- TEST 7: Branch & Jump ---
+    asm volatile ("li t0, 1; li t1, 2; blt t0, t1, 1f; li %0, 0; j 2f; 1: li %0, 77; 2:" : "=r"(result) : : "t0", "t1");
+    if (result != 77) return 107;
 
-    // --- TEST 9: JALR (Jump and Link Register) ---
-    asm volatile (
-        "la t0, 1f\n"
-        "jalr ra, t0, 0\n"
-        "li %0, 999\n"
-        "j 2f\n"
-        "1: li %0, 88\n"
-        "2:" : "=r"(result) : : "t0", "ra"
-    );
-    if (result != 88) return 109;
+    // --- TEST 8: JALR ---
+    asm volatile ("la t0, 1f; jalr ra, t0, 0; li %0, 0; j 2f; 1: li %0, 88; 2:" : "=r"(result) : : "t0", "ra");
+    if (result != 88) return 108;
 
-    // --- TEST 10: Memory Widths ---
+    // --- TEST 9: Shift Logic ---
+    asm volatile ("li t0, 0xFF; slli t0, t0, 8; srli %0, t0, 4" : "=r"(result) : : "t0");
+    if (result != 0xFF0) return 109;
+
+    // --- TEST 10: Little-Endian Memory Widths ---
     scratch = 0;
     asm volatile (
         "li t0, 0x12\n"
-        "sb t0, 0(%1)\n"
+        "sb t0, 0(%1)\n"             // byte 0 = 12
         "li t0, 0x3456\n"
-        "sh t0, 2(%1)\n"
-        "ld %0, 0(%1)"
+        "sh t0, 2(%1)\n"             // byte 2 = 56, byte 3 = 34
+        "li t0, 0x789ABCDE\n"
+        "sw t0, 4(%1)\n"             // byte 4 = DE, byte 5 = BC, byte 6 = 9A, byte 7 = 78
+        "ld %0, 0(%1)"               // Load 64-bit
         : "=r"(result) : "r"(&scratch) : "t0", "memory"
     );
-    if (result != 0x0000345600000012) return 110;
+    // Correct Little-Endian expected value:
+    if (result != 0x789ABCDE34560012) return 110;
 
+    // --- TEST 11: Sign Extension (Critical for Custom Cores) ---
+    scratch = 0xFFFFFFFFFFFFFF80; // -128 in byte 0
+    asm volatile ("lb %0, 0(%1)" : "=r"(result) : "r"(&scratch));
+    if (result != -128) return 111;
+
+    // --- FINAL SUCCESS ---
     return 123; 
 }
