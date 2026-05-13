@@ -261,14 +261,25 @@ check_fetch:
      andi x3, x4, 8 # PET.X (bit 3)
      beqz x3, PERM_FAULT
 
+#update_ad:
+#     # 3. Update A/D bits
+#     ori x4, x4, 0x40  # set Accessed bit (bit 6)
+#     li x3, 15
+#     bne x8, x3, write_pte
+#     ori x4, x4, 0x80  # set Dirty bit (bit 7) if store
+
 update_ad:
-     # 3. Update A/D bits
-     ori x4, x4, 0x40  # set Accessed bit (bit 6)
-    #ori x4, x4, 0x41  # set Accessed bit (bit 6) and Valid bit(bit 0)
+     # 3. Update A/D bits and flush only when dirty bit 0->1
      li x3, 15
-    #li x3, 14
-     bne x8, x3, write_pte
-     ori x4, x4, 0x80  # set Dirty bit (bit 7) if store
+     bne x8, x3, set_a # if not store not need set dirty
+     andi x3, x4, 0x80 # if store check Dirty bit 7
+     bnez x3, set_d    # Dirty so no flush for remove duplicate possible
+     sfence.vma        # no dirty so flush the (possible) original 0 drity record in tlb
+set_d:
+     ori x4, x4, 0x80  # set Dirty bit (bit 7) 
+set_a:
+     ori x4, x4, 0x40  # set Accessed bit (bit 6)
+
 write_pte:
      sd x4, 0(x6) # write updated PTE back to memory
      jalr x0, 0(x5)  # return to leaf formatter
