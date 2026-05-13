@@ -1,0 +1,27 @@
+/usr/local/projects/steps_cpu/cpu_on_board/opensbi/build/platform/generic/lib/utils/suspend/fdt_suspend_andes_atcsmu.o: \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/lib/utils/suspend/fdt_suspend_andes_atcsmu.c \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/sbi_visibility.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/build/platform/generic/kconfig/autoconf.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/platform/generic/include/andes/andes.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/sbi_bitops.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/sbi_types.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/sbi_scratch.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/riscv_asm.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/riscv_encoding.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/sbi_const.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/sbi_console.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/sbi_domain.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/riscv_locks.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/sbi_list.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/sbi_hartmask.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/sbi_bitmap.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/sbi_domain_context.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/sbi_domain_data.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/sbi_error.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/sbi_ecall_interface.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/sbi_hart.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/sbi_system.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi_utils/cache/fdt_cmo_helper.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi_utils/fdt/fdt_driver.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi_utils/fdt/fdt_helper.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi_utils/hsm/fdt_hsm_andes_atcsmu.h

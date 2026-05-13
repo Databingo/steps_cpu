@@ -1,0 +1,4 @@
+/usr/local/projects/steps_cpu/cpu_on_board/opensbi/build/platform/generic/mips/mips_warm_boot.o: \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/platform/generic/mips/mips_warm_boot.S \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/sbi_visibility.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/build/platform/generic/kconfig/autoconf.h
