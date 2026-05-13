@@ -585,8 +585,6 @@
 //    return 0;
 //}
 
-
-
 #define _GNU_SOURCE
 #include <stdio.h>
 #include <unistd.h>
@@ -617,9 +615,10 @@ int main() {
     asm volatile ("li t0, 100; li t1, 3; div %0, t0, t1" : "=r"(result) : : "t0", "t1");
     if (result != 33) return 104;
 
-    // --- TEST 5: Atomic LR/SC ---
+    // --- TEST 5: Atomic LR/SC (LOOP REMOVED) ---
+    // If sc.d fails, result or scratch will not be 60, and it will return 105.
     scratch = 55;
-    asm volatile ("1: lr.d t1, (%1); addi t1, t1, 5; sc.d t2, t1, (%1); bnez t2, 1b; mv %0, t1" 
+    asm volatile ("lr.d t1, (%1); addi t1, t1, 5; sc.d t2, t1, (%1); mv %0, t1" 
                   : "=r"(result) : "r"(&scratch) : "t1", "t2", "memory");
     if (result != 60 || scratch != 60) return 105;
 
@@ -628,37 +627,36 @@ int main() {
     asm volatile ("li t0, 50; amoadd.d %0, t0, (%1)" : "=r"(result) : "r"(&scratch) : "t0");
     if (result != 100 || scratch != 150) return 106;
 
-//    // --- TEST 7: Branch & Jump ---
-//    asm volatile ("li t0, 1; li t1, 2; blt t0, t1, 1f; li %0, 0; j 2f; 1: li %0, 77; 2:" : "=r"(result) : : "t0", "t1");
-//    if (result != 77) return 107;
-//
-//    // --- TEST 8: JALR ---
-//    asm volatile ("la t0, 1f; jalr ra, t0, 0; li %0, 0; j 2f; 1: li %0, 88; 2:" : "=r"(result) : : "t0", "ra");
-//    if (result != 88) return 108;
-//
-//    // --- TEST 9: Shift Logic ---
-//    asm volatile ("li t0, 0xFF; slli t0, t0, 8; srli %0, t0, 4" : "=r"(result) : : "t0");
-//    if (result != 0xFF0) return 109;
-//
-//    // --- TEST 10: Little-Endian Memory Widths ---
-//    scratch = 0;
-//    asm volatile (
-//        "li t0, 0x12\n"
-//        "sb t0, 0(%1)\n"             // byte 0 = 12
-//        "li t0, 0x3456\n"
-//        "sh t0, 2(%1)\n"             // byte 2 = 56, byte 3 = 34
-//        "li t0, 0x789ABCDE\n"
-//        "sw t0, 4(%1)\n"             // byte 4 = DE, byte 5 = BC, byte 6 = 9A, byte 7 = 78
-//        "ld %0, 0(%1)"               // Load 64-bit
-//        : "=r"(result) : "r"(&scratch) : "t0", "memory"
-//    );
-//    // Correct Little-Endian expected value:
-//    if (result != 0x789ABCDE34560012) return 110;
-//
-//    // --- TEST 11: Sign Extension (Critical for Custom Cores) ---
-//    scratch = 0xFFFFFFFFFFFFFF80; // -128 in byte 0
-//    asm volatile ("lb %0, 0(%1)" : "=r"(result) : "r"(&scratch));
-//    if (result != -128) return 111;
+    // --- TEST 7: Branch & Jump ---
+    asm volatile ("li t0, 1; li t1, 2; blt t0, t1, 1f; li %0, 0; j 2f; 1: li %0, 77; 2:" : "=r"(result) : : "t0", "t1");
+    if (result != 77) return 107;
+
+    // --- TEST 8: JALR ---
+    asm volatile ("la t0, 1f; jalr ra, t0, 0; li %0, 0; j 2f; 1: li %0, 88; 2:" : "=r"(result) : : : "t0", "ra");
+    if (result != 88) return 108;
+
+    // --- TEST 9: Shift Logic ---
+    asm volatile ("li t0, 0xFF; slli t0, t0, 8; srli %0, t0, 4" : "=r"(result) : : "t0");
+    if (result != 0xFF0) return 109;
+
+    // --- TEST 10: Little-Endian Memory Widths ---
+    scratch = 0;
+    asm volatile (
+        "li t0, 0x12\n"
+        "sb t0, 0(%1)\n"             // byte 0 = 12
+        "li t0, 0x3456\n"
+        "sh t0, 2(%1)\n"             // byte 2 = 56, byte 3 = 34
+        "li t0, 0x789ABCDE\n"
+        "sw t0, 4(%1)\n"             // byte 4 = DE, byte 5 = BC, byte 6 = 9A, byte 7 = 78
+        "ld %0, 0(%1)"               // Load 64-bit
+        : "=r"(result) : "r"(&scratch) : "t0", "memory"
+    );
+    if (result != 0x789ABCDE34560012) return 110;
+
+    // --- TEST 11: Sign Extension ---
+    scratch = 0xFFFFFFFFFFFFFF80; // -128 in byte 0
+    asm volatile ("lb %0, 0(%1)" : "=r"(result) : "r"(&scratch));
+    if (result != -128) return 111;
 
     // --- FINAL SUCCESS ---
     return 123; 
