@@ -588,33 +588,65 @@
 //
 //
 
+//#include <unistd.h>
+//
+//int main() {
+//    // Stage 100: Program started
+//    volatile int stage = 100;
+//    
+//    // Pointer to the UART register
+//    volatile unsigned int *uart_tx = (volatile unsigned int *)0x2004;
+//
+//    // --- STEP 1: Attempt to write 'A' ---
+//    // If this hangs, the CPU is stuck inside the Store instruction logic.
+//    *uart_tx = 'A';
+//    stage = 111; // Reached Stage 111 (0x6F)
+//
+//    // --- STEP 2: Attempt to write 'B' ---
+//    // If this hangs, the first write worked, but the second one is stuck 
+//    // waiting for a 'ready' bit that never comes.
+//    *uart_tx = 'B';
+//    stage = 112; // Reached Stage 112 (0x70)
+//
+//    // --- STEP 3: Final Calculation ---
+//    volatile int x = 100;
+//    volatile int y = 23;
+//    if ((x + y) == 123) {
+//        stage = 123; // Reached FINAL Stage 123 (0x7B)
+//    }
+//
+//    // This return triggers the Kernel Panic exitcode
+//    return stage; 
+//}
+  
+  
+#define _GNU_SOURCE
+#include <stdio.h>
 #include <unistd.h>
+#include <sys/mount.h>
+
+// Manual printer for extra safety
+void manual_puts(const char *s) {
+    volatile unsigned int *uart_tx = (volatile unsigned int *)0x2004;
+    while (*s) {
+        *uart_tx = *s++;
+    }
+}
 
 int main() {
-    // Stage 100: Program started
-    volatile int stage = 100;
-    
-    // Pointer to the UART register
-    volatile unsigned int *uart_tx = (volatile unsigned int *)0x2004;
+    // Setup environment for the C library
+    mkdir("/dev", 0755);
+    mount("devtmpfs", "/dev", "devtmpfs", 0, NULL);
 
-    // --- STEP 1: Attempt to write 'A' ---
-    // If this hangs, the CPU is stuck inside the Store instruction logic.
-    *uart_tx = 'A';
-    stage = 111; // Reached Stage 111 (0x6F)
+    // 1. Manual Print
+    manual_puts("1. MANUAL PRINT: OK\n");
 
-    // --- STEP 2: Attempt to write 'B' ---
-    // If this hangs, the first write worked, but the second one is stuck 
-    // waiting for a 'ready' bit that never comes.
-    *uart_tx = 'B';
-    stage = 112; // Reached Stage 112 (0x70)
+    // 2. Standard C Library Print
+    // Since the hardware is now stable, Linux's console driver should work.
+    // If this prints, your Device Tree and SiFive-wrapper are also correct!
+    printf("2. STANDARD PRINTF: SUCCESS\n");
+    fflush(stdout);
 
-    // --- STEP 3: Final Calculation ---
-    volatile int x = 100;
-    volatile int y = 23;
-    if ((x + y) == 123) {
-        stage = 123; // Reached FINAL Stage 123 (0x7B)
-    }
-
-    // This return triggers the Kernel Panic exitcode
-    return stage; 
-}
+    // Final result
+    return 123; 
+} 
