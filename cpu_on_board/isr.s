@@ -238,6 +238,9 @@ check_permissions:
      li x3, 12
      beq x8, x3, check_fetch
 check_load:
+     li a0, 76 # L
+     sb a0, 0(x7) # debug for load fault
+
      andi x3, x4, 2 # PET.R (bit 1)
      bnez x3, update_ad
      
