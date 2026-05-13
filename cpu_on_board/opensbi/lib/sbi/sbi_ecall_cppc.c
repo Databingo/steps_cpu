@@ -12,9 +12,8 @@
 #include <sbi/sbi_cppc.h>
 
 static int sbi_ecall_cppc_handler(unsigned long extid, unsigned long funcid,
-				  const struct sbi_trap_regs *regs,
-				  unsigned long *out_val,
-				  struct sbi_trap_info *out_trap)
+				  struct sbi_trap_regs *regs,
+				  struct sbi_ecall_return *out)
 {
 	int ret = 0;
 	uint64_t temp;
@@ -22,23 +21,29 @@ static int sbi_ecall_cppc_handler(unsigned long extid, unsigned long funcid,
 	switch (funcid) {
 	case SBI_EXT_CPPC_READ:
 		ret = sbi_cppc_read(regs->a0, &temp);
-		*out_val = temp;
+		out->value = temp;
 		break;
 	case SBI_EXT_CPPC_READ_HI:
 #if __riscv_xlen == 32
 		ret = sbi_cppc_read(regs->a0, &temp);
-		*out_val = temp >> 32;
+		out->value = temp >> 32;
 #else
-		*out_val = 0;
+		out->value = 0;
 #endif
 		break;
 	case SBI_EXT_CPPC_WRITE:
-		ret = sbi_cppc_write(regs->a0, regs->a1);
+#if __riscv_xlen == 32
+		temp = regs->a2;
+		temp = (temp << 32) | regs->a1;
+#else
+		temp = regs->a1;
+#endif
+		ret = sbi_cppc_write(regs->a0, temp);
 		break;
 	case SBI_EXT_CPPC_PROBE:
 		ret = sbi_cppc_probe(regs->a0);
 		if (ret >= 0) {
-			*out_val = ret;
+			out->value = ret;
 			ret = 0;
 		}
 		break;
@@ -60,6 +65,7 @@ static int sbi_ecall_cppc_register_extensions(void)
 }
 
 struct sbi_ecall_extension ecall_cppc = {
+	.name			= "cppc",
 	.extid_start		= SBI_EXT_CPPC,
 	.extid_end		= SBI_EXT_CPPC,
 	.register_extensions	= sbi_ecall_cppc_register_extensions,

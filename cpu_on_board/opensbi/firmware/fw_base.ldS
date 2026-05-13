@@ -20,6 +20,7 @@
 		PROVIDE(_text_start = .);
 		*(.entry)
 		*(.text)
+		*(.text.*)
 		. = ALIGN(8);
 		PROVIDE(_text_end = .);
 	}
@@ -38,19 +39,17 @@
 		. = ALIGN(8);
 	}
 
-	. = ALIGN(0x1000); /* Ensure next section is page aligned */
-
-	.dynsym : {
-		PROVIDE(__dyn_sym_start = .);
+	.dynsym :
+	{
 		*(.dynsym)
-		PROVIDE(__dyn_sym_end = .);
 	}
 
+	. = ALIGN(0x1000); /* Ensure next section is page aligned */
+
 	.rela.dyn : {
-		PROVIDE(__rel_dyn_start = .);
+		PROVIDE(__rela_dyn_start = .);
 		*(.rela*)
-		. = ALIGN(8);
-		PROVIDE(__rel_dyn_end = .);
+		PROVIDE(__rela_dyn_end = .);
 	}
 
 	PROVIDE(_rodata_end = .);
