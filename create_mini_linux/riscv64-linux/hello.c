@@ -459,15 +459,15 @@ int main() {
     int fd1 = open("/dev/hvc0", O_RDWR | O_NONBLOCK);
     int fd2 = open("/dev/hvc0", O_RDWR | O_NONBLOCK);
 
-    if (fd1 != 1) { return 50+fd1; }
+    if (fd1 != 1) { return 900+fd1; }
 
     int flags = fcntl(1, F_GETFL);
-    if (flags < 0) return 60 + errno;
+    if (flags < 0) return 800 + errno;
 
 
     char test_char = 'A';
     if (write(1, &test_char, 1) < 0){
-	return 100 + errno;
+	return 700 + errno;
     }
 
     //if (fd > 2) close(fd);
@@ -475,7 +475,7 @@ int main() {
 
     int ret =   write(1, "\n====================\nSUCCESS: A\n====================\n", 54);
     if (ret < 0) {
-        return 200 + errno;
+        return 600 + errno;
     }
 
     printf("OK\n");
