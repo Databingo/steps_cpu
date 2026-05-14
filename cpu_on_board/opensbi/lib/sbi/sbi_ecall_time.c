@@ -15,16 +15,17 @@
 #include <sbi/sbi_timer.h>
 
 static int sbi_ecall_time_handler(unsigned long extid, unsigned long funcid,
-				  struct sbi_trap_regs *regs,
-				  struct sbi_ecall_return *out)
+				  const struct sbi_trap_regs *regs,
+				  unsigned long *out_val,
+				  struct sbi_trap_info *out_trap)
 {
 	int ret = 0;
 
 	if (funcid == SBI_EXT_TIME_SET_TIMER) {
 #if __riscv_xlen == 32
-		sbi_timer_smode_event_start((((u64)regs->a1 << 32) | (u64)regs->a0));
+		sbi_timer_event_start((((u64)regs->a1 << 32) | (u64)regs->a0));
 #else
-		sbi_timer_smode_event_start((u64)regs->a0);
+		sbi_timer_event_start((u64)regs->a0);
 #endif
 	} else
 		ret = SBI_ENOTSUPP;
@@ -40,7 +41,6 @@ static int sbi_ecall_time_register_extensions(void)
 }
 
 struct sbi_ecall_extension ecall_time = {
-	.name			= "time",
 	.extid_start		= SBI_EXT_TIME,
 	.extid_end		= SBI_EXT_TIME,
 	.register_extensions	= sbi_ecall_time_register_extensions,

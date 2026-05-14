@@ -14,11 +14,11 @@
 #include <sbi/sbi_ecall_interface.h>
 #include <sbi/sbi_trap.h>
 #include <sbi/riscv_asm.h>
-#include <sbi/sbi_hart_protection.h>
 
 static int sbi_ecall_dbcn_handler(unsigned long extid, unsigned long funcid,
-				  struct sbi_trap_regs *regs,
-				  struct sbi_ecall_return *out)
+				  const struct sbi_trap_regs *regs,
+				  unsigned long *out_val,
+				  struct sbi_trap_info *out_trap)
 {
 	ulong smode = (csr_read(CSR_MSTATUS) & MSTATUS_MPP) >>
 			MSTATUS_MPP_SHIFT;
@@ -34,10 +34,10 @@ static int sbi_ecall_dbcn_handler(unsigned long extid, unsigned long funcid,
 		 * Based on above, we simply fail if the upper 32bits of
 		 * the physical address (i.e. a2 register) is non-zero on
 		 * RV32.
-		 *
-		 * Analogously, we fail if the upper 64bit of the
-		 * physical address (i.e. a2 register) is non-zero on
-		 * RV64.
+                 *
+                 * Analogously, we fail if the upper 64bit of the
+                 * physical address (i.e. a2 register) is non-zero on
+                 * RV64.
 		 */
 		if (regs->a2)
 			return SBI_ERR_FAILED;
@@ -46,12 +46,10 @@ static int sbi_ecall_dbcn_handler(unsigned long extid, unsigned long funcid,
 					regs->a1, regs->a0, smode,
 					SBI_DOMAIN_READ|SBI_DOMAIN_WRITE))
 			return SBI_ERR_INVALID_PARAM;
-		sbi_hart_protection_map_range(regs->a1, regs->a0);
 		if (funcid == SBI_EXT_DBCN_CONSOLE_WRITE)
-			out->value = sbi_nputs((const char *)regs->a1, regs->a0);
+			*out_val = sbi_nputs((const char *)regs->a1, regs->a0);
 		else
-			out->value = sbi_ngets((char *)regs->a1, regs->a0);
-		sbi_hart_protection_unmap_range(regs->a1, regs->a0);
+			*out_val = sbi_ngets((char *)regs->a1, regs->a0);
 		return 0;
 	case SBI_EXT_DBCN_CONSOLE_WRITE_BYTE:
 		sbi_putc(regs->a0);
@@ -74,7 +72,6 @@ static int sbi_ecall_dbcn_register_extensions(void)
 }
 
 struct sbi_ecall_extension ecall_dbcn = {
-	.name			= "dbcn",
 	.extid_start		= SBI_EXT_DBCN,
 	.extid_end		= SBI_EXT_DBCN,
 	.register_extensions	= sbi_ecall_dbcn_register_extensions,

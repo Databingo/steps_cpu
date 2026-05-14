@@ -16,10 +16,9 @@
 #include <sbi_utils/timer/aclint_mtimer.h>
 
 struct timer_mtimer_quirks {
-	bool		is_clint;
-	unsigned int	clint_mtime_offset;
-	bool		clint_without_mtime;
+	unsigned int	mtime_offset;
 	bool		has_64bit_mmio;
+	bool		without_mtime;
 };
 
 struct timer_mtimer_node {
@@ -30,23 +29,20 @@ static SBI_LIST_HEAD(mtn_list);
 
 static struct aclint_mtimer_data *mt_reference = NULL;
 
-static int timer_mtimer_cold_init(const void *fdt, int nodeoff,
+static int timer_mtimer_cold_init(void *fdt, int nodeoff,
 				  const struct fdt_match *match)
 {
 	int rc;
 	unsigned long addr[2], size[2];
 	struct timer_mtimer_node *mtn, *n;
 	struct aclint_mtimer_data *mt;
-	const struct timer_mtimer_quirks *quirks = match->data;
-	bool is_clint = quirks && quirks->is_clint;
-	bool is_ref = false;
 
 	mtn = sbi_zalloc(sizeof(*mtn));
 	if (!mtn)
 		return SBI_ENOMEM;
 	mt = &mtn->data;
 
-	rc = fdt_parse_aclint_node(fdt, nodeoff, true, !is_clint,
+	rc = fdt_parse_aclint_node(fdt, nodeoff, true,
 				   &addr[0], &size[0], &addr[1], &size[1],
 				   &mt->first_hartid, &mt->hart_count);
 	if (rc) {
@@ -62,31 +58,30 @@ static int timer_mtimer_cold_init(const void *fdt, int nodeoff,
 		return rc;
 	}
 
-	if (is_clint) { /* SiFive CLINT */
+	if (match->data) { /* SiFive CLINT */
+		const struct timer_mtimer_quirks *quirks = match->data;
+
 		/* Set CLINT addresses */
 		mt->mtimecmp_addr = addr[0] + ACLINT_DEFAULT_MTIMECMP_OFFSET;
 		mt->mtimecmp_size = ACLINT_DEFAULT_MTIMECMP_SIZE;
-		if (!quirks->clint_without_mtime) {
+		if (!quirks->without_mtime) {
 			mt->mtime_addr = addr[0] + ACLINT_DEFAULT_MTIME_OFFSET;
 			mt->mtime_size = size[0] - mt->mtimecmp_size;
 			/* Adjust MTIMER address and size for CLINT device */
-			mt->mtime_addr += quirks->clint_mtime_offset;
-			mt->mtime_size -= quirks->clint_mtime_offset;
+			mt->mtime_addr += quirks->mtime_offset;
+			mt->mtime_size -= quirks->mtime_offset;
 		} else {
 			mt->mtime_addr = mt->mtime_size = 0;
 		}
-		mt->mtimecmp_addr += quirks->clint_mtime_offset;
+		mt->mtimecmp_addr += quirks->mtime_offset;
+		/* Apply additional CLINT quirks */
+		mt->has_64bit_mmio = quirks->has_64bit_mmio;
 	} else { /* RISC-V ACLINT MTIMER */
 		/* Set ACLINT MTIMER addresses */
 		mt->mtime_addr = addr[0];
 		mt->mtime_size = size[0];
 		mt->mtimecmp_addr = addr[1];
 		mt->mtimecmp_size = size[1];
-	}
-
-	/* Apply additional quirks */
-	if (quirks) {
-		mt->has_64bit_mmio = quirks->has_64bit_mmio;
 	}
 
 	/* Check if MTIMER device has shared MTIME address */
@@ -111,16 +106,13 @@ static int timer_mtimer_cold_init(const void *fdt, int nodeoff,
 	}
 
 	/*
-	 * If we have a DT property to indicate which MTIMER is the reference,
-	 * select the first MTIMER device that has it. Otherwise, select the
-	 * first MTIMER device with no associated HARTs as our reference.
+	 * Select first MTIMER device with no associated HARTs as our
+	 * reference MTIMER device. This is only a temporary strategy
+	 * of selecting reference MTIMER device. In future, we might
+	 * define an optional DT property or some other mechanism to
+	 * help us select the reference MTIMER device.
 	 */
-	if (fdt_getprop(fdt, nodeoff, "riscv,reference-mtimer", NULL))
-		is_ref = true;
-	else if (!mt->hart_count)
-		is_ref = true;
-
-	if (is_ref && !mt_reference) {
+	if (!mt->hart_count && !mt_reference) {
 		mt_reference = mt;
 		/*
 		 * Set reference for already propbed MTIMER devices
@@ -141,34 +133,26 @@ static int timer_mtimer_cold_init(const void *fdt, int nodeoff,
 }
 
 static const struct timer_mtimer_quirks sifive_clint_quirks = {
-	.is_clint		= true,
-	.clint_mtime_offset	= CLINT_MTIMER_OFFSET,
-	.has_64bit_mmio		= true,
+	.mtime_offset	= CLINT_MTIMER_OFFSET,
+	.has_64bit_mmio	= true,
 };
 
 static const struct timer_mtimer_quirks thead_clint_quirks = {
-	.is_clint		= true,
-	.clint_mtime_offset	= CLINT_MTIMER_OFFSET,
-	.clint_without_mtime	= true,
-};
-
-static const struct timer_mtimer_quirks thead_aclint_quirks = {
-	.has_64bit_mmio		= false,
+	.mtime_offset	= CLINT_MTIMER_OFFSET,
+	.without_mtime  = true,
 };
 
 static const struct fdt_match timer_mtimer_match[] = {
-	{ .compatible = "mips,p8700-aclint-mtimer" },
 	{ .compatible = "riscv,clint0", .data = &sifive_clint_quirks },
 	{ .compatible = "sifive,clint0", .data = &sifive_clint_quirks },
-	{ .compatible = "sifive,clint2", .data = &sifive_clint_quirks },
 	{ .compatible = "thead,c900-clint", .data = &thead_clint_quirks },
-	{ .compatible = "thead,c900-aclint-mtimer",
-	  .data = &thead_aclint_quirks },
 	{ .compatible = "riscv,aclint-mtimer" },
 	{ },
 };
 
-const struct fdt_driver fdt_timer_mtimer = {
+struct fdt_timer fdt_timer_mtimer = {
 	.match_table = timer_mtimer_match,
-	.init = timer_mtimer_cold_init,
+	.cold_init = timer_mtimer_cold_init,
+	.warm_init = aclint_mtimer_warm_init,
+	.exit = NULL,
 };

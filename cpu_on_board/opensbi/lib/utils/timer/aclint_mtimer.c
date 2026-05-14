@@ -72,9 +72,13 @@ static u64 mtimer_value(void)
 static void mtimer_event_stop(void)
 {
 	u32 target_hart = current_hartid();
-	struct sbi_scratch *scratch = sbi_scratch_thishart_ptr();
+	struct sbi_scratch *scratch;
 	struct aclint_mtimer_data *mt;
 	u64 *time_cmp;
+
+	scratch = sbi_hartid_to_scratch(target_hart);
+	if (!scratch)
+		return;
 
 	mt = mtimer_get_hart_data_ptr(scratch);
 	if (!mt)
@@ -88,9 +92,13 @@ static void mtimer_event_stop(void)
 static void mtimer_event_start(u64 next_event)
 {
 	u32 target_hart = current_hartid();
-	struct sbi_scratch *scratch = sbi_scratch_thishart_ptr();
+	struct sbi_scratch *scratch;
 	struct aclint_mtimer_data *mt;
 	u64 *time_cmp;
+
+	scratch = sbi_hartid_to_scratch(target_hart);
+	if (!scratch)
+		return;
 
 	mt = mtimer_get_hart_data_ptr(scratch);
 	if (!mt)
@@ -109,34 +117,10 @@ static struct sbi_timer_device mtimer = {
 	.timer_event_stop = mtimer_event_stop
 };
 
-struct aclint_mtimer_data *aclint_get_mtimer_data(void)
-{
-	return mtimer_get_hart_data_ptr(sbi_scratch_thishart_ptr());
-}
-
-void aclint_mtimer_update(struct aclint_mtimer_data *mt,
-			  struct aclint_mtimer_data *ref)
+void aclint_mtimer_sync(struct aclint_mtimer_data *mt)
 {
 	u64 v1, v2, mv, delta;
 	u64 *mt_time_val, *ref_time_val;
-
-	if (!mt || !ref || !mt->time_rd || !mt->time_wr || !ref->time_rd)
-		return;
-
-	mt_time_val = (void *)mt->mtime_addr;
-	ref_time_val = (void *)ref->mtime_addr;
-	if (!atomic_raw_xchg_ulong(&mt->time_delta_computed, 1)) {
-		v1 = mt->time_rd(mt_time_val);
-		mv = ref->time_rd(ref_time_val);
-		v2 = mt->time_rd(mt_time_val);
-		delta = mv - ((v1 / 2) + (v2 / 2));
-		mt->time_wr(false, mt->time_rd(mt_time_val) + delta,
-			    mt_time_val);
-	}
-}
-
-void aclint_mtimer_sync(struct aclint_mtimer_data *mt)
-{
 	struct aclint_mtimer_data *reference;
 
 	/* Sync-up non-shared MTIME if reference is available */
@@ -144,7 +128,17 @@ void aclint_mtimer_sync(struct aclint_mtimer_data *mt)
 		return;
 
 	reference = mt->time_delta_reference;
-	aclint_mtimer_update(mt, reference);
+	mt_time_val = (void *)mt->mtime_addr;
+	ref_time_val = (void *)reference->mtime_addr;
+	if (!atomic_raw_xchg_ulong(&mt->time_delta_computed, 1)) {
+		v1 = mt->time_rd(mt_time_val);
+		mv = reference->time_rd(ref_time_val);
+		v2 = mt->time_rd(mt_time_val);
+		delta = mv - ((v1 / 2) + (v2 / 2));
+		mt->time_wr(false, mt->time_rd(mt_time_val) + delta,
+			    mt_time_val);
+	}
+
 }
 
 void aclint_mtimer_set_reference(struct aclint_mtimer_data *mt,
@@ -157,12 +151,16 @@ void aclint_mtimer_set_reference(struct aclint_mtimer_data *mt,
 	mt->time_delta_computed = 0;
 }
 
-static int aclint_mtimer_warm_init(void)
+int aclint_mtimer_warm_init(void)
 {
 	u64 *mt_time_cmp;
 	u32 target_hart = current_hartid();
-	struct sbi_scratch *scratch = sbi_scratch_thishart_ptr();
+	struct sbi_scratch *scratch;
 	struct aclint_mtimer_data *mt;
+
+	scratch = sbi_hartid_to_scratch(target_hart);
+	if (!scratch)
+		return SBI_ENOENT;
 
 	mt = mtimer_get_hart_data_ptr(scratch);
 	if (!mt)
@@ -221,13 +219,8 @@ int aclint_mtimer_cold_init(struct aclint_mtimer_data *mt,
 	/* Update MTIMER pointer in scratch space */
 	for (i = 0; i < mt->hart_count; i++) {
 		scratch = sbi_hartid_to_scratch(mt->first_hartid + i);
-		/*
-		 * We don't need to fail if scratch pointer is not available
-		 * because we might be dealing with hartid of a HART disabled
-		 * in the device tree.
-		 */
 		if (!scratch)
-			continue;
+			return SBI_ENOENT;
 		mtimer_set_hart_data_ptr(scratch, mt);
 	}
 
@@ -274,7 +267,6 @@ int aclint_mtimer_cold_init(struct aclint_mtimer_data *mt,
 	}
 
 	mtimer.timer_freq = mt->mtime_freq;
-	mtimer.warm_init = aclint_mtimer_warm_init;
 	sbi_timer_set_device(&mtimer);
 
 	return 0;

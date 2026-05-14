@@ -1,0 +1,31 @@
+/usr/local/projects/steps_cpu/cpu_on_board/opensbi/build/platform/generic/renesas/rzfive/rzfive.o: \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/platform/generic/renesas/rzfive/rzfive.c \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/sbi_visibility.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/build/platform/generic/kconfig/autoconf.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/platform/generic/include/andes/andes_pma.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/sbi_types.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/platform/generic/include/andes/andes_pmu.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/sbi_hart.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/sbi_bitops.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/platform/generic/include/andes/andes_sbi.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/sbi_ecall.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/sbi_list.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/sbi_trap.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/riscv_encoding.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/sbi_const.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/sbi_scratch.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/riscv_asm.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/platform/generic/include/platform_override.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/sbi_platform.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/sbi_ecall_interface.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/sbi_error.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/sbi_version.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/sbi_trap_ldst.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi_utils/fdt/fdt_driver.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi_utils/fdt/fdt_helper.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/sbi_domain.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/riscv_locks.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/sbi_hartmask.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/sbi_bitmap.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/sbi_domain_context.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/sbi_domain_data.h

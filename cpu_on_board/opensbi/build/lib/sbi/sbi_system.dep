@@ -1,6 +1,5 @@
 /usr/local/projects/steps_cpu/cpu_on_board/opensbi/build/lib/sbi/sbi_system.o: \
  /usr/local/projects/steps_cpu/cpu_on_board/opensbi/lib/sbi/sbi_system.c \
- /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/sbi_visibility.h \
  /usr/local/projects/steps_cpu/cpu_on_board/opensbi/build/platform/generic/kconfig/autoconf.h \
  /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/riscv_asm.h \
  /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/riscv_encoding.h \
@@ -8,22 +7,17 @@
  /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/sbi_bitops.h \
  /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/sbi_types.h \
  /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/sbi_domain.h \
- /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/riscv_locks.h \
- /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/sbi_list.h \
  /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/sbi_hartmask.h \
  /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/sbi_bitmap.h \
- /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/sbi_scratch.h \
- /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/sbi_domain_context.h \
- /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/sbi_domain_data.h \
  /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/sbi_hart.h \
  /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/sbi_hsm.h \
  /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/sbi_platform.h \
  /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/sbi_ecall_interface.h \
  /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/sbi_error.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/sbi_scratch.h \
  /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/sbi_version.h \
- /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/sbi_trap_ldst.h \
- /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/sbi_trap.h \
  /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/sbi_system.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/sbi_list.h \
  /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/sbi_ipi.h \
  /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/sbi_init.h \
  /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/sbi_timer.h

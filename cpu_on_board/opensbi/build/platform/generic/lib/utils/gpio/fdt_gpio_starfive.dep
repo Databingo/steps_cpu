@@ -1,6 +1,5 @@
 /usr/local/projects/steps_cpu/cpu_on_board/opensbi/build/platform/generic/lib/utils/gpio/fdt_gpio_starfive.o: \
  /usr/local/projects/steps_cpu/cpu_on_board/opensbi/lib/utils/gpio/fdt_gpio_starfive.c \
- /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/sbi_visibility.h \
  /usr/local/projects/steps_cpu/cpu_on_board/opensbi/build/platform/generic/kconfig/autoconf.h \
  /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/riscv_io.h \
  /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/riscv_barrier.h \
@@ -11,17 +10,9 @@
  /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/sbi_console.h \
  /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi_utils/fdt/fdt_helper.h \
  /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/sbi_domain.h \
- /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/riscv_locks.h \
- /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/sbi_list.h \
  /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/sbi_hartmask.h \
  /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/sbi_bitmap.h \
  /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/sbi_bitops.h \
- /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/sbi_scratch.h \
- /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/riscv_asm.h \
- /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/riscv_encoding.h \
- /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/sbi_const.h \
- /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/sbi_domain_context.h \
- /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/sbi_domain_data.h \
  /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi_utils/gpio/fdt_gpio.h \
- /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi_utils/fdt/fdt_driver.h \
- /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi_utils/gpio/gpio.h
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi_utils/gpio/gpio.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/sbi_list.h

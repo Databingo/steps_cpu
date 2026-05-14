@@ -1,89 +1,111 @@
 /*
  * SPDX-License-Identifier: BSD-2-Clause
  *
- * Copyright (c) 2025 Andes Technology Corporation
+ * Copyright (c) 2022 Andes Technology Corporation
+ *
+ * Authors:
+ *   Yu Chien Peter Lin <peterlin@andestech.com>
  */
 
-#include <andes/andes.h>
-#include <andes/andes_pmu.h>
-#include <andes/andes_sbi.h>
 #include <platform_override.h>
-#include <sbi/sbi_ecall_interface.h>
-#include <sbi/riscv_asm.h>
-#include <sbi/sbi_init.h>
-#include <sbi/sbi_scratch.h>
 #include <sbi_utils/fdt/fdt_helper.h>
-#include <sbi_utils/hsm/fdt_hsm_andes_atcsmu.h>
+#include <sbi_utils/fdt/fdt_fixup.h>
+#include <sbi_utils/sys/atcsmu.h>
+#include <sbi/riscv_asm.h>
+#include <sbi/sbi_bitops.h>
+#include <sbi/sbi_error.h>
+#include <sbi/sbi_hsm.h>
+#include <sbi/sbi_ipi.h>
+#include <sbi/sbi_init.h>
+#include <andes/andes45.h>
 
-static unsigned long andes_hart_data_offset;
-extern void _start_warm(void);
+static struct smu_data smu = { 0 };
+extern void __ae350_enable_coherency_warmboot(void);
+extern void __ae350_disable_coherency(void);
 
-void ae350_non_ret_save(struct sbi_scratch *scratch)
+static __always_inline bool is_andes25(void)
 {
-	struct andes_hart_data *andes_hdata = sbi_scratch_offset_ptr(scratch,
-								     andes_hart_data_offset);
-
-	andes_hdata->mcache_ctl = csr_read(CSR_MCACHE_CTL);
-	andes_hdata->mmisc_ctl = csr_read(CSR_MMISC_CTL);
-	andes_hdata->mpft_ctl = csr_read(CSR_MPFT_CTL);
-	andes_hdata->mslideleg = csr_read(CSR_MSLIDELEG);
-	andes_hdata->mxstatus = csr_read(CSR_MXSTATUS);
-	andes_hdata->slie = csr_read(CSR_SLIE);
-	andes_hdata->slip = csr_read(CSR_SLIP);
-	andes_hdata->pmacfg0 = csr_read(CSR_PMACFG0);
-	andes_hdata->pmacfg2 = csr_read_num(CSR_PMACFG0 + 2);
-	for (int i = 0; i < 16; i++)
-		andes_hdata->pmaaddrX[i] = csr_read_num(CSR_PMAADDR0 + i);
+	ulong marchid = csr_read(CSR_MARCHID);
+	return !!(EXTRACT_FIELD(marchid, CSR_MARCHID_MICROID) == 0xa25);
 }
 
-void ae350_non_ret_restore(struct sbi_scratch *scratch)
+static int ae350_hart_start(u32 hartid, ulong saddr)
 {
-	struct andes_hart_data *andes_hdata = sbi_scratch_offset_ptr(scratch,
-								     andes_hart_data_offset);
+	/* Don't send wakeup command at boot-time */
+	if (!sbi_init_count(hartid) || (is_andes25() && hartid == 0))
+		return sbi_ipi_raw_send(hartid);
 
-	csr_write(CSR_MCACHE_CTL, andes_hdata->mcache_ctl);
-	csr_write(CSR_MMISC_CTL, andes_hdata->mmisc_ctl);
-	csr_write(CSR_MPFT_CTL, andes_hdata->mpft_ctl);
-	csr_write(CSR_MSLIDELEG, andes_hdata->mslideleg);
-	csr_write(CSR_MXSTATUS, andes_hdata->mxstatus);
-	csr_write(CSR_SLIE, andes_hdata->slie);
-	csr_write(CSR_SLIP, andes_hdata->slip);
-	csr_write(CSR_PMACFG0, andes_hdata->pmacfg0);
-	csr_write_num(CSR_PMACFG0 + 2, andes_hdata->pmacfg2);
-	for (int i = 0; i < 16; i++)
-		csr_write_num(CSR_PMAADDR0 + i, andes_hdata->pmaaddrX[i]);
+	/* Write wakeup command to the sleep hart */
+	smu_set_command(&smu, WAKEUP_CMD, hartid);
+
+	return 0;
 }
 
-void ae350_enable_coherency_warmboot(void)
+static int ae350_hart_stop(void)
 {
-	ae350_enable_coherency();
-	_start_warm();
-}
-
-static int ae350_early_init(bool cold_boot)
-{
+	int rc;
 	u32 hartid = current_hartid();
-	u32 sleep_type = atcsmu_get_sleep_type(hartid);
 
-	if (cold_boot) {
-		andes_hart_data_offset = sbi_scratch_alloc_offset(sizeof(struct andes_hart_data));
-		if (!andes_hart_data_offset)
-			return SBI_ENOMEM;
-	}
+	/**
+	 * For Andes AX25MP, the hart0 shares power domain with
+	 * L2-cache, instead of turning it off, it should fall
+	 * through and jump to warmboot_addr.
+	 */
+	if (is_andes25() && hartid == 0)
+		return SBI_ENOTSUPP;
 
-	/* Don't restore Andes CSRs during boot or wake up from light sleep */
-	if (sbi_init_count(current_hartindex()) && sleep_type == SBI_SUSP_SLEEP_TYPE_SUSPEND)
-		ae350_non_ret_restore(sbi_scratch_thishart_ptr());
+	if (!smu_support_sleep_mode(&smu, DEEPSLEEP_MODE, hartid))
+		return SBI_ENOTSUPP;
 
-	return generic_early_init(cold_boot);
+	/**
+	 * disable all events, the current hart will be
+	 * woken up from reset vector when other hart
+	 * writes its PCS (power control slot) control
+	 * register
+	 */
+	smu_set_wakeup_events(&smu, 0x0, hartid);
+	smu_set_command(&smu, DEEP_SLEEP_CMD, hartid);
+
+	rc = smu_set_reset_vector(&smu, (ulong)__ae350_enable_coherency_warmboot,
+			       hartid);
+	if (rc)
+		goto fail;
+
+	__ae350_disable_coherency();
+
+	wfi();
+
+fail:
+	/* It should never reach here */
+	sbi_hart_hang();
+	return 0;
 }
 
-static int ae350_platform_init(const void *fdt, int nodeoff, const struct fdt_match *match)
+static const struct sbi_hsm_device andes_smu = {
+	.name	      = "andes_smu",
+	.hart_start   = ae350_hart_start,
+	.hart_stop    = ae350_hart_stop,
+};
+
+static void ae350_hsm_device_init(void)
 {
-	generic_platform_ops.early_init = ae350_early_init;
-	generic_platform_ops.extensions_init = andes_pmu_extensions_init;
-	generic_platform_ops.pmu_init = andes_pmu_init;
-	generic_platform_ops.vendor_ext_provider = andes_sbi_vendor_ext_provider;
+	int rc;
+	void *fdt;
+
+	fdt = fdt_get_address();
+
+	rc = fdt_parse_compat_addr(fdt, (uint64_t *)&smu.addr,
+				   "andestech,atcsmu");
+
+	if (!rc) {
+		sbi_hsm_set_device(&andes_smu);
+	}
+}
+
+static int ae350_final_init(bool cold_boot, const struct fdt_match *match)
+{
+	if (cold_boot)
+		ae350_hsm_device_init();
 
 	return 0;
 }
@@ -93,7 +115,7 @@ static const struct fdt_match andes_ae350_match[] = {
 	{ },
 };
 
-const struct fdt_driver andes_ae350 = {
+const struct platform_override andes_ae350 = {
 	.match_table = andes_ae350_match,
-	.init = ae350_platform_init,
+	.final_init  = ae350_final_init,
 };

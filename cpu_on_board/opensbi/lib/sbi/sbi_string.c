@@ -68,32 +68,33 @@ char *sbi_strcpy(char *dest, const char *src)
 {
 	char *ret = dest;
 
-	while ((*dest++ = *src++) != '\0') {
+	while (*src != '\0') {
+		*dest++ = *src++;
 	}
+
 	return ret;
 }
 
 char *sbi_strncpy(char *dest, const char *src, size_t count)
 {
-	char *tmp = dest;
+	char *ret = dest;
 
-	while (count) {
-		if ((*tmp = *src) != 0)
-			src++;
-		tmp++;
-		count--;
+	while (count-- && *src != '\0') {
+		*dest++ = *src++;
 	}
-	return dest;
+
+	return ret;
 }
 
 char *sbi_strchr(const char *s, int c)
 {
-	do {
-		if (*s == (char)c)
-			return (char *)s;
-	} while (*s++ != '\0');
+	while (*s != '\0' && *s != (char)c)
+		s++;
 
-	return NULL;
+	if (*s == '\0')
+		return NULL;
+	else
+		return (char *)s;
 }
 
 char *sbi_strrchr(const char *s, int c)

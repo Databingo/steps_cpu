@@ -126,6 +126,9 @@ The DT properties of a domain configuration DT node are as follows:
 * **compatible** (Mandatory) - The compatible string of the domain
   configuration. This DT property should have value *"opensbi,domain,config"*
 
+* **system-suspend-test** (Optional) - When present, enable a system
+  suspend test implementation which simply waits five seconds and issues a WFI.
+
 ### Domain Memory Region Node
 
 The domain memory region DT node describes details of a memory region and
@@ -173,12 +176,14 @@ The DT properties of a domain instance DT node are as follows:
   Any region of a domain defined in DT node cannot have only M-bits set
   in access permissions i.e. it cannot be an m-mode only accessible region.
 * **boot-hart** (Optional) - The DT node phandle of the HART booting the
-  domain instance. If not specified, defaults to the coldboot HART. Note that
-  if the coldboot HART is assigned to this domain, it will be forced as
-  the boot HART regardless of this property.
+  domain instance. If coldboot HART is assigned to the domain instance then
+  this DT property is ignored and the coldboot HART is assumed to be the
+  boot HART of the domain instance.
 * **next-arg1** (Optional) - The 64 bit next booting stage arg1 for the
   domain instance. If this DT property is not available and coldboot HART
-  is not assigned to the domain instance then **next booting stage arg1 of coldboot HART**
+  is not assigned to the domain instance then **0x0** is used as default
+  value. If this DT property is not available and coldboot HART is assigned
+  to the domain instance then **next booting stage arg1 of coldboot HART**
   is used as default value.
 * **next-addr** (Optional) - The 64 bit next booting stage address for the
   domain instance. If this DT property is not available and coldboot HART
@@ -232,6 +237,7 @@ be done:
     chosen {
         opensbi-domains {
             compatible = "opensbi,domain,config";
+            system-suspend-test;
 
             tmem: tmem {
                 compatible = "opensbi,domain,memregion";

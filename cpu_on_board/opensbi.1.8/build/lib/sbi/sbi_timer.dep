@@ -1,0 +1,25 @@
+/usr/local/projects/steps_cpu/cpu_on_board/opensbi/build/lib/sbi/sbi_timer.o: \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/lib/sbi/sbi_timer.c \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/sbi_visibility.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/build/platform/generic/kconfig/autoconf.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/riscv_asm.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/riscv_encoding.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/sbi_const.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/riscv_barrier.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/riscv_locks.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/sbi_types.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/sbi_console.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/sbi_error.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/sbi_ecall_interface.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/sbi_hart.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/sbi_bitops.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/sbi_hartmask.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/sbi_bitmap.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/sbi_scratch.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/sbi_platform.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/sbi_version.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/sbi_trap_ldst.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/sbi_trap.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/sbi_pmu.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/sbi_timer.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/sbi_list.h

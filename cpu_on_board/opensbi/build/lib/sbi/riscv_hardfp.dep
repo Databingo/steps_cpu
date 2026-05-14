@@ -1,4 +1,3 @@
 /usr/local/projects/steps_cpu/cpu_on_board/opensbi/build/lib/sbi/riscv_hardfp.o: \
  /usr/local/projects/steps_cpu/cpu_on_board/opensbi/lib/sbi/riscv_hardfp.S \
- /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/sbi_visibility.h \
  /usr/local/projects/steps_cpu/cpu_on_board/opensbi/build/platform/generic/kconfig/autoconf.h

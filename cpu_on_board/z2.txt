@@ -662,7 +662,7 @@ wire is_store = (op == 7'b0100011) || (op == 7'b0101111 && w_func5 != 5'b00010);
 		for (i=0;i<11;i=i+1) begin sre[i]<= 64'b0; end 
 		for (i=0;i<=25;i=i+1) begin Csrs[i]<= 64'b0; end
 		//Csrs[medeleg] <= 64'hb1af; // delegate to S-mode 1011000110101111 // see VII 3.1.15 mcasue exceptions
-		Csrs[medeleg] <= 64'hb109; // delegate to S-mode no 12/13/15
+		Csrs[medeleg] <= 64'hb109; // delegate to S-mode 1011000100001001 15/13/12/8/3/0
 		Csrs[mideleg] <= 64'h0222; // delegate to S-mode 0000001000100010 see VII 3.1.15 mcasue interrupt 1/5/9 SSIP(supervisor software interrupt) STIP(time) SEIP(external)
 		// Initialize Machine Info for OpenSBI
 		//Csrs[misa] <= 64'h8000000000141101; //RV64IMASU extensions(63:62=2 64bits | 1<<0 Atomic| 1<<8 Integer| 1<<12 Multiply| 1<<18 Supervisor| 1 <<20 User) so: 64'h8000000000141101; RV64IMASU
@@ -2895,6 +2895,9 @@ check_permissions:
      li x3, 12
      beq x8, x3, check_fetch
 check_load:
+    #li a0, 76 # L
+    #sb a0, 0(x7) # debug for load fault
+
      andi x3, x4, 2 # PET.R (bit 1)
      bnez x3, update_ad
      
@@ -2918,14 +2921,25 @@ check_fetch:
      andi x3, x4, 8 # PET.X (bit 3)
      beqz x3, PERM_FAULT
 
+#update_ad:
+#     # 3. Update A/D bits
+#     ori x4, x4, 0x40  # set Accessed bit (bit 6)
+#     li x3, 15
+#     bne x8, x3, write_pte
+#     ori x4, x4, 0x80  # set Dirty bit (bit 7) if store
+
 update_ad:
-     # 3. Update A/D bits
-     ori x4, x4, 0x40  # set Accessed bit (bit 6)
-    #ori x4, x4, 0x41  # set Accessed bit (bit 6) and Valid bit(bit 0)
+     # 3. Update A/D bits and flush only when dirty bit 0->1
      li x3, 15
-    #li x3, 14
-     bne x8, x3, write_pte
-     ori x4, x4, 0x80  # set Dirty bit (bit 7) if store
+     bne x8, x3, set_a # if not store not need set dirty
+     andi x3, x4, 0x80 # if store check Dirty bit 7
+     bnez x3, set_d    # Dirty so no flush for remove duplicate possible
+     sfence.vma        # no dirty so flush the (possible) original 0 drity record in tlb
+set_d:
+     ori x4, x4, 0x80  # set Dirty bit (bit 7) 
+set_a:
+     ori x4, x4, 0x40  # set Accessed bit (bit 6)
+
 write_pte:
      sd x4, 0(x6) # write updated PTE back to memory
      jalr x0, 0(x5)  # return to leaf formatter
@@ -3240,8 +3254,8 @@ print7: # a0, 7 char left one for null
             reg = <0x00 0x10000000 0x00 0x100>;
             clock-frequency = <12500000>;
             reg-shift = <0>;
-            //status = "okay";
-            status = "disabled";
+            status = "okay";
+            //status = "disabled";
         };
                
         uart0: uart@2004{
@@ -3300,8 +3314,8 @@ print7: # a0, 7 char left one for null
        //bootargs = "no4lvl earlycon=sbi console=hvc0 panic=0 init_on_alloc=0 ignore_loglevel initcall_debug rcu_update.rcu_cpu_stall_suppress=1 rdinit=/bin/echo HELLO /dev/ttyprintk";
        //bootargs = "no4lvl earlycon=sbi console=ttySIF0 panic=0 init_on_alloc=0 ignore_loglevel initcall_debug rcu_update.rcu_cpu_stall_suppress=1 rdinit=/hello";
        bootargs = "no4lvl earlycon=sbi console=hvc0 panic=0 init_on_alloc=0 ignore_loglevel initcall_debug rcu_update.rcu_cpu_stall_suppress=1 rdinit=/hello";
-       //stdout-path = "/soc/serial@10000000";
-       stdout-path = "/soc/uart@2004";
+       stdout-path = "/soc/serial@10000000";
+       //stdout-path = "/soc/uart@2004";
     };
 
 
@@ -3335,7 +3349,8 @@ rm -rf build/platform/generic/firmware/*  \
 
 # for buildroot-linux-busybox   linxu fore payload offset = 2M ?
 #make O=build_soc \
-make CROSS_COMPILE=/usr/local/projects/bin/xpack-riscv-none-elf-gcc-14.2.0-3/bin/riscv-none-elf- \
+#make CROSS_COMPILE=/usr/local/projects/bin/xpack-riscv-none-elf-gcc-14.2.0-3/bin/riscv-none-elf- \
+make ARCH=riscv CROSS_COMPILE=/usr/local/projects/steps_cpu/create_mini_linux/buildroot-2026.02/output/host/bin/riscv64-buildroot-linux-musl-  \
      PLATFORM=generic \
      FW_PIC=n \
      PLATFORM_RISCV_ISA=rv64ima_zicsr_zifencei \

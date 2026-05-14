@@ -13,6 +13,12 @@
 
 	.section .entry, "ax", %progbits
 	.align 3
+_bad_dynamic_info:
+	wfi
+	j	_bad_dynamic_info
+
+	.section .entry, "ax", %progbits
+	.align 3
 	.global fw_boot_hart
 	/*
 	 * This function is called very early even before
@@ -24,10 +30,10 @@ fw_boot_hart:
 	/* Sanity checks */
 	li	a1, FW_DYNAMIC_INFO_MAGIC_VALUE
 	REG_L	a0, FW_DYNAMIC_INFO_MAGIC_OFFSET(a2)
-	bne	a0, a1, _start_hang
+	bne	a0, a1, _bad_dynamic_info
 	li	a1, FW_DYNAMIC_INFO_VERSION_MAX
 	REG_L	a0, FW_DYNAMIC_INFO_VERSION_OFFSET(a2)
-	bgt	a0, a1, _start_hang
+	bgt	a0, a1, _bad_dynamic_info
 
 	/* Read boot HART id */
 	li	a1, FW_DYNAMIC_INFO_VERSION_2
@@ -123,7 +129,7 @@ fw_options:
 	REG_L	a0, (a0)
 	ret
 
-	.section .data
+	.section .entry, "ax", %progbits
 	.align 3
 _dynamic_next_arg1:
 	RISCV_PTR 0x0

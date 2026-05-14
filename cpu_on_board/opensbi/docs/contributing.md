@@ -1,15 +1,17 @@
 OpenSBI Contribution Guideline
 ==============================
 
-All contributions to OpenSBI must be sent via email patches to the OpenSBI
-mailing list at `opensbi@lists.infradead.org`
+All contributions to OpenSBI can be sent in the following ways:
+1. Email patches to the OpenSBI mailing list at `opensbi@lists.infradead.org`
+2. GitHub Pull Requests (PRs) to the [OpenSBI main repository]
 
 To join the OpenSBI mailing list, please visit the [OpenSBI infradead page].
 
-The mailing list based patch approach is preferred over github PRs so that they
-are visible to a wider audience. All accepted patches on the OpenSBI mailing
-list will be taken by one of the OpenSBI maintainers and merged into the
-[OpenSBI main repository].
+The OpenSBI maintainers prefer patches via the OpenSBI mailing list
+(option 1 above) so that they are visible to a wider audience. All
+accepted patches on the OpenSBI mailing list will be taken by any of
+the OpenSBI maintainers and merged into the [OpenSBI main repository]
+using GitHub PRs.
 
 All contributed work must follow the following rules:
 1. OpenSBI code should be written in accordance to the [Linux coding style].
@@ -31,6 +33,9 @@ riscv/opensbi repository. Instead, prefer using a fork of the riscv/opensbi main
 repository and branches within that fork to create pull requests.
 7. A maintainer cannot merge his own pull requests in the riscv/opensbi main
 repository.
+8. A pull request must get at least one review from a maintainer.
+9. A pull request must spend at least 24 hours in review to allow for other
+developers to review.
 
 -----------------------------------------------------------------------
 

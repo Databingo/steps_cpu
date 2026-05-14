@@ -588,6 +588,8 @@
 //
 //
 
+
+// --------------AB printed ---------
 //#include <unistd.h>
 //
 //int main() {
@@ -620,6 +622,7 @@
 //}
   
   
+// --------------MANUAL printed ---------
 #define _GNU_SOURCE
 #include <stdio.h>
 #include <unistd.h>
