@@ -1,5 +1,0 @@
-/usr/local/projects/steps_cpu/cpu_on_board/opensbi/build/platform/generic/firmware/fw_jump.elf.ld: \
- /usr/local/projects/steps_cpu/cpu_on_board/opensbi/firmware/fw_jump.elf.ldS \
- /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/sbi_visibility.h \
- /usr/local/projects/steps_cpu/cpu_on_board/opensbi/build/platform/generic/kconfig/autoconf.h \
- /usr/local/projects/steps_cpu/cpu_on_board/opensbi/firmware/fw_base.ldS
