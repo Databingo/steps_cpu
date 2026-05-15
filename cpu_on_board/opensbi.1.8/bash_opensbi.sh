@@ -32,8 +32,8 @@ make ARCH=riscv CROSS_COMPILE=/usr/local/projects/steps_cpu/create_mini_linux/bu
      PLATFORM_RISCV_ISA=rv64ima_zicsr_zifencei \
      PLATFORM_RISCV_ABI=lp64 \
      EXTRA_CCASFLAGS="-march=rv64ima_zicsr_zifencei -mabi=lp64" \
-     EXTRA_CFLAGS="-mno-relax -march=rv64ima_zicsr_zifencei -mabi=lp64 -fno-stack-protector -fno-PIE -no-pie" \
-     EXTRA_LDFLAGS="-no-pie" \
+     EXTRA_CFLAGS="-mno-relax -march=rv64ima_zicsr_zifencei -mabi=lp64 -fno-stack-protector -fno-PIE" \
+     EXTRA_LDFLAGS="-Wl,-no-pie -mno-relax" \
      FW_COLDBOOT_HART=0 \
      FW_HART_COUNT=1 \
      FW_TEXT_START=0x80000000 \
