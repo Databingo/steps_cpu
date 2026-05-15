@@ -26,7 +26,7 @@ rm -rf build/platform/generic/firmware/*  \
 # for buildroot-linux-busybox   linxu fore payload offset = 2M ?
 #make O=build_soc \
 #make CROSS_COMPILE=/usr/local/projects/bin/xpack-riscv-none-elf-gcc-14.2.0-3/bin/riscv-none-elf- \
-make ARCH=riscv CROSS_COMPILE=/usr/local/projects/steps_cpu/create_mini_linux/buildroot-2026.02/output/host/bin/riscv64-buildroot-linux-musl-  \
+make DEBUG=1 ARCH=riscv CROSS_COMPILE=/usr/local/projects/steps_cpu/create_mini_linux/buildroot-2026.02/output/host/bin/riscv64-buildroot-linux-musl-  \
      PLATFORM=generic \
      FW_PIC=n \
      PLATFORM_RISCV_ISA=rv64ima_zicsr_zifencei \
