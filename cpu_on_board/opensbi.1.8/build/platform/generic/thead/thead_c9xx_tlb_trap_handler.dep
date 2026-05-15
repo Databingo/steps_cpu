@@ -1,4 +1,4 @@
-/usr/local/projects/steps_cpu/cpu_on_board/opensbi/build/platform/generic/thead/thead_c9xx_tlb_trap_handler.o: \
- /usr/local/projects/steps_cpu/cpu_on_board/opensbi/platform/generic/thead/thead_c9xx_tlb_trap_handler.S \
- /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/sbi_visibility.h \
- /usr/local/projects/steps_cpu/cpu_on_board/opensbi/build/platform/generic/kconfig/autoconf.h
+/usr/local/projects/steps_cpu/cpu_on_board/opensbi.1.8/build/platform/generic/thead/thead_c9xx_tlb_trap_handler.o: \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi.1.8/platform/generic/thead/thead_c9xx_tlb_trap_handler.S \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi.1.8/include/sbi/sbi_visibility.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi.1.8/build/platform/generic/kconfig/autoconf.h

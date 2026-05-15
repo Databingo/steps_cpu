@@ -1,15 +1,15 @@
-/usr/local/projects/steps_cpu/cpu_on_board/opensbi/build/platform/generic/thead/thead_c9xx_pmu.o: \
- /usr/local/projects/steps_cpu/cpu_on_board/opensbi/platform/generic/thead/thead_c9xx_pmu.c \
- /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/sbi_visibility.h \
- /usr/local/projects/steps_cpu/cpu_on_board/opensbi/build/platform/generic/kconfig/autoconf.h \
- /usr/local/projects/steps_cpu/cpu_on_board/opensbi/platform/generic/include/thead/c9xx_encoding.h \
- /usr/local/projects/steps_cpu/cpu_on_board/opensbi/platform/generic/include/thead/c9xx_pmu.h \
- /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/riscv_asm.h \
- /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/riscv_encoding.h \
- /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/sbi_const.h \
- /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/sbi_bitops.h \
- /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/sbi_types.h \
- /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/sbi_ecall_interface.h \
- /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/sbi_pmu.h \
- /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/sbi_trap.h \
- /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/sbi_scratch.h
+/usr/local/projects/steps_cpu/cpu_on_board/opensbi.1.8/build/platform/generic/thead/thead_c9xx_pmu.o: \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi.1.8/platform/generic/thead/thead_c9xx_pmu.c \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi.1.8/include/sbi/sbi_visibility.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi.1.8/build/platform/generic/kconfig/autoconf.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi.1.8/platform/generic/include/thead/c9xx_encoding.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi.1.8/platform/generic/include/thead/c9xx_pmu.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi.1.8/include/sbi/riscv_asm.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi.1.8/include/sbi/riscv_encoding.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi.1.8/include/sbi/sbi_const.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi.1.8/include/sbi/sbi_bitops.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi.1.8/include/sbi/sbi_types.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi.1.8/include/sbi/sbi_ecall_interface.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi.1.8/include/sbi/sbi_pmu.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi.1.8/include/sbi/sbi_trap.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi.1.8/include/sbi/sbi_scratch.h
