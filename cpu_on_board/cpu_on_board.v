@@ -219,6 +219,9 @@ assign DRAM_CKE = 1; // always enable
     reg uart_read_step;
     wire uart_waitrequest;
     reg [1:0] sifive_uart_ie;
+    reg [31:0] uart_txctr_reg;
+    reg [31:0] uart_rxctr_reg;
+    reg [31:0] uart_div;
     //wire jtag_addr = (bus_read_done == 0 && bus_address == `Art_base) ? 1'b1:1'b0;  
     wire jtag_addr = (bus_address == `ArtIE) ? 1'b1 :  // map IE to Jcontrol1, map Read to Jcontrol1. Else(write) to Data0
                      (bus_read_done == 0 && bus_address == `Art_base) ? 1'b1:1'b0;  
@@ -383,6 +386,7 @@ assign DRAM_CKE = 1; // always enable
 	    uart_irq_pre <= 0;
 	    uart_tx_pre <= 0;
 	    sifive_uart_ie <= 2'b0;
+	    uart_div <= 32'd1;
             //sd_rd_start <= 0;
 	end else begin
         bus_address_reg <= bus_address>>2;
@@ -511,6 +515,9 @@ assign DRAM_CKE = 1; // always enable
 	            if (uart_read_step ==1 &&  uart_waitrequest) begin uart_read_pulse <= 1; end  
 	            if (uart_read_step ==1 && !uart_waitrequest) begin bus_read_data <= {32'b0, ~uart_readdata[15], 23'b0, uart_readdata[7:0]}; uart_read_step <= 0; bus_read_done <=1;end 
 		end
+		 `Art_txctr: begin bus_read_data <= {32'b0, uart_txctr_reg}; bus_read_done <= 1; end 
+		 `Art_rxctr: begin bus_read_data <= {32'b0, uart_rxctr_reg}; bus_read_done <= 1; end 
+		 `Art_div: begin bus_read_data <= {32'b0, uart_div}; bus_read_done <= 1; end 
 		 `ArtIP: begin bus_read_data <= {62'b0, uart_irq, 1'b1}; bus_read_done <= 1; end // IP, RX is bit 1, bit 0 buffer has space, bit 1 data is waiting to be read. bit 0=1 always has space
 		 `ArtIE: begin bus_read_data <= {62'b0, sifive_uart_ie}; bus_read_done <= 1; end // return saved ie
 	         default: begin bus_read_data <= 64'b0; bus_read_done <= 1; end // Dummy ACK for TXCTRL/RXCTRL/DIV registers
@@ -652,22 +659,18 @@ assign DRAM_CKE = 1; // always enable
 	    //if (Sdc_read_selected) begin sd_rd_start <= 1; bus_write_done <= 1; end
 	    if (Sdc_read_selected) begin bus_write_done <= 1; end
 
-	    //if (Art_selected) begin uart_write_pulse <= 1; bus_write_done <=1; end
 	    if (Art_selected) begin 
-	      if (bus_address == `Art_base || bus_address == `ArtIE) begin 
-	        if (bus_address == `ArtIE) sifive_uart_ie <= bus_write_data[1:0];
+	      if (bus_address == `Art_base ) begin 
 	        if (uart_write_step ==0) begin uart_write_pulse <= 1; uart_write_step <= 1; end
 	        if (uart_write_step ==1 &&  uart_waitrequest) begin uart_write_pulse <= 1; end
-	        //if (uart_write_step ==1 && !uart_waitrequest) begin uart_write_step <= 0; bus_write_done <=1; uart_write_pulse <= 0;end
 	        if (uart_write_step ==1 && !uart_waitrequest) begin uart_write_step <= 0; bus_write_done <=1; end
-
-
-	      end else bus_write_done <= 1;
+	      end
+	      if (bus_address == `ArtIE) begin sifive_uart_ie <= bus_write_data[1:0]; bus_write_done <= 1; end
+	      if (bus_address == `ArtIP) begin bus_write_done <= 1; end
+	      if (bus_address == `Art_txctr) begin uart_txctr_reg <= bus_write_data[31:0]; bus_write_done <= 1; end
+	      if (bus_address == `Art_rxctr) begin uart_rxctr_reg <= bus_write_data[31:0]; bus_write_done <= 1; end
+	      if (bus_address == `Art_div) begin uart_div <= bus_write_data[31:0]; bus_write_done <= 1; end
 	    end
-	    //if (Art_selected) begin 
-	    //    if (!uart_waitrequest) begin uart_write_pulse <= 1; bus_write_done <=1; end
-	    //end
-        
 	
 
             //if (Clint_selected) begin bus_write_done <= 1; end 
