@@ -291,8 +291,8 @@ assign DRAM_CKE = 1; // always enable
     wire Sdram_selected = (bus_address >= `Sdram_min && bus_address < `Sdram_max);
     wire Mtime_selected = (bus_address == `Mtime || bus_address == `Mtime + 4);
     wire Mtimecmp_selected = (bus_address == `Mtimecmp || bus_address == `Mtimecmp + 4);
-    //wire Clint_selected = (bus_address >= `Clint_base && bus_address <= `Mtime);
-    wire Clintbase_selected = (bus_address == `Clint_base);
+    wire Clint_selected = (bus_address >= `Clint_base && bus_address <= `Mtime);
+    //wire Clintbase_selected = (bus_address == `Clint_base);
     //wire CacheI_selected = (bus_address == `CacheI);
     //---
     wire CacheI_L_selected = (bus_address == `CacheI_L);
