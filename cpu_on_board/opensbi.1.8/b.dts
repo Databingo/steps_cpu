@@ -31,7 +31,7 @@
         //timebase-frequency = <125000>; // mimic 0.124MHz
         //timebase-frequency = <1250000>; // mimic 1.24MHz
 
-        cpu@0 {
+        cpu0_node: cpu@0 {
             phandle = <0x01>;
             device_type = "cpu";
             reg = <0x00>;
@@ -133,6 +133,15 @@
        //stdout-path = "/soc/serial@10000000";
        //stdout-path = "/soc/uart@2004";
        stdout-path = "serial0";
+
+
+       opensbi-config {
+           compatible = "opensbi,config";
+           sbi-console = &uart0;
+           cold-boot-harts = <&cpu0_node>;
+       };
+
+
     };
 
 
