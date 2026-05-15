@@ -1,0 +1,7 @@
+/usr/local/projects/steps_cpu/cpu_on_board/opensbi.1.8/build/platform/generic/firmware/payloads/test_main.o: \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi.1.8/firmware/payloads/test_main.c \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi.1.8/include/sbi/sbi_visibility.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi.1.8/build/platform/generic/kconfig/autoconf.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi.1.8/include/sbi/sbi_ecall_interface.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi.1.8/include/sbi/sbi_types.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi.1.8/include/sbi/sbi_string.h
