@@ -335,7 +335,7 @@ assign DRAM_CKE = 1; // always enable
     reg msip_interrupt = 0;
     wire uart_irq;
     reg uart_irq_pre;
-    reg uart_tx_pre;
+    //reg uart_tx_pre;
     wire [31:0] uart_readdata;
 
 
@@ -397,9 +397,9 @@ assign DRAM_CKE = 1; // always enable
 	    //mtimecmp <=  64'h80000000;
 	    mtimecmp <=  64'hffffffffffffffff;
 	    uart_irq_pre <= 0;
-	    uart_tx_pre <= 0;
-	    sifive_uart_ie <= 2'b0;
-	    uart_div <= 32'd1;
+	    //uart_tx_pre <= 0;
+	    //sifive_uart_ie <= 2'b0;
+	    //uart_div <= 32'd1;
             //sd_rd_start <= 0;
 	end else begin
         bus_address_reg <= bus_address>>2;
@@ -412,8 +412,8 @@ assign DRAM_CKE = 1; // always enable
 	//if (uart_irq && !uart_irq_pre) Plic_pending[1] <= 1;
 	uart_irq_pre <= uart_irq;
 	if (uart_irq && !uart_irq_pre) Plic_pending[1] <= 1;
-	uart_tx_pre <=  sifive_uart_ie[0];
-	if (sifive_uart_ie[0] && !uart_tx_pre) Plic_pending[1] <= 1;
+	//uart_tx_pre <=  sifive_uart_ie[0];
+	//if (sifive_uart_ie[0] && !uart_tx_pre) Plic_pending[1] <= 1;
 	//if ((1'b1 & sifive_uart_ie[0]) || (uart_irq & sifive_uart_ie[1])) Plic_pending[1] <= 1; // ( TX_ready && TX_enabled ) ||( RX_ready && RX_enabled )
 	//if (uart_irq) Plic_pending[1] <= 1; //??
 	//if (key_pressed_edge) Plic_pending[1] <= 1;
