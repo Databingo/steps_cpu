@@ -75,9 +75,11 @@
         };
                
         uart0: serial@2004{
-             compatible = "sifive,uart0";  // driver
+             //compatible = "sifive,uart0";  // driver
+             compatible = "altr,juart-1.0";  // driver
              //reg = <0x0 0x2004 0x0 0x10>;
-             reg = <0x0 0x2004 0x0 0x20>;
+             //reg = <0x0 0x2004 0x0 0x20>;
+             reg = <0x0 0x2004 0x0 0x8>;
              // if using PLIC point to IRQ 1. If bypass use extended
              //interrupts-extended = <&cpu0_intc 0x09>; // add dummy external interrupt mapping
              interrupt-parent = <&plic>;  
