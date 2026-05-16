@@ -1,5 +1,7 @@
 <?xml version="1.0" ?>
 <LOG_ROOT>
 	<PROJECT NAME="cpu_on_board">
+		<CBX_INST_ENTRY INSTANCE_NAME="|cpu_on_board|jtag_uart_system:my_jtag_system|jtag_uart_system_jtag_uart_0:jtag_uart_0|jtag_uart_system_jtag_uart_0_scfifo_r:the_jtag_uart_system_jtag_uart_0_scfifo_r|scfifo:rfifo" CBX_FILE_NAME="scfifo_9r21.tdf"/>
+		<CBX_INST_ENTRY INSTANCE_NAME="|cpu_on_board|jtag_uart_system:my_jtag_system|jtag_uart_system_jtag_uart_0:jtag_uart_0|jtag_uart_system_jtag_uart_0_scfifo_w:the_jtag_uart_system_jtag_uart_0_scfifo_w|scfifo:wfifo" CBX_FILE_NAME="scfifo_9r21.tdf"/>
 	</PROJECT>
 </LOG_ROOT>
