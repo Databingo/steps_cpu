@@ -58,8 +58,8 @@ reg in_debug = 0;
 reg i_cache_refill=0;
 wire STrap = (mmu_pc || mmu_da || i_cache_refill || in_debug);
 wire is_mem_access = (op == 7'b0000011 || op == 7'b0100011 || op == 7'b0101111); //load/store/atm
-//wire is_unaligned_access = is_mem_access && current_privilege_mode != M_mode && (
-wire is_unaligned_access = is_mem_access && (
+wire is_unaligned_access = is_mem_access && current_privilege_mode != M_mode && (
+//wire is_unaligned_access = is_mem_access && (
     (w_func3[1:0] == 2'b01 && ls_va[0]   != 1'b0) || // lh/lhu/sh
     (w_func3[1:0] == 2'b10 && ls_va[1:0] != 2'b00) || // lw/lwu/sw
     (w_func3[1:0] == 2'b11 && ls_va[2:0] != 3'b000)  // ld/sd/AMO
