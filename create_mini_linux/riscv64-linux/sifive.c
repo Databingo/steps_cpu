@@ -491,10 +491,14 @@ static void __ssp_set_stop_bits(struct sifive_serial_port *ssp, char nstop)
  *
  * Context: Any context.
  */
+//static void __maybe_unused __ssp_wait_for_xmitr(struct sifive_serial_port *ssp)
+//{
+//	while (sifive_serial_is_txfifo_full(ssp))
+//		udelay(1); /* XXX Could probably be more intelligent here */
+//}
 static void __maybe_unused __ssp_wait_for_xmitr(struct sifive_serial_port *ssp)
 {
-	while (sifive_serial_is_txfifo_full(ssp))
-		udelay(1); /* XXX Could probably be more intelligent here */
+	return;
 }
 
 /*
