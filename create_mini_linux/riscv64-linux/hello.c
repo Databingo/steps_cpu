@@ -739,6 +739,7 @@
 #include <fcntl.h>
 #include <string.h>
 #include <sys/sysmacros.h>
+#include <sys/syscall.h>
 
 // Direct hardware print
 void manual_puts(const char *s) {
@@ -787,11 +788,27 @@ int main() {
     }
 
 
-    int flags = fcntl(1, F_GETFL);
-    if (flags < 0) {
-        manual_puts("4.5 fcntl Fail. Errno: ");
-        manual_print_int(errno);
-    }
+    //int flags = fcntl(1, F_GETFL); // fdget_raw(1) 9EBADF-NULL at index 1
+    //if (flags < 0) {
+    //    manual_puts("4.5 fcntl Fail. Errno: ");
+    //    manual_print_int(errno);
+    //}
+
+    // Bypass musl libc wrappers entirely to test the true kernel state
+    int raw_fcntl = syscall(25, 1, F_GETFL); // 25 is __NR_fcntl on RISC-V 64
+    manual_puts("4.5 RAW fcntl returned: ");
+    manual_print_int(raw_fcntl);
+
+    // Let's also check if the kernel thinks FD 1 exists via fstat (syscall 80)
+    struct stat st;
+    int raw_fstat = syscall(80, 1, &st);
+    manual_puts("4.6 RAW fstat(1) returned: ");
+    manual_print_int(raw_fstat);
+
+
+
+
+
 
     // Open kmsg using HARDCODED 1 (O_WRONLY)
     int kmsg = open("/dev/kmsg", 1);
