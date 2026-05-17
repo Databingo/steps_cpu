@@ -1,4 +1,4 @@
-/usr/local/projects/steps_cpu/cpu_on_board/opensbi.1.8/build/lib/sbi/sbi_hfence.o: \
- /usr/local/projects/steps_cpu/cpu_on_board/opensbi.1.8/lib/sbi/sbi_hfence.S \
- /usr/local/projects/steps_cpu/cpu_on_board/opensbi.1.8/include/sbi/sbi_visibility.h \
- /usr/local/projects/steps_cpu/cpu_on_board/opensbi.1.8/build/platform/generic/kconfig/autoconf.h
+/usr/local/projects/steps_cpu/cpu_on_board/opensbi/build/lib/sbi/sbi_hfence.o: \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/lib/sbi/sbi_hfence.S \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/sbi_visibility.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/build/platform/generic/kconfig/autoconf.h

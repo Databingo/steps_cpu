@@ -1,7 +1,7 @@
-/usr/local/projects/steps_cpu/cpu_on_board/opensbi.1.8/build/lib/sbi/riscv_locks.o: \
- /usr/local/projects/steps_cpu/cpu_on_board/opensbi.1.8/lib/sbi/riscv_locks.c \
- /usr/local/projects/steps_cpu/cpu_on_board/opensbi.1.8/include/sbi/sbi_visibility.h \
- /usr/local/projects/steps_cpu/cpu_on_board/opensbi.1.8/build/platform/generic/kconfig/autoconf.h \
- /usr/local/projects/steps_cpu/cpu_on_board/opensbi.1.8/include/sbi/riscv_barrier.h \
- /usr/local/projects/steps_cpu/cpu_on_board/opensbi.1.8/include/sbi/riscv_locks.h \
- /usr/local/projects/steps_cpu/cpu_on_board/opensbi.1.8/include/sbi/sbi_types.h
+/usr/local/projects/steps_cpu/cpu_on_board/opensbi/build/lib/sbi/riscv_locks.o: \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/lib/sbi/riscv_locks.c \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/sbi_visibility.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/build/platform/generic/kconfig/autoconf.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/riscv_barrier.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/riscv_locks.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/sbi_types.h

@@ -31,14 +31,13 @@
         //timebase-frequency = <125000>; // mimic 0.124MHz
         //timebase-frequency = <1250000>; // mimic 1.24MHz
 
-        cpu0_node: cpu@0 {
+        cpu@0 {
             phandle = <0x01>;
             device_type = "cpu";
             reg = <0x00>;
             status = "okay";
             compatible = "riscv";
-            //riscv,isa = "rv64imasu_zicsr_zifencei";
-            riscv,isa = "rv64ima_zicsr_zifencei";
+            riscv,isa = "rv64imasu_zicsr_zifencei";
             mmu-type = "riscv,sv39";
 
 
@@ -70,16 +69,14 @@
             reg = <0x00 0x10000000 0x00 0x100>;
             clock-frequency = <12500000>;
             reg-shift = <0>;
-            //status = "okay";
-            status = "disabled";
+            status = "okay";
+            //status = "disabled";
         };
                
-        uart0: serial@2004{
-             //compatible = "sifive,uart0";  // driver
-             compatible = "altr,juart-1.0";  // driver
+        uart0: uart@2004{
+             compatible = "sifive,uart0";  // driver
              //reg = <0x0 0x2004 0x0 0x10>;
-             //reg = <0x0 0x2004 0x0 0x20>;
-             reg = <0x0 0x2004 0x0 0x8>;
+             reg = <0x0 0x2004 0x0 0x20>;
              // if using PLIC point to IRQ 1. If bypass use extended
              //interrupts-extended = <&cpu0_intc 0x09>; // add dummy external interrupt mapping
              interrupt-parent = <&plic>;  
@@ -132,18 +129,8 @@
        //bootargs = "no4lvl earlycon=sbi console=hvc0 panic=0 init_on_alloc=0 ignore_loglevel initcall_debug rcu_update.rcu_cpu_stall_suppress=1 rdinit=/bin/echo HELLO /dev/ttyprintk";
        //bootargs = "no4lvl earlycon=sbi console=ttySIF0 panic=0 init_on_alloc=0 ignore_loglevel initcall_debug rcu_update.rcu_cpu_stall_suppress=1 rdinit=/hello";
        bootargs = "no4lvl earlycon=sbi console=hvc0 panic=0 init_on_alloc=0 ignore_loglevel initcall_debug rcu_update.rcu_cpu_stall_suppress=1 rdinit=/hello";
-       //stdout-path = "/soc/serial@10000000";
+       stdout-path = "/soc/serial@10000000";
        //stdout-path = "/soc/uart@2004";
-       stdout-path = "serial0";
-
-
-       opensbi-config {
-           compatible = "opensbi,config";
-           sbi-console = &uart0;
-           cold-boot-harts = <&cpu0_node>;
-       };
-
-
     };
 
 

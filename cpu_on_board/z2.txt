@@ -58,8 +58,7 @@ reg in_debug = 0;
 reg i_cache_refill=0;
 wire STrap = (mmu_pc || mmu_da || i_cache_refill || in_debug);
 wire is_mem_access = (op == 7'b0000011 || op == 7'b0100011 || op == 7'b0101111); //load/store/atm
-//wire is_unaligned_access = is_mem_access && current_privilege_mode != M_mode && (
-wire is_unaligned_access = is_mem_access && (
+wire is_unaligned_access = is_mem_access && current_privilege_mode != M_mode && (
     (w_func3[1:0] == 2'b01 && ls_va[0]   != 1'b0) || // lh/lhu/sh
     (w_func3[1:0] == 2'b10 && ls_va[1:0] != 2'b00) || // lw/lwu/sw
     (w_func3[1:0] == 2'b11 && ls_va[2:0] != 3'b000)  // ld/sd/AMO
@@ -3255,8 +3254,8 @@ print7: # a0, 7 char left one for null
             reg = <0x00 0x10000000 0x00 0x100>;
             clock-frequency = <12500000>;
             reg-shift = <0>;
-            //status = "okay";
-            status = "disabled";
+            status = "okay";
+            //status = "disabled";
         };
                
         uart0: uart@2004{
@@ -3315,8 +3314,8 @@ print7: # a0, 7 char left one for null
        //bootargs = "no4lvl earlycon=sbi console=hvc0 panic=0 init_on_alloc=0 ignore_loglevel initcall_debug rcu_update.rcu_cpu_stall_suppress=1 rdinit=/bin/echo HELLO /dev/ttyprintk";
        //bootargs = "no4lvl earlycon=sbi console=ttySIF0 panic=0 init_on_alloc=0 ignore_loglevel initcall_debug rcu_update.rcu_cpu_stall_suppress=1 rdinit=/hello";
        bootargs = "no4lvl earlycon=sbi console=hvc0 panic=0 init_on_alloc=0 ignore_loglevel initcall_debug rcu_update.rcu_cpu_stall_suppress=1 rdinit=/hello";
-       //stdout-path = "/soc/serial@10000000";
-       stdout-path = "/soc/uart@2004";
+       stdout-path = "/soc/serial@10000000";
+       //stdout-path = "/soc/uart@2004";
     };
 
 
@@ -3350,7 +3349,8 @@ rm -rf build/platform/generic/firmware/*  \
 
 # for buildroot-linux-busybox   linxu fore payload offset = 2M ?
 #make O=build_soc \
-make CROSS_COMPILE=/usr/local/projects/bin/xpack-riscv-none-elf-gcc-14.2.0-3/bin/riscv-none-elf- \
+#make CROSS_COMPILE=/usr/local/projects/bin/xpack-riscv-none-elf-gcc-14.2.0-3/bin/riscv-none-elf- \
+make ARCH=riscv CROSS_COMPILE=/usr/local/projects/steps_cpu/create_mini_linux/buildroot-2026.02/output/host/bin/riscv64-buildroot-linux-musl-  \
      PLATFORM=generic \
      FW_PIC=n \
      PLATFORM_RISCV_ISA=rv64ima_zicsr_zifencei \

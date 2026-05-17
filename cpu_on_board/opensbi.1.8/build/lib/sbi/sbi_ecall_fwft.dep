@@ -1,15 +1,15 @@
-/usr/local/projects/steps_cpu/cpu_on_board/opensbi.1.8/build/lib/sbi/sbi_ecall_fwft.o: \
- /usr/local/projects/steps_cpu/cpu_on_board/opensbi.1.8/lib/sbi/sbi_ecall_fwft.c \
- /usr/local/projects/steps_cpu/cpu_on_board/opensbi.1.8/include/sbi/sbi_visibility.h \
- /usr/local/projects/steps_cpu/cpu_on_board/opensbi.1.8/build/platform/generic/kconfig/autoconf.h \
- /usr/local/projects/steps_cpu/cpu_on_board/opensbi.1.8/include/sbi/sbi_ecall.h \
- /usr/local/projects/steps_cpu/cpu_on_board/opensbi.1.8/include/sbi/sbi_types.h \
- /usr/local/projects/steps_cpu/cpu_on_board/opensbi.1.8/include/sbi/sbi_list.h \
- /usr/local/projects/steps_cpu/cpu_on_board/opensbi.1.8/include/sbi/sbi_ecall_interface.h \
- /usr/local/projects/steps_cpu/cpu_on_board/opensbi.1.8/include/sbi/sbi_error.h \
- /usr/local/projects/steps_cpu/cpu_on_board/opensbi.1.8/include/sbi/sbi_fwft.h \
- /usr/local/projects/steps_cpu/cpu_on_board/opensbi.1.8/include/sbi/sbi_trap.h \
- /usr/local/projects/steps_cpu/cpu_on_board/opensbi.1.8/include/sbi/riscv_encoding.h \
- /usr/local/projects/steps_cpu/cpu_on_board/opensbi.1.8/include/sbi/sbi_const.h \
- /usr/local/projects/steps_cpu/cpu_on_board/opensbi.1.8/include/sbi/sbi_scratch.h \
- /usr/local/projects/steps_cpu/cpu_on_board/opensbi.1.8/include/sbi/riscv_asm.h
+/usr/local/projects/steps_cpu/cpu_on_board/opensbi/build/lib/sbi/sbi_ecall_fwft.o: \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/lib/sbi/sbi_ecall_fwft.c \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/sbi_visibility.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/build/platform/generic/kconfig/autoconf.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/sbi_ecall.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/sbi_types.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/sbi_list.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/sbi_ecall_interface.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/sbi_error.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/sbi_fwft.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/sbi_trap.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/riscv_encoding.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/sbi_const.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/sbi_scratch.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/riscv_asm.h

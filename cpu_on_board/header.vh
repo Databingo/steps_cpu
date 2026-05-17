@@ -5,11 +5,8 @@
 `define Key_base   64'h0000_2000
 `define Art_base   64'h0000_2004
 `define ArtK_base  64'h0000_2008
-`define Art_txctr  64'h0000_200c
-`define Art_rxctr  64'h0000_2010
 `define ArtIE      64'h0000_2014
 `define ArtIP      64'h0000_2018
-`define Art_div    64'h0000_201C
 `define Art_last   64'h0000_201C
 
 `define Sdc_base   64'h0000_3000

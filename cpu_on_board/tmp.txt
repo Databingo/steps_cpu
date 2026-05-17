@@ -384,6 +384,47 @@ jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I copy_sector
 addi t1, t1, 1
 addi s0, s0, 512
 blt t1, t2, copy_sector_loop
+search_kernel:
+# li s9, "KERNL"
+addi s9, x0, 0x0
+ori s9, s9, 0x26
+slli s9, s9, 0xb
+ori s9, s9, 0x139
+slli s9, s9, 0xb
+ori s9, s9, 0x248
+slli s9, s9, 0xb
+ori s9, s9, 0x54b
+# j find_kernel
+jal x0, find_kernel
+copy_kernel:
+# li s0, 0x80200000 
+addi s0, x0, 0x0
+slli s0, s0, 0xb
+ori s0, s0, 0x200
+slli s0, s0, 0xb
+ori s0, s0, 0x400
+slli s0, s0, 0xb
+copy_kernel_sector_loop:
+# li a0, 96 
+addi a0, x0, 0x0
+addi a0, x0, 0x0
+addi a0, x0, 0x60
+# call putchar
+auipc x1, 0 # R_RISCV_PCREL_HI20 putchar
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I putchar
+# mv a0, t1
+addi a0, t1, 0
+# call sd_read_sector  
+auipc x1, 0 # R_RISCV_PCREL_HI20 sd_read_sector
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I sd_read_sector
+# mv a0, s0
+addi a0, s0, 0
+# call copy_sector
+auipc x1, 0 # R_RISCV_PCREL_HI20 copy_sector
+jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I copy_sector
+addi t1, t1, 1
+addi s0, s0, 512
+blt t1, t2, copy_kernel_sector_loop
 boot_opensbi:
 #     li s0, 0x80000000 
 addi s0, x0, 0x0
@@ -409,8 +450,6 @@ ori a0, a0, 0x20a
 auipc x1, 0 # R_RISCV_PCREL_HI20 print7
 jalr x1, 0(x1) # R_RISCV_PCREL_LO12_I print7
 fence.i
-#     nop
-addi x0, x0, 0
 #     li a0, 0 
 addi a0, x0, 0x0
 #     li a1, 0 

@@ -1,4 +1,4 @@
-/usr/local/projects/steps_cpu/cpu_on_board/opensbi.1.8/Kconfig
+/usr/local/projects/steps_cpu/cpu_on_board/opensbi/Kconfig
 platform/generic/Kconfig
 platform/generic/andes/Kconfig
 platform/generic/eswin/Kconfig

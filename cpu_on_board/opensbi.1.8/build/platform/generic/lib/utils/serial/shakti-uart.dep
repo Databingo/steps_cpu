@@ -1,9 +1,9 @@
-/usr/local/projects/steps_cpu/cpu_on_board/opensbi.1.8/build/platform/generic/lib/utils/serial/shakti-uart.o: \
- /usr/local/projects/steps_cpu/cpu_on_board/opensbi.1.8/lib/utils/serial/shakti-uart.c \
- /usr/local/projects/steps_cpu/cpu_on_board/opensbi.1.8/include/sbi/sbi_visibility.h \
- /usr/local/projects/steps_cpu/cpu_on_board/opensbi.1.8/build/platform/generic/kconfig/autoconf.h \
- /usr/local/projects/steps_cpu/cpu_on_board/opensbi.1.8/include/sbi/riscv_io.h \
- /usr/local/projects/steps_cpu/cpu_on_board/opensbi.1.8/include/sbi/riscv_barrier.h \
- /usr/local/projects/steps_cpu/cpu_on_board/opensbi.1.8/include/sbi/sbi_types.h \
- /usr/local/projects/steps_cpu/cpu_on_board/opensbi.1.8/include/sbi/sbi_console.h \
- /usr/local/projects/steps_cpu/cpu_on_board/opensbi.1.8/include/sbi_utils/serial/shakti-uart.h
+/usr/local/projects/steps_cpu/cpu_on_board/opensbi/build/platform/generic/lib/utils/serial/shakti-uart.o: \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/lib/utils/serial/shakti-uart.c \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/sbi_visibility.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/build/platform/generic/kconfig/autoconf.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/riscv_io.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/riscv_barrier.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/sbi_types.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/sbi_console.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi_utils/serial/shakti-uart.h

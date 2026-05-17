@@ -456,26 +456,25 @@ addi t1, t1, 1
 addi s0, s0, 512
 blt t1, t2, copy_sector_loop
 
-# -------------------- 
-#search_kernel:
-#li s9, "KERNL"
-##mv a0, s9
-##call print7
-#j find_kernel
-#
-#copy_kernel: 
-#li s0, 0x80200000 # FW_JUMP to KERNL base 0x80200000
-#copy_kernel_sector_loop:
-#li a0, 96 # `
-#call putchar
-#mv a0, t1
-#call sd_read_sector  # use a0 as sector no.
-#mv a0, s0
-#call copy_sector
-#addi t1, t1, 1
-#addi s0, s0, 512
-#blt t1, t2, copy_kernel_sector_loop
-# -------------------- 
+ 
+search_kernel:
+li s9, "KERNL"
+#mv a0, s9
+#call print7
+j find_kernel
+
+copy_kernel: 
+li s0, 0x80200000 # FW_JUMP to KERNL base 0x80200000
+copy_kernel_sector_loop:
+li a0, 96 # `
+call putchar
+mv a0, t1
+call sd_read_sector  # use a0 as sector no.
+mv a0, s0
+call copy_sector
+addi t1, t1, 1
+addi s0, s0, 512
+blt t1, t2, copy_kernel_sector_loop
 
 
 
@@ -561,7 +560,6 @@ boot_opensbi:
    #csrw 0x7cc, t0  # open debug print
 
    #csrwi mdebug, 8 
-    nop
     li a0, 0 # use core 0
     li a1, 0 # let opensbi use its embedded DTB
    #li a1, 0x80100000 # set DTB addr

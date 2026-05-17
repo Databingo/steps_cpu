@@ -1,13 +1,13 @@
-/usr/local/projects/steps_cpu/cpu_on_board/opensbi.1.8/build/platform/generic/lib/utils/mailbox/rpmi_mailbox.o: \
- /usr/local/projects/steps_cpu/cpu_on_board/opensbi.1.8/lib/utils/mailbox/rpmi_mailbox.c \
- /usr/local/projects/steps_cpu/cpu_on_board/opensbi.1.8/include/sbi/sbi_visibility.h \
- /usr/local/projects/steps_cpu/cpu_on_board/opensbi.1.8/build/platform/generic/kconfig/autoconf.h \
- /usr/local/projects/steps_cpu/cpu_on_board/opensbi.1.8/include/sbi/sbi_error.h \
- /usr/local/projects/steps_cpu/cpu_on_board/opensbi.1.8/include/sbi/sbi_ecall_interface.h \
- /usr/local/projects/steps_cpu/cpu_on_board/opensbi.1.8/include/sbi/sbi_types.h \
- /usr/local/projects/steps_cpu/cpu_on_board/opensbi.1.8/include/sbi_utils/mailbox/mailbox.h \
- /usr/local/projects/steps_cpu/cpu_on_board/opensbi.1.8/include/sbi/sbi_list.h \
- /usr/local/projects/steps_cpu/cpu_on_board/opensbi.1.8/include/sbi/riscv_atomic.h \
- /usr/local/projects/steps_cpu/cpu_on_board/opensbi.1.8/include/sbi_utils/mailbox/rpmi_mailbox.h \
- /usr/local/projects/steps_cpu/cpu_on_board/opensbi.1.8/include/sbi_utils/mailbox/rpmi_msgprot.h \
- /usr/local/projects/steps_cpu/cpu_on_board/opensbi.1.8/include/sbi/sbi_byteorder.h
+/usr/local/projects/steps_cpu/cpu_on_board/opensbi/build/platform/generic/lib/utils/mailbox/rpmi_mailbox.o: \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/lib/utils/mailbox/rpmi_mailbox.c \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/sbi_visibility.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/build/platform/generic/kconfig/autoconf.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/sbi_error.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/sbi_ecall_interface.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/sbi_types.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi_utils/mailbox/mailbox.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/sbi_list.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/riscv_atomic.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi_utils/mailbox/rpmi_mailbox.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi_utils/mailbox/rpmi_msgprot.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/sbi_byteorder.h

@@ -1,12 +1,12 @@
-/usr/local/projects/steps_cpu/cpu_on_board/opensbi.1.8/build/platform/generic/firmware/fw_jump.o: \
- /usr/local/projects/steps_cpu/cpu_on_board/opensbi.1.8/firmware/fw_jump.S \
- /usr/local/projects/steps_cpu/cpu_on_board/opensbi.1.8/include/sbi/sbi_visibility.h \
- /usr/local/projects/steps_cpu/cpu_on_board/opensbi.1.8/build/platform/generic/kconfig/autoconf.h \
- /usr/local/projects/steps_cpu/cpu_on_board/opensbi.1.8/firmware/fw_base.S \
- /usr/local/projects/steps_cpu/cpu_on_board/opensbi.1.8/include/sbi/riscv_asm.h \
- /usr/local/projects/steps_cpu/cpu_on_board/opensbi.1.8/include/sbi/riscv_encoding.h \
- /usr/local/projects/steps_cpu/cpu_on_board/opensbi.1.8/include/sbi/sbi_const.h \
- /usr/local/projects/steps_cpu/cpu_on_board/opensbi.1.8/include/sbi/riscv_elf.h \
- /usr/local/projects/steps_cpu/cpu_on_board/opensbi.1.8/include/sbi/sbi_platform.h \
- /usr/local/projects/steps_cpu/cpu_on_board/opensbi.1.8/include/sbi/sbi_scratch.h \
- /usr/local/projects/steps_cpu/cpu_on_board/opensbi.1.8/include/sbi/sbi_trap.h
+/usr/local/projects/steps_cpu/cpu_on_board/opensbi/build/platform/generic/firmware/fw_jump.o: \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/firmware/fw_jump.S \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/sbi_visibility.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/build/platform/generic/kconfig/autoconf.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/firmware/fw_base.S \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/riscv_asm.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/riscv_encoding.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/sbi_const.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/riscv_elf.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/sbi_platform.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/sbi_scratch.h \
+ /usr/local/projects/steps_cpu/cpu_on_board/opensbi/include/sbi/sbi_trap.h

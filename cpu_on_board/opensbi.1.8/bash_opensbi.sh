@@ -26,22 +26,20 @@ rm -rf build/platform/generic/firmware/*  \
 # for buildroot-linux-busybox   linxu fore payload offset = 2M ?
 #make O=build_soc \
 #make CROSS_COMPILE=/usr/local/projects/bin/xpack-riscv-none-elf-gcc-14.2.0-3/bin/riscv-none-elf- \
-make DEBUG=1 ARCH=riscv CROSS_COMPILE=/usr/local/projects/steps_cpu/create_mini_linux/buildroot-2026.02/output/host/bin/riscv64-buildroot-linux-musl-  \
+make ARCH=riscv CROSS_COMPILE=/usr/local/projects/steps_cpu/create_mini_linux/buildroot-2026.02/output/host/bin/riscv64-buildroot-linux-musl-  \
      PLATFORM=generic \
      FW_PIC=n \
      PLATFORM_RISCV_ISA=rv64ima_zicsr_zifencei \
      PLATFORM_RISCV_ABI=lp64 \
      EXTRA_CCASFLAGS="-march=rv64ima_zicsr_zifencei -mabi=lp64" \
-     EXTRA_CFLAGS="-mno-relax -march=rv64ima_zicsr_zifencei -mabi=lp64 -fno-stack-protector -fno-PIE -mstrict-align" \
-     EXTRA_LDFLAGS="-Wl,-no-pie -mno-relax" \
+     EXTRA_CFLAGS="-mno-relax -march=rv64ima_zicsr_zifencei -mabi=lp64" \
      FW_COLDBOOT_HART=0 \
      FW_HART_COUNT=1 \
      FW_TEXT_START=0x80000000 \
      FW_FDT_PATH=my_board.dtb \
-     FW_PAYLOAD=y \
-     FW_PAYLOAD_PATH=/usr/local/projects/steps_cpu/create_mini_linux/riscv64-linux/Image \
-    #FW_JUMP_FDT_ADDR=0x80100000 \
-    #FW_JUMP_ADDR=0x80200000 \
+     FW_JUMP_FDT_ADDR=0x80100000 \
+     FW_PAYLOAD=n \
+     FW_JUMP_ADDR=0x80200000 \
     #SBI_EXT_TIME=n\
     #FW_PAYLOAD_OFFSET=0x200000 \
     #FW_PAYLOAD_PATH=/usr/local/projects/steps_cpu/create_mini_linux/riscv64-linux/Image \
