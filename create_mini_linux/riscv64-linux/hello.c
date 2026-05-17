@@ -626,6 +626,7 @@
 #define _GNU_SOURCE
 #include <stdio.h>
 #include <unistd.h>
+#include <fcntl.h>
 #include <sys/mount.h>
 #include <sys/stat.h>
 
@@ -645,6 +646,13 @@ int main() {
     // 1. Manual Print
     manual_puts("1. MANUAL PRINT: OK\n");
 
+    // 2. THE FIX: Open the Linux console and attach it to printf (stdout)
+    int fd = open("/dev/console", O_RDWR);
+    if (fd >= 0) {
+        dup2(fd, 0); // Attach to stdin  (for scanf / input)
+        dup2(fd, 1); // Attach to stdout (for printf)
+        dup2(fd, 2); // Attach to stderr (for errors)
+    }
     // 2. Standard C Library Print
     // Since the hardware is now stable, Linux's console driver should work.
     // If this prints, your Device Tree and SiFive-wrapper are also correct!
