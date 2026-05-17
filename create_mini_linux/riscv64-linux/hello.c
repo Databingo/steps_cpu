@@ -415,77 +415,6 @@
 //}
 
 
-//#define _GNU_SOURCE
-//#include <stdio.h>
-//#include <fcntl.h>
-//#include <unistd.h>
-//#include <sys/stat.h>
-//#include <sys/sysmacros.h>
-//#include <sys/mount.h>
-//#include <errno.h>
-//#include <fcntl.h>
-//
-//int main() {
-//    // 1. Create the dev directory
-//    mkdir("/dev", 0755);
-//    
-//    // 2. Create the console node
-//    //mknod("/dev/console", S_IFCHR | 0600, makedev(5, 1));
-//      
-//      
-//      
-//    int t = mount("devtmpfs", "/dev", "devtmpfs", 0, NULL);
-//    if (t < 0) { return 51;} 
-//    //int r = mknod("/dev/hvc0", S_IFCHR | 0600, makedev(229, 0));
-//    //if (r < 0) {}
-//
-//    close(0);
-//    close(1);
-//    close(2);
-//
-//
-//
-//    // 3. MAGIC TRICK: Open with O_NONBLOCK!
-//    // This strictly forbids Linux from going to sleep to wait for your broken PLIC!
-//    //int fd = open("/dev/console", O_WRONLY | O_NONBLOCK);
-//    //int fd = open("/dev/hvc0", O_RDWR | O_NONBLOCK);
-//    ////return fd;  // 3
-//    //if (fd < 0) { 
-//    //    fd = open("/dev/console", O_RDWR | O_NONBLOCK);
-//    //    if (fd < 0) return 52; // Failed to open
-//    //}
-//
-//    int fd0 = open("/dev/hvc0", O_RDWR | O_NONBLOCK);
-//    int fd1 = open("/dev/hvc0", O_RDWR | O_NONBLOCK);
-//    int fd2 = open("/dev/hvc0", O_RDWR | O_NONBLOCK);
-//
-//    if (fd1 != 1) { return 900+fd1; }
-//
-//    int flags = fcntl(1, F_GETFL);
-//    if (flags < 0) return 800 + errno;
-//
-//
-//    char test_char = 'A';
-//    if (write(1, &test_char, 1) < 0){
-//	return 700 + errno;
-//    }
-//
-//    //if (fd > 2) close(fd);
-//
-//
-//    int ret =   write(1, "\n====================\nSUCCESS: A\n====================\n", 54);
-//    if (ret < 0) {
-//        return 600 + errno;
-//    }
-//
-//    printf("OK\n");
-//
-//
-//    // Hang forever
-//    while(1) { sleep(1); }
-//    return 0;
-//}
-  
   
 //#define _GNU_SOURCE
 //#include <unistd.h>
@@ -664,55 +593,138 @@
 //} 
 
 
+//#define _GNU_SOURCE
+//#include <stdio.h>
+//#include <unistd.h>
+//#include <fcntl.h>
+//#include <sys/mount.h>
+//#include <sys/stat.h>
+//#include <string.h>
+//
+//// Direct hardware print (The proven baseline)
+//void manual_puts(const char *s) {
+//    volatile unsigned int *uart_tx = (volatile unsigned int *)0x2004;
+//    while (*s) *uart_tx = *s++;
+//}
+//
+//int main() {
+//    // 1. Mount /dev
+//    mkdir("/dev", 0755);
+//    mount("devtmpfs", "/dev", "devtmpfs", 0, NULL);
+//    manual_puts("1. MANUAL PRINT: OK\n");
+//
+//    // 2. Test /dev/console
+//    int fd = open("/dev/console", O_RDWR);
+//    if (fd < 0) {
+//        manual_puts("ERROR: Failed to open /dev/console!\n");
+//    } else {
+//        manual_puts("2. /dev/console OPENED SAFELY\n");
+//        dup2(fd, 1); // Bind stdout to console
+//        dup2(fd, 2); // Bind stderr to console
+//    }
+//
+//    // 3. Test Direct Kernel Logging (Bypasses TTY buffer!)
+//    int kmsg = open("/dev/kmsg", O_WRONLY);
+//    if (kmsg >= 0) {
+//        char *kmsg_str = "3. KMSG PRINT: THIS BYPASSES THE TTY BUFFER!\n";
+//        write(kmsg, kmsg_str, strlen(kmsg_str));
+//        close(kmsg);
+//    }
+//
+//    // 4. Test Buffered TTY Print
+//    printf("4. STANDARD PRINTF: HELLO FROM HVC0!\n");
+//    fflush(stdout);
+//
+//    manual_puts("5. WAITING FOR LINUX BACKGROUND THREAD TO FLUSH TTY...\n");
+//
+//    // 6. INFINITE LOOP: Prevents Kernel Panic and allows background threads to run
+//    while (1) {
+//        sleep(1); 
+//        // If this loop runs, your timer interrupts are working perfectly!
+//    }
+//
+//    return 123; 
+//}
+
 #define _GNU_SOURCE
 #include <stdio.h>
-#include <unistd.h>
 #include <fcntl.h>
-#include <sys/mount.h>
+#include <unistd.h>
 #include <sys/stat.h>
+#include <sys/sysmacros.h>
+#include <sys/mount.h>
+#include <errno.h>
 #include <string.h>
 
-// Direct hardware print (The proven baseline)
+// Direct hardware print
 void manual_puts(const char *s) {
     volatile unsigned int *uart_tx = (volatile unsigned int *)0x2004;
     while (*s) *uart_tx = *s++;
 }
 
+// Safe function to print a 1-digit or 2-digit integer to hardware UART
+void manual_print_int(int num) {
+    volatile unsigned int *uart_tx = (volatile unsigned int *)0x2004;
+    if (num < 0) { *uart_tx = '-'; num = -num; }
+    if (num >= 10) { *uart_tx = '0' + (num / 10); }
+    *uart_tx = '0' + (num % 10);
+    *uart_tx = '\n';
+}
+
 int main() {
-    // 1. Mount /dev
-    mkdir("/dev", 0755);
-    mount("devtmpfs", "/dev", "devtmpfs", 0, NULL);
+    // THIS REQUIRES YOUR HARDWARE 'PMA' SWITCH TO BE ON!
     manual_puts("1. MANUAL PRINT: OK\n");
 
-    // 2. Test /dev/console
-    int fd = open("/dev/console", O_RDWR);
-    if (fd < 0) {
-        manual_puts("ERROR: Failed to open /dev/console!\n");
+    mkdir("/dev", 0755);
+    int t = mount("devtmpfs", "/dev", "devtmpfs", 0, NULL);
+    if (t < 0) { 
+        manual_puts("Mount Failed! Errno: ");
+        manual_print_int(errno);
+        return 51;
+    } 
+    manual_puts("2. Mount devtmpfs: OK\n");
+
+    // Clear default FDs
+    close(0);
+    close(1);
+    close(2);
+
+    // Reassign FDs to hvc0
+    int fd0 = open("/dev/hvc0", O_RDWR | O_NONBLOCK);
+    int fd1 = open("/dev/hvc0", O_RDWR | O_NONBLOCK);
+    int fd2 = open("/dev/hvc0", O_RDWR | O_NONBLOCK);
+
+    if (fd1 != 1) { 
+        manual_puts("3. open /dev/hvc0 Fail. FD is: ");
+        manual_print_int(fd1);
+    }
+
+    int flags = fcntl(1, F_GETFL);
+    if (flags < 0) {
+        manual_puts("3. fcntl Fail. Errno: ");
+        manual_print_int(errno);
+    }
+
+    char test_char = 'A';
+    if (write(1, &test_char, 1) < 0) {
+        manual_puts("4. write A failed. Errno: ");
+        manual_print_int(errno);
+    }
+
+    int ret = write(1, "\n====================\nSUCCESS: A\n====================\n", 54);
+    if (ret < 0) {
+        manual_puts("5. write string failed. Errno: ");
+        manual_print_int(errno);
     } else {
-        manual_puts("2. /dev/console OPENED SAFELY\n");
-        dup2(fd, 1); // Bind stdout to console
-        dup2(fd, 2); // Bind stderr to console
+        manual_puts("5. WRITE SYSCALL RETURNED SUCCESS!\n");
     }
 
-    // 3. Test Direct Kernel Logging (Bypasses TTY buffer!)
-    int kmsg = open("/dev/kmsg", O_WRONLY);
-    if (kmsg >= 0) {
-        char *kmsg_str = "3. KMSG PRINT: THIS BYPASSES THE TTY BUFFER!\n";
-        write(kmsg, kmsg_str, strlen(kmsg_str));
-        close(kmsg);
-    }
+    printf("OK\n");
+    fflush(stdout); // Force printf to push to the kernel
 
-    // 4. Test Buffered TTY Print
-    printf("4. STANDARD PRINTF: HELLO FROM HVC0!\n");
-    fflush(stdout);
+    manual_puts("6. CPU going to sleep now...\n");
 
-    manual_puts("5. WAITING FOR LINUX BACKGROUND THREAD TO FLUSH TTY...\n");
-
-    // 6. INFINITE LOOP: Prevents Kernel Panic and allows background threads to run
-    while (1) {
-        sleep(1); 
-        // If this loop runs, your timer interrupts are working perfectly!
-    }
-
-    return 123; 
+    // Hang forever
+    while(1) { sleep(1); }
+    return 0;
 }
