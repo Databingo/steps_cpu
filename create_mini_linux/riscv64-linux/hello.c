@@ -701,28 +701,28 @@ int main() {
 
     int flags = fcntl(1, F_GETFL);
     if (flags < 0) {
-        manual_puts("3. fcntl Fail. Errno: ");
+        manual_puts("4. fcntl Fail. Errno: ");
         manual_print_int(errno);
     }
 
     char test_char = 'A';
     if (write(1, &test_char, 1) < 0) {
-        manual_puts("4. write A failed. Errno: ");
+        manual_puts("5. write A failed. Errno: ");
         manual_print_int(errno);
     }
 
     int ret = write(1, "\n====================\nSUCCESS: A\n====================\n", 54);
     if (ret < 0) {
-        manual_puts("5. write string failed. Errno: ");
+        manual_puts("6. write string failed. Errno: ");
         manual_print_int(errno);
     } else {
-        manual_puts("5. WRITE SYSCALL RETURNED SUCCESS!\n");
+        manual_puts("7. WRITE SYSCALL RETURNED SUCCESS!\n");
     }
 
     printf("OK\n");
     fflush(stdout); // Force printf to push to the kernel
 
-    manual_puts("6. CPU going to sleep now...\n");
+    manual_puts("8. CPU going to sleep now...\n");
 
     // Hang forever
     while(1) { sleep(1); }
