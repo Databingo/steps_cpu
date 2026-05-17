@@ -66,15 +66,11 @@ static void set_reg(u32 num, u32 val)
 	writel(val, uart_base + (num * 0x4));
 }
 
-//static void sifive_uart_putc(char ch)
-//{
-//	while (get_reg(UART_REG_TXFIFO) & UART_TXFIFO_FULL)
-//		;
-//
-//	set_reg(UART_REG_TXFIFO, ch);
-//}
 static void sifive_uart_putc(char ch)
 {
+	while (get_reg(UART_REG_TXFIFO) & UART_TXFIFO_FULL)
+		;
+
 	set_reg(UART_REG_TXFIFO, ch);
 }
 
