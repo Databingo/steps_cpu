@@ -14,7 +14,6 @@ cp linux/arch/riscv/boot/Image.xz .
 cp ../buildroot-2026.02/output/images/rootfs.cpio .
 
 
-cm
 
 
 
