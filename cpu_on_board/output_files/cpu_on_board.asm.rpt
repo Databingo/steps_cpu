@@ -1,5 +1,5 @@
 Assembler report for cpu_on_board
-Wed May 13 11:48:29 2026
+Sun May 17 09:16:22 2026
 Quartus II 32-bit Version 13.0.1 Build 232 06/12/2013 Service Pack 1 SJ Web Edition
 
 
@@ -39,7 +39,7 @@ applicable agreement for further details.
 +---------------------------------------------------------------+
 ; Assembler Summary                                             ;
 +-----------------------+---------------------------------------+
-; Assembler Status      ; Successful - Wed May 13 11:48:29 2026 ;
+; Assembler Status      ; Successful - Sun May 17 09:16:22 2026 ;
 ; Revision Name         ; cpu_on_board                          ;
 ; Top-level Entity Name ; cpu_on_board                          ;
 ; Family                ; Cyclone II                            ;
@@ -142,14 +142,14 @@ Info: Running Quartus II 32-bit Assembler
     Info: programming logic devices manufactured by Altera and sold by 
     Info: Altera or its authorized distributors.  Please refer to the 
     Info: applicable agreement for further details.
-    Info: Processing started: Wed May 13 11:47:56 2026
+    Info: Processing started: Sun May 17 09:16:17 2026
 Info: Command: quartus_asm --read_settings_files=on --write_settings_files=off cpu_on_board -c cpu_on_board
 Info (115031): Writing out detailed assembly data for power analysis
 Info (115030): Assembler is generating device programming files
 Info: Quartus II 32-bit Assembler was successful. 0 errors, 0 warnings
     Info: Peak virtual memory: 383 megabytes
-    Info: Processing ended: Wed May 13 11:48:31 2026
-    Info: Elapsed time: 00:00:35
-    Info: Total CPU time (on all processors): 00:00:34
+    Info: Processing ended: Sun May 17 09:16:22 2026
+    Info: Elapsed time: 00:00:05
+    Info: Total CPU time (on all processors): 00:00:05
 
 
