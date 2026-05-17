@@ -804,12 +804,14 @@ int main() {
     int raw_fcntl = syscall(25, 1, F_GETFL); // 25 is __NR_fcntl on RISC-V 64
     manual_puts("4.5 RAW fcntl returned: ");
     manual_print_int(raw_fcntl);
+    manual_print_int(errno);
 
     // Let's also check if the kernel thinks FD 1 exists via fstat (syscall 80)
     struct stat st;
     int raw_fstat = syscall(80, 1, &st);
     manual_puts("4.6 RAW fstat(1) returned: ");
     manual_print_int(raw_fstat);
+    manual_print_int(errno);
 
 
 
