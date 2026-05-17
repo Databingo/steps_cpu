@@ -646,15 +646,96 @@
 //    return 123; 
 //}
 
+//#define _GNU_SOURCE
+//#include <stdio.h>
+//#include <fcntl.h>
+//#include <unistd.h>
+//#include <sys/stat.h>
+//#include <sys/sysmacros.h>
+//#include <sys/mount.h>
+//#include <errno.h>
+//#include <string.h>
+//
+//// Direct hardware print
+//void manual_puts(const char *s) {
+//    volatile unsigned int *uart_tx = (volatile unsigned int *)0x2004;
+//    while (*s) *uart_tx = *s++;
+//}
+//
+//// Safe function to print a 1-digit or 2-digit integer to hardware UART
+//void manual_print_int(int num) {
+//    volatile unsigned int *uart_tx = (volatile unsigned int *)0x2004;
+//    if (num < 0) { *uart_tx = '-'; num = -num; }
+//    if (num >= 10) { *uart_tx = '0' + (num / 10); }
+//    *uart_tx = '0' + (num % 10);
+//    *uart_tx = '\n';
+//}
+//
+//int main() {
+//    // THIS REQUIRES YOUR HARDWARE 'PMA' SWITCH TO BE ON!
+//    manual_puts("1. MANUAL PRINT: OK\n");
+//
+//    mkdir("/dev", 0755);
+//    int t = mount("devtmpfs", "/dev", "devtmpfs", 0, NULL);
+//    if (t < 0) { 
+//        manual_puts("Mount Failed! Errno: ");
+//        manual_print_int(errno);
+//        return 51;
+//    } 
+//    manual_puts("2. Mount devtmpfs: OK\n");
+//
+//    // Clear default FDs
+//    close(0);
+//    close(1);
+//    close(2);
+//
+//    // Reassign FDs to hvc0
+//    int fd0 = open("/dev/hvc0", O_RDWR | O_NONBLOCK);
+//    int fd1 = open("/dev/hvc0", O_RDWR | O_NONBLOCK);
+//    int fd2 = open("/dev/hvc0", O_RDWR | O_NONBLOCK);
+//
+//    if (fd1 != 1) { 
+//        manual_puts("3. open /dev/hvc0 Fail. FD is: ");
+//        manual_print_int(fd1);
+//    }
+//
+//    int flags = fcntl(1, F_GETFL);
+//    if (flags < 0) {
+//        manual_puts("4. fcntl Fail. Errno: ");
+//        manual_print_int(errno);
+//    }
+//
+//    char test_char = 'A';
+//    if (write(1, &test_char, 1) < 0) {
+//        manual_puts("5. write A failed. Errno: ");
+//        manual_print_int(errno);
+//    }
+//
+//    int ret = write(1, "\n====================\nSUCCESS: A\n====================\n", 54);
+//    if (ret < 0) {
+//        manual_puts("6. write string failed. Errno: ");
+//        manual_print_int(errno);
+//    } else {
+//        manual_puts("7. WRITE SYSCALL RETURNED SUCCESS!\n");
+//    }
+//
+//    printf("OK\n");
+//    fflush(stdout); // Force printf to push to the kernel
+//
+//    manual_puts("8. CPU going to sleep now...\n");
+//
+//    // Hang forever
+//    while(1) { sleep(1); }
+//    return 0;
+//}
+
+
 #define _GNU_SOURCE
 #include <stdio.h>
-#include <fcntl.h>
 #include <unistd.h>
 #include <sys/stat.h>
-#include <sys/sysmacros.h>
 #include <sys/mount.h>
 #include <errno.h>
-#include <string.h>
 
 // Direct hardware print
 void manual_puts(const char *s) {
@@ -662,69 +743,71 @@ void manual_puts(const char *s) {
     while (*s) *uart_tx = *s++;
 }
 
-// Safe function to print a 1-digit or 2-digit integer to hardware UART
+// Safe function to print up to a 3-digit integer to hardware UART
 void manual_print_int(int num) {
     volatile unsigned int *uart_tx = (volatile unsigned int *)0x2004;
     if (num < 0) { *uart_tx = '-'; num = -num; }
-    if (num >= 10) { *uart_tx = '0' + (num / 10); }
+    if (num >= 100) { *uart_tx = '0' + (num / 100); num %= 100; }
+    if (num >= 10)  { *uart_tx = '0' + (num / 10); }
     *uart_tx = '0' + (num % 10);
     *uart_tx = '\n';
 }
 
 int main() {
-    // THIS REQUIRES YOUR HARDWARE 'PMA' SWITCH TO BE ON!
     manual_puts("1. MANUAL PRINT: OK\n");
 
     mkdir("/dev", 0755);
-    int t = mount("devtmpfs", "/dev", "devtmpfs", 0, NULL);
-    if (t < 0) { 
-        manual_puts("Mount Failed! Errno: ");
-        manual_print_int(errno);
-        return 51;
-    } 
+    mount("devtmpfs", "/dev", "devtmpfs", 0, NULL);
     manual_puts("2. Mount devtmpfs: OK\n");
 
-    // Clear default FDs
-    close(0);
-    close(1);
-    close(2);
+    // Open console using HARDCODED 2 (O_RDWR) to prevent macro bugs
+    int fd = open("/dev/console", 2);
+    manual_puts("3. open(/dev/console) returned: "); 
+    manual_print_int(fd);
 
-    // Reassign FDs to hvc0
-    int fd0 = open("/dev/hvc0", O_RDWR | O_NONBLOCK);
-    int fd1 = open("/dev/hvc0", O_RDWR | O_NONBLOCK);
-    int fd2 = open("/dev/hvc0", O_RDWR | O_NONBLOCK);
+    if (fd >= 0) {
+        // Safely map fd to 0, 1, and 2 without destroying it
+        if (fd != 0) dup2(fd, 0);
+        if (fd != 1) dup2(fd, 1);
+        if (fd != 2) dup2(fd, 2);
+        if (fd > 2)  close(fd); // Clean up original fd if it was 3 or higher
 
-    if (fd1 != 1) { 
-        manual_puts("3. open /dev/hvc0 Fail. FD is: ");
-        manual_print_int(fd1);
+        int w = write(1, "A\n", 2);
+        manual_puts("4. write(1) returned: ");
+        manual_print_int(w);
+        if (w < 0) {
+            manual_puts("   Errno: ");
+            manual_print_int(errno);
+        }
     }
+
 
     int flags = fcntl(1, F_GETFL);
     if (flags < 0) {
-        manual_puts("4. fcntl Fail. Errno: ");
+        manual_puts("4.5 fcntl Fail. Errno: ");
         manual_print_int(errno);
     }
 
-    char test_char = 'A';
-    if (write(1, &test_char, 1) < 0) {
-        manual_puts("5. write A failed. Errno: ");
-        manual_print_int(errno);
+    // Open kmsg using HARDCODED 1 (O_WRONLY)
+    int kmsg = open("/dev/kmsg", 1);
+    manual_puts("5. open(/dev/kmsg) returned: ");
+    manual_print_int(kmsg);
+
+    if (kmsg >= 0) {
+        int w2 = write(kmsg, "<1>HELLO FROM KMSG!\n", 20);
+        manual_puts("6. write(kmsg) returned: ");
+        manual_print_int(w2);
+        if (w2 < 0) {
+            manual_puts("   Errno: ");
+            manual_print_int(errno);
+        }
     }
 
-    int ret = write(1, "\n====================\nSUCCESS: A\n====================\n", 54);
-    if (ret < 0) {
-        manual_puts("6. write string failed. Errno: ");
-        manual_print_int(errno);
-    } else {
-        manual_puts("7. WRITE SYSCALL RETURNED SUCCESS!\n");
-    }
-
-    printf("OK\n");
-    fflush(stdout); // Force printf to push to the kernel
+    manual_puts("7. Testing printf...\n");
+    printf("PRINTF IS WORKING!\n");
+    fflush(stdout);
 
     manual_puts("8. CPU going to sleep now...\n");
-
-    // Hang forever
     while(1) { sleep(1); }
     return 0;
 }
