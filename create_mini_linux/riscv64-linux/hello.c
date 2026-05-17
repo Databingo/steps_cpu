@@ -764,6 +764,12 @@ int main() {
     mount("devtmpfs", "/dev", "devtmpfs", 0, NULL);
     manual_puts("2. Mount devtmpfs: OK\n");
 
+    // FIX: Force synchronous creation of the device nodes
+    // so we don't have to wait for the devtmpfs kernel thread.
+    mknod("/dev/console", S_IFCHR | 0600, makedev(5, 1));
+    mknod("/dev/kmsg", S_IFCHR | 0600, makedev(1, 11));
+
+
     // Clear default FDs
     close(0);
     close(1);
