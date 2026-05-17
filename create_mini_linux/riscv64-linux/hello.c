@@ -841,7 +841,12 @@
 //    while(1) { sleep(1); }
 //    return 0;
 //}
-  
+
+
+
+
+
+
 #define _GNU_SOURCE
 #include <stdio.h>
 #include <unistd.h>
@@ -906,14 +911,13 @@ void run_hardware_diagnostics() {
     uint32_t val32 = 0x99999999;
     
     // We force a 32-bit store to the UPPER half of the 64-bit word
+    // 'sw' allows immediate offsets.
     asm volatile (
         "sw %1, 4(%0)\n"
         : : "r" (ram), "r" (val32) : "memory"
     );
 
     // If working, memory should be 0x9999999933334444
-    // If your Verilog fails to shift the data to the upper 32-bits, 
-    // it will either overwrite the bottom half or write 0x0000000033334444.
     if (ram[0] == 0x9999999933334444ULL) {
         manual_puts("  -> PASS: 'sw' shifted correctly.\n");
     } else {
@@ -928,9 +932,13 @@ void run_hardware_diagnostics() {
     ram[0] = 0x1111222233334444ULL;
     uint32_t or_val = 0x55555555;
     
+    // Calculate the exact address of the upper 32 bits (offset +4)
+    // AMO instructions do NOT allow immediate offsets.
+    volatile uint32_t *target_addr = (volatile uint32_t *)((char *)ram + 4);
+    
     asm volatile (
-        "amoor.w zero, %1, 4(%0)\n"
-        : : "r" (ram), "r" (or_val) : "memory"
+        "amoor.w zero, %1, (%0)\n"
+        : : "r" (target_addr), "r" (or_val) : "memory"
     );
 
     // If working, upper 32-bits (0x11112222 | 0x55555555) = 0x55557777
@@ -965,9 +973,4 @@ int main() {
 
     while(1) { sleep(1); }
     return 0;
-} 
-  
-      
-  
-  
-       
+}
