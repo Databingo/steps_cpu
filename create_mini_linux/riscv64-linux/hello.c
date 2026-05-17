@@ -730,6 +730,118 @@
 //}
 
 
+//#define _GNU_SOURCE
+//#include <stdio.h>
+//#include <unistd.h>
+//#include <sys/stat.h>
+//#include <sys/mount.h>
+//#include <errno.h>
+//#include <fcntl.h>
+//#include <string.h>
+//#include <sys/sysmacros.h>
+//#include <sys/syscall.h>
+//
+//// Direct hardware print
+//void manual_puts(const char *s) {
+//    volatile unsigned int *uart_tx = (volatile unsigned int *)0x2004;
+//    while (*s) *uart_tx = *s++;
+//}
+//
+//// Safe function to print up to a 3-digit integer to hardware UART
+//void manual_print_int(int num) {
+//    volatile unsigned int *uart_tx = (volatile unsigned int *)0x2004;
+//    if (num < 0) { *uart_tx = '-'; num = -num; }
+//    if (num >= 100) { *uart_tx = '0' + (num / 100); num %= 100; }
+//    if (num >= 10)  { *uart_tx = '0' + (num / 10); }
+//    *uart_tx = '0' + (num % 10);
+//    *uart_tx = '\n';
+//}
+//
+//int main() {
+//    manual_puts("1. MANUAL PRINT: OK\n");
+//
+//    mkdir("/dev", 0755);
+//    mount("devtmpfs", "/dev", "devtmpfs", 0, NULL);
+//    manual_puts("2. Mount devtmpfs: OK\n");
+//
+//    // FIX: Force synchronous creation of the device nodes
+//    // so we don't have to wait for the devtmpfs kernel thread.
+//    mknod("/dev/console", S_IFCHR | 0600, makedev(5, 1));
+//    mknod("/dev/kmsg", S_IFCHR | 0600, makedev(1, 11));
+//
+//
+//    // Clear default FDs
+//    close(0);
+//    close(1);
+//    close(2);
+//
+//    // Open console using HARDCODED 2 (O_RDWR) to prevent macro bugs
+//    int fd0 = open("/dev/console", 2);// RDWR
+//    int fd1 = open("/dev/console", 2);
+//    int fd2 = open("/dev/console", 2);
+//
+//    if (fd1 != 1) { 
+//        manual_puts("3. open /dev/console Fail. FD is: ");
+//        manual_print_int(fd1);
+//    }
+//
+//    int w = write(1, "A\n", 2);
+//    manual_puts("4. write(1) returned: ");
+//    manual_print_int(w);
+//    if (w < 0) {
+//        manual_puts("   Errno: ");
+//        manual_print_int(errno);
+//    }
+//
+//
+//    //int flags = fcntl(1, F_GETFL); // fdget_raw(1) 9EBADF-NULL at index 1
+//    //if (flags < 0) {
+//    //    manual_puts("4.5 fcntl Fail. Errno: ");
+//    //    manual_print_int(errno);
+//    //}
+//
+//    // Bypass musl libc wrappers entirely to test the true kernel state
+//    int raw_fcntl = syscall(25, 1, F_GETFL); // 25 is __NR_fcntl on RISC-V 64
+//    manual_puts("4.5 RAW fcntl returned: ");
+//    manual_print_int(raw_fcntl);
+//    manual_print_int(errno);
+//
+//    // Let's also check if the kernel thinks FD 1 exists via fstat (syscall 80)
+//    struct stat st;
+//    int raw_fstat = syscall(80, 1, &st);
+//    manual_puts("4.6 RAW fstat(1) returned: ");
+//    manual_print_int(raw_fstat);
+//    manual_print_int(errno);
+//
+//
+//
+//
+//
+//
+//    // Open kmsg using HARDCODED 1 (O_WRONLY)
+//    int kmsg = open("/dev/kmsg", 1);
+//    manual_puts("5. open(/dev/kmsg) returned: ");
+//    manual_print_int(kmsg);
+//
+//    if (kmsg >= 0) {
+//        int w2 = write(kmsg, "<1>HELLO FROM KMSG!\n", 20);
+//        manual_puts("6. write(kmsg) returned: ");
+//        manual_print_int(w2);
+//        if (w2 < 0) {
+//            manual_puts("   Errno: ");
+//            manual_print_int(errno);
+//        }
+//    }
+//
+//    manual_puts("7. Testing printf...\n");
+//    printf("PRINTF IS WORKING!\n");
+//    fflush(stdout);
+//
+//    manual_puts("8. CPU going to sleep now...\n");
+//    while(1) { sleep(1); }
+//    return 0;
+//}
+  
 #define _GNU_SOURCE
 #include <stdio.h>
 #include <unistd.h>
@@ -737,107 +849,125 @@
 #include <sys/mount.h>
 #include <errno.h>
 #include <fcntl.h>
-#include <string.h>
-#include <sys/sysmacros.h>
-#include <sys/syscall.h>
+#include <stdint.h>
+#include <sys/mman.h>
 
-// Direct hardware print
+// Safe hardware print
 void manual_puts(const char *s) {
     volatile unsigned int *uart_tx = (volatile unsigned int *)0x2004;
-    while (*s) *uart_tx = *s++;
+    while (*s) {
+        *uart_tx = *s++;
+        for (volatile int i = 0; i < 50000; i++); 
+    }
 }
 
-// Safe function to print up to a 3-digit integer to hardware UART
-void manual_print_int(int num) {
+// Print 64-bit Hex to check memory corruption
+void manual_print_hex(uint64_t num) {
     volatile unsigned int *uart_tx = (volatile unsigned int *)0x2004;
-    if (num < 0) { *uart_tx = '-'; num = -num; }
-    if (num >= 100) { *uart_tx = '0' + (num / 100); num %= 100; }
-    if (num >= 10)  { *uart_tx = '0' + (num / 10); }
-    *uart_tx = '0' + (num % 10);
-    *uart_tx = '\n';
+    *uart_tx = '0'; for (volatile int i=0; i<50000; i++);
+    *uart_tx = 'x'; for (volatile int i=0; i<50000; i++);
+    for (int i = 15; i >= 0; i--) {
+        int nibble = (num >> (i * 4)) & 0xF;
+        *uart_tx = nibble < 10 ? '0' + nibble : 'A' + (nibble - 10);
+        for (volatile int j = 0; j < 50000; j++);
+    }
+    *uart_tx = '\n'; for (volatile int i=0; i<50000; i++);
+}
+
+void run_hardware_diagnostics() {
+    manual_puts("\n--- STARTING CPU HARDWARE DIAGNOSTICS ---\n");
+
+    // Allocate a brand new page to guarantee D=0 (Forces a TLB Store Fault)
+    volatile uint64_t *ram = mmap(NULL, 4096, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+    
+    // ---------------------------------------------------------
+    // TEST 1: TLB Store Fault Recovery (Does 'sd' get dropped?)
+    // ---------------------------------------------------------
+    manual_puts("TEST 1: 64-bit SD on clean page (TLB Fault Test)...\n");
+    uint64_t magic = 0xDEADBEEFCAFEBABE;
+    
+    asm volatile (
+        "sd %1, 0(%0)\n"
+        : : "r" (ram), "r" (magic) : "memory"
+    );
+    
+    if (ram[0] == magic) {
+        manual_puts("  -> PASS: 'sd' executed successfully.\n");
+    } else {
+        manual_puts("  -> FAIL! TLB/Store dropped the instruction. Read: ");
+        manual_print_hex(ram[0]);
+    }
+
+    // ---------------------------------------------------------
+    // TEST 2: 32-bit Store Alignment (Bus STRB/Shift Bug Test)
+    // ---------------------------------------------------------
+    manual_puts("TEST 2: 32-bit SW to offset 4...\n");
+    ram[0] = 0x1111222233334444ULL; // Reset to known state
+    uint32_t val32 = 0x99999999;
+    
+    // We force a 32-bit store to the UPPER half of the 64-bit word
+    asm volatile (
+        "sw %1, 4(%0)\n"
+        : : "r" (ram), "r" (val32) : "memory"
+    );
+
+    // If working, memory should be 0x9999999933334444
+    // If your Verilog fails to shift the data to the upper 32-bits, 
+    // it will either overwrite the bottom half or write 0x0000000033334444.
+    if (ram[0] == 0x9999999933334444ULL) {
+        manual_puts("  -> PASS: 'sw' shifted correctly.\n");
+    } else {
+        manual_puts("  -> FAIL! Bus byte-enable/shift is broken. Read: ");
+        manual_print_hex(ram[0]);
+    }
+
+    // ---------------------------------------------------------
+    // TEST 3: 32-bit AMO Alignment (FD allocation uses this)
+    // ---------------------------------------------------------
+    manual_puts("TEST 3: 32-bit AMOOR.W to offset 4...\n");
+    ram[0] = 0x1111222233334444ULL;
+    uint32_t or_val = 0x55555555;
+    
+    asm volatile (
+        "amoor.w zero, %1, 4(%0)\n"
+        : : "r" (ram), "r" (or_val) : "memory"
+    );
+
+    // If working, upper 32-bits (0x11112222 | 0x55555555) = 0x55557777
+    if (ram[0] == 0x5555777733334444ULL) {
+        manual_puts("  -> PASS: 'amoor.w' works at offset 4.\n");
+    } else {
+        manual_puts("  -> FAIL! AMO data was written to wrong lane. Read: ");
+        manual_print_hex(ram[0]);
+    }
+    
+    manual_puts("--- END DIAGNOSTICS ---\n\n");
 }
 
 int main() {
-    manual_puts("1. MANUAL PRINT: OK\n");
+    run_hardware_diagnostics();
 
+    // Now try to boot standard Linux
     mkdir("/dev", 0755);
     mount("devtmpfs", "/dev", "devtmpfs", 0, NULL);
-    manual_puts("2. Mount devtmpfs: OK\n");
+    sleep(1); // Give devtmpfs time to populate
 
-    // FIX: Force synchronous creation of the device nodes
-    // so we don't have to wait for the devtmpfs kernel thread.
-    mknod("/dev/console", S_IFCHR | 0600, makedev(5, 1));
-    mknod("/dev/kmsg", S_IFCHR | 0600, makedev(1, 11));
-
-
-    // Clear default FDs
-    close(0);
-    close(1);
-    close(2);
-
-    // Open console using HARDCODED 2 (O_RDWR) to prevent macro bugs
-    int fd0 = open("/dev/console", 2);// RDWR
-    int fd1 = open("/dev/console", 2);
-    int fd2 = open("/dev/console", 2);
-
-    if (fd1 != 1) { 
-        manual_puts("3. open /dev/console Fail. FD is: ");
-        manual_print_int(fd1);
+    int console_fd = open("/dev/console", O_RDWR);
+    if (console_fd >= 0) {
+        dup2(console_fd, 0);
+        dup2(console_fd, 1);
+        dup2(console_fd, 2);
+        if (console_fd > 2) close(console_fd);
     }
 
-    int w = write(1, "A\n", 2);
-    manual_puts("4. write(1) returned: ");
-    manual_print_int(w);
-    if (w < 0) {
-        manual_puts("   Errno: ");
-        manual_print_int(errno);
-    }
-
-
-    //int flags = fcntl(1, F_GETFL); // fdget_raw(1) 9EBADF-NULL at index 1
-    //if (flags < 0) {
-    //    manual_puts("4.5 fcntl Fail. Errno: ");
-    //    manual_print_int(errno);
-    //}
-
-    // Bypass musl libc wrappers entirely to test the true kernel state
-    int raw_fcntl = syscall(25, 1, F_GETFL); // 25 is __NR_fcntl on RISC-V 64
-    manual_puts("4.5 RAW fcntl returned: ");
-    manual_print_int(raw_fcntl);
-    manual_print_int(errno);
-
-    // Let's also check if the kernel thinks FD 1 exists via fstat (syscall 80)
-    struct stat st;
-    int raw_fstat = syscall(80, 1, &st);
-    manual_puts("4.6 RAW fstat(1) returned: ");
-    manual_print_int(raw_fstat);
-    manual_print_int(errno);
-
-
-
-
-
-
-    // Open kmsg using HARDCODED 1 (O_WRONLY)
-    int kmsg = open("/dev/kmsg", 1);
-    manual_puts("5. open(/dev/kmsg) returned: ");
-    manual_print_int(kmsg);
-
-    if (kmsg >= 0) {
-        int w2 = write(kmsg, "<1>HELLO FROM KMSG!\n", 20);
-        manual_puts("6. write(kmsg) returned: ");
-        manual_print_int(w2);
-        if (w2 < 0) {
-            manual_puts("   Errno: ");
-            manual_print_int(errno);
-        }
-    }
-
-    manual_puts("7. Testing printf...\n");
-    printf("PRINTF IS WORKING!\n");
+    printf("Standard Printf Boot Sequence\n");
     fflush(stdout);
 
-    manual_puts("8. CPU going to sleep now...\n");
     while(1) { sleep(1); }
     return 0;
-}
+} 
+  
+      
+  
+  
+       
