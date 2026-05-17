@@ -622,43 +622,97 @@
 //}
   
   
-// --------------MANUAL printed ---------
+//// --------------MANUAL printed ---------
+//#define _GNU_SOURCE
+//#include <stdio.h>
+//#include <unistd.h>
+//#include <fcntl.h>
+//#include <sys/mount.h>
+//#include <sys/stat.h>
+//
+//// Manual printer for extra safety
+//void manual_puts(const char *s) {
+//    volatile unsigned int *uart_tx = (volatile unsigned int *)0x2004;
+//    while (*s) {
+//        *uart_tx = *s++;
+//    }
+//}
+//
+//int main() {
+//    // Setup environment for the C library
+//    mkdir("/dev", 0755);
+//    mount("devtmpfs", "/dev", "devtmpfs", 0, NULL);
+//
+//    // 1. Manual Print
+//    manual_puts("1. MANUAL PRINT: OK\n");
+//
+//    // 2. THE FIX: Open the Linux console and attach it to printf (stdout)
+//    int fd = open("/dev/console", O_RDWR);
+//    if (fd >= 0) {
+//        dup2(fd, 0); // Attach to stdin  (for scanf / input)
+//        dup2(fd, 1); // Attach to stdout (for printf)
+//        dup2(fd, 2); // Attach to stderr (for errors)
+//    }
+//    // 2. Standard C Library Print
+//    // Since the hardware is now stable, Linux's console driver should work.
+//    // If this prints, your Device Tree and SiFive-wrapper are also correct!
+//    printf("2. STANDARD PRINTF: SUCCESS\n");
+//    fflush(stdout);
+//
+//    // Final result
+//    return 123; 
+//} 
+
+
 #define _GNU_SOURCE
 #include <stdio.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/mount.h>
 #include <sys/stat.h>
+#include <string.h>
 
-// Manual printer for extra safety
+// Direct hardware print (The proven baseline)
 void manual_puts(const char *s) {
     volatile unsigned int *uart_tx = (volatile unsigned int *)0x2004;
-    while (*s) {
-        *uart_tx = *s++;
-    }
+    while (*s) *uart_tx = *s++;
 }
 
 int main() {
-    // Setup environment for the C library
+    // 1. Mount /dev
     mkdir("/dev", 0755);
     mount("devtmpfs", "/dev", "devtmpfs", 0, NULL);
-
-    // 1. Manual Print
     manual_puts("1. MANUAL PRINT: OK\n");
 
-    // 2. THE FIX: Open the Linux console and attach it to printf (stdout)
+    // 2. Test /dev/console
     int fd = open("/dev/console", O_RDWR);
-    if (fd >= 0) {
-        dup2(fd, 0); // Attach to stdin  (for scanf / input)
-        dup2(fd, 1); // Attach to stdout (for printf)
-        dup2(fd, 2); // Attach to stderr (for errors)
+    if (fd < 0) {
+        manual_puts("ERROR: Failed to open /dev/console!\n");
+    } else {
+        manual_puts("2. /dev/console OPENED SAFELY\n");
+        dup2(fd, 1); // Bind stdout to console
+        dup2(fd, 2); // Bind stderr to console
     }
-    // 2. Standard C Library Print
-    // Since the hardware is now stable, Linux's console driver should work.
-    // If this prints, your Device Tree and SiFive-wrapper are also correct!
-    printf("2. STANDARD PRINTF: SUCCESS\n");
+
+    // 3. Test Direct Kernel Logging (Bypasses TTY buffer!)
+    int kmsg = open("/dev/kmsg", O_WRONLY);
+    if (kmsg >= 0) {
+        char *kmsg_str = "3. KMSG PRINT: THIS BYPASSES THE TTY BUFFER!\n";
+        write(kmsg, kmsg_str, strlen(kmsg_str));
+        close(kmsg);
+    }
+
+    // 4. Test Buffered TTY Print
+    printf("4. STANDARD PRINTF: HELLO FROM HVC0!\n");
     fflush(stdout);
 
-    // Final result
+    manual_puts("5. WAITING FOR LINUX BACKGROUND THREAD TO FLUSH TTY...\n");
+
+    // 6. INFINITE LOOP: Prevents Kernel Panic and allows background threads to run
+    while (1) {
+        sleep(1); 
+        // If this loop runs, your timer interrupts are working perfectly!
+    }
+
     return 123; 
-} 
+}
