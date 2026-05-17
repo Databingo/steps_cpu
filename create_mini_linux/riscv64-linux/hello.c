@@ -763,25 +763,27 @@ int main() {
     mount("devtmpfs", "/dev", "devtmpfs", 0, NULL);
     manual_puts("2. Mount devtmpfs: OK\n");
 
+    // Clear default FDs
+    close(0);
+    close(1);
+    close(2);
+
     // Open console using HARDCODED 2 (O_RDWR) to prevent macro bugs
-    int fd = open("/dev/console", 2);
-    manual_puts("3. open(/dev/console) returned: "); 
-    manual_print_int(fd);
+    int fd0 = open("/dev/console", 2);// RDWR
+    int fd1 = open("/dev/console", 2);
+    int fd2 = open("/dev/console", 2);
 
-    if (fd >= 0) {
-        // Safely map fd to 0, 1, and 2 without destroying it
-        if (fd != 0) dup2(fd, 0);
-        if (fd != 1) dup2(fd, 1);
-        if (fd != 2) dup2(fd, 2);
-        if (fd > 2)  close(fd); // Clean up original fd if it was 3 or higher
+    if (fd1 != 1) { 
+        manual_puts("3. open /dev/console Fail. FD is: ");
+        manual_print_int(fd1);
+    }
 
-        int w = write(1, "A\n", 2);
-        manual_puts("4. write(1) returned: ");
-        manual_print_int(w);
-        if (w < 0) {
-            manual_puts("   Errno: ");
-            manual_print_int(errno);
-        }
+    int w = write(1, "A\n", 2);
+    manual_puts("4. write(1) returned: ");
+    manual_print_int(w);
+    if (w < 0) {
+        manual_puts("   Errno: ");
+        manual_print_int(errno);
     }
 
 
