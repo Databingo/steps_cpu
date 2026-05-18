@@ -699,73 +699,67 @@ out1:
 out:
 	return err;
 }
+  
 
 
 
 
 
-#include <linux/nospec.h>
 
-SYSCALL_DEFINE3(fcntl, unsigned int, fd, unsigned int, cmd, unsigned long, arg)
-{	
-	struct fd f;
-	long err = -EBADF;
-
-	struct files_struct *files;
-	struct fdtable *fdt;
-	struct file *raw_f = NULL;
-	int files_count = -1;
-	unsigned int nospec_fd = -1;
-
-	/* 1. Manually fetch exactly what fdget_raw tries to fetch */
-	rcu_read_lock();
-	files = current->files;
-	if (files) {
-		files_count = atomic_read(&files->count);
-		fdt = rcu_dereference_raw(files->fdt);
-		if (fdt && fdt->fd && fd < fdt->max_fds) {
-			nospec_fd = array_index_nospec(fd, fdt->max_fds);
-			raw_f = rcu_dereference_raw(fdt->fd[fd]);
-		}
-	}
-	rcu_read_unlock();
-
-	/* 2. Call the real kernel function */
-	f = fdget_raw(fd);
-
-	/* 3. Check for failure and OVERRIDE if it's a hardware bug */
-	if (!fd_file(f)) {
-		printk("\n>>> FCNTL HARDWARE BUG TRIGGERED! fd=%u <<<\n", fd);
-		printk("files->count = %d (If not 1, Atomics LR/SC are broken!)\n", files_count);
-		printk("nospec_fd    = %u (expected %u. If different, ALU Shift is broken!)\n", nospec_fd, fd);
-		printk("raw_f        = %px\n", raw_f);
-		
-		if (raw_f) {
-			printk("!!! FORCING OVERRIDE: Bypassing fdget_raw bug !!!\n");
-			/* Modern Kernel (6.9+) uses an opaque 'word' in struct fd. 
-			 * Because raw_f is 8-byte aligned, the lowest bits are 0, 
-			 * effectively faking the "do not decrement refcount" flag! */
-			f.word = (unsigned long)raw_f;
-		} else {
-			goto out;
-		}
-	}
-
-	if (unlikely(fd_file(f)->f_mode & FMODE_PATH)) {
-		if (!check_fcntl_cmd(cmd))
-			goto out1;
-	}
-
-	err = security_file_fcntl(fd_file(f), cmd, arg);
-	if (!err)
-		err = do_fcntl(fd, cmd, arg, fd_file(f));
-
-out1:
-	fdput(f);
-out:
-	return err;
-}
-
+//SYSCALL_DEFINE3(fcntl, unsigned int, fd, unsigned int, cmd, unsigned long, arg)
+//{	
+//	struct fd f;
+//	long err = -EBADF;
+//
+//	/* --- HARDWARE BUG DIAGNOSTIC BLOCK --- */
+//	struct files_struct *files = current->files;
+//	struct fdtable *fdt;
+//	struct file *file_fast = (void*)-1;
+//	struct file *file_slow = (void*)-1;
+//
+//	if (files) {
+//		/* 1. THE FAST READ (Mimics the buggy pipeline behavior) */
+//		fdt = files->fdt;
+//		if (fdt && fd < fdt->max_fds)
+//			file_fast = fdt->fd[fd];
+//
+//		/* 2. THE SLOW READ (Uses NOPs to wait for hardware pipeline) */
+//		asm volatile("nop; nop; nop; nop; nop" ::: "memory");
+//		fdt = files->fdt;
+//		asm volatile("nop; nop; nop; nop; nop" ::: "memory");
+//		if (fdt && fd < fdt->max_fds)
+//			file_slow = fdt->fd[fd];
+//
+//		/* 3. COMPARE RESULTS */
+//		if (file_fast != file_slow) {
+//			printk("\n!!! HW CORE BUG CONFIRMED: PIPELINE HAZARD !!!\n");
+//			printk("  Task: %s (pid %d) looking up FD: %u\n", current->comm, current->pid, fd);
+//			printk("  Fast Read (Buggy): %px\n", file_fast);
+//			printk("  Slow Read (Correct): %px\n", file_slow);
+//			printk("  Difference: The CPU failed to wait for memory load!\n\n");
+//		}
+//	}
+//	/* ------------------------------------- */
+//
+//	f = fdget_raw(fd);
+//
+//	if (!fd_file(f))
+//		goto out;
+//
+//	if (unlikely(fd_file(f)->f_mode & FMODE_PATH)) {
+//		if (!check_fcntl_cmd(cmd))
+//			goto out1;
+//	}
+//
+//	err = security_file_fcntl(fd_file(f), cmd, arg);
+//	if (!err)
+//		err = do_fcntl(fd, cmd, arg, fd_file(f));
+//
+//out1:
+// 	fdput(f);
+//out:
+//	return err;
+//}
 
 
 
