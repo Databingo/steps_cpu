@@ -12,6 +12,8 @@ echo "---------- opensbi config ---------" >> z2.txt
 cat opensbi/bash_opensbi.sh >> z2.txt
 echo "---------- test hello.c  ---------" >> z2.txt
 cat ../create_mini_linux/riscv64-linux/hello.c >> z2.txt
+echo "---------- change content and problem log ---------" >> z2.txt
+cat log >> z2.txt
 #echo "---------- bootloader code ---------" >> z2.txt
 #cat bootloader.s >> z2.txt
 #echo "---------- mini_kernel test code ---------" >> z2.txt

@@ -3835,77 +3835,6 @@ make CROSS_COMPILE=/usr/local/projects/bin/xpack-riscv-none-elf-gcc-14.2.0-3/bin
 //}
 
 
-//#define _GNU_SOURCE
-//#include <stdio.h>
-//#include <fcntl.h>
-//#include <unistd.h>
-//#include <sys/stat.h>
-//#include <sys/sysmacros.h>
-//#include <sys/mount.h>
-//#include <errno.h>
-//#include <fcntl.h>
-//
-//int main() {
-//    // 1. Create the dev directory
-//    mkdir("/dev", 0755);
-//    
-//    // 2. Create the console node
-//    //mknod("/dev/console", S_IFCHR | 0600, makedev(5, 1));
-//      
-//      
-//      
-//    int t = mount("devtmpfs", "/dev", "devtmpfs", 0, NULL);
-//    if (t < 0) { return 51;} 
-//    //int r = mknod("/dev/hvc0", S_IFCHR | 0600, makedev(229, 0));
-//    //if (r < 0) {}
-//
-//    close(0);
-//    close(1);
-//    close(2);
-//
-//
-//
-//    // 3. MAGIC TRICK: Open with O_NONBLOCK!
-//    // This strictly forbids Linux from going to sleep to wait for your broken PLIC!
-//    //int fd = open("/dev/console", O_WRONLY | O_NONBLOCK);
-//    //int fd = open("/dev/hvc0", O_RDWR | O_NONBLOCK);
-//    ////return fd;  // 3
-//    //if (fd < 0) { 
-//    //    fd = open("/dev/console", O_RDWR | O_NONBLOCK);
-//    //    if (fd < 0) return 52; // Failed to open
-//    //}
-//
-//    int fd0 = open("/dev/hvc0", O_RDWR | O_NONBLOCK);
-//    int fd1 = open("/dev/hvc0", O_RDWR | O_NONBLOCK);
-//    int fd2 = open("/dev/hvc0", O_RDWR | O_NONBLOCK);
-//
-//    if (fd1 != 1) { return 900+fd1; }
-//
-//    int flags = fcntl(1, F_GETFL);
-//    if (flags < 0) return 800 + errno;
-//
-//
-//    char test_char = 'A';
-//    if (write(1, &test_char, 1) < 0){
-//	return 700 + errno;
-//    }
-//
-//    //if (fd > 2) close(fd);
-//
-//
-//    int ret =   write(1, "\n====================\nSUCCESS: A\n====================\n", 54);
-//    if (ret < 0) {
-//        return 600 + errno;
-//    }
-//
-//    printf("OK\n");
-//
-//
-//    // Hang forever
-//    while(1) { sleep(1); }
-//    return 0;
-//}
-  
   
 //#define _GNU_SOURCE
 //#include <unistd.h>
@@ -4084,55 +4013,749 @@ make CROSS_COMPILE=/usr/local/projects/bin/xpack-riscv-none-elf-gcc-14.2.0-3/bin
 //} 
 
 
+//#define _GNU_SOURCE
+//#include <stdio.h>
+//#include <unistd.h>
+//#include <fcntl.h>
+//#include <sys/mount.h>
+//#include <sys/stat.h>
+//#include <string.h>
+//
+//// Direct hardware print (The proven baseline)
+//void manual_puts(const char *s) {
+//    volatile unsigned int *uart_tx = (volatile unsigned int *)0x2004;
+//    while (*s) *uart_tx = *s++;
+//}
+//
+//int main() {
+//    // 1. Mount /dev
+//    mkdir("/dev", 0755);
+//    mount("devtmpfs", "/dev", "devtmpfs", 0, NULL);
+//    manual_puts("1. MANUAL PRINT: OK\n");
+//
+//    // 2. Test /dev/console
+//    int fd = open("/dev/console", O_RDWR);
+//    if (fd < 0) {
+//        manual_puts("ERROR: Failed to open /dev/console!\n");
+//    } else {
+//        manual_puts("2. /dev/console OPENED SAFELY\n");
+//        dup2(fd, 1); // Bind stdout to console
+//        dup2(fd, 2); // Bind stderr to console
+//    }
+//
+//    // 3. Test Direct Kernel Logging (Bypasses TTY buffer!)
+//    int kmsg = open("/dev/kmsg", O_WRONLY);
+//    if (kmsg >= 0) {
+//        char *kmsg_str = "3. KMSG PRINT: THIS BYPASSES THE TTY BUFFER!\n";
+//        write(kmsg, kmsg_str, strlen(kmsg_str));
+//        close(kmsg);
+//    }
+//
+//    // 4. Test Buffered TTY Print
+//    printf("4. STANDARD PRINTF: HELLO FROM HVC0!\n");
+//    fflush(stdout);
+//
+//    manual_puts("5. WAITING FOR LINUX BACKGROUND THREAD TO FLUSH TTY...\n");
+//
+//    // 6. INFINITE LOOP: Prevents Kernel Panic and allows background threads to run
+//    while (1) {
+//        sleep(1); 
+//        // If this loop runs, your timer interrupts are working perfectly!
+//    }
+//
+//    return 123; 
+//}
+
+//#define _GNU_SOURCE
+//#include <stdio.h>
+//#include <fcntl.h>
+//#include <unistd.h>
+//#include <sys/stat.h>
+//#include <sys/sysmacros.h>
+//#include <sys/mount.h>
+//#include <errno.h>
+//#include <string.h>
+//
+//// Direct hardware print
+//void manual_puts(const char *s) {
+//    volatile unsigned int *uart_tx = (volatile unsigned int *)0x2004;
+//    while (*s) *uart_tx = *s++;
+//}
+//
+//// Safe function to print a 1-digit or 2-digit integer to hardware UART
+//void manual_print_int(int num) {
+//    volatile unsigned int *uart_tx = (volatile unsigned int *)0x2004;
+//    if (num < 0) { *uart_tx = '-'; num = -num; }
+//    if (num >= 10) { *uart_tx = '0' + (num / 10); }
+//    *uart_tx = '0' + (num % 10);
+//    *uart_tx = '\n';
+//}
+//
+//int main() {
+//    // THIS REQUIRES YOUR HARDWARE 'PMA' SWITCH TO BE ON!
+//    manual_puts("1. MANUAL PRINT: OK\n");
+//
+//    mkdir("/dev", 0755);
+//    int t = mount("devtmpfs", "/dev", "devtmpfs", 0, NULL);
+//    if (t < 0) { 
+//        manual_puts("Mount Failed! Errno: ");
+//        manual_print_int(errno);
+//        return 51;
+//    } 
+//    manual_puts("2. Mount devtmpfs: OK\n");
+//
+//    // Clear default FDs
+//    close(0);
+//    close(1);
+//    close(2);
+//
+//    // Reassign FDs to hvc0
+//    int fd0 = open("/dev/hvc0", O_RDWR | O_NONBLOCK);
+//    int fd1 = open("/dev/hvc0", O_RDWR | O_NONBLOCK);
+//    int fd2 = open("/dev/hvc0", O_RDWR | O_NONBLOCK);
+//
+//    if (fd1 != 1) { 
+//        manual_puts("3. open /dev/hvc0 Fail. FD is: ");
+//        manual_print_int(fd1);
+//    }
+//
+//    int flags = fcntl(1, F_GETFL);
+//    if (flags < 0) {
+//        manual_puts("4. fcntl Fail. Errno: ");
+//        manual_print_int(errno);
+//    }
+//
+//    char test_char = 'A';
+//    if (write(1, &test_char, 1) < 0) {
+//        manual_puts("5. write A failed. Errno: ");
+//        manual_print_int(errno);
+//    }
+//
+//    int ret = write(1, "\n====================\nSUCCESS: A\n====================\n", 54);
+//    if (ret < 0) {
+//        manual_puts("6. write string failed. Errno: ");
+//        manual_print_int(errno);
+//    } else {
+//        manual_puts("7. WRITE SYSCALL RETURNED SUCCESS!\n");
+//    }
+//
+//    printf("OK\n");
+//    fflush(stdout); // Force printf to push to the kernel
+//
+//    manual_puts("8. CPU going to sleep now...\n");
+//
+//    // Hang forever
+//    while(1) { sleep(1); }
+//    return 0;
+//}
+
+
+//#define _GNU_SOURCE
+//#include <stdio.h>
+//#include <unistd.h>
+//#include <sys/stat.h>
+//#include <sys/mount.h>
+//#include <errno.h>
+//#include <fcntl.h>
+//#include <string.h>
+//#include <sys/sysmacros.h>
+//#include <sys/syscall.h>
+//
+//// Direct hardware print
+//void manual_puts(const char *s) {
+//    volatile unsigned int *uart_tx = (volatile unsigned int *)0x2004;
+//    while (*s) *uart_tx = *s++;
+//}
+//
+//// Safe function to print up to a 3-digit integer to hardware UART
+//void manual_print_int(int num) {
+//    volatile unsigned int *uart_tx = (volatile unsigned int *)0x2004;
+//    if (num < 0) { *uart_tx = '-'; num = -num; }
+//    if (num >= 100) { *uart_tx = '0' + (num / 100); num %= 100; }
+//    if (num >= 10)  { *uart_tx = '0' + (num / 10); }
+//    *uart_tx = '0' + (num % 10);
+//    *uart_tx = '\n';
+//}
+//
+//int main() {
+//    manual_puts("1. MANUAL PRINT: OK\n");
+//
+//    mkdir("/dev", 0755);
+//    mount("devtmpfs", "/dev", "devtmpfs", 0, NULL);
+//    manual_puts("2. Mount devtmpfs: OK\n");
+//
+//    // FIX: Force synchronous creation of the device nodes
+//    // so we don't have to wait for the devtmpfs kernel thread.
+//    mknod("/dev/console", S_IFCHR | 0600, makedev(5, 1));
+//    mknod("/dev/kmsg", S_IFCHR | 0600, makedev(1, 11));
+//
+//
+//    // Clear default FDs
+//    close(0);
+//    close(1);
+//    close(2);
+//
+//    // Open console using HARDCODED 2 (O_RDWR) to prevent macro bugs
+//    int fd0 = open("/dev/console", 2);// RDWR
+//    int fd1 = open("/dev/console", 2);
+//    int fd2 = open("/dev/console", 2);
+//
+//    if (fd1 != 1) { 
+//        manual_puts("3. open /dev/console Fail. FD is: ");
+//        manual_print_int(fd1);
+//    }
+//
+//    int w = write(1, "A\n", 2);
+//    manual_puts("4. write(1) returned: ");
+//    manual_print_int(w);
+//    if (w < 0) {
+//        manual_puts("   Errno: ");
+//        manual_print_int(errno);
+//    }
+//
+//
+//    //int flags = fcntl(1, F_GETFL); // fdget_raw(1) 9EBADF-NULL at index 1
+//    //if (flags < 0) {
+//    //    manual_puts("4.5 fcntl Fail. Errno: ");
+//    //    manual_print_int(errno);
+//    //}
+//
+//    // Bypass musl libc wrappers entirely to test the true kernel state
+//    int raw_fcntl = syscall(25, 1, F_GETFL); // 25 is __NR_fcntl on RISC-V 64
+//    manual_puts("4.5 RAW fcntl returned: ");
+//    manual_print_int(raw_fcntl);
+//    manual_print_int(errno);
+//
+//    // Let's also check if the kernel thinks FD 1 exists via fstat (syscall 80)
+//    struct stat st;
+//    int raw_fstat = syscall(80, 1, &st);
+//    manual_puts("4.6 RAW fstat(1) returned: ");
+//    manual_print_int(raw_fstat);
+//    manual_print_int(errno);
+//
+//
+//
+//
+//
+//
+//    // Open kmsg using HARDCODED 1 (O_WRONLY)
+//    int kmsg = open("/dev/kmsg", 1);
+//    manual_puts("5. open(/dev/kmsg) returned: ");
+//    manual_print_int(kmsg);
+//
+//    if (kmsg >= 0) {
+//        int w2 = write(kmsg, "<1>HELLO FROM KMSG!\n", 20);
+//        manual_puts("6. write(kmsg) returned: ");
+//        manual_print_int(w2);
+//        if (w2 < 0) {
+//            manual_puts("   Errno: ");
+//            manual_print_int(errno);
+//        }
+//    }
+//
+//    manual_puts("7. Testing printf...\n");
+//    printf("PRINTF IS WORKING!\n");
+//    fflush(stdout);
+//
+//    manual_puts("8. CPU going to sleep now...\n");
+//    while(1) { sleep(1); }
+//    return 0;
+//}
+
+
+
+//#define _GNU_SOURCE
+//#include <stdio.h>
+//#include <unistd.h>
+//#include <sys/stat.h>
+//#include <sys/mount.h>
+//#include <errno.h>
+//#include <fcntl.h>
+//#include <string.h>
+//#include <sys/mman.h>
+//#include <sys/sysmacros.h>
+//
+//void manual_puts(const char *s) {
+//    volatile unsigned int *uart_tx = (volatile unsigned int *)0x2004;
+//    while (*s) {
+//        *uart_tx = *s++;
+//        for (volatile int i = 0; i < 50000; i++); 
+//    }
+//}
+//
+//void manual_print_int(int num) {
+//    volatile unsigned int *uart_tx = (volatile unsigned int *)0x2004;
+//    if (num < 0) { *uart_tx = '-'; num = -num; }
+//    if (num >= 10)  { *uart_tx = '0' + (num / 10); }
+//    *uart_tx = '0' + (num % 10);
+//    *uart_tx = '\n';
+//}
+//
+//int main() {
+//    manual_puts("1. Software Workaround Start\n");
+//
+//    mkdir("/dev", 0755);
+//    mount("devtmpfs", "/dev", "devtmpfs", 0, NULL);
+//
+//    // WORKAROUND: Map a "Safe" High-Memory Page (At 4GB mark)
+//    // This address has bit 32 set, so (va[63:16] == 0) will be FALSE.
+//    void *high_mem = mmap((void*)0x100000000, 4096, PROT_READ | PROT_WRITE, 
+//                          MAP_PRIVATE | MAP_ANONYMOUS | MAP_FIXED, -1, 0);
+//
+//    if (high_mem == MAP_FAILED) {
+//        manual_puts("Mmap failed! Trying lower but safe address...\n");
+//        high_mem = mmap((void*)0x80000000, 4096, PROT_READ | PROT_WRITE, 
+//                        MAP_PRIVATE | MAP_ANONYMOUS | MAP_FIXED, -1, 0);
+//    }
+//
+//    // Define "Safe" pointers in high memory
+//    char *safe_console = (char *)high_mem;
+//    char *safe_kmsg = (char *)high_mem + 100;
+//    struct stat *safe_stat = (struct stat *)((char *)high_mem + 512);
+//
+//    // Copy paths to high memory
+//    strcpy(safe_console, "/dev/console");
+//    strcpy(safe_kmsg, "/dev/kmsg");
+//
+//    // Force create nodes just in case devtmpfs is slow
+//    mknod(safe_console, S_IFCHR | 0600, makedev(5, 1));
+//    mknod(safe_kmsg, S_IFCHR | 0600, makedev(1, 11));
+//
+//    //sleep(1);
+//
+//    // Try to open using the HIGH MEMORY pointers
+//    int fd = open(safe_console, O_RDWR);
+//    manual_puts("open(/dev/console) result: ");
+//    manual_print_int(fd);
+//
+//    if (fd >= 0) {
+//        // Force the console onto FD 0, 1, 2
+//        dup2(fd, 0);
+//        dup2(fd, 1);
+//        dup2(fd, 2);
+//        if (fd > 2) close(fd);
+//
+//        manual_puts("2. FDs 0,1,2 mapped to console.\n");
+//
+//        // Test fcntl on FD 1
+//        int flags = fcntl(1, F_GETFL);
+//        manual_puts("fcntl(1) result: ");
+//        manual_print_int(flags);
+//
+//        // Test fstat on FD 1 using high memory buffer
+//        int st_res = fstat(1, safe_stat);
+//        manual_puts("fstat(1) result: ");
+//        manual_print_int(st_res);
+//    }
+//
+//    manual_puts("3. Testing final printf...\n");
+//    printf("PRINTF WORKAROUND SUCCESS!\n");
+//    fflush(stdout);
+//
+//    while(1) { sleep(1); }
+//    return 0;
+//}
+
+
+
+
 #define _GNU_SOURCE
 #include <stdio.h>
 #include <unistd.h>
-#include <fcntl.h>
-#include <sys/mount.h>
 #include <sys/stat.h>
-#include <string.h>
+#include <sys/mount.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <stdint.h>
+#include <sys/mman.h>
+#include <sys/sysmacros.h>
 
-// Direct hardware print (The proven baseline)
+// Helper to set your local SoC debug CSR using the hex you provided
+#define SET_MDEBUG_ON()  asm volatile (".word 0x7cc45073") // csrrwi x0, 0x7cc, 8
+#define SET_MDEBUG_OFF() asm volatile (".word 0x7cc05073") // csrrwi x0, 0x7cc, 0
+            
+// Safe hardware print
 void manual_puts(const char *s) {
     volatile unsigned int *uart_tx = (volatile unsigned int *)0x2004;
-    while (*s) *uart_tx = *s++;
+    while (*s) {
+        *uart_tx = *s++;
+        for (volatile int i = 0; i < 50000; i++); 
+    }
+}
+
+// Safe function to print up to a 3-digit integer to hardware UART
+void manual_print_int(int num) {
+    volatile unsigned int *uart_tx = (volatile unsigned int *)0x2004;
+    if (num < 0) { *uart_tx = '-'; num = -num; }
+    if (num >= 100) { *uart_tx = '0' + (num / 100); num %= 100; }
+    if (num >= 10)  { *uart_tx = '0' + (num / 10); }
+    *uart_tx = '0' + (num % 10);
+    *uart_tx = '\n';
+}
+
+// Print 64-bit Hex to check memory corruption
+void manual_print_hex(uint64_t num) {
+    volatile unsigned int *uart_tx = (volatile unsigned int *)0x2004;
+    *uart_tx = '0'; for (volatile int i=0; i<50000; i++);
+    *uart_tx = 'x'; for (volatile int i=0; i<50000; i++);
+    for (int i = 15; i >= 0; i--) {
+        int nibble = (num >> (i * 4)) & 0xF;
+        *uart_tx = nibble < 10 ? '0' + nibble : 'A' + (nibble - 10);
+        for (volatile int j = 0; j < 50000; j++);
+    }
+    *uart_tx = '\n'; for (volatile int i=0; i<50000; i++);
+}
+
+void run_hardware_diagnostics() {
+    manual_puts("\n--- STARTING CPU HARDWARE DIAGNOSTICS ---\n");
+
+    // Allocate a brand new page to guarantee D=0 (Forces a TLB Store Fault)
+    volatile uint64_t *ram = mmap(NULL, 4096, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+    
+    // ---------------------------------------------------------
+    // TEST 1: TLB Store Fault Recovery (Does 'sd' get dropped?)
+    // ---------------------------------------------------------
+    manual_puts("TEST 1: 64-bit SD on clean page (TLB Fault Test)...\n");
+    uint64_t magic = 0xDEADBEEFCAFEBABE;
+    
+    asm volatile (
+        "sd %1, 0(%0)\n"
+        : : "r" (ram), "r" (magic) : "memory"
+    );
+    
+    if (ram[0] == magic) {
+        manual_puts("  -> PASS: 'sd' executed successfully.\n");
+    } else {
+        manual_puts("  -> FAIL! TLB/Store dropped the instruction. Read: ");
+        manual_print_hex(ram[0]);
+    }
+
+    // ---------------------------------------------------------
+    // TEST 2: 32-bit Store Alignment (Bus STRB/Shift Bug Test)
+    // ---------------------------------------------------------
+    manual_puts("TEST 2: 32-bit SW to offset 4...\n");
+    ram[0] = 0x1111222233334444ULL; // Reset to known state
+    uint32_t val32 = 0x99999999;
+    
+    // We force a 32-bit store to the UPPER half of the 64-bit word
+    // 'sw' allows immediate offsets.
+    asm volatile (
+        "sw %1, 4(%0)\n"
+        : : "r" (ram), "r" (val32) : "memory"
+    );
+
+    // If working, memory should be 0x9999999933334444
+    if (ram[0] == 0x9999999933334444ULL) {
+        manual_puts("  -> PASS: 'sw' shifted correctly.\n");
+    } else {
+        manual_puts("  -> FAIL! Bus byte-enable/shift is broken. Read: ");
+        manual_print_hex(ram[0]);
+    }
+
+    // ---------------------------------------------------------
+    // TEST 3: 32-bit AMO Alignment (FD allocation uses this)
+    // ---------------------------------------------------------
+    manual_puts("TEST 3: 32-bit AMOOR.W to offset 4...\n");
+    ram[0] = 0x1111222233334444ULL;
+    uint32_t or_val = 0x55555555;
+    
+    // Calculate the exact address of the upper 32 bits (offset +4)
+    // AMO instructions do NOT allow immediate offsets.
+    volatile uint32_t *target_addr = (volatile uint32_t *)((char *)ram + 4);
+    
+    asm volatile (
+        "amoor.w zero, %1, (%0)\n"
+        : : "r" (target_addr), "r" (or_val) : "memory"
+    );
+
+    // If working, upper 32-bits (0x11112222 | 0x55555555) = 0x55557777
+    if (ram[0] == 0x5555777733334444ULL) {
+        manual_puts("  -> PASS: 'amoor.w' works at offset 4.\n");
+    } else {
+        manual_puts("  -> FAIL! AMO data was written to wrong lane. Read: ");
+        manual_print_hex(ram[0]);
+    }
+    
+    manual_puts("--- END DIAGNOSTICS ---\n\n");
 }
 
 int main() {
-    // 1. Mount /dev
-    mkdir("/dev", 0755);
-    mount("devtmpfs", "/dev", "devtmpfs", 0, NULL);
+    //run_hardware_diagnostics();
+
     manual_puts("1. MANUAL PRINT: OK\n");
 
-    // 2. Test /dev/console
-    int fd = open("/dev/console", O_RDWR);
-    if (fd < 0) {
-        manual_puts("ERROR: Failed to open /dev/console!\n");
-    } else {
-        manual_puts("2. /dev/console OPENED SAFELY\n");
-        dup2(fd, 1); // Bind stdout to console
-        dup2(fd, 2); // Bind stderr to console
+    mkdir("/dev", 0755);
+    mount("devtmpfs", "/dev", "devtmpfs", 0, NULL);
+    manual_puts("2. Mount devtmpfs: OK\n");
+
+
+    const char *path = "/dev/console";
+    manual_puts("Address of /dev/console string: ");
+    manual_print_hex((uintptr_t)path);
+    
+    if (((uintptr_t)path >> 16) == 0) {
+        manual_puts("!!! CRITICAL: This string is in the Low IO PMA zone!\n");
     }
 
-    // 3. Test Direct Kernel Logging (Bypasses TTY buffer!)
-    int kmsg = open("/dev/kmsg", O_WRONLY);
+
+    // Try to check a "Safe" High-Memory FD
+    int fd_high = open("/dev/console", O_RDWR);
+    manual_puts("Open FD: "); manual_print_int(fd_high);
+    
+    // We know FD 1 is broken. Let's see if we can create an FD
+    // that uses a higher number (unlikely to be in the low 64KB range)
+    int fd_test = dup3(fd_high, 100, 0); // Force to FD 100
+    manual_puts("Dup2 to 100 result: "); manual_print_int(fd_test);
+    
+    int w = write(100, "TEST\n", 5);
+    manual_puts("Write to 100 result: "); manual_print_int(w);
+
+
+
+
+
+
+
+    // FIX: Force synchronous creation of the device nodes
+    // so we don't have to wait for the devtmpfs kernel thread.
+    mknod(path, S_IFCHR | 0600, makedev(5, 1));
+    mknod("/dev/kmsg", S_IFCHR | 0600, makedev(1, 11));
+
+
+    // Clear default FDs
+    close(0);
+    close(1);
+    close(2);
+
+    // Open console using HARDCODED 2 (O_RDWR) to prevent macro bugs
+    int fd0 = open("/dev/console", 2);// RDWR
+    int fd1 = open("/dev/console", 2);
+    int fd2 = open("/dev/console", 2);
+
+    if (fd1 != 1) { 
+        manual_puts("3. open /dev/console Fail. FD is: ");
+        manual_print_int(fd1);
+    }
+
+    w = write(1, "A\n", 2);
+    manual_puts("4. write(1) returned: ");
+    manual_print_int(w);
+    if (w < 0) {
+        manual_puts("   Errno: ");
+        manual_print_int(errno);
+    }
+
+
+    int flags = fcntl(1, F_GETFL); // fdget_raw(1) 9EBADF-NULL at index 1
+    if (flags < 0) {
+        manual_puts("4.5 fcntl Fail. Errno: ");
+        manual_print_int(errno);
+    }
+
+    // Bypass musl libc wrappers entirely to test the true kernel state
+    //SET_MDEBUG_ON(); 
+    //syscall(25, 1, F_GETFL); // 25 is __NR_fcntl on RISC-V 64
+    //SET_MDEBUG_OFF();
+
+    //int raw_fcntl = syscall(25, 1, F_GETFL); // 25 is __NR_fcntl on RISC-V 64
+    //manual_puts("4.5 RAW fcntl returned: ");
+    //manual_print_int(raw_fcntl);
+    //manual_print_int(errno);
+
+    // Let's also check if the kernel thinks FD 1 exists via fstat (syscall 80)
+    struct stat st;
+    int raw_fstat = syscall(80, 1, &st);
+    manual_puts("4.6 RAW fstat(1) returned: ");
+    manual_print_int(raw_fstat);
+    manual_print_int(errno);
+
+
+
+
+
+
+    // Open kmsg using HARDCODED 1 (O_WRONLY)
+    int kmsg = open("/dev/kmsg", 1);
+    manual_puts("5. open(/dev/kmsg) returned: ");
+    manual_print_int(kmsg);
+
     if (kmsg >= 0) {
-        char *kmsg_str = "3. KMSG PRINT: THIS BYPASSES THE TTY BUFFER!\n";
-        write(kmsg, kmsg_str, strlen(kmsg_str));
-        close(kmsg);
+        int w2 = write(kmsg, "<1>HELLO FROM KMSG!\n", 20);
+        manual_puts("6. write(kmsg) returned: ");
+        manual_print_int(w2);
+        if (w2 < 0) {
+            manual_puts("   Errno: ");
+            manual_print_int(errno);
+        }
     }
 
-    // 4. Test Buffered TTY Print
-    printf("4. STANDARD PRINTF: HELLO FROM HVC0!\n");
+    manual_puts("7. Testing printf...\n");
+    printf("PRINTF IS WORKING!\n");
     fflush(stdout);
 
-    manual_puts("5. WAITING FOR LINUX BACKGROUND THREAD TO FLUSH TTY...\n");
+    manual_puts("8. CPU going to sleep now...\n");
+    while(1) { sleep(1); }
+    return 0;
 
-    // 6. INFINITE LOOP: Prevents Kernel Panic and allows background threads to run
-    while (1) {
-        sleep(1); 
-        // If this loop runs, your timer interrupts are working perfectly!
-    }
-
-    return 123; 
 }
+  
+
+
+
+
+//#define _GNU_SOURCE
+//#include <stdio.h>
+//#include <unistd.h>
+//#include <stdint.h>
+//#include <sys/mman.h>
+//#include <string.h>
+//#include <sys/stat.h>
+//#include <sys/mount.h>
+//#include <errno.h>
+//#include <fcntl.h>
+//#include <sys/sysmacros.h>
+//
+//// Direct hardware print
+//void manual_puts(const char *s) {
+//    volatile unsigned int *uart_tx = (volatile unsigned int *)0x2004;
+//    while (*s) { *uart_tx = *s++; for (volatile int i = 0; i < 50000; i++); }
+//}
+//
+//void manual_print_hex(uint64_t num) {
+//    volatile unsigned int *uart_tx = (volatile unsigned int *)0x2004;
+//    const char *hex = "0123456789ABCDEF";
+//    for (int i = 15; i >= 0; i--) {
+//        *uart_tx = hex[(num >> (i * 4)) & 0xF];
+//        for (volatile int j = 0; j < 50000; j++);
+//    }
+//    *uart_tx = '\n';
+//}
+//
+//int main() {
+//    manual_puts("--- PROBING THE 'BLACK HOLE' (0-64KB) ---\n");
+//
+//    // TEST 1: Userspace Low RAM Probe
+//    // We try to allocate memory at 32KB (0x8000). 
+//    // This is inside your is_low_io range (ls_va[63:16] == 0).
+//    uint64_t *low_ptr = (uint64_t*)mmap((void*)0x8000, 4096, PROT_READ|PROT_WRITE, 
+//                                        MAP_PRIVATE|MAP_ANONYMOUS|MAP_FIXED, -1, 0);
+//    
+//    if (low_ptr != MAP_FAILED) {
+//        manual_puts("Writing 0xDEADBEEF to VA 0x8000...\n");
+//        *low_ptr = 0xDEADBEEFCAFEBABEULL;
+//        
+//        uint64_t val = *low_ptr;
+//        manual_puts("Read back from VA 0x8000: ");
+//        manual_print_hex(val);
+//
+//        if (val != 0xDEADBEEFCAFEBABEULL) {
+//            manual_puts("!!! BUG CONFIRMED: VA < 64KB is being bypassed to Physical RAM/MMIO!\n");
+//        } else {
+//            manual_puts("VA 0x8000 worked? Check if Physical 0x8000 is also RAM.\n");
+//        }
+//    }
+//
+//    // TEST 2: Locate the Kernel FD Table
+//    // We use the hardware trace hooks to see what VA the kernel touches during fcntl
+//    manual_puts("\n--- TRACING KERNEL FD TABLE ACCESS ---\n");
+//    int fd = open("/dev/console", 2);
+//    
+//    //asm volatile (".word 0x7cc45073"); // SET_MDEBUG_ON
+//    fcntl(fd, F_GETFL);                // The kernel will access the FD table here
+//    //asm volatile (".word 0x7cc05073"); // SET_MDEBUG_OFF
+//
+//    manual_puts("Look at the 'va' in the trace above while PC is in 0xFFFFFFFF... range.\n");
+//    manual_puts("If 'va' is < 0x10000, that is why fcntl fails!\n");
+//
+//    while(1) sleep(1);
+//    return 0;
+//}
+---------- change content and problem log ---------
+
+SYSCALL_DEFINE3(fcntl, unsigned int, fd, unsigned int, cmd, unsigned long, arg)
+{	
+	struct fd f;
+	long err = -EBADF;
+
+	struct files_struct *files;
+	struct fdtable *fdt;
+	struct file *raw_f = NULL;
+	long f_count = -1;
+
+	/* 1. Manually fetch the file pointer and f_count */
+	rcu_read_lock();
+	files = current->files;
+	fdt = files ? rcu_dereference_raw(files->fdt) : NULL;
+	if (fdt && fdt->fd && fd < fdt->max_fds) {
+		raw_f = rcu_dereference_raw(fdt->fd[fd]);
+	}
+	if (raw_f) {
+		f_count = atomic_long_read(&raw_f->f_count);
+	}
+	rcu_read_unlock();
+
+	/* 2. Call the real kernel function */
+	f = fdget_raw(fd);
+
+	/* 3. Diagnose why it failed */
+	if (!fd_file(f)) {
+		printk("FCNTL_DBG[pid=%d, fd=%u]: fdget_raw FAILED!\n", current->pid, fd);
+		printk("   -> raw_f = %px\n", raw_f);
+		printk("   -> f_count = %ld\n", f_count);
+		
+		if (raw_f && f_count == 0) {
+			printk("   -> DIAGNOSIS: f_count is 0! The struct file was corrupted with zeros!\n");
+		} else if (raw_f && f_count > 0) {
+			printk("   -> DIAGNOSIS: f_count is %ld, but fdget_raw failed. Hardware ATOMIC instruction bug!\n", f_count);
+		} else if (!raw_f) {
+			printk("   -> DIAGNOSIS: raw_f is NULL. FD array slot was cleared.\n");
+		}
+		goto out;
+	}
+
+	if (unlikely(fd_file(f)->f_mode & FMODE_PATH)) {
+		if (!check_fcntl_cmd(cmd))
+			goto out1;
+	}
+
+	err = security_file_fcntl(fd_file(f), cmd, arg);
+	if (!err)
+		err = do_fcntl(fd, cmd, arg, fd_file(f));
+
+out1:
+ 	fdput(f);
+out:
+	return err;
+}
+
+
+
+Freeing unused kernel image (initmem) memory: 1344K
+Kernel memory protection not selected by kernel config.
+Run /hello as init process
+  with arguments:
+    /hello
+  with environment:
+    HOME=/
+    TERM=linux
+1. MANUAL PRINT: OK
+2. Mount devtmpfs: OK
+Address of /dev/console string: 0x0000000000012E00
+Open FD: 3
+Dup2 to 100 result: -1
+Write to 100 result: -1
+4. write(1) returned: -1
+   Errno: 9
+FCNTL_DBG[pid=1, fd=1]: fdget_raw FAILED!
+   -> raw_f = ffffffd6000c1300
+   -> f_count = 1
+   -> DIAGNOSIS: f_count is 1, but fdget_raw failed. Hardware ATOMIC instruction bug!
+4.5 fcntl Fail. Errno: 9
+4.6 RAW fstat(1) returned: -1
+9
+5. open(/dev/kmsg) returned: 5
+6. write(kmsg) returned: -1
+   Errno: 9
+7. Testing printf...
+8. CPU going to sleep now...
+
