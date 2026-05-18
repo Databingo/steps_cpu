@@ -847,6 +847,137 @@
 
 
 
+//#define _GNU_SOURCE
+//#include <stdio.h>
+//#include <unistd.h>
+//#include <sys/stat.h>
+//#include <sys/mount.h>
+//#include <errno.h>
+//#include <fcntl.h>
+//#include <stdint.h>
+//#include <sys/mman.h>
+//
+//// Safe hardware print
+//void manual_puts(const char *s) {
+//    volatile unsigned int *uart_tx = (volatile unsigned int *)0x2004;
+//    while (*s) {
+//        *uart_tx = *s++;
+//        for (volatile int i = 0; i < 50000; i++); 
+//    }
+//}
+//
+//// Print 64-bit Hex to check memory corruption
+//void manual_print_hex(uint64_t num) {
+//    volatile unsigned int *uart_tx = (volatile unsigned int *)0x2004;
+//    *uart_tx = '0'; for (volatile int i=0; i<50000; i++);
+//    *uart_tx = 'x'; for (volatile int i=0; i<50000; i++);
+//    for (int i = 15; i >= 0; i--) {
+//        int nibble = (num >> (i * 4)) & 0xF;
+//        *uart_tx = nibble < 10 ? '0' + nibble : 'A' + (nibble - 10);
+//        for (volatile int j = 0; j < 50000; j++);
+//    }
+//    *uart_tx = '\n'; for (volatile int i=0; i<50000; i++);
+//}
+//
+//void run_hardware_diagnostics() {
+//    manual_puts("\n--- STARTING CPU HARDWARE DIAGNOSTICS ---\n");
+//
+//    // Allocate a brand new page to guarantee D=0 (Forces a TLB Store Fault)
+//    volatile uint64_t *ram = mmap(NULL, 4096, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+//    
+//    // ---------------------------------------------------------
+//    // TEST 1: TLB Store Fault Recovery (Does 'sd' get dropped?)
+//    // ---------------------------------------------------------
+//    manual_puts("TEST 1: 64-bit SD on clean page (TLB Fault Test)...\n");
+//    uint64_t magic = 0xDEADBEEFCAFEBABE;
+//    
+//    asm volatile (
+//        "sd %1, 0(%0)\n"
+//        : : "r" (ram), "r" (magic) : "memory"
+//    );
+//    
+//    if (ram[0] == magic) {
+//        manual_puts("  -> PASS: 'sd' executed successfully.\n");
+//    } else {
+//        manual_puts("  -> FAIL! TLB/Store dropped the instruction. Read: ");
+//        manual_print_hex(ram[0]);
+//    }
+//
+//    // ---------------------------------------------------------
+//    // TEST 2: 32-bit Store Alignment (Bus STRB/Shift Bug Test)
+//    // ---------------------------------------------------------
+//    manual_puts("TEST 2: 32-bit SW to offset 4...\n");
+//    ram[0] = 0x1111222233334444ULL; // Reset to known state
+//    uint32_t val32 = 0x99999999;
+//    
+//    // We force a 32-bit store to the UPPER half of the 64-bit word
+//    // 'sw' allows immediate offsets.
+//    asm volatile (
+//        "sw %1, 4(%0)\n"
+//        : : "r" (ram), "r" (val32) : "memory"
+//    );
+//
+//    // If working, memory should be 0x9999999933334444
+//    if (ram[0] == 0x9999999933334444ULL) {
+//        manual_puts("  -> PASS: 'sw' shifted correctly.\n");
+//    } else {
+//        manual_puts("  -> FAIL! Bus byte-enable/shift is broken. Read: ");
+//        manual_print_hex(ram[0]);
+//    }
+//
+//    // ---------------------------------------------------------
+//    // TEST 3: 32-bit AMO Alignment (FD allocation uses this)
+//    // ---------------------------------------------------------
+//    manual_puts("TEST 3: 32-bit AMOOR.W to offset 4...\n");
+//    ram[0] = 0x1111222233334444ULL;
+//    uint32_t or_val = 0x55555555;
+//    
+//    // Calculate the exact address of the upper 32 bits (offset +4)
+//    // AMO instructions do NOT allow immediate offsets.
+//    volatile uint32_t *target_addr = (volatile uint32_t *)((char *)ram + 4);
+//    
+//    asm volatile (
+//        "amoor.w zero, %1, (%0)\n"
+//        : : "r" (target_addr), "r" (or_val) : "memory"
+//    );
+//
+//    // If working, upper 32-bits (0x11112222 | 0x55555555) = 0x55557777
+//    if (ram[0] == 0x5555777733334444ULL) {
+//        manual_puts("  -> PASS: 'amoor.w' works at offset 4.\n");
+//    } else {
+//        manual_puts("  -> FAIL! AMO data was written to wrong lane. Read: ");
+//        manual_print_hex(ram[0]);
+//    }
+//    
+//    manual_puts("--- END DIAGNOSTICS ---\n\n");
+//}
+//
+//int main() {
+//    run_hardware_diagnostics();
+//
+//    // Now try to boot standard Linux
+//    mkdir("/dev", 0755);
+//    mount("devtmpfs", "/dev", "devtmpfs", 0, NULL);
+//    sleep(1); // Give devtmpfs time to populate
+//
+//    int console_fd = open("/dev/console", O_RDWR);
+//    if (console_fd >= 0) {
+//        dup2(console_fd, 0);
+//        dup2(console_fd, 1);
+//        dup2(console_fd, 2);
+//        if (console_fd > 2) close(console_fd);
+//    }
+//
+//    printf("Standard Printf Boot Sequence\n");
+//    fflush(stdout);
+//
+//    while(1) { sleep(1); }
+//    return 0;
+//}
+  
+  
+  
+  
 #define _GNU_SOURCE
 #include <stdio.h>
 #include <unistd.h>
@@ -854,10 +985,12 @@
 #include <sys/mount.h>
 #include <errno.h>
 #include <fcntl.h>
-#include <stdint.h>
-#include <sys/mman.h>
+#include <sys/syscall.h>
 
-// Safe hardware print
+// Helper to set your local SoC debug CSR using the hex you provided
+#define SET_MDEBUG_ON()  asm volatile (".word 0x7cc45073") // csrrwi x0, 0x7cc, 8
+#define SET_MDEBUG_OFF() asm volatile (".word 0x7cc05073") // csrrwi x0, 0x7cc, 0
+
 void manual_puts(const char *s) {
     volatile unsigned int *uart_tx = (volatile unsigned int *)0x2004;
     while (*s) {
@@ -866,111 +999,38 @@ void manual_puts(const char *s) {
     }
 }
 
-// Print 64-bit Hex to check memory corruption
-void manual_print_hex(uint64_t num) {
-    volatile unsigned int *uart_tx = (volatile unsigned int *)0x2004;
-    *uart_tx = '0'; for (volatile int i=0; i<50000; i++);
-    *uart_tx = 'x'; for (volatile int i=0; i<50000; i++);
-    for (int i = 15; i >= 0; i--) {
-        int nibble = (num >> (i * 4)) & 0xF;
-        *uart_tx = nibble < 10 ? '0' + nibble : 'A' + (nibble - 10);
-        for (volatile int j = 0; j < 50000; j++);
-    }
-    *uart_tx = '\n'; for (volatile int i=0; i<50000; i++);
-}
-
-void run_hardware_diagnostics() {
-    manual_puts("\n--- STARTING CPU HARDWARE DIAGNOSTICS ---\n");
-
-    // Allocate a brand new page to guarantee D=0 (Forces a TLB Store Fault)
-    volatile uint64_t *ram = mmap(NULL, 4096, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
-    
-    // ---------------------------------------------------------
-    // TEST 1: TLB Store Fault Recovery (Does 'sd' get dropped?)
-    // ---------------------------------------------------------
-    manual_puts("TEST 1: 64-bit SD on clean page (TLB Fault Test)...\n");
-    uint64_t magic = 0xDEADBEEFCAFEBABE;
-    
-    asm volatile (
-        "sd %1, 0(%0)\n"
-        : : "r" (ram), "r" (magic) : "memory"
-    );
-    
-    if (ram[0] == magic) {
-        manual_puts("  -> PASS: 'sd' executed successfully.\n");
-    } else {
-        manual_puts("  -> FAIL! TLB/Store dropped the instruction. Read: ");
-        manual_print_hex(ram[0]);
-    }
-
-    // ---------------------------------------------------------
-    // TEST 2: 32-bit Store Alignment (Bus STRB/Shift Bug Test)
-    // ---------------------------------------------------------
-    manual_puts("TEST 2: 32-bit SW to offset 4...\n");
-    ram[0] = 0x1111222233334444ULL; // Reset to known state
-    uint32_t val32 = 0x99999999;
-    
-    // We force a 32-bit store to the UPPER half of the 64-bit word
-    // 'sw' allows immediate offsets.
-    asm volatile (
-        "sw %1, 4(%0)\n"
-        : : "r" (ram), "r" (val32) : "memory"
-    );
-
-    // If working, memory should be 0x9999999933334444
-    if (ram[0] == 0x9999999933334444ULL) {
-        manual_puts("  -> PASS: 'sw' shifted correctly.\n");
-    } else {
-        manual_puts("  -> FAIL! Bus byte-enable/shift is broken. Read: ");
-        manual_print_hex(ram[0]);
-    }
-
-    // ---------------------------------------------------------
-    // TEST 3: 32-bit AMO Alignment (FD allocation uses this)
-    // ---------------------------------------------------------
-    manual_puts("TEST 3: 32-bit AMOOR.W to offset 4...\n");
-    ram[0] = 0x1111222233334444ULL;
-    uint32_t or_val = 0x55555555;
-    
-    // Calculate the exact address of the upper 32 bits (offset +4)
-    // AMO instructions do NOT allow immediate offsets.
-    volatile uint32_t *target_addr = (volatile uint32_t *)((char *)ram + 4);
-    
-    asm volatile (
-        "amoor.w zero, %1, (%0)\n"
-        : : "r" (target_addr), "r" (or_val) : "memory"
-    );
-
-    // If working, upper 32-bits (0x11112222 | 0x55555555) = 0x55557777
-    if (ram[0] == 0x5555777733334444ULL) {
-        manual_puts("  -> PASS: 'amoor.w' works at offset 4.\n");
-    } else {
-        manual_puts("  -> FAIL! AMO data was written to wrong lane. Read: ");
-        manual_print_hex(ram[0]);
-    }
-    
-    manual_puts("--- END DIAGNOSTICS ---\n\n");
-}
-
 int main() {
-    run_hardware_diagnostics();
+    manual_puts("1. Starting init...\n");
 
-    // Now try to boot standard Linux
     mkdir("/dev", 0755);
     mount("devtmpfs", "/dev", "devtmpfs", 0, NULL);
-    sleep(1); // Give devtmpfs time to populate
+    sleep(1); 
 
-    int console_fd = open("/dev/console", O_RDWR);
-    if (console_fd >= 0) {
-        dup2(console_fd, 0);
-        dup2(console_fd, 1);
-        dup2(console_fd, 2);
-        if (console_fd > 2) close(console_fd);
+    // Force open console
+    int fd1 = open("/dev/console", O_RDWR);
+    
+    manual_puts("--- TRACING FCNTL(1) ---\n");
+    
+    // --- START HARDWARE TRACE ---
+    SET_MDEBUG_ON(); 
+    
+    // This is the call that returns EBADF (9)
+    int flags = fcntl(1, F_GETFL); 
+    
+    SET_MDEBUG_OFF();
+    // --- STOP HARDWARE TRACE ---
+
+    if (flags < 0) {
+        manual_puts("Fcntl failed. Check UART trace above for a0/pc values.\n");
     }
 
-    printf("Standard Printf Boot Sequence\n");
-    fflush(stdout);
+    manual_puts("--- TRACING OPEN(KMSG) ---\n");
+    
+    SET_MDEBUG_ON();
+    int kmsg = open("/dev/kmsg", O_WRONLY);
+    SET_MDEBUG_OFF();
 
+    manual_puts("7. CPU going to sleep now...\n");
     while(1) { sleep(1); }
     return 0;
-}
+} 
