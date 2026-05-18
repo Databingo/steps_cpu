@@ -939,251 +939,309 @@
 
 
 
-#define _GNU_SOURCE
-#include <stdio.h>
-#include <unistd.h>
-#include <sys/stat.h>
-#include <sys/mount.h>
-#include <errno.h>
-#include <fcntl.h>
-#include <stdint.h>
-#include <sys/mman.h>
-#include <sys/sysmacros.h>
-
-// Helper to set your local SoC debug CSR using the hex you provided
-#define SET_MDEBUG_ON()  asm volatile (".word 0x7cc45073") // csrrwi x0, 0x7cc, 8
-#define SET_MDEBUG_OFF() asm volatile (".word 0x7cc05073") // csrrwi x0, 0x7cc, 0
-            
-// Safe hardware print
-void manual_puts(const char *s) {
-    volatile unsigned int *uart_tx = (volatile unsigned int *)0x2004;
-    while (*s) {
-        *uart_tx = *s++;
-        for (volatile int i = 0; i < 50000; i++); 
-    }
-}
-
-// Safe function to print up to a 3-digit integer to hardware UART
-void manual_print_int(int num) {
-    volatile unsigned int *uart_tx = (volatile unsigned int *)0x2004;
-    if (num < 0) { *uart_tx = '-'; num = -num; }
-    if (num >= 100) { *uart_tx = '0' + (num / 100); num %= 100; }
-    if (num >= 10)  { *uart_tx = '0' + (num / 10); }
-    *uart_tx = '0' + (num % 10);
-    *uart_tx = '\n';
-}
-
-// Print 64-bit Hex to check memory corruption
-void manual_print_hex(uint64_t num) {
-    volatile unsigned int *uart_tx = (volatile unsigned int *)0x2004;
-    *uart_tx = '0'; for (volatile int i=0; i<50000; i++);
-    *uart_tx = 'x'; for (volatile int i=0; i<50000; i++);
-    for (int i = 15; i >= 0; i--) {
-        int nibble = (num >> (i * 4)) & 0xF;
-        *uart_tx = nibble < 10 ? '0' + nibble : 'A' + (nibble - 10);
-        for (volatile int j = 0; j < 50000; j++);
-    }
-    *uart_tx = '\n'; for (volatile int i=0; i<50000; i++);
-}
-
-void run_hardware_diagnostics() {
-    manual_puts("\n--- STARTING CPU HARDWARE DIAGNOSTICS ---\n");
-
-    // Allocate a brand new page to guarantee D=0 (Forces a TLB Store Fault)
-    volatile uint64_t *ram = mmap(NULL, 4096, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
-    
-    // ---------------------------------------------------------
-    // TEST 1: TLB Store Fault Recovery (Does 'sd' get dropped?)
-    // ---------------------------------------------------------
-    manual_puts("TEST 1: 64-bit SD on clean page (TLB Fault Test)...\n");
-    uint64_t magic = 0xDEADBEEFCAFEBABE;
-    
-    asm volatile (
-        "sd %1, 0(%0)\n"
-        : : "r" (ram), "r" (magic) : "memory"
-    );
-    
-    if (ram[0] == magic) {
-        manual_puts("  -> PASS: 'sd' executed successfully.\n");
-    } else {
-        manual_puts("  -> FAIL! TLB/Store dropped the instruction. Read: ");
-        manual_print_hex(ram[0]);
-    }
-
-    // ---------------------------------------------------------
-    // TEST 2: 32-bit Store Alignment (Bus STRB/Shift Bug Test)
-    // ---------------------------------------------------------
-    manual_puts("TEST 2: 32-bit SW to offset 4...\n");
-    ram[0] = 0x1111222233334444ULL; // Reset to known state
-    uint32_t val32 = 0x99999999;
-    
-    // We force a 32-bit store to the UPPER half of the 64-bit word
-    // 'sw' allows immediate offsets.
-    asm volatile (
-        "sw %1, 4(%0)\n"
-        : : "r" (ram), "r" (val32) : "memory"
-    );
-
-    // If working, memory should be 0x9999999933334444
-    if (ram[0] == 0x9999999933334444ULL) {
-        manual_puts("  -> PASS: 'sw' shifted correctly.\n");
-    } else {
-        manual_puts("  -> FAIL! Bus byte-enable/shift is broken. Read: ");
-        manual_print_hex(ram[0]);
-    }
-
-    // ---------------------------------------------------------
-    // TEST 3: 32-bit AMO Alignment (FD allocation uses this)
-    // ---------------------------------------------------------
-    manual_puts("TEST 3: 32-bit AMOOR.W to offset 4...\n");
-    ram[0] = 0x1111222233334444ULL;
-    uint32_t or_val = 0x55555555;
-    
-    // Calculate the exact address of the upper 32 bits (offset +4)
-    // AMO instructions do NOT allow immediate offsets.
-    volatile uint32_t *target_addr = (volatile uint32_t *)((char *)ram + 4);
-    
-    asm volatile (
-        "amoor.w zero, %1, (%0)\n"
-        : : "r" (target_addr), "r" (or_val) : "memory"
-    );
-
-    // If working, upper 32-bits (0x11112222 | 0x55555555) = 0x55557777
-    if (ram[0] == 0x5555777733334444ULL) {
-        manual_puts("  -> PASS: 'amoor.w' works at offset 4.\n");
-    } else {
-        manual_puts("  -> FAIL! AMO data was written to wrong lane. Read: ");
-        manual_print_hex(ram[0]);
-    }
-    
-    manual_puts("--- END DIAGNOSTICS ---\n\n");
-}
-
-int main() {
-    //run_hardware_diagnostics();
-
-    manual_puts("1. MANUAL PRINT: OK\n");
-
-    mkdir("/dev", 0755);
-    mount("devtmpfs", "/dev", "devtmpfs", 0, NULL);
-    manual_puts("2. Mount devtmpfs: OK\n");
-
-
-    const char *path = "/dev/console";
-    manual_puts("Address of /dev/console string: ");
-    manual_print_hex((uintptr_t)path);
-    
-    if (((uintptr_t)path >> 16) == 0) {
-        manual_puts("!!! CRITICAL: This string is in the Low IO PMA zone!\n");
-    }
-
-
-    // Try to check a "Safe" High-Memory FD
-    int fd_high = open("/dev/console", O_RDWR);
-    manual_puts("Open FD: "); manual_print_int(fd_high);
-    
-    // We know FD 1 is broken. Let's see if we can create an FD
-    // that uses a higher number (unlikely to be in the low 64KB range)
-    int fd_test = dup3(fd_high, 100, 0); // Force to FD 100
-    manual_puts("Dup2 to 100 result: "); manual_print_int(fd_test);
-    
-    int w = write(100, "TEST\n", 5);
-    manual_puts("Write to 100 result: "); manual_print_int(w);
-
-
-
-
-
-
-
-    // FIX: Force synchronous creation of the device nodes
-    // so we don't have to wait for the devtmpfs kernel thread.
-    mknod(path, S_IFCHR | 0600, makedev(5, 1));
-    mknod("/dev/kmsg", S_IFCHR | 0600, makedev(1, 11));
-
-
-    // Clear default FDs
-    close(0);
-    close(1);
-    close(2);
-
-    // Open console using HARDCODED 2 (O_RDWR) to prevent macro bugs
-    int fd0 = open("/dev/console", 2);// RDWR
-    int fd1 = open("/dev/console", 2);
-    int fd2 = open("/dev/console", 2);
-
-    if (fd1 != 1) { 
-        manual_puts("3. open /dev/console Fail. FD is: ");
-        manual_print_int(fd1);
-    }
-
-    w = write(1, "A\n", 2);
-    manual_puts("4. write(1) returned: ");
-    manual_print_int(w);
-    if (w < 0) {
-        manual_puts("   Errno: ");
-        manual_print_int(errno);
-    }
-
-
-    //int flags = fcntl(1, F_GETFL); // fdget_raw(1) 9EBADF-NULL at index 1
-    //if (flags < 0) {
-    //    manual_puts("4.5 fcntl Fail. Errno: ");
-    //    manual_print_int(errno);
-    //}
-
-    // Bypass musl libc wrappers entirely to test the true kernel state
-    //SET_MDEBUG_ON(); 
-    //syscall(25, 1, F_GETFL); // 25 is __NR_fcntl on RISC-V 64
-    //SET_MDEBUG_OFF();
-
-    int raw_fcntl = syscall(25, 1, F_GETFL); // 25 is __NR_fcntl on RISC-V 64
-    manual_puts("4.5 RAW fcntl returned: ");
-    manual_print_int(raw_fcntl);
-    manual_print_int(errno);
-
-    // Let's also check if the kernel thinks FD 1 exists via fstat (syscall 80)
-    struct stat st;
-    int raw_fstat = syscall(80, 1, &st);
-    manual_puts("4.6 RAW fstat(1) returned: ");
-    manual_print_int(raw_fstat);
-    manual_print_int(errno);
-
-
-
-
-
-
-    // Open kmsg using HARDCODED 1 (O_WRONLY)
-    int kmsg = open("/dev/kmsg", 1);
-    manual_puts("5. open(/dev/kmsg) returned: ");
-    manual_print_int(kmsg);
-
-    if (kmsg >= 0) {
-        int w2 = write(kmsg, "<1>HELLO FROM KMSG!\n", 20);
-        manual_puts("6. write(kmsg) returned: ");
-        manual_print_int(w2);
-        if (w2 < 0) {
-            manual_puts("   Errno: ");
-            manual_print_int(errno);
-        }
-    }
-
-    manual_puts("7. Testing printf...\n");
-    printf("PRINTF IS WORKING!\n");
-    fflush(stdout);
-
-    manual_puts("8. CPU going to sleep now...\n");
-    while(1) { sleep(1); }
-    return 0;
-
-}
+//#define _GNU_SOURCE
+//#include <stdio.h>
+//#include <unistd.h>
+//#include <sys/stat.h>
+//#include <sys/mount.h>
+//#include <errno.h>
+//#include <fcntl.h>
+//#include <stdint.h>
+//#include <sys/mman.h>
+//#include <sys/sysmacros.h>
+//
+//// Helper to set your local SoC debug CSR using the hex you provided
+//#define SET_MDEBUG_ON()  asm volatile (".word 0x7cc45073") // csrrwi x0, 0x7cc, 8
+//#define SET_MDEBUG_OFF() asm volatile (".word 0x7cc05073") // csrrwi x0, 0x7cc, 0
+//            
+//// Safe hardware print
+//void manual_puts(const char *s) {
+//    volatile unsigned int *uart_tx = (volatile unsigned int *)0x2004;
+//    while (*s) {
+//        *uart_tx = *s++;
+//        for (volatile int i = 0; i < 50000; i++); 
+//    }
+//}
+//
+//// Safe function to print up to a 3-digit integer to hardware UART
+//void manual_print_int(int num) {
+//    volatile unsigned int *uart_tx = (volatile unsigned int *)0x2004;
+//    if (num < 0) { *uart_tx = '-'; num = -num; }
+//    if (num >= 100) { *uart_tx = '0' + (num / 100); num %= 100; }
+//    if (num >= 10)  { *uart_tx = '0' + (num / 10); }
+//    *uart_tx = '0' + (num % 10);
+//    *uart_tx = '\n';
+//}
+//
+//// Print 64-bit Hex to check memory corruption
+//void manual_print_hex(uint64_t num) {
+//    volatile unsigned int *uart_tx = (volatile unsigned int *)0x2004;
+//    *uart_tx = '0'; for (volatile int i=0; i<50000; i++);
+//    *uart_tx = 'x'; for (volatile int i=0; i<50000; i++);
+//    for (int i = 15; i >= 0; i--) {
+//        int nibble = (num >> (i * 4)) & 0xF;
+//        *uart_tx = nibble < 10 ? '0' + nibble : 'A' + (nibble - 10);
+//        for (volatile int j = 0; j < 50000; j++);
+//    }
+//    *uart_tx = '\n'; for (volatile int i=0; i<50000; i++);
+//}
+//
+//void run_hardware_diagnostics() {
+//    manual_puts("\n--- STARTING CPU HARDWARE DIAGNOSTICS ---\n");
+//
+//    // Allocate a brand new page to guarantee D=0 (Forces a TLB Store Fault)
+//    volatile uint64_t *ram = mmap(NULL, 4096, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+//    
+//    // ---------------------------------------------------------
+//    // TEST 1: TLB Store Fault Recovery (Does 'sd' get dropped?)
+//    // ---------------------------------------------------------
+//    manual_puts("TEST 1: 64-bit SD on clean page (TLB Fault Test)...\n");
+//    uint64_t magic = 0xDEADBEEFCAFEBABE;
+//    
+//    asm volatile (
+//        "sd %1, 0(%0)\n"
+//        : : "r" (ram), "r" (magic) : "memory"
+//    );
+//    
+//    if (ram[0] == magic) {
+//        manual_puts("  -> PASS: 'sd' executed successfully.\n");
+//    } else {
+//        manual_puts("  -> FAIL! TLB/Store dropped the instruction. Read: ");
+//        manual_print_hex(ram[0]);
+//    }
+//
+//    // ---------------------------------------------------------
+//    // TEST 2: 32-bit Store Alignment (Bus STRB/Shift Bug Test)
+//    // ---------------------------------------------------------
+//    manual_puts("TEST 2: 32-bit SW to offset 4...\n");
+//    ram[0] = 0x1111222233334444ULL; // Reset to known state
+//    uint32_t val32 = 0x99999999;
+//    
+//    // We force a 32-bit store to the UPPER half of the 64-bit word
+//    // 'sw' allows immediate offsets.
+//    asm volatile (
+//        "sw %1, 4(%0)\n"
+//        : : "r" (ram), "r" (val32) : "memory"
+//    );
+//
+//    // If working, memory should be 0x9999999933334444
+//    if (ram[0] == 0x9999999933334444ULL) {
+//        manual_puts("  -> PASS: 'sw' shifted correctly.\n");
+//    } else {
+//        manual_puts("  -> FAIL! Bus byte-enable/shift is broken. Read: ");
+//        manual_print_hex(ram[0]);
+//    }
+//
+//    // ---------------------------------------------------------
+//    // TEST 3: 32-bit AMO Alignment (FD allocation uses this)
+//    // ---------------------------------------------------------
+//    manual_puts("TEST 3: 32-bit AMOOR.W to offset 4...\n");
+//    ram[0] = 0x1111222233334444ULL;
+//    uint32_t or_val = 0x55555555;
+//    
+//    // Calculate the exact address of the upper 32 bits (offset +4)
+//    // AMO instructions do NOT allow immediate offsets.
+//    volatile uint32_t *target_addr = (volatile uint32_t *)((char *)ram + 4);
+//    
+//    asm volatile (
+//        "amoor.w zero, %1, (%0)\n"
+//        : : "r" (target_addr), "r" (or_val) : "memory"
+//    );
+//
+//    // If working, upper 32-bits (0x11112222 | 0x55555555) = 0x55557777
+//    if (ram[0] == 0x5555777733334444ULL) {
+//        manual_puts("  -> PASS: 'amoor.w' works at offset 4.\n");
+//    } else {
+//        manual_puts("  -> FAIL! AMO data was written to wrong lane. Read: ");
+//        manual_print_hex(ram[0]);
+//    }
+//    
+//    manual_puts("--- END DIAGNOSTICS ---\n\n");
+//}
+//
+//int main() {
+//    //run_hardware_diagnostics();
+//
+//    manual_puts("1. MANUAL PRINT: OK\n");
+//
+//    mkdir("/dev", 0755);
+//    mount("devtmpfs", "/dev", "devtmpfs", 0, NULL);
+//    manual_puts("2. Mount devtmpfs: OK\n");
+//
+//
+//    const char *path = "/dev/console";
+//    manual_puts("Address of /dev/console string: ");
+//    manual_print_hex((uintptr_t)path);
+//    
+//    if (((uintptr_t)path >> 16) == 0) {
+//        manual_puts("!!! CRITICAL: This string is in the Low IO PMA zone!\n");
+//    }
+//
+//
+//    // Try to check a "Safe" High-Memory FD
+//    int fd_high = open("/dev/console", O_RDWR);
+//    manual_puts("Open FD: "); manual_print_int(fd_high);
+//    
+//    // We know FD 1 is broken. Let's see if we can create an FD
+//    // that uses a higher number (unlikely to be in the low 64KB range)
+//    int fd_test = dup3(fd_high, 100, 0); // Force to FD 100
+//    manual_puts("Dup2 to 100 result: "); manual_print_int(fd_test);
+//    
+//    int w = write(100, "TEST\n", 5);
+//    manual_puts("Write to 100 result: "); manual_print_int(w);
+//
+//
+//
+//
+//
+//
+//
+//    // FIX: Force synchronous creation of the device nodes
+//    // so we don't have to wait for the devtmpfs kernel thread.
+//    mknod(path, S_IFCHR | 0600, makedev(5, 1));
+//    mknod("/dev/kmsg", S_IFCHR | 0600, makedev(1, 11));
+//
+//
+//    // Clear default FDs
+//    close(0);
+//    close(1);
+//    close(2);
+//
+//    // Open console using HARDCODED 2 (O_RDWR) to prevent macro bugs
+//    int fd0 = open("/dev/console", 2);// RDWR
+//    int fd1 = open("/dev/console", 2);
+//    int fd2 = open("/dev/console", 2);
+//
+//    if (fd1 != 1) { 
+//        manual_puts("3. open /dev/console Fail. FD is: ");
+//        manual_print_int(fd1);
+//    }
+//
+//    w = write(1, "A\n", 2);
+//    manual_puts("4. write(1) returned: ");
+//    manual_print_int(w);
+//    if (w < 0) {
+//        manual_puts("   Errno: ");
+//        manual_print_int(errno);
+//    }
+//
+//
+//    //int flags = fcntl(1, F_GETFL); // fdget_raw(1) 9EBADF-NULL at index 1
+//    //if (flags < 0) {
+//    //    manual_puts("4.5 fcntl Fail. Errno: ");
+//    //    manual_print_int(errno);
+//    //}
+//
+//    // Bypass musl libc wrappers entirely to test the true kernel state
+//    //SET_MDEBUG_ON(); 
+//    //syscall(25, 1, F_GETFL); // 25 is __NR_fcntl on RISC-V 64
+//    //SET_MDEBUG_OFF();
+//
+//    int raw_fcntl = syscall(25, 1, F_GETFL); // 25 is __NR_fcntl on RISC-V 64
+//    manual_puts("4.5 RAW fcntl returned: ");
+//    manual_print_int(raw_fcntl);
+//    manual_print_int(errno);
+//
+//    // Let's also check if the kernel thinks FD 1 exists via fstat (syscall 80)
+//    struct stat st;
+//    int raw_fstat = syscall(80, 1, &st);
+//    manual_puts("4.6 RAW fstat(1) returned: ");
+//    manual_print_int(raw_fstat);
+//    manual_print_int(errno);
+//
+//
+//
+//
+//
+//
+//    // Open kmsg using HARDCODED 1 (O_WRONLY)
+//    int kmsg = open("/dev/kmsg", 1);
+//    manual_puts("5. open(/dev/kmsg) returned: ");
+//    manual_print_int(kmsg);
+//
+//    if (kmsg >= 0) {
+//        int w2 = write(kmsg, "<1>HELLO FROM KMSG!\n", 20);
+//        manual_puts("6. write(kmsg) returned: ");
+//        manual_print_int(w2);
+//        if (w2 < 0) {
+//            manual_puts("   Errno: ");
+//            manual_print_int(errno);
+//        }
+//    }
+//
+//    manual_puts("7. Testing printf...\n");
+//    printf("PRINTF IS WORKING!\n");
+//    fflush(stdout);
+//
+//    manual_puts("8. CPU going to sleep now...\n");
+//    while(1) { sleep(1); }
+//    return 0;
+//
+//}
   
 
 
 
 
+#define _GNU_SOURCE
+#include <stdio.h>
+#include <unistd.h>
+#include <stdint.h>
+#include <sys/mman.h>
+#include <string.h>
 
+// Direct hardware print
+void manual_puts(const char *s) {
+    volatile unsigned int *uart_tx = (volatile unsigned int *)0x2004;
+    while (*s) { *uart_tx = *s++; for (volatile int i = 0; i < 50000; i++); }
+}
 
+void manual_print_hex(uint64_t num) {
+    volatile unsigned int *uart_tx = (volatile unsigned int *)0x2004;
+    const char *hex = "0123456789ABCDEF";
+    for (int i = 15; i >= 0; i--) {
+        *uart_tx = hex[(num >> (i * 4)) & 0xF];
+        for (volatile int j = 0; j < 50000; j++);
+    }
+    *uart_tx = '\n';
+}
 
+int main() {
+    manual_puts("--- PROBING THE 'BLACK HOLE' (0-64KB) ---\n");
 
+    // TEST 1: Userspace Low RAM Probe
+    // We try to allocate memory at 32KB (0x8000). 
+    // This is inside your is_low_io range (ls_va[63:16] == 0).
+    uint64_t *low_ptr = (uint64_t*)mmap((void*)0x8000, 4096, PROT_READ|PROT_WRITE, 
+                                        MAP_PRIVATE|MAP_ANONYMOUS|MAP_FIXED, -1, 0);
+    
+    if (low_ptr != MAP_FAILED) {
+        manual_puts("Writing 0xDEADBEEF to VA 0x8000...\n");
+        *low_ptr = 0xDEADBEEFCAFEBABEULL;
+        
+        uint64_t val = *low_ptr;
+        manual_puts("Read back from VA 0x8000: ");
+        manual_print_hex(val);
+
+        if (val != 0xDEADBEEFCAFEBABEULL) {
+            manual_puts("!!! BUG CONFIRMED: VA < 64KB is being bypassed to Physical RAM/MMIO!\n");
+        } else {
+            manual_puts("VA 0x8000 worked? Check if Physical 0x8000 is also RAM.\n");
+        }
+    }
+
+    // TEST 2: Locate the Kernel FD Table
+    // We use the hardware trace hooks to see what VA the kernel touches during fcntl
+    manual_puts("\n--- TRACING KERNEL FD TABLE ACCESS ---\n");
+    int fd = open("/dev/console", 2);
+    
+    asm volatile (".word 0x7cc45073"); // SET_MDEBUG_ON
+    fcntl(fd, F_GETFL);                // The kernel will access the FD table here
+    asm volatile (".word 0x7cc05073"); // SET_MDEBUG_OFF
+
+    manual_puts("Look at the 'va' in the trace above while PC is in 0xFFFFFFFF... range.\n");
+    manual_puts("If 'va' is < 0x10000, that is why fcntl fails!\n");
+
+    while(1) sleep(1);
+    return 0;
+}
