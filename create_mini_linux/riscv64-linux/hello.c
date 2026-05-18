@@ -870,6 +870,16 @@ void manual_puts(const char *s) {
     }
 }
 
+// Safe function to print up to a 3-digit integer to hardware UART
+void manual_print_int(int num) {
+    volatile unsigned int *uart_tx = (volatile unsigned int *)0x2004;
+    if (num < 0) { *uart_tx = '-'; num = -num; }
+    if (num >= 100) { *uart_tx = '0' + (num / 100); num %= 100; }
+    if (num >= 10)  { *uart_tx = '0' + (num / 10); }
+    *uart_tx = '0' + (num % 10);
+    *uart_tx = '\n';
+}
+
 // Print 64-bit Hex to check memory corruption
 void manual_print_hex(uint64_t num) {
     volatile unsigned int *uart_tx = (volatile unsigned int *)0x2004;
