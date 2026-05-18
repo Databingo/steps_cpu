@@ -969,34 +969,103 @@ void run_hardware_diagnostics() {
 int main() {
     //run_hardware_diagnostics();
 
-    // Now try to boot standard Linux
+    manual_puts("1. MANUAL PRINT: OK\n");
+
     mkdir("/dev", 0755);
     mount("devtmpfs", "/dev", "devtmpfs", 0, NULL);
-    manual_puts("mount devtmpfs ok \n");
+    manual_puts("2. Mount devtmpfs: OK\n");
 
-    int console_fd = open("/dev/console", O_RDWR);
-    if (console_fd >= 0) {
-        dup2(console_fd, 0);
-        dup2(console_fd, 1);
-        dup2(console_fd, 2);
-        if (console_fd > 2) close(console_fd);
+    // FIX: Force synchronous creation of the device nodes
+    // so we don't have to wait for the devtmpfs kernel thread.
+    mknod("/dev/console", S_IFCHR | 0600, makedev(5, 1));
+    mknod("/dev/kmsg", S_IFCHR | 0600, makedev(1, 11));
+
+
+    // Clear default FDs
+    close(0);
+    close(1);
+    close(2);
+
+    // Open console using HARDCODED 2 (O_RDWR) to prevent macro bugs
+    int fd0 = open("/dev/console", 2);// RDWR
+    int fd1 = open("/dev/console", 2);
+    int fd2 = open("/dev/console", 2);
+
+    if (fd1 != 1) { 
+        manual_puts("3. open /dev/console Fail. FD is: ");
+        manual_print_int(fd1);
     }
-    manual_puts("open /dev/console ok \n");
 
-    SET_MDEBUG_ON(); 
-    int flags = fcntl(1, F_GETFL); // fdget_raw(1) 9EBADF-NULL at index 1
-    SET_MDEBUG_OFF();
-    if (flags < 0) {
-        manual_puts("fcntl Fail. Errno: ");
+    int w = write(1, "A\n", 2);
+    manual_puts("4. write(1) returned: ");
+    manual_print_int(w);
+    if (w < 0) {
+        manual_puts("   Errno: ");
         manual_print_int(errno);
     }
 
 
-    printf("Standard Printf Boot Sequence\n");
+    //int flags = fcntl(1, F_GETFL); // fdget_raw(1) 9EBADF-NULL at index 1
+    //if (flags < 0) {
+    //    manual_puts("4.5 fcntl Fail. Errno: ");
+    //    manual_print_int(errno);
+    //}
+
+    // Bypass musl libc wrappers entirely to test the true kernel state
+    SET_MDEBUG_ON(); 
+    syscall(25, 1, F_GETFL); // 25 is __NR_fcntl on RISC-V 64
+    SET_MDEBUG_OFF();
+
+    int raw_fcntl = syscall(25, 1, F_GETFL); // 25 is __NR_fcntl on RISC-V 64
+    manual_puts("4.5 RAW fcntl returned: ");
+    manual_print_int(raw_fcntl);
+    manual_print_int(errno);
+
+    // Let's also check if the kernel thinks FD 1 exists via fstat (syscall 80)
+    struct stat st;
+    int raw_fstat = syscall(80, 1, &st);
+    manual_puts("4.6 RAW fstat(1) returned: ");
+    manual_print_int(raw_fstat);
+    manual_print_int(errno);
+
+
+
+
+
+
+    // Open kmsg using HARDCODED 1 (O_WRONLY)
+    int kmsg = open("/dev/kmsg", 1);
+    manual_puts("5. open(/dev/kmsg) returned: ");
+    manual_print_int(kmsg);
+
+    if (kmsg >= 0) {
+        int w2 = write(kmsg, "<1>HELLO FROM KMSG!\n", 20);
+        manual_puts("6. write(kmsg) returned: ");
+        manual_print_int(w2);
+        if (w2 < 0) {
+            manual_puts("   Errno: ");
+            manual_print_int(errno);
+        }
+    }
+
+    manual_puts("7. Testing printf...\n");
+    printf("PRINTF IS WORKING!\n");
     fflush(stdout);
 
+    manual_puts("8. CPU going to sleep now...\n");
     while(1) { sleep(1); }
     return 0;
+
+
+
+
+
+
+
+
+
+
+
 }
   
   
