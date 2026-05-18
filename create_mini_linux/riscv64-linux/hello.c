@@ -856,6 +856,7 @@
 #include <fcntl.h>
 #include <stdint.h>
 #include <sys/mman.h>
+#include <sys/sysmacros.h>
 
 // Helper to set your local SoC debug CSR using the hex you provided
 #define SET_MDEBUG_ON()  asm volatile (".word 0x7cc45073") // csrrwi x0, 0x7cc, 8
