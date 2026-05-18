@@ -1189,6 +1189,11 @@
 #include <stdint.h>
 #include <sys/mman.h>
 #include <string.h>
+#include <sys/stat.h>
+#include <sys/mount.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <sys/sysmacros.h>
 
 // Direct hardware print
 void manual_puts(const char *s) {
