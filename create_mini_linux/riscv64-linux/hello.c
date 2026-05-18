@@ -1126,7 +1126,7 @@ int main() {
     mknod(safe_console, S_IFCHR | 0600, makedev(5, 1));
     mknod(safe_kmsg, S_IFCHR | 0600, makedev(1, 11));
 
-    sleep(1);
+    //sleep(1);
 
     // Try to open using the HIGH MEMORY pointers
     int fd = open(safe_console, O_RDWR);
