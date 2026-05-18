@@ -1117,7 +1117,7 @@ int main() {
         manual_print_int(fd1);
     }
 
-    int w = write(1, "A\n", 2);
+    w = write(1, "A\n", 2);
     manual_puts("4. write(1) returned: ");
     manual_print_int(w);
     if (w < 0) {
