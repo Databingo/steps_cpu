@@ -568,13 +568,122 @@ static int check_fcntl_cmd(unsigned cmd)
 	return 0;
 }
 
+//SYSCALL_DEFINE3(fcntl, unsigned int, fd, unsigned int, cmd, unsigned long, arg)
+//{	
+//	struct fd f = fdget_raw(fd);
+//	long err = -EBADF;
+//
+//	if (!fd_file(f))
+//		goto out;
+//
+//	if (unlikely(fd_file(f)->f_mode & FMODE_PATH)) {
+//		if (!check_fcntl_cmd(cmd))
+//			goto out1;
+//	}
+//
+//	err = security_file_fcntl(fd_file(f), cmd, arg);
+//	if (!err)
+//		err = do_fcntl(fd, cmd, arg, fd_file(f));
+//
+//out1:
+// 	fdput(f);
+//out:
+//	return err;
+//}
+
+
+
+
+//SYSCALL_DEFINE3(fcntl, unsigned int, fd, unsigned int, cmd, unsigned long, arg)
+//{	
+//	struct fd f;
+//	long err = -EBADF;
+//	
+//	/* Variables for our debug log */
+//	struct files_struct *files;
+//	struct fdtable *fdt;
+//	struct file *raw_f = NULL;
+//
+//	/* --- SIMPLE & POWERFUL FDGET UNROLL DEBUG --- */
+//	rcu_read_lock();
+//	files = current->files;
+//	fdt = files ? rcu_dereference_raw(files->fdt) : NULL;
+//	if (fdt && fdt->fd && fd < fdt->max_fds)
+//		raw_f = rcu_dereference_raw(fdt->fd[fd]);
+//
+//	printk("FCNTL_DBG[pid=%d, fd=%u]: files=%px fdt=%px array=%px max=%u file=%px\n",
+//		current->pid, fd, files, fdt, 
+//		fdt ? fdt->fd : NULL, 
+//		fdt ? fdt->max_fds : 0, 
+//		raw_f);
+//	rcu_read_unlock();
+//	/* -------------------------------------------- */
+//
+//	f = fdget_raw(fd);
+//
+//	if (!fd_file(f)) {
+//		printk("FCNTL_DBG[pid=%d]: fdget_raw returned NULL file! Returning -EBADF\n", current->pid);
+//		goto out;
+//	}
+//
+//	if (unlikely(fd_file(f)->f_mode & FMODE_PATH)) {
+//		if (!check_fcntl_cmd(cmd))
+//			goto out1;
+//	}
+//
+//	err = security_file_fcntl(fd_file(f), cmd, arg);
+//	if (!err)
+//		err = do_fcntl(fd, cmd, arg, fd_file(f));
+//
+//out1:
+// 	fdput(f);
+//out:
+//	return err;
+//}
+
+
+
+
 SYSCALL_DEFINE3(fcntl, unsigned int, fd, unsigned int, cmd, unsigned long, arg)
 {	
-	struct fd f = fdget_raw(fd);
+	struct fd f;
 	long err = -EBADF;
 
-	if (!fd_file(f))
+	struct files_struct *files;
+	struct fdtable *fdt;
+	struct file *raw_f = NULL;
+	long f_count = -1;
+
+	/* 1. Manually fetch the file pointer and f_count */
+	rcu_read_lock();
+	files = current->files;
+	fdt = files ? rcu_dereference_raw(files->fdt) : NULL;
+	if (fdt && fdt->fd && fd < fdt->max_fds) {
+		raw_f = rcu_dereference_raw(fdt->fd[fd]);
+	}
+	if (raw_f) {
+		f_count = atomic_long_read(&raw_f->f_count);
+	}
+	rcu_read_unlock();
+
+	/* 2. Call the real kernel function */
+	f = fdget_raw(fd);
+
+	/* 3. Diagnose why it failed */
+	if (!fd_file(f)) {
+		printk("FCNTL_DBG[pid=%d, fd=%u]: fdget_raw FAILED!\n", current->pid, fd);
+		printk("   -> raw_f = %px\n", raw_f);
+		printk("   -> f_count = %ld\n", f_count);
+		
+		if (raw_f && f_count == 0) {
+			printk("   -> DIAGNOSIS: f_count is 0! The struct file was corrupted with zeros!\n");
+		} else if (raw_f && f_count > 0) {
+			printk("   -> DIAGNOSIS: f_count is %ld, but fdget_raw failed. Hardware ATOMIC instruction bug!\n", f_count);
+		} else if (!raw_f) {
+			printk("   -> DIAGNOSIS: raw_f is NULL. FD array slot was cleared.\n");
+		}
 		goto out;
+	}
 
 	if (unlikely(fd_file(f)->f_mode & FMODE_PATH)) {
 		if (!check_fcntl_cmd(cmd))
@@ -590,6 +699,84 @@ out1:
 out:
 	return err;
 }
+
+
+
+
+
+#include <linux/nospec.h>
+
+SYSCALL_DEFINE3(fcntl, unsigned int, fd, unsigned int, cmd, unsigned long, arg)
+{	
+	struct fd f;
+	long err = -EBADF;
+
+	struct files_struct *files;
+	struct fdtable *fdt;
+	struct file *raw_f = NULL;
+	int files_count = -1;
+	unsigned int nospec_fd = -1;
+
+	/* 1. Manually fetch exactly what fdget_raw tries to fetch */
+	rcu_read_lock();
+	files = current->files;
+	if (files) {
+		files_count = atomic_read(&files->count);
+		fdt = rcu_dereference_raw(files->fdt);
+		if (fdt && fdt->fd && fd < fdt->max_fds) {
+			nospec_fd = array_index_nospec(fd, fdt->max_fds);
+			raw_f = rcu_dereference_raw(fdt->fd[fd]);
+		}
+	}
+	rcu_read_unlock();
+
+	/* 2. Call the real kernel function */
+	f = fdget_raw(fd);
+
+	/* 3. Check for failure and OVERRIDE if it's a hardware bug */
+	if (!fd_file(f)) {
+		printk("\n>>> FCNTL HARDWARE BUG TRIGGERED! fd=%u <<<\n", fd);
+		printk("files->count = %d (If not 1, Atomics LR/SC are broken!)\n", files_count);
+		printk("nospec_fd    = %u (expected %u. If different, ALU Shift is broken!)\n", nospec_fd, fd);
+		printk("raw_f        = %px\n", raw_f);
+		
+		if (raw_f) {
+			printk("!!! FORCING OVERRIDE: Bypassing fdget_raw bug !!!\n");
+			/* Modern Kernel (6.9+) uses an opaque 'word' in struct fd. 
+			 * Because raw_f is 8-byte aligned, the lowest bits are 0, 
+			 * effectively faking the "do not decrement refcount" flag! */
+			f.word = (unsigned long)raw_f;
+		} else {
+			goto out;
+		}
+	}
+
+	if (unlikely(fd_file(f)->f_mode & FMODE_PATH)) {
+		if (!check_fcntl_cmd(cmd))
+			goto out1;
+	}
+
+	err = security_file_fcntl(fd_file(f), cmd, arg);
+	if (!err)
+		err = do_fcntl(fd, cmd, arg, fd_file(f));
+
+out1:
+	fdput(f);
+out:
+	return err;
+}
+
+
+
+
+
+
+
+
+
+
+
+
 
 #if BITS_PER_LONG == 32
 SYSCALL_DEFINE3(fcntl64, unsigned int, fd, unsigned int, cmd,
