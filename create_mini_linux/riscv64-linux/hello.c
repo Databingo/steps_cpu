@@ -1078,6 +1078,24 @@ int main() {
     }
 
 
+    // Try to check a "Safe" High-Memory FD
+    int fd_high = open("/dev/console", O_RDWR);
+    manual_puts("Open FD: "); manual_print_int(fd_high);
+    
+    // We know FD 1 is broken. Let's see if we can create an FD
+    // that uses a higher number (unlikely to be in the low 64KB range)
+    int fd_test = dup3(fd_high, 100, 0); // Force to FD 100
+    manual_puts("Dup2 to 100 result: "); manual_print_int(fd_test);
+    
+    int w = write(100, "TEST\n", 5);
+    manual_puts("Write to 100 result: "); manual_print_int(w);
+
+
+
+
+
+
+
     // FIX: Force synchronous creation of the device nodes
     // so we don't have to wait for the devtmpfs kernel thread.
     mknod(path, S_IFCHR | 0600, makedev(5, 1));
