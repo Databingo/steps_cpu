@@ -38,10 +38,13 @@ wire m_interrupts = (meip || msip || mtip) && (current_privilege_mode < M_mode |
 wire s_interrupts = (seip || ssip || stip) && (current_privilege_mode < S_mode || (current_privilege_mode == S_mode && Csrs[sstatus][SIE]));
 wire any_interrupt = (m_interrupts || s_interrupts);
 
-wire is_low_io   = (ls_va[63:16] == 48'h0);    // 0x0000-0xffff (64KB) ROM, RAM, UART, SD 
-wire is_clint_io = (ls_va[63:16] == 48'h0200); // 0x0200_0000-0x0200_ffff (64KB)
-wire is_plic_io  = (ls_va[63:24] == 40'h0C);   // 0x0C00_0000-0x0Cff_ffff (16MB) ??
+//wire is_low_io   = (ls_va[63:16] == 48'h0);    // 0x0000-0xffff (64KB) ROM, RAM, UART, SD 
+//wire is_clint_io = (ls_va[63:16] == 48'h0200); // 0x0200_0000-0x0200_ffff (64KB)
+//wire is_plic_io  = (ls_va[63:24] == 40'h0C);   // 0x0C00_0000-0x0Cff_ffff (16MB) ??
 //wire is_mmio_io = (current_privilege_mode == M_mode) && (is_low_io || is_clint_io || is_plic_io) && !pma;
+wire is_low_io   = (ls_va[63:14] == 50'h0);    // 0x0000-0x3fff (16KB) ROM 0x000, RAM 0x800, KEY 0x2000 UART 0x2004, SD 0x3000-0x3228
+wire is_clint_io = (ls_va[63:16] == 48'h0200); // 0x0200_0000-0x0200_ffff (64KB) mtimecmp 0x0200_4000 mtime 0x0200_bff8
+wire is_plic_io  = (ls_va[63:22] == 42'h030);   // 0x0C00_0000-0x0C3f_ffff (4MB) PLIC base 0x0c00_0000 - Claim registers 0xc20_0004
 wire is_mmio_io =  (is_low_io || is_clint_io || is_plic_io) && pma;
 
 (* keep = 1 *) reg [63:0] pc;
@@ -814,7 +817,7 @@ wire is_store = (op == 7'b0100011) || (op == 7'b0101111 && w_func5 != 5'b00010);
                     // Store after TLB
                     32'b???????_?????_?????_???_?????_0100011: begin 
                         if (store_step == 0) begin bus_address <= pda; bus_write_data <= w_store_data; bus_write_enable <= 1; pc <= pc_4; bubble <= 1; store_step <= 1; bus_ls_type <= w_func3; 
-			    if (reserve_valid && reserve_addr[63:3] == pda[63:3]) reserve_valid <= 0; end // if lr, break the contract; if in 8-byte
+			    if (!STrap && reserve_valid && reserve_addr[63:3] == pda[63:3]) reserve_valid <= 0; end // if lr, break the contract; if in 8-byte
                         if (store_step == 1 && bus_write_done == 0) begin pc <= pc_4; bubble <= 1; end // bus working
                         if (store_step == 1 && bus_write_done == 1) begin store_step <= 0; end 
                     end   
@@ -926,16 +929,16 @@ wire is_store = (op == 7'b0100011) || (op == 7'b0101111 && w_func5 != 5'b00010);
 		    //32'b0001001??????????_000_?????_1110011: begin tlb_flush <= 1; bubble <=1; pc <= pc; end // Sfence.vma (supervisor fence for virtual memory address) have to bubble the fetch next ir from old tlb, redo
 		    32'b0001001??????????_000_?????_1110011: begin tlb_flush <= 1; bubble <=1; pc <= pc; end // Sfence.vma  have to bubble the fetch next ir from old tlb, recheck fail in bubble, strap
 		    // Atomic after TLB // -- ATOMIC instructions (A-extension) opcode: 0101111
-		    32'b00010_??_?????_?????_01?_?????_0101111: begin  // lr Lr._mmu 3 cycles lr.w010 lr.d011
+		    32'b00010_??_?????_?????_01?_?????_0101111: begin  // Lr Lr._mmu 3 cycles lr.w010 lr.d011
 		        if (load_step == 0) begin bus_address <= pda; bus_read_enable <=1; pc <= pc_4; bubble <=1; load_step <=1; bus_ls_type <= w_func3; reserve_addr <= pda; reserve_valid <=1; end
 		        if (load_step == 1 && bus_read_done == 0) begin pc <= pc_4; bubble <= 1; end // bus working
 		        if (load_step == 1 && bus_read_done == 1) begin re[w_rd] <= amo_op_mem; load_step <= 0; end end
-	            32'b00011_??_?????_?????_01?_?????_0101111: begin  // sc sc.w010 sc.d011
+	            32'b00011_??_?????_?????_01?_?????_0101111: begin  // Sc sc.w010 sc.d011
 		        if (store_step == 0) begin 
-		            if (!reserve_valid || reserve_addr != pda) begin re[w_rd] <= 1; reserve_valid <= 0; end // finish failed 1 in rd cycle without bubble & clear reserve
+		            if (!reserve_valid || reserve_addr[63:3] != pda[63:3]) begin re[w_rd] <= 1; reserve_valid <= 0; end // Finish failed 1 in rd cycle without bubble & clear reserve
 		            else begin bus_address <= pda; 
 			    bus_write_data<= w_atomic_write_data;
-			    bus_write_enable<=1;pc<=pc_4;bubble<=1;store_step<=1;bus_ls_type<=w_func3;reserve_valid<=0;end end //consumed
+			    bus_write_enable<=1;pc<=pc_4;bubble<=1;store_step<=1;bus_ls_type<=w_func3;reserve_valid<=0;end end // Consumed
 		        if (store_step == 1 && bus_write_done == 0) begin pc <= pc_4; bubble <= 1; end // bus working 1 bubble2 this3
 		        if (store_step == 1 && bus_write_done == 1) begin store_step <= 0; re[w_rd] <= 0; end end // sc.w successed return 0 in rd
 	           // Amos(swap, add, xor, and, or, min, max) w/d
