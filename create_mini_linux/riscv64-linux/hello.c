@@ -1084,7 +1084,7 @@ void run_hardware_diagnostics() {
 
 int main() {
     //run_hardware_diagnostics();
-    test_sra()
+    test_sra();
       
     
     manual_puts("1. MANUAL PRINT: OK\n");
