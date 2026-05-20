@@ -510,4 +510,6 @@ Linux exit code
 内存测试 litmus tests
 形式验证
 
-RVV riscv-v-spec rvv-bench | CUDA->OpenCL->SYCL->RVV
+RVV riscv-v-spec rvv-bench | CUDA->OpenCL->SYCL->RVV |llvm/test/CodeGen/RISCV/rvv riscv-gnu-toolchain/gccrvv
+Pytorch-onnx-tvm/mlir/rvv
+RVV(激活函数/通用控制)+TUP(矩阵计算脉动阵列)
