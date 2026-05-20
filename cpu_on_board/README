@@ -510,4 +510,4 @@ Linux exit code
 内存测试 litmus tests
 形式验证
 
-RVV riscv-v-spec rvv-bench
+RVV riscv-v-spec rvv-bench | CUDA->OpenCL->SYCL->RVV
