@@ -704,7 +704,7 @@ wire is_store = (op == 7'b0100011) || (op == 7'b0101111 && w_func5 != 5'b00010);
 
 	    // Async Interrupt PLIC full (Platform-Level-Interrupt-Control)  MMIO (hardwire timers uart plic)  first priority in case blocked by itlb cloud
 	    if (any_interrupt && !STrap && !load_step && !store_step && !mul_enable && !div_enable) begin //mstatus[3] MIE // cpu0_intc
-		reserve_valid <= 0; // Interrupt clear lr.w/lr.d
+		//reserve_valid <= 0; // Interrupt clear lr.w/lr.d
 		do_trap = 1; trap_is_interrupt =1; trap_val = 0; trap_epc = (bubble) ? pc : pc_4; // !!! save pc (j/b EXE was flushed currectly, vma executed only in EXEcuting)
 		if (meip) trap_cause = 11; // Cause 11 for Machine External Interrupt
 		else if (msip) trap_cause = 3;  // Cause 3 for Machine Sofeware Interrupt
@@ -752,7 +752,7 @@ wire is_store = (op == 7'b0100011) || (op == 7'b0101111 && w_func5 != 5'b00010);
 		trap_val = ls_va; 
 		trap_epc = pc_4;
 		trap_cause = (op == 7'b0000011) ? 4 : 6; // cause 4 Load address misaliged; cause 6 Store/amo address misaligned
-		reserve_valid <= 0; // clear lr.w/lr.d
+		//reserve_valid <= 0; // clear lr.w/lr.d
 
 	    // d-tlb miss STrap load/store/atom
 	    end else if (need_trans_d && !tlb_d_hit && is_mem_access) begin  
@@ -792,7 +792,7 @@ wire is_store = (op == 7'b0100011) || (op == 7'b0101111 && w_func5 != 5'b00010);
 		    trap_cause = re[8];
 		    trap_val = re[9];
 		    trap_epc = saved_user_pc;
-		    reserve_valid <= 0; // clear lr.w/lr.d  Real Trap has to clear lock
+		    //reserve_valid <= 0; // clear lr.w/lr.d  Real Trap has to clear lock
 		end
 
 	//    // Async Interrupt PLIC full (Platform-Level-Interrupt-Control)  MMIO (hardwire timers uart plic)
@@ -1017,6 +1017,7 @@ wire is_store = (op == 7'b0100011) || (op == 7'b0101111 && w_func5 != 5'b00010);
 	    end 
 	    // Trap
 	    if (do_trap) begin
+		reserve_valid <= 0; // clear lr.w/lr.d
 		if ((trap_is_interrupt ? Csrs[mideleg][trap_cause] : Csrs[medeleg][trap_cause]) == 1'b1 && current_privilege_mode <= S_mode) begin // Trap in S-mode
 	                 			           Csrs[scause][INTERRUPT] <= trap_is_interrupt; //63_type 0exception 1interrupt|value
 	                 			           Csrs[scause][CAUSE+62:CAUSE] <= trap_cause;
