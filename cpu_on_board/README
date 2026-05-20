@@ -503,3 +503,7 @@ init=
 
 Linux exit code
 9 EBADF bad file descriptor  i.e S not allow U write to SBI
+
+指令测试 riscv-arch-test riscv-test riscv-torture
+随机测试 riscv-dv
+差分测试 qemu resgisters compare
