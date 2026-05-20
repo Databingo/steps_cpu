@@ -1061,6 +1061,33 @@ void run_hardware_diagnostics() {
 
 int main() {
     //run_hardware_diagnostics();
+      
+    //test rsa
+    void test_sra() {
+        manual_puts("PROBING SRA (Shift Right Arithmetic)...\n");
+        
+        int64_t negative_val = -100;
+        int64_t result;
+    
+        // Force a 64-bit SRAI by 63
+        asm volatile (
+            "srai %0, %1, 63"
+            : "=r" (result)
+            : "r" (negative_val)
+        );
+    
+        if (result == -1) {
+            manual_puts("  -> SRA PASS: Result is -1\n");
+        } else {
+            manual_puts("  -> SRA FAIL! Result is: ");
+            manual_print_hex((uint64_t)result);
+            manual_puts("     (Expected FFFFFFFFFFFFFFFF)\n");
+        }
+    }
+    
+
+
+
 
     manual_puts("1. MANUAL PRINT: OK\n");
 
