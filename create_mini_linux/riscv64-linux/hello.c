@@ -1059,9 +1059,6 @@ void run_hardware_diagnostics() {
     manual_puts("--- END DIAGNOSTICS ---\n\n");
 }
 
-int main() {
-    //run_hardware_diagnostics();
-      
     //test rsa
     void test_sra() {
         manual_puts("PROBING SRA (Shift Right Arithmetic)...\n");
@@ -1084,11 +1081,12 @@ int main() {
             manual_puts("     (Expected FFFFFFFFFFFFFFFF)\n");
         }
     }
+
+int main() {
+    //run_hardware_diagnostics();
+    test_sra()
+      
     
-
-
-
-
     manual_puts("1. MANUAL PRINT: OK\n");
 
     mkdir("/dev", 0755);
