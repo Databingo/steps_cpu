@@ -506,4 +506,8 @@ Linux exit code
 
 指令测试 riscv-arch-test riscv-test riscv-torture
 随机测试 riscv-dv
-差分测试 qemu resgisters compare
+差分测试 qemu/spike resgisters compare
+内存测试 litmus tests
+形式验证
+
+RVV riscv-v-spec rvv-bench
