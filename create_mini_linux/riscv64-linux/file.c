@@ -920,6 +920,85 @@ struct file *get_file_active(struct file **f)
 }
 EXPORT_SYMBOL_GPL(get_file_active);
 
+//static inline struct file *__fget_files_rcu(struct files_struct *files,
+//       unsigned int fd, fmode_t mask)
+//{
+//	for (;;) {
+//		struct file *file;
+//		struct fdtable *fdt = rcu_dereference_raw(files->fdt);
+//		struct file __rcu **fdentry;
+//		unsigned long nospec_mask;
+//
+//		/* Mask is a 0 for invalid fd's, ~0 for valid ones */
+//		nospec_mask = array_index_mask_nospec(fd, fdt->max_fds);
+//
+//		/*
+//		 * fdentry points to the 'fd' offset, or fdt->fd[0].
+//		 * Loading from fdt->fd[0] is always safe, because the
+//		 * array always exists.
+//		 */
+//		fdentry = fdt->fd + (fd & nospec_mask);
+//
+//		/* Do the load, then mask any invalid result */
+//		file = rcu_dereference_raw(*fdentry);
+//		file = (void *)(nospec_mask & (unsigned long)file);
+//		if (unlikely(!file))
+//			return NULL;
+//
+//		/*
+//		 * Ok, we have a file pointer that was valid at
+//		 * some point, but it might have become stale since.
+//		 *
+//		 * We need to confirm it by incrementing the refcount
+//		 * and then check the lookup again.
+//		 *
+//		 * atomic_long_inc_not_zero() gives us a full memory
+//		 * barrier. We only really need an 'acquire' one to
+//		 * protect the loads below, but we don't have that.
+//		 */
+//		if (unlikely(!atomic_long_inc_not_zero(&file->f_count)))
+//			continue;
+//
+//		/*
+//		 * Such a race can take two forms:
+//		 *
+//		 *  (a) the file ref already went down to zero and the
+//		 *      file hasn't been reused yet or the file count
+//		 *      isn't zero but the file has already been reused.
+//		 *
+//		 *  (b) the file table entry has changed under us.
+//		 *       Note that we don't need to re-check the 'fdt->fd'
+//		 *       pointer having changed, because it always goes
+//		 *       hand-in-hand with 'fdt'.
+//		 *
+//		 * If so, we need to put our ref and try again.
+//		 */
+//		if (unlikely(file != rcu_dereference_raw(*fdentry)) ||
+//		    unlikely(rcu_dereference_raw(files->fdt) != fdt)) {
+//			fput(file);
+//			continue;
+//		}
+//
+//		/*
+//		 * This isn't the file we're looking for or we're not
+//		 * allowed to get a reference to it.
+//		 */
+//		if (unlikely(file->f_mode & mask)) {
+//			fput(file);
+//			return NULL;
+//		}
+//
+//		/*
+//		 * Ok, we have a ref to the file, and checked that it
+//		 * still exists.
+//		 */
+//		return file;
+//	}
+//}
+
+
+
+
 static inline struct file *__fget_files_rcu(struct files_struct *files,
        unsigned int fd, fmode_t mask)
 {
@@ -929,72 +1008,51 @@ static inline struct file *__fget_files_rcu(struct files_struct *files,
 		struct file __rcu **fdentry;
 		unsigned long nospec_mask;
 
-		/* Mask is a 0 for invalid fd's, ~0 for valid ones */
 		nospec_mask = array_index_mask_nospec(fd, fdt->max_fds);
-
-		/*
-		 * fdentry points to the 'fd' offset, or fdt->fd[0].
-		 * Loading from fdt->fd[0] is always safe, because the
-		 * array always exists.
-		 */
 		fdentry = fdt->fd + (fd & nospec_mask);
-
-		/* Do the load, then mask any invalid result */
 		file = rcu_dereference_raw(*fdentry);
 		file = (void *)(nospec_mask & (unsigned long)file);
-		if (unlikely(!file))
-			return NULL;
 
-		/*
-		 * Ok, we have a file pointer that was valid at
-		 * some point, but it might have become stale since.
-		 *
-		 * We need to confirm it by incrementing the refcount
-		 * and then check the lookup again.
-		 *
-		 * atomic_long_inc_not_zero() gives us a full memory
-		 * barrier. We only really need an 'acquire' one to
-		 * protect the loads below, but we don't have that.
-		 */
-		if (unlikely(!atomic_long_inc_not_zero(&file->f_count)))
+		if (unlikely(!file)) return NULL;
+
+		/* LOG: Before Atomic Instruction */
+		if (fd == 1) {
+			long cur_ref = atomic_long_read(&file->f_count);
+			printk("DEBUG: fd=1 found %px, current f_count=%ld. Attempting inc...\n", file, cur_ref);
+		}
+
+		/* This is the LR/SC loop on RISC-V */
+		if (unlikely(!atomic_long_inc_not_zero(&file->f_count))) {
+			if (fd == 1) printk("DEBUG: fd=1 atomic_long_inc_not_zero FAILED\n");
 			continue;
+		}
 
-		/*
-		 * Such a race can take two forms:
-		 *
-		 *  (a) the file ref already went down to zero and the
-		 *      file hasn't been reused yet or the file count
-		 *      isn't zero but the file has already been reused.
-		 *
-		 *  (b) the file table entry has changed under us.
-		 *       Note that we don't need to re-check the 'fdt->fd'
-		 *       pointer having changed, because it always goes
-		 *       hand-in-hand with 'fdt'.
-		 *
-		 * If so, we need to put our ref and try again.
-		 */
+		/* LOG: After Atomic Instruction */
+		if (fd == 1) printk("DEBUG: fd=1 atomic_long_inc_not_zero SUCCESS\n");
+
 		if (unlikely(file != rcu_dereference_raw(*fdentry)) ||
 		    unlikely(rcu_dereference_raw(files->fdt) != fdt)) {
+			if (fd == 1) printk("DEBUG: fd=1 Race detected, retrying...\n");
 			fput(file);
 			continue;
 		}
 
-		/*
-		 * This isn't the file we're looking for or we're not
-		 * allowed to get a reference to it.
-		 */
 		if (unlikely(file->f_mode & mask)) {
 			fput(file);
 			return NULL;
 		}
 
-		/*
-		 * Ok, we have a ref to the file, and checked that it
-		 * still exists.
-		 */
 		return file;
 	}
 }
+
+
+
+
+
+
+
+
 
 static struct file *__fget_files(struct files_struct *files, unsigned int fd,
 				 fmode_t mask)
@@ -1097,32 +1155,97 @@ EXPORT_SYMBOL(task_lookup_next_fdget_rcu);
  * The fput_needed flag returned by fget_light should be passed to the
  * corresponding fput_light.
  */
+//static inline struct fd __fget_light(unsigned int fd, fmode_t mask)
+//{
+//	struct files_struct *files = current->files;
+//	struct file *file;
+//
+//	/*
+//	 * If another thread is concurrently calling close_fd() followed
+//	 * by put_files_struct(), we must not observe the old table
+//	 * entry combined with the new refcount - otherwise we could
+//	 * return a file that is concurrently being freed.
+//	 *
+//	 * atomic_read_acquire() pairs with atomic_dec_and_test() in
+//	 * put_files_struct().
+//	 */
+//	if (likely(atomic_read_acquire(&files->count) == 1)) {
+//		file = files_lookup_fd_raw(files, fd);
+//		if (!file || unlikely(file->f_mode & mask))
+//			return EMPTY_FD;
+//		return BORROWED_FD(file);
+//	} else {
+//		file = __fget_files(files, fd, mask);
+//		if (!file)
+//			return EMPTY_FD;
+//		return CLONED_FD(file);
+//	}
+//}
+
+
+
+
+
+//static inline struct fd __fget_light(unsigned int fd, fmode_t mask)
+//{
+//	struct files_struct *files = current->files;
+//	struct file *file;
+//	int count = atomic_read(&files->count);
+//
+//	if (likely(count == 1)) {
+//		file = files_lookup_fd_raw(files, fd);
+//		if (!file || unlikely(file->f_mode & mask))
+//			return EMPTY_FD;
+//		return BORROWED_FD(file);
+//	} else {
+//		/* LOG: Entering Atomic Path */
+//		if (fd == 1) printk("DEBUG: fd=1 Atomic Path (files->count=%d)\n", count);
+//		
+//		file = __fget_files(files, fd, mask);
+//		if (!file) {
+//			if (fd == 1) printk("DEBUG: fd=1 __fget_files returned NULL\n");
+//			return EMPTY_FD;
+//		}
+//		return CLONED_FD(file);
+//	}
+//}
+
+
+
 static inline struct fd __fget_light(unsigned int fd, fmode_t mask)
 {
 	struct files_struct *files = current->files;
 	struct file *file;
+	unsigned int count = atomic_read(&files->count);
 
-	/*
-	 * If another thread is concurrently calling close_fd() followed
-	 * by put_files_struct(), we must not observe the old table
-	 * entry combined with the new refcount - otherwise we could
-	 * return a file that is concurrently being freed.
-	 *
-	 * atomic_read_acquire() pairs with atomic_dec_and_test() in
-	 * put_files_struct().
-	 */
-	if (likely(atomic_read_acquire(&files->count) == 1)) {
+	if (likely(count == 1)) {
+		/* THE FAST PATH */
 		file = files_lookup_fd_raw(files, fd);
+		
+		if (fd == 1) {
+			struct fdtable *fdt = rcu_dereference_raw(files->fdt);
+			printk("FGET_DBG: fd=1 FastPath. fdt=%px, max=%u, result=%px\n", 
+				fdt, fdt->max_fds, file);
+		}
+
 		if (!file || unlikely(file->f_mode & mask))
 			return EMPTY_FD;
 		return BORROWED_FD(file);
 	} else {
+		/* THE ATOMIC PATH */
 		file = __fget_files(files, fd, mask);
+		if (fd == 1) printk("FGET_DBG: fd=1 AtomicPath result=%px\n", file);
 		if (!file)
 			return EMPTY_FD;
 		return CLONED_FD(file);
 	}
 }
+
+
+
+
+
+
 struct fd fdget(unsigned int fd)
 {
 	return __fget_light(fd, FMODE_PATH);
