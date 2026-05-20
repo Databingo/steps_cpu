@@ -138,10 +138,14 @@ wire is_arith_shift = ir[30]; // sra/sraw/srai/sraiw
 
 wire [5:0] shift_amt = is_imm_shift ? w_shamt : rs2[5:0];
 wire [5:0] final_shift_amt = is_word_shift ? {1'b0, shift_amt[4:0]} : shift_amt;
-wire [63:0] shift_to_right = is_word_shift ? {{32{is_arith_shift & rs1[31]}}, rs1[31:0]}: rs1;
+wire signed [63:0] shift_to_right = is_word_shift ? $signed({{32{is_arith_shift & rs1[31]}}, rs1[31:0]}) : rs1;
+//wire signed [63:0] shift_to_right = is_word_shift ? $signed({{32{is_arith_shift & rs1[31]}}, rs1[31:0]}) : rs1;
 
 wire [63:0] raw_sll = rs1 << final_shift_amt;
-wire [63:0] raw_srl_sra = is_arith_shift ? ($signed(shift_to_right) >>> final_shift_amt): (shift_to_right >> final_shift_amt);
+wire signed [63:0] raw_srl_sra = is_arith_shift ? ($signed(shift_to_right) >>> final_shift_amt): $signed(shift_to_right >> final_shift_amt);
+//wire signed [63:0] raw_srl_sra = is_arith_shift ? (shift_to_right >>> final_shift_amt) : $signed(shift_to_right >> final_shift_amt);
+
+
 
 wire [63:0] shared_sll = is_word_shift ? {{32{raw_sll[31]}}, raw_sll[31:0]} : raw_sll;
 wire [63:0] shared_srl_sra = is_word_shift ? {{32{raw_srl_sra[31]}}, raw_srl_sra[31:0]} : raw_srl_sra;
