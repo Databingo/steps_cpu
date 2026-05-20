@@ -512,4 +512,4 @@ Linux exit code
 
 RVV riscv-v-spec rvv-bench | CUDA->OpenCL->SYCL->RVV |llvm/test/CodeGen/RISCV/rvv riscv-gnu-toolchain/gccrvv
 Pytorch-onnx-tvm/mlir/rvv
-RVV(激活函数/通用控制)+TUP(矩阵计算脉动阵列)
+RVV(激活函数softmaxLayerNorm残差加法ReluGELU/通用控制数据搬运)+TUP(矩阵计算脉动阵列)

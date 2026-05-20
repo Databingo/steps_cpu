@@ -1082,10 +1082,37 @@ void run_hardware_diagnostics() {
         }
     }
 
+void test_srli() {
+    manual_puts("PROBING SRLI (Shift Right Logical)...\n");
+    
+    // 0x8000...0000: Only the sign bit is 1
+    uint64_t val = 0x8000000000000000ULL;
+    uint64_t result;
+
+    // Force a 64-bit SRLI by 1
+    asm volatile (
+        "srli %0, %1, 1"
+        : "=r" (result)
+        : "r" (val)
+    );
+
+    // Expected: 0x4000000000000000 (Top bit becomes 0)
+    // If it fails: 0xC000000000000000 (Top bit stays 1)
+    if (result == 0x4000000000000000ULL) {
+        manual_puts("  -> SRLI PASS: Result is 0x4000000000000000\n");
+    } else {
+        manual_puts("  -> SRLI FAIL! Result is: ");
+        manual_print_hex(result);
+        manual_puts("     (Expected 0x4000000000000000)\n");
+    }
+}
+
+
+
 int main() {
     //run_hardware_diagnostics();
     test_sra();
-      
+    test_srli(); 
     
     manual_puts("1. MANUAL PRINT: OK\n");
 
