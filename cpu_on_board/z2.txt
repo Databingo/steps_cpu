@@ -38,10 +38,13 @@ wire m_interrupts = (meip || msip || mtip) && (current_privilege_mode < M_mode |
 wire s_interrupts = (seip || ssip || stip) && (current_privilege_mode < S_mode || (current_privilege_mode == S_mode && Csrs[sstatus][SIE]));
 wire any_interrupt = (m_interrupts || s_interrupts);
 
-wire is_low_io   = (ls_va[63:16] == 48'h0);    // 0x0000-0xffff (64KB) ROM, RAM, UART, SD 
-wire is_clint_io = (ls_va[63:16] == 48'h0200); // 0x0200_0000-0x0200_ffff (64KB)
-wire is_plic_io  = (ls_va[63:24] == 40'h0C);   // 0x0C00_0000-0x0Cff_ffff (16MB) ??
+//wire is_low_io   = (ls_va[63:16] == 48'h0);    // 0x0000-0xffff (64KB) ROM, RAM, UART, SD 
+//wire is_clint_io = (ls_va[63:16] == 48'h0200); // 0x0200_0000-0x0200_ffff (64KB)
+//wire is_plic_io  = (ls_va[63:24] == 40'h0C);   // 0x0C00_0000-0x0Cff_ffff (16MB) ??
 //wire is_mmio_io = (current_privilege_mode == M_mode) && (is_low_io || is_clint_io || is_plic_io) && !pma;
+wire is_low_io   = (ls_va[63:14] == 50'h0);    // 0x0000-0x3fff (16KB) ROM 0x000, RAM 0x800, KEY 0x2000 UART 0x2004, SD 0x3000-0x3228
+wire is_clint_io = (ls_va[63:16] == 48'h0200); // 0x0200_0000-0x0200_ffff (64KB) mtimecmp 0x0200_4000 mtime 0x0200_bff8
+wire is_plic_io  = (ls_va[63:22] == 42'h030);   // 0x0C00_0000-0x0C3f_ffff (4MB) PLIC base 0x0c00_0000 - Claim registers 0xc20_0004
 wire is_mmio_io =  (is_low_io || is_clint_io || is_plic_io) && pma;
 
 (* keep = 1 *) reg [63:0] pc;
@@ -135,10 +138,14 @@ wire is_arith_shift = ir[30]; // sra/sraw/srai/sraiw
 
 wire [5:0] shift_amt = is_imm_shift ? w_shamt : rs2[5:0];
 wire [5:0] final_shift_amt = is_word_shift ? {1'b0, shift_amt[4:0]} : shift_amt;
-wire [63:0] shift_to_right = is_word_shift ? {{32{is_arith_shift & rs1[31]}}, rs1[31:0]}: rs1;
+wire signed [63:0] shift_to_right = is_word_shift ? $signed({{32{is_arith_shift & rs1[31]}}, rs1[31:0]}) : rs1;
+//wire signed [63:0] shift_to_right = is_word_shift ? $signed({{32{is_arith_shift & rs1[31]}}, rs1[31:0]}) : rs1;
 
 wire [63:0] raw_sll = rs1 << final_shift_amt;
-wire [63:0] raw_srl_sra = is_arith_shift ? ($signed(shift_to_right) >>> final_shift_amt): (shift_to_right >> final_shift_amt);
+wire signed [63:0] raw_srl_sra = is_arith_shift ? ($signed(shift_to_right) >>> final_shift_amt): $signed(shift_to_right >> final_shift_amt);
+//wire signed [63:0] raw_srl_sra = is_arith_shift ? (shift_to_right >>> final_shift_amt) : $signed(shift_to_right >> final_shift_amt);
+
+
 
 wire [63:0] shared_sll = is_word_shift ? {{32{raw_sll[31]}}, raw_sll[31:0]} : raw_sll;
 wire [63:0] shared_srl_sra = is_word_shift ? {{32{raw_srl_sra[31]}}, raw_srl_sra[31:0]} : raw_srl_sra;
@@ -697,7 +704,7 @@ wire is_store = (op == 7'b0100011) || (op == 7'b0101111 && w_func5 != 5'b00010);
 
 	    // Async Interrupt PLIC full (Platform-Level-Interrupt-Control)  MMIO (hardwire timers uart plic)  first priority in case blocked by itlb cloud
 	    if (any_interrupt && !STrap && !load_step && !store_step && !mul_enable && !div_enable) begin //mstatus[3] MIE // cpu0_intc
-		reserve_valid <= 0; // Interrupt clear lr.w/lr.d
+		//reserve_valid <= 0; // Interrupt clear lr.w/lr.d
 		do_trap = 1; trap_is_interrupt =1; trap_val = 0; trap_epc = (bubble) ? pc : pc_4; // !!! save pc (j/b EXE was flushed currectly, vma executed only in EXEcuting)
 		if (meip) trap_cause = 11; // Cause 11 for Machine External Interrupt
 		else if (msip) trap_cause = 3;  // Cause 3 for Machine Sofeware Interrupt
@@ -745,7 +752,7 @@ wire is_store = (op == 7'b0100011) || (op == 7'b0101111 && w_func5 != 5'b00010);
 		trap_val = ls_va; 
 		trap_epc = pc_4;
 		trap_cause = (op == 7'b0000011) ? 4 : 6; // cause 4 Load address misaliged; cause 6 Store/amo address misaligned
-		reserve_valid <= 0; // clear lr.w/lr.d
+		//reserve_valid <= 0; // clear lr.w/lr.d
 
 	    // d-tlb miss STrap load/store/atom
 	    end else if (need_trans_d && !tlb_d_hit && is_mem_access) begin  
@@ -785,7 +792,7 @@ wire is_store = (op == 7'b0100011) || (op == 7'b0101111 && w_func5 != 5'b00010);
 		    trap_cause = re[8];
 		    trap_val = re[9];
 		    trap_epc = saved_user_pc;
-		    reserve_valid <= 0; // clear lr.w/lr.d  Real Trap has to clear lock
+		    //reserve_valid <= 0; // clear lr.w/lr.d  Real Trap has to clear lock
 		end
 
 	//    // Async Interrupt PLIC full (Platform-Level-Interrupt-Control)  MMIO (hardwire timers uart plic)
@@ -814,7 +821,7 @@ wire is_store = (op == 7'b0100011) || (op == 7'b0101111 && w_func5 != 5'b00010);
                     // Store after TLB
                     32'b???????_?????_?????_???_?????_0100011: begin 
                         if (store_step == 0) begin bus_address <= pda; bus_write_data <= w_store_data; bus_write_enable <= 1; pc <= pc_4; bubble <= 1; store_step <= 1; bus_ls_type <= w_func3; 
-			    if (reserve_valid && reserve_addr[63:3] == pda[63:3]) reserve_valid <= 0; end // if lr, break the contract; if in 8-byte
+			    if (!STrap && reserve_valid && reserve_addr[63:3] == pda[63:3]) reserve_valid <= 0; end // if lr, break the contract; if in 8-byte
                         if (store_step == 1 && bus_write_done == 0) begin pc <= pc_4; bubble <= 1; end // bus working
                         if (store_step == 1 && bus_write_done == 1) begin store_step <= 0; end 
                     end   
@@ -926,16 +933,16 @@ wire is_store = (op == 7'b0100011) || (op == 7'b0101111 && w_func5 != 5'b00010);
 		    //32'b0001001??????????_000_?????_1110011: begin tlb_flush <= 1; bubble <=1; pc <= pc; end // Sfence.vma (supervisor fence for virtual memory address) have to bubble the fetch next ir from old tlb, redo
 		    32'b0001001??????????_000_?????_1110011: begin tlb_flush <= 1; bubble <=1; pc <= pc; end // Sfence.vma  have to bubble the fetch next ir from old tlb, recheck fail in bubble, strap
 		    // Atomic after TLB // -- ATOMIC instructions (A-extension) opcode: 0101111
-		    32'b00010_??_?????_?????_01?_?????_0101111: begin  // lr Lr._mmu 3 cycles lr.w010 lr.d011
+		    32'b00010_??_?????_?????_01?_?????_0101111: begin  // Lr Lr._mmu 3 cycles lr.w010 lr.d011
 		        if (load_step == 0) begin bus_address <= pda; bus_read_enable <=1; pc <= pc_4; bubble <=1; load_step <=1; bus_ls_type <= w_func3; reserve_addr <= pda; reserve_valid <=1; end
 		        if (load_step == 1 && bus_read_done == 0) begin pc <= pc_4; bubble <= 1; end // bus working
 		        if (load_step == 1 && bus_read_done == 1) begin re[w_rd] <= amo_op_mem; load_step <= 0; end end
-	            32'b00011_??_?????_?????_01?_?????_0101111: begin  // sc sc.w010 sc.d011
+	            32'b00011_??_?????_?????_01?_?????_0101111: begin  // Sc sc.w010 sc.d011
 		        if (store_step == 0) begin 
-		            if (!reserve_valid || reserve_addr != pda) begin re[w_rd] <= 1; reserve_valid <= 0; end // finish failed 1 in rd cycle without bubble & clear reserve
+		            if (!reserve_valid || reserve_addr[63:3] != pda[63:3]) begin re[w_rd] <= 1; reserve_valid <= 0; end // Finish failed 1 in rd cycle without bubble & clear reserve
 		            else begin bus_address <= pda; 
 			    bus_write_data<= w_atomic_write_data;
-			    bus_write_enable<=1;pc<=pc_4;bubble<=1;store_step<=1;bus_ls_type<=w_func3;reserve_valid<=0;end end //consumed
+			    bus_write_enable<=1;pc<=pc_4;bubble<=1;store_step<=1;bus_ls_type<=w_func3;reserve_valid<=0;end end // Consumed
 		        if (store_step == 1 && bus_write_done == 0) begin pc <= pc_4; bubble <= 1; end // bus working 1 bubble2 this3
 		        if (store_step == 1 && bus_write_done == 1) begin store_step <= 0; re[w_rd] <= 0; end end // sc.w successed return 0 in rd
 	           // Amos(swap, add, xor, and, or, min, max) w/d
@@ -1010,6 +1017,7 @@ wire is_store = (op == 7'b0100011) || (op == 7'b0101111 && w_func5 != 5'b00010);
 	    end 
 	    // Trap
 	    if (do_trap) begin
+		reserve_valid <= 0; // clear lr.w/lr.d
 		if ((trap_is_interrupt ? Csrs[mideleg][trap_cause] : Csrs[medeleg][trap_cause]) == 1'b1 && current_privilege_mode <= S_mode) begin // Trap in S-mode
 	                 			           Csrs[scause][INTERRUPT] <= trap_is_interrupt; //63_type 0exception 1interrupt|value
 	                 			           Csrs[scause][CAUSE+62:CAUSE] <= trap_cause;
@@ -3211,10 +3219,10 @@ print7: # a0, 7 char left one for null
     cpus {
         #address-cells = <0x01>;
         #size-cells = <0x00>;
-        timebase-frequency = <12500000>;
+        //timebase-frequency = <12500000>;
         //timebase-frequency = <960000000>; //960 MHz
         //timebase-frequency = <125000>; // mimic 0.124MHz
-        //timebase-frequency = <1250000>; // mimic 1.24MHz
+        timebase-frequency = <1250000>; // mimic 1.24MHz
 
         cpu@0 {
             phandle = <0x01>;
@@ -3313,7 +3321,8 @@ print7: # a0, 7 char left one for null
        //bootargs = "no4lvl earlycon=sbi console=hvc0 panic=0 init_on_alloc=0 ignore_loglevel initcall_debug rcu_update.rcu_cpu_stall_suppress=1 rdinit=/bin/sleep 100";
        //bootargs = "no4lvl earlycon=sbi console=hvc0 panic=0 init_on_alloc=0 ignore_loglevel initcall_debug rcu_update.rcu_cpu_stall_suppress=1 rdinit=/bin/echo HELLO /dev/ttyprintk";
        //bootargs = "no4lvl earlycon=sbi console=ttySIF0 panic=0 init_on_alloc=0 ignore_loglevel initcall_debug rcu_update.rcu_cpu_stall_suppress=1 rdinit=/hello";
-       bootargs = "no4lvl earlycon=sbi console=hvc0 sbi_con.poll=1 panic=0 init_on_alloc=0 ignore_loglevel initcall_debug rcu_update.rcu_cpu_stall_suppress=1 rdinit=/hello";
+       //bootargs = "no4lvl earlycon=sbi console=hvc0 sbi_con.poll=1 panic=0 init_on_alloc=0 ignore_loglevel initcall_debug rcu_update.rcu_cpu_stall_suppress=1 rdinit=/hello";
+       bootargs = "no4lvl earlycon=sbi console=hvc0 sbi_con.poll=1 panic=0 init_on_alloc=0 ignore_loglevel initcall_debug rcu_update.rcu_cpu_stall_suppress=1";
        //stdout-path = "/soc/serial@10000000";
        stdout-path = "/soc/uart@2004";
     };
@@ -4479,9 +4488,61 @@ void run_hardware_diagnostics() {
     manual_puts("--- END DIAGNOSTICS ---\n\n");
 }
 
+    //test rsa
+    void test_sra() {
+        manual_puts("PROBING SRA (Shift Right Arithmetic)...\n");
+        
+        int64_t negative_val = -100;
+        int64_t result;
+    
+        // Force a 64-bit SRAI by 63
+        asm volatile (
+            "srai %0, %1, 63"
+            : "=r" (result)
+            : "r" (negative_val)
+        );
+    
+        if (result == -1) {
+            manual_puts("  -> SRA PASS: Result is -1\n");
+        } else {
+            manual_puts("  -> SRA FAIL! Result is: ");
+            manual_print_hex((uint64_t)result);
+            manual_puts("     (Expected FFFFFFFFFFFFFFFF)\n");
+        }
+    }
+
+void test_srli() {
+    manual_puts("PROBING SRLI (Shift Right Logical)...\n");
+    
+    // 0x8000...0000: Only the sign bit is 1
+    uint64_t val = 0x8000000000000000ULL;
+    uint64_t result;
+
+    // Force a 64-bit SRLI by 1
+    asm volatile (
+        "srli %0, %1, 1"
+        : "=r" (result)
+        : "r" (val)
+    );
+
+    // Expected: 0x4000000000000000 (Top bit becomes 0)
+    // If it fails: 0xC000000000000000 (Top bit stays 1)
+    if (result == 0x4000000000000000ULL) {
+        manual_puts("  -> SRLI PASS: Result is 0x4000000000000000\n");
+    } else {
+        manual_puts("  -> SRLI FAIL! Result is: ");
+        manual_print_hex(result);
+        manual_puts("     (Expected 0x4000000000000000)\n");
+    }
+}
+
+
+
 int main() {
     //run_hardware_diagnostics();
-
+    test_sra();
+    test_srli(); 
+    
     manual_puts("1. MANUAL PRINT: OK\n");
 
     mkdir("/dev", 0755);
