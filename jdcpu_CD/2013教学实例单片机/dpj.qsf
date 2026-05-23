@@ -1,0 +1,147 @@
+# Copyright (C) 1991-2007 Altera Corporation
+# Your use of Altera Corporation's design tools, logic functions 
+# and other software and tools, and its AMPP partner logic 
+# functions, and any output files from any of the foregoing 
+# (including device programming or simulation files), and any 
+# associated documentation or information are expressly subject 
+# to the terms and conditions of the Altera Program License 
+# Subscription Agreement, Altera MegaCore Function License 
+# Agreement, or other applicable license agreement, including, 
+# without limitation, that your use is for the sole purpose of 
+# programming logic devices manufactured by Altera and sold by 
+# Altera or its authorized distributors.  Please refer to the 
+# applicable agreement for further details.
+
+
+# The default values for assignments are stored in the file
+#		dpj_assignment_defaults.qdf
+# If this file doesn't exist, and for assignments not listed, see file
+#		assignment_defaults.qdf
+
+# Altera recommends that you do not modify this file. This
+# file is updated automatically by the Quartus II software
+# and any changes you make may be lost or overwritten.
+
+
+set_global_assignment -name FAMILY Cyclone
+set_global_assignment -name DEVICE EP1C6T144C8
+set_global_assignment -name TOP_LEVEL_ENTITY dpj
+set_global_assignment -name ORIGINAL_QUARTUS_VERSION 7.2
+set_global_assignment -name PROJECT_CREATION_TIME_DATE "17:06:44  DECEMBER 12, 2013"
+set_global_assignment -name LAST_QUARTUS_VERSION 7.2
+set_global_assignment -name USE_GENERATED_PHYSICAL_CONSTRAINTS OFF -section_id eda_palace
+set_global_assignment -name LL_ROOT_REGION ON -entity dpj -section_id "Root Region"
+set_global_assignment -name LL_MEMBER_STATE LOCKED -entity dpj -section_id "Root Region"
+set_global_assignment -name INCREMENTAL_VECTOR_INPUT_SOURCE buffcpu.vwf
+set_global_assignment -name BDF_FILE add4.bdf
+set_global_assignment -name BDF_FILE add8.bdf
+set_global_assignment -name BDF_FILE addbus_8.bdf
+set_global_assignment -name BDF_FILE addsub.bdf
+set_global_assignment -name BDF_FILE addsub_8.bdf
+set_global_assignment -name VERILOG_FILE altpll0.v
+set_global_assignment -name VERILOG_FILE buffin.v
+set_global_assignment -name VERILOG_FILE clk18.v
+set_global_assignment -name BDF_FILE control.bdf
+set_global_assignment -name VERILOG_FILE control1.v
+set_global_assignment -name BDF_FILE cpu8.bdf
+set_global_assignment -name BDF_FILE ctrl.bdf
+set_global_assignment -name BDF_FILE dram.bdf
+set_global_assignment -name BDF_FILE jcq8.bdf
+set_global_assignment -name BDF_FILE jcqbus4.bdf
+set_global_assignment -name BDF_FILE jjdy.bdf
+set_global_assignment -name BDF_FILE JPQ.bdf
+set_global_assignment -name BDF_FILE jshdy.bdf
+set_global_assignment -name BDF_FILE jshdy1.bdf
+set_global_assignment -name BDF_FILE jshdy4.bdf
+set_global_assignment -name BDF_FILE jshq8.bdf
+set_global_assignment -name BDF_FILE jshq8t.bdf
+set_global_assignment -name BDF_FILE jshqdy.bdf
+set_global_assignment -name VERILOG_FILE lpm_ram_dq0.v
+set_global_assignment -name VERILOG_FILE lpm_ram_dq1.v
+set_global_assignment -name VERILOG_FILE lpm_ram_dq2.v
+set_global_assignment -name BDF_FILE mycpu.bdf
+set_global_assignment -name VERILOG_FILE mycputop.v
+set_global_assignment -name BDF_FILE qjq.bdf
+set_global_assignment -name BDF_FILE ram.bdf
+set_global_assignment -name BDF_FILE ram256.bdf
+set_global_assignment -name VERILOG_FILE SEG7_LUT.v
+set_global_assignment -name VERILOG_FILE SEG7_LUT0.v
+set_global_assignment -name VERILOG_FILE SEG7_LUT_4.v
+set_global_assignment -name BDF_FILE sp.bdf
+set_global_assignment -name BDF_FILE sp8.bdf
+set_global_assignment -name BDF_FILE spdy.bdf
+set_global_assignment -name BDF_FILE spdy4.bdf
+set_global_assignment -name BDF_FILE test.bdf
+set_global_assignment -name BDF_FILE xz.bdf
+set_global_assignment -name BDF_FILE zhlymq.bdf
+set_global_assignment -name BDF_FILE buffcpu.bdf
+set_global_assignment -name LL_ROOT_REGION ON -entity buffcpu -section_id "Root Region"
+set_global_assignment -name LL_MEMBER_STATE LOCKED -entity buffcpu -section_id "Root Region"
+set_global_assignment -name BDF_FILE dpj.bdf
+set_global_assignment -name PARTITION_NETLIST_TYPE SOURCE -section_id Top
+set_global_assignment -name PARTITION_COLOR 2147039 -section_id Top
+set_instance_assignment -name PARTITION_HIERARCHY no_file_for_top_partition -to | -section_id Top
+set_location_assignment PIN_93 -to clk27
+set_location_assignment PIN_104 -to HEX0[6]
+set_location_assignment PIN_105 -to HEX0[5]
+set_location_assignment PIN_106 -to HEX0[4]
+set_location_assignment PIN_107 -to HEX0[3]
+set_location_assignment PIN_108 -to HEX0[2]
+set_location_assignment PIN_109 -to HEX0[1]
+set_location_assignment PIN_110 -to HEX0[0]
+set_location_assignment PIN_84 -to HEX1[6]
+set_location_assignment PIN_85 -to HEX1[5]
+set_location_assignment PIN_96 -to HEX1[4]
+set_location_assignment PIN_97 -to HEX1[3]
+set_location_assignment PIN_98 -to HEX1[2]
+set_location_assignment PIN_99 -to HEX1[1]
+set_location_assignment PIN_100 -to HEX1[0]
+set_location_assignment PIN_4 -to HEX2[6]
+set_location_assignment PIN_5 -to HEX2[5]
+set_location_assignment PIN_6 -to HEX2[4]
+set_location_assignment PIN_7 -to HEX2[3]
+set_location_assignment PIN_10 -to HEX2[2]
+set_location_assignment PIN_11 -to HEX2[1]
+set_location_assignment PIN_26 -to HEX2[0]
+set_location_assignment PIN_132 -to HEX3[6]
+set_location_assignment PIN_133 -to HEX3[5]
+set_location_assignment PIN_134 -to HEX3[4]
+set_location_assignment PIN_139 -to HEX3[3]
+set_location_assignment PIN_140 -to HEX3[2]
+set_location_assignment PIN_141 -to HEX3[1]
+set_location_assignment PIN_142 -to HEX3[0]
+set_location_assignment PIN_77 -to KEY[3]
+set_location_assignment PIN_78 -to KEY[2]
+set_location_assignment PIN_79 -to KEY[1]
+set_location_assignment PIN_82 -to KEY[0]
+set_location_assignment PIN_69 -to LEDG[7]
+set_location_assignment PIN_70 -to LEDG[6]
+set_location_assignment PIN_71 -to LEDG[5]
+set_location_assignment PIN_72 -to LEDG[4]
+set_location_assignment PIN_76 -to LEDG[3]
+set_location_assignment PIN_75 -to LEDG[2]
+set_location_assignment PIN_74 -to LEDG[1]
+set_location_assignment PIN_73 -to LEDG[0]
+set_location_assignment PIN_53 -to LEDR[9]
+set_location_assignment PIN_56 -to LEDR[8]
+set_location_assignment PIN_57 -to LEDR[7]
+set_location_assignment PIN_58 -to LEDR[6]
+set_location_assignment PIN_59 -to LEDR[5]
+set_location_assignment PIN_60 -to LEDR[4]
+set_location_assignment PIN_61 -to LEDR[3]
+set_location_assignment PIN_62 -to LEDR[2]
+set_location_assignment PIN_67 -to LEDR[1]
+set_location_assignment PIN_68 -to LEDR[0]
+set_location_assignment PIN_16 -to RE_N
+set_location_assignment PIN_34 -to SW[9]
+set_location_assignment PIN_35 -to SW[8]
+set_location_assignment PIN_36 -to SW[7]
+set_location_assignment PIN_37 -to SW[6]
+set_location_assignment PIN_38 -to SW[5]
+set_location_assignment PIN_39 -to SW[4]
+set_location_assignment PIN_40 -to SW[3]
+set_location_assignment PIN_41 -to SW[2]
+set_location_assignment PIN_42 -to SW[1]
+set_location_assignment PIN_47 -to SW[0]
+set_global_assignment -name CYCLONE_CONFIGURATION_DEVICE EPCS1
+set_global_assignment -name RESERVE_ASDO_AFTER_CONFIGURATION "AS INPUT TRI-STATED"

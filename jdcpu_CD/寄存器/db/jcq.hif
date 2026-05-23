@@ -1,0 +1,167 @@
+Version 7.2 Build 151 09/26/2007 SJ Web Edition
+38
+2293
+OFF
+OFF
+OFF
+OFF
+ON
+ON
+ON
+FV_OFF
+Level2
+0
+0
+VRSM_ON
+VHSM_ON
+0
+-- Start Partition --
+-- End Partition --
+-- Start Library Paths --
+-- End Library Paths --
+-- Start VHDL Libraries --
+-- End VHDL Libraries --
+# entity
+ymq_4
+# storage
+db|jcq.(1).cnf
+db|jcq.(1).cnf
+# case_insensitive
+# source_file
+ymq_4.bdf
+58bcc38d796b9a7165b35cb47939637
+25
+# internal_option {
+BLOCK_DESIGN_NAMING
+OFF
+}
+# hierarchies {
+ymq_4:inst
+ymq_4:inst19
+ymq_4:inst20
+ymq_4:inst9
+ymq_4:inst10
+ymq_4:inst11
+ymq_4:inst12
+ymq_4:inst13
+ymq_4:inst15
+ymq_4:inst17
+ymq_4:inst22
+ymq_4:inst24
+ymq_4:inst26
+ymq_4:inst28
+ymq_4:inst30
+ymq_4:inst32
+ymq_4:inst34
+}
+# lmf
+c:|altera|72|quartus|lmf|
+d41d8cd98f0b24e980998ecf8427e
+# macro_sequence
+
+# end
+# entity
+jcqdy_4
+# storage
+db|jcq.(0).cnf
+db|jcq.(0).cnf
+# case_insensitive
+# source_file
+jcqdy_4.bdf
+5c9187aa1c7e6b8a59c0313c855925
+25
+# internal_option {
+BLOCK_DESIGN_NAMING
+OFF
+}
+# lmf
+c:|altera|72|quartus|lmf|
+d41d8cd98f0b24e980998ecf8427e
+# macro_sequence
+
+# end
+# entity
+jjydy
+# storage
+db|jcq.(2).cnf
+db|jcq.(2).cnf
+# case_insensitive
+# source_file
+jjydy.bdf
+cea86bee8e8621782a83ea957b571b
+25
+# internal_option {
+BLOCK_DESIGN_NAMING
+OFF
+}
+# lmf
+c:|altera|72|quartus|lmf|
+d41d8cd98f0b24e980998ecf8427e
+# macro_sequence
+
+# end
+# entity
+xz
+# storage
+db|jcq.(3).cnf
+db|jcq.(3).cnf
+# case_insensitive
+# source_file
+xz.bdf
+284ceda02920d138f53b59f811ff
+25
+# internal_option {
+BLOCK_DESIGN_NAMING
+OFF
+}
+# lmf
+c:|altera|72|quartus|lmf|
+d41d8cd98f0b24e980998ecf8427e
+# macro_sequence
+
+# end
+# entity
+jjdy
+# storage
+db|jcq.(4).cnf
+db|jcq.(4).cnf
+# case_insensitive
+# source_file
+jjdy.bdf
+fe24bb5cca3a7bfd7d6597bf84d135c
+25
+# internal_option {
+BLOCK_DESIGN_NAMING
+OFF
+}
+# lmf
+c:|altera|72|quartus|lmf|
+d41d8cd98f0b24e980998ecf8427e
+# macro_sequence
+
+# end
+# entity
+ymq8
+# storage
+db|jcq.(5).cnf
+db|jcq.(5).cnf
+# case_insensitive
+# source_file
+ymq8.bdf
+77f5966ae31eb9962979e5b3d29d7579
+25
+# internal_option {
+BLOCK_DESIGN_NAMING
+OFF
+}
+# hierarchies {
+|
+}
+# lmf
+c:|altera|72|quartus|lmf|
+d41d8cd98f0b24e980998ecf8427e
+# macro_sequence
+
+# end
+# complete
+

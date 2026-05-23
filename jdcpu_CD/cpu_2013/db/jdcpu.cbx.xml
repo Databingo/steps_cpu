@@ -1,0 +1,10 @@
+<?xml version="1.0" ?>
+<LOG_ROOT>
+	<PROJECT NAME="jdcpu">
+		<CBX_INST_ENTRY INSTANCE_NAME="|mycputop|bufuucpu:cpu0|jb_cpu:cpu0|lpm_ram_dq:iram|altram:sram|altsyncram:ram_block" CBX_FILE_NAME="altsyncram_ek91.tdf"/>
+		<CBX_INST_ENTRY INSTANCE_NAME="|mycputop|bufuucpu:cpu0|jb_cpu:cpu0|lpm_ram_dq:sram|altram:sram|altsyncram:ram_block" CBX_FILE_NAME="altsyncram_3h71.tdf"/>
+		<CBX_INST_ENTRY INSTANCE_NAME="|mycputop|bufuucpu:cpu0|jb_cpu:cpu0|lpm_divide:Div0" CBX_FILE_NAME="lpm_divide_h8m.tdf"/>
+		<CBX_INST_ENTRY INSTANCE_NAME="|mycputop|bufuucpu:cpu0|jb_cpu:cpu0|lpm_mult:Mult0" CBX_FILE_NAME="mult_nn01.tdf"/>
+		<CBX_INST_ENTRY INSTANCE_NAME="|mycputop|bufuucpu:cpu0|jb_cpu:cpu0|lpm_ram_dq:dram|altram:sram|altsyncram:ram_block" CBX_FILE_NAME="altsyncram_gh71.tdf"/>
+	</PROJECT>
+</LOG_ROOT>

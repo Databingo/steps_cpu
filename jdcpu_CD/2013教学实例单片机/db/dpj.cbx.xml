@@ -1,0 +1,7 @@
+<?xml version="1.0" ?>
+<LOG_ROOT>
+	<PROJECT NAME="dpj">
+		<CBX_INST_ENTRY INSTANCE_NAME="|dpj|mycputop:inst|buffcpu:jsj0|ram:dram|lpm_ram_dq1:inst|altsyncram:altsyncram_component" CBX_FILE_NAME="altsyncram_1oc1.tdf"/>
+		<CBX_INST_ENTRY INSTANCE_NAME="|dpj|mycputop:inst|buffcpu:jsj0|ram:iram|lpm_ram_dq1:inst|altsyncram:altsyncram_component" CBX_FILE_NAME="altsyncram_1oc1.tdf"/>
+	</PROJECT>
+</LOG_ROOT>

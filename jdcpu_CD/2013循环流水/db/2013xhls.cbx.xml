@@ -1,0 +1,16 @@
+<?xml version="1.0" ?>
+<LOG_ROOT>
+	<PROJECT NAME="2013xhls">
+		<CBX_INST_ENTRY INSTANCE_NAME="|xhlsTOP|buffcpu:cpu0|Ls_cpum:cpum|lpm_mult:Mult1" CBX_FILE_NAME="mult_nn01.tdf"/>
+		<CBX_INST_ENTRY INSTANCE_NAME="|xhlsTOP|buffcpu:cpu0|Ls_cpum:cpum|lpm_mult:Mult5" CBX_FILE_NAME="mult_nn01.tdf"/>
+		<CBX_INST_ENTRY INSTANCE_NAME="|xhlsTOP|buffcpu:cpu0|Ls_cpum:cpum|lpm_mult:Mult9" CBX_FILE_NAME="mult_nn01.tdf"/>
+		<CBX_INST_ENTRY INSTANCE_NAME="|xhlsTOP|buffcpu:cpu0|Ls_cpum:cpum|altsyncram5:sram|altsyncram:altsyncram_component" CBX_FILE_NAME="altsyncram_tlf1.tdf"/>
+		<CBX_INST_ENTRY INSTANCE_NAME="|xhlsTOP|buffcpu:cpu0|Ls_cpum:cpum|altsyncram6:dram|altsyncram:altsyncram_component" CBX_FILE_NAME="altsyncram_tlf1.tdf"/>
+		<CBX_INST_ENTRY INSTANCE_NAME="|xhlsTOP|buffcpu:cpu0|Ls_cpum:cpum|lpm_mult:Mult11" CBX_FILE_NAME="mult_nn01.tdf"/>
+		<CBX_INST_ENTRY INSTANCE_NAME="|xhlsTOP|buffcpu:cpu0|Ls_cpum:cpum|lpm_mult:Mult13" CBX_FILE_NAME="mult_nn01.tdf"/>
+		<CBX_INST_ENTRY INSTANCE_NAME="|xhlsTOP|buffcpu:cpu0|Ls_cpum:cpum|lpm_mult:Mult15" CBX_FILE_NAME="mult_nn01.tdf"/>
+		<CBX_INST_ENTRY INSTANCE_NAME="|xhlsTOP|buffcpu:cpu0|Ls_cpum:cpum|altsyncram4:iram|altsyncram:altsyncram_component" CBX_FILE_NAME="altsyncram_toh1.tdf"/>
+		<CBX_INST_ENTRY INSTANCE_NAME="|xhlsTOP|buffcpu:cpu0|Ls_cpum:cpum|lpm_mult:Mult3" CBX_FILE_NAME="mult_nn01.tdf"/>
+		<CBX_INST_ENTRY INSTANCE_NAME="|xhlsTOP|buffcpu:cpu0|Ls_cpum:cpum|lpm_mult:Mult7" CBX_FILE_NAME="mult_nn01.tdf"/>
+	</PROJECT>
+</LOG_ROOT>
