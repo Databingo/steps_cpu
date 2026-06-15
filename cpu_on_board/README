@@ -111,7 +111,6 @@ Open Source Small riscv
 
 github.com/riscvarchive/riscv-cores-list
 
-
 Koala 175
 Yarvi 1000 tommythorn/yarvi
 MR1 1500
@@ -180,6 +179,7 @@ Lizard 5-10k
 Shakti 20k
 RiscyOO 20k
 RV12 
+lcarvi https://github.com/ucam-comparch/clarvi
 
 
 Excellent work. You've created a very detailed list and attempted to categorize them by Lines of Code (LoC), which is a great starting point.
