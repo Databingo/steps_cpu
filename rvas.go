@@ -966,6 +966,8 @@ func main() { //t6a7s11
 
 			}
 
+			//任意 64 位有符号数拼接 lui20 srli1 addi11 slli11 addi11 slli11 addi11 slli11 addi11
+
 
 		case "j": // PC尾跳转 j offset|jump to pc+offset
 			ins := fmt.Sprintf("# %s\n", line)
