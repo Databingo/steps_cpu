@@ -992,7 +992,7 @@ func main() { //t6a7s11
 				real_instr.WriteString(origin_instr)
 			}
 		case "jalr": // 寄存器跳转 jalr rs |jump to rs|save pc+4 to x1 (imm defalut 0, retrun default x1)
-			if len(code) == 2 { // different from real: jal rd, imm
+			if len(code) == 2 { // different from real: jalr rd, imm(rs1)
 				ins := fmt.Sprintf("# %s\n", line)
 				real_instr.WriteString(ins)
 				//ins = fmt.Sprintf("jalr x1, %s, 0\n", code[1])
