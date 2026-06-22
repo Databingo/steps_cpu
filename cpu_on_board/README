@@ -115,7 +115,7 @@ Koala 175
 Yarvi 1000 tommythorn/yarvi
 MR1 1500
 Minerva 2000
-Hazard3 2500
+Hazard3 2500 RV32I
 SCR1 3000
 Kronos 5000
 FemtoRV32 500-1000
@@ -137,8 +137,6 @@ riscv_vhdl 10k
 Klessydar T03/T13 5-15k
 xiangshan 20k
 Boom 100k
-CVA6 100k
-BlackParrot 100k
 lbex 
 Neorv32 10k
 scarab
@@ -187,7 +185,12 @@ lowRISC
 Vscale
 Aquila
 MIV_RV32
-9444(run linux)
+XiangShan (64 run linux)
+CVA6 100k (64 run linux)
+BlackParrot 100k (64 run linux)
+C906/C910 (64 run linux)
+9444 (64 run linux)
+quasiSoC (32 run linux)
 
 
 Excellent work. You've created a very detailed list and attempted to categorize them by Lines of Code (LoC), which is a great starting point.
