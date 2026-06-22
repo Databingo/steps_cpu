@@ -154,6 +154,7 @@ Icicle
 FlexPRET
 Taiga
 SweRV EH1/2
+SweRV EL2
 Lambda
 RVcoreP
 ORCA
@@ -180,6 +181,12 @@ Shakti 20k
 RiscyOO 20k
 RV12 
 lcarvi https://github.com/ucam-comparch/clarvi
+NaxRiscv
+RIDECORE
+lowRISC
+Vscale
+Aquila
+MIV_RV32
 
 
 Excellent work. You've created a very detailed list and attempted to categorize them by Lines of Code (LoC), which is a great starting point.
