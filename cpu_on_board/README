@@ -179,18 +179,22 @@ Shakti 20k
 RiscyOO 20k
 RV12 
 lcarvi https://github.com/ucam-comparch/clarvi
-NaxRiscv
 RIDECORE
 lowRISC
 Vscale
 Aquila
 MIV_RV32
+kianRiscV (32 run linux)
+NaxRiscv (64 run linux)
 XiangShan (64 run linux)
 CVA6 100k (64 run linux)
 BlackParrot 100k (64 run linux)
 C906/C910 (64 run linux)
 9444 (64 run linux)
 quasiSoC (32 run linux)
+rv64core (64 run linux)
+croyde-riscv(64)
+CSRV64I_SC
 
 
 Excellent work. You've created a very detailed list and attempted to categorize them by Lines of Code (LoC), which is a great starting point.

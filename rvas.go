@@ -1552,6 +1552,28 @@ func main() { //t6a7s11
 	    }
 
 
+
+    // ================== 插入绝对地址重定位代码 ==================
+    fmt.Println("start global address relocation.")
+    text_size := uint64(address) // 2.5pass 结束后，address 刚好又加回了 .text 段的总大小
+    data_shndx := uint16(slices.Index(shstrtab, ".data\x00"))
+
+    for key, _ := range symbolTable {
+        if sym_idx, exists := sym_idx_map[key+"\x00"]; exists {
+            // 如果这个符号属于数据段 .data
+            if symtab_[sym_idx].Shndx == data_shndx {
+                // 绝对地址 = .text 长度 + 变量在 .data 内的偏移量
+                symtab_[sym_idx].Value += text_size 
+                
+                // 写入编译器内部符号表，供 3pass 里的 la 寻址使用
+                symbolTable[key] = int64(symtab_[sym_idx].Value)
+            }
+        }
+    }
+
+
+
+
 	// reset file to start and reinitialize scanner
 	//_, err = file.Seek(0, io.SeekStart)
 	//scanner = bufio.NewScanner(file)
@@ -1567,6 +1589,12 @@ func main() { //t6a7s11
 		log.Fatal(err)
 	}
 	defer f.Close()
+
+
+
+
+
+
 
 
 	//-------3pass ------------------
